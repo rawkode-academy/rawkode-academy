@@ -2,6 +2,7 @@
 import "vidstack/bundle";
 import { actions } from "astro:actions";
 import { onMounted, onUnmounted, ref } from "vue";
+import { css } from "../../../styled-system/css";
 
 const props = defineProps<{
 	video: string;
@@ -10,6 +11,9 @@ const props = defineProps<{
 	initialPosition?: number;
 	isAuthenticated?: boolean;
 }>();
+
+const wrapperClass = css({ w: "full", aspectRatio: "16/9" });
+const playerClass = css({ w: "full", h: "full" });
 
 const progressMilestones = ref<Set<number>>(new Set());
 let savePositionTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -199,10 +203,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-	<div class="w-full aspect-video">
+	<div :class="wrapperClass">
 		<media-player
 			:autoplay="!!autoPlay"
-			class="w-full h-full"
+			:class="playerClass"
 			playsinline
 		>
 			<media-provider>
@@ -233,7 +237,7 @@ onUnmounted(() => {
 	:deep(video::-webkit-media-controls-fullscreen-button) {
 		display: inline-block !important;
 	}
-	
+
 	:deep(.vds-fullscreen) {
 		position: relative !important;
 	}

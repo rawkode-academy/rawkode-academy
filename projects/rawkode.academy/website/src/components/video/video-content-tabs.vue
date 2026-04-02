@@ -1,14 +1,15 @@
 <template>
   <div class="glass-card-shimmer">
     <!-- Tab Navigation -->
-    <div class="border-b border-subtle relative z-10">
+    <div :class="tabNavClass" class="border-subtle">
       <!-- Dropdown for Mobile -->
-      <div class="sm:hidden px-2 pt-2 pb-3">
+      <div :class="mobileSelectWrapClass">
         <label for="tabs-mobile" class="sr-only">Select a tab</label>
         <select
           id="tabs-mobile"
           name="tabs-mobile"
-          class="glass-interactive block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
+          :class="mobileSelectClass"
+          class="glass-interactive"
           :value="activeTab"
           @change="setActiveTab($event.target.value)"
         >
@@ -19,16 +20,14 @@
       </div>
 
       <!-- Tab bar for sm and up -->
-      <nav class="hidden sm:flex -mb-px overflow-x-auto" role="tablist">
+      <nav :class="tabBarClass" role="tablist">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           :id="`video-tab-${tab.id}`"
           :class="[
-            'tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
-            activeTab === tab.id
-              ? 'border-primary text-primary dark:text-primary'
-              : 'border-transparent text-muted hover:text-primary-content',
+            tabButtonClass,
+            activeTab === tab.id ? activeTabClass : inactiveTabClass,
           ]"
           role="tab"
           :aria-selected="activeTab === tab.id"
@@ -41,7 +40,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="p-4 sm:p-6 relative z-10">
+    <div :class="tabContentClass">
       <!-- Comments Panel -->
       <div
         v-show="activeTab === 'comments'"
@@ -72,7 +71,7 @@
         role="tabpanel"
         aria-labelledby="video-tab-resources"
       >
-        <div class="prose prose-lg dark:prose-invert max-w-none">
+        <div class="prose prose-lg dark:prose-invert" :class="proseWrapClass">
           <p class="text-muted">
             Resources related to this video will be displayed here, including
             links, downloads, and additional materials.
@@ -84,6 +83,7 @@
 </template>
 
 <script>
+import { css } from "../../../styled-system/css";
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
 
@@ -94,6 +94,59 @@ const trackEvent = (event, properties) => {
 	} catch {
 		// Ignore tracking errors
 	}
+};
+
+const tabStyles = {
+	tabNavClass: css({
+		borderBottomWidth: "1px",
+		position: "relative",
+		zIndex: 10,
+	}),
+	mobileSelectWrapClass: css({
+		display: { base: "block", sm: "none" },
+		px: "2",
+		pt: "2",
+		pb: "3",
+	}),
+	mobileSelectClass: css({
+		display: "block",
+		w: "full",
+		pl: "3",
+		pr: "10",
+		py: "2",
+		fontSize: { base: "base", sm: "sm" },
+		_focus: { outline: "none", ringColor: "rgba(var(--brand-primary), 0.5)", borderColor: "rgba(var(--brand-primary), 0.5)" },
+	}),
+	tabBarClass: css({
+		display: { base: "none", sm: "flex" },
+		mb: "-1px",
+		overflowX: "auto",
+	}),
+	tabButtonClass: css({
+		flexShrink: 0,
+		px: { base: "4", sm: "6" },
+		py: "3",
+		borderBottomWidth: "2px",
+		fontWeight: "medium",
+		fontSize: "sm",
+		whiteSpace: "nowrap",
+		transition: "colors",
+	}),
+	activeTabClass: css({
+		borderColor: "rgb(var(--brand-primary))",
+		color: "rgb(var(--brand-primary))",
+	}),
+	inactiveTabClass: css({
+		borderColor: "transparent",
+		color: { base: "gray.500", _dark: "gray.400" },
+		_hover: { color: { base: "gray.900", _dark: "white" } },
+	}),
+	tabContentClass: css({
+		p: { base: "4", sm: "6" },
+		position: "relative",
+		zIndex: 10,
+	}),
+	proseWrapClass: css({ maxWidth: "none" }),
 };
 
 export default {
@@ -117,6 +170,9 @@ export default {
 				{ id: "resources", label: "Resources" },
 			],
 		};
+	},
+	created() {
+		Object.assign(this, tabStyles);
 	},
 	methods: {
 		setActiveTab(tabId) {

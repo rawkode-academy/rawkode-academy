@@ -1,4 +1,5 @@
 ---
+import { css } from "../../../styled-system/css";
 import VideoProgressBar from "@/components/video/VideoProgressBar.vue";
 
 interface Video {
@@ -64,21 +65,89 @@ function calculateProgress(videoId: string, duration: number): number | null {
 	const progress = (positionSeconds / duration) * 100;
 	return Math.min(progress, 100);
 }
+
+const sectionStyle = css({ paddingBlock: "section-tight" });
+
+const headerStyle = css({
+	textAlign: "center",
+	display: "flex",
+	flexDirection: "column",
+	gap: "stack-sm",
+});
+
+const titleStyle = css({
+	fontSize: { base: "3xl", sm: "4xl" },
+	fontWeight: "extrabold",
+}) + " text-primary-content";
+
+const descStyle = css({ fontSize: "lg" }) + " text-muted";
+
+const gridStyle = css({
+	display: "grid",
+	gap: "stack-lg",
+	gridTemplateColumns: { md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" },
+});
+
+const linkStyle = css({
+	borderRadius: "lg",
+	_focusVisible: { outline: "none", ring: "2", ringColor: "rgba(var(--brand-primary), 0.5)", ringOffset: "2" },
+});
+
+const thumbWrapStyle = css({
+	position: "relative",
+	aspectRatio: "16/9",
+	overflow: "hidden",
+	borderRadius: "lg",
+});
+
+const imgStyle = css({
+	w: "full",
+	h: "full",
+	objectFit: "cover",
+	shadow: "md",
+	transition: "transform 0.2s",
+});
+
+const durationBadgeStyle = css({
+	position: "absolute",
+	bottom: "2",
+	right: "2",
+	borderRadius: "md",
+	bg: "rgba(0, 0, 0, 0.75)",
+	px: "2",
+	py: "1",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "white",
+	backdropFilter: "blur(4px)",
+});
+
+const videoTitleStyle = css({
+	fontSize: "base",
+	fontWeight: "medium",
+	transition: "colors 0.2s",
+	lineClamp: 2,
+}) + " text-primary-content";
+
+const dateStyle = css({
+	mt: "1",
+	fontSize: "sm",
+}) + " text-muted";
 ---
 
-<section class="section-py-tight">
-	<div class="text-center stack-gap-sm">
-		<h2 class="text-3xl font-extrabold text-primary-content sm:text-4xl">{title}</h2>
-		<p class="text-lg text-muted">{description}</p>
+<section class={sectionStyle}>
+	<div class={headerStyle}>
+		<h2 class={titleStyle}>{title}</h2>
+		<p class={descStyle}>{description}</p>
 	</div>
-	<div class="stack-gap-lg grid md:grid-cols-2 lg:grid-cols-4">
+	<div class={gridStyle}>
 		{videos.map((video: Video) => (
-			<a href={`/watch/${video.slug}`} class="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 rounded-lg">
-				<div class="relative aspect-video overflow-hidden rounded-lg">
+			<a href={`/watch/${video.slug}`} class={linkStyle + " group"}>
+				<div class={thumbWrapStyle}>
 					<img
 						src={video.thumbnailUrl}
 						alt={video.title}
-						class="w-full h-full object-cover shadow-md transition-transform duration-200 group-hover:scale-[1.03]"
+						class={imgStyle + " group-hover:scale-[1.03]"}
 						loading="lazy"
 					/>
 					{(() => {
@@ -92,15 +161,15 @@ function calculateProgress(videoId: string, duration: number): number | null {
 							/>
 						) : null;
 					})()}
-					<div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-sm font-medium text-white backdrop-blur-sm">
+					<div class={durationBadgeStyle}>
 						{formatDuration(video.duration)}
 					</div>
 				</div>
-				<div class="mt-3">
-					<h3 class="text-base font-medium text-primary-content group-hover:text-primary transition-colors duration-200 line-clamp-2">
+				<div class={css({ mt: "3" })}>
+					<h3 class={videoTitleStyle + " group-hover:text-primary"}>
 						{video.title}
 					</h3>
-					<p class="mt-1 text-sm text-muted">
+					<p class={dateStyle}>
 						{formatDate(video.publishedAt)}
 					</p>
 				</div>

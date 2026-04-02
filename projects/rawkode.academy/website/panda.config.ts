@@ -1,17 +1,9 @@
 import { defineConfig } from "@pandacss/dev";
-import { createPreset } from "@park-ui/panda-preset";
-import teal from "@park-ui/panda-preset/colors/teal";
-import slate from "@park-ui/panda-preset/colors/slate";
 
 export default defineConfig({
 	preflight: true,
 	presets: [
 		"@pandacss/dev/presets",
-		createPreset({
-			accentColor: teal,
-			grayColor: slate,
-			radius: "xl",
-		}),
 	],
 
 	include: [

@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { css } from "../../../styled-system/css";
 
 interface Props {
 	hosts: CollectionEntry<"people">[];
@@ -8,60 +9,124 @@ interface Props {
 
 const { hosts, guests } = Astro.props;
 const hasSpeakers = hosts.length > 0 || guests.length > 0;
+
+const sectionStyle = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: { base: "3", sm: "4", lg: "6" },
+	pt: "8",
+	borderTopWidth: "1px",
+	borderColor: "rgba(var(--brand-secondary), 0.2)",
+});
+
+const headingStyle = css({
+	fontSize: "2xl",
+	fontWeight: "bold",
+	mb: "6",
+}) + " text-primary-content";
+
+const gridStyle = css({
+	display: "grid",
+	gap: "4",
+	gridTemplateColumns: { sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)", xl: "repeat(4, 1fr)" },
+});
+
+const personCardStyle = (type: "host" | "guest") => css({
+	display: "flex",
+	alignItems: "center",
+	p: "4",
+	gap: "4",
+	transition: "colors",
+	_hover: {
+		borderColor: type === "host" ? "rgba(var(--brand-primary), 0.5)" : "rgb(var(--brand-secondary))",
+	},
+}) + " glass-panel group";
+
+const avatarStyle = (type: "host" | "guest") => css({
+	w: "12",
+	h: "12",
+	borderRadius: "full",
+	objectFit: "cover",
+	borderWidth: "2px",
+	borderColor: type === "host" ? "rgb(var(--brand-primary))" : "rgba(var(--brand-secondary), 0.5)",
+});
+
+const badgeStyle = (type: "host" | "guest") => css({
+	position: "absolute",
+	bottom: "-1",
+	right: "-1",
+	fontSize: "10px",
+	fontWeight: "bold",
+	px: "1.5",
+	py: "0.5",
+	borderRadius: "full",
+	borderWidth: "1px",
+	shadow: "sm",
+	bg: type === "host" ? "rgb(var(--brand-primary))" : "rgb(var(--brand-secondary))",
+	color: type === "host" ? "white" : "rgb(55 65 81)",
+	borderColor: type === "host" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
+});
+
+const nameStyle = css({
+	fontWeight: "medium",
+	truncate: true,
+	transition: "colors",
+}) + " text-primary-content";
+
+const handleStyle = css({
+	fontSize: "xs",
+	truncate: true,
+}) + " text-secondary-content";
 ---
 
 {hasSpeakers && (
-	<section class="section-gap pt-8 border-t border-secondary/20">
-		<h2 class="text-2xl font-bold text-primary-content mb-6">
+	<section class={sectionStyle}>
+		<h2 class={headingStyle}>
 			Meet the Cast
 		</h2>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		<div class={gridStyle}>
 			{hosts.map((person) => (
-				<div
-					class="glass-panel group flex items-center p-4 gap-4 hover:border-primary/50 transition-colors"
-				>
-					<div class="relative shrink-0">
+				<div class={personCardStyle("host")}>
+					<div class={css({ position: "relative", flexShrink: 0 })}>
 						<img
 							src={person.data.avatarUrl || '/images/avatars/default.png'}
 							alt={person.data.name}
-							class="w-12 h-12 rounded-full object-cover border-2 border-primary"
+							class={avatarStyle("host")}
 							loading="lazy"
 						/>
-						<span class="absolute -bottom-1 -right-1 bg-primary text-primary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-primary-content/10 shadow-sm">
+						<span class={badgeStyle("host")}>
 							HOST
 						</span>
 					</div>
-					<div class="min-w-0">
-						<h3 class="font-medium text-primary-content truncate group-hover:text-primary transition-colors">
+					<div class={css({ minWidth: 0 })}>
+						<h3 class={nameStyle + " group-hover:text-primary"}>
 							{person.data.name}
 						</h3>
-						<p class="text-xs text-secondary-content truncate">
+						<p class={handleStyle}>
 							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
 						</p>
 					</div>
 				</div>
 			))}
-			
+
 			{guests.map((person) => (
-				<div
-					class="glass-panel group flex items-center p-4 gap-4 hover:border-secondary transition-colors"
-				>
-					<div class="relative shrink-0">
+				<div class={personCardStyle("guest")}>
+					<div class={css({ position: "relative", flexShrink: 0 })}>
 						<img
 							src={person.data.avatarUrl || '/images/avatars/default.png'}
 							alt={person.data.name}
-							class="w-12 h-12 rounded-full object-cover border-2 border-secondary/50"
+							class={avatarStyle("guest")}
 							loading="lazy"
 						/>
-						<span class="absolute -bottom-1 -right-1 bg-secondary text-secondary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-secondary-content/10 shadow-sm">
+						<span class={badgeStyle("guest")}>
 							GUEST
 						</span>
 					</div>
-					<div class="min-w-0">
-						<h3 class="font-medium text-primary-content truncate group-hover:text-secondary transition-colors">
+					<div class={css({ minWidth: 0 })}>
+						<h3 class={nameStyle + " group-hover:text-secondary"}>
 							{person.data.name}
 						</h3>
-						<p class="text-xs text-secondary-content truncate">
+						<p class={handleStyle}>
 							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
 						</p>
 					</div>

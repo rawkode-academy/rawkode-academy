@@ -1,17 +1,17 @@
 <template>
   <div class="transcript-wrapper">
     <!-- Search bar -->
-    <div v-if="transcriptLoaded && !error" class="mb-4">
-      <div class="relative">
+    <div v-if="transcriptLoaded && !error" :class="searchWrapperClass">
+      <div :class="searchContainerClass">
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search transcript..."
           aria-label="Search transcript"
-          class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent"
+          :class="searchInputClass"
         />
         <svg
-          class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+          :class="searchIconClass"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -24,7 +24,7 @@
           ></path>
         </svg>
       </div>
-      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="searchQuery.length >= 2" :class="searchResultsClass">
         <span>{{ searchResultsText }}</span>
       </div>
     </div>
@@ -33,8 +33,8 @@
     <SkeletonTranscript v-if="loading" />
 
     <!-- Error state -->
-    <div v-if="error" class="text-center py-8">
-      <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+    <div v-if="error" :class="errorClass">
+      <p :class="errorTextClass">{{ errorMessage }}</p>
     </div>
 
     <!-- Transcript content with scrollable container -->
@@ -42,12 +42,12 @@
       <div
         v-for="(paragraph, index) in paragraphs"
         :key="index"
-        class="transcript-paragraph mb-6"
+        :class="paragraphClass"
       >
-        <div class="text-sm text-primary dark:text-primary font-mono mb-2">
+        <div :class="timestampClass">
           {{ paragraph[0].start }}
         </div>
-        <div class="text-gray-900 dark:text-gray-100 leading-relaxed">
+        <div :class="textClass">
           <span
             v-for="(cue, cueIndex) in paragraph"
             :key="`${index}-${cueIndex}`"
@@ -63,11 +63,55 @@
 </template>
 
 <script>
+import { css } from "../../../styled-system/css";
 import SkeletonTranscript from "@/components/common/SkeletonTranscript.vue";
 import {
 	groupTranscriptParagraphs,
 	parseWebVTT,
 } from "@/utils/video-transcript";
+
+const styles = {
+	searchWrapperClass: css({ mb: "4" }),
+	searchContainerClass: css({ position: "relative" }),
+	searchInputClass: css({
+		w: "full",
+		px: "4",
+		py: "2",
+		pl: "10",
+		borderWidth: "1px",
+		borderColor: { base: "gray.300", _dark: "gray.700" },
+		borderRadius: "lg",
+		bg: { base: "white", _dark: "gray.800" },
+		color: { base: "gray.900", _dark: "gray.100" },
+		_focus: { ring: "2", ringColor: "rgb(var(--brand-primary))", borderColor: "transparent" },
+	}),
+	searchIconClass: css({
+		position: "absolute",
+		left: "3",
+		top: "2.5",
+		w: "5",
+		h: "5",
+		color: "gray.400",
+	}),
+	searchResultsClass: css({
+		mt: "2",
+		fontSize: "sm",
+		color: { base: "gray.600", _dark: "gray.400" },
+	}),
+	errorClass: css({ textAlign: "center", py: "8" }),
+	errorTextClass: css({ color: { base: "red.600", _dark: "red.400" } }),
+	paragraphClass: css({ mb: "6" }),
+	timestampClass: css({
+		fontSize: "sm",
+		color: "rgb(var(--brand-primary))",
+		fontFamily: "mono",
+		mb: "2",
+	}),
+	textClass: css({
+		color: { base: "gray.900", _dark: "gray.100" },
+		lineHeight: "relaxed",
+	}),
+};
 
 export default {
 	components: {
@@ -94,6 +138,10 @@ export default {
 			searchQuery: "",
 			matchCount: 0,
 		};
+	},
+	created() {
+		// Expose static CSS class names as non-reactive properties
+		Object.assign(this, styles);
 	},
 	computed: {
 		searchResultsText() {

@@ -1,5 +1,6 @@
 ---
 import { GRAPHQL_ENDPOINT } from "astro:env/server";
+import { css } from "../../../styled-system/css";
 
 interface Props {
 	videoId: string;
@@ -8,27 +9,27 @@ interface Props {
 const { videoId } = Astro.props;
 
 const DEFAULT_REACTIONS = [
-	{ emoji: "👍", label: "Like" },
-	{ emoji: "👏", label: "Applause" },
-	{ emoji: "🚀", label: "Rocket" },
-	{ emoji: "💡", label: "Insightful" },
+	{ emoji: "\u{1F44D}", label: "Like" },
+	{ emoji: "\u{1F44F}", label: "Applause" },
+	{ emoji: "\u{1F680}", label: "Rocket" },
+	{ emoji: "\u{1F4A1}", label: "Insightful" },
 ];
 
 const EXTRA_EMOJIS = [
-	"😊",
-	"😍",
-	"🤔",
-	"😎",
-	"🙌",
-	"💯",
-	"🎉",
-	"💪",
-	"🤯",
-	"🤩",
-	"😂",
-	"🤝",
-	"👀",
-	"🧠",
+	"\u{1F60A}",
+	"\u{1F60D}",
+	"\u{1F914}",
+	"\u{1F60E}",
+	"\u{1F64C}",
+	"\u{1F4AF}",
+	"\u{1F389}",
+	"\u{1F4AA}",
+	"\u{1F92F}",
+	"\u{1F929}",
+	"\u{1F602}",
+	"\u{1F91D}",
+	"\u{1F440}",
+	"\u{1F9E0}",
 ];
 
 // Fetch current reaction counts
@@ -63,35 +64,89 @@ try {
 	console.error("Failed to fetch reactions:", error);
 }
 const isAuthenticated = !!Astro.locals.user;
+
+const containerStyle = css({ p: { base: "3", sm: "4" } });
+
+const reactionRowStyle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: { base: "1.5", sm: "2" },
+	flexWrap: "wrap",
+	position: "relative",
+	zIndex: 10,
+});
+
+const reactionBtnStyle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: { base: "1", sm: "2" },
+	px: { base: "2", sm: "3" },
+	py: { base: "1.5", sm: "2" },
+	_focus: { outline: "none", ring: "2", ringColor: "rgba(var(--brand-primary), 0.5)" },
+});
+
+const addEmojiBtnStyle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: { base: "1", sm: "2" },
+	px: { base: "2", sm: "3" },
+	py: { base: "1.5", sm: "2" },
+	borderWidth: "2px",
+	borderStyle: "dashed",
+	borderColor: { base: "rgba(209, 213, 219, 0.6)", _dark: "rgba(75, 85, 99, 0.6)" },
+});
+
+const emojiPickerStyle = css({
+	mt: "3",
+	p: { base: "2", sm: "3" },
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(5, 1fr)", sm: "repeat(7, 1fr)" },
+	gap: "1",
+	position: "relative",
+	zIndex: 10,
+});
+
+const emojiOptionStyle = css({
+	p: { base: "1.5", sm: "2" },
+	fontSize: { base: "lg", sm: "2xl" },
+	cursor: "pointer",
+});
+
+const emojiTextStyle = css({ fontSize: { base: "base", sm: "xl" } });
+
+const countStyle = css({
+	fontSize: { base: "xs", sm: "sm" },
+	fontWeight: "medium",
+}) + " text-secondary-content";
 ---
 
 <div
-	class="glass-card-shimmer p-3 sm:p-4"
+	class={containerStyle + " glass-card-shimmer"}
 	data-video-id={videoId}
 	data-authenticated={isAuthenticated}
 >
-	<div class="flex items-center gap-1.5 sm:gap-2 flex-wrap relative z-10">
+	<div class={reactionRowStyle}>
 		{
 			DEFAULT_REACTIONS.map((reaction) => (
 				<button
-					class="reaction-btn glass-interactive flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+					class={"reaction-btn glass-interactive " + reactionBtnStyle}
 					data-emoji={reaction.emoji}
 					aria-label={`${reaction.label} reaction`}
 				>
-					<span class="text-base sm:text-xl">{reaction.emoji}</span>
-					<span class="count text-xs sm:text-sm font-medium text-secondary-content">{reactionCounts[reaction.emoji] || 0}</span>
+					<span class={emojiTextStyle}>{reaction.emoji}</span>
+					<span class={"count " + countStyle}>{reactionCounts[reaction.emoji] || 0}</span>
 				</button>
 			))
 		}
-		<button class="add-emoji reaction-btn glass-interactive flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-gray-300/60 dark:!border-gray-600/60" aria-label="Add custom emoji"
+		<button class={"add-emoji reaction-btn glass-interactive " + addEmojiBtnStyle} aria-label="Add custom emoji"
 			>+</button
 		>
 	</div>
 
-	<div class="emoji-picker hidden mt-3 p-2 sm:p-3 glass-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10">
+	<div class={"emoji-picker hidden glass-card " + emojiPickerStyle}>
 		{
 			EXTRA_EMOJIS.map((emoji) => (
-				<button class="emoji-option glass-interactive p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
+				<button class={"emoji-option glass-interactive " + emojiOptionStyle} data-emoji={emoji}>
 					{emoji}
 				</button>
 			))
@@ -100,10 +155,13 @@ const isAuthenticated = !!Astro.locals.user;
 </div>
 
 <style>
-	@reference "../../styles/global.css";
-
 	.reaction-btn.active {
-		@apply ring-2 ring-primary/70 bg-primary/30 dark:bg-primary/20;
+		box-shadow: 0 0 0 2px rgba(var(--brand-primary), 0.7);
+		background-color: rgba(var(--brand-primary), 0.3);
+	}
+
+	html.dark .reaction-btn.active {
+		background-color: rgba(var(--brand-primary), 0.2);
 	}
 </style>
 

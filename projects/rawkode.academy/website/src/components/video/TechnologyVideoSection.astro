@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { css } from "../../../styled-system/css";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
 interface Props {
@@ -35,56 +36,147 @@ const formatDuration = (seconds?: number | null) => {
 };
 
 const hasMoreVideos = totalVideos && totalVideos > videos.length;
+
+const sectionStyle = css({ mt: "8" });
+
+const headerStyle = css({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	mb: "4",
+});
+
+const titleGroupStyle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+});
+
+const iconWrapStyle = css({
+	w: "6",
+	h: "6",
+	position: "relative",
+	overflow: "hidden",
+	borderRadius: "md",
+});
+
+const iconImgStyle = css({
+	w: "full",
+	h: "full",
+	objectFit: "contain",
+});
+
+const sectionTitleStyle = css({
+	fontSize: "lg",
+	fontWeight: "semibold",
+}) + " text-primary-content";
+
+const viewAllLinkStyle = css({
+	fontSize: "sm",
+	color: "rgb(var(--brand-primary))",
+	_hover: { opacity: 0.8 },
+	transition: "colors",
+	display: "flex",
+	alignItems: "center",
+	gap: "1",
+});
+
+const gridStyle = css({
+	display: "grid",
+	gap: "4",
+	gridTemplateColumns: { sm: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" },
+});
+
+const cardLinkStyle = css({
+	display: "block",
+	borderRadius: "lg",
+	overflow: "hidden",
+});
+
+const thumbWrapStyle = css({
+	position: "relative",
+	aspectRatio: "16/9",
+	overflow: "hidden",
+	bg: { base: "gray.100", _dark: "gray.800" },
+});
+
+const thumbImgStyle = css({
+	w: "full",
+	h: "full",
+	objectFit: "cover",
+	transition: "transform 0.2s",
+});
+
+const durationBadgeStyle = css({
+	position: "absolute",
+	bottom: "2",
+	right: "2",
+	bg: "rgba(0, 0, 0, 0.8)",
+	color: "white",
+	fontSize: "xs",
+	px: "2",
+	py: "1",
+	borderRadius: "md",
+});
+
+const videoTitleStyle = css({
+	fontWeight: "medium",
+	lineClamp: 2,
+	transition: "colors",
+	fontSize: "sm",
+}) + " text-secondary-content";
+
+const chevronStyle = css({ w: "4", h: "4" });
 ---
 
 {videos.length > 0 && (
-	<section class="mt-8">
-		<div class="flex items-center justify-between mb-4">
-			<div class="flex items-center gap-3">
+	<section class={sectionStyle}>
+		<div class={headerStyle}>
+			<div class={titleGroupStyle}>
 				{iconUrl && (
-					<div class="w-6 h-6 relative overflow-hidden rounded">
+					<div class={iconWrapStyle}>
 						<img
 							src={iconUrl}
 							alt={techName}
-							class="w-full h-full object-contain"
+							class={iconImgStyle}
 							onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
 						/>
 					</div>
 				)}
-				<h3 class="text-lg font-semibold text-primary-content">
+				<h3 class={sectionTitleStyle}>
 					More about {techName}
 				</h3>
 			</div>
 			<a
 				href={`/technology/${techId}`}
-				class="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+				class={viewAllLinkStyle}
 			>
 				{hasMoreVideos ? `View all ${totalVideos} videos` : "View technology"}
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class={chevronStyle} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</a>
 		</div>
 
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<div class={gridStyle}>
 			{videos.map((video) => (
 				<a
 					href={`/watch/${video.slug}`}
-					class="group block glass-interactive rounded-lg overflow-hidden"
+					class={cardLinkStyle + " group glass-interactive"}
 				>
-					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
+					<div class={thumbWrapStyle}>
 						<img
 							src={video.thumbnailUrl}
 							alt={video.title}
-							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+							class={thumbImgStyle + " group-hover:scale-105"}
 							loading="lazy"
 						/>
-						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+						<div class={durationBadgeStyle}>
 							{formatDuration(video.duration)}
 						</div>
 					</div>
-					<div class="p-3">
-						<h4 class="font-medium text-secondary-content group-hover:text-primary-content line-clamp-2 transition-colors text-sm">
+					<div class={css({ p: "3" })}>
+						<h4 class={videoTitleStyle + " group-hover:text-primary-content"}>
 							{video.title}
 						</h4>
 					</div>
