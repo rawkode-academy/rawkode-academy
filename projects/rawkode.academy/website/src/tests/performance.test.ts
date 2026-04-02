@@ -10,20 +10,17 @@ const readProjectFile = (relativePath: string): string =>
 	readFileSync(resolve(PROJECT_ROOT, relativePath), "utf-8");
 
 describe("Core Web Vitals Guardrails", () => {
-	it("loads PostHog only after consent and idle time", () => {
+	it("loads PostHog lazily after idle time", () => {
 		const source = readProjectFile("src/components/posthog/index.astro");
 
-		expect(source).toContain("window.enablePostHog");
-		expect(source).toContain("consent_analytics");
 		expect(source).toContain("requestIdleCallback");
-		expect(source).toContain("shouldEnableTracking()");
+		expect(source).toContain("respect_dnt: true");
 		expect(source).not.toContain("type=\"text/partytown\"");
 	});
 
 	it("loads Grafana SDKs lazily via dynamic imports", () => {
 		const source = readProjectFile("src/components/grafana/index.astro");
 
-		expect(source).toContain("window.enableGrafanaFaro");
 		expect(source).toContain("requestIdleCallback");
 		expect(source).toContain('import("@grafana/faro-web-sdk")');
 		expect(source).toContain('import("@grafana/faro-web-tracing")');

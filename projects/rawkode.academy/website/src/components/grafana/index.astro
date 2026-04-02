@@ -6,34 +6,18 @@
 	const FARO_URL =
 		"https://faro-collector-prod-gb-south-1.grafana.net/collect/b8e6c95e9ef352ba577b11e06a79a0e4";
 	const FARO_APP_NAME = "rawkode.academy";
-	const CONSENT_KEY = "consent_analytics";
-
 	let faroInstance = null;
 	let faroInitPromise = null;
 	let pageStartTime = Date.now();
 	let pageExitHandlerAttached = false;
 	let errorHandlersAttached = false;
 
-	const getConsent = () => {
-		try {
-			return localStorage.getItem(CONSENT_KEY);
-		} catch {
-			return null;
-		}
-	};
-
-	const checkDoNotTrack = () =>
-		navigator.doNotTrack === "1" || window.doNotTrack === "1";
-
 	const isLocalhost = () =>
 		window.location.hostname === "localhost" ||
 		window.location.hostname === "127.0.0.1";
 
-	const shouldEnableTracking = () =>
-		getConsent() === "granted" &&
-		!checkDoNotTrack() &&
-		!isLocalhost() &&
-		Boolean(FARO_URL);
+	const shouldEnableFaro = () =>
+		!isLocalhost() && Boolean(FARO_URL);
 
 	const getUtmParams = () => {
 		try {
@@ -135,7 +119,7 @@
 
 	const initializeFaroClient = async () => {
 		if (faroInstance) return faroInstance;
-		if (!shouldEnableTracking()) return null;
+		if (!shouldEnableFaro()) return null;
 
 		if (!faroInitPromise) {
 			faroInitPromise = (async () => {
@@ -181,7 +165,7 @@
 	};
 
 	const scheduleGrafanaEnable = () => {
-		if (!shouldEnableTracking()) return;
+		if (!shouldEnableFaro()) return;
 
 		const start = () => {
 			void initializeFaroClient();
@@ -196,13 +180,8 @@
 
 	window.grafanaFaro = null;
 
-	// Called by consent banner after user grants consent.
-	window.enableGrafanaFaro = () => {
-		scheduleGrafanaEnable();
-	};
-
-	// Returning visitors with existing consent should initialize observability lazily.
-	if (shouldEnableTracking()) {
+	// Initialize Faro lazily after page load.
+	if (shouldEnableFaro()) {
 		if (document.readyState === "complete") {
 			scheduleGrafanaEnable();
 		} else {
