@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { css } from "../../../styled-system/css";
 
 type Resource = NonNullable<
 	CollectionEntry<"articles">["data"]["resources"]
@@ -52,13 +53,81 @@ const getCategoryLabel = (category: string) => {
 			return "Additional Resources";
 	}
 };
+
+const sectionStyle = css({
+	mt: '12',
+	pt: '8',
+	borderTopWidth: '1px',
+	borderTopStyle: 'solid',
+	borderColor: 'border.subtle',
+});
+
+const headingStyle = css({
+	fontSize: 'xl',
+	fontWeight: 'bold',
+	color: 'fg.default',
+	mb: '6',
+});
+
+const categoryListStyle = css({ display: 'flex', flexDir: 'column', gap: '6' });
+
+const categoryHeadingStyle = css({
+	fontSize: 'sm',
+	fontWeight: '600',
+	color: 'fg.subtle',
+	textTransform: 'uppercase',
+	letterSpacing: 'wider',
+	mb: '3',
+});
+
+const resourceGridStyle = css({ display: 'grid', gap: '3' });
+
+const resourceLinkStyle = css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '3',
+	p: '3',
+	rounded: 'lg',
+	bg: 'bg.subtle',
+	transition: 'all 0.2s',
+	_hover: { bg: 'bg.muted' },
+});
+
+const categoryIconStyle = css({
+	w: '5',
+	h: '5',
+	mt: '0.5',
+	color: 'fg.subtle',
+	flexShrink: '0',
+});
+
+const resourceContentStyle = css({ flex: '1', minW: '0' });
+
+const resourceTitleStyle = css({
+	fontWeight: '500',
+	color: 'fg.default',
+});
+
+const resourceDescStyle = css({
+	fontSize: 'sm',
+	color: 'fg.subtle',
+	mt: '0.5',
+});
+
+const externalIconStyle = css({
+	w: '4',
+	h: '4',
+	mt: '1',
+	color: 'fg.subtle',
+	flexShrink: '0',
+});
 ---
 
 {
 	resources && resources.length > 0 && (
-		<div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-			<h2 class="text-xl font-bold text-primary-content mb-6">Resources & References</h2>
-			
+		<div class={sectionStyle}>
+			<h2 class={headingStyle}>Resources & References</h2>
+
 			<style>
 				@keyframes highlight-pulse {
 					0% {
@@ -78,31 +147,29 @@ const getCategoryLabel = (category: string) => {
 						transform: scale(1);
 					}
 				}
-				
+
 				.resource-link {
 					text-decoration: none !important;
 				}
-				
+
 				.resource-wrapper:target .resource-link {
 					animation: highlight-pulse 3s ease-out;
 				}
-				
+
 				.resource-wrapper {
 					scroll-margin-top: 6rem;
 				}
 			</style>
-			
-			<div class="space-y-6">
+
+			<div class={categoryListStyle}>
 				{Object.entries(groupResourcesByCategory(resources)).map(([category, categoryResources]) => (
 					<div>
-						<h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+						<h3 class={categoryHeadingStyle}>
 							{getCategoryLabel(category)}
 						</h3>
-						<div class="grid gap-3">
+						<div class={resourceGridStyle}>
 							{categoryResources.map(resource => {
-								// Find the original index of this resource in the flat array
 								const resourceIndex = resources.findIndex(r => r === resource) + 1;
-								// Use explicit ID if available, otherwise use index
 								const resourceId = resource.id || `${resourceIndex}`;
 								return (
 									<div id={`resource-${resourceId}`} class="resource-wrapper">
@@ -110,10 +177,10 @@ const getCategoryLabel = (category: string) => {
 											href={resource.url || resource.filePath || "#"}
 											target={resource.type === "url" ? "_blank" : undefined}
 											rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-											class="resource-link flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group"
+											class={`resource-link ${resourceLinkStyle}`}
 										>
 									<svg
-										class="w-5 h-5 mt-0.5 text-gray-400 dark:text-gray-500 group-hover:text-primary flex-shrink-0"
+										class={categoryIconStyle}
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -125,19 +192,19 @@ const getCategoryLabel = (category: string) => {
 											d={getCategoryIcon(category)}
 										/>
 									</svg>
-									<div class="flex-1 min-w-0">
-										<div class="font-medium text-primary-content group-hover:text-primary">
+									<div class={resourceContentStyle}>
+										<div class={resourceTitleStyle}>
 											{resource.title}
 										</div>
 										{resource.description && (
-											<div class="text-sm text-muted mt-0.5">
+											<div class={resourceDescStyle}>
 												{resource.description}
 											</div>
 										)}
 									</div>
 									{resource.type === "url" && (
 										<svg
-											class="w-4 h-4 mt-1 text-gray-400 dark:text-gray-500 group-hover:text-primary flex-shrink-0"
+											class={externalIconStyle}
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"

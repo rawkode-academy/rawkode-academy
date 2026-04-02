@@ -1,16 +1,28 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { css } from "../../../styled-system/css";
 
 type Props = {
 	series: CollectionEntry<"series">;
 };
 
 const { series } = Astro.props;
+
+const textStyle = css({
+	fontSize: 'xl',
+	fontWeight: '600',
+	color: 'brand.primary',
+});
+
+const linkStyle = css({
+	textDecoration: 'underline',
+	_hover: { textDecoration: 'none' },
+});
 ---
 
-<p class="text-xl font-semibold text-primary dark:text-primary">
+<p class={textStyle}>
 	Part of the series: <a
-		class="underline hover:no-underline"
+		class={linkStyle}
 		href={`/series/${series.id}`}>{series.data.title}</a
 	>
 </p>
