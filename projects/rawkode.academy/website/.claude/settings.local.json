@@ -68,7 +68,8 @@
       "mcp__claude_ai_PostHog__projects-get",
       "mcp__claude_ai_PostHog__query-trends",
       "mcp__claude_ai_PostHog__query-run",
-      "Bash(bunx astro:*)"
+      "Bash(bunx astro:*)",
+      "Bash(cuenv task:*)"
     ],
     "deny": []
   }
