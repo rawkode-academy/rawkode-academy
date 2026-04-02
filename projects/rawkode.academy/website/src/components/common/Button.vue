@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -39,12 +39,12 @@ const tag = computed(() => (props.href ? "a" : "button"));
 
 const variantStyles = {
 	primary: {
-		color: "white",
+		color: "brandAccent.contrast",
 		backgroundImage: "linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
 		_hover: { filter: "brightness(1.1)" },
-		_focus: { ringWidth: "4px", ringColor: "colorPalette.default/50" },
+		_focus: { ringWidth: "4px", ringColor: "brandAccent.ring" },
 		border: "1px solid",
-		borderColor: { base: "colorPalette.default/30", _dark: "colorPalette.default/50" },
+		borderColor: "brandAccent.border",
 	},
 	secondary: {
 		color: { base: "gray.900", _dark: "white" },

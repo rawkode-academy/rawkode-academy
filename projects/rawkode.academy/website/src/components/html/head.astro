@@ -22,19 +22,17 @@ const normalizedTitle = baseTitle.toLowerCase().includes(BRAND_NAME.toLowerCase(
 ---
 
 <style is:global>
-	@reference "../../styles/global.css";
-
 	h1,
 	h2,
 	h3,
 	h4,
 	h5,
 	h6 {
-		@apply font-display;
+		font-family: var(--font-quicksand), sans-serif;
 	}
 
 	body {
-		font-family: var(--font-body);
+		font-family: var(--font-poppins), sans-serif;
 	}
 
 	pre,
@@ -42,7 +40,7 @@ const normalizedTitle = baseTitle.toLowerCase().includes(BRAND_NAME.toLowerCase(
 	kbd,
 	samp,
 	tt {
-		@apply font-mono;
+		font-family: var(--font-monaspace-neon), monospace;
 	}
 </style>
 

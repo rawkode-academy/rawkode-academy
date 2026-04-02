@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed, useAttrs } from "vue";
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	variant?:
@@ -41,16 +41,16 @@ const sizeMap = {
 // Shared brand variant used by primary, secondary, tertiary, and info
 const brandOutline = {
 	border: "1px solid",
-	borderColor: { base: "colorPalette.default/50", _dark: "colorPalette.default/50" },
-	color: { base: "colorPalette.default", _dark: "white" },
-	bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "colorPalette.default/40" },
+	borderColor: "brandAccent.border",
+	color: "brandAccent.text",
+	bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "brandAccent.subtle" },
 };
 
 const brandSolid = {
-	bg: { base: "colorPalette.default/20", _dark: "colorPalette.default/40" },
-	color: { base: "colorPalette.default", _dark: "white" },
+	bg: "brandAccent.subtle",
+	color: "brandAccent.text",
 	border: "1px solid",
-	borderColor: { base: "colorPalette.default/30", _dark: "colorPalette.default/50" },
+	borderColor: "brandAccent.border",
 };
 
 function colorVariant(
@@ -113,15 +113,15 @@ const variantStyles = computed(() => {
 		info: o
 			? {
 					border: "1px solid",
-					borderColor: { base: "colorPalette.default/50", _dark: "colorPalette.default/60" },
-					color: "colorPalette.default",
-					bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "colorPalette.default/20" },
+					borderColor: "brandAccent.border",
+					color: "brandAccent.text",
+					bg: { base: "rgba(255, 255, 255, 0.3)", _dark: "brandAccent.subtle" },
 				}
 			: {
-					bg: "colorPalette.default/20",
-					color: "colorPalette.default",
+					bg: "brandAccent.subtle",
+					color: "brandAccent.text",
 					border: "1px solid",
-					borderColor: { base: "colorPalette.default/30", _dark: "colorPalette.default/50" },
+					borderColor: "brandAccent.border",
 				},
 	};
 

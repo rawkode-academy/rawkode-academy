@@ -1,4 +1,5 @@
 ---
+import { css, cx } from "styled-system/css";
 import type { CollectionEntry } from "astro:content";
 
 interface Props {
@@ -11,57 +12,57 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 ---
 
 {hasSpeakers && (
-	<section class="section-gap pt-8 border-t border-secondary/20">
-		<h2 class="text-2xl font-bold text-primary-content mb-6">
+	<section class={css({ pt: '8', borderTopWidth: '1px', borderColor: 'secondary/20' })}>
+		<h2 class={cx('text-primary-content', css({ fontSize: '2xl', fontWeight: 'bold', mb: '6' }))}>
 			Meet the Cast
 		</h2>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		<div class={css({ display: 'grid', gap: '4', sm: { gridTemplateColumns: 'repeat(2, 1fr)' }, lg: { gridTemplateColumns: 'repeat(3, 1fr)' }, xl: { gridTemplateColumns: 'repeat(4, 1fr)' } })}>
 			{hosts.map((person) => (
 				<div
-					class="glass-panel group flex items-center p-4 gap-4 hover:border-primary/50 transition-colors"
+					class={cx('glass-panel', css({ display: 'flex', alignItems: 'center', p: '4', gap: '4', _hover: { borderColor: 'primary/50' }, transition: 'colors' }))}
 				>
-					<div class="relative shrink-0">
+					<div class={css({ pos: 'relative', flexShrink: '0' })}>
 						<img
 							src={person.data.avatarUrl || '/images/avatars/default.png'}
 							alt={person.data.name}
-							class="w-12 h-12 rounded-full object-cover border-2 border-primary"
+							class={css({ w: '12', h: '12', rounded: 'full', objectFit: 'cover', borderWidth: '2px', borderColor: 'primary' })}
 							loading="lazy"
 						/>
-						<span class="absolute -bottom-1 -right-1 bg-primary text-primary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-primary-content/10 shadow-sm">
+						<span class={cx('text-primary-content', css({ pos: 'absolute', bottom: '-1', right: '-1', bg: 'primary', fontSize: '10px', fontWeight: 'bold', px: '1.5', py: '0.5', rounded: 'full', borderWidth: '1px', borderColor: 'primary/10', shadow: 'sm' }))}>
 							HOST
 						</span>
 					</div>
-					<div class="min-w-0">
-						<h3 class="font-medium text-primary-content truncate group-hover:text-primary transition-colors">
+					<div class={css({ minW: '0' })}>
+						<h3 class={cx('text-primary-content', css({ fontWeight: 'medium', truncate: true, _groupHover: { color: 'primary' }, transition: 'colors' }))}>
 							{person.data.name}
 						</h3>
-						<p class="text-xs text-secondary-content truncate">
+						<p class={cx('text-secondary-content', css({ fontSize: 'xs', truncate: true }))}>
 							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
 						</p>
 					</div>
 				</div>
 			))}
-			
+
 			{guests.map((person) => (
 				<div
-					class="glass-panel group flex items-center p-4 gap-4 hover:border-secondary transition-colors"
+					class={cx('glass-panel', css({ display: 'flex', alignItems: 'center', p: '4', gap: '4', _hover: { borderColor: 'secondary' }, transition: 'colors' }))}
 				>
-					<div class="relative shrink-0">
+					<div class={css({ pos: 'relative', flexShrink: '0' })}>
 						<img
 							src={person.data.avatarUrl || '/images/avatars/default.png'}
 							alt={person.data.name}
-							class="w-12 h-12 rounded-full object-cover border-2 border-secondary/50"
+							class={css({ w: '12', h: '12', rounded: 'full', objectFit: 'cover', borderWidth: '2px', borderColor: 'secondary/50' })}
 							loading="lazy"
 						/>
-						<span class="absolute -bottom-1 -right-1 bg-secondary text-secondary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-secondary-content/10 shadow-sm">
+						<span class={cx('text-secondary-content', css({ pos: 'absolute', bottom: '-1', right: '-1', bg: 'secondary', fontSize: '10px', fontWeight: 'bold', px: '1.5', py: '0.5', rounded: 'full', borderWidth: '1px', borderColor: 'secondary/10', shadow: 'sm' }))}>
 							GUEST
 						</span>
 					</div>
-					<div class="min-w-0">
-						<h3 class="font-medium text-primary-content truncate group-hover:text-secondary transition-colors">
+					<div class={css({ minW: '0' })}>
+						<h3 class={cx('text-primary-content', css({ fontWeight: 'medium', truncate: true, _groupHover: { color: 'secondary' }, transition: 'colors' }))}>
 							{person.data.name}
 						</h3>
-						<p class="text-xs text-secondary-content truncate">
+						<p class={cx('text-secondary-content', css({ fontSize: 'xs', truncate: true }))}>
 							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
 						</p>
 					</div>

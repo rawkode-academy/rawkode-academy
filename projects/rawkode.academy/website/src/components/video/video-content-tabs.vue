@@ -1,14 +1,14 @@
 <template>
   <div class="glass-card-shimmer">
     <!-- Tab Navigation -->
-    <div class="border-b border-subtle relative z-10">
+    <div :class="css({ borderBottomWidth: '1px', borderColor: 'subtle', pos: 'relative', zIndex: '10' })">
       <!-- Dropdown for Mobile -->
-      <div class="sm:hidden px-2 pt-2 pb-3">
-        <label for="tabs-mobile" class="sr-only">Select a tab</label>
+      <div :class="css({ sm: { display: 'none' }, px: '2', pt: '2', pb: '3' })">
+        <label for="tabs-mobile" :class="css({ srOnly: true })">Select a tab</label>
         <select
           id="tabs-mobile"
           name="tabs-mobile"
-          class="glass-interactive block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
+          :class="cx('glass-interactive', 'text-primary-content', css({ display: 'block', w: 'full', pl: '3', pr: '10', py: '2', fontSize: 'base', _focus: { outline: 'none', ringColor: 'primary/50', borderColor: 'primary/50' }, sm: { fontSize: 'sm' } }))"
           :value="activeTab"
           @change="setActiveTab($event.target.value)"
         >
@@ -19,16 +19,16 @@
       </div>
 
       <!-- Tab bar for sm and up -->
-      <nav class="hidden sm:flex -mb-px overflow-x-auto" role="tablist">
+      <nav :class="css({ display: 'none', sm: { display: 'flex' }, mb: '-1px', overflowX: 'auto' })" role="tablist">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           :id="`video-tab-${tab.id}`"
           :class="[
-            'tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
+            css({ flexShrink: '0', px: '4', sm: { px: '6' }, py: '3', borderBottomWidth: '2px', fontWeight: 'medium', fontSize: 'sm', whiteSpace: 'nowrap', transition: 'colors' }),
             activeTab === tab.id
-              ? 'border-primary text-primary dark:text-primary'
-              : 'border-transparent text-muted hover:text-primary-content',
+              ? css({ borderColor: 'primary', color: 'primary', _dark: { color: 'primary' } })
+              : cx('text-muted', css({ borderColor: 'transparent', _hover: { color: 'var(--text-primary-content)' } })),
           ]"
           role="tab"
           :aria-selected="activeTab === tab.id"
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="p-4 sm:p-6 relative z-10">
+    <div :class="css({ p: '4', sm: { p: '6' }, pos: 'relative', zIndex: '10' })">
       <!-- Comments Panel -->
       <div
         v-show="activeTab === 'comments'"
@@ -72,7 +72,7 @@
         role="tabpanel"
         aria-labelledby="video-tab-resources"
       >
-        <div class="prose prose-lg dark:prose-invert max-w-none">
+        <div :class="cx('prose', css({ maxW: 'none' }))">
           <p class="text-muted">
             Resources related to this video will be displayed here, including
             links, downloads, and additional materials.
@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import { css, cx } from "styled-system/css";
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
 
@@ -101,6 +102,9 @@ export default {
 	components: {
 		VideoTranscript,
 		VideoComments,
+	},
+	setup() {
+		return { css, cx };
 	},
 	props: {
 		videoId: {

@@ -1,4 +1,5 @@
 ---
+import { css, cx } from "styled-system/css";
 import VideoProgressBar from "@/components/video/VideoProgressBar.vue";
 
 interface Video {
@@ -67,18 +68,26 @@ function calculateProgress(videoId: string, duration: number): number | null {
 ---
 
 <section class="section-py-tight">
-	<div class="text-center stack-gap-sm">
-		<h2 class="text-3xl font-extrabold text-primary-content sm:text-4xl">{title}</h2>
-		<p class="text-lg text-muted">{description}</p>
+	<div class={cx('stack-gap-sm', css({ textAlign: 'center' }))}>
+		<h2 class={cx('text-primary-content', css({ fontSize: '3xl', fontWeight: 'extrabold', sm: { fontSize: '4xl' } }))}>{title}</h2>
+		<p class={cx('text-muted', css({ fontSize: 'lg' }))}>{description}</p>
 	</div>
-	<div class="stack-gap-lg grid md:grid-cols-2 lg:grid-cols-4">
+	<div class={cx('stack-gap-lg', css({ display: 'grid', md: { gridTemplateColumns: 'repeat(2, 1fr)' }, lg: { gridTemplateColumns: 'repeat(4, 1fr)' } }))}>
 		{videos.map((video: Video) => (
-			<a href={`/watch/${video.slug}`} class="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 rounded-lg">
-				<div class="relative aspect-video overflow-hidden rounded-lg">
+			<a href={`/watch/${video.slug}`} class={css({
+	_focusVisible: {
+		outline: 'none',
+		ringWidth: '2px',
+		ringColor: 'primary/50',
+		ringOffset: '2px',
+	},
+	rounded: 'lg',
+})} style="cursor:pointer">
+				<div class={css({ pos: 'relative', aspectRatio: 'video', overflow: 'hidden', rounded: 'lg' })}>
 					<img
 						src={video.thumbnailUrl}
 						alt={video.title}
-						class="w-full h-full object-cover shadow-md transition-transform duration-200 group-hover:scale-[1.03]"
+						class={css({ w: 'full', h: 'full', objectFit: 'cover', shadow: 'md', transition: 'transform', transitionDuration: '200ms', _groupHover: { scale: '1.03' } })}
 						loading="lazy"
 					/>
 					{(() => {
@@ -92,15 +101,15 @@ function calculateProgress(videoId: string, duration: number): number | null {
 							/>
 						) : null;
 					})()}
-					<div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-sm font-medium text-white backdrop-blur-sm">
+					<div class={css({ pos: 'absolute', bottom: '2', right: '2', rounded: 'md', bg: 'black/75', px: '2', py: '1', fontSize: 'sm', fontWeight: 'medium', color: 'white', backdropFilter: 'blur(4px)' })}>
 						{formatDuration(video.duration)}
 					</div>
 				</div>
-				<div class="mt-3">
-					<h3 class="text-base font-medium text-primary-content group-hover:text-primary transition-colors duration-200 line-clamp-2">
+				<div class={css({ mt: '3' })}>
+					<h3 class={cx('text-primary-content', css({ fontSize: 'base', fontWeight: 'medium', _groupHover: { color: 'primary' }, transition: 'colors', transitionDuration: '200ms', lineClamp: '2' }))}>
 						{video.title}
 					</h3>
-					<p class="mt-1 text-sm text-muted">
+					<p class={cx('text-muted', css({ mt: '1', fontSize: 'sm' }))}>
 						{formatDate(video.publishedAt)}
 					</p>
 				</div>

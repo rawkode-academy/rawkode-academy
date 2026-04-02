@@ -1,14 +1,14 @@
 <template>
-  <div :class="css({ height: 'full', display: 'flex', flexDirection: 'column', bg: 'gray.900', color: 'gray.100' })">
+  <div :class="css({ h: 'full', display: 'flex', flexDirection: 'column', bg: 'gray.900', color: 'gray.100' })">
     <!-- Header -->
     <div :class="css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: '4', bg: 'gray.800', borderBottomWidth: '1px', borderColor: 'gray.700' })">
       <div :class="css({ display: 'flex', alignItems: 'center', gap: '4' })">
         <h3 :class="css({ fontSize: 'lg', fontWeight: 'semibold' })">{{ title }}</h3>
         <div v-if="status === 'booting'" :class="css({ display: 'flex', alignItems: 'center', gap: '2', fontSize: 'sm', color: 'gray.400' })">
-          <div :class="css({ animation: 'spin', borderRadius: 'full', h: '4', w: '4', borderWidth: '2px', borderColor: 'gray.400', borderTopColor: 'transparent' })"></div>
+          <div :class="css({ rounded: 'full', h: '4', w: '4', borderWidth: '2px', borderColor: 'gray.400', borderTopColor: 'transparent', animation: 'spin' })"></div>
           <span>Starting container...</span>
         </div>
-        <div v-else-if="status === 'installing'" :class="css({ display: 'flex', alignItems: 'center', gap: '2', fontSize: 'sm', color: 'teal.500' })">
+        <div v-else-if="status === 'installing'" :class="[css({ display: 'flex', alignItems: 'center', gap: '2', fontSize: 'sm' }), 'text-primary']">
           <div :class="css({ animation: 'pulse' })">&#x25CF;</div>
           <span>Installing dependencies...</span>
         </div>
@@ -21,7 +21,7 @@
         <button
           @click="restart"
           :disabled="status !== 'ready'"
-          :class="css({ p: '2', color: 'gray.400', cursor: 'pointer', _hover: { color: 'white' }, _disabled: { opacity: '0.5', cursor: 'not-allowed' }, transition: 'colors' })"
+          :class="css({ p: '2', color: 'gray.400', _hover: { color: 'white' }, _disabled: { opacity: '0.5', cursor: 'not-allowed' }, transition: 'colors' })"
           title="Restart"
         >
           <svg :class="css({ w: '5', h: '5' })" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@
         <div :class="css({ p: '2', bg: 'gray.800', borderBottomWidth: '1px', borderColor: 'gray.700', position: 'relative', zIndex: '10' })">
           <select
             v-model="selectedFile"
-            :class="css({ w: 'full', px: '3', py: '1', bg: 'gray.700', color: 'white', borderRadius: 'md', borderWidth: '1px', borderColor: 'gray.600', cursor: 'pointer', transition: 'colors', _hover: { bg: 'gray.600' }, _focus: { borderColor: 'teal.500', outline: 'none' } })"
+            :class="css({ w: 'full', px: '3', py: '1', bg: 'gray.700', color: 'white', rounded: 'md', borderWidth: '1px', borderColor: 'gray.600', _hover: { bg: 'gray.600' }, _focus: { borderColor: 'primary', outline: 'none' }, cursor: 'pointer', transition: 'colors' })"
             :disabled="fileList.length === 0"
           >
             <option v-if="fileList.length === 0" value="">No files loaded</option>
@@ -72,7 +72,7 @@
               :href="previewUrl"
               target="_blank"
               rel="noopener noreferrer"
-              :class="css({ fontSize: 'sm', color: 'teal.500', textDecoration: 'underline', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1', _hover: { color: 'teal.400' }, transition: 'colors' })"
+              :class="[css({ fontSize: 'sm', textDecoration: 'underline', transition: 'all', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1' }), 'text-primary hover:text-primary/90']"
               @click.stop
             >
               {{ previewUrl }}
@@ -108,15 +108,14 @@
         <span :class="css({ fontSize: 'sm', color: 'gray.400' })">Terminal</span>
         <button
           @click="clearTerminal"
-          :class="css({ fontSize: 'xs', color: 'gray.500', cursor: 'pointer', _hover: { color: 'gray.300' }, transition: 'colors' })"
+          :class="css({ fontSize: 'xs', color: 'gray.500', _hover: { color: 'gray.300' }, transition: 'colors' })"
         >
           Clear
         </button>
       </div>
       <div
         ref="terminalOutput"
-        :class="css({ overflow: 'auto', p: '2', fontFamily: 'mono', fontSize: 'xs' })"
-        style="height: calc(100% - 2rem)"
+        :class="css({ h: 'calc(100% - 2rem)', overflowY: 'auto', p: '2', fontFamily: 'mono', fontSize: 'xs' })"
       >
         <div
           v-for="(line, index) in terminalLines"
@@ -130,8 +129,8 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "styled-system/css";
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
-import { css } from "../../styled-system/css";
 import { WebContainer } from "@webcontainer/api";
 
 interface Props {
@@ -176,10 +175,10 @@ const clearTerminal = () => {
 };
 
 const getTerminalLineClass = (line: string) => {
-	if (line.startsWith("[error]")) return css({ color: 'red.400' });
-	if (line.startsWith("[success]")) return css({ color: 'green.400' });
-	if (line.startsWith("[info]")) return css({ color: 'gray.300' });
-	return css({ color: 'gray.400' });
+	if (line.startsWith("[error]")) return "text-red-400";
+	if (line.startsWith("[success]")) return "text-green-400";
+	if (line.startsWith("[info]")) return "text-gray-300";
+	return "text-gray-400";
 };
 
 const formatTerminalLine = (line: string) => {

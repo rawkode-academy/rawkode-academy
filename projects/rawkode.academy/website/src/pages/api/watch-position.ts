@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { fetchWithTimeout } from "@/utils/timeout";
 
 export const POST: APIRoute = async ({ locals, request }) => {
 	const user = locals.user;
@@ -38,7 +39,8 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			);
 		}
 
-		const response = await env.WATCH_HISTORY.fetch(
+		const response = await fetchWithTimeout(
+			env.WATCH_HISTORY.fetch.bind(env.WATCH_HISTORY),
 			new Request("https://watch-history.internal/", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -48,6 +50,11 @@ export const POST: APIRoute = async ({ locals, request }) => {
 					userId: user.id,
 				}),
 			}),
+			{},
+			{
+				timeoutMs: 4000,
+				label: "Watch history API service",
+			},
 		);
 
 		if (!response.ok) {

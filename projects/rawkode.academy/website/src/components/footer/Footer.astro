@@ -18,6 +18,7 @@ import {
 	WrenchScrewdriverIcon,
 } from "@heroicons/vue/24/outline";
 import type { FunctionalComponent, HTMLAttributes, VNodeProps } from "vue";
+import { css, cx } from "styled-system/css";
 
 type FooterLink = {
 	name: string;
@@ -101,24 +102,59 @@ const aboutSection: FooterSection = {
 		{ name: "Privacy Policy", href: "/privacy", icon: ShieldCheckIcon },
 	],
 };
+
+const sectionTitleStyle = css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	color: { base: 'gray.900', _dark: 'white' },
+	letterSpacing: 'wider',
+	textTransform: 'uppercase',
+	mb: '4',
+});
+
+const linkListStyle = css({ display: 'flex', flexDir: 'column', gap: '3' });
+
+const footerLinkStyle = cx('link-muted', css({ fontSize: 'sm' }));
+
+const socialLinkStyle = css({
+	color: { base: 'gray.500', _dark: 'gray.400' },
+	transition: 'color',
+	transitionDuration: '200ms',
+	_hover: { color: 'teal.500' },
+});
+
+const socialIconStyle = css({ h: '5', w: '5' });
 ---
 
-<footer class="relative mt-16 px-4 pb-10">
-    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-64 blur-[180px] opacity-40 bg-gradient-to-t from-primary/30 via-transparent to-secondary/20 dark:from-primary/40"></div>
-    <div class="glass-panel relative mx-auto max-w-7xl overflow-hidden rounded-[32px]">
-        <div class="px-4 py-12 sm:px-6 lg:px-10">
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+<footer class={css({ position: 'relative', mt: '16', px: '4', pb: '10' })}>
+    <div class={css({
+        pointerEvents: 'none',
+        position: 'absolute',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        h: '64',
+        filter: 'blur(180px)',
+        opacity: '0.4',
+        backgroundImage: {
+            base: 'linear-gradient(to top, rgba(4,181,156,0.3), transparent, rgba(133,255,149,0.2))',
+            _dark: 'linear-gradient(to top, rgba(4,181,156,0.4), transparent, rgba(133,255,149,0.2))',
+        },
+    })}></div>
+    <div class={cx('glass-panel', css({ position: 'relative', mx: 'auto', maxW: '7xl', overflow: 'hidden', borderRadius: '3xl' }))}>
+        <div class={css({ px: { base: '4', sm: '6', lg: '10' }, py: '12' })}>
+        <div class={css({ display: 'grid', gridTemplateColumns: { base: 'repeat(2, minmax(0, 1fr))', md: 'repeat(5, minmax(0, 1fr))' }, gap: '8' })}>
             <!-- Learning Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class={sectionTitleStyle}>
                     {learningSections.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class={linkListStyle}>
                     {learningSections.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class={footerLinkStyle}
                             >
                                 {link.name}
                             </a>
@@ -129,15 +165,15 @@ const aboutSection: FooterSection = {
 
             <!-- Organizations Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class={sectionTitleStyle}>
                     {organizationSection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class={linkListStyle}>
                     {organizationSection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class={footerLinkStyle}
                             >
                                 {link.name}
                             </a>
@@ -148,21 +184,21 @@ const aboutSection: FooterSection = {
 
             <!-- Community Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class={sectionTitleStyle}>
                     {communitySection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class={linkListStyle}>
                     {communitySection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
                                 target={link.external ? "_blank" : "_self"}
                                 rel={link.external ? "noopener noreferrer" : undefined}
-                                class="link-muted text-sm flex items-center gap-1"
+                                class={cx(footerLinkStyle, css({ display: 'flex', alignItems: 'center', gap: '1' }))}
                             >
                                 {link.name}
                                 {link.external && (
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class={css({ w: '3', h: '3' })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                     </svg>
                                 )}
@@ -174,15 +210,15 @@ const aboutSection: FooterSection = {
 
             <!-- Contributors Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class={sectionTitleStyle}>
                     {contributorsSection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class={linkListStyle}>
                     {contributorsSection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class={footerLinkStyle}
                             >
                                 {link.name}
                             </a>
@@ -193,15 +229,15 @@ const aboutSection: FooterSection = {
 
             <!-- About Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class={sectionTitleStyle}>
                     {aboutSection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class={linkListStyle}>
                     {aboutSection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class={footerLinkStyle}
                             >
                                 {link.name}
                             </a>
@@ -212,12 +248,12 @@ const aboutSection: FooterSection = {
         </div>
 
         <!-- Bottom section with logo and social links -->
-        <div class="mt-8 pt-8 border-t border-subtle">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center mb-4 md:mb-0">
-                    <a href="/" class="text-muted" aria-label="return to the home page">
+        <div class={css({ mt: '8', pt: '8', borderTopWidth: '1px', borderColor: { base: 'rgba(255,255,255,0.2)', _dark: 'rgba(107,114,128,0.5)' } })}>
+            <div class={css({ display: 'flex', flexDir: { base: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: 'center' })}>
+                <div class={css({ display: 'flex', alignItems: 'center', mb: { base: '4', md: '0' } })}>
+                    <a href="/" class={css({ color: { base: 'gray.500', _dark: 'gray.400' } })} aria-label="return to the home page">
                         <svg
-                            class="fill-current h-6"
+                            class={css({ fill: 'currentColor', h: '6' })}
                             id="Layer_1"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 559.671 143.20864"
@@ -228,18 +264,18 @@ const aboutSection: FooterSection = {
                         </svg>
                     </a>
                 </div>
-                <div class="text-sm text-muted">
-                    © {currentYear} Rawkode Academy. All rights reserved.
+                <div class={css({ fontSize: 'sm', color: { base: 'gray.500', _dark: 'gray.400' } })}>
+                    &copy; {currentYear} Rawkode Academy. All rights reserved.
                 </div>
-                <div class="flex space-x-6 mt-4 md:mt-0">
+                <div class={css({ display: 'flex', gap: '6', mt: { base: '4', md: '0' } })}>
                     <a
                         href="https://github.com/rawkode-academy/rawkode-academy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted"
+                        class={socialLinkStyle}
                         aria-label="GitHub"
                     >
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class={socialIconStyle} fill="currentColor" viewBox="0 0 24 24">
                             <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" />
                         </svg>
                     </a>
@@ -247,10 +283,10 @@ const aboutSection: FooterSection = {
                         href="https://x.com/RawkodeAcademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted"
+                        class={socialLinkStyle}
                         aria-label="X (Twitter)"
                     >
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class={socialIconStyle} fill="currentColor" viewBox="0 0 24 24">
                             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                         </svg>
                     </a>
@@ -258,10 +294,10 @@ const aboutSection: FooterSection = {
                         href="https://bsky.app/profile/rawkode.academy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted"
+                        class={socialLinkStyle}
                         aria-label="Bluesky"
                     >
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class={socialIconStyle} fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z" />
                         </svg>
                     </a>
@@ -269,10 +305,10 @@ const aboutSection: FooterSection = {
                         href="https://uk.linkedin.com/company/rawkodeacademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted"
+                        class={socialLinkStyle}
                         aria-label="LinkedIn"
                     >
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class={socialIconStyle} fill="currentColor" viewBox="0 0 24 24">
                             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                         </svg>
                     </a>

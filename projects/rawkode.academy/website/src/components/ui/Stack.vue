@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	direction?: "vertical" | "horizontal";
@@ -24,61 +25,38 @@ const props = withDefaults(defineProps<Props>(), {
 	wrap: false,
 });
 
-const baseClasses = "flex";
-
-const directionClasses = {
-	vertical: "flex-col",
-	horizontal: "flex-row",
+const spacingMap = {
+	vertical: { none: "0", xs: "1", sm: "2", md: "4", lg: "6", xl: "8", "2xl": "12" },
+	horizontal: { none: "0", xs: "2", sm: "3", md: "4", lg: "6", xl: "8", "2xl": "12" },
 };
 
-const spacingClasses = {
-	vertical: {
-		none: "gap-0",
-		xs: "gap-1",
-		sm: "gap-2",
-		md: "gap-4",
-		lg: "gap-6",
-		xl: "gap-8",
-		"2xl": "gap-12",
-	},
-	horizontal: {
-		none: "gap-0",
-		xs: "gap-2",
-		sm: "gap-3",
-		md: "gap-4",
-		lg: "gap-6",
-		xl: "gap-8",
-		"2xl": "gap-12",
-	},
-};
+const alignMap = {
+	start: "flex-start",
+	center: "center",
+	end: "flex-end",
+	stretch: "stretch",
+} as const;
 
-const alignClasses = {
-	start: "items-start",
-	center: "items-center",
-	end: "items-end",
-	stretch: "items-stretch",
-};
-
-const justifyClasses = {
-	start: "justify-start",
-	center: "justify-center",
-	end: "justify-end",
-	between: "justify-between",
-	around: "justify-around",
-	evenly: "justify-evenly",
-};
+const justifyMap = {
+	start: "flex-start",
+	center: "center",
+	end: "flex-end",
+	between: "space-between",
+	around: "space-around",
+	evenly: "space-evenly",
+} as const;
 
 const stackClasses = computed(() => {
-	return [
-		baseClasses,
-		directionClasses[props.direction],
-		spacingClasses[props.direction][props.spacing],
-		alignClasses[props.align],
-		justifyClasses[props.justify],
-		props.wrap && "flex-wrap",
+	return cx(
+		css({
+			display: "flex",
+			flexDirection: props.direction === "vertical" ? "column" : "row",
+			gap: spacingMap[props.direction][props.spacing],
+			alignItems: alignMap[props.align],
+			justifyContent: justifyMap[props.justify],
+			...(props.wrap ? { flexWrap: "wrap" } : {}),
+		}),
 		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
+	);
 });
 </script>

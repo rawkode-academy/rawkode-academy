@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	title: string;
@@ -73,6 +73,6 @@ const props = withDefaults(defineProps<Props>(), {
 	class: "",
 });
 
-const iconBgClass = props.iconBgColor || css({ bg: "colorPalette.default/10" });
+const iconBgClass = props.iconBgColor || css({ bg: "brandAccent.subtle" });
 const className = props.class;
 </script>

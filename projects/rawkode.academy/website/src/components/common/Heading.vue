@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 interface Props {
 	as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";

@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 export interface Props {
 	href?: string;
@@ -18,13 +18,14 @@ const skipLinkClass = css({
 		zIndex: 50,
 		px: "4",
 		py: "2",
-		bg: "colorPalette.default",
-		color: "white",
+		backgroundImage:
+			"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+		color: "brandAccent.contrast",
 		borderRadius: "md",
 		outline: "none",
 		ringWidth: "2px",
 		ringOffset: "2px",
-		ringColor: "colorPalette.default",
+		ringColor: "brandAccent.ring",
 	},
 });
 ---

@@ -3,7 +3,7 @@
     <svg
       v-if="showIcon"
       xmlns="http://www.w3.org/2000/svg"
-      :class="css({ height: '4', width: '4', color: 'colorPalette.default' })"
+      :class="css({ height: '4', width: '4', color: 'brandAccent.text' })"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	date: Date;

@@ -2,8 +2,8 @@
   <div>
     <!-- Checking Subscription -->
     <div v-if="checkingSubscription" :class="css({ textAlign: 'center' })">
-      <div :class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: '16', h: '16', borderRadius: 'full', bg: 'gray.700/50', mb: '4' })">
-        <svg :class="css({ animation: 'spin', h: '8', w: '8', color: 'teal.500' })" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <div :class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: '16', h: '16', rounded: 'full', bg: 'gray.700/50', mb: '4' })">
+        <svg :class="[css({ h: '8', w: '8' }), 'animate-spin text-primary']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle :class="css({ opacity: '0.25' })" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path :class="css({ opacity: '0.75' })" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -13,7 +13,7 @@
 
     <!-- Already Subscribed -->
     <div v-else-if="isAlreadySubscribed" :class="css({ textAlign: 'center' })">
-      <div :class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: '16', h: '16', borderRadius: 'full', bg: 'green.500/20', mb: '4' })">
+      <div :class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: '16', h: '16', rounded: 'full', bg: 'green.500/20', mb: '4' })">
         <svg xmlns="http://www.w3.org/2000/svg" :class="css({ h: '8', w: '8', color: 'green.400' })" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
@@ -26,7 +26,7 @@
 
     <!-- Success -->
     <div v-else-if="submitted" :class="css({ textAlign: 'center' })">
-      <div :class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: '16', h: '16', borderRadius: 'full', bg: 'green.500/20', mb: '4' })">
+      <div :class="css({ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', w: '16', h: '16', rounded: 'full', bg: 'green.500/20', mb: '4' })">
         <svg xmlns="http://www.w3.org/2000/svg" :class="css({ h: '8', w: '8', color: 'green.400' })" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
@@ -39,7 +39,7 @@
 
     <!-- Form -->
     <form v-else @submit.prevent="submitForm" :class="css({ display: 'flex', flexDirection: 'column', gap: '4' })">
-      <div v-if="error" :class="css({ p: '3', bg: 'red.500/20', borderWidth: '1px', borderColor: 'red.500/30', borderRadius: 'lg', color: 'red.300', fontSize: 'sm' })">
+      <div v-if="error" :class="css({ p: '3', bg: 'red.500/20', borderWidth: '1px', borderColor: 'red.500/30', rounded: 'lg', color: 'red.300', fontSize: 'sm' })">
         {{ error }}
       </div>
 
@@ -50,17 +50,17 @@
           id="email"
           placeholder="Enter your email"
           required
-          :class="css({ w: 'full', px: '4', py: '3', bg: 'gray.900/50', borderWidth: '1px', borderColor: 'gray.600', borderRadius: 'lg', color: 'white', _placeholder: { color: 'gray.500' }, _focus: { outline: 'none', ringWidth: '2px', ringColor: 'teal.500', borderColor: 'transparent' }, _disabled: { opacity: '0.5' } })"
+          :class="css({ w: 'full', px: '4', py: '3', bg: 'gray.900/50', borderWidth: '1px', borderColor: 'gray.600', rounded: 'lg', color: 'white', _placeholder: { color: 'gray.500' }, _focus: { outline: 'none', ring: '2px', ringColor: 'primary', borderColor: 'transparent' } })"
           :disabled="loading"
         />
       </div>
 
-      <div v-if="signupConfig.sponsor && signupConfig.allowSponsorContact" :class="css({ display: 'flex', alignItems: 'flex-start', gap: '3' })">
+      <div v-if="signupConfig.sponsor && signupConfig.allowSponsorContact" :class="css({ display: 'flex', alignItems: 'start', gap: '3' })">
         <input
           v-model="sponsorConsent"
           type="checkbox"
           id="sponsor-consent"
-          :class="css({ mt: '1', w: '4', h: '4', borderRadius: 'sm', borderColor: 'gray.600', bg: 'gray.900' })"
+          :class="css({ mt: '1', w: '4', h: '4', bg: 'gray.900', borderColor: 'gray.600', rounded: 'sm', _focus: { ring: '2px', ringColor: 'primary' } })"
           :disabled="loading"
         />
         <label for="sponsor-consent" :class="css({ fontSize: 'sm', color: 'gray.400' })">
@@ -71,10 +71,10 @@
       <button
         type="submit"
         :disabled="loading"
-        :class="css({ w: 'full', py: '3', px: '4', bg: 'teal.500', color: 'white', fontWeight: 'semibold', borderRadius: 'lg', transition: 'colors', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', _hover: { bg: 'teal.600' }, _disabled: { bg: 'gray.700', cursor: 'not-allowed' } })"
+        :class="css({ w: 'full', py: '3', px: '4', bg: 'primary', _hover: { bg: 'primary/90' }, _disabled: { bg: 'gray.700' }, color: 'white', fontWeight: 'semibold', rounded: 'lg', transition: 'colors', transitionDuration: '200ms', display: 'flex', alignItems: 'center', justifyContent: 'center' })"
       >
         <span v-if="loading" :class="css({ display: 'flex', alignItems: 'center' })">
-          <svg :class="css({ animation: 'spin', ml: '-1', mr: '3', h: '5', w: '5', color: 'white' })" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg :class="[css({ ml: '-1', mr: '3', h: '5', w: '5', color: 'white' }), 'animate-spin']" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle :class="css({ opacity: '0.25' })" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path :class="css({ opacity: '0.75' })" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -89,8 +89,8 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "styled-system/css";
 import { ref, onMounted } from "vue";
-import { css } from "../../styled-system/css";
 import { actions } from "astro:actions";
 import {
 	getSessionCampaignAttribution,

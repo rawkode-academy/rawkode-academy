@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Component } from "vue";
+import { css } from "styled-system/css";
 
 // Track analytics events client-side
 const trackEvent = (event: string, properties?: Record<string, unknown>) => {
@@ -65,6 +66,159 @@ const handleClick = (e: Event) => {
 		});
 	}
 };
+
+const rootItemBase = css({
+	display: 'flex',
+	alignItems: 'center',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	borderRadius: 'xl',
+	transition: 'all',
+	transitionDuration: '200ms',
+	position: 'relative',
+	border: '1px solid transparent',
+	w: 'full',
+});
+
+const rootItemCollapsed = css({
+	flexDir: 'column',
+	alignItems: 'center',
+	justifyContent: 'center',
+	textAlign: 'center',
+	gap: '0.5',
+	p: '2',
+});
+
+const rootItemExpanded = css({
+	px: '3',
+	py: '2.5',
+});
+
+const rootItemActiveCollapsed = css({
+	bg: 'teal.500/10',
+	color: 'teal.500',
+});
+
+const rootItemActiveExpanded = css({
+	bgGradient: 'to-r',
+	gradientFrom: 'teal.500/15',
+	gradientTo: 'teal.500/5',
+	color: 'teal.500',
+	borderColor: 'teal.500/20',
+});
+
+const rootItemInactive = css({
+	color: { base: 'gray.700', _dark: 'gray.300' },
+	_hover: {
+		bg: { base: 'rgba(255,255,255,0.6)', _dark: 'rgba(55,65,81,0.6)' },
+		color: 'teal.500',
+	},
+});
+
+const iconCollapsed = css({
+	flexShrink: '0',
+	transition: 'colors',
+	transitionDuration: '200ms',
+	w: '6',
+	h: '6',
+});
+
+const iconExpanded = css({
+	flexShrink: '0',
+	transition: 'colors',
+	transitionDuration: '200ms',
+	w: '5',
+	h: '5',
+	mr: '3',
+});
+
+const iconActive = css({ color: 'teal.500' });
+const iconInactive = css({ color: { base: 'gray.500', _dark: 'gray.400' } });
+
+const labelStyle = css({
+	transition: 'opacity',
+	transitionDuration: '200ms',
+});
+
+const externalIconStyle = css({
+	w: '3.5',
+	h: '3.5',
+	ml: 'auto',
+	color: { base: 'gray.500', _dark: 'gray.400' },
+});
+
+const childrenListStyle = css({
+	mt: '1',
+	ml: '6',
+	position: 'relative',
+});
+
+const childrenLineStyle = css({
+	position: 'absolute',
+	left: '0',
+	top: '1',
+	bottom: '1',
+	w: '1px',
+	bg: 'teal.500/30',
+});
+
+const nestedLineStyle = css({
+	position: 'absolute',
+	left: '0',
+	top: '50%',
+	w: '3',
+	h: '1px',
+	bg: 'teal.500/30',
+});
+
+const nestedLinkBase = css({
+	display: 'flex',
+	alignItems: 'center',
+	fontWeight: 'medium',
+	pl: '5',
+	pr: '3',
+	py: '1.5',
+	transition: 'all',
+	transitionDuration: '200ms',
+});
+
+const nestedLinkDepth1 = css({ fontSize: 'xs' });
+const nestedLinkDeeper = css({ fontSize: '0.7rem' });
+
+const nestedLinkActive = css({ color: 'teal.500' });
+const nestedLinkInactive = css({
+	color: { base: 'gray.500', _dark: 'gray.400' },
+	_hover: { color: 'teal.500' },
+});
+
+const dotBase = css({
+	borderRadius: 'full',
+	mr: '2',
+	transition: 'colors',
+	transitionDuration: '200ms',
+});
+
+const dotDepth1 = css({ w: '1.5', h: '1.5' });
+const dotDeeper = css({ w: '1', h: '1' });
+const dotActive = css({ bg: 'teal.500' });
+const dotInactive = css({ bg: { base: 'gray.500/50', _dark: 'gray.400/50' } });
+
+const nestedChildrenList = css({
+	ml: '5',
+	position: 'relative',
+});
+
+const nestedChildrenLine = css({
+	position: 'absolute',
+	left: '0',
+	top: '1',
+	bottom: '1',
+	w: '1px',
+	bg: 'teal.500/20',
+});
+
+const relativeStyle = css({ position: 'relative' });
+const hiddenStyle = css({ display: 'none' });
 </script>
 
 <template>
@@ -75,16 +229,13 @@ const handleClick = (e: Event) => {
 			:target="item.external ? '_blank' : undefined"
 			:rel="item.external ? 'noopener noreferrer' : undefined"
 			:class="[
-				'flex items-center text-sm font-medium rounded-xl transition-all duration-200',
-				'group relative border border-transparent w-full',
-				isCollapsed
-					? 'flex-col items-center justify-center text-center gap-0.5 p-2'
-					: 'px-3 py-2.5',
+				rootItemBase,
+				isCollapsed ? rootItemCollapsed : rootItemExpanded,
 				isActive(item)
 					? isCollapsed
-						? 'bg-primary/10 text-primary'
-						: 'bg-gradient-to-r from-primary/15 to-primary/5 text-primary border-primary/20'
-					: 'text-secondary-content hover:bg-white/60 dark:hover:bg-gray-700/60 hover:text-primary',
+						? rootItemActiveCollapsed
+						: rootItemActiveExpanded
+					: rootItemInactive,
 			]"
 			:aria-current="item.current ? 'page' : undefined"
 			:title="isCollapsed ? item.name : undefined"
@@ -94,24 +245,21 @@ const handleClick = (e: Event) => {
 				:is="item.icon"
 				v-if="item.icon"
 				:class="[
-					'flex-shrink-0 transition-colors',
-					isCollapsed ? 'w-6 h-6' : 'w-5 h-5 mr-3',
-					isActive(item) ? 'text-primary' : 'text-muted group-hover:text-primary',
+					isCollapsed ? iconCollapsed : iconExpanded,
+					isActive(item) ? iconActive : iconInactive,
 				]"
 			/>
 			<span
 				:class="[
-					'transition-opacity duration-200',
-					isCollapsed
-						? 'hidden'
-						: '',
+					labelStyle,
+					isCollapsed ? hiddenStyle : '',
 				]"
 			>
 				{{ item.name }}
 			</span>
 			<svg
 				v-if="item.external && !isCollapsed"
-				class="w-3.5 h-3.5 ml-auto text-muted group-hover:text-primary"
+				:class="externalIconStyle"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -124,10 +272,10 @@ const handleClick = (e: Event) => {
 		<!-- Children - Expanded mode -->
 		<ul
 			v-if="shouldShowChildren(item) && !isCollapsed"
-			class="mt-1 ml-6 relative"
+			:class="childrenListStyle"
 		>
-			<div class="absolute left-0 top-1 bottom-1 w-px bg-primary/30"></div>
-			<li v-for="child in item.children" :key="child.href" class="relative">
+			<div :class="childrenLineStyle"></div>
+			<li v-for="child in item.children" :key="child.href" :class="relativeStyle">
 				<NavItem :item="child" :isCollapsed="isCollapsed" :depth="1" />
 			</li>
 		</ul>
@@ -135,21 +283,21 @@ const handleClick = (e: Event) => {
 
 	<!-- Nested items (depth > 0) - Expanded mode -->
 	<template v-else-if="!isCollapsed">
-		<div class="absolute left-0 top-1/2 w-3 h-px bg-primary/30" :style="{ opacity: 1 - depth * 0.2 }"></div>
+		<div :class="nestedLineStyle" :style="{ opacity: 1 - depth * 0.2 }"></div>
 		<a
 			:href="item.href"
 			:class="[
-				'flex items-center font-medium pl-5 pr-3 py-1.5 transition-all duration-200',
-				depth === 1 ? 'text-xs' : 'text-[0.7rem]',
-				isActive(item) ? 'text-primary' : 'text-muted hover:text-primary',
+				nestedLinkBase,
+				depth === 1 ? nestedLinkDepth1 : nestedLinkDeeper,
+				isActive(item) ? nestedLinkActive : nestedLinkInactive,
 			]"
 			:aria-current="item.current ? 'page' : undefined"
 		>
 			<span
 				:class="[
-					'rounded-full mr-2 transition-colors',
-					depth === 1 ? 'w-1.5 h-1.5' : 'w-1 h-1',
-					isActive(item) ? 'bg-primary' : 'bg-muted/50',
+					dotBase,
+					depth === 1 ? dotDepth1 : dotDeeper,
+					isActive(item) ? dotActive : dotInactive,
 				]"
 			></span>
 			{{ item.name }}
@@ -158,10 +306,10 @@ const handleClick = (e: Event) => {
 		<!-- Nested children -->
 		<ul
 			v-if="shouldShowChildren(item)"
-			class="ml-5 relative"
+			:class="nestedChildrenList"
 		>
-			<div class="absolute left-0 top-1 bottom-1 w-px bg-primary/20"></div>
-			<li v-for="child in item.children" :key="child.href" class="relative">
+			<div :class="nestedChildrenLine"></div>
+			<li v-for="child in item.children" :key="child.href" :class="relativeStyle">
 				<NavItem :item="child" :isCollapsed="isCollapsed" :depth="depth + 1" />
 			</li>
 		</ul>

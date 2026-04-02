@@ -1,5 +1,5 @@
 ---
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 
 type Props = {
 	variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -23,10 +23,13 @@ const {
 
 const variantStyles: Record<string, Record<string, any>> = {
 	primary: {
-		color: "white",
-		bg: "colorPalette.default",
-		_hover: { bg: "colorPalette.default/90" },
-		_focus: { ringWidth: "4px", ringColor: "colorPalette.default" },
+		color: "brandAccent.contrast",
+		backgroundImage:
+			"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+		border: "1px solid",
+		borderColor: "brandAccent.border",
+		_hover: { filter: "brightness(1.05)" },
+		_focus: { ringWidth: "4px", ringColor: "brandAccent.ring" },
 	},
 	secondary: {
 		color: { base: "gray.900", _dark: "white" },

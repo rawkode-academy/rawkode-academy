@@ -1,4 +1,5 @@
 ---
+import { css, cx } from "styled-system/css";
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
@@ -122,53 +123,146 @@ function formatDuration(seconds: number) {
         />
 
         <!-- Hero -->
-        <section class="relative overflow-hidden" style="border-bottom: 1px solid var(--surface-border)">
-                <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/5 dark:from-primary/20 dark:to-secondary/10" aria-hidden="true"></div>
-                <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)]" aria-hidden="true"></div>
+        <section class={css({
+	pos: 'relative',
+	overflow: 'hidden',
+})} style="border-bottom: 1px solid var(--surface-border)">
+                <div class={css({
+	pos: 'absolute',
+	inset: '0',
+	bgGradient: 'to-br',
+	gradientFrom: 'primary/10',
+	gradientVia: 'transparent',
+	gradientTo: 'secondary/5',
+	_dark: { gradientFrom: 'primary/20', gradientTo: 'secondary/10' },
+})} aria-hidden="true"></div>
+                <div class={css({
+	pos: 'absolute',
+	inset: '0',
+	bg: 'radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.15),transparent)',
+	_dark: { bg: 'radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)' },
+})} aria-hidden="true"></div>
 
-                <div class="relative mx-auto max-w-7xl content-px pb-12 pt-8">
+                <div class={cx('content-px', css({
+	pos: 'relative',
+	mx: 'auto',
+	maxW: '7xl',
+	pb: '12',
+	pt: '8',
+}))}>
                         <Breadcrumb elements={breadcrumbElements} />
 
-                        <div class="mt-8 flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
+                        <div class={css({
+	mt: '8',
+	display: 'flex',
+	flexDir: 'column',
+	gap: '8',
+	lg: {
+		flexDir: 'row',
+		alignItems: 'center',
+		gap: '12',
+	},
+})}>
                                 <!-- Show info -->
-                                <div class="flex-1 space-y-5">
-                                        <div class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 dark:bg-primary/20">
-                                                <svg class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <div class={css({
+	flex: '1',
+	gap: '5',
+})}>
+                                        <div class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	rounded: 'full',
+	bg: 'primary/10',
+	px: '3',
+	py: '1',
+	_dark: { bg: 'primary/20' },
+})}>
+                                                <svg class={css({
+	h: '4',
+	w: '4',
+	color: 'primary',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
                                                 </svg>
-                                                <span class="text-sm font-semibold text-primary dark:text-primary-300">Show</span>
+                                                <span class={css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	color: 'primary',
+	_dark: { color: 'primary.300' },
+})}>Show</span>
                                         </div>
 
-                                        <h1 class="text-4xl font-extrabold tracking-tight text-primary-content sm:text-5xl lg:text-6xl">
+                                        <h1 class={cx('text-primary-content', css({
+	fontSize: '4xl',
+	fontWeight: 'extrabold',
+	letterSpacing: 'tight',
+	sm: { fontSize: '5xl' },
+	lg: { fontSize: '6xl' },
+}))}>
                                                 {showEntry.data.name}
                                         </h1>
 
                                         {hostNames.length > 0 && (
-                                                <div class="flex flex-wrap items-center gap-2">
-                                                        <span class="text-sm text-muted">Hosted by</span>
+                                                <div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '2',
+})}>
+                                                        <span class={cx('text-muted', css({
+	fontSize: 'sm',
+}))}>Hosted by</span>
                                                         {hostNames.map((host) => (
-                                                                <span class="glass-chip text-sm font-medium text-primary-content">
+                                                                <span class={cx('glass-chip', 'text-primary-content', css({
+	fontSize: 'sm',
+	fontWeight: 'medium',
+}))}>
                                                                         {host}
                                                                 </span>
                                                         ))}
                                                 </div>
                                         )}
 
-                                        <p class="max-w-2xl text-lg leading-relaxed text-secondary-content">
+                                        <p class={cx('text-secondary-content', css({
+	maxW: '2xl',
+	fontSize: 'lg',
+	lineHeight: 'relaxed',
+}))}>
                                                 {showDescription}
                                         </p>
 
                                         {feedVideos.length > 0 && (
-                                                <div class="flex flex-wrap items-center gap-4 text-sm text-muted">
-                                                        <div class="flex items-center gap-1.5">
-                                                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                <div class={cx('text-muted', css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '4',
+	fontSize: 'sm',
+}))}>
+                                                        <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '1.5',
+})}>
+                                                                <svg class={css({
+	h: '4',
+	w: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
                                                                 </svg>
                                                                 <span>{feedVideos.length} {feedVideos.length === 1 ? "episode" : "episodes"}</span>
                                                         </div>
                                                         {totalHours > 0 && (
-                                                                <div class="flex items-center gap-1.5">
-                                                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                                <div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '1.5',
+})}>
+                                                                        <svg class={css({
+	h: '4',
+	w: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                                                         </svg>
                                                                         <span>{totalHours}+ hours of content</span>
@@ -182,37 +276,123 @@ function formatDuration(seconds: number) {
 
                                 <!-- Cover image or latest episode thumbnail -->
                                 {showEntry.data.cover ? (
-                                        <div class="flex-shrink-0 w-full lg:w-2/5 max-w-md">
-                                                <div class="overflow-hidden rounded-2xl shadow-xl" style="border: 1px solid var(--surface-border)">
+                                        <div class={css({
+	flexShrink: '0',
+	w: 'full',
+	lg: { w: '2/5' },
+	maxW: 'md',
+})}>
+                                                <div class={css({
+	overflow: 'hidden',
+	rounded: '2xl',
+	shadow: 'xl',
+})} style="border: 1px solid var(--surface-border)">
                                                         <Image
                                                                 src={showEntry.data.cover.image}
                                                                 alt={showEntry.data.cover.alt}
-                                                                class="w-full h-auto object-cover"
+                                                                class={css({
+	w: 'full',
+	h: 'auto',
+	objectFit: 'cover',
+})}
                                                         />
                                                 </div>
                                         </div>
                                 ) : latestEpisode ? (
-                                        <div class="flex-shrink-0 w-full lg:w-2/5 max-w-md">
-                                                <a href={`/watch/${latestEpisode.slug}`} class="group block">
-                                                        <div class="relative overflow-hidden rounded-2xl shadow-xl" style="border: 1px solid var(--surface-border)">
+                                        <div class={css({
+	flexShrink: '0',
+	w: 'full',
+	lg: { w: '2/5' },
+	maxW: 'md',
+})}>
+                                                <a href={`/watch/${latestEpisode.slug}`} class={css({
+	display: 'block',
+})}>
+                                                        <div class={css({
+	pos: 'relative',
+	overflow: 'hidden',
+	rounded: '2xl',
+	shadow: 'xl',
+})} style="border: 1px solid var(--surface-border)">
                                                                 <img
                                                                         src={latestEpisode.thumbnailUrl}
                                                                         alt={`Latest episode: ${latestEpisode.title}`}
-                                                                        class="aspect-video w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                                                                        class={css({
+	aspectRatio: 'video',
+	w: 'full',
+	objectFit: 'cover',
+	transition: 'transform',
+	transitionDuration: '200ms',
+	_groupHover: { scale: '1.03' },
+})}
                                                                         loading="eager"
                                                                 />
-                                                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                                                                <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                                                                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/90 text-white shadow-lg backdrop-blur-sm">
-                                                                                <svg class="h-7 w-7 ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                                <div class={css({
+	pos: 'absolute',
+	inset: '0',
+	bgGradient: 'to-t',
+	gradientFrom: 'black/60',
+	gradientVia: 'transparent',
+	gradientTo: 'transparent',
+})}></div>
+                                                                <div class={css({
+	pos: 'absolute',
+	inset: '0',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	opacity: '0',
+	transition: 'opacity',
+	_groupHover: { opacity: '1' },
+})}>
+                                                                        <div class={css({
+	display: 'flex',
+	h: '16',
+	w: '16',
+	alignItems: 'center',
+	justifyContent: 'center',
+	rounded: 'full',
+	bg: 'primary/90',
+	color: 'white',
+	shadow: 'lg',
+	backdropBlur: 'sm',
+})}>
+                                                                                <svg class={css({
+	h: '7',
+	w: '7',
+	ml: '1',
+})} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                                                         <path d="M8 5v14l11-7z" />
                                                                                 </svg>
                                                                         </div>
                                                                 </div>
-                                                                <div class="absolute bottom-0 left-0 right-0 p-4">
-                                                                        <p class="text-xs font-medium text-white/80">Latest Episode</p>
-                                                                        <p class="mt-1 line-clamp-2 text-sm font-semibold text-white">{latestEpisode.title}</p>
-                                                                        <div class="mt-2 flex items-center gap-3 text-xs text-white/70">
+                                                                <div class={css({
+	pos: 'absolute',
+	bottom: '0',
+	left: '0',
+	right: '0',
+	p: '4',
+})}>
+                                                                        <p class={css({
+	fontSize: 'xs',
+	fontWeight: 'medium',
+	color: 'white/80',
+})}>Latest Episode</p>
+                                                                        <p class={css({
+	mt: '1',
+	lineClamp: '2',
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	color: 'white',
+})}>{latestEpisode.title}</p>
+                                                                        <div class={css({
+	mt: '2',
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+	fontSize: 'xs',
+	color: 'white/70',
+})}>
                                                                                 <span>{formatDate(latestEpisode.publishedAt)}</span>
                                                                                 {latestEpisode.duration > 0 && (
                                                                                         <span>{formatDuration(latestEpisode.duration)}</span>
@@ -226,9 +406,11 @@ function formatDuration(seconds: number) {
                         </div>
 
                         <!-- Newsletter - full width, subtle -->
-                        <div class="mt-8">
+                        <div class={css({
+	mt: '8',
+})}>
                                 <NewsletterCTA
-                                        class="!py-0"
+                                        style="padding-top:0;padding-bottom:0"
                                         audience={`show:${showEntry.data.id}`}
                                         badge="Get notified of new episodes"
                                         headline={`Subscribe to ${showEntry.data.name}`}
@@ -240,7 +422,13 @@ function formatDuration(seconds: number) {
 
         <!-- Episodes -->
         <section class="section-py" style="background: var(--surface-base)">
-                <div class="mx-auto flex max-w-7xl flex-col gap-10 content-px">
+                <div class={cx('content-px', css({
+	mx: 'auto',
+	display: 'flex',
+	maxW: '7xl',
+	flexDir: 'column',
+	gap: '10',
+}))}>
                         {feedVideos.length > 0 ? (
                                 <VideoFeed
                                         title="Episodes"
@@ -248,9 +436,21 @@ function formatDuration(seconds: number) {
                                         videos={feedVideos}
                                 />
                         ) : (
-                                <div class="mx-auto max-w-2xl rounded-2xl glass-card p-12 text-center">
+                                <div class={cx('glass-card', css({
+	mx: 'auto',
+	maxW: '2xl',
+	rounded: '2xl',
+	p: '12',
+	textAlign: 'center',
+}))}>
                                         <svg
-                                                class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
+                                                class={css({
+	mx: 'auto',
+	h: '16',
+	w: '16',
+	color: 'primary/30',
+	_dark: { color: 'primary/20' },
+})}
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -263,10 +463,17 @@ function formatDuration(seconds: number) {
                                                         d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"
                                                 />
                                         </svg>
-                                        <p class="mt-4 text-lg font-medium text-secondary-content">
+                                        <p class={cx('text-secondary-content', css({
+	mt: '4',
+	fontSize: 'lg',
+	fontWeight: 'medium',
+}))}>
                                                 No episodes yet
                                         </p>
-                                        <p class="mt-2 text-sm text-muted">
+                                        <p class={cx('text-muted', css({
+	mt: '2',
+	fontSize: 'sm',
+}))}>
                                                 Episodes for this show are coming soon. Check back later!
                                         </p>
                                 </div>

@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
@@ -66,16 +67,50 @@ const hasShows = showsToRender.length > 0;
 ---
 
 <Page title="Shows">
-        <section class="relative overflow-hidden py-16 sm:py-20">
+        <section class={css({
+	pos: 'relative',
+	overflow: 'hidden',
+	py: '16',
+	sm: {
+		py: '20',
+	},
+})}>
                 <!-- Background gradient -->
-                <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent dark:from-primary/10" aria-hidden="true"></div>
+                <div class={css({
+	pos: 'absolute',
+	inset: '0',
+	bgGradient: 'to-b',
+	gradientFrom: 'primary/5',
+	gradientVia: 'transparent',
+	gradientTo: 'transparent',
+}) + " dark:from-primary/10"} aria-hidden="true"></div>
 
-                <div class="relative mx-auto max-w-7xl content-px">
+                <div class={css({
+	pos: 'relative',
+	mx: 'auto',
+	maxW: '7xl',
+}) + " content-px"}>
                         <!-- Header -->
-                        <div class="mb-12 text-center">
-                                <div class="mb-4 inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-2 dark:bg-primary/20">
+                        <div class={css({
+	mb: '12',
+	textAlign: 'center',
+})}>
+                                <div class={css({
+	mb: '4',
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	rounded: 'full',
+	bg: 'primary/10',
+	px: '4',
+	py: '2',
+}) + " dark:bg-primary/20"}>
                                         <svg
-                                                class="mr-2 h-5 w-5 text-primary dark:text-primary-300"
+                                                class={css({
+	mr: '2',
+	h: '5',
+	w: '5',
+}) + " text-primary dark:text-primary-300"}
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -88,28 +123,69 @@ const hasShows = showsToRender.length > 0;
                                                         d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
                                                 />
                                         </svg>
-                                        <span class="text-sm font-semibold text-primary dark:text-primary-300">Original Series</span>
+                                        <span class={css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+}) + " text-primary dark:text-primary-300"}>Original Series</span>
                                 </div>
-                                <h1 class="text-4xl font-extrabold tracking-tight text-primary-content sm:text-5xl lg:text-6xl">
+                                <h1 class={css({
+	fontSize: '4xl',
+	fontWeight: 'extrabold',
+	letterSpacing: 'tight',
+	sm: {
+		fontSize: '5xl',
+	},
+	lg: {
+		fontSize: '6xl',
+	},
+}) + " text-primary-content"}>
                                         Shows
                                 </h1>
-                                <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+                                <p class={css({
+	mx: 'auto',
+	mt: '6',
+	maxW: '2xl',
+	fontSize: 'lg',
+	lineHeight: 'relaxed',
+}) + " text-muted"}>
                                         Discover our collection of shows, each bringing you in-depth content and expert insights from passionate hosts.
                                 </p>
                         </div>
 
                         <!-- Content -->
-                        <div class="mt-16">
+                        <div class={css({
+	mt: '16',
+})}>
                                 {hasShows ? (
-                                        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                                        <div class={css({
+	display: 'grid',
+	gap: '8',
+	sm: {
+		gridTemplateColumns: 'repeat(2, 1fr)',
+	},
+	lg: {
+		gridTemplateColumns: 'repeat(3, 1fr)',
+	},
+})}>
                                                 {showsToRender.map((show) => (
                                                         <ShowCard show={show} />
                                                 ))}
                                         </div>
                                 ) : (
-                                        <div class="mx-auto max-w-2xl rounded-2xl glass-card p-12 text-center">
+                                        <div class={css({
+	mx: 'auto',
+	maxW: '2xl',
+	rounded: '2xl',
+	p: '12',
+	textAlign: 'center',
+}) + " glass-card"}>
                                                 <svg
-                                                        class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
+                                                        class={css({
+	mx: 'auto',
+	h: '16',
+	w: '16',
+	color: 'primary/30',
+}) + " dark:text-primary/20"}
                                                         fill="none"
                                                         viewBox="0 0 24 24"
                                                         stroke="currentColor"
@@ -122,10 +198,17 @@ const hasShows = showsToRender.length > 0;
                                                                 d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
                                                         />
                                                 </svg>
-                                                <p class="mt-4 text-lg font-medium text-secondary-content">
+                                                <p class={css({
+	mt: '4',
+	fontSize: 'lg',
+	fontWeight: 'medium',
+}) + " text-secondary-content"}>
                                                         No shows available yet
                                                 </p>
-                                                <p class="mt-2 text-sm text-muted">
+                                                <p class={css({
+	mt: '2',
+	fontSize: 'sm',
+}) + " text-muted"}>
                                                         We're working on bringing you exciting new content. Check back soon!
                                                 </p>
                                         </div>

@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 type Resource = NonNullable<
 	CollectionEntry<"articles">["data"]["resources"]
@@ -54,79 +54,23 @@ const getCategoryLabel = (category: string) => {
 	}
 };
 
-const sectionStyle = css({
-	mt: '12',
-	pt: '8',
-	borderTopWidth: '1px',
-	borderTopStyle: 'solid',
-	borderColor: 'border.subtle',
-});
-
-const headingStyle = css({
-	fontSize: 'xl',
-	fontWeight: 'bold',
-	color: 'fg.default',
-	mb: '6',
-});
-
-const categoryListStyle = css({ display: 'flex', flexDir: 'column', gap: '6' });
-
-const categoryHeadingStyle = css({
-	fontSize: 'sm',
-	fontWeight: '600',
-	color: 'fg.subtle',
-	textTransform: 'uppercase',
-	letterSpacing: 'wider',
-	mb: '3',
-});
-
-const resourceGridStyle = css({ display: 'grid', gap: '3' });
-
-const resourceLinkStyle = css({
-	display: 'flex',
-	alignItems: 'flex-start',
-	gap: '3',
-	p: '3',
-	rounded: 'lg',
-	bg: 'bg.subtle',
-	transition: 'all 0.2s',
-	_hover: { bg: 'bg.muted' },
-});
-
-const categoryIconStyle = css({
-	w: '5',
-	h: '5',
-	mt: '0.5',
-	color: 'fg.subtle',
-	flexShrink: '0',
-});
-
-const resourceContentStyle = css({ flex: '1', minW: '0' });
-
-const resourceTitleStyle = css({
-	fontWeight: '500',
-	color: 'fg.default',
-});
-
-const resourceDescStyle = css({
-	fontSize: 'sm',
-	color: 'fg.subtle',
-	mt: '0.5',
-});
-
-const externalIconStyle = css({
-	w: '4',
-	h: '4',
-	mt: '1',
-	color: 'fg.subtle',
-	flexShrink: '0',
-});
+const wrapperStyle = css({ mt: '12', pt: '8', borderTopWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } });
+const headingStyle = css({ fontSize: 'xl', fontWeight: 'bold', mb: '6' });
+const spaceStyle = css({ display: 'flex', flexDirection: 'column', gap: '6' });
+const catLabelStyle = css({ fontSize: 'sm', fontWeight: 'semibold', textTransform: 'uppercase', letterSpacing: 'wider', mb: '3' });
+const gridStyle = css({ display: 'grid', gap: '3' });
+const linkStyle = css({ display: 'flex', alignItems: 'flex-start', gap: '3', p: '3', borderRadius: 'lg', bg: { base: 'gray.50', _dark: 'gray.800/50' }, transition: 'all', transitionDuration: '200ms', _hover: { bg: { base: 'gray.100', _dark: 'gray.800' } } });
+const iconStyle = css({ w: '5', h: '5', mt: '0.5', color: { base: 'gray.400', _dark: 'gray.500' }, flexShrink: '0', _groupHover: { color: 'brandAccent.text' } });
+const contentStyle = css({ flex: '1', minW: '0' });
+const titleStyle = css({ fontWeight: 'medium', _groupHover: { color: 'brandAccent.text' } });
+const descStyle = css({ fontSize: 'sm', mt: '0.5' });
+const extIconStyle = css({ w: '4', h: '4', mt: '1', color: { base: 'gray.400', _dark: 'gray.500' }, flexShrink: '0', _groupHover: { color: 'brandAccent.text' } });
 ---
 
 {
 	resources && resources.length > 0 && (
-		<div class={sectionStyle}>
-			<h2 class={headingStyle}>Resources & References</h2>
+		<div class={wrapperStyle}>
+			<h2 class={`${headingStyle} text-primary-content`}>Resources & References</h2>
 
 			<style>
 				@keyframes highlight-pulse {
@@ -161,15 +105,17 @@ const externalIconStyle = css({
 				}
 			</style>
 
-			<div class={categoryListStyle}>
+			<div class={spaceStyle}>
 				{Object.entries(groupResourcesByCategory(resources)).map(([category, categoryResources]) => (
 					<div>
-						<h3 class={categoryHeadingStyle}>
+						<h3 class={`${catLabelStyle} text-muted`}>
 							{getCategoryLabel(category)}
 						</h3>
-						<div class={resourceGridStyle}>
+						<div class={gridStyle}>
 							{categoryResources.map(resource => {
+								// Find the original index of this resource in the flat array
 								const resourceIndex = resources.findIndex(r => r === resource) + 1;
+								// Use explicit ID if available, otherwise use index
 								const resourceId = resource.id || `${resourceIndex}`;
 								return (
 									<div id={`resource-${resourceId}`} class="resource-wrapper">
@@ -177,10 +123,10 @@ const externalIconStyle = css({
 											href={resource.url || resource.filePath || "#"}
 											target={resource.type === "url" ? "_blank" : undefined}
 											rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-											class={`resource-link ${resourceLinkStyle}`}
+											class={`resource-link group ${linkStyle}`}
 										>
 									<svg
-										class={categoryIconStyle}
+										class={iconStyle}
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -192,19 +138,19 @@ const externalIconStyle = css({
 											d={getCategoryIcon(category)}
 										/>
 									</svg>
-									<div class={resourceContentStyle}>
-										<div class={resourceTitleStyle}>
+									<div class={contentStyle}>
+										<div class={`${titleStyle} text-primary-content`}>
 											{resource.title}
 										</div>
 										{resource.description && (
-											<div class={resourceDescStyle}>
+											<div class={`${descStyle} text-muted`}>
 												{resource.description}
 											</div>
 										)}
 									</div>
 									{resource.type === "url" && (
 										<svg
-											class={externalIconStyle}
+											class={extIconStyle}
 											fill="none"
 											stroke="currentColor"
 											viewBox="0 0 24 24"

@@ -129,7 +129,7 @@
 </template>
 
 <script setup lang="ts">
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 interface Props {
 	variant?: "error" | "warning";

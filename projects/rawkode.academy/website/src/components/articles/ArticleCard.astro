@@ -6,7 +6,7 @@ import BaseCard from "../common/BaseCard.vue";
 import FormattedDate from "../common/FormattedDate.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 type Props = {
 	article: CollectionEntry<"articles">;
@@ -22,69 +22,19 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 const overlayStyle = css({
 	position: 'absolute',
 	inset: '0',
-	bgGradient: 'to-tr',
-	gradientFrom: 'brand.primary/30',
-	gradientTo: 'brand.secondary/30',
+	backgroundImage:
+		'linear-gradient(to top right, rgb(var(--brand-primary) / 0.3), rgb(var(--brand-primary) / 0.24))',
 	mixBlendMode: 'multiply',
 	zIndex: '10',
 });
-
-const imgStyle = css({
-	w: 'full',
-	h: '52',
-	objectFit: 'cover',
-});
-
-const badgeStyle = css({
-	fontSize: 'xs',
-	fontWeight: '600',
-	px: '2.5',
-	py: '1',
-	rounded: 'full',
-	backdropFilter: 'blur(4px)',
-	shadow: 'md',
-});
-
-const titleStyle = css({
-	mb: '3',
-	fontSize: 'xl',
-	fontWeight: 'bold',
-	letterSpacing: 'tight',
-	color: 'fg.default',
-	lineClamp: '2',
-});
-
-const subtitleStyle = css({
-	mb: '4',
-	fontWeight: '300',
-	color: 'fg.subtle',
-	lineClamp: '3',
-});
-
-const footerStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	justifyContent: 'space-between',
-});
-
-const metaStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	gap: '3',
-	fontSize: 'sm',
-	color: 'fg.subtle',
-});
-
-const iconTextStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	gap: '1',
-});
-
-const iconStyle = css({
-	h: '4',
-	w: '4',
-});
+const imgStyle = css({ w: 'full', h: '52', objectFit: 'cover' });
+const badgeStyle = css({ fontSize: 'xs', fontWeight: 'semibold', px: '2.5', py: '1', borderRadius: 'full', backdropFilter: 'blur(4px)', shadow: 'md' });
+const titleStyle = css({ mb: '3', fontSize: 'xl', fontWeight: 'bold', letterSpacing: 'tight', color: { base: 'gray.900', _dark: 'white' }, lineClamp: '2' });
+const subtitleStyle = css({ mb: '4', fontWeight: 'light', color: { base: 'gray.500', _dark: 'gray.400' }, lineClamp: '3' });
+const footerStyle = css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between' });
+const metaStyle = css({ display: 'flex', alignItems: 'center', gap: '3', fontSize: 'sm', color: { base: 'gray.500', _dark: 'gray.400' } });
+const iconTimeStyle = css({ display: 'flex', alignItems: 'center', gap: '1' });
+const svgStyle = css({ h: '4', w: '4' });
 ---
 
 <BaseCard href={`/read/${article.id}`}>
@@ -127,8 +77,8 @@ const iconStyle = css({
 		<div class={footerStyle}>
 			<AuthorAvatarGroup authors={authors} />
 			<div class={metaStyle}>
-				<span class={iconTextStyle}>
-					<svg xmlns="http://www.w3.org/2000/svg" class={iconStyle} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<span class={iconTimeStyle}>
+					<svg xmlns="http://www.w3.org/2000/svg" class={svgStyle} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
 					{readingTime.text}

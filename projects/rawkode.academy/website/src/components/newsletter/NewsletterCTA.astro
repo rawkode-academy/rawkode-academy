@@ -1,13 +1,15 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = false;
 
 import { env } from "cloudflare:workers";
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
-import { css } from "../../../styled-system/css";
+import { withTimeout } from "@/utils/timeout";
 
 interface Props {
 	class?: string;
+	style?: string;
 	badge?: string;
 	headline?: string;
 	subtitle?: string;
@@ -16,6 +18,7 @@ interface Props {
 
 const {
 	class: className,
+	style: inlineStyle,
 	badge = "Weekly Cloud Native insights",
 	headline = "Stay ahead in cloud native",
 	subtitle = "Tutorials, deep dives, and curated events—no fluff.",
@@ -28,7 +31,13 @@ let isSubscribed = false;
 if (user && import.meta.env.PROD) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		const prefs = await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId, "newsletter", audience);
+		const prefs = await withTimeout(
+			() => env.EMAIL_PREFERENCES.getPreferences(prefixedUserId, "newsletter", audience),
+			{
+				timeoutMs: 3000,
+				label: "Newsletter preference lookup",
+			},
+		);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch preferences", e);
@@ -44,26 +53,46 @@ const hasNewsletterCookie =
 
 // For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
+
+const sectionStyle = css({ w: 'full', py: '12', pos: 'relative', zIndex: '10' });
+const cardWrapper = css({ p: { base: '4', sm: '6' } });
+const flexRow = css({
+	display: 'flex',
+	flexDir: { base: 'column', sm: 'row' },
+	alignItems: { sm: 'center' },
+	gap: { base: '4', sm: '6' },
+});
+const contentCol = css({ flex: '1', minW: '0', display: 'flex', flexDir: 'column', gap: '1' });
+const badgeRow = css({ display: 'flex', alignItems: 'center', gap: '2' });
+const badgeDot = css({ h: '2', w: '2', rounded: 'full', bg: 'primary' });
+const badgeText = css({ fontSize: 'xs', fontWeight: 'medium', color: 'primary' });
+const headlineStyle = css({
+	fontSize: { base: 'lg', sm: 'xl' },
+	fontFamily: 'display',
+	fontWeight: 'semibold',
+	letterSpacing: 'tight',
+});
+const widgetCol = css({ w: { sm: '64' }, flexShrink: '0' });
 ---
 
 {!shouldHide && (
-<section class:list={[css({ w: "full", py: "12", position: "relative", zIndex: "10" }), className]}>
-	<div class={css({ border: "1px solid var(--surface-border)", backdropFilter: "blur(20px)", borderRadius: "xl", bg: "var(--surface-card)", boxShadow: "var(--surface-shadow)", background: "linear-gradient(135deg, rgba(var(--brand-primary), 0.05), rgba(var(--brand-secondary), 0.03))", p: { base: "4", sm: "6" } })}>
-		<div class={css({ display: "flex", flexDir: { base: "column", sm: "row" }, sm: { alignItems: "center" }, gap: { base: "4", sm: "6" } })}>
-			<div class={css({ flex: "1", minW: "0", display: "flex", flexDir: "column", gap: "1" })}>
-				<div class={css({ display: "flex", alignItems: "center", gap: "2" })}>
-					<span class={css({ h: "2", w: "2", borderRadius: "full", bg: "rgb(var(--brand-primary))" })}></span>
-					<span class={css({ fontSize: "xs", fontWeight: "medium", color: "rgb(var(--brand-primary))" })}>{badge}</span>
+<section class:list={[sectionStyle, className]} style={inlineStyle}>
+	<div class:list={["glass-card bg-gradient-card card-shadow", cardWrapper]}>
+		<div class={flexRow}>
+			<div class={contentCol}>
+				<div class={badgeRow}>
+					<span class={badgeDot}></span>
+					<span class={badgeText}>{badge}</span>
 				</div>
-				<h2 class={css({ fontSize: { base: "lg", sm: "xl" }, fontFamily: "display", fontWeight: "semibold", letterSpacing: "tight", color: { base: "gray.900", _dark: "white" } })}>
+				<h2 class:list={["text-primary-content", headlineStyle]}>
 					{headline}
 				</h2>
-				<p class={css({ fontSize: "sm", color: { base: "gray.600", _dark: "gray.400" } })}>
+				<p class:list={["text-muted", css({ fontSize: 'sm' })]}>
 					{subtitle}
 				</p>
 			</div>
 
-			<div class={css({ sm: { w: "64" }, flexShrink: "0" })}>
+			<div class={widgetCol}>
 				<NewsletterWidget
 					client:visible
 					isSignedIn={!!user}

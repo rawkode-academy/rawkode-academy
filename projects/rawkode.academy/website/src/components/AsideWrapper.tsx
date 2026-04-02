@@ -5,7 +5,7 @@ import {
 	LightBulbIcon,
 } from "@heroicons/react/24/outline";
 import type React from "react";
-import { css } from "../../styled-system/css";
+import { css } from "styled-system/css";
 
 interface AsideProps {
 	variant: "tip" | "caution" | "danger" | "info";
@@ -14,42 +14,48 @@ interface AsideProps {
 
 const variantStyles = {
 	tip: {
-		container: css({
-			background: { base: "linear-gradient(to right, token(colors.green.50), token(colors.green.100))", _dark: "linear-gradient(to right, rgba(20,83,45,0.8), rgba(6,78,59,0.8))" },
-			color: { base: "green.800", _dark: "green.100" },
-		}),
-		icon: css({ color: { base: "green.600", _dark: "green.400" } }),
-		gradient: css({ background: "linear-gradient(to bottom right, token(colors.green.500), token(colors.green.400))" }),
-		border: css({ borderColor: "green.500" }),
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'green.50', _dark: 'green.950/80' }, gradientTo: { base: 'green.100', _dark: 'green.900/80' }, color: { base: 'green.800', _dark: 'green.100' } }),
+		icon: css({ color: { base: 'green.600', _dark: 'green.400' } }),
+		gradient: css({ bgGradient: 'to-br', gradientFrom: 'green.500', gradientTo: 'green.400' }),
+		border: css({ borderColor: 'green.500' }),
 	},
 	caution: {
-		container: css({
-			background: { base: "linear-gradient(to right, token(colors.orange.50), token(colors.orange.100))", _dark: "linear-gradient(to right, rgba(124,45,18,0.8), rgba(154,52,18,0.8))" },
-			color: { base: "orange.800", _dark: "orange.100" },
-		}),
-		icon: css({ color: { base: "orange.600", _dark: "orange.400" } }),
-		gradient: css({ background: "linear-gradient(to bottom right, token(colors.yellow.500), token(colors.orange.400))" }),
-		border: css({ borderColor: "yellow.500" }),
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'orange.50', _dark: 'orange.950/80' }, gradientTo: { base: 'orange.100', _dark: 'orange.900/80' }, color: { base: 'orange.800', _dark: 'orange.100' } }),
+		icon: css({ color: { base: 'orange.600', _dark: 'orange.400' } }),
+		gradient: css({ bgGradient: 'to-br', gradientFrom: 'yellow.500', gradientTo: 'orange.400' }),
+		border: css({ borderColor: 'yellow.500' }),
 	},
 	danger: {
-		container: css({
-			background: { base: "linear-gradient(to right, token(colors.red.50), token(colors.red.100))", _dark: "linear-gradient(to right, rgba(127,29,29,0.8), rgba(136,19,55,0.8))" },
-			color: { base: "red.800", _dark: "red.100" },
-		}),
-		icon: css({ color: { base: "red.600", _dark: "red.400" } }),
-		gradient: css({ background: "linear-gradient(to bottom right, token(colors.red.500), token(colors.red.400))" }),
-		border: css({ borderColor: "red.500" }),
+		container: css({ bgGradient: 'to-r', gradientFrom: { base: 'red.50', _dark: 'red.950/80' }, gradientTo: { base: 'red.100', _dark: 'red.900/80' }, color: { base: 'red.800', _dark: 'red.100' } }),
+		icon: css({ color: { base: 'red.600', _dark: 'red.400' } }),
+		gradient: css({ bgGradient: 'to-br', gradientFrom: 'red.500', gradientTo: 'red.400' }),
+		border: css({ borderColor: 'red.500' }),
 	},
 	info: {
 		container: css({
-			background: { base: "linear-gradient(to right, rgba(var(--brand-primary),0.05), rgba(var(--brand-primary),0.1))", _dark: "linear-gradient(to right, rgba(var(--brand-primary),0.8), rgba(var(--brand-primary),0.7))" },
-			color: "rgb(var(--brand-primary))",
+			backgroundImage: {
+				base: "linear-gradient(135deg, rgb(var(--brand-primary) / 0.06) 0%, rgb(var(--brand-secondary) / 0.12) 100%)",
+				_dark: "linear-gradient(135deg, rgb(var(--brand-primary) / 0.18) 0%, rgb(var(--brand-secondary) / 0.12) 100%)",
+			},
+			color: { base: "gray.900", _dark: "gray.50" },
 		}),
-		icon: css({ color: "rgb(var(--brand-primary))" }),
-		gradient: css({ background: "linear-gradient(to bottom right, rgba(var(--brand-primary),0.5), rgb(var(--brand-secondary)))" }),
-		border: css({ borderColor: "rgb(var(--brand-primary))" }),
+		icon: css({ color: 'brandAccent.text' }),
+		gradient: css({
+			backgroundImage:
+				"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+		}),
+		border: css({ borderColor: 'brandAccent.border' }),
 	},
 };
+
+const wrapperStyle = css({ my: '2', borderRadius: 'lg', backdropFilter: 'blur(4px)', shadow: 'md', borderRightWidth: '1px', borderBottomWidth: '1px', position: 'relative', overflow: 'hidden', transition: 'all', transitionDuration: '200ms', _hover: { shadow: 'lg', translateY: '-0.5' } });
+const accentLineStyle = css({ position: 'absolute', left: '0', top: '0', bottom: '0', w: '1.5' });
+const innerStyle = css({ px: '4', position: 'relative', zIndex: '10' });
+const headerStyle = css({ display: 'flex', alignItems: 'center', gap: '2' });
+const iconBubbleStyle = css({ borderRadius: 'full', p: '1.5', display: 'flex', alignItems: 'center', justifyContent: 'center', shadow: 'sm', transform: 'scale(1)', transition: 'transform', transitionDuration: '200ms', _hover: { transform: 'scale(1.05)' } });
+const iconStyle = css({ h: '4', w: '4', color: 'white' });
+const labelStyle = css({ fontSize: 'xs', fontWeight: 'bold', letterSpacing: 'wider' });
+const bodyStyle = css({ px: '0.5' });
 
 const AsideWrapper: React.FC<AsideProps> = ({ variant, children }) => {
 	const styles = variantStyles[variant];
@@ -63,23 +69,24 @@ const AsideWrapper: React.FC<AsideProps> = ({ variant, children }) => {
 
 	return (
 		<div
-			className={`aside ${css({ my: "2", borderRadius: "lg", backdropFilter: "blur(4px)", shadow: "md", borderRight: "1px solid", borderBottom: "1px solid", position: "relative", overflow: "hidden", transition: "all", transitionDuration: "200ms", _hover: { shadow: "lg", transform: "translateY(-2px)" } })} ${styles.border} ${styles.container}`}
+			className={`aside ${wrapperStyle} ${styles.border} ${styles.container}`}
 		>
 			<div
-				className={`${css({ position: "absolute", left: "0", top: "0", bottom: "0", w: "1.5" })} ${styles.gradient}`}
+				className={`${accentLineStyle} ${styles.gradient}`}
+				style={{ boxShadow: '0 0 8px rgba(var(--accent-glow),0.6)' }}
 			/>
-			<div className={css({ px: "4", position: "relative", zIndex: "10" })}>
-				<div className={css({ display: "flex", alignItems: "center", gap: "2" })}>
+			<div className={innerStyle}>
+				<div className={headerStyle}>
 					<div
-						className={`${css({ borderRadius: "full", p: "1.5", display: "flex", alignItems: "center", justifyContent: "center", shadow: "sm", transition: "transform", transitionDuration: "200ms", _hover: { transform: "scale(1.05)" } })} ${styles.gradient}`}
+						className={`${iconBubbleStyle} ${styles.gradient}`}
 					>
-						<IconComponent className={css({ h: "4", w: "4", color: "white" })} aria-hidden="true" />
+						<IconComponent className={iconStyle} aria-hidden="true" />
 					</div>
-					<p className={css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider" })}>
+					<p className={labelStyle}>
 						{variant.toUpperCase()}
 					</p>
 				</div>
-				<div className={css({ px: "0.5" })}>{children}</div>
+				<div className={bodyStyle}>{children}</div>
 			</div>
 		</div>
 	);

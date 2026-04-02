@@ -8,6 +8,7 @@ import {
 	getAttributionFromSource,
 	getDistinctId,
 } from "@/server/analytics";
+import { withTimeout } from "@/utils/timeout";
 
 /**
  * Helper to create a prefixed user ID for email preferences.
@@ -139,13 +140,20 @@ export const newsletter = {
 			const source = input.source || `website:${input.channel}:unknown`;
 
 			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
+				await withTimeout(
+					() =>
+						env.EMAIL_PREFERENCES.setPreference(
+							prefixedUserId,
+							{
+								audience: input.audience,
+								channel: input.channel,
+								status: "subscribed",
+								source,
+							},
+						),
 					{
-						audience: input.audience,
-						channel: input.channel,
-						status: "subscribed",
-						source,
+						timeoutMs: 4000,
+						label: "Newsletter subscribe preference update",
 					},
 				);
 
@@ -191,13 +199,20 @@ export const newsletter = {
 			const source = input.source || "website:newsletter:unknown";
 
 			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
+				await withTimeout(
+					() =>
+						env.EMAIL_PREFERENCES.setPreference(
+							prefixedUserId,
+							{
+								audience: input.audience,
+								channel: "newsletter",
+								status: "unsubscribed",
+								source,
+							},
+						),
 					{
-						audience: input.audience,
-						channel: "newsletter",
-						status: "unsubscribed",
-						source,
+						timeoutMs: 4000,
+						label: "Newsletter unsubscribe preference update",
 					},
 				);
 
@@ -237,13 +252,20 @@ export const newsletter = {
 			const status = input.subscribed ? "subscribed" : "unsubscribed";
 
 			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
+				await withTimeout(
+					() =>
+						env.EMAIL_PREFERENCES.setPreference(
+							prefixedUserId,
+							{
+								audience: input.audience,
+								channel: input.channel,
+								status,
+								source,
+							},
+						),
 					{
-						audience: input.audience,
-						channel: input.channel,
-						status,
-						source,
+						timeoutMs: 4000,
+						label: "Newsletter preference update",
 					},
 				);
 
@@ -279,19 +301,33 @@ export const newsletter = {
 			const source = input.source || "website:settings:unsubscribe-all";
 
 			const allPrefs =
-				await env.EMAIL_PREFERENCES.getPreferences(
-					prefixedUserId,
+				await withTimeout(
+					() =>
+						env.EMAIL_PREFERENCES.getPreferences(
+							prefixedUserId,
+						),
+					{
+						timeoutMs: 4000,
+						label: "Newsletter preference lookup",
+					},
 				);
 
 			const unsubscribePromises = allPrefs.map(
 				(pref: { channel: string; audience: string }) =>
-					env.EMAIL_PREFERENCES.setPreference(
-						prefixedUserId,
+					withTimeout(
+						() =>
+							env.EMAIL_PREFERENCES.setPreference(
+								prefixedUserId,
+								{
+									audience: pref.audience,
+									channel: pref.channel,
+									status: "unsubscribed",
+									source,
+								},
+							),
 						{
-							audience: pref.audience,
-							channel: pref.channel,
-							status: "unsubscribed",
-							source,
+							timeoutMs: 4000,
+							label: "Newsletter bulk unsubscribe preference update",
 						},
 					),
 			);
@@ -330,13 +366,20 @@ export const newsletter = {
 			const isAuthenticated = Boolean(context.locals.user);
 
 			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
+				await withTimeout(
+					() =>
+						env.EMAIL_PREFERENCES.setPreference(
+							prefixedUserId,
+							{
+								audience: input.audience,
+								channel: input.channel,
+								status: "subscribed",
+								source,
+							},
+						),
 					{
-						audience: input.audience,
-						channel: input.channel,
-						status: "subscribed",
-						source,
+						timeoutMs: 4000,
+						label: "Email-only newsletter subscribe preference update",
 					},
 				);
 
@@ -390,13 +433,20 @@ export const newsletter = {
 			const isAuthenticated = Boolean(context.locals.user);
 
 			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
+				await withTimeout(
+					() =>
+						env.EMAIL_PREFERENCES.setPreference(
+							prefixedUserId,
+							{
+								audience: input.audience,
+								channel: "newsletter",
+								status: "unsubscribed",
+								source,
+							},
+						),
 					{
-						audience: input.audience,
-						channel: "newsletter",
-						status: "unsubscribed",
-						source,
+						timeoutMs: 4000,
+						label: "Email-only newsletter unsubscribe preference update",
 					},
 				);
 

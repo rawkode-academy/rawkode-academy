@@ -1,8 +1,9 @@
 ---
+import { css } from "styled-system/css";
 import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createLearnerId } from "@/actions/newsletter";
-import { css } from "../../styled-system/css";
+import { withTimeout } from "@/utils/timeout";
 
 const user = Astro.locals.user;
 
@@ -13,33 +14,85 @@ if (!user) {
 const prefixedUserId = createLearnerId(user.id);
 
 // Auto-subscribe the user
-await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
-	audience: "academy",
-	channel: "newsletter",
-	status: "subscribed",
-	source: "registration-flow",
-});
+await withTimeout(
+	() =>
+		env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+			audience: "academy",
+			channel: "newsletter",
+			status: "subscribed",
+			source: "registration-flow",
+		}),
+	{
+		timeoutMs: 4000,
+		label: "Confirm subscription preference update",
+	},
+);
 ---
 
 <Page title="Subscription Confirmed" description="You are now subscribed to the Rawkode Academy newsletter.">
-	<div class={css({ minH: "60vh", display: "flex", flexDir: "column", alignItems: "center", justifyContent: "center", px: "4", textAlign: "center" })}>
-		<div class={css({ w: "24", h: "24", bg: { base: "green.100", _dark: "green.900/30" }, borderRadius: "full", display: "flex", alignItems: "center", justifyContent: "center", mb: "8" })}>
-			<svg xmlns="http://www.w3.org/2000/svg" class={css({ h: "12", w: "12", color: { base: "green.600", _dark: "green.400" } })} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	<div class={css({
+	minH: '60vh',
+	display: 'flex',
+	flexDir: 'column',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '4',
+	textAlign: 'center',
+})}>
+		<div class={css({
+	w: '24',
+	h: '24',
+	bg: 'green.100',
+	rounded: 'full',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	mb: '8',
+}) + " dark:bg-green-900/30"}>
+			<svg xmlns="http://www.w3.org/2000/svg" class={css({
+	h: '12',
+	w: '12',
+	color: 'green.600',
+}) + " dark:text-green-400"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 			</svg>
 		</div>
-
-		<h1 class={css({ fontSize: "4xl", fontWeight: "bold", color: { base: "gray.900", _dark: "white" }, mb: "4" })}>
+		
+		<h1 class={css({
+	fontSize: '4xl',
+	fontWeight: 'bold',
+	mb: '4',
+}) + " text-primary-content"}>
 			Subscription Confirmed!
 		</h1>
-
-		<p class={css({ fontSize: "xl", color: { base: "gray.600", _dark: "gray.400" }, maxW: "2xl", mb: "8" })}>
+		
+		<p class={css({
+	fontSize: 'xl',
+	maxW: '2xl',
+	mb: '8',
+}) + " text-muted"}>
 			Thanks for joining the Rawkode Academy newsletter. You'll now receive updates about our latest courses, videos, and articles.
 		</p>
-
-		<a
+		
+		<a 
 			href="/"
-			class={css({ display: "inline-flex", alignItems: "center", justifyContent: "center", px: "6", py: "3", border: "1px solid transparent", fontSize: "base", fontWeight: "medium", borderRadius: "md", color: "white", bg: "rgb(var(--brand-primary))", transition: "colors", _hover: { opacity: "0.9" } })}
+			class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	px: '6',
+	py: '3',
+	borderWidth: '1px',
+	borderColor: 'transparent',
+	fontSize: 'base',
+	fontWeight: 'medium',
+	rounded: 'md',
+	color: 'white',
+	_hover: {
+		bg: 'primary/90',
+	},
+	transition: 'colors',
+}) + " bg-primary"}
 		>
 			Back to Home
 		</a>

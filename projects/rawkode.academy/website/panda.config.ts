@@ -71,6 +71,44 @@ export default defineConfig({
 
 			semanticTokens: {
 				colors: {
+					brandAccent: {
+						solid: {
+							value: {
+								base: "rgb(var(--brand-primary))",
+								_dark: "rgb(var(--brand-primary))",
+							},
+						},
+						contrast: {
+							value: {
+								base: "#ffffff",
+								_dark: "#ffffff",
+							},
+						},
+						text: {
+							value: {
+								base: "rgb(var(--brand-primary))",
+								_dark: "rgb(var(--brand-secondary))",
+							},
+						},
+						subtle: {
+							value: {
+								base: "rgba(var(--brand-primary), 0.12)",
+								_dark: "rgba(var(--brand-primary), 0.22)",
+							},
+						},
+						border: {
+							value: {
+								base: "rgba(var(--brand-primary), 0.28)",
+								_dark: "rgba(var(--brand-secondary), 0.4)",
+							},
+						},
+						ring: {
+							value: {
+								base: "rgba(var(--brand-primary), 0.4)",
+								_dark: "rgba(var(--brand-secondary), 0.55)",
+							},
+						},
+					},
 					surface: {
 						base: {
 							value: { base: "#f5f7ff", _dark: "#030617" },

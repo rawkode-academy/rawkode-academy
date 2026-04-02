@@ -1,7 +1,7 @@
 ---
+import { css } from "styled-system/css";
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
-import { css } from "../../../styled-system/css";
 import Badge from "@/components/common/Badge.vue";
 
 type Props = {
@@ -63,7 +63,7 @@ function formatDuration(minutes: number): string {
 		<div class={css({ display: 'flex', flexDirection: 'column', gap: '8' })}>
 			{/* Course Overview Stats */}
 			{totalDuration > 0 && (
-				<div class={css({ bg: { base: 'gray.50', _dark: 'gray.800/30' }, borderRadius: 'lg', p: '6', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } })}>
+				<div class={css({ bg: { base: 'gray.50', _dark: 'gray.800/30' }, rounded: 'lg', p: '6', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } })}>
 					<div class={css({ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '4' })}>
 						<div class={css({ display: 'flex', alignItems: 'center', gap: '6' })}>
 							<div>
@@ -83,7 +83,7 @@ function formatDuration(minutes: number): string {
 				const sectionDuration = modules.reduce((acc, module) => acc + (module.data.duration || 0), 0);
 
 				return (
-					<div class={css({ borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' }, borderRadius: 'lg', overflow: 'hidden' })}>
+					<div class={css({ borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' }, rounded: 'lg', overflow: 'hidden' })}>
 						{/* Section Header */}
 						<div class={css({ bg: { base: 'gray.50', _dark: 'gray.800/50' }, px: '4', py: '3', borderBottomWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } })}>
 							<div class={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between' })}>
@@ -102,7 +102,7 @@ function formatDuration(minutes: number): string {
 						</div>
 
 						{/* Section Modules */}
-						<div class={css({ '& > * + *': { borderTopWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' } } })}>
+						<div class={css({ divideY: '1px', divideColor: { base: 'gray.200', _dark: 'gray.700' } })}>
 							{modules.map((module) => {
 								const isDraft = module.data.draft;
 								const Element = isDraft ? 'div' : 'a';
@@ -110,20 +110,23 @@ function formatDuration(minutes: number): string {
 									? { class: css({ display: 'block', p: '6', bg: { base: 'white', _dark: 'gray.800' }, cursor: 'not-allowed' }) }
 									: {
 										href: `/courses/${course.id}/${module.id}`,
-										class: css({ display: 'block', p: '6', bg: { base: 'white', _dark: 'gray.800' }, transition: 'all', _hover: { bg: { base: 'gray.50', _dark: 'gray.700/50' } } })
+										class: css({ display: 'block', p: '6', bg: { base: 'white', _dark: 'gray.800' }, _hover: { bg: { base: 'gray.50', _dark: 'gray.700/50' } }, transition: 'all', transitionDuration: '200ms' })
 									};
 
 								return (
 									<Element {...elementProps}>
 										<div class={css({ display: 'flex', alignItems: 'center', gap: '4' })}>
-											<div class={css({ flexShrink: '0', w: '10', h: '10', bg: { base: 'gray.100', _dark: 'gray.700' }, color: { base: 'gray.600', _dark: 'gray.300' }, borderRadius: 'full', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'sm', fontWeight: 'medium' })}>
+											<div class={css({ flexShrink: '0', w: '10', h: '10', bg: { base: 'gray.100', _dark: 'gray.700' }, color: { base: 'gray.600', _dark: 'gray.300' }, rounded: 'full', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'sm', fontWeight: 'medium' })}>
 												{module.data.order}
 											</div>
 											<div class={css({ flex: '1', minW: '0' })}>
-												<h4 class={css({ fontSize: 'md', fontWeight: 'medium', lineClamp: 2, mb: '1', color: { base: 'gray.900', _dark: 'white' }, transition: 'colors' })}>
+												<h4 class={isDraft
+													? css({ fontSize: 'base', fontWeight: 'medium', mb: '1', color: { base: 'gray.900', _dark: 'white' } })
+													: css({ fontSize: 'base', fontWeight: 'medium', mb: '1', color: { base: 'gray.900', _dark: 'white' }, transition: 'colors' })
+												}>
 													{module.data.title}
 												</h4>
-												<p class={css({ fontSize: 'sm', mt: '1', lineClamp: 2, color: { base: 'gray.500', _dark: 'gray.400' } })}>
+												<p class={css({ fontSize: 'sm', mt: '1', color: { base: 'gray.500', _dark: 'gray.400' } })}>
 													{module.data.description}
 												</p>
 											</div>

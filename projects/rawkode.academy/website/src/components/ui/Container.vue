@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
@@ -18,30 +19,28 @@ const props = withDefaults(defineProps<Props>(), {
 	padding: "md",
 });
 
-const sizeClasses = {
-	sm: "max-w-2xl",
-	md: "max-w-4xl",
-	lg: "max-w-6xl",
-	xl: "max-w-7xl",
-	"2xl": "max-w-screen-2xl",
-	full: "max-w-full",
+const sizeStyles = {
+	sm: css({ maxWidth: "2xl" }),
+	md: css({ maxWidth: "4xl" }),
+	lg: css({ maxWidth: "6xl" }),
+	xl: css({ maxWidth: "7xl" }),
+	"2xl": css({ maxWidth: "breakpoint-2xl" }),
+	full: css({ maxWidth: "full" }),
 };
 
-const paddingClasses = {
+const paddingStyles = {
 	none: "",
-	sm: "px-4",
-	md: "px-4 lg:px-6",
-	lg: "px-4 lg:px-8",
+	sm: css({ px: "4" }),
+	md: css({ px: "4", lg: { px: "6" } }),
+	lg: css({ px: "4", lg: { px: "8" } }),
 };
 
 const containerClasses = computed(() => {
-	return [
-		"mx-auto",
-		sizeClasses[props.size],
-		paddingClasses[props.padding],
+	return cx(
+		css({ mx: "auto" }),
+		sizeStyles[props.size],
+		paddingStyles[props.padding],
 		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
+	);
 });
 </script>

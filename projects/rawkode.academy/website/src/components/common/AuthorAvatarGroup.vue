@@ -15,7 +15,7 @@
             objectFit: 'cover',
             borderWidth: '2px',
             borderStyle: 'solid',
-            borderColor: 'colorPalette.default',
+            borderColor: 'brandAccent.border',
             p: '0.5',
             bg: { base: 'white', _dark: 'gray.800' },
           })"
@@ -49,16 +49,16 @@
             width: '10',
             height: '10',
             borderRadius: 'full',
-            bg: { base: 'colorPalette.default/10', _dark: 'colorPalette.default/20' },
+            bg: 'brandAccent.subtle',
             borderWidth: '2px',
             borderStyle: 'solid',
-            borderColor: 'colorPalette.default',
+            borderColor: 'brandAccent.border',
             p: '0.5',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: 'xs',
-            color: 'colorPalette.default',
+            color: 'brandAccent.text',
             fontWeight: 'medium',
           })"
         >
@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import type { CollectionEntry } from "astro:content";
 import { computed } from "vue";
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 interface Props {
 	authors: CollectionEntry<"people">[];

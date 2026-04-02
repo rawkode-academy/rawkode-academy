@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = true;
 
 import TopicHub from "@/components/technology/TopicHub.astro";
@@ -15,9 +16,9 @@ import {
 	DEFAULT_TECHNOLOGY_STATUS,
 	DEFAULT_TECHNOLOGY_LICENSE,
 } from "@rawkodeacademy/content";
-import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import { resolveWebsiteContentDirSync } from "@/utils/content-dir";
 
 export interface Technology extends Omit<TechnologyData, "logos"> {
 	id: string;
@@ -76,7 +77,7 @@ export const getStaticPaths = (async () => {
 	}
 
 	try {
-		const base = resolveContentDirSync("technologies");
+		const base = resolveWebsiteContentDirSync("technologies");
 		async function walk(dir: string, rel = ""): Promise<string[]> {
 			const out: string[] = [];
 			const entries = await readdir(dir, { withFileTypes: true });
@@ -188,7 +189,7 @@ if (!technology) {
 				community: e.data.community,
 			};
 		} else {
-			const base = resolveContentDirSync("technologies");
+			const base = resolveWebsiteContentDirSync("technologies");
 			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
 			const fm = matter(raw).data as any;
 			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
@@ -294,12 +295,27 @@ const hasCommunityLinks =
 ---
 
 <Page title={seoTitle} description={seoDescription}>
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
+	<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+}) + " stack-gap-lg section-py section-pt-0 page-px"}>
 		<!-- Header Section -->
-		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+		<section class={css({
+	w: 'full',
+})}>
+			<div class={css({
+	rounded: '3xl',
+	p: '6',
+	md: {
+		p: '8',
+	},
+	maxW: '7xl',
+	mx: 'auto',
+}) + " glass-panel"}>
 				<!-- Breadcrumb -->
-				<div class="mb-6">
+				<div class={css({
+	mb: '6',
+})}>
 					<Breadcrumb elements={[
 						{ title: 'Home', link: '/' },
 						{ title: 'Technologies', link: '/technology' },
@@ -308,67 +324,163 @@ const hasCommunityLinks =
 				</div>
 
 				<!-- Technology Header -->
-				<div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+				<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	md: {
+		flexDir: 'row',
+		alignItems: 'flex-start',
+	},
+	alignItems: 'center',
+	gap: '8',
+})}>
 					<!-- Logo -->
-					<div class="glass-media-brand w-28 h-28 md:w-32 md:h-32 rounded-2xl p-4 flex items-center justify-center flex-shrink-0 shadow-lg">
+					<div class={css({
+	w: '28',
+	h: '28',
+	md: {
+		w: '32',
+		h: '32',
+	},
+	rounded: '2xl',
+	p: '4',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+	flexShrink: '0',
+	shadow: 'lg',
+}) + " glass-media-brand"}>
 						<img
 							src={technology.logo ? technology.logo : placeholderLogo}
 							alt={`${technology.name} Logo`}
-							class="w-full h-full object-contain drop-shadow-lg"
+							class={css({
+	w: 'full',
+	h: 'full',
+	objectFit: 'contain',
+	dropShadow: 'lg',
+})}
 							onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
 						/>
 					</div>
 
 					<!-- Info -->
-					<div class="flex-1 text-center md:text-left">
+					<div class={css({
+	flex: '1',
+	textAlign: 'center',
+	md: {
+		textAlign: 'left',
+	},
+})}>
 						<!-- Badges Row -->
-						<div class="flex flex-wrap items-center gap-2 mb-3 justify-center md:justify-start">
+						<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '2',
+	mb: '3',
+	justifyContent: 'center',
+	md: {
+		justifyContent: 'flex-start',
+	},
+})}>
 							{technology.matrix && (
-								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
+								<a href="/technology/matrix" class={css({
+	display: 'inline-flex',
+	flexWrap: 'wrap',
+	alignItems: 'center',
+	gap: '2',
+}) + " group"}>
 									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
 										{statusLabel}
 									</span>
-									<span class="text-sm text-muted group-hover:text-primary transition-colors">
+									<span class={css({
+	fontSize: 'sm',
+	transition: 'colors',
+}) + " text-muted group-hover:text-primary"}>
 										{groupingLabel}
 									</span>
 									{trajectoryIcon && (
-										<span class="text-sm" title={`Trajectory: ${technology.matrix.trajectory}`}>
+										<span class={css({
+	fontSize: 'sm',
+})} title={`Trajectory: ${technology.matrix.trajectory}`}>
 											{trajectoryIcon}
 										</span>
 									)}
-									<svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<svg class={css({
+	w: '4',
+	h: '4',
+	color: 'gray.400',
+	transition: 'colors',
+}) + " group-hover:text-primary"} fill="none" viewBox="0 0 24 24" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
 									</svg>
 								</a>
 							)}
 							{technology.cncf?.status && (
 								<span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cncfStatusColors[technology.cncf.status]}`}>
-									<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+									<svg class={css({
+	w: '3.5',
+	h: '3.5',
+})} viewBox="0 0 24 24" fill="currentColor">
 										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 									</svg>
 									CNCF {cncfStatusLabels[technology.cncf.status]}
 								</span>
 							)}
 							{technology.category && (
-								<span class="text-xs text-muted bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+								<span class={css({
+	fontSize: 'xs',
+	bg: 'gray.100',
+	px: '2',
+	py: '1',
+	rounded: 'full',
+}) + " text-muted dark:bg-gray-800"}>
 									{technology.category}{technology.subcategory && ` / ${technology.subcategory}`}
 								</span>
 							)}
 						</div>
-						<h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-primary-content mb-4">
+						<h1 class={css({
+	fontSize: '3xl',
+	md: {
+		fontSize: '4xl',
+	},
+	lg: {
+		fontSize: '5xl',
+	},
+	fontWeight: 'extrabold',
+	mb: '4',
+}) + " text-primary-content"}>
 							{technology.name}
 						</h1>
 
 						<!-- Action Buttons -->
-						<div class="flex flex-wrap gap-3 justify-center md:justify-start">
+						<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	gap: '3',
+	justifyContent: 'center',
+	md: {
+		justifyContent: 'flex-start',
+	},
+})}>
 							{technology.website && (
 								<a
 									href={technology.website}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+									class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '5',
+	py: '2.5',
+	rounded: 'xl',
+}) + " btn-solid"}
 								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<svg class={css({
+	w: '5',
+	h: '5',
+})} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
 									</svg>
 									Official Website
@@ -379,9 +491,19 @@ const hasCommunityLinks =
 									href={technology.documentation}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+									class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '5',
+	py: '2.5',
+	rounded: 'xl',
+}) + " btn-glass"}
 								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<svg class={css({
+	w: '5',
+	h: '5',
+})} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
 									</svg>
 									Documentation
@@ -392,9 +514,19 @@ const hasCommunityLinks =
 									href={technology.source}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
+									class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '5',
+	py: '2.5',
+	rounded: 'xl',
+}) + " btn-glass"}
 								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<svg class={css({
+	w: '5',
+	h: '5',
+})} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
 									</svg>
 									Source Code
@@ -402,8 +534,13 @@ const hasCommunityLinks =
 							)}
 						</div>
 						{technology.license && (
-							<p class="mt-3 text-sm text-muted">
-								License: <span class="font-medium text-secondary-content">{technology.license}</span>
+							<p class={css({
+	mt: '3',
+	fontSize: 'sm',
+}) + " text-muted"}>
+								License: <span class={css({
+	fontWeight: 'medium',
+}) + " text-secondary-content"}>{technology.license}</span>
 							</p>
 						)}
 					</div>
@@ -413,29 +550,79 @@ const hasCommunityLinks =
 
 		<!-- Rawkode's Take (Card Back) -->
 		{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
-			<section class="w-full">
-				<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-					<div class="flex flex-col md:flex-row gap-6">
+			<section class={css({
+	w: 'full',
+})}>
+				<div class={css({
+	rounded: '3xl',
+	p: '6',
+	md: {
+		p: '8',
+	},
+	maxW: '7xl',
+	mx: 'auto',
+}) + " glass-panel"}>
+					<div class={css({
+	display: 'flex',
+	flexDir: 'column',
+	md: {
+		flexDir: 'row',
+	},
+	gap: '6',
+})}>
 						<!-- Left: Emoji & Why -->
-						<div class="flex-1">
-							<div class="flex items-center gap-3 mb-4">
+						<div class={css({
+	flex: '1',
+})}>
+							<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+	mb: '4',
+})}>
 								{technology.matrix.makesMeFeel && (
-									<span class="text-4xl">{technology.matrix.makesMeFeel}</span>
+									<span class={css({
+	fontSize: '4xl',
+})}>{technology.matrix.makesMeFeel}</span>
 								)}
 								<div>
-									<h2 class="text-xl font-bold text-primary-content">Rawkode's Take</h2>
-									<p class="text-sm text-muted">Personal opinion, not gospel</p>
+									<h2 class={css({
+	fontSize: 'xl',
+	fontWeight: 'bold',
+}) + " text-primary-content"}>Rawkode's Take</h2>
+									<p class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>Personal opinion, not gospel</p>
 								</div>
 							</div>
 							{technology.matrix.why && (
-								<p class="text-secondary-content leading-relaxed mb-4">
+								<p class={css({
+	lineHeight: 'relaxed',
+	mb: '4',
+}) + " text-secondary-content"}>
 									{technology.matrix.why}
 								</p>
 							)}
 							{technology.matrix.spicyTake && (
-								<div class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl">
-									<span class="text-lg flex-shrink-0">🌶️</span>
-									<p class="text-sm italic text-red-800 dark:text-red-200">
+								<div class={css({
+	display: 'flex',
+	alignItems: 'flex-start',
+	gap: '2',
+	p: '3',
+	bg: 'red.50',
+	borderWidth: '1px',
+	borderColor: 'red.200',
+	rounded: 'xl',
+}) + " dark:bg-red-900/20 dark:border-red-800/40"}>
+									<span class={css({
+	fontSize: 'lg',
+	flexShrink: '0',
+})}>🌶️</span>
+									<p class={css({
+	fontSize: 'sm',
+	fontStyle: 'italic',
+	color: 'red.800',
+}) + " dark:text-red-200"}>
 										{technology.matrix.spicyTake}
 									</p>
 								</div>
@@ -443,7 +630,16 @@ const hasCommunityLinks =
 						</div>
 
 						<!-- Right: Stats -->
-						<div class="flex flex-wrap md:flex-col gap-3 md:gap-2 md:min-w-[140px]">
+						<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	md: {
+		flexDir: 'column',
+		gap: '2',
+		minW: '140px',
+	},
+	gap: '3',
+})}>
 							{technology.matrix.firstUsed && (
 								<div class="stat-pill">
 									<span class="stat-pill-label">First Used</span>
@@ -479,69 +675,183 @@ const hasCommunityLinks =
 
 		<!-- CNCF & Community Info Grid -->
 		{(technology.cncf || hasCommunityLinks) && (
-			<section class="w-full">
-				<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<section class={css({
+	w: 'full',
+})}>
+				<div class={css({
+	maxW: '7xl',
+	mx: 'auto',
+	display: 'grid',
+	gridTemplateColumns: '1fr',
+	lg: {
+		gridTemplateColumns: 'repeat(2, 1fr)',
+	},
+	gap: '6',
+})}>
 					<!-- CNCF Details -->
 					{technology.cncf && (
-						<div class="glass-panel rounded-3xl p-6">
-							<div class="flex items-center gap-3 mb-5">
-								<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-									<svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<div class={css({
+	rounded: '3xl',
+	p: '6',
+}) + " glass-panel"}>
+							<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+	mb: '5',
+})}>
+								<div class={css({
+	w: '10',
+	h: '10',
+	rounded: 'xl',
+	bgGradient: 'to-br',
+	gradientFrom: 'blue.500',
+	gradientTo: 'purple.600',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+})}>
+									<svg class={css({
+	w: '5',
+	h: '5',
+	color: 'white',
+})} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
 									</svg>
 								</div>
 								<div>
-									<h3 class="text-lg font-bold text-primary-content">CNCF Project</h3>
-									<p class="text-sm text-muted">Cloud Native Computing Foundation</p>
+									<h3 class={css({
+	fontSize: 'lg',
+	fontWeight: 'bold',
+}) + " text-primary-content"}>CNCF Project</h3>
+									<p class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>Cloud Native Computing Foundation</p>
 								</div>
 							</div>
 
 							<!-- CNCF Timeline -->
-							<div class="space-y-3 mb-5">
+							<div class={css({
+	gap: '3',
+	mb: '5',
+})}>
 								{technology.cncf.accepted && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-blue-500"></div>
-										<span class="text-sm text-muted">
-											Accepted: <span class="font-medium">{technology.cncf.accepted}</span>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+})}>
+										<div class={css({
+	w: '2',
+	h: '2',
+	rounded: 'full',
+	bg: 'blue.500',
+})}></div>
+										<span class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>
+											Accepted: <span class={css({
+	fontWeight: 'medium',
+})}>{technology.cncf.accepted}</span>
 										</span>
 									</div>
 								)}
 								{technology.cncf.incubating && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-purple-500"></div>
-										<span class="text-sm text-muted">
-											Incubating: <span class="font-medium">{technology.cncf.incubating}</span>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+})}>
+										<div class={css({
+	w: '2',
+	h: '2',
+	rounded: 'full',
+	bg: 'purple.500',
+})}></div>
+										<span class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>
+											Incubating: <span class={css({
+	fontWeight: 'medium',
+})}>{technology.cncf.incubating}</span>
 										</span>
 									</div>
 								)}
 								{technology.cncf.graduated && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-green-500"></div>
-										<span class="text-sm text-muted">
-											Graduated: <span class="font-medium">{technology.cncf.graduated}</span>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+})}>
+										<div class={css({
+	w: '2',
+	h: '2',
+	rounded: 'full',
+	bg: 'green.500',
+})}></div>
+										<span class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>
+											Graduated: <span class={css({
+	fontWeight: 'medium',
+})}>{technology.cncf.graduated}</span>
 										</span>
 									</div>
 								)}
 								{technology.cncf.archived && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-gray-400"></div>
-										<span class="text-sm text-muted">
-											Archived: <span class="font-medium">{technology.cncf.archived}</span>
+									<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+})}>
+										<div class={css({
+	w: '2',
+	h: '2',
+	rounded: 'full',
+	bg: 'gray.400',
+})}></div>
+										<span class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>
+											Archived: <span class={css({
+	fontWeight: 'medium',
+})}>{technology.cncf.archived}</span>
 										</span>
 									</div>
 								)}
 							</div>
 
 							<!-- CNCF Links -->
-							<div class="flex flex-wrap gap-2">
+							<div class={css({
+	display: 'flex',
+	flexWrap: 'wrap',
+	gap: '2',
+})}>
 								{technology.cncf.devStatsUrl && (
 									<a
 										href={technology.cncf.devStatsUrl}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '1.5',
+	px: '3',
+	py: '1.5',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
 										</svg>
 										Dev Stats
@@ -552,9 +862,26 @@ const hasCommunityLinks =
 										href={technology.cncf.annualReviewUrl}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '1.5',
+	px: '3',
+	py: '1.5',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 										</svg>
 										Annual Review
@@ -566,28 +893,79 @@ const hasCommunityLinks =
 
 					<!-- Community Links -->
 					{hasCommunityLinks && (
-						<div class="glass-panel rounded-3xl p-6">
-							<div class="flex items-center gap-3 mb-5">
-								<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
-									<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<div class={css({
+	rounded: '3xl',
+	p: '6',
+}) + " glass-panel"}>
+							<div class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '3',
+	mb: '5',
+})}>
+								<div class={css({
+	w: '10',
+	h: '10',
+	rounded: 'xl',
+	bgGradient: 'to-br',
+	gradientFrom: 'green.500',
+	gradientTo: 'teal.600',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+})}>
+									<svg class={css({
+	w: '5',
+	h: '5',
+	color: 'white',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 									</svg>
 								</div>
 								<div>
-									<h3 class="text-lg font-bold text-primary-content">Community</h3>
-									<p class="text-sm text-muted">Join the conversation</p>
+									<h3 class={css({
+	fontSize: 'lg',
+	fontWeight: 'bold',
+}) + " text-primary-content"}>Community</h3>
+									<p class={css({
+	fontSize: 'sm',
+}) + " text-muted"}>Join the conversation</p>
 								</div>
 							</div>
 
-							<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+							<div class={css({
+	display: 'grid',
+	gridTemplateColumns: 'repeat(2, 1fr)',
+	sm: {
+		gridTemplateColumns: 'repeat(3, 1fr)',
+	},
+	gap: '2',
+})}>
 								{technology.community?.twitter && (
 									<a
 										href={technology.community.twitter}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="currentColor" viewBox="0 0 24 24">
 											<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
 										</svg>
 										Twitter/X
@@ -598,9 +976,27 @@ const hasCommunityLinks =
 										href={technology.community.youtube}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+										<svg class={css({
+	w: '4',
+	h: '4',
+	color: 'red.600',
+})} fill="currentColor" viewBox="0 0 24 24">
 											<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
 										</svg>
 										YouTube
@@ -611,9 +1007,26 @@ const hasCommunityLinks =
 										href={technology.community.slack}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="currentColor" viewBox="0 0 24 24">
 											<path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
 										</svg>
 										Slack
@@ -624,9 +1037,26 @@ const hasCommunityLinks =
 										href={technology.community.blog}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
 										</svg>
 										Blog
@@ -637,9 +1067,26 @@ const hasCommunityLinks =
 										href={technology.community.mailingList}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
 										</svg>
 										Mailing List
@@ -650,9 +1097,26 @@ const hasCommunityLinks =
 										href={technology.community.githubDiscussions}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="currentColor" viewBox="0 0 24 24">
 											<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
 										</svg>
 										Discussions
@@ -663,9 +1127,26 @@ const hasCommunityLinks =
 										href={technology.community.chat}
 										target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
+										class={css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	px: '3',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	bg: 'gray.100',
+	_hover: {
+		bg: 'gray.200',
+	},
+	rounded: 'lg',
+	transition: 'colors',
+}) + " text-secondary-content dark:bg-gray-800 dark:hover:bg-gray-700"}
 									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+										<svg class={css({
+	w: '4',
+	h: '4',
+})} fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 											<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
 										</svg>
 										Chat
@@ -679,8 +1160,13 @@ const hasCommunityLinks =
 		)}
 
 		<!-- Related Content (Videos & Articles) -->
-		<section class="w-full">
-			<div class="max-w-7xl mx-auto">
+		<section class={css({
+	w: 'full',
+})}>
+			<div class={css({
+	maxW: '7xl',
+	mx: 'auto',
+})}>
 				<TopicHub
 					technologyId={technology.id}
 					technologyName={technology.name}
@@ -690,8 +1176,13 @@ const hasCommunityLinks =
 		</section>
 
 		<!-- CTA Section -->
-		<section class="w-full">
-			<div class="max-w-xl mx-auto">
+		<section class={css({
+	w: 'full',
+})}>
+			<div class={css({
+	maxW: 'xl',
+	mx: 'auto',
+})}>
 				<NewsletterCTA
 					server:defer
 					audience={`technology:${technology.id}`}
@@ -704,18 +1195,40 @@ const hasCommunityLinks =
 
 		<!-- Comprehensive Guide Content -->
 		{hasContent && Content && (
-			<section class="w-full">
-				<div class="max-w-4xl mx-auto">
-					<div class="glass-panel rounded-3xl p-6 md:p-10">
-						<div class="mb-8">
-							<h2 class="text-2xl md:text-3xl font-bold text-primary-content mb-2">
+			<section class={css({
+	w: 'full',
+})}>
+				<div class={css({
+	maxW: '4xl',
+	mx: 'auto',
+})}>
+					<div class={css({
+	rounded: '3xl',
+	p: '6',
+	md: {
+		p: '10',
+	},
+}) + " glass-panel"}>
+						<div class={css({
+	mb: '8',
+})}>
+							<h2 class={css({
+	fontSize: '2xl',
+	md: {
+		fontSize: '3xl',
+	},
+	fontWeight: 'bold',
+	mb: '2',
+}) + " text-primary-content"}>
 								Complete Guide
 							</h2>
 							<p class="text-muted">
 								Comprehensive documentation, best practices, and getting started tutorials
 							</p>
 						</div>
-						<article class="prose prose-lg dark:prose-invert max-w-none">
+						<article class={css({
+	maxW: 'none',
+}) + " prose prose-lg dark:prose-invert"}>
 							<Content />
 						</article>
 					</div>

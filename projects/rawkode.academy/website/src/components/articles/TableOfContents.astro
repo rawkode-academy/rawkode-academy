@@ -1,6 +1,6 @@
 ---
 import type { MarkdownHeading } from "astro";
-import { css } from "../../../styled-system/css";
+import { css } from "styled-system/css";
 
 type Props = {
 	headings: MarkdownHeading[];
@@ -9,24 +9,9 @@ type Props = {
 
 const { headings, class: className = "" } = Astro.props;
 
-const mobileToggleStyle = css({
-	display: 'none',
-	position: 'fixed',
-	top: '24',
-	right: '0',
-	zIndex: '50',
-	p: '2.5',
-	borderTopLeftRadius: 'xl',
-	borderBottomLeftRadius: 'xl',
-	shadow: 'lg',
-	mdDown: { display: 'block' },
-});
-
-const iconStyle = css({
-	h: '5',
-	w: '5',
-	color: 'brand.primary',
-});
+const toggleBtnStyle = css({ display: { md: 'none' }, position: 'fixed', top: '24', right: '0', zIndex: '50', p: '2.5', borderTopLeftRadius: 'xl', borderBottomLeftRadius: 'xl', shadow: 'lg' });
+const svgOpenStyle = css({ h: '5', w: '5', color: 'brandAccent.text' });
+const svgCloseStyle = css({ h: '5', w: '5', color: 'brandAccent.text', display: 'none' });
 
 type TocHeading = MarkdownHeading & { subheadings: MarkdownHeading[] };
 
@@ -54,14 +39,14 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 <!-- Mobile toggle -->
 <button
 	id="toc-mobile-toggle"
-	class={mobileToggleStyle}
+	class={toggleBtnStyle}
 	style="background: var(--surface-card); border: 1px solid var(--surface-border); border-right: none;"
 	aria-label="Toggle table of contents"
 >
 	<svg
 		id="toc-icon-open"
 		xmlns="http://www.w3.org/2000/svg"
-		class={iconStyle}
+		class={svgOpenStyle}
 		fill="none"
 		viewBox="0 0 24 24"
 		stroke="currentColor"
@@ -72,7 +57,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	<svg
 		id="toc-icon-close"
 		xmlns="http://www.w3.org/2000/svg"
-		class={`${iconStyle} hidden`}
+		class={svgCloseStyle}
 		fill="none"
 		viewBox="0 0 24 24"
 		stroke="currentColor"

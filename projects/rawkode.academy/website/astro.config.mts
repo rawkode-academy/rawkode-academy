@@ -67,6 +67,13 @@ type AstroVitePlugins = NonNullable<
 const asAstroVitePlugins = (plugins: unknown[]): AstroVitePlugins =>
 	plugins as unknown as AstroVitePlugins;
 
+const astroRuntimeDepsToSkip = [
+	"astro/actions/runtime/entrypoints/server.js",
+	"astro/assets/services/noop",
+	"astro/env/runtime",
+	"graphql-request",
+];
+
 // Check if D2 is available (used for diagram rendering)
 let d2Available = false;
 try {
@@ -106,7 +113,7 @@ try {
 export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
-		imageService: "cloudflare",
+		imageService: "compile",
 		sessionKVBindingName: "SESSION",
 	}),
 	trailingSlash: "never",
@@ -134,7 +141,6 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			// PandaCSS is integrated via the @pandacss/astro integration above
 			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
 				? [
 						faroUploader({
@@ -162,18 +168,25 @@ export default defineConfig({
 				],
 			},
 		},
+		optimizeDeps: {
+			// These Astro runtime entrypoints are already virtualized for the Workers runner.
+			// Letting Vite prebundle them has been causing missing dep chunks on full reload.
+			exclude: astroRuntimeDepsToSkip,
+		},
 		build: {
 			sourcemap: true,
 		},
 		resolve: {
-			// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
-			// Without this, MessageChannel from node:worker_threads needs to be polyfilled.
-			// https://github.com/withastro/adapters/pull/436
-			alias: import.meta.env.PROD
-				? {
-						"react-dom/server": "react-dom/server.edge",
-					}
-				: {},
+			alias: {
+				// PandaCSS generated utilities
+				"styled-system": join(process.cwd(), "styled-system"),
+				// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
+				// Without this, MessageChannel from node:worker_threads needs to be polyfilled.
+				// https://github.com/withastro/adapters/pull/436
+				...(import.meta.env.PROD
+					? { "react-dom/server": "react-dom/server.edge" }
+					: {}),
+			},
 		},
 		ssr: {
 			external: [
@@ -184,6 +197,9 @@ export default defineConfig({
 				"node:crypto",
 				"node:worker_threads",
 			],
+			optimizeDeps: {
+				exclude: astroRuntimeDepsToSkip,
+			},
 		},
 	},
 	site: getSiteUrl(),

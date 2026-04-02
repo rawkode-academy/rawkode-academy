@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 export const prerender = true;
 
 import { getCollection } from "astro:content";
@@ -208,7 +209,12 @@ const graveyardTechnologies = allTechnologies
 				</h1>
 				<p class="hero-subtitle text-secondary-content">
 					My opinionated journey through cloud native technologies.
-					<br class="hidden md:block" />
+					<br class={css({
+	display: 'none',
+	md: {
+		display: 'block',
+	},
+})} />
 					From first glance to full advocacy.
 				</p>
 
@@ -292,7 +298,9 @@ const graveyardTechnologies = allTechnologies
 		<!-- Matrix Updates CTA -->
 		<NewsletterCTA
 			server:defer
-			class="mb-8"
+			class={css({
+	mb: '8',
+})}
 			audience="matrix"
 			badge="Matrix updates in your inbox"
 			headline="Track my technology journey"

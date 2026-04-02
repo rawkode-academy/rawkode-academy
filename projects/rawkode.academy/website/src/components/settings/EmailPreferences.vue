@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { css, cx } from "styled-system/css";
 import { ref, computed } from "vue";
 import { actions } from "astro:actions";
-import { css } from "../../../styled-system/css";
 
 const props = defineProps<{
 	academyNewsletter: boolean;
@@ -138,84 +138,200 @@ const formatTechName = (id: string) => {
 		.join(" ");
 };
 
-const sectionTitleStyle = css({
-	fontSize: "sm",
-	fontWeight: "semibold",
-	color: { base: "neutral.700", _dark: "neutral.300" },
-	textTransform: "uppercase",
-	letterSpacing: "wide",
-	mb: "3",
+const spaceY8 = css({ display: 'flex', flexDir: 'column', gap: '8' });
+const spaceY3 = css({ display: 'flex', flexDir: 'column', gap: '3' });
+const spaceY2 = css({ display: 'flex', flexDir: 'column', gap: '2' });
+const sectionHeading = css({
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	color: { base: 'neutral.700', _dark: 'neutral.300' },
+	textTransform: 'uppercase',
+	letterSpacing: 'wide',
+	mb: '3',
+});
+const preferenceRow = css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	p: '4',
+	rounded: 'xl',
+	bg: { base: 'white/50', _dark: 'white/5' },
+	borderWidth: '1px',
+	borderColor: { base: 'neutral.200', _dark: 'neutral.800' },
+});
+const prefContent = css({ flex: '1', pr: '4' });
+const prefTitle = css({
+	fontSize: 'base',
+	fontWeight: 'medium',
+	color: { base: 'neutral.900', _dark: 'white' },
+});
+const prefDesc = css({
+	fontSize: 'sm',
+	color: { base: 'neutral.500', _dark: 'neutral.400' },
+	mt: '1',
+});
+const toggleBase = css({
+	pos: 'relative',
+	display: 'inline-flex',
+	h: '6',
+	w: '11',
+	flexShrink: '0',
+	cursor: 'pointer',
+	rounded: 'full',
+	borderWidth: '2px',
+	borderColor: 'transparent',
+	transition: 'colors',
+	transitionDuration: '200ms',
+	transitionTimingFunction: 'ease-in-out',
+	_focus: {
+		outline: 'none',
+		ringWidth: '2px',
+		ringColor: 'primary',
+		ringOffsetWidth: '2px',
+	},
+	_dark: { _focus: { ringOffsetColor: 'neutral.900' } },
+});
+const toggleOn = css({ bg: 'primary' });
+const toggleOff = css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } });
+const toggleDisabled = css({ opacity: '0.5', cursor: 'wait' });
+const srOnly = css({ srOnly: true });
+const toggleKnob = css({
+	pointerEvents: 'none',
+	display: 'inline-block',
+	h: '5',
+	w: '5',
+	transform: 'auto',
+	rounded: 'full',
+	bg: 'white',
+	shadow: 'sm',
+	ringWidth: '0',
+	transition: 'all',
+	transitionDuration: '200ms',
+	transitionTimingFunction: 'ease-in-out',
+});
+const knobOn = css({ translateX: '5' });
+const knobOff = css({ translateX: '0' });
+
+const techRow = css({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	p: '3',
+	rounded: 'lg',
+	bg: { base: 'white/50', _dark: 'white/5' },
+	borderWidth: '1px',
+	borderColor: { base: 'neutral.200', _dark: 'neutral.800' },
+});
+const techName = css({
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	color: { base: 'neutral.900', _dark: 'white' },
+});
+const unsubBtn = css({
+	fontSize: 'sm',
+	color: { base: 'red.600', _dark: 'red.400' },
+	fontWeight: 'medium',
+	_hover: { color: { base: 'red.700', _dark: 'red.300' } },
+	_disabled: { opacity: '0.5' },
 });
 
-const prefRowStyle = css({
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "space-between",
-	p: "4",
-	borderRadius: "xl",
-	bg: { base: "white/50", _dark: "white/5" },
-	border: "1px solid",
-	borderColor: { base: "neutral.200", _dark: "neutral.800" },
+const successMsg = css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	p: '3',
+	rounded: 'lg',
+	bg: { base: 'green.50', _dark: 'green.900/20' },
+	color: { base: 'green.700', _dark: 'green.400' },
+	fontSize: 'sm',
+});
+const errorMsg = css({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '2',
+	p: '3',
+	rounded: 'lg',
+	bg: { base: 'red.50', _dark: 'red.900/20' },
+	color: { base: 'red.700', _dark: 'red.400' },
+	fontSize: 'sm',
+});
+const iconSm = css({ w: '5', h: '5', flexShrink: '0' });
+
+const unsubAllSection = css({
+	pt: '6',
+	borderTopWidth: '1px',
+	borderColor: { base: 'neutral.200', _dark: 'neutral.800' },
+});
+const unsubAllLink = css({
+	fontSize: 'sm',
+	color: { base: 'neutral.500', _dark: 'neutral.400' },
+	_hover: { color: { base: 'red.600', _dark: 'red.400' } },
+	transition: 'colors',
+});
+const confirmBox = css({
+	p: '4',
+	rounded: 'xl',
+	bg: { base: 'red.50', _dark: 'red.900/20' },
+	borderWidth: '1px',
+	borderColor: { base: 'red.200', _dark: 'red.800' },
+});
+const confirmText = css({
+	fontSize: 'sm',
+	color: { base: 'red.700', _dark: 'red.300' },
+	mb: '3',
+});
+const confirmActions = css({ display: 'flex', gap: '3' });
+const confirmYes = css({
+	px: '4',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	color: 'white',
+	bg: 'red.600',
+	_hover: { bg: 'red.700' },
+	rounded: 'lg',
+	_disabled: { opacity: '0.5', cursor: 'wait' },
+});
+const confirmCancel = css({
+	px: '4',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'medium',
+	color: { base: 'neutral.700', _dark: 'neutral.300' },
+	_hover: { bg: { base: 'neutral.100', _dark: 'neutral.800' } },
+	rounded: 'lg',
 });
 
-const prefTitleStyle = css({
-	fontSize: "base",
-	fontWeight: "medium",
-	color: { base: "neutral.900", _dark: "white" },
+const noSubsSection = css({
+	textAlign: 'center',
+	py: '4',
+	color: { base: 'neutral.500', _dark: 'neutral.400' },
 });
-
-const prefDescStyle = css({
-	fontSize: "sm",
-	color: { base: "neutral.500", _dark: "neutral.400" },
-	mt: "1",
-});
-
-const toggleBaseStyle = css({
-	position: "relative",
-	display: "inline-flex",
-	h: "6",
-	w: "11",
-	flexShrink: "0",
-	cursor: "pointer",
-	borderRadius: "full",
-	border: "2px solid transparent",
-	transition: "colors",
-	transitionDuration: "200ms",
-	transitionTimingFunction: "ease-in-out",
-	_focus: { outline: "none", ring: "2px solid", ringColor: "rgb(var(--brand-primary))", ringOffset: "2px" },
-});
-
-const toggleKnobStyle = css({
-	pointerEvents: "none",
-	display: "inline-block",
-	h: "5",
-	w: "5",
-	transform: "translateX(0)",
-	borderRadius: "full",
-	bg: "white",
-	shadow: "sm",
-	ring: "0",
-	transition: "transform",
-	transitionDuration: "200ms",
-	transitionTimingFunction: "ease-in-out",
+const noSubsText = css({ fontSize: 'sm' });
+const noSubsLink = css({
+	fontSize: 'sm',
+	color: 'primary',
+	_hover: { textDecoration: 'underline' },
+	mt: '1',
+	display: 'inline-block',
 });
 </script>
 
 <template>
-	<div :class="css({ display: 'flex', flexDir: 'column', gap: '8' })">
+	<div :class="spaceY8">
 		<!-- Newsletters Section -->
 		<div>
-			<h3 :class="sectionTitleStyle">
+			<h3 :class="sectionHeading">
 				Newsletters
 			</h3>
-			<div :class="css({ display: 'flex', flexDir: 'column', gap: '3' })">
+			<div :class="spaceY3">
 				<!-- Academy Newsletter -->
-				<div :class="prefRowStyle">
-					<div :class="css({ flex: '1', pr: '4' })">
-						<h4 :class="prefTitleStyle">
+				<div :class="preferenceRow">
+					<div :class="prefContent">
+						<h4 :class="prefTitle">
 							Academy Newsletter
 						</h4>
-						<p :class="prefDescStyle">
+						<p :class="prefDesc">
 							Updates about new courses, videos, articles, and cloud native
 							content.
 						</p>
@@ -227,34 +343,30 @@ const toggleKnobStyle = css({
 							togglePreference('academyNewsletter', 'newsletter', 'academy')
 						"
 						:class="[
-							toggleBaseStyle,
-							preferences.academyNewsletter
-								? css({ bg: 'rgb(var(--brand-primary))' })
-								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
-							isLoading === 'academyNewsletter' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
+							toggleBase,
+							preferences.academyNewsletter ? toggleOn : toggleOff,
+							isLoading === 'academyNewsletter' ? toggleDisabled : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.academyNewsletter"
 					>
-						<span :class="css({ srOnly: true })">Toggle academy newsletter</span>
+						<span :class="srOnly">Toggle academy newsletter</span>
 						<span
 							:class="[
-								toggleKnobStyle,
-								preferences.academyNewsletter
-									? css({ transform: 'translateX(1.25rem)' })
-									: css({ transform: 'translateX(0)' }),
+								toggleKnob,
+								preferences.academyNewsletter ? knobOn : knobOff,
 							]"
 						/>
 					</button>
 				</div>
 
 				<!-- Technology Matrix Updates -->
-				<div :class="prefRowStyle">
-					<div :class="css({ flex: '1', pr: '4' })">
-						<h4 :class="prefTitleStyle">
+				<div :class="preferenceRow">
+					<div :class="prefContent">
+						<h4 :class="prefTitle">
 							Technology Matrix Updates
 						</h4>
-						<p :class="prefDescStyle">
+						<p :class="prefDesc">
 							Get notified when technologies move through the matrix or new
 							opinions are added.
 						</p>
@@ -266,34 +378,30 @@ const toggleKnobStyle = css({
 							togglePreference('matrixNewsletter', 'newsletter', 'matrix')
 						"
 						:class="[
-							toggleBaseStyle,
-							preferences.matrixNewsletter
-								? css({ bg: 'rgb(var(--brand-primary))' })
-								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
-							isLoading === 'matrixNewsletter' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
+							toggleBase,
+							preferences.matrixNewsletter ? toggleOn : toggleOff,
+							isLoading === 'matrixNewsletter' ? toggleDisabled : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.matrixNewsletter"
 					>
-						<span :class="css({ srOnly: true })">Toggle matrix updates</span>
+						<span :class="srOnly">Toggle matrix updates</span>
 						<span
 							:class="[
-								toggleKnobStyle,
-								preferences.matrixNewsletter
-									? css({ transform: 'translateX(1.25rem)' })
-									: css({ transform: 'translateX(0)' }),
+								toggleKnob,
+								preferences.matrixNewsletter ? knobOn : knobOff,
 							]"
 						/>
 					</button>
 				</div>
 
 				<!-- Kubernetes Release Updates -->
-				<div :class="prefRowStyle">
-					<div :class="css({ flex: '1', pr: '4' })">
-						<h4 :class="prefTitleStyle">
+				<div :class="preferenceRow">
+					<div :class="prefContent">
+						<h4 :class="prefTitle">
 							Kubernetes Release Updates
 						</h4>
-						<p :class="prefDescStyle">
+						<p :class="prefDesc">
 							Get notified about new Kubernetes releases, cheat sheets, and
 							upgrade guides.
 						</p>
@@ -305,22 +413,18 @@ const toggleKnobStyle = css({
 							togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')
 						"
 						:class="[
-							toggleBaseStyle,
-							preferences.kubernetesReleaseUpdates
-								? css({ bg: 'rgb(var(--brand-primary))' })
-								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
-							isLoading === 'kubernetesReleaseUpdates' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
+							toggleBase,
+							preferences.kubernetesReleaseUpdates ? toggleOn : toggleOff,
+							isLoading === 'kubernetesReleaseUpdates' ? toggleDisabled : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.kubernetesReleaseUpdates"
 					>
-						<span :class="css({ srOnly: true })">Toggle Kubernetes release updates</span>
+						<span :class="srOnly">Toggle Kubernetes release updates</span>
 						<span
 							:class="[
-								toggleKnobStyle,
-								preferences.kubernetesReleaseUpdates
-									? css({ transform: 'translateX(1.25rem)' })
-									: css({ transform: 'translateX(0)' }),
+								toggleKnob,
+								preferences.kubernetesReleaseUpdates ? knobOn : knobOff,
 							]"
 						/>
 					</button>
@@ -330,23 +434,23 @@ const toggleKnobStyle = css({
 
 		<!-- Technology-Specific Subscriptions -->
 		<div v-if="techSubs.length > 0">
-			<h3 :class="sectionTitleStyle">
+			<h3 :class="sectionHeading">
 				Technology Updates
 			</h3>
-			<div :class="css({ display: 'flex', flexDir: 'column', gap: '2' })">
+			<div :class="spaceY2">
 				<div
 					v-for="techId in techSubs"
 					:key="techId"
-					:class="css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: '3', borderRadius: 'lg', bg: { base: 'white/50', _dark: 'white/5' }, border: '1px solid', borderColor: { base: 'neutral.200', _dark: 'neutral.800' } })"
+					:class="techRow"
 				>
-					<span :class="css({ fontSize: 'sm', fontWeight: 'medium', color: { base: 'neutral.900', _dark: 'white' } })">
+					<span :class="techName">
 						{{ formatTechName(techId) }}
 					</span>
 					<button
 						type="button"
 						:disabled="isLoading === `tech-${techId}`"
 						@click="unsubscribeTechnology(techId)"
-						:class="css({ fontSize: 'sm', color: { base: 'red.600', _dark: 'red.400' }, fontWeight: 'medium', _hover: { color: { base: 'red.700', _dark: 'red.300' } }, _disabled: { opacity: '0.5' } })"
+						:class="unsubBtn"
 					>
 						{{ isLoading === `tech-${techId}` ? "..." : "Unsubscribe" }}
 					</button>
@@ -356,17 +460,17 @@ const toggleKnobStyle = css({
 
 		<!-- Communication Preferences Section -->
 		<div>
-			<h3 :class="sectionTitleStyle">
+			<h3 :class="sectionHeading">
 				Communication Preferences
 			</h3>
-			<div :class="css({ display: 'flex', flexDir: 'column', gap: '3' })">
+			<div :class="spaceY3">
 				<!-- Marketing Emails -->
-				<div :class="prefRowStyle">
-					<div :class="css({ flex: '1', pr: '4' })">
-						<h4 :class="prefTitleStyle">
+				<div :class="preferenceRow">
+					<div :class="prefContent">
+						<h4 :class="prefTitle">
 							Marketing Emails
 						</h4>
-						<p :class="prefDescStyle">
+						<p :class="prefDesc">
 							Product announcements, promotions, and partner offers.
 						</p>
 					</div>
@@ -377,32 +481,30 @@ const toggleKnobStyle = css({
 							togglePreference('marketingEmails', 'marketing', 'academy')
 						"
 						:class="[
-							toggleBaseStyle,
-							preferences.marketingEmails
-								? css({ bg: 'rgb(var(--brand-primary))' })
-								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
-							isLoading === 'marketingEmails' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
+							toggleBase,
+							preferences.marketingEmails ? toggleOn : toggleOff,
+							isLoading === 'marketingEmails' ? toggleDisabled : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.marketingEmails"
 					>
-						<span :class="css({ srOnly: true })">Toggle marketing emails</span>
+						<span :class="srOnly">Toggle marketing emails</span>
 						<span
 							:class="[
-								toggleKnobStyle,
-								preferences.marketingEmails ? css({ transform: 'translateX(1.25rem)' }) : css({ transform: 'translateX(0)' }),
+								toggleKnob,
+								preferences.marketingEmails ? knobOn : knobOff,
 							]"
 						/>
 					</button>
 				</div>
 
 				<!-- Service Notifications -->
-				<div :class="prefRowStyle">
-					<div :class="css({ flex: '1', pr: '4' })">
-						<h4 :class="prefTitleStyle">
+				<div :class="preferenceRow">
+					<div :class="prefContent">
+						<h4 :class="prefTitle">
 							Service Notifications
 						</h4>
-						<p :class="prefDescStyle">
+						<p :class="prefDesc">
 							Account-related notifications like login alerts and security
 							notices.
 						</p>
@@ -412,20 +514,18 @@ const toggleKnobStyle = css({
 						:disabled="isLoading === 'serviceEmails'"
 						@click="togglePreference('serviceEmails', 'service', 'academy')"
 						:class="[
-							toggleBaseStyle,
-							preferences.serviceEmails
-								? css({ bg: 'rgb(var(--brand-primary))' })
-								: css({ bg: { base: 'neutral.300', _dark: 'neutral.700' } }),
-							isLoading === 'serviceEmails' ? css({ opacity: '0.5', cursor: 'wait' }) : '',
+							toggleBase,
+							preferences.serviceEmails ? toggleOn : toggleOff,
+							isLoading === 'serviceEmails' ? toggleDisabled : '',
 						]"
 						role="switch"
 						:aria-checked="preferences.serviceEmails"
 					>
-						<span :class="css({ srOnly: true })">Toggle service notifications</span>
+						<span :class="srOnly">Toggle service notifications</span>
 						<span
 							:class="[
-								toggleKnobStyle,
-								preferences.serviceEmails ? css({ transform: 'translateX(1.25rem)' }) : css({ transform: 'translateX(0)' }),
+								toggleKnob,
+								preferences.serviceEmails ? knobOn : knobOff,
 							]"
 						/>
 					</button>
@@ -436,10 +536,10 @@ const toggleKnobStyle = css({
 		<!-- Success Message -->
 		<div
 			v-if="showSuccess"
-			:class="css({ display: 'flex', alignItems: 'center', gap: '2', p: '3', borderRadius: 'lg', bg: { base: 'green.50', _dark: 'green.900/20' }, color: { base: 'green.700', _dark: 'green.400' }, fontSize: 'sm' })"
+			:class="successMsg"
 		>
 			<svg
-				:class="css({ w: '5', h: '5', flexShrink: '0' })"
+				:class="iconSm"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -457,10 +557,10 @@ const toggleKnobStyle = css({
 		<!-- Error Message -->
 		<div
 			v-if="error"
-			:class="css({ display: 'flex', alignItems: 'center', gap: '2', p: '3', borderRadius: 'lg', bg: { base: 'red.50', _dark: 'red.900/20' }, color: { base: 'red.700', _dark: 'red.400' }, fontSize: 'sm' })"
+			:class="errorMsg"
 		>
 			<svg
-				:class="css({ w: '5', h: '5', flexShrink: '0' })"
+				:class="iconSm"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -477,32 +577,32 @@ const toggleKnobStyle = css({
 
 		<!-- Unsubscribe from All Section -->
 		<div
-			:class="css({ pt: '6', borderTop: '1px solid', borderColor: { base: 'neutral.200', _dark: 'neutral.800' } })"
+			:class="unsubAllSection"
 			v-if="hasAnySubscription"
 		>
 			<div v-if="!showUnsubscribeConfirm">
 				<button
 					type="button"
 					@click="showUnsubscribeConfirm = true"
-					:class="css({ fontSize: 'sm', color: { base: 'neutral.500', _dark: 'neutral.400' }, transition: 'colors', _hover: { color: { base: 'red.600', _dark: 'red.400' } } })"
+					:class="unsubAllLink"
 				>
 					Unsubscribe from all emails
 				</button>
 			</div>
 			<div
 				v-else
-				:class="css({ p: '4', borderRadius: 'xl', bg: { base: 'red.50', _dark: 'red.900/20' }, border: '1px solid', borderColor: { base: 'red.200', _dark: 'red.800' } })"
+				:class="confirmBox"
 			>
-				<p :class="css({ fontSize: 'sm', color: { base: 'red.700', _dark: 'red.300' }, mb: '3' })">
+				<p :class="confirmText">
 					Are you sure you want to unsubscribe from all emails? You will stop
 					receiving all newsletters and notifications from Rawkode Academy.
 				</p>
-				<div :class="css({ display: 'flex', gap: '3' })">
+				<div :class="confirmActions">
 					<button
 						type="button"
 						:disabled="isUnsubscribingAll"
 						@click="unsubscribeFromAll"
-						:class="css({ px: '4', py: '2', fontSize: 'sm', fontWeight: 'medium', color: 'white', bg: 'red.600', borderRadius: 'lg', _hover: { bg: 'red.700' }, _disabled: { opacity: '0.5', cursor: 'wait' } })"
+						:class="confirmYes"
 					>
 						{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
 					</button>
@@ -510,7 +610,7 @@ const toggleKnobStyle = css({
 						type="button"
 						:disabled="isUnsubscribingAll"
 						@click="showUnsubscribeConfirm = false"
-						:class="css({ px: '4', py: '2', fontSize: 'sm', fontWeight: 'medium', color: { base: 'neutral.700', _dark: 'neutral.300' }, borderRadius: 'lg', _hover: { bg: { base: 'neutral.100', _dark: 'neutral.800' } } })"
+						:class="confirmCancel"
 					>
 						Cancel
 					</button>
@@ -521,12 +621,12 @@ const toggleKnobStyle = css({
 		<!-- No Subscriptions Message -->
 		<div
 			v-if="!hasAnySubscription"
-			:class="css({ textAlign: 'center', py: '4', color: { base: 'neutral.500', _dark: 'neutral.400' } })"
+			:class="noSubsSection"
 		>
-			<p :class="css({ fontSize: 'sm' })">You are not subscribed to any emails.</p>
+			<p :class="noSubsText">You are not subscribed to any emails.</p>
 			<a
 				href="/"
-				:class="css({ fontSize: 'sm', color: 'rgb(var(--brand-primary))', _hover: { textDecoration: 'underline' }, mt: '1', display: 'inline-block' })"
+				:class="noSubsLink"
 			>
 				Explore content and subscribe
 			</a>

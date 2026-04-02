@@ -1,20 +1,30 @@
 ---
+import { css } from "styled-system/css";
 
+const section = css({ bg: { base: 'white', _dark: 'gray.900' } });
+const container = css({ py: { base: '8', sm: '16' }, px: { base: '4', lg: '6' }, mx: 'auto', maxW: 'breakpoint-xl' });
+const inner = css({ maxW: 'breakpoint-md', mx: 'auto' });
+const heading = css({ mb: '6', fontSize: '4xl', letterSpacing: 'tight', fontWeight: 'extrabold', color: { base: 'gray.900', _dark: 'white' } });
+const row = css({ display: 'flex', alignItems: 'flex-start', mb: '6' });
+const rowLast = css({ display: 'flex', alignItems: 'flex-start' });
+const iconWrap = css({ mr: '4', mt: '1', flexShrink: '0' });
+const iconRed = css({ h: '6', w: '6', color: 'red.500' });
+const iconGreen = css({ h: '6', w: '6', color: 'brandAccent.text' });
+const textLight = css({ fontWeight: 'light', color: { base: 'gray.600', _dark: 'gray.300' }, fontSize: { sm: 'lg' } });
+const textMedium = css({ fontWeight: 'medium', color: { base: 'gray.700', _dark: 'gray.200' }, fontSize: { sm: 'lg' } });
 ---
 
-<section class="bg-white dark:bg-gray-900">
-	<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
-		<div class="max-w-(--breakpoint-md) mx-auto">
-			<h2
-				class="mb-6 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
-			>
+<section class={section}>
+	<div class={container}>
+		<div class={inner}>
+			<h2 class={heading}>
 				Beyond Traditional Conference Sponsorships
 			</h2>
 
-			<div class="flex items-start mb-6">
-				<div class="mr-4 mt-1 shrink-0">
+			<div class={row}>
+				<div class={iconWrap}>
 					<svg
-						class="h-6 w-6 text-red-500"
+						class={iconRed}
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
@@ -26,17 +36,17 @@
 							d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 					</svg>
 				</div>
-				<p class="font-light text-gray-600 dark:text-gray-300 sm:text-lg">
+				<p class={textLight}>
 					Traditional conference sponsorships often involve significant
-					investments—booth setup, team travel, event coordination, and
-					hospitality expenses—for just a few days of visibility.
+					investments--booth setup, team travel, event coordination, and
+					hospitality expenses--for just a few days of visibility.
 				</p>
 			</div>
 
-			<div class="flex items-start mb-6">
-				<div class="mr-4 mt-1 shrink-0">
+			<div class={row}>
+				<div class={iconWrap}>
 					<svg
-						class="h-6 w-6 text-red-500"
+						class={iconRed}
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
@@ -48,17 +58,17 @@
 							d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 					</svg>
 				</div>
-				<p class="font-light text-gray-600 dark:text-gray-300 sm:text-lg">
+				<p class={textLight}>
 					After the event concludes, the challenge of converting brief
 					interactions into meaningful business relationships begins, with
 					uncertain ROI on your investment.
 				</p>
 			</div>
 
-			<div class="flex items-start mb-6">
-				<div class="mr-4 mt-1 shrink-0">
+			<div class={row}>
+				<div class={iconWrap}>
 					<svg
-						class="h-6 w-6 text-secondary"
+						class={iconGreen}
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
@@ -70,7 +80,7 @@
 							d="M5 13l4 4L19 7"></path>
 					</svg>
 				</div>
-				<p class="font-medium text-gray-700 dark:text-gray-200 sm:text-lg">
+				<p class={textMedium}>
 					Our partnership model offers a strategic alternative: a year-long
 					collaboration that provides continuous engagement with our developer
 					community, targeted content creation, and sustained visibility for
@@ -78,10 +88,10 @@
 				</p>
 			</div>
 
-			<div class="flex items-start">
-				<div class="mr-4 mt-1 shrink-0">
+			<div class={rowLast}>
+				<div class={iconWrap}>
 					<svg
-						class="h-6 w-6 text-secondary"
+						class={iconGreen}
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
@@ -93,7 +103,7 @@
 							d="M5 13l4 4L19 7"></path>
 					</svg>
 				</div>
-				<p class="font-medium text-gray-700 dark:text-gray-200 sm:text-lg">
+				<p class={textMedium}>
 					We're committed to your success, creating authentic connections
 					between your solutions and our developer audience through expert
 					content that showcases your technology's true value.

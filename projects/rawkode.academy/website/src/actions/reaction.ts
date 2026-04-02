@@ -2,6 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
 import { captureServerEvent, getDistinctId } from "../server/analytics";
+import { fetchWithTimeout } from "@/utils/timeout";
 
 const ReactionSchema = z.object({
 	contentId: z.string(),
@@ -35,7 +36,8 @@ export const addReaction = defineAction({
 			// and new Better Auth UUIDs transparently. Service binding requests are internal
 			// (no Origin/Authorization headers), so the emoji-reactions service skips auth validation.
 			// See platform/emoji-reactions/IDENTITY_MIGRATION.md for details on identity continuity.
-			const response = await env.EMOJI_REACTIONS.fetch(
+			const response = await fetchWithTimeout(
+				env.EMOJI_REACTIONS.fetch.bind(env.EMOJI_REACTIONS),
 				new Request("https://emoji-reactions.internal/", {
 					method: "POST",
 					headers: {
@@ -48,6 +50,11 @@ export const addReaction = defineAction({
 						contentTimestamp: contentTimestamp ?? 0,
 					}),
 				}),
+				{},
+				{
+					timeoutMs: 4000,
+					label: "Emoji reactions service",
+				},
 			);
 
 			if (!response.ok) {

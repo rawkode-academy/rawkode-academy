@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "styled-system/css";
 import { computed } from "vue";
 import { getAxisOptions, type DimensionKey } from "@/lib/explorer/dimensions";
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { css } from "styled-system/css";
+
 interface Props {
 	title: string;
 	stats: Stat[];
@@ -10,19 +12,29 @@ interface Stat {
 }
 
 defineProps<Props>();
+
+const sectionStyle = css({ bg: { base: 'white', _dark: 'gray.900' } });
+const outerStyle = css({ px: '4', mx: 'auto', maxW: 'breakpoint-xl', lg: { px: '6' } });
+const titleWrapStyle = css({ mx: 'auto', maxW: 'breakpoint-md', textAlign: 'center' });
+const titleStyle = css({ fontSize: { base: '3xl', md: '4xl' }, letterSpacing: 'tight', fontWeight: 'extrabold', color: { base: 'gray.900', _dark: 'white' } });
+const gridWrapStyle = css({ maxW: 'breakpoint-xl', px: '4', mx: 'auto', textAlign: 'center', lg: { py: '16', px: '6' } });
+const gridStyle = css({ display: 'grid', maxW: 'breakpoint-md', gap: '8', mx: 'auto', color: { base: 'gray.900', _dark: 'white' }, sm: { gridTemplateColumns: 'repeat(3, 1fr)' } });
+const itemStyle = css({ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' });
+const valueStyle = css({ mb: '2', fontSize: { base: '4xl', md: '5xl' }, fontWeight: 'extrabold' });
+const labelStyle = css({ fontWeight: 'light', color: { base: 'gray.500', _dark: 'gray.400' } });
 </script>
 
 <template>
-	<section class="bg-white dark:bg-gray-900">
-		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6 xl:px-0">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center">
-				<h2 class="text-3xl tracking-tight font-extrabold text-gray-900 md:text-4xl dark:text-white">{{ title }}</h2>
+	<section :class="sectionStyle">
+		<div :class="outerStyle">
+			<div :class="titleWrapStyle">
+				<h2 :class="titleStyle">{{ title }}</h2>
 			</div>
-			<div class="max-w-(--breakpoint-xl) px-4 mx-auto text-center lg:py-16 lg:px-6">
-				<dl class="grid max-w-(--breakpoint-md) gap-8 mx-auto text-gray-900 sm:grid-cols-3 dark:text-white">
-					<div v-for="stat in stats" class="flex flex-col items-center justify-center">
-						<dt class="mb-2 text-4xl md:text-5xl font-extrabold">{{ stat.value }}</dt>
-						<dd class="font-light text-gray-500 dark:text-gray-400">{{ stat.label }}</dd>
+			<div :class="gridWrapStyle">
+				<dl :class="gridStyle">
+					<div v-for="stat in stats" :class="itemStyle">
+						<dt :class="valueStyle">{{ stat.value }}</dt>
+						<dd :class="labelStyle">{{ stat.label }}</dd>
 					</div>
 				</dl>
 			</div>

@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 
 interface Props {
 	padding?: "none" | "sm" | "md" | "lg" | "xl";

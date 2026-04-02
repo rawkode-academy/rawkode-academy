@@ -42,6 +42,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "styled-system/css";
 import { computed, watch } from "vue";
 import type { DimensionKey } from "@/lib/explorer/dimensions";
 import type { ExplorerFilters } from "@/lib/explorer/presets";

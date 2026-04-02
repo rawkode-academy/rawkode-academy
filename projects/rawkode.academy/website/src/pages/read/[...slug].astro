@@ -1,4 +1,5 @@
 ---
+import { css } from "styled-system/css";
 import { getImage } from "astro:assets";
 import { getEntry } from "astro:content";
 import {
@@ -20,7 +21,6 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
-import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -70,93 +70,6 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	day: "numeric",
 	year: "numeric",
 }).format(article.data.publishedAt);
-
-const articlePageStyle = css({ maxW: '100%' });
-
-const articleHeaderStyle = css({
-	mb: '8',
-	pr: '16',
-	mdDown: { pr: '0' },
-});
-
-const h1Style = css({
-	fontSize: 'clamp(1.75rem, 4.5vw, 2.5rem)',
-	fontWeight: '800',
-	lineHeight: '1.2',
-	letterSpacing: '-0.02em',
-	color: 'fg.default',
-	m: '0',
-	mb: '4',
-});
-
-const bylineStyle = css({
-	display: 'flex',
-	flexWrap: 'wrap',
-	alignItems: 'center',
-	gap: '0.5rem 0.625rem',
-	fontSize: 'sm',
-	color: 'fg.subtle',
-});
-
-const bylineAuthorsStyle = css({
-	display: 'flex',
-	alignItems: 'center',
-	gap: '3',
-});
-
-const authorStyle = css({
-	display: 'inline-flex',
-	alignItems: 'center',
-	gap: '2',
-	color: 'fg.default',
-	textDecoration: 'none',
-	fontWeight: '500',
-	transition: 'colors',
-	transitionDuration: '150ms',
-	_hover: { color: 'brand.primary' },
-});
-
-const authorAvatarStyle = css({
-	w: '7',
-	h: '7',
-	rounded: 'full',
-	objectFit: 'cover',
-});
-
-const bylineSepStyle = css({
-	color: { base: 'gray.300', _dark: 'gray.600' },
-});
-
-const bylineNoWrapStyle = css({ whiteSpace: 'nowrap' });
-
-const bylineTypeStyle = css({
-	py: '1',
-	px: '2.5',
-	fontSize: '0.6875rem',
-	fontWeight: '600',
-	textTransform: 'uppercase',
-	letterSpacing: '0.05em',
-	color: 'brand.primary',
-	bg: { base: 'rgb(var(--brand-primary) / 0.1)', _dark: 'rgb(var(--brand-primary) / 0.2)' },
-	rounded: 'sm',
-});
-
-const seriesLinkStyle = css({
-	mt: '4',
-	pt: '4',
-	borderTopWidth: '1px',
-	borderTopStyle: 'solid',
-	borderTopColor: 'border.subtle',
-});
-
-const articleContentStyle = css({ position: 'relative' });
-
-const proseStyle = css({
-	w: 'full',
-	mb: '24',
-	pr: '16',
-	mdDown: { pr: '0' },
-});
 ---
 
 <Page
@@ -180,54 +93,54 @@ const proseStyle = css({
 		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
 	)}
 
-	<div class={articlePageStyle}>
+	<div class="article-page">
 		<!-- Breadcrumb -->
 		<Breadcrumb elements={breadcrumbElements} />
 
 		<!-- Article Header -->
-		<header class={articleHeaderStyle}>
+		<header class="article-header">
 			<!-- Title -->
-			<h1 class={h1Style}>{article.data.title}</h1>
+			<h1>{article.data.title}</h1>
 
 			<!-- Byline: Author + Meta in one row -->
-			<div class={bylineStyle}>
-				<div class={bylineAuthorsStyle}>
+			<div class="byline">
+				<div class="byline-authors">
 					{authors.map((author) => (
 						<a
 							href={author.data.github}
 							target="_blank"
 							rel="author noopener noreferrer"
-							class={authorStyle}
+							class="author"
 						>
 							<img
 								src={author.data.avatarUrl}
 								alt=""
-								class={authorAvatarStyle}
+								class="author-avatar"
 								loading="lazy"
 							/>
-							<span>{author.data.name}</span>
+							<span class="author-name">{author.data.name}</span>
 						</a>
 					))}
 				</div>
 
-				<span class={bylineSepStyle}>&middot;</span>
+				<span class="byline-sep">·</span>
 
-				<time datetime={article.data.publishedAt.toString()} class={bylineNoWrapStyle}>
+				<time datetime={article.data.publishedAt.toString()} class="byline-date">
 					{publishDate}
 				</time>
 
-				<span class={bylineSepStyle}>&middot;</span>
+				<span class="byline-sep">·</span>
 
-				<span class={bylineNoWrapStyle}>{readingTime.text}</span>
+				<span class="byline-read">{readingTime.text}</span>
 
-				<span class={bylineTypeStyle}>
+				<span class="byline-type">
 					{badgeConfig.label}
 				</span>
 			</div>
 
 			<!-- Series -->
 			{maybeSeries && (
-				<div class={seriesLinkStyle}>
+				<div class="series-link">
 					<SeriesLink series={maybeSeries} />
 				</div>
 			)}
@@ -237,16 +150,170 @@ const proseStyle = css({
 		<InternalLinks article={article} />
 
 		<!-- Content -->
-		<div class={articleContentStyle}>
+		<div class="article-content">
 			<TableOfContents headings={headings} />
 
-			<article class={`prose ${proseStyle}`}>
+			<article class="prose">
 				<Updates updates={article.data.updates} />
 				<Content />
-				<NewsletterCTA class="my-12 not-prose" />
+				<NewsletterCTA class={css({
+	my: '12',
+}) + " not-prose"} />
 				<Resources resources={article.data.resources} />
 				<RelatedArticles currentArticle={article} limit={3} />
 			</article>
 		</div>
 	</div>
 </Page>
+
+<style>
+	.article-page {
+		max-width: 100%;
+	}
+
+	/* Header - needs right padding for TOC */
+	.article-header {
+		margin-bottom: 2rem;
+		padding-right: 4rem;
+	}
+
+	@media (max-width: 767px) {
+		.article-header {
+			padding-right: 0;
+		}
+	}
+
+	h1 {
+		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+		font-weight: 800;
+		line-height: 1.2;
+		letter-spacing: -0.02em;
+		color: rgb(17 24 39);
+		margin: 0 0 1rem;
+	}
+
+	:root.dark h1 {
+		color: white;
+	}
+
+	/* Byline */
+	.byline {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.625rem;
+		font-size: 0.875rem;
+		color: rgb(107 114 128);
+	}
+
+	:root.dark .byline {
+		color: rgb(156 163 175);
+	}
+
+	.byline-authors {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.author {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: rgb(17 24 39);
+		text-decoration: none;
+		font-weight: 500;
+		transition: color 0.15s;
+	}
+
+	:root.dark .author {
+		color: white;
+	}
+
+	.author:hover {
+		color: rgb(var(--brand-primary));
+	}
+
+	.author-avatar {
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.byline-sep {
+		color: rgb(209 213 219);
+	}
+
+	:root.dark .byline-sep {
+		color: rgb(75 85 99);
+	}
+
+	.byline-date,
+	.byline-read {
+		white-space: nowrap;
+	}
+
+	.byline-type {
+		padding: 0.25rem 0.625rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: rgb(var(--brand-primary));
+		background: rgb(var(--brand-primary) / 0.1);
+		border-radius: 4px;
+	}
+
+	:root.dark .byline-type {
+		background: rgb(var(--brand-primary) / 0.2);
+	}
+
+	/* Series */
+	.series-link {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--surface-border);
+	}
+
+	/* Content */
+	.article-content {
+		position: relative;
+	}
+
+	.prose {
+		width: 100%;
+		margin-bottom: 6rem;
+		padding-right: 4rem;
+	}
+
+	@media (max-width: 767px) {
+		.prose {
+			padding-right: 0;
+		}
+	}
+
+	/* Prose overrides */
+	:global(.prose pre),
+	:global(.prose code),
+	:global(.prose table),
+	:global(.prose img),
+	:global(.prose iframe) {
+		max-width: 100%;
+		overflow-x: auto;
+	}
+
+	:global(.prose p),
+	:global(.prose li),
+	:global(.prose h1),
+	:global(.prose h2),
+	:global(.prose h3),
+	:global(.prose h4) {
+		overflow-wrap: break-word;
+		word-break: break-word;
+	}
+
+	:global(.prose pre) {
+		white-space: pre-wrap;
+	}
+</style>

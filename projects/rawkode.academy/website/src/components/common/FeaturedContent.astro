@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import { css, cx } from "../../../styled-system/css";
+import { css, cx } from "styled-system/css";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
 interface Props {
@@ -176,7 +176,7 @@ const featuredLabel = css({
 	fontSize: "0.6rem",
 	textTransform: "uppercase",
 	letterSpacing: "0.2em",
-	color: "colorPalette.default",
+	color: "brandAccent.text",
 	fontWeight: "semibold",
 });
 
@@ -192,9 +192,7 @@ const descStyle = css({
 	color: "fg.muted",
 	fontSize: "sm",
 	lineHeight: "relaxed",
-	display: "-webkit-box",
-	WebkitLineClamp: "2",
-	WebkitBoxOrient: "vertical",
+	lineClamp: "2",
 	overflow: "hidden",
 });
 
@@ -228,12 +226,15 @@ const ctaBtn = css({
 	width: "full",
 	px: "5",
 	py: "3",
-	bg: "colorPalette.default",
-	color: "white",
+	backgroundImage:
+		"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+	color: "brandAccent.contrast",
 	fontSize: "sm",
 	fontWeight: "semibold",
 	borderRadius: "xl",
 	shadow: "lg",
+	border: "1px solid",
+	borderColor: "brandAccent.border",
 	_active: { transform: "scale(0.98)" },
 	transition: "transform",
 	transitionDuration: "200ms",
@@ -305,9 +306,7 @@ const desktopDesc = css({
 	color: "fg.muted",
 	fontSize: { base: "sm", xl: "base" },
 	lineHeight: "relaxed",
-	display: "-webkit-box",
-	WebkitLineClamp: "2",
-	WebkitBoxOrient: "vertical",
+	lineClamp: "2",
 	overflow: "hidden",
 });
 
@@ -348,14 +347,17 @@ const desktopCta = css({
 	gap: "2",
 	px: "5",
 	py: "2.5",
-	bg: "colorPalette.default",
-	color: "white",
+	backgroundImage:
+		"linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%)",
+	color: "brandAccent.contrast",
 	fontSize: "sm",
 	fontWeight: "semibold",
 	borderRadius: "xl",
 	transition: "all",
 	transitionDuration: "300ms",
 	shadow: "lg",
+	border: "1px solid",
+	borderColor: "brandAccent.border",
 });
 
 const rightPanel = css({

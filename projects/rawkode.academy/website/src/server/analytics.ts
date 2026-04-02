@@ -1,5 +1,6 @@
 import { CloudEvent } from "cloudevents";
 import { createLogger } from "@/lib/logger";
+import { fetchWithTimeout } from "@/utils/timeout";
 
 const logger = createLogger("analytics");
 
@@ -200,16 +201,24 @@ export async function captureServerEvent(
 	if (analytics) {
 		// Use service binding via fetch to POST /track endpoint
 		try {
-			await analytics.fetch("https://analytics.internal/track", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
+			await fetchWithTimeout(
+				analytics.fetch.bind(analytics),
+				"https://analytics.internal/track",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						event: cloudEvent,
+						attributes: attributesToPromote,
+					}),
 				},
-				body: JSON.stringify({
-					event: cloudEvent,
-					attributes: attributesToPromote,
-				}),
-			});
+				{
+					timeoutMs: 1500,
+					label: "Analytics event",
+				},
+			);
 		} catch (err) {
 			logger.error("Analytics service binding call failed", err);
 		}
@@ -251,16 +260,24 @@ export async function identifyServerUser(
 
 	if (analytics) {
 		try {
-			await analytics.fetch("https://analytics.internal/track", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
+			await fetchWithTimeout(
+				analytics.fetch.bind(analytics),
+				"https://analytics.internal/track",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						event: cloudEvent,
+						attributes: ["distinct_id", "anon_id"],
+					}),
 				},
-				body: JSON.stringify({
-					event: cloudEvent,
-					attributes: ["distinct_id", "anon_id"],
-				}),
-			});
+				{
+					timeoutMs: 1500,
+					label: "Analytics identify event",
+				},
+			);
 		} catch (err) {
 			logger.error("Analytics identify call failed", err);
 		}

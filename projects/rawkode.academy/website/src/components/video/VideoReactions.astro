@@ -1,5 +1,7 @@
 ---
+import { css, cx } from "styled-system/css";
 import { GRAPHQL_ENDPOINT } from "astro:env/server";
+import { fetchWithTimeout } from "@/utils/timeout";
 
 interface Props {
 	videoId: string;
@@ -8,44 +10,52 @@ interface Props {
 const { videoId } = Astro.props;
 
 const DEFAULT_REACTIONS = [
-	{ emoji: "👍", label: "Like" },
-	{ emoji: "👏", label: "Applause" },
-	{ emoji: "🚀", label: "Rocket" },
-	{ emoji: "💡", label: "Insightful" },
+	{ emoji: "\u{1F44D}", label: "Like" },
+	{ emoji: "\u{1F44F}", label: "Applause" },
+	{ emoji: "\u{1F680}", label: "Rocket" },
+	{ emoji: "\u{1F4A1}", label: "Insightful" },
 ];
 
 const EXTRA_EMOJIS = [
-	"😊",
-	"😍",
-	"🤔",
-	"😎",
-	"🙌",
-	"💯",
-	"🎉",
-	"💪",
-	"🤯",
-	"🤩",
-	"😂",
-	"🤝",
-	"👀",
-	"🧠",
+	"\u{1F60A}",
+	"\u{1F60D}",
+	"\u{1F914}",
+	"\u{1F60E}",
+	"\u{1F64C}",
+	"\u{1F4AF}",
+	"\u{1F389}",
+	"\u{1F4AA}",
+	"\u{1F92F}",
+	"\u{1F929}",
+	"\u{1F602}",
+	"\u{1F91D}",
+	"\u{1F440}",
+	"\u{1F9E0}",
 ];
 
 // Fetch current reaction counts
 let reactionCounts: Record<string, number> = {};
 try {
-	const response = await fetch(GRAPHQL_ENDPOINT, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			query: `query($videoId: String!) {
-				videoByID(id: $videoId) {
-					emojiReactions { emoji count }
-				}
-			}`,
-			variables: { videoId },
-		}),
-	});
+	const response = await fetchWithTimeout(
+		fetch,
+		GRAPHQL_ENDPOINT,
+		{
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				query: `query($videoId: String!) {
+					videoByID(id: $videoId) {
+						emojiReactions { emoji count }
+					}
+				}`,
+				variables: { videoId },
+			}),
+		},
+		{
+			timeoutMs: 4000,
+			label: "Video reaction count query",
+		},
+	);
 
 	if (response.ok) {
 		const result = (await response.json()) as {
@@ -66,32 +76,61 @@ const isAuthenticated = !!Astro.locals.user;
 ---
 
 <div
-	class="glass-card-shimmer p-3 sm:p-4"
+	class="glass-card-shimmer"
+	style={`padding: clamp(0.75rem, 2vw, 1rem);`}
 	data-video-id={videoId}
 	data-authenticated={isAuthenticated}
 >
-	<div class="flex items-center gap-1.5 sm:gap-2 flex-wrap relative z-10">
+	<div class={css({ display: 'flex', alignItems: 'center', gap: '1.5', sm: { gap: '2' }, flexWrap: 'wrap', pos: 'relative', zIndex: '10' })}>
 		{
 			DEFAULT_REACTIONS.map((reaction) => (
 				<button
-					class="reaction-btn glass-interactive flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+					class={cx('glass-interactive', css({
+						display: 'flex',
+						alignItems: 'center',
+						gap: '1',
+						px: '2',
+						py: '1.5',
+						sm: { gap: '2', px: '3', py: '2' },
+						_focus: { outline: 'none', ringWidth: '2px', ringColor: 'primary/50' },
+					}))}
 					data-emoji={reaction.emoji}
 					aria-label={`${reaction.label} reaction`}
 				>
-					<span class="text-base sm:text-xl">{reaction.emoji}</span>
-					<span class="count text-xs sm:text-sm font-medium text-secondary-content">{reactionCounts[reaction.emoji] || 0}</span>
+					<span class={css({ fontSize: 'base', sm: { fontSize: 'xl' } })}>{reaction.emoji}</span>
+					<span class={cx('text-secondary-content', css({ fontSize: 'xs', sm: { fontSize: 'sm' }, fontWeight: 'medium' }))}>{reactionCounts[reaction.emoji] || 0}</span>
 				</button>
 			))
 		}
-		<button class="add-emoji reaction-btn glass-interactive flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-gray-300/60 dark:!border-gray-600/60" aria-label="Add custom emoji"
+		<button class={cx('glass-interactive', css({
+			display: 'flex',
+			alignItems: 'center',
+			gap: '1',
+			px: '2',
+			py: '1.5',
+			sm: { gap: '2', px: '3', py: '2' },
+			borderWidth: '2px',
+			borderStyle: 'dashed',
+			borderColor: 'gray.300/60',
+			_dark: { borderColor: 'gray.600/60' },
+		}))} aria-label="Add custom emoji"
 			>+</button
 		>
 	</div>
 
-	<div class="emoji-picker hidden mt-3 p-2 sm:p-3 glass-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10">
+	<div class={cx('glass-card', css({
+		display: 'none',
+		mt: '3',
+		p: '2',
+		gridTemplateColumns: 'repeat(5, 1fr)',
+		sm: { p: '3', gridTemplateColumns: 'repeat(7, 1fr)' },
+		gap: '1',
+		pos: 'relative',
+		zIndex: '10',
+	}))} data-emoji-picker>
 		{
 			EXTRA_EMOJIS.map((emoji) => (
-				<button class="emoji-option glass-interactive p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
+				<button class={cx('glass-interactive', css({ p: '1.5', fontSize: 'lg', sm: { p: '2', fontSize: '2xl' }, cursor: 'pointer' }))} data-emoji={emoji}>
 					{emoji}
 				</button>
 			))
@@ -100,10 +139,13 @@ const isAuthenticated = !!Astro.locals.user;
 </div>
 
 <style>
-	@reference "../../styles/global.css";
-
 	.reaction-btn.active {
-		@apply ring-2 ring-primary/70 bg-primary/30 dark:bg-primary/20;
+		box-shadow: 0 0 0 2px rgb(var(--brand-primary) / 0.7);
+		background: rgb(var(--brand-primary) / 0.3);
+	}
+
+	html.dark .reaction-btn.active {
+		background: rgb(var(--brand-primary) / 0.2);
 	}
 </style>
 
@@ -112,9 +154,9 @@ const isAuthenticated = !!Astro.locals.user;
 
 	const container = document.querySelector("[data-video-id]") as HTMLElement;
 	const videoId = container?.dataset.videoId || "";
-	const emojiPicker = container?.querySelector(".emoji-picker") as HTMLElement;
+	const emojiPicker = container?.querySelector("[data-emoji-picker]") as HTMLElement;
 	const addEmojiBtn = container?.querySelector(
-		".add-emoji",
+		"[aria-label='Add custom emoji']",
 	) as HTMLButtonElement;
 
 	// Handle reactions
@@ -124,7 +166,8 @@ const isAuthenticated = !!Astro.locals.user;
 		) as HTMLButtonElement;
 		if (!button) return;
 
-		const countEl = button.querySelector(".count") as HTMLElement;
+		const countEl = button.querySelector("span:last-child") as HTMLElement;
+		if (!countEl) return;
 		const currentCount = parseInt(countEl.textContent || "0");
 
 		// Get current video timestamp
@@ -166,7 +209,9 @@ const isAuthenticated = !!Astro.locals.user;
 	}
 
 	// Set up reaction buttons
-	container?.querySelectorAll(".reaction-btn[data-emoji]").forEach((btn) => {
+	container?.querySelectorAll("button[data-emoji]").forEach((btn) => {
+		// Skip buttons inside emoji picker
+		if (btn.closest("[data-emoji-picker]")) return;
 		btn.addEventListener("click", (e) => {
 			const emoji = (e.currentTarget as HTMLElement).dataset.emoji;
 			if (emoji) handleReaction(emoji);
@@ -175,15 +220,18 @@ const isAuthenticated = !!Astro.locals.user;
 
 	// Set up emoji picker
 	addEmojiBtn?.addEventListener("click", () => {
-		emojiPicker.hidden = !emojiPicker.hidden;
+		if (emojiPicker) {
+			const isHidden = emojiPicker.style.display === 'none' || !emojiPicker.style.display;
+			emojiPicker.style.display = isHidden ? 'grid' : 'none';
+		}
 	});
 
-	emojiPicker?.querySelectorAll(".emoji-option").forEach((btn) => {
+	emojiPicker?.querySelectorAll("button[data-emoji]").forEach((btn) => {
 		btn.addEventListener("click", (e) => {
 			const emoji = (e.currentTarget as HTMLElement).dataset.emoji;
 			if (emoji) {
 				handleReaction(emoji);
-				emojiPicker.hidden = true;
+				if (emojiPicker) emojiPicker.style.display = 'none';
 			}
 		});
 	});
@@ -191,7 +239,7 @@ const isAuthenticated = !!Astro.locals.user;
 	// Close emoji picker on outside click
 	document.addEventListener("click", (e) => {
 		if (!container?.contains(e.target as Node)) {
-			emojiPicker.hidden = true;
+			if (emojiPicker) emojiPicker.style.display = 'none';
 		}
 	});
 </script>

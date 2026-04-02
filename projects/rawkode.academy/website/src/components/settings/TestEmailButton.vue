@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { css } from "styled-system/css";
 import { ref } from "vue";
 import { actions } from "astro:actions";
-import { css } from "../../../styled-system/css";
 
 const isSending = ref(false);
 const error = ref<string | null>(null);
@@ -29,54 +29,77 @@ const sendTestEmail = async () => {
 		isSending.value = false;
 	}
 };
+
+const spaceY3 = css({ display: 'flex', flexDir: 'column', gap: '3' });
+const descText = css({
+	fontSize: 'sm',
+	color: { base: 'neutral.600', _dark: 'neutral.400' },
+});
+const rowStyle = css({ display: 'flex', alignItems: 'center', gap: '3' });
+const btnStyle = css({
+	display: 'inline-flex',
+	alignItems: 'center',
+	gap: '2',
+	rounded: 'lg',
+	bg: 'primary',
+	px: '4',
+	py: '2',
+	fontSize: 'sm',
+	fontWeight: 'semibold',
+	color: 'white',
+	shadow: 'md',
+	transition: 'all',
+	_hover: { bg: 'primary/90' },
+	_focusVisible: {
+		outline: '2px solid',
+		outlineColor: 'primary',
+		outlineOffset: '2px',
+	},
+	_disabled: { cursor: 'not-allowed', opacity: '0.6' },
+});
+const spinnerStyle = css({ h: '4', w: '4', animation: 'spin' });
+const opacity25 = css({ opacity: '0.25' });
+const opacity75 = css({ opacity: '0.75' });
+const successText = css({
+	fontSize: 'sm',
+	color: { base: 'green.600', _dark: 'green.400' },
+});
+const errorText = css({
+	fontSize: 'sm',
+	color: { base: 'red.600', _dark: 'red.400' },
+});
 </script>
 
 <template>
-	<div :class="css({ display: 'flex', flexDir: 'column', gap: '3' })">
-		<p :class="css({ fontSize: 'sm', color: { base: 'neutral.600', _dark: 'neutral.400' } })">
+	<div :class="spaceY3">
+		<p :class="descText">
 			Send yourself a quick test message to verify email delivery.
 		</p>
 
-		<div :class="css({ display: 'flex', alignItems: 'center', gap: '3' })">
+		<div :class="rowStyle">
 			<button
 				type="button"
 				:disabled="isSending"
 				@click="sendTestEmail"
-				:class="css({
-					display: 'inline-flex',
-					alignItems: 'center',
-					gap: '2',
-					borderRadius: 'lg',
-					bg: 'rgb(var(--brand-primary))',
-					px: '4',
-					py: '2',
-					fontSize: 'sm',
-					fontWeight: 'semibold',
-					color: 'white',
-					shadow: 'md',
-					transition: 'all',
-					_hover: { opacity: '0.9' },
-					_focusVisible: { outline: '2px solid', outlineOffset: '2px', outlineColor: 'rgb(var(--brand-primary))' },
-					_disabled: { cursor: 'not-allowed', opacity: '0.6' },
-				})"
+				:class="btnStyle"
 			>
 				<svg
 					v-if="isSending"
-					:class="css({ h: '4', w: '4', animation: 'spin' })"
+					:class="spinnerStyle"
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
 				>
-					<circle :class="css({ opacity: '0.25' })" cx="12" cy="12" r="10" stroke-width="4"></circle>
-					<path :class="css({ opacity: '0.75' })" d="M4 12a8 8 0 018-8" stroke-linecap="round" stroke-width="4"></path>
+					<circle :class="opacity25" cx="12" cy="12" r="10" stroke-width="4"></circle>
+					<path :class="opacity75" d="M4 12a8 8 0 018-8" stroke-linecap="round" stroke-width="4"></path>
 				</svg>
 				<span>{{ isSending ? "Sending..." : "Send Test Email" }}</span>
 			</button>
 
-			<span v-if="success" :class="css({ fontSize: 'sm', color: { base: 'green.600', _dark: 'green.400' } })">
+			<span v-if="success" :class="successText">
 				{{ success }}
 			</span>
-			<span v-else-if="error" :class="css({ fontSize: 'sm', color: { base: 'red.600', _dark: 'red.400' } })">
+			<span v-else-if="error" :class="errorText">
 				{{ error }}
 			</span>
 		</div>
