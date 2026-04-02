@@ -1,13 +1,24 @@
 <template>
 	<div
-		class="flex gap-3 p-4 border-b border-gray-200 dark:border-gray-700"
+		:class="css({
+			display: 'flex',
+			gap: '3',
+			p: '4',
+			borderBottomWidth: '1px',
+			borderColor: { base: 'gray.200', _dark: 'gray.700' },
+		})"
 		role="status"
 		:aria-label="ariaLabel"
 	>
-		<span class="sr-only">{{ ariaLabel }}</span>
+		<span :class="css({ srOnly: true })">{{ ariaLabel }}</span>
 		<!-- Avatar skeleton -->
 		<div
-			class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full shrink-0"
+			:class="css({
+				animation: 'pulse',
+				bg: { base: 'gray.200', _dark: 'gray.700' },
+				borderRadius: 'full',
+				flexShrink: '0',
+			})"
 			:style="{
 				width: '2.5rem',
 				height: '2.5rem',
@@ -15,15 +26,25 @@
 		/>
 
 		<!-- Comment content -->
-		<div class="flex-1">
+		<div :class="css({ flex: '1' })">
 			<!-- Header with author and timestamp -->
-			<div class="flex items-center gap-2 mb-2">
+			<div :class="css({ display: 'flex', alignItems: 'center', gap: '2', mb: '2' })">
 				<div
-					class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-4"
+					:class="css({
+						animation: 'pulse',
+						bg: { base: 'gray.200', _dark: 'gray.700' },
+						borderRadius: 'md',
+						h: '4',
+					})"
 					style="width: 120px"
 				/>
 				<div
-					class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-3"
+					:class="css({
+						animation: 'pulse',
+						bg: { base: 'gray.200', _dark: 'gray.700' },
+						borderRadius: 'md',
+						h: '3',
+					})"
 					style="width: 80px"
 				/>
 			</div>
@@ -39,6 +60,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import SkeletonText from "./SkeletonText.vue";
 
 interface Props {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { css } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { Testimonial } from "@/types/testimonial";
 
@@ -112,12 +112,37 @@ const formattedPosition = computed(() => {
 	const total = `${testimonialCount.value}`.padStart(2, "0");
 	return `${current} / ${total}`;
 });
+
+const navButtonClass = css({
+	h: '12',
+	w: '12',
+	borderRadius: 'full',
+	borderWidth: '1px',
+	borderColor: { base: 'gray.200', _dark: 'gray.700' },
+	display: 'grid',
+	placeItems: 'center',
+	transition: 'all',
+	transitionDuration: '200ms',
+	cursor: 'pointer',
+	_hover: {
+		borderColor: 'colorPalette.default',
+		color: 'colorPalette.default',
+	},
+	_focusVisible: {
+		outline: 'none',
+		ringWidth: '2px',
+		ringColor: 'colorPalette.default',
+	},
+});
+
+const navIconSmClass = css({ h: '5', w: '5' });
+const navIconLgClass = css({ h: '6', w: '6' });
 </script>
 
 <template>
-	<div class="mt-8 md:mt-10 max-w-4xl mx-auto" v-if="activeTestimonial">
+	<div :class="css({ mt: '8', md: { mt: '10' }, maxW: '4xl', mx: 'auto' })" v-if="activeTestimonial">
 		<div
-			class="relative group"
+			:class="css({ position: 'relative' })"
 			@mouseenter="pauseAutoplay"
 			@mouseleave="resumeAutoplay"
 			@touchstart.passive="pauseAutoplay"
@@ -128,48 +153,88 @@ const formattedPosition = computed(() => {
 			<button
 				v-if="hasMultiple"
 				type="button"
-				class="hidden md:grid absolute left-0 top-1/2 -translate-y-1/2 -translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-muted hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+				:class="cx(
+					navButtonClass,
+					css({
+						display: { base: 'none', md: 'grid' },
+						position: 'absolute',
+						left: '0',
+						top: '50%',
+						transform: 'translateY(-50%) translateX(-3rem)',
+						zIndex: '10',
+						bg: { base: 'white/50', _dark: 'gray.900/50' },
+						color: { base: 'gray.400', _dark: 'gray.500' },
+						_hover: {
+							bg: { base: 'white', _dark: 'gray.900' },
+						},
+					}),
+				)"
 				aria-label="Show previous testimonial"
 				@click="goPrev"
 			>
-				<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">
+				<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" :class="navIconLgClass">
 					<path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 				</svg>
 			</button>
 
-			<div class="w-full mx-auto">
+			<div :class="css({ w: 'full', mx: 'auto' })">
 				<Transition name="fade" mode="out-in">
 					<article
 						:key="`${activeTestimonial.author.name}-${activeIndex}`"
-						class="relative rounded-3xl border border-gray-200/80 dark:border-gray-800/70 bg-white/95 dark:bg-gray-900/70 shadow-xl shadow-gray-200/70 dark:shadow-black/30 p-6 sm:p-10 overflow-hidden"
+						:class="css({
+							position: 'relative',
+							borderRadius: '3xl',
+							borderWidth: '1px',
+							borderColor: { base: 'gray.200/80', _dark: 'gray.800/70' },
+							bg: { base: 'white/95', _dark: 'gray.900/70' },
+							shadow: { base: '0 25px 50px -12px rgba(229,231,235,0.7)', _dark: '0 25px 50px -12px rgba(0,0,0,0.3)' },
+							p: { base: '6', sm: '10' },
+							overflow: 'hidden',
+						})"
 					>
 						<!-- Progress Bar -->
-						<div v-if="hasMultiple" class="absolute top-0 left-0 right-0 h-1 bg-gray-200/70 dark:bg-gray-800/70">
+						<div v-if="hasMultiple" :class="css({ position: 'absolute', top: '0', left: '0', right: '0', h: '1', bg: { base: 'gray.200/70', _dark: 'gray.800/70' } })">
 							<div
 								:key="`progress-${progressKey}`"
-								class="progress-fill h-full w-full origin-left bg-linear-to-r from-primary to-secondary"
-								:class="{ 'is-paused': isManuallyPaused }"
+								:class="cx(
+									'progress-fill',
+									css({
+										h: 'full',
+										w: 'full',
+										transformOrigin: 'left',
+										backgroundImage: 'linear-gradient(to right, rgb(var(--brand-primary)), rgb(var(--brand-secondary)))',
+									}),
+									isManuallyPaused ? 'is-paused' : '',
+								)"
 								:style="{ '--testimonial-progress-duration': autoplayDuration }"
 							></div>
 						</div>
 
-						<div class="flex flex-col items-center text-center">
-							<p class="mt-4 text-xs uppercase tracking-[0.4em] text-primary/70 font-semibold">
+						<div :class="css({ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' })">
+							<p :class="css({ mt: '4', fontSize: 'xs', textTransform: 'uppercase', letterSpacing: '0.4em', color: 'colorPalette.default/70', fontWeight: 'semibold' })">
 								Featured Story
 							</p>
-							
-							<blockquote class="mt-6" aria-live="polite">
-								<p class="text-lg sm:text-2xl leading-relaxed text-gray-800 dark:text-gray-100 font-medium">
+
+							<blockquote :class="css({ mt: '6' })" aria-live="polite">
+								<p :class="css({ fontSize: { base: 'lg', sm: '2xl' }, lineHeight: 'relaxed', color: { base: 'gray.800', _dark: 'gray.100' }, fontWeight: 'medium' })">
 									&ldquo;{{ activeTestimonial.quote }}&rdquo;
 								</p>
 							</blockquote>
 
-							<div class="mt-8 flex flex-col items-center gap-4">
-								<div v-if="activeTestimonial.author.image" class="shrink-0">
+							<div :class="css({ mt: '8', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4' })">
+								<div v-if="activeTestimonial.author.image" :class="css({ flexShrink: '0' })">
 									<img
 										:src="activeTestimonial.author.image"
 										:alt="`${activeTestimonial.author.name} profile picture`"
-										class="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md"
+										:class="css({
+											w: { base: '16', sm: '20' },
+											h: { base: '16', sm: '20' },
+											borderRadius: 'full',
+											objectFit: 'cover',
+											borderWidth: '4px',
+											borderColor: { base: 'white', _dark: 'gray.800' },
+											shadow: 'md',
+										})"
 										loading="lazy"
 									/>
 								</div>
@@ -179,14 +244,14 @@ const formattedPosition = computed(() => {
 										:href="activeTestimonial.author.link"
 										target="_blank"
 										rel="noopener noreferrer"
-										class="text-lg font-bold text-primary-content hover:text-primary transition-colors"
+										:class="cx('text-primary-content', css({ fontSize: 'lg', fontWeight: 'bold', _hover: { color: 'colorPalette.default' }, transition: 'colors', transitionDuration: '200ms' }))"
 									>
 										{{ activeTestimonial.author.name }}
 									</a>
-									<p v-else class="text-lg font-bold text-primary-content">
+									<p v-else :class="cx('text-primary-content', css({ fontSize: 'lg', fontWeight: 'bold' }))">
 										{{ activeTestimonial.author.name }}
 									</p>
-									<p class="text-sm text-muted font-medium mt-1">
+									<p :class="cx('text-muted', css({ fontSize: 'sm', fontWeight: 'medium', mt: '1' }))">
 										{{ activeTestimonial.author.title }}
 									</p>
 								</div>
@@ -200,11 +265,26 @@ const formattedPosition = computed(() => {
 			<button
 				v-if="hasMultiple"
 				type="button"
-				class="hidden md:grid absolute right-0 top-1/2 -translate-y-1/2 translate-x-12 z-10 h-12 w-12 place-items-center rounded-full border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-900/50 text-muted hover:border-primary hover:text-primary hover:bg-white dark:hover:bg-gray-900 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+				:class="cx(
+					navButtonClass,
+					css({
+						display: { base: 'none', md: 'grid' },
+						position: 'absolute',
+						right: '0',
+						top: '50%',
+						transform: 'translateY(-50%) translateX(3rem)',
+						zIndex: '10',
+						bg: { base: 'white/50', _dark: 'gray.900/50' },
+						color: { base: 'gray.400', _dark: 'gray.500' },
+						_hover: {
+							bg: { base: 'white', _dark: 'gray.900' },
+						},
+					}),
+				)"
 				aria-label="Show next testimonial"
 				@click="goNext"
 			>
-				<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6">
+				<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" :class="navIconLgClass">
 					<path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 				</svg>
 			</button>
@@ -212,37 +292,51 @@ const formattedPosition = computed(() => {
 			<!-- Mobile Controls -->
 			<div
 				v-if="hasMultiple"
-				class="md:hidden mt-6 flex items-center justify-center gap-6"
+				:class="css({ display: { base: 'flex', md: 'none' }, mt: '6', alignItems: 'center', justifyContent: 'center', gap: '6' })"
 			>
 				<button
 					type="button"
-					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-muted grid place-items-center hover:border-primary hover:text-primary shadow-sm"
+					:class="cx(
+						navButtonClass,
+						css({
+							bg: { base: 'white', _dark: 'gray.800' },
+							color: { base: 'gray.400', _dark: 'gray.500' },
+							shadow: 'sm',
+						}),
+					)"
 					aria-label="Show previous testimonial"
 					@click="goPrev"
 				>
-					<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+					<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" :class="navIconSmClass">
 						<path d="M12 5l-5 5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 					</svg>
 				</button>
-				
-				<span class="text-sm font-medium text-muted tabular-nums">
+
+				<span :class="cx('text-muted', css({ fontSize: 'sm', fontWeight: 'medium', fontVariantNumeric: 'tabular-nums' }))">
 					{{ formattedPosition }}
 				</span>
 
 				<button
 					type="button"
-					class="h-12 w-12 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-muted grid place-items-center hover:border-primary hover:text-primary shadow-sm"
+					:class="cx(
+						navButtonClass,
+						css({
+							bg: { base: 'white', _dark: 'gray.800' },
+							color: { base: 'gray.400', _dark: 'gray.500' },
+							shadow: 'sm',
+						}),
+					)"
 					aria-label="Show next testimonial"
 					@click="goNext"
 				>
-					<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5">
+					<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" :class="navIconSmClass">
 						<path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
 					</svg>
 				</button>
 			</div>
 		</div>
 	</div>
-	<p v-else class="mt-6 text-center text-muted">
+	<p v-else :class="cx('text-muted', css({ mt: '6', textAlign: 'center' }))">
 		No testimonials available just yet.
 	</p>
 </template>

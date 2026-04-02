@@ -1,5 +1,5 @@
 ---
-import { css } from "../../../styled-system/css";
+import { css, cx } from "../../../styled-system/css";
 import { getCollection, type CollectionEntry } from "astro:content";
 
 interface Props {
@@ -150,15 +150,15 @@ const hasLinks = Boolean(upLinks.length || sideways.length || downLinks.length);
 ---
 
 {hasLinks && (
-  <aside class="mt-4 mb-8 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 p-4">
-    <div class="grid gap-4 md:grid-cols-3">
+  <aside class={css({ mt: '4', mb: '8', borderRadius: 'lg', borderWidth: '1px', borderColor: { base: 'gray.200', _dark: 'gray.700' }, bg: { base: 'gray.50/60', _dark: 'gray.800/40' }, p: '4' })}>
+    <div class={css({ display: 'grid', gap: '4', md: { gridTemplateColumns: '3' } })}>
       {/* Up (hub) */}
       {upLinks.length > 0 && (
         <div>
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Up: Hubs</h3>
-          <ul class="space-y-1 list-disc list-inside text-sm">
+          <h3 class={css({ fontSize: 'sm', fontWeight: 'semibold', color: { base: 'gray.700', _dark: 'gray.300' }, mb: '2' })}>Up: Hubs</h3>
+          <ul class={css({ display: 'flex', flexDirection: 'column', gap: '1', listStyleType: 'disc', listStylePosition: 'inside', fontSize: 'sm' })}>
             {upLinks.map((l) => (
-              <li><a href={l.href} class="text-primary hover:underline">{l.label}</a></li>
+              <li><a href={l.href} class={css({ color: 'colorPalette.default', _hover: { textDecoration: 'underline' } })}>{l.label}</a></li>
             ))}
           </ul>
         </div>
@@ -167,10 +167,10 @@ const hasLinks = Boolean(upLinks.length || sideways.length || downLinks.length);
       {/* Sideways (peers) */}
       {sideways.length > 0 && (
         <div>
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Sideways: Related</h3>
-          <ul class="space-y-1 list-disc list-inside text-sm">
+          <h3 class={css({ fontSize: 'sm', fontWeight: 'semibold', color: { base: 'gray.700', _dark: 'gray.300' }, mb: '2' })}>Sideways: Related</h3>
+          <ul class={css({ display: 'flex', flexDirection: 'column', gap: '1', listStyleType: 'disc', listStylePosition: 'inside', fontSize: 'sm' })}>
             {sideways.map((a) => (
-              <li><a href={`/read/${a.id}`} class="text-primary hover:underline">{a.data.title}</a></li>
+              <li><a href={`/read/${a.id}`} class={css({ color: 'colorPalette.default', _hover: { textDecoration: 'underline' } })}>{a.data.title}</a></li>
             ))}
           </ul>
         </div>
@@ -179,10 +179,10 @@ const hasLinks = Boolean(upLinks.length || sideways.length || downLinks.length);
       {/* Down (deep guides) */}
       {downLinks.length > 0 && (
         <div>
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Deeper: Guides & Videos</h3>
-          <ul class="space-y-1 list-disc list-inside text-sm">
+          <h3 class={css({ fontSize: 'sm', fontWeight: 'semibold', color: { base: 'gray.700', _dark: 'gray.300' }, mb: '2' })}>Deeper: Guides & Videos</h3>
+          <ul class={css({ display: 'flex', flexDirection: 'column', gap: '1', listStyleType: 'disc', listStylePosition: 'inside', fontSize: 'sm' })}>
             {downLinks.map((l) => (
-              <li><a href={l.href} class="text-primary hover:underline">{l.label}</a></li>
+              <li><a href={l.href} class={css({ color: 'colorPalette.default', _hover: { textDecoration: 'underline' } })}>{l.label}</a></li>
             ))}
           </ul>
         </div>

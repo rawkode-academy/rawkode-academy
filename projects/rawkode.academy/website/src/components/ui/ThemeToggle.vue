@@ -9,18 +9,18 @@
 		<transition name="fade" mode="out-in">
 			<svg
 				:key="currentTheme"
-				class="w-5 h-5"
+				:class="css({ w: '5', h: '5' })"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
 				xmlns="http://www.w3.org/2000/svg"
 			>
-				<circle cx="12" cy="12" r="10" stroke-width="2" class="stroke-primary" />
-				<circle cx="12" cy="12" r="6" fill="currentColor" class="fill-primary" />
+				<circle cx="12" cy="12" r="10" stroke-width="2" :class="css({ stroke: 'colorPalette.default' })" />
+				<circle cx="12" cy="12" r="6" fill="currentColor" :class="css({ fill: 'colorPalette.default' })" />
 			</svg>
 		</transition>
 
-		<span v-if="showLabel" class="ml-2 text-sm font-medium">
+		<span v-if="showLabel" :class="css({ ml: '2', fontSize: 'sm', fontWeight: 'medium' })">
 			{{ themeDisplayName }}
 		</span>
 	</button>
@@ -28,6 +28,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import { css, cx } from "../../../styled-system/css";
 import {
 	getTheme,
 	toggleTheme,
@@ -91,26 +92,55 @@ const handleToggle = () => {
 };
 
 const buttonClasses = computed(() => {
-	const baseClasses =
-		"inline-flex items-center justify-center transition-smooth focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
+	const base = css({
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		transition: 'all',
+		transitionDuration: '200ms',
+		cursor: 'pointer',
+		_focus: {
+			outline: 'none',
+			ringWidth: '2px',
+			ringColor: 'colorPalette.default',
+			ringOffsetWidth: '2px',
+		},
+	});
 
-	const variantClasses = {
-		icon: "rounded-full hover:bg-gray-100 dark:hover:bg-gray-800",
-		button:
-			"rounded-lg border border-glass hover:bg-white/60 dark:hover:bg-gray-700/70",
+	const variantStyles = {
+		icon: css({
+			borderRadius: 'full',
+			_hover: {
+				bg: { base: 'gray.100', _dark: 'gray.800' },
+			},
+		}),
+		button: css({
+			borderRadius: 'lg',
+			borderWidth: '1px',
+			borderColor: 'white/20',
+			_hover: {
+				bg: { base: 'white/60', _dark: 'gray.700/70' },
+			},
+		}),
 	};
 
-	const sizeClasses = {
-		sm: props.variant === "button" ? "px-3 py-2" : "p-2",
-		md: props.variant === "button" ? "px-4 py-2.5" : "p-2.5",
-		lg: props.variant === "button" ? "px-5 py-3" : "p-3",
+	const sizeStyles = {
+		sm: props.variant === "button"
+			? css({ px: '3', py: '2' })
+			: css({ p: '2' }),
+		md: props.variant === "button"
+			? css({ px: '4', py: '2.5' })
+			: css({ p: '2.5' }),
+		lg: props.variant === "button"
+			? css({ px: '5', py: '3' })
+			: css({ p: '3' }),
 	};
 
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		sizeClasses[props.size],
-	].join(" ");
+	return cx(
+		base,
+		variantStyles[props.variant],
+		sizeStyles[props.size],
+	);
 });
 </script>
 

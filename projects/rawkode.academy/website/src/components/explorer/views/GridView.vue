@@ -85,7 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import { css } from "../../../../styled-system/css";
 import { computed } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import type { DimensionKey } from "@/lib/explorer/dimensions";

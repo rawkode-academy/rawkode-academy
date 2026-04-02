@@ -4,21 +4,30 @@
 		role="status"
 		aria-label="Loading transcript..."
 	>
-		<span class="sr-only">Loading transcript...</span>
+		<span :class="css({ srOnly: true })">Loading transcript...</span>
 		<!-- Search bar skeleton -->
-		<div class="mb-4">
+		<div :class="css({ mb: '4' })">
 			<div
-				class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg"
+				:class="css({
+					animation: 'pulse',
+					bg: { base: 'gray.200', _dark: 'gray.700' },
+					borderRadius: 'lg',
+				})"
 				style="height: 42px"
 			/>
 		</div>
 
 		<!-- Transcript paragraphs skeleton -->
-		<div class="space-y-6">
+		<div :class="css({ display: 'flex', flexDirection: 'column', gap: '6' })">
 			<div v-for="i in 4" :key="i" class="transcript-paragraph-skeleton">
 				<!-- Timestamp -->
 				<div
-					class="animate-pulse bg-primary/20 dark:bg-primary/20 rounded mb-2"
+					:class="css({
+						animation: 'pulse',
+						bg: 'colorPalette.default/20',
+						borderRadius: 'md',
+						mb: '2',
+					})"
 					:style="{
 						height: '1rem',
 						width: getTimestampWidth(i),
@@ -36,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { css } from "../../../styled-system/css";
 import SkeletonText from "./SkeletonText.vue";
 
 const getTimestampWidth = (index: number): string => {
