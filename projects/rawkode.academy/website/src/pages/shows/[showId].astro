@@ -122,11 +122,11 @@ function formatDuration(seconds: number) {
         />
 
         <!-- Hero -->
-        <section class="relative overflow-hidden border-b border-gray-200 dark:border-gray-800">
+        <section class="relative overflow-hidden" style="border-bottom: 1px solid var(--surface-border)">
                 <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/5 dark:from-primary/20 dark:to-secondary/10" aria-hidden="true"></div>
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)]" aria-hidden="true"></div>
 
-                <div class="relative mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+                <div class="relative mx-auto max-w-7xl content-px pb-12 pt-8">
                         <Breadcrumb elements={breadcrumbElements} />
 
                         <div class="mt-8 flex flex-col gap-8 lg:flex-row lg:items-center lg:gap-12">
@@ -147,7 +147,7 @@ function formatDuration(seconds: number) {
                                                 <div class="flex flex-wrap items-center gap-2">
                                                         <span class="text-sm text-muted">Hosted by</span>
                                                         {hostNames.map((host) => (
-                                                                <span class="rounded-full bg-white/60 px-3 py-1 text-sm font-medium text-primary-content shadow-sm backdrop-blur dark:bg-white/10">
+                                                                <span class="glass-chip text-sm font-medium text-primary-content">
                                                                         {host}
                                                                 </span>
                                                         ))}
@@ -183,7 +183,7 @@ function formatDuration(seconds: number) {
                                 <!-- Cover image or latest episode thumbnail -->
                                 {showEntry.data.cover ? (
                                         <div class="flex-shrink-0 w-full lg:w-2/5 max-w-md">
-                                                <div class="overflow-hidden rounded-2xl shadow-xl ring-1 ring-gray-200 dark:ring-gray-700">
+                                                <div class="overflow-hidden rounded-2xl shadow-xl" style="border: 1px solid var(--surface-border)">
                                                         <Image
                                                                 src={showEntry.data.cover.image}
                                                                 alt={showEntry.data.cover.alt}
@@ -194,11 +194,11 @@ function formatDuration(seconds: number) {
                                 ) : latestEpisode ? (
                                         <div class="flex-shrink-0 w-full lg:w-2/5 max-w-md">
                                                 <a href={`/watch/${latestEpisode.slug}`} class="group block">
-                                                        <div class="relative overflow-hidden rounded-2xl shadow-xl ring-1 ring-gray-200 dark:ring-gray-700">
+                                                        <div class="relative overflow-hidden rounded-2xl shadow-xl" style="border: 1px solid var(--surface-border)">
                                                                 <img
                                                                         src={latestEpisode.thumbnailUrl}
                                                                         alt={`Latest episode: ${latestEpisode.title}`}
-                                                                        class="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                                        class="aspect-video w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
                                                                         loading="eager"
                                                                 />
                                                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -238,9 +238,9 @@ function formatDuration(seconds: number) {
                 </div>
         </section>
 
-        <!-- Episodes + Newsletter -->
-        <section class="bg-gray-50 py-12 dark:bg-gray-950">
-                <div class="mx-auto flex max-w-7xl flex-col gap-10 px-4 sm:px-6 lg:px-8">
+        <!-- Episodes -->
+        <section class="section-py" style="background: var(--surface-base)">
+                <div class="mx-auto flex max-w-7xl flex-col gap-10 content-px">
                         {feedVideos.length > 0 ? (
                                 <VideoFeed
                                         title="Episodes"
@@ -248,9 +248,9 @@ function formatDuration(seconds: number) {
                                         videos={feedVideos}
                                 />
                         ) : (
-                                <div class="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-12 text-center shadow-sm dark:border-gray-800 dark:from-gray-900/40 dark:to-gray-900/20">
+                                <div class="mx-auto max-w-2xl rounded-2xl glass-card p-12 text-center">
                                         <svg
-                                                class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600"
+                                                class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"

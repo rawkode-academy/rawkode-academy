@@ -1,6 +1,6 @@
 <template>
 	<div v-if="links.length > 0" class="flex flex-col gap-3">
-		<p class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+		<p class="text-sm font-semibold uppercase tracking-wide text-muted">
 			Subscribe
 		</p>
 		<div class="flex flex-wrap gap-2">
@@ -10,7 +10,7 @@
 				:href="link.url"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-700"
+				class="glass-chip gap-2 rounded-lg px-4 py-2 text-sm font-medium text-secondary-content transition-all duration-200 hover:shadow-md hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
 				@click="handleSubscribeClick(link)"
 			>
 				<font-awesome-icon :icon="getIcon(link.icon)" class="h-4 w-4" />
