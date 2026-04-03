@@ -1,0 +1,219 @@
+---
+import {
+	type CollectionEntry,
+	getCollection,
+	getEntries,
+	render,
+} from "astro:content";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import Page from "@/wrappers/page.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+
+export const prerender = true;
+
+type Props = {
+	article: CollectionEntry<"news">;
+};
+
+export const getStaticPaths: GetStaticPaths =
+	async (): Promise<GetStaticPathsResult> => {
+		const articles = await getCollection("news");
+		return articles.map((article: CollectionEntry<"news">) => ({
+			params: { slug: article.id },
+			props: { article },
+		}));
+	};
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const authors = await getEntries(article.data.authors);
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "News", link: "/news" },
+	{ title: article.data.title, link: `/news/${article.id}` },
+];
+
+const publishDate = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "numeric",
+	year: "numeric",
+}).format(article.data.publishedAt);
+
+---
+
+<Page
+	title={article.data.title}
+	description={article.data.description}
+	isArticle={true}
+	publishedAt={article.data.publishedAt}
+	authors={authors}
+>
+	<div class="article-page">
+		<Breadcrumb elements={breadcrumbElements} />
+
+		<header class="article-header">
+			<h1>{article.data.title}</h1>
+
+			<div class="byline">
+				<div class="byline-authors">
+					{authors.map((author) => (
+						<a
+							href={author.data.github}
+							target="_blank"
+							rel="author noopener noreferrer"
+							class="author"
+						>
+							<img
+								src={author.data.avatarUrl}
+								alt=""
+								class="author-avatar"
+								loading="lazy"
+							/>
+							<span class="author-name">{author.data.name}</span>
+						</a>
+					))}
+				</div>
+
+				<span class="byline-sep">&middot;</span>
+
+				<time datetime={article.data.publishedAt.toString()} class="byline-date">
+					{publishDate}
+				</time>
+
+			</div>
+		</header>
+
+		<div class="article-content">
+			<article class="prose">
+				<Content />
+			</article>
+		</div>
+	</div>
+</Page>
+
+<style>
+	.article-page {
+		max-width: 100%;
+	}
+
+	.article-header {
+		margin-bottom: 2rem;
+		padding-right: 4rem;
+	}
+
+	@media (max-width: 767px) {
+		.article-header {
+			padding-right: 0;
+		}
+	}
+
+	h1 {
+		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+		font-weight: 800;
+		line-height: 1.2;
+		letter-spacing: -0.02em;
+		color: rgb(17 24 39);
+		margin: 0 0 1rem;
+	}
+
+	:root.dark h1 {
+		color: white;
+	}
+
+	.byline {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.625rem;
+		font-size: 0.875rem;
+		color: rgb(107 114 128);
+	}
+
+	:root.dark .byline {
+		color: rgb(156 163 175);
+	}
+
+	.byline-authors {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.author {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		color: rgb(17 24 39);
+		text-decoration: none;
+		font-weight: 500;
+		transition: color 0.15s;
+	}
+
+	:root.dark .author {
+		color: white;
+	}
+
+	.author:hover {
+		color: rgb(var(--brand-primary));
+	}
+
+	.author-avatar {
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+
+	.byline-sep {
+		color: rgb(209 213 219);
+	}
+
+	:root.dark .byline-sep {
+		color: rgb(75 85 99);
+	}
+
+	.byline-date {
+		white-space: nowrap;
+	}
+
+
+	.article-content {
+		position: relative;
+	}
+
+	.prose {
+		width: 100%;
+		margin-bottom: 6rem;
+		padding-right: 4rem;
+	}
+
+	@media (max-width: 767px) {
+		.prose {
+			padding-right: 0;
+		}
+	}
+
+	:global(.prose pre),
+	:global(.prose code),
+	:global(.prose table),
+	:global(.prose img),
+	:global(.prose iframe) {
+		max-width: 100%;
+		overflow-x: auto;
+	}
+
+	:global(.prose p),
+	:global(.prose li),
+	:global(.prose h1),
+	:global(.prose h2),
+	:global(.prose h3),
+	:global(.prose h4) {
+		overflow-wrap: break-word;
+		word-break: break-word;
+	}
+
+	:global(.prose pre) {
+		white-space: pre-wrap;
+	}
+</style>

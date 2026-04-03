@@ -1,0 +1,27 @@
+---
+title: "NVIDIA Donates GPU DRA Driver to CNCF, Open-Sources KAI Scheduler and Grove"
+description: "NVIDIA shifts governance of its Dynamic Resource Allocation driver for GPUs to the CNCF, gets KAI Scheduler accepted as a Sandbox project, and open-sources Grove for AI inference orchestration."
+publishedAt: 2026-03-24
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+NVIDIA announced at KubeCon Europe 2026 in Amsterdam that it is donating its Dynamic Resource Allocation (DRA) driver for GPUs to the Cloud Native Computing Foundation, shifting governance of the most critical piece of GPU-on-Kubernetes plumbing from a single vendor to the upstream community.
+
+This is a big deal. GPU orchestration in Kubernetes has been vendor-controlled territory, and NVIDIA just handed the keys to the community. AWS, Broadcom, Canonical, Google Cloud, Microsoft, Nutanix, Red Hat, and SUSE are all collaborating on the effort.
+
+## KAI Scheduler Enters CNCF Sandbox
+
+NVIDIA's KAI Scheduler also joined the CNCF Sandbox. It's a Kubernetes-native scheduler built specifically for AI workloads at scale. It handles DRA for GPUs, topology-aware placement, and hierarchical PodGroups for gang scheduling. Multiple workloads can share GPUs efficiently. That's a direct answer to the GPU utilization problem that plagues most AI clusters.
+
+## Grove: A New API for AI Inference Orchestration
+
+NVIDIA also unveiled Grove, a new open-source Kubernetes API for orchestrating AI workloads on GPU clusters. Grove uses three hierarchical custom resources (PodCliques, PodCliqueScalingGroups, and PodCliqueSets) to describe multi-component workloads including specific roles, dependencies, scaling rules, and startup order within a single custom resource.
+
+## GPU Support for Confidential Containers
+
+In collaboration with the CNCF's Confidential Containers community, NVIDIA introduced GPU support for Kata Containers, lightweight virtual machines that act like containers, enabling AI workloads to run with additional protections around data confidentiality.
+
+GPU resource management in Kubernetes just shifted from vendor-controlled to community-governed. Platform teams can now bet on DRA as the standard abstraction for GPU allocation without single-vendor lock-in. NVIDIA is betting that a standardized, open GPU abstraction in Kubernetes will grow the total market faster than a proprietary lock-in strategy. Given the list of collaborators already on board, that bet looks solid.

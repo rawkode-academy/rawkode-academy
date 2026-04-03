@@ -1,0 +1,36 @@
+---
+title: "Istio Ships Ambient Multicluster Beta and Gateway API Inference Extension"
+description: "Istio's ambient mode gains multicluster support in beta with sidecar-free cross-cluster routing, and integrates the Gateway API Inference Extension for model-aware traffic management."
+publishedAt: 2026-03-25
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - istio
+---
+
+Istio dropped two big releases at KubeCon + CloudNativeCon Europe 2026: Ambient Multicluster in beta and the Gateway API Inference Extension in beta.
+
+## Ambient Multicluster Beta
+
+Istio's ambient mode now supports multicluster deployments, giving you cross-cluster traffic routing without sidecars. The key capabilities include:
+
+- Dynamic cross-cluster failover where requests automatically redirect to another cluster when a service failure is detected
+- ztunnel-to-ztunnel mTLS for zero-trust security across cluster boundaries
+- Simplified operational model compared to sidecar-based multicluster deployments
+
+This eliminates the sidecar tax for cross-cluster traffic, a pain point that's plagued multi-cluster Kubernetes teams for years.
+
+## Gateway API Inference Extension
+
+Istio also integrated the Gateway API Inference Extension, which effectively turns any Istio gateway into an inference gateway. The extension adds:
+
+- **Model-aware routing** so you can route requests based on the target model
+- **Per-request criticality levels** to prioritize inference requests
+- **Load balancing based on real-time model server metrics** for better GPU utilization without manual tuning
+
+This means platform teams can use their existing Istio service mesh infrastructure to route to LLM backends with model-aware intelligence, without deploying a separate inference proxy.
+
+## The Bigger Picture
+
+Ambient multicluster removes the sidecar overhead for cross-cluster networking while keeping zero-trust security intact. The inference extension is equally useful: instead of bolting on a separate inference gateway, your existing mesh handles model routing natively. Two fewer things to deploy and operate.

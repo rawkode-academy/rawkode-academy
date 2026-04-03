@@ -1,0 +1,27 @@
+---
+title: "llm-d Accepted as CNCF Sandbox Project — Kubernetes-Native Distributed LLM Inference Gets an Open Standard"
+description: "The distributed LLM inference engine co-created by Red Hat, Google Cloud, IBM Research, CoreWeave, and NVIDIA joins the CNCF, establishing an open standard for inference workloads on Kubernetes."
+publishedAt: 2026-03-24
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+llm-d, the distributed LLM inference engine co-created by Red Hat, Google Cloud, IBM Research, CoreWeave, and NVIDIA, has been accepted as a CNCF Sandbox project. It's establishing an open standard for running inference workloads on Kubernetes.
+
+The project launched in May 2025 with a clear vision: any model, any accelerator, any cloud. Since then AMD, Cisco, Hugging Face, Intel, Lambda, and Mistral AI have joined, along with UC Berkeley and the University of Chicago.
+
+## Gateway API Inference Extension
+
+llm-d serves as the primary implementation of the Kubernetes Gateway API Inference Extension (GAIE), providing inference-aware traffic management via the Endpoint Picker (EPP). In practice, that means model-aware routing, per-request criticality levels, and load balancing based on real-time model server metrics. All through standard Kubernetes APIs.
+
+## Performance at Scale
+
+The latest v0.5 release shows near-zero routing latency in multi-tenant SaaS scenarios and scales to roughly 120,000 tokens per second. Those are production-grade numbers.
+
+## What This Means for Your Inference Stack
+
+This is the strongest signal yet that LLM inference is becoming a standardized Kubernetes workload, not a bespoke deployment. If you're choosing between vLLM, TGI, or custom inference setups, llm-d's CNCF home and multi-vendor backing make it the safest bet for long-term interoperability.
+
+It's also the reference implementation for Gateway API Inference Extension. That means it won't just run inference on Kubernetes. It'll shape how inference routing works in Kubernetes for years to come.

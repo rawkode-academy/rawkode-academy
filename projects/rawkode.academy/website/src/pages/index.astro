@@ -21,6 +21,12 @@ const heroLogos = allTechnologies
 	.sort(() => Math.random() - 0.5)
 	.slice(0, 4);
 
+// Fetch latest news
+const allNews = await getCollection("news");
+const latestNews = allNews
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, 4);
+
 // Fetch latest content
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
 const latestArticles = allArticles
@@ -192,6 +198,52 @@ const academyValues = [
 
 	<div class="page-px section-py-tight !pt-4 sm:!pt-6 lg:!pt-8">
 		<div class="mx-auto max-w-6xl space-y-16 sm:space-y-20 lg:space-y-24">
+			{latestNews.length > 0 && (
+				<section class="space-y-8">
+					<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+						<div class="space-y-3">
+							<div class="eyebrow-label">News</div>
+							<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
+								Cloud Native News
+							</h2>
+							<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+								Curated stories from across the cloud native ecosystem.
+							</p>
+						</div>
+						<div class="md:pb-1">
+							<a
+								href="/news"
+								class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
+							>
+								All news
+								<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+							</a>
+						</div>
+					</div>
+
+					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						{latestNews.map((item) => (
+							<a
+								href={`/news/${item.id}`}
+								class="soft-panel group block h-full p-4 sm:p-5"
+							>
+								<div class="space-y-3">
+									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+										<span>{formatPublishedDate(item.data.publishedAt)}</span>
+									</div>
+									<h4 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
+										{item.data.title}
+									</h4>
+									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
+										{item.data.description}
+									</p>
+								</div>
+							</a>
+						))}
+					</div>
+				</section>
+			)}
+
 			<section class="space-y-8">
 				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
 					<div class="space-y-3">

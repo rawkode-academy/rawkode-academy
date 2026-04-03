@@ -15,6 +15,7 @@ This directory contains all content for the Rawkode Academy platform, structured
 | `testimonials/` | User testimonials | quote, author |
 | `learning-paths/` | Curated learning paths | title, technologies |
 | `series/` | Content series | title, parts |
+| `news/` | Cloud native news articles | title, source, score, tags |
 | `changelog/` | Platform updates | version, changes |
 | `adrs/` | Architecture Decision Records | title, status, context |
 
