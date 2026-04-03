@@ -37,54 +37,71 @@ function getDifficultyVariant(
 }
 ---
 
-<BaseCard href={`/courses/${course.id}`} class="hover:shadow-xl hover:scale-105">
+<BaseCard href={`/courses/${course.id}`} class="group">
 	<Fragment slot="cover">
-		<div class="absolute inset-0 bg-gradient-overlay z-10"></div>
+		<div class="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent"></div>
 		{
 			course.data.cover ? (
 				<Image
-					class="w-full h-52 object-cover"
+					class="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
 					src={course.data.cover.image}
 					alt={course.data.cover.alt}
 					loading="lazy"
 				/>
 			) : (
-				<div class="w-full h-52 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-					<svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-					</svg>
+				<div class="flex h-48 w-full items-end bg-gradient-to-br from-primary via-primary/80 to-secondary p-6">
+					<div class="max-w-[14rem]">
+						<p class="text-xs font-semibold uppercase tracking-[0.22em] text-white/75">Course</p>
+						<p class="mt-3 text-2xl font-bold leading-tight text-white">{course.data.title}</p>
+					</div>
 				</div>
 			)
 		}
-		<div class="absolute top-3 left-3 right-3 z-20 flex justify-between">
+		<div class="absolute left-4 right-4 top-4 z-20 flex flex-wrap items-start justify-between gap-2">
 			<Badge
 				variant={getDifficultyVariant(course.data.difficulty)}
 				size="sm"
-				class="backdrop-blur-sm shadow-md"
+				class="shadow-md"
 			>
 				{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
 			</Badge>
 			<Badge
 				variant="default"
 				size="sm"
-				class="backdrop-blur-sm shadow-md bg-white/90 dark:bg-gray-800/90 text-secondary-content"
+				class="bg-white/90 text-secondary-content shadow-md dark:bg-gray-900/85"
 			>
 				{totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}
 			</Badge>
 		</div>
 	</Fragment>
 	<Fragment slot="content">
-		<h2 class="mb-3 text-xl font-bold tracking-tight text-primary-content line-clamp-2">
-			{course.data.title}
-		</h2>
-		<p class="mb-4 font-light text-muted line-clamp-3 flex-grow">
-			{course.data.description}
-		</p>
+		<div class="flex h-full flex-col gap-4">
+			<div class="space-y-3">
+				<h2 class="text-2xl font-bold tracking-tight text-primary-content transition-colors group-hover:text-primary">
+					{course.data.title}
+				</h2>
+				<p class="line-clamp-4 text-sm leading-7 text-secondary-content sm:text-base">
+					{course.data.description}
+				</p>
+			</div>
+
+			{course.data.learningPath.length > 0 && (
+				<div class="rounded-[1.15rem] border border-white/40 bg-white/55 px-4 py-4 dark:border-white/8 dark:bg-gray-950/25">
+					<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">You’ll cover</p>
+					<p class="mt-2 line-clamp-2 text-sm leading-6 text-primary-content">
+						{course.data.learningPath.slice(0, 2).join(" • ")}
+					</p>
+				</div>
+			)}
+		</div>
 	</Fragment>
 	<Fragment slot="footer">
-		<div class="flex items-center justify-between">
+		<div class="flex items-center justify-between gap-4">
 			<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
-			<FormattedDate date={course.data.publishedAt} format="short" />
+			<div class="text-right">
+				<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Published</p>
+				<FormattedDate date={course.data.publishedAt} format="short" />
+			</div>
 		</div>
 	</Fragment>
 </BaseCard>

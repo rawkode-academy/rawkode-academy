@@ -1,18 +1,18 @@
 <template>
-  <div v-if="resources && resources.length > 0" class="space-y-6">
-    <div class="bg-gradient-to-r from-primary to-secondary text-white rounded-xl p-6 shadow-lg">
+  <div v-if="resources && resources.length > 0" class="space-y-4">
+    <div class="section-shell-muted px-6 py-5">
       <h3 class="text-2xl font-bold flex items-center gap-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
         </svg>
         Resources
       </h3>
-      <p class="text-sm mt-2 text-secondary/80">Supporting materials for this module</p>
+      <p class="mt-2 text-sm text-secondary-content">Supporting materials for this module</p>
     </div>
     
     <div class="space-y-4">
       <div v-for="[category, categoryResources] in Object.entries(groupedResources)" :key="category" 
-           class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+           class="section-shell-muted p-5">
         <h4 class="text-sm font-semibold uppercase tracking-wider flex items-center gap-2 mb-4"
             :class="getCategoryColorClass(category)">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@
             :target="resource.type === 'url' ? '_blank' : undefined"
             :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
             @click="resource.type === 'embed' && openEmbedModal(resource)"
-            class="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all group cursor-pointer text-left w-full"
+            class="group flex w-full cursor-pointer items-start gap-3 rounded-[1.15rem] border border-white/40 bg-white/65 p-4 text-left transition-colors hover:bg-white dark:border-white/8 dark:bg-gray-950/25 dark:hover:bg-gray-950/40"
           >
             <div class="flex-shrink-0 p-2 rounded-lg transition-colors"
                  :class="getResourceIconClass(resource.type)">
@@ -45,10 +45,10 @@
             </div>
             
             <div class="flex-1 min-w-0">
-              <h5 class="font-semibold text-gray-900 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors">
+              <h5 class="font-semibold text-primary-content transition-colors group-hover:text-primary">
                 {{ resource.title }}
               </h5>
-              <p v-if="resource.description" class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p v-if="resource.description" class="mt-1 text-sm text-secondary-content">
                 {{ resource.description }}
               </p>
               <div class="flex items-center gap-3 mt-3">
