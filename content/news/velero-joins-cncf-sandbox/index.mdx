@@ -11,14 +11,14 @@ technologies:
 
 Broadcom has officially handed Velero over to the CNCF Sandbox. The project's sandbox application, sponsored by TOC member Davanum Srinivas, passed its vote and the repository is migrating from `vmware-tanzu/velero` to a new `velero-io` GitHub organization.
 
-This isn't just a logo swap. Velero has been the default answer to "how do I back up my Kubernetes cluster?" for years, but it's always lived under VMware's umbrella. First VMware, then Broadcom after the acquisition. That single-vendor ownership made some teams nervous, especially as Broadcom's post-acquisition priorities shifted.
+This isn't just a logo swap. Velero has been the default answer to "how do I back up my Kubernetes cluster?" since its days as Heptio Ark back in 2017. First VMware, then Broadcom after the 2023 acquisition. That single-vendor ownership made some teams nervous, especially as Broadcom's post-acquisition priorities shifted toward infrastructure software monetization.
 
 Now the maintainer list tells a different story. Contributors from Broadcom, Red Hat, and Microsoft all hold commit access. Tiger Kaovilai, a Red Hat maintainer, publicly backed the sandbox application. That's three competing cloud vendors collaborating on the same backup tool. It doesn't happen often.
 
-For platform teams already running Velero, nothing breaks. The Apache 2.0 license stays. Your existing plugins and configurations keep working. What changes is the governance: technical decisions now go through CNCF processes rather than a single company's internal roadmap.
+For platform teams already running Velero, nothing breaks. The Apache 2.0 license stays. Your existing plugins, Helm charts, and backup schedules keep working. What changes is the governance: technical decisions now go through CNCF processes rather than a single company's internal roadmap.
 
 The timing matters. Kubernetes 1.36 ships later this month with DRA going GA and the gitRepo volume type finally removed. Clusters are getting more complex. Backup tooling that can't keep pace with new resource types and storage patterns becomes a liability fast. Vendor-neutral governance means Velero's plugin ecosystem can evolve without waiting for one company's product priorities to align.
 
-Velero presented to TAG Operational Resilience back in February before filing the sandbox application on February 6. The whole process took under two months from application to acceptance. That's fast by CNCF standards and suggests the TOC saw this as overdue rather than controversial.
+Velero presented to TAG Operational Resilience before filing the sandbox application on February 6. Nikhita Raghunath from Broadcom filed the application, and the whole process took under two months from application to acceptance. That's fast by CNCF standards and suggests the TOC saw this as overdue rather than controversial.
 
 If you're evaluating Kubernetes backup options, this changes the calculus. A CNCF-governed Velero with multi-vendor maintainership is a safer long-term bet than it was six months ago. Watch the `velero-io` org for the repo migration and updated contribution guidelines.
