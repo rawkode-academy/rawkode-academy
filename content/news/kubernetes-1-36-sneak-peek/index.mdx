@@ -1,0 +1,33 @@
+---
+title: "Kubernetes 1.36 Sneak Peek: DRA Goes GA, Ingress-NGINX Retires, HPA Scales to Zero"
+description: "Kubernetes v1.36, releasing April 22, finalizes DRA to GA, graduates User Namespaces, enables HPA scale-to-zero by default, and formally retires Ingress-NGINX."
+publishedAt: 2026-03-30
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes v1.36 drops on April 22, 2026. It's a big one. Several features that have been cooking for years are finally landing, and one major deprecation will force migration plans.
+
+## DRA Goes GA
+
+Four Dynamic Resource Allocation (DRA) enhancements are graduating to GA. After years of development, hardware-aware scheduling is now a first-class, production-ready feature in upstream Kubernetes. GPUs and other accelerators are finally manageable through standard Kubernetes APIs. No more relying on vendor-specific device plugins alone.
+
+## Ingress-NGINX Formally Retired
+
+Kubernetes SIG Network and the Security Response Committee have formally retired the Ingress-NGINX controller as of March 24, 2026. There will be no further releases, bugfixes, or security updates. Existing deployments continue to function and artifacts remain available, but this cements Gateway API as the standard ingress path going forward.
+
+## HPA Scale-to-Zero Enabled by Default
+
+The `HPAScaleToZero` feature gate, which has been sitting in alpha since Kubernetes v1.16, is now enabled by default. The Horizontal Pod Autoscaler can finally scale workloads down to zero replicas without additional configuration.
+
+## Additional Highlights
+
+- **User Namespaces** graduate to stable, providing better pod isolation
+- **Mutating Admission Policies** graduate to stable
+- The **gitRepo volume plugin** is permanently disabled with no opt-back-in
+- The **externalIPs** field in Service spec is being deprecated, with full removal planned for v1.43
+- 18 enhancements moving to stable in total
+
+Still on Ingress-NGINX? Start planning your Gateway API migration now. HPA scale-to-zero landing as default changes the economics of event-driven and batch workloads. And DRA going GA means hardware-aware scheduling is production-ready upstream, not a vendor add-on.

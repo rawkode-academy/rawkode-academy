@@ -1,9 +1,3 @@
----
-runme:
-  version: v3
-shell: bash
----
-
 # Rawkode Academy Website
 
 This is the website at https://rawkode.academy.
