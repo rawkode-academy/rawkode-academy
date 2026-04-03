@@ -527,42 +527,62 @@ body::before {
 @layer components {
 	/* Glass Morphism Components */
 	.glass-panel {
-		@apply border backdrop-blur-2xl rounded-xl;
-		background-color: var(--surface-card);
-		border-color: var(--surface-border);
-		box-shadow: var(--surface-shadow);
+		@apply border rounded-[1.5rem];
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, var(--surface-card) 88%, white 12%) 0%,
+				color-mix(in srgb, var(--surface-card) 94%, rgb(var(--brand-primary) / 0.05) 6%) 100%
+			);
+		border-color: color-mix(in srgb, var(--surface-border) 92%, transparent);
+		box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
 	}
 
 	.glass-card {
-		@apply border backdrop-blur-xl rounded-xl;
-		background-color: var(--surface-card);
-		border-color: var(--surface-border);
-		box-shadow: var(--surface-shadow);
+		@apply border rounded-[1.35rem];
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, var(--surface-card) 90%, white 10%) 0%,
+				color-mix(in srgb, var(--surface-card) 96%, rgb(var(--brand-primary) / 0.04) 4%) 100%
+			);
+		border-color: color-mix(in srgb, var(--surface-border) 94%, transparent);
+		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 	}
 
 	/* Glass card with shimmer effect overlay */
 	.glass-card-shimmer {
-		@apply relative overflow-hidden border backdrop-blur-xl rounded-xl;
-		background-color: var(--surface-card);
-		border-color: var(--surface-border);
-		box-shadow: var(--surface-shadow);
+		@apply relative overflow-hidden border rounded-[1.35rem];
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, var(--surface-card) 90%, white 10%) 0%,
+				color-mix(in srgb, var(--surface-card) 96%, rgb(var(--brand-primary) / 0.04) 4%) 100%
+			);
+		border-color: color-mix(in srgb, var(--surface-border) 94%, transparent);
+		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 	}
 
 	.glass-card-shimmer::before {
 		content: "";
-		@apply absolute inset-0 pointer-events-none rounded-xl;
+		@apply pointer-events-none absolute left-5 right-5 top-0;
+		height: 1px;
 		background: linear-gradient(
-			to bottom,
-			rgba(255, 255, 255, 0.1) 0%,
-			transparent 100%
+			90deg,
+			rgb(var(--brand-primary) / 0.22) 0%,
+			transparent 38%,
+			transparent 62%,
+			rgb(var(--brand-secondary) / 0.18) 100%
 		);
 	}
 
 	html.dark .glass-card-shimmer::before {
 		background: linear-gradient(
-			to bottom,
-			rgba(255, 255, 255, 0.05) 0%,
-			transparent 100%
+			90deg,
+			rgb(var(--brand-primary) / 0.28) 0%,
+			transparent 38%,
+			transparent 62%,
+			rgb(var(--brand-secondary) / 0.22) 100%
 		);
 	}
 
@@ -589,34 +609,36 @@ body::before {
 
 	.glass-chip {
 		@apply inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold;
-		background-color: var(--surface-card-muted);
-		border: 1px solid var(--surface-border);
+		background-color: color-mix(in srgb, var(--surface-card-muted) 78%, transparent);
+		border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
 		color: inherit;
 	}
 
 	.section-shell {
-		@apply relative overflow-hidden rounded-[1.75rem] border;
+		@apply relative overflow-hidden rounded-[1.35rem] border;
 		background:
 			linear-gradient(
 				180deg,
-				rgba(255, 255, 255, 0.82) 0%,
-				rgba(255, 255, 255, 0.68) 100%
+				color-mix(in srgb, var(--surface-card) 88%, white 12%) 0%,
+				color-mix(in srgb, var(--surface-card) 96%, rgb(var(--brand-primary) / 0.04) 4%) 100%
 			);
-		border-color: var(--surface-border);
-		box-shadow: var(--surface-shadow);
+		border-color: color-mix(in srgb, var(--surface-border) 94%, transparent);
+		box-shadow: none;
 	}
 
 	.section-shell::before {
 		content: "";
-		@apply pointer-events-none absolute inset-0;
+		@apply pointer-events-none absolute left-6 right-6 top-0;
+		height: 1px;
 		background:
 			linear-gradient(
-				135deg,
-				rgb(var(--brand-primary) / 0.12) 0%,
-				transparent 48%,
-				rgb(var(--brand-secondary) / 0.08) 100%
+				90deg,
+				rgb(var(--brand-primary) / 0.24) 0%,
+				transparent 42%,
+				transparent 58%,
+				rgb(var(--brand-secondary) / 0.18) 100%
 			);
-		opacity: 0.9;
+		opacity: 1;
 	}
 
 	.section-shell > * {
@@ -628,31 +650,31 @@ body::before {
 		background:
 			linear-gradient(
 				180deg,
-				rgba(15, 23, 42, 0.44) 0%,
-				rgba(7, 11, 24, 0.58) 100%
+				rgba(10, 16, 28, 0.58) 0%,
+				rgba(6, 11, 22, 0.7) 100%
 			);
 	}
 
 	html.dark .section-shell::before {
 		background:
 			linear-gradient(
-				135deg,
-				rgb(var(--brand-primary) / 0.18) 0%,
-				transparent 48%,
-				rgb(var(--brand-secondary) / 0.12) 100%
+				90deg,
+				rgb(var(--brand-primary) / 0.3) 0%,
+				transparent 42%,
+				transparent 58%,
+				rgb(var(--brand-secondary) / 0.2) 100%
 			);
 	}
 
 	.section-shell-muted {
-		@apply relative overflow-hidden rounded-[1.5rem] border;
-		background-color: rgba(255, 255, 255, 0.62);
-		border-color: var(--surface-border);
-		box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06);
+		@apply relative overflow-hidden rounded-[1.2rem] border;
+		background-color: color-mix(in srgb, var(--surface-card) 72%, transparent);
+		border-color: color-mix(in srgb, var(--surface-border) 86%, transparent);
+		box-shadow: none;
 	}
 
 	html.dark .section-shell-muted {
-		background-color: rgba(15, 23, 42, 0.28);
-		box-shadow: 0 20px 45px rgba(2, 6, 23, 0.3);
+		background-color: rgba(15, 23, 42, 0.22);
 	}
 
 	.eyebrow-label {
@@ -668,6 +690,26 @@ body::before {
 
 	html.dark .stat-panel {
 		background-color: rgba(15, 23, 42, 0.34);
+	}
+
+	.soft-panel {
+		@apply rounded-[1.2rem] border;
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, var(--surface-card-muted) 78%, transparent) 0%,
+				color-mix(in srgb, var(--surface-card) 68%, transparent) 100%
+			);
+		border-color: color-mix(in srgb, var(--surface-border) 78%, transparent);
+	}
+
+	html.dark .soft-panel {
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, var(--surface-card-muted) 42%, transparent) 0%,
+				rgba(8, 13, 26, 0.34) 100%
+			);
 	}
 
 	.surface-divider {

@@ -29,10 +29,22 @@ export function useCommandPalette(): CommandPaletteHook {
 			}
 		};
 
+		const handleOpenRequest = () => {
+			setIsOpen(true);
+		};
+
 		document.addEventListener("keydown", handleKeyDown);
+		document.addEventListener(
+			"open-command-palette",
+			handleOpenRequest as EventListener,
+		);
 
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
+			document.removeEventListener(
+				"open-command-palette",
+				handleOpenRequest as EventListener,
+			);
 		};
 	}, []);
 

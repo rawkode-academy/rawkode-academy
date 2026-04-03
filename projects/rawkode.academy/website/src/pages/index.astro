@@ -1,12 +1,11 @@
 ---
-import FeatureList from "@/components/feature/list.vue";
+import { Image } from "astro:assets";
 import HeroTypewriter from "@/components/hero/typewriter.tsx";
 import PartnerLogos from "@/components/partner/logos.astro";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
-import ArticleCard from "@/components/articles/ArticleCard.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 
@@ -26,11 +25,13 @@ const heroLogos = allTechnologies
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
 const latestArticles = allArticles
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 3);
+	.slice(0, 4);
+const [featuredArticle, ...secondaryArticles] = latestArticles;
 
 // Get published videos only (filters out future-dated for scheduled publishing)
 const allVideos = await getPublishedVideos();
 const latestVideos = allVideos.slice(0, 4); // Already sorted by getPublishedVideos
+const [featuredVideo, ...secondaryVideos] = latestVideos;
 
 // Social proof stats - simplified metrics
 const allCourses = await getCollection("courses");
@@ -53,6 +54,16 @@ const pageTitle = "Cloud Native & Kubernetes Education | Rawkode Academy";
 const pageDescription =
 	"Master Cloud Native technologies and Kubernetes with Rawkode Academy's expert-led courses, articles, and live streams. Stay ahead in the fast-evolving tech landscape.";
 
+const formatLabel = (value?: string | null) => {
+	if (!value) {
+		return null;
+	}
+
+	return value
+		.replace(/[-_]/g, " ")
+		.replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 // Format duration helper
 const formatDuration = (seconds?: number | null) => {
 	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
@@ -69,6 +80,77 @@ const formatDuration = (seconds?: number | null) => {
 	}
 	return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
+
+const formatPublishedDate = (date: Date) =>
+	date.toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
+
+const compactCopy = (text: string, maxLength: number) => {
+	const normalized = text.replace(/\s+/g, " ").trim();
+	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
+
+	if (firstSentence && firstSentence.length <= maxLength) {
+		return firstSentence;
+	}
+
+	if (normalized.length <= maxLength) {
+		return normalized;
+	}
+
+	return `${normalized.slice(0, maxLength).trimEnd()}…`;
+};
+
+const summarizeVideo = (video: (typeof latestVideos)[number]) =>
+	compactCopy(video.data.subtitle || video.data.description, 180);
+
+const summarizeArticle = (article: (typeof latestArticles)[number]) =>
+	compactCopy(
+		article.data.openGraph?.subtitle || article.data.subtitle || article.data.description,
+		160,
+	);
+
+const videoLabel = (video: (typeof latestVideos)[number]) =>
+	formatLabel(video.data.category) ||
+	(video.data.type === "live" ? "Live Session" : "Recorded Session");
+
+const articleLabel = (article: (typeof latestArticles)[number]) =>
+	formatLabel(article.data.type) || "Article";
+
+const academyValues = [
+	{
+		title: "Authenticity",
+		description:
+			"We show the trade-offs, the rough edges, and the decisions we'd still make again.",
+	},
+	{
+		title: "Organic Content",
+		description:
+			"Much of the curriculum comes from problems we're solving in public, not invented demos.",
+	},
+	{
+		title: "Embracing Failure",
+		description:
+			"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
+	},
+	{
+		title: "Hands-On",
+		description:
+			"Less slideware, more terminal time, real code, and live builds you can follow end to end.",
+	},
+	{
+		title: "Forward Thinking",
+		description:
+			"We test new tools early, evaluate them honestly, and show where they fit.",
+	},
+	{
+		title: "Open & Closed Source",
+		description:
+			"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
+	},
+] as const;
 ---
 
 <Page title={pageTitle} description={pageDescription}>
@@ -98,185 +180,251 @@ const formatDuration = (seconds?: number | null) => {
 		socialProof={socialProofStats}
 	/>
 
-	<section id="newsletter-signup" class="page-px section-pt-0">
-		<div class="mx-auto max-w-3xl scroll-mt-24">
-			<NewsletterCTA
-				server:defer
-				class="mb-0"
-				badge="Weekly Cloud Native insights"
-				headline="Get cloud native insights weekly"
-				subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
-			/>
-		</div>
-	</section>
+	<div id="newsletter-signup" class="page-px section-pt-0 scroll-mt-24">
+		<NewsletterCTA
+			variant="section"
+			class="mb-0 !pt-6 !pb-4 sm:!pt-8 sm:!pb-6 lg:!pt-10 lg:!pb-8"
+			badge="Weekly Cloud Native insights"
+			headline="Get cloud native insights weekly"
+			subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
+		/>
+	</div>
 
-	<section class="page-px section-py">
-		<div class="mx-auto max-w-7xl">
-			<div class="mb-14 space-y-3 text-center">
-				<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl mb-4">
-					Latest from the <span class="text-primary">Academy</span>
-				</h2>
-				<p class="text-muted text-lg max-w-3xl mx-auto">
-					Fresh content to keep you ahead in the cloud-native landscape
-				</p>
-			</div>
-
-			<div class="mb-16 space-y-6">
-				<div class="flex flex-wrap items-end justify-between gap-3">
-					<h3 class="flex items-center gap-2 text-xl font-semibold tracking-tight text-primary-content sm:text-2xl">
-						<span class="text-primary">📺</span> Latest Videos
-					</h3>
-					<a
-						href="/watch"
-						class="inline-flex min-h-11 items-center gap-1 rounded-full border border-white/60 bg-white/65 px-4 py-2 text-sm font-semibold text-primary shadow-sm backdrop-blur-md transition-colors hover:text-secondary dark:border-white/10 dark:bg-gray-900/55"
-					>
-						View all
-						<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-					</a>
+	<div class="page-px section-py-tight !pt-4 sm:!pt-6 lg:!pt-8">
+		<div class="mx-auto max-w-6xl space-y-16 sm:space-y-20 lg:space-y-24">
+			<section class="space-y-8">
+				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+					<div class="space-y-3">
+						<div class="eyebrow-label">Watch</div>
+						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
+							Videos
+						</h2>
+						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+							New sessions, reviews, and walkthroughs from the sharp end of cloud native engineering.
+						</p>
+					</div>
+					<div class="md:pb-1">
+						<a
+							href="/watch"
+							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
+						>
+							Browse videos
+							<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+						</a>
+					</div>
 				</div>
-				<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-					{latestVideos.slice(0, 3).map((video) => (
+
+				{featuredVideo && (
+					<a
+						href={`/watch/${featuredVideo.data.slug}`}
+						class="soft-panel group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[20rem_minmax(0,1fr)] md:items-center lg:p-6"
+					>
+						<div class="relative aspect-video overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5">
+							<img
+								src={`https://content.rawkode.academy/videos/${featuredVideo.data.id}/thumbnail.jpg`}
+								alt={featuredVideo.data.title}
+								class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
+								loading="lazy"
+							/>
+						</div>
+
+						<div class="space-y-4">
+							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+								<span>{videoLabel(featuredVideo)}</span>
+								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
+								<span>{formatPublishedDate(featuredVideo.data.publishedAt)}</span>
+								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
+								<span>{formatDuration(typeof featuredVideo.data.duration === "number" ? featuredVideo.data.duration : undefined)}</span>
+							</div>
+							<h3 class="max-w-[18ch] text-balance text-[clamp(1.85rem,2.4vw,2.75rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-primary-content transition-colors group-hover:text-primary">
+								{featuredVideo.data.title}
+							</h3>
+							<p class="max-w-[40rem] text-base leading-8 text-secondary-content">
+								{summarizeVideo(featuredVideo)}
+							</p>
+							<div class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+								Watch video
+								<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+							</div>
+						</div>
+					</a>
+				)}
+
+				<div class="grid gap-4 md:grid-cols-3">
+					{secondaryVideos.map((video) => (
 						<a
 							href={`/watch/${video.data.slug}`}
-							class="glass-card-shimmer group block overflow-hidden rounded-[1.5rem] border-white/50 motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-[0_24px_50px_rgba(15,23,42,0.12)]"
+							class="soft-panel group block h-full p-4 sm:p-5"
 						>
-							<div class="relative aspect-video overflow-hidden bg-surface">
-								<img
-									src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}
-									alt={video.data.title}
-									class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-105"
-									loading="lazy"
-								/>
-								<div class="absolute bottom-3 right-3 rounded-full bg-black/75 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-									{formatDuration(typeof video.data.duration === "number" ? video.data.duration : undefined)}
+							<div class="space-y-3">
+								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+									<span>{videoLabel(video)}</span>
+									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
+									<span>{formatPublishedDate(video.data.publishedAt)}</span>
 								</div>
-								<div class="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 motion-safe:transition-opacity motion-safe:duration-300 group-hover:opacity-100">
-									<div class="flex h-12 w-12 scale-75 items-center justify-center rounded-full bg-white/90 text-primary shadow-lg motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-100">
-										<svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-									</div>
-								</div>
-							</div>
-
-							<div class="p-5 sm:p-6">
-								<h3 class="mb-2 text-lg font-semibold tracking-tight text-primary-content line-clamp-2 transition-colors group-hover:text-primary">
+								<h4 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
 									{video.data.title}
-								</h3>
-
-								<div class="flex items-center text-sm text-muted">
-									<svg class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-									</svg>
-									{video.data.publishedAt.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
-								</div>
+								</h4>
+								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
+									{summarizeVideo(video)}
+								</p>
 							</div>
 						</a>
 					))}
 				</div>
-			</div>
+			</section>
 
-			<div class="mb-16 space-y-6">
-				<div class="flex flex-wrap items-end justify-between gap-3">
-					<h3 class="flex items-center gap-2 text-xl font-semibold tracking-tight text-primary-content sm:text-2xl">
-						<span class="text-primary">📝</span> Latest Articles
-					</h3>
-					<a
-						href="/read"
-						class="inline-flex min-h-11 items-center gap-1 rounded-full border border-white/60 bg-white/65 px-4 py-2 text-sm font-semibold text-primary shadow-sm backdrop-blur-md transition-colors hover:text-secondary dark:border-white/10 dark:bg-gray-900/55"
-					>
-						View all
-						<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-					</a>
+			<section class="space-y-8">
+				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+					<div class="space-y-3">
+						<div class="eyebrow-label">Read</div>
+						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
+							Writing
+						</h2>
+						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+							Architecture notes, breakdowns, and context for the parts that need more than a runtime.
+						</p>
+					</div>
+					<div class="md:pb-1">
+						<a
+							href="/read"
+							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
+						>
+							Browse articles
+							<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+						</a>
+					</div>
 				</div>
-				<div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-					{latestArticles.map((article) => (
-						<ArticleCard article={article} />
+
+				{featuredArticle && (
+					<a
+						href={`/read/${featuredArticle.id}`}
+						class="soft-panel group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center lg:p-6"
+					>
+						<div class="space-y-4 md:order-1">
+							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+								<span>{articleLabel(featuredArticle)}</span>
+								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
+								<span>{formatPublishedDate(featuredArticle.data.publishedAt)}</span>
+							</div>
+							<h3 class="max-w-[18ch] text-balance text-[clamp(1.85rem,2.4vw,2.7rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-primary-content transition-colors group-hover:text-primary">
+								{featuredArticle.data.title}
+							</h3>
+							<p class="max-w-[38rem] text-base leading-8 text-secondary-content">
+								{summarizeArticle(featuredArticle)}
+							</p>
+							<div class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+								Read article
+								<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+							</div>
+						</div>
+
+						<div class="overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5 md:order-2">
+							<div class="relative aspect-[16/10] overflow-hidden">
+								{featuredArticle.data.cover ? (
+									<Image
+										src={featuredArticle.data.cover.image}
+										alt={featuredArticle.data.cover.alt}
+										class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
+										loading="lazy"
+									/>
+								) : (
+									<div class="flex h-full w-full items-end bg-[linear-gradient(135deg,rgba(var(--brand-primary),0.9),rgba(var(--brand-secondary),0.68))] p-6">
+										<p class="max-w-[18rem] text-2xl font-semibold leading-tight text-white">
+											{featuredArticle.data.title}
+										</p>
+									</div>
+								)}
+							</div>
+						</div>
+					</a>
+				)}
+
+				<div class="grid gap-4 md:grid-cols-3">
+					{secondaryArticles.map((article) => (
+						<a
+							href={`/read/${article.id}`}
+							class="soft-panel group block h-full p-4 sm:p-5"
+						>
+							<div class="space-y-3">
+								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
+									<span>{articleLabel(article)}</span>
+									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
+									<span>{formatPublishedDate(article.data.publishedAt)}</span>
+								</div>
+								<h4 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
+									{article.data.title}
+								</h4>
+								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
+									{summarizeArticle(article)}
+								</p>
+							</div>
+						</a>
 					))}
 				</div>
-			</div>
+			</section>
 
-		</div>
-	</section>
-
-	<FeatureList
-		title="Our Learning Path & Values"
-		description="We teach the way experienced engineers actually learn: in public, in context, and close to the sharp edges."
-		segments={[
-			{
-				title: "Authenticity",
-				emoji: "🎭",
-				description:
-					"We show the trade-offs, the rough edges, and the decisions we'd make again.",
-			},
-			{
-				title: "Organic Content",
-				emoji: "🌱",
-				description:
-					"Much of the curriculum comes from problems we're solving in public, not invented demos.",
-			},
-			{
-				title: "Embracing Failure",
-				emoji: "🤦",
-				description:
-					"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
-			},
-			{
-				title: "Hands-On",
-				emoji: "⌨️",
-				description:
-					"Less slideware, more terminal time, real code, and live builds you can follow end to end.",
-			},
-			{
-				title: "Forward-Facing, Forward-Thinking",
-				emoji: "🔭",
-				description:
-					"We test new tools early, evaluate them honestly, and show where they fit in practice.",
-			},
-			{
-				title: "Open & Closed Source",
-				emoji: "🔐",
-				description:
-					"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
-			},
-		]}
-	/>
-
-	<section class="section-highlight section-separator">
-		<div class="mx-auto max-w-(--breakpoint-xl) px-4 py-10 lg:px-6 lg:py-12">
-				<TestimonialSlider type="viewer" blurb="Straight from viewers learning in public with us." />
-		</div>
-	</section>
-
-	<section class="relative page-px section-py">
-		<div class="pointer-events-none absolute inset-0 flex justify-center">
-			<div class="h-full w-5/6 max-w-6xl rounded-[40px] bg-gradient-to-r from-primary/25 via-white/30 to-secondary/25 blur-[220px] opacity-40 dark:from-primary/40 dark:via-gray-900/40 dark:to-secondary/40"></div>
-		</div>
-		<div class="relative mx-auto max-w-7xl">
-			<div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-				<div class="max-w-3xl">
-					<div class="glass-chip text-primary/85">Partners</div>
-					<h2 class="mt-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						Companies supporting <span class="text-primary">Rawkode Academy</span>
+			<section class="space-y-8">
+				<div class="space-y-3">
+					<div class="eyebrow-label">Values</div>
+					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
+						How we teach
 					</h2>
-					<p class="mt-4 max-w-[58ch] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-						These companies help fund videos, tutorials, and hands-on coverage. We only partner with teams whose tools we can discuss honestly in public.
+					<p class="max-w-[38rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+						We teach in public, in context, and close to the sharp edges.
 					</p>
 				</div>
-				<div class="lg:pb-1">
-					<a
-						href="/organizations/partnerships"
-						title="Partner with Rawkode"
-						class="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-primary/20 bg-white/70 px-5 py-3 text-base font-semibold text-primary shadow-sm backdrop-blur-md motion-safe:transition-all motion-safe:duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:border-primary/35 motion-safe:hover:text-primary-content dark:border-white/10 dark:bg-gray-900/55"
-					>
-						Partner with Rawkode
-						<svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-							<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-						</svg>
-					</a>
+
+				<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+					{academyValues.map((value, index) => (
+						<article class="soft-panel h-full p-5 sm:p-6">
+							<div class="space-y-3">
+								<p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+									{String(index + 1).padStart(2, "0")}
+								</p>
+								<h3 class="max-w-[16ch] text-xl font-semibold leading-[1.08] tracking-[-0.04em] text-primary-content">
+									{value.title}
+								</h3>
+								<p class="text-sm leading-7 text-secondary-content sm:text-base">
+									{value.description}
+								</p>
+							</div>
+						</article>
+					))}
 				</div>
-			</div>
-			<div class="mt-10">
+			</section>
+
+			<section>
+				<TestimonialSlider type="viewer" blurb="Feedback from viewers learning in public with us." />
+			</section>
+
+			<section class="space-y-8">
+				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+					<div class="max-w-3xl space-y-3">
+						<div class="eyebrow-label">Partners</div>
+						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
+							Supporting the academy
+						</h2>
+						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
+							Teams that fund the work while leaving us free to speak plainly about the tools.
+						</p>
+					</div>
+					<div class="md:pb-1">
+						<a
+							href="/organizations/partnerships"
+							title="Partner with Rawkode"
+							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
+						>
+							Partner with Rawkode
+							<svg aria-hidden="true" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+								<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+							</svg>
+						</a>
+					</div>
+				</div>
+
 				<PartnerLogos compact />
-			</div>
+			</section>
 		</div>
-	</section>
+	</div>
 </Page>
