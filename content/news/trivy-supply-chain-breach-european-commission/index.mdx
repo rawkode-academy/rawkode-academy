@@ -1,0 +1,27 @@
+---
+title: "Trivy Supply Chain Attack Breaches European Commission Cloud, 340 GB of Data Leaked"
+description: "A compromised version of Aqua Security's Trivy scanner gave attackers initial access to the European Commission's cloud infrastructure, resulting in 340 GB of stolen data published by ShinyHunters."
+publishedAt: 2026-04-03
+authors:
+  - rawkode
+technologies:
+  - trivy
+---
+
+The European Commission's cloud infrastructure got popped through a supply chain attack on Trivy, Aqua Security's open source vulnerability scanner. CERT-EU confirmed the initial access vector on April 3, and the damage is significant: roughly 340 GB of data exfiltrated and leaked by the ShinyHunters threat group.
+
+Here's the chain. On March 19, attackers who'd compromised Trivy's GitHub Actions environment weeks earlier published a malicious release (v0.69.4) along with tampered versions of `trivy-action` and `setup-trivy`. They force-pushed 76 of 77 version tags in the `aquasecurity/trivy-action` repository, redirecting trusted references to malicious commits. Any CI/CD pipeline pulling those tags ran attacker-controlled code.
+
+The EC was one of those pipelines.
+
+Once inside, the attackers grabbed an AWS API key with broad account access. They used TruffleHog to scan for additional secrets, validated AWS credentials via the Security Token Service, then created and attached a new access key to an existing user account. From there, it was standard cloud reconnaissance and lateral movement.
+
+The breach was detected by the EC's Security Operations Center on March 24. CERT-EU was notified the next day. By March 28, ShinyHunters had already published the stolen data on their dark web leak site. The haul included over 51,000 email-related files, personal data (names, usernames, email addresses), and bounce-back notifications that potentially contained user-submitted content. The EC says the _europa.eu_ websites themselves weren't affected.
+
+Wiz researchers link the attack methodology to TeamPCP, the same group behind the compromises of Checkmarx's KICS, the LiteLLM Python package (versions 1.82.7 and 1.82.8 on PyPI), and Telnyx. TeamPCP's broader campaign targets CI/CD tooling specifically, harvesting credentials, Kubernetes tokens, Docker configs, SSH keys, and cloud provider secrets from build environments.
+
+Aqua Security says their commercial products weren't affected and that the investigation is nearly finalized as of April 1. They've rotated credentials and published remediation guidance.
+
+If you're running Trivy in CI/CD, check your pins right now. Don't reference mutable tags for security tooling actions. Pin to commit SHAs. If you pulled `trivy-action` or `setup-trivy` between late February and March 19 without SHA pinning, assume your pipeline secrets were exposed and rotate everything: cloud credentials, API tokens, Kubernetes service account tokens, the lot.
+
+This is the second major supply chain attack targeting cloud native security tooling in 2026, and it won't be the last. The uncomfortable question for platform teams: how many of your CI/CD actions are pinned to tags instead of SHAs?
