@@ -372,6 +372,22 @@ const courseModules = defineCollection({
 		}),
 });
 
+const news = defineCollection({
+	loader: glob({
+		pattern: ["**/*.{md,mdx}"],
+		base: resolveContentDirSync("news"),
+	}),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		publishedAt: z.coerce.date(),
+		authors: z.array(reference("people")).default(["rawkode"] as any),
+		technologies: z
+			.array(z.string().min(1))
+			.default([]),
+	}),
+});
+
 const changelog = defineCollection({
 	loader: glob({
 		pattern: ["**/*.md", "**/*.mdx"],
@@ -417,4 +433,5 @@ export const collections = {
 	courseModules,
 	changelog,
 	learningPaths,
+	news,
 };

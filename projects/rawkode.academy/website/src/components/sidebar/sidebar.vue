@@ -3,6 +3,7 @@ import {
 	AcademicCapIcon,
 	CubeIcon,
 	MapIcon,
+	MegaphoneIcon,
 	NewspaperIcon,
 	TvIcon,
 	VideoCameraIcon,
@@ -22,6 +23,11 @@ const isMobileViewport = ref(false);
 const storageKey = "sidebar-collapsed";
 
 const baseItems: RawNavItem[] = [
+	{
+		name: "News",
+		href: "/news",
+		icon: MegaphoneIcon,
+	},
 	{
 		name: "Videos",
 		href: "/watch",
