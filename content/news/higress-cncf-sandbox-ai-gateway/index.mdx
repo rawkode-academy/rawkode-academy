@@ -1,0 +1,35 @@
+---
+title: "Higress Joins CNCF Sandbox as Ingress NGINX's Retirement Leaves a Gap"
+description: "Alibaba's Envoy-based AI gateway enters the CNCF Sandbox with full Nginx Ingress annotation compatibility, arriving just as teams scramble to replace the now-retired Ingress NGINX controller."
+publishedAt: 2026-04-03
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - envoy
+  - istio
+---
+
+Ingress NGINX is dead. SIG Network and the Kubernetes Security Response Committee retired it on March 24, and there won't be any more releases, bugfixes, or security patches. If you're running it in production, you're now on your own.
+
+Into that vacuum steps Higress, which just passed the CNCF Technical Oversight Committee vote to join the Sandbox. Built on Envoy and Istio, it's not a new project. Alibaba has run it in production for years across services handling massive scale, and companies like DJI, Ctrip, and Kuaishou have adopted it outside Alibaba's ecosystem.
+
+## What Makes It Different
+
+Higress isn't just another Gateway API implementation. It does three things that matter right now:
+
+**Drop-in Nginx Ingress compatibility.** It supports mainstream Nginx Ingress annotations, so teams don't need to rewrite their entire ingress configuration on day one. The migration path is incremental rather than a forklift.
+
+**No more configuration injection.** Nginx Ingress had a long history of security vulnerabilities rooted in its configuration-injection model. Higress replaces that with an xDS control plane and Wasm sandbox, eliminating an entire class of attack vectors.
+
+**AI traffic as a first-class concern.** Token-based rate limiting, multi-model fallback, model-aware routing, and native support for the Gateway API Inference Extension. If you're running LLM inference behind Kubernetes, Higress treats that traffic differently from regular HTTP requests, which is exactly what you want when a single request can consume GPU time worth orders of magnitude more than a typical API call.
+
+## The Timing Matters
+
+The Gateway API has been the official direction for Kubernetes ingress since v1.1 went GA, but adoption has been gradual. Many teams stuck with Ingress NGINX because it worked and migration felt like unnecessary risk.
+
+That calculus just changed. With no security patches coming for Ingress NGINX, every team running it needs a migration plan. The options include Cilium's ingress implementation, Solo.io's kgateway, Envoy Gateway, and now Higress. Each makes different tradeoffs.
+
+Higress bets on backward compatibility and AI readiness. If your team has heavy Nginx Ingress annotation usage and is starting to route inference traffic, it's worth evaluating. If you've already committed to Gateway API with no legacy annotations, Envoy Gateway or kgateway might be simpler.
+
+Either way, the clock is ticking on Ingress NGINX. Check your clusters.
