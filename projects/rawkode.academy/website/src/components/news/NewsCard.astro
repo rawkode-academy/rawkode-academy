@@ -1,0 +1,32 @@
+---
+import { type CollectionEntry } from "astro:content";
+import BaseCard from "../common/BaseCard.vue";
+import FormattedDate from "../common/FormattedDate.vue";
+
+type Props = {
+	article: CollectionEntry<"news">;
+};
+
+const { article } = Astro.props;
+---
+
+<BaseCard href={`/news/${article.id}`}>
+	<Fragment slot="cover">
+		<div class="relative h-32 bg-linear-to-br from-gray-900 to-gray-800 flex items-center justify-center overflow-hidden">
+			<div class="absolute inset-0 bg-linear-to-tr from-primary/20 to-secondary/10"></div>
+		</div>
+	</Fragment>
+	<Fragment slot="content">
+		<h2 class="mb-3 text-lg font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
+			{article.data.title}
+		</h2>
+		<p class="mb-4 text-sm font-light text-gray-500 dark:text-gray-400 line-clamp-3">
+			{article.data.description}
+		</p>
+	</Fragment>
+	<Fragment slot="footer">
+		<div class="flex items-center justify-end">
+			<FormattedDate date={article.data.publishedAt} showIcon={true} />
+		</div>
+	</Fragment>
+</BaseCard>

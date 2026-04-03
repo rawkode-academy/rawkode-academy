@@ -1,0 +1,66 @@
+---
+import { getCollection } from "astro:content";
+import NewsCard from "@/components/news/NewsCard.astro";
+import SectionHeader from "@/components/common/SectionHeader.vue";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = true;
+
+const allNews = await getCollection("news");
+
+// Sort by date (newest first)
+allNews.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const pageTitle = "Cloud Native News | Rawkode Academy";
+const pageDescription =
+	"Curated cloud native, Kubernetes, and AI infrastructure news for senior engineers. No fluff, no hype.";
+---
+
+<Page title={pageTitle} description={pageDescription}>
+	<style>
+		@reference "../../styles/global.css";
+
+		.news-card {
+			@apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
+		}
+	</style>
+
+	<!-- Hero -->
+	<section class="relative py-16 overflow-hidden">
+		<div class="absolute inset-0 bg-linear-to-br from-gray-900 via-gray-900 to-gray-800"></div>
+		<div class="absolute inset-0 bg-linear-to-tr from-primary/10 to-secondary/5"></div>
+		<div class="relative container mx-auto px-4 md:px-6 text-center">
+			<div class="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-primary/20 border border-primary/30">
+				<span class="relative flex h-2 w-2">
+					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+					<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+				</span>
+				<span class="text-sm font-medium text-primary">Cloud Native News</span>
+			</div>
+			<h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+				News
+			</h1>
+			<p class="text-lg text-gray-400 max-w-2xl mx-auto">
+				Curated cloud native news for practitioners. No fluff, no hype.
+			</p>
+		</div>
+	</section>
+
+	<!-- News Grid -->
+	<section class="py-16 bg-gray-50 dark:bg-gray-900">
+		<div class="container mx-auto px-4 md:px-6">
+			<SectionHeader
+				title="Latest Stories"
+				subtitle="The latest cloud native news, curated for you"
+			/>
+
+			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+				{allNews.map(article => (
+					<div class="news-card h-full">
+						<NewsCard article={article} />
+					</div>
+				))}
+			</div>
+		</div>
+	</section>
+</Page>
