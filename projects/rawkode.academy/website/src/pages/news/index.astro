@@ -1,0 +1,91 @@
+---
+import { getCollection } from "astro:content";
+import Page from "@/wrappers/page.astro";
+
+export const prerender = true;
+
+const allNews = await getCollection("news");
+
+allNews.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const pageTitle = "Cloud Native News | Rawkode Academy";
+const pageDescription =
+	"Cloud native, Kubernetes, and AI infrastructure news for engineers.";
+
+function formatDisplayDate(date: Date): string {
+	return new Intl.DateTimeFormat("en-US", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	}).format(date);
+}
+
+function formatTechnologyLabel(value: string): string {
+	return value
+		.split(/[-/]/g)
+		.filter(Boolean)
+		.map((segment) =>
+			segment.length <= 3
+				? segment.toUpperCase()
+				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
+		)
+		.join(" ");
+}
+---
+
+<Page title={pageTitle} description={pageDescription}>
+	<section class="page-px section-py-tight">
+		<div class="mx-auto max-w-4xl">
+			<header class="mb-6 border-b border-black/10 pb-5 dark:border-white/10 sm:mb-8 sm:pb-6">
+				<div class="eyebrow-label">Cloud Native News</div>
+				<h1 class="mt-3 font-display text-3xl font-semibold tracking-tight text-primary-content sm:text-4xl">
+					Latest stories
+				</h1>
+			</header>
+
+			{
+				allNews.length > 0 ? (
+					<ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+						{
+							allNews.map((story) => (
+								<li class="py-5 sm:py-6">
+									<article class="space-y-2">
+										<div class="flex flex-wrap items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+											<time datetime={story.data.publishedAt.toISOString()}>
+												{formatDisplayDate(story.data.publishedAt)}
+											</time>
+											{
+												story.data.technologies[0] && (
+													<>
+														<span>/</span>
+														<span>{formatTechnologyLabel(story.data.technologies[0])}</span>
+													</>
+												)
+											}
+										</div>
+
+										<h2 class="font-display text-2xl font-semibold leading-tight tracking-tight text-primary-content sm:text-[1.9rem]">
+											<a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
+												{story.data.title}
+											</a>
+										</h2>
+
+										<p class="max-w-[66ch] text-base leading-8 text-secondary-content">
+											{story.data.description}
+										</p>
+									</article>
+								</li>
+							))
+						}
+					</ul>
+				) : (
+					<section class="border-y border-black/10 py-8 dark:border-white/10">
+						<p class="text-base leading-8 text-secondary-content">
+							No news published yet.
+						</p>
+					</section>
+				)
+			}
+		</div>
+	</section>
+</Page>

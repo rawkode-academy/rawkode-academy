@@ -1,0 +1,34 @@
+---
+title: "KubeVirt v1.8: Hypervisor Abstraction Layer, Confidential VMs, and the Push Toward CNCF Graduation"
+description: "KubeVirt v1.8 introduces a hypervisor abstraction layer decoupling it from KVM, Intel TDX attestation for confidential VMs, and PCIe NUMA topology awareness for near-native GPU performance."
+publishedAt: 2026-03-25
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - kubevirt
+---
+
+KubeVirt v1.8 landed at KubeCon Europe 2026 with three features that change how the project fits into the broader cloud native stack. The project is actively pushing toward CNCF graduation.
+
+## Hypervisor Abstraction Layer
+
+This is the big one. A new Hypervisor Abstraction Layer decouples KubeVirt from KVM, letting you plug in alternative hypervisor backends while keeping KVM-first behavior as the default.
+
+What does that actually mean? It opens the door to backends like Firecracker and Cloud Hypervisor. KubeVirt isn't just a KVM wrapper anymore. It's positioning itself as a general-purpose VM management layer.
+
+## Confidential Computing
+
+KubeVirt v1.8 adds Intel TDX (Trust Domain Extensions) attestation support. Confidential VMs can now cryptographically prove they're running on trusted hardware. If you're in a regulated industry running AI workloads that need hardware-attested isolation, this is directly for you.
+
+## AI/HPC Performance
+
+PCIe NUMA topology awareness is here, alongside other resource improvements. The result: AI and HPC workloads in VMs can hit near-native performance with GPU passthrough.
+
+That's a meaningful shift. You get the flexibility of VMs without giving up the performance that GPU-accelerated workloads demand.
+
+## Path to Graduation
+
+With v1.8 and the project's first live summit, a cross-industry contributor base is pushing KubeVirt toward CNCF graduation. KubeVirt joined CNCF in September 2019 and moved to Incubating in April 2022. The completed security audit was a critical step in getting there.
+
+If you're running mixed VM and container workloads on Kubernetes, especially with confidential computing requirements, v1.8 makes KubeVirt worth a serious look.
