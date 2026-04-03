@@ -179,16 +179,22 @@ function formatDuration(minutes?: number) {
 		<div class="mx-auto max-w-7xl space-y-6">
 			<Breadcrumb elements={breadcrumbElements} />
 
-			<header class="section-shell card-padding-lg">
-				<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start">
-					<div class="space-y-5">
-						<div class="flex flex-wrap gap-3">
-							<span class="glass-chip text-primary">Course Lesson</span>
+			<header class="border-b border-black/10 pb-8 dark:border-white/10">
+				<div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_19rem] xl:items-end">
+					<div class="space-y-6">
+						<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-muted">
+							<span class="text-primary">Course Lesson</span>
 							{formatDuration(module.data.duration) && (
-								<span class="glass-chip text-secondary-content">{formatDuration(module.data.duration)}</span>
+								<>
+									<span class="hidden h-1 w-1 rounded-full bg-black/20 dark:bg-white/20 sm:block"></span>
+									<span>{formatDuration(module.data.duration)}</span>
+								</>
 							)}
 							{module.data.difficulty && (
-								<span class="glass-chip text-secondary-content capitalize">{module.data.difficulty}</span>
+								<>
+									<span class="hidden h-1 w-1 rounded-full bg-black/20 dark:bg-white/20 sm:block"></span>
+									<span class="capitalize">{module.data.difficulty}</span>
+								</>
 							)}
 						</div>
 
@@ -202,99 +208,113 @@ function formatDuration(minutes?: number) {
 						</div>
 					</div>
 
-					<div class="section-shell-muted p-5">
-						<div class="space-y-4">
-							<div class="space-y-2">
-								<div class="eyebrow-label">Course Context</div>
-								<h2 class="text-2xl font-bold text-primary-content">{course.data.title}</h2>
-								<p class="text-sm leading-7 text-secondary-content">
-									Module {currentIndex + 1} of {allCourseModules.length}. Move through the course in order or jump back to the full curriculum.
-								</p>
-							</div>
+					<div class="space-y-4 border-t border-black/10 pt-5 dark:border-white/10 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+						<div class="space-y-2">
+							<div class="eyebrow-label">Course Context</div>
+							<h2 class="text-2xl font-bold tracking-tight text-primary-content">{course.data.title}</h2>
+							<p class="text-sm leading-7 text-secondary-content">
+								Module {currentIndex + 1} of {allCourseModules.length}. Move through the course in order or jump back to the full curriculum.
+							</p>
+						</div>
 
-							<div class="flex flex-wrap gap-3">
+						<div class="flex flex-wrap gap-3">
+							<a
+								href={`/courses/${course.id}`}
+								class="inline-flex min-h-11 items-center justify-center rounded-full border border-black/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary/25 hover:text-primary-content dark:border-white/10 dark:text-white"
+							>
+								View course
+							</a>
+							{nextModule && (
 								<a
-									href={`/courses/${course.id}`}
-									class="inline-flex min-h-11 items-center justify-center rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-white dark:border-white/10 dark:bg-gray-900/55 dark:text-white dark:hover:bg-gray-900/80"
+									href={moduleHref(nextModule)}
+									class="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
 								>
-									View course
+									Next lesson
 								</a>
-								{nextModule && (
-									<a
-										href={moduleHref(nextModule)}
-										class="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
-									>
-										Next lesson
-									</a>
-								)}
-							</div>
+							)}
 						</div>
 					</div>
 				</div>
 			</header>
 
-			<div class:list={["grid gap-8 xl:items-start", dedupedResources.length > 0 && "xl:grid-cols-[minmax(0,1fr)_21rem]"]}>
-				<div class="space-y-8">
-					{module.data.video && (
-						<section class="section-shell overflow-hidden p-3 sm:p-4">
+			<div class:list={["module-flow", dedupedResources.length > 0 && "module-flow--with-rail"]}>
+				{module.data.video && (
+					<section class="module-flow__video space-y-5 border-y border-black/10 py-6 dark:border-white/10">
+						<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+							<div class="space-y-2">
+								<div class="eyebrow-label">Watch the Lesson</div>
+								<h2 class="text-3xl font-bold tracking-tight text-primary-content">Follow the build in real time</h2>
+							</div>
+							<p class="max-w-xl text-sm leading-7 text-secondary-content sm:text-right sm:text-base">
+								Pause, replay, and keep the notes and resources beside you as you work through the module.
+							</p>
+						</div>
+						<div class="overflow-hidden rounded-[1.5rem] bg-black/5 dark:bg-white/5">
 							<VideoPlayer
 								video={module.data.video.id}
 								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
 								client:only="vue"
 								isAuthenticated={false}
 							/>
-						</section>
-					)}
+						</div>
+					</section>
+				)}
 
-					<article class="section-shell card-padding-lg">
-						<div class="mb-6 space-y-2">
+				{dedupedResources.length > 0 && (
+					<aside class="module-flow__rail xl:sticky xl:top-28 xl:self-start">
+						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
+					</aside>
+				)}
+
+				<article class="module-flow__notes space-y-6">
+					<div class="flex flex-col gap-3 border-b border-black/10 pb-6 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
+						<div class="space-y-2">
 							<div class="eyebrow-label">Lesson Notes</div>
 							<h2 class="text-3xl font-bold tracking-tight text-primary-content">What you’ll implement</h2>
 						</div>
-						<div class="prose prose-lg max-w-none dark:prose-invert prose-headings:scroll-mt-24">
-							<Content />
+						<p class="max-w-xl text-sm leading-7 text-secondary-content sm:text-right sm:text-base">
+							The notes mirror the lesson flow so you can scan, copy, and revisit the important decisions quickly.
+						</p>
+					</div>
+					<div class="prose prose-lg max-w-none dark:prose-invert prose-headings:scroll-mt-24">
+						<Content />
+					</div>
+				</article>
+
+				{(previousModule || nextModule) && (
+					<nav class="module-flow__nav border-t border-black/10 pt-6 dark:border-white/10">
+						<div class="grid gap-4 md:grid-cols-2">
+							{previousModule && (
+								<a
+									href={moduleHref(previousModule)}
+									class="group border-b border-black/8 py-4 transition-colors hover:text-primary dark:border-white/8"
+								>
+									<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Previous</p>
+									<div class="mt-2 flex items-start justify-between gap-4">
+										<p class="font-semibold text-primary-content transition-colors group-hover:text-primary">
+											{previousModule.data.title}
+										</p>
+										<span class="text-primary transition-transform duration-200 group-hover:-translate-x-0.5">←</span>
+									</div>
+								</a>
+							)}
+
+							{nextModule && (
+								<a
+									href={moduleHref(nextModule)}
+									class="group border-b border-black/8 py-4 text-left transition-colors hover:text-primary dark:border-white/8 md:text-right"
+								>
+									<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Next</p>
+									<div class="mt-2 flex items-start justify-between gap-4 md:flex-row-reverse">
+										<p class="font-semibold text-primary-content transition-colors group-hover:text-primary">
+											{nextModule.data.title}
+										</p>
+										<span class="text-primary transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+									</div>
+								</a>
+							)}
 						</div>
-					</article>
-
-					{(previousModule || nextModule) && (
-						<nav class="section-shell-muted p-6">
-							<div class="flex flex-col gap-4 md:flex-row md:items-stretch md:justify-between">
-								{previousModule ? (
-									<a
-										href={moduleHref(previousModule)}
-										class="flex flex-1 items-center justify-between rounded-[1.25rem] border border-white/40 bg-white/65 px-4 py-4 transition-colors hover:bg-white dark:border-white/8 dark:bg-gray-950/30 dark:hover:bg-gray-950/45"
-									>
-										<div>
-											<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Previous</p>
-											<p class="mt-1 font-semibold text-primary-content">{previousModule.data.title}</p>
-										</div>
-										<span class="text-primary">←</span>
-									</a>
-								) : (
-									<div></div>
-								)}
-
-								{nextModule && (
-									<a
-										href={moduleHref(nextModule)}
-										class="flex flex-1 items-center justify-between rounded-[1.25rem] border border-white/40 bg-white/65 px-4 py-4 text-right transition-colors hover:bg-white dark:border-white/8 dark:bg-gray-950/30 dark:hover:bg-gray-950/45"
-									>
-										<div class="ml-auto">
-											<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Next</p>
-											<p class="mt-1 font-semibold text-primary-content">{nextModule.data.title}</p>
-										</div>
-										<span class="ml-4 text-primary">→</span>
-									</a>
-								)}
-							</div>
-						</nav>
-					)}
-				</div>
-
-				{dedupedResources.length > 0 && (
-					<aside class="xl:sticky xl:top-28">
-						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
-					</aside>
+					</nav>
 				)}
 			</div>
 
@@ -310,3 +330,29 @@ function formatDuration(minutes?: number) {
 		</div>
 	</section>
 </Page>
+
+<style>
+	.module-flow {
+		display: grid;
+		gap: clamp(2rem, 4vw, 3rem);
+	}
+
+	@media (min-width: 1280px) {
+		.module-flow--with-rail {
+			grid-template-columns: minmax(0, 1fr) 20rem;
+			column-gap: clamp(2.5rem, 4vw, 3.5rem);
+			align-items: start;
+		}
+
+		.module-flow__video,
+		.module-flow__notes,
+		.module-flow__nav {
+			grid-column: 1;
+		}
+
+		.module-flow__rail {
+			grid-column: 2;
+			grid-row: 1 / span 3;
+		}
+	}
+</style>

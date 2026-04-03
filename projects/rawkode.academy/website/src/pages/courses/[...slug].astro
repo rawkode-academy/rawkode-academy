@@ -180,47 +180,45 @@ function getResourceHref(
 
 				{hasCourseResources && (
 					<aside class="xl:sticky xl:top-28">
-						<div class="section-shell-muted p-6">
-							<div class="space-y-5">
-								<div class="space-y-2">
-									<div class="eyebrow-label">Course Resources</div>
-									<h2 class="text-2xl font-bold text-primary-content">Reference material</h2>
-									<p class="text-sm leading-7 text-secondary-content">
-										Docs, source code, and supporting references for the modules in this course.
-									</p>
-								</div>
+						<div class="space-y-5 border-t border-black/10 pt-6 dark:border-white/10 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+							<div class="space-y-2">
+								<div class="eyebrow-label">Course Resources</div>
+								<h2 class="text-2xl font-bold text-primary-content">Reference material</h2>
+								<p class="text-sm leading-7 text-secondary-content">
+									Docs, source code, and supporting references for the modules in this course.
+								</p>
+							</div>
 
-								<div class="space-y-3">
-									{course.data.resources?.map((resource) => {
-										const href = getResourceHref(resource);
+							<div class="divide-y divide-black/8 dark:divide-white/8">
+								{course.data.resources?.map((resource) => {
+									const href = getResourceHref(resource);
 
-										return (
-											<div class="rounded-[1.25rem] border border-white/40 bg-white/65 p-4 dark:border-white/8 dark:bg-gray-950/30">
-												<div class="flex items-start justify-between gap-4">
-													<div class="space-y-1">
-														<h3 class="font-semibold text-primary-content">{resource.title}</h3>
-														{resource.description && (
-															<p class="text-sm leading-6 text-secondary-content">{resource.description}</p>
-														)}
-													</div>
-													{href && (
-														<a
-															href={href}
-															target={resource.type === "url" ? "_blank" : undefined}
-															rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-															class="text-primary transition-colors hover:text-secondary"
-															aria-label={`Open ${resource.title}`}
-														>
-															<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-															</svg>
-														</a>
+									return (
+										<div class="py-4">
+											<div class="flex items-start justify-between gap-4">
+												<div class="space-y-1">
+													<h3 class="font-semibold text-primary-content">{resource.title}</h3>
+													{resource.description && (
+														<p class="text-sm leading-6 text-secondary-content">{resource.description}</p>
 													)}
 												</div>
+												{href && (
+													<a
+														href={href}
+														target={resource.type === "url" ? "_blank" : undefined}
+														rel={resource.type === "url" ? "noopener noreferrer" : undefined}
+														class="text-primary transition-colors hover:text-secondary"
+														aria-label={`Open ${resource.title}`}
+													>
+														<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+														</svg>
+													</a>
+												)}
 											</div>
-										);
-									})}
-								</div>
+										</div>
+									);
+								})}
 							</div>
 						</div>
 					</aside>

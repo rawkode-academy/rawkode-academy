@@ -68,13 +68,14 @@ import { ThemeToggle } from "@/components/ui";
 			</div>
 
 			<!-- Center section - Search -->
-			<form
-				action="/search"
-				method="GET"
-				class="hidden md:flex flex-1 max-w-xl mx-4"
-			>
-				<label for="topbar-search" class="sr-only">Search</label>
-				<div class="relative w-full">
+			<div class="hidden md:flex flex-1 max-w-xl mx-4">
+				<button
+					type="button"
+					id="topbar-search-trigger"
+					aria-haspopup="dialog"
+					aria-label="Search videos, articles, and technologies"
+					class="relative w-full bg-white/30 dark:bg-gray-700/50 backdrop-blur-md border border-white/30 dark:border-gray-500/50 text-gray-900 dark:text-white text-sm rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-primary/50 block pl-10 pr-20 py-2 shadow-inner transition-all duration-200 hover:bg-white/40 dark:hover:bg-gray-600/60 text-left"
+				>
 					<div
 						class="flex absolute inset-y-0 left-0 items-center pl-4 pointer-events-none"
 					>
@@ -90,14 +91,9 @@ import { ThemeToggle } from "@/components/ui";
 							></path>
 						</svg>
 					</div>
-					<input
-						type="text"
-						name="q"
-						id="topbar-search"
-						class="bg-white/30 dark:bg-gray-700/50 backdrop-blur-md border border-white/30 dark:border-gray-500/50 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-primary focus:border-primary/50 block w-full pl-10 pr-20 py-2 placeholder-gray-400 dark:placeholder-gray-300 cursor-pointer shadow-inner transition-all duration-200 hover:bg-white/40 dark:hover:bg-gray-600/60"
-						placeholder="Search videos, articles, technologies..."
-						readonly
-					/>
+					<span class="block truncate text-gray-400 dark:text-gray-300">
+						Search videos, articles, technologies...
+					</span>
 					<div
 						class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
 					>
@@ -108,8 +104,8 @@ import { ThemeToggle } from "@/components/ui";
 							⌘K
 						</kbd>
 					</div>
-				</div>
-			</form>
+				</button>
+			</div>
 
 			<!-- Right section - Theme Toggle & Profile -->
 			<div class="flex items-center gap-2">
@@ -136,9 +132,11 @@ import { ThemeToggle } from "@/components/ui";
 
 	<!-- Floating Action Button for mobile search -->
 	<button
+		type="button"
 		id="fab-search"
 		class="md:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-primary/90 to-secondary/90 backdrop-blur-xl text-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4)] transform hover:scale-105 transition-all duration-200 flex items-center justify-center border border-white/20"
 		aria-label="Open search"
+		aria-haspopup="dialog"
 	>
 		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path
@@ -159,20 +157,13 @@ import { ThemeToggle } from "@/components/ui";
 
 		// Function to open command palette
 		function openCommandPalette() {
-			document.dispatchEvent(
-				new KeyboardEvent("keydown", {
-					key: "k",
-					metaKey: isMac,
-					ctrlKey: !isMac,
-					bubbles: true,
-				}),
-			);
+			document.dispatchEvent(new CustomEvent("open-command-palette"));
 		}
 
-		// Add click handler to search input to open command palette
-		const searchInput = document.getElementById("topbar-search");
-		if (searchInput) {
-			searchInput.addEventListener("click", (e) => {
+		// Add click handler to search trigger to open command palette
+		const searchTrigger = document.getElementById("topbar-search-trigger");
+		if (searchTrigger) {
+			searchTrigger.addEventListener("click", (e) => {
 				e.preventDefault();
 				openCommandPalette();
 			});
