@@ -11,6 +11,7 @@ interface Props {
 	headline?: string;
 	subtitle?: string;
 	audience?: string;
+	variant?: "card" | "section";
 }
 
 const {
@@ -19,6 +20,7 @@ const {
 	headline = "Stay ahead in cloud native",
 	subtitle = "Tutorials, deep dives, and curated events—no fluff.",
 	audience = "academy",
+	variant = "card",
 } = Astro.props;
 
 const user = Astro.locals.user;
@@ -27,7 +29,11 @@ let isSubscribed = false;
 if (user && import.meta.env.PROD) {
 	try {
 		const prefixedUserId = createLearnerId(user.id);
-		const prefs = await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId, "newsletter", audience);
+		const prefs = await env.EMAIL_PREFERENCES.getPreferences(
+			prefixedUserId,
+			"newsletter",
+			audience,
+		);
 		isSubscribed = prefs.length > 0;
 	} catch (e) {
 		console.error("Failed to fetch preferences", e);
@@ -43,36 +49,49 @@ const hasNewsletterCookie =
 
 // For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
+const isSection = variant === "section";
 ---
 
 {!shouldHide && (
-<section class:list={["w-full py-12 relative z-10", className]}>
-        <div class="glass-card bg-gradient-card card-shadow p-4 sm:p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-                        <div class="flex-1 min-w-0 space-y-1">
-                                <div class="flex items-center gap-2">
-                                        <span class="h-2 w-2 rounded-full bg-primary"></span>
-                                        <span class="text-xs font-medium text-primary">{badge}</span>
-                                </div>
-                                <h2 class="text-lg sm:text-xl font-display font-semibold tracking-tight text-primary-content">
-                                        {headline}
-                                </h2>
-                                <p class="text-sm text-muted">
-                                        {subtitle}
-                                </p>
-                        </div>
+	<section class:list={[isSection ? "relative z-10 w-full overflow-hidden py-8 sm:py-10" : "relative z-10 w-full py-12", className]}>
+		<div
+			class:list={[
+				isSection
+					? "relative mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] px-6 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
+					: "section-shell-muted overflow-hidden rounded-[1.75rem] px-6 py-6 sm:px-8 sm:py-8",
+			]}
+		>
+			{isSection ? (
+				<div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_50%,_rgba(var(--brand-primary),0.12),_transparent_34%),radial-gradient(circle_at_100%_18%,_rgba(var(--brand-secondary),0.1),_transparent_26%)] dark:bg-[radial-gradient(circle_at_0%_50%,_rgba(var(--brand-primary),0.16),_transparent_34%),radial-gradient(circle_at_100%_18%,_rgba(var(--brand-secondary),0.12),_transparent_26%)]"></div>
+			) : (
+				<div class="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-primary/10 to-transparent dark:from-primary/14"></div>
+			)}
 
-                        <div class="sm:w-64 flex-shrink-0">
-                                <NewsletterWidget
-                                        client:visible
-                                        isSignedIn={!!user}
-                                        isSubscribed={isSubscribed}
-                                        signInUrl={signInUrl}
-                                        pagePath={pagePath}
-                                        audience={audience}
-                                />
-                        </div>
-                </div>
-        </div>
-</section>
+			<div class:list={[isSection ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center lg:gap-10" : "grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-8"]}>
+				<div class:list={[isSection ? "min-w-0 space-y-3" : "min-w-0 space-y-2"]}>
+					<div class="flex items-center gap-2">
+						<span class="h-2 w-2 rounded-full bg-primary"></span>
+						<span class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{badge}</span>
+					</div>
+					<h2 class:list={[isSection ? "max-w-[18ch] text-balance text-2xl font-display font-semibold tracking-tight text-primary-content sm:max-w-none sm:text-3xl" : "text-xl font-display font-semibold tracking-tight text-primary-content sm:text-2xl"]}>
+						{headline}
+					</h2>
+					<p class:list={[isSection ? "max-w-[48ch] text-base leading-8 text-secondary-content sm:text-lg" : "max-w-[52ch] text-sm leading-7 text-secondary-content sm:text-base"]}>
+						{subtitle}
+					</p>
+				</div>
+
+				<div class:list={[isSection ? "w-full max-w-md lg:justify-self-end" : "w-full max-w-sm lg:justify-self-end"]}>
+					<NewsletterWidget
+						client:visible
+						isSignedIn={!!user}
+						isSubscribed={isSubscribed}
+						signInUrl={signInUrl}
+						pagePath={pagePath}
+						audience={audience}
+					/>
+				</div>
+			</div>
+		</div>
+	</section>
 )}

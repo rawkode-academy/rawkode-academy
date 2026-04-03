@@ -12,9 +12,13 @@ const props = defineProps<Props>();
 
 const activeIndex = ref(0);
 const progressKey = ref(0);
-const isManuallyPaused = ref(false);
+const isUserPaused = ref(false);
+const isInteractionPaused = ref(false);
 const testimonialCount = computed(() => props.testimonials.length);
 const hasMultiple = computed(() => testimonialCount.value > 1);
+const isPaused = computed(
+	() => isUserPaused.value || isInteractionPaused.value,
+);
 const autoplayDuration = `${AUTOPLAY_INTERVAL}ms`;
 
 const activeTestimonial = computed(() => {
@@ -33,7 +37,7 @@ const clearAutoplay = () => {
 
 const startAutoplay = () => {
 	clearAutoplay();
-	if (!hasMultiple.value || isManuallyPaused.value) return;
+	if (!hasMultiple.value || isPaused.value) return;
 	autoplayTimer = setInterval(() => {
 		nextTestimonial();
 	}, AUTOPLAY_INTERVAL);
@@ -76,15 +80,20 @@ const prevTestimonial = () => {
 		(activeIndex.value - 1 + testimonialCount.value) % testimonialCount.value;
 };
 
-const pauseAutoplay = () => {
-	if (isManuallyPaused.value) return;
-	isManuallyPaused.value = true;
+const pauseForInteraction = () => {
+	if (isInteractionPaused.value) return;
+	isInteractionPaused.value = true;
 	clearAutoplay();
 };
 
-const resumeAutoplay = () => {
-	if (!isManuallyPaused.value) return;
-	isManuallyPaused.value = false;
+const resumeAfterInteraction = () => {
+	if (!isInteractionPaused.value) return;
+	isInteractionPaused.value = false;
+	startAutoplay();
+};
+
+const toggleAutoplay = () => {
+	isUserPaused.value = !isUserPaused.value;
 	startAutoplay();
 };
 
@@ -94,19 +103,15 @@ const handleFocusOut = (event: FocusEvent) => {
 	if (currentTarget && nextTarget && currentTarget.contains(nextTarget)) {
 		return;
 	}
-	resumeAutoplay();
+	resumeAfterInteraction();
 };
 
 const goNext = () => {
-	pauseAutoplay();
 	nextTestimonial();
-	resumeAutoplay();
 };
 
 const goPrev = () => {
-	pauseAutoplay();
 	prevTestimonial();
-	resumeAutoplay();
 };
 
 const formattedPosition = computed(() => {
@@ -121,13 +126,13 @@ const formattedPosition = computed(() => {
 	<div class="mx-auto mt-8 max-w-4xl md:mt-10" v-if="activeTestimonial">
 		<div
 			class="relative group"
-			@mouseenter="pauseAutoplay"
-			@mouseleave="resumeAutoplay"
-			@focusin="pauseAutoplay"
+			@mouseenter="pauseForInteraction"
+			@mouseleave="resumeAfterInteraction"
+			@focusin="pauseForInteraction"
 			@focusout="handleFocusOut"
-			@touchstart.passive="pauseAutoplay"
-			@touchend.passive="resumeAutoplay"
-			@touchcancel.passive="resumeAutoplay"
+			@touchstart.passive="pauseForInteraction"
+			@touchend.passive="resumeAfterInteraction"
+			@touchcancel.passive="resumeAfterInteraction"
 		>
 			<div class="w-full mx-auto">
 				<Transition name="fade" mode="out-in">
@@ -139,13 +144,13 @@ const formattedPosition = computed(() => {
 							<div
 								:key="`progress-${progressKey}`"
 								class="progress-fill h-full w-full origin-left bg-linear-to-r from-primary to-secondary"
-								:class="{ 'is-paused': isManuallyPaused }"
+								:class="{ 'is-paused': isPaused }"
 								:style="{ '--testimonial-progress-duration': autoplayDuration }"
 							></div>
 						</div>
 
 						<div class="relative flex flex-col items-center text-center md:grid md:grid-cols-[minmax(0,1fr)_12rem] md:items-end md:gap-8 md:text-left">
-							<blockquote class="w-full" aria-live="polite">
+							<blockquote class="w-full">
 								<p class="text-pretty text-base font-medium leading-7 text-primary-content sm:text-[1.05rem] sm:leading-[1.65] lg:text-[1.16rem] lg:leading-[1.58]">
 									&ldquo;{{ activeTestimonial.quote }}&rdquo;
 								</p>
@@ -207,6 +212,43 @@ const formattedPosition = computed(() => {
 					<span class="min-w-[4.75rem] px-2 text-center text-sm font-medium text-muted tabular-nums">
 						{{ formattedPosition }}
 					</span>
+
+					<button
+						type="button"
+						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors motion-safe:duration-200 hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						:aria-label="isPaused ? 'Resume testimonial autoplay' : 'Pause testimonial autoplay'"
+						:aria-pressed="isPaused"
+						@click="toggleAutoplay"
+					>
+						<svg
+							v-if="isPaused"
+							viewBox="0 0 20 20"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-5 w-5"
+						>
+							<path
+								d="M8 6l6 4-6 4V6z"
+								fill="currentColor"
+								stroke="currentColor"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<svg
+							v-else
+							viewBox="0 0 20 20"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-5 w-5"
+						>
+							<path
+								d="M7 5.5v9M13 5.5v9"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+							/>
+						</svg>
+					</button>
 
 					<button
 						type="button"

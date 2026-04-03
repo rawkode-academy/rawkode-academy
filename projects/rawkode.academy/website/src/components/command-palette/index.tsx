@@ -52,12 +52,13 @@ export default function CommandPalette({
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
 	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
 	const [pages, setPages] = useState<CommandPage[]>(["root"]);
+	const [hasLoadedNavigation, setHasLoadedNavigation] = useState(false);
 	const hasTrackedOpen = useRef(false);
 
 	const activePage = pages[pages.length - 1];
@@ -125,26 +126,6 @@ export default function CommandPalette({
 	);
 
 	useEffect(() => {
-		const fetchNavigationItems = async () => {
-			try {
-				const response = await fetch("/api/sitemap-pages.json");
-				if (response.ok) {
-					const sitemapItems: NavigationItem[] = await response.json();
-					// Filter out articles initially
-					const filteredItems = sitemapItems.filter(
-						(item) => item.category !== "Articles",
-					);
-					setNavigationItems(filteredItems);
-				}
-			} catch (error) {
-				console.error("Failed to fetch navigation items:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchNavigationItems();
-
 		// Get current theme
 		setCurrentTheme(getTheme());
 
@@ -162,35 +143,89 @@ export default function CommandPalette({
 		};
 	}, []);
 
+	useEffect(() => {
+		if (!isOpen || hasLoadedNavigation) return;
+
+		const abortController = new AbortController();
+
+		const fetchNavigationItems = async () => {
+			setIsLoading(true);
+
+			try {
+				const response = await fetch("/api/sitemap-pages.json", {
+					signal: abortController.signal,
+				});
+
+				if (!response.ok) {
+					return;
+				}
+
+				const sitemapItems: NavigationItem[] = await response.json();
+				setNavigationItems(
+					sitemapItems.filter((item) => item.category !== "Articles"),
+				);
+				setHasLoadedNavigation(true);
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+			} finally {
+				if (!abortController.signal.aborted) {
+					setIsLoading(false);
+				}
+			}
+		};
+
+		fetchNavigationItems();
+
+		return () => {
+			abortController.abort();
+		};
+	}, [hasLoadedNavigation, isOpen]);
+
 	// Search for articles when user types
 	useEffect(() => {
 		if (searchTimeoutRef.current) {
 			clearTimeout(searchTimeoutRef.current);
 		}
 
-		if (activePage !== "root") {
+		if (!isOpen || activePage !== "root") {
 			setArticleItems([]);
 			setIsSearchingArticles(false);
 			return;
 		}
 
 		if (search.length >= 2) {
+			const abortController = new AbortController();
+
 			setIsSearchingArticles(true);
 			searchTimeoutRef.current = setTimeout(async () => {
 				try {
 					const response = await fetch(
 						`/api/search-articles.json?q=${encodeURIComponent(search)}`,
+						{ signal: abortController.signal },
 					);
 					if (response.ok) {
 						const articles: NavigationItem[] = await response.json();
 						setArticleItems(articles);
 					}
 				} catch (error) {
-					console.error("Failed to search articles:", error);
+					if (error instanceof DOMException && error.name === "AbortError") {
+						return;
+					}
 				} finally {
-					setIsSearchingArticles(false);
+					if (!abortController.signal.aborted) {
+						setIsSearchingArticles(false);
+					}
 				}
 			}, 300); // Debounce search
+
+			return () => {
+				abortController.abort();
+				if (searchTimeoutRef.current) {
+					clearTimeout(searchTimeoutRef.current);
+				}
+			};
 		} else {
 			setArticleItems([]);
 			setIsSearchingArticles(false);
@@ -201,7 +236,7 @@ export default function CommandPalette({
 				clearTimeout(searchTimeoutRef.current);
 			}
 		};
-	}, [activePage, search]);
+	}, [activePage, isOpen, search]);
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {

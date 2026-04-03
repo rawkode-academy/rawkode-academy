@@ -57,7 +57,7 @@ function formatDuration(minutes: number): string {
 
 {
 	totalModules === 0 ? (
-		<div class="section-shell-muted card-padding text-center">
+		<div class="border-t border-black/10 py-6 text-center dark:border-white/10">
 			<p class="text-lg font-semibold text-primary-content">No curriculum is published yet.</p>
 			<p class="mt-2 text-sm text-secondary-content">
 				Check back soon for new modules and release updates.
@@ -65,16 +65,15 @@ function formatDuration(minutes: number): string {
 		</div>
 	) : (
 		<div class="space-y-6">
-			<div class="section-shell-muted card-padding">
-				<div class="grid gap-4 sm:grid-cols-3">
-					<div class="stat-panel gap-3">
+			<div class="grid gap-6 border-t border-black/10 pt-6 dark:border-white/10 sm:grid-cols-3">
+				<div class="space-y-2">
 						<div class="eyebrow-label tracking-[0.18em]">Curriculum</div>
 						<div>
 							<div class="text-3xl font-bold text-primary-content">{totalModules}</div>
 							<p class="mt-1 text-sm text-secondary-content">Modules planned across the course.</p>
 						</div>
-					</div>
-					<div class="stat-panel gap-3">
+				</div>
+				<div class="space-y-2">
 						<div class="eyebrow-label tracking-[0.18em]">Available</div>
 						<div>
 							<div class="text-3xl font-bold text-primary-content">{availableModules.length}</div>
@@ -84,14 +83,13 @@ function formatDuration(minutes: number): string {
 									: "Everything in the outline is live."}
 							</p>
 						</div>
-					</div>
-					<div class="stat-panel gap-3">
+				</div>
+				<div class="space-y-2">
 						<div class="eyebrow-label tracking-[0.18em]">Runtime</div>
 						<div>
 							<div class="text-3xl font-bold text-primary-content">{formatDuration(totalDuration)}</div>
 							<p class="mt-1 text-sm text-secondary-content">Published lessons ready to watch now.</p>
 						</div>
-					</div>
 				</div>
 			</div>
 
@@ -102,8 +100,8 @@ function formatDuration(minutes: number): string {
 					.reduce((acc, module) => acc + (module.data.duration || 0), 0);
 
 				return (
-					<section class="section-shell-muted overflow-hidden">
-						<header class="border-b surface-divider px-5 py-5 sm:px-6">
+					<section class="border-t border-black/10 pt-5 dark:border-white/10">
+						<header class="pb-5">
 							<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 								<div class="space-y-2">
 									<div class="eyebrow-label">{sectionName}</div>
@@ -115,18 +113,18 @@ function formatDuration(minutes: number): string {
 								</div>
 								<div class="flex flex-wrap items-center gap-2">
 									{sectionDuration > 0 && (
-										<Badge variant="default" size="sm" class="bg-white/80 dark:bg-gray-900/70">
+										<Badge variant="default" size="sm" class="bg-transparent">
 											{formatDuration(sectionDuration)}
 										</Badge>
 									)}
-									<Badge variant="default" size="sm" class="bg-white/80 dark:bg-gray-900/70">
+									<Badge variant="default" size="sm" class="bg-transparent">
 										{modules.length} module{modules.length === 1 ? "" : "s"}
 									</Badge>
 								</div>
 							</div>
 						</header>
 
-						<div class="divide-y surface-divider">
+						<div class="divide-y surface-divider border-y">
 							{modules.map((module) => {
 								const isDraft = module.data.draft;
 								const displayOrder = displayOrderById.get(module.id);
@@ -135,19 +133,19 @@ function formatDuration(minutes: number): string {
 								const elementProps = isDraft
 									? {
 											class:
-												"block px-5 py-5 sm:px-6",
+												"block px-1 py-5 sm:px-2",
 										}
 									: {
 											href: `/courses/${course.id}/${moduleSlug}`,
 											class:
-												"group block px-5 py-5 transition-colors duration-200 hover:bg-white/45 dark:hover:bg-gray-950/25 sm:px-6",
+												"group block px-1 py-5 transition-colors duration-200 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] sm:px-2",
 										};
 
 								return (
 									<Element {...elementProps}>
 										<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 											<div class="flex gap-4">
-												<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/40 bg-white/70 text-sm font-semibold text-primary-content dark:border-white/8 dark:bg-gray-950/30">
+												<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary-content dark:bg-primary/18">
 													{displayOrder}
 												</div>
 												<div class="min-w-0">

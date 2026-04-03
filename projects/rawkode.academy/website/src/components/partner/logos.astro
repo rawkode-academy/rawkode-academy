@@ -189,41 +189,49 @@ const previousPartners: Partners = [
 ];
 ---
 
-<div class="partner-showcase space-y-10">
-	<div class="space-y-4">
-		<div class="flex flex-wrap items-center justify-between gap-3">
+<div class:list={["partner-showcase", compact ? "space-y-10" : "space-y-12"]}>
+	{
+		compact ? (
 			<div>
 				<p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
 					Current Partners
 				</p>
-				<h3 class="mt-2 text-2xl font-semibold tracking-tight text-primary-content">
-					Supporting the academy right now
-				</h3>
 			</div>
-			<span class="partner-wall-chip">{currentPartners.length} current</span>
-		</div>
-		<p class="max-w-[62ch] text-sm leading-7 text-secondary-content sm:text-base">
-			These teams currently fund the academy. We still evaluate their tools with
-			the same candid, hands-on standard as everything else on Rawkode.
-		</p>
-	</div>
+		) : (
+			<div class="space-y-4">
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<div>
+						<p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
+							Current Partners
+						</p>
+						<h3 class="mt-2 text-2xl font-semibold tracking-tight text-primary-content">
+							Supporting the academy right now
+						</h3>
+					</div>
+					<span class="partner-wall-chip">{currentPartners.length} current</span>
+				</div>
+				<p class="max-w-[62ch] text-sm leading-7 text-secondary-content sm:text-base">
+					These teams currently fund the academy. We still evaluate their tools with
+					the same candid, hands-on standard as everything else on Rawkode.
+				</p>
+			</div>
+		)
+	}
 
-	<div class="grid gap-5 lg:grid-cols-2">
+	<div class:list={["partner-current-list", compact && "partner-current-list-compact"]}>
 		{currentPartners.map((partner) => (
 			<article
-				class="partner-card group"
+				class="partner-entry group"
 				style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark}; --partner-accent-light: ${partner.logo.accentLight ?? partner.logo.fillLight}; --partner-accent-dark: ${partner.logo.accentDark ?? partner.logo.fillDark};`}
 			>
-				<div class="partner-top">
+				<div class="partner-entry-meta">
 					{partner.industry && <span class="partner-industry">{partner.industry}</span>}
-					<div class="partner-since">
-						<span>since</span>
-						<strong>{partner.since}</strong>
-					</div>
+					<span class="partner-meta-dot" aria-hidden="true"></span>
+					<span class="partner-since-inline">Since {partner.since}</span>
 				</div>
 
-				<div class="partner-logo-stage">
-					<div class="partner-logo-tile">
+				<div class="partner-entry-grid">
+					<div class="partner-logo-stage">
 						<div
 							class="partner-logo"
 							style={`color: light-dark(${partner.logo.fillLight}, ${partner.logo.fillDark});`}
@@ -231,50 +239,49 @@ const previousPartners: Partners = [
 							<Fragment set:html={partner.logo.image.default} />
 						</div>
 					</div>
-				</div>
 
-				<div class="space-y-3">
-					<h3 class="text-2xl font-semibold tracking-tight text-primary-content">
-						{partner.name}
-					</h3>
-					{partner.description && (
-						<p class="text-sm leading-7 text-secondary-content sm:text-[0.96rem]">
-							{partner.description}
-						</p>
-					)}
-				</div>
+					<div class="space-y-3">
+						<h3 class="text-2xl font-semibold tracking-tight text-primary-content">
+							{partner.name}
+						</h3>
+						{partner.description && (
+							<p class="text-sm leading-7 text-secondary-content sm:text-[0.96rem]">
+								{partner.description}
+							</p>
+						)}
 
-				<a
-					href={withUtm(partner.url)}
-					title={`Visit ${partner.name} website`}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="partner-link inline-flex min-h-11 items-center gap-2 text-sm font-semibold"
-				>
-					Visit {partner.name}
-					<svg
-						aria-hidden="true"
-						class="w-4 h-4"
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 20 20"
-						fill="currentColor"
-					>
-						<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-						<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-					</svg>
-				</a>
+						<a
+							href={withUtm(partner.url)}
+							title={`Visit ${partner.name} website`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="partner-link inline-flex min-h-11 items-center gap-2 text-sm font-semibold"
+						>
+							Visit {partner.name}
+							<svg
+								aria-hidden="true"
+								class="w-4 h-4"
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 20 20"
+								fill="currentColor"
+							>
+								<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+								<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+							</svg>
+						</a>
+					</div>
+				</div>
 			</article>
 		))}
 	</div>
 
 	{
 		compact ? (
-			<div class="partner-alumni-compact">
-				<div class="partner-alumni-header">
+			<section class="partner-history partner-history-compact">
+				<div class="partner-history-header partner-history-header-compact">
 					<p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
 						Previously supported by
 					</p>
-					<span class="partner-alumni-count">{previousPartners.length} teams</span>
 				</div>
 
 				<div class="partner-alumni-grid">
@@ -285,7 +292,7 @@ const previousPartners: Partners = [
 							aria-label={`Visit ${partner.name}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="partner-alumni-logo"
+							class="partner-mark partner-alumni-logo"
 							style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark}; --partner-accent-light: ${partner.logo.accentLight ?? partner.logo.fillLight}; --partner-accent-dark: ${partner.logo.accentDark ?? partner.logo.fillDark};`}
 						>
 							<div class="partner-alumni-mark">
@@ -294,10 +301,10 @@ const previousPartners: Partners = [
 						</a>
 					))}
 				</div>
-			</div>
+			</section>
 		) : (
-			<div class="partner-wall rounded-[28px] p-6 sm:p-8">
-				<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+			<section class="partner-history">
+				<div class="partner-history-header">
 					<div>
 						<p class="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
 							Past Partners
@@ -313,7 +320,7 @@ const previousPartners: Partners = [
 					<span class="partner-wall-chip">{previousPartners.length} past</span>
 				</div>
 
-				<div class="partner-wall-grid grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+				<div class="partner-history-grid">
 					{previousPartners.map((partner) => (
 						<a
 							href={withUtm(partner.url)}
@@ -321,7 +328,7 @@ const previousPartners: Partners = [
 							aria-label={`Visit ${partner.name}`}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="partner-wall-logo"
+							class="partner-mark partner-wall-logo"
 							style={`--partner-fill-light: ${partner.logo.fillLight}; --partner-fill-dark: ${partner.logo.fillDark}; --partner-accent-light: ${partner.logo.accentLight ?? partner.logo.fillLight}; --partner-accent-dark: ${partner.logo.accentDark ?? partner.logo.fillDark};`}
 						>
 							<div class="partner-alumni-mark">
@@ -330,107 +337,82 @@ const previousPartners: Partners = [
 						</a>
 					))}
 				</div>
-			</div>
+			</section>
 		)
 	}
 </div>
 
 <style is:global>
-	.partner-card {
-		position: relative;
+	.partner-current-list {
+		border-top: 1px solid var(--surface-border-strong);
+	}
+
+	.partner-entry {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
-		border-radius: 1.75rem;
-		padding: 1.5rem;
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card) 96%, var(--partner-fill-light) 4%),
-				color-mix(in srgb, var(--surface-card) 94%, var(--partner-fill-dark) 6%)
-			);
-		border: 1px solid color-mix(in srgb, var(--partner-fill-dark) 18%, var(--surface-border));
-		box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
-		overflow: hidden;
-		transition:
-			transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-			box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
-			border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
-	}
-
-	.partner-card::after {
-		content: "";
-		position: absolute;
-		inset: 0;
-		background:
-			radial-gradient(circle at 120% -15%, rgba(255, 255, 255, 0.45), transparent 48%),
-			linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.08));
-		opacity: 0.85;
-		pointer-events: none;
-	}
-
-	html.dark .partner-card {
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card) 92%, var(--partner-fill-light) 8%),
-				color-mix(in srgb, var(--surface-card) 90%, var(--partner-fill-dark) 10%)
-			);
-		border-color: color-mix(in srgb, var(--partner-fill-dark) 28%, var(--surface-border));
-		box-shadow: 0 28px 70px rgba(2, 6, 23, 0.4);
-	}
-
-	.partner-card > * {
-		position: relative;
-		z-index: 1;
-	}
-
-	.partner-card:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 28px 60px rgba(15, 23, 42, 0.16);
-		border-color: color-mix(in srgb, var(--partner-fill-dark) 34%, var(--surface-border-strong));
-	}
-
-	.partner-top {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
 		gap: 1rem;
+		padding-block: 1.5rem;
+	}
+
+	.partner-entry + .partner-entry {
+		border-top: 1px solid var(--surface-border);
+	}
+
+	.partner-entry-grid {
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	.partner-entry-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
 	}
 
 	.partner-industry {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		padding: 0.5rem 0.85rem;
-		border-radius: 999px;
-		border: 1px solid color-mix(in srgb, var(--partner-fill-dark) 24%, var(--surface-border));
-		background: color-mix(in srgb, var(--partner-fill-light) 10%, var(--surface-card));
-		color: color-mix(in srgb, var(--partner-fill-dark) 70%, rgb(15 23 42));
-		font-size: 0.68rem;
+		color: color-mix(in srgb, var(--partner-fill-dark) 68%, rgb(15 23 42));
+		font-size: 0.72rem;
 		font-weight: 700;
-		letter-spacing: 0.16em;
+		letter-spacing: 0.18em;
 		text-transform: uppercase;
 	}
 
 	html.dark .partner-industry {
-		background: color-mix(in srgb, var(--partner-fill-dark) 16%, var(--surface-card));
 		color: color-mix(in srgb, white 82%, var(--partner-fill-light) 18%);
 	}
 
+	.partner-meta-dot {
+		width: 0.25rem;
+		height: 0.25rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--partner-fill-dark) 32%, var(--surface-border));
+	}
+
+	.partner-since-inline {
+		color: var(--text-muted);
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+	}
+
 	.partner-logo-stage {
-		border-radius: 1.5rem;
+		display: grid;
+		place-items: center;
+		min-height: 7rem;
+		padding: 1rem 1.25rem;
 		border: 1px solid color-mix(in srgb, var(--partner-fill-dark) 14%, var(--surface-border));
+		border-radius: 1.15rem;
 		background:
 			linear-gradient(
 				135deg,
 				color-mix(in srgb, var(--partner-fill-light) 10%, white 90%),
-				color-mix(in srgb, var(--partner-fill-dark) 8%, white 92%)
+				color-mix(in srgb, var(--partner-fill-dark) 6%, white 94%)
 			);
-		display: grid;
-		place-items: center;
-		min-height: 8.5rem;
-		padding: 1.25rem;
 	}
 
 	html.dark .partner-logo-stage {
@@ -440,13 +422,6 @@ const previousPartners: Partners = [
 				color-mix(in srgb, var(--partner-fill-light) 12%, rgb(15 23 42) 88%),
 				color-mix(in srgb, var(--partner-fill-dark) 12%, rgb(15 23 42) 88%)
 			);
-	}
-
-	.partner-logo-tile {
-		width: 100%;
-		min-height: 5rem;
-		display: grid;
-		place-items: center;
 	}
 
 	.partner-logo {
@@ -472,31 +447,6 @@ const previousPartners: Partners = [
 	.partner-logo svg rect:not([style*="fill: none"]),
 	.partner-logo svg polygon {
 		fill: currentColor !important;
-	}
-
-
-	.partner-since {
-		text-transform: uppercase;
-		font-size: 0.65rem;
-		letter-spacing: 0.24em;
-		color: rgb(100 116 139);
-		text-align: right;
-	}
-
-	html.dark .partner-since {
-		color: rgba(255, 255, 255, 0.6);
-	}
-
-	.partner-since strong {
-		display: block;
-		margin-top: 0.2rem;
-		letter-spacing: normal;
-		font-size: 1rem;
-		color: rgb(15 23 42);
-	}
-
-	html.dark .partner-since strong {
-		color: white;
 	}
 
 	.partner-link {
@@ -525,41 +475,34 @@ const previousPartners: Partners = [
 		transform: scaleX(1.1);
 	}
 
-	.partner-wall {
-		background:
-			linear-gradient(
-				120deg,
-				color-mix(in srgb, var(--surface-card) 94%, rgb(var(--brand-primary)) 6%),
-				color-mix(in srgb, var(--surface-card) 92%, rgb(var(--brand-secondary)) 8%)
-			);
-		border: 1px solid var(--surface-border);
-		box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+	.partner-history {
+		padding-top: 0.5rem;
 	}
 
-	.partner-alumni-compact {
-		border-top: 1px solid var(--surface-border);
-		padding-top: 1.5rem;
-	}
-
-	.partner-alumni-header {
+	.partner-history-header {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.75rem 1rem;
-		margin-bottom: 1rem;
+		gap: 1rem;
+		border-top: 1px solid var(--surface-border-strong);
+		padding-top: 1.5rem;
+		padding-bottom: 1rem;
 	}
 
-	.partner-alumni-count {
-		color: var(--text-muted);
-		font-size: 0.95rem;
-		font-weight: 600;
+	.partner-current-list-compact {
+		border-top: 0;
+	}
+
+	.partner-history-header-compact {
+		padding-bottom: 0.25rem;
 	}
 
 	.partner-alumni-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.85rem;
+		column-gap: 1rem;
+		row-gap: 0;
 	}
 
 	.partner-wall-chip {
@@ -568,7 +511,7 @@ const previousPartners: Partners = [
 		justify-content: center;
 		padding: 0.5rem 1.25rem;
 		border-radius: 999px;
-		background: rgba(15, 23, 42, 0.06);
+		background: rgba(15, 23, 42, 0.04);
 		color: rgba(15, 23, 42, 0.7);
 		font-size: 0.85rem;
 		font-weight: 600;
@@ -579,16 +522,20 @@ const previousPartners: Partners = [
 		color: rgba(255, 255, 255, 0.85);
 	}
 
-	.partner-wall-logo,
-	.partner-alumni-logo {
-		border-radius: 1.25rem;
-		border: 1px solid color-mix(in srgb, var(--partner-accent-dark, var(--partner-fill-dark, #94a3b8)) 18%, var(--surface-border));
-		background: color-mix(in srgb, var(--partner-accent-light, var(--partner-fill-light, #f5f5f5)) 8%, var(--surface-card));
-		padding: 0.85rem 1rem;
+	.partner-history-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: 1.25rem;
+		row-gap: 0;
+	}
+
+	.partner-mark {
+		padding: 0.95rem 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		height: 4.5rem;
+		min-height: 4.5rem;
+		border-bottom: 1px solid var(--surface-border);
 		opacity: 0.85;
 		transition:
 			transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
@@ -596,20 +543,19 @@ const previousPartners: Partners = [
 			border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
-	.partner-alumni-logo {
-		height: 4.25rem;
-		background:
-			linear-gradient(
-				135deg,
-				color-mix(in srgb, var(--surface-card) 84%, var(--partner-accent-light, var(--partner-fill-light, #f5f5f5)) 16%),
-				color-mix(in srgb, var(--surface-card) 72%, var(--partner-accent-dark, var(--partner-fill-dark, #94a3b8)) 28%)
-			);
-		border-color: color-mix(in srgb, var(--partner-accent-dark, var(--partner-fill-dark, #94a3b8)) 26%, var(--surface-border));
+	.partner-history-compact .partner-alumni-grid {
+		row-gap: 0.85rem;
+	}
+
+	.partner-history-compact .partner-mark {
+		border-bottom: 0;
+		padding-block: 0.35rem;
+		min-height: 3.5rem;
 	}
 
 	.partner-alumni-mark {
 		width: 100%;
-		height: 2.5rem;
+		height: 2.3rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -641,34 +587,30 @@ const previousPartners: Partners = [
 		stroke: currentColor !important;
 	}
 
-	.partner-wall-logo:hover,
-	.partner-alumni-logo:hover {
-		transform: translateY(-2px);
+	.partner-mark:hover {
+		transform: translateX(2px);
 		opacity: 1;
-		border-color: color-mix(in srgb, var(--partner-accent-dark, var(--partner-fill-dark, #94a3b8)) 32%, var(--surface-border-strong));
 	}
 
-	.partner-wall-logo:focus-visible,
-	.partner-alumni-logo:focus-visible {
+	.partner-mark:focus-visible {
 		outline: none;
 		opacity: 1;
-		border-color: color-mix(in srgb, var(--partner-accent-dark, var(--partner-fill-dark, #94a3b8)) 36%, var(--surface-border-strong));
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--partner-accent-dark, var(--partner-fill-dark, #94a3b8)) 18%, transparent);
 	}
 
-	@media (max-width: 639px) {
-		.partner-card {
-			padding: 1.25rem;
-		}
-
-		.partner-logo-stage {
-			min-height: 7rem;
-			padding: 1rem;
+	@media (min-width: 768px) {
+		.partner-entry-grid {
+			grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+			align-items: center;
 		}
 	}
 
 	@media (min-width: 640px) {
 		.partner-alumni-grid {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+
+		.partner-history-grid {
 			grid-template-columns: repeat(4, minmax(0, 1fr));
 		}
 	}
