@@ -8,7 +8,6 @@ export const prerender = true;
 
 const allNews = await getCollection("news");
 
-// Sort by date (newest first)
 allNews.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 const pageTitle = "Cloud Native News | Rawkode Academy";
