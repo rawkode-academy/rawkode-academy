@@ -10,11 +10,11 @@
           <slot name="badge" />
         </div>
       </div>
-      <div class="p-6 flex flex-col grow relative z-10">
+      <div class="card-padding flex flex-col grow relative z-10">
         <slot name="content" />
         <div
           v-if="$slots.footer"
-          class="mt-auto pt-4 border-t border-white/20 dark:border-gray-600/50"
+          class="surface-divider mt-auto border-t pt-4"
         >
           <slot name="footer" />
         </div>

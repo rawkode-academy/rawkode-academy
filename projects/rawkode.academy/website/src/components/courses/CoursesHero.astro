@@ -1,0 +1,165 @@
+---
+type AuthorSummary = {
+	name: string;
+	avatarUrl?: string | undefined;
+};
+
+type Props = {
+	courseId: string;
+	courseName: string;
+	courseDescription: string;
+	moduleCount: number;
+	availableModuleCount: number;
+	difficulty: string;
+	firstModuleSlug?: string | undefined;
+	learningPath: string[];
+	authors: AuthorSummary[];
+	publishedLabel?: string | undefined;
+};
+
+const {
+	courseId,
+	courseName,
+	courseDescription,
+	moduleCount,
+	availableModuleCount,
+	difficulty,
+	firstModuleSlug,
+	learningPath,
+	authors,
+	publishedLabel,
+} = Astro.props;
+
+const primaryHref = firstModuleSlug
+	? `/courses/${courseId}/${firstModuleSlug}`
+	: `/courses/${courseId}`;
+---
+
+<section
+	class="relative overflow-hidden rounded-[2.5rem] border border-black/5 bg-white/55 px-6 py-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/8 dark:bg-slate-950/20 dark:shadow-[0_30px_80px_rgba(2,6,23,0.3)] sm:px-8 lg:px-10 lg:py-10"
+>
+	<div class="pointer-events-none absolute inset-0">
+		<div class="absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl dark:bg-primary/12"></div>
+		<div class="absolute right-0 top-10 h-72 w-72 rounded-full bg-secondary/10 blur-3xl dark:bg-secondary/12"></div>
+	</div>
+
+	<div class="relative space-y-8">
+		<div class="space-y-5">
+			<div class="flex flex-wrap gap-3">
+				<span class="glass-chip text-primary">Latest course</span>
+				{publishedLabel && (
+					<span class="glass-chip text-secondary-content">Published {publishedLabel}</span>
+				)}
+				{availableModuleCount > 0 && availableModuleCount < moduleCount && (
+					<span class="glass-chip text-secondary-content">{availableModuleCount} live now</span>
+				)}
+			</div>
+
+			<div class="max-w-4xl space-y-4">
+				<h1
+					class="max-w-4xl text-4xl font-extrabold leading-[0.95] tracking-tight text-primary-content sm:text-5xl xl:text-6xl"
+				>
+					{courseName}
+				</h1>
+				<p class="max-w-[62ch] text-lg leading-8 text-secondary-content sm:text-xl">
+					{courseDescription}
+				</p>
+			</div>
+		</div>
+
+		<div class="flex flex-col gap-5 border-t border-black/8 pt-6 dark:border-white/8 lg:flex-row lg:items-center lg:justify-between">
+			{authors.length > 0 && (
+				<div class="flex flex-wrap items-center gap-3">
+					<div class="flex -space-x-3">
+						{authors.map((author) =>
+							author.avatarUrl ? (
+								<img
+									src={author.avatarUrl}
+									alt={author.name}
+									class="h-12 w-12 rounded-full border-2 border-white/80 object-cover shadow-sm dark:border-slate-950/80"
+									loading="lazy"
+								/>
+							) : (
+								<div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/80 bg-gradient-to-br from-primary to-secondary text-sm font-bold text-white shadow-sm dark:border-slate-950/80">
+									{author.name.charAt(0)}
+								</div>
+							),
+						)}
+					</div>
+					<div class="min-w-0">
+						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Taught by</p>
+						<p class="text-base font-semibold text-primary-content">
+							{authors.map((author) => author.name).join(", ")}
+						</p>
+					</div>
+				</div>
+			)}
+
+			<div class="flex flex-wrap gap-4">
+				<a
+					href={primaryHref}
+					class="inline-flex min-h-11 items-center justify-center rounded-xl border border-primary/30 bg-gradient-primary px-7 py-3 text-lg font-medium text-white shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-primary/50"
+				>
+					{availableModuleCount > 0 ? "Start learning now" : "View course outline"}
+				</a>
+				<a
+					href="#all-courses"
+					class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/50 bg-white/50 px-6 py-3 text-lg font-medium text-gray-900 shadow-md transition-all duration-200 hover:scale-105 hover:bg-white/70 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-200/50 dark:border-gray-500/60 dark:bg-gray-700/60 dark:text-white dark:hover:bg-gray-600/70 dark:focus:ring-gray-500/50"
+				>
+					Browse all courses
+				</a>
+			</div>
+		</div>
+
+		<div class="grid gap-5 border-t border-black/8 pt-6 dark:border-white/8 sm:grid-cols-3">
+			<div class="space-y-2">
+				<div class="eyebrow-label tracking-[0.2em]">Curriculum</div>
+				<div>
+					<div class="text-3xl font-bold text-primary-content">{moduleCount}</div>
+					<p class="mt-1 text-sm text-secondary-content">Structured modules with clear progression.</p>
+				</div>
+			</div>
+
+			<div class="space-y-2">
+				<div class="eyebrow-label tracking-[0.2em]">Availability</div>
+				<div>
+					<div class="text-3xl font-bold text-primary-content">{availableModuleCount || moduleCount}</div>
+					<p class="mt-1 text-sm text-secondary-content">
+						{availableModuleCount > 0 ? "Ready to start today." : "Course outline in progress."}
+					</p>
+				</div>
+			</div>
+
+			<div class="space-y-2">
+				<div class="eyebrow-label tracking-[0.2em]">Level</div>
+				<div>
+					<div class="text-3xl font-bold text-primary-content">{difficulty}</div>
+					<p class="mt-1 text-sm text-secondary-content">Hands-on guidance without vendor fluff.</p>
+				</div>
+			</div>
+		</div>
+
+		{learningPath.length > 0 && (
+			<div class="border-t border-black/8 pt-6 dark:border-white/8">
+				<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+					<div class="max-w-2xl space-y-2">
+						<div class="eyebrow-label">What You’ll Cover</div>
+						<p class="text-sm leading-7 text-secondary-content sm:text-base">
+							The course is laid out as a practical path, not a pile of disconnected videos.
+						</p>
+					</div>
+					<p class="text-sm font-medium uppercase tracking-[0.2em] text-muted">Self-paced</p>
+				</div>
+
+				<div class="mt-5 grid gap-3 md:grid-cols-3">
+					{learningPath.slice(0, 3).map((step, index) => (
+						<div class="rounded-[1.25rem] border border-black/8 bg-white/35 px-4 py-4 dark:border-white/8 dark:bg-white/[0.03]">
+							<div class="text-sm font-semibold text-primary">0{index + 1}</div>
+							<p class="mt-2 text-sm leading-6 text-primary-content">{step}</p>
+						</div>
+					))}
+				</div>
+			</div>
+		)}
+	</div>
+</section>

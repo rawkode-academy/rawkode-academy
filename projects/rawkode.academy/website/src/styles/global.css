@@ -594,6 +594,90 @@ body::before {
 		color: inherit;
 	}
 
+	.section-shell {
+		@apply relative overflow-hidden rounded-[1.75rem] border;
+		background:
+			linear-gradient(
+				180deg,
+				rgba(255, 255, 255, 0.82) 0%,
+				rgba(255, 255, 255, 0.68) 100%
+			);
+		border-color: var(--surface-border);
+		box-shadow: var(--surface-shadow);
+	}
+
+	.section-shell::before {
+		content: "";
+		@apply pointer-events-none absolute inset-0;
+		background:
+			linear-gradient(
+				135deg,
+				rgb(var(--brand-primary) / 0.12) 0%,
+				transparent 48%,
+				rgb(var(--brand-secondary) / 0.08) 100%
+			);
+		opacity: 0.9;
+	}
+
+	.section-shell > * {
+		position: relative;
+		z-index: 1;
+	}
+
+	html.dark .section-shell {
+		background:
+			linear-gradient(
+				180deg,
+				rgba(15, 23, 42, 0.44) 0%,
+				rgba(7, 11, 24, 0.58) 100%
+			);
+	}
+
+	html.dark .section-shell::before {
+		background:
+			linear-gradient(
+				135deg,
+				rgb(var(--brand-primary) / 0.18) 0%,
+				transparent 48%,
+				rgb(var(--brand-secondary) / 0.12) 100%
+			);
+	}
+
+	.section-shell-muted {
+		@apply relative overflow-hidden rounded-[1.5rem] border;
+		background-color: rgba(255, 255, 255, 0.62);
+		border-color: var(--surface-border);
+		box-shadow: 0 20px 45px rgba(15, 23, 42, 0.06);
+	}
+
+	html.dark .section-shell-muted {
+		background-color: rgba(15, 23, 42, 0.28);
+		box-shadow: 0 20px 45px rgba(2, 6, 23, 0.3);
+	}
+
+	.eyebrow-label {
+		@apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em];
+		color: rgb(var(--brand-primary));
+	}
+
+	.stat-panel {
+		@apply flex min-h-24 flex-col justify-between rounded-[1.25rem] border p-4 sm:p-5;
+		background-color: rgba(255, 255, 255, 0.74);
+		border-color: var(--surface-border);
+	}
+
+	html.dark .stat-panel {
+		background-color: rgba(15, 23, 42, 0.34);
+	}
+
+	.surface-divider {
+		border-color: var(--surface-border);
+	}
+
+	.surface-divider-strong {
+		border-color: var(--surface-border-strong);
+	}
+
 	/* Branded media container for logos/icons within glass cards - glass-like with subtle brand tint */
 	.glass-media-brand {
 		@apply backdrop-blur-sm;
@@ -1320,6 +1404,10 @@ body::before {
 
 	.card-padding-lg {
 		padding: var(--space-card-pad-lg);
+	}
+
+	.grid-auto-cards {
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 	}
 
 	.section-pt-0 {

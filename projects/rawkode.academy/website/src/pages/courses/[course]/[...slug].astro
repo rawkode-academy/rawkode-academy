@@ -1,15 +1,16 @@
 ---
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
-import { join, dirname } from "node:path";
+import { dirname, join } from "node:path";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
+import { createLogger } from "@/lib/logger";
+import { getCourseModuleSlug } from "@/utils/course-path";
 import { loadWebContainerFiles } from "@/utils/webcontainer-loader";
 import type { GetStaticPaths } from "astro";
-import { createLogger } from "@/lib/logger";
 
 export const prerender = true;
 
@@ -25,7 +26,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 	const modules = await getCollection("courseModules");
 
 	return modules.map((module) => {
-		const course = courses.find((c) => c.id === module.data.course.id);
+		const course = courses.find((entry) => entry.id === module.data.course.id);
 		if (!course) {
 			throw new Error(`Course not found for module: ${module.id}`);
 		}
@@ -33,7 +34,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 		return {
 			params: {
 				course: course.id,
-				slug: module.id,
+				slug: getCourseModuleSlug(course.id, module.id),
 			},
 			props: {
 				module,
@@ -55,15 +56,12 @@ const computeImageUrl = async (module: CollectionEntry<"courseModules">) => {
 
 const { module, course } = Astro.props;
 
-// Prevent viewing draft modules
 if (module.data.draft) {
 	return Astro.redirect("/404");
 }
 
 const { Content } = await render(module);
 
-// Process resources to load WebContainer files
-// Process both course and module resources
 const allResources = [
 	...(course.data.resources || []),
 	...(module.data.resources || []),
@@ -76,12 +74,11 @@ const processedResources = await Promise.all(
 			resource.embedConfig?.container === "webcontainer" &&
 			resource.embedConfig.import?.localDir
 		) {
-			// Get the module file path
 			const moduleFilePath = join(
 				process.cwd(),
 				"content",
 				"courses",
-				module.id + ".mdx",
+				`${module.id}.mdx`,
 			);
 			const moduleDir = dirname(moduleFilePath);
 			const importPath = join(moduleDir, resource.embedConfig.import.localDir);
@@ -100,11 +97,29 @@ const processedResources = await Promise.all(
 				return resource;
 			}
 		}
+
 		return resource;
 	}),
 );
 
+const dedupedResources = Array.from(
+	new Map(
+		processedResources.map((resource) => {
+			const key = [
+				resource.type,
+				resource.title,
+				resource.url || "",
+				resource.filePath || "",
+				resource.embedConfig?.src || "",
+			].join("::");
+
+			return [key, resource];
+		}),
+	).values(),
+);
+
 const imageUrl = await computeImageUrl(module);
+const moduleSlug = getCourseModuleSlug(course.id, module.id);
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
@@ -112,173 +127,179 @@ const breadcrumbElements = [
 	{ title: course.data.title, link: `/courses/${course.id}` },
 	{
 		title: module.data.title,
-		link: `/courses/${course.id}/modules/${module.id}`,
+		link: `/courses/${course.id}/${moduleSlug}`,
 	},
 ];
 
-// Get all course modules for navigation
 const allCourseModules = (await getCollection("courseModules"))
-	.filter((m) => m.data.course.id === course.id)
-	.filter((m) => !m.data.draft)
+	.filter((entry) => entry.data.course.id === course.id)
+	.filter((entry) => !entry.data.draft)
 	.sort((a, b) => a.data.order - b.data.order);
 
-const currentIndex = allCourseModules.findIndex((m) => m.id === module.id);
+const currentIndex = allCourseModules.findIndex(
+	(entry) => entry.id === module.id,
+);
 const previousModule =
 	currentIndex > 0 ? allCourseModules[currentIndex - 1] : null;
 const nextModule =
-	currentIndex < allCourseModules.length - 1
+	currentIndex >= 0 && currentIndex < allCourseModules.length - 1
 		? allCourseModules[currentIndex + 1]
 		: null;
+
+function moduleHref(entry: CollectionEntry<"courseModules">) {
+	return `/courses/${course.id}/${getCourseModuleSlug(course.id, entry.id)}`;
+}
+
+function formatDuration(minutes?: number) {
+	if (!minutes || minutes <= 0) return null;
+
+	const hours = Math.floor(minutes / 60);
+	const mins = minutes % 60;
+
+	if (hours > 0 && mins > 0) return `${hours}h ${mins}m`;
+	if (hours > 0) return `${hours}h`;
+	return `${mins}m`;
+}
 ---
 
 <Page
 	title={`${module.data.title} - ${course.data.title}`}
 	description={module.data.description}
-	image={imageUrl ? { image: imageUrl.startsWith('http') ? new URL(imageUrl) : new URL(imageUrl, Astro.site || "https://rawkode.academy"), text: module.data.title, format: "png" as const } : undefined}
+	image={imageUrl
+		? {
+				image: imageUrl.startsWith("http")
+					? new URL(imageUrl)
+					: new URL(imageUrl, Astro.site || "https://rawkode.academy"),
+				text: module.data.title,
+				format: "png" as const,
+			}
+		: undefined}
 >
-	<section id="article" class="pt-4 sm:pt-8">
-		<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+	<section class="page-px section-py-tight">
+		<div class="mx-auto max-w-7xl space-y-6">
 			<Breadcrumb elements={breadcrumbElements} />
 
-			<!-- Module Header -->
-			<div class="mb-8 bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
-				<h1
-					class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4"
-				>
-					{module.data.title}
-				</h1>
-				<p class="text-lg text-gray-600 dark:text-gray-300 mb-4">
-					{module.data.description}
-				</p>
-				<div class="flex flex-wrap items-center gap-4 text-sm">
-					{module.data.duration && module.data.duration > 0 && (
-						<div class="flex items-center gap-2">
-							<svg
-								class="w-5 h-5 text-gray-500"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-							</svg>
-							<span class="text-gray-600 dark:text-gray-400">
-								{Math.floor(module.data.duration / 60) > 0 && `${Math.floor(module.data.duration / 60)}h `}
-								{module.data.duration % 60 > 0 && `${module.data.duration % 60}m`}
-							</span>
+			<header class="section-shell card-padding-lg">
+				<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start">
+					<div class="space-y-5">
+						<div class="flex flex-wrap gap-3">
+							<span class="glass-chip text-primary">Course Lesson</span>
+							{formatDuration(module.data.duration) && (
+								<span class="glass-chip text-secondary-content">{formatDuration(module.data.duration)}</span>
+							)}
+							{module.data.difficulty && (
+								<span class="glass-chip text-secondary-content capitalize">{module.data.difficulty}</span>
+							)}
 						</div>
-					)}
-					{
-						module.data.difficulty && (
-							<div class="flex items-center gap-2">
-								<svg
-									class="w-5 h-5 text-gray-500"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-									/>
-								</svg>
-								<span class="text-gray-600 dark:text-gray-400 capitalize">
-									{module.data.difficulty}
-								</span>
+
+						<div class="max-w-4xl space-y-4">
+							<h1 class="text-4xl font-extrabold tracking-tight text-primary-content md:text-5xl">
+								{module.data.title}
+							</h1>
+							<p class="max-w-[65ch] text-lg leading-8 text-secondary-content">
+								{module.data.description}
+							</p>
+						</div>
+					</div>
+
+					<div class="section-shell-muted p-5">
+						<div class="space-y-4">
+							<div class="space-y-2">
+								<div class="eyebrow-label">Course Context</div>
+								<h2 class="text-2xl font-bold text-primary-content">{course.data.title}</h2>
+								<p class="text-sm leading-7 text-secondary-content">
+									Module {currentIndex + 1} of {allCourseModules.length}. Move through the course in order or jump back to the full curriculum.
+								</p>
 							</div>
-						)
-					}
+
+							<div class="flex flex-wrap gap-3">
+								<a
+									href={`/courses/${course.id}`}
+									class="inline-flex min-h-11 items-center justify-center rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-white dark:border-white/10 dark:bg-gray-900/55 dark:text-white dark:hover:bg-gray-900/80"
+								>
+									View course
+								</a>
+								{nextModule && (
+									<a
+										href={moduleHref(nextModule)}
+										class="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
+									>
+										Next lesson
+									</a>
+								)}
+							</div>
+						</div>
+					</div>
 				</div>
+			</header>
+
+			<div class:list={["grid gap-8 xl:items-start", dedupedResources.length > 0 && "xl:grid-cols-[minmax(0,1fr)_21rem]"]}>
+				<div class="space-y-8">
+					{module.data.video && (
+						<section class="section-shell overflow-hidden p-3 sm:p-4">
+							<VideoPlayer
+								video={module.data.video.id}
+								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
+								client:only="vue"
+								isAuthenticated={false}
+							/>
+						</section>
+					)}
+
+					<article class="section-shell card-padding-lg">
+						<div class="mb-6 space-y-2">
+							<div class="eyebrow-label">Lesson Notes</div>
+							<h2 class="text-3xl font-bold tracking-tight text-primary-content">What you’ll implement</h2>
+						</div>
+						<div class="prose prose-lg max-w-none dark:prose-invert prose-headings:scroll-mt-24">
+							<Content />
+						</div>
+					</article>
+
+					{(previousModule || nextModule) && (
+						<nav class="section-shell-muted p-6">
+							<div class="flex flex-col gap-4 md:flex-row md:items-stretch md:justify-between">
+								{previousModule ? (
+									<a
+										href={moduleHref(previousModule)}
+										class="flex flex-1 items-center justify-between rounded-[1.25rem] border border-white/40 bg-white/65 px-4 py-4 transition-colors hover:bg-white dark:border-white/8 dark:bg-gray-950/30 dark:hover:bg-gray-950/45"
+									>
+										<div>
+											<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Previous</p>
+											<p class="mt-1 font-semibold text-primary-content">{previousModule.data.title}</p>
+										</div>
+										<span class="text-primary">←</span>
+									</a>
+								) : (
+									<div></div>
+								)}
+
+								{nextModule && (
+									<a
+										href={moduleHref(nextModule)}
+										class="flex flex-1 items-center justify-between rounded-[1.25rem] border border-white/40 bg-white/65 px-4 py-4 text-right transition-colors hover:bg-white dark:border-white/8 dark:bg-gray-950/30 dark:hover:bg-gray-950/45"
+									>
+										<div class="ml-auto">
+											<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Next</p>
+											<p class="mt-1 font-semibold text-primary-content">{nextModule.data.title}</p>
+										</div>
+										<span class="ml-4 text-primary">→</span>
+									</a>
+								)}
+							</div>
+						</nav>
+					)}
+				</div>
+
+				{dedupedResources.length > 0 && (
+					<aside class="xl:sticky xl:top-28">
+						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
+					</aside>
+				)}
 			</div>
 
-			<!-- Video Player (if video exists) -->
-			{
-				module.data.video && (
-					<div class="mb-8">
-						<VideoPlayer
-							video={module.data.video.id}
-							thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
-							client:only="vue"
-							isAuthenticated={false}
-						/>
-					</div>
-				)
-			}
-
-			<!-- Course Content -->
-			<div
-				class="prose dark:prose-dark max-w-none prose-headings:scroll-mt-20"
-			>
-				<Content />
-			</div>
-
-			<!-- Resources Section -->
-			{
-				processedResources && processedResources.length > 0 && (
-					<div class="mt-12">
-						<ResourceList resources={processedResources} client:load />
-					</div>
-				)
-			}
-
-			<!-- Navigation -->
-			<div class="mt-12 flex justify-between items-center border-t pt-8">
-				{
-					previousModule && (
-						<a
-							href={`/courses/${course.id}/${previousModule.id}`}
-							class="flex items-center gap-2 text-primary hover:text-primary-dark transition-colors"
-						>
-							<svg
-								class="w-5 h-5"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15 19l-7-7 7-7"
-								/>
-							</svg>
-							<span>{previousModule.data.title}</span>
-						</a>
-					)
-				}
-				{
-					nextModule && (
-						<a
-							href={`/courses/${course.id}/${nextModule.id}`}
-							class="flex items-center gap-2 text-primary hover:text-primary-dark transition-colors ml-auto"
-						>
-							<span>{nextModule.data.title}</span>
-							<svg
-								class="w-5 h-5"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 5l7 7-7 7"
-								/>
-							</svg>
-						</a>
-					)
-				}
-			</div>
-
-			<!-- Course Signup -->
 			{course.data.signupConfig && (
-				<div class="mt-12">
+				<div class="mx-auto max-w-5xl">
 					<CourseSignupForm
 						courseId={course.id}
 						courseTitle={course.data.title}
