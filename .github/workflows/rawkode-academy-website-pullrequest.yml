@@ -20,12 +20,6 @@ on:
     - projects/rawkode.academy/website/public/**
     - projects/rawkode.academy/website/schema/**
     - projects/rawkode.academy/website/src/**
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

@@ -1,7 +1,5 @@
 ---
 import { getCollection } from "astro:content";
-import NewsCard from "@/components/news/NewsCard.astro";
-import SectionHeader from "@/components/common/SectionHeader.vue";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -12,54 +10,82 @@ allNews.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf
 
 const pageTitle = "Cloud Native News | Rawkode Academy";
 const pageDescription =
-	"Curated cloud native, Kubernetes, and AI infrastructure news for senior engineers. No fluff, no hype.";
+	"Cloud native, Kubernetes, and AI infrastructure news for engineers.";
+
+function formatDisplayDate(date: Date): string {
+	return new Intl.DateTimeFormat("en-US", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	}).format(date);
+}
+
+function formatTechnologyLabel(value: string): string {
+	return value
+		.split(/[-/]/g)
+		.filter(Boolean)
+		.map((segment) =>
+			segment.length <= 3
+				? segment.toUpperCase()
+				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
+		)
+		.join(" ");
+}
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<style>
-		@reference "../../styles/global.css";
+	<section class="page-px section-py-tight">
+		<div class="mx-auto max-w-4xl">
+			<header class="mb-6 border-b border-black/10 pb-5 dark:border-white/10 sm:mb-8 sm:pb-6">
+				<div class="eyebrow-label">Cloud Native News</div>
+				<h1 class="mt-3 font-display text-3xl font-semibold tracking-tight text-primary-content sm:text-4xl">
+					Latest stories
+				</h1>
+			</header>
 
-		.news-card {
-			@apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
-		}
-	</style>
+			{
+				allNews.length > 0 ? (
+					<ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+						{
+							allNews.map((story) => (
+								<li class="py-5 sm:py-6">
+									<article class="space-y-2">
+										<div class="flex flex-wrap items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+											<time datetime={story.data.publishedAt.toISOString()}>
+												{formatDisplayDate(story.data.publishedAt)}
+											</time>
+											{
+												story.data.technologies[0] && (
+													<>
+														<span>/</span>
+														<span>{formatTechnologyLabel(story.data.technologies[0])}</span>
+													</>
+												)
+											}
+										</div>
 
-	<!-- Hero -->
-	<section class="relative py-16 overflow-hidden">
-		<div class="absolute inset-0 bg-linear-to-br from-gray-900 via-gray-900 to-gray-800"></div>
-		<div class="absolute inset-0 bg-linear-to-tr from-primary/10 to-secondary/5"></div>
-		<div class="relative container mx-auto px-4 md:px-6 text-center">
-			<div class="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-primary/20 border border-primary/30">
-				<span class="relative flex h-2 w-2">
-					<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-					<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-				</span>
-				<span class="text-sm font-medium text-primary">Cloud Native News</span>
-			</div>
-			<h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
-				News
-			</h1>
-			<p class="text-lg text-gray-400 max-w-2xl mx-auto">
-				Curated cloud native news for practitioners. No fluff, no hype.
-			</p>
-		</div>
-	</section>
+										<h2 class="font-display text-2xl font-semibold leading-tight tracking-tight text-primary-content sm:text-[1.9rem]">
+											<a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
+												{story.data.title}
+											</a>
+										</h2>
 
-	<!-- News Grid -->
-	<section class="py-16 bg-gray-50 dark:bg-gray-900">
-		<div class="container mx-auto px-4 md:px-6">
-			<SectionHeader
-				title="Latest Stories"
-				subtitle="The latest cloud native news, curated for you"
-			/>
-
-			<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{allNews.map(article => (
-					<div class="news-card h-full">
-						<NewsCard article={article} />
-					</div>
-				))}
-			</div>
+										<p class="max-w-[66ch] text-base leading-8 text-secondary-content">
+											{story.data.description}
+										</p>
+									</article>
+								</li>
+							))
+						}
+					</ul>
+				) : (
+					<section class="border-y border-black/10 py-8 dark:border-white/10">
+						<p class="text-base leading-8 text-secondary-content">
+							No news published yet.
+						</p>
+					</section>
+				)
+			}
 		</div>
 	</section>
 </Page>

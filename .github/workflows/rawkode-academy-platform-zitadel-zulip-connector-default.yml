@@ -12,12 +12,6 @@ on:
     - projects/rawkode.academy/platform/zitadel-zulip-connector/**
     - projects/rawkode.academy/platform/zitadel-zulip-connector/env.cue
     - projects/rawkode.academy/platform/zitadel-zulip-connector/schema/**
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

@@ -12,12 +12,6 @@ on:
     - projects/rawkode.academy/platform/watch-history/**
     - projects/rawkode.academy/platform/watch-history/env.cue
     - projects/rawkode.academy/platform/watch-history/schema/**
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

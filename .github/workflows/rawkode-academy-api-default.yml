@@ -20,12 +20,6 @@ on:
     - projects/rawkode.academy/api/src/**
     - projects/rawkode.academy/api/supergraph.graphql
     - projects/rawkode.academy/api/wrangler.jsonc
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

@@ -12,12 +12,6 @@ on:
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/env.cue
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/schema/**
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

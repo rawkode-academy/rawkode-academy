@@ -12,12 +12,6 @@ on:
     - projects/rawkode.tools/star-catcher/env.cue
     - projects/rawkode.tools/star-catcher/schema/**
     - projects/rawkode.tools/star-catcher/wrangler.jsonc
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

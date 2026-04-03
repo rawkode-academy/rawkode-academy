@@ -14,12 +14,6 @@ on:
     - projects/rawkode.news/schema/**
     - projects/rawkode.news/src/**
     - projects/rawkode.news/wrangler.jsonc
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

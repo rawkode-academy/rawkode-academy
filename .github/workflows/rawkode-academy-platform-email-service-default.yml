@@ -12,12 +12,6 @@ on:
     - projects/rawkode.academy/platform/email-service/**
     - projects/rawkode.academy/platform/email-service/env.cue
     - projects/rawkode.academy/platform/email-service/schema/**
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}

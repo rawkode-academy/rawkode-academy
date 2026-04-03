@@ -12,12 +12,6 @@ on:
     - projects/rawkode.academy/platform/emoji-reactions/**
     - projects/rawkode.academy/platform/emoji-reactions/env.cue
     - projects/rawkode.academy/platform/emoji-reactions/schema/**
-    paths-ignore:
-    - docs/**
-    - examples/**
-    - '*.md'
-    - LICENSE
-    - .vscode/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
