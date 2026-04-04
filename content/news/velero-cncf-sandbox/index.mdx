@@ -1,0 +1,36 @@
+---
+title: "Broadcom Donates Velero to CNCF Sandbox, Ending Single-Vendor Stewardship"
+description: "Velero, the most widely used Kubernetes backup and disaster recovery tool, moves to vendor-neutral CNCF governance after Broadcom submits it to the Sandbox."
+publishedAt: 2026-04-04
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - velero
+---
+
+Broadcom has handed Velero over to the CNCF Sandbox. The CNCF Technical Oversight Committee approved the submission, and the project now operates under vendor-neutral governance.
+
+This matters because Velero isn't some niche side project. It's the default Kubernetes backup tool for a huge chunk of the ecosystem. If your team runs stateful workloads on Kubernetes, there's a good chance Velero is already in your cluster.
+
+## What Actually Happened
+
+Broadcom filed the Sandbox application back in February 2026, and the formal acceptance followed shortly after. The announcement landed at KubeCon + CloudNativeCon Europe in Amsterdam. Alongside the donation, Broadcom also shipped VKS 3.6, its managed Kubernetes offering built on vSphere.
+
+The timing isn't accidental. Since acquiring VMware, Broadcom has faced questions about its commitment to open source projects that originated inside VMware. Donating Velero to the CNCF is a concrete answer to those questions.
+
+## Why Single-Vendor Governance Was a Problem
+
+Velero already had maintainers from Broadcom, Red Hat, and Microsoft. But the project's governance structure didn't reflect that reality. Decisions still flowed through Broadcom's internal processes, and external contributors had limited influence over the roadmap.
+
+Under CNCF governance, that changes. The project gets a neutral home, contributor agreements shift to the CNCF's standard DCO model, and the technical direction becomes genuinely community-driven.
+
+For platform teams evaluating Velero against alternatives like Kasten K10 or Stash, this removes one of the biggest concerns: what happens to the project if the vendor loses interest?
+
+## What You Should Do
+
+Nothing dramatic. If you're running Velero today, it keeps working. The GitHub repository will migrate to the `velero-project` organization under CNCF, and you'll want to watch for updated container image references once that transition completes.
+
+If you've been holding off on Velero because of the single-vendor question, that objection just disappeared. The CNCF Sandbox is where projects like Containerd, Flux, and Argo started before graduating to higher maturity levels.
+
+The real test comes next: can the community accelerate development now that governance friction is lower? Velero's feature backlog includes better support for volume snapshots across cloud providers and tighter integration with the Kubernetes Resource Model. Those features have been slow to land. Open governance might be exactly what the project needs to ship faster.
