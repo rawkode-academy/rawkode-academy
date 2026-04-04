@@ -1,0 +1,28 @@
+---
+title: "GitHub Actions OIDC Tokens Now Include Repository Custom Properties"
+description: "GitHub Actions OIDC custom properties hit GA, letting platform teams build cloud trust policies based on repo metadata like environment type or compliance tier instead of managing per-repo configurations."
+publishedAt: 2026-04-04
+authors:
+  - rawkode
+technologies: []
+---
+
+GitHub shipped three updates to Actions on April 2, and the one worth paying attention to is the general availability of repository custom properties as claims in OIDC tokens.
+
+If you've set up OIDC federation between GitHub Actions and a cloud provider, you know the drill. You define trust policies that map specific repos to specific cloud roles. It works, but it doesn't scale. Every new repository means another trust policy entry, another PR to your infrastructure repo, another thing to forget.
+
+Custom properties change that. You tag repositories with metadata like `environment: production`, `team: platform`, or `compliance-tier: soc2`, and those properties show up as claims in the OIDC token. Your cloud provider's trust policy can match on those properties directly.
+
+One IAM policy that says "any repo tagged `environment: production` and `team: platform` can assume this role" replaces dozens of individual repo-to-role mappings. That's the kind of reduction in configuration sprawl that actually sticks.
+
+## The other two updates
+
+Service containers now support entrypoint and command overrides. If you've been writing wrapper scripts to customize service container behavior in your workflow YAML, you can stop. The syntax mirrors Docker Compose, so there's nothing new to learn.
+
+Azure private networking for hosted runners picked up failover support in public preview. You designate a secondary subnet, potentially in a different region, and Actions fails over to it when the primary becomes unavailable. Failover can be manual or automatic during regional outages.
+
+## Who should care
+
+Platform teams running GitHub Actions at scale with cloud OIDC federation should audit their trust policies. The custom properties approach is cleaner than what you're probably doing today, and it's GA now, not beta.
+
+The service container change is smaller but solves a real pain point for anyone running integration tests against customized database or cache containers in CI. Worth a quick update to your workflows.
