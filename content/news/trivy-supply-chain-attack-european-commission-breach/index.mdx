@@ -1,0 +1,32 @@
+---
+title: "Trivy Supply Chain Attack Hits the European Commission, Exposes 340 GB of Data"
+description: "A compromised release of the Trivy vulnerability scanner was used as the initial access vector in a breach of the European Commission's AWS infrastructure, leaking 340 GB of data. If you run Trivy in CI/CD, check your version now."
+publishedAt: 2026-04-04
+authors:
+  - rawkode
+technologies:
+  - trivy
+  - kubernetes
+---
+
+Your security scanner got owned. That's the short version.
+
+On March 19, a threat actor known as TeamPCP published a malicious release of Trivy (v0.69.4) through Aqua Security's own release infrastructure. The attackers had obtained credentials from a previous, incompletely remediated incident, giving them access to GitHub Actions workflows, release binaries, and Docker Hub images simultaneously. They poisoned all three channels at once.
+
+The payload was a credential stealer. It harvested AWS keys, GCP service accounts, Azure tokens, SSH keys, Kubernetes configs, Docker credentials, and anything else sitting in CI/CD environment variables. Trivy runs in thousands of pipelines with access to exactly these secrets by design. That's what made this so effective.
+
+Five days passed before the European Commission's Security Operations Center noticed something wrong. By then, attackers had already used stolen AWS API credentials to access EC cloud infrastructure. CERT-EU confirmed the connection on March 25. Three days later, the group ShinyHunters published 340 GB of exfiltrated data on their dark web leak site, including names, usernames, email addresses, and over 51,000 email-related files from European Commission systems.
+
+Cisco got hit too. Attackers used credentials harvested through the compromised GitHub Action to access build and development environments, stealing data from dozens of devices.
+
+Aqua Security's response was messy. TeamPCP actively interfered with disclosure by deleting GitHub discussion threads and flooding issue trackers with spam. Security researchers at StepSecurity provided independent technical analysis that helped the community understand the scope.
+
+## What You Need to Do
+
+Pin to known-safe versions immediately: trivy binary v0.69.3 or earlier, trivy-action v0.35.0 (commit `57a97c7`), setup-trivy v0.2.6 (commit `3fb12ec`). Don't just check the version tag. Verify the commit SHA.
+
+Then rotate everything. If your pipeline ran the compromised version between March 19 and when you patched, assume every secret in that pipeline's environment was exfiltrated. AWS keys, service account tokens, deploy keys, registry credentials. All of it.
+
+Audit your GitHub Actions while you're at it. Pin actions to commit SHAs, not tags. Tags are mutable. This attack worked because the attacker could push a new binary behind an existing release mechanism. SHA pinning wouldn't have prevented the binary compromise, but it protects against the Action-level vector.
+
+This is the third major supply chain attack against cloud native tooling in the past year. The pattern is clear: CI/CD pipelines are the highest-value targets in modern infrastructure, and security tools running inside those pipelines carry the most privileged access of all. If you're not treating your scanner's release integrity with the same rigor you apply to your own deployments, you're leaving the door open.
