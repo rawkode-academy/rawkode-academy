@@ -1,0 +1,25 @@
+---
+title: "Kubernetes 1.36 Brings HPA Scale-to-Zero and Finally Kills externalIPs"
+description: "Kubernetes 1.36, releasing April 22, promotes HPA scale-to-zero to on-by-default, deprecates the long-exploitable externalIPs field, and permanently disables the gitRepo volume plugin."
+publishedAt: 2026-04-04
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes 1.36 drops on April 22, and it's one of those releases where the deprecations matter more than the new features.
+
+The headline addition is HPA scale-to-zero finally being enabled by default. This feature gate has been sitting in alpha since v1.16. Seven years. The Horizontal Pod Autoscaler can now scale your workloads down to zero replicas without you flipping any feature gates, which is a big deal for batch processing and event-driven workloads where you don't want idle pods burning resources 24/7.
+
+But the real story here is what's getting removed.
+
+`service.spec.externalIPs` is officially deprecated. If you've been using this field, you'll start seeing warnings in 1.36, with full removal planned for v1.43. The reason? CVE-2020-8554, a man-in-the-middle vulnerability that's been a known problem for six years. In multitenant clusters, anyone who can create or edit Services could intercept traffic meant for other pods. SIG Network is pointing teams toward LoadBalancer services, NodePort, or Gateway API as replacements.
+
+The `gitRepo` volume plugin is gone for good. Not deprecated, not behind a feature gate you can re-enable. Permanently disabled. It allowed attackers to execute code as root on nodes, and there's no safe way to fix it. If you're still cloning repos into pods this way, switch to an init container running `git clone`.
+
+On the constructive side, 18 features are graduating to stable. User Namespaces in pods and Mutating Admission Policies both hit GA, which gives you better pod isolation and more flexible policy enforcement without reaching for third-party tools. Four Dynamic Resource Allocation enhancements also graduate, making GPU and specialized hardware scheduling more predictable.
+
+There's also a quieter but practical change: ephemeral tokens for image pulls. The kubelet can now use short-lived, auto-rotating Kubernetes Service Account tokens scoped to individual pods when authenticating against container registries. No more long-lived image pull secrets sitting in your cluster.
+
+If you're running any Services with `externalIPs`, start planning now. Grep your manifests, check your Helm charts, audit your operators. You've got until v1.43 for full removal, but the deprecation warnings start in three weeks.
