@@ -98,8 +98,8 @@ github.com/cilium/cilium v1.19.0-pre.4.0.20260213132713-fc21b7bb6280 h1:ibJlSKB5
 github.com/cilium/cilium v1.19.0-pre.4.0.20260213132713-fc21b7bb6280/go.mod h1:NsI5fI4u0DQ+rlfQ5GkLQLnhiExWLY7Wg9ui9rR2ZYU=
 github.com/cilium/ebpf v0.20.1-0.20260108141042-f7e80f49188b h1:ubt7adiPfM2/6QrjNI8T+LAe4J7KHVkAMbEJ3+LLTXk=
 github.com/cilium/ebpf v0.20.1-0.20260108141042-f7e80f49188b/go.mod h1:dM+AMI6FkW5LOkzikdefUmzK0z81o7GqiKXon7D1F58=
-github.com/cilium/hive v0.0.1 h1:NrHJ1DD74B77ib4UhujEQ0j4nCQmyKOic9qtwrreJRs=
-github.com/cilium/hive v0.0.1/go.mod h1:4/8FBMcTjVdkrNNWaB7t3QqaU4kZDJLJ1leKVP9GjEI=
+github.com/cilium/hive v1.0.1 h1:5PZpis3yw1ywfTnDVQ8AB7k/esVVeoE0cnWVyZDCxE0=
+github.com/cilium/hive v1.0.1/go.mod h1:NY1wD3TQ4sya7zkhkB4QX6eIZ4FjwZPG+lnUB2IH5Xs=
 github.com/cilium/proxy v0.0.0-20250623105955-2136f59a4ea1 h1:SOOtIfQmW/pF1iW1I4hVUx1pvgX7Xh2E8jHv+itBXQ0=
 github.com/cilium/proxy v0.0.0-20250623105955-2136f59a4ea1/go.mod h1:Kwyyx+cC2H67Aj1sDuqBLvPn6TEmEJRPvULIrJ/kBRo=
 github.com/cilium/statedb v0.6.3 h1:SfZ8c/34BseSeKkx2rINeHP8fCzyCUrcKbMlxqI/uxs=
