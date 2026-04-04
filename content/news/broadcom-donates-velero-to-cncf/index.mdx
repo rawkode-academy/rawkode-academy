@@ -13,7 +13,7 @@ Broadcom announced at KubeCon EU 2026 in Amsterdam that it's donating Velero to 
 
 Velero handles backup, restore, and migration for Kubernetes clusters. It works at the Kubernetes API layer, not the control-plane datastore, which makes it portable across providers and distributions. If you've ever needed to move workloads between clusters or set up disaster recovery, you've probably used it or evaluated it.
 
-The sandbox application was filed back in February. Maintainers already span Broadcom, Red Hat, and Microsoft, so this isn't a case of a single company dumping an abandoned project. The existing governance model already follows CNCF principles: consensus-based decisions, supermajority voting, 5-day review periods, and consolidated company voting to prevent any one vendor from dominating.
+The sandbox application was filed back in February by Nikhita Raghunath at Broadcom. Maintainers already span Broadcom, Red Hat, and Microsoft, so this isn't a case of a single company dumping an abandoned project. The existing governance model already follows CNCF principles: consensus-based decisions, supermajority voting, 5-day review periods, and consolidated company voting to prevent any one vendor from dominating.
 
 ## What's Actually Changing
 
@@ -22,6 +22,8 @@ For day-to-day users, not much changes right now. Your Helm charts still work. Y
 The real shift is structural. Under CNCF governance, Velero gets a neutral home that should attract more contributors and integrations. Chris Aniszczyk, CNCF's CTO, put it plainly: Velero "provides a vital layer for backup and disaster recovery" and now gains "a vendor-neutral home to foster community collaboration and growth."
 
 This matters because Broadcom's acquisition of VMware left a lot of open source projects in an uncertain state. Donating Velero to the CNCF is a signal that Broadcom isn't pulling the rug out from under projects that platform teams depend on. It's the opposite move from what many in the community feared post-acquisition.
+
+Velero started life as Heptio Ark back in 2017. VMware acquired Heptio, then Broadcom acquired VMware. That's two acquisitions deep for a tool that thousands of platform teams depend on daily. Every time ownership changed, the community held its breath. This donation finally removes that uncertainty.
 
 ## The Broader Pattern
 
