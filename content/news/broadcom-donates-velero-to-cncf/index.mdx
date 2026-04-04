@@ -1,0 +1,30 @@
+---
+title: "Broadcom Hands Velero to the CNCF Sandbox"
+description: "Broadcom donates Velero, the widely-used Kubernetes backup and migration tool, to the CNCF Sandbox, shifting it to vendor-neutral governance with maintainers from Broadcom, Red Hat, and Microsoft."
+publishedAt: 2026-04-04
+authors:
+  - rawkode
+technologies:
+  - velero
+  - kubernetes
+---
+
+Broadcom announced at KubeCon EU 2026 in Amsterdam that it's donating Velero to the CNCF Sandbox. The project has been accepted, and governance is now transitioning to CNCF standards.
+
+Velero handles backup, restore, and migration for Kubernetes clusters. It works at the Kubernetes API layer, not the control-plane datastore, which makes it portable across providers and distributions. If you've ever needed to move workloads between clusters or set up disaster recovery, you've probably used it or evaluated it.
+
+The sandbox application was filed back in February. Maintainers already span Broadcom, Red Hat, and Microsoft, so this isn't a case of a single company dumping an abandoned project. The existing governance model already follows CNCF principles: consensus-based decisions, supermajority voting, 5-day review periods, and consolidated company voting to prevent any one vendor from dominating.
+
+## What's Actually Changing
+
+For day-to-day users, not much changes right now. Your Helm charts still work. Your backup schedules don't break.
+
+The real shift is structural. Under CNCF governance, Velero gets a neutral home that should attract more contributors and integrations. Chris Aniszczyk, CNCF's CTO, put it plainly: Velero "provides a vital layer for backup and disaster recovery" and now gains "a vendor-neutral home to foster community collaboration and growth."
+
+This matters because Broadcom's acquisition of VMware left a lot of open source projects in an uncertain state. Donating Velero to the CNCF is a signal that Broadcom isn't pulling the rug out from under projects that platform teams depend on. It's the opposite move from what many in the community feared post-acquisition.
+
+## The Broader Pattern
+
+Velero joins a KubeCon EU 2026 that was packed with governance moves. NVIDIA donated its GPU DRA driver to CNCF. Kyverno graduated. There's a clear trend: the ecosystem is consolidating critical infrastructure under vendor-neutral governance faster than it ever has before.
+
+For teams currently running Velero, the practical advice is simple: keep using it. The project just got more sustainable, not less. If you've been holding off on contributing upstream because of the VMware/Broadcom uncertainty, that blocker is gone.
