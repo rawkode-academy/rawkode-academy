@@ -1,7 +1,7 @@
 ---
-title: "Kubescape 4.0 Ships Runtime Threat Detection and AI Agent Security Scanning"
-description: "The CNCF incubating project reaches a major milestone with runtime threat detection going GA, a streamlined single-agent architecture, and new controls that scan AI agents running on Kubernetes for misconfigurations."
-publishedAt: 2026-04-03
+title: "Kubescape 4.0 Ships Runtime Threat Detection GA and First-of-Its-Kind AI Agent Security Scanning"
+description: "The CNCF incubating project promotes runtime threat detection to general availability, consolidates its node agent architecture, and introduces 15 new controls specifically targeting AI agent misconfigurations in Kubernetes."
+publishedAt: 2026-04-05
 authors:
   - rawkode
 technologies:
@@ -9,32 +9,26 @@ technologies:
   - kubernetes
 ---
 
-Kubescape 4.0 dropped at KubeCon Europe 2026 in Amsterdam, and it's the biggest release the project has shipped since joining CNCF as a sandbox project back in 2022. The headline: runtime threat detection is now GA, the architecture got simpler, and there's a whole new surface area for scanning AI agents running in your clusters.
+Kubescape 4.0 dropped at KubeCon Europe in Amsterdam, and it's doing something no other open source Kubernetes security tool has attempted: scanning the security posture of AI agents running inside your clusters.
 
-## Runtime Threat Detection Goes GA
+The release promotes two features to GA. Runtime Threat Detection now uses CEL-based detection rules that learn normal workload behavior through Application Profiles, then alert on deviations. ARMO, the project's primary maintainer, claims this cuts CVE noise by over 95%. That's a bold number, but the approach is sound. Instead of drowning you in every known vulnerability for every image, it focuses on what's actually executing at runtime.
 
-The runtime engine monitors processes, Linux capabilities, syscalls, network and HTTP events, and filesystem activity. Detection rules are written in CEL (Common Expression Language) and managed as Kubernetes CRDs, so they fit naturally into GitOps workflows.
+Kubescape Storage also hits GA. It uses the Kubernetes Aggregated API to store SBOMs, vulnerability manifests, and Application Profiles in a dedicated layer, keeping that metadata out of etcd. For large clusters, that's a meaningful architectural decision.
 
-ARMO's Ben Hirschberg and the maintainer team claim the approach cuts CVE noise by over 95%. That's a bold number, but the mechanism makes sense: instead of flagging every known vulnerability in an image, the engine learns normal workload behavior through ApplicationProfiles and only alerts on deviations. Alerts forward to AlertManager, SIEM tools, Syslog, or HTTP webhooks.
+## The AI Agent Angle
 
-The storage layer is worth noting too. Kubescape now uses Kubernetes Aggregated API to store security metadata (ApplicationProfiles, SBOMs, vulnerability manifests) separately from etcd. That matters if you're running high-density clusters where etcd is already under pressure.
+Here's where it gets interesting. Kubescape 4.0 ships 15 Rego-based controls covering 42 security-critical configuration points in KAgent's CRDs. These check for things like empty security contexts on default deployments, missing NetworkPolicies, and controllers with over-privileged namespace-wide watch permissions.
 
-## Fewer Moving Parts
+If you're running agentic AI workloads on Kubernetes, these agents often get deep infrastructure access. That's a new attack surface that most security tooling simply ignores. Kubescape is the first project to systematically target it.
 
-Previous versions required a host-sensor DaemonSet and a separate host-agent. Both are gone. Kubescape 4.0 runs a single node-agent per node. Fewer components means fewer things to audit and fewer things that break during upgrades.
+There's also a KAgent-native plug-in that lets AI assistants query your cluster's security posture directly. They can inspect vulnerability manifests, review RBAC configurations, and analyze container runtime behavior through ApplicationProfiles and NetworkNeighborhoods.
 
-## AI Agents Get Their Own Security Controls
+## Cleaner Architecture
 
-This is the part that's genuinely new territory. Kubescape 4.0 introduces 15 Rego-based controls covering 42 security-critical configuration points specifically for KAgent, the CNCF Sandbox project that orchestrates AI agents on Kubernetes using Model Context Protocol.
+The 4.0 release removes the old host-sensor DaemonSet and folds those capabilities into the node-agent. One agent per node, direct API communication between core microservices. Less privilege escalation surface, easier auditing.
 
-Think about what KAgent does: it creates direct pathways between AI models and your cluster's infrastructure. A misconfigured KAgent deployment could let an AI agent escalate privileges, watch namespaces it shouldn't, or hit APIs without proper network policies. Kubescape now checks for exactly these scenarios.
+Compliance coverage now includes CIS Benchmark 1.12 for vanilla Kubernetes and CIS Benchmark 1.8 for EKS and AKS, alongside existing NSA-CISA and MITRE ATT&CK framework support.
 
-"We need robust security guardrails to stop agents from exploiting them for high-risk actions like unauthorized access or deleting production data," Hirschberg said. That's not hypothetical. As more teams deploy AI agents with cluster access, the attack surface is real and growing.
+Ben Hirschberg, Kubescape core maintainer and ARMO CTO, led the release. New maintainer Amir Malka joined the project, while David Wertenteil and Craig Box moved to emeritus status.
 
-There's also a KAgent-native plugin that lets AI assistants query Kubescape's security data directly. So an AI agent can inspect vulnerability manifests, review RBAC configurations, and check container behavior at runtime. It's security tooling designed for both sides of the AI coin: securing agents and empowering them.
-
-## Compliance Coverage
-
-Kubescape 4.0 supports NSA-CISA, MITRE ATT&CK, and CIS Benchmarks (including 1.12 for vanilla Kubernetes and 1.8 for EKS and AKS). If you're already using Kubescape for compliance scanning, the runtime detection layer plugs directly into those existing frameworks.
-
-If you're running AI workloads on Kubernetes and haven't thought about how to secure the agents themselves, this release is a good reason to start.
+If you're already running Kubescape, the upgrade path is straightforward since it's a Helm chart update. If you're not, and you've got AI agents anywhere near your clusters, this is worth a look. The 42-point KAgent security scan alone will probably surface something you didn't know about.
