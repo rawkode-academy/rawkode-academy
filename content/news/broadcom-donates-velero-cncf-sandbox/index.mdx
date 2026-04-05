@@ -1,0 +1,32 @@
+---
+title: "Broadcom Hands Velero to the CNCF Sandbox"
+description: "Broadcom has donated Velero, the most widely adopted Kubernetes backup and restore tool, to the CNCF Sandbox, shifting governance to a vendor-neutral model with maintainers from Broadcom, Red Hat, and Microsoft."
+publishedAt: 2026-04-05
+authors:
+  - rawkode
+technologies:
+  - velero
+  - kubernetes
+---
+
+Broadcom just gave away one of the most important tools in the Kubernetes ecosystem. Velero, the backup and restore project that countless platform teams rely on for disaster recovery, is now a CNCF Sandbox project.
+
+The timing isn't accidental. Since acquiring VMware, Broadcom has faced persistent questions about its commitment to open source projects that originated under the VMware umbrella. Donating Velero to the CNCF is Broadcom's clearest answer yet.
+
+## What actually changes
+
+For most Velero users, the short answer is: not much, right now. The project's governance already followed CNCF principles, with consensus-based decision making and supermajority voting. Maintainers from Broadcom, Red Hat, and Microsoft were already collaborating across vendor lines. What changes is the legal and organizational home.
+
+Velero now sits under the CNCF's vendor-neutral umbrella, which means no single company controls the project's direction. Nikhita Raghunath from Broadcom submitted the sandbox application, and the Technical Oversight Committee approved it after a presentation to TAG Operational Resilience in February.
+
+The sandbox application positions Velero as filling "a missing layer between orchestration and storage primitives" in the CNCF landscape. That's accurate. While projects like Kanister and K8up exist in this space, Velero has the largest installed base by a wide margin.
+
+## Why platform teams should care
+
+If you're running Velero in production today, this is good news. Vendor-neutral governance reduces the risk of a single company deprioritizing or changing the project's direction. That concern wasn't theoretical. Broadcom's track record with acquired open source projects has been mixed, and platform teams building disaster recovery workflows on top of Velero needed this kind of assurance.
+
+The CNCF sandbox is also a stepping stone. Projects that enter the sandbox can progress to incubating and eventually graduated status, which signals maturity and long-term viability. Given Velero's existing multi-vendor maintainer base and production adoption, it wouldn't be surprising to see it move through the maturity levels quickly.
+
+There's a practical angle too. CNCF projects tend to attract more contributors. More contributors means faster bug fixes, broader CSI driver support, and better integration with the rest of the cloud native stack.
+
+If you're evaluating Kubernetes backup solutions, Velero just became a safer long-term bet. If you're already running it, keep doing what you're doing. The project isn't going anywhere, and that's exactly the point.
