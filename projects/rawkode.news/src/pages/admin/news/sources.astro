@@ -1,0 +1,50 @@
+---
+import NewsSourcesAdminPanel from "@/components/news-ingest/NewsSourcesAdminPanel.svelte";
+import { listNewsSources } from "@/domains/news-ingest/server";
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getSessionWithPermissions } from "@/core/server/session";
+import { env } from "cloudflare:workers";
+
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+const user = session?.user ?? null;
+const isAdmin = Boolean(permissions?.isAdmin);
+
+const initialSources = isAdmin ? await listNewsSources(env) : [];
+---
+
+<BaseLayout
+  title="Admin News Sources | Rawkode News"
+  description="Manage RSS and Bluesky news sources for Rawkode News."
+  robots="noindex, nofollow"
+  ogType="website"
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={user}
+    isAdmin={isAdmin}
+  >
+    <main class="space-y-5 py-7">
+      {
+        !isAdmin ? (
+          <section class="border-y border-border/70 bg-muted/15 px-5 py-5 text-sm text-muted-foreground">
+            Admin role required.
+          </section>
+        ) : (
+          <>
+            <header class="rkn-view-header space-y-2">
+              <p class="rkn-kicker">Admin</p>
+              <h1 class="rkn-page-title">News sources</h1>
+              <p class="text-sm text-muted-foreground">
+                Keep the source catalog tidy here so the review inbox stays focused on publish decisions.
+              </p>
+            </header>
+
+            <NewsSourcesAdminPanel client:load initialSources={initialSources} pageSize={10} />
+          </>
+        )
+      }
+    </main>
+  </AppShell>
+</BaseLayout>

@@ -1,10 +1,10 @@
 ---
-import TagsAdminPanel from "@/components/admin/TagsAdminPanel.svelte";
+import TagsAdminPanel from "@/components/tags/TagsAdminPanel.svelte";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { parsePageValue } from "@/components/admin/tags/shared";
-import { getSessionWithPermissions } from "@/lib/server/session";
-import { listTags } from "@/lib/server/tags";
+import { parsePageValue } from "@/components/tags/admin/shared";
+import { getSessionWithPermissions } from "@/core/server/session";
+import { listTags } from "@/domains/tags/server";
 import { env } from "cloudflare:workers";
 
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);

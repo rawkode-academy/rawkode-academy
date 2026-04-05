@@ -1,11 +1,11 @@
 ---
 import Pagination from "@/components/common/Pagination.astro";
-import PostRowSvelte from "@/components/feed/PostRowSvelte.svelte";
+import PostRowSvelte from "@/components/posts/PostRowSvelte.svelte";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { buttonPrimarySmClass, buttonSecondarySmClass } from "@/lib/ui-classes";
-import { listPosts, parsePageValue } from "@/lib/server/posts";
-import { getSessionWithPermissions } from "@/lib/server/session";
+import { buttonPrimarySmClass, buttonSecondarySmClass } from "@/shared/ui/classes";
+import { listPosts, parsePageValue } from "@/domains/posts/server";
+import { getSessionWithPermissions } from "@/core/server/session";
 import { env } from "cloudflare:workers";
 
 const page = parsePageValue(Astro.url.searchParams.get("page")) ?? 1;

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { buildAuthorizationUrl } from "@/lib/auth";
+import { buildAuthorizationUrl } from "@/core/auth";
 export const PKCE_COOKIE_NAME = "pkce_verifier";
 
 export const GET: APIRoute = async (context) => {

@@ -4,9 +4,9 @@ import { eq } from "drizzle-orm";
 
 import { getDb } from "../../../db";
 import { postTags, posts, tags } from "../../../db/schema";
-import { acceptsArticleHtml } from "@/lib/content-negotiation";
-import { parseEntityId } from "@/lib/ids";
-import type { TagKind } from "@/lib/tags";
+import { acceptsArticleHtml } from "@/shared/content-negotiation";
+import { parseEntityId } from "@/shared/ids";
+import type { TagKind } from "@/domains/tags/model";
 
 const normalizeTimestamp = (value: Date | number) => {
   const date = value instanceof Date ? value : new Date(value);

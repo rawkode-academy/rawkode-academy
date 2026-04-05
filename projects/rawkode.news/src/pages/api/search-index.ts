@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { searchPosts } from "@/lib/server/posts";
+import { searchPosts } from "@/domains/posts/server";
 
 export const GET: APIRoute = async ({ request }) => {
   const requestUrl = new URL(request.url);

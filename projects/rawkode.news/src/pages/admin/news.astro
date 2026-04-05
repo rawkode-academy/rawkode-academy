@@ -1,0 +1,63 @@
+---
+import NewsInboxAdminPanel from "@/components/news-ingest/NewsInboxAdminPanel.svelte";
+import { listNewsCandidates, listNewsSources } from "@/domains/news-ingest/server";
+import AppShell from "@/components/layout/AppShell.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getSessionWithPermissions } from "@/core/server/session";
+import { listTags } from "@/domains/tags/server";
+import { env } from "cloudflare:workers";
+
+const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
+const user = session?.user ?? null;
+const isAdmin = Boolean(permissions?.isAdmin);
+
+const [initialSources, initialCandidates, optionalTags] = isAdmin
+  ? await Promise.all([
+      listNewsSources(env),
+      listNewsCandidates(env),
+      listTags(env, "optional"),
+    ])
+  : [[], [], []];
+---
+
+<BaseLayout
+  title="Admin News | Rawkode News"
+  description="Review and publish pulled news candidates for Rawkode News."
+  robots="noindex, nofollow"
+  ogType="website"
+>
+  <AppShell
+    pathname={Astro.url.pathname}
+    search={Astro.url.search}
+    user={user}
+    isAdmin={isAdmin}
+  >
+    <main class="space-y-5 py-7">
+      {
+        !isAdmin ? (
+          <section class="border-y border-border/70 bg-muted/15 px-5 py-5 text-sm text-muted-foreground">
+            Admin role required.
+          </section>
+        ) : (
+          <>
+            <header class="rkn-view-header space-y-2">
+              <p class="rkn-kicker">Admin</p>
+              <h1 class="rkn-page-title">News inbox</h1>
+              <p class="text-sm text-muted-foreground">
+                Pull from RSS and Bluesky, review candidates, and publish them into the live news feed.
+              </p>
+            </header>
+
+            <NewsInboxAdminPanel
+              client:load
+              initialSources={initialSources}
+              initialCandidates={initialCandidates}
+              optionalTags={optionalTags}
+              pageSize={12}
+            />
+          </>
+        )
+      }
+    </main>
+  </AppShell>
+</BaseLayout>

@@ -1,8 +1,8 @@
 ---
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { buttonPrimarySmClass } from "@/lib/ui-classes";
-import { getSessionWithPermissions } from "@/lib/server/session";
+import { buttonPrimarySmClass } from "@/shared/ui/classes";
+import { getSessionWithPermissions } from "@/core/server/session";
 import { env } from "cloudflare:workers";
 
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);

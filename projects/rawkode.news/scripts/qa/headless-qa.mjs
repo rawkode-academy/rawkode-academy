@@ -66,6 +66,8 @@ const defaultRoutes = [
   "/search?q=kubernetes",
   "/submit",
   "/profile",
+  "/admin/news",
+  "/admin/news/sources",
   "/admin/tags",
   "/this-route-should-404",
 ];

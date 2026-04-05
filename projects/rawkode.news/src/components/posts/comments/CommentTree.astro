@@ -1,0 +1,96 @@
+---
+import { actions } from "astro:actions";
+import type { CommentNode } from "@/shared/contracts";
+import { commentAnchor, formatCountLabel, formatRelativeTime } from "@/shared/contracts";
+import { COMMENT_BODY_MAX_LENGTH } from "@/shared/input-limits";
+import {
+  buttonPrimarySmClass,
+  textActionMutedXsClass,
+  textLinkMutedXsClass,
+  textareaClass,
+} from "@/shared/ui/classes";
+
+type Props = {
+  comments: CommentNode[];
+  canReply: boolean;
+  postId: string;
+  returnTo: string;
+  depth?: number;
+};
+
+const {
+  comments,
+  canReply,
+  postId,
+  returnTo,
+  depth = 0,
+} = Astro.props as Props;
+---
+
+{
+  comments.map((comment) => (
+    <div class="rkn-thread-node space-y-3" style={`--rkn-thread-depth: ${depth ? Math.min(depth, 5) : 0};`}>
+      <article
+        id={commentAnchor(comment)}
+        class="border-l border-border/75 px-3 py-2 text-sm target:border-primary/60 target:bg-primary/10"
+      >
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="break-words font-semibold text-foreground" dir="auto">{comment.author}</span>
+            <span>·</span>
+            <span>{formatRelativeTime(comment.createdAt)}</span>
+          </div>
+          <a
+            href={`${returnTo}#${commentAnchor(comment)}`}
+            class={textLinkMutedXsClass}
+          >
+            Permalink
+          </a>
+        </div>
+
+        <p class="mt-2 break-words whitespace-pre-wrap text-sm leading-relaxed text-foreground/95" dir="auto">{comment.body}</p>
+
+        <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <span>{formatCountLabel(comment.replies.length, "reply", "replies")}</span>
+        </div>
+
+        {
+          canReply ? (
+            <details class="mt-3">
+              <summary class={`inline-flex cursor-pointer list-none items-center gap-1 ${textActionMutedXsClass} [&::-webkit-details-marker]:hidden`}>
+                Reply
+              </summary>
+              <form method="POST" action={actions.createComment} class="mt-3 space-y-3 border-l-2 border-primary/25 bg-muted/15 px-3 py-3">
+                <input type="hidden" name="postId" value={postId} />
+                <input type="hidden" name="parentId" value={comment.id} />
+                <input type="hidden" name="returnTo" value={returnTo} />
+                <textarea
+                  name="body"
+                  required
+                  maxlength={COMMENT_BODY_MAX_LENGTH}
+                  dir="auto"
+                  class={`${textareaClass} min-h-[90px]`}
+                  placeholder="Add a specific, useful reply"
+                />
+                <button
+                  type="submit"
+                  class={buttonPrimarySmClass}
+                >
+                  Add reply
+                </button>
+              </form>
+            </details>
+          ) : null
+        }
+      </article>
+
+      {
+        comment.replies.length ? (
+          <div class="rkn-thread-branch space-y-3">
+            <Astro.self comments={comment.replies} canReply={canReply} postId={postId} returnTo={returnTo} depth={depth + 1} />
+          </div>
+        ) : null
+      }
+    </div>
+  ))
+}

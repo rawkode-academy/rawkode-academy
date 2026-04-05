@@ -26,11 +26,13 @@
     "sharp": "^0.34.5",
     "svelte": "^5.55.1",
     "tailwindcss": "^4.2.2",
-    "tldts": "^7.0.28"
+    "tldts": "^7.0.28",
+    "turndown": "^7.2.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "@cloudflare/workers-types": "^4.20260405.1",
+    "@types/turndown": "^5.0.6",
     "axe-core": "^4.11.2",
     "drizzle-kit": "^0.31.10",
     "playwright": "^1.59.1",

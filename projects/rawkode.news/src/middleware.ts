@@ -1,7 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { env } from "cloudflare:workers";
-import { SESSION_COOKIE_NAME, type StoredSession } from "@/lib/auth";
-import { acceptsArticleHtml } from "@/lib/content-negotiation";
+import { SESSION_COOKIE_NAME, type StoredSession } from "@/core/auth";
+import { acceptsArticleHtml } from "@/shared/content-negotiation";
 
 const itemPathPattern = /^\/item\/([^/]+)\/?$/;
 

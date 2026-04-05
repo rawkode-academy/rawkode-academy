@@ -2,22 +2,22 @@
 import { actions } from "astro:actions";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { mandatoryTagSlugs } from "@/lib/contracts";
+import { mandatoryTagSlugs } from "@/shared/contracts";
 import {
   POST_BODY_MAX_LENGTH,
   POST_TITLE_MAX_LENGTH,
   POST_URL_MAX_LENGTH,
-} from "@/lib/input-limits";
+} from "@/shared/input-limits";
 import {
   buttonPrimaryLgClass,
   buttonSecondarySmClass,
   checkboxPillSmClass,
   inputClass,
   textareaClass,
-} from "@/lib/ui-classes";
-import { getSessionWithPermissions } from "@/lib/server/session";
-import { listTags } from "@/lib/server/tags";
-import { MAX_OPTIONAL_TAGS } from "@/lib/tags";
+} from "@/shared/ui/classes";
+import { getSessionWithPermissions } from "@/core/server/session";
+import { listTags } from "@/domains/tags/server";
+import { MAX_OPTIONAL_TAGS } from "@/domains/tags/model";
 import { env } from "cloudflare:workers";
 
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
@@ -230,7 +230,7 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
 
   const PREVIEW_DEBOUNCE_MS = 120;
   const getMarkdownRenderer = async () => {
-    const module = await import("@/lib/markdown");
+    const module = await import("@/shared/markdown");
     return module.renderMarkdownToHtml;
   };
 

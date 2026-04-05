@@ -1,5 +1,5 @@
 ---
-import type { StoredSession } from "@/lib/auth";
+import type { StoredSession } from "@/core/auth";
 import {
   buttonPrimarySmClass,
   buttonSecondarySmClass,
@@ -7,7 +7,7 @@ import {
   menuPanelItemClass,
   shellNavItemSmClass,
   shellNavStrongItemSmClass,
-} from "@/lib/ui-classes";
+} from "@/shared/ui/classes";
 
 type Props = {
   pathname: string;
@@ -116,9 +116,17 @@ const displayInitials = displayName
                       Profile
                     </a>
                     {isAdmin ? (
-                      <a href="/admin/tags" class={menuPanelItemClass}>
-                        Admin tags
-                      </a>
+                      <>
+                        <a href="/admin/news" class={menuPanelItemClass}>
+                          Admin news
+                        </a>
+                        <a href="/admin/news/sources" class={menuPanelItemClass}>
+                          Admin sources
+                        </a>
+                        <a href="/admin/tags" class={menuPanelItemClass}>
+                          Admin tags
+                        </a>
+                      </>
                     ) : null}
                     <a
                       href={signOutUrl}
@@ -183,9 +191,17 @@ const displayInitials = displayName
                     Profile
                   </a>
                   {isAdmin ? (
-                    <a href="/admin/tags" class={shellNavItemSmClass}>
-                      Admin tags
-                    </a>
+                    <>
+                      <a href="/admin/news" class={shellNavItemSmClass}>
+                        Admin news
+                      </a>
+                      <a href="/admin/news/sources" class={shellNavItemSmClass}>
+                        Admin sources
+                      </a>
+                      <a href="/admin/tags" class={shellNavItemSmClass}>
+                        Admin tags
+                      </a>
+                    </>
                   ) : null}
                   <a
                     href={signOutUrl}

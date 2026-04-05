@@ -1,11 +1,11 @@
 ---
-import FeedPage from "@/components/feed/FeedPage.astro";
+import FeedPage from "@/components/posts/FeedPage.astro";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { buildCanonicalPath } from "@/lib/seo";
-import { listPosts, parsePageValue, parseTagSearchParam } from "@/lib/server/posts";
-import { getSessionWithPermissions } from "@/lib/server/session";
-import { listTags } from "@/lib/server/tags";
+import { buildCanonicalPath } from "@/shared/seo";
+import { listPosts, parsePageValue, parseTagSearchParam } from "@/domains/posts/server";
+import { getSessionWithPermissions } from "@/core/server/session";
+import { listTags } from "@/domains/tags/server";
 import { env } from "cloudflare:workers";
 
 const page = parsePageValue(Astro.url.searchParams.get("page")) ?? 1;
