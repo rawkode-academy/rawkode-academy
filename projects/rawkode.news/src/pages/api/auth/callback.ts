@@ -7,7 +7,7 @@ import {
   parseState,
   SESSION_COOKIE_NAME,
   SESSION_DURATION_SECONDS,
-} from "@/lib/auth";
+} from "@/core/auth";
 import { PKCE_COOKIE_NAME } from "./sign-in";
 
 export const GET: APIRoute = async (context) => {

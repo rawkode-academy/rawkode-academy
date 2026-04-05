@@ -2,7 +2,7 @@
 import SearchPanel from "@/components/search/SearchPanel.svelte";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getSessionWithPermissions } from "@/lib/server/session";
+import { getSessionWithPermissions } from "@/core/server/session";
 import { env } from "cloudflare:workers";
 
 const { session, permissions } = await getSessionWithPermissions(env, Astro.cookies);
@@ -10,7 +10,7 @@ const { session, permissions } = await getSessionWithPermissions(env, Astro.cook
 
 <BaseLayout
   title="Search | Rawkode News"
-  description="Search posts across Rawkode News."
+  description="Search every post stored in Rawkode News."
   robots="noindex, nofollow"
   ogType="website"
 >
@@ -24,7 +24,7 @@ const { session, permissions } = await getSessionWithPermissions(env, Astro.cook
       <header class="rkn-view-header space-y-2">
         <h1 class="rkn-page-title">Search posts</h1>
         <p class="max-w-[72ch] text-sm text-muted-foreground">
-          Find discussions by project, author, keyword, or source domain.
+          Search every stored post by project, author, keyword, or source domain.
         </p>
       </header>
 
