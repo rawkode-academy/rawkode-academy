@@ -94,7 +94,7 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                       name="title"
                       required
                       maxlength={POST_TITLE_MAX_LENGTH}
-                      aria-describedby="submit-title-hint"
+                      aria-describedby="submit-title-hint submit-link-preview-status"
                       dir="auto"
                       placeholder="What changed in Kubernetes scheduling?"
                       class={inputClass}
@@ -102,6 +102,30 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                     <p id="submit-title-hint" class="text-xs text-muted-foreground">
                       Be specific. Up to {POST_TITLE_MAX_LENGTH} characters.
                     </p>
+                  </div>
+
+                  <div class="space-y-2">
+                    <label for="submit-url" class="text-sm font-semibold text-foreground">
+                      Source URL (optional)
+                    </label>
+                    <input
+                      id="submit-url"
+                      name="url"
+                      type="url"
+                      inputmode="url"
+                      maxlength={POST_URL_MAX_LENGTH}
+                      aria-describedby="submit-url-hint submit-link-preview-status"
+                      placeholder="https://..."
+                      class={inputClass}
+                    />
+                    <p id="submit-url-hint" class="text-xs text-muted-foreground">
+                      Optional. Use http:// or https://.
+                    </p>
+                    <p
+                      id="submit-link-preview-status"
+                      aria-live="polite"
+                      class="min-h-[1rem] text-xs text-muted-foreground"
+                    ></p>
                   </div>
 
                   <div class="space-y-3">
@@ -153,25 +177,6 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
                         0/{MAX_OPTIONAL_TAGS} optional tags selected.
                       </p>
                     </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <label for="submit-url" class="text-sm font-semibold text-foreground">
-                      Source URL (optional)
-                    </label>
-                    <input
-                      id="submit-url"
-                      name="url"
-                      type="url"
-                      inputmode="url"
-                      maxlength={POST_URL_MAX_LENGTH}
-                      aria-describedby="submit-url-hint"
-                      placeholder="https://..."
-                      class={inputClass}
-                    />
-                    <p id="submit-url-hint" class="text-xs text-muted-foreground">
-                      Optional. Use http:// or https://.
-                    </p>
                   </div>
 
                   <div class="space-y-2">
@@ -317,6 +322,173 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
     apply();
   };
 
+  const initLinkPreviewLookup = () => {
+    const titleInput = document.getElementById("submit-title");
+    const urlInput = document.getElementById("submit-url");
+    const status = document.getElementById("submit-link-preview-status");
+
+    if (
+      !(titleInput instanceof HTMLInputElement) ||
+      !(urlInput instanceof HTMLInputElement) ||
+      !(status instanceof HTMLElement)
+    ) {
+      return;
+    }
+    if (titleInput.dataset.linkPreviewBound === "1") {
+      return;
+    }
+
+    titleInput.dataset.linkPreviewBound = "1";
+
+    type LinkPreviewPayload = {
+      error?: string;
+      title?: string;
+      url?: string;
+    };
+    let requestToken = 0;
+    let lookupTimer = 0;
+    const LINK_PREVIEW_DEBOUNCE_MS = 180;
+
+    const normalizeUrl = (value: string) => {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      try {
+        const parsed = new URL(trimmed);
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+          return null;
+        }
+        return parsed.toString();
+      } catch {
+        return null;
+      }
+    };
+
+    const setStatus = (
+      message: string,
+      tone: "error" | "muted" | "success" = "muted",
+    ) => {
+      status.textContent = message;
+      status.classList.remove("text-muted-foreground", "text-destructive", "text-foreground");
+
+      if (tone === "error") {
+        status.classList.add("text-destructive");
+        return;
+      }
+      if (tone === "success") {
+        status.classList.add("text-foreground");
+        return;
+      }
+      status.classList.add("text-muted-foreground");
+    };
+
+    const replaceTitleIfUnchanged = (candidateUrls: string[], nextTitle: string) => {
+      const currentTitle = titleInput.value.trim();
+      if (!currentTitle || candidateUrls.includes(currentTitle)) {
+        titleInput.value = nextTitle;
+        return true;
+      }
+      return false;
+    };
+
+    const fetchPreview = async (url: string): Promise<LinkPreviewPayload> => {
+      return await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`, {
+        headers: {
+          Accept: "application/json",
+        },
+      }).then(async (response) => {
+        const payload = (await response.json().catch(() => ({}))) as LinkPreviewPayload;
+        if (!response.ok) {
+          throw new Error(
+            typeof payload?.error === "string" && payload.error
+              ? payload.error
+              : "Could not load page title.",
+          );
+        }
+        return payload;
+      });
+    };
+
+    const resolveUrl = async (url: string) => {
+      const token = ++requestToken;
+      setStatus("Fetching title from source…");
+
+      try {
+        const preview = await fetchPreview(url);
+        if (token !== requestToken) {
+          return;
+        }
+
+        if (typeof preview?.title === "string" && preview.title) {
+          const didReplaceTitle = replaceTitleIfUnchanged(
+            [url, preview.url ?? ""].filter(Boolean),
+            preview.title,
+          );
+          setStatus(
+            didReplaceTitle
+              ? "Source title applied."
+              : "Source title fetched. Current title kept.",
+            didReplaceTitle ? "success" : "muted",
+          );
+          return;
+        }
+
+        setStatus("No source title found. Enter one manually.");
+      } catch (error) {
+        if (token !== requestToken) {
+          return;
+        }
+
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : "Could not load page title. Enter one manually.";
+        setStatus(message, "error");
+      }
+    };
+
+    const resolveCurrentUrl = () => {
+      requestToken += 1;
+      const normalizedUrl = normalizeUrl(urlInput.value);
+      if (!normalizedUrl) {
+        if (!urlInput.value.trim()) {
+          setStatus("");
+          return;
+        }
+
+        setStatus("Paste or enter a full http:// or https:// URL to fetch the title.");
+        return;
+      }
+
+      void resolveUrl(normalizedUrl);
+    };
+
+    const scheduleCurrentUrlLookup = () => {
+      window.clearTimeout(lookupTimer);
+      lookupTimer = window.setTimeout(resolveCurrentUrl, LINK_PREVIEW_DEBOUNCE_MS);
+    };
+
+    titleInput.addEventListener("paste", (event) => {
+      const pastedText = event.clipboardData?.getData("text/plain") ?? "";
+      const normalizedUrl = normalizeUrl(pastedText);
+      if (!normalizedUrl) {
+        return;
+      }
+
+      event.preventDefault();
+      titleInput.value = normalizedUrl;
+      void resolveUrl(normalizedUrl);
+    });
+
+    urlInput.addEventListener("input", scheduleCurrentUrlLookup);
+    urlInput.addEventListener("change", () => {
+      window.clearTimeout(lookupTimer);
+      resolveCurrentUrl();
+    });
+  };
+
   const initSubmitPendingState = () => {
     const form = document.getElementById("submit-post-form");
     const button = document.getElementById("submit-post-button");
@@ -347,6 +519,7 @@ const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(
   const initSubmitPage = () => {
     initSubmitPreview();
     initOptionalTagLimit();
+    initLinkPreviewLookup();
     initSubmitPendingState();
   };
 
