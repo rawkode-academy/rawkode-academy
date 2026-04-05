@@ -213,9 +213,10 @@ const extractDocumentTitle = (documentHtml: string) => {
     return null;
   }
 
-  const value = collapseWhitespace(
-    decodeHtmlEntities(titleMatch[1].replace(/<[^>]+>/g, "")),
-  );
+  const rawTitleText = titleMatch[1]
+    .replace(/<[^>]+>/g, "")
+    .replace(/[<>]/g, "");
+  const value = collapseWhitespace(decodeHtmlEntities(rawTitleText));
   return value || null;
 };
 
