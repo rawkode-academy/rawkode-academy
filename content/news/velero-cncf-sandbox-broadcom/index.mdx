@@ -1,0 +1,32 @@
+---
+title: "Broadcom Donates Velero to the CNCF Sandbox"
+description: "Broadcom has handed Velero, the Kubernetes backup and migration tool used across roughly half of cloud native environments, to the CNCF Sandbox for vendor-neutral governance."
+publishedAt: 2026-04-05
+authors:
+  - rawkode
+technologies:
+  - velero
+  - kubernetes
+---
+
+Velero, the backup and disaster recovery tool that's been a staple of Kubernetes operations since the Heptio days, now belongs to the CNCF. Broadcom announced the Sandbox submission at KubeCon EU 2026 in Amsterdam, and the project has been accepted.
+
+This isn't a small project changing hands. Velero handles cluster state backup, persistent volume snapshots, and cross-cluster migration for a significant chunk of the Kubernetes ecosystem. It operates at the Kubernetes API layer rather than the control-plane datastore level, which makes it portable across providers and distributions. If you've ever needed to move workloads between clusters or recover from a bad deployment, there's a good chance Velero was involved.
+
+The backstory matters here. Heptio built Velero (originally called Ark), VMware acquired Heptio in 2018, and Broadcom acquired VMware in 2023. Through two acquisitions, the project stayed under single-vendor control. That's now changing.
+
+## What the CNCF Move Actually Means
+
+Broadcom filed the Sandbox application in February 2026. The stated goals are straightforward: widen the contributor base and align governance with CNCF standards. In practice, this removes the perception that Velero's roadmap serves Broadcom's interests first. Other vendors and end users can now push the project in directions that don't depend on one company's product strategy.
+
+Chris Aniszczyk, CTO of CNCF, pointed to the shift toward "long-term resilience and data management" as organizations scale stateful workloads. That's a diplomatic way of saying backup tooling has been an afterthought in cloud native for too long.
+
+There's a practical angle too. Velero's plugin architecture supports AWS, Azure, GCP, and MinIO out of the box. Under CNCF governance, expect providers like Ceph and other storage backends to get first-class attention from contributors who previously had no seat at the table.
+
+## What Teams Should Do
+
+If you're already running Velero, nothing breaks. Your existing Helm charts, container images, and backup schedules keep working. But you should watch the governance repo for changes to release cadence and plugin compatibility.
+
+If you've been evaluating Velero against commercial alternatives, the CNCF move strengthens the case for the open source option. Vendor lock-in risk just dropped to near zero.
+
+The bigger question is whether this signals a pattern. Broadcom also released VKS 3.6 at the same event, integrating CNCF projects like Antrea and Pinniped directly into their Kubernetes service. Donating Velero while simultaneously building on CNCF projects suggests Broadcom sees more value in contributing to the ecosystem than controlling individual tools. Whether that goodwill holds up through Broadcom's next earnings call is another matter entirely.
