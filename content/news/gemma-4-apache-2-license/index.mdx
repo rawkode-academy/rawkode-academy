@@ -1,0 +1,22 @@
+---
+title: "Google Releases Gemma 4 Under Apache 2.0, Dropping Its Restrictive Custom License"
+description: "Google's Gemma 4 models are the first in the family released under an OSI-approved Apache 2.0 license, removing legal ambiguity for teams self-hosting AI inference in production."
+publishedAt: 2026-04-05
+authors:
+  - rawkode
+technologies: []
+---
+
+Google just open-sourced Gemma 4 under Apache 2.0. That's a big deal.
+
+Previous Gemma releases shipped with a custom license that made legal teams nervous. You could download the weights and run inference, but the terms were vague enough that many organizations wouldn't touch them for production workloads. Apache 2.0 changes that entirely. It's an OSI-approved license with well-understood patent grants, irrevocable usage rights, and zero royalty obligations.
+
+The Gemma 4 family spans from small edge models up to 31 billion parameters. Google says the models have been downloaded over 400 million times across all versions, with the community creating more than 100,000 variants. Those numbers will likely accelerate now that the licensing friction is gone.
+
+Why does this matter for platform engineers specifically? If you're running inference workloads on Kubernetes, the license on your model weights is a dependency just like any other. Teams using llm-d, vLLM, or similar serving infrastructure can now slot Gemma 4 into their pipelines without legal review holding things up for weeks.
+
+The timing is interesting. Meta's Llama models still ship under a custom license with usage restrictions above 700 million monthly active users. Mistral uses Apache 2.0 for some models but not others. Google going all-in on Apache 2.0 for Gemma 4 puts competitive pressure on every other foundation model provider to simplify their terms.
+
+Three things stand out about this release. First, Google explicitly calls out "local, private execution that doesn't rely on cloud-only infrastructure" as a design goal. That's Google acknowledging the self-hosted inference trend rather than fighting it. Second, the 31B parameter model hits a sweet spot for teams that need something more capable than a 7B model but can't justify the GPU budget for a 70B+ deployment. Third, the community variant ecosystem (100,000+ fine-tuned models) means you're not locked into Google's base checkpoints.
+
+There's a practical question worth asking your team: are you currently blocked on deploying an open model because of license ambiguity? If so, Gemma 4 under Apache 2.0 just removed that blocker. If you're already running Llama or Mistral models without concern, this probably doesn't change your stack today, but it does give you another strong option when you next evaluate model choices.
