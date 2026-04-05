@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { formatInteger, parseApiPostList, type ApiPost } from "@/lib/contracts";
+  import { formatInteger, parseApiPostList, type ApiPost } from "@/shared/contracts";
   import {
     buttonGhostSmClass,
     buttonPrimarySmClass,
     buttonSecondarySmClass,
     inputClass,
-  } from "@/lib/ui-classes";
+  } from "@/shared/ui/classes";
 
   type SearchPost = ApiPost;
   type SearchStatusTone = "idle" | "loading" | "success" | "warning" | "error";
@@ -29,7 +29,7 @@
   let noResultsQuery = "";
   let fromPath = "/search";
   let isSearching = false;
-  let PostRowComponent: (typeof import("@/components/feed/PostRowSvelte.svelte"))["default"] | null = null;
+  let PostRowComponent: (typeof import("@/components/posts/PostRowSvelte.svelte"))["default"] | null = null;
 
   let activeController: AbortController | null = null;
   let activeRequestToken = 0;
@@ -76,7 +76,7 @@
       return;
     }
     if (!postRowLoader) {
-      postRowLoader = import("@/components/feed/PostRowSvelte.svelte")
+      postRowLoader = import("@/components/posts/PostRowSvelte.svelte")
         .then((module) => {
           PostRowComponent = module.default;
         })
@@ -272,7 +272,7 @@
     </div>
 
     <div class="text-xs text-muted-foreground">
-      <p id="search-hint">Search across titles, summaries, authors, and source domains.</p>
+      <p id="search-hint">Search every post in D1 across titles, summaries, authors, and source domains.</p>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
@@ -338,7 +338,7 @@
     </div>
   {:else}
     <div class="space-y-2 px-[clamp(1rem,2.1vw,1.25rem)] py-6 text-sm text-muted-foreground">
-      <p>Search by keyword, author, or source domain.</p>
+      <p>Search every stored post by keyword, author, or source domain.</p>
       <p class="text-xs">Results are limited to the top {formatInteger(SEARCH_RESULT_LIMIT)} matches.</p>
     </div>
   {/if}

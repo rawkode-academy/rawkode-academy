@@ -91,3 +91,95 @@ export const roles = sqliteTable("roles", {
   id: text("id").primaryKey().notNull(),
   role: text("role").notNull(),
 });
+
+export const newsSources = sqliteTable(
+  "news_sources",
+  {
+    id: text("id").primaryKey(),
+    type: text("type", { enum: ["rss", "bluesky"] }).notNull(),
+    name: text("name").notNull(),
+    locator: text("locator").notNull(),
+    enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+    lastPulledAt: integer("last_pulled_at", { mode: "timestamp_ms" }),
+    lastPullStatus: text("last_pull_status", { enum: ["success", "error"] }),
+    lastPullMessage: text("last_pull_message"),
+    lastPullCount: integer("last_pull_count").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("news_sources_type_locator_idx").on(table.type, table.locator),
+    index("news_sources_type_idx").on(table.type),
+    index("news_sources_enabled_idx").on(table.enabled),
+    index("news_sources_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const newsCandidates = sqliteTable(
+  "news_candidates",
+  {
+    id: text("id").primaryKey(),
+    normalizedUrl: text("normalized_url").notNull(),
+    originalUrl: text("original_url").notNull(),
+    title: text("title").notNull(),
+    excerpt: text("excerpt"),
+    authorName: text("author_name"),
+    publishedAt: integer("published_at", { mode: "timestamp_ms" }),
+    status: text("status", { enum: ["pending", "converted", "dismissed"] })
+      .notNull()
+      .default("pending"),
+    convertedPostId: text("converted_post_id").references(() => posts.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    latestSourceId: text("latest_source_id").references(() => newsSources.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    latestSourceName: text("latest_source_name"),
+    latestSourceType: text("latest_source_type", { enum: ["rss", "bluesky"] }),
+    firstSeenAt: integer("first_seen_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("news_candidates_normalized_url_idx").on(table.normalizedUrl),
+    index("news_candidates_status_idx").on(table.status),
+    index("news_candidates_last_seen_at_idx").on(table.lastSeenAt),
+    index("news_candidates_published_at_idx").on(table.publishedAt),
+    index("news_candidates_latest_source_id_idx").on(table.latestSourceId),
+  ],
+);
+
+export const newsCandidateMentions = sqliteTable(
+  "news_candidate_mentions",
+  {
+    candidateId: text("candidate_id")
+      .notNull()
+      .references(() => newsCandidates.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    sourceId: text("source_id")
+      .notNull()
+      .references(() => newsSources.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    sourceItemUrl: text("source_item_url").notNull(),
+    sourceItemId: text("source_item_id"),
+    pulledAt: integer("pulled_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.sourceId, table.sourceItemUrl],
+      name: "news_candidate_mentions_source_id_source_item_url_pk",
+    }),
+    index("news_candidate_mentions_candidate_id_idx").on(table.candidateId),
+    index("news_candidate_mentions_source_id_idx").on(table.sourceId),
+    index("news_candidate_mentions_pulled_at_idx").on(table.pulledAt),
+  ],
+);

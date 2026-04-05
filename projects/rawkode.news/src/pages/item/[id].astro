@@ -1,14 +1,14 @@
 ---
-import CommentsPanel from "@/components/post/CommentsPanel.svelte";
+import CommentsPanel from "@/components/posts/comments/CommentsPanel.svelte";
 import AppShell from "@/components/layout/AppShell.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { formatRelativeTime } from "@/lib/contracts";
-import { parseEntityId } from "@/lib/ids";
-import { renderMarkdownToHtml } from "@/lib/markdown";
-import { buildCanonicalPath, getPostMeta, postUnavailableCopy } from "@/lib/seo";
-import { buttonPrimarySmClass, inlineBackLinkSmClass, inlinePrimaryLinkClass } from "@/lib/ui-classes";
-import { getPostById, listCommentsByPostId } from "@/lib/server/posts";
-import { getSessionWithPermissions } from "@/lib/server/session";
+import { formatRelativeTime } from "@/shared/contracts";
+import { parseEntityId } from "@/shared/ids";
+import { renderMarkdownToHtml } from "@/shared/markdown";
+import { buildCanonicalPath, getPostMeta, postUnavailableCopy } from "@/shared/seo";
+import { buttonPrimarySmClass, inlineBackLinkSmClass, inlinePrimaryLinkClass } from "@/shared/ui/classes";
+import { getPostById, listCommentsByPostId } from "@/domains/posts/server";
+import { getSessionWithPermissions } from "@/core/server/session";
 import { env } from "cloudflare:workers";
 
 const postId = parseEntityId(Astro.params.id);
