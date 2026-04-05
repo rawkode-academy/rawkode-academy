@@ -1,11 +1,12 @@
 ---
 title: "Trivy Supply Chain Attack Hits the European Commission, Exposes 340 GB of Data"
 description: "A compromised release of the Trivy vulnerability scanner was used as the initial access vector in a breach of the European Commission's AWS infrastructure, leaking 340 GB of data. If you run Trivy in CI/CD, check your version now."
-publishedAt: 2026-04-04
+publishedAt: 2026-04-05
 authors:
   - rawkode
 technologies:
   - trivy
+  - docker
   - kubernetes
 ---
 
@@ -17,7 +18,9 @@ The payload was a credential stealer. It harvested AWS keys, GCP service account
 
 Five days passed before the European Commission's Security Operations Center noticed something wrong. By then, attackers had already used stolen AWS API credentials to access EC cloud infrastructure. CERT-EU confirmed the connection on March 25. Three days later, the group ShinyHunters published 340 GB of exfiltrated data on their dark web leak site, including names, usernames, email addresses, and over 51,000 email-related files from European Commission systems.
 
-Cisco got hit too. Attackers used credentials harvested through the compromised GitHub Action to access build and development environments, stealing data from dozens of devices.
+Cisco got hit too. Attackers used credentials harvested through the compromised GitHub Action to access build and development environments, stealing data from dozens of devices. Early estimates suggest at least 1,000 SaaS environments were affected.
+
+The attack didn't stop at Trivy. BerriAI's CI/CD pipeline used Trivy for scanning, and the poisoned action harvested a PyPI publishing token. TeamPCP used it to push malicious packages to the Python Package Index, hitting LiteLLM's AI gateway. Then came "CanisterWorm," a self-propagating worm that used stolen npm publish tokens to spread through the npm ecosystem. Each compromised tool became a vector for reaching the next target.
 
 Aqua Security's response was messy. TeamPCP actively interfered with disclosure by deleting GitHub discussion threads and flooding issue trackers with spam. Security researchers at StepSecurity provided independent technical analysis that helped the community understand the scope.
 
