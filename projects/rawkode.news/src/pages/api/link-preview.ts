@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
-import { fetchLinkPreview } from "@/lib/server/link-preview";
-import { asRequestError } from "@/lib/server/errors";
+import { fetchLinkPreview } from "@/server/link-preview";
+import { asRequestError } from "@/server/errors";
 
 export const GET: APIRoute = async ({ request }) => {
   const requestUrl = new URL(request.url);
