@@ -1,0 +1,26 @@
+---
+title: "Tekton Leaves the CD Foundation for CNCF Incubation"
+description: "The CNCF TOC voted to accept Tekton as an incubating project, pulling Kubernetes-native CI/CD out of the CD Foundation and into the broader cloud native ecosystem."
+publishedAt: 2026-04-05
+authors:
+  - rawkode
+technologies:
+  - tektoncd
+  - kubernetes
+---
+
+Tekton is now a CNCF incubating project. The TOC vote happened March 24th at KubeCon EU in Amsterdam, and it marks the end of Tekton's seven-year run under the Continuous Delivery Foundation.
+
+Here's the short version: Google created Tekton in 2018, donated it to the CDF in 2019, and the project graduated there. Now it's moving to CNCF with incubating status. The CDF was one of four Linux Foundation sub-foundations created to house CD-specific projects alongside Jenkins, Jenkins X, and Spinnaker. Tekton was arguably its biggest success story.
+
+The numbers tell the rest. 11,000+ GitHub stars, 600+ contributors, 5,000+ pull requests. Red Hat built OpenShift Pipelines on top of it. IBM runs it inside Cloud Continuous Delivery. Ford Motor Company uses it. Puppet uses it. The v1.0 stable release for Pipelines shipped, and the project added Pipelines-as-Code to the Tekton org.
+
+So why move? Tekton's composable primitives (Steps, Tasks, Pipelines) aren't just CI/CD anymore. Teams use them as a general-purpose Kubernetes-native workflow engine. That puts Tekton squarely in CNCF territory, where it can integrate more tightly with projects like Argo CD, SPIFFE/SPIRE, and Sigstore for supply chain security. Sitting in the CDF meant being adjacent to that ecosystem rather than part of it.
+
+The governance model carries over unchanged. No single company can hold more than 40% of board seats. Changes go through Tekton Enhancement Proposals. Contributors span Red Hat, Google, IBM, and a long tail of individual maintainers. Chad Beaudin and Jeremy Rickard sponsored the incubation as TOC members, citing the project's "composable design and broad adoption."
+
+For existing users, nothing breaks. APIs, releases, support policies all stay the same. Your pipelines keep running. The shift is organizational, not technical.
+
+The more interesting question is what this means for the CD Foundation itself. It lost its most prominent graduated project. CDEvents and Shipwright remain, but the CDF's gravity just got lighter. Andrea Frittoli from the Tekton Governing Board pointed to "broad adoption across open source projects" as a key achievement from the CDF years. Vincent Demeester called Tekton "a true Kubernetes-native primitive." Both framings suggest the project outgrew its original home.
+
+If you're picking a CI/CD engine for a new Kubernetes platform, Tekton under CNCF governance is a stronger bet than it was last month. The project won't disappear into a single vendor's roadmap, and CNCF incubation means there's a clear path to graduation with all the scrutiny that entails.
