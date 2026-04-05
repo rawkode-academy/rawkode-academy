@@ -1,0 +1,33 @@
+---
+title: "Axios npm Package Compromised by North Korean Hackers for Three Hours"
+description: "North Korean threat group UNC1069 social-engineered the Axios maintainer to publish backdoored npm versions, dropping a cross-platform RAT on macOS, Windows, and Linux before npm pulled the packages."
+publishedAt: 2026-04-05
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Axios, the most popular JavaScript HTTP client with over 100 million weekly downloads, was compromised on March 31 after North Korean threat actors social-engineered a maintainer into installing malware on his own machine.
+
+The attack lasted roughly three hours. That's it. But three hours on a package with that download volume is plenty.
+
+Google's Mandiant team formally attributed the compromise to UNC1069, a DPRK-linked group they've been tracking across multiple supply chain operations. The social engineering was precise: attackers impersonated the founder of a legitimate company, set up a branded Slack workspace with convincing CI-related channels, and scheduled a Microsoft Teams call with maintainer Jason Saayman. During the call, a fake "system update" prompt delivered a RAT that stole his npm credentials.
+
+Two malicious versions hit the registry: `axios@1.14.1` and `axios@0.30.4`. Both pulled in a fake dependency called `plain-crypto-js@4.2.1` that never appears in legitimate Axios source. The package's postinstall hook ran an obfuscated dropper that phoned home to `sfrclak.com:8000`, then delivered platform-specific second-stage payloads:
+
+- **macOS:** a Mach-O binary dropped to `/Library/Caches/com.apple.act.mond`
+- **Windows:** a persistent PowerShell payload at `%PROGRAMDATA%\wt.exe`
+- **Linux:** a Python RAT script at `/tmp/ld.py`
+
+The malware, which Mandiant tracks as WAVESHAPER.V2, then cleaned up after itself. It deleted the dropper, swapped its own `package.json` with a clean stub reporting version 4.2.0, so `npm list` wouldn't flag anything suspicious. Forensic misdirection baked right into the install.
+
+StepSecurity's Harden-Runner caught C2 callbacks within two seconds of `npm install`, before npm had even finished resolving dependencies. That's how fast the postinstall hook fires.
+
+**If you're wondering whether you're affected:** check for `node_modules/plain-crypto-js/` anywhere in your projects or CI environments. That directory shouldn't exist. Period. If it does, assume full compromise of that machine.
+
+Saayman responded with a transparency post and outlined the remediation: credential rotation across all affected systems, a move to OIDC-based publishing flows, immutable releases, and tightened GitHub Actions configurations.
+
+The remediation steps for everyone else are straightforward. Pin to `axios@1.14.0` or `0.30.3`. If you ran either compromised version, rotate every credential on that machine. For persistent CI runners that executed the malicious versions, reformat and rebuild from a known-good state. Running `npm install --ignore-scripts` blocks postinstall hooks, but that's a band-aid, not a fix.
+
+This is the second major npm supply chain hit in 2026, and it won't be the last. The pattern keeps repeating: one maintainer, one set of stolen credentials, millions of downstream installs. npm's lack of mandatory two-party publishing for high-impact packages remains the structural gap. Until the registry itself enforces stronger controls on packages above a certain download threshold, we're relying on individual maintainers to be unhackable. They aren't. Nobody is.
