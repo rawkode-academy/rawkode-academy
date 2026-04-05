@@ -11,6 +11,10 @@
 		"binding": "ASSETS",
 		"directory": "./dist"
 	},
+	"browser": {
+		"binding": "BROWSER",
+		"remote": true
+	},
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": {
