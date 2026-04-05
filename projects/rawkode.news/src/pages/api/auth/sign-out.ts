@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { SESSION_COOKIE_NAME } from "@/lib/auth";
+import { SESSION_COOKIE_NAME } from "@/core/auth";
 
 export const GET: APIRoute = async (context) => {
   const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
