@@ -1,0 +1,26 @@
+---
+title: "Kubescape 4.0 Ships Runtime Threat Detection GA and Starts Scanning AI Agents"
+description: "The CNCF incubating project promotes its eBPF-based runtime engine to general availability and introduces the first security controls specifically targeting Kubernetes AI agent deployments."
+publishedAt: 2026-04-05
+authors:
+  - rawkode
+technologies:
+  - kubescape
+  - kubernetes
+---
+
+Kubescape 4.0 is out, and it's the first Kubernetes security tool to ship controls specifically designed to audit AI agents running inside your cluster.
+
+The headline feature is runtime threat detection reaching GA. ARMO's team has been building this for a while, but 4.0 marks the point where they're confident enough to call it production-ready. The engine uses eBPF via the node-agent to monitor processes, syscalls, network traffic, HTTP events, and filesystem activity. Detection rules are written in CEL and work against Application Profiles, which are Kubernetes CRDs that model expected container behavior. When something deviates from the profile, you get an alert.
+
+That's not new conceptually. Falco does similar things. What's different here is the architecture cleanup: Kubescape 4.0 kills the separate host-sensor DaemonSet and host-agent entirely. Everything now runs through a single node-agent per node with a direct API to the core Kubescape microservices. Fewer moving parts, easier to audit.
+
+The AI agent scanning is where it gets interesting.
+
+ARMO built 15 OPA Rego controls covering 42 security-critical configuration points in KAgent's CRDs. These check for things like empty security contexts in default deployments and missing NetworkPolicies. If your team is deploying AI agents via KAgent on Kubernetes, these controls catch the configuration mistakes that turn an AI assistant into an attack surface.
+
+There's also a KAgent-native plugin that lets AI assistants query Kubescape directly from within a cluster. An agent can inspect vulnerability manifests, review RBAC configurations, check runtime behavior through ApplicationProfiles and NetworkNeighborhoods, and get remediation guidance. It's security-as-a-tool-call, basically.
+
+The timing here isn't accidental. Every platform team is getting pressure to deploy AI workloads, and most of the existing security tooling treats them like any other container. They're not. AI agents make outbound API calls, load models dynamically, and often run with broader permissions than they should. Kubescape 4.0 is the first project to acknowledge that gap with actual shipped controls rather than a blog post about future plans.
+
+Alerts integrate with AlertManager, SIEM tools, Syslog, and HTTP webhooks. If you're already running Kubescape in your cluster, upgrading to 4.0 is worth doing this week.
