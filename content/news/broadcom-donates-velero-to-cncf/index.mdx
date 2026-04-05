@@ -1,6 +1,6 @@
 ---
 title: "Broadcom Hands Velero to the CNCF Sandbox"
-description: "Broadcom donates Velero, the widely-used Kubernetes backup and migration tool, to the CNCF Sandbox, shifting it to vendor-neutral governance with maintainers from Broadcom, Red Hat, and Microsoft."
+description: "Broadcom donated Velero, the standard Kubernetes backup and disaster recovery tool, to the CNCF Sandbox, moving it to vendor-neutral governance after years under VMware's umbrella."
 publishedAt: 2026-04-05
 authors:
   - rawkode
@@ -9,24 +9,18 @@ technologies:
   - kubernetes
 ---
 
-Broadcom announced at KubeCon EU 2026 in Amsterdam that it's donating Velero to the CNCF Sandbox. The project has been accepted, and governance is now transitioning to CNCF standards.
+Broadcom has given Velero to the CNCF. The Sandbox application was filed in February, and the acceptance was announced at KubeCon EU in Amsterdam last week. After years living under VMware's roof, Kubernetes' most widely adopted backup tool now has a vendor-neutral home.
 
-Velero handles backup, restore, and migration for Kubernetes clusters. It works at the Kubernetes API layer, not the control-plane datastore, which makes it portable across providers and distributions. If you've ever needed to move workloads between clusters or set up disaster recovery, you've probably used it or evaluated it.
+This matters because of who's doing the giving. Broadcom's acquisition of VMware left a lot of open source communities nervous about the future of projects they depended on. Donating Velero to the CNCF is a concrete signal that Broadcom isn't pulling the ladder up behind it. Chris Aniszczyk, CNCF's CTO, framed it as fostering "community collaboration and growth," but the subtext is clearer: Broadcom wants to be seen as a good steward.
 
-The sandbox application was filed back in February by Nikhita Raghunath at Broadcom. Maintainers already span Broadcom, Red Hat, and Microsoft, so this isn't a case of a single company dumping an abandoned project. The existing governance model already follows CNCF principles: consensus-based decisions, supermajority voting, 5-day review periods, and consolidated company voting to prevent any one vendor from dominating.
+For platform teams running stateful workloads, Velero is probably already in your cluster. It handles backup, restore, and migration of both cluster state and persistent volumes. If you've ever had to recover from a botched Helm upgrade at 2am, there's a decent chance Velero was involved.
 
-## What's Actually Changing
+The project isn't arriving at CNCF as a single-vendor effort. Nikhita Raghunath at Broadcom filed the Sandbox application, but maintainers already span Broadcom, Red Hat, and Microsoft. The existing governance model follows CNCF principles: consensus-based decisions, supermajority voting, and consolidated company voting to prevent any one vendor from dominating.
 
-For day-to-day users, not much changes right now. Your Helm charts still work. Your backup schedules don't break.
+What changes practically? Not much right now. Your Helm charts still work. Your backup schedules don't break. The Sandbox designation is the first rung on the CNCF ladder, with Incubating and Graduated status ahead. The real shift is structural: contribution barriers drop when a project isn't perceived as someone else's product.
 
-The real shift is structural. Under CNCF governance, Velero gets a neutral home that should attract more contributors and integrations. Chris Aniszczyk, CNCF's CTO, put it plainly: Velero "provides a vital layer for backup and disaster recovery" and now gains "a vendor-neutral home to foster community collaboration and growth."
+Velero started life as Heptio Ark back in 2017. VMware acquired Heptio, then Broadcom acquired VMware. That's two acquisitions deep for a tool that thousands of teams depend on daily. Every ownership change made the community hold its breath. This donation finally removes that uncertainty.
 
-This matters because Broadcom's acquisition of VMware left a lot of open source projects in an uncertain state. Donating Velero to the CNCF is a signal that Broadcom isn't pulling the rug out from under projects that platform teams depend on. It's the opposite move from what many in the community feared post-acquisition.
+Broadcom also shipped VKS 3.6 alongside this announcement, adding Kubernetes 1.35 support with 24-month extended version support, RHEL 9 compatibility, and declarative TuneD profiles for kernel tuning. They're positioning themselves as one of the top five long-term contributors to CNCF projects.
 
-Velero started life as Heptio Ark back in 2017. VMware acquired Heptio, then Broadcom acquired VMware. That's two acquisitions deep for a tool that thousands of platform teams depend on daily. Every time ownership changed, the community held its breath. This donation finally removes that uncertainty.
-
-## The Broader Pattern
-
-Velero joins a KubeCon EU 2026 that was packed with governance moves. NVIDIA donated its GPU DRA driver to CNCF. Kyverno graduated. There's a clear trend: the ecosystem is consolidating critical infrastructure under vendor-neutral governance faster than it ever has before.
-
-For teams currently running Velero, the practical advice is simple: keep using it. The project just got more sustainable, not less. If you've been holding off on contributing upstream because of the VMware/Broadcom uncertainty, that blocker is gone.
+If you're already running Velero, keep going. If you've been holding off on contributing upstream because of the VMware/Broadcom uncertainty, that blocker is gone.
