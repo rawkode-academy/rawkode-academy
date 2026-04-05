@@ -17,7 +17,6 @@
     "@astrojs/cloudflare": "^13.1.7",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/svelte": "^8.0.4",
-    "@cloudflare/playwright": "^1.2.0",
     "@paralleldrive/cuid2": "^3.3.0",
     "@tailwindcss/vite": "^4.2.2",
     "astro": "^6.1.3",

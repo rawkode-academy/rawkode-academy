@@ -1,5 +1,4 @@
 import type { APIRoute } from "astro";
-import { env } from "cloudflare:workers";
 import { fetchLinkPreview } from "@/lib/server/link-preview";
 import { asRequestError } from "@/lib/server/errors";
 
@@ -8,7 +7,7 @@ export const GET: APIRoute = async ({ request }) => {
   const targetUrl = requestUrl.searchParams.get("url") ?? "";
 
   try {
-    const preview = await fetchLinkPreview(targetUrl, env.BROWSER);
+    const preview = await fetchLinkPreview(targetUrl);
     return Response.json(preview, {
       headers: {
         "Cache-Control": "no-store",
