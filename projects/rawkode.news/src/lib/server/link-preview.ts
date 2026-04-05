@@ -1,4 +1,3 @@
-import { launch } from "@cloudflare/playwright";
 import { POST_URL_MAX_LENGTH } from "@/lib/input-limits";
 import { RequestError } from "@/lib/server/errors";
 
@@ -6,12 +5,35 @@ const ALLOWED_PROTOCOLS = new Set(["http:", "https:"]);
 const DISALLOWED_HOST_SUFFIXES = [".internal", ".local", ".localdomain", ".home.arpa"];
 const MAX_HTML_LENGTH = 512_000;
 const HTML_CONTENT_TYPES = ["text/html", "application/xhtml+xml"];
+const PRIMARY_META_TITLE_NAMES = new Set(["og:title", "twitter:title"]);
 const BOT_CHALLENGE_PATTERNS = [
   /AwsWafIntegration/i,
   /window\.gokuProps/i,
   /id=["']challenge-container["']/i,
   /verify that you'?re not a robot/i,
   /This requires JavaScript\. Enable JavaScript and then reload the page\./i,
+] as const;
+const NAMED_HTML_ENTITIES = new Map<string, string>([
+  ["amp", "&"],
+  ["apos", "'"],
+  ["gt", ">"],
+  ["lt", "<"],
+  ["nbsp", " "],
+  ["quot", "\""],
+]);
+const BROWSER_HEADER_PROFILES = [
+  {
+    secChUa: "\"Chromium\";v=\"147\", \"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"99\"",
+    secChUaPlatform: "\"macOS\"",
+    userAgent:
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.50 Safari/537.36",
+  },
+  {
+    secChUa: "\"Chromium\";v=\"147\", \"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"99\"",
+    secChUaPlatform: "\"Windows\"",
+    userAgent:
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.50 Safari/537.36",
+  },
 ] as const;
 
 const collapseWhitespace = (value: string) => value.replace(/\s+/g, " ").trim();
@@ -136,93 +158,186 @@ const normalizeLookupUrl = (value: string) => {
 
   return parsed.toString();
 };
+
+const decodeHtmlEntities = (value: string) =>
+  value.replace(/&(#x?[0-9a-f]+|[a-z][a-z0-9]+);/gi, (match, entity: string) => {
+    const normalized = entity.toLowerCase();
+    if (normalized.startsWith("#x")) {
+      const codePoint = Number.parseInt(normalized.slice(2), 16);
+      return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
+    }
+    if (normalized.startsWith("#")) {
+      const codePoint = Number.parseInt(normalized.slice(1), 10);
+      return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
+    }
+    return NAMED_HTML_ENTITIES.get(normalized) ?? match;
+  });
+
+const parseHtmlAttributes = (tagSource: string) => {
+  const attributes = new Map<string, string>();
+  const source = tagSource
+    .replace(/^<meta\b/i, "")
+    .replace(/\/?>\s*$/i, "");
+  const attributePattern =
+    /([^\s=/>]+)(?:\s*=\s*("([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+
+  for (const match of source.matchAll(attributePattern)) {
+    const name = match[1]?.toLowerCase();
+    if (!name || name === "/") {
+      continue;
+    }
+
+    const value = match[3] ?? match[4] ?? match[5] ?? "";
+    attributes.set(name, value);
+  }
+
+  return attributes;
+};
+
 const isBotChallengeDocument = (documentHtml: string) =>
   BOT_CHALLENGE_PATTERNS.some((pattern) => pattern.test(documentHtml));
 
-export const fetchLinkPreview = async (value: string, browserBinding: Env["BROWSER"]) => {
-  const requestedUrl = normalizeLookupUrl(value);
-  const browser = await launch({
-    fetch: browserBinding.fetch.bind(browserBinding) as typeof fetch,
+const extractMetaTitle = (documentHtml: string) => {
+  for (const match of documentHtml.matchAll(/<meta\b[^>]*>/gi)) {
+    const attributes = parseHtmlAttributes(match[0]);
+    const property = (attributes.get("property") ?? attributes.get("name") ?? "")
+      .trim()
+      .toLowerCase();
+
+    if (!PRIMARY_META_TITLE_NAMES.has(property)) {
+      continue;
+    }
+
+    const content = collapseWhitespace(
+      decodeHtmlEntities(attributes.get("content") ?? ""),
+    );
+    if (content) {
+      return content;
+    }
+  }
+
+  return null;
+};
+
+const extractDocumentTitle = (documentHtml: string) => {
+  const metaTitle = extractMetaTitle(documentHtml);
+  if (metaTitle) {
+    return metaTitle;
+  }
+
+  const titleMatch = documentHtml.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+  if (!titleMatch?.[1]) {
+    return null;
+  }
+
+  const rawTitleText = titleMatch[1]
+    .replace(/<[^>]+>/g, "")
+    .replace(/[<>]/g, "");
+  const value = collapseWhitespace(decodeHtmlEntities(rawTitleText));
+  return value || null;
+};
+
+const hashHostname = (hostname: string) => {
+  let value = 0;
+
+  for (const character of hostname) {
+    value = (value * 33 + character.charCodeAt(0)) >>> 0;
+  }
+
+  return value;
+};
+
+const getBrowserProfileSequence = (hostname: string) => {
+  const primaryIndex = hashHostname(hostname) % BROWSER_HEADER_PROFILES.length;
+  return BROWSER_HEADER_PROFILES.map((_, offset) =>
+    BROWSER_HEADER_PROFILES[(primaryIndex + offset) % BROWSER_HEADER_PROFILES.length],
+  );
+};
+
+const buildBrowserLikeHeaders = (
+  profile: (typeof BROWSER_HEADER_PROFILES)[number],
+) =>
+  new Headers({
+    Accept:
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Cache-Control": "max-age=0",
+    Pragma: "no-cache",
+    Priority: "u=0, i",
+    "Sec-CH-UA": profile.secChUa,
+    "Sec-CH-UA-Mobile": "?0",
+    "Sec-CH-UA-Platform": profile.secChUaPlatform,
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": profile.userAgent,
   });
 
-  try {
-    const page = await browser.newPage();
-    const response = await page.goto(requestedUrl, {
-      waitUntil: "domcontentloaded",
-      timeout: 15_000,
-    });
+const shouldRetryWithNextProfile = (error: RequestError) =>
+  error.status === 403 ||
+  error.status === 429 ||
+  error.message === "Source blocked automated title lookup";
 
-    if (!response) {
-      throw new RequestError("Source did not return an HTML document", 422);
-    }
+const fetchPreviewWithProfile = async (
+  requestedUrl: string,
+  profile: (typeof BROWSER_HEADER_PROFILES)[number],
+) => {
+  const response = await fetch(requestedUrl, {
+    headers: buildBrowserLikeHeaders(profile),
+    redirect: "follow",
+  });
 
-    if (!response.ok()) {
-      throw new RequestError(
-        `Source returned ${response.status()}`,
-        response.status() >= 500 ? 502 : 422,
-      );
-    }
-
-    const contentType = response.headers()["content-type"]?.toLowerCase() ?? "";
-    if (
-      contentType &&
-      !HTML_CONTENT_TYPES.some((allowedType) => contentType.includes(allowedType))
-    ) {
-      throw new RequestError("Source did not return an HTML document", 422);
-    }
-
-    await page
-      .waitForFunction(
-        () => {
-          const meta =
-            document.querySelector('meta[property="og:title"]') ??
-            document.querySelector('meta[name="og:title"]') ??
-            document.querySelector('meta[property="twitter:title"]') ??
-            document.querySelector('meta[name="twitter:title"]');
-
-          return Boolean(document.title.trim() || meta?.getAttribute("content")?.trim());
-        },
-        { timeout: 2_500 },
-      )
-      .catch(() => {});
-
-    const documentHtml = (await page.content()).slice(0, MAX_HTML_LENGTH);
-    if (isBotChallengeDocument(documentHtml)) {
-      throw new RequestError("Source blocked automated title lookup", 422);
-    }
-
-    const title = await page.evaluate(() => {
-      const selectors = [
-        'meta[property="og:title"]',
-        'meta[name="og:title"]',
-        'meta[property="twitter:title"]',
-        'meta[name="twitter:title"]',
-      ];
-
-      for (const selector of selectors) {
-        const content = document.querySelector(selector)?.getAttribute("content")?.trim();
-        if (content) {
-          return content;
-        }
-      }
-
-      const fallbackTitle = document.title.trim();
-      return fallbackTitle || null;
-    });
-
-    return {
-      title: title ? collapseWhitespace(title) : null,
-      url: normalizeLookupUrl(page.url() || requestedUrl),
-    };
-  } catch (error) {
-    if (error instanceof RequestError) {
-      throw error;
-    }
-    if (error instanceof Error && /timeout/i.test(error.message)) {
-      throw new RequestError("Source timed out during title lookup", 504);
-    }
-    throw new RequestError("Could not load page title", 502);
-  } finally {
-    await browser.close();
+  if (!response.ok) {
+    throw new RequestError(
+      `Source returned ${response.status}`,
+      response.status >= 500 ? 502 : response.status,
+    );
   }
+
+  const finalUrl = normalizeLookupUrl(response.url || requestedUrl);
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+  if (
+    contentType &&
+    !HTML_CONTENT_TYPES.some((allowedType) => contentType.includes(allowedType))
+  ) {
+    throw new RequestError("Source did not return an HTML document", 422);
+  }
+
+  const documentHtml = (await response.text()).slice(0, MAX_HTML_LENGTH);
+  console.log(documentHtml);
+  if (isBotChallengeDocument(documentHtml)) {
+    throw new RequestError("Source blocked automated title lookup", 422);
+  }
+
+  return {
+    title: extractDocumentTitle(documentHtml),
+    url: finalUrl,
+  };
+};
+
+export const fetchLinkPreview = async (value: string) => {
+  const requestedUrl = normalizeLookupUrl(value);
+  const profiles = getBrowserProfileSequence(new URL(requestedUrl).hostname);
+  let lastError: RequestError | null = null;
+
+  for (const [index, profile] of profiles.entries()) {
+    try {
+      return await fetchPreviewWithProfile(requestedUrl, profile);
+    } catch (error) {
+      const requestError = error instanceof RequestError
+        ? error
+        : error instanceof Error && /timeout/i.test(error.message)
+          ? new RequestError("Source timed out during title lookup", 504)
+          : new RequestError("Could not load page title", 502);
+
+      lastError = requestError;
+      if (index === profiles.length - 1 || !shouldRetryWithNextProfile(requestError)) {
+        throw requestError;
+      }
+    }
+  }
+
+  throw lastError ?? new RequestError("Could not load page title", 502);
 };
