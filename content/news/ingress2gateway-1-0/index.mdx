@@ -1,0 +1,38 @@
+---
+title: "Ingress2Gateway 1.0 Lands as Ingress-NGINX Finally Retires"
+description: "SIG Network shipped a stable Ingress2Gateway 1.0 with 30+ annotation conversions and controller-level tests, giving teams a tested path off the now-retired Ingress-NGINX."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+If you're still running Ingress-NGINX in production, the clock isn't ticking anymore. It already stopped. SIG Network retired the project on March 24, and the same group just stamped Ingress2Gateway 1.0 as stable. That's the tool you're meant to reach for.
+
+The 1.0 cut is the first time the project has claimed production readiness. Previous versions handled the easy cases. Anything with interesting annotations got left behind, which is a problem when Ingress-NGINX annotations are basically how most teams configured routing for the last five years.
+
+## What actually shipped
+
+Ingress2Gateway now converts more than 30 Ingress-NGINX annotations into Gateway API resources. The list covers the ones people actually care about: CORS, backend TLS, regex path matching, URL rewrites, redirects, and header manipulation. Each annotation has controller-level integration tests that spin up a real cluster, apply both the original Ingress and the generated Gateway API config, and compare runtime behaviour. Not just YAML diffs. Actual routing, actual redirects, actual rewrites.
+
+That's a meaningful bar. Most migration tools I've seen in this space stop at "the output parses." This one runs it.
+
+```bash
+go install github.com/kubernetes-sigs/ingress2gateway@v1.0.0
+ingress2gateway print --providers=ingress-nginx
+```
+
+Point it at a cluster or a directory of manifests and it prints HTTPRoutes, Gateways, and the policies you need. Review the output. Don't just pipe it into kubectl apply and walk away.
+
+## Why now
+
+Kubernetes v1.36 drops April 22 and formalises the retirement in the release notes. GKE, AKS, and EKS have all started nudging customers off Ingress-NGINX based installs. The CVE-2025-1974 "IngressNightmare" mess last year was the push that broke the camel's back for a lot of platform teams, and the SIG just didn't have the maintainer bandwidth to keep shipping fixes.
+
+The replacement story depends on who you ask. Envoy Gateway, Cilium Gateway, Istio, and Kong all implement Gateway API now. Ingress2Gateway doesn't pick for you. It gives you a vendor-neutral Gateway API manifest and lets your chosen controller take it from there.
+
+## One caveat
+
+If your Ingress-NGINX setup leans on snippet annotations or custom Lua, Ingress2Gateway won't save you. Those never had a direct Gateway API equivalent and probably never will. Gateway API is deliberately more opinionated about what belongs in the API versus what belongs in a controller-specific extension. Teams with heavy snippet use should plan for a rewrite, not a conversion.
+
+For everyone else, this is as close to a push-button migration as you're going to get. Run it against a staging cluster this week. See what it spits out. You're going to need the answer before your next platform upgrade anyway.
