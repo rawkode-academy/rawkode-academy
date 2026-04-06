@@ -1,0 +1,37 @@
+---
+title: "Kubescape 4.0 Ships Runtime Threat Detection and KAgent Scanning"
+description: "Kubescape 4.0 promotes runtime threat detection to GA, collapses its agent footprint to one DaemonSet per node, and adds posture scanning for KAgent AI workloads."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - kubescape
+  - kagent
+---
+
+ARMO and the Kubescape maintainers have cut Kubescape 4.0, and it's the biggest shift the project has had since joining CNCF. Runtime Threat Detection and Kubescape Storage are now generally available, the agent topology has been simplified down to a single node-agent, and there's a brand new scanner aimed squarely at KAgent.
+
+## Runtime Threat Detection Goes GA
+
+The Runtime Threat Detection engine watches processes, syscalls, Linux capabilities, network and HTTP events, and filesystem activity. Detection rules are written in CEL and evaluated against per-workload Application Profiles that learn what "normal" looks like for each pod.
+
+The team claims this cuts CVE noise by over 95%. That's a big number, but the mechanism is sensible: if a CVE sits in a code path your workload never executes, the profile knows, and you don't get paged.
+
+Rules and RuleBindings are CRDs now. You can ship them like any other Kubernetes manifest. Alerts forward to AlertManager, SIEM tools, syslog, stdout, or HTTP webhooks, so plugging this into an existing detection pipeline isn't a rewrite.
+
+## One Agent Per Node
+
+Earlier versions ran a host-sensor "pop-up" DaemonSet for node scanning, plus a separate host-agent. Both are gone in 4.0. Their work has been folded into the node-agent through a direct internal API between Kubescape's microservices.
+
+Fewer pods, fewer ServiceAccounts to audit, less to explain to your security team when they ask what's running as privileged. If you've been holding off on Kubescape because the deployment looked busy, this is the version to revisit.
+
+## Scanning KAgent
+
+The headline AI feature is posture scanning for KAgent, the CNCF Sandbox project for orchestrating AI agents on Kubernetes. KAgent CRDs wire AI models directly to enterprise infrastructure, which means a misconfiguration can hand an LLM far more authority than anyone intended.
+
+Kubescape 4.0 inspects 42 security-critical configuration points across KAgent's CRDs. It's the first time the project has gone after the security of AI agents themselves rather than just the clusters they run on.
+
+## Should You Upgrade?
+
+If you're already running Kubescape, the agent consolidation alone is worth the upgrade window. If you've been evaluating runtime detection tools and didn't want a Falco-sized commitment, the GA promotion makes Kubescape a credible option to trial this quarter. And if you're running KAgent in anything resembling production, you want the new scanner before someone else finds those 42 misconfigurations for you.
