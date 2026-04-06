@@ -1,0 +1,33 @@
+---
+title: "Kubernetes 1.36 Finally Deprecates Service externalIPs, Closing a Six-Year MITM Hole"
+description: "The externalIPs field on Services starts throwing deprecation warnings in v1.36 and disappears entirely in v1.43. It's the end of CVE-2020-8554, a flaw that's haunted multi-tenant clusters since 2020."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Six years. That's how long `service.spec.externalIPs` has been a known man-in-the-middle vector with no real fix. The Kubernetes v1.36 sneak peek confirms the deprecation is finally happening, with warnings landing in 1.36 and full removal scheduled for v1.43.
+
+If you don't remember CVE-2020-8554, here's the short version. Any user with permission to create or update a Service could set `externalIPs` to an arbitrary address and silently intercept traffic destined for that IP inside the cluster. On multi-tenant clusters, a namespace admin could hijack traffic to a node, another pod, or an upstream API. The Kubernetes Security Response Committee rated it medium severity and shipped no patch, because the behavior is baked into how kube-proxy programs iptables. The only mitigations were admission controllers and OPA/Gatekeeper policies that most teams never deployed.
+
+KEP-5707 is the enhancement driving the removal. It lands deprecation warnings in v1.36, which ships April 22, and targets v1.43 for the field's complete removal from the Service spec.
+
+What should you actually do? Grep your manifests.
+
+```bash
+kubectl get svc -A -o json | jq '.items[] | select(.spec.externalIPs) | .metadata'
+```
+
+If anything comes back, you've got migration work. The replacements depend on why you were using it:
+
+- Exposing a service on a node's existing IP? Use `LoadBalancer` with a bare-metal controller like MetalLB or kube-vip, or a `NodePort`.
+- Routing traffic from an external load balancer to a specific backend IP? Gateway API handles this cleanly now that it's GA.
+- Pinning a service to a fixed cluster-external address for legacy integration? That's the exact pattern the deprecation is killing. You'll need to front it with something that actually owns the IP.
+
+The interesting part isn't the deprecation itself. It's that Kubernetes is now willing to remove a footgun even when there's no clean migration for every user. For years, the answer to CVE-2020-8554 was "write a policy." Datadog Security Labs called it "unpatchable" back in 2022. Turning deprecation warnings on is a policy statement: if your platform still relies on this field in 2027, that's your problem to solve, not SIG Network's.
+
+Platform teams running multi-tenant clusters should treat the 1.36 warnings as a hard deadline. Audit now, migrate during the v1.37 and v1.38 cycles, and you'll sail through v1.43. Leave it until the upgrade blocks, and you'll be explaining to tenants why their Services stopped resolving.
+
+Check your clusters this week.
