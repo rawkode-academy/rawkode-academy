@@ -1,0 +1,32 @@
+---
+title: "Kubescape 4.0 Ships Runtime Threat Detection GA and AI Agent Scanning"
+description: "The CNCF Kubernetes security platform promotes runtime threat detection to GA, drops the host-sensor DaemonSet, and adds 15 new controls for scanning AI agent configurations."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - kubescape
+  - kubernetes
+---
+
+Kubescape 4.0 landed at KubeCon EU in Amsterdam. The headline: runtime threat detection is now GA, and the project can scan AI agent deployments for security misconfigurations.
+
+The runtime engine monitors processes, system calls, network connections, HTTP events, and file system activity across your cluster. Detection rules are written in CEL and managed as Kubernetes CRDs (RuleBindings), so you're working with the same expression language that Kubernetes itself is converging on. Alerts pipe out to AlertManager, SIEM systems, Syslog, or HTTP webhooks.
+
+Runtime detection in a Kubernetes security scanner isn't new. What's notable is the architecture overhaul that came with it. Kubescape 4.0 kills the old host-sensor DaemonSet entirely. That "pop-up" pattern created ephemeral high-privilege pods that made security teams twitch. The node-agent now handles everything directly, communicating with core Kubescape microservices through a direct API. One fewer privileged workload per node.
+
+## AI Agent Scanning
+
+This is the part that's genuinely new territory. Kubescape 4.0 ships 15 Rego-based controls covering 42 security-critical configuration points in KAgent's CRDs. It checks for the usual suspects: empty security contexts in default deployments, missing NetworkPolicies, and over-privileged controller-wide namespace watching.
+
+There's also a KAgent-native plug-in that lets AI assistants query your cluster's security posture from inside the cluster itself. An agent can list vulnerability manifests, review RBAC configuration scans, and inspect container behavior at runtime. Whether you trust an AI agent to do your security reviews is a separate conversation, but the plumbing is there.
+
+## What Else Changed
+
+Kubescape Storage hit GA alongside runtime detection. It uses Kubernetes Aggregated APIs to store Application Profiles, SBOMs, and vulnerability manifests as centralized security metadata. Useful if you're running high-density clusters where tracking what's actually deployed gets messy fast.
+
+CIS Benchmark support got bumped to 1.12 for vanilla Kubernetes and 1.8 for EKS and AKS.
+
+Ben Hirschberg from ARMO continues as core maintainer, with Amir Malka joining the maintainer roster. Craig Box moved to emeritus status.
+
+If you're already running Kubescape for posture scanning, the upgrade path is straightforward. If you've been evaluating runtime security options and don't want to bolt on another tool, 4.0 makes Kubescape a more complete package. The AI agent scanning is early-stage, but the fact that a CNCF security project is treating agent workloads as a first-class threat surface says something about where the ecosystem thinks it's headed.
