@@ -1,0 +1,55 @@
+---
+title: "Dapr Agents v1.0 Hits GA: Durable AI Agent Execution Comes to Kubernetes"
+description: "The CNCF Dapr project ships a production-ready Python framework for running AI agents with automatic failure recovery, SPIFFE-based identity, and state persistence across 25+ databases."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - dapr
+  - kubernetes
+---
+
+Most AI agent frameworks don't survive a pod eviction. Dapr Agents v1.0, announced at KubeCon EU in Amsterdam, is built specifically around that problem.
+
+The framework, now generally available as part of the CNCF's Dapr project, treats every agent invocation as a durable workflow. User input, intermediate steps, tool calls, and decisions all get persisted. When a process crashes or a node goes down, execution picks up exactly where it stopped. No developer-managed checkpoints. No manual recovery logic.
+
+That's a meaningful difference from tools like LangChain or CrewAI, where agent state lives in memory and a restart means starting over.
+
+## How It Actually Works
+
+Each agent runs as an Actor with a full Dapr Workflow backing it. State can persist to any of 25+ supported database backends, from managed cloud services to self-hosted options. The Dapr Conversation API abstracts LLM providers, so you can swap between OpenAI, Azure OpenAI, NVIDIA, and Hugging Face without code changes.
+
+Multi-agent coordination works two ways. Deterministic mode runs agents as child workflows in fixed patterns when you need auditability. Autonomous mode lets agents discover and orchestrate each other at runtime through an agent registry. Pick whichever matches your trust level.
+
+Security uses SPIFFE identities and mutual TLS between agents. No static API keys floating around. Each agent gets a cryptographically verifiable workload identity that also controls access to databases and message brokers. If you're already running SPIRE in your cluster, this plugs right in.
+
+Observability comes free: OpenTelemetry tracing with W3C context propagation across agents, tools, and LLM calls, plus Prometheus metrics. Zero instrumentation code required.
+
+## Who's Using It
+
+ZEISS Vision Care presented their implementation at KubeCon. They're using Dapr Agents to extract optical parameters from highly variable, unstructured documents. A large EU logistics company runs it for warehouse operations with automatic flagging and task routing.
+
+The Python package pulls over 8,000 monthly downloads on PyPI, with daily downloads regularly exceeding 1,000. Over 20 releases shipped in under a year before stabilizing at 1.0.
+
+## The Competitive Angle
+
+Yaron Schneider, Dapr maintainer, frames it bluntly: "Dapr is becoming the resilience layer for AI systems." Mark Fussell, also on the Dapr steering committee, points out that most agent frameworks focus on logic alone and leave operations teams to figure out recovery.
+
+Microsoft's Agent Framework and Amazon's Strands Agents both launched recently, but neither bakes durability into the execution model the way Dapr does. That's the bet here: as AI agents move from demos to production, the teams that need them running 24/7 will pick the framework that handles Tuesday's 3am node failure gracefully.
+
+NVIDIA co-developed the 1.0 release over a yearlong collaboration. That partnership matters because GPU-heavy inference workloads are exactly where node instability hits hardest.
+
+Getting started is minimal:
+
+```python
+from dapr_agents import DurableAgent
+from dapr_agents.workflow.runners import AgentRunner
+
+agent = DurableAgent(name="Assistant",
+  system_prompt="You are a helpful assistant")
+runner = AgentRunner()
+runner.subscribe(agent)
+runner.serve(agent, port=8001)
+```
+
+Those seven lines get you durable execution, conversation persistence, SPIFFE identity, distributed tracing, and agent registry integration. Whether that simplicity holds up in a real production deployment is the question worth testing.
