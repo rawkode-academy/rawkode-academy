@@ -1,0 +1,36 @@
+---
+title: "Broadcom Hands Velero to the CNCF Sandbox, Ending Single-Vendor Control of Kubernetes Backup"
+description: "Broadcom has donated Velero, the widely-used Kubernetes backup and restore project, to the CNCF Sandbox. The move shifts governance to the community and opens the door for broader contributor participation."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - velero
+  - kubernetes
+---
+
+Velero, the go-to project for Kubernetes backup, restore, and migration, now lives under CNCF governance. Broadcom announced the donation at KubeCon EU 2026 in Amsterdam, and the CNCF Technical Oversight Committee has accepted it into the Sandbox.
+
+This isn't a new project looking for credibility. Velero has been around since the Heptio days, before VMware acquired Heptio over five years ago, and before Broadcom acquired VMware. It already has maintainers from Broadcom, Red Hat, and Microsoft. The CNCF move formalizes what's been true for a while: Velero outgrew single-vendor stewardship.
+
+## What Actually Changes
+
+For teams already running Velero, the short answer is: not much, yet. Your backup schedules won't break. The CLI stays the same.
+
+What changes is who decides where the project goes next. Under Broadcom, roadmap decisions filtered through one company's priorities. Under CNCF governance, the technical direction opens up to the broader maintainer group. That matters when you're trusting a project with your disaster recovery strategy.
+
+The sandbox application was filed back in February. Broadcom says it's among the top five long-term contributors to CNCF projects, so this fits a pattern of upstream investment rather than a one-off gesture.
+
+## Why Platform Teams Should Pay Attention
+
+Velero sits in a category that doesn't get enough scrutiny: day-two operations tooling. Everyone obsesses over deployment pipelines and service meshes. Fewer teams spend equal energy on what happens when a namespace gets accidentally deleted at 2 AM.
+
+If you're running Velero in production today, the CNCF move is worth tracking for two reasons. First, vendor-neutral governance means no single company can deprioritize features your team depends on. Second, a wider contributor base typically means faster bug fixes and broader storage provider support.
+
+The timing is also worth noting. Broadcom's relationship with the open source community has been... complicated since the VMware acquisition. Donating Velero to CNCF could signal a genuine shift, or it could be a strategic move to reduce maintenance burden. Probably both.
+
+## What's Next
+
+Velero enters the Sandbox as a mature project, which puts it on a faster track toward Incubation if the community shows up. The project already meets many of the criteria that newer sandbox projects spend years building: production adoption, multi-organization maintainership, and a security audit track record.
+
+If your team uses Velero, now's a good time to look at contributing. The governance transition is exactly when new voices have the most influence on project direction.
