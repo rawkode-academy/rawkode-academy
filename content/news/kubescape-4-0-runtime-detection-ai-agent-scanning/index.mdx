@@ -1,0 +1,47 @@
+---
+title: "Kubescape 4.0: Runtime Threat Detection Goes GA, Adds Security Scanning for AI Agents"
+description: "Kubescape 4.0 promotes runtime threat detection to general availability with CEL-based rules, introduces 15 security controls for KAgent CRDs, and consolidates its node architecture down to a single agent per node."
+publishedAt: 2026-04-06
+authors:
+  - rawkode
+technologies:
+  - kubescape
+  - kubernetes
+  - kagent
+---
+
+Kubescape 4.0 shipped at KubeCon EU 2026 in Amsterdam with two headline changes: runtime threat detection is now GA, and the project can scan AI agent configurations for security misconfigurations. It's the first Kubernetes security platform to explicitly target AI agent workloads.
+
+## Runtime Threat Detection Hits GA
+
+The runtime engine has been in beta since Kubescape joined the CNCF as an incubating project in January 2025. Version 4.0 promotes it to general availability.
+
+The detection system builds on Application Profiles, which are learned baselines of what your workloads normally do. It watches processes, Linux capabilities, syscalls, network and HTTP events, and filesystem activity. When something deviates from the baseline, it fires. ARMO, the primary maintainer, claims this approach cuts CVE noise by over 95%.
+
+Detection rules use Common Expression Language (CEL), the same language Kubernetes itself is converging on for admission control. Rules and RuleBindings are managed as Kubernetes CRDs, and alerts can forward to AlertManager, SIEM tools, Syslog, or HTTP webhooks. Nothing exotic in the integration story.
+
+## AI Agent Scanning
+
+This is the more unusual addition. Kubescape 4.0 ships 15 OPA Rego-based controls that cover 42 security-critical configuration points in KAgent's Custom Resource Definitions. KAgent is the CNCF Sandbox project for orchestrating AI agents on Kubernetes.
+
+The controls check for things you'd expect: empty security contexts in default deployments, missing NetworkPolicies, and controllers with overly broad namespace permissions. Basic stuff, but nobody else was scanning for it. If you're running KAgent in production, these controls give you a starting point for locking down your agent infrastructure.
+
+There's also a KAgent plugin that lets AI assistants query Kubescape directly for vulnerability data, RBAC issues, and remediation guidance through ApplicationProfiles and NetworkNeighborhoods.
+
+## One Agent Per Node
+
+The 4.0 release removes the host-sensor DaemonSet, a component the community had flagged as intrusive because it spun up ephemeral, high-privilege Pods for node scanning. The host-agent is also gone. Both sets of capabilities now live in the node-agent.
+
+The result: one agent per node. Fewer moving parts, easier auditing, and a smaller attack surface. Existing users will need to update their Helm values since the old components won't exist anymore.
+
+## Kubescape Storage
+
+Kubescape Storage also graduates to GA. It uses the Kubernetes Aggregated API to store security metadata like Application Profiles, SBOMs, and vulnerability manifests in a dedicated layer, keeping that data out of etcd. For large clusters, this matters. Cramming security metadata into etcd alongside your regular cluster state is a recipe for performance problems at scale.
+
+## Updated Compliance Benchmarks
+
+The release adds CIS Benchmark 1.12 for vanilla Kubernetes and CIS Benchmark 1.8 for EKS and AKS environments. NSA-CISA and MITRE ATT&CK framework coverage carries over from 3.x.
+
+Ben Hirschberg authored the announcement. Amir Malka, who presented the runtime architecture at KubeCon North America 2025, joins as a new maintainer. Craig Box and David Wertenteil move to emeritus status.
+
+If you're already running Kubescape 3.x, the upgrade path is straightforward but not invisible. The host-sensor and host-agent removal means your deployment manifests will change. If you're evaluating Kubernetes security tools for the first time, 4.0 is a reasonable place to start, particularly if you're running AI workloads and want guardrails that actually understand what KAgent CRDs look like.
