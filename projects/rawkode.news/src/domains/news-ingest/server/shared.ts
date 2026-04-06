@@ -1,4 +1,4 @@
-import TurndownService from "turndown";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 import type { NewsSourceType } from "@/domains/news-ingest/contracts";
 import {
   NEWS_SOURCE_LOCATOR_MAX_LENGTH,
@@ -36,15 +36,13 @@ const NAMED_HTML_ENTITIES = new Map<string, string>([
 ]);
 const CONTROL_CHARS_RE = /[\u0000-\u001f\u007f]+/gu;
 const HTML_FRAGMENT_RE = /<\/?[a-z][^>]*>/iu;
-const turndownService = new TurndownService({
-  bulletListMarker: "-",
+const htmlToMarkdown = new NodeHtmlMarkdown({
+  bulletMarker: "-",
   codeBlockStyle: "fenced",
   emDelimiter: "*",
-  headingStyle: "atx",
   strongDelimiter: "**",
+  ignore: ["script", "style", "noscript"],
 });
-
-turndownService.remove(["script", "style", "noscript"]);
 
 export const collapseWhitespace = (value: string) => value.replace(/\s+/gu, " ").trim();
 
@@ -118,7 +116,7 @@ export const normalizeRichTextToMarkdown = (
 
   const decodedInput = decodeHtmlEntities(normalizedInput);
   const markdown = HTML_FRAGMENT_RE.test(decodedInput)
-    ? turndownService.turndown(decodedInput)
+    ? htmlToMarkdown.translate(decodedInput)
     : decodedInput;
   const normalized = normalizeMarkdownWhitespace(markdown);
 
