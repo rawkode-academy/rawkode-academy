@@ -1,0 +1,40 @@
+---
+title: "Higress Joins CNCF Sandbox with a Migration Path off Ingress-NGINX"
+description: "Alibaba's Envoy-based gateway lands at CNCF as the Ingress-NGINX retirement deadline looms, pitching itself as a drop-in replacement with an AI gateway bolted on."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - envoy
+  - istio
+  - kubernetes
+---
+
+Alibaba has donated Higress to the CNCF Sandbox. If you've been putting off the Ingress-NGINX migration (and most teams have), this is worth a look.
+
+Quick recap on why you should care: Ingress-NGINX is retiring. Kubernetes 1.36 ships this month with Ingress-NGINX removed from the default path, and the upstream controller stops getting security patches. Every cluster running it needs a plan. Gateway API is the eventual answer, but switching your ingress manifests over isn't free.
+
+## What Higress actually is
+
+Higress is an Envoy and Istio-based gateway that Alibaba has run in production for years. It merges three things teams usually run separately: a north-south ingress gateway, an east-west microservices gateway, and an AI gateway for LLM traffic. One control plane, one binary, xDS under the hood, WebAssembly for extensions.
+
+The interesting trick is annotation compatibility. Higress understands the Ingress-NGINX annotation set, so you can point it at your existing `Ingress` resources and they mostly just work. That's the pitch: stop bleeding CVEs on an unmaintained NGINX config, keep your manifests, migrate to Gateway API on your own schedule.
+
+## The AI gateway part
+
+This is where Higress diverges from Envoy Gateway and Kong. Built-in features:
+
+- Native LLM routing with token-based rate limits (not request-based, which is the wrong unit for model traffic)
+- Multi-model fallback, so a timeout on GPT-5 can roll over to Claude or a local model
+- Model Context Protocol (MCP) support as a first-class thing, not a plugin
+- RAG integration and model-aware load balancing
+
+If you're currently running a separate proxy in front of your LLM calls (a LiteLLM sidecar, a custom Envoy filter, whatever), Higress wants to collapse that into the same gateway that's already handling your web traffic.
+
+## Adopters worth noting
+
+Alibaba Group, Ant Group, Ctrip, DJI, Kuaishou, and Sealos are listed as production users. That's a Chinese-internet-scale stress test, which matters because it means the project has been hardened against traffic volumes most Western users will never see.
+
+The catch: CNCF Sandbox is the earliest stage. Governance has to move from Alibaba-internal to vendor-neutral, the maintainer base needs to diversify, and the docs (currently heavy on Chinese-first examples) need English parity. Don't bet your platform on it this quarter. Do run a PoC against a non-critical namespace before KubeCon NA.
+
+Source: [CNCF blog](https://www.cncf.io/blog/2026/03/25/higress-joins-cncf-delivering-an-enterprise-grade-ai-gateway-and-a-seamless-path-from-nginx-ingress/)
