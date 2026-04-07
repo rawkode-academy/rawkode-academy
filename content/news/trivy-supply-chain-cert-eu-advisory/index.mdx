@@ -1,0 +1,39 @@
+---
+title: "CERT-EU Confirms Trivy Compromise Exfiltrated 340GB from European Commission AWS"
+description: "CERT-EU's April 3 advisory details how the March Trivy supply chain attack was used to steal an AWS API key and drain 340GB from Europa.eu. If you ran trivy-action in CI, you need to check your audit logs."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - trivy
+  - kubernetes
+---
+
+CERT-EU published its official advisory on April 3, and it's uglier than the early reporting suggested. The Trivy supply chain compromise from March wasn't a hypothetical risk. TeamPCP used it to harvest an AWS API key out of a European Commission CI pipeline and walk out with more than 340GB of uncompressed data from the Europa web hosting service, affecting up to 71 client tenants. ShinyHunters has already posted the dataset on its leak site.
+
+If you've been treating this as someone else's problem, stop.
+
+Here's the short version of what happened. On March 19 around 17:43 UTC, an attacker with residual access from an earlier February foothold force-pushed 76 of 77 version tags in `aquasecurity/trivy-action` and all 7 tags in `aquasecurity/setup-trivy`, pointing trusted references at malicious commits. The same compromised `aqua-bot` service account triggered the release pipeline and published a poisoned Trivy binary as v0.69.4. Anyone pinning to a tag rather than a commit SHA pulled the malicious version on their next CI run.
+
+The payload was a credential stealer. It scraped whatever secrets the runner had access to, which in the European Commission's case included an AWS API key with enough reach to hit an S3 bucket holding Europa tenant data.
+
+**Safe versions to pin to right now:**
+
+- `trivy` binary: `v0.69.3` or earlier
+- `aquasecurity/trivy-action`: `v0.35.0` (commit `57a97c7`)
+- `aquasecurity/setup-trivy`: `v0.2.6` (commit `3fb12ec`)
+
+Pin by commit SHA, not tag. Tags are mutable. That's the whole lesson of this incident in one sentence.
+
+What to actually do in your environment:
+
+1. Grep your workflow files for `trivy-action` and `setup-trivy`. Check every reference. If it's a tag, replace it with the commit SHA above.
+2. Pull CI logs for any runs between March 19 and whenever you rotated. Look for unexpected outbound connections from the runner.
+3. Rotate any secret the runner could read during that window. Yes, all of them. The stealer didn't discriminate.
+4. If you use AWS, check CloudTrail for `GetCallerIdentity` and `ListBuckets` calls from IPs you don't recognise. That's the TeamPCP reconnaissance pattern Microsoft's guidance flagged on March 24.
+
+The Aqua team rotated credentials on March 1 after the initial February incident, but the rotation missed something and the attacker kept a way back in. That's worth sitting with. Credential rotation is only as good as your inventory of where credentials exist, and most teams don't have that inventory.
+
+There's a broader point here about scanners. Trivy sits inside the CI pipelines of a huge chunk of the cloud native world precisely because it's trusted to read everything. That trust is the attack surface. A compromised SBOM tool, a compromised image scanner, a compromised policy engine: they all have the same blast radius because they all run with the same elevated access. Treat them accordingly. Pin by SHA, scope their tokens, and audit their network egress like you would any other workload you don't fully control.
+
+Read the [CERT-EU advisory](https://cert.europa.eu/blog/european-commission-cloud-breach-trivy-supply-chain) and the [Trivy GHSA](https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23) before your next standup. If your answer to "did we run trivy-action in the affected window?" is "I'll check," that's your morning.
