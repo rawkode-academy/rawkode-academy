@@ -1,0 +1,36 @@
+---
+title: "Tekton Leaves the CD Foundation, Joins CNCF as Incubating"
+description: "Tekton moves from the Continuous Delivery Foundation to CNCF as an incubating project, consolidating Kubernetes-native CI/CD under one foundation."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - tektoncd
+  - kubernetes
+---
+
+The CNCF Technical Oversight Committee has voted Tekton in as an incubating project. The move was announced on March 25, 2026, and shifts Tekton out of the Continuous Delivery Foundation, where it had been a graduated project since being donated by Google in 2019.
+
+For users, nothing changes today. Same codebase, same maintainers, same v1.0 Pipelines API. The interesting part is what the move signals.
+
+## Why The Move
+
+Tekton was the CDF's flagship graduated project. Leaving means giving up that status and starting again at the incubation tier inside CNCF. The maintainers picked that trade because most of Tekton's actual users, integrators, and adjacent projects already live in the CNCF orbit. Argo, Flux, Knative, Backstage, Crossplane. Running CI/CD on Kubernetes from a foundation that doesn't host Kubernetes was getting awkward.
+
+The CDF, for its part, isn't disappearing. Jenkins, Spinnaker, and Ortelius stay put. But Tekton was the Kubernetes-native piece, and Kubernetes-native belongs next to Kubernetes.
+
+## What Incubation Resets
+
+Graduation criteria at CNCF aren't trivial. Tekton will need a fresh third-party security audit, updated governance docs aligned to CNCF requirements, and the usual due diligence on adopters and contributor diversity. Expect that work to take a year or so before any graduation conversation starts.
+
+The maintainers have been clear that backwards compatibility is non-negotiable through this. If you've got Tekton Pipelines v1 running in production, your YAML keeps working.
+
+## The Practical Read
+
+If you're a platform team currently picking a CI/CD substrate, this nudges Tekton further into the "safe bet" column. Consolidation under one foundation reduces the risk of competing governance, conflicting roadmaps, and the kind of slow drift that kills interop between sibling projects.
+
+If you're already on Argo Workflows or Argo Events for your pipelines, the obvious question is whether tighter foundation alignment eventually means tighter technical alignment. Don't hold your breath. These are different projects with different designs, and CNCF has plenty of overlapping tools that coexist just fine.
+
+Worth watching: how the Tekton Chains work on supply chain attestation evolves now that it sits next to in-toto, SPIFFE, and the rest of the CNCF security stack. That's where the move could actually pay off technically.
+
+Source: [CNCF blog](https://www.cncf.io/blog/2026/03/24/tekton-becomes-a-cncf-incubating-project/)
