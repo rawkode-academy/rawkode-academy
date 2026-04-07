@@ -1,0 +1,29 @@
+---
+title: "Trivy Supply Chain Compromise Hits CI Pipelines Worldwide"
+description: "A malicious Trivy v0.69.4 release exfiltrated secrets from CI runners, and the fallout now includes a confirmed European Commission data breach. Here's what to check in your pipelines."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - trivy
+  - aquaproj
+---
+
+If you run Trivy in CI, stop what you're doing and check your pinned versions. On March 19, attackers published a malicious `v0.69.4` of the scanner, along with poisoned tags across `aquasecurity/trivy-action` and `aquasecurity/setup-trivy`. The payload was built to steal secrets from whatever runner picked it up.
+
+Aqua Security's team caught it the same day and pulled the artifacts by around 20:38 UTC, but the blast radius keeps growing. The European Commission has now confirmed that roughly 300GB of data was exfiltrated from its AWS environment via an API key lifted during this incident. That's not a theoretical risk anymore.
+
+The attack chain is ugly because it's so mundane. Back in late February, attackers used a misconfiguration in Trivy's own GitHub Actions setup to grab a privileged token. Aqua rotated credentials on March 1 and disclosed the earlier incident, but the rotation missed something. The attacker, operating as "TeamPCP," kept residual access and waited three weeks before detonating.
+
+When they did, they force-pushed 76 of 77 tags in `trivy-action` and all 7 tags in `setup-trivy`. That's the part platform engineers should sit with for a minute. If your workflow references `aquasecurity/trivy-action@0.28.0` by tag, a force-push silently redirects that reference to a malicious commit. No version bump, no PR, no diff in your repo. The `aqua-bot` service account then triggered the release automation and pushed the malicious binary through the normal channels.
+
+What to do now, in rough priority order:
+
+1. **Check every workflow that invokes `trivy-action` or `setup-trivy`.** If you're pinning by tag, you're trusting that tag hasn't moved. Switch to commit SHAs. GitHub even recommends this in their hardening guide, and this is exactly why.
+2. **Audit for v0.69.4.** Any runner that pulled it between March 19 and the takedown should be treated as compromised. Assume secrets exposed to that job are burned.
+3. **Rotate anything those jobs touched.** Cloud credentials, registry tokens, deploy keys, signing keys. All of them. The European Commission story is what happens when you skip this step.
+4. **Ship your Actions audit logs somewhere queryable** if you aren't already. You need to be able to answer "did we run the bad version" in minutes, not days.
+
+Aqua's been publishing ongoing updates and indicators of compromise, and Microsoft, CrowdStrike, and Palo Alto have all put out detection guidance. The technical writeups are worth reading even if you don't run Trivy, because the pattern generalizes: incomplete credential rotation after a prior incident, tag-based references to third-party actions, and a service account with enough power to cut releases on its own. Plenty of other popular Actions have the same shape.
+
+The uncomfortable question this raises: how many of your dependencies could be replaced by an attacker tomorrow without you noticing? If the answer isn't "zero, because we pin by SHA and verify signatures," that's the work.
