@@ -1,0 +1,24 @@
+---
+title: "Istio 1.27 Hits End of Life With a Final 1.27.9 Patch"
+description: "Istio shipped 1.27.9 on April 7 and marked the 1.27 branch unsupported. If you're still on 1.27, you're now on your own for security fixes."
+slug: istio-127-final-patch
+type: news
+publishedAt: 2026-04-07
+isDraft: false
+authors:
+  - rawkode
+technologies:
+  - istio
+---
+
+Istio 1.27 is done. The project cut 1.27.9 today and flagged the branch as unsupported on the news page, closing out a release line that first shipped in August 2025. If your clusters are still running 1.27, any CVE disclosed from tomorrow onward won't get a backport.
+
+The final patch isn't empty. 1.27.9 fixes a race in the HBONE proxy that produced intermittent `h2 ping error: broken pipe` log spam, stops istiod from crashing when a cluster has CRDs newer than the version it knows about (hello, TLSRoute v1.5), and corrects the `serviceAccount` matcher in `AuthorizationPolicy` so accounts with special characters actually match. There's also a fix for unnecessary Gateway restarts after istiod restarts, which anyone running large meshes has probably cursed about at least once.
+
+Worth flagging: the TLSRoute hostname intersection fix. Istio was not properly enforcing the intersection between `TLSRoute` hostnames and the parent Gateway listener hostnames, which is a conformance bug against the Gateway API spec. If you depend on TLS passthrough routing, upgrade and re-test your hostname constraints before assuming they did what you thought.
+
+Istio's support policy gives a minor release roughly six weeks past the N+2 release. 1.29 landed on February 26, so the 1.27 clock ran out on March 30. Today's 1.27.9 is the courtesy goodbye, not a reprieve. The supported lines are now 1.28 and 1.29.
+
+If you can't jump straight to 1.29, at least get to 1.28.5, which carries the fixes from ISTIO-SECURITY-2026-001 including the JWKS resolver auth bypass (CVE-2026-31837, CVSS 8.7) and the RBAC multivalue header bypass. Running an EOL service mesh with a known auth bypass in the recent history of the project is not a position you want to explain in a postmortem.
+
+Check your fleet. `istioctl version` across every cluster, and if any of them still say 1.27, that's your Monday.
