@@ -1,0 +1,32 @@
+---
+title: "Kubescape 4.0 Moves Runtime Threat Detection and Storage to GA"
+description: "Kubescape 4.0 graduates its eBPF runtime detection engine and Aggregated API storage backend to GA, and adds security controls for KAgent AI agents."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - kubescape
+  - kubernetes
+---
+
+Kubescape 4.0 landed at KubeCon Europe in Amsterdam, and the big shift isn't another scanner. It's that Runtime Threat Detection and Kubescape Storage are both GA. That's the part worth your attention.
+
+## Runtime Detection, Finally GA
+
+The runtime engine watches processes, syscalls, network events, and filesystem activity on each node, then matches them against CEL-based detection rules tied to per-workload Application Profiles. Those profiles act as learned baselines, so the engine fires on deviation rather than on every CVE match. ARMO says this cuts CVE noise by over 95% in practice, because a vulnerable package that's never loaded at runtime simply doesn't show up as an alert.
+
+If you've been waiting for an open source alternative to the commercial Falco-plus-policy-engine stacks, this is it. And you don't need to run a separate DaemonSet pile anymore. The 4.0 release collapses the previous multi-agent architecture into a single node-agent per node, which the team describes as more stable and easier to audit.
+
+## Storage Out of etcd
+
+Kubescape Storage also hit GA. It uses the Kubernetes Aggregated API to keep Application Profiles, SBOMs, and vulnerability manifests outside etcd. If you've ever watched a security tool blow up your etcd with CRDs, you'll know why this matters. The team tested it on clusters with thousands of workloads before shipping GA.
+
+## KAgent Controls
+
+The release also ships 15 Rego-based controls covering 42 configuration points in KAgent CRDs, the CNCF project for running AI agents on Kubernetes. They catch the usual suspects: empty security contexts on default deployments, missing NetworkPolicies, controllers watching cluster-wide when they shouldn't. It's the first systematic attempt I've seen from a mainstream cloud native security tool to treat AI agents as workloads that need their own policy baseline rather than a novelty.
+
+## Compliance Bumps
+
+CIS Benchmark 1.12 for vanilla Kubernetes, plus 1.8 for EKS and AKS, are now supported. If you're chasing compliance reports, the updated mappings save you a manual diff.
+
+Running Kubescape already? The upgrade path is documented and the single-agent architecture is a drop-in replacement. If you're not, this is a reasonable week to spin it up in a test cluster and point it at a noisy namespace. See what the Application Profiles flag that your current scanner misses.
