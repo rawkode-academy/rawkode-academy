@@ -1,0 +1,49 @@
+---
+title: "CERT-EU Pins Europa.eu Breach on Trivy Supply Chain Compromise"
+description: "CERT-EU traced the theft of 350 GB of data from European Commission systems back to CVE-2026-33634, the Trivy GitHub Action takeover. Here's what the post-mortem actually says."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - trivy
+---
+
+CERT-EU dropped its post-mortem on April 3, and it's not pretty. The 350 GB of data exfiltrated from Europa.eu on March 24 came in through Trivy. Specifically, CVE-2026-33634, the supply chain compromise that briefly turned Aqua Security's vulnerability scanner into a credential stealer.
+
+If you skipped the original advisory two weeks ago because "it's just a scanner," this is your reminder that scanners run with secrets.
+
+## What CERT-EU found
+
+Attackers used the trojanised `aquasecurity/trivy-action` to scrape AWS API keys out of a Commission GitHub Actions runner. From there they minted fresh access keys (a classic detection-evasion move) and pulled 91.7 GB compressed, 350 GB uncompressed, covering messages, names and emails tied to 42 internal Commission clients and at least 29 other EU bodies.
+
+The good news, such as it is: no lateral movement into other Commission AWS accounts. The bad news is that none of that mattered. The blast radius of one compromised pipeline was already enormous.
+
+CERT-EU attributes the initial access to TeamPCP, the same group Aqua Security named when the advisory landed on March 22.
+
+## Why one scanner gave up the keys to a continent
+
+The mechanics are worth rehearsing because they apply to almost every CI pipeline running today.
+
+TeamPCP didn't break Trivy's code. They got hold of publishing credentials, force-pushed 76 of 77 tags in `aquasecurity/trivy-action` to malicious commits, replaced all 7 tags in `aquasecurity/setup-trivy`, and shipped poisoned `v0.69.4`, `v0.69.5` and `v0.69.6` container images to Docker Hub. Anyone pinning to a tag instead of a commit SHA pulled the malware on their next run.
+
+Trivy needs access to pipeline secrets by design. That's the whole job. So the attackers got GitHub tokens, cloud credentials, SSH keys, Kubernetes service account tokens, whatever the runner could see.
+
+The root cause was a non-atomic secret rotation back in late February. The first breach was supposed to be contained. It wasn't. The attacker kept a foothold and came back six weeks later.
+
+## What to actually do
+
+CERT-EU's recommendations are the ones you've heard before, which is the depressing part:
+
+- Pin GitHub Actions to immutable commit SHAs, not tags. `uses: aquasecurity/trivy-action@<sha>` not `@master` and not `@0.28.0`.
+- Roll every secret any affected runner could touch. GitHub tokens, AWS keys, GCP service accounts, kubeconfig contents, the lot.
+- Delete cached `trivy:0.69.4`, `0.69.5` and `0.69.6` images from your registries.
+- Revert to `trivy-action@0.35.0`, `setup-trivy@0.2.6` (recreated clean), and Trivy `0.69.3` until the ecosystem rebuilds trust.
+- Hunt for unusual Cloudflare tunnel activity and unexpected `CreateAccessKey` calls in CloudTrail. Those are TeamPCP's calling cards.
+
+If your platform team has been putting off the "pin everything to SHAs" ticket, this is the receipt you needed. The Commission has 350 GB of hindsight to share.
+
+When does your last unpinned action get fixed?
+
+Sources:
+- [CERT-EU blames Trivy supply chain attack for Europa.eu data breach](https://www.csoonline.com/article/4154176/cert-eu-blames-trivy-supply-chain-attack-for-europa-eu-data-breach.html)
+- [Aqua Security advisory GHSA-69fq-xp46-6x23](https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23)
