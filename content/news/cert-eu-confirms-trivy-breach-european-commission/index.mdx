@@ -1,0 +1,25 @@
+---
+title: "CERT-EU Confirms Trivy Supply Chain Attack Breached the European Commission"
+description: "CERT-EU's April 3 advisory ties the March 19 Trivy compromise to a 340GB data theft at europa.eu. TeamPCP harvested AWS keys from the Commission's CI pipeline and handed the loot to ShinyHunters."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - trivy
+---
+
+CERT-EU published an advisory on April 3 confirming what a lot of people had been quietly worrying about since mid-March: the poisoned Trivy 0.69.4 release landed inside the European Commission's CI pipeline, and it walked out with an AWS API key.
+
+From there, things got ugly fast. The attackers, tracked as TeamPCP, pivoted into the Commission's AWS account, exfiltrated roughly 340GB of uncompressed data across up to 71 tenants on the europa.eu hosting platform, and passed the dataset to ShinyHunters, who promptly dumped it on their leak site. Names, usernames, email addresses. The usual grim list.
+
+If you're running Trivy in CI, you already know the drill. Pin versions. Audit what ran between March 17 and March 20. Rotate any cloud credentials that could have been visible to the scanner's process. Aqua's post-incident guidance is still being updated, and the `trivy-action` and `setup-trivy` GitHub Actions were compromised alongside the CLI, so check your workflow runs too.
+
+The uncomfortable part is the shape of this attack. Trivy isn't some abandoned side project. It's one of the most widely deployed open source scanners in the cloud native world, and it ended up being the delivery vehicle for a breach at one of the most security-conscious institutions in Europe. A tool teams adopted specifically to find vulnerabilities became the vulnerability.
+
+TeamPCP aren't amateurs either. They're the same crew that's been burning through exposed Docker sockets, Kubernetes API servers, Ray dashboards, and Redis instances for the better part of a year. Getting maintainer credentials for a CNCF-adjacent project was the logical next step, and it worked on the first try.
+
+Two things worth sitting with. First, CERT-EU's timeline shows the malicious release sat in the wild for long enough to catch an automated pipeline at the European Commission. That's not a detection failure unique to Brussels. Any shop pulling `latest` or auto-updating scanner versions in CI had the same exposure window. Second, the blast radius wasn't the scanner itself. It was whatever IAM role the scanner's runner happened to hold. If your Trivy job can read S3, so can whoever owns the build.
+
+So what's the actual homework? Read the CERT-EU advisory. Check your Trivy versions against the known-bad list. Assume any credential exposed to a CI runner during the window is burned and rotate it. And if you've been putting off scoping down your scanner's IAM permissions, this is the week.
+
+Source: [CERT-EU Confirms Trivy Supply Chain Attack Led to European Commission AWS Breach](https://cybersecuritynews.com/european-commission-breach-trivy/)
