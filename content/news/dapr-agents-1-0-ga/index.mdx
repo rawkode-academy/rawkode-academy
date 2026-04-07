@@ -1,0 +1,29 @@
+---
+title: "Dapr Agents v1.0 Hits GA: Durable AI Agents That Survive Pod Crashes"
+description: "The Dapr project shipped Dapr Agents v1.0, a Python framework built on Dapr Workflows that keeps AI agents running across restarts, node failures, and network drops."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - dapr
+---
+
+Dapr Agents v1.0 is GA. If you've been gluing together LangChain scripts and hoping your agent survives a pod restart, this is the release to pay attention to.
+
+The framework runs agents as Dapr Workflow instances. That means state is persisted, retries are automatic, and when a process dies mid-tool-call the agent resumes where it left off instead of starting over or hallucinating its way back to the task. It's a sharp departure from the "smart but stateless" agent frameworks dominating the Python ecosystem.
+
+You can install it today:
+
+```bash
+pip install dapr-agents
+```
+
+What you get out of the box: persistent conversation memory backed by 25+ Dapr state stores, unified LLM integration across OpenAI, Azure, NVIDIA, Hugging Face, and ElevenLabs, structured tool calling via JSON Schema, OpenAPI v3.1, and MCP, SPIFFE workload identity with mTLS, plus OpenTelemetry tracing and Prometheus metrics with W3C context propagation. Multi-agent coordination supports both deterministic pipelines and autonomous orchestration patterns.
+
+The project is a yearlong collaboration between NVIDIA, Diagrid, and the Dapr community. Roberto Rodriguez at NVIDIA started it. Diagrid now ships full-time maintainers. CNCF announced the GA at KubeCon Europe in Amsterdam.
+
+Production references aren't hypothetical. ZEISS Vision Care is running document extraction workflows on it. A large EU logistics company is using it for warehouse automation. The framework already sees more than 8,000 monthly downloads before hitting v1.0.
+
+Why should a platform team care? Because the "agent survives infrastructure reality" problem is usually left as an exercise for the reader. Most teams end up writing their own checkpointing, retry, and state layer on top of whatever LLM orchestration library they picked. Dapr Agents puts that layer underneath the API, which is exactly where it belongs on Kubernetes.
+
+If your team is running AI agents in production, or about to, pull down the quickstarts and see whether the workflow-based model fits your failure modes better than what you've built yourself.
