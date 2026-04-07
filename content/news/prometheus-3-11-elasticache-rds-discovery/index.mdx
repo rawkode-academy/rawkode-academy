@@ -1,0 +1,24 @@
+---
+title: "Prometheus 3.11 Lands Elasticache and RDS Discovery, Native Histogram Trimming"
+description: "Prometheus v3.11.0 ships AWS Elasticache and RDS service discovery, Azure Workload Identity, and experimental fast-startup TSDB. There's also a Hetzner label deprecation you'll want to plan around."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - prometheus
+  - kubernetes
+---
+
+Prometheus v3.11.0 dropped on April 2, and it's a meaty one. If you're scraping anything on AWS, the headline change is two new service discovery roles: `elasticache` and `rds`. No more bolting on exporters with hand-rolled relabel configs to find your Redis or Postgres instances. Point Prometheus at your AWS account and the targets show up.
+
+Azure users get Workload Identity authentication, which means you can finally stop shipping client secrets to your scrape configs.
+
+The PromQL changes are where it gets interesting. There are two new operators, `</` and `>/`, that trim native histogram observations below or above a threshold. Pair that with the experimental `histogram_quantiles` variadic function and you can compute p50, p95, and p99 in a single expression instead of three. Native histograms have been dragging their feet toward general use for a while, and these are the kinds of ergonomic wins that make people actually adopt them.
+
+On the TSDB side, there's an experimental fast-startup feature that persists a `series_state.json` file so Prometheus doesn't have to rebuild its in-memory index from scratch on every restart. If you've ever waited ten minutes for a large Prometheus to come back after an OOM kill, you know why this matters. There's also percentage-based retention, so you can finally say "use 80% of the disk" instead of guessing at a byte count.
+
+Kubernetes service discovery picked up `__meta_kubernetes_pod_deployment_name`, `__meta_kubernetes_pod_cronjob_name`, and `__meta_kubernetes_pod_job_name` labels on the pod role. Anyone who's written a regex to parse a Deployment name out of a ReplicaSet hash will appreciate this.
+
+Two things to plan for. Hetzner users: the `__meta_hetzner_datacenter` label on the `robot` role is deprecated, and the `hcloud` role's deprecated labels stop working entirely after July 1, 2026. Update your relabel rules now. And `promtool` debug output now goes to stderr instead of stdout, so any CI pipeline parsing its output needs a quick check.
+
+The full changelog is on [GitHub](https://github.com/prometheus/prometheus/releases/tag/v3.11.0). Worth a read before you upgrade.
