@@ -1,0 +1,34 @@
+---
+title: "Dragonfly Adds Native Hugging Face and ModelScope Protocol Support for P2P Model Distribution"
+description: "The CNCF graduated project now speaks hf:// and modelscope:// directly, letting clusters pull massive AI models over a peer-to-peer mesh without proxies or URL rewriting."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - dragonfly
+---
+
+If you've ever watched 200 GPU nodes hammer the Hugging Face CDN at the same time, you know the problem. Pulling DeepSeek-R1 onto a fleet hurts. Dragonfly just shipped a fix that doesn't ask you to stand up a proxy or rewrite a single URL.
+
+The CNCF graduated project added two new built-in backends: `hf://` for Hugging Face Hub and `modelscope://` for ModelScope. They land via PRs #1665 and #1673, and the syntax is exactly what you'd hope for:
+
+```bash
+dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O ./model.safetensors
+dfget modelscope://deepseek-ai/DeepSeek-R1 -O ./DeepSeek-R1/ -r
+```
+
+Authentication works through `--hf-token` and `--ms-token`. You can pin revisions, recurse into whole repositories with `-r`, and pull from private repos. Nothing exotic.
+
+## Why this changes the math
+
+The number Dragonfly's team published is hard to ignore. A 130 GB model fanned out to 200 nodes normally drags 26 TB across the origin. With piece-based P2P streaming, one seed peer fetches it once and the other 199 nodes trade chunks among themselves. Origin traffic drops to roughly 130 GB. That's a 99.5% reduction, and it's the difference between a model rollout that finishes before lunch and one that gets you a polite email from your CDN provider.
+
+The streaming part matters too. Peers don't wait for the seed to finish before they start sharing. As soon as a piece lands, it's available to the swarm.
+
+## What was painful before
+
+Before this, running Dragonfly in front of Hugging Face meant configuring it as an HTTP proxy and rewriting `huggingface.co` URLs in your tooling. Doable, but every team reinvented the same glue. Now `hf://` and `modelscope://` are first-class citizens inside the pluggable backend system, and recursive downloads preserve auth context by emitting native protocol URLs back into the pipeline instead of leaking them as raw HTTPS.
+
+If you're already running Dragonfly for container image distribution, you can point it at model weights tomorrow. If you're not, this is a reasonable excuse to look at it. Pulling LLMs at scale isn't getting cheaper, and the bandwidth bill is a real line item now.
+
+One question worth asking your platform team: what's your current p99 model pull time, and how much of it is just the origin throttling you?
