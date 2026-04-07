@@ -1,0 +1,34 @@
+---
+title: "Velero Lands in the CNCF Sandbox"
+description: "Broadcom has handed Velero, the de facto Kubernetes backup tool, to the CNCF Sandbox. Vendor-neutral governance is finally on the table for cluster backup and DR."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - velero
+---
+
+Velero is now a CNCF Sandbox project. Broadcom announced the donation at KubeCon EU in Amsterdam, and the Sandbox application was formally accepted in early April. For a project that's been the default answer to "how do I back up my cluster?" for years, this is overdue.
+
+Velero started life at Heptio in 2017, then rode through the VMware acquisition and into Broadcom's portfolio. That's a lot of corporate ownership for a tool platform teams already treat as critical infrastructure. Sandbox status doesn't change the code, but it changes who decides where the code goes next.
+
+## What actually changes
+
+Governance moves to a vendor-neutral TOC-overseen model. The maintainer roster opens up. Roadmap discussions happen in the open, and contributions stop flowing through a single vendor's review queue. If you've ever tried to upstream a fix to a project where one company holds the keys, you know why this matters.
+
+The trademark, the GitHub org, and the release infrastructure all transfer to CNCF. Broadcom keeps contributing engineering time, but they no longer control the project unilaterally.
+
+## Why platform teams should care
+
+Backup and disaster recovery are exactly the kind of capability you don't want tied to a single vendor's strategic priorities. If Broadcom had ever decided Velero wasn't aligned with VMware's commercial direction, users would've been stuck forking or migrating. That tail risk is gone now.
+
+The other practical upside: a broader contributor base usually means faster movement on the long tail of plugins. Velero's value comes from its provider plugins for object stores, snapshot APIs, and CSI drivers. More maintainers, more plugins kept current.
+
+## What to watch
+
+Sandbox is the entry tier. Incubating and Graduated are where the security audits, governance maturity, and adoption metrics get scrutinised. Expect a push toward Incubating within the next year, and watch for the first non-Broadcom maintainers to land commit access.
+
+If you're already running Velero in production, nothing breaks today. If you've been hesitant to standardise on it because of the single-vendor concern, that objection just expired.
+
+Source: [The New Stack](https://thenewstack.io/broadcom-donates-velero-cncf/)
