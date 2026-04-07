@@ -1,0 +1,31 @@
+---
+title: "Dapr Agents 1.0 Hits GA: A Durable Python Framework for AI Agents in Production"
+description: "CNCF announced general availability of Dapr Agents v1.0 at KubeCon Europe, a Python framework that keeps long-running AI agents alive across crashes using Dapr's workflow engine."
+publishedAt: 2026-04-07
+authors:
+  - rawkode
+technologies:
+  - dapr
+---
+
+CNCF shipped Dapr Agents v1.0 this week at KubeCon + CloudNativeCon Europe in Amsterdam. It's a Python framework for building LLM-powered agents that don't fall over the moment a pod restarts.
+
+The pitch is simple. Most agent frameworks optimise for cleverness. Dapr Agents optimises for staying alive. If your agent is halfway through a 40-minute workflow and the node dies, the workflow engine picks it back up where it left off. State persists. Memory persists. The retry logic is the runtime's problem, not yours.
+
+## What's actually in the box
+
+Durable workflows backed by Dapr's existing workflow engine. Persistent state across more than 30 supported stores, so you can pick Redis, Postgres, Cosmos DB, or whatever your platform team already runs. Secure agent-to-agent communication using SPIFFE identities. Multi-agent coordination over pub/sub. Built-in observability via the same OpenTelemetry plumbing Dapr already exposes.
+
+The 1.0 release is the result of about a year of work between NVIDIA, the Dapr maintainers, and end users who'd been running pre-GA builds in anger.
+
+## Why this one's worth a look
+
+There's no shortage of agent frameworks. LangGraph, CrewAI, AutoGen, Bedrock Agents, the list keeps growing. What none of them really solved is the boring production stuff: what happens when your LLM call times out at minute 38 of a 45-minute task, and the agent was three tool calls deep into a workflow that mutated external state.
+
+Dapr Agents inherits the answer from Dapr itself. Workflows are deterministic and replayable. If you've built anything with Dapr Workflows or Temporal before, the mental model will feel familiar. If you haven't, the learning curve is real but the payoff is agents you can actually page someone about.
+
+It runs anywhere Dapr runs, which in practice means any Kubernetes cluster with the Dapr control plane installed. `pip install dapr-agents` and you're going.
+
+If you're picking an agent framework for something that needs to survive a Tuesday afternoon deploy, this one just earned a spot on the shortlist.
+
+Source: [CNCF announcement](https://www.cncf.io/announcements/2026/03/23/general-availability-of-dapr-agents-delivers-production-reliability-for-enterprise-ai/)
