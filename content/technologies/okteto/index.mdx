@@ -11,28 +11,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: explore
 ---
-Okteto is a platform that enables developers to build and test cloud-native applications directly in Kubernetes environments. It provides a fast and iterative development loop by allowing developers to work with their local development tools and IDEs, while seamlessly integrating with remote Kubernetes clusters. This eliminates the need for constant rebuilding and redeploying of code, significantly accelerating the development process.
+Okteto is an inner-loop development tool for Kubernetes. The core workflow is `okteto up`: it swaps a running pod's container image for a language-appropriate development image, starts a bidirectional file sync between your working directory and the container, and opens an interactive shell plus port-forwards. You edit code locally, the container sees the changes instantly, and your app runs against real cluster dependencies without a Docker build, push, or redeploy on every iteration.
 
-Okteto's value lies in its ability to streamline the developer experience for cloud-native applications. By providing a familiar and efficient local development environment connected directly to Kubernetes, it reduces the friction and complexity associated with developing and testing in a cloud-native context. Main use cases include developing microservices, testing applications in production-like environments, and collaborating on cloud-native projects.
+Development environments are described by an `okteto.yml` manifest that can reference existing Helm charts, Kustomize bases, Docker Compose files, or raw manifests, and declare a `dev` section per service that controls the sync, command, and forwarded ports. File synchronization is implemented on top of Syncthing, which gives it reasonable performance on large trees and across unreliable links. The `okteto` CLI is open-source and Apache-2.0 licensed; the company also sells a managed SaaS and a self-hostable product that layer on top with preview environments per pull request, multi-tenant namespaces, and SSO.
 
-Okteto is a cloud-native development platform that allows developers to code, build, and test applications directly within their Kubernetes clusters. It aims to provide a fast and iterative inner development loop, enabling developers to bypass the traditional build-deploy-test cycle and work with their applications in a live, production-like environment.
-
-## Key Features
-
--   **Cloud-Native Development Environments:** Creates isolated development environments within Kubernetes, accessible from your local IDE and tools.
--   **Live Reloading:** Synchronizes local code changes to your application running in the cluster in real-time, providing instant feedback.
--   **Local Tooling Integration:** Connects your local IDE and development tools to the remote Kubernetes environment, allowing you to debug, edit, and test as if everything were local.
--   **`okteto up` Command:** The core command that launches your development environment, sets up port forwarding, and synchronizes your code.
--   **Context Management:** Easily manage and switch between different Kubernetes contexts and development environments.
--   **Dynamic Manifests:** Allows for dynamic modification of Kubernetes manifests to inject development-specific configurations.
--   **Ephemeral Environments:** Quickly provision and tear down development environments, ideal for feature branches and pull requests.
-
-## Benefits
-
--   **Accelerated Development Workflow:** Significantly reduces the inner development loop by eliminating constant rebuilds, pushes, and redeployments.
--   **Realistic Environments:** Develop and test against a production-like Kubernetes environment, catching issues earlier and ensuring higher fidelity.
--   **Developer Productivity:** Empowers developers to code faster, debug more effectively, and focus on application logic rather than environment setup.
--   **Resource Optimization:** Leverages cluster resources for development, potentially reducing local machine strain and standardizing development infrastructure.
--   **Simplified Collaboration:** Enables teams to share and collaborate on development environments, ensuring consistency across the team.
--   **Deployment Independence:** Develop and test applications without affecting other running services in the cluster.
--   **Cross-Platform Compatibility:** Works across various operating systems and development setups.
+It occupies the same niche as Tilt, Skaffold, Telepresence, DevSpace, and Garden — all different takes on "stop waiting for CI and redeploys while iterating on a service inside a cluster". Okteto's distinguishing trait is the container-swap-plus-sync model rather than rebuilding images on every change.

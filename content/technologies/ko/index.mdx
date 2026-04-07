@@ -5,6 +5,7 @@ logos:
   stacked: true
 website: 'https://ko.build/'
 source: 'https://github.com/ko-build/ko'
+documentation: 'https://ko.build/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -18,6 +19,8 @@ community:
 matrix:
   status: watch
 ---
-ko is a CNCF sandbox project.
+ko is a CLI that builds and publishes container images for Go applications without a Dockerfile and without a Docker daemon. You point it at a Go import path and it produces an OCI image and pushes it to a registry in one command.
 
-ko is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Because Go binaries are statically linked, ko skips the whole multi-stage Dockerfile dance: it cross-compiles the binary directly with the Go toolchain, then assembles an OCI image in-process using go-containerregistry. The resulting image is based on distroless (`gcr.io/distroless/static` by default), so you get a tiny, non-root image with no shell or package manager. Because the image has a deterministic, reproducible layer layout, re-publishing the same source produces the same digest, which plays nicely with Sigstore/Cosign signing. ko also has a `ko resolve` mode that rewrites `image: ko://./cmd/foo` references in your YAML manifests with the pushed digest, which is the workflow Knative, Tekton, and Kubernetes SIGs use to ship their own components.
+
+For Go projects specifically it replaces Docker+Dockerfile entirely. For multi-language shops the rough equivalents are Buildpacks, Jib (Java), and Bazel rules_oci.

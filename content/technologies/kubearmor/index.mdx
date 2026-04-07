@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubearmor.io/'
 source: 'https://github.com/kubearmor/kubearmor'
+documentation: 'https://docs.kubearmor.io/kubearmor'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -36,6 +37,8 @@ community:
 matrix:
   status: skip
 ---
-Runtime protection for Kubernetes & other cloud Workloads. Kubearmor provides a observability and policy enforcement system to restrict any unwanted, malicious behaviour of cloud-native workloads at runtime.
+KubeArmor is a runtime security enforcement engine for Kubernetes, VMs, and bare metal. Unlike Falco, which detects and alerts on suspicious events, KubeArmor actively blocks them at the kernel level using Linux Security Modules — AppArmor, SELinux, or BPF-LSM depending on what the host supports.
 
-KubeArmor is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Policies are expressed as `KubeArmorPolicy` CRDs that target pods by label and describe allowed/blocked process executions, file access paths, network access, and Linux capabilities. The KubeArmor daemon on each node translates those policies into concrete LSM rules (AppArmor profiles, SELinux context, or BPF-LSM programs) and attaches them to the matching container's cgroup. Because enforcement happens in-kernel before the syscall returns, you get actual prevention rather than post-facto alerts: a pod that tries to exec `/bin/sh` or write to `/etc` outside of its policy is blocked with -EPERM. An eBPF-based observer emits telemetry of allowed and denied syscalls for SIEM ingestion.
+
+It was contributed to the CNCF by AccuKnox. Its natural comparisons are Falco (detection), Tetragon (observation + optional enforcement via eBPF), and plain AppArmor profiles — KubeArmor's niche is giving you LSM-backed enforcement with a Kubernetes-native policy surface.

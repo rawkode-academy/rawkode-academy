@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://wasmedge.org/'
 source: 'https://github.com/WasmEdge/WasmEdge'
+documentation: 'https://wasmedge.org/docs/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -38,6 +39,8 @@ community:
 matrix:
   status: watch
 ---
-WasmEdge Runtime is a CNCF sandbox project.
+WasmEdge is a lightweight, high-performance WebAssembly runtime written in C++, optimized for server-side and edge workloads. It implements the core Wasm spec plus WASI, and layers on extensions for things the base spec does not cover: sockets for networking, a TensorFlow / PyTorch / llama.cpp inference plugin, a KV store interface, and async HTTP.
 
-WasmEdge Runtime is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The runtime can execute Wasm in interpreted mode or ahead-of-time compiled to native via LLVM, which closes most of the performance gap with native binaries. It ships as an OCI-compatible runtime that plugs into containerd and CRI-O via crun or runwasi, so a Pod with a Wasm workload can be scheduled by Kubernetes exactly like a container. It also embeds into Rust, Go, Node.js, and Python processes as a library, which is how it is often used as a sandbox for user-defined functions.
+
+WasmEdge is a CNCF sandbox project maintained by Second State, and is commonly used for serverless functions, edge compute, and running LLM inference at the edge.

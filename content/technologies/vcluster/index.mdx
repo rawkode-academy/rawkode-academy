@@ -3,6 +3,7 @@ name: vCluster
 logos:
   stacked: true
 website: 'https://www.vcluster.com/'
+source: 'https://github.com/loft-sh/vcluster'
 documentation: 'https://www.vcluster.com/docs/getting-started/setup'
 license: Apache-2.0
 status: stable
@@ -11,6 +12,8 @@ subcategory: Certified Kubernetes - Distribution
 matrix:
   status: watch
 ---
-vcluster is a lightweight Kubernetes distribution that runs inside another Kubernetes cluster. It creates fully functional virtual Kubernetes clusters – each with its own control plane, data store, and worker nodes – that are isolated from the underlying host cluster and other vclusters. This allows teams to have dedicated, isolated Kubernetes environments without the overhead of managing full-blown Kubernetes clusters. This is particularly useful for development, testing, and CI/CD pipelines.
+vCluster creates fully functional Kubernetes clusters that run as Pods inside another Kubernetes cluster. Each virtual cluster has its own API server, controller manager, and data store, so tenants see their own dedicated cluster, can install CRDs, and can create cluster-scoped resources like namespaces, without needing cluster-admin on the host.
 
-The value of vcluster lies in its ability to dramatically reduce resource consumption, simplify cluster management, and improve developer agility. It allows for multi-tenancy within a single Kubernetes cluster, reducing costs and operational complexity. It also enables rapid iteration and experimentation, as teams can spin up and tear down vclusters quickly and easily without impacting other workloads.
+By default vCluster runs k3s as the virtual control plane (k8s and k0s are also supported) and stores state in SQLite, Postgres, or an embedded etcd. It does not run its own kubelets. Instead, a syncer translates workloads from the virtual cluster into real Pods on the host cluster, rewriting namespaces and ownership so multiple vClusters can coexist safely. Services, endpoints, and persistent volume claims are mapped through in the same way.
+
+Compared to namespace-based multi-tenancy, vCluster gives tenants meaningful API-level isolation; compared to running separate real clusters, it is dramatically cheaper. It is maintained by Loft Labs and widely used for preview environments, per-team dev clusters, and CI.

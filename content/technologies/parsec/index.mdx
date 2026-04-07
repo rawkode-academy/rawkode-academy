@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Parsec is a CNCF sandbox project.
+Parsec, the Platform Abstraction for Security, is a hardware-agnostic security service that exposes a single API for cryptographic operations regardless of the underlying secure element. Applications ask Parsec to generate a key, sign a payload, or wrap a secret; Parsec routes the call to whichever hardware root of trust is available on the platform — a TPM 2.0, an HSM over PKCS#11, an Arm TrustZone-backed trusted application, or a cloud KMS.
 
-Parsec is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The service is written in Rust and runs as a local daemon that clients talk to over a Unix domain socket using a compact wire protocol. Client libraries exist for Rust, C, Go, and Python, and there is a PKCS#11 adapter for software that only knows how to talk to HSMs that way. Internally, Parsec organises providers — one per backend technology — behind a core that handles authentication, key naming, and RPC dispatch, so multiple applications on the same host can share access to the same HSM or TPM without trampling each other's key slots. The project originated with Arm and is now under the Cloud Native Computing Foundation as a sandbox project.
+
+Parsec is useful anywhere you need workload-level access to hardware-backed keys without writing separate code for every device: confidential computing workloads, IoT gateways, vehicle ECUs, and Kubernetes nodes where several pods want to use the host TPM. It is Apache-2.0 licensed and lives at `parallaxsecond/parsec` on GitHub.

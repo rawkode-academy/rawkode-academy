@@ -6,7 +6,8 @@ logos:
   stacked: true
 website: 'https://inspektor-gadget.io/'
 source: 'https://github.com/inspektor-gadget/inspektor-gadget'
-license: Apache-2.0
+documentation: 'https://inspektor-gadget.io/docs/latest/'
+license: Apache-2.0; GPL-2.0-only WITH Linux-syscall-note for BPF templates
 status: stable
 category: Observability and Analysis
 subcategory: Observability
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: explore
 ---
-Open source eBPF debugging and data collection tool for Kubernetes and Linux
+Inspektor Gadget is a collection of eBPF-based debugging and observation "gadgets" for Kubernetes, originally built at Kinvolk and now maintained by Microsoft. It gives you the BCC/bpftrace family of tools (execsnoop, opensnoop, tcptracer, biolatency, oomkill, etc.) but automatically enriched with Kubernetes metadata — pod, container, namespace, and node — so you can say "show me every file opened in pods matching label `app=api`" instead of "show me every file opened by PID 4712 on node `ip-10-0-3-41`."
 
-Inspektor Gadget is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It runs as a DaemonSet. The `ig` binary loads eBPF programs into the kernel on each node and correlates the resulting events with the container runtime via the cgroup/mntns identifier. Gadgets come in several flavors: tracers that stream events, snapshotters that capture state at a point in time, profilers that collect stacks, and top-style gadgets. Inspektor Gadget supports optional WebAssembly modules and OCI image-based gadgets; image-based gadgets reached GA in v0.31.0, so gadgets can now be pulled and distributed like container images.
+
+It is the closest thing Kubernetes has to a first-class equivalent of `strace` and `bpftrace` for clusters. For deeper runtime security use cases overlap with Falco and Tetragon, but Inspektor Gadget is deliberately aimed at ad-hoc investigation rather than rule-based alerting.

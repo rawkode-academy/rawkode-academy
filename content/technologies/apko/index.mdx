@@ -4,8 +4,9 @@ seo:
   title: 'apko: Build Minimal Secure OCI Images Faster'
   description: 'Learn apko with practical tutorials to build reproducible, SBOM-ready, distroless OCI images without Dockerfiles.'
 logos: null
-website: 'https://github.com/chainguard-dev/apko'
-documentation: 'https://github.com/chainguard-dev/apko#readme'
+website: 'https://apko.dev/'
+documentation: 'https://apko.dev/docs/'
+source: 'https://github.com/chainguard-dev/apko'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -13,30 +14,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: learn
 ---
-apko is a tool for building minimal, unprivileged container images. It emphasizes reproducibility and security by leveraging declarative configuration and cryptographic verification of all dependencies. Apko eliminates the need for Dockerfiles, offering a more streamlined and auditable process for creating base images and application containers.
+apko is a tool from Chainguard that builds OCI container images declaratively from a YAML file and a set of APK packages. There is no Dockerfile, no `RUN` steps, and no container runtime involved in the build — apko resolves the package list, fetches the APKs, and writes a tarball that is already a valid OCI image.
 
-Apko provides value by reducing image size, improving security posture through a minimal attack surface, and enhancing reproducibility. Its main use cases include creating base images for Kubernetes deployments, building lightweight application containers, and facilitating secure software supply chains.
+Because the build is purely a package install with no arbitrary shell execution, apko produces bit-for-bit reproducible images: the same config and package versions give the exact same image hash on any machine. Every build also generates an SBOM in SPDX format and sets the image creation timestamp to the epoch (or a user-specified value) so layer digests are stable. It is the tool Chainguard uses to produce their Wolfi-based distroless images, and it is typically paired with `melange`, which builds the APKs themselves from source.
 
-apko is a command-line tool for building OCI container images from APK packages. It is designed to replace traditional `Dockerfile` builds with a purely declarative approach, resulting in smaller, safer, and more reproducible images.
-
-## Key Features
-
-- **Reproducibility:** apko builds are fully reproducible. Given the same configuration file and source repositories, it produces a bitwise-identical image every time.
-- **Security by Design:** It builds "distroless" style images by default—containing only the packages you explicitly request. This minimizes the attack surface and reduces vulnerability noise.
-- **SBOM Generation:** Every build automatically generates a comprehensive Software Bill of Materials (SBOM), making it easier to track dependencies and comply with security standards.
-- **No Dockerfiles:** Images are defined in declarative YAML, removing the need for imperative build steps and ensuring a cleaner build process.
-
-## How It Works
-
-Instead of running `RUN` commands in a Dockerfile, you define your image in a YAML file. This configuration specifies:
-
-1.  **Repositories:** Where to fetch APK packages (e.g., Alpine Linux or Wolfi repositories).
-2.  **Packages:** The list of packages to install.
-3.  **Accounts:** Users and groups to create.
-4.  **Entrypoint:** The command to run when the container starts.
-
-apko then resolves the dependencies, fetches the packages, and assembles the filesystem layer-by-layer without needing a container runtime daemon.
-
-## Integration
-
-apko is often used in conjunction with **melange**, a tool for building APK packages from source. Together, they provide a complete pipeline for building secure software supply chains: `melange` compiles the software into APKs, and `apko` assembles those APKs into a final OCI image.
+In the image build landscape apko sits alongside `ko` (for Go binaries), BuildKit (general Dockerfile builds), and Buildpacks. Its niche is supply-chain focused base images: minimal, reproducible, SBOM-attested, and free of the build tools and package managers that inflate attack surface in traditional Alpine or Debian images. If you are not using Wolfi or Alpine APK packages, apko is not the right tool.

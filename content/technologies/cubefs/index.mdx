@@ -36,6 +36,8 @@ community:
   twitter: 'https://twitter.com/ChubaoFS'
   slack: 'https://cubefs.slack.com/'
 ---
-CubeFS is a CNCF graduated project.
+CubeFS (originally ChubaoFS) is a distributed file system written in Go that exposes POSIX, HDFS, and S3-compatible APIs over the same backend. It was open-sourced by JD.com, where it runs large-scale AI training, container image storage, and database workloads, and was accepted into the CNCF in 2019, graduating in December 2024.
 
-CubeFS is a Cloud Native Computing Foundation (CNCF) graduated project.
+Architecturally, CubeFS splits metadata and data across independent services. The Master handles cluster topology. Metanodes store file system metadata in memory, replicated via Raft, and shard a single filesystem ("volume") into metadata partitions. Datanodes store the actual file content in data partitions, using either multi-replica for small files or Reed-Solomon erasure coding for large cold data to cut storage overhead. Clients mount volumes via a FUSE client, an HDFS-compatible client, or the S3 gateway. Each volume can be tuned independently for consistency, replication factor, and erasure-coding policy.
+
+CubeFS competes with JuiceFS, Alluxio, Ceph (CephFS), and Lustre. Its pitch compared to Ceph is simpler operations and Go-based tooling; compared to JuiceFS, that it stores data in its own datanodes rather than delegating to object storage, which gives it lower latency for small-file AI training workloads.

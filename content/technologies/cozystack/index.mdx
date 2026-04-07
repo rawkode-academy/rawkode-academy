@@ -35,6 +35,8 @@ cncf:
 matrix:
   status: skip
 ---
-Cozystack is a free PaaS platform and framework for building private clouds and providing users/customers with managed Kubernetes,  KubeVirt-based VMs, databases as a service, NATS, message brokers, etc. with GPU support in VMs and Kubernetes clusters.
+Cozystack is a free, open-source PaaS built on Kubernetes and designed to turn bare-metal servers into a private cloud. You install it directly onto a handful of physical machines and end up with a platform that can provision managed Kubernetes clusters, VMs, and databases for internal tenants.
 
-Cozystack is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture glues together a lot of existing cloud-native projects rather than reinventing them. Talos Linux runs on the bare metal; the management cluster uses Cluster API plus KubeVirt to spin up tenant Kubernetes clusters as sets of VMs. Storage is handled by LINSTOR/DRBD for block and Rook/Ceph for object; networking uses Cilium and Kube-OVN; managed services (PostgreSQL via CloudNativePG, MySQL, Kafka, Redis, RabbitMQ, MongoDB, ClickHouse, Seaweed, NATS) are delivered by their respective operators and exposed as tenant-consumable resources.
+
+Cozystack is built by Ænix and entered the CNCF sandbox in 2025. It sits in the same space as Rancher/Harvester, Sylva, and OpenShift on bare metal — the niche of "give me a usable private cloud on commodity hardware without paying VMware" — but with a stronger emphasis on multi-tenant managed services rather than just VM hosting.

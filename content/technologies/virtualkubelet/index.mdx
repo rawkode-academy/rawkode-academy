@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://virtual-kubelet.io/'
 source: 'https://github.com/virtual-kubelet/virtual-kubelet'
+documentation: 'https://virtual-kubelet.io/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -19,6 +20,8 @@ community:
 matrix:
   status: watch
 ---
-Virtual Kubelet is a CNCF sandbox project.
+Virtual Kubelet is a library and open project that implements the kubelet API without actually running containers on a node. It registers itself with the Kubernetes API server as a Node object, and when the scheduler places a Pod on that "node" the provider implementation translates the Pod spec into something else entirely.
 
-Virtual Kubelet is a Cloud Native Computing Foundation (CNCF) sandbox project.
+That "something else" is the whole point. Providers have been written for AWS Fargate, Azure Container Instances, Alibaba ECI, HashiCorp Nomad, and AdmiraltyLab's cross-cluster scheduling, among others. From the cluster's perspective, Pods come up, report status, and stream logs like any other workload, but underneath they are running on a serverless container service, a separate cluster, or a bespoke runtime. This is the mechanism behind AKS Virtual Nodes and EKS-on-Fargate style integrations.
+
+Virtual Kubelet is a CNCF sandbox project and is primarily a building block: most users encounter it indirectly through a specific cloud provider's burst-to-serverless feature rather than deploying it by hand.

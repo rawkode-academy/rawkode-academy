@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://runme.dev/'
 documentation: 'https://runme.dev/docs'
+source: 'https://github.com/runmedev/runme'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -13,4 +14,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: watch
 ---
-Runme is a tool that enables you to execute code snippets directly from README files and other markdown documents. It treats markdown documents as executable scripts, allowing you to define and run code blocks interactively. This streamlines development workflows by making documentation more dynamic and useful, fostering a 'docs-as-code' approach. It improves collaboration, simplifies onboarding, and provides a consistent environment for developers to run and test instructions documented in markdown.
+runme turns Markdown files into executable, interactive runbooks. Shell fenced code blocks inside a `README.md` or any other Markdown file become runnable cells that you can execute from a CLI, a VS Code extension, or a standalone desktop app, with outputs captured back into the session.
+
+The project is built around the idea that the documentation developers already write — install steps, local dev loops, deployment commands, on-call runbooks — is executable in principle but broken in practice because copy-pasting into a terminal loses context, order, and environment. runme addresses this by parsing Markdown into a cell-based notebook model and attaching metadata per block through standard code fence attributes: working directory, whether to require confirmation, environment variable propagation, shell to use, whether to stream output, and so on. A single runbook can mix bash, PowerShell, JavaScript, Python, and other interpreters, and variables exported in one cell are available to later cells.
+
+runme integrates with VS Code as a notebook renderer, ships a CLI (`runme run <task>`) for CI, and has a cloud component for team runbook sharing and audit. Typical use cases include onboarding guides, incident playbooks, and opinionated "how to ship this service" documents that platform teams want to stay in sync with reality. It is Apache-2.0 licensed and written in Go.

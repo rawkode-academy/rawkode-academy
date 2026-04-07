@@ -13,27 +13,8 @@ community:
 matrix:
   status: watch
 ---
-Kapitan is a generic, open-source configuration management tool designed for complex, multi-environment deployments. It enables you to manage infrastructure and application configurations across diverse targets, such as Kubernetes clusters, virtual machines, and cloud platforms. Kapitan provides a templating engine, secret management, and inventory management capabilities, allowing you to define configurations as code, promoting consistency and reproducibility.
+Kapitan is a generic templating and inventory tool originally built inside Deutsche Bank for managing configuration across many environments and targets. Its central idea is a single hierarchical **inventory**, powered by **reclass**, where every deployable thing ("target") inherits parameters from a tree of classes, and those parameters are then fed into templates to produce concrete output files.
 
-Kapitan's value lies in its ability to simplify configuration management across various environments by providing a centralized way to define and manage configurations. It helps reduce the complexity of deploying and managing applications across heterogeneous environments, improving operational efficiency and reducing errors. Common use cases include deploying applications to multiple Kubernetes clusters, managing infrastructure as code, and handling secret management in a secure and automated manner.
+The templating side is deliberately pluggable: you can render Jinja2, Jsonnet, Kadet (Kapitan's own Python DSL that builds dict trees and serializes to YAML), Helm charts, or CUE, all driven by the same inventory values. The output is written into `compiled/<target>/`, which you then commit or hand off to `kubectl apply`, Terraform, or whatever else consumes it. For secrets, Kapitan ships `kapitan refs`, which supports GPG, AWS KMS, Google KMS, Azure Key Vault, Vault, and age, with the secret references embedded in the inventory and resolved at compile time.
 
-Kapitan is a sophisticated, open-source configuration management tool designed for handling complex, multi-environment deployments. It provides a flexible framework to define, manage, and deploy configurations for various targets, including Kubernetes, virtual machines, and cloud platforms, using a declarative approach.
-
-## Key Features
-
--   **Templating Engine:** Kapitan uses a powerful templating system (Jinja2) to generate configurations from a single source, allowing for parameterization and customization across different environments.
--   **Secrets Management:** Integrates robust secrets management capabilities, allowing sensitive data to be encrypted and decrypted securely, ensuring that secrets are not exposed in plain text.
--   **Inventory Management:** Manages an inventory of targets and their associated parameters, enabling you to define configurations at a high level and apply them selectively.
--   **Targets & Components:** Organizes configurations into reusable "components" and applies them to specific "targets" (e.g., dev, staging, prod environments), promoting modularity and reusability.
--   **GitOps Workflow Support:** Facilitates GitOps by treating configurations as code, enabling version control, peer review, and automated deployment pipelines.
--   **Multiple Output Formats:** Generates configurations in various formats, such as YAML, JSON, and raw text, suitable for different deployment tools and platforms.
-
-## Benefits
-
--   **Simplified Configuration Management:** Centralizes the definition and management of complex configurations, reducing fragmentation and inconsistency.
--   **Increased Reproducibility:** Ensures that deployments are consistent and reproducible across all environments, minimizing configuration drift.
--   **Reduced Errors:** Declarative configurations and templating help eliminate manual errors and misconfigurations.
--   **Enhanced Security:** Robust secrets management protects sensitive information throughout the configuration lifecycle.
--   **Scalability:** Efficiently manages configurations for a large number of applications and infrastructure components.
--   **Flexibility:** Adaptable to diverse deployment scenarios and integrates well with existing DevOps toolchains.
--   **Single Source of Truth:** Promotes Git as the single source of truth for all configurations, improving auditability and traceability.
+It is the tool you reach for when Helm's values.yaml is not structured enough and you have, say, 200 clusters that all need slightly different versions of 30 components. It sits in the same space as Jsonnet+tanka, cdk8s, and Crossplane compositions, but with a much stronger inventory model. Maintained by a small community; expect a learning curve because the Reclass-plus-everything model is unlike most other config tools.

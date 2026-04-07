@@ -3,6 +3,7 @@ name: Meilisearch
 logos:
   horizontal: true
 website: 'https://www.meilisearch.com/'
+source: 'https://github.com/meilisearch/meilisearch'
 documentation: 'https://www.meilisearch.com/docs'
 license: MIT
 status: stable
@@ -11,29 +12,8 @@ subcategory: Database
 matrix:
   status: watch
 ---
-Meilisearch is a powerful, fast, open-source, and typo-tolerant search engine. It's designed to be developer-friendly and easy to integrate into any application. Meilisearch focuses on providing a great search experience with minimal configuration, allowing users to instantly find relevant information as they type, even with typos or misspellings. Its primary value lies in its speed, ease of use, and the ability to deliver relevant search results quickly and accurately.
+Meilisearch is an open-source search engine written in Rust, aimed at powering search-as-you-type experiences in web and mobile apps. It prioritises relevance tuning, sub-50ms response times on moderate datasets, and a REST API that an application developer can integrate in an afternoon.
 
-Meilisearch is a powerful, open-source, and lightning-fast search engine designed for instant, relevant, and typo-tolerant search experiences. It provides a developer-friendly API and focuses on delivering a great search experience with minimal configuration, making it easy to integrate into any application or website.
+Internally Meilisearch stores documents in an LMDB-backed index and uses a custom inverted index plus a bucket-sort ranking pipeline with configurable ranking rules — words, typo, proximity, attribute, sort, exactness — that can be reordered per index. Typo tolerance is built in via a Levenshtein automaton, and the query pipeline supports filtering, faceting, geo search, synonyms, and stop-word lists. Recent releases add vector search with HNSW indexes and hybrid search that combines lexical BM25-style ranking with vector similarity, which brings LLM retrieval use cases into the same engine. Client SDKs exist for JavaScript, Python, Ruby, PHP, Go, Rust, Java, and .NET, and the project ships a hosted Meilisearch Cloud alongside the self-hostable binary.
 
-## Key Features
-
--   **Typo Tolerance:** Automatically handles typos and misspellings, ensuring users find what they're looking for even with mistakes.
--   **Search-as-You-Type:** Delivers relevant search results in under 50 milliseconds, providing an instant and fluid search experience.
--   **Relevancy Ranking:** Automatically ranks results based on multiple criteria, including word proximity, number of matches, and query length.
--   **Filtering & Sorting:** Supports powerful filtering and sorting capabilities to refine search results based on specific attributes.
--   **Faceting:** Enables faceted search for category-based navigation and filtering.
--   **Synonyms:** Allows you to define synonyms to expand search queries and improve relevancy.
--   **Multi-Language Support:** Optimized for various languages, handling their unique linguistic characteristics.
--   **RESTful API & SDKs:** Provides a simple and intuitive RESTful API along with official SDKs for popular programming languages.
-
-## Benefits
-
--   **Superior User Experience:** Delivers instant and accurate search results, even with imperfect queries, greatly enhancing user satisfaction.
--   **Simplified Integration:** Developer-friendly design and comprehensive SDKs make it easy to integrate search functionality into your applications.
--   **High Performance:** Optimized for speed, ensuring a responsive search experience even with large datasets.
--   **Flexible Deployment:** Can be self-hosted on various environments or consumed as a managed service.
--   **Open Source:** Community Edition is open-source, providing transparency and flexibility.
-
-## Licensing Model
-
-Meilisearch offers a **Community Edition** under the **MIT License**, which includes the core search engine. For enterprise-grade features and support, a **Commercial** or **Business Source License (BSL 1.1)** model is available.
+Meilisearch competes with Elasticsearch, OpenSearch, Typesense, and Algolia, and its niche is being a single small Rust binary that gives you Algolia-quality relevance defaults without running a JVM cluster.

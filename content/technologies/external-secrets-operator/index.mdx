@@ -44,6 +44,9 @@ community:
 matrix:
   status: skip
 ---
-external-secrets is a CNCF sandbox project.
 
-external-secrets is a Cloud Native Computing Foundation (CNCF) sandbox project.
+External Secrets Operator (ESO) is a Kubernetes controller that syncs secrets from external secret managers — AWS Secrets Manager, HashiCorp Vault, Google Secret Manager, Azure Key Vault, 1Password, Doppler, Akeyless, and many others — into native Kubernetes `Secret` objects. It solves the very practical problem of "my source of truth for credentials is Vault, but my workloads only know how to read Kubernetes Secrets."
+
+The model has three CRDs. A `SecretStore` (or cluster-scoped `ClusterSecretStore`) describes a backend and how to authenticate to it — IRSA, workload identity, Vault Kubernetes auth, static tokens, etc. An `ExternalSecret` says "fetch these keys from that store and create a Kubernetes Secret called X." A `PushSecret` does the inverse, pushing Kubernetes-defined values out to a backend. The controller reconciles on an interval (default 1h) and on changes, so rotation in the backend eventually propagates into the cluster.
+
+ESO is effectively the successor to the older Secrets Store CSI Driver + provider plugin approach for most use cases, because it produces real Kubernetes Secrets that any pod can consume via `envFrom`/`valueFrom` without a CSI mount. It's a CNCF Sandbox project and is widely deployed — the combination of ESO + Vault or ESO + AWS Secrets Manager is the standard pattern for secret management on Kubernetes now.

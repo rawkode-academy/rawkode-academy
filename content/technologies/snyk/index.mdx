@@ -4,11 +4,15 @@ logos:
   horizontal: true
 website: 'https://snyk.io/'
 documentation: 'https://docs.snyk.io/'
-license: Proprietary
+license: Commercial
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
 matrix:
   status: skip
 ---
-Snyk is a developer security platform designed to find and fix vulnerabilities in open source libraries, container images, infrastructure as code, and application code. It integrates directly into developer workflows, allowing teams to identify and address security issues early in the development lifecycle. Snyk helps organizations shift security left, empowering developers to own security while maintaining velocity and reducing the burden on security teams. Its main use cases include scanning dependencies for known vulnerabilities, identifying licensing issues, scanning container images for operating system vulnerabilities and misconfigurations, and finding security flaws in code and infrastructure-as-code configurations.
+Snyk is a commercial developer-first security platform that scans source code, open-source dependencies, container images, and infrastructure-as-code for vulnerabilities and license issues. It is built around a proprietary vulnerability database curated by Snyk's security research team that augments public CVE data with earlier disclosures, exploit maturity, and fix metadata.
+
+The platform is split into four main products. Snyk Open Source performs software composition analysis across package managers like npm, Maven, pip, Go modules, and NuGet, and can generate automatic fix pull requests that bump to the minimum non-vulnerable version. Snyk Code is a static application security testing engine that uses a semantic, AST-based analysis rather than regex rules. Snyk Container inspects OCI images and recommends base-image upgrades. Snyk IaC scans Terraform, CloudFormation, Kubernetes manifests, and Helm charts against policy.
+
+Snyk integrates through CLI, IDE plugins (VS Code, JetBrains), Git providers (GitHub, GitLab, Bitbucket), CI systems, and container registries, which is why it is commonly used as the "shift-left" security gate in developer workflows alongside Dependabot and Trivy.

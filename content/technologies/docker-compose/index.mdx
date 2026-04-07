@@ -4,6 +4,7 @@ logos:
   stacked: true
 website: 'https://www.docker.com/'
 documentation: 'https://docs.docker.com/compose/'
+source: 'https://github.com/docker/compose'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -13,31 +14,8 @@ community:
 matrix:
   status: learn
 ---
-Docker Compose is a tool for defining and running multi-container Docker applications. It uses a YAML file to configure your application's services, networks, and volumes. With Compose, you can spin up an entire application stack with a single command, making it incredibly easy to manage complex deployments.
+Docker Compose is a tool for defining and running multi-container applications on a single Docker host from a declarative YAML file. A `compose.yaml` lists `services` (containers to run), `networks` (user-defined bridge networks that connect them), and `volumes` (named Docker volumes for persistent state); `docker compose up` brings the whole stack online in dependency order, and `docker compose down` tears it back down.
 
-Docker Compose simplifies the process of developing, testing, and deploying applications that rely on multiple interconnected containers. It's particularly useful for local development environments, continuous integration pipelines, and small to medium-sized production deployments where the full orchestration capabilities of tools like Kubernetes aren't needed.
+Compose started life in 2014 as Fig, was acquired by Docker and rewritten in Go as Compose v2 (now a `docker compose` subcommand instead of the separate Python `docker-compose` binary), and its file format has been standardized as the open Compose Specification. Other tools implement it: Podman's `podman compose`, `nerdctl`, and Kubernetes-focused converters like `kompose` all understand some subset of the spec.
 
-Docker Compose simplifies the management of multi-container Docker applications by allowing you to define your entire application stack in a single, declarative YAML file. This makes it easy to set up, run, and scale complex applications that consist of multiple interdependent services.
-
-## Key Concepts
-
--   **`compose.yaml` (or `docker-compose.yml`):** The configuration file where you define your application's services, networks, and volumes. This file specifies how your application components should be built and run.
--   **Services:** Individual containers that make up your application (e.g., a web server, a database, an API).
--   **Networks:** Define how services can communicate with each other. Compose sets up a default network for your application.
--   **Volumes:** Used for persistent data storage, ensuring that data is not lost when containers are stopped or removed.
-
-## Features & Benefits
-
--   **Single-Command Setup:** Spin up your entire application with a single command (`docker compose up`), greatly simplifying development and deployment.
--   **Isolated Environments:** Services run in isolated environments, ensuring no conflicts between dependencies.
--   **Reproducibility:** The `compose.yaml` file acts as an infrastructure-as-code definition for your application, ensuring consistent environments across different machines and team members.
--   **Local Development:** Ideal for setting up complex local development environments, mimicking production setups.
--   **Simplified Orchestration:** Provides a lightweight orchestration solution for small to medium-sized deployments where a full Kubernetes setup might be overkill.
--   **Portability:** Your `compose.yaml` file can be shared and used on any machine with Docker and Docker Compose installed.
-
-## Common Use Cases
-
--   **Local Development:** Quickly spin up all dependencies (database, cache, API) for a development environment.
--   **Testing:** Set up isolated test environments for integration and end-to-end testing.
--   **Single-Host Deployments:** Deploy small to medium-sized applications to a single server.
--   **CI/CD Pipelines:** Use Compose to build and test multi-service applications in automated pipelines.
+Its sweet spot is local development of multi-service apps (web + database + cache + worker), CI integration tests, and quick demos — any situation where Kubernetes is overkill but you still need more than one container wired together. For production deployments beyond a single host, most teams graduate to Kubernetes, Nomad, or a managed container service; recent Compose versions do also have limited "deploy to cloud" backends, but the mainstream path is still Compose for dev and Kubernetes for prod, often with the same image definitions used in both.

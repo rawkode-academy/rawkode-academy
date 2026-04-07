@@ -24,6 +24,8 @@ community:
 matrix:
   status: skip
 ---
-Chaos Mesh is a CNCF incubating project.
+Chaos Mesh is a Kubernetes-native chaos engineering platform originally built at PingCAP to stress-test TiDB. You describe experiments as CRDs — `NetworkChaos`, `PodChaos`, `IOChaos`, `StressChaos`, `TimeChaos`, `DNSChaos`, `HTTPChaos`, `KernelChaos`, `JVMChaos` — pick targets with label selectors, and the controller applies the fault to matching pods for a specified duration or on a cron schedule. There's also a web dashboard (Chaos Dashboard) and a YAML-based `Workflow` CRD for building multi-step experiments.
 
-Chaos Mesh is a Cloud Native Computing Foundation (CNCF) incubating project.
+Under the hood the implementation is interesting. Network chaos uses `tc` and iptables via a privileged chaos-daemon DaemonSet on each node. I/O chaos uses a FUSE sidecar that mirrors the container's filesystem and injects latency or errors on selected paths. Time chaos uses eBPF and `LD_PRELOAD` to shift the monotonic clock for a specific process without affecting the rest of the host. JVM chaos uses bytecode instrumentation via Byteman. DNS chaos intercepts DNS queries by replacing the pod's DNS config with a custom resolver. None of this requires changes to the target application.
+
+Chaos Mesh was donated to the CNCF in 2020 and became an incubating project in 2022. In the chaos engineering landscape it and LitmusChaos are the two leading Kubernetes-native options; ChaosBlade is a close cousin with broader OS-level reach, and Gremlin is the commercial alternative. If you're on Kubernetes and want declarative, CRD-driven chaos experiments, Chaos Mesh is the most full-featured open source choice.

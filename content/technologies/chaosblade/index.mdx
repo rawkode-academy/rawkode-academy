@@ -18,6 +18,8 @@ community:
 matrix:
   status: skip
 ---
-Chaosblade is a CNCF sandbox project.
+ChaosBlade is a chaos engineering toolkit originally built at Alibaba from the lessons of their internal MonkeyKing fault-injection system. It's distributed as a single `blade` CLI that can inject a wide catalog of faults into Linux hosts, JVM applications, Docker and containerd containers, Kubernetes clusters, and cloud resources — CPU load, memory pressure, disk fill, network latency and loss, process kill, file corruption, JVM method exceptions and delays, and database query faults among them.
 
-Chaosblade is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core is Go, with language-specific agents where needed. For Linux OS-level faults it wraps utilities like `tc`, `stress-ng`, and `iptables` behind a unified grammar. For JVM faults, a Java agent uses bytecode instrumentation to inject exceptions or delays into specific methods without restarting the application. For Kubernetes, a `chaosblade-operator` exposes `ChaosBlade` CRDs so you can describe experiments declaratively and target pods via label selectors.
+
+ChaosBlade joined the CNCF sandbox in 2021. In the chaos engineering space it sits next to Chaos Mesh (also CNCF, more Kubernetes-native and with a richer UI), LitmusChaos, and the commercial Gremlin. ChaosBlade's strongest points are the breadth of OS-level fault types and the JVM bytecode injection, which matches Alibaba's Java-heavy stack. Outside of JVM-dominated environments, most new adopters pick Chaos Mesh or Litmus instead.

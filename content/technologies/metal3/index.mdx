@@ -4,6 +4,7 @@ logos:
   icon: true
 website: 'https://metal3.io/'
 source: 'https://github.com/metal3-io/baremetal-operator'
+documentation: 'https://book.metal3.io/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -33,6 +34,8 @@ community:
 matrix:
   status: skip
 ---
-Metal³ is a CNCF incubating project.
+Metal3 (metal-cubed) is a Kubernetes-native bare-metal provisioning stack. It exposes physical servers as BareMetalHost custom resources so a Kubernetes control plane can inspect, power, partition, and install them the same way it reconciles Deployments.
 
-Metal³ is a Cloud Native Computing Foundation (CNCF) incubating project.
+The core component is the baremetal-operator, which drives hosts via Ironic — the OpenStack bare-metal service — packaged as a container. Ironic handles the actual work: IPMI, Redfish, or iDRAC for power control; iPXE and virtual media for boot; inspection via ironic-python-agent; and image writing using qemu-img. On top of that, the Cluster API provider for Metal3 (CAPM3) turns BareMetalHosts into Cluster API Machines, so declaring a new worker becomes a matter of scaling a MachineDeployment, which provisions bare metal end-to-end without a separate automation layer.
+
+Metal3 is the upstream of Red Hat OpenShift's bare-metal installer and is used by SUSE Rancher and several telco edge distributions. It competes with MAAS, Tinkerbell, and vendor-specific provisioners, and its niche is giving Cluster API a true bare-metal infrastructure provider so the same declarative workflow used for AWS or vSphere clusters works on physical hardware.

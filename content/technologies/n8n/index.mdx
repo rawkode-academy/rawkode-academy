@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://n8n.io/'
 documentation: 'https://docs.n8n.io/'
+source: 'https://github.com/n8n-io/n8n'
 license: Mixed (Sustainable Use / Commercial)
 status: stable
 category: App Definition and Development
@@ -11,35 +12,8 @@ subcategory: Streaming & Messaging
 matrix:
   status: explore
 ---
-n8n is a fair-code workflow automation platform. It empowers users to connect different applications and services together without writing any code. It provides a visual, node-based editor to create and automate complex workflows, enabling businesses to streamline processes, integrate data, and automate repetitive tasks. It is self-hostable, allowing for greater control over data and security.
+n8n is a source-available workflow automation tool that connects APIs, databases, and SaaS products through a node-based visual editor. It sits in the same category as Zapier and Make, but runs as a self-hostable Node.js application backed by PostgreSQL, SQLite, or MySQL for workflow state and execution history.
 
-n8n's main use cases include automating marketing campaigns, synchronizing data between CRMs and other business tools, automating e-commerce tasks like order processing and customer support, building internal tools, and integrating with various APIs for custom solutions. It offers a wide range of integrations and custom functions to tailor the automation to specific needs.
+Workflows are directed graphs of nodes, where each node is a typed integration (HTTP Request, Postgres, Slack, OpenAI, etc.) or a control primitive (IF, Switch, Merge, Loop). Execution can be triggered by webhooks, cron, polling, or manual invocation, and the Code node lets you drop into JavaScript or Python when the built-in nodes are not enough. More recent releases add a LangChain-based AI agent node set for chaining LLM calls, tools, and vector stores inside the same graph.
 
-n8n is a "fair-code" workflow automation platform that enables users to connect applications and services, automate tasks, and build complex workflows without necessarily writing code. It offers a visual, node-based editor for creating powerful automations, with the flexibility to extend functionality using JavaScript or Python when needed.
-
-## Key Features
-
--   **Visual Workflow Editor:** Create complex workflows by dragging and dropping nodes and connecting them visually, making automation accessible to both technical and non-technical users.
--   **Extensive Integrations:** Connects with over 400 applications, APIs, and services (e.g., CRM, marketing tools, databases, messaging apps) out-of-the-box.
--   **Code Flexibility:** While primarily a low-code/no-code platform, n8n allows users to inject custom JavaScript or Python code snippets into workflows for advanced logic and custom integrations.
--   **AI-Native Capabilities:** Supports building AI agent workflows based on frameworks like LangChain, enabling integration with large language models and custom AI services.
--   **Self-Hostable:** Provides the option to self-host the platform, giving users full control over their data, privacy, and security.
--   **Enterprise-Ready Features:** Offers advanced features for enterprise use cases, including user management, advanced permissions, Single Sign-On (SSO), and air-gapped deployment options.
--   **Data Transformation:** Powerful capabilities to transform, filter, and manipulate data between different steps in a workflow.
-
-## Licensing Model ("Fair-Code")
-
-n8n operates under a "fair-code" licensing model, which distinguishes it from traditional open-source:
--   The core source code is available (hence "fair-code"), allowing self-hosting and modification.
--   However, commercial use (e.g., for revenue-generating activities) typically falls under the **Sustainable Use License** or the **n8n Enterprise License**, which requires a commercial subscription.
--   It is free for non-profit and personal use.
-    Always refer to the official n8n website and GitHub repository for the most precise and up-to-date licensing information.
-
-## Benefits
-
--   **Streamlined Operations:** Automate repetitive tasks and integrate disparate systems, improving operational efficiency.
--   **Increased Productivity:** Empowers both technical and non-technical users to build and manage automations quickly.
--   **Data Control:** Self-hosting options provide greater control over data sovereignty and security.
--   **Scalability:** Designed to handle a wide range of workloads, from simple personal automations to complex enterprise workflows.
--   **Flexibility:** Combines the ease of low-code with the power of custom code, adapting to diverse automation needs.
--   **AI Augmentation:** Leverage AI to enhance workflows and create intelligent automation solutions.
+n8n is distributed under the Sustainable Use License, a source-available "fair-code" license that permits internal and personal use but restricts hosting it as a competing commercial service. The Enterprise edition adds SSO, RBAC, external secrets, and log streaming on top of the community build. For teams that want to avoid Zapier's per-task pricing or keep sensitive data on their own infrastructure, n8n is the usual self-hosted alternative, alongside Node-RED (more IoT-oriented), Windmill, and Temporal for code-first durable workflows.

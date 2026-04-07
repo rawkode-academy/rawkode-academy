@@ -16,6 +16,9 @@ cncf:
 matrix:
   status: skip
 ---
-Heterogeneous AI Computing Virtualization Middleware
 
-hami is a Cloud Native Computing Foundation (CNCF) sandbox project.
+HAMi (Heterogeneous AI Computing Virtualization Middleware, formerly "k8s-vGPU-scheduler") is a Kubernetes middleware that lets multiple pods share a single physical accelerator with hard resource limits. The headline use case is splitting one NVIDIA GPU across several workloads by core percentage and memory bytes, without needing MIG-capable hardware or a paid vGPU license.
+
+HAMi has three moving parts: a mutating webhook that rewrites pod specs to request virtual devices, a scheduler extender that picks nodes with enough free slice to satisfy a request, and per-device plugins that do the actual in-container virtualization. For NVIDIA GPUs it hooks the CUDA driver to enforce memory and SM utilization limits in-container, so a pod that asks for 3GiB of an 8GiB card simply cannot allocate more — the isolation is real rather than just scheduling-time accounting. Beyond NVIDIA, it supports Cambricon MLUs, Hygon DCUs, Moore Threads, Iluvatar CoreX, Ascend NPUs, and several other Chinese AI accelerators, which is rare for Kubernetes GPU tooling.
+
+HAMi is a CNCF Sandbox project and workloads don't need changes to adopt it — they still request `nvidia.com/gpu`-style resources, but through the HAMi extended resource names. It competes with NVIDIA's own device plugin + MIG / Time-Slicing, Volcano's vGPU support, and Run:AI's scheduler. The attraction is getting meaningful multi-tenancy on commodity GPUs without MIG-capable silicon.

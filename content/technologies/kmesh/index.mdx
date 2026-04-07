@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kmesh.net'
 source: 'https://github.com/kmesh-net/kmesh'
+documentation: 'https://kmesh.net/docs/welcome'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -20,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Kmesh is a high-performance and low overhead service mesh data plane based on eBPF and programmable kernel. Kmesh brings traffic management, security and monitoring to service communication without needing application code changes. It is natively sidecarless, zero intrusion and without adding any resource cost to application container.
+Kmesh is a sidecarless service mesh data plane that runs traffic management logic in the Linux kernel via eBPF. Instead of steering pod traffic through a per-pod Envoy proxy, Kmesh attaches eBPF programs at the socket/cgroup level on each node and handles L4 routing, load balancing, and authorization there.
 
-Kmesh is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It speaks the xDS protocol, so it can consume configuration from an Istio control plane (istiod) and replace the Envoy sidecar for most L4 use cases. For L7 features that are harder to implement in eBPF, Kmesh has a "dual-engine" mode that offloads HTTP-aware processing to a per-node waypoint proxy — conceptually similar to Istio ambient mesh's ztunnel + waypoint split. The headline numbers the project reports are roughly 60% lower forwarding latency and 70% lower data-plane overhead versus sidecar Envoy, which is the usual motivation for moving mesh logic into the kernel.
+
+It is developed largely by Huawei and competes with Istio ambient, Cilium Service Mesh, and Linkerd. If you are evaluating ambient-style meshes specifically for the CPU/memory savings at high pod density, Kmesh is one of two serious eBPF-native options.

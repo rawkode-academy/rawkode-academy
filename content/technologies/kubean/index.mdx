@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubean-io.github.io/kubean/'
 source: 'https://github.com/kubean-io/kubean'
+documentation: 'https://kubean-io.github.io/kubean/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: skip
 ---
-Product ready cluster lifecycle management toolchains based on kubespray and other cluster LCM engine.
+Kubean is a Kubernetes cluster lifecycle operator built on top of Kubespray. It wraps Kubespray's Ansible playbooks in a set of CRDs so you can drive cluster install, scale, upgrade, and teardown operations by writing YAML to a management cluster instead of running ansible-playbook from a laptop.
 
-Kubean is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The key CRDs are `Cluster`, `ClusterOperation`, `Manifest`, and `LocalService`. A Cluster defines inventory and global vars; a ClusterOperation is a Job-like resource describing the action (create, upgrade, scale, reset) and kicks off a pod that runs the corresponding Kubespray playbook against the target hosts. The Manifest records the tested matrix of Kubernetes + addon versions and the container images required for air-gapped installs, and LocalService configures the offline package/image mirror that Kubean can serve. Because the operator model gives you status subresources and events, you can GitOps cluster lifecycles the same way you GitOps workloads.
+
+Kubean is developed by DaoCloud and is used as the cluster installer inside their Kairship and DCE platforms. Compared to Cluster API it is less abstract — it is specifically Kubespray-as-an-operator — which makes it a good fit for bare metal and air-gapped environments where Kubespray is already the trusted installer.

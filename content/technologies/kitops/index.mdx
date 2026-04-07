@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kitops.org/'
 source: 'https://github.com/kitops-ml/kitops'
+documentation: 'https://kitops.org/docs/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: skip
 ---
-An open standard for packaging, managing, and deploying ML models and artifacts across different systems
+KitOps packages AI/ML projects as OCI artifacts so model weights, datasets, code, and configuration can be versioned, signed, and distributed through any existing container registry. The packaging format is called a ModelKit, defined by a Kitfile manifest that lists each asset and its role.
 
-KitOps is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Under the hood a ModelKit is a regular OCI artifact: each asset (model, dataset, notebook, code directory, config) becomes its own layer with a SHA-256 digest. Because it is plain OCI, you can push it to Docker Hub, ECR, GCR, GHCR, Harbor, Artifactory, or any other registry without new infrastructure, and sign it with Cosign the same way you sign container images. The `kit` CLI lets you pull selectively — grab only the weights on a GPU inference node, only the dataset on a training job — without downloading the entire bundle.
+
+The problem KitOps solves is that ML teams were previously scattering models across Hugging Face, S3 buckets, DVC, and Git LFS, with no unified provenance story. It is the closest thing to "containers for models" and overlaps with Hugging Face Hub, MLflow's model registry, and ORAS-based workflows, but stays closer to the existing DevOps toolchain by reusing OCI end-to-end.

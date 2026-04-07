@@ -2,6 +2,7 @@
 name: MinIO
 website: 'https://min.io/'
 documentation: 'https://min.io/docs/'
+source: 'https://github.com/minio/minio'
 license: AGPL-3.0
 status: deprecated
 category: Runtime
@@ -21,32 +22,8 @@ matrix:
     the inevitable conclusion of treating your community as a liability
     rather than an asset.
 ---
+MinIO is an S3-compatible object store written in Go. A single binary speaks the full Amazon S3 REST API — including multipart upload, versioning, bucket policies, object lock (WORM), SSE-KMS encryption, and the Select API — so applications and tools built for S3 run against MinIO unchanged.
 
-MinIO is a high-performance, S3-compatible object storage system. Originally designed for cloud-native workloads, it became popular for self-hosted object storage due to its simplicity and S3 API compatibility.
+MinIO scales out in "server pools" using erasure coding rather than replication. Objects are split into data and parity shards (the default 4+4 gives 50% usable capacity and tolerates half the drives failing) and written across drives with MinIO's own BitRot protection via HighwayHash. A MinIO cluster has no metadata server; placement is derived from object names and the fixed pool topology, which keeps the control path simple and the data path fast. Site replication, bucket replication, and tiering to other S3 endpoints or cold cloud storage are built in, as are an IAM system, OIDC and LDAP integration, and a Prometheus metrics endpoint.
 
-## History of Controversy
-
-MinIO's relationship with its community has been troubled:
-
-- **2019:** Silent switch from Apache 2.0 to AGPL license
-- **Legal Actions:** Aggressive pursuit of companies using MinIO, including the Weka fiasco
-- **Feature Stripping:** Key features moved behind a $96K/year enterprise paywall
-- **Community Hostility:** Locking GitHub issues when users pushed back on changes
-- **Docker Abandonment:** Left Docker images unpatched during critical CVEs
-
-## Technical Features
-
-- S3-compatible API
-- Erasure coding for data protection
-- Bucket versioning
-- Object locking for compliance
-- Server-side encryption
-- Multi-site replication (enterprise only)
-
-## Alternatives
-
-If you're evaluating object storage solutions, consider:
-
-- **SeaweedFS** - Apache 2.0 licensed, community-friendly
-- **Ceph** - Full-featured distributed storage
-- **Garage** - Lightweight, geo-distributed storage
+MinIO runs on bare metal, in Docker, and on Kubernetes via the DirectPV CSI driver and its operator, and is used as the storage backend for Loki, Thanos, Mimir, and countless data-lake stacks. It competes with Ceph RGW, SeaweedFS, and Garage on the self-hosted side, and with AWS S3 and GCS in hybrid deployments.

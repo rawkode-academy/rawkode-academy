@@ -12,6 +12,8 @@ subcategory: Security & Compliance
 matrix:
   status: skip
 ---
-is a CNCF sandbox project.
+Open Policy Containers (OPCR) is a set of tools and conventions for packaging Open Policy Agent policies as OCI artifacts and distributing them through standard container registries. Instead of pulling Rego bundles from ad-hoc HTTP servers, you `policy build`, `policy push`, and `policy pull` them from Docker Hub, GHCR, ECR, or any OCI-compliant registry, the same way you handle container images.
 
-is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The `policy` CLI wraps the build-sign-push loop: it compiles Rego source into an OPA bundle, stores it as an OCI artifact with a well-defined media type, and can sign it with Cosign so consumers can verify provenance before loading the bundle into OPA. A companion discovery plugin lets an OPA instance pull policies directly from a registry at startup and on a refresh interval, which closes the gap between image supply-chain tooling (Cosign, Notation, Rekor) and policy supply chains.
+
+OPCR sits in the supply chain security niche alongside ORAS (generic OCI artifact packaging), Cosign (signing), and Styra DAS or OPAL (centralized policy distribution). It is sponsored primarily by Aserto and released under Apache-2.0. For teams that already treat registries as the single source of truth for deployable artifacts, OPCR lets Rego policies live in that same pipeline.

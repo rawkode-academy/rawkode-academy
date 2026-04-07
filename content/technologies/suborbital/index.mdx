@@ -2,8 +2,9 @@
 name: Suborbital
 logos:
   horizontal: true
-website: 'https://suborbital.dev/'
-documentation: 'https://docs.suborbital.dev/'
+website: 'https://github.com/suborbital'
+source: 'https://github.com/suborbital'
+documentation: 'https://github.com/suborbital/e2core#readme'
 license: Apache-2.0
 status: stable
 category: Wasm
@@ -11,6 +12,8 @@ subcategory: Application Frameworks
 matrix:
   status: skip
 ---
-Suborbital is a platform for building and deploying web applications using WebAssembly (Wasm). It allows developers to build secure and performant serverless functions in any language that compiles to Wasm, enabling greater flexibility and speed. Suborbital provides a standardized execution environment for these functions, facilitating rapid development and deployment, while managing versioning, secrets, and other operational concerns.
+Suborbital was a WebAssembly-based platform for embedding third-party extensions and plugins inside SaaS applications, best known for its E2Core runtime and the Atmo/Reactr/Sat framework for building Wasm-backed microservices. It let product teams expose extension points where customers could upload their own Wasm modules, written in Rust, Go, or JavaScript, and have them run safely inside the host application.
 
-Suborbital's core value lies in its ability to drastically improve application performance and reduce infrastructure costs. By leveraging Wasm's lightweight nature and inherent security, applications can be deployed closer to the user, reducing latency. Common use cases include building serverless APIs, event-driven applications, and edge computing solutions.
+The core building block was Reactr, a Go library that embedded Wasmer/Wasmtime and provided a scheduler and capability API so Wasm modules could do controlled HTTP calls, logging, and cache access without breaking the sandbox. E2Core extended that into a full server that ran functions behind HTTP routes, and Subo was the developer CLI for scaffolding and building modules. The design targeted "plugin systems for SaaS" rather than general-purpose FaaS.
+
+Reactr is now explicitly deprecated, but the Suborbital repositories remain available on GitHub, so the codebase is still a useful reference implementation for embedding WebAssembly as an extensibility surface in Go applications.

@@ -5,6 +5,7 @@ import TopicHub from "@/components/technology/TopicHub.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
+import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
@@ -221,10 +222,44 @@ if (!technology) {
 }
 
 const placeholderLogo = "/apple-touch-icon.png";
-const seoTitle = technology.seo?.title ?? `${technology.name} | Rawkode Academy`;
-const seoDescription =
-	technology.seo?.description ??
-	`Learn ${technology.name} with practical tutorials, videos, and guides from Rawkode Academy.`;
+
+const videoCount = technology.videos?.length ?? 0;
+const categoryLabel = technology.subcategory ?? technology.category ?? "Cloud Native";
+
+const seoTitle =
+	technology.seo?.title ??
+	(videoCount > 0
+		? `${technology.name} Tutorials, Videos & Guides | Rawkode Academy`
+		: `${technology.name} — ${categoryLabel} | Rawkode Academy`);
+
+const seoDescription = (() => {
+	if (technology.seo?.description) return technology.seo.description;
+	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
+	const parts: string[] = [];
+	if (videoCount > 0) {
+		parts.push(
+			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}`,
+		);
+	} else {
+		parts.push(`${technology.name}, a ${categoryLabel} project`);
+	}
+	if (cncfUseCase) parts.push(cncfUseCase);
+	parts.push(
+		`Watch deep-dives, live coding, and interviews from Rawkode Academy.`,
+	);
+	return parts.join(". ");
+})();
+
+// Page is "thin" if it has no MDX body content AND no associated videos.
+// noindex these so Google doesn't classify the site as low-quality.
+const noindex = !hasContent && videoCount === 0;
+
+const technologyUrl = new URL(`/technology/${technology.id.replace(/\/index$/, "")}`, Astro.site).href;
+const absoluteLogo = technology.logo
+	? technology.logo.startsWith("http")
+		? technology.logo
+		: new URL(technology.logo, Astro.site).href
+	: undefined;
 
 // Status display helpers
 const statusLabels: Record<string, string> = {
@@ -293,7 +328,24 @@ const hasCommunityLinks =
 		technology.community.chat);
 ---
 
-<Page title={seoTitle} description={seoDescription}>
+<Page
+	title={seoTitle}
+	description={seoDescription}
+	noindex={noindex}
+	useImageDirectly={Boolean(absoluteLogo)}
+	image={absoluteLogo ? { image: new URL(absoluteLogo) } : undefined}
+>
+	<TechnologyJsonLd
+		slot="extra-head"
+		name={technology.name}
+		url={technologyUrl}
+		description={seoDescription}
+		image={absoluteLogo}
+		website={technology.website}
+		source={technology.source}
+		documentation={technology.documentation}
+		category={categoryLabel}
+	/>
 	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
 		<!-- Header Section -->
 		<section class="w-full">

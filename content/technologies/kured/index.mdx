@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kured.dev'
 source: 'https://github.com/kubereboot/kured'
+documentation: 'https://kured.dev/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -22,6 +23,8 @@ community:
 matrix:
   status: skip
 ---
-Kured (KUbernetes REboot Daemon) is a Kubernetes daemonset that performs safe automatic node reboots when the need to do so is indicated by the package management system of the underlying OS
+Kured (KUbernetes REboot Daemon) is a DaemonSet that reboots Kubernetes nodes safely when the underlying OS signals that a reboot is required. It was created by Weaveworks and is now a CNCF sandbox project.
 
-Kured is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The daemon runs on every node and watches for a sentinel — by default the file /var/run/reboot-required that Debian and Ubuntu write after a kernel or glibc upgrade — or the result of a configurable sentinel command for other distributions. When a reboot is needed, kured takes a cluster-wide lock via an annotation on a DaemonSet object so only one node reboots at a time, cordons the node, drains its pods, and then triggers a systemd reboot. After the node comes back it uncordons itself and releases the lock. Reboots can be gated on a maintenance window, the absence of firing Prometheus alerts, or the absence of pods matching a selector, so rollouts pause automatically when the cluster is unhealthy.
+
+Kured is the standard answer for "I enabled unattended-upgrades on my nodes, now what?" and pairs naturally with tools like system-upgrade-controller, which handles the package updates themselves.

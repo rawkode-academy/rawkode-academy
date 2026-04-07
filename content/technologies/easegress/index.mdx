@@ -18,6 +18,9 @@ community:
 matrix:
   status: skip
 ---
-Easegress is a CNCF sandbox project.
 
-Easegress is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Easegress is a Go-based traffic orchestration system from MegaEase that functions as an API gateway, reverse proxy, and service mesh data plane. It speaks HTTP/1.1, HTTP/2, HTTP/3 (QUIC), and MQTT, and can sit in front of services to handle routing, load balancing, rate limiting, circuit breaking, and canary/traffic-splitting.
+
+Architecturally, Easegress runs as a cluster of nodes that use an embedded Raft implementation for leader election and configuration replication — there is no external etcd dependency, which makes it one of the simpler gateways to operate standalone. Traffic flows through user-defined Pipelines composed of Filters (proxy, validator, request builder, wasm, etc.), so you build behavior by composing small filters rather than writing Envoy-style xDS config. It supports WebAssembly filters for custom logic and has an OpenTelemetry integration for tracing.
+
+It competes most directly with Envoy, Kong, and Traefik. The pitch versus Envoy is operational simplicity (one Go binary, built-in clustering), and more recently it has picked up AI gateway features — proxying and observing calls to OpenAI, Anthropic, and similar providers. Easegress entered the CNCF Sandbox in December 2023.

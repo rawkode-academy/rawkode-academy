@@ -3,7 +3,8 @@ name: Restate
 logos:
   horizontal: true
 website: 'https://restate.dev/'
-documentation: 'https://restate.dev/docs/'
+documentation: 'https://docs.restate.dev/'
+source: 'https://github.com/restatedev/restate'
 license: BUSL-1.1
 status: stable
 category: App Definition and Development
@@ -11,4 +12,8 @@ subcategory: Streaming & Messaging
 matrix:
   status: explore
 ---
-Restate is a distributed application framework for building reliable and scalable serverless applications. It simplifies state management, coordination, and fault tolerance in distributed systems by providing a durable execution model. Restate's key value lies in enabling developers to write simple, sequential code that automatically recovers from failures and scales horizontally without requiring complex infrastructure or intricate error handling logic. It's particularly well-suited for building applications that require complex workflows, long-running processes, and guaranteed consistency, such as e-commerce order processing, financial transactions, and IoT data pipelines.
+Restate is a durable execution engine for building resilient distributed applications. Founded by alumni of the Apache Flink and AWS teams, it provides the same "write code like it's local, but every step is persisted and replayable" model as Temporal, AWS Step Functions, and Cloudflare Durable Objects, but as a single self-contained binary written in Rust.
+
+The runtime sits in front of stateless service handlers that you write in TypeScript, Java, Kotlin, Go, Python, or Rust. Handlers are invoked via HTTP or Lambda, and each call goes through the Restate server, which records every side effect, RPC, sleep, and state access in a journaled log backed by RocksDB. If a handler crashes mid-execution, Restate replays the journal so that already-completed steps are returned from the log and the function resumes from where it left off with exactly-once semantics. Keyed services provide per-key state and serialized access — effectively virtual actors — for workflows that need to coordinate on a single entity without an external database.
+
+Restate clusters run as a set of peer nodes that replicate the log using a Raft-like consensus protocol, so there is no separate database or queue to operate: invocations, state, and timers are all stored by Restate itself. Typical use cases include order processing, payment workflows, agentic AI orchestration, saga patterns, and anywhere you would otherwise reach for Temporal. It is released under BUSL-1.1, with each release converting to Apache-2.0 after its change date.

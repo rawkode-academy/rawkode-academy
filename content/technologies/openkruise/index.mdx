@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://openkruise.io/'
+documentation: 'https://openkruise.io/docs'
 source: 'https://github.com/openkruise/kruise'
 license: Apache-2.0
 status: stable
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: skip
 ---
-OpenKruise is a CNCF incubating project.
+OpenKruise is a set of Kubernetes controllers that extend the built-in workload APIs with features Alibaba and other large operators found missing in Deployment, StatefulSet, and DaemonSet. It is packaged as a single `kruise-manager` operator that installs a family of CRDs.
 
-OpenKruise is a Cloud Native Computing Foundation (CNCF) incubating project.
+The headline workloads are `CloneSet` (a Deployment replacement with in-place pod updates, partition-based canaries, and explicit pod deletion selection), `Advanced StatefulSet` (a superset of StatefulSet with in-place updates, MaxUnavailable, and parallel pod management), `Advanced DaemonSet` (partition rollouts and surging), `SidecarSet` (inject and hot-upgrade sidecar containers across many pods without restarting the main container), and `BroadcastJob` / `AdvancedCronJob` for running jobs on every matching node. Separate CRDs like `PodUnavailableBudget`, `WorkloadSpread`, `ContainerRecreateRequest`, `ImagePullJob`, and `NodeImage` cover pre-pulling images, controlled restarts, and topology-aware scheduling. The in-place update feature is the biggest draw: it mutates an existing pod's container image without deleting and recreating the pod, which matters for workloads where pod identity or warmed state is expensive to lose.
+
+OpenKruise is a CNCF incubating project (sandbox 2020, incubating 2023), Apache-2.0, and comes from Alibaba. It is most often compared with Argo Rollouts and Flagger for progressive delivery, though Kruise operates at the workload controller layer rather than as a higher-level rollout manager.

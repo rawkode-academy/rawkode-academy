@@ -4,6 +4,7 @@ logos:
   stacked: true
 website: 'https://www.openfaas.com/'
 documentation: 'https://docs.openfaas.com/'
+source: 'https://github.com/openfaas/faas'
 license: Mixed (MIT / EULA)
 status: stable
 category: Serverless
@@ -11,34 +12,8 @@ subcategory: Installable Platform
 matrix:
   status: explore
 ---
-OpenFaaS (Functions as a Service) is a framework for building serverless functions on top of Kubernetes. It enables developers to package code into portable, containerized functions that can be deployed and scaled automatically. By leveraging containers and Kubernetes, OpenFaaS provides a vendor-neutral and portable solution for serverless workloads, offering an alternative to proprietary cloud provider solutions.
+OpenFaaS is a Functions-as-a-Service framework that runs on Kubernetes (via `faas-netes`) or directly on containerd (via `faasd` for single-node installs). A function is a container image that implements a simple HTTP watchdog contract: the `of-watchdog` sidecar binary receives requests, invokes your handler over stdin/stdout or HTTP, and returns the response, so any language or binary can become a function.
 
-OpenFaaS simplifies the process of building, deploying, and managing functions, allowing developers to focus on writing code rather than infrastructure. It streamlines development workflows, reduces operational overhead, and improves resource utilization. Main use cases include event-driven processing, microservices, API endpoints, and automating repetitive tasks.
+The control plane is an API gateway that fronts the function pods and exposes a REST API plus a CLI (`faas-cli`). Functions are defined in a `stack.yaml` that points at a language template, built with BuildKit, pushed to a registry, and deployed as Kubernetes Deployments. Autoscaling is driven by Prometheus metrics and handled either by OpenFaaS's built-in scaler or by KEDA for event-driven scale-to-zero. Event connectors exist for Kafka, NATS, SQS, Postgres, cron, and MQTT, which turn OpenFaaS into a general-purpose event router rather than just an HTTP function runner.
 
-OpenFaaS (Functions as a Service) is an open-source framework that simplifies the deployment of serverless functions and microservices on top of Kubernetes. It allows developers to package any code or binary into a container, making it a portable and vendor-neutral solution for event-driven workloads.
-
-## Key Features
-
--   **Kubernetes-Native:** Designed to run seamlessly on Kubernetes, leveraging its orchestration capabilities for scaling, healing, and resource management.
--   **Multi-Language Support:** Write functions in any language using custom Dockerfiles or utilize the built-in language templates (Python, Node.js, Go, etc.).
--   **Auto-Scaling:** Functions can automatically scale up and down based on demand, including scaling to zero when not in use, optimizing resource utilization.
--   **Event-Driven:** Easily connect functions to various event sources like HTTP requests, Kafka, RabbitMQ, and more.
--   **UI Portal & CLI:** Provides an intuitive UI for managing functions and a powerful CLI for defining, deploying, and invoking functions.
--   **Prometheus Integration:** Built-in integration with Prometheus for monitoring function performance and usage.
--   **Portable:** Deploy OpenFaaS functions on any cloud or on-premises environment that supports Kubernetes.
-
-## Licensing Model
-
-OpenFaaS utilizes a mixed licensing model:
--   The core OpenFaaS framework is open-source, with third-party contributions typically under the **MIT License**.
--   However, specific contributions and intellectual property from OpenFaaS Ltd. (the company behind OpenFaaS) are distributed under an **End User License Agreement (EULA)**.
-    It's important to review the specific licensing terms on their GitHub repository for precise details, especially for commercial use cases.
-
-## Benefits
-
--   **Simplified Serverless:** Abstract away Kubernetes complexities, allowing developers to focus purely on writing function logic.
--   **Cost-Effective:** Functions scale down to zero, reducing infrastructure costs for idle applications.
--   **Increased Developer Velocity:** Faster development and deployment of microservices and event-driven architectures.
--   **Portability:** Avoids vendor lock-in, allowing deployment across various Kubernetes providers.
--   **Operational Efficiency:** Automates much of the operational burden of managing serverless workloads.
--   **Extensible Ecosystem:** A rich ecosystem of templates, integrations, and a growing community.
+Licensing is mixed: `faas-netes`, `faasd`, and the community templates are MIT, while OpenFaaS Pro and OpenFaaS Edge (features like HA, retries, long-running async jobs, SSO) are commercial under a EULA. In the cloud-native serverless space it competes with Knative Serving, Fission, Nuclio, OpenFunction, and Kubeless (archived). OpenFaaS's niche is the classic container-per-function FaaS model with minimal moving parts.
