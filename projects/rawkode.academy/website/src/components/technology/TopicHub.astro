@@ -12,9 +12,17 @@ export interface Props {
 		thumbnailUrl: string;
 		slug: string;
 	}>;
+	showArticles?: boolean;
+	showVideos?: boolean;
 }
 
-const { technologyId, technologyName, videos = [] } = Astro.props;
+const {
+	technologyId,
+	technologyName,
+	videos = [],
+	showArticles = true,
+	showVideos = true,
+} = Astro.props;
 
 // Get all articles that mention this technology
 const allArticles = await getCollection("articles", ({ data }) => {
@@ -25,11 +33,15 @@ const allArticles = await getCollection("articles", ({ data }) => {
 const articles = allArticles.sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
+
+const hasArticles = showArticles && articles.length > 0;
+const hasVideos = showVideos && videos.length > 0;
+const isEmpty = !hasArticles && !hasVideos;
 ---
 
 <div class="space-y-12">
   <!-- Articles Section -->
-  {articles.length > 0 && (
+  {hasArticles && (
     <section>
       <SectionHeader 
         title={`Articles about ${technologyName}`}
@@ -45,7 +57,7 @@ const articles = allArticles.sort(
   )}
 
   <!-- Videos Section -->
-  {videos.length > 0 && (
+  {hasVideos && (
     <section>
       <SectionHeader 
         title={`Videos about ${technologyName}`}
@@ -75,10 +87,14 @@ const articles = allArticles.sort(
   )}
 
   <!-- Empty State -->
-  {articles.length === 0 && videos.length === 0 && (
+  {isEmpty && (
     <div class="text-center py-12">
       <p class="text-gray-500 dark:text-gray-400">
-        No content found for {technologyName} yet. Check back soon!
+        {showArticles && !showVideos
+          ? `No articles found for ${technologyName} yet. Check back soon!`
+          : !showArticles && showVideos
+            ? `No videos found for ${technologyName} yet. Check back soon!`
+            : `No content found for ${technologyName} yet. Check back soon!`}
       </p>
     </div>
   )}
