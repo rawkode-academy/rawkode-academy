@@ -1,0 +1,64 @@
+---
+title: "Dragonfly Adds Native Hugging Face and ModelScope Protocols"
+description: "Dragonfly's dfget now supports hf:// and modelscope:// with auth and revision pinning. The upside is simpler model distribution and lower origin egress, but benchmark claims still need real cluster data."
+publishedAt: 2026-04-08
+authors:
+  - rawkode
+technologies:
+  - dragonfly
+  - kubernetes
+---
+
+## What happened
+
+Dragonfly added native Hugging Face and ModelScope support to `dfget` via `hf://` and `modelscope://`.
+
+For platform teams, this removes a lot of custom model sync and cache glue.
+
+You can pull models directly with built-in auth, revision pinning, and recursive fetches.
+
+## Why it matters
+
+On inference clusters, model pull is usually the cold-start bottleneck and one of the biggest avoidable egress costs.
+
+The traffic math is straightforward. A 130 GB model across 200 nodes is 26 TB if every node pulls from origin. With Dragonfly in front, origin should see roughly one full pull (~130 GB). That is the 99.5% claim.
+
+It also reduces lock-in to internal mirror pipelines and custom fetch services that become permanent maintenance debt.
+
+## How it looks
+
+```sh
+dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O /models/DeepSeek-R1/model.safetensors
+dfget hf://owner/repo -O ./repo/ -r
+```
+
+ModelScope follows the same pattern with `--ms-token` and `--ms-revision`.
+
+The key behavior is piece-level sharing. Seed peers can upload chunks before the full model download completes, so pulls become parallel instead of serialized.
+
+## Proven vs unproven
+
+Proven:
+
+- Native `hf://` and `modelscope://` support in `dfget`
+- Cleaner integration path than custom mirror jobs
+- Clear origin-traffic reduction math
+
+Unproven (in public data so far):
+
+- p50/p95 model-ready startup time at scale
+- cross-AZ and cross-region behavior
+- token handling guidance that avoids secrets in shell history
+- failure behavior when origin is slow or rate-limited
+- end-to-end security posture for private model pulls
+
+## What to do next
+
+If you currently mirror Hugging Face or ModelScope into internal storage, run a controlled pilot and compare:
+
+- cold-start time per pod
+- origin egress
+- east-west network load
+- operational complexity (how much code/config you can delete)
+
+If the numbers hold, delete the mirror pipeline.
