@@ -1,5 +1,5 @@
 ---
-name: interLink
+name: Interlink
 logos:
   icon: true
   horizontal: true
@@ -20,7 +20,7 @@ community:
 matrix:
   status: skip
 ---
-interLink is a Kubernetes virtual kubelet provider that lets a pod land on a node that is not actually a Kubernetes node at all — most commonly an HPC batch system like Slurm, HTCondor, or a remote cloud batch API. It was built out of the INFN and interTwin EU research projects to let physics workloads written as container images run on existing supercomputing allocations without forcing those sites to install Kubernetes.
+Interlink is a Kubernetes virtual kubelet provider that lets a pod land on a node that is not actually a Kubernetes node at all — most commonly an HPC batch system like Slurm, HTCondor, or a remote cloud batch API. It was built out of the INFN and interTwin EU research projects to let physics workloads written as container images run on existing supercomputing allocations without forcing those sites to install Kubernetes.
 
 Architecturally it has two halves. A virtual-kubelet provider runs in the "user" cluster and registers a fake node. When a pod is scheduled to it, the provider hands the pod spec to an **interLink API server**, which in turn forwards it to a **sidecar plugin** for the target system. Plugins exist for Slurm (sbatch scripts that pull a Singularity/Apptainer image), Docker, remote Kubernetes, and cloud batch. The sidecar reports status back, and from the user cluster's point of view it is just a long-running pod.
 
