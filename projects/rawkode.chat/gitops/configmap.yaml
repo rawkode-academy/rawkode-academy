@@ -6,7 +6,7 @@ metadata:
 data:
   WADDLE_MODE: homeserver
   WADDLE_BASE_URL: https://rawkode.chat
-  WADDLE_CORS_ORIGINS: https://rawkode.chat
+  WADDLE_CORS_ORIGINS: https://rawkode.chat,https://chat.waddle.social
   WADDLE_XMPP_ENABLED: "true"
   WADDLE_XMPP_DOMAIN: rawkode.chat
   WADDLE_XMPP_PORT: "5222"
