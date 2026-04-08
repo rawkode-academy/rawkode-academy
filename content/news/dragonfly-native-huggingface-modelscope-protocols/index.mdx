@@ -1,6 +1,6 @@
 ---
-title: "Dragonfly Adds Native Hugging Face and ModelScope Protocols, Cuts Model Pull Origin Traffic 99.5%"
-description: "Dragonfly's new hf:// and modelscope:// URL schemes let GPU clusters fetch AI models via P2P with built-in auth, recursive fetches, and revision pinning. Origin traffic drops from 26 TB to ~130 GB across 200 nodes."
+title: "Dragonfly Adds Native Hugging Face and ModelScope Protocols"
+description: "Dragonfly's dfget now supports hf:// and modelscope:// with auth and revision pinning. The upside is simpler model distribution and lower origin egress, but benchmark claims still need real cluster data."
 publishedAt: 2026-04-08
 authors:
   - rawkode
@@ -9,33 +9,56 @@ technologies:
   - kubernetes
 ---
 
-CNCF's Graduated P2P file distribution project Dragonfly now speaks Hugging Face and ModelScope natively. Two backends merged into the dfget client add `hf://` and `modelscope://` URL schemes that handle authentication, revision pinning, and recursive fetches. The original Dragonfly post was published on d7y.io on March 11, 2026, and CNCF published a Kubestronaut post on April 6, 2026.
+## What happened
 
-The math is the headline. Pulling a 130 GB model across 200 GPU nodes used to mean 26 TB of egress hitting the Hugging Face origin. With Dragonfly's seed peer in front, that drops to roughly 130 GB. A 99.5% reduction.
+Dragonfly added native Hugging Face and ModelScope support to `dfget` via `hf://` and `modelscope://`.
 
-## How it looks in practice
+For platform teams, this removes a lot of custom model sync and cache glue.
 
-The new commands are about as simple as you'd hope:
+You can pull models directly with built-in auth, revision pinning, and recursive fetches.
+
+## Why it matters
+
+On inference clusters, model pull is usually the cold-start bottleneck and one of the biggest avoidable egress costs.
+
+The traffic math is straightforward. A 130 GB model across 200 nodes is 26 TB if every node pulls from origin. With Dragonfly in front, origin should see roughly one full pull (~130 GB). That is the 99.5% claim.
+
+It also reduces lock-in to internal mirror pipelines and custom fetch services that become permanent maintenance debt.
+
+## How it looks
 
 ```sh
 dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O /models/DeepSeek-R1/model.safetensors
 dfget hf://owner/repo -O ./repo/ -r
-dfget hf://owner/private-model/weights.bin -O /models/private/weights.bin --hf-token=hf_xxx
-dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O /models/DeepSeek-R1/model.safetensors --hf-revision v2.0
 ```
 
-Same pattern for ModelScope with `--ms-token` and `--ms-revision`. You don't need to mirror the hub, manually shard files, or build a custom CSI plugin to get models onto nodes. dfget understands the URL scheme, hits the origin once, and seeds peers as soon as the first piece lands.
+ModelScope follows the same pattern with `--ms-token` and `--ms-revision`.
 
-That last bit matters. Dragonfly's seed peer doesn't wait to finish downloading the entire model before sharing. As soon as a single piece is ready, it can flow to peers. For a multi-hundred-gigabyte LLM, that turns hours of cold-start delay into something closer to a parallel download.
+The key behavior is piece-level sharing. Seed peers can upload chunks before the full model download completes, so pulls become parallel instead of serialized.
 
-## The cold-start problem this solves
+## Proven vs unproven
 
-If you're running inference on Kubernetes with dozens of pods spinning up across GPU nodes, the model pull is often the slowest and most expensive part of cold start. Egress from public hubs costs real money. Bandwidth on shared corporate networks gets ugly fast.
+Proven:
 
-Dragonfly reached CNCF Graduated maturity level on October 28, 2025, and CNCF publicly announced Dragonfly's graduation on January 14, 2026. Dragonfly has also documented Hugging Face integration guidance since November 2023. What's new is that protocol support now lives inside dfget itself. You stop maintaining a sync job. You stop fighting with proxy configs. Point your inference job at `hf://` and let the P2P mesh handle the rest.
+- Native `hf://` and `modelscope://` support in `dfget`
+- Cleaner integration path than custom mirror jobs
+- Clear origin-traffic reduction math
 
-## What's still missing
+Unproven (in public data so far):
 
-The blog post is light on empirical benchmarks. The 99.5% number is a traffic-reduction calculation based on file size, not a measured wall-clock improvement on a real cluster. P2P performance depends heavily on node-to-node bandwidth, which varies wildly between bare-metal, public cloud, and cross-AZ topologies. If you're evaluating this for production, run it on your own setup before celebrating.
+- p50/p95 model-ready startup time at scale
+- cross-AZ and cross-region behavior
+- token handling guidance that avoids secrets in shell history
+- failure behavior when origin is slow or rate-limited
+- end-to-end security posture for private model pulls
 
-That said, if your platform team has been writing custom code to mirror models from Hugging Face into an internal registry, this is your chance to delete a service. Try the new schemes against a single inference workload and measure cold-start time. The numbers should speak for themselves.
+## What to do next
+
+If you currently mirror Hugging Face or ModelScope into internal storage, run a controlled pilot and compare:
+
+- cold-start time per pod
+- origin egress
+- east-west network load
+- operational complexity (how much code/config you can delete)
+
+If the numbers hold, delete the mirror pipeline.
