@@ -35,6 +35,8 @@ community:
 matrix:
   status: watch
 ---
-OpenFunction is a CNCF sandbox project.
+OpenFunction is a Kubernetes-native Functions-as-a-Service platform that stitches together best-of-breed components from the cloud-native ecosystem rather than reinventing the build or runtime layers. A single `Function` CRD describes a source repository, build strategy, and runtime configuration; OpenFunction's operator expands it into the underlying objects.
 
-OpenFunction is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The build phase uses Shipwright and Cloud Native Buildpacks (or Kaniko/BuildKit) to turn source code into an OCI image without a Dockerfile. For synchronous HTTP functions, the runtime phase deploys the image onto Knative Serving, giving scale-to-zero and request-based autoscaling. For asynchronous, event-driven functions, it uses Dapr for pub/sub bindings and KEDA for scaling based on queue depth (Kafka, NATS, RabbitMQ, Pulsar, Redis, etc.). An optional ingress controller, based on Contour, routes external HTTP traffic to the synchronous functions. The overall story: one CRD, many specialised projects doing the actual work.
+
+OpenFunction is a CNCF sandbox project sponsored mainly by KubeSphere/QingCloud and Apache-2.0 licensed. It competes with Knative as a standalone, OpenFaaS, Fission, and Nuclio. Its differentiator is explicit first-class support for both sync (Knative) and async (Dapr + KEDA) runtimes through a unified CRD.

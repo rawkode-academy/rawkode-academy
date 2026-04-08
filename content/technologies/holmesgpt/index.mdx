@@ -12,6 +12,8 @@ subcategory: AI-Assisted Operations
 matrix:
   status: skip
 ---
-is a CNCF sandbox project.
+HolmesGPT is an LLM-powered troubleshooting agent for Kubernetes and related infrastructure, built by Robusta. Given an alert or a question like "why is this pod crashlooping," it iteratively calls tools — `kubectl`, Prometheus queries, log fetches, Grafana, Loki, OpenSearch, Datadog, Confluence runbooks — and feeds the output back into an LLM until it produces a root-cause explanation.
 
-is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The tool-calling design is the important part: HolmesGPT is not a chatbot wrapped around a static prompt. It uses the ReAct pattern with a pluggable set of "toolsets" defined in YAML, so you can extend it to query your own systems. It runs as a CLI, a Kubernetes deployment, or as part of Robusta's alert pipeline, and supports OpenAI, Anthropic, Azure OpenAI, AWS Bedrock, and local models via LiteLLM.
+
+In practice it is most useful as a first-responder glued onto Alertmanager: instead of paging a human for every noisy alert, HolmesGPT produces a structured investigation report with the commands it ran and what they returned. Whether that report is actually correct is still entirely a function of the underlying model and the quality of the toolsets you give it.

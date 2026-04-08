@@ -19,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Open-source layer 7 load balancer derived from proprietary Baidu FrontEnd
+BFE (Beyond Front End) is a Layer 7 reverse proxy and load balancer written in Go, originally developed at Baidu where it handles the bulk of the company's front-door traffic — reportedly over a trillion requests per day. It was open sourced in 2019 and donated to the CNCF as a sandbox project in 2020.
 
-BFE is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally BFE sits in the same category as Nginx, HAProxy, and Envoy: terminate TLS, parse HTTP/HTTPS/HTTP/2/HTTP/3 requests, run them through a rules engine, and forward to a backend cluster. Its distinguishing features are a condition-expression-based routing language (`req_host_in("example.com") && req_path_prefix_in("/api")`) instead of Nginx-style location blocks, and a modular pluggable filter chain that lets you add request/response processing in Go without forking the proxy. It supports multi-tenancy with per-tenant config, health checks, connection pooling, dynamic config reload, and active/passive backend probing.
+
+In practice BFE is an interesting alternative if you want an Nginx-class edge proxy written in Go that you can extend in Go, but outside of Baidu and a few other large Chinese deployments adoption is limited. For most teams, Envoy (plus a control plane like Istio or Contour) or Nginx remain the default choices.

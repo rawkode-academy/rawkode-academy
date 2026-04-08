@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kuadrant.io'
 source: 'https://github.com/kuadrant/kuadrant-operator'
+documentation: 'https://docs.kuadrant.io/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -16,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Kuadrant combines Gateway API and Istio-based gateway controllers to enhance application connectivity. It enables platform engineers  and application developers to easily connect, secure, and protect their services and infrastructure across multiple clusters  with policies for TLS, DNS, application authentication & authorization, and rate limiting.
+Kuadrant is a set of Kubernetes Gateway API policy extensions that add rate limiting, authentication, authorization, and multi-cluster DNS/TLS to any Gateway API implementation. It does not ship its own gateway; instead it attaches policies to existing Istio or Envoy Gateway installations.
 
-Kuadrant is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core CRDs are AuthPolicy, RateLimitPolicy, DNSPolicy, and TLSPolicy, all of which attach to a Gateway or HTTPRoute via the Gateway API policy attachment pattern. Auth and rate limit policies are enforced by two sub-components — Authorino (an ext_authz service backed by OPA/CEL-like expressions, supporting OIDC, API keys, mTLS, OPA Rego) and Limitador (a Redis-backed ext_ratelimit service implementing the Envoy ratelimit protocol). Because these are standard Envoy extension points, the same policies work across any Envoy-based Gateway API implementation. DNSPolicy and TLSPolicy, paired with a multi-cluster gateway setup, handle GSLB-style failover and cert-manager integration across clusters.
+
+Kuadrant is developed by Red Hat and shares heritage with 3scale. Compared to a bespoke API management product (Kong, Apigee, 3scale on-premises), Kuadrant is specifically the Kubernetes-native, CRD-driven version layered on open Gateway API rather than a separate proxy and control plane.

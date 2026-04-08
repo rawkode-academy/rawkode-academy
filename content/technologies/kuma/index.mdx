@@ -34,6 +34,8 @@ community:
   twitter: 'https://twitter.com/KumaMesh'
   blog: 'https://kuma.io/blog/'
 ---
-Kuma is a CNCF sandbox project.
+Kuma is a service mesh built on the Envoy proxy, originally created by Kong and donated to the CNCF. It supports both Kubernetes and VM-based workloads from a single control plane and was designed from the start for multi-zone deployments that span clusters and data centres.
 
-Kuma is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The control plane, kuma-cp, is written in Go and distributes xDS configuration to Envoy sidecars injected next to each workload. Policies — mTLS, traffic permissions, routing, retries, rate limits, circuit breakers — are expressed as Kubernetes CRDs or, on VMs, as YAML resources stored in kuma-cp's built-in store backed by Postgres or the Kubernetes API. In multi-zone mode a global control plane federates with per-zone control planes that discover local workloads and synchronise state over a secure gRPC channel, giving cross-cluster service discovery without a flat network.
+
+Kuma competes with Istio, Linkerd, and Consul Connect. Its distinguishing points are first-class VM support, the universal/Kubernetes split, and a smaller surface area than Istio while still using Envoy, which makes it attractive for hybrid estates that have not fully migrated to Kubernetes.

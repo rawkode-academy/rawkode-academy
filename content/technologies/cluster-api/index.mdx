@@ -13,17 +13,8 @@ matrix:
 terms:
   - CAPI
 ---
-Cluster API is a Kubernetes sub-project focused on simplifying the creation, upgrading, and operation of Kubernetes clusters. It uses Kubernetes-style declarative APIs to manage the lifecycle of clusters, enabling infrastructure as code for Kubernetes. This allows for consistent and repeatable cluster deployments across various infrastructure providers, from on-premises data centers to public clouds. It promotes infrastructure immutability and automation for Kubernetes cluster management.
+Cluster API (CAPI) is a Kubernetes SIG project that uses Kubernetes CRDs and controllers to manage the lifecycle of Kubernetes clusters themselves. You run a "management cluster" with CAPI installed, then create `Cluster`, `Machine`, `MachineDeployment`, and `KubeadmControlPlane` resources to describe the workload clusters you want. Controllers reconcile those resources into real infrastructure and kubeadm-bootstrapped nodes.
 
-Cluster API brings the power of declarative Kubernetes-style APIs to cluster creation, configuration, and management. It treats clusters as resources, just like Pods or Services.
+The power of CAPI is that the infrastructure side is pluggable. A provider implements `InfrastructureProvider` contracts to create machines and networks on a specific platform, and there are mature providers for AWS (CAPA), Azure (CAPZ), GCP (CAPG), vSphere (CAPV), OpenStack, Equinix Metal, MAAS, Nutanix, Proxmox, Hetzner, and many more. Bootstrap providers (usually kubeadm) turn raw machines into Kubernetes nodes; control plane providers manage the etcd/API server lifecycle and handle rolling upgrades of the control plane by replacing nodes one at a time. Upgrades are declarative — bump the `version` field, CAPI rolls the control plane and then the worker MachineDeployments.
 
-## Key Features
-
--   **Declarative API:** Manage clusters using the same `kubectl` commands and YAML manifests you use for your applications.
--   **Infrastructure Provider Support:** Extensible architecture supports major cloud providers (AWS, Azure, GCP), virtualization platforms (vSphere, OpenStack), and bare metal.
--   **Automated Lifecycle Management:** Handles creation, scaling (up and down), upgrades (control plane and worker nodes), and deletion of clusters.
--   **Immutability:** Promotes immutable infrastructure by replacing nodes during upgrades rather than patching them in place.
-
-## Architecture
-
-Cluster API works by having a "Management Cluster" which hosts the CAPI controllers. These controllers watch for custom resources (like `Cluster`, `Machine`, `MachineDeployment`) and reconcile them against the infrastructure provider to spawn and manage "Workload Clusters".
+CAPI is the machinery behind Tanzu Kubernetes Grid, Rancher (RKE2 via CAPI), OpenShift Hosted Control Planes, Kubermatic, and many internal "cluster-as-a-service" platforms. If you need to manage more than a handful of Kubernetes clusters across heterogeneous infrastructure, it's the standard answer — the alternative is writing Terraform per provider and gluing it together with bash, which is exactly the problem CAPI exists to solve.

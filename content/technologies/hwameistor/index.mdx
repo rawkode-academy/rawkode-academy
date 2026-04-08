@@ -21,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Hwameistor is an HA local storage system for cloud-native stateful workloads
+HwameiStor is a local storage system for Kubernetes that turns the disks on your worker nodes (HDD, SSD, NVMe) into a pool of persistent volumes exposed via CSI. It is developed by DaoCloud and aimed at workloads that want the performance of direct-attached storage without giving up dynamic provisioning or volume lifecycle management.
 
-HwameiStor is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally it runs as a set of controllers and per-node agents that discover local block devices, group them into storage pools by media type, and carve out LVM-backed logical volumes on demand. A scheduler extender ensures pods are scheduled onto the node that actually has the data, and it supports volume replication across nodes for HA, snapshots, expansion, and migration when a node is drained. Volumes are exposed through the standard CSI driver.
+
+It occupies the same niche as OpenEBS LocalPV / Mayastor, Longhorn, and TopoLVM: use local NVMe for databases and AI/ML workloads where the Ceph-style network-replicated approach is too slow. Compared to Longhorn it leans more toward raw LVM performance and less toward distributed block replication. CNCF sandbox.

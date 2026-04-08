@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://open-cluster-management.io/'
+documentation: 'https://open-cluster-management.io/docs/'
 source: 'https://github.com/open-cluster-management-io/ocm'
 license: Apache-2.0
 status: stable
@@ -21,6 +22,8 @@ community:
 matrix:
   status: skip
 ---
-Open Cluster Management is a CNCF sandbox project.
+Open Cluster Management (OCM) is a multi-cluster control plane for Kubernetes that turns a fleet of clusters into an inventory you can query, schedule work onto, and apply policies across from a single hub. It is the upstream that powers Red Hat Advanced Cluster Management (RHACM) and is a CNCF sandbox project.
 
-Open Cluster Management is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture is pull-based. A hub cluster runs the OCM control plane; each managed cluster runs a `klusterlet` agent that registers itself with the hub (via a CSR-based join handshake) and then watches for `ManifestWork` CRs targeted at it. Workload placement is expressed through `Placement` and `PlacementDecision` resources, which let the scheduler pick clusters by labels, taints, or custom scoring plugins — effectively kube-scheduler semantics, but for clusters instead of pods. Add-ons built on top of OCM include the Policy framework (which layers on Kyverno, Gatekeeper, or config-policy-controller), Application lifecycle management, cluster-proxy for reaching private clusters, and the submariner add-on for pod-to-pod networking across clusters.
+
+OCM competes with Karmada, KubeFed (deprecated), Argo CD ApplicationSets for GitOps-driven fan-out, Rancher Fleet, and Cluster API-based fleet tools. It is Apache-2.0 licensed and contributed to primarily by Red Hat and Alibaba.

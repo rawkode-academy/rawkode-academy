@@ -3,6 +3,7 @@ name: Velero
 logos:
   horizontal: true
 website: 'https://velero.io/'
+source: 'https://github.com/vmware-tanzu/velero'
 documentation: 'https://velero.io/docs/'
 license: Apache-2.0
 status: stable
@@ -13,4 +14,8 @@ community:
 matrix:
   status: learn
 ---
-Velero is an open-source tool designed to back up and restore Kubernetes cluster resources and persistent volumes. It allows you to recover from loss of data, corruption, or disaster. It enables migrating Kubernetes resources to other clusters, replicating your production environment for development and testing, and backing up application data before upgrades.
+Velero is a backup and disaster recovery tool for Kubernetes, originally built at Heptio as Ark and now maintained by the community. It backs up two things together: the Kubernetes API objects in a namespace or cluster, and the persistent volumes attached to the workloads running in it.
+
+API resources are serialized and written to an object store (S3, GCS, Azure Blob, MinIO, or anything S3-compatible). Volumes are handled either through the underlying storage provider's snapshot API (EBS, GCE PD, Azure Disk, CSI snapshots) or via filesystem-level backup using Kopia or Restic, which copies the contents of any PV regardless of storage backend. Restores can be scoped by namespace, label selector, or resource type, and include label transformations so a backup can be rehydrated into a different cluster or namespace.
+
+Velero is the standard answer to Kubernetes backup for cluster migration, cross-region DR, and pre-upgrade safety nets, and is the foundation for several vendor backup products including VMware's Tanzu Mission Control and OpenShift OADP.

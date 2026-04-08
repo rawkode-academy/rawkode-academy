@@ -6,7 +6,7 @@ logos:
   stacked: true
 website: 'https://oauth2-proxy.github.io/oauth2-proxy/'
 source: 'https://github.com/oauth2-proxy/oauth2-proxy'
-license: Apache-2.0
+license: MIT
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-A generic reverse proxy that provides authentication with Google, Azure, OpenID Connect and many more identity providers.
+OAuth2 Proxy is a reverse proxy written in Go that puts an OAuth2 or OIDC login flow in front of any upstream HTTP service. It handles the authorization code exchange with an identity provider, stores the resulting session in a cookie (or Redis), and forwards authenticated requests to the backend along with identity headers such as `X-Auth-Request-Email` or a pass-through `Authorization: Bearer` token.
 
-OAuth2 Proxy is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It supports a long list of providers out of the box: Google, GitHub, GitLab, Keycloak, Okta, Azure AD, Auth0, and any generic OIDC issuer. Access can be filtered by email domain, GitHub org/team, GitLab group, or OIDC claim. The project is most commonly deployed alongside Kubernetes Ingress controllers — NGINX Ingress exposes an `auth_request` hook, and Traefik has a `forwardAuth` middleware — so a single oauth2-proxy instance can gate many cluster services without requiring each one to implement its own login flow. This is the canonical way to add SSO to dashboards like Prometheus, Alertmanager, Kibana, or Argo CD's UI when you do not want a full service mesh.
+
+The project began as Bitly's `google_auth_proxy`, was forked by Pusher, and now lives at `oauth2-proxy/oauth2-proxy` under the MIT license. It entered the CNCF sandbox in 2025. Alternatives include Pomerium, Ory Oathkeeper, Authelia, and Keycloak Gatekeeper (now unmaintained).

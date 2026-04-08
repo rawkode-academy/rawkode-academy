@@ -41,6 +41,8 @@ community:
 matrix:
   status: watch
 ---
-Backstage is a CNCF incubating project.
+Backstage is an open-source framework for building internal developer portals, originally created at Spotify in 2016 and donated to the CNCF in 2020. At its core it is a TypeScript/React application with a Node.js backend, plus a plugin system that lets you bolt on integrations with the rest of your stack: Kubernetes, GitHub, Jenkins, ArgoCD, PagerDuty, Grafana, Jira, and several hundred others.
 
-Backstage is a Cloud Native Computing Foundation (CNCF) incubating project.
+The centerpiece is the Software Catalog — a YAML-driven (`catalog-info.yaml` in each repo) registry of components, APIs, systems, resources, and the teams that own them, stored in Postgres and visualized as a graph. On top of that sit two other pillars: Software Templates (a scaffolder that generates new repos/services from golden-path templates using Cookiecutter-style actions) and TechDocs (a docs-as-code system that renders Markdown from each repo into a searchable site using MkDocs). Plugins live inside the monorepo you scaffold from `@backstage/create-app` — Backstage is explicitly not a SaaS; you fork it, add plugins, and run your own instance.
+
+Backstage is effectively the de-facto platform for IDPs in the cloud-native world, and Spotify, Red Hat (Janus/RHDH), Roadie, and others sell managed or opinionated distributions on top of it. The main criticism is fair: it's a React monorepo you have to own and upgrade, and the learning curve for writing plugins is steep. Alternatives like Port, Cortex, and OpsLevel trade that ownership for a SaaS model.

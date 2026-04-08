@@ -37,6 +37,8 @@ community:
 matrix:
   status: skip
 ---
-OVN-Kubernetes is a CNCF sandbox project.
+OVN-Kubernetes is a Kubernetes CNI plugin built on top of Open Virtual Network (OVN), the logical networking layer that Open vSwitch (OVS) exposes for software-defined networks. It is the default CNI in OpenShift and the upstream project became a CNCF sandbox project in 2024.
 
-OVN-Kubernetes is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Instead of programming iptables or generating individual flow rules per node, OVN-Kubernetes translates Kubernetes objects — Services, NetworkPolicies, EndpointSlices, Nodes — into logical switches, routers, and ACLs in OVN's northbound database. OVN's northd then compiles those logical flows into OpenFlow rules that ovs-vswitchd installs on each node. The result is that policy, routing, and load balancing are modelled in a single declarative graph that OVS enforces at the datapath, and changes propagate through OVN's southbound database to all nodes without per-node controllers reinventing state. It supports VXLAN and Geneve overlays, hardware offload via smart NICs, IPv4/IPv6 dual-stack, egress IPs, multicast, network segmentation per namespace, and multiple networks per pod through the upcoming `NetworkAttachmentDefinition` integration.
+
+OVN-Kubernetes is Apache-2.0 and targets the same problem space as Cilium, Calico, Antrea, Kube-OVN, and Flannel. Its defining feature is reusing the mature OVN/OVS codebase from the OpenStack world rather than building a new datapath, which is attractive in telco and enterprise environments that already run OVS and want consistent networking across virtual machines and Kubernetes pods.

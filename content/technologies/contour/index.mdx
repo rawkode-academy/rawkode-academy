@@ -21,6 +21,8 @@ community:
 matrix:
   status: watch
 ---
-Contour is a CNCF incubating project.
+Contour is a Kubernetes Ingress controller that uses Envoy as its data plane. The Contour control plane watches Kubernetes Ingress, Gateway API, and its own `HTTPProxy` CRD, translates those resources into Envoy xDS configuration, and streams it to Envoy Pods over gRPC. Envoy handles the actual L7 traffic.
 
-Contour is a Cloud Native Computing Foundation (CNCF) incubating project.
+Contour was created by Heptio (now VMware/Broadcom) to expose the power of Envoy without making users hand-write Envoy YAML. Its `HTTPProxy` CRD fills gaps the original Ingress resource left open — weighted traffic splitting, header and path rewrites, external auth, rate limiting, TLS delegation across namespaces, and inclusion/delegation so platform teams can carve namespaces into subroutes without giving tenants access to the root host. Contour was also one of the first controllers to implement the Kubernetes Gateway API and is a reference implementation.
+
+In the ecosystem, Contour competes with ingress-nginx, Traefik, HAProxy Ingress, Emissary-ingress (another Envoy-based controller from Ambassador Labs), and Istio/Gloo when used purely as ingress. If you're already running Envoy or want first-class Gateway API support without pulling in a full service mesh, Contour is the lightweight option.

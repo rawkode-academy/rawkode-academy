@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubestellar.io'
 source: 'https://github.com/kubestellar/kubestellar'
+documentation: 'https://kubestellar.io/docs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -26,6 +27,8 @@ community:
 matrix:
   status: skip
 ---
-KubeStellar is a CNCF sandbox project.
+KubeStellar is a CNCF sandbox project for multi-cluster workload placement on Kubernetes. It lets you write a normal Kubernetes manifest once in a central control plane and have it delivered to any number of target clusters selected by label, without teaching your tooling about the remote clusters.
 
-KubeStellar is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture is built on KubeFlex, which hosts lightweight Kubernetes control planes as tenants. A Workload Description Space (WDS) holds the user's desired manifests, an Inventory and Transport Space (ITS) tracks registered workload execution clusters (WECs), and BindingPolicy custom resources match objects in the WDS to clusters in the ITS. A transport controller then syncs the matched objects out to the target clusters and reports status back. Because the WDS exposes a real kube-apiserver, any tool that speaks Kubernetes — kubectl, Helm, Argo CD, Flux — can drive multi-cluster deployments unchanged.
+
+KubeStellar grew out of IBM Research's work on the earlier KCP project and overlaps with Open Cluster Management, Karmada, and Argo CD ApplicationSets, but leans harder on the "plain Kubernetes API everywhere" model and decouples inventory, workload description, and transport.

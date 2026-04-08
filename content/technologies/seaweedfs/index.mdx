@@ -1,6 +1,7 @@
 ---
 name: SeaweedFS
 website: 'https://seaweedfs.github.io/'
+source: 'https://github.com/seaweedfs/seaweedfs'
 documentation: 'https://github.com/seaweedfs/seaweedfs/wiki'
 license: Apache-2.0
 status: stable
@@ -20,37 +21,8 @@ matrix:
     more valuable: a license you can trust and a community that isn't
     treated like a legal liability.
 ---
+SeaweedFS is a distributed file and object store written in Go, inspired by Facebook's Haystack paper. It is designed to store and serve large numbers of small files efficiently by packing them into append-only volume files and locating them through compact in-memory indexes instead of a traditional inode tree.
 
-SeaweedFS is a fast distributed storage system for blobs, objects, files, and data lake. It implements an object store with O(1) disk seek, a Filer supporting cross-cluster active-active replication, and Hadoop-compatible filesystem support.
+The cluster has three roles. Master servers track volume-to-server mapping and keep the topology. Volume servers store the actual data in fixed-size volumes (typically 30 GB) replicated according to a configurable replication policy across racks or data centers. Filer servers provide a POSIX-like metadata layer backed by a pluggable database (LevelDB, BoltDB, SQLite, MySQL, Postgres, Redis, Cassandra, TiKV, or etcd) so that directories and permissions sit on top of the volume store. On top of that, SeaweedFS exposes an HTTP API for raw blob access, an S3-compatible gateway, WebDAV, FUSE mounts, a HDFS adapter, and a Kubernetes CSI driver.
 
-## Key Features
-
-- **S3 API Compatibility:** Drop-in replacement for S3-based workflows
-- **O(1) Disk Seek:** Fast read performance regardless of file count
-- **Filer:** POSIX-like file system interface with directory structure
-- **Erasure Coding:** Efficient storage with data protection
-- **Tiered Storage:** Hot, warm, cold data management
-- **Cross-Datacenter Replication:** Active-active replication support
-
-## Architecture
-
-SeaweedFS separates metadata from data:
-
-- **Master Server:** Manages volume servers and file ID allocation
-- **Volume Server:** Stores actual file data in volumes
-- **Filer:** Optional component providing file system semantics
-
-## Use Cases
-
-- Object storage for cloud-native applications
-- Media and asset storage
-- Backup and archival systems
-- Data lake storage layer
-- CDN origin storage
-
-## Why SeaweedFS over MinIO?
-
-- **Apache 2.0 License:** Permissive license with no surprise changes
-- **Community-Friendly:** Active development without hostile legal tactics
-- **Feature Parity:** S3 compatibility without enterprise paywalls
-- **Transparent Roadmap:** Open development process
+Because data is append-only and reads go straight from an in-memory needle map to a byte offset within a volume file, SeaweedFS handles billions of small files with tight latency budgets, which is its differentiator against Ceph, MinIO, and Longhorn. It also supports erasure coding for cold data, tiered storage to S3, and cross-cluster replication. The project is Apache-2.0 licensed.

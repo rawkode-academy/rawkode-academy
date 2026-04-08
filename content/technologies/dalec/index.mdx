@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: watch
 ---
-Dalec provides a declarative format for building system packages and containers from those packages in a secure way for supply chain security.
+Dalec is a BuildKit frontend for producing OS packages (RPM, DEB, Windows MSIs, Azure Linux images) and signed container images from a single declarative YAML spec. It was originally built by Microsoft to harden the Azure Linux (formerly CBL-Mariner) supply chain, and entered the CNCF sandbox in October 2025.
 
-Dalec is a Cloud Native Computing Foundation (CNCF) sandbox project.
+You write a `spec.yaml` that describes sources (Git repos, HTTP downloads, inline scripts), build dependencies, build steps, and the target artifacts. Because Dalec is a BuildKit frontend, `docker build` or `buildx` picks it up via the `#syntax=` directive the same way the standard Dockerfile frontend works — no separate tool to install. BuildKit then resolves the DAG, runs builds in sandboxed, content-addressed containers, signs artifacts, and emits either OS packages, base images containing those packages, or SBOMs and provenance attestations in the in-toto format.
+
+The interesting property is reproducibility and supply-chain clarity: the same spec file produces both the `.rpm` and the container image that bundles it, with matching SLSA attestations, so you don't end up with a "build the package" pipeline and a separate, divergent "build the image" pipeline. It's aimed at distro maintainers and platform teams shipping first-party base images, not at application developers.

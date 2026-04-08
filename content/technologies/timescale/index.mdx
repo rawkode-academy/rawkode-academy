@@ -1,10 +1,11 @@
 ---
-name: Timescale
+name: TimescaleDB
 logos:
   horizontal: true
-website: 'https://www.timescale.com/'
-documentation: 'https://docs.timescale.com/'
-license: Apache-2.0
+website: 'https://www.tigerdata.com/'
+documentation: 'https://docs.tigerdata.com/'
+source: 'https://github.com/timescale/timescaledb'
+license: Apache-2.0 AND LicenseRef-Timescale
 status: stable
 category: App Definition and Development
 subcategory: Database
@@ -13,4 +14,8 @@ community:
 matrix:
   status: skip
 ---
-TimescaleDB is an open-source time-series database built on PostgreSQL. It's engineered to efficiently store and analyze time-series data, providing the full power of SQL with scalability and performance optimizations specific to time-series workloads. It essentially extends PostgreSQL to handle the demands of large-scale time-series applications. TimescaleDB is particularly well-suited for IoT, DevOps monitoring, financial markets, and industrial data applications. It provides significant benefits over traditional relational databases for time-series by offering native compression, continuous aggregates for real-time analysis, and optimized query performance.
+TimescaleDB is a PostgreSQL extension that turns Postgres into a time-series database. It adds hypertables, which transparently partition a regular table into chunks by time (and optionally by space), so inserts and range queries stay fast as the table grows into billions of rows.
+
+Because it is an extension, TimescaleDB inherits the full SQL surface, indexes, joins, foreign keys, and tooling of Postgres. On top of that it adds time-series specific features: continuous aggregates that incrementally materialize rollups, compression that converts row-oriented chunks into columnar segments, data retention policies, and hyperfunctions for things like time_bucket, gap-filling, and last-observation-carried-forward.
+
+TimescaleDB is a common backend for metrics, IoT telemetry, financial tick data, and application observability, where teams want the operational familiarity of Postgres without running a separate specialized TSDB like InfluxDB or Prometheus for long-term storage. The company behind it rebranded from Timescale to Tiger Data in 2025, but the open-source extension and repository still use the TimescaleDB name.

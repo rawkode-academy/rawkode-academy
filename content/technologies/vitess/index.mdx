@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://vitess.io/'
+source: 'https://github.com/vitessio/vitess'
 documentation: 'https://vitess.io/docs/'
 license: Apache-2.0
 status: stable
@@ -42,6 +43,8 @@ community:
 terms:
   - MySQL
 ---
-Vitess is a database clustering system for horizontal scaling of MySQL. It enables you to shard and scale MySQL databases without application-level changes. It's particularly well-suited for cloud-native environments where scalability, fault tolerance, and operational simplicity are critical. Vitess provides features like connection pooling, query rewriting, and traffic shaping, allowing you to manage large MySQL deployments efficiently.
+Vitess is a database clustering system that turns MySQL into a horizontally-scalable, sharded database while keeping it look like a single logical MySQL server to applications. It was built at YouTube to survive the scaling problems of a write-heavy MySQL deployment and is now a CNCF graduated project.
 
-Vitess helps organizations address the challenges of scaling MySQL beyond the limits of a single instance. It improves performance, reduces operational overhead, and enhances resilience. Common use cases include large web applications, SaaS platforms, and any database-driven application requiring high availability, scalability, and consistent performance.
+Clients talk to VTGate, a stateless proxy that speaks the MySQL wire protocol. VTGate parses queries, consults a VSchema to figure out how tables are sharded, and routes or scatter-gathers the query to the right VTTablet processes, which each sit in front of a real MySQL instance. Resharding is online: Vitess can split shards by streaming rows between tablets, switching writes over atomically, and cleaning up the old shards, all without downtime. It also handles topology metadata, backups, automatic failover, and connection pooling, so MySQL's usual operational pain points are absorbed by the control plane.
+
+Vitess powers databases at Slack, YouTube, Square, GitHub, HubSpot, and PlanetScale, which was built directly on top of it.

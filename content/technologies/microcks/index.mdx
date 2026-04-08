@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://microcks.io'
 source: 'https://github.com/microcks/microcks'
+documentation: 'https://microcks.io/documentation/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -46,6 +47,8 @@ community:
 matrix:
   status: skip
 ---
-Microcks is a CNCF sandbox project.
+Microcks turns API and event specifications into live mock servers and contract tests. Given an OpenAPI, AsyncAPI, gRPC/protobuf, GraphQL SDL, Postman collection, or SoapUI project, it spins up an endpoint that replays example responses and, for async APIs, produces or consumes messages on the configured broker.
 
-Microcks is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The server is a Spring Boot application backed by MongoDB for artifact storage and Keycloak for auth. Uploaded artifacts are parsed into an internal model and exposed under stable mock URLs; example data can come from the spec itself, from Postman collection examples, or from separate "secondary" files so teams can keep mock data alongside the contract. For async APIs, Microcks integrates with Kafka, MQTT, AMQP, NATS, WebSockets, Google Pub/Sub, and Amazon SQS/SNS to publish and verify messages. A microcks-cli and GitHub Actions, Jenkins, and Tekton integrations run the same mocks as contract-conformance tests in CI against a real implementation.
+
+Microcks is a CNCF sandbox project and overlaps with Prism, WireMock, and Postman Mock Servers, with its distinguishing points being native AsyncAPI support and a single platform that handles both mocking and contract testing.

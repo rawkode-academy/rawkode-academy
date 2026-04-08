@@ -49,6 +49,9 @@ community:
   slack: 'https://cloud-native.slack.com/messages/dragonfly/'
   mailingList: 'https://groups.google.com/g/dragonfly-developers'
 ---
-Delivers efficient, stable, and secure data distribution and acceleration powered by P2P technology, with an optional content‑addressable filesystem that accelerates OCI container launch.
 
-Dragonfly is a Cloud Native Computing Foundation (CNCF) graduated project.
+Dragonfly is a peer-to-peer file and container image distribution system originally built at Alibaba to move large binaries across thousands of hosts without melting the origin registry. Instead of every node pulling from a central OCI registry, Dragonfly peers share layers and blobs directly, and a manager coordinates which peer has what.
+
+The architecture has three main components written in Go: the `manager` (cluster-wide control plane and UI), `scheduler` (matches peers to pieces of content and drives the P2P topology), and `dfdaemon` (runs on each host, either as a proxy intercepting registry pulls or as a sidecar). A companion project, Nydus, pairs with Dragonfly to provide on-demand, chunk-level lazy image loading — containers start before the full image has been pulled, which is a big deal for multi-GB AI/ML images.
+
+It's used in production by Alibaba, Ant Group, Meituan, Tencent, Baidu and others for image distribution at the scale of hundreds of thousands of nodes. The typical alternative is just hammering Harbor with more replicas; Dragonfly trades that for a more complex topology in exchange for dramatically lower origin load and faster cold-start times. CNCF graduated the project in October 2025.

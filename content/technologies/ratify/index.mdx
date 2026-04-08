@@ -19,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-A verification engine on Kubernetes which enables verification of artifact security metadata and admits for deployment only those that comply with policies you create.
+Ratify is a verification engine for OCI artifacts and container images. It plugs into Kubernetes admission control and other enforcement points to answer the question "is this image allowed to run, given the signatures, SBOMs, and vulnerability scans attached to it?" The project was started by Microsoft and accepted into the CNCF sandbox in 2024.
 
-Ratify is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Ratify's architecture is pluggable. Stores know how to fetch artifacts and their referrers from an OCI registry (via the OCI 1.1 Referrers API or fallback ORAS tag schemes). Verifiers validate specific types of referrer: Notary v2 (notation) and Cosign signatures, SPDX/CycloneDX SBOMs, Trivy and Grype vulnerability reports, and arbitrary schema-validation verifiers. A policy provider — either a config-based one or Rego via OPA — combines verifier results into an accept/reject decision. On Kubernetes, Ratify runs as an external data provider for Gatekeeper (or as a Kyverno verifier), so constraints like "all images in the `prod` namespace must be signed by our Notary key and have a Trivy report with no critical CVEs" are enforced at admission time.
+
+The project is the reference implementation for supply-chain verification against OCI 1.1-compliant registries and is commonly paired with Cosign, Notation, and Tekton Chains in a secure software supply chain pipeline.

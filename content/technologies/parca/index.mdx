@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://www.parca.dev/'
 documentation: 'https://www.parca.dev/docs/'
+source: 'https://github.com/parca-dev/parca'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -14,28 +15,8 @@ terms:
   - eBPF
   - Polar Signals
 ---
-Parca is an open-source continuous profiling tool designed for performance analysis in production environments. It continuously collects profiles of your applications, enabling you to identify performance bottlenecks and optimize resource utilization. It stores profile data efficiently, allowing you to query and visualize performance trends over time. This helps improve application efficiency, reduce infrastructure costs, and enhance overall system performance by pinpointing the exact lines of code or functions that are consuming the most resources.
+Parca is an open-source continuous profiling system built around an eBPF-based whole-system profiler and a columnar storage engine designed specifically for stack-trace data. It is developed by Polar Signals and released under Apache-2.0.
 
-Parca's primary use cases include identifying CPU-intensive code, memory leaks, lock contention, and other performance issues. By providing detailed insights into resource consumption, Parca helps developers and operations teams proactively address performance bottlenecks and optimize their applications. It's particularly valuable in cloud-native environments, where resource efficiency is crucial for cost optimization and scalability.
+The Parca Agent runs as a DaemonSet on every node and uses eBPF perf events to sample on-CPU stacks across all processes at ~19 Hz, regardless of language or runtime. Because the sampler lives in the kernel, there is no per-service instrumentation or runtime agent to attach; native code, Go, Rust, C++, and Java (with appropriate unwinding support) all get profiled through the same pipeline. Symbols are resolved out-of-band, either from debug info on the node or from an uploaded symbol store, so stripped production binaries still produce useful flame graphs. Profiles are shipped in the standard pprof format to the Parca server, which stores them in FrostDB, an embedded columnar database also from Polar Signals, tuned for time-series of stacks.
 
-Parca is an open-source, continuous profiling platform that provides deep insights into the resource consumption of your applications in production. By continuously collecting CPU and memory usage profiles, it helps developers and operations teams identify performance bottlenecks and optimize their software for efficiency and cost.
-
-## Key Features
-
--   **Continuous Profiling:** Collects CPU and memory profiles of all code running in your infrastructure 24/7, with minimal overhead, using eBPF.
--   **eBPF-based Profiler:** Leverages eBPF for efficient and safe in-kernel profiling, allowing it to collect data from any language or runtime without recompilation or instrumentation.
--   **Open Standards (pprof):** Adheres to the pprof format, making it compatible with existing profiling tools and visualizations.
--   **Queryable Profile Data:** Stores profile data in a highly efficient database, enabling fast and flexible querying and aggregation over long periods.
--   **Web UI & Visualization:** Provides an intuitive web interface for visualizing profiles (e.g., flame graphs), comparing performance changes, and drilling down into specific code paths.
--   **Metrics Integration:** Integrates seamlessly with Prometheus, allowing you to correlate profile data with other operational metrics.
--   **Target Discovery:** Automatically discovers targets to profile across your infrastructure, particularly in Kubernetes environments.
-
-## Benefits
-
--   **Performance Optimization:** Pinpoints the exact lines of code or functions that consume the most CPU and memory, allowing for targeted optimizations.
--   **Cost Savings:** By identifying and resolving inefficient code, Parca helps reduce cloud infrastructure costs through better resource utilization.
--   **Reduced Latency:** Optimizing critical code paths directly contributes to lower application latency and improved user experience.
--   **Faster Incident Response:** Provides crucial context during incidents by allowing teams to examine performance profiles leading up to an issue.
--   **Proactive Performance Management:** Continuously monitors performance, enabling proactive identification and resolution of bottlenecks before they become critical.
--   **Language Agnostic:** Works across various programming languages and runtimes thanks to its eBPF-based profiling.
--   **Shift-Left Performance:** Empowers developers to address performance issues early in the development cycle.
+The query UI produces flame graphs, icicle graphs, and diff views across arbitrary label selectors and time ranges, so you can ask "what changed in CPU usage for this deployment between yesterday and today?" In the continuous profiling space Parca competes with Pyroscope (now Grafana Pyroscope), Pixie's perf profiler, and vendor offerings from Datadog, Elastic, and Google Cloud Profiler. It integrates cleanly with Prometheus service discovery and is the natural fit when the rest of your observability stack is already eBPF- and label-based.

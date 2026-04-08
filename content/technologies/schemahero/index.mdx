@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://schemahero.io/'
 documentation: 'https://schemahero.io/docs/'
+source: 'https://github.com/schemahero/schemahero'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -19,4 +20,8 @@ community:
 matrix:
   status: explore
 ---
-SchemaHero is a Kubernetes operator for managing database schema migrations. It allows developers to declaratively define the desired state of their database schemas in YAML files and automatically apply the necessary changes. This simplifies database schema management, promotes infrastructure-as-code practices, and helps ensure consistency across different environments. SchemaHero supports various databases, including PostgreSQL, MySQL, and MongoDB, and integrates seamlessly with existing CI/CD pipelines, enabling automated schema migrations as part of the software delivery process.
+SchemaHero is a Kubernetes operator that manages database schemas declaratively. Instead of shipping a series of ordered up/down migration files, developers describe the desired shape of each table as a Kubernetes custom resource and SchemaHero computes the DDL needed to get the live database there.
+
+The operator installs two CRDs: `Database`, which holds connection details to a target PostgreSQL, MySQL, CockroachDB, Cassandra, SQLite, RQLite, or TimescaleDB instance, and `Table`, which declares the desired columns, types, indexes, and constraints. When a Table is applied, the operator introspects the current schema in the target database, diffs it against the desired state, and generates a `Migration` resource containing the planned ALTER/CREATE statements. Migrations are not applied automatically — they sit in a pending state so that a human or GitOps workflow can review the SQL before approving it, which is the primary safety mechanism against destructive changes in production. Once approved, the operator executes the statements and records the result.
+
+SchemaHero was created at Replicated and accepted into the CNCF sandbox in 2020. It fits naturally into a GitOps pipeline alongside Argo CD or Flux, replacing migration runners like Flyway and Liquibase for teams that want their database schema to live next to their Kubernetes manifests as a first-class declarative resource. It is Apache-2.0 licensed.

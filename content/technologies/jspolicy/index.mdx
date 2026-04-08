@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://jspolicy.com/'
 documentation: 'https://jspolicy.com/docs/'
+source: 'https://github.com/loft-sh/jspolicy'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -11,27 +12,8 @@ subcategory: Security & Compliance
 matrix:
   status: skip
 ---
-jsPolicy is a lightweight, policy-as-code engine designed for modern cloud-native environments. It allows you to define and enforce policies using JavaScript, providing a flexible and programmable way to govern various aspects of your infrastructure, such as security, compliance, and resource management. By leveraging JavaScript, jsPolicy simplifies policy creation, testing, and deployment, enabling organizations to automate policy enforcement and improve operational efficiency.
+jsPolicy is a Kubernetes admission-control engine from Loft Labs that lets you write validating, mutating, and controller policies in JavaScript or TypeScript instead of Rego. Policies are delivered as `JsPolicy` CRDs; the controller compiles the code (TypeScript is transpiled), bundles it, and executes it in a sandboxed V8 runtime embedded in the jsPolicy webhook server.
 
-jsPolicy's main use cases include validating Kubernetes resources, enforcing security best practices across applications, controlling API access, and automating compliance checks. It integrates seamlessly with existing DevOps workflows and tools, allowing you to build a robust and scalable policy enforcement system.
+There are three policy types. **Validating** policies reject API requests that don't match the rules. **Mutating** policies can patch objects before they are persisted. **Controller** policies watch existing resources and react on changes, which lets you use the same mental model for admission and for background reconciliation. Because the runtime is V8, policies can import a curated subset of helpers and even use parts of the npm ecosystem, and they are cached as compiled bundles so hot-path evaluation is fast.
 
-jsPolicy is a powerful policy-as-code engine for Kubernetes that allows platform engineers and developers to define and enforce policies using JavaScript or TypeScript. It provides a flexible, fast, and programmable way to govern various aspects of your Kubernetes infrastructure and applications.
-
-## Key Features
-
--   **JavaScript/TypeScript for Policies:** Write policies using familiar JavaScript or TypeScript, leveraging the vast ecosystem of NPM packages and existing programming skills.
--   **Three Policy Types:** Supports Validating Policies (preventing invalid resources), Mutating Policies (modifying resources before creation/update), and Controller Policies (automating actions based on resource changes).
--   **Fast Execution (V8 Engine):** Policies are executed with Google's V8 JavaScript engine, ensuring high performance and low latency.
--   **Easy Cluster Access:** Provides a simple API to interact with Kubernetes resources within your policies, enabling dynamic decision-making.
--   **Testing & Debugging:** Policies can be easily tested and debugged locally using standard JavaScript tooling.
--   **Version Control:** Store policies in Git alongside your application code, enabling GitOps workflows for policy management.
--   **WebAssembly (WASM) Support:** Can compile policies to WebAssembly for even greater portability and security.
-
-## Benefits
-
--   **Enhanced Security:** Enforce security best practices, prevent misconfigurations, and ensure compliance across your Kubernetes clusters.
--   **Simplified Policy Logic:** Express complex policy logic in a familiar programming language, making policies easier to write, read, and maintain compared to YAML-based solutions.
--   **Improved Governance:** Automate governance over Kubernetes resources, reducing manual intervention and human error.
--   **Increased Developer Productivity:** Empowers developers to define and manage policies themselves, reducing bottlenecks and accelerating development.
--   **Extensibility:** Leverage the rich JavaScript ecosystem for advanced policy logic and integrations.
--   **Faster Feedback Loop:** Test policies locally before deployment, catching issues early in the development cycle.
+It sits in the same category as Kyverno (YAML-native) and OPA/Gatekeeper (Rego). The pitch is simply: your platform team already knows JavaScript, and expressing policy as imperative code with normal control flow and unit tests is easier than Rego for most people. The latest tagged upstream release is v0.2.2 (2023-02-21), so evaluate its maintenance status before committing to it for production policy.

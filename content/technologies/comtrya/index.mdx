@@ -10,19 +10,8 @@ subcategory: Automation & Configuration
 matrix:
   status: graveyard
 ---
-Configuration Management for Localhost; written in Rust
+Comtrya is a dotfiles and workstation configuration manager written in Rust. It is aimed squarely at the problem of setting up a new laptop — installing packages, symlinking dotfiles, cloning repos, configuring macOS defaults — without the weight of Ansible, Chef, or Puppet.
 
-Comtrya is a modern, fast, and cross-platform configuration management tool written in Rust, specifically designed for managing developer environments and dotfiles.
+Configuration is declared as YAML "manifests" containing a list of actions: `package.install`, `file.link`, `file.copy`, `directory.create`, `command.run`, `git.clone`, `user.group`, and more. Manifests declare dependencies on other manifests so Comtrya resolves them into a DAG and runs them in order. Package actions abstract over the underlying manager (Homebrew, apt, dnf, pacman, winget), so the same manifest can target macOS, Linux, and Windows with per-OS overrides via Tera templating.
 
-## Why Comtrya?
-
--   **Speed:** Built with Rust, it executes configuration tasks incredibly fast.
--   **Simplicity:** Uses YAML for configuration, making it easy to read and write without learning a complex DSL.
--   **Idempotency:** Ensures that running the tool multiple times produces the same result, only making changes when necessary.
--   **No Dependencies:** Being a single binary, it doesn't require a complex setup or runtime environment like Python or Ruby.
-
-## Use Cases
-
--   **Dotfiles Management:** Symlinking and managing configuration files for your shell, editor, and tools.
--   **Package Installation:** Automating the installation of packages via Homebrew, apt, cargo, etc.
--   **System Setup:** Bootstrapping a new machine with all your required tools and settings in minutes.
+Comtrya sits in the same niche as chezmoi, Nix Home Manager, and yadm, but trades Nix-level reproducibility for a lighter, more imperative model that feels closer to Ansible playbooks. It is a hobby-scale project — originally created by David Flanagan (Rawkode) — and best suited to individual workstation bootstrapping rather than fleet management.

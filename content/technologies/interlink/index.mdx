@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://interlink-project.dev'
 source: 'https://github.com/interlink-hq/interLink'
+documentation: 'https://interlink-project.dev/docs/intro'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -15,11 +16,12 @@ cncf:
   accepted: '2025-03-04'
   devStatsUrl: 'https://interlink.devstats.cncf.io/'
 community:
-  blog: 'https://intertwin-eu.github.io/interLink/blog/'
   githubDiscussions: 'https://github.com/interlink-hq/interLink/discussions'
 matrix:
   status: skip
 ---
-InterLink aims to provide an abstraction for the execution of a Kubernetes pod on any remote resource capable of managing a Container execution lifecycle thanks to the Virtual Kubelet interface. It allows you to extend your cloud environment anywhere by running Kubernetes workloads on various infrastructures, creating a seamless cloud-native experience across diverse environments.
+Interlink is a Kubernetes virtual kubelet provider that lets a pod land on a node that is not actually a Kubernetes node at all — most commonly an HPC batch system like Slurm, HTCondor, or a remote cloud batch API. It was built out of the INFN and interTwin EU research projects to let physics workloads written as container images run on existing supercomputing allocations without forcing those sites to install Kubernetes.
 
-Interlink is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally it has two halves. A virtual-kubelet provider runs in the "user" cluster and registers a fake node. When a pod is scheduled to it, the provider hands the pod spec to an **interLink API server**, which in turn forwards it to a **sidecar plugin** for the target system. Plugins exist for Slurm (sbatch scripts that pull a Singularity/Apptainer image), Docker, remote Kubernetes, and cloud batch. The sidecar reports status back, and from the user cluster's point of view it is just a long-running pod.
+
+The headline use case is bursting Kubernetes workloads onto HPC resources at CERN and similar sites, but it is also useful for any scenario where you want Kubernetes as the control plane while the actual execution happens somewhere that cannot run kubelet. CNCF sandbox, Apache-2.0.

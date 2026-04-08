@@ -4,7 +4,7 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://www.cloudnative-pg.io/'
+website: 'https://cloudnative-pg.io/'
 source: 'https://github.com/cloudnative-pg/cloudnative-pg'
 license: Apache-2.0
 status: stable
@@ -34,6 +34,8 @@ community:
 matrix:
   status: adopt
 ---
-CloudNativePG is a comprehensive platform designed to seamlessly manage PostgreSQL databases within Kubernetes environments, covering the entire operational lifecycle from initial deployment to ongoing maintenance
+CloudNativePG is a Kubernetes operator for running PostgreSQL in production. You create a `Cluster` resource describing the Postgres version, instance count, storage, and backup configuration, and the operator provisions a primary and replicas, handles streaming replication, performs fast failover on primary loss, runs continuous physical base backups and WAL archiving to S3-compatible object storage, and can do point-in-time recovery to a new cluster.
 
-CloudNativePG is a Cloud Native Computing Foundation (CNCF) sandbox project.
+What makes it architecturally interesting is that it doesn't use a separate high-availability agent like Patroni or Stolon. The operator itself (running in its own namespace) is the control loop, and every Postgres pod runs an instance manager that acts as both PID 1 and the replication client. Primary selection is driven by Kubernetes API state rather than a separate DCS — etcd is already the DCS. It uses standard Postgres streaming replication, supports synchronous and quorum-based replication, and integrates with Barman for WAL archiving. Connection pooling via PgBouncer, pg_rewind-based reattachment after failover, and rolling minor-version upgrades are all first class.
+
+CloudNativePG was created by EDB and donated to the CNCF as a sandbox project in 2025. In the Postgres-on-Kubernetes space it competes with Zalando's postgres-operator, Crunchy Data's PGO, StackGres, and Kubegres. CloudNativePG has become the most actively developed and is rapidly becoming the default community choice, especially for teams that don't want to pay for a commercial distribution.

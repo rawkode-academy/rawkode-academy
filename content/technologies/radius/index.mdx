@@ -21,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Radius is a cloud-native application platform that enables developers and the platform engineers that support them to collaborate on delivering and managing cloud-native applications that follow organizational best practices for cost, operations and security, by default.
+Radius is an application platform that lets developers describe a whole distributed application — containers, databases, queues, caches, and the relationships between them — as a single model, and then deploys it across Kubernetes and cloud resources. It was created by Microsoft, open-sourced in 2023, and accepted into the CNCF sandbox in 2024.
 
-Radius is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core abstraction is the Radius Application, written in Bicep (and increasingly Terraform) and composed of Containers, Resources (e.g., `Applications.Datastores/mongoDatabases`, `Applications.Messaging/rabbitMQQueues`), and typed Connections between them. At deploy time, the Radius control plane resolves each Resource to either an in-cluster implementation via its Recipes system (which runs a Bicep or Terraform module) or to a managed cloud service like Azure Cosmos DB or AWS SQS, and wires credentials and endpoints into the connected containers automatically. This separates the developer's view of the app from the platform engineer's view of how each dependency is fulfilled in a given environment.
+
+Radius runs as a set of controllers on top of Kubernetes and manages state via its own resource provider model borrowed from ARM/Azure. Supported targets include Kubernetes, Azure, and AWS, with extensibility through Recipes so platform teams can define standard implementations of things like "a Postgres database" or "a Redis cache" once and reuse them across environments. It sits in the same problem space as Crossplane, Score, and KubeVela.

@@ -3,6 +3,7 @@ name: Tyk
 logos:
   horizontal: true
 website: 'https://tyk.io/'
+source: 'https://github.com/TykTechnologies/tyk'
 documentation: 'https://tyk.io/docs/'
 license: MPL-2.0
 status: stable
@@ -11,6 +12,8 @@ subcategory: API Gateway
 matrix:
   status: skip
 ---
-Tyk is an open-source API Gateway that provides comprehensive API management capabilities. It enables organizations to control access to their APIs, secure them with various authentication methods, and monitor their performance. Tyk provides features like rate limiting, authentication, authorization, analytics, request transformation, and caching. It's designed to be highly performant, scalable, and flexible, making it suitable for a wide range of use cases, from simple API proxying to complex microservices architectures.
+Tyk is an open-source API gateway written in Go that fronts REST, GraphQL, gRPC, and async (Kafka, SSE, WebSocket) APIs. The gateway handles the usual concerns: authentication, rate limiting and quotas, request and response transformation, versioning, circuit breaking, and analytics.
 
-Tyk simplifies API lifecycle management by providing a central point of control for all APIs. It empowers developers to quickly expose and manage their APIs while enabling operations teams to monitor and optimize API performance. Use cases include securing public and private APIs, managing microservices, enabling API monetization, and integrating with existing identity providers.
+It supports most common auth schemes out of the box, including API keys, JWTs, OAuth2, OpenID Connect, HMAC, and mTLS, and policies are attached to keys so rate limits and access rights travel with the consumer. Custom logic can be added with middleware written in JavaScript, Python, Lua, gRPC plugins, or Go plugins compiled into the gateway. For GraphQL, Tyk can act as a universal data graph, stitching REST and gRPC upstreams into a single schema.
+
+The gateway itself is open source under MPL-2.0, while the dashboard, developer portal, and multi-data-center management ("Tyk Cloud" / self-managed) are commercial. It is commonly deployed in front of internal APIs or as an alternative to Kong and Apigee.

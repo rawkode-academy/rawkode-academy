@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://robusta.dev/'
 documentation: 'https://docs.robusta.dev/'
+source: 'https://github.com/robusta-dev/robusta'
 license: MIT
 status: stable
 category: Observability and Analysis
@@ -11,4 +12,8 @@ subcategory: Observability
 matrix:
   status: skip
 ---
-Robusta is an open-source observability platform designed to provide real-time troubleshooting and automated remediation for Kubernetes clusters. It proactively detects issues by monitoring metrics, logs, and events, and sends actionable alerts to communication platforms like Slack, Microsoft Teams, and more. By providing contextualized information and automated actions, Robusta helps DevOps and SRE teams quickly diagnose and resolve problems, reducing downtime and improving application performance.
+Robusta is an open-source Kubernetes alerting and troubleshooting toolkit that wraps Prometheus alerts with context, automated diagnostics, and rich notifications. It ships with its own kube-prometheus-stack distribution so that a single Helm install brings up Prometheus, Alertmanager, Grafana, and the Robusta relay in a pre-integrated configuration.
+
+The core component is a Python-based engine that consumes Alertmanager webhooks and Kubernetes events, then runs playbooks in response. A playbook is a small piece of code that can, for example, fetch pod logs, describe the offending resource, run `kubectl top`, pull a Java thread dump, generate a flame graph, or compare the current deployment to its previous revision, then attach the result directly to the Slack, Microsoft Teams, PagerDuty, or ServiceNow message. The built-in playbook library covers common Kubernetes failure modes — CrashLoopBackOff, OOMKilled, ImagePullBackOff, failing liveness probes, noisy neighbors — so operators see the root-cause information inline with the alert instead of context-switching to kubectl.
+
+Robusta also exposes a SaaS UI called Robusta Platform that aggregates data across clusters, provides timelines and change tracking, and in its HolmesGPT component uses an LLM agent to reason over cluster state during incident investigation. The engine itself is MIT licensed on GitHub.

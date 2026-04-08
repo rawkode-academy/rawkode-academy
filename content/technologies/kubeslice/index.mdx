@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubeslice.io'
 source: 'https://github.com/kubeslice/kubeslice'
+documentation: 'https://kubeslice.io/documentation/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -28,6 +29,8 @@ community:
 matrix:
   status: skip
 ---
-KubeSlice is a CNCF sandbox project.
+KubeSlice is a Kubernetes multi-cluster networking project, originally built by Avesha and donated to the CNCF as a sandbox project. It stitches namespaces across clusters into a logical "slice" with its own overlay network, flat IP space, and isolation boundary, letting pods in different clusters talk as if they sat in the same cluster.
 
-KubeSlice is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A slice is defined by a SliceConfig custom resource managed by the KubeSlice Controller, which runs on a dedicated Kubernetes cluster and drives workers in every participating data-plane cluster. Each worker runs slice operators that program an overlay built on WireGuard tunnels between slice gateway pods, plus an Istio-based east-west service export and import mechanism for discovery. Namespace isolation, network policies, and per-slice QoS are enforced by the operators so that tenants sharing a cluster cannot see each other's traffic.
+
+In the CNCF landscape KubeSlice overlaps with Submariner, Cilium Cluster Mesh, and Liqo, but differs by framing multi-cluster connectivity as tenanted slices rather than raw pod-to-pod routing, which fits multi-tenant platforms and 5G edge deployments where each tenant needs its own network view across clouds.

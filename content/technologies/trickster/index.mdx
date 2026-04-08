@@ -5,6 +5,7 @@ logos:
   stacked: true
 website: 'https://trickstercache.org'
 source: 'https://github.com/trickstercache/trickster'
+documentation: 'https://trickstercache.org/'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -16,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Trickster is a CNCF sandbox project.
+Trickster is an HTTP reverse proxy cache built primarily to accelerate time-series dashboards. It sits in front of backends like Prometheus, InfluxDB, ClickHouse, and Grafana's SimpleJSON, and caches query results so that repeated dashboard loads do not re-run the same range queries against the TSDB.
 
-Trickster is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Its main trick is Delta Proxy Caching. When a dashboard refreshes a range query, Trickster recognizes that most of the requested window overlaps data it already has, and only fetches the delta from the upstream, merging it with the cached series before returning the response. It also normalizes time ranges and step intervals so that small differences in the request do not defeat the cache.
+
+Trickster started at Comcast and is now a CNCF sandbox project. It supports multiple cache backends (in-memory, bbolt, Redis, filesystem) and can also act as a general HTTP reverse proxy with a rules-based routing engine.

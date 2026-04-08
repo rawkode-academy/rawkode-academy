@@ -35,6 +35,8 @@ community:
 matrix:
   status: skip
 ---
-k8gb is a CNCF sandbox project.
+k8gb is a global server load balancer for Kubernetes that uses DNS — not BGP, not an overlay — to steer traffic between multiple clusters in different regions. It is designed to be cheap, multi-cluster native, and have zero dependence on a commercial GSLB appliance like F5 BIG-IP GTM or a cloud-vendor product like Route 53 traffic policies.
 
-k8gb is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture is deliberately small. Each cluster runs a k8gb controller alongside CoreDNS. You annotate an Ingress with a `k8gb.io/strategy` (round-robin, failover, geoip, weighted) and the controller generates DNS records in an edge DNS zone — Infoblox, Route 53, NS1, ns1, CoreDNS itself — that resolve to the correct cluster's load balancer IPs. Health checks are driven by each cluster's own Kubernetes liveness data: if an Ingress goes unhealthy in one cluster, the local controller removes its IP from the shared DNS zone, and traffic shifts to the surviving cluster without any central brain. Because state lives in DNS, there is no cross-cluster control plane to keep in sync.
+
+It fits naturally with Cilium or Submariner for L4/L7 cluster connectivity, and slots into the "active-active across regions" gap that many teams have been filling with spreadsheets and manual Route 53 weights. CNCF sandbox, Apache-2.0.

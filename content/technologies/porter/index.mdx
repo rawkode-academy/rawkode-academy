@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://porter.sh/'
+documentation: 'https://porter.sh/docs/'
 source: 'https://github.com/getporter/porter'
 license: Apache-2.0
 status: stable
@@ -23,6 +24,8 @@ community:
 matrix:
   status: skip
 ---
-Porter is a CNCF sandbox project.
+Porter is a tool for packaging applications together with all the scripts, tools, and credentials they need to deploy, as a single distributable artifact called a bundle. It is the reference implementation of the CNAB (Cloud Native Application Bundle) specification and has been a CNCF sandbox project since 2020.
 
-Porter is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A Porter bundle is built from a `porter.yaml` that declares parameters, credentials, outputs, and a sequence of install/upgrade/uninstall actions implemented by mixins. Mixins wrap common tools — Helm, Terraform, kubectl, the AWS/Azure/GCP CLIs, Docker, Exec — so that a single bundle can, for example, provision an AWS RDS instance with Terraform, install a Helm chart against it, and then run a database migration with a shell script, all in one atomic operation. The bundle itself is an OCI image that can be pushed to any OCI registry alongside the invocation image that contains the mixins and logic.
+
+Porter tracks installation state (parameters supplied, outputs produced, last action taken) so that `porter upgrade` and `porter uninstall` know exactly what to act on, which gives CNAB-style lifecycle management to stacks that would otherwise be a pile of README steps. It is primarily used by platform teams who need to ship opinionated, cross-tool deployment bundles to internal consumers without forcing them to install and configure the underlying tools themselves.

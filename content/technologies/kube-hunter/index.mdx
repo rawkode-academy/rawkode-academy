@@ -8,3 +8,8 @@ status: stable
 category: Provisioning
 subcategory: Security & Compliance
 ---
+kube-hunter is a penetration-testing tool for Kubernetes, also from Aqua Security. Where kube-bench audits static configuration, kube-hunter actively probes a cluster from the network to find exploitable weaknesses — exposed kubelets, open etcd, unauthenticated API server endpoints, leaked service account tokens, insecure dashboard installs, and so on.
+
+It can run in three modes: remote (from outside the cluster, pointed at an IP or CIDR), internal (from inside a pod, simulating a compromised workload), and network (scanning a whole subnet for Kubernetes components). Each "hunter" module is a Python plugin that looks for one class of issue and reports a CVE or vulnerability ID with severity. An "active hunting" flag enables checks that go beyond detection and actually attempt exploitation — e.g., running a command through an exposed kubelet — which is why it is normally only pointed at test clusters.
+
+It is the tool you reach for when you want to answer "what can an attacker see and do if they land on a pod in this cluster?" rather than "is this cluster configured correctly?" Aqua now says kube-hunter is not under active development and recommends Trivy for new Kubernetes scanning work; the project still works, but new coverage has largely moved there and to commercial scanners.
