@@ -250,31 +250,6 @@ const seoDescription = (() => {
 	return parts.join(". ");
 })();
 
-function getIntroParagraph(body?: string): string | null {
-	if (!body) return null;
-	const paragraph = body
-		.split(/\n\s*\n/)
-		.map((chunk) => chunk.trim())
-		.find((chunk) => chunk.length > 0 && !chunk.startsWith("#") && !chunk.startsWith("<"));
-
-	if (!paragraph) return null;
-
-	return paragraph
-		.replace(/!\[[^\]]*\]\([^)]+\)/g, "")
-		.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-		.replace(/`([^`]+)`/g, "$1")
-		.replace(/\*\*([^*]+)\*\*/g, "$1")
-		.replace(/\*([^*]+)\*/g, "$1")
-		.replace(/\s+/g, " ")
-		.trim();
-}
-
-function getLeadSentence(text?: string | null): string | null {
-	if (!text) return null;
-	const match = text.match(/.+?[.!?](?=\s|$)/);
-	return (match?.[0] ?? text).trim();
-}
-
 // Page is "thin" if it has no MDX body content AND no associated videos.
 // noindex these so Google doesn't classify the site as low-quality.
 const noindex = !hasContent && videoCount === 0;
@@ -341,35 +316,6 @@ const cncfStatusColors: Record<string, string> = {
 		"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-700",
 };
 
-const introParagraph = getIntroParagraph(technologyEntry?.body);
-const heroDek = getLeadSentence(introParagraph) ?? technology.matrix?.why ?? seoDescription;
-const heroOverline = hasContent ? "Technology Field Guide" : "Technology Overview";
-const matrixConfidenceLabel = technology.matrix?.confidence
-	? technology.matrix.confidence === "deep-experience"
-		? "Deep XP"
-		: technology.matrix.confidence === "some-experience"
-			? "Some XP"
-			: "Gut Feel"
-	: null;
-
-const snapshotStats: { label: string; value: string }[] = [];
-if (statusLabel) snapshotStats.push({ label: "Matrix", value: statusLabel });
-if (technology.matrix?.firstUsed) {
-	snapshotStats.push({ label: "First Used", value: technology.matrix.firstUsed });
-}
-if (technology.matrix?.lastUsed) {
-	snapshotStats.push({ label: "Last Used", value: technology.matrix.lastUsed });
-}
-if (matrixConfidenceLabel) {
-	snapshotStats.push({ label: "Confidence", value: matrixConfidenceLabel });
-}
-if (videoCount > 0) {
-	snapshotStats.push({
-		label: "Videos",
-		value: `${videoCount} ${videoCount === 1 ? "episode" : "episodes"}`,
-	});
-}
-
 // Check if we have community links to display
 const hasCommunityLinks =
 	technology.community &&
@@ -401,28 +347,19 @@ const hasCommunityLinks =
 		category={categoryLabel}
 	/>
 	<div class="technology-stage page-px section-py section-pt-0">
-		<section class="technology-hero-shell">
-			<div class="technology-hero">
-				<div class="technology-hero-grid">
-					<div class="technology-hero-copy">
-						<div class="mb-6">
-							<Breadcrumb elements={[
-								{ title: 'Home', link: '/' },
-								{ title: 'Technologies', link: '/technology' },
-								{ title: technology.name, link: `/technology/${technology.id}` },
-							]} />
-						</div>
+		<section class="w-full">
+			<div class="glass-panel technology-header-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+				<div class="mb-6">
+					<Breadcrumb elements={[
+						{ title: 'Home', link: '/' },
+						{ title: 'Technologies', link: '/technology' },
+						{ title: technology.name, link: `/technology/${technology.id}` },
+					]} />
+				</div>
 
-						<div class="technology-hero-topline">
-							<span class="technology-overline">{heroOverline}</span>
-							{hasContent && (
-								<a href="#complete-guide" class="technology-jump-link">
-									Read the guide
-								</a>
-							)}
-						</div>
-
-						<div class="flex flex-wrap items-center gap-2 mb-4">
+				<div class="technology-header-grid">
+					<div class="technology-header-copy">
+						<div class="flex flex-wrap items-center gap-2 mb-3">
 							{technology.matrix && (
 								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
 									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
@@ -456,8 +393,10 @@ const hasCommunityLinks =
 							)}
 						</div>
 
+						<p class="technology-kicker">
+							{hasContent ? "Technology Guide" : "Technology Overview"}
+						</p>
 						<h1 class="technology-title">{technology.name}</h1>
-						<p class="technology-dek">{heroDek}</p>
 
 						<div class="flex flex-wrap gap-3 items-center">
 							{technology.website && (
@@ -499,148 +438,108 @@ const hasCommunityLinks =
 									Source Code
 								</a>
 							)}
+							{hasContent && (
+								<a href="#complete-guide" class="technology-guide-link">
+									Read the guide
+								</a>
+							)}
 						</div>
 
-						<div class="technology-meta-grid">
-							{technology.license && (
-								<div class="technology-meta-card">
-									<span class="technology-meta-label">License</span>
-									<span class="technology-meta-value">{technology.license}</span>
-								</div>
-							)}
-							<div class="technology-meta-card">
-								<span class="technology-meta-label">Focus</span>
-								<span class="technology-meta-value">{categoryLabel}</span>
-							</div>
-							{technology.cncf?.status && (
-								<div class="technology-meta-card">
-									<span class="technology-meta-label">CNCF</span>
-									<span class="technology-meta-value">
-										{cncfStatusLabels[technology.cncf.status]}
-									</span>
-								</div>
-							)}
-							{videoCount > 0 && (
-								<div class="technology-meta-card">
-									<span class="technology-meta-label">Coverage</span>
-									<span class="technology-meta-value">
-										{videoCount} {videoCount === 1 ? "video" : "videos"}
-									</span>
-								</div>
-							)}
-						</div>
+						{technology.license && (
+							<p class="mt-4 text-sm text-muted">
+								License: <span class="font-medium text-secondary-content">{technology.license}</span>
+							</p>
+						)}
 					</div>
 
-					<aside class="technology-hero-aside">
-						<div class="technology-logo-stage">
-							<div class="technology-logo-glow"></div>
-							<div class="glass-media-brand technology-logo-frame">
-								<img
-									src={technology.logo ? technology.logo : placeholderLogo}
-									alt={`${technology.name} Logo`}
-									class="w-full h-full object-contain drop-shadow-lg"
-									onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
-								/>
-							</div>
+					<div class="technology-logo-shell">
+						<div class="glass-media-brand technology-logo-card">
+							<img
+								src={technology.logo ? technology.logo : placeholderLogo}
+								alt={`${technology.name} Logo`}
+								class="w-full h-full object-contain drop-shadow-lg"
+								onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+							/>
 						</div>
-
-						{snapshotStats.length > 0 && (
-							<div class="technology-snapshot-panel">
-								<div class="technology-snapshot-head">
-									<span class="technology-overline">Snapshot</span>
-									<p class="technology-snapshot-title">What stands out immediately</p>
-								</div>
-								<div class="technology-stat-grid">
-									{snapshotStats.map((item) => (
-										<div class="technology-stat">
-											<span class="technology-stat-label">{item.label}</span>
-											<span class="technology-stat-value">{item.value}</span>
-										</div>
-									))}
-								</div>
-							</div>
-						)}
-					</aside>
+					</div>
 				</div>
 			</div>
 		</section>
 
 		{hasContent && Content && (
-			<section id="complete-guide" class="guide-section">
-				<div class="guide-layout">
-					<aside class="guide-sidebar">
-						{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
-							<div class="guide-sidebar-block guide-opinion-block">
-								<div class="guide-opinion-head">
-									{technology.matrix.makesMeFeel && (
-										<span class="guide-opinion-emoji">{technology.matrix.makesMeFeel}</span>
-									)}
-									<div>
-										<p class="guide-sidebar-label">Rawkode's Take</p>
-										<h2 class="guide-sidebar-title">Opinionated signal, not brochure copy</h2>
-									</div>
-								</div>
-								{technology.matrix.why && (
-									<p class="guide-sidebar-copy">{technology.matrix.why}</p>
-								)}
-								{technology.matrix.spicyTake && (
-									<div class="guide-spicy-callout">
-										<span class="text-lg flex-shrink-0">🌶️</span>
-										<p>{technology.matrix.spicyTake}</p>
-									</div>
-								)}
-							</div>
-						)}
-
-						<div class="guide-sidebar-block">
-							<p class="guide-sidebar-label">At a glance</p>
-							<h2 class="guide-sidebar-title">What to know before you bet on {technology.name}</h2>
-							<div class="guide-fact-list">
-								<div class="guide-fact-row">
-									<span>Category</span>
-									<strong>{categoryLabel}</strong>
-								</div>
-								{statusLabel && (
-									<div class="guide-fact-row">
-										<span>Matrix</span>
-										<strong>{statusLabel}</strong>
-									</div>
-								)}
-								{technology.cncf?.status && (
-									<div class="guide-fact-row">
-										<span>CNCF</span>
-										<strong>{cncfStatusLabels[technology.cncf.status]}</strong>
-									</div>
-								)}
-								{matrixConfidenceLabel && (
-									<div class="guide-fact-row">
-										<span>Confidence</span>
-										<strong>{matrixConfidenceLabel}</strong>
-									</div>
-								)}
-								{trajectoryIcon && technology.matrix?.trajectory && (
-									<div class="guide-fact-row">
-										<span>Trajectory</span>
-										<strong>{trajectoryIcon} {technology.matrix.trajectory}</strong>
-									</div>
-								)}
-							</div>
-						</div>
-					</aside>
-
-					<div class="guide-story">
-						<div class="guide-story-head">
-							<p class="guide-sidebar-label">Complete Guide</p>
-							<h2 class="guide-story-title">
-								Architecture, trade-offs, and where {technology.name} fits
-							</h2>
-							<p class="guide-story-copy">
-								The useful part goes first: real context, concrete implementation details, and enough signal to decide whether this deserves your time.
-							</p>
+			<section id="complete-guide" class="w-full">
+				<div class="max-w-5xl mx-auto">
+					<div class="guide-panel rounded-3xl p-6 md:p-10">
+						<div class="mb-8">
+							<p class="technology-kicker">Field Guide</p>
+							<h2 class="guide-title">Complete Guide</h2>
 						</div>
 						<article class="guide-prose prose prose-lg dark:prose-invert max-w-none">
 							<Content />
 						</article>
+					</div>
+				</div>
+			</section>
+		)}
+
+		{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
+			<section class="w-full">
+				<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+					<div class="flex flex-col md:flex-row gap-6">
+						<div class="flex-1">
+							<div class="flex items-center gap-3 mb-4">
+								{technology.matrix.makesMeFeel && (
+									<span class="text-4xl">{technology.matrix.makesMeFeel}</span>
+								)}
+								<div>
+									<h2 class="text-xl font-bold text-primary-content">Rawkode's Take</h2>
+									<p class="text-sm text-muted">Personal opinion, not gospel</p>
+								</div>
+							</div>
+							{technology.matrix.why && (
+								<p class="text-secondary-content leading-relaxed mb-4">
+									{technology.matrix.why}
+								</p>
+							)}
+							{technology.matrix.spicyTake && (
+								<div class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl">
+									<span class="text-lg flex-shrink-0">🌶️</span>
+									<p class="text-sm italic text-red-800 dark:text-red-200">
+										{technology.matrix.spicyTake}
+									</p>
+								</div>
+							)}
+						</div>
+
+						<div class="flex flex-wrap md:flex-col gap-3 md:gap-2 md:min-w-[140px]">
+							{technology.matrix.firstUsed && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">First Used</span>
+									<span class="stat-pill-value">{technology.matrix.firstUsed}</span>
+								</div>
+							)}
+							{technology.matrix.lastUsed && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">Last Used</span>
+									<span class="stat-pill-value">{technology.matrix.lastUsed}</span>
+								</div>
+							)}
+							{technology.matrix.confidence && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">Confidence</span>
+									<span class="stat-pill-value">
+										{technology.matrix.confidence === 'deep-experience' ? 'Deep XP' :
+										 technology.matrix.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
+									</span>
+								</div>
+							)}
+							{(technology.videos?.length ?? 0) > 0 && (
+								<div class="stat-pill">
+									<span class="stat-pill-label">Videos</span>
+									<span class="stat-pill-value">{technology.videos?.length ?? 0}</span>
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 			</section>
@@ -986,107 +885,41 @@ const hasCommunityLinks =
 		gap: clamp(2rem, 4vw, 3.5rem);
 	}
 
-	.technology-hero-shell,
-	.guide-section {
-		width: 100%;
-	}
-
-	.technology-hero {
+	.technology-header-panel {
 		position: relative;
 		overflow: hidden;
-		padding: clamp(1.5rem, 3vw, 3rem);
-		border-radius: 2rem;
-		border: 1px solid rgba(13, 148, 136, 0.14);
-		background:
-			radial-gradient(circle at top right, rgba(45, 212, 191, 0.18), transparent 28%),
-			radial-gradient(circle at bottom left, rgba(20, 184, 166, 0.12), transparent 32%),
-			linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(245, 255, 252, 0.92) 46%, rgba(240, 253, 250, 0.98));
-		box-shadow:
-			0 20px 60px rgba(15, 23, 42, 0.08),
-			inset 0 1px 0 rgba(255, 255, 255, 0.85);
 	}
 
-	.technology-hero::before {
+	.technology-header-panel::before {
 		content: "";
 		position: absolute;
-		inset: auto -4rem -8rem auto;
-		width: 18rem;
-		height: 18rem;
+		inset: auto -5rem -7rem auto;
+		width: 16rem;
+		height: 16rem;
 		border-radius: 9999px;
-		background: radial-gradient(circle, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0));
+		background: radial-gradient(circle, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0));
 		pointer-events: none;
 	}
 
-	.technology-hero::after {
-		content: "";
-		position: absolute;
-		inset: 1.25rem;
-		border-radius: 1.5rem;
-		border: 1px solid rgba(255, 255, 255, 0.55);
-		pointer-events: none;
-	}
-
-	.technology-hero-grid {
+	.technology-header-grid {
 		position: relative;
 		display: grid;
 		gap: clamp(1.5rem, 3vw, 3rem);
-		align-items: start;
+		align-items: center;
 	}
 
-	.technology-hero-copy {
+	.technology-header-copy {
 		position: relative;
 		z-index: 1;
 	}
 
-	.technology-hero-topline {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
-		margin-bottom: 1rem;
-	}
-
-	.technology-overline {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
+	.technology-kicker {
+		margin: 0 0 0.85rem;
 		font-size: 0.72rem;
 		font-weight: 700;
+		letter-spacing: 0.22em;
 		text-transform: uppercase;
-		letter-spacing: 0.24em;
 		color: rgb(13, 148, 136);
-	}
-
-	.technology-overline::before {
-		content: "";
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 9999px;
-		background: currentColor;
-	}
-
-	.technology-jump-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.45rem;
-		padding: 0.5rem 0.8rem;
-		border-radius: 9999px;
-		font-size: 0.84rem;
-		font-weight: 600;
-		color: rgb(17, 94, 89);
-		background: rgba(255, 255, 255, 0.7);
-		border: 1px solid rgba(15, 118, 110, 0.12);
-		transition:
-			transform 180ms ease,
-			border-color 180ms ease,
-			background 180ms ease;
-	}
-
-	.technology-jump-link:hover {
-		transform: translateY(-1px);
-		background: rgba(255, 255, 255, 0.92);
-		border-color: rgba(15, 118, 110, 0.3);
 	}
 
 	.technology-taxonomy-pill {
@@ -1102,269 +935,73 @@ const hasCommunityLinks =
 	}
 
 	.technology-title {
-		font-size: clamp(3rem, 6vw, 5.5rem);
+		margin: 0 0 1.35rem;
+		font-size: clamp(2.75rem, 6vw, 5rem);
 		line-height: 0.96;
 		font-weight: 900;
 		letter-spacing: -0.05em;
 		color: rgb(15, 23, 42);
-		max-width: 10ch;
-		margin: 0 0 1rem;
 		text-wrap: balance;
 	}
 
-	.technology-dek {
-		max-width: 56rem;
-		margin: 0 0 1.75rem;
-		font-size: clamp(1.08rem, 2vw, 1.42rem);
-		line-height: 1.75;
-		color: rgba(15, 23, 42, 0.82);
-		text-wrap: pretty;
-	}
-
-	.technology-meta-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-		gap: 0.85rem;
-		margin-top: 1.75rem;
-	}
-
-	.technology-meta-card,
-	.technology-stat,
-	.guide-sidebar-block,
-	.technology-signal-panel {
-		border: 1px solid rgba(148, 163, 184, 0.18);
-		background: rgba(255, 255, 255, 0.72);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-	}
-
-	.technology-meta-card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		padding: 0.95rem 1rem;
-		border-radius: 1.1rem;
-	}
-
-	.technology-meta-label,
-	.technology-stat-label,
-	.guide-sidebar-label {
-		font-size: 0.7rem;
+	.technology-guide-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.72rem 1rem;
+		border-radius: 0.9rem;
+		font-size: 0.95rem;
 		font-weight: 700;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-		color: rgb(100, 116, 139);
-	}
-
-	.technology-meta-value,
-	.technology-stat-value {
-		font-size: 1rem;
-		font-weight: 700;
-		line-height: 1.3;
 		color: rgb(15, 23, 42);
+		background: rgba(255, 255, 255, 0.7);
+		border: 1px solid rgba(148, 163, 184, 0.2);
+		transition:
+			transform 180ms ease,
+			border-color 180ms ease,
+			background 180ms ease;
 	}
 
-	.technology-hero-aside {
-		position: relative;
-		z-index: 1;
-		display: grid;
-		gap: 1rem;
-		align-content: start;
+	.technology-guide-link:hover {
+		transform: translateY(-1px);
+		background: rgba(255, 255, 255, 0.94);
+		border-color: rgba(13, 148, 136, 0.24);
 	}
 
-	.technology-logo-stage {
-		position: relative;
+	.technology-logo-shell {
 		display: grid;
 		place-items: center;
-		min-height: 17rem;
 	}
 
-	.technology-logo-glow {
-		position: absolute;
-		width: 14rem;
-		height: 14rem;
-		border-radius: 9999px;
-		background:
-			radial-gradient(circle, rgba(20, 184, 166, 0.32), rgba(20, 184, 166, 0.02) 65%, transparent 75%);
-		filter: blur(6px);
-	}
-
-	.technology-logo-frame {
-		position: relative;
-		width: clamp(9rem, 26vw, 14rem);
-		height: clamp(9rem, 26vw, 14rem);
-		padding: 1.75rem;
+	.technology-logo-card {
+		width: clamp(9rem, 22vw, 13rem);
+		height: clamp(9rem, 22vw, 13rem);
+		padding: 1.5rem;
 		border-radius: 2rem;
 	}
 
-	.technology-snapshot-panel {
-		padding: 1.15rem;
-		border-radius: 1.5rem;
-		border: 1px solid rgba(148, 163, 184, 0.18);
-		background: rgba(255, 255, 255, 0.78);
-	}
-
-	.technology-snapshot-head {
-		margin-bottom: 1rem;
-	}
-
-	.technology-snapshot-title {
-		margin-top: 0.45rem;
-		font-size: 1.05rem;
-		font-weight: 700;
-		color: rgb(15, 23, 42);
-	}
-
-	.technology-stat-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.75rem;
-	}
-
-	.technology-stat {
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-		padding: 0.95rem;
-		border-radius: 1rem;
-	}
-
-	.guide-layout {
-		display: grid;
-		gap: clamp(1.5rem, 3vw, 3rem);
-		align-items: start;
-	}
-
-	.guide-sidebar {
-		display: grid;
-		gap: 1rem;
-	}
-
-	.guide-sidebar-block {
-		padding: 1.3rem;
-		border-radius: 1.45rem;
-	}
-
-	.guide-opinion-head {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.85rem;
-		margin-bottom: 1rem;
-	}
-
-	.guide-opinion-emoji {
-		font-size: 2rem;
-		line-height: 1;
-	}
-
-	.guide-sidebar-title {
-		margin-top: 0.45rem;
-		font-size: 1.2rem;
-		line-height: 1.25;
-		font-weight: 800;
-		color: rgb(15, 23, 42);
-		text-wrap: balance;
-	}
-
-	.guide-sidebar-copy {
-		font-size: 1rem;
-		line-height: 1.75;
-		color: rgba(15, 23, 42, 0.8);
-	}
-
-	.guide-spicy-callout {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.75rem;
-		margin-top: 1rem;
-		padding: 0.95rem 1rem;
-		border-radius: 1rem;
-		border: 1px solid rgba(248, 113, 113, 0.24);
-		background: rgba(254, 242, 242, 0.92);
-		color: rgb(153, 27, 27);
-		font-size: 0.96rem;
-		font-style: italic;
-		line-height: 1.6;
-	}
-
-	.guide-fact-list {
-		display: grid;
-		gap: 0.75rem;
-		margin-top: 1rem;
-	}
-
-	.guide-fact-row {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 1rem;
-		padding-top: 0.75rem;
-		border-top: 1px solid rgba(148, 163, 184, 0.18);
-		font-size: 0.98rem;
-		color: rgb(71, 85, 105);
-	}
-
-	.guide-fact-row strong {
-		text-align: right;
-		color: rgb(15, 23, 42);
-	}
-
-	.guide-story {
-		position: relative;
-		padding: clamp(1.4rem, 3vw, 2.5rem);
-		border-radius: 2rem;
+	.guide-panel {
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.78)),
-			radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 30%);
+			linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9)),
+			radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 32%);
 		box-shadow:
-			0 20px 56px rgba(15, 23, 42, 0.06),
-			inset 0 1px 0 rgba(255, 255, 255, 0.8);
+			0 18px 44px rgba(15, 23, 42, 0.06),
+			inset 0 1px 0 rgba(255, 255, 255, 0.82);
 	}
 
-	.guide-story::before {
-		content: "";
-		position: absolute;
-		top: 1.5rem;
-		bottom: 1.5rem;
-		left: clamp(1rem, 2vw, 1.4rem);
-		width: 1px;
-		background: linear-gradient(180deg, rgba(13, 148, 136, 0), rgba(13, 148, 136, 0.28), rgba(13, 148, 136, 0));
-	}
-
-	.guide-story-head {
-		position: relative;
-		padding-left: clamp(1rem, 2vw, 1.6rem);
-		margin-bottom: 1.8rem;
-	}
-
-	.guide-story-title {
-		margin-top: 0.45rem;
-		font-size: clamp(2rem, 4vw, 3.35rem);
-		line-height: 0.98;
+	.guide-title {
+		margin: 0.45rem 0 0;
+		font-size: clamp(2rem, 4vw, 3rem);
+		line-height: 1;
 		font-weight: 900;
 		letter-spacing: -0.04em;
 		color: rgb(15, 23, 42);
-		max-width: 11ch;
-		text-wrap: balance;
-	}
-
-	.guide-story-copy {
-		max-width: 46rem;
-		margin-top: 1rem;
-		font-size: 1.02rem;
-		line-height: 1.75;
-		color: rgba(15, 23, 42, 0.72);
-	}
-
-	.guide-prose {
-		position: relative;
-		padding-left: clamp(1rem, 2vw, 1.6rem);
 	}
 
 	.guide-prose :global(p:first-of-type) {
-		font-size: clamp(1.12rem, 1.55vw, 1.34rem);
+		font-size: clamp(1.08rem, 1.5vw, 1.28rem);
 		line-height: 1.82;
-		color: rgba(15, 23, 42, 0.84);
+		color: rgba(15, 23, 42, 0.82);
 	}
 
 	.guide-prose :global(h2),
@@ -1383,6 +1020,9 @@ const hasCommunityLinks =
 	.technology-signal-panel {
 		padding: 1.4rem;
 		border-radius: 1.6rem;
+		border: 1px solid rgba(148, 163, 184, 0.18);
+		background: rgba(255, 255, 255, 0.72);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 	}
 
 	.technology-signal-icon {
@@ -1403,17 +1043,8 @@ const hasCommunityLinks =
 	}
 
 	@media (min-width: 960px) {
-		.technology-hero-grid {
-			grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.8fr);
-		}
-
-		.guide-layout {
-			grid-template-columns: minmax(18rem, 0.76fr) minmax(0, 1.34fr);
-		}
-
-		.guide-sidebar {
-			position: sticky;
-			top: 6rem;
+		.technology-header-grid {
+			grid-template-columns: minmax(0, 1.4fr) auto;
 		}
 	}
 
@@ -1421,96 +1052,37 @@ const hasCommunityLinks =
 		.technology-title {
 			max-width: none;
 		}
-
-		.guide-story-title {
-			max-width: none;
-		}
 	}
 
 	@media (max-width: 720px) {
-		.technology-hero {
-			padding: 1.25rem;
-			border-radius: 1.6rem;
-		}
-
-		.technology-stat-grid,
-		.technology-meta-grid {
-			grid-template-columns: 1fr;
-		}
-
-		.guide-story {
-			padding: 1.25rem;
-			border-radius: 1.4rem;
-		}
-
-		.guide-story::before {
-			left: 0.8rem;
-			top: 1rem;
-			bottom: 1rem;
-		}
-
-		.guide-story-head,
-		.guide-prose {
-			padding-left: 1rem;
+		.technology-guide-link {
+			width: 100%;
 		}
 	}
 
-	:global(.dark) .technology-hero {
-		border-color: rgba(45, 212, 191, 0.2);
-		background:
-			radial-gradient(circle at top right, rgba(45, 212, 191, 0.18), transparent 28%),
-			radial-gradient(circle at bottom left, rgba(20, 184, 166, 0.16), transparent 32%),
-			linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(10, 18, 33, 0.94) 46%, rgba(10, 24, 24, 0.96));
-		box-shadow:
-			0 24px 72px rgba(2, 6, 23, 0.45),
-			inset 0 1px 0 rgba(255, 255, 255, 0.04);
+	:global(.dark) .technology-taxonomy-pill,
+	:global(.dark) .technology-guide-link,
+	:global(.dark) .guide-panel,
+	:global(.dark) .technology-signal-panel {
+		background: rgba(15, 23, 42, 0.72);
+		border-color: rgba(148, 163, 184, 0.16);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 	}
 
 	:global(.dark) .technology-title,
-	:global(.dark) .technology-dek,
-	:global(.dark) .technology-meta-value,
-	:global(.dark) .technology-stat-value,
-	:global(.dark) .technology-snapshot-title,
-	:global(.dark) .guide-sidebar-title,
-	:global(.dark) .guide-story-title,
-	:global(.dark) .guide-fact-row strong,
+	:global(.dark) .guide-title,
 	:global(.dark) .guide-prose :global(h2),
 	:global(.dark) .guide-prose :global(h3) {
 		color: rgb(241, 245, 249);
 	}
 
-	:global(.dark) .technology-taxonomy-pill,
-	:global(.dark) .technology-meta-card,
-	:global(.dark) .technology-stat,
-	:global(.dark) .guide-sidebar-block,
-	:global(.dark) .technology-signal-panel,
-	:global(.dark) .technology-snapshot-panel,
-	:global(.dark) .guide-story {
-		background: rgba(15, 23, 42, 0.7);
-		border-color: rgba(148, 163, 184, 0.16);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+	:global(.dark) .technology-kicker {
+		color: rgb(94, 234, 212);
 	}
 
-	:global(.dark) .technology-jump-link {
-		color: rgb(153, 246, 228);
-		background: rgba(15, 23, 42, 0.62);
-		border-color: rgba(45, 212, 191, 0.18);
-	}
-
-	:global(.dark) .technology-meta-label,
-	:global(.dark) .technology-stat-label,
-	:global(.dark) .guide-sidebar-label,
-	:global(.dark) .guide-fact-row,
-	:global(.dark) .guide-story-copy,
-	:global(.dark) .guide-sidebar-copy,
+	:global(.dark) .technology-guide-link,
 	:global(.dark) .guide-prose :global(p),
-	:global(.dark) .technology-dek {
-		color: rgba(226, 232, 240, 0.78);
-	}
-
-	:global(.dark) .guide-spicy-callout {
-		background: rgba(127, 29, 29, 0.34);
-		border-color: rgba(248, 113, 113, 0.26);
-		color: rgb(254, 202, 202);
+	:global(.dark) .guide-prose :global(p:first-of-type) {
+		color: rgba(226, 232, 240, 0.82);
 	}
 </style>
