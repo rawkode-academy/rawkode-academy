@@ -12,13 +12,13 @@
 	"devDependencies": {
 		"@cloudflare/workers-types": "4.20250525.0",
 		"@types/bun": "latest",
-		"wrangler": "4.16.1"
+		"wrangler": "4.59.1"
 	},
 	"peerDependencies": {
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"hono": "4.7.10",
+		"hono": "4.12.12",
 		"zod": "^3.25.28"
 	}
 }
