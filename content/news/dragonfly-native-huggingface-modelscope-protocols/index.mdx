@@ -1,6 +1,6 @@
 ---
-title: "Dragonfly Adds Native Hugging Face and ModelScope Protocols, Cuts Model Pull Traffic 99%"
-description: "Dragonfly's new hf:// and modelscope:// URL schemes let GPU clusters fetch AI models via P2P with built-in auth, recursive fetches, and revision pinning. Origin traffic drops from 26 TB to 130 GB across 200 nodes."
+title: "Dragonfly Adds Native Hugging Face and ModelScope Protocols, Cuts Model Pull Origin Traffic 99.5%"
+description: "Dragonfly's new hf:// and modelscope:// URL schemes let GPU clusters fetch AI models via P2P with built-in auth, recursive fetches, and revision pinning. Origin traffic drops from 26 TB to ~130 GB across 200 nodes."
 publishedAt: 2026-04-08
 authors:
   - rawkode
@@ -9,7 +9,7 @@ technologies:
   - kubernetes
 ---
 
-CNCF's Graduated P2P file distribution project Dragonfly now speaks Hugging Face and ModelScope natively. Two backends merged into the dfget client add `hf://` and `modelscope://` URL schemes that handle authentication, revision pinning, and recursive fetches. The CNCF blog republished the announcement on Monday, putting it in front of platform teams who'd missed the original drop on d7y.io.
+CNCF's Graduated P2P file distribution project Dragonfly now speaks Hugging Face and ModelScope natively. Two backends merged into the dfget client add `hf://` and `modelscope://` URL schemes that handle authentication, revision pinning, and recursive fetches. The original Dragonfly post was published on d7y.io on March 11, 2026, and CNCF published a Kubestronaut post on April 6, 2026.
 
 The math is the headline. Pulling a 130 GB model across 200 GPU nodes used to mean 26 TB of egress hitting the Hugging Face origin. With Dragonfly's seed peer in front, that drops to roughly 130 GB. A 99.5% reduction.
 
@@ -18,10 +18,10 @@ The math is the headline. Pulling a 130 GB model across 200 GPU nodes used to me
 The new commands are about as simple as you'd hope:
 
 ```sh
-dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O /models/
+dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O /models/DeepSeek-R1/model.safetensors
 dfget hf://owner/repo -O ./repo/ -r
-dfget hf://owner/private-model/weights.bin --hf-token=hf_xxx
-dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors --hf-revision v2.0
+dfget hf://owner/private-model/weights.bin -O /models/private/weights.bin --hf-token=hf_xxx
+dfget hf://deepseek-ai/DeepSeek-R1/model.safetensors -O /models/DeepSeek-R1/model.safetensors --hf-revision v2.0
 ```
 
 Same pattern for ModelScope with `--ms-token` and `--ms-revision`. You don't need to mirror the hub, manually shard files, or build a custom CSI plugin to get models onto nodes. dfget understands the URL scheme, hits the origin once, and seeds peers as soon as the first piece lands.
@@ -32,7 +32,7 @@ That last bit matters. Dragonfly's seed peer doesn't wait to finish downloading 
 
 If you're running inference on Kubernetes with dozens of pods spinning up across GPU nodes, the model pull is often the slowest and most expensive part of cold start. Egress from public hubs costs real money. Bandwidth on shared corporate networks gets ugly fast.
 
-Dragonfly graduated from CNCF in October 2025, and Hugging Face has been collaborating with the d7y team since 2023. What's new is that the protocol support now lives inside dfget itself. You stop maintaining a sync job. You stop fighting with proxy configs. Point your inference job at `hf://` and let the P2P mesh handle the rest.
+Dragonfly reached CNCF Graduated maturity level on October 28, 2025, and CNCF publicly announced Dragonfly's graduation on January 14, 2026. Dragonfly has also documented Hugging Face integration guidance since November 2023. What's new is that protocol support now lives inside dfget itself. You stop maintaining a sync job. You stop fighting with proxy configs. Point your inference job at `hf://` and let the P2P mesh handle the rest.
 
 ## What's still missing
 
