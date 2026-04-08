@@ -3,7 +3,8 @@ name: Portainer
 logos:
   horizontal: true
 website: 'https://www.portainer.io/'
-documentation: 'https://documentation.portainer.io/'
+documentation: 'https://docs.portainer.io/'
+source: 'https://github.com/portainer/portainer'
 license: Mixed (Zlib / Commercial)
 status: stable
 category: Platform
@@ -11,34 +12,8 @@ subcategory: PaaS/Container Service
 matrix:
   status: explore
 ---
-Portainer is a lightweight management UI that allows you to easily build, manage and maintain your Docker, Docker Swarm, Kubernetes, and Nomad environments. It provides a user-friendly interface for managing containers, images, networks, volumes, and other resources, simplifying the process of deploying and monitoring applications. Portainer eliminates the need for complex command-line operations and offers a centralized view of your containerized infrastructure. 
+Portainer is a web UI and management server for container environments that targets Docker, Docker Swarm, Kubernetes, and Nomad from a single console. It is written in Go with an Angular frontend and is distributed as a container image that runs alongside the environments it manages.
 
-Portainer offers a streamlined approach to container management, providing significant value by reducing the learning curve associated with container orchestration tools. Its main use cases include simplifying Docker deployments for small teams, providing a user-friendly Kubernetes interface for developers and operators, and enabling centralized management of multiple container environments.
+A Portainer deployment consists of a central server and one or more agents. The agent is deployed into each managed environment and exposes a hardened API back to the server over TLS so that a single Portainer instance can control clusters across different networks and cloud accounts without needing direct Docker socket or kubeconfig access. The server handles authentication (local, LDAP, OAuth, OIDC), role-based access control down to individual resources, and stores its state in BoltDB. For Kubernetes it provides a form-based application editor, live manifest view, Helm chart deployment via the Helm SDK, and GitOps workflows that reconcile stacks from a Git repository.
 
-Portainer is a comprehensive and lightweight management user interface (UI) designed to simplify the deployment, management, and monitoring of containerized environments, including Docker, Docker Swarm, Kubernetes, and Nomad. It provides a user-friendly graphical interface that abstracts away the complexity of command-line operations, making container orchestration more accessible.
-
-## Key Features
-
--   **Unified Management Console:** Provides a single pane of glass to manage all your container environments (Docker, Kubernetes, Docker Swarm, Nomad).
--   **Intuitive UI:** Offers a simple and intuitive web-based interface for managing containers, images, volumes, networks, and applications.
--   **Application Deployment:** Easily deploy applications using Docker Compose, Kubernetes manifests, or custom application templates.
--   **Real-time Monitoring:** Provides real-time insights into container status, resource usage, and events across your environments.
--   **Access Control & Security:** Features like role-based access control (RBAC), user management, and integration with authentication providers enhance security.
--   **Registry Management:** Manage Docker registries and image access directly from the UI.
--   **Templates & Stacks:** Use application templates and Docker Compose stacks to standardize deployments and configurations.
--   **Extensions:** Supports extensions to expand functionality, such as vulnerability scanning.
-
-## Licensing Model
-
-Portainer operates under a mixed licensing model:
--   **Portainer Community Edition (CE):** The core open-source product is available under the permissive **Zlib License**. This version provides robust features for individual users and small teams.
--   **Portainer Business Edition (BE):** Builds upon the CE with additional enterprise-grade features such as enhanced RBAC, GitOps integration, advanced authentication, and dedicated support. This version requires a commercial license.
-
-## Benefits
-
--   **Simplified Container Management:** Lowers the barrier to entry for managing Docker and Kubernetes, especially for new users or teams preferring a GUI.
--   **Increased Productivity:** Speeds up deployment and management tasks by eliminating complex command-line operations.
--   **Centralized Control:** Provides a unified view and control plane for diverse container orchestration environments.
--   **Enhanced Visibility:** Offers clear insights into the state and health of your containerized applications and infrastructure.
--   **Cost-Effective:** The open-source CE provides powerful features for free, while the BE offers enterprise capabilities.
--   **Reduced Operational Complexity:** Automates many routine container management tasks, freeing up valuable time for DevOps and operations teams.
+Portainer is often deployed on home labs, edge fleets, and small to midsize Docker and K3s environments where kubectl or raw Docker Compose is too friction-heavy for the operators. The Community Edition is Zlib-licensed; the Business Edition is a commercial product that adds features like OpenID RBAC, audit logs, Edge Compute, and support contracts.

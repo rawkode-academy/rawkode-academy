@@ -25,6 +25,8 @@ community:
 matrix:
   status: explore
 ---
-Perses is a dashboard tool to visualize observability data from Prometheus/Thanos/Jaeger.
+Perses is a dashboarding tool for observability data that treats dashboards as versioned, schema-validated artifacts rather than JSON blobs edited in a UI. It is Apache-2.0, a CNCF sandbox project as of 2024, and driven primarily by contributors from Red Hat, Amadeus, and the Prometheus community.
 
-Perses is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Dashboards in Perses are Kubernetes-style resources with an OpenAPI schema, a CUE-based data model for validation, and a stable Go/TypeScript SDK for programmatic authoring. You can define a dashboard in YAML, JSON, or by composing it from TypeScript/CUE at build time, then store it in Git, lint it in CI, and deploy it like any other manifest. The backend is a stateless Go server that can run embedded storage or a database and exposes a REST API; the frontend is a React app built on the Perses component library, which is also published so other projects (including Grafana plugins and observability vendors) can reuse the panels and query editors. Data source support focuses on Prometheus and Tempo today, with a plugin model for adding more.
+
+The explicit pitch is being the "dashboards as code" alternative to Grafana — Grafana supports JSON dashboards but was not designed schema-first, and its JSON model drifts across versions. Perses is aimed at teams running large numbers of dashboards across fleets of clusters that want generation, review, and validation to live in the same tooling as their application code. Alongside it sit Grafana (the incumbent), Chronosphere, Honeycomb Boards, and the observability UIs shipped with Prometheus and Thanos.

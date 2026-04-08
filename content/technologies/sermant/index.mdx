@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://sermant.io/'
 source: 'https://github.com/sermant-io/Sermant'
+documentation: 'https://sermant.io/docs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -16,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Sermant a proxyless service mesh solution based on Javaagent.
+Sermant is a proxyless service mesh for Java applications, originally developed by Huawei and donated to the CNCF Sandbox. It uses the JVM's bytecode instrumentation (Java Agent) API to inject service governance logic directly into running applications, rather than intercepting traffic through a sidecar proxy like Envoy.
 
-Sermant is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Because the governance code runs inside the same JVM as the application, Sermant avoids the extra network hop and serialization cost that sidecar meshes incur. It ships plugins for common concerns such as traffic routing, tag-based routing, graceful online/offline handling, flow control, and database read/write separation. Plugins are loaded and isolated via a dedicated class loader so application classpaths are unaffected.
+
+Sermant integrates with existing Java microservice stacks including Spring Cloud and Apache Dubbo, and uses registries like Nacos, ServiceComb, or ZooKeeper for service discovery. It targets brownfield environments where teams want mesh-like governance capabilities without rewriting services or deploying sidecars on every pod.

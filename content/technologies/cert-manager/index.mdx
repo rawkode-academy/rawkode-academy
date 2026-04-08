@@ -48,6 +48,8 @@ community:
   youtube: 'https://www.youtube.com/@cert-manager'
   slack: 'https://kubernetes.slack.com/messages/cert-manager'
 ---
-cert-manager is a CNCF graduated project.
+cert-manager is a Kubernetes controller that issues and renews X.509 certificates automatically. You create a `Certificate` resource describing the hostnames you want, point it at an `Issuer` (Let's Encrypt, Vault, Venafi, an internal CA, or a self-signed CA), and cert-manager handles CSR generation, ACME challenges, renewal before expiry, and storage of the resulting key/cert pair in a Kubernetes Secret. An ingress annotation is usually enough to TLS-enable an entire application.
 
-cert-manager is a Cloud Native Computing Foundation (CNCF) graduated project.
+The architecture is a set of CRDs — `Issuer`/`ClusterIssuer`, `Certificate`, `CertificateRequest`, `Order`, `Challenge` — reconciled by a controller written in Go. ACME support includes both HTTP-01 (via an ingress shim that creates solver pods) and DNS-01 across most major DNS providers (Route53, Cloud DNS, Cloudflare, Azure DNS, RFC2136, and many more). Beyond ACME, it plugs into Vault PKI, Google CA Service, AWS Private CA, Venafi TPP/Cloud, and `step-ca`. The `trust-manager` sub-project distributes CA bundles cluster-wide.
+
+cert-manager started at Jetstack in 2017, became a CNCF sandbox project in 2020, and graduated in September 2024. It is the de-facto standard for TLS on Kubernetes — if your cluster runs an ingress controller or a service mesh with mTLS, there is an overwhelming chance cert-manager is issuing its certificates. Alternatives like SPIRE exist but target a different problem (workload identity) rather than PKI for HTTPS.

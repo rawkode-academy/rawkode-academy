@@ -30,6 +30,9 @@ cncf:
 matrix:
   status: skip
 ---
-Emissary-Ingress is a CNCF incubating project.
 
-Emissary-Ingress is a Cloud Native Computing Foundation (CNCF) incubating project.
+Emissary-Ingress is a Kubernetes-native API gateway built on top of Envoy. Originally released as Ambassador by Datawire (now Ambassador Labs), it was renamed and donated to the CNCF in 2021. Its job is to translate Kubernetes CRDs — `Mapping`, `Host`, `TLSContext`, `AuthService`, `RateLimitService` — into Envoy xDS configuration and push it to an embedded Envoy process that actually handles the traffic.
+
+The control plane is written in Python and Go. It watches the Kubernetes API for Emissary CRDs (and, optionally, Gateway API resources), compiles them into a full Envoy bootstrap + xDS snapshot, and hot-reloads Envoy. Because the data plane is stock Envoy, you get the usual Envoy features: HTTP/1.1, HTTP/2, gRPC, WebSockets, mTLS, retries, timeouts, rate limiting, external auth via ext_authz. Canary and traffic-splitting are done by weighting Mappings that point at the same prefix.
+
+Emissary competes with Contour, Gloo, Istio ingress, and increasingly the Kubernetes Gateway API implementations directly. Its historical selling point was the developer-friendly CRD model — app teams own their own Mappings — versus Istio's cluster-wide ops-heavy approach. Ambassador Labs has been shifting focus to their commercial Edge Stack and Telepresence, so Emissary's upstream cadence is slower than it once was, but it's still in wide production use and remains a CNCF incubating project.

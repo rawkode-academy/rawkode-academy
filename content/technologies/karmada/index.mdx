@@ -44,6 +44,8 @@ community:
 matrix:
   status: skip
 ---
-Karmada is a CNCF incubating project.
+Karmada is a multi-cluster Kubernetes orchestrator, the spiritual successor to the abandoned Kubernetes Federation v2 project. You run a Karmada control plane (its own API server, etcd, and controllers) that joins any number of member clusters, and you then submit normal Kubernetes manifests to it. Karmada decides which member clusters each object belongs on and distributes it there.
 
-Karmada is a Cloud Native Computing Foundation (CNCF) incubating project.
+Placement decisions are driven by two CRDs: `PropagationPolicy` declares which resources go to which clusters (filtered by label, region, provider, or static name), and `OverridePolicy` lets you mutate fields per cluster — image tags, replica counts, resource requests — so you can propagate the same Deployment to three clusters with different settings. The scheduler supports weighted, duplicated, and aggregated (split-replicas) spread modes, and can rebalance when clusters come or go. A "pull mode" agent lets member clusters behind firewalls reach out to the Karmada control plane instead of the other way around.
+
+It is Huawei's answer to running workloads across multi-cloud and hybrid fleets with one logical control plane, and is widely used in Chinese cloud providers. Alternatives include Red Hat's Open Cluster Management (OCM), Liqo, and Cluster API + Argo CD ApplicationSets. CNCF incubating since 2023.

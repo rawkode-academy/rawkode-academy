@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://tokenetes.io/'
 source: 'https://github.com/tokenetes/tokenetes'
+documentation: 'https://tokenetes.io/docs/transaction-token/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: skip
 ---
-Tokenetes implements Transaction Tokens (TraTs) for microservices call chains.  It's a Kubernetes-native framework providing immutable identity and context in  service-to-service communication to prevent attacks like software supply chain  or privileged user compromise.
+Tokenetes is a CNCF sandbox project that implements the IETF Transaction Tokens (TraT) draft. Transaction Tokens are short-lived, signed tokens that carry the authenticated identity of the original caller and the immutable context of a specific transaction as a request fans out through a chain of microservices.
 
-Tokenetes is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The problem Tokenetes addresses is that OAuth access tokens were designed to authorize a client to call a resource server, not to preserve "who started this, and what did they ask for" across many internal hops. Without transaction tokens, downstream services either over-trust their peers or re-authorize against the original bearer token in ways that are hard to scope. A Tokenetes service sits inside the trust domain, issues TraTs to workloads on demand, and lets receivers verify that the request they are handling is part of a sanctioned transaction.
+
+The project originated from work by SGNL and is aimed at zero-trust architectures where cross-service identity propagation needs to be explicit and auditable.

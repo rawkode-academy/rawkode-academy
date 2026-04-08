@@ -3,7 +3,8 @@ name: Kubevious
 logos:
   horizontal: true
 website: 'https://kubevious.io/'
-documentation: 'https://kubevious.io/documentation/'
+source: 'https://github.com/kubevious/kubevious'
+documentation: 'https://kubevious.io/docs/'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -11,25 +12,8 @@ subcategory: Observability
 matrix:
   status: skip
 ---
-Kubevious is an open-source platform that provides a comprehensive view and understanding of Kubernetes configurations and relationships. It analyzes your Kubernetes cluster configuration in real-time, identifies potential issues, and visualizes the dependencies between different resources. This allows teams to effectively troubleshoot problems, ensure compliance with best practices, and improve the overall stability and security of their Kubernetes deployments. It helps users to understand the relationships between different objects in Kubernetes and validate that these objects are properly configured according to defined policies.
+Kubevious is a Kubernetes dashboard and rule engine focused on configuration correlation and safety. Instead of showing resources as flat lists, it builds an application-centric tree that joins Deployments, Services, Ingresses, ConfigMaps, RBAC, and network policies so you can see everything that touches a workload in one place.
 
-Kubevious is an open-source tool designed to provide app-centric assurance, validation, and introspection for Kubernetes. It aims to prevent disasters and outages by continuously validating application manifests, monitoring the cluster state, and visualizing configurations and their relationships in real-time.
+The backend ingests cluster state into a graph, runs a rules engine against it, and ships built-in checks for common mistakes like dangling services, missing resource limits, or RBAC that grants cluster-admin by accident. Custom rules are written in a small JavaScript-like DSL and can flag or warn on any shape in the graph. A "time machine" feature snapshots cluster state so operators can diff configuration between two points in time for forensics. A Slack bot and a CLI round out the interface.
 
-## Key Features
-
--   **App-Centric Visualization:** Provides an intuitive graphical interface that visualizes your applications and their dependencies within the Kubernetes cluster, helping to understand complex relationships.
--   **Continuous Validation:** Continuously checks your Kubernetes manifests and live cluster state against best practices, policies, and identified issues (e.g., misconfigurations, conflicts, inconsistencies).
--   **Configuration Drift Detection:** Identifies discrepancies between your desired configuration (e.g., in Git) and the actual state of your running cluster.
--   **Problem Detection & Remediation:** Automatically detects errors, misconfigurations, and violations of best practices, offering insights and guidance for remediation.
--   **Root Cause Analysis:** Helps in quickly pinpointing the root cause of issues by highlighting changes and their impact on related resources.
--   **Contextual Insights:** Enriches Kubernetes resources with relevant information, making it easier to understand their purpose and state.
--   **CLI for CI/CD Integration:** The Kubevious CLI allows for validation of YAML manifests in CI/CD pipelines, shifting error detection left.
-
-## Benefits
-
--   **Prevents Outages:** By proactively identifying and highlighting potential issues, Kubevious helps prevent service disruptions and outages.
--   **Reduces Troubleshooting Time:** Simplifies complex debugging by providing a clear visual representation of configurations and problems, reducing MTTR.
--   **Ensures Best Practices:** Helps enforce best practices and architectural guidelines across the Kubernetes environment.
--   **Improved Understanding:** Offers a comprehensive and easy-to-understand view of the Kubernetes cluster state, even for those new to Kubernetes.
--   **Enhanced Collaboration:** Provides a common platform for developers and operations teams to understand and troubleshoot applications.
--   **Cost-Effective:** As an open-source solution, it provides powerful capabilities for Kubernetes management without additional licensing costs.
+Kubevious is a CNCF sandbox project and overlaps with Lens and Headlamp for visualisation, and with Polaris or Datree for policy checks, but its value is the correlated view — answering "what will break if I change this ConfigMap" rather than listing raw objects.

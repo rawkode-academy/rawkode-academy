@@ -8,3 +8,8 @@ status: stable
 category: Provisioning
 subcategory: Security & Compliance
 ---
+Sonobuoy is a diagnostic tool for Kubernetes clusters that runs conformance and custom test suites inside the cluster and reports back on the results. It is the reference tool used by the CNCF Kubernetes Conformance Program: if a vendor wants to earn the "Certified Kubernetes" mark, they must pass the upstream end-to-end tests via Sonobuoy and submit the tarball.
+
+Architecturally, `sonobuoy run` deploys an aggregator pod and a set of plugin pods into the target cluster. The default plugins execute the upstream Kubernetes e2e conformance tests and the systemd-logs gatherer, but any container that writes results to a known path can be a plugin, so teams can run custom compliance, security, or smoke-test suites the same way. Results are streamed back to the aggregator, bundled into a tarball, and inspectable via `sonobuoy results`.
+
+Sonobuoy was created at Heptio (now VMware/Broadcom) and is the canonical way to validate that a new or upgraded cluster actually behaves like Kubernetes before handing it to application teams.

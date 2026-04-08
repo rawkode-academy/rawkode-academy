@@ -1,0 +1,31 @@
+---
+interface Props {
+	name: string;
+	url: string;
+	description: string;
+	image?: string | undefined;
+	sameAs?: (string | undefined)[] | undefined;
+	jobTitle?: string | undefined;
+}
+
+const { name, url, description, image, sameAs, jobTitle } = Astro.props;
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "Person",
+	name,
+	url,
+	description,
+	...(image && { image }),
+	...(jobTitle && { jobTitle }),
+	...(sameAs && sameAs.filter(Boolean).length > 0 && {
+		sameAs: sameAs.filter((s): s is string => Boolean(s)),
+	}),
+};
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+></script>

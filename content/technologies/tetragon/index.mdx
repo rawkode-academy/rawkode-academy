@@ -3,12 +3,14 @@ name: Tetragon
 logos:
   stacked: true
 website: 'https://tetragon.io/'
+source: 'https://github.com/cilium/tetragon'
 documentation: 'https://tetragon.io/docs/'
 license: Apache-2.0
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
 cncf:
+  status: incubating
   accepted: '2021-10-13'
   devStatsUrl: 'https://cilium.devstats.cncf.io/'
 community:
@@ -19,6 +21,8 @@ matrix:
 terms:
   - eBPF
 ---
-Tetragon is a powerful, eBPF-based security observability and runtime enforcement tool designed for Kubernetes environments. It enables deep visibility into security-relevant events, such as process executions, network activity, and system calls, with minimal overhead. By leveraging eBPF, Tetragon provides real-time monitoring and analysis of application behavior, allowing users to detect and respond to security threats, enforce security policies, and gain valuable insights into application performance.
+Tetragon is an eBPF-based security observability and runtime enforcement tool, part of the Cilium project at Isovalent and the CNCF. It instruments the Linux kernel directly to observe process execution, file access, network activity, and capability changes, and can synchronously kill or block offending processes from within the kernel before the syscall returns.
 
-Tetragon's primary value lies in its ability to provide fine-grained security observability within Kubernetes without requiring intrusive agents or modifications to application code. This allows security teams to quickly identify and mitigate security risks, improve compliance posture, and gain a better understanding of their application security landscape. Common use cases include threat detection, intrusion prevention, policy enforcement, and security auditing.
+The key difference from auditd or user-space agents is that Tetragon attaches eBPF programs to kernel hooks (kprobes, tracepoints, LSM hooks, uprobes) and evaluates policies in kernel space. A `TracingPolicy` CRD describes which events to match, which selectors to apply (by binary path, namespace, pod label, argument value, capability), and what action to take: log, produce a Tetragon event, or `SIGKILL` the process. Because enforcement happens in the kernel, there is no TOCTOU gap between detection and action, which is a chronic weakness of user-space eBPF observers.
+
+Tetragon automatically correlates kernel events with Kubernetes metadata (pod, namespace, container image, labels) and exports JSON events for consumption by SIEMs, Grafana, or Falco-compatible pipelines. It is commonly deployed alongside Cilium as the runtime-security layer in cloud-native environments.

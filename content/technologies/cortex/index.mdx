@@ -37,17 +37,8 @@ community:
 matrix:
   status: skip
 ---
-Cortex is a horizontally scalable, highly available, multi-tenant, long-term storage for Prometheus. It allows you to ingest and query metrics from multiple Prometheus servers, centralizing your monitoring data. This provides a global view across all your clusters and enables long-term retention of metrics beyond Prometheus's local storage limitations. It allows you to reliably store Prometheus data for years and efficiently query it, supporting advanced analytics and historical analysis.
+Cortex is a horizontally scalable, multi-tenant long-term storage backend for Prometheus. Prometheus servers remote-write their samples into Cortex, which stores them in object storage (S3, GCS, Azure Blob) and exposes a fully PromQL-compatible query API. Tenants are identified by the `X-Scope-OrgID` header, so a single Cortex cluster can serve metrics for dozens or hundreds of isolated teams or customers.
 
-Cortex provides a scalable, long-term storage solution for Prometheus metrics, solving the "global view" and "long-term retention" challenges of standard Prometheus deployments.
+Cortex is decomposed into a handful of microservices that you can scale independently: distributors hash and replicate incoming samples to ingesters; ingesters buffer recent data in memory and periodically flush TSDB blocks to object storage; the store-gateway serves historical blocks; queriers fan out PromQL reads across ingesters and store-gateways; the query-frontend splits long queries, caches results, and queues them; the compactor merges and deduplicates blocks in the background. It uses a hash ring (backed by Consul, etcd, or memberlist) for service discovery and sharding.
 
-## Key Features
-
--   **Horizontal Scalability:** Cortex can run across multiple machines, allowing you to scale ingestion and query capacity independently.
--   **High Availability:** It supports replication of data, ensuring no single point of failure.
--   **Multi-Tenancy:** A single Cortex cluster can isolate data and queries for multiple independent tenants (e.g., different teams or customers), secured by authentication.
--   **Long-Term Storage:** Designed to store metrics for years, typically using object storage (like S3 or GCS) as a backend.
-
-## Architecture
-
-Cortex is composed of several microservices (Ingesters, Distributors, Queriers, Query Frontend, etc.) that work together to handle the read and write paths efficiently. This microservices architecture allows for fine-grained scaling based on your specific workload (e.g., heavy write vs. heavy read).
+Historically, Cortex and Thanos were the two main answers to the "global Prometheus" problem. In 2022, Grafana Labs forked Cortex to create Grafana Mimir, and much of the active development shifted there. Cortex itself is still maintained in CNCF incubation, but Mimir, Thanos, and VictoriaMetrics are now the more commonly deployed options for new long-term Prometheus storage.

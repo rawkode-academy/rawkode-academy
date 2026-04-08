@@ -38,6 +38,8 @@ community:
   slack: 'https://rook-io.slack.com/'
   blog: 'https://blog.rook.io/'
 ---
-Rook is a CNCF graduated project.
+Rook is a Kubernetes operator that runs Ceph as a cloud-native storage system inside a cluster. It was the first storage project to graduate in the CNCF (2020) and since version 1.3 has focused exclusively on Ceph after earlier support for Cassandra, CockroachDB, and NFS was dropped.
 
-Rook is a Cloud Native Computing Foundation (CNCF) graduated project.
+The operator deploys and manages every Ceph component — monitors (MON), managers (MGR), object storage daemons (OSDs), metadata servers (MDS), and RGW — as Kubernetes pods, with CRDs like `CephCluster`, `CephBlockPool`, `CephFilesystem`, and `CephObjectStore` describing desired state. OSDs consume raw block devices directly from worker nodes, and Rook takes care of running the CSI drivers (`rook-ceph-csi-rbd` and `cephfs`) that expose Ceph RBD images and CephFS volumes to standard PersistentVolumeClaims. Day-two operations such as expanding capacity, rolling upgrades, failure domain placement, encryption at rest with LUKS, and orchestrating monitor failover are handled by the operator's reconcile loop.
+
+With Rook-Ceph, a single storage backend provides block (RWO), shared file (RWX), and S3-compatible object storage from the same cluster, which is why it remains the go-to choice for self-hosted Kubernetes that needs production-grade persistent storage without depending on a cloud provider. It is Apache-2.0 licensed and typically paired with kernel-level Ceph clients and the native Ceph tooling for debugging.

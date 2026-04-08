@@ -4,9 +4,10 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://github.com/containers/bootc'
-source: 'https://github.com/containers/bootc'
-license: Apache-2.0
+website: 'https://bootc.dev/'
+documentation: 'https://bootc.dev/bootc/'
+source: 'https://github.com/bootc-dev/bootc'
+license: Apache-2.0 OR MIT
 status: stable
 category: Runtime
 subcategory: Container Runtime
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: watch
 ---
-The bootc provides transactional, in-place operating system images and updates using OCI/Docker container images. This project applies the Docker container layering model to bootable host systems, using standard OCI/Docker containers as a transport and delivery format for base operating system updates.
+bootc ("bootable containers") lets you ship and update an entire Linux operating system as an OCI container image. You build a `FROM quay.io/fedora/fedora-bootc:41` image, add your own packages and config with normal Dockerfile instructions, push it to a registry, and `bootc switch` on the target host pulls and boots it as the root filesystem. Upgrades become `bootc upgrade`, and rollbacks are just the previous image.
 
-bootc is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Under the hood bootc is built on top of OSTree (the same content-addressed filesystem technology behind Fedora Silverblue and Red Hat CoreOS) but presents a container-native interface instead of the older `rpm-ostree` workflow. The host runs a transactional, image-based filesystem where the OS is immutable between reboots; `/etc` and `/var` are writable but the rest of the tree is swapped atomically on update. Because the artifact is a standard OCI image, you build, sign, scan, and distribute it with the same tooling as your application containers — Cosign, Trivy, any registry.
+
+bootc is maintained in the `bootc-dev` GitHub org, primarily driven by Red Hat, and became a CNCF sandbox project in 2025. It's the foundation for Fedora/CentOS/RHEL bootc image modes and a direct conceptual cousin of Flatcar, Talos, and Chainguard's container-optimized OSes.

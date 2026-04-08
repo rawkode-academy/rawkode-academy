@@ -4,6 +4,7 @@ logos:
   stacked: true
 website: 'https://www.rancher.com'
 documentation: 'https://rancher.com/docs/'
+source: 'https://github.com/rancher/rancher'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -11,6 +12,8 @@ subcategory: Scheduling & Orchestration
 matrix:
   status: skip
 ---
-Rancher is a comprehensive, open-source Kubernetes management platform designed for organizations adopting containerization at scale. It acts as a centralized management layer, providing a single pane of glass to oversee multiple Kubernetes clusters, whether they are running on-premises, in the cloud, at the edge, or even across hybrid and multi-cloud environments. Rancher isn't a Kubernetes distribution itself but rather a tool that simplifies the complexities of managing diverse Kubernetes environments.
+Rancher is a multi-cluster Kubernetes management platform originally built by Rancher Labs and now maintained by SUSE. It provides a single control plane for provisioning, upgrading, and operating Kubernetes clusters across clouds, on-prem, and edge, regardless of whether those clusters are RKE, RKE2, K3s, EKS, AKS, GKE, or any other CNCF-certified distribution.
 
-The core value of Rancher lies in its ability to streamline Kubernetes operations, enhance security, and improve developer productivity. It offers features like centralized authentication and access control, simplified cluster provisioning and upgrades, integrated monitoring and alerting, and an application catalog for easy deployment of pre-packaged solutions. Main use cases for Rancher include managing hybrid and multi-cloud Kubernetes deployments, simplifying Kubernetes for development teams by providing an intuitive UI and tooling, enforcing consistent security policies across clusters, and enabling efficient lifecycle management of Kubernetes environments.
+A Rancher deployment runs as a set of controllers on a management Kubernetes cluster. Downstream clusters are registered through a lightweight agent that establishes an outbound tunnel to the Rancher server, allowing the management plane to authenticate users via SAML/OIDC/LDAP, impersonate them against the downstream API server, and enforce Rancher-level RBAC that projects onto native Kubernetes RBAC. Rancher ships integrated components for in-cluster monitoring (Prometheus/Grafana), logging (Fluent Bit/Fluentd), GitOps (Fleet), service mesh (Istio), security scanning (CIS benchmarks, Kubewarden), and application catalogs backed by Helm.
+
+Rancher is frequently paired with SUSE's own distributions — K3s for edge and single-node deployments, RKE2 for government-grade hardened Kubernetes, and Harvester for HCI and VM workloads via KubeVirt. It is Apache-2.0 licensed and typically chosen by organizations that run fleets of Kubernetes clusters in heterogeneous environments and want a vendor-neutral UI and RBAC layer on top of them.

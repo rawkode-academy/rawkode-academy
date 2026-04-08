@@ -4,6 +4,7 @@ logos:
   icon: true
 website: 'https://www.rust-lang.org/'
 documentation: 'https://doc.rust-lang.org/stable/book/'
+source: 'https://github.com/rust-lang/rust'
 license: MIT OR Apache-2.0
 status: stable
 category: Wasm
@@ -11,6 +12,8 @@ subcategory: Languages
 matrix:
   status: learn
 ---
-Rust is a systems programming language focused on safety, speed, and concurrency. It achieves memory safety without garbage collection by employing a borrow checker, preventing data races and dangling pointers at compile time. This makes Rust ideal for performance-critical applications and systems programming, where control over memory and execution is paramount. Rust's rich type system and modern concurrency features also allow developers to build reliable and efficient concurrent systems. 
+Rust is a statically typed, compiled systems programming language that provides memory and thread safety without a garbage collector. It was started at Mozilla by Graydon Hoare in 2006, reached 1.0 in 2015, and is now governed by the Rust Foundation with an open RFC and edition process.
 
-Its main use cases include operating systems, embedded systems, game development, web browsers (like Firefox components), and high-performance networking applications. In the cloud native space, Rust is increasingly adopted for building infrastructure components, container runtimes, and serverless functions, offering a compelling alternative to languages like C++ and Go when performance and resource efficiency are crucial.
+The defining feature is the ownership and borrow-checker model: every value has a single owner, references are checked at compile time to prevent dangling pointers and data races, and lifetimes encode how long a borrow is valid. The result is C/C++-level runtime performance with the memory-safety guarantees usually associated with managed languages. Rust compiles to native code via LLVM, supports no_std bare-metal targets, and has first-class WebAssembly support through `wasm32-unknown-unknown` and `wasm32-wasip1` targets, making it the default choice for writing WASI components and browser-side Wasm modules. The toolchain — `rustup`, `cargo`, `rustc`, `clippy`, and `rustfmt` — is shipped as a unified stack, and dependencies are managed through crates.io.
+
+Cloud-native projects written in Rust include the Linkerd2-proxy data plane, Firecracker microVMs, Deno and Bun runtimes, the TiKV distributed KV store, the Databend and Polars analytics engines, InfluxDB 3.0, the Wasmtime and WasmEdge runtimes, and significant parts of the Linux kernel. Rust is dual-licensed under MIT or Apache-2.0.

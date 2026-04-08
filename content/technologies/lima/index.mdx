@@ -2,8 +2,9 @@
 name: Lima
 logos:
   horizontal: true
-website: 'https://github.com/lima-vm/lima'
+website: 'https://lima-vm.io/'
 source: 'https://github.com/lima-vm/lima'
+documentation: 'https://lima-vm.io/docs/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -18,6 +19,8 @@ community:
 matrix:
   status: watch
 ---
-Linux virtual machines, typically on macOS, for running containerd
+Lima (Linux Machines) launches Linux virtual machines on macOS and Linux with automatic file sharing, port forwarding, and containerd pre-installed. It exists to give macOS developers a lightweight way to run Linux workloads without Docker Desktop.
 
-Lima is a Cloud Native Computing Foundation (CNCF) incubating project.
+On macOS Lima uses the native Virtualization.framework or QEMU as the hypervisor, boots a cloud-init-configured Ubuntu, Fedora, or Alpine image, and sets up a virtiofs or 9p mount so the host's home directory appears inside the guest. Guest agents forward listening ports back to localhost on the host, so a service started inside the VM is reachable without extra configuration. The limactl CLI takes a YAML template describing CPU, memory, disk, mounts, and provisioning scripts, which makes per-project environments reproducible. nerdctl, the Docker-compatible CLI from the containerd project, is bundled so `lima nerdctl run` works as a drop-in for `docker run`.
+
+Lima is the engine underneath Colima, Rancher Desktop, and Finch, all of which wrap it with a simpler UX aimed at Docker replacement. It competes with Docker Desktop, Podman Machine, and OrbStack, and is maintained by Akihiro Suda, one of the containerd and BuildKit maintainers.

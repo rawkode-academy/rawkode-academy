@@ -2,13 +2,15 @@
 name: CueBlox
 website: 'https://rawkode.academy'
 documentation: 'https://rawkode.academy'
-license: None
+license: MIT
 status: abandoned
 category: App Definition and Development
 subcategory: Application Definition & Image Build
 matrix:
   status: graveyard
 ---
-CueBlox is a hypothetical cloud-native orchestration platform designed to simplify the management and deployment of complex, distributed applications. It leverages a declarative configuration language (likely inspired by Cue) and integrates seamlessly with Kubernetes to provide a unified interface for defining infrastructure, application dependencies, and runtime policies. Its value lies in reducing operational overhead, enhancing application consistency, and improving developer velocity. 
+CueBlox was an experimental headless CMS built on top of CUE. The idea was to use CUE schemas to define content types, validate Markdown/YAML content against them, and expose the result as a typed content API — effectively a Hugo/Netlify CMS alternative where the schema language was CUE instead of bespoke YAML.
 
-Main use cases for CueBlox include managing microservice architectures, deploying serverless functions, orchestrating data pipelines, and automating infrastructure provisioning across multiple cloud environments. By abstracting away the complexities of underlying infrastructure, CueBlox enables teams to focus on building and delivering valuable software features.
+The project was created by David Flanagan (Rawkode) and is no longer actively developed. The interesting ideas from it — CUE as the schema layer for structured content and configuration — have been picked up more broadly by the CUE ecosystem itself and by tools like Timoni for Kubernetes packaging.
+
+If you're looking at CueBlox today, you almost certainly want something else: Astro's content collections, Keystatic, Sanity, or a plain Git-backed setup with CUE used directly for validation.

@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Bank-Vaults is a Vault swiss-army knife: a K8s operator, Go client with automatic token renewal, automatic configuration, multiple unseal options and more. A CLI tool to init, unseal and configure Vault (auth methods, secret engines). Direct secret injection into Pods.
+Bank-Vaults is a set of tools and a Kubernetes operator that make HashiCorp Vault easier to run on Kubernetes. Operating Vault correctly — auto-unsealing, storing the root keys safely, configuring auth methods and policies in a reproducible way, and getting secrets to applications — is surprisingly fiddly, and Bank-Vaults packages a set of opinions that handle most of it for you.
 
-Bank-Vaults is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The project is built around three main pieces. The Vault Operator deploys and manages Vault clusters from a CRD, including auto-initialization and auto-unseal using KMS keys from AWS, GCP, Azure, or plain Kubernetes Secrets. A mutating webhook injects secrets directly into Pods as environment variables or files by rewriting them at admission time — so application code can use `vault:secret/data/mysecret#key` references in its env vars and get the real value at runtime, without needing a Vault-aware SDK or a sidecar. A Go library wraps the Vault API and adds higher-level helpers that the other components share.
+
+Bank-Vaults was originally built by Banzai Cloud and is now maintained as the `bank-vaults` GitHub org; it joined the CNCF sandbox in 2024. It overlaps with Vault's own official Helm chart and the Vault Secrets Operator from HashiCorp, and with External Secrets Operator for the secret-injection story. Its niche is teams that want a batteries-included, CRD-driven way to run Vault on Kubernetes without writing their own operator.

@@ -51,6 +51,8 @@ community:
   twitter: 'https://twitter.com/cloudeventsio'
   slack: 'https://cloud-native.slack.com/messages/cloudevents'
 ---
-Standardizing common eventing metadata and their location to help with event identification and routing.
+CloudEvents is a specification — not a piece of software — that defines a common envelope for describing event data. Every event has a small set of required attributes (`id`, `source`, `specversion`, `type`) and optional ones (`subject`, `time`, `datacontenttype`, `dataschema`), plus an opaque `data` payload. That's it. The whole spec fits in a short document; the value is that any producer and any consumer can agree on how to identify, route, and deduplicate an event without negotiating a bespoke schema.
 
-CloudEvents is a Cloud Native Computing Foundation (CNCF) graduated project.
+The spec defines bindings for how events are carried over different protocols: HTTP (binary mode puts attributes in headers, structured mode puts the whole envelope in the body), Kafka (headers + key), AMQP, MQTT, NATS, and WebSockets. It also defines a JSON format for serialization and extensions like `partitionkey`, `traceparent` (W3C Trace Context), and `sequence`. Reference SDKs exist for Go, Java, JavaScript, Python, C#, Rust, Ruby, and PHP.
+
+CloudEvents is the event format used by Knative Eventing, Argo Events, AWS EventBridge (for partner events), Azure Event Grid, Google Eventarc, and essentially every CNCF project that emits events. It graduated from the CNCF in January 2024. Adopting it costs almost nothing — you set a few headers on an HTTP POST — and it pays off the first time you need to route events through a broker or build a consumer that isn't tightly coupled to one producer's schema. If you're designing a service that emits events, there's no good reason not to use it.

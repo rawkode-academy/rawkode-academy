@@ -4,7 +4,8 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://www.opencost.io/'
+website: 'https://opencost.io/'
+documentation: 'https://opencost.io/docs/'
 source: 'https://github.com/opencost/opencost'
 license: Apache-2.0
 status: stable
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-OpenCost provides visibility into current and historical Kubernetes spend and resource allocation.
+OpenCost is a cost monitoring tool for Kubernetes that attributes cloud infrastructure spend down to individual namespaces, deployments, pods, and labels. It is the open-source core extracted from Kubecost, donated to the CNCF, and maintained as the reference implementation of the FinOps Foundation's Kubernetes cost allocation spec.
 
-OpenCost is a Cloud Native Computing Foundation (CNCF) incubating project.
+OpenCost joins Prometheus metrics (`kube_pod_container_resource_requests`, `container_memory_working_set_bytes`, etc.) with cloud provider billing data to compute hourly costs for CPU, memory, GPU, storage, and network for every workload. It ships with built-in pricing for AWS, GCP, Azure, Oracle, Alibaba, and Scaleway, and can consume the AWS Cost and Usage Report or GCP/Azure billing exports for reconciled "actual" costs rather than list-price estimates. Allocation output is available via a REST API, exported as Prometheus metrics, and increasingly via the FOCUS billing schema for ingestion into downstream FinOps tools.
+
+The project is Apache-2.0 and a CNCF incubating project. In the same space you will find Kubecost (the commercial superset), Cloudability, CAST AI, Vantage, Finout, and cloud-native tools like AWS Cost Explorer — but OpenCost is the only vendor-neutral option that runs entirely inside the cluster and speaks Prometheus natively.

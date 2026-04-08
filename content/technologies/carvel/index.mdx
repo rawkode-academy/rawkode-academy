@@ -5,7 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://carvel.dev/'
-documentation: 'https://carvel.dev/docs/'
+documentation: 'https://carvel.dev/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -29,20 +29,8 @@ terms:
   - vendir
   - secretgen-controller
 ---
-Carvel is a suite of reliable, single-purpose, composable tools that provide simple building blocks to create and manage Kubernetes applications. It aims to make Kubernetes more accessible and manageable by providing tools that focus on specific tasks like packaging, configuration, and deployment. Carvel simplifies application delivery and management by enabling users to define, package, and deploy applications in a declarative and repeatable way. It helps to manage the complexity of Kubernetes manifests and configurations, reducing errors and improving overall application lifecycle management.
+Carvel is a suite of single-purpose Unix-style CLI tools for configuring, packaging, and deploying applications to Kubernetes. It came out of VMware Tanzu (originally as `k14s`) and is a deliberate alternative to the "one big tool" approach of Helm: each Carvel tool does one job, reads and writes plain files, and composes with the others through pipes.
 
-Carvel tools include: `kapp` (for application deployment and lifecycle management), `ytt` (for YAML templating), `kbld` (for building container images), `imgpkg` (for packaging and distributing container images and configuration), and `vendir` (for declarative vendoring of configuration from various sources). These tools can be used individually or in combination to streamline Kubernetes workflows and improve developer productivity.
+The core tools are `ytt`, a YAML templating language based on Starlark that operates on parsed YAML documents instead of raw text (so you can't generate invalid YAML by accident); `kapp`, a deployer that computes a diff between a set of manifests and live cluster state, groups resources into a labeled "app", orders changes by type, and waits on readiness — effectively a safer `kubectl apply`; `kbld`, which resolves image references to immutable digests and rewrites manifests accordingly; `imgpkg`, which bundles a directory of configuration plus all the images it references into a single OCI artifact; and `vendir`, which declaratively syncs external sources (Git repos, Helm charts, HTTP tarballs) into a `vendor/` directory. `kapp-controller` runs the same machinery inside a cluster as a GitOps-style operator with `App` and `PackageInstall` CRDs.
 
-Carvel provides a powerful collection of tools designed to enhance the experience of deploying and managing applications on Kubernetes. By offering focused, composable utilities, Carvel enables users to automate complex Kubernetes workflows and maintain consistency across environments.
-
-## Key Tools and Their Purpose
-
-Carvel's toolkit includes:
-
--   **`kapp`:** A CLI tool that installs, upgrades, and deletes Kubernetes applications by grouping resources. It provides a safer and more manageable way to handle deployments, understanding dependencies and showing changes before applying them.
--   **`ytt`:** A templating tool that allows you to overlay and customize YAML configurations. It provides powerful data-oriented templating, schema validation, and functions to simplify complex YAML structures, making them more readable and maintainable.
--   **`kbld`:** Designed for image building and resolution. It ensures that images referenced in your Kubernetes manifests are immutable and verifiable, integrating with various build tools and container registries.
--   **`imgpkg`:** A tool for packaging and distributing application configurations and images. It creates OCI (Open Container Initiative) compliant bundles that can be pushed to any OCI registry, simplifying the distribution of entire application states.
--   **`vendir`:** A declarative content synchronizer. It allows you to declare external resources (like Git repositories, HTTP files, Helm charts) in a YAML file and synchronize them into your local workspace, ensuring reproducible content sourcing.
-
-These tools are built to work together, offering a declarative and robust approach to application delivery on Kubernetes, from development to production.
+Carvel joined the CNCF sandbox in 2022. In practice it sits alongside Helm and Kustomize as a third option for Kubernetes configuration: you reach for it when you've been burned by Helm's text-based templating or want a stricter, more auditable pipeline from source YAML to live cluster. It's the packaging system underneath Tanzu Kubernetes Grid and Tanzu Community Edition.

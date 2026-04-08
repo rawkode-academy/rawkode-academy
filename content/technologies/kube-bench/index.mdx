@@ -8,3 +8,8 @@ status: stable
 category: Provisioning
 subcategory: Security & Compliance
 ---
+kube-bench is a Go tool from Aqua Security that checks whether a Kubernetes cluster is deployed according to the CIS Kubernetes Benchmark. It runs on a node (or as a Job), inspects process flags, file permissions, and configuration files for the API server, controller manager, scheduler, kubelet, and etcd, and prints a pass/fail/warn per CIS control.
+
+Checks are declarative YAML, grouped by benchmark version (CIS 1.23, 1.24, 1.27, etc.) and by target (master, node, etcd, policies). Each check has a `test` that can run a binary, parse a file, or grep a process argument — for example, "ensure `--anonymous-auth=false` on the API server" or "ensure `/etc/kubernetes/admin.conf` has 600 permissions." Because the checks are data, you can override them for managed distributions; kube-bench ships variants for EKS, GKE, AKS, OpenShift, Rancher, and k3s that skip controls the cloud provider owns.
+
+It is effectively the standard tool for auditing cluster configuration against CIS and is commonly run as a Kubernetes CronJob with results shipped to a SIEM. It only checks static configuration — for runtime and workload-level checks you pair it with kube-hunter, Trivy, or Falco.

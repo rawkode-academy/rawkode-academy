@@ -3,6 +3,7 @@ name: Meshery
 logos: null
 website: 'https://meshery.io'
 source: 'https://github.com/meshery/meshery'
+documentation: 'https://docs.meshery.io/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -51,6 +52,8 @@ community:
 matrix:
   status: skip
 ---
-Meshery is a CNCF sandbox project.
+Meshery is a multi-cluster, multi-mesh management plane for cloud native infrastructure, maintained by Layer5. It models Kubernetes clusters and the stacks running on them as "designs" — declarative, visually-editable bundles of manifests, Helm charts, and operator CRDs — and deploys, compares, and lifecycles them across environments.
 
-Meshery is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture is a Go server exposing REST and GraphQL APIs, a React front end, and a set of gRPC "adapters" that each wrap a specific ecosystem project — Istio, Linkerd, Consul, Cilium, Kuma, Nginx Service Mesh, and many non-mesh projects via its broader integrations catalog. Designs are authored in a Kubernetes-like model backed by the OAM-inspired MeshModel registry, rendered to concrete manifests at apply time, and can be pushed to any number of registered clusters from a single workspace. A mesheryctl CLI mirrors the web UI for CI use, and built-in load generators (fortio, wrk2, nighthawk) let users attach performance profiles to designs.
+
+Meshery is a CNCF project and sits alongside Argo CD, Flux, and Backstage in the platform-engineering toolbox, with its niche being visual, multi-project design plus opinionated support for comparing service-mesh implementations.

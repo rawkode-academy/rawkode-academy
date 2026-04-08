@@ -5,8 +5,9 @@ seo:
   description: 'Scan container images, Kubernetes manifests, and IaC with Trivy using practical tutorials for faster cloud-native security workflows.'
 logos:
   stacked: true
-website: 'https://aquasecurity.github.io/trivy/'
-documentation: 'https://aquasecurity.github.io/trivy/v0.48/'
+website: 'https://trivy.dev/'
+source: 'https://github.com/aquasecurity/trivy'
+documentation: 'https://trivy.dev/docs/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -16,4 +17,8 @@ community:
 matrix:
   status: skip
 ---
-Trivy is a comprehensive and easy-to-use security scanner for containers, Kubernetes, and other cloud-native artifacts. It helps developers and security teams identify vulnerabilities, misconfigurations, and secrets in their infrastructure early in the development lifecycle. By scanning container images, file systems, and repositories, Trivy enables proactive risk mitigation and ensures compliance with security best practices.
+Trivy is a security scanner from Aqua Security that finds vulnerabilities, misconfigurations, exposed secrets, and license issues across a wide range of targets. A single binary can scan container images, filesystems, Git repositories, running Kubernetes clusters, Terraform and CloudFormation, Helm charts, Dockerfiles, and SBOMs.
+
+For vulnerability scanning it inspects OS packages (Alpine, Debian, Ubuntu, RHEL, and others) and language-specific lockfiles (npm, pip, Go modules, Cargo, Maven, and more), matching them against a database assembled from upstream advisories. The database is distributed as an OCI artifact so air-gapped environments can mirror it. For IaC and Kubernetes it uses built-in policies (formerly shipped as tfsec and Defsec) to flag misconfigurations like public S3 buckets or privileged pods.
+
+Trivy integrates cleanly into CI with non-zero exit codes on findings, and ships as a Kubernetes operator and an Aqua Trivy Helm chart for continuous in-cluster scanning. It has become the default scanner embedded in GitLab, Harbor, Artifact Hub, and many CNCF projects.

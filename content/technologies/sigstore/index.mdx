@@ -6,6 +6,7 @@ seo:
 logos:
   stacked: true
 website: 'https://www.sigstore.dev/'
+source: 'https://github.com/sigstore/sigstore'
 documentation: 'https://docs.sigstore.dev/'
 license: Apache-2.0
 status: stable
@@ -18,4 +19,8 @@ community:
 matrix:
   status: explore
 ---
-Sigstore is a project that enables software signing, verifying, and discovering using transparency log technology. It aims to make software supply chain security practices more accessible and widespread by providing free, easy-to-use tools for signing and verifying software artifacts. Sigstore eliminates the need for developers to manage long-lived keys and provides a mechanism to publicly audit and track the signing and verification history of software.
+Sigstore is a set of services and tools for signing, verifying, and proving the provenance of software artifacts without requiring developers to manage long-lived signing keys. It was started at Red Hat and the Linux Foundation to close the gap that GPG and manual key management left in the software supply chain.
+
+The system has three core components. Cosign is the CLI that produces and verifies signatures over OCI container images, blobs, and in-toto attestations. Fulcio is a certificate authority that issues short-lived X.509 code-signing certificates bound to an OIDC identity (GitHub Actions, Google, GitLab, etc.), so the signer is a verifiable identity rather than an opaque key. Rekor is an append-only, Merkle-tree transparency log that records every signature so tampering and backdating become detectable.
+
+Together these enable keyless signing: a CI job authenticates to Fulcio via its workload OIDC token, receives a certificate valid for a few minutes, signs the artifact, and logs the signature to Rekor. Verifiers later check the signature against the certificate chain and the Rekor inclusion proof. Sigstore is used by Kubernetes, the Python Package Index, npm, Homebrew, and Chainguard images, and it underpins SLSA provenance attestations across the CNCF ecosystem.

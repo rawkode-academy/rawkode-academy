@@ -19,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Clusterpedia is used for complex resources search across multiple clusters, support simultaneous search of a single kind of resource  or multiple kinds of resources existing in multiple clusters.
+Clusterpedia is a multi-cluster search engine for Kubernetes resources. It aggregates resources from many clusters into a single, queryable store so you can run complex searches, list, and watch across fleets without hitting each cluster's API server directly.
 
-Clusterpedia is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It works by running a set of controllers (ClusterSynchro Manager) that connect to registered `PediaCluster` resources, pull their resources, and persist them into a storage layer backed by a relational database (MySQL or PostgreSQL) or other pluggable backends. A custom API server then exposes a Kubernetes-compatible API under the `clusterpedia.io` group, letting you use `kubectl` with extra search parameters like label selectors, field selectors, fuzzy name matching, pagination, and SQL-style ordering that the upstream API server does not support.
+
+In practice, Clusterpedia fills a gap that tools like Karmada and Open Cluster Management leave open: they federate workloads, but searching resources across clusters still requires fanning out queries. Clusterpedia is purpose-built for the read path — inventory, audit, and debugging across tens or hundreds of clusters — and supports both "real-time" (proxy to live cluster) and "cached" query modes depending on whether you want consistency or speed.

@@ -2,6 +2,7 @@
 name: OpenFeature
 logos: null
 website: 'https://openfeature.dev/'
+documentation: 'https://openfeature.dev/docs/reference/intro/'
 source: 'https://github.com/open-feature/spec'
 license: Apache-2.0
 status: stable
@@ -20,6 +21,8 @@ community:
 matrix:
   status: explore
 ---
-Standardizing Feature Flagging for Everyone
+OpenFeature is a vendor-neutral specification and set of SDKs for feature flagging. It decouples the feature-flag API your application calls from the backend that actually evaluates the flags, so switching between LaunchDarkly, Flagsmith, Split, ConfigCat, Unleash, GO Feature Flag, or a self-hosted implementation becomes a provider swap rather than a code rewrite.
 
-OpenFeature is a Cloud Native Computing Foundation (CNCF) incubating project.
+The spec defines a small, typed evaluation API — `getBooleanValue`, `getStringValue`, `getObjectValue`, etc. — along with an `EvaluationContext` for passing user and request attributes, and a hooks system for cross-cutting concerns like logging, telemetry, and validation. Providers implement a narrow interface; the SDK plugs them in at runtime. There are official SDKs for Java, .NET, Go, JavaScript/Node, Python, Ruby, PHP, and Rust, plus a daemon called `flagd` that speaks a gRPC evaluation protocol so languages without a native SDK can still participate. OpenFeature also publishes OpenTelemetry semantic conventions for feature-flag evaluation, so flag decisions can land on existing traces and metrics without custom instrumentation.
+
+OpenFeature was accepted into the CNCF in 2022, reached incubating status in 2023, and is Apache-2.0. Its position in the ecosystem is similar to what OpenTelemetry is to observability or SQL to databases: a common surface over a competitive market of backends.

@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Dex is a CNCF sandbox project.
+Dex is an OpenID Connect (OIDC) and OAuth 2.0 identity provider that acts as a federation layer in front of other identity stores. It doesn't store passwords itself; instead it delegates authentication to upstream "connectors" — LDAP, SAML, GitHub, Google, Microsoft, GitLab, Bitbucket, OpenShift, OIDC-compliant providers, and more — and re-exposes them as a single OIDC endpoint your applications can trust.
 
-Dex is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The original use case, and still the dominant one, is issuing OIDC tokens for `kubectl` and the Kubernetes API server. Kubernetes only speaks OIDC for user authentication, so putting Dex in front of, say, GitHub or LDAP gives you `kubectl` login flows with group claims that map cleanly to RBAC. Argo CD, Harbor, Gitea, Grafana, and many other cloud-native apps use Dex the same way. It's written in Go, stores its state in etcd, Postgres, MySQL, SQLite, or Kubernetes CRDs, and ships as a single binary or container.
+
+Dex was originally created by CoreOS (which also open-sourced etcd and rkt), later maintained by Red Hat, and is now a CNCF sandbox project with an independent community. Alternatives in the same space include Keycloak (heavier, Java-based, with a full user database and admin UI), Ory Hydra and Kratos (more modular), Authelia, and Zitadel. Dex's niche is being small, stateless-ish, and purely a federation layer — not a full IAM product.

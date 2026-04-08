@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://loxilb.io'
 source: 'https://github.com/loxilb-io/loxilb'
+documentation: 'https://docs.loxilb.io/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-eBPF based cloud-native load-balancer. Powering Kubernetes|Edge|5G|IoT|XaaS Apps.
+loxilb is an open-source load balancer for Kubernetes and edge workloads, built around an eBPF data plane and a Go control plane. It implements Kubernetes Service type LoadBalancer without depending on a cloud provider, which makes it a bare-metal and telco-friendly alternative to MetalLB.
 
-LoxiLB is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The data path is an eBPF/XDP program attached to network interfaces that performs connection tracking, DNAT, SNAT, stateful firewalling, and QoS entirely in-kernel, bypassing iptables and conntrack. A user-space Go daemon programs the eBPF maps and speaks BGP via an embedded goBGP stack, so loxilb can advertise service VIPs upstream the same way MetalLB does in BGP mode. Beyond L4, it supports SCTP multi-homing, GTP, and SRv6 — features that matter for 5G user-plane and edge deployments more than for typical web workloads. A companion kube-loxilb operator integrates with the Kubernetes Service API and optionally acts as an ingress controller.
+
+loxilb sits alongside MetalLB, Cilium's LB-IPAM and BGP control plane, and PureLB, and differentiates on telco-grade protocol support and the eBPF-first data plane.

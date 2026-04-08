@@ -20,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Artifact Hub is a CNCF incubating project.
+Artifact Hub is a web-based discovery index for cloud-native packages — Helm charts, OLM operators, Falco rules, OPA policies, Tekton tasks, Krew kubectl plugins, Tinkerbell actions, KEDA scalers, Keptn integrations, Kyverno policies, and more. It solves the "where do I find a chart for X" problem that existed after the original `helm/charts` monorepo was deprecated in 2020 and chart publishing became federated.
 
-Artifact Hub is a Cloud Native Computing Foundation (CNCF) incubating project.
+It's a Go backend with a React frontend, backed by PostgreSQL. Repositories self-register (`helm repo add` style) and Artifact Hub periodically crawls them to ingest metadata, README files, values schemas, signatures, and security scan results from Trivy. Packages are ranked by signals like maintainer verification, Cosign signatures, OpenSSF Scorecard results, and recency. You can search across every indexed artifact type in one place and, for charts specifically, get inline values documentation and install commands.
+
+Artifact Hub is maintained by the CNCF itself (it moved from a Helm subproject to a top-level CNCF project in 2020, now incubating) and the public instance at artifacthub.io is the closest thing the ecosystem has to a central package registry. You can also self-host it if you need to index private repositories alongside public ones.

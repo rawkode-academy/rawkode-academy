@@ -4,7 +4,7 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://github.com/modelpack/model-spec'
+website: 'https://modelpack.org/'
 source: 'https://github.com/modelpack/model-spec'
 license: Apache-2.0
 status: stable
@@ -16,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-The project establishes open standards for packaging, distributing and running AI artifacts in the cloud-native environment.
+ModelPack is a specification and toolset for packaging machine-learning models as OCI artifacts so the existing container registry ecosystem — Harbor, GHCR, ECR, GCP Artifact Registry — can store, sign, and distribute models the same way it already handles images. It is a CNCF sandbox project.
 
-ModelPack is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The specification defines a media-type layout for a model package: a manifest that references layers containing model weights, tokenizer files, configuration, and optional datasets and code, each addressed by content digest. Because the result is a valid OCI artifact, standard tooling for signing (cosign), SBOMs, provenance attestations (in-toto), and mirroring works on models without modification. The reference CLI, modctl, builds packages from a ModelFile descriptor and pushes or pulls them from any OCI registry; KitOps is a compatible implementation that adds a Python SDK and integrations with common MLOps platforms.
+
+ModelPack competes conceptually with Hugging Face Hub's proprietary repo format and with ad-hoc tarballs in S3. Its pitch is using OCI as the lingua franca for model distribution so the supply-chain controls teams already apply to container images — registry auth, scanning, admission policies — extend cleanly to ML artifacts.

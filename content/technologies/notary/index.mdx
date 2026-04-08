@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://notaryproject.dev/'
+documentation: 'https://notaryproject.dev/docs/'
 source: 'https://github.com/notaryproject/notation'
 license: Apache-2.0
 status: stable
@@ -18,6 +19,8 @@ cncf:
 matrix:
   status: watch
 ---
-Notary Project is a CNCF incubating project.
+The Notary Project is a set of specifications and tooling for signing and verifying OCI artifacts, most commonly container images. Its reference CLI, `notation`, produces detached signatures that are stored as OCI artifacts alongside the image in any OCI 1.1-compatible registry, so signature distribution rides on the same infrastructure as the image itself.
 
-Notary Project is a Cloud Native Computing Foundation (CNCF) incubating project.
+Notation v2 is a clean break from the original TUF-based Notary v1 (which backed Docker Content Trust). It uses X.509 certificates and PKCS#11 or cloud KMS key stores rather than TUF key hierarchies, and signatures are expressed as COSE or JWS envelopes pointed at by an OCI `referrers` relationship. Verification is driven by a trust policy document that pins trusted identities, certificate chains, and scopes per registry or repository. Plugins connect `notation` to AWS Signer, Azure Key Vault, Google Cloud KMS, HashiCorp Vault, and hardware tokens.
+
+In the supply-chain security landscape, Notation competes and overlaps with Sigstore's `cosign`. Cosign leans on keyless, OIDC-based signing against a transparency log (Rekor), while Notation targets teams that already operate traditional X.509 PKI and want CA-rooted trust. Both are commonly consumed at admission time via Kyverno, OPA Gatekeeper, or Ratify. Notary has been a CNCF incubating project since 2017.

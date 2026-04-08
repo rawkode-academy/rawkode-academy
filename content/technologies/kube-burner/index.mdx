@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kube-burner.github.io/kube-burner/'
 source: 'https://github.com/kube-burner/kube-burner'
+documentation: 'https://kube-burner.github.io/kube-burner/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Kube-burner is a CNCF sandbox project.
+kube-burner is a performance and scale testing tool for Kubernetes. It hammers an API server with configurable churn of objects — Namespaces, Deployments, Pods, Services, Secrets, ConfigMaps, custom CRDs — while recording timing, API server latency, and cluster metrics to measure how a cluster behaves at scale.
 
-Kube-burner is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A test is a YAML config file listing jobs; each job specifies an object template, how many to create (jobIterations), queries-per-second limits, and an optional churn phase where objects are deleted and recreated to simulate long-running turnover. kube-burner talks to the API server directly via client-go, measures per-object apply/ready latency, and optionally scrapes Prometheus at the end of the run to compute alerting and a set of built-in indicators (etcd fsync P99, API server request latency, kubelet pod startup latency) that get indexed into Elasticsearch/OpenSearch for later comparison. It has a plugin for OCP (kube-burner-ocp) that wraps the canonical Red Hat scale tests — node-density, cluster-density-v2, etc.
+
+Red Hat uses kube-burner in its own release pipeline to catch scale regressions in OpenShift. It is the go-to tool when you want to answer "how many pods/nodes/secrets can this control plane handle before latency degrades" with reproducible numbers rather than vibes.

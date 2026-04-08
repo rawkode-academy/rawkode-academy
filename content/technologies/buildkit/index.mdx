@@ -3,6 +3,7 @@ name: BuildKit
 logos: null
 website: 'https://github.com/moby/buildkit'
 documentation: 'https://docs.docker.com/build/buildkit/'
+source: 'https://github.com/moby/buildkit'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -10,22 +11,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: learn
 ---
-BuildKit is a toolkit for converting source code to build artifacts in an efficient, expressive and reproducible manner. It's designed as a replacement for the classic Dockerfile build system, offering features such as concurrent dependency resolution, optimized layer caching, and support for sophisticated build strategies. It addresses common pain points of traditional Docker builds, like slow build times and inefficient image layering, leading to faster builds, smaller images, and improved security.
+BuildKit is the build backend that replaced Docker's legacy image builder. When you run `docker build` on any recent version of Docker, you're using BuildKit under the hood. It lives in the Moby project and is also the engine behind `buildx`, `nerdctl build`, earthly, depot.dev, and most of the third-party container build tools in the ecosystem.
 
-BuildKit is a modern build subsystem for Docker and other container platforms, designed to improve performance, storage management, and feature extensibility compared to the legacy builder.
+The key idea is LLB (Low-Level Build), an intermediate representation that describes a build as a DAG of filesystem operations. Frontends parse high-level input — Dockerfiles or custom formats — into LLB, and the BuildKit daemon executes that DAG with aggressive parallelism and fine-grained content-addressed caching. Independent stages run concurrently, cache keys are computed per operation from input digests rather than per-line, and cache can be exported to and imported from an OCI registry so CI runners share work. It also supports secret mounts (`--mount=type=secret`), SSH forwarding (`--mount=type=ssh`), rootless builds, and cross-platform builds via QEMU emulation or remote builders.
 
-## Key Features
-
-- **Concurrent Building:** BuildKit constructs a dependency graph of your build steps and executes independent steps in parallel, significantly speeding up build times.
-- **Advanced Caching:** It offers flexible caching mechanisms, including the ability to export build caches to a registry, allowing CI/CD pipelines to reuse cache layers across different runners.
-- ** LLB (Low-Level Build):** BuildKit uses an intermediate binary format called LLB. This decouples the frontend (like Dockerfile syntax) from the backend, allowing developers to extend build capabilities or create entirely new build languages without changing the core builder.
-- **Secret Management:** BuildKit provides secure ways to mount secrets (like API keys or SSH credentials) into the build process without persisting them in the final image layers.
-- **Rootless Execution:** It supports running in rootless mode, improving security by not requiring root privileges on the host system.
-
-## Architecture
-
-BuildKit consists of two main components:
-1.  **`buildkitd` (Daemon):** The background service that manages the build process, cache, and workers.
-2.  **`buildctl` (Client):** The command-line tool used to communicate with the daemon and trigger builds.
-
-While often used transparently within Docker (via `DOCKER_BUILDKIT=1`), it can also be used as a standalone tool for advanced use cases.
+Architecturally it's `buildkitd` (the daemon, written in Go) plus `buildctl` (a thin client), though most users only ever interact with it through `docker buildx`. Because the Dockerfile frontend is itself pulled from an image (`# syntax=docker/dockerfile:1.7`), new Dockerfile features ship independently of the BuildKit release cycle. If you care about build performance, BuildKit is not optional — it's the baseline.

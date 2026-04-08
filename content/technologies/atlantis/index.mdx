@@ -16,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-Terraform Pull Request Automation for Teams
+Atlantis is a self-hosted Terraform pull request automation server. You point it at your GitHub, GitLab, Bitbucket, or Azure DevOps repo, and when someone opens a PR touching Terraform code Atlantis runs `terraform plan` and posts the output as a PR comment. Reviewers approve the plan by commenting `atlantis apply`, at which point Atlantis runs the apply and reports back. The Terraform state is locked on the PR while it's open so two PRs can't race each other.
 
-Atlantis is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It's a single Go binary that you run somewhere with network access to your VCS webhook endpoint and credentials for your cloud provider. Workflows are configurable per-repo via an `atlantis.yaml` — you can define projects, pin Terraform versions (via the tfenv-like `terraform_version` field), run custom pre/post hooks, and scope applies to specific directories. It supports Terragrunt, OpenTofu, and policy checks via Conftest.
+
+Atlantis was originally built at HootSuite in 2017, open sourced in 2018, and became a CNCF sandbox project in 2024. It competes with Terraform Cloud/HCP, Spacelift, env0, and Scalr — the main appeal being that it's free, self-hosted, and you keep your state and credentials entirely inside your own infrastructure. For teams that just want PR-driven Terraform without a SaaS dependency, it's the obvious choice.

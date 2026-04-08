@@ -19,6 +19,8 @@ community:
 matrix:
   status: watch
 ---
-A constraint-based record & functional language mainly used in configuration and policy scenarios.
+KCL (Kusion Configuration Language) is a statically typed, constraint-based configuration language built for generating Kubernetes manifests, Terraform input, and other structured configuration. It originated at Ant Group, powers their internal Kusion platform, and was donated to the CNCF sandbox in 2023.
 
-KCL is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Syntactically KCL looks like a blend of Python and TypeScript: you declare schemas with typed fields, default values, and inline validation rules, then instantiate them and the compiler checks everything at compile time. `check` blocks let you attach assertions directly to a schema ("replicas must be odd in production," "memory limit ≥ request"), so policy lives next to the data. The toolchain is written in Rust, compiles fast, and ships a package registry (`kcl.mod`), an LSP, formatter, import tools for Helm/CRDs/OpenAPI, and bindings to Go, Python, and Java for embedding. It also integrates with Argo CD, Flux, Helm (as a post-renderer), Crossplane, and Kustomize.
+
+It lives in the same territory as Jsonnet, CUE, Pkl, and Nickel. The rough positioning: Jsonnet gave you templating, CUE gave you types and constraints with a new mental model, and KCL aims for CUE-level validation with a more familiar imperative syntax and a better error-message experience for people coming from Python.

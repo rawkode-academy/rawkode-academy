@@ -3,7 +3,7 @@ name: Docker Build Cloud
 logos:
   horizontal: true
 website: 'https://www.docker.com/products/build-cloud/'
-documentation: 'https://docs.docker.com/build/cloud/'
+documentation: 'https://docs.docker.com/build-cloud/'
 license: Commercial
 status: stable
 category: App Definition and Development
@@ -11,22 +11,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: skip
 ---
-Docker Build Cloud is a hosted, collaborative build service offered by Docker. It accelerates container image builds by leveraging remote build infrastructure, enabling developers to build faster and more efficiently. This significantly reduces build times, parallelizes builds across multiple architectures and platforms (like x86 and ARM), and frees up local resources. It's particularly useful for larger projects with complex build processes, teams working collaboratively on containerized applications, and organizations needing to optimize their CI/CD pipelines. By offloading builds to the cloud, Docker Build Cloud improves developer productivity and reduces the bottleneck of local machine limitations.
+Docker Build Cloud is a hosted BuildKit service from Docker Inc. You register a cloud builder with `docker buildx create --driver cloud <org>/<name>`, and subsequent `docker build` commands ship their build context to Docker's remote builders instead of executing locally. The image layers come back, or get pushed directly to a registry from the cloud side.
 
-Key benefits include significantly faster build times, increased parallelism for concurrent builds, improved resource utilization by offloading build processes, simplified cross-platform image builds, and tighter integration with the Docker ecosystem, streamlining the overall containerization workflow. This helps organizations accelerate their software delivery lifecycle and improve developer experience.
+Two things make it useful in practice. First, native multi-architecture builds: the service runs native ARM64 and AMD64 builders, so `docker build --platform linux/amd64,linux/arm64` doesn't fall back to QEMU emulation (which can be 10x slower for compile-heavy languages). Second, shared cache: the BuildKit cache lives on the remote builder and is shared across your team and CI jobs, so the layer your coworker built this morning is a cache hit when you build locally this afternoon. That eliminates the usual "CI cache is cold because each runner starts fresh" problem.
 
-Docker Build Cloud is a managed service by Docker designed to drastically speed up container image builds by offloading them to powerful, cloud-based infrastructure. It leverages advanced BuildKit features to offer optimized, scalable, and collaborative build environments.
-
-## Key Features & Benefits
-
--   **Accelerated Build Times:** Offloads compute-intensive build processes to remote, high-performance builders in the cloud, significantly reducing local build times.
--   **Multi-Architecture Builds:** Natively supports building images for different architectures (e.g., AMD64 and ARM64) without requiring local emulation, simplifying cross-platform development.
--   **Shared Caching:** Implements intelligent, fine-grained caching across teams and projects, minimizing redundant build steps and ensuring consistent, faster builds.
--   **Parallel Builds:** Executes multiple build jobs concurrently, maximizing efficiency and throughput, especially in CI/CD pipelines.
--   **Build Insights:** Provides detailed visibility into build history, performance metrics, and logs for better optimization and troubleshooting.
--   **Resource Optimization:** Frees up local developer machine resources by moving builds to the cloud, allowing developers to focus on coding.
--   **Seamless Integration:** Integrates effortlessly with existing Docker workflows and CI/CD systems, enhancing productivity without disrupting current processes.
-
-## How It Works
-
-Docker Build Cloud functions by providing remote BuildKit builders. When you initiate a build using the Docker CLI (configured to use Build Cloud), the build context is securely sent to a cloud builder. The cloud builder executes the build process, leverages its optimized environment and shared cache, and returns the resulting image layers and metadata. This process ensures that builds are not only faster but also more consistent and reproducible across different environments.
+Docker Build Cloud is a commercial add-on to Docker paid plans. Alternatives are running your own remote BuildKit instance (the open-source piece does all of this, you just manage the machines), Depot.dev (a popular third-party remote build service that predates Docker's offering), Namespace, Blacksmith, or the native multi-arch runners some CI vendors now provide. Under the hood it's all the same BuildKit; the question is who runs the servers and cache.

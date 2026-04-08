@@ -3,7 +3,8 @@ name: WunderGraph
 logos:
   horizontal: true
 website: 'https://wundergraph.com/'
-documentation: 'https://wundergraph.com/docs'
+source: 'https://github.com/wundergraph/cosmo'
+documentation: 'https://cosmo-docs.wundergraph.com/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -11,6 +12,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: explore
 ---
-WunderGraph is a serverless API developer platform that transforms existing data sources (GraphQL APIs, REST APIs, databases) into secure, high-performance GraphQL APIs with built-in authentication and authorization. It focuses on removing boilerplate and complexity from API development, enabling developers to build production-ready backends-for-frontends (BFFs) faster and with less code. It allows secure server-side composition of data from multiple sources and automates common API tasks, while providing type safety and security guarantees.
+WunderGraph is an open-source GraphQL federation platform centered on Cosmo, a high-performance router written in Go. Cosmo implements the Apollo Federation v1 and v2 specs and acts as the supergraph gateway: teams publish subgraph schemas to a schema registry, Cosmo composes them, and clients query a single federated endpoint.
 
-WunderGraph's primary use cases include aggregating data from various APIs and databases into a unified GraphQL API, building secure and scalable backend APIs for web and mobile applications, creating personalized data experiences, and simplifying API deployment in serverless environments. It's also used for internal tooling and data integration scenarios where simplifying the development experience and ensuring data security are critical.
+The router executes query plans natively in Go rather than by proxying to an external query planner, which is how it claims significantly better tail latency than Apollo Router for the same workloads. On top of federation it supports event-driven GraphQL subscriptions over NATS, Kafka, and Redis (Cosmo Streams), adapts REST and gRPC upstreams into subgraphs, and provides an analytics backend backed by ClickHouse for tracing and schema usage. A separate Hub product adds governance: schema proposals, breaking-change checks, and CI-enforced change policies.
+
+WunderGraph originally shipped a different product focused on BFF-style generated clients, but the current focus is Cosmo as an open-source alternative to Apollo GraphOS for teams running federated GraphQL at scale.

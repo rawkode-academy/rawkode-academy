@@ -13,6 +13,8 @@ subcategory: Automation & Configuration
 matrix:
   status: skip
 ---
-aquaproj (aqua) is a declarative CLI version manager. It enables you to manage CLI tools and their versions in a consistent and reproducible way across different environments. Instead of manually installing and updating CLI tools, you define the tools and versions you need in a configuration file, and aqua automatically installs and manages them. This ensures that everyone on your team uses the same versions of tools, preventing compatibility issues and streamlining development workflows. It supports various package managers and methods of installation.
+Aqua is a declarative CLI version manager. You list the tools you need — `terraform`, `kubectl`, `helm`, `gh`, hundreds more — with exact versions in an `aqua.yaml` file, and `aqua install` downloads them into a per-user cache and creates shim binaries on your `$PATH`. Run any tool and aqua transparently resolves it to the correct pinned version for the current directory.
 
-aquaproj (aqua) provides declarative, reproducible management of CLI tools via a single configuration file, ensuring consistent versions across machines and CI pipelines.
+Under the hood, aqua is a single Go binary that pulls from a community-maintained registry of package definitions (over 1,500 tools). Each registry entry describes where to download the binary for each OS/arch and, crucially, an SHA-256 checksum or Cosign signature. That makes aqua a practical supply-chain tool as well: every install can be checksum-verified, and you can enforce policies that refuse to install unsigned or unknown packages. It also generates lockfiles so CI and developer machines stay in sync.
+
+In the broader ecosystem, aqua overlaps with `asdf`, `mise`, and Nix. Compared to asdf/mise it is narrower (binaries only, no language toolchains) but significantly faster and has better checksum handling out of the box. Compared to Nix it is drastically simpler at the cost of flexibility. It is a good fit for platform teams who want every engineer to run the same `kubectl` and `terraform` without writing bootstrap scripts.

@@ -13,36 +13,8 @@ community:
 matrix:
   status: skip
 ---
-Inlets is a Cloud Native tunnel that exposes your local endpoint to the Internet. It provides an alternative to ngrok, exposing local services securely without relying on centralized services. It enables use cases such as exposing local Kubernetes clusters for remote access, testing webhooks on local development environments, or sharing local applications for demos or collaboration.
+Inlets is a reverse tunnel built by Alex Ellis (of OpenFaaS) that punches out from a private network to a public exit-server and relays inbound traffic back. You run the server on a cheap cloud VM with a public IP, run the client next to the thing you want to expose (laptop, Raspberry Pi, on-prem Kubernetes), and the client holds an outbound websocket to the server over which all traffic is multiplexed.
 
-Inlets is a cloud-native tunnel designed to securely expose local services and endpoints to the internet. Developed by OpenFaaS Ltd., it provides a self-hosted alternative to SaaS tunnel solutions like ngrok, giving users full control over their data and infrastructure.
+Originally the project had an open-source core (inlets OSS) and a Pro edition; as of 2022 the open-source edition was deprecated and Inlets Pro / "inlets" is now a commercial product. It supports both HTTP (L7, with host-based routing, multiple upstream services per tunnel, TLS termination) and raw TCP (L4, for SSH, Postgres, RDP, etc.), runs natively on Kubernetes with a LoadBalancer controller that provisions real public IPs for clusters behind NAT, and can be automated via `inletsctl` to spin up exit-servers on DigitalOcean, Linode, Hetzner, Scaleway, and others.
 
-## Key Features
-
--   **Secure Tunnels:** Establishes secure tunnels over websockets with TLS encryption, ensuring that data in transit is protected.
--   **Cloud Native Design:** Built for modern cloud and Kubernetes environments, making it easy to integrate into existing infrastructure.
--   **L7 (HTTP) & L4 (TCP) Tunneling:** Supports both HTTP-level and raw TCP tunneling, allowing you to expose a wide variety of services, including web applications, databases, SSH, and more.
--   **Multiple Endpoints:** Capable of exposing multiple services through a single tunnel.
--   **Load Balancing:** Includes built-in load balancing capabilities for HTTP tunnels.
--   **Self-Hosted Control:** Unlike many SaaS alternatives, Inlets is self-hosted, meaning you deploy and manage the components (client and server) yourself, maintaining full control over your network traffic.
-
-## How it Works
-
-Inlets operates with two main components:
-
-1.  **Inlets Client:** Runs on your local machine or within your private network, pointing to the service you want to expose.
-2.  **Inlets Server (or "Exit-server"):** Runs on a public cloud VM or Kubernetes cluster with a public IP address.
-
-The client establishes an outbound websocket connection to the server. Traffic destined for the public server is then securely forwarded through this websocket tunnel to your local service.
-
-## Benefits
-
--   **Data Control & Privacy:** Since it's self-hosted, you retain full control over your data, unlike third-party SaaS tunnel providers.
--   **Versatility:** Ideal for a wide range of use cases, including:
-    -   Exposing local development environments for webhooks testing.
-    -   Providing remote access to local Kubernetes clusters.
-    -   Sharing local applications for demos or collaboration.
-    -   Connecting on-premise services to cloud resources.
--   **Reduced Latency:** By choosing the geographic location of your exit-server, you can minimize latency for your users.
--   **Cost-Effective:** Often more cost-effective than proprietary SaaS tunnel solutions, especially for continuous or high-volume usage.
--   **Cloud & Edge Integration:** Designed to work seamlessly in cloud-native and edge computing scenarios.
+It occupies the same space as ngrok, Cloudflare Tunnel, and Tailscale Funnel, but the sales pitch is that you own the exit node, your data never traverses a third-party SaaS, and you pay per VM instead of per tunnel.

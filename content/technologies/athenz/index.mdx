@@ -20,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Open source platform for X.509 certificate based service authentication and fine grained access control in dynamic infrastructures
+Athenz is a service-to-service authentication and fine-grained authorization system built at Yahoo (now part of Verizon Media / Yahoo again) and open sourced in 2016. It issues short-lived X.509 certificates and JWT-like access tokens that workloads use to prove their identity to each other, and it evaluates RBAC policies to decide what those identities are allowed to do.
 
-Athenz is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core architecture is two services: ZMS (the authorization management system) holds the source-of-truth for domains, roles, and policies in a central database; ZTS (the token service) runs regionally and mints service certificates and access tokens against that policy, doing the hot-path work without hitting ZMS on every request. Workloads authenticate to ZTS with a bootstrapped identity — typically a node attestation provided by AWS, GCP, or a Kubernetes service account — and receive an SVID-style cert they can then present to peers or to an Envoy sidecar.
+
+In the broader identity landscape Athenz overlaps significantly with SPIFFE/SPIRE, HashiCorp Vault's PKI engine, and cert-manager. Its distinguishing feature is that it ties identity issuance directly to a centralized RBAC policy model, which is why it's still used heavily inside large operators like Yahoo, LinkedIn, and Verizon Media. Outside of those environments most new projects reach for SPIFFE first.

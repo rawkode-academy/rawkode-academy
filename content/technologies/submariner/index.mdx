@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://submariner.io'
 source: 'https://github.com/submariner-io/submariner'
+documentation: 'https://submariner.io/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -18,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Submariner enables direct networking between Pods and Services in different Kubernetes clusters, either on-premises or in the cloud.
+Submariner provides flat Layer 3 connectivity and cross-cluster service discovery between Kubernetes clusters, including clusters that live in different clouds, VPCs, or on-premises networks with overlapping or non-overlapping CIDRs. It lets a pod in cluster A reach a service in cluster B by its DNS name, as if they were in the same cluster.
 
-Submariner is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally, Submariner elects a Gateway node in each participating cluster that terminates an encrypted tunnel (IPsec via Libreswan or WireGuard) to the other clusters' gateways. A Route Agent on every node programs the data path so pod and service traffic destined for remote CIDRs is routed through the local gateway. The Broker is a lightweight coordination point (itself a Kubernetes cluster) that shares endpoint and service information across members. Lighthouse extends CoreDNS with the `clusterset.local` domain defined by the Kubernetes multi-cluster services API so services can be exported and consumed by name. Globalnet handles the overlapping-CIDR case by NATing traffic through a virtual global CIDR.
+
+Submariner is a CNCF Sandbox project originated at Rancher/SUSE and is commonly used for hybrid-cloud failover, regulated multi-region deployments, and federating clusters managed by Red Hat Advanced Cluster Management.

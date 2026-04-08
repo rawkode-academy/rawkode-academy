@@ -5,7 +5,8 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://www.tremor.rs/'
-documentation: 'https://docs.tremor.rs/'
+source: 'https://github.com/tremor-rs/tremor-runtime'
+documentation: 'https://www.tremor.rs/docs/0.12/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -19,6 +20,8 @@ community:
 matrix:
   status: graveyard
 ---
-Tremor is an event processing system designed for high-throughput, low-latency, and fault-tolerant data streaming. It acts as a data ingestion and processing pipeline, capable of transforming, filtering, enriching, and routing events in real-time. Tremor provides a powerful query language for defining data flows and transformations, allowing users to build complex event processing logic with relative ease.
+Tremor is an event processing engine written in Rust, originally built at Wayfair to sit between their applications and their observability and messaging backends. It was donated to the CNCF and is designed for the kind of high-volume routing, filtering, rate-limiting, and transformation work that otherwise ends up scattered across Logstash, Vector, and custom Kafka consumers.
 
-The value of Tremor lies in its ability to handle large volumes of event data from diverse sources, enabling real-time analytics, alerting, and data aggregation. It's particularly well-suited for use cases such as IoT data processing, log aggregation, security information and event management (SIEM), and industrial automation, where timely and accurate insights are crucial.
+Pipelines in Tremor are expressed as directed graphs with connectors (onramps and offramps) for things like Kafka, NATS, HTTP, Elasticsearch, and the file system. The logic inside a pipeline is written in Tremor's own query and scripting languages, which include structural pattern matching over JSON-like records and a SQL-style windowed query language for aggregations.
+
+Tremor's CNCF matrix status is now archived and the project is effectively dormant, but its ideas around typed event pipelines in Rust live on in tools like Vector and Benthos.

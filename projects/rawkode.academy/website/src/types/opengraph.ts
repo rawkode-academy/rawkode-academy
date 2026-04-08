@@ -11,4 +11,5 @@ export interface OpenGraphProps {
 	publishedAt?: Date | undefined;
 	updatedAt?: Date | undefined;
 	authors?: CollectionEntry<"people">[] | undefined;
+	noindex?: boolean | undefined;
 }

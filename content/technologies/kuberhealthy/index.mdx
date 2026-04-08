@@ -5,6 +5,7 @@ logos:
   horizontal: true
 website: 'https://github.com/kuberhealthy/kuberhealthy'
 source: 'https://github.com/kuberhealthy/kuberhealthy'
+documentation: 'https://github.com/kuberhealthy/kuberhealthy#readme'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -15,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-Kuberhealthy is a CNCF sandbox project.
+Kuberhealthy is a synthetic monitoring operator for Kubernetes. It runs user-defined "check" pods on a schedule and exposes their pass/fail results as Prometheus metrics and a JSON status endpoint, so you can alert on "can this cluster actually do the thing" rather than only on symptomatic CPU or memory signals.
 
-Kuberhealthy is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A check is just a container that runs, does something, and reports success or failure back to the Kuberhealthy operator via an injected URL and token. Out of the box it ships checks for deployment (can the cluster create a Deployment, roll it, and tear it down?), DNS resolution, image pull, PVC provisioning, kube-proxy connectivity, daemonset rollout, and network connectivity across nodes. Because checks are just containers, you can write your own in any language — the standard pattern is a small Go or Python binary that calls the Kubernetes API or your own application and reports success via the client library. A `KuberhealthyCheck` CRD declares the image, schedule, and timeout; the operator runs the pod in a dedicated namespace and tracks its last state.
+
+It was open-sourced by Comcast and later moved to the kuberhealthy org. Its niche versus Prometheus blackbox_exporter is that checks run inside the cluster and exercise Kubernetes primitives, which is how you catch things like "PersistentVolumes have been failing to bind for two hours" before any workload notices.

@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://urunc.io/'
 source: 'https://github.com/urunc-dev/urunc'
+documentation: 'https://urunc.io/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-A CRI-compatible runtime for running unikernels and application kernels as containers.  urunc bridges the gap between unikernels and containerized environments, enabling seamless  integration with cloud-native architectures while maintaining OCI compatibility.
+urunc is an OCI-compliant container runtime for unikernels. Where runc spawns a Linux process in namespaces and cgroups, urunc takes the same OCI bundle and instead boots the contained unikernel image on top of a virtual machine monitor or sandbox (QEMU, Firecracker, solo5, and others).
 
-urunc is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The point is to let unikernels participate in the existing container ecosystem. A unikernel image is packaged into a standard OCI artifact, stored in any registry, and scheduled by containerd, CRI-O, or Kubernetes just like a normal container. urunc reads the OCI spec, picks the appropriate VMM based on annotations, and launches the unikernel with the right devices and network plumbing. This gives workloads hardware-level isolation and very small attack surfaces without forcing operators to adopt an entirely separate orchestration stack.
+
+urunc is a CNCF sandbox project, developed by Nubificus, and is primarily useful for edge, multi-tenant, and security-sensitive scenarios where unikernel boot times and footprint matter.

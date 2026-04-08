@@ -2,9 +2,10 @@
 name: SOPS
 logos:
   icon: true
-website: 'https://github.com/getsops'
+website: 'https://getsops.io/'
 source: 'https://github.com/getsops/sops'
-license: Apache-2.0
+documentation: 'https://getsops.io/'
+license: MPL-2.0
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
@@ -17,6 +18,8 @@ community:
 matrix:
   status: skip
 ---
-sops is an editor of encrypted files that supports YAML, JSON, ENV, INI and BINARY formats and encrypts with AWS KMS, GCP KMS, Azure Key Vault, age, and PGP.
+SOPS (Secrets OPerationS) is a file-level encryption tool for YAML, JSON, ENV, INI, and binary files that lets teams store secrets in Git alongside the rest of their configuration. Originally built at Mozilla and now a CNCF Sandbox project maintained by the getsops community, it solves the awkward problem that generic tools like GPG encrypt the whole file, making diffs useless and merges painful.
 
-SOPS is a Cloud Native Computing Foundation (CNCF) sandbox project.
+SOPS encrypts only the values in a structured file while leaving keys in plaintext, so diffs still show which field changed without revealing the secret. Each file gets a data key that encrypts the values with AES-256-GCM; that data key is itself wrapped with one or more key management backends, so you can mix and match AWS KMS, GCP KMS, Azure Key Vault, HashiCorp Vault, age, and PGP in the same file. A `.sops.yaml` creation rule maps file paths to recipients, so committing a new file automatically picks the right keys.
+
+SOPS is the default secrets story in GitOps workflows built on Flux (which has a dedicated SOPS controller) and is commonly paired with Terraform, Helm, and Kustomize through plugins to decrypt secrets at apply time.

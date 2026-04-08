@@ -19,6 +19,9 @@ community:
 matrix:
   status: explore
 ---
-is a CNCF sandbox project.
 
-is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Headlamp is an open-source Kubernetes dashboard, originally built by Kinvolk (now Microsoft) and donated to the CNCF Sandbox in 2022. It's a web UI — or a desktop app via Electron — for browsing and managing clusters: workloads, storage, networking, RBAC, custom resources, logs, exec, and port-forward.
+
+The interesting bit versus the older Kubernetes Dashboard is that Headlamp is built as an extensible React/TypeScript frontend with a first-class plugin API. You can ship a plugin that adds new pages, sidebar entries, resource detail tabs, action buttons, or entire custom-resource viewers, and load it into any Headlamp deployment without forking the project. That's what makes vendors (like Flux, Kubeflow, Kanister, Kubescape, KubeVirt) ship Headlamp plugins as the UI layer for their controllers. Authentication is whatever the kubeconfig or OIDC provider says — Headlamp itself doesn't store credentials — and it can run in-cluster, as a standalone app, or as a local desktop tool pointing at multiple kubeconfig contexts at once.
+
+It competes with K9s (terminal UI), Lens (closed-source after a relicense), OpenLens, and the legacy Kubernetes Dashboard. Its niche is being "the extensible, vendor-neutral web UI for Kubernetes" — the piece the community wanted after Lens went proprietary.

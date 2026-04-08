@@ -4,6 +4,7 @@ logos:
   icon: true
 website: 'https://stackerbuild.io'
 source: 'https://github.com/project-stacker/stacker'
+documentation: 'https://stackerbuild.io/latest/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -14,6 +15,8 @@ cncf:
 matrix:
   status: skip
 ---
-Stacker is a tool for building OCI images and related artifacts such as SBOMs natively via a declarative yaml format.
+Stacker is a tool for building OCI container images from a declarative YAML file, without requiring a Docker daemon or root privileges. It was originally developed at Cisco for building minimal, reproducible images for network operating systems and is now a CNCF Sandbox project.
 
-Stacker is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A `stacker.yaml` describes a set of layers, each with a base image, build commands, imports (files or tarballs pulled into the build), and runtime config. Stacker executes the build inside an unprivileged user namespace using LXC, so builds work on shared CI runners where Docker-in-Docker is not an option. Layers are content-addressed and cached, and the tool can directly emit OCI images into an OCI layout, push them to a registry, or produce SquashFS-backed images suitable for immutable appliances.
+
+Stacker is differentiated by its focus on reproducibility, offline/air-gapped workflows, and integration with the OCI image spec and zot registry rather than Docker tooling. It is typically chosen by teams shipping embedded systems, network OS images, or strict supply-chain environments where daemonless and rootless builds matter.

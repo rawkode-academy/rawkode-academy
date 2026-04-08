@@ -4,7 +4,7 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://capsule.clastix.io'
+website: 'https://projectcapsule.dev/'
 source: 'https://github.com/projectcapsule/capsule'
 license: Apache-2.0
 status: stable
@@ -30,6 +30,8 @@ community:
 matrix:
   status: skip
 ---
-Capsule implements a multi-tenant and policy-based environment in your Kubernetes cluster. It is designed as a micro-services-based ecosystem with the minimalist approach, leveraging only on upstream Kubernetes.
+Capsule is a Kubernetes operator that implements soft multi-tenancy on a single cluster. Instead of giving each tenant their own cluster or virtual control plane, Capsule introduces a `Tenant` CRD that owns a group of namespaces, and a set of policies that constrain what workloads inside those namespaces can do — how many namespaces a tenant can create, which nodes they can schedule on, what storage classes they can use, what ingress hostnames they can claim, and so on.
 
-Capsule is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It works as a validating/mutating admission webhook plus a controller. When a tenant-owner user creates a namespace, Capsule automatically stamps it with the tenant label, applies the tenant's ResourceQuotas, LimitRanges, NetworkPolicies, and RBAC, and blocks any resource that would violate tenant boundaries. A tenant owner gets enough RBAC to self-serve namespaces without ever touching cluster-scoped resources directly — which is the core problem: stock Kubernetes RBAC has no notion of "owner of a group of namespaces".
+
+Capsule is built by Clastix and has been a CNCF sandbox project since 2022. It sits in the same space as vcluster (virtual control planes), HNC (Hierarchical Namespace Controller from sig-multitenancy), and Kiosk. The Capsule approach is lighter-weight than vcluster — one real control plane, policy-enforced tenant boundaries — which is a good fit for internal platforms where hard isolation isn't required but self-service is.

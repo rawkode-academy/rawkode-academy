@@ -2,8 +2,9 @@
 name: Helm Dashboard
 logos:
   horizontal: true
-website: 'https://helm.sh/'
-documentation: 'https://helm.sh/docs/'
+website: 'https://github.com/komodorio/helm-dashboard'
+source: 'https://github.com/komodorio/helm-dashboard'
+documentation: 'https://github.com/komodorio/helm-dashboard#readme'
 license: Apache-2.0
 status: abandoned
 category: Orchestration & Management
@@ -11,26 +12,8 @@ subcategory: Scheduling & Orchestration
 matrix:
   status: graveyard
 ---
-Helm Dashboard, while no longer actively maintained by the Helm project itself, provided a web-based user interface for managing Helm charts and deployments within a Kubernetes cluster. It aimed to simplify the process of installing, upgrading, and deleting applications packaged as Helm charts, making it more accessible to users who preferred a visual interface over command-line interactions. Its primary value was enhancing the usability of Helm, particularly for teams less familiar with CLI tools, enabling them to easily monitor chart deployments, view release history, and inspect resources deployed by Helm.
+Helm Dashboard was a web UI for inspecting and managing Helm releases in a Kubernetes cluster, originally built by Komodor. It listed installed releases, showed manifest diffs between revisions, let you browse the actual Kubernetes resources a chart produced, and exposed rollback and upgrade buttons on top of the Helm SDK.
 
-Helm Dashboard is an open-source web-based user interface designed to provide a visual overview and management capabilities for Helm charts and releases within a Kubernetes cluster. While it was once a valuable tool for simplifying Helm operations, it is currently unmaintained.
+The project is abandoned. The repository has not received meaningful updates since Komodor stopped investing in it, and it is not maintained by the Helm project itself — despite the name, it was never an official Helm subproject. It still works against older Helm releases but does not track current Helm 3.x changes.
 
-## Key Features (as of its active development)
-
--   **Visual Release Management:** Provided a clear overview of all installed Helm charts (releases) across your Kubernetes clusters.
--   **Revision History:** Allowed users to inspect the history of each Helm release, including manifest differences between revisions.
--   **Resource Inspection:** Enabled browsing of the actual Kubernetes resources (Deployments, Services, Pods, etc.) that were deployed by a specific Helm chart.
--   **Rollback & Upgrade:** Facilitated easy rollback to previous versions or upgrades to new versions of applications directly from the UI.
--   **Problem Scanning Integration:** Supported integration with various problem scanners to identify issues within deployed applications.
--   **Multi-Cluster Support:** Capable of managing Helm releases across multiple Kubernetes clusters from a single interface.
--   **Local or In-Cluster Deployment:** Could be run as a standalone binary locally or deployed directly into a Kubernetes cluster.
-
-## Benefits
-
--   **Simplified Helm Operations:** Made Helm more accessible to users who preferred a graphical interface over command-line tools.
--   **Enhanced Visibility:** Provided a visual "pane of glass" for understanding the state of Helm-managed applications.
--   **Faster Troubleshooting:** Visual diffs and resource inspection aided in quickly identifying and debugging deployment issues.
-
-## Current Status
-
-It is important to note that **Helm Dashboard is currently unmaintained**. While the core Helm project is actively developed by the CNCF community, the dashboard component, as provided by Komodor, is no longer receiving updates. Users should be aware of this status when considering its use in production environments.
+If you want a GUI for Helm today, look at k9s (TUI with Helm plugin), Headlamp, or the Helm integration in whatever cluster dashboard you already run. For GitOps-driven release management, Argo CD and Flux have replaced the "click to upgrade" workflow Helm Dashboard was targeting.

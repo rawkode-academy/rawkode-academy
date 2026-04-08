@@ -1,8 +1,9 @@
 ---
 name: Sveltos
 logos: null
-website: 'https://projectsveltos.io/'
-documentation: 'https://projectsveltos.io/docs/'
+website: 'https://projectsveltos.github.io/sveltos/'
+documentation: 'https://projectsveltos.github.io/sveltos/'
+source: 'https://github.com/projectsveltos/sveltos'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -10,4 +11,8 @@ subcategory: Scheduling & Orchestration
 matrix:
   status: watch
 ---
-Sveltos is a Kubernetes add-on controller designed to simplify deploying and managing applications across multiple Kubernetes clusters. It allows users to define a single set of configurations and policies that can be automatically applied to a fleet of clusters, regardless of their underlying infrastructure or distribution. This drastically reduces operational overhead and ensures consistency across environments.
+Sveltos is a Kubernetes add-on controller for deploying and managing resources, Helm charts, and Kustomize overlays across a fleet of workload clusters from a single management cluster. It sits one level above tools like Argo CD and Flux by treating "where to deploy" as a first-class selector problem rather than a per-cluster configuration step.
+
+A user creates a `ClusterProfile` or `Profile` that lists the Helm charts, raw manifests, Kustomize references, or Carvel packages to install, plus a label selector that matches target clusters. Sveltos then reconciles the selected add-ons onto any cluster whose labels match, continuously, so new clusters that join the fleet inherit the right add-ons automatically and clusters that drift get repaired. It supports templating based on the target cluster's metadata, cross-cluster event-driven deployment (deploy to cluster B when something happens in cluster A), drift detection, and techniques like rolling upgrades across clusters.
+
+Sveltos integrates with Cluster API for provisioning, uses Sveltos Agent on each workload cluster as the enforcement point, and is commonly paired with Rancher, EKS Anywhere, or Cluster API-based fleet management where per-cluster GitOps repositories become unmanageable.

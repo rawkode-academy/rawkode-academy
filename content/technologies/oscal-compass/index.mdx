@@ -50,6 +50,8 @@ community:
 matrix:
   status: skip
 ---
-The OSCAL COMPASS project is set of tools that enable the creation, validation, and governance of documentation artifacts for compliance needs. It leverages NIST's OSCAL (Open Security Controls Assessment Language) as a standard data format for interchange between tools and people, and provides an opinionated approach to OSCAL SDK and adoption by policy engines.
+OSCAL Compass is a collection of tools that make NIST's Open Security Controls Assessment Language (OSCAL) usable in real DevSecOps pipelines. OSCAL is a set of JSON/YAML/XML schemas published by NIST for expressing control catalogs (NIST 800-53, ISO 27001, FedRAMP), profiles that tailor catalogs, component definitions, system security plans, and assessment results. OSCAL Compass provides the glue that turns those documents into something you can automate.
 
-OSCAL-COMPASS is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The headline project is `compliance-trestle`, a Python CLI and library for editing, validating, splitting, merging, and version-controlling OSCAL documents. It lets compliance teams keep catalogs and SSPs in Git alongside the code they describe, generate Markdown for human review, and synchronize between OSCAL models and operational tooling. Around `trestle`, the project includes `compliance-to-policy` (which translates OSCAL component definitions into Kyverno, OPA, or Auditree policies so declared controls actually get enforced) and `agile-authoring` patterns for iterating on FedRAMP-style System Security Plans with pull requests instead of Word documents.
+
+OSCAL Compass was originally incubated by IBM, accepted into the CNCF sandbox in 2024, and is Apache-2.0. It is most relevant to teams operating under FedRAMP, FISMA, or any framework where NIST 800-53 is the source of truth — the goal is "compliance as code" in the literal sense of making assessment artifacts machine-readable from end to end.

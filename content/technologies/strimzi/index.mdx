@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://strimzi.io/'
 source: 'https://github.com/strimzi/strimzi-kafka-operator'
+documentation: 'https://strimzi.io/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -27,11 +28,12 @@ cncf:
 community:
   twitter: 'https://twitter.com/strimziio'
   slack: 'https://cloud-native.slack.com/messages/strimzi'
-  mailingList: >-
-    https://github.com/cncf/artwork/blob/master/examples/sandbox.md#strimzi-logos
+  mailingList: 'https://lists.cncf.io/g/cncf-strimzi-users/topics'
 matrix:
   status: skip
 ---
-Strimzi is a CNCF incubating project.
+Strimzi is a Kubernetes operator for running Apache Kafka. It turns every moving part of a Kafka deployment, brokers, controllers, topics, users, connectors, and mirror pipelines, into Kubernetes custom resources, so operators can `kubectl apply` a cluster rather than shepherd JVMs and ZooKeeper ensembles by hand.
 
-Strimzi is a Cloud Native Computing Foundation (CNCF) incubating project.
+The project ships several CRDs and controllers. `Kafka` describes a cluster and its listeners, storage, authentication, and authorization; the Cluster Operator then creates StatefulSets, Services, and ConfigMaps to match. `KafkaTopic` and `KafkaUser` are reconciled by dedicated Entity Operators that drive changes into Kafka via its admin API. `KafkaConnect`, `KafkaConnector`, `KafkaMirrorMaker2`, and `KafkaBridge` cover connect pipelines, cross-cluster replication, and HTTP access. Strimzi supports both classic ZooKeeper mode and KRaft mode and handles rolling upgrades, rebalancing via Cruise Control, TLS cert rotation, and OAuth integration.
+
+Strimzi is a CNCF Incubating project originated by Red Hat and is the upstream for Red Hat's AMQ Streams and OpenShift Streams for Apache Kafka. It is the dominant way to run self-managed Kafka on Kubernetes.

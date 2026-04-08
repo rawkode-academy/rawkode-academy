@@ -41,6 +41,9 @@ community:
   slack: 'http://slack.k8s.io/'
   mailingList: 'https://groups.google.com/forum/?hl=en#!forum/etcd-dev'
 ---
-etcd is a CNCF graduated project.
 
-etcd is a Cloud Native Computing Foundation (CNCF) graduated project.
+etcd is a distributed key-value store that provides strongly consistent reads and writes across a cluster. It is the default backing store for Kubernetes, where it holds the entire cluster state — every Pod, Service, ConfigMap, and Secret — behind the API server.
+
+Internally, etcd uses the Raft consensus algorithm to replicate data across an odd-numbered cluster (typically 3 or 5 members) and tolerate the loss of a minority of nodes. Data is stored in a multi-version concurrency control (MVCC) B+ tree backed by bbolt, which lets clients watch keys for changes and receive ordered notifications — the mechanism Kubernetes controllers rely on to react to state. Clients talk gRPC, and every write is an fsync-to-disk per committed Raft entry.
+
+Beyond Kubernetes, etcd is also used by Cilium, M3, OpenStack, CoreDNS, and Rook. Operating it well is mostly about disk I/O: etcd is extremely sensitive to fsync latency, and a slow disk will produce the "apply took too long" messages that eventually turn into leader elections and API server timeouts. The usual production advice is dedicated SSDs, isolation from noisy neighbours, and backups via `etcdctl snapshot save`. It graduated from the CNCF in 2020.

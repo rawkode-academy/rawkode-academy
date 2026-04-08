@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kudo.dev/'
 source: 'https://github.com/kudobuilder/kudo'
+documentation: 'https://github.com/kudobuilder/kudo#readme'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-KUDO is a CNCF sandbox project.
+KUDO, the Kubernetes Universal Declarative Operator, is a toolkit for building Kubernetes operators without writing Go code. An operator is packaged as a KUDO bundle containing templated manifests, parameter definitions, and a plan — an ordered set of phases and steps that describe install, upgrade, backup, and other lifecycle actions.
 
-KUDO is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The kudo-controller runs in-cluster and reconciles Instance custom resources against these plans, rendering manifests with the user's parameters and executing steps sequentially or in parallel. Operators ship as versioned packages pulled from an operator repository, similar to Helm charts, but with first-class lifecycle plans instead of a single install template. A kubectl-kudo CLI drives installs, upgrades, and plan execution.
+
+KUDO was started by D2iQ and joined the CNCF sandbox in 2020. It competes conceptually with the Operator SDK's Helm and Ansible modes and with Crossplane, and it remains a useful reference for how day-2 operations can be modelled declaratively without hand-written controllers.

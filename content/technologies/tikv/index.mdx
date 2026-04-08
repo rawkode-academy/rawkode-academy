@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://tikv.org'
 source: 'https://github.com/tikv/tikv'
+documentation: 'https://tikv.org/docs'
 license: Apache-2.0
 status: stable
 matrix:
@@ -45,6 +46,8 @@ community:
   blog: 'https://tikv.org/blog/'
   mailingList: 'https://tikv.org/community/community/'
 ---
-A distributed transactional key-value database. Based on the design of Google Spanner and HBase, but simpler to manage and without dependencies on any distributed filesystem
+TiKV is a distributed, transactional key-value store written in Rust that provides horizontal scalability, strong consistency, and ACID transactions across a cluster. It is the storage layer underneath TiDB and a CNCF Graduated project inspired in part by Google's Spanner.
 
-TiKV is a Cloud Native Computing Foundation (CNCF) graduated project.
+Data is range-partitioned into "Regions" of roughly 96 MiB, each replicated via the Raft consensus algorithm to tolerate node failures. The Placement Driver (PD) is a separate cluster that tracks region metadata and orchestrates splits, merges, and rebalancing based on live load and size metrics. The per-node storage engine is RocksDB (with the Titan extension for large values) and, more recently, the Raft Engine for the Raft log. Transactions are built on a Percolator-style two-phase commit protocol using timestamps from PD, providing snapshot isolation and serializable transactions across regions. Clients can use either the raw KV API or the transactional API, and gRPC is the wire protocol.
+
+TiKV powers TiDB's HTAP platform and is also used directly as a standalone store by projects that need a scalable, consistent KV layer, including JuiceFS, TiFS, and various geospatial and indexing systems.

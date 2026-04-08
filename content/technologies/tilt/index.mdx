@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://tilt.dev/'
 documentation: 'https://docs.tilt.dev/'
+source: 'https://github.com/tilt-dev/tilt'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -13,6 +14,8 @@ community:
 matrix:
   status: graveyard
 ---
-Tilt is a tool that simplifies and accelerates the development process for teams building Kubernetes applications. It provides a local Kubernetes environment that mirrors production, enabling developers to iterate on their code quickly and reliably without constant deployments to remote clusters. Tilt automatically rebuilds and redeploys code changes to the local cluster, often in seconds, and streams logs and events directly from the cluster to the developer's workstation. This allows for faster feedback loops, easier debugging, and more efficient development workflows.
+Tilt is a development environment automation tool for multi-service Kubernetes applications. It watches your source tree, rebuilds the affected containers, updates them in a local or remote cluster, and streams logs and health into a single live dashboard so developers don't have to stitch together `docker build`, `kubectl apply`, and `kubectl logs` by hand.
 
-Tilt's primary value proposition is improved developer productivity and reduced development friction. It bridges the gap between local development and the cloud native world by providing a consistent and familiar environment. It is mainly used by developers working on microservices architectures, backend services, and other Kubernetes-based applications, allowing them to focus on writing code rather than managing complex deployment processes. Tilt allows teams to share configurations and ensure everyone is using the same development environment.
+The build is driven by a `Tiltfile`, a Starlark (Python-dialect) script that declares how services are built and deployed: Docker images, Helm charts, Kustomize overlays, raw YAML, or custom build commands. Tilt's killer feature is `live_update`, which syncs changed files straight into running containers and optionally runs in-container steps (like `npm install` or `go build`) instead of doing a full image rebuild and pod restart, collapsing the feedback loop to seconds. The UI shows per-resource status, readiness, logs, and errors, and supports triggers and dependencies so services that depend on a database come up in the right order.
+
+Tilt was created by Windmill Engineering (acquired by Docker in 2023). It occupies the same niche as Skaffold and Garden, with a stronger emphasis on a rich interactive UI for developers working on large microservice stacks.

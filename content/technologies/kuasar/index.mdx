@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kuasar.io/'
 source: 'https://github.com/kuasar-io/kuasar'
+documentation: 'https://kuasar.io/docs/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -20,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-A multi-sandbox container runtime that provides cloud-native, all-scenario multiple sandbox container solutions.
+Kuasar is a container runtime that implements the containerd "sandboxer" API to support multiple sandbox technologies side-by-side on a single node. It is written in Rust and was donated to the CNCF by Huawei.
 
-Kuasar is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The problem it solves is shim sprawl. In stock containerd, each pod spawns its own containerd-shim process per sandbox, which at high density (hundreds of pods on a node) becomes meaningful memory and CPU overhead. Kuasar replaces the per-pod shim with a single long-running sandboxer process per sandbox type, using containerd's sandbox API (introduced in 1.7). It ships sandboxers for MicroVM-based runtimes (Cloud Hypervisor, QEMU, StratoVirt — the Kata Containers use case), WasmEdge for WebAssembly workloads, quark for lightweight Linux sandboxes, and a runc sandboxer for classic Linux containers. All of them are managed through one unified interface so you can mix VM, Wasm, and runc pods on the same node.
+
+The reported win versus per-shim runtimes is ~99% reduction in shim memory overhead and ~2x faster pod startup. It competes with Kata's shim-v2 and the traditional runc+containerd stack when the goal is high-density multi-tenant nodes or mixing sandbox types.

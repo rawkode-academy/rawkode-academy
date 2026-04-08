@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Kubernetes AI Toolchain Operator (KAITO) simplifies LLM inference, tuning, and RAG workloads on Kubernetes.
+KAITO (Kubernetes AI Toolchain Operator) is a Kubernetes operator from Microsoft that makes serving open-weight LLMs on a cluster a one-CRD operation. You write a `Workspace` resource that names a model — `falcon-7b`, `llama-2-13b-chat`, `phi-3`, `mistral-7b`, etc. — and KAITO takes care of provisioning GPU nodes, pulling a pre-built inference image, and exposing the model behind an OpenAI-compatible HTTP endpoint.
 
-KAITO is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Under the hood it has two controllers. The **workspace controller** reconciles model workloads: it picks the right inference runtime (vLLM or Hugging Face TGI), mounts the model weights (either pre-baked into images hosted in MCR, or downloaded at runtime), and wires up a Service. The **node provisioner** integrates with Karpenter to request the exact GPU SKU the chosen model needs (A100, H100, specific VRAM class) from the underlying cloud, so you are not pre-sizing a node pool. KAITO also supports fine-tuning jobs using LoRA/QLoRA with the same Workspace abstraction, and RAG pipelines via a companion `RAGEngine` CRD.
+
+It was donated to the CNCF sandbox in 2024 and is the opinionated "just serve this model" counterpart to lower-level stacks like KServe + vLLM. If you are on AKS the Karpenter integration is native; on other clouds you bring your own node provisioning.

@@ -32,6 +32,8 @@ community:
 matrix:
   status: skip
 ---
-Aeraki Mesh allows you to manage any layer-7 traffic in a service mesh
+Aeraki Mesh ("Aeraki" is Greek for "breeze") is a management plane that extends Istio to handle non-HTTP Layer 7 protocols. Out of the box Istio and Envoy give rich traffic management for HTTP and gRPC, but protocols like Dubbo, Thrift, Redis, Kafka, and MetaProtocol need extra work — Aeraki provides that missing piece without forcing users to modify Istio or Envoy themselves.
 
-Aeraki Mesh is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally, Aeraki runs alongside istiod as a separate controller. It watches Istio's service registry and pushes protocol-specific configuration to Envoy sidecars via EnvoyFilter resources. It ships MetaProtocol, a generic Layer 7 framework that lets operators add support for custom RPC protocols by writing a codec plugin instead of a full Envoy network filter in C++.
+
+In practice Aeraki is most useful in environments with heavy Dubbo or Thrift traffic — typically larger Chinese tech stacks migrating from traditional microservice frameworks into Istio. For plain HTTP/gRPC workloads it adds no value over stock Istio. The project is a CNCF sandbox entry and is primarily maintained by Tetrate.

@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubeedge.io/en/'
 source: 'https://github.com/kubeedge/kubeedge'
+documentation: 'https://kubeedge.io/docs/'
 license: Apache-2.0
 status: stable
 matrix:
@@ -44,6 +45,8 @@ community:
   slack: 'https://kubeedge.slack.com/'
   mailingList: 'https://groups.google.com/forum/#!forum/kubeedge'
 ---
-KubeEdge is a CNCF graduated project.
+KubeEdge extends Kubernetes out to edge nodes that have intermittent connectivity, limited resources, and often sit behind NAT. Instead of running a full kubelet + kube-proxy + CNI stack on every edge device, KubeEdge splits the system into a cloud side (CloudCore) and an edge side (EdgeCore) and runs a tiny agent at the edge.
 
-KubeEdge is a Cloud Native Computing Foundation (CNCF) graduated project.
+CloudCore lives in your central Kubernetes cluster and extends the API server with EdgeController, DeviceController, and a sync service. EdgeCore is the edge agent: it contains Edged (a slimmed-down kubelet that runs pods via containerd/CRI-O), EdgeHub (a WebSocket client that tunnels back to CloudCore), DeviceTwin (a local SQLite store that caches device/state), and EventBus (an MQTT broker for talking to IoT devices on the LAN). Because the edge keeps a local state store, pods keep running and devices keep being controlled when the WAN link drops, and sync resumes automatically when connectivity returns. Device abstractions (Device, DeviceModel CRDs) let you model sensors/actuators declaratively and map them to Modbus, OPC-UA, Bluetooth, or MQTT protocol drivers.
+
+It graduated from the CNCF in September 2024. Its competition is K3s (which takes the opposite approach — run a full if slim Kubernetes at the edge), OpenYurt, and SuperEdge. KubeEdge's differentiator is first-class IoT device modeling and the offline-tolerant sync design.

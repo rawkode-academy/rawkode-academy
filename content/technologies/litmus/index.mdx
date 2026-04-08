@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://litmuschaos.io/'
+source: 'https://github.com/litmuschaos/litmus'
 documentation: 'https://docs.litmuschaos.io/'
 license: Apache-2.0
 status: stable
@@ -22,34 +23,8 @@ community:
 matrix:
   status: skip
 ---
-Litmus is a Cloud-Native chaos engineering platform designed to identify weaknesses in Kubernetes deployments by injecting controlled failures. It allows teams to proactively discover potential issues and improve the resilience of their applications. By simulating real-world failure scenarios, Litmus helps developers and operators build confidence in their system's ability to withstand unexpected disruptions, ultimately leading to improved uptime and reduced risk.
+LitmusChaos is a chaos engineering platform for Kubernetes. It provides a catalog of pre-built fault injections — pod delete, network latency, DNS chaos, disk fill, CPU hog, node drain, and cloud-provider-specific faults for AWS, Azure, and GCP — packaged as reusable experiments.
 
-LitmusChaos is an open-source, Cloud-Native Chaos Engineering platform that helps Site Reliability Engineers (SREs) and developers improve the resilience of their Kubernetes applications and infrastructure. It achieves this by systematically injecting controlled faults and observing how the system behaves under stress, thereby uncovering weaknesses before they impact users.
+Experiments are defined as ChaosExperiment and ChaosEngine custom resources and executed by the chaos-operator, which launches a runner pod that in turn invokes the actual fault logic (often via Ansible or Go-based executors). Workflows chain experiments together and are authored in Argo Workflows under the hood, so Litmus inherits Argo's DAG semantics. The ChaosCenter web console provides multi-cluster scheduling, RBAC, and probes that assert application health before, during, and after an experiment — a run fails if the probes detect regressions. ChaosHub is a public catalog of community-contributed experiments packaged as charts.
 
-## Key Features
-
--   **Cloud-Native Chaos Experiments:** Provides a wide range of pre-defined chaos experiments (e.g., pod delete, network latency, CPU hog) that can be run on Kubernetes.
--   **Kubernetes-Native:** Chaos experiments are defined as Custom Resources (CRs) in Kubernetes, making them easy to manage and integrate with existing Kubernetes tools.
--   **Chaos Workflows:** Orchestrate complex chaos experiments across multiple applications and infrastructure components using chaos workflows.
--   **Chaos Control Plane:** A central component for managing chaos experiments, visualizing results, and defining chaos schedules.
--   **Observability Integration:** Integrates with popular monitoring and observability tools to help analyze the impact of chaos experiments and validate resilience.
--   **Experiment Customization:** Allows users to create custom chaos experiments tailored to their specific applications and infrastructure.
--   **Automated Verification:** Define probes to automatically verify the system's health and application performance during and after chaos injection.
-
-## How it Works
-
-LitmusChaos operates in two main planes:
-
-1.  **Chaos Control Plane:** Resides in the Kubernetes cluster (or a separate management cluster) and handles the scheduling, management, and monitoring of chaos experiments.
-2.  **Chaos Execution Plane:** Deploys temporary "chaos agents" or "chaos operators" within the target Kubernetes cluster(s) to inject faults and observe their effects.
-
-Users define ChaosExperiments (e.g., `Pod-Delete`, `Network-Delay`) as Kubernetes custom resources, which are then picked up by Litmus to execute the desired fault injection.
-
-<h2>Benefits</h2>
-
--   **Proactive Weakness Identification:** Discover system weaknesses and potential points of failure before they cause outages.
--   **Improved System Resilience:** Build more robust and fault-tolerant applications by systematically testing their behavior under adverse conditions.
--   **Reduced Downtime:** Minimize the impact of real-world failures by understanding and mitigating their effects in advance.
--   **Increased Confidence:** Gain confidence in your system's ability to withstand unexpected disruptions.
--   **Enhanced Observability:** Improve understanding of system behavior and dependencies under stress.
--   **Shift Left Chaos Engineering:** Integrate chaos testing into development and CI/CD pipelines, making resilience a continuous practice.
+Litmus is a CNCF incubating project maintained by Harness, and it competes with Chaos Mesh, Gremlin, and AWS Fault Injection Simulator. Its distinguishing traits are the pluggable probe model and the use of Argo Workflows for orchestration.

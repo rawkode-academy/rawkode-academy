@@ -44,34 +44,9 @@ community:
 terms:
   - Sysdig
 ---
-Falco is a cloud-native runtime security project. It's a behavioral activity monitor designed to detect anomalous activity and security threats within Kubernetes, containers, and the underlying host. Falco leverages system calls from the Linux kernel as its primary data source, allowing it to identify unexpected application behavior, policy violations, intrusions, and data exfiltration attempts in real-time. It provides valuable insights into application security and system integrity.
 
-Falco's value lies in its ability to provide deep visibility into runtime behavior without requiring code instrumentation. Its main use cases include detecting security breaches, identifying misconfigurations, monitoring compliance with security policies, auditing system activity, and troubleshooting application performance issues. It's highly configurable through a rules engine that can be tailored to specific environments and security needs.
+Falco is a runtime security tool that watches system calls on Linux hosts and fires alerts when they match suspicious patterns — a shell spawning inside a container, an unexpected write to `/etc`, a process opening a raw socket, a sensitive file being read. It was created by Sysdig and was the first runtime security project to graduate from the CNCF.
 
-Falco is the industry-standard for cloud-native runtime security, detecting unexpected application behavior and potential threats in real-time within Kubernetes, containers, and host systems. As a Cloud Native Computing Foundation (CNCF) incubating project, it's a powerful tool for enhancing the security posture of modern distributed environments.
+Falco gets its event stream from one of two drivers: a classic kernel module, or (more commonly now) an eBPF probe — either a legacy eBPF probe or the modern CO-RE probe that works across kernel versions without recompilation. Events flow into a userspace engine that evaluates them against rules written in a YAML DSL with macros and lists, so you can express things like "a process named `bash` exec'd inside a container whose image is not in this allow-list." Matched events get emitted as structured output to stdout, files, gRPC, or through Falcosidekick to Slack/webhooks/SIEMs.
 
-## How Falco Works
-
-Falco operates by acting as a behavioral activity monitor. It leverages two primary drivers to capture system activity:
-
-1.  **Kernel Module:** A traditional Linux kernel module (though eBPF is becoming the preferred modern driver).
-2.  **eBPF Probe:** An eBPF program loaded into the Linux kernel, providing a highly efficient and safe way to collect system call events.
-
-These drivers intercept system calls and other kernel events, which Falco then filters against a set of customizable rules. When a rule is violated, Falco generates an alert, which can be sent to various outputs (syslog, files, HTTP endpoints, gRPC, etc.).
-
-## Key Features
-
--   **Real-time Threat Detection:** Monitors system activity for suspicious behavior based on a powerful rules engine.
--   **Rich Event Sources:** Observes Linux system calls, Kubernetes API audit events, and other data sources for comprehensive coverage.
--   **Customizable Rules:** Define your own rules using a YAML-based syntax to detect specific threats and policy violations relevant to your environment.
--   **Container & Kubernetes Awareness:** Enriches events with context from containers and Kubernetes metadata (pod names, namespaces, labels), making alerts more actionable.
--   **Integration with Alerting Systems:** Integrates with popular tools like Prometheus, Alertmanager, Slack, PagerDuty, and SIEM systems for immediate notification and response.
--   **eBPF-Powered Performance:** Utilizes eBPF for efficient and low-overhead event collection from the kernel.
-
-## Benefits
-
--   **Enhanced Cloud-Native Security:** Provides deep visibility into application behavior at runtime, crucial for detecting advanced threats that static analysis misses.
--   **Compliance & Auditing:** Helps meet compliance requirements by auditing system calls and enforcing security policies.
--   **Reduced Mean Time to Respond (MTTR):** Real-time alerts enable faster detection and response to security incidents.
--   **Non-Intrusive:** Monitors activity without requiring changes to application code or container images.
--   **Highly Extensible:** The rule engine and output mechanisms are highly customizable to fit various operational and security needs.
+It runs as a DaemonSet on Kubernetes and ships with a large default ruleset covering MITRE ATT&CK techniques and CIS benchmarks. Related projects include Falcosidekick (event fan-out), Falco Talon (automated response), and the broader plugin framework that lets Falco ingest non-syscall sources like Kubernetes audit logs, AWS CloudTrail, GitHub audit, and Okta. The main alternative in the same space is Tetragon, which is also eBPF-based but integrates more tightly with Cilium and can enforce policy in-kernel rather than only alert.

@@ -5,6 +5,7 @@ logos:
   horizontal: true
 website: 'https://kgateway.dev/'
 source: 'https://github.com/kgateway-dev/kgateway'
+documentation: 'https://kgateway.dev/docs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -29,6 +30,8 @@ community:
 matrix:
   status: skip
 ---
-An Envoy-powered, Kubernetes-native API Gateway that integrates Kubernetes Gateway API with a control plane for API connectivity in any cloud environment.
+kgateway is an Envoy-based ingress controller and API gateway that implements the Kubernetes Gateway API. It is the open-source project formerly known as Gloo Edge, donated to the CNCF by Solo.io in 2024 and renamed when it entered the sandbox.
 
-Kgateway is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally it is a control plane that watches Gateway, HTTPRoute, and kgateway-specific CRDs, then translates them into Envoy xDS configuration served to a fleet of Envoy proxies. The data plane is just vanilla Envoy, so you get the full set of Envoy filters — HTTP/1.1, HTTP/2, HTTP/3, gRPC, WebSockets, TCP, TLS termination, external authz, rate limiting via the Envoy ratelimit service, and WASM filter extensions. It supports transformation filters for request/response rewriting without writing a plugin, and has specific features for LLM/agent traffic (token-based rate limiting, prompt guarding) via the agentgateway integration.
+
+In the Gateway API landscape it sits alongside Istio, Envoy Gateway, Contour, and Traefik. The differentiator versus bare Envoy Gateway is the larger set of policy CRDs (auth, rate limit, transformations) inherited from Gloo, and a longer production history under the old name.

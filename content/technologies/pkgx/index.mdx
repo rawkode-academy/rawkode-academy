@@ -2,32 +2,15 @@
 name: pkgx
 website: 'https://pkgx.sh/'
 documentation: 'https://docs.pkgx.sh/'
-license: MIT
+license: Apache-2.0
 status: stable
 category: Provisioning
 subcategory: Automation & Configuration
 matrix:
   status: skip
 ---
-pkgx is a fast, cross-platform package manager designed to simplify development environment setup. It excels at managing arbitrary toolchains, including those not found in system package managers. It solves the problem of dependency conflicts and inconsistent environments by providing isolated installations and deterministic builds. pkgx is particularly useful for scripting, CI/CD pipelines, and managing projects with complex dependency requirements, allowing developers to easily manage multiple versions of tools like Node.js, Python, and Go, without interfering with system-level packages or other projects.
+pkgx is a cross-platform package runner and package manager from the creator of Homebrew, Max Howell. Instead of installing tools globally, `pkgx node@20` fetches an isolated build of Node 20 into `~/.pkgx` and runs it, resolving its transitive dependencies on the fly from a distributed registry of pre-built binaries.
 
-pkgx is a universal package manager designed to simplify the management of developer toolchains and dependencies across various projects and environments. It allows developers to easily install and use different versions of software without conflicts, making development more consistent and reproducible.
+Packages are defined declaratively in the pantry repository (github.com/pkgxdev/pantry) as YAML specs that describe how to build each project from source for macOS (arm64/x86_64) and Linux (arm64/x86_64). The builds are content-addressed and relocatable, which means multiple versions coexist without conflict and activation is just a matter of prepending the right directories to `PATH`. A `dev` shim hooks into your shell so that entering a project directory with a `package.json`, `pyproject.toml`, or similar manifest automatically makes the correct versions of node, python, or go available in that shell, similar to direnv combined with asdf or mise.
 
-## Key Features
-
--   **Universal Package Management:** Manages arbitrary toolchains and packages, even those not typically found in system package managers.
--   **Isolated Environments:** Installs tools in isolated environments, preventing dependency conflicts and ensuring project-specific dependencies are met.
--   **Deterministic Builds:** Aims for deterministic builds, ensuring that a given set of inputs always produces the same output.
--   **Version Management:** Easily switch between different versions of tools (e.g., Node.js, Python, Go) without interfering with system-level installations or other projects.
--   **Cross-Platform:** Designed to work across various operating systems, providing a consistent experience for developers.
--   **Developer-Friendly CLI:** Offers a simple and intuitive command-line interface for managing packages and environments.
--   **CI/CD Integration:** Simplifies CI/CD pipelines by providing a consistent and reproducible way to set up build environments.
-
-## Benefits
-
--   **Eliminates "Works on My Machine" Issues:** Ensures consistency across development teams and environments.
--   **Simplified Dependency Management:** Manages complex dependency trees with ease, reducing setup time for new projects.
--   **Increased Developer Productivity:** Developers can quickly access and manage the tools they need, reducing friction in their workflow.
--   **Reduced Build Times:** By caching and reusing dependencies, pkgx can accelerate build processes.
--   **Enhanced Reproducibility:** Guarantees that applications can be built and run identically across different machines and over time.
--   **Cleaner System:** Avoids cluttering your system with multiple versions of tools or conflicting dependencies.
+pkgx is MIT-licensed and competes with Homebrew, asdf, mise, Nix, and devbox. Its niche is being daemonless, not requiring sudo, and being usable as a one-off runner in CI (`pkgx +node@20 npm test`) without committing to a package manager installation on the runner.

@@ -3,6 +3,7 @@ name: Tinkerbell
 logos: null
 website: 'https://tinkerbell.org/'
 source: 'https://github.com/tinkerbell/tinkerbell'
+documentation: 'https://tinkerbell.org/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -18,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Tinkerbell is a CNCF sandbox project.
+Tinkerbell is a bare-metal provisioning engine that treats physical machines like cloud instances. It was created at Equinix Metal (then Packet) to automate the process of netbooting, installing, and configuring servers at scale, and is now a CNCF project.
 
-Tinkerbell is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A Tinkerbell stack combines several components: Smee handles DHCP, PXE, and iPXE; Hegel exposes instance metadata; Tink runs workflows made of containerized actions against a target machine; and Rufio drives power and boot control through BMCs using IPMI or Redfish. Hardware inventory and workflows are expressed as Kubernetes custom resources, so the same GitOps patterns used for applications can drive OS installs, firmware updates, and disk wipes on real servers.
+
+Tinkerbell is used to bring up bare metal for Kubernetes clusters, edge sites, and private cloud fleets without relying on vendor-specific provisioning tools.

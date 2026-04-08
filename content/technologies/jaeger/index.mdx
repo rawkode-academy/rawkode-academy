@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://www.jaegertracing.io/'
 source: 'https://github.com/jaegertracing/jaeger'
+documentation: 'https://www.jaegertracing.io/docs/latest/'
 license: Apache-2.0
 status: stable
 matrix:
@@ -43,6 +44,8 @@ community:
   blog: 'https://medium.com/jaegertracing/'
   mailingList: 'https://groups.google.com/forum/#!forum/jaeger-tracing'
 ---
-Jaeger is a CNCF graduated project.
+Jaeger is a distributed tracing backend originally built at Uber and modeled on Google's Dapper paper. It ingests spans from instrumented applications, indexes and stores them, and exposes a query API and UI for digging through individual traces and computing service dependency graphs. It graduated from the CNCF in 2019.
 
-Jaeger is a Cloud Native Computing Foundation (CNCF) graduated project.
+The classic Jaeger pipeline was: application → Jaeger client library → `jaeger-agent` (local UDP receiver) → `jaeger-collector` → storage (Cassandra or Elasticsearch) → `jaeger-query` + UI. Jaeger v2, released in 2024, replaces the hand-rolled collector with an OpenTelemetry Collector build: the receivers, processors, and exporters are OTel components, and Jaeger is effectively a distribution of the OTel Collector plus the Jaeger UI and query service. The native instrumentation libraries are deprecated in favor of OpenTelemetry SDKs, and both Jaeger and OTLP span formats are accepted.
+
+Storage backends include Cassandra, Elasticsearch/OpenSearch, and Badger (single-node); there is also ClickHouse support via the OTel Collector. For sampling at volume, the recommended pattern is tail-based sampling in the collector tier. Jaeger's main competition is Tempo (Grafana's trace backend, which uses object storage and delegates search to Loki/metrics-generated links) and commercial APM tools.

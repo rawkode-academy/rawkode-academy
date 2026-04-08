@@ -5,6 +5,7 @@ logos:
   horizontal: true
 website: 'https://saltproject.io'
 documentation: 'https://docs.saltproject.io/'
+source: 'https://github.com/saltstack/salt'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -14,6 +15,8 @@ matrix:
 terms:
   - SaltStack
 ---
-Salt is an open-source configuration management and remote execution engine. It automates tasks like software installation, configuration management, and system administration across distributed systems. Salt provides a flexible infrastructure-as-code approach, enabling users to define desired states and enforce them consistently across their environments. It brings value through efficient orchestration, increased automation, and improved consistency, reducing manual intervention and minimizing errors.
+Salt (formerly SaltStack) is a Python-based configuration management and remote execution system created by Thomas S. Hatch in 2011. It targets the same space as Ansible, Puppet, and Chef but differs in being designed around a persistent pub/sub bus for low-latency command execution across tens of thousands of nodes.
 
-Salt is used for a wide range of use cases, including provisioning and configuring servers, deploying applications, managing cloud infrastructure, automating security compliance, and orchestrating complex workflows. Its scalability and modular architecture make it suitable for both small and large environments, from individual servers to massive data centers and cloud deployments.
+A typical Salt deployment has a central `salt-master` and `salt-minion` agents on each managed host connected over ZeroMQ (or the newer RAET/TCP transports). Commands issued on the master are published on a bus and executed in parallel by every matching minion, with results streamed back, which makes ad-hoc operations like "run this command on every web server tagged production" near-instantaneous. Desired state is expressed in States, written as YAML files rendered through the Jinja templating engine and organized into SLS (SaLt State) formulas. A parallel data layer called Pillar provides per-minion secrets and variables, while Grains expose static facts gathered from each host.
+
+Beyond agent-based operation, Salt also supports agentless SSH via `salt-ssh`, cloud provisioning via `salt-cloud`, and a Reactor system that turns events on the bus into automated responses, which is the basis for its event-driven infrastructure story. Salt is Apache-2.0 licensed and maintained by VMware (now Broadcom) after the 2020 SaltStack acquisition.

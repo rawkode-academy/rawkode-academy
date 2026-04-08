@@ -6,7 +6,8 @@ aliases:
 logos:
   stacked: true
 website: 'https://webassembly.org/'
-documentation: 'https://webassembly.github.io/docs/'
+source: 'https://github.com/WebAssembly/spec'
+documentation: 'https://developer.mozilla.org/en-US/docs/WebAssembly'
 license: Apache-2.0 OR MIT
 status: stable
 category: Wasm
@@ -36,6 +37,8 @@ terms:
   - WASM
   - WASI
 ---
-WebAssembly (Wasm) is a binary instruction format for a stack-based virtual machine. It is designed as a portable compilation target for programming languages, enabling deployment on the web for client-side scripting or on servers for cloud computing. WebAssembly's primary value proposition lies in its near-native performance, security, and cross-platform compatibility, allowing developers to build high-performance applications that can run in a variety of environments. 
+WebAssembly (Wasm) is a portable binary instruction format for a stack-based virtual machine. It was originally designed so browsers could run languages other than JavaScript at near-native speed, and is a W3C standard shipped in every major browser. Code written in C, C++, Rust, Go, Zig, AssemblyScript, and increasingly other languages can be compiled to a .wasm module and executed inside a sandboxed VM with explicit, capability-based access to the outside world.
 
-Main use cases include accelerating web applications by running computationally intensive tasks client-side, enabling serverless functions with fast startup times, building blockchain applications with secure and sandboxed execution environments, creating cross-platform games, and embedding WebAssembly runtimes in other applications for extensibility and sandboxed execution.
+That sandboxing model is what makes Wasm interesting outside the browser. A module has no ambient access to the filesystem, network, or clock; the host must explicitly grant each capability. WASI, the WebAssembly System Interface, standardizes those host APIs so the same module can run on Wasmtime, Wasmer, WasmEdge, or a browser polyfill. The Component Model builds on top of WASI with typed interfaces (WIT), so components written in different source languages can link together without sharing ABIs.
+
+Wasm is now used well beyond the browser: as a plugin format for Envoy and Istio, as a serverless runtime (Fastly Compute, Fermyon Spin, wasmCloud), as an embedded scripting engine inside databases and proxies, and as a secure sandbox for user-provided code.

@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://koordinator.sh'
 source: 'https://github.com/koordinator-sh/koordinator'
+documentation: 'https://koordinator.sh/docs/architecture/overview'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -16,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-QoS based scheduling system for hybrid orchestration workloads on Kubernetes, bringing workloads the best layout and status.
+Koordinator is a Kubernetes scheduling system for colocating latency-sensitive online services with batch and AI workloads on the same nodes. It was open-sourced by Alibaba out of their internal experience running mixed workloads at very high cluster utilization.
 
-Koordinator is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core idea is QoS-aware overcommit. Koordinator labels pods with priority classes (product, mid, batch, free) and uses its koordlet node agent to continuously measure real CPU/memory headroom — not requests — and publish a "reclaimed" resource back to the scheduler. Batch pods then bin-pack into reclaimed capacity and get throttled or evicted under CPU/memory pressure before they can hurt the online tier. Isolation is enforced through cgroup tuning, CPU suppression, and memory QoS features in the kernel. It ships a scheduler built as a set of kube-scheduler plugins plus descheduler components that rebalance hot nodes.
+
+It is the closest open-source analog to Google's Borg-style colocation, and overlaps with Volcano (batch scheduling) and Crane (cost/efficiency). Its niche is specifically wringing 60-70% cluster utilization out of hardware that would otherwise sit at 20% because the online services refuse to share nodes.

@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://krkn-chaos.github.io/krkn'
 source: 'https://github.com/krkn-chaos/krkn'
+documentation: 'https://krkn-chaos.github.io/krkn/'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Chaos testing tool for Kubernetes to identify bottlenecks and improve resilience and performance under failure conditions.
+Krkn (pronounced "kraken") is a chaos engineering tool for Kubernetes and OpenShift. It was originally built by Red Hat's performance and scale team to find resilience bugs in OpenShift itself, and is the chaos framework they use in their own release pipeline.
 
-Krkn is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It ships a library of chaos scenarios driven by YAML — pod disruption, node shutdown, network chaos via tc/iptables, CPU/memory/IO hogs, time skew, application outages, etcd/API-server outages, zone failures, and PVC/ceph disruption. Each scenario runs for a configured duration while Krkn snapshots Prometheus metrics and measures cluster/application health against user-defined Cerberus signals. If the cluster or a monitored app breaches its SLOs during the run, the scenario fails, which makes the tool useful inside CI rather than just for manual game days. Krkn-hub packages the scenarios as container images so you can run them from a pipeline with only environment variables.
+
+In the chaos tooling landscape it sits alongside Chaos Mesh, LitmusChaos, and Gremlin. Its niche is Kubernetes control-plane and infrastructure-level fault injection with tight Prometheus/SLO integration, rather than application-level HTTP/gRPC fault injection.

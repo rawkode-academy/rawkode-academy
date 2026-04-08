@@ -8,3 +8,9 @@ status: stable
 category: Provisioning
 subcategory: Security & Compliance
 ---
+
+Grype is a container image and filesystem vulnerability scanner from Anchore, written in Go. You point it at an image (`grype alpine:3.19`), a directory, a tarball, or an SBOM, and it emits a list of known CVEs affecting the packages it finds, with severity, fix version, and upstream data source.
+
+Internally Grype works in two steps. First it builds (or ingests) a Syft SBOM — Syft is Anchore's sibling project that catalogs installed packages from OS distros (apk, dpkg, rpm), language ecosystems (npm, pip, gem, cargo, go modules, maven, composer), and binary artifacts. Then it matches that package list against its own vulnerability database, which Anchore builds nightly by aggregating NVD, GitHub Security Advisories, and per-distro security trackers (Alpine SecDB, Debian Security Tracker, RHSA, Amazon Linux ALAS, Ubuntu USN, Wolfi, Chainguard, etc.). That split is why Grype tends to be accurate for distro packages: it uses the distro's own advisory data instead of falling back to NVD version matching, which is notoriously noisy.
+
+It overlaps heavily with Trivy (Aquasec), which is the dominant scanner in the same niche, and with Clair, Docker Scout, and Snyk Container. Grype's distinguishing trait is the clean split with Syft — you can generate an SBOM once, archive it, and re-scan it later as new CVEs are published without re-pulling the image. It's the scanner under a lot of admission-time policy setups via Kyverno + Cosign + Grype.

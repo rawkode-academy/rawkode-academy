@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://podman-desktop.io/'
+documentation: 'https://podman-desktop.io/docs/intro'
 source: 'https://github.com/podman-desktop/podman-desktop'
 license: Apache-2.0
 status: stable
@@ -35,6 +36,8 @@ cncf:
 matrix:
   status: skip
 ---
-An open-source tool for developers to work with containers and Kubernetes with an intuitive and user-friendly interface to effortlessly build, manage, and deploy containers and Kubernetes — all from the desktop.
+Podman Desktop is a cross-platform graphical application for managing containers and Kubernetes from a developer workstation. It is built on Electron and maintained by Red Hat, with the project accepted into the CNCF sandbox in 2025. It acts as a Docker Desktop replacement while remaining fully open-source under Apache-2.0.
 
-Podman Desktop is a Cloud Native Computing Foundation (CNCF) sandbox project.
+On macOS and Windows, Podman Desktop provisions and manages a `podman machine` VM (a Fedora CoreOS guest running on QEMU, Hyper-V, or Apple's Virtualization framework via vfkit) so that the Linux Podman engine is available to the host CLI and GUI. The UI exposes image builds and pulls, container lifecycle, volumes, and pod management, plus a compose view for multi-container applications. A Docker compatibility socket ships out of the box, so tools wired to `/var/run/docker.sock` (testcontainers, IDE plugins, Buildx clients) continue to work without change.
+
+Beyond Podman itself, the app is extensible and ships integrations for Kind, Minikube, Lima, OpenShift Local (crc), and even Docker as an alternative backend. It can deploy workloads directly into a local Kubernetes cluster, inspect pods, and port-forward services, which positions it as the GUI layer for developers standardizing on Podman and local Kubernetes for inner-loop work.

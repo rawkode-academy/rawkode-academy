@@ -19,6 +19,8 @@ community:
 matrix:
   status: explore
 ---
-ORAS is a CNCF sandbox project.
+ORAS — OCI Registry As Storage — is a CLI and Go library for pushing, pulling, and referencing arbitrary artifacts in any OCI-compliant container registry. Instead of treating a registry as a place only for Docker images, ORAS lets you store Helm charts, WASM modules, SBOMs, Cosign signatures, Tekton pipelines, OPA bundles, ML models, or any other file with a custom media type, reusing the authentication, distribution, replication, and RBAC you already get from your registry.
 
-ORAS is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Technically, ORAS pushes artifacts as OCI image manifests (or, with OCI 1.1, artifact manifests) whose layers are the files you want to store and whose `config` media type identifies the artifact kind. The `referrers` API introduced in the OCI Distribution Spec 1.1 lets one artifact point at another — this is how Cosign signatures and SBOMs can be attached to an image and discovered later, and ORAS is the reference implementation of that flow. The `oras` CLI handles push, pull, discover, copy, and attach operations, and the Go library is embedded inside Notation, Helm 3 OCI support, Flux, Cosign, and many other tools.
+
+ORAS is a CNCF sandbox project, Apache-2.0, and increasingly the de facto way the cloud-native ecosystem stores non-image artifacts. If a tool says "we can store this in an OCI registry", odds are very good that ORAS is doing the pushing and pulling underneath.

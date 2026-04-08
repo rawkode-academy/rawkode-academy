@@ -18,6 +18,8 @@ community:
 matrix:
   status: skip
 ---
-Antrea is a CNCF sandbox project.
+Antrea is a Kubernetes CNI plugin that uses Open vSwitch (OVS) as its dataplane to implement pod networking, NetworkPolicy, and service load balancing. It was created by VMware and is the CNI that underpins vSphere with Tanzu and several other VMware Kubernetes offerings.
 
-Antrea is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Instead of relying on iptables or eBPF like Calico and Cilium do, Antrea programs OVS flow rules through a per-node agent written in Go. This gives it strong visibility tooling — `antctl traceflow` can inject a packet and show every OVS table hit it takes through the cluster — and makes it a natural fit for environments already running NSX or other OVS-based infrastructure. It supports overlay (Geneve, VXLAN, GRE) and no-encap modes, Windows nodes, multi-cluster networking via ClusterSet, and Kubernetes NetworkPolicy plus its own ClusterNetworkPolicy CRD with tiers and FQDN rules.
+
+Antrea competes directly with Calico, Cilium, and Flannel. Its main draws are OVS-based debuggability, first-class Windows support, and tight integration with the VMware ecosystem; its main trade-off is that it lacks the kernel-level eBPF story that Cilium has made the default for new clusters. It has been a CNCF sandbox project since 2021.

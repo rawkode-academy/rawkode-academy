@@ -41,27 +41,8 @@ community:
 terms:
   - Upbound
 ---
-Crossplane is an open-source Kubernetes add-on that extends your Kubernetes cluster to become a universal control plane. It allows you to manage and provision infrastructure from various cloud providers, on-premise environments, and SaaS offerings using Kubernetes APIs and tooling. By defining custom resource definitions (CRDs), you can create reusable abstractions for infrastructure services, enabling application teams to self-service provision resources without needing to understand the underlying provider details.
+Crossplane turns a Kubernetes cluster into a control plane for arbitrary external resources — AWS RDS databases, GCP buckets, Cloudflare zones, GitHub repos, Snowflake warehouses, and anything else with an API. You write Kubernetes manifests, Crossplane reconciles them against the target cloud, and the rest of your Kubernetes tooling (RBAC, GitOps with ArgoCD or Flux, audit logs, admission policies) applies to infrastructure for free.
 
-Crossplane transforms your Kubernetes cluster into a "universal control plane", allowing you to manage and provision external infrastructure and managed services using Kubernetes-native APIs and tools.
+The runtime is a set of controllers. Providers (`provider-upjet-aws`, `provider-gcp`, `provider-azure`, `provider-terraform`, hundreds of community providers) install CRDs for each managed service and reconcile them against the vendor API. On top of that, Crossplane's Composition engine lets platform teams define a high-level `CompositeResourceDefinition` (XRD) — for example, `XPostgresDatabase` — and a `Composition` that fans it out into the underlying provider resources (a VPC, subnet, RDS instance, parameter group, DNS record, and Secret). Application teams then consume the simple `Claim` and never see the cloud-specific details. Modern Crossplane uses composition functions (WASM or gRPC) so you can write composition logic in KCL, Python, Go, or CUE instead of raw YAML patches.
 
-## Key Concepts
-
--   **Universal Control Plane:** Extends Kubernetes to control not just applications, but also underlying infrastructure and cloud services (databases, message queues, object storage, etc.).
--   **Infrastructure as Code (IaC):** Define your infrastructure resources declaratively using Kubernetes YAML, just like you define your applications.
--   **Custom Resources (CRs) & Controllers:** Crossplane introduces Custom Resource Definitions (CRDs) for various infrastructure components. Its controllers watch these CRs and reconcile them with the actual external cloud or on-premise resources.
--   **Providers:** Providers are Kubernetes controllers that enable Crossplane to interact with specific external APIs (e.g., `provider-aws`, `provider-azure`, `provider-gcp`, `provider-helm`, `provider-sql`).
-
-## How it Works
-
-1.  **Install Crossplane:** Deploy Crossplane and the necessary providers (e.g., `provider-aws`) to your Kubernetes cluster.
-2.  **Define Infrastructure:** Create Kubernetes Custom Resources (CRs) that represent the desired state of your external infrastructure (e.g., an AWS RDS instance, an Azure SQL database).
-3.  **Reconciliation:** Crossplane controllers constantly observe these CRs and make API calls to the respective cloud providers to provision, configure, and manage the actual infrastructure resources.
-4.  **Application Consumption:** Applications running in Kubernetes can then bind to these provisioned resources using Crossplane's binding mechanism.
-
-## Benefits
-
--   **Self-Service Infrastructure:** Application developers can provision their own infrastructure without needing direct cloud credentials or understanding cloud-specific APIs.
--   **Unified API:** Manage both applications and infrastructure through a single, consistent Kubernetes API.
--   **GitOps Ready:** Infrastructure definitions can be version-controlled in Git, enabling GitOps workflows for infrastructure management.
--   **Abstraction:** Platform teams can create higher-level abstractions ("Compositions") to expose simplified infrastructure options to developers, while managing underlying complexities.
+Crossplane is the main Kubernetes-native alternative to Terraform/OpenTofu and Pulumi. The trade-off is continuous reconciliation and a Kubernetes-shaped UX versus Terraform's plan/apply model and mature ecosystem. It graduated in the CNCF in 2025 and is the backbone of several commercial platform products, notably Upbound.

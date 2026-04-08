@@ -21,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Akri is a CNCF sandbox project.
+Akri is a Kubernetes resource interface for exposing leaf devices — IP cameras, USB peripherals, OPC UA servers, Bluetooth sensors — as native cluster resources. It was originally built by Microsoft to solve a concrete edge/IoT problem: Kubernetes knows how to schedule pods onto nodes, but it has no native way to discover a thermal camera on the same LAN and hand it to a workload.
 
-Akri is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The project is written in Rust and works through two main components. Discovery Handlers run on each node and implement protocol-specific discovery (ONVIF, udev, OPC UA, and custom gRPC-based handlers). When a device is found, the Akri Controller creates an Instance CRD and exposes the device through the Kubernetes device plugin framework, so pods can request it with a standard resource limit. If the device appears on multiple nodes, Akri can schedule a broker pod per node to proxy access.
+
+Akri sits in a niche next to projects like KubeEdge and k3s on the edge side, and is distinct from CSI or device plugins because it focuses on dynamic, network-attached leaf devices rather than local hardware. It has been a CNCF sandbox project since 2021, though development activity has slowed significantly in the last year.

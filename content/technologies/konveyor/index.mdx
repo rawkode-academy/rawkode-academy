@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://www.konveyor.io/'
 source: 'https://github.com/konveyor/operator'
+documentation: 'https://konveyor.io/docs/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -35,6 +36,8 @@ community:
 matrix:
   status: skip
 ---
-Konveyor is a CNCF sandbox project.
+Konveyor is a toolchain for assessing and migrating existing applications to Kubernetes and cloud-native runtimes. Its flagship component is the Migration Toolkit for Applications (MTA/Tackle), which performs static analysis of Java and other source codebases against rule sets to flag code that will not run well on OpenShift/Kubernetes.
 
-Konveyor is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The analyzer is driven by YAML rule sets that match source patterns, library versions, or XML descriptors — for example, flagging EJB remote interfaces, JNDI lookups of a proprietary app server, or filesystem paths that assume local storage. Findings are tagged with effort estimates and categorized by migration target (containerization, Quarkus, Spring Boot, EAP on OpenShift) so a platform team can triage a portfolio of hundreds of apps. Beyond assessment, Konveyor includes Move2Kube for generating Kubernetes manifests from Cloud Foundry/Docker Compose input, and Crane for live migration of namespaces between clusters.
+
+It originated at Red Hat as the OSS side of Migration Toolkit for Applications and is most useful in enterprise Java shops moving legacy workloads off WebSphere/WebLogic/JBoss EAP onto OpenShift or vanilla Kubernetes.

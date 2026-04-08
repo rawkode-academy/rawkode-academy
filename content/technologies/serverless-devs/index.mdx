@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://www.serverless-devs.com/'
 source: 'https://github.com/serverless-devs/serverless-devs'
+documentation: 'https://www.serverless-devs.com/docs/overview'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -16,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Serverless Devs is a CNCF sandbox project.
+Serverless Devs is an open-source developer tool for building, deploying, and managing serverless applications across multiple cloud providers. Originated by Alibaba and donated to the CNCF Sandbox, it offers a single CLI and YAML-based application model (`s.yaml`) that abstracts provider-specific details behind reusable components.
 
-Serverless Devs is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The tool is built around a component model: each component is a versioned package, published to a public registry, that implements operations like `deploy`, `remove`, `invoke`, or `logs` for a given target such as Alibaba Cloud Function Compute, AWS Lambda, Tencent SCF, or Huawei FunctionGraph. An application's `s.yaml` references components with inputs, so the same project description can be deployed through provider-specific implementations.
+
+Serverless Devs includes a component marketplace, environment/stage support, and plugin hooks for CI pipelines, making it a pragmatic choice for teams operating functions across Chinese and global cloud providers from a unified workflow.

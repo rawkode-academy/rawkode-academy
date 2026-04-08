@@ -1,0 +1,42 @@
+---
+interface Props {
+	name: string;
+	url: string;
+	description: string;
+	image?: string | undefined;
+	website?: string | undefined;
+	source?: string | undefined;
+	documentation?: string | undefined;
+	category?: string | undefined;
+}
+
+const { name, url, description, image, website, source, documentation, category } = Astro.props;
+
+const sameAs = [website, source, documentation].filter(
+	(v): v is string => Boolean(v),
+);
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "SoftwareApplication",
+	name,
+	url,
+	description,
+	...(image && { image }),
+	...(category && { applicationCategory: category }),
+	...(sameAs.length > 0 && { sameAs }),
+	// Required by Google for SoftwareApplication; permissive defaults
+	operatingSystem: "Any",
+	offers: {
+		"@type": "Offer",
+		price: "0",
+		priceCurrency: "USD",
+	},
+};
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+></script>

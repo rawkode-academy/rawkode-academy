@@ -5,7 +5,8 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://xregistry.io'
-source: 'https://github.com/xregistry/server'
+source: 'https://github.com/xregistry/spec'
+documentation: 'https://xregistry.io/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: skip
 ---
-The xRegistry project defines an abstract model for managing metadata about resources and provides a REST-based interface to discover, create, modify and delete those resources.
+xRegistry is a specification for a generic, extensible metadata registry and the HTTP API to query it. It defines a common resource model ("groups" containing "resources" with versioned "versions") and a standard set of conventions for discovery, pagination, filtering, and references, so that different kinds of metadata registries all look the same from a client's perspective.
 
-xRegistry is a Cloud Native Computing Foundation (CNCF) sandbox project.
+On top of that core model, xRegistry defines domain-specific specs that instantiate it: the Schema Registry spec for managing JSON Schema, Avro, and Protobuf; the Message Definitions spec for CloudEvents and async message payloads; and the Endpoints spec for describing where producers and consumers can reach those messages. In practice that means a single API can serve schemas, event type definitions, and endpoint metadata in an interoperable way, rather than each tool inventing its own registry shape.
+
+xRegistry is a CNCF sandbox project and is being driven by contributors from Microsoft, Google, and the CloudEvents community. The reference server is available at github.com/xregistry/server, and the specs cover both the wire format (JSON over HTTP) and filesystem representations so registries can be checked into Git.

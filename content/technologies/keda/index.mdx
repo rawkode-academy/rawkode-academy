@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://keda.sh/'
 source: 'https://github.com/kedacore/keda'
+documentation: 'https://keda.sh/docs/'
 license: Apache-2.0
 status: stable
 matrix:
@@ -26,6 +27,8 @@ community:
   slack: 'https://kubernetes.slack.com/archives/CKZJ36A5D'
   blog: 'https://keda.sh/blog'
 ---
-KEDA is a CNCF graduated project.
+KEDA (Kubernetes Event-Driven Autoscaling) scales Deployments, StatefulSets, and Jobs based on external event sources — queue depth, stream lag, database row counts, Prometheus queries, HTTP rate — instead of just CPU and memory. Crucially, it can scale a workload all the way down to zero replicas when there is nothing to do, and back up again when work arrives.
 
-KEDA is a Cloud Native Computing Foundation (CNCF) graduated project.
+Architecturally KEDA is small. The **operator** watches `ScaledObject` and `ScaledJob` CRDs, and for each one it reconciles a standard Kubernetes HPA behind the scenes. The scale-to-zero behavior is handled by the operator itself, because HPA alone cannot cross the 0⇔1 boundary. The **metrics adapter** implements the Kubernetes external metrics API, so the HPA can fetch "messages in queue" from KEDA rather than from an in-cluster metrics server. The actual event sources are exposed as "scalers" — over 60 of them, including Kafka, RabbitMQ, AWS SQS, Azure Service Bus, Redis streams, Prometheus, MongoDB, and NATS — each a Go package in the KEDA repo.
+
+KEDA was started by Microsoft and Red Hat, donated to the CNCF, and graduated in 2023. It is the standard answer for "my worker should run zero pods when the Kafka topic is empty," and the underlying building block for serverless stacks like Azure Container Apps and the HTTP add-on for scale-from-zero on web workloads.

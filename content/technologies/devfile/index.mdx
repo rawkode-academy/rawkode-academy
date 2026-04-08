@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://devfile.io'
+documentation: 'https://devfile.io/docs/2.3.0/what-is-a-devfile'
 source: 'https://github.com/devfile/api'
 license: Apache-2.0
 status: stable
@@ -23,6 +24,8 @@ community:
 matrix:
   status: skip
 ---
-Devfile is a CNCF sandbox project.
+Devfile is an open specification — and a set of libraries and registries implementing it — for describing a containerized development environment in portable YAML. A `devfile.yaml` declares components (container images, Kubernetes resources, volumes), commands (build, run, test, debug), and events (preStart, postStart) in a tool-neutral format. A Devfile-aware tool reads the file and spins up the corresponding workspace.
 
-Devfile is a Cloud Native Computing Foundation (CNCF) sandbox project.
+It originated at Red Hat as the configuration format for Eclipse Che and OpenShift Dev Spaces, and has since been adopted by odo (the OpenShift developer CLI), IntelliJ's Red Hat extensions, and the public Devfile Registry that ships ready-to-use stacks for Node, Java, Python, Go, Quarkus, Spring Boot, and others. The project joined the CNCF sandbox in 2022.
+
+Devfile overlaps conceptually with the Microsoft-driven `devcontainer.json` standard used by VS Code Dev Containers, GitHub Codespaces, and DevPod. The practical difference is focus: `devcontainer.json` describes a single container with VS Code features; Devfile describes a multi-component, Kubernetes-native workspace including build and run commands, which fits Che/OpenShift's in-cluster development model. In practice, `devcontainer.json` has won broader mindshare in the wider ecosystem, while Devfile remains the native format inside the Red Hat developer tooling world.

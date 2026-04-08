@@ -6,7 +6,7 @@ logos:
   stacked: true
 website: 'https://bpfman.io/'
 source: 'https://github.com/bpfman/bpfman'
-license: Apache-2.0
+license: Apache-2.0 OR BSD-2-Clause
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
@@ -19,6 +19,8 @@ community:
 matrix:
   status: watch
 ---
-An eBPF Manager for Linux and Kubernetes
+bpfman (formerly bpfd) is a system daemon for loading, unloading, and managing eBPF programs on Linux hosts, with a focus on Kubernetes. The problem it solves is that eBPF programs usually want to be loaded directly by the application that uses them, which means every eBPF-using workload needs `CAP_BPF` and `CAP_SYS_ADMIN`, and multiple programs attaching to the same hook (like XDP on a NIC) can fight for ownership. bpfman centralizes that loading behind a single privileged daemon and exposes a gRPC API to unprivileged clients.
 
-bpfman is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The daemon is written in Rust on top of Aya (a pure-Rust eBPF library). It can load programs from OCI images — you package your compiled `.o` file as an OCI artifact, push it to a registry, and bpfman pulls, verifies, and attaches it. On Kubernetes, bpfman runs as a DaemonSet and ships CRDs like `XdpProgram`, `TcProgram`, `TracepointProgram`, and `UprobeProgram`; a controller reconciles those into gRPC calls to the local daemon on each node. Multiple XDP programs can be multiplexed safely onto the same interface using bpfman's dispatcher.
+
+bpfman is a CNCF sandbox project, originally from Red Hat, and is aimed squarely at the "eBPF on Kubernetes" problem space that Cilium and Tetragon also operate in — but it's a layer below them, providing the loader/manager infrastructure rather than a specific networking or observability solution. It's the closest thing to a standard eBPF program manager for cluster operators.

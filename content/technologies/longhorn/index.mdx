@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://longhorn.io/'
 source: 'https://github.com/longhorn/longhorn'
+documentation: 'https://longhorn.io/docs/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -30,6 +31,8 @@ cncf:
 matrix:
   status: skip
 ---
-Cloud-native distributed storage for Kubernetes
+Longhorn is a distributed block storage system for Kubernetes, created at Rancher Labs and now a CNCF incubating project. It turns the local disks attached to worker nodes into replicated persistent volumes that pods consume through a standard CSI driver.
 
-Longhorn is a Cloud Native Computing Foundation (CNCF) incubating project.
+Each Longhorn volume has a dedicated microservice controller called the engine, implemented on top of a modified iSCSI target (longhorn-engine) that runs in a per-volume pod. The engine synchronously replicates writes to two or three replica pods, each of which stores the volume as a sparse file on a node's local filesystem. Because every volume has its own engine process, a fault in one volume's replicas cannot affect another. Snapshots are copy-on-write inside the engine; backups are incremental and uploaded to S3 or NFS; and volumes can be restored into another cluster from the same backup store, which is how disaster recovery and cross-cluster migration work.
+
+Longhorn ships a web UI for volume, snapshot, and backup management, plus a ShareManager for ReadWriteMany volumes backed by NFS. It competes with Rook-Ceph, OpenEBS, and Portworx, and its niche is being simple to install and operate on small-to-medium clusters that want replicated block storage without running a full Ceph cluster.

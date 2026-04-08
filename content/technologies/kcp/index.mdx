@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kcp.io'
 source: 'https://github.com/kcp-dev/kcp'
+documentation: 'https://docs.kcp.io/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -26,6 +27,8 @@ community:
 matrix:
   status: skip
 ---
-kcp is a CNCF sandbox project.
+kcp is the Kubernetes API machinery without Kubernetes. It is a fork of `kube-apiserver` and the surrounding controller libraries, stripped of pods, nodes, and the rest of the container-oriented APIs, and extended with a native multi-tenancy concept called **workspaces**. The result is a control plane that serves CRDs and the full watch/list/reconcile machinery you know from Kubernetes, but as a general-purpose declarative API platform rather than a container orchestrator.
 
-kcp is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Workspaces are the headline feature: a kcp server can serve effectively unlimited logical clusters, each with its own API surface, RBAC, and resource graph, all sharing one etcd. **APIExports** and **APIBindings** let one workspace publish a set of CRDs and another workspace consume them, with a controller-facing "virtual workspace" endpoint that presents bound APIs across many tenants at once. This makes it possible to build a SaaS where every tenant thinks they have their own Kubernetes-style API for your product, without you running a cluster per tenant.
+
+Originally a Red Hat research project, kcp is now a CNCF sandbox project. It is not a Kubernetes distribution and you cannot run pods on it; think of it as "the API layer of Kubernetes as a platform-building toolkit," in the space of Crossplane, Upbound Spaces, and the internal developer platform ecosystem.

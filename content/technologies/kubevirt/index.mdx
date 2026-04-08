@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubevirt.io/'
 source: 'https://github.com/kubevirt/kubevirt'
+documentation: 'https://kubevirt.io/user-guide/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -30,6 +31,8 @@ community:
 matrix:
   status: explore
 ---
-KubeVirt is a CNCF incubating project.
+KubeVirt is a Kubernetes add-on that runs virtual machines as first-class workloads alongside containers. A VirtualMachine custom resource maps to a pod whose main container wraps libvirt and QEMU/KVM, so the guest gets real hardware virtualisation while Kubernetes schedules, networks, and stores it like any other pod.
 
-KubeVirt is a Cloud Native Computing Foundation (CNCF) incubating project.
+The control plane consists of virt-operator, virt-api, and virt-controller running in the cluster, plus a virt-handler DaemonSet on every node that supervises local virt-launcher pods. Storage attaches via CDI (Containerized Data Importer), which imports disk images into PVCs, and live migration is implemented by streaming QEMU state between virt-launcher pods on different nodes. Networking uses the standard CNI stack, with Multus commonly layered in to attach extra NICs from bridges or SR-IOV for VMs that need bare-metal-grade connectivity.
+
+KubeVirt is a CNCF incubating project and the engine behind Red Hat OpenShift Virtualization and SUSE Harvester. It targets teams that want to retire standalone oVirt or vSphere clusters and run legacy VMs next to modern containerised workloads on a single Kubernetes control plane.

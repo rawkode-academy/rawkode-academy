@@ -8,3 +8,8 @@ status: stable
 category: Provisioning
 subcategory: Security & Compliance
 ---
+Syft is an open-source CLI and Go library from Anchore that generates Software Bill of Materials (SBOMs) for container images and filesystems. Given an image reference, a Docker archive, an OCI layout, or a directory, it catalogs every installed package it can recognize and emits an SBOM in SPDX, CycloneDX, or Syft's own JSON format.
+
+Detection is catalog-driven: Syft ships cataloguers for OS packages (dpkg, rpm, apk, Alpine, Wolfi), and language ecosystems including Go modules and binaries, Java JARs and WARs, Python wheels and egg-info, Node.js `package.json`/`package-lock.json`, Ruby gems, Rust Cargo lockfiles, PHP Composer, Dart pub, Dotnet, Elixir, and more. Each cataloguer walks the target's filesystem with a pluggable source abstraction, so Syft can run against a running container, a remote image, or an SBOM-generating build step without needing a daemon.
+
+Syft is the canonical upstream for SBOM generation in the Sigstore/SLSA supply-chain toolchain and is commonly paired with Grype (for CVE scanning of the resulting SBOM) and Cosign (to attach and sign the SBOM as an in-toto attestation on the image).

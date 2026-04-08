@@ -20,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Armada is a CNCF sandbox project.
+Armada is a multi-cluster batch job scheduler built for high-throughput, bursty workloads — the kind of problem that breaks the default Kubernetes scheduler. It was built at G-Research, a quantitative finance firm, to run millions of backtest and risk jobs per day across tens of thousands of nodes spread over multiple Kubernetes clusters.
 
-Armada is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture separates a central Armada server (backed by Postgres and Pulsar for the event log) from per-cluster executor components. Jobs are submitted to Armada queues with fair-share priority; the server decides which cluster a job should run on, then the executor actually creates the Pod. Because queueing and scheduling happen outside any single Kubernetes scheduler, Armada can sustain job submission rates in the hundreds of thousands per hour, far beyond what `kube-scheduler` was designed for, and it handles cluster failover naturally.
+
+Armada competes with Volcano, Kueue, and YuniKorn in the Kubernetes batch space, and more broadly with HTCondor and Slurm in traditional HPC. It is the right choice specifically when you have many small jobs, many clusters, and a need for fair-share queueing; for single-cluster ML training Kueue is usually simpler. It has been a CNCF sandbox project since 2022.

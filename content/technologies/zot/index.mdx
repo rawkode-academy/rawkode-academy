@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://zotregistry.dev/'
 source: 'https://github.com/project-zot/zot'
+documentation: 'https://zotregistry.dev/latest/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -43,6 +44,8 @@ community:
 matrix:
   status: skip
 ---
-Zot is an OCI-native container registry for distributing container images and OCI artifacts.
+zot is an OCI-native container and artifact registry that stores everything on a plain filesystem or object store, with no database. The on-disk layout is the OCI Image Layout specification verbatim, so the contents of a zot storage directory can be read by any OCI-compliant tool without going through zot at all.
 
-zot is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Because it is OCI-only (no Docker v1 legacy), the codebase is much smaller than Distribution/Harbor and focuses on the features modern supply-chain work actually needs: storing and serving OCI artifacts of any media type, ORAS references, Cosign signatures, SBOMs, and Notary v2 signatures as first-class objects. It ships with built-in Trivy-based vulnerability scanning, a search extension that exposes a GraphQL API for finding images and their referrers, and sync/mirroring from upstream registries. Authentication supports htpasswd, LDAP, OIDC, and mTLS, and authorization can be expressed per-repository.
+
+zot is a CNCF sandbox project maintained primarily by Cisco. It is commonly deployed as an embedded registry in edge and air-gapped environments, and as a lightweight registry for CI where the operational overhead of Harbor is too much.

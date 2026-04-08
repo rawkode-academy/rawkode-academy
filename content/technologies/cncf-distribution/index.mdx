@@ -3,7 +3,8 @@ name: Distribution
 logos:
   icon: true
   stacked: true
-website: 'https://github.com/distribution/distribution'
+website: 'https://distribution.github.io/distribution/'
+documentation: 'https://distribution.github.io/distribution/about/'
 source: 'https://github.com/distribution/distribution'
 license: Apache-2.0
 status: stable
@@ -15,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-Distribution is a CNCF sandbox project.
+Distribution is the reference implementation of the OCI Distribution Specification — the HTTP API used to pull and push container images. It is the codebase that originally shipped as Docker Registry v2, donated to the CNCF in 2018, and today powers the official `registry:3` image.
 
-Distribution is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Written in Go, Distribution implements the `/v2/` REST API for manifests, blobs, tags, and uploads, with pluggable storage drivers for filesystem, S3, GCS, Azure Blob, and Swift. Content is addressed by SHA-256 digest, making image layers deduplicated and immutable. It supports OCI image and artifact manifests, image indexes for multi-arch images, and — as of recent releases — the referrers API used by Sigstore and in-toto attestations.
+
+Distribution is deliberately minimal: no auth backend, no UI, no vulnerability scanning. Those concerns are layered on by downstream projects like Harbor (which embeds Distribution), Zot, or managed registry services. If you need a plain, standards-compliant registry to run in a pipeline or airgap, this is the one.

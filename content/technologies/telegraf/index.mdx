@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://www.influxdata.com/products/telegraf/'
 documentation: 'https://docs.influxdata.com/telegraf/v1/'
+source: 'https://github.com/influxdata/telegraf'
 license: MIT
 status: stable
 category: Observability and Analysis
@@ -14,6 +15,8 @@ terms:
   - InfluxDB
   - InfluxData
 ---
-Telegraf is an open-source, plugin-driven server agent for collecting and reporting metrics and events from a wide variety of sources. It's part of the TICK stack (Telegraf, InfluxDB, Chronograf, Kapacitor) and is designed to be highly flexible and lightweight, making it suitable for collecting data from servers, databases, applications, and even IoT devices. Telegraf eliminates the need for writing custom data collection scripts by providing hundreds of input plugins for commonly used technologies. 
+Telegraf is an open-source, plugin-driven agent from InfluxData for collecting, processing, and forwarding metrics, events, and logs. It ships as a single Go binary with no runtime dependencies and is commonly used as the scraping and shipping layer in front of a time-series database.
 
-The value Telegraf provides lies in its ease of configuration and extensibility, allowing users to easily monitor their entire infrastructure. It simplifies the process of gathering time-series data, transforming it, and sending it to various outputs, like InfluxDB, Graphite, Prometheus, or even cloud platforms. Its primary use cases include server monitoring, application performance monitoring (APM), database monitoring, and IoT data collection.
+Its architecture is organized around four kinds of plugins declared in a TOML config. Input plugins gather data: system stats, SNMP, Kafka, Kubernetes, MySQL, PostgreSQL, Prometheus endpoints, cloud provider APIs, and hundreds more. Processor plugins enrich, filter, rename, or tag points in flight. Aggregator plugins compute rolling statistics like min/max/percentiles. Output plugins write the results to destinations such as InfluxDB, Prometheus remote write, Kafka, Elasticsearch, CloudWatch, Datadog, or files. Telegraf speaks InfluxDB Line Protocol natively but supports JSON, CSV, Prometheus, OpenTelemetry, and many other formats.
+
+Because a single agent can ingest from many sources and fan out to many sinks, Telegraf is frequently used as a vendor-neutral metrics collector in hybrid environments, a protocol translator in front of Prometheus or OTLP pipelines, and the default on-host agent for InfluxDB and Grafana Cloud deployments.

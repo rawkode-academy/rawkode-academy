@@ -2,10 +2,11 @@
 name: Waypoint
 logos:
   icon: true
-website: 'https://www.waypointproject.io/'
-documentation: 'https://www.waypointproject.io/docs'
+website: 'https://github.com/hashicorp/waypoint'
+source: 'https://github.com/hashicorp/waypoint'
+documentation: 'https://developer.hashicorp.com/waypoint/docs'
 license: BUSL-1.1
-status: stable
+status: abandoned
 category: App Definition and Development
 subcategory: Continuous Integration & Delivery
 matrix:
@@ -13,6 +14,8 @@ matrix:
 terms:
   - HashiCorp
 ---
-Waypoint, by HashiCorp, is a developer-centric platform designed to simplify the build, deploy, and release process for modern applications. It provides a consistent workflow across diverse deployment environments, including Kubernetes, Amazon ECS, Google Cloud Run, and serverless platforms. Waypoint abstracts away the complexities of underlying infrastructure, allowing developers to focus on writing code and delivering value. 
+Waypoint was HashiCorp's attempt at a unified build, deploy, and release tool. A single `waypoint.hcl` described an application and its three phases: build (using Cloud Native Buildpacks, a Dockerfile, or a language-specific builder), deploy (to Kubernetes, Nomad, ECS, Lambda, Cloud Run, or a static host), and release (flipping traffic over via an ingress, load balancer, or service mesh). Plugins supplied the concrete implementations for each target.
 
-It streamlines the deployment pipeline by offering a single, unified interface for building, deploying, and releasing applications. This reduces the operational overhead associated with managing different deployment strategies and environments. Waypoint aims to improve developer velocity and collaboration by providing a consistent and repeatable deployment experience, regardless of the underlying infrastructure.
+The idea was to give developers a `waypoint up` command that produced a URL, regardless of the underlying platform, while operators retained control over the plugins and policies. A Waypoint server held project state, history, and auth, and the CLI and a web UI talked to it.
+
+HashiCorp sunset Waypoint Community Edition in 2024, and the GitHub repository was archived on January 8, 2024. HashiCorp now steers users toward HCP Waypoint, so the open-source codebase is mainly useful as a reference for existing installations.

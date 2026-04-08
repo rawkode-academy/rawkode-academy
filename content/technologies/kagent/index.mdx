@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Kagent is an open source programming framework designed for DevOps and platform engineers to run AI agents in Kubernetes
+kagent is a framework for running LLM agents as first-class Kubernetes workloads. It was started by Solo.io and donated to the CNCF sandbox in 2025. The project defines CRDs — `Agent`, `Tool`, `ModelConfig`, `Team` — so that agents, the tools they can call, and the models behind them are declared in YAML and reconciled by a controller, exactly like the rest of your cluster state.
 
-kagent is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally the control plane is built on Microsoft's AutoGen Python agent framework; each declared agent runs as a pod that exposes a chat/MCP-style interface and is wired up to tools that can be inline Python, MCP servers, or wrappers around existing cluster-native CLIs (`kubectl`, Istio `istioctl`, Prometheus queries, Argo CD). A bundled web UI lets you converse with agents and inspect the tool calls, traces, and token usage. Because tools are decoupled from agents, you can give the same SRE-investigator agent access to different tool sets per team or per environment.
+
+The initial target use cases are Kubernetes troubleshooting, Istio/Envoy debugging, and general "agentic SRE" workflows, with kagent positioned as the Kubernetes-native place to run those agents rather than a SaaS dashboard. It overlaps conceptually with HolmesGPT but focuses on multi-agent coordination and a declarative, CRD-based runtime.

@@ -20,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Connect is a family of libraries for building browser and gRPC-compatible HTTP APIs.
+Connect is an RPC framework from Buf that uses Protobuf schemas but runs over plain HTTP/1.1, HTTP/2, and HTTP/3 — without the gRPC wire protocol's hard dependency on HTTP/2 trailers. A Connect server speaks three protocols simultaneously on the same endpoint: Connect's own protocol (which works through any HTTP proxy, browser `fetch`, and curl), gRPC, and gRPC-Web. Clients can pick whichever they need.
 
-Connect RPC is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The practical win is that you get one `.proto` file, one generated service interface, and a single handler that any client can call: a Go backend, a TypeScript web app using `@connectrpc/connect-web`, a Swift iOS app, or a regular gRPC client. Unary calls look like JSON or Protobuf POSTs with predictable status codes, so they're debuggable with `curl` and cacheable by CDNs. Streaming uses enveloped messages over a single HTTP body. There are official implementations for Go (`connect-go`), TypeScript/JavaScript (`connect-es`), Swift, Kotlin, and Python.
+
+Connect exists because gRPC-Web required a translating proxy (Envoy) in front of gRPC services to be callable from browsers, and because the gRPC protocol itself is awkward to debug. It's a pragmatic alternative to gRPC for teams that are all-in on Protobuf but want browser reachability and simpler ops.

@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://volcano.sh/'
 source: 'https://github.com/volcano-sh/volcano'
+documentation: 'https://volcano.sh/en/docs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -20,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Volcano is a CNCF incubating project.
+Volcano is a batch scheduling system for Kubernetes aimed at HPC, AI, and big data workloads that the default kube-scheduler handles poorly. These workloads want group semantics: a training job needs all of its workers to start together or none of them, and a distributed job should not deadlock against another job that has grabbed half the GPUs each.
 
-Volcano is a Cloud Native Computing Foundation (CNCF) incubating project.
+Volcano addresses this with gang scheduling, fair-share and capacity queues, preemption, job dependencies, and topology-aware placement that takes GPU and NUMA locality into account. It introduces a PodGroup CRD and a Job CRD so that a set of Pods can be scheduled atomically, and ships framework integrations for TensorFlow, PyTorch, MPI, Spark, Flink, Ray, and Argo workflows, so jobs from those frameworks can be submitted natively and queued by Volcano.
+
+It originated at Huawei and is a CNCF incubating project, commonly used as the scheduler for Kubernetes-based AI training platforms and HPC clusters.

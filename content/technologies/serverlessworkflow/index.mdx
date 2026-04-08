@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://serverlessworkflow.io'
 source: 'https://github.com/serverlessworkflow/specification'
+documentation: 'https://serverlessworkflow.io/docs/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Serverless Workflow is a CNCF sandbox project.
+Serverless Workflow is a CNCF specification for defining declarative workflows that orchestrate functions, services, and events. Rather than being a single engine, it is a vendor-neutral DSL, expressed in YAML or JSON, that describes states, transitions, event triggers, retries, timeouts, and compensation logic in a portable format.
 
-Serverless Workflow is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The spec models workflows as a finite state machine with state types such as `operation`, `event`, `switch`, `parallel`, `foreach`, `callback`, and `inject`. Data flows between states using JSONPath or jq expressions, and functions can be invoked via REST, gRPC, GraphQL, OpenAPI, AsyncAPI, or CloudEvents. This lets authors express long-running, event-driven business processes without coupling them to a specific runtime.
+
+Multiple runtimes implement the specification, including SonataFlow (formerly Kogito Serverless Workflow), Synapse, and Automatiko. The goal is the same portability story that OCI brought to container images: a workflow written against the spec can move between compatible engines on Kubernetes, Knative, or hosted FaaS platforms.

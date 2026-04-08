@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://werf.io/'
 source: 'https://github.com/werf/werf'
+documentation: 'https://werf.io/docs/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -21,6 +22,8 @@ community:
 matrix:
   status: skip
 ---
-werf is a solution for implementing efficient and consistent software delivery to Kubernetes. It covers the entire CI/CD lifecycle and all related artifacts, glues commonly used tools (Git, Docker/Buildah, Helm, K8s) and facilitates best practices.
+werf is an open-source CLI that combines image building, registry management, and Kubernetes deployment into one Git-driven workflow. It wraps Buildah and Helm under a single tool so that a commit hash deterministically produces the same images, the same tags, and the same release.
 
-werf is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The distinguishing idea is "Giterminism": the configuration werf reads must come from Git, and builds are keyed by content hashes of the files that actually influenced them, which enables strong layer caching across CI runners and across branches. Images are tagged by content rather than by branch or commit, so identical content skips a rebuild and redeploy. On the deploy side, werf uses Helm 3 under the hood but adds real-time resource tracking, so `werf converge` blocks until Pods are actually Ready and streams logs and events from the workloads it just applied. Cleanup is based on which images are still referenced by Git history and by the cluster, so unused images get garbage collected from the registry automatically.
+
+werf is developed by Flant and is a CNCF sandbox project, commonly used as a replacement for hand-rolled "build image + helm upgrade" CI pipelines.

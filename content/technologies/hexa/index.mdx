@@ -16,6 +16,8 @@ community:
 matrix:
   status: skip
 ---
-Hexa is a CNCF sandbox project.
+Hexa is a policy orchestration project that translates a single, vendor-neutral authorization policy into the native policy formats of different target systems. The core idea is IDQL (Identity Query Language), a JSON-based policy format that describes "who can do what to which resource," which Hexa then converts into Google Cloud IAM, AWS Cedar/Verified Permissions, Azure RBAC, Open Policy Agent rego, and similar dialects.
 
-Hexa is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The project ships a Go-based policy orchestrator and a set of "provider" plugins that read and write policy in each target system. The workflow is: author IDQL centrally, apply via the orchestrator, and let Hexa reconcile each platform's native policy store. This matters for organizations that have identical access rules scattered across four clouds and an API gateway, all expressed differently.
+
+Hexa is a CNCF sandbox project, donated by Strata Identity, and is still early — the set of supported providers and the IDQL spec itself are evolving. If you are already all-in on OPA or Cedar, Hexa is not a replacement; it is an upstream abstraction that targets those engines alongside cloud-native IAM.

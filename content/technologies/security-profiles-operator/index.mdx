@@ -2,6 +2,7 @@
 name: Security Profiles Operator (SPO)
 logos: null
 website: 'https://github.com/kubernetes-sigs/security-profiles-operator'
+source: 'https://github.com/kubernetes-sigs/security-profiles-operator'
 documentation: >-
   https://github.com/kubernetes-sigs/security-profiles-operator/blob/main/installation-usage.md
 license: Apache-2.0
@@ -11,6 +12,8 @@ subcategory: Security & Compliance
 matrix:
   status: explore
 ---
-The Kubernetes Security Profiles Operator simplifies the management of seccomp profiles in Kubernetes. Seccomp (Secure Computing Mode) is a Linux kernel feature that restricts the system calls a process can make, thus reducing the attack surface. The Seccomp Operator automates the generation, deployment, and management of seccomp profiles, making it easier to enforce security policies at the container level.
+The Security Profiles Operator (SPO) is a Kubernetes SIG project that manages the lifecycle of seccomp, SELinux, and AppArmor profiles across a cluster. It turns low-level Linux security profiles into Kubernetes-native custom resources that can be distributed to every node and bound to workloads declaratively.
 
-It provides value by enabling fine-grained control over container capabilities, enhancing security posture, and reducing the complexity of seccomp profile management. Main use cases include hardening container workloads, limiting potential security breaches, and ensuring compliance with security standards.
+SPO installs a DaemonSet that syncs profiles onto each node's local filesystem at the path that kubelet expects, so a `SeccompProfile` CR named `nginx-restricted` becomes a file under `/var/lib/kubelet/seccomp/operator/...` ready to be referenced by pod security context. Similar controllers handle `SelinuxProfile` (translating high-level rules into CIL and loading them via selinuxd) and `AppArmorProfile`. Beyond static distribution, SPO can record profiles at runtime: a `ProfileRecording` resource attaches eBPF or oci-hook-based recorders to selected pods, captures every syscall they make, and produces a minimal seccomp profile that represents exactly the workload's real behavior — effectively automating what was previously a tedious manual audit.
+
+SPO also exposes a webhook that can bind profiles to workloads via labels and a profile-binding mechanism for enforcing "every pod in this namespace must use this seccomp profile." It is the standard way to deploy fine-grained kernel-level confinement on Kubernetes without maintaining node-level provisioning scripts, and is the project CIS and NSA Kubernetes hardening guides point to for runtime syscall restriction. It is Apache-2.0 licensed under kubernetes-sigs.

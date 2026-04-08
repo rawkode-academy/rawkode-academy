@@ -2,10 +2,11 @@
 name: System Initiative
 logos:
   icon: true
-website: 'https://systeminit.com/'
-documentation: 'https://docs.systeminit.com'
+website: 'https://www.systeminit.com/'
+source: 'https://github.com/systeminit/si'
+documentation: 'https://github.com/systeminit/si#readme'
 license: Apache-2.0
-status: stable
+status: abandoned
 category: Provisioning
 subcategory: Automation & Configuration
 matrix:
@@ -14,6 +15,8 @@ terms:
   - SysInit
   - SI
 ---
-System Initiative is a project focused on improving how complex, multi-service applications are composed, deployed, and managed in cloud-native environments. It aims to streamline service composition and lifecycle management, enabling developers to define application blueprints that describe the desired state of their applications and rely on automated reconciliation to achieve and maintain that state. This includes automated service discovery, dependency management, and configuration management.
+System Initiative was an infrastructure automation platform built by Adam Jacob (co-founder of Chef) that replaced declarative IaC files and plan/apply cycles with a live, collaborative graph of infrastructure components. Instead of writing HCL or YAML and running a planner, engineers worked in a visual canvas where each asset was a "component" backed by a programmable model.
 
-System Initiative's value lies in simplifying the orchestration of applications consisting of numerous microservices. Use cases include deploying and managing complex applications on Kubernetes, automating cross-service dependencies, and enabling self-healing and auto-scaling capabilities at the application level, rather than just at the individual service level.
+Each component had attributes, qualification functions (checks that ran as the model changed), code-generation functions that produced provider payloads, and action functions that called out to real APIs. The system continuously re-evaluated the graph as users dragged, connected, or edited components, so validation and generated cloud payloads updated in real time. Changes were staged in change sets that multiple users could collaborate on simultaneously, with conflict resolution built into the model, before being applied to the real world. Asset definitions (for AWS, Docker, Kubernetes, and so on) were themselves components that could be forked and customized inside the tool.
+
+System Initiative open-sourced its platform in 2024 under the Apache-2.0 license, but archived the public repository in February 2026 and is no longer maintaining it. It remains a historical reference for teams exploring alternatives to text-file IaC, long plan cycles, and brittle module abstractions.

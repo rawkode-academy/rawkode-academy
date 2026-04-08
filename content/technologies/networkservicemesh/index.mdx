@@ -21,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Network Service Mesh is a CNCF sandbox project.
+Network Service Mesh (NSM) is a CNCF sandbox project that provides L2/L3 connectivity between Kubernetes workloads independent of the CNI in use. Where traditional service meshes like Istio or Linkerd operate at L7 on top of the cluster's existing pod network, NSM attaches additional network interfaces to pods on demand and wires them into arbitrary virtual networks.
 
-Network Service Mesh is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture is modelled on telco Network Function Virtualization. A workload requests a "network service" via a label or annotation; an NSM control plane matches the request to a Network Service Endpoint (NSE), and a forwarder (using kernel, VPP, or SR-IOV dataplanes) sets up a point-to-point link, typically a VXLAN, Wireguard, or MEMIF tunnel. This enables use cases that plain CNI cannot express cleanly: multi-cluster L3 connectivity, service chaining through firewalls or DPI, multiple network interfaces per pod, and hybrid cloud/edge overlays that cross Kubernetes and non-Kubernetes endpoints.
+
+NSM is most commonly seen in 5G/telco workloads (vRAN, UPF) and in multi-cluster networking scenarios, alongside or as an alternative to Multus, Cilium Cluster Mesh, Submariner, and Skupper. It is Apache-2.0 licensed and has been in the CNCF sandbox since 2019.

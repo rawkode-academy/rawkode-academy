@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://www.keycloak.org/'
 source: 'https://github.com/keycloak/keycloak'
+documentation: 'https://www.keycloak.org/documentation'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -49,6 +50,8 @@ community:
 matrix:
   status: skip
 ---
-Keycloak is an open-source identity and access management solution for modern applications and services,  built on top of industry security standard protocols.
+Keycloak is an open-source identity and access management server. It implements OpenID Connect, OAuth 2.0, and SAML 2.0, and handles user federation, single sign-on, social login, and fine-grained authorization against a pluggable user store.
 
-Keycloak is a Cloud Native Computing Foundation (CNCF) incubating project.
+A Keycloak deployment is organized into realms, each with its own users, clients (applications), roles, groups, and identity providers. Users can live in Keycloak's own database (backed by a JDBC store — Postgres in practice) or be federated from LDAP, Active Directory, or a custom SPI. Brokering to upstream IdPs (Google, GitHub, another Keycloak, any OIDC/SAML server) is a first-class feature, which is why it is so frequently used as the SSO layer in front of a mixed stack of in-house and off-the-shelf apps. The server is written in Java on Quarkus (Keycloak 17+ replaced the older WildFly distribution).
+
+It competes with Okta, Auth0, and Azure AD on the commercial side, and with Authentik, Ory Hydra/Kratos, and Zitadel on the open-source side. Keycloak is the heaviest of those but also the most feature-complete for enterprise protocol support — if you need SAML, WS-Federation, LDAP federation, and OIDC in one box, it is usually the default answer.

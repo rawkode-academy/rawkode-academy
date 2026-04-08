@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://thanos.io/'
+source: 'https://github.com/thanos-io/thanos'
 documentation: 'https://thanos.io/tip/thanos/getting-started.md/'
 license: Apache-2.0
 status: stable
@@ -38,4 +39,8 @@ community:
 matrix:
   status: skip
 ---
-Thanos is a highly available, distributed system built on top of Prometheus. It allows you to query metrics from multiple Prometheus instances, providing a global view of your application performance and infrastructure. This enables long-term storage and analysis of Prometheus data beyond the limited retention capabilities of individual Prometheus servers. Thanos achieves this through components like Store Gateway, Compactor, Querier, and Ruler, which work together to fetch, store, and process Prometheus data across multiple deployments and time spans. Its value lies in providing unified observability, enabling scaling Prometheus beyond single clusters, and facilitating reliable long-term metric storage.
+Thanos extends Prometheus with unlimited retention, high availability, and a single global query view across many Prometheus servers. It is a set of stateless components that cooperate with existing Prometheus instances rather than a rewrite, so teams can adopt it incrementally.
+
+The Sidecar runs next to each Prometheus and uploads completed TSDB blocks to an object store (S3, GCS, Azure Blob, Ceph, MinIO, etc.). Store Gateway exposes those historical blocks as a query API backed by object storage. Querier is a stateless PromQL engine that fans out over Sidecars, Store Gateways, and other Queriers via the Thanos gRPC Store API, deduplicates samples from HA Prometheus pairs, and returns a global result. Compactor downsamples old blocks to 5m and 1h resolutions and runs vertical compaction to make long-range queries tractable. Receive accepts Prometheus remote-write for push-based or multi-tenant setups, and Ruler evaluates recording and alerting rules against the global view.
+
+Thanos is a CNCF Incubating project originated at Improbable and is one of the two dominant approaches (the other being Cortex/Mimir) for turning Prometheus into a long-term, global monitoring system.

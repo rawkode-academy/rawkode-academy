@@ -17,6 +17,9 @@ cncf:
 matrix:
   status: skip
 ---
-Eraser uses vulnerability data to remove non-running images from all Kubernetes nodes in a cluster.
 
-Eraser is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Eraser is a Kubernetes component that removes vulnerable and unused container images from worker nodes. On a typical cluster, kubelet's garbage collection only evicts images under disk pressure, so known-CVE images can linger on nodes long after no pod uses them — Eraser's job is to actively go find and delete them.
+
+It runs as a controller plus a per-node DaemonSet-spawned job pattern. An `ImageList` or `ImageJob` CR tells Eraser which images to remove; the controller schedules short-lived pods on each node that talk directly to the container runtime (containerd, CRI-O) via CRI and delete the specified images. It can also run in a scanning mode where it uses Trivy to find vulnerable images on each node and then remove them automatically on a schedule.
+
+Eraser is maintained primarily by Microsoft and lives in the CNCF Sandbox (accepted 2023). It's narrow in scope — it doesn't scan running containers, patch images, or manage admission — but it fills a real gap that Kyverno, Gatekeeper, and image-scanning tools don't: actually deleting the bad bits off the nodes once you know they're there.

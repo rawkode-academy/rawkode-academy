@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://pipecd.dev/'
+documentation: 'https://pipecd.dev/docs/'
 source: 'https://github.com/pipe-cd/pipecd'
 license: Apache-2.0
 status: stable
@@ -21,6 +22,8 @@ community:
 matrix:
   status: skip
 ---
-GitOps style continuous delivery platform that provides consistent deployment and operations experience for any applications
+PipeCD is a GitOps-style continuous delivery system originally built at CyberAgent and donated to the CNCF in 2023. It targets a wide range of deployment targets from a single control plane: Kubernetes manifests and Kustomize/Helm, Terraform, AWS ECS, AWS Lambda, and Google Cloud Run.
 
-PipeCD is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally, PipeCD splits into a central control plane (piped-control-plane) that stores pipeline state and a lightweight agent called `piped` that runs inside each target environment. The agent pulls desired state from Git, plans a diff against the live target, and executes user-defined stages such as canary, baseline/canary analysis, traffic shifting, manual approval, and rollback. Because the agent runs inside the cluster or account it deploys to, no inbound access to workloads is required from the control plane.
+
+Compared to Argo CD and Flux, PipeCD's differentiator is the unified pipeline model across non-Kubernetes targets like Lambda and ECS, plus built-in progressive delivery primitives without a separate controller like Argo Rollouts or Flagger. It integrates with Prometheus, Datadog, Stackdriver, and CloudWatch for metrics-based analysis during progressive rollouts.

@@ -9,33 +9,8 @@ subcategory: Scheduling & Orchestration
 matrix:
   status: skip
 ---
-Lens is a powerful open-source Kubernetes IDE. It provides a single pane of glass to manage and monitor multiple Kubernetes clusters, regardless of their location (local, cloud, or on-premise). It simplifies Kubernetes management by providing a user-friendly interface, advanced features for cluster navigation, resource management, and real-time monitoring, abstracting away the complexity of `kubectl` and YAML files.
+Lens is a desktop IDE for Kubernetes, built as an Electron application that runs on macOS, Windows, and Linux. It reads your local kubeconfig, connects directly to clusters via the Kubernetes API, and presents workloads, nodes, events, and logs through a single navigation tree.
 
-Lens significantly improves developer productivity by offering features like built-in terminal access to clusters, easy access to logs and events, and streamlined deployment processes. It also offers extension capabilities, allowing users to add custom tools and integrations to further enhance their workflow. It is used primarily by developers, operators, and DevOps engineers who need a visual and efficient way to interact with their Kubernetes environments.
+Under the hood Lens uses client-go-style API calls via its own TypeScript client, streams container logs and exec sessions over the API server's websocket endpoints, and embeds a Monaco editor for live-editing manifests. It can attach a Prometheus instance discovered in-cluster to overlay CPU, memory, and network metrics on any workload view without requiring Grafana. An extension API lets third parties add catalog entries, custom views, and menu items; CNCF projects like OpenEBS, Calico, and Kubescape ship Lens extensions. Lens Desktop is distributed by Mirantis under a freemium model, and the fully open-source fork OpenLens exists for users who want a purely community-maintained build.
 
-Lens is a powerful, standalone Integrated Development Environment (IDE) specifically designed for Kubernetes. It provides a graphical user interface (GUI) that simplifies the management, monitoring, and troubleshooting of multiple Kubernetes clusters, abstracting away the complexities of `kubectl` and YAML manifests.
-
-## Key Features
-
--   **Multi-Cluster Management:** Connect and manage all your Kubernetes clusters (local, cloud, on-premises) from a single application.
--   **Real-time Visibility:** Provides a live, interactive view of your cluster's state, including nodes, pods, deployments, services, and other resources.
--   **Resource Management:** Easily view, edit, delete, and create Kubernetes resources directly from the GUI.
--   **Terminal Access:** Built-in terminal for `kubectl` access to any connected cluster and shell access to running containers.
--   **Logs & Events:** Stream logs and view events for pods and other resources in real-time, aiding in quick debugging.
--   **Metrics & Monitoring:** Integrates with Prometheus to display real-time resource usage metrics for nodes, pods, and containers.
--   **Extension API:** Allows for extending Lens's functionality with custom tools, integrations, and dashboards.
--   **User-Friendly Interface:** Offers an intuitive and well-organized interface that reduces the learning curve for Kubernetes.
--   **Lens Prism AI:** (Newer feature) Integrates AI-powered assistance for troubleshooting and optimization, enhancing developer productivity.
-
-## Benefits
-
--   **Simplified Kubernetes Interaction:** Makes Kubernetes more accessible and less daunting, especially for developers and those new to the platform.
--   **Increased Developer Productivity:** Accelerates development, troubleshooting, and operational tasks by providing a unified and visual interface.
--   **Faster Incident Resolution:** Enables quicker triage and root cause analysis with real-time observability and contextual debugging information.
--   **Consistent Experience:** Provides a consistent management experience across diverse Kubernetes environments.
--   **Reduced Cognitive Load:** Abstracts away much of the command-line complexity, allowing users to focus on understanding and managing their applications.
--   **Secure Operations:** Runs locally, respecting user credentials and RBAC, ensuring data stays within the user's environment.
-
-## License
-
-Lens operates under a proprietary license, offering a Community Edition with core functionalities and paid Pro features for advanced capabilities and enterprise use cases.
+Lens overlaps with Headlamp, k9s, and the official Kubernetes Dashboard. Its niche is offering a GUI-first experience that still gives power users kubectl-equivalent access through an embedded terminal and per-cluster context switching.

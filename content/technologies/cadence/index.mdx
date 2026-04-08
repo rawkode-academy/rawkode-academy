@@ -19,6 +19,8 @@ community:
 matrix:
   status: graveyard
 ---
-Cadence is a distributed, scalable, durable, and highly available fault-oblivious stateful code platform.
+Cadence is a durable execution engine built at Uber for writing long-running, fault-tolerant workflows as plain application code. You write a workflow function in Go or Java that calls "activities" (your actual side-effecting work — HTTP calls, database writes, etc.), and Cadence records every activity result to persistent storage. If the worker process crashes halfway through, the workflow is replayed from the event history on a new worker and deterministically resumes exactly where it left off. Sleeps can last months, retries are automatic, and failures of any piece are recoverable.
 
-Cadence Workflow is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The server is Go, stores event history in Cassandra, MySQL, or PostgreSQL, and uses a sharded architecture with four service roles (frontend, matching, history, worker). Workers are separate processes running your code, pulling tasks from task lists over gRPC. The workflow determinism requirement means you can't call `time.Now()` or make direct network calls from workflow code — you go through Cadence primitives so the replay is consistent.
+
+If this sounds like Temporal, that's because Temporal is a fork of Cadence created in 2019 by the original Cadence team (Maxim Fateev, Samar Abbas) after they left Uber. Temporal has since become the more actively developed and commercially backed of the two, while Cadence continues as an Uber-maintained open source project and joined the CNCF sandbox in 2025. For new projects, most engineers reach for Temporal first; Cadence is mainly relevant if you're already on it or inside Uber's ecosystem.

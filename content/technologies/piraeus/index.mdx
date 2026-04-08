@@ -16,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-Piraeus Datastore is a CNCF sandbox project.
+Piraeus Datastore is a Kubernetes-native block storage system that packages LINBIT's LINSTOR and DRBD as an operator. It provides persistent volumes for stateful workloads by replicating block devices across cluster nodes at the kernel level rather than over a userspace data path.
 
-Piraeus Datastore is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Underneath, DRBD (Distributed Replicated Block Device) is a Linux kernel module that synchronously mirrors block writes between nodes over TCP or RDMA, giving Piraeus its consistency guarantees without an intermediate object layer. LINSTOR is the control plane that places volumes, manages LVM or ZFS storage pools on each node, and reconciles replica counts. The Piraeus Operator installs LINSTOR controllers, satellites, and the CSI driver onto a cluster and exposes StorageClasses so that standard PVC workflows create replicated DRBD volumes transparently.
+
+Because DRBD operates below the filesystem, Piraeus is typically chosen for workloads that need low-latency, strongly-consistent block storage with local reads, such as databases, message queues, and virtual machines under KubeVirt. It sits in the same space as Rook-Ceph (RBD), Longhorn, and OpenEBS, trading Ceph's feature surface for a simpler, kernel-accelerated data path. Piraeus was accepted into the CNCF sandbox in 2021.

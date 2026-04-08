@@ -23,6 +23,9 @@ community:
   twitter: 'https://twitter.com/envoyproxy'
   slack: 'https://envoyproxy.slack.com/'
 ---
-Envoy is a CNCF graduated project.
 
-Envoy is a Cloud Native Computing Foundation (CNCF) graduated project.
+Envoy is a high-performance L4/L7 proxy written in C++, originally built at Lyft and now the data plane under most of cloud-native networking. It speaks HTTP/1.1, HTTP/2, HTTP/3, gRPC, TCP, UDP, and has first-class support for mTLS, retries, timeouts, outlier detection, circuit breaking, rate limiting, and rich observability out of every request.
+
+The defining idea is xDS: Envoy's configuration (listeners, clusters, routes, endpoints, secrets) is streamed in from a control plane over gRPC, so the proxy can be reconfigured dynamically without dropping connections. That split is why Envoy became the substrate for Istio, Consul Connect, Gloo, Emissary-Ingress, Contour, Kuma, AWS App Mesh, and Cloudflare's internal gateway. The filter chain architecture — HTTP filters, network filters, and listener filters — lets you compose behavior, and WebAssembly filters (proxy-wasm) plus Lua give you custom extension points without recompiling.
+
+Envoy Mobile embeds the same core in iOS/Android apps, and Envoy Gateway is a newer project that wraps Envoy behind the Kubernetes Gateway API to give it a Kubernetes-native UX without pulling in all of Istio. It's the first CNCF graduated proxy and remains the default answer for "we need a service proxy we can actually observe." The main cost is configuration complexity — raw Envoy config is famously verbose, which is precisely why everyone runs it behind a control plane.

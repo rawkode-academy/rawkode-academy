@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://nats.io/'
+documentation: 'https://docs.nats.io/'
 source: 'https://github.com/nats-io/nats-server'
 license: Apache-2.0
 status: stable
@@ -23,7 +24,7 @@ cncf:
     - Cloud Architects
   tags:
     - Edge
-    - Muli-cloud
+    - Multi-cloud
     - Messaging
     - Streaming Data
     - PubSub
@@ -45,11 +46,13 @@ cncf:
   businessUseCase: '>-'
 community:
   twitter: 'https://twitter.com/nats_io'
-  mailingList: 'https://nats.io/blog/'
   slack: 'https://slack.nats.io/'
+  blog: 'https://nats.io/blog/'
 matrix:
   status: explore
 ---
-NATS.io is a connective technology for distributed systems and is a perfect fit to connect devices, edge, cloud or hybrid deployments. True multi-tenancy makes NATS ideal for SaaS and self-healing and scaling technology allows for topology changes anytime with zero downtime.
+NATS is a high-performance messaging system that provides publish/subscribe, request/reply, and queue group semantics over a single, lightweight protocol. The core server is written in Go, runs as a single static binary, and is designed to handle millions of messages per second per node with sub-millisecond latency.
 
-NATS is a Cloud Native Computing Foundation (CNCF) incubating project.
+Subjects are hierarchical, dot-separated strings (e.g. `orders.us.west.created`) and support wildcards for fan-out routing. JetStream, the built-in persistence layer, adds at-least-once and exactly-once delivery, message replay, key-value and object stores, and Raft-replicated streams across clusters. Servers connect in a full mesh and can be federated across regions using leaf nodes and gateways, which makes NATS well-suited to edge and multi-cloud topologies where Kafka's broker model is too heavy.
+
+NATS is commonly compared to Kafka, RabbitMQ, and Redis Streams. It is lighter than Kafka (no ZooKeeper or KRaft, no per-topic partitions to manage) but provides durable streams via JetStream when you need them. It ships clients for Go, Rust, Java, .NET, Python, JavaScript, and C, and integrates with Dapr, Benthos, CloudEvents, and Kubernetes via the NATS operator and Helm charts.

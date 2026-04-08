@@ -21,6 +21,8 @@ community:
 matrix:
   status: adopt
 ---
-Container Network Interface (CNI) is a CNCF incubating project.
+The Container Network Interface (CNI) is a specification and set of libraries for configuring network interfaces in Linux containers. Originally built by CoreOS for rkt, it is now the networking plugin API used by Kubernetes, OpenShift, Cloud Foundry, Mesos, containerd, CRI-O, Podman, and Kata Containers.
 
-Container Network Interface (CNI) is a Cloud Native Computing Foundation (CNCF) incubating project.
+The contract is deliberately tiny. A runtime calls a CNI plugin binary with a JSON config on stdin and a command (`ADD`, `DEL`, `CHECK`, `GC`) plus environment variables identifying the container's network namespace. The plugin sets up (or tears down) the interface — creating veth pairs, bridges, routes, IPAM allocations — and returns a JSON result describing IPs and DNS. Plugins can be chained: a typical Kubernetes node runs an IPAM plugin (`host-local`) followed by a main plugin (`bridge`, `ptp`) and a `portmap` or `bandwidth` plugin.
+
+The `containernetworking/cni` repo ships the spec and libcni; `containernetworking/plugins` ships the reference plugins (`bridge`, `macvlan`, `ipvlan`, `host-local`, `loopback`, `portmap`, `bandwidth`, `firewall`). In production, most Kubernetes clusters run a higher-level CNI implementation instead: Cilium, Calico, Flannel, Weave, or the AWS/Azure/GCP cloud-provider plugins. CNI itself is the thin interface that lets all of them plug into the same runtime.

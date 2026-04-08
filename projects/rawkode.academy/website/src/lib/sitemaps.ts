@@ -322,20 +322,47 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getTechnologySitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [technologies, mtimes] = await Promise.all([
+	const [technologies, mtimes, allVideos] = await Promise.all([
 		getCollection("technologies"),
 		getContentMtimes("technologies"),
+		getPublishedVideos(),
 	]);
 
-	const entries = technologies.map((technology) => ({
-		path: `/technology/${technology.id}`,
-		lastmod: pickLastmod(
-			mtimes.get(technology.id),
-			(technology.data as Record<string, unknown>).updatedAt,
-			(technology.data as Record<string, unknown>).publishedAt,
-		),
-		changefreq: "weekly" as const,
-	}));
+	// Build a Set of technology IDs that have at least one video, so we can
+	// exclude empty/thin tech pages from the sitemap (Google penalizes thin
+	// content site-wide). Tech IDs in videos are normalized to "<id>/index".
+	const techsWithVideos = new Set<string>();
+	for (const v of allVideos) {
+		const refs = (v.data as { technologies?: unknown }).technologies;
+		if (Array.isArray(refs)) {
+			for (const ref of refs) {
+				const id =
+					typeof ref === "string"
+						? ref
+						: ref && typeof ref === "object" && "id" in ref
+							? (ref as { id: string }).id
+							: undefined;
+				if (id) techsWithVideos.add(id);
+			}
+		}
+	}
+
+	const entries = technologies
+		.filter((technology) => {
+			const hasBody = Boolean(
+				technology.body && technology.body.trim().length > 0,
+			);
+			return hasBody || techsWithVideos.has(technology.id);
+		})
+		.map((technology) => ({
+			path: `/technology/${technology.id.replace(/\/index$/, "")}`,
+			lastmod: pickLastmod(
+				mtimes.get(technology.id),
+				(technology.data as Record<string, unknown>).updatedAt,
+				(technology.data as Record<string, unknown>).publishedAt,
+			),
+			changefreq: "weekly" as const,
+		}));
 
 	return sortByPath(entries);
 }
@@ -411,20 +438,57 @@ export async function getLearningPathSitemapEntries(): Promise<
 }
 
 export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [people, mtimes] = await Promise.all([
+	const [people, mtimes, allVideos, allShows] = await Promise.all([
 		getCollection("people"),
 		getContentMtimes("people"),
+		getPublishedVideos(),
+		getCollection("shows"),
 	]);
 
-	const entries = people.map((person) => ({
-		path: `/people/${person.data.id}`,
-		lastmod: pickLastmod(
-			mtimes.get(person.id),
-			(person.data as Record<string, unknown>).updatedAt,
-			(person.data as Record<string, unknown>).publishedAt,
-		),
-		changefreq: "monthly" as const,
-	}));
+	// Build a Set of person IDs who appear as a guest in at least one video
+	// or host at least one show. People without any appearances are excluded
+	// from the sitemap to avoid shipping thin/empty profiles to Google.
+	const peopleWithAppearances = new Set<string>();
+	const collectRefId = (ref: unknown): string | undefined => {
+		if (typeof ref === "string") return ref;
+		if (ref && typeof ref === "object" && "id" in ref) {
+			return (ref as { id: string }).id;
+		}
+		return undefined;
+	};
+	for (const v of allVideos) {
+		const guests = (v.data as { guests?: unknown[] }).guests;
+		if (Array.isArray(guests)) {
+			for (const g of guests) {
+				const id = collectRefId(g);
+				if (id) peopleWithAppearances.add(id);
+			}
+		}
+	}
+	for (const s of allShows) {
+		const hosts = (s.data as { hosts?: unknown[] }).hosts;
+		if (Array.isArray(hosts)) {
+			for (const h of hosts) {
+				const id = collectRefId(h);
+				if (id) peopleWithAppearances.add(id);
+			}
+		}
+	}
+
+	const entries = people
+		.filter((person) => {
+			const hasBody = Boolean(person.body && person.body.trim().length > 0);
+			return hasBody || peopleWithAppearances.has(person.data.id);
+		})
+		.map((person) => ({
+			path: `/people/${person.data.id}`,
+			lastmod: pickLastmod(
+				mtimes.get(person.id),
+				(person.data as Record<string, unknown>).updatedAt,
+				(person.data as Record<string, unknown>).publishedAt,
+			),
+			changefreq: "monthly" as const,
+		}));
 
 	return sortByPath(entries);
 }

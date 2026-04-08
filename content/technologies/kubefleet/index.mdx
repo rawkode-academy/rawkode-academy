@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubefleet.dev/'
 source: 'https://github.com/kubefleet-dev/kubefleet'
+documentation: 'https://kubefleet.dev/docs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -29,6 +30,8 @@ community:
 matrix:
   status: skip
 ---
-A multi-cluster solution that enables users to effectively manage their applications running in multiple Kubernetes clusters.
+KubeFleet is a multi-cluster Kubernetes resource placement controller. You designate one cluster as the fleet hub and register other clusters as members; KubeFleet then propagates selected resources from the hub to member clusters according to declarative placement policies.
 
-KubeFleet is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core CRDs are `MemberCluster`, `ClusterResourcePlacement` (CRP), and `Work`. A CRP selects a set of resources on the hub (by namespace, label, or GVK) and a set of target clusters (by label, property, or a scheduling strategy — PickAll, PickN, PickFixed). The fleet scheduler then produces Work objects that an agent on each member cluster reconciles into actual resources, with rollout strategies, drift detection, and staged updates. It supports cluster properties and cost-based scoring so you can prefer cheaper or less-loaded clusters, and taints/tolerations at the cluster level so you can cordon clusters for maintenance without changing every placement.
+
+KubeFleet is the open-source upstream behind Azure Kubernetes Fleet Manager; Microsoft donated it to the CNCF sandbox in early 2025. It overlaps with Karmada, Open Cluster Management, and Liqo — its differentiator is the close mapping to the Kubernetes API (placements feel like a multi-cluster scheduler for arbitrary resources) and production hardening from the Azure Fleet service.

@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://score.dev/'
 source: 'https://github.com/score-spec/spec'
+documentation: 'https://docs.score.dev/docs/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -34,6 +35,8 @@ community:
 matrix:
   status: skip
 ---
-Score is an open-source workload specification designed to simplify development for cloud-native developers.
+Score is an open, platform-agnostic workload specification created by Humanitec and donated to the CNCF (sandbox, 2024). It defines a small YAML schema that describes a workload — its containers, resource requests, and declared dependencies on things like databases, DNS, queues, and volumes — without specifying how any of those dependencies are actually provisioned.
 
-Score is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A `score.yaml` file is intentionally the lowest common denominator between local development and production. A developer hands the file to a Score implementation, and that implementation translates it into the target runtime's native manifests. `score-compose` generates a Docker Compose file for local use; `score-k8s` generates Kubernetes manifests; `score-helm` produces Helm values. Resources referenced in the spec (`type: postgres`, `type: s3`) are resolved to local stand-ins in dev and to real cloud services in production by the platform team's chosen implementation, so the same workload definition flows unchanged from laptop to CI to cluster.
+
+The point of Score is to be the contract between application developers and platform engineers in a platform-engineering setup: developers describe what their service needs, platform teams decide how each resource type is fulfilled per environment. It sits alongside tooling like Humanitec Orchestrator, Crossplane, Radius, and KubeVela, and is explicitly designed to be thin enough to generate into any of them. Score is Apache-2.0 licensed.

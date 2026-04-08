@@ -44,6 +44,8 @@ cncf:
 community:
   slack: 'https://cloud-native.slack.com/messages/in-toto'
 ---
-in-toto is a CNCF graduated project.
+in-toto is a framework for cryptographically verifying that every step of a software supply chain was performed by the expected party and produced the expected artifacts. It originated from NYU's Secure Systems Lab alongside TUF, and is now a CNCF graduated project.
 
-in-toto is a Cloud Native Computing Foundation (CNCF) graduated project.
+The model is built on two primitives: a **layout**, signed by the project owner, which declares the steps of the supply chain (clone, test, build, package), who is authorized to perform each one, and how the artifacts flow between them; and **link metadata**, signed by whoever actually performs a step, which records the materials that went in and the products that came out. A verifier replays the layout against the collected link files and fails the build if anything is missing, unauthorized, or tampered with. This maps cleanly onto SLSA provenance — in-toto attestations are the on-wire format SLSA uses.
+
+It is wired into Sigstore (cosign produces in-toto attestations), Tekton Chains (which emits link metadata for every TaskRun), Jenkins, GitLab, and SPIRE for identity. If you have ever signed a container image with cosign, you have already used in-toto's attestation format whether you noticed or not.

@@ -11,34 +11,9 @@ subcategory: Continuous Integration & Delivery
 matrix:
   status: skip
 ---
-GitLab is a comprehensive DevOps platform delivered as a single application. It provides a complete lifecycle toolchain, from project planning and source code management (SCM) to CI/CD, security, and monitoring. GitLab enables development, security, and operations teams to collaborate effectively, accelerate software delivery, and reduce development costs.
 
-GitLab's value lies in its unified approach, which streamlines workflows, increases visibility, and fosters collaboration across the entire software development lifecycle. Main use cases include version control, continuous integration and continuous delivery (CI/CD), issue tracking, code review, security scanning, and release management, ultimately empowering organizations to build, test, and deploy software faster and more efficiently.
+GitLab is an end-to-end DevOps platform: Git hosting, merge requests, CI/CD, container registry, package registry, issue tracking, wiki, SAST/DAST/dependency scanning, infrastructure-as-code state, a Kubernetes agent, and an observability stack, all in one application. It's available as SaaS (gitlab.com) or self-hosted (Community Edition under MIT, Enterprise Edition under a source-available license with paid tiers).
 
-GitLab is a unified DevOps platform that covers the entire software development lifecycle, from planning and source code management to CI/CD, security, and monitoring. It aims to provide a single application for all stages of software development, fostering collaboration and accelerating delivery.
+Architecturally, GitLab is a large Ruby on Rails monolith (`gitlab-rails`) plus a handful of Go services: `gitaly` (the Git RPC layer that owns the actual repositories), `gitlab-shell` (SSH), `gitlab-workhorse` (HTTP request smart-proxying and large file handling), `sidekiq` (background jobs), and the CI runner agents. Storage is Postgres plus Redis plus object storage; Gitaly Cluster provides replication and leader election for Git itself via Praefect. The CI system is defined in `.gitlab-ci.yml`, runs on GitLab Runner, and supports Docker, Kubernetes, shell, and custom executors.
 
-## Key Features
-
--   **Source Code Management (SCM):** Git-based repository management, including version control, branching, and merging.
--   **Continuous Integration/Continuous Delivery (CI/CD):** Integrated CI/CD pipelines to automate building, testing, and deploying applications.
--   **Issue Tracking & Project Management:** Tools for planning, tracking, and managing projects, including issues, epics, and agile boards.
--   **Code Review:** Built-in code review capabilities, discussions, and merge requests.
--   **Security Scanning:** Integrated security features like Static Application Security Testing (SAST), Dynamic Application Security Testing (DAST), Dependency Scanning, and Container Scanning.
--   **Container Registry:** A built-in registry for Docker images and other container artifacts.
--   **Monitoring & Observability:** Tools to monitor application performance and infrastructure health.
--   **AI-Assisted Development (GitLab Duo):** (As a premium feature) AI-powered assistance for code creation, vulnerability detection, and more.
-
-## Licensing Model
-
-GitLab operates under a mixed licensing model:
--   **GitLab Community Edition (CE):** The core open-source product is licensed under the **MIT License**. This version includes essential SCM and CI/CD functionalities.
--   **GitLab Enterprise Edition (EE):** Builds upon the CE foundation with additional features tailored for larger organizations, advanced security, and compliance. This version is proprietary and requires a commercial license.
-
-## Benefits
-
--   **Unified Platform:** Streamlines the DevOps workflow by bringing all tools into a single application, reducing toolchain complexity.
--   **Accelerated Delivery:** Automates processes and reduces manual handoffs, enabling faster software delivery.
--   **Enhanced Security:** Integrates security scanning throughout the development lifecycle, allowing for early detection of vulnerabilities.
--   **Improved Collaboration:** Fosters better communication and collaboration between development, security, and operations teams.
--   **Increased Visibility:** Provides end-to-end visibility into the software development process.
--   **Scalability:** Designed to scale from small teams to large enterprises with complex needs.
+Compared to a GitHub + third-party stack, GitLab's pitch is "one tool, one auth model, one UI for everything DevOps" — which is genuinely useful for regulated environments that need self-hosting and audit, and painful when you want to swap a component for a best-of-breed alternative. The product has aggressively absorbed adjacent categories (security scanning, value stream analytics, and more recently AI via GitLab Duo), which is either a feature or a source of bloat depending on whom you ask.

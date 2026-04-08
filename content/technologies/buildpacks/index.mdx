@@ -21,6 +21,8 @@ community:
 matrix:
   status: explore
 ---
-Buildpacks is a CNCF incubating project.
+Cloud Native Buildpacks (CNB) turn source code into OCI images without a Dockerfile. You point `pack build myapp` at a directory; the buildpack detects the language (Go, Node, Python, Java, Ruby, .NET, PHP, …), installs the right toolchain, compiles the app, and produces a runnable image using a known-good base. The contract is: give me source, I'll give you an image.
 
-Buildpacks is a Cloud Native Computing Foundation (CNCF) incubating project.
+A CNB build runs through an ordered set of buildpacks against a "stack" (a pair of build and run base images). Each buildpack has a `detect` phase that decides whether it applies and a `build` phase that contributes layers. The lifecycle caches layers by content hash and, crucially, supports rebasing: if only the OS base image changes for a security fix, `pack rebase` swaps the bottom layers without rebuilding the app layers, which is something Dockerfile-based images can't do cheaply. Builds can happen locally via pack, inside Kubernetes via kpack (from the Tanzu team, now the VMware OSS org), or as part of CI.
+
+Buildpacks originated at Heroku and were redesigned as Cloud Native Buildpacks by Heroku and Pivotal in 2018. They're a CNCF incubating project and are the image-build mechanism behind Heroku, Cloud Foundry, Google Cloud Run source deploys, and Tanzu Application Platform. For teams that don't want every repo to own a Dockerfile — especially in a golden-path platform — they're the cleanest alternative to BuildKit.

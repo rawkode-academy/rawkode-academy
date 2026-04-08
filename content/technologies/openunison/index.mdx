@@ -1,15 +1,18 @@
 ---
 name: OpenUnison
 logos: null
-website: 'https://www.tremolosecurity.com/openunison/'
-documentation: 'https://www.tremolosecurity.com/openunison/docs/latest/'
-license: Unknown
+website: 'https://openunison.github.io/'
+documentation: 'https://openunison.github.io/deployauth/'
+source: 'https://github.com/OpenUnison/openunison-k8s'
+license: Apache-2.0
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
 matrix:
   status: explore
 ---
-OpenUnison is an identity management solution built for Kubernetes and cloud-native environments. It centralizes authentication and authorization, allowing organizations to manage access to their cloud-native applications and services consistently across different identity providers (IdPs). It supports various identity providers (e.g., Active Directory, Azure AD, Google, SAML, OIDC) and enables fine-grained access control policies based on user attributes, roles, and context.
+OpenUnison is an identity and access management platform from Tremolo Security, best known for providing authentication, authorization, and self-service access to Kubernetes clusters. It acts as a reverse proxy and identity provider in front of the Kubernetes API server, the dashboard, and auxiliary tools like Argo CD, Grafana, and Vault, so a single SSO flow covers every cluster-adjacent UI.
 
-OpenUnison simplifies security management by providing a single point of control for authentication and authorization across cloud-native deployments. It reduces the operational overhead associated with managing multiple IdPs and access control mechanisms, while improving security posture and compliance. Its main use cases include securing Kubernetes clusters, microservices, APIs, and web applications in cloud-native environments.
+It supports SAML, OIDC, and LDAP as upstream identity sources and brokers those logins into Kubernetes-compatible tokens or impersonation headers. Beyond SSO, OpenUnison includes a lightweight workflow engine for access requests — a developer can request namespace access, an owner approves it, and OpenUnison reconciles the resulting RBAC bindings — which turns it into a cluster-scoped portal rather than a pure gateway. Features like automatic `kubectl` token refresh, audit logging, and multi-cluster support via a single portal are the main reasons teams deploy it instead of rolling their own oauth2-proxy plus dex plus dashboard setup.
+
+OpenUnison is open-source under the Apache-2.0 license, with a commercial "Namespace as a Service" distribution from Tremolo on top. In the same space sit Dex (pure OIDC bridge), Keycloak, Pinniped, and Teleport, with OpenUnison occupying the niche of "integrated Kubernetes access portal with request workflows" rather than a general-purpose IdP.

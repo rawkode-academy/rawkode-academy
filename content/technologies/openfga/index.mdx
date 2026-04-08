@@ -3,6 +3,7 @@ name: OpenFGA
 logos:
   icon: true
 website: 'https://openfga.dev'
+documentation: 'https://openfga.dev/docs/fga'
 source: 'https://github.com/openfga/openfga'
 license: Apache-2.0
 status: stable
@@ -39,6 +40,8 @@ community:
 matrix:
   status: skip
 ---
-OpenFGA is a high performance and flexible authorization/permission system built for developers and inspired by Google Zanzibar
+OpenFGA is an authorization system inspired by Google's Zanzibar paper. Instead of static roles or attribute expressions, OpenFGA models permissions as a graph of relationships between objects: "user:anne is a reader of document:readme", "document:readme is in folder:design", "folder:design parent-of document:readme". Applications call `Check(user, relation, object)` and OpenFGA answers by traversing those relationship tuples against an authorization model.
 
-OpenFGA is a Cloud Native Computing Foundation (CNCF) incubating project.
+The authorization model is written in a small DSL that compiles to a JSON schema describing types (`user`, `document`, `folder`, ...) and the relations between them, including computed relations like `viewer = reader or owner or viewer from parent`. Tuples are stored in a pluggable datastore — Postgres, MySQL, or SQLite today — and the server exposes gRPC and HTTP APIs plus official SDKs for Go, JavaScript, .NET, Java, Python, and more. On top of `Check`, it offers `ListObjects`, `ListUsers`, and `Expand` for building UIs that ask "which documents can Anne see?" without N check calls. It was created and open-sourced by Auth0/Okta.
+
+OpenFGA joined the CNCF as a sandbox project in 2022 and was promoted to incubating in 2025. Competing or adjacent projects include SpiceDB from AuthZed (also Zanzibar-inspired), Cerbos (policy-based, closer to ABAC), Permit.io, Oso, and OPA when wired up for ReBAC. Pick OpenFGA when your authorization problem is naturally graph-shaped — shared drives, multi-tenant SaaS, org hierarchies — and fine-grained listing matters.

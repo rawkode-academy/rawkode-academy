@@ -2,8 +2,9 @@
 name: Quickwit
 logos:
   horizontal: true
-website: 'https://www.quickwit.io/'
-documentation: 'https://www.quickwit.io/docs'
+website: 'https://quickwit.io/'
+documentation: 'https://quickwit.io/docs/'
+source: 'https://github.com/quickwit-oss/quickwit'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -11,4 +12,8 @@ subcategory: Logging
 matrix:
   status: explore
 ---
-Quickwit is a cost-effective and performant search engine built for logs and analytics. It directly indexes data in object storage (like AWS S3, Google Cloud Storage, or Azure Blob Storage), eliminating the need for data ingestion and complex pipelines. This reduces operational overhead and storage costs. It's designed for petabyte-scale data volumes and offers low-latency queries, making it ideal for security information and event management (SIEM), observability, and log analytics applications where fast insights from massive datasets are crucial.
+Quickwit is a distributed search engine for logs, traces, and general event data, written in Rust and built around Tantivy, the inverted-index library that also powers Meilisearch. Its core design decision is decoupling storage from compute: indexes are stored as immutable splits on object storage (S3, GCS, Azure Blob, or local filesystem) and queried by stateless search nodes that can be scaled independently of ingestion.
+
+Each split is a self-contained Tantivy index with a hotcache that lets Quickwit answer queries by fetching only the relevant byte ranges from object storage, which is what makes running log search directly on S3 affordable. Ingestion happens through a push API, Kafka, Kinesis, Pulsar, or OTLP; a metastore (PostgreSQL or a file-backed store) tracks splits and their metadata. Quickwit implements the Elasticsearch _search API for compatibility with existing clients, the Jaeger gRPC API as a tracing backend, and an OTLP ingest endpoint for OpenTelemetry logs and traces. There is no Lucene or JVM in the path.
+
+In practice it competes with Elasticsearch, OpenSearch, Loki, and Grafana Tempo. The pitch is sub-second log search at Grafana Loki-style storage cost, without Loki's label-only query model, and it is commonly paired with Grafana or Jaeger as the query frontend. Quickwit was acquired by Datadog in 2025 but remains Apache-2.0 licensed on GitHub.

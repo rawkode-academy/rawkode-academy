@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://keylime.dev/'
 source: 'https://github.com/keylime/keylime'
+documentation: 'https://keylime.readthedocs.io/en/latest/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -22,6 +23,8 @@ community:
 matrix:
   status: skip
 ---
-Bootstrap & Maintain Trust on the Edge / Cloud and IoT.
+Keylime is a remote boot attestation and runtime integrity monitoring system built on TPM 2.0. It lets you cryptographically verify that a remote machine booted the kernel, initramfs, and boot arguments you expected, and continuously monitor the IMA (Integrity Measurement Architecture) event log for unexpected file executions.
 
-Keylime is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture has three parts: an agent running on each node that talks to the local TPM, a verifier that performs periodic quote attestation against known-good PCR values, and a registrar that tracks which agents exist and their enrollment keys (AIK/EK). When a node fails a quote — a PCR value diverges from policy, or IMA records a hash that is not on the allowlist — the verifier fires a revocation action, which can kick the node out of a cluster, rotate its credentials, or trigger any custom webhook.
+
+Keylime originated at MIT Lincoln Laboratory and is now used heavily in telco, government, and edge deployments where you need confidential/measured-boot guarantees. It is the hardware-root-of-trust counterpart to tools like in-toto or Sigstore (which attest to software supply chains) — Keylime attests to the machine the software is actually running on.

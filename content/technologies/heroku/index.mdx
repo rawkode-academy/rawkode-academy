@@ -7,26 +7,8 @@ status: stable
 category: Platform
 subcategory: PaaS / Container Service
 ---
+Heroku is the managed PaaS that popularized `git push heroku main` as a deployment workflow. You point it at a repository, it detects the language via a buildpack, compiles a slug, and runs it inside a lightweight Linux container called a dyno. Everything — processes, scaling, logging, add-ons — is described through the `Procfile` and a handful of CLI commands.
 
-Heroku is a cloud Platform as a Service (PaaS) that enables developers to build, run, and operate applications entirely in the cloud. Founded in 2007 and acquired by Salesforce in 2010, Heroku pioneered the modern PaaS model with its git-based deployment workflow and addon ecosystem.
+The dyno model is the core abstraction: stateless, ephemeral containers that are restarted at least daily and assigned to a process type (`web`, `worker`, etc.). Scaling is horizontal (`heroku ps:scale web=5`) and vertical across predefined dyno sizes. Persistent state lives in managed add-ons — Heroku Postgres, Heroku Redis, Kafka — attached via config vars. Releases are immutable and rollbacks are a single command.
 
-## Key Features
-
-- **Git-based Deployments:** Push code to deploy with `git push heroku main`
-- **Buildpacks:** Automatic detection and configuration for major languages and frameworks
-- **Add-ons Marketplace:** Extensive ecosystem of managed services (databases, caching, monitoring)
-- **Dyno Architecture:** Lightweight containers that scale horizontally
-- **Heroku Postgres:** Fully managed PostgreSQL database service
-- **Review Apps:** Automatic deployment of pull requests for testing
-
-## Heroku Vibes
-
-Heroku Vibes is an AI-powered development experience that helps developers build and deploy applications faster through intelligent code generation and application scaffolding.
-
-## Use Cases
-
-- Rapid prototyping and MVP development
-- Small to medium-scale web applications
-- API backends and microservices
-- Marketing and landing pages
-- Internal tools and dashboards
+Heroku was acquired by Salesforce in 2010 and the buildpack spec it invented became the basis for Cloud Native Buildpacks, now used by Paketo, kpack, and `pack`. It ended its free tier in late 2022, which pushed many hobby users toward Fly.io, Render, and Railway, but it remains a reference point for what a good developer experience on top of a container platform looks like. If you have ever deployed to Kubernetes and thought "this should be one command," you are thinking of Heroku.

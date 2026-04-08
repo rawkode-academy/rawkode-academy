@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://wasmcloud.com'
 source: 'https://github.com/wasmCloud/wasmCloud'
+documentation: 'https://wasmcloud.com/docs'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -26,6 +27,8 @@ community:
 matrix:
   status: watch
 ---
-wasmCloud is a CNCF incubating project.
+wasmCloud is a distributed application runtime built around the WebAssembly Component Model. Applications are composed of stateless WebAssembly components that declare the capabilities they need (HTTP server, key-value store, messaging, blob storage) using WIT interfaces, and the runtime injects providers that implement those capabilities at deploy time.
 
-wasmCloud is a Cloud Native Computing Foundation (CNCF) incubating project.
+A wasmCloud lattice is a set of hosts connected by NATS. Components and capability providers can be scheduled onto any host in the lattice, and invocations between them are routed through NATS, so a component in one region can transparently call a KV provider running elsewhere. Applications are described declaratively with wadm manifests, which the control plane reconciles across the lattice. Because components are pure Wasm with no ambient capabilities, they start in milliseconds and can be safely multi-tenanted.
+
+The project was started at Cosmonic and is a CNCF incubating project. It is one of the more concrete production uses of the Wasm component model, alongside Fermyon Spin and Fastly's Compute@Edge.

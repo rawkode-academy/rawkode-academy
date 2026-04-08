@@ -46,6 +46,8 @@ community:
 matrix:
   status: adopt
 ---
-CRI-O is a CNCF graduated project.
+CRI-O is a container runtime built exclusively to implement the Kubernetes Container Runtime Interface (CRI). It is the default runtime on OpenShift and is used by Kubernetes distributions that want a minimal, Kubernetes-only runtime rather than the more general-purpose containerd.
 
-CRI-O is a Cloud Native Computing Foundation (CNCF) graduated project.
+Architecturally, CRI-O is a small Go daemon that receives CRI gRPC calls from the kubelet and delegates the work to existing libraries: `containers/image` for pulling OCI images, `containers/storage` for overlay snapshots, CNI for networking, and an OCI runtime (usually `runc`, but also `crun`, `youki`, or `kata-runtime`) for launching containers. There is no daemon owning the containers themselves — CRI-O uses a small `conmon` process per container to supervise the runtime and handle logs and exit status, so if CRI-O restarts, containers keep running.
+
+Because the scope is bounded by the CRI spec, CRI-O tracks Kubernetes releases one-to-one: CRI-O 1.30 targets Kubernetes 1.30. That tight coupling, along with SELinux, seccomp, and user-namespace defaults that line up with Red Hat's security posture, is why Red Hat picked it for OpenShift. For most other Kubernetes users, containerd is the more common choice; the two are broadly interchangeable from the kubelet's point of view. CRI-O graduated in the CNCF in 2023.

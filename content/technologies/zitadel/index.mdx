@@ -1,9 +1,10 @@
 ---
-name: Zitadel
+name: ZITADEL
 logos:
   horizontal: true
 website: 'https://zitadel.com/'
-documentation: 'https://zitadel.com/docs/category/zitadel/'
+source: 'https://github.com/zitadel/zitadel'
+documentation: 'https://zitadel.com/docs/'
 license: AGPL-3.0
 status: stable
 category: Provisioning
@@ -11,6 +12,8 @@ subcategory: Security & Compliance
 matrix:
   status: explore
 ---
-Zitadel is an open-source, cloud-native identity management platform built for modern applications. It provides a comprehensive suite of features for authentication, authorization, and user management, including multi-factor authentication, passwordless login, role-based access control, and identity federation. Zitadel simplifies the complexities of identity management, enabling developers to focus on building core application features while ensuring secure and compliant access to their resources.
+ZITADEL is an open-source identity and access management platform written in Go. It provides a full OpenID Connect and OAuth 2.0 provider, SAML 2.0, user management, multi-tenant organizations, RBAC, and a self-service account console, positioning itself as an alternative to Keycloak, Auth0, and Okta.
 
-Zitadel's value lies in its ability to streamline identity operations, reduce development overhead, and improve security posture. Common use cases include securing web and mobile applications, managing access to APIs and microservices, and providing a unified identity platform for organizations with diverse user populations. It is designed to be highly scalable and resilient, making it suitable for both small startups and large enterprises.
+Internally, ZITADEL is built on event sourcing: every change to a user, project, application, or grant is an immutable event in an event store, and the query side is projected into Postgres (previously CockroachDB) tables. That gives it a full audit log for free and makes horizontal scaling of the read path straightforward. It supports the features you would expect from a modern IdP, including passkeys and WebAuthn, OTP, push notifications, passwordless login, SCIM-like user provisioning, custom actions (JavaScript hooks that run during flows), and branding per organization.
+
+ZITADEL is available as a managed cloud, self-hosted binary, or Helm chart. It is a common pick for teams that want a self-hostable Auth0 replacement without running the older Keycloak stack.

@@ -4,6 +4,7 @@ logos:
   icon: true
 website: 'https://fleet.rancher.io/'
 documentation: 'https://fleet.rancher.io/'
+source: 'https://github.com/rancher/fleet'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -11,25 +12,9 @@ subcategory: Continuous Integration & Delivery
 matrix:
   status: skip
 ---
-Fleet is a lightweight Kubernetes distribution manager. It simplifies the process of managing and deploying Kubernetes across a fleet of machines, especially edge and bare metal servers. It enables GitOps-style management, allowing you to define desired cluster states in Git repositories and automatically reconcile the actual state with the desired state, ensuring consistency and simplified management at scale.
 
-Fleet's value lies in its ability to bring centralized and declarative management to distributed Kubernetes deployments. Common use cases include managing edge clusters for IoT applications, deploying Kubernetes on bare metal servers without the complexity of traditional infrastructure setup, and simplifying the management of multiple Kubernetes clusters spread across different environments.
+Fleet is Rancher/SUSE's GitOps engine for managing Kubernetes at scale — specifically, at the "thousands of clusters" scale that edge and retail deployments produce. It's the continuous delivery backbone of Rancher 2.5+ and ships as the default app-delivery mechanism for RKE2, K3s, and Rancher-managed clusters.
 
-Fleet is a powerful GitOps-driven deployment engine designed by Rancher to manage and deploy applications to a vast number of Kubernetes clusters, from a single central Git repository. It simplifies the operational challenges of managing many clusters, especially in edge computing and bare metal environments.
+Fleet has a two-level architecture. A central "upstream" Kubernetes cluster runs the Fleet controller and holds `GitRepo` and `Bundle` resources; downstream clusters run a lightweight agent that registers with the upstream and pulls its assigned bundles. A `GitRepo` points at a Git repo containing raw manifests, Helm charts, or Kustomize overlays; Fleet renders them into `Bundles`, then uses `ClusterGroup` label selectors to decide which downstream clusters get which bundle, with per-target customizations. Because the targeting is label-based, rolling a config change across 10,000 edge stores is the same operation as rolling it across one.
 
-## Key Features & How It Works
-
--   **GitOps at Scale:** Fleet embraces the GitOps philosophy, using Git as the single source of truth for all cluster configurations and applications. It continuously reconciles the desired state defined in Git with the actual state of your clusters.
--   **Helm-Centric Deployment:** Regardless of whether your source manifests are raw Kubernetes YAML, Kustomize configurations, or Helm charts, Fleet internally converts them into Helm releases for consistent and auditable deployments.
--   **Multi-Cluster Management:** Designed specifically for managing a "fleet" of Kubernetes clusters, Fleet provides a centralized mechanism to deploy applications and configurations across all of them.
--   **Application & Cluster Management:** It allows you to group clusters, target specific applications to specific groups, and manage the lifecycle of those applications declaratively.
--   **Scalable Architecture:** Built to handle thousands of clusters, Fleet uses a lightweight agent deployed on each managed cluster to communicate with the central Fleet controller.
-
-## Benefits
-
--   **Centralized Control:** Manage all your Kubernetes clusters and their deployed applications from a single Git repository.
--   **Consistency & Reproducibility:** Ensures that applications and configurations are consistent across all managed clusters, reducing configuration drift.
--   **Simplified Operations:** Automates deployments and updates, significantly reducing the manual effort required for large-scale Kubernetes management.
--   **Edge & Bare Metal Optimized:** Particularly well-suited for environments where clusters are distributed or have limited resources, common in edge computing and IoT.
--   **Auditability:** Every change is tracked in Git, providing a complete audit trail and simplifying rollbacks.
--   **Developer Empowerment:** Developers can update applications by simply pushing changes to Git, with Fleet handling the deployment to all relevant clusters.
+Compared to Argo CD and Flux, Fleet's distinguishing trait is that scale-out model: one control plane managing many heterogeneous clusters, with the agent-pull design tolerating flaky edge networks. The tradeoff is a smaller ecosystem and a UX that's tightly coupled to Rancher. If you already run Rancher, Fleet is what you use; if you don't, Argo CD or Flux are usually the first picks.

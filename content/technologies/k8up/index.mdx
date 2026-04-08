@@ -17,6 +17,8 @@ community:
 matrix:
   status: skip
 ---
-K8up is a CNCF sandbox project.
+K8up is a Kubernetes operator, built by VSHN, that backs up PersistentVolumeClaims and application-level dumps using **restic**. You apply a `Backup` or `Schedule` CRD in a namespace, and the operator spawns a Job that mounts the PVCs in read-only mode, runs restic against an S3, Azure Blob, GCS, Swift, or B2 repository, and records the result as a `Snapshot` CR.
 
-K8up is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The useful details: because it is restic under the hood, you get deduplication, encryption at rest, and incremental backups for free, and you can restore using plain `restic` from outside the cluster if the operator is unavailable. K8up also supports pre-backup hooks — it can exec into pods to run `pg_dump`, `mysqldump`, or custom commands and stream the output into the same restic repository, so databases get consistent logical backups alongside volume snapshots. Retention (`keepDaily`, `keepWeekly`, etc.) and prune jobs are expressed in the same CRD, so lifecycle policy is GitOps-friendly.
+
+It sits alongside Velero and Kanister in the Kubernetes backup space. Velero focuses on whole-cluster disaster recovery and is heavier; K8up is simpler and per-namespace, which tends to suit multi-tenant clusters where each team wants to own its own backup policy.

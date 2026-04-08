@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://spidernet-io.github.io/spiderpool/'
 source: 'https://github.com/spidernet-io/spiderpool'
+documentation: 'https://spidernet-io.github.io/spiderpool/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -20,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Spiderpool is the underlay and RDMA network solution of the Kubernetes, for bare metal, VM and public cloud
+Spiderpool is an IP Address Management (IPAM) plugin for Kubernetes focused on underlay and RDMA networking scenarios, particularly where pods need to attach directly to a physical network via Macvlan, SR-IOV, or IPvlan. It is a CNCF Sandbox project originated at DaoCloud.
 
-Spiderpool is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Most CNIs (Calico, Cilium, Flannel) manage IPs as part of an overlay model, but underlay networks that share a LAN with the host require coordinated, non-conflicting address allocation, gateway detection, stale-lease cleanup, and sometimes affinity to specific nodes or namespaces. Spiderpool provides these via CRDs such as `SpiderIPPool`, `SpiderSubnet`, `SpiderReservedIP`, and `SpiderMultusConfig`, with garbage collection that reconciles leases against actual pod state to avoid IP leakage during crashes.
+
+Spiderpool is typically deployed alongside Multus CNI so pods can attach to multiple networks, and it integrates with Macvlan, SR-IOV, Cilium, Calico, and Weave. Its main audience is operators running Kubernetes on bare metal or for telco/AI workloads where high-performance underlay and RDMA networks are required.

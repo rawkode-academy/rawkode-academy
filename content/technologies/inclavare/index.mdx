@@ -19,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Inclavare Containers is a CNCF sandbox project.
+Inclavare Containers is a confidential-computing container runtime that launches each container inside a hardware enclave — originally Intel SGX, with later work for TDX and AMD SEV. It was started at Alibaba and accepted into the CNCF sandbox in 2021. The name is Latin for "to enclave."
 
-Inclavare Containers is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The runtime is OCI-compatible: it implements the `runc` interface as `rune`, so Kubernetes and containerd can schedule enclave workloads without changes higher up the stack. When `rune` starts a container, instead of invoking the host kernel directly, it loads the workload inside an enclave through a libOS layer — Occlum (Rust, MIT-developed) or Graphene/Gramine — which provides a POSIX surface to the application while keeping memory encrypted and inaccessible to the host OS, hypervisor, or other tenants. It also ships an attestation service so remote parties can verify that a running container is genuinely inside a legitimate enclave before releasing secrets to it.
+
+Activity on the main repo has slowed; much of the confidential-containers work has shifted to the broader CNCF Confidential Containers project, which Inclavare contributors helped seed.

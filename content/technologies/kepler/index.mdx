@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://sustainable-computing.io/'
 source: 'https://github.com/sustainable-computing-io/kepler'
+documentation: 'https://sustainable-computing.io/kepler/installation/guide/'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -33,6 +34,8 @@ cncf:
 matrix:
   status: skip
 ---
-Kepler (Kubernetes-based Efficient Power Level Exporter) uses eBPF to probe energy related system stats and exports as Prometheus metrics.
+Kepler (Kubernetes Efficient Power Level Exporter) is a Prometheus exporter that estimates the energy consumption of Kubernetes pods, containers, and nodes. It attributes power draw back to individual workloads so you can reason about watts-per-request, not just CPU-per-request.
 
-Kepler is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Kepler reads hardware counters via eBPF programs attached to scheduler tracepoints, combining them with RAPL (Running Average Power Limit) on Intel/AMD CPUs, NVML for NVIDIA GPUs, and ACPI where available. On hardware that does not expose direct power counters — most public cloud VMs — it falls back to a pre-trained machine learning model that maps CPU cycles, instructions, cache misses, and memory references to estimated joules. Metrics are exported with standard Kubernetes labels (namespace, pod, container) so they join the rest of your Prometheus data without extra plumbing.
+
+It is typically paired with Grafana dashboards and the OpenTelemetry collector, and is the data source behind most CNCF TAG Environmental Sustainability work on carbon-aware scheduling and reporting. If you want a defensible number for the carbon footprint of a specific Deployment rather than a cluster-wide average from your cloud bill, Kepler is the project doing that job today.

@@ -20,6 +20,9 @@ community:
 matrix:
   status: learn
 ---
-A community Linux distribution designed for container workloads, with high security and low maintenance
 
-Flatcar Container Linux is a Cloud Native Computing Foundation (CNCF) incubating project.
+Flatcar Container Linux is a minimal, immutable, automatically-updating Linux distribution purpose-built for running containers. It's the direct continuation of CoreOS Container Linux — when Red Hat bought CoreOS and eventually sunset the original, Kinvolk forked it as Flatcar, and it was later acquired by Microsoft and donated to the CNCF (Incubating, 2024).
+
+The OS image is read-only. `/usr` is mounted from a signed, verity-protected partition and there are two of them in an A/B layout, so updates are atomic: the new image is written to the passive slot, activated on reboot, and can be rolled back if boot fails. There is no package manager in the traditional sense — if you want extra software on the host, you run it in a container. First-boot configuration is done declaratively through Ignition (JSON, usually generated from Butane YAML), which sets up users, networks, disks, and systemd units before the system ever reaches multi-user mode. Updates come from Nebraska (the open-source update server) in public or private channels (alpha/beta/stable/LTS).
+
+Flatcar is the base OS under a lot of production Kubernetes: Kinvolk's own Lokomotive, Giant Swarm's clusters, Azure's AKS node images in some configurations, and many bare-metal Cluster API deployments. Its closest peers are Talos Linux (even more opinionated, API-driven, no SSH), Fedora CoreOS (the upstream successor to Red Hat's CoreOS), and Bottlerocket (AWS's Rust-based equivalent).

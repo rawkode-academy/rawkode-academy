@@ -22,4 +22,8 @@ community:
 matrix:
   status: graveyard
 ---
-Slim Toolkit is a toolkit focused on minimizing and securing container images. It analyzes container images and removes unnecessary files, binaries, and dependencies, resulting in smaller, more secure, and faster-to-deploy containers. This process reduces the attack surface, improves resource utilization, and speeds up build and deployment pipelines. It's commonly used by DevOps teams and developers to optimize container images for production environments, ensuring they are as lean and secure as possible.
+Slim Toolkit (formerly DockerSlim) analyzes container images and produces minimized versions that contain only the files a workload actually uses at runtime. Typical results are 10x to 30x smaller images with a drastically reduced attack surface, without requiring the application to be rewritten for a distroless or scratch base.
+
+The core `slim build` command runs the source image, probes the application using HTTP/TCP probes, unit tests, or a user-supplied script, and traces system calls and file access to learn which binaries, libraries, and config files are actually touched. It then generates a new image containing only those artifacts, optionally re-applying seccomp and AppArmor profiles derived from the observed syscalls. Other commands include `xray` for static analysis of image layers and `lint` for Dockerfile inspection.
+
+Slim Toolkit is used as a post-build hardening step in CI pipelines where teams want to ship smaller, more secure images from familiar base images like `node`, `python`, or `openjdk` without maintaining custom minimal base images themselves.

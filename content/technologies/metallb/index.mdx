@@ -4,8 +4,9 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://metallb.universe.tf'
+website: 'https://metallb.io/'
 source: 'https://github.com/metallb/metallb'
+documentation: 'https://metallb.io/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -19,6 +20,8 @@ community:
 matrix:
   status: graveyard
 ---
-MetalLB is a CNCF sandbox project.
+MetalLB is a load-balancer implementation for Kubernetes clusters that do not run on a cloud provider, so Service type LoadBalancer actually gets an external IP on bare metal, on-prem vSphere, or home-lab clusters. It was the first widely-used answer to the "pending external IP" problem and is now a CNCF sandbox project.
 
-MetalLB is a Cloud Native Computing Foundation (CNCF) sandbox project.
+MetalLB has a controller that allocates IPs from configured IPAddressPools and a speaker DaemonSet that advertises those IPs to the surrounding network. It offers two operating modes. In L2 mode the speakers respond to ARP for IPv4 or NDP for IPv6 from one elected node per service, so failover is an ARP re-announce; this works on any flat L2 segment but funnels all traffic through a single node. In BGP mode every speaker peers with the upstream routers and advertises the service VIP with ECMP across all ready nodes, giving real multi-node load distribution and integrating cleanly with existing data-centre fabrics.
+
+MetalLB competes with PureLB, Cilium's LB-IPAM, kube-vip, and loxilb. Its strength is being small, focused, and battle-tested — it does nothing except turn Services into routable IPs.

@@ -16,6 +16,8 @@ community:
 matrix:
   status: skip
 ---
-ContainerSSH launches a new container for each SSH connection in Kubernetes, Podman or Docker. The user is transparently dropped in the container and the container is removed when the user disconnects. Authentication and container configuration are dynamic using webhooks, no system users required.
+ContainerSSH is an SSH server that launches a fresh container for every incoming SSH session. Instead of granting users accounts on a shared host, each `ssh user@host` drops the user into an ephemeral container — configured per-user via a webhook — and destroys it on disconnect.
 
-ContainerSSH is a Cloud Native Computing Foundation (CNCF) sandbox project.
+On each connection, ContainerSSH calls out to an HTTP authentication server (you implement it) to authenticate the user, then calls a configuration server to decide which image to run, what environment variables to set, and which backend to use. Supported backends are Docker and Kubernetes; in the Kubernetes case each session becomes a Pod. Audit logs can be written in a tamper-evident format and include full session recordings compatible with `asciinema` for replay.
+
+The use cases are niche but real: honeypots, CTF and training platforms, per-customer shell access for SaaS products, and jump hosts where you want zero-trust, zero-persistence sessions. It's written in Go and was accepted into the CNCF sandbox in 2022. Development has slowed considerably in recent years, so check current maintenance status before relying on it for production.

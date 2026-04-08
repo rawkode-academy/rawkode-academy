@@ -6,10 +6,11 @@ logos:
   stacked: true
 website: 'https://youki-dev.github.io/youki/'
 source: 'https://github.com/youki-dev/youki'
+documentation: 'https://youki-dev.github.io/youki/'
 license: Apache-2.0
 status: stable
 category: Runtime
-subcategory: Cloud Native Network
+subcategory: Container Runtime
 cncf:
   status: sandbox
   accepted: '2024-10-17'
@@ -19,6 +20,8 @@ community:
 matrix:
   status: watch
 ---
-youki is a CNCF sandbox project.
+youki is an OCI-compliant low-level container runtime written in Rust, a drop-in alternative to runc. It implements the OCI runtime specification, so higher-level tooling like containerd, CRI-O, Podman, and Docker can delegate container creation to youki without changes on their side.
 
-youki is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Because it is written in Rust, youki avoids a class of memory-safety issues that affect C runtimes, and benchmarks have shown faster container startup than both runc (Go) and crun (C) in several workloads. The implementation covers the usual Linux isolation primitives: namespaces (PID, mount, network, user, UTS, IPC, cgroup), cgroups v1 and v2, seccomp, capabilities, AppArmor, SELinux labeling, and rootless mode. It also supports the WasmEdge and Wasmtime handlers so that Wasm workloads can be launched through the OCI runtime interface.
+
+youki is a CNCF sandbox project and is one of the better-known examples of "rewrite it in Rust" applied to foundational container tooling.

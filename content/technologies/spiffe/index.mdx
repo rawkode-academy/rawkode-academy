@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://spiffe.io/'
 source: 'https://github.com/spiffe/spiffe'
+documentation: 'https://spiffe.io/docs/latest/spiffe-about/overview/'
 license: Apache-2.0
 status: stable
 matrix:
@@ -43,6 +44,8 @@ community:
   blog: 'https://blog.spiffe.io/'
   mailingList: 'https://groups.google.com/a/spiffe.io/forum/#!forum/announce'
 ---
-SPIFFE is a CNCF graduated project.
+SPIFFE (Secure Production Identity Framework For Everyone) is a CNCF-graduated specification that defines how workloads can be given a cryptographic identity independent of network location, shared secrets, or bearer tokens. The goal is to replace IP allowlists, API keys, and long-lived certificates with short-lived, automatically rotated identities that work the same across VMs, containers, Kubernetes pods, and serverless functions.
 
-SPIFFE is a Cloud Native Computing Foundation (CNCF) graduated project.
+The spec has three main concepts. A SPIFFE ID is a URI of the form `spiffe://trust-domain/workload/path` that names a workload. An SVID (SPIFFE Verifiable Identity Document) is the cryptographic credential that proves that identity, issued as either an X.509 certificate with the SPIFFE ID in the SAN or a signed JWT. The Workload API is a local, unauthenticated gRPC endpoint that workloads call to fetch their current SVID and trust bundle; the implementation attests the caller (by process, K8s pod, AWS instance metadata, etc.) before issuing credentials, so no secret ever needs to be provisioned into the workload.
+
+SPIFFE is the identity foundation under Istio, Consul, Kuma, Cilium, and many zero-trust networking stacks, and SPIRE is its reference implementation.

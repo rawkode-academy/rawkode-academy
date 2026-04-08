@@ -3,7 +3,8 @@ name: Universal Blue
 logos:
   horizontal: true
 website: 'https://universal-blue.org/'
-documentation: 'https://universal-blue.org/docs/'
+source: 'https://github.com/ublue-os/main'
+documentation: 'https://universal-blue.org/documentation.html'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -15,6 +16,8 @@ terms:
   - Silverblue
   - Fedora
 ---
-Universal Blue is a community-driven project that focuses on creating immutable, container-based operating system images that can be deployed on desktops and servers. It aims to provide a more reliable and reproducible computing environment by separating the base operating system from user data and applications. Updates are delivered atomically, minimizing the risk of system breakage and ensuring consistent behavior across deployments. It utilizes technologies like rpm-ostree and containers to achieve its goals. 
+Universal Blue is a family of custom Fedora Atomic desktop images built with cloud-native tooling. Instead of installing Fedora Silverblue or Kinoite and then tweaking it by hand, you rebase to an OCI image maintained on GitHub, and ostree pulls the next version atomically on reboot.
 
-Universal Blue is particularly valuable for users and organizations seeking increased stability, security, and easier management of their operating systems. It streamlines system administration by simplifying updates and allowing for customization through layered images, making it well-suited for use cases like developer workstations, kiosks, and container hosts. It's designed to be highly customizable, allowing users to create personalized immutable systems based on Fedora Linux or other distributions.
+The images are assembled in GitHub Actions by layering RPMs, Flatpaks, drivers, and configuration on top of the Fedora base, then pushed to a container registry as signed OCI artifacts. Because the whole OS is an immutable container image, rollbacks are trivial (pin to the previous tag) and drift between machines effectively disappears. The project maintains several curated variants: Bluefin (GNOME, developer workstation), Aurora (KDE Plasma), Bazzite (gaming, Steam Deck-style with HDR and controller support), and uCore (a server variant based on Fedora CoreOS).
+
+Universal Blue is a practical demonstration that the container build-and-ship model works for desktop Linux, not just for server workloads.

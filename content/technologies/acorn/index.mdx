@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://github.com/acorn-io/runtime'
 documentation: 'https://github.com/acorn-io/runtime#readme'
+source: 'https://github.com/acorn-io/runtime'
 license: Apache-2.0
 status: abandoned
 category: App Definition and Development
@@ -11,8 +12,8 @@ subcategory: Application Definition & Image Build
 matrix:
   status: graveyard
 ---
-Acorn packaged applications and their dependencies into self-contained "Acorn" images to simplify running workloads on Kubernetes. It aimed to improve the developer experience by abstracting Kubernetes details and providing a consistent deployment workflow from local development through production.
+Acorn was an application packaging and deployment framework for Kubernetes that let developers define an entire app — containers, volumes, secrets, and ingress — in a single file written in Acornfile, a CUE-derived configuration language. `acorn run` would then push that bundle to a cluster as an OCI image and reconcile it into the underlying Kubernetes primitives.
 
-The project is no longer maintained: the `acorn-io/runtime` repository is archived, acorn.io now redirects to Obot, and the hosted documentation has been taken down.
+The project was built by the team behind Rancher and k3s (Darren Shepherd, Ibrahim Jarif, and others at Acorn Labs) as an attempt to hide Helm charts and raw YAML behind a simpler developer-facing abstraction. It shipped a CLI, a per-cluster controller, and a managed SaaS (Acorn Cloud) for sharing apps across clusters.
 
-Acorn offered a higher-level application packaging model on top of Kubernetes, bundling services, configuration, and dependencies into a single artifact for simplified deployments.
+Acorn Labs pivoted away from the runtime in 2024 to focus on GPTScript and AI tooling, and the repository is no longer maintained. If you need the same shape of abstraction today, look at Score, KubeVela, Radius, or just Helm with a thin wrapper — all of which are actively developed. With the repository archived and no security updates planned, migration is the sensible path.

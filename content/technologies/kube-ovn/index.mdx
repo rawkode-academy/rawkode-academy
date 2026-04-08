@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kube-ovn.io'
 source: 'https://github.com/kubeovn/kube-ovn'
+documentation: 'https://kubeovn.github.io/docs/stable/en/'
 license: Apache-2.0
 status: stable
 category: Runtime
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Kube-OVN is a CNCF sandbox project.
+Kube-OVN is a Kubernetes CNI plugin that uses OVN (Open Virtual Network) and Open vSwitch as its data plane. OVN originated in the OpenStack/Neutron world, and Kube-OVN wraps it to deliver Kubernetes pod networking with the kind of SDN features the traditional CNI plugins (Flannel, Calico) do not emphasise.
 
-Kube-OVN is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Each Kubernetes Namespace maps to an OVN logical switch by default, so you get subnet-per-namespace, native IPAM, and subnet-level QoS/ACLs out of the box. Beyond that it ships static IPs for pods, multiple subnets and IP pools, VPCs with overlapping CIDRs, virtual routers, load balancers, ECMP, BGP/VXLAN underlay modes, DPDK/Hardware offload for high throughput, and a SR-IOV/Offload path for bare metal. Multus multi-NIC, dual-stack IPv4/IPv6, and egress gateways are all supported. Observability pulls through OVN flow tracing, `kubectl ko` pktmon utilities, and Prometheus metrics on flow table depth, conntrack entries, and per-pod traffic.
+
+Kube-OVN is heavy compared to Flannel or Calico, but that is the point — it is aimed at telco/NFV, edge, and multi-tenant workloads that need VPC-like isolation, overlapping IP spaces, or per-workload QoS that Calico's BGP-first model does not cover cleanly.

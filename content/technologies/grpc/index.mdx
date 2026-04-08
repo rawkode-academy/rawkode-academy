@@ -22,6 +22,9 @@ community:
 matrix:
   status: learn
 ---
-gRPC is a CNCF incubating project.
 
-gRPC is a Cloud Native Computing Foundation (CNCF) incubating project.
+gRPC is a high-performance RPC framework originally built at Google and open-sourced in 2015. Service interfaces are defined in Protocol Buffers `.proto` files, the `protoc` compiler (with language plugins) generates client stubs and server skeletons, and the runtime handles serialization, transport, flow control, deadlines, metadata, and retries. It's a CNCF incubating project.
+
+The transport is HTTP/2, which is the detail that makes the rest of gRPC work: multiplexed streams on a single TCP connection, bidirectional streaming, header compression via HPACK, and first-class support for trailers (how gRPC delivers final status codes after a streamed response). That gives you four call patterns for free — unary, server streaming, client streaming, and bidi streaming — without any framework-level bolt-ons. Payloads are protobuf binary by default; there are also JSON transcoding layers (grpc-gateway, Envoy's grpc-json transcoder) for REST compatibility.
+
+Ecosystem-wise, gRPC is the default inter-service protocol in modern cloud-native systems: Kubernetes API clients use it via client-go + protobuf, etcd speaks it natively, Envoy's xDS control plane is gRPC streaming, and basically every service mesh assumes it. The usual tradeoff versus REST/JSON is tooling and debuggability (you need gRPC-aware tools like `grpcurl`, Postman, or Wireshark dissectors) in exchange for tighter schemas, smaller wire size, and streaming. gRPC-Web exists for browser clients, but it requires a proxy (Envoy or grpc-web's own) because browsers can't speak raw HTTP/2 trailers. Connect (buf.build) is a newer, compatible alternative runtime that smooths over several of gRPC's rough edges.

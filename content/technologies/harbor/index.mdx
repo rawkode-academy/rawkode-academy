@@ -64,6 +64,9 @@ community:
   slack: 'https://cloud-native.slack.com/messages/harbor/'
   mailingList: 'https://lists.cncf.io/g/harbor-users/topics'
 ---
-Harbor is a CNCF graduated project.
 
-Harbor is a Cloud Native Computing Foundation (CNCF) graduated project.
+Harbor is an open-source OCI registry — container images, Helm charts, CNABs, and other OCI artifacts — with a focus on security, multi-tenancy, and replication. It was created at VMware, donated to the CNCF in 2018, and graduated in 2020. It's effectively the default self-hosted registry choice when Docker Registry / Distribution alone isn't enough.
+
+Architecturally, Harbor wraps the upstream CNCF Distribution registry with a set of Go services: `core` (API, auth, RBAC, project model), `jobservice` (async tasks like replication, GC, and retention), `portal` (Angular UI), a Postgres metadata database, Redis, and optional integrations with Trivy for vulnerability scanning and Notary/Cosign for signing. Storage is pluggable — local filesystem, S3, GCS, Azure Blob, Swift. Projects are the tenancy boundary: RBAC, quotas, content trust policies, vulnerability severity gates, and retention rules all attach at the project level.
+
+The features that actually make people pick Harbor over plain Distribution are image signing and scan-gated pulls (block any pull of an image with critical CVEs), tag immutability and retention rules, project quotas, proxy-cache projects (Harbor as a pull-through cache for Docker Hub, GCR, ECR), and active-active replication between Harbor instances — essential for multi-region or air-gapped deployments. Most large on-prem Kubernetes shops end up running Harbor, and it's often paired with Dragonfly/Nydus for in-cluster image distribution at scale.

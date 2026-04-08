@@ -21,6 +21,8 @@ community:
 matrix:
   status: skip
 ---
-Confidential Containers is an open source community working to enable cloud native  confidential computing by leveraging Trusted Execution Environments to protect  containers and data.
+Confidential Containers (CoCo) is a project that runs unmodified Kubernetes Pods inside hardware Trusted Execution Environments (TEEs) such as Intel TDX, AMD SEV-SNP, IBM Secure Execution, and ARM CCA. The goal is to protect workloads and their data from the host operating system, hypervisor, and cluster administrator — the cloud provider can run your Pod without being able to read its memory.
 
-Confidential Containers is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally, CoCo builds on Kata Containers: each Pod runs inside a lightweight VM, and CoCo extends Kata so that VM is launched inside a TEE. An in-guest `agent` pulls container images directly into the encrypted VM (rather than trusting the host to unpack them), decrypts them using keys released only after remote attestation, and starts them under a container runtime. The trust root is the Key Broker Service (KBS) and Attestation Service: they verify TEE evidence from the guest and only then release image decryption keys, signed-image verification policies, and secrets.
+
+On the Kubernetes side, CoCo plugs in as a `RuntimeClass` (e.g. `kata-qemu-tdx`), so existing workloads opt in per-Pod without application changes. It is still a young area with significant performance and tooling trade-offs, but it is the main upstream effort to make confidential computing usable through standard Kubernetes APIs.

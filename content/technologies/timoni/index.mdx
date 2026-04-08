@@ -3,7 +3,8 @@ name: Timoni
 logos:
   horizontal: true
 website: 'https://timoni.sh/'
-documentation: 'https://timoni.sh/get-started/'
+source: 'https://github.com/stefanprodan/timoni'
+documentation: 'https://timoni.sh/quickstart/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -13,4 +14,8 @@ matrix:
 terms:
   - CUE
 ---
-Timoni is a package manager for Kubernetes, powered by CUE. It simplifies application configuration and deployment by providing a declarative and composable way to manage Kubernetes resources. Timoni helps teams define, share, and reuse application templates and configurations, reducing boilerplate and promoting consistency across environments. It enables easier management of complex applications by leveraging CUE's data validation and code generation features.
+Timoni is a package manager for Kubernetes that uses CUE instead of Go templates. A Timoni module is a CUE project that generates and validates Kubernetes manifests, and modules are distributed as OCI artifacts signed with Cosign, rather than as tarballs on an HTTP chart repository.
+
+Using CUE gives Timoni schema-aware validation: values are type-checked against the same CUE definitions that produce the manifests, so invalid configuration is caught before anything reaches the API server. Timoni also supports bundles, which compose multiple modules into a single deployable unit, and handles CRD lifecycle, drift detection, and server-side apply as part of its reconciliation loop.
+
+It was created by Stefan Prodan, who also maintains Flux. Timoni is aimed at teams who have outgrown the string-templating model of Helm and want the configuration itself to be a programmable, typed artifact.

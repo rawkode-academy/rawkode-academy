@@ -11,25 +11,8 @@ subcategory: Observability
 matrix:
   status: skip
 ---
-Komodor is a Kubernetes troubleshooting platform designed to help DevOps engineers and developers quickly resolve incidents and maintain cluster health. It provides a centralized view of Kubernetes events, metrics, and logs, combined with automated root cause analysis and remediation recommendations. The platform aims to reduce the mean time to resolution (MTTR) for Kubernetes issues by surfacing relevant data and simplifying complex debugging processes. Common use cases include incident response, proactive monitoring, performance optimization, and overall Kubernetes cluster management.
+Komodor is a commercial SaaS platform for Kubernetes troubleshooting and fleet operations. You install an agent in each cluster and it streams Kubernetes events, resource diffs, Helm releases, Argo CD sync history, and optional log/metric snapshots into a central backend that builds a timeline of every change.
 
-Komodor is a commercial Kubernetes troubleshooting and operations platform that leverages AI to help DevOps engineers and developers quickly identify, diagnose, and resolve issues within their Kubernetes environments. It provides a unified view and automates many aspects of incident response and cluster management.
+The product is organized around that timeline: when a pod starts crashlooping, you can see which Deployment revision, ConfigMap, Secret, or upstream chart change correlates in time with the failure, without stitching together kubectl output yourself. It layers RBAC, drift detection across a fleet of clusters, a node actions/remediation layer, and an AI assistant (Klaudia) that proposes probable root cause. Komodor is agnostic about where clusters run — EKS, GKE, AKS, on-prem — and connects to Prometheus/Datadog/Sentry/PagerDuty for cross-correlation.
 
-## Key Features
-
--   **Autonomous AI SRE:** Powered by Klaudia AI, Komodor proactively detects and helps remediate issues, optimizing the reliability and performance of Kubernetes infrastructure.
--   **Centralized Observability:** Aggregates and correlates data from various Kubernetes sources (events, logs, metrics, deployments, configurations) into a single, intuitive dashboard.
--   **Automated Root Cause Analysis:** Automatically analyzes incidents and provides insights into the probable root causes, reducing the mean time to resolution (MTTR).
--   **Contextual Troubleshooting:** Enriches Kubernetes events and data with relevant context, making it easier to understand the state of applications and infrastructure.
--   **Deployment Tracking:** Monitors deployments and changes, quickly identifying issues introduced by new releases.
--   **Cost & Performance Optimization:** Offers insights and recommendations to optimize resource allocation and improve performance within Kubernetes clusters.
--   **Integrations:** Connects with popular tools across your DevOps stack, including CI/CD, monitoring, and alerting systems.
-
-## Benefits
-
--   **Faster Incident Resolution:** Significantly reduces the time it takes to identify, diagnose, and resolve Kubernetes-related issues.
--   **Improved Reliability:** Proactive detection and automated remediation capabilities help maintain the health and stability of clusters.
--   **Simplified Kubernetes Operations:** Lowers the operational burden on platform and DevOps teams, allowing them to manage complex environments more easily.
--   **Enhanced Developer Productivity:** Provides developers with the tools and insights needed to troubleshoot their applications effectively, reducing friction.
--   **Cost Efficiency:** Optimizes resource usage and helps prevent costly outages by ensuring a healthy and performant infrastructure.
--   **Scalable Management:** Designed to manage and monitor Kubernetes clusters at enterprise scale.
+Overlapping tools include Robusta, Cast AI, Datadog's Kubernetes product, and open-source k8sgpt. Komodor's focus is specifically the change-centric view of why a workload broke between yesterday and today, which is a different angle than general-purpose Kubernetes observability.
