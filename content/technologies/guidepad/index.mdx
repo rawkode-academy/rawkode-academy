@@ -11,24 +11,9 @@ subcategory: Application Definition & Image Build
 matrix:
   status: explore
 ---
-The Development Framework for managing complexity and expanding capabilities
 
-Guidepad is a development framework designed to manage the inherent complexity of modern software systems by treating "systems as data." It provides a unified approach to defining, building, and deploying software across various environments, expanding capabilities through its data-driven architecture.
+Guidepad is a commercial "platform-as-data" product that models entities, services, APIs, permissions, infrastructure, and workflows as declarative configuration, then turns that configuration into running software at runtime. The pitch is low-code/no-code primitives for building internal platforms that cover DevOps, MLOps, data engineering, and workflow automation under one roof.
 
-## Key Concepts and Features
+Instead of assembling a bespoke internal developer platform from Backstage, Terraform, a workflow engine, and custom glue, Guidepad exposes a set of modular abstractions — entity schemas, service definitions, API operations, permission boundaries, and a bundled workflow engine — that get interpreted by the platform runtime. Users describe what they want (schemas, pipelines, permissions) and Guidepad generates the corresponding UIs, APIs, and orchestration. The workflow engine is reused as the substrate for ML/AI pipelines, DevOps automation, and ETL, so the same primitives model a data pipeline and a deployment pipeline.
 
--   **Platform-as-Data:** Guidepad allows you to define and manage your entire platform—including infrastructure, operations, and applications—as data. This enables the creation of reusable control planes and abstracts away environmental differences across cloud, on-premise, and edge deployments.
--   **Operations Definition:** Encapsulates functionality and dynamically routes operation requests. It can automatically generate APIs (REST, GraphQL) and allows for native import of operations into your codebase, streamlining service interaction.
--   **Dynamic Types:** Enables the definition of types as language-agnostic data. This feature allows for the runtime generation of system types, dynamic mapping and migration of data between storage engines, and the enforcement of schemas to adapt rapidly to changes.
--   **Embedded Workflow Automation:** Workflows are defined as data, allowing for the reuse of Guidepad abstractions (operations, environments) to automate repetitive tasks and manage system changes effectively.
--   **Software as Data:** Services and environments are declared as data, with their states managed via "State Plans," ensuring consistency and auditability.
--   **Communication Backbone:** Provides a native backbone for inter-service messaging, simplifying communication complexities in microservices architectures.
--   **Extensibility:** Features a plugin framework that allows users to extend existing functionality and add new capabilities tailored to their specific needs.
-
-## Benefits
-
--   **Manages Complexity at Scale:** Designed to handle the intricate details of complex systems, providing a systematic way to build, specify, deploy, and maintain them.
--   **Adaptability & Evolution:** By defining systems as data, Guidepad promotes building highly adaptable systems that can evolve with changing requirements.
--   **Enhanced Observability:** Offers "Functional Panes of Glass" where observability is directly linked to data definitions, providing deep insights into system behavior.
--   **Automated Development Tasks:** The WorkPlan system automates tedious tasks, integrating natively with other Guidepad features to streamline operations like schema changes and State Plan executions.
--   **Improved Consistency:** Ensures consistency across environments and applications by enforcing data-driven definitions and workflows.
+It's a closed-source, commercial product rather than an open project, and it's less widely known than the open-source IDP building blocks it competes with (Backstage, Port, Cortex, Humanitec). The audience is enterprises that want a single vendor-owned platform layer instead of integrating half a dozen tools themselves.

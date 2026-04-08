@@ -21,6 +21,8 @@ community:
 matrix:
   status: watch
 ---
-Paralus is a free, open source tool that enables controlled, audited access to Kubernetes infrastructure and Zero trust Kubernetes with zero friction.
+Paralus is a tool for managing secure, audited access to multiple Kubernetes clusters from a single portal. It gives platform teams a way to hand out `kubeconfig` files tied to SSO identity, enforce RBAC across clusters centrally, and record every `kubectl` action for audit — without running a separate bastion host or VPN per cluster.
 
-Paralus is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The architecture is a hub-and-spoke model. A central Paralus control plane (Postgres-backed) holds users, projects, roles, and cluster registrations; each managed cluster runs a lightweight agent that dials out to the control plane over a persistent connection. When a user runs `kubectl`, requests are proxied through the control plane to the cluster agent, which means inbound cluster connectivity is not required and audit logs naturally land at one point. Identities come from an upstream IdP via OIDC or SAML; the portal maps IdP groups to Paralus roles, which translate to Kubernetes RBAC bindings on the target clusters. A zero-trust kubectl CLI plugin (`pctl`) wraps credential handoff so users never see raw service account tokens.
+
+Paralus was donated to the CNCF sandbox by Rafay Systems in 2022 and is Apache-2.0. In the same space you will find Teleport, Pinniped, OpenUnison, Loft vCluster with the loft.sh platform, and cloud-vendor IAM-backed cluster access. Paralus's niche is the combination of centralized audit and zero inbound connectivity for air-gapped and multi-cloud fleets.

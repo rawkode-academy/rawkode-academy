@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kusionstack.io/'
 source: 'https://github.com/KusionStack/kusion'
+documentation: 'https://www.kusionstack.io/docs/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -18,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-KusionStack is a CNCF sandbox project.
+KusionStack is an open-source toolchain for building internal developer platforms on Kubernetes, originally developed inside Ant Group and now a CNCF sandbox project. The core idea is to describe applications, infrastructure, and policies in KCL — a typed, constraint-based configuration language also maintained by the project — and compile that into concrete Kubernetes manifests and cloud resources.
 
-KusionStack is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The stack is made of several components. Kusion is the CLI and engine that takes KCL modules, resolves them into a desired state graph, and applies it to target environments, similar in spirit to Terraform plan/apply but for mixed Kubernetes + cloud footprints. Karpor provides a multi-cluster search and insight layer over live resources. Kuperator (operating.kusionstack.io) ships workload CRDs such as CollaSet and PodDecoration that extend beyond the default Deployment/StatefulSet semantics, and CtrlMesh adds control-plane sharding for large operator fleets.
+
+KusionStack competes with Crossplane compositions, Backstage scaffolder + Terraform, and KubeVela, and is distinguished by betting on KCL as the single language for platform abstractions rather than HCL, CUE, or YAML overlays.

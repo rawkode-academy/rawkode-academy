@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://github.com/SlimPlanet/SlimFaas'
 source: 'https://github.com/SlimPlanet/SlimFaas'
+documentation: 'https://github.com/SlimPlanet/SlimFaas#readme'
 license: Apache-2.0
 status: stable
 category: Serverless
@@ -16,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-The slimest and simplest Function As A Service
+SlimFaaS is a lightweight function-as-a-service runtime for Kubernetes, written in .NET and designed to turn any existing container into a scale-to-zero HTTP endpoint with minimal infrastructure. Unlike Knative or OpenFaaS, it does not require a service mesh, an ingress controller, or a CRD-heavy operator install.
 
-SlimFaaS is a Cloud Native Computing Foundation (CNCF) sandbox project.
+A single SlimFaaS deployment acts as a proxy and scaler in front of user pods. It reads a simple configuration (env vars or ConfigMap) that lists functions, their target deployments, and scale-to-zero timeouts, then uses the Kubernetes API to scale replicas up on incoming requests and back down when idle. It supports synchronous HTTP invocation, a built-in queue for async calls, public/private visibility, and a small web UI for inspecting functions.
+
+SlimFaaS is aimed at teams that already run Kubernetes and want per-function scale-to-zero for cost-sensitive workloads, internal tooling, or event handlers without pulling in a full serverless platform.

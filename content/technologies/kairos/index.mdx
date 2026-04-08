@@ -32,6 +32,8 @@ community:
 matrix:
   status: explore
 ---
-Kairos is a CNCF sandbox project.
+Kairos turns any Linux distribution into an immutable, A/B-upgradeable, container-packaged OS for edge and Kubernetes nodes. The operating system is shipped and updated as an OCI image: you `docker pull` a new version, and the node atomically switches to it on reboot, with the previous image kept as a fallback partition. There is no package manager on the running system.
 
-Kairos is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The build process is a "factory" that takes a base image (openSUSE, Ubuntu, Alpine, Rocky, Debian, etc.) and layers Kairos's immutable-root tooling, a cloud-init-compatible provisioning agent, and optionally a Kubernetes distribution (k3s, k0s, or RKE2) on top. You declare the node configuration in a YAML cloud-config — users, network, kube config, any extensions — either at install time via a USB image or via a P2P mesh that lets nodes discover each other and bootstrap a cluster automatically (the project calls this "zero-touch" mode, built on libp2p).
+
+It is aimed squarely at fleets of edge nodes where you want containers-everywhere semantics extended to the OS itself: image-based immutability, signed boot, and rollback on failure. It sits alongside Talos Linux, Flatcar, Bottlerocket, and Fedora CoreOS, with Kairos's differentiator being that you can turn *any* existing distro into an immutable Kairos derivative rather than being locked into a single base. Kairos joined the CNCF sandbox in 2024.

@@ -2,8 +2,9 @@
 name: Promscale
 logos:
   stacked: true
-website: 'https://promscale.com/'
-documentation: 'https://docs.promscale.com/'
+website: 'https://github.com/timescale/promscale'
+documentation: 'https://promscale-legacy-docs.timescale.com/'
+source: 'https://github.com/timescale/promscale'
 license: Apache-2.0
 status: deprecated
 category: Observability and Analysis
@@ -11,27 +12,8 @@ subcategory: Observability
 matrix:
   status: skip
 ---
-Promscale is an open-source observability backend designed for time-series data, specifically optimized for metrics and traces. Built on PostgreSQL and TimescaleDB, it provides a scalable and reliable storage solution for Prometheus metrics, Jaeger traces, and OpenTelemetry data. Promscale's value lies in its ability to handle high-cardinality data and complex analytical queries that can be challenging for Prometheus alone. It leverages SQL for powerful querying, allowing users to gain deeper insights into application performance and system behavior. Main use cases include monitoring microservices, analyzing infrastructure performance, and troubleshooting application issues within cloud-native environments. Promscale supports both storing and querying metrics and traces within a single system, enabling correlation of related telemetry data.
+Promscale was an observability backend built by Timescale that used PostgreSQL with the TimescaleDB extension as the underlying store for Prometheus metrics and OpenTelemetry traces. It implemented the Prometheus remote_write and remote_read APIs so that a standard Prometheus server could stream samples into a Postgres hypertable, and it provided a PromQL query engine that translated PromQL into SQL against that schema.
 
-Promscale was an open-source, unified observability backend designed for long-term storage and analysis of Prometheus metrics, Jaeger traces, and OpenTelemetry data. Built on top of PostgreSQL and TimescaleDB, it provided a scalable and robust solution for handling high-cardinality time-series data and complex analytical queries within a single system.
+The value proposition was full SQL access to Prometheus data: histograms, exemplars, and labels were all queryable with joins against business tables living in the same Postgres instance, and long-term retention and downsampling were handled by TimescaleDB's continuous aggregates and compression policies. Promscale also accepted OTLP traces and stored them alongside metrics so that trace-to-metric correlation could be expressed as a SQL join instead of a cross-system link.
 
-## Key Features (historical)
-
--   **Unified Telemetry Storage:** Stored metrics (from Prometheus) and traces (from Jaeger/OpenTelemetry) in a single, correlated backend.
--   **PromQL Compatibility:** Provided 100% PromQL compatibility, allowing users to leverage their existing Prometheus queries and dashboards.
--   **SQL Querying:** Leveraged the power of SQL (via PostgreSQL) for advanced analytical queries across metrics and traces, enabling richer data analysis.
--   **High Cardinality Support:** Optimized for handling high-cardinality data, a common challenge in large-scale monitoring environments.
--   **Long-Term Retention:** Enabled long-term storage of observability data, going beyond Prometheus's local storage limitations.
--   **Grafana Integration:** Integrated seamlessly with Grafana for visualization and dashboarding of metrics and traces.
--   **OpenTelemetry Support:** Provided a backend for OpenTelemetry traces, facilitating distributed tracing.
-
-## Benefits (historical)
-
--   **Simplified Observability Stack:** Consolidated metrics and traces into a single datastore, reducing operational complexity and cost.
--   **Enhanced Analytical Capabilities:** SQL-based querying allowed for deeper and more complex analysis of observability data.
--   **Improved Troubleshooting:** Enabled better correlation between metrics and traces, accelerating root cause analysis.
--   **Scalability & Reliability:** Leveraged the robustness of PostgreSQL and the time-series capabilities of TimescaleDB for scalable and reliable storage.
-
-## Current Status
-
-It is important to note that **Promscale is now deprecated and unmaintained as of April 2, 2024**. While it offered valuable features, users should be aware of its unmaintained status when considering it for new deployments or ongoing operations. The project suggests users consider other solutions for their long-term storage and observability needs.
+Timescale announced Promscale's discontinuation in February 2023 and the repository is archived. Teams that evaluated Promscale have generally moved to Mimir, Thanos, VictoriaMetrics, or Cortex for metrics and to Tempo or Jaeger for traces. The project remains useful as a reference for how a SQL database can back a PromQL engine, but it should not be used for new deployments.

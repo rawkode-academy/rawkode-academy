@@ -26,24 +26,8 @@ community:
   blog: 'https://coredns.io/blog/'
   mailingList: 'https://groups.google.com/forum/#!forum/coredns-discuss'
 ---
-CoreDNS is a fast, flexible, and extensible DNS server that can serve as a cluster DNS for Kubernetes. Written in Go, it is designed to be a modular and pluggable DNS server, where functionality is provided through a chain of plugins. These plugins can be configured and chained together to provide various DNS features, such as service discovery, load balancing, and external service resolution.
+CoreDNS is a DNS server written in Go that has been the default cluster DNS for Kubernetes since 1.13, replacing kube-dns. Inside a Kubernetes cluster it resolves `my-svc.my-namespace.svc.cluster.local` to Service ClusterIPs, handles Pod A records, and forwards everything else upstream.
 
-CoreDNS is valuable because it offers a highly customizable and scalable solution for managing DNS within containerized environments. Its integration with Kubernetes simplifies service discovery and provides a robust and reliable way for applications to resolve service names. Main use cases include Kubernetes cluster DNS, service discovery in cloud-native architectures, and general-purpose DNS server replacement.
+Its defining feature is the plugin chain. CoreDNS is built on the same Caddy core as the Caddy web server, and every feature — zone files, caching, Kubernetes service discovery, Prometheus metrics, rewrites, DNS-over-TLS — is a plugin compiled into the binary and composed via a `Corefile`. A query walks through the chain until a plugin answers it. The order in the Corefile matters, and swapping plugins in or out is a recompile (`go build` with a plugin list) rather than a dynamic load, which keeps the runtime small and predictable.
 
-CoreDNS is a cloud-native DNS server that focuses on flexibility through a unique plugin-based architecture. It is the default DNS server for Kubernetes.
-
-## Plugin Architecture
-
-The core strength of CoreDNS lies in its plugins. Every feature, from serving a zone file to caching responses to Kubernetes service discovery, is implemented as a middleware plugin. This means:
-
--   **Extensibility:** You can easily write custom plugins to handle specific DNS logic.
--   **Efficiency:** You only load the plugins you need.
--   **Chaining:** Plugins are chained together; a request passes through the chain until a plugin handles it.
-
-## Key Plugins
-
--   **`kubernetes`:** Serves DNS records for Kubernetes Services and Pods.
--   **`etcd`:** Serves records stored in an etcd cluster.
--   **`promethus`:** Exposes metrics for Prometheus monitoring.
--   **`cache`:** Caches DNS responses to improve performance.
--   **`forward`:** Forwards queries to upstream DNS servers (like 8.8.8.8).
+Beyond Kubernetes, CoreDNS is used as an authoritative and recursive DNS server in its own right, with backends for etcd, Consul, file-based zones, and external plugins for Redis, route53, and more. It's a CNCF graduated project and, in practical terms, the de-facto DNS server of the cloud-native world — if you're running Kubernetes, you're running CoreDNS.

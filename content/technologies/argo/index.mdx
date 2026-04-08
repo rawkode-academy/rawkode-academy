@@ -40,6 +40,8 @@ community:
   slack: 'https://argoproj.github.io/community/join-slack'
   blog: 'https://blog.argoproj.io/'
 ---
-Kubernetes-native tools to run workflows, manage clusters, and do GitOps right.
+Argo is a family of four Kubernetes-native projects that share a common controller pattern but solve different problems. Argo CD is a GitOps continuous delivery controller that reconciles a Git repository of manifests against a cluster. Argo Workflows is a DAG/step-based workflow engine where each node is a Kubernetes Pod. Argo Events provides an event bus and sensors for triggering workflows or other actions from webhooks, Kafka, SQS, calendar events, and so on. Argo Rollouts extends Deployments with canary and blue-green strategies driven by Prometheus or other metrics.
 
-Argo is a Cloud Native Computing Foundation (CNCF) graduated project.
+All four are implemented as Kubernetes controllers in Go, using CRDs as their public API. Argo CD in particular has become the de-facto GitOps engine in the CNCF ecosystem: it renders manifests from Helm, Kustomize, Jsonnet, or raw YAML, computes a diff against live cluster state, and applies changes with pluggable sync waves and health checks. The web UI and `argocd` CLI make drift between Git and cluster state immediately obvious.
+
+Argo graduated from the CNCF in December 2022 and is maintained by Intuit, Red Hat, Akuity, Codefresh, and others. Its main competitor in GitOps is Flux (also CNCF graduated); for workflows it overlaps with Tekton and Kubeflow Pipelines, though Argo Workflows is actually the engine Kubeflow Pipelines runs on top of.

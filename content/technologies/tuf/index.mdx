@@ -4,9 +4,10 @@ logos:
   icon: true
   horizontal: true
   stacked: true
-website: 'https://theupdateframework.github.io/'
-source: 'https://github.com/theupdateframework/python-tuf'
-license: Apache-2.0
+website: 'https://theupdateframework.io/'
+source: 'https://github.com/theupdateframework/specification'
+documentation: 'https://theupdateframework.io/docs/'
+license: Community Specification License 1.0
 status: stable
 category: Provisioning
 subcategory: Security & Compliance
@@ -45,6 +46,8 @@ community:
 matrix:
   status: skip
 ---
-The Update Framework (TUF) is a CNCF graduated project.
+The Update Framework (TUF) is a specification for securing software update systems against a realistic attacker model, including a compromised repository or a stolen signing key. It was originally designed at NYU for the Tor project and is now a CNCF graduated project.
 
-The Update Framework (TUF) is a Cloud Native Computing Foundation (CNCF) graduated project.
+TUF's core idea is role-based metadata signed with separate keys, where each role has a narrow responsibility. The root role establishes trust and is rotated infrequently from offline keys. The targets role signs the actual file hashes. The snapshot role signs a consistent view of all targets metadata to prevent mix-and-match attacks, and the timestamp role signs a short-lived attestation that the client is seeing current metadata, which defends against freeze and rollback attacks. Responsibility for subtrees of targets can be delegated to additional keys without expanding the root's trust.
+
+TUF is the basis for Docker Notary, Sigstore's root of trust, Python's PEP 458 for PyPI, Automotive Grade Linux's Uptane, and the update mechanisms in Fuchsia and RubyGems.

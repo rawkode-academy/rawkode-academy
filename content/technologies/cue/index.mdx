@@ -27,28 +27,8 @@ matrix:
     semantics. It’s not academic, it’s just powerful, and that scares people
     more than YAML ever will.
 ---
-CUE (Configure, Unify, Execute) is a constraint-based, gradual typing configuration language. It allows users to define configurations that are both human-readable and machine-verifiable. CUE unifies data definition, configuration, validation, and data templating into a single language, providing a powerful tool for managing complexity in modern software systems.
+CUE (Configure, Unify, Execute) is a data constraint language from Marcel van Lohuizen, who previously worked on Borg's configuration language (BCL/GCL) at Google. It's a superset of JSON where types and values live in the same lattice: `int` is a constraint satisfied by all integers, `>0` is a narrower constraint, `42` is the narrowest. Unification — CUE's core operation — combines any two values into the most specific value that satisfies both, or fails with a clear conflict. This means schemas, defaults, and concrete data compose associatively and commutatively, and order of imports doesn't matter.
 
-The value of CUE lies in its ability to simplify configuration management, reduce errors, and improve the reliability of deployments. Its use cases include defining Kubernetes configurations, generating API schemas, managing infrastructure as code, data validation, and simplifying CI/CD pipelines. It promotes consistency and avoids configuration drift by enforcing constraints.
+In practice, CUE is used for Kubernetes manifests (it round-trips to YAML and JSON, and can import OpenAPI, Protobuf, and JSON Schema), generating configuration across multiple systems from a single source of truth, validating data in CI, and as the base language for higher-level tools — Dagger's pipelines originally used CUE, Istio uses it internally for CRD validation, and Timoni is a Helm-alternative built entirely on CUE modules. It has a package manager (`cue mod`), a central registry, and modules with SemVer.
 
-CUE is a powerful open-source language and runtime that brings declarative configuration, schema validation, and code generation together. It's designed to simplify the complex world of modern system configuration, particularly in cloud-native environments.
-
-## Core Principles
-
--   **Configuration as Data:** CUE treats configuration as data, allowing it to be validated, unified, and reasoned about programmatically.
--   **Unification:** The core operation in CUE is unification. When two CUE values are unified, they produce a new value that satisfies the constraints of both, or an error if they conflict. This is used for merging configurations and validating against schemas.
--   **Gradual Typing:** CUE supports gradual typing, meaning you can start with loosely defined configurations and incrementally add strictness and validation as your needs evolve.
-
-## Key Features
-
--   **Schema Definition & Validation:** Define precise schemas for your configurations. CUE can then validate your configuration files against these schemas, catching errors before deployment.
--   **Code & Configuration Generation:** Generate configuration files (JSON, YAML), API schemas (OpenAPI), and even code from CUE definitions. This ensures consistency between your systems.
--   **Templating & Overlays:** CUE's unification model provides a powerful and safe alternative to traditional templating languages. You can apply overlays to base configurations without introducing unexpected side effects.
--   **Cross-Domain Integration:** Seamlessly integrate CUE with various tools and formats, including Kubernetes, OpenAPI, Protobuf, and JSON Schema.
-
-## Use Cases
-
--   **Kubernetes Configuration:** Define and validate Kubernetes manifests, ensuring they conform to best practices and operational policies.
--   **API Design:** Use CUE to define API schemas, which can then be used to generate OpenAPI specifications and client/server code.
--   **Infrastructure as Code:** Manage infrastructure configurations with strong validation and modularity.
--   **Data Validation:** Validate any structured data, ensuring correctness and consistency.
+Compared to Jsonnet, Dhall, or Helm templates, CUE's win is that there is no separate templating language layered on top of your data: constraints, defaults, and values are all the same thing, and conflicts are statically detectable. The cost is a steep learning curve — unification, disjunctions, and the type lattice are unfamiliar to most engineers arriving from YAML and Go templates.

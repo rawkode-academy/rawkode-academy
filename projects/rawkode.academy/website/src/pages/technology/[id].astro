@@ -5,6 +5,7 @@ import TopicHub from "@/components/technology/TopicHub.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
+import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
@@ -221,10 +222,45 @@ if (!technology) {
 }
 
 const placeholderLogo = "/apple-touch-icon.png";
-const seoTitle = technology.seo?.title ?? `${technology.name} | Rawkode Academy`;
-const seoDescription =
-	technology.seo?.description ??
-	`Learn ${technology.name} with practical tutorials, videos, and guides from Rawkode Academy.`;
+
+const videoCount = technology.videos?.length ?? 0;
+const featuredVideos = (technology.videos ?? []).slice(0, 4);
+const categoryLabel = technology.subcategory ?? technology.category ?? "Cloud Native";
+
+const seoTitle =
+	technology.seo?.title ??
+	(videoCount > 0
+		? `${technology.name} Tutorials, Videos & Guides | Rawkode Academy`
+		: `${technology.name} — ${categoryLabel} | Rawkode Academy`);
+
+const seoDescription = (() => {
+	if (technology.seo?.description) return technology.seo.description;
+	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
+	const parts: string[] = [];
+	if (videoCount > 0) {
+		parts.push(
+			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}`,
+		);
+	} else {
+		parts.push(`${technology.name}, a ${categoryLabel} project`);
+	}
+	if (cncfUseCase) parts.push(cncfUseCase);
+	parts.push(
+		`Watch deep-dives, live coding, and interviews from Rawkode Academy.`,
+	);
+	return parts.join(". ");
+})();
+
+// Page is "thin" if it has no MDX body content AND no associated videos.
+// noindex these so Google doesn't classify the site as low-quality.
+const noindex = !hasContent && videoCount === 0;
+
+const technologyUrl = new URL(`/technology/${technology.id.replace(/\/index$/, "")}`, Astro.site).href;
+const absoluteLogo = technology.logo
+	? technology.logo.startsWith("http")
+		? technology.logo
+		: new URL(technology.logo, Astro.site).href
+	: undefined;
 
 // Status display helpers
 const statusLabels: Record<string, string> = {
@@ -293,12 +329,27 @@ const hasCommunityLinks =
 		technology.community.chat);
 ---
 
-<Page title={seoTitle} description={seoDescription}>
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
-		<!-- Header Section -->
+<Page
+	title={seoTitle}
+	description={seoDescription}
+	noindex={noindex}
+	useImageDirectly={Boolean(absoluteLogo)}
+	image={absoluteLogo ? { image: new URL(absoluteLogo) } : undefined}
+>
+	<TechnologyJsonLd
+		slot="extra-head"
+		name={technology.name}
+		url={technologyUrl}
+		description={seoDescription}
+		image={absoluteLogo}
+		website={technology.website}
+		source={technology.source}
+		documentation={technology.documentation}
+		category={categoryLabel}
+	/>
+	<div class="technology-stage page-px section-py section-pt-0">
 		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-				<!-- Breadcrumb -->
+			<div class="glass-panel technology-header-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
 				<div class="mb-6">
 					<Breadcrumb elements={[
 						{ title: 'Home', link: '/' },
@@ -307,22 +358,9 @@ const hasCommunityLinks =
 					]} />
 				</div>
 
-				<!-- Technology Header -->
-				<div class="flex flex-col md:flex-row items-center md:items-start gap-8">
-					<!-- Logo -->
-					<div class="glass-media-brand w-28 h-28 md:w-32 md:h-32 rounded-2xl p-4 flex items-center justify-center flex-shrink-0 shadow-lg">
-						<img
-							src={technology.logo ? technology.logo : placeholderLogo}
-							alt={`${technology.name} Logo`}
-							class="w-full h-full object-contain drop-shadow-lg"
-							onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
-						/>
-					</div>
-
-					<!-- Info -->
-					<div class="flex-1 text-center md:text-left">
-						<!-- Badges Row -->
-						<div class="flex flex-wrap items-center gap-2 mb-3 justify-center md:justify-start">
+				<div class="technology-header-grid">
+					<div class="technology-header-copy">
+						<div class="flex flex-wrap items-center gap-2 mb-3">
 							{technology.matrix && (
 								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
 									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
@@ -350,17 +388,18 @@ const hasCommunityLinks =
 								</span>
 							)}
 							{technology.category && (
-								<span class="text-xs text-muted bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+								<span class="technology-taxonomy-pill">
 									{technology.category}{technology.subcategory && ` / ${technology.subcategory}`}
 								</span>
 							)}
 						</div>
-						<h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-primary-content mb-4">
-							{technology.name}
-						</h1>
 
-						<!-- Action Buttons -->
-						<div class="flex flex-wrap gap-3 justify-center md:justify-start">
+						<p class="technology-kicker">
+							{hasContent ? "Technology Guide" : "Technology Overview"}
+						</p>
+						<h1 class="technology-title">{technology.name}</h1>
+
+						<div class="flex flex-wrap gap-3 items-center">
 							{technology.website && (
 								<a
 									href={technology.website}
@@ -400,92 +439,145 @@ const hasCommunityLinks =
 									Source Code
 								</a>
 							)}
+							{hasContent && (
+								<a href="#complete-guide" class="technology-guide-link">
+									Read the guide
+								</a>
+							)}
 						</div>
+
 						{technology.license && (
-							<p class="mt-3 text-sm text-muted">
+							<p class="mt-4 text-sm text-muted">
 								License: <span class="font-medium text-secondary-content">{technology.license}</span>
 							</p>
 						)}
+					</div>
+
+					<div class="technology-logo-shell">
+						<div class="glass-media-brand technology-logo-card">
+							<img
+								src={technology.logo ? technology.logo : placeholderLogo}
+								alt={`${technology.name} Logo`}
+								class="w-full h-full object-contain drop-shadow-lg"
+								onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
 		</section>
 
-		<!-- Rawkode's Take (Card Back) -->
-		{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
-			<section class="w-full">
-				<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-					<div class="flex flex-col md:flex-row gap-6">
-						<!-- Left: Emoji & Why -->
-						<div class="flex-1">
+		<section class="w-full">
+			<div class="main-content-grid max-w-7xl mx-auto">
+				{hasContent && Content && (
+					<section id="complete-guide" class="guide-panel rounded-3xl p-6 md:p-8">
+						<div class="mb-6">
+							<p class="technology-kicker">Field Guide</p>
+							<h2 class="guide-title">Complete Guide</h2>
+						</div>
+						<article class="guide-prose prose prose-lg dark:prose-invert max-w-none">
+							<Content />
+						</article>
+					</section>
+				)}
+
+				<aside class="media-rail">
+					{featuredVideos.length > 0 && (
+						<section class="video-panel rounded-3xl p-5 md:p-6">
+							<div class="mb-4">
+								<p class="technology-kicker">Watch</p>
+								<h2 class="video-panel-title">Latest Videos</h2>
+							</div>
+							<div class="video-rail-grid">
+								{featuredVideos.map((video) => (
+									<a href={`/watch/${video.slug}`} class="video-card group">
+										<img
+											src={video.thumbnailUrl}
+											alt={video.title}
+											class="video-card-image"
+											loading="lazy"
+										/>
+										<div class="video-card-overlay"></div>
+										<div class="video-card-title">{video.title}</div>
+									</a>
+								))}
+							</div>
+							{videoCount > featuredVideos.length && (
+								<a href="#more-content" class="video-more-link">
+									Browse all {videoCount} videos
+								</a>
+							)}
+						</section>
+					)}
+
+					{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
+						<section class="glass-panel matrix-rail-panel rounded-3xl p-5 md:p-6">
 							<div class="flex items-center gap-3 mb-4">
 								{technology.matrix.makesMeFeel && (
-									<span class="text-4xl">{technology.matrix.makesMeFeel}</span>
+									<span class="text-3xl">{technology.matrix.makesMeFeel}</span>
 								)}
 								<div>
-									<h2 class="text-xl font-bold text-primary-content">Rawkode's Take</h2>
-									<p class="text-sm text-muted">Personal opinion, not gospel</p>
+									<h2 class="text-lg font-bold text-primary-content">Rawkode's Take</h2>
+									<p class="text-xs text-muted">What matters in practice</p>
 								</div>
 							</div>
 							{technology.matrix.why && (
-								<p class="text-secondary-content leading-relaxed mb-4">
+								<p class="text-sm text-secondary-content leading-relaxed mb-4">
 									{technology.matrix.why}
 								</p>
 							)}
 							{technology.matrix.spicyTake && (
 								<div class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl">
-									<span class="text-lg flex-shrink-0">🌶️</span>
+									<span class="text-base flex-shrink-0">🌶️</span>
 									<p class="text-sm italic text-red-800 dark:text-red-200">
 										{technology.matrix.spicyTake}
 									</p>
 								</div>
 							)}
-						</div>
-
-						<!-- Right: Stats -->
-						<div class="flex flex-wrap md:flex-col gap-3 md:gap-2 md:min-w-[140px]">
-							{technology.matrix.firstUsed && (
-								<div class="stat-pill">
-									<span class="stat-pill-label">First Used</span>
-									<span class="stat-pill-value">{technology.matrix.firstUsed}</span>
-								</div>
-							)}
-							{technology.matrix.lastUsed && (
-								<div class="stat-pill">
-									<span class="stat-pill-label">Last Used</span>
-									<span class="stat-pill-value">{technology.matrix.lastUsed}</span>
-								</div>
-							)}
-							{technology.matrix.confidence && (
-								<div class="stat-pill">
-									<span class="stat-pill-label">Confidence</span>
-									<span class="stat-pill-value">
-										{technology.matrix.confidence === 'deep-experience' ? 'Deep XP' :
-										 technology.matrix.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
-									</span>
-								</div>
-							)}
-							{(technology.videos?.length ?? 0) > 0 && (
-								<div class="stat-pill">
-									<span class="stat-pill-label">Videos</span>
-									<span class="stat-pill-value">{technology.videos?.length ?? 0}</span>
-								</div>
-							)}
-						</div>
-					</div>
-				</div>
-			</section>
-		)}
+							<div class="matrix-stat-grid mt-4">
+								{technology.matrix.firstUsed && (
+									<div class="stat-pill">
+										<span class="stat-pill-label">First Used</span>
+										<span class="stat-pill-value">{technology.matrix.firstUsed}</span>
+									</div>
+								)}
+								{technology.matrix.lastUsed && (
+									<div class="stat-pill">
+										<span class="stat-pill-label">Last Used</span>
+										<span class="stat-pill-value">{technology.matrix.lastUsed}</span>
+									</div>
+								)}
+								{technology.matrix.confidence && (
+									<div class="stat-pill">
+										<span class="stat-pill-label">Confidence</span>
+										<span class="stat-pill-value">
+											{technology.matrix.confidence === 'deep-experience' ? 'Deep XP' :
+											 technology.matrix.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
+										</span>
+									</div>
+								)}
+								{videoCount > 0 && (
+									<div class="stat-pill">
+										<span class="stat-pill-label">Videos</span>
+										<span class="stat-pill-value">{videoCount}</span>
+									</div>
+								)}
+							</div>
+						</section>
+					)}
+				</aside>
+			</div>
+		</section>
 
 		<!-- CNCF & Community Info Grid -->
 		{(technology.cncf || hasCommunityLinks) && (
 			<section class="w-full">
-				<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<div class="technology-signal-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
 					<!-- CNCF Details -->
 					{technology.cncf && (
-						<div class="glass-panel rounded-3xl p-6">
+						<div class="technology-signal-panel">
 							<div class="flex items-center gap-3 mb-5">
-								<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+								<div class="technology-signal-icon technology-signal-icon-cncf">
 									<svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
 									</svg>
@@ -566,9 +658,9 @@ const hasCommunityLinks =
 
 					<!-- Community Links -->
 					{hasCommunityLinks && (
-						<div class="glass-panel rounded-3xl p-6">
+						<div class="technology-signal-panel">
 							<div class="flex items-center gap-3 mb-5">
-								<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center">
+								<div class="technology-signal-icon technology-signal-icon-community">
 									<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 									</svg>
@@ -678,13 +770,14 @@ const hasCommunityLinks =
 			</section>
 		)}
 
-		<!-- Related Content (Videos & Articles) -->
-		<section class="w-full">
+		<!-- Additional Content (Articles) -->
+		<section id="more-content" class="w-full">
 			<div class="max-w-7xl mx-auto">
 				<TopicHub
 					technologyId={technology.id}
 					technologyName={technology.name}
 					videos={technology.videos || []}
+					showVideos={false}
 				/>
 			</div>
 		</section>
@@ -701,27 +794,6 @@ const hasCommunityLinks =
 				/>
 			</div>
 		</section>
-
-		<!-- Comprehensive Guide Content -->
-		{hasContent && Content && (
-			<section class="w-full">
-				<div class="max-w-4xl mx-auto">
-					<div class="glass-panel rounded-3xl p-6 md:p-10">
-						<div class="mb-8">
-							<h2 class="text-2xl md:text-3xl font-bold text-primary-content mb-2">
-								Complete Guide
-							</h2>
-							<p class="text-muted">
-								Comprehensive documentation, best practices, and getting started tutorials
-							</p>
-						</div>
-						<article class="prose prose-lg dark:prose-invert max-w-none">
-							<Content />
-						</article>
-					</div>
-				</div>
-			</section>
-		)}
 	</div>
 </Page>
 
@@ -831,14 +903,237 @@ const hasCommunityLinks =
 		color: rgb(249, 168, 212);
 	}
 
-	/* Stat Pills for Card Back */
+	.technology-stage {
+		max-width: 84rem;
+		margin: 0 auto;
+		display: grid;
+		gap: clamp(1.5rem, 3vw, 2.5rem);
+	}
+
+	.technology-header-panel {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.technology-header-panel::before {
+		content: "";
+		position: absolute;
+		inset: auto -5rem -7rem auto;
+		width: 16rem;
+		height: 16rem;
+		border-radius: 9999px;
+		background: radial-gradient(circle, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0));
+		pointer-events: none;
+	}
+
+	.technology-header-grid {
+		position: relative;
+		display: grid;
+		gap: clamp(1.5rem, 3vw, 3rem);
+		align-items: center;
+	}
+
+	.technology-header-copy {
+		position: relative;
+		z-index: 1;
+	}
+
+	.technology-kicker {
+		margin: 0 0 0.85rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.22em;
+		text-transform: uppercase;
+		color: rgb(13, 148, 136);
+	}
+
+	.technology-taxonomy-pill {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.4rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.76rem;
+		font-weight: 600;
+		color: rgb(31, 41, 55);
+		background: rgba(255, 255, 255, 0.72);
+		border: 1px solid rgba(148, 163, 184, 0.22);
+	}
+
+	.technology-title {
+		margin: 0 0 1rem;
+		font-size: clamp(2.2rem, 4.2vw, 3.8rem);
+		line-height: 0.98;
+		font-weight: 850;
+		letter-spacing: -0.05em;
+		color: rgb(15, 23, 42);
+		text-wrap: balance;
+	}
+
+	.technology-guide-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.72rem 1rem;
+		border-radius: 0.9rem;
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: rgb(15, 23, 42);
+		background: rgba(255, 255, 255, 0.7);
+		border: 1px solid rgba(148, 163, 184, 0.2);
+		transition:
+			transform 180ms ease,
+			border-color 180ms ease,
+			background 180ms ease;
+	}
+
+	.technology-guide-link:hover {
+		transform: translateY(-1px);
+		background: rgba(255, 255, 255, 0.94);
+		border-color: rgba(13, 148, 136, 0.24);
+	}
+
+	.technology-logo-shell {
+		display: grid;
+		place-items: center;
+	}
+
+	.technology-logo-card {
+		width: clamp(8.2rem, 18vw, 11rem);
+		height: clamp(8.2rem, 18vw, 11rem);
+		padding: 1.2rem;
+		border-radius: 2rem;
+	}
+
+	.main-content-grid {
+		display: grid;
+		gap: 1.25rem;
+		align-items: start;
+	}
+
+	.media-rail {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.guide-panel {
+		border: 1px solid rgba(148, 163, 184, 0.16);
+		background:
+			linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9)),
+			radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 32%);
+		box-shadow:
+			0 18px 44px rgba(15, 23, 42, 0.06),
+			inset 0 1px 0 rgba(255, 255, 255, 0.82);
+	}
+
+	.guide-title {
+		margin: 0.35rem 0 0;
+		font-size: clamp(1.75rem, 2.8vw, 2.5rem);
+		line-height: 1.05;
+		font-weight: 850;
+		letter-spacing: -0.04em;
+		color: rgb(15, 23, 42);
+	}
+
+	.guide-prose :global(p:first-of-type) {
+		font-size: clamp(1.02rem, 1.15vw, 1.15rem);
+		line-height: 1.75;
+		color: rgba(15, 23, 42, 0.82);
+	}
+
+	.guide-prose :global(h2),
+	.guide-prose :global(h3) {
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		color: rgb(15, 23, 42);
+		text-wrap: balance;
+	}
+
+	.guide-prose :global(a) {
+		text-decoration-thickness: 0.08em;
+		text-underline-offset: 0.18em;
+	}
+
+	.video-panel,
+	.matrix-rail-panel {
+		border: 1px solid rgba(148, 163, 184, 0.18);
+		background: rgba(255, 255, 255, 0.84);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+	}
+
+	.video-panel-title {
+		margin: 0.25rem 0 0;
+		font-size: 1.5rem;
+		line-height: 1.1;
+		font-weight: 800;
+		color: rgb(15, 23, 42);
+	}
+
+	.video-rail-grid {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.video-card {
+		position: relative;
+		display: block;
+		overflow: hidden;
+		border-radius: 0.9rem;
+		background: rgb(15, 23, 42);
+		aspect-ratio: 16 / 9;
+	}
+
+	.video-card-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 220ms ease;
+	}
+
+	.video-card-overlay {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.1) 58%);
+	}
+
+	.video-card-title {
+		position: absolute;
+		left: 0.7rem;
+		right: 0.7rem;
+		bottom: 0.65rem;
+		color: rgb(248, 250, 252);
+		font-size: 0.86rem;
+		font-weight: 650;
+		line-height: 1.35;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.video-card:hover .video-card-image {
+		transform: scale(1.04);
+	}
+
+	.video-more-link {
+		display: inline-flex;
+		margin-top: 0.9rem;
+		font-size: 0.86rem;
+		font-weight: 700;
+		color: rgb(13, 148, 136);
+	}
+
+	.matrix-stat-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.55rem;
+	}
+
 	.stat-pill {
 		display: flex;
 		flex-direction: column;
-		padding: 0.5rem 0.75rem;
+		padding: 0.5rem 0.65rem;
 		background: rgba(0, 0, 0, 0.03);
 		border-radius: 10px;
-		min-width: 90px;
 	}
 
 	:global(.dark) .stat-pill {
@@ -846,8 +1141,8 @@ const hasCommunityLinks =
 	}
 
 	.stat-pill-label {
-		font-size: 0.65rem;
-		font-weight: 600;
+		font-size: 0.62rem;
+		font-weight: 650;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		color: rgb(107, 114, 128);
@@ -858,12 +1153,100 @@ const hasCommunityLinks =
 	}
 
 	.stat-pill-value {
-		font-size: 0.9rem;
+		font-size: 0.86rem;
 		font-weight: 700;
 		color: rgb(17, 24, 39);
 	}
 
 	:global(.dark) .stat-pill-value {
 		color: rgb(255, 255, 255);
+	}
+
+	.technology-signal-panel {
+		padding: 1.1rem;
+		border-radius: 1.6rem;
+		border: 1px solid rgba(148, 163, 184, 0.18);
+		background: rgba(255, 255, 255, 0.72);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	}
+
+	.technology-signal-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 1rem;
+	}
+
+	.technology-signal-icon-cncf {
+		background: linear-gradient(135deg, rgb(59, 130, 246), rgb(124, 58, 237));
+	}
+
+	.technology-signal-icon-community {
+		background: linear-gradient(135deg, rgb(16, 185, 129), rgb(13, 148, 136));
+	}
+
+	@media (min-width: 1120px) {
+		.main-content-grid {
+			grid-template-columns: minmax(0, 1.55fr) minmax(21rem, 0.95fr);
+		}
+
+		.media-rail {
+			position: sticky;
+			top: 6rem;
+		}
+	}
+
+	@media (min-width: 960px) {
+		.technology-header-grid {
+			grid-template-columns: minmax(0, 1.45fr) auto;
+		}
+	}
+
+	@media (max-width: 959px) {
+		.technology-title {
+			max-width: none;
+		}
+	}
+
+	@media (max-width: 720px) {
+		.technology-guide-link {
+			width: 100%;
+		}
+
+		.matrix-stat-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	:global(.dark) .technology-taxonomy-pill,
+	:global(.dark) .technology-guide-link,
+	:global(.dark) .guide-panel,
+	:global(.dark) .video-panel,
+	:global(.dark) .matrix-rail-panel,
+	:global(.dark) .technology-signal-panel {
+		background: rgba(15, 23, 42, 0.72);
+		border-color: rgba(148, 163, 184, 0.16);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+	}
+
+	:global(.dark) .technology-title,
+	:global(.dark) .guide-title,
+	:global(.dark) .video-panel-title,
+	:global(.dark) .guide-prose :global(h2),
+	:global(.dark) .guide-prose :global(h3) {
+		color: rgb(241, 245, 249);
+	}
+
+	:global(.dark) .technology-kicker {
+		color: rgb(94, 234, 212);
+	}
+
+	:global(.dark) .technology-guide-link,
+	:global(.dark) .video-more-link,
+	:global(.dark) .guide-prose :global(p),
+	:global(.dark) .guide-prose :global(p:first-of-type) {
+		color: rgba(226, 232, 240, 0.82);
 	}
 </style>

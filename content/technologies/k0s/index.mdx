@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://k0sproject.io/'
 documentation: 'https://docs.k0sproject.io/'
+source: 'https://github.com/k0sproject/k0s'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -22,29 +23,12 @@ cncf:
 community:
   twitter: 'https://x.com/k0sproject'
   slack: 'http://slack.k8s.io/'
-  blog: 'https://medium.com/k0sproject'
+  blog: 'https://blog.k0sproject.io/'
 matrix:
   status: skip
 ---
-k0s is a fully conformant and highly distributable Kubernetes distribution. It's designed to be lightweight, single binary and simple to install. k0s can run on any infrastructure, from bare metal servers and virtual machines to public and private clouds. It's particularly useful in edge computing, IoT deployments, and other resource-constrained environments where a full-fledged Kubernetes cluster might be too heavy.
+k0s is a conformant Kubernetes distribution from Mirantis that ships as a single static Go binary containing the API server, controller manager, scheduler, kubelet, kube-proxy, and an embedded etcd. You download one file, run `k0s install controller` or `k0s install worker`, and you have a cluster — no package manager, no Docker, no host-side systemd fleet of components.
 
-k0s is a zero-friction Kubernetes distribution, offering a lightweight, single-binary solution for deploying conformant Kubernetes clusters anywhere. It's designed for simplicity and versatility, making it ideal for a wide range of environments, from local development to edge computing and large-scale production deployments.
+The distinguishing design choices versus k3s: k0s uses vanilla upstream Kubernetes with zero patches, uses etcd by default for multi-node clusters, and falls back to SQLite via kine for single-node installs while also supporting MySQL and PostgreSQL. It also supports a "controller-only" mode where control-plane nodes refuse to run workloads and ships `k0sctl`, a separate tool that takes a YAML inventory of SSH hosts and performs zero-downtime install, upgrade, and rollback across the cluster, which is closer to a real lifecycle manager than what k3s offers out of the box. CNIs (Kube-router default, Calico supported), CSI, and runtime are all pluggable.
 
-## Key Features
-
--   **Single Binary:** All Kubernetes components are bundled into a single executable, simplifying installation and reducing dependencies.
--   **No Host OS Dependencies:** Beyond the Linux kernel, k0s requires no specific operating system dependencies, making it highly portable.
--   **100% Upstream Kubernetes:** k0s uses vanilla Kubernetes components without modifications, ensuring full compatibility with existing Kubernetes tools and APIs.
--   **Lightweight & Performant:** Optimized for resource efficiency, it can run on minimal hardware, making it suitable for edge and IoT devices.
--   **Automated Lifecycle Management:** Provides tools for easy installation, upgrades, and uninstallation, simplifying cluster operations.
--   **Flexible Deployment:** Supports various configurations, including single-node, multi-node, and highly available setups, and works across bare metal, VMs, and cloud environments.
--   **Extensible:** Supports a wide range of Container Network Interfaces (CNIs), Container Runtimes (CRIs), storage options, and datastore backends.
-
-## Benefits
-
--   **Reduced Complexity:** Simplifies the entire Kubernetes experience, from deployment to ongoing management.
--   **Fast Installation:** Get a fully functional Kubernetes cluster up and running in minutes.
--   **Versatile Use Cases:** Ideal for edge computing, IoT deployments, embedded systems, CI/CD pipelines, and development environments where a full Kubernetes distribution might be too resource-intensive.
--   **Reproducible Environments:** The single-binary approach helps ensure consistency across deployments.
--   **Enhanced Security:** Benefits from rapid adoption of upstream Kubernetes security fixes.
--   **Operational Efficiency:** Automates many operational tasks, reducing the burden on platform engineers.
+It is aimed at the same space as k3s, MicroK8s, and Talos: edge, bare metal, air-gapped, and IoT. Rough rule of thumb: choose k3s if you want the smallest possible footprint and don't mind the upstream modifications; choose k0s if you want unmodified Kubernetes in a single binary with fleet-style lifecycle tooling.

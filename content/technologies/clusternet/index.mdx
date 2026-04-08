@@ -19,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Clusternet is a CNCF sandbox project.
+Clusternet is a multi-cluster management and application distribution platform for Kubernetes. It lets you manage a fleet of "child" clusters from a single "parent" cluster — including child clusters sitting behind NAT or firewalls where the parent can't reach them directly — and schedule applications across them with a pluggable scheduler and declarative subscription model.
 
-Clusternet is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The unusual architectural choice is the reverse tunnel. Each child cluster runs a `clusternet-agent` that registers itself with the parent and establishes an outbound websocket tunnel. The parent then exposes each child's API server at a path on the parent's aggregated API server, so `kubectl` against the parent (with a context switch via the `kubectl cluster-info` shim) can reach any child without any inbound connectivity on the child side. On top of that, a `Subscription` CRD describes "deploy these manifests / Helm charts / kustomizations to these clusters selected by labels", and a scheduler handles spreading, placement constraints, and dynamic rebalancing.
+
+Clusternet has been a CNCF sandbox project since 2023. Its peers are Karmada (also a CNCF project, fleet scheduling focused), Open Cluster Management, KubeFed (effectively deprecated), and Rancher's Fleet. Clusternet's specific strength is the reverse-tunnel model, which is genuinely useful for edge deployments where child clusters run inside customer networks; for pure cloud fleets, Karmada has seen broader adoption.

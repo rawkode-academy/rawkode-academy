@@ -16,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-K8sGPT is a CNCF sandbox project.
+K8sGPT scans a Kubernetes cluster for broken resources and explains what is wrong in plain English. Under the hood it is a Go CLI (and a companion operator) that runs a set of hard-coded "analyzers" — one per resource type — which look for well-known failure modes: pods in `ImagePullBackOff`, services with no matching endpoints, ingresses pointing at nothing, RBAC roles with dangling subjects, and so on. The analyzer output is already useful on its own (`k8sgpt analyze` prints a structured list), and then optionally an LLM is called to translate each finding into a remediation suggestion.
 
-K8sGPT is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The LLM layer is pluggable: OpenAI, Azure OpenAI, AWS Bedrock, Cohere, Google Vertex AI, Ollama for local models, and several others. Sensitive fields can be anonymized before they leave the cluster. The operator variant (`k8sgpt-operator`) runs the same analyzers continuously and emits `Result` CRs that can be surfaced in Grafana or Backstage, so the tool becomes an always-on triage layer instead of an interactive CLI.
+
+It was started by Alex Jones and donated to the CNCF sandbox in late 2023. It is one of the cleaner examples of LLM-assisted ops because most of the value comes from the deterministic analyzers; the model is just doing natural-language rewriting on top.

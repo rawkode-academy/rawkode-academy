@@ -2,10 +2,12 @@
 export const prerender = true;
 
 import Page from "@/wrappers/page.astro";
-import { getCollection, getEntries } from "astro:content";
+import { getCollection, getEntries, render } from "astro:content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import ShowCard from "@/components/show/ShowCard.astro";
+import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import type { ShowSummary } from "@/types/show";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -19,6 +21,10 @@ const { person } = Astro.props;
 
 const videos = await getCollection("videos");
 const shows = await getCollection("shows");
+const technologies = await getCollection("technologies");
+const techNameById = new Map(
+	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
+);
 
 // Helper to match references
 const matchRef = (ref: { collection: string; id: string } | string, id: string) => {
@@ -67,8 +73,65 @@ const guestVideoFeed = guestVideos.map((video) => ({
         : String(video.data.publishedAt),
 })).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-const pageTitle = `${person.data.name} - Rawkode Academy`;
-const pageDescription = `Meet ${person.data.name}, a contributor to Rawkode Academy.`;
+// Render any biography MDX body content (most people have empty bodies)
+const { Content: BiographyContent } = await render(person);
+const hasBiography = Boolean(person.body && person.body.trim().length > 0);
+
+// Build a data-driven description so each profile is unique to Google
+const videoCount = guestVideos.length;
+const showCount = hostedShows.length;
+
+// Top technologies this person has talked about, sorted by frequency
+const techCounts = new Map<string, number>();
+for (const v of guestVideos) {
+	for (const techId of normalizeTechnologyReferences(v.data.technologies)) {
+		const id = techId.replace(/\/index$/, "");
+		techCounts.set(id, (techCounts.get(id) ?? 0) + 1);
+	}
+}
+const topTechNames = [...techCounts.entries()]
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 5)
+	.map(([id]) => techNameById.get(id) ?? id);
+
+const showNames = hostedShows.map((s) => s.data.name);
+
+// Thin profiles (no shows hosted, no guest appearances) get noindex'd so
+// Google doesn't classify them as low-quality and drag down site quality.
+const noindex = videoCount === 0 && showCount === 0 && !hasBiography;
+
+const pageTitle = (() => {
+	if (showCount > 0) {
+		return `${person.data.name} — Host of ${showNames[0]} | Rawkode Academy`;
+	}
+	if (topTechNames.length > 0) {
+		return `${person.data.name} — Talks on ${topTechNames.slice(0, 2).join(" & ")} | Rawkode Academy`;
+	}
+	return `${person.data.name} | Rawkode Academy`;
+})();
+
+const pageDescription = (() => {
+	const parts: string[] = [];
+	if (showCount > 0) {
+		parts.push(
+			`Host of ${showNames.slice(0, 2).join(" and ")}${showCount > 2 ? ` and ${showCount - 2} more shows` : ""}`,
+		);
+	}
+	if (videoCount > 0) {
+		parts.push(
+			`${videoCount} appearance${videoCount === 1 ? "" : "s"} on Rawkode Academy`,
+		);
+	}
+	if (topTechNames.length > 0) {
+		parts.push(`covering ${topTechNames.slice(0, 4).join(", ")}`);
+	}
+	if (parts.length === 0) {
+		return `${person.data.name} on Rawkode Academy — interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
+	}
+	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and deep dives on Rawkode Academy.`;
+})();
+
+const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
 
 const socialLinks = [
     person.data.twitter && { name: "Twitter", url: person.data.twitter, icon: "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" },
@@ -79,7 +142,29 @@ const socialLinks = [
 
 ---
 
-<Page title={pageTitle} description={pageDescription}>
+<Page
+    title={pageTitle}
+    description={pageDescription}
+    noindex={noindex}
+    useImageDirectly={Boolean(person.data.avatarUrl)}
+    image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
+>
+    <PersonJsonLd
+        slot="extra-head"
+        name={person.data.name}
+        url={profileUrl}
+        description={pageDescription}
+        image={person.data.avatarUrl}
+        sameAs={[
+            person.data.github,
+            person.data.twitter,
+            person.data.bluesky,
+            person.data.linkedin,
+            person.data.website,
+            person.data.youtube,
+            person.data.mastodon,
+        ]}
+    />
     <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
         <!-- Profile Header -->
         <section class="w-full">
@@ -138,6 +223,14 @@ const socialLinks = [
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- SEO summary + biography (always visible body text for crawlers) -->
+        <section class="w-full max-w-5xl mx-auto">
+            <div class="prose prose-lg dark:prose-invert max-w-none">
+                <p class="text-secondary-content">{pageDescription}</p>
+                {hasBiography && <BiographyContent />}
             </div>
         </section>
 

@@ -9,7 +9,7 @@ logos:
   stacked: true
 website: 'https://opentelemetry.io/'
 documentation: 'https://opentelemetry.io/docs/'
-license: Unknown
+license: Apache-2.0
 status: stable
 category: Observability and Analysis
 subcategory: Observability
@@ -59,4 +59,8 @@ matrix:
 terms:
   - OTel
 ---
-OpenTelemetry is an open-source observability framework providing a set of APIs, SDKs, and tools for collecting telemetry data (metrics, logs, and traces). It aims to standardize how telemetry data is generated and collected, enabling developers to understand the behavior and performance of their software. OpenTelemetry provides value by allowing developers to instrument their applications once and export data to multiple backend observability platforms. This avoids vendor lock-in and provides greater flexibility in choosing the best tools for analyzing application performance.
+OpenTelemetry (OTel) is a vendor-neutral framework for generating, collecting, and exporting telemetry from applications — traces, metrics, and logs — under a single specification and wire protocol (OTLP). It is the result of merging OpenTracing and OpenCensus, and today is the second-most-active CNCF project after Kubernetes.
+
+The project is structured in three layers. The specification defines the data model, semantic conventions (e.g. how HTTP and database spans are named and attributed), and the OTLP protocol. SDKs in more than ten languages implement that spec, providing a tracer and meter API plus auto-instrumentation for common libraries (HTTP servers, gRPC, SQL drivers, messaging clients). The OpenTelemetry Collector is a standalone Go binary that ingests OTLP and legacy formats via receivers, runs processors (batching, sampling, attribute rewriting, tail-based sampling), and forwards to exporters for every major backend: Jaeger, Tempo, Prometheus, Loki, Elastic, Datadog, Honeycomb, Splunk, and others. Running the Collector as a sidecar, daemonset, and gateway tier is the standard production topology.
+
+OTel is Apache-2.0 licensed. Adopting OpenTelemetry is how teams avoid vendor lock-in on the instrumentation layer: instrument once against the OTel SDK, then point the Collector at whichever backend they happen to be paying for this year.

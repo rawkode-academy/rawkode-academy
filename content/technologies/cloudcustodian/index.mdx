@@ -18,6 +18,8 @@ cncf:
 matrix:
   status: skip
 ---
-Cloud Custodian is a CNCF incubating project.
+Cloud Custodian ("c7n") is a policy-as-code engine for enforcing compliance, cost, and security rules against cloud resources. You write YAML policies that select resources with JMESPath-like filters — "EBS volumes that are unencrypted", "S3 buckets without versioning", "EC2 instances older than 30 days with the `env=dev` tag" — and specify actions to take: tag, notify, stop, terminate, snapshot, delete. Custodian then scans the account and applies the policy.
 
-Cloud Custodian is a Cloud Native Computing Foundation (CNCF) incubating project.
+It was originally built at Capital One in 2016 and is written in Python. The architecture is straightforward: a rules engine that maps policy YAML to provider APIs. It started as AWS-only and now also has solid support for Azure, GCP, Kubernetes, Tencent Cloud, and OCI, with varying coverage. Policies can run in "pull" mode from a CI/CD job or an EC2 instance, but the more interesting mode is "push" — Custodian compiles the policy into a Lambda function triggered by CloudTrail events or EventBridge, so noncompliant resources are caught and remediated seconds after creation. Output goes to S3, CloudWatch, or a SIEM.
+
+Cloud Custodian joined the CNCF sandbox in 2020 and moved to incubating in 2022. It overlaps with Prowler, Steampipe, and AWS Config rules on the detection side and with AWS Lambda automation patterns on the remediation side. Its niche is very clear: if you want to write declarative YAML rules that both detect and fix cloud misconfigurations without building a custom Lambda pipeline per rule, this is the mature, battle-tested option.

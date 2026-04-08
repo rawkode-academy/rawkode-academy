@@ -23,6 +23,9 @@ matrix:
 category: App Definition and Development
 subcategory: Application Definition & Image Build
 ---
-Helm is a CNCF graduated project.
 
-Helm is a Cloud Native Computing Foundation (CNCF) graduated project.
+Helm is the package manager for Kubernetes. A Helm chart is a directory of Go-templated YAML manifests plus a `values.yaml` file; `helm install` renders the templates against the supplied values and submits the resulting objects to the Kubernetes API as a named "release." It's a CNCF graduated project and was one of the first Kubernetes ecosystem tools to exist.
+
+Helm 3 (2019) removed the in-cluster `tiller` server that Helm 2 shipped with; the modern CLI talks directly to the Kubernetes API and stores release metadata as Secrets (or ConfigMaps) in the target namespace. That makes the security model the same as any other kubectl user. Charts can declare dependencies on other charts, run lifecycle hooks (pre-install, post-upgrade, etc.), and ship tests. Values can be supplied via `--set`, values files, or increasingly through higher-level tools that treat Helm as a rendering library: Argo CD, Flux, Terraform's helm provider, and Helmfile all consume charts without running `helm install` themselves.
+
+The Go-templating-over-YAML approach is Helm's most-criticized design choice — whitespace-sensitive templates producing YAML is famously painful — and it's driven the existence of alternatives like Kustomize (patch-based, no templates), Jsonnet/Tanka, and cdk8s. Despite that, Helm remains the lingua franca for distributing Kubernetes applications: almost every vendor ships a Helm chart, and `artifacthub.io` is where you go to find them. OCI-based chart storage (pushing charts to any OCI registry like Harbor or ECR) is now the recommended distribution method, replacing the older chart museum/repo index pattern.

@@ -70,6 +70,10 @@ const normalizedTitle = baseTitle.toLowerCase().includes(BRAND_NAME.toLowerCase(
 
 	<title>{normalizedTitle}</title>
 
+	{Astro.props.noindex && (
+		<meta name="robots" content="noindex,follow" />
+	)}
+
 	<!-- Canonical URL -->
 	<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
 

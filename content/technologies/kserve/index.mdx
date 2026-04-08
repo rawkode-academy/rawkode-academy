@@ -3,6 +3,8 @@ name: KServe
 logos:
   icon: true
 website: 'https://kserve.github.io/website/'
+source: 'https://github.com/kserve/kserve'
+documentation: 'https://kserve.github.io/website/docs/intro'
 license: Apache-2.0
 status: stable
 category: CNAI
@@ -18,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-is a CNCF sandbox project.
+KServe is a Kubernetes-native model inference platform. It provides an `InferenceService` CRD that takes a model artifact (from S3, GCS, PVC, or an OCI registry) and a framework name, and stands up a serving deployment with autoscaling, canary rollouts, and a standard prediction HTTP/gRPC interface.
 
-is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Under the hood it sits on top of Knative Serving for request-driven autoscaling (including scale-to-zero) and Istio or Gateway API for traffic routing. A model pod runs a framework-specific runtime — TensorFlow Serving, TorchServe, Triton, SKLearn, XGBoost, HuggingFace — wrapped in the KServe predictor contract, and can optionally chain to transformer and explainer pods for pre/post-processing and feature attribution. KServe implements the Open Inference Protocol (v2), so clients speak the same REST/gRPC API regardless of the backing runtime. ModelMesh, merged into the project, adds multi-model serving where hundreds of small models share a pool of runtime pods, which is how you serve a long tail of models cost-effectively.
+
+It started life as KFServing inside Kubeflow and was spun out as its own project. Comparable tools include Seldon Core, BentoML, NVIDIA Triton standalone, and Ray Serve — KServe's differentiator is the tight Kubernetes/Knative integration and the standardized inference protocol.

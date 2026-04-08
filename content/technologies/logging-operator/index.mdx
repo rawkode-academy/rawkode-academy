@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kube-logging.dev/'
 source: 'https://github.com/kube-logging/logging-operator'
+documentation: 'https://kube-logging.dev/docs/'
 license: Apache-2.0
 status: stable
 category: Observability and Analysis
@@ -19,6 +20,8 @@ community:
 matrix:
   status: skip
 ---
-Logging Operator (Kube Logging) is a CNCF sandbox project.
+Logging Operator is a Kubernetes operator from Kube Logging (formerly Banzai Cloud) that manages Fluent Bit and Fluentd deployments declaratively. Instead of hand-writing Fluent Bit input plugins and Fluentd parser blocks, users describe logging pipelines as Kubernetes custom resources and the operator renders the configuration.
 
-Logging Operator (Kube Logging) is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Four CRDs do the work. Logging defines a tenant and points at a Fluent Bit DaemonSet and a Fluentd StatefulSet. Flow and ClusterFlow select which pods' logs to route via label selectors and declare filter and parser chains. Output and ClusterOutput describe destinations — Loki, Elasticsearch, Kafka, S3, Splunk, Datadog, and more — complete with authentication from Kubernetes secrets. The operator generates the matching Fluent Bit and Fluentd configs, reloads the pods, and handles rolling upgrades.
+
+Logging Operator is a CNCF sandbox project and the log-collection layer behind Rancher's fleet logging, Kubesphere, and several managed Kubernetes platforms. It competes with the OpenTelemetry Collector operator and with hand-rolled Helm charts for Fluent Bit, and is the right pick when teams want multi-tenant log routing expressed as Kubernetes objects rather than ConfigMaps.

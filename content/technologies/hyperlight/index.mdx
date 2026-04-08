@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-A lightweight, secure container runtime solution designed for modern cloud-native workloads
+Hyperlight is a Rust library from Microsoft for running small, untrusted functions inside bare-bones hardware-virtualized micro-VMs, with startup times measured in a millisecond or two. It was open-sourced in late 2024 and donated to the CNCF sandbox in 2025. The goal is to give function-as-a-service platforms isolation stronger than a container or a language runtime sandbox without the cold-start cost of a full VM like Firecracker.
 
-Hyperlight is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Hyperlight micro-VMs have no kernel, no OS, no virtual devices, and no BIOS. The host loads guest code directly into memory and enters the hypervisor (KVM on Linux, Windows Hypervisor Platform on Windows) with a minimal CPU state. Guests typically run WebAssembly compiled to native via `wasmtime`, but any code that conforms to the very restricted guest ABI works. Communication between host and guest happens through a shared memory region and a small set of hypercalls instead of virtio.
+
+The use case Microsoft is building around it is multi-tenant serverless: run each customer request in its own fresh micro-VM to get hardware isolation without paying for a VM boot. If Firecracker is "strip a VM to the bone," Hyperlight is "skip the OS entirely and run a single function."

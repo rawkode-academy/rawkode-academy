@@ -3,6 +3,7 @@ name: kube-rs
 logos: null
 website: 'https://kube.rs'
 source: 'https://github.com/kube-rs/kube'
+documentation: 'https://kube.rs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -16,6 +17,8 @@ community:
 matrix:
   status: learn
 ---
-kube-rs is the core Rust ecosystem for building applications against Kubernetes
+kube-rs is the Rust client for Kubernetes and the ecosystem around it. It is the Rust equivalent of client-go: an async API client, typed resource bindings, a watch/informer cache layer, and a controller-runtime-style reconciliation framework for writing operators in Rust.
 
-kube-rs is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The crate set is split into `kube` (the umbrella), `kube-client` (HTTP/gRPC client over hyper and tower), `kube-core` (types and API mechanics), `kube-derive` (a procedural macro that generates CRD structs with OpenAPI schemas from Rust types), and `kube-runtime` (watcher streams, reflectors, and a `Controller` that maps to the Go controller-runtime pattern). CRDs are defined as ordinary Rust structs annotated with `#[derive(CustomResource, JsonSchema)]`, and `kube::CustomResourceExt::crd()` emits the YAML CRD definition at compile time. It targets stable Rust, builds on tokio, and interoperates with tower middleware for tracing, metrics, and retries.
+
+It is the foundation for most Rust-based Kubernetes controllers in production — Krustlet, Linkerd's policy controller, Stackable, Materialize's operators, and many of the controllers inside Fermyon. If you want to write an operator in Rust instead of Go, kube-rs is effectively the only serious choice.

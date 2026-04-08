@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://www.kubewarden.io'
 source: 'https://github.com/kubewarden/kubewarden-controller'
+documentation: 'https://docs.kubewarden.io/'
 license: Apache-2.0
 status: stable
 category: Provisioning
@@ -50,6 +51,8 @@ community:
 matrix:
   status: skip
 ---
-Kubewarden is a Policy Engine powered by WebAssembly policies. Its policies can be written in CEL, Rego (OPA & Gatekeeper flavours), Rust, Go, YAML, and others. Kubewarden simplifies Policy-As-Code by allowing policy authors and consumers to use their preferred tooling and stack, develop and test policies out of cluster.
+Kubewarden is a Kubernetes policy engine that executes admission policies as WebAssembly modules. Policies are compiled to Wasm from Rust, Go, Rego, or Swift and distributed as OCI artifacts, so the same supply-chain tooling used for container images — registries, signing, SBOMs — applies to policies.
 
-Kubewarden is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The project installs a ValidatingAdmissionWebhook and a MutatingAdmissionWebhook backed by PolicyServer pods, which load Wasm modules on demand and run them in a sandboxed wasmtime runtime. ClusterAdmissionPolicy and AdmissionPolicy custom resources bind a module to specific resources and operations, and an audit scanner re-evaluates policies against existing cluster state to catch drift. Because Wasm modules are stateless and deterministic, they start fast and can be cached and shared across clusters.
+
+Kubewarden is a CNCF sandbox project sponsored by SUSE. It sits in the same space as OPA Gatekeeper and Kyverno, but differs in letting policy authors use general-purpose languages compiled to Wasm instead of Rego or Kyverno's YAML DSL, which appeals to teams that already have Rust or Go expertise.

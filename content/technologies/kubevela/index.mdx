@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://kubevela.io'
 source: 'https://github.com/kubevela/kubevela'
+documentation: 'https://kubevela.io/docs/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -54,6 +55,8 @@ community:
 matrix:
   status: skip
 ---
-KubeVela is a CNCF incubating project.
+KubeVela is an application delivery platform built on the Open Application Model (OAM), originally developed at Alibaba and now a CNCF incubating project. It lets platform teams describe reusable Components, Traits, Policies, and Workflow steps in CUE, then exposes them to developers through a single Application custom resource that hides the underlying Kubernetes machinery.
 
-KubeVela is a Cloud Native Computing Foundation (CNCF) incubating project.
+At runtime the KubeVela controller renders an Application into concrete resources — Deployments, Services, Helm releases, Terraform modules, or any CRD — by executing the workflow steps defined on the app. Rollouts, canary, multi-cluster delivery via Cluster Gateway, and approval gates are all expressed as workflow steps rather than bolted on. Because definitions are CUE-based, platform engineers can extend the catalog without forking the controller.
+
+KubeVela sits in the same space as Crossplane compositions, Argo CD + Kustomize stacks, and Humanitec, but its distinguishing idea is OAM's separation of application definition from platform capabilities, so the same Application manifest can target different environments by swapping the backing Trait and Policy implementations.

@@ -15,6 +15,8 @@ cncf:
 matrix:
   status: explore
 ---
-Kanister is a CNCF sandbox project.
+Kanister is an extensible application-aware data protection framework for Kubernetes, built by Kasten (now Veeam Kasten). Unlike PV-level snapshot tools, it starts from the assumption that the right way to back up a stateful application is to run its own commands — `mongodump`, `pg_basebackup`, `redis-cli BGSAVE`, Cassandra `nodetool snapshot` — and stream the output to object storage.
 
-Kanister is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The core abstraction is a **Blueprint**: a CRD containing a set of named actions (`backup`, `restore`, `delete`) where each action is a list of phases. Each phase is a function — `KubeExec`, `KubeTask`, `PrepareData`, `BackupData`, `CreateVolumeSnapshot`, and others — that Kanister's controller executes in the target namespace. An `ActionSet` CRD is what you create to actually run a Blueprint against a specific application instance; the controller picks it up and records status. Because Blueprints are declarative YAML, the community maintains a library of them for the common stateful workloads (Postgres, MongoDB, MySQL, Cassandra, Elasticsearch, etc.).
+
+It is routinely paired with Velero — Kanister provides the application-consistent dump, Velero handles namespace-level object backup and restore orchestration. CNCF sandbox, Apache-2.0.

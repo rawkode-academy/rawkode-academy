@@ -19,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Copa is a CNCF sandbox project.
+Copa (Copacetic) patches known OS-package vulnerabilities in container images without rebuilding them from source. You feed it an image and a vulnerability scan report from Trivy (or a Grype report, or nothing at all for "update everything"), and it produces a new image with the affected `apt`, `apk`, or `dnf` packages upgraded in place.
 
-Copa is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Under the hood, Copa uses BuildKit directly: it mounts the target image as a BuildKit rootfs, runs the distro's package manager inside it against the appropriate upstream repositories, and emits a new image layer containing only the updated package files. Because it never touches the original Dockerfile or rebuilds from scratch, it can patch vendor images, base images you don't own, and long-lived production images much faster than a full rebuild — typically seconds instead of minutes — and it preserves the original layer structure so downstream signatures and SBOMs remain meaningful.
+
+Copa was started by Microsoft, entered the CNCF sandbox in 2023, and is typically wired into CI pipelines after a scan step (`trivy image --format json` → `copa patch`) or run as a controller in environments like Azure Container Registry. It sits in the same space as tools like Chainguard's image refresh approach, but works on any distro image you already have.

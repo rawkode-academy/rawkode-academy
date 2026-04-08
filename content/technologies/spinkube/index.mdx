@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://www.spinkube.dev/'
 source: 'https://github.com/spinframework/spin-operator'
+documentation: 'https://www.spinkube.dev/docs/overview/'
 license: Apache-2.0
 status: stable
 category: Wasm
@@ -17,6 +18,8 @@ cncf:
 matrix:
   status: watch
 ---
-Open source platform for efficiently running (containerless) Spin-based WebAssembly (Wasm) applications on Kubernetes.
+SpinKube is an open-source project for running Spin (WebAssembly) applications natively on Kubernetes. Instead of wrapping each Wasm module in a container, it registers Wasm as a first-class workload type so the kubelet runs components directly on a Wasm runtime, cutting resource use and startup latency dramatically compared to container-based serverless stacks.
 
-SpinKube is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The stack has four main pieces. `containerd-shim-spin` is a containerd shim that executes Spin apps on Wasmtime when a pod's runtime class targets it. The Spin Operator provides a `SpinApp` CRD so users can declare a Spin application as a Kubernetes resource. Runtime Class Manager (formerly KWasm) installs and configures the shim on each node. The Spin Plugin for kube streamlines building and deploying apps from a Spin project. Spin apps are distributed as OCI artifacts, so existing registries and image-signing workflows apply unchanged.
+
+SpinKube was contributed by Fermyon, Microsoft, SUSE, and LiquidReply, and is a CNCF Sandbox project. It is useful for teams that want the density and cold-start profile of Wasm without abandoning Kubernetes as their control plane.

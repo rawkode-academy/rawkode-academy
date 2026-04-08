@@ -17,6 +17,8 @@ cncf:
 matrix:
   status: skip
 ---
-Carina is a CNCF sandbox project.
+Carina is a Kubernetes CSI driver for local disks. It discovers the local block devices on each node, groups them into LVM volume groups, and then carves PersistentVolumes out of those VGs on demand as logical volumes. The goal is to give stateful workloads like MySQL, PostgreSQL, MongoDB, and Cassandra the raw performance of local NVMe/SSD storage without asking operators to hand-manage PVs.
 
-Carina is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally Carina ships a CSI controller and a per-node agent. The node agent watches local disks, formats them into one of several named device classes (for example `ssd`, `hdd`), and reports capacity back to the control plane. When a PVC requests a Carina storage class, the scheduler extender co-locates the pod with a node that has enough free capacity in the right device class, and the agent creates the LV and bind-mounts it into the pod. It also supports raw block volumes, volume expansion, bcache-based tiered storage, and disk failure detection.
+
+Carina was originally built at Bocloud, open sourced in 2021, and entered the CNCF sandbox in 2022. In the local-storage space it competes with TopoLVM (which is a close conceptual cousin, also LVM-based), OpenEBS LocalPV, and the upstream Kubernetes Local Persistent Volume feature. Activity has been relatively quiet recently; TopoLVM is the more popular choice for new deployments.

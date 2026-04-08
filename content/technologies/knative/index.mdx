@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://knative.dev'
 source: 'https://github.com/knative/serving'
+documentation: 'https://knative.dev/docs/'
 license: Apache-2.0
 status: stable
 category: Orchestration & Management
@@ -46,6 +47,8 @@ community:
 matrix:
   status: learn
 ---
-Knative is a developer-focused serverless application layer which is a great complement to the existing Kubernetes application constructs. Knative consists of three components: an HTTP-triggered autoscaling container runtime called “Knative Serving”, a CloudEvents-over-HTTP asynchronous routing layer called “Knative Eventing”, and a developer-focused function framework which leverages the Serving and Eventing components, called "Knative Functions".
+Knative is a set of Kubernetes CRDs and controllers that add serverless primitives on top of any conformant cluster. It has two independent components: Serving, which handles request-driven workloads with scale-to-zero and revisions, and Eventing, which provides pub/sub plumbing around CloudEvents.
 
-Knative is a Cloud Native Computing Foundation (CNCF) graduated project.
+Serving introduces the Service, Configuration, Revision, and Route resources. A Knative Service creates an immutable Revision for each config change; the Route then splits traffic between revisions by percentage, which is how you get canary and blue/green deployments for free. The activator and autoscaler (KPA) scale pods based on concurrent in-flight requests rather than CPU, and scale to zero by parking traffic at the activator until the first request arrives. Eventing provides Brokers, Triggers, Channels, and Subscriptions so you can wire up event sources (Kafka, GitHub, Kubernetes API, S3, etc.) to any HTTP endpoint with filtering by CloudEvent attributes.
+
+It is the engine behind Google Cloud Run, IBM Code Engine, and Red Hat OpenShift Serverless. If you want FaaS-style scale-to-zero and URL-addressable revisions on your own Kubernetes cluster — without buying into OpenFaaS, Fission, or a cloud provider — Knative is the de-facto choice. It graduated from the CNCF in September 2025.

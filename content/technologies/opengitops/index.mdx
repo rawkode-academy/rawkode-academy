@@ -18,6 +18,8 @@ community:
 matrix:
   status: watch
 ---
-OpenGitOps is a CNCF sandbox project.
+OpenGitOps is a CNCF sandbox working group that publishes a vendor-neutral specification for what "GitOps" actually means, rather than a runnable piece of software. It exists so that Argo CD, Flux, Jenkins X, Weave GitOps, and other tools can claim GitOps conformance against a shared definition instead of everyone redefining the term.
 
-OpenGitOps is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The project's main artefact is a short set of principles: the desired state of a system is declarative, versioned and immutable, pulled automatically, and continuously reconciled. Around those principles, the GitOps Working Group maintains a glossary, conformance criteria, and reference documentation that tool authors and platform teams can cite. There is no controller or CLI here; the deliverables are markdown specs in the `open-gitops/documents` and `open-gitops/project` repositories.
+
+OpenGitOps was founded by Weaveworks, Codefresh, GitHub, Microsoft, Red Hat, and others, accepted into the CNCF sandbox in 2021, and released under Apache-2.0. Treat it as the terminological and conformance layer underneath the actual implementations — Argo CD and Flux being the two dominant reconcilers most teams will end up running.

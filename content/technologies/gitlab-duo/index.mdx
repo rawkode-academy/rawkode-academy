@@ -11,25 +11,9 @@ subcategory: AI-Assisted Development
 matrix:
   status: skip
 ---
-GitLab Duo is a suite of AI-powered capabilities integrated directly into the GitLab platform to enhance the software development lifecycle. It aims to increase developer productivity, improve code quality, and accelerate delivery cycles. GitLab Duo provides features like AI-assisted code completion, code suggestions, vulnerability detection, and test generation, all designed to reduce the time spent on repetitive tasks and enable developers to focus on more strategic initiatives.
 
-GitLab Duo is an AI-powered suite of features natively integrated into the GitLab DevSecOps platform, designed to supercharge developer productivity, enhance code quality, and accelerate the entire software development lifecycle. It leverages artificial intelligence and machine learning across various stages of development.
+GitLab Duo is GitLab's AI feature set bolted onto the DevOps platform — code completion, chat, merge request summaries, vulnerability explanations, root-cause analysis for failing CI jobs, and test generation. It's the direct analogue of GitHub Copilot + Copilot Chat, scoped to GitLab's project, issue, MR, pipeline, and security-finding context.
 
-## Key Features
+Under the hood, Duo is a set of features that call out to an "AI Gateway" service that GitLab operates, which in turn proxies to underlying foundation models (historically Anthropic Claude for chat and Google Vertex AI models for code completion, with the set evolving). The gateway is what lets self-managed GitLab instances use Duo without shipping raw code straight to a third-party inference provider — requests go from the GitLab instance to GitLab's gateway and back. Completion is wired into the Web IDE and several editor extensions (VS Code, JetBrains, Neovim) via the GitLab Language Server.
 
--   **AI-Assisted Code Completion & Generation:** Provides intelligent code suggestions and can generate code snippets, reducing the time developers spend on boilerplate or repetitive coding tasks.
--   **Code Explanation:** Helps developers understand complex or unfamiliar code by providing AI-generated explanations.
--   **Code Review Assistance:** Aids in the code review process by identifying potential issues, suggesting improvements, and summarizing changes.
--   **Vulnerability Detection & Remediation:** Enhances security by proactively identifying security vulnerabilities in code and suggesting fixes.
--   **Test Generation:** Assists in generating unit and integration tests, improving test coverage and code reliability.
--   **Conversation & Chat:** Offers AI chat capabilities to answer development-related questions, explain concepts, and provide guidance.
--   **Summarization:** Summarizes long threads, merge requests, or documentation to help developers quickly grasp key information.
-
-## Benefits
-
--   **Increased Developer Productivity:** Automates repetitive tasks, provides instant suggestions, and reduces context switching, allowing developers to focus on innovation.
--   **Improved Code Quality:** AI-driven suggestions and review assistance lead to cleaner, more efficient, and more secure code.
--   **Accelerated Delivery Cycles:** Speeds up development, testing, and security processes, contributing to faster time-to-market.
--   **Enhanced Security:** Proactive vulnerability detection and remediation guidance improve the overall security posture of applications.
--   **Streamlined Onboarding:** Helps new developers quickly get up to speed by providing AI assistance for understanding codebases and processes.
--   **Cost Efficiency:** By increasing productivity and reducing errors, GitLab Duo helps optimize development costs.
+Duo is sold as an add-on on top of Premium/Ultimate tiers, split into Duo Pro (code suggestions + chat) and Duo Enterprise (plus the deeper MR/pipeline/vulnerability features and self-hosted model options). The differentiator versus Copilot is context: because GitLab already owns the MR, pipeline, and SAST data, Duo can answer questions like "why did this pipeline fail" or "explain this vulnerability in the context of this MR" without a separate integration layer. The flip side is that it's only useful if you're already on GitLab.

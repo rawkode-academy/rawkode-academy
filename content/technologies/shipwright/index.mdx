@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://shipwright.io'
 source: 'https://github.com/shipwright-io/build'
+documentation: 'https://shipwright.io/docs/'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -18,6 +19,8 @@ community:
 matrix:
   status: skip
 ---
-Shipwright is a CNCF sandbox project.
+Shipwright is a Kubernetes framework for building container images from source code using pluggable build strategies. It defines a set of CRDs, primarily `Build`, `BuildRun`, and `BuildStrategy`, that let platform teams describe how to turn a Git repository into an OCI image without committing to any single build tool.
 
-Shipwright is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Under the hood, Shipwright compiles a `BuildRun` into a Tekton `TaskRun` that executes the selected strategy. Out of the box it supports Buildpacks, Kaniko, BuildKit, Buildah, ko, and Source-to-Image, each wrapped as a `ClusterBuildStrategy`. Because strategies are CRDs themselves, platform engineers can fork, extend, or write new ones, and application developers reference them by name without knowing the underlying tool.
+
+Shipwright slots into CI/CD systems alongside Tekton Pipelines, Argo CD, and OpenShift Pipelines, and is the upstream project behind OpenShift Builds v2. It is useful for teams that want a consistent, declarative image-building API on Kubernetes while keeping flexibility about which builder runs underneath.

@@ -4,6 +4,7 @@ logos:
   horizontal: true
 website: 'https://goteleport.com/'
 documentation: 'https://goteleport.com/docs/'
+source: 'https://github.com/gravitational/teleport'
 license: AGPL-3.0
 status: stable
 category: Provisioning
@@ -29,6 +30,8 @@ matrix:
     security, and the longer teams resist adopting it, the more reckless they
     look.
 ---
-Teleport is an identity-aware access proxy that consolidates access to servers, applications, databases, and Kubernetes clusters behind a single, unified platform. It eliminates the need for traditional VPNs and SSH keys, providing a more secure and auditable approach to infrastructure access. Teleport leverages short-lived certificates and integrates with identity providers (like Okta, Google Workspace, or Active Directory) to enforce authentication and authorization policies.
+Teleport is an identity-aware access proxy that provides unified, short-lived certificate-based access to infrastructure: SSH servers, Kubernetes clusters, databases, internal web applications, Windows desktops, and cloud provider APIs. It replaces the sprawl of static SSH keys, bastion hosts, VPNs, and per-tool credentials with a single control plane that knows who you are and what you're allowed to touch.
 
-Teleport provides value by reducing the attack surface, simplifying compliance, and improving developer productivity. Its main use cases include secure remote access for engineers, privileged access management for administrators, and centralized auditing of all infrastructure access activities.
+A Teleport cluster consists of an Auth Service (a certificate authority and policy engine), a Proxy Service (the user-facing entry point that terminates TLS and brokers connections), and Agents that run next to the resources being protected and register themselves with the cluster. Users authenticate via SSO (SAML, OIDC, GitHub) and optional hardware MFA, and the Auth Service issues short-lived X.509 and SSH certificates scoped by role. Every session is recorded and audit-logged; interactive SSH and kubectl sessions can be replayed afterward. Features like Access Requests, Session Moderation, and Device Trust layer zero-trust controls on top of that baseline.
+
+Teleport is used as a common access layer across clouds and on-prem, and integrates with Kubernetes RBAC, AWS IAM, and existing IdPs so permissions remain grounded in the upstream identity provider rather than in Teleport-specific users.

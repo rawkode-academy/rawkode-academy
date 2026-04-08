@@ -5,7 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://drasi.io'
-source: 'http://github.com/drasi-project/drasi-platform'
+source: 'https://github.com/drasi-project/drasi-platform'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -16,6 +16,9 @@ cncf:
 matrix:
   status: skip
 ---
-A data change processing platform to simplify change-driven systems that need to detect, evaluate, and react to data changes quickly and efficiently at scale.
 
-Drasi is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Drasi is a data change processing platform from Microsoft that watches data sources for changes, evaluates continuous queries over those change streams, and fires reactions when a query's result set changes. The idea is to replace the usual homegrown mess of polling jobs, CDC pipelines, Kafka topics, and stream processors when all you actually wanted was "tell me when this condition becomes true."
+
+The runtime has three moving parts. Sources subscribe to change feeds from systems like PostgreSQL, Cosmos DB, Dapr state stores, or Kubernetes resources and normalise them into a change stream. Continuous Queries are declared in Cypher — the same query language as Neo4j — and are evaluated incrementally against a graph built from the incoming changes, so the engine only re-computes the affected subgraph on each update. Reactions (webhooks, SignalR, storage queues, Dapr, Gremlin, Debezium) fire when the query result set adds, removes, or updates rows.
+
+Drasi can run embedded as a Rust library (`drasi-lib`), as a standalone server, or on Kubernetes. It joined the CNCF Sandbox in January 2025. The interesting thing is Cypher over live heterogeneous sources: you can write one query that joins a row from Postgres with a Kubernetes pod and a message queue entry, and have it re-evaluated continuously without standing up Flink.

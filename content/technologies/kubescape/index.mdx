@@ -5,6 +5,7 @@ logos:
   horizontal: true
   stacked: true
 website: 'https://kubescape.io/'
+source: 'https://github.com/kubescape/kubescape'
 documentation: 'https://kubescape.io/docs/'
 license: Apache-2.0
 status: stable
@@ -39,27 +40,8 @@ matrix:
 terms:
   - Armo
 ---
-Kubescape is an open-source Kubernetes security platform that allows users to scan, analyze, and report on security risks in their Kubernetes deployments. It provides a comprehensive view of your cluster's security posture by identifying misconfigurations, vulnerabilities, and deviations from established security best practices like the MITRE ATT&CK framework, NSA/CISA hardening guidance, and the CIS benchmarks. Kubescape enables organizations to proactively prevent security incidents, improve compliance, and strengthen their overall cloud native security.
+Kubescape is a Kubernetes security scanner that checks manifests, Helm charts, and live clusters against hardening frameworks including the NSA/CISA Kubernetes Hardening Guide, MITRE ATT&CK, and the CIS Kubernetes Benchmark. It was created by ARMO and donated to the CNCF, where it is now an incubating project.
 
-Kubescape is a comprehensive open-source security platform for Kubernetes that helps organizations enforce security best practices, identify misconfigurations, and manage vulnerabilities across their cloud-native environments. It provides full-lifecycle security for Kubernetes, from development to production runtime.
+The scanner runs as a CLI for CI pipelines and as an in-cluster operator that continuously evaluates resources. Controls are written in Rego and executed by the OPA engine, so rules are portable and auditable. Beyond static checks, Kubescape ships an eBPF-based node agent that records syscalls and network activity to build application profiles, then flags runtime deviations and generates tailored seccomp profiles and network policies from observed behaviour. It also pulls SBOMs and matches them against Grype's vulnerability database to correlate CVEs with the workloads that actually load the affected files.
 
-## Key Features
-
--   **Misconfiguration Scanning:** Scans Kubernetes configurations (YAML files, Helm charts, Live Clusters) against a wide range of security frameworks and benchmarks, including NSA/CISA Kubernetes Hardening Guide, MITRE ATT&CK, and CIS Kubernetes Benchmarks.
--   **Vulnerability Scanning:** Identifies known vulnerabilities in container images, providing a holistic view of risks from code to deployment.
--   **Compliance Management:** Helps achieve and maintain compliance with various industry standards by providing detailed reports and remediation guidance.
--   **Runtime Security (eBPF-based):** Utilizes eBPF to monitor application behavior at runtime, detecting anomalous activities and potential threats.
--   **Admission Control:** Integrates with Kubernetes admission controllers to prevent insecure configurations from being deployed to the cluster.
--   **Automated Remediation:** Offers auto-remediation capabilities to automatically fix identified misconfigurations.
--   **Policy Enforcement:** Define and enforce custom security policies tailored to specific organizational needs.
--   **Risk Analysis:** Provides a prioritized list of risks with actionable recommendations, enabling teams to focus on the most critical issues.
--   **AI Integration:** Leverages AI capabilities for enhanced security analysis and automation.
-
-## Benefits
-
--   **Proactive Security:** Identifies and prevents security risks early in the development lifecycle, shifting security left.
--   **Improved Compliance:** Simplifies the process of achieving and maintaining compliance with security regulations and best practices.
--   **Enhanced Visibility:** Provides a centralized, comprehensive view of the Kubernetes security posture.
--   **Reduced Attack Surface:** Helps harden Kubernetes clusters and applications by eliminating misconfigurations and vulnerabilities.
--   **Streamlined DevSecOps:** Integrates seamlessly into CI/CD pipelines, automating security checks and empowering developers to build secure applications.
--   **Cost-Effective:** As an open-source solution, it offers powerful security capabilities without proprietary licensing costs.
+Results surface through a CLI, a Prometheus exporter, VS Code and Lens integrations, and the hosted ARMO Platform. In the CNCF landscape Kubescape overlaps with kube-bench (CIS-only), Trivy (image-first), and Falco (runtime-only), combining posture scanning, vulnerability management, and runtime detection in a single agent.

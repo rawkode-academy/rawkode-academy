@@ -6,6 +6,7 @@ logos:
   stacked: true
 website: 'https://spiffe.io/spire/'
 source: 'https://github.com/spiffe/spire'
+documentation: 'https://spiffe.io/docs/latest/spire-about/'
 license: Apache-2.0
 status: stable
 matrix:
@@ -40,6 +41,8 @@ community:
   twitter: 'https://twitter.com/spiffeio'
   slack: 'https://slack.spiffe.io/'
 ---
-SPIRE is a CNCF graduated project.
+SPIRE (the SPIFFE Runtime Environment) is the reference implementation of the SPIFFE specification. It issues short-lived X.509 or JWT SVIDs to workloads after cryptographically attesting their identity, and automatically rotates them before expiry so applications never deal with long-lived credentials.
 
-SPIRE is a Cloud Native Computing Foundation (CNCF) graduated project.
+SPIRE splits responsibilities between a central Server and per-node Agents. The Server runs its own certificate authority (or federates with an external one via upstream signing), stores registration entries that map attestation selectors to SPIFFE IDs, and signs SVIDs. Each node runs an Agent that attests itself to the Server (using a plugin for EC2, GCP, Azure, Kubernetes PSAT, TPM, etc.) and then exposes a local Unix-domain Workload API. When a process connects, the Agent attests it through workload attestors (Unix, Docker, Kubernetes), looks up matching registration entries, and hands back the correct SVID without ever placing a secret on disk.
+
+SPIRE supports federation between trust domains, nested topologies for multi-cluster deployments, and pluggable datastores (SQL, etcd). It is the identity plane under production Istio, Consul, and Kuma deployments, and is used directly by organizations like Bloomberg, Uber, Pinterest, and ByteDance to eliminate shared secrets between services.

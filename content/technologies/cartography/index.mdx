@@ -16,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-Cartography is a Python tool that consolidates infrastructure assets and the relationships between them in an intuitive graph view.
+Cartography crawls your cloud and SaaS inventory and loads it into a Neo4j graph database so you can query the relationships with Cypher. It was open sourced by Lyft's security team in 2019 to answer questions that are painful in flat tabular asset inventories — things like "which IAM principals can assume a role that has access to this S3 bucket" or "which GitHub users have write access to a repo whose CI deploys to this Kubernetes namespace".
 
-Cartography is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Cartography is written in Python and works by running "intel modules" on a schedule. Each module calls a provider's API (AWS, GCP, Azure, Okta, GitHub, Kubernetes, CrowdStrike, Duo, Snowflake, Tailscale, and dozens more) and MERGEs the results into Neo4j as nodes and relationships. Once the graph is populated, you ask questions with Cypher: `MATCH (u:GitHubUser)-[:MEMBER_OF]->(t:GitHubTeam)-[:ADMIN]->(r:GitHubRepository) RETURN u, r`. Cartography ships an analysis job runner that can execute canned Cypher queries on a schedule and emit findings.
+
+The project moved from Lyft to the CNCF as a sandbox project in 2024. It's one of the foundational tools in the modern attack-surface-management and "cloud security graph" space — commercial tools like Wiz, Orca, and Steampipe solve similar problems, but Cartography is the open-source option and is frequently used as a building block by security teams who want to write their own detections.

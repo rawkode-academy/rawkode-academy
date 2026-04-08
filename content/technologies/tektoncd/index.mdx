@@ -1,9 +1,10 @@
 ---
-name: TektonCD
+name: Tekton
 logos:
   stacked: true
 website: 'https://tekton.dev/'
 documentation: 'https://tekton.dev/docs/'
+source: 'https://github.com/tektoncd/pipeline'
 license: Apache-2.0
 status: stable
 category: App Definition and Development
@@ -11,6 +12,8 @@ subcategory: Continuous Integration & Delivery
 matrix:
   status: skip
 ---
-Tekton is a powerful and flexible open-source framework for creating CI/CD systems, allowing developers to build, test, and deploy across multiple platforms and cloud providers. Built on Kubernetes, Tekton enables the creation of reusable components called Tasks, which can be orchestrated into Pipelines to define the entire software delivery lifecycle. It provides a standard vocabulary and architecture for building CI/CD pipelines, promoting consistency and portability across different environments. 
+Tekton is a Kubernetes-native CI/CD framework that models pipelines entirely as Kubernetes custom resources. Every unit of work is a pod, every pipeline is a CRD, and there is no long-running build server to operate: the Kubernetes control plane is the scheduler and state store.
 
-Tekton's value lies in its Kubernetes-native design, declarative configuration, extensibility, and reusability. It simplifies the process of defining and executing CI/CD pipelines, allowing teams to focus on developing and delivering software more efficiently. Main use cases include building and testing code, deploying applications to various environments (staging, production), running integration tests, and managing infrastructure deployments.
+The core primitives are `Step` (a container), `Task` (an ordered list of Steps that run in a single pod sharing a workspace), `Pipeline` (a DAG of Tasks with parameter passing and results), and the `TaskRun`/`PipelineRun` resources that represent a single execution. Workspaces abstract over persistent volumes, ConfigMaps, or secrets so Tasks can share files without baking volume assumptions into their definitions. Tekton Triggers turns webhook payloads into PipelineRuns, Tekton Chains signs artifacts and produces in-toto/SLSA provenance using Sigstore, Tekton Results archives completed runs, and Tekton Hub and the Tekton Catalog distribute reusable Tasks.
+
+Tekton began at Google as a fork of the Knative build project and is now a CDF (Continuous Delivery Foundation) project. It is the engine underneath Jenkins X, OpenShift Pipelines, and Google Cloud Build's second-generation offering.

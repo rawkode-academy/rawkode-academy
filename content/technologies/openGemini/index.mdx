@@ -18,6 +18,8 @@ community:
 matrix:
   status: skip
 ---
-openGemini is an open source distributed time series DBMS with high concurrency, high performance, and high scalability, focusing on the storage and analysis of massive observability data.
+openGemini is a distributed time-series database written in Go and originally developed by Huawei Cloud for telemetry, monitoring, and IoT workloads. It speaks the InfluxDB line protocol and InfluxQL, so existing Telegraf and Influx client pipelines can point at it with minimal changes.
 
-openGemini is a Cloud Native Computing Foundation (CNCF) sandbox project.
+The engine is column-oriented and designed around high-cardinality tag sets, which has historically been a pain point for InfluxDB 1.x/2.x. openGemini uses time-partitioned shards, Z-order indexing for multi-dimensional filters, and vectorised query execution to keep scans efficient as the number of series grows. The cluster architecture separates metadata nodes, SQL nodes, and storage nodes, allowing independent horizontal scaling, and supports replication across storage nodes for high availability. A Kubernetes operator and Helm chart handle cluster lifecycle.
+
+openGemini was accepted into the CNCF sandbox in 2024 and is Apache-2.0 licensed. In the time-series landscape it sits alongside InfluxDB, VictoriaMetrics, TimescaleDB, QuestDB, and M3DB — the pitch being InfluxQL compatibility combined with better high-cardinality behaviour and horizontal scaling than single-node Influx deployments provide.

@@ -4,6 +4,7 @@ logos:
   stacked: true
 website: 'https://www.kubeclipper.io/'
 source: 'https://github.com/kubeclipper/kubeclipper'
+documentation: 'https://kubeclipper.io/docs/'
 license: Apache-2.0
 status: stable
 category: Platform
@@ -15,6 +16,8 @@ cncf:
 matrix:
   status: skip
 ---
-Manage kubernetes in the most light and convenient way.
+KubeClipper is a lightweight Kubernetes cluster lifecycle manager with a web UI. You install it with a single `kcctl deploy` command and then drive cluster creation, scaling, upgrade, and backup across a fleet of remote hosts from a browser — no Ansible inventory, no separate management cluster required.
 
-KubeClipper is a Cloud Native Computing Foundation (CNCF) sandbox project.
+Architecturally it has two components: `kc-server`, a control plane that stores cluster state in an embedded etcd and exposes a REST API + UI, and `kc-agent`, a per-host agent that receives operations (install kubeadm, pull images, configure CRI, join cluster) from the server over a message queue. Because the agent is only ~10 MB and speaks a simple protocol, KubeClipper is well suited to bare metal, edge, and air-gapped sites where you cannot assume SSH + Python are available the way Kubespray does. It supports multiple Kubernetes distributions and CNI/CRI combinations, and includes a plugin system for registering addons.
+
+In the installer landscape it sits alongside Kubespray, Kubean, Kops, and Cluster API. Its niche is the "I want a GUI to manage a handful of small clusters at the edge" case that none of those cleanly address. It is developed by 99cloud.
