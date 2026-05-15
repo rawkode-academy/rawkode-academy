@@ -108,15 +108,53 @@ const quoteAvatar = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover
 const quoteAvatarStyle = "width: 48px; height: 48px;";
 const quoteName = css({ fontWeight: "semibold", color: "fg.primary", fontSize: "sm" });
 const quoteTitle = css({ fontSize: "xs", color: "fg.muted" });
+
+const heroActions = css({ display: "flex", flexWrap: "wrap", gap: "3", justifyContent: "center", mt: "2" });
+const heroBtnPrimary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "xl",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
+	textDecoration: "none",
+	boxShadow: "lg",
+	transition: "transform 150ms ease, box-shadow 150ms ease",
+	_hover: { transform: "translateY(-1px)", boxShadow: "xl" },
+});
+const heroBtnSecondary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "xl",
+	fontWeight: "medium",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { bg: "bg.sunken", borderColor: "fg.brand" },
+});
 ---
 
 <Page title="Strategic Technology Partnerships | Rawkode Academy" description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth.">
 	<FAQJsonLD questions={partnershipFAQs} slot="head" />
 
-	<PageHero eyebrow="Partner With Us" title="Strategic Technology Partnerships" subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance." />
+	<PageHero eyebrow="Partner With Us" title="Strategic Technology Partnerships" subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance.">
+		<div class={heroActions}>
+			<a href="#benefits" class={heroBtnPrimary}>Explore Benefits</a>
+			<a href="/organizations/lets-chat" class={heroBtnSecondary}>Become a Partner</a>
+		</div>
+	</PageHero>
 
 	<div class={shell}>
-		<section class={sectionBlock}>
+		<section class={sectionBlock} id="benefits">
 			<div class={statsGrid}>
 				{stats.map((s) => (
 					<div class={statCard}>
