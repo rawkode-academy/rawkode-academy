@@ -35,6 +35,12 @@ const publishedShows = shows.filter((show) => show.data.publish);
 						</svg>
 						Atom Feed
 					</a>
+					<a href="/api/feeds/all.json" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
+						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+							<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v2H7V5zm0 4h6v2H7V9zm0 4h4v2H7v-2z" clip-rule="evenodd"></path>
+						</svg>
+						JSON Feed
+					</a>
 				</div>
 			</div>
 
@@ -151,6 +157,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			<div class="space-y-2 text-gray-300">
 				<p><strong>RSS 2.0:</strong> The most widely supported feed format, compatible with virtually all feed readers.</p>
 				<p><strong>Atom 1.0:</strong> A more modern and technically superior format with better support for content types and metadata.</p>
+				<p><strong>JSON Feed 1.1:</strong> A modern JSON-based feed format supported by NetNewsWire, Feedbin, Inoreader, and others. Easier to consume programmatically.</p>
 			</div>
 		</div>
 	</div>
