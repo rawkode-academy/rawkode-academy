@@ -4,7 +4,7 @@ export interface ArticleListEntry {
 		title: string;
 		description: string;
 		publishedAt: Date;
-		updatedAt?: Date;
+		updatedAt?: Date | undefined;
 	};
 }
 
