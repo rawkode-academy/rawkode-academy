@@ -1045,6 +1045,73 @@ describe("Article ItemList JSON-LD", () => {
 
 		expect(() => JSON.stringify(jsonLd)).not.toThrow();
 	});
+
+	it("formats minutes as ISO 8601 durations and skips empty/zero/negative inputs", async () => {
+		const { minutesToIsoDuration } = await import(
+			"../lib/learning-path-jsonld.ts"
+		);
+		expect(minutesToIsoDuration(90)).toBe("PT1H30M");
+		expect(minutesToIsoDuration(30)).toBe("PT30M");
+		expect(minutesToIsoDuration(120)).toBe("PT2H");
+		expect(minutesToIsoDuration(0)).toBeUndefined();
+		expect(minutesToIsoDuration(-5)).toBeUndefined();
+		expect(minutesToIsoDuration(Number.NaN)).toBeUndefined();
+	});
+
+	it("builds learning-path Course JSON-LD with provider, free offer, courseInstance, ISO duration, and prerequisites", async () => {
+		const { buildLearningPathJsonLd } = await import(
+			"../lib/learning-path-jsonld.ts"
+		);
+
+		const jsonLd = buildLearningPathJsonLd({
+			siteUrl: "https://rawkode.academy",
+			pathUrl:
+				"https://rawkode.academy/learning-paths/cloud-native-foundations",
+			source: {
+				title: "Cloud Native Foundations",
+				description: "Start your Cloud Native journey.",
+				difficulty: "intermediate",
+				estimatedDuration: 150,
+				prerequisites: ["Familiarity with containers", "Basic Linux"],
+				technologyLabels: ["Kubernetes", "CNCF"],
+				publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+			},
+			authors: [{ id: "rawkode", name: "David Flanagan" }],
+		});
+
+		expect(jsonLd["@type"]).toBe("Course");
+		expect(jsonLd.name).toBe("Cloud Native Foundations");
+		expect(jsonLd.educationalLevel).toBe("Intermediate");
+		expect(jsonLd.learningResourceType).toBe("LearningPath");
+		expect(jsonLd.timeRequired).toBe("PT2H30M");
+		expect(jsonLd.isAccessibleForFree).toBe(true);
+		expect(jsonLd.datePublished).toBe("2026-05-15T08:00:00.000Z");
+		expect(jsonLd.coursePrerequisites).toBe(
+			"Familiarity with containers; Basic Linux",
+		);
+
+		const provider = jsonLd.provider as Record<string, unknown>;
+		expect(provider.name).toBe("Rawkode Academy");
+
+		const offer = jsonLd.offers as Record<string, unknown>;
+		expect(offer.price).toBe("0");
+		expect(offer.priceCurrency).toBe("USD");
+		expect(offer.availability).toBe("https://schema.org/InStock");
+
+		const instances = jsonLd.hasCourseInstance as Array<
+			Record<string, unknown>
+		>;
+		expect(instances).toHaveLength(1);
+		expect(instances[0]?.courseMode).toBe("online");
+		expect(instances[0]?.courseWorkload).toBe("PT2H30M");
+
+		expect(jsonLd.teaches).toEqual(["Kubernetes", "CNCF"]);
+		const author = jsonLd.author as Array<Record<string, unknown>>;
+		expect(author[0]?.name).toBe("David Flanagan");
+		expect(author[0]?.url).toBe("https://rawkode.academy/people/rawkode");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
 });
 
 describe("Structured Data Validation", () => {
