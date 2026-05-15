@@ -795,6 +795,23 @@ describe("Crawlability and Sitemaps", () => {
 			]),
 		);
 	});
+
+	it("renders an OpenSearch description that points browsers at /search?q={searchTerms}", async () => {
+		const { renderOpenSearchDescription } = await import(
+			"../pages/opensearch.xml.ts"
+		);
+		const xml = renderOpenSearchDescription(new URL("https://rawkode.academy"));
+
+		expect(xml).toContain('xmlns="http://a9.com/-/spec/opensearch/1.1/"');
+		expect(xml).toContain("<ShortName>Rawkode Academy</ShortName>");
+		expect(xml).toContain(
+			'<Url type="text/html" method="get" template="https://rawkode.academy/search?q={searchTerms}"/>',
+		);
+		expect(xml).toContain(
+			'<Url type="application/opensearchdescription+xml" rel="self" template="https://rawkode.academy/opensearch.xml"/>',
+		);
+		expect(xml).toContain("https://rawkode.academy/favicon-16x16.png");
+	});
 });
 
 describe("Related news selector", () => {
