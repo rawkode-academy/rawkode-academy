@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -50,6 +51,10 @@ function formatTechnologyLabel(value: string): string {
 
 <Page title={pageTitle} description={pageDescription}>
 	<Fragment slot="extra-head">
+		<NewsItemListJsonLd
+			stories={allNews}
+			listUrl={new URL("/news", Astro.site ?? Astro.url).href}
+		/>
 		<link
 			rel="alternate"
 			type="application/rss+xml"
