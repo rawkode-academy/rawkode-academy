@@ -1,113 +1,109 @@
 /**
- * Theme Management Utility
- * Handles switching between Rawkode's two brand themes.
+ * Theme utilities.
  *
- * NOTE: A follow-up pass will reduce this to rawkode-blue + light/dark only
- * and remove the toggle. See projects/rawkode.academy/website/DS.md.
+ * The site has a single brand theme — Rawkode Blue. Users can still
+ * toggle light vs. dark mode. The legacy `Theme` / `setTheme` / `toggleTheme`
+ * exports remain as thin shims so the existing ThemeToggle and command-palette
+ * keep working until a follow-up loop replaces those UIs with a plain
+ * dark-mode toggle (see DS.md).
  */
 
-export type Theme = "rawkode-green" | "rawkode-blue";
+export type Theme = "rawkode-blue";
 
 const THEME_STORAGE_KEY = "rawkode-theme";
-const DEFAULT_THEME: Theme = "rawkode-green";
+const DARK_STORAGE_KEY = "rawkode-color-scheme";
+const DEFAULT_THEME: Theme = "rawkode-blue";
 
-export const ALL_THEMES: Theme[] = ["rawkode-green", "rawkode-blue"];
+export const ALL_THEMES: Theme[] = [DEFAULT_THEME];
 
-/**
- * Get the current theme from localStorage or return default
- */
+const BRAND_COLORS = {
+	primary: "#5F5ED7",
+	secondary: "#00CEFF",
+	accent: "#111827",
+} as const;
+
+const DISPLAY_NAME = "Rawkode Blue";
+
 export function getTheme(): Theme {
-	if (typeof window === "undefined") return DEFAULT_THEME;
-
-	const stored = localStorage.getItem(THEME_STORAGE_KEY);
-	if (stored && ALL_THEMES.includes(stored as Theme)) {
-		return stored as Theme;
-	}
-
 	return DEFAULT_THEME;
 }
 
 /**
- * Set the theme and persist to localStorage
+ * No-op now that there is only one theme — kept so existing callers don't break.
+ * Persists the (single) theme so future loads stay deterministic.
  */
-export function setTheme(theme: Theme): void {
+export function setTheme(_theme: Theme): void {
 	if (typeof window === "undefined") return;
 
-	if (theme === "rawkode-green") {
-		document.documentElement.removeAttribute("data-theme");
-	} else {
-		document.documentElement.setAttribute("data-theme", theme);
-	}
-
-	localStorage.setItem(THEME_STORAGE_KEY, theme);
-
-	window.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
+	document.documentElement.removeAttribute("data-theme");
+	localStorage.setItem(THEME_STORAGE_KEY, DEFAULT_THEME);
+	window.dispatchEvent(
+		new CustomEvent("theme-change", { detail: { theme: DEFAULT_THEME } }),
+	);
 }
 
 /**
- * Toggle between the two brand themes
+ * No-op now that there is only one theme. Returns the canonical theme so
+ * callers can continue to read `toggleTheme()` for display purposes.
  */
 export function toggleTheme(): Theme {
-	const current = getTheme();
-	const currentIndex = ALL_THEMES.indexOf(current);
-	const nextIndex = (currentIndex + 1) % ALL_THEMES.length;
-	const next = ALL_THEMES[nextIndex] || DEFAULT_THEME;
-	setTheme(next);
-	return next;
+	setTheme(DEFAULT_THEME);
+	return DEFAULT_THEME;
 }
 
 /**
- * Initialize theme on page load
- * Should be called as early as possible to avoid flash
+ * Initialize theme + dark-mode preference on page load.
+ * Call as early as possible to avoid FOUC.
  */
 export function initTheme(): void {
 	if (typeof window === "undefined") return;
 
-	const theme = getTheme();
-	if (theme !== "rawkode-green") {
-		document.documentElement.setAttribute("data-theme", theme);
-	}
+	// Theme is always rawkode-blue — no data-theme attribute needed.
+	document.documentElement.removeAttribute("data-theme");
+
+	const storedScheme = localStorage.getItem(DARK_STORAGE_KEY);
+	const prefersDark =
+		storedScheme === "dark" ||
+		(storedScheme !== "light" &&
+			window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+	document.documentElement.classList.toggle("dark", prefersDark);
 }
 
-const THEME_COLORS: Record<
-	Theme,
-	{ primary: string; secondary: string; accent: string }
-> = {
-	"rawkode-green": {
-		primary: "#04B59C",
-		secondary: "#85FF95",
-		accent: "#23282D",
-	},
-	"rawkode-blue": {
-		primary: "#5F5ED7",
-		secondary: "#00CEFF",
-		accent: "#111827",
-	},
-};
-
-const THEME_DISPLAY_NAMES: Record<Theme, string> = {
-	"rawkode-green": "Rawkode Green",
-	"rawkode-blue": "Rawkode Blue",
-};
-
 /**
- * Get theme colors for current theme
+ * Get the brand colours for the (single) theme.
  */
 export function getThemeColors(): {
 	primary: string;
 	secondary: string;
 	accent: string;
 } {
-	if (typeof window === "undefined") {
-		return THEME_COLORS["rawkode-green"];
-	}
-
-	return THEME_COLORS[getTheme()];
+	return { ...BRAND_COLORS };
 }
 
-/**
- * Get theme display name
- */
-export function getThemeDisplayName(theme: Theme): string {
-	return THEME_DISPLAY_NAMES[theme];
+export function getThemeDisplayName(_theme: Theme = DEFAULT_THEME): string {
+	return DISPLAY_NAME;
+}
+
+/* ---------- Dark mode (the only thing users actually toggle) ---------- */
+
+export type ColorScheme = "light" | "dark";
+
+export function getColorScheme(): ColorScheme {
+	if (typeof window === "undefined") return "light";
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+export function setColorScheme(scheme: ColorScheme): void {
+	if (typeof window === "undefined") return;
+	document.documentElement.classList.toggle("dark", scheme === "dark");
+	localStorage.setItem(DARK_STORAGE_KEY, scheme);
+	window.dispatchEvent(
+		new CustomEvent("color-scheme-change", { detail: { scheme } }),
+	);
+}
+
+export function toggleColorScheme(): ColorScheme {
+	const next: ColorScheme = getColorScheme() === "dark" ? "light" : "dark";
+	setColorScheme(next);
+	return next;
 }

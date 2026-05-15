@@ -56,7 +56,7 @@ const props = withDefaults(defineProps<Props>(), {
 	size: "md",
 });
 
-const currentTheme = ref<Theme>("rawkode-green");
+const currentTheme = ref<Theme>("rawkode-blue");
 
 const themeDisplayName = computed(() =>
 	getThemeDisplayName(currentTheme.value),

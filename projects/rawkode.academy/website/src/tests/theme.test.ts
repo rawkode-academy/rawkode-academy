@@ -1,10 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	ALL_THEMES,
+	getColorScheme,
 	getTheme,
 	getThemeColors,
 	getThemeDisplayName,
+	setColorScheme,
 	setTheme,
+	toggleColorScheme,
 	toggleTheme,
 } from "../lib/theme";
 
@@ -16,6 +19,12 @@ describe("Theme Management", () => {
 		if (typeof document === "undefined") {
 			global.document = {
 				documentElement: {
+					classList: {
+						add: () => {},
+						remove: () => {},
+						toggle: () => {},
+						contains: () => false,
+					},
 					setAttribute: () => {},
 					removeAttribute: () => {},
 				},
@@ -35,6 +44,7 @@ describe("Theme Management", () => {
 				dispatchEvent: () => true,
 				addEventListener: () => {},
 				removeEventListener: () => {},
+				matchMedia: () => ({ matches: false }),
 			} as unknown as Window & typeof globalThis;
 		}
 
@@ -81,86 +91,96 @@ describe("Theme Management", () => {
 	});
 
 	describe("ALL_THEMES", () => {
-		it("should contain both brand themes", () => {
-			expect(ALL_THEMES).toContain("rawkode-green");
-			expect(ALL_THEMES).toContain("rawkode-blue");
-		});
-
-		it("should have exactly 2 themes", () => {
-			expect(ALL_THEMES).toHaveLength(2);
+		it("should contain only the canonical brand theme", () => {
+			expect(ALL_THEMES).toEqual(["rawkode-blue"]);
 		});
 	});
 
 	describe("getTheme", () => {
-		it("should return default theme when no theme is stored", () => {
-			expect(getTheme()).toBe("rawkode-green");
-		});
-
-		it("should return stored theme when valid", () => {
-			localStorage.setItem("rawkode-theme", "rawkode-blue");
+		it("always returns rawkode-blue", () => {
 			expect(getTheme()).toBe("rawkode-blue");
-		});
-
-		it("should return default theme when stored theme is invalid", () => {
-			localStorage.setItem("rawkode-theme", "invalid-theme");
-			expect(getTheme()).toBe("rawkode-green");
 		});
 	});
 
 	describe("setTheme", () => {
-		it("should store theme in localStorage", () => {
-			setTheme("rawkode-blue");
-			expect(localStorage.getItem("rawkode-theme")).toBe("rawkode-blue");
-		});
-
-		it("should set data-theme attribute for non-default themes", () => {
-			const setAttribute = vi.fn();
-			document.documentElement.setAttribute = setAttribute;
-
-			setTheme("rawkode-blue");
-			expect(setAttribute).toHaveBeenCalledWith("data-theme", "rawkode-blue");
-		});
-
-		it("should remove data-theme attribute for default theme", () => {
+		it("removes any stale data-theme attribute", () => {
 			const removeAttribute = vi.fn();
 			document.documentElement.removeAttribute = removeAttribute;
 
-			setTheme("rawkode-green");
+			setTheme("rawkode-blue");
 			expect(removeAttribute).toHaveBeenCalledWith("data-theme");
+		});
+
+		it("persists the canonical theme to localStorage", () => {
+			setTheme("rawkode-blue");
+			expect(localStorage.getItem("rawkode-theme")).toBe("rawkode-blue");
 		});
 	});
 
 	describe("toggleTheme", () => {
-		it("should toggle between the two brand themes", () => {
-			setTheme("rawkode-green");
-
+		it("is a no-op that returns the canonical theme", () => {
 			expect(toggleTheme()).toBe("rawkode-blue");
-			expect(toggleTheme()).toBe("rawkode-green");
 		});
 	});
 
 	describe("getThemeDisplayName", () => {
-		it("should return correct display name for each theme", () => {
-			expect(getThemeDisplayName("rawkode-green")).toBe("Rawkode Green");
+		it("returns the canonical brand name", () => {
 			expect(getThemeDisplayName("rawkode-blue")).toBe("Rawkode Blue");
 		});
 	});
 
 	describe("getThemeColors", () => {
-		it("should return correct colors for rawkode-green", () => {
-			setTheme("rawkode-green");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#04B59C");
-			expect(colors.secondary).toBe("#85FF95");
-			expect(colors.accent).toBe("#23282D");
-		});
-
-		it("should return correct colors for rawkode-blue", () => {
-			setTheme("rawkode-blue");
+		it("returns the rawkode-blue brand palette", () => {
 			const colors = getThemeColors();
 			expect(colors.primary).toBe("#5F5ED7");
 			expect(colors.secondary).toBe("#00CEFF");
 			expect(colors.accent).toBe("#111827");
+		});
+	});
+
+	describe("ColorScheme (light / dark)", () => {
+		it("reads light by default", () => {
+			document.documentElement.classList = {
+				add: () => {},
+				remove: () => {},
+				toggle: () => {},
+				contains: () => false,
+			} as unknown as DOMTokenList;
+			expect(getColorScheme()).toBe("light");
+		});
+
+		it("setColorScheme persists and toggles the dark class", () => {
+			const toggle = vi.fn();
+			document.documentElement.classList = {
+				add: () => {},
+				remove: () => {},
+				toggle,
+				contains: () => false,
+			} as unknown as DOMTokenList;
+
+			setColorScheme("dark");
+			expect(toggle).toHaveBeenCalledWith("dark", true);
+			expect(localStorage.getItem("rawkode-color-scheme")).toBe("dark");
+		});
+
+		it("toggleColorScheme flips the active mode", () => {
+			let isDark = false;
+			document.documentElement.classList = {
+				add: () => {
+					isDark = true;
+				},
+				remove: () => {
+					isDark = false;
+				},
+				toggle: (cls: string, force?: boolean) => {
+					if (cls !== "dark") return;
+					isDark = force ?? !isDark;
+				},
+				contains: (cls: string) => cls === "dark" && isDark,
+			} as unknown as DOMTokenList;
+
+			expect(toggleColorScheme()).toBe("dark");
+			expect(toggleColorScheme()).toBe("light");
 		});
 	});
 });

@@ -1,30 +1,33 @@
 ---
 /**
- * Inline theme initialization script
- * Should be placed in <head> as early as possible to prevent FOUC
+ * Inline theme initialization script.
+ * Single brand theme (Rawkode Blue) — only the light/dark color-scheme
+ * needs to be applied early to prevent FOUC.
  */
 ---
 
 <script is:inline>
 	(function () {
-		const THEME_STORAGE_KEY = "rawkode-theme";
-		const DEFAULT_THEME = "rawkode-green";
-		const ALL_THEMES = ["rawkode-green", "rawkode-blue"];
+		const DARK_STORAGE_KEY = "rawkode-color-scheme";
 
-		// Get stored theme or default
-		let theme = DEFAULT_THEME;
+		let prefersDark = false;
 		try {
-			const stored = localStorage.getItem(THEME_STORAGE_KEY);
-			if (stored && ALL_THEMES.includes(stored)) {
-				theme = stored;
+			const stored = localStorage.getItem(DARK_STORAGE_KEY);
+			if (stored === "dark") {
+				prefersDark = true;
+			} else if (stored === "light") {
+				prefersDark = false;
+			} else if (window.matchMedia) {
+				prefersDark = window.matchMedia(
+					"(prefers-color-scheme: dark)",
+				).matches;
 			}
 		} catch (e) {
 			// localStorage might not be available
 		}
 
-		// Apply theme immediately (rawkode-green is the default, so no attribute needed)
-		if (theme !== "rawkode-green") {
-			document.documentElement.setAttribute("data-theme", theme);
+		if (prefersDark) {
+			document.documentElement.classList.add("dark");
 		}
 	})();
 </script>

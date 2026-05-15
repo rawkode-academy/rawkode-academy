@@ -56,7 +56,7 @@ export default function CommandPalette({
 	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
+	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-blue");
 	const [pages, setPages] = useState<CommandPage[]>(["root"]);
 	const [hasLoadedNavigation, setHasLoadedNavigation] = useState(false);
 	const hasTrackedOpen = useRef(false);

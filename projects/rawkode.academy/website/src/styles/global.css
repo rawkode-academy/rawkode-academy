@@ -1,61 +1,13 @@
 @import "tailwindcss";
 
 :root {
-	/* Brand Colors - Default Theme: Rawkode Green (Teal + Green) */
-	--brand-primary: 4 181 156; /* Teal #04B59C */
-	--brand-secondary: 133 255 149; /* Green #85FF95 */
-	--brand-accent: 35 40 45; /* Black #23282D */
-
-	/* Shared Surface Tokens */
-	color-scheme: light dark;
-	--surface-base: #f5f7ff;
-	--surface-overlay: rgba(255, 255, 255, 0.92);
-	--surface-card: rgba(255, 255, 255, 0.85);
-	--surface-card-muted: rgba(15, 23, 42, 0.05);
-	--surface-border: rgba(15, 23, 42, 0.06);
-	--surface-border-strong: rgba(15, 23, 42, 0.12);
-	--surface-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
-	--surface-shadow-strong: 0 25px 80px rgba(15, 23, 42, 0.2);
-
-	/* Theme-aware backdrop with brand colors */
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(var(--brand-primary), 0.15) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(var(--brand-secondary), 0.12) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.08) 0%,
-			transparent 50%
-		),
-		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
-
-	/* Layout Spacing Tokens */
-	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
-	--space-page: clamp(1.5rem, 4vw, 3rem);
-	--space-page-lg: clamp(2rem, 5vw, 4rem);
-	--space-section-tight: clamp(2rem, 5vw, 3.75rem);
-	--space-section: clamp(3rem, 6vw, 5rem);
-	--space-section-relaxed: clamp(4rem, 7vw, 6rem);
-	--space-stack-sm: clamp(1rem, 3vw, 1.75rem);
-	--space-stack: clamp(1.5rem, 3.5vw, 2.5rem);
-	--space-stack-lg: clamp(2rem, 4.5vw, 3.25rem);
-	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
-	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
-}
-
-/* Alternative Theme: Rawkode Blue */
-:root[data-theme="rawkode-blue"] {
+	/* Rawkode Blue — canonical brand palette */
 	--brand-primary: 95 94 215; /* Purple #5F5ED7 */
 	--brand-secondary: 0 206 255; /* Cyan #00CEFF */
-	--brand-accent: 17 24 39; /* Dark Blue-Gray */
+	--brand-accent: 17 24 39; /* Dark Blue-Gray #111827 */
 
+	/* Light-mode surface tokens */
+	color-scheme: light dark;
 	--surface-base: #eef2ff;
 	--surface-overlay: rgba(255, 255, 255, 0.94);
 	--surface-card: rgba(255, 255, 255, 0.88);
@@ -82,9 +34,22 @@
 			transparent 50%
 		),
 		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
+
+	/* Layout Spacing Tokens */
+	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
+	--space-page: clamp(1.5rem, 4vw, 3rem);
+	--space-page-lg: clamp(2rem, 5vw, 4rem);
+	--space-section-tight: clamp(2rem, 5vw, 3.75rem);
+	--space-section: clamp(3rem, 6vw, 5rem);
+	--space-section-relaxed: clamp(4rem, 7vw, 6rem);
+	--space-stack-sm: clamp(1rem, 3vw, 1.75rem);
+	--space-stack: clamp(1.5rem, 3.5vw, 2.5rem);
+	--space-stack-lg: clamp(2rem, 4.5vw, 3.25rem);
+	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
+	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
 }
 
-html.dark[data-theme="rawkode-blue"] {
+html.dark {
 	--surface-base: #040712;
 	--surface-overlay: rgba(4, 7, 18, 0.92);
 	--surface-card: rgba(8, 12, 25, 0.9);
@@ -110,34 +75,6 @@ html.dark[data-theme="rawkode-blue"] {
 			rgba(var(--brand-primary), 0.28) 0%,
 			transparent 45%
 		), linear-gradient(145deg, #030510 0%, #050b1f 55%, #081430 100%);
-}
-
-html.dark {
-	--surface-base: #030617;
-	--surface-overlay: rgba(6, 11, 27, 0.92);
-	--surface-card: rgba(8, 14, 31, 0.9);
-	--surface-card-muted: rgba(148, 163, 184, 0.08);
-	--surface-border: rgba(148, 163, 184, 0.2);
-	--surface-border-strong: rgba(var(--brand-primary), 0.35);
-	--surface-shadow: 0 35px 120px rgba(2, 6, 23, 0.65);
-	--surface-shadow-strong: 0 45px 120px rgba(2, 6, 23, 0.75);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.4) 0%,
-			transparent 35%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.35) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.25) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #020617 0%, #020b26 55%, #05080f 100%);
 }
 
 body {
