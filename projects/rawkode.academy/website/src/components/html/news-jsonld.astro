@@ -1,0 +1,41 @@
+---
+import type { CollectionEntry } from "astro:content";
+import * as utf64 from "utf64";
+import { buildNewsArticleJsonLd } from "@/lib/news-jsonld";
+
+interface Props {
+	article: CollectionEntry<"news">;
+	authors: CollectionEntry<"people">[];
+	// Allow placement into a named slot in parents (for TS exactOptionalPropertyTypes)
+	slot?: string;
+}
+
+const { article, authors } = Astro.props;
+
+// Reuse the dynamic OG image generator so social cards and the structured
+// data image stay in lockstep without a second pipeline.
+const imageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
+	JSON.stringify({
+		title: article.data.title,
+		format: "png",
+		template: "gradient",
+	}),
+)}`;
+
+const jsonLd = buildNewsArticleJsonLd({
+	article: article.data,
+	authors: authors.map((author) => ({
+		name: author.data.name,
+		url: author.data.github,
+	})),
+	url: Astro.url.href,
+	imageUrl,
+	siteUrl: (Astro.site ?? Astro.url).origin,
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
