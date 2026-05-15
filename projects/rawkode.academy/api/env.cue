@@ -21,7 +21,7 @@ ci: pipelines: {
 }
 
 tasks: {
-	collectSchemas: {
+	collectSchemas: schema.#Task & {
 		command: "bun"
 		args: ["run", "scripts/collect-schemas.ts"]
 
@@ -35,7 +35,7 @@ tasks: {
 			"schemas/**",
 		]
 	}
-	compose: {
+	compose: schema.#Task & {
 		command: "bun"
 		args: ["run", "scripts/compose.ts"]
 		dependsOn: [_t.collectSchemas]
@@ -49,7 +49,7 @@ tasks: {
 			"supergraph.graphql",
 		]
 	}
-	deploy: {
+	deploy: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.compose]

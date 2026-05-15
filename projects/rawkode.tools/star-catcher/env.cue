@@ -31,23 +31,23 @@ ci: pipelines: {
 }
 
 tasks: {
-	cloudflare: {
+	cloudflare: schema.#TaskGroup & {
 		type: "group"
-		types: {
+		types: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "types"]
-				inputs: ["wrangler.jsonc"]
+			inputs: ["wrangler.jsonc"]
 			outputs: ["worker-configuration.d.ts"]
 		}
 	}
 
-	dev: {
+	dev: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
 		dependsOn: [_t.cloudflare.types]
 	}
 
-	deploy: {
+	deploy: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.cloudflare.types]

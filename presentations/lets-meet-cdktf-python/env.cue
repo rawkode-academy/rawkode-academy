@@ -23,7 +23,7 @@ env: {
 }
 
 tasks: {
-	deploy: {
+	deploy: schema.#Task & {
 		command: "cdktf"
 		args: ["deploy", "--auto-approve"]
 	}

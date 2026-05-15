@@ -9,12 +9,12 @@ name: "klustered-dev"
 let _t = tasks
 
 tasks: {
-	codegen: {
+	codegen: schema.#Task & {
 		command: "bun"
 		args: ["panda", "codegen"]
 	}
 
-	dev: {
+	dev: schema.#Task & {
 		command: "bun"
 		args: ["astro", "dev"]
 		dependsOn: [_t.codegen]
@@ -28,7 +28,7 @@ tasks: {
 		]
 	}
 
-	build: {
+	build: schema.#Task & {
 		command: "bun"
 		args: ["astro", "build"]
 		dependsOn: [_t.codegen]
@@ -42,7 +42,7 @@ tasks: {
 		]
 	}
 
-	preview: {
+	preview: schema.#Task & {
 		command: "bun"
 		args: ["astro", "preview"]
 	}

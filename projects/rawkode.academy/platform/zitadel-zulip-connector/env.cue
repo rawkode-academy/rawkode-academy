@@ -29,7 +29,7 @@ ci: pipelines: {
 }
 
 tasks: {
-	deploy: {
+	deploy: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
 	}

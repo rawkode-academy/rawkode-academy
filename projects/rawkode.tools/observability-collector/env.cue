@@ -31,17 +31,17 @@ ci: pipelines: {
 }
 
 tasks: {
-	dev: {
+	dev: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "dev"]
 	}
 
-	deploy: {
+	deploy: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
 	}
 
-	typegen: {
+	typegen: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "types", "--env-interface", "CloudflareBindings"]
 	}
