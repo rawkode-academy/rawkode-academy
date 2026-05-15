@@ -975,6 +975,78 @@ describe("News ItemList JSON-LD", () => {
 	});
 });
 
+describe("Article ItemList JSON-LD", () => {
+	it("builds an ItemList of Article items for the /read index, newest first, capped at the limit", async () => {
+		const { buildArticleItemListJsonLd } = await import(
+			"../lib/article-itemlist-jsonld.ts"
+		);
+
+		const articles = [
+			{
+				id: "older-article",
+				data: {
+					title: "Older article",
+					description: "Older",
+					publishedAt: new Date("2026-04-01T00:00:00.000Z"),
+				},
+			},
+			{
+				id: "newest-article",
+				data: {
+					title: "Newest article",
+					description: "Newest",
+					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+					updatedAt: new Date("2026-05-15T09:30:00.000Z"),
+				},
+			},
+			{
+				id: "middle-article",
+				data: {
+					title: "Middle article",
+					description: "Middle",
+					publishedAt: new Date("2026-05-01T00:00:00.000Z"),
+				},
+			},
+		];
+
+		const jsonLd = buildArticleItemListJsonLd({
+			siteUrl: "https://rawkode.academy",
+			listUrl: "https://rawkode.academy/read",
+			listName: "Cloud Native Articles",
+			articles,
+			limit: 2,
+		});
+
+		expect(jsonLd["@context"]).toBe("https://schema.org");
+		expect(jsonLd["@type"]).toBe("ItemList");
+		expect(jsonLd.name).toBe("Cloud Native Articles");
+		expect(jsonLd.url).toBe("https://rawkode.academy/read");
+		expect(jsonLd.numberOfItems).toBe(2);
+
+		const elements = jsonLd.itemListElement as Array<Record<string, unknown>>;
+		expect(elements).toHaveLength(2);
+		expect(elements[0]?.position).toBe(1);
+		expect(elements[0]?.url).toBe(
+			"https://rawkode.academy/read/newest-article",
+		);
+		expect(elements[1]?.position).toBe(2);
+		expect(elements[1]?.url).toBe(
+			"https://rawkode.academy/read/middle-article",
+		);
+
+		const firstItem = elements[0]?.item as Record<string, unknown>;
+		expect(firstItem["@type"]).toBe("Article");
+		expect(firstItem.headline).toBe("Newest article");
+		expect(firstItem.datePublished).toBe("2026-05-15T08:00:00.000Z");
+		expect(firstItem.dateModified).toBe("2026-05-15T09:30:00.000Z");
+
+		const secondItem = elements[1]?.item as Record<string, unknown>;
+		expect(secondItem.dateModified).toBe(secondItem.datePublished);
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+});
+
 describe("Structured Data Validation", () => {
 	it("should model VideoObject JSON-LD with clip urls, captions, and transcript text", () => {
 		const videoJsonLd = {
