@@ -70,6 +70,7 @@ const showSummaries: ShowSummary[] = await Promise.all(
 		const showVideos = videos.filter((v) => v.data.show?.id === show.data.id);
 		const hosts = await getEntries(show.data.hosts);
 
+
 		return {
 			id: show.data.id,
 			name: show.data.name,
@@ -205,6 +206,20 @@ const socialLinks = [
 		icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
 	},
 ].filter(Boolean);
+
+// rel="me" advertises that this profile owns the linked accounts.
+// Mastodon's verification crawler reads this on visit (either head <link>
+// or body <a>) and shows a green checkmark on the corresponding profile
+// link. Same mechanism works for other Fediverse/IndieWeb tools.
+const relMeUrls = [
+	person.data.mastodon,
+	person.data.github,
+	person.data.bluesky,
+	person.data.twitter,
+	person.data.linkedin,
+	person.data.website,
+	person.data.youtube,
+].filter((url): url is string => typeof url === "string" && url.length > 0);
 ---
 
 <Page
@@ -230,6 +245,11 @@ const socialLinks = [
             person.data.mastodon,
         ]}
     />
+    <Fragment slot="extra-head">
+        {relMeUrls.map((url) => (
+            <link rel="me" href={url} />
+        ))}
+    </Fragment>
     <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
         <!-- Profile Header -->
         <section class="w-full">
@@ -266,7 +286,7 @@ const socialLinks = [
                                 <a
                                     href={link.url}
                                     target="_blank"
-                                    rel="noopener noreferrer"
+                                    rel="me noopener noreferrer"
                                     class="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-muted hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
                                     aria-label={link.name}
                                 >
