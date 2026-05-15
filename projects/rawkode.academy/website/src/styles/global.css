@@ -47,6 +47,7 @@
 	--space-stack-lg: clamp(2rem, 4.5vw, 3.25rem);
 	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
 	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
+
 }
 
 html.dark {
@@ -123,6 +124,23 @@ body::before {
 	--spacing-stack-lg: var(--space-stack-lg);
 	--spacing-card: var(--space-card-pad);
 	--spacing-card-lg: var(--space-card-pad-lg);
+
+	/* Radius Scale — exposed as Tailwind's `rounded-xs/sm/md/lg/xl/2xl/3xl`.
+	   Sized so that:
+	     xs (6px)   — chips, small pills
+	     sm (8px)   — inputs, small buttons
+	     md (12px)  — secondary cards
+	     lg (16px)  — buttons, default surfaces
+	     xl (19.2px) — soft / muted panels, stat panels
+	     2xl (21.6px) — glass cards, section shells
+	     3xl (24px) — glass panels (hero-level) */
+	--radius-xs: 0.375rem;
+	--radius-sm: 0.5rem;
+	--radius-md: 0.75rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1.2rem;
+	--radius-2xl: 1.35rem;
+	--radius-3xl: 1.5rem;
 }
 
 @layer base {
@@ -138,7 +156,7 @@ body::before {
 @layer components {
 	/* Glass Morphism Components */
 	.glass-panel {
-		@apply border rounded-[1.5rem];
+		@apply border rounded-3xl;
 		background:
 			linear-gradient(
 				180deg,
@@ -150,7 +168,7 @@ body::before {
 	}
 
 	.glass-card {
-		@apply border rounded-[1.35rem];
+		@apply border rounded-2xl;
 		background:
 			linear-gradient(
 				180deg,
@@ -163,7 +181,7 @@ body::before {
 
 	/* Glass card with shimmer effect overlay */
 	.glass-card-shimmer {
-		@apply relative overflow-hidden border rounded-[1.35rem];
+		@apply relative overflow-hidden border rounded-2xl;
 		background:
 			linear-gradient(
 				180deg,
@@ -226,7 +244,7 @@ body::before {
 	}
 
 	.section-shell {
-		@apply relative overflow-hidden rounded-[1.35rem] border;
+		@apply relative overflow-hidden rounded-2xl border;
 		background:
 			linear-gradient(
 				180deg,
@@ -278,7 +296,7 @@ body::before {
 	}
 
 	.section-shell-muted {
-		@apply relative overflow-hidden rounded-[1.2rem] border;
+		@apply relative overflow-hidden rounded-xl border;
 		background-color: color-mix(in srgb, var(--surface-card) 72%, transparent);
 		border-color: color-mix(in srgb, var(--surface-border) 86%, transparent);
 		box-shadow: none;
@@ -294,7 +312,7 @@ body::before {
 	}
 
 	.stat-panel {
-		@apply flex min-h-24 flex-col justify-between rounded-[1.25rem] border p-4 sm:p-5;
+		@apply flex min-h-24 flex-col justify-between rounded-xl border p-4 sm:p-5;
 		background-color: rgba(255, 255, 255, 0.74);
 		border-color: var(--surface-border);
 	}
@@ -304,7 +322,7 @@ body::before {
 	}
 
 	.soft-panel {
-		@apply rounded-[1.2rem] border;
+		@apply rounded-xl border;
 		background:
 			linear-gradient(
 				180deg,

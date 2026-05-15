@@ -1,21 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	ALL_THEMES,
 	getColorScheme,
-	getTheme,
 	getThemeColors,
-	getThemeDisplayName,
 	setColorScheme,
-	setTheme,
 	toggleColorScheme,
-	toggleTheme,
 } from "../lib/theme";
 
 describe("Theme Management", () => {
 	let originalLocalStorage: Storage;
 
 	beforeEach(() => {
-		// Setup DOM environment
 		if (typeof document === "undefined") {
 			global.document = {
 				documentElement: {
@@ -48,7 +42,6 @@ describe("Theme Management", () => {
 			} as unknown as Window & typeof globalThis;
 		}
 
-		// Mock localStorage
 		originalLocalStorage = window.localStorage;
 		const localStorageMock: Storage = (() => {
 			const store: Record<string, string> = {};
@@ -88,45 +81,6 @@ describe("Theme Management", () => {
 				writable: true,
 			});
 		}
-	});
-
-	describe("ALL_THEMES", () => {
-		it("should contain only the canonical brand theme", () => {
-			expect(ALL_THEMES).toEqual(["rawkode-blue"]);
-		});
-	});
-
-	describe("getTheme", () => {
-		it("always returns rawkode-blue", () => {
-			expect(getTheme()).toBe("rawkode-blue");
-		});
-	});
-
-	describe("setTheme", () => {
-		it("removes any stale data-theme attribute", () => {
-			const removeAttribute = vi.fn();
-			document.documentElement.removeAttribute = removeAttribute;
-
-			setTheme("rawkode-blue");
-			expect(removeAttribute).toHaveBeenCalledWith("data-theme");
-		});
-
-		it("persists the canonical theme to localStorage", () => {
-			setTheme("rawkode-blue");
-			expect(localStorage.getItem("rawkode-theme")).toBe("rawkode-blue");
-		});
-	});
-
-	describe("toggleTheme", () => {
-		it("is a no-op that returns the canonical theme", () => {
-			expect(toggleTheme()).toBe("rawkode-blue");
-		});
-	});
-
-	describe("getThemeDisplayName", () => {
-		it("returns the canonical brand name", () => {
-			expect(getThemeDisplayName("rawkode-blue")).toBe("Rawkode Blue");
-		});
 	});
 
 	describe("getThemeColors", () => {

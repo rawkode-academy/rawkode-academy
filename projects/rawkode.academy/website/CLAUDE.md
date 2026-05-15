@@ -15,64 +15,94 @@ bun run sync:content  # Sync GraphQL content
 
 ## Component Library & Design System
 
-### Theme System
+### Theme: Rawkode Blue
 
-The website supports two brand themes that can be switched dynamically:
+The website ships a single brand theme — **Rawkode Blue** — with light and dark colour schemes. Users toggle light/dark; the brand palette is fixed.
 
-#### Available Themes
+#### Palette
 
-1. **rawkode-green** (Default)
-   - Primary: Teal `#04B59C` (4, 181, 156)
-   - Secondary: Green `#85FF95` (133, 255, 149)
-   - Accent: Black `#23282D` (35, 40, 45)
-   - Gradient: 45° angle from Teal to Green
+- **Primary**: `#5F5ED7` (Purple)
+- **Secondary**: `#00CEFF` (Cyan)
+- **Accent**: `#111827` (Dark Blue-Gray)
+- **Brand gradient**: 135° from `--brand-primary` → `--brand-secondary`
 
-2. **rawkode-blue**
-   - Primary: Purple `#5F5ED7` (95, 94, 215)
-   - Secondary: Cyan `#00CEFF` (0, 206, 255)
-   - Accent: Dark Blue-Gray `#111827` (17, 24, 39)
-   - Gradient: 45° angle from Purple to Cyan
+#### Using brand colours in components
 
-#### Using Themes in Components
-
-All components should use semantic Tailwind classes that automatically adapt to the current theme:
+Always reach for semantic Tailwind classes — never hardcode hex values:
 
 ```vue
-<!-- ✅ Good - Uses theme-aware classes -->
+<!-- ✅ Good -->
 <div class="bg-primary text-white">
   <h1 class="text-primary-content">Title</h1>
   <p class="text-secondary-content">Description</p>
   <button class="bg-gradient-primary">Click me</button>
 </div>
 
-<!-- ❌ Bad - Hardcoded colors -->
-<div class="bg-[#04B59C] text-white">
-  <h1 class="text-gray-900">Title</h1>
-  <button style="background: linear-gradient(135deg, #04b59c, #85ff95)">
-    Click me
-  </button>
+<!-- ❌ Bad -->
+<div class="bg-[#5F5ED7] text-white">
+  <h1 class="text-gray-900 dark:text-white">Title</h1>
 </div>
 ```
 
-#### Theme-Aware Color Classes
+#### Brand colour classes
 
 | Class | Description |
 |-------|-------------|
-| `text-primary` / `bg-primary` / `border-primary` | Uses current theme's primary color |
-| `text-secondary` / `bg-secondary` / `border-secondary` | Uses current theme's secondary color |
-| `text-primary-content` | Primary text color (gray-900 / white) |
-| `text-secondary-content` | Secondary text color (gray-700 / gray-300) |
-| `text-muted` | Muted text color (gray-600 / gray-400) |
-| `bg-gradient-primary` | Brand gradient at 45° |
-| `bg-gradient-secondary` | Brand gradient at 45° |
+| `text-primary` / `bg-primary` / `border-primary` | Uses `--brand-primary` |
+| `text-secondary` / `bg-secondary` / `border-secondary` | Uses `--brand-secondary` |
+| `text-primary-content` | Primary text colour (gray-900 / white) |
+| `text-secondary-content` | Secondary text colour (gray-700 / gray-300) |
+| `text-muted` | Muted text colour (gray-600 / gray-400) |
+| `bg-gradient-primary` | 135° brand gradient (primary → secondary) |
+| `bg-gradient-secondary` | 315° brand gradient (reverse sweep) |
+| `bg-gradient-hero` / `bg-gradient-hero-alt` | Brand-tinted hero washes (mode-aware) |
 | `bg-gradient-card` | Subtle brand gradient for cards |
 | `border-glass` | Glass morphism border |
-| `card-shadow` | Standard card shadow |
-| `card-hover` | Card hover effects |
+| `card-shadow` / `card-shadow-elevated` | Surface shadows |
+| `card-hover` | Card hover interactions |
 
-#### Implementing Theme Toggle
+#### Radius scale
 
-1. **Add the theme script to your layout's `<head>`:**
+Use the radius scale tokens instead of `rounded-[1.35rem]` style literals:
+
+| Token | Class | Value | Use for |
+|-------|-------|-------|---------|
+| `--radius-xs`   | `rounded-xs`   | 0.375rem | Chips, small pills |
+| `--radius-sm`   | `rounded-sm`   | 0.5rem   | Inputs, small buttons |
+| `--radius-md`   | `rounded-md`   | 0.75rem  | Secondary cards |
+| `--radius-lg`   | `rounded-lg`   | 1rem     | Buttons, default surfaces |
+| `--radius-xl`   | `rounded-xl`   | 1.2rem   | Soft / muted panels, stat panels |
+| `--radius-2xl`  | `rounded-2xl`  | 1.35rem  | Glass cards, section shells |
+| `--radius-3xl`  | `rounded-3xl`  | 1.5rem   | Glass panels (hero-level) |
+| `--radius-pill` | `rounded-full` | 9999px   | Pills, avatars |
+
+#### Light / Dark mode
+
+The site exposes a sun/moon toggle (`<ThemeToggle />`) and a "Change appearance" command in the command palette. Both wrap the same module:
+
+```typescript
+import {
+  getColorScheme,
+  setColorScheme,
+  toggleColorScheme,
+} from "@/lib/theme";
+
+// Read
+const scheme = getColorScheme(); // "light" | "dark"
+
+// Write
+setColorScheme("dark");
+
+// Flip
+const next = toggleColorScheme(); // returns the new scheme
+
+// Listen
+window.addEventListener("color-scheme-change", (event) => {
+  console.log("Color scheme is now:", event.detail.scheme);
+});
+```
+
+`ThemeScript.astro` should sit in the document `<head>` to apply the persisted scheme before paint:
 
 ```astro
 ---
@@ -90,7 +120,7 @@ import ThemeScript from "@/components/theme/ThemeScript.astro";
 </html>
 ```
 
-2. **Add the ThemeToggle component to your UI:**
+Drop the `<ThemeToggle />` component anywhere you need the user-facing switch:
 
 ```vue
 <script setup>
@@ -98,35 +128,10 @@ import { ThemeToggle } from "@/components/ui";
 </script>
 
 <template>
-  <!-- Icon only -->
-  <ThemeToggle />
-
-  <!-- With label -->
-  <ThemeToggle :showLabel="true" />
-
-  <!-- Button variant -->
+  <ThemeToggle />                                        <!-- icon -->
+  <ThemeToggle :showLabel="true" />                      <!-- icon + label -->
   <ThemeToggle variant="button" size="lg" :showLabel="true" />
 </template>
-```
-
-3. **Programmatic theme control:**
-
-```typescript
-import { setTheme, getTheme, toggleTheme } from "@/lib/theme";
-
-// Get current theme
-const current = getTheme(); // "rawkode-green" | "rawkode-blue"
-
-// Set specific theme
-setTheme("rawkode-blue");
-
-// Toggle between themes
-const newTheme = toggleTheme();
-
-// Listen for theme changes
-window.addEventListener("theme-change", (event) => {
-  console.log("Theme changed to:", event.detail.theme);
-});
 ```
 
 ## Component Library
