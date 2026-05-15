@@ -1,127 +1,125 @@
 <template>
 	<button
-		@click="handleToggle"
-		:class="buttonClasses"
-		:aria-label="`Change theme (current: ${themeDisplayName})`"
 		type="button"
+		:aria-label="ariaLabel"
+		:title="ariaLabel"
+		@click="onToggle"
+		:class="rootClass"
 	>
-		<!-- Icon for theme -->
-		<transition name="fade" mode="out-in">
-			<svg
-				:key="currentTheme"
-				class="w-5 h-5"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<circle cx="12" cy="12" r="10" stroke-width="2" class="stroke-primary" />
-				<circle cx="12" cy="12" r="6" fill="currentColor" class="fill-primary" />
-			</svg>
-		</transition>
-
-		<span v-if="showLabel" class="ml-2 text-sm font-medium">
-			{{ themeDisplayName }}
-		</span>
+		<svg
+			v-if="mode === 'dark'"
+			:class="iconClass"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<circle cx="12" cy="12" r="5" />
+			<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+		</svg>
+		<svg
+			v-else
+			:class="iconClass"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+		</svg>
+		<span v-if="showLabel" class="theme-toggle-label">{{ label }}</span>
 	</button>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from "vue";
-import {
-	getTheme,
-	toggleTheme,
-	getThemeDisplayName,
-	type Theme,
-} from "../../lib/theme";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { css, cx } from "../../../styled-system/css";
+import { getMode, toggleMode, type Mode } from "@/lib/theme";
 
-// Track analytics events client-side
-const trackEvent = (event: string, properties?: Record<string, unknown>) => {
-	try {
-		(window as any).posthog?.capture(event, properties);
-	} catch {
-		// Ignore tracking errors
+const props = withDefaults(
+	defineProps<{
+		showLabel?: boolean;
+		variant?: "icon" | "button";
+		size?: "sm" | "md" | "lg";
+	}>(),
+	{ showLabel: false, variant: "icon", size: "md" },
+);
+
+const mode = ref<Mode>("dark");
+const label = computed(() => (mode.value === "dark" ? "Light mode" : "Dark mode"));
+const ariaLabel = computed(() => `Switch to ${label.value.toLowerCase()}`);
+
+const onModeChange = (event: Event) => {
+	const detail = (event as CustomEvent<{ mode: Mode }>).detail;
+	if (detail?.mode) {
+		mode.value = detail.mode;
 	}
 };
 
-interface Props {
-	showLabel?: boolean;
-	variant?: "icon" | "button";
-	size?: "sm" | "md" | "lg";
-}
-
-const props = withDefaults(defineProps<Props>(), {
-	showLabel: false,
-	variant: "icon",
-	size: "md",
+onMounted(() => {
+	mode.value = getMode();
+	window.addEventListener("mode-change", onModeChange);
 });
 
-const currentTheme = ref<Theme>("rawkode-green");
+onBeforeUnmount(() => {
+	window.removeEventListener("mode-change", onModeChange);
+});
 
-const themeDisplayName = computed(() =>
-	getThemeDisplayName(currentTheme.value),
+const onToggle = () => {
+	mode.value = toggleMode();
+};
+
+const rootClass = computed(() =>
+	cx(
+		css({
+			display: "inline-flex",
+			alignItems: "center",
+			justifyContent: "center",
+			gap: "2",
+			borderRadius: "full",
+			color: "fg.muted",
+			transition: "all 150ms ease",
+			cursor: "pointer",
+			outline: "none",
+			_hover: { color: "fg.brand", bg: "bg.surface" },
+			_focusVisible: {
+				outline: "2px solid",
+				outlineColor: "border.focus",
+				outlineOffset: "2px",
+			},
+		}),
+		props.variant === "button"
+			? css({
+					border: "1px solid",
+					borderColor: "border.default",
+					_hover: { borderColor: "border.strong" },
+				})
+			: undefined,
+		props.size === "sm"
+			? css({ padding: props.variant === "button" ? "1.5" : "1" })
+			: props.size === "lg"
+				? css({ padding: props.variant === "button" ? "3" : "2.5" })
+				: css({ padding: props.variant === "button" ? "2" : "2" }),
+	),
 );
 
-// Listen for theme changes from other components
-const handleThemeChange = (event: Event) => {
-	const customEvent = event as CustomEvent<{ theme: Theme }>;
-	currentTheme.value = customEvent.detail.theme;
-};
-
-onMounted(() => {
-	// Initialize theme from storage
-	currentTheme.value = getTheme();
-
-	window.addEventListener("theme-change", handleThemeChange);
-});
-
-onUnmounted(() => {
-	window.removeEventListener("theme-change", handleThemeChange);
-});
-
-const handleToggle = () => {
-	const previousTheme = currentTheme.value;
-	currentTheme.value = toggleTheme();
-	// Track theme switch
-	trackEvent("theme_switched", {
-		from_theme: previousTheme,
-		to_theme: currentTheme.value,
-		source: "theme_toggle_button",
-	});
-};
-
-const buttonClasses = computed(() => {
-	const baseClasses =
-		"inline-flex items-center justify-center transition-smooth focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
-
-	const variantClasses = {
-		icon: "rounded-full hover:bg-gray-100 dark:hover:bg-gray-800",
-		button:
-			"rounded-lg border border-glass hover:bg-white/60 dark:hover:bg-gray-700/70",
-	};
-
-	const sizeClasses = {
-		sm: props.variant === "button" ? "px-3 py-2" : "p-2",
-		md: props.variant === "button" ? "px-4 py-2.5" : "p-2.5",
-		lg: props.variant === "button" ? "px-5 py-3" : "p-3",
-	};
-
-	return [
-		baseClasses,
-		variantClasses[props.variant],
-		sizeClasses[props.size],
-	].join(" ");
-});
+const iconClass = computed(() =>
+	css({
+		width: props.size === "sm" ? "4" : props.size === "lg" ? "6" : "5",
+		height: props.size === "sm" ? "4" : props.size === "lg" ? "6" : "5",
+	}),
+);
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-	transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-	opacity: 0;
+.theme-toggle-label {
+	font-size: 0.875rem;
+	font-weight: 500;
 }
 </style>

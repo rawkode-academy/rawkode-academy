@@ -1,164 +1,65 @@
 /**
- * Theme Management Utility
- * Handles theme switching between multiple color themes
+ * Theme management for design system v2.
+ *
+ * The site is single-brand (rawkode-blue: purple + cyan). The only thing
+ * the user toggles is colour mode: `light` or `dark`. Mode is applied via
+ * a `.dark` class on `<html>` so Panda's `_dark` condition can target it.
+ *
+ * Persistence: localStorage `rawkode-mode`. Fallback: `prefers-color-scheme`.
  */
 
-export type Theme =
-	| "rawkode-green"
-	| "rawkode-blue"
-	| "catppuccin"
-	| "dracula"
-	| "solarized"
-	| "pride"
-	| "lgbtq";
+export type Mode = "light" | "dark";
 
-const THEME_STORAGE_KEY = "rawkode-theme";
-const DEFAULT_THEME: Theme = "rawkode-green";
+const MODE_STORAGE_KEY = "rawkode-mode";
 
-// All available themes for cycling/rotation
-export const ALL_THEMES: Theme[] = [
-	"rawkode-green",
-	"rawkode-blue",
-	"catppuccin",
-	"dracula",
-	"solarized",
-	"pride",
-	"lgbtq",
-];
+/** Read the user's preferred mode from localStorage or the OS. */
+export function getMode(): Mode {
+	if (typeof window === "undefined") return "dark";
 
-/**
- * Get the current theme from localStorage or return default
- */
-export function getTheme(): Theme {
-	if (typeof window === "undefined") return DEFAULT_THEME;
-
-	const stored = localStorage.getItem(THEME_STORAGE_KEY);
-	if (stored && ALL_THEMES.includes(stored as Theme)) {
-		return stored as Theme;
+	try {
+		const stored = window.localStorage.getItem(MODE_STORAGE_KEY);
+		if (stored === "light" || stored === "dark") {
+			return stored;
+		}
+	} catch {
+		// localStorage unavailable; fall through to OS preference.
 	}
 
-	return DEFAULT_THEME;
+	return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+		? "dark"
+		: "light";
 }
 
-/**
- * Set the theme and persist to localStorage
- */
-export function setTheme(theme: Theme): void {
+/** Apply a mode to the document and persist the choice. */
+export function setMode(mode: Mode): void {
 	if (typeof window === "undefined") return;
 
-	// Update data attribute on root element
-	if (theme === "rawkode-green") {
-		document.documentElement.removeAttribute("data-theme");
-	} else {
-		document.documentElement.setAttribute("data-theme", theme);
+	document.documentElement.classList.toggle("dark", mode === "dark");
+
+	try {
+		window.localStorage.setItem(MODE_STORAGE_KEY, mode);
+	} catch {
+		// Persistence is best-effort.
 	}
 
-	// Persist to localStorage
-	localStorage.setItem(THEME_STORAGE_KEY, theme);
-
-	// Dispatch custom event for components to listen to
-	window.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
+	window.dispatchEvent(
+		new CustomEvent<{ mode: Mode }>("mode-change", { detail: { mode } }),
+	);
 }
 
-/**
- * Toggle between themes (cycles through all available themes)
- */
-export function toggleTheme(): Theme {
-	const current = getTheme();
-	const currentIndex = ALL_THEMES.indexOf(current);
-	const nextIndex = (currentIndex + 1) % ALL_THEMES.length;
-	const next = ALL_THEMES[nextIndex] || DEFAULT_THEME;
-	setTheme(next);
+/** Flip the current mode and return the new value. */
+export function toggleMode(): Mode {
+	const next: Mode = getMode() === "dark" ? "light" : "dark";
+	setMode(next);
 	return next;
 }
 
 /**
- * Initialize theme on page load
- * Should be called as early as possible to avoid flash
+ * Apply the persisted or OS-preferred mode before paint.
+ * Safe to call from an inline script in <head>; idempotent everywhere else.
  */
-export function initTheme(): void {
+export function initMode(): void {
 	if (typeof window === "undefined") return;
-
-	const theme = getTheme();
-	if (theme !== "rawkode-green") {
-		document.documentElement.setAttribute("data-theme", theme);
-	}
-}
-
-const THEME_COLORS: Record<
-	Theme,
-	{ primary: string; secondary: string; accent: string }
-> = {
-	"rawkode-green": {
-		primary: "#04B59C",
-		secondary: "#85FF95",
-		accent: "#23282D",
-	},
-	"rawkode-blue": {
-		primary: "#5F5ED7",
-		secondary: "#00CEFF",
-		accent: "#111827",
-	},
-	catppuccin: {
-		primary: "#CBA6F7",
-		secondary: "#F5C2E7",
-		accent: "#1E1E2E",
-	},
-	dracula: {
-		primary: "#BD93F9",
-		secondary: "#FF79C6",
-		accent: "#282A36",
-	},
-	solarized: {
-		primary: "#268BD2",
-		secondary: "#2AA198",
-		accent: "#002B36",
-	},
-	pride: {
-		primary: "#FF595E",
-		secondary: "#FFCA3A",
-		accent: "#6A4C93",
-	},
-	lgbtq: {
-		primary: "#5BCEFA",
-		secondary: "#F5A9B8",
-		accent: "#FFFFFF",
-	},
-};
-
-const THEME_DISPLAY_NAMES: Record<Theme, string> = {
-	"rawkode-green": "Rawkode Green",
-	"rawkode-blue": "Rawkode Blue",
-	catppuccin: "Catppuccin",
-	dracula: "Dracula",
-	solarized: "Solarized",
-	pride: "Pride",
-	lgbtq: "LGBTQ+",
-};
-
-/**
- * Get theme colors for current theme
- */
-export function getThemeColors(): {
-	primary: string;
-	secondary: string;
-	accent: string;
-} {
-	if (typeof window === "undefined") {
-		return {
-			primary: "#04B59C",
-			secondary: "#85FF95",
-			accent: "#23282D",
-		};
-	}
-
-	const theme = getTheme();
-	return THEME_COLORS[theme];
-}
-
-/**
- * Get theme display name
- */
-export function getThemeDisplayName(theme: Theme): string {
-	return THEME_DISPLAY_NAMES[theme];
+	const mode = getMode();
+	document.documentElement.classList.toggle("dark", mode === "dark");
 }

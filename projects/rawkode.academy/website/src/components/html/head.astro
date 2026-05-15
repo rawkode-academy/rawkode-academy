@@ -107,36 +107,7 @@ const normalizedTitle = baseTitle
 	<!-- Grafana Faro observability (loaded lazily, skips localhost) -->
 	<Grafana />
 
-	<!-- Initial theme script: respects saved preference or OS setting; avoids FOUC -->
-	<script is:inline>
-		(function () {
-			try {
-				var stored = localStorage.getItem('theme');
-				var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-				var isDark = stored ? (stored === 'dark') : prefersDark;
-				// Apply class for environments or components relying on .dark selector
-				document.documentElement.classList.toggle('dark', !!isDark);
-				// Keep meta theme-color in sync for UAs that ignore media attribute switching
-				var metas = document.querySelectorAll('meta[name="theme-color"]');
-				metas.forEach(function (m) {
-					if (!m.media) m.setAttribute('content', isDark ? '#0b0b0f' : '#ffffff');
-				});
-				// React to OS changes
-				if (window.matchMedia) {
-					var mq = window.matchMedia('(prefers-color-scheme: dark)');
-					mq.addEventListener('change', function (e) {
-						var forced = localStorage.getItem('theme');
-						if (forced) return; // user override wins
-						var nextDark = e.matches;
-						document.documentElement.classList.toggle('dark', nextDark);
-						metas.forEach(function (m) { if (!m.media) m.setAttribute('content', nextDark ? '#0b0b0f' : '#ffffff'); });
-					});
-				}
-			} catch (_) { /* no-op */ }
-		})();
-	</script>
-
-	<!-- Color theme script: initializes rawkode-green/rawkode-blue theme -->
+	<!-- Mode script: sets `.dark` class before paint, syncs theme-color meta -->
 	<ThemeScript />
 
 	{import.meta.env.DEV && (

@@ -9,13 +9,7 @@ import {
 } from "react";
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
-import {
-	setTheme,
-	getTheme,
-	getThemeDisplayName,
-	ALL_THEMES,
-	type Theme,
-} from "@/lib/theme";
+import { getMode, setMode, toggleMode, type Mode } from "@/lib/theme";
 import "./styles.css";
 
 interface NavigationItem {
@@ -26,10 +20,9 @@ interface NavigationItem {
 	category: string;
 	keywords?: string[];
 	action?: () => boolean | void;
-	theme?: Theme;
 }
 
-type CommandPage = "root" | "themes";
+type CommandPage = "root";
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -56,18 +49,13 @@ export default function CommandPalette({
 	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
+	const [currentMode, setCurrentMode] = useState<Mode>("dark");
 	const [pages, setPages] = useState<CommandPage[]>(["root"]);
 	const [hasLoadedNavigation, setHasLoadedNavigation] = useState(false);
 	const hasTrackedOpen = useRef(false);
 
 	const activePage = pages[pages.length - 1];
 	const isRootPage = activePage === "root";
-
-	const goToPage = useCallback((page: CommandPage) => {
-		setPages((prev) => [...prev, page]);
-		setSearch("");
-	}, []);
 
 	const goBack = useCallback(() => {
 		setPages((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
@@ -84,61 +72,44 @@ export default function CommandPalette({
 		return searchTerms.every((term) => valueLower.includes(term)) ? 1 : 0;
 	};
 
-	const themeItems = useMemo(
-		() =>
-			ALL_THEMES.map((theme) => ({
-				id: `theme-${theme}`,
-				title: getThemeDisplayName(theme),
-				description: `Switch to ${getThemeDisplayName(theme)} theme`,
-				category: "Themes",
-				keywords: ["theme", "color", "appearance", theme],
-				theme,
-				action: () => {
-					const previousTheme = currentTheme;
-					setTheme(theme);
-					setCurrentTheme(theme);
-					// Track theme switch
-					trackEvent("theme_switched", {
-						from_theme: previousTheme,
-						to_theme: theme,
-						source: "command_palette",
-					});
-				},
-			})),
-		[currentTheme],
-	);
-
 	const commandItems = useMemo(
 		() => [
 			{
-				id: "command-change-theme",
-				title: "Change theme",
-				description: "Choose a different color theme",
+				id: "command-toggle-mode",
+				title:
+					currentMode === "dark"
+						? "Switch to light mode"
+						: "Switch to dark mode",
+				description: "Toggle between light and dark colour modes",
 				category: "Commands",
-				keywords: ["theme", "appearance", "color", "change"],
+				keywords: ["theme", "appearance", "color", "mode", "light", "dark"],
 				action: () => {
-					goToPage("themes");
-					return false;
+					const previous = currentMode;
+					const next = toggleMode();
+					setCurrentMode(next);
+					trackEvent("mode_switched", {
+						from_mode: previous,
+						to_mode: next,
+						source: "command_palette",
+					});
 				},
 			},
 		],
-		[goToPage],
+		[currentMode],
 	);
 
 	useEffect(() => {
-		// Get current theme
-		setCurrentTheme(getTheme());
+		setCurrentMode(getMode());
 
-		// Listen for theme changes
-		const handleThemeChange = (event: Event) => {
-			const customEvent = event as CustomEvent<{ theme: Theme }>;
-			setCurrentTheme(customEvent.detail.theme);
+		const handleModeChange = (event: Event) => {
+			const customEvent = event as CustomEvent<{ mode: Mode }>;
+			setCurrentMode(customEvent.detail.mode);
 		};
-		window.addEventListener("theme-change", handleThemeChange);
+		window.addEventListener("mode-change", handleModeChange);
 
 		return () => {
 			if (typeof window !== "undefined") {
-				window.removeEventListener("theme-change", handleThemeChange);
+				window.removeEventListener("mode-change", handleModeChange);
 			}
 		};
 	}, []);
@@ -326,23 +297,11 @@ export default function CommandPalette({
 
 	if (!isOpen) return null;
 
-	const rootItems = [...commandItems, ...navigationItems, ...articleItems];
-	const themePageItems = [
-		{
-			id: "command-back-to-root",
-			title: "Back to commands",
-			description: "Return to the main menu",
-			category: "Commands",
-			keywords: ["back", "commands", "themes", "return"],
-			action: () => {
-				goBack();
-				return false;
-			},
-		},
-		...themeItems,
+	const displayedItems = [
+		...commandItems,
+		...navigationItems,
+		...articleItems,
 	];
-
-	const displayedItems = activePage === "themes" ? themePageItems : rootItems;
 
 	const groupedItems = displayedItems.reduce(
 		(acc, item) => {
@@ -394,11 +353,7 @@ export default function CommandPalette({
 							</svg>
 							<Command.Input
 								ref={inputRef}
-								placeholder={
-									activePage === "themes"
-										? "Search themes..."
-										: "Search pages..."
-								}
+								placeholder="Search pages..."
 								value={search}
 								onValueChange={setSearch}
 								className="command-palette-input"
@@ -454,9 +409,7 @@ export default function CommandPalette({
 						<Command.Empty className="command-palette-empty">
 							{!isLoading &&
 								!isSearchingArticles &&
-								(activePage === "themes"
-									? `No themes match "${search}"`
-									: `No results found for "${search}"`)}
+								`No results found for "${search}"`}
 						</Command.Empty>
 
 						{Object.entries(groupedItems).map(([category, items]) => {

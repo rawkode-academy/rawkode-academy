@@ -1,221 +1,108 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-	ALL_THEMES,
-	getTheme,
-	getThemeColors,
-	getThemeDisplayName,
-	setTheme,
-	toggleTheme,
-} from "../lib/theme";
+import { getMode, setMode, toggleMode } from "../lib/theme";
 
-describe("Theme Management", () => {
-	let originalLocalStorage: Storage;
+describe("Mode management", () => {
+	const original = {
+		localStorage: typeof window !== "undefined" ? window.localStorage : null,
+	};
 
 	beforeEach(() => {
-		// Setup DOM environment
 		if (typeof document === "undefined") {
 			global.document = {
-				documentElement: {
-					setAttribute: () => {},
-					removeAttribute: () => {},
-				},
+				documentElement: { classList: { toggle: () => {} } },
 			} as unknown as Document;
 		}
-
 		if (typeof window === "undefined") {
 			global.window = {
-				localStorage: {
-					getItem: () => null,
-					setItem: () => {},
-					removeItem: () => {},
-					clear: () => {},
-					key: () => null,
-					length: 0,
-				} as Storage,
 				dispatchEvent: () => true,
 				addEventListener: () => {},
 				removeEventListener: () => {},
+				matchMedia: () => ({ matches: false }),
 			} as unknown as Window & typeof globalThis;
 		}
 
-		// Mock localStorage
-		originalLocalStorage = window.localStorage;
-		const localStorageMock: Storage = (() => {
-			const store: Record<string, string> = {};
-			return {
-				get length() {
-					return Object.keys(store).length;
-				},
-				clear() {
-					for (const key of Object.keys(store)) {
-						delete store[key];
-					}
-				},
-				getItem(key: string) {
-					return store[key] ?? null;
-				},
-				key(index: number) {
-					return Object.keys(store)[index] ?? null;
-				},
-				removeItem(key: string) {
-					delete store[key];
-				},
-				setItem(key: string, value: string) {
-					store[key] = value;
-				},
-			} as Storage;
-		})();
+		const store: Record<string, string> = {};
+		const fakeStorage: Storage = {
+			get length() {
+				return Object.keys(store).length;
+			},
+			clear() {
+				for (const k of Object.keys(store)) delete store[k];
+			},
+			getItem: (k) => store[k] ?? null,
+			setItem: (k, v) => {
+				store[k] = v;
+			},
+			removeItem: (k) => {
+				delete store[k];
+			},
+			key: (i) => Object.keys(store)[i] ?? null,
+		};
 		Object.defineProperty(window, "localStorage", {
-			value: localStorageMock,
-			writable: true,
+			value: fakeStorage,
+			configurable: true,
 		});
+
+		vi.spyOn(document.documentElement.classList, "toggle");
+		vi.spyOn(window, "dispatchEvent");
 	});
 
 	afterEach(() => {
-		if (originalLocalStorage) {
+		vi.restoreAllMocks();
+		if (original.localStorage) {
 			Object.defineProperty(window, "localStorage", {
-				value: originalLocalStorage,
-				writable: true,
+				value: original.localStorage,
+				configurable: true,
 			});
 		}
 	});
 
-	describe("ALL_THEMES", () => {
-		it("should contain all expected themes", () => {
-			expect(ALL_THEMES).toContain("rawkode-green");
-			expect(ALL_THEMES).toContain("rawkode-blue");
-			expect(ALL_THEMES).toContain("catppuccin");
-			expect(ALL_THEMES).toContain("dracula");
-			expect(ALL_THEMES).toContain("solarized");
-			expect(ALL_THEMES).toContain("pride");
-			expect(ALL_THEMES).toContain("lgbtq");
-		});
+	it("falls back to prefers-color-scheme when nothing is stored", () => {
+		(window as unknown as { matchMedia: (q: string) => MediaQueryList }).matchMedia =
+			((_query: string) =>
+				({ matches: true }) as MediaQueryList) as never;
+		expect(getMode()).toBe("dark");
 
-		it("should have exactly 7 themes", () => {
-			expect(ALL_THEMES).toHaveLength(7);
-		});
+		(window as unknown as { matchMedia: (q: string) => MediaQueryList }).matchMedia =
+			((_query: string) =>
+				({ matches: false }) as MediaQueryList) as never;
+		expect(getMode()).toBe("light");
 	});
 
-	describe("getTheme", () => {
-		it("should return default theme when no theme is stored", () => {
-			expect(getTheme()).toBe("rawkode-green");
-		});
-
-		it("should return stored theme when valid", () => {
-			localStorage.setItem("rawkode-theme", "dracula");
-			expect(getTheme()).toBe("dracula");
-		});
-
-		it("should return default theme when stored theme is invalid", () => {
-			localStorage.setItem("rawkode-theme", "invalid-theme");
-			expect(getTheme()).toBe("rawkode-green");
-		});
+	it("honours an explicit stored mode over the OS preference", () => {
+		window.localStorage.setItem("rawkode-mode", "light");
+		(window as unknown as { matchMedia: (q: string) => MediaQueryList }).matchMedia =
+			((_query: string) =>
+				({ matches: true }) as MediaQueryList) as never;
+		expect(getMode()).toBe("light");
 	});
 
-	describe("setTheme", () => {
-		it("should store theme in localStorage", () => {
-			setTheme("catppuccin");
-			expect(localStorage.getItem("rawkode-theme")).toBe("catppuccin");
-		});
+	it("setMode toggles the .dark class, persists, and dispatches", () => {
+		setMode("dark");
+		expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+			"dark",
+			true,
+		);
+		expect(window.localStorage.getItem("rawkode-mode")).toBe("dark");
+		expect(window.dispatchEvent).toHaveBeenCalledWith(
+			expect.objectContaining({ type: "mode-change" }),
+		);
 
-		it("should set data-theme attribute for non-default themes", () => {
-			const setAttribute = vi.fn();
-			document.documentElement.setAttribute = setAttribute;
-
-			setTheme("dracula");
-			expect(setAttribute).toHaveBeenCalledWith("data-theme", "dracula");
-		});
-
-		it("should remove data-theme attribute for default theme", () => {
-			const removeAttribute = vi.fn();
-			document.documentElement.removeAttribute = removeAttribute;
-
-			setTheme("rawkode-green");
-			expect(removeAttribute).toHaveBeenCalledWith("data-theme");
-		});
+		setMode("light");
+		expect(document.documentElement.classList.toggle).toHaveBeenCalledWith(
+			"dark",
+			false,
+		);
+		expect(window.localStorage.getItem("rawkode-mode")).toBe("light");
 	});
 
-	describe("toggleTheme", () => {
-		it("should cycle through all themes in order", () => {
-			setTheme("rawkode-green");
+	it("toggleMode flips and returns the new value", () => {
+		window.localStorage.setItem("rawkode-mode", "light");
+		const next = toggleMode();
+		expect(next).toBe("dark");
+		expect(window.localStorage.getItem("rawkode-mode")).toBe("dark");
 
-			expect(toggleTheme()).toBe("rawkode-blue");
-			expect(toggleTheme()).toBe("catppuccin");
-			expect(toggleTheme()).toBe("dracula");
-			expect(toggleTheme()).toBe("solarized");
-			expect(toggleTheme()).toBe("pride");
-			expect(toggleTheme()).toBe("lgbtq");
-			expect(toggleTheme()).toBe("rawkode-green"); // Back to start
-		});
-	});
-
-	describe("getThemeDisplayName", () => {
-		it("should return correct display name for each theme", () => {
-			expect(getThemeDisplayName("rawkode-green")).toBe("Rawkode Green");
-			expect(getThemeDisplayName("rawkode-blue")).toBe("Rawkode Blue");
-			expect(getThemeDisplayName("catppuccin")).toBe("Catppuccin");
-			expect(getThemeDisplayName("dracula")).toBe("Dracula");
-			expect(getThemeDisplayName("solarized")).toBe("Solarized");
-			expect(getThemeDisplayName("pride")).toBe("Pride");
-			expect(getThemeDisplayName("lgbtq")).toBe("LGBTQ+");
-		});
-	});
-
-	describe("getThemeColors", () => {
-		it("should return correct colors for rawkode-green", () => {
-			setTheme("rawkode-green");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#04B59C");
-			expect(colors.secondary).toBe("#85FF95");
-			expect(colors.accent).toBe("#23282D");
-		});
-
-		it("should return correct colors for rawkode-blue", () => {
-			setTheme("rawkode-blue");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#5F5ED7");
-			expect(colors.secondary).toBe("#00CEFF");
-			expect(colors.accent).toBe("#111827");
-		});
-
-		it("should return correct colors for catppuccin", () => {
-			setTheme("catppuccin");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#CBA6F7");
-			expect(colors.secondary).toBe("#F5C2E7");
-			expect(colors.accent).toBe("#1E1E2E");
-		});
-
-		it("should return correct colors for dracula", () => {
-			setTheme("dracula");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#BD93F9");
-			expect(colors.secondary).toBe("#FF79C6");
-			expect(colors.accent).toBe("#282A36");
-		});
-
-		it("should return correct colors for solarized", () => {
-			setTheme("solarized");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#268BD2");
-			expect(colors.secondary).toBe("#2AA198");
-			expect(colors.accent).toBe("#002B36");
-		});
-
-		it("should return correct colors for pride", () => {
-			setTheme("pride");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#FF595E");
-			expect(colors.secondary).toBe("#FFCA3A");
-			expect(colors.accent).toBe("#6A4C93");
-		});
-
-		it("should return correct colors for lgbtq", () => {
-			setTheme("lgbtq");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#5BCEFA");
-			expect(colors.secondary).toBe("#F5A9B8");
-			expect(colors.accent).toBe("#FFFFFF");
-		});
+		const back = toggleMode();
+		expect(back).toBe("light");
 	});
 });

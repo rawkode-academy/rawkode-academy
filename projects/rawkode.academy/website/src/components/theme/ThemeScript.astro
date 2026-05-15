@@ -1,38 +1,59 @@
 ---
-/**
- * Inline theme initialization script
- * Should be placed in <head> as early as possible to prevent FOUC
+/*
+ * Inline mode initialization script. Place in <head> as early as possible
+ * to avoid a flash of the wrong colour mode. Mirrors src/lib/theme.ts.
+ *
+ * Also keeps any non-media-scoped <meta name="theme-color"> in sync with
+ * the active mode so mobile browsers paint the chrome correctly.
  */
 ---
 
 <script is:inline>
 	(function () {
-		const THEME_STORAGE_KEY = "rawkode-theme";
-		const DEFAULT_THEME = "rawkode-green";
-		const ALL_THEMES = [
-			"rawkode-green",
-			"rawkode-blue",
-			"catppuccin",
-			"dracula",
-			"solarized",
-			"pride",
-			"lgbtq",
-		];
+		const KEY = "rawkode-mode";
+		const DARK_BG = "#0b0b0f";
+		const LIGHT_BG = "#ffffff";
 
-		// Get stored theme or default
-		let theme = DEFAULT_THEME;
-		try {
-			const stored = localStorage.getItem(THEME_STORAGE_KEY);
-			if (stored && ALL_THEMES.includes(stored)) {
-				theme = stored;
+		function resolveInitial() {
+			try {
+				const stored = localStorage.getItem(KEY);
+				if (stored === "light" || stored === "dark") return stored;
+			} catch (_) {}
+			return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+				? "dark"
+				: "light";
+		}
+
+		function syncMetaColor(isDark) {
+			const metas = document.querySelectorAll('meta[name="theme-color"]');
+			metas.forEach(function (m) {
+				if (!m.media) m.setAttribute("content", isDark ? DARK_BG : LIGHT_BG);
+			});
+		}
+
+		const initial = resolveInitial();
+		document.documentElement.classList.toggle("dark", initial === "dark");
+		syncMetaColor(initial === "dark");
+
+		if (window.matchMedia) {
+			window
+				.matchMedia("(prefers-color-scheme: dark)")
+				.addEventListener("change", function (e) {
+					try {
+						const stored = localStorage.getItem(KEY);
+						if (stored === "light" || stored === "dark") return;
+					} catch (_) {}
+					const nextDark = e.matches;
+					document.documentElement.classList.toggle("dark", nextDark);
+					syncMetaColor(nextDark);
+				});
+		}
+
+		window.addEventListener("mode-change", function (e) {
+			const next = e && e.detail && e.detail.mode;
+			if (next === "dark" || next === "light") {
+				syncMetaColor(next === "dark");
 			}
-		} catch (e) {
-			// localStorage might not be available
-		}
-
-		// Apply theme immediately (rawkode-green is the default, so no attribute needed)
-		if (theme !== "rawkode-green") {
-			document.documentElement.setAttribute("data-theme", theme);
-		}
+		});
 	})();
 </script>
