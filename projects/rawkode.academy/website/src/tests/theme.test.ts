@@ -81,18 +81,13 @@ describe("Theme Management", () => {
 	});
 
 	describe("ALL_THEMES", () => {
-		it("should contain all expected themes", () => {
+		it("should contain both brand themes", () => {
 			expect(ALL_THEMES).toContain("rawkode-green");
 			expect(ALL_THEMES).toContain("rawkode-blue");
-			expect(ALL_THEMES).toContain("catppuccin");
-			expect(ALL_THEMES).toContain("dracula");
-			expect(ALL_THEMES).toContain("solarized");
-			expect(ALL_THEMES).toContain("pride");
-			expect(ALL_THEMES).toContain("lgbtq");
 		});
 
-		it("should have exactly 7 themes", () => {
-			expect(ALL_THEMES).toHaveLength(7);
+		it("should have exactly 2 themes", () => {
+			expect(ALL_THEMES).toHaveLength(2);
 		});
 	});
 
@@ -102,8 +97,8 @@ describe("Theme Management", () => {
 		});
 
 		it("should return stored theme when valid", () => {
-			localStorage.setItem("rawkode-theme", "dracula");
-			expect(getTheme()).toBe("dracula");
+			localStorage.setItem("rawkode-theme", "rawkode-blue");
+			expect(getTheme()).toBe("rawkode-blue");
 		});
 
 		it("should return default theme when stored theme is invalid", () => {
@@ -114,16 +109,16 @@ describe("Theme Management", () => {
 
 	describe("setTheme", () => {
 		it("should store theme in localStorage", () => {
-			setTheme("catppuccin");
-			expect(localStorage.getItem("rawkode-theme")).toBe("catppuccin");
+			setTheme("rawkode-blue");
+			expect(localStorage.getItem("rawkode-theme")).toBe("rawkode-blue");
 		});
 
 		it("should set data-theme attribute for non-default themes", () => {
 			const setAttribute = vi.fn();
 			document.documentElement.setAttribute = setAttribute;
 
-			setTheme("dracula");
-			expect(setAttribute).toHaveBeenCalledWith("data-theme", "dracula");
+			setTheme("rawkode-blue");
+			expect(setAttribute).toHaveBeenCalledWith("data-theme", "rawkode-blue");
 		});
 
 		it("should remove data-theme attribute for default theme", () => {
@@ -136,16 +131,11 @@ describe("Theme Management", () => {
 	});
 
 	describe("toggleTheme", () => {
-		it("should cycle through all themes in order", () => {
+		it("should toggle between the two brand themes", () => {
 			setTheme("rawkode-green");
 
 			expect(toggleTheme()).toBe("rawkode-blue");
-			expect(toggleTheme()).toBe("catppuccin");
-			expect(toggleTheme()).toBe("dracula");
-			expect(toggleTheme()).toBe("solarized");
-			expect(toggleTheme()).toBe("pride");
-			expect(toggleTheme()).toBe("lgbtq");
-			expect(toggleTheme()).toBe("rawkode-green"); // Back to start
+			expect(toggleTheme()).toBe("rawkode-green");
 		});
 	});
 
@@ -153,11 +143,6 @@ describe("Theme Management", () => {
 		it("should return correct display name for each theme", () => {
 			expect(getThemeDisplayName("rawkode-green")).toBe("Rawkode Green");
 			expect(getThemeDisplayName("rawkode-blue")).toBe("Rawkode Blue");
-			expect(getThemeDisplayName("catppuccin")).toBe("Catppuccin");
-			expect(getThemeDisplayName("dracula")).toBe("Dracula");
-			expect(getThemeDisplayName("solarized")).toBe("Solarized");
-			expect(getThemeDisplayName("pride")).toBe("Pride");
-			expect(getThemeDisplayName("lgbtq")).toBe("LGBTQ+");
 		});
 	});
 
@@ -176,46 +161,6 @@ describe("Theme Management", () => {
 			expect(colors.primary).toBe("#5F5ED7");
 			expect(colors.secondary).toBe("#00CEFF");
 			expect(colors.accent).toBe("#111827");
-		});
-
-		it("should return correct colors for catppuccin", () => {
-			setTheme("catppuccin");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#CBA6F7");
-			expect(colors.secondary).toBe("#F5C2E7");
-			expect(colors.accent).toBe("#1E1E2E");
-		});
-
-		it("should return correct colors for dracula", () => {
-			setTheme("dracula");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#BD93F9");
-			expect(colors.secondary).toBe("#FF79C6");
-			expect(colors.accent).toBe("#282A36");
-		});
-
-		it("should return correct colors for solarized", () => {
-			setTheme("solarized");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#268BD2");
-			expect(colors.secondary).toBe("#2AA198");
-			expect(colors.accent).toBe("#002B36");
-		});
-
-		it("should return correct colors for pride", () => {
-			setTheme("pride");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#FF595E");
-			expect(colors.secondary).toBe("#FFCA3A");
-			expect(colors.accent).toBe("#6A4C93");
-		});
-
-		it("should return correct colors for lgbtq", () => {
-			setTheme("lgbtq");
-			const colors = getThemeColors();
-			expect(colors.primary).toBe("#5BCEFA");
-			expect(colors.secondary).toBe("#F5A9B8");
-			expect(colors.accent).toBe("#FFFFFF");
 		});
 	});
 });

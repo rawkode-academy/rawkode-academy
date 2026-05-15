@@ -1,30 +1,17 @@
 /**
  * Theme Management Utility
- * Handles theme switching between multiple color themes
+ * Handles switching between Rawkode's two brand themes.
+ *
+ * NOTE: A follow-up pass will reduce this to rawkode-blue + light/dark only
+ * and remove the toggle. See projects/rawkode.academy/website/DS.md.
  */
 
-export type Theme =
-	| "rawkode-green"
-	| "rawkode-blue"
-	| "catppuccin"
-	| "dracula"
-	| "solarized"
-	| "pride"
-	| "lgbtq";
+export type Theme = "rawkode-green" | "rawkode-blue";
 
 const THEME_STORAGE_KEY = "rawkode-theme";
 const DEFAULT_THEME: Theme = "rawkode-green";
 
-// All available themes for cycling/rotation
-export const ALL_THEMES: Theme[] = [
-	"rawkode-green",
-	"rawkode-blue",
-	"catppuccin",
-	"dracula",
-	"solarized",
-	"pride",
-	"lgbtq",
-];
+export const ALL_THEMES: Theme[] = ["rawkode-green", "rawkode-blue"];
 
 /**
  * Get the current theme from localStorage or return default
@@ -46,22 +33,19 @@ export function getTheme(): Theme {
 export function setTheme(theme: Theme): void {
 	if (typeof window === "undefined") return;
 
-	// Update data attribute on root element
 	if (theme === "rawkode-green") {
 		document.documentElement.removeAttribute("data-theme");
 	} else {
 		document.documentElement.setAttribute("data-theme", theme);
 	}
 
-	// Persist to localStorage
 	localStorage.setItem(THEME_STORAGE_KEY, theme);
 
-	// Dispatch custom event for components to listen to
 	window.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
 }
 
 /**
- * Toggle between themes (cycles through all available themes)
+ * Toggle between the two brand themes
  */
 export function toggleTheme(): Theme {
 	const current = getTheme();
@@ -99,41 +83,11 @@ const THEME_COLORS: Record<
 		secondary: "#00CEFF",
 		accent: "#111827",
 	},
-	catppuccin: {
-		primary: "#CBA6F7",
-		secondary: "#F5C2E7",
-		accent: "#1E1E2E",
-	},
-	dracula: {
-		primary: "#BD93F9",
-		secondary: "#FF79C6",
-		accent: "#282A36",
-	},
-	solarized: {
-		primary: "#268BD2",
-		secondary: "#2AA198",
-		accent: "#002B36",
-	},
-	pride: {
-		primary: "#FF595E",
-		secondary: "#FFCA3A",
-		accent: "#6A4C93",
-	},
-	lgbtq: {
-		primary: "#5BCEFA",
-		secondary: "#F5A9B8",
-		accent: "#FFFFFF",
-	},
 };
 
 const THEME_DISPLAY_NAMES: Record<Theme, string> = {
 	"rawkode-green": "Rawkode Green",
 	"rawkode-blue": "Rawkode Blue",
-	catppuccin: "Catppuccin",
-	dracula: "Dracula",
-	solarized: "Solarized",
-	pride: "Pride",
-	lgbtq: "LGBTQ+",
 };
 
 /**
@@ -145,15 +99,10 @@ export function getThemeColors(): {
 	accent: string;
 } {
 	if (typeof window === "undefined") {
-		return {
-			primary: "#04B59C",
-			secondary: "#85FF95",
-			accent: "#23282D",
-		};
+		return THEME_COLORS["rawkode-green"];
 	}
 
-	const theme = getTheme();
-	return THEME_COLORS[theme];
+	return THEME_COLORS[getTheme()];
 }
 
 /**
