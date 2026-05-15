@@ -15,7 +15,9 @@ export interface Props {
 	showArticles?: boolean;
 	showVideos?: boolean;
 	showNews?: boolean;
+	showLearningPaths?: boolean;
 	newsLimit?: number;
+	learningPathLimit?: number;
 }
 
 const {
@@ -25,7 +27,9 @@ const {
 	showArticles = true,
 	showVideos = true,
 	showNews = true,
+	showLearningPaths = true,
 	newsLimit = 6,
+	learningPathLimit = 6,
 } = Astro.props;
 
 // Technology IDs from the collection look like "kubernetes/index"; raw IDs
@@ -56,19 +60,74 @@ const allNews = showNews
 			.slice(0, newsLimit)
 	: [];
 
+const learningPaths = showLearningPaths
+	? (await getCollection("learningPaths"))
+			.filter((path) => matchesTechnology(path.data.technologies))
+			.sort(
+				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+			)
+			.slice(0, learningPathLimit)
+	: [];
+
 const hasArticles = showArticles && articles.length > 0;
 const hasVideos = showVideos && videos.length > 0;
 const hasNews = showNews && allNews.length > 0;
-const isEmpty = !hasArticles && !hasVideos && !hasNews;
+const hasLearningPaths = showLearningPaths && learningPaths.length > 0;
+const isEmpty = !hasArticles && !hasVideos && !hasNews && !hasLearningPaths;
 
 const newsDateFormatter = new Intl.DateTimeFormat("en-US", {
 	month: "short",
 	day: "numeric",
 	year: "numeric",
 });
+
+const difficultyLabel: Record<string, string> = {
+	beginner: "Beginner",
+	intermediate: "Intermediate",
+	advanced: "Advanced",
+};
+function formatLearningPathDuration(minutes: number): string {
+	if (!minutes) return "Self-paced";
+	const h = Math.floor(minutes / 60);
+	const m = minutes % 60;
+	if (!h) return `${m}m`;
+	if (!m) return `${h}h`;
+	return `${h}h ${m}m`;
+}
 ---
 
 <div class="space-y-12">
+  <!-- Learning Paths Section -->
+  {hasLearningPaths && (
+    <section>
+      <SectionHeader
+        title={`${technologyName} learning paths`}
+        showSeparator={false}
+        class="mb-6"
+      />
+      <div class="grid gap-6 md:grid-cols-2">
+        {learningPaths.map((path) => (
+          <a
+            href={`/learning-paths/${path.id}`}
+            class="group block rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 p-6 shadow-sm hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+          >
+            <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted mb-2">
+              <span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
+              <span aria-hidden="true">·</span>
+              <span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
+            </div>
+            <h3 class="font-display text-xl font-semibold leading-tight tracking-tight text-primary-content group-hover:text-primary transition-colors">
+              {path.data.title}
+            </h3>
+            <p class="mt-2 max-w-[60ch] text-sm leading-6 text-secondary-content">
+              {path.data.description}
+            </p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
   <!-- News Section -->
   {hasNews && (
     <section>
