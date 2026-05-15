@@ -5,12 +5,17 @@ import Button from "@/components/common/Button.astro";
 import FormattedDate from "@/components/common/FormattedDate.vue";
 import type { CollectionEntry } from "astro:content";
 
+export type LearningPathTechnology = {
+	id: string;
+	label: string;
+};
+
 type Props = {
 	title: string;
 	description: string;
 	difficulty: "beginner" | "intermediate" | "advanced";
 	durationLabel: string;
-	technologies: string[];
+	technologies: LearningPathTechnology[];
 	prerequisites: string[];
 	authors: CollectionEntry<"people">[];
 	publishedAt: Date;
@@ -79,9 +84,15 @@ const hasPrerequisites = prerequisites.length > 0;
 						</h2>
 						<div class="flex flex-wrap gap-2">
 							{technologies.map((technology) => (
-								<Badge variant="secondary" size="xs">
-									{technology}
-								</Badge>
+								<a
+									href={`/technology/${technology.id}`}
+									class="inline-flex"
+									aria-label={`Browse ${technology.label} content`}
+								>
+									<Badge variant="secondary" size="xs">
+										{technology.label}
+									</Badge>
+								</a>
 							))}
 						</div>
 					</div>
