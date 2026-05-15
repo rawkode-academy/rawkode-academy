@@ -74,6 +74,7 @@ Use the radius scale tokens instead of `rounded-[1.35rem]` style literals:
 | `--radius-xl`   | `rounded-xl`   | 1.2rem   | Soft / muted panels, stat panels |
 | `--radius-2xl`  | `rounded-2xl`  | 1.35rem  | Glass cards, section shells |
 | `--radius-3xl`  | `rounded-3xl`  | 1.5rem   | Glass panels (hero-level) |
+| `--radius-4xl`  | `rounded-4xl`  | 2rem     | Page-level shells (sidebar, footer container) |
 | `--radius-pill` | `rounded-full` | 9999px   | Pills, avatars |
 
 #### Motion
