@@ -8,6 +8,7 @@ import {
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
 import LearningPathHero from "@/components/learning-paths/LearningPathHero.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 
 export const prerender = true;
 
@@ -172,6 +173,14 @@ const pageDescription = learningPath.data.description;
 			)}
 		</aside>
 	</section>
+
+	<NewsletterCTA
+		class="mt-16"
+		audience="learning-paths"
+		badge="New paths weekly"
+		headline="Get notified when we ship new learning paths"
+		subtitle="Structured roadmaps for Cloud Native, AI infra, and platform engineering — delivered when they're ready."
+	/>
 
 	<footer class="mt-16">
 		<div class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
