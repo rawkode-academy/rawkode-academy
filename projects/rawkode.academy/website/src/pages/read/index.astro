@@ -3,6 +3,7 @@ import { getCollection, getEntries } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
 import FeaturedContent from "@/components/common/FeaturedContent.astro";
 import SectionHeader from "@/components/common/SectionHeader.vue";
+import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -32,6 +33,11 @@ const pageDescription =
 
 <Page title={pageTitle} description={pageDescription}>
   <Fragment slot="extra-head">
+    <ArticleItemListJsonLd
+      articles={allArticles.filter((article) => !article.data.draft)}
+      listUrl={new URL("/read", Astro.site ?? Astro.url).href}
+      listName="Cloud Native & Kubernetes Articles"
+    />
     <link
       rel="alternate"
       type="application/rss+xml"

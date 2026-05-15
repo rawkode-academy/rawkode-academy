@@ -1,0 +1,37 @@
+---
+import { buildArticleItemListJsonLd } from "@/lib/article-itemlist-jsonld";
+
+interface ArticleEntryInput {
+	id: string;
+	data: {
+		title: string;
+		description: string;
+		publishedAt: Date;
+		updatedAt?: Date;
+	};
+}
+
+interface Props {
+	articles: ReadonlyArray<ArticleEntryInput>;
+	listUrl: string;
+	listName?: string;
+	limit?: number;
+	slot?: string;
+}
+
+const { articles, listUrl, listName, limit } = Astro.props;
+
+const jsonLd = buildArticleItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	listName: listName ?? "Articles",
+	articles,
+	...(typeof limit === "number" ? { limit } : {}),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
