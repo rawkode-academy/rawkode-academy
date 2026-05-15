@@ -1,11 +1,10 @@
 ---
 export const prerender = true;
 
-import TopicHub from "@/components/technology/TopicHub.astro";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-import Page from "@/wrappers/page.astro";
+import Prose from "@/components/prose/Prose.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
+import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
@@ -19,18 +18,12 @@ import {
 import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import { css } from "../../../styled-system/css";
 
 export interface Technology extends Omit<TechnologyData, "logos"> {
 	id: string;
 	logo?: string | undefined;
-	videos?:
-		| {
-				id: string;
-				title: string;
-				thumbnailUrl: string;
-				slug: string;
-		  }[]
-		| undefined;
+	videos?: { id: string; title: string; thumbnailUrl: string; slug: string }[] | undefined;
 	videoCount?: number;
 	articleCount?: number;
 }
@@ -41,8 +34,7 @@ export const getStaticPaths = (async () => {
 		if (items.length > 0) {
 			return Promise.all(
 				items.map(async (e) => {
-					const logo =
-						resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
+					const logo = resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
 					const videos = await getVideosForTechnology(e.id);
 					return {
 						params: { id: e.id },
@@ -70,10 +62,7 @@ export const getStaticPaths = (async () => {
 			);
 		}
 	} catch (error) {
-		console.warn(
-			"getCollection('technologies') failed; falling back to FS glob:",
-			error,
-		);
+		console.warn("getCollection('technologies') failed; falling back to FS glob:", error);
 	}
 
 	try {
@@ -90,7 +79,6 @@ export const getStaticPaths = (async () => {
 			return out;
 		}
 		const files = await walk(base);
-
 		return await Promise.all(
 			files.map(async (rel) => {
 				const id = rel.replace(/\.mdx$/i, "");
@@ -146,182 +134,75 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 let { technology } = Astro.props as { technology?: Technology };
-
 const id = Astro.params.id as string;
 const items = await getCollection("technologies");
 const technologyEntry = items.find((x) => x.id === id);
 let Content: any = null;
 let hasContent = false;
-
 if (technologyEntry) {
 	try {
 		const rendered = await render(technologyEntry);
 		Content = rendered.Content;
-		hasContent = Boolean(
-			technologyEntry.body && technologyEntry.body.trim().length > 0,
-		);
+		hasContent = Boolean(technologyEntry.body && technologyEntry.body.trim().length > 0);
 	} catch (err) {
 		console.warn("Failed to render technology content:", err);
 	}
 }
 
-if (!technology) {
-	try {
-		const e = technologyEntry;
-		if (e) {
-			const logo = resolveTechnologyIconUrl(e.id, e.data.logos) ?? undefined;
-			const videos = await getVideosForTechnology(e.id);
-			technology = {
-				id: e.id,
-				name: e.data.name,
-				seo: e.data.seo,
-				documentation: e.data.documentation,
-				website: e.data.website,
-				source: e.data.source,
-				license: e.data.license,
-				category: e.data.category,
-				subcategory: e.data.subcategory,
-				status: e.data.status,
-				logo,
-				videos,
-				matrix: e.data.matrix,
-				cncf: e.data.cncf,
-				community: e.data.community,
-			};
-		} else {
-			const base = resolveContentDirSync("technologies");
-			const raw = await readFile(join(base, `${id}.mdx`), "utf8");
-			const fm = matter(raw).data as any;
-			const logo = resolveTechnologyIconUrl(id, fm.logos) ?? undefined;
-			const videos = await getVideosForTechnology(id);
-			technology = {
-				id,
-				name: fm.name ?? id,
-				seo: fm.seo,
-				documentation: fm.documentation,
-				website: fm.website,
-				source: fm.source,
-				license: fm.license,
-				category: fm.category,
-				subcategory: fm.subcategory,
-				status: fm.status,
-				logo,
-				videos,
-				matrix: fm.matrix,
-				cncf: fm.cncf,
-				community: fm.community,
-			};
-		}
-	} catch (err) {
-		console.error("Failed to load technology at runtime:", err);
-	}
+if (!technology && technologyEntry) {
+	const logo = resolveTechnologyIconUrl(technologyEntry.id, technologyEntry.data.logos) ?? undefined;
+	const videos = await getVideosForTechnology(technologyEntry.id);
+	technology = {
+		id: technologyEntry.id,
+		name: technologyEntry.data.name,
+		seo: technologyEntry.data.seo,
+		documentation: technologyEntry.data.documentation,
+		website: technologyEntry.data.website,
+		source: technologyEntry.data.source,
+		license: technologyEntry.data.license,
+		category: technologyEntry.data.category,
+		subcategory: technologyEntry.data.subcategory,
+		status: technologyEntry.data.status,
+		logo,
+		videos,
+		matrix: technologyEntry.data.matrix,
+		cncf: technologyEntry.data.cncf,
+		community: technologyEntry.data.community,
+	};
 }
 
-if (!technology) {
-	return Astro.redirect("/technology");
-}
+if (!technology) return Astro.redirect("/technology");
 
 const placeholderLogo = "/apple-touch-icon.png";
-
 const videoCount = technology.videos?.length ?? 0;
-const featuredVideos = (technology.videos ?? []).slice(0, 4);
-const categoryLabel =
-	technology.subcategory ?? technology.category ?? "Cloud Native";
+const featuredVideos = (technology.videos ?? []).slice(0, 6);
+const categoryLabel = technology.subcategory ?? technology.category ?? "Cloud Native";
 
-const seoTitle =
-	technology.seo?.title ??
-	(videoCount > 0
-		? `${technology.name} Tutorials, Videos & Guides | Rawkode Academy`
-		: `${technology.name} — ${categoryLabel} | Rawkode Academy`);
+const seoTitle = technology.seo?.title ?? (videoCount > 0 ? `${technology.name} Tutorials, Videos & Guides | Rawkode Academy` : `${technology.name} — ${categoryLabel} | Rawkode Academy`);
 
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
 	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
 	const parts: string[] = [];
-	if (videoCount > 0) {
-		parts.push(
-			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}`,
-		);
-	} else {
-		parts.push(`${technology.name}, a ${categoryLabel} project`);
-	}
+	if (videoCount > 0) parts.push(`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}`);
+	else parts.push(`${technology.name}, a ${categoryLabel} project`);
 	if (cncfUseCase) parts.push(cncfUseCase);
-	parts.push(
-		`Watch deep-dives, live coding, and interviews from Rawkode Academy.`,
-	);
+	parts.push(`Watch deep-dives, live coding, and interviews from Rawkode Academy.`);
 	return parts.join(". ");
 })();
 
-// Page is "thin" if it has no MDX body content AND no associated videos.
-// noindex these so Google doesn't classify the site as low-quality.
 const noindex = !hasContent && videoCount === 0;
 
-const technologyUrl = new URL(
-	`/technology/${technology.id.replace(/\/index$/, "")}`,
-	Astro.site,
-).href;
-const absoluteLogo = technology.logo
-	? technology.logo.startsWith("http")
-		? technology.logo
-		: new URL(technology.logo, Astro.site).href
-	: undefined;
+const technologyUrl = new URL(`/technology/${technology.id.replace(/\/index$/, "")}`, Astro.site).href;
+const absoluteLogo = technology.logo ? (technology.logo.startsWith("http") ? technology.logo : new URL(technology.logo, Astro.site).href) : undefined;
 
-// Status display helpers
-const statusLabels: Record<string, string> = {
-	skip: "Skip",
-	watch: "Watch",
-	explore: "Explore",
-	learn: "Learn",
-	adopt: "Adopt",
-	advocate: "Advocate",
-	graveyard: "Graveyard",
-	"guilty-pleasure": "Guilty Pleasure",
-	// Legacy values
-	hold: "Skip",
-	assess: "Watch",
-	trial: "Explore",
-};
-const groupingLabels: Record<string, string> = {
-	plumbing: "Plumbing",
-	platform: "Platform",
-	observability: "Observability",
-	security: "Security",
-};
-const trajectoryEmoji: Record<string, string> = {
-	rising: "↗️",
-	stable: "→",
-	falling: "↘️",
-};
-
-const statusLabel = technology.matrix?.status
-	? statusLabels[technology.matrix.status] || technology.matrix.status
-	: "";
-const groupingLabel = technology.matrix?.grouping
-	? groupingLabels[technology.matrix.grouping] || technology.matrix.grouping
-	: "";
-const trajectoryIcon = technology.matrix?.trajectory
-	? trajectoryEmoji[technology.matrix.trajectory]
-	: null;
-
-// CNCF status helpers
 const cncfStatusLabels: Record<string, string> = {
 	sandbox: "Sandbox",
 	incubating: "Incubating",
 	graduated: "Graduated",
 	archived: "Archived",
 };
-const cncfStatusColors: Record<string, string> = {
-	sandbox:
-		"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-	incubating:
-		"bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-	graduated:
-		"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
-	archived:
-		"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-700",
-};
 
-// Check if we have community links to display
 const hasCommunityLinks =
 	technology.community &&
 	(technology.community.twitter ||
@@ -331,6 +212,200 @@ const hasCommunityLinks =
 		technology.community.mailingList ||
 		technology.community.githubDiscussions ||
 		technology.community.chat);
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+
+const heroCard = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "1fr auto" },
+	gap: "8",
+	alignItems: "center",
+	p: { base: "8", md: "12" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	backgroundImage:
+		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 50%)",
+});
+
+const tagRow = css({ display: "flex", flexWrap: "wrap", gap: "2", mb: "4" });
+
+const cncfBadge = css({
+	display: "inline-flex",
+	alignItems: "center",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+});
+
+const catPill = css({
+	display: "inline-flex",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	color: "fg.muted",
+	fontSize: "xs",
+	fontWeight: "medium",
+});
+
+const eyebrow = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", mb: "2" });
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "4xl", md: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "6",
+});
+
+const btnRow = css({ display: "flex", flexWrap: "wrap", gap: "3", alignItems: "center" });
+
+const primaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const ghostBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
+});
+
+const licenseLine = css({ mt: "4", fontSize: "sm", color: "fg.muted" });
+const licenseEm = css({ fontWeight: "medium", color: "fg.secondary" });
+
+const logoBox = css({
+	w: "40",
+	h: "40",
+	p: "6",
+	borderRadius: "3xl",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	"& img": { maxWidth: "full", maxHeight: "full", objectFit: "contain" },
+});
+
+const sectionBlock = css({ mt: "16" });
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "6",
+});
+
+const videoGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const videoCard = css({
+	display: "flex",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+});
+
+const videoThumb = css({
+	aspectRatio: "16 / 9",
+	bg: "bg.sunken",
+	overflow: "hidden",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const videoBody = css({ p: "5" });
+const videoTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary", lineHeight: "tight", display: "-webkit-box", WebkitLineClamp: "2", WebkitBoxOrient: "vertical", overflow: "hidden" });
+
+const communityGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+	gap: "3",
+});
+
+const communityLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "4",
+	py: "3",
+	borderRadius: "xl",
+	bg: "bg.surface",
+	color: "fg.secondary",
+	textDecoration: "none",
+	fontSize: "sm",
+	fontWeight: "medium",
+	transition: "all 150ms ease",
+	_hover: { bg: "bg.brand-subtle", color: "fg.brand" },
+});
+
+const guideCard = css({
+	mt: "16",
+	p: { base: "6", md: "10" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const guideEyebrow = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+});
+
+const guideTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mt: "2",
+	mb: "6",
+});
 ---
 
 <Page
@@ -352,913 +427,87 @@ const hasCommunityLinks =
 		category={categoryLabel}
 	/>
 	<Fragment slot="extra-head">
-		<link
-			rel="alternate"
-			type="application/rss+xml"
-			title={`Rawkode Academy — ${technology.name} (RSS)`}
-			href={`/api/feeds/technology/${technology.id.replace(/\/index$/, "")}.xml`}
-		/>
+		<link rel="alternate" type="application/rss+xml" title={`Rawkode Academy — ${technology.name} (RSS)`} href={`/api/feeds/technology/${technology.id.replace(/\/index$/, "")}.xml`} />
 	</Fragment>
-	<div class="technology-stage page-px section-py section-pt-0">
-		<section class="w-full">
-			<div class="glass-panel technology-header-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-				<div class="mb-6">
-					<Breadcrumb elements={[
-						{ title: 'Home', link: '/' },
-						{ title: 'Technologies', link: '/technology' },
-						{ title: technology.name, link: `/technology/${technology.id}` },
-					]} />
+
+	<div class={shell}>
+		<Breadcrumb elements={[{ title: "Home", link: "/" }, { title: "Technologies", link: "/technology" }, { title: technology.name, link: `/technology/${technology.id}` }]} />
+
+		<section class={heroCard}>
+			<div>
+				<div class={tagRow}>
+					{technology.cncf?.status && (
+						<span class={cncfBadge}>CNCF {cncfStatusLabels[technology.cncf.status] ?? technology.cncf.status}</span>
+					)}
+					{technology.category && (
+						<span class={catPill}>
+							{technology.category}{technology.subcategory && ` / ${technology.subcategory}`}
+						</span>
+					)}
 				</div>
-
-				<div class="technology-header-grid">
-					<div class="technology-header-copy">
-						<div class="flex flex-wrap items-center gap-2 mb-3">
-							{technology.matrix && (
-								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
-									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
-										{statusLabel}
-									</span>
-									<span class="text-sm text-muted group-hover:text-primary transition-colors">
-										{groupingLabel}
-									</span>
-									{trajectoryIcon && (
-										<span class="text-sm" title={`Trajectory: ${technology.matrix.trajectory}`}>
-											{trajectoryIcon}
-										</span>
-									)}
-									<svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-									</svg>
-								</a>
-							)}
-							{technology.cncf?.status && (
-								<span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cncfStatusColors[technology.cncf.status]}`}>
-									<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-									</svg>
-									CNCF {cncfStatusLabels[technology.cncf.status]}
-								</span>
-							)}
-							{technology.category && (
-								<span class="technology-taxonomy-pill">
-									{technology.category}{technology.subcategory && ` / ${technology.subcategory}`}
-								</span>
-							)}
-						</div>
-
-						<p class="technology-kicker">
-							{hasContent ? "Technology Guide" : "Technology Overview"}
-						</p>
-						<h1 class="technology-title">{technology.name}</h1>
-
-						<div class="flex flex-wrap gap-3 items-center">
-							{technology.website && (
-								<a
-									href={technology.website}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
-								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-									</svg>
-									Official Website
-								</a>
-							)}
-							{technology.documentation && (
-								<a
-									href={technology.documentation}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
-								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-									</svg>
-									Documentation
-								</a>
-							)}
-							{technology.source && (
-								<a
-									href={technology.source}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
-								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-									</svg>
-									Source Code
-								</a>
-							)}
-							{hasContent && (
-								<a href="#complete-guide" class="technology-guide-link">
-									Read the guide
-								</a>
-							)}
-						</div>
-
-						{technology.license && (
-							<p class="mt-4 text-sm text-muted">
-								License: <span class="font-medium text-secondary-content">{technology.license}</span>
-							</p>
-						)}
-					</div>
-
-					<div class="technology-logo-shell">
-						<div class="glass-media-brand technology-logo-card">
-							<img
-								src={technology.logo ? technology.logo : placeholderLogo}
-								alt={`${technology.name} Logo`}
-								class="w-full h-full object-contain drop-shadow-lg"
-								onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
-							/>
-						</div>
-					</div>
+				<p class={eyebrow}>{hasContent ? "Technology Guide" : "Technology Overview"}</p>
+				<h1 class={title}>{technology.name}</h1>
+				<div class={btnRow}>
+					{technology.website && (
+						<a href={technology.website} target="_blank" rel="noopener noreferrer" class={primaryBtn}>Official Website</a>
+					)}
+					{technology.documentation && (
+						<a href={technology.documentation} target="_blank" rel="noopener noreferrer" class={ghostBtn}>Documentation</a>
+					)}
+					{technology.source && (
+						<a href={technology.source} target="_blank" rel="noopener noreferrer" class={ghostBtn}>Source Code</a>
+					)}
 				</div>
-			</div>
-		</section>
-
-		<section class="w-full">
-			<div class="main-content-grid max-w-7xl mx-auto">
-				{hasContent && Content && (
-					<section id="complete-guide" class="guide-panel rounded-3xl p-6 md:p-8">
-						<div class="mb-6">
-							<p class="technology-kicker">Field Guide</p>
-							<h2 class="guide-title">Complete Guide</h2>
-						</div>
-						<article class="guide-prose prose prose-lg dark:prose-invert max-w-none">
-							<Content />
-						</article>
-					</section>
+				{technology.license && (
+					<p class={licenseLine}>License: <span class={licenseEm}>{technology.license}</span></p>
 				)}
-
-				<aside class="media-rail">
-					{featuredVideos.length > 0 && (
-						<section class="video-panel rounded-3xl p-5 md:p-6">
-							<div class="mb-4">
-								<p class="technology-kicker">Watch</p>
-								<h2 class="video-panel-title">Latest Videos</h2>
-							</div>
-							<div class="video-rail-grid">
-								{featuredVideos.map((video) => (
-									<a href={`/watch/${video.slug}`} class="video-card group">
-										<img
-											src={video.thumbnailUrl}
-											alt={video.title}
-											class="video-card-image"
-											loading="lazy"
-										/>
-										<div class="video-card-overlay"></div>
-										<div class="video-card-title">{video.title}</div>
-									</a>
-								))}
-							</div>
-							{videoCount > featuredVideos.length && (
-								<a href="#more-content" class="video-more-link">
-									Browse all {videoCount} videos
-								</a>
-							)}
-						</section>
-					)}
-
-					{technology.matrix && (technology.matrix.why || technology.matrix.spicyTake || technology.matrix.makesMeFeel) && (
-						<section class="glass-panel matrix-rail-panel rounded-3xl p-5 md:p-6">
-							<div class="flex items-center gap-3 mb-4">
-								{technology.matrix.makesMeFeel && (
-									<span class="text-3xl">{technology.matrix.makesMeFeel}</span>
-								)}
-								<div>
-									<h2 class="text-lg font-bold text-primary-content">Rawkode's Take</h2>
-									<p class="text-xs text-muted">What matters in practice</p>
-								</div>
-							</div>
-							{technology.matrix.why && (
-								<p class="text-sm text-secondary-content leading-relaxed mb-4">
-									{technology.matrix.why}
-								</p>
-							)}
-							{technology.matrix.spicyTake && (
-								<div class="flex items-start gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/40 rounded-xl">
-									<span class="text-base flex-shrink-0">🌶️</span>
-									<p class="text-sm italic text-red-800 dark:text-red-200">
-										{technology.matrix.spicyTake}
-									</p>
-								</div>
-							)}
-							<div class="matrix-stat-grid mt-4">
-								{technology.matrix.firstUsed && (
-									<div class="stat-pill">
-										<span class="stat-pill-label">First Used</span>
-										<span class="stat-pill-value">{technology.matrix.firstUsed}</span>
-									</div>
-								)}
-								{technology.matrix.lastUsed && (
-									<div class="stat-pill">
-										<span class="stat-pill-label">Last Used</span>
-										<span class="stat-pill-value">{technology.matrix.lastUsed}</span>
-									</div>
-								)}
-								{technology.matrix.confidence && (
-									<div class="stat-pill">
-										<span class="stat-pill-label">Confidence</span>
-										<span class="stat-pill-value">
-											{technology.matrix.confidence === 'deep-experience' ? 'Deep XP' :
-											 technology.matrix.confidence === 'some-experience' ? 'Some XP' : 'Gut'}
-										</span>
-									</div>
-								)}
-								{videoCount > 0 && (
-									<div class="stat-pill">
-										<span class="stat-pill-label">Videos</span>
-										<span class="stat-pill-value">{videoCount}</span>
-									</div>
-								)}
-							</div>
-						</section>
-					)}
-				</aside>
+			</div>
+			<div class={logoBox}>
+				<img src={technology.logo ? technology.logo : placeholderLogo} alt={`${technology.name} logo`} onerror={`this.onerror=null; this.src='${placeholderLogo}';`} />
 			</div>
 		</section>
 
-		<!-- CNCF & Community Info Grid -->
-		{(technology.cncf || hasCommunityLinks) && (
-			<section class="w-full">
-				<div class="technology-signal-grid max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
-					<!-- CNCF Details -->
-					{technology.cncf && (
-						<div class="technology-signal-panel">
-							<div class="flex items-center gap-3 mb-5">
-								<div class="technology-signal-icon technology-signal-icon-cncf">
-									<svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-lg font-bold text-primary-content">CNCF Project</h3>
-									<p class="text-sm text-muted">Cloud Native Computing Foundation</p>
-								</div>
+		{featuredVideos.length > 0 && (
+			<section class={sectionBlock}>
+				<h2 class={sectionTitle}>Videos & Tutorials</h2>
+				<div class={videoGrid}>
+					{featuredVideos.map((v) => (
+						<a href={`/watch/${v.slug}`} class={videoCard}>
+							<div class={videoThumb}>
+								<img src={v.thumbnailUrl} alt={v.title} loading="lazy" />
 							</div>
-
-							<!-- CNCF Timeline -->
-							<div class="space-y-3 mb-5">
-								{technology.cncf.accepted && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-blue-500"></div>
-										<span class="text-sm text-muted">
-											Accepted: <span class="font-medium">{technology.cncf.accepted}</span>
-										</span>
-									</div>
-								)}
-								{technology.cncf.incubating && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-purple-500"></div>
-										<span class="text-sm text-muted">
-											Incubating: <span class="font-medium">{technology.cncf.incubating}</span>
-										</span>
-									</div>
-								)}
-								{technology.cncf.graduated && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-green-500"></div>
-										<span class="text-sm text-muted">
-											Graduated: <span class="font-medium">{technology.cncf.graduated}</span>
-										</span>
-									</div>
-								)}
-								{technology.cncf.archived && (
-									<div class="flex items-center gap-3">
-										<div class="w-2 h-2 rounded-full bg-gray-400"></div>
-										<span class="text-sm text-muted">
-											Archived: <span class="font-medium">{technology.cncf.archived}</span>
-										</span>
-									</div>
-								)}
+							<div class={videoBody}>
+								<h3 class={videoTitle}>{v.title}</h3>
 							</div>
-
-							<!-- CNCF Links -->
-							<div class="flex flex-wrap gap-2">
-								{technology.cncf.devStatsUrl && (
-									<a
-										href={technology.cncf.devStatsUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-										</svg>
-										Dev Stats
-									</a>
-								)}
-								{technology.cncf.annualReviewUrl && (
-									<a
-										href={technology.cncf.annualReviewUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-										</svg>
-										Annual Review
-									</a>
-								)}
-							</div>
-						</div>
-					)}
-
-					<!-- Community Links -->
-					{hasCommunityLinks && (
-						<div class="technology-signal-panel">
-							<div class="flex items-center gap-3 mb-5">
-								<div class="technology-signal-icon technology-signal-icon-community">
-									<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-									</svg>
-								</div>
-								<div>
-									<h3 class="text-lg font-bold text-primary-content">Community</h3>
-									<p class="text-sm text-muted">Join the conversation</p>
-								</div>
-							</div>
-
-							<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-								{technology.community?.twitter && (
-									<a
-										href={technology.community.twitter}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-										</svg>
-										Twitter/X
-									</a>
-								)}
-								{technology.community?.youtube && (
-									<a
-										href={technology.community.youtube}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-										</svg>
-										YouTube
-									</a>
-								)}
-								{technology.community?.slack && (
-									<a
-										href={technology.community.slack}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/>
-										</svg>
-										Slack
-									</a>
-								)}
-								{technology.community?.blog && (
-									<a
-										href={technology.community.blog}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-										</svg>
-										Blog
-									</a>
-								)}
-								{technology.community?.mailingList && (
-									<a
-										href={technology.community.mailingList}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-										</svg>
-										Mailing List
-									</a>
-								)}
-								{technology.community?.githubDiscussions && (
-									<a
-										href={technology.community.githubDiscussions}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-										</svg>
-										Discussions
-									</a>
-								)}
-								{technology.community?.chat && (
-									<a
-										href={technology.community.chat}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-content bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-									>
-										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-										</svg>
-										Chat
-									</a>
-								)}
-							</div>
-						</div>
-					)}
+						</a>
+					))}
 				</div>
 			</section>
 		)}
 
-		<!-- Additional Content (Articles) -->
-		<section id="more-content" class="w-full">
-			<div class="max-w-7xl mx-auto">
-				<TopicHub
-					technologyId={technology.id}
-					technologyName={technology.name}
-					videos={technology.videos || []}
-					showVideos={false}
-				/>
-			</div>
-		</section>
+		{hasCommunityLinks && technology.community && (
+			<section class={sectionBlock}>
+				<h2 class={sectionTitle}>Community</h2>
+				<div class={communityGrid}>
+					{technology.community.twitter && <a href={technology.community.twitter} target="_blank" rel="noopener noreferrer" class={communityLink}>Twitter</a>}
+					{technology.community.youtube && <a href={technology.community.youtube} target="_blank" rel="noopener noreferrer" class={communityLink}>YouTube</a>}
+					{technology.community.slack && <a href={technology.community.slack} target="_blank" rel="noopener noreferrer" class={communityLink}>Slack</a>}
+					{technology.community.blog && <a href={technology.community.blog} target="_blank" rel="noopener noreferrer" class={communityLink}>Blog</a>}
+					{technology.community.mailingList && <a href={technology.community.mailingList} target="_blank" rel="noopener noreferrer" class={communityLink}>Mailing List</a>}
+					{technology.community.githubDiscussions && <a href={technology.community.githubDiscussions} target="_blank" rel="noopener noreferrer" class={communityLink}>GitHub Discussions</a>}
+					{technology.community.chat && <a href={technology.community.chat} target="_blank" rel="noopener noreferrer" class={communityLink}>Chat</a>}
+				</div>
+			</section>
+		)}
 
-		<!-- CTA Section -->
-		<section class="w-full">
-			<div class="max-w-xl mx-auto">
-				<NewsletterCTA
-					server:defer
-					audience={`technology:${technology.id}`}
-					badge={`${technology.name} updates`}
-					headline={`Stay Updated on ${technology.name}`}
-					subtitle="Get notified when we publish new tutorials, courses, and videos."
-				/>
-			</div>
-		</section>
+		{hasContent && Content && (
+			<section id="complete-guide" class={guideCard}>
+				<span class={guideEyebrow}>Field Guide</span>
+				<h2 class={guideTitle}>Complete Guide</h2>
+				<Prose>
+					<Content />
+				</Prose>
+			</section>
+		)}
 	</div>
 </Page>
-
-<style>
-	.matrix-badge {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
-
-	/* Skip - red */
-	.matrix-badge-skip,
-	.matrix-badge-hold {
-		background: rgba(239, 68, 68, 0.15);
-		color: rgb(185, 28, 28);
-		border: 1px solid rgba(239, 68, 68, 0.3);
-	}
-
-	/* Watch - orange */
-	.matrix-badge-watch,
-	.matrix-badge-assess {
-		background: rgba(249, 115, 22, 0.15);
-		color: rgb(194, 65, 12);
-		border: 1px solid rgba(249, 115, 22, 0.3);
-	}
-
-	/* Explore - yellow */
-	.matrix-badge-explore,
-	.matrix-badge-trial {
-		background: rgba(234, 179, 8, 0.15);
-		color: rgb(161, 98, 7);
-		border: 1px solid rgba(234, 179, 8, 0.3);
-	}
-
-	/* Learn - blue */
-	.matrix-badge-learn {
-		background: rgba(59, 130, 246, 0.15);
-		color: rgb(29, 78, 216);
-		border: 1px solid rgba(59, 130, 246, 0.3);
-	}
-
-	/* Adopt - green */
-	.matrix-badge-adopt {
-		background: rgba(34, 197, 94, 0.15);
-		color: rgb(21, 128, 61);
-		border: 1px solid rgba(34, 197, 94, 0.3);
-	}
-
-	/* Advocate - purple */
-	.matrix-badge-advocate {
-		background: rgba(139, 92, 246, 0.15);
-		color: rgb(109, 40, 217);
-		border: 1px solid rgba(139, 92, 246, 0.3);
-	}
-
-	/* Special zones */
-	.matrix-badge-graveyard {
-		background: rgba(107, 114, 128, 0.15);
-		color: rgb(75, 85, 99);
-		border: 1px solid rgba(107, 114, 128, 0.3);
-	}
-
-	.matrix-badge-guilty-pleasure {
-		background: rgba(236, 72, 153, 0.15);
-		color: rgb(190, 24, 93);
-		border: 1px solid rgba(236, 72, 153, 0.3);
-	}
-
-	/* Dark mode adjustments */
-	:global(.dark) .matrix-badge-skip,
-	:global(.dark) .matrix-badge-hold {
-		color: rgb(252, 165, 165);
-	}
-
-	:global(.dark) .matrix-badge-watch,
-	:global(.dark) .matrix-badge-assess {
-		color: rgb(253, 186, 116);
-	}
-
-	:global(.dark) .matrix-badge-explore,
-	:global(.dark) .matrix-badge-trial {
-		color: rgb(253, 224, 71);
-	}
-
-	:global(.dark) .matrix-badge-learn {
-		color: rgb(147, 197, 253);
-	}
-
-	:global(.dark) .matrix-badge-adopt {
-		color: rgb(134, 239, 172);
-	}
-
-	:global(.dark) .matrix-badge-advocate {
-		color: rgb(196, 181, 253);
-	}
-
-	:global(.dark) .matrix-badge-graveyard {
-		color: rgb(156, 163, 175);
-	}
-
-	:global(.dark) .matrix-badge-guilty-pleasure {
-		color: rgb(249, 168, 212);
-	}
-
-	.technology-stage {
-		max-width: 84rem;
-		margin: 0 auto;
-		display: grid;
-		gap: clamp(1.5rem, 3vw, 2.5rem);
-	}
-
-	.technology-header-panel {
-		position: relative;
-		overflow: hidden;
-	}
-
-	.technology-header-panel::before {
-		content: "";
-		position: absolute;
-		inset: auto -5rem -7rem auto;
-		width: 16rem;
-		height: 16rem;
-		border-radius: 9999px;
-		background: radial-gradient(circle, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0));
-		pointer-events: none;
-	}
-
-	.technology-header-grid {
-		position: relative;
-		display: grid;
-		gap: clamp(1.5rem, 3vw, 3rem);
-		align-items: center;
-	}
-
-	.technology-header-copy {
-		position: relative;
-		z-index: 1;
-	}
-
-	.technology-kicker {
-		margin: 0 0 0.85rem;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.22em;
-		text-transform: uppercase;
-		color: rgb(13, 148, 136);
-	}
-
-	.technology-taxonomy-pill {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.4rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.76rem;
-		font-weight: 600;
-		color: rgb(31, 41, 55);
-		background: rgba(255, 255, 255, 0.72);
-		border: 1px solid rgba(148, 163, 184, 0.22);
-	}
-
-	.technology-title {
-		margin: 0 0 1rem;
-		font-size: clamp(2.2rem, 4.2vw, 3.8rem);
-		line-height: 0.98;
-		font-weight: 850;
-		letter-spacing: -0.05em;
-		color: rgb(15, 23, 42);
-		text-wrap: balance;
-	}
-
-	.technology-guide-link {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.72rem 1rem;
-		border-radius: 0.9rem;
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: rgb(15, 23, 42);
-		background: rgba(255, 255, 255, 0.7);
-		border: 1px solid rgba(148, 163, 184, 0.2);
-		transition:
-			transform 180ms ease,
-			border-color 180ms ease,
-			background 180ms ease;
-	}
-
-	.technology-guide-link:hover {
-		transform: translateY(-1px);
-		background: rgba(255, 255, 255, 0.94);
-		border-color: rgba(13, 148, 136, 0.24);
-	}
-
-	.technology-logo-shell {
-		display: grid;
-		place-items: center;
-	}
-
-	.technology-logo-card {
-		width: clamp(8.2rem, 18vw, 11rem);
-		height: clamp(8.2rem, 18vw, 11rem);
-		padding: 1.2rem;
-		border-radius: 2rem;
-	}
-
-	.main-content-grid {
-		display: grid;
-		gap: 1.25rem;
-		align-items: start;
-	}
-
-	.media-rail {
-		display: grid;
-		gap: 1rem;
-	}
-
-	.guide-panel {
-		border: 1px solid rgba(148, 163, 184, 0.16);
-		background:
-			linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9)),
-			radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 32%);
-		box-shadow:
-			0 18px 44px rgba(15, 23, 42, 0.06),
-			inset 0 1px 0 rgba(255, 255, 255, 0.82);
-	}
-
-	.guide-title {
-		margin: 0.35rem 0 0;
-		font-size: clamp(1.75rem, 2.8vw, 2.5rem);
-		line-height: 1.05;
-		font-weight: 850;
-		letter-spacing: -0.04em;
-		color: rgb(15, 23, 42);
-	}
-
-	.guide-prose :global(p:first-of-type) {
-		font-size: clamp(1.02rem, 1.15vw, 1.15rem);
-		line-height: 1.75;
-		color: rgba(15, 23, 42, 0.82);
-	}
-
-	.guide-prose :global(h2),
-	.guide-prose :global(h3) {
-		font-weight: 800;
-		letter-spacing: -0.03em;
-		color: rgb(15, 23, 42);
-		text-wrap: balance;
-	}
-
-	.guide-prose :global(a) {
-		text-decoration-thickness: 0.08em;
-		text-underline-offset: 0.18em;
-	}
-
-	.video-panel,
-	.matrix-rail-panel {
-		border: 1px solid rgba(148, 163, 184, 0.18);
-		background: rgba(255, 255, 255, 0.84);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-	}
-
-	.video-panel-title {
-		margin: 0.25rem 0 0;
-		font-size: 1.5rem;
-		line-height: 1.1;
-		font-weight: 800;
-		color: rgb(15, 23, 42);
-	}
-
-	.video-rail-grid {
-		display: grid;
-		gap: 0.75rem;
-	}
-
-	.video-card {
-		position: relative;
-		display: block;
-		overflow: hidden;
-		border-radius: 0.9rem;
-		background: rgb(15, 23, 42);
-		aspect-ratio: 16 / 9;
-	}
-
-	.video-card-image {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		transition: transform 220ms ease;
-	}
-
-	.video-card-overlay {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(to top, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.1) 58%);
-	}
-
-	.video-card-title {
-		position: absolute;
-		left: 0.7rem;
-		right: 0.7rem;
-		bottom: 0.65rem;
-		color: rgb(248, 250, 252);
-		font-size: 0.86rem;
-		font-weight: 650;
-		line-height: 1.35;
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-
-	.video-card:hover .video-card-image {
-		transform: scale(1.04);
-	}
-
-	.video-more-link {
-		display: inline-flex;
-		margin-top: 0.9rem;
-		font-size: 0.86rem;
-		font-weight: 700;
-		color: rgb(13, 148, 136);
-	}
-
-	.matrix-stat-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.55rem;
-	}
-
-	.stat-pill {
-		display: flex;
-		flex-direction: column;
-		padding: 0.5rem 0.65rem;
-		background: rgba(0, 0, 0, 0.03);
-		border-radius: 10px;
-	}
-
-	:global(.dark) .stat-pill {
-		background: rgba(255, 255, 255, 0.05);
-	}
-
-	.stat-pill-label {
-		font-size: 0.62rem;
-		font-weight: 650;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: rgb(107, 114, 128);
-	}
-
-	:global(.dark) .stat-pill-label {
-		color: rgb(156, 163, 175);
-	}
-
-	.stat-pill-value {
-		font-size: 0.86rem;
-		font-weight: 700;
-		color: rgb(17, 24, 39);
-	}
-
-	:global(.dark) .stat-pill-value {
-		color: rgb(255, 255, 255);
-	}
-
-	.technology-signal-panel {
-		padding: 1.1rem;
-		border-radius: 1.6rem;
-		border: 1px solid rgba(148, 163, 184, 0.18);
-		background: rgba(255, 255, 255, 0.72);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-	}
-
-	.technology-signal-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.75rem;
-		height: 2.75rem;
-		border-radius: 1rem;
-	}
-
-	.technology-signal-icon-cncf {
-		background: linear-gradient(135deg, rgb(59, 130, 246), rgb(124, 58, 237));
-	}
-
-	.technology-signal-icon-community {
-		background: linear-gradient(135deg, rgb(16, 185, 129), rgb(13, 148, 136));
-	}
-
-	@media (min-width: 1120px) {
-		.main-content-grid {
-			grid-template-columns: minmax(0, 1.55fr) minmax(21rem, 0.95fr);
-		}
-
-		.media-rail {
-			position: sticky;
-			top: 6rem;
-		}
-	}
-
-	@media (min-width: 960px) {
-		.technology-header-grid {
-			grid-template-columns: minmax(0, 1.45fr) auto;
-		}
-	}
-
-	@media (max-width: 959px) {
-		.technology-title {
-			max-width: none;
-		}
-	}
-
-	@media (max-width: 720px) {
-		.technology-guide-link {
-			width: 100%;
-		}
-
-		.matrix-stat-grid {
-			grid-template-columns: 1fr;
-		}
-	}
-
-	:global(.dark) .technology-taxonomy-pill,
-	:global(.dark) .technology-guide-link,
-	:global(.dark) .guide-panel,
-	:global(.dark) .video-panel,
-	:global(.dark) .matrix-rail-panel,
-	:global(.dark) .technology-signal-panel {
-		background: rgba(15, 23, 42, 0.72);
-		border-color: rgba(148, 163, 184, 0.16);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-	}
-
-	:global(.dark) .technology-title,
-	:global(.dark) .guide-title,
-	:global(.dark) .video-panel-title,
-	:global(.dark) .guide-prose :global(h2),
-	:global(.dark) .guide-prose :global(h3) {
-		color: rgb(241, 245, 249);
-	}
-
-	:global(.dark) .technology-kicker {
-		color: rgb(94, 234, 212);
-	}
-
-	:global(.dark) .technology-guide-link,
-	:global(.dark) .video-more-link,
-	:global(.dark) .guide-prose :global(p),
-	:global(.dark) .guide-prose :global(p:first-of-type) {
-		color: rgba(226, 232, 240, 0.82);
-	}
-</style>
