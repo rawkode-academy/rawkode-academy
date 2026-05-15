@@ -249,6 +249,12 @@ const relMeUrls = [
         {relMeUrls.map((url) => (
             <link rel="me" href={url} />
         ))}
+        <link
+            rel="alternate"
+            type="application/rss+xml"
+            title={`Rawkode Academy — ${person.data.name} (RSS)`}
+            href={`/api/feeds/people/${person.data.id}.xml`}
+        />
     </Fragment>
     <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
         <!-- Profile Header -->
