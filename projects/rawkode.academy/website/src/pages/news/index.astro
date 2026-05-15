@@ -4,11 +4,22 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const allNews = await getCollection("news");
+const [allNews, allTechnologies] = await Promise.all([
+	getCollection("news"),
+	getCollection("technologies"),
+]);
 
 allNews.sort(
 	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
+
+// Build a lookup from the raw tech id used in news frontmatter (e.g. "kubernetes")
+// to the canonical display name on the technologies collection (e.g. "Kubernetes").
+const technologyNameById = new Map<string, string>();
+for (const technology of allTechnologies) {
+	const rawId = technology.id.replace(/\/index$/, "");
+	technologyNameById.set(rawId, technology.data.name);
+}
 
 const pageTitle = "Cloud Native News | Rawkode Academy";
 const pageDescription =
@@ -23,6 +34,8 @@ function formatDisplayDate(date: Date): string {
 }
 
 function formatTechnologyLabel(value: string): string {
+	const fromCollection = technologyNameById.get(value);
+	if (fromCollection) return fromCollection;
 	return value
 		.split(/[-/]/g)
 		.filter(Boolean)
@@ -74,7 +87,12 @@ function formatTechnologyLabel(value: string): string {
 												story.data.technologies[0] && (
 													<>
 														<span>/</span>
-														<span>{formatTechnologyLabel(story.data.technologies[0])}</span>
+														<a
+															href={`/technology/${story.data.technologies[0]}`}
+															class="transition-colors hover:text-primary"
+														>
+															{formatTechnologyLabel(story.data.technologies[0])}
+														</a>
 													</>
 												)
 											}
