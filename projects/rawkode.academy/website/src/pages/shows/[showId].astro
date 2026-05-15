@@ -2,9 +2,11 @@
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
+import { getImage } from "astro:assets";
 import { getPublishedVideos } from "@/lib/content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
+import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import SubscribeLinks from "@/components/show/SubscribeLinks.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -93,6 +95,18 @@ const latestEpisode = feedVideos[0];
 const totalDurationSeconds = feedVideos.reduce((sum, v) => sum + v.duration, 0);
 const totalHours = Math.floor(totalDurationSeconds / 3600);
 
+let podcastImageUrl: string | undefined;
+if (showEntry.data.podcast?.artworkUrl) {
+	podcastImageUrl = showEntry.data.podcast.artworkUrl;
+} else if (showEntry.data.cover) {
+	try {
+		const resolved = await getImage({ src: showEntry.data.cover.image });
+		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
+	} catch {
+		// Fall through with no image — JSON-LD `image` is optional.
+	}
+}
+
 function formatDate(dateString: string) {
 	return new Date(dateString).toLocaleDateString("en-US", {
 		year: "numeric",
@@ -114,6 +128,13 @@ function formatDuration(seconds: number) {
 ---
 
 <Page title={pageTitle} description={showDescription}>
+        <PodcastSeriesJsonLd
+                slot="extra-head"
+                show={showEntry}
+                hosts={hostEntries}
+                episodeCount={feedVideos.length}
+                {...(podcastImageUrl ? { imageUrl: podcastImageUrl } : {})}
+        />
         <VideoMetadata
                 slot="extra-head"
                 title={pageTitle}
