@@ -1,553 +1,583 @@
 ---
 import { Image } from "astro:assets";
-import HeroTypewriter from "@/components/hero/typewriter.tsx";
-import PartnerLogos from "@/components/partner/logos.astro";
-import TestimonialSlider from "@/components/testimonial/slider.astro";
-import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
+import Page from "@/wrappers/page.astro";
 import { getPublishedVideos } from "@/lib/content";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
-import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { css } from "../../styled-system/css";
 
-// Fetch random technologies for hero
-const allTechnologies = await getCollection("technologies");
-const heroLogos = allTechnologies
-	.filter((tech) => tech.data.logos?.icon === true)
-	.map((tech) => ({
-		name: tech.data.name,
-		iconUrl: resolveTechnologyIconUrl(tech.id, tech.data.logos) || "",
-	}))
-	.filter((logo) => logo.iconUrl)
-	.sort(() => Math.random() - 0.5)
-	.slice(0, 4);
+const allArticles = await getCollection("articles", ({ data }) => !data.draft);
+const latestArticles = allArticles
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, 6);
 
-// Fetch latest news
+const allVideos = await getPublishedVideos();
+const latestVideos = allVideos.slice(0, 6);
+
 const allNews = await getCollection("news");
 const latestNews = allNews
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4);
 
-// Fetch latest content
-const allArticles = await getCollection("articles", ({ data }) => !data.draft);
-const latestArticles = allArticles
-	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 4);
-const [featuredArticle, ...secondaryArticles] = latestArticles;
-
-// Get published videos only (filters out future-dated for scheduled publishing)
-const allVideos = await getPublishedVideos();
-const latestVideos = allVideos.slice(0, 4); // Already sorted by getPublishedVideos
-const [featuredVideo, ...secondaryVideos] = latestVideos;
-
-// Fetch latest learning paths
 const allLearningPaths = await getCollection("learningPaths");
 const latestLearningPaths = allLearningPaths
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4);
 
-function formatLearningPathDuration(minutes: number): string {
-	if (!minutes) return "Self-paced";
-	const h = Math.floor(minutes / 60);
-	const m = minutes % 60;
-	if (!h) return `${m}m`;
-	if (!m) return `${h}h`;
-	return `${h}h ${m}m`;
-}
-
-const difficultyDisplayLabel: Record<string, string> = {
-	beginner: "Beginner",
-	intermediate: "Intermediate",
-	advanced: "Advanced",
-};
-
-// Social proof stats - simplified metrics
 const allCourses = await getCollection("courses");
 const totalContent = allVideos.length + allArticles.length + allCourses.length;
-
-// Calculate total hours from video durations (duration is in seconds)
 const totalSeconds = allVideos.reduce((acc, video) => {
 	const duration = video.data.duration;
 	return acc + (typeof duration === "number" && duration > 0 ? duration : 0);
 }, 0);
 const totalHours = Math.floor(totalSeconds / 3600);
 
-const socialProofStats = [
-	{ icon: "📚", value: `${totalContent}+`, label: "Resources" },
-	{ icon: "⏱️", value: `${totalHours}+`, label: "Hours of Video" },
-	{ icon: "👥", value: "30K+", label: "Learners" },
+const stats = [
+	{ value: `${totalContent}+`, label: "Resources" },
+	{ value: `${totalHours}+`, label: "Hours of video" },
+	{ value: "30K+", label: "Learners" },
 ];
+
+const formatDate = (date: Date) =>
+	date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
+const compact = (text: string, max = 160) => {
+	const t = text.replace(/\s+/g, " ").trim();
+	return t.length <= max ? t : `${t.slice(0, max).trimEnd()}…`;
+};
+
+const difficultyLabel: Record<string, string> = {
+	beginner: "Beginner",
+	intermediate: "Intermediate",
+	advanced: "Advanced",
+};
+const fmtPathDuration = (m: number) => {
+	if (!m) return "Self-paced";
+	const h = Math.floor(m / 60);
+	const r = m % 60;
+	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
+};
 
 const pageTitle = "Cloud Native & Kubernetes Education | Rawkode Academy";
 const pageDescription =
-	"Master Cloud Native technologies and Kubernetes with Rawkode Academy's expert-led courses, articles, and live streams. Stay ahead in the fast-evolving tech landscape.";
+	"Master Cloud Native technologies and Kubernetes with Rawkode Academy's expert-led courses, articles, and live streams.";
 
-const formatLabel = (value?: string | null) => {
-	if (!value) {
-		return null;
-	}
-
-	return value
-		.replace(/[-_]/g, " ")
-		.replace(/\b\w/g, (char) => char.toUpperCase());
-};
-
-// Format duration helper
-const formatDuration = (seconds?: number | null) => {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = seconds % 60;
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
-			.toString()
-			.padStart(2, "0")}`;
-	}
-	return `${minutes}:${secs.toString().padStart(2, "0")}`;
-};
-
-const formatPublishedDate = (date: Date) =>
-	date.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-
-const compactCopy = (text: string, maxLength: number) => {
-	const normalized = text.replace(/\s+/g, " ").trim();
-	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
-
-	if (firstSentence && firstSentence.length <= maxLength) {
-		return firstSentence;
-	}
-
-	if (normalized.length <= maxLength) {
-		return normalized;
-	}
-
-	return `${normalized.slice(0, maxLength).trimEnd()}…`;
-};
-
-const summarizeVideo = (video: (typeof latestVideos)[number]) =>
-	compactCopy(video.data.subtitle || video.data.description, 180);
-
-const summarizeArticle = (article: (typeof latestArticles)[number]) =>
-	compactCopy(
-		article.data.openGraph?.subtitle ||
-			article.data.subtitle ||
-			article.data.description,
-		160,
-	);
-
-const videoLabel = (video: (typeof latestVideos)[number]) =>
-	formatLabel(video.data.category) ||
-	(video.data.type === "live" ? "Live Session" : "Recorded Session");
-
-const articleLabel = (article: (typeof latestArticles)[number]) =>
-	formatLabel(article.data.type) || "Article";
-
-const academyValues = [
-	{
-		title: "Authenticity",
-		description:
-			"We show the trade-offs, the rough edges, and the decisions we'd still make again.",
+const heroWrap = css({
+	position: "relative",
+	mt: "8",
+	mx: { base: "2", md: "0" },
+	overflow: "hidden",
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	px: { base: "6", md: "12", lg: "16" },
+	py: { base: "12", md: "16", lg: "20" },
+	backgroundImage:
+		"radial-gradient(circle at 15% 20%, token(colors.brand.500)/15, transparent 45%), radial-gradient(circle at 85% 30%, token(colors.cyan.500)/15, transparent 45%)",
+	_dark: {
+		backgroundImage:
+			"radial-gradient(circle at 15% 20%, token(colors.brand.500)/25, transparent 45%), radial-gradient(circle at 85% 30%, token(colors.cyan.500)/20, transparent 45%)",
 	},
-	{
-		title: "Organic Content",
-		description:
-			"Much of the curriculum comes from problems we're solving in public, not invented demos.",
+});
+
+const eyebrow = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const heroTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "4xl", md: "5xl", lg: "6xl" },
+	fontWeight: "bold",
+	lineHeight: "1.05",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	textWrap: "balance",
+	mt: "5",
+	maxWidth: "44rem",
+});
+
+const heroTitleAccent = css({
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+});
+
+const heroSubtitle = css({
+	mt: "5",
+	fontSize: { base: "lg", md: "xl" },
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	maxWidth: "42rem",
+	textWrap: "pretty",
+});
+
+const heroActions = css({
+	mt: "8",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+});
+
+const buttonSolid = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "md",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	boxShadow: "md",
+	transition: "transform 150ms ease, box-shadow 150ms ease",
+	_hover: { transform: "translateY(-1px)", boxShadow: "lg" },
+});
+
+const buttonOutline = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "md",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	transition: "background 150ms ease",
+	_hover: { bg: "bg.sunken" },
+});
+
+const statsRow = css({
+	mt: "10",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: { base: "6", md: "10" },
+});
+const statItem = css({ display: "flex", flexDirection: "column", gap: "1" });
+const statValue = css({
+	fontFamily: "display",
+	fontSize: "3xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+});
+const statLabel = css({ fontSize: "sm", color: "fg.muted" });
+
+const sectionsWrap = css({
+	mt: "16",
+	display: "flex",
+	flexDirection: "column",
+	gap: { base: "16", md: "20" },
+	maxWidth: "80rem",
+	mx: "auto",
+	px: { base: "4", md: "0" },
+});
+
+const sectionHeader = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "minmax(0,1fr) auto" },
+	alignItems: "end",
+	gap: "4",
+	mb: "8",
+});
+
+const sectionEyebrow = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mt: "2",
+});
+
+const sectionSubtitle = css({
+	mt: "3",
+	maxWidth: "40rem",
+	color: "fg.secondary",
+	fontSize: "md",
+	lineHeight: "1.6",
+});
+
+const sectionLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: "fg.brand",
+	textDecoration: "none",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateX(2px)" },
+});
+
+const grid4 = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+});
+const grid3 = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const cardLink = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	h: "full",
+	p: { base: "5", md: "6" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: {
+		transform: "translateY(-2px)",
+		boxShadow: "lg",
+		borderColor: "border.default",
 	},
-	{
-		title: "Embracing Failure",
-		description:
-			"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
-	},
-	{
-		title: "Hands-On",
-		description:
-			"Less slideware, more terminal time, real code, and live builds you can follow end to end.",
-	},
-	{
-		title: "Forward Thinking",
-		description:
-			"We test new tools early, evaluate them honestly, and show where they fit.",
-	},
-	{
-		title: "Open & Closed Source",
-		description:
-			"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
-	},
-] as const;
+});
+
+const cardMeta = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const cardDivider = css({
+	w: "1",
+	h: "1",
+	borderRadius: "full",
+	bg: "border.default",
+});
+
+const cardTitle = css({
+	fontSize: "lg",
+	fontWeight: "semibold",
+	lineHeight: "tight",
+	color: "fg.primary",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const cardBody = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	display: "-webkit-box",
+	WebkitLineClamp: "3",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+});
+
+const featuredGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "20rem 1fr" },
+	alignItems: "center",
+	gap: "8",
+	p: { base: "5", md: "6" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+});
+
+const featuredMedia = css({
+	position: "relative",
+	aspectRatio: "16 / 10",
+	overflow: "hidden",
+	borderRadius: "xl",
+	bg: "bg.sunken",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const featuredTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+	textWrap: "balance",
+});
+
+const ctaCard = css({
+	mt: "16",
+	mx: { base: "4", md: "auto" },
+	maxWidth: "60rem",
+	p: { base: "8", md: "12" },
+	borderRadius: "3xl",
+	textAlign: "center",
+	color: "white",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	boxShadow: "xl",
+});
+const ctaTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	textWrap: "balance",
+});
+const ctaSubtitle = css({
+	mt: "3",
+	fontSize: { base: "md", md: "lg" },
+	opacity: "0.92",
+	maxWidth: "40rem",
+	mx: "auto",
+});
+const ctaActions = css({
+	mt: "8",
+	display: "flex",
+	flexWrap: "wrap",
+	justifyContent: "center",
+	gap: "3",
+});
+const ctaButton = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "md",
+	color: "fg.primary",
+	bg: "white",
+	textDecoration: "none",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>`;
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<HeroTypewriter
-		client:only="react"
-		highlight="hard"
-		logos={heroLogos}
-		primaryButton={{
-			text: "Start Watching Free",
-			link: "/watch",
-		}}
-		secondaryButton={{
-			text: "Get Weekly Insights",
-			link: "#newsletter-signup",
-		}}
-		rotatedPrefixes={[
-			"Cloud Native",
-			"Kubernetes",
-			"Platform Engineering",
-			"Observability",
-			"WebAssembly",
-			"GitOps",
-			"SRE",
-			"Microservices",
-		]}
-		suffix="may be complex, but it doesn't need to be hard."
-		socialProof={socialProofStats}
-	/>
-
-	<div id="newsletter-signup" class="page-px section-pt-0 scroll-mt-24">
-		<NewsletterCTA
-			variant="section"
-			class="mb-0 !pt-6 !pb-4 sm:!pt-8 sm:!pb-6 lg:!pt-10 lg:!pb-8"
-			badge="Weekly Cloud Native insights"
-			headline="Get cloud native insights weekly"
-			subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
-		/>
-	</div>
-
-	<div class="page-px section-py-tight !pt-4 sm:!pt-6 lg:!pt-8">
-		<div class="mx-auto max-w-6xl space-y-16 sm:space-y-20 lg:space-y-24">
-			{latestNews.length > 0 && (
-				<section class="space-y-8">
-					<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-						<div class="space-y-3">
-							<div class="eyebrow-label">News</div>
-							<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-								Cloud Native News
-							</h2>
-							<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-								Curated stories from across the cloud native ecosystem.
-							</p>
-						</div>
-						<div class="md:pb-1">
-							<a
-								href="/news"
-								class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-							>
-								All news
-								<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</a>
-						</div>
-					</div>
-
-					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						{latestNews.map((item) => (
-							<a
-								href={`/news/${item.id}`}
-								class="soft-panel group block h-full p-4 sm:p-5"
-							>
-								<div class="space-y-3">
-									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-										<span>{formatPublishedDate(item.data.publishedAt)}</span>
-									</div>
-									<h4 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
-										{item.data.title}
-									</h4>
-									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-										{item.data.description}
-									</p>
-								</div>
-							</a>
-						))}
-					</div>
-				</section>
-			)}
-
-			{latestLearningPaths.length > 0 && (
-				<section class="space-y-8">
-					<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-						<div class="space-y-3">
-							<div class="eyebrow-label">Learn</div>
-							<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-								Learning Paths
-							</h2>
-							<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-								Curated, structured roadmaps for mastering Cloud Native — start here when you want a guided journey instead of a single tutorial.
-							</p>
-						</div>
-						<div class="md:pb-1">
-							<a
-								href="/learning-paths"
-								class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-							>
-								All learning paths
-								<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</a>
-						</div>
-					</div>
-
-					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						{latestLearningPaths.map((path) => (
-							<a
-								href={`/learning-paths/${path.id}`}
-								class="soft-panel group block h-full p-4 sm:p-5"
-							>
-								<div class="space-y-3">
-									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-										<span>{difficultyDisplayLabel[path.data.difficulty] ?? path.data.difficulty}</span>
-										<span aria-hidden="true">·</span>
-										<span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
-									</div>
-									<h4 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
-										{path.data.title}
-									</h4>
-									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-										{path.data.description}
-									</p>
-								</div>
-							</a>
-						))}
-					</div>
-				</section>
-			)}
-
-			<section class="space-y-8">
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div class="space-y-3">
-						<div class="eyebrow-label">Watch</div>
-						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-							Videos
-						</h2>
-						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-							New sessions, reviews, and walkthroughs from the sharp end of cloud native engineering.
-						</p>
-					</div>
-					<div class="md:pb-1">
-						<a
-							href="/watch"
-							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-						>
-							Browse videos
-							<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-						</a>
-					</div>
+	<section class={heroWrap}>
+		<span class={eyebrow}>Rawkode Academy</span>
+		<h1 class={heroTitle}>
+			<span class={heroTitleAccent}>Cloud Native</span> education<br />
+			that respects your time.
+		</h1>
+		<p class={heroSubtitle}>
+			Tutorials, articles, learning paths, and live builds from real production engineering. No fluff, no sponsored-only content — just the work.
+		</p>
+		<div class={heroActions}>
+			<a href="/watch" class={buttonSolid}>
+				Start Watching Free
+				<Fragment set:html={arrowIcon} />
+			</a>
+			<a href="/learning-paths" class={buttonOutline}>Explore Learning Paths</a>
+		</div>
+		<div class={statsRow}>
+			{stats.map((s) => (
+				<div class={statItem}>
+					<span class={statValue}>{s.value}</span>
+					<span class={statLabel}>{s.label}</span>
 				</div>
+			))}
+		</div>
+	</section>
 
-				{featuredVideo && (
-					<a
-						href={`/watch/${featuredVideo.data.slug}`}
-						class="soft-panel group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[20rem_minmax(0,1fr)] md:items-center lg:p-6"
-					>
-						<div class="relative aspect-video overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5">
+	<div class={sectionsWrap}>
+		{latestNews.length > 0 && (
+			<section>
+				<header class={sectionHeader}>
+					<div>
+						<span class={sectionEyebrow}>News</span>
+						<h2 class={sectionTitle}>Cloud Native News</h2>
+						<p class={sectionSubtitle}>Curated stories from across the cloud native ecosystem.</p>
+					</div>
+					<a href="/news" class={sectionLink}>
+						All news
+						<Fragment set:html={arrowIcon} />
+					</a>
+				</header>
+				<div class={grid4}>
+					{latestNews.map((item) => (
+						<a href={`/news/${item.id}`} class={cardLink}>
+							<div class={cardMeta}>
+								<span>{formatDate(item.data.publishedAt)}</span>
+							</div>
+							<h3 class={cardTitle}>{item.data.title}</h3>
+							<p class={cardBody}>{compact(item.data.description, 140)}</p>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		{latestLearningPaths.length > 0 && (
+			<section>
+				<header class={sectionHeader}>
+					<div>
+						<span class={sectionEyebrow}>Learn</span>
+						<h2 class={sectionTitle}>Learning Paths</h2>
+						<p class={sectionSubtitle}>Structured roadmaps to take you from zero to production.</p>
+					</div>
+					<a href="/learning-paths" class={sectionLink}>
+						All paths
+						<Fragment set:html={arrowIcon} />
+					</a>
+				</header>
+				<div class={grid4}>
+					{latestLearningPaths.map((path) => (
+						<a href={`/learning-paths/${path.id}`} class={cardLink}>
+							<div class={cardMeta}>
+								<span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
+								<span class={cardDivider}></span>
+								<span>{fmtPathDuration(path.data.estimatedDuration)}</span>
+							</div>
+							<h3 class={cardTitle}>{path.data.title}</h3>
+							<p class={cardBody}>{compact(path.data.description, 140)}</p>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		{latestVideos.length > 0 && (
+			<section>
+				<header class={sectionHeader}>
+					<div>
+						<span class={sectionEyebrow}>Watch</span>
+						<h2 class={sectionTitle}>Videos</h2>
+						<p class={sectionSubtitle}>New sessions and walkthroughs from the sharp end of cloud native engineering.</p>
+					</div>
+					<a href="/watch" class={sectionLink}>
+						Browse videos
+						<Fragment set:html={arrowIcon} />
+					</a>
+				</header>
+				{latestVideos[0] && (
+					<a href={`/watch/${latestVideos[0].data.slug}`} class={featuredGrid}>
+						<div class={featuredMedia}>
 							<img
-								src={`https://content.rawkode.academy/videos/${featuredVideo.data.id}/thumbnail.jpg`}
-								alt={featuredVideo.data.title}
-								class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
+								src={`https://content.rawkode.academy/videos/${latestVideos[0].data.id}/thumbnail.jpg`}
+								alt={latestVideos[0].data.title}
 								loading="lazy"
 							/>
 						</div>
-
-						<div class="space-y-4">
-							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-								<span>{videoLabel(featuredVideo)}</span>
-								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-								<span>{formatPublishedDate(featuredVideo.data.publishedAt)}</span>
-								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-								<span>{formatDuration(typeof featuredVideo.data.duration === "number" ? featuredVideo.data.duration : undefined)}</span>
+						<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+							<div class={cardMeta}>
+								<span>{formatDate(latestVideos[0].data.publishedAt as Date)}</span>
 							</div>
-							<h3 class="max-w-[18ch] text-balance text-[clamp(1.85rem,2.4vw,2.75rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-primary-content transition-colors group-hover:text-primary">
-								{featuredVideo.data.title}
-							</h3>
-							<p class="max-w-[40rem] text-base leading-8 text-secondary-content">
-								{summarizeVideo(featuredVideo)}
-							</p>
-							<div class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-								Watch video
-								<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</div>
+							<h3 class={featuredTitle}>{latestVideos[0].data.title}</h3>
+							<p class={cardBody}>{compact(latestVideos[0].data.subtitle || latestVideos[0].data.description, 200)}</p>
 						</div>
 					</a>
 				)}
-
-				<div class="grid gap-4 md:grid-cols-3">
-					{secondaryVideos.map((video) => (
-						<a
-							href={`/watch/${video.data.slug}`}
-							class="soft-panel group block h-full p-4 sm:p-5"
-						>
-							<div class="space-y-3">
-								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-									<span>{videoLabel(video)}</span>
-									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-									<span>{formatPublishedDate(video.data.publishedAt)}</span>
-								</div>
-								<h4 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
-									{video.data.title}
-								</h4>
-								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-									{summarizeVideo(video)}
-								</p>
+				<div class={grid3} style="margin-top: 1rem;">
+					{latestVideos.slice(1, 4).map((video) => (
+						<a href={`/watch/${video.data.slug}`} class={cardLink}>
+							<div class={cardMeta}>
+								<span>{formatDate(video.data.publishedAt as Date)}</span>
 							</div>
+							<h3 class={cardTitle}>{video.data.title}</h3>
+							<p class={cardBody}>{compact(video.data.subtitle || video.data.description, 140)}</p>
 						</a>
 					))}
 				</div>
 			</section>
+		)}
 
-			<section class="space-y-8">
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div class="space-y-3">
-						<div class="eyebrow-label">Read</div>
-						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-							Writing
-						</h2>
-						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-							Architecture notes, breakdowns, and context for the parts that need more than a runtime.
-						</p>
-					</div>
-					<div class="md:pb-1">
-						<a
-							href="/read"
-							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-						>
-							Browse articles
-							<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-						</a>
-					</div>
-				</div>
-
-				{featuredArticle && (
-					<a
-						href={`/read/${featuredArticle.id}`}
-						class="soft-panel group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center lg:p-6"
-					>
-						<div class="space-y-4 md:order-1">
-							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-								<span>{articleLabel(featuredArticle)}</span>
-								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-								<span>{formatPublishedDate(featuredArticle.data.publishedAt)}</span>
-							</div>
-							<h3 class="max-w-[18ch] text-balance text-[clamp(1.85rem,2.4vw,2.7rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-primary-content transition-colors group-hover:text-primary">
-								{featuredArticle.data.title}
-							</h3>
-							<p class="max-w-[38rem] text-base leading-8 text-secondary-content">
-								{summarizeArticle(featuredArticle)}
-							</p>
-							<div class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-								Read article
-								<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</div>
-						</div>
-
-						<div class="overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5 md:order-2">
-							<div class="relative aspect-[16/10] overflow-hidden">
-								{featuredArticle.data.cover ? (
-									<Image
-										src={featuredArticle.data.cover.image}
-										alt={featuredArticle.data.cover.alt}
-										class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
-										loading="lazy"
-									/>
-								) : (
-									<div class="flex h-full w-full items-end bg-[linear-gradient(135deg,rgba(var(--brand-primary),0.9),rgba(var(--brand-secondary),0.68))] p-6">
-										<p class="max-w-[18rem] text-2xl font-semibold leading-tight text-white">
-											{featuredArticle.data.title}
-										</p>
-									</div>
-								)}
-							</div>
-						</div>
-					</a>
-				)}
-
-				<div class="grid gap-4 md:grid-cols-3">
-					{secondaryArticles.map((article) => (
-						<a
-							href={`/read/${article.id}`}
-							class="soft-panel group block h-full p-4 sm:p-5"
-						>
-							<div class="space-y-3">
-								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-									<span>{articleLabel(article)}</span>
-									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-									<span>{formatPublishedDate(article.data.publishedAt)}</span>
-								</div>
-								<h4 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
-									{article.data.title}
-								</h4>
-								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-									{summarizeArticle(article)}
-								</p>
-							</div>
-						</a>
-					))}
-				</div>
-			</section>
-
-			<section class="space-y-8">
-				<div class="space-y-3">
-					<div class="eyebrow-label">Values</div>
-					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						How we teach
-					</h2>
-					<p class="max-w-[38rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-						We teach in public, in context, and close to the sharp edges.
-					</p>
-				</div>
-
-				<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-					{academyValues.map((value, index) => (
-						<article class="soft-panel h-full p-5 sm:p-6">
-							<div class="space-y-3">
-								<p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-									{String(index + 1).padStart(2, "0")}
-								</p>
-								<h3 class="max-w-[16ch] text-xl font-semibold leading-[1.08] tracking-[-0.04em] text-primary-content">
-									{value.title}
-								</h3>
-								<p class="text-sm leading-7 text-secondary-content sm:text-base">
-									{value.description}
-								</p>
-							</div>
-						</article>
-					))}
-				</div>
-			</section>
-
+		{latestArticles.length > 0 && (
 			<section>
-				<TestimonialSlider type="viewer" blurb="Feedback from viewers learning in public with us." />
-			</section>
-
-			<section class="space-y-8">
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div class="max-w-3xl space-y-3">
-						<div class="eyebrow-label">Partners</div>
-						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-							Supporting the academy
-						</h2>
-						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-							Teams that fund the work while leaving us free to speak plainly about the tools.
-						</p>
+				<header class={sectionHeader}>
+					<div>
+						<span class={sectionEyebrow}>Read</span>
+						<h2 class={sectionTitle}>Articles</h2>
+						<p class={sectionSubtitle}>Architecture notes, breakdowns, and context for the parts that need more than a runtime.</p>
 					</div>
-					<div class="md:pb-1">
-						<a
-							href="/organizations/partnerships"
-							title="Partner with Rawkode"
-							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-						>
-							Partner with Rawkode
-							<svg aria-hidden="true" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-							</svg>
+					<a href="/read" class={sectionLink}>
+						Browse articles
+						<Fragment set:html={arrowIcon} />
+					</a>
+				</header>
+				{latestArticles[0] && (
+					<a href={`/read/${latestArticles[0].id}`} class={featuredGrid} style="grid-template-columns: 1fr 20rem;">
+						<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+							<div class={cardMeta}>
+								<span>{formatDate(latestArticles[0].data.publishedAt)}</span>
+							</div>
+							<h3 class={featuredTitle}>{latestArticles[0].data.title}</h3>
+							<p class={cardBody}>{compact(latestArticles[0].data.description, 200)}</p>
+						</div>
+						{latestArticles[0].data.cover ? (
+							<div class={featuredMedia}>
+								<Image
+									src={latestArticles[0].data.cover.image}
+									alt={latestArticles[0].data.cover.alt || latestArticles[0].data.title}
+									width={640}
+									height={400}
+									loading="lazy"
+								/>
+							</div>
+						) : (
+							<div class={featuredMedia}></div>
+						)}
+					</a>
+				)}
+				<div class={grid3} style="margin-top: 1rem;">
+					{latestArticles.slice(1, 4).map((article) => (
+						<a href={`/read/${article.id}`} class={cardLink}>
+							<div class={cardMeta}>
+								<span>{formatDate(article.data.publishedAt)}</span>
+							</div>
+							<h3 class={cardTitle}>{article.data.title}</h3>
+							<p class={cardBody}>{compact(article.data.description, 140)}</p>
 						</a>
-					</div>
+					))}
 				</div>
-
-				<PartnerLogos compact />
 			</section>
-		</div>
+		)}
+
+		<section class={ctaCard}>
+			<h2 class={ctaTitle}>Get weekly Cloud Native insights</h2>
+			<p class={ctaSubtitle}>Tutorials, deep dives, and curated events — straight to your inbox. No spam, unsubscribe anytime.</p>
+			<div class={ctaActions}>
+				<a href="/feeds" class={ctaButton}>
+					Browse feeds
+					<Fragment set:html={arrowIcon} />
+				</a>
+			</div>
+		</section>
 	</div>
 </Page>
