@@ -89,10 +89,10 @@ const heroCard = css({
 	bg: "bg.raised",
 	overflow: "hidden",
 	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 55%)",
+		"radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.10), transparent 55%), radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.10), transparent 55%)",
 	_dark: {
 		backgroundImage:
-			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 55%)",
+			"radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.18), transparent 55%), radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.15), transparent 55%)",
 	},
 });
 
@@ -422,7 +422,7 @@ const pageDescription = learningPath.data.description;
 			All Learning Paths
 		</a>
 
-		<div class={heroCard}>
+		<div class:list={[heroCard, "hero-aurora"]}>
 			<span class={eyebrow}>Learning Path · {difficultyLabel(learningPath.data.difficulty)}</span>
 			<h1 class={title}>{learningPath.data.title}</h1>
 			<p class={desc}>{learningPath.data.description}</p>

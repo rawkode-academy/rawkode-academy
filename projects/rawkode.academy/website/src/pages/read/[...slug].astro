@@ -289,7 +289,7 @@ const ctaSection = css({
 	position: "relative",
 	overflow: "hidden",
 	backgroundImage:
-		"radial-gradient(circle at 30% 20%, token(colors.brand.500)/12, transparent 55%), radial-gradient(circle at 75% 30%, token(colors.cyan.500)/10, transparent 55%)",
+		"radial-gradient(circle at 30% 20%, rgba(95, 94, 215, 0.12), transparent 55%), radial-gradient(circle at 75% 30%, rgba(0, 206, 255, 0.10), transparent 55%)",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 });
@@ -451,7 +451,7 @@ const ctaSecondary = css({
 			</section>
 		)}
 
-		<section class={ctaSection}>
+		<section class:list={[ctaSection, "hero-aurora"]}>
 			<h2 class={ctaTitle}>Hungry for more cloud native engineering?</h2>
 			<p class={ctaDesc}>Subscribe to the feed or jump into a guided learning path — fresh field reports and curated curricula straight from the platform.</p>
 			<div class={ctaBtns}>

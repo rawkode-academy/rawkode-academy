@@ -99,7 +99,7 @@ const heroLayout = css({
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/12, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/12, transparent 50%)",
+		"radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.12), transparent 50%), radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.12), transparent 50%)",
 });
 
 const eyebrow = css({
@@ -219,7 +219,7 @@ const subscribeSection = css({
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	backgroundImage:
-		"radial-gradient(circle at 80% 50%, token(colors.brand.500)/8, transparent 50%)",
+		"radial-gradient(circle at 80% 50%, rgba(95, 94, 215, 0.08), transparent 50%)",
 });
 
 const subscribeHead = css({
@@ -298,7 +298,7 @@ const subscribeLinks = (showEntry.data.subscribeLinks as Array<{ platform: strin
 	<div class={shell}>
 		<Breadcrumb elements={breadcrumbElements} />
 
-		<div class={heroLayout}>
+		<div class:list={[heroLayout, "hero-aurora"]}>
 			<div>
 				<span class={eyebrow}>Show</span>
 				<h1 class={title}>{showEntry.data.name}</h1>

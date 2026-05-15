@@ -324,7 +324,7 @@ const footerCta = css({
 	gap: "6",
 	alignItems: "center",
 	backgroundImage:
-		"radial-gradient(circle at 0% 0%, token(colors.brand.500)/12, transparent 50%), radial-gradient(circle at 100% 100%, token(colors.cyan.500)/12, transparent 50%)",
+		"radial-gradient(circle at 0% 0%, rgba(95, 94, 215, 0.12), transparent 50%), radial-gradient(circle at 100% 100%, rgba(0, 206, 255, 0.12), transparent 50%)",
 });
 
 const footerCtaTitle = css({
@@ -556,7 +556,7 @@ const linkIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 		</div>
 
 		<div class={footerWrap}>
-			<div class={footerCta}>
+			<div class:list={[footerCta, "hero-aurora"]}>
 				<div>
 					<h3 class={footerCtaTitle}>Cloud Native news, weekly</h3>
 					<p class={footerCtaSub}>Get our analysis of releases, CVEs, and ecosystem shifts straight in your reader. RSS, Atom, or JSON.</p>

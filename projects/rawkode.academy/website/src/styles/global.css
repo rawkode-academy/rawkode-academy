@@ -33,6 +33,48 @@ body {
 	border-radius: var(--radii-sm, 4px);
 }
 
+/* Brand-aurora gradient backdrops.
+ *
+ * Panda's analyzer doesn't reliably emit CSS rules for long arbitrary
+ * `backgroundImage` strings with multiple radial-gradient layers. Defining
+ * these as plain classes here keeps the brand-coloured wash on every hero
+ * without depending on Panda parsing.
+ */
+.hero-aurora {
+	background-image:
+		radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.10), transparent 50%),
+		radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.10), transparent 50%);
+}
+.dark .hero-aurora {
+	background-image:
+		radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.20), transparent 50%),
+		radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.18), transparent 50%);
+}
+
+.hero-aurora-strong {
+	background-image:
+		radial-gradient(circle at 12% 15%, rgba(95, 94, 215, 0.15), transparent 50%),
+		radial-gradient(circle at 88% 25%, rgba(0, 206, 255, 0.15), transparent 50%);
+}
+.dark .hero-aurora-strong {
+	background-image:
+		radial-gradient(circle at 12% 15%, rgba(95, 94, 215, 0.28), transparent 50%),
+		radial-gradient(circle at 88% 25%, rgba(0, 206, 255, 0.22), transparent 50%);
+}
+
+.hero-aurora-grid {
+	background-image:
+		linear-gradient(to right, rgba(15, 23, 42, 0.06) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+	background-size: 48px 48px;
+	mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%);
+}
+.dark .hero-aurora-grid {
+	background-image:
+		linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+		linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+}
+
 /* Webkit fallbacks for properties Panda doesn't accept in its SystemStyleObject:
  * - line-clamp requires -webkit-box-orient: vertical alongside display: -webkit-box
  *   plus -webkit-line-clamp for Safari and older Chromium.

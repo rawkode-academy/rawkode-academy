@@ -125,12 +125,6 @@ const heroWrap = css({
 	bg: "bg.raised",
 	px: { base: "6", md: "12", lg: "16" },
 	py: { base: "14", md: "20", lg: "24" },
-	backgroundImage:
-		"radial-gradient(circle at 12% 15%, token(colors.brand.500)/15, transparent 50%), radial-gradient(circle at 88% 25%, token(colors.cyan.500)/15, transparent 50%)",
-	_dark: {
-		backgroundImage:
-			"radial-gradient(circle at 12% 15%, token(colors.brand.500)/28, transparent 50%), radial-gradient(circle at 88% 25%, token(colors.cyan.500)/22, transparent 50%)",
-	},
 });
 
 const heroGrid = css({
@@ -397,7 +391,7 @@ const cardLink = css({
 		inset: "0",
 		borderRadius: "2xl",
 		padding: "1px",
-		background: "linear-gradient(135deg, token(colors.brand.500)/0, token(colors.cyan.500)/0)",
+		background: "linear-gradient(135deg, rgba(95, 94, 215, 0.00), rgba(0, 206, 255, 0.00))",
 		WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
 		WebkitMaskComposite: "xor",
 		maskComposite: "exclude",
@@ -732,7 +726,7 @@ const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="curren
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<section class={heroWrap}>
+	<section class:list={[heroWrap, "hero-aurora-strong"]}>
 		<div class={heroPattern}></div>
 		<div class={heroGrid}>
 			<div>

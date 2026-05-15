@@ -70,7 +70,7 @@ const featuredCard = css({
 	overflow: "hidden",
 	mb: "14",
 	backgroundImage:
-		"radial-gradient(circle at 15% 10%, token(colors.brand.500)/8, transparent 50%), radial-gradient(circle at 85% 20%, token(colors.cyan.500)/8, transparent 50%)",
+		"radial-gradient(circle at 15% 10%, rgba(95, 94, 215, 0.08), transparent 50%), radial-gradient(circle at 85% 20%, rgba(0, 206, 255, 0.08), transparent 50%)",
 });
 
 const featuredMedia = css({
@@ -95,7 +95,7 @@ const featuredMediaFallback = css({
 	fontSize: "8xl",
 	fontFamily: "display",
 	fontWeight: "bold",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/15, token(colors.cyan.500)/15)",
+	backgroundImage: "linear-gradient(135deg, rgba(95, 94, 215, 0.15), rgba(0, 206, 255, 0.15))",
 });
 
 const featuredBody = css({
@@ -286,7 +286,7 @@ const courseThumbFallback = css({
 	fontSize: "5xl",
 	fontFamily: "display",
 	fontWeight: "bold",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/20, token(colors.cyan.500)/15)",
+	backgroundImage: "linear-gradient(135deg, rgba(95, 94, 215, 0.20), rgba(0, 206, 255, 0.15))",
 });
 
 const courseBadge = css({
@@ -392,7 +392,7 @@ const emptyCard = css({
 <Page title={pageTitle} description={pageDescription}>
 	{featured ? (
 		<div class={shell}>
-			<div class={featuredCard}>
+			<div class:list={[featuredCard, "hero-aurora"]}>
 				<div class={featuredBody}>
 					<div class={featuredFlagRow}>
 						<span class={featuredFlag}>

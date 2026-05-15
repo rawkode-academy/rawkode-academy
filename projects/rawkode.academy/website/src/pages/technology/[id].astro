@@ -226,7 +226,7 @@ const heroCard = css({
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 50%)",
+		"radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.10), transparent 50%), radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.10), transparent 50%)",
 });
 
 const tagRow = css({ display: "flex", flexWrap: "wrap", gap: "2", mb: "4" });
@@ -444,7 +444,7 @@ const guideTitle = css({
 	<div class={shell}>
 		<Breadcrumb elements={[{ title: "Home", link: "/" }, { title: "Technologies", link: "/technology" }, { title: technology.name, link: `/technology/${technology.id}` }]} />
 
-		<section class={heroCard}>
+		<section class:list={[heroCard, "hero-aurora"]}>
 			<div>
 				<div class={tagRow}>
 					{technology.cncf?.status && (

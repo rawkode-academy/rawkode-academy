@@ -19,12 +19,6 @@ const wrap = css({
 	py: padY[size],
 	px: { base: "4", md: "6" },
 	textAlign: align,
-	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 50%)",
-	_dark: {
-		backgroundImage:
-			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 50%)",
-	},
 });
 
 const inner = css({
@@ -68,7 +62,7 @@ const subtitleClass = css({
 });
 ---
 
-<section class={wrap}>
+<section class:list={[wrap, "hero-aurora"]}>
 	<div class={inner}>
 		{eyebrow && <span class={eyebrowClass}>{eyebrow}</span>}
 		<h1 class={titleClass}>{title}</h1>

@@ -66,10 +66,10 @@ const heroCard = css({
 	bg: "bg.raised",
 	overflow: "hidden",
 	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 55%)",
+		"radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.10), transparent 55%), radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.10), transparent 55%)",
 	_dark: {
 		backgroundImage:
-			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 55%)",
+			"radial-gradient(circle at 20% 20%, rgba(95, 94, 215, 0.18), transparent 55%), radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.15), transparent 55%)",
 	},
 });
 
@@ -95,7 +95,7 @@ const heroMediaFallback = css({
 	fontSize: "8xl",
 	fontFamily: "display",
 	fontWeight: "bold",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/15, token(colors.cyan.500)/15)",
+	backgroundImage: "linear-gradient(135deg, rgba(95, 94, 215, 0.15), rgba(0, 206, 255, 0.15))",
 });
 
 const heroFlagRow = css({ display: "inline-flex", gap: "2", mb: "4", flexWrap: "wrap" });
@@ -326,7 +326,7 @@ const externalLink = css({
 	)}
 
 	<div class={shell}>
-		<div class={heroCard}>
+		<div class:list={[heroCard, "hero-aurora"]}>
 			<div class={heroBody}>
 				<div class={heroFlagRow}>
 					<span class={eyebrow}>Course · {course.data.difficulty.charAt(0).toUpperCase()}{course.data.difficulty.slice(1)}</span>
