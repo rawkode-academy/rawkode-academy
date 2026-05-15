@@ -1,0 +1,184 @@
+---
+import UserHeader from "@/components/auth/user-header.astro";
+import { ThemeToggle } from "@/components/ui";
+import RawkodeLogo from "@/components/brand/RawkodeLogo.astro";
+import { css } from "../../../styled-system/css";
+
+const nav = css({
+	position: "fixed",
+	top: "4",
+	left: { base: "4", md: "8" },
+	right: { base: "4", md: "8" },
+	zIndex: "50",
+	px: "4",
+	py: "2.5",
+	bg: "bg.raised/80",
+	backdropFilter: "blur(24px)",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	boxShadow: "md",
+});
+
+const navInner = css({
+	position: "relative",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "4",
+});
+
+const leftGroup = css({ display: "flex", alignItems: "center", gap: "3" });
+
+const iconButton = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	width: "10",
+	height: "10",
+	borderRadius: "lg",
+	color: "fg.muted",
+	bg: "transparent",
+	border: "none",
+	cursor: "pointer",
+	transition: "background 150ms ease, color 150ms ease, transform 150ms ease",
+	_hover: { bg: "bg.sunken", color: "fg.primary", transform: "scale(1.05)" },
+	_focusVisible: { outline: "2px solid", outlineColor: "border.focus", outlineOffset: "2px" },
+});
+
+const mobileToggle = css({
+	display: "inline-flex",
+	md: { display: "none" },
+	alignItems: "center",
+	justifyContent: "center",
+	width: "10",
+	height: "10",
+	borderRadius: "lg",
+	color: "fg.muted",
+	bg: "transparent",
+	border: "none",
+	cursor: "pointer",
+	_hover: { bg: "bg.sunken", color: "fg.primary" },
+});
+
+const desktopToggle = css({
+	display: "none",
+	md: { display: "inline-flex" },
+	alignItems: "center",
+	justifyContent: "center",
+	width: "10",
+	height: "10",
+	borderRadius: "lg",
+	color: "fg.muted",
+	bg: "transparent",
+	border: "none",
+	cursor: "pointer",
+	_hover: { bg: "bg.sunken", color: "fg.primary" },
+});
+
+const logoLink = css({ display: "inline-flex", color: "fg.primary" });
+
+const searchWrap = css({
+	display: "none",
+	md: { display: "flex" },
+	flex: "1",
+	maxWidth: "32rem",
+	mx: "4",
+});
+
+const searchButton = css({
+	position: "relative",
+	display: "flex",
+	alignItems: "center",
+	width: "full",
+	pl: "10",
+	pr: "20",
+	py: "2",
+	fontSize: "sm",
+	color: "fg.muted",
+	bg: "bg.surface",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	cursor: "pointer",
+	textAlign: "left",
+	transition: "background 150ms ease, border-color 150ms ease",
+	_hover: { bg: "bg.sunken", borderColor: "border.default" },
+	_focusVisible: { outline: "2px solid", outlineColor: "border.focus", outlineOffset: "1px" },
+});
+
+const searchIcon = css({
+	position: "absolute",
+	left: "3",
+	top: "50%",
+	transform: "translateY(-50%)",
+	width: "4",
+	height: "4",
+	color: "fg.muted",
+	pointerEvents: "none",
+});
+
+const kbdClass = css({
+	position: "absolute",
+	right: "3",
+	top: "50%",
+	transform: "translateY(-50%)",
+	display: "inline-flex",
+	alignItems: "center",
+	px: "2",
+	py: "0.5",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	bg: "bg.sunken",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	borderRadius: "md",
+	pointerEvents: "none",
+});
+
+const rightGroup = css({ display: "flex", alignItems: "center", gap: "2" });
+---
+
+<nav class={nav} aria-label="Primary">
+	<div class={navInner}>
+		<div class={leftGroup}>
+			<button class={desktopToggle} id="sidebar-toggle-btn" aria-label="Toggle sidebar">
+				<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+				</svg>
+			</button>
+
+			<button class={mobileToggle} id="mobile-sidebar-btn" aria-label="Toggle mobile menu">
+				<svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"></path>
+				</svg>
+			</button>
+
+			<a href="/" aria-label="Return to home" class={logoLink}>
+				<RawkodeLogo height="1.75rem" />
+			</a>
+		</div>
+
+		<div class={searchWrap}>
+			<button
+				type="button"
+				id="topbar-search-trigger"
+				class={searchButton}
+				aria-haspopup="dialog"
+				aria-label="Search videos, articles, and technologies"
+			>
+				<svg class={searchIcon} fill="currentColor" viewBox="0 0 20 20">
+					<path fill-rule="evenodd" clip-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"></path>
+				</svg>
+				<span>Search videos, articles, technologies…</span>
+				<kbd class={kbdClass} id="command-shortcut">⌘K</kbd>
+			</button>
+		</div>
+
+		<div class={rightGroup}>
+			<ThemeToggle client:load variant="icon" size="md" />
+			<UserHeader server:defer />
+		</div>
+	</div>
+</nav>
