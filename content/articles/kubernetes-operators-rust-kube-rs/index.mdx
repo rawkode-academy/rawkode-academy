@@ -181,6 +181,14 @@ use kube::{
 use std::sync::Arc;
 use tokio::time::Duration;
 
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Kubernetes API error: {0}")]
+    KubeError(#[from] kube::Error),
+    #[error("Resource is missing a namespace")]
+    MissingNamespace,
+}
+
 // Shared state for the controller
 struct Context {
     client: Client,
@@ -192,7 +200,7 @@ async fn reconcile(
 ) -> Result<Action, Error> {
     let client = &ctx.client;
     let name = webapp.name_any();
-    let namespace = webapp.namespace().unwrap_or_default();
+    let namespace = webapp.namespace().ok_or_else(|| Error::MissingNamespace)?;
 
     tracing::info!(
         name = %name,
@@ -245,7 +253,7 @@ async fn reconcile_deployment(
     client: &Client,
     webapp: &WebApp,
 ) -> Result<(), Error> {
-    let namespace = webapp.namespace().unwrap_or_default();
+    let namespace = webapp.namespace().ok_or_else(|| Error::MissingNamespace)?;
     let name = webapp.name_any();
     let deployments: Api<Deployment> =
         Api::namespaced(client.clone(), &namespace);
