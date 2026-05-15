@@ -121,6 +121,20 @@ const hasNextPage = end < allVideos.length;
 		description="Explore our collection of educational videos about cloud native technologies, development practices, and more."
 		isVideoList={true}
 	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/rss+xml"
+		title="Rawkode Academy - Videos (RSS)"
+		href="/api/feeds/videos.xml"
+	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/atom+xml"
+		title="Rawkode Academy - Videos (Atom)"
+		href="/api/feeds/videos.atom"
+	/>
 
 	<!-- Featured Content Section -->
 	{featuredVideo && (
