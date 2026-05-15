@@ -1,0 +1,25 @@
+---
+title: "vLLM 0.21 lands Transformers v5 deprecation, C++20 build, and a new Blackwell attention backend"
+description: "vLLM 0.21.0 ships on May 15 with two breaking-class changes — a C++20 compiler requirement and Transformers v4 deprecation — plus the TOKENSPEED_MLA attention backend for DeepSeek-R1 and Kimi-K25 on Blackwell."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+vLLM v0.21.0 dropped on May 15, 2026 with 367 commits from 202 contributors and two breaking-class changes that will force updates before the next image bump.
+
+## Breaking changes to plan around
+
+The release formally deprecates `transformers` v4 support and tells users to migrate to v5. The build itself now requires a C++20-compatible compiler "for compatibility with PyTorch," called out in the release notes as a breaking build change. Pin your CUDA + toolchain carefully on the next rebuild.
+
+## Blackwell gets a new MLA attention backend
+
+The headline runtime change is the `TOKENSPEED_MLA` attention backend on Blackwell, targeting DeepSeek-R1 and Kimi-K25 for both prefill and decode (model names per the release notes verbatim). KV offloading now integrates with the Hybrid Memory Allocator, and speculative decoding respects reasoning/thinking budgets — useful if you've been serving reasoning models with hand-tuned token caps.
+
+## What to do
+
+If you run vLLM in production, verify your build environment supports C++20 before consuming a newer wheel or image, and start the `transformers` v5 migration now rather than at the next breaking jump. On Blackwell, benchmark `TOKENSPEED_MLA` against your current backend before switching defaults.
+
+**Source:** [vLLM v0.21.0 release notes](https://github.com/vllm-project/vllm/releases/tag/v0.21.0) — May 15, 2026
