@@ -1,7 +1,9 @@
 ---
 import { getCollection } from "astro:content";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -10,12 +12,8 @@ const [allNews, allTechnologies] = await Promise.all([
 	getCollection("technologies"),
 ]);
 
-allNews.sort(
-	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
-);
+allNews.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
-// Build a lookup from the raw tech id used in news frontmatter (e.g. "kubernetes")
-// to the canonical display name on the technologies collection (e.g. "Kubernetes").
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
 	const rawId = technology.id.replace(/\/index$/, "");
@@ -23,15 +21,10 @@ for (const technology of allTechnologies) {
 }
 
 const pageTitle = "Cloud Native News | Rawkode Academy";
-const pageDescription =
-	"Cloud native, Kubernetes, and AI infrastructure news for engineers.";
+const pageDescription = "Cloud native, Kubernetes, and AI infrastructure news for engineers.";
 
 function formatDisplayDate(date: Date): string {
-	return new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	}).format(date);
+	return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
 }
 
 function formatTechnologyLabel(value: string): string {
@@ -40,97 +33,94 @@ function formatTechnologyLabel(value: string): string {
 	return value
 		.split(/[-/]/g)
 		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
+		.map((s) => (s.length <= 3 ? s.toUpperCase() : `${s.charAt(0).toUpperCase()}${s.slice(1)}`))
 		.join(" ");
 }
+
+const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const list = css({
+	display: "flex",
+	flexDirection: "column",
+	divideY: "1px",
+	"& > * + *": { borderTopWidth: "1px", borderTopColor: "border.muted" },
+});
+
+const item = css({ py: "6", display: "flex", flexDirection: "column", gap: "2" });
+
+const meta = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const metaLink = css({
+	color: "fg.muted",
+	textDecoration: "none",
+	transition: "color 150ms ease",
+	_hover: { color: "fg.brand" },
+});
+
+const titleLink = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.15",
+	color: "fg.primary",
+	textDecoration: "none",
+	transition: "color 150ms ease",
+	_hover: { color: "fg.brand" },
+});
+
+const desc = css({ fontSize: "md", lineHeight: "1.7", color: "fg.secondary", maxWidth: "66ch" });
+
+const emptyState = css({ py: "12", color: "fg.secondary", textAlign: "center" });
 ---
 
 <Page title={pageTitle} description={pageDescription}>
 	<Fragment slot="extra-head">
-		<NewsItemListJsonLd
-			stories={allNews}
-			listUrl={new URL("/news", Astro.site ?? Astro.url).href}
-		/>
-		<link
-			rel="alternate"
-			type="application/rss+xml"
-			title="Rawkode Academy - News (RSS)"
-			href="/api/feeds/news.xml"
-		/>
-		<link
-			rel="alternate"
-			type="application/atom+xml"
-			title="Rawkode Academy - News (Atom)"
-			href="/api/feeds/news.atom"
-		/>
-		<link
-			rel="alternate"
-			type="application/feed+json"
-			title="Rawkode Academy - News (JSON Feed)"
-			href="/api/feeds/news.json"
-		/>
+		<NewsItemListJsonLd stories={allNews} listUrl={new URL("/news", Astro.site ?? Astro.url).href} />
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - News (RSS)" href="/api/feeds/news.xml" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - News (Atom)" href="/api/feeds/news.atom" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-4xl">
-			<header class="mb-6 border-b border-black/10 pb-5 dark:border-white/10 sm:mb-8 sm:pb-6">
-				<div class="eyebrow-label">Cloud Native News</div>
-				<h1 class="mt-3 font-display text-3xl font-semibold tracking-tight text-primary-content sm:text-4xl">
-					Latest stories
-				</h1>
-			</header>
 
-			{
-				allNews.length > 0 ? (
-					<ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
-						{
-							allNews.map((story) => (
-								<li class="py-5 sm:py-6">
-									<article class="space-y-2">
-										<div class="flex flex-wrap items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-											<time datetime={story.data.publishedAt.toISOString()}>
-												{formatDisplayDate(story.data.publishedAt)}
-											</time>
-											{
-												story.data.technologies[0] && (
-													<>
-														<span>/</span>
-														<a
-															href={`/technology/${story.data.technologies[0]}`}
-															class="transition-colors hover:text-primary"
-														>
-															{formatTechnologyLabel(story.data.technologies[0])}
-														</a>
-													</>
-												)
-											}
-										</div>
+	<PageHero eyebrow="Cloud Native News" title="Latest stories" subtitle="Curated updates from across the cloud native ecosystem." />
 
-										<h2 class="font-display text-2xl font-semibold leading-tight tracking-tight text-primary-content sm:text-[1.9rem]">
-											<a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
-												{story.data.title}
-											</a>
-										</h2>
-
-										<p class="max-w-[66ch] text-base leading-8 text-secondary-content">
-											{story.data.description}
-										</p>
-									</article>
-								</li>
-							))
-						}
-					</ul>
-				) : (
-					<section class="border-y border-black/10 py-8 dark:border-white/10">
-						<p class="text-base leading-8 text-secondary-content">
-							No news published yet.
-						</p>
-					</section>
-				)
-			}
-		</div>
-	</section>
+	<div class={shell}>
+		{allNews.length > 0 ? (
+			<ul class={list}>
+				{allNews.map((story) => (
+					<li>
+						<article class={item}>
+							<div class={meta}>
+								<time datetime={story.data.publishedAt.toISOString()}>
+									{formatDisplayDate(story.data.publishedAt)}
+								</time>
+								{story.data.technologies[0] && (
+									<>
+										<span>/</span>
+										<a href={`/technology/${story.data.technologies[0]}`} class={metaLink}>
+											{formatTechnologyLabel(story.data.technologies[0])}
+										</a>
+									</>
+								)}
+							</div>
+							<a href={`/news/${story.id}`} class={titleLink}>{story.data.title}</a>
+							<p class={desc}>{story.data.description}</p>
+						</article>
+					</li>
+				))}
+			</ul>
+		) : (
+			<p class={emptyState}>No news published yet.</p>
+		)}
+	</div>
 </Page>

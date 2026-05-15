@@ -2,19 +2,15 @@
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
-import ShowCard from "@/components/show/ShowCard.astro";
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
+import { css } from "../../../styled-system/css";
 
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
-);
+Astro.response.headers.set("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400");
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
 Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
-Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Build shows from local content + videos
 const showEntries = await getCollection("shows");
 const videos = await getCollection("videos");
 
@@ -34,10 +30,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 		const people = await getEntries(s.data.hosts);
 		const hosts = people.map((p) => {
 			const parts = String(p.data.name).trim().split(/\s+/);
-			return {
-				forename: parts[0] || "",
-				surname: parts.slice(1).join(" ") || "",
-			};
+			return { forename: parts[0] || "", surname: parts.slice(1).join(" ") || "" };
 		});
 		const eps = videos
 			.filter((v) => getShowId(v.data.show) === s.data.id)
@@ -51,86 +44,110 @@ const showsToRender: ShowSummary[] = await (async () => {
 							: String(v.data.publishedAt),
 				},
 			}));
-		list.push({
-			id: s.data.id,
-			name: s.data.name,
-			hosts,
-			episodes: eps,
-			cover: s.data.cover,
-		});
+		list.push({ id: s.data.id, name: s.data.name, hosts, episodes: eps, cover: s.data.cover });
 	}
 	return list;
 })();
 
 const hasShows = showsToRender.length > 0;
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: "6",
+});
+
+const showCard = css({
+	display: "flex",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+});
+
+const coverWrap = css({
+	aspectRatio: "16 / 9",
+	overflow: "hidden",
+	bg: "bg.sunken",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const body = css({ p: "6", display: "flex", flexDirection: "column", gap: "3", flex: "1" });
+
+const showName = css({
+	fontFamily: "display",
+	fontSize: "xl",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const hostsLine = css({ fontSize: "sm", color: "fg.muted" });
+
+const episodeCount = css({
+	mt: "auto",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.brand",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const emptyCard = css({
+	mx: "auto",
+	maxWidth: "32rem",
+	p: "12",
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textAlign: "center",
+});
 ---
 
 <Page title="Shows">
-        <section class="relative overflow-hidden py-16 sm:py-20">
-                <!-- Background gradient -->
-                <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent dark:from-primary/10" aria-hidden="true"></div>
+	<PageHero eyebrow="Original Series" title="Shows" subtitle="In-depth content and expert insights from passionate hosts." />
 
-                <div class="relative mx-auto max-w-7xl content-px">
-                        <!-- Header -->
-                        <div class="mb-12 text-center">
-                                <div class="mb-4 inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-2 dark:bg-primary/20">
-                                        <svg
-                                                class="mr-2 h-5 w-5 text-primary dark:text-primary-300"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                                aria-hidden="true"
-                                        >
-                                                <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
-                                                />
-                                        </svg>
-                                        <span class="text-sm font-semibold text-primary dark:text-primary-300">Original Series</span>
-                                </div>
-                                <h1 class="text-4xl font-extrabold tracking-tight text-primary-content sm:text-5xl lg:text-6xl">
-                                        Shows
-                                </h1>
-                                <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-                                        Discover our collection of shows, each bringing you in-depth content and expert insights from passionate hosts.
-                                </p>
-                        </div>
-
-                        <!-- Content -->
-                        <div class="mt-16">
-                                {hasShows ? (
-                                        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                                                {showsToRender.map((show) => (
-                                                        <ShowCard show={show} />
-                                                ))}
-                                        </div>
-                                ) : (
-                                        <div class="mx-auto max-w-2xl rounded-2xl glass-card p-12 text-center">
-                                                <svg
-                                                        class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        aria-hidden="true"
-                                                >
-                                                        <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="1.5"
-                                                                d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
-                                                        />
-                                                </svg>
-                                                <p class="mt-4 text-lg font-medium text-secondary-content">
-                                                        No shows available yet
-                                                </p>
-                                                <p class="mt-2 text-sm text-muted">
-                                                        We're working on bringing you exciting new content. Check back soon!
-                                                </p>
-                                        </div>
-                                )}
-                        </div>
-                </div>
-        </section>
+	<div class={shell}>
+		{hasShows ? (
+			<div class={grid}>
+				{showsToRender.map((show) => (
+					<a href={`/shows/${show.id}`} class={showCard}>
+						{show.cover ? (
+							<div class={coverWrap}>
+								<img src={typeof show.cover === "string" ? show.cover : show.cover?.image?.src || ""} alt={show.name} loading="lazy" />
+							</div>
+						) : (
+							<div class={coverWrap}></div>
+						)}
+						<div class={body}>
+							<h2 class={showName}>{show.name}</h2>
+							{show.hosts.length > 0 && (
+								<p class={hostsLine}>
+									Hosted by {show.hosts.map((h) => `${h.forename} ${h.surname}`.trim()).join(", ")}
+								</p>
+							)}
+							<span class={episodeCount}>
+								{show.episodes.length} episode{show.episodes.length === 1 ? "" : "s"}
+							</span>
+						</div>
+					</a>
+				))}
+			</div>
+		) : (
+			<div class={emptyCard}>
+				<p>No shows available yet. We're working on bringing you exciting new content — check back soon!</p>
+			</div>
+		)}
+	</div>
 </Page>

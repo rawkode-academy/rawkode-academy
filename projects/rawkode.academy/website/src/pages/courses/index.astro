@@ -1,159 +1,232 @@
 ---
 import { getCollection, getEntries } from "astro:content";
-import CourseCard from "@/components/courses/CourseCard.astro";
-import CoursesHero from "@/components/courses/CoursesHero.astro";
 import { getCourseModuleSlug } from "@/utils/course-path";
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-// Get all courses and sort by published date
 const allCourses = (await getCollection("courses")).sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
 
-const featuredCourse = allCourses[0];
-const libraryCourses = allCourses.slice(1);
+const featured = allCourses[0];
+const rest = allCourses.slice(1);
 
-// Get course modules for featured course
 let featuredModuleCount = 0;
 let featuredAvailableModuleCount = 0;
 let firstModuleSlug: string | undefined;
 let featuredAuthors: { name: string; avatarUrl?: string | undefined }[] = [];
-let featuredPublishedLabel: string | undefined;
 
-if (featuredCourse) {
+if (featured) {
 	const courseModules = (await getCollection("courseModules"))
-		.filter((module) => module.data.course.id === featuredCourse.id)
+		.filter((m) => m.data.course.id === featured.id)
 		.sort((a, b) => a.data.order - b.data.order);
-
 	featuredModuleCount = courseModules.length;
-	featuredAvailableModuleCount = courseModules.filter(
-		(module) => !module.data.draft,
-	).length;
-
-	const publishedModules = courseModules.filter((module) => !module.data.draft);
-	firstModuleSlug = publishedModules[0]
-		? getCourseModuleSlug(featuredCourse.id, publishedModules[0].id)
-		: undefined;
-
-	const authors = await getEntries(featuredCourse.data.authors);
-	featuredAuthors = authors.map((author) => ({
-		name: author.data.name,
-		avatarUrl: author.data.avatarUrl,
-	}));
-	featuredPublishedLabel = featuredCourse.data.publishedAt.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
+	featuredAvailableModuleCount = courseModules.filter((m) => !m.data.draft).length;
+	const publishedModules = courseModules.filter((m) => !m.data.draft);
+	firstModuleSlug = publishedModules[0] ? getCourseModuleSlug(featured.id, publishedModules[0].id) : undefined;
+	const authors = await getEntries(featured.data.authors);
+	featuredAuthors = authors.map((a) => ({ name: a.data.name, avatarUrl: a.data.avatarUrl }));
 }
 
 const pageTitle = "Cloud Native Courses | Rawkode Academy";
-const pageDescription =
-	"Hands-on cloud native courses, labs, and implementation walkthroughs from Rawkode Academy. Learn Kubernetes, identity, GraphQL, Rust, and the tooling behind real platform work.";
+const pageDescription = "Hands-on cloud native courses, labs, and implementation walkthroughs from Rawkode Academy.";
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const featuredCard = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr" },
+	gap: "6",
+	p: { base: "6", md: "10" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	mb: "12",
+});
+
+const featuredEyebrow = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+});
+
+const featuredTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+});
+
+const featuredDesc = css({ fontSize: "lg", lineHeight: "1.7", color: "fg.secondary", maxWidth: "48rem" });
+
+const stats = css({ display: "flex", flexWrap: "wrap", gap: "6", color: "fg.muted", fontSize: "sm" });
+
+const actions = css({ display: "flex", flexWrap: "wrap", gap: "3", mt: "3" });
+
+const primaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	boxShadow: "md",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const secondaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "6",
+});
+
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const courseCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+});
+
+const courseMeta = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const courseTitle = css({
+	fontSize: "lg",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const courseDesc = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	display: "-webkit-box",
+	WebkitLineClamp: "3",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+});
+
+const emptyCard = css({
+	mt: "8",
+	p: { base: "8", md: "12" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textAlign: "center",
+});
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-7xl">
-			{featuredCourse ? (
-				<CoursesHero
-					courseId={featuredCourse.id}
-					courseName={featuredCourse.data.title}
-					courseDescription={featuredCourse.data.description}
-					moduleCount={featuredModuleCount}
-					availableModuleCount={featuredAvailableModuleCount}
-					difficulty={featuredCourse.data.difficulty.charAt(0).toUpperCase() + featuredCourse.data.difficulty.slice(1)}
-					firstModuleSlug={firstModuleSlug}
-					learningPath={featuredCourse.data.learningPath}
-					authors={featuredAuthors}
-					publishedLabel={featuredPublishedLabel}
-				/>
-			) : (
-				<div class="section-shell card-padding-lg text-center">
-					<div class="mx-auto max-w-3xl space-y-5">
-						<div class="eyebrow-label justify-center">Courses</div>
-						<h1 class="text-4xl font-extrabold tracking-tight text-primary-content md:text-5xl">
-							Cloud native courses are on the way
-						</h1>
-						<p class="text-lg leading-8 text-secondary-content">
-							We’re building practical, engineering-first courses that stay close to the tools,
-							trade-offs, and deployment paths teams actually use.
-						</p>
-					</div>
+	{featured ? (
+		<div class={shell}>
+			<div class={featuredCard}>
+				<span class={featuredEyebrow}>Featured Course</span>
+				<h1 class={featuredTitle}>{featured.data.title}</h1>
+				<p class={featuredDesc}>{featured.data.description}</p>
+				<div class={stats}>
+					<span>{featuredAvailableModuleCount} of {featuredModuleCount} modules available</span>
+					<span>·</span>
+					<span>{featured.data.difficulty.charAt(0).toUpperCase()}{featured.data.difficulty.slice(1)}</span>
+					{featuredAuthors[0] && (
+						<>
+							<span>·</span>
+							<span>{featuredAuthors.map((a) => a.name).join(", ")}</span>
+						</>
+					)}
 				</div>
-			)}
-		</div>
-	</section>
-
-	<section id="all-courses" class="page-px section-py-tight">
-		<div class="mx-auto max-w-7xl">
-			<div class="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-				<div class="max-w-3xl space-y-3">
-					<div class="eyebrow-label">Course Library</div>
-					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						{libraryCourses.length > 0 ? "Explore the rest of the library" : "More courses are on the way"}
-					</h2>
-					<p class="text-base leading-7 text-secondary-content sm:text-lg">
-						{libraryCourses.length > 0
-							? "Each course is built from real implementation work, not generic slideware. Pick the next topic that matches the problems you’re solving now."
-							: "We’re building out the library with the same engineering-first approach: practical modules, implementation detail, and zero marketing padding."}
-					</p>
+				<div class={actions}>
+					{firstModuleSlug ? (
+						<a href={`/courses/${firstModuleSlug}`} class={primaryBtn}>Start course</a>
+					) : (
+						<a href={`/courses/${featured.id}`} class={primaryBtn}>View course</a>
+					)}
+					<a href="#all-courses" class={secondaryBtn}>Browse library</a>
 				</div>
-				<p class="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-					{libraryCourses.length} more course{libraryCourses.length === 1 ? "" : "s"}
-				</p>
 			</div>
+		</div>
+	) : (
+		<PageHero eyebrow="Courses" title="Cloud Native Courses Are On The Way" subtitle="We're building practical, engineering-first courses that stay close to the tools, trade-offs, and deployment paths real teams use." />
+	)}
 
-			{libraryCourses.length > 0 ? (
-				<div class="grid grid-auto-cards gap-6">
-					{libraryCourses.map((course) => (
-						<CourseCard course={course} />
+	<section id="all-courses">
+		<div class={shell}>
+			<h2 class={sectionTitle}>{rest.length > 0 ? "Course Library" : "More courses launching soon"}</h2>
+			{rest.length > 0 ? (
+				<div class={grid}>
+					{rest.map((course) => (
+						<a href={`/courses/${course.id}`} class={courseCard}>
+							<div class={courseMeta}>
+								<span>{course.data.difficulty.charAt(0).toUpperCase()}{course.data.difficulty.slice(1)}</span>
+							</div>
+							<h3 class={courseTitle}>{course.data.title}</h3>
+							<p class={courseDesc}>{course.data.description}</p>
+						</a>
 					))}
 				</div>
 			) : (
-				<div class="section-shell-muted card-padding text-center">
-					<h2 class="text-2xl font-bold text-primary-content">More courses launching soon</h2>
-					<p class="mt-3 text-secondary-content">
-						Stay tuned for upcoming Kubernetes, platform engineering, and identity deep dives.
-					</p>
+				<div class={emptyCard}>
+					<p>Stay tuned for upcoming Kubernetes, platform engineering, and identity deep dives.</p>
 				</div>
 			)}
-		</div>
-	</section>
-
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-5xl">
-			<div class="section-shell card-padding-lg text-center">
-				<div class="mx-auto max-w-3xl space-y-5">
-					<div class="eyebrow-label justify-center">Stay in the Loop</div>
-					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						Get notified when new lessons ship
-					</h2>
-					<p class="text-base leading-7 text-secondary-content sm:text-lg">
-						Follow the academy for new course releases, module drops, and the implementation notes
-						that usually make the best lessons.
-					</p>
-				</div>
-
-				<div class="mt-8 flex flex-wrap justify-center gap-4">
-					<a
-						href="/watch"
-						class="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
-					>
-						Start with free videos
-					</a>
-					<a
-						href="https://github.com/rawkode-academy"
-						target="_blank"
-						rel="noreferrer"
-						class="inline-flex min-h-11 items-center justify-center rounded-full border border-white/60 bg-white/70 px-6 py-3 text-sm font-semibold text-primary shadow-sm transition-colors duration-200 hover:bg-white dark:border-white/10 dark:bg-gray-900/55 dark:text-white dark:hover:bg-gray-900/80"
-					>
-						Follow on GitHub
-					</a>
-				</div>
-			</div>
 		</div>
 	</section>
 </Page>

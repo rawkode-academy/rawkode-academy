@@ -1,8 +1,9 @@
 ---
 import { getCollection, getEntries } from "astro:content";
-import LearningPathCard from "@/components/learning-paths/LearningPathCard.astro";
 import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist-jsonld.astro";
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
@@ -22,51 +23,124 @@ const itemListPaths = await Promise.all(
 		const authorEntries = await getEntries(path.data.authors);
 		return {
 			path,
-			authors: authorEntries.map((author) => ({
-				id: author.data.id,
-				name: author.data.name,
-			})),
+			authors: authorEntries.map((a) => ({ id: a.data.id, name: a.data.name })),
 			technologyLabels: (path.data.technologies ?? []).map(
-				(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+				(id) => technologyNameById.get(id) ?? id,
 			),
 		};
 	}),
 );
 
+const difficultyLabel: Record<string, string> = {
+	beginner: "Beginner",
+	intermediate: "Intermediate",
+	advanced: "Advanced",
+};
+
+const fmtDuration = (m: number) => {
+	if (!m) return "Self-paced";
+	const h = Math.floor(m / 60);
+	const r = m % 60;
+	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
+};
+
 const pageTitle = "Learning Paths | Rawkode Academy";
-const pageDescription =
-	"Curated, video-driven journeys to help you level up your Kubernetes, platform engineering, and cloud native skills.";
+const pageDescription = "Curated, video-driven journeys to level up your Kubernetes, platform engineering, and cloud native skills.";
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const card = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+});
+
+const meta = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const dot = css({ w: "1", h: "1", borderRadius: "full", bg: "border.default" });
+
+const title = css({
+	fontSize: "xl",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	lineHeight: "tight",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const desc = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	display: "-webkit-box",
+	WebkitLineClamp: "3",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+});
+
+const tags = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "1" });
+const tag = css({
+	px: "2",
+	py: "0.5",
+	borderRadius: "md",
+	fontSize: "xs",
+	fontWeight: "medium",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+});
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<LearningPathItemListJsonLd
-		slot="extra-head"
-		paths={itemListPaths}
-		listUrl={new URL("/learning-paths", Astro.site ?? Astro.url).href}
-		listName="Rawkode Academy Learning Paths"
-	/>
-	<section class="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-		<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
-		<div class="relative z-10 px-6 py-16 md:px-10 lg:px-16">
-			<div class="max-w-3xl">
-				<p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary mb-4">
-					Guided Learning
-				</p>
-				<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-primary-content mb-4">
-					Learning Paths
-				</h1>
-				<p class="text-lg text-muted leading-relaxed">
-					Each path bundles Rawkode Academy videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed. Start with the challenge you're facing and follow along step-by-step.
-				</p>
-			</div>
-		</div>
-	</section>
+	<LearningPathItemListJsonLd slot="extra-head" paths={itemListPaths} listUrl={new URL("/learning-paths", Astro.site ?? Astro.url).href} listName="Rawkode Academy Learning Paths" />
 
-	<section class="mt-12">
-		<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-			{learningPaths.map((learningPath) => (
-				<LearningPathCard learningPath={learningPath} />
+	<PageHero eyebrow="Guided Learning" title="Learning Paths" subtitle="Each path bundles videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed." />
+
+	<div class={shell}>
+		<div class={grid}>
+			{learningPaths.map((path) => (
+				<a href={`/learning-paths/${path.id}`} class={card}>
+					<div class={meta}>
+						<span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
+						<span class={dot}></span>
+						<span>{fmtDuration(path.data.estimatedDuration)}</span>
+					</div>
+					<h2 class={title}>{path.data.title}</h2>
+					<p class={desc}>{path.data.description}</p>
+					{path.data.technologies && path.data.technologies.length > 0 && (
+						<div class={tags}>
+							{path.data.technologies.slice(0, 4).map((t) => (
+								<span class={tag}>{technologyNameById.get(t) ?? t}</span>
+							))}
+						</div>
+					)}
+				</a>
 			))}
 		</div>
-	</section>
+	</div>
 </Page>

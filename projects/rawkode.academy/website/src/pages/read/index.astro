@@ -1,186 +1,199 @@
 ---
+import { Image } from "astro:assets";
 import { getCollection, getEntries } from "astro:content";
-import ArticleCard from "@/components/articles/ArticleCard.astro";
-import FeaturedContent from "@/components/common/FeaturedContent.astro";
-import SectionHeader from "@/components/common/SectionHeader.vue";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-const allArticles = await getCollection("articles");
-
-// Sort articles by publication date
-allArticles.sort(
+const allArticles = (await getCollection("articles", ({ data }) => !data.draft)).sort(
 	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
 
-// Featured posts are the first 3
-const featuredPosts = allArticles.slice(0, 3);
-const latestPost = featuredPosts[0];
-
-const latestPostAuthors = latestPost
-	? await getEntries(latestPost.data.authors)
-	: [];
-
-// Get remaining posts (skip the first one since it's featured)
-const remainingPosts = allArticles.slice(1);
+const featured = allArticles[0];
+const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
+const remaining = allArticles.slice(1);
 
 const pageTitle = "Cloud Native & Kubernetes Articles | Rawkode Academy";
-const pageDescription =
-	"Deep dive into cloud native technologies, Kubernetes, observability, and more. Articles written by practitioners for practitioners at Rawkode Academy.";
+const pageDescription = "Deep dives into cloud native technologies, Kubernetes, and observability.";
+
+const formatDate = (date: Date) =>
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const featuredCard = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "1.2fr 1fr" },
+	gap: "8",
+	alignItems: "center",
+	p: { base: "6", md: "10" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	mb: "12",
+	transition: "transform 200ms ease, box-shadow 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+});
+
+const featuredMedia = css({
+	aspectRatio: "16 / 10",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	bg: "bg.sunken",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const featuredMeta = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const featuredTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.05",
+	color: "fg.primary",
+	textWrap: "balance",
+	mt: "3",
+});
+
+const featuredDesc = css({
+	mt: "4",
+	fontSize: "md",
+	lineHeight: "1.7",
+	color: "fg.secondary",
+	maxWidth: "44rem",
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "6",
+});
+
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const card = css({
+	display: "flex",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+});
+const cardImg = css({
+	aspectRatio: "16 / 9",
+	overflow: "hidden",
+	bg: "bg.sunken",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+const cardBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "2", flex: "1" });
+const cardMeta = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+const cardTitle = css({
+	fontSize: "lg",
+	fontWeight: "semibold",
+	lineHeight: "tight",
+	color: "fg.primary",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+const cardDesc = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	display: "-webkit-box",
+	WebkitLineClamp: "3",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+});
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-  <Fragment slot="extra-head">
-    <ArticleItemListJsonLd
-      articles={allArticles.filter((article) => !article.data.draft)}
-      listUrl={new URL("/read", Astro.site ?? Astro.url).href}
-      listName="Cloud Native & Kubernetes Articles"
-    />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="Rawkode Academy - Articles (RSS)"
-      href="/api/feeds/articles.xml"
-    />
-    <link
-      rel="alternate"
-      type="application/feed+json"
-      title="Rawkode Academy - Articles (JSON Feed)"
-      href="/api/feeds/articles.json"
-    />
-    <link
-      rel="alternate"
-      type="application/atom+xml"
-      title="Rawkode Academy - Articles (Atom)"
-      href="/api/feeds/articles.atom"
-    />
-  </Fragment>
-  <style>
-    @reference "../../styles/global.css";
+	<Fragment slot="extra-head">
+		<ArticleItemListJsonLd articles={allArticles} listUrl={new URL("/read", Astro.site ?? Astro.url).href} listName="Cloud Native & Kubernetes Articles" />
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
+	</Fragment>
 
-    /* Core styles */
-    .primary-gradient {
-      @apply bg-linear-to-r from-primary to-secondary;
-    }
+	<PageHero eyebrow="Articles" title="Cloud Native Writing" subtitle="Architecture notes, breakdowns, and context — written by practitioners, for practitioners." />
 
-    .text-gradient {
-      @apply bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary;
-    }
+	<div class={shell}>
+		{featured && (
+			<a href={`/read/${featured.id}`} class={featuredCard}>
+				<div>
+					<div class={featuredMeta}>
+						<span>{formatDate(featured.data.publishedAt)}</span>
+						{featuredAuthors[0] && (
+							<>
+								<span>·</span>
+								<span>{featuredAuthors.map((a) => a.data.name).join(", ")}</span>
+							</>
+						)}
+					</div>
+					<h2 class={featuredTitle}>{featured.data.title}</h2>
+					<p class={featuredDesc}>{featured.data.openGraph?.subtitle || featured.data.description}</p>
+				</div>
+				{featured.data.cover ? (
+					<div class={featuredMedia}>
+						<Image src={featured.data.cover.image} alt={featured.data.cover.alt || featured.data.title} width={800} height={500} loading="eager" />
+					</div>
+				) : (
+					<div class={featuredMedia}></div>
+				)}
+			</a>
+		)}
 
-    .article-card {
-      @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
-    }
-
-    .terminal {
-      @apply font-mono rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700;
-    }
-
-    .terminal-header {
-      @apply flex items-center p-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
-    }
-
-    .terminal-body {
-      @apply p-4 bg-white dark:bg-gray-900;
-    }
-
-    .terminal-prompt::before {
-      content: "$ ";
-      @apply text-primary;
-    }
-
-    .terminal-output {
-      @apply pl-4 my-2;
-    }
-
-    /* Animation */
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-    }
-
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.5);
-      pointer-events: none;
-    }
-
-    /* Filter button styles */
-    .filter-btn {
-      @apply px-3 py-1 rounded-full text-sm font-medium transition-all duration-200;
-    }
-
-    .filter-btn:not(.active) {
-      @apply bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700;
-    }
-
-    .filter-btn.active {
-      @apply bg-primary text-white;
-    }
-
-    /* Scrolling animation */
-    .scroll-prompt {
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      60% {
-        transform: translateY(-5px);
-      }
-    }
-  </style>
-
-  <!-- Featured Content Section -->
-  {latestPost && (
-    <FeaturedContent
-      type="article"
-      title={latestPost.data.title}
-      description={latestPost.data.openGraph?.subtitle || latestPost.data.description}
-      thumbnailUrl={typeof latestPost.data.cover?.image === 'string' ? latestPost.data.cover.image : latestPost.data.cover?.image?.src || "https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"}
-      thumbnailAlt={latestPost.data.cover?.alt || "Article cover image"}
-      author={latestPostAuthors.map(author => author.data.name).join(", ")}
-      date={latestPost.data.publishedAt.toISOString()}
-      href={`/read/${latestPost.id}`}
-      ctaText="Read Article"
-      articleType={latestPost.data.type}
-    />
-  )}
-
-  <!-- Main Content -->
-  <section class="py-16 bg-gray-50 dark:bg-gray-900">
-    <div class="container mx-auto px-4 md:px-6">
-      <!-- All Articles -->
-      <div>
-        <SectionHeader title="All Articles" />
-
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {remainingPosts.map(article => (
-            <div class="article-card h-full">
-              <ArticleCard article={article} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
+		<h2 class={sectionTitle}>All articles</h2>
+		<div class={grid}>
+			{remaining.map((article) => (
+				<a href={`/read/${article.id}`} class={card}>
+					{article.data.cover ? (
+						<div class={cardImg}>
+							<Image src={article.data.cover.image} alt={article.data.cover.alt || article.data.title} width={600} height={340} loading="lazy" />
+						</div>
+					) : (
+						<div class={cardImg}></div>
+					)}
+					<div class={cardBody}>
+						<div class={cardMeta}>{formatDate(article.data.publishedAt)}</div>
+						<h3 class={cardTitle}>{article.data.title}</h3>
+						<p class={cardDesc}>{article.data.description}</p>
+					</div>
+				</a>
+			))}
+		</div>
+	</div>
 </Page>
