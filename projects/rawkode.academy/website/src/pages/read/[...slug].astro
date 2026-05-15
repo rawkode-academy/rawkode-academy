@@ -15,7 +15,7 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import SeriesLink from "@/components/series/SeriesLink.astro";
 import Page from "@/wrappers/page.astro";
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
-import InternalLinks from "@/components/seo/InternalLinks.astro";
+import RelatedVideos from "@/components/articles/RelatedVideos.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
@@ -194,9 +194,6 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 			)}
 		</header>
 
-		<!-- Internal Links -->
-		<InternalLinks article={article} />
-
 		<!-- Content -->
 		<div class="article-content">
 			<TableOfContents headings={headings} />
@@ -223,6 +220,7 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 				<NewsletterCTA class="my-12 not-prose" />
 				<Resources resources={article.data.resources} />
 				<RelatedArticles currentArticle={article} limit={3} />
+				<RelatedVideos currentArticle={article} limit={3} />
 			</article>
 		</div>
 	</div>
