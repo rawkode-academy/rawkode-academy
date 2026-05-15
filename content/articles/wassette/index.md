@@ -10,7 +10,7 @@ publishedAt: 2025-08-07
 cover:
   image: "./cover.png"
   alt: "Wassette WebAssembly-based security for AI agent tooling"
-isDraft: false
+draft: false
 authors:
   - rawkode
 technologies:
