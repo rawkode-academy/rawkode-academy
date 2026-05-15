@@ -151,6 +151,13 @@ const hasNextPage = end < allVideos.length;
 		title="Rawkode Academy - Videos (Atom)"
 		href="/api/feeds/videos.atom"
 	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/feed+json"
+		title="Rawkode Academy - Videos (JSON Feed)"
+		href="/api/feeds/videos.json"
+	/>
 
 	<!-- Featured Content Section -->
 	{featuredVideo && (

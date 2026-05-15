@@ -256,6 +256,13 @@ if (isAuthenticated && user?.id) {
 		title="Rawkode Academy - Videos (Atom)"
 		href="/api/feeds/videos.atom"
 	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/feed+json"
+		title="Rawkode Academy - Videos (JSON Feed)"
+		href="/api/feeds/videos.json"
+	/>
 	<div class="min-h-screen">
 		<div class="container-content content-px py-4 sm:py-6 lg:py-8">
 			{/* Breadcrumb */}
