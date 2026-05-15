@@ -3,112 +3,56 @@ import { getCollection, getEntry } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
-import VideoReactions from "@/components/video/VideoReactions.astro";
-import VideoContentTabs from "@/components/video/video-content-tabs.vue";
-import VideoCast from "@/components/video/VideoCast.astro";
-import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
+import { css } from "../../../styled-system/css";
 
 export const prerender = false;
 
-// Get the slug from URL params
 const { slug } = Astro.params;
-
-// First, try to get video from the collection (build-time data)
 const videos = await getCollection("videos");
-let video: (typeof videos)[0] | undefined = videos.find(
-	(v) => v.data.slug === slug,
-);
+let video: (typeof videos)[0] | undefined = videos.find((v) => v.data.slug === slug);
 
-// Handle 404 case if still not found
 if (!video) {
 	return Astro.redirect("/404");
 }
 
-// Set cache headers for ISR
-// Individual video pages can cache longer since they change less frequently
-// Client cache: 10 minutes, Edge cache: 2 hours, Serve stale for 48 hours
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
-);
+Astro.response.headers.set("Cache-Control", "public, max-age=600, s-maxage=7200, stale-while-revalidate=172800");
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
+Astro.response.headers.set("Cache-Tag", `video-${video.data.slug}, videos-page, video-detail`);
 
-// Add cache tags for targeted invalidation
-// Use video-specific tag to purge individual videos
-Astro.response.headers.set(
-	"Cache-Tag",
-	`video-${video.data.slug}, videos-page, video-detail`,
-);
-
-// Add build timestamp for debugging
-Astro.response.headers.set("X-Build-Time", new Date().toISOString());
-
-// Configure Marked to handle single newlines as breaks
-const marked = new Marked({
-	breaks: true,
-	gfm: true,
-});
-// Convert literal \n escape sequences to actual newlines before processing
+const marked = new Marked({ breaks: true, gfm: true });
 const processedDescription = video.data.description.replace(/\\n/g, "\n");
 const renderedDescriptionHtml = marked.parse(processedDescription);
 
-// Fetch chapters for key moments (clips) JSON-LD
 type Chapter = { startTime: number; title: string };
-let clips: Array<{ name: string; startOffset: number; endOffset?: number }> =
-	[];
-const durationSec: number | null =
-	typeof video.data.duration === "number" ? video.data.duration : null;
-
+let clips: Array<{ name: string; startOffset: number; endOffset?: number }> = [];
+const durationSec: number | null = typeof video.data.duration === "number" ? video.data.duration : null;
 const chapterSource: Chapter[] = Array.isArray(video.data.chapters)
-	? (video.data.chapters as Chapter[]).map((c) => ({
-			title: c.title,
-			startTime: Math.max(0, Math.floor(c?.startTime ?? 0)),
-		}))
+	? (video.data.chapters as Chapter[]).map((c) => ({ title: c.title, startTime: Math.max(0, Math.floor(c?.startTime ?? 0)) }))
 	: [];
-
 if (chapterSource.length > 0) {
 	chapterSource.sort((a, b) => a.startTime - b.startTime);
 	clips = chapterSource.map((c, i) => {
 		const next = chapterSource[i + 1];
-		return {
-			name: c.title,
-			startOffset: c.startTime,
-			...(next ? { endOffset: next.startTime } : {}),
-		};
+		return { name: c.title, startOffset: c.startTime, ...(next ? { endOffset: next.startTime } : {}) };
 	});
 }
 
-// Format date to readable format
 const formatDate = (date: Date | string) => {
 	const d = typeof date === "string" ? new Date(date) : date;
-	return d.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
+	return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 };
 
-// Resolve referenced show and technologies
 const showRef = video.data.show;
 const showId =
-	typeof showRef === "string"
-		? showRef
-		: showRef && typeof showRef === "object" && "id" in showRef
-			? (showRef as { id: string }).id
-			: null;
+	typeof showRef === "string" ? showRef : showRef && typeof showRef === "object" && "id" in showRef ? (showRef as { id: string }).id : null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
 
-// Normalize technology references (handles both string IDs and Astro reference objects)
-const normalizedTechIds = normalizeTechnologyReferences(
-	video.data.technologies,
-);
+const normalizedTechIds = normalizeTechnologyReferences(video.data.technologies);
 const techEntries = (
 	await Promise.all(
 		normalizedTechIds.map(async (id) => {
@@ -120,24 +64,6 @@ const techEntries = (
 		}),
 	)
 ).filter((t): t is NonNullable<typeof t> => Boolean(t));
-
-// Fetch videos for each technology (excluding current video)
-const videosPerTechnology = await Promise.all(
-	techEntries.map(async (tech) => {
-		const techId = tech.id.replace(/\/index$/, "");
-		const allVideos = await getVideosForTechnology(techId);
-		const filteredVideos = allVideos.filter((v) => v.slug !== slug).slice(0, 3);
-		return {
-			technology: tech,
-			videos: filteredVideos,
-			totalVideos: allVideos.filter((v) => v.slug !== slug).length,
-		};
-	}),
-);
-
-const technologiesWithVideos = videosPerTechnology.filter(
-	(t) => t.videos.length > 0,
-);
 
 const hostEntries =
 	showEntry && Array.isArray(showEntry.data.hosts)
@@ -168,6 +94,8 @@ const guestEntries = Array.isArray(video.data.guests)
 		).filter((g): g is NonNullable<typeof g> => Boolean(g))
 	: [];
 
+const cast = [...hostEntries.map((h) => ({ person: h, role: "Host" })), ...guestEntries.map((g) => ({ person: g, role: "Guest" }))];
+
 const breadcrumbElements = showEntry
 	? [
 			{ title: "Home", link: "/" },
@@ -184,13 +112,8 @@ const breadcrumbElements = showEntry
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
-const watchVideoSeoText = await buildWatchVideoSeoText({
-	captionUrl,
-	description: processedDescription,
-	chapters: chapterSource,
-});
+const watchVideoSeoText = await buildWatchVideoSeoText({ captionUrl, description: processedDescription, chapters: chapterSource });
 
-// Get user authentication status and watch position
 const user = Astro.locals.user;
 const isAuthenticated = !!user;
 
@@ -211,169 +134,193 @@ if (isAuthenticated && user?.id) {
 				variables: { userId: user.id, videoId: video.data.id },
 			}),
 		});
-		const result = (await response.json()) as {
-			data?: { getWatchPosition?: { positionSeconds?: number } };
-		};
+		const result = (await response.json()) as { data?: { getWatchPosition?: { positionSeconds?: number } } };
 		initialPosition = result?.data?.getWatchPosition?.positionSeconds ?? 0;
-	} catch {
-		// Silently fail - not critical
-	}
+	} catch {}
 }
+
+const shell = css({ maxWidth: "72rem", mx: "auto", px: { base: "4", md: "6" }, py: "8" });
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "4xl", lg: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+	mb: "3",
+	textWrap: "balance",
+});
+
+const meta = css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3", fontSize: "sm", color: "fg.muted", mb: "6" });
+const sep = css({ color: "border.default" });
+
+const playerWrap = css({
+	position: "relative",
+	aspectRatio: "16 / 9",
+	width: "full",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	bg: "black",
+	boxShadow: "xl",
+	mb: "8",
+});
+
+const sectionCard = css({
+	p: { base: "5", md: "8" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	mb: "8",
+});
+
+const sectionEyebrow = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+	mb: "2",
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: "xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "4",
+});
+
+const proseClass = css({
+	color: "fg.secondary",
+	fontSize: "md",
+	lineHeight: "1.7",
+	"& p": { my: "3" },
+	"& a": { color: "fg.brand", textDecoration: "underline" },
+	"& code": { fontFamily: "mono", bg: "bg.sunken", px: "1.5", py: "0.5", borderRadius: "sm" },
+});
+
+const techList = css({ display: "flex", flexWrap: "wrap", gap: "2" });
+
+const techPill = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3",
+	py: "2",
+	borderRadius: "full",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	color: "fg.secondary",
+	textDecoration: "none",
+	fontSize: "sm",
+	transition: "all 150ms ease",
+	_hover: { color: "fg.brand", bg: "bg.brand-subtle", borderColor: "border.default" },
+});
+
+const techIcon = css({ width: "5", height: "5", objectFit: "contain" });
+
+const castGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "3",
+});
+
+const castMember = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	p: "3",
+	borderRadius: "xl",
+	bg: "bg.surface",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "background 150ms ease",
+	_hover: { bg: "bg.sunken" },
+});
+
+const castAvatar = css({ width: "10", height: "10", borderRadius: "full", objectFit: "cover" });
+const castName = css({ fontWeight: "semibold", fontSize: "sm" });
+const castRole = css({ fontSize: "xs", color: "fg.muted" });
 ---
 
-<Page
-	title={video.data.title}
-	description={video.data.description}
-	useImageDirectly={true}
-	image={{ image: new URL(thumbnailUrl) }}
->
+<Page title={video.data.title} description={video.data.description} useImageDirectly={true} image={{ image: new URL(thumbnailUrl) }}>
 	<VideoMetadata
 		slot="extra-head"
 		title={video.data.title}
 		description={video.data.description}
 		thumbnailUrl={thumbnailUrl}
-		publishedAt={(video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt))}
+		publishedAt={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)}
 		duration={durationSec ?? 0}
 		streamUrl={streamUrl}
 		captionUrl={captionUrl}
 		transcript={watchVideoSeoText.transcriptExcerpt}
-		keywords={techEntries.map((tech) => tech.data.name)}
+		keywords={techEntries.map((t) => t.data.name)}
 		isLiveBroadcast={video.data.type === "live"}
 		category={video.data.category}
 		clips={clips}
 	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/rss+xml"
-		title="Rawkode Academy - Videos (RSS)"
-		href="/api/feeds/videos.xml"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/atom+xml"
-		title="Rawkode Academy - Videos (Atom)"
-		href="/api/feeds/videos.atom"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/feed+json"
-		title="Rawkode Academy - Videos (JSON Feed)"
-		href="/api/feeds/videos.json"
-	/>
-	<div class="min-h-screen">
-		<div class="container-content content-px py-4 sm:py-6 lg:py-8">
-			{/* Breadcrumb */}
-			<div class="section-mb">
-				<Breadcrumb elements={breadcrumbElements} />
-			</div>
+	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
+	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
+	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
-			{/* Hero Section with Title */}
-			<div class="section-mb">
-				<h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-primary-content mb-2 sm:mb-3 tracking-tight">{video.data.title}</h1>
-				<div class="flex flex-wrap items-center card-gap text-sm text-muted">
-					<time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)} class="flex items-center gap-1.5 sm:gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-						</svg>
-						{formatDate(video.data.publishedAt)}
-					</time>
-					<span class="opacity-50">•</span>
-					<span>{Math.floor((durationSec ?? 0) / 60)} min watch</span>
-				</div>
-			</div>
+	<div class={shell}>
+		<Breadcrumb elements={breadcrumbElements} />
 
-			{/* Main Content */}
-			<div class="section-gap">
-				{/* Video Player */}
-				<div class="relative w-full aspect-video rounded-xl overflow-hidden card-shadow-elevated">
-					<VideoPlayer
-						client:only="vue"
-						video={video.data.id}
-						thumbnailUrl={thumbnailUrl}
-						initialPosition={initialPosition}
-						isAuthenticated={isAuthenticated}
-					/>
-				</div>
-
-				{/* Video Controls & Social Features */}
-				<VideoReactions
-					server:defer
-					videoId={video.data.slug}
-				/>
-
-				{/* Server-rendered episode description for UX and crawlability */}
-				<section class="glass-card-shimmer p-4 sm:p-6">
-					<div class="space-y-1">
-						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-							Overview
-						</p>
-						<h2 class="text-xl font-semibold text-primary-content">
-							About this video
-						</h2>
-					</div>
-					<div
-						class="prose prose-lg mt-6 max-w-none dark:prose-invert"
-						set:html={renderedDescriptionHtml}
-					/>
-				</section>
-
-				{/* Technologies Section */}
-				{techEntries.length > 0 && (
-					<div>
-						<h3 class="text-base font-medium text-secondary-content mb-3">Technologies featured in this video</h3>
-						<div class="flex flex-wrap gap-2">
-							{techEntries.map((tech) => (
-								<a
-									Astro.key={tech.id}
-									href={`/technology/${tech.id.replace(/\/index$/, '')}`}
-									class="glass-interactive inline-flex items-center gap-2 px-3 py-2 group"
-								>
-									<div class="w-5 h-5 sm:w-6 sm:h-6 relative overflow-hidden rounded">
-										<img
-											src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || '/apple-touch-icon.png'}
-											alt={tech.data.name}
-											class="w-full h-full object-contain"
-											onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
-										/>
-									</div>
-									<span class="text-sm font-medium text-secondary-content group-hover:text-primary-content transition-colors">
-										{tech.data.name}
-									</span>
-									<svg class="w-4 h-4 text-muted group-hover:text-secondary-content transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-									</svg>
-								</a>
-							))}
-						</div>
-					</div>
-				)}
-
-				{/* Cast & Speakers */}
-				<VideoCast hosts={hostEntries} guests={guestEntries} />
-
-				{/* Newsletter Signup - High Value Placement */}
-				<NewsletterCTA class="!my-0" />
-				{/* Tabbed Content: Transcript, Comments & Resources */}
-				<VideoContentTabs
-					client:idle
-					videoId={video.data.id}
-				/>
-
-				{/* More Videos by Technology */}
-				{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (
-					<TechnologyVideoSection
-						technology={technology}
-						videos={videos}
-						totalVideos={totalVideos}
-					/>
-				))}
-			</div>
-
+		<h1 class={title}>{video.data.title}</h1>
+		<div class={meta}>
+			<time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)}>
+				{formatDate(video.data.publishedAt)}
+			</time>
+			{durationSec && durationSec > 0 && <>
+				<span class={sep}>·</span>
+				<span>{Math.floor(durationSec / 60)} min watch</span>
+			</>}
 		</div>
+
+		<div class={playerWrap}>
+			<VideoPlayer client:only="vue" video={video.data.id} thumbnailUrl={thumbnailUrl} initialPosition={initialPosition} isAuthenticated={isAuthenticated} />
+		</div>
+
+		<section class={sectionCard}>
+			<span class={sectionEyebrow}>Overview</span>
+			<h2 class={sectionTitle}>About this video</h2>
+			<div class={proseClass} set:html={renderedDescriptionHtml}></div>
+		</section>
+
+		{techEntries.length > 0 && (
+			<section class={sectionCard}>
+				<span class={sectionEyebrow}>Technologies</span>
+				<h2 class={sectionTitle}>Featured in this video</h2>
+				<div class={techList}>
+					{techEntries.map((tech) => (
+						<a href={`/technology/${tech.id.replace(/\/index$/, "")}`} class={techPill}>
+							<img src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || "/apple-touch-icon.png"} alt={tech.data.name} class={techIcon} onerror="this.onerror=null; this.src='/apple-touch-icon.png'" />
+							<span>{tech.data.name}</span>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		{cast.length > 0 && (
+			<section class={sectionCard}>
+				<span class={sectionEyebrow}>Cast</span>
+				<h2 class={sectionTitle}>Hosts & Guests</h2>
+				<div class={castGrid}>
+					{cast.map(({ person, role }) => (
+						<a href={`/people/${person.data.id}`} class={castMember}>
+							<img src={person.data.avatarUrl ?? "/apple-touch-icon.png"} alt={person.data.name} class={castAvatar} onerror="this.onerror=null; this.src='/apple-touch-icon.png'" />
+							<div>
+								<div class={castName}>{person.data.name}</div>
+								<div class={castRole}>{role}</div>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
 	</div>
 </Page>
-
-<!-- Prose styles are defined in the global design system -->

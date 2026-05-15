@@ -1,229 +1,299 @@
 ---
 import { getImage } from "astro:assets";
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
-import CourseModules from "@/components/courses/CourseModules.astro";
-import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
-import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
+import { type CollectionEntry, getCollection, getEntries, render } from "astro:content";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
+import Prose from "@/components/prose/Prose.astro";
+import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-type Props = {
-	course: CollectionEntry<"courses">;
-};
+type Props = { course: CollectionEntry<"courses"> };
 
-const computeImageUrl = async (
-	course: CollectionEntry<"courses">,
-): Promise<URL | undefined> => {
+const computeImageUrl = async (course: CollectionEntry<"courses">): Promise<URL | undefined> => {
 	if (course.data.cover) {
 		const image = await getImage({ src: course.data.cover.image });
-
 		return new URL(image.src, Astro.site);
 	}
-
 	return undefined;
 };
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const courses = await getCollection("courses");
-
-		return courses.map((course: CollectionEntry<"courses">) => {
-			return {
-				params: {
-					slug: course.id,
-				},
-				props: {
-					course,
-				},
-			};
-		});
-	};
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+	const courses = await getCollection("courses");
+	return courses.map((course) => ({ params: { slug: course.id }, props: { course } }));
+};
 
 const { course } = Astro.props;
-
 const { Content } = await render(course);
 const authors = await getEntries(course.data.authors);
 
-// Get all modules for this course
 const allCourseModules = (await getCollection("courseModules"))
-	.filter((module) => module.data.course.id === course.id)
+	.filter((m) => m.data.course.id === course.id)
 	.sort((a, b) => a.data.order - b.data.order);
 
 const totalModules = allCourseModules.length;
-const availableModuleCount = allCourseModules.filter(
-	(module) => !module.data.draft,
-).length;
-const totalDuration = allCourseModules
-	.filter((module) => !module.data.draft)
-	.reduce((acc, module) => acc + (module.data.duration || 0), 0);
+const availableModuleCount = allCourseModules.filter((m) => !m.data.draft).length;
+const totalDuration = allCourseModules.filter((m) => !m.data.draft).reduce((acc, m) => acc + (m.data.duration || 0), 0);
 
-// Format duration
-function formatDuration(minutes: number): string {
-	if (minutes === 0) return "Self-paced";
-	const hours = Math.floor(minutes / 60);
-	const mins = minutes % 60;
-	if (hours === 0) return `${mins}m`;
-	if (mins === 0) return `${hours}h`;
-	return `${hours}h ${mins}m`;
-}
-
-// Utility function to get difficulty variant
+const formatDuration = (m: number) => {
+	if (!m) return "Self-paced";
+	const h = Math.floor(m / 60);
+	const r = m % 60;
+	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
+};
 
 const imageUrl = await computeImageUrl(course);
-const hasCourseResources = Boolean(course.data.resources?.length);
 
-// Format authors for the hero component
-const formattedAuthors = authors.map((author) => ({
-	name: author.data.name,
-	avatarUrl: author.data.avatarUrl,
-}));
-
-function getResourceHref(
-	resource: NonNullable<typeof course.data.resources>[number],
-) {
+const getResourceHref = (resource: NonNullable<typeof course.data.resources>[number]) => {
 	if (resource.type === "url") return resource.url;
-	if (resource.type === "file" && resource.filePath)
-		return `/resources/${resource.filePath}`;
+	if (resource.type === "file" && resource.filePath) return `/resources/${resource.filePath}`;
 	return undefined;
-}
+};
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+
+const heroCard = css({
+	p: { base: "6", md: "10" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	backgroundImage:
+		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 50%)",
+	_dark: {
+		backgroundImage:
+			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 50%)",
+	},
+});
+
+const eyebrow = css({
+	display: "inline-flex",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	mb: "4",
+});
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+	textWrap: "balance",
+});
+
+const desc = css({ mt: "5", fontSize: { base: "md", md: "lg" }, color: "fg.secondary", lineHeight: "1.7", maxWidth: "44rem" });
+
+const stats = css({ mt: "8", display: "flex", flexWrap: "wrap", gap: "6", color: "fg.muted", fontSize: "sm" });
+
+const layout = css({
+	mt: "12",
+	display: "grid",
+	gap: "10",
+	gridTemplateColumns: { base: "1fr", xl: "1fr 20rem" },
+	alignItems: "start",
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "4",
+});
+
+const sectionEyebrow = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+});
+
+const sectionCard = css({
+	p: { base: "6", md: "8" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	mb: "8",
+});
+
+const moduleList = css({ display: "flex", flexDirection: "column", gap: "3" });
+
+const moduleRow = css({
+	display: "flex",
+	gap: "4",
+	alignItems: "center",
+	p: "4",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.canvas",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateX(4px)", borderColor: "border.default" },
+});
+
+const moduleNum = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontWeight: "bold",
+	fontSize: "sm",
+});
+
+const moduleInfo = css({ display: "flex", flexDirection: "column", gap: "1", flex: "1" });
+const moduleTitle = css({ fontWeight: "semibold", color: "fg.primary" });
+const moduleMeta = css({ fontSize: "xs", color: "fg.muted" });
+
+const draftBadge = css({
+	display: "inline-flex",
+	px: "2",
+	py: "0.5",
+	borderRadius: "md",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	bg: "bg.sunken",
+});
+
+const aside = css({ display: "flex", flexDirection: "column", gap: "5" });
+
+const resourceItem = css({
+	display: "flex",
+	justifyContent: "space-between",
+	gap: "3",
+	py: "3",
+	borderBottomWidth: "1px",
+	borderBottomColor: "border.muted",
+	_last: { borderBottomWidth: "0" },
+});
+
+const resourceTitle = css({ fontWeight: "semibold", color: "fg.primary", fontSize: "sm" });
+const resourceDesc = css({ fontSize: "xs", color: "fg.muted", mt: "1" });
+
+const externalLink = css({
+	color: "fg.brand",
+	flexShrink: 0,
+	_hover: { color: "fg.brand" },
+});
 ---
 
 <Page
 	title={course.data.title}
 	description={course.data.description}
-	image={imageUrl
-		? {
-				image: imageUrl,
-				text: course.data.title,
-				format: "png" as const,
-			}
-		: undefined}
+	image={imageUrl ? { image: imageUrl, text: course.data.title, format: "png" as const } : undefined}
 	publishedAt={course.data.publishedAt}
 	updatedAt={course.data.updatedAt}
 	authors={authors}
 >
 	{imageUrl && (
-		<CourseJsonLd
-			slot="extra-head"
-			course={course}
-			modules={allCourseModules}
-			authors={authors}
-		/>
+		<CourseJsonLd slot="extra-head" course={course} modules={allCourseModules} authors={authors} />
 	)}
-	
-	<!-- Hero Section with Signup Form -->
-	<CourseDetailHero
-		title={course.data.title}
-		description={course.data.description}
-		moduleCount={totalModules}
-		availableModuleCount={availableModuleCount}
-		totalDuration={formatDuration(totalDuration)}
-		difficulty={course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
-		learningPath={course.data.learningPath}
-		authors={formattedAuthors}
-	>
-		<Fragment slot="signup-form">
-			{course.data.signupConfig && (
-				<CourseSignupFormCompact 
-					courseId={course.id}
-					courseTitle={course.data.title}
-					signupConfig={course.data.signupConfig}
-					isAlreadySubscribed={false}
-					server:defer 
-				/>
-			)}
-		</Fragment>
-	</CourseDetailHero>
 
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-7xl">
-			<div class:list={["grid gap-8 xl:items-start", hasCourseResources && "xl:grid-cols-[minmax(0,1fr)_20rem]"]}>
-				<div class="space-y-8">
-					{Content && (
-						<section class="section-shell card-padding-lg">
-							<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-								<div class="space-y-2">
-									<div class="eyebrow-label">Course Overview</div>
-									<h2 class="text-3xl font-bold tracking-tight text-primary-content">What this course covers</h2>
-								</div>
-								<p class="max-w-xl text-sm leading-7 text-secondary-content sm:text-base">
-									Use this as the editorial overview before diving into the curriculum below.
-								</p>
-							</div>
-							<article class="prose prose-lg max-w-none dark:prose-invert">
-								<Content />
-							</article>
-						</section>
-					)}
-
-					<section id="course-content" class="section-shell card-padding-lg scroll-mt-28">
-						<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-							<div class="space-y-2">
-								<div class="eyebrow-label">Curriculum</div>
-								<h2 class="text-3xl font-bold tracking-tight text-primary-content">Course content</h2>
-							</div>
-							<p class="max-w-xl text-sm leading-7 text-secondary-content sm:text-base">
-								Published modules are ready now. Planned lessons stay visible so the path is obvious.
-							</p>
-						</div>
-						<CourseModules course={course} />
-					</section>
-				</div>
-
-				{hasCourseResources && (
-					<aside class="xl:sticky xl:top-28">
-						<div class="space-y-5 border-t border-black/10 pt-6 dark:border-white/10 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
-							<div class="space-y-2">
-								<div class="eyebrow-label">Course Resources</div>
-								<h2 class="text-2xl font-bold text-primary-content">Reference material</h2>
-								<p class="text-sm leading-7 text-secondary-content">
-									Docs, source code, and supporting references for the modules in this course.
-								</p>
-							</div>
-
-							<div class="divide-y divide-black/8 dark:divide-white/8">
-								{course.data.resources?.map((resource) => {
-									const href = getResourceHref(resource);
-
-									return (
-										<div class="py-4">
-											<div class="flex items-start justify-between gap-4">
-												<div class="space-y-1">
-													<h3 class="font-semibold text-primary-content">{resource.title}</h3>
-													{resource.description && (
-														<p class="text-sm leading-6 text-secondary-content">{resource.description}</p>
-													)}
-												</div>
-												{href && (
-													<a
-														href={href}
-														target={resource.type === "url" ? "_blank" : undefined}
-														rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-														class="text-primary transition-colors hover:text-secondary"
-														aria-label={`Open ${resource.title}`}
-													>
-														<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-														</svg>
-													</a>
-												)}
-											</div>
-										</div>
-									);
-								})}
-							</div>
-						</div>
-					</aside>
+	<div class={shell}>
+		<div class={heroCard}>
+			<span class={eyebrow}>Course · {course.data.difficulty.charAt(0).toUpperCase()}{course.data.difficulty.slice(1)}</span>
+			<h1 class={title}>{course.data.title}</h1>
+			<p class={desc}>{course.data.description}</p>
+			<div class={stats}>
+				<span>{availableModuleCount} of {totalModules} modules available</span>
+				<span>·</span>
+				<span>{formatDuration(totalDuration)}</span>
+				{authors[0] && (
+					<>
+						<span>·</span>
+						<span>by {authors.map((a) => a.data.name).join(", ")}</span>
+					</>
 				)}
 			</div>
 		</div>
-	</section>
+
+		<section class={layout}>
+			<div>
+				<div class={sectionCard}>
+					<span class={sectionEyebrow}>Course Overview</span>
+					<h2 class={sectionTitle} style="margin-top: 0.5rem;">What this course covers</h2>
+					<Prose>
+						<Content />
+					</Prose>
+				</div>
+
+				<div class={sectionCard} id="course-content">
+					<span class={sectionEyebrow}>Curriculum</span>
+					<h2 class={sectionTitle} style="margin-top: 0.5rem;">Course content</h2>
+					<div class={moduleList}>
+						{allCourseModules.map((module, idx) => (
+							module.data.draft ? (
+								<div class={moduleRow} style="opacity: 0.6;">
+									<span class={moduleNum}>{idx + 1}</span>
+									<div class={moduleInfo}>
+										<span class={moduleTitle}>{module.data.title}</span>
+										{module.data.description && <span class={moduleMeta}>{module.data.description}</span>}
+									</div>
+									<span class={draftBadge}>Coming soon</span>
+								</div>
+							) : (
+								<a href={`/courses/${getCourseModuleSlug(course.id, module.id)}`} class={moduleRow}>
+									<span class={moduleNum}>{idx + 1}</span>
+									<div class={moduleInfo}>
+										<span class={moduleTitle}>{module.data.title}</span>
+										<span class={moduleMeta}>
+											{module.data.duration ? formatDuration(module.data.duration) : ""}
+											{module.data.description && ` · ${module.data.description}`}
+										</span>
+									</div>
+								</a>
+							)
+						))}
+					</div>
+				</div>
+			</div>
+
+			{course.data.resources && course.data.resources.length > 0 && (
+				<aside class={aside}>
+					<div class={sectionCard}>
+						<span class={sectionEyebrow}>Course Resources</span>
+						<h2 class={sectionTitle} style="margin-top: 0.5rem; font-size: 1.25rem;">Reference Material</h2>
+						<div>
+							{course.data.resources.map((resource) => {
+								const href = getResourceHref(resource);
+								return (
+									<div class={resourceItem}>
+										<div>
+											<div class={resourceTitle}>{resource.title}</div>
+											{resource.description && <div class={resourceDesc}>{resource.description}</div>}
+										</div>
+										{href && (
+											<a href={href} target={resource.type === "url" ? "_blank" : undefined} rel={resource.type === "url" ? "noopener noreferrer" : undefined} class={externalLink} aria-label={`Open ${resource.title}`}>
+												<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+											</a>
+										)}
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				</aside>
+			)}
+		</section>
+	</div>
 </Page>

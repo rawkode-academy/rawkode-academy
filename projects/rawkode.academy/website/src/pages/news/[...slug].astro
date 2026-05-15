@@ -1,32 +1,24 @@
 ---
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
+import { type CollectionEntry, getCollection, getEntries, render } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import NewsJsonLd from "@/components/html/news-jsonld.astro";
-import RelatedNews from "@/components/news/RelatedNews.astro";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import Prose from "@/components/prose/Prose.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-type Props = {
-	article: CollectionEntry<"news">;
-};
+type Props = { article: CollectionEntry<"news"> };
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const articles = await getCollection("news");
-		return articles.map((article: CollectionEntry<"news">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+	const articles = await getCollection("news");
+	return articles.map((article: CollectionEntry<"news">) => ({
+		params: { slug: article.id },
+		props: { article },
+	}));
+};
 
 const { article } = Astro.props;
 const { Content } = await render(article);
@@ -45,18 +37,14 @@ function formatTechnologyLabel(value: string): string {
 	return value
 		.split(/[-/]/g)
 		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
+		.map((s) => (s.length <= 3 ? s.toUpperCase() : `${s.charAt(0).toUpperCase()}${s.slice(1)}`))
 		.join(" ");
 }
 
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	id: technologyId,
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
+const tags = (article.data.technologies ?? []).map((id) => ({
+	id,
+	label: formatTechnologyLabel(id),
+	href: `/technology/${id}`,
 }));
 
 const breadcrumbElements = [
@@ -65,13 +53,88 @@ const breadcrumbElements = [
 	{ title: article.data.title, link: `/news/${article.id}` },
 ];
 
-const publishDate = new Intl.DateTimeFormat("en-US", {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-}).format(article.data.publishedAt);
-
+const publishDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(article.data.publishedAt);
 const readingTime = calculateReadingTime(article.body || "");
+
+const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+	mb: "4",
+	textWrap: "balance",
+});
+
+const byline = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "3",
+	fontSize: "sm",
+	color: "fg.muted",
+	mb: "10",
+});
+
+const authorLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	color: "fg.primary",
+	textDecoration: "none",
+	fontWeight: "medium",
+	transition: "color 150ms ease",
+	_hover: { color: "fg.brand" },
+});
+
+const authorAvatar = css({
+	width: "7",
+	height: "7",
+	borderRadius: "full",
+	objectFit: "cover",
+});
+
+const sep = css({ color: "border.default" });
+
+const tagsFooter = css({
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "3",
+	mt: "10",
+	pt: "6",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const tagsLabel = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const tagsList = css({ display: "flex", flexWrap: "wrap", gap: "2", listStyle: "none", m: "0", p: "0" });
+
+const tag = css({
+	display: "inline-flex",
+	alignItems: "center",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.secondary",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { color: "fg.brand", borderColor: "border.default", bg: "bg.brand-subtle" },
+});
 ---
 
 <Page
@@ -83,287 +146,47 @@ const readingTime = calculateReadingTime(article.body || "");
 >
 	<Fragment slot="extra-head">
 		<NewsJsonLd article={article} authors={authors} />
-		<link
-			rel="alternate"
-			type="application/rss+xml"
-			title="Rawkode Academy - News (RSS)"
-			href="/api/feeds/news.xml"
-		/>
-		<link
-			rel="alternate"
-			type="application/atom+xml"
-			title="Rawkode Academy - News (Atom)"
-			href="/api/feeds/news.atom"
-		/>
-		<link
-			rel="alternate"
-			type="application/feed+json"
-			title="Rawkode Academy - News (JSON Feed)"
-			href="/api/feeds/news.json"
-		/>
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - News (RSS)" href="/api/feeds/news.xml" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - News (Atom)" href="/api/feeds/news.atom" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
-	<div class="article-page">
+
+	<div class={shell}>
 		<Breadcrumb elements={breadcrumbElements} />
 
-		<header class="article-header">
-			<h1>{article.data.title}</h1>
+		<h1 class={title}>{article.data.title}</h1>
 
-			<div class="byline">
-				<div class="byline-authors">
-					{authors.map((author) => (
-						<a
-							href={`/people/${author.data.id}`}
-							rel="author"
-							class="author"
-						>
-							{author.data.avatarUrl && (
-								<img
-									src={author.data.avatarUrl}
-									alt=""
-									class="author-avatar"
-									loading="lazy"
-								/>
-							)}
-							<span class="author-name">{author.data.name}</span>
-						</a>
-					))}
-				</div>
-
-				<span class="byline-sep">&middot;</span>
-
-				<time datetime={article.data.publishedAt.toString()} class="byline-date">
-					{publishDate}
-				</time>
-
-				<span class="byline-sep">&middot;</span>
-
-				<span class="byline-read">{readingTime.text}</span>
-
-			</div>
-		</header>
-
-		<div class="article-content">
-			<article class="prose">
-				<Content />
-			</article>
-
-			<NewsletterCTA
-				class="my-12 not-prose"
-				audience="news"
-				badge="Cloud Native news weekly"
-				headline="Stay on top of the cloud-native release wire"
-				subtitle="Kubernetes, AI infra, and CNCF moves — delivered when they matter."
-			/>
-
-			{tags.length > 0 && (
-				<footer class="tags-footer">
-					<span class="tags-label">Tagged in</span>
-					<ul class="tags-list">
-						{tags.map((tag) => (
-							<li>
-								<a href={tag.href} class="tag" rel="tag">
-									{tag.label}
-								</a>
-							</li>
-						))}
-					</ul>
-				</footer>
-			)}
-
-			<RelatedNews currentStory={article} limit={3} />
+		<div class={byline}>
+			{authors.map((author, idx) => (
+				<>
+					{idx > 0 && <span class={sep}>·</span>}
+					<a href={`/people/${author.data.id}`} rel="author" class={authorLink}>
+						{author.data.avatarUrl && <img src={author.data.avatarUrl} alt="" class={authorAvatar} loading="lazy" />}
+						<span>{author.data.name}</span>
+					</a>
+				</>
+			))}
+			<span class={sep}>·</span>
+			<time datetime={article.data.publishedAt.toString()}>{publishDate}</time>
+			<span class={sep}>·</span>
+			<span>{readingTime.text}</span>
 		</div>
+
+		<Prose>
+			<Content />
+		</Prose>
+
+		{tags.length > 0 && (
+			<footer class={tagsFooter}>
+				<span class={tagsLabel}>Tagged in</span>
+				<ul class={tagsList}>
+					{tags.map((t) => (
+						<li>
+							<a href={t.href} class={tag} rel="tag">{t.label}</a>
+						</li>
+					))}
+				</ul>
+			</footer>
+		)}
 	</div>
 </Page>
-
-<style>
-	.article-page {
-		max-width: 100%;
-	}
-
-	.article-header {
-		margin-bottom: 2rem;
-		padding-right: 4rem;
-	}
-
-	@media (max-width: 767px) {
-		.article-header {
-			padding-right: 0;
-		}
-	}
-
-	h1 {
-		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
-		font-weight: 800;
-		line-height: 1.2;
-		letter-spacing: -0.02em;
-		color: rgb(17 24 39);
-		margin: 0 0 1rem;
-	}
-
-	:root.dark h1 {
-		color: white;
-	}
-
-	.byline {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.625rem;
-		font-size: 0.875rem;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .byline {
-		color: rgb(156 163 175);
-	}
-
-	.byline-authors {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.author {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		font-weight: 500;
-		transition: color 0.15s;
-	}
-
-	:root.dark .author {
-		color: white;
-	}
-
-	.author:hover {
-		color: rgb(var(--brand-primary));
-	}
-
-	.author-avatar {
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.byline-sep {
-		color: rgb(209 213 219);
-	}
-
-	:root.dark .byline-sep {
-		color: rgb(75 85 99);
-	}
-
-	.byline-date,
-	.byline-read {
-		white-space: nowrap;
-	}
-
-
-	.article-content {
-		position: relative;
-	}
-
-	.prose {
-		width: 100%;
-		margin-bottom: 6rem;
-		padding-right: 4rem;
-	}
-
-	@media (max-width: 767px) {
-		.prose {
-			padding-right: 0;
-		}
-	}
-
-	:global(.prose pre),
-	:global(.prose code),
-	:global(.prose table),
-	:global(.prose img),
-	:global(.prose iframe) {
-		max-width: 100%;
-		overflow-x: auto;
-	}
-
-	:global(.prose p),
-	:global(.prose li),
-	:global(.prose h1),
-	:global(.prose h2),
-	:global(.prose h3),
-	:global(.prose h4) {
-		overflow-wrap: break-word;
-		word-break: break-word;
-	}
-
-	:global(.prose pre) {
-		white-space: pre-wrap;
-	}
-
-	.tags-footer {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.75rem;
-		margin: 2rem 0 3rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid rgb(0 0 0 / 0.1);
-		padding-right: 4rem;
-	}
-
-	:root.dark .tags-footer {
-		border-top-color: rgb(255 255 255 / 0.1);
-	}
-
-	@media (max-width: 767px) {
-		.tags-footer {
-			padding-right: 0;
-		}
-	}
-
-	.tags-label {
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .tags-label {
-		color: rgb(156 163 175);
-	}
-
-	.tags-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.tag {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		border: 1px solid rgb(0 0 0 / 0.1);
-		font-size: 0.85rem;
-		font-weight: 500;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		transition: color 0.15s, border-color 0.15s, background-color 0.15s;
-	}
-
-	:root.dark .tag {
-		color: rgb(229 231 235);
-		border-color: rgb(255 255 255 / 0.1);
-	}
-
-	.tag:hover {
-		color: rgb(var(--brand-primary));
-		border-color: rgb(var(--brand-primary) / 0.4);
-		background-color: rgb(var(--brand-primary) / 0.05);
-	}
-</style>

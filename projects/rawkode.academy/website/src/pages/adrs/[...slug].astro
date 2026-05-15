@@ -5,30 +5,18 @@ import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { createLogger } from "@/lib/logger";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
 const logger = createLogger("adrs");
 
-type Props = {
-	adr: CollectionEntry<"adrs">;
+type Props = { adr: CollectionEntry<"adrs"> };
+
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+	const adrs = await getCollection("adrs");
+	return adrs.map((adr) => ({ params: { slug: adr.id }, props: { adr } }));
 };
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const adrs = await getCollection("adrs");
-
-		return adrs.map((adr) => {
-			return {
-				params: {
-					slug: adr.id,
-				},
-				props: {
-					adr,
-				},
-			};
-		});
-	};
 
 const { adr } = Astro.props;
 const { Content } = await render(adr);
@@ -40,133 +28,147 @@ try {
 	logger.error(`Error fetching authors for ADR ${adr.id}`, error);
 }
 
-const formatDate = (date: Date): string => {
-	return new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	}).format(date);
-};
+const formatDate = (date: Date) =>
+	new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(date);
 
-// Extract the ADR number from the ID using a regex to ensure it's 4 digits
 const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
+
+const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const titleClass = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+	mb: "8",
+});
+
+const numberClass = css({ color: "fg.brand" });
+
+const metaCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	mb: "10",
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+});
+
+const authorList = css({ display: "flex", flexWrap: "wrap", gap: "3" });
+
+const authorChip = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3",
+	py: "1.5",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "sm",
+	fontWeight: "medium",
+	textDecoration: "none",
+});
+
+const authorAvatar = css({
+	width: "6",
+	height: "6",
+	borderRadius: "full",
+	objectFit: "cover",
+});
+
+const status = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.brand",
+});
+
+const proseClass = css({
+	color: "fg.secondary",
+	fontSize: "md",
+	lineHeight: "1.7",
+	"& h2": {
+		fontFamily: "display",
+		fontSize: "2xl",
+		fontWeight: "bold",
+		color: "fg.primary",
+		mt: "10",
+		mb: "4",
+	},
+	"& h3": {
+		fontFamily: "display",
+		fontSize: "xl",
+		fontWeight: "semibold",
+		color: "fg.primary",
+		mt: "8",
+		mb: "3",
+	},
+	"& p": { my: "4" },
+	"& ul, & ol": { pl: "6", my: "4" },
+	"& ul": { listStyle: "disc" },
+	"& ol": { listStyle: "decimal" },
+	"& li": { my: "1" },
+	"& a": { color: "fg.brand", textDecoration: "underline" },
+	"& code": { fontFamily: "mono", bg: "bg.sunken", px: "1.5", py: "0.5", borderRadius: "sm", fontSize: "0.9em" },
+	"& pre": {
+		fontFamily: "mono",
+		bg: "bg.sunken",
+		p: "4",
+		borderRadius: "md",
+		overflow: "auto",
+		my: "4",
+		borderWidth: "1px",
+		borderColor: "border.muted",
+	},
+	"& pre code": { bg: "transparent", p: "0" },
+	"& blockquote": {
+		borderLeftWidth: "3px",
+		borderLeftColor: "fg.brand",
+		pl: "4",
+		my: "4",
+		fontStyle: "italic",
+		color: "fg.muted",
+	},
+});
 ---
 
 <Page title={`ADR-${adrNumber}: ${adr.data.title}`} description={`Architecture Decision Record: ${adr.data.title}`}>
-  <AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
-  <h1 class="text-5xl font-extrabold dark:text-white">
-    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
-  </h1>
+	<AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
 
-  <div class="relative max-w-full overflow-x-hidden">
-    <article class="format prose dark:format-invert w-full max-w-full">
-      <header class="mb-8 lg:mb-10 not-format">
-        <!-- Metadata card with glass morphism effect -->
-        <div
-          class="relative backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg"
-        >
-          <div class="flex flex-col gap-4">
-            <!-- Author section -->
-            {authors.length > 0 && (
-              <div class="flex flex-col">
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <div class="flex -space-x-4">
-                    {authors.filter(author => author && author.data).slice(0, 4).map((author, index) => (
-                      <div class="relative" style={`z-index: ${10 - index}`}>
-                        <img
-                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-secondary bg-white dark:bg-gray-800"
-                          src={author.data.avatarUrl}
-                          alt={`Profile picture of ${author.data.name}`}
-                        />
-                        {index === 0 && (
-                          <span class="absolute bottom-0 right-0 h-4 w-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></span>
-                        )}
-                      </div>
-                    ))}
-                    {authors.filter(author => author && author.data).length > 4 && (
-                      <div class="relative z-0">
-                        <div class="w-16 h-16 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-secondary dark:text-secondary font-medium">
-                          +{authors.filter(author => author && author.data).length - 4}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  {authors.filter(author => author && author.data).map((author) => (
-                    <div class="inline-flex items-center bg-primary/10 dark:bg-primary/20 rounded-full px-3 py-1">
-                      <a
-                        href={author.data.github}
-                        target="_blank"
-                        rel="author noopener noreferrer"
-                        class="text-sm font-medium text-secondary dark:text-secondary hover:text-secondary/90 dark:hover:text-secondary/90 transition-colors"
-                      >
-                        {author.data.name}
-                      </a>
-                      <span class="mx-1 text-secondary dark:text-secondary">•</span>
-                      <span class="text-xs text-secondary dark:text-secondary">@{author.id}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+	<div class={shell}>
+		<h1 class={titleClass}>
+			<span class={numberClass}>ADR-{adrNumber}:</span> {adr.data.title}
+		</h1>
 
-            {authors.length > 0 && <div class="w-full h-px bg-gray-200 dark:bg-gray-700 my-2"></div>}
+		<div class={metaCard}>
+			{authors.length > 0 && (
+				<div class={authorList}>
+					{authors.filter((a) => a && a.data).map((author) => (
+						<a href={author.data.github} target="_blank" rel="author noopener noreferrer" class={authorChip}>
+							<img class={authorAvatar} src={author.data.avatarUrl} alt={author.data.name} />
+							{author.data.name}
+						</a>
+					))}
+				</div>
+			)}
+			<span class={status}>
+				<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				Adopted on {formatDate(adr.data.adoptedAt)}
+			</span>
+		</div>
 
-            <!-- Status section -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div class="mt-2 md:mt-0">
-                {adr.data.adoptedAt ? (
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-green-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span class="ml-2 text-sm font-medium text-green-700 dark:text-green-400">
-                      Adopted on {formatDate(adr.data.adoptedAt)}
-                    </span>
-                  </div>
-                ) : (
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-yellow-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-
-                    <span class="ml-2 text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                      Adopted on {formatDate(adr.data.adoptedAt)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div class="prose dark:prose-invert max-w-none">
-        <Content />
-      </div>
-    </article>
-  </div>
+		<article class={proseClass}>
+			<Content />
+		</article>
+	</div>
 </Page>

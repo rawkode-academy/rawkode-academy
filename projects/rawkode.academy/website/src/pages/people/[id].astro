@@ -1,20 +1,16 @@
 ---
 export const prerender = true;
 
-import Page from "@/wrappers/page.astro";
 import { getCollection, getEntries, render } from "astro:content";
-import VideoFeed from "@/components/video/video-feed.astro";
-import ShowCard from "@/components/show/ShowCard.astro";
 import PersonJsonLd from "@/components/html/person-jsonld.astro";
-import type { ShowSummary } from "@/types/show";
+import Prose from "@/components/prose/Prose.astro";
+import Page from "@/wrappers/page.astro";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { css } from "../../../styled-system/css";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
-	return people.map((person) => ({
-		params: { id: person.data.id },
-		props: { person },
-	}));
+	return people.map((person) => ({ params: { id: person.data.id }, props: { person } }));
 }
 
 const { person } = Astro.props;
@@ -24,99 +20,39 @@ const shows = await getCollection("shows");
 const technologies = await getCollection("technologies");
 const news = await getCollection("news");
 const articles = await getCollection("articles", ({ data }) => !data.draft);
-const techNameById = new Map(
-	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
-);
+const techNameById = new Map(technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const));
 
-// Helper to match references
-const matchRef = (
-	ref: { collection: string; id: string } | string,
-	id: string,
-) => {
-	if (typeof ref === "string") return ref === id;
-	return ref.id === id;
-};
+const matchRef = (ref: { collection: string; id: string } | string, id: string) =>
+	typeof ref === "string" ? ref === id : ref.id === id;
 
-const hostedShows = shows.filter((show) =>
-	show.data.hosts.some((h) => matchRef(h, person.data.id)),
-);
-
-const guestVideos = videos.filter((video) =>
-	video.data.guests.some((g) => matchRef(g, person.data.id)),
-);
-
+const hostedShows = shows.filter((show) => show.data.hosts.some((h) => matchRef(h, person.data.id)));
+const guestVideos = videos.filter((video) => video.data.guests.some((g) => matchRef(g, person.data.id)));
 const authoredNews = news
-	.filter((story) =>
-		story.data.authors.some((author) => matchRef(author, person.data.id)),
-	)
+	.filter((s) => s.data.authors.some((a) => matchRef(a, person.data.id)))
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
-
 const authoredArticles = articles
-	.filter((article) =>
-		article.data.authors.some((author) => matchRef(author, person.data.id)),
-	)
+	.filter((a) => a.data.authors.some((au) => matchRef(au, person.data.id)))
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
 const formatPublishDate = (date: Date) =>
-	new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	}).format(date);
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
 
-// Prepare Show Summaries
-const showSummaries: ShowSummary[] = await Promise.all(
-	hostedShows.map(async (show) => {
-		const showVideos = videos.filter((v) => v.data.show?.id === show.data.id);
-		const hosts = await getEntries(show.data.hosts);
-
-		return {
-			id: show.data.id,
-			name: show.data.name,
-			hosts: hosts.map((h) => ({
-				forename: h.data.forename ?? null,
-				surname: h.data.surname ?? null,
-			})),
-			cover: show.data.cover,
-			episodes: showVideos.map((v) => ({
-				video: {
-					title: v.data.title,
-					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
-					publishedAt: v.data.publishedAt.toISOString(),
-				},
-			})),
-		};
-	}),
-);
-
-// Prepare Guest Videos for Feed
 const guestVideoFeed = guestVideos
-	.map((video) => ({
-		id: video.data.id,
-		title: video.data.title,
-		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
-		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
-		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
-		slug: video.data.slug,
-		publishedAt:
-			video.data.publishedAt instanceof Date
-				? video.data.publishedAt.toISOString()
-				: String(video.data.publishedAt),
+	.map((v) => ({
+		id: v.data.id,
+		title: v.data.title,
+		thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
+		duration: typeof v.data.duration === "number" ? v.data.duration : 0,
+		slug: v.data.slug,
+		publishedAt: v.data.publishedAt instanceof Date ? v.data.publishedAt.toISOString() : String(v.data.publishedAt),
 	}))
-	.sort(
-		(a, b) =>
-			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-	);
+	.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-// Render any biography MDX body content (most people have empty bodies)
 const { Content: BiographyContent } = await render(person);
 const hasBiography = Boolean(person.body && person.body.trim().length > 0);
 
-// Build a data-driven description so each profile is unique to Google
 const videoCount = guestVideos.length;
 const showCount = hostedShows.length;
-
-// Top technologies this person has talked about, sorted by frequency
 const techCounts = new Map<string, number>();
 for (const v of guestVideos) {
 	for (const techId of normalizeTechnologyReferences(v.data.technologies)) {
@@ -130,326 +66,297 @@ const topTechNames = [...techCounts.entries()]
 	.map(([id]) => techNameById.get(id) ?? id);
 
 const showNames = hostedShows.map((s) => s.data.name);
-
 const newsCount = authoredNews.length;
 const articleCount = authoredArticles.length;
-
-// Thin profiles (no shows hosted, no guest appearances, no authored content,
-// no biography) get noindex'd so Google doesn't classify them as low-quality
-// and drag down site quality.
-const noindex =
-	videoCount === 0 &&
-	showCount === 0 &&
-	newsCount === 0 &&
-	articleCount === 0 &&
-	!hasBiography;
+const noindex = videoCount === 0 && showCount === 0 && newsCount === 0 && articleCount === 0 && !hasBiography;
 
 const pageTitle = (() => {
-	if (showCount > 0) {
-		return `${person.data.name} — Host of ${showNames[0]} | Rawkode Academy`;
-	}
-	if (topTechNames.length > 0) {
-		return `${person.data.name} — Talks on ${topTechNames.slice(0, 2).join(" & ")} | Rawkode Academy`;
-	}
+	if (showCount > 0) return `${person.data.name} — Host of ${showNames[0]} | Rawkode Academy`;
+	if (topTechNames.length > 0) return `${person.data.name} — Talks on ${topTechNames.slice(0, 2).join(" & ")} | Rawkode Academy`;
 	return `${person.data.name} | Rawkode Academy`;
 })();
 
 const pageDescription = (() => {
 	const parts: string[] = [];
-	if (showCount > 0) {
-		parts.push(
-			`Host of ${showNames.slice(0, 2).join(" and ")}${showCount > 2 ? ` and ${showCount - 2} more shows` : ""}`,
-		);
-	}
-	if (videoCount > 0) {
-		parts.push(
-			`${videoCount} appearance${videoCount === 1 ? "" : "s"} on Rawkode Academy`,
-		);
-	}
+	if (showCount > 0) parts.push(`Host of ${showNames.slice(0, 2).join(" and ")}${showCount > 2 ? ` and ${showCount - 2} more shows` : ""}`);
+	if (videoCount > 0) parts.push(`${videoCount} appearance${videoCount === 1 ? "" : "s"} on Rawkode Academy`);
 	const writtenCount = newsCount + articleCount;
-	if (writtenCount > 0) {
-		parts.push(
-			`${writtenCount} published ${writtenCount === 1 ? "story" : "stories"}`,
-		);
-	}
-	if (topTechNames.length > 0) {
-		parts.push(`covering ${topTechNames.slice(0, 4).join(", ")}`);
-	}
-	if (parts.length === 0) {
-		return `${person.data.name} on Rawkode Academy — interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
-	}
+	if (writtenCount > 0) parts.push(`${writtenCount} published ${writtenCount === 1 ? "story" : "stories"}`);
+	if (topTechNames.length > 0) parts.push(`covering ${topTechNames.slice(0, 4).join(", ")}`);
+	if (parts.length === 0) return `${person.data.name} on Rawkode Academy — interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
 	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and deep dives on Rawkode Academy.`;
 })();
 
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
 
 const socialLinks = [
-	person.data.mastodon && {
-		name: "Mastodon",
-		url: person.data.mastodon,
-		filled: true,
-		icon: "M21.327 8.566c0-4.339-2.843-5.61-2.843-5.61-1.433-.658-3.894-.935-6.451-.956h-.063c-2.557.021-5.016.298-6.45.956 0 0-2.843 1.272-2.843 5.61 0 .993-.019 2.181.012 3.441.103 4.243.778 8.425 4.701 9.463 1.809.479 3.362.579 4.612.51 2.268-.126 3.541-.809 3.541-.809l-.075-1.646s-1.621.511-3.441.449c-1.804-.062-3.707-.194-3.999-2.409a4.523 4.523 0 0 1-.041-.621s1.77.433 4.014.536c1.372.063 2.658-.08 3.965-.236 2.506-.299 4.688-1.843 4.962-3.254.434-2.223.398-5.424.398-5.424zm-3.353 5.59h-2.081V9.057c0-1.075-.452-1.62-1.357-1.62-1 0-1.501.647-1.501 1.927v2.791h-2.069V9.364c0-1.28-.501-1.927-1.502-1.927-.905 0-1.357.546-1.357 1.62v5.099H6.026V8.903c0-1.074.273-1.927.823-2.558.566-.631 1.307-.955 2.228-.955 1.065 0 1.872.409 2.405 1.228l.518.869.519-.869c.533-.819 1.34-1.228 2.405-1.228.92 0 1.662.324 2.228.955.549.631.822 1.484.822 2.558v5.253z",
-	},
-	person.data.bluesky && {
-		name: "Bluesky",
-		url: person.data.bluesky,
-		filled: true,
-		icon: "M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z",
-	},
-	person.data.twitter && {
-		name: "Twitter",
-		url: person.data.twitter,
-		icon: "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z",
-	},
-	person.data.github && {
-		name: "GitHub",
-		url: person.data.github,
-		icon: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22",
-	},
-	person.data.linkedin && {
-		name: "LinkedIn",
-		url: person.data.linkedin,
-		icon: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M2 4a2 2 0 1 1 4 0 2 2 0 0 1-4 0z",
-	},
-	person.data.website && {
-		name: "Website",
-		url: person.data.website,
-		icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
-	},
-].filter(Boolean);
+	person.data.github && { name: "GitHub", url: person.data.github, icon: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" },
+	person.data.twitter && { name: "Twitter", url: person.data.twitter, icon: "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" },
+	person.data.linkedin && { name: "LinkedIn", url: person.data.linkedin, icon: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M2 4a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" },
+	person.data.website && { name: "Website", url: person.data.website, icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
+].filter(Boolean) as Array<{ name: string; url: string; icon: string }>;
 
-// rel="me" advertises that this profile owns the linked accounts.
-// Mastodon's verification crawler reads this on visit (either head <link>
-// or body <a>) and shows a green checkmark on the corresponding profile
-// link. Same mechanism works for other Fediverse/IndieWeb tools.
-const relMeUrls = [
-	person.data.mastodon,
-	person.data.github,
-	person.data.bluesky,
-	person.data.twitter,
-	person.data.linkedin,
-	person.data.website,
-	person.data.youtube,
-].filter((url): url is string => typeof url === "string" && url.length > 0);
+const relMeUrls = [person.data.mastodon, person.data.github, person.data.bluesky, person.data.twitter, person.data.linkedin, person.data.website, person.data.youtube].filter((u): u is string => typeof u === "string" && u.length > 0);
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+
+const heroCard = css({
+	display: "flex",
+	flexDirection: { base: "column", md: "row" },
+	alignItems: { base: "center", md: "flex-start" },
+	gap: { base: "8", md: "12" },
+	p: { base: "8", md: "12" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	backgroundImage:
+		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 50%)",
+});
+
+const avatarWrap = css({
+	width: { base: "40", md: "48" },
+	height: { base: "40", md: "48" },
+	borderRadius: "full",
+	overflow: "hidden",
+	borderWidth: "4px",
+	borderColor: "bg.surface",
+	boxShadow: "lg",
+	flexShrink: 0,
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const heroBody = css({ flex: "1", textAlign: { base: "center", md: "left" } });
+
+const nameClass = css({
+	fontFamily: "display",
+	fontSize: { base: "4xl", md: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "2",
+});
+
+const handle = css({ fontSize: "lg", color: "fg.brand", fontWeight: "medium" });
+
+const socialRow = css({
+	mt: "5",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	justifyContent: { base: "center", md: "flex-start" },
+});
+
+const socialBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	borderRadius: "full",
+	bg: "bg.surface",
+	color: "fg.muted",
+	transition: "all 200ms ease",
+	_hover: { bg: "bg.brand", color: "fg.on-brand" },
+});
+
+const sectionBlock = css({ mt: "16", maxWidth: "72rem", mx: "auto" });
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "8",
+});
+
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const card = css({
+	display: "flex",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+});
+
+const cardThumb = css({
+	aspectRatio: "16 / 9",
+	overflow: "hidden",
+	bg: "bg.sunken",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const cardBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "2" });
+const cardMeta = css({ fontSize: "xs", color: "fg.muted", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "wider" });
+const cardTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary", lineHeight: "tight" });
+
+const list = css({
+	display: "flex",
+	flexDirection: "column",
+});
+
+const listItem = css({
+	py: "6",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	_first: { borderTopWidth: "0" },
+});
+
+const listMeta = css({ fontSize: "xs", fontWeight: "semibold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.muted", mb: "2" });
+const listTitle = css({
+	fontSize: { base: "lg", md: "xl" },
+	fontWeight: "semibold",
+	color: "fg.primary",
+	lineHeight: "tight",
+	mb: "2",
+});
+const listLink = css({ textDecoration: "none", color: "fg.primary", _hover: { color: "fg.brand" } });
+const listDesc = css({ color: "fg.secondary", lineHeight: "1.7", maxWidth: "66ch" });
 ---
 
 <Page
-    title={pageTitle}
-    description={pageDescription}
-    noindex={noindex}
-    useImageDirectly={Boolean(person.data.avatarUrl)}
-    image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
+	title={pageTitle}
+	description={pageDescription}
+	noindex={noindex}
+	useImageDirectly={Boolean(person.data.avatarUrl)}
+	image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
 >
-    <PersonJsonLd
-        slot="extra-head"
-        name={person.data.name}
-        url={profileUrl}
-        description={pageDescription}
-        image={person.data.avatarUrl}
-        sameAs={[
-            person.data.github,
-            person.data.twitter,
-            person.data.bluesky,
-            person.data.linkedin,
-            person.data.website,
-            person.data.youtube,
-            person.data.mastodon,
-        ]}
-    />
-    <Fragment slot="extra-head">
-        {relMeUrls.map((url) => (
-            <link rel="me" href={url} />
-        ))}
-        <link
-            rel="alternate"
-            type="application/rss+xml"
-            title={`Rawkode Academy — ${person.data.name} (RSS)`}
-            href={`/api/feeds/people/${person.data.id}.xml`}
-        />
-    </Fragment>
-    <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
-        <!-- Profile Header -->
-        <section class="w-full">
-            <div class="glass-panel rounded-3xl p-8 md:p-12 max-w-5xl mx-auto">
-                <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
-                    <!-- Avatar -->
-                    <div class="flex-shrink-0">
-                        <div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-white/50 dark:border-gray-700/50 shadow-xl">
-                            <img
-                                src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
-                                alt={person.data.name}
-                                class="w-full h-full object-cover"
-                                onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-                            />
-                        </div>
-                    </div>
+	<PersonJsonLd
+		slot="extra-head"
+		name={person.data.name}
+		url={profileUrl}
+		description={pageDescription}
+		image={person.data.avatarUrl}
+		sameAs={[person.data.github, person.data.twitter, person.data.bluesky, person.data.linkedin, person.data.website, person.data.youtube, person.data.mastodon]}
+	/>
+	<Fragment slot="extra-head">
+		{relMeUrls.map((url) => <link rel="me" href={url} />)}
+		<link rel="alternate" type="application/rss+xml" title={`Rawkode Academy — ${person.data.name} (RSS)`} href={`/api/feeds/people/${person.data.id}.xml`} />
+	</Fragment>
 
-                    <!-- Info -->
-                    <div class="flex-1 text-center md:text-left space-y-6">
-                        <div>
-                            <h1 class="text-4xl md:text-5xl font-extrabold text-primary-content mb-2">
-                                {person.data.name}
-                            </h1>
-                            {person.data.handles.twitter && (
-                                <p class="text-lg text-primary font-medium">
-                                    @{person.data.handles.twitter}
-                                </p>
-                            )}
-                        </div>
+	<div class={shell}>
+		<section class={heroCard}>
+			<div class={avatarWrap}>
+				<img src={person.data.avatarUrl ?? "/apple-touch-icon.png"} alt={person.data.name} onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`} />
+			</div>
+			<div class={heroBody}>
+				<h1 class={nameClass}>{person.data.name}</h1>
+				{person.data.handles?.twitter && <p class={handle}>@{person.data.handles.twitter}</p>}
+				{socialLinks.length > 0 && (
+					<div class={socialRow}>
+						{socialLinks.map((link) => (
+							<a href={link.url} target="_blank" rel="me noopener noreferrer" class={socialBtn} aria-label={link.name}>
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d={link.icon} />
+								</svg>
+							</a>
+						))}
+					</div>
+				)}
+			</div>
+		</section>
 
-                        <!-- Social Links -->
-                        <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                            {socialLinks.map((link: any) => (
-                                <a
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="me noopener noreferrer"
-                                    class="p-3 rounded-full bg-gray-100 dark:bg-gray-800 text-muted hover:bg-primary hover:text-white dark:hover:bg-primary dark:hover:text-white transition-all duration-300 shadow-sm hover:shadow-md"
-                                    aria-label={link.name}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill={link.filled ? "currentColor" : "none"}
-                                        stroke={link.filled ? "none" : "currentColor"}
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                    >
-                                        <path d={link.icon} />
-                                    </svg>
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+		{(hasBiography || pageDescription) && (
+			<div style="max-width: 60rem; margin: 3rem auto 0;">
+				<Prose>
+					<p>{pageDescription}</p>
+					{hasBiography && <BiographyContent />}
+				</Prose>
+			</div>
+		)}
 
-        <!-- SEO summary + biography (always visible body text for crawlers) -->
-        <section class="w-full max-w-5xl mx-auto">
-            <div class="prose prose-lg dark:prose-invert max-w-none">
-                <p class="text-secondary-content">{pageDescription}</p>
-                {hasBiography && <BiographyContent />}
-            </div>
-        </section>
+		{hostedShows.length > 0 && (
+			<section class={sectionBlock}>
+				<h2 class={sectionTitle}>Shows Hosted</h2>
+				<div class={grid}>
+					{hostedShows.map((show) => (
+						<a href={`/shows/${show.data.id}`} class={card}>
+							{show.data.cover && (
+								<div class={cardThumb}>
+									<img src={typeof show.data.cover === "string" ? show.data.cover : show.data.cover?.image?.src || ""} alt={show.data.name} loading="lazy" />
+								</div>
+							)}
+							<div class={cardBody}>
+								<div class={cardMeta}>Show</div>
+								<h3 class={cardTitle}>{show.data.name}</h3>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
 
-        <!-- Hosted Shows -->
-        {showSummaries.length > 0 && (
-            <section class="w-full max-w-7xl mx-auto">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-                        Shows Hosted
-                    </h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {showSummaries.map((show) => (
-                        <ShowCard show={show} />
-                    ))}
-                </div>
-            </section>
-        )}
+		{guestVideoFeed.length > 0 && (
+			<section class={sectionBlock}>
+				<h2 class={sectionTitle}>Guest Appearances</h2>
+				<div class={grid}>
+					{guestVideoFeed.slice(0, 9).map((video) => (
+						<a href={`/watch/${video.slug}`} class={card}>
+							<div class={cardThumb}>
+								<img src={video.thumbnailUrl} alt={video.title} loading="lazy" />
+							</div>
+							<div class={cardBody}>
+								<div class={cardMeta}>{formatPublishDate(new Date(video.publishedAt))}</div>
+								<h3 class={cardTitle}>{video.title}</h3>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
 
-        <!-- Guest Appearances -->
-        {guestVideoFeed.length > 0 && (
-            <section class="w-full max-w-7xl mx-auto">
-                 <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-                        Guest Appearances
-                    </h2>
-                </div>
-                <VideoFeed
-                    title=""
-                    description=""
-                    videos={guestVideoFeed}
-                />
-            </section>
-        )}
+		{authoredArticles.length > 0 && (
+			<section class={sectionBlock} style="max-width: 60rem;">
+				<h2 class={sectionTitle}>Articles</h2>
+				<ul class={list} style="list-style: none; padding: 0; margin: 0;">
+					{authoredArticles.map((article) => (
+						<li class={listItem}>
+							<article>
+								<div class={listMeta}>
+									<time datetime={article.data.publishedAt.toISOString()}>{formatPublishDate(article.data.publishedAt)}</time>
+								</div>
+								<h3 class={listTitle}>
+									<a href={`/read/${article.id}`} class={listLink}>{article.data.title}</a>
+								</h3>
+								<p class={listDesc}>{article.data.description}</p>
+							</article>
+						</li>
+					))}
+				</ul>
+			</section>
+		)}
 
-        <!-- Authored Articles -->
-        {authoredArticles.length > 0 && (
-            <section class="w-full max-w-5xl mx-auto">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-primary/10 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-                        Articles
-                    </h2>
-                </div>
-                <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
-                    {authoredArticles.map((article) => (
-                        <li class="py-5 sm:py-6">
-                            <article class="space-y-2">
-                                <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                                    <time datetime={article.data.publishedAt.toISOString()}>
-                                        {formatPublishDate(article.data.publishedAt)}
-                                    </time>
-                                </div>
-                                <h3 class="text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
-                                    <a href={`/read/${article.id}`} class="transition-colors hover:text-primary">
-                                        {article.data.title}
-                                    </a>
-                                </h3>
-                                <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
-                                    {article.data.description}
-                                </p>
-                            </article>
-                        </li>
-                    ))}
-                </ul>
-            </section>
-        )}
-
-        <!-- Latest News -->
-        {authoredNews.length > 0 && (
-            <section class="w-full max-w-5xl mx-auto">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-                        Latest News
-                    </h2>
-                </div>
-                <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
-                    {authoredNews.map((story) => (
-                        <li class="py-5 sm:py-6">
-                            <article class="space-y-2">
-                                <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                                    <time datetime={story.data.publishedAt.toISOString()}>
-                                        {formatPublishDate(story.data.publishedAt)}
-                                    </time>
-                                </div>
-                                <h3 class="text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
-                                    <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
-                                        {story.data.title}
-                                    </a>
-                                </h3>
-                                <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
-                                    {story.data.description}
-                                </p>
-                            </article>
-                        </li>
-                    ))}
-                </ul>
-            </section>
-        )}
-    </div>
+		{authoredNews.length > 0 && (
+			<section class={sectionBlock} style="max-width: 60rem;">
+				<h2 class={sectionTitle}>News</h2>
+				<ul class={list} style="list-style: none; padding: 0; margin: 0;">
+					{authoredNews.map((story) => (
+						<li class={listItem}>
+							<article>
+								<div class={listMeta}>
+									<time datetime={story.data.publishedAt.toISOString()}>{formatPublishDate(story.data.publishedAt)}</time>
+								</div>
+								<h3 class={listTitle}>
+									<a href={`/news/${story.id}`} class={listLink}>{story.data.title}</a>
+								</h3>
+								<p class={listDesc}>{story.data.description}</p>
+							</article>
+						</li>
+					))}
+				</ul>
+			</section>
+		)}
+	</div>
 </Page>

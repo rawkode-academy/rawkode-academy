@@ -1,0 +1,95 @@
+---
+import { css } from "../../../styled-system/css";
+
+const proseClass = css({
+	color: "fg.secondary",
+	fontSize: "md",
+	lineHeight: "1.75",
+	maxWidth: "70ch",
+	"& h1, & h2, & h3, & h4, & h5, & h6": {
+		fontFamily: "display",
+		color: "fg.primary",
+		letterSpacing: "tight",
+		lineHeight: "1.2",
+	},
+	"& h1": { fontSize: { base: "3xl", md: "4xl" }, mt: "10", mb: "5", fontWeight: "bold" },
+	"& h2": { fontSize: { base: "2xl", md: "3xl" }, mt: "10", mb: "4", fontWeight: "bold" },
+	"& h3": { fontSize: "xl", mt: "8", mb: "3", fontWeight: "semibold" },
+	"& h4": { fontSize: "lg", mt: "6", mb: "2", fontWeight: "semibold" },
+	"& p": { my: "4" },
+	"& ul, & ol": { pl: "6", my: "4" },
+	"& ul": { listStyle: "disc" },
+	"& ol": { listStyle: "decimal" },
+	"& li": { my: "1" },
+	"& li > p": { my: "2" },
+	"& a": {
+		color: "fg.brand",
+		textDecoration: "underline",
+		textDecorationThickness: "1px",
+		textUnderlineOffset: "3px",
+		transition: "color 150ms ease",
+		_hover: { color: "fg.brand" },
+	},
+	"& strong, & b": { color: "fg.primary", fontWeight: "semibold" },
+	"& em, & i": { fontStyle: "italic" },
+	"& code": {
+		fontFamily: "mono",
+		bg: "bg.sunken",
+		color: "fg.primary",
+		px: "1.5",
+		py: "0.5",
+		borderRadius: "sm",
+		fontSize: "0.92em",
+		fontWeight: "normal",
+	},
+	"& pre": {
+		fontFamily: "mono",
+		bg: "bg.sunken",
+		color: "fg.primary",
+		p: "4",
+		borderRadius: "md",
+		overflow: "auto",
+		my: "5",
+		borderWidth: "1px",
+		borderColor: "border.muted",
+		fontSize: "sm",
+	},
+	"& pre code": { bg: "transparent", p: "0", borderRadius: "0" },
+	"& blockquote": {
+		borderLeftWidth: "3px",
+		borderLeftColor: "fg.brand",
+		pl: "4",
+		my: "5",
+		fontStyle: "italic",
+		color: "fg.muted",
+	},
+	"& img, & video": {
+		maxWidth: "full",
+		height: "auto",
+		borderRadius: "lg",
+		my: "5",
+	},
+	"& hr": {
+		borderColor: "border.muted",
+		my: "8",
+	},
+	"& table": {
+		width: "full",
+		my: "5",
+		borderCollapse: "collapse",
+		fontSize: "sm",
+	},
+	"& th, & td": {
+		borderBottomWidth: "1px",
+		borderBottomColor: "border.muted",
+		px: "3",
+		py: "2",
+		textAlign: "left",
+	},
+	"& th": { fontWeight: "semibold", color: "fg.primary", bg: "bg.sunken" },
+});
+---
+
+<article class={proseClass}>
+	<slot />
+</article>

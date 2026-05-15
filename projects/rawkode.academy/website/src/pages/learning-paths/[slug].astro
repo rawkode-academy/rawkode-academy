@@ -1,35 +1,19 @@
 ---
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
+import { type CollectionEntry, getCollection, getEntries, render } from "astro:content";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
-import Page from "@/wrappers/page.astro";
-import LearningPathHero from "@/components/learning-paths/LearningPathHero.astro";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
+import Prose from "@/components/prose/Prose.astro";
+import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-type Props = {
-	learningPath: CollectionEntry<"learningPaths">;
+type Props = { learningPath: CollectionEntry<"learningPaths"> };
+
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+	const learningPaths = await getCollection("learningPaths");
+	return learningPaths.map((lp) => ({ params: { slug: lp.id }, props: { learningPath: lp } }));
 };
-
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const learningPaths = await getCollection("learningPaths");
-
-		return learningPaths.map((learningPath) => ({
-			params: {
-				slug: learningPath.id,
-			},
-			props: {
-				learningPath,
-			},
-		}));
-	};
 
 const { learningPath } = Astro.props;
 const { Content, headings } = await render(learningPath);
@@ -41,195 +25,291 @@ for (const technology of allTechnologies) {
 	const rawId = technology.id.replace(/\/index$/, "");
 	technologyNameById.set(rawId, technology.data.name);
 }
+
 const technologyLabels = (learningPath.data.technologies ?? []).map(
-	(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+	(id) => technologyNameById.get(id) ?? id,
 );
-const technologyTags = (learningPath.data.technologies ?? []).map(
-	(technologyId) => ({
-		id: technologyId,
-		label: technologyNameById.get(technologyId) ?? technologyId,
-	}),
-);
+const technologyTags = (learningPath.data.technologies ?? []).map((id) => ({
+	id,
+	label: technologyNameById.get(id) ?? id,
+}));
 
-function formatDuration(minutes: number): string {
-	if (!minutes) {
-		return "Self-paced";
-	}
+const fmtDuration = (m: number) => {
+	if (!m) return "Self-paced";
+	const h = Math.floor(m / 60);
+	const r = m % 60;
+	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
+};
 
-	const hours = Math.floor(minutes / 60);
-	const mins = minutes % 60;
-
-	if (!hours) {
-		return `${mins}m`;
-	}
-
-	if (!mins) {
-		return `${hours}h`;
-	}
-
-	return `${hours}h ${mins}m`;
-}
-
-const durationLabel = formatDuration(learningPath.data.estimatedDuration);
-const outline = headings.filter((heading) => heading.depth === 2);
+const durationLabel = fmtDuration(learningPath.data.estimatedDuration);
+const outline = headings.filter((h) => h.depth === 2);
 const prerequisites = learningPath.data.prerequisites ?? [];
+
+const difficultyLabel = (d: string) => d.charAt(0).toUpperCase() + d.slice(1);
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+
+const backLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.brand",
+	textDecoration: "none",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateX(-2px)" },
+	mb: "6",
+});
+
+const heroCard = css({
+	p: { base: "6", md: "10" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	backgroundImage:
+		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/8, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/8, transparent 50%)",
+	_dark: {
+		backgroundImage:
+			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/15, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 50%)",
+	},
+});
+
+const eyebrow = css({
+	display: "inline-flex",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	mb: "4",
+});
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.1",
+	color: "fg.primary",
+	textWrap: "balance",
+});
+
+const desc = css({
+	mt: "5",
+	fontSize: { base: "md", md: "lg" },
+	color: "fg.secondary",
+	lineHeight: "1.7",
+	maxWidth: "44rem",
+});
+
+const layout = css({
+	mt: "12",
+	display: "grid",
+	gap: "10",
+	gridTemplateColumns: { base: "1fr", lg: "3fr 1fr" },
+});
+
+const aside = css({ display: "flex", flexDirection: "column", gap: "5" });
+
+const sideCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const sideTitle = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+	mb: "4",
+});
+
+const sideList = css({ display: "flex", flexDirection: "column", gap: "4", fontSize: "sm" });
+
+const dt = css({ fontSize: "xs", color: "fg.muted", textTransform: "uppercase", letterSpacing: "wider" });
+const dd = css({ fontWeight: "semibold", color: "fg.primary", mt: "0.5" });
+
+const tagList = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "2" });
+const tag = css({
+	display: "inline-flex",
+	px: "2.5",
+	py: "0.5",
+	borderRadius: "md",
+	fontSize: "xs",
+	fontWeight: "medium",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	textDecoration: "none",
+	_hover: { bg: "bg.brand", color: "fg.on-brand" },
+});
+
+const prereqList = css({ display: "flex", flexDirection: "column", gap: "2", mt: "2" });
+const prereqDot = css({ display: "inline-block", w: "1.5", h: "1.5", borderRadius: "full", bg: "fg.brand", mr: "2" });
+
+const outlineList = css({ display: "flex", flexDirection: "column", gap: "3" });
+
+const outlineNum = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "6",
+	h: "6",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+});
+
+const outlineLink = css({
+	color: "fg.secondary",
+	textDecoration: "none",
+	_hover: { color: "fg.brand" },
+});
+
+const footer = css({
+	mt: "16",
+	p: "8",
+	borderWidth: "1px",
+	borderStyle: "dashed",
+	borderColor: "border.default",
+	borderRadius: "3xl",
+	textAlign: "center",
+});
+
+const footerTitle = css({
+	fontFamily: "display",
+	fontSize: "2xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "4",
+});
+
+const footerBtns = css({ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "3", mt: "6" });
+
+const primaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const secondaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
+});
 
 const pageTitle = `${learningPath.data.title} | Learning Path`;
 const pageDescription = learningPath.data.description;
 ---
 
-<Page
-	title={pageTitle}
-	description={pageDescription}
-	publishedAt={learningPath.data.publishedAt}
-	authors={authors}
->
-	<LearningPathJsonLd
-		slot="extra-head"
-		learningPath={learningPath}
-		authors={authors}
-		technologyLabels={technologyLabels}
-	/>
-	<nav class="mb-6">
-		<a
-			href="/learning-paths"
-			class="inline-flex items-center text-sm font-medium text-primary hover:text-primary-dark transition-colors"
-		>
-			<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+<Page title={pageTitle} description={pageDescription} publishedAt={learningPath.data.publishedAt} authors={authors}>
+	<LearningPathJsonLd slot="extra-head" learningPath={learningPath} authors={authors} technologyLabels={technologyLabels} />
+
+	<div class={shell}>
+		<a href="/learning-paths" class={backLink}>
+			<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
 			All Learning Paths
 		</a>
-	</nav>
 
-	<LearningPathHero
-		title={learningPath.data.title}
-		description={learningPath.data.description}
-		difficulty={learningPath.data.difficulty}
-		durationLabel={durationLabel}
-		technologies={technologyTags}
-		prerequisites={prerequisites}
-		authors={authors}
-		publishedAt={learningPath.data.publishedAt}
-	/>
-
-	<section
-		id="learning-path-content"
-		class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
-	>
-		<article class="prose prose-lg max-w-none dark:prose-invert">
-			<Content />
-		</article>
-		<aside class="space-y-6">
-			<div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-lg">
-				<h2 class="text-sm font-semibold uppercase tracking-wide text-muted mb-3">
-					At a Glance
-				</h2>
-				<ul class="space-y-3 text-sm text-muted">
-					<li class="flex items-start gap-3">
-						<svg class="w-5 h-5 mt-0.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0-6v2m0 16v2m10-10h-2M6 12H4m15.364-7.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728 1.414 1.414M16.95 16.95l1.414 1.414" />
-						</svg>
-						<div>
-							<p class="text-xs uppercase tracking-wide text-muted">Estimated time</p>
-							<p class="font-semibold text-primary-content">{durationLabel}</p>
-						</div>
-					</li>
-					<li class="flex items-start gap-3">
-						<svg class="w-5 h-5 mt-0.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 21.5 12.083 12.083 0 015.84 10.578L12 14z" />
-						</svg>
-						<div>
-							<p class="text-xs uppercase tracking-wide text-muted">Difficulty</p>
-							<p class="font-semibold text-primary-content">
-								{learningPath.data.difficulty.charAt(0).toUpperCase() + learningPath.data.difficulty.slice(1)}
-							</p>
-						</div>
-					</li>
-					{technologyTags.length > 0 && (
-						<li>
-							<p class="text-xs uppercase tracking-wide text-muted mb-2">Technologies</p>
-							<div class="flex flex-wrap gap-2">
-								{technologyTags.map((technology) => (
-									<a
-										href={`/technology/${technology.id}`}
-										rel="tag"
-										class="inline-flex items-center rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary hover:bg-secondary/25 hover:text-secondary dark:bg-secondary/20 dark:text-secondary/90 dark:hover:bg-secondary/30 transition-colors"
-									>
-										{technology.label}
-									</a>
-								))}
-							</div>
-						</li>
-					)}
-					{prerequisites.length > 0 && (
-						<li>
-							<p class="text-xs uppercase tracking-wide text-muted mb-2">Prerequisites</p>
-							<ul class="space-y-2">
-								{prerequisites.map((item) => (
-									<li class="flex items-start gap-2 text-sm">
-										<span class="mt-1 inline-flex h-1.5 w-1.5 rounded-full bg-primary"></span>
-										<span>{item}</span>
-									</li>
-								))}
-							</ul>
-						</li>
-					)}
-				</ul>
-			</div>
-
-			{outline.length > 0 && (
-				<div class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-lg">
-					<h2 class="text-sm font-semibold uppercase tracking-wide text-muted mb-3">
-						Curriculum Overview
-					</h2>
-					<ol class="space-y-3 text-sm text-muted">
-						{outline.map((heading, index) => (
-							<li class="flex items-start gap-3">
-								<span class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-									{index + 1}
-								</span>
-								<a href={`#${heading.slug}`} class="hover:text-primary transition-colors">
-									{heading.text}
-								</a>
-							</li>
-						))}
-					</ol>
-				</div>
-			)}
-		</aside>
-	</section>
-
-	<NewsletterCTA
-		class="mt-16"
-		audience="learning-paths"
-		badge="New paths weekly"
-		headline="Get notified when we ship new learning paths"
-		subtitle="Structured roadmaps for Cloud Native, AI infra, and platform engineering — delivered when they're ready."
-	/>
-
-	<footer class="mt-16">
-		<div class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
-			<h2 class="text-2xl font-semibold text-primary-content mb-4">
-				Ready for another challenge?
-			</h2>
-			<p class="text-muted mb-6">
-				Explore more curated journeys, or jump back into the Rawkode Academy video library.
-			</p>
-			<div class="flex flex-wrap justify-center gap-4">
-				<a
-					href="/learning-paths"
-					class="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-white font-medium hover:bg-primary-dark transition-colors"
-				>
-					Browse Learning Paths
-				</a>
-				<a
-					href="/watch"
-					class="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 px-5 py-2.5 text-secondary-content font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-				>
-					View All Videos
-				</a>
-			</div>
+		<div class={heroCard}>
+			<span class={eyebrow}>Learning Path · {difficultyLabel(learningPath.data.difficulty)}</span>
+			<h1 class={title}>{learningPath.data.title}</h1>
+			<p class={desc}>{learningPath.data.description}</p>
 		</div>
-	</footer>
+
+		<section class={layout}>
+			<Prose>
+				<Content />
+			</Prose>
+
+			<aside class={aside}>
+				<div class={sideCard}>
+					<h2 class={sideTitle}>At a Glance</h2>
+					<ul class={sideList}>
+						<li>
+							<div class={dt}>Estimated time</div>
+							<div class={dd}>{durationLabel}</div>
+						</li>
+						<li>
+							<div class={dt}>Difficulty</div>
+							<div class={dd}>{difficultyLabel(learningPath.data.difficulty)}</div>
+						</li>
+						{technologyTags.length > 0 && (
+							<li>
+								<div class={dt}>Technologies</div>
+								<div class={tagList}>
+									{technologyTags.map((t) => (
+										<a href={`/technology/${t.id}`} rel="tag" class={tag}>{t.label}</a>
+									))}
+								</div>
+							</li>
+						)}
+						{prerequisites.length > 0 && (
+							<li>
+								<div class={dt}>Prerequisites</div>
+								<ul class={prereqList}>
+									{prerequisites.map((item) => (
+										<li><span class={prereqDot}></span>{item}</li>
+									))}
+								</ul>
+							</li>
+						)}
+					</ul>
+				</div>
+
+				{outline.length > 0 && (
+					<div class={sideCard}>
+						<h2 class={sideTitle}>Curriculum</h2>
+						<ol class={outlineList}>
+							{outline.map((heading, index) => (
+								<li style="display: flex; gap: 0.75rem; align-items: flex-start;">
+									<span class={outlineNum}>{index + 1}</span>
+									<a href={`#${heading.slug}`} class={outlineLink}>{heading.text}</a>
+								</li>
+							))}
+						</ol>
+					</div>
+				)}
+			</aside>
+		</section>
+
+		<footer class={footer}>
+			<h2 class={footerTitle}>Ready for another challenge?</h2>
+			<p style="color: var(--colors-fg-secondary);">Explore more curated journeys, or jump back into the Rawkode Academy video library.</p>
+			<div class={footerBtns}>
+				<a href="/learning-paths" class={primaryBtn}>Browse Learning Paths</a>
+				<a href="/watch" class={secondaryBtn}>View All Videos</a>
+			</div>
+		</footer>
+	</div>
 </Page>

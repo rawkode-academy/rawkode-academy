@@ -1,35 +1,20 @@
 ---
 import { getImage } from "astro:assets";
-import { getEntry } from "astro:content";
-import {
-	type CollectionEntry,
-	getCollection,
-	getEntries,
-	render,
-} from "astro:content";
-import RelatedArticles from "@/components/articles/RelatedArticles.astro";
-import Resources from "@/components/articles/Resources.astro";
-import TableOfContents from "@/components/articles/TableOfContents.astro";
-import Updates from "@/components/articles/Updates.astro";
+import { type CollectionEntry, getCollection, getEntries, getEntry, render } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-import SeriesLink from "@/components/series/SeriesLink.astro";
+import Prose from "@/components/prose/Prose.astro";
 import Page from "@/wrappers/page.astro";
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
 import InternalLinks from "@/components/seo/InternalLinks.astro";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
-import { getTypeBadgeConfig } from "@/utils/article-types";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-type Props = {
-	article: CollectionEntry<"articles">;
-};
+type Props = { article: CollectionEntry<"articles"> };
 
-const computeImageUrl = async (
-	article: CollectionEntry<"articles">,
-): Promise<URL | undefined> => {
+const computeImageUrl = async (article: CollectionEntry<"articles">): Promise<URL | undefined> => {
 	if (article.data.cover) {
 		const image = await getImage({ src: article.data.cover.image });
 		return new URL(image.src, Astro.site);
@@ -37,20 +22,15 @@ const computeImageUrl = async (
 	return undefined;
 };
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const articles = await getCollection("articles");
-		return articles.map((article: CollectionEntry<"articles">) => ({
-			params: { slug: article.id },
-			props: { article },
-		}));
-	};
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+	const articles = await getCollection("articles");
+	return articles.map((article: CollectionEntry<"articles">) => ({ params: { slug: article.id }, props: { article } }));
+};
 
 const { article } = Astro.props;
 const { Content, headings } = await render(article);
 const authors = await getEntries(article.data.authors);
-const maybeSeries =
-	article.data.series && (await getEntry("series", article.data.series.id));
+const maybeSeries = article.data.series && (await getEntry("series", article.data.series.id));
 
 const imageUrl = await computeImageUrl(article);
 const readingTime = calculateReadingTime(article.body || "");
@@ -62,24 +42,20 @@ for (const technology of allTechnologies) {
 	technologyNameById.set(rawId, technology.data.name);
 }
 
-function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
+const formatTechnologyLabel = (v: string) => {
+	const fromCollection = technologyNameById.get(v);
 	if (fromCollection) return fromCollection;
-	return value
+	return v
 		.split(/[-/]/g)
 		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
+		.map((s) => (s.length <= 3 ? s.toUpperCase() : `${s.charAt(0).toUpperCase()}${s.slice(1)}`))
 		.join(" ");
-}
+};
 
-const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	id: technologyId,
-	label: formatTechnologyLabel(technologyId),
-	href: `/technology/${technologyId}`,
+const tags = (article.data.technologies ?? []).map((id) => ({
+	id,
+	label: formatTechnologyLabel(id),
+	href: `/technology/${id}`,
 }));
 
 const breadcrumbElements = [
@@ -89,24 +65,157 @@ const breadcrumbElements = [
 ];
 
 const articleType = article.data.type || "tutorial";
-const badgeConfig = getTypeBadgeConfig(articleType);
 
-const publishDate = new Intl.DateTimeFormat("en-US", {
-	month: "short",
-	day: "numeric",
-	year: "numeric",
-}).format(article.data.publishedAt);
+const publishDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(article.data.publishedAt);
+
+const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+
+const layout = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "1fr 18rem" },
+	gap: "12",
+	alignItems: "start",
+	mt: "8",
+});
+
+const articleHeader = css({ mb: "10" });
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.05",
+	color: "fg.primary",
+	textWrap: "balance",
+});
+
+const typeBadge = css({
+	display: "inline-flex",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	mb: "4",
+});
+
+const byline = css({
+	mt: "5",
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "3",
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const authorLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	color: "fg.primary",
+	textDecoration: "none",
+	fontWeight: "medium",
+	_hover: { color: "fg.brand" },
+});
+
+const authorAvatar = css({ width: "7", height: "7", borderRadius: "full", objectFit: "cover" });
+
+const sep = css({ color: "border.default" });
+
+const coverWrap = css({
+	mt: "10",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	"& img": { width: "full", height: "auto", display: "block" },
+});
+
+const aside = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "5",
+	position: { lg: "sticky" },
+	top: { lg: "28" },
+});
+
+const tocCard = css({
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const tocTitle = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+	mb: "3",
+});
+
+const tocList = css({ display: "flex", flexDirection: "column", gap: "2", fontSize: "sm", listStyle: "none", m: "0", p: "0" });
+
+const tocLink = css({
+	color: "fg.secondary",
+	textDecoration: "none",
+	display: "block",
+	py: "1",
+	transition: "color 150ms ease",
+	_hover: { color: "fg.brand" },
+});
+
+const tagsFooter = css({
+	mt: "12",
+	pt: "6",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "3",
+});
+
+const tag = css({
+	display: "inline-flex",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.secondary",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { color: "fg.brand", borderColor: "border.default", bg: "bg.brand-subtle" },
+});
+
+const seriesCard = css({
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	mb: "8",
+});
+const seriesLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", mb: "2" });
+const seriesLink = css({ color: "fg.primary", fontWeight: "semibold", textDecoration: "none", _hover: { color: "fg.brand" } });
 ---
 
 <Page
 	title={`${article.data.openGraph?.title || article.data.title}`}
 	subtitle={article.data.openGraph?.subtitle}
 	description={article.data.description}
-	image={imageUrl ? {
-		image: imageUrl,
-		text: article.data.title,
-		format: "png" as const
-	} : undefined}
+	image={imageUrl ? { image: imageUrl, text: article.data.title, format: "png" as const } : undefined}
 	useImageDirectly={true}
 	isArticle={true}
 	publishedAt={article.data.publishedAt}
@@ -118,323 +227,78 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	) : (
 		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
 	)}
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/rss+xml"
-		title="Rawkode Academy - Articles (RSS)"
-		href="/api/feeds/articles.xml"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/atom+xml"
-		title="Rawkode Academy - Articles (Atom)"
-		href="/api/feeds/articles.atom"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/feed+json"
-		title="Rawkode Academy - Articles (JSON Feed)"
-		href="/api/feeds/articles.json"
-	/>
+	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
+	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
+	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
 
-	<div class="article-page">
-		<!-- Breadcrumb -->
+	<div class={shell}>
 		<Breadcrumb elements={breadcrumbElements} />
 
-		<!-- Article Header -->
-		<header class="article-header">
-			<!-- Title -->
-			<h1>{article.data.title}</h1>
-
-			<!-- Byline: Author + Meta in one row -->
-			<div class="byline">
-				<div class="byline-authors">
-					{authors.map((author) => (
-						<a
-							href={`/people/${author.data.id}`}
-							rel="author"
-							class="author"
-						>
-							{author.data.avatarUrl && (
-								<img
-									src={author.data.avatarUrl}
-									alt=""
-									class="author-avatar"
-									loading="lazy"
-								/>
-							)}
-							<span class="author-name">{author.data.name}</span>
+		<header class={articleHeader}>
+			<span class={typeBadge}>{articleType}</span>
+			<h1 class={title}>{article.data.title}</h1>
+			<div class={byline}>
+				{authors.map((author, idx) => (
+					<>
+						{idx > 0 && <span class={sep}>·</span>}
+						<a href={`/people/${author.data.id}`} rel="author" class={authorLink}>
+							{author.data.avatarUrl && <img src={author.data.avatarUrl} alt="" class={authorAvatar} loading="lazy" />}
+							<span>{author.data.name}</span>
 						</a>
-					))}
-				</div>
-
-				<span class="byline-sep">·</span>
-
-				<time datetime={article.data.publishedAt.toString()} class="byline-date">
-					{publishDate}
-				</time>
-
-				<span class="byline-sep">·</span>
-
-				<span class="byline-read">{readingTime.text}</span>
-
-				<span class="byline-type">
-					{badgeConfig.label}
-				</span>
+					</>
+				))}
+				<span class={sep}>·</span>
+				<time datetime={article.data.publishedAt.toString()}>{publishDate}</time>
+				<span class={sep}>·</span>
+				<span>{readingTime.text}</span>
 			</div>
-
-			<!-- Series -->
-			{maybeSeries && (
-				<div class="series-link">
-					<SeriesLink series={maybeSeries} />
-				</div>
-			)}
 		</header>
 
-		<!-- Internal Links -->
-		<InternalLinks article={article} />
+		{article.data.cover && (
+			<div class={coverWrap}>
+				<img src={typeof article.data.cover.image === "string" ? article.data.cover.image : article.data.cover.image.src} alt={article.data.cover.alt || article.data.title} />
+			</div>
+		)}
 
-		<!-- Content -->
-		<div class="article-content">
-			<TableOfContents headings={headings} />
+		<section class={layout}>
+			<div>
+				{maybeSeries && (
+					<div class={seriesCard}>
+						<div class={seriesLabel}>Part of series</div>
+						<a href={`/series/${maybeSeries.id}`} class={seriesLink}>{maybeSeries.data.title}</a>
+					</div>
+				)}
 
-			<article class="prose">
-				<Updates updates={article.data.updates} />
-				<Content />
+				<Prose>
+					<Content />
+				</Prose>
 
 				{tags.length > 0 && (
-					<footer class="tags-footer not-prose">
-						<span class="tags-label">Tagged in</span>
-						<ul class="tags-list">
-							{tags.map((tag) => (
-								<li>
-									<a href={tag.href} class="tag" rel="tag">
-										{tag.label}
-									</a>
-								</li>
-							))}
-						</ul>
+					<footer class={tagsFooter}>
+						<span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--colors-fg-muted);">Tagged in</span>
+						{tags.map((t) => (
+							<a href={t.href} class={tag} rel="tag">{t.label}</a>
+						))}
 					</footer>
 				)}
 
-				<NewsletterCTA class="my-12 not-prose" />
-				<Resources resources={article.data.resources} />
-				<RelatedArticles currentArticle={article} limit={3} />
-			</article>
-		</div>
+				<InternalLinks article={article} />
+			</div>
+
+			<aside class={aside}>
+				{tocItems.length > 0 && (
+					<div class={tocCard}>
+						<h2 class={tocTitle}>On this page</h2>
+						<ul class={tocList}>
+							{tocItems.map((h) => (
+								<li style={`padding-left: ${(h.depth - 2) * 0.75}rem;`}>
+									<a href={`#${h.slug}`} class={tocLink}>{h.text}</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+			</aside>
+		</section>
 	</div>
 </Page>
-
-<style>
-	.article-page {
-		max-width: 100%;
-	}
-
-	/* Header - needs right padding for TOC */
-	.article-header {
-		margin-bottom: 2rem;
-		padding-right: 4rem;
-	}
-
-	@media (max-width: 767px) {
-		.article-header {
-			padding-right: 0;
-		}
-	}
-
-	h1 {
-		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
-		font-weight: 800;
-		line-height: 1.2;
-		letter-spacing: -0.02em;
-		color: rgb(17 24 39);
-		margin: 0 0 1rem;
-	}
-
-	:root.dark h1 {
-		color: white;
-	}
-
-	/* Byline */
-	.byline {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.625rem;
-		font-size: 0.875rem;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .byline {
-		color: rgb(156 163 175);
-	}
-
-	.byline-authors {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.author {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		font-weight: 500;
-		transition: color 0.15s;
-	}
-
-	:root.dark .author {
-		color: white;
-	}
-
-	.author:hover {
-		color: rgb(var(--brand-primary));
-	}
-
-	.author-avatar {
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.byline-sep {
-		color: rgb(209 213 219);
-	}
-
-	:root.dark .byline-sep {
-		color: rgb(75 85 99);
-	}
-
-	.byline-date,
-	.byline-read {
-		white-space: nowrap;
-	}
-
-	.byline-type {
-		padding: 0.25rem 0.625rem;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: rgb(var(--brand-primary));
-		background: rgb(var(--brand-primary) / 0.1);
-		border-radius: 4px;
-	}
-
-	:root.dark .byline-type {
-		background: rgb(var(--brand-primary) / 0.2);
-	}
-
-	/* Series */
-	.series-link {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--surface-border);
-	}
-
-	/* Content */
-	.article-content {
-		position: relative;
-	}
-
-	.prose {
-		width: 100%;
-		margin-bottom: 6rem;
-		padding-right: 4rem;
-	}
-
-	@media (max-width: 767px) {
-		.prose {
-			padding-right: 0;
-		}
-	}
-
-	/* Prose overrides */
-	:global(.prose pre),
-	:global(.prose code),
-	:global(.prose table),
-	:global(.prose img),
-	:global(.prose iframe) {
-		max-width: 100%;
-		overflow-x: auto;
-	}
-
-	:global(.prose p),
-	:global(.prose li),
-	:global(.prose h1),
-	:global(.prose h2),
-	:global(.prose h3),
-	:global(.prose h4) {
-		overflow-wrap: break-word;
-		word-break: break-word;
-	}
-
-	:global(.prose pre) {
-		white-space: pre-wrap;
-	}
-
-	.tags-footer {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.75rem;
-		margin: 2rem 0 0;
-		padding-top: 1.5rem;
-		border-top: 1px solid rgb(0 0 0 / 0.1);
-	}
-
-	:root.dark .tags-footer {
-		border-top-color: rgb(255 255 255 / 0.1);
-	}
-
-	.tags-label {
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .tags-label {
-		color: rgb(156 163 175);
-	}
-
-	.tags-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.tag {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		border: 1px solid rgb(0 0 0 / 0.1);
-		font-size: 0.85rem;
-		font-weight: 500;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		transition: color 0.15s, border-color 0.15s, background-color 0.15s;
-	}
-
-	:root.dark .tag {
-		color: rgb(229 231 235);
-		border-color: rgb(255 255 255 / 0.1);
-	}
-
-	.tag:hover {
-		color: rgb(var(--brand-primary));
-		border-color: rgb(var(--brand-primary) / 0.4);
-		background-color: rgb(var(--brand-primary) / 0.05);
-	}
-</style>
