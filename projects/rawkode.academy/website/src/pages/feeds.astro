@@ -129,10 +129,29 @@ const publishedShows = shows.filter((show) => show.data.publish);
 		</div>
 
 		<div class="mt-12 p-6 bg-gray-800 rounded-lg border border-gray-700">
+			<h2 class="text-xl font-semibold mb-3 text-secondary">Subscribe to everything in one click</h2>
+			<p class="text-gray-300 mb-3">
+				Import our OPML file into your feed reader (Feedly, Inoreader, NetNewsWire, etc.)
+				to subscribe to all feeds at once — global feeds, every podcast, plus per-technology
+				and per-contributor feeds, organised in folders.
+			</p>
+			<a
+				href="/feeds.opml"
+				class="inline-flex items-center gap-3 text-primary hover:text-primary/90 transition-colors"
+			>
+				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+					<path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+				</svg>
+				Download feeds.opml
+			</a>
+		</div>
+
+		<div class="mt-12 p-6 bg-gray-800 rounded-lg border border-gray-700">
 			<h2 class="text-xl font-semibold mb-3 text-secondary">Feed Formats</h2>
 			<div class="space-y-2 text-gray-300">
 				<p><strong>RSS 2.0:</strong> The most widely supported feed format, compatible with virtually all feed readers.</p>
 				<p><strong>Atom 1.0:</strong> A more modern and technically superior format with better support for content types and metadata.</p>
+				<p><strong>OPML 2.0:</strong> An XML format feed readers use to import multiple subscriptions in one go. Our OPML at <code>/feeds.opml</code> lists every feed we publish, grouped into folders.</p>
 			</div>
 		</div>
 	</div>
