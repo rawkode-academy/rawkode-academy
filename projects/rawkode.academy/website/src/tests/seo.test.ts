@@ -1364,6 +1364,50 @@ describe("Structured Data Validation", () => {
 		expect(jsonLd.keywords).toBeUndefined();
 	});
 
+	it("builds OPML with top-level feeds, grouped sub-feeds, and escaped attributes", async () => {
+		const { buildOpmlDocument } = await import("../lib/opml.ts");
+
+		const xml = buildOpmlDocument({
+			title: "Rawkode Academy feeds",
+			ownerName: "Rawkode Academy",
+			dateCreated: new Date("2026-05-15T10:00:00.000Z"),
+			topLevelFeeds: [
+				{
+					text: "All Content",
+					xmlUrl: "https://rawkode.academy/api/feeds/all.xml",
+					htmlUrl: "https://rawkode.academy/feeds",
+				},
+			],
+			groups: [
+				{
+					text: "Technologies",
+					children: [
+						{
+							text: "Kubernetes & friends",
+							xmlUrl:
+								"https://rawkode.academy/api/feeds/technology/kubernetes.xml",
+							htmlUrl: "https://rawkode.academy/technology/kubernetes",
+						},
+					],
+				},
+				{
+					text: "Empty",
+					children: [],
+				},
+			],
+		});
+
+		expect(xml).toContain('<opml version="2.0">');
+		expect(xml).toContain("<title>Rawkode Academy feeds</title>");
+		expect(xml).toContain(
+			'<outline text="All Content" title="All Content" type="rss" xmlUrl="https://rawkode.academy/api/feeds/all.xml" htmlUrl="https://rawkode.academy/feeds"/>',
+		);
+		expect(xml).toContain('<outline text="Technologies" title="Technologies">');
+		expect(xml).toContain("Kubernetes &amp; friends");
+		expect(xml).not.toContain('text="Empty"');
+		expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
+	});
+
 	it("builds a JSON Feed 1.1 document with required fields and per-item shape", async () => {
 		const { buildJsonFeed } = await import("../lib/json-feed.ts");
 
