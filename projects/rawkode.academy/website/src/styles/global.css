@@ -51,6 +51,16 @@ body {
 		radial-gradient(circle at 80% 30%, rgba(0, 206, 255, 0.18), transparent 50%);
 }
 
+/* Typewriter hero responds to mobile by stacking the logo grid below the copy. */
+@media (max-width: 1023px) {
+	.hero-typewriter-inner {
+		grid-template-columns: 1fr !important;
+	}
+	.hero-typewriter-logos {
+		display: none !important;
+	}
+}
+
 .hero-aurora-strong {
 	background-image:
 		radial-gradient(circle at 12% 15%, rgba(95, 94, 215, 0.15), transparent 50%),

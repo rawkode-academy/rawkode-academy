@@ -4,6 +4,7 @@ export const prerender = false;
 import { env } from "cloudflare:workers";
 import NewsletterWidget from "./NewsletterWidget.vue";
 import { createLearnerId } from "@/actions/newsletter";
+import { css } from "../../../styled-system/css";
 
 interface Props {
 	class?: string;
@@ -18,7 +19,7 @@ const {
 	class: className,
 	badge = "Weekly Cloud Native insights",
 	headline = "Stay ahead in cloud native",
-	subtitle = "Tutorials, deep dives, and curated events—no fluff.",
+	subtitle = "Tutorials, deep dives, and curated events — no fluff.",
 	audience = "academy",
 	variant = "card",
 } = Astro.props;
@@ -43,45 +44,85 @@ if (user && import.meta.env.PROD) {
 const pagePath = Astro.url.pathname;
 const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
-// Check for the newsletter subscription cookie (server-side)
 const hasNewsletterCookie =
 	Astro.cookies.get(`newsletter:${audience}:updates`)?.value === "true";
 
-// For anonymous users with the cookie, hide the CTA entirely
 const shouldHide = !user && hasNewsletterCookie;
 const isSection = variant === "section";
+
+const wrap = css({
+	position: "relative",
+	zIndex: "10",
+	width: "full",
+	py: { base: "8", md: "12" },
+});
+
+const card = css({
+	position: "relative",
+	mx: "auto",
+	maxWidth: "80rem",
+	overflow: "hidden",
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	px: { base: "6", md: "10" },
+	py: { base: "7", md: "10" },
+});
+
+const grid = css({
+	position: "relative",
+	display: "grid",
+	gap: "6",
+	gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) 20rem" },
+	alignItems: "center",
+});
+
+const eyebrowRow = css({ display: "flex", alignItems: "center", gap: "2" });
+const eyebrowDot = css({ w: "2", h: "2", borderRadius: "full", bg: "fg.brand" });
+const eyebrowText = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.brand",
+});
+
+const headlineStyle = css({
+	mt: "2",
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	textWrap: "balance",
+	maxWidth: "30ch",
+});
+
+const subStyle = css({
+	mt: "3",
+	fontSize: { base: "md", md: "lg" },
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	maxWidth: "48ch",
+});
+
+const widgetWrap = css({ width: "full", maxWidth: "28rem", lg: { justifySelf: "end" } });
 ---
 
 {!shouldHide && (
-	<section class:list={[isSection ? "relative z-10 w-full overflow-hidden py-8 sm:py-10" : "relative z-10 w-full py-12", className]}>
-		<div
-			class:list={[
-				isSection
-					? "relative mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] px-6 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
-					: "section-shell-muted overflow-hidden rounded-[1.75rem] px-6 py-6 sm:px-8 sm:py-8",
-			]}
-		>
-			{isSection ? (
-				<div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_50%,_rgba(var(--brand-primary),0.12),_transparent_34%),radial-gradient(circle_at_100%_18%,_rgba(var(--brand-secondary),0.1),_transparent_26%)] dark:bg-[radial-gradient(circle_at_0%_50%,_rgba(var(--brand-primary),0.16),_transparent_34%),radial-gradient(circle_at_100%_18%,_rgba(var(--brand-secondary),0.12),_transparent_26%)]"></div>
-			) : (
-				<div class="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-primary/10 to-transparent dark:from-primary/14"></div>
-			)}
-
-			<div class:list={[isSection ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center lg:gap-10" : "grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-8"]}>
-				<div class:list={[isSection ? "min-w-0 space-y-3" : "min-w-0 space-y-2"]}>
-					<div class="flex items-center gap-2">
-						<span class="h-2 w-2 rounded-full bg-primary"></span>
-						<span class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{badge}</span>
+	<section class:list={[wrap, "hero-aurora", className]}>
+		<div class={card}>
+			<div class={grid}>
+				<div>
+					<div class={eyebrowRow}>
+						<span class={eyebrowDot}></span>
+						<span class={eyebrowText}>{badge}</span>
 					</div>
-					<h2 class:list={[isSection ? "max-w-[18ch] text-balance text-2xl font-display font-semibold tracking-tight text-primary-content sm:max-w-none sm:text-3xl" : "text-xl font-display font-semibold tracking-tight text-primary-content sm:text-2xl"]}>
-						{headline}
-					</h2>
-					<p class:list={[isSection ? "max-w-[48ch] text-base leading-8 text-secondary-content sm:text-lg" : "max-w-[52ch] text-sm leading-7 text-secondary-content sm:text-base"]}>
-						{subtitle}
-					</p>
+					<h2 class={headlineStyle}>{headline}</h2>
+					<p class={subStyle}>{subtitle}</p>
 				</div>
-
-				<div class:list={[isSection ? "w-full max-w-md lg:justify-self-end" : "w-full max-w-sm lg:justify-self-end"]}>
+				<div class={widgetWrap}>
 					<NewsletterWidget
 						client:visible
 						isSignedIn={!!user}

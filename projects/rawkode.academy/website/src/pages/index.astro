@@ -1,8 +1,11 @@
 ---
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
+import HeroTypewriter from "@/components/hero/typewriter.tsx";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { getPublishedVideos } from "@/lib/content";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { css } from "../../styled-system/css";
 
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
@@ -29,6 +32,16 @@ for (const technology of allTechnologies) {
 	const rawId = technology.id.replace(/\/index$/, "");
 	technologyNameById.set(rawId, technology.data.name);
 }
+
+const heroLogos = allTechnologies
+	.filter((tech) => tech.data.logos?.icon === true)
+	.map((tech) => ({
+		name: tech.data.name,
+		iconUrl: resolveTechnologyIconUrl(tech.id, tech.data.logos) || "",
+	}))
+	.filter((logo) => logo.iconUrl)
+	.sort(() => Math.random() - 0.5)
+	.slice(0, 4);
 function formatTechnologyLabel(value: string): string {
 	const fromCollection = technologyNameById.get(value);
 	if (fromCollection) return fromCollection;
@@ -40,6 +53,14 @@ function formatTechnologyLabel(value: string): string {
 }
 
 const allCourses = await getCollection("courses");
+const allTestimonials = await getCollection("testimonials");
+const viewerTestimonials = allTestimonials
+	.filter((t) => t.data.type === "viewer")
+	.slice(0, 4);
+
+const partners = [
+	{ name: "Spectro Cloud", url: "https://spectrocloud.com", since: "2025", industry: "Kubernetes" },
+];
 const totalContent = allVideos.length + allArticles.length + allCourses.length;
 const totalSeconds = allVideos.reduce((acc, video) => {
 	const duration = video.data.duration;
@@ -726,44 +747,34 @@ const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="curren
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<section class:list={[heroWrap, "hero-aurora-strong"]}>
-		<div class={heroPattern}></div>
-		<div class={heroGrid}>
-			<div>
-				<span class={eyebrow}><Fragment set:html={sparkleSvg} /> Rawkode Academy</span>
-				<h1 class={heroTitle}>
-					<span class={heroTitleAccent}>Cloud Native</span> education<br />
-					that respects your time.
-				</h1>
-				<p class={heroSubtitle}>
-					Tutorials, articles, learning paths, and live builds from real production engineering. No fluff, no sponsored-only content — just the work.
-				</p>
-				<div class={heroActions}>
-					<a href="/watch" class={buttonSolid}>
-						Start watching free
-						<Fragment set:html={arrowIcon} />
-					</a>
-					<a href="/learning-paths" class={buttonOutline}>Explore learning paths</a>
-				</div>
-				<div class={statsRowMobile}>
-					{stats.map((s) => (
-						<div>
-							<div class={statMobileValue}>{s.value}</div>
-							<div class={statMobileLabel}>{s.label}</div>
-						</div>
-					))}
-				</div>
-			</div>
-			<aside class={heroStatsCard}>
-				{stats.map((s) => (
-					<div class={heroStatItem}>
-						<div class={heroStatValue}><span>{s.value}</span></div>
-						<div class={heroStatLabel}>{s.label}</div>
-					</div>
-				))}
-			</aside>
-		</div>
-	</section>
+	<HeroTypewriter
+		client:only="react"
+		highlight="hard"
+		logos={heroLogos}
+		primaryButton={{ text: "Start watching free", link: "/watch" }}
+		secondaryButton={{ text: "Get weekly insights", link: "#newsletter-signup" }}
+		rotatedPrefixes={[
+			"Cloud Native",
+			"Kubernetes",
+			"Platform Engineering",
+			"Observability",
+			"WebAssembly",
+			"GitOps",
+			"SRE",
+			"Microservices",
+		]}
+		suffix="may be complex, but it doesn't need to be hard."
+		socialProof={stats.map((s) => ({ icon: "", value: s.value, label: s.label }))}
+	/>
+
+	<div id="newsletter-signup">
+		<NewsletterCTA
+			variant="section"
+			badge="Weekly Cloud Native insights"
+			headline="Get Cloud Native insights weekly"
+			subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
+		/>
+	</div>
 
 	<div class={sectionsWrap}>
 		{latestNews.length > 0 && (
@@ -958,6 +969,61 @@ const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="curren
 						<h3 class={principleTitle}>{p.title}</h3>
 						<p class={principleBody}>{p.body}</p>
 					</div>
+				))}
+			</div>
+		</section>
+
+		{viewerTestimonials.length > 0 && (
+			<section style="display: flex; flex-direction: column; gap: 2rem;">
+				<div>
+					<span class={sectionEyebrow}>Community signal</span>
+					<h2 class={sectionTitle}>What our viewers say</h2>
+					<p class={sectionSubtitle}>Feedback from viewers learning in public with us.</p>
+				</div>
+				<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1.5rem;">
+					{viewerTestimonials.map((t) => (
+						<figure style="display: flex; flex-direction: column; gap: 1rem; padding: 1.75rem; border-radius: 1.25rem; border: 1px solid var(--colors-border-muted); background: var(--colors-bg-raised); margin: 0;">
+							<svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" style="color: var(--colors-fg-brand); flex-shrink: 0;">
+								<path fill="currentColor" d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z"/>
+							</svg>
+							<blockquote style="margin: 0; font-size: 0.95rem; line-height: 1.7; color: var(--colors-fg-secondary); display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden;">
+								{t.data.quote}
+							</blockquote>
+							<figcaption style="display: flex; align-items: center; gap: 0.75rem; margin-top: auto;">
+								<img src={t.data.author.image} alt={t.data.author.name} style="width: 2.5rem; height: 2.5rem; border-radius: 9999px; object-fit: cover;" loading="lazy" />
+								<div>
+									<div style="font-weight: 600; color: var(--colors-fg-primary); font-size: 0.9rem;">{t.data.author.name}</div>
+									<div style="font-size: 0.78rem; color: var(--colors-fg-muted);">{t.data.author.title}</div>
+								</div>
+							</figcaption>
+						</figure>
+					))}
+				</div>
+			</section>
+		)}
+
+		<section style="display: flex; flex-direction: column; gap: 2rem;">
+			<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+				<div>
+					<span class={sectionEyebrow}>Partners</span>
+					<h2 class={sectionTitle}>Supporting the academy</h2>
+					<p class={sectionSubtitle}>Teams that fund the work while leaving us free to speak plainly about the tools.</p>
+				</div>
+				<a href="/organizations/partnerships" class={sectionLink}>
+					Partner with Rawkode
+					<Fragment set:html={arrowIcon} />
+				</a>
+			</div>
+			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem;">
+				{partners.map((p) => (
+					<a href={p.url} target="_blank" rel="noopener noreferrer" style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.5rem; border-radius: 1.25rem; border: 1px solid var(--colors-border-muted); background: var(--colors-bg-raised); color: var(--colors-fg-primary); text-decoration: none; transition: transform 200ms ease, border-color 200ms ease;">
+						<div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--colors-fg-muted);">
+							<span style="color: var(--colors-fg-brand);">{p.industry}</span>
+							<span>·</span>
+							<span>Since {p.since}</span>
+						</div>
+						<div style="font-family: var(--fonts-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; color: var(--colors-fg-primary);">{p.name}</div>
+					</a>
 				))}
 			</div>
 		</section>
