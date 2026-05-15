@@ -43,10 +43,11 @@ const homeLink = css({
 	textDecoration: "none",
 	transition: "transform 150ms ease, color 150ms ease",
 	_hover: { color: "fg.brand", transform: "scale(1.1)" },
-	"& svg": { width: "3.5", height: "3.5" },
+	"& svg": { width: "14px", height: "14px" },
 });
 
-const chevron = css({ width: "4", height: "4", color: "fg.muted", mx: "0.5" });
+const chevron = css({ color: "fg.muted", mx: "0.5" });
+const chevronStyle = "width: 16px; height: 16px; flex-shrink: 0;";
 
 const linkClass = css({
 	color: "fg.muted",
@@ -75,7 +76,7 @@ const linkClass = css({
 						</a>
 					) : (
 						<>
-							<svg class={chevron} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+							<svg class={chevron} style={chevronStyle} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 								<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
 							</svg>
 							<a href={el.link} class={linkClass}>{el.title}</a>

@@ -191,8 +191,10 @@ const instructorRow = css({
 	color: "fg.muted",
 });
 
-const avatarSm = css({ width: "7", height: "7", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
-const avatarXs = css({ width: "5", height: "5", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarSm = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarXs = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarSmStyle = "width: 28px; height: 28px;";
+const avatarXsStyle = "width: 20px; height: 20px;";
 
 const actions = css({ mt: "6", display: "flex", flexWrap: "wrap", gap: "3" });
 
@@ -419,7 +421,7 @@ const emptyCard = css({
 					</div>
 					{featured.authors[0] && (
 						<div class={instructorRow}>
-							{featured.authors[0].avatarUrl && <img src={featured.authors[0].avatarUrl} alt="" class={avatarSm} loading="lazy" />}
+							{featured.authors[0].avatarUrl && <img src={featured.authors[0].avatarUrl} alt="" class={avatarSm} style={avatarSmStyle} loading="lazy" />}
 							<span>Instructed by <strong style="color: var(--colors-fg-primary);">{featured.authors.map((a) => a.name).join(", ")}</strong></span>
 						</div>
 					)}
@@ -480,7 +482,7 @@ const emptyCard = css({
 								<p class={courseDesc}>{course.data.description}</p>
 								<div class={courseFooter}>
 									<span class={authorChip}>
-										{authors[0]?.avatarUrl && <img src={authors[0].avatarUrl} alt="" class={avatarXs} loading="lazy" />}
+										{authors[0]?.avatarUrl && <img src={authors[0].avatarUrl} alt="" class={avatarXs} style={avatarXsStyle} loading="lazy" />}
 										<span>{authors[0]?.name ?? "Rawkode Academy"}</span>
 									</span>
 									<span>{new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(course.data.publishedAt)}</span>

@@ -140,7 +140,8 @@ const authorLink = css({
 	_hover: { color: "fg.brand" },
 });
 
-const authorAvatar = css({ width: "7", height: "7", borderRadius: "full", objectFit: "cover" });
+const authorAvatar = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover" });
+const authorAvatarStyle = "width: 28px; height: 28px;";
 
 const sep = css({ color: "border.default" });
 
@@ -368,7 +369,7 @@ const ctaSecondary = css({
 					<>
 						{idx > 0 && <span class={sep}>·</span>}
 						<a href={`/people/${author.data.id}`} rel="author" class={authorLink}>
-							{author.data.avatarUrl && <img src={author.data.avatarUrl} alt="" class={authorAvatar} loading="lazy" />}
+							{author.data.avatarUrl && <img src={author.data.avatarUrl} alt="" class={authorAvatar} style={authorAvatarStyle} loading="lazy" />}
 							<span>{author.data.name}</span>
 						</a>
 					</>

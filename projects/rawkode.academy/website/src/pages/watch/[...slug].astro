@@ -239,7 +239,8 @@ const techPill = css({
 	_hover: { color: "fg.brand", bg: "bg.brand-subtle", borderColor: "border.default" },
 });
 
-const techIcon = css({ width: "5", height: "5", objectFit: "contain" });
+const techIcon = css({ flexShrink: 0, objectFit: "contain" });
+const techIconStyle = "width: 20px; height: 20px;";
 
 const castGrid = css({
 	display: "grid",
@@ -260,7 +261,8 @@ const castMember = css({
 	_hover: { bg: "bg.sunken" },
 });
 
-const castAvatar = css({ width: "10", height: "10", borderRadius: "full", objectFit: "cover" });
+const castAvatar = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover" });
+const castAvatarStyle = "width: 40px; height: 40px;";
 const castName = css({ fontWeight: "semibold", fontSize: "sm" });
 const castRole = css({ fontSize: "xs", color: "fg.muted" });
 
@@ -448,7 +450,7 @@ const fmtDurationShort = (sec: number) => {
 				<div class={techList}>
 					{techEntries.map((tech) => (
 						<a href={`/technology/${tech.id.replace(/\/index$/, "")}`} class={techPill}>
-							<img src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || "/apple-touch-icon.png"} alt={tech.data.name} class={techIcon} onerror="this.onerror=null; this.src='/apple-touch-icon.png'" />
+							<img src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || "/apple-touch-icon.png"} alt={tech.data.name} class={techIcon} style={techIconStyle} onerror="this.onerror=null; this.src='/apple-touch-icon.png'" />
 							<span>{tech.data.name}</span>
 						</a>
 					))}
@@ -463,7 +465,7 @@ const fmtDurationShort = (sec: number) => {
 				<div class={castGrid}>
 					{cast.map(({ person, role }) => (
 						<a href={`/people/${person.data.id}`} class={castMember}>
-							<img src={person.data.avatarUrl ?? "/apple-touch-icon.png"} alt={person.data.name} class={castAvatar} onerror="this.onerror=null; this.src='/apple-touch-icon.png'" />
+							<img src={person.data.avatarUrl ?? "/apple-touch-icon.png"} alt={person.data.name} class={castAvatar} style={castAvatarStyle} onerror="this.onerror=null; this.src='/apple-touch-icon.png'" />
 							<div>
 								<div class={castName}>{person.data.name}</div>
 								<div class={castRole}>{role}</div>

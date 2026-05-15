@@ -290,7 +290,8 @@ const currentEntry = css({
 });
 const currentMeta = css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3", gridColumn: { base: "1", md: "1 / -1" } });
 const currentIndustry = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand" });
-const currentDot = css({ width: "1", height: "1", borderRadius: "full", bg: "border.default" });
+const currentDot = css({ flexShrink: 0, borderRadius: "full", bg: "border.default" });
+const currentDotStyle = "width: 4px; height: 4px;";
 const currentSince = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.muted" });
 const currentLogoStage = css({
 	display: "grid",
@@ -402,7 +403,7 @@ const pastMark = css({
 					<article class={currentEntry}>
 						<div class={currentMeta}>
 							<span class={currentIndustry}>{p.industry}</span>
-							<span class={currentDot} aria-hidden="true"></span>
+							<span class={currentDot} style={currentDotStyle} aria-hidden="true"></span>
 							<span class={currentSince}>Since {p.since}</span>
 						</div>
 						<div class={currentLogoStage} set:html={p.logo}></div>

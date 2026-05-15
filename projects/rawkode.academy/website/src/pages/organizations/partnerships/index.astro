@@ -104,7 +104,8 @@ const ctaBtn = css({ mt: "8", display: "inline-flex", alignItems: "center", gap:
 const quoteCard = css({ display: "flex", flexDirection: "column", gap: "4", p: "7", borderRadius: "2xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised" });
 const quoteText = css({ fontSize: "md", color: "fg.secondary", lineHeight: "1.7", fontStyle: "italic" });
 const quoteFigure = css({ display: "flex", alignItems: "center", gap: "3", mt: "auto" });
-const quoteAvatar = css({ width: "12", height: "12", borderRadius: "full", objectFit: "cover" });
+const quoteAvatar = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover" });
+const quoteAvatarStyle = "width: 48px; height: 48px;";
 const quoteName = css({ fontWeight: "semibold", color: "fg.primary", fontSize: "sm" });
 const quoteTitle = css({ fontSize: "xs", color: "fg.muted" });
 ---
@@ -177,7 +178,7 @@ const quoteTitle = css({ fontSize: "xs", color: "fg.muted" });
 							</svg>
 							<blockquote class={quoteText} style="margin: 0;">"{t.data.quote.slice(0, 280)}"</blockquote>
 							<figcaption class={quoteFigure}>
-								<img class={quoteAvatar} src={t.data.author.image} alt={t.data.author.name} loading="lazy" />
+								<img class={quoteAvatar} style={quoteAvatarStyle} src={t.data.author.image} alt={t.data.author.name} loading="lazy" />
 								<div>
 									<div class={quoteName}>{t.data.author.name}</div>
 									<div class={quoteTitle}>{t.data.author.title}</div>

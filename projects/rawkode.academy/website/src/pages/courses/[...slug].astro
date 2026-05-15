@@ -150,7 +150,8 @@ const instructorRow = css({
 	color: "fg.muted",
 });
 
-const avatarSm = css({ width: "10", height: "10", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarSm = css({ flexShrink: 0, borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarSmStyle = "width: 40px; height: 40px;";
 
 const ctaRow = css({ mt: "6", display: "flex", flexWrap: "wrap", gap: "3" });
 
@@ -350,7 +351,7 @@ const externalLink = css({
 				)}
 				{authors[0] && (
 					<div class={instructorRow}>
-						{authors[0].data.avatarUrl && <img src={authors[0].data.avatarUrl} alt="" class={avatarSm} loading="lazy" />}
+						{authors[0].data.avatarUrl && <img src={authors[0].data.avatarUrl} alt="" class={avatarSm} style={avatarSmStyle} loading="lazy" />}
 						<div>
 							<div style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--colors-fg-muted);">Instructor</div>
 							<div style="font-weight: 600; color: var(--colors-fg-primary);">{authors.map((a) => a.data.name).join(", ")}</div>
