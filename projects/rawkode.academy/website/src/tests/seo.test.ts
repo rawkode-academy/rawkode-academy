@@ -1296,4 +1296,68 @@ describe("Structured Data Validation", () => {
 		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
 		expect(jsonLd.keywords).toBeUndefined();
 	});
+
+	it("extracts the 4-digit ADR number from canonical IDs and falls back when absent", async () => {
+		const { extractAdrNumber } = await import("../lib/adr-jsonld.ts");
+		expect(extractAdrNumber("0042-use-cloudflare-d1")).toBe("0042");
+		expect(extractAdrNumber("0001-adopt-astro")).toBe("0001");
+		expect(extractAdrNumber("not-a-numbered-adr")).toBeUndefined();
+		expect(extractAdrNumber("42-missing-padding")).toBeUndefined();
+	});
+
+	it("builds ADR TechArticle JSON-LD with identifier, ISO dates, publisher, and internal author links", async () => {
+		const { buildAdrJsonLd } = await import("../lib/adr-jsonld.ts");
+
+		const jsonLd = buildAdrJsonLd({
+			siteUrl: "https://rawkode.academy",
+			adrUrl: "https://rawkode.academy/adrs/0042-use-cloudflare-d1",
+			source: {
+				id: "0042-use-cloudflare-d1",
+				title: "Use Cloudflare D1 for all new services",
+				adoptedAt: new Date("2026-05-15T10:00:00.000Z"),
+			},
+			authors: [{ id: "rawkode", name: "David Flanagan" }],
+		});
+
+		expect(jsonLd["@type"]).toBe("TechArticle");
+		expect(jsonLd.headline).toBe(
+			"ADR-0042: Use Cloudflare D1 for all new services",
+		);
+		expect(jsonLd.identifier).toBe("ADR-0042");
+		expect(jsonLd.datePublished).toBe("2026-05-15T10:00:00.000Z");
+		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
+		expect(jsonLd.articleSection).toBe("Architecture Decision Records");
+
+		const mainEntity = jsonLd.mainEntityOfPage as Record<string, unknown>;
+		expect(mainEntity["@id"]).toBe(
+			"https://rawkode.academy/adrs/0042-use-cloudflare-d1",
+		);
+
+		const publisher = jsonLd.publisher as Record<string, unknown>;
+		expect(publisher.name).toBe("Rawkode Academy");
+
+		const author = jsonLd.author as Array<Record<string, unknown>>;
+		expect(author).toHaveLength(1);
+		expect(author[0]?.name).toBe("David Flanagan");
+		expect(author[0]?.url).toBe("https://rawkode.academy/people/rawkode");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+
+	it("omits identifier and author when ADR id is unnumbered and no authors are given", async () => {
+		const { buildAdrJsonLd } = await import("../lib/adr-jsonld.ts");
+		const jsonLd = buildAdrJsonLd({
+			siteUrl: "https://rawkode.academy",
+			adrUrl: "https://rawkode.academy/adrs/some-text-only-id",
+			source: {
+				id: "some-text-only-id",
+				title: "Adopt X",
+				adoptedAt: new Date("2026-05-15T10:00:00.000Z"),
+			},
+			authors: [],
+		});
+		expect(jsonLd.identifier).toBeUndefined();
+		expect(jsonLd.headline).toBe("Adopt X");
+		expect(jsonLd.author).toBeUndefined();
+	});
 });
