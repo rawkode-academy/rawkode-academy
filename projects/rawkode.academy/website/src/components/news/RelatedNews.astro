@@ -1,0 +1,202 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import { selectRelatedNews } from "@/lib/related-news";
+
+interface Props {
+	currentStory: CollectionEntry<"news">;
+	limit?: number;
+}
+
+const { currentStory, limit = 3 } = Astro.props;
+
+const [allNews, allTechnologies] = await Promise.all([
+	getCollection("news"),
+	getCollection("technologies"),
+]);
+
+const technologyNameById = new Map<string, string>();
+for (const technology of allTechnologies) {
+	const rawId = technology.id.replace(/\/index$/, "");
+	technologyNameById.set(rawId, technology.data.name);
+}
+
+function formatTechnologyLabel(value: string): string {
+	const fromCollection = technologyNameById.get(value);
+	if (fromCollection) return fromCollection;
+	return value
+		.split(/[-/]/g)
+		.filter(Boolean)
+		.map((segment) =>
+			segment.length <= 3
+				? segment.toUpperCase()
+				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
+		)
+		.join(" ");
+}
+
+const formatDisplayDate = (date: Date) =>
+	new Intl.DateTimeFormat("en-US", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	}).format(date);
+
+const related = selectRelatedNews(
+	currentStory.id,
+	currentStory.data.technologies ?? [],
+	allNews,
+	limit,
+);
+---
+
+{related.length > 0 && (
+	<section class="related-news">
+		<h2 class="related-heading">More stories</h2>
+		<ul class="related-list">
+			{related.map((story) => {
+				const topTechnology = story.data.technologies?.[0];
+				return (
+					<li class="related-item">
+						<article>
+							<div class="related-meta">
+								<time datetime={story.data.publishedAt.toISOString()}>
+									{formatDisplayDate(story.data.publishedAt)}
+								</time>
+								{topTechnology && (
+									<>
+										<span aria-hidden="true">/</span>
+										<span>{formatTechnologyLabel(topTechnology)}</span>
+									</>
+								)}
+							</div>
+							<h3 class="related-title">
+								<a href={`/news/${story.id}`}>{story.data.title}</a>
+							</h3>
+							<p class="related-dek">{story.data.description}</p>
+						</article>
+					</li>
+				);
+			})}
+		</ul>
+	</section>
+)}
+
+<style>
+	.related-news {
+		margin: 1.5rem 0 4rem;
+		padding-top: 2rem;
+		padding-right: 4rem;
+		border-top: 1px solid rgb(0 0 0 / 0.1);
+	}
+
+	:root.dark .related-news {
+		border-top-color: rgb(255 255 255 / 0.1);
+	}
+
+	@media (max-width: 767px) {
+		.related-news {
+			padding-right: 0;
+		}
+	}
+
+	.related-heading {
+		font-size: 1.5rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		color: rgb(17 24 39);
+		margin: 0 0 1.25rem;
+	}
+
+	:root.dark .related-heading {
+		color: white;
+	}
+
+	.related-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 1.25rem;
+	}
+
+	@media (min-width: 768px) {
+		.related-list {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 1.5rem;
+		}
+	}
+
+	.related-item {
+		border-radius: 1rem;
+		padding: 1.25rem;
+		border: 1px solid rgb(0 0 0 / 0.08);
+		transition:
+			border-color 0.15s,
+			background-color 0.15s,
+			transform 0.15s;
+	}
+
+	:root.dark .related-item {
+		border-color: rgb(255 255 255 / 0.08);
+	}
+
+	.related-item:hover {
+		border-color: rgb(var(--brand-primary) / 0.4);
+		background-color: rgb(var(--brand-primary) / 0.03);
+	}
+
+	.related-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.72rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		color: rgb(107 114 128);
+		margin-bottom: 0.5rem;
+	}
+
+	:root.dark .related-meta {
+		color: rgb(156 163 175);
+	}
+
+	.related-title {
+		font-size: 1.15rem;
+		line-height: 1.3;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		margin: 0 0 0.5rem;
+		color: rgb(17 24 39);
+	}
+
+	:root.dark .related-title {
+		color: white;
+	}
+
+	.related-title a {
+		color: inherit;
+		text-decoration: none;
+		transition: color 0.15s;
+	}
+
+	.related-title a:hover {
+		color: rgb(var(--brand-primary));
+	}
+
+	.related-dek {
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: rgb(75 85 99);
+		margin: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	:root.dark .related-dek {
+		color: rgb(209 213 219);
+	}
+</style>
