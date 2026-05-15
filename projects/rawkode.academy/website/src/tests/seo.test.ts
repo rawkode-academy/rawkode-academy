@@ -584,15 +584,6 @@ describe("Crawlability and Sitemaps", () => {
 		vi.doMock("@/lib/content", () => ({
 			getPublishedVideos: vi.fn(),
 		}));
-		vi.doMock("@rawkodeacademy/content/utils", () => ({
-			resolveContentDirSync: vi.fn(),
-		}));
-		vi.doMock("glob", () => ({
-			glob: vi.fn(),
-		}));
-		vi.doMock("node:fs/promises", () => ({
-			stat: vi.fn(),
-		}));
 
 		const { buildSitemapIndexEntries, sitemapDefinitions } = await import(
 			"../lib/sitemaps.ts"
