@@ -85,6 +85,39 @@ body {
 		linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
 }
 
+/* Line-clamp utility classes — Panda's `lineClamp` token doesn't emit the
+ * `display: -webkit-box` + `-webkit-line-clamp` combination most browsers
+ * still require. Apply these via `class:list` alongside Panda styles.
+ */
+.line-clamp-1 {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 1;
+	line-clamp: 1;
+	overflow: hidden;
+}
+.line-clamp-2 {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+}
+.line-clamp-3 {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	overflow: hidden;
+}
+.line-clamp-4 {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 4;
+	line-clamp: 4;
+	overflow: hidden;
+}
+
 /* Webkit fallbacks for properties Panda doesn't accept in its SystemStyleObject:
  * - line-clamp requires -webkit-box-orient: vertical alongside display: -webkit-box
  *   plus -webkit-line-clamp for Safari and older Chromium.
