@@ -6,6 +6,7 @@ import {
 	render,
 } from "astro:content";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import RelatedNews from "@/components/news/RelatedNews.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -77,6 +78,7 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	authors={authors}
 >
 	<Fragment slot="extra-head">
+		<NewsJsonLd article={article} authors={authors} />
 		<link
 			rel="alternate"
 			type="application/rss+xml"
