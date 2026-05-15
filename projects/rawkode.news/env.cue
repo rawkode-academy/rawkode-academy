@@ -33,7 +33,7 @@ ci: pipelines: {
 }
 
 tasks: {
-	dev: {
+	dev: schema.#Task & {
 		command: "bun"
 		args: ["run", "dev"]
 
@@ -46,7 +46,7 @@ tasks: {
 		]
 	}
 
-	build: {
+	build: schema.#Task & {
 		command: "bun"
 		args: ["run", "build"]
 
@@ -62,14 +62,14 @@ tasks: {
 		]
 	}
 
-	deploy: {
+	deploy: schema.#TaskGroup & {
 		type: "group"
-		main: {
+		main: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "deploy"]
 			dependsOn: [_t.build]
 		}
-		preview: {
+		preview: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]

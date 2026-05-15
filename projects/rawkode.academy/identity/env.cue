@@ -21,17 +21,17 @@ ci: pipelines: {
 }
 
 tasks: {
-	auth: {
+	auth: schema.#TaskGroup & {
 		type: "group"
-		generate: {
+		generate: schema.#Task & {
 			command: "bun"
 			args: ["x", "@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
 		}
 	}
 
-	bun: {
+	bun: schema.#TaskGroup & {
 		type: "group"
-		dev: {
+		dev: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "dev"]
 			inputs: [
@@ -43,15 +43,15 @@ tasks: {
 		}
 	}
 
-	migrations: {
+	migrations: schema.#TaskGroup & {
 		type: "group"
-		remote: {
+		remote: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
 		}
 	}
 
-	build: {
+	build: schema.#Task & {
 		command: "bun"
 		args: ["run", "build"]
 		inputs: [
@@ -62,7 +62,7 @@ tasks: {
 		]
 	}
 
-	deploy: {
+	deploy: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.migrations.remote, _t.build]

@@ -9,13 +9,13 @@ name: "cloudnativecompass-fm"
 let _t = tasks
 
 tasks: {
-	terraform: {
+	terraform: schema.#TaskGroup & {
 		type: "group"
-		plan: {
+		plan: schema.#Task & {
 			command: "terraform"
 			args: ["plan", "-out=.terraform.plan.json"]
 		}
-		apply: {
+		apply: schema.#Task & {
 			command: "terraform"
 			args: ["apply", ".terraform.plan.json"]
 			dependsOn: [_t.terraform.plan]

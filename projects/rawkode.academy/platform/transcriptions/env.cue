@@ -37,15 +37,15 @@ ci: pipelines: {
 }
 
 tasks: {
-	deploy: {
+	deploy: schema.#Task & {
 		command: "bun"
 		args: ["x", "wrangler", "deploy", "--config", "./wrangler.jsonc"]
 	}
-	"check-missing": {
+	"check-missing": schema.#Task & {
 		command: "bun"
 		args: ["scripts/schedule_missing.ts"]
 	}
-	"schedule-missing": {
+	"schedule-missing": schema.#Task & {
 		command: "bun"
 		args: ["scripts/schedule_missing.ts", "--execute"]
 	}
