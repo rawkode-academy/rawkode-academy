@@ -55,6 +55,33 @@ const maybeSeries =
 const imageUrl = await computeImageUrl(article);
 const readingTime = calculateReadingTime(article.body || "");
 
+const allTechnologies = await getCollection("technologies");
+const technologyNameById = new Map<string, string>();
+for (const technology of allTechnologies) {
+	const rawId = technology.id.replace(/\/index$/, "");
+	technologyNameById.set(rawId, technology.data.name);
+}
+
+function formatTechnologyLabel(value: string): string {
+	const fromCollection = technologyNameById.get(value);
+	if (fromCollection) return fromCollection;
+	return value
+		.split(/[-/]/g)
+		.filter(Boolean)
+		.map((segment) =>
+			segment.length <= 3
+				? segment.toUpperCase()
+				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
+		)
+		.join(" ");
+}
+
+const tags = (article.data.technologies ?? []).map((technologyId) => ({
+	id: technologyId,
+	label: formatTechnologyLabel(technologyId),
+	href: `/technology/${technologyId}`,
+}));
+
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Articles", link: "/read" },
@@ -170,6 +197,22 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 			<article class="prose">
 				<Updates updates={article.data.updates} />
 				<Content />
+
+				{tags.length > 0 && (
+					<footer class="tags-footer not-prose">
+						<span class="tags-label">Tagged in</span>
+						<ul class="tags-list">
+							{tags.map((tag) => (
+								<li>
+									<a href={tag.href} class="tag" rel="tag">
+										{tag.label}
+									</a>
+								</li>
+							))}
+						</ul>
+					</footer>
+				)}
+
 				<NewsletterCTA class="my-12 not-prose" />
 				<Resources resources={article.data.resources} />
 				<RelatedArticles currentArticle={article} limit={3} />
@@ -327,5 +370,64 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 
 	:global(.prose pre) {
 		white-space: pre-wrap;
+	}
+
+	.tags-footer {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem 0.75rem;
+		margin: 2rem 0 0;
+		padding-top: 1.5rem;
+		border-top: 1px solid rgb(0 0 0 / 0.1);
+	}
+
+	:root.dark .tags-footer {
+		border-top-color: rgb(255 255 255 / 0.1);
+	}
+
+	.tags-label {
+		font-size: 0.72rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		color: rgb(107 114 128);
+	}
+
+	:root.dark .tags-label {
+		color: rgb(156 163 175);
+	}
+
+	.tags-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.tag {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		border: 1px solid rgb(0 0 0 / 0.1);
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: rgb(17 24 39);
+		text-decoration: none;
+		transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+	}
+
+	:root.dark .tag {
+		color: rgb(229 231 235);
+		border-color: rgb(255 255 255 / 0.1);
+	}
+
+	.tag:hover {
+		color: rgb(var(--brand-primary));
+		border-color: rgb(var(--brand-primary) / 0.4);
+		background-color: rgb(var(--brand-primary) / 0.05);
 	}
 </style>
