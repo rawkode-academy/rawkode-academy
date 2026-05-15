@@ -1,0 +1,44 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { buildPodcastSeriesJsonLd } from "@/lib/podcast-series-jsonld";
+
+interface Props {
+	show: CollectionEntry<"shows">;
+	hosts: ReadonlyArray<CollectionEntry<"people">>;
+	episodeCount?: number;
+	imageUrl?: string;
+	slot?: string;
+}
+
+const { show, hosts, episodeCount, imageUrl } = Astro.props;
+
+const siteUrl = (Astro.site ?? Astro.url).origin;
+const homePageUrl = new URL(`/shows/${show.data.id}`, siteUrl).href;
+const feedUrl = new URL(`/api/feeds/shows/${show.data.id}.xml`, siteUrl).href;
+
+const jsonLd = buildPodcastSeriesJsonLd({
+	siteUrl,
+	source: {
+		id: show.data.id,
+		name: show.data.name,
+		...(show.data.description ? { description: show.data.description } : {}),
+		...(show.data.podcast?.category
+			? { category: show.data.podcast.category }
+			: {}),
+		...(show.data.podcast?.subcategory
+			? { subcategory: show.data.podcast.subcategory }
+			: {}),
+		...(imageUrl ? { imageUrl } : {}),
+		...(typeof episodeCount === "number" ? { episodeCount } : {}),
+	},
+	hosts: hosts.map((host) => ({ id: host.data.id, name: host.data.name })),
+	feedUrl,
+	homePageUrl,
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
