@@ -1,7 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
-import HeroTypewriter from "@/components/hero/typewriter.tsx";
+import HeroTypewriter from "@/components/hero/Typewriter.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { getPublishedVideos } from "@/lib/content";
@@ -558,7 +558,6 @@ const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="curren
 
 <Page title={pageTitle} description={pageDescription}>
 	<HeroTypewriter
-		client:only="react"
 		highlight="hard"
 		logos={heroLogos}
 		primaryButton={{ text: "Start watching free", link: "/watch" }}
@@ -574,7 +573,7 @@ const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="curren
 			"Microservices",
 		]}
 		suffix="may be complex, but it doesn't need to be hard."
-		socialProof={stats.map((s) => ({ icon: "", value: s.value, label: s.label }))}
+		socialProof={stats.map((s) => ({ value: s.value, label: s.label }))}
 	/>
 
 	<div id="newsletter-signup">

@@ -1,0 +1,386 @@
+---
+import { css } from "../../../styled-system/css";
+
+interface Button {
+	text: string;
+	link: string;
+	newWindow?: boolean;
+}
+
+interface TechLogo {
+	name: string;
+	iconUrl: string;
+}
+
+interface SocialProofStat {
+	icon?: string;
+	value: string;
+	label: string;
+}
+
+export interface Props {
+	rotatedPrefixes: string[];
+	suffix: string;
+	highlight?: string;
+	logos: TechLogo[];
+	primaryButton: Button;
+	secondaryButton: Button;
+	socialProof?: SocialProofStat[];
+}
+
+const {
+	rotatedPrefixes,
+	suffix,
+	highlight,
+	logos,
+	primaryButton,
+	secondaryButton,
+	socialProof = [],
+} = Astro.props;
+
+// Sort once on server so initial paint is stable.
+const initialPrefix = rotatedPrefixes[0] ?? "";
+
+const highlightedSuffix = highlight
+	? suffix.split(highlight)
+	: [suffix];
+
+const section = css({
+	position: "relative",
+	overflow: "hidden",
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.canvas/50",
+	mt: { base: "6", md: "8" },
+	mx: { base: "2", md: "0" },
+});
+
+const inner = css({
+	position: "relative",
+	zIndex: "1",
+	display: "grid",
+	gap: { base: "8", lg: "5" },
+	gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1.22fr) minmax(14rem, 0.68fr)" },
+	alignItems: "center",
+	maxWidth: "72rem",
+	mx: "auto",
+	px: { base: "5", md: "8", lg: "12" },
+	py: { base: "14", md: "18", lg: "22" },
+});
+
+const eyebrow = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3",
+	py: "1.5",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "0.18em",
+	textTransform: "uppercase",
+	mb: "5",
+});
+
+const eyebrowDot = css({
+	w: "2",
+	h: "2",
+	borderRadius: "full",
+	bg: "fg.brand",
+});
+
+const headingBlock = css({
+	color: "fg.primary",
+	mb: "5",
+});
+
+const rotatingLine = css({
+	display: "block",
+	fontFamily: "display",
+	fontSize: { base: "4xl", md: "5xl", lg: "6xl" },
+	fontWeight: "bold",
+	lineHeight: "1.02",
+	letterSpacing: "-0.04em",
+	color: "fg.brand",
+	minHeight: "1.2em",
+});
+
+const cursor = css({
+	display: "inline-block",
+	width: "0.08em",
+	height: "0.85em",
+	backgroundColor: "currentColor",
+	verticalAlign: "baseline",
+	ml: "0.05em",
+	animation: "typewriter-cursor 1s steps(2) infinite",
+});
+
+const suffixLine = css({
+	display: "block",
+	mt: "2",
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
+	fontWeight: "bold",
+	lineHeight: "0.98",
+	letterSpacing: "-0.03em",
+	color: "fg.primary",
+	textWrap: "balance",
+	maxWidth: "20ch",
+});
+
+const highlightSpan = css({
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
+	backgroundClip: "text",
+	color: "transparent",
+});
+
+const subStyle = css({
+	fontSize: { base: "md", md: "lg" },
+	lineHeight: "1.6",
+	color: "fg.secondary",
+	maxWidth: "42rem",
+	mb: "8",
+});
+
+const buttonsRow = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	alignItems: "center",
+});
+
+const primaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	minH: "12",
+	px: "6",
+	py: "3",
+	borderRadius: "xl",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
+	textDecoration: "none",
+	boxShadow: "lg",
+	transition: "transform 150ms ease, box-shadow 150ms ease",
+	_hover: { transform: "translateY(-1px)", boxShadow: "xl" },
+});
+
+const secondaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	minH: "12",
+	px: "6",
+	py: "3",
+	borderRadius: "xl",
+	fontWeight: "medium",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { bg: "bg.sunken", borderColor: "fg.brand" },
+});
+
+const statsRow = css({
+	mt: "8",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+});
+
+const statChip = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "3",
+	px: "4",
+	py: "2.5",
+	borderRadius: "full",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+});
+
+const statValue = css({
+	fontFamily: "display",
+	fontSize: "md",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	lineHeight: "1",
+});
+
+const statLabel = css({
+	fontSize: "2xs",
+	fontWeight: "semibold",
+	letterSpacing: "0.18em",
+	textTransform: "uppercase",
+	color: "fg.muted",
+	lineHeight: "1.2",
+});
+
+const logoCol = css({
+	display: { base: "none", lg: "grid" },
+	gridTemplateColumns: "repeat(2, 1fr)",
+	gap: "3",
+});
+
+const logoCard = css({
+	aspectRatio: "1 / 1",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	p: "5",
+	borderRadius: "2xl",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	transition: "transform 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", borderColor: "fg.brand" },
+});
+
+const logoImg = css({
+	maxWidth: "5rem",
+	maxHeight: "5rem",
+	objectFit: "contain",
+});
+
+const arrowIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>`;
+---
+
+<section class:list={[section, "hero-aurora-strong"]}>
+	<div class={inner}>
+		<div>
+			<span class={eyebrow}>
+				<span class={eyebrowDot}></span>
+				Hands-on cloud native education
+			</span>
+
+			<h1 class={headingBlock}>
+				<span class="sr-only">{rotatedPrefixes.join(", ")} {suffix}</span>
+				<span aria-hidden="true" class={rotatingLine}>
+					<span data-rotator-text>{initialPrefix}</span><span class={cursor} aria-hidden="true"></span>
+				</span>
+				<span aria-hidden="true" class={suffixLine}>
+					{highlightedSuffix.map((part, i) => (
+						i === highlightedSuffix.length - 1
+							? <span>{part}</span>
+							: <>{part}<span class={highlightSpan}>{highlight}</span></>
+					))}
+				</span>
+			</h1>
+
+			<p class={subStyle}>
+				Hands-on lessons, candid trade-offs, and real build sessions for engineers who want signal instead of slideware.
+			</p>
+
+			<div class={buttonsRow}>
+				<a href={primaryButton.link} target={primaryButton.newWindow ? "_blank" : "_self"} class={primaryBtn}>
+					{primaryButton.text}
+					<Fragment set:html={arrowIcon} />
+				</a>
+				<a href={secondaryButton.link} target={secondaryButton.newWindow ? "_blank" : "_self"} class={secondaryBtn}>
+					{secondaryButton.text}
+				</a>
+			</div>
+
+			{socialProof.length > 0 && (
+				<div class={statsRow}>
+					{socialProof.map((s) => (
+						<div class={statChip}>
+							{s.icon && <span style="font-size: 1rem;">{s.icon}</span>}
+							<div style="display: flex; flex-direction: column; gap: 0.125rem;">
+								<span class={statValue}>{s.value}</span>
+								<span class={statLabel}>{s.label}</span>
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+
+		<div
+			class={logoCol}
+			data-hero-logos
+			data-logos={JSON.stringify(logos.slice(0, 8))}
+		>
+			{logos.slice(0, 4).map((logo) => (
+				<div class={logoCard} title={logo.name}>
+					<img src={logo.iconUrl} alt={logo.name} class={logoImg} loading="lazy" />
+				</div>
+			))}
+		</div>
+	</div>
+</section>
+
+<style is:global>
+	@keyframes typewriter-cursor {
+		to {
+			opacity: 0;
+		}
+	}
+</style>
+
+<script
+	is:inline
+	define:vars={{
+		prefixes: rotatedPrefixes,
+		typeSpeed: 60,
+		deleteSpeed: 30,
+		holdMs: 1300,
+	}}
+>
+	(() => {
+		const el = document.querySelector("[data-rotator-text]");
+		if (!el || prefixes.length <= 1) return;
+
+		// Shuffle order so each load isn't identical
+		const shuffled = [...prefixes].sort(() => Math.random() - 0.5);
+		let i = 0;
+		let phase = "hold"; // "type" | "hold" | "delete"
+		let text = el.textContent || shuffled[0];
+		let target = shuffled[0];
+
+		const tick = () => {
+			if (phase === "hold") {
+				phase = "delete";
+				setTimeout(tick, holdMs);
+				return;
+			}
+
+			if (phase === "delete") {
+				if (text.length > 0) {
+					text = text.slice(0, -1);
+					el.textContent = text;
+					setTimeout(tick, deleteSpeed);
+					return;
+				}
+				i = (i + 1) % shuffled.length;
+				target = shuffled[i];
+				phase = "type";
+				setTimeout(tick, 80);
+				return;
+			}
+
+			if (phase === "type") {
+				if (text.length < target.length) {
+					text = target.slice(0, text.length + 1);
+					el.textContent = text;
+					setTimeout(tick, typeSpeed);
+					return;
+				}
+				phase = "hold";
+				setTimeout(tick, holdMs);
+				return;
+			}
+		};
+
+		// First tick: schedule after a hold so the SSR'd text holds first
+		setTimeout(tick, holdMs);
+	})();
+</script>
