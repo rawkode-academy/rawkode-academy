@@ -30,22 +30,6 @@ const navInner = css({
 
 const leftGroup = css({ display: "flex", alignItems: "center", gap: "3" });
 
-const iconButton = css({
-	display: "inline-flex",
-	alignItems: "center",
-	justifyContent: "center",
-	width: "10",
-	height: "10",
-	borderRadius: "lg",
-	color: "fg.muted",
-	bg: "transparent",
-	border: "none",
-	cursor: "pointer",
-	transition: "background 150ms ease, color 150ms ease, transform 150ms ease",
-	_hover: { bg: "bg.sunken", color: "fg.primary", transform: "scale(1.05)" },
-	_focusVisible: { outline: "2px solid", outlineColor: "border.focus", outlineOffset: "2px" },
-});
-
 const mobileToggle = css({
 	display: "inline-flex",
 	md: { display: "none" },

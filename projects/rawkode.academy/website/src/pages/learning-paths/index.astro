@@ -115,7 +115,7 @@ const card = css({
 		opacity: 0,
 		transition: "opacity 200ms ease",
 	},
-	_hoverBefore: { opacity: 1 },
+	"&:hover::before": { opacity: 1 },
 });
 
 const cardAccent = css({
@@ -178,7 +178,6 @@ const desc = css({
 	lineHeight: "1.6",
 	display: "-webkit-box",
 	WebkitLineClamp: "3",
-	WebkitBoxOrient: "vertical",
 	overflow: "hidden",
 });
 

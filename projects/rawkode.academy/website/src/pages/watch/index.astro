@@ -59,7 +59,7 @@ const thumbHero = css({
 	borderRadius: "2xl",
 	bg: "bg.sunken",
 	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
-	"a:hover & img": { transform: "scale(1.04)" },
+	"a:hover &": { "& img": { transform: "scale(1.04)" } },
 });
 
 const playOverlay = css({
@@ -76,7 +76,7 @@ const playOverlay = css({
 		filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))",
 		transition: "transform 200ms ease",
 	},
-	"a:hover & svg": { transform: "scale(1.1)" },
+	"a:hover &": { "& svg": { transform: "scale(1.1)" } },
 });
 
 const featuredBody = css({
@@ -248,15 +248,25 @@ const cardDesc = css({
 	lineHeight: "1.6",
 	display: "-webkit-box",
 	WebkitLineClamp: "2",
-	WebkitBoxOrient: "vertical",
 	overflow: "hidden",
 });
 ---
 
 <Page title={pageTitle} description={pageDescription}>
 	<Fragment slot="extra-head">
-		<VideoItemListJsonLd videos={allVideos} listUrl={new URL("/watch", Astro.site ?? Astro.url).href} listName="Cloud Native Videos" />
-		<VideoMetadata />
+		<VideoItemListJsonLd
+			videos={allVideos.map((v) => ({
+				id: v.data.id,
+				slug: v.data.slug,
+				title: v.data.title,
+				description: v.data.description,
+				publishedAt: v.data.publishedAt instanceof Date ? v.data.publishedAt : new Date(v.data.publishedAt),
+				...(typeof v.data.duration === "number" ? { duration: v.data.duration } : {}),
+			}))}
+			listUrl={new URL("/watch", Astro.site ?? Astro.url).href}
+			listName="Cloud Native Videos"
+		/>
+		<VideoMetadata title={pageTitle} description={pageDescription} isVideoList={true} />
 	</Fragment>
 
 	<PageHero eyebrow="Videos" title="Watch & Learn" subtitle="Live sessions, screencasts, and deep dives from the sharp end of cloud native engineering." />

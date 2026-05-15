@@ -1,7 +1,6 @@
 import { Command } from "cmdk";
 import {
 	type ReactElement,
-	useCallback,
 	useEffect,
 	useMemo,
 	useRef,
@@ -9,7 +8,7 @@ import {
 } from "react";
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
-import { getMode, setMode, toggleMode, type Mode } from "@/lib/theme";
+import { getMode, toggleMode, type Mode } from "@/lib/theme";
 import "./styles.css";
 
 interface NavigationItem {
@@ -56,11 +55,6 @@ export default function CommandPalette({
 
 	const activePage = pages[pages.length - 1];
 	const isRootPage = activePage === "root";
-
-	const goBack = useCallback(() => {
-		setPages((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-		setSearch("");
-	}, []);
 
 	const customFilter = (value: string, search: string): number => {
 		if (!search.trim()) return 1; // Show all items when search is empty
@@ -427,7 +421,6 @@ export default function CommandPalette({
 								>
 									{items.map((item) => {
 										const ItemIcon = getItemIcon(item);
-										const isCurrentTheme = item.theme === currentTheme;
 										return (
 											<Command.Item
 												key={item.id}
@@ -439,11 +432,6 @@ export default function CommandPalette({
 												<div className="command-palette-item-content">
 													<div className="command-palette-item-title">
 														{item.title}
-														{isCurrentTheme && (
-															<span className="ml-2 text-xs text-primary">
-																(active)
-															</span>
-														)}
 													</div>
 												</div>
 												{item.href && item.href.startsWith("http") && (

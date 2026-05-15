@@ -10,9 +10,6 @@ export default defineConfig({
 	// Strict design tokens — fail on unknown tokens.
 	strictTokens: false,
 
-	// Use !important for utilities when conflicting with other styles.
-	important: false,
-
 	// Where to look for class usages in source files.
 	include: [
 		"./src/**/*.{ts,tsx,js,jsx,vue,astro,mdx}",
@@ -75,6 +72,20 @@ export default defineConfig({
 						800: { value: "#1e293b" },
 						900: { value: "#111827" },
 						950: { value: "#0b0b0f" },
+					},
+				},
+				fonts: {
+					body: {
+						value:
+							"var(--font-quicksand), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+					},
+					display: {
+						value:
+							"var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+					},
+					mono: {
+						value:
+							"var(--font-monaspace-neon), 'JetBrains Mono', ui-monospace, monospace",
 					},
 				},
 			},
@@ -190,20 +201,6 @@ export default defineConfig({
 							_dark: "0 24px 64px rgba(0, 0, 0, 0.7)",
 						},
 					},
-				},
-			},
-			fonts: {
-				body: {
-					value:
-						"var(--font-quicksand), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-				},
-				display: {
-					value:
-						"var(--font-poppins), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-				},
-				mono: {
-					value:
-						"var(--font-monaspace-neon), 'JetBrains Mono', ui-monospace, monospace",
 				},
 			},
 		},

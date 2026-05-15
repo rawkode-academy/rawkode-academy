@@ -62,7 +62,7 @@ for (const story of rest) {
 		groups.push({ label, stories: [] });
 		currentKey = key;
 	}
-	groups[groups.length - 1].stories.push(story);
+	groups[groups.length - 1]!.stories.push(story);
 }
 
 const totalStories = allNews.length;
@@ -144,7 +144,6 @@ const heroTitle = css({
 
 const heroAccent = css({
 	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
-	WebkitBackgroundClip: "text",
 	backgroundClip: "text",
 	color: "transparent",
 });

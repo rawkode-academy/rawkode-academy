@@ -1,7 +1,7 @@
 ---
 export const prerender = true;
 
-import { getCollection, getEntries, render } from "astro:content";
+import { getCollection, render } from "astro:content";
 import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import Prose from "@/components/prose/Prose.astro";
 import Page from "@/wrappers/page.astro";
@@ -154,7 +154,6 @@ const statNumber = css({
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
-	WebkitBackgroundClip: "text",
 	backgroundClip: "text",
 	color: "transparent",
 });

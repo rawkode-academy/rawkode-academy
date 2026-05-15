@@ -273,7 +273,7 @@ const courseThumb = css({
 	bg: "bg.sunken",
 	position: "relative",
 	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
-	"a:hover & img": { transform: "scale(1.04)" },
+	"a:hover &": { "& img": { transform: "scale(1.04)" } },
 });
 
 const courseThumbFallback = css({
@@ -344,7 +344,6 @@ const courseDesc = css({
 	lineHeight: "1.6",
 	display: "-webkit-box",
 	WebkitLineClamp: "3",
-	WebkitBoxOrient: "vertical",
 	overflow: "hidden",
 });
 

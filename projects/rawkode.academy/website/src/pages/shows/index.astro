@@ -60,11 +60,11 @@ const showsToRender: ShowWithLatest[] = await (async () => {
 				: undefined,
 		});
 	}
-	return list.sort((a, b) => b.episodes.length - a.episodes.length);
+	return list.sort((a, b) => (b.episodes?.length ?? 0) - (a.episodes?.length ?? 0));
 })();
 
 const hasShows = showsToRender.length > 0;
-const totalEpisodes = showsToRender.reduce((acc, s) => acc + s.episodes.length, 0);
+const totalEpisodes = showsToRender.reduce((acc, s) => acc + (s.episodes?.length ?? 0), 0);
 
 const formatDate = (iso: string) =>
 	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(iso));
@@ -117,7 +117,7 @@ const coverWrap = css({
 	overflow: "hidden",
 	bg: "bg.sunken",
 	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
-	"a:hover & img": { transform: "scale(1.04)" },
+	"a:hover &": { "& img": { transform: "scale(1.04)" } },
 });
 
 const coverFallback = css({
@@ -191,7 +191,6 @@ const latestTitle = css({
 	color: "fg.primary",
 	display: "-webkit-box",
 	WebkitLineClamp: "2",
-	WebkitBoxOrient: "vertical",
 	overflow: "hidden",
 	lineHeight: "1.4",
 });
@@ -243,14 +242,14 @@ const emptyCard = css({
 								)}
 								<span class={episodeBadge}>
 									<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 8l6 4-6 4V8z"/></svg>
-									{show.episodes.length} ep{show.episodes.length === 1 ? "" : "s"}
+									{show.episodes?.length ?? 0} ep{(show.episodes?.length ?? 0) === 1 ? "" : "s"}
 								</span>
 							</div>
 							<div class={body}>
 								<h2 class={showName}>{show.name}</h2>
-								{show.hosts.length > 0 && (
+								{(show.hosts?.length ?? 0) > 0 && (
 									<p class={hostsLine}>
-										Hosted by {show.hosts.map((h) => `${h.forename} ${h.surname}`.trim()).join(", ")}
+										Hosted by {(show.hosts ?? []).map((h) => `${h.forename} ${h.surname}`.trim()).join(", ")}
 									</p>
 								)}
 								{show.latestEpisode ? (

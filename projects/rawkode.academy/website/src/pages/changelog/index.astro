@@ -163,7 +163,7 @@ const avatar = css({ width: "6", height: "6", borderRadius: "full", objectFit: "
 				</div>
 				<div class={list} data-changelog-list>
 					{processedChangelog.map((entry) => {
-						const style = typeStyles[entry.type as keyof typeof typeStyles] ?? typeStyles.chore;
+						const style = (typeStyles[entry.type as keyof typeof typeStyles] ?? typeStyles.chore) as { bg: string; color: string };
 						return (
 							<article class={entryCard} data-type={entry.type}>
 								<div class={tagRow}>

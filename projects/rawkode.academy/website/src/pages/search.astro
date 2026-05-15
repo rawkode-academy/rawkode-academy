@@ -190,7 +190,7 @@ const card = css({
 const thumb = css({ aspectRatio: "16 / 9", overflow: "hidden", bg: "bg.sunken", "& img": { width: "full", height: "full", objectFit: "cover" } });
 const cardBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "2" });
 const cardMeta = css({ fontSize: "xs", color: "fg.muted", fontWeight: "semibold", letterSpacing: "wider", textTransform: "uppercase" });
-const cardTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary", lineHeight: "tight", display: "-webkit-box", WebkitLineClamp: "2", WebkitBoxOrient: "vertical", overflow: "hidden" });
+const cardTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary", lineHeight: "tight", display: "-webkit-box", WebkitLineClamp: "2", overflow: "hidden" });
 ---
 
 <Page title={searchQuery ? `${searchQuery} Search Results` : "Search"} description="Search Rawkode Academy videos, articles, and technologies.">

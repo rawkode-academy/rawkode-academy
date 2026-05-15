@@ -33,6 +33,18 @@ body {
 	border-radius: var(--radii-sm, 4px);
 }
 
+/* Webkit fallbacks for properties Panda doesn't accept in its SystemStyleObject:
+ * - line-clamp requires -webkit-box-orient: vertical alongside display: -webkit-box
+ *   plus -webkit-line-clamp for Safari and older Chromium.
+ * - background-clip: text requires the -webkit- prefix in Safari.
+ */
+[class*="d_-webkit-box"] {
+	-webkit-box-orient: vertical;
+}
+[class*="bg-cl_text"] {
+	-webkit-background-clip: text;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
