@@ -5,7 +5,7 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Prose from "@/components/prose/Prose.astro";
 import Page from "@/wrappers/page.astro";
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
-import InternalLinks from "@/components/seo/InternalLinks.astro";
+import RelatedVideos from "@/components/articles/RelatedVideos.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { css } from "../../../styled-system/css";
@@ -408,7 +408,7 @@ const ctaSecondary = css({
 					</footer>
 				)}
 
-				<InternalLinks article={article} />
+				<RelatedVideos currentArticle={article} limit={3} />
 			</div>
 
 			<aside class={aside} aria-label="Article sidebar">
