@@ -1,0 +1,28 @@
+---
+title: "Kubernetes 1.36 lands DRA prioritized list in GA, with four more device features in beta"
+description: "Dynamic Resource Allocation graduates its prioritized list to stable and promotes partitionable devices, device taints, resource health status, and device binding conditions to beta. The DRA team's May 7 update fills in the operator-facing surface that GPU and accelerator scheduling has been waiting on."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+The DRA team published the v1.36 status update for Dynamic Resource Allocation on May 7. Headline: prioritized list is stable, four more features land in beta, and the operator-facing surface for GPU and accelerator scheduling is mostly past alpha.
+
+## What's stable
+
+**Prioritized list (GA).** A claim can declare an ordered preference list of device classes; the scheduler walks the list and binds the first match. The DRA team's own framing uses an H100-then-A100 fallback as the example. For mixed-vintage GPU fleets this replaces the per-namespace queue gymnastics teams have been doing to express soft preferences against a single device class.
+
+## What's in beta
+
+- **Partitionable devices** — first-class support for sharing one physical accelerator across multiple Pods. MIG-style partitioning on NVIDIA GPUs is the motivating case, but the API is generic.
+- **Device taints** — the standard taint/toleration model from nodes, applied to devices. Cordon a faulty or reserved accelerator and only claims with the matching toleration bind to it.
+- **Resource health status** — device health surfaces in Pod status, so hardware failures become observable through the same path as the rest of the workload state.
+- **Device binding conditions** — a Pod's binding to a node is held until named external resources are ready, closing a class of races where Pods were scheduled before their hardware was actually prepared.
+
+## Why this matters
+
+DRA has been the answer to "how does Kubernetes schedule GPUs without a vendor-specific device plugin per accelerator" for several releases. v1.36 is the first release where the core operator-facing primitives — selection preferences, partitioning, taints, health, and binding ordering — are all at GA or beta in the same line-up. Building a multi-tenant GPU cluster on DRA without alpha gates flipped on is now a credible plan.
+
+**Source:** [Kubernetes v1.36: More Drivers, New Features, and the Next Era of DRA](https://kubernetes.io/blog/2026/05/07/kubernetes-v1-36-dra-136-updates/) — The DRA team, May 7, 2026.

@@ -1,0 +1,26 @@
+---
+title: "Kubernetes 1.36 promotes Volume Group Snapshots to GA, locks in crash-consistent multi-volume snapshots"
+description: "VolumeGroupSnapshot, VolumeGroupSnapshotContent, and VolumeGroupSnapshotClass moved to v1 in Kubernetes v1.36 after three years across Alpha and two Beta cycles. CSI driver–only; manifests must move from v1beta2 to v1."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes v1.36 graduates Volume Group Snapshots to General Availability. The three group-snapshot kinds — `VolumeGroupSnapshot`, `VolumeGroupSnapshotContent`, and `VolumeGroupSnapshotClass` — are now promoted to `groupsnapshot.storage.k8s.io/v1`, per the May 8 announcement on the Kubernetes blog by Xing Yang (VMware by Broadcom).
+
+## What this gives you
+
+The feature lets you take a crash-consistent snapshot across a label-selected set of PersistentVolumeClaims at the same point in time, then restore the whole group to new volumes pre-populated with the snapshot data. The motivating case is the boring-but-load-bearing one: stateful workloads that span more than one PV — data plus write-ahead log, sharded storage with paired indexes — where independent per-volume snapshots leave you with inconsistent state after a restore. With group snapshots the API provides write-order consistency without forcing the application to quiesce.
+
+## Timeline and constraints
+
+- Alpha in v1.27 (May 2023)
+- Beta in v1.32 (December 2024)
+- Beta v2 in v1.34 (September 2025)
+- GA in v1.36 (May 2026)
+
+The feature is CSI-only and depends on driver support — confirm your CSI driver implements the group snapshot extension APIs before relying on it. The API promotion from `v1beta2` to `v1` is a hard cutover: update manifests and any backup automation that hardcodes the beta group.
+
+**Source:** [Kubernetes v1.36: Moving Volume Group Snapshots to GA](https://kubernetes.io/blog/2026/05/08/kubernetes-v1-36-volume-group-snapshot-ga/) — Xing Yang (VMware by Broadcom), May 8, 2026.

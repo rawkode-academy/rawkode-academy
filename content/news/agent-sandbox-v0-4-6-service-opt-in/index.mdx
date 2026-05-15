@@ -1,0 +1,29 @@
+---
+title: "Agent Sandbox v0.4.6 makes headless Services opt-in for AI agent workloads on Kubernetes"
+description: "The Kubernetes SIG Apps subproject for agent runtimes shipped v0.4.6 on May 14 with a breaking default — sandboxes no longer auto-create headless Services — plus a Pod-IP routing header that lets clients reach sandboxes without going through kube-proxy or cluster DNS."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+`kubernetes-sigs/agent-sandbox` v0.4.6 dropped on May 14, 2026 with a breaking default change for anyone running large fleets of agent sandboxes on Kubernetes.
+
+## Service creation is now opt-in
+
+Until v0.4.6 the Agent Sandbox controller automatically created a headless Service for every `Sandbox` resource. With this release it does not. Sandboxes that need a Service must set `spec.service: true` explicitly. The release notes call out scalability: at thousands of pods, a Service per sandbox was forcing churn through kube-proxy and Kubernetes DNS that the project no longer wants to pay for by default.
+
+The Python SDK and the upstream `sandbox-router` now support direct Pod-IP routing via the `X-Sandbox-Pod-IP` header, which removes the need for a Service for any caller that already knows the target Pod.
+
+## Other notable changes
+
+- Fixed a hash-availability bug during suspension when replicas scale to zero (#754); status label selectors stay available and suspension fails gracefully if the hash can't be resolved.
+- New OpenClaw example targeting gVisor on GKE, plus a Network Policy management guide and core API docs in `docs/api.md`.
+- Automated weekly releases now ship every Thursday at 09:00 UTC via GitHub Actions (#783).
+
+## What to do
+
+If you operate `Sandbox` resources today, audit every workload that assumes a Service exists per sandbox. Either flip `spec.service: true` to preserve the old behaviour, or migrate callers to the `X-Sandbox-Pod-IP` header before bumping the image.
+
+**Source:** [kubernetes-sigs/agent-sandbox v0.4.6 release notes](https://github.com/kubernetes-sigs/agent-sandbox/releases/tag/v0.4.6) — May 14, 2026.
