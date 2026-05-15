@@ -10,6 +10,7 @@ import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import RelatedNews from "@/components/news/RelatedNews.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
+import { calculateReadingTime } from "@/utils/reading-time";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
 export const prerender = true;
@@ -69,6 +70,8 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	day: "numeric",
 	year: "numeric",
 }).format(article.data.publishedAt);
+
+const readingTime = calculateReadingTime(article.body || "");
 ---
 
 <Page
@@ -125,6 +128,10 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 				<time datetime={article.data.publishedAt.toString()} class="byline-date">
 					{publishDate}
 				</time>
+
+				<span class="byline-sep">&middot;</span>
+
+				<span class="byline-read">{readingTime.text}</span>
 
 			</div>
 		</header>
@@ -243,7 +250,8 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 		color: rgb(75 85 99);
 	}
 
-	.byline-date {
+	.byline-date,
+	.byline-read {
 		white-space: nowrap;
 	}
 

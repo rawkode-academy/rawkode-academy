@@ -1045,6 +1045,73 @@ describe("Article ItemList JSON-LD", () => {
 
 		expect(() => JSON.stringify(jsonLd)).not.toThrow();
 	});
+
+	it("formats minutes as ISO 8601 durations and skips empty/zero/negative inputs", async () => {
+		const { minutesToIsoDuration } = await import(
+			"../lib/learning-path-jsonld.ts"
+		);
+		expect(minutesToIsoDuration(90)).toBe("PT1H30M");
+		expect(minutesToIsoDuration(30)).toBe("PT30M");
+		expect(minutesToIsoDuration(120)).toBe("PT2H");
+		expect(minutesToIsoDuration(0)).toBeUndefined();
+		expect(minutesToIsoDuration(-5)).toBeUndefined();
+		expect(minutesToIsoDuration(Number.NaN)).toBeUndefined();
+	});
+
+	it("builds learning-path Course JSON-LD with provider, free offer, courseInstance, ISO duration, and prerequisites", async () => {
+		const { buildLearningPathJsonLd } = await import(
+			"../lib/learning-path-jsonld.ts"
+		);
+
+		const jsonLd = buildLearningPathJsonLd({
+			siteUrl: "https://rawkode.academy",
+			pathUrl:
+				"https://rawkode.academy/learning-paths/cloud-native-foundations",
+			source: {
+				title: "Cloud Native Foundations",
+				description: "Start your Cloud Native journey.",
+				difficulty: "intermediate",
+				estimatedDuration: 150,
+				prerequisites: ["Familiarity with containers", "Basic Linux"],
+				technologyLabels: ["Kubernetes", "CNCF"],
+				publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+			},
+			authors: [{ id: "rawkode", name: "David Flanagan" }],
+		});
+
+		expect(jsonLd["@type"]).toBe("Course");
+		expect(jsonLd.name).toBe("Cloud Native Foundations");
+		expect(jsonLd.educationalLevel).toBe("Intermediate");
+		expect(jsonLd.learningResourceType).toBe("LearningPath");
+		expect(jsonLd.timeRequired).toBe("PT2H30M");
+		expect(jsonLd.isAccessibleForFree).toBe(true);
+		expect(jsonLd.datePublished).toBe("2026-05-15T08:00:00.000Z");
+		expect(jsonLd.coursePrerequisites).toBe(
+			"Familiarity with containers; Basic Linux",
+		);
+
+		const provider = jsonLd.provider as Record<string, unknown>;
+		expect(provider.name).toBe("Rawkode Academy");
+
+		const offer = jsonLd.offers as Record<string, unknown>;
+		expect(offer.price).toBe("0");
+		expect(offer.priceCurrency).toBe("USD");
+		expect(offer.availability).toBe("https://schema.org/InStock");
+
+		const instances = jsonLd.hasCourseInstance as Array<
+			Record<string, unknown>
+		>;
+		expect(instances).toHaveLength(1);
+		expect(instances[0]?.courseMode).toBe("online");
+		expect(instances[0]?.courseWorkload).toBe("PT2H30M");
+
+		expect(jsonLd.teaches).toEqual(["Kubernetes", "CNCF"]);
+		const author = jsonLd.author as Array<Record<string, unknown>>;
+		expect(author[0]?.name).toBe("David Flanagan");
+		expect(author[0]?.url).toBe("https://rawkode.academy/people/rawkode");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
 });
 
 describe("Structured Data Validation", () => {
@@ -1295,5 +1362,231 @@ describe("Structured Data Validation", () => {
 
 		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
 		expect(jsonLd.keywords).toBeUndefined();
+	});
+
+	it("formats video seconds as ISO 8601 PT…H…M…S durations", async () => {
+		const { secondsToIsoVideoDuration } = await import(
+			"../lib/video-itemlist-jsonld.ts"
+		);
+		expect(secondsToIsoVideoDuration(90)).toBe("PT1M30S");
+		expect(secondsToIsoVideoDuration(3661)).toBe("PT1H1M1S");
+		expect(secondsToIsoVideoDuration(3600)).toBe("PT1H");
+		expect(secondsToIsoVideoDuration(30)).toBe("PT30S");
+		expect(secondsToIsoVideoDuration(0)).toBeUndefined();
+		expect(secondsToIsoVideoDuration(-5)).toBeUndefined();
+		expect(secondsToIsoVideoDuration(Number.NaN)).toBeUndefined();
+	});
+
+	it("builds an ItemList of VideoObject items for the /watch index, newest first", async () => {
+		const { buildVideoItemListJsonLd } = await import(
+			"../lib/video-itemlist-jsonld.ts"
+		);
+
+		const jsonLd = buildVideoItemListJsonLd({
+			siteUrl: "https://rawkode.academy",
+			listUrl: "https://rawkode.academy/watch",
+			listName: "Rawkode Academy Videos",
+			videos: [
+				{
+					id: "old-id",
+					slug: "older-talk",
+					title: "Older talk",
+					description: "Older",
+					publishedAt: new Date("2026-04-01T00:00:00.000Z"),
+					duration: 120,
+				},
+				{
+					id: "new-id",
+					slug: "newer-talk",
+					title: "Newer talk",
+					description: "Newer",
+					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+					duration: 3661,
+				},
+			],
+			limit: 5,
+		});
+
+		expect(jsonLd["@context"]).toBe("https://schema.org");
+		expect(jsonLd["@type"]).toBe("ItemList");
+		expect(jsonLd.name).toBe("Rawkode Academy Videos");
+		expect(jsonLd.numberOfItems).toBe(2);
+
+		const elements = jsonLd.itemListElement as Array<Record<string, unknown>>;
+		expect(elements[0]?.url).toBe("https://rawkode.academy/watch/newer-talk");
+		const firstItem = elements[0]?.item as Record<string, unknown>;
+		expect(firstItem["@type"]).toBe("VideoObject");
+		expect(firstItem.duration).toBe("PT1H1M1S");
+		expect(firstItem.thumbnailUrl).toBe(
+			"https://content.rawkode.academy/videos/new-id/thumbnail.jpg",
+		);
+		expect(firstItem.uploadDate).toBe("2026-05-15T08:00:00.000Z");
+
+		const secondItem = elements[1]?.item as Record<string, unknown>;
+		expect(secondItem.duration).toBe("PT2M");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+
+	it("builds OPML with top-level feeds, grouped sub-feeds, and escaped attributes", async () => {
+		const { buildOpmlDocument } = await import("../lib/opml.ts");
+
+		const xml = buildOpmlDocument({
+			title: "Rawkode Academy feeds",
+			ownerName: "Rawkode Academy",
+			dateCreated: new Date("2026-05-15T10:00:00.000Z"),
+			topLevelFeeds: [
+				{
+					text: "All Content",
+					xmlUrl: "https://rawkode.academy/api/feeds/all.xml",
+					htmlUrl: "https://rawkode.academy/feeds",
+				},
+			],
+			groups: [
+				{
+					text: "Technologies",
+					children: [
+						{
+							text: "Kubernetes & friends",
+							xmlUrl:
+								"https://rawkode.academy/api/feeds/technology/kubernetes.xml",
+							htmlUrl: "https://rawkode.academy/technology/kubernetes",
+						},
+					],
+				},
+				{
+					text: "Empty",
+					children: [],
+				},
+			],
+		});
+
+		expect(xml).toContain('<opml version="2.0">');
+		expect(xml).toContain("<title>Rawkode Academy feeds</title>");
+		expect(xml).toContain(
+			'<outline text="All Content" title="All Content" type="rss" xmlUrl="https://rawkode.academy/api/feeds/all.xml" htmlUrl="https://rawkode.academy/feeds"/>',
+		);
+		expect(xml).toContain('<outline text="Technologies" title="Technologies">');
+		expect(xml).toContain("Kubernetes &amp; friends");
+		expect(xml).not.toContain('text="Empty"');
+		expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
+	});
+
+	it("builds a JSON Feed 1.1 document with required fields and per-item shape", async () => {
+		const { buildJsonFeed } = await import("../lib/json-feed.ts");
+
+		const feed = buildJsonFeed({
+			title: "Rawkode Academy",
+			description: "Latest content",
+			homePageUrl: "https://rawkode.academy/",
+			feedUrl: "https://rawkode.academy/api/feeds/all.json",
+			favicon: "https://rawkode.academy/favicon-32x32.png",
+			items: [
+				{
+					id: "https://rawkode.academy/news/example/",
+					url: "https://rawkode.academy/news/example/",
+					title: "Example",
+					summary: "Example summary",
+					date_published: "2026-05-15T08:00:00.000Z",
+					date_modified: "2026-05-15T09:00:00.000Z",
+					authors: [
+						{
+							name: "David Flanagan",
+							url: "https://rawkode.academy/people/rawkode",
+						},
+					],
+					tags: ["News", "Kubernetes"],
+				},
+				{
+					id: "https://rawkode.academy/watch/example-video/",
+					url: "https://rawkode.academy/watch/example-video/",
+					title: "Example video",
+					date_published: "2026-04-01T08:00:00.000Z",
+					image: "https://content.rawkode.academy/videos/x/thumbnail.jpg",
+				},
+			],
+		});
+
+		expect(feed.version).toBe("https://jsonfeed.org/version/1.1");
+		expect(feed.title).toBe("Rawkode Academy");
+		expect(feed.feed_url).toBe("https://rawkode.academy/api/feeds/all.json");
+		expect(feed.language).toBe("en");
+
+		const items = feed.items as Array<Record<string, unknown>>;
+		expect(items).toHaveLength(2);
+		expect(items[0]?.id).toBe("https://rawkode.academy/news/example/");
+		expect(items[0]?.date_modified).toBe("2026-05-15T09:00:00.000Z");
+		const authors = items[0]?.authors as Array<Record<string, unknown>>;
+		expect(authors[0]?.url).toBe("https://rawkode.academy/people/rawkode");
+		expect(items[1]?.date_modified).toBeUndefined();
+		expect(items[1]?.image).toBe(
+			"https://content.rawkode.academy/videos/x/thumbnail.jpg",
+		);
+
+		expect(() => JSON.stringify(feed)).not.toThrow();
+	});
+
+	it("extracts the 4-digit ADR number from canonical IDs and falls back when absent", async () => {
+		const { extractAdrNumber } = await import("../lib/adr-jsonld.ts");
+		expect(extractAdrNumber("0042-use-cloudflare-d1")).toBe("0042");
+		expect(extractAdrNumber("0001-adopt-astro")).toBe("0001");
+		expect(extractAdrNumber("not-a-numbered-adr")).toBeUndefined();
+		expect(extractAdrNumber("42-missing-padding")).toBeUndefined();
+	});
+
+	it("builds ADR TechArticle JSON-LD with identifier, ISO dates, publisher, and internal author links", async () => {
+		const { buildAdrJsonLd } = await import("../lib/adr-jsonld.ts");
+
+		const jsonLd = buildAdrJsonLd({
+			siteUrl: "https://rawkode.academy",
+			adrUrl: "https://rawkode.academy/adrs/0042-use-cloudflare-d1",
+			source: {
+				id: "0042-use-cloudflare-d1",
+				title: "Use Cloudflare D1 for all new services",
+				adoptedAt: new Date("2026-05-15T10:00:00.000Z"),
+			},
+			authors: [{ id: "rawkode", name: "David Flanagan" }],
+		});
+
+		expect(jsonLd["@type"]).toBe("TechArticle");
+		expect(jsonLd.headline).toBe(
+			"ADR-0042: Use Cloudflare D1 for all new services",
+		);
+		expect(jsonLd.identifier).toBe("ADR-0042");
+		expect(jsonLd.datePublished).toBe("2026-05-15T10:00:00.000Z");
+		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
+		expect(jsonLd.articleSection).toBe("Architecture Decision Records");
+
+		const mainEntity = jsonLd.mainEntityOfPage as Record<string, unknown>;
+		expect(mainEntity["@id"]).toBe(
+			"https://rawkode.academy/adrs/0042-use-cloudflare-d1",
+		);
+
+		const publisher = jsonLd.publisher as Record<string, unknown>;
+		expect(publisher.name).toBe("Rawkode Academy");
+
+		const author = jsonLd.author as Array<Record<string, unknown>>;
+		expect(author).toHaveLength(1);
+		expect(author[0]?.name).toBe("David Flanagan");
+		expect(author[0]?.url).toBe("https://rawkode.academy/people/rawkode");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+
+	it("omits identifier and author when ADR id is unnumbered and no authors are given", async () => {
+		const { buildAdrJsonLd } = await import("../lib/adr-jsonld.ts");
+		const jsonLd = buildAdrJsonLd({
+			siteUrl: "https://rawkode.academy",
+			adrUrl: "https://rawkode.academy/adrs/some-text-only-id",
+			source: {
+				id: "some-text-only-id",
+				title: "Adopt X",
+				adoptedAt: new Date("2026-05-15T10:00:00.000Z"),
+			},
+			authors: [],
+		});
+		expect(jsonLd.identifier).toBeUndefined();
+		expect(jsonLd.headline).toBe("Adopt X");
+		expect(jsonLd.author).toBeUndefined();
 	});
 });
