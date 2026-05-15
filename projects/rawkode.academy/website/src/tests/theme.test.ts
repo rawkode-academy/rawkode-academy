@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getColorScheme,
+	getColorSchemePreference,
 	getThemeColors,
 	setColorScheme,
 	toggleColorScheme,
@@ -38,7 +39,11 @@ describe("Theme Management", () => {
 				dispatchEvent: () => true,
 				addEventListener: () => {},
 				removeEventListener: () => {},
-				matchMedia: () => ({ matches: false }),
+				matchMedia: () => ({
+					matches: false,
+					addEventListener: () => {},
+					removeEventListener: () => {},
+				}),
 			} as unknown as Window & typeof globalThis;
 		}
 
@@ -72,6 +77,15 @@ describe("Theme Management", () => {
 			value: localStorageMock,
 			writable: true,
 		});
+
+		Object.defineProperty(window, "matchMedia", {
+			configurable: true,
+			value: () => ({
+				matches: false,
+				addEventListener: () => {},
+				removeEventListener: () => {},
+			}),
+		});
 	});
 
 	afterEach(() => {
@@ -92,7 +106,7 @@ describe("Theme Management", () => {
 		});
 	});
 
-	describe("ColorScheme (light / dark)", () => {
+	describe("ColorSchemePreference", () => {
 		const stubClassList = (impl: Partial<DOMTokenList>) => {
 			Object.defineProperty(document.documentElement, "classList", {
 				configurable: true,
@@ -100,17 +114,27 @@ describe("Theme Management", () => {
 			});
 		};
 
-		it("reads light by default", () => {
-			stubClassList({
-				add: () => {},
-				remove: () => {},
-				toggle: () => false,
-				contains: () => false,
-			});
-			expect(getColorScheme()).toBe("light");
+		it("defaults to 'system' when nothing is stored", () => {
+			expect(getColorSchemePreference()).toBe("system");
 		});
 
-		it("setColorScheme persists and toggles the dark class", () => {
+		it("returns the stored preference when valid", () => {
+			localStorage.setItem("rawkode-color-scheme", "dark");
+			expect(getColorSchemePreference()).toBe("dark");
+
+			localStorage.setItem("rawkode-color-scheme", "light");
+			expect(getColorSchemePreference()).toBe("light");
+
+			localStorage.setItem("rawkode-color-scheme", "system");
+			expect(getColorSchemePreference()).toBe("system");
+		});
+
+		it("falls back to 'system' for invalid stored values", () => {
+			localStorage.setItem("rawkode-color-scheme", "midnight-purple");
+			expect(getColorSchemePreference()).toBe("system");
+		});
+
+		it("setColorScheme persists the preference and toggles the dark class", () => {
 			const toggle = vi.fn();
 			stubClassList({
 				add: () => {},
@@ -124,7 +148,30 @@ describe("Theme Management", () => {
 			expect(localStorage.getItem("rawkode-color-scheme")).toBe("dark");
 		});
 
-		it("toggleColorScheme flips the active mode", () => {
+		it("setColorScheme('system') resolves via prefers-color-scheme", () => {
+			Object.defineProperty(window, "matchMedia", {
+				configurable: true,
+				value: () => ({
+					matches: true,
+					addEventListener: () => {},
+					removeEventListener: () => {},
+				}),
+			});
+
+			const toggle = vi.fn();
+			stubClassList({
+				add: () => {},
+				remove: () => {},
+				toggle,
+				contains: () => false,
+			});
+
+			setColorScheme("system");
+			expect(toggle).toHaveBeenCalledWith("dark", true);
+			expect(localStorage.getItem("rawkode-color-scheme")).toBe("system");
+		});
+
+		it("toggleColorScheme cycles light → dark → system → light", () => {
 			let isDark = false;
 			stubClassList({
 				add: () => {
@@ -141,8 +188,39 @@ describe("Theme Management", () => {
 				contains: (cls: string) => cls === "dark" && isDark,
 			});
 
+			localStorage.setItem("rawkode-color-scheme", "light");
 			expect(toggleColorScheme()).toBe("dark");
+			expect(toggleColorScheme()).toBe("system");
 			expect(toggleColorScheme()).toBe("light");
+		});
+	});
+
+	describe("getColorScheme (applied)", () => {
+		const stubClassList = (impl: Partial<DOMTokenList>) => {
+			Object.defineProperty(document.documentElement, "classList", {
+				configurable: true,
+				value: impl as DOMTokenList,
+			});
+		};
+
+		it("reads 'light' when html.dark is absent", () => {
+			stubClassList({
+				add: () => {},
+				remove: () => {},
+				toggle: () => false,
+				contains: () => false,
+			});
+			expect(getColorScheme()).toBe("light");
+		});
+
+		it("reads 'dark' when html.dark is present", () => {
+			stubClassList({
+				add: () => {},
+				remove: () => {},
+				toggle: () => true,
+				contains: (cls: string) => cls === "dark",
+			});
+			expect(getColorScheme()).toBe("dark");
 		});
 	});
 });

@@ -3,11 +3,32 @@
 		@click="handleToggle"
 		:class="buttonClasses"
 		:aria-label="ariaLabel"
+		:title="ariaLabel"
 		type="button"
 	>
 		<transition name="fade" mode="out-in">
+			<!-- System (auto) — monitor icon -->
 			<svg
-				v-if="scheme === 'dark'"
+				v-if="preference === 'system'"
+				key="system"
+				class="w-5 h-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
+			>
+				<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+				<line x1="8" y1="21" x2="16" y2="21" />
+				<line x1="12" y1="17" x2="12" y2="21" />
+			</svg>
+
+			<!-- Dark — sun icon (clicking moves toward light) -->
+			<svg
+				v-else-if="preference === 'dark'"
 				key="sun"
 				class="w-5 h-5"
 				fill="none"
@@ -24,6 +45,8 @@
 					d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
 				/>
 			</svg>
+
+			<!-- Light — moon icon (clicking moves toward dark) -->
 			<svg
 				v-else
 				key="moon"
@@ -51,7 +74,8 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
 	type ColorScheme,
-	getColorScheme,
+	type ColorSchemePreference,
+	getColorSchemePreference,
 	toggleColorScheme,
 } from "../../lib/theme";
 
@@ -76,38 +100,49 @@ const props = withDefaults(defineProps<Props>(), {
 	size: "md",
 });
 
-const scheme = ref<ColorScheme>("light");
+const preference = ref<ColorSchemePreference>("system");
 
-const label = computed(() =>
-	scheme.value === "dark" ? "Switch to light mode" : "Switch to dark mode",
+const NEXT_DESCRIPTION: Record<ColorSchemePreference, string> = {
+	light: "Switch to dark mode",
+	dark: "Switch to system theme",
+	system: "Switch to light mode",
+};
+
+const CURRENT_LABEL: Record<ColorSchemePreference, string> = {
+	light: "Light mode",
+	dark: "Dark mode",
+	system: "System theme",
+};
+
+const label = computed(() => NEXT_DESCRIPTION[preference.value]);
+
+const ariaLabel = computed(
+	() => `${NEXT_DESCRIPTION[preference.value]} (current: ${CURRENT_LABEL[preference.value].toLowerCase()})`,
 );
 
-const ariaLabel = computed(() =>
-	scheme.value === "dark"
-		? "Switch to light mode (current: dark)"
-		: "Switch to dark mode (current: light)",
-);
-
-const handleSchemeChange = (event: Event) => {
-	const customEvent = event as CustomEvent<{ scheme: ColorScheme }>;
-	scheme.value = customEvent.detail.scheme;
+const handlePreferenceChange = (event: Event) => {
+	const customEvent = event as CustomEvent<{
+		preference: ColorSchemePreference;
+		scheme: ColorScheme;
+	}>;
+	preference.value = customEvent.detail.preference;
 };
 
 onMounted(() => {
-	scheme.value = getColorScheme();
-	window.addEventListener("color-scheme-change", handleSchemeChange);
+	preference.value = getColorSchemePreference();
+	window.addEventListener("color-scheme-change", handlePreferenceChange);
 });
 
 onUnmounted(() => {
-	window.removeEventListener("color-scheme-change", handleSchemeChange);
+	window.removeEventListener("color-scheme-change", handlePreferenceChange);
 });
 
 const handleToggle = () => {
-	const previous = scheme.value;
-	scheme.value = toggleColorScheme();
+	const previous = preference.value;
+	preference.value = toggleColorScheme();
 	trackEvent("color_scheme_switched", {
-		from_scheme: previous,
-		to_scheme: scheme.value,
+		from_preference: previous,
+		to_preference: preference.value,
 		source: "theme_toggle_button",
 	});
 };

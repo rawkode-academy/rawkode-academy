@@ -1,33 +1,67 @@
 ---
 /**
  * Inline theme initialization script.
- * Single brand theme (Rawkode Blue) — only the light/dark color-scheme
- * needs to be applied early to prevent FOUC.
+ *
+ * Mirrors the logic in `src/lib/theme.ts` so the correct colour scheme
+ * is applied before paint (no FOUC). Supports three preferences:
+ *   - "light"  — always light
+ *   - "dark"   — always dark
+ *   - "system" — follow `prefers-color-scheme`, including live updates
+ *
+ * When the preference is "system", a `prefers-color-scheme` listener
+ * is installed so OS theme changes are reflected without a reload.
  */
 ---
 
 <script is:inline>
 	(function () {
-		const DARK_STORAGE_KEY = "rawkode-color-scheme";
+		const PREF_STORAGE_KEY = "rawkode-color-scheme";
+		const VALID = ["light", "dark", "system"];
 
-		let prefersDark = false;
-		try {
-			const stored = localStorage.getItem(DARK_STORAGE_KEY);
-			if (stored === "dark") {
-				prefersDark = true;
-			} else if (stored === "light") {
-				prefersDark = false;
-			} else if (window.matchMedia) {
-				prefersDark = window.matchMedia(
-					"(prefers-color-scheme: dark)",
-				).matches;
+		function readPreference() {
+			try {
+				const stored = localStorage.getItem(PREF_STORAGE_KEY);
+				if (stored && VALID.includes(stored)) return stored;
+			} catch (e) {
+				// localStorage may be unavailable; fall through.
 			}
-		} catch (e) {
-			// localStorage might not be available
+			return "system";
 		}
 
-		if (prefersDark) {
-			document.documentElement.classList.add("dark");
+		function applyScheme(scheme) {
+			document.documentElement.classList.toggle("dark", scheme === "dark");
+		}
+
+		function resolve(pref) {
+			if (pref === "dark") return "dark";
+			if (pref === "light") return "light";
+			return window.matchMedia &&
+				window.matchMedia("(prefers-color-scheme: dark)").matches
+				? "dark"
+				: "light";
+		}
+
+		applyScheme(resolve(readPreference()));
+
+		// Live-update when preference is "system" and OS theme changes.
+		if (window.matchMedia) {
+			const mq = window.matchMedia("(prefers-color-scheme: dark)");
+			const handle = (event) => {
+				if (readPreference() !== "system") return;
+				const scheme = event.matches ? "dark" : "light";
+				applyScheme(scheme);
+				window.dispatchEvent(
+					new CustomEvent("color-scheme-change", {
+						detail: { preference: "system", scheme },
+					}),
+				);
+			};
+			if (mq.addEventListener) {
+				mq.addEventListener("change", handle);
+			} else if (mq.addListener) {
+				// Safari < 14 fallback
+				mq.addListener(handle);
+			}
 		}
 	})();
 </script>

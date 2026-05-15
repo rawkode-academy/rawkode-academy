@@ -108,31 +108,45 @@ Light and dark modes have separate shadow ramps — the variables swap automatic
 
 Add `class="focus-ring"` to any focusable element that needs a consistent keyboard-only focus outline. The utility uses `:focus-visible` so the ring only appears for keyboard navigation, not mouse clicks. The ring colour is `--brand-primary` with a 2px outline and 2px offset.
 
-#### Light / Dark mode
+#### Light / Dark / System mode
 
-The site exposes a sun/moon toggle (`<ThemeToggle />`) and a "Change appearance" command in the command palette. Both wrap the same module:
+Two concepts:
+
+- **Preference** (`ColorSchemePreference`) — the user's stored choice: `"light"`, `"dark"`, or `"system"`. `"system"` follows the OS `prefers-color-scheme` media query.
+- **Applied scheme** (`ColorScheme`) — the resolved value on the page: `"light"` or `"dark"`.
+
+The site exposes a cycling sun/moon/monitor toggle (`<ThemeToggle />`) and an "Appearance" sub-page in the command palette with all three options. Both wrap the same module:
 
 ```typescript
 import {
-  getColorScheme,
-  setColorScheme,
-  toggleColorScheme,
+  getColorScheme,           // applied — "light" | "dark"
+  getColorSchemePreference, // stored — "light" | "dark" | "system"
+  setColorScheme,           // takes preference, persists + applies
+  toggleColorScheme,        // cycles light → dark → system → light
 } from "@/lib/theme";
 
-// Read
-const scheme = getColorScheme(); // "light" | "dark"
+// Read the user's preference
+const pref = getColorSchemePreference(); // "light" | "dark" | "system"
 
-// Write
-setColorScheme("dark");
+// Read the applied scheme on the page right now
+const applied = getColorScheme(); // "light" | "dark"
 
-// Flip
-const next = toggleColorScheme(); // returns the new scheme
+// Set the preference (persists to localStorage and updates html.dark)
+setColorScheme("system");
 
-// Listen
+// Cycle through preferences
+const next = toggleColorScheme();
+
+// Listen for changes (fires on user toggle AND on OS theme change when pref === "system")
 window.addEventListener("color-scheme-change", (event) => {
-  console.log("Color scheme is now:", event.detail.scheme);
+  console.log(
+    "preference:", event.detail.preference,
+    "applied:", event.detail.scheme,
+  );
 });
 ```
+
+When the preference is `"system"`, `theme.ts` installs a `prefers-color-scheme` listener so the page automatically follows OS theme changes without a reload.
 
 `ThemeScript.astro` should sit in the document `<head>` to apply the persisted scheme before paint:
 

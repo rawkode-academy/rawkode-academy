@@ -10,8 +10,8 @@ import {
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
 import {
-	type ColorScheme,
-	getColorScheme,
+	type ColorSchemePreference,
+	getColorSchemePreference,
 	setColorScheme,
 } from "@/lib/theme";
 import "./styles.css";
@@ -24,7 +24,7 @@ interface NavigationItem {
 	category: string;
 	keywords?: string[];
 	action?: () => boolean | void;
-	scheme?: ColorScheme;
+	preference?: ColorSchemePreference;
 }
 
 type CommandPage = "root" | "appearance";
@@ -54,7 +54,8 @@ export default function CommandPalette({
 	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [currentScheme, setCurrentScheme] = useState<ColorScheme>("light");
+	const [currentPreference, setCurrentPreference] =
+		useState<ColorSchemePreference>("system");
 	const [pages, setPages] = useState<CommandPage[]>(["root"]);
 	const [hasLoadedNavigation, setHasLoadedNavigation] = useState(false);
 	const hasTrackedOpen = useRef(false);
@@ -82,35 +83,51 @@ export default function CommandPalette({
 		return searchTerms.every((term) => valueLower.includes(term)) ? 1 : 0;
 	};
 
-	const appearanceItems = useMemo<NavigationItem[]>(
-		() =>
-			(["light", "dark"] as const).map((nextScheme) => ({
-				id: `appearance-${nextScheme}`,
-				title: nextScheme === "dark" ? "Dark mode" : "Light mode",
-				description: `Switch to ${nextScheme} mode`,
-				category: "Appearance",
-				keywords: [
-					"theme",
-					"appearance",
-					"color",
-					"mode",
-					nextScheme,
-					nextScheme === "dark" ? "night" : "day",
-				],
-				scheme: nextScheme,
-				action: () => {
-					const previous = currentScheme;
-					setColorScheme(nextScheme);
-					setCurrentScheme(nextScheme);
-					trackEvent("color_scheme_switched", {
-						from_scheme: previous,
-						to_scheme: nextScheme,
-						source: "command_palette",
-					});
-				},
-			})),
-		[currentScheme],
-	);
+	const appearanceItems = useMemo<NavigationItem[]>(() => {
+		const options: ReadonlyArray<{
+			preference: ColorSchemePreference;
+			title: string;
+			description: string;
+			keywords: string[];
+		}> = [
+			{
+				preference: "light",
+				title: "Light mode",
+				description: "Always use the light theme",
+				keywords: ["light", "day", "bright"],
+			},
+			{
+				preference: "dark",
+				title: "Dark mode",
+				description: "Always use the dark theme",
+				keywords: ["dark", "night", "dim"],
+			},
+			{
+				preference: "system",
+				title: "System theme",
+				description: "Follow your operating system preference",
+				keywords: ["system", "auto", "os", "automatic"],
+			},
+		];
+		return options.map(({ preference, title, description, keywords }) => ({
+			id: `appearance-${preference}`,
+			title,
+			description,
+			category: "Appearance",
+			keywords: ["theme", "appearance", "color", "mode", ...keywords],
+			preference,
+			action: () => {
+				const previous = currentPreference;
+				setColorScheme(preference);
+				setCurrentPreference(preference);
+				trackEvent("color_scheme_switched", {
+					from_preference: previous,
+					to_preference: preference,
+					source: "command_palette",
+				});
+			},
+		}));
+	}, [currentPreference]);
 
 	const commandItems = useMemo(
 		() => [
@@ -130,12 +147,13 @@ export default function CommandPalette({
 	);
 
 	useEffect(() => {
-		// Get current color scheme
-		setCurrentScheme(getColorScheme());
+		setCurrentPreference(getColorSchemePreference());
 
 		const handleSchemeChange = (event: Event) => {
-			const customEvent = event as CustomEvent<{ scheme: ColorScheme }>;
-			setCurrentScheme(customEvent.detail.scheme);
+			const customEvent = event as CustomEvent<{
+				preference: ColorSchemePreference;
+			}>;
+			setCurrentPreference(customEvent.detail.preference);
 		};
 		window.addEventListener("color-scheme-change", handleSchemeChange);
 
@@ -478,7 +496,8 @@ export default function CommandPalette({
 								>
 									{items.map((item) => {
 										const ItemIcon = getItemIcon(item);
-										const isActiveScheme = item.scheme === currentScheme;
+										const isActiveScheme =
+											item.preference === currentPreference;
 										return (
 											<Command.Item
 												key={item.id}
