@@ -49,8 +49,7 @@ export const AllVariants: Story = {
             <Badge variant="default">Default</Badge>
             <Badge variant="primary">Primary</Badge>
             <Badge variant="secondary">Secondary</Badge>
-            <Badge variant="tertiary">Tertiary</Badge>
-            <Badge variant="success">Success</Badge>
+                        <Badge variant="success">Success</Badge>
             <Badge variant="warning">Warning</Badge>
             <Badge variant="danger">Danger</Badge>
             <Badge variant="info">Info</Badge>
@@ -95,8 +94,7 @@ export const OutlineVariants: Story = {
             <Badge variant="default" :outline="true">Default</Badge>
             <Badge variant="primary" :outline="true">Primary</Badge>
             <Badge variant="secondary" :outline="true">Secondary</Badge>
-            <Badge variant="tertiary" :outline="true">Tertiary</Badge>
-            <Badge variant="success" :outline="true">Success</Badge>
+                        <Badge variant="success" :outline="true">Success</Badge>
             <Badge variant="warning" :outline="true">Warning</Badge>
             <Badge variant="danger" :outline="true">Danger</Badge>
             <Badge variant="info" :outline="true">Info</Badge>

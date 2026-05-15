@@ -47,15 +47,15 @@ const isOpen = (id: string) => !!openItems[id];
 			<h2 :id="`accordion-heading-${item.id}`">
 				<button
 					type="button"
-					class="flex justify-between items-center py-5 px-4 w-full font-medium text-left border-b border-white/20 dark:border-gray-700/40 transition-all duration-200 rounded-t-xl hover:bg-white/40 dark:hover:bg-gray-800/40 hover:backdrop-blur-md"
-					:class="isOpen(item.id) ? 'text-gray-900 dark:text-white bg-white/30 dark:bg-gray-800/30 backdrop-blur-md' : 'text-gray-500 dark:text-gray-400'"
+					class="flex justify-between items-center py-5 px-4 w-full font-medium text-left border-b border-white/20 dark:border-gray-700/40 transition-smooth focus-ring rounded-t-xl hover:bg-white/40 dark:hover:bg-gray-800/40 hover:backdrop-blur-md"
+					:class="isOpen(item.id) ? 'text-primary-content bg-white/30 dark:bg-gray-800/30 backdrop-blur-md' : 'text-muted'"
 					@click="toggleItem(item.id)"
 					:aria-expanded="isOpen(item.id)"
 					:aria-controls="`accordion-body-${item.id}`"
 				>
 					<span>{{ item.question }}</span>
 					<svg
-						class="w-6 h-6 shrink-0 transition-transform duration-200"
+						class="w-6 h-6 shrink-0 transition-smooth"
 						:class="{ 'rotate-180': isOpen(item.id) }"
 						fill="currentColor"
 						viewBox="0 0 20 20"
@@ -70,8 +70,8 @@ const isOpen = (id: string) => !!openItems[id];
 				</button>
 			</h2>
 			<Transition
-				enter-active-class="transition-all duration-200 ease-out"
-				leave-active-class="transition-all duration-200 ease-out"
+				enter-active-class="transition-smooth"
+				leave-active-class="transition-smooth"
 				enter-from-class="opacity-0 max-h-0"
 				enter-to-class="opacity-100 max-h-screen"
 				leave-from-class="opacity-100 max-h-screen"
@@ -85,7 +85,7 @@ const isOpen = (id: string) => !!openItems[id];
 					class="overflow-hidden"
 				>
 					<div class="py-5 px-4 border-b border-white/20 dark:border-gray-700/40 bg-white/20 dark:bg-gray-800/20 backdrop-blur-sm">
-						<div class="text-gray-600 dark:text-gray-300">
+						<div class="text-secondary-content">
 							<slot :name="`answer-${item.id}`">
 								{{ item.answer }}
 							</slot>
