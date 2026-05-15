@@ -906,16 +906,62 @@ body::before {
 
 	/* Link Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
-	/* Gradient Presets */
+	/* Gradient Presets — brand-aware hero washes derived from the active theme */
 	.bg-gradient-hero {
-		@apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-black;
+		background:
+			radial-gradient(
+				circle at 12% 18%,
+				rgb(var(--brand-primary) / 0.18) 0%,
+				transparent 48%
+			),
+			radial-gradient(
+				circle at 88% 12%,
+				rgb(var(--brand-secondary) / 0.14) 0%,
+				transparent 52%
+			),
+			linear-gradient(
+				145deg,
+				color-mix(in srgb, var(--surface-base) 92%, rgb(var(--brand-primary) / 0.05)) 0%,
+				color-mix(in srgb, var(--surface-base) 96%, rgb(var(--brand-secondary) / 0.04)) 100%
+			);
+	}
+
+	html.dark .bg-gradient-hero {
+		background:
+			radial-gradient(
+				circle at 18% 12%,
+				rgb(var(--brand-primary) / 0.32) 0%,
+				transparent 48%
+			),
+			radial-gradient(
+				circle at 86% 18%,
+				rgb(var(--brand-secondary) / 0.22) 0%,
+				transparent 52%
+			),
+			linear-gradient(
+				145deg,
+				color-mix(in srgb, var(--surface-base) 86%, rgb(var(--brand-primary) / 0.18)) 0%,
+				color-mix(in srgb, var(--surface-base) 92%, rgb(var(--brand-accent) / 0.4)) 100%
+			);
 	}
 
 	.bg-gradient-hero-alt {
-		@apply bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800;
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--surface-base) 94%, rgb(var(--brand-primary) / 0.06)) 0%,
+			color-mix(in srgb, var(--surface-overlay) 88%, rgb(var(--brand-secondary) / 0.04)) 100%
+		);
 	}
 
-	/* Brand gradient: Theme-aware at 45° angle */
+	html.dark .bg-gradient-hero-alt {
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--surface-base) 90%, rgb(var(--brand-primary) / 0.22)) 0%,
+			color-mix(in srgb, var(--surface-overlay) 86%, rgb(var(--brand-accent) / 0.35)) 100%
+		);
+	}
+
+	/* Brand gradient: canonical 135° diagonal sweep, primary → secondary */
 	.bg-gradient-primary {
 		background: linear-gradient(
 			135deg,
@@ -924,11 +970,12 @@ body::before {
 		);
 	}
 
+	/* Secondary gradient: reverse sweep so it complements primary visually */
 	.bg-gradient-secondary {
 		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary)) 0%,
-			rgb(var(--brand-secondary)) 100%
+			315deg,
+			rgb(var(--brand-secondary)) 0%,
+			rgb(var(--brand-primary)) 100%
 		);
 	}
 
