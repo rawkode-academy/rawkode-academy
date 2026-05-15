@@ -6,7 +6,9 @@ export const prerender = true;
 
 const allNews = await getCollection("news");
 
-allNews.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+allNews.sort(
+	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
 
 const pageTitle = "Cloud Native News | Rawkode Academy";
 const pageDescription =
@@ -34,6 +36,20 @@ function formatTechnologyLabel(value: string): string {
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+	<Fragment slot="extra-head">
+		<link
+			rel="alternate"
+			type="application/rss+xml"
+			title="Rawkode Academy - News (RSS)"
+			href="/api/feeds/news.xml"
+		/>
+		<link
+			rel="alternate"
+			type="application/atom+xml"
+			title="Rawkode Academy - News (Atom)"
+			href="/api/feeds/news.atom"
+		/>
+	</Fragment>
 	<section class="page-px section-py-tight">
 		<div class="mx-auto max-w-4xl">
 			<header class="mb-6 border-b border-black/10 pb-5 dark:border-white/10 sm:mb-8 sm:pb-6">
