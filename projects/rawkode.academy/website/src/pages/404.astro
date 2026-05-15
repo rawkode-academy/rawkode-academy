@@ -1,145 +1,194 @@
 ---
 import MinimalLayout from "@/layouts/minimal.astro";
+import { css } from "../../styled-system/css";
 
 export const prerender = true;
 
 const quickLinks = [
-	{
-		title: "Return home",
-		description: "Head back to the front page and resume your journey.",
-		href: "/",
-	},
-	{
-		title: "Browse courses",
-		description: "Deep dives, labs, and workshops from Rawkode Academy.",
-		href: "/courses",
-	},
-	{
-		title: "Learning paths",
-		description: "Opinionated roadmaps to master cloud native topics.",
-		href: "/learning-paths",
-	},
-	{
-		title: "Technology guides",
-		description: "Explore the tools, runtimes, and projects we teach.",
-		href: "/technology",
-	},
+	{ title: "Home", description: "Return to the front page.", href: "/" },
+	{ title: "Browse Videos", description: "Live sessions and screencasts.", href: "/watch" },
+	{ title: "Learning Paths", description: "Structured cloud native roadmaps.", href: "/learning-paths" },
+	{ title: "Technologies", description: "Tools and projects we cover.", href: "/technology" },
 ];
 
-const supportLinks = [
-	{
-		title: "Search the site",
-		description: "Find videos, articles, and docs across the academy.",
-		href: "/search",
-	},
-	{
-		title: "Chat on Discord",
-		description: "Ask the community for a direct link or recommendation.",
-		href: "https://discord.gg/rawkode",
-	},
-];
+const main = css({
+	position: "relative",
+	minH: "100vh",
+	overflow: "hidden",
+	color: "fg.primary",
+	bg: "bg.canvas",
+});
+
+const bgFx = css({
+	position: "absolute",
+	inset: "0",
+	pointerEvents: "none",
+	backgroundImage:
+		"radial-gradient(circle at 50% -10%, token(colors.brand.500)/20, transparent 50%), radial-gradient(circle at 80% 80%, token(colors.cyan.500)/15, transparent 50%)",
+});
+
+const shell = css({
+	position: "relative",
+	zIndex: "1",
+	maxWidth: "60rem",
+	mx: "auto",
+	px: { base: "6", md: "10" },
+	py: { base: "20", md: "32" },
+	textAlign: "center",
+});
+
+const eyebrow = css({
+	fontSize: "xs",
+	letterSpacing: "0.4em",
+	textTransform: "uppercase",
+	color: "fg.brand",
+	fontWeight: "semibold",
+});
+
+const heading = css({
+	fontFamily: "display",
+	fontSize: { base: "4xl", md: "6xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.05",
+	color: "fg.primary",
+	mt: "6",
+	textWrap: "balance",
+});
+
+const subtitle = css({ mt: "4", fontSize: { base: "md", md: "lg" }, color: "fg.secondary", lineHeight: "1.6", maxWidth: "36rem", mx: "auto" });
+
+const buttonsRow = css({ mt: "10", display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "3" });
+
+const primaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	boxShadow: "md",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const ghostBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
+});
+
+const searchForm = css({
+	mt: "12",
+	mx: "auto",
+	maxWidth: "40rem",
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	p: "2",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const searchInput = css({
+	flex: "1",
+	bg: "transparent",
+	color: "fg.primary",
+	border: "none",
+	px: "4",
+	py: "2",
+	fontSize: "md",
+	_focus: { outline: "none" },
+});
+
+const searchBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	borderRadius: "lg",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	border: "none",
+	cursor: "pointer",
+});
+
+const grid = css({
+	mt: "16",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+	gap: "4",
+	maxWidth: "48rem",
+	mx: "auto",
+});
+
+const card = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "2",
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	textAlign: "left",
+	transition: "transform 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", borderColor: "border.default" },
+});
+
+const cardTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary" });
+const cardDesc = css({ fontSize: "sm", color: "fg.muted" });
 ---
 
 <MinimalLayout title="404 – Rawkode Academy" description="We couldn't find that page, but here are a few quick ways to get back on course.">
-	<main class="relative isolate min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-		<div class="pointer-events-none absolute inset-0">
-			<div class="absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/30 blur-3xl"></div>
-			<div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"></div>
-			<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.12),_transparent_55%)]"></div>
-		</div>
+	<main class={main}>
+		<div class={bgFx} aria-hidden="true"></div>
+		<section class={shell}>
+			<p class={eyebrow}>Lost in the cluster</p>
+			<h1 class={heading}>We couldn't route that request.</h1>
+			<p class={subtitle}>The page you're looking for may have moved or the URL has a typo. Let's get you back to shipping something great.</p>
 
-		<section class="relative z-10 px-6 py-24 sm:py-32">
-			<div class="mx-auto flex max-w-4xl flex-col items-center text-center">
-				<p class="text-xs uppercase tracking-[0.4em] text-primary/70">Lost in the cluster</p>
-				<h1 class="mt-6 text-4xl font-semibold leading-tight text-white sm:text-5xl">
-					We couldn't route that request.
-				</h1>
-				<p class="mt-4 text-lg text-slate-300">
-					The page you're looking for may have moved, or the URL has a typo. Let's get you
-					back to shipping something great.
-				</p>
-				<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-					<a
-						href="/"
-						class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-secondary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary/30 transition hover:scale-[1.01]"
-					>
-						<span>Back to homepage</span>
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
-						</svg>
-					</a>
-					<a
-						href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose"
-						class="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-6 py-3 text-base font-semibold text-white/90 transition hover:border-white/40"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Report an issue
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4l-5 5m-1 6a9 9 0 110-18 9 9 0 010 18z" />
-						</svg>
-					</a>
-				</div>
+			<div class={buttonsRow}>
+				<a href="/" class={primaryBtn}>
+					Back to homepage
+					<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M13 5l7 7-7 7" /></svg>
+				</a>
+				<a href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose" target="_blank" rel="noopener noreferrer" class={ghostBtn}>
+					Report an issue
+				</a>
 			</div>
 
-			<form action="/search" method="get" class="mx-auto mt-12 flex max-w-3xl items-center justify-between gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3 text-left backdrop-blur">
-				<div class="flex flex-1 flex-col">
-					<label for="not-found-search" class="text-xs uppercase tracking-[0.3em] text-white/60">Search everything</label>
-					<input
-						type="search"
-						name="q"
-						id="not-found-search"
-						placeholder="Videos, docs, workshops, experiments..."
-						class="mt-2 bg-transparent text-base text-white placeholder:text-slate-400 focus:outline-none"
-						required
-					/>
-				</div>
-				<button
-					type="submit"
-					class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white transition hover:bg-white/20"
-					aria-label="Search"
-				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-					</svg>
+			<form action="/search" method="get" class={searchForm}>
+				<input type="search" name="q" placeholder="Search videos, articles, technologies…" class={searchInput} required />
+				<button type="submit" class={searchBtn} aria-label="Search">
+					<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
 				</button>
 			</form>
 
-			<div class="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-2">
+			<div class={grid}>
 				{quickLinks.map((link) => (
-					<a
-						href={link.href}
-						class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur transition hover:border-white/30 hover:bg-white/10"
-					>
-						<div class="flex items-center justify-between gap-6">
-							<div>
-								<p class="text-sm uppercase tracking-[0.3em] text-primary/80">{link.title}</p>
-								<p class="mt-3 text-base text-slate-200">{link.description}</p>
-							</div>
-							<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white transition group-hover:translate-x-1">
-								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-								</svg>
-							</div>
-						</div>
-					</a>
-				))}
-			</div>
-
-			<div class="mx-auto mt-16 grid max-w-4xl gap-6 md:grid-cols-2">
-				{supportLinks.map((link) => (
-					<a
-						href={link.href}
-						class="group flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur transition hover:border-white/30 hover:bg-white/10"
-					>
-						<p class="text-sm font-semibold tracking-wide text-white/80">{link.title}</p>
-						<p class="text-base text-slate-300">{link.description}</p>
-						<span class="inline-flex items-center gap-2 text-sm font-semibold text-primary/80">
-							<span>Open</span>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
-							</svg>
-						</span>
+					<a href={link.href} class={card}>
+						<span class={cardTitle}>{link.title}</span>
+						<span class={cardDesc}>{link.description}</span>
 					</a>
 				))}
 			</div>

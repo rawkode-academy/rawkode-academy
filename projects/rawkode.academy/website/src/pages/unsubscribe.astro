@@ -3,12 +3,12 @@ import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
 import { createLogger } from "@/lib/logger";
+import { css } from "../../styled-system/css";
 
 export const prerender = false;
 
 const logger = createLogger("unsubscribe");
 
-// Get email from query parameter
 const email = Astro.url.searchParams.get("email");
 const success = Astro.url.searchParams.get("success");
 const user = Astro.locals.user;
@@ -16,142 +16,163 @@ const pagePath = Astro.url.pathname;
 
 let unsubscribeResult: { success: boolean; message: string } | null = null;
 
-// Handle form submission for anonymous users
 if (Astro.request.method === "POST" && !user) {
 	const formData = await Astro.request.formData();
-	const submittedEmail = formData
-		.get("email")
-		?.toString()
-		?.toLowerCase()
-		?.trim();
-
+	const submittedEmail = formData.get("email")?.toString()?.toLowerCase()?.trim();
 	if (submittedEmail) {
 		try {
 			const prefixedUserId = createEmailId(submittedEmail);
-			await env.EMAIL_PREFERENCES.setPreference(
-				prefixedUserId,
-				{
-					audience: "academy",
-					channel: "newsletter",
-					status: "unsubscribed",
-					source: `website:newsletter:${pagePath}`,
-				},
-			);
-
-			// Clear the newsletter cookie if present
-			Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
-
-			// Redirect to success state
-			return Astro.redirect(`/unsubscribe?success=true`);
-		} catch (e) {
-			logger.error("Failed to unsubscribe", e);
-			unsubscribeResult = {
-				success: false,
-				message:
-					"Failed to process your unsubscribe request. Please try again.",
-			};
-		}
-	} else {
-		unsubscribeResult = {
-			success: false,
-			message: "Please enter a valid email address.",
-		};
-	}
-}
-
-// Handle form submission for signed-in users
-if (Astro.request.method === "POST" && user) {
-	try {
-		const prefixedUserId = createLearnerId(user.id);
-		await env.EMAIL_PREFERENCES.setPreference(
-			prefixedUserId,
-			{
+			await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
 				audience: "academy",
 				channel: "newsletter",
 				status: "unsubscribed",
 				source: `website:newsletter:${pagePath}`,
-			},
-		);
+			});
+			Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
+			return Astro.redirect(`/unsubscribe?success=true`);
+		} catch (e) {
+			logger.error("Failed to unsubscribe", e);
+			unsubscribeResult = { success: false, message: "Failed to process your unsubscribe request. Please try again." };
+		}
+	} else {
+		unsubscribeResult = { success: false, message: "Please enter a valid email address." };
+	}
+}
 
-		// Redirect to success state
+if (Astro.request.method === "POST" && user) {
+	try {
+		const prefixedUserId = createLearnerId(user.id);
+		await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+			audience: "academy",
+			channel: "newsletter",
+			status: "unsubscribed",
+			source: `website:newsletter:${pagePath}`,
+		});
 		return Astro.redirect(`/unsubscribe?success=true`);
 	} catch (e) {
 		logger.error("Failed to unsubscribe", e);
-		unsubscribeResult = {
-			success: false,
-			message: "Failed to process your unsubscribe request. Please try again.",
-		};
+		unsubscribeResult = { success: false, message: "Failed to process your unsubscribe request. Please try again." };
 	}
 }
+
+const wrap = css({
+	minHeight: "60vh",
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center",
+	textAlign: "center",
+	px: "4",
+	py: "16",
+});
+
+const iconWrap = css({
+	width: "24",
+	height: "24",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	mb: "8",
+});
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl" },
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "4",
+});
+
+const subtitle = css({ fontSize: "lg", color: "fg.secondary", maxWidth: "36rem", lineHeight: "1.7", mb: "8" });
+
+const errorBox = css({
+	mb: "6",
+	p: "4",
+	borderRadius: "lg",
+	bg: "rgba(239, 68, 68, 0.1)",
+	color: "rgb(239, 68, 68)",
+	maxWidth: "32rem",
+});
+
+const form = css({ width: "full", maxWidth: "28rem", display: "flex", flexDirection: "column", gap: "3" });
+
+const input = css({
+	width: "full",
+	py: "3",
+	px: "4",
+	borderRadius: "lg",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	color: "fg.primary",
+	fontSize: "md",
+	_focus: { outline: "2px solid", outlineColor: "border.focus", outlineOffset: "1px" },
+});
+
+const dangerBtn = css({
+	width: "full",
+	py: "3",
+	px: "6",
+	borderRadius: "lg",
+	bg: "rgb(220, 38, 38)",
+	color: "white",
+	fontWeight: "semibold",
+	cursor: "pointer",
+	border: "none",
+	transition: "background 150ms ease",
+	_hover: { bg: "rgb(185, 28, 28)" },
+});
+
+const primaryBtn = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	boxShadow: "md",
+});
+
+const footer = css({ mt: "8", fontSize: "sm", color: "fg.muted" });
+const footerLink = css({ color: "fg.brand", textDecoration: "underline" });
 ---
 
 <Page title="Unsubscribe - Rawkode Academy" description="Unsubscribe from the Rawkode Academy newsletter.">
-	<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+	<div class={wrap}>
 		{success === "true" ? (
 			<>
-				<div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+				<div class={iconWrap}>
+					<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
 					</svg>
 				</div>
-				
-				<h1 class="text-4xl font-bold text-primary-content mb-4">
-					Unsubscribed Successfully
-				</h1>
-				
-				<p class="text-xl text-muted max-w-2xl mb-8">
-					You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!
-				</p>
-				
-				<a 
-					href="/"
-					class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
-				>
-					Back to Home
-				</a>
+				<h1 class={title}>Unsubscribed Successfully</h1>
+				<p class={subtitle}>You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!</p>
+				<a href="/" class={primaryBtn}>Back to home</a>
 			</>
 		) : (
 			<>
-				<h1 class="text-4xl font-bold text-primary-content mb-4">
-					Unsubscribe from Newsletter
-				</h1>
-				
-				<p class="text-xl text-muted max-w-2xl mb-8">
-					{user 
+				<h1 class={title}>Unsubscribe from Newsletter</h1>
+				<p class={subtitle}>
+					{user
 						? "Click the button below to unsubscribe from the Rawkode Academy newsletter."
-						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."
-					}
+						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."}
 				</p>
-
-				{unsubscribeResult?.success === false && (
-					<div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 max-w-md">
-						{unsubscribeResult.message}
-					</div>
-				)}
-
-				<form method="POST" class="w-full max-w-md space-y-4">
+				{unsubscribeResult?.success === false && <div class={errorBox}>{unsubscribeResult.message}</div>}
+				<form method="POST" class={form}>
 					{!user && (
-						<input
-							type="email"
-							name="email"
-							value={email || ""}
-							placeholder="Enter your email address"
-							required
-							class="w-full py-3 px-4 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-						/>
+						<input type="email" name="email" value={email || ""} placeholder="Enter your email address" required class={input} />
 					)}
-					
-					<button
-						type="submit"
-						class="w-full py-3 px-6 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
-					>
-						Unsubscribe
-					</button>
+					<button type="submit" class={dangerBtn}>Unsubscribe</button>
 				</form>
-
-				<p class="mt-8 text-sm text-muted">
-					Changed your mind? <a href="/" class="text-primary hover:underline">Go back home</a>
-				</p>
+				<p class={footer}>Changed your mind? <a href="/" class={footerLink}>Go back home</a></p>
 			</>
 		)}
 	</div>

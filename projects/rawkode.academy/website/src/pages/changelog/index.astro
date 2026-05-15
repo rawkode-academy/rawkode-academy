@@ -1,31 +1,20 @@
 ---
 import { getCollection, getEntry } from "astro:content";
-import Button from "@/components/common/Button.vue";
-import { Hero } from "@/components/ui";
 import { marked } from "marked";
-import PageWrapper from "../../wrappers/page.astro";
+import PageHero from "@/components/layout/PageHero.astro";
+import Prose from "@/components/prose/Prose.astro";
+import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
 
-// Configure marked for better GitLab-style rendering
-marked.setOptions({
-	breaks: true,
-	gfm: true,
-	pedantic: false,
-});
+marked.setOptions({ breaks: true, gfm: true, pedantic: false });
 
-// Get all changelog entries from the content collection
 const changelogEntries = await getCollection("changelog");
+const sortedChangelog = changelogEntries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// Sort by date (newest first)
-const sortedChangelog = changelogEntries.sort((a, b) => {
-	return b.data.date.getTime() - a.data.date.getTime();
-});
-
-// Process entries to render markdown and fetch author data
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const renderedContent = marked(entry.body || "");
 		const authorEntry = await getEntry(entry.data.author);
-
 		return {
 			...entry.data,
 			id: entry.id,
@@ -38,96 +27,99 @@ const processedChangelog = await Promise.all(
 	}),
 );
 
-const typeColors = {
-	feature: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-	fix: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-	chore: "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary",
-	docs: "bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary",
-	breaking:
-		"bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+const typeStyles: Record<string, { bg: string; color: string }> = {
+	feature: { bg: "rgba(34, 197, 94, 0.15)", color: "rgb(34, 197, 94)" },
+	fix: { bg: "rgba(239, 68, 68, 0.15)", color: "rgb(239, 68, 68)" },
+	chore: { bg: "rgba(95, 94, 215, 0.15)", color: "rgb(95, 94, 215)" },
+	docs: { bg: "rgba(0, 206, 255, 0.15)", color: "rgb(0, 206, 255)" },
+	breaking: { bg: "rgba(249, 115, 22, 0.15)", color: "rgb(249, 115, 22)" },
 };
+
+const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const emptyState = css({ textAlign: "center", py: "12", color: "fg.muted" });
+
+const list = css({ display: "flex", flexDirection: "column", gap: "6" });
+
+const entryCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const tagRow = css({ mb: "3" });
+
+const typeTag = css({
+	display: "inline-flex",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	textTransform: "uppercase",
+	letterSpacing: "wider",
+});
+
+const entryTitle = css({
+	fontFamily: "display",
+	fontSize: "xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "3",
+});
+
+const footer = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "4",
+	mt: "5",
+	pt: "4",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const authorRow = css({ display: "flex", alignItems: "center", gap: "2" });
+const avatar = css({ width: "6", height: "6", borderRadius: "full", objectFit: "cover" });
 ---
 
-<PageWrapper
-	title="Changelog"
-	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
->
-	<!-- Hero Section -->
-	<Hero
-		title="Changelog"
-		subtitle="Stay up to date with the latest updates, features, and improvements to Rawkode Academy."
-		badge="What's New"
-		background="blobs"
-		pattern="grid"
-		wave={true}
-		stats={[
-			{ label: `${changelogEntries.length} Updates` },
-			{ label: 'Weekly Releases' },
-			{ label: 'Open Source' }
-		]}
-		client:load
-	>
-		<Fragment slot="actions">
-			<Button href="#latest" variant="primary" size="lg">View Latest</Button>
-			<Button href="https://github.com/rawkode-academy" variant="ghost" size="lg">GitHub</Button>
-		</Fragment>
-	</Hero>
+<Page title="Changelog" description="Stay up to date with the latest changes and improvements to Rawkode Academy.">
+	<PageHero eyebrow="What's New" title="Changelog" subtitle="Stay up to date with the latest updates, features, and improvements." />
 
-	<div id="latest" class="max-w-4xl mx-auto px-4 py-8">
-
-		{
-			processedChangelog.length === 0 ? (
-				<div class="text-center py-12">
-					<p class="text-gray-500 dark:text-gray-400">
-						No changelog entries found.
-					</p>
-				</div>
-			) : (
-				<div class="space-y-8">
-					{processedChangelog.map((entry) => (
-						<article class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-							<div class="flex items-start justify-between mb-4">
-								<div class="flex-1">
-									<div class="flex items-center gap-3 mb-2">
-										<span
-											class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeColors[entry.type as keyof typeof typeColors] || typeColors.chore}`}
-										>
-											{entry.type}
-										</span>
-									</div>
-									<h2 class="text-xl font-semibold text-primary-content mb-2">
-										{entry.title}
-									</h2>
-									<div
-										class="text-muted mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
-										set:html={entry.renderedContent}
-									/>
-								</div>
+	<div class={shell}>
+		{processedChangelog.length === 0 ? (
+			<p class={emptyState}>No changelog entries found.</p>
+		) : (
+			<div class={list}>
+				{processedChangelog.map((entry) => {
+					const style = typeStyles[entry.type as keyof typeof typeStyles] ?? typeStyles.chore;
+					return (
+						<article class={entryCard}>
+							<div class={tagRow}>
+								<span class={typeTag} style={`background: ${style.bg}; color: ${style.color};`}>
+									{entry.type}
+								</span>
 							</div>
-
-							<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-								<div class="flex items-center gap-4">
-									<time datetime={entry.date.toISOString()}>
-										{entry.date.toLocaleDateString("en-US", {
-											year: "numeric",
-											month: "long",
-											day: "numeric",
-										})}
-									</time>
-									<div class="flex items-center gap-2">
-										<img
-											src={entry.author.avatar_url}
-											alt={entry.author.name}
-											class="w-5 h-5 rounded-full"
-										/>
-										<span>by {entry.author.name}</span>
-									</div>
+							<h2 class={entryTitle}>{entry.title}</h2>
+							<Prose>
+								<div set:html={entry.renderedContent} />
+							</Prose>
+							<div class={footer}>
+								<time datetime={entry.date.toISOString()}>
+									{entry.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+								</time>
+								<div class={authorRow}>
+									{entry.author.avatar_url && <img src={entry.author.avatar_url} alt={entry.author.name} class={avatar} />}
+									<span>by {entry.author.name}</span>
 								</div>
 							</div>
 						</article>
-					))}
-				</div>
-			)
-		}
+					);
+				})}
+			</div>
+		)}
 	</div>
-</PageWrapper>
+</Page>
