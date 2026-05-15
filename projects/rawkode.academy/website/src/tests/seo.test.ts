@@ -1296,4 +1296,85 @@ describe("Structured Data Validation", () => {
 		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
 		expect(jsonLd.keywords).toBeUndefined();
 	});
+
+	it("parses well-formed acct: resources and rejects everything else", async () => {
+		const { parseAcctResource } = await import("../lib/webfinger.ts");
+		expect(parseAcctResource("acct:rawkode@rawkode.academy")).toEqual({
+			user: "rawkode",
+			domain: "rawkode.academy",
+		});
+		expect(parseAcctResource("acct:Some-User_99@Example.COM")).toEqual({
+			user: "Some-User_99",
+			domain: "example.com",
+		});
+		expect(parseAcctResource(null)).toBeNull();
+		expect(parseAcctResource(undefined)).toBeNull();
+		expect(parseAcctResource("")).toBeNull();
+		expect(parseAcctResource("rawkode@rawkode.academy")).toBeNull();
+		expect(parseAcctResource("acct:nodomain")).toBeNull();
+		expect(parseAcctResource("acct:@rawkode.academy")).toBeNull();
+		expect(parseAcctResource("acct:rawkode@")).toBeNull();
+		expect(parseAcctResource("acct:bad space@rawkode.academy")).toBeNull();
+	});
+
+	it("parses Mastodon-style profile URLs into actor URL + components", async () => {
+		const { parseMastodonProfile } = await import("../lib/webfinger.ts");
+		expect(parseMastodonProfile("https://hachyderm.io/@rawkode")).toEqual({
+			instance: "hachyderm.io",
+			username: "rawkode",
+			profileUrl: "https://hachyderm.io/@rawkode",
+			actorUrl: "https://hachyderm.io/users/rawkode",
+		});
+		expect(parseMastodonProfile("https://fromm.social/@thilo/")).toEqual(
+			expect.objectContaining({
+				instance: "fromm.social",
+				username: "thilo",
+				actorUrl: "https://fromm.social/users/thilo",
+			}),
+		);
+		expect(parseMastodonProfile(undefined)).toBeNull();
+		expect(parseMastodonProfile("")).toBeNull();
+		expect(parseMastodonProfile("not a url")).toBeNull();
+		expect(
+			parseMastodonProfile("https://example.com/users/rawkode"),
+		).toBeNull();
+	});
+
+	it("builds a Webfinger JRD with subject, aliases, ActivityPub self, and profile-page links", async () => {
+		const { buildWebfingerResponse, parseMastodonProfile } = await import(
+			"../lib/webfinger.ts"
+		);
+		const mastodonProfile = parseMastodonProfile(
+			"https://hachyderm.io/@rawkode",
+		);
+		expect(mastodonProfile).not.toBeNull();
+		if (!mastodonProfile) return;
+
+		const jrd = buildWebfingerResponse({
+			subject: "acct:rawkode@rawkode.academy",
+			displayName: "David Flanagan",
+			mastodonProfile,
+			homepage: "https://rawkode.academy/people/rawkode",
+		});
+
+		expect(jrd.subject).toBe("acct:rawkode@rawkode.academy");
+		expect(jrd.aliases).toEqual([
+			"https://hachyderm.io/@rawkode",
+			"https://hachyderm.io/users/rawkode",
+			"https://rawkode.academy/people/rawkode",
+		]);
+		expect(jrd.links).toEqual([
+			{
+				rel: "self",
+				type: "application/activity+json",
+				href: "https://hachyderm.io/users/rawkode",
+			},
+			{
+				rel: "http://webfinger.net/rel/profile-page",
+				type: "text/html",
+				href: "https://hachyderm.io/@rawkode",
+			},
+		]);
+		expect(() => JSON.stringify(jrd)).not.toThrow();
+	});
 });
