@@ -1296,4 +1296,68 @@ describe("Structured Data Validation", () => {
 		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
 		expect(jsonLd.keywords).toBeUndefined();
 	});
+
+	it("formats video seconds as ISO 8601 PT…H…M…S durations", async () => {
+		const { secondsToIsoVideoDuration } = await import(
+			"../lib/video-itemlist-jsonld.ts"
+		);
+		expect(secondsToIsoVideoDuration(90)).toBe("PT1M30S");
+		expect(secondsToIsoVideoDuration(3661)).toBe("PT1H1M1S");
+		expect(secondsToIsoVideoDuration(3600)).toBe("PT1H");
+		expect(secondsToIsoVideoDuration(30)).toBe("PT30S");
+		expect(secondsToIsoVideoDuration(0)).toBeUndefined();
+		expect(secondsToIsoVideoDuration(-5)).toBeUndefined();
+		expect(secondsToIsoVideoDuration(Number.NaN)).toBeUndefined();
+	});
+
+	it("builds an ItemList of VideoObject items for the /watch index, newest first", async () => {
+		const { buildVideoItemListJsonLd } = await import(
+			"../lib/video-itemlist-jsonld.ts"
+		);
+
+		const jsonLd = buildVideoItemListJsonLd({
+			siteUrl: "https://rawkode.academy",
+			listUrl: "https://rawkode.academy/watch",
+			listName: "Rawkode Academy Videos",
+			videos: [
+				{
+					id: "old-id",
+					slug: "older-talk",
+					title: "Older talk",
+					description: "Older",
+					publishedAt: new Date("2026-04-01T00:00:00.000Z"),
+					duration: 120,
+				},
+				{
+					id: "new-id",
+					slug: "newer-talk",
+					title: "Newer talk",
+					description: "Newer",
+					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+					duration: 3661,
+				},
+			],
+			limit: 5,
+		});
+
+		expect(jsonLd["@context"]).toBe("https://schema.org");
+		expect(jsonLd["@type"]).toBe("ItemList");
+		expect(jsonLd.name).toBe("Rawkode Academy Videos");
+		expect(jsonLd.numberOfItems).toBe(2);
+
+		const elements = jsonLd.itemListElement as Array<Record<string, unknown>>;
+		expect(elements[0]?.url).toBe("https://rawkode.academy/watch/newer-talk");
+		const firstItem = elements[0]?.item as Record<string, unknown>;
+		expect(firstItem["@type"]).toBe("VideoObject");
+		expect(firstItem.duration).toBe("PT1H1M1S");
+		expect(firstItem.thumbnailUrl).toBe(
+			"https://content.rawkode.academy/videos/new-id/thumbnail.jpg",
+		);
+		expect(firstItem.uploadDate).toBe("2026-05-15T08:00:00.000Z");
+
+		const secondItem = elements[1]?.item as Record<string, unknown>;
+		expect(secondItem.duration).toBe("PT2M");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
 });

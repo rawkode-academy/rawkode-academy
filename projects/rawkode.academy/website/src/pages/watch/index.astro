@@ -3,6 +3,7 @@ export const prerender = false;
 
 import { getPublishedVideos } from "@/lib/content";
 import FeaturedContent from "@/components/common/FeaturedContent.astro";
+import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
@@ -128,6 +129,21 @@ const hasNextPage = end < allVideos.length;
 		title="Rawkode Academy - Videos (RSS)"
 		href="/api/feeds/videos.xml"
 	/>
+	{page === 1 && (
+		<VideoItemListJsonLd
+			slot="extra-head"
+			videos={allVideos.map((v) => ({
+				id: v.id,
+				slug: v.slug,
+				title: v.title,
+				description: v.description,
+				publishedAt: v.publishedAt instanceof Date ? v.publishedAt : new Date(v.publishedAt),
+				...(typeof v.duration === "number" ? { duration: v.duration } : {}),
+			}))}
+			listUrl={new URL("/watch", Astro.site ?? Astro.url).href}
+			listName="Rawkode Academy Videos"
+		/>
+	)}
 	<link
 		slot="extra-head"
 		rel="alternate"
