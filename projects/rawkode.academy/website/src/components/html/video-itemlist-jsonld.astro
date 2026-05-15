@@ -1,0 +1,36 @@
+---
+import { buildVideoItemListJsonLd } from "@/lib/video-itemlist-jsonld";
+
+interface VideoInput {
+	id: string;
+	slug: string;
+	title: string;
+	description: string;
+	publishedAt: Date;
+	duration?: number;
+}
+
+interface Props {
+	videos: ReadonlyArray<VideoInput>;
+	listUrl: string;
+	listName?: string;
+	limit?: number;
+	slot?: string;
+}
+
+const { videos, listUrl, listName, limit } = Astro.props;
+
+const jsonLd = buildVideoItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	listName: listName ?? "Videos",
+	videos,
+	...(typeof limit === "number" ? { limit } : {}),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
