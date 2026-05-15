@@ -1067,4 +1067,80 @@ describe("Structured Data Validation", () => {
 		// Validate JSON structure can be serialized
 		expect(() => JSON.stringify(courseJsonLd)).not.toThrow();
 	});
+
+	it("models NewsArticle JSON-LD with publisher, image, author, keywords, and ISO dates", async () => {
+		const { buildNewsArticleJsonLd } = await import("../lib/news-jsonld.ts");
+
+		const jsonLd = buildNewsArticleJsonLd({
+			article: {
+				title: "Kubernetes 1.36 sneak peek",
+				description: "What's coming in the next Kubernetes release.",
+				publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+				updatedAt: new Date("2026-05-15T09:30:00.000Z"),
+				technologies: ["kubernetes", "cncf"],
+			},
+			authors: [
+				{ name: "David Flanagan", url: "https://github.com/rawkode" },
+				{ name: "Anonymous" },
+			],
+			url: "https://rawkode.academy/news/kubernetes-1-36-sneak-peek",
+			imageUrl: "https://image.rawkode.academy/image?payload=test",
+			siteUrl: "https://rawkode.academy",
+		});
+
+		expect(jsonLd["@context"]).toBe("https://schema.org");
+		expect(jsonLd["@type"]).toBe("NewsArticle");
+		expect(jsonLd.headline).toBe("Kubernetes 1.36 sneak peek");
+		expect(jsonLd.datePublished).toBe("2026-05-15T08:00:00.000Z");
+		expect(jsonLd.dateModified).toBe("2026-05-15T09:30:00.000Z");
+		expect(jsonLd.image).toEqual([
+			"https://image.rawkode.academy/image?payload=test",
+		]);
+		expect(jsonLd.articleSection).toBe("News");
+		expect(jsonLd.keywords).toBe("Kubernetes, CNCF");
+
+		const mainEntity = jsonLd.mainEntityOfPage as Record<string, unknown>;
+		expect(mainEntity["@type"]).toBe("WebPage");
+		expect(mainEntity["@id"]).toBe(
+			"https://rawkode.academy/news/kubernetes-1-36-sneak-peek",
+		);
+
+		const author = jsonLd.author as Array<Record<string, unknown>>;
+		expect(author).toHaveLength(2);
+		expect(author[0]).toEqual({
+			"@type": "Person",
+			name: "David Flanagan",
+			url: "https://github.com/rawkode",
+		});
+		expect(author[1]).toEqual({ "@type": "Person", name: "Anonymous" });
+
+		const publisher = jsonLd.publisher as Record<string, unknown>;
+		expect(publisher["@type"]).toBe("Organization");
+		expect(publisher.name).toBe("Rawkode Academy");
+		expect(publisher.url).toBe("https://rawkode.academy");
+		const logo = publisher.logo as Record<string, unknown>;
+		expect(logo["@type"]).toBe("ImageObject");
+		expect(logo.url).toBe("https://rawkode.academy/android-chrome-512x512.png");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+
+	it("falls back dateModified to publishedAt and omits keywords when no technologies", async () => {
+		const { buildNewsArticleJsonLd } = await import("../lib/news-jsonld.ts");
+
+		const jsonLd = buildNewsArticleJsonLd({
+			article: {
+				title: "Untagged story",
+				description: "No tech tags here.",
+				publishedAt: new Date("2026-05-15T10:00:00.000Z"),
+			},
+			authors: [{ name: "Reporter" }],
+			url: "https://rawkode.academy/news/untagged-story",
+			imageUrl: "https://image.rawkode.academy/image?payload=untagged",
+			siteUrl: "https://rawkode.academy",
+		});
+
+		expect(jsonLd.dateModified).toBe(jsonLd.datePublished);
+		expect(jsonLd.keywords).toBeUndefined();
+	});
 });
