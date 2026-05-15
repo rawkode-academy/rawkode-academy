@@ -95,6 +95,12 @@ const readingTime = calculateReadingTime(article.body || "");
 			title="Rawkode Academy - News (Atom)"
 			href="/api/feeds/news.atom"
 		/>
+		<link
+			rel="alternate"
+			type="application/feed+json"
+			title="Rawkode Academy - News (JSON Feed)"
+			href="/api/feeds/news.json"
+		/>
 	</Fragment>
 	<div class="article-page">
 		<Breadcrumb elements={breadcrumbElements} />

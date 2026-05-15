@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { buildLearningPathItemListJsonLd } from "@/lib/learning-path-itemlist-jsonld";
+
+interface PathInput {
+	path: CollectionEntry<"learningPaths">;
+	authors: ReadonlyArray<{ id: string; name: string }>;
+	technologyLabels: ReadonlyArray<string>;
+}
+
+interface Props {
+	paths: ReadonlyArray<PathInput>;
+	listUrl: string;
+	listName?: string;
+	limit?: number;
+	slot?: string;
+}
+
+const { paths, listUrl, listName, limit } = Astro.props;
+
+const jsonLd = buildLearningPathItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	listName: listName ?? "Learning Paths",
+	paths: paths.map(({ path, authors, technologyLabels }) => ({
+		id: path.id,
+		source: {
+			title: path.data.title,
+			description: path.data.description,
+			difficulty: path.data.difficulty,
+			estimatedDuration: path.data.estimatedDuration,
+			prerequisites: path.data.prerequisites ?? [],
+			technologyLabels,
+			publishedAt: path.data.publishedAt,
+		},
+		authors,
+	})),
+	...(typeof limit === "number" ? { limit } : {}),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
