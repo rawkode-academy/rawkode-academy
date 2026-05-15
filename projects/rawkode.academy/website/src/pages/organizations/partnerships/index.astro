@@ -1,364 +1,161 @@
 ---
-import Button from "@/components/common/Button.vue";
-import { Hero } from "@/components/ui";
-import FAQ from "@/components/faq/list.vue";
-import FeatureListIcons from "@/components/feature/list-icons.vue";
-import FAQJsonLD from "@/components/html/faq-jsonld.astro";
-import PartnerLogos from "@/components/partner/logos.astro";
-import Pricing from "@/components/partner/pricing/cards.vue";
-import Featured from "@/components/partner/pricing/featured.vue";
-import VsConference from "@/components/partner/vs-conference.astro";
-import Stats from "@/components/stats/simple.vue";
-import TestimonialSlider from "@/components/testimonial/slider.astro";
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import FAQJsonLD from "@/components/html/faq-jsonld.astro";
+import { css } from "../../../../styled-system/css";
 
 export const prerender = true;
+
+const valueProps = [
+	{ title: "Authentic technical content", description: "Expert-led tutorials, walkthroughs, and reviews that show your technology in real engineering work — not marketing fluff." },
+	{ title: "Developer community engagement", description: "Direct conversations with engineers through live streams, AMAs, and community programmes." },
+	{ title: "Flexible partnership tiers", description: "Engagement levels designed to match different budgets and content needs — from project-based to long-term annual programmes." },
+	{ title: "Measurable outcomes", description: "Comprehensive analytics tailored to your goals — engagement, sentiment, community growth, and product adoption indicators." },
+];
 
 const partnershipFAQs = [
 	{
 		question: "What is the minimum partnership duration?",
-		answer:
-			"Our partnerships are structured as annual engagements to ensure we can deliver meaningful results. Developer marketing and education require a strategic, long-term approach to build awareness, trust, and adoption. Our experience shows that sustained engagement over time yields significantly better outcomes than short-term campaigns.",
+		answer: "Our partnerships are structured as annual engagements to ensure we can deliver meaningful results. Developer marketing and education require a strategic, long-term approach to build awareness, trust, and adoption.",
 	},
 	{
 		question: "What are the payment terms for partnerships?",
-		answer:
-			"For Nip and Dram partnerships, we typically require annual payment upfront. For Blend and Malt partnerships, we offer flexible payment options including quarterly or semi-annual installments. We're happy to discuss payment structures that align with your budgeting cycles during our consultation.",
+		answer: "For our entry tiers we typically require annual payment upfront. For larger engagements we offer flexible payment options including quarterly or semi-annual installments.",
 	},
 	{
 		question: "How do you measure partnership success?",
-		answer:
-			"We provide comprehensive analytics and reporting tailored to your specific goals. Metrics typically include content engagement (views, watch time, interactions), developer sentiment, community growth, and when possible, product adoption indicators. All partnerships include regular performance reviews to ensure we're delivering value and to refine our approach as needed. For partners at the Blend and Malt tiers, we also provide deeper insights into developer behavior and preferences, helping you refine your product and go-to-market strategy.",
+		answer: "We provide comprehensive analytics tailored to your goals. Metrics include content engagement, developer sentiment, community growth, and product adoption indicators. All partnerships include regular performance reviews.",
 	},
 	{
 		question: "How do you qualify potential partners?",
-		answer:
-			"We partner with companies that offer genuine value to developers and align with our mission of advancing developer education. We evaluate potential partners based on their technology's innovation, market relevance, and potential impact on the developer community. We're selective in our partnerships to ensure we can authentically advocate for your products.",
-	},
-	{
-		question: "I have additional questions about partnerships",
-		answer:
-			"We'd be happy to discuss your specific needs and answer any questions you may have. Schedule a consultation with our partnership team to explore how we can work together to achieve your developer marketing and education goals.",
+		answer: "We partner with companies that offer genuine value to developers and align with our mission of advancing developer education. We evaluate potential partners based on innovation, relevance, and community impact.",
 	},
 ];
+
+const shell = css({ maxWidth: "72rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const grid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const card = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const cardTitle = css({
+	fontFamily: "display",
+	fontSize: "lg",
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "3",
+});
+
+const cardBody = css({ color: "fg.secondary", lineHeight: "1.6" });
+
+const sectionBlock = css({ mt: "16" });
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "8",
+	textAlign: "center",
+});
+
+const faqList = css({ display: "flex", flexDirection: "column", gap: "3", maxWidth: "48rem", mx: "auto" });
+
+const faqItem = css({
+	p: "5",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const faqQ = css({
+	fontWeight: "semibold",
+	color: "fg.primary",
+	fontSize: "md",
+	mb: "2",
+	cursor: "pointer",
+	listStyle: "none",
+});
+
+const faqA = css({ color: "fg.secondary", lineHeight: "1.6", fontSize: "sm" });
+
+const ctaCard = css({
+	mt: "16",
+	mx: "auto",
+	maxWidth: "60rem",
+	p: { base: "8", md: "12" },
+	borderRadius: "3xl",
+	textAlign: "center",
+	color: "white",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	boxShadow: "xl",
+});
+
+const ctaTitle = css({ fontFamily: "display", fontSize: { base: "2xl", md: "3xl" }, fontWeight: "bold" });
+const ctaBody = css({ mt: "3", fontSize: { base: "md", md: "lg" }, opacity: "0.92", maxWidth: "40rem", mx: "auto" });
+
+const ctaBtn = css({
+	mt: "8",
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "white",
+	textDecoration: "none",
+	_hover: { transform: "translateY(-1px)" },
+});
 ---
 
-<style>
-	@reference "../../../styles/global.css";
-
-	.section-separator {
-		@apply py-16 md:py-20;
-	}
-
-	.section-highlight {
-		@apply bg-gray-50 dark:bg-gray-900 relative overflow-hidden;
-	}
-
-	.section-highlight::before {
-		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary to-secondary;
-	}
-
-	.section-highlight::after {
-		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-linear-to-r from-primary/10 to-secondary/10 blur-2xl;
-	}
-</style>
-
-<Page
-	title="Strategic Technology Partnerships | Rawkode Academy"
-	description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth through expert technical content and strategic guidance."
->
+<Page title="Strategic Technology Partnerships | Rawkode Academy" description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth.">
 	<FAQJsonLD questions={partnershipFAQs} slot="head" />
-	<!-- Hero Section -->
-	<Hero
-		title="Strategic Technology Partnerships"
-		subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance."
-		badge="Partner With Us"
-		background="blobs"
-		pattern="grid"
-		wave={true}
-		stats={[
-			{ label: '100K+ Developers' },
-			{ label: 'Global Reach' },
-			{ label: 'Proven Results' }
-		]}
-		client:load
-	>
-		<Fragment slot="actions">
-			<Button href="#benefits" variant="primary" size="lg">Explore Benefits</Button>
-			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Become a Partner</Button>
-		</Fragment>
-	</Hero>
 
-	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
-		<p class="text-xl text-secondary-content mb-8 leading-relaxed">
-			At Rawkode Academy, we connect cutting-edge technologies with the
-			developers who bring them to life. Our expertise bridges the critical gap
-			between technical innovation and developer understanding.
-		</p>
+	<PageHero eyebrow="Partner With Us" title="Strategic Technology Partnerships" subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance." />
 
-		<div class="mt-12 grid gap-8 text-left md:grid-cols-3">
-			<div class="border-t border-black/10 pt-5 dark:border-white/10">
-				<div class="flex items-center mb-4">
-					<div class="mr-4 rounded-full bg-primary/10 p-3">
-						<svg
-							class="w-6 h-6 text-primary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-						</svg>
-					</div>
-					<h3 class="text-lg font-bold">Amplify Your Reach</h3>
+	<div class={shell}>
+		<div class={grid}>
+			{valueProps.map((vp) => (
+				<div class={card}>
+					<h2 class={cardTitle}>{vp.title}</h2>
+					<p class={cardBody}>{vp.description}</p>
 				</div>
-				<p class="text-muted">
-					Extend your message to our engaged community of developers and
-					technical decision-makers through authentic, expert-led content.
-				</p>
-			</div>
-
-			<div class="border-t border-black/10 pt-5 dark:border-white/10">
-				<div class="flex items-center mb-4">
-					<div class="mr-4 rounded-full bg-secondary/10 p-3">
-						<svg
-							class="w-6 h-6 text-secondary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-							></path>
-						</svg>
-					</div>
-					<h3 class="text-lg font-bold">Accelerate Adoption</h3>
-				</div>
-				<p class="text-muted">
-					Remove barriers to entry through strategic educational content that
-					showcases your product's unique value and practical applications.
-				</p>
-			</div>
-
-			<div class="border-t border-black/10 pt-5 dark:border-white/10">
-				<div class="flex items-center mb-4">
-					<div class="mr-4 rounded-full bg-tertiary/10 p-3">
-						<svg
-							class="w-6 h-6 text-tertiary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-							></path>
-						</svg>
-					</div>
-					<h3 class="text-lg font-bold">Strategic Growth</h3>
-				</div>
-				<p class="text-muted">
-					Refine your developer experience and go-to-market approach with expert
-					guidance that drives measurable business outcomes.
-				</p>
-			</div>
+			))}
 		</div>
+
+		<section class={sectionBlock}>
+			<h2 class={sectionTitle}>Frequently asked questions</h2>
+			<div class={faqList}>
+				{partnershipFAQs.map((faq) => (
+					<details class={faqItem}>
+						<summary class={faqQ}>{faq.question}</summary>
+						<p class={faqA}>{faq.answer}</p>
+					</details>
+				))}
+			</div>
+		</section>
+
+		<section class={ctaCard}>
+			<h2 class={ctaTitle}>Let's build something together</h2>
+			<p class={ctaBody}>Schedule a consultation with our team to discuss your goals and how a partnership can help.</p>
+			<a href="/organizations/lets-chat" class={ctaBtn}>
+				Schedule a chat
+				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7" /></svg>
+			</a>
+		</section>
 	</div>
-
-	<section id="benefits" class="bg-white dark:bg-gray-800 py-16">
-		<FeatureListIcons />
-	</section>
-
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Proven Developer Engagement
-				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
-					Our strategic partnerships deliver measurable results for technology
-					companies worldwide
-				</p>
-			</div>
-			<Stats
-				title=""
-				stats={[
-					{
-						label: "Technologies Covered",
-						value: "90+",
-					},
-					{
-						label: "Hours of Content Produced",
-						value: "500+",
-					},
-					{
-						label: "Developer Views",
-						value: "1M+",
-					},
-				]}
-			/>
-
-			<TestimonialSlider
-				type="partner"
-				blurb="Hear directly from the companies that have partnered with us"
-			/>
-		</div>
-	</section>
-
-	<section
-		class="section-highlight section-separator bg-linear-to-b from-white to-gray-50 dark:from-gray-900 dark:to-black"
-	>
-		<div class="py-2 px-4 mx-auto lg:px-6 max-w-7xl">
-			<div class="mb-12 lg:mb-16 text-center">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our <span class="text-primary">Trusted</span> Partners
-				</h2>
-				<p
-					class="text-gray-600 sm:text-xl dark:text-gray-400 max-w-3xl mx-auto"
-				>
-					Join these innovative companies who trust Rawkode Academy to connect
-					their technologies with developers worldwide.
-				</p>
-			</div>
-
-			<div class="relative">
-				<div
-					class="absolute inset-0 bg-linear-to-r from-primary/5 via-transparent to-secondary/5 rounded-xl"
-				>
-				</div>
-				<div class="relative">
-					<PartnerLogos />
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="bg-white dark:bg-gray-800 py-16">
-		<div class="container mx-auto px-4">
-			<VsConference />
-		</div>
-	</section>
-
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-12">
-				<h2
-					class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content"
-				>
-					Partnership Tiers
-				</h2>
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
-					Whether you're looking to increase brand awareness, educate developers
-					about your technology, or develop a comprehensive go-to-market
-					strategy, we offer flexible partnership options to meet your specific
-					goals.
-				</p>
-			</div>
-
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-10">
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
-					The Rawkode Academy is proudly brought to you from Glasgow, Scotland.
-					Our partnership tiers are named after traditional Scottish whisky
-					measurements, reflecting our heritage of quality, craftsmanship, and
-					attention to detail.
-				</p>
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃</p>
-			</div>
-
-			<div class="mx-auto max-w-6xl">
-				<Featured />
-				<Pricing />
-			</div>
-		</div>
-	</section>
-
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center">
-				<div class="inline-block p-2 mb-6 bg-primary/10 rounded-full">
-					<svg
-						class="w-8 h-8 text-primary"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-						></path>
-					</svg>
-				</div>
-
-				<h2
-					class="mb-6 text-4xl tracking-tight font-extrabold text-primary-content"
-				>
-					Ready to Transform Your <span class="text-primary"
-						>Developer Strategy</span
-					>?
-				</h2>
-				<p
-					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
-				>
-					Schedule a consultation to explore how a strategic partnership can
-					align with your specific business objectives and connect your
-					technology with our passionate developer community.
-				</p>
-				<div class="flex flex-col sm:flex-row justify-center gap-4">
-					<a
-						href="/organizations/lets-chat"
-						class="inline-flex items-center justify-center px-6 py-4 text-base font-medium text-white bg-primary hover:bg-secondary rounded-lg transition-all duration-300 shadow-md hover:shadow-lg"
-					>
-						Schedule Your Consultation
-						<svg
-							class="w-5 h-5 ml-2"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-								clip-rule="evenodd"></path>
-						</svg>
-					</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl tracking-tight font-extrabold text-primary-content"
-				>
-					Frequently Asked Questions
-				</h2>
-				<p class="text-lg text-muted">
-					Learn more about partnering with Rawkode Academy
-				</p>
-			</div>
-			<FAQ client:load items={partnershipFAQs} title="Partnership FAQ" />
-		</div>
-	</section>
 </Page>

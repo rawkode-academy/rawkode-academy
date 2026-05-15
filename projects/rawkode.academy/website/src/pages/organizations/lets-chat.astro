@@ -1,177 +1,98 @@
 ---
+import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { css } from "../../../styled-system/css";
+
+const benefits = [
+	"Your product's unique value proposition and how to effectively communicate it to developers",
+	"Your current developer marketing challenges and opportunities",
+	"Which partnership tier would best align with your business objectives",
+	"Potential content strategies and formats to showcase your technology",
+	"How we measure success and provide ongoing value throughout our partnership",
+];
+
+const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const card = css({
+	p: { base: "6", md: "8" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	mb: "8",
+});
+
+const intro = css({ fontSize: "lg", color: "fg.secondary", lineHeight: "1.7", mb: "6" });
+
+const link = css({ color: "fg.brand", textDecoration: "underline" });
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: "xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "4",
+});
+
+const benefitList = css({ display: "flex", flexDirection: "column", gap: "3", listStyle: "none", p: "0", m: "0" });
+
+const benefitItem = css({ display: "flex", alignItems: "flex-start", gap: "3", fontSize: "md", color: "fg.secondary", lineHeight: "1.6" });
+
+const checkIcon = css({ flexShrink: 0, color: "fg.brand", mt: "1" });
+
+const bookingWrap = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.surface",
+});
+
+const bookingTitle = css({
+	fontFamily: "display",
+	fontSize: "xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+	textAlign: "center",
+	mb: "6",
+});
+
+const bookingFrame = css({ width: "full", minHeight: "600px", overflow: "hidden" });
 ---
 
-<style>
-	@reference "../../styles/global.css";
+<Page title="Schedule a Partnership Consultation" description="Discuss how Rawkode Academy can help accelerate your developer marketing strategy and product adoption.">
+	<PageHero eyebrow="Let's Chat" title="Schedule a Consultation" subtitle="Tell us about your goals and we'll outline how a partnership, consulting engagement, or training plan can help." />
 
-	h1,
-	h2,
-	h3 {
-		@apply mt-8 mb-4;
-	}
-
-	h1 {
-		@apply text-4xl tracking-tight font-bold text-gray-900 dark:text-white;
-	}
-
-	.benefits-list {
-		@apply mt-6 space-y-4;
-	}
-
-	.benefits-list li {
-		@apply flex items-start;
-	}
-
-	.benefits-list .icon {
-		@apply shrink-0 w-5 h-5 text-primary mt-1 mr-3;
-	}
-
-	.benefits-list .text {
-		@apply text-gray-600 dark:text-gray-300;
-	}
-
-	#booking-page {
-		@apply w-full min-h-[600px] overflow-hidden;
-	}
-</style>
-
-<Page
-	title="Schedule a Partnership Consultation"
-	description="Discuss how Rawkode Academy can help accelerate your developer marketing strategy and product adoption."
->
-	<div class="max-w-4xl mx-auto">
-		<h1 class="text-center mb-6">Schedule Your Partnership Consultation</h1>
-
-		<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-			<p class="text-lg text-gray-700 dark:text-gray-300 mb-4">
-				Ready to explore how a <a
-					href="/organizations/partnerships"
-					class="text-primary hover:underline">Rawkode Academy partnership</a
-				> can accelerate your developer marketing strategy and product adoption?
-				Schedule a consultation with our team to discuss your specific goals and
-				how we can help you achieve them.
+	<div class={shell}>
+		<div class={card}>
+			<p class={intro}>
+				Ready to explore how a <a href="/organizations/partnerships" class={link}>Rawkode Academy partnership</a> can accelerate your developer marketing strategy and product adoption? Schedule a consultation with our team to discuss your specific goals and how we can help you achieve them.
 			</p>
-
-			<h2 class="text-2xl font-semibold text-gray-800 dark:text-white">
-				During our consultation, we'll discuss:
-			</h2>
-
-			<ul class="benefits-list">
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Your product's unique value proposition and how to effectively
-						communicate it to developers</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Your current developer marketing challenges and opportunities</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Which partnership tier would best align with your business
-						objectives</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Potential content strategies and formats to showcase your
-						technology</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>How we measure success and provide ongoing value throughout our
-						partnership</span
-					>
-				</li>
+			<h2 class={sectionTitle}>During our consultation, we'll discuss</h2>
+			<ul class={benefitList}>
+				{benefits.map((benefit) => (
+					<li class={benefitItem}>
+						<svg class={checkIcon} width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+						</svg>
+						<span>{benefit}</span>
+					</li>
+				))}
 			</ul>
 		</div>
 
-		<div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
-			<h2
-				class="text-2xl font-semibold text-gray-800 dark:text-white text-center mb-6"
-			>
-				Select a Time That Works for You
-			</h2>
-
-			<div id="booking-page">
-				<!-- this is where we will inject the interface -->
-			</div>
-
+		<div class={bookingWrap}>
+			<h2 class={bookingTitle}>Select a time that works for you</h2>
+			<div id="booking-page" class={bookingFrame}></div>
 			<script is:inline>
-				window.SavvyCal =
-					window.SavvyCal ||
-					function () {
-						(SavvyCal.q = SavvyCal.q || []).push(arguments);
-					};
+				window.SavvyCal = window.SavvyCal || function () {
+					(SavvyCal.q = SavvyCal.q || []).push(arguments);
+				};
 			</script>
-			<script is:inline async src="https://embed.savvycal.com/v1/embed.js"
-			></script>
+			<script is:inline async src="https://embed.savvycal.com/v1/embed.js"></script>
 			<script is:inline>
 				SavvyCal("init", { origin: "https://meet.rawkode.academy" });
-				SavvyCal("inline", {
-					link: "collaborate",
-					selector: "#booking-page",
-					theme: "os",
-				});
+				SavvyCal("inline", { link: "collaborate", selector: "#booking-page", theme: "os" });
 			</script>
 		</div>
 	</div>

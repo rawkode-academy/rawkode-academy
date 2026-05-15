@@ -1,63 +1,111 @@
 ---
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
-import SeriesArticles from "@/components/articles/series/SeriesArticles.astro";
+import PageHero from "@/components/layout/PageHero.astro";
+import Prose from "@/components/prose/Prose.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
-type Props = {
-	series: CollectionEntry<"series">;
-};
+type Props = { series: CollectionEntry<"series"> };
 
-const computeImageUrl = async (
-	series: CollectionEntry<"series">,
-): Promise<URL | undefined> => {
+const computeImageUrl = async (series: CollectionEntry<"series">): Promise<URL | undefined> => {
 	if (series.data.cover) {
 		const image = await getImage({ src: series.data.cover.image });
-
 		return new URL(image.src, Astro.site);
 	}
-
 	return undefined;
 };
 
-export const getStaticPaths: GetStaticPaths =
-	async (): Promise<GetStaticPathsResult> => {
-		const seriesEntries = await getCollection("series");
-
-		return seriesEntries.map((series) => {
-			return {
-				params: {
-					slug: series.id,
-				},
-				props: {
-					series,
-				},
-			};
-		});
-	};
+export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
+	const seriesEntries = await getCollection("series");
+	return seriesEntries.map((series) => ({ params: { slug: series.id }, props: { series } }));
+};
 
 const { series } = Astro.props;
 const { Content } = await render(series);
-
 const imageUrl = await computeImageUrl(series);
+
+const articles = (await getCollection("articles", ({ data }) => !data.draft))
+	.filter((a) => a.data.series?.id === series.id)
+	.sort((a, b) => a.data.publishedAt.getTime() - b.data.publishedAt.getTime());
+
+const formatDate = (d: Date) =>
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(d);
+
+const shell = css({ maxWidth: "64rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mt: "12",
+	mb: "6",
+});
+
+const list = css({ display: "flex", flexDirection: "column", gap: "3" });
+
+const articleCard = css({
+	display: "flex",
+	gap: "4",
+	alignItems: "center",
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateX(4px)", borderColor: "border.default" },
+});
+
+const num = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontWeight: "bold",
+	flexShrink: 0,
+});
+
+const info = css({ flex: "1", display: "flex", flexDirection: "column", gap: "1", minWidth: "0" });
+
+const articleTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary", lineHeight: "tight" });
+const articleMeta = css({ fontSize: "xs", color: "fg.muted" });
 ---
 
-<Page title={`${series.data.title} | Series`} image={{image: imageUrl }}>
-	<h1 class="text-5xl font-extrabold dark:text-white">
-		{series.data.title}
-	</h1>
+<Page title={`${series.data.title} | Series`} image={imageUrl ? { image: imageUrl } : undefined}>
+	<PageHero eyebrow="Series" title={series.data.title} subtitle={series.data.description} />
 
-	<article class="max-w-(--breakpoint-xl) format prose lg:prose-xl dark:format-invert">
-		<Content />
+	<div class={shell}>
+		<Prose>
+			<Content />
+		</Prose>
 
-		<h2 class="text-4xl font-bold dark:text-white">Articles</h2>
-
-		<div class="not-format">
-			<SeriesArticles series={series} />
-
-		</div>
-	</article>
+		{articles.length > 0 && (
+			<>
+				<h2 class={sectionTitle}>Articles in this series</h2>
+				<div class={list}>
+					{articles.map((article, i) => (
+						<a href={`/read/${article.id}`} class={articleCard}>
+							<span class={num}>{i + 1}</span>
+							<div class={info}>
+								<span class={articleTitle}>{article.data.title}</span>
+								<span class={articleMeta}>{formatDate(article.data.publishedAt)}</span>
+							</div>
+						</a>
+					))}
+				</div>
+			</>
+		)}
+	</div>
 </Page>
