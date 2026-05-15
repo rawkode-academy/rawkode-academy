@@ -14,8 +14,6 @@
 	--surface-card-muted: rgba(95, 94, 215, 0.08);
 	--surface-border: rgba(95, 94, 215, 0.16);
 	--surface-border-strong: rgba(0, 206, 255, 0.32);
-	--surface-shadow: 0 35px 80px rgba(22, 28, 45, 0.18);
-	--surface-shadow-strong: 0 45px 120px rgba(17, 24, 39, 0.25);
 
 	--app-backdrop:
 		radial-gradient(
@@ -57,8 +55,6 @@ html.dark {
 	--surface-card-muted: rgba(0, 206, 255, 0.12);
 	--surface-border: rgba(95, 94, 215, 0.35);
 	--surface-border-strong: rgba(0, 206, 255, 0.45);
-	--surface-shadow: 0 35px 120px rgba(2, 6, 23, 0.7);
-	--surface-shadow-strong: 0 45px 140px rgba(1, 4, 16, 0.85);
 
 	--app-backdrop:
 		radial-gradient(

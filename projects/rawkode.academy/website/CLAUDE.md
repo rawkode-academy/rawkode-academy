@@ -108,6 +108,20 @@ Light and dark modes have separate shadow ramps — the variables swap automatic
 
 Add `class="focus-ring"` to any focusable element that needs a consistent keyboard-only focus outline. The utility uses `:focus-visible` so the ring only appears for keyboard navigation, not mouse clicks. The ring colour is `--brand-primary` with a 2px outline and 2px offset.
 
+The header chrome (sidebar toggle, mobile menu, logo link, search trigger, FAB) and the `Button.vue` / `Button.astro` primitives have already been migrated to `focus-ring` — keep new components on the same pattern instead of hand-rolling `focus:outline-none focus:ring-4 focus:ring-*` boilerplate.
+
+#### Colouring SVGs
+
+Tailwind v4's default `fill-black` / `fill-white` / `fill-gray-*` utilities **don't work reliably** in this codebase — our `@theme` block interacts badly with the default colour palette and SVGs end up rendering `fill: white` regardless of the class. The workaround is to set `fill="currentColor"` on the SVG and drive the colour through a `text-*` class:
+
+```astro
+<!-- ❌ Don't — `fill-black dark:fill-white` renders white-on-white in light mode -->
+<svg class="fill-black dark:fill-white">…</svg>
+
+<!-- ✅ Do — route through `color` which works correctly -->
+<svg fill="currentColor" class="text-primary-content">…</svg>
+```
+
 #### Light / Dark / System mode
 
 Two concepts:

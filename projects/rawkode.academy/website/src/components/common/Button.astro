@@ -20,17 +20,17 @@ const {
 } = Astro.props;
 
 const baseClasses =
-	"inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-4";
+	"inline-flex items-center justify-center font-medium rounded-lg transition-smooth focus-ring";
 
 const variantClasses = {
 	primary:
-		"text-white bg-primary hover:bg-primary/90 focus:ring-primary dark:bg-primary/20 dark:hover:bg-primary/90 dark:focus:ring-primary",
+		"text-white bg-primary hover:bg-primary/90 dark:bg-primary/20 dark:hover:bg-primary/90",
 	secondary:
-		"text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700",
+		"text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600",
 	ghost:
-		"text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-200 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700",
+		"text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700",
 	danger:
-		"text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800",
+		"text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600",
 };
 
 const sizeClasses = {

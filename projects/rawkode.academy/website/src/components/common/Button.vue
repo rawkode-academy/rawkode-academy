@@ -37,17 +37,17 @@ const props = withDefaults(defineProps<Props>(), {
 const tag = computed(() => (props.href ? "a" : "button"));
 
 const baseClasses =
-	"inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 backdrop-blur-md shadow-md hover:shadow-lg hover:scale-105";
+	"inline-flex items-center justify-center font-medium rounded-xl transition-smooth focus-ring backdrop-blur-md shadow-md hover:shadow-lg hover:scale-105";
 
 const variantClasses = {
 	primary:
-		"text-white bg-gradient-primary hover:brightness-110 focus:ring-primary/50 border border-primary/30 dark:bg-gradient-primary dark:border-primary/50",
+		"text-white bg-gradient-primary hover:brightness-110 border border-primary/30 dark:bg-gradient-primary dark:border-primary/50",
 	secondary:
-		"text-gray-900 bg-white/50 dark:bg-gray-700/60 backdrop-blur-lg border border-white/50 dark:border-gray-500/60 hover:bg-white/70 dark:hover:bg-gray-600/70 focus:ring-gray-200/50 dark:text-white dark:focus:ring-gray-500/50",
+		"text-gray-900 bg-white/50 dark:bg-gray-700/60 backdrop-blur-lg border border-white/50 dark:border-gray-500/60 hover:bg-white/70 dark:hover:bg-gray-600/70 dark:text-white",
 	ghost:
-		"text-gray-700 hover:text-gray-900 hover:bg-white/60 dark:hover:bg-gray-600/60 focus:ring-gray-200/50 dark:text-gray-200 dark:hover:text-white dark:focus:ring-gray-600/50 border border-transparent hover:border-white/30 dark:hover:border-gray-500/40",
+		"text-gray-700 hover:text-gray-900 hover:bg-white/60 dark:hover:bg-gray-600/60 dark:text-gray-200 dark:hover:text-white border border-transparent hover:border-white/30 dark:hover:border-gray-500/40",
 	danger:
-		"text-white bg-gradient-to-r from-red-600/90 to-red-700/90 hover:from-red-700/95 hover:to-red-800/95 focus:ring-red-300/50 border border-red-500/30 dark:from-red-500/90 dark:to-red-600/90 dark:hover:from-red-600/95 dark:hover:to-red-700/95 dark:focus:ring-red-400/50 dark:border-red-400/50",
+		"text-white bg-gradient-to-r from-red-600/90 to-red-700/90 hover:from-red-700/95 hover:to-red-800/95 border border-red-500/30 dark:from-red-500/90 dark:to-red-600/90 dark:hover:from-red-600/95 dark:hover:to-red-700/95 dark:border-red-400/50",
 };
 
 const sizeClasses = {
