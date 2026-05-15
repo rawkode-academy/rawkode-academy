@@ -48,6 +48,16 @@ const firstAuthorTwitterHandle = shouldShowArticleMeta
 const twitterCreator = firstAuthorTwitterHandle
 	? `@${firstAuthorTwitterHandle.replace(/^@/, "")}`
 	: undefined;
+
+// Mastodon and other Fediverse servers credit the post creator on link
+// previews when this meta tag is present and points at a profile URL.
+const firstAuthorMastodon = shouldShowArticleMeta
+	? authors?.find(
+			(author: CollectionEntry<"people">) =>
+				typeof author.data.mastodon === "string" &&
+				author.data.mastodon.trim().length > 0,
+		)?.data.mastodon
+	: undefined;
 ---
 
 <meta
@@ -61,6 +71,9 @@ const twitterCreator = firstAuthorTwitterHandle
 	property="og:image"
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
+{firstAuthorMastodon && (
+	<meta name="fediverse:creator" content={firstAuthorMastodon} />
+)}
 
 <!-- Article specific Open Graph meta tags -->
 {
