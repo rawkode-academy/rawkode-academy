@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { buildAdrJsonLd } from "@/lib/adr-jsonld";
+
+interface Props {
+	adr: CollectionEntry<"adrs">;
+	authors: ReadonlyArray<CollectionEntry<"people">>;
+	slot?: string;
+}
+
+const { adr, authors } = Astro.props;
+
+const siteUrl = (Astro.site ?? Astro.url).origin;
+const adrUrl = new URL(`/adrs/${adr.id}`, siteUrl).href;
+
+const jsonLd = buildAdrJsonLd({
+	siteUrl,
+	adrUrl,
+	source: {
+		id: adr.id,
+		title: adr.data.title,
+		adoptedAt: adr.data.adoptedAt,
+	},
+	authors: authors.map((author) => ({
+		id: author.data.id,
+		name: author.data.name,
+	})),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
