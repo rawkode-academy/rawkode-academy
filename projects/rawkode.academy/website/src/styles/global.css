@@ -398,13 +398,25 @@ html.dark {
 	}
 
 	/* Shadow utilities — wired to the `--shadow-*` ramp so light/dark
-	   variants come from one place. */
-	.card-shadow {
+	   variants come from one place. Pick `sm/md/lg/xl` for new code;
+	   `card-shadow` (= md) and `card-shadow-elevated` (= lg) remain
+	   for backward compatibility with existing callers. */
+	.card-shadow-sm {
+		box-shadow: var(--shadow-sm);
+	}
+
+	.card-shadow,
+	.card-shadow-md {
 		box-shadow: var(--shadow-md);
 	}
 
+	.card-shadow-lg,
 	.card-shadow-elevated {
 		box-shadow: var(--shadow-lg);
+	}
+
+	.card-shadow-xl {
+		box-shadow: var(--shadow-xl);
 	}
 
 	.card-hover {

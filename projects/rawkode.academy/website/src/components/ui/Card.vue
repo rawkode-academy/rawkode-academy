@@ -91,12 +91,14 @@ const roundedClasses = {
 	"3xl": "rounded-3xl",
 };
 
+// Wired to the `--shadow-*` ramp via the `.card-shadow-*` utilities so
+// light/dark variants come from one place.
 const shadowClasses = {
 	none: "",
-	sm: "shadow-sm",
-	md: "card-shadow",
-	lg: "shadow-lg",
-	elevated: "card-shadow-elevated",
+	sm: "card-shadow-sm",
+	md: "card-shadow-md",
+	lg: "card-shadow-lg",
+	elevated: "card-shadow-xl",
 };
 
 const cardClasses = computed(() => {
