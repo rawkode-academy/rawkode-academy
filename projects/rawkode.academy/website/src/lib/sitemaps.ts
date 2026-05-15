@@ -1,8 +1,4 @@
 import { getCollection } from "astro:content";
-import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
-import { glob } from "glob";
-import { stat } from "node:fs/promises";
-import { join } from "node:path";
 import { getPublishedVideos } from "@/lib/content";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
@@ -35,120 +31,37 @@ export interface SitemapDefinition {
 
 type StaticPageDefinition = {
 	path: string;
-	source: string;
 	changefreq: SitemapChangeFreq;
 };
 
 const staticPages: StaticPageDefinition[] = [
-	{ path: "/", source: "src/pages/index.astro", changefreq: "daily" },
-	{
-		path: "/about",
-		source: "src/pages/about/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/watch",
-		source: "src/pages/watch/index.astro",
-		changefreq: "daily",
-	},
-	{
-		path: "/shows",
-		source: "src/pages/shows/index.astro",
-		changefreq: "weekly",
-	},
-	{ path: "/read", source: "src/pages/read/index.astro", changefreq: "daily" },
-	{
-		path: "/courses",
-		source: "src/pages/courses/index.astro",
-		changefreq: "weekly",
-	},
-	{
-		path: "/learning-paths",
-		source: "src/pages/learning-paths/index.astro",
-		changefreq: "weekly",
-	},
-	{
-		path: "/technology",
-		source: "src/pages/technology/index.astro",
-		changefreq: "weekly",
-	},
-	{
-		path: "/technology/matrix",
-		source: "src/pages/technology/matrix.astro",
-		changefreq: "weekly",
-	},
-	{
-		path: "/technology/matrix/advanced",
-		source: "src/pages/technology/matrix/advanced.astro",
-		changefreq: "weekly",
-	},
-	{
-		path: "/people",
-		source: "src/pages/people/index.astro",
-		changefreq: "weekly",
-	},
-	{ path: "/adrs", source: "src/pages/adrs/index.astro", changefreq: "weekly" },
-	{
-		path: "/changelog",
-		source: "src/pages/changelog/index.astro",
-		changefreq: "daily",
-	},
-	{ path: "/feeds", source: "src/pages/feeds.astro", changefreq: "monthly" },
-	{ path: "/privacy", source: "src/pages/privacy.mdx", changefreq: "yearly" },
-	{ path: "/search", source: "src/pages/search.astro", changefreq: "weekly" },
-	{
-		path: "/community-day",
-		source: "src/pages/community-day/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/organizations",
-		source: "src/pages/organizations/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/organizations/branding",
-		source: "src/pages/organizations/branding/index.astro",
-		changefreq: "yearly",
-	},
-	{
-		path: "/organizations/consulting",
-		source: "src/pages/organizations/consulting/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/organizations/training",
-		source: "src/pages/organizations/training/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/organizations/partnerships",
-		source: "src/pages/organizations/partnerships/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/organizations/lets-chat",
-		source: "src/pages/organizations/lets-chat.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/maintainers/share-your-project",
-		source: "src/pages/maintainers/share-your-project.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/games/secret-of-kubernetes-island",
-		source: "src/pages/games/secret-of-kubernetes-island/index.astro",
-		changefreq: "monthly",
-	},
-	{
-		path: "/resources/kubernetes/1.35-cheatsheet",
-		source: "src/pages/resources/kubernetes/1.35-cheatsheet.astro",
-		changefreq: "monthly",
-	},
+	{ path: "/", changefreq: "daily" },
+	{ path: "/about", changefreq: "monthly" },
+	{ path: "/watch", changefreq: "daily" },
+	{ path: "/shows", changefreq: "weekly" },
+	{ path: "/read", changefreq: "daily" },
+	{ path: "/courses", changefreq: "weekly" },
+	{ path: "/learning-paths", changefreq: "weekly" },
+	{ path: "/technology", changefreq: "weekly" },
+	{ path: "/technology/matrix", changefreq: "weekly" },
+	{ path: "/technology/matrix/advanced", changefreq: "weekly" },
+	{ path: "/people", changefreq: "weekly" },
+	{ path: "/adrs", changefreq: "weekly" },
+	{ path: "/changelog", changefreq: "daily" },
+	{ path: "/feeds", changefreq: "monthly" },
+	{ path: "/privacy", changefreq: "yearly" },
+	{ path: "/search", changefreq: "weekly" },
+	{ path: "/community-day", changefreq: "monthly" },
+	{ path: "/organizations", changefreq: "monthly" },
+	{ path: "/organizations/branding", changefreq: "yearly" },
+	{ path: "/organizations/consulting", changefreq: "monthly" },
+	{ path: "/organizations/training", changefreq: "monthly" },
+	{ path: "/organizations/partnerships", changefreq: "monthly" },
+	{ path: "/organizations/lets-chat", changefreq: "monthly" },
+	{ path: "/maintainers/share-your-project", changefreq: "monthly" },
+	{ path: "/games/secret-of-kubernetes-island", changefreq: "monthly" },
+	{ path: "/resources/kubernetes/1.35-cheatsheet", changefreq: "monthly" },
 ];
-
-const contentMtimeCache = new Map<string, Promise<Map<string, Date>>>();
 
 function normalizePath(path: string): string {
 	const withLeadingSlash = path.startsWith("/") ? path : `/${path}`;
@@ -198,44 +111,6 @@ function escapeXml(value: unknown): string {
 				return char;
 		}
 	});
-}
-
-async function getContentMtimes(
-	contentDir: string,
-): Promise<Map<string, Date>> {
-	if (!contentMtimeCache.has(contentDir)) {
-		contentMtimeCache.set(
-			contentDir,
-			(async () => {
-				const baseDir = resolveContentDirSync(contentDir);
-				const files = await glob("**/*.{md,mdx,yaml,yml}", {
-					cwd: baseDir,
-					nodir: true,
-				});
-				const entries = await Promise.all(
-					files.map(async (file) => {
-						const absolutePath = join(baseDir, file);
-						const fileStats = await stat(absolutePath);
-						const id = file
-							.replace(/\\/g, "/")
-							.replace(/\.(md|mdx|yaml|yml)$/i, "");
-						return [id, fileStats.mtime] as const;
-					}),
-				);
-				return new Map(entries);
-			})(),
-		);
-	}
-	return (await contentMtimeCache.get(contentDir)) ?? new Map();
-}
-
-async function getStaticPageLastmod(source: string): Promise<Date> {
-	try {
-		const fileStats = await stat(join(process.cwd(), source));
-		return fileStats.mtime;
-	} catch {
-		return BUILD_TIME;
-	}
 }
 
 function sortByPath(entries: SitemapUrlEntry[]): SitemapUrlEntry[] {
@@ -316,27 +191,22 @@ ${body}
 }
 
 export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const entries = await Promise.all(
-		staticPages.map(async (page) => ({
-			path: page.path,
-			lastmod: await getStaticPageLastmod(page.source),
-			changefreq: page.changefreq,
-		})),
-	);
+	const entries = staticPages.map((page) => ({
+		path: page.path,
+		lastmod: BUILD_TIME,
+		changefreq: page.changefreq,
+	}));
 
 	return sortByPath(entries);
 }
 
 export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [articles, mtimes] = await Promise.all([
-		getCollection("articles", ({ data }) => !data.draft),
-		getContentMtimes("articles"),
-	]);
+	const articles = await getCollection("articles", ({ data }) => !data.draft);
 
 	const entries = articles.map((article) => ({
 		path: `/read/${article.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(article.id),
+			undefined,
 			article.data.updatedAt,
 			article.data.publishedAt,
 		),
@@ -349,9 +219,8 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getTechnologySitemapEntries(): Promise<
 	SitemapUrlEntry[]
 > {
-	const [technologies, mtimes, allVideos] = await Promise.all([
+	const [technologies, allVideos] = await Promise.all([
 		getCollection("technologies"),
-		getContentMtimes("technologies"),
 		getPublishedVideos(),
 	]);
 
@@ -384,7 +253,7 @@ export async function getTechnologySitemapEntries(): Promise<
 		.map((technology) => ({
 			path: `/technology/${technology.id.replace(/\/index$/, "")}`,
 			lastmod: pickLastmod(
-				mtimes.get(technology.id),
+				undefined,
 				(technology.data as Record<string, unknown>).updatedAt,
 				(technology.data as Record<string, unknown>).publishedAt,
 			),
@@ -395,17 +264,14 @@ export async function getTechnologySitemapEntries(): Promise<
 }
 
 export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [videos, mtimes] = await Promise.all([
-		getPublishedVideos(),
-		getContentMtimes("videos"),
-	]);
+	const videos = await getPublishedVideos();
 
 	const entries = videos.map((video) => ({
 		path: `/watch/${video.data.slug}`,
 		lastmod: pickLastmod(
-			mtimes.get(video.id),
-			video.data.publishedAt,
+			undefined,
 			(video.data as Record<string, unknown>).updatedAt,
+			video.data.publishedAt,
 		),
 		changefreq: "daily" as const,
 	}));
@@ -414,16 +280,15 @@ export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [courses, modules, mtimes] = await Promise.all([
+	const [courses, modules] = await Promise.all([
 		getCollection("courses"),
 		getCollection("courseModules", ({ data }) => !data.draft),
-		getContentMtimes("courses"),
 	]);
 
 	const courseEntries = courses.map((course) => ({
 		path: `/courses/${course.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(course.id),
+			undefined,
 			course.data.updatedAt,
 			course.data.publishedAt,
 		),
@@ -433,7 +298,7 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const moduleEntries = modules.map((module) => ({
 		path: `/courses/${module.data.course.id}/${module.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(module.id),
+			undefined,
 			module.data.updatedAt,
 			module.data.publishedAt,
 		),
@@ -446,15 +311,12 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 export async function getLearningPathSitemapEntries(): Promise<
 	SitemapUrlEntry[]
 > {
-	const [learningPaths, mtimes] = await Promise.all([
-		getCollection("learningPaths"),
-		getContentMtimes("learning-paths"),
-	]);
+	const learningPaths = await getCollection("learningPaths");
 
 	const entries = learningPaths.map((learningPath) => ({
 		path: `/learning-paths/${learningPath.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(learningPath.id),
+			undefined,
 			(learningPath.data as Record<string, unknown>).updatedAt,
 			learningPath.data.publishedAt,
 		),
@@ -465,9 +327,8 @@ export async function getLearningPathSitemapEntries(): Promise<
 }
 
 export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [people, mtimes, allVideos, allShows] = await Promise.all([
+	const [people, allVideos, allShows] = await Promise.all([
 		getCollection("people"),
-		getContentMtimes("people"),
 		getPublishedVideos(),
 		getCollection("shows"),
 	]);
@@ -510,7 +371,7 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		.map((person) => ({
 			path: `/people/${person.data.id}`,
 			lastmod: pickLastmod(
-				mtimes.get(person.id),
+				undefined,
 				(person.data as Record<string, unknown>).updatedAt,
 				(person.data as Record<string, unknown>).publishedAt,
 			),
@@ -521,15 +382,12 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [shows, mtimes] = await Promise.all([
-		getCollection("shows"),
-		getContentMtimes("shows"),
-	]);
+	const shows = await getCollection("shows");
 
 	const entries = shows.map((show) => ({
 		path: `/shows/${show.data.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(show.id),
+			undefined,
 			(show.data as Record<string, unknown>).updatedAt,
 			(show.data as Record<string, unknown>).publishedAt,
 		),
@@ -540,15 +398,12 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [seriesEntries, mtimes] = await Promise.all([
-		getCollection("series"),
-		getContentMtimes("series"),
-	]);
+	const seriesEntries = await getCollection("series");
 
 	const entries = seriesEntries.map((seriesEntry) => ({
 		path: `/series/${seriesEntry.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(seriesEntry.id),
+			undefined,
 			(seriesEntry.data as Record<string, unknown>).updatedAt,
 			(seriesEntry.data as Record<string, unknown>).publishedAt,
 		),
@@ -559,15 +414,12 @@ export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getNewsSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [newsItems, mtimes] = await Promise.all([
-		getCollection("news"),
-		getContentMtimes("news"),
-	]);
+	const newsItems = await getCollection("news");
 
 	const entries = newsItems.map((item) => ({
 		path: `/news/${item.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(item.id),
+			undefined,
 			(item.data as Record<string, unknown>).updatedAt,
 			item.data.publishedAt,
 		),
@@ -603,15 +455,12 @@ export async function getFreshNewsSitemapEntries(
 }
 
 export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const [adrs, mtimes] = await Promise.all([
-		getCollection("adrs"),
-		getContentMtimes("adrs"),
-	]);
+	const adrs = await getCollection("adrs");
 
 	const entries = adrs.map((adr) => ({
 		path: `/adrs/${adr.id}`,
 		lastmod: pickLastmod(
-			mtimes.get(adr.id),
+			undefined,
 			adr.data.adoptedAt,
 			(adr.data as Record<string, unknown>).updatedAt,
 		),
