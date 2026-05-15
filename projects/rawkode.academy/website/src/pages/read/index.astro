@@ -31,6 +31,20 @@ const pageDescription =
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+  <Fragment slot="extra-head">
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Rawkode Academy - Articles (RSS)"
+      href="/api/feeds/articles.xml"
+    />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      title="Rawkode Academy - Articles (Atom)"
+      href="/api/feeds/articles.atom"
+    />
+  </Fragment>
   <style>
     @reference "../../styles/global.css";
 

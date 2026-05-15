@@ -242,6 +242,20 @@ if (isAuthenticated && user?.id) {
 		category={video.data.category}
 		clips={clips}
 	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/rss+xml"
+		title="Rawkode Academy - Videos (RSS)"
+		href="/api/feeds/videos.xml"
+	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/atom+xml"
+		title="Rawkode Academy - Videos (Atom)"
+		href="/api/feeds/videos.atom"
+	/>
 	<div class="min-h-screen">
 		<div class="container-content content-px py-4 sm:py-6 lg:py-8">
 			{/* Breadcrumb */}

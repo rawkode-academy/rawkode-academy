@@ -91,6 +91,20 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	) : (
 		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
 	)}
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/rss+xml"
+		title="Rawkode Academy - Articles (RSS)"
+		href="/api/feeds/articles.xml"
+	/>
+	<link
+		slot="extra-head"
+		rel="alternate"
+		type="application/atom+xml"
+		title="Rawkode Academy - Articles (Atom)"
+		href="/api/feeds/articles.atom"
+	/>
 
 	<div class="article-page">
 		<!-- Breadcrumb -->
