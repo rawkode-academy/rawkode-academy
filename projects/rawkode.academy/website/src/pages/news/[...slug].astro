@@ -8,6 +8,7 @@ import {
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import RelatedNews from "@/components/news/RelatedNews.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
@@ -132,6 +133,14 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 			<article class="prose">
 				<Content />
 			</article>
+
+			<NewsletterCTA
+				class="my-12 not-prose"
+				audience="news"
+				badge="Cloud Native news weekly"
+				headline="Stay on top of the cloud-native release wire"
+				subtitle="Kubernetes, AI infra, and CNCF moves — delivered when they matter."
+			/>
 
 			{tags.length > 0 && (
 				<footer class="tags-footer">
