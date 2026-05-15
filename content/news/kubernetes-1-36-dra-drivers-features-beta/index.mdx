@@ -1,0 +1,33 @@
+---
+title: "Kubernetes 1.36 graduates DRA prioritized list to GA and pushes five device-control features to beta"
+description: "On the heels of DRA graduating to GA in v1.36, the May 7 follow-up details one new stable feature — prioritized list — and five betas covering partitionable devices, device taints, device binding conditions, resource health, and extended-resource integration. ResourceClaims also work with the new PodGroup API."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes v1.36 shipped Dynamic Resource Allocation to GA on April 22. The follow-up blog post on May 7 details one feature graduating to GA inside DRA itself and five betas that fill in operational gaps for accelerator scheduling.
+
+## What graduated
+
+**Prioritized list (GA).** A ResourceClaim can declare ordered preferences for device selection. The example from the post: "H100, but if none are available, fall back to an A100." Scheduling honors the ordering when devices are heterogeneous across the cluster — useful in any fleet running mixed accelerator generations.
+
+## What hit beta
+
+- **Partitionable devices.** Define logical partitions of physical hardware. The intended pattern is Multi-Instance GPU style allocation, with the scheduler tracking partitions as first-class allocatable units.
+- **Device taints.** Apply taints directly to DRA devices, parallel to node taints. Faulty hardware stops getting allocated without ripping it out of the resource pool.
+- **Device binding conditions.** Block a Pod's scheduling commitment on an external preparation step, so pods don't fire before fabric setup or out-of-band device prep completes.
+- **Resource health status.** Pod status surfaces device health with human-readable messages instead of forcing operators into driver logs.
+- **Extended resource support.** Pods can request DRA-managed resources through the familiar extended-resource API on containers, easing migration for clusters that haven't adopted ResourceClaim semantics yet.
+
+## DRA in PodGroups
+
+ResourceClaims now work with the new PodGroup API that also landed in 1.36. Gang-scheduled jobs — the standard AI training pattern — can request DRA-managed accelerators through a single shared claim rather than stitching per-pod requests together at submit time.
+
+## Driver ecosystem
+
+The post explicitly notes the driver ecosystem expanding past GPU accelerators to networking and other hardware classes. NVIDIA's donation of the GPU DRA driver to the CNCF in March feeds into the same pipeline.
+
+**Source:** [Kubernetes v1.36: More Drivers, New Features, and the Next Era of DRA](https://kubernetes.io/blog/2026/05/07/kubernetes-v1-36-dra-136-updates/) — May 7, 2026.

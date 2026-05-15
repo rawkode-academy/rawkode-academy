@@ -1,0 +1,29 @@
+---
+title: "Kubernetes 1.36 introduces pod-level CPU, memory, and topology managers in alpha"
+description: "The kubelet's CPU, memory, and topology managers extend to pod scope behind the PodLevelResourceManagers and PodLevelResources feature gates. Performance-critical containers keep NUMA alignment while lightweight sidecars share a pod-level budget rather than burning dedicated cores."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes v1.36 ships pod-level resource managers in alpha. The kubelet's CPU, memory, and topology managers — historically per-container — now operate at the pod boundary. Two feature gates need to be on: `PodLevelResourceManagers` and `PodLevelResources`.
+
+## What changes
+
+A pod can declare resources at `.spec.resources`, and the kubelet uses that allocation as the budget and NUMA-alignment scope for the entire pod. Containers can still set their own requests and limits; any unused pod-level budget becomes a shared pool that lightweight sidecars draw from.
+
+Example: a pod with `cpu: 8` at pod level and a primary container at `cpu: 6` leaves a 2-CPU pool that metrics exporters, log shippers, or service-mesh sidecars share — no per-sidecar dedicated allocation required.
+
+## Why this exists
+
+The status quo forces a choice between Guaranteed QoS on the main workload (and over-allocating cores per sidecar) or Burstable everywhere (and losing NUMA pinning entirely). Pod-level resources keep the performance-critical container on dedicated, NUMA-aligned cores while collapsing sidecar overhead into the leftover budget on the same NUMA node.
+
+The post calls out two concrete patterns: latency-sensitive databases with backup agents and metrics exporters, and GPU-accelerated training pods with service-mesh sidecars. Both are workloads where mixing per-container Guaranteed pods has been awkward.
+
+## Status
+
+Alpha, off by default. The Topology Manager scope `pod` is required to get cross-container NUMA alignment under this model.
+
+**Source:** [Kubernetes v1.36: Pod-Level Resource Managers (Alpha)](https://kubernetes.io/blog/2026/05/01/kubernetes-v1-36-feature-pod-level-resource-managers-alpha/) — May 1, 2026.
