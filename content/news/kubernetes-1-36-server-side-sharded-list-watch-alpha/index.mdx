@@ -1,0 +1,31 @@
+---
+title: "Kubernetes 1.36 lands server-side sharded list and watch in alpha"
+description: "KEP-5866 ships in v1.36 with a new shardSelector field on ListOptions, moving event filtering from clients to the API server. Horizontally sharded controllers no longer pay for the full stream of deserialization on objects they don't own."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+KEP-5866 landed in Kubernetes v1.36 as an alpha. The feature moves event filtering from clients into the API server for the common case where a controller is sharded horizontally across replicas.
+
+## The cost being paid today
+
+When N replicas of a controller each watch the same high-cardinality resource — Pods is the canonical case — the API server fans the full event stream to each replica. Every replica deserializes payloads it then discards. Network bandwidth scales with replica count rather than with shard size, and the CPU spent on deserializing discarded objects is pure waste.
+
+## The new path
+
+The alpha adds a `shardSelector` field to `ListOptions`. Clients pass a deterministic expression — currently a 64-bit FNV-1a hash over `metadata.uid` or `metadata.namespace` — that the API server evaluates before emitting events. A two-shard split on UID looks like:
+
+```
+shardRange(object.metadata.uid, '0x0000000000000000', '0x8000000000000000')
+```
+
+The Go shared informer factory accepts the selector via `WithTweakListOptions`, so adoption is a one-line change for controllers already using the shared informer pattern. List responses include a `shardInfo` field that echoes back the applied selector, so clients can verify the server actually honored it.
+
+## What to do with this
+
+Alpha status means it ships behind a feature gate. Treat this as 1.37 planning material if you operate API servers under load from sharded controllers, and as the upstream answer to the long-standing question: why does scaling controller replicas not reduce apiserver egress?
+
+**Source:** [Kubernetes v1.36: Server-Side Sharded List and Watch](https://kubernetes.io/blog/2026/05/06/kubernetes-v1-36-server-side-sharded-list-and-watch/) — May 6, 2026.
