@@ -131,7 +131,7 @@ export const getStaticPaths = (async () => {
 								name: id,
 								videos,
 								status: DEFAULT_TECHNOLOGY_STATUS,
-								website: '',
+								website: "",
 								license: DEFAULT_TECHNOLOGY_LICENSE,
 							} as Technology,
 						},
@@ -225,7 +225,8 @@ const placeholderLogo = "/apple-touch-icon.png";
 
 const videoCount = technology.videos?.length ?? 0;
 const featuredVideos = (technology.videos ?? []).slice(0, 4);
-const categoryLabel = technology.subcategory ?? technology.category ?? "Cloud Native";
+const categoryLabel =
+	technology.subcategory ?? technology.category ?? "Cloud Native";
 
 const seoTitle =
 	technology.seo?.title ??
@@ -255,7 +256,10 @@ const seoDescription = (() => {
 // noindex these so Google doesn't classify the site as low-quality.
 const noindex = !hasContent && videoCount === 0;
 
-const technologyUrl = new URL(`/technology/${technology.id.replace(/\/index$/, "")}`, Astro.site).href;
+const technologyUrl = new URL(
+	`/technology/${technology.id.replace(/\/index$/, "")}`,
+	Astro.site,
+).href;
 const absoluteLogo = technology.logo
 	? technology.logo.startsWith("http")
 		? technology.logo
@@ -347,6 +351,14 @@ const hasCommunityLinks =
 		documentation={technology.documentation}
 		category={categoryLabel}
 	/>
+	<Fragment slot="extra-head">
+		<link
+			rel="alternate"
+			type="application/rss+xml"
+			title={`Rawkode Academy — ${technology.name} (RSS)`}
+			href={`/api/feeds/technology/${technology.id.replace(/\/index$/, "")}.xml`}
+		/>
+	</Fragment>
 	<div class="technology-stage page-px section-py section-pt-0">
 		<section class="w-full">
 			<div class="glass-panel technology-header-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
