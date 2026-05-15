@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntries, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { createLogger } from "@/lib/logger";
@@ -52,6 +53,7 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 ---
 
 <Page title={`ADR-${adrNumber}: ${adr.data.title}`} description={`Architecture Decision Record: ${adr.data.title}`}>
+  <AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
   <h1 class="text-5xl font-extrabold dark:text-white">
     <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
   </h1>
