@@ -1,0 +1,34 @@
+---
+import { buildNewsItemListJsonLd } from "@/lib/news-itemlist-jsonld";
+
+interface NewsStoryInput {
+	id: string;
+	data: {
+		title: string;
+		description: string;
+		publishedAt: Date;
+	};
+}
+
+interface Props {
+	stories: ReadonlyArray<NewsStoryInput>;
+	listUrl: string;
+	limit?: number;
+	slot?: string;
+}
+
+const { stories, listUrl, limit } = Astro.props;
+
+const jsonLd = buildNewsItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	stories,
+	...(typeof limit === "number" ? { limit } : {}),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>

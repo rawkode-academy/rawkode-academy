@@ -894,6 +894,87 @@ describe("Related news selector", () => {
 	});
 });
 
+describe("News ItemList JSON-LD", () => {
+	it("builds an ItemList of NewsArticle items for the news index, newest first, capped at the limit", async () => {
+		const { buildNewsItemListJsonLd } = await import(
+			"../lib/news-itemlist-jsonld.ts"
+		);
+
+		const stories = [
+			{
+				id: "older",
+				data: {
+					title: "Older story",
+					description: "Older",
+					publishedAt: new Date("2026-04-01T00:00:00.000Z"),
+				},
+			},
+			{
+				id: "newest",
+				data: {
+					title: "Newest story",
+					description: "Newest",
+					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+				},
+			},
+			{
+				id: "middle",
+				data: {
+					title: "Middle story",
+					description: "Middle",
+					publishedAt: new Date("2026-05-01T00:00:00.000Z"),
+				},
+			},
+		];
+
+		const jsonLd = buildNewsItemListJsonLd({
+			siteUrl: "https://rawkode.academy",
+			listUrl: "https://rawkode.academy/news",
+			stories,
+			limit: 2,
+		});
+
+		expect(jsonLd["@context"]).toBe("https://schema.org");
+		expect(jsonLd["@type"]).toBe("ItemList");
+		expect(jsonLd.url).toBe("https://rawkode.academy/news");
+		expect(jsonLd.numberOfItems).toBe(2);
+		expect(jsonLd.itemListOrder).toBe(
+			"https://schema.org/ItemListOrderDescending",
+		);
+
+		const elements = jsonLd.itemListElement as Array<Record<string, unknown>>;
+		expect(elements).toHaveLength(2);
+		expect(elements[0]?.position).toBe(1);
+		expect(elements[0]?.url).toBe("https://rawkode.academy/news/newest");
+		expect(elements[1]?.position).toBe(2);
+		expect(elements[1]?.url).toBe("https://rawkode.academy/news/middle");
+
+		const firstItem = elements[0]?.item as Record<string, unknown>;
+		expect(firstItem["@type"]).toBe("NewsArticle");
+		expect(firstItem.headline).toBe("Newest story");
+		expect(firstItem.datePublished).toBe("2026-05-15T08:00:00.000Z");
+		const mainEntity = firstItem.mainEntityOfPage as Record<string, unknown>;
+		expect(mainEntity["@id"]).toBe("https://rawkode.academy/news/newest");
+		const publisher = firstItem.publisher as Record<string, unknown>;
+		expect(publisher.name).toBe("Rawkode Academy");
+
+		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+
+	it("returns an empty ItemList when given no stories", async () => {
+		const { buildNewsItemListJsonLd } = await import(
+			"../lib/news-itemlist-jsonld.ts"
+		);
+		const jsonLd = buildNewsItemListJsonLd({
+			siteUrl: "https://rawkode.academy",
+			listUrl: "https://rawkode.academy/news",
+			stories: [],
+		});
+		expect(jsonLd.numberOfItems).toBe(0);
+		expect(jsonLd.itemListElement).toEqual([]);
+	});
+});
+
 describe("Structured Data Validation", () => {
 	it("should model VideoObject JSON-LD with clip urls, captions, and transcript text", () => {
 		const videoJsonLd = {
