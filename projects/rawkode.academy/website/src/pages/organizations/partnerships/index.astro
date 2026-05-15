@@ -2,221 +2,111 @@
 import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
+import { getCollection } from "astro:content";
 import { css } from "../../../../styled-system/css";
 
 export const prerender = true;
 
-const valueProps = [
-	{ title: "Authentic technical content", description: "Expert-led tutorials, walkthroughs, and reviews that show your technology in real engineering work — not marketing fluff." },
-	{ title: "Developer community engagement", description: "Direct conversations with engineers through live streams, AMAs, and community programmes." },
-	{ title: "Flexible partnership tiers", description: "Engagement levels designed to match different budgets and content needs — from project-based to long-term annual programmes." },
-	{ title: "Measurable outcomes", description: "Comprehensive analytics tailored to your goals — engagement, sentiment, community growth, and product adoption indicators." },
+const stats = [
+	{ value: "100K+", label: "Developers", description: "Reached across YouTube, articles, and live streams" },
+	{ value: "Global", label: "Reach", description: "Engineers tuning in from 60+ countries" },
+	{ value: "Proven", label: "Results", description: "Real adoption signals, not vanity metrics" },
 ];
 
 const pillars = [
-	{ name: "Developer Marketing", tagline: "We inspire developers", description: "Authentic technical content that puts your product in the hands of engineers." },
-	{ name: "Developer Education", tagline: "We level up developers", description: "Tutorials, learning paths, and workshops that turn curiosity into adoption." },
-	{ name: "Developer Experience", tagline: "We support developers", description: "DX audits, docs reviews, and onboarding optimisation rooted in real feedback." },
+	{ title: "Amplify Your Reach", description: "Extend your message to our engaged community of developers and technical decision-makers through authentic, expert-led content." },
+	{ title: "Accelerate Adoption", description: "Remove barriers to entry through strategic educational content that showcases your product's unique value and practical applications." },
+	{ title: "Strategic Growth", description: "Refine your developer experience and go-to-market approach with expert guidance that drives measurable business outcomes." },
 ];
 
-const tiers = [
-	{ name: "Nip", scope: "Essential visibility", highlights: ["Featured content placement", "Quarterly check-ins", "Annual programme"] },
-	{ name: "Dram", scope: "Most popular", featured: true, highlights: ["Everything in Nip", "Co-produced video series", "Community AMA & launch support"] },
-	{ name: "Blend", scope: "Extensive collaboration", highlights: ["Everything in Dram", "Dedicated DevRel hours", "Strategic content calendar"] },
-	{ name: "Malt", scope: "Premier engagement", highlights: ["Everything in Blend", "Hands-on consulting hours", "Co-branded campaigns"] },
+const focusAreas = [
+	{
+		title: "Developer Marketing",
+		description: "Authentic, hands-on content that meets engineers where they learn — not paid placements they scroll past.",
+		points: ["Long-form video tutorials and walkthroughs", "Live streamed deep-dives with the maintainers", "Co-authored articles on real implementation work"],
+	},
+	{
+		title: "Developer Education",
+		description: "Curriculum-grade content that turns awareness into competence and competence into advocacy.",
+		points: ["Multi-module learning paths with hands-on labs", "Structured workshops for your community", "Reference architectures and golden paths"],
+	},
+	{
+		title: "Developer Experience",
+		description: "Battle-tested feedback on your CLI, SDK, docs, and onboarding — from engineers who use them in anger.",
+		points: ["DX audits with prioritised recommendations", "Documentation review and rewrites", "Onboarding-flow analysis with playable demos"],
+	},
+];
+
+const currentPartners = [
+	{ name: "Spectro Cloud", industry: "Kubernetes", since: "2025", description: "Kubernetes management platform for deploying, operating, and securing clusters across environments.", url: "https://spectrocloud.com" },
+	{ name: "Teleport", industry: "Identity & Access", since: "2026", description: "Secure access platform for servers, Kubernetes clusters, databases, and internal applications.", url: "https://goteleport.com" },
 ];
 
 const partnershipFAQs = [
-	{
-		question: "What is the minimum partnership duration?",
-		answer: "Our partnerships are structured as annual engagements to ensure we can deliver meaningful results. Developer marketing and education require a strategic, long-term approach to build awareness, trust, and adoption.",
-	},
-	{
-		question: "What are the payment terms for partnerships?",
-		answer: "For our entry tiers we typically require annual payment upfront. For larger engagements we offer flexible payment options including quarterly or semi-annual installments.",
-	},
-	{
-		question: "How do you measure partnership success?",
-		answer: "We provide comprehensive analytics tailored to your goals. Metrics include content engagement, developer sentiment, community growth, and product adoption indicators. All partnerships include regular performance reviews.",
-	},
-	{
-		question: "How do you qualify potential partners?",
-		answer: "We partner with companies that offer genuine value to developers and align with our mission of advancing developer education. We evaluate potential partners based on innovation, relevance, and community impact.",
-	},
+	{ question: "What is the minimum partnership duration?", answer: "Our partnerships are structured as annual engagements to ensure we can deliver meaningful results. Developer marketing and education require a strategic, long-term approach to build awareness, trust, and adoption." },
+	{ question: "What are the payment terms for partnerships?", answer: "For our entry tiers we typically require annual payment upfront. For larger engagements we offer flexible payment options including quarterly or semi-annual installments." },
+	{ question: "How do you measure partnership success?", answer: "We provide comprehensive analytics tailored to your goals. Metrics include content engagement, developer sentiment, community growth, and product adoption indicators. All partnerships include regular performance reviews." },
+	{ question: "How do you qualify potential partners?", answer: "We partner with companies that offer genuine value to developers and align with our mission of advancing developer education. We evaluate potential partners based on innovation, relevance, and community impact." },
+	{ question: "I have additional questions about partnerships", answer: "We'd be happy to discuss your specific needs. Schedule a consultation with our partnership team to explore how we can work together." },
 ];
 
-const shell = css({ maxWidth: "72rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+const allTestimonials = await getCollection("testimonials");
+const partnerTestimonials = allTestimonials.filter((t) => t.data.type === "partner").slice(0, 3);
 
-const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+const sectionBlock = css({ mb: "20" });
+const sectionEyebrow = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+const sectionTitle = css({ fontFamily: "display", fontSize: { base: "2xl", md: "4xl" }, fontWeight: "bold", letterSpacing: "tight", color: "fg.primary", textAlign: "center", mb: "4", textWrap: "balance" });
+const sectionLede = css({ maxWidth: "44rem", mx: "auto", color: "fg.secondary", fontSize: { base: "md", md: "lg" }, lineHeight: "1.7", textAlign: "center" });
 
-const grid = css({
-	display: "grid",
-	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-	gap: "5",
-});
+const grid3 = css({ display: "grid", gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: "5", mt: "10" });
+const grid2 = css({ display: "grid", gridTemplateColumns: { base: "1fr", lg: "repeat(2, minmax(0, 1fr))" }, gap: "5", mt: "10" });
 
-const pillarsGrid = css({
-	display: "grid",
-	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
-	gap: "5",
-	mb: "16",
-});
-
-const pillarCard = css({
-	p: "6",
-	borderRadius: "2xl",
-	borderWidth: "1px",
-	borderColor: "border.muted",
-	bg: "bg.raised",
-	textAlign: "center",
-});
-
-const pillarName = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "1" });
-const pillarTagline = css({ fontSize: "sm", color: "fg.brand", fontWeight: "semibold", mb: "3" });
-const pillarBody = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
-
-const tierGrid = css({
-	display: "grid",
-	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
-	gap: "4",
-	mb: "16",
-});
-
-const tierCard = css({
-	position: "relative",
-	display: "flex",
-	flexDirection: "column",
-	gap: "3",
-	p: "6",
-	borderRadius: "2xl",
-	borderWidth: "1px",
-	borderColor: "border.muted",
-	bg: "bg.raised",
-});
-
-const tierCardFeatured = css({
-	borderColor: "fg.brand",
-	boxShadow: "0 0 0 1px var(--colors-fg-brand)",
-});
-
-const tierBadge = css({
-	position: "absolute",
-	top: "-3",
-	right: "5",
-	px: "2.5",
-	py: "0.5",
-	borderRadius: "full",
-	bg: "bg.brand",
-	color: "fg.on-brand",
-	fontSize: "2xs",
-	fontWeight: "bold",
-	letterSpacing: "wider",
-	textTransform: "uppercase",
-});
-
-const tierName = css({
-	fontFamily: "display",
-	fontSize: "2xl",
-	fontWeight: "bold",
-	letterSpacing: "tight",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
-	backgroundClip: "text",
-	color: "transparent",
-});
-
-const tierScope = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
-
-const tierList = css({ display: "flex", flexDirection: "column", gap: "2", mt: "2", listStyle: "none", p: "0" });
-const tierItem = css({
-	display: "flex",
-	alignItems: "flex-start",
-	gap: "2",
-	fontSize: "sm",
-	color: "fg.secondary",
-	lineHeight: "1.5",
-});
-const tierCheck = css({ color: "fg.brand", flexShrink: 0, mt: "0.5" });
-
-const card = css({
-	p: "6",
-	borderRadius: "2xl",
-	borderWidth: "1px",
-	borderColor: "border.muted",
-	bg: "bg.raised",
-});
-
-const cardTitle = css({
-	fontFamily: "display",
-	fontSize: "lg",
-	fontWeight: "bold",
-	color: "fg.primary",
-	mb: "3",
-});
-
+const card = css({ p: "6", borderRadius: "2xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised" });
+const cardTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "3" });
 const cardBody = css({ color: "fg.secondary", lineHeight: "1.6" });
 
-const sectionBlock = css({ mt: "16" });
+const statsGrid = css({ display: "grid", gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: "5", mt: "12" });
+const statCard = css({ p: "8", borderRadius: "2xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised", textAlign: "center" });
+const statValue = css({ fontFamily: "display", fontSize: "4xl", fontWeight: "bold", letterSpacing: "tight", backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)", backgroundClip: "text", color: "transparent" });
+const statLabel = css({ mt: "2", fontSize: "lg", fontWeight: "semibold", color: "fg.primary" });
+const statDesc = css({ mt: "3", fontSize: "sm", color: "fg.muted" });
 
-const sectionTitle = css({
-	fontFamily: "display",
-	fontSize: { base: "2xl", md: "3xl" },
-	fontWeight: "bold",
-	letterSpacing: "tight",
-	color: "fg.primary",
-	mb: "8",
-	textAlign: "center",
-});
+const focusGrid = css({ display: "grid", gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: "5", mt: "12" });
+const focusCard = css({ display: "flex", flexDirection: "column", gap: "4", p: "7", borderRadius: "2xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised" });
+const focusList = css({ display: "flex", flexDirection: "column", gap: "2", mt: "auto", listStyle: "none", p: "0" });
+const focusListItem = css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm", color: "fg.secondary" });
+const checkIcon = css({ flexShrink: 0, color: "fg.brand", mt: "0.5" });
 
-const faqList = css({ display: "flex", flexDirection: "column", gap: "3", maxWidth: "48rem", mx: "auto" });
+const partnerCard = css({ display: "flex", flexDirection: "column", gap: "3", p: "8", borderRadius: "2xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised", textDecoration: "none", color: "fg.primary", transition: "transform 200ms ease, border-color 200ms ease", _hover: { transform: "translateY(-2px)", borderColor: "fg.brand" } });
+const partnerMeta = css({ display: "flex", alignItems: "center", gap: "2", fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase" });
+const partnerIndustry = css({ color: "fg.brand" });
+const partnerSince = css({ color: "fg.muted" });
+const partnerName = css({ fontFamily: "display", fontSize: "2xl", fontWeight: "bold", letterSpacing: "tight", color: "fg.primary" });
+const partnerDesc = css({ fontSize: "md", color: "fg.secondary", lineHeight: "1.6" });
+const partnerLink = css({ mt: "auto", display: "inline-flex", alignItems: "center", gap: "1.5", fontSize: "sm", fontWeight: "semibold", color: "fg.brand" });
 
-const faqItem = css({
-	p: "5",
-	borderRadius: "xl",
-	borderWidth: "1px",
-	borderColor: "border.muted",
-	bg: "bg.raised",
-});
+const pitchCard = css({ mt: "16", p: { base: "8", md: "12" }, borderRadius: "3xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised", display: "grid", gridTemplateColumns: { base: "1fr", lg: "1fr 1fr" }, gap: "10", alignItems: "center" });
+const pitchEyebrow = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", mb: "3" });
+const pitchTitle = css({ fontFamily: "display", fontSize: { base: "2xl", md: "3xl" }, fontWeight: "bold", letterSpacing: "tight", color: "fg.primary", mb: "5", textWrap: "balance" });
+const pitchBody = css({ fontSize: "md", color: "fg.secondary", lineHeight: "1.7", mb: "4" });
 
-const faqQ = css({
-	fontWeight: "semibold",
-	color: "fg.primary",
-	fontSize: "md",
-	mb: "2",
-	cursor: "pointer",
-	listStyle: "none",
-});
+const faqList = css({ display: "flex", flexDirection: "column", gap: "3", maxWidth: "52rem", mx: "auto", mt: "10" });
+const faqItem = css({ p: "5", borderRadius: "xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised" });
+const faqQ = css({ fontWeight: "semibold", color: "fg.primary", fontSize: "md", cursor: "pointer", listStyle: "none" });
+const faqA = css({ color: "fg.secondary", lineHeight: "1.7", fontSize: "sm", mt: "3" });
 
-const faqA = css({ color: "fg.secondary", lineHeight: "1.6", fontSize: "sm" });
+const ctaCard = css({ mt: "20", mx: "auto", maxWidth: "60rem", p: { base: "8", md: "12" }, borderRadius: "3xl", textAlign: "center", color: "white", backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)", boxShadow: "xl" });
+const ctaTitle = css({ fontFamily: "display", fontSize: { base: "2xl", md: "3xl" }, fontWeight: "bold", textWrap: "balance" });
+const ctaBody = css({ mt: "3", fontSize: { base: "md", md: "lg" }, opacity: "0.92", maxWidth: "44rem", mx: "auto" });
+const ctaBtn = css({ mt: "8", display: "inline-flex", alignItems: "center", gap: "2", px: "6", py: "3", borderRadius: "lg", fontWeight: "semibold", color: "fg.primary", bg: "white", textDecoration: "none", transition: "transform 150ms ease", _hover: { transform: "translateY(-1px)" } });
 
-const ctaCard = css({
-	mt: "16",
-	mx: "auto",
-	maxWidth: "60rem",
-	p: { base: "8", md: "12" },
-	borderRadius: "3xl",
-	textAlign: "center",
-	color: "white",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
-	boxShadow: "xl",
-});
-
-const ctaTitle = css({ fontFamily: "display", fontSize: { base: "2xl", md: "3xl" }, fontWeight: "bold" });
-const ctaBody = css({ mt: "3", fontSize: { base: "md", md: "lg" }, opacity: "0.92", maxWidth: "40rem", mx: "auto" });
-
-const ctaBtn = css({
-	mt: "8",
-	display: "inline-flex",
-	alignItems: "center",
-	gap: "2",
-	px: "6",
-	py: "3",
-	borderRadius: "lg",
-	fontWeight: "semibold",
-	color: "fg.primary",
-	bg: "white",
-	textDecoration: "none",
-	_hover: { transform: "translateY(-1px)" },
-});
+const quoteCard = css({ display: "flex", flexDirection: "column", gap: "4", p: "7", borderRadius: "2xl", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised" });
+const quoteText = css({ fontSize: "md", color: "fg.secondary", lineHeight: "1.7", fontStyle: "italic" });
+const quoteFigure = css({ display: "flex", alignItems: "center", gap: "3", mt: "auto" });
+const quoteAvatar = css({ width: "12", height: "12", borderRadius: "full", objectFit: "cover" });
+const quoteName = css({ fontWeight: "semibold", color: "fg.primary", fontSize: "sm" });
+const quoteTitle = css({ fontSize: "xs", color: "fg.muted" });
 ---
 
 <Page title="Strategic Technology Partnerships | Rawkode Academy" description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth.">
@@ -225,50 +115,116 @@ const ctaBtn = css({
 	<PageHero eyebrow="Partner With Us" title="Strategic Technology Partnerships" subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance." />
 
 	<div class={shell}>
-		<p class={sectionLabel}>Three-pillar approach</p>
-		<h2 class={sectionTitle}>How we accelerate developer adoption</h2>
-		<div class={pillarsGrid}>
-			{pillars.map((p) => (
-				<div class={pillarCard}>
-					<h3 class={pillarName}>{p.name}</h3>
-					<p class={pillarTagline}>{p.tagline}</p>
-					<p class={pillarBody}>{p.description}</p>
-				</div>
-			))}
-		</div>
-
-		<p class={sectionLabel}>Partnership tiers</p>
-		<h2 class={sectionTitle}>Engagement levels named after Scottish whisky measures</h2>
-		<div class={tierGrid}>
-			{tiers.map((tier) => (
-				<div class={`${tierCard} ${tier.featured ? tierCardFeatured : ""}`}>
-					{tier.featured && <span class={tierBadge}>Most popular</span>}
-					<span class={tierName}>{tier.name}</span>
-					<span class={tierScope}>{tier.scope}</span>
-					<ul class={tierList}>
-						{tier.highlights.map((h) => (
-							<li class={tierItem}>
-								<svg class={tierCheck} width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-								<span>{h}</span>
-							</li>
-						))}
-					</ul>
-				</div>
-			))}
-		</div>
-
-		<p class={sectionLabel}>What you get</p>
-		<h2 class={sectionTitle}>Every partnership delivers</h2>
-		<div class={grid}>
-			{valueProps.map((vp) => (
-				<div class={card}>
-					<h2 class={cardTitle}>{vp.title}</h2>
-					<p class={cardBody}>{vp.description}</p>
-				</div>
-			))}
-		</div>
+		<section class={sectionBlock}>
+			<div class={statsGrid}>
+				{stats.map((s) => (
+					<div class={statCard}>
+						<div class={statValue}>{s.value}</div>
+						<div class={statLabel}>{s.label}</div>
+						<p class={statDesc}>{s.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
 
 		<section class={sectionBlock}>
+			<p class={sectionEyebrow}>How it works</p>
+			<h2 class={sectionTitle}>Connect technology with developers who'll champion it</h2>
+			<p class={sectionLede}>At Rawkode Academy, we connect cutting-edge technologies with the developers who bring them to life. Our expertise bridges the critical gap between technical innovation and developer understanding.</p>
+			<div class={grid3}>
+				{pillars.map((p) => (
+					<div class={card}>
+						<h3 class={cardTitle}>{p.title}</h3>
+						<p class={cardBody}>{p.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionEyebrow}>What we deliver</p>
+			<h2 class={sectionTitle}>Three areas, one engagement</h2>
+			<p class={sectionLede}>Every partnership combines marketing, education, and developer-experience work — because adoption requires all three.</p>
+			<div class={focusGrid}>
+				{focusAreas.map((area) => (
+					<article class={focusCard}>
+						<h3 class={cardTitle}>{area.title}</h3>
+						<p class={cardBody}>{area.description}</p>
+						<ul class={focusList}>
+							{area.points.map((point) => (
+								<li class={focusListItem}>
+									<svg class={checkIcon} width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+										<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+									</svg>
+									<span>{point}</span>
+								</li>
+							))}
+						</ul>
+					</article>
+				))}
+			</div>
+		</section>
+
+		{partnerTestimonials.length > 0 && (
+			<section class={sectionBlock}>
+				<p class={sectionEyebrow}>Partner stories</p>
+				<h2 class={sectionTitle}>What our partners say</h2>
+				<div class={grid3}>
+					{partnerTestimonials.map((t) => (
+						<figure class={quoteCard}>
+							<svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" style="color: var(--colors-fg-brand);">
+								<path fill="currentColor" d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z"/>
+							</svg>
+							<blockquote class={quoteText} style="margin: 0;">"{t.data.quote.slice(0, 280)}"</blockquote>
+							<figcaption class={quoteFigure}>
+								<img class={quoteAvatar} src={t.data.author.image} alt={t.data.author.name} loading="lazy" />
+								<div>
+									<div class={quoteName}>{t.data.author.name}</div>
+									<div class={quoteTitle}>{t.data.author.title}</div>
+								</div>
+							</figcaption>
+						</figure>
+					))}
+				</div>
+			</section>
+		)}
+
+		<section class={sectionBlock}>
+			<p class={sectionEyebrow}>Current partners</p>
+			<h2 class={sectionTitle}>Teams we're working with right now</h2>
+			<div class={grid2}>
+				{currentPartners.map((p) => (
+					<a href={p.url} target="_blank" rel="noopener noreferrer" class={partnerCard}>
+						<div class={partnerMeta}>
+							<span class={partnerIndustry}>{p.industry}</span>
+							<span class={partnerSince}>· SINCE {p.since}</span>
+						</div>
+						<div class={partnerName}>{p.name}</div>
+						<p class={partnerDesc}>{p.description}</p>
+						<span class={partnerLink}>
+							Visit {p.name}
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+						</span>
+					</a>
+				))}
+			</div>
+		</section>
+
+		<section class={pitchCard}>
+			<div>
+				<p class={pitchEyebrow}>The alternative</p>
+				<h2 class={pitchTitle}>Beyond traditional conference sponsorships</h2>
+				<p class={pitchBody}>Traditional conference sponsorships often involve significant investments — booth setup, team travel, event coordination, and hospitality expenses — for just a few days of visibility.</p>
+				<p class={pitchBody}>After the event concludes, the challenge of converting brief interactions into meaningful business relationships begins, with uncertain ROI on your investment.</p>
+			</div>
+			<div>
+				<p class={pitchBody} style="margin-top: 0;">Our partnership model offers a strategic alternative: a year-long collaboration that provides continuous engagement with our developer community, targeted content creation, and sustained visibility for your brand.</p>
+				<p class={pitchBody}>Schedule a consultation to explore how a partnership can align with your business objectives and connect your technology with our passionate developer community.</p>
+			</div>
+		</section>
+
+		<section class={sectionBlock} style="margin-top: 5rem;">
+			<p class={sectionEyebrow}>FAQ</p>
 			<h2 class={sectionTitle}>Frequently asked questions</h2>
 			<div class={faqList}>
 				{partnershipFAQs.map((faq) => (
@@ -282,9 +238,9 @@ const ctaBtn = css({
 
 		<section class={ctaCard}>
 			<h2 class={ctaTitle}>Let's build something together</h2>
-			<p class={ctaBody}>Schedule a consultation with our team to discuss your goals and how a partnership can help.</p>
+			<p class={ctaBody}>Schedule a consultation with our team to discuss your goals and explore how a partnership can help.</p>
 			<a href="/organizations/lets-chat" class={ctaBtn}>
-				Schedule a chat
+				Schedule your consultation
 				<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7" /></svg>
 			</a>
 		</section>
