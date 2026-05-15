@@ -1,0 +1,23 @@
+---
+title: "Microcks moves from CNCF Sandbox to Incubation"
+description: "The CNCF Technical Oversight Committee voted to promote Microcks — a multi-protocol API mocking and contract-testing platform — to Incubating status, three years after Sandbox acceptance."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - microcks
+---
+
+The CNCF Technical Oversight Committee has voted to promote Microcks from Sandbox to Incubating, according to the [CNCF announcement on May 7, 2026](https://www.cncf.io/blog/2026/05/07/microcks-becomes-a-cncf-incubating-project/). Microcks entered the Sandbox on June 22, 2023.
+
+## What Microcks covers that other mocking tools don't
+
+Microcks generates live mock servers from contract documents — OpenAPI, AsyncAPI, gRPC/Protobuf, GraphQL SDL, Postman collections, and SOAP/WSDL — and runs the same artifacts as conformance tests against a real implementation. Its Async Minion component publishes and verifies messages on Kafka, MQTT, AMQP, NATS, WebSockets, Google Pub/Sub, and Amazon SQS/SNS, which is the part most other open-source mock servers don't do.
+
+## What the promotion actually means
+
+Incubation is the CNCF level that requires production adopters, documented governance, and a sustained contributor base — not just a maturity badge. The announcement lists 645 contributors, 2.5 million container image downloads in 2025, and 34 public adopters. Maintainers Laurent Broudoux (project creator, 2015) and Yacine Kheddache continue under formal CNCF vendor-neutral governance.
+
+If you've been hand-rolling Kafka or AsyncAPI mocks for integration tests, this is the boring-correct path the foundation is now backing.
+
+**Source:** [Microcks becomes a CNCF incubating project](https://www.cncf.io/blog/2026/05/07/microcks-becomes-a-cncf-incubating-project/) — CNCF, May 7, 2026
