@@ -22,56 +22,91 @@ const { person } = Astro.props;
 const videos = await getCollection("videos");
 const shows = await getCollection("shows");
 const technologies = await getCollection("technologies");
+const news = await getCollection("news");
+const articles = await getCollection("articles", ({ data }) => !data.draft);
 const techNameById = new Map(
 	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
 );
 
 // Helper to match references
-const matchRef = (ref: { collection: string; id: string } | string, id: string) => {
-    if (typeof ref === 'string') return ref === id;
-    return ref.id === id;
+const matchRef = (
+	ref: { collection: string; id: string } | string,
+	id: string,
+) => {
+	if (typeof ref === "string") return ref === id;
+	return ref.id === id;
 };
 
 const hostedShows = shows.filter((show) =>
-    show.data.hosts.some((h) => matchRef(h, person.data.id))
+	show.data.hosts.some((h) => matchRef(h, person.data.id)),
 );
 
 const guestVideos = videos.filter((video) =>
-    video.data.guests.some((g) => matchRef(g, person.data.id))
+	video.data.guests.some((g) => matchRef(g, person.data.id)),
 );
 
-// Prepare Show Summaries
-const showSummaries: ShowSummary[] = await Promise.all(hostedShows.map(async (show) => {
-    const showVideos = videos.filter(v => v.data.show?.id === show.data.id);
-    const hosts = await getEntries(show.data.hosts);
+const authoredNews = news
+	.filter((story) =>
+		story.data.authors.some((author) => matchRef(author, person.data.id)),
+	)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
 
-    return {
-        id: show.data.id,
-        name: show.data.name,
-        hosts: hosts.map(h => ({ forename: h.data.forename ?? null, surname: h.data.surname ?? null })),
-        cover: show.data.cover,
-        episodes: showVideos.map(v => ({
-            video: {
-                title: v.data.title,
-                thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
-                publishedAt: v.data.publishedAt.toISOString()
-            }
-        }))
-    };
-}));
+const authoredArticles = articles
+	.filter((article) =>
+		article.data.authors.some((author) => matchRef(author, person.data.id)),
+	)
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+const formatPublishDate = (date: Date) =>
+	new Intl.DateTimeFormat("en-US", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	}).format(date);
+
+// Prepare Show Summaries
+const showSummaries: ShowSummary[] = await Promise.all(
+	hostedShows.map(async (show) => {
+		const showVideos = videos.filter((v) => v.data.show?.id === show.data.id);
+		const hosts = await getEntries(show.data.hosts);
+
+		return {
+			id: show.data.id,
+			name: show.data.name,
+			hosts: hosts.map((h) => ({
+				forename: h.data.forename ?? null,
+				surname: h.data.surname ?? null,
+			})),
+			cover: show.data.cover,
+			episodes: showVideos.map((v) => ({
+				video: {
+					title: v.data.title,
+					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
+					publishedAt: v.data.publishedAt.toISOString(),
+				},
+			})),
+		};
+	}),
+);
 
 // Prepare Guest Videos for Feed
-const guestVideoFeed = guestVideos.map((video) => ({
-    id: video.data.id,
-    title: video.data.title,
-    thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
-    streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
-    duration: typeof video.data.duration === "number" ? video.data.duration : 0,
-    slug: video.data.slug,
-    publishedAt: video.data.publishedAt instanceof Date
-        ? video.data.publishedAt.toISOString()
-        : String(video.data.publishedAt),
-})).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+const guestVideoFeed = guestVideos
+	.map((video) => ({
+		id: video.data.id,
+		title: video.data.title,
+		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
+		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
+		slug: video.data.slug,
+		publishedAt:
+			video.data.publishedAt instanceof Date
+				? video.data.publishedAt.toISOString()
+				: String(video.data.publishedAt),
+	}))
+	.sort(
+		(a, b) =>
+			new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+	);
 
 // Render any biography MDX body content (most people have empty bodies)
 const { Content: BiographyContent } = await render(person);
@@ -96,9 +131,18 @@ const topTechNames = [...techCounts.entries()]
 
 const showNames = hostedShows.map((s) => s.data.name);
 
-// Thin profiles (no shows hosted, no guest appearances) get noindex'd so
-// Google doesn't classify them as low-quality and drag down site quality.
-const noindex = videoCount === 0 && showCount === 0 && !hasBiography;
+const newsCount = authoredNews.length;
+const articleCount = authoredArticles.length;
+
+// Thin profiles (no shows hosted, no guest appearances, no authored content,
+// no biography) get noindex'd so Google doesn't classify them as low-quality
+// and drag down site quality.
+const noindex =
+	videoCount === 0 &&
+	showCount === 0 &&
+	newsCount === 0 &&
+	articleCount === 0 &&
+	!hasBiography;
 
 const pageTitle = (() => {
 	if (showCount > 0) {
@@ -122,6 +166,12 @@ const pageDescription = (() => {
 			`${videoCount} appearance${videoCount === 1 ? "" : "s"} on Rawkode Academy`,
 		);
 	}
+	const writtenCount = newsCount + articleCount;
+	if (writtenCount > 0) {
+		parts.push(
+			`${writtenCount} published ${writtenCount === 1 ? "story" : "stories"}`,
+		);
+	}
 	if (topTechNames.length > 0) {
 		parts.push(`covering ${topTechNames.slice(0, 4).join(", ")}`);
 	}
@@ -134,12 +184,27 @@ const pageDescription = (() => {
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
 
 const socialLinks = [
-    person.data.twitter && { name: "Twitter", url: person.data.twitter, icon: "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" },
-    person.data.github && { name: "GitHub", url: person.data.github, icon: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" },
-    person.data.linkedin && { name: "LinkedIn", url: person.data.linkedin, icon: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M2 4a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" },
-    person.data.website && { name: "Website", url: person.data.website, icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" },
+	person.data.twitter && {
+		name: "Twitter",
+		url: person.data.twitter,
+		icon: "M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z",
+	},
+	person.data.github && {
+		name: "GitHub",
+		url: person.data.github,
+		icon: "M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22",
+	},
+	person.data.linkedin && {
+		name: "LinkedIn",
+		url: person.data.linkedin,
+		icon: "M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z M2 9h4v12H2z M2 4a2 2 0 1 1 4 0 2 2 0 0 1-4 0z",
+	},
+	person.data.website && {
+		name: "Website",
+		url: person.data.website,
+		icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
+	},
 ].filter(Boolean);
-
 ---
 
 <Page
@@ -273,6 +338,80 @@ const socialLinks = [
                     description=""
                     videos={guestVideoFeed}
                 />
+            </section>
+        )}
+
+        <!-- Authored Articles -->
+        {authoredArticles.length > 0 && (
+            <section class="w-full max-w-5xl mx-auto">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 rounded-lg bg-primary/10 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
+                        Articles
+                    </h2>
+                </div>
+                <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+                    {authoredArticles.map((article) => (
+                        <li class="py-5 sm:py-6">
+                            <article class="space-y-2">
+                                <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                                    <time datetime={article.data.publishedAt.toISOString()}>
+                                        {formatPublishDate(article.data.publishedAt)}
+                                    </time>
+                                </div>
+                                <h3 class="text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
+                                    <a href={`/read/${article.id}`} class="transition-colors hover:text-primary">
+                                        {article.data.title}
+                                    </a>
+                                </h3>
+                                <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
+                                    {article.data.description}
+                                </p>
+                            </article>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+        )}
+
+        <!-- Latest News -->
+        {authoredNews.length > 0 && (
+            <section class="w-full max-w-5xl mx-auto">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 rounded-lg bg-secondary/10 text-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
+                        Latest News
+                    </h2>
+                </div>
+                <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+                    {authoredNews.map((story) => (
+                        <li class="py-5 sm:py-6">
+                            <article class="space-y-2">
+                                <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                                    <time datetime={story.data.publishedAt.toISOString()}>
+                                        {formatPublishDate(story.data.publishedAt)}
+                                    </time>
+                                </div>
+                                <h3 class="text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
+                                    <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
+                                        {story.data.title}
+                                    </a>
+                                </h3>
+                                <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
+                                    {story.data.description}
+                                </p>
+                            </article>
+                        </li>
+                    ))}
+                </ul>
             </section>
         )}
     </div>
