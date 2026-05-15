@@ -1,36 +1,25 @@
 <template>
-	<component
-		:is="tag"
-		:href="href"
-		:class="cardClasses"
-		v-bind="$attrs"
-	>
-		<!-- Badge overlay (top-left) -->
-		<div v-if="$slots.badge" class="absolute top-3 left-3 z-20">
+	<component :is="tag" :href="href" :class="classes.root" v-bind="$attrs">
+		<div v-if="$slots.badge" :class="badgeWrapClass">
 			<slot name="badge" />
 		</div>
 
-		<!-- Media/Cover slot -->
-		<div v-if="$slots.media" class="relative">
+		<div v-if="$slots.media" :class="mediaWrapClass">
 			<slot name="media" />
-			<!-- Overlay slot (for gradients over media) -->
-			<div v-if="$slots.overlay" class="absolute inset-0">
+			<div v-if="$slots.overlay" :class="overlayWrapClass">
 				<slot name="overlay" />
 			</div>
 		</div>
 
-		<!-- Header slot -->
-		<div v-if="$slots.header" :class="headerClasses">
+		<div v-if="$slots.header" :class="classes.header">
 			<slot name="header" />
 		</div>
 
-		<!-- Main content -->
-		<div :class="contentClasses">
+		<div :class="classes.body">
 			<slot />
 		</div>
 
-		<!-- Footer slot -->
-		<div v-if="$slots.footer" :class="footerClasses">
+		<div v-if="$slots.footer" :class="classes.footer">
 			<slot name="footer" />
 		</div>
 	</component>
@@ -38,92 +27,115 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { card } from "../../../styled-system/recipes";
+import { css, cx } from "../../../styled-system/css";
 
-interface Props {
-	variant?: "glass" | "solid" | "gradient" | "bordered" | "flat";
-	padding?: "none" | "sm" | "md" | "lg";
-	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
-	shadow?: "none" | "sm" | "md" | "lg" | "elevated";
-	hover?: boolean;
-	href?: string;
-	headerPadding?: "none" | "sm" | "md" | "lg";
-	footerPadding?: "none" | "sm" | "md" | "lg";
-	class?: string;
-}
+const props = withDefaults(
+	defineProps<{
+		variant?: "elevated" | "glass" | "outline" | "subtle";
+		href?: string;
+		interactive?: boolean;
+	}>(),
+	{ variant: "elevated", interactive: false },
+);
 
-const props = withDefaults(defineProps<Props>(), {
-	variant: "glass",
-	padding: "md",
-	rounded: "xl",
-	shadow: "md",
-	hover: true,
-	headerPadding: "md",
-	footerPadding: "md",
-});
+defineOptions({ inheritAttrs: false });
 
 const tag = computed(() => (props.href ? "a" : "div"));
 
-const baseClasses = "relative overflow-hidden flex flex-col h-full";
+const variantStyles = {
+	elevated: css({
+		bg: "bg.surface",
+		borderWidth: "1px",
+		borderColor: "border.muted",
+		boxShadow: "md",
+	}),
+	glass: css({
+		bg: "bg.raised/70",
+		borderWidth: "1px",
+		borderColor: "border.muted",
+		backdropFilter: "auto",
+		backdropBlur: "xl",
+		boxShadow: "md",
+	}),
+	outline: css({
+		bg: "transparent",
+		borderWidth: "1px",
+		borderColor: "border.default",
+	}),
+	subtle: css({
+		bg: "bg.sunken",
+		borderWidth: "1px",
+		borderColor: "transparent",
+	}),
+} as const;
 
-const variantClasses = {
-	glass: "card-base backdrop-blur-2xl",
-	solid:
-		"bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
-	gradient: "bg-gradient-card border-glass",
-	bordered: "bg-transparent border-glass-strong",
-	flat: "bg-gray-50 dark:bg-gray-900",
-};
-
-const paddingClasses = {
-	none: "p-0",
-	sm: "p-3",
-	md: "p-6",
-	lg: "p-8",
-};
-
-const roundedClasses = {
-	none: "rounded-none",
-	sm: "rounded-sm",
-	md: "rounded-md",
-	lg: "rounded-lg",
-	xl: "rounded-xl",
-	"2xl": "rounded-2xl",
-	"3xl": "rounded-3xl",
-};
-
-const shadowClasses = {
-	none: "",
-	sm: "shadow-sm",
-	md: "card-shadow",
-	lg: "shadow-lg",
-	elevated: "card-shadow-elevated",
-};
-
-const cardClasses = computed(() => {
-	const classes = [
-		baseClasses,
-		variantClasses[props.variant],
-		roundedClasses[props.rounded],
-		shadowClasses[props.shadow],
-		props.hover && "card-hover cursor-pointer",
-		props.class,
-	].filter(Boolean);
-
-	return classes.join(" ");
+const interactiveStyles = css({
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	cursor: "pointer",
+	_hover: {
+		transform: "translateY(-2px)",
+		boxShadow: "lg",
+		borderColor: "border.default",
+	},
+	_focusVisible: {
+		outline: "2px solid",
+		outlineColor: "border.focus",
+		outlineOffset: "2px",
+	},
 });
 
-const headerClasses = computed(() => {
-	return paddingClasses[props.headerPadding];
+const classes = computed(() => {
+	const slots = card();
+	return {
+		root: cx(
+			slots.root,
+			css({
+				position: "relative",
+				display: "flex",
+				flexDirection: "column",
+				overflow: "hidden",
+				borderRadius: "xl",
+				textDecoration: "none",
+				color: "fg.primary",
+				h: "full",
+			}),
+			variantStyles[props.variant],
+			(props.interactive || !!props.href) && interactiveStyles,
+		),
+		header: cx(
+			slots.header,
+			css({ px: "6", pt: "6", pb: "0", display: "flex", flexDir: "column", gap: "1" }),
+		),
+		body: cx(slots.body, css({ p: "6", display: "flex", flexDir: "column", flex: "1" })),
+		footer: cx(
+			slots.footer,
+			css({
+				px: "6",
+				py: "4",
+				mt: "auto",
+				borderTopWidth: "1px",
+				borderTopColor: "border.muted",
+				display: "flex",
+				alignItems: "center",
+				gap: "3",
+			}),
+		),
+	};
 });
 
-const contentClasses = computed(() => {
-	return [paddingClasses[props.padding], "flex flex-col grow"].join(" ");
+const badgeWrapClass = css({
+	position: "absolute",
+	top: "3",
+	left: "3",
+	zIndex: "10",
 });
 
-const footerClasses = computed(() => {
-	return [
-		paddingClasses[props.footerPadding],
-		"mt-auto border-t border-glass-subtle",
-	].join(" ");
+const mediaWrapClass = css({
+	position: "relative",
+	overflow: "hidden",
+	"& > img, & > video, & > picture": { width: "full", height: "auto", display: "block" },
 });
+
+const overlayWrapClass = css({ position: "absolute", inset: "0", pointerEvents: "none" });
 </script>

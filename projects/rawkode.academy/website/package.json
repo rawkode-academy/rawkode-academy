@@ -26,6 +26,7 @@
 		"panda": "panda codegen --clean"
 	},
 	"dependencies": {
+		"@ark-ui/vue": "^5.36.2",
 		"@astrojs/check": "0.9.8",
 		"@astrojs/cloudflare": "13.1.4",
 		"@astrojs/mdx": "5.0.3",

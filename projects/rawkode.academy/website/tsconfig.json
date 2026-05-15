@@ -18,6 +18,7 @@
 		"jsx": "react-jsx",
 		"jsxImportSource": "react",
 		"types": ["vidstack/vue"],
+		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"@games/*": ["../games/*"]

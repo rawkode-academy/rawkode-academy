@@ -1,84 +1,68 @@
 <template>
-	<div :class="stackClasses">
+	<div :class="className" v-bind="$attrs">
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css } from "../../../styled-system/css";
 
-interface Props {
-	direction?: "vertical" | "horizontal";
-	spacing?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-	align?: "start" | "center" | "end" | "stretch";
-	justify?: "start" | "center" | "end" | "between" | "around" | "evenly";
-	wrap?: boolean;
-	class?: string;
-}
+type Spacing = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
-const props = withDefaults(defineProps<Props>(), {
-	direction: "vertical",
-	spacing: "md",
-	align: "stretch",
-	justify: "start",
-	wrap: false,
-});
-
-const baseClasses = "flex";
-
-const directionClasses = {
-	vertical: "flex-col",
-	horizontal: "flex-row",
-};
-
-const spacingClasses = {
-	vertical: {
-		none: "gap-0",
-		xs: "gap-1",
-		sm: "gap-2",
-		md: "gap-4",
-		lg: "gap-6",
-		xl: "gap-8",
-		"2xl": "gap-12",
+const props = withDefaults(
+	defineProps<{
+		direction?: "vertical" | "horizontal";
+		spacing?: Spacing;
+		align?: "start" | "center" | "end" | "stretch";
+		justify?: "start" | "center" | "end" | "between" | "around" | "evenly";
+		wrap?: boolean;
+	}>(),
+	{
+		direction: "vertical",
+		spacing: "md",
+		align: "stretch",
+		justify: "start",
+		wrap: false,
 	},
-	horizontal: {
-		none: "gap-0",
-		xs: "gap-2",
-		sm: "gap-3",
-		md: "gap-4",
-		lg: "gap-6",
-		xl: "gap-8",
-		"2xl": "gap-12",
-	},
+);
+
+defineOptions({ inheritAttrs: false });
+
+const gapToken: Record<Spacing, string> = {
+	none: "0",
+	xs: "1",
+	sm: "2",
+	md: "4",
+	lg: "6",
+	xl: "8",
+	"2xl": "12",
 };
 
-const alignClasses = {
-	start: "items-start",
-	center: "items-center",
-	end: "items-end",
-	stretch: "items-stretch",
-};
+const alignMap = {
+	start: "flex-start",
+	center: "center",
+	end: "flex-end",
+	stretch: "stretch",
+} as const;
 
-const justifyClasses = {
-	start: "justify-start",
-	center: "justify-center",
-	end: "justify-end",
-	between: "justify-between",
-	around: "justify-around",
-	evenly: "justify-evenly",
-};
+const justifyMap = {
+	start: "flex-start",
+	center: "center",
+	end: "flex-end",
+	between: "space-between",
+	around: "space-around",
+	evenly: "space-evenly",
+} as const;
 
-const stackClasses = computed(() => {
-	return [
-		baseClasses,
-		directionClasses[props.direction],
-		spacingClasses[props.direction][props.spacing],
-		alignClasses[props.align],
-		justifyClasses[props.justify],
-		props.wrap && "flex-wrap",
-		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
-});
+const className = computed(() =>
+	css({
+		display: "flex",
+		flexDirection: props.direction === "horizontal" ? "row" : "column",
+		gap: gapToken[props.spacing],
+		alignItems: alignMap[props.align],
+		justifyContent: justifyMap[props.justify],
+		flexWrap: props.wrap ? "wrap" : "nowrap",
+	}),
+);
 </script>

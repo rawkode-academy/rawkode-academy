@@ -1,76 +1,57 @@
 <template>
-	<div :class="gridClasses">
+	<div :class="className" v-bind="$attrs">
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css } from "../../../styled-system/css";
 
-interface Props {
-	cols?: 1 | 2 | 3 | 4 | 5 | 6 | "auto-fit" | "auto-fill";
-	colsMd?: 1 | 2 | 3 | 4 | 5 | 6;
-	colsLg?: 1 | 2 | 3 | 4 | 5 | 6;
-	gap?: "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
-	class?: string;
-}
+type Cols = 1 | 2 | 3 | 4 | 5 | 6 | "auto-fit" | "auto-fill";
+type Gap = "none" | "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
 
-const props = withDefaults(defineProps<Props>(), {
-	cols: 1,
-	gap: "md",
-});
+const props = withDefaults(
+	defineProps<{
+		cols?: Cols;
+		colsMd?: 1 | 2 | 3 | 4 | 5 | 6;
+		colsLg?: 1 | 2 | 3 | 4 | 5 | 6;
+		gap?: Gap;
+		minColWidth?: string;
+	}>(),
+	{ cols: 1, gap: "md", minColWidth: "250px" },
+);
 
-const baseClasses = "grid";
+defineOptions({ inheritAttrs: false });
 
-const colsClasses = {
-	1: "grid-cols-1",
-	2: "grid-cols-2",
-	3: "grid-cols-3",
-	4: "grid-cols-4",
-	5: "grid-cols-5",
-	6: "grid-cols-6",
-	"auto-fit": "grid-cols-[repeat(auto-fit,minmax(250px,1fr))]",
-	"auto-fill": "grid-cols-[repeat(auto-fill,minmax(250px,1fr))]",
+const gapToken: Record<Gap, string> = {
+	none: "0",
+	xs: "2",
+	sm: "3",
+	md: "6",
+	lg: "8",
+	xl: "10",
+	"2xl": "12",
 };
 
-const colsMdClasses = {
-	1: "md:grid-cols-1",
-	2: "md:grid-cols-2",
-	3: "md:grid-cols-3",
-	4: "md:grid-cols-4",
-	5: "md:grid-cols-5",
-	6: "md:grid-cols-6",
+const colTemplate = (c: Cols, min: string): string => {
+	if (c === "auto-fit") return `repeat(auto-fit, minmax(${min}, 1fr))`;
+	if (c === "auto-fill") return `repeat(auto-fill, minmax(${min}, 1fr))`;
+	return `repeat(${c}, minmax(0, 1fr))`;
 };
 
-const colsLgClasses = {
-	1: "lg:grid-cols-1",
-	2: "lg:grid-cols-2",
-	3: "lg:grid-cols-3",
-	4: "lg:grid-cols-4",
-	5: "lg:grid-cols-5",
-	6: "lg:grid-cols-6",
-};
-
-const gapClasses = {
-	none: "gap-0",
-	xs: "gap-2",
-	sm: "gap-3",
-	md: "gap-6",
-	lg: "gap-8",
-	xl: "gap-10",
-	"2xl": "gap-12",
-};
-
-const gridClasses = computed(() => {
-	return [
-		baseClasses,
-		colsClasses[props.cols],
-		props.colsMd && colsMdClasses[props.colsMd],
-		props.colsLg && colsLgClasses[props.colsLg],
-		gapClasses[props.gap],
-		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
+const className = computed(() => {
+	const styles: Record<string, unknown> = {
+		display: "grid",
+		gridTemplateColumns: colTemplate(props.cols, props.minColWidth),
+		gap: gapToken[props.gap],
+	};
+	if (props.colsMd) {
+		styles.md = { gridTemplateColumns: `repeat(${props.colsMd}, minmax(0, 1fr))` };
+	}
+	if (props.colsLg) {
+		styles.lg = { gridTemplateColumns: `repeat(${props.colsLg}, minmax(0, 1fr))` };
+	}
+	return css(styles);
 });
 </script>

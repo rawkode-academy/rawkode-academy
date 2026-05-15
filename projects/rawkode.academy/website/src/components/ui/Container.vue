@@ -1,47 +1,45 @@
 <template>
-	<div :class="containerClasses">
+	<div :class="className" v-bind="$attrs">
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { css } from "../../../styled-system/css";
 
-interface Props {
-	size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
-	padding?: "none" | "sm" | "md" | "lg";
-	class?: string;
-}
+const props = withDefaults(
+	defineProps<{
+		size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
+		padding?: "none" | "sm" | "md" | "lg";
+	}>(),
+	{ size: "xl", padding: "md" },
+);
 
-const props = withDefaults(defineProps<Props>(), {
-	size: "xl",
-	padding: "md",
-});
+defineOptions({ inheritAttrs: false });
 
-const sizeClasses = {
-	sm: "max-w-2xl",
-	md: "max-w-4xl",
-	lg: "max-w-6xl",
-	xl: "max-w-7xl",
-	"2xl": "max-w-screen-2xl",
-	full: "max-w-full",
-};
+const sizeMap = {
+	sm: "42rem",
+	md: "56rem",
+	lg: "72rem",
+	xl: "80rem",
+	"2xl": "96rem",
+	full: "100%",
+} as const;
 
-const paddingClasses = {
-	none: "",
-	sm: "px-4",
-	md: "px-4 lg:px-6",
-	lg: "px-4 lg:px-8",
-};
+const paddingMap = {
+	none: { px: "0" },
+	sm: { px: "4" },
+	md: { px: "4", lg: { px: "6" } },
+	lg: { px: "4", lg: { px: "8" } },
+} as const;
 
-const containerClasses = computed(() => {
-	return [
-		"mx-auto",
-		sizeClasses[props.size],
-		paddingClasses[props.padding],
-		props.class,
-	]
-		.filter(Boolean)
-		.join(" ");
-});
+const className = computed(() =>
+	css({
+		mx: "auto",
+		w: "full",
+		maxWidth: sizeMap[props.size],
+		...paddingMap[props.padding],
+	}),
+);
 </script>
