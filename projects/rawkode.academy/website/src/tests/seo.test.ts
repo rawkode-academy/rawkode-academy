@@ -797,6 +797,86 @@ describe("Crawlability and Sitemaps", () => {
 	});
 });
 
+describe("Related news selector", () => {
+	function makeStory(id: string, technologies: string[], publishedAt: string) {
+		return {
+			id,
+			data: {
+				title: `Story ${id}`,
+				description: `Description for ${id}`,
+				technologies,
+				publishedAt: new Date(publishedAt),
+			},
+		};
+	}
+
+	it("ranks stories with more shared technology tags above newer-but-unrelated ones", async () => {
+		const { selectRelatedNews } = await import("../lib/related-news.ts");
+		const current = makeStory(
+			"current",
+			["kubernetes", "cncf"],
+			"2026-05-15T00:00:00.000Z",
+		);
+		const candidates = [
+			current,
+			makeStory(
+				"two-shared",
+				["kubernetes", "cncf", "istio"],
+				"2026-04-01T00:00:00.000Z",
+			),
+			makeStory("one-shared", ["kubernetes"], "2026-05-14T00:00:00.000Z"),
+			makeStory(
+				"brand-new-unrelated",
+				["postgres"],
+				"2026-05-15T08:00:00.000Z",
+			),
+		];
+
+		const related = selectRelatedNews(
+			current.id,
+			current.data.technologies,
+			candidates,
+			3,
+		);
+
+		expect(related.map((story) => story.id)).toEqual([
+			"two-shared",
+			"one-shared",
+			"brand-new-unrelated",
+		]);
+	});
+
+	it("falls back to recency when no candidate shares a tag, and excludes the current story", async () => {
+		const { selectRelatedNews } = await import("../lib/related-news.ts");
+		const current = makeStory("current", ["niche"], "2026-05-15T00:00:00.000Z");
+		const candidates = [
+			current,
+			makeStory("older", ["postgres"], "2026-01-01T00:00:00.000Z"),
+			makeStory("newer", ["kubernetes"], "2026-05-14T00:00:00.000Z"),
+		];
+
+		const related = selectRelatedNews(
+			current.id,
+			current.data.technologies,
+			candidates,
+			5,
+		);
+
+		expect(related.map((story) => story.id)).toEqual(["newer", "older"]);
+	});
+
+	it("returns an empty array when limit is non-positive", async () => {
+		const { selectRelatedNews } = await import("../lib/related-news.ts");
+		const related = selectRelatedNews(
+			"current",
+			[],
+			[makeStory("any", [], "2026-05-15T00:00:00.000Z")],
+			0,
+		);
+		expect(related).toEqual([]);
+	});
+});
+
 describe("Structured Data Validation", () => {
 	it("should model VideoObject JSON-LD with clip urls, captions, and transcript text", () => {
 		const videoJsonLd = {
