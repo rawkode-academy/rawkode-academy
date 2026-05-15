@@ -9,6 +9,8 @@ export interface NewsArticleSource {
 	publishedAt: Date;
 	updatedAt?: Date;
 	technologies?: ReadonlyArray<string>;
+	wordCount?: number;
+	readingMinutes?: number;
 }
 
 export interface BuildNewsArticleJsonLdInput {
@@ -79,6 +81,22 @@ export function buildNewsArticleJsonLd(
 
 	if (keywords.length > 0) {
 		jsonLd.keywords = keywords.join(", ");
+	}
+
+	if (
+		typeof article.wordCount === "number" &&
+		Number.isFinite(article.wordCount) &&
+		article.wordCount > 0
+	) {
+		jsonLd.wordCount = Math.floor(article.wordCount);
+	}
+
+	if (
+		typeof article.readingMinutes === "number" &&
+		Number.isFinite(article.readingMinutes) &&
+		article.readingMinutes > 0
+	) {
+		jsonLd.timeRequired = `PT${Math.ceil(article.readingMinutes)}M`;
 	}
 
 	return jsonLd;
