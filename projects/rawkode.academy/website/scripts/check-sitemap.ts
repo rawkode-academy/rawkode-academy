@@ -49,6 +49,8 @@ export const REQUIRED_SITEMAP_PATHS = [
 	"/sitemaps/people.xml",
 	"/sitemaps/shows.xml",
 	"/sitemaps/series.xml",
+	"/sitemaps/news.xml",
+	"/news-sitemap.xml",
 	"/sitemaps/adrs.xml",
 ] as const;
 
@@ -170,7 +172,9 @@ export function buildSupplementalUrlChecks(base: string): UrlExpectation[] {
 	}));
 }
 
-async function getSitemapFetchResult(base: string): Promise<SitemapFetchResult> {
+async function getSitemapFetchResult(
+	base: string,
+): Promise<SitemapFetchResult> {
 	const candidates = [
 		new URL("/sitemap-index.xml", base).href,
 		new URL("/sitemap.xml", base).href,
@@ -237,25 +241,13 @@ async function checkUrl(
 
 	if (ok && contentType.includes("text/html")) {
 		const html = await response.text();
-		canonical = extractTagAttribute(
-			html,
-			"link",
-			{ rel: "canonical" },
-			"href",
-		);
-		robots = extractTagAttribute(
-			html,
-			"meta",
-			{ name: "robots" },
-			"content",
-		);
+		canonical = extractTagAttribute(html, "link", { rel: "canonical" }, "href");
+		robots = extractTagAttribute(html, "meta", { name: "robots" }, "content");
 
 		const expectedCanonical = expectation?.expectedCanonical ?? url;
 		if (canonical) {
-			canonicalOk =
-				normalizeUrl(canonical) === normalizeUrl(expectedCanonical);
-			hostOk =
-				new URL(canonical).hostname.replace(/^www\./, "") === apexHost;
+			canonicalOk = normalizeUrl(canonical) === normalizeUrl(expectedCanonical);
+			hostOk = new URL(canonical).hostname.replace(/^www\./, "") === apexHost;
 		}
 
 		if (expectation?.expectedRobots) {
@@ -287,7 +279,9 @@ export async function run() {
 	const { indexUrl, sitemapLocs, pageUrls } = await getSitemapFetchResult(base);
 	const limitedPageUrls = pageUrls.slice(0, limit);
 	console.log(`Fetched sitemap index: ${indexUrl}`);
-	console.log(`Found ${sitemapLocs.length} child sitemaps and ${pageUrls.length} URLs`);
+	console.log(
+		`Found ${sitemapLocs.length} child sitemaps and ${pageUrls.length} URLs`,
+	);
 
 	const sitemapPaths = new Set(sitemapLocs.map((loc) => new URL(loc).pathname));
 	const missingSitemaps = REQUIRED_SITEMAP_PATHS.filter(
@@ -348,7 +342,9 @@ export async function run() {
 	console.log("\nSummary:");
 	console.log(`  Total sitemap URLs checked: ${pageResults.length}`);
 	console.log(`  Required sitemap files missing: ${missingSitemaps.length}`);
-	console.log(`  Disallowed URLs in sitemap set: ${disallowedSitemapUrls.length}`);
+	console.log(
+		`  Disallowed URLs in sitemap set: ${disallowedSitemapUrls.length}`,
+	);
 	console.log(`  Canonical/page failures: ${pageFailures.length}`);
 	console.log(`  Page fetch errors: ${pageErrorCount}`);
 	console.log(`  Supplemental URL failures: ${supplementalFailures.length}`);

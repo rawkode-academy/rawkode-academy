@@ -16,7 +16,10 @@ import {
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
 const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
-const ARTICLE_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/articles");
+const ARTICLE_CONTENT_DIR = resolve(
+	TESTS_DIR,
+	"../../../../../content/articles",
+);
 const TECHNOLOGY_CONTENT_DIR = resolve(
 	TESTS_DIR,
 	"../../../../../content/technologies",
@@ -273,8 +276,8 @@ describe("SEO Validation", () => {
 
 	describe("URL Structure", () => {
 		it("all article URLs should be SEO-friendly", async () => {
-				getCollection.mockResolvedValue([
-					{
+			getCollection.mockResolvedValue([
+				{
 					id: "test-article-seo-friendly-url",
 					data: {
 						title: "SEO Friendly URL Article",
@@ -324,7 +327,7 @@ describe("SEO Validation", () => {
 					},
 					body: "This is a sufficiently long body of content to satisfy the minimal length check for the SEO content structure test. It intentionally exceeds one hundred characters.",
 				},
-				]);
+			]);
 
 			const articles = (await getCollection(
 				"articles",
@@ -624,6 +627,8 @@ describe("Crawlability and Sitemaps", () => {
 		expect(sitemapPaths).toContain("/video-sitemap.xml");
 		expect(sitemapPaths).toContain("/sitemaps/pages.xml");
 		expect(sitemapPaths).toContain("/sitemaps/articles.xml");
+		expect(sitemapPaths).toContain("/sitemaps/news.xml");
+		expect(sitemapPaths).toContain("/news-sitemap.xml");
 		expect(
 			sitemapPaths.some(
 				(path) =>
@@ -632,6 +637,80 @@ describe("Crawlability and Sitemaps", () => {
 					path.startsWith("/private"),
 			),
 		).toBe(false);
+	});
+
+	it("filters Google News sitemap to items published within the last 48 hours, newest first", async () => {
+		const { selectFreshNewsItems } = await import("../lib/sitemaps.ts");
+
+		const now = new Date("2026-05-15T12:00:00.000Z");
+		const items = [
+			{
+				id: "ancient-story",
+				data: {
+					title: "Ancient",
+					publishedAt: new Date("2026-05-01T09:00:00.000Z"),
+				},
+			},
+			{
+				id: "edge-of-window",
+				data: {
+					title: "Edge",
+					// Exactly 48h - 1ms before now; should be included.
+					publishedAt: new Date("2026-05-13T12:00:00.001Z"),
+				},
+			},
+			{
+				id: "fresh-story",
+				data: {
+					title: "Fresh",
+					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+				},
+			},
+			{
+				id: "stale-story",
+				data: {
+					title: "Stale",
+					publishedAt: new Date("2026-05-13T11:00:00.000Z"),
+				},
+			},
+		];
+
+		const fresh = selectFreshNewsItems(items, now);
+		expect(fresh.map((item) => item.id)).toEqual([
+			"fresh-story",
+			"edge-of-window",
+		]);
+	});
+
+	it("renders the Google News sitemap with the news: namespace and per-item metadata", async () => {
+		const { renderGoogleNewsSitemap } = await import(
+			"../pages/news-sitemap.xml.ts"
+		);
+
+		const xml = renderGoogleNewsSitemap(new URL("https://rawkode.academy"), [
+			{
+				id: "kubernetes-1-36-sneak-peek",
+				data: {
+					title: "Kubernetes 1.36 sneak peek & ampersand",
+					publishedAt: new Date("2026-05-15T08:00:00.000Z"),
+				},
+			},
+		]);
+
+		expect(xml).toContain(
+			'xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"',
+		);
+		expect(xml).toContain(
+			"<loc>https://rawkode.academy/news/kubernetes-1-36-sneak-peek</loc>",
+		);
+		expect(xml).toContain("<news:name>Rawkode Academy</news:name>");
+		expect(xml).toContain("<news:language>en</news:language>");
+		expect(xml).toContain(
+			"<news:publication_date>2026-05-15T08:00:00.000Z</news:publication_date>",
+		);
+		expect(xml).toContain(
+			"<news:title>Kubernetes 1.36 sneak peek &amp; ampersand</news:title>",
+		);
 	});
 
 	it("renders video sitemap durations as bounded integer seconds", async () => {

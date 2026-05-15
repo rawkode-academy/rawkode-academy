@@ -41,11 +41,27 @@ type StaticPageDefinition = {
 
 const staticPages: StaticPageDefinition[] = [
 	{ path: "/", source: "src/pages/index.astro", changefreq: "daily" },
-	{ path: "/about", source: "src/pages/about/index.astro", changefreq: "monthly" },
-	{ path: "/watch", source: "src/pages/watch/index.astro", changefreq: "daily" },
-	{ path: "/shows", source: "src/pages/shows/index.astro", changefreq: "weekly" },
+	{
+		path: "/about",
+		source: "src/pages/about/index.astro",
+		changefreq: "monthly",
+	},
+	{
+		path: "/watch",
+		source: "src/pages/watch/index.astro",
+		changefreq: "daily",
+	},
+	{
+		path: "/shows",
+		source: "src/pages/shows/index.astro",
+		changefreq: "weekly",
+	},
 	{ path: "/read", source: "src/pages/read/index.astro", changefreq: "daily" },
-	{ path: "/courses", source: "src/pages/courses/index.astro", changefreq: "weekly" },
+	{
+		path: "/courses",
+		source: "src/pages/courses/index.astro",
+		changefreq: "weekly",
+	},
 	{
 		path: "/learning-paths",
 		source: "src/pages/learning-paths/index.astro",
@@ -66,7 +82,11 @@ const staticPages: StaticPageDefinition[] = [
 		source: "src/pages/technology/matrix/advanced.astro",
 		changefreq: "weekly",
 	},
-	{ path: "/people", source: "src/pages/people/index.astro", changefreq: "weekly" },
+	{
+		path: "/people",
+		source: "src/pages/people/index.astro",
+		changefreq: "weekly",
+	},
 	{ path: "/adrs", source: "src/pages/adrs/index.astro", changefreq: "weekly" },
 	{
 		path: "/changelog",
@@ -180,7 +200,9 @@ function escapeXml(value: unknown): string {
 	});
 }
 
-async function getContentMtimes(contentDir: string): Promise<Map<string, Date>> {
+async function getContentMtimes(
+	contentDir: string,
+): Promise<Map<string, Date>> {
 	if (!contentMtimeCache.has(contentDir)) {
 		contentMtimeCache.set(
 			contentDir,
@@ -232,7 +254,10 @@ function getLatestLastmod(entries: SitemapUrlEntry[]): Date | undefined {
 	);
 }
 
-export function toAbsoluteUrl(site: URL | string | undefined, path: string): string {
+export function toAbsoluteUrl(
+	site: URL | string | undefined,
+	path: string,
+): string {
 	const base = site ? new URL(site.toString()) : new URL(DEFAULT_SITE_URL);
 	return new URL(normalizePath(path), base).href;
 }
@@ -321,7 +346,9 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	return sortByPath(entries);
 }
 
-export async function getTechnologySitemapEntries(): Promise<SitemapUrlEntry[]> {
+export async function getTechnologySitemapEntries(): Promise<
+	SitemapUrlEntry[]
+> {
 	const [technologies, mtimes, allVideos] = await Promise.all([
 		getCollection("technologies"),
 		getContentMtimes("technologies"),
@@ -531,6 +558,50 @@ export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	return sortByPath(entries);
 }
 
+export async function getNewsSitemapEntries(): Promise<SitemapUrlEntry[]> {
+	const [newsItems, mtimes] = await Promise.all([
+		getCollection("news"),
+		getContentMtimes("news"),
+	]);
+
+	const entries = newsItems.map((item) => ({
+		path: `/news/${item.id}`,
+		lastmod: pickLastmod(
+			mtimes.get(item.id),
+			(item.data as Record<string, unknown>).updatedAt,
+			item.data.publishedAt,
+		),
+		changefreq: "weekly" as const,
+	}));
+
+	return sortByPath(entries);
+}
+
+export const GOOGLE_NEWS_FRESHNESS_MS = 2 * 24 * 60 * 60 * 1000;
+
+export function selectFreshNewsItems<T extends { data: { publishedAt: Date } }>(
+	items: readonly T[],
+	now: Date = new Date(),
+): T[] {
+	const cutoff = now.getTime() - GOOGLE_NEWS_FRESHNESS_MS;
+	return [...items]
+		.filter((item) => item.data.publishedAt.getTime() >= cutoff)
+		.sort(
+			(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+		);
+}
+
+export async function getFreshNewsSitemapEntries(
+	now: Date = new Date(),
+): Promise<SitemapUrlEntry[]> {
+	const newsItems = await getCollection("news");
+	return selectFreshNewsItems(newsItems, now).map((item) => ({
+		path: `/news/${item.id}`,
+		lastmod: item.data.publishedAt,
+		changefreq: "hourly" as const,
+	}));
+}
+
 export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	const [adrs, mtimes] = await Promise.all([
 		getCollection("adrs"),
@@ -586,6 +657,14 @@ export const sitemapDefinitions: readonly SitemapDefinition[] = [
 	{
 		path: "/sitemaps/series.xml",
 		getEntries: getSeriesSitemapEntries,
+	},
+	{
+		path: "/sitemaps/news.xml",
+		getEntries: getNewsSitemapEntries,
+	},
+	{
+		path: "/news-sitemap.xml",
+		getEntries: getFreshNewsSitemapEntries,
 	},
 	{
 		path: "/sitemaps/adrs.xml",
