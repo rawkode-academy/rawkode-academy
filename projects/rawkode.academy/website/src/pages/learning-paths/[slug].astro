@@ -493,18 +493,35 @@ const pageDescription = learningPath.data.description;
 							<div class={dt}>Difficulty</div>
 							<div class={dd}>{difficultyLabel(learningPath.data.difficulty)}</div>
 						</li>
-						{technologyTags.length > 0 && (
-							<li>
-								<div class={dt}>Technologies</div>
-								<div class={tagList}>
-									{technologyTags.map((t) => (
-										<a href={`/technology/${t.id}`} rel="tag" class={tag}>{t.label}</a>
-									))}
-								</div>
-							</li>
-						)}
 					</ul>
 				</div>
+
+				{technologyTags.length > 0 && (
+					<div class={sideCard}>
+						<h2 class={sideTitle}>Technologies Covered</h2>
+						<div class={tagList}>
+							{technologyTags.map((t) => (
+								<a href={`/technology/${t.id}`} rel="tag" class={tag}>{t.label}</a>
+							))}
+						</div>
+					</div>
+				)}
+
+				{authors.length > 0 && (
+					<div class={sideCard}>
+						<h2 class={sideTitle}>Your Guides</h2>
+						<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+							{authors.map((a) => (
+								<a href={`/people/${a.data.id}`} style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--colors-fg-primary); transition: color 150ms ease;">
+									<img src={a.data.avatarUrl ?? "/apple-touch-icon.png"} alt={a.data.name} style="width: 2.5rem; height: 2.5rem; border-radius: 9999px; object-fit: cover;" loading="lazy" onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`} />
+									<div>
+										<div style="font-weight: 600; font-size: 0.875rem; color: var(--colors-fg-primary);">{a.data.name}</div>
+									</div>
+								</a>
+							))}
+						</div>
+					</div>
+				)}
 
 				{outline.length > 0 && (
 					<div class={sideCard}>

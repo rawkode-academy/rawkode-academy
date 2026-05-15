@@ -12,24 +12,60 @@ const stats = [
 ];
 
 const missionPillars = [
-	{ title: "Hands-on & honest", description: "We build in the open, share the messy bits, and keep cameras rolling when things go sideways." },
-	{ title: "Maintainer-first", description: "Creators and core contributors sit beside us to explain the 'why' behind their decisions." },
-	{ title: "Future-looking", description: "We scout emerging runtimes, infrastructure patterns, and developer workflows long before they're mainstream." },
+	{ title: "Hands-on & honest", description: "We build in the open, share the messy bits, and keep the cameras rolling when things go sideways. Every episode is a real session — no rehearsals, no rerolls, no curated highlight reel pretending to be a tutorial." },
+	{ title: "Maintainer-first", description: "Creators and core contributors sit beside us to explain the 'why' behind their decisions. We give them the floor, ask the questions our audience would ask, and never reduce a project to a marketing soundbite." },
+	{ title: "Future-looking", description: "We scout emerging runtimes, infrastructure patterns, and developer workflows long before they're mainstream — then we revisit them as they mature, so you can see where the industry is actually heading rather than where it claims to be." },
 ];
 
 const timeline = [
-	{ period: "2003 — 2014", title: "Full-stack builder & accidental SRE", description: "David cut his teeth on ticketing systems for horse racing tracks, touching everything from custom kernels to QT POS apps. Puppet automation in 2004 cemented a lifelong obsession with operational excellence." },
-	{ period: "2014 — 2016", title: "Scaling TeamRock (now LouderSound)", description: "As Director of Development, he led the shift from VMs to containerized AWS workloads — just in time for an enormous traffic spike following the passing of Lemmy Kilmister." },
-	{ period: "2016 — 2019", title: "Developer advocate at InfluxData", description: "Helping operators adopt InfluxDB and Telegraf for Kubernetes metrics, well before metrics-server replaced Heapster on clusters." },
-	{ period: "2019", title: "Rawkode Academy launches", description: 'The first video, "Last Week in Kubernetes," sets the tone: live, hands-on exploration guided by curiosity.' },
-	{ period: "2021", title: "Klustered arrives", description: "We invited friends and experts to debug intentionally broken Kubernetes clusters in real time. The format quickly became a community favorite." },
-	{ period: "Today", title: "Still experimenting", description: "Rawkode Academy blends live streams, deep-dive series, and research-backed learning paths to help engineers keep pace with cloud native change." },
+	{
+		period: "2003 — 2014",
+		title: "Full-stack builder & accidental SRE",
+		description: "David cut his teeth on ticketing systems for UK horse racing tracks, touching everything from custom kernels in C to QT-based point-of-sale apps and Windows CE handhelds. Discovering Puppet in 2004 sparked a lifelong obsession with operational excellence — and proved that the most important system is the one nobody notices.",
+	},
+	{
+		period: "2014 — 2016",
+		title: "Scaling TeamRock (now LouderSound)",
+		description: "As Director of Development at the UK's largest rock & metal media group, David led the migration from virtual machines to containerized AWS workloads — just in time for an enormous traffic spike following the passing of Lemmy Kilmister. The container investment proved that infrastructure resilience is a competitive advantage long before \"platform engineering\" was a job title.",
+	},
+	{
+		period: "2016 — 2019",
+		title: "Developer advocate at InfluxData",
+		description: "Helping operators adopt InfluxDB and Telegraf for Kubernetes metrics through meetups, conference talks, and engineering team office-hours — back when metrics-server still hadn't replaced Heapster on real clusters. The advocacy work that took David from London to Tokyo shaped Rawkode Academy's maintainer-first interview style.",
+	},
+	{
+		period: "2019",
+		title: "Rawkode Academy officially launches",
+		description: 'The first video, "Last Week in Kubernetes," set the tone for everything that followed: live, hands-on exploration guided by curiosity, recorded in public, mistakes and all. No edits. No talking points. Just engineering.',
+	},
+	{
+		period: "2021",
+		title: "Klustered arrives",
+		description: "We invited friends and experts to debug intentionally broken Kubernetes clusters in real time — and the format quickly became a community favorite. Klustered turned incident response into a celebration of how engineers actually think under pressure, and proved education can be genuinely entertaining.",
+	},
+	{
+		period: "Today",
+		title: "Still experimenting, still sharing",
+		description: "Rawkode Academy blends live streams, deep-dive series, and research-backed learning paths to help engineers keep pace with cloud native change. We're still building in public, still learning out loud, and still convinced the best way to teach a thing is to do the thing where everyone can watch.",
+	},
 ];
 
 const signatureFormats = [
-	{ title: "Rawkode Live", description: "Pair-programming sessions with maintainers where we explore new releases, ship POCs, and fix bugs the honest way.", chips: ["Live coding", "Maintainer access", "Transparent problem-solving"] },
-	{ title: "Klustered", description: "A chaos-friendly challenge series where experts race to repair sabotaged Kubernetes clusters.", chips: ["Kubernetes", "Incident response", "Game show energy"] },
-	{ title: "Learning Paths", description: "Structured, research-backed collections that turn sprawling topics into actionable skill trees.", chips: ["Self-paced", "Curated", "Actionable"] },
+	{
+		title: "Rawkode Live",
+		description: "Pair-programming sessions with maintainers and contributors where we explore new releases, ship proof-of-concepts, and fix bugs the honest way. No demo magic, no polished slide decks — just two engineers learning out loud, with the chat asking the hard questions in real time.",
+		chips: ["Live coding", "Maintainer access", "Transparent problem-solving"],
+	},
+	{
+		title: "Klustered",
+		description: "A chaos-friendly challenge series where experts race to repair sabotaged Kubernetes clusters. Every episode reveals new observability, networking, and reliability tactics — and proves that the most valuable engineering skill is staying calm while the cluster is on fire.",
+		chips: ["Kubernetes", "Incident response", "Game show energy"],
+	},
+	{
+		title: "Learning Paths",
+		description: "Structured, research-backed collections of shows, articles, and labs that turn sprawling topics like Platform Engineering, WebAssembly, and Service Meshes into actionable skill trees. Built for engineers who want to go deep without getting lost.",
+		chips: ["Self-paced", "Curated resources", "Actionable outcomes"],
+	},
 ];
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" } });
@@ -218,7 +254,7 @@ const ctaGhostBtn = css({
 ---
 
 <Page title="About Rawkode Academy" description="Get to know the story, mission, and formats behind Rawkode Academy.">
-	<PageHero eyebrow="Our Story" title="Cloud Native education built in public" subtitle="We document the wins, losses, and aha moments that come from exploring the rapidly changing infrastructure landscape." size="lg" />
+	<PageHero eyebrow="Our Story" title="Cloud Native education built in public" subtitle="We document the wins, losses, and aha moments that come from exploring the rapidly changing infrastructure landscape — alongside the maintainers and engineers who shape it." size="lg" />
 
 	<div class={shell}>
 		<section class={section}>
@@ -226,8 +262,9 @@ const ctaGhostBtn = css({
 				<div class={card}>
 					<p class={timelinePeriod}>Mission</p>
 					<h2 class={cardTitle}>Empower developers to navigate constant change</h2>
-					<p class={cardBody}>Rawkode Academy makes complex cloud native topics approachable without sanding off the hard edges. We combine research, real production experience, and humility to show exactly how we learn.</p>
-					<p class={cardBody} style="margin-top: 1rem;">Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to every experiment, refactor, and architectural debate.</p>
+					<p class={cardBody}>Rawkode Academy exists to make complex cloud native topics approachable without sanding off the hard edges. We combine deep research, real production experience, and a lot of humility to show exactly how we learn — including the dead ends.</p>
+					<p class={cardBody} style="margin-top: 1rem;">Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to every experiment, refactor, and architectural debate. The technology will keep changing; the way we approach it shouldn't have to.</p>
+					<p class={cardBody} style="margin-top: 1rem;">We document the path, not just the destination — because the people who'll inherit these systems deserve to see how we got here.</p>
 				</div>
 				<div style="display: flex; flex-direction: column; gap: 1.25rem;">
 					{missionPillars.map((pillar) => (
@@ -243,7 +280,7 @@ const ctaGhostBtn = css({
 		<section class={section}>
 			<p class={sectionEyebrow}>Impact</p>
 			<h2 class={sectionTitle}>Proof that curiosity scales</h2>
-			<p class={sectionLede}>We obsess over doing the work in public — these numbers are a snapshot of what that persistence has unlocked.</p>
+			<p class={sectionLede}>We obsess over doing the work in public — these numbers are a snapshot of what that persistence has unlocked. They are not the point of the work, but they are evidence that the work is finding the engineers who need it.</p>
 			<div class={grid3}>
 				{stats.map((stat) => (
 					<div class={statCard}>
@@ -257,8 +294,8 @@ const ctaGhostBtn = css({
 
 		<section class={section}>
 			<p class={sectionEyebrow}>Founder's Journey</p>
-			<h2 class={sectionTitle}>Two decades of building & sharing</h2>
-			<p class={sectionLede}>Every experiment inside Rawkode Academy is rooted in lessons from running production systems, leading teams, and collaborating with the maintainers who shape our industry.</p>
+			<h2 class={sectionTitle}>Two decades of building, sharing, and mentoring</h2>
+			<p class={sectionLede}>Every experiment inside Rawkode Academy is rooted in lessons from running production systems, leading teams, and collaborating with the maintainers who shape our industry. Here is the long version of how we got here.</p>
 			<div class={timelineList}>
 				{timeline.map((item) => (
 					<div class={timelineCard}>
@@ -317,10 +354,12 @@ const ctaGhostBtn = css({
 
 		<section class={cta}>
 			<h2 class={ctaTitle}>Bring Rawkode Academy into your week</h2>
-			<p class={ctaBody}>Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization.</p>
+			<p class={ctaBody}>Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization. Together we'll keep the Cloud Native ecosystem open, welcoming, and practical.</p>
 			<div class={ctaRow}>
 				<a href="/shows" class={ctaBtn}>See upcoming shows</a>
 				<a href="/maintainers/share-your-project" class={ctaGhostBtn}>Share your project</a>
+				<a href="/feeds" class={ctaGhostBtn}>Follow our feeds</a>
+				<a href="/organizations" class={ctaGhostBtn}>Partner with us</a>
 			</div>
 		</section>
 	</div>

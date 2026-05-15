@@ -178,6 +178,17 @@ const videoCount = technology.videos?.length ?? 0;
 const featuredVideos = (technology.videos ?? []).slice(0, 6);
 const categoryLabel = technology.subcategory ?? technology.category ?? "Cloud Native";
 
+// Recent news mentioning this technology
+const techIdNormalized = technology.id.replace(/\/index$/, "");
+const allNews = await getCollection("news");
+const recentNews = allNews
+	.filter((story) => (story.data.technologies ?? []).some((t) => t === techIdNormalized || t === technology!.id))
+	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+	.slice(0, 4);
+
+const formatNewsDate = (d: Date) =>
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(d);
+
 const seoTitle = technology.seo?.title ?? (videoCount > 0 ? `${technology.name} Tutorials, Videos & Guides | Rawkode Academy` : `${technology.name} — ${categoryLabel} | Rawkode Academy`);
 
 const seoDescription = (() => {
@@ -507,6 +518,21 @@ const guideTitle = css({
 							<div class={videoBody}>
 								<h3 class={videoTitle}>{v.title}</h3>
 							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		{recentNews.length > 0 && (
+			<section class={sectionBlock}>
+				<h2 class={sectionTitle}>Recent {technology.name} news</h2>
+				<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem;">
+					{recentNews.map((story) => (
+						<a href={`/news/${story.id}`} style="display: flex; flex-direction: column; gap: 0.5rem; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--colors-border-muted); background: var(--colors-bg-raised); text-decoration: none; color: var(--colors-fg-primary); transition: transform 200ms ease, border-color 200ms ease;">
+							<time style="font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--colors-fg-muted);">{formatNewsDate(story.data.publishedAt)}</time>
+							<h3 style="font-size: 1rem; font-weight: 600; line-height: 1.4; color: var(--colors-fg-primary); margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{story.data.title}</h3>
+							<p style="font-size: 0.8125rem; color: var(--colors-fg-secondary); line-height: 1.6; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{story.data.description}</p>
 						</a>
 					))}
 				</div>
