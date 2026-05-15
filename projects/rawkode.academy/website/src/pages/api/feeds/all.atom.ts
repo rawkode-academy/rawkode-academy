@@ -12,15 +12,16 @@ interface AtomEntry {
 	author?: string;
 	thumbnail?: string;
 	duration?: number;
-	type: "article" | "video";
+	type: "article" | "video" | "news";
 	content?: string;
 }
 
 export async function GET(context: APIContext) {
-	const [articles, videos, technologies] = await Promise.all([
+	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
 		getCollection("videos"),
 		getCollection("technologies"),
+		getCollection("news"),
 	]);
 
 	const techName = new Map(
@@ -77,6 +78,23 @@ export async function GET(context: APIContext) {
 		entries.push(entry);
 	});
 
+	// Add news stories
+	await Promise.all(
+		news.map(async (story) => {
+			const authors = await getEntries(story.data.authors);
+			entries.push({
+				title: story.data.title,
+				description: story.data.description,
+				url: `${site}/news/${story.id}/`,
+				published: new Date(story.data.publishedAt).toISOString(),
+				updated: new Date(story.data.publishedAt).toISOString(),
+				categories: [...(story.data.technologies ?? [])],
+				author: authors.map((author) => author.data.name).join(", "),
+				type: "news",
+			});
+		}),
+	);
+
 	// Sort all entries by published date desc
 	entries.sort(
 		(a, b) => new Date(b.published).getTime() - new Date(a.published).getTime(),
@@ -91,7 +109,7 @@ export async function GET(context: APIContext) {
 	const atomFeed = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 	<title>Rawkode Academy - All Content</title>
-	<subtitle>Latest articles and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development</subtitle>
+	<subtitle>Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development</subtitle>
 	<link href="${feedUrl}" rel="self" type="application/atom+xml"/>
 	<link href="${site}" rel="alternate" type="text/html"/>
 	<id>${site}/</id>

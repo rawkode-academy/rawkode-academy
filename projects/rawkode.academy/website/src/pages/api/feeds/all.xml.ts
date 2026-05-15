@@ -9,10 +9,11 @@ import type { RSSFeedItem } from "@astrojs/rss";
 const logger = createLogger("feeds");
 
 export async function GET(context: APIContext) {
-	const [articles, videos, technologies] = await Promise.all([
+	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
 		getCollection("videos"),
 		getCollection("technologies"),
+		getCollection("news"),
 	]);
 
 	const techName = new Map(
@@ -110,8 +111,36 @@ export async function GET(context: APIContext) {
 		})
 		.filter((item): item is RSSFeedItem => item !== null);
 
+	// Add news (lightweight — description is the body)
+	const newsItems = (
+		await Promise.all(
+			news.map(async (story): Promise<RSSFeedItem | null> => {
+				const title = (story.data.title || "").trim();
+				const description = (story.data.description || "").trim();
+				if (!title || !description) {
+					logger.warn(
+						`Skipping news story with missing title or description: ${story.id}`,
+					);
+					return null;
+				}
+				const authors = await getEntries(story.data.authors);
+				const item: RSSFeedItem = {
+					title,
+					description,
+					pubDate: new Date(story.data.publishedAt),
+					link: `/news/${story.id}/`,
+					categories: [...(story.data.technologies ?? [])],
+				};
+				if (authors.length > 0) {
+					item.author = authors.map((author) => author.data.name).join(", ");
+				}
+				return item;
+			}),
+		)
+	).filter((item): item is RSSFeedItem => item !== null);
+
 	// Combine all items
-	const items = [...articleItems, ...videoItems];
+	const items = [...articleItems, ...videoItems, ...newsItems];
 
 	// Sort all items by date desc
 	items.sort((a, b) => {
@@ -123,7 +152,7 @@ export async function GET(context: APIContext) {
 	return rss({
 		title: "Rawkode Academy - All Content",
 		description:
-			"Latest articles and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
+			"Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
 		site: context.site?.toString() || "https://rawkode.academy",
 		items,
 		customData: "<language>en-us</language>",
