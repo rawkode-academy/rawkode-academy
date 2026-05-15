@@ -140,8 +140,10 @@ const authorRow = css({
 	gap: "2",
 });
 
-const avatarSm = css({ width: "7", height: "7", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
-const avatarXs = css({ width: "5", height: "5", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarSm = css({ borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarXs = css({ borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarSmStyle = "width: 28px; height: 28px; flex-shrink: 0;";
+const avatarXsStyle = "width: 20px; height: 20px; flex-shrink: 0;";
 
 const sep = css({ color: "border.default" });
 
@@ -322,7 +324,7 @@ const placeholderImg = css({
 					<div class={featuredFooter}>
 						{featured.authors[0] && (
 							<span class={authorRow}>
-								{featured.authors[0].data.avatarUrl && <img src={featured.authors[0].data.avatarUrl} alt="" class={avatarSm} loading="lazy" />}
+								{featured.authors[0].data.avatarUrl && <img src={featured.authors[0].data.avatarUrl} alt="" class={avatarSm} style={avatarSmStyle} loading="lazy" />}
 								<span style="color: var(--colors-fg-primary); font-weight: 500;">{featured.authors.map((a) => a.data.name).join(", ")}</span>
 							</span>
 						)}
@@ -373,7 +375,7 @@ const placeholderImg = css({
 						<p class={cardDesc}>{article.data.description}</p>
 						<div class={cardFooter}>
 							<span class={authorRow}>
-								{authors[0]?.data.avatarUrl && <img src={authors[0].data.avatarUrl} alt="" class={avatarXs} loading="lazy" />}
+								{authors[0]?.data.avatarUrl && <img src={authors[0].data.avatarUrl} alt="" class={avatarXs} style={avatarXsStyle} loading="lazy" />}
 								<span>{authors[0]?.data.name ?? "Rawkode Academy"}</span>
 							</span>
 							<span>{formatDate(article.data.publishedAt)} · {reading.text}</span>
