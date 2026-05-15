@@ -139,24 +139,31 @@ describe("Theme Management", () => {
 	});
 
 	describe("ColorScheme (light / dark)", () => {
+		const stubClassList = (impl: Partial<DOMTokenList>) => {
+			Object.defineProperty(document.documentElement, "classList", {
+				configurable: true,
+				value: impl as DOMTokenList,
+			});
+		};
+
 		it("reads light by default", () => {
-			document.documentElement.classList = {
+			stubClassList({
 				add: () => {},
 				remove: () => {},
-				toggle: () => {},
+				toggle: () => false,
 				contains: () => false,
-			} as unknown as DOMTokenList;
+			});
 			expect(getColorScheme()).toBe("light");
 		});
 
 		it("setColorScheme persists and toggles the dark class", () => {
 			const toggle = vi.fn();
-			document.documentElement.classList = {
+			stubClassList({
 				add: () => {},
 				remove: () => {},
 				toggle,
 				contains: () => false,
-			} as unknown as DOMTokenList;
+			});
 
 			setColorScheme("dark");
 			expect(toggle).toHaveBeenCalledWith("dark", true);
@@ -165,19 +172,20 @@ describe("Theme Management", () => {
 
 		it("toggleColorScheme flips the active mode", () => {
 			let isDark = false;
-			document.documentElement.classList = {
+			stubClassList({
 				add: () => {
 					isDark = true;
 				},
 				remove: () => {
 					isDark = false;
 				},
-				toggle: (cls: string, force?: boolean) => {
-					if (cls !== "dark") return;
+				toggle: ((cls: string, force?: boolean) => {
+					if (cls !== "dark") return isDark;
 					isDark = force ?? !isDark;
-				},
+					return isDark;
+				}) as DOMTokenList["toggle"],
 				contains: (cls: string) => cls === "dark" && isDark,
-			} as unknown as DOMTokenList;
+			});
 
 			expect(toggleColorScheme()).toBe("dark");
 			expect(toggleColorScheme()).toBe("light");
