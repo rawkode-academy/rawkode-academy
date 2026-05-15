@@ -1,0 +1,25 @@
+---
+title: "Kubernetes Ships May Patch Wave Across 1.33–1.36, Fixes IPv6 ServiceCIDR Allocation Bug"
+description: "Kubernetes 1.36.1, 1.35.5, 1.34.8, and 1.33.12 landed on the May 12 cherry-pick window. No CVEs, but a real correctness bug — services getting IPv6 addresses outside their allocated CIDR — is among the fixes."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes shipped its scheduled May patch wave: v1.36.1, v1.35.5, v1.34.8, and v1.33.12, all built off the May 8 cherry-pick deadline with target dates of May 12–13. No CVEs were rolled in this cycle, but the v1.34.8 changelog includes a handful of fixes that production operators should read before skipping the upgrade.
+
+## Notable fixes
+
+- **IPv6 ServiceCIDR allocation correctness ([#138385](https://github.com/kubernetes/kubernetes/pull/138385)).** A bug allowed 64-bit IPv6 ServiceCIDRs to allocate addresses outside the configured subnet range. If you run dual-stack or IPv6-only services, validate your allocations after upgrading.
+- **Scheduler in-flight queue cleanup ([#138435](https://github.com/kubernetes/kubernetes/pull/138435)).** Stale state could persist after failed scheduling attempts, with cascading effects on subsequent decisions.
+- **Kube-proxy large-cluster sync ([#138637](https://github.com/kubernetes/kubernetes/pull/138637)).** Full-sync was being skipped under "large cluster mode" in cases where it shouldn't have been.
+- **Windows HNS endpoint cleanup ([#138601](https://github.com/kubernetes/kubernetes/pull/138601)).** Addresses DNS timeouts on L2Bridge networks — a long-standing pain point for Windows nodes.
+- **Kubeadm and kubelet fixes ([#138685](https://github.com/kubernetes/kubernetes/pull/138685) and others).** Better handling of delayed load balancers during init, etcd cluster status checks, LocalAPIEndpoint defaulting, and pod-startup SLI metric accuracy.
+
+## Support context
+
+v1.34 enters maintenance mode on August 27, 2026, with end-of-life on October 27. Operators still on v1.33 should be planning their move; the 1.33.12 patch is a continuity release rather than a destination.
+
+**Sources:** [Kubernetes patch release schedule](https://kubernetes.io/releases/patch-releases/), [CHANGELOG-1.34](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.34.md) — May 12–13, 2026.
