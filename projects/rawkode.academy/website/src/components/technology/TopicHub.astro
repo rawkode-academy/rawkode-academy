@@ -14,6 +14,8 @@ export interface Props {
 	}>;
 	showArticles?: boolean;
 	showVideos?: boolean;
+	showNews?: boolean;
+	newsLimit?: number;
 }
 
 const {
@@ -22,11 +24,21 @@ const {
 	videos = [],
 	showArticles = true,
 	showVideos = true,
+	showNews = true,
+	newsLimit = 6,
 } = Astro.props;
+
+// Technology IDs from the collection look like "kubernetes/index"; raw IDs
+// (as used in news/article frontmatter) drop the suffix. Match both forms.
+const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
+const matchesTechnology = (technologies: ReadonlyArray<string> | undefined) =>
+	Array.isArray(technologies) &&
+	(technologies.includes(technologyId) ||
+		technologies.includes(normalizedTechnologyId));
 
 // Get all articles that mention this technology
 const allArticles = await getCollection("articles", ({ data }) => {
-	return !data.draft && data.technologies?.includes(technologyId);
+	return !data.draft && matchesTechnology(data.technologies);
 });
 
 // Sort articles by date
@@ -34,16 +46,65 @@ const articles = allArticles.sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
 
+// Get news matching this technology
+const allNews = showNews
+	? (await getCollection("news"))
+			.filter((story) => matchesTechnology(story.data.technologies))
+			.sort(
+				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+			)
+			.slice(0, newsLimit)
+	: [];
+
 const hasArticles = showArticles && articles.length > 0;
 const hasVideos = showVideos && videos.length > 0;
-const isEmpty = !hasArticles && !hasVideos;
+const hasNews = showNews && allNews.length > 0;
+const isEmpty = !hasArticles && !hasVideos && !hasNews;
+
+const newsDateFormatter = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "numeric",
+	year: "numeric",
+});
 ---
 
 <div class="space-y-12">
+  <!-- News Section -->
+  {hasNews && (
+    <section>
+      <SectionHeader
+        title={`Recent ${technologyName} news`}
+        showSeparator={false}
+        class="mb-6"
+      />
+      <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+        {allNews.map((story) => (
+          <li class="py-5 sm:py-6">
+            <article class="space-y-2">
+              <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+                <time datetime={story.data.publishedAt.toISOString()}>
+                  {newsDateFormatter.format(story.data.publishedAt)}
+                </time>
+              </div>
+              <h3 class="font-display text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
+                <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
+                  {story.data.title}
+                </a>
+              </h3>
+              <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
+                {story.data.description}
+              </p>
+            </article>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
   <!-- Articles Section -->
   {hasArticles && (
     <section>
-      <SectionHeader 
+      <SectionHeader
         title={`Articles about ${technologyName}`}
         showSeparator={false}
         class="mb-6"
@@ -59,7 +120,7 @@ const isEmpty = !hasArticles && !hasVideos;
   <!-- Videos Section -->
   {hasVideos && (
     <section>
-      <SectionHeader 
+      <SectionHeader
         title={`Videos about ${technologyName}`}
         showSeparator={false}
         class="mb-6"
@@ -90,11 +151,7 @@ const isEmpty = !hasArticles && !hasVideos;
   {isEmpty && (
     <div class="text-center py-12">
       <p class="text-gray-500 dark:text-gray-400">
-        {showArticles && !showVideos
-          ? `No articles found for ${technologyName} yet. Check back soon!`
-          : !showArticles && showVideos
-            ? `No videos found for ${technologyName} yet. Check back soon!`
-            : `No content found for ${technologyName} yet. Check back soon!`}
+        No content found for {technologyName} yet. Check back soon!
       </p>
     </div>
   )}
