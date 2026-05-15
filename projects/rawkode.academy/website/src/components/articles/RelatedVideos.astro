@@ -1,0 +1,120 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+
+interface Props {
+	currentArticle: CollectionEntry<"articles">;
+	limit?: number;
+}
+
+const { currentArticle, limit = 3 } = Astro.props;
+
+const normalizeTechnologyId = (value: unknown): string | null => {
+	let raw: string | null = null;
+	if (typeof value === "string" && value.length > 0) {
+		raw = value;
+	} else if (
+		value &&
+		typeof value === "object" &&
+		"id" in value &&
+		typeof (value as { id?: unknown }).id === "string" &&
+		(value as { id: string }).id.length > 0
+	) {
+		raw = (value as { id: string }).id;
+	}
+	if (!raw) return null;
+	return raw.replace(/\/index$/, "");
+};
+
+const formatDuration = (seconds?: number | null) => {
+	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
+		return "--:--";
+	}
+	const hours = Math.floor(seconds / 3600);
+	const minutes = Math.floor((seconds % 3600) / 60);
+	const secs = seconds % 60;
+
+	if (hours > 0) {
+		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	}
+	return `${minutes}:${secs.toString().padStart(2, "0")}`;
+};
+
+const articleTechnologyIds = Array.isArray(currentArticle.data.technologies)
+	? currentArticle.data.technologies
+			.map(normalizeTechnologyId)
+			.filter((technologyId): technologyId is string => Boolean(technologyId))
+	: [];
+const articleTechnologySet = new Set(articleTechnologyIds);
+
+let relatedVideos: {
+	slug: string;
+	title: string;
+	duration: number;
+	thumbnailUrl: string;
+}[] = [];
+
+if (articleTechnologySet.size > 0) {
+	const videos = await getCollection("videos");
+	relatedVideos = videos
+		.map((video) => {
+			const technologyIds = (video.data.technologies ?? [])
+				.map(normalizeTechnologyId)
+				.filter((technologyId): technologyId is string => Boolean(technologyId));
+			const sharedTechnologyCount = technologyIds.filter((technologyId) =>
+				articleTechnologySet.has(technologyId),
+			).length;
+			return { video, sharedTechnologyCount };
+		})
+		.filter((item) => item.sharedTechnologyCount > 0)
+		.sort((left, right) => {
+			if (left.sharedTechnologyCount !== right.sharedTechnologyCount) {
+				return right.sharedTechnologyCount - left.sharedTechnologyCount;
+			}
+			return (
+				new Date(right.video.data.publishedAt).getTime() -
+					new Date(left.video.data.publishedAt).getTime() ||
+				left.video.data.title.localeCompare(right.video.data.title)
+			);
+		})
+		.slice(0, limit)
+		.map((item) => ({
+			slug: item.video.data.slug,
+			title: item.video.data.title,
+			duration: item.video.data.duration,
+			thumbnailUrl: `https://content.rawkode.academy/videos/${item.video.data.id}/thumbnail.jpg`,
+		}));
+}
+---
+
+{relatedVideos.length > 0 && (
+	<section class="mt-16 pt-16 border-t border-gray-200 dark:border-gray-700">
+		<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+			Related Videos
+		</h2>
+		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+			{relatedVideos.map((video) => (
+				<a
+					href={`/watch/${video.slug}`}
+					class="group block glass-interactive rounded-lg overflow-hidden"
+				>
+					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
+						<img
+							src={video.thumbnailUrl}
+							alt={video.title}
+							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+							loading="lazy"
+						/>
+						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+							{formatDuration(video.duration)}
+						</div>
+					</div>
+					<div class="p-3">
+						<h3 class="font-medium text-secondary-content group-hover:text-primary-content line-clamp-2 transition-colors text-sm">
+							{video.title}
+						</h3>
+					</div>
+				</a>
+			))}
+		</div>
+	</section>
+)}
