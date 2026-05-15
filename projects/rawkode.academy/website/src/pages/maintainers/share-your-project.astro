@@ -25,11 +25,27 @@ const processSteps = [
 	{ title: "Connect", description: "After the stream, we'll share the recording and help you connect with interested developers from our community." },
 ];
 
+const expectations = [
+	{ title: "Introduction", description: "We'll start with introductions and background on you and your project. What problem does it solve? What inspired you to create it?" },
+	{ title: "Demo & Walkthrough", description: "Show your project in action with a live demonstration. Walk through key features, architecture decisions, and what makes your approach unique." },
+	{ title: "Q&A & Discussion", description: "Engage with the audience through live Q&A. Discuss challenges, future plans, and how others can contribute to your project." },
+	{ title: "Builder Feedback", description: "Receive real-time feedback from David and the community on your project's design, developer experience, and roadmap." },
+];
+
+const testimonials = [
+	{
+		quote: "Being a guest on David's Rawkode Academy channel was a very great experience. This was my first time being a guest in such a format and David made sure that it turned out being a great session.",
+		name: "Alexander Block",
+		role: "Maintainer of Kluctl",
+	},
+];
+
 const faqItems = [
 	{ question: "What types of projects are suitable for Rawkode Live?", answer: "We welcome open-source projects related to cloud-native technologies, developer tools, infrastructure, and automation. The key criteria are that your project solves a real problem for developers and has an open-source component." },
 	{ question: "Do I need to be the project creator to present?", answer: "Not necessarily. We welcome core contributors or maintainers who are deeply familiar with the project and can speak authoritatively about its design, implementation, and roadmap." },
 	{ question: "How technical should my presentation be?", answer: "Our audience is primarily developers and technical professionals, so we encourage in-depth technical discussions. The best presentations balance technical detail with clear explanations of the problem being solved." },
 	{ question: "Is there a cost to participate?", answer: "No, featuring your open-source project on Rawkode Live is completely free. We're passionate about supporting the open-source community and helping great projects gain visibility." },
+	{ question: "What's the format of the session?", answer: "Sessions typically run 60-90 minutes and include an introduction to you and your project, a demonstration or walkthrough, and audience Q&A. The format is conversational and flexible, allowing us to focus on the most interesting aspects of your project." },
 ];
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
@@ -137,6 +153,72 @@ const stepNum = css({
 const stepTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
 const stepBody = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
 
+const sectionLede = css({
+	mt: "-6",
+	mb: "8",
+	maxWidth: "44rem",
+	mx: "auto",
+	fontSize: "md",
+	color: "fg.secondary",
+	lineHeight: "1.7",
+	textAlign: "center",
+});
+
+const expectGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const expectCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const expectTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
+const expectBody = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
+
+const testimonialGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr" },
+	gap: "5",
+	maxWidth: "48rem",
+	mx: "auto",
+});
+
+const testimonialCard = css({
+	p: { base: "6", md: "8" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+});
+
+const testimonialQuote = css({
+	fontSize: { base: "md", md: "lg" },
+	color: "fg.primary",
+	lineHeight: "1.7",
+	fontStyle: "italic",
+});
+
+const testimonialAttr = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+});
+
+const testimonialName = css({ fontWeight: "semibold", color: "fg.primary", fontSize: "sm" });
+const testimonialRole = css({ fontSize: "sm", color: "fg.muted" });
+
 const faqList = css({ display: "flex", flexDirection: "column", gap: "3", maxWidth: "48rem", mx: "auto" });
 
 const faqItem = css({
@@ -221,6 +303,38 @@ const ctaBtn = css({
 						<h3 class={stepTitle}>{step.title}</h3>
 						<p class={stepBody}>{step.description}</p>
 					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={section}>
+			<h2 class={sectionTitle}>What to Expect</h2>
+			<p class={sectionLede}>Our sessions are typically 60-90 minutes long and follow this format:</p>
+			<div class={expectGrid}>
+				{expectations.map((e) => (
+					<div class={expectCard}>
+						<h3 class={expectTitle}>{e.title}</h3>
+						<p class={expectBody}>{e.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={section}>
+			<h2 class={sectionTitle}>What Project Maintainers Say</h2>
+			<p class={sectionLede}>Curious what it's like to join us?</p>
+			<div class={testimonialGrid}>
+				{testimonials.map((t) => (
+					<figure class={testimonialCard}>
+						<svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" style="color: var(--colors-fg-brand); opacity: 0.6;">
+							<path d="M7.17 6.17A5 5 0 0 0 2 11v7h7v-7H5.5A3.5 3.5 0 0 1 9 7.5V6.17h-1.83zm10 0A5 5 0 0 0 12 11v7h7v-7h-3.5A3.5 3.5 0 0 1 19 7.5V6.17h-1.83z"/>
+						</svg>
+						<blockquote class={testimonialQuote}>{t.quote}</blockquote>
+						<figcaption class={testimonialAttr}>
+							<span class={testimonialName}>{t.name}</span>
+							<span class={testimonialRole}>{t.role}</span>
+						</figcaption>
+					</figure>
 				))}
 			</div>
 		</section>

@@ -1,9 +1,57 @@
 ---
 import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import controlplaneSvg from "@/components/partner/logos/controlplane.svg?raw";
+import fermyonSvg from "@/components/partner/logos/fermyon.svg?raw";
+import guidepadSvg from "@/components/partner/logos/guidepad.svg?raw";
+import herokuSvg from "@/components/partner/logos/heroku.svg?raw";
+import microsoftSvg from "@/components/partner/logos/microsoft.svg?raw";
+import ngrokSvg from "@/components/partner/logos/ngrok.svg?raw";
+import spectrocloudSvg from "@/components/partner/logos/spectrocloud.svg?raw";
+import teleportSvg from "@/components/partner/logos/teleport.svg?raw";
+import wundergraphSvg from "@/components/partner/logos/wundergraph.svg?raw";
+import zitadelSvg from "@/components/partner/logos/zitadel.svg?raw";
 import { css } from "../../../styled-system/css";
 
 export const prerender = true;
+
+function withUtm(url: string): string {
+	const u = new URL(url);
+	u.searchParams.set("utm_source", "rawkode-academy");
+	u.searchParams.set("utm_medium", "partner-logo");
+	u.searchParams.set("utm_campaign", "website");
+	return u.toString();
+}
+
+const currentPartners = [
+	{
+		name: "Spectro Cloud",
+		industry: "Kubernetes",
+		since: "2025",
+		description: "Kubernetes management platform for deploying, operating, and securing clusters across environments.",
+		url: "https://spectrocloud.com",
+		logo: spectrocloudSvg,
+	},
+	{
+		name: "Teleport",
+		industry: "Identity & Access",
+		since: "2026",
+		description: "Secure access platform for servers, Kubernetes clusters, databases, and internal applications.",
+		url: "https://goteleport.com",
+		logo: teleportSvg,
+	},
+];
+
+const pastPartners = [
+	{ name: "ControlPlane", url: "https://controlplane.io", logo: controlplaneSvg },
+	{ name: "Fermyon", url: "https://www.fermyon.com", logo: fermyonSvg },
+	{ name: "Guidepad", url: "https://guidepad.io", logo: guidepadSvg },
+	{ name: "Heroku", url: "https://heroku.com", logo: herokuSvg },
+	{ name: "Microsoft Azure", url: "https://azure.com", logo: microsoftSvg },
+	{ name: "ngrok", url: "https://ngrok.com", logo: ngrokSvg },
+	{ name: "WunderGraph", url: "https://wundergraph.com", logo: wundergraphSvg },
+	{ name: "Zitadel", url: "https://zitadel.com", logo: zitadelSvg },
+];
 
 const reachStats = [
 	{ value: "100K+", label: "Developers reached" },
@@ -68,7 +116,7 @@ const statValue = css({
 	fontSize: { base: "3xl", md: "4xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
 	backgroundClip: "text",
 	color: "transparent",
 });
@@ -193,7 +241,7 @@ const ctaCard = css({
 	borderRadius: "3xl",
 	textAlign: "center",
 	color: "white",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
 	boxShadow: "xl",
 });
 
@@ -219,6 +267,71 @@ const ctaBtn = css({
 	textDecoration: "none",
 	transition: "transform 150ms ease",
 	_hover: { transform: "translateY(-1px)" },
+});
+
+const partnersIntro = css({ maxWidth: "44rem", mx: "auto", color: "fg.secondary", fontSize: { base: "md", md: "lg" }, lineHeight: "1.7", textAlign: "center", mb: "10" });
+
+const partnersHeader = css({ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "3", mt: "16", mb: "4" });
+const partnersHeaderCol = css({ display: "flex", flexDirection: "column", gap: "1" });
+const partnersEyebrow = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand" });
+const partnersSubTitle = css({ fontFamily: "display", fontSize: "2xl", fontWeight: "bold", letterSpacing: "tight", color: "fg.primary" });
+const partnersChip = css({ display: "inline-flex", alignItems: "center", px: "4", py: "1.5", borderRadius: "full", borderWidth: "1px", borderColor: "border.muted", bg: "bg.raised", color: "fg.muted", fontSize: "sm", fontWeight: "semibold" });
+const partnersLede = css({ maxWidth: "60ch", color: "fg.secondary", fontSize: { base: "sm", md: "md" }, lineHeight: "1.7", mb: "8" });
+
+const currentList = css({ display: "flex", flexDirection: "column", borderTopWidth: "1px", borderColor: "border.muted" });
+const currentEntry = css({
+	display: "grid",
+	gap: "5",
+	py: "6",
+	borderBottomWidth: "1px",
+	borderColor: "border.muted",
+	gridTemplateColumns: { base: "1fr", md: "minmax(0, 18rem) minmax(0, 1fr)" },
+	alignItems: "center",
+});
+const currentMeta = css({ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3", gridColumn: { base: "1", md: "1 / -1" } });
+const currentIndustry = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand" });
+const currentDot = css({ width: "1", height: "1", borderRadius: "full", bg: "border.default" });
+const currentSince = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.muted" });
+const currentLogoStage = css({
+	display: "grid",
+	placeItems: "center",
+	minHeight: "7rem",
+	px: "5",
+	py: "4",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	"& svg": { width: "100%", height: "4rem", maxWidth: "12rem", display: "block" },
+	"& svg path, & svg circle, & svg polygon, & svg rect:not([fill='none'])": { fill: "currentColor !important" },
+	color: "fg.primary",
+});
+const currentBody = css({ display: "flex", flexDirection: "column", gap: "3" });
+const currentName = css({ fontFamily: "display", fontSize: "2xl", fontWeight: "bold", letterSpacing: "tight", color: "fg.primary" });
+const currentDesc = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.7" });
+const currentLink = css({ display: "inline-flex", alignItems: "center", gap: "2", fontSize: "sm", fontWeight: "semibold", color: "fg.brand", textDecoration: "none", _hover: { textDecoration: "underline" } });
+
+const pastGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", sm: "repeat(4, minmax(0, 1fr))" },
+	columnGap: "5",
+	rowGap: "0",
+});
+const pastMark = css({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	py: "4",
+	minHeight: "4.5rem",
+	borderBottomWidth: "1px",
+	borderColor: "border.muted",
+	opacity: "0.8",
+	transition: "opacity 200ms ease, transform 200ms ease",
+	color: "fg.secondary",
+	_hover: { opacity: "1", transform: "translateX(2px)" },
+	"& svg": { width: "100%", height: "2.3rem", maxWidth: "100%", display: "block" },
+	"& svg path, & svg circle, & svg polygon, & svg rect:not([fill='none']), & svg ellipse": { fill: "currentColor !important" },
+	"& svg [stroke]:not([stroke='none'])": { stroke: "currentColor !important" },
 });
 ---
 
@@ -269,6 +382,57 @@ const ctaBtn = css({
 				</a>
 			))}
 		</div>
+
+		<section>
+			<p class={sectionLabel} style="margin-top: 4rem;">Partner showcase</p>
+			<h2 class={sectionTitle}>Trusted by Innovative Companies</h2>
+			<p class={partnersIntro}>Join these organizations who have partnered with us to accelerate their cloud native journey.</p>
+
+			<div class={partnersHeader}>
+				<div class={partnersHeaderCol}>
+					<span class={partnersEyebrow}>Current partners</span>
+					<h3 class={partnersSubTitle}>Supporting the academy right now</h3>
+				</div>
+				<span class={partnersChip}>{currentPartners.length} current</span>
+			</div>
+			<p class={partnersLede}>These teams currently fund the academy. We still evaluate their tools with the same candid, hands-on standard as everything else on Rawkode.</p>
+
+			<div class={currentList}>
+				{currentPartners.map((p) => (
+					<article class={currentEntry}>
+						<div class={currentMeta}>
+							<span class={currentIndustry}>{p.industry}</span>
+							<span class={currentDot} aria-hidden="true"></span>
+							<span class={currentSince}>Since {p.since}</span>
+						</div>
+						<div class={currentLogoStage} set:html={p.logo}></div>
+						<div class={currentBody}>
+							<h4 class={currentName}>{p.name}</h4>
+							<p class={currentDesc}>{p.description}</p>
+							<a href={withUtm(p.url)} target="_blank" rel="noopener noreferrer" class={currentLink}>
+								Visit {p.name}
+								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+							</a>
+						</div>
+					</article>
+				))}
+			</div>
+
+			<div class={partnersHeader}>
+				<div class={partnersHeaderCol}>
+					<span class={partnersEyebrow} style="color: var(--colors-fg-muted);">Past partners</span>
+					<h3 class={partnersSubTitle}>Teams we've partnered with before</h3>
+				</div>
+				<span class={partnersChip}>{pastPartners.length} past</span>
+			</div>
+			<p class={partnersLede}>Companies we've worked with on earlier sponsorships and educational projects.</p>
+
+			<div class={pastGrid}>
+				{pastPartners.map((p) => (
+					<a href={withUtm(p.url)} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${p.name}`} title={p.name} class={pastMark} set:html={p.logo}></a>
+				))}
+			</div>
+		</section>
 
 		<section class={ctaCard}>
 			<h2 class={ctaTitle}>Ready to talk?</h2>

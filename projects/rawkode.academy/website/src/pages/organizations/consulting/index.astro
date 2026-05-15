@@ -5,6 +5,35 @@ import { css } from "../../../../styled-system/css";
 
 export const prerender = true;
 
+const pillars = [
+	{ title: "Cloud Native Expertise", description: "Deep experience with Kubernetes, Terraform, Pulumi, and GitOps workflows to help you build robust, scalable infrastructure and delivery pipelines." },
+	{ title: "GitOps & Continuous Delivery", description: "Implement GitOps practices and continuous delivery pipelines using tools like Flux and ArgoCD to enable declarative, git-based infrastructure and application deployments." },
+	{ title: "Reliability & Observability", description: "Establish SRE practices and comprehensive observability solutions that improve system reliability, incident response, and operational visibility." },
+];
+
+const consultingServices = [
+	{
+		title: "Developer Experience Optimization",
+		description: "Streamline how engineers build, test, and ship — from local environments to production pipelines.",
+		points: ["CI/CD pipeline optimization", "Development environment setup", "Docker and containerization strategies"],
+	},
+	{
+		title: "Cloud Native Architecture",
+		description: "Design and validate cloud native architectures that scale with your business and your team.",
+		points: ["Kubernetes deployment strategies", "Microservices architecture design", "Service mesh implementation"],
+	},
+	{
+		title: "Platform Engineering",
+		description: "Build the internal platform your engineers actually want to use — with golden paths and self-service from day one.",
+		points: ["Self-service infrastructure portals", "GitOps and Infrastructure as Code", "Developer tooling standardization"],
+	},
+	{
+		title: "Technical Team Development",
+		description: "Grow the people behind the platform with workshops, mentoring, and architectural reviews.",
+		points: ["Custom technical workshops", "Mentoring and technical guidance", "Technology architecture reviews"],
+	},
+];
+
 const services = [
 	{ title: "Developer experience audits", description: "Deep audits of your docs, onboarding flow, and developer tools to find friction and recommend concrete improvements." },
 	{ title: "Technical strategy workshops", description: "Working sessions to align product, engineering, and DevRel on a shared roadmap rooted in real developer feedback." },
@@ -20,27 +49,84 @@ const outcomes = [
 ];
 
 const engagements = [
-	{ name: "Technology Assessment", duration: "1–2 weeks", description: "Targeted audit of a specific surface — docs, onboarding, an SDK, or a platform component — with a written report and actionable recommendations." },
-	{ name: "Implementation Sprint", duration: "2–4 weeks", featured: true, description: "Focused engagement to ship a concrete deliverable: revamped onboarding flow, new docs section, or a working platform PoC." },
-	{ name: "Staff Augmentation", duration: "Flexible", description: "Day-rate engagement to embed alongside your platform, DevRel, or engineering team for ongoing strategic and hands-on work." },
+	{
+		name: "Technology Assessment",
+		duration: "1–2 weeks",
+		description: "Targeted audit of a specific surface — docs, onboarding, an SDK, or a platform component — with a written report and actionable recommendations.",
+		points: ["Deep-dive technical discovery", "Prioritized recommendations", "Detailed documentation", "Executive presentation"],
+	},
+	{
+		name: "Implementation Sprint",
+		duration: "2–4 weeks",
+		featured: true,
+		description: "Focused engagement to ship a concrete deliverable: revamped onboarding flow, new docs section, or a working platform PoC.",
+		points: ["Focused technical project", "Direct hands-on coding", "Knowledge transfer sessions", "Complete documentation", "2 weeks of follow-up support"],
+	},
+	{
+		name: "Staff Augmentation",
+		duration: "Flexible",
+		description: "Day-rate engagement to embed alongside your platform, DevRel, or engineering team for ongoing strategic and hands-on work.",
+		points: ["Minimum 5-day commitment", "Flexible scheduling", "Direct collaboration with your team", "Volume discounts available"],
+	},
 ];
 
 const process = [
-	{ step: "01", title: "Discovery", description: "We map your goals, audience, and constraints — and align on a measurable definition of success." },
-	{ step: "02", title: "Planning", description: "A written engagement plan with deliverables, owners, and checkpoints so nothing gets lost in translation." },
-	{ step: "03", title: "Execution", description: "Hands-on work, paired with your team. Weekly demos. No surprises at the end." },
-	{ step: "04", title: "Transition", description: "Documentation, runbooks, and a handover session so your team owns the outcome long after we leave." },
+	{ step: "01", title: "Discovery", description: "We dig into your specific challenges, technical environment, and team capabilities — so the engagement is rooted in your reality, not a generic playbook." },
+	{ step: "02", title: "Planning", description: "Together we define clear objectives, determine success metrics, and create an actionable implementation plan with deliverables and checkpoints." },
+	{ step: "03", title: "Execution", description: "We implement solutions hands-on, sharing knowledge throughout the process so your team grows alongside the work — no black boxes." },
+	{ step: "04", title: "Transition", description: "We hand over comprehensive documentation, runbooks, and a final session so your team is fully equipped to maintain and extend what we built." },
 ];
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
 const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
 
+const sectionLede = css({ maxWidth: "44rem", mx: "auto", color: "fg.secondary", fontSize: { base: "md", md: "lg" }, lineHeight: "1.7", textAlign: "center", mb: "10" });
+
+const pillarGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const pillarCard = css({
+	p: "7",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const pillarTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "3" });
+const pillarBody = css({ color: "fg.secondary", lineHeight: "1.6" });
+
+const serviceGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const serviceCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+	p: "7",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const serviceTitle = css({ fontFamily: "display", fontSize: "xl", fontWeight: "bold", color: "fg.primary" });
+const serviceDesc = css({ color: "fg.secondary", lineHeight: "1.6" });
+
+const serviceList = css({ display: "flex", flexDirection: "column", gap: "2", mt: "auto", listStyle: "none", p: "0" });
+const serviceListItem = css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm", color: "fg.secondary" });
+
 const engagementGrid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
 	gap: "5",
-	mb: "16",
 });
 
 const engagementCard = css({
@@ -92,11 +178,13 @@ const engagementDuration = css({
 const engagementName = css({ fontFamily: "display", fontSize: "xl", fontWeight: "bold", color: "fg.primary" });
 const engagementDesc = css({ color: "fg.secondary", lineHeight: "1.6" });
 
+const engagementPoints = css({ display: "flex", flexDirection: "column", gap: "2", mt: "2", listStyle: "none", p: "0" });
+const engagementPoint = css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm", color: "fg.secondary" });
+
 const processGrid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
 	gap: "4",
-	mb: "16",
 });
 
 const processCard = css({
@@ -115,7 +203,7 @@ const processStep = css({
 	fontSize: "3xl",
 	fontWeight: "bold",
 	letterSpacing: "tight",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
 	backgroundClip: "text",
 	color: "transparent",
 	lineHeight: "1",
@@ -141,7 +229,7 @@ const card = css({
 const cardTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "3" });
 const cardBody = css({ color: "fg.secondary", lineHeight: "1.6" });
 
-const sectionBlock = css({ mt: "16" });
+const sectionBlock = css({ mt: "20" });
 
 const sectionTitle = css({
 	fontFamily: "display",
@@ -149,8 +237,9 @@ const sectionTitle = css({
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
-	mb: "8",
+	mb: "4",
 	textAlign: "center",
+	textWrap: "balance",
 });
 
 const outcomeList = css({ maxWidth: "44rem", mx: "auto", display: "flex", flexDirection: "column", gap: "3", listStyle: "none", p: "0" });
@@ -170,14 +259,14 @@ const outcomeItem = css({
 const checkIcon = css({ flexShrink: 0, color: "fg.brand", mt: "0.5" });
 
 const ctaCard = css({
-	mt: "16",
+	mt: "20",
 	mx: "auto",
 	maxWidth: "60rem",
 	p: { base: "8", md: "12" },
 	borderRadius: "3xl",
 	textAlign: "center",
 	color: "white",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
 	boxShadow: "xl",
 });
 
@@ -204,32 +293,83 @@ const ctaBtn = css({
 	<PageHero eyebrow="Consulting" title="Expert Cloud Native Consulting" subtitle="Battle-tested expertise to improve your developer experience, go-to-market strategy, and platform engineering practice." />
 
 	<div class={shell}>
-		<p class={sectionLabel}>Engagement models</p>
-		<h2 class={sectionTitle}>Pick the shape that fits</h2>
-		<div class={engagementGrid}>
-			{engagements.map((e) => (
-				<div class={`${engagementCard} ${e.featured ? engagementFeatured : ""}`}>
-					{e.featured && <span class={engagementBadge}>Popular</span>}
-					<span class={engagementDuration}>{e.duration}</span>
-					<h3 class={engagementName}>{e.name}</h3>
-					<p class={engagementDesc}>{e.description}</p>
-				</div>
-			))}
-		</div>
-
-		<p class={sectionLabel}>Service areas</p>
-		<h2 class={sectionTitle}>Where we plug in</h2>
-		<div class={grid}>
-			{services.map((service) => (
-				<div class={card}>
-					<h2 class={cardTitle}>{service.title}</h2>
-					<p class={cardBody}>{service.description}</p>
-				</div>
-			))}
-		</div>
+		<section>
+			<p class={sectionLabel}>What we bring</p>
+			<h2 class={sectionTitle}>Expertise across the cloud native stack</h2>
+			<p class={sectionLede}>Three pillars sit at the heart of every consulting engagement — the foundations we lean on to help teams ship faster, more reliably, and with less drag.</p>
+			<div class={pillarGrid}>
+				{pillars.map((p) => (
+					<div class={pillarCard}>
+						<h3 class={pillarTitle}>{p.title}</h3>
+						<p class={pillarBody}>{p.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
 
 		<section class={sectionBlock}>
+			<p class={sectionLabel}>Consulting services</p>
+			<h2 class={sectionTitle}>Our Consulting Services</h2>
+			<p class={sectionLede}>Four practice areas — pick the one that matches today's pain, or combine them into a broader engagement.</p>
+			<div class={serviceGrid}>
+				{consultingServices.map((s) => (
+					<article class={serviceCard}>
+						<h3 class={serviceTitle}>{s.title}</h3>
+						<p class={serviceDesc}>{s.description}</p>
+						<ul class={serviceList}>
+							{s.points.map((point) => (
+								<li class={serviceListItem}>
+									<svg class={checkIcon} width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+									<span>{point}</span>
+								</li>
+							))}
+						</ul>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionLabel}>Engagement models</p>
+			<h2 class={sectionTitle}>Pick the shape that fits</h2>
+			<p class={sectionLede}>Three ways to work together — sized to the depth of the problem you're solving.</p>
+			<div class={engagementGrid}>
+				{engagements.map((e) => (
+					<div class={`${engagementCard} ${e.featured ? engagementFeatured : ""}`}>
+						{e.featured && <span class={engagementBadge}>Popular</span>}
+						<span class={engagementDuration}>{e.duration}</span>
+						<h3 class={engagementName}>{e.name}</h3>
+						<p class={engagementDesc}>{e.description}</p>
+						<ul class={engagementPoints}>
+							{e.points.map((point) => (
+								<li class={engagementPoint}>
+									<svg class={checkIcon} width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+									<span>{point}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionLabel}>Service areas</p>
+			<h2 class={sectionTitle}>Where we plug in</h2>
+			<div class={grid}>
+				{services.map((service) => (
+					<div class={card}>
+						<h3 class={cardTitle}>{service.title}</h3>
+						<p class={cardBody}>{service.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionLabel}>Our approach</p>
 			<h2 class={sectionTitle}>How we work</h2>
+			<p class={sectionLede}>A consistent four-step approach — so every engagement is structured, transparent, and built around your team owning the outcome.</p>
 			<div class={processGrid}>
 				{process.map((p) => (
 					<div class={processCard}>

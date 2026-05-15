@@ -11,11 +11,33 @@ import { css } from "../../../../styled-system/css";
 
 export const prerender = true;
 
-const palette = [
-	{ label: "Brand Purple", hex: "#5F5ED7", usage: "Primary actions, headings, hero sweeps" },
-	{ label: "Brand Cyan", hex: "#00CEFF", usage: "Buttons, accents, status indicators" },
-	{ label: "Ink", hex: "#111827", usage: "Body text and typographic surfaces" },
+const greenPalette = [
+	{ label: "Teal", hex: "#04B59C", usage: "Primary actions and hero gradients" },
+	{ label: "Green", hex: "#85FF95", usage: "Glow accents and CTA outlines" },
+	{ label: "Black", hex: "#23282D", usage: "Typography and surfaces" },
 ];
+
+const bluePalette = [
+	{ label: "Purple", hex: "#5F5ED7", usage: "Primary headlines and hero sweeps" },
+	{ label: "Blue", hex: "#00CEFF", usage: "Buttons, inputs, and status indicators" },
+	{ label: "Black", hex: "#23282D", usage: "Depth, borders, and typography" },
+];
+
+const themingCss = `/* Define colors as variables */
+:root {
+  --brand-primary: #5F5ED7;
+  --brand-on-surface: #23282D; /* base black */
+}
+
+/* Inline svg -- set svg children to currentColor */
+.brand-logo svg * {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Usage: tint the svg by setting color */
+.brand-logo--primary { color: var(--brand-primary); }
+.brand-logo--dark { color: var(--brand-on-surface); }`;
 
 const gradients = [
 	{ name: "Rawkode Core Gradient", angle: "45°", stops: [{ label: "Purple", hex: "#5F5ED7" }, { label: "Cyan", hex: "#00CEFF" }], usage: "Primary brand surfaces, hero backdrops, CTAs, button fills.", background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)" },
@@ -151,6 +173,26 @@ const guidelineIcon = css({
 const guidelineBody = css({ display: "flex", flexDirection: "column", gap: "1" });
 const guidelineTitle = css({ fontFamily: "display", fontSize: "md", fontWeight: "bold", color: "fg.primary" });
 const guidelineDesc = css({ fontSize: "sm", color: "fg.muted", lineHeight: "1.6" });
+
+const themeBlock = css({ mb: "10" });
+const themeLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", mb: "3" });
+const themeTitle = css({ fontFamily: "display", fontSize: { base: "xl", md: "2xl" }, fontWeight: "bold", color: "fg.primary", mb: "5" });
+
+const codeBlock = css({
+	p: { base: "5", md: "6" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	overflow: "auto",
+	fontFamily: "mono",
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.7",
+	whiteSpace: "pre",
+});
+
+const themingIntro = css({ fontSize: "md", color: "fg.secondary", lineHeight: "1.7", mb: "6", maxWidth: "60ch" });
 ---
 
 <Page title="Brand Assets | Rawkode Academy" description="Official Rawkode Academy brand assets, palette, and gradients for partners and contributors.">
@@ -174,19 +216,47 @@ const guidelineDesc = css({ fontSize: "sm", color: "fg.muted", lineHeight: "1.6"
 		</section>
 
 		<section class={section}>
-			<h2 class={sectionTitle}>Palette</h2>
-			<div class={grid3}>
-				{palette.map((c) => (
-					<div class={colorCard}>
-						<div class={colorSwatch} style={`background: ${c.hex};`}></div>
-						<div class={colorMeta}>
-							<span class={colorLabel}>{c.label}</span>
-							<span class={colorHex}>{c.hex}</span>
-							<span class={colorUsage}>{c.usage}</span>
+			<h2 class={sectionTitle}>Core color palettes</h2>
+
+			<div class={themeBlock}>
+				<p class={themeLabel}>Default</p>
+				<h3 class={themeTitle}>Rawkode Green Theme</h3>
+				<div class={grid3}>
+					{greenPalette.map((c) => (
+						<div class={colorCard}>
+							<div class={colorSwatch} style={`background: ${c.hex};`}></div>
+							<div class={colorMeta}>
+								<span class={colorLabel}>{c.label}</span>
+								<span class={colorHex}>{c.hex}</span>
+								<span class={colorUsage}>{c.usage}</span>
+							</div>
 						</div>
-					</div>
-				))}
+					))}
+				</div>
 			</div>
+
+			<div class={themeBlock}>
+				<p class={themeLabel}>Co-brand</p>
+				<h3 class={themeTitle}>Rawkode Blue Theme</h3>
+				<div class={grid3}>
+					{bluePalette.map((c) => (
+						<div class={colorCard}>
+							<div class={colorSwatch} style={`background: ${c.hex};`}></div>
+							<div class={colorMeta}>
+								<span class={colorLabel}>{c.label}</span>
+								<span class={colorHex}>{c.hex}</span>
+								<span class={colorUsage}>{c.usage}</span>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section class={section}>
+			<h2 class={sectionTitle}>How to theme black SVGs</h2>
+			<p class={themingIntro}>Only a black source file lives in the repository — theming is applied through CSS. Inline the SVG when possible; for <code>&lt;img/&gt;</code> tags, use CSS filters or masking.</p>
+			<pre class={codeBlock}><code>{themingCss}</code></pre>
 		</section>
 
 		<section class={section}>

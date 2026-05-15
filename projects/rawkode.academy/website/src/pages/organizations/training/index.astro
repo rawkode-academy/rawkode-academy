@@ -5,6 +5,45 @@ import { css } from "../../../../styled-system/css";
 
 export const prerender = true;
 
+const pillars = [
+	{ title: "Cloud Engineering Expertise", description: "Deep specialization in Terraform, Pulumi, Kubernetes, GitOps, SRE practices, and cloud-native observability with hands-on labs using your actual infrastructure." },
+	{ title: "GitOps Workflows", description: "Master GitOps workflows with tools like Flux and ArgoCD, implementing declarative, git-based continuous delivery for your applications and infrastructure." },
+	{ title: "Platform Engineering", description: "Build internal developer platforms and establish platform engineering practices that improve developer productivity and operational excellence." },
+];
+
+const trainingPrograms = [
+	{
+		title: "Kubernetes for Developers and Operators",
+		description: "Comprehensive Kubernetes training tailored to both application developers and platform operators, covering everything from local development to production-grade cluster management.",
+		points: ["Developer-focused application deployment", "Operator patterns for platform teams", "Advanced networking and storage solutions", "Production-grade cluster management"],
+	},
+	{
+		title: "Infrastructure as Code",
+		description: "Master infrastructure automation with Terraform and Pulumi, learning how to design, implement, and maintain scalable infrastructure across multiple cloud providers.",
+		points: ["Terraform best practices and workflows", "Pulumi and programming language approaches", "Multi-cloud and hybrid infrastructure", "Testing and validation strategies"],
+	},
+	{
+		title: "Cloud Engineering",
+		description: "Learn essential cloud engineering skills across major platforms like AWS, Azure, and GCP with hands-on practices focused on automation, security, and cost optimization.",
+		points: ["Multi-cloud architecture strategies", "Cloud-native security and compliance", "Serverless and managed service integration", "Cost optimization techniques"],
+	},
+	{
+		title: "SRE and Observability",
+		description: "Build reliability into your systems with Site Reliability Engineering practices and comprehensive observability solutions for modern distributed applications.",
+		points: ["SLIs, SLOs, and Error Budgets", "Distributed tracing and metrics collection", "Alerting and on-call strategies", "Incident management and postmortems"],
+	},
+	{
+		title: "GitOps and Continuous Delivery",
+		description: "Implement declarative, Git-based delivery pipelines for applications and infrastructure with modern GitOps tools and methodologies.",
+		points: ["Flux and ArgoCD implementation", "Continuous deployment patterns", "Progressive delivery techniques", "Multi-environment promotion strategies"],
+	},
+	{
+		title: "Platform Engineering",
+		description: "Design and build effective internal developer platforms that improve productivity, standardize workflows, and enable self-service capabilities for engineering teams.",
+		points: ["Internal platform architecture", "Self-service developer portals", "Developer experience optimization", "Platform team operating models"],
+	},
+];
+
 const programmes = [
 	{ title: "Cloud Native Fundamentals", description: "From containers to orchestration — a hands-on introduction to the cloud native stack for engineers new to Kubernetes.", duration: "2 days" },
 	{ title: "Kubernetes Production Readiness", description: "What it actually takes to run Kubernetes in production — observability, security, multi-tenancy, and reliability practices.", duration: "3 days" },
@@ -20,27 +59,86 @@ const features = [
 ];
 
 const formats = [
-	{ name: "On-site Workshop", capacity: "Up to 20 engineers", description: "In-person training at your offices. The deepest format for tight-knit teams who want to learn together.", icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" },
-	{ name: "Virtual Live", capacity: "Up to 15 engineers", featured: true, description: "Distributed teams learn together over video. Live exercises, shared labs, real-time Q&A.", icon: "M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z" },
-	{ name: "Custom Programme", capacity: "Flexible", description: "Multi-week curricula built for platform teams adopting a new technology stack or organisational pattern.", icon: "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" },
+	{
+		name: "On-site Workshop",
+		capacity: "Up to 20 engineers",
+		description: "Immersive in-person training at your location. Our expert instructor travels to your office to deliver hands-on training tailored to your team's needs.",
+		points: ["Up to 20 participants", "Customized curriculum", "Hands-on exercises", "Direct interaction with instructor", "All training materials included"],
+		icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+	},
+	{
+		name: "Virtual Live Training",
+		capacity: "Up to 15 engineers",
+		featured: true,
+		description: "Interactive, instructor-led remote training delivered via video conference. Ideal for distributed teams or organizations looking to minimize travel costs.",
+		points: ["Up to 15 participants", "Customized curriculum", "Virtual lab environments", "Interactive breakout sessions", "Session recordings provided"],
+		icon: "M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z",
+	},
+	{
+		name: "Custom Program",
+		capacity: "Flexible",
+		description: "A fully customized training program designed to meet your specific needs, combining different delivery formats and specialized content.",
+		points: ["Blended learning approaches", "Multi-week learning paths", "Integration with your tools and environment", "Custom labs and exercises", "Mentoring and follow-up support"],
+		icon: "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2",
+	},
 ];
 
 const process = [
-	{ step: "01", title: "Assessment", description: "We map the team's current skill level and the gap you want to close — through interviews and short skills surveys." },
-	{ step: "02", title: "Customisation", description: "Curriculum tailored to your stack, your problem domain, and the production scenarios your engineers actually face." },
-	{ step: "03", title: "Delivery", description: "Hands-on workshops with real clusters and real problems. No slideware-only sessions." },
-	{ step: "04", title: "Follow-up", description: "Office hours, async support, and a 30-day check-in to make sure the material sticks." },
+	{ step: "01", title: "Assessment", description: "We start by understanding your team's current skill levels, learning objectives, and technical environment — through short interviews and surveys." },
+	{ step: "02", title: "Customization", description: "We develop a tailored curriculum that aligns with your specific technology stack and the business challenges your engineers actually face." },
+	{ step: "03", title: "Delivery", description: "Our expert instructors deliver engaging, hands-on training that balances theory with practical application — no slideware-only sessions." },
+	{ step: "04", title: "Follow-up", description: "We provide resources and limited support after training to help solidify learning and address questions that arise once people return to real work." },
 ];
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
 const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
 
+const sectionLede = css({ maxWidth: "44rem", mx: "auto", color: "fg.secondary", fontSize: { base: "md", md: "lg" }, lineHeight: "1.7", textAlign: "center", mb: "10" });
+
+const pillarGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const pillarCard = css({
+	p: "7",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const pillarTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "3" });
+const pillarBody = css({ color: "fg.secondary", lineHeight: "1.6" });
+
+const programGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+
+const programCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+	p: "7",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const programTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
+const programDesc = css({ color: "fg.secondary", lineHeight: "1.6" });
+const programList = css({ display: "flex", flexDirection: "column", gap: "2", mt: "auto", listStyle: "none", p: "0" });
+const programListItem = css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm", color: "fg.secondary" });
+
 const formatGrid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
 	gap: "5",
-	mb: "16",
 });
 
 const formatCard = css({
@@ -89,6 +187,8 @@ const formatIcon = css({
 const formatName = css({ fontFamily: "display", fontSize: "xl", fontWeight: "bold", color: "fg.primary" });
 const formatCapacity = css({ fontSize: "xs", color: "fg.muted", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "wider" });
 const formatDesc = css({ color: "fg.secondary", lineHeight: "1.6" });
+const formatPoints = css({ display: "flex", flexDirection: "column", gap: "2", mt: "2", listStyle: "none", p: "0" });
+const formatPoint = css({ display: "flex", alignItems: "flex-start", gap: "2", fontSize: "sm", color: "fg.secondary" });
 
 const processGrid = css({
 	display: "grid",
@@ -112,7 +212,7 @@ const processStep = css({
 	fontSize: "3xl",
 	fontWeight: "bold",
 	letterSpacing: "tight",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
 	backgroundClip: "text",
 	color: "transparent",
 	lineHeight: "1",
@@ -155,7 +255,7 @@ const programmeMeta = css({
 const cardTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
 const cardBody = css({ color: "fg.secondary", lineHeight: "1.6" });
 
-const sectionBlock = css({ mt: "16" });
+const sectionBlock = css({ mt: "20" });
 
 const sectionTitle = css({
 	fontFamily: "display",
@@ -163,8 +263,9 @@ const sectionTitle = css({
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
-	mb: "8",
+	mb: "4",
 	textAlign: "center",
+	textWrap: "balance",
 });
 
 const featureGrid = css({
@@ -189,14 +290,14 @@ const featureItem = css({
 const checkIcon = css({ flexShrink: 0, color: "fg.brand", mt: "0.5" });
 
 const ctaCard = css({
-	mt: "16",
+	mt: "20",
 	mx: "auto",
 	maxWidth: "60rem",
 	p: { base: "8", md: "12" },
 	borderRadius: "3xl",
 	textAlign: "center",
 	color: "white",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	backgroundImage: "linear-gradient(135deg, #5f5ed7, #00ceff)",
 	boxShadow: "xl",
 });
 
@@ -223,36 +324,87 @@ const ctaBtn = css({
 	<PageHero eyebrow="Training" title="Hands-On Team Training" subtitle="Cloud native training programmes for engineering teams — real clusters, real production scenarios, real outcomes." />
 
 	<div class={shell}>
-		<p class={sectionLabel}>Delivery formats</p>
-		<h2 class={sectionTitle}>Train however your team learns best</h2>
-		<div class={formatGrid}>
-			{formats.map((f) => (
-				<div class={`${formatCard} ${f.featured ? formatFeatured : ""}`}>
-					{f.featured && <span class={formatBadge}>Most flexible</span>}
-					<span class={formatIcon}>
-						<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={f.icon} /></svg>
-					</span>
-					<h3 class={formatName}>{f.name}</h3>
-					<span class={formatCapacity}>{f.capacity}</span>
-					<p class={formatDesc}>{f.description}</p>
-				</div>
-			))}
-		</div>
-
-		<p class={sectionLabel}>Available programmes</p>
-		<h2 class={sectionTitle}>Topics we teach today</h2>
-		<div class={grid}>
-			{programmes.map((p) => (
-				<div class={card}>
-					<span class={programmeMeta}>{p.duration}</span>
-					<h2 class={cardTitle}>{p.title}</h2>
-					<p class={cardBody}>{p.description}</p>
-				</div>
-			))}
-		</div>
+		<section>
+			<p class={sectionLabel}>What we bring</p>
+			<h2 class={sectionTitle}>Cloud native expertise, delivered hands-on</h2>
+			<p class={sectionLede}>Three pillars sit behind every training programme — the foundations your team will leave with, regardless of which curriculum you choose.</p>
+			<div class={pillarGrid}>
+				{pillars.map((p) => (
+					<div class={pillarCard}>
+						<h3 class={pillarTitle}>{p.title}</h3>
+						<p class={pillarBody}>{p.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
 
 		<section class={sectionBlock}>
+			<p class={sectionLabel}>Our training programs</p>
+			<h2 class={sectionTitle}>Programmes built around the work your team actually does</h2>
+			<p class={sectionLede}>Six curricula, each designed and refined through years of production engineering — pick one, or combine multiple into a longer learning path.</p>
+			<div class={programGrid}>
+				{trainingPrograms.map((p) => (
+					<article class={programCard}>
+						<h3 class={programTitle}>{p.title}</h3>
+						<p class={programDesc}>{p.description}</p>
+						<ul class={programList}>
+							{p.points.map((point) => (
+								<li class={programListItem}>
+									<svg class={checkIcon} width="18" height="18" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+									<span>{point}</span>
+								</li>
+							))}
+						</ul>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionLabel}>Training delivery options</p>
+			<h2 class={sectionTitle}>Train however your team learns best</h2>
+			<p class={sectionLede}>Three delivery formats — in-person, virtual, or a fully blended programme tailored to a multi-week learning path.</p>
+			<div class={formatGrid}>
+				{formats.map((f) => (
+					<div class={`${formatCard} ${f.featured ? formatFeatured : ""}`}>
+						{f.featured && <span class={formatBadge}>Most flexible</span>}
+						<span class={formatIcon}>
+							<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={f.icon} /></svg>
+						</span>
+						<h3 class={formatName}>{f.name}</h3>
+						<span class={formatCapacity}>{f.capacity}</span>
+						<p class={formatDesc}>{f.description}</p>
+						<ul class={formatPoints}>
+							{f.points.map((point) => (
+								<li class={formatPoint}>
+									<svg class={checkIcon} width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+									<span>{point}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionLabel}>Available programmes</p>
+			<h2 class={sectionTitle}>Topics we teach today</h2>
+			<div class={grid}>
+				{programmes.map((p) => (
+					<div class={card}>
+						<span class={programmeMeta}>{p.duration}</span>
+						<h3 class={cardTitle}>{p.title}</h3>
+						<p class={cardBody}>{p.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={sectionBlock}>
+			<p class={sectionLabel}>Our training process</p>
 			<h2 class={sectionTitle}>How a programme runs</h2>
+			<p class={sectionLede}>A consistent four-step process — so every programme is grounded in your team's reality, not a generic syllabus.</p>
 			<div class={processGrid}>
 				{process.map((p) => (
 					<div class={processCard}>
