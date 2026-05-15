@@ -1364,6 +1364,60 @@ describe("Structured Data Validation", () => {
 		expect(jsonLd.keywords).toBeUndefined();
 	});
 
+	it("builds a JSON Feed 1.1 document with required fields and per-item shape", async () => {
+		const { buildJsonFeed } = await import("../lib/json-feed.ts");
+
+		const feed = buildJsonFeed({
+			title: "Rawkode Academy",
+			description: "Latest content",
+			homePageUrl: "https://rawkode.academy/",
+			feedUrl: "https://rawkode.academy/api/feeds/all.json",
+			favicon: "https://rawkode.academy/favicon-32x32.png",
+			items: [
+				{
+					id: "https://rawkode.academy/news/example/",
+					url: "https://rawkode.academy/news/example/",
+					title: "Example",
+					summary: "Example summary",
+					date_published: "2026-05-15T08:00:00.000Z",
+					date_modified: "2026-05-15T09:00:00.000Z",
+					authors: [
+						{
+							name: "David Flanagan",
+							url: "https://rawkode.academy/people/rawkode",
+						},
+					],
+					tags: ["News", "Kubernetes"],
+				},
+				{
+					id: "https://rawkode.academy/watch/example-video/",
+					url: "https://rawkode.academy/watch/example-video/",
+					title: "Example video",
+					date_published: "2026-04-01T08:00:00.000Z",
+					image: "https://content.rawkode.academy/videos/x/thumbnail.jpg",
+				},
+			],
+		});
+
+		expect(feed.version).toBe("https://jsonfeed.org/version/1.1");
+		expect(feed.title).toBe("Rawkode Academy");
+		expect(feed.feed_url).toBe("https://rawkode.academy/api/feeds/all.json");
+		expect(feed.language).toBe("en");
+
+		const items = feed.items as Array<Record<string, unknown>>;
+		expect(items).toHaveLength(2);
+		expect(items[0]?.id).toBe("https://rawkode.academy/news/example/");
+		expect(items[0]?.date_modified).toBe("2026-05-15T09:00:00.000Z");
+		const authors = items[0]?.authors as Array<Record<string, unknown>>;
+		expect(authors[0]?.url).toBe("https://rawkode.academy/people/rawkode");
+		expect(items[1]?.date_modified).toBeUndefined();
+		expect(items[1]?.image).toBe(
+			"https://content.rawkode.academy/videos/x/thumbnail.jpg",
+		);
+
+		expect(() => JSON.stringify(feed)).not.toThrow();
+	});
+
 	it("extracts the 4-digit ADR number from canonical IDs and falls back when absent", async () => {
 		const { extractAdrNumber } = await import("../lib/adr-jsonld.ts");
 		expect(extractAdrNumber("0042-use-cloudflare-d1")).toBe("0042");
