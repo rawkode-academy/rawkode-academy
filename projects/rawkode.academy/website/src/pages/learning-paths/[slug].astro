@@ -8,6 +8,7 @@ import {
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
 import LearningPathHero from "@/components/learning-paths/LearningPathHero.astro";
+import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 
 export const prerender = true;
@@ -43,6 +44,12 @@ for (const technology of allTechnologies) {
 const technologyLabels = (learningPath.data.technologies ?? []).map(
 	(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
 );
+const technologyTags = (learningPath.data.technologies ?? []).map(
+	(technologyId) => ({
+		id: technologyId,
+		label: technologyNameById.get(technologyId) ?? technologyId,
+	}),
+);
 
 function formatDuration(minutes: number): string {
 	if (!minutes) {
@@ -66,7 +73,6 @@ function formatDuration(minutes: number): string {
 const durationLabel = formatDuration(learningPath.data.estimatedDuration);
 const outline = headings.filter((heading) => heading.depth === 2);
 const prerequisites = learningPath.data.prerequisites ?? [];
-const technologies = learningPath.data.technologies ?? [];
 
 const pageTitle = `${learningPath.data.title} | Learning Path`;
 const pageDescription = learningPath.data.description;
@@ -101,7 +107,7 @@ const pageDescription = learningPath.data.description;
 		description={learningPath.data.description}
 		difficulty={learningPath.data.difficulty}
 		durationLabel={durationLabel}
-		technologies={technologies}
+		technologies={technologyTags}
 		prerequisites={prerequisites}
 		authors={authors}
 		publishedAt={learningPath.data.publishedAt}
@@ -140,14 +146,18 @@ const pageDescription = learningPath.data.description;
 							</p>
 						</div>
 					</li>
-					{technologies.length > 0 && (
+					{technologyTags.length > 0 && (
 						<li>
 							<p class="text-xs uppercase tracking-wide text-muted mb-2">Technologies</p>
 							<div class="flex flex-wrap gap-2">
-								{technologies.map((technology) => (
-									<span class="inline-flex items-center rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary dark:bg-secondary/20 dark:text-secondary/90">
-										{technology}
-									</span>
+								{technologyTags.map((technology) => (
+									<a
+										href={`/technology/${technology.id}`}
+										rel="tag"
+										class="inline-flex items-center rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary hover:bg-secondary/25 hover:text-secondary dark:bg-secondary/20 dark:text-secondary/90 dark:hover:bg-secondary/30 transition-colors"
+									>
+										{technology.label}
+									</a>
 								))}
 							</div>
 						</li>
@@ -189,6 +199,14 @@ const pageDescription = learningPath.data.description;
 			)}
 		</aside>
 	</section>
+
+	<NewsletterCTA
+		class="mt-16"
+		audience="learning-paths"
+		badge="New paths weekly"
+		headline="Get notified when we ship new learning paths"
+		subtitle="Structured roadmaps for Cloud Native, AI infra, and platform engineering — delivered when they're ready."
+	/>
 
 	<footer class="mt-16">
 		<div class="rounded-3xl border border-dashed border-gray-300 dark:border-gray-700 p-8 text-center">
