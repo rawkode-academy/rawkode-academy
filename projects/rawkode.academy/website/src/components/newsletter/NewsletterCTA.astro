@@ -21,7 +21,6 @@ const {
 	headline = "Stay ahead in cloud native",
 	subtitle = "Tutorials, deep dives, and curated events — no fluff.",
 	audience = "academy",
-	variant = "card",
 } = Astro.props;
 
 const user = Astro.locals.user;
@@ -48,7 +47,6 @@ const hasNewsletterCookie =
 	Astro.cookies.get(`newsletter:${audience}:updates`)?.value === "true";
 
 const shouldHide = !user && hasNewsletterCookie;
-const isSection = variant === "section";
 
 const wrap = css({
 	position: "relative",

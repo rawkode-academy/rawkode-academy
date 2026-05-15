@@ -16,7 +16,6 @@ Astro.response.headers.set(
 const allVideos = await getPublishedVideos();
 const featured = allVideos[0];
 const rest = allVideos.slice(1, 18);
-const totalVideoCount = allVideos.length;
 
 const pageTitle = "Cloud Native Videos | Rawkode Academy";
 const pageDescription = "Watch live sessions, screencasts, and deep-dives on cloud native engineering.";
