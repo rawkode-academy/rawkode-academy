@@ -1,0 +1,40 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { buildLearningPathJsonLd } from "@/lib/learning-path-jsonld";
+
+interface Props {
+	learningPath: CollectionEntry<"learningPaths">;
+	authors: ReadonlyArray<CollectionEntry<"people">>;
+	technologyLabels: ReadonlyArray<string>;
+	slot?: string;
+}
+
+const { learningPath, authors, technologyLabels } = Astro.props;
+
+const siteUrl = (Astro.site ?? Astro.url).origin;
+const pathUrl = new URL(`/learning-paths/${learningPath.id}`, siteUrl).href;
+
+const jsonLd = buildLearningPathJsonLd({
+	siteUrl,
+	pathUrl,
+	source: {
+		title: learningPath.data.title,
+		description: learningPath.data.description,
+		difficulty: learningPath.data.difficulty,
+		estimatedDuration: learningPath.data.estimatedDuration,
+		prerequisites: learningPath.data.prerequisites ?? [],
+		technologyLabels,
+		publishedAt: learningPath.data.publishedAt,
+	},
+	authors: authors.map((author) => ({
+		id: author.data.id,
+		name: author.data.name,
+	})),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
