@@ -9,6 +9,7 @@ import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
 import LearningPathHero from "@/components/learning-paths/LearningPathHero.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 
 export const prerender = true;
 
@@ -33,6 +34,16 @@ export const getStaticPaths: GetStaticPaths =
 const { learningPath } = Astro.props;
 const { Content, headings } = await render(learningPath);
 const authors = await getEntries(learningPath.data.authors);
+
+const allTechnologies = await getCollection("technologies");
+const technologyNameById = new Map<string, string>();
+for (const technology of allTechnologies) {
+	const rawId = technology.id.replace(/\/index$/, "");
+	technologyNameById.set(rawId, technology.data.name);
+}
+const technologyLabels = (learningPath.data.technologies ?? []).map(
+	(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+);
 
 function formatDuration(minutes: number): string {
 	if (!minutes) {
@@ -68,6 +79,12 @@ const pageDescription = learningPath.data.description;
 	publishedAt={learningPath.data.publishedAt}
 	authors={authors}
 >
+	<LearningPathJsonLd
+		slot="extra-head"
+		learningPath={learningPath}
+		authors={authors}
+		technologyLabels={technologyLabels}
+	/>
 	<nav class="mb-6">
 		<a
 			href="/learning-paths"
