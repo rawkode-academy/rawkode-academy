@@ -1,0 +1,36 @@
+---
+title: "vLLM 0.21 Lands With C++20 Requirement, Transformers v5 Migration, and a New Blackwell MLA Backend"
+description: "vLLM 0.21.0 ships breaking compiler and dependency requirements alongside KV-offload integration and a TOKENSPEED_MLA attention backend for DeepSeek-R1 and Kimi-K25 on Blackwell GPUs."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies: []
+---
+
+vLLM cut the v0.21.0 release on May 15. The notes record 367 commits from 202 contributors (49 of them new) since v0.20.0. Two breaking changes lead the list, so anyone running v0.20.x in production should treat this as a planned upgrade rather than a drop-in.
+
+## Breaking changes
+
+- **C++20 compiler required.** PyTorch's own toolchain bump propagates here. Custom build pipelines pinned to older toolchains will fail.
+- **Transformers v4 deprecated.** vLLM now expects Transformers v5. Any model loader paths or tokenizer code coupled to v4 internals needs to move.
+
+## KV offloading and the Hybrid Memory Allocator
+
+The release integrates KV offloading with the Hybrid Memory Allocator (HMA), adds scheduler-side sliding-window group support, and ships a `MooncakeStoreConnector` for distributed KV stores. For long-context and multi-tenant inference, this consolidates a set of features that previously lived behind different connectors and flags.
+
+## Speculative decoding for reasoning models
+
+Speculative decoding now respects reasoning/thinking budgets, which was a correctness gap for spec-decoding against models that emit hidden reasoning tokens. Drafter attention backends can be selected independently from the main model. Multimodal speculative decoding lands with warnings — usable, but not yet a recommended production path.
+
+## New attention backend on Blackwell
+
+A new `TOKENSPEED_MLA` attention backend targets DeepSeek-R1 and Kimi-K25 prefill+decode on Blackwell GPUs. Faster FP8 group-quant kernels are also in. AMD ROCm 7.2.2 support, Dynamic Batch Optimization, and a Fused Shared Expert path for Qwen3-Next round out the hardware story; Intel XPU gains a top-k/top-p sample kernel and LoRA support.
+
+## What to do
+
+- If you're on v0.20.x, plan the Transformers v5 migration before upgrading.
+- Custom container builds need a C++20-capable compiler.
+- DeepSeek-R1 / Kimi-K25 on Blackwell is the most concrete reason to move quickly.
+- Validate spec-decoding behavior on any reasoning-model deployments — the budget-aware path changes prior outputs.
+
+**Source:** [vLLM v0.21.0 release notes](https://github.com/vllm-project/vllm/releases/tag/v0.21.0) — May 15, 2026.

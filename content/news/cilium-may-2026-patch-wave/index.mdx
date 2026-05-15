@@ -1,0 +1,34 @@
+---
+title: "Cilium Ships Coordinated Patch Wave Across 1.17, 1.18, and 1.19"
+description: "Cilium published v1.19.4, v1.18.10, and v1.17.16 on May 13, fixing IPsec packet drops during key rotation, ARP failures for LoadBalancer services, and a CiliumLocalRedirectPolicy edge case that could override an existing Service frontend."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - cilium
+---
+
+Cilium published patch releases for all three supported branches on May 13: v1.19.4, v1.18.10, and v1.17.16. No new CVEs were assigned in this wave, but the bug list is dominated by production-stability fixes worth tracking, especially for clusters using IPsec, the egress gateway, or LocalRedirectPolicies.
+
+## What's fixed
+
+- **IPsec packet drops during key rotation.** Rolling restarts with key rotation could drop packets — fixed across the wave.
+- **WireGuard MTU clamping.** MTU is now clamped to `IPV6_MIN_MTU` (1280) to prevent packet loss in tunnel-plus-encryption scenarios.
+- **ARP failures for LoadBalancer services.** Caused by pointer reuse during BPF map iteration; this manifested as intermittent service unreachability.
+- **CiliumLocalRedirectPolicy edge case.** The `addressMatcher` could override an existing Service's frontend when its backend pods were not yet `Ready`. Patched.
+- **L7 LoadBalancer / Ingress drops on bridged kernels.** Specific kernel/bridge combinations saw traffic drops; resolved.
+- **SocketLB error codes.** Returned incorrect codes when services lacked backends, breaking client retry logic that keyed on errno.
+- **Datapath reinitialization deadlock** when triggered from the local API.
+
+## Notable smaller items
+
+- `EndpointSlices` are now filtered by the `service-proxy-name` label at watch level, reducing apiserver load in clusters that segment proxies.
+- iptables masquerading respects longest-prefix-match via route sorting — fixes a subtle correctness issue when overlapping CIDRs are configured.
+- The SPIRE client is now configurable for `ztunnel`, useful for service-mesh integrations.
+- `x/net` was bumped to v0.53 and base images refreshed.
+
+## What to do
+
+If you run IPsec with periodic key rotation, or rely on LoadBalancer services on hosts where ARP behavior is sensitive, this patch wave is worth scheduling promptly. Operators on 1.18.0–1.18.5 should also confirm they're past v1.18.6 if they ever ran WireGuard with the beta Node Encryption feature — that earlier fix addressed CVE-2026-26963 and is unrelated to this wave.
+
+**Sources:** [Cilium v1.19.4](https://github.com/cilium/cilium/releases/tag/v1.19.4), [Cilium v1.18.10](https://github.com/cilium/cilium/releases/tag/v1.18.10), [Cilium v1.17.16](https://github.com/cilium/cilium/releases/tag/v1.17.16) — May 13, 2026.
