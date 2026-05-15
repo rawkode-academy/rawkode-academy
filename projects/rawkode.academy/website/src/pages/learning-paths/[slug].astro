@@ -47,6 +47,24 @@ const prerequisites = learningPath.data.prerequisites ?? [];
 
 const difficultyLabel = (d: string) => d.charAt(0).toUpperCase() + d.slice(1);
 
+const difficultyAccent: Record<string, string> = {
+	beginner: "var(--colors-green-9, #16a34a)",
+	intermediate: "var(--colors-amber-9, #d97706)",
+	advanced: "var(--colors-red-9, #dc2626)",
+};
+
+// Find related learning paths sharing technologies
+const allPaths = (await getCollection("learningPaths")).filter((lp) => lp.id !== learningPath.id);
+const pathTechSet = new Set(learningPath.data.technologies ?? []);
+const relatedPaths = allPaths
+	.map((p) => ({ p, overlap: (p.data.technologies ?? []).filter((t) => pathTechSet.has(t)).length }))
+	.filter(({ overlap }) => overlap > 0)
+	.sort((x, y) => y.overlap - x.overlap || y.p.data.publishedAt.getTime() - x.p.data.publishedAt.getTime())
+	.slice(0, 3)
+	.map(({ p }) => p);
+
+const formatDate = (d: Date) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(d);
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
 
 const backLink = css({
@@ -63,17 +81,93 @@ const backLink = css({
 });
 
 const heroCard = css({
+	position: "relative",
 	p: { base: "6", md: "10" },
 	borderRadius: "3xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
+	overflow: "hidden",
 	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/8, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/8, transparent 50%)",
+		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 55%)",
 	_dark: {
 		backgroundImage:
-			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/15, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 50%)",
+			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 55%)",
 	},
+});
+
+const heroStats = css({
+	mt: "8",
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const statItem = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+	p: "4",
+	borderRadius: "xl",
+	bg: "bg.canvas/60",
+	backdropFilter: "blur(8px)",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+});
+
+const statLabel = css({
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const statValue = css({
+	fontFamily: "display",
+	fontSize: { base: "lg", md: "xl" },
+	fontWeight: "bold",
+	color: "fg.primary",
+	lineHeight: "tight",
+});
+
+const heroCta = css({
+	mt: "8",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+});
+
+const heroPrimary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	boxShadow: "md",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const heroSecondary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
 });
 
 const eyebrow = css({
@@ -177,6 +271,96 @@ const outlineLink = css({
 	_hover: { color: "fg.brand" },
 });
 
+const prereqHero = css({
+	mt: "12",
+	p: { base: "6", md: "8" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const prereqHeroTitle = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	fontFamily: "display",
+	fontSize: { base: "lg", md: "xl" },
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "4",
+});
+
+const prereqHeroList = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+	gap: "3",
+	listStyle: "none",
+	m: 0,
+	p: 0,
+});
+
+const prereqHeroItem = css({
+	display: "flex",
+	alignItems: "flex-start",
+	gap: "3",
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+});
+
+const prereqCheck = css({
+	flexShrink: 0,
+	mt: "0.5",
+	w: "5",
+	h: "5",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+});
+
+const relatedSection = css({ mt: "16" });
+const relatedHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "6",
+	flexWrap: "wrap",
+});
+const relatedTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "xl", md: "2xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+});
+const relatedAll = css({ fontSize: "sm", fontWeight: "semibold", color: "fg.brand", textDecoration: "none", _hover: { textDecoration: "underline" } });
+const relatedGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+const relatedCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "5",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", borderColor: "border.default" },
+});
+const relatedMetaLine = css({ fontSize: "xs", color: "fg.muted", display: "flex", gap: "2", alignItems: "center" });
+const relatedCardTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary", lineHeight: "1.3", "a:hover &": { color: "fg.brand" } });
+
 const footer = css({
 	mt: "16",
 	p: "8",
@@ -245,7 +429,55 @@ const pageDescription = learningPath.data.description;
 			<span class={eyebrow}>Learning Path · {difficultyLabel(learningPath.data.difficulty)}</span>
 			<h1 class={title}>{learningPath.data.title}</h1>
 			<p class={desc}>{learningPath.data.description}</p>
+			<div class={heroStats}>
+				<div class={statItem}>
+					<span class={statLabel}>Difficulty</span>
+					<span class={statValue} style={`color: ${difficultyAccent[learningPath.data.difficulty] || "inherit"};`}>{difficultyLabel(learningPath.data.difficulty)}</span>
+				</div>
+				<div class={statItem}>
+					<span class={statLabel}>Time investment</span>
+					<span class={statValue}>{durationLabel}</span>
+				</div>
+				<div class={statItem}>
+					<span class={statLabel}>Technologies</span>
+					<span class={statValue}>{technologyTags.length}</span>
+				</div>
+				<div class={statItem}>
+					<span class={statLabel}>Published</span>
+					<span class={statValue}>{formatDate(learningPath.data.publishedAt)}</span>
+				</div>
+			</div>
+			<div class={heroCta}>
+				{outline[0] && (
+					<a href={`#${outline[0].slug}`} class={heroPrimary}>
+						Start learning
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg>
+					</a>
+				)}
+				<a href="/watch" class={heroSecondary}>Browse videos</a>
+			</div>
 		</div>
+
+		{prerequisites.length > 0 && (
+			<div class={prereqHero}>
+				<h2 class={prereqHeroTitle}>
+					<span style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 9999px; background: var(--colors-bg-brand-subtle); color: var(--colors-fg-brand);">
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+					</span>
+					Before you begin
+				</h2>
+				<ul class={prereqHeroList}>
+					{prerequisites.map((item) => (
+						<li class={prereqHeroItem}>
+							<span class={prereqCheck} aria-hidden="true">
+								<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+							</span>
+							<span>{item}</span>
+						</li>
+					))}
+				</ul>
+			</div>
+		)}
 
 		<section class={layout}>
 			<Prose>
@@ -274,16 +506,6 @@ const pageDescription = learningPath.data.description;
 								</div>
 							</li>
 						)}
-						{prerequisites.length > 0 && (
-							<li>
-								<div class={dt}>Prerequisites</div>
-								<ul class={prereqList}>
-									{prerequisites.map((item) => (
-										<li><span class={prereqDot}></span>{item}</li>
-									))}
-								</ul>
-							</li>
-						)}
 					</ul>
 				</div>
 
@@ -302,6 +524,28 @@ const pageDescription = learningPath.data.description;
 				)}
 			</aside>
 		</section>
+
+		{relatedPaths.length > 0 && (
+			<section class={relatedSection}>
+				<div class={relatedHead}>
+					<h2 class={relatedTitle}>Related learning paths</h2>
+					<a href="/learning-paths" class={relatedAll}>Browse all paths →</a>
+				</div>
+				<div class={relatedGrid}>
+					{relatedPaths.map((p) => (
+						<a href={`/learning-paths/${p.id}`} class={relatedCard}>
+							<div class={relatedMetaLine}>
+								<span>{difficultyLabel(p.data.difficulty)}</span>
+								<span>·</span>
+								<span>{fmtDuration(p.data.estimatedDuration)}</span>
+							</div>
+							<h3 class={relatedCardTitle}>{p.data.title}</h3>
+							<p style="font-size: 0.875rem; color: var(--colors-fg-secondary); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{p.data.description}</p>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
 
 		<footer class={footer}>
 			<h2 class={footerTitle}>Ready for another challenge?</h2>

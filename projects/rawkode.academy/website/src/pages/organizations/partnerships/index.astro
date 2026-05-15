@@ -13,6 +13,19 @@ const valueProps = [
 	{ title: "Measurable outcomes", description: "Comprehensive analytics tailored to your goals — engagement, sentiment, community growth, and product adoption indicators." },
 ];
 
+const pillars = [
+	{ name: "Developer Marketing", tagline: "We inspire developers", description: "Authentic technical content that puts your product in the hands of engineers." },
+	{ name: "Developer Education", tagline: "We level up developers", description: "Tutorials, learning paths, and workshops that turn curiosity into adoption." },
+	{ name: "Developer Experience", tagline: "We support developers", description: "DX audits, docs reviews, and onboarding optimisation rooted in real feedback." },
+];
+
+const tiers = [
+	{ name: "Nip", scope: "Essential visibility", highlights: ["Featured content placement", "Quarterly check-ins", "Annual programme"] },
+	{ name: "Dram", scope: "Most popular", featured: true, highlights: ["Everything in Nip", "Co-produced video series", "Community AMA & launch support"] },
+	{ name: "Blend", scope: "Extensive collaboration", highlights: ["Everything in Dram", "Dedicated DevRel hours", "Strategic content calendar"] },
+	{ name: "Malt", scope: "Premier engagement", highlights: ["Everything in Blend", "Hands-on consulting hours", "Co-branded campaigns"] },
+];
+
 const partnershipFAQs = [
 	{
 		question: "What is the minimum partnership duration?",
@@ -34,11 +47,96 @@ const partnershipFAQs = [
 
 const shell = css({ maxWidth: "72rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
+const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+
 const grid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" },
 	gap: "5",
 });
+
+const pillarsGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+	mb: "16",
+});
+
+const pillarCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textAlign: "center",
+});
+
+const pillarName = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "1" });
+const pillarTagline = css({ fontSize: "sm", color: "fg.brand", fontWeight: "semibold", mb: "3" });
+const pillarBody = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
+
+const tierGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+	mb: "16",
+});
+
+const tierCard = css({
+	position: "relative",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const tierCardFeatured = css({
+	borderColor: "fg.brand",
+	boxShadow: "0 0 0 1px var(--colors-fg-brand)",
+});
+
+const tierBadge = css({
+	position: "absolute",
+	top: "-3",
+	right: "5",
+	px: "2.5",
+	py: "0.5",
+	borderRadius: "full",
+	bg: "bg.brand",
+	color: "fg.on-brand",
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const tierName = css({
+	fontFamily: "display",
+	fontSize: "2xl",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+});
+
+const tierScope = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
+
+const tierList = css({ display: "flex", flexDirection: "column", gap: "2", mt: "2", listStyle: "none", p: "0" });
+const tierItem = css({
+	display: "flex",
+	alignItems: "flex-start",
+	gap: "2",
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.5",
+});
+const tierCheck = css({ color: "fg.brand", flexShrink: 0, mt: "0.5" });
 
 const card = css({
 	p: "6",
@@ -128,6 +226,40 @@ const ctaBtn = css({
 	<PageHero eyebrow="Partner With Us" title="Strategic Technology Partnerships" subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance." />
 
 	<div class={shell}>
+		<p class={sectionLabel}>Three-pillar approach</p>
+		<h2 class={sectionTitle}>How we accelerate developer adoption</h2>
+		<div class={pillarsGrid}>
+			{pillars.map((p) => (
+				<div class={pillarCard}>
+					<h3 class={pillarName}>{p.name}</h3>
+					<p class={pillarTagline}>{p.tagline}</p>
+					<p class={pillarBody}>{p.description}</p>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>Partnership tiers</p>
+		<h2 class={sectionTitle}>Engagement levels named after Scottish whisky measures</h2>
+		<div class={tierGrid}>
+			{tiers.map((tier) => (
+				<div class={`${tierCard} ${tier.featured ? tierCardFeatured : ""}`}>
+					{tier.featured && <span class={tierBadge}>Most popular</span>}
+					<span class={tierName}>{tier.name}</span>
+					<span class={tierScope}>{tier.scope}</span>
+					<ul class={tierList}>
+						{tier.highlights.map((h) => (
+							<li class={tierItem}>
+								<svg class={tierCheck} width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+								<span>{h}</span>
+							</li>
+						))}
+					</ul>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>What you get</p>
+		<h2 class={sectionTitle}>Every partnership delivers</h2>
 		<div class={grid}>
 			{valueProps.map((vp) => (
 				<div class={card}>

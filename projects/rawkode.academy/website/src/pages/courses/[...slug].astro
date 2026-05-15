@@ -1,5 +1,5 @@
 ---
-import { getImage } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, getEntries, render } from "astro:content";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Prose from "@/components/prose/Prose.astro";
@@ -55,17 +55,135 @@ const getResourceHref = (resource: NonNullable<typeof course.data.resources>[num
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
 
 const heroCard = css({
-	p: { base: "6", md: "10" },
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "1.4fr 1fr" },
+	gap: { base: "6", md: "10" },
+	alignItems: "stretch",
+	p: { base: "5", md: "5" },
 	borderRadius: "3xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
+	overflow: "hidden",
 	backgroundImage:
-		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 50%)",
+		"radial-gradient(circle at 20% 20%, token(colors.brand.500)/10, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/10, transparent 55%)",
 	_dark: {
 		backgroundImage:
-			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 50%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 50%)",
+			"radial-gradient(circle at 20% 20%, token(colors.brand.500)/18, transparent 55%), radial-gradient(circle at 80% 30%, token(colors.cyan.500)/15, transparent 55%)",
 	},
+});
+
+const heroBody = css({ display: "flex", flexDirection: "column", justifyContent: "center", p: { base: "2", md: "6" } });
+
+const heroMedia = css({
+	overflow: "hidden",
+	borderRadius: "2xl",
+	bg: "bg.sunken",
+	boxShadow: "lg",
+	minHeight: { lg: "20rem" },
+	display: "flex",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const heroMediaFallback = css({
+	width: "full",
+	minHeight: "16rem",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	color: "fg.brand",
+	fontSize: "8xl",
+	fontFamily: "display",
+	fontWeight: "bold",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/15, token(colors.cyan.500)/15)",
+});
+
+const heroFlagRow = css({ display: "inline-flex", gap: "2", mb: "4", flexWrap: "wrap" });
+
+const freePill = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+});
+
+const progressTrack = css({
+	mt: "8",
+	height: "8px",
+	bg: "bg.sunken",
+	borderRadius: "full",
+	overflow: "hidden",
+});
+
+const progressFill = css({
+	height: "full",
+	backgroundImage: "linear-gradient(90deg, token(colors.brand.500), token(colors.cyan.500))",
+	borderRadius: "full",
+	transition: "width 400ms ease",
+});
+
+const progressMeta = css({
+	mt: "3",
+	display: "flex",
+	justifyContent: "space-between",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const instructorRow = css({
+	mt: "8",
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const avatarSm = css({ width: "10", height: "10", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+
+const ctaRow = css({ mt: "6", display: "flex", flexWrap: "wrap", gap: "3" });
+
+const ctaPrimary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	boxShadow: "md",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+
+const ctaSecondary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "6",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
 });
 
 const eyebrow = css({
@@ -211,20 +329,55 @@ const externalLink = css({
 
 	<div class={shell}>
 		<div class={heroCard}>
-			<span class={eyebrow}>Course · {course.data.difficulty.charAt(0).toUpperCase()}{course.data.difficulty.slice(1)}</span>
-			<h1 class={title}>{course.data.title}</h1>
-			<p class={desc}>{course.data.description}</p>
-			<div class={stats}>
-				<span>{availableModuleCount} of {totalModules} modules available</span>
-				<span>·</span>
-				<span>{formatDuration(totalDuration)}</span>
-				{authors[0] && (
+			<div class={heroBody}>
+				<div class={heroFlagRow}>
+					<span class={eyebrow}>Course · {course.data.difficulty.charAt(0).toUpperCase()}{course.data.difficulty.slice(1)}</span>
+					<span class={freePill}>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+						Free &amp; Open
+					</span>
+				</div>
+				<h1 class={title}>{course.data.title}</h1>
+				<p class={desc}>{course.data.description}</p>
+				{totalModules > 0 && (
 					<>
-						<span>·</span>
-						<span>by {authors.map((a) => a.data.name).join(", ")}</span>
+						<div class={progressTrack} aria-hidden="true">
+							<div class={progressFill} style={`width: ${Math.round((availableModuleCount / totalModules) * 100)}%;`}></div>
+						</div>
+						<div class={progressMeta}>
+							<span>{availableModuleCount} of {totalModules} modules live</span>
+							<span>{formatDuration(totalDuration)}</span>
+						</div>
 					</>
 				)}
+				{authors[0] && (
+					<div class={instructorRow}>
+						{authors[0].data.avatarUrl && <img src={authors[0].data.avatarUrl} alt="" class={avatarSm} loading="lazy" />}
+						<div>
+							<div style="font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--colors-fg-muted);">Instructor</div>
+							<div style="font-weight: 600; color: var(--colors-fg-primary);">{authors.map((a) => a.data.name).join(", ")}</div>
+						</div>
+					</div>
+				)}
+				<div class={ctaRow}>
+					{allCourseModules.filter((m) => !m.data.draft)[0] && (
+						<a href={`/courses/${getCourseModuleSlug(course.id, allCourseModules.filter((m) => !m.data.draft)[0]!.id)}`} class={ctaPrimary}>
+							Start learning
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg>
+						</a>
+					)}
+					<a href="#course-content" class={ctaSecondary}>See curriculum</a>
+				</div>
 			</div>
+			{course.data.cover ? (
+				<div class={heroMedia}>
+					<Image src={course.data.cover.image} alt={course.data.cover.alt || course.data.title} width={800} height={600} loading="eager" />
+				</div>
+			) : (
+				<div class={heroMedia}>
+					<div class={heroMediaFallback}>{course.data.title.charAt(0)}</div>
+				</div>
+			)}
 		</div>
 
 		<section class={layout}>

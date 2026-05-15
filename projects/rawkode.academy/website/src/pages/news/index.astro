@@ -1,8 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
-import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { calculateReadingTime } from "@/utils/reading-time";
 import { css } from "../../../styled-system/css";
 
 export const prerender = true;
@@ -37,18 +37,384 @@ function formatTechnologyLabel(value: string): string {
 		.join(" ");
 }
 
-const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+// Tech tally for sidebar
+const techCount = new Map<string, number>();
+for (const story of allNews) {
+	for (const t of story.data.technologies ?? []) {
+		techCount.set(t, (techCount.get(t) ?? 0) + 1);
+	}
+}
+const topTechs = Array.from(techCount.entries())
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 12);
+
+const featured = allNews[0];
+const rest = allNews.slice(1);
+
+// Group remaining stories by Month + Year for visual rhythm
+const groups: { label: string; stories: typeof rest }[] = [];
+let currentKey = "";
+for (const story of rest) {
+	const d = story.data.publishedAt;
+	const key = `${d.getFullYear()}-${d.getMonth()}`;
+	const label = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(d);
+	if (key !== currentKey) {
+		groups.push({ label, stories: [] });
+		currentKey = key;
+	}
+	groups[groups.length - 1].stories.push(story);
+}
+
+const totalStories = allNews.length;
+const latestDate = allNews[0]?.data.publishedAt;
+
+// ── Styles ──────────────────────────────────────────────────────────────
+
+const hero = css({
+	position: "relative",
+	overflow: "hidden",
+	borderBottomWidth: "1px",
+	borderBottomColor: "border.muted",
+	px: { base: "4", md: "6" },
+	py: { base: "14", md: "20" },
+	backgroundImage:
+		"radial-gradient(circle at 18% 25%, token(colors.brand.500)/15, transparent 55%), radial-gradient(circle at 82% 40%, token(colors.cyan.500)/12, transparent 55%)",
+	_dark: {
+		backgroundImage:
+			"radial-gradient(circle at 18% 25%, token(colors.brand.500)/25, transparent 55%), radial-gradient(circle at 82% 40%, token(colors.cyan.500)/18, transparent 55%)",
+	},
+});
+
+const heroPattern = css({
+	position: "absolute",
+	inset: "0",
+	pointerEvents: "none",
+	opacity: { base: "0.35", _dark: "0.5" },
+	backgroundImage:
+		"linear-gradient(to right, token(colors.border.muted) 1px, transparent 1px), linear-gradient(to bottom, token(colors.border.muted) 1px, transparent 1px)",
+	backgroundSize: "48px 48px",
+	maskImage: "radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 75%)",
+});
+
+const heroInner = css({
+	position: "relative",
+	zIndex: "1",
+	maxWidth: "72rem",
+	mx: "auto",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "minmax(0, 1fr) auto" },
+	alignItems: "end",
+	gap: "8",
+});
+
+const heroEyebrow = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const heroDot = css({
+	w: "1.5",
+	h: "1.5",
+	borderRadius: "full",
+	bg: "fg.brand",
+	boxShadow: "0 0 0 4px token(colors.brand.500)/20",
+	animation: "pulse 2s ease-in-out infinite",
+});
+
+const heroTitle = css({
+	mt: "5",
+	fontFamily: "display",
+	fontSize: { base: "4xl", md: "6xl", lg: "7xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.0",
+	color: "fg.primary",
+	textWrap: "balance",
+});
+
+const heroAccent = css({
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+});
+
+const heroSub = css({
+	mt: "5",
+	fontSize: { base: "md", md: "lg" },
+	color: "fg.secondary",
+	maxWidth: "40rem",
+	lineHeight: "1.6",
+});
+
+const heroMeta = css({
+	mt: "6",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "5",
+	alignItems: "center",
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const heroMetaValue = css({
+	color: "fg.primary",
+	fontWeight: "semibold",
+});
+
+const feedActions = css({
+	display: "flex",
+	gap: "2",
+	flexWrap: "wrap",
+});
+
+const feedButton = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3.5",
+	py: "2",
+	borderRadius: "lg",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { borderColor: "fg.brand", color: "fg.brand" },
+});
+
+const layoutWrap = css({
+	maxWidth: "72rem",
+	mx: "auto",
+	px: { base: "4", md: "6" },
+	py: { base: "10", md: "14" },
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) 16rem" },
+	gap: { base: "12", lg: "16" },
+	alignItems: "start",
+});
+
+const main = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "10",
+});
+
+const featuredCard = css({
+	position: "relative",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "auto minmax(0, 1fr)" },
+	gap: { base: "5", md: "8" },
+	p: { base: "6", md: "8" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	overflow: "hidden",
+	_before: {
+		content: '""',
+		position: "absolute",
+		top: "0",
+		left: "0",
+		right: "0",
+		height: "3px",
+		backgroundImage: "linear-gradient(90deg, token(colors.brand.500), token(colors.cyan.500))",
+	},
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "xl", borderColor: "fg.brand" },
+});
+
+const featuredBadge = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	width: "fit-content",
+});
+
+const featuredMeta = css({
+	display: "flex",
+	alignItems: "center",
+	flexWrap: "wrap",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const featuredMetaDot = css({
+	w: "1",
+	h: "1",
+	borderRadius: "full",
+	bg: "border.default",
+});
+
+const featuredDate = css({
+	display: "flex",
+	flexDirection: "column",
+	alignItems: { base: "flex-start", md: "center" },
+	justifyContent: "center",
+	gap: "0",
+	minWidth: { md: "9rem" },
+	pr: { md: "8" },
+	borderRightWidth: { md: "1px" },
+	borderRightColor: "border.muted",
+});
+
+const featuredDay = css({
+	fontFamily: "display",
+	fontSize: { base: "5xl", md: "6xl" },
+	fontWeight: "bold",
+	color: "fg.primary",
+	lineHeight: "1",
+	letterSpacing: "tight",
+});
+
+const featuredMonthYear = css({
+	mt: "2",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	textTransform: "uppercase",
+	letterSpacing: "wider",
+});
+
+const featuredTitleLink = css({
+	display: "block",
+	mt: "4",
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "4xl", lg: "5xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.05",
+	color: "fg.primary",
+	textDecoration: "none",
+	textWrap: "balance",
+	transition: "color 150ms ease",
+	_hover: { color: "fg.brand" },
+});
+
+const featuredDesc = css({
+	mt: "4",
+	fontSize: { base: "md", md: "lg" },
+	lineHeight: "1.6",
+	color: "fg.secondary",
+});
+
+const groupHeader = css({
+	display: "flex",
+	alignItems: "center",
+	gap: "3",
+	mb: "6",
+	"&::after": {
+		content: '""',
+		flex: "1",
+		height: "1px",
+		bg: "border.muted",
+	},
+});
+
+const groupLabel = css({
+	fontFamily: "display",
+	fontSize: "sm",
+	fontWeight: "bold",
+	color: "fg.muted",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const groupCount = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	minWidth: "1.5rem",
+	h: "1.5rem",
+	px: "2",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "bold",
+});
 
 const list = css({
 	display: "flex",
 	flexDirection: "column",
-	divideY: "1px",
-	"& > * + *": { borderTopWidth: "1px", borderTopColor: "border.muted" },
+	gap: "0",
 });
 
-const item = css({ py: "6", display: "flex", flexDirection: "column", gap: "2" });
+const item = css({
+	position: "relative",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "6rem minmax(0, 1fr)" },
+	gap: { base: "3", md: "6" },
+	py: { base: "6", md: "7" },
+	borderBottomWidth: "1px",
+	borderBottomColor: "border.muted",
+	transition: "background 150ms ease",
+	_first: { pt: "0" },
+	_last: { borderBottomWidth: "0" },
+	"&:hover": {
+		"& .item-title": { color: "fg.brand" },
+	},
+});
 
-const meta = css({
+const itemDateBlock = css({
+	display: "flex",
+	flexDirection: { base: "row", md: "column" },
+	alignItems: { base: "center", md: "flex-start" },
+	gap: { base: "2", md: "0" },
+	pt: { md: "1" },
+});
+
+const itemDay = css({
+	fontFamily: "display",
+	fontSize: { base: "lg", md: "3xl" },
+	fontWeight: "bold",
+	color: "fg.primary",
+	lineHeight: "1",
+	letterSpacing: "tight",
+});
+
+const itemMonth = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	textTransform: "uppercase",
+	letterSpacing: "wider",
+	mt: { md: "1" },
+});
+
+const itemBody = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "2",
+});
+
+const itemMeta = css({
 	display: "flex",
 	flexWrap: "wrap",
 	alignItems: "center",
@@ -60,28 +426,146 @@ const meta = css({
 	color: "fg.muted",
 });
 
-const metaLink = css({
-	color: "fg.muted",
+const itemTag = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1",
+	px: "2",
+	py: "0.5",
+	borderRadius: "md",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
 	textDecoration: "none",
-	transition: "color 150ms ease",
-	_hover: { color: "fg.brand" },
+	transition: "background 150ms ease",
+	_hover: { bg: "bg.surface" },
 });
 
-const titleLink = css({
+const itemDot = css({
+	w: "1",
+	h: "1",
+	borderRadius: "full",
+	bg: "border.default",
+});
+
+const itemTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "2xl", md: "3xl" },
+	fontSize: { base: "xl", md: "2xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
-	lineHeight: "1.15",
+	lineHeight: "1.2",
 	color: "fg.primary",
 	textDecoration: "none",
+	textWrap: "balance",
 	transition: "color 150ms ease",
 	_hover: { color: "fg.brand" },
 });
 
-const desc = css({ fontSize: "md", lineHeight: "1.7", color: "fg.secondary", maxWidth: "66ch" });
+const itemDesc = css({
+	fontSize: { base: "sm", md: "md" },
+	lineHeight: "1.65",
+	color: "fg.secondary",
+	maxWidth: "68ch",
+});
+
+// Sidebar
+const sidebar = css({
+	display: { base: "none", lg: "flex" },
+	flexDirection: "column",
+	gap: "8",
+	position: "sticky",
+	top: "6rem",
+});
+
+const sidebarBlock = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const sidebarTitle = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const sidebarTechList = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+});
+
+const sidebarTechLink = css({
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "3",
+	px: "3",
+	py: "2",
+	borderRadius: "lg",
+	textDecoration: "none",
+	color: "fg.secondary",
+	fontSize: "sm",
+	fontWeight: "medium",
+	transition: "background 150ms ease, color 150ms ease",
+	_hover: { bg: "bg.brand-subtle", color: "fg.brand" },
+});
+
+const sidebarTechCount = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const sidebarCard = css({
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const sidebarCardTitle = css({
+	fontFamily: "display",
+	fontSize: "md",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	letterSpacing: "tight",
+});
+
+const sidebarCardBody = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+});
+
+const sidebarFeedLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "2.5",
+	py: "1",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	borderRadius: "md",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { color: "fg.brand", borderColor: "fg.brand" },
+});
 
 const emptyState = css({ py: "12", color: "fg.secondary", textAlign: "center" });
+
+const rssIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.18 15.64a2.18 2.18 0 1 1 0 4.36 2.18 2.18 0 0 1 0-4.36zM4 4.44A19.56 19.56 0 0 1 23.56 24h-2.83A16.73 16.73 0 0 0 4 7.27V4.44zm0 5.66a13.9 13.9 0 0 1 13.9 13.9h-2.83A11.07 11.07 0 0 0 4 12.93V10.1z"/></svg>`;
+const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.4L21 11l-6.6 2.6L12 20l-2.4-6.4L3 11l6.6-2.6L12 2z"/></svg>`;
 ---
 
 <Page title={pageTitle} description={pageDescription}>
@@ -92,35 +576,134 @@ const emptyState = css({ py: "12", color: "fg.secondary", textAlign: "center" })
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
 
-	<PageHero eyebrow="Cloud Native News" title="Latest stories" subtitle="Curated updates from across the cloud native ecosystem." />
+	<section class={hero}>
+		<div class={heroPattern}></div>
+		<div class={heroInner}>
+			<div>
+				<span class={heroEyebrow}>
+					<span class={heroDot}></span>
+					Cloud Native News
+				</span>
+				<h1 class={heroTitle}>
+					Signal, not <span class={heroAccent}>noise.</span>
+				</h1>
+				<p class={heroSub}>
+					Vendor-neutral analysis of releases, CVEs, and shifts in cloud native infrastructure — written by engineers who run this stuff in production.
+				</p>
+				<div class={heroMeta}>
+					<span><span class={heroMetaValue}>{totalStories}</span> stories</span>
+					{latestDate && (
+						<>
+							<span style="opacity: 0.4">·</span>
+							<span>Last update <span class={heroMetaValue}>{formatDisplayDate(latestDate)}</span></span>
+						</>
+					)}
+				</div>
+			</div>
+			<div class={feedActions}>
+				<a href="/api/feeds/news.xml" class={feedButton}>
+					<Fragment set:html={rssIcon} />
+					RSS
+				</a>
+				<a href="/api/feeds/news.atom" class={feedButton}>Atom</a>
+				<a href="/api/feeds/news.json" class={feedButton}>JSON</a>
+			</div>
+		</div>
+	</section>
 
-	<div class={shell}>
-		{allNews.length > 0 ? (
-			<ul class={list}>
-				{allNews.map((story) => (
-					<li>
-						<article class={item}>
-							<div class={meta}>
-								<time datetime={story.data.publishedAt.toISOString()}>
-									{formatDisplayDate(story.data.publishedAt)}
-								</time>
-								{story.data.technologies[0] && (
-									<>
-										<span>/</span>
-										<a href={`/technology/${story.data.technologies[0]}`} class={metaLink}>
-											{formatTechnologyLabel(story.data.technologies[0])}
-										</a>
-									</>
-								)}
-							</div>
-							<a href={`/news/${story.id}`} class={titleLink}>{story.data.title}</a>
-							<p class={desc}>{story.data.description}</p>
-						</article>
-					</li>
-				))}
-			</ul>
-		) : (
-			<p class={emptyState}>No news published yet.</p>
-		)}
+	<div class={layoutWrap}>
+		<div class={main}>
+			{allNews.length === 0 && <p class={emptyState}>No news published yet.</p>}
+
+			{featured && (
+				<article class={featuredCard}>
+					<div class={featuredDate}>
+						<div class={featuredDay}>{featured.data.publishedAt.getDate().toString().padStart(2, "0")}</div>
+						<div class={featuredMonthYear}>
+							{new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(featured.data.publishedAt)}
+						</div>
+					</div>
+					<div>
+						<div class={featuredMeta}>
+							<span class={featuredBadge}><Fragment set:html={sparkleSvg} /> Latest</span>
+							{featured.data.technologies?.[0] && (
+								<>
+									<span class={featuredMetaDot}></span>
+									<a href={`/technology/${featured.data.technologies[0]}`} class={itemTag}>
+										{formatTechnologyLabel(featured.data.technologies[0])}
+									</a>
+								</>
+							)}
+							<span class={featuredMetaDot}></span>
+							<span>{calculateReadingTime(featured.body || "").text}</span>
+						</div>
+						<a href={`/news/${featured.id}`} class={featuredTitleLink}>{featured.data.title}</a>
+						<p class={featuredDesc}>{featured.data.description}</p>
+					</div>
+				</article>
+			)}
+
+			{groups.map((group) => (
+				<section>
+					<header class={groupHeader}>
+						<span class={groupLabel}>{group.label}</span>
+						<span class={groupCount}>{group.stories.length}</span>
+					</header>
+					<ul class={list} style="list-style: none; padding: 0; margin: 0;">
+						{group.stories.map((story) => (
+							<li>
+								<article class={item}>
+									<div class={itemDateBlock}>
+										<div class={itemDay}>{story.data.publishedAt.getDate().toString().padStart(2, "0")}</div>
+										<div class={itemMonth}>
+											{new Intl.DateTimeFormat("en-US", { month: "short" }).format(story.data.publishedAt)}
+										</div>
+									</div>
+									<div class={itemBody}>
+										<div class={itemMeta}>
+											{story.data.technologies?.[0] && (
+												<a href={`/technology/${story.data.technologies[0]}`} class={itemTag}>
+													{formatTechnologyLabel(story.data.technologies[0])}
+												</a>
+											)}
+											<span class={itemDot}></span>
+											<span>{calculateReadingTime(story.body || "").text}</span>
+										</div>
+										<a href={`/news/${story.id}`} class={`${itemTitle} item-title`}>{story.data.title}</a>
+										<p class={itemDesc}>{story.data.description}</p>
+									</div>
+								</article>
+							</li>
+						))}
+					</ul>
+				</section>
+			))}
+		</div>
+
+		<aside class={sidebar}>
+			<div class={sidebarBlock}>
+				<span class={sidebarTitle}>Top technologies</span>
+				<div class={sidebarTechList}>
+					{topTechs.map(([tech, count]) => (
+						<a href={`/technology/${tech}`} class={sidebarTechLink}>
+							<span>{formatTechnologyLabel(tech)}</span>
+							<span class={sidebarTechCount}>{count}</span>
+						</a>
+					))}
+				</div>
+			</div>
+
+			<div class={sidebarCard}>
+				<span class={sidebarCardTitle}>Subscribe</span>
+				<p class={sidebarCardBody}>
+					Get cloud native news in your reader of choice. We support every common feed format.
+				</p>
+				<div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+					<a href="/api/feeds/news.xml" class={sidebarFeedLink}><Fragment set:html={rssIcon} /> RSS</a>
+					<a href="/api/feeds/news.atom" class={sidebarFeedLink}>Atom</a>
+					<a href="/api/feeds/news.json" class={sidebarFeedLink}>JSON</a>
+				</div>
+			</div>
+		</aside>
 	</div>
 </Page>

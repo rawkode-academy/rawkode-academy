@@ -18,7 +18,15 @@ const palette = [
 ];
 
 const gradients = [
-	{ name: "Brand Gradient", angle: "45°", stops: [{ label: "Purple", hex: "#5F5ED7" }, { label: "Cyan", hex: "#00CEFF" }], usage: "Primary brand surfaces, hero backdrops, CTAs.", background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)" },
+	{ name: "Rawkode Core Gradient", angle: "45°", stops: [{ label: "Purple", hex: "#5F5ED7" }, { label: "Cyan", hex: "#00CEFF" }], usage: "Primary brand surfaces, hero backdrops, CTAs, button fills.", background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)" },
+	{ name: "Rawkode Academy Gradient", angle: "45°", stops: [{ label: "Teal", hex: "#04B59C" }, { label: "Green", hex: "#85FF95" }], usage: "Educational and event surfaces, co-brand with green-leaning partners.", background: "linear-gradient(45deg, #04B59C 0%, #85FF95 100%)" },
+];
+
+const guidelines = [
+	{ title: "Clearspace", description: "Reserve clearspace equal to the height of the monogram on all sides. Don't let other marks crowd ours.", icon: "M4 6h16M4 12h16M4 18h16" },
+	{ title: "Use currentColor", description: "Our SVGs use currentColor so they inherit the parent's color. Set a CSS color and the logo follows.", icon: "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" },
+	{ title: "Don't rotate or distort", description: "Keep the logos upright and proportional. Never stretch, skew, or recolour the lockups outside of the official palette.", icon: "M12 9v3.75m-9.303 3.376C1.83 17.626 2.914 19.5 4.645 19.5h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" },
+	{ title: "Light & dark", description: "The brand colours work on both light and dark canvases. Avoid mid-grey backgrounds that flatten the gradient.", icon: "M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" },
 ];
 
 const logos = [
@@ -111,6 +119,38 @@ const gradientMeta = css({ p: "5" });
 const gradientTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", mb: "2" });
 const gradientDesc = css({ fontSize: "sm", color: "fg.muted", mb: "3" });
 const gradientStops = css({ display: "flex", gap: "3", fontSize: "xs", fontFamily: "mono", color: "fg.secondary" });
+
+const guidelineGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const guidelineCard = css({
+	display: "flex",
+	gap: "4",
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const guidelineIcon = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	borderRadius: "lg",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	flexShrink: 0,
+});
+
+const guidelineBody = css({ display: "flex", flexDirection: "column", gap: "1" });
+const guidelineTitle = css({ fontFamily: "display", fontSize: "md", fontWeight: "bold", color: "fg.primary" });
+const guidelineDesc = css({ fontSize: "sm", color: "fg.muted", lineHeight: "1.6" });
 ---
 
 <Page title="Brand Assets | Rawkode Academy" description="Official Rawkode Academy brand assets, palette, and gradients for partners and contributors.">
@@ -151,7 +191,7 @@ const gradientStops = css({ display: "flex", gap: "3", fontSize: "xs", fontFamil
 
 		<section class={section}>
 			<h2 class={sectionTitle}>Gradients</h2>
-			<div class={grid3} style="grid-template-columns: 1fr;">
+			<div class={grid3} style="grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));">
 				{gradients.map((g) => (
 					<div class={gradientCard}>
 						<div class={gradientSwatch} style={`background: ${g.background};`}></div>
@@ -161,6 +201,23 @@ const gradientStops = css({ display: "flex", gap: "3", fontSize: "xs", fontFamil
 							<div class={gradientStops}>
 								{g.stops.map((s) => <span>{s.label}: {s.hex}</span>)}
 							</div>
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={section}>
+			<h2 class={sectionTitle}>Usage guidelines</h2>
+			<div class={guidelineGrid}>
+				{guidelines.map((g) => (
+					<div class={guidelineCard}>
+						<span class={guidelineIcon}>
+							<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={g.icon} /></svg>
+						</span>
+						<div class={guidelineBody}>
+							<h3 class={guidelineTitle}>{g.title}</h3>
+							<p class={guidelineDesc}>{g.description}</p>
 						</div>
 					</div>
 				))}

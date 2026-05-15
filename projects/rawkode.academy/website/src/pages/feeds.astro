@@ -62,7 +62,57 @@ for (const show of publishedShows) {
 	});
 }
 
+const formatExplainers = [
+	{ label: "RSS 2.0", description: "Universally supported. Compatible with virtually every feed reader.", icon: "M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" },
+	{ label: "Atom 1.0", description: "More modern, stricter spec. Great for newsroom and CMS tooling.", icon: "M12 2L2 7l10 5l10-5l-10-5zM2 17l10 5l10-5M2 12l10 5l10-5" },
+	{ label: "JSON Feed", description: "Modern JSON format. Easier to consume programmatically.", icon: "M10 20l-1.25 5l1.5-3.5L8 22M14 20l1.25 5l-1.5-3.5L16 22M12 2v20M5 12h14" },
+];
+
 const shell = css({ maxWidth: "72rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const formatGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "4",
+	mb: "12",
+});
+
+const formatCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const formatIcon = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	borderRadius: "lg",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+});
+
+const formatLabel = css({ fontFamily: "display", fontSize: "md", fontWeight: "bold", color: "fg.primary" });
+const formatDesc = css({ fontSize: "sm", color: "fg.muted", lineHeight: "1.5" });
+
+const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+
+const sectionHeading = css({
+	fontFamily: "display",
+	fontSize: { base: "xl", md: "2xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	textAlign: "center",
+	mb: "8",
+});
 
 const intro = css({
 	maxWidth: "44rem",
@@ -159,6 +209,22 @@ const opmlBtn = css({
 	<PageHero eyebrow="Subscribe" title="RSS & Atom Feeds" subtitle="Subscribe to our feeds to stay updated with the latest content from Rawkode Academy." />
 
 	<div class={shell}>
+		<p class={sectionLabel}>Supported formats</p>
+		<h2 class={sectionHeading}>Pick the format your reader speaks</h2>
+		<div class={formatGrid}>
+			{formatExplainers.map((f) => (
+				<div class={formatCard}>
+					<span class={formatIcon}>
+						<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={f.icon} /></svg>
+					</span>
+					<span class={formatLabel}>{f.label}</span>
+					<p class={formatDesc}>{f.description}</p>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>Available feeds</p>
+		<h2 class={sectionHeading}>Subscribe to what you care about</h2>
 		<div class={grid}>
 			{groups.map((group) => (
 				<div class={card}>

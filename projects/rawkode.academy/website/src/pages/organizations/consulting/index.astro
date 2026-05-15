@@ -19,7 +19,111 @@ const outcomes = [
 	"Faster ramp-up for new platform and DevRel teams",
 ];
 
+const engagements = [
+	{ name: "Technology Assessment", duration: "1–2 weeks", description: "Targeted audit of a specific surface — docs, onboarding, an SDK, or a platform component — with a written report and actionable recommendations." },
+	{ name: "Implementation Sprint", duration: "2–4 weeks", featured: true, description: "Focused engagement to ship a concrete deliverable: revamped onboarding flow, new docs section, or a working platform PoC." },
+	{ name: "Staff Augmentation", duration: "Flexible", description: "Day-rate engagement to embed alongside your platform, DevRel, or engineering team for ongoing strategic and hands-on work." },
+];
+
+const process = [
+	{ step: "01", title: "Discovery", description: "We map your goals, audience, and constraints — and align on a measurable definition of success." },
+	{ step: "02", title: "Planning", description: "A written engagement plan with deliverables, owners, and checkpoints so nothing gets lost in translation." },
+	{ step: "03", title: "Execution", description: "Hands-on work, paired with your team. Weekly demos. No surprises at the end." },
+	{ step: "04", title: "Transition", description: "Documentation, runbooks, and a handover session so your team owns the outcome long after we leave." },
+];
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+
+const engagementGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+	mb: "16",
+});
+
+const engagementCard = css({
+	position: "relative",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const engagementFeatured = css({
+	borderColor: "fg.brand",
+	boxShadow: "0 0 0 1px var(--colors-fg-brand)",
+});
+
+const engagementBadge = css({
+	position: "absolute",
+	top: "-3",
+	right: "5",
+	px: "2.5",
+	py: "0.5",
+	borderRadius: "full",
+	bg: "bg.brand",
+	color: "fg.on-brand",
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const engagementDuration = css({
+	display: "inline-flex",
+	px: "2.5",
+	py: "0.5",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	alignSelf: "flex-start",
+});
+
+const engagementName = css({ fontFamily: "display", fontSize: "xl", fontWeight: "bold", color: "fg.primary" });
+const engagementDesc = css({ color: "fg.secondary", lineHeight: "1.6" });
+
+const processGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+	mb: "16",
+});
+
+const processCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const processStep = css({
+	fontFamily: "display",
+	fontSize: "3xl",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+	lineHeight: "1",
+});
+
+const processTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
+const processDesc = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
 
 const grid = css({
 	display: "grid",
@@ -101,6 +205,21 @@ const ctaBtn = css({
 	<PageHero eyebrow="Consulting" title="Expert Cloud Native Consulting" subtitle="Battle-tested expertise to improve your developer experience, go-to-market strategy, and platform engineering practice." />
 
 	<div class={shell}>
+		<p class={sectionLabel}>Engagement models</p>
+		<h2 class={sectionTitle}>Pick the shape that fits</h2>
+		<div class={engagementGrid}>
+			{engagements.map((e) => (
+				<div class={`${engagementCard} ${e.featured ? engagementFeatured : ""}`}>
+					{e.featured && <span class={engagementBadge}>Popular</span>}
+					<span class={engagementDuration}>{e.duration}</span>
+					<h3 class={engagementName}>{e.name}</h3>
+					<p class={engagementDesc}>{e.description}</p>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>Service areas</p>
+		<h2 class={sectionTitle}>Where we plug in</h2>
 		<div class={grid}>
 			{services.map((service) => (
 				<div class={card}>
@@ -109,6 +228,19 @@ const ctaBtn = css({
 				</div>
 			))}
 		</div>
+
+		<section class={sectionBlock}>
+			<h2 class={sectionTitle}>How we work</h2>
+			<div class={processGrid}>
+				{process.map((p) => (
+					<div class={processCard}>
+						<span class={processStep}>{p.step}</span>
+						<h3 class={processTitle}>{p.title}</h3>
+						<p class={processDesc}>{p.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
 
 		<section class={sectionBlock}>
 			<h2 class={sectionTitle}>Outcomes you can expect</h2>

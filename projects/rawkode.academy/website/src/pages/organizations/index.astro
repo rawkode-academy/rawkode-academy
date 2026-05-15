@@ -5,6 +5,19 @@ import { css } from "../../../styled-system/css";
 
 export const prerender = true;
 
+const reachStats = [
+	{ value: "100K+", label: "Developers reached" },
+	{ value: "90+", label: "Technologies covered" },
+	{ value: "500+", label: "Hours of content" },
+	{ value: "1M+", label: "Developer views" },
+];
+
+const pillars = [
+	{ title: "Authentic expertise", description: "Two decades of building, breaking, and operating production cloud native systems — not surface-level marketing fluff." },
+	{ title: "Engaged community", description: "Direct access to engineers who tune in for the hard problems, the live coding, and the unfiltered conversations." },
+	{ title: "Measurable results", description: "Comprehensive analytics tailored to your goals — engagement, sentiment, community growth, and adoption signals." },
+];
+
 const services = [
 	{
 		title: "Strategic Partnerships",
@@ -33,6 +46,86 @@ const services = [
 ];
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const statsGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+	mb: "16",
+});
+
+const statBox = css({
+	textAlign: "center",
+	p: { base: "5", md: "7" },
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const statValue = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "4xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+});
+
+const statLabel = css({ mt: "2", fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
+
+const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	textAlign: "center",
+	mb: "10",
+});
+
+const pillarsGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+	mb: "16",
+});
+
+const pillarCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const pillarIcon = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "10",
+	h: "10",
+	mb: "4",
+	borderRadius: "lg",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontFamily: "display",
+	fontWeight: "bold",
+});
+
+const pillarTitle = css({
+	fontFamily: "display",
+	fontSize: "lg",
+	fontWeight: "bold",
+	color: "fg.primary",
+	mb: "3",
+});
+
+const pillarBody = css({ color: "fg.secondary", lineHeight: "1.6" });
 
 const grid = css({
 	display: "grid",
@@ -134,6 +227,29 @@ const ctaBtn = css({
 	<PageHero eyebrow="For Organizations" title="Partner with the Academy" subtitle="Strategic partnerships, hands-on consulting, and team training rooted in real cloud native experience." />
 
 	<div class={shell}>
+		<div class={statsGrid}>
+			{reachStats.map((stat) => (
+				<div class={statBox}>
+					<p class={statValue}>{stat.value}</p>
+					<p class={statLabel}>{stat.label}</p>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>Why teams choose us</p>
+		<h2 class={sectionTitle}>Trusted by maintainers and platform teams</h2>
+		<div class={pillarsGrid}>
+			{pillars.map((p, i) => (
+				<div class={pillarCard}>
+					<span class={pillarIcon}>{(i + 1).toString().padStart(2, "0")}</span>
+					<h3 class={pillarTitle}>{p.title}</h3>
+					<p class={pillarBody}>{p.description}</p>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>Engagement options</p>
+		<h2 class={sectionTitle}>Pick the engagement that fits</h2>
 		<div class={grid}>
 			{services.map((service) => (
 				<a href={service.link} class={card}>

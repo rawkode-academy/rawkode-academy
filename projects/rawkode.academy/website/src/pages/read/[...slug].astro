@@ -70,6 +70,20 @@ const publishDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "num
 
 const tocItems = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
+// Related articles: same technologies, excluding self, max 3
+const allArticlesForRelated = await getCollection("articles", ({ data }) => !data.draft);
+const articleTechSet = new Set(article.data.technologies ?? []);
+const related = allArticlesForRelated
+	.filter((a) => a.id !== article.id)
+	.map((a) => {
+		const overlap = (a.data.technologies ?? []).filter((t) => articleTechSet.has(t)).length;
+		return { a, overlap };
+	})
+	.filter(({ overlap }) => overlap > 0)
+	.sort((x, y) => y.overlap - x.overlap || y.a.data.publishedAt.valueOf() - x.a.data.publishedAt.valueOf())
+	.slice(0, 3)
+	.map(({ a }) => a);
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
 
 const layout = css({
@@ -209,6 +223,118 @@ const seriesCard = css({
 });
 const seriesLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", mb: "2" });
 const seriesLink = css({ color: "fg.primary", fontWeight: "semibold", textDecoration: "none", _hover: { color: "fg.brand" } });
+
+const relatedSection = css({ mt: "20" });
+const relatedHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "8",
+	flexWrap: "wrap",
+});
+const relatedTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "xl", md: "2xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+});
+const relatedAll = css({
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: "fg.brand",
+	textDecoration: "none",
+	_hover: { textDecoration: "underline" },
+});
+const relatedGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+});
+const relatedCard = css({
+	display: "flex",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+});
+const relatedThumb = css({
+	aspectRatio: "16 / 9",
+	overflow: "hidden",
+	bg: "bg.sunken",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+const relatedBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "2" });
+const relatedCardTitle = css({
+	fontSize: "md",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	lineHeight: "1.3",
+	"a:hover &": { color: "fg.brand" },
+});
+const relatedMeta = css({ fontSize: "xs", color: "fg.muted" });
+
+const ctaSection = css({
+	mt: "16",
+	p: { base: "8", md: "10" },
+	borderRadius: "3xl",
+	textAlign: "center",
+	position: "relative",
+	overflow: "hidden",
+	backgroundImage:
+		"radial-gradient(circle at 30% 20%, token(colors.brand.500)/12, transparent 55%), radial-gradient(circle at 75% 30%, token(colors.cyan.500)/10, transparent 55%)",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+});
+const ctaTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "xl", md: "2xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "3",
+	textWrap: "balance",
+});
+const ctaDesc = css({ fontSize: "sm", color: "fg.secondary", maxWidth: "32rem", mx: "auto", mb: "6" });
+const ctaBtns = css({ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "3" });
+const ctaPrimary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "sm",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	transition: "transform 150ms ease",
+	_hover: { transform: "translateY(-1px)" },
+});
+const ctaSecondary = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "2.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "sm",
+	color: "fg.primary",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.default",
+	textDecoration: "none",
+	_hover: { bg: "bg.sunken" },
+});
 ---
 
 <Page
@@ -285,7 +411,7 @@ const seriesLink = css({ color: "fg.primary", fontWeight: "semibold", textDecora
 				<InternalLinks article={article} />
 			</div>
 
-			<aside class={aside}>
+			<aside class={aside} aria-label="Article sidebar">
 				{tocItems.length > 0 && (
 					<div class={tocCard}>
 						<h2 class={tocTitle}>On this page</h2>
@@ -299,6 +425,42 @@ const seriesLink = css({ color: "fg.primary", fontWeight: "semibold", textDecora
 					</div>
 				)}
 			</aside>
+		</section>
+
+		{related.length > 0 && (
+			<section class={relatedSection}>
+				<div class={relatedHead}>
+					<h2 class={relatedTitle}>Keep reading</h2>
+					<a href="/read" class={relatedAll}>Browse all articles →</a>
+				</div>
+				<div class={relatedGrid}>
+					{related.map((r) => (
+						<a href={`/read/${r.id}`} class={relatedCard}>
+							{r.data.cover && (
+								<div class={relatedThumb}>
+									<img src={typeof r.data.cover.image === "string" ? r.data.cover.image : r.data.cover.image.src} alt={r.data.cover.alt || r.data.title} loading="lazy" />
+								</div>
+							)}
+							<div class={relatedBody}>
+								<h3 class={relatedCardTitle}>{r.data.title}</h3>
+								<span class={relatedMeta}>{new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(r.data.publishedAt)}</span>
+							</div>
+						</a>
+					))}
+				</div>
+			</section>
+		)}
+
+		<section class={ctaSection}>
+			<h2 class={ctaTitle}>Hungry for more cloud native engineering?</h2>
+			<p class={ctaDesc}>Subscribe to the feed or jump into a guided learning path — fresh field reports and curated curricula straight from the platform.</p>
+			<div class={ctaBtns}>
+				<a href="/learning-paths" class={ctaPrimary}>Browse Learning Paths</a>
+				<a href="/api/feeds/articles.xml" class={ctaSecondary}>
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 11a9 9 0 019 9h-3a6 6 0 00-6-6v-3zm0-7a16 16 0 0116 16h-3A13 13 0 004 7V4zm2 13a2 2 0 110 4 2 2 0 010-4z"/></svg>
+					Subscribe via RSS
+				</a>
+			</div>
 		</section>
 	</div>
 </Page>

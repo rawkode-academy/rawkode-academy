@@ -300,8 +300,19 @@ const ghostBtn = css({
 	_hover: { bg: "bg.sunken" },
 });
 
-const licenseLine = css({ mt: "4", fontSize: "sm", color: "fg.muted" });
-const licenseEm = css({ fontWeight: "medium", color: "fg.secondary" });
+const metaGrid = css({
+	mt: "6",
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))" },
+	gap: "3",
+	pt: "5",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const metaItem = css({ display: "flex", flexDirection: "column", gap: "0.5" });
+const metaLabel = css({ fontSize: "2xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.muted" });
+const metaValue = css({ fontSize: "sm", fontWeight: "semibold", color: "fg.primary" });
 
 const logoBox = css({
 	w: "40",
@@ -458,9 +469,26 @@ const guideTitle = css({
 						<a href={technology.source} target="_blank" rel="noopener noreferrer" class={ghostBtn}>Source Code</a>
 					)}
 				</div>
-				{technology.license && (
-					<p class={licenseLine}>License: <span class={licenseEm}>{technology.license}</span></p>
-				)}
+				<div class={metaGrid}>
+					{technology.license && (
+						<div class={metaItem}>
+							<span class={metaLabel}>License</span>
+							<span class={metaValue}>{technology.license}</span>
+						</div>
+					)}
+					{technology.status && (
+						<div class={metaItem}>
+							<span class={metaLabel}>Status</span>
+							<span class={metaValue} style="text-transform: capitalize;">{technology.status}</span>
+						</div>
+					)}
+					{videoCount > 0 && (
+						<div class={metaItem}>
+							<span class={metaLabel}>Videos</span>
+							<span class={metaValue}>{videoCount}</span>
+						</div>
+					)}
+				</div>
 			</div>
 			<div class={logoBox}>
 				<img src={technology.logo ? technology.logo : placeholderLogo} alt={`${technology.name} logo`} onerror={`this.onerror=null; this.src='${placeholderLogo}';`} />

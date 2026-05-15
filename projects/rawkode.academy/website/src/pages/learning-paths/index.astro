@@ -18,12 +18,12 @@ for (const technology of allTechnologies) {
 	technologyNameById.set(rawId, technology.data.name);
 }
 
-const itemListPaths = await Promise.all(
+const pathsWithMeta = await Promise.all(
 	learningPaths.map(async (path) => {
 		const authorEntries = await getEntries(path.data.authors);
 		return {
 			path,
-			authors: authorEntries.map((a) => ({ id: a.data.id, name: a.data.name })),
+			authors: authorEntries.map((a) => ({ id: a.data.id, name: a.data.name, avatarUrl: a.data.avatarUrl })),
 			technologyLabels: (path.data.technologies ?? []).map(
 				(id) => technologyNameById.get(id) ?? id,
 			),
@@ -31,10 +31,22 @@ const itemListPaths = await Promise.all(
 	}),
 );
 
+const itemListPaths = pathsWithMeta.map((p) => ({
+	path: p.path,
+	authors: p.authors.map((a) => ({ id: a.id, name: a.name })),
+	technologyLabels: p.technologyLabels,
+}));
+
 const difficultyLabel: Record<string, string> = {
 	beginner: "Beginner",
 	intermediate: "Intermediate",
 	advanced: "Advanced",
+};
+
+const difficultyAccent: Record<string, string> = {
+	beginner: "var(--colors-green-9, #16a34a)",
+	intermediate: "var(--colors-amber-9, #d97706)",
+	advanced: "var(--colors-red-9, #dc2626)",
 };
 
 const fmtDuration = (m: number) => {
@@ -44,21 +56,44 @@ const fmtDuration = (m: number) => {
 	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
 };
 
+const formatDate = (date: Date) =>
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+
 const pageTitle = "Learning Paths | Rawkode Academy";
 const pageDescription = "Curated, video-driven journeys to level up your Kubernetes, platform engineering, and cloud native skills.";
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
+const sectionHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "8",
+	flexWrap: "wrap",
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+});
+
+const sectionCount = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
+
 const grid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" },
-	gap: "5",
+	gap: "6",
 });
 
 const card = css({
+	position: "relative",
 	display: "flex",
 	flexDirection: "column",
-	gap: "3",
+	gap: "4",
 	p: "6",
 	borderRadius: "2xl",
 	borderWidth: "1px",
@@ -66,8 +101,30 @@ const card = css({
 	bg: "bg.raised",
 	textDecoration: "none",
 	color: "fg.primary",
+	overflow: "hidden",
 	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+	_hover: { transform: "translateY(-3px)", boxShadow: "lg", borderColor: "border.default" },
+	_before: {
+		content: "''",
+		position: "absolute",
+		top: "0",
+		left: "0",
+		right: "0",
+		h: "3px",
+		backgroundImage: "linear-gradient(90deg, token(colors.brand.500), token(colors.cyan.500))",
+		opacity: 0,
+		transition: "opacity 200ms ease",
+	},
+	_hoverBefore: { opacity: 1 },
+});
+
+const cardAccent = css({
+	position: "absolute",
+	top: "0",
+	left: "0",
+	right: "0",
+	h: "3px",
+	transition: "opacity 200ms ease",
 });
 
 const meta = css({
@@ -75,21 +132,42 @@ const meta = css({
 	flexWrap: "wrap",
 	alignItems: "center",
 	gap: "2",
-	fontSize: "xs",
-	fontWeight: "semibold",
-	letterSpacing: "wider",
-	textTransform: "uppercase",
-	color: "fg.muted",
 });
 
-const dot = css({ w: "1", h: "1", borderRadius: "full", bg: "border.default" });
+const difficultyBadge = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+});
+
+const difficultyDot = css({ w: "1.5", h: "1.5", borderRadius: "full" });
+
+const duration = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	fontSize: "xs",
+	color: "fg.muted",
+	fontWeight: "medium",
+});
 
 const title = css({
+	fontFamily: "display",
 	fontSize: "xl",
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
-	lineHeight: "tight",
+	lineHeight: "1.2",
+	textWrap: "balance",
 	transition: "color 150ms ease",
 	"a:hover &": { color: "fg.brand" },
 });
@@ -104,16 +182,35 @@ const desc = css({
 	overflow: "hidden",
 });
 
-const tags = css({ display: "flex", flexWrap: "wrap", gap: "1.5", mt: "1" });
+const tags = css({ display: "flex", flexWrap: "wrap", gap: "1.5" });
+
 const tag = css({
 	px: "2",
 	py: "0.5",
 	borderRadius: "md",
 	fontSize: "xs",
 	fontWeight: "medium",
-	bg: "bg.brand-subtle",
-	color: "fg.brand",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	color: "fg.secondary",
 });
+
+const footer = css({
+	mt: "auto",
+	pt: "4",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "2",
+	fontSize: "xs",
+	color: "fg.muted",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const authorRow = css({ display: "inline-flex", alignItems: "center", gap: "2" });
+const avatarXs = css({ width: "5", height: "5", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
 ---
 
 <Page title={pageTitle} description={pageDescription}>
@@ -122,25 +219,53 @@ const tag = css({
 	<PageHero eyebrow="Guided Learning" title="Learning Paths" subtitle="Each path bundles videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed." />
 
 	<div class={shell}>
+		<div class={sectionHead}>
+			<div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+				<h2 class={sectionTitle}>Curated journeys</h2>
+				<span class={sectionCount}>{learningPaths.length} path{learningPaths.length === 1 ? "" : "s"}</span>
+			</div>
+		</div>
 		<div class={grid}>
-			{learningPaths.map((path) => (
-				<a href={`/learning-paths/${path.id}`} class={card}>
-					<div class={meta}>
-						<span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
-						<span class={dot}></span>
-						<span>{fmtDuration(path.data.estimatedDuration)}</span>
-					</div>
-					<h2 class={title}>{path.data.title}</h2>
-					<p class={desc}>{path.data.description}</p>
-					{path.data.technologies && path.data.technologies.length > 0 && (
-						<div class={tags}>
-							{path.data.technologies.slice(0, 4).map((t) => (
-								<span class={tag}>{technologyNameById.get(t) ?? t}</span>
-							))}
+			{pathsWithMeta.map(({ path, authors, technologyLabels }) => {
+				const diff = path.data.difficulty;
+				const accent = difficultyAccent[diff] || "var(--colors-brand-500)";
+				return (
+					<a href={`/learning-paths/${path.id}`} class={card}>
+						<span class={cardAccent} style={`background: linear-gradient(90deg, ${accent}, var(--colors-brand-500)); opacity: 0.85;`}></span>
+						<div class={meta}>
+							<span class={difficultyBadge}>
+								<span class={difficultyDot} style={`background: ${accent};`}></span>
+								{difficultyLabel[diff] ?? diff}
+							</span>
+							<span class={duration}>
+								<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+								{fmtDuration(path.data.estimatedDuration)}
+							</span>
 						</div>
-					)}
-				</a>
-			))}
+						<h2 class={title}>{path.data.title}</h2>
+						<p class={desc}>{path.data.description}</p>
+						{technologyLabels.length > 0 && (
+							<div class={tags}>
+								{technologyLabels.slice(0, 4).map((label) => (
+									<span class={tag}>{label}</span>
+								))}
+								{technologyLabels.length > 4 && (
+									<span class={tag}>+{technologyLabels.length - 4}</span>
+								)}
+							</div>
+						)}
+						<div class={footer}>
+							<span class={authorRow}>
+								{authors[0]?.avatarUrl && <img src={authors[0].avatarUrl} alt="" class={avatarXs} loading="lazy" />}
+								<span>{authors.map((a) => a.name).join(", ") || "Rawkode Academy"}</span>
+							</span>
+							<span>{formatDate(path.data.publishedAt)}</span>
+						</div>
+					</a>
+				);
+			})}
 		</div>
 	</div>
 </Page>
+</content>
+</invoke>

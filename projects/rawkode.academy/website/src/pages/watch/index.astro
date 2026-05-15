@@ -34,41 +34,113 @@ const fmtDuration = (s?: number | null) => {
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
 const featuredCard = css({
+	position: "relative",
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", md: "1.4fr 1fr" },
-	gap: "8",
-	alignItems: "center",
-	p: { base: "6", md: "10" },
+	gap: { base: "6", md: "10" },
+	alignItems: "stretch",
+	p: { base: "5", md: "5" },
 	borderRadius: "3xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	textDecoration: "none",
 	color: "fg.primary",
-	mb: "12",
-	transition: "transform 200ms ease, box-shadow 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+	mb: "14",
+	overflow: "hidden",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "xl", borderColor: "border.default" },
 });
 
 const thumbHero = css({
+	position: "relative",
 	aspectRatio: "16 / 9",
 	overflow: "hidden",
 	borderRadius: "2xl",
 	bg: "bg.sunken",
-	"& img": { width: "full", height: "full", objectFit: "cover" },
+	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
+	"a:hover & img": { transform: "scale(1.04)" },
+});
+
+const playOverlay = css({
+	position: "absolute",
+	inset: "0",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	pointerEvents: "none",
+	"& svg": {
+		w: "16",
+		h: "16",
+		color: "white",
+		filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))",
+		transition: "transform 200ms ease",
+	},
+	"a:hover & svg": { transform: "scale(1.1)" },
+});
+
+const featuredBody = css({
+	display: "flex",
+	flexDirection: "column",
+	justifyContent: "center",
+	p: { base: "2", md: "6" },
+});
+
+const featuredBadgeRow = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	mb: "4",
+	flexWrap: "wrap",
+});
+
+const featuredFlag = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
 });
 
 const featuredTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "3xl", md: "4xl" },
+	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
+	lineHeight: "1.05",
 	color: "fg.primary",
 	textWrap: "balance",
-	mt: "3",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
 });
 
-const featuredDesc = css({ mt: "4", fontSize: "md", lineHeight: "1.7", color: "fg.secondary" });
+const featuredDesc = css({ mt: "5", fontSize: { base: "md", md: "lg" }, lineHeight: "1.7", color: "fg.secondary", maxWidth: "40rem" });
+
+const featuredFooter = css({
+	mt: "6",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	fontSize: "sm",
+	color: "fg.muted",
+	alignItems: "center",
+});
+
+const sectionHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "8",
+	flexWrap: "wrap",
+});
 
 const sectionTitle = css({
 	fontFamily: "display",
@@ -76,13 +148,33 @@ const sectionTitle = css({
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
-	mb: "6",
+});
+
+const sectionCount = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
+
+const feedLinks = css({ display: "flex", gap: "2", flexWrap: "wrap" });
+
+const feedLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1.5",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { color: "fg.brand", borderColor: "border.default", bg: "bg.brand-subtle" },
 });
 
 const grid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
-	gap: "5",
+	gap: "6",
 });
 
 const card = css({
@@ -117,7 +209,21 @@ const durationBadge = css({
 	fontSize: "xs",
 	fontWeight: "semibold",
 	color: "white",
-	bg: "rgba(0, 0, 0, 0.65)",
+	bg: "rgba(0, 0, 0, 0.75)",
+	backdropFilter: "blur(4px)",
+});
+
+const cardPlay = css({
+	position: "absolute",
+	inset: "0",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	opacity: 0,
+	bg: "rgba(0,0,0,0.35)",
+	transition: "opacity 200ms ease",
+	"a:hover &": { opacity: 1 },
+	"& svg": { w: "12", h: "12", color: "white", filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.5))" },
 });
 
 const cardBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "2", flex: "1" });
@@ -160,29 +266,57 @@ const cardDesc = css({
 			<a href={`/watch/${featured.data.slug}`} class={featuredCard}>
 				<div class={thumbHero}>
 					<img src={`https://content.rawkode.academy/videos/${featured.data.id}/thumbnail.jpg`} alt={featured.data.title} loading="eager" />
+					<div class={playOverlay} aria-hidden="true">
+						<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,0.55)"/><path d="M10 8l6 4-6 4V8z" fill="white"/></svg>
+					</div>
+					{fmtDuration(typeof featured.data.duration === "number" ? featured.data.duration : undefined) && (
+						<span class={durationBadge}>{fmtDuration(typeof featured.data.duration === "number" ? featured.data.duration : undefined)}</span>
+					)}
 				</div>
-				<div>
-					<div class={cardMeta}>
+				<div class={featuredBody}>
+					<div class={featuredBadgeRow}>
+						<span class={featuredFlag}>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 8l6 4-6 4V8z"/></svg>
+							Latest video
+						</span>
+					</div>
+					<h2 class={featuredTitle}>{featured.data.title}</h2>
+					<p class={featuredDesc}>{featured.data.subtitle || featured.data.description}</p>
+					<div class={featuredFooter}>
 						<span>{formatDate(featured.data.publishedAt as Date)}</span>
 						{fmtDuration(typeof featured.data.duration === "number" ? featured.data.duration : undefined) && (
 							<>
-								<span style="margin: 0 0.5rem;">·</span>
+								<span style="color: var(--colors-border-default);">·</span>
 								<span>{fmtDuration(typeof featured.data.duration === "number" ? featured.data.duration : undefined)}</span>
 							</>
 						)}
 					</div>
-					<h2 class={featuredTitle}>{featured.data.title}</h2>
-					<p class={featuredDesc}>{featured.data.subtitle || featured.data.description}</p>
 				</div>
 			</a>
 		)}
 
-		<h2 class={sectionTitle}>All videos</h2>
+		<div class={sectionHead}>
+			<div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+				<h2 class={sectionTitle}>Latest videos</h2>
+				<span class={sectionCount}>{allVideos.length} video{allVideos.length === 1 ? "" : "s"}</span>
+			</div>
+			<div class={feedLinks}>
+				<a href="/api/feeds/videos.xml" class={feedLink}>
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 11a9 9 0 019 9h-3a6 6 0 00-6-6v-3zm0-7a16 16 0 0116 16h-3A13 13 0 004 7V4zm2 13a2 2 0 110 4 2 2 0 010-4z"/></svg>
+					RSS
+				</a>
+				<a href="/shows" class={feedLink}>Browse by show</a>
+			</div>
+		</div>
+
 		<div class={grid}>
 			{rest.map((video) => (
 				<a href={`/watch/${video.data.slug}`} class={card}>
 					<div class={cardThumb}>
 						<img src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`} alt={video.data.title} loading="lazy" />
+						<div class={cardPlay} aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,0.6)"/><path d="M10 8l6 4-6 4V8z" fill="white"/></svg>
+						</div>
 						{fmtDuration(typeof video.data.duration === "number" ? video.data.duration : undefined) && (
 							<span class={durationBadge}>{fmtDuration(typeof video.data.duration === "number" ? video.data.duration : undefined)}</span>
 						)}

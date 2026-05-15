@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import { getCollection, getEntries } from "astro:content";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import PageHero from "@/components/layout/PageHero.astro";
@@ -11,25 +12,44 @@ const allCourses = (await getCollection("courses")).sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
 
-const featured = allCourses[0];
-const rest = allCourses.slice(1);
+const allModules = await getCollection("courseModules");
 
-let featuredModuleCount = 0;
-let featuredAvailableModuleCount = 0;
-let firstModuleSlug: string | undefined;
-let featuredAuthors: { name: string; avatarUrl?: string | undefined }[] = [];
-
-if (featured) {
-	const courseModules = (await getCollection("courseModules"))
-		.filter((m) => m.data.course.id === featured.id)
+const decorateCourse = async (course: (typeof allCourses)[number]) => {
+	const courseModules = allModules
+		.filter((m) => m.data.course.id === course.id)
 		.sort((a, b) => a.data.order - b.data.order);
-	featuredModuleCount = courseModules.length;
-	featuredAvailableModuleCount = courseModules.filter((m) => !m.data.draft).length;
-	const publishedModules = courseModules.filter((m) => !m.data.draft);
-	firstModuleSlug = publishedModules[0] ? getCourseModuleSlug(featured.id, publishedModules[0].id) : undefined;
-	const authors = await getEntries(featured.data.authors);
-	featuredAuthors = authors.map((a) => ({ name: a.data.name, avatarUrl: a.data.avatarUrl }));
-}
+	const published = courseModules.filter((m) => !m.data.draft);
+	const totalDuration = published.reduce((acc, m) => acc + (m.data.duration || 0), 0);
+	const authors = await getEntries(course.data.authors);
+	const firstModule = published[0];
+	return {
+		course,
+		moduleCount: courseModules.length,
+		availableCount: published.length,
+		totalDuration,
+		authors: authors.map((a) => ({ id: a.data.id, name: a.data.name, avatarUrl: a.data.avatarUrl })),
+		firstModuleSlug: firstModule ? getCourseModuleSlug(course.id, firstModule.id) : undefined,
+	};
+};
+
+const decorated = await Promise.all(allCourses.map(decorateCourse));
+const featured = decorated[0];
+const rest = decorated.slice(1);
+
+const fmtDuration = (m: number) => {
+	if (!m) return "Self-paced";
+	const h = Math.floor(m / 60);
+	const r = m % 60;
+	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
+};
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const difficultyAccent: Record<string, string> = {
+	beginner: "var(--colors-green-9, #16a34a)",
+	intermediate: "var(--colors-amber-9, #d97706)",
+	advanced: "var(--colors-red-9, #dc2626)",
+};
 
 const pageTitle = "Cloud Native Courses | Rawkode Academy";
 const pageDescription = "Hands-on cloud native courses, labs, and implementation walkthroughs from Rawkode Academy.";
@@ -37,39 +57,144 @@ const pageDescription = "Hands-on cloud native courses, labs, and implementation
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
 const featuredCard = css({
+	position: "relative",
 	display: "grid",
-	gridTemplateColumns: { base: "1fr" },
-	gap: "6",
-	p: { base: "6", md: "10" },
+	gridTemplateColumns: { base: "1fr", lg: "1.3fr 1fr" },
+	gap: { base: "6", md: "10" },
+	alignItems: "stretch",
+	p: { base: "5", md: "5" },
 	borderRadius: "3xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
-	mb: "12",
+	overflow: "hidden",
+	mb: "14",
+	backgroundImage:
+		"radial-gradient(circle at 15% 10%, token(colors.brand.500)/8, transparent 50%), radial-gradient(circle at 85% 20%, token(colors.cyan.500)/8, transparent 50%)",
 });
 
-const featuredEyebrow = css({
+const featuredMedia = css({
+	order: { base: 1, lg: 2 },
+	aspectRatio: { base: "16 / 10", lg: "auto" },
+	minHeight: { lg: "22rem" },
+	overflow: "hidden",
+	borderRadius: "2xl",
+	bg: "bg.sunken",
+	position: "relative",
+	boxShadow: "lg",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const featuredMediaFallback = css({
+	width: "full",
+	height: "full",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	color: "fg.brand",
+	fontSize: "8xl",
+	fontFamily: "display",
+	fontWeight: "bold",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/15, token(colors.cyan.500)/15)",
+});
+
+const featuredBody = css({
+	order: { base: 2, lg: 1 },
+	display: "flex",
+	flexDirection: "column",
+	justifyContent: "center",
+	p: { base: "2", md: "6" },
+});
+
+const featuredFlagRow = css({ display: "inline-flex", gap: "2", mb: "4", flexWrap: "wrap" });
+
+const featuredFlag = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
 	fontSize: "xs",
 	fontWeight: "bold",
 	letterSpacing: "wider",
 	textTransform: "uppercase",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+});
+
+const freePill = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	bg: "bg.brand-subtle",
 	color: "fg.brand",
+	borderWidth: "1px",
+	borderColor: "border.muted",
 });
 
 const featuredTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "3xl", md: "4xl" },
+	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
-	lineHeight: "1.1",
+	lineHeight: "1.05",
 	color: "fg.primary",
+	textWrap: "balance",
 });
 
-const featuredDesc = css({ fontSize: "lg", lineHeight: "1.7", color: "fg.secondary", maxWidth: "48rem" });
+const featuredDesc = css({ mt: "5", fontSize: { base: "md", md: "lg" }, lineHeight: "1.7", color: "fg.secondary", maxWidth: "40rem" });
 
-const stats = css({ display: "flex", flexWrap: "wrap", gap: "6", color: "fg.muted", fontSize: "sm" });
+const statsRow = css({
+	mt: "6",
+	display: "grid",
+	gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+	gap: "3",
+	maxWidth: "32rem",
+});
 
-const actions = css({ display: "flex", flexWrap: "wrap", gap: "3", mt: "3" });
+const statBlock = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+	p: "3",
+	borderRadius: "lg",
+	bg: "bg.canvas/60",
+	backdropFilter: "blur(8px)",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+});
+
+const statLabel = css({
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const statValue = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary", lineHeight: "tight" });
+
+const instructorRow = css({
+	mt: "5",
+	display: "flex",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const avatarSm = css({ width: "7", height: "7", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarXs = css({ width: "5", height: "5", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+
+const actions = css({ mt: "6", display: "flex", flexWrap: "wrap", gap: "3" });
 
 const primaryBtn = css({
 	display: "inline-flex",
@@ -103,53 +228,112 @@ const secondaryBtn = css({
 	_hover: { bg: "bg.sunken" },
 });
 
+const sectionHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "8",
+	flexWrap: "wrap",
+});
+
 const sectionTitle = css({
 	fontFamily: "display",
 	fontSize: { base: "2xl", md: "3xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
-	mb: "6",
 });
+
+const sectionCount = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
 
 const grid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", xl: "repeat(3, minmax(0, 1fr))" },
-	gap: "5",
+	gap: "6",
 });
 
 const courseCard = css({
 	display: "flex",
 	flexDirection: "column",
-	gap: "3",
-	p: "6",
+	overflow: "hidden",
 	borderRadius: "2xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	textDecoration: "none",
 	color: "fg.primary",
-	transition: "transform 200ms ease, box-shadow 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-3px)", boxShadow: "lg", borderColor: "border.default" },
 });
 
-const courseMeta = css({
+const courseThumb = css({
+	aspectRatio: "16 / 9",
+	overflow: "hidden",
+	bg: "bg.sunken",
+	position: "relative",
+	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
+	"a:hover & img": { transform: "scale(1.04)" },
+});
+
+const courseThumbFallback = css({
+	width: "full",
+	height: "full",
 	display: "flex",
-	flexWrap: "wrap",
 	alignItems: "center",
-	gap: "2",
-	fontSize: "xs",
-	fontWeight: "semibold",
+	justifyContent: "center",
+	color: "fg.brand",
+	fontSize: "5xl",
+	fontFamily: "display",
+	fontWeight: "bold",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/20, token(colors.cyan.500)/15)",
+});
+
+const courseBadge = css({
+	position: "absolute",
+	top: "3",
+	left: "3",
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "2xs",
+	fontWeight: "bold",
 	letterSpacing: "wider",
 	textTransform: "uppercase",
-	color: "fg.muted",
+	bg: "bg.canvas/85",
+	color: "fg.brand",
+	backdropFilter: "blur(8px)",
 });
 
+const courseModuleBadge = css({
+	position: "absolute",
+	bottom: "3",
+	right: "3",
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1",
+	px: "2",
+	py: "1",
+	borderRadius: "md",
+	fontSize: "2xs",
+	fontWeight: "semibold",
+	bg: "rgba(0,0,0,0.75)",
+	color: "white",
+	backdropFilter: "blur(4px)",
+});
+
+const courseBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "3", flex: "1" });
+
 const courseTitle = css({
+	fontFamily: "display",
 	fontSize: "lg",
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
+	lineHeight: "1.2",
 	transition: "color 150ms ease",
 	"a:hover &": { color: "fg.brand" },
 });
@@ -163,6 +347,37 @@ const courseDesc = css({
 	WebkitBoxOrient: "vertical",
 	overflow: "hidden",
 });
+
+const courseFooter = css({
+	mt: "auto",
+	pt: "3",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "2",
+	fontSize: "xs",
+	color: "fg.muted",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const authorChip = css({ display: "inline-flex", alignItems: "center", gap: "1.5" });
+
+const difficultyChip = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1",
+	px: "2",
+	py: "0.5",
+	borderRadius: "md",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	bg: "bg.surface",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+});
+
+const difficultyDot = css({ w: "1.5", h: "1.5", borderRadius: "full" });
 
 const emptyCard = css({
 	mt: "8",
@@ -179,27 +394,54 @@ const emptyCard = css({
 	{featured ? (
 		<div class={shell}>
 			<div class={featuredCard}>
-				<span class={featuredEyebrow}>Featured Course</span>
-				<h1 class={featuredTitle}>{featured.data.title}</h1>
-				<p class={featuredDesc}>{featured.data.description}</p>
-				<div class={stats}>
-					<span>{featuredAvailableModuleCount} of {featuredModuleCount} modules available</span>
-					<span>·</span>
-					<span>{featured.data.difficulty.charAt(0).toUpperCase()}{featured.data.difficulty.slice(1)}</span>
-					{featuredAuthors[0] && (
-						<>
-							<span>·</span>
-							<span>{featuredAuthors.map((a) => a.name).join(", ")}</span>
-						</>
+				<div class={featuredBody}>
+					<div class={featuredFlagRow}>
+						<span class={featuredFlag}>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z"/></svg>
+							Featured course
+						</span>
+						<span class={freePill}>Free &amp; Open</span>
+					</div>
+					<h1 class={featuredTitle}>{featured.course.data.title}</h1>
+					<p class={featuredDesc}>{featured.course.data.description}</p>
+					<div class={statsRow}>
+						<div class={statBlock}>
+							<span class={statLabel}>Modules</span>
+							<span class={statValue}>{featured.availableCount} / {featured.moduleCount}</span>
+						</div>
+						<div class={statBlock}>
+							<span class={statLabel}>Length</span>
+							<span class={statValue}>{fmtDuration(featured.totalDuration)}</span>
+						</div>
+						<div class={statBlock}>
+							<span class={statLabel}>Level</span>
+							<span class={statValue} style={`color: ${difficultyAccent[featured.course.data.difficulty] || "inherit"};`}>{cap(featured.course.data.difficulty)}</span>
+						</div>
+					</div>
+					{featured.authors[0] && (
+						<div class={instructorRow}>
+							{featured.authors[0].avatarUrl && <img src={featured.authors[0].avatarUrl} alt="" class={avatarSm} loading="lazy" />}
+							<span>Instructed by <strong style="color: var(--colors-fg-primary);">{featured.authors.map((a) => a.name).join(", ")}</strong></span>
+						</div>
 					)}
+					<div class={actions}>
+						{featured.firstModuleSlug ? (
+							<a href={`/courses/${featured.firstModuleSlug}`} class={primaryBtn}>
+								Start learning
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7"/></svg>
+							</a>
+						) : (
+							<a href={`/courses/${featured.course.id}`} class={primaryBtn}>View course</a>
+						)}
+						<a href="#all-courses" class={secondaryBtn}>Browse library</a>
+					</div>
 				</div>
-				<div class={actions}>
-					{firstModuleSlug ? (
-						<a href={`/courses/${firstModuleSlug}`} class={primaryBtn}>Start course</a>
+				<div class={featuredMedia}>
+					{featured.course.data.cover ? (
+						<Image src={featured.course.data.cover.image} alt={featured.course.data.cover.alt || featured.course.data.title} width={900} height={600} loading="eager" />
 					) : (
-						<a href={`/courses/${featured.id}`} class={primaryBtn}>View course</a>
+						<div class={featuredMediaFallback}>{featured.course.data.title.charAt(0)}</div>
 					)}
-					<a href="#all-courses" class={secondaryBtn}>Browse library</a>
 				</div>
 			</div>
 		</div>
@@ -209,16 +451,42 @@ const emptyCard = css({
 
 	<section id="all-courses">
 		<div class={shell}>
-			<h2 class={sectionTitle}>{rest.length > 0 ? "Course Library" : "More courses launching soon"}</h2>
+			<div class={sectionHead}>
+				<div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+					<h2 class={sectionTitle}>{rest.length > 0 ? "Course library" : "More courses launching soon"}</h2>
+					{rest.length > 0 && <span class={sectionCount}>{rest.length} course{rest.length === 1 ? "" : "s"}</span>}
+				</div>
+			</div>
 			{rest.length > 0 ? (
 				<div class={grid}>
-					{rest.map((course) => (
+					{rest.map(({ course, moduleCount, availableCount, authors }) => (
 						<a href={`/courses/${course.id}`} class={courseCard}>
-							<div class={courseMeta}>
-								<span>{course.data.difficulty.charAt(0).toUpperCase()}{course.data.difficulty.slice(1)}</span>
+							<div class={courseThumb}>
+								{course.data.cover ? (
+									<Image src={course.data.cover.image} alt={course.data.cover.alt || course.data.title} width={600} height={340} loading="lazy" />
+								) : (
+									<div class={courseThumbFallback}>{course.data.title.charAt(0)}</div>
+								)}
+								<span class={courseBadge}>Free</span>
+								<span class={courseModuleBadge}>{availableCount}/{moduleCount} module{moduleCount === 1 ? "" : "s"}</span>
 							</div>
-							<h3 class={courseTitle}>{course.data.title}</h3>
-							<p class={courseDesc}>{course.data.description}</p>
+							<div class={courseBody}>
+								<div>
+									<span class={difficultyChip}>
+										<span class={difficultyDot} style={`background: ${difficultyAccent[course.data.difficulty] || "currentColor"};`}></span>
+										{cap(course.data.difficulty)}
+									</span>
+								</div>
+								<h3 class={courseTitle}>{course.data.title}</h3>
+								<p class={courseDesc}>{course.data.description}</p>
+								<div class={courseFooter}>
+									<span class={authorChip}>
+										{authors[0]?.avatarUrl && <img src={authors[0].avatarUrl} alt="" class={avatarXs} loading="lazy" />}
+										<span>{authors[0]?.name ?? "Rawkode Academy"}</span>
+									</span>
+									<span>{new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(course.data.publishedAt)}</span>
+								</div>
+							</div>
 						</a>
 					))}
 				</div>
@@ -230,3 +498,5 @@ const emptyCard = css({
 		</div>
 	</section>
 </Page>
+</content>
+</invoke>

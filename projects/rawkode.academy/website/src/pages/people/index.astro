@@ -74,13 +74,16 @@ const card = css({
 });
 
 const avatar = css({
+	position: "relative",
 	width: "20",
 	height: "20",
 	borderRadius: "full",
 	overflow: "hidden",
 	borderWidth: "2px",
 	borderColor: "border.muted",
+	transition: "border-color 200ms ease, transform 200ms ease",
 	"& img": { width: "full", height: "full", objectFit: "cover" },
+	"a:hover &": { borderColor: "fg.brand", transform: "scale(1.05)" },
 });
 
 const personName = css({

@@ -5,6 +5,7 @@ import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import Prose from "@/components/prose/Prose.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
+import { selectRelatedNews } from "@/lib/related-news";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import { css } from "../../../styled-system/css";
 
@@ -24,7 +25,11 @@ const { article } = Astro.props;
 const { Content } = await render(article);
 const authors = await getEntries(article.data.authors);
 
-const allTechnologies = await getCollection("technologies");
+const [allTechnologies, allNews] = await Promise.all([
+	getCollection("technologies"),
+	getCollection("news"),
+]);
+
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
 	const rawId = technology.id.replace(/\/index$/, "");
@@ -54,63 +59,59 @@ const breadcrumbElements = [
 ];
 
 const publishDate = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(article.data.publishedAt);
+const isoDate = article.data.publishedAt.toISOString();
 const readingTime = calculateReadingTime(article.body || "");
 
-const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "10" });
+const formatDisplayDate = (date: Date) =>
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
 
-const title = css({
-	fontFamily: "display",
-	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
-	fontWeight: "bold",
-	letterSpacing: "tight",
-	lineHeight: "1.1",
-	color: "fg.primary",
-	mb: "4",
-	textWrap: "balance",
+const related = selectRelatedNews(
+	article.id,
+	article.data.technologies ?? [],
+	allNews,
+	3,
+);
+
+const articleUrl = new URL(`/news/${article.id}`, Astro.site ?? Astro.url).href;
+const shareTitle = encodeURIComponent(article.data.title);
+const shareUrl = encodeURIComponent(articleUrl);
+
+// ── Styles ──────────────────────────────────────────────────────────────
+
+const progressBar = css({
+	position: "fixed",
+	top: "0",
+	left: "0",
+	height: "3px",
+	width: "var(--news-progress, 0%)",
+	backgroundImage: "linear-gradient(90deg, token(colors.brand.500), token(colors.cyan.500))",
+	zIndex: "50",
+	transition: "width 80ms linear",
+	pointerEvents: "none",
 });
 
-const byline = css({
+const shell = css({
+	maxWidth: "72rem",
+	mx: "auto",
+	px: { base: "4", md: "6" },
+	pt: "8",
+	pb: "16",
+});
+
+const header = css({
+	maxWidth: "52rem",
+	mx: "auto",
+	mb: { base: "10", md: "14" },
+	textAlign: "center",
+});
+
+const headerMeta = css({
 	display: "flex",
 	flexWrap: "wrap",
-	alignItems: "center",
-	gap: "3",
-	fontSize: "sm",
-	color: "fg.muted",
-	mb: "10",
-});
-
-const authorLink = css({
-	display: "inline-flex",
+	justifyContent: "center",
 	alignItems: "center",
 	gap: "2",
-	color: "fg.primary",
-	textDecoration: "none",
-	fontWeight: "medium",
-	transition: "color 150ms ease",
-	_hover: { color: "fg.brand" },
-});
-
-const authorAvatar = css({
-	width: "7",
-	height: "7",
-	borderRadius: "full",
-	objectFit: "cover",
-});
-
-const sep = css({ color: "border.default" });
-
-const tagsFooter = css({
-	display: "flex",
-	flexWrap: "wrap",
-	alignItems: "center",
-	gap: "3",
-	mt: "10",
-	pt: "6",
-	borderTopWidth: "1px",
-	borderTopColor: "border.muted",
-});
-
-const tagsLabel = css({
+	mb: "6",
 	fontSize: "xs",
 	fontWeight: "semibold",
 	letterSpacing: "wider",
@@ -118,23 +119,345 @@ const tagsLabel = css({
 	color: "fg.muted",
 });
 
-const tagsList = css({ display: "flex", flexWrap: "wrap", gap: "2", listStyle: "none", m: "0", p: "0" });
-
-const tag = css({
+const tagPill = css({
 	display: "inline-flex",
 	alignItems: "center",
-	px: "3",
+	px: "2.5",
 	py: "1",
 	borderRadius: "full",
-	borderWidth: "1px",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	textDecoration: "none",
+	fontWeight: "bold",
+	transition: "background 150ms ease",
+	_hover: { bg: "bg.surface" },
+});
+
+const headerDot = css({
+	w: "1",
+	h: "1",
+	borderRadius: "full",
+	bg: "border.default",
+});
+
+const title = css({
+	fontFamily: "display",
+	fontSize: { base: "3xl", md: "5xl", lg: "6xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	lineHeight: "1.05",
+	color: "fg.primary",
+	mb: "6",
+	textWrap: "balance",
+});
+
+const dek = css({
+	fontSize: { base: "lg", md: "xl" },
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	textWrap: "pretty",
+	maxWidth: "44rem",
+	mx: "auto",
+});
+
+const byline = css({
+	mt: "10",
+	display: "flex",
+	flexWrap: "wrap",
+	justifyContent: "center",
+	alignItems: "center",
+	gap: "5",
+	pt: "6",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const authorBlock = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "3",
+	textDecoration: "none",
+});
+
+const authorAvatar = css({
+	width: "10",
+	height: "10",
+	borderRadius: "full",
+	objectFit: "cover",
+	borderWidth: "2px",
 	borderColor: "border.muted",
+});
+
+const authorInfo = css({
+	display: "flex",
+	flexDirection: "column",
+	textAlign: "left",
+});
+
+const authorName = css({
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: "fg.primary",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const authorRole = css({
+	fontSize: "xs",
+	color: "fg.muted",
+});
+
+const bylineMetaItem = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	fontSize: "sm",
+	color: "fg.muted",
+	"& svg": { width: "3.5", height: "3.5", color: "fg.muted" },
+});
+
+const articleLayout = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) 14rem" },
+	gap: { base: "10", lg: "16" },
+	alignItems: "start",
+	maxWidth: "64rem",
+	mx: "auto",
+});
+
+const proseWrap = css({
+	"& article": { maxWidth: "none" },
+});
+
+const aside = css({
+	display: { base: "none", lg: "flex" },
+	flexDirection: "column",
+	gap: "6",
+	position: "sticky",
+	top: "6rem",
+});
+
+const asideSection = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const asideTitle = css({
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const shareList = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+});
+
+const shareLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2.5",
+	px: "3",
+	py: "2",
+	borderRadius: "lg",
+	color: "fg.secondary",
 	fontSize: "sm",
 	fontWeight: "medium",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	"& svg": { width: "4", height: "4" },
+	_hover: { color: "fg.brand", bg: "bg.brand-subtle" },
+});
+
+const asideTagsList = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "1.5",
+	listStyle: "none",
+	m: "0",
+	p: "0",
+});
+
+const asideTag = css({
+	display: "inline-flex",
+	alignItems: "center",
+	px: "2.5",
+	py: "1",
+	borderRadius: "md",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.surface",
+	fontSize: "xs",
+	fontWeight: "semibold",
 	color: "fg.secondary",
 	textDecoration: "none",
 	transition: "all 150ms ease",
-	_hover: { color: "fg.brand", borderColor: "border.default", bg: "bg.brand-subtle" },
+	_hover: { color: "fg.brand", borderColor: "fg.brand", bg: "bg.brand-subtle" },
 });
+
+const footerWrap = css({
+	mt: "16",
+	pt: "10",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	maxWidth: "64rem",
+	mx: "auto",
+	display: "flex",
+	flexDirection: "column",
+	gap: "16",
+});
+
+const footerCta = css({
+	position: "relative",
+	overflow: "hidden",
+	p: { base: "8", md: "10" },
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "minmax(0, 1fr) auto" },
+	gap: "6",
+	alignItems: "center",
+	backgroundImage:
+		"radial-gradient(circle at 0% 0%, token(colors.brand.500)/12, transparent 50%), radial-gradient(circle at 100% 100%, token(colors.cyan.500)/12, transparent 50%)",
+});
+
+const footerCtaTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "xl", md: "2xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+});
+
+const footerCtaSub = css({
+	mt: "2",
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	maxWidth: "36rem",
+});
+
+const footerCtaButton = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "5",
+	py: "3",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "sm",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	textDecoration: "none",
+	whiteSpace: "nowrap",
+	transition: "transform 150ms ease, box-shadow 150ms ease",
+	boxShadow: "md",
+	_hover: { transform: "translateY(-1px)", boxShadow: "lg" },
+});
+
+const relatedWrap = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "6",
+});
+
+const relatedHeader = css({
+	display: "flex",
+	alignItems: "end",
+	justifyContent: "space-between",
+	gap: "4",
+});
+
+const relatedHeading = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+});
+
+const relatedLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "sm",
+	fontWeight: "semibold",
+	color: "fg.brand",
+	textDecoration: "none",
+	transition: "gap 150ms ease",
+	_hover: { gap: "3" },
+});
+
+const relatedGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const relatedCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	height: "full",
+	transition: "transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease",
+	_hover: { transform: "translateY(-2px)", borderColor: "fg.brand", boxShadow: "lg" },
+});
+
+const relatedMeta = css({
+	display: "flex",
+	alignItems: "center",
+	flexWrap: "wrap",
+	gap: "2",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.muted",
+});
+
+const relatedMetaTag = css({ color: "fg.brand" });
+
+const relatedTitle = css({
+	fontFamily: "display",
+	fontSize: "lg",
+	fontWeight: "semibold",
+	letterSpacing: "tight",
+	lineHeight: "1.25",
+	color: "fg.primary",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const relatedDesc = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.55",
+	display: "-webkit-box",
+	WebkitLineClamp: "3",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+});
+
+const arrowIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>`;
+const clockIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+const calIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+const xIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
+const blueskyIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.335 5.144c2.838 2.13 5.892 6.45 7.012 8.768 1.12-2.319 4.174-6.638 7.012-8.768 2.047-1.537 5.36-2.726 5.36 1.057 0 .755-.433 6.345-.687 7.252-.881 3.155-4.094 3.96-6.95 3.474 4.994.85 6.265 3.665 3.522 6.48-5.21 5.346-7.487-1.342-8.07-3.057-.108-.314-.158-.46-.16-.336-.001-.124-.05.022-.158.336-.583 1.715-2.86 8.403-8.07 3.057-2.743-2.815-1.472-5.63 3.521-6.48-2.855.486-6.068-.32-6.95-3.474-.253-.907-.686-6.497-.686-7.252 0-3.783 3.313-2.594 5.36-1.057z"/></svg>`;
+const linkedinIcon = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`;
+const linkIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
 ---
 
 <Page
@@ -151,42 +474,162 @@ const tag = css({
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
 
+	<div id="news-progress" class={progressBar}></div>
+
 	<div class={shell}>
 		<Breadcrumb elements={breadcrumbElements} />
 
-		<h1 class={title}>{article.data.title}</h1>
+		<header class={header}>
+			<div class={headerMeta}>
+				{tags[0] && <a href={tags[0].href} class={tagPill}>{tags[0].label}</a>}
+				<span class={headerDot}></span>
+				<time datetime={isoDate}>{publishDate}</time>
+				<span class={headerDot}></span>
+				<span>{readingTime.text}</span>
+			</div>
 
-		<div class={byline}>
-			{authors.map((author, idx) => (
-				<>
-					{idx > 0 && <span class={sep}>·</span>}
-					<a href={`/people/${author.data.id}`} rel="author" class={authorLink}>
+			<h1 class={title}>{article.data.title}</h1>
+
+			<p class={dek}>{article.data.description}</p>
+
+			<div class={byline}>
+				{authors.map((author) => (
+					<a href={`/people/${author.data.id}`} rel="author" class={authorBlock}>
 						{author.data.avatarUrl && <img src={author.data.avatarUrl} alt="" class={authorAvatar} loading="lazy" />}
-						<span>{author.data.name}</span>
+						<span class={authorInfo}>
+							<span class={authorName}>{author.data.name}</span>
+							<span class={authorRole}>Author</span>
+						</span>
 					</a>
-				</>
-			))}
-			<span class={sep}>·</span>
-			<time datetime={article.data.publishedAt.toString()}>{publishDate}</time>
-			<span class={sep}>·</span>
-			<span>{readingTime.text}</span>
+				))}
+				<span class={bylineMetaItem}>
+					<Fragment set:html={calIcon} />
+					{publishDate}
+				</span>
+				<span class={bylineMetaItem}>
+					<Fragment set:html={clockIcon} />
+					{readingTime.text}
+				</span>
+			</div>
+		</header>
+
+		<div class={articleLayout}>
+			<div class={proseWrap}>
+				<Prose>
+					<Content />
+				</Prose>
+			</div>
+
+			<aside class={aside}>
+				<div class={asideSection}>
+					<span class={asideTitle}>Share</span>
+					<div class={shareList}>
+						<a class={shareLink} href={`https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}`} target="_blank" rel="noopener noreferrer">
+							<Fragment set:html={xIcon} />
+							Post to X
+						</a>
+						<a class={shareLink} href={`https://bsky.app/intent/compose?text=${shareTitle}%20${shareUrl}`} target="_blank" rel="noopener noreferrer">
+							<Fragment set:html={blueskyIcon} />
+							Bluesky
+						</a>
+						<a class={shareLink} href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} target="_blank" rel="noopener noreferrer">
+							<Fragment set:html={linkedinIcon} />
+							LinkedIn
+						</a>
+						<button class={shareLink} type="button" id="copy-link" style="background: none; border: none; cursor: pointer; text-align: left; font: inherit;">
+							<Fragment set:html={linkIcon} />
+							<span id="copy-link-label">Copy link</span>
+						</button>
+					</div>
+				</div>
+
+				{tags.length > 0 && (
+					<div class={asideSection}>
+						<span class={asideTitle}>Filed under</span>
+						<ul class={asideTagsList}>
+							{tags.map((t) => (
+								<li><a href={t.href} class={asideTag} rel="tag">{t.label}</a></li>
+							))}
+						</ul>
+					</div>
+				)}
+			</aside>
 		</div>
 
-		<Prose>
-			<Content />
-		</Prose>
+		<div class={footerWrap}>
+			<div class={footerCta}>
+				<div>
+					<h3 class={footerCtaTitle}>Cloud Native news, weekly</h3>
+					<p class={footerCtaSub}>Get our analysis of releases, CVEs, and ecosystem shifts straight in your reader. RSS, Atom, or JSON.</p>
+				</div>
+				<a href="/api/feeds/news.xml" class={footerCtaButton}>
+					Subscribe via RSS
+					<Fragment set:html={arrowIcon} />
+				</a>
+			</div>
 
-		{tags.length > 0 && (
-			<footer class={tagsFooter}>
-				<span class={tagsLabel}>Tagged in</span>
-				<ul class={tagsList}>
-					{tags.map((t) => (
-						<li>
-							<a href={t.href} class={tag} rel="tag">{t.label}</a>
-						</li>
-					))}
-				</ul>
-			</footer>
-		)}
+			{related.length > 0 && (
+				<section class={relatedWrap}>
+					<header class={relatedHeader}>
+						<h2 class={relatedHeading}>More stories</h2>
+						<a href="/news" class={relatedLink}>
+							All news
+							<Fragment set:html={arrowIcon} />
+						</a>
+					</header>
+					<div class={relatedGrid}>
+						{related.map((story) => {
+							const topTech = story.data.technologies?.[0];
+							return (
+								<a href={`/news/${story.id}`} class={relatedCard}>
+									<div class={relatedMeta}>
+										<time datetime={story.data.publishedAt.toISOString()}>{formatDisplayDate(story.data.publishedAt)}</time>
+										{topTech && (
+											<>
+												<span class={headerDot}></span>
+												<span class={relatedMetaTag}>{formatTechnologyLabel(topTech)}</span>
+											</>
+										)}
+									</div>
+									<h3 class={relatedTitle}>{story.data.title}</h3>
+									<p class={relatedDesc}>{story.data.description}</p>
+								</a>
+							);
+						})}
+					</div>
+				</section>
+			)}
+		</div>
 	</div>
+
+	<script>
+		// Reading progress bar
+		const progress = document.getElementById("news-progress");
+		const updateProgress = () => {
+			if (!progress) return;
+			const h = document.documentElement;
+			const scrolled = h.scrollTop;
+			const max = h.scrollHeight - h.clientHeight;
+			const pct = max > 0 ? Math.min(100, (scrolled / max) * 100) : 0;
+			progress.style.setProperty("--news-progress", `${pct}%`);
+		};
+		document.addEventListener("scroll", updateProgress, { passive: true });
+		updateProgress();
+
+		// Copy-link button
+		const copyBtn = document.getElementById("copy-link");
+		const copyLabel = document.getElementById("copy-link-label");
+		if (copyBtn && copyLabel) {
+			copyBtn.addEventListener("click", async () => {
+				try {
+					await navigator.clipboard.writeText(window.location.href);
+					copyLabel.textContent = "Copied!";
+					setTimeout(() => { copyLabel.textContent = "Copy link"; }, 1800);
+				} catch {
+					copyLabel.textContent = "Failed";
+					setTimeout(() => { copyLabel.textContent = "Copy link"; }, 1800);
+				}
+			});
+		}
+	</script>
 </Page>

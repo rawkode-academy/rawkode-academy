@@ -24,8 +24,12 @@ const getShowId = (value: unknown): string | null => {
 	return null;
 };
 
-const showsToRender: ShowSummary[] = await (async () => {
-	const list: ShowSummary[] = [];
+type ShowWithLatest = ShowSummary & {
+	latestEpisode?: { title: string; publishedAt: string } | undefined;
+};
+
+const showsToRender: ShowWithLatest[] = await (async () => {
+	const list: ShowWithLatest[] = [];
 	for (const s of showEntries) {
 		const people = await getEntries(s.data.hosts);
 		const hosts = people.map((p) => {
@@ -34,6 +38,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 		});
 		const eps = videos
 			.filter((v) => getShowId(v.data.show) === s.data.id)
+			.sort((a, b) => new Date(b.data.publishedAt as Date | string).getTime() - new Date(a.data.publishedAt as Date | string).getTime())
 			.map((v) => ({
 				video: {
 					title: v.data.title,
@@ -44,14 +49,46 @@ const showsToRender: ShowSummary[] = await (async () => {
 							: String(v.data.publishedAt),
 				},
 			}));
-		list.push({ id: s.data.id, name: s.data.name, hosts, episodes: eps, cover: s.data.cover });
+		list.push({
+			id: s.data.id,
+			name: s.data.name,
+			hosts,
+			episodes: eps,
+			cover: s.data.cover,
+			latestEpisode: eps[0]
+				? { title: eps[0].video.title, publishedAt: eps[0].video.publishedAt }
+				: undefined,
+		});
 	}
-	return list;
+	return list.sort((a, b) => b.episodes.length - a.episodes.length);
 })();
 
 const hasShows = showsToRender.length > 0;
+const totalEpisodes = showsToRender.reduce((acc, s) => acc + s.episodes.length, 0);
+
+const formatDate = (iso: string) =>
+	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(iso));
 
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const sectionHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "8",
+	flexWrap: "wrap",
+});
+
+const sectionTitle = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+});
+
+const sectionCount = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
 
 const grid = css({
 	display: "grid",
@@ -60,6 +97,7 @@ const grid = css({
 });
 
 const showCard = css({
+	position: "relative",
 	display: "flex",
 	flexDirection: "column",
 	overflow: "hidden",
@@ -70,14 +108,48 @@ const showCard = css({
 	textDecoration: "none",
 	color: "fg.primary",
 	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+	_hover: { transform: "translateY(-3px)", boxShadow: "xl", borderColor: "border.default" },
 });
 
 const coverWrap = css({
+	position: "relative",
 	aspectRatio: "16 / 9",
 	overflow: "hidden",
 	bg: "bg.sunken",
-	"& img": { width: "full", height: "full", objectFit: "cover" },
+	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
+	"a:hover & img": { transform: "scale(1.04)" },
+});
+
+const coverFallback = css({
+	width: "full",
+	height: "full",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	color: "fg.brand",
+	fontSize: "6xl",
+	fontFamily: "display",
+	fontWeight: "bold",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/20, token(colors.cyan.500)/15)",
+});
+
+const episodeBadge = css({
+	position: "absolute",
+	top: "3",
+	left: "3",
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	bg: "bg.canvas/85",
+	color: "fg.brand",
+	backdropFilter: "blur(8px)",
 });
 
 const body = css({ p: "6", display: "flex", flexDirection: "column", gap: "3", flex: "1" });
@@ -88,19 +160,52 @@ const showName = css({
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
+	lineHeight: "1.2",
 	transition: "color 150ms ease",
 	"a:hover &": { color: "fg.brand" },
 });
 
 const hostsLine = css({ fontSize: "sm", color: "fg.muted" });
 
-const episodeCount = css({
+const latestBlock = css({
 	mt: "auto",
-	fontSize: "xs",
-	fontWeight: "semibold",
-	color: "fg.brand",
+	pt: "4",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+});
+
+const latestLabel = css({
+	fontSize: "2xs",
+	fontWeight: "bold",
 	letterSpacing: "wider",
 	textTransform: "uppercase",
+	color: "fg.brand",
+});
+
+const latestTitle = css({
+	fontSize: "sm",
+	fontWeight: "medium",
+	color: "fg.primary",
+	display: "-webkit-box",
+	WebkitLineClamp: "2",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+	lineHeight: "1.4",
+});
+
+const latestDate = css({ fontSize: "xs", color: "fg.muted" });
+
+const noEpisodes = css({
+	mt: "auto",
+	pt: "4",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	fontSize: "xs",
+	color: "fg.muted",
+	fontStyle: "italic",
 });
 
 const emptyCard = css({
@@ -120,30 +225,48 @@ const emptyCard = css({
 
 	<div class={shell}>
 		{hasShows ? (
-			<div class={grid}>
-				{showsToRender.map((show) => (
-					<a href={`/shows/${show.id}`} class={showCard}>
-						{show.cover ? (
+			<>
+				<div class={sectionHead}>
+					<div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+						<h2 class={sectionTitle}>Browse our shows</h2>
+						<span class={sectionCount}>{showsToRender.length} show{showsToRender.length === 1 ? "" : "s"} · {totalEpisodes} episodes</span>
+					</div>
+				</div>
+				<div class={grid}>
+					{showsToRender.map((show) => (
+						<a href={`/shows/${show.id}`} class={showCard}>
 							<div class={coverWrap}>
-								<img src={typeof show.cover === "string" ? show.cover : show.cover?.image?.src || ""} alt={show.name} loading="lazy" />
+								{show.cover ? (
+									<img src={typeof show.cover === "string" ? show.cover : show.cover?.image?.src || ""} alt={show.name} loading="lazy" />
+								) : (
+									<div class={coverFallback}>{show.name.charAt(0)}</div>
+								)}
+								<span class={episodeBadge}>
+									<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 8l6 4-6 4V8z"/></svg>
+									{show.episodes.length} ep{show.episodes.length === 1 ? "" : "s"}
+								</span>
 							</div>
-						) : (
-							<div class={coverWrap}></div>
-						)}
-						<div class={body}>
-							<h2 class={showName}>{show.name}</h2>
-							{show.hosts.length > 0 && (
-								<p class={hostsLine}>
-									Hosted by {show.hosts.map((h) => `${h.forename} ${h.surname}`.trim()).join(", ")}
-								</p>
-							)}
-							<span class={episodeCount}>
-								{show.episodes.length} episode{show.episodes.length === 1 ? "" : "s"}
-							</span>
-						</div>
-					</a>
-				))}
-			</div>
+							<div class={body}>
+								<h2 class={showName}>{show.name}</h2>
+								{show.hosts.length > 0 && (
+									<p class={hostsLine}>
+										Hosted by {show.hosts.map((h) => `${h.forename} ${h.surname}`.trim()).join(", ")}
+									</p>
+								)}
+								{show.latestEpisode ? (
+									<div class={latestBlock}>
+										<span class={latestLabel}>Latest episode</span>
+										<span class={latestTitle}>{show.latestEpisode.title}</span>
+										<span class={latestDate}>{formatDate(show.latestEpisode.publishedAt)}</span>
+									</div>
+								) : (
+									<span class={noEpisodes}>Episodes coming soon</span>
+								)}
+							</div>
+						</a>
+					))}
+				</div>
+			</>
 		) : (
 			<div class={emptyCard}>
 				<p>No shows available yet. We're working on bringing you exciting new content — check back soon!</p>
@@ -151,3 +274,5 @@ const emptyCard = css({
 		)}
 	</div>
 </Page>
+</content>
+</invoke>

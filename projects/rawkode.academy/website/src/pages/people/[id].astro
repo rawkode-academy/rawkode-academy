@@ -139,6 +139,27 @@ const nameClass = css({
 
 const handle = css({ fontSize: "lg", color: "fg.brand", fontWeight: "medium" });
 
+const statsRow = css({
+	mt: "6",
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "6",
+	justifyContent: { base: "center", md: "flex-start" },
+});
+
+const statBlock = css({ display: "flex", flexDirection: "column", gap: "0.25" });
+const statNumber = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+});
+const statText = css({ fontSize: "xs", fontWeight: "medium", color: "fg.muted", textTransform: "uppercase", letterSpacing: "wider" });
+
 const socialRow = css({
 	mt: "5",
 	display: "flex",
@@ -254,6 +275,34 @@ const listDesc = css({ color: "fg.secondary", lineHeight: "1.7", maxWidth: "66ch
 			<div class={heroBody}>
 				<h1 class={nameClass}>{person.data.name}</h1>
 				{person.data.handles?.twitter && <p class={handle}>@{person.data.handles.twitter}</p>}
+				{(videoCount > 0 || showCount > 0 || articleCount > 0 || newsCount > 0) && (
+					<div class={statsRow}>
+						{showCount > 0 && (
+							<div class={statBlock}>
+								<span class={statNumber}>{showCount}</span>
+								<span class={statText}>{showCount === 1 ? "Show hosted" : "Shows hosted"}</span>
+							</div>
+						)}
+						{videoCount > 0 && (
+							<div class={statBlock}>
+								<span class={statNumber}>{videoCount}</span>
+								<span class={statText}>{videoCount === 1 ? "Appearance" : "Appearances"}</span>
+							</div>
+						)}
+						{articleCount > 0 && (
+							<div class={statBlock}>
+								<span class={statNumber}>{articleCount}</span>
+								<span class={statText}>{articleCount === 1 ? "Article" : "Articles"}</span>
+							</div>
+						)}
+						{newsCount > 0 && (
+							<div class={statBlock}>
+								<span class={statNumber}>{newsCount}</span>
+								<span class={statText}>{newsCount === 1 ? "News story" : "News stories"}</span>
+							</div>
+						)}
+					</div>
+				)}
 				{socialLinks.length > 0 && (
 					<div class={socialRow}>
 						{socialLinks.map((link) => (

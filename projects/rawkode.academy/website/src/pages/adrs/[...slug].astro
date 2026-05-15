@@ -15,10 +15,25 @@ type Props = { adr: CollectionEntry<"adrs"> };
 
 export const getStaticPaths: GetStaticPaths = async (): Promise<GetStaticPathsResult> => {
 	const adrs = await getCollection("adrs");
-	return adrs.map((adr) => ({ params: { slug: adr.id }, props: { adr } }));
+	const sorted = [...adrs].sort((a, b) => {
+		const an = a.id.match(/^(\d{4})-/)?.[1] || "0000";
+		const bn = b.id.match(/^(\d{4})-/)?.[1] || "0000";
+		return Number.parseInt(an) - Number.parseInt(bn);
+	});
+	return sorted.map((adr, idx) => ({
+		params: { slug: adr.id },
+		props: {
+			adr,
+			prev: idx > 0 ? sorted[idx - 1] : null,
+			next: idx < sorted.length - 1 ? sorted[idx + 1] : null,
+		},
+	}));
 };
 
-const { adr } = Astro.props;
+const { adr, prev, next } = Astro.props as Props & {
+	prev: CollectionEntry<"adrs"> | null;
+	next: CollectionEntry<"adrs"> | null;
+};
 const { Content } = await render(adr);
 
 let authors: CollectionEntry<"people">[] = [];
@@ -35,6 +50,33 @@ const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
 
 const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
+const backLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	fontSize: "sm",
+	color: "fg.muted",
+	fontWeight: "medium",
+	textDecoration: "none",
+	mb: "8",
+	transition: "color 150ms ease",
+	_hover: { color: "fg.brand" },
+});
+
+const sigilLarge = css({
+	display: "inline-flex",
+	px: "3.5",
+	py: "1",
+	mb: "4",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontFamily: "mono",
+	fontSize: "sm",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+});
+
 const titleClass = css({
 	fontFamily: "display",
 	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
@@ -45,7 +87,35 @@ const titleClass = css({
 	mb: "8",
 });
 
-const numberClass = css({ color: "fg.brand" });
+const numberClass = css({ color: "fg.brand", display: "none" });
+
+const navRow = css({
+	mt: "16",
+	pt: "8",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "1fr 1fr" },
+	gap: "4",
+});
+
+const navCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+	p: "5",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	textDecoration: "none",
+	color: "fg.primary",
+	transition: "all 150ms ease",
+	_hover: { borderColor: "border.default", transform: "translateY(-2px)" },
+});
+
+const navLabel = css({ fontSize: "xs", fontWeight: "semibold", color: "fg.muted", textTransform: "uppercase", letterSpacing: "wider" });
+const navTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary" });
 
 const metaCard = css({
 	p: "6",
@@ -144,9 +214,14 @@ const proseClass = css({
 	<AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
 
 	<div class={shell}>
-		<h1 class={titleClass}>
-			<span class={numberClass}>ADR-{adrNumber}:</span> {adr.data.title}
-		</h1>
+		<a href="/adrs" class={backLink}>
+			<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+			</svg>
+			All decisions
+		</a>
+		<span class={sigilLarge}>ADR-{adrNumber}</span>
+		<h1 class={titleClass}>{adr.data.title}</h1>
 
 		<div class={metaCard}>
 			{authors.length > 0 && (
@@ -170,5 +245,22 @@ const proseClass = css({
 		<article class={proseClass}>
 			<Content />
 		</article>
+
+		{(prev || next) && (
+			<nav class={navRow} aria-label="ADR navigation">
+				{prev ? (
+					<a href={`/adrs/${prev.id}`} class={navCard}>
+						<span class={navLabel}>← Previous</span>
+						<span class={navTitle}>ADR-{prev.id.match(/^(\d{4})-/)?.[1] || "0000"}: {prev.data.title}</span>
+					</a>
+				) : <span />}
+				{next ? (
+					<a href={`/adrs/${next.id}`} class={navCard} style="text-align: right;">
+						<span class={navLabel}>Next →</span>
+						<span class={navTitle}>ADR-{next.id.match(/^(\d{4})-/)?.[1] || "0000"}: {next.data.title}</span>
+					</a>
+				) : <span />}
+			</nav>
+		)}
 	</div>
 </Page>

@@ -35,7 +35,58 @@ const typeStyles: Record<string, { bg: string; color: string }> = {
 	breaking: { bg: "rgba(249, 115, 22, 0.15)", color: "rgb(249, 115, 22)" },
 };
 
+const typeCounts = new Map<string, number>();
+for (const entry of processedChangelog) {
+	typeCounts.set(entry.type, (typeCounts.get(entry.type) ?? 0) + 1);
+}
+const typeFilterEntries = [...typeCounts.entries()].sort((a, b) => b[1] - a[1]);
+
 const shell = css({ maxWidth: "56rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const summaryBar = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "3",
+	alignItems: "center",
+	justifyContent: "space-between",
+	mb: "6",
+});
+
+const summaryCount = css({ fontSize: "sm", color: "fg.muted", fontWeight: "medium" });
+const summaryCountStrong = css({
+	fontFamily: "display",
+	fontSize: "lg",
+	fontWeight: "bold",
+	color: "fg.primary",
+});
+
+const filterRow = css({ display: "flex", flexWrap: "wrap", gap: "2", mb: "8" });
+
+const filterChip = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3.5",
+	py: "1.5",
+	borderRadius: "full",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.surface",
+	color: "fg.secondary",
+	fontSize: "sm",
+	fontWeight: "medium",
+	cursor: "pointer",
+	textTransform: "capitalize",
+	transition: "all 150ms ease",
+	_hover: { borderColor: "border.default", color: "fg.primary" },
+	"&[aria-pressed='true']": {
+		bg: "bg.brand-subtle",
+		borderColor: "fg.brand",
+		color: "fg.brand",
+	},
+});
+
+const filterCount = css({ fontSize: "xs", fontWeight: "semibold", opacity: "0.7" });
 
 const emptyState = css({ textAlign: "center", py: "12", color: "fg.muted" });
 
@@ -93,33 +144,73 @@ const avatar = css({ width: "6", height: "6", borderRadius: "full", objectFit: "
 		{processedChangelog.length === 0 ? (
 			<p class={emptyState}>No changelog entries found.</p>
 		) : (
-			<div class={list}>
-				{processedChangelog.map((entry) => {
-					const style = typeStyles[entry.type as keyof typeof typeStyles] ?? typeStyles.chore;
-					return (
-						<article class={entryCard}>
-							<div class={tagRow}>
-								<span class={typeTag} style={`background: ${style.bg}; color: ${style.color};`}>
-									{entry.type}
-								</span>
-							</div>
-							<h2 class={entryTitle}>{entry.title}</h2>
-							<Prose>
-								<div set:html={entry.renderedContent} />
-							</Prose>
-							<div class={footer}>
-								<time datetime={entry.date.toISOString()}>
-									{entry.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-								</time>
-								<div class={authorRow}>
-									{entry.author.avatar_url && <img src={entry.author.avatar_url} alt={entry.author.name} class={avatar} />}
-									<span>by {entry.author.name}</span>
+			<>
+				<div class={summaryBar}>
+					<p class={summaryCount}>
+						<span class={summaryCountStrong} data-visible-count>{processedChangelog.length}</span>
+						{" "}updates · most recent first
+					</p>
+				</div>
+				<div class={filterRow}>
+					<button type="button" class={filterChip} data-type-filter="all" aria-pressed="true">
+						All <span class={filterCount}>{processedChangelog.length}</span>
+					</button>
+					{typeFilterEntries.map(([type, count]) => (
+						<button type="button" class={filterChip} data-type-filter={type} aria-pressed="false">
+							{type} <span class={filterCount}>{count}</span>
+						</button>
+					))}
+				</div>
+				<div class={list} data-changelog-list>
+					{processedChangelog.map((entry) => {
+						const style = typeStyles[entry.type as keyof typeof typeStyles] ?? typeStyles.chore;
+						return (
+							<article class={entryCard} data-type={entry.type}>
+								<div class={tagRow}>
+									<span class={typeTag} style={`background: ${style.bg}; color: ${style.color};`}>
+										{entry.type}
+									</span>
 								</div>
-							</div>
-						</article>
-					);
-				})}
-			</div>
+								<h2 class={entryTitle}>{entry.title}</h2>
+								<Prose>
+									<div set:html={entry.renderedContent} />
+								</Prose>
+								<div class={footer}>
+									<time datetime={entry.date.toISOString()}>
+										{entry.date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+									</time>
+									<div class={authorRow}>
+										{entry.author.avatar_url && <img src={entry.author.avatar_url} alt={entry.author.name} class={avatar} />}
+										<span>by {entry.author.name}</span>
+									</div>
+								</div>
+							</article>
+						);
+					})}
+				</div>
+			</>
 		)}
 	</div>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-type-filter]"));
+			const entries = Array.from(document.querySelectorAll<HTMLElement>("[data-changelog-list] > article"));
+			const countTarget = document.querySelector<HTMLElement>("[data-visible-count]");
+
+			buttons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const filter = btn.dataset.typeFilter ?? "all";
+					buttons.forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+					let visible = 0;
+					entries.forEach((entry) => {
+						const matches = filter === "all" || entry.dataset.type === filter;
+						entry.style.display = matches ? "" : "none";
+						if (matches) visible += 1;
+					});
+					if (countTarget) countTarget.textContent = visible.toString();
+				});
+			});
+		});
+	</script>
 </Page>

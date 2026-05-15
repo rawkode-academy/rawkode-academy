@@ -11,6 +11,13 @@ const stats = [
 	{ value: "100%", label: "Enjoyed the Experience" },
 ];
 
+const benefits = [
+	{ title: "Gain visibility", description: "Reach engineers who actively seek out new tooling — not surface-level marketing impressions.", icon: "M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" },
+	{ title: "Get real feedback", description: "Live Q&A and pair-programming with a technical audience that asks the hard questions.", icon: "M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" },
+	{ title: "Connect with the community", description: "Conversations continue after the stream ends — we introduce you to maintainers and contributors who care.", icon: "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a3 3 0 015.356-1.857M17 10.5a4 4 0 100-8 4 4 0 000 8zm-7 0a4 4 0 110-8 4 4 0 010 8z" },
+	{ title: "It's fun", description: "Relaxed, authentic conversation. No corporate talking points, no slideware. Just engineers talking shop.", icon: "M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+];
+
 const processSteps = [
 	{ title: "Apply", description: "Submit your project through our booking system. We'll review it to ensure it's a good fit for our audience." },
 	{ title: "Prepare", description: "Once approved, we'll send you preparation guidelines to help you showcase your project effectively." },
@@ -67,6 +74,37 @@ const statValue = css({
 });
 
 const statLabel = css({ mt: "2", color: "fg.muted", fontSize: "sm" });
+
+const benefitGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const benefitCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const benefitIcon = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "11",
+	h: "11",
+	borderRadius: "xl",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+});
+
+const benefitTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
+const benefitDesc = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
 
 const stepsGrid = css({
 	display: "grid",
@@ -155,6 +193,21 @@ const ctaBtn = css({
 					<div class={statCard}>
 						<div class={statValue}>{s.value}</div>
 						<div class={statLabel}>{s.label}</div>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class={section}>
+			<h2 class={sectionTitle}>Why join</h2>
+			<div class={benefitGrid}>
+				{benefits.map((b) => (
+					<div class={benefitCard}>
+						<span class={benefitIcon}>
+							<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={b.icon} /></svg>
+						</span>
+						<h3 class={benefitTitle}>{b.title}</h3>
+						<p class={benefitDesc}>{b.description}</p>
 					</div>
 				))}
 			</div>

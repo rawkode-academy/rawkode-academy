@@ -45,6 +45,14 @@ const feedVideos = results
 const formatDate = (date: string) =>
 	new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
+const suggestedSearches = ["Kubernetes", "WASM", "Cilium", "Argo", "Pulumi", "OpenTelemetry"];
+const quickDestinations = [
+	{ title: "Browse videos", description: "Live streams, deep dives, and screencasts.", href: "/watch" },
+	{ title: "Technologies", description: "325+ cloud native tools and platforms.", href: "/technology" },
+	{ title: "Learning paths", description: "Structured cloud native roadmaps.", href: "/learning-paths" },
+	{ title: "Shows", description: "Klustered, Rawkode Live, Cloud Native Compass.", href: "/shows" },
+];
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
 const searchForm = css({
@@ -87,11 +95,69 @@ const searchBtn = css({
 
 const emptyState = css({
 	textAlign: "center",
-	py: "16",
+	py: "12",
 	color: "fg.secondary",
 	maxWidth: "32rem",
 	mx: "auto",
 });
+
+const startCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "8",
+	alignItems: "center",
+	textAlign: "center",
+	maxWidth: "44rem",
+	mx: "auto",
+});
+
+const suggestionRow = css({ display: "flex", flexWrap: "wrap", gap: "2", justifyContent: "center" });
+const suggestionChip = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3.5",
+	py: "1.5",
+	borderRadius: "full",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	color: "fg.secondary",
+	fontSize: "sm",
+	fontWeight: "medium",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { borderColor: "fg.brand", color: "fg.brand", transform: "translateY(-1px)" },
+});
+
+const suggestionLabel = css({ fontSize: "xs", fontWeight: "semibold", color: "fg.muted", textTransform: "uppercase", letterSpacing: "wider", mb: "3" });
+
+const quickGrid = css({
+	mt: "6",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+	gap: "4",
+	width: "full",
+});
+
+const quickCard = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "1",
+	p: "5",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	color: "fg.primary",
+	textDecoration: "none",
+	textAlign: "left",
+	transition: "all 200ms ease",
+	_hover: { transform: "translateY(-2px)", borderColor: "border.default", boxShadow: "lg" },
+});
+
+const quickTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.primary" });
+const quickDesc = css({ fontSize: "sm", color: "fg.muted" });
 
 const resultsHeader = css({
 	fontFamily: "display",
@@ -139,9 +205,36 @@ const cardTitle = css({ fontSize: "md", fontWeight: "semibold", color: "fg.prima
 
 	<div class={shell}>
 		{searchQuery.length === 0 ? (
-			<p class={emptyState}>Enter a search term to find videos.</p>
+			<div class={startCard}>
+				<div>
+					<p class={suggestionLabel}>Try a popular search</p>
+					<div class={suggestionRow}>
+						{suggestedSearches.map((term) => (
+							<a href={`/search?q=${encodeURIComponent(term)}`} class={suggestionChip}>{term}</a>
+						))}
+					</div>
+				</div>
+				<div style="width: 100%;">
+					<p class={suggestionLabel}>Or jump straight in</p>
+					<div class={quickGrid}>
+						{quickDestinations.map((d) => (
+							<a href={d.href} class={quickCard}>
+								<span class={quickTitle}>{d.title}</span>
+								<span class={quickDesc}>{d.description}</span>
+							</a>
+						))}
+					</div>
+				</div>
+			</div>
 		) : feedVideos.length === 0 ? (
-			<p class={emptyState}>No videos matched "{searchQuery}".</p>
+			<div class={startCard}>
+				<p class={emptyState}>No videos matched "{searchQuery}". Try one of these instead:</p>
+				<div class={suggestionRow}>
+					{suggestedSearches.map((term) => (
+						<a href={`/search?q=${encodeURIComponent(term)}`} class={suggestionChip}>{term}</a>
+					))}
+				</div>
+			</div>
 		) : (
 			<>
 				<h2 class={resultsHeader}>{feedVideos.length} result{feedVideos.length === 1 ? "" : "s"} for "{searchQuery}"</h2>

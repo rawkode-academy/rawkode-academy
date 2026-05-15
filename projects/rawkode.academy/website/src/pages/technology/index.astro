@@ -16,6 +16,8 @@ type Technology = {
 	logo?: string;
 	website?: string;
 	documentation?: string;
+	category?: string;
+	cncfStatus?: string;
 };
 
 let technologies: Technology[] = [];
@@ -29,13 +31,56 @@ try {
 			...(logo && { logo }),
 			...(e.data.website && { website: e.data.website }),
 			...(e.data.documentation && { documentation: e.data.documentation }),
+			...(e.data.category && { category: e.data.category }),
+			...(e.data.cncf?.status && { cncfStatus: e.data.cncf.status }),
 		};
 	});
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
 }
 
+technologies.sort((a, b) => a.name.localeCompare(b.name));
+
+const categoryCounts = new Map<string, number>();
+for (const tech of technologies) {
+	const cat = tech.category ?? "Uncategorised";
+	categoryCounts.set(cat, (categoryCounts.get(cat) ?? 0) + 1);
+}
+const categoryEntries = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1]);
+const cncfCount = technologies.filter((t) => t.cncfStatus).length;
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const statsRow = css({
+	display: "grid",
+	gridTemplateColumns: { base: "repeat(3, minmax(0, 1fr))" },
+	gap: "3",
+	mb: "10",
+	maxWidth: "44rem",
+	mx: "auto",
+});
+
+const statBox = css({
+	textAlign: "center",
+	p: "4",
+	borderRadius: "xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const statValue = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+});
+
+const statLabel = css({ mt: "1", fontSize: "xs", color: "fg.muted", fontWeight: "medium", textTransform: "uppercase", letterSpacing: "wider" });
 
 const toolbar = css({
 	display: "flex",
@@ -43,7 +88,43 @@ const toolbar = css({
 	alignItems: { base: "stretch", md: "center" },
 	justifyContent: "space-between",
 	gap: "4",
-	mb: "8",
+	mb: "6",
+});
+
+const filterRow = css({
+	display: "flex",
+	flexWrap: "wrap",
+	gap: "2",
+	mb: "10",
+});
+
+const filterChip = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3.5",
+	py: "1.5",
+	borderRadius: "full",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.surface",
+	color: "fg.secondary",
+	fontSize: "sm",
+	fontWeight: "medium",
+	cursor: "pointer",
+	transition: "all 150ms ease",
+	_hover: { borderColor: "border.default", color: "fg.primary" },
+	"&[aria-pressed='true']": {
+		bg: "bg.brand-subtle",
+		borderColor: "fg.brand",
+		color: "fg.brand",
+	},
+});
+
+const filterChipCount = css({
+	fontSize: "xs",
+	fontWeight: "semibold",
+	opacity: "0.7",
 });
 
 const searchWrap = css({ position: "relative", width: { base: "full", md: "24rem" } });
@@ -83,6 +164,7 @@ const grid = css({
 });
 
 const card = css({
+	position: "relative",
 	display: "flex",
 	flexDirection: "column",
 	overflow: "hidden",
@@ -94,6 +176,34 @@ const card = css({
 	color: "fg.primary",
 	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
 	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+});
+
+const cncfFlag = css({
+	position: "absolute",
+	top: "3",
+	right: "3",
+	display: "inline-flex",
+	alignItems: "center",
+	px: "2",
+	py: "0.5",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const cardCategory = css({
+	fontSize: "xs",
+	color: "fg.muted",
+	fontWeight: "medium",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	overflow: "hidden",
+	textOverflow: "ellipsis",
+	whiteSpace: "nowrap",
 });
 
 const logoWrap = css({
@@ -145,6 +255,21 @@ const hiddenClass = css({ display: "none" });
 	<PageHero eyebrow="Technology Hub" title="Explore Technologies" subtitle="Browse Rawkode Academy's catalogue of tools and platforms. Start typing to find what you're looking for." />
 
 	<div class={shell}>
+		<div class={statsRow}>
+			<div class={statBox}>
+				<p class={statValue}>{technologies.length}</p>
+				<p class={statLabel}>Projects</p>
+			</div>
+			<div class={statBox}>
+				<p class={statValue}>{categoryEntries.length}</p>
+				<p class={statLabel}>Categories</p>
+			</div>
+			<div class={statBox}>
+				<p class={statValue}>{cncfCount}</p>
+				<p class={statLabel}>CNCF</p>
+			</div>
+		</div>
+
 		<div class={toolbar}>
 			<p class={countText}>
 				Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies
@@ -157,15 +282,32 @@ const hiddenClass = css({ display: "none" });
 			</div>
 		</div>
 
+		<div class={filterRow}>
+			<button type="button" class={filterChip} data-filter="all" aria-pressed="true">
+				All <span class={filterChipCount}>{technologies.length}</span>
+			</button>
+			<button type="button" class={filterChip} data-filter="__cncf">
+				CNCF <span class={filterChipCount}>{cncfCount}</span>
+			</button>
+			{categoryEntries.map(([cat, count]) => (
+				<button type="button" class={filterChip} data-filter={cat} aria-pressed="false">
+					{cat} <span class={filterChipCount}>{count}</span>
+				</button>
+			))}
+		</div>
+
 		<div id="technologies" class={grid}>
 			{technologies.map((tech) => {
 				const searchKeywords = tech.name.toLowerCase();
+				const category = tech.category ?? "Uncategorised";
 				return (
-					<a href={`/technology/${tech.id}`} class={`${card} tech-card-link`} data-keywords={searchKeywords}>
+					<a href={`/technology/${tech.id}`} class={`${card} tech-card-link`} data-keywords={searchKeywords} data-category={category} data-cncf={tech.cncfStatus ? "1" : "0"}>
+						{tech.cncfStatus && <span class={cncfFlag}>{tech.cncfStatus}</span>}
 						<div class={logoWrap}>
 							<img src={tech.logo ?? "/apple-touch-icon.png"} alt={`${tech.name} logo`} onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`} />
 						</div>
 						<div class={cardBody}>
+							{tech.category && <span class={cardCategory}>{tech.category}</span>}
 							<h3 class={techName}>{tech.name}</h3>
 							<span class={learnMore}>
 								Learn more
@@ -188,13 +330,25 @@ const hiddenClass = css({ display: "none" });
 			const cards = Array.from(document.querySelectorAll<HTMLElement>("#technologies .tech-card-link"));
 			const emptyState = document.getElementById("technology-empty-state");
 			const countTargets = document.querySelectorAll<HTMLElement>("[data-tech-visible-count]");
+			const filterButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-filter]"));
 
-			const applySearch = () => {
+			let activeFilter = "all";
+
+			const applyFilters = () => {
 				const query = (searchInput?.value ?? "").trim().toLowerCase();
 				let visible = 0;
 				cards.forEach((card) => {
 					const keywords = card.dataset.keywords ?? "";
-					const matches = keywords.includes(query);
+					const category = card.dataset.category ?? "";
+					const isCncf = card.dataset.cncf === "1";
+					const matchesSearch = keywords.includes(query);
+					const matchesFilter =
+						activeFilter === "all"
+							? true
+							: activeFilter === "__cncf"
+								? isCncf
+								: category === activeFilter;
+					const matches = matchesSearch && matchesFilter;
 					card.style.display = matches ? "" : "none";
 					if (matches) visible += 1;
 				});
@@ -202,8 +356,16 @@ const hiddenClass = css({ display: "none" });
 				if (emptyState) emptyState.style.display = visible === 0 ? "block" : "none";
 			};
 
-			searchInput?.addEventListener("input", applySearch);
-			applySearch();
+			filterButtons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					activeFilter = btn.dataset.filter ?? "all";
+					filterButtons.forEach((b) => b.setAttribute("aria-pressed", b === btn ? "true" : "false"));
+					applyFilters();
+				});
+			});
+
+			searchInput?.addEventListener("input", applyFilters);
+			applyFilters();
 		});
 	</script>
 </Page>

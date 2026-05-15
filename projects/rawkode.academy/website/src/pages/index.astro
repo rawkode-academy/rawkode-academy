@@ -8,10 +8,10 @@ import { css } from "../../styled-system/css";
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
 const latestArticles = allArticles
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-	.slice(0, 6);
+	.slice(0, 4);
 
 const allVideos = await getPublishedVideos();
-const latestVideos = allVideos.slice(0, 6);
+const latestVideos = allVideos.slice(0, 4);
 
 const allNews = await getCollection("news");
 const latestNews = allNews
@@ -22,6 +22,22 @@ const allLearningPaths = await getCollection("learningPaths");
 const latestLearningPaths = allLearningPaths
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4);
+
+const allTechnologies = await getCollection("technologies");
+const technologyNameById = new Map<string, string>();
+for (const technology of allTechnologies) {
+	const rawId = technology.id.replace(/\/index$/, "");
+	technologyNameById.set(rawId, technology.data.name);
+}
+function formatTechnologyLabel(value: string): string {
+	const fromCollection = technologyNameById.get(value);
+	if (fromCollection) return fromCollection;
+	return value
+		.split(/[-/]/g)
+		.filter(Boolean)
+		.map((s) => (s.length <= 3 ? s.toUpperCase() : `${s.charAt(0).toUpperCase()}${s.slice(1)}`))
+		.join(" ");
+}
 
 const allCourses = await getCollection("courses");
 const totalContent = allVideos.length + allArticles.length + allCourses.length;
@@ -34,7 +50,7 @@ const totalHours = Math.floor(totalSeconds / 3600);
 const stats = [
 	{ value: `${totalContent}+`, label: "Resources" },
 	{ value: `${totalHours}+`, label: "Hours of video" },
-	{ value: "30K+", label: "Learners" },
+	{ value: "30K+", label: "Engineers learning" },
 ];
 
 const formatDate = (date: Date) =>
@@ -57,6 +73,43 @@ const fmtPathDuration = (m: number) => {
 	return !h ? `${r}m` : !r ? `${h}h` : `${h}h ${r}m`;
 };
 
+const fmtVideoDuration = (seconds: number | undefined | null): string | null => {
+	if (!seconds || typeof seconds !== "number" || seconds <= 0) return null;
+	const m = Math.floor(seconds / 60);
+	const s = Math.floor(seconds % 60);
+	const h = Math.floor(m / 60);
+	const mm = m % 60;
+	if (h > 0) return `${h}:${mm.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+	return `${mm}:${s.toString().padStart(2, "0")}`;
+};
+
+const principles = [
+	{
+		title: "Authenticity",
+		body: "We show the trade-offs and the rough edges, not just the happy path. Real engineering is messy.",
+	},
+	{
+		title: "Organic curriculum",
+		body: "Lessons grow from the problems we actually hit in production — never from a marketing brief.",
+	},
+	{
+		title: "Embrace failure",
+		body: "Misconfigured clusters and broken builds stay in the cut. The recovery is the lesson.",
+	},
+	{
+		title: "Hands-on",
+		body: "Terminals over slideware. If you can't run it, you don't understand it.",
+	},
+	{
+		title: "Forward thinking",
+		body: "We test new tools early so you don't have to. Some make it. Most don't. We tell you why.",
+	},
+	{
+		title: "Vendor-neutral",
+		body: "Open and closed source get the same scrutiny. We answer to engineers, not roadmaps.",
+	},
+];
+
 const pageTitle = "Cloud Native & Kubernetes Education | Rawkode Academy";
 const pageDescription =
 	"Master Cloud Native technologies and Kubernetes with Rawkode Academy's expert-led courses, articles, and live streams.";
@@ -71,13 +124,33 @@ const heroWrap = css({
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	px: { base: "6", md: "12", lg: "16" },
-	py: { base: "12", md: "16", lg: "20" },
+	py: { base: "14", md: "20", lg: "24" },
 	backgroundImage:
-		"radial-gradient(circle at 15% 20%, token(colors.brand.500)/15, transparent 45%), radial-gradient(circle at 85% 30%, token(colors.cyan.500)/15, transparent 45%)",
+		"radial-gradient(circle at 12% 15%, token(colors.brand.500)/15, transparent 50%), radial-gradient(circle at 88% 25%, token(colors.cyan.500)/15, transparent 50%)",
 	_dark: {
 		backgroundImage:
-			"radial-gradient(circle at 15% 20%, token(colors.brand.500)/25, transparent 45%), radial-gradient(circle at 85% 30%, token(colors.cyan.500)/20, transparent 45%)",
+			"radial-gradient(circle at 12% 15%, token(colors.brand.500)/28, transparent 50%), radial-gradient(circle at 88% 25%, token(colors.cyan.500)/22, transparent 50%)",
 	},
+});
+
+const heroGrid = css({
+	position: "relative",
+	zIndex: "1",
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) auto" },
+	alignItems: "end",
+	gap: { base: "8", lg: "12" },
+});
+
+const heroPattern = css({
+	position: "absolute",
+	inset: "0",
+	pointerEvents: "none",
+	opacity: { base: "0.4", _dark: "0.5" },
+	backgroundImage:
+		"linear-gradient(to right, token(colors.border.muted) 1px, transparent 1px), linear-gradient(to bottom, token(colors.border.muted) 1px, transparent 1px)",
+	backgroundSize: "56px 56px",
+	maskImage: "radial-gradient(ellipse 80% 60% at 50% 40%, black 30%, transparent 75%)",
 });
 
 const eyebrow = css({
@@ -97,14 +170,14 @@ const eyebrow = css({
 
 const heroTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "4xl", md: "5xl", lg: "6xl" },
+	fontSize: { base: "4xl", md: "6xl", lg: "7xl" },
 	fontWeight: "bold",
-	lineHeight: "1.05",
+	lineHeight: "1.02",
 	letterSpacing: "tight",
 	color: "fg.primary",
 	textWrap: "balance",
 	mt: "5",
-	maxWidth: "44rem",
+	maxWidth: "46rem",
 });
 
 const heroTitleAccent = css({
@@ -115,11 +188,11 @@ const heroTitleAccent = css({
 });
 
 const heroSubtitle = css({
-	mt: "5",
+	mt: "6",
 	fontSize: { base: "lg", md: "xl" },
 	color: "fg.secondary",
-	lineHeight: "1.6",
-	maxWidth: "42rem",
+	lineHeight: "1.55",
+	maxWidth: "40rem",
 	textWrap: "pretty",
 });
 
@@ -161,30 +234,89 @@ const buttonOutline = css({
 	borderWidth: "1px",
 	borderColor: "border.default",
 	textDecoration: "none",
-	transition: "background 150ms ease",
-	_hover: { bg: "bg.sunken" },
+	transition: "background 150ms ease, border-color 150ms ease",
+	_hover: { bg: "bg.sunken", borderColor: "fg.brand" },
 });
 
-const statsRow = css({
-	mt: "10",
-	display: "flex",
-	flexWrap: "wrap",
-	gap: { base: "6", md: "10" },
+const heroStatsCard = css({
+	display: { base: "none", lg: "flex" },
+	flexDirection: "column",
+	gap: "5",
+	p: "8",
+	borderRadius: "2xl",
+	bg: "bg.surface/80",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	backdropFilter: "blur(8px)",
+	minWidth: "16rem",
 });
-const statItem = css({ display: "flex", flexDirection: "column", gap: "1" });
-const statValue = css({
-	fontFamily: "display",
-	fontSize: "3xl",
-	fontWeight: "bold",
-	color: "fg.primary",
-});
-const statLabel = css({ fontSize: "sm", color: "fg.muted" });
 
-const sectionsWrap = css({
-	mt: "16",
+const heroStatItem = css({
 	display: "flex",
 	flexDirection: "column",
-	gap: { base: "16", md: "20" },
+	gap: "0.5",
+	pb: "5",
+	borderBottomWidth: "1px",
+	borderBottomColor: "border.muted",
+	_last: { pb: "0", borderBottomWidth: "0" },
+});
+
+const heroStatValue = css({
+	fontFamily: "display",
+	fontSize: "4xl",
+	fontWeight: "bold",
+	color: "fg.primary",
+	lineHeight: "1",
+	letterSpacing: "tight",
+	"& span": {
+		backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+		WebkitBackgroundClip: "text",
+		backgroundClip: "text",
+		color: "transparent",
+	},
+});
+
+const heroStatLabel = css({
+	mt: "1",
+	fontSize: "sm",
+	color: "fg.muted",
+	textTransform: "uppercase",
+	letterSpacing: "wider",
+	fontWeight: "semibold",
+});
+
+const statsRowMobile = css({
+	display: { base: "grid", lg: "none" },
+	gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+	gap: "4",
+	mt: "10",
+	pt: "8",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const statMobileValue = css({
+	fontFamily: "display",
+	fontSize: { base: "2xl", md: "3xl" },
+	fontWeight: "bold",
+	color: "fg.primary",
+	lineHeight: "1.1",
+});
+
+const statMobileLabel = css({
+	mt: "1",
+	fontSize: "xs",
+	color: "fg.muted",
+	textTransform: "uppercase",
+	letterSpacing: "wider",
+	fontWeight: "semibold",
+});
+
+const sectionsWrap = css({
+	mt: { base: "16", md: "24" },
+	display: "flex",
+	flexDirection: "column",
+	gap: { base: "20", md: "28" },
 	maxWidth: "80rem",
 	mx: "auto",
 	px: { base: "4", md: "0" },
@@ -231,8 +363,8 @@ const sectionLink = css({
 	fontWeight: "semibold",
 	color: "fg.brand",
 	textDecoration: "none",
-	transition: "transform 150ms ease",
-	_hover: { transform: "translateX(2px)" },
+	transition: "gap 150ms ease",
+	_hover: { gap: "3" },
 });
 
 const grid4 = css({
@@ -247,6 +379,7 @@ const grid3 = css({
 });
 
 const cardLink = css({
+	position: "relative",
 	display: "flex",
 	flexDirection: "column",
 	gap: "3",
@@ -258,11 +391,30 @@ const cardLink = css({
 	bg: "bg.raised",
 	textDecoration: "none",
 	color: "fg.primary",
+	overflow: "hidden",
 	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_before: {
+		content: '""',
+		position: "absolute",
+		inset: "0",
+		borderRadius: "2xl",
+		padding: "1px",
+		background: "linear-gradient(135deg, token(colors.brand.500)/0, token(colors.cyan.500)/0)",
+		WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+		WebkitMaskComposite: "xor",
+		maskComposite: "exclude",
+		pointerEvents: "none",
+		opacity: "0",
+		transition: "opacity 200ms ease, background 200ms ease",
+	},
 	_hover: {
 		transform: "translateY(-2px)",
 		boxShadow: "lg",
-		borderColor: "border.default",
+		borderColor: "transparent",
+		_before: {
+			opacity: "1",
+			background: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+		},
 	},
 });
 
@@ -285,11 +437,16 @@ const cardDivider = css({
 	bg: "border.default",
 });
 
+const cardTag = css({
+	color: "fg.brand",
+});
+
 const cardTitle = css({
 	fontSize: "lg",
 	fontWeight: "semibold",
-	lineHeight: "tight",
+	lineHeight: "1.25",
 	color: "fg.primary",
+	letterSpacing: "tight",
 	transition: "color 150ms ease",
 	"a:hover &": { color: "fg.brand" },
 });
@@ -305,63 +462,232 @@ const cardBody = css({
 });
 
 const featuredGrid = css({
+	position: "relative",
 	display: "grid",
-	gridTemplateColumns: { base: "1fr", md: "20rem 1fr" },
-	alignItems: "center",
-	gap: "8",
-	p: { base: "5", md: "6" },
-	borderRadius: "2xl",
+	gridTemplateColumns: { base: "1fr", md: "minmax(0, 1.05fr) minmax(0, 1fr)" },
+	alignItems: "stretch",
+	gap: { base: "5", md: "8" },
+	p: { base: "5", md: "7" },
+	borderRadius: "3xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
 	textDecoration: "none",
 	color: "fg.primary",
-	transition: "transform 200ms ease, box-shadow 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+	overflow: "hidden",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: {
+		transform: "translateY(-2px)",
+		boxShadow: "xl",
+		borderColor: "fg.brand",
+	},
+});
+
+const featuredBody = css({
+	display: "flex",
+	flexDirection: "column",
+	gap: "4",
+	justifyContent: "center",
+	py: { md: "4" },
 });
 
 const featuredMedia = css({
 	position: "relative",
 	aspectRatio: "16 / 10",
 	overflow: "hidden",
-	borderRadius: "xl",
+	borderRadius: "2xl",
 	bg: "bg.sunken",
-	"& img": { width: "full", height: "full", objectFit: "cover" },
+	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
+	"a:hover &": { "& img": { transform: "scale(1.03)" } },
+});
+
+const featuredBadge = css({
+	position: "absolute",
+	top: "3",
+	left: "3",
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1.5",
+	borderRadius: "full",
+	bg: "bg.canvas/85",
+	color: "fg.primary",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	backdropFilter: "blur(8px)",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+});
+
+const playIcon = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "4",
+	h: "4",
+	color: "fg.brand",
+});
+
+const durationPill = css({
+	position: "absolute",
+	bottom: "3",
+	right: "3",
+	px: "2.5",
+	py: "1",
+	borderRadius: "md",
+	bg: "rgba(0,0,0,0.75)",
+	color: "white",
+	fontSize: "xs",
+	fontFamily: "mono",
+	fontWeight: "semibold",
 });
 
 const featuredTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "2xl", md: "3xl" },
+	fontSize: { base: "2xl", md: "3xl", lg: "4xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
-	lineHeight: "1.1",
+	lineHeight: "1.05",
 	color: "fg.primary",
 	textWrap: "balance",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
+});
+
+const featuredDesc = css({
+	fontSize: { base: "sm", md: "md" },
+	color: "fg.secondary",
+	lineHeight: "1.6",
+	display: "-webkit-box",
+	WebkitLineClamp: "3",
+	WebkitBoxOrient: "vertical",
+	overflow: "hidden",
+});
+
+const principlesSection = css({
+	position: "relative",
+	overflow: "hidden",
+	borderRadius: "3xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	px: { base: "6", md: "10", lg: "14" },
+	py: { base: "12", md: "16" },
+});
+
+const principlesHeader = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "minmax(0,1fr) minmax(0,1fr)" },
+	gap: { base: "4", md: "12" },
+	alignItems: "end",
+	mb: "12",
+});
+
+const principlesGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
+	gap: { base: "5", md: "8" },
+});
+
+const principleItem = css({
+	position: "relative",
+	pl: "10",
+});
+
+const principleNumber = css({
+	position: "absolute",
+	left: "0",
+	top: "0",
+	fontFamily: "display",
+	fontSize: "sm",
+	fontWeight: "bold",
+	color: "fg.brand",
+	letterSpacing: "wider",
+	"&::after": {
+		content: '""',
+		display: "block",
+		mt: "1.5",
+		width: "6",
+		height: "1px",
+		bg: "fg.brand",
+	},
+});
+
+const principleTitle = css({
+	fontFamily: "display",
+	fontSize: "lg",
+	fontWeight: "semibold",
+	letterSpacing: "tight",
+	color: "fg.primary",
+	mb: "2",
+});
+
+const principleBody = css({
+	fontSize: "sm",
+	color: "fg.secondary",
+	lineHeight: "1.6",
 });
 
 const ctaCard = css({
-	mt: "16",
-	mx: { base: "4", md: "auto" },
-	maxWidth: "60rem",
-	p: { base: "8", md: "12" },
+	position: "relative",
+	overflow: "hidden",
+	mx: { base: "0", md: "auto" },
+	maxWidth: "70rem",
+	p: { base: "10", md: "16" },
 	borderRadius: "3xl",
 	textAlign: "center",
 	color: "white",
-	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
-	boxShadow: "xl",
+	backgroundImage:
+		"linear-gradient(135deg, token(colors.brand.600) 0%, token(colors.brand.500) 45%, token(colors.cyan.500) 100%)",
+	boxShadow: "2xl",
 });
+
+const ctaPattern = css({
+	position: "absolute",
+	inset: "0",
+	opacity: "0.25",
+	backgroundImage:
+		"radial-gradient(circle at 20% 20%, white 1px, transparent 1px), radial-gradient(circle at 70% 70%, white 1px, transparent 1px)",
+	backgroundSize: "40px 40px, 60px 60px",
+	pointerEvents: "none",
+});
+
+const ctaInner = css({ position: "relative", zIndex: "1" });
+
+const ctaEyebrow = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	bg: "rgba(255,255,255,0.18)",
+	color: "white",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	mb: "6",
+});
+
 const ctaTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "2xl", md: "3xl" },
+	fontSize: { base: "3xl", md: "5xl" },
 	fontWeight: "bold",
 	textWrap: "balance",
+	letterSpacing: "tight",
+	lineHeight: "1.05",
 });
 const ctaSubtitle = css({
-	mt: "3",
+	mt: "5",
 	fontSize: { base: "md", md: "lg" },
 	opacity: "0.92",
-	maxWidth: "40rem",
+	maxWidth: "44rem",
 	mx: "auto",
+	lineHeight: "1.6",
 });
 const ctaActions = css({
 	mt: "8",
@@ -374,45 +700,78 @@ const ctaButton = css({
 	display: "inline-flex",
 	alignItems: "center",
 	gap: "2",
-	px: "6",
-	py: "3",
+	px: "7",
+	py: "3.5",
 	borderRadius: "lg",
 	fontWeight: "semibold",
 	fontSize: "md",
-	color: "fg.primary",
+	color: "brand.700",
 	bg: "white",
 	textDecoration: "none",
-	transition: "transform 150ms ease",
-	_hover: { transform: "translateY(-1px)" },
+	boxShadow: "md",
+	transition: "transform 150ms ease, box-shadow 150ms ease",
+	_hover: { transform: "translateY(-1px)", boxShadow: "lg" },
+});
+const ctaButtonGhost = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+	px: "7",
+	py: "3.5",
+	borderRadius: "lg",
+	fontWeight: "semibold",
+	fontSize: "md",
+	color: "white",
+	bg: "rgba(255,255,255,0.12)",
+	borderWidth: "1px",
+	borderColor: "rgba(255,255,255,0.35)",
+	textDecoration: "none",
+	transition: "background 150ms ease",
+	_hover: { bg: "rgba(255,255,255,0.2)" },
 });
 
 const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>`;
+const playSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const sparkleSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.4L21 11l-6.6 2.6L12 20l-2.4-6.4L3 11l6.6-2.6L12 2z"/></svg>`;
 ---
 
 <Page title={pageTitle} description={pageDescription}>
 	<section class={heroWrap}>
-		<span class={eyebrow}>Rawkode Academy</span>
-		<h1 class={heroTitle}>
-			<span class={heroTitleAccent}>Cloud Native</span> education<br />
-			that respects your time.
-		</h1>
-		<p class={heroSubtitle}>
-			Tutorials, articles, learning paths, and live builds from real production engineering. No fluff, no sponsored-only content — just the work.
-		</p>
-		<div class={heroActions}>
-			<a href="/watch" class={buttonSolid}>
-				Start Watching Free
-				<Fragment set:html={arrowIcon} />
-			</a>
-			<a href="/learning-paths" class={buttonOutline}>Explore Learning Paths</a>
-		</div>
-		<div class={statsRow}>
-			{stats.map((s) => (
-				<div class={statItem}>
-					<span class={statValue}>{s.value}</span>
-					<span class={statLabel}>{s.label}</span>
+		<div class={heroPattern}></div>
+		<div class={heroGrid}>
+			<div>
+				<span class={eyebrow}><Fragment set:html={sparkleSvg} /> Rawkode Academy</span>
+				<h1 class={heroTitle}>
+					<span class={heroTitleAccent}>Cloud Native</span> education<br />
+					that respects your time.
+				</h1>
+				<p class={heroSubtitle}>
+					Tutorials, articles, learning paths, and live builds from real production engineering. No fluff, no sponsored-only content — just the work.
+				</p>
+				<div class={heroActions}>
+					<a href="/watch" class={buttonSolid}>
+						Start watching free
+						<Fragment set:html={arrowIcon} />
+					</a>
+					<a href="/learning-paths" class={buttonOutline}>Explore learning paths</a>
 				</div>
-			))}
+				<div class={statsRowMobile}>
+					{stats.map((s) => (
+						<div>
+							<div class={statMobileValue}>{s.value}</div>
+							<div class={statMobileLabel}>{s.label}</div>
+						</div>
+					))}
+				</div>
+			</div>
+			<aside class={heroStatsCard}>
+				{stats.map((s) => (
+					<div class={heroStatItem}>
+						<div class={heroStatValue}><span>{s.value}</span></div>
+						<div class={heroStatLabel}>{s.label}</div>
+					</div>
+				))}
+			</aside>
 		</div>
 	</section>
 
@@ -431,15 +790,24 @@ const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 					</a>
 				</header>
 				<div class={grid4}>
-					{latestNews.map((item) => (
-						<a href={`/news/${item.id}`} class={cardLink}>
-							<div class={cardMeta}>
-								<span>{formatDate(item.data.publishedAt)}</span>
-							</div>
-							<h3 class={cardTitle}>{item.data.title}</h3>
-							<p class={cardBody}>{compact(item.data.description, 140)}</p>
-						</a>
-					))}
+					{latestNews.map((item) => {
+						const topTech = item.data.technologies?.[0];
+						return (
+							<a href={`/news/${item.id}`} class={cardLink}>
+								<div class={cardMeta}>
+									<time datetime={item.data.publishedAt.toISOString()}>{formatDate(item.data.publishedAt)}</time>
+									{topTech && (
+										<>
+											<span class={cardDivider}></span>
+											<span class={cardTag}>{formatTechnologyLabel(topTech)}</span>
+										</>
+									)}
+								</div>
+								<h3 class={cardTitle}>{item.data.title}</h3>
+								<p class={cardBody}>{compact(item.data.description, 140)}</p>
+							</a>
+						);
+					})}
 				</div>
 			</section>
 		)}
@@ -461,7 +829,7 @@ const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 					{latestLearningPaths.map((path) => (
 						<a href={`/learning-paths/${path.id}`} class={cardLink}>
 							<div class={cardMeta}>
-								<span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
+								<span class={cardTag}>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
 								<span class={cardDivider}></span>
 								<span>{fmtPathDuration(path.data.estimatedDuration)}</span>
 							</div>
@@ -494,13 +862,20 @@ const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 								alt={latestVideos[0].data.title}
 								loading="lazy"
 							/>
+							<span class={featuredBadge}>
+								<span class={playIcon}><Fragment set:html={playSvg} /></span>
+								Featured
+							</span>
+							{fmtVideoDuration(latestVideos[0].data.duration as number | undefined) && (
+								<span class={durationPill}>{fmtVideoDuration(latestVideos[0].data.duration as number | undefined)}</span>
+							)}
 						</div>
-						<div style="display: flex; flex-direction: column; gap: 0.75rem;">
+						<div class={featuredBody}>
 							<div class={cardMeta}>
-								<span>{formatDate(latestVideos[0].data.publishedAt as Date)}</span>
+								<time datetime={(latestVideos[0].data.publishedAt as Date).toISOString()}>{formatDate(latestVideos[0].data.publishedAt as Date)}</time>
 							</div>
 							<h3 class={featuredTitle}>{latestVideos[0].data.title}</h3>
-							<p class={cardBody}>{compact(latestVideos[0].data.subtitle || latestVideos[0].data.description, 200)}</p>
+							<p class={featuredDesc}>{compact(latestVideos[0].data.subtitle || latestVideos[0].data.description, 220)}</p>
 						</div>
 					</a>
 				)}
@@ -508,7 +883,13 @@ const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 					{latestVideos.slice(1, 4).map((video) => (
 						<a href={`/watch/${video.data.slug}`} class={cardLink}>
 							<div class={cardMeta}>
-								<span>{formatDate(video.data.publishedAt as Date)}</span>
+								<time datetime={(video.data.publishedAt as Date).toISOString()}>{formatDate(video.data.publishedAt as Date)}</time>
+								{fmtVideoDuration(video.data.duration as number | undefined) && (
+									<>
+										<span class={cardDivider}></span>
+										<span>{fmtVideoDuration(video.data.duration as number | undefined)}</span>
+									</>
+								)}
 							</div>
 							<h3 class={cardTitle}>{video.data.title}</h3>
 							<p class={cardBody}>{compact(video.data.subtitle || video.data.description, 140)}</p>
@@ -532,34 +913,35 @@ const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 					</a>
 				</header>
 				{latestArticles[0] && (
-					<a href={`/read/${latestArticles[0].id}`} class={featuredGrid} style="grid-template-columns: 1fr 20rem;">
-						<div style="display: flex; flex-direction: column; gap: 0.75rem;">
-							<div class={cardMeta}>
-								<span>{formatDate(latestArticles[0].data.publishedAt)}</span>
-							</div>
-							<h3 class={featuredTitle}>{latestArticles[0].data.title}</h3>
-							<p class={cardBody}>{compact(latestArticles[0].data.description, 200)}</p>
-						</div>
+					<a href={`/read/${latestArticles[0].id}`} class={featuredGrid}>
 						{latestArticles[0].data.cover ? (
 							<div class={featuredMedia}>
 								<Image
 									src={latestArticles[0].data.cover.image}
 									alt={latestArticles[0].data.cover.alt || latestArticles[0].data.title}
-									width={640}
-									height={400}
+									width={800}
+									height={500}
 									loading="lazy"
 								/>
+								<span class={featuredBadge}>Featured</span>
 							</div>
 						) : (
 							<div class={featuredMedia}></div>
 						)}
+						<div class={featuredBody}>
+							<div class={cardMeta}>
+								<time datetime={latestArticles[0].data.publishedAt.toISOString()}>{formatDate(latestArticles[0].data.publishedAt)}</time>
+							</div>
+							<h3 class={featuredTitle}>{latestArticles[0].data.title}</h3>
+							<p class={featuredDesc}>{compact(latestArticles[0].data.description, 220)}</p>
+						</div>
 					</a>
 				)}
 				<div class={grid3} style="margin-top: 1rem;">
 					{latestArticles.slice(1, 4).map((article) => (
 						<a href={`/read/${article.id}`} class={cardLink}>
 							<div class={cardMeta}>
-								<span>{formatDate(article.data.publishedAt)}</span>
+								<time datetime={article.data.publishedAt.toISOString()}>{formatDate(article.data.publishedAt)}</time>
 							</div>
 							<h3 class={cardTitle}>{article.data.title}</h3>
 							<p class={cardBody}>{compact(article.data.description, 140)}</p>
@@ -569,14 +951,40 @@ const arrowIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" s
 			</section>
 		)}
 
+		<section class={principlesSection}>
+			<div class={principlesHeader}>
+				<div>
+					<span class={sectionEyebrow}>How we teach</span>
+					<h2 class={sectionTitle}>Six principles, no compromises</h2>
+				</div>
+				<p class={sectionSubtitle} style="margin-top: 0;">
+					This is what every video, article, and learning path is measured against. If it doesn't land here, it doesn't ship.
+				</p>
+			</div>
+			<div class={principlesGrid}>
+				{principles.map((p, i) => (
+					<div class={principleItem}>
+						<span class={principleNumber}>{(i + 1).toString().padStart(2, "0")}</span>
+						<h3 class={principleTitle}>{p.title}</h3>
+						<p class={principleBody}>{p.body}</p>
+					</div>
+				))}
+			</div>
+		</section>
+
 		<section class={ctaCard}>
-			<h2 class={ctaTitle}>Get weekly Cloud Native insights</h2>
-			<p class={ctaSubtitle}>Tutorials, deep dives, and curated events — straight to your inbox. No spam, unsubscribe anytime.</p>
-			<div class={ctaActions}>
-				<a href="/feeds" class={ctaButton}>
-					Browse feeds
-					<Fragment set:html={arrowIcon} />
-				</a>
+			<div class={ctaPattern}></div>
+			<div class={ctaInner}>
+				<span class={ctaEyebrow}><Fragment set:html={sparkleSvg} /> Weekly digest</span>
+				<h2 class={ctaTitle}>Cloud Native, delivered weekly</h2>
+				<p class={ctaSubtitle}>Tutorials, deep dives, and curated events — straight to your inbox. No spam, unsubscribe anytime.</p>
+				<div class={ctaActions}>
+					<a href="/feeds" class={ctaButton}>
+						Subscribe to feeds
+						<Fragment set:html={arrowIcon} />
+					</a>
+					<a href="/news" class={ctaButtonGhost}>Read the news</a>
+				</div>
 			</div>
 		</section>
 	</div>

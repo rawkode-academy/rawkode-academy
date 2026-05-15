@@ -19,7 +19,108 @@ const features = [
 	"Ongoing learning support after the workshop",
 ];
 
+const formats = [
+	{ name: "On-site Workshop", capacity: "Up to 20 engineers", description: "In-person training at your offices. The deepest format for tight-knit teams who want to learn together.", icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" },
+	{ name: "Virtual Live", capacity: "Up to 15 engineers", featured: true, description: "Distributed teams learn together over video. Live exercises, shared labs, real-time Q&A.", icon: "M15 10l4.553-2.276A1 1 0 0 1 21 8.618v6.764a1 1 0 0 1-1.447.894L15 14M5 18h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z" },
+	{ name: "Custom Programme", capacity: "Flexible", description: "Multi-week curricula built for platform teams adopting a new technology stack or organisational pattern.", icon: "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" },
+];
+
+const process = [
+	{ step: "01", title: "Assessment", description: "We map the team's current skill level and the gap you want to close — through interviews and short skills surveys." },
+	{ step: "02", title: "Customisation", description: "Curriculum tailored to your stack, your problem domain, and the production scenarios your engineers actually face." },
+	{ step: "03", title: "Delivery", description: "Hands-on workshops with real clusters and real problems. No slideware-only sessions." },
+	{ step: "04", title: "Follow-up", description: "Office hours, async support, and a 30-day check-in to make sure the material sticks." },
+];
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
+
+const sectionLabel = css({ fontSize: "xs", fontWeight: "bold", letterSpacing: "wider", textTransform: "uppercase", color: "fg.brand", textAlign: "center", mb: "3" });
+
+const formatGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+	gap: "5",
+	mb: "16",
+});
+
+const formatCard = css({
+	position: "relative",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+});
+
+const formatFeatured = css({
+	borderColor: "fg.brand",
+	boxShadow: "0 0 0 1px var(--colors-fg-brand)",
+});
+
+const formatBadge = css({
+	position: "absolute",
+	top: "-3",
+	right: "5",
+	px: "2.5",
+	py: "0.5",
+	borderRadius: "full",
+	bg: "bg.brand",
+	color: "fg.on-brand",
+	fontSize: "2xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+});
+
+const formatIcon = css({
+	display: "inline-flex",
+	alignItems: "center",
+	justifyContent: "center",
+	w: "12",
+	h: "12",
+	borderRadius: "xl",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
+});
+
+const formatName = css({ fontFamily: "display", fontSize: "xl", fontWeight: "bold", color: "fg.primary" });
+const formatCapacity = css({ fontSize: "xs", color: "fg.muted", fontWeight: "semibold", textTransform: "uppercase", letterSpacing: "wider" });
+const formatDesc = css({ color: "fg.secondary", lineHeight: "1.6" });
+
+const processGrid = css({
+	display: "grid",
+	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+	gap: "4",
+});
+
+const processCard = css({
+	p: "6",
+	borderRadius: "2xl",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	bg: "bg.raised",
+	display: "flex",
+	flexDirection: "column",
+	gap: "3",
+});
+
+const processStep = css({
+	fontFamily: "display",
+	fontSize: "3xl",
+	fontWeight: "bold",
+	letterSpacing: "tight",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+	WebkitBackgroundClip: "text",
+	backgroundClip: "text",
+	color: "transparent",
+	lineHeight: "1",
+});
+
+const processTitle = css({ fontFamily: "display", fontSize: "lg", fontWeight: "bold", color: "fg.primary" });
+const processDesc = css({ fontSize: "sm", color: "fg.secondary", lineHeight: "1.6" });
 
 const grid = css({
 	display: "grid",
@@ -123,6 +224,24 @@ const ctaBtn = css({
 	<PageHero eyebrow="Training" title="Hands-On Team Training" subtitle="Cloud native training programmes for engineering teams — real clusters, real production scenarios, real outcomes." />
 
 	<div class={shell}>
+		<p class={sectionLabel}>Delivery formats</p>
+		<h2 class={sectionTitle}>Train however your team learns best</h2>
+		<div class={formatGrid}>
+			{formats.map((f) => (
+				<div class={`${formatCard} ${f.featured ? formatFeatured : ""}`}>
+					{f.featured && <span class={formatBadge}>Most flexible</span>}
+					<span class={formatIcon}>
+						<svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={f.icon} /></svg>
+					</span>
+					<h3 class={formatName}>{f.name}</h3>
+					<span class={formatCapacity}>{f.capacity}</span>
+					<p class={formatDesc}>{f.description}</p>
+				</div>
+			))}
+		</div>
+
+		<p class={sectionLabel}>Available programmes</p>
+		<h2 class={sectionTitle}>Topics we teach today</h2>
 		<div class={grid}>
 			{programmes.map((p) => (
 				<div class={card}>
@@ -132,6 +251,19 @@ const ctaBtn = css({
 				</div>
 			))}
 		</div>
+
+		<section class={sectionBlock}>
+			<h2 class={sectionTitle}>How a programme runs</h2>
+			<div class={processGrid}>
+				{process.map((p) => (
+					<div class={processCard}>
+						<span class={processStep}>{p.step}</span>
+						<h3 class={processTitle}>{p.title}</h3>
+						<p class={processDesc}>{p.description}</p>
+					</div>
+				))}
+			</div>
+		</section>
 
 		<section class={sectionBlock}>
 			<h2 class={sectionTitle}>What every programme includes</h2>

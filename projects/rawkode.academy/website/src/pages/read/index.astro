@@ -4,6 +4,7 @@ import { getCollection, getEntries } from "astro:content";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
 import PageHero from "@/components/layout/PageHero.astro";
 import Page from "@/wrappers/page.astro";
+import { calculateReadingTime } from "@/utils/reading-time";
 import { css } from "../../../styled-system/css";
 
 export const prerender = true;
@@ -12,9 +13,19 @@ const allArticles = (await getCollection("articles", ({ data }) => !data.draft))
 	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
 
-const featured = allArticles[0];
-const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
-const remaining = allArticles.slice(1);
+type ArticleEntry = (typeof allArticles)[number];
+
+const decorate = async (article: ArticleEntry) => {
+	const authors = await getEntries(article.data.authors);
+	return {
+		article,
+		authors,
+		reading: calculateReadingTime(article.body || ""),
+	};
+};
+
+const featured = allArticles[0] ? await decorate(allArticles[0]) : null;
+const remaining = await Promise.all(allArticles.slice(1).map(decorate));
 
 const pageTitle = "Cloud Native & Kubernetes Articles | Rawkode Academy";
 const pageDescription = "Deep dives into cloud native technologies, Kubernetes, and observability.";
@@ -22,61 +33,136 @@ const pageDescription = "Deep dives into cloud native technologies, Kubernetes, 
 const formatDate = (date: Date) =>
 	new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
 
+const typeLabel: Record<string, string> = {
+	tutorial: "Tutorial",
+	article: "Article",
+	guide: "Guide",
+	news: "News",
+};
+
 const shell = css({ maxWidth: "80rem", mx: "auto", px: { base: "4", md: "6" }, py: "12" });
 
-const featuredCard = css({
+const featuredWrap = css({
+	position: "relative",
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", md: "1.2fr 1fr" },
-	gap: "8",
-	alignItems: "center",
-	p: { base: "6", md: "10" },
+	gap: { base: "6", md: "10" },
+	alignItems: "stretch",
+	p: { base: "5", md: "5" },
 	borderRadius: "3xl",
 	borderWidth: "1px",
 	borderColor: "border.muted",
 	bg: "bg.raised",
+	overflow: "hidden",
 	textDecoration: "none",
 	color: "fg.primary",
-	mb: "12",
-	transition: "transform 200ms ease, box-shadow 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg" },
+	mb: "14",
+	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
+	_hover: { transform: "translateY(-2px)", boxShadow: "xl", borderColor: "border.default" },
 });
 
-const featuredMedia = css({
-	aspectRatio: "16 / 10",
-	overflow: "hidden",
-	borderRadius: "2xl",
-	bg: "bg.sunken",
-	"& img": { width: "full", height: "full", objectFit: "cover" },
-});
-
-const featuredMeta = css({
+const featuredBody = css({
 	display: "flex",
-	flexWrap: "wrap",
+	flexDirection: "column",
+	justifyContent: "center",
+	p: { base: "2", md: "8" },
+	order: { base: 2, md: 1 },
+});
+
+const featuredBadgeRow = css({
+	display: "inline-flex",
+	alignItems: "center",
 	gap: "2",
+	mb: "4",
+});
+
+const featuredFlag = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "bold",
+	letterSpacing: "wider",
+	textTransform: "uppercase",
+	color: "fg.on-brand",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500), token(colors.cyan.500))",
+});
+
+const typePill = css({
+	display: "inline-flex",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.brand-subtle",
+	color: "fg.brand",
 	fontSize: "xs",
 	fontWeight: "semibold",
 	letterSpacing: "wider",
 	textTransform: "uppercase",
-	color: "fg.muted",
 });
 
 const featuredTitle = css({
 	fontFamily: "display",
-	fontSize: { base: "3xl", md: "4xl" },
+	fontSize: { base: "3xl", md: "4xl", lg: "5xl" },
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	lineHeight: "1.05",
 	color: "fg.primary",
 	textWrap: "balance",
-	mt: "3",
+	transition: "color 150ms ease",
+	"a:hover &": { color: "fg.brand" },
 });
 
 const featuredDesc = css({
-	mt: "4",
-	fontSize: "md",
+	mt: "5",
+	fontSize: { base: "md", md: "lg" },
 	lineHeight: "1.7",
 	color: "fg.secondary",
-	maxWidth: "44rem",
+	maxWidth: "40rem",
+});
+
+const featuredFooter = css({
+	mt: "8",
+	display: "flex",
+	flexWrap: "wrap",
+	alignItems: "center",
+	gap: "3",
+	fontSize: "sm",
+	color: "fg.muted",
+});
+
+const authorRow = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "2",
+});
+
+const avatarSm = css({ width: "7", height: "7", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+const avatarXs = css({ width: "5", height: "5", borderRadius: "full", objectFit: "cover", borderWidth: "1px", borderColor: "border.muted" });
+
+const sep = css({ color: "border.default" });
+
+const featuredMedia = css({
+	order: { base: 1, md: 2 },
+	aspectRatio: { base: "16 / 10", md: "auto" },
+	minHeight: { md: "22rem" },
+	overflow: "hidden",
+	borderRadius: "2xl",
+	bg: "bg.sunken",
+	position: "relative",
+	"& img": { width: "full", height: "full", objectFit: "cover" },
+});
+
+const sectionHead = css({
+	display: "flex",
+	alignItems: "baseline",
+	justifyContent: "space-between",
+	gap: "4",
+	mb: "8",
+	flexWrap: "wrap",
 });
 
 const sectionTitle = css({
@@ -85,13 +171,41 @@ const sectionTitle = css({
 	fontWeight: "bold",
 	letterSpacing: "tight",
 	color: "fg.primary",
-	mb: "6",
+});
+
+const sectionCount = css({
+	fontSize: "sm",
+	color: "fg.muted",
+	fontWeight: "medium",
+});
+
+const feedLinks = css({
+	display: "flex",
+	gap: "2",
+	flexWrap: "wrap",
+});
+
+const feedLink = css({
+	display: "inline-flex",
+	alignItems: "center",
+	gap: "1.5",
+	px: "3",
+	py: "1.5",
+	borderRadius: "full",
+	fontSize: "xs",
+	fontWeight: "semibold",
+	color: "fg.muted",
+	borderWidth: "1px",
+	borderColor: "border.muted",
+	textDecoration: "none",
+	transition: "all 150ms ease",
+	_hover: { color: "fg.brand", borderColor: "border.default", bg: "bg.brand-subtle" },
 });
 
 const grid = css({
 	display: "grid",
 	gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" },
-	gap: "5",
+	gap: "6",
 });
 
 const card = css({
@@ -105,30 +219,47 @@ const card = css({
 	textDecoration: "none",
 	color: "fg.primary",
 	transition: "transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease",
-	_hover: { transform: "translateY(-2px)", boxShadow: "lg", borderColor: "border.default" },
+	_hover: { transform: "translateY(-3px)", boxShadow: "lg", borderColor: "border.default" },
 });
+
 const cardImg = css({
 	aspectRatio: "16 / 9",
 	overflow: "hidden",
 	bg: "bg.sunken",
-	"& img": { width: "full", height: "full", objectFit: "cover" },
+	position: "relative",
+	"& img": { width: "full", height: "full", objectFit: "cover", transition: "transform 400ms ease" },
+	"a:hover & img": { transform: "scale(1.04)" },
 });
-const cardBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "2", flex: "1" });
-const cardMeta = css({
-	fontSize: "xs",
-	fontWeight: "semibold",
+
+const cardTypeFlag = css({
+	position: "absolute",
+	top: "3",
+	left: "3",
+	display: "inline-flex",
+	px: "2.5",
+	py: "1",
+	borderRadius: "full",
+	bg: "bg.canvas/85",
+	backdropFilter: "blur(8px)",
+	color: "fg.brand",
+	fontSize: "2xs",
+	fontWeight: "bold",
 	letterSpacing: "wider",
 	textTransform: "uppercase",
-	color: "fg.muted",
 });
+
+const cardBody = css({ p: "5", display: "flex", flexDirection: "column", gap: "3", flex: "1" });
+
 const cardTitle = css({
 	fontSize: "lg",
 	fontWeight: "semibold",
-	lineHeight: "tight",
+	lineHeight: "1.3",
 	color: "fg.primary",
+	textWrap: "balance",
 	transition: "color 150ms ease",
 	"a:hover &": { color: "fg.brand" },
 });
+
 const cardDesc = css({
 	fontSize: "sm",
 	color: "fg.secondary",
@@ -137,6 +268,32 @@ const cardDesc = css({
 	WebkitLineClamp: "3",
 	WebkitBoxOrient: "vertical",
 	overflow: "hidden",
+});
+
+const cardFooter = css({
+	mt: "auto",
+	pt: "3",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	gap: "2",
+	fontSize: "xs",
+	color: "fg.muted",
+	borderTopWidth: "1px",
+	borderTopColor: "border.muted",
+});
+
+const placeholderImg = css({
+	width: "full",
+	height: "full",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	color: "fg.muted",
+	fontSize: "5xl",
+	fontFamily: "display",
+	fontWeight: "bold",
+	backgroundImage: "linear-gradient(135deg, token(colors.brand.500)/20, token(colors.cyan.500)/15)",
 });
 ---
 
@@ -148,52 +305,85 @@ const cardDesc = css({
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
 	</Fragment>
 
-	<PageHero eyebrow="Articles" title="Cloud Native Writing" subtitle="Architecture notes, breakdowns, and context — written by practitioners, for practitioners." />
+	<PageHero eyebrow="Articles" title="Cloud Native Writing" subtitle="Architecture notes, breakdowns, and field reports — written by practitioners, for practitioners." />
 
 	<div class={shell}>
 		{featured && (
-			<a href={`/read/${featured.id}`} class={featuredCard}>
-				<div>
-					<div class={featuredMeta}>
-						<span>{formatDate(featured.data.publishedAt)}</span>
-						{featuredAuthors[0] && (
-							<>
-								<span>·</span>
-								<span>{featuredAuthors.map((a) => a.data.name).join(", ")}</span>
-							</>
+			<a href={`/read/${featured.article.id}`} class={featuredWrap}>
+				<div class={featuredBody}>
+					<div class={featuredBadgeRow}>
+						<span class={featuredFlag}>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.39 7.36H22l-6.19 4.5L18.2 21 12 16.5 5.8 21l2.39-7.14L2 9.36h7.61L12 2z"/></svg>
+							Featured
+						</span>
+						<span class={typePill}>{typeLabel[featured.article.data.type] ?? featured.article.data.type}</span>
+					</div>
+					<h2 class={featuredTitle}>{featured.article.data.title}</h2>
+					<p class={featuredDesc}>{featured.article.data.openGraph?.subtitle || featured.article.data.description}</p>
+					<div class={featuredFooter}>
+						{featured.authors[0] && (
+							<span class={authorRow}>
+								{featured.authors[0].data.avatarUrl && <img src={featured.authors[0].data.avatarUrl} alt="" class={avatarSm} loading="lazy" />}
+								<span style="color: var(--colors-fg-primary); font-weight: 500;">{featured.authors.map((a) => a.data.name).join(", ")}</span>
+							</span>
 						)}
+						<span class={sep}>·</span>
+						<span>{formatDate(featured.article.data.publishedAt)}</span>
+						<span class={sep}>·</span>
+						<span>{featured.reading.text}</span>
 					</div>
-					<h2 class={featuredTitle}>{featured.data.title}</h2>
-					<p class={featuredDesc}>{featured.data.openGraph?.subtitle || featured.data.description}</p>
 				</div>
-				{featured.data.cover ? (
-					<div class={featuredMedia}>
-						<Image src={featured.data.cover.image} alt={featured.data.cover.alt || featured.data.title} width={800} height={500} loading="eager" />
-					</div>
-				) : (
-					<div class={featuredMedia}></div>
-				)}
+				<div class={featuredMedia}>
+					{featured.article.data.cover ? (
+						<Image src={featured.article.data.cover.image} alt={featured.article.data.cover.alt || featured.article.data.title} width={900} height={600} loading="eager" />
+					) : (
+						<div class={placeholderImg}>{featured.article.data.title.charAt(0)}</div>
+					)}
+				</div>
 			</a>
 		)}
 
-		<h2 class={sectionTitle}>All articles</h2>
+		<div class={sectionHead}>
+			<div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+				<h2 class={sectionTitle}>The library</h2>
+				<span class={sectionCount}>{allArticles.length} article{allArticles.length === 1 ? "" : "s"}</span>
+			</div>
+			<div class={feedLinks}>
+				<a href="/api/feeds/articles.xml" class={feedLink}>
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 11a9 9 0 019 9h-3a6 6 0 00-6-6v-3zm0-7a16 16 0 0116 16h-3A13 13 0 004 7V4zm2 13a2 2 0 110 4 2 2 0 010-4z"/></svg>
+					RSS
+				</a>
+				<a href="/api/feeds/articles.json" class={feedLink}>JSON Feed</a>
+				<a href="/api/feeds/articles.atom" class={feedLink}>Atom</a>
+			</div>
+		</div>
+
 		<div class={grid}>
-			{remaining.map((article) => (
+			{remaining.map(({ article, authors, reading }) => (
 				<a href={`/read/${article.id}`} class={card}>
-					{article.data.cover ? (
-						<div class={cardImg}>
+					<div class={cardImg}>
+						{article.data.cover ? (
 							<Image src={article.data.cover.image} alt={article.data.cover.alt || article.data.title} width={600} height={340} loading="lazy" />
-						</div>
-					) : (
-						<div class={cardImg}></div>
-					)}
+						) : (
+							<div class={placeholderImg}>{article.data.title.charAt(0)}</div>
+						)}
+						<span class={cardTypeFlag}>{typeLabel[article.data.type] ?? article.data.type}</span>
+					</div>
 					<div class={cardBody}>
-						<div class={cardMeta}>{formatDate(article.data.publishedAt)}</div>
 						<h3 class={cardTitle}>{article.data.title}</h3>
 						<p class={cardDesc}>{article.data.description}</p>
+						<div class={cardFooter}>
+							<span class={authorRow}>
+								{authors[0]?.data.avatarUrl && <img src={authors[0].data.avatarUrl} alt="" class={avatarXs} loading="lazy" />}
+								<span>{authors[0]?.data.name ?? "Rawkode Academy"}</span>
+							</span>
+							<span>{formatDate(article.data.publishedAt)} · {reading.text}</span>
+						</div>
 					</div>
 				</a>
 			))}
 		</div>
 	</div>
 </Page>
+</content>
+</invoke>
