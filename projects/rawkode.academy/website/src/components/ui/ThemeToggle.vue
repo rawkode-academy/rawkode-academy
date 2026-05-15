@@ -114,7 +114,7 @@ const handleToggle = () => {
 
 const buttonClasses = computed(() => {
 	const baseClasses =
-		"inline-flex items-center justify-center transition-smooth focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
+		"inline-flex items-center justify-center transition-smooth focus-ring";
 
 	const variantClasses = {
 		icon: "rounded-full hover:bg-gray-100 dark:hover:bg-gray-800",

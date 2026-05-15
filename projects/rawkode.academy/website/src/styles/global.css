@@ -141,6 +141,34 @@ body::before {
 	--radius-xl: 1.2rem;
 	--radius-2xl: 1.35rem;
 	--radius-3xl: 1.5rem;
+
+	/* Motion tokens — durations + easings used across the system.
+	   Exposed as Tailwind utilities: `duration-fast/base/slow/slower`
+	   and `ease-standard/out/in/spring`. */
+	--duration-fast: 120ms; /* micro-interactions, hover ticks */
+	--duration-base: 200ms; /* default transitions */
+	--duration-slow: 300ms; /* card hovers, layout shifts */
+	--duration-slower: 500ms; /* page-level moves */
+
+	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* Material standard */
+	--ease-out: cubic-bezier(0, 0, 0.2, 1); /* deceleration */
+	--ease-in: cubic-bezier(0.4, 0, 1, 1); /* acceleration */
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* gentle overshoot */
+
+	/* Shadow ramp — depth scale. The legacy `card-shadow` /
+	   `card-shadow-elevated` utilities now use these tokens. */
+	--shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+	--shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
+	--shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14);
+	--shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.18);
+}
+
+/* Dark-mode shadow ramp — deeper, no light bleed. */
+html.dark {
+	--shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+	--shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+	--shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+	--shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.7);
 }
 
 @layer base {
@@ -373,32 +401,25 @@ body::before {
 		@apply bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl border border-white/40 dark:border-gray-600/50;
 	}
 
+	/* Shadow utilities — wired to the `--shadow-*` ramp so light/dark
+	   variants come from one place. */
 	.card-shadow {
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12);
-	}
-
-	.dark .card-shadow {
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+		box-shadow: var(--shadow-md);
 	}
 
 	.card-shadow-elevated {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18);
-	}
-
-	.dark .card-shadow-elevated {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+		box-shadow: var(--shadow-lg);
 	}
 
 	.card-hover {
-		@apply transition-all duration-300 hover:bg-white/60 dark:hover:bg-gray-700/70 hover:scale-[1.02];
+		transition-property: background-color, box-shadow, transform;
+		transition-duration: var(--duration-slow);
+		transition-timing-function: var(--ease-standard);
 	}
 
 	.card-hover:hover {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18);
-	}
-
-	.dark .card-hover:hover {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+		@apply bg-white/60 dark:bg-gray-700/70 scale-[1.02];
+		box-shadow: var(--shadow-lg);
 	}
 
 	/* Border Utilities - Semantic */
@@ -665,13 +686,21 @@ body::before {
 
 	/* Text Color Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
-	/* Animation Utilities */
+	/* Animation Utilities — wired to the motion-token scale. */
 	.transition-card {
-		@apply transition-all duration-300;
+		transition: all var(--duration-slow) var(--ease-standard);
 	}
 
 	.transition-smooth {
-		@apply transition-all duration-200;
+		transition: all var(--duration-base) var(--ease-standard);
+	}
+
+	.transition-fast {
+		transition: all var(--duration-fast) var(--ease-standard);
+	}
+
+	.transition-spring {
+		transition: all var(--duration-slow) var(--ease-spring);
 	}
 
 	/* Prose styles for article content - Enhanced Typography */
@@ -1174,8 +1203,8 @@ body::before {
 @utility link-muted {
 	color: rgb(75 85 99);
 	transition-property: color;
-	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-	transition-duration: 200ms;
+	transition-timing-function: var(--ease-standard);
+	transition-duration: var(--duration-base);
 
 	:root.dark & {
 		color: rgb(156 163 175);
@@ -1183,5 +1212,16 @@ body::before {
 
 	&:hover {
 		color: rgb(var(--brand-primary));
+	}
+}
+
+/* Focus ring — apply via `class="focus-ring"` on any focusable element
+   that needs a consistent brand-primary outline. Pairs with `:focus-visible`
+   so it only shows for keyboard navigation. */
+@utility focus-ring {
+	&:focus-visible {
+		outline: 2px solid rgb(var(--brand-primary));
+		outline-offset: 2px;
+		border-radius: var(--radius-sm);
 	}
 }

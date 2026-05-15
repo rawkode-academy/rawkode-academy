@@ -76,6 +76,38 @@ Use the radius scale tokens instead of `rounded-[1.35rem]` style literals:
 | `--radius-3xl`  | `rounded-3xl`  | 1.5rem   | Glass panels (hero-level) |
 | `--radius-pill` | `rounded-full` | 9999px   | Pills, avatars |
 
+#### Motion
+
+Durations and easings live as CSS custom properties on `:root`. Compose them yourself for one-off transitions, or use the pre-baked utility classes for common cases:
+
+| Token | Value | Use for |
+|-------|-------|---------|
+| `--duration-fast`   | 120ms | Micro-interactions, hover ticks |
+| `--duration-base`   | 200ms | Default transitions |
+| `--duration-slow`   | 300ms | Card hovers, layout shifts |
+| `--duration-slower` | 500ms | Page-level moves |
+| `--ease-standard`   | `cubic-bezier(0.4, 0, 0.2, 1)` | Material standard — default |
+| `--ease-out`        | `cubic-bezier(0, 0, 0.2, 1)`   | Deceleration |
+| `--ease-in`         | `cubic-bezier(0.4, 0, 1, 1)`   | Acceleration |
+| `--ease-spring`     | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Gentle overshoot |
+
+Pre-built utility classes: `transition-fast`, `transition-smooth` (base), `transition-card` (slow), `transition-spring`.
+
+#### Shadow ramp
+
+| Token | Use for |
+|-------|---------|
+| `--shadow-sm` | Subtle elevation (chips, hover-on-light surfaces) |
+| `--shadow-md` | Default card shadow |
+| `--shadow-lg` | Elevated cards, modals, hovered interactive surfaces |
+| `--shadow-xl` | Floating panels, sheets |
+
+Light and dark modes have separate shadow ramps — the variables swap automatically under `html.dark`. The legacy `.card-shadow` / `.card-shadow-elevated` classes now resolve to `--shadow-md` / `--shadow-lg`.
+
+#### Focus ring
+
+Add `class="focus-ring"` to any focusable element that needs a consistent keyboard-only focus outline. The utility uses `:focus-visible` so the ring only appears for keyboard navigation, not mouse clicks. The ring colour is `--brand-primary` with a 2px outline and 2px offset.
+
 #### Light / Dark mode
 
 The site exposes a sun/moon toggle (`<ThemeToggle />`) and a "Change appearance" command in the command palette. Both wrap the same module:
