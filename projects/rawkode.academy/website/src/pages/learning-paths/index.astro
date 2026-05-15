@@ -1,6 +1,7 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, getEntries } from "astro:content";
 import LearningPathCard from "@/components/learning-paths/LearningPathCard.astro";
+import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -9,12 +10,41 @@ const learningPaths = (await getCollection("learningPaths")).sort(
 	(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 );
 
+const allTechnologies = await getCollection("technologies");
+const technologyNameById = new Map<string, string>();
+for (const technology of allTechnologies) {
+	const rawId = technology.id.replace(/\/index$/, "");
+	technologyNameById.set(rawId, technology.data.name);
+}
+
+const itemListPaths = await Promise.all(
+	learningPaths.map(async (path) => {
+		const authorEntries = await getEntries(path.data.authors);
+		return {
+			path,
+			authors: authorEntries.map((author) => ({
+				id: author.data.id,
+				name: author.data.name,
+			})),
+			technologyLabels: (path.data.technologies ?? []).map(
+				(technologyId) => technologyNameById.get(technologyId) ?? technologyId,
+			),
+		};
+	}),
+);
+
 const pageTitle = "Learning Paths | Rawkode Academy";
 const pageDescription =
 	"Curated, video-driven journeys to help you level up your Kubernetes, platform engineering, and cloud native skills.";
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+	<LearningPathItemListJsonLd
+		slot="extra-head"
+		paths={itemListPaths}
+		listUrl={new URL("/learning-paths", Astro.site ?? Astro.url).href}
+		listName="Rawkode Academy Learning Paths"
+	/>
 	<section class="relative overflow-hidden rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
 		<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
 		<div class="relative z-10 px-6 py-16 md:px-10 lg:px-16">
