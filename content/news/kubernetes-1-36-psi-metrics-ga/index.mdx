@@ -1,0 +1,25 @@
+---
+title: "Kubernetes 1.36 graduates PSI metrics to GA"
+description: "Pressure Stall Information metrics are now GA at node, pod, and container levels in Kubernetes v1.36, giving operators a kernel-grade signal for resource contention without out-of-band tooling."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Pressure Stall Information (PSI) metrics reached general availability in Kubernetes v1.36, with the announcement landing on the project blog on May 12, 2026.
+
+## What PSI actually measures
+
+PSI surfaces percentages of time tasks are stalled on CPU, memory, or I/O — not how much resource was consumed, but how much time was lost waiting. The kernel has exposed this since 2018; Kubernetes now wires it through the kubelet at node, pod, and container granularity. Each metric ships as a cumulative total plus moving averages over 10s, 60s, and 300s windows, distinguishing transient spikes from sustained contention.
+
+## Production overhead
+
+SIG Node measured kubelet collection overhead consistently below 2.5% of total node capacity, with kernel-level tracking between 0.925% and 3.125%, validated under high-density workloads of 80+ pods.
+
+## Why this matters
+
+PSI gives you a first-class upstream answer to "is this pod actually being starved?" without resorting to eBPF tooling or vendor agents. If you've been reading CPU throttling counters to debug noisy-neighbor problems, you now have a directly applicable signal.
+
+**Source:** [Kubernetes v1.36: PSI Metrics for Kubernetes Graduates to GA](https://kubernetes.io/blog/2026/05/12/kubernetes-v1-36-psi-metrics-ga/) — May 12, 2026

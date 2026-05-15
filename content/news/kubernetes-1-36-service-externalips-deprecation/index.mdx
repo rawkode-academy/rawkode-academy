@@ -1,0 +1,31 @@
+---
+title: "Kubernetes 1.36 formally deprecates Service externalIPs"
+description: "The .spec.externalIPs field on Service objects is formally deprecated in Kubernetes v1.36, with kube-proxy implementation slated for removal in a future minor release. Driven by CVE-2020-8554."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+The `.spec.externalIPs` field on Kubernetes Service objects is formally deprecated in v1.36, per the project blog post on May 14, 2026. Implementation removal from `kube-proxy` is planned for a future minor release, and conformance criteria will eventually require implementations not to support it.
+
+## Why it's going
+
+The deprecation is security-driven. [CVE-2020-8554](https://www.cvedetails.com/cve/CVE-2020-8554/) showed that any user with permission to create Services could intercept arbitrary external traffic by claiming an IP. The API assumes all cluster users are fully trusted, which has not matched real deployments for years. Kubernetes has been recommending disabling `externalIPs` since v1.21.
+
+## Migration paths
+
+The blog post calls out three replacements:
+
+- **LoadBalancer Services** with manually managed IPs (simplest, least defensive)
+- **MetalLB** for bare-metal clusters needing real load-balancer semantics
+- **Ingress controllers** for HTTP/HTTPS traffic
+
+This deprecation does **not** affect the Node API's `.status.addresses` `ExternalIP` entries or the `EXTERNAL-IP` column kubectl prints for LoadBalancer Services. Only the `Service.spec.externalIPs` field is being removed.
+
+## What to do
+
+Audit your clusters for `Service.spec.externalIPs` usage now. Some clusters have carried this configuration silently since the 1.x era, and removal is no longer hypothetical.
+
+**Source:** [Kubernetes v1.36: Deprecation and removal of Service ExternalIPs](https://kubernetes.io/blog/2026/05/14/kubernetes-v1-36-deprecation-and-removal-of-service-externalips/) — May 14, 2026

@@ -1,0 +1,28 @@
+---
+title: "Kubernetes 1.36 splits Workload and PodGroup APIs for batch and AI scheduling"
+description: "Kubernetes v1.36 introduces a new PodGroup API alongside the Workload API in scheduling.k8s.io/v1alpha2, separating static templates from runtime state and unlocking DRA for gang-scheduled workloads."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes v1.36 ships the second iteration of workload-aware scheduling, announced on the project blog May 13, 2026. The shape of the API has changed since v1.35.
+
+## A clean split
+
+`v1.35` introduced the Workload API and basic gang scheduling on a Pod-based framework. `v1.36` moves both APIs to `scheduling.k8s.io/v1alpha2` and splits concerns: the Workload acts as a static template containing `podGroupTemplates`, while the new PodGroup object carries the runtime `schedulingPolicy` and `status.conditions`. The Pod field `workloadRef` is replaced with `schedulingGroup`, which references a PodGroup directly so the scheduler can read scheduling state without parsing the Workload.
+
+## What landed under the new shape
+
+- A new PodGroup scheduling cycle in `kube-scheduler` for atomic workload processing
+- First iterations of topology-aware scheduling and workload-aware preemption
+- `ResourceClaim` support for workloads, extending Dynamic Resource Allocation to entire PodGroups
+- The first phase of integration between the Job controller and the new API
+
+## Still alpha
+
+Everything in `v1alpha2` is alpha. Don't migrate production gang-scheduling off Kueue, Volcano, or YuniKorn yet. But the upstream foundations for the same patterns now exist, and the API shape will keep moving until beta.
+
+**Source:** [Kubernetes v1.36: Advancing Workload-Aware Scheduling](https://kubernetes.io/blog/2026/05/13/kubernetes-v1-36-advancing-workload-aware-scheduling/) — May 13, 2026
