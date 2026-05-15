@@ -1,0 +1,35 @@
+---
+title: "OpenTelemetry Collector 0.152 ships GenAI normalizer and removes the Sarama Kafka implementation"
+description: "Released May 12, OTel Collector v0.152.0 adds an alpha processor that normalizes GenAI telemetry from OpenInference and OpenLLMetry to the official OTel GenAI semantic conventions. The Sarama-based Kafka receiver is removed and a Cardinality Guardian processor lands in alpha."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - opentelemetry
+---
+
+OpenTelemetry Collector v0.152.0 landed on May 12, 2026 with three new alpha components in the contrib distribution and a Kafka breaking change worth scheduling around.
+
+## GenAI normalizer
+
+The new `genainormalizer` processor normalizes GenAI telemetry attributes from OpenInference and OpenLLMetry to the official OTel GenAI Semantic Conventions. OpenInference and OpenLLMetry both shipped LLM telemetry conventions ahead of the OTel GenAI semconv work; this processor lets operators run one backend without maintaining parallel attribute schemas per instrumentation library.
+
+Stability is alpha — expect attribute mappings to shift as the OTel GenAI semconv itself continues to evolve.
+
+## Cardinality Guardian
+
+The `cardinality_guardian` processor (alpha) targets metrics with unbounded label values eating telemetry budget. The release notes are sparse; the use case is straightforward enough that operators dealing with chatty labels will recognize the shape of the fix.
+
+## MCP server extension
+
+A new MCP (Model Context Protocol) server extension ships in alpha. The MCP integration story for the collector is early; the extension is a starting point rather than a finished integration.
+
+## Kafka Sarama removal
+
+The `receiver.kafkametricsreceiver.UseFranzGo` feature gate is now stable, and the Sarama-based Kafka implementation has been removed from the kafkametrics receiver. Anyone running a custom build of the collector that depended on Sarama needs a migration plan before bumping past 0.151.
+
+## Component renames
+
+Several components were renamed to snake_case with deprecated aliases: `otlpjson` → `otlp_json`, `kafkametrics` → `kafka_metrics`, `kubeletstats` → `kubelet_stats`, `roundrobin` → `round_robin`. Aliases keep existing configs working; new configs should use the new names.
+
+**Sources:** [OpenTelemetry Collector v0.152.0 release](https://github.com/open-telemetry/opentelemetry-collector-releases/releases/tag/v0.152.0), [contrib changelog](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/CHANGELOG.md) — May 12, 2026.
