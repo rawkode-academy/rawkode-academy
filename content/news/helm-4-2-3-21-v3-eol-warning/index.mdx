@@ -1,0 +1,32 @@
+---
+title: "Helm 4.2 lands; Helm 3.21 ships with an explicit end-of-life warning"
+description: "Helm v4.2.0 and v3.21.0 both released on May 14, with the v3 release notes now stating that the v3 line is approaching end-of-life — a planning trigger for the long tail of clusters still on v3 charts."
+publishedAt: 2026-05-15
+authors:
+  - rawkode
+technologies:
+  - helm
+---
+
+Helm shipped [v4.2.0](https://github.com/helm/helm/releases/tag/v4.2.0) and [v3.21.0](https://github.com/helm/helm/releases/tag/v3.21.0) on May 14, 2026. The notable change isn't in the changelog — it's the warning at the top of the v3.21.0 notes that Helm v3 is approaching end-of-life and that operators should plan their migration to v4.
+
+## What's in v4.2
+
+The release continues to track Kubernetes upstream tightly: client libraries are bumped to v1.36, Go is bumped to 1.26, and controller-runtime to v0.24. The headline functional changes:
+
+- A new `mustToToml` template function for charts that need TOML rendering without dropping back to raw strings.
+- `--dry-run=server` now honours `generateName:` instead of erroring on names that the apiserver would assign.
+- The build switches to goreleaser; binaries are now produced for `loong64` (LoongArch).
+- Multiple fixes for post-renderers — hooks no longer collide with templates, and YAML separator parsing and Windows line-ending handling are corrected.
+
+The `--hide-notes` and `--render-subchart-notes` flags are deprecated.
+
+## What's in v3.21
+
+The v3 line is in maintenance: this release upgrades `opentelemetry` packages to pick up patched CVEs and corrects a chart-path bug. No new functional surface.
+
+## Why this matters now
+
+Helm v4 has been GA since November 12, 2025, but most production clusters still distribute v3 charts. The explicit "approaching end-of-life" language in a release-notes header — rather than a separate deprecation announcement — is the planning trigger: vendors will start dropping v3-only charts, and chart authors will need to validate against v4's stricter template engine.
+
+**Sources:** [Helm v4.2.0](https://github.com/helm/helm/releases/tag/v4.2.0), [Helm v3.21.0](https://github.com/helm/helm/releases/tag/v3.21.0) — May 14, 2026
