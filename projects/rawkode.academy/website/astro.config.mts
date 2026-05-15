@@ -3,7 +3,6 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
-import tailwindcss from "@tailwindcss/vite";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
@@ -135,7 +134,6 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			tailwindcss(),
 			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
 				? [
 						faroUploader({
