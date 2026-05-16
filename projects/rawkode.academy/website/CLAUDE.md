@@ -111,6 +111,21 @@ Add `class="focus-ring"` to any focusable element that needs a consistent keyboa
 
 The header chrome (sidebar toggle, mobile menu, logo link, search trigger, FAB) and the `Button.vue` / `Button.astro` primitives have already been migrated to `focus-ring` — keep new components on the same pattern instead of hand-rolling `focus:outline-none focus:ring-4 focus:ring-*` boilerplate.
 
+#### Heading ramp
+
+The `@layer base` styles in `global.css` give every page-level `<h1>`–`<h4>` a consistent display-font ramp without needing utility classes on every heading:
+
+| Tag | Size              | Weight     | Family            |
+|-----|-------------------|------------|-------------------|
+| h1  | text-3xl md:4xl   | extrabold  | `--font-display`  |
+| h2  | text-2xl md:3xl   | bold       | `--font-display`  |
+| h3  | text-xl md:2xl    | semibold   | `--font-display`  |
+| h4  | text-lg md:xl     | semibold   | `--font-display`  |
+
+Colour is `text-primary-content` (theme-aware). Negative letter-spacing tightens the headlines without going into "decorative" territory.
+
+Component-level utility classes (`<h2 class="text-4xl …">`) still override these base styles by specificity. The richer prose typography lives separately in `@layer components > .prose h1…h4` for long-form article content.
+
 #### Colouring SVGs
 
 Tailwind v4's default `fill-black` / `fill-white` / `fill-gray-*` utilities **don't work reliably** in this codebase — our `@theme` block interacts badly with the default colour palette and SVGs end up rendering `fill: white` regardless of the class. The workaround is to set `fill="currentColor"` on the SVG and drive the colour through a `text-*` class:
