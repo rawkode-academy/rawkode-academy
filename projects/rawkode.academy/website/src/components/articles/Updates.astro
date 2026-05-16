@@ -42,7 +42,7 @@ const formatDate = (date: Date) => {
 					{updates.map((update, index) => (
 						<span class="ml-1">
 							{formatDate(update.date)} - {update.description}
-							{index < updates.length - 1 && <span class="text-gray-400 dark:text-gray-600"> • </span>}
+							{index < updates.length - 1 && <span class="text-muted"> • </span>}
 						</span>
 					))}
 				</div>
