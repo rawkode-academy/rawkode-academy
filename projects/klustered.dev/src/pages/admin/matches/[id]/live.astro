@@ -1,0 +1,178 @@
+---
+import { env } from "cloudflare:workers";
+import { asc, eq } from "drizzle-orm";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getDb, schema } from "@/db/client";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const matchId = Astro.params.id!;
+const db = getDb(env.DB);
+
+const match = await db
+	.select()
+	.from(schema.matches)
+	.where(eq(schema.matches.id, matchId))
+	.get();
+if (!match) return Astro.redirect("/admin/matches", 303);
+
+const teams = await db
+	.select({ id: schema.teams.id, name: schema.teams.name })
+	.from(schema.teams)
+	.orderBy(asc(schema.teams.name))
+	.all();
+const teamName = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+const startedAt = match.startedAt;
+const endedAt = match.endedAt;
+const isLive = match.status === "live";
+const isCompleted = match.status === "completed";
+const elapsedMsAtRender = startedAt
+	? (endedAt ?? new Date()).getTime() - startedAt.getTime()
+	: 0;
+
+function pad(n: number): string {
+	return n.toString().padStart(2, "0");
+}
+function formatElapsed(ms: number): string {
+	if (ms < 0) ms = 0;
+	const total = Math.floor(ms / 1000);
+	const h = Math.floor(total / 3600);
+	const m = Math.floor((total % 3600) / 60);
+	const s = total % 60;
+	return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+---
+
+<PortalLayout title="Live control" section="admin" nav={[...ADMIN_NAV]}>
+	<a
+		href={`/admin/matches/${matchId}`}
+		class="text-xs text-slate-400 hover:underline"
+	>
+		← Match details
+	</a>
+
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+		<div class="flex flex-wrap items-baseline justify-between gap-4">
+			<div>
+				<p class="text-xs uppercase tracking-[0.3em] text-fuchsia-400">
+					Match · {match.status}
+				</p>
+				<h2 class="mt-1 text-2xl font-bold tracking-tight">
+					{match.teamAId ? teamName[match.teamAId] ?? match.teamAId : "TBD"}
+					<span class="mx-2 text-slate-500">vs</span>
+					{match.teamBId ? teamName[match.teamBId] ?? match.teamBId : "TBD"}
+				</h2>
+			</div>
+			<div
+				class="rounded-2xl border border-slate-700 bg-slate-950 px-6 py-3 text-right"
+			>
+				<p class="text-xs uppercase tracking-wider text-slate-400">
+					Cluster-broken time
+				</p>
+				<p
+					id="timer"
+					data-started-at={startedAt?.getTime() ?? ""}
+					data-ended-at={endedAt?.getTime() ?? ""}
+					class="mt-1 font-mono text-4xl font-bold text-fuchsia-300"
+				>
+					{formatElapsed(elapsedMsAtRender)}
+				</p>
+			</div>
+		</div>
+
+		<div class="mt-6 flex flex-wrap gap-3">
+			{
+				!isLive && !isCompleted && (
+					<form method="POST" action={`/api/admin/matches/${matchId}/live/start`}>
+						<button class="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-400">
+							Mark cluster broken (start clock)
+						</button>
+					</form>
+				)
+			}
+
+			{
+				isLive && (
+					<form method="POST" action={`/api/admin/matches/${matchId}/live/end`} class="flex flex-wrap items-end gap-3">
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-slate-400">Winner</span>
+							<select
+								name="winnerTeamId"
+								required
+								class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100"
+							>
+								{match.teamAId && (
+									<option value={match.teamAId}>{teamName[match.teamAId]}</option>
+								)}
+								{match.teamBId && (
+									<option value={match.teamBId}>{teamName[match.teamBId]}</option>
+								)}
+							</select>
+						</label>
+						<label class="flex flex-col gap-1">
+							<span class="text-xs text-slate-400">Notes (optional)</span>
+							<input
+								name="notes"
+								class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100"
+							/>
+						</label>
+						<button class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-400">
+							Cluster fixed (stop clock + record result)
+						</button>
+					</form>
+				)
+			}
+
+			<form method="POST" action={`/api/admin/matches/${matchId}/live/cancel`}>
+				<button
+					class="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 transition hover:bg-slate-800"
+				>
+					Cancel / disqualify
+				</button>
+			</form>
+		</div>
+	</section>
+
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-400">
+		<h3 class="text-sm font-semibold uppercase tracking-wider text-slate-300">
+			Public broadcast
+		</h3>
+		<p class="mt-2">
+			When this match is live the public site at <a href="https://klustered.live" class="text-fuchsia-300 hover:underline">klustered.live</a> shows a banner pointing at the YouTube broadcast and auto-refreshes the time-on-clock from <code class="rounded bg-slate-800 px-1 py-0.5">/api/live</code>.
+		</p>
+	</section>
+</PortalLayout>
+
+<script is:inline>
+	(() => {
+		const el = document.getElementById("timer");
+		if (!el) return;
+		const startedAt = Number(el.dataset.startedAt);
+		const endedAtRaw = Number(el.dataset.endedAt);
+		if (!startedAt) return;
+
+		const endedAt = endedAtRaw || null;
+
+		function pad(n) {
+			return String(n).padStart(2, "0");
+		}
+		function format(ms) {
+			if (ms < 0) ms = 0;
+			const total = Math.floor(ms / 1000);
+			const h = Math.floor(total / 3600);
+			const m = Math.floor((total % 3600) / 60);
+			const s = total % 60;
+			return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+		}
+
+		function tick() {
+			const end = endedAt ?? Date.now();
+			el.textContent = format(end - startedAt);
+		}
+		tick();
+		if (!endedAt) {
+			setInterval(tick, 1000);
+		}
+	})();
+</script>
+

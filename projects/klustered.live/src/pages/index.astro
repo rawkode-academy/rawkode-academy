@@ -1,5 +1,6 @@
 ---
 import SiteLayout from "@/layouts/SiteLayout.astro";
+import LiveBanner from "@/components/LiveBanner.astro";
 import { getEpisodes } from "@/lib/content";
 
 const episodes = await getEpisodes();
@@ -7,6 +8,10 @@ const latest = episodes[0];
 ---
 
 <SiteLayout title="Break the cluster. Fix it on stage." heroVariant="subtle">
+	<div class="pt-8">
+		<LiveBanner />
+	</div>
+
 	<section class="pt-16 md:pt-24">
 		<p class="text-xs font-semibold uppercase tracking-[0.4em] text-fuchsia-400">
 			Coming back · season 2026

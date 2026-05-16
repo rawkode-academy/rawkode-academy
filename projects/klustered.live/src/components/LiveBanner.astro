@@ -1,0 +1,115 @@
+---
+import { env } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
+import { getDb, schema } from "@/db/client";
+
+const db = getDb(env.DB);
+const teamA = alias(schema.teams, "team_a");
+const teamB = alias(schema.teams, "team_b");
+
+const live = await db
+	.select({
+		id: schema.matches.id,
+		startedAt: schema.matches.startedAt,
+		seasonName: schema.seasons.name,
+		teamAName: teamA.name,
+		teamBName: teamB.name,
+	})
+	.from(schema.matches)
+	.leftJoin(schema.brackets, eq(schema.matches.bracketId, schema.brackets.id))
+	.leftJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
+	.leftJoin(teamA, eq(schema.matches.teamAId, teamA.id))
+	.leftJoin(teamB, eq(schema.matches.teamBId, teamB.id))
+	.where(eq(schema.matches.status, "live"))
+	.get();
+---
+
+{
+	live && live.startedAt && (
+		<div
+			class="relative overflow-hidden rounded-3xl border border-rose-500/50 bg-gradient-to-br from-rose-500/15 via-fuchsia-500/15 to-amber-500/10 p-6"
+			data-live-banner
+			data-match-id={live.id}
+			data-started-at={live.startedAt.getTime()}
+		>
+			<div
+				aria-hidden="true"
+				class="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-500/30 to-transparent blur-2xl"
+			/>
+
+			<div class="flex flex-wrap items-center gap-3">
+				<span class="inline-flex items-center gap-2 rounded-full bg-rose-500 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+					<span class="relative flex h-2 w-2">
+						<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+						<span class="relative inline-flex h-2 w-2 rounded-full bg-white" />
+					</span>
+					Live now
+				</span>
+				<p class="text-xs uppercase tracking-[0.3em] text-slate-300">
+					{live.seasonName}
+				</p>
+			</div>
+
+			<p class="mt-4 text-3xl font-black tracking-tight md:text-4xl">
+				{live.teamAName ?? "TBD"}
+				<span class="mx-2 text-slate-500">vs</span>
+				{live.teamBName ?? "TBD"}
+			</p>
+
+			<div class="mt-4 flex flex-wrap items-baseline gap-6">
+				<div>
+					<p class="text-xs uppercase tracking-wider text-slate-400">
+						Cluster broken for
+					</p>
+					<p data-live-timer class="font-mono text-3xl font-bold text-rose-200">
+						—
+					</p>
+				</div>
+				<a
+					href="https://www.youtube.com/@rawkode"
+					target="_blank"
+					rel="noopener"
+					class="ml-auto inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+				>
+					Watch live on YouTube →
+				</a>
+			</div>
+		</div>
+
+		<script is:inline>
+			(() => {
+				const root = document.querySelector("[data-live-banner]");
+				if (!root) return;
+				const startedAt = Number(root.getAttribute("data-started-at"));
+				const timer = root.querySelector("[data-live-timer]");
+				if (!startedAt || !timer) return;
+
+				function pad(n) {
+					return String(n).padStart(2, "0");
+				}
+				function tick() {
+					const ms = Date.now() - startedAt;
+					const total = Math.max(0, Math.floor(ms / 1000));
+					const h = Math.floor(total / 3600);
+					const m = Math.floor((total % 3600) / 60);
+					const s = total % 60;
+					timer.textContent = h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+				}
+				tick();
+				setInterval(tick, 1000);
+
+				// Refresh banner state every 30s so it disappears once the match ends.
+				setInterval(async () => {
+					try {
+						const res = await fetch("/api/live", { cache: "no-store" });
+						const data = await res.json();
+						if (!data.live || data.live.matchId !== root.getAttribute("data-match-id")) {
+							window.location.reload();
+						}
+					} catch {}
+				}, 30000);
+			})();
+		</script>
+	)
+}
