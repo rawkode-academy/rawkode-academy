@@ -71,7 +71,7 @@
                 :href="getExternalUrl()"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white/50 dark:bg-gray-700/50 backdrop-blur-md border border-white/50 dark:border-gray-600/50 rounded-xl hover:bg-white/70 dark:hover:bg-gray-600/70 hover:scale-105 transition-smooth shadow-md hover:shadow-lg"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary-content bg-white/50 dark:bg-gray-700/50 backdrop-blur-md border border-white/50 dark:border-gray-600/50 rounded-xl hover:bg-white/70 dark:hover:bg-gray-600/70 hover:scale-105 transition-smooth shadow-md hover:shadow-lg"
               >
                 Open in new tab
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
