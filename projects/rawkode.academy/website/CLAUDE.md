@@ -92,7 +92,7 @@ Durations and easings live as CSS custom properties on `:root`. Compose them you
 | `--ease-in`         | `cubic-bezier(0.4, 0, 1, 1)`   | Acceleration |
 | `--ease-spring`     | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Gentle overshoot |
 
-Pre-built utility classes: `transition-fast`, `transition-smooth` (base), `transition-card` (slow), `transition-spring`.
+Pre-built utility classes: `transition-fast`, `transition-smooth` (base), `transition-card` (slow), `transition-spring`. For property-specific colour transitions (buttons / chips / links where `transition: all` would catch unrelated property changes), use `transition-colors-smooth` or `transition-colors-card`.
 
 #### Shadow ramp
 

@@ -1,7 +1,7 @@
 <template>
 	<a :href="href" :class="['group block h-full', className]">
 		<article
-			class="flex h-full flex-col border-t border-black/10 pt-4 transition-colors duration-200 dark:border-white/10"
+			class="flex h-full flex-col border-t border-black/10 pt-4 transition-colors-smooth dark:border-white/10"
 		>
 			<div
 				v-if="$slots.cover"

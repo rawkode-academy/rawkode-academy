@@ -168,7 +168,7 @@ const formatTechName = (id: string) => {
 							togglePreference('academyNewsletter', 'newsletter', 'academy')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-ring',
+							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors-smooth ease-in-out focus-ring',
 							preferences.academyNewsletter
 								? 'bg-primary'
 								: 'bg-neutral-300 dark:bg-neutral-700',
@@ -209,7 +209,7 @@ const formatTechName = (id: string) => {
 							togglePreference('matrixNewsletter', 'newsletter', 'matrix')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-ring',
+							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors-smooth ease-in-out focus-ring',
 							preferences.matrixNewsletter
 								? 'bg-primary'
 								: 'bg-neutral-300 dark:bg-neutral-700',
@@ -250,7 +250,7 @@ const formatTechName = (id: string) => {
 							togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-ring',
+							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors-smooth ease-in-out focus-ring',
 							preferences.kubernetesReleaseUpdates
 								? 'bg-primary'
 								: 'bg-neutral-300 dark:bg-neutral-700',
@@ -328,7 +328,7 @@ const formatTechName = (id: string) => {
 							togglePreference('marketingEmails', 'marketing', 'academy')
 						"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-ring',
+							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors-smooth ease-in-out focus-ring',
 							preferences.marketingEmails
 								? 'bg-primary'
 								: 'bg-neutral-300 dark:bg-neutral-700',
@@ -365,7 +365,7 @@ const formatTechName = (id: string) => {
 						:disabled="isLoading === 'serviceEmails'"
 						@click="togglePreference('serviceEmails', 'service', 'academy')"
 						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-ring',
+							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors-smooth ease-in-out focus-ring',
 							preferences.serviceEmails
 								? 'bg-primary'
 								: 'bg-neutral-300 dark:bg-neutral-700',

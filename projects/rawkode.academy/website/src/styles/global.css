@@ -1242,6 +1242,20 @@ html.dark {
 	transition: all var(--duration-slow) var(--ease-spring);
 }
 
+/* Property-specific colour transitions — for buttons / chips / links
+   where a `transition: all` would catch unrelated property changes. */
+@utility transition-colors-smooth {
+	transition-property: color, background-color, border-color, fill, stroke;
+	transition-duration: var(--duration-base);
+	transition-timing-function: var(--ease-standard);
+}
+
+@utility transition-colors-card {
+	transition-property: color, background-color, border-color, fill, stroke;
+	transition-duration: var(--duration-slow);
+	transition-timing-function: var(--ease-standard);
+}
+
 /* Shadow utilities — wired to the `--shadow-*` ramp so the light/dark
    variants come from one place. Declared as `@utility` so `@apply`
    works in scoped <style> blocks (e.g. `about/index.astro`'s
