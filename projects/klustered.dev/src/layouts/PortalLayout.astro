@@ -17,6 +17,14 @@ const { title, section, nav = [] } = Astro.props;
 const user = Astro.locals.user!;
 const roles: Role[] = Astro.locals.roles;
 const pathname = Astro.url.pathname;
+
+const activeHref = (() => {
+	const exact = nav.find((l) => l.href === pathname);
+	if (exact) return exact.href;
+	return nav
+		.filter((l) => l.href !== "/" && pathname.startsWith(`${l.href}/`))
+		.sort((a, b) => b.href.length - a.href.length)[0]?.href;
+})();
 ---
 
 <!doctype html>
@@ -61,9 +69,7 @@ const pathname = Astro.url.pathname;
 					nav.length > 0 && (
 						<nav class="mt-6 flex flex-col gap-1" aria-label="Portal sections">
 							{nav.map((link) => {
-								const active =
-									pathname === link.href ||
-									(link.href !== "/" && pathname.startsWith(`${link.href}/`));
+								const active = activeHref === link.href;
 								return (
 									<a
 										href={link.href}
