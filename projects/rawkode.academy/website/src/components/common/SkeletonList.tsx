@@ -28,7 +28,7 @@ export function SkeletonList({
 			{Array.from({ length: items }).map((_, index) => (
 				<div
 					key={index}
-					className="flex items-center gap-3 p-3 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+					className="flex items-center gap-3 p-3 border-b border-surface last:border-b-0"
 				>
 					{showIcon && (
 						<div

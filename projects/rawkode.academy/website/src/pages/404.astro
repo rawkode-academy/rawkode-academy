@@ -28,8 +28,8 @@ const quickLinks = [
 
 const supportLinks = [
 	{
-		title: "Search the site",
-		description: "Find videos, articles, and docs across the academy.",
+		title: "Search videos",
+		description: "Find a video by title or topic across the academy.",
 		href: "/search",
 	},
 	{
@@ -84,12 +84,12 @@ const supportLinks = [
 
 			<form action="/search" method="get" class="mx-auto mt-12 flex max-w-3xl items-center justify-between gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3 text-left backdrop-blur">
 				<div class="flex flex-1 flex-col">
-					<label for="not-found-search" class="text-xs uppercase tracking-[0.3em] text-white/60">Search everything</label>
+					<label for="not-found-search" class="text-xs uppercase tracking-[0.3em] text-white/60">Search videos</label>
 					<input
 						type="search"
 						name="q"
 						id="not-found-search"
-						placeholder="Videos, docs, workshops, experiments..."
+						placeholder="Kubernetes operators, GraphQL, Talos…"
 						class="mt-2 bg-transparent text-base text-white placeholder:text-slate-400 focus:outline-none"
 						required
 					/>

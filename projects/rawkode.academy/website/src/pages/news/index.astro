@@ -24,7 +24,7 @@ for (const technology of allTechnologies) {
 
 const pageTitle = "Cloud Native News";
 const pageDescription =
-	"Cloud native, Kubernetes, and AI infrastructure news for engineers — release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
+	"Cloud native, Kubernetes, and AI infrastructure news for engineers - release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
 
 function formatDisplayDate(date: Date): string {
 	return new Intl.DateTimeFormat("en-US", {
@@ -49,7 +49,7 @@ function formatTechnologyLabel(value: string): string {
 }
 ---
 
-<Page title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
 	<Fragment slot="extra-head">
 		<NewsItemListJsonLd
 			stories={allNews}

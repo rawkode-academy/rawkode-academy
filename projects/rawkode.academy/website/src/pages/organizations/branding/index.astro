@@ -16,7 +16,7 @@ const colorThemes = [
 		name: "Rawkode Blue",
 		badge: "Canonical",
 		description:
-			"The single brand identity for Rawkode and Rawkode Academy. Used across every Rawkode property — website, content, livestreams, merch, and partner lockups.",
+			"The single brand identity for Rawkode and Rawkode Academy. Used across every Rawkode property: website, content, livestreams, merch, and partner lockups.",
 		gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
 		colors: [
 			{
@@ -45,7 +45,7 @@ const brandGradients = [
 		angleLabel: "135°",
 		angleDeg: 135,
 		description:
-			"The canonical brand gradient — purple into cyan on a 135° sweep, top-left to bottom-right. Used across hero washes, logo lockups, and CTAs.",
+			"The canonical brand gradient. Purple into cyan on a 135° sweep, top-left to bottom-right. Used across hero washes, logo lockups, and CTAs.",
 		stops: [
 			{ label: "Purple", hex: "#5F5ED7", offset: "0%" },
 			{ label: "Cyan", hex: "#00CEFF", offset: "100%" },
@@ -143,7 +143,7 @@ const defaultLogoGradient =
 	"linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)";
 ---
 
-<Page title="Branding" description="Official Rawkode Academy brand assets — logos, colors, and usage guidelines for partners.">
+<Page title="Branding" description="Official Rawkode Academy brand assets: logos, colors, and usage guidelines for partners.">
   <Hero title="Branding Guidelines" subtitle="Our brand assets, color system, and recommended usage for partners" badge="Partner Resources" background="blobs" pattern="grid" wave={true} client:load>
     <Fragment slot="actions">
       <Button variant="primary" href="#assets">View Assets</Button>
@@ -251,7 +251,7 @@ const defaultLogoGradient =
       <div class="space-y-4">
         <div class="flex flex-col gap-2">
           <h3 class="text-lg font-semibold text-primary-content">Core color palette</h3>
-          <p class="text-secondary-content">Rawkode has a single canonical brand identity — Rawkode Blue. All Rawkode properties (website, content, livestreams, merch, partner co-brands) use this palette. Partners must stick to this treatment — no custom palettes.</p>
+          <p class="text-secondary-content">Rawkode has a single canonical brand identity: Rawkode Blue. All Rawkode properties (website, content, livestreams, merch, partner co-brands) use this palette. Partners must stick to this treatment, no custom palettes.</p>
         </div>
         <div class="grid md:grid-cols-2 gap-6">
           {colorThemes.map((theme) => (
@@ -286,8 +286,8 @@ const defaultLogoGradient =
 
       <pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-md overflow-x-auto"><code>{`/* Define colors as variables */
 :root {
-  --brand-primary: #5F5ED7;   /* Rawkode Blue — purple */
-  --brand-secondary: #00CEFF; /* Rawkode Blue — cyan */
+  --brand-primary: #5F5ED7;   /* Rawkode Blue, purple */
+  --brand-secondary: #00CEFF; /* Rawkode Blue, cyan */
   --brand-on-surface: #111827; /* deep blue-gray */
 }
 
@@ -301,7 +301,7 @@ const defaultLogoGradient =
 .brand-logo--primary { color: var(--brand-primary); }
 .brand-logo--dark { color: var(--brand-on-surface); }`}</code></pre>
 
-      <h3 class="text-lg font-semibold mt-10 text-primary-content">Clearspace and sizing — rules</h3>
+      <h3 class="text-lg font-semibold mt-10 text-primary-content">Clearspace and sizing: rules</h3>
       <ul class="list-disc pl-6 text-secondary-content">
         <li>Always maintain a minimum clearspace equal to the height of the monogram on all sides.</li>
         <li>Do not place the wordmark on low-contrast or busy patterns.</li>

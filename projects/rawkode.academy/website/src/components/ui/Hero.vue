@@ -232,7 +232,7 @@ const actionsClasses = computed(() => {
 </script>
 
 <style scoped>
-/* Brand-tinted grid pattern — uses currentColor so it inherits the active brand-primary
+/* Brand-tinted grid pattern - uses currentColor so it inherits the active brand-primary
    when the parent sets `color: rgb(var(--brand-primary))`. */
 .bg-grid-pattern {
 	color: rgb(var(--brand-primary));

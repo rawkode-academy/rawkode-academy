@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="flex gap-3 p-4 border-b border-gray-200 dark:border-gray-700"
+		class="flex gap-3 p-4 border-b border-surface"
 		role="status"
 		:aria-label="ariaLabel"
 	>

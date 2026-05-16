@@ -2,7 +2,7 @@ export interface PersonListEntry {
 	id: string;
 	name: string;
 	avatarUrl?: string | undefined;
-	// Full URLs only — the content-config transform on people resolves
+	// Full URLs only - the content-config transform on people resolves
 	// the bare-handle frontmatter fields into URLs already.
 	sameAs?: ReadonlyArray<string | undefined>;
 }

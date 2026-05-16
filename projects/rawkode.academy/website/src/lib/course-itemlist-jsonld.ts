@@ -36,7 +36,7 @@ const difficultyEducationalLevel: Record<
 /**
  * Build a schema.org ItemList JSON-LD payload for the courses index page.
  *
- * Each ListItem embeds a Course item — Google's documented shape for the
+ * Each ListItem embeds a Course item - Google's documented shape for the
  * Course rich result on list-type pages.
  * See https://developers.google.com/search/docs/appearance/structured-data/course
  */

@@ -4,9 +4,9 @@
  *
  * Mirrors the logic in `src/lib/theme.ts` so the correct colour scheme
  * is applied before paint (no FOUC). Supports three preferences:
- *   - "light"  — always light
- *   - "dark"   — always dark
- *   - "system" — follow `prefers-color-scheme`, including live updates
+ *   - "light"  - always light
+ *   - "dark"   - always dark
+ *   - "system" - follow `prefers-color-scheme`, including live updates
  *
  * When the preference is "system", a `prefers-color-scheme` listener
  * is installed so OS theme changes are reflected without a reload.

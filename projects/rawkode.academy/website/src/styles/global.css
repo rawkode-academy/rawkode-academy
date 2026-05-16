@@ -1177,3 +1177,16 @@ html.dark {
 @utility card-shadow-xl {
 	box-shadow: var(--shadow-xl);
 }
+
+/* Brand-tinted surface borders. Replaces the `border-gray-200 dark:border-gray-700`
+   neutral pair across the codebase: on a rawkode-blue design system,
+   neutral grays felt off — the brand palette wants brand-tinted borders.
+   `--surface-border` resolves per mode (light: subtle purple at low
+   opacity, dark: more saturated purple at higher opacity). */
+@utility border-surface {
+	border-color: var(--surface-border);
+}
+
+@utility border-surface-strong {
+	border-color: var(--surface-border-strong);
+}

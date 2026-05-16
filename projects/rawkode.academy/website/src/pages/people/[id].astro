@@ -146,10 +146,10 @@ const noindex =
 
 const pageTitle = (() => {
 	if (showCount > 0) {
-		return `${person.data.name} — Host of ${showNames[0]}`;
+		return `${person.data.name}: Host of ${showNames[0]}`;
 	}
 	if (topTechNames.length > 0) {
-		return `${person.data.name} — Talks on ${topTechNames.slice(0, 2).join(" & ")}`;
+		return `${person.data.name}: Talks on ${topTechNames.slice(0, 2).join(" & ")}`;
 	}
 	return person.data.name;
 })();
@@ -176,7 +176,7 @@ const pageDescription = (() => {
 		parts.push(`covering ${topTechNames.slice(0, 4).join(", ")}`);
 	}
 	if (parts.length === 0) {
-		return `${person.data.name} on Rawkode Academy — interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
+		return `${person.data.name} on Rawkode Academy: interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
 	}
 	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and deep dives on Rawkode Academy.`;
 })();
@@ -237,6 +237,7 @@ const relMeUrls = [
     title={pageTitle}
     description={pageDescription}
     noindex={noindex}
+    pageType="ProfilePage"
     useImageDirectly={Boolean(person.data.avatarUrl)}
     image={person.data.avatarUrl ? { image: new URL(person.data.avatarUrl) } : undefined}
 >
@@ -263,7 +264,7 @@ const relMeUrls = [
         <link
             rel="alternate"
             type="application/rss+xml"
-            title={`Rawkode Academy — ${person.data.name} (RSS)`}
+            title={`Rawkode Academy: ${person.data.name} (RSS)`}
             href={`/api/feeds/people/${person.data.id}.xml`}
         />
     </Fragment>

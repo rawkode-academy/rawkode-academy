@@ -127,7 +127,7 @@ const offerings: Offering[] = [
 			</div>
 			<div class="space-y-12 md:grid md:grid-cols-1 lg:grid-cols-3 md:gap-8 xl:gap-12 md:space-y-0">
 				<div v-for="offer in offerings"
-					class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-card">
+					class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-surface shadow-sm hover:shadow-lg transition-card">
 					<div class="flex items-center mb-4">
 						<div
 							:class="`flex justify-center items-center mr-4 w-12 h-12 bg-${offer.color} rounded-full dark:bg-${offer.color} lg:h-14 lg:w-14`">
