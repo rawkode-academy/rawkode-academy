@@ -153,7 +153,7 @@ const expandSidebar = () => {
 	<aside
 		class="glass-panel sidebar-shell"
 		:class="[
-			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-card ease-[cubic-bezier(0.22,1,0.36,1)]',
 			'rounded-4xl',
 			isCollapsed ? 'hidden md:block md:w-[4.75rem]' : 'block w-64',
 		]"

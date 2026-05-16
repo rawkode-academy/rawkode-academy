@@ -96,7 +96,7 @@ const pricingPlans: PricingPlan[] = [
 <template>
 	<div class="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
 		<div v-for="plan in pricingPlans"
-			class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-800 dark:text-white transition-all duration-300 hover:shadow-xl hover:drop-shadow-xl hover:scale-[1.02]"
+			class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-800 dark:text-white transition-card hover:shadow-xl hover:drop-shadow-xl hover:scale-[1.02]"
 			:class="{ 'border-secondary dark:border-secondary border-2 relative': plan.popular }">
 
 			<div v-if="plan.popular"

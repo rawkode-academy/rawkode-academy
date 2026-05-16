@@ -249,7 +249,7 @@ const trackSignInClick = () => {
 						type="button"
 						@click="subscribeAsLearner"
 						:disabled="isLoading"
-						class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-wait disabled:hover:translate-y-0 disabled:hover:shadow-none"
+						class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-smooth bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-wait disabled:hover:translate-y-0 disabled:hover:shadow-none"
 					>
 						<span class="flex items-center justify-center gap-2">
 							<svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -280,7 +280,7 @@ const trackSignInClick = () => {
 							v-if="!isExpanded"
 							type="button"
 							@click="expandForm"
-							class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0"
+							class="group w-full py-2.5 px-4 rounded-xl text-sm font-semibold transition-smooth bg-primary text-white hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:translate-y-0"
 						>
 							<span class="flex items-center justify-center gap-2">
 								<svg class="w-4 h-4 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -312,7 +312,7 @@ const trackSignInClick = () => {
 									placeholder="you@example.com"
 									required
 									:disabled="isLoading"
-									class="w-full py-2.5 pl-4 pr-12 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/80 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+									class="w-full py-2.5 pl-4 pr-12 rounded-xl border-2 border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/80 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm transition-smooth focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
 								/>
 								<p :id="emailHelpId" class="sr-only">
 									Get weekly cloud native updates in your inbox.
@@ -320,7 +320,7 @@ const trackSignInClick = () => {
 								<button
 									type="submit"
 									:disabled="isLoading || !email.trim()"
-									class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-primary text-white transition-all duration-200 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+									class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-primary text-white transition-smooth hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
 									aria-label="Submit email subscription"
 									:title="isLoading ? 'Subscribing...' : 'Subscribe'"
 								>
@@ -344,7 +344,7 @@ const trackSignInClick = () => {
 							<a
 								:href="signInUrl"
 								@click="trackSignInClick"
-								class="inline-flex items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide text-white bg-gradient-primary shadow-lg hover:shadow-xl border border-white/40 dark:border-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+								class="inline-flex items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide text-white bg-gradient-primary shadow-lg hover:shadow-xl border border-white/40 dark:border-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-smooth"
 							>
 								Continue with Sign in
 							</a>

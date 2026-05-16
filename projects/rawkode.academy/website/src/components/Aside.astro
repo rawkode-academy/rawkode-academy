@@ -58,7 +58,7 @@ switch (variant) {
 ---
 
 <div
-	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-all duration-200 hover:shadow-md group ${styles.glow}`}
+	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-smooth hover:shadow-md group ${styles.glow}`}
 >
 	<!-- Subtle accent line -->
 	<div class={`absolute left-0 top-0 bottom-0 w-0.5 ${styles.iconBg} opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
@@ -128,7 +128,7 @@ switch (variant) {
 
 	/* Refined link styling */
 	.aside :global(a) {
-		@apply font-medium underline decoration-1 underline-offset-2 transition-all duration-200;
+		@apply font-medium underline decoration-1 underline-offset-2 transition-smooth;
 	}
 
 	.aside.border-green-200 :global(a) {
