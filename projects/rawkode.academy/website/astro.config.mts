@@ -112,7 +112,13 @@ export default defineConfig({
 	}),
 	trailingSlash: "never",
 	integrations: [
-		...(d2Available ? [d2()] : []),
+		// Inline the SVG output so we don't depend on the generated file's
+		// on-disk path. Our article MDX lives outside the website project (in
+		// the sibling @rawkodeacademy/content package), and astro-d2 computes
+		// its output path relative to file.cwd — that traversal escapes both
+		// public/ and the URL base, leaving the <img src> pointing at a path
+		// that never ships in dist. Inlining avoids the broken file reference.
+		...(d2Available ? [d2({ inline: true })] : []),
 		expressiveCode({
 			themes: ["catppuccin-mocha", "catppuccin-latte"],
 			...(cueLanguageGrammar && {
