@@ -53,6 +53,19 @@ Always reach for semantic Tailwind classes — never hardcode hex values:
 | `text-primary-content` | Primary text colour (gray-900 / white) |
 | `text-secondary-content` | Secondary text colour (gray-700 / gray-300) |
 | `text-muted` | Muted text colour (gray-600 / gray-400) |
+
+The text-tone names are also exposed as **CSS custom properties** at `:root` and `html.dark` (`--text-primary-content`, `--text-secondary-content`, `--text-muted`) so scoped Astro/Vue `<style>` blocks can reach them via `var()`:
+
+```vue
+<style scoped>
+.popover-title {
+  /* Use this from scoped styles since @utility classes can't be @apply'd here */
+  color: var(--text-primary-content);
+}
+</style>
+```
+
+When applying as a class on an element, prefer the `text-*` utility. The CSS var is for cases where you need the colour value inside a CSS rule (gradients, computed colours, etc.).
 | `bg-gradient-primary` | 135° brand gradient (primary → secondary) |
 | `bg-gradient-secondary` | 315° brand gradient (reverse sweep) |
 | `bg-gradient-hero` / `bg-gradient-hero-alt` | Brand-tinted hero washes (mode-aware) |
