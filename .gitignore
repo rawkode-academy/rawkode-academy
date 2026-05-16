@@ -35,3 +35,6 @@ devenv.local.nix
 
 # macOS
 .DS_Store
+
+# Loop directive (per-session, never committed)
+LOOP.md
