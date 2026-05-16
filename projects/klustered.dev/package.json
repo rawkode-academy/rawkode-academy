@@ -1,0 +1,28 @@
+{
+	"name": "klustered-dev",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro check && astro build",
+		"preview": "astro preview",
+		"check": "astro check",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "wrangler d1 migrations apply DB"
+	},
+	"dependencies": {
+		"@astrojs/check": "0.9.8",
+		"@astrojs/cloudflare": "13.1.4",
+		"@tailwindcss/vite": "^4.2.2",
+		"astro": "https://pkg.pr.new/astro@16059",
+		"better-auth": "^1.5.6",
+		"drizzle-orm": "^0.45.1",
+		"tailwindcss": "^4.2.2",
+		"typescript": "^6.0.2"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20251208.0",
+		"drizzle-kit": "^0.31.6",
+		"wrangler": "^4.77.0"
+	}
+}

@@ -4,18 +4,20 @@ Admin + competitor portal for the Klustered game show. Lives at `https://kluster
 
 ## Stack
 
-- Deno 2 + Astro 5
+- Bun + Astro 5 (matches `projects/rawkode.academy/website`)
 - Tailwind v4
-- Cloudflare D1 (separate instance from `rawkode.academy`)
+- Cloudflare Workers (SSR via `@astrojs/cloudflare`)
+- Cloudflare D1 + Drizzle ORM
 - Shared Better Auth deployment with `rawkode.academy`
-- Cloudflare Workers (static `dist/` for now; SSR added when auth lands)
 
 ## Development
 
 ```sh
-cuenv task dev    # or: deno task dev
-cuenv task build  # or: deno task build
-cuenv task check  # or: deno task check
+cuenv task dev       # or: bun run dev
+cuenv task build     # or: bun run build
+cuenv task check     # or: bun run check
+cuenv task db.generate
+cuenv task db.migrate
 ```
 
 The companion public site lives at `../klustered.live/`.
