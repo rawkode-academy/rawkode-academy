@@ -43,7 +43,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bytes",
- "http",
+ "http 1.4.0",
  "spin-sdk",
  "wit-bindgen-rust",
 ]
@@ -74,12 +74,22 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.2.9"
+version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd6effc99afb63425aff9b05836f029929e345a6148a14b7ecd5ab67af944482"
+checksum = "601cbb57e577e2f5ef5be8e7b83f0f63994f25aa94d673e54a92d5c516d101f1"
 dependencies = [
  "bytes",
  "fnv",
+ "itoa",
+]
+
+[[package]]
+name = "http"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
+dependencies = [
+ "bytes",
  "itoa",
 ]
 
@@ -173,7 +183,7 @@ source = "git+https://github.com/fermyon/spin?tag=v1.3.0#9fb8256d1380a046414b22b
 dependencies = [
  "anyhow",
  "bytes",
- "http",
+ "http 0.2.12",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -187,7 +197,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "form_urlencoded",
- "http",
+ "http 0.2.12",
  "routefinder",
  "spin-macro",
  "thiserror",
