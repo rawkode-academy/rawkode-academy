@@ -35,8 +35,17 @@ const navLinks = [
 		<meta property="og:title" content={`${title} · Klustered`} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
+		<meta name="theme-color" content="#000000" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<link rel="alternate" type="application/calendar" href="/schedule.ics" title="Klustered schedule" />
 	</head>
 	<body class="min-h-dvh bg-black font-sans text-white antialiased">
+		<a
+			href="#main"
+			class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900"
+		>
+			Skip to content
+		</a>
 		{
 			heroVariant === "subtle" && (
 				<div
@@ -57,14 +66,15 @@ const navLinks = [
 					/ Live
 				</span>
 			</a>
-			<nav class="hidden gap-1 md:flex">
+			<nav class="hidden gap-1 md:flex" aria-label="Primary">
 				{
 					navLinks.map((link) => {
 						const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
 						return (
 							<a
 								href={link.href}
-								class={`rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition ${
+								aria-current={active ? "page" : undefined}
+								class={`rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-400 ${
 									active
 										? "bg-fuchsia-500/15 text-fuchsia-200"
 										: "text-slate-300 hover:bg-white/5 hover:text-white"
@@ -78,7 +88,7 @@ const navLinks = [
 			</nav>
 		</header>
 
-		<main class="mx-auto max-w-6xl px-6 pb-24">
+		<main id="main" class="mx-auto max-w-6xl px-6 pb-24">
 			<slot />
 		</main>
 

@@ -100,9 +100,14 @@ const seasons = await db
 					<textarea
 						name="message"
 						rows="5"
+						maxlength="2000"
+						data-counter-input
 						placeholder="What you do, what cluster horrors you've seen, why you want to do this on a livestream…"
 						class="rounded-lg border border-white/15 bg-black/40 px-3 py-2 text-sm text-white focus:border-fuchsia-500 focus:outline-none"
 					/>
+					<span class="self-end text-[10px] uppercase tracking-wider text-slate-500" data-counter-output>
+						0 / 2000
+					</span>
 				</label>
 
 				<button
@@ -112,6 +117,20 @@ const seasons = await db
 					Send application
 				</button>
 			</form>
+
+			<script is:inline>
+				(() => {
+					const input = document.querySelector("[data-counter-input]");
+					const out = document.querySelector("[data-counter-output]");
+					if (!input || !out) return;
+					const max = input.maxLength;
+					function update() {
+						out.textContent = `${input.value.length} / ${max}`;
+					}
+					input.addEventListener("input", update);
+					update();
+				})();
+			</script>
 		)
 	}
 </SiteLayout>

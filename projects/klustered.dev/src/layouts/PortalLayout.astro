@@ -26,8 +26,16 @@ const pathname = Astro.url.pathname;
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="robots" content="noindex" />
 		<title>{title} · Klustered</title>
+		<meta name="theme-color" content="#020617" />
 	</head>
 	<body class="min-h-dvh bg-slate-950 text-slate-100 antialiased">
+		<a
+			href="#portal-main"
+			class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900"
+		>
+			Skip to content
+		</a>
+
 		<div class="grid min-h-dvh grid-cols-1 md:grid-cols-[16rem_1fr]">
 			<aside
 				class="border-b border-slate-800 bg-slate-900/60 px-6 py-6 md:border-b-0 md:border-r"
@@ -51,7 +59,7 @@ const pathname = Astro.url.pathname;
 
 				{
 					nav.length > 0 && (
-						<nav class="mt-6 flex flex-col gap-1">
+						<nav class="mt-6 flex flex-col gap-1" aria-label="Portal sections">
 							{nav.map((link) => {
 								const active =
 									pathname === link.href ||
@@ -59,7 +67,8 @@ const pathname = Astro.url.pathname;
 								return (
 									<a
 										href={link.href}
-										class={`rounded-lg px-3 py-1.5 text-sm transition ${
+										aria-current={active ? "page" : undefined}
+										class={`rounded-lg px-3 py-1.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-400 ${
 											active
 												? "bg-fuchsia-500/15 text-fuchsia-200"
 												: "text-slate-300 hover:bg-slate-800/60 hover:text-slate-100"
@@ -95,7 +104,7 @@ const pathname = Astro.url.pathname;
 				</div>
 			</aside>
 
-			<main class="flex flex-col gap-6 px-6 py-8 md:px-10 md:py-10">
+			<main id="portal-main" class="flex flex-col gap-6 px-6 py-8 md:px-10 md:py-10">
 				<header>
 					<h1 class="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
 				</header>
