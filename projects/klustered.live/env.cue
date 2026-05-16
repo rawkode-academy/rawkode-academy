@@ -37,24 +37,24 @@ ci: pipelines: {
 
 tasks: {
 	dev: schema.#Task & {
-		command: "deno"
-		args: ["task", "dev"]
+		command: "bun"
+		args: ["run", "dev"]
 
 		inputs: [
 			"astro.config.mjs",
-			"deno.json",
+			"package.json",
 			"public/**",
 			"src/**",
 		]
 	}
 
 	build: schema.#Task & {
-		command: "deno"
-		args: ["task", "build"]
+		command: "bun"
+		args: ["run", "build"]
 
 		inputs: [
 			"astro.config.mjs",
-			"deno.json",
+			"package.json",
 			"public/**",
 			"src/**",
 		]
@@ -65,12 +65,12 @@ tasks: {
 	}
 
 	check: schema.#Task & {
-		command: "deno"
-		args: ["task", "check"]
+		command: "bun"
+		args: ["run", "check"]
 
 		inputs: [
 			"astro.config.mjs",
-			"deno.json",
+			"package.json",
 			"src/**",
 			"tsconfig.json",
 		]
@@ -79,13 +79,13 @@ tasks: {
 	deploy: schema.#TaskGroup & {
 		type: "group"
 		main: schema.#Task & {
-			command: "deno"
-			args: ["run", "-A", "npm:wrangler@^4", "deploy"]
+			command: "bun"
+			args: ["x", "wrangler", "deploy"]
 			dependsOn: [_t.build]
 		}
 		preview: schema.#Task & {
-			command: "deno"
-			args: ["run", "-A", "npm:wrangler@^4", "versions", "upload"]
+			command: "bun"
+			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"

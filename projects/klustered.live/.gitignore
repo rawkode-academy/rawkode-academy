@@ -2,7 +2,7 @@
 dist/
 .astro/
 
-# Deno
+# Node / Bun
 node_modules/
 
 # Cloudflare

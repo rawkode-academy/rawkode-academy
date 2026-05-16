@@ -1,0 +1,23 @@
+{
+	"name": "klustered-live",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro check && astro build",
+		"preview": "astro preview",
+		"check": "astro check"
+	},
+	"dependencies": {
+		"@astrojs/check": "0.9.8",
+		"@astrojs/cloudflare": "13.1.4",
+		"@tailwindcss/vite": "^4.2.2",
+		"astro": "https://pkg.pr.new/astro@16059",
+		"tailwindcss": "^4.2.2",
+		"typescript": "^6.0.2"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20251208.0",
+		"wrangler": "^4.77.0"
+	}
+}
