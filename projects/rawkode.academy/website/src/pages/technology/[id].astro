@@ -379,7 +379,7 @@ const hasCommunityLinks =
 
 				<div class="technology-header-grid">
 					<div class="technology-header-copy">
-						<div class="flex flex-wrap items-center gap-2 mb-3">
+						<div class="technology-badges-row flex flex-wrap items-center gap-2 mb-3">
 							{technology.matrix && (
 								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
 									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
@@ -418,7 +418,7 @@ const hasCommunityLinks =
 						</p>
 						<h1 class="technology-title">{technology.name}</h1>
 
-						<div class="flex flex-wrap gap-3 items-center">
+						<div class="technology-actions-row flex flex-wrap gap-3 items-center">
 							{technology.website && (
 								<a
 									href={technology.website}
@@ -1235,7 +1235,8 @@ const hasCommunityLinks =
 			text-align: center;
 		}
 
-		.technology-header-copy > div {
+		.technology-badges-row,
+		.technology-actions-row {
 			justify-content: center;
 		}
 
