@@ -1,0 +1,12 @@
+---
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const title = "Ucompetitors";
+---
+
+<PortalLayout title={title} section="admin" nav={[...ADMIN_NAV]}>
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+		<p>CRUD for {title.toLowerCase()} lands in Phase 5.</p>
+	</section>
+</PortalLayout>
