@@ -231,8 +231,8 @@ const categoryLabel =
 const seoTitle =
 	technology.seo?.title ??
 	(videoCount > 0
-		? `${technology.name} Tutorials, Videos & Guides | Rawkode Academy`
-		: `${technology.name} — ${categoryLabel} | Rawkode Academy`);
+		? `${technology.name} Tutorials, Videos & Guides`
+		: `${technology.name} — ${categoryLabel}`);
 
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
