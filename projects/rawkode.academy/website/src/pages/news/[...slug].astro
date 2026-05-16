@@ -80,6 +80,8 @@ const readingTime = calculateReadingTime(article.body || "");
 	isArticle={true}
 	publishedAt={article.data.publishedAt}
 	authors={authors}
+	articleSection="News"
+	articleTags={tags.map((tag) => tag.label)}
 >
 	<Fragment slot="extra-head">
 		<NewsJsonLd article={article} authors={authors} />

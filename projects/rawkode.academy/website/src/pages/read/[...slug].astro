@@ -129,6 +129,8 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 	publishedAt={article.data.publishedAt}
 	updatedAt={article.data.updatedAt}
 	authors={authors}
+	articleSection={badgeConfig.label}
+	articleTags={tags.map((tag) => tag.label)}
 	{...(howToJsonLd ? { jsonLd: howToJsonLd } : {})}
 >
 	{imageUrl ? (
