@@ -34,4 +34,11 @@ export interface OpenGraphProps {
 	 * on tutorial articles.
 	 */
 	jsonLd?: Record<string, unknown> | undefined;
+	/**
+	 * Open Graph article-namespace section + tags. Only emitted when
+	 * `isArticle` is true. LinkedIn and Facebook use these to categorise
+	 * shares so they group with related posts in feed recommendations.
+	 */
+	articleSection?: string | undefined;
+	articleTags?: ReadonlyArray<string> | undefined;
 }

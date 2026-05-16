@@ -13,6 +13,8 @@ const {
 	updatedAt,
 	authors,
 	pageType = "WebPage",
+	articleSection,
+	articleTags,
 } = Astro.props;
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
@@ -124,6 +126,12 @@ const firstAuthorMastodon = shouldShowArticleMeta
 	shouldShowArticleMeta && (
 		<>
 			<meta property="article:publisher" content="https://rawkode.academy" />
+			{articleSection && (
+				<meta property="article:section" content={articleSection} />
+			)}
+			{articleTags?.map((tag: string) => (
+				<meta property="article:tag" content={tag} />
+			))}
 			{authors && authors.map((author: CollectionEntry<"people">) => (
 				author.data.github && <meta property="article:author" content={author.data.github} />
 			))}
