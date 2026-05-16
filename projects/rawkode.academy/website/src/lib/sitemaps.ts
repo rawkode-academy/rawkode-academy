@@ -228,6 +228,7 @@ export async function getArticleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			article.data.publishedAt,
 		),
 		changefreq: "daily" as const,
+		priority: 0.7,
 	}));
 
 	return sortByPath(entries);
@@ -275,6 +276,7 @@ export async function getTechnologySitemapEntries(): Promise<
 				(technology.data as Record<string, unknown>).publishedAt,
 			),
 			changefreq: "weekly" as const,
+			priority: 0.5,
 		}));
 
 	return sortByPath(entries);
@@ -291,6 +293,7 @@ export async function getVideoSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			video.data.publishedAt,
 		),
 		changefreq: "daily" as const,
+		priority: 0.7,
 	}));
 
 	return sortByPath(entries);
@@ -310,6 +313,7 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			course.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
+		priority: 0.7,
 	}));
 
 	const moduleEntries = modules.map((module) => ({
@@ -320,6 +324,7 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			module.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
+		priority: 0.6,
 	}));
 
 	return sortByPath([...courseEntries, ...moduleEntries]);
@@ -338,6 +343,7 @@ export async function getLearningPathSitemapEntries(): Promise<
 			learningPath.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
+		priority: 0.7,
 	}));
 
 	return sortByPath(entries);
@@ -393,6 +399,7 @@ export async function getPeopleSitemapEntries(): Promise<SitemapUrlEntry[]> {
 				(person.data as Record<string, unknown>).publishedAt,
 			),
 			changefreq: "monthly" as const,
+			priority: 0.4,
 		}));
 
 	return sortByPath(entries);
@@ -409,6 +416,7 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			(show.data as Record<string, unknown>).publishedAt,
 		),
 		changefreq: "weekly" as const,
+		priority: 0.6,
 	}));
 
 	return sortByPath(entries);
@@ -425,6 +433,7 @@ export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			(seriesEntry.data as Record<string, unknown>).publishedAt,
 		),
 		changefreq: "weekly" as const,
+		priority: 0.5,
 	}));
 
 	return sortByPath(entries);
@@ -441,6 +450,7 @@ export async function getNewsSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			item.data.publishedAt,
 		),
 		changefreq: "weekly" as const,
+		priority: 0.7,
 	}));
 
 	return sortByPath(entries);
@@ -468,6 +478,7 @@ export async function getFreshNewsSitemapEntries(
 		path: `/news/${item.id}`,
 		lastmod: item.data.publishedAt,
 		changefreq: "hourly" as const,
+		priority: 0.7,
 	}));
 }
 
@@ -482,6 +493,7 @@ export async function getAdrSitemapEntries(): Promise<SitemapUrlEntry[]> {
 			(adr.data as Record<string, unknown>).updatedAt,
 		),
 		changefreq: "monthly" as const,
+		priority: 0.4,
 	}));
 
 	return sortByPath(entries);
