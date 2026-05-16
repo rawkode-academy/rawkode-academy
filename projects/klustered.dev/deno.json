@@ -1,0 +1,26 @@
+{
+	"tasks": {
+		"dev": "deno run -A npm:astro@^5 dev",
+		"build": "deno run -A npm:astro@^5 build",
+		"preview": "deno run -A npm:astro@^5 preview",
+		"check": "deno run -A npm:astro@^5 check"
+	},
+	"imports": {
+		"astro": "npm:astro@^5",
+		"@astrojs/check": "npm:@astrojs/check@^0.9",
+		"@astrojs/cloudflare": "npm:@astrojs/cloudflare@^13",
+		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4",
+		"tailwindcss": "npm:tailwindcss@^4",
+		"typescript": "npm:typescript@^5"
+	},
+	"nodeModulesDir": "auto",
+	"compilerOptions": {
+		"jsx": "preserve",
+		"lib": ["dom", "dom.iterable", "deno.ns"]
+	},
+	"fmt": {
+		"useTabs": true,
+		"indentWidth": 2,
+		"lineWidth": 100
+	}
+}
