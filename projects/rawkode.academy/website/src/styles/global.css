@@ -593,44 +593,6 @@ html.dark {
 		);
 	}
 
-	/* Active/selected state gradient */
-	.bg-gradient-active {
-		background: linear-gradient(
-			to right,
-			rgba(var(--brand-primary), 0.15) 0%,
-			rgba(var(--brand-primary), 0.05) 100%
-		);
-	}
-
-	/* Image/video overlay gradient */
-	.bg-gradient-overlay {
-		background: linear-gradient(
-			to top right,
-			rgba(var(--brand-primary), 0.3) 0%,
-			rgba(var(--brand-secondary), 0.3) 100%
-		);
-		mix-blend-mode: multiply;
-	}
-
-	/* Decorative glow effect (used with blur) */
-	.bg-gradient-glow {
-		background: linear-gradient(
-			to top,
-			rgba(var(--brand-primary), 0.3) 0%,
-			transparent 50%,
-			rgba(var(--brand-secondary), 0.2) 100%
-		);
-	}
-
-	html.dark .bg-gradient-glow {
-		background: linear-gradient(
-			to top,
-			rgba(var(--brand-primary), 0.4) 0%,
-			transparent 50%,
-			rgba(var(--brand-secondary), 0.25) 100%
-		);
-	}
-
 	/* Text Color Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
 	/* Animation Utilities — defined as `@utility` at the end of file
