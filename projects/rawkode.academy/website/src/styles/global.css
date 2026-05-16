@@ -370,16 +370,6 @@ html.dark {
 		color: rgb(var(--brand-primary));
 	}
 
-	.stat-panel {
-		@apply flex min-h-24 flex-col justify-between rounded-xl border p-4 sm:p-5;
-		background-color: rgba(255, 255, 255, 0.74);
-		border-color: var(--surface-border);
-	}
-
-	html.dark .stat-panel {
-		background-color: rgba(15, 23, 42, 0.34);
-	}
-
 	.soft-panel {
 		@apply rounded-xl border;
 		background:
@@ -402,10 +392,6 @@ html.dark {
 
 	.surface-divider {
 		border-color: var(--surface-border);
-	}
-
-	.surface-divider-strong {
-		border-color: var(--surface-border-strong);
 	}
 
 	/* Branded media container for logos/icons within glass cards - glass-like with subtle brand tint */
@@ -456,14 +442,6 @@ html.dark {
 		border-color: rgba(107, 114, 128, 0.5);
 	}
 
-	.border-muted {
-		border-color: rgba(255, 255, 255, 0.4);
-	}
-
-	html.dark .border-muted {
-		border-color: rgba(75, 85, 99, 0.4);
-	}
-
 	/* Border Utilities - Legacy glass variants */
 	.border-glass {
 		@apply border border-white/40 dark:border-gray-600/50;
@@ -484,22 +462,6 @@ html.dark {
 
 	html.dark .bg-surface {
 		background: rgba(31, 41, 55, 0.4);
-	}
-
-	.bg-surface-hover {
-		background: rgba(255, 255, 255, 0.6);
-	}
-
-	html.dark .bg-surface-hover {
-		background: rgba(55, 65, 81, 0.6);
-	}
-
-	.bg-surface-active {
-		background: rgba(255, 255, 255, 0.7);
-	}
-
-	html.dark .bg-surface-active {
-		background: rgba(55, 65, 81, 0.7);
 	}
 
 	/* Button Variants */
