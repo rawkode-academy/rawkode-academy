@@ -1,17 +1,39 @@
 ---
 export const prerender = true;
 
+import PersonItemListJsonLd from "@/components/html/person-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 
 const people = await getCollection("people");
 const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+const peopleJsonLd = sortedPeople.map((person) => ({
+	id: person.data.id,
+	name: person.data.name,
+	avatarUrl: person.data.avatarUrl,
+	sameAs: [
+		person.data.github,
+		person.data.twitter,
+		person.data.bluesky,
+		person.data.linkedin,
+		person.data.mastodon,
+		person.data.website,
+		person.data.youtube,
+	],
+}));
 ---
 
 <Page
 	title="People"
 	description="Meet the hosts, guests, contributors, and instructors behind Rawkode Academy — the people creating and curating our cloud native content."
 >
+	<PersonItemListJsonLd
+		slot="extra-head"
+		people={peopleJsonLd}
+		listUrl={new URL("/people", Astro.site ?? Astro.url).href}
+		listName="Rawkode Academy People"
+	/>
 	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
 		<!-- Hero Section -->
 		<section class="w-full">
