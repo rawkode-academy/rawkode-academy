@@ -47,6 +47,7 @@ try {
 	technologies = items.map((e) => {
 		const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
 		const slug = e.id.endsWith("/index") ? e.id.slice(0, -6) : e.id;
+		const lastCovered = techRecencyMap.get(slug);
 
 		const tech: Technology = {
 			id: e.id,
@@ -54,7 +55,7 @@ try {
 			...(logo && { logo }),
 			...(e.data.website && { website: e.data.website }),
 			...(e.data.documentation && { documentation: e.data.documentation }),
-			lastCovered: techRecencyMap.get(slug),
+			...(lastCovered && { lastCovered }),
 		};
 		return tech;
 	});
