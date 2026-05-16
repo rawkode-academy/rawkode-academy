@@ -4,6 +4,7 @@ export const prerender = true;
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("technology");
@@ -14,14 +15,38 @@ type Technology = {
 	logo?: string;
 	website?: string;
 	documentation?: string;
+	lastCovered?: Date;
 };
 
 let technologies: Technology[] = [];
 try {
-	const items = await getCollection("technologies");
+	const [items, allVideos, allArticles, allNews, allCourses] = await Promise.all([
+		getCollection("technologies"),
+		getCollection("videos"),
+		getCollection("articles"),
+		getCollection("news"),
+		getCollection("courses"),
+	]);
+
+	const techRecencyMap = new Map<string, Date>();
+
+	const trackRecency = (techs: unknown, date: Date) => {
+		for (const slug of normalizeTechnologyReferences(techs)) {
+			const existing = techRecencyMap.get(slug);
+			if (!existing || date > existing) {
+				techRecencyMap.set(slug, date);
+			}
+		}
+	};
+
+	for (const item of allVideos) trackRecency(item.data.technologies, new Date(item.data.publishedAt));
+	for (const item of allArticles) trackRecency(item.data.technologies, new Date(item.data.publishedAt));
+	for (const item of allNews) trackRecency(item.data.technologies, new Date(item.data.publishedAt));
+	for (const item of allCourses) trackRecency(item.data.technologies, new Date(item.data.publishedAt));
 
 	technologies = items.map((e) => {
 		const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
+		const slug = e.id.endsWith("/index") ? e.id.slice(0, -6) : e.id;
 
 		const tech: Technology = {
 			id: e.id,
@@ -29,8 +54,16 @@ try {
 			...(logo && { logo }),
 			...(e.data.website && { website: e.data.website }),
 			...(e.data.documentation && { documentation: e.data.documentation }),
+			lastCovered: techRecencyMap.get(slug),
 		};
 		return tech;
+	});
+
+	technologies.sort((a, b) => {
+		if (a.lastCovered && b.lastCovered) return b.lastCovered.getTime() - a.lastCovered.getTime();
+		if (a.lastCovered) return -1;
+		if (b.lastCovered) return 1;
+		return a.name.localeCompare(b.name);
 	});
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
