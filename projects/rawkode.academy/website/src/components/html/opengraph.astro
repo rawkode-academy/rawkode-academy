@@ -112,40 +112,32 @@ const firstAuthorMastodon = shouldShowArticleMeta
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
 
-<script
-	is:inline
-	type="application/ld+json"
-	set:html={JSON.stringify({
-		"@context": "https://schema.org",
-		"@type": shouldShowArticleMeta ? "Article" : "WebPage",
-		headline: title,
-		description: openGraphDescription,
-		image: useImageDirectly ? image?.image : openGraphImageUrl,
-		url: openGraphUrl.toString(),
-		datePublished: publishedAt ? publishedAt.toISOString() : undefined,
-		dateModified: updatedAt ? updatedAt.toISOString() : undefined,
-		publisher: {
-			"@type": "Organization",
-			name: "Rawkode Academy",
-			logo: {
-				"@type": "ImageObject",
-				url: "https://rawkode.academy/android-chrome-512x512.png",
-			},
-		},
-		mainEntityOfPage: {
+{!shouldShowArticleMeta && (
+	<script
+		is:inline
+		type="application/ld+json"
+		set:html={JSON.stringify({
+			"@context": "https://schema.org",
 			"@type": "WebPage",
-			"@id": openGraphUrl.toString(),
-		},
-		...(shouldShowArticleMeta && authors && authors.length > 0 && {
-			author: authors.map((author: CollectionEntry<"people">) => ({
-				"@type": "Person",
-				name: author.data.name,
-				url: author.data.github,
-				sameAs: [
-					author.data.github,
-					author.data.twitter,
-				].filter(Boolean),
-			})),
-		}),
-	})}
-></script>
+			name: title,
+			description: openGraphDescription,
+			image: useImageDirectly ? image?.image : openGraphImageUrl,
+			url: openGraphUrl.toString(),
+			publisher: {
+				"@type": "Organization",
+				name: "Rawkode Academy",
+				logo: {
+					"@type": "ImageObject",
+					url: new URL(
+						"/android-chrome-512x512.png",
+						openGraphUrl,
+					).href,
+				},
+			},
+			mainEntityOfPage: {
+				"@type": "WebPage",
+				"@id": openGraphUrl.toString(),
+			},
+		})}
+	></script>
+)}
