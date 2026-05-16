@@ -1,0 +1,136 @@
+---
+import SiteLayout from "@/layouts/SiteLayout.astro";
+import { getEpisodes, getSeasonFromEpisode } from "@/lib/content";
+
+const allEpisodes = await getEpisodes();
+const slug = Astro.params.slug;
+
+const episode = allEpisodes.find((e) => {
+	const epSlug = e.data.slug ?? e.id.split("/").pop();
+	return epSlug === slug;
+});
+
+if (!episode) {
+	return Astro.redirect("/episodes", 303);
+}
+
+const season = getSeasonFromEpisode(episode);
+const youtubeId = episode.data.youtubeId;
+const descriptionFirstParagraph = episode.data.description?.split("\n").find(
+	(line) => line.trim().length > 0,
+);
+const chapters = episode.data.chapters ?? [];
+const technologies = episode.data.technologies ?? [];
+
+function formatChapterTime(seconds: number): string {
+	const h = Math.floor(seconds / 3600);
+	const m = Math.floor((seconds % 3600) / 60);
+	const s = seconds % 60;
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+---
+
+<SiteLayout
+	title={episode.data.title}
+	description={descriptionFirstParagraph ?? episode.data.title}
+>
+	<section class="pt-12">
+		<a
+			href={`/episodes?season=${season}`}
+			class="text-xs uppercase tracking-[0.3em] text-fuchsia-400 hover:text-fuchsia-300"
+		>
+			← {season}
+		</a>
+
+		<h1 class="mt-2 text-4xl font-black tracking-tight md:text-5xl">
+			{episode.data.title}
+		</h1>
+
+		<p class="mt-3 text-sm text-slate-400">
+			<time datetime={episode.data.publishedAt.toISOString()}>
+				{new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(
+					episode.data.publishedAt,
+				)}
+			</time>
+		</p>
+	</section>
+
+	{
+		youtubeId && (
+			<section class="mt-8 overflow-hidden rounded-2xl border border-white/10">
+				<div class="aspect-video w-full bg-black">
+					<iframe
+						class="h-full w-full"
+						src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
+						title={episode.data.title}
+						loading="lazy"
+						frameborder="0"
+						allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+						allowfullscreen
+					/>
+				</div>
+			</section>
+		)
+	}
+
+	<section class="mt-10 grid gap-8 md:grid-cols-[1fr_280px]">
+		<div>
+			{
+				descriptionFirstParagraph && (
+					<p class="text-lg text-slate-200">{descriptionFirstParagraph}</p>
+				)
+			}
+
+			{
+				chapters.length > 0 && (
+					<div class="mt-8">
+						<h2 class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+							Chapters
+						</h2>
+						<ol class="mt-3 flex flex-col gap-1 text-sm">
+							{chapters.map((c) => (
+								<li class="flex items-baseline gap-3 rounded-lg px-3 py-1.5 hover:bg-white/5">
+									<span class="font-mono text-xs text-fuchsia-300">
+										{formatChapterTime(c.startTime)}
+									</span>
+									<span class="text-slate-300">{c.title}</span>
+								</li>
+							))}
+						</ol>
+					</div>
+				)
+			}
+		</div>
+
+		<aside class="flex flex-col gap-6">
+			{
+				technologies.length > 0 && (
+					<div>
+						<h2 class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+							Technologies
+						</h2>
+						<ul class="mt-3 flex flex-wrap gap-2">
+							{technologies.map((t) => (
+								<li class="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-200">
+									{t}
+								</li>
+							))}
+						</ul>
+					</div>
+				)
+			}
+
+			<div>
+				<h2 class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+					Season
+				</h2>
+				<p class="mt-3 text-sm">
+					<a href={`/episodes?season=${season}`} class="text-slate-200 hover:underline">
+						{season}
+					</a>
+				</p>
+			</div>
+		</aside>
+	</section>
+</SiteLayout>
