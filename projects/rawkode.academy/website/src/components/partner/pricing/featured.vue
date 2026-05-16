@@ -54,7 +54,7 @@ const maltPricingPlan: PricingPlan = {
 			<p class="text-lg font-medium text-secondary-content mb-6">{{ maltPricingPlan.description }}</p>
 			<div class="grid gap-4 mt-4 lg:mt-6">
 				<!-- List -->
-				<ul role="list" class="space-y-6 dark:text-white">
+				<ul role="list" class="space-y-6 text-primary-content">
 					<li v-for="feature in maltPricingPlan.features" class="flex items-start space-x-3">
 						<!-- Icon -->
 						<svg class="shrink-0 w-5 h-5 mt-1 text-secondary" fill="currentColor" viewBox="0 0 20 20"
