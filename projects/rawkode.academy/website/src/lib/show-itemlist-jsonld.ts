@@ -22,7 +22,7 @@ function joinUrl(base: string, path: string): string {
 /**
  * Build a schema.org ItemList JSON-LD payload for the shows index page.
  *
- * Each ListItem embeds a PodcastSeries item — the show pages individually
+ * Each ListItem embeds a PodcastSeries item - the show pages individually
  * emit PodcastSeries JSON-LD already; the listing's ItemList groups them
  * so Google can surface the whole library.
  */

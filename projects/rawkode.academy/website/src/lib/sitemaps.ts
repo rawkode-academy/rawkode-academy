@@ -44,7 +44,7 @@ type StaticPageDefinition = {
 const staticPages: StaticPageDefinition[] = [
 	// Homepage is the strongest within-site signal.
 	{ path: "/", changefreq: "daily", priority: 1.0 },
-	// Top-level content listings — primary navigation targets.
+	// Top-level content listings - primary navigation targets.
 	{ path: "/watch", changefreq: "daily", priority: 0.9 },
 	{ path: "/read", changefreq: "daily", priority: 0.9 },
 	{ path: "/news", changefreq: "daily", priority: 0.9 },

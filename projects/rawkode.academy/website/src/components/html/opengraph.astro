@@ -23,7 +23,7 @@ const openGraphDescription =
 
 // Static fallback served from our own origin. Used when the caller hasn't
 // passed an image and we'd otherwise rely on the dynamic image service
-// (image.rawkode.academy) — that service has been returning 403 site-wide,
+// (image.rawkode.academy) - that service has been returning 403 site-wide,
 // which broke every social-share preview on the affected pages. Falling
 // back to the brand icon means the preview is at least branded rather than
 // broken. Pages that have a real image (article covers, etc.) still go
@@ -53,7 +53,7 @@ const ogImageAlt = usingStaticFallback ? "Rawkode Academy" : title;
 
 // Show article-specific meta tags only when the caller opts in via the
 // `isArticle` prop. The previous heuristic also matched `/blog/` (a route
-// that doesn't exist) and `/series/` (a CollectionPage — not an Article).
+// that doesn't exist) and `/series/` (a CollectionPage - not an Article).
 const shouldShowArticleMeta = isArticle;
 
 // X / Twitter handles. site = brand; creator = first author with a handle

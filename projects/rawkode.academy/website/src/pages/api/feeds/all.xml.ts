@@ -111,7 +111,7 @@ export async function GET(context: APIContext) {
 		})
 		.filter((item): item is RSSFeedItem => item !== null);
 
-	// Add news (lightweight — description is the body)
+	// Add news (lightweight - description is the body)
 	const newsItems = (
 		await Promise.all(
 			news.map(async (story): Promise<RSSFeedItem | null> => {

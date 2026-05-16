@@ -120,7 +120,7 @@ export async function GET(context: APIContext) {
 
 	return withRssMimeType(
 		await rss({
-			title: `Rawkode Academy — ${personName}`,
+			title: `Rawkode Academy - ${personName}`,
 			description: `Articles, news, and video appearances by ${personName} on Rawkode Academy.`,
 			site: context.site?.toString() || "https://rawkode.academy",
 			items,

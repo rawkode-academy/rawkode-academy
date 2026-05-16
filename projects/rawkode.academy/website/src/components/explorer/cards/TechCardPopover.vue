@@ -50,7 +50,7 @@
               <span class="stat-label">Articles</span>
             </div>
             <div class="stat">
-              <span class="stat-value">{{ technology.cardData.firstUsed ? formatDate(technology.cardData.firstUsed) : '—' }}</span>
+              <span class="stat-value">{{ technology.cardData.firstUsed ? formatDate(technology.cardData.firstUsed) : '–' }}</span>
               <span class="stat-label">First Used</span>
             </div>
             <div class="stat">
@@ -132,11 +132,11 @@ const trajectoryIcon = computed(() => {
 		stable: "→",
 		falling: "↘️",
 	};
-	return trajectory ? icons[trajectory] || "—" : "—";
+	return trajectory ? icons[trajectory] || "–" : "–";
 });
 
 const formatDate = (dateStr: string | null): string => {
-	if (!dateStr) return "—";
+	if (!dateStr) return "–";
 	const [year, month] = dateStr.split("-");
 	if (!year || !month) return dateStr;
 	const months = [

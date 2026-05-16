@@ -232,7 +232,7 @@ const seoTitle =
 	technology.seo?.title ??
 	(videoCount > 0
 		? `${technology.name} Tutorials, Videos & Guides`
-		: `${technology.name} — ${categoryLabel}`);
+		: `${technology.name} - ${categoryLabel}`);
 
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
@@ -355,7 +355,7 @@ const hasCommunityLinks =
 		<link
 			rel="alternate"
 			type="application/rss+xml"
-			title={`Rawkode Academy — ${technology.name} (RSS)`}
+			title={`Rawkode Academy - ${technology.name} (RSS)`}
 			href={`/api/feeds/technology/${technology.id.replace(/\/index$/, "")}.xml`}
 		/>
 	</Fragment>

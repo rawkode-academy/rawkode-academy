@@ -67,23 +67,23 @@ export const GET: APIRoute = async ({ site }) => {
 
 	const topLevelFeeds: OpmlFeed[] = [
 		{
-			text: "Rawkode Academy — All Content",
+			text: "Rawkode Academy: All Content",
 			xmlUrl: u("/api/feeds/all.xml"),
 			htmlUrl: u("/feeds"),
 			description: "Articles, news, and videos in one feed.",
 		},
 		{
-			text: "Rawkode Academy — Articles",
+			text: "Rawkode Academy: Articles",
 			xmlUrl: u("/api/feeds/articles.xml"),
 			htmlUrl: u("/read"),
 		},
 		{
-			text: "Rawkode Academy — News",
+			text: "Rawkode Academy: News",
 			xmlUrl: u("/api/feeds/news.xml"),
 			htmlUrl: u("/news"),
 		},
 		{
-			text: "Rawkode Academy — Videos",
+			text: "Rawkode Academy: Videos",
 			xmlUrl: u("/api/feeds/videos.xml"),
 			htmlUrl: u("/watch"),
 		},
@@ -96,7 +96,7 @@ export const GET: APIRoute = async ({ site }) => {
 		}))
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.map(({ rawId, name }) => ({
-			text: `Rawkode Academy — ${name}`,
+			text: `Rawkode Academy: ${name}`,
 			xmlUrl: u(`/api/feeds/technology/${rawId}.xml`),
 			htmlUrl: u(`/technology/${rawId}`),
 		}));
@@ -113,7 +113,7 @@ export const GET: APIRoute = async ({ site }) => {
 		.map((person) => ({ id: person.data.id, name: person.data.name }))
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.map(({ id, name }) => ({
-			text: `Rawkode Academy — ${name}`,
+			text: `Rawkode Academy: ${name}`,
 			xmlUrl: u(`/api/feeds/people/${id}.xml`),
 			htmlUrl: u(`/people/${id}`),
 		}));
@@ -123,7 +123,7 @@ export const GET: APIRoute = async ({ site }) => {
 		.map((show) => ({ id: show.data.id, name: show.data.name }))
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.map(({ id, name }) => ({
-			text: `Rawkode Academy — ${name} (podcast)`,
+			text: `Rawkode Academy: ${name} (podcast)`,
 			xmlUrl: u(`/api/feeds/shows/${id}.xml`),
 			htmlUrl: u(`/shows/${id}`),
 		}));

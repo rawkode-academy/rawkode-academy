@@ -3,7 +3,7 @@ import type { ImageServicePayload } from "./image-service";
 
 /**
  * Schema.org `@type` for the inline WebPage-family JSON-LD emitted by
- * opengraph.astro. Article pages set `isArticle` instead — they're served
+ * opengraph.astro. Article pages set `isArticle` instead - they're served
  * by the dedicated article-jsonld emitters and the inline WebPage block
  * is suppressed.
  */
