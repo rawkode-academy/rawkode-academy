@@ -85,7 +85,11 @@ if (Astro.request.method === "POST" && user) {
 }
 ---
 
-<Page title="Unsubscribe - Rawkode Academy" description="Unsubscribe from the Rawkode Academy newsletter.">
+<Page
+	title="Unsubscribe"
+	description="Unsubscribe from the Rawkode Academy newsletter."
+	noindex
+>
 	<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
 		{success === "true" ? (
 			<>

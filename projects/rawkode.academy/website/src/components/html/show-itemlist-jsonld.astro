@@ -1,0 +1,33 @@
+---
+import { buildShowItemListJsonLd } from "@/lib/show-itemlist-jsonld";
+
+interface ShowEntryInput {
+	id: string;
+	name: string;
+	description?: string | undefined;
+	imageUrl?: string | undefined;
+	episodeCount?: number | undefined;
+}
+
+interface Props {
+	shows: ReadonlyArray<ShowEntryInput>;
+	listUrl: string;
+	listName?: string;
+	slot?: string;
+}
+
+const { shows, listUrl, listName } = Astro.props;
+
+const jsonLd = buildShowItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	listName: listName ?? "Shows",
+	shows,
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
