@@ -89,6 +89,13 @@ const normalizedTitle =
 	<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
 
 	<Opengraph {...Astro.props} />
+	{Astro.props.jsonLd && (
+		<script
+			is:inline
+			type="application/ld+json"
+			set:html={JSON.stringify(Astro.props.jsonLd)}
+		/>
+	)}
 	<SearchActionJsonLd />
 	<OrganizationJsonLd />
 

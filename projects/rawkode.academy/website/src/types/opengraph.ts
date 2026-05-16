@@ -27,4 +27,11 @@ export interface OpenGraphProps {
 	authors?: CollectionEntry<"people">[] | undefined;
 	noindex?: boolean | undefined;
 	pageType?: PageType | undefined;
+	/**
+	 * Optional pre-built schema.org JSON-LD blob to emit in <head> in
+	 * addition to the inline WebPage / Article JSON-LD. Use for entity
+	 * types that aren't covered by the standard emitters — e.g. HowTo
+	 * on tutorial articles.
+	 */
+	jsonLd?: Record<string, unknown> | undefined;
 }
