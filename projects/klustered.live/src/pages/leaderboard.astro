@@ -1,0 +1,137 @@
+---
+import { env } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+import SiteLayout from "@/layouts/SiteLayout.astro";
+import { getDb, schema } from "@/db/client";
+
+const db = getDb(env.DB);
+
+const matchResults = await db
+	.select({
+		matchId: schema.matchResults.matchId,
+		winnerTeamId: schema.matchResults.winnerTeamId,
+		timeToResolveSeconds: schema.matchResults.timeToResolveSeconds,
+		teamAId: schema.matches.teamAId,
+		teamBId: schema.matches.teamBId,
+	})
+	.from(schema.matchResults)
+	.innerJoin(schema.matches, eq(schema.matchResults.matchId, schema.matches.id))
+	.all();
+
+const teams = await db
+	.select({ id: schema.teams.id, name: schema.teams.name })
+	.from(schema.teams)
+	.all();
+const teamName = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+type Standing = {
+	teamId: string;
+	wins: number;
+	losses: number;
+	fastestFix: number | null;
+};
+
+const standings = new Map<string, Standing>();
+for (const r of matchResults) {
+	const participants = [r.teamAId, r.teamBId].filter(
+		(id): id is string => !!id,
+	);
+	for (const id of participants) {
+		if (!standings.has(id)) {
+			standings.set(id, { teamId: id, wins: 0, losses: 0, fastestFix: null });
+		}
+	}
+	if (r.winnerTeamId && standings.has(r.winnerTeamId)) {
+		const s = standings.get(r.winnerTeamId)!;
+		s.wins++;
+		if (r.timeToResolveSeconds !== null) {
+			s.fastestFix =
+				s.fastestFix === null
+					? r.timeToResolveSeconds
+					: Math.min(s.fastestFix, r.timeToResolveSeconds);
+		}
+	}
+	for (const id of participants) {
+		if (r.winnerTeamId && id !== r.winnerTeamId && standings.has(id)) {
+			standings.get(id)!.losses++;
+		}
+	}
+}
+
+const ranked = [...standings.values()]
+	.map((s) => ({
+		...s,
+		winRate: s.wins + s.losses > 0 ? s.wins / (s.wins + s.losses) : 0,
+	}))
+	.sort((a, b) => {
+		if (b.wins !== a.wins) return b.wins - a.wins;
+		if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+		if (a.fastestFix !== null && b.fastestFix !== null)
+			return a.fastestFix - b.fastestFix;
+		return 0;
+	});
+
+function formatDuration(seconds: number | null): string {
+	if (seconds === null) return "—";
+	const m = Math.floor(seconds / 60);
+	const s = seconds % 60;
+	return `${m}m ${s.toString().padStart(2, "0")}s`;
+}
+---
+
+<SiteLayout
+	title="Leaderboard"
+	description="Cross-season Klustered standings."
+>
+	<section class="pt-12">
+		<p class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+			Hall of fame
+		</p>
+		<h1 class="mt-2 text-4xl font-black tracking-tight md:text-5xl">
+			Leaderboard
+		</h1>
+		<p class="mt-3 text-slate-400">
+			All-time standings across every season. Ties broken by win rate, then
+			fastest fix.
+		</p>
+	</section>
+
+	<section class="mt-10 overflow-hidden rounded-2xl border border-white/10">
+		<table class="w-full text-left text-sm">
+			<thead class="bg-white/5 text-xs uppercase tracking-wider text-slate-400">
+				<tr>
+					<th class="px-6 py-3">#</th>
+					<th class="px-6 py-3">Team</th>
+					<th class="px-6 py-3">Wins</th>
+					<th class="px-6 py-3">Losses</th>
+					<th class="px-6 py-3">Win rate</th>
+					<th class="px-6 py-3">Fastest fix</th>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-white/5">
+				{
+					ranked.length === 0 ? (
+						<tr>
+							<td colspan="6" class="px-6 py-6 text-center text-slate-400">
+								No results yet — check back after the first match.
+							</td>
+						</tr>
+					) : (
+						ranked.map((row, i) => (
+							<tr>
+								<td class="px-6 py-3 font-mono text-xs text-fuchsia-300">{i + 1}</td>
+								<td class="px-6 py-3 font-semibold">{teamName[row.teamId] ?? row.teamId}</td>
+								<td class="px-6 py-3 text-emerald-300">{row.wins}</td>
+								<td class="px-6 py-3 text-rose-300">{row.losses}</td>
+								<td class="px-6 py-3">{Math.round(row.winRate * 100)}%</td>
+								<td class="px-6 py-3 font-mono text-xs">
+									{formatDuration(row.fastestFix)}
+								</td>
+							</tr>
+						))
+					)
+				}
+			</tbody>
+		</table>
+	</section>
+</SiteLayout>

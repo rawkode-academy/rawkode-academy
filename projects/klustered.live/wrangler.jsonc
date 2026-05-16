@@ -20,5 +20,12 @@
 			"enabled": true,
 			"destinations": ["grafana-logs"]
 		}
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "klustered",
+			"database_id": "PLACEHOLDER-RUN-WRANGLER-D1-CREATE-KLUSTERED"
+		}
+	]
 }

@@ -12,6 +12,7 @@
 		"@astrojs/check": "0.9.8",
 		"@astrojs/cloudflare": "13.1.4",
 		"@astrojs/mdx": "5.0.3",
+		"drizzle-orm": "^0.45.1",
 		"@tailwindcss/vite": "^4.2.2",
 		"astro": "https://pkg.pr.new/astro@16059",
 		"tailwindcss": "^4.2.2",

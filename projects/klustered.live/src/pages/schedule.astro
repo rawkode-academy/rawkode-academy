@@ -1,0 +1,80 @@
+---
+import { env } from "cloudflare:workers";
+import { asc, eq } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
+import SiteLayout from "@/layouts/SiteLayout.astro";
+import { getDb, schema } from "@/db/client";
+
+const db = getDb(env.DB);
+const teamA = alias(schema.teams, "team_a");
+const teamB = alias(schema.teams, "team_b");
+
+const rows = await db
+	.select({
+		id: schema.matches.id,
+		scheduledAt: schema.matches.scheduledAt,
+		status: schema.matches.status,
+		roundNumber: schema.matches.roundNumber,
+		positionInRound: schema.matches.positionInRound,
+		bracketName: schema.brackets.name,
+		seasonName: schema.seasons.name,
+		teamAName: teamA.name,
+		teamBName: teamB.name,
+	})
+	.from(schema.matches)
+	.leftJoin(schema.brackets, eq(schema.matches.bracketId, schema.brackets.id))
+	.leftJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
+	.leftJoin(teamA, eq(schema.matches.teamAId, teamA.id))
+	.leftJoin(teamB, eq(schema.matches.teamBId, teamB.id))
+	.where(eq(schema.matches.status, "scheduled"))
+	.orderBy(asc(schema.matches.scheduledAt))
+	.all();
+
+function formatScheduled(value: Date | null): string {
+	if (!value) return "TBD";
+	return new Intl.DateTimeFormat("en", {
+		dateStyle: "full",
+		timeStyle: "short",
+	}).format(value);
+}
+---
+
+<SiteLayout title="Schedule" description="Upcoming Klustered matches.">
+	<section class="pt-12">
+		<p class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+			Coming up
+		</p>
+		<h1 class="mt-2 text-4xl font-black tracking-tight md:text-5xl">Schedule</h1>
+		<p class="mt-3 text-slate-400">
+			Times are shown in your browser's timezone. Live broadcasts on YouTube.
+		</p>
+	</section>
+
+	<section class="mt-10">
+		{
+			rows.length === 0 ? (
+				<p class="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-slate-400">
+					Nothing scheduled right now. Watch this space.
+				</p>
+			) : (
+				<ul class="flex flex-col gap-3">
+					{rows.map((m) => (
+						<li class="rounded-2xl border border-white/10 bg-white/5 p-5">
+							<div class="flex flex-wrap items-baseline justify-between gap-3">
+								<div>
+									<p class="text-xs uppercase tracking-[0.3em] text-fuchsia-400">
+										{m.seasonName} · {m.bracketName} · R{m.roundNumber}
+									</p>
+									<p class="mt-1 text-xl font-bold tracking-tight">
+										{m.teamAName ?? "TBD"} <span class="text-slate-500">vs</span> {m.teamBName ?? "TBD"}
+									</p>
+								</div>
+								<p class="text-sm text-slate-300">{formatScheduled(m.scheduledAt)}</p>
+							</div>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</section>
+</SiteLayout>
