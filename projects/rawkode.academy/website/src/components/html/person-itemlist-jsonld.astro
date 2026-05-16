@@ -1,0 +1,32 @@
+---
+import { buildPersonItemListJsonLd } from "@/lib/person-itemlist-jsonld";
+
+interface PersonEntryInput {
+	id: string;
+	name: string;
+	avatarUrl?: string | undefined;
+	sameAs?: ReadonlyArray<string | undefined>;
+}
+
+interface Props {
+	people: ReadonlyArray<PersonEntryInput>;
+	listUrl: string;
+	listName?: string;
+	slot?: string;
+}
+
+const { people, listUrl, listName } = Astro.props;
+
+const jsonLd = buildPersonItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	listName: listName ?? "People",
+	people,
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
