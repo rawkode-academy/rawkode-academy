@@ -37,7 +37,7 @@ export const Default: Story = {
             <BaseCard :href="href">
               <template #content>
                 <h3 class="text-lg font-semibold mb-2">Card Title</h3>
-                <p class="text-gray-600 dark:text-gray-300">
+                <p class="text-secondary-content">
                   This is a basic card with just content.
                 </p>
               </template>
@@ -75,7 +75,7 @@ export const WithCover: Story = {
               </template>
               <template #content>
                 <h3 class="text-lg font-semibold mb-2">Article Title</h3>
-                <p class="text-gray-600 dark:text-gray-300">
+                <p class="text-secondary-content">
                   A card with a cover image showcasing an article preview.
                 </p>
               </template>
@@ -110,7 +110,7 @@ export const WithBadge: Story = {
               </template>
               <template #content>
                 <h3 class="text-lg font-semibold mb-2">Kubernetes Fundamentals</h3>
-                <p class="text-gray-600 dark:text-gray-300">
+                <p class="text-secondary-content">
                   Learn the basics of container orchestration with Kubernetes.
                 </p>
               </template>
@@ -135,7 +135,7 @@ export const WithFooter: Story = {
             <BaseCard href="/blog/post">
               <template #content>
                 <h3 class="text-lg font-semibold mb-2">Blog Post Title</h3>
-                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                <p class="text-secondary-content mb-4">
                   This card demonstrates the footer slot for metadata or additional information.
                 </p>
               </template>
@@ -184,7 +184,7 @@ export const CompleteExample: Story = {
               </template>
               <template #content>
                 <Heading as="h3" size="lg" class="mb-2">Advanced Kubernetes Patterns</Heading>
-                <p class="text-gray-600 dark:text-gray-300 line-clamp-3">
+                <p class="text-secondary-content line-clamp-3">
                   Master advanced deployment patterns, custom operators, and production-ready
                   configurations for enterprise Kubernetes deployments.
                 </p>
@@ -245,7 +245,7 @@ export const CardGrid: Story = {
               </template>
               <template #content>
                 <h3 class="text-lg font-semibold mb-2">{{ item.title }}</h3>
-                <p class="text-gray-600 dark:text-gray-300">{{ item.description }}</p>
+                <p class="text-secondary-content">{{ item.description }}</p>
               </template>
               <template #footer>
                 <FormattedDate :date="item.date" />

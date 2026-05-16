@@ -59,7 +59,7 @@ const AsideWrapper: React.FC<AsideProps> = ({ variant, children }) => {
 
 	return (
 		<div
-			className={`aside my-2 rounded-lg backdrop-blur-sm shadow-md border-r border-b ${styles.border} ${styles.container} relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5`}
+			className={`aside my-2 rounded-lg backdrop-blur-sm shadow-md border-r border-b ${styles.border} ${styles.container} relative overflow-hidden transition-smooth hover:shadow-lg hover:-translate-y-0.5`}
 		>
 			<div
 				className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${styles.gradient} shadow-[0_0_8px_rgba(var(--accent-glow),0.6)]`}
