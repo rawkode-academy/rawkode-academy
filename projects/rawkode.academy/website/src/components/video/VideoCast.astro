@@ -17,7 +17,8 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 		</h2>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{hosts.map((person) => (
-				<div
+				<a
+					href={`/people/${person.id}`}
 					class="glass-panel group flex items-center p-4 gap-4 hover:border-primary/50 transition-colors"
 				>
 					<div class="relative shrink-0">
@@ -39,11 +40,12 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
 						</p>
 					</div>
-				</div>
+				</a>
 			))}
-			
+
 			{guests.map((person) => (
-				<div
+				<a
+					href={`/people/${person.id}`}
 					class="glass-panel group flex items-center p-4 gap-4 hover:border-secondary transition-colors"
 				>
 					<div class="relative shrink-0">
@@ -65,7 +67,7 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 							@{person.data.github ? person.data.github.split('/').pop() : person.data.id}
 						</p>
 					</div>
-				</div>
+				</a>
 			))}
 		</div>
 	</section>
