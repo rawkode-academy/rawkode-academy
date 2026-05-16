@@ -418,27 +418,9 @@ html.dark {
 		@apply bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl border border-white/40 dark:border-gray-600/50;
 	}
 
-	/* Shadow utilities — wired to the `--shadow-*` ramp so light/dark
-	   variants come from one place. Pick `sm/md/lg/xl` for new code;
-	   `card-shadow` (= md) and `card-shadow-elevated` (= lg) remain
-	   for backward compatibility with existing callers. */
-	.card-shadow-sm {
-		box-shadow: var(--shadow-sm);
-	}
-
-	.card-shadow,
-	.card-shadow-md {
-		box-shadow: var(--shadow-md);
-	}
-
-	.card-shadow-lg,
-	.card-shadow-elevated {
-		box-shadow: var(--shadow-lg);
-	}
-
-	.card-shadow-xl {
-		box-shadow: var(--shadow-xl);
-	}
+	/* Shadow utilities — defined as `@utility` at the end of file so
+	   `@apply card-shadow-{sm,md,lg,xl}` works in scoped Astro/Vue
+	   <style> blocks too. */
 
 	.card-hover {
 		transition-property: background-color, box-shadow, transform;
@@ -1258,4 +1240,33 @@ html.dark {
 
 @utility transition-spring {
 	transition: all var(--duration-slow) var(--ease-spring);
+}
+
+/* Shadow utilities — wired to the `--shadow-*` ramp so the light/dark
+   variants come from one place. Declared as `@utility` so `@apply`
+   works in scoped <style> blocks (e.g. `about/index.astro`'s
+   `.timeline-item`). `card-shadow` (= md) and `card-shadow-elevated`
+   (= lg) remain as backwards-compatible aliases. */
+@utility card-shadow-sm {
+	box-shadow: var(--shadow-sm);
+}
+
+@utility card-shadow {
+	box-shadow: var(--shadow-md);
+}
+
+@utility card-shadow-md {
+	box-shadow: var(--shadow-md);
+}
+
+@utility card-shadow-lg {
+	box-shadow: var(--shadow-lg);
+}
+
+@utility card-shadow-elevated {
+	box-shadow: var(--shadow-lg);
+}
+
+@utility card-shadow-xl {
+	box-shadow: var(--shadow-xl);
 }
