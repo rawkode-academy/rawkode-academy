@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@astrojs/check": "0.9.8",
 		"@astrojs/cloudflare": "13.1.4",
+		"@astrojs/mdx": "5.0.3",
 		"@tailwindcss/vite": "^4.2.2",
 		"astro": "https://pkg.pr.new/astro@16059",
 		"better-auth": "^1.5.6",
