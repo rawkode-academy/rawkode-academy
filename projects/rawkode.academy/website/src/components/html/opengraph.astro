@@ -110,6 +110,12 @@ const firstAuthorMastodon = shouldShowArticleMeta
 			{authors && authors.map((author: CollectionEntry<"people">) => (
 				author.data.github && <meta property="article:author" content={author.data.github} />
 			))}
+			{authors && authors.length > 0 && (
+				<meta
+					name="author"
+					content={authors.map((author: CollectionEntry<"people">) => author.data.name).join(", ")}
+				/>
+			)}
 		</>
 	)
 }
