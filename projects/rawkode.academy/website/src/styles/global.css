@@ -526,35 +526,6 @@ html.dark {
 		background: rgba(55, 65, 81, 0.5);
 	}
 
-	.btn-glass-subtle {
-		@apply inline-flex items-center justify-center px-4 py-2 rounded-lg;
-		@apply text-sm font-medium transition-all duration-200;
-		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		color: rgb(55 65 81); /* gray-700 */
-	}
-
-	html.dark .btn-glass-subtle {
-		color: rgb(209 213 219); /* gray-300 */
-	}
-
-	.btn-glass-subtle:hover {
-		background: rgba(255, 255, 255, 0.2);
-		color: rgb(17 24 39); /* gray-900 */
-	}
-
-	html.dark .btn-glass-subtle:hover {
-		color: rgb(255 255 255); /* white */
-	}
-
-	html.dark .btn-glass-subtle {
-		border-color: rgba(75, 85, 99, 0.3);
-	}
-
-	html.dark .btn-glass-subtle:hover {
-		background: rgba(55, 65, 81, 0.3);
-	}
-
 	.btn-solid {
 		@apply inline-flex items-center justify-center px-4 py-2 rounded-lg;
 		@apply text-sm font-medium transition-all duration-200;
@@ -566,17 +537,6 @@ html.dark {
 	.btn-solid:hover {
 		@apply shadow-lg scale-105;
 		filter: brightness(1.1);
-	}
-
-	/* Social share button base - for branded social buttons with custom colors */
-	.btn-social {
-		@apply inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-lg;
-		@apply text-sm font-medium text-white gap-2;
-		@apply transition-colors cursor-pointer;
-	}
-
-	.btn-social:hover {
-		filter: brightness(0.9);
 	}
 
 	/* Link Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
@@ -1094,11 +1054,6 @@ html.dark {
 	/* Responsive Content Padding - commonly used pattern */
 	.content-px {
 		@apply px-3 sm:px-6 lg:px-8;
-	}
-
-	/* Responsive Content Padding with vertical */
-	.content-p {
-		@apply p-3 sm:p-6 lg:p-8;
 	}
 
 	/* Responsive Section Gap - for vertical spacing between sections */
