@@ -211,6 +211,12 @@ const articles = defineCollection({
 			type: z
 				.enum(["tutorial", "article", "guide", "news"])
 				.default("tutorial"),
+			// Opt-in flag for emitting schema.org HowTo JSON-LD. Many tutorials
+			// in our corpus are deep-dive explainers rather than step-by-step
+			// procedures, and HowTo specifically wants procedural content — so
+			// gate the emission on an explicit author signal rather than the
+			// broad `type: "tutorial"` default.
+			howto: z.boolean().default(false),
 			series: reference("series").optional(),
 			technologies: z
 				.array(z.string().min(1))
