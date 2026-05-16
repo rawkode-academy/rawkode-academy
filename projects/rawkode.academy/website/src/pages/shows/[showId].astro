@@ -25,7 +25,7 @@ if (!showId) {
 const shows = await getCollection("shows");
 const showEntry = shows.find((s) => s.data.id === showId);
 
-if (!showEntry) {
+if (!showEntry || !showEntry.data.publish) {
 	return new Response(null, { status: 404 });
 }
 
@@ -80,8 +80,14 @@ Astro.response.headers.set(
 );
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
+// Published shows should always have a description. The fallback only
+// fires when a show was published without one - at which point it's a
+// content bug, not something the template should paper over with a
+// placeholder. Compose a sensible auto-line so meta tags still render
+// without ever shipping "coming soon" to crawlers.
 const showDescription =
-	showEntry.data.description?.trim() || "Episode guide coming soon.";
+	showEntry.data.description?.trim() ||
+	`Watch ${showEntry.data.name} on Rawkode Academy.`;
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
@@ -103,7 +109,7 @@ if (showEntry.data.podcast?.artworkUrl) {
 		const resolved = await getImage({ src: showEntry.data.cover.image });
 		podcastImageUrl = new URL(resolved.src, Astro.site ?? Astro.url).href;
 	} catch {
-		// Fall through with no image — JSON-LD `image` is optional.
+		// Fall through with no image - JSON-LD `image` is optional.
 	}
 }
 

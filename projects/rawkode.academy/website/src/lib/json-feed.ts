@@ -33,7 +33,7 @@ export interface BuildJsonFeedInput {
 /**
  * Build a JSON Feed 1.1 document. Spec: https://www.jsonfeed.org/version/1.1/
  *
- * JSON Feed is a modern alternative to RSS/Atom — same shape, much friendlier
+ * JSON Feed is a modern alternative to RSS/Atom - same shape, much friendlier
  * to consume in JS clients, and supported by NetNewsWire, Feedbin, Inoreader,
  * FeedLand, and Reeder among others.
  */

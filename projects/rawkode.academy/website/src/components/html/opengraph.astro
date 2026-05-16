@@ -12,6 +12,7 @@ const {
 	publishedAt,
 	updatedAt,
 	authors,
+	pageType = "WebPage",
 } = Astro.props;
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
@@ -22,7 +23,7 @@ const openGraphDescription =
 
 // Static fallback served from our own origin. Used when the caller hasn't
 // passed an image and we'd otherwise rely on the dynamic image service
-// (image.rawkode.academy) — that service has been returning 403 site-wide,
+// (image.rawkode.academy) - that service has been returning 403 site-wide,
 // which broke every social-share preview on the affected pages. Falling
 // back to the brand icon means the preview is at least branded rather than
 // broken. Pages that have a real image (article covers, etc.) still go
@@ -44,9 +45,15 @@ const openGraphImageUrl = image
 		)}`
 	: staticFallbackImageUrl;
 
+// The static fallback is the brand icon at known dimensions; declaring
+// them lets social platforms render the preview without fetching the
+// asset and inspecting it first.
+const usingStaticFallback = !image;
+const ogImageAlt = usingStaticFallback ? "Rawkode Academy" : title;
+
 // Show article-specific meta tags only when the caller opts in via the
 // `isArticle` prop. The previous heuristic also matched `/blog/` (a route
-// that doesn't exist) and `/series/` (a CollectionPage — not an Article).
+// that doesn't exist) and `/series/` (a CollectionPage - not an Article).
 const shouldShowArticleMeta = isArticle;
 
 // X / Twitter handles. site = brand; creator = first author with a handle
@@ -87,6 +94,14 @@ const firstAuthorMastodon = shouldShowArticleMeta
 	property="og:image"
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
+<meta property="og:image:alt" content={ogImageAlt} />
+{usingStaticFallback && (
+	<>
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="512" />
+		<meta property="og:image:height" content="512" />
+	</>
+)}
 {firstAuthorMastodon && (
 	<meta name="fediverse:creator" content={firstAuthorMastodon} />
 )}
@@ -133,6 +148,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 	name="twitter:image"
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
+<meta name="twitter:image:alt" content={ogImageAlt} />
 
 {!shouldShowArticleMeta && (
 	<script
@@ -140,7 +156,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 		type="application/ld+json"
 		set:html={JSON.stringify({
 			"@context": "https://schema.org",
-			"@type": "WebPage",
+			"@type": pageType,
 			name: title,
 			description: openGraphDescription,
 			image: useImageDirectly ? image?.image : openGraphImageUrl,
@@ -157,7 +173,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 				},
 			},
 			mainEntityOfPage: {
-				"@type": "WebPage",
+				"@type": pageType,
 				"@id": openGraphUrl.toString(),
 			},
 		})}

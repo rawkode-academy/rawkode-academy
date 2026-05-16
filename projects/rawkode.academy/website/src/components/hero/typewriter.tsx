@@ -131,7 +131,7 @@ const Typewriter = (props: Props) => {
 
 						<p className="max-w-2xl text-base leading-7 text-secondary-content sm:text-lg sm:leading-7">
 							Hands-on lessons, candid trade-offs, and real build sessions for
-							engineers who want signal instead of slideware.
+							engineers who want signal instead of marketing fluff.
 						</p>
 					</div>
 

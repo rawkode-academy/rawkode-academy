@@ -35,7 +35,7 @@
       <div
         v-for="comment in comments"
         :key="comment.id"
-        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+        class="bg-white dark:bg-gray-800 border border-surface rounded-lg p-4"
       >
         <div class="flex items-start space-x-3">
           <div class="flex-shrink-0">
@@ -72,7 +72,7 @@
         </div>
       </div>
 
-      <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-surface">
         <a
           :href="discordInviteUrl"
           target="_blank"

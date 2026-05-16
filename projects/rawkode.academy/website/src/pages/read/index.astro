@@ -31,7 +31,7 @@ const pageDescription =
 	"Deep dive into cloud native technologies, Kubernetes, observability, and more. Articles written by practitioners for practitioners at Rawkode Academy.";
 ---
 
-<Page title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
   <Fragment slot="extra-head">
     <ArticleItemListJsonLd
       articles={allArticles.filter((article) => !article.data.draft)}
@@ -74,11 +74,11 @@ const pageDescription =
     }
 
     .terminal {
-      @apply font-mono rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700;
+      @apply font-mono rounded-lg overflow-hidden border border-surface;
     }
 
     .terminal-header {
-      @apply flex items-center p-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700;
+      @apply flex items-center p-2 bg-gray-100 dark:bg-gray-800 border-b border-surface;
     }
 
     .terminal-body {

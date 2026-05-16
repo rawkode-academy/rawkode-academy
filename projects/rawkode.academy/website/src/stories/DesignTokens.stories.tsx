@@ -21,7 +21,7 @@ const ColorSwatch = ({
 }) => (
 	<div className="flex flex-col items-center">
 		<div
-			className="w-24 h-24 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 mb-2"
+			className="w-24 h-24 rounded-lg shadow-md border border-surface mb-2"
 			style={{ backgroundColor: color }}
 		/>
 		<p className="text-sm font-medium text-gray-900 dark:text-white">{name}</p>

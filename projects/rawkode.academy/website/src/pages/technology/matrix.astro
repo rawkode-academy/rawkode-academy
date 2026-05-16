@@ -263,7 +263,7 @@ const graveyardTechnologies = allTechnologies
 				</summary>
 				<div class="legend-content">
 					<p class="legend-intro">
-						This matrix represents my personal journey with cloud native technologies. Each stage reflects where a technology sits in my evaluation and adoption process—from first impression to full advocacy. It's opinionated, based on my experience, and constantly evolving.
+						This matrix represents my personal journey with cloud native technologies. Each stage reflects where a technology sits in my evaluation and adoption process, from first impression to full advocacy. It's opinionated, based on my experience, and constantly evolving.
 					</p>
 					<div class="legend-stages">
 						{pipelineStages.map((stage) => (
@@ -296,7 +296,7 @@ const graveyardTechnologies = allTechnologies
 			audience="matrix"
 			badge="Matrix updates in your inbox"
 			headline="Track my technology journey"
-			subtitle="Get notified when I move technologies through the matrix—new discoveries, changed opinions, and spicy takes."
+			subtitle="Get notified when I move technologies through the matrix, with new discoveries, changed opinions, and spicy takes."
 		/>
 
 		<div class="matrix-content">
@@ -324,7 +324,7 @@ const graveyardTechnologies = allTechnologies
 							<div class="lane-tab">
 								<span class="lane-icon">{lane.icon}</span>
 								<span class="lane-title">{lane.label}</span>
-								<span class="lane-desc text-muted">— {lane.description}</span>
+								<span class="lane-desc text-muted">{lane.description}</span>
 							</div>
 						</div>
 						<div class="lane glass-card">
@@ -515,11 +515,11 @@ const graveyardTechnologies = allTechnologies
 							<span class="stat-label">Articles</span>
 						</div>
 						<div class="modal-stat">
-							<span id="modal-first-used" class="stat-value">—</span>
+							<span id="modal-first-used" class="stat-value">–</span>
 							<span class="stat-label">First Used</span>
 						</div>
 						<div class="modal-stat">
-							<span id="modal-trajectory" class="stat-value">—</span>
+							<span id="modal-trajectory" class="stat-value">–</span>
 							<span class="stat-label">Trajectory</span>
 						</div>
 					</div>
@@ -1913,7 +1913,7 @@ const graveyardTechnologies = allTechnologies
 	};
 
 	function formatDate(dateStr: string): string {
-		if (!dateStr) return "—";
+		if (!dateStr) return "–";
 		const [year, month] = dateStr.split("-");
 		if (!year || !month) return dateStr;
 		const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1991,7 +1991,7 @@ const graveyardTechnologies = allTechnologies
 		if (modalVideos) modalVideos.textContent = videoCount;
 		if (modalArticles) modalArticles.textContent = articleCount;
 		if (modalFirstUsed) modalFirstUsed.textContent = formatDate(firstUsed);
-		if (modalTrajectory) modalTrajectory.textContent = trajectoryIcons[trajectory] || "—";
+		if (modalTrajectory) modalTrajectory.textContent = trajectoryIcons[trajectory] || "–";
 
 		if (modalSpicySection && modalSpicyTake) {
 			if (spicy) {

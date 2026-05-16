@@ -35,7 +35,7 @@ export const GET: APIRoute = async ({ site }) => {
 	);
 
 	const feed = buildJsonFeed({
-		title: "Rawkode Academy — News",
+		title: "Rawkode Academy - News",
 		description:
 			"Cloud native, Kubernetes, and AI infrastructure news for engineers.",
 		homePageUrl: u("/news"),

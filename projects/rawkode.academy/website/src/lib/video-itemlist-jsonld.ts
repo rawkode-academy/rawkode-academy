@@ -56,7 +56,7 @@ export function secondsToIsoVideoDuration(
 /**
  * Build a schema.org ItemList JSON-LD payload for the /watch videos index.
  *
- * Each ListItem embeds a lightweight VideoObject — the shape Google requires
+ * Each ListItem embeds a lightweight VideoObject - the shape Google requires
  * for the video Carousel rich result on list-type pages (see
  * https://developers.google.com/search/docs/appearance/structured-data/carousel).
  */

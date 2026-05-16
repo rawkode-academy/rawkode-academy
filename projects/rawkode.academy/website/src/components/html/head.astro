@@ -16,7 +16,7 @@ const { userId } = Astro.props;
 const BRAND_NAME = "Rawkode Academy";
 const TITLE_SUFFIX = ` | ${BRAND_NAME}`;
 // Google truncates SERP titles around 60 characters. Skip the brand
-// suffix when appending it would push the title past that threshold —
+// suffix when appending it would push the title past that threshold -
 // `og:site_name` (emitted by opengraph.astro) and the domain itself
 // carry the brand for the cases where the suffix is dropped.
 const TITLE_MAX_LENGTH = 60;
@@ -62,6 +62,7 @@ const normalizedTitle =
 	<Font cssVariable="--font-monaspace-neon" />
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="color-scheme" content="light dark" />
 
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

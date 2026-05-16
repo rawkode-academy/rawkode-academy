@@ -26,7 +26,7 @@ function joinUrl(base: string, path: string): string {
 /**
  * Build a schema.org ItemList JSON-LD payload for the articles index page.
  *
- * Each ListItem embeds an Article item — Google's preferred shape for the
+ * Each ListItem embeds an Article item - Google's preferred shape for the
  * Article rich result carousel on list-type pages.
  * See https://developers.google.com/search/docs/appearance/structured-data/carousel.
  */

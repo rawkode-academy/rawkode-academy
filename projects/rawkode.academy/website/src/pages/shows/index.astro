@@ -15,8 +15,11 @@ Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
 Astro.response.headers.set("Cache-Tag", "shows-page, shows-list");
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Build shows from local content + videos
-const showEntries = await getCollection("shows");
+// Build shows from local content + videos. `publish: false` shows are
+// drafts / archived - they don't belong in the public directory.
+const showEntries = (await getCollection("shows")).filter(
+	(s) => s.data.publish,
+);
 const videos = await getCollection("videos");
 
 const getShowId = (value: unknown): string | null => {
@@ -80,7 +83,8 @@ const showsJsonLd = showEntries.map((s) => {
 
 <Page
 	title="Shows"
-	description="Browse the live and recurring shows from Rawkode Academy — interviews, deep dives, and hands-on streams covering the cloud native ecosystem."
+	description="Browse the live and recurring shows from Rawkode Academy - interviews, deep dives, and hands-on streams covering the cloud native ecosystem."
+	pageType="CollectionPage"
 >
 	<ShowItemListJsonLd
 		slot="extra-head"

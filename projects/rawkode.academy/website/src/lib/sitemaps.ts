@@ -17,6 +17,12 @@ export interface SitemapUrlEntry {
 	path: string;
 	lastmod: Date;
 	changefreq: SitemapChangeFreq;
+	/**
+	 * 0.0–1.0; only emitted into the sitemap when set. Most crawlers
+	 * de-emphasise priority on cross-domain comparisons but use it as a
+	 * within-site hint for which pages to crawl first / how often.
+	 */
+	priority?: number;
 }
 
 export interface SitemapIndexEntry {
@@ -32,34 +38,41 @@ export interface SitemapDefinition {
 type StaticPageDefinition = {
 	path: string;
 	changefreq: SitemapChangeFreq;
+	priority: number;
 };
 
 const staticPages: StaticPageDefinition[] = [
-	{ path: "/", changefreq: "daily" },
-	{ path: "/about", changefreq: "monthly" },
-	{ path: "/watch", changefreq: "daily" },
-	{ path: "/shows", changefreq: "weekly" },
-	{ path: "/read", changefreq: "daily" },
-	{ path: "/news", changefreq: "daily" },
-	{ path: "/courses", changefreq: "weekly" },
-	{ path: "/learning-paths", changefreq: "weekly" },
-	{ path: "/technology", changefreq: "weekly" },
-	{ path: "/technology/matrix", changefreq: "weekly" },
-	{ path: "/technology/matrix/advanced", changefreq: "weekly" },
-	{ path: "/people", changefreq: "weekly" },
-	{ path: "/adrs", changefreq: "weekly" },
-	{ path: "/changelog", changefreq: "daily" },
-	{ path: "/feeds", changefreq: "monthly" },
-	{ path: "/privacy", changefreq: "yearly" },
-	{ path: "/organizations", changefreq: "monthly" },
-	{ path: "/organizations/branding", changefreq: "yearly" },
-	{ path: "/organizations/consulting", changefreq: "monthly" },
-	{ path: "/organizations/training", changefreq: "monthly" },
-	{ path: "/organizations/partnerships", changefreq: "monthly" },
-	{ path: "/organizations/lets-chat", changefreq: "monthly" },
-	{ path: "/maintainers/share-your-project", changefreq: "monthly" },
-	{ path: "/games/secret-of-kubernetes-island", changefreq: "monthly" },
-	{ path: "/resources/kubernetes/1.35-cheatsheet", changefreq: "monthly" },
+	// Homepage is the strongest within-site signal.
+	{ path: "/", changefreq: "daily", priority: 1.0 },
+	// Top-level content listings - primary navigation targets.
+	{ path: "/watch", changefreq: "daily", priority: 0.9 },
+	{ path: "/read", changefreq: "daily", priority: 0.9 },
+	{ path: "/news", changefreq: "daily", priority: 0.9 },
+	{ path: "/shows", changefreq: "weekly", priority: 0.9 },
+	{ path: "/courses", changefreq: "weekly", priority: 0.9 },
+	{ path: "/learning-paths", changefreq: "weekly", priority: 0.9 },
+	{ path: "/technology", changefreq: "weekly", priority: 0.9 },
+	// Secondary hubs.
+	{ path: "/about", changefreq: "monthly", priority: 0.8 },
+	{ path: "/people", changefreq: "weekly", priority: 0.8 },
+	// Sub-listings and tooling.
+	{ path: "/technology/matrix", changefreq: "weekly", priority: 0.7 },
+	{ path: "/technology/matrix/advanced", changefreq: "weekly", priority: 0.7 },
+	{ path: "/adrs", changefreq: "weekly", priority: 0.6 },
+	{ path: "/changelog", changefreq: "daily", priority: 0.6 },
+	{ path: "/feeds", changefreq: "monthly", priority: 0.5 },
+	// Organization / commercial pages.
+	{ path: "/organizations", changefreq: "monthly", priority: 0.7 },
+	{ path: "/organizations/consulting", changefreq: "monthly", priority: 0.7 },
+	{ path: "/organizations/training", changefreq: "monthly", priority: 0.7 },
+	{ path: "/organizations/partnerships", changefreq: "monthly", priority: 0.7 },
+	{ path: "/organizations/lets-chat", changefreq: "monthly", priority: 0.5 },
+	{ path: "/organizations/branding", changefreq: "yearly", priority: 0.4 },
+	// Long-tail / utility pages.
+	{ path: "/maintainers/share-your-project", changefreq: "monthly", priority: 0.5 },
+	{ path: "/games/secret-of-kubernetes-island", changefreq: "monthly", priority: 0.5 },
+	{ path: "/resources/kubernetes/1.35-cheatsheet", changefreq: "monthly", priority: 0.5 },
+	{ path: "/privacy", changefreq: "yearly", priority: 0.3 },
 ];
 
 function normalizePath(path: string): string {
@@ -152,10 +165,14 @@ export function renderUrlSet(
 	const body = sortByPath(entries)
 		.map((entry) => {
 			const loc = escapeXml(toAbsoluteUrl(site, entry.path));
+			const priorityLine =
+				typeof entry.priority === "number"
+					? `\n    <priority>${entry.priority.toFixed(1)}</priority>`
+					: "";
 			return `  <url>
     <loc>${loc}</loc>
     <lastmod>${entry.lastmod.toISOString()}</lastmod>
-    <changefreq>${entry.changefreq}</changefreq>
+    <changefreq>${entry.changefreq}</changefreq>${priorityLine}
   </url>`;
 		})
 		.join("\n");
@@ -194,6 +211,7 @@ export async function getPagesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		path: page.path,
 		lastmod: BUILD_TIME,
 		changefreq: page.changefreq,
+		priority: page.priority,
 	}));
 
 	return sortByPath(entries);

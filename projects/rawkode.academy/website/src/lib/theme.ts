@@ -1,13 +1,13 @@
 /**
  * Theme utilities.
  *
- * The site has a single brand theme — Rawkode Blue (defined in `:root`
+ * The site has a single brand theme - Rawkode Blue (defined in `:root`
  * and `html.dark` in `src/styles/global.css`). The only user-controlled
  * knob is the colour-scheme preference: light, dark, or system.
  *
  * Concepts:
- *   - `ColorScheme`             — the *applied* mode on the page (light | dark).
- *   - `ColorSchemePreference`   — the user's *stored* choice
+ *   - `ColorScheme`             - the *applied* mode on the page (light | dark).
+ *   - `ColorSchemePreference`   - the user's *stored* choice
  *                                 (light | dark | system). "system" defers
  *                                 to the OS `prefers-color-scheme` media query.
  */
@@ -60,7 +60,7 @@ export function getColorSchemePreference(): ColorSchemePreference {
 }
 
 /**
- * Read the *applied* colour scheme from the document — i.e. whether
+ * Read the *applied* colour scheme from the document - i.e. whether
  * `html.dark` is currently set.
  */
 export function getColorScheme(): ColorScheme {
@@ -109,7 +109,7 @@ let systemMediaListener: ((event: MediaQueryListEvent) => void) | null = null;
  * (or the default), then install a listener so OS theme changes are
  * reflected while preference is "system".
  *
- * Call as early as possible — the inline `ThemeScript.astro` mirrors
+ * Call as early as possible - the inline `ThemeScript.astro` mirrors
  * this so the right class is applied before paint.
  */
 export function initTheme(): void {

@@ -13,7 +13,7 @@ interface RenderResult {
  * `application/xml` that the library ships with. Feed readers and crawlers
  * use the registered type for discovery; the generic one weakens that.
  *
- * Use a `Headers` instance for the copy — case-insensitive `.set()` then
+ * Use a `Headers` instance for the copy - case-insensitive `.set()` then
  * actually replaces the existing header. Spreading a plain object copy
  * preserves both casings and ends up emitting the Content-Type twice.
  */

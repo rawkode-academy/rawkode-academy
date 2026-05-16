@@ -7,7 +7,7 @@
 		type="button"
 	>
 		<transition name="fade" mode="out-in">
-			<!-- System (auto) — monitor icon -->
+			<!-- System (auto) - monitor icon -->
 			<svg
 				v-if="preference === 'system'"
 				key="system"
@@ -26,7 +26,7 @@
 				<line x1="12" y1="17" x2="12" y2="21" />
 			</svg>
 
-			<!-- Dark — sun icon (clicking moves toward light) -->
+			<!-- Dark - sun icon (clicking moves toward light) -->
 			<svg
 				v-else-if="preference === 'dark'"
 				key="sun"
@@ -46,7 +46,7 @@
 				/>
 			</svg>
 
-			<!-- Light — moon icon (clicking moves toward dark) -->
+			<!-- Light - moon icon (clicking moves toward dark) -->
 			<svg
 				v-else
 				key="moon"

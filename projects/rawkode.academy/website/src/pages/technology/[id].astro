@@ -232,18 +232,11 @@ const seoTitle =
 	technology.seo?.title ??
 	(videoCount > 0
 		? `${technology.name} Tutorials, Videos & Guides`
-		: `${technology.name} — ${categoryLabel}`);
+		: `${technology.name} - ${categoryLabel}`);
 
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
-	const rawCncfUseCase = (technology as any).cncf?.useCase as string | undefined;
-	// 50+ technology MDX files have `useCase: '>-'` (a literal yaml-folded
-	// scalar indicator that was authored as a quoted string and therefore
-	// not interpreted). Skip values that don't contain at least one letter
-	// so we don't render "Some tech, a project. >-. Watch deep-dives…".
-	const cncfUseCase = rawCncfUseCase && /[a-z]/i.test(rawCncfUseCase)
-		? rawCncfUseCase.trim()
-		: undefined;
+	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
 	const parts: string[] = [];
 	if (videoCount > 0) {
 		parts.push(
@@ -325,7 +318,7 @@ const cncfStatusColors: Record<string, string> = {
 	graduated:
 		"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800",
 	archived:
-		"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+		"bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-surface",
 };
 
 // Check if we have community links to display
@@ -362,7 +355,7 @@ const hasCommunityLinks =
 		<link
 			rel="alternate"
 			type="application/rss+xml"
-			title={`Rawkode Academy — ${technology.name} (RSS)`}
+			title={`Rawkode Academy - ${technology.name} (RSS)`}
 			href={`/api/feeds/technology/${technology.id.replace(/\/index$/, "")}.xml`}
 		/>
 	</Fragment>

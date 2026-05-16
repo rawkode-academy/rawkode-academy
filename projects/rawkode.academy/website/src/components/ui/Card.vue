@@ -68,7 +68,7 @@ const baseClasses = "relative overflow-hidden flex flex-col h-full";
 const variantClasses = {
 	glass: "card-base backdrop-blur-2xl",
 	solid:
-		"bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
+		"bg-white dark:bg-gray-800 border border-surface",
 	gradient: "bg-gradient-card border-glass",
 	bordered: "bg-transparent border-glass-strong",
 	flat: "bg-gray-50 dark:bg-gray-900",
