@@ -696,22 +696,9 @@ html.dark {
 
 	/* Text Color Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
-	/* Animation Utilities — wired to the motion-token scale. */
-	.transition-card {
-		transition: all var(--duration-slow) var(--ease-standard);
-	}
-
-	.transition-smooth {
-		transition: all var(--duration-base) var(--ease-standard);
-	}
-
-	.transition-fast {
-		transition: all var(--duration-fast) var(--ease-standard);
-	}
-
-	.transition-spring {
-		transition: all var(--duration-slow) var(--ease-spring);
-	}
+	/* Animation Utilities — defined as `@utility` at the end of file
+	   so `@apply transition-card`/`-smooth`/`-fast`/`-spring` works in
+	   scoped Astro/Vue <style> blocks. */
 
 	/* Prose styles for article content - Enhanced Typography */
 	.prose {
@@ -1234,4 +1221,22 @@ html.dark {
 		outline-offset: 2px;
 		border-radius: var(--radius-sm);
 	}
+}
+
+/* Motion utilities — Tailwind v4 `@utility` so `@apply` works from
+   scoped Astro/Vue <style> blocks too. */
+@utility transition-fast {
+	transition: all var(--duration-fast) var(--ease-standard);
+}
+
+@utility transition-smooth {
+	transition: all var(--duration-base) var(--ease-standard);
+}
+
+@utility transition-card {
+	transition: all var(--duration-slow) var(--ease-standard);
+}
+
+@utility transition-spring {
+	transition: all var(--duration-slow) var(--ease-spring);
 }
