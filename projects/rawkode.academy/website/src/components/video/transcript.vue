@@ -24,7 +24,7 @@
           ></path>
         </svg>
       </div>
-      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-muted">
         <span>{{ searchResultsText }}</span>
       </div>
     </div>

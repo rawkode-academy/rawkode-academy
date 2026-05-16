@@ -72,10 +72,10 @@ onUnmounted(() => {
 				dropdownOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
 			]">
 			<div class="py-3 px-4">
-				<span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ user.name }}</span>
+				<span class="block text-sm font-semibold text-primary-content">{{ user.name }}</span>
 				<span class="block text-sm text-gray-900 truncate dark:text-white">{{ user.email }}</span>
 			</div>
-			<ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="userProfileButton">
+			<ul class="py-1 text-secondary-content" aria-labelledby="userProfileButton">
 				<li>
 					<a href="/settings"
 						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>

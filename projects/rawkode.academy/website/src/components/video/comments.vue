@@ -1,6 +1,6 @@
 <template>
   <div class="comments-section mt-8">
-    <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+    <h3 class="text-xl font-semibold mb-4 text-primary-content">
       Comments {{ !loading ? `(${comments.length})` : '' }}
     </h3>
 
@@ -56,7 +56,7 @@
 
           <div class="flex-1 min-w-0">
             <div class="flex items-center space-x-2 mb-1">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+              <h4 class="text-sm font-medium text-primary-content">
                 {{ comment.author }}
               </h4>
               <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -65,7 +65,7 @@
             </div>
 
             <div
-              class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none dark:prose-invert"
+              class="text-sm text-secondary-content prose prose-sm max-w-none dark:prose-invert"
               v-html="formatContent(comment.content)"
             ></div>
           </div>

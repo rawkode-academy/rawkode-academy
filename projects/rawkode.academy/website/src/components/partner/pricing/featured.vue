@@ -50,8 +50,8 @@ const maltPricingPlan: PricingPlan = {
 			Premier Partnership
 		</div>
 		<div class="col-span-2 p-6 lg:p-8">
-			<h2 class="mb-3 text-3xl font-bold text-gray-900 dark:text-white">{{ maltPricingPlan.title }}</h2>
-			<p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-6">{{ maltPricingPlan.description }}</p>
+			<h2 class="mb-3 text-3xl font-bold text-primary-content">{{ maltPricingPlan.title }}</h2>
+			<p class="text-lg font-medium text-secondary-content mb-6">{{ maltPricingPlan.description }}</p>
 			<div class="grid gap-4 mt-4 lg:mt-6">
 				<!-- List -->
 				<ul role="list" class="space-y-6 dark:text-white">
@@ -65,7 +65,7 @@ const maltPricingPlan: PricingPlan = {
 						</svg>
 						<div>
 							<span class="font-medium text-gray-800 dark:text-gray-200">{{ feature.text }}</span>
-							<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+							<p class="text-sm text-muted mt-1">
 								{{ feature.description }}
 							</p>
 						</div>
@@ -75,7 +75,7 @@ const maltPricingPlan: PricingPlan = {
 		</div>
 		<div class="flex p-6 text-center bg-gray-50 lg:p-8 dark:bg-gray-700">
 			<div class="self-center w-full">
-				<div class="text-5xl font-extrabold text-gray-900 dark:text-white">{{ maltPricingPlan.price }}</div>
+				<div class="text-5xl font-extrabold text-primary-content">{{ maltPricingPlan.price }}</div>
 				<div class="mt-1 mb-6 text-gray-500 text-light dark:text-gray-400">USD / annually</div>
 				<div class="mb-6 text-sm text-gray-600 dark:text-gray-300">
 					Maximize your developer engagement and product adoption with our most comprehensive partnership tier

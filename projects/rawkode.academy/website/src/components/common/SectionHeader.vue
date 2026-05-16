@@ -2,7 +2,7 @@
   <div :class="[wrapperClasses, className]">
     <div class="h-10 w-1 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
     <div :class="textClasses">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+      <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
         {{ title }}
       </h2>
       <p

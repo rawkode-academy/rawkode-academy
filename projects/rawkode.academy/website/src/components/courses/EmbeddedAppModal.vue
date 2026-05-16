@@ -17,7 +17,7 @@
         >
           <!-- Header -->
           <div class="flex items-center justify-between p-4 border-b border-white/30 dark:border-gray-700/50 backdrop-blur-md">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="text-lg font-semibold text-primary-content">
               {{ resource.title }}
             </h3>
             <button
@@ -36,7 +36,7 @@
             <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
               <div class="text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-primary"></div>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading application...</p>
+                <p class="mt-2 text-sm text-muted">Loading application...</p>
               </div>
             </div>
 
@@ -62,7 +62,7 @@
 
           <!-- Footer -->
           <div class="flex items-center justify-between p-4 border-t border-white/30 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-md">
-            <p v-if="resource.description" class="text-sm text-gray-600 dark:text-gray-400">
+            <p v-if="resource.description" class="text-sm text-muted">
               {{ resource.description }}
             </p>
             <div class="flex items-center gap-2">
