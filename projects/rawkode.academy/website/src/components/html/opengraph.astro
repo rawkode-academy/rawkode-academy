@@ -20,15 +20,29 @@ const openGraphDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
 
-const openGraphImageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
-	JSON.stringify({
-		...image,
-		title,
-		subtitle,
-		format: "png",
-		template: "gradient",
-	}),
-)}`;
+// Static fallback served from our own origin. Used when the caller hasn't
+// passed an image and we'd otherwise rely on the dynamic image service
+// (image.rawkode.academy) — that service has been returning 403 site-wide,
+// which broke every social-share preview on the affected pages. Falling
+// back to the brand icon means the preview is at least branded rather than
+// broken. Pages that have a real image (article covers, etc.) still go
+// through the dynamic service to get a per-page card.
+const staticFallbackImageUrl = new URL(
+	"/android-chrome-512x512.png",
+	openGraphUrl,
+).href;
+
+const openGraphImageUrl = image
+	? `https://image.rawkode.academy/image?payload=${utf64.encode(
+			JSON.stringify({
+				...image,
+				title,
+				subtitle,
+				format: "png",
+				template: "gradient",
+			}),
+		)}`
+	: staticFallbackImageUrl;
 
 // Show article-specific meta tags only when the caller opts in via the
 // `isArticle` prop. The previous heuristic also matched `/blog/` (a route
