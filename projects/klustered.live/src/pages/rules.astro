@@ -1,0 +1,56 @@
+---
+import SiteLayout from "@/layouts/SiteLayout.astro";
+
+const rules = [
+	{
+		title: "60 minutes on the clock",
+		detail:
+			"Once the kubeconfig is handed over the timer starts. Time runs through any breaks, snack runs, and audience banter.",
+	},
+	{
+		title: "No reverting the sabotage",
+		detail:
+			"You can't `git revert` the changes that caused the break. You have to find them, understand them, and fix forward.",
+	},
+	{
+		title: "Any tool, any approach",
+		detail:
+			"kubectl, k9s, GitOps controllers, raw etcdctl, ssh into nodes — all fair game. The judge cares about a healthy cluster, not the method.",
+	},
+	{
+		title: "Talk it out loud",
+		detail:
+			"You're miked up. The audience is learning from your reasoning. If you're silent for 90 seconds, the judge can ask what you're thinking.",
+	},
+	{
+		title: "The saboteur is in the booth",
+		detail:
+			"They watch with us and can drop hints if (and only if) the competitor is well and truly stuck. Hints cost time on the scoreboard.",
+	},
+	{
+		title: "A 'fix' means a healthy cluster",
+		detail:
+			"Healthy is defined per scenario: usually `kubectl get pods --all-namespaces` clean, plus a specific workload the saboteur designates returning to ready.",
+	},
+];
+---
+
+<SiteLayout title="Rules" description="How the Klustered game show works.">
+	<section class="pt-12">
+		<p class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+			House rules
+		</p>
+		<h1 class="mt-2 text-4xl font-black tracking-tight md:text-5xl">Rules</h1>
+	</section>
+
+	<section class="mt-10 grid gap-4 md:grid-cols-2">
+		{
+			rules.map((r) => (
+				<div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+					<h2 class="text-lg font-bold tracking-tight text-white">{r.title}</h2>
+					<p class="mt-2 text-sm text-slate-300">{r.detail}</p>
+				</div>
+			))
+		}
+	</section>
+</SiteLayout>
