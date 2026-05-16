@@ -5,3 +5,27 @@
 /embed/*
   Cross-Origin-Embedder-Policy: require-corp
   Cross-Origin-Opener-Policy: same-origin
+
+# Feed MIME types. The handlers set these via `new Response(..., { headers })`
+# but the endpoints are `prerender = true`, so Workers serves them as static
+# assets and overrides the Content-Type based on file extension (.json →
+# application/json, .xml → application/xml). Set the correct registered MIME
+# types here so feed readers and crawlers can sniff them properly:
+#   - application/rss+xml for RSS 2.0
+#   - application/feed+json for JSON Feed 1.1
+# Atom feeds use the .atom extension and are served with application/atom+xml
+# by Workers' default mapping, so they don't need an override.
+/api/feeds/*.xml
+  Content-Type: application/rss+xml; charset=utf-8
+
+/api/feeds/*.json
+  Content-Type: application/feed+json; charset=utf-8
+
+/api/feeds/shows/*.xml
+  Content-Type: application/rss+xml; charset=utf-8
+
+/api/feeds/technology/*.xml
+  Content-Type: application/rss+xml; charset=utf-8
+
+/api/feeds/people/*.xml
+  Content-Type: application/rss+xml; charset=utf-8

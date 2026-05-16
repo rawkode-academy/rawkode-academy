@@ -54,7 +54,13 @@ const feedVideos = results
 	}));
 ---
 
-<Page title={searchQuery ? `${searchQuery} Search Results` : "Search"}>
+<Page
+	title={searchQuery ? `Search results for "${searchQuery}"` : "Search"}
+	description={searchQuery
+		? `Search results for "${searchQuery}" across Rawkode Academy's cloud native videos, articles, and learning paths.`
+		: "Search Rawkode Academy's library of cloud native and Kubernetes videos, articles, and learning paths."}
+	noindex
+>
 	{searchQuery.length === 0 ? (
 		<p class="text-center text-muted py-16">
 			Enter a search term to find videos.

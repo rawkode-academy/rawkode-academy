@@ -4,14 +4,25 @@ import DefaultLayout from "@/layouts/app.astro";
 import type { OpenGraphProps } from "@/types/opengraph";
 import "@/styles/global.css";
 
-interface Props extends OpenGraphProps {}
+interface Props extends OpenGraphProps {
+	// Astro passes MDX frontmatter under `Astro.props.frontmatter` when this
+	// wrapper is used as an MDX `layout:`. Unwrap so the props reach <head>.
+	frontmatter?: OpenGraphProps;
+}
 
 // Get user ID for PostHog identification (links browser sessions to server-side events)
 const userId = Astro.locals.user?.id;
+
+// When invoked via MDX `layout:` frontmatter (e.g. /privacy.mdx), the
+// frontmatter object is the only place title/description live. When
+// invoked as an Astro component (`<Page title="...">`), the props sit at
+// the top level. Merge so either pattern works.
+const { frontmatter, ...directProps } = Astro.props;
+const headProps = { ...(frontmatter ?? {}), ...directProps };
 ---
 
 <html lang="en" class="scroll-smooth focus:scroll-auto">
-	<DefaultHead {...Astro.props} userId={userId}>
+	<DefaultHead {...headProps} userId={userId}>
 		<slot name="extra-head" slot="extra-head" />
 	</DefaultHead>
 

@@ -1,7 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
-import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+import { renderAndSanitizeArticles, withRssMimeType } from "../../../lib/feed-utils";
 import { createLogger } from "@/lib/logger";
 
 import type { RSSFeedItem } from "@astrojs/rss";
@@ -149,16 +149,18 @@ export async function GET(context: APIContext) {
 		return bTime - aTime;
 	});
 
-	return rss({
-		title: "Rawkode Academy - All Content",
-		description:
-			"Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
-		site: context.site?.toString() || "https://rawkode.academy",
-		items,
-		customData: "<language>en-us</language>",
-		stylesheet: false,
-		xmlns: {
-			itunes: "http://www.itunes.com/dtds/podcast-1.0.dtd",
-		},
-	});
+	return withRssMimeType(
+		await rss({
+			title: "Rawkode Academy - All Content",
+			description:
+				"Latest articles, news, and videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
+			site: context.site?.toString() || "https://rawkode.academy",
+			items,
+			customData: "<language>en-us</language>",
+			stylesheet: false,
+			xmlns: {
+				itunes: "http://www.itunes.com/dtds/podcast-1.0.dtd",
+			},
+		}),
+	);
 }

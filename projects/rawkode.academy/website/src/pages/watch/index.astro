@@ -110,7 +110,10 @@ const feedVideos = allVideos.slice(start, end).map((v) => ({
 const hasNextPage = end < allVideos.length;
 ---
 
-<Page title="Videos">
+<Page
+	title="Cloud Native & Kubernetes Videos"
+	description="Watch hands-on cloud native and Kubernetes tutorials, deep dives, and live builds — practical content for engineers shipping production systems."
+>
 	{page > 1 && (
 		<Fragment slot="extra-head">
 			<meta name="robots" content="noindex,follow" />

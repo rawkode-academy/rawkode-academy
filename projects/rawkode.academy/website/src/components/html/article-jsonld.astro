@@ -3,27 +3,43 @@ import type { CollectionEntry } from "astro:content";
 
 interface Props {
 	article: CollectionEntry<"articles">;
-	authors: Array<{ data: { name: string } }>;
+	authors: CollectionEntry<"people">[];
 	imageUrl?: URL; // absolute URL if available
 	// Allow placement into a named slot in parents (for TS exactOptionalPropertyTypes)
 	slot?: string;
 }
 
 const { article, authors, imageUrl } = Astro.props;
+const siteOrigin = (Astro.site ?? Astro.url).origin;
 
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "TechArticle",
 	headline: article.data.title,
-	author: authors.map((a) => ({ "@type": "Person", name: a.data.name })),
+	description: article.data.description,
+	author: authors.map((a) => ({
+		"@type": "Person",
+		name: a.data.name,
+		...(a.data.github ? { url: a.data.github } : {}),
+	})),
 	datePublished: new Date(article.data.publishedAt).toISOString(),
 	dateModified: new Date(
 		article.data.updatedAt ?? article.data.publishedAt,
 	).toISOString(),
 	mainEntityOfPage: { "@type": "WebPage", "@id": Astro.url.href },
+	url: Astro.url.href,
 	image: imageUrl
 		? imageUrl.href
 		: new URL("/android-chrome-512x512.png", Astro.site || Astro.url).href,
+	publisher: {
+		"@type": "Organization",
+		name: "Rawkode Academy",
+		url: siteOrigin,
+		logo: {
+			"@type": "ImageObject",
+			url: new URL("/android-chrome-512x512.png", siteOrigin).href,
+		},
+	},
 };
 ---
 
