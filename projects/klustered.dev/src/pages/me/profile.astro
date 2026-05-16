@@ -1,12 +1,100 @@
 ---
+import { env } from "cloudflare:workers";
 import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getDb } from "@/db/client";
 import { COMPETITOR_NAV } from "@/lib/nav";
+import { getCompetitorForUser } from "@/lib/competitor";
+import { getPerson } from "@/lib/content";
 
-const title = "Uprofile";
+const user = Astro.locals.user!;
+const db = getDb(env.DB);
+
+const competitor = await getCompetitorForUser(db, user.id);
+const person = competitor ? await getPerson(competitor.personSlug) : undefined;
 ---
 
-<PortalLayout title={title} section="me" nav={[...COMPETITOR_NAV]}>
-	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
-		<p>This is the {title.toLowerCase()} page. Real content lands in Phase 6.</p>
+<PortalLayout title="Profile" section="me" nav={[...COMPETITOR_NAV]}>
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm">
+		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+			Account
+		</h2>
+		<dl class="mt-3 grid gap-3 sm:grid-cols-2 text-slate-300">
+			<div>
+				<dt class="text-xs text-slate-500">Name</dt>
+				<dd>{user.name}</dd>
+			</div>
+			<div>
+				<dt class="text-xs text-slate-500">Email</dt>
+				<dd>{user.email}</dd>
+			</div>
+			<div>
+				<dt class="text-xs text-slate-500">User id</dt>
+				<dd class="font-mono text-xs">{user.id}</dd>
+			</div>
+		</dl>
 	</section>
+
+	{
+		competitor ? (
+			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm">
+				<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+					Competitor record
+				</h2>
+				<dl class="mt-3 grid gap-3 sm:grid-cols-2 text-slate-300">
+					<div>
+						<dt class="text-xs text-slate-500">Display name</dt>
+						<dd>{competitor.displayName}</dd>
+					</div>
+					<div>
+						<dt class="text-xs text-slate-500">Person slug</dt>
+						<dd class="font-mono text-xs">{competitor.personSlug}</dd>
+					</div>
+					{person && person.data.github && (
+						<div>
+							<dt class="text-xs text-slate-500">GitHub</dt>
+							<dd>
+								<a
+									href={`https://github.com/${person.data.github}`}
+									class="text-fuchsia-300 hover:underline"
+								>
+									@{person.data.github}
+								</a>
+							</dd>
+						</div>
+					)}
+					{person && person.data.twitter && (
+						<div>
+							<dt class="text-xs text-slate-500">Twitter / X</dt>
+							<dd>
+								<a
+									href={`https://twitter.com/${person.data.twitter}`}
+									class="text-fuchsia-300 hover:underline"
+								>
+									@{person.data.twitter}
+								</a>
+							</dd>
+						</div>
+					)}
+					{person && person.data.website && (
+						<div class="sm:col-span-2">
+							<dt class="text-xs text-slate-500">Website</dt>
+							<dd>
+								<a href={person.data.website} class="text-fuchsia-300 hover:underline">
+									{person.data.website}
+								</a>
+							</dd>
+						</div>
+					)}
+				</dl>
+				{competitor.bio && <p class="mt-4 text-slate-400">{competitor.bio}</p>}
+				<p class="mt-4 text-xs text-slate-500">
+					Bio + public profile fields live in <code class="rounded bg-slate-800 px-1 py-0.5">content/people/{competitor.personSlug}.mdx</code> — open a PR to edit them.
+				</p>
+			</section>
+		) : (
+			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+				Your account isn't linked to a competitor yet.
+			</section>
+		)
+	}
 </PortalLayout>

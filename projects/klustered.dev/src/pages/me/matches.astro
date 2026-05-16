@@ -1,12 +1,113 @@
 ---
+import { env } from "cloudflare:workers";
 import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getDb, schema } from "@/db/client";
 import { COMPETITOR_NAV } from "@/lib/nav";
+import { getCompetitorForUser, getMyMatches } from "@/lib/competitor";
 
-const title = "Umatches";
+const user = Astro.locals.user!;
+const db = getDb(env.DB);
+
+const competitor = await getCompetitorForUser(db, user.id);
+const matches = competitor ? await getMyMatches(db, competitor.id) : [];
+
+const teamMap: Record<string, string> = {};
+if (matches.length > 0) {
+	const teams = await db
+		.select({ id: schema.teams.id, name: schema.teams.name })
+		.from(schema.teams)
+		.all();
+	for (const t of teams) teamMap[t.id] = t.name;
+}
+
+function formatScheduled(value: Date | null): string {
+	if (!value) return "TBD";
+	return new Intl.DateTimeFormat("en", {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(value);
+}
+
+const now = Date.now();
+const upcoming = matches.filter(
+	(m) => !m.endedAt && (!m.scheduledAt || m.scheduledAt.getTime() >= now),
+);
+const past = matches.filter(
+	(m) => m.endedAt || (m.scheduledAt && m.scheduledAt.getTime() < now),
+);
 ---
 
-<PortalLayout title={title} section="me" nav={[...COMPETITOR_NAV]}>
-	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
-		<p>This is the {title.toLowerCase()} page. Real content lands in Phase 6.</p>
-	</section>
+<PortalLayout title="My matches" section="me" nav={[...COMPETITOR_NAV]}>
+	{
+		!competitor ? (
+			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+				Your account isn't linked to a competitor yet. Ask an admin to link
+				your user id (<code class="font-mono">{user.id}</code>) on /admin/competitors.
+			</section>
+		) : matches.length === 0 ? (
+			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+				You aren't on any teams with scheduled matches yet.
+			</section>
+		) : (
+			<>
+				<section>
+					<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+						Upcoming
+					</h2>
+					{upcoming.length === 0 ? (
+						<p class="mt-2 text-sm text-slate-400">Nothing on the calendar.</p>
+					) : (
+						<ul class="mt-3 flex flex-col gap-2">
+							{upcoming.map((m) => (
+								<li class="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm">
+									<div class="flex flex-wrap items-center justify-between gap-3">
+										<div>
+											<span class="text-slate-100">{m.teamAId ? teamMap[m.teamAId] : "TBD"}</span>
+											<span class="mx-2 text-slate-500">vs</span>
+											<span class="text-slate-100">{m.teamBId ? teamMap[m.teamBId] : "TBD"}</span>
+										</div>
+										<div class="flex items-center gap-3 text-xs text-slate-400">
+											<span>{formatScheduled(m.scheduledAt)}</span>
+											<span class="rounded-full bg-slate-800 px-2 py-0.5 capitalize">{m.status}</span>
+										</div>
+									</div>
+								</li>
+							))}
+						</ul>
+					)}
+				</section>
+
+				<section>
+					<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+						Past
+					</h2>
+					{past.length === 0 ? (
+						<p class="mt-2 text-sm text-slate-400">No completed matches yet.</p>
+					) : (
+						<ul class="mt-3 flex flex-col gap-2">
+							{past.map((m) => (
+								<li class="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm">
+									<div class="flex flex-wrap items-center justify-between gap-3">
+										<div>
+											<span class={m.winnerTeamId === m.teamAId ? "text-emerald-300" : "text-slate-100"}>
+												{m.teamAId ? teamMap[m.teamAId] : "TBD"}
+											</span>
+											<span class="mx-2 text-slate-500">vs</span>
+											<span class={m.winnerTeamId === m.teamBId ? "text-emerald-300" : "text-slate-100"}>
+												{m.teamBId ? teamMap[m.teamBId] : "TBD"}
+											</span>
+										</div>
+										<div class="flex items-center gap-3 text-xs text-slate-400">
+											<span>{formatScheduled(m.scheduledAt)}</span>
+											<span class="rounded-full bg-slate-800 px-2 py-0.5 capitalize">{m.status}</span>
+										</div>
+									</div>
+								</li>
+							))}
+						</ul>
+					)}
+				</section>
+			</>
+		)
+	}
 </PortalLayout>

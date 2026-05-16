@@ -41,6 +41,7 @@ export const competitors = sqliteTable(
 		personSlug: text("person_slug").notNull(),
 		displayName: text("display_name").notNull(),
 		bio: text("bio"),
+		userId: text("user_id"),
 		createdAt: createdAt(),
 		updatedAt: updatedAt(),
 	},
