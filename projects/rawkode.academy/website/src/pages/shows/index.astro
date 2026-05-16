@@ -3,6 +3,7 @@ export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
 import ShowCard from "@/components/show/ShowCard.astro";
+import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 
@@ -63,12 +64,30 @@ const showsToRender: ShowSummary[] = await (async () => {
 })();
 
 const hasShows = showsToRender.length > 0;
+
+const showsJsonLd = showEntries.map((s) => {
+	const episodeCount = videos.filter(
+		(v) => getShowId(v.data.show) === s.data.id,
+	).length;
+	return {
+		id: s.data.id,
+		name: s.data.name,
+		...(s.data.description ? { description: s.data.description } : {}),
+		...(episodeCount > 0 ? { episodeCount } : {}),
+	};
+});
 ---
 
 <Page
 	title="Shows"
 	description="Browse the live and recurring shows from Rawkode Academy — interviews, deep dives, and hands-on streams covering the cloud native ecosystem."
 >
+	<ShowItemListJsonLd
+		slot="extra-head"
+		shows={showsJsonLd}
+		listUrl={new URL("/shows", Astro.site ?? Astro.url).href}
+		listName="Rawkode Academy Shows"
+	/>
         <section class="relative overflow-hidden py-16 sm:py-20">
                 <!-- Background gradient -->
                 <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent dark:from-primary/10" aria-hidden="true"></div>
