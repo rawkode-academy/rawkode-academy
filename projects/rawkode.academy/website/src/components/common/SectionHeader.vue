@@ -52,10 +52,18 @@ const title = props.title;
 
 <style scoped>
 .bg-gradient-to-b {
-  background-image: linear-gradient(to bottom, var(--primary), var(--secondary));
+  background-image: linear-gradient(
+    to bottom,
+    rgb(var(--brand-primary)),
+    rgb(var(--brand-secondary))
+  );
 }
 
 .bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--primary), transparent);
+  background-image: linear-gradient(
+    to right,
+    rgb(var(--brand-primary)),
+    transparent
+  );
 }
 </style>

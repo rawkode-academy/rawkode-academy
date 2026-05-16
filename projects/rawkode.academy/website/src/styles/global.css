@@ -46,6 +46,14 @@
 	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
 	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
 
+	/* Semantic text-tone tokens — mirrored from the `@utility` blocks
+	   below so scoped Astro/Vue `<style>` blocks can reach them via
+	   `color: var(--text-primary-content)` etc. The `@utility` classes
+	   remain the primary surface; these vars are for scoped styles
+	   that can't use `@apply`. */
+	--text-primary-content: rgb(17 24 39);
+	--text-secondary-content: rgb(55 65 81);
+	--text-muted: rgb(75 85 99);
 }
 
 html.dark {
@@ -55,6 +63,12 @@ html.dark {
 	--surface-card-muted: rgba(0, 206, 255, 0.12);
 	--surface-border: rgba(95, 94, 215, 0.35);
 	--surface-border-strong: rgba(0, 206, 255, 0.45);
+
+	/* Dark-mode text tones — mirror the `:root.dark &` blocks in
+	   the `@utility text-*` declarations below. */
+	--text-primary-content: rgb(255 255 255);
+	--text-secondary-content: rgb(209 213 219);
+	--text-muted: rgb(156 163 175);
 
 	--app-backdrop:
 		radial-gradient(
