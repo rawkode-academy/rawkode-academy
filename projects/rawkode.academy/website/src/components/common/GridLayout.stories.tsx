@@ -122,27 +122,27 @@ export const CardGrid: Story = {
 			component={{
 				template: `
           <GridLayout :cols="{ default: 1, md: 2, lg: 3 }" :gap="6">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-surface">
               <h3 class="text-lg font-semibold text-primary-content mb-2">Feature 1</h3>
               <p class="text-secondary-content">Description of the first feature goes here.</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-surface">
               <h3 class="text-lg font-semibold text-primary-content mb-2">Feature 2</h3>
               <p class="text-secondary-content">Description of the second feature goes here.</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-surface">
               <h3 class="text-lg font-semibold text-primary-content mb-2">Feature 3</h3>
               <p class="text-secondary-content">Description of the third feature goes here.</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-surface">
               <h3 class="text-lg font-semibold text-primary-content mb-2">Feature 4</h3>
               <p class="text-secondary-content">Description of the fourth feature goes here.</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-surface">
               <h3 class="text-lg font-semibold text-primary-content mb-2">Feature 5</h3>
               <p class="text-secondary-content">Description of the fifth feature goes here.</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-surface">
               <h3 class="text-lg font-semibold text-primary-content mb-2">Feature 6</h3>
               <p class="text-secondary-content">Description of the sixth feature goes here.</p>
             </div>
