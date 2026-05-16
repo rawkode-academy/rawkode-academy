@@ -236,7 +236,14 @@ const seoTitle =
 
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
-	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
+	const rawCncfUseCase = (technology as any).cncf?.useCase as string | undefined;
+	// 50+ technology MDX files have `useCase: '>-'` (a literal yaml-folded
+	// scalar indicator that was authored as a quoted string and therefore
+	// not interpreted). Skip values that don't contain at least one letter
+	// so we don't render "Some tech, a project. >-. Watch deep-dives…".
+	const cncfUseCase = rawCncfUseCase && /[a-z]/i.test(rawCncfUseCase)
+		? rawCncfUseCase.trim()
+		: undefined;
 	const parts: string[] = [];
 	if (videoCount > 0) {
 		parts.push(

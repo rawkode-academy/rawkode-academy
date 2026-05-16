@@ -128,6 +128,13 @@ function formatDuration(seconds: number) {
 ---
 
 <Page title={pageTitle} description={showDescription}>
+        <link
+                slot="extra-head"
+                rel="alternate"
+                type="application/rss+xml"
+                title={`${showEntry.data.name} (Podcast RSS)`}
+                href={`/api/feeds/shows/${showEntry.data.id}.xml`}
+        />
         <PodcastSeriesJsonLd
                 slot="extra-head"
                 show={showEntry}

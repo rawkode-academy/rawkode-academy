@@ -1,6 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
+import { withRssMimeType } from "../../../lib/feed-utils";
 
 export async function GET(context: APIContext) {
 	const news = await getCollection("news");
@@ -25,13 +26,15 @@ export async function GET(context: APIContext) {
 		}),
 	);
 
-	return rss({
-		title: "Rawkode Academy - News",
-		description:
-			"Cloud native, Kubernetes, and AI infrastructure news for engineers.",
-		site: context.site?.toString() || "https://rawkode.academy",
-		items,
-		customData: "<language>en-us</language>",
-		stylesheet: false,
-	});
+	return withRssMimeType(
+		await rss({
+			title: "Rawkode Academy - News",
+			description:
+				"Cloud native, Kubernetes, and AI infrastructure news for engineers.",
+			site: context.site?.toString() || "https://rawkode.academy",
+			items,
+			customData: "<language>en-us</language>",
+			stylesheet: false,
+		}),
+	);
 }

@@ -1,6 +1,9 @@
 {
-	"name": "",
-	"short_name": "",
+	"name": "Rawkode Academy",
+	"short_name": "Rawkode Academy",
+	"description": "Cloud Native and Kubernetes education — courses, articles, videos, and live builds for engineers shipping production systems.",
+	"start_url": "/",
+	"scope": "/",
 	"icons": [
 		{
 			"src": "/android-chrome-192x192.png",
@@ -11,9 +14,15 @@
 			"src": "/android-chrome-512x512.png",
 			"sizes": "512x512",
 			"type": "image/png"
+		},
+		{
+			"src": "/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
 		}
 	],
-	"theme_color": "#ffffff",
-	"background_color": "#ffffff",
+	"theme_color": "#5F5ED7",
+	"background_color": "#0b0b0f",
 	"display": "standalone"
 }

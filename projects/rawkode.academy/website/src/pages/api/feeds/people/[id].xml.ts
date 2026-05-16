@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
+import { withRssMimeType } from "../../../../lib/feed-utils";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
@@ -117,12 +118,14 @@ export async function GET(context: APIContext) {
 		return bTime - aTime;
 	});
 
-	return rss({
-		title: `Rawkode Academy — ${personName}`,
-		description: `Articles, news, and video appearances by ${personName} on Rawkode Academy.`,
-		site: context.site?.toString() || "https://rawkode.academy",
-		items,
-		customData: "<language>en-us</language>",
-		stylesheet: false,
-	});
+	return withRssMimeType(
+		await rss({
+			title: `Rawkode Academy — ${personName}`,
+			description: `Articles, news, and video appearances by ${personName} on Rawkode Academy.`,
+			site: context.site?.toString() || "https://rawkode.academy",
+			items,
+			customData: "<language>en-us</language>",
+			stylesheet: false,
+		}),
+	);
 }
