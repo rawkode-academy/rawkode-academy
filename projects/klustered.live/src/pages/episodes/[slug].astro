@@ -35,6 +35,20 @@ function formatChapterTime(seconds: number): string {
 	title={episode.data.title}
 	description={descriptionFirstParagraph ?? episode.data.title}
 >
+	<script
+		type="application/ld+json"
+		set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "VideoObject",
+			name: episode.data.title,
+			description: descriptionFirstParagraph ?? episode.data.title,
+			uploadDate: episode.data.publishedAt.toISOString(),
+			...(episode.data.youtubeId
+				? { embedUrl: `https://www.youtube.com/embed/${episode.data.youtubeId}` }
+				: {}),
+		})}
+	/>
+
 	<section class="pt-12">
 		<a
 			href={`/episodes?season=${season}`}
