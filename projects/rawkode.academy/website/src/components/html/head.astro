@@ -15,12 +15,20 @@ interface Props extends OpenGraphProps {
 const { userId } = Astro.props;
 const BRAND_NAME = "Rawkode Academy";
 const TITLE_SUFFIX = ` | ${BRAND_NAME}`;
+// Google truncates SERP titles around 60 characters. Skip the brand
+// suffix when appending it would push the title past that threshold —
+// `og:site_name` (emitted by opengraph.astro) and the domain itself
+// carry the brand for the cases where the suffix is dropped.
+const TITLE_MAX_LENGTH = 60;
 const baseTitle = (Astro.props.title ?? BRAND_NAME).trim();
-const normalizedTitle = baseTitle
+const baseTitleContainsBrand = baseTitle
 	.toLowerCase()
-	.includes(BRAND_NAME.toLowerCase())
-	? baseTitle
-	: `${baseTitle}${TITLE_SUFFIX}`;
+	.includes(BRAND_NAME.toLowerCase());
+const normalizedTitle =
+	baseTitleContainsBrand ||
+	baseTitle.length + TITLE_SUFFIX.length > TITLE_MAX_LENGTH
+		? baseTitle
+		: `${baseTitle}${TITLE_SUFFIX}`;
 ---
 
 <style is:global>
