@@ -64,7 +64,7 @@ const maltPricingPlan: PricingPlan = {
 								clip-rule="evenodd"></path>
 						</svg>
 						<div>
-							<span class="font-medium text-gray-800 dark:text-gray-200">{{ feature.text }}</span>
+							<span class="font-medium text-primary-content">{{ feature.text }}</span>
 							<p class="text-sm text-muted mt-1">
 								{{ feature.description }}
 							</p>
@@ -77,7 +77,7 @@ const maltPricingPlan: PricingPlan = {
 			<div class="self-center w-full">
 				<div class="text-5xl font-extrabold text-primary-content">{{ maltPricingPlan.price }}</div>
 				<div class="mt-1 mb-6 text-gray-500 text-light dark:text-gray-400">USD / annually</div>
-				<div class="mb-6 text-sm text-gray-600 dark:text-gray-300">
+				<div class="mb-6 text-sm text-secondary-content">
 					Maximize your developer engagement and product adoption with our most comprehensive partnership tier
 				</div>
 				<a href="/organizations/lets-chat"

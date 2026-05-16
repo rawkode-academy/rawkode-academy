@@ -15,7 +15,7 @@
       retry-text="Retry loading comments"
     />
 
-    <div v-else-if="comments.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+    <div v-else-if="comments.length === 0" class="text-center py-8 text-muted">
       <p>No comments yet. Join the discussion on Discord!</p>
       <a
         v-if="discordInviteUrl"
@@ -59,7 +59,7 @@
               <h4 class="text-sm font-medium text-primary-content">
                 {{ comment.author }}
               </h4>
-              <span class="text-xs text-gray-500 dark:text-gray-400">
+              <span class="text-xs text-muted">
                 {{ formatDate(comment.timestamp) }}
               </span>
             </div>

@@ -109,7 +109,7 @@ const pricingPlans: PricingPlan[] = [
 				plan.description }}</p>
 			<div class="grid justify-center my-8">
 				<div class="text-5xl font-extrabold">{{ plan.price }}</div>
-				<div class="text-gray-500 dark:text-gray-400">USD / annually</div>
+				<div class="text-muted">USD / annually</div>
 			</div>
 
 			<!-- List -->
@@ -123,8 +123,8 @@ const pricingPlans: PricingPlan[] = [
 							clip-rule="evenodd"></path>
 					</svg>
 					<div>
-						<span class="font-medium text-gray-800 dark:text-gray-200">{{ feature.text }}</span>
-						<p v-if="feature.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+						<span class="font-medium text-primary-content">{{ feature.text }}</span>
+						<p v-if="feature.description" class="text-sm text-muted mt-1">
 							{{ feature.description }}
 						</p>
 					</div>

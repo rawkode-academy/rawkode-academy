@@ -7,7 +7,7 @@
       </h2>
       <p
         v-if="subtitle"
-        class="text-base text-gray-600 dark:text-gray-300 mt-2 max-w-2xl"
+        class="text-base text-secondary-content mt-2 max-w-2xl"
       >
         {{ subtitle }}
       </p>

@@ -119,7 +119,7 @@ const offerings: Offering[] = [
 			<div class="max-w-(--breakpoint-md) mb-8 lg:mb-16">
 				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content">Partner With Industry
 					Experts</h2>
-				<p class="font-light text-gray-500 dark:text-gray-400 sm:text-xl">We carefully select partners whose
+				<p class="font-light text-muted sm:text-xl">We carefully select partners whose
 					technologies genuinely enhance developers' work and lives. Our authentic approach ensures we can effectively
 					advocate for your solutions and help you reach your growth objectives.</p>
 				<p class="mt-4 text-black dark:text-white sm:text-xl font-medium">Our three-pillar approach to developer

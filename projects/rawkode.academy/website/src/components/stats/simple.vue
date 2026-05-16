@@ -22,7 +22,7 @@ defineProps<Props>();
 				<dl class="grid max-w-(--breakpoint-md) gap-8 mx-auto text-gray-900 sm:grid-cols-3 dark:text-white">
 					<div v-for="stat in stats" class="flex flex-col items-center justify-center">
 						<dt class="mb-2 text-4xl md:text-5xl font-extrabold">{{ stat.value }}</dt>
-						<dd class="font-light text-gray-500 dark:text-gray-400">{{ stat.label }}</dd>
+						<dd class="font-light text-muted">{{ stat.label }}</dd>
 					</div>
 				</dl>
 			</div>

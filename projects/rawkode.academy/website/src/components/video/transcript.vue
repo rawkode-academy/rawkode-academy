@@ -47,7 +47,7 @@
         <div class="text-sm text-primary dark:text-primary font-mono mb-2">
           {{ paragraph[0].start }}
         </div>
-        <div class="text-gray-900 dark:text-gray-100 leading-relaxed">
+        <div class="text-primary-content leading-relaxed">
           <span
             v-for="(cue, cueIndex) in paragraph"
             :key="`${index}-${cueIndex}`"
