@@ -100,6 +100,24 @@ tasks: {
 				"wrangler.jsonc",
 			]
 		}
+		"migrate-local": schema.#Task & {
+			command: "bun"
+			args: ["run", "db:migrate:local"]
+
+			inputs: [
+				"migrations/**",
+				"wrangler.jsonc",
+			]
+		}
+		seed: schema.#Task & {
+			command: "bun"
+			args: ["run", "db:seed"]
+
+			inputs: [
+				"scripts/seed.ts",
+				"wrangler.jsonc",
+			]
+		}
 	}
 
 	deploy: schema.#TaskGroup & {
