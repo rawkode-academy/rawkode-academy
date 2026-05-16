@@ -49,6 +49,8 @@ export function buildAdrJsonLd(
 		"@context": "https://schema.org",
 		"@type": "TechArticle",
 		headline,
+		description: `Architecture Decision Record: ${source.title}. Context, decision, and consequences from Rawkode Academy's engineering team.`,
+		image: joinUrl(siteUrl, PUBLISHER_LOGO_PATH),
 		url: adrUrl,
 		datePublished: adoptedAtIso,
 		dateModified: adoptedAtIso,
