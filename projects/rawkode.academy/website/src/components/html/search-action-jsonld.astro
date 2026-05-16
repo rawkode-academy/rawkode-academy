@@ -1,15 +1,21 @@
 ---
-// SearchAction schema for sitelinks searchbox
+// SearchAction schema for sitelinks searchbox. Google expects the
+// placeholder `{search_term_string}` to land in the urlTemplate as
+// literal curly braces, so build it via string concat rather than
+// `new URL(...)` (the URL constructor percent-encodes the braces).
+const siteOrigin = (
+	Astro.site?.toString() ?? "https://rawkode.academy/"
+).replace(/\/$/, "");
 const searchActionJsonLd = {
 	"@context": "https://schema.org",
 	"@type": "WebSite",
-	url: Astro.site?.toString() || "https://rawkode.academy",
+	url: `${siteOrigin}/`,
 	name: "Rawkode Academy",
 	potentialAction: {
 		"@type": "SearchAction",
 		target: {
 			"@type": "EntryPoint",
-			urlTemplate: `${Astro.site}search?q={search_term_string}`,
+			urlTemplate: `${siteOrigin}/search?q={search_term_string}`,
 		},
 		"query-input": "required name=search_term_string",
 	},

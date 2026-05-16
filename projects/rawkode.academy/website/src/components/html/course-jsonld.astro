@@ -38,12 +38,15 @@ const courseInstances = modules.map((module) => ({
 	courseWorkload: "PT30M", // Estimated 30 minutes per module
 }));
 
+const courseUrl = new URL(`/courses/${course.id}`, Astro.site).href;
+
 // Create structured data for the course
 const courseJsonLd = {
 	"@context": "https://schema.org",
 	"@type": "Course",
 	name: course.data.title,
 	description: course.data.description,
+	url: courseUrl,
 	provider: {
 		"@type": "Organization",
 		name: "Rawkode Academy",
@@ -53,12 +56,8 @@ const courseJsonLd = {
 			url: "https://rawkode.academy/android-chrome-512x512.png",
 		},
 	},
-	educationalCredentialAwarded: "Certificate of Completion",
-	coursePrerequisites: [],
 	hasCourseInstance: courseInstances,
-	numberOfCredits: modules.length,
 	timeRequired: totalDurationISO,
-	skillLevel: getSkillLevel(course.data.difficulty),
 	inLanguage: "en-US",
 	availableLanguage: ["en-US"],
 	datePublished: course.data.publishedAt.toISOString(),
@@ -73,23 +72,17 @@ const courseJsonLd = {
 		name: author.data.name,
 		url: author.data.github,
 	})),
-	teaches: modules.map((module) => module.data.title).join(", "),
+	teaches: modules.map((module) => module.data.title),
 	educationalLevel: getSkillLevel(course.data.difficulty),
 	learningResourceType: "Online Course",
 	interactivityType: "active",
 	isAccessibleForFree: true,
-	url: new URL(`/courses/${course.id}`, Astro.site).href,
 	offers: {
 		"@type": "Offer",
 		price: "0",
 		priceCurrency: "USD",
 		availability: "https://schema.org/InStock",
 		category: "Educational",
-		itemOffered: {
-			"@type": "Course",
-			name: course.data.title,
-			url: new URL(`/courses/${course.id}`, Astro.site).href,
-		},
 	},
 };
 ---
