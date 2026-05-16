@@ -8,6 +8,23 @@ interface RenderResult {
 }
 
 /**
+ * Wrap a Response from `@astrojs/rss` so it carries the IANA-registered
+ * MIME type for RSS 2.0 (`application/rss+xml`) instead of the generic
+ * `application/xml` that the library ships with. Feed readers and crawlers
+ * use the registered type for discovery; the generic one weakens that.
+ */
+export function withRssMimeType(res: Response): Response {
+	return new Response(res.body, {
+		status: res.status,
+		statusText: res.statusText,
+		headers: {
+			...Object.fromEntries(res.headers),
+			"Content-Type": "application/rss+xml; charset=utf-8",
+		},
+	});
+}
+
+/**
  * Render and sanitize a single article's content to HTML
  * Attempts to render MDX content to HTML with fallbacks
  */
