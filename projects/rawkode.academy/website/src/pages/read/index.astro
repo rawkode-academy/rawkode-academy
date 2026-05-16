@@ -31,7 +31,7 @@ const pageDescription =
 	"Deep dive into cloud native technologies, Kubernetes, observability, and more. Articles written by practitioners for practitioners at Rawkode Academy.";
 ---
 
-<Page title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
   <Fragment slot="extra-head">
     <ArticleItemListJsonLd
       articles={allArticles.filter((article) => !article.data.draft)}

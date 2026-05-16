@@ -12,6 +12,7 @@ const {
 	publishedAt,
 	updatedAt,
 	authors,
+	pageType = "WebPage",
 } = Astro.props;
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
@@ -155,7 +156,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 		type="application/ld+json"
 		set:html={JSON.stringify({
 			"@context": "https://schema.org",
-			"@type": "WebPage",
+			"@type": pageType,
 			name: title,
 			description: openGraphDescription,
 			image: useImageDirectly ? image?.image : openGraphImageUrl,
@@ -172,7 +173,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 				},
 			},
 			mainEntityOfPage: {
-				"@type": "WebPage",
+				"@type": pageType,
 				"@id": openGraphUrl.toString(),
 			},
 		})}
