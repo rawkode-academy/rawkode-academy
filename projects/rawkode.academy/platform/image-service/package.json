@@ -22,7 +22,7 @@
     "yoga-wasm-web": "0.3.3"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "12.1.0",
+    "@astrojs/cloudflare": "12.6.6",
     "@astrojs/ts-plugin": "1.10.4",
     "deno": "2.2.4",
     "vitest": "2.1.9"
