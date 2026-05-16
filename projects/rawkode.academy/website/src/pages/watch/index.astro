@@ -120,6 +120,16 @@ const hasNextPage = end < allVideos.length;
 			<meta name="robots" content="noindex,follow" />
 		</Fragment>
 	)}
+	{page > 1 && (
+		<link
+			slot="extra-head"
+			rel="prev"
+			href={page === 2 ? "/watch" : `/watch?page=${page - 1}`}
+		/>
+	)}
+	{hasNextPage && (
+		<link slot="extra-head" rel="next" href={`/watch?page=${page + 1}`} />
+	)}
 	<VideoMetadata
 		slot="extra-head"
 		title="Rawkode Academy Videos"
