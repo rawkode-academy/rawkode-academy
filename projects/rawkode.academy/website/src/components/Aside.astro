@@ -48,8 +48,8 @@ switch (variant) {
 		break;
 	case "info":
 		styles.container =
-			"bg-gradient-to-r from-primary/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/30 text-primary dark:text-primary";
-		styles.icon = "text-primary dark:text-primary";
+			"bg-gradient-to-r from-primary/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/30 text-primary";
+		styles.icon = "text-primary";
 		styles.iconBg = "bg-primary/10 dark:bg-primary/20";
 		styles.border = "border-primary/20 dark:border-primary/60";
 		styles.glow = "shadow-primary/10 dark:shadow-primary/20";
@@ -148,7 +148,7 @@ switch (variant) {
 
 	.aside.border-primary\/20 :global(a) {
 		@apply text-primary decoration-primary/50 hover:text-primary/90 hover:decoration-primary;
-		@apply dark:text-primary dark:decoration-primary/50 dark:hover:text-primary/90 dark:hover:decoration-primary;
+		@apply dark:decoration-primary/50 dark:hover:text-primary/90 dark:hover:decoration-primary;
 	}
 
 	/* Subtle shadow on hover */

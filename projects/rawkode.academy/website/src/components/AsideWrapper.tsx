@@ -43,8 +43,8 @@ const AsideWrapper: React.FC<AsideProps> = ({ variant, children }) => {
 			break;
 		case "info":
 			styles.container =
-				"bg-gradient-to-r from-primary/5 to-primary/10 text-primary dark:from-primary/30 dark:to-primary/20 dark:text-primary";
-			styles.icon = "text-primary dark:text-primary";
+				"bg-gradient-to-r from-primary/5 to-primary/10 text-primary dark:from-primary/30 dark:to-primary/20";
+			styles.icon = "text-primary";
 			styles.gradient = "from-primary/50 to-secondary";
 			styles.border = "border-primary";
 			break;

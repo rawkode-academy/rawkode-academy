@@ -22,7 +22,7 @@
         :href="discordInviteUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center mt-2 text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
+        class="inline-flex items-center mt-2 text-primary hover:text-primary/90"
       >
         Join the discussion on Discord
         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +77,7 @@
           :href="discordInviteUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
+          class="inline-flex items-center text-primary hover:text-primary/90"
         >
           Want to share your thoughts? Join the discussion on Discord
           <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
