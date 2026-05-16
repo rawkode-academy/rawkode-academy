@@ -18,7 +18,7 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{hosts.map((person) => (
 				<a
-					href={`/people/${person.id}`}
+					href={`/people/${person.data.id}`}
 					class="glass-panel group flex items-center p-4 gap-4 hover:border-primary/50 transition-colors"
 				>
 					<div class="relative shrink-0">
@@ -45,7 +45,7 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 
 			{guests.map((person) => (
 				<a
-					href={`/people/${person.id}`}
+					href={`/people/${person.data.id}`}
 					class="glass-panel group flex items-center p-4 gap-4 hover:border-secondary transition-colors"
 				>
 					<div class="relative shrink-0">
