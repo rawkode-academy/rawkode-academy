@@ -359,6 +359,17 @@ const hasCommunityLinks =
 				</div>
 
 				<div class="technology-header-grid">
+					<div class="technology-logo-shell">
+						<div class="glass-media-brand technology-logo-card">
+							<img
+								src={technology.logo ? technology.logo : placeholderLogo}
+								alt={`${technology.name} Logo`}
+								class="w-full h-full object-contain drop-shadow-lg"
+								onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+							/>
+						</div>
+					</div>
+
 					<div class="technology-header-copy">
 						<div class="flex flex-wrap items-center gap-2 mb-3">
 							{technology.matrix && (
@@ -451,17 +462,6 @@ const hasCommunityLinks =
 								License: <span class="font-medium text-secondary-content">{technology.license}</span>
 							</p>
 						)}
-					</div>
-
-					<div class="technology-logo-shell">
-						<div class="glass-media-brand technology-logo-card">
-							<img
-								src={technology.logo ? technology.logo : placeholderLogo}
-								alt={`${technology.name} Logo`}
-								class="w-full h-full object-contain drop-shadow-lg"
-								onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
-							/>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -1202,6 +1202,9 @@ const hasCommunityLinks =
 		.technology-header-grid {
 			grid-template-columns: minmax(0, 1.45fr) auto;
 		}
+
+		.technology-header-copy { order: 1; }
+		.technology-logo-shell { order: 2; }
 	}
 
 	@media (max-width: 959px) {
