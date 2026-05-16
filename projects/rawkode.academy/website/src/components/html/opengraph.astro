@@ -44,6 +44,12 @@ const openGraphImageUrl = image
 		)}`
 	: staticFallbackImageUrl;
 
+// The static fallback is the brand icon at known dimensions; declaring
+// them lets social platforms render the preview without fetching the
+// asset and inspecting it first.
+const usingStaticFallback = !image;
+const ogImageAlt = usingStaticFallback ? "Rawkode Academy" : title;
+
 // Show article-specific meta tags only when the caller opts in via the
 // `isArticle` prop. The previous heuristic also matched `/blog/` (a route
 // that doesn't exist) and `/series/` (a CollectionPage — not an Article).
@@ -87,6 +93,14 @@ const firstAuthorMastodon = shouldShowArticleMeta
 	property="og:image"
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
+<meta property="og:image:alt" content={ogImageAlt} />
+{usingStaticFallback && (
+	<>
+		<meta property="og:image:type" content="image/png" />
+		<meta property="og:image:width" content="512" />
+		<meta property="og:image:height" content="512" />
+	</>
+)}
 {firstAuthorMastodon && (
 	<meta name="fediverse:creator" content={firstAuthorMastodon} />
 )}
@@ -133,6 +147,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 	name="twitter:image"
 	content={useImageDirectly ? image?.image : openGraphImageUrl}
 />
+<meta name="twitter:image:alt" content={ogImageAlt} />
 
 {!shouldShowArticleMeta && (
 	<script
