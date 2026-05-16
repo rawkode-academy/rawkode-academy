@@ -1,0 +1,38 @@
+---
+import { buildCourseItemListJsonLd } from "@/lib/course-itemlist-jsonld";
+
+interface CourseEntryInput {
+	id: string;
+	data: {
+		title: string;
+		description: string;
+		publishedAt: Date;
+		updatedAt?: Date | undefined;
+		difficulty: "beginner" | "intermediate" | "advanced";
+	};
+}
+
+interface Props {
+	courses: ReadonlyArray<CourseEntryInput>;
+	listUrl: string;
+	listName?: string;
+	limit?: number;
+	slot?: string;
+}
+
+const { courses, listUrl, listName, limit } = Astro.props;
+
+const jsonLd = buildCourseItemListJsonLd({
+	siteUrl: (Astro.site ?? Astro.url).origin,
+	listUrl,
+	listName: listName ?? "Courses",
+	courses,
+	...(typeof limit === "number" ? { limit } : {}),
+});
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+/>
