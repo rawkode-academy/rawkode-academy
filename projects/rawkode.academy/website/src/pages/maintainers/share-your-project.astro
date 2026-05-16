@@ -148,7 +148,7 @@ const faqItems = [
 		<Title title="Why Share Your Project?" />
 
 		<div class="grid gap-8 lg:grid-cols-2 mt-8">
-			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-card">
 				<div class="flex items-center mb-4">
 					<div class="p-2 mr-4 bg-primary/10 dark:bg-primary/20 rounded-full">
 						<svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -162,7 +162,7 @@ const faqItems = [
 					Introduce your project to a dedicated audience of developers, potential contributors, and early adopters. Get valuable exposure for your hard work and reach developers who are actively looking for new tools and technologies.
 				</p>
 			</div>
-			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-card">
 				<div class="flex items-center mb-4">
 					<div class="p-2 mr-4 bg-secondary/10 dark:bg-secondary/20 rounded-full">
 						<svg class="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -175,7 +175,7 @@ const faqItems = [
 					Engage in a live Q&A session with an audience that understands technical challenges. Receive constructive feedback, answer questions, and spark discussions that can help shape your project's future and identify blind spots.
 				</p>
 			</div>
-			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-card">
 				<div class="flex items-center mb-4">
 					<div class="p-2 mr-4 bg-primary/10 dark:bg-primary/20 rounded-full">
 						<svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -188,7 +188,7 @@ const faqItems = [
 					Become part of the Rawkode community. Connect with like-minded individuals, find collaborators, and build relationships with other maintainers and developers who share your passion for open source and innovation.
 				</p>
 			</div>
-			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+			<div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-card">
 				<div class="flex items-center mb-4">
 					<div class="p-2 mr-4 bg-green-100 dark:bg-green-900 rounded-full">
 						<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -285,13 +285,13 @@ const faqItems = [
 			<div class="mx-auto max-w-(--breakpoint-md)">
 				<div id="accordion-flush" data-accordion="collapse"
 					data-active-classes="bg-white dark:bg-gray-900 text-primary-content"
-					data-inactive-classes="text-gray-500 dark:text-gray-400">
+					data-inactive-classes="text-muted">
 
 					{faqItems.map((item, index) => (
 						<>
 							<h2 id={`accordion-flush-heading-${index + 1}`}>
 								<button type="button"
-									class="flex justify-between items-center py-5 w-full font-medium text-left text-gray-900 bg-white border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+									class="flex justify-between items-center py-5 w-full font-medium text-left text-primary-content bg-white border-b border-gray-200 dark:border-gray-700 dark:bg-gray-900"
 									data-accordion-target={`#accordion-flush-body-${index + 1}`}
 									aria-expanded={index === 0 ? "true" : "false"}
 									aria-controls={`accordion-flush-body-${index + 1}`}>

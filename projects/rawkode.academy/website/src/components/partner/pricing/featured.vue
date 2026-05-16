@@ -44,17 +44,17 @@ const maltPricingPlan: PricingPlan = {
 
 <template>
 	<div
-		class="my-4 mb-12 border-4 border-secondary bg-white rounded-lg shadow lg:grid lg:grid-cols-3 dark:bg-gray-800 transition-all duration-300 hover:shadow-2xl hover:drop-shadow-2xl hover:scale-[1.02] relative">
+		class="my-4 mb-12 border-4 border-secondary bg-white rounded-lg shadow lg:grid lg:grid-cols-3 dark:bg-gray-800 transition-card hover:shadow-2xl hover:drop-shadow-2xl hover:scale-[1.02] relative">
 		<div
 			class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-secondary text-white px-4 py-1 rounded-full text-sm font-bold">
 			Premier Partnership
 		</div>
 		<div class="col-span-2 p-6 lg:p-8">
-			<h2 class="mb-3 text-3xl font-bold text-gray-900 dark:text-white">{{ maltPricingPlan.title }}</h2>
-			<p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-6">{{ maltPricingPlan.description }}</p>
+			<h2 class="mb-3 text-3xl font-bold text-primary-content">{{ maltPricingPlan.title }}</h2>
+			<p class="text-lg font-medium text-secondary-content mb-6">{{ maltPricingPlan.description }}</p>
 			<div class="grid gap-4 mt-4 lg:mt-6">
 				<!-- List -->
-				<ul role="list" class="space-y-6 dark:text-white">
+				<ul role="list" class="space-y-6 text-primary-content">
 					<li v-for="feature in maltPricingPlan.features" class="flex items-start space-x-3">
 						<!-- Icon -->
 						<svg class="shrink-0 w-5 h-5 mt-1 text-secondary" fill="currentColor" viewBox="0 0 20 20"
@@ -64,8 +64,8 @@ const maltPricingPlan: PricingPlan = {
 								clip-rule="evenodd"></path>
 						</svg>
 						<div>
-							<span class="font-medium text-gray-800 dark:text-gray-200">{{ feature.text }}</span>
-							<p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+							<span class="font-medium text-primary-content">{{ feature.text }}</span>
+							<p class="text-sm text-muted mt-1">
 								{{ feature.description }}
 							</p>
 						</div>
@@ -75,13 +75,13 @@ const maltPricingPlan: PricingPlan = {
 		</div>
 		<div class="flex p-6 text-center bg-gray-50 lg:p-8 dark:bg-gray-700">
 			<div class="self-center w-full">
-				<div class="text-5xl font-extrabold text-gray-900 dark:text-white">{{ maltPricingPlan.price }}</div>
+				<div class="text-5xl font-extrabold text-primary-content">{{ maltPricingPlan.price }}</div>
 				<div class="mt-1 mb-6 text-gray-500 text-light dark:text-gray-400">USD / annually</div>
-				<div class="mb-6 text-sm text-gray-600 dark:text-gray-300">
+				<div class="mb-6 text-sm text-secondary-content">
 					Maximize your developer engagement and product adoption with our most comprehensive partnership tier
 				</div>
 				<a href="/organizations/lets-chat"
-					class="flex justify-center text-white bg-secondary hover:bg-primary focus:ring-4 focus:ring-secondary/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors duration-300">
+					class="flex justify-center text-white bg-secondary hover:bg-primary focus:ring-4 focus:ring-secondary/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors-card">
 					{{ maltPricingPlan.ctaText }}
 				</a>
 			</div>

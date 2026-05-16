@@ -13,69 +13,46 @@ export const prerender = true;
 
 const colorThemes = [
 	{
-		name: "Rawkode Green Theme",
-		badge: "Default",
+		name: "Rawkode Blue",
+		badge: "Canonical",
 		description:
-			"Everyday Rawkode Academy brand moments — content, docs, livestreams, and merch.",
-		gradient: "from-[#04B59C]/60 via-transparent to-[#85FF95]/50",
-		colors: [
-			{
-				label: "Teal",
-				hex: "#04B59C",
-				usage: "Primary actions & hero gradients",
-			},
-			{ label: "Green", hex: "#85FF95", usage: "Glow accents & CTA outlines" },
-			{ label: "Black", hex: "#23282D", usage: "Typography & surfaces" },
-		],
-	},
-	{
-		name: "Rawkode Blue Theme",
-		badge: "System",
-		description:
-			"Use when we co-brand with developer tooling or infra partners who lean blue.",
+			"The single brand identity for Rawkode and Rawkode Academy. Used across every Rawkode property — website, content, livestreams, merch, and partner lockups.",
 		gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
 		colors: [
 			{
 				label: "Purple",
 				hex: "#5F5ED7",
-				usage: "Primary headlines & hero sweeps",
+				usage: "Primary actions, headlines, brand-primary surfaces",
 			},
-			{ label: "Blue", hex: "#00CEFF", usage: "Buttons, inputs, status" },
-			{ label: "Black", hex: "#23282D", usage: "Depth, borders, typography" },
+			{
+				label: "Cyan",
+				hex: "#00CEFF",
+				usage: "Secondary highlights, CTA gradients, status glows",
+			},
+			{
+				label: "Dark Blue-Gray",
+				hex: "#111827",
+				usage: "Typography on light, deep backgrounds in dark mode",
+			},
 		],
 	},
 ];
 
 const brandGradients = [
 	{
-		id: "academy",
-		name: "Rawkode Academy Gradient",
-		angleLabel: "45°",
-		angleDeg: 45,
+		id: "rawkode-blue",
+		name: "Rawkode Blue Gradient",
+		angleLabel: "135°",
+		angleDeg: 135,
 		description:
-			"Academy visuals run from teal into green (page 8), mirrored across hero cards and merch.",
-		stops: [
-			{ label: "Teal", hex: "#04B59C", offset: "0%" },
-			{ label: "Green", hex: "#85FF95", offset: "100%" },
-		],
-		usage:
-			"Use when the Academy is the lead brand story: curriculum launches, learning hub surfaces, etc.",
-		background: "linear-gradient(45deg, #04B59C 0%, #85FF95 100%)",
-	},
-	{
-		id: "core",
-		name: "Rawkode Core Gradient",
-		angleLabel: "45°",
-		angleDeg: 45,
-		description:
-			"Primary Rawkode lockups transition from purple into blue as documented in the PDF (page 5).",
+			"The canonical brand gradient — purple into cyan on a 135° sweep, top-left to bottom-right. Used across hero washes, logo lockups, and CTAs.",
 		stops: [
 			{ label: "Purple", hex: "#5F5ED7", offset: "0%" },
-			{ label: "Blue", hex: "#00CEFF", offset: "100%" },
+			{ label: "Cyan", hex: "#00CEFF", offset: "100%" },
 		],
 		usage:
-			"Keep for Rawkode logos, backdrops, and partner lockups tied to the core company brand.",
-		background: "linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)",
+			"Use for any Rawkode lockup, hero panel, button gradient, or partner co-brand surface.",
+		background: "linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)",
 	},
 ];
 
@@ -163,7 +140,7 @@ const gradientDownloadJson = JSON.stringify(
 const defaultGradientId = brandGradients[0]?.id ?? null;
 const defaultLogoGradient =
 	brandGradients[0]?.background ??
-	"linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%)";
+	"linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)";
 ---
 
 <Page title="Branding | Rawkode Academy" description="Official Rawkode Academy brand assets — logos, colors, and usage guidelines for partners.">
@@ -181,21 +158,21 @@ const defaultLogoGradient =
     </div>
     <div class="relative max-w-6xl mx-auto px-4">
       <div class="max-w-3xl">
-        <h2 class="text-3xl font-semibold text-gray-900 dark:text-white mb-4">Logo assets</h2>
-        <p class="mb-8 text-gray-600 dark:text-white/70">Our master artwork ships in black so you can tint it for any surface. Inline the SVGs and apply <code class="bg-black/30 px-1 rounded text-white">currentColor</code> to match blue or green palettes without exporting variants.</p>
+        <h2 class="text-3xl font-semibold text-primary-content mb-4">Logo assets</h2>
+        <p class="mb-8 text-secondary-content">Our master artwork ships in black so you can tint it for any surface. Inline the SVGs and apply <code class="bg-black/30 px-1 rounded text-white">currentColor</code> to match the Rawkode Blue palette without exporting variants.</p>
       </div>
 
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div class="space-y-1">
-          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-white/60">Preview treatments</p>
-          <p class="text-sm text-gray-600 dark:text-white/70 max-w-xl">Toggle between the solid fill and official gradients to see how the lockups glow when you tint them.</p>
+          <p class="eyebrow-label">Preview treatments</p>
+          <p class="text-sm text-secondary-content max-w-xl">Toggle between the solid fill and the official Rawkode Blue gradient to see how the lockups glow when you tint them.</p>
         </div>
         <div class="flex flex-wrap gap-3" data-logo-preview-controls>
-          <button type="button" class="logo-preview-toggle" data-preview-mode="solid" aria-pressed="true">Solid Fill</button>
+          <button type="button" class="logo-preview-toggle focus-ring" data-preview-mode="solid" aria-pressed="true">Solid Fill</button>
           {brandGradients.map((gradient) => (
             <button
               type="button"
-              class="logo-preview-toggle"
+              class="logo-preview-toggle focus-ring"
               data-preview-mode="gradient"
               data-gradient-id={gradient.id}
               data-gradient-style={gradient.background}
@@ -215,20 +192,20 @@ const defaultLogoGradient =
         style={`--logo-preview-gradient:${defaultLogoGradient};`}
       >
         {logoPreviewAssets.map((logo) => (
-          <article class={`relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-white/15 bg-white/90 dark:bg-white/5 backdrop-blur-2xl p-7 flex flex-col gap-6 shadow-[0_18px_55px_rgba(15,23,42,0.25)] ${logo.cardClass ?? ""}`}>
-            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-[#6B46FF]/10 dark:from-white/10 pointer-events-none"></div>
+          <article class={`relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-white/15 bg-white/90 dark:bg-white/5 backdrop-blur-2xl p-7 flex flex-col gap-6 card-shadow-lg ${logo.cardClass ?? ""}`}>
+            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-primary/10 dark:from-white/10 pointer-events-none"></div>
             <div class="relative flex flex-col gap-6 items-center text-center">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{logo.name}</h3>
+              <h3 class="text-lg font-semibold text-primary-content">{logo.name}</h3>
               <div class="flex flex-col items-center gap-5 w-full">
                 <div class={`p-4 rounded-2xl bg-white border border-gray-100 dark:bg-white/5 dark:border-white/20 flex items-center justify-center overflow-hidden ${logo.previewWrapper} mx-auto`}>
                   <div class={`brand-logo ${logo.assetClass ?? ""}`} style={`--logo-mask:${logo.maskUrl};`} set:html={logo.asset}></div>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-white/70 max-w-sm leading-relaxed mx-auto pb-1">{logo.description}</p>
-                <button type="button" class="logo-download-link" data-logo-download data-logo-slug={logo.slug}>
+                <p class="text-sm text-secondary-content max-w-sm leading-relaxed mx-auto pb-1">{logo.description}</p>
+                <button type="button" class="logo-download-link focus-ring" data-logo-download data-logo-slug={logo.slug}>
                   Download SVG
                 </button>
               </div>
-              <ul class="text-xs uppercase tracking-wide text-gray-500 dark:text-white/60 space-y-2 w-full text-center md:text-left pt-2">
+              <ul class="text-xs uppercase tracking-wide text-muted space-y-2 w-full text-center md:text-left pt-2">
                 {logo.useCases.map((useCase) => (
                   <li class="flex items-center gap-2 justify-center md:justify-start">
                     <span class="inline-flex w-2.5 h-2.5 rounded-full bg-gray-900 dark:bg-white/70"></span>
@@ -243,12 +220,12 @@ const defaultLogoGradient =
 
       <div class="space-y-4 mb-14">
         <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Official gradients</h3>
-          <p class="text-gray-600 dark:text-white/70">The PDF mandates two gradients: purple→blue for Rawkode and teal→green for Rawkode Academy, both running on a 45° angle from top-left to bottom-right. Use these for hero panels, gradient logos, and any glowing dividers.</p>
+          <h3 class="text-lg font-semibold text-primary-content">Official gradient</h3>
+          <p class="text-secondary-content">The Rawkode Blue gradient runs purple into cyan on a 135° sweep, top-left to bottom-right. Use it for hero panels, gradient logos, button gradients, and any glowing dividers.</p>
         </div>
         <div class="grid md:grid-cols-2 gap-6">
           {brandGradients.map((gradient) => (
-            <article class="rounded-2xl overflow-hidden border border-gray-200/60 dark:border-white/15 shadow-[0_20px_60px_rgba(15,23,42,0.2)]">
+            <article class="rounded-2xl overflow-hidden border border-gray-200/60 dark:border-white/15 card-shadow-lg">
               <div class="p-6 text-white" style={`background:${gradient.background}`}>
                 <div class="flex items-center justify-between gap-4 flex-wrap">
                   <div>
@@ -264,7 +241,7 @@ const defaultLogoGradient =
                 <p class="text-sm text-white/80 mt-4 max-w-2xl">{gradient.description}</p>
               </div>
               <div class="bg-white/90 dark:bg-gray-900/70 p-4">
-                <p class="text-sm text-gray-700 dark:text-white/70">{gradient.usage}</p>
+                <p class="text-sm text-secondary-content">{gradient.usage}</p>
               </div>
             </article>
           ))}
@@ -273,27 +250,27 @@ const defaultLogoGradient =
 
       <div class="space-y-4">
         <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Core color palettes</h3>
-          <p class="text-gray-600 dark:text-white/70">Rawkode runs two first-class themes. Use the Green theme by default and switch to the Blue theme when a partner already leans blue. Partners must stick to one of these two treatments — no custom palettes.</p>
+          <h3 class="text-lg font-semibold text-primary-content">Core color palette</h3>
+          <p class="text-secondary-content">Rawkode has a single canonical brand identity — Rawkode Blue. All Rawkode properties (website, content, livestreams, merch, partner co-brands) use this palette. Partners must stick to this treatment — no custom palettes.</p>
         </div>
         <div class="grid md:grid-cols-2 gap-6">
           {colorThemes.map((theme) => (
-            <article class="relative rounded-2xl overflow-hidden border border-gray-200/70 dark:border-white/10 bg-white/90 dark:bg-white/10 backdrop-blur-2xl p-6 shadow-[0_20px_60px_rgba(4,181,156,0.2)]">
+            <article class="relative rounded-2xl overflow-hidden border border-gray-200/70 dark:border-white/10 bg-white/90 dark:bg-white/10 backdrop-blur-2xl p-6 card-shadow-lg">
               <div class={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-70 pointer-events-none`}></div>
               <div class="relative flex flex-col gap-5">
                 <div>
-                  <p class="text-xs tracking-[0.2em] uppercase text-gray-500 dark:text-white/70">{theme.badge}</p>
-                  <h4 class="text-2xl font-semibold text-gray-900 dark:text-white">{theme.name}</h4>
-                  <p class="text-sm text-gray-600 dark:text-white/70 mt-1">{theme.description}</p>
+                  <p class="eyebrow-label">{theme.badge}</p>
+                  <h4 class="text-2xl font-semibold text-primary-content">{theme.name}</h4>
+                  <p class="text-sm text-secondary-content mt-1">{theme.description}</p>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-3">
                   {theme.colors.map((color) => (
                     <div class="rounded-xl border border-gray-200 dark:border-white/20 bg-white dark:bg-white/10 overflow-hidden">
                       <div class="h-16" style={`background:${color.hex}`}></div>
                       <div class="p-3">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white">{color.label}</div>
-                        <div class="text-xs text-gray-600 dark:text-white/70">{color.hex}</div>
-                        <p class="text-xs text-gray-500 dark:text-white/60 mt-1">{color.usage}</p>
+                        <div class="text-sm font-semibold text-primary-content">{color.label}</div>
+                        <div class="text-xs text-secondary-content">{color.hex}</div>
+                        <p class="text-xs text-muted mt-1">{color.usage}</p>
                       </div>
                     </div>
                   ))}
@@ -304,13 +281,14 @@ const defaultLogoGradient =
         </div>
       </div>
 
-      <h3 class="text-lg font-semibold mb-3 text-gray-900 dark:text-white">How to theme our black SVGs</h3>
-      <p class="mb-6 text-gray-600 dark:text-white/70">We keep only the black source file in the repo and theme it with CSS. Inline SVGs work best; when using an <code>&lt;img/&gt;</code>, use <code>filter</code> or CSS masking if needed. Prefer the following approach for inline SVGs:</p>
+      <h3 class="text-lg font-semibold mb-3 text-primary-content">How to theme our black SVGs</h3>
+      <p class="mb-6 text-secondary-content">We keep only the black source file in the repo and theme it with CSS. Inline SVGs work best; when using an <code>&lt;img/&gt;</code>, use <code>filter</code> or CSS masking if needed. Prefer the following approach for inline SVGs:</p>
 
       <pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-md overflow-x-auto"><code>{`/* Define colors as variables */
 :root {
-  --brand-primary: #6B46FF;
-  --brand-on-surface: #23282D; /* base black */
+  --brand-primary: #5F5ED7;   /* Rawkode Blue — purple */
+  --brand-secondary: #00CEFF; /* Rawkode Blue — cyan */
+  --brand-on-surface: #111827; /* deep blue-gray */
 }
 
 /* Inline svg -- set svg children to currentColor */
@@ -323,8 +301,8 @@ const defaultLogoGradient =
 .brand-logo--primary { color: var(--brand-primary); }
 .brand-logo--dark { color: var(--brand-on-surface); }`}</code></pre>
 
-      <h3 class="text-lg font-semibold mt-10 text-gray-900 dark:text-white">Clearspace and sizing — rules</h3>
-      <ul class="list-disc pl-6 text-gray-600 dark:text-white/70">
+      <h3 class="text-lg font-semibold mt-10 text-primary-content">Clearspace and sizing — rules</h3>
+      <ul class="list-disc pl-6 text-secondary-content">
         <li>Always maintain a minimum clearspace equal to the height of the monogram on all sides.</li>
         <li>Do not place the wordmark on low-contrast or busy patterns.</li>
         <li>For co-branding, use the black monogram with a white stroke on dark backgrounds or the black mark on light backgrounds.</li>
@@ -521,14 +499,14 @@ const defaultLogoGradient =
     font-weight: 600;
     padding: 0.65rem 1.15rem;
     border-radius: 999px;
-    transition: all 0.2s ease;
+    transition: var(--duration-base) var(--ease-standard);
   }
 
   .logo-preview-toggle[aria-pressed="true"] {
     background: rgba(15, 23, 42, 0.9);
     color: white;
     border-color: rgba(15, 23, 42, 0.9);
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
+    box-shadow: var(--shadow-md);
   }
 
   html.dark .logo-preview-toggle {
@@ -538,8 +516,8 @@ const defaultLogoGradient =
   }
 
   html.dark .logo-preview-toggle[aria-pressed="true"] {
-    background: rgba(133, 255, 149, 0.2);
-    border-color: rgba(133, 255, 149, 0.4);
+    background: rgb(var(--brand-secondary) / 0.2);
+    border-color: rgb(var(--brand-secondary) / 0.45);
     color: white;
   }
 
@@ -555,29 +533,29 @@ const defaultLogoGradient =
     text-transform: uppercase;
     letter-spacing: 0.08em;
     border: 1px solid rgba(15, 23, 42, 0.15);
-    background: linear-gradient(120deg, rgba(var(--brand-primary), 0.12), rgba(var(--brand-secondary), 0.12));
+    background: linear-gradient(135deg, rgba(var(--brand-primary), 0.12), rgba(var(--brand-secondary), 0.12));
     color: #0f172a;
     text-decoration: none;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: transform var(--duration-base) var(--ease-standard), box-shadow var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard);
   }
 
   .logo-download-link:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+    box-shadow: var(--shadow-md);
     border-color: rgba(15, 23, 42, 0.3);
   }
 
   html.dark .logo-download-link {
     border-color: rgba(255, 255, 255, 0.25);
-    background: linear-gradient(120deg, rgba(var(--brand-primary), 0.3), rgba(var(--brand-secondary), 0.25));
+    background: linear-gradient(135deg, rgba(var(--brand-primary), 0.3), rgba(var(--brand-secondary), 0.25));
     color: white;
   }
 
   html.dark .logo-download-link:hover {
-    box-shadow: 0 12px 30px rgba(4, 13, 33, 0.4);
+    box-shadow: var(--shadow-lg);
     border-color: rgba(255, 255, 255, 0.4);
   }
 
@@ -650,7 +628,7 @@ const defaultLogoGradient =
 
   [data-preview-mode="gradient"] .brand-logo::after {
     opacity: 1;
-    background: var(--logo-preview-gradient, linear-gradient(45deg, #5F5ED7 0%, #00CEFF 100%));
+    background: var(--logo-preview-gradient, linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%));
     mask-image: var(--logo-mask);
     -webkit-mask-image: var(--logo-mask);
     mask-repeat: no-repeat;

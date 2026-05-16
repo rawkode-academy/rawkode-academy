@@ -58,7 +58,7 @@ defineProps<Props>();
 								</div>
 							</div>
 							<div class="space-y-3">
-								<h3 class="min-w-0 max-w-[16ch] text-balance text-2xl font-semibold leading-[1.05] tracking-[-0.045em] text-primary-content transition-colors duration-200 group-hover:text-primary">
+								<h3 class="min-w-0 max-w-[16ch] text-balance text-2xl font-semibold leading-[1.05] tracking-[-0.045em] text-primary-content transition-colors-smooth group-hover:text-primary">
 									{{ item.title }}
 								</h3>
 								<p class="max-w-[34ch] text-base leading-8 text-secondary-content">

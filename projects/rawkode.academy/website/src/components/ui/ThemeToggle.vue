@@ -2,43 +2,87 @@
 	<button
 		@click="handleToggle"
 		:class="buttonClasses"
-		:aria-label="`Change theme (current: ${themeDisplayName})`"
+		:aria-label="ariaLabel"
+		:title="ariaLabel"
 		type="button"
 	>
-		<!-- Icon for theme -->
 		<transition name="fade" mode="out-in">
+			<!-- System (auto) — monitor icon -->
 			<svg
-				:key="currentTheme"
+				v-if="preference === 'system'"
+				key="system"
 				class="w-5 h-5"
 				fill="none"
 				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
 				viewBox="0 0 24 24"
 				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
 			>
-				<circle cx="12" cy="12" r="10" stroke-width="2" class="stroke-primary" />
-				<circle cx="12" cy="12" r="6" fill="currentColor" class="fill-primary" />
+				<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+				<line x1="8" y1="21" x2="16" y2="21" />
+				<line x1="12" y1="17" x2="12" y2="21" />
+			</svg>
+
+			<!-- Dark — sun icon (clicking moves toward light) -->
+			<svg
+				v-else-if="preference === 'dark'"
+				key="sun"
+				class="w-5 h-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="4" />
+				<path
+					d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+				/>
+			</svg>
+
+			<!-- Light — moon icon (clicking moves toward dark) -->
+			<svg
+				v-else
+				key="moon"
+				class="w-5 h-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+				aria-hidden="true"
+			>
+				<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
 			</svg>
 		</transition>
 
 		<span v-if="showLabel" class="ml-2 text-sm font-medium">
-			{{ themeDisplayName }}
+			{{ label }}
 		</span>
 	</button>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import {
-	getTheme,
-	toggleTheme,
-	getThemeDisplayName,
-	type Theme,
+	type ColorScheme,
+	type ColorSchemePreference,
+	getColorSchemePreference,
+	toggleColorScheme,
 } from "../../lib/theme";
 
-// Track analytics events client-side
 const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	try {
-		(window as any).posthog?.capture(event, properties);
+		(window as { posthog?: { capture: (e: string, p?: unknown) => void } })
+			.posthog?.capture(event, properties);
 	} catch {
 		// Ignore tracking errors
 	}
@@ -56,43 +100,56 @@ const props = withDefaults(defineProps<Props>(), {
 	size: "md",
 });
 
-const currentTheme = ref<Theme>("rawkode-green");
+const preference = ref<ColorSchemePreference>("system");
 
-const themeDisplayName = computed(() =>
-	getThemeDisplayName(currentTheme.value),
+const NEXT_DESCRIPTION: Record<ColorSchemePreference, string> = {
+	light: "Switch to dark mode",
+	dark: "Switch to system theme",
+	system: "Switch to light mode",
+};
+
+const CURRENT_LABEL: Record<ColorSchemePreference, string> = {
+	light: "Light mode",
+	dark: "Dark mode",
+	system: "System theme",
+};
+
+const label = computed(() => NEXT_DESCRIPTION[preference.value]);
+
+const ariaLabel = computed(
+	() => `${NEXT_DESCRIPTION[preference.value]} (current: ${CURRENT_LABEL[preference.value].toLowerCase()})`,
 );
 
-// Listen for theme changes from other components
-const handleThemeChange = (event: Event) => {
-	const customEvent = event as CustomEvent<{ theme: Theme }>;
-	currentTheme.value = customEvent.detail.theme;
+const handlePreferenceChange = (event: Event) => {
+	const customEvent = event as CustomEvent<{
+		preference: ColorSchemePreference;
+		scheme: ColorScheme;
+	}>;
+	preference.value = customEvent.detail.preference;
 };
 
 onMounted(() => {
-	// Initialize theme from storage
-	currentTheme.value = getTheme();
-
-	window.addEventListener("theme-change", handleThemeChange);
+	preference.value = getColorSchemePreference();
+	window.addEventListener("color-scheme-change", handlePreferenceChange);
 });
 
 onUnmounted(() => {
-	window.removeEventListener("theme-change", handleThemeChange);
+	window.removeEventListener("color-scheme-change", handlePreferenceChange);
 });
 
 const handleToggle = () => {
-	const previousTheme = currentTheme.value;
-	currentTheme.value = toggleTheme();
-	// Track theme switch
-	trackEvent("theme_switched", {
-		from_theme: previousTheme,
-		to_theme: currentTheme.value,
+	const previous = preference.value;
+	preference.value = toggleColorScheme();
+	trackEvent("color_scheme_switched", {
+		from_preference: previous,
+		to_preference: preference.value,
 		source: "theme_toggle_button",
 	});
 };
 
 const buttonClasses = computed(() => {
 	const baseClasses =
-		"inline-flex items-center justify-center transition-smooth focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
+		"inline-flex items-center justify-center transition-smooth focus-ring";
 
 	const variantClasses = {
 		icon: "rounded-full hover:bg-gray-100 dark:hover:bg-gray-800",

@@ -17,12 +17,12 @@
         >
           <!-- Header -->
           <div class="flex items-center justify-between p-4 border-b border-white/30 dark:border-gray-700/50 backdrop-blur-md">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="text-lg font-semibold text-primary-content">
               {{ resource.title }}
             </h3>
             <button
               @click="close"
-              class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all duration-200 rounded-lg hover:bg-white/60 dark:hover:bg-gray-700/60 hover:backdrop-blur-md"
+              class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-smooth rounded-lg hover:bg-white/60 dark:hover:bg-gray-700/60 hover:backdrop-blur-md"
               aria-label="Close"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
             <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
               <div class="text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-primary"></div>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Loading application...</p>
+                <p class="mt-2 text-sm text-muted">Loading application...</p>
               </div>
             </div>
 
@@ -62,7 +62,7 @@
 
           <!-- Footer -->
           <div class="flex items-center justify-between p-4 border-t border-white/30 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-md">
-            <p v-if="resource.description" class="text-sm text-gray-600 dark:text-gray-400">
+            <p v-if="resource.description" class="text-sm text-muted">
               {{ resource.description }}
             </p>
             <div class="flex items-center gap-2">
@@ -71,7 +71,7 @@
                 :href="getExternalUrl()"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white/50 dark:bg-gray-700/50 backdrop-blur-md border border-white/50 dark:border-gray-600/50 rounded-xl hover:bg-white/70 dark:hover:bg-gray-600/70 hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary-content bg-white/50 dark:bg-gray-700/50 backdrop-blur-md border border-white/50 dark:border-gray-600/50 rounded-xl hover:bg-white/70 dark:hover:bg-gray-600/70 hover:scale-105 transition-smooth shadow-md hover:shadow-lg"
               >
                 Open in new tab
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

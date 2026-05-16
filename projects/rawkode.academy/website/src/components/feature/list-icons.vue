@@ -117,9 +117,9 @@ const offerings: Offering[] = [
 	<section class="bg-white dark:bg-gray-900">
 		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
 			<div class="max-w-(--breakpoint-md) mb-8 lg:mb-16">
-				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Partner With Industry
+				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content">Partner With Industry
 					Experts</h2>
-				<p class="font-light text-gray-500 dark:text-gray-400 sm:text-xl">We carefully select partners whose
+				<p class="font-light text-muted sm:text-xl">We carefully select partners whose
 					technologies genuinely enhance developers' work and lives. Our authentic approach ensures we can effectively
 					advocate for your solutions and help you reach your growth objectives.</p>
 				<p class="mt-4 text-black dark:text-white sm:text-xl font-medium">Our three-pillar approach to developer
@@ -127,7 +127,7 @@ const offerings: Offering[] = [
 			</div>
 			<div class="space-y-12 md:grid md:grid-cols-1 lg:grid-cols-3 md:gap-8 xl:gap-12 md:space-y-0">
 				<div v-for="offer in offerings"
-					class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300">
+					class="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-card">
 					<div class="flex items-center mb-4">
 						<div
 							:class="`flex justify-center items-center mr-4 w-12 h-12 bg-${offer.color} rounded-full dark:bg-${offer.color} lg:h-14 lg:w-14`">
@@ -139,12 +139,12 @@ const offerings: Offering[] = [
 							</svg>
 						</div>
 						<div>
-							<h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ offer.title }}</h3>
+							<h3 class="text-2xl font-bold text-primary-content">{{ offer.title }}</h3>
 							<p :class="`text-${offer.color} font-medium`">{{ offer.description }}</p>
 						</div>
 					</div>
 
-					<p class="mb-6 text-gray-700 dark:text-gray-300">{{ offer.tagline }}</p>
+					<p class="mb-6 text-secondary-content">{{ offer.tagline }}</p>
 
 					<ul role="list" class="space-y-5">
 						<li v-for="feature in offer.features" class="relative pl-8">
@@ -155,8 +155,8 @@ const offerings: Offering[] = [
 									clip-rule="evenodd"></path>
 							</svg>
 							<div>
-								<span class="font-medium text-gray-900 dark:text-white">{{ feature.name }}</span>
-								<p class="text-sm text-gray-600 dark:text-gray-400">{{ feature.description }}</p>
+								<span class="font-medium text-primary-content">{{ feature.name }}</span>
+								<p class="text-sm text-muted">{{ feature.description }}</p>
 							</div>
 						</li>
 					</ul>

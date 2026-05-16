@@ -200,7 +200,7 @@ const formattedPosition = computed(() => {
 				<div class="glass-card inline-flex min-h-12 items-center gap-1 rounded-full px-2 py-2 shadow-sm">
 					<button
 						type="button"
-						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors motion-safe:duration-200 hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors-smooth hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-ring"
 						aria-label="Show previous testimonial"
 						@click="goPrev"
 					>
@@ -215,7 +215,7 @@ const formattedPosition = computed(() => {
 
 					<button
 						type="button"
-						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors motion-safe:duration-200 hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors-smooth hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-ring"
 						:aria-label="isPaused ? 'Resume testimonial autoplay' : 'Pause testimonial autoplay'"
 						:aria-pressed="isPaused"
 						@click="toggleAutoplay"
@@ -252,7 +252,7 @@ const formattedPosition = computed(() => {
 
 					<button
 						type="button"
-						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors motion-safe:duration-200 hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors-smooth hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-ring"
 						aria-label="Show next testimonial"
 						@click="goNext"
 					>

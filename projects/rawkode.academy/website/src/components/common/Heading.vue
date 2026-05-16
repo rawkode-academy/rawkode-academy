@@ -58,7 +58,7 @@ const weightClasses = {
 	extrabold: "font-extrabold",
 };
 
-const baseClasses = "text-gray-900 dark:text-white tracking-tight";
+const baseClasses = "text-primary-content tracking-tight";
 
 const headingClasses = computed(() => {
 	const classes = [

@@ -138,7 +138,7 @@
 	background: none;
 	width: 100%;
 	text-align: left;
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: all var(--duration-base) var(--ease-standard);
 	border-radius: 12px;
 	margin: 2px 8px;
 	width: calc(100% - 16px);

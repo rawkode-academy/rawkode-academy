@@ -294,6 +294,7 @@ export function getCategoryIcon(
 		case "external":
 			return ExternalIcon;
 		case "themes":
+		case "appearance":
 			return ThemeIcon;
 		case "commands":
 			return CommandIcon;

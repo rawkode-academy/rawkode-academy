@@ -12,7 +12,6 @@ interface Props {
 		| "default"
 		| "primary"
 		| "secondary"
-		| "tertiary"
 		| "success"
 		| "warning"
 		| "danger"
@@ -31,7 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const baseClasses =
-	"inline-flex items-center font-semibold transition-all duration-200 backdrop-blur-md shadow-sm";
+	"inline-flex items-center font-semibold transition-smooth backdrop-blur-md shadow-sm";
 
 const variantClasses = {
 	default: props.outline
@@ -43,9 +42,6 @@ const variantClasses = {
 	secondary: props.outline
 		? "border border-secondary/50 text-secondary dark:text-white bg-white/30 dark:bg-secondary/40"
 		: "bg-secondary/20 text-secondary dark:bg-secondary/40 dark:text-white border border-secondary/30 dark:border-secondary/50",
-	tertiary: props.outline
-		? "border border-tertiary/50 text-tertiary dark:text-white bg-white/30 dark:bg-tertiary/40"
-		: "bg-tertiary/20 text-tertiary dark:bg-tertiary/40 dark:text-white border border-tertiary/30 dark:border-tertiary/50",
 	success: props.outline
 		? "border border-green-600/50 text-green-600 dark:border-green-400/60 dark:text-green-300 bg-white/30 dark:bg-green-700/40"
 		: "bg-green-500/20 text-green-700 dark:bg-green-600/40 dark:text-green-200 border border-green-500/30 dark:border-green-500/50",

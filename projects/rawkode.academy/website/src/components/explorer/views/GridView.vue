@@ -376,7 +376,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
     inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-base) var(--ease-standard);
   pointer-events: none;
   z-index: 100;
 }
@@ -402,7 +402,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   opacity: 0;
   visibility: hidden;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-base) var(--ease-standard);
   pointer-events: none;
   z-index: 100;
 }

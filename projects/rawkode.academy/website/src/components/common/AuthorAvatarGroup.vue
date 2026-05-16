@@ -28,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div v-if="showNames" class="font-medium dark:text-white">
+    <div v-if="showNames" class="font-medium text-primary-content">
       <div class="text-sm">{{ authorNames }}</div>
     </div>
   </div>

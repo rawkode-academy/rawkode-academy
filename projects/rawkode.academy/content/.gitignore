@@ -10,3 +10,10 @@ node_modules/
 /package.json
 /tsconfig.json
 /biome.json
+
+# Stray SVGs emitted by astro-d2 in the website build. Its output path is
+# computed relative to the website project root, which (because our article
+# MDX lives in the sibling @rawkodeacademy/content package) traverses into
+# this directory. The website inlines the SVGs into HTML, so these on-disk
+# copies are dead weight — never commit them.
+/articles/**/index-*.svg

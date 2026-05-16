@@ -2,12 +2,12 @@
   <div :class="[wrapperClasses, className]">
     <div class="h-10 w-1 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
     <div :class="textClasses">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
+      <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
         {{ title }}
       </h2>
       <p
         v-if="subtitle"
-        class="text-base text-gray-600 dark:text-gray-300 mt-2 max-w-2xl"
+        class="text-base text-secondary-content mt-2 max-w-2xl"
       >
         {{ subtitle }}
       </p>
@@ -52,10 +52,18 @@ const title = props.title;
 
 <style scoped>
 .bg-gradient-to-b {
-  background-image: linear-gradient(to bottom, var(--primary), var(--secondary));
+  background-image: linear-gradient(
+    to bottom,
+    rgb(var(--brand-primary)),
+    rgb(var(--brand-secondary))
+  );
 }
 
 .bg-gradient-to-r {
-  background-image: linear-gradient(to right, var(--primary), transparent);
+  background-image: linear-gradient(
+    to right,
+    rgb(var(--brand-primary)),
+    transparent
+  );
 }
 </style>

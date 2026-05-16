@@ -1,69 +1,19 @@
 @import "tailwindcss";
 
 :root {
-	/* Brand Colors - Default Theme: Rawkode Green (Teal + Green) */
-	--brand-primary: 4 181 156; /* Teal #04B59C */
-	--brand-secondary: 133 255 149; /* Green #85FF95 */
-	--brand-accent: 35 40 45; /* Black #23282D */
-
-	/* Shared Surface Tokens */
-	color-scheme: light dark;
-	--surface-base: #f5f7ff;
-	--surface-overlay: rgba(255, 255, 255, 0.92);
-	--surface-card: rgba(255, 255, 255, 0.85);
-	--surface-card-muted: rgba(15, 23, 42, 0.05);
-	--surface-border: rgba(15, 23, 42, 0.06);
-	--surface-border-strong: rgba(15, 23, 42, 0.12);
-	--surface-shadow: 0 30px 80px rgba(15, 23, 42, 0.15);
-	--surface-shadow-strong: 0 25px 80px rgba(15, 23, 42, 0.2);
-
-	/* Theme-aware backdrop with brand colors */
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(var(--brand-primary), 0.15) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(var(--brand-secondary), 0.12) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.08) 0%,
-			transparent 50%
-		),
-		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
-
-	/* Layout Spacing Tokens */
-	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
-	--space-page: clamp(1.5rem, 4vw, 3rem);
-	--space-page-lg: clamp(2rem, 5vw, 4rem);
-	--space-section-tight: clamp(2rem, 5vw, 3.75rem);
-	--space-section: clamp(3rem, 6vw, 5rem);
-	--space-section-relaxed: clamp(4rem, 7vw, 6rem);
-	--space-stack-sm: clamp(1rem, 3vw, 1.75rem);
-	--space-stack: clamp(1.5rem, 3.5vw, 2.5rem);
-	--space-stack-lg: clamp(2rem, 4.5vw, 3.25rem);
-	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
-	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
-}
-
-/* Alternative Theme: Rawkode Blue */
-:root[data-theme="rawkode-blue"] {
+	/* Rawkode Blue — canonical brand palette */
 	--brand-primary: 95 94 215; /* Purple #5F5ED7 */
 	--brand-secondary: 0 206 255; /* Cyan #00CEFF */
-	--brand-accent: 17 24 39; /* Dark Blue-Gray */
+	--brand-accent: 17 24 39; /* Dark Blue-Gray #111827 */
 
+	/* Light-mode surface tokens */
+	color-scheme: light dark;
 	--surface-base: #eef2ff;
 	--surface-overlay: rgba(255, 255, 255, 0.94);
 	--surface-card: rgba(255, 255, 255, 0.88);
 	--surface-card-muted: rgba(95, 94, 215, 0.08);
 	--surface-border: rgba(95, 94, 215, 0.16);
 	--surface-border-strong: rgba(0, 206, 255, 0.32);
-	--surface-shadow: 0 35px 80px rgba(22, 28, 45, 0.18);
-	--surface-shadow-strong: 0 45px 120px rgba(17, 24, 39, 0.25);
 
 	--app-backdrop:
 		radial-gradient(
@@ -82,17 +32,43 @@
 			transparent 50%
 		),
 		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
+
+	/* Layout Spacing Tokens */
+	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
+	--space-page: clamp(1.5rem, 4vw, 3rem);
+	--space-page-lg: clamp(2rem, 5vw, 4rem);
+	--space-section-tight: clamp(2rem, 5vw, 3.75rem);
+	--space-section: clamp(3rem, 6vw, 5rem);
+	--space-section-relaxed: clamp(4rem, 7vw, 6rem);
+	--space-stack-sm: clamp(1rem, 3vw, 1.75rem);
+	--space-stack: clamp(1.5rem, 3.5vw, 2.5rem);
+	--space-stack-lg: clamp(2rem, 4.5vw, 3.25rem);
+	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
+	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
+
+	/* Semantic text-tone tokens — mirrored from the `@utility` blocks
+	   below so scoped Astro/Vue `<style>` blocks can reach them via
+	   `color: var(--text-primary-content)` etc. The `@utility` classes
+	   remain the primary surface; these vars are for scoped styles
+	   that can't use `@apply`. */
+	--text-primary-content: rgb(17 24 39);
+	--text-secondary-content: rgb(55 65 81);
+	--text-muted: rgb(75 85 99);
 }
 
-html.dark[data-theme="rawkode-blue"] {
+html.dark {
 	--surface-base: #040712;
 	--surface-overlay: rgba(4, 7, 18, 0.92);
 	--surface-card: rgba(8, 12, 25, 0.9);
 	--surface-card-muted: rgba(0, 206, 255, 0.12);
 	--surface-border: rgba(95, 94, 215, 0.35);
 	--surface-border-strong: rgba(0, 206, 255, 0.45);
-	--surface-shadow: 0 35px 120px rgba(2, 6, 23, 0.7);
-	--surface-shadow-strong: 0 45px 140px rgba(1, 4, 16, 0.85);
+
+	/* Dark-mode text tones — mirror the `:root.dark &` blocks in
+	   the `@utility text-*` declarations below. */
+	--text-primary-content: rgb(255 255 255);
+	--text-secondary-content: rgb(209 213 219);
+	--text-muted: rgb(156 163 175);
 
 	--app-backdrop:
 		radial-gradient(
@@ -110,360 +86,6 @@ html.dark[data-theme="rawkode-blue"] {
 			rgba(var(--brand-primary), 0.28) 0%,
 			transparent 45%
 		), linear-gradient(145deg, #030510 0%, #050b1f 55%, #081430 100%);
-}
-
-/* Catppuccin Theme */
-:root[data-theme="catppuccin"] {
-	--brand-primary: 203 166 247; /* Mauve #CBA6F7 */
-	--brand-secondary: 245 194 231; /* Pink #F5C2E7 */
-	--brand-accent: 30 30 46; /* Base #1E1E2E */
-
-	--surface-base: #fef6ff;
-	--surface-overlay: rgba(255, 255, 255, 0.94);
-	--surface-card: rgba(255, 255, 255, 0.88);
-	--surface-card-muted: rgba(203, 166, 247, 0.08);
-	--surface-border: rgba(30, 30, 46, 0.12);
-	--surface-border-strong: rgba(245, 194, 231, 0.32);
-	--surface-shadow: 0 35px 80px rgba(69, 46, 95, 0.12);
-	--surface-shadow-strong: 0 45px 120px rgba(69, 46, 95, 0.18);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(var(--brand-primary), 0.3) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(var(--brand-secondary), 0.2) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.15) 0%,
-			transparent 50%
-		),
-		linear-gradient(140deg, #f5e0ff 0%, #faf0ff 35%, #f0f5ff 70%, #fff0fa 100%);
-}
-
-html.dark[data-theme="catppuccin"] {
-	--surface-base: #120f1b;
-	--surface-overlay: rgba(12, 9, 18, 0.92);
-	--surface-card: rgba(19, 15, 28, 0.92);
-	--surface-card-muted: rgba(203, 166, 247, 0.14);
-	--surface-border: rgba(245, 194, 231, 0.28);
-	--surface-border-strong: rgba(203, 166, 247, 0.38);
-	--surface-shadow: 0 35px 120px rgba(5, 4, 12, 0.7);
-	--surface-shadow-strong: 0 45px 140px rgba(5, 4, 12, 0.85);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.45) 0%,
-			transparent 32%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.35) 0%,
-			transparent 42%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.25) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #0c0716 0%, #140b1f 55%, #1c1230 100%);
-}
-
-/* Dracula Theme */
-:root[data-theme="dracula"] {
-	--brand-primary: 189 147 249; /* Purple #BD93F9 */
-	--brand-secondary: 255 121 198; /* Pink #FF79C6 */
-	--brand-accent: 40 42 54; /* Background #282A36 */
-
-	--surface-base: #f7f2ff;
-	--surface-overlay: rgba(255, 255, 255, 0.94);
-	--surface-card: rgba(255, 255, 255, 0.88);
-	--surface-card-muted: rgba(189, 147, 249, 0.08);
-	--surface-border: rgba(40, 42, 54, 0.12);
-	--surface-border-strong: rgba(255, 121, 198, 0.3);
-	--surface-shadow: 0 30px 80px rgba(40, 42, 54, 0.18);
-	--surface-shadow-strong: 0 45px 120px rgba(40, 42, 54, 0.25);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(var(--brand-primary), 0.3) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(var(--brand-secondary), 0.25) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.15) 0%,
-			transparent 50%
-		),
-		linear-gradient(140deg, #f0e6ff 0%, #fff0f8 35%, #f0f0ff 70%, #ffe6f5 100%);
-}
-
-html.dark[data-theme="dracula"] {
-	--surface-base: #0f0d18;
-	--surface-overlay: rgba(11, 9, 20, 0.92);
-	--surface-card: rgba(20, 16, 32, 0.92);
-	--surface-card-muted: rgba(255, 121, 198, 0.18);
-	--surface-border: rgba(189, 147, 249, 0.32);
-	--surface-border-strong: rgba(255, 121, 198, 0.4);
-	--surface-shadow: 0 35px 120px rgba(1, 2, 8, 0.75);
-	--surface-shadow-strong: 0 45px 140px rgba(1, 1, 4, 0.88);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.5) 0%,
-			transparent 30%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.4) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.3) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #0b0512 0%, #140a1f 55%, #1c0f2c 100%);
-}
-
-/* Solarized Theme */
-:root[data-theme="solarized"] {
-	--brand-primary: 38 139 210; /* Blue #268BD2 */
-	--brand-secondary: 42 161 152; /* Cyan #2AA198 */
-	--brand-accent: 0 43 54; /* Base03 #002B36 */
-
-	--surface-base: #fdf6e3;
-	--surface-overlay: rgba(255, 255, 255, 0.94);
-	--surface-card: rgba(255, 255, 255, 0.88);
-	--surface-card-muted: rgba(42, 161, 152, 0.08);
-	--surface-border: rgba(0, 43, 54, 0.12);
-	--surface-border-strong: rgba(38, 139, 210, 0.3);
-	--surface-shadow: 0 30px 80px rgba(0, 43, 54, 0.18);
-	--surface-shadow-strong: 0 45px 120px rgba(0, 43, 54, 0.25);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(var(--brand-primary), 0.25) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(var(--brand-secondary), 0.2) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.12) 0%,
-			transparent 50%
-		),
-		linear-gradient(140deg, #fdf6e3 0%, #eee8d5 35%, #f5f5f0 70%, #fffff8 100%);
-}
-
-html.dark[data-theme="solarized"] {
-	--surface-base: #04151a;
-	--surface-overlay: rgba(3, 12, 15, 0.92);
-	--surface-card: rgba(4, 17, 21, 0.92);
-	--surface-card-muted: rgba(42, 161, 152, 0.16);
-	--surface-border: rgba(38, 139, 210, 0.32);
-	--surface-border-strong: rgba(42, 161, 152, 0.38);
-	--surface-shadow: 0 35px 120px rgba(1, 5, 8, 0.75);
-	--surface-shadow-strong: 0 45px 140px rgba(0, 3, 5, 0.85);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.45) 0%,
-			transparent 32%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.35) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.25) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #021016 0%, #041d23 55%, #062a30 100%);
-}
-
-/* Pride Theme - Cotton Candy Palette */
-:root[data-theme="pride"] {
-	--brand-primary: 255 89 94; /* Red #FF595E */
-	--brand-secondary: 255 202 58; /* Yellow #FFCA3A */
-	--brand-accent: 106 76 147; /* Purple #6A4C93 */
-
-	--surface-base: #fff8f6;
-	--surface-overlay: rgba(255, 255, 255, 0.95);
-	--surface-card: rgba(255, 255, 255, 0.9);
-	--surface-card-muted: rgba(255, 89, 94, 0.12);
-	--surface-border: rgba(106, 76, 147, 0.18);
-	--surface-border-strong: rgba(255, 202, 58, 0.35);
-	--surface-shadow: 0 30px 80px rgba(106, 76, 147, 0.15);
-	--surface-shadow-strong: 0 45px 120px rgba(106, 76, 147, 0.2);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(255, 89, 94, 0.2) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(255, 202, 58, 0.25) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(106, 76, 147, 0.15) 0%,
-			transparent 50%
-		),
-		linear-gradient(
-			140deg,
-			#ffe6e7 0%,
-			#fff9e6 20%,
-			#f0ffe6 40%,
-			#e6f5ff 60%,
-			#ede6ff 80%,
-			#f5e6ff 100%
-		);
-}
-
-html.dark[data-theme="pride"] {
-	--surface-base: #1c050d;
-	--surface-overlay: rgba(16, 3, 10, 0.95);
-	--surface-card: rgba(14, 2, 9, 0.9);
-	--surface-card-muted: rgba(255, 202, 58, 0.12);
-	--surface-border: rgba(255, 89, 94, 0.35);
-	--surface-border-strong: rgba(106, 76, 147, 0.45);
-	--surface-shadow: 0 35px 120px rgba(5, 0, 4, 0.8);
-	--surface-shadow-strong: 0 45px 140px rgba(5, 0, 4, 0.9);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.5) 0%,
-			transparent 32%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.4) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-accent), 0.35) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #140009 0%, #190311 55%, #0f0314 100%);
-}
-
-/* LGBTQ+ Theme - Transgender Pride Flag */
-:root[data-theme="lgbtq"] {
-	--brand-primary: 91 206 250; /* Light Blue #5BCEFA */
-	--brand-secondary: 245 169 184; /* Pink #F5A9B8 */
-	--brand-accent: 255 255 255; /* White #FFFFFF */
-
-	--surface-base: #f3f9ff;
-	--surface-overlay: rgba(255, 255, 255, 0.96);
-	--surface-card: rgba(255, 255, 255, 0.92);
-	--surface-card-muted: rgba(91, 206, 250, 0.12);
-	--surface-border: rgba(91, 206, 250, 0.2);
-	--surface-border-strong: rgba(245, 169, 184, 0.35);
-	--surface-shadow: 0 30px 80px rgba(44, 82, 130, 0.12);
-	--surface-shadow-strong: 0 45px 120px rgba(44, 82, 130, 0.18);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(91, 206, 250, 0.3) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(245, 169, 184, 0.35) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(91, 206, 250, 0.2) 0%,
-			transparent 50%
-		),
-		linear-gradient(
-			140deg,
-			#e6f7ff 0%,
-			#ffebf0 20%,
-			#fff 40%,
-			#ffebf0 60%,
-			#e6f7ff 80%,
-			#ffffff 100%
-		);
-}
-
-html.dark[data-theme="lgbtq"] {
-	--surface-base: #031520;
-	--surface-overlay: rgba(3, 11, 17, 0.94);
-	--surface-card: rgba(5, 15, 24, 0.92);
-	--surface-card-muted: rgba(91, 206, 250, 0.18);
-	--surface-border: rgba(91, 206, 250, 0.35);
-	--surface-border-strong: rgba(245, 169, 184, 0.4);
-	--surface-shadow: 0 35px 120px rgba(2, 5, 11, 0.78);
-	--surface-shadow-strong: 0 45px 140px rgba(1, 3, 8, 0.88);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.45) 0%,
-			transparent 32%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.4) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(255, 255, 255, 0.25) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #030914 0%, #041b2a 55%, #031324 100%);
-}
-
-html.dark {
-	--surface-base: #030617;
-	--surface-overlay: rgba(6, 11, 27, 0.92);
-	--surface-card: rgba(8, 14, 31, 0.9);
-	--surface-card-muted: rgba(148, 163, 184, 0.08);
-	--surface-border: rgba(148, 163, 184, 0.2);
-	--surface-border-strong: rgba(var(--brand-primary), 0.35);
-	--surface-shadow: 0 35px 120px rgba(2, 6, 23, 0.65);
-	--surface-shadow-strong: 0 45px 120px rgba(2, 6, 23, 0.75);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.4) 0%,
-			transparent 35%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.35) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.25) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #020617 0%, #020b26 55%, #05080f 100%);
 }
 
 body {
@@ -512,22 +134,88 @@ body::before {
 	--spacing-stack-lg: var(--space-stack-lg);
 	--spacing-card: var(--space-card-pad);
 	--spacing-card-lg: var(--space-card-pad-lg);
+
+	/* Radius Scale — exposed as Tailwind's `rounded-xs/sm/md/lg/xl/2xl/3xl/4xl`.
+	   Sized so that:
+	     xs (6px)   — chips, small pills
+	     sm (8px)   — inputs, small buttons
+	     md (12px)  — secondary cards
+	     lg (16px)  — buttons, default surfaces
+	     xl (19.2px) — soft / muted panels, stat panels
+	     2xl (21.6px) — glass cards, section shells
+	     3xl (24px) — glass panels (hero-level)
+	     4xl (32px) — page-level shells (sidebar, footer container) */
+	--radius-xs: 0.375rem;
+	--radius-sm: 0.5rem;
+	--radius-md: 0.75rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1.2rem;
+	--radius-2xl: 1.35rem;
+	--radius-3xl: 1.5rem;
+	--radius-4xl: 2rem;
+
+	/* Motion tokens — durations + easings used across the system.
+	   Exposed as Tailwind utilities: `duration-fast/base/slow/slower`
+	   and `ease-standard/out/in/spring`. */
+	--duration-fast: 120ms; /* micro-interactions, hover ticks */
+	--duration-base: 200ms; /* default transitions */
+	--duration-slow: 300ms; /* card hovers, layout shifts */
+	--duration-slower: 500ms; /* page-level moves */
+
+	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* Material standard */
+	--ease-out: cubic-bezier(0, 0, 0.2, 1); /* deceleration */
+	--ease-in: cubic-bezier(0.4, 0, 1, 1); /* acceleration */
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* gentle overshoot */
+
+	/* Shadow ramp — depth scale. The legacy `card-shadow` /
+	   `card-shadow-elevated` utilities now use these tokens. */
+	--shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+	--shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
+	--shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14);
+	--shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.18);
+}
+
+/* Dark-mode shadow ramp — deeper, no light bleed. */
+html.dark {
+	--shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+	--shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+	--shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
+	--shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.7);
 }
 
 @layer base {
+	/* Heading ramp — display font, semantic colour, balanced tracking.
+	   Component-level utility classes still override these by specificity.
+	   The prose-content variants live further down in @layer components. */
 	h1 {
-		@apply text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white;
+		@apply text-3xl md:text-4xl font-extrabold tracking-tight text-primary-content;
+		font-family: var(--font-display);
+		letter-spacing: -0.02em;
 	}
 
 	h2 {
-		@apply text-2xl md:text-3xl font-bold text-gray-900 dark:text-white;
+		@apply text-2xl md:text-3xl font-bold tracking-tight text-primary-content;
+		font-family: var(--font-display);
+		letter-spacing: -0.015em;
+	}
+
+	h3 {
+		@apply text-xl md:text-2xl font-semibold text-primary-content;
+		font-family: var(--font-display);
+		letter-spacing: -0.01em;
+	}
+
+	h4 {
+		@apply text-lg md:text-xl font-semibold text-primary-content;
+		font-family: var(--font-display);
+		letter-spacing: -0.005em;
 	}
 }
 
 @layer components {
 	/* Glass Morphism Components */
 	.glass-panel {
-		@apply border rounded-[1.5rem];
+		@apply border rounded-3xl;
 		background:
 			linear-gradient(
 				180deg,
@@ -539,7 +227,7 @@ body::before {
 	}
 
 	.glass-card {
-		@apply border rounded-[1.35rem];
+		@apply border rounded-2xl;
 		background:
 			linear-gradient(
 				180deg,
@@ -552,7 +240,7 @@ body::before {
 
 	/* Glass card with shimmer effect overlay */
 	.glass-card-shimmer {
-		@apply relative overflow-hidden border rounded-[1.35rem];
+		@apply relative overflow-hidden border rounded-2xl;
 		background:
 			linear-gradient(
 				180deg,
@@ -615,7 +303,7 @@ body::before {
 	}
 
 	.section-shell {
-		@apply relative overflow-hidden rounded-[1.35rem] border;
+		@apply relative overflow-hidden rounded-2xl border;
 		background:
 			linear-gradient(
 				180deg,
@@ -667,7 +355,7 @@ body::before {
 	}
 
 	.section-shell-muted {
-		@apply relative overflow-hidden rounded-[1.2rem] border;
+		@apply relative overflow-hidden rounded-xl border;
 		background-color: color-mix(in srgb, var(--surface-card) 72%, transparent);
 		border-color: color-mix(in srgb, var(--surface-border) 86%, transparent);
 		box-shadow: none;
@@ -682,18 +370,8 @@ body::before {
 		color: rgb(var(--brand-primary));
 	}
 
-	.stat-panel {
-		@apply flex min-h-24 flex-col justify-between rounded-[1.25rem] border p-4 sm:p-5;
-		background-color: rgba(255, 255, 255, 0.74);
-		border-color: var(--surface-border);
-	}
-
-	html.dark .stat-panel {
-		background-color: rgba(15, 23, 42, 0.34);
-	}
-
 	.soft-panel {
-		@apply rounded-[1.2rem] border;
+		@apply rounded-xl border;
 		background:
 			linear-gradient(
 				180deg,
@@ -714,10 +392,6 @@ body::before {
 
 	.surface-divider {
 		border-color: var(--surface-border);
-	}
-
-	.surface-divider-strong {
-		border-color: var(--surface-border-strong);
 	}
 
 	/* Branded media container for logos/icons within glass cards - glass-like with subtle brand tint */
@@ -744,32 +418,19 @@ body::before {
 		@apply bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl border border-white/40 dark:border-gray-600/50;
 	}
 
-	.card-shadow {
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12);
-	}
-
-	.dark .card-shadow {
-		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
-	}
-
-	.card-shadow-elevated {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18);
-	}
-
-	.dark .card-shadow-elevated {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
-	}
+	/* Shadow utilities — defined as `@utility` at the end of file so
+	   `@apply card-shadow-{sm,md,lg,xl}` works in scoped Astro/Vue
+	   <style> blocks too. */
 
 	.card-hover {
-		@apply transition-all duration-300 hover:bg-white/60 dark:hover:bg-gray-700/70 hover:scale-[1.02];
+		transition-property: background-color, box-shadow, transform;
+		transition-duration: var(--duration-slow);
+		transition-timing-function: var(--ease-standard);
 	}
 
 	.card-hover:hover {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.18);
-	}
-
-	.dark .card-hover:hover {
-		box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+		@apply bg-white/60 dark:bg-gray-700/70 scale-[1.02];
+		box-shadow: var(--shadow-lg);
 	}
 
 	/* Border Utilities - Semantic */
@@ -779,14 +440,6 @@ body::before {
 
 	html.dark .border-subtle {
 		border-color: rgba(107, 114, 128, 0.5);
-	}
-
-	.border-muted {
-		border-color: rgba(255, 255, 255, 0.4);
-	}
-
-	html.dark .border-muted {
-		border-color: rgba(75, 85, 99, 0.4);
 	}
 
 	/* Border Utilities - Legacy glass variants */
@@ -809,22 +462,6 @@ body::before {
 
 	html.dark .bg-surface {
 		background: rgba(31, 41, 55, 0.4);
-	}
-
-	.bg-surface-hover {
-		background: rgba(255, 255, 255, 0.6);
-	}
-
-	html.dark .bg-surface-hover {
-		background: rgba(55, 65, 81, 0.6);
-	}
-
-	.bg-surface-active {
-		background: rgba(255, 255, 255, 0.7);
-	}
-
-	html.dark .bg-surface-active {
-		background: rgba(55, 65, 81, 0.7);
 	}
 
 	/* Button Variants */
@@ -851,35 +488,6 @@ body::before {
 		background: rgba(55, 65, 81, 0.5);
 	}
 
-	.btn-glass-subtle {
-		@apply inline-flex items-center justify-center px-4 py-2 rounded-lg;
-		@apply text-sm font-medium transition-all duration-200;
-		background: transparent;
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		color: rgb(55 65 81); /* gray-700 */
-	}
-
-	html.dark .btn-glass-subtle {
-		color: rgb(209 213 219); /* gray-300 */
-	}
-
-	.btn-glass-subtle:hover {
-		background: rgba(255, 255, 255, 0.2);
-		color: rgb(17 24 39); /* gray-900 */
-	}
-
-	html.dark .btn-glass-subtle:hover {
-		color: rgb(255 255 255); /* white */
-	}
-
-	html.dark .btn-glass-subtle {
-		border-color: rgba(75, 85, 99, 0.3);
-	}
-
-	html.dark .btn-glass-subtle:hover {
-		background: rgba(55, 65, 81, 0.3);
-	}
-
 	.btn-solid {
 		@apply inline-flex items-center justify-center px-4 py-2 rounded-lg;
 		@apply text-sm font-medium transition-all duration-200;
@@ -893,29 +501,64 @@ body::before {
 		filter: brightness(1.1);
 	}
 
-	/* Social share button base - for branded social buttons with custom colors */
-	.btn-social {
-		@apply inline-flex items-center justify-center px-3 sm:px-4 py-2 rounded-lg;
-		@apply text-sm font-medium text-white gap-2;
-		@apply transition-colors cursor-pointer;
-	}
-
-	.btn-social:hover {
-		filter: brightness(0.9);
-	}
-
 	/* Link Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
-	/* Gradient Presets */
+	/* Gradient Presets — brand-aware hero washes derived from the active theme */
 	.bg-gradient-hero {
-		@apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-black;
+		background:
+			radial-gradient(
+				circle at 12% 18%,
+				rgb(var(--brand-primary) / 0.18) 0%,
+				transparent 48%
+			),
+			radial-gradient(
+				circle at 88% 12%,
+				rgb(var(--brand-secondary) / 0.14) 0%,
+				transparent 52%
+			),
+			linear-gradient(
+				145deg,
+				color-mix(in srgb, var(--surface-base) 92%, rgb(var(--brand-primary) / 0.05)) 0%,
+				color-mix(in srgb, var(--surface-base) 96%, rgb(var(--brand-secondary) / 0.04)) 100%
+			);
+	}
+
+	html.dark .bg-gradient-hero {
+		background:
+			radial-gradient(
+				circle at 18% 12%,
+				rgb(var(--brand-primary) / 0.32) 0%,
+				transparent 48%
+			),
+			radial-gradient(
+				circle at 86% 18%,
+				rgb(var(--brand-secondary) / 0.22) 0%,
+				transparent 52%
+			),
+			linear-gradient(
+				145deg,
+				color-mix(in srgb, var(--surface-base) 86%, rgb(var(--brand-primary) / 0.18)) 0%,
+				color-mix(in srgb, var(--surface-base) 92%, rgb(var(--brand-accent) / 0.4)) 100%
+			);
 	}
 
 	.bg-gradient-hero-alt {
-		@apply bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800;
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--surface-base) 94%, rgb(var(--brand-primary) / 0.06)) 0%,
+			color-mix(in srgb, var(--surface-overlay) 88%, rgb(var(--brand-secondary) / 0.04)) 100%
+		);
 	}
 
-	/* Brand gradient: Theme-aware at 45° angle */
+	html.dark .bg-gradient-hero-alt {
+		background: linear-gradient(
+			180deg,
+			color-mix(in srgb, var(--surface-base) 90%, rgb(var(--brand-primary) / 0.22)) 0%,
+			color-mix(in srgb, var(--surface-overlay) 86%, rgb(var(--brand-accent) / 0.35)) 100%
+		);
+	}
+
+	/* Brand gradient: canonical 135° diagonal sweep, primary → secondary */
 	.bg-gradient-primary {
 		background: linear-gradient(
 			135deg,
@@ -924,11 +567,12 @@ body::before {
 		);
 	}
 
+	/* Secondary gradient: reverse sweep so it complements primary visually */
 	.bg-gradient-secondary {
 		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary)) 0%,
-			rgb(var(--brand-secondary)) 100%
+			315deg,
+			rgb(var(--brand-secondary)) 0%,
+			rgb(var(--brand-primary)) 100%
 		);
 	}
 
@@ -949,54 +593,11 @@ body::before {
 		);
 	}
 
-	/* Active/selected state gradient */
-	.bg-gradient-active {
-		background: linear-gradient(
-			to right,
-			rgba(var(--brand-primary), 0.15) 0%,
-			rgba(var(--brand-primary), 0.05) 100%
-		);
-	}
-
-	/* Image/video overlay gradient */
-	.bg-gradient-overlay {
-		background: linear-gradient(
-			to top right,
-			rgba(var(--brand-primary), 0.3) 0%,
-			rgba(var(--brand-secondary), 0.3) 100%
-		);
-		mix-blend-mode: multiply;
-	}
-
-	/* Decorative glow effect (used with blur) */
-	.bg-gradient-glow {
-		background: linear-gradient(
-			to top,
-			rgba(var(--brand-primary), 0.3) 0%,
-			transparent 50%,
-			rgba(var(--brand-secondary), 0.2) 100%
-		);
-	}
-
-	html.dark .bg-gradient-glow {
-		background: linear-gradient(
-			to top,
-			rgba(var(--brand-primary), 0.4) 0%,
-			transparent 50%,
-			rgba(var(--brand-secondary), 0.25) 100%
-		);
-	}
-
 	/* Text Color Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
 
-	/* Animation Utilities */
-	.transition-card {
-		@apply transition-all duration-300;
-	}
-
-	.transition-smooth {
-		@apply transition-all duration-200;
-	}
+	/* Animation Utilities — defined as `@utility` at the end of file
+	   so `@apply transition-card`/`-smooth`/`-fast`/`-spring` works in
+	   scoped Astro/Vue <style> blocks. */
 
 	/* Prose styles for article content - Enhanced Typography */
 	.prose {
@@ -1379,11 +980,6 @@ body::before {
 		@apply px-3 sm:px-6 lg:px-8;
 	}
 
-	/* Responsive Content Padding with vertical */
-	.content-p {
-		@apply p-3 sm:p-6 lg:p-8;
-	}
-
 	/* Responsive Section Gap - for vertical spacing between sections */
 	.section-gap {
 		@apply space-y-3 sm:space-y-4 lg:space-y-6;
@@ -1498,8 +1094,8 @@ body::before {
 @utility link-muted {
 	color: rgb(75 85 99);
 	transition-property: color;
-	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-	transition-duration: 200ms;
+	transition-timing-function: var(--ease-standard);
+	transition-duration: var(--duration-base);
 
 	:root.dark & {
 		color: rgb(156 163 175);
@@ -1508,4 +1104,76 @@ body::before {
 	&:hover {
 		color: rgb(var(--brand-primary));
 	}
+}
+
+/* Focus ring — apply via `class="focus-ring"` on any focusable element
+   that needs a consistent brand-primary outline. Pairs with `:focus-visible`
+   so it only shows for keyboard navigation. */
+@utility focus-ring {
+	&:focus-visible {
+		outline: 2px solid rgb(var(--brand-primary));
+		outline-offset: 2px;
+		border-radius: var(--radius-sm);
+	}
+}
+
+/* Motion utilities — Tailwind v4 `@utility` so `@apply` works from
+   scoped Astro/Vue <style> blocks too. */
+@utility transition-fast {
+	transition: all var(--duration-fast) var(--ease-standard);
+}
+
+@utility transition-smooth {
+	transition: all var(--duration-base) var(--ease-standard);
+}
+
+@utility transition-card {
+	transition: all var(--duration-slow) var(--ease-standard);
+}
+
+@utility transition-spring {
+	transition: all var(--duration-slow) var(--ease-spring);
+}
+
+/* Property-specific colour transitions — for buttons / chips / links
+   where a `transition: all` would catch unrelated property changes. */
+@utility transition-colors-smooth {
+	transition-property: color, background-color, border-color, fill, stroke;
+	transition-duration: var(--duration-base);
+	transition-timing-function: var(--ease-standard);
+}
+
+@utility transition-colors-card {
+	transition-property: color, background-color, border-color, fill, stroke;
+	transition-duration: var(--duration-slow);
+	transition-timing-function: var(--ease-standard);
+}
+
+/* Shadow utilities — wired to the `--shadow-*` ramp so the light/dark
+   variants come from one place. Declared as `@utility` so `@apply`
+   works in scoped <style> blocks (e.g. `about/index.astro`'s
+   `.timeline-item`). `card-shadow` (= md) and `card-shadow-elevated`
+   (= lg) remain as backwards-compatible aliases. */
+@utility card-shadow-sm {
+	box-shadow: var(--shadow-sm);
+}
+
+@utility card-shadow {
+	box-shadow: var(--shadow-md);
+}
+
+@utility card-shadow-md {
+	box-shadow: var(--shadow-md);
+}
+
+@utility card-shadow-lg {
+	box-shadow: var(--shadow-lg);
+}
+
+@utility card-shadow-elevated {
+	box-shadow: var(--shadow-lg);
+}
+
+@utility card-shadow-xl {
+	box-shadow: var(--shadow-xl);
 }

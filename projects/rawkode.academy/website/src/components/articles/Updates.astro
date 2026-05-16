@@ -21,7 +21,7 @@ const formatDate = (date: Date) => {
 
 {
 	updates && updates.length > 0 && (
-		<div class="mb-4 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-md px-3 py-2 border border-gray-200 dark:border-gray-800">
+		<div class="mb-4 text-sm text-muted bg-gray-50 dark:bg-gray-900/50 rounded-md px-3 py-2 border border-gray-200 dark:border-gray-800">
 			<div class="flex items-start gap-2">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -29,7 +29,7 @@ const formatDate = (date: Date) => {
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
 					stroke="currentColor"
-					class="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-500"
+					class="w-4 h-4 mt-0.5 flex-shrink-0 text-muted"
 				>
 					<path
 						stroke-linecap="round"
@@ -38,11 +38,11 @@ const formatDate = (date: Date) => {
 					/>
 				</svg>
 				<div class="flex-1">
-					<span class="font-medium text-gray-700 dark:text-gray-300">Updated:</span>
+					<span class="font-medium text-secondary-content">Updated:</span>
 					{updates.map((update, index) => (
 						<span class="ml-1">
 							{formatDate(update.date)} - {update.description}
-							{index < updates.length - 1 && <span class="text-gray-400 dark:text-gray-600"> • </span>}
+							{index < updates.length - 1 && <span class="text-muted"> • </span>}
 						</span>
 					))}
 				</div>

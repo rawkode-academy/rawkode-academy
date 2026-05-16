@@ -1,6 +1,6 @@
 <template>
   <div class="comments-section mt-8">
-    <h3 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+    <h3 class="text-xl font-semibold mb-4 text-primary-content">
       Comments {{ !loading ? `(${comments.length})` : '' }}
     </h3>
 
@@ -15,14 +15,14 @@
       retry-text="Retry loading comments"
     />
 
-    <div v-else-if="comments.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+    <div v-else-if="comments.length === 0" class="text-center py-8 text-muted">
       <p>No comments yet. Join the discussion on Discord!</p>
       <a
         v-if="discordInviteUrl"
         :href="discordInviteUrl"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center mt-2 text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
+        class="inline-flex items-center mt-2 text-primary hover:text-primary/90"
       >
         Join the discussion on Discord
         <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,16 +56,16 @@
 
           <div class="flex-1 min-w-0">
             <div class="flex items-center space-x-2 mb-1">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-white">
+              <h4 class="text-sm font-medium text-primary-content">
                 {{ comment.author }}
               </h4>
-              <span class="text-xs text-gray-500 dark:text-gray-400">
+              <span class="text-xs text-muted">
                 {{ formatDate(comment.timestamp) }}
               </span>
             </div>
 
             <div
-              class="text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none dark:prose-invert"
+              class="text-sm text-secondary-content prose prose-sm max-w-none dark:prose-invert"
               v-html="formatContent(comment.content)"
             ></div>
           </div>
@@ -77,7 +77,7 @@
           :href="discordInviteUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center text-primary hover:text-primary/90 dark:text-primary dark:hover:text-primary/90"
+          class="inline-flex items-center text-primary hover:text-primary/90"
         >
           Want to share your thoughts? Join the discussion on Discord
           <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

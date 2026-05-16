@@ -46,11 +46,11 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 		</span>
 	</Fragment>
 	<Fragment slot="content">
-		<h2 class="mb-3 text-xl font-bold tracking-tight text-gray-900 dark:text-white line-clamp-2">
+		<h2 class="mb-3 text-xl font-bold tracking-tight text-primary-content line-clamp-2">
 			{article.data.title}
 		</h2>
 		{article.data.openGraph?.subtitle && (
-			<p class="mb-4 font-light text-gray-500 dark:text-gray-400 line-clamp-3">
+			<p class="mb-4 font-light text-muted line-clamp-3">
 				{article.data.openGraph?.subtitle}
 			</p>
 		)}
@@ -58,7 +58,7 @@ const badgeConfig = getTypeBadgeConfig(articleType);
 	<Fragment slot="footer">
 		<div class="flex items-center justify-between">
 			<AuthorAvatarGroup authors={authors} />
-			<div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+			<div class="flex items-center gap-3 text-sm text-muted">
 				<span class="flex items-center gap-1">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

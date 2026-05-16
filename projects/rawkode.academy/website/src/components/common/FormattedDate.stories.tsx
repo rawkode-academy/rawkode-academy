@@ -167,14 +167,14 @@ export const InContext: Story = {
 				template: `
           <article class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
             <h2 class="text-xl font-bold mb-2">Understanding Kubernetes Deployments</h2>
-            <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <div class="flex items-center gap-4 text-sm text-muted">
               <span>By John Doe</span>
               <span>•</span>
               <FormattedDate :date="publishDate" />
               <span>•</span>
               <span>5 min read</span>
             </div>
-            <p class="mt-4 text-gray-700 dark:text-gray-300">
+            <p class="mt-4 text-secondary-content">
               Learn how to effectively manage and scale your applications using Kubernetes deployments...
             </p>
           </article>

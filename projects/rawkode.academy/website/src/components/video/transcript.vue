@@ -8,10 +8,10 @@
           type="text"
           placeholder="Search transcript..."
           aria-label="Search transcript"
-          class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary focus:border-transparent"
+          class="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-primary-content focus-ring"
         />
         <svg
-          class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+          class="absolute left-3 top-2.5 w-5 h-5 text-muted"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -24,7 +24,7 @@
           ></path>
         </svg>
       </div>
-      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-muted">
         <span>{{ searchResultsText }}</span>
       </div>
     </div>
@@ -47,7 +47,7 @@
         <div class="text-sm text-primary dark:text-primary font-mono mb-2">
           {{ paragraph[0].start }}
         </div>
-        <div class="text-gray-900 dark:text-gray-100 leading-relaxed">
+        <div class="text-primary-content leading-relaxed">
           <span
             v-for="(cue, cueIndex) in paragraph"
             :key="`${index}-${cueIndex}`"
