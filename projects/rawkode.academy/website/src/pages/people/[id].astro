@@ -146,12 +146,12 @@ const noindex =
 
 const pageTitle = (() => {
 	if (showCount > 0) {
-		return `${person.data.name} — Host of ${showNames[0]} | Rawkode Academy`;
+		return `${person.data.name} — Host of ${showNames[0]}`;
 	}
 	if (topTechNames.length > 0) {
-		return `${person.data.name} — Talks on ${topTechNames.slice(0, 2).join(" & ")} | Rawkode Academy`;
+		return `${person.data.name} — Talks on ${topTechNames.slice(0, 2).join(" & ")}`;
 	}
-	return `${person.data.name} | Rawkode Academy`;
+	return person.data.name;
 })();
 
 const pageDescription = (() => {

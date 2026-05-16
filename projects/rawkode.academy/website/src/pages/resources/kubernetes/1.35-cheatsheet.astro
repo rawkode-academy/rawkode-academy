@@ -41,9 +41,9 @@ if (user) {
 // User has access if they've subscribed (via preferences, cookie, or query param)
 const hasAccess = hasNewsletterSubscription || hasCheatsheetCookie || Astro.url.searchParams.has("subscribed");
 
-const pageTitle = "Kubernetes 1.35 Cheat Sheet | Rawkode Academy";
+const pageTitle = "Kubernetes 1.35 Cheat Sheet";
 const pageDescription =
-	"Your comprehensive guide to Kubernetes 1.35 - breaking changes, new GA features, AI/ML scheduler primitives, and migration checklist. Free for cloud native engineers.";
+	"A guide to Kubernetes 1.35 — breaking changes, new GA features, AI/ML scheduler primitives, and a migration checklist for cloud native engineers.";
 ---
 
 <Page title={pageTitle} description={pageDescription}>

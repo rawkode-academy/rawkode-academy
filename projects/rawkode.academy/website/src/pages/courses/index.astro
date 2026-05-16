@@ -2,6 +2,7 @@
 import { getCollection, getEntries } from "astro:content";
 import CourseCard from "@/components/courses/CourseCard.astro";
 import CoursesHero from "@/components/courses/CoursesHero.astro";
+import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
 
@@ -49,12 +50,18 @@ if (featuredCourse) {
 	});
 }
 
-const pageTitle = "Cloud Native Courses | Rawkode Academy";
+const pageTitle = "Cloud Native Courses";
 const pageDescription =
 	"Hands-on cloud native courses, labs, and walkthroughs covering Kubernetes, identity, GraphQL, Rust, and the tooling behind real platform engineering.";
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+	<CourseItemListJsonLd
+		slot="extra-head"
+		courses={allCourses}
+		listUrl={new URL("/courses", Astro.site ?? Astro.url).href}
+		listName="Cloud Native Courses"
+	/>
 	<section class="page-px section-py-tight">
 		<div class="mx-auto max-w-7xl">
 			{featuredCourse ? (
