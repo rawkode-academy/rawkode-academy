@@ -159,6 +159,29 @@ export const matchResults = sqliteTable("match_results", {
 	recordedByUserId: text("recorded_by_user_id"),
 });
 
+export const sessions = sqliteTable("sessions", {
+	id: text("id").primaryKey(),
+	userId: text("user_id").notNull(),
+	userEmail: text("user_email").notNull(),
+	userName: text("user_name").notNull(),
+	userImage: text("user_image"),
+	expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+	createdAt: createdAt(),
+	lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" })
+		.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+		.notNull(),
+});
+
+export const userRoles = sqliteTable(
+	"user_roles",
+	{
+		userId: text("user_id").notNull(),
+		role: text("role", { enum: ["admin", "competitor"] }).notNull(),
+		createdAt: createdAt(),
+	},
+	(t) => [primaryKey({ columns: [t.userId, t.role] })],
+);
+
 export const registrations = sqliteTable("registrations", {
 	id: text("id").primaryKey(),
 	seasonId: text("season_id")
