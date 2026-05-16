@@ -162,7 +162,7 @@ export const RealWorldExample: Story = {
             <Section padding="xl" background="gradient">
               <div class="text-center mb-12">
                 <Heading as="h1" size="4xl">Welcome to Our Platform</Heading>
-                <p class="text-xl text-gray-600 dark:text-gray-300 mt-4">
+                <p class="text-xl text-secondary-content mt-4">
                   Discover amazing features and capabilities
                 </p>
               </div>
@@ -173,19 +173,19 @@ export const RealWorldExample: Story = {
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
                   <Heading as="h3" size="lg">Feature One</Heading>
-                  <p class="mt-2 text-gray-600 dark:text-gray-300">
+                  <p class="mt-2 text-secondary-content">
                     Description of the first feature goes here.
                   </p>
                 </div>
                 <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
                   <Heading as="h3" size="lg">Feature Two</Heading>
-                  <p class="mt-2 text-gray-600 dark:text-gray-300">
+                  <p class="mt-2 text-secondary-content">
                     Description of the second feature goes here.
                   </p>
                 </div>
                 <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
                   <Heading as="h3" size="lg">Feature Three</Heading>
-                  <p class="mt-2 text-gray-600 dark:text-gray-300">
+                  <p class="mt-2 text-secondary-content">
                     Description of the third feature goes here.
                   </p>
                 </div>
@@ -195,7 +195,7 @@ export const RealWorldExample: Story = {
             <Section padding="lg" background="gray">
               <div class="text-center">
                 <Heading as="h2" size="2xl">Ready to Get Started?</Heading>
-                <p class="text-lg text-gray-600 dark:text-gray-300 mt-4 mb-8">
+                <p class="text-lg text-secondary-content mt-4 mb-8">
                   Join thousands of users who are already benefiting from our platform.
                 </p>
               </div>

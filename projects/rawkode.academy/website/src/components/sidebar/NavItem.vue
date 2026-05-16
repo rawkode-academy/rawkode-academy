@@ -75,10 +75,10 @@ const handleClick = (e: Event) => {
 			:target="item.external ? '_blank' : undefined"
 			:rel="item.external ? 'noopener noreferrer' : undefined"
 			:class="[
-				'group relative flex w-full items-center border transition-all duration-200 ease-out',
+				'group relative flex w-full items-center border transition-smooth focus-ring',
 				isCollapsed
-					? 'min-h-12 justify-center rounded-[1.2rem] px-0 py-2.5'
-					: 'gap-3 rounded-[1.2rem] px-2.5 py-2',
+					? 'min-h-12 justify-center rounded-xl px-0 py-2.5'
+					: 'gap-3 rounded-xl px-2.5 py-2',
 				isActive(item)
 					? 'border-primary/12 bg-white/72 text-slate-950 shadow-[0_12px_28px_-24px_rgba(15,23,42,0.9)] dark:border-primary/30 dark:bg-slate-950/72 dark:text-white'
 					: 'border-transparent text-slate-700 hover:border-white/45 hover:bg-white/48 hover:text-slate-950 dark:text-slate-300 dark:hover:border-white/8 dark:hover:bg-slate-950/50 dark:hover:text-white',
@@ -88,7 +88,7 @@ const handleClick = (e: Event) => {
 			@click="handleClick"
 		>
 			<span
-				class="absolute left-0 top-2 bottom-2 w-0.5 origin-center rounded-full bg-gradient-to-b from-primary via-primary to-secondary transition-all duration-200"
+				class="absolute left-0 top-2 bottom-2 w-0.5 origin-center rounded-full bg-gradient-to-b from-primary via-primary to-secondary transition-smooth"
 				:class="
 					isActive(item)
 						? 'opacity-100 scale-y-100'
@@ -100,7 +100,7 @@ const handleClick = (e: Event) => {
 				:is="item.icon"
 				v-if="item.icon"
 				:class="[
-					'relative z-10 shrink-0 rounded-[0.95rem] border p-2.5 transition-colors duration-200',
+					'relative z-10 shrink-0 rounded-lg border p-2.5 transition-smooth',
 					isCollapsed ? 'h-10 w-10' : 'h-9 w-9',
 					isActive(item)
 						? 'border-primary/10 bg-primary/10 text-primary dark:border-primary/25 dark:bg-primary/12'
@@ -129,7 +129,7 @@ const handleClick = (e: Event) => {
 		<a
 			:href="item.href"
 			:class="[
-				'group relative flex items-center gap-2 rounded-xl py-1.5 pl-2.5 pr-2 transition-all duration-200',
+				'group relative flex items-center gap-2 rounded-xl py-1.5 pl-2.5 pr-2 transition-smooth focus-ring',
 				depth === 1 ? 'text-[0.8rem]' : 'text-[0.75rem]',
 				isActive(item)
 					? 'bg-primary/7 text-slate-950 dark:bg-primary/10 dark:text-white'
@@ -143,10 +143,10 @@ const handleClick = (e: Event) => {
 			></span>
 			<span
 				:class="[
-					'ml-4 rounded-full transition-all duration-200',
+					'ml-4 rounded-full transition-smooth',
 					depth === 1 ? 'h-1.5 w-1.5' : 'h-1 w-1',
 					isActive(item)
-						? 'bg-primary shadow-[0_0_0_3px_rgba(4,181,156,0.1)]'
+						? 'bg-primary shadow-[0_0_0_3px_rgb(var(--brand-primary)/0.1)]'
 						: 'bg-slate-300 dark:bg-slate-600',
 				]"
 			></span>

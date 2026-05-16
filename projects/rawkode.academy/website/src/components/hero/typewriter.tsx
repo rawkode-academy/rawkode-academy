@@ -193,7 +193,7 @@ const Typewriter = (props: Props) => {
 								<div className="section-shell-muted relative aspect-square rounded-[1.6rem] p-4 motion-safe:transition-transform motion-safe:duration-200 motion-safe:hover:-translate-y-0.5">
 									<div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/35 to-transparent dark:from-white/5" />
 									<div className="flex h-full items-center justify-center px-3">
-										<div className="relative h-full w-full max-h-[8rem] max-w-[8rem] transition-all duration-300 group-hover:scale-[1.03] motion-reduce:transition-none">
+										<div className="relative h-full w-full max-h-[8rem] max-w-[8rem] transition-card group-hover:scale-[1.03] motion-reduce:transition-none">
 											<div
 												className="absolute inset-0 animate-[scanline-scroll_1s_linear_infinite] motion-reduce:animate-none"
 												style={scanlineMaskStyle}
@@ -220,14 +220,14 @@ const Typewriter = (props: Props) => {
 											<img
 												src={logo.iconUrl}
 												alt={logo.name}
-												className="absolute inset-0 h-full w-full object-contain opacity-0 transition-all duration-300 group-hover:opacity-100 motion-reduce:transition-none"
+												className="absolute inset-0 h-full w-full object-contain opacity-0 transition-card group-hover:opacity-100 motion-reduce:transition-none"
 												loading="lazy"
 											/>
 										</div>
 									</div>
 								</div>
 								<div
-									className={`pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 motion-safe:translate-y-1 ${
+									className={`pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 opacity-0 transition-smooth group-hover:translate-y-0 group-hover:opacity-100 motion-safe:translate-y-1 ${
 										index < 2 ? "bottom-full mb-3" : "top-full mt-3"
 									}`}
 								>

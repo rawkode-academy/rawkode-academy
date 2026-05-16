@@ -277,7 +277,7 @@ const subscribeAsLearner = async () => {
 						:key="feature.id"
 						@click="toggleFeature(feature.id)"
 						:aria-expanded="isExpanded(feature.id)"
-						class="group text-left rounded-lg p-2.5 sm:p-3 transition-all duration-200 bg-black/20 hover:bg-black/30 focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
+						class="group text-left rounded-lg p-2.5 sm:p-3 transition-smooth bg-black/20 hover:bg-black/30 focus:outline-none focus:ring-2 focus:ring-white/30 cursor-pointer"
 					>
 						<div class="flex items-start gap-2 sm:gap-3">
 							<!-- Category pill -->
@@ -312,7 +312,7 @@ const subscribeAsLearner = async () => {
 
 								<!-- Expandable detail -->
 								<Transition
-									enter-active-class="transition-all duration-200 ease-out"
+									enter-active-class="transition-smooth ease-out"
 									enter-from-class="opacity-0 max-h-0"
 									enter-to-class="opacity-100 max-h-24"
 									leave-active-class="transition-all duration-150 ease-in"

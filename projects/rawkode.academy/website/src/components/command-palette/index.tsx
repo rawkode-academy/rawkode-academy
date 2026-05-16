@@ -10,11 +10,9 @@ import {
 import { SkeletonList } from "@/components/common/SkeletonList";
 import { getCategoryIcon, GitHubIcon } from "./icons";
 import {
-	setTheme,
-	getTheme,
-	getThemeDisplayName,
-	ALL_THEMES,
-	type Theme,
+	type ColorSchemePreference,
+	getColorSchemePreference,
+	setColorScheme,
 } from "@/lib/theme";
 import "./styles.css";
 
@@ -26,10 +24,10 @@ interface NavigationItem {
 	category: string;
 	keywords?: string[];
 	action?: () => boolean | void;
-	theme?: Theme;
+	preference?: ColorSchemePreference;
 }
 
-type CommandPage = "root" | "themes";
+type CommandPage = "root" | "appearance";
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -56,7 +54,8 @@ export default function CommandPalette({
 	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<Theme>("rawkode-green");
+	const [currentPreference, setCurrentPreference] =
+		useState<ColorSchemePreference>("system");
 	const [pages, setPages] = useState<CommandPage[]>(["root"]);
 	const [hasLoadedNavigation, setHasLoadedNavigation] = useState(false);
 	const hasTrackedOpen = useRef(false);
@@ -84,40 +83,62 @@ export default function CommandPalette({
 		return searchTerms.every((term) => valueLower.includes(term)) ? 1 : 0;
 	};
 
-	const themeItems = useMemo(
-		() =>
-			ALL_THEMES.map((theme) => ({
-				id: `theme-${theme}`,
-				title: getThemeDisplayName(theme),
-				description: `Switch to ${getThemeDisplayName(theme)} theme`,
-				category: "Themes",
-				keywords: ["theme", "color", "appearance", theme],
-				theme,
-				action: () => {
-					const previousTheme = currentTheme;
-					setTheme(theme);
-					setCurrentTheme(theme);
-					// Track theme switch
-					trackEvent("theme_switched", {
-						from_theme: previousTheme,
-						to_theme: theme,
-						source: "command_palette",
-					});
-				},
-			})),
-		[currentTheme],
-	);
+	const appearanceItems = useMemo<NavigationItem[]>(() => {
+		const options: ReadonlyArray<{
+			preference: ColorSchemePreference;
+			title: string;
+			description: string;
+			keywords: string[];
+		}> = [
+			{
+				preference: "light",
+				title: "Light mode",
+				description: "Always use the light theme",
+				keywords: ["light", "day", "bright"],
+			},
+			{
+				preference: "dark",
+				title: "Dark mode",
+				description: "Always use the dark theme",
+				keywords: ["dark", "night", "dim"],
+			},
+			{
+				preference: "system",
+				title: "System theme",
+				description: "Follow your operating system preference",
+				keywords: ["system", "auto", "os", "automatic"],
+			},
+		];
+		return options.map(({ preference, title, description, keywords }) => ({
+			id: `appearance-${preference}`,
+			title,
+			description,
+			category: "Appearance",
+			keywords: ["theme", "appearance", "color", "mode", ...keywords],
+			preference,
+			action: () => {
+				const previous = currentPreference;
+				setColorScheme(preference);
+				setCurrentPreference(preference);
+				trackEvent("color_scheme_switched", {
+					from_preference: previous,
+					to_preference: preference,
+					source: "command_palette",
+				});
+			},
+		}));
+	}, [currentPreference]);
 
 	const commandItems = useMemo(
 		() => [
 			{
-				id: "command-change-theme",
-				title: "Change theme",
-				description: "Choose a different color theme",
+				id: "command-change-appearance",
+				title: "Change appearance",
+				description: "Switch between light and dark mode",
 				category: "Commands",
-				keywords: ["theme", "appearance", "color", "change"],
+				keywords: ["theme", "appearance", "color", "mode", "dark", "light"],
 				action: () => {
-					goToPage("themes");
+					goToPage("appearance");
 					return false;
 				},
 			},
@@ -126,19 +147,19 @@ export default function CommandPalette({
 	);
 
 	useEffect(() => {
-		// Get current theme
-		setCurrentTheme(getTheme());
+		setCurrentPreference(getColorSchemePreference());
 
-		// Listen for theme changes
-		const handleThemeChange = (event: Event) => {
-			const customEvent = event as CustomEvent<{ theme: Theme }>;
-			setCurrentTheme(customEvent.detail.theme);
+		const handleSchemeChange = (event: Event) => {
+			const customEvent = event as CustomEvent<{
+				preference: ColorSchemePreference;
+			}>;
+			setCurrentPreference(customEvent.detail.preference);
 		};
-		window.addEventListener("theme-change", handleThemeChange);
+		window.addEventListener("color-scheme-change", handleSchemeChange);
 
 		return () => {
 			if (typeof window !== "undefined") {
-				window.removeEventListener("theme-change", handleThemeChange);
+				window.removeEventListener("color-scheme-change", handleSchemeChange);
 			}
 		};
 	}, []);
@@ -327,22 +348,23 @@ export default function CommandPalette({
 	if (!isOpen) return null;
 
 	const rootItems = [...commandItems, ...navigationItems, ...articleItems];
-	const themePageItems = [
+	const appearancePageItems = [
 		{
 			id: "command-back-to-root",
 			title: "Back to commands",
 			description: "Return to the main menu",
 			category: "Commands",
-			keywords: ["back", "commands", "themes", "return"],
+			keywords: ["back", "commands", "appearance", "return"],
 			action: () => {
 				goBack();
 				return false;
 			},
 		},
-		...themeItems,
+		...appearanceItems,
 	];
 
-	const displayedItems = activePage === "themes" ? themePageItems : rootItems;
+	const displayedItems =
+		activePage === "appearance" ? appearancePageItems : rootItems;
 
 	const groupedItems = displayedItems.reduce(
 		(acc, item) => {
@@ -395,8 +417,8 @@ export default function CommandPalette({
 							<Command.Input
 								ref={inputRef}
 								placeholder={
-									activePage === "themes"
-										? "Search themes..."
+									activePage === "appearance"
+										? "Search appearance..."
 										: "Search pages..."
 								}
 								value={search}
@@ -454,8 +476,8 @@ export default function CommandPalette({
 						<Command.Empty className="command-palette-empty">
 							{!isLoading &&
 								!isSearchingArticles &&
-								(activePage === "themes"
-									? `No themes match "${search}"`
+								(activePage === "appearance"
+									? `No appearance options match "${search}"`
 									: `No results found for "${search}"`)}
 						</Command.Empty>
 
@@ -474,7 +496,8 @@ export default function CommandPalette({
 								>
 									{items.map((item) => {
 										const ItemIcon = getItemIcon(item);
-										const isCurrentTheme = item.theme === currentTheme;
+										const isActiveScheme =
+											item.preference === currentPreference;
 										return (
 											<Command.Item
 												key={item.id}
@@ -486,7 +509,7 @@ export default function CommandPalette({
 												<div className="command-palette-item-content">
 													<div className="command-palette-item-title">
 														{item.title}
-														{isCurrentTheme && (
+														{isActiveScheme && (
 															<span className="ml-2 text-xs text-primary">
 																(active)
 															</span>

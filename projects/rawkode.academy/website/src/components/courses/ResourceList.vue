@@ -180,7 +180,7 @@ const getCategoryColorClass = (category: string) => {
 		case "demos":
 			return "text-secondary dark:text-secondary";
 		default:
-			return "text-gray-600 dark:text-gray-400";
+			return "text-muted";
 	}
 };
 
@@ -206,7 +206,7 @@ const getResourceIconClass = (type: string) => {
 		case "embed":
 			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
 		default:
-			return "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400";
+			return "bg-gray-100 dark:bg-gray-800 text-muted";
 	}
 };
 
@@ -219,7 +219,7 @@ const getResourceTypeBadgeClass = (type: string) => {
 		case "embed":
 			return "text-secondary";
 		default:
-			return "text-gray-700 dark:text-gray-300";
+			return "text-secondary-content";
 	}
 };
 

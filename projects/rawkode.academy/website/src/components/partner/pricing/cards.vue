@@ -96,7 +96,7 @@ const pricingPlans: PricingPlan[] = [
 <template>
 	<div class="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
 		<div v-for="plan in pricingPlans"
-			class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-800 dark:text-white transition-all duration-300 hover:shadow-xl hover:drop-shadow-xl hover:scale-[1.02]"
+			class="flex flex-col p-6 mx-auto max-w-lg text-center text-gray-900 bg-white rounded-lg border border-gray-100 shadow dark:border-gray-600 xl:p-8 dark:bg-gray-800 dark:text-white transition-card hover:shadow-xl hover:drop-shadow-xl hover:scale-[1.02]"
 			:class="{ 'border-secondary dark:border-secondary border-2 relative': plan.popular }">
 
 			<div v-if="plan.popular"
@@ -109,7 +109,7 @@ const pricingPlans: PricingPlan[] = [
 				plan.description }}</p>
 			<div class="grid justify-center my-8">
 				<div class="text-5xl font-extrabold">{{ plan.price }}</div>
-				<div class="text-gray-500 dark:text-gray-400">USD / annually</div>
+				<div class="text-muted">USD / annually</div>
 			</div>
 
 			<!-- List -->
@@ -123,8 +123,8 @@ const pricingPlans: PricingPlan[] = [
 							clip-rule="evenodd"></path>
 					</svg>
 					<div>
-						<span class="font-medium text-gray-800 dark:text-gray-200">{{ feature.text }}</span>
-						<p v-if="feature.description" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+						<span class="font-medium text-primary-content">{{ feature.text }}</span>
+						<p v-if="feature.description" class="text-sm text-muted mt-1">
 							{{ feature.description }}
 						</p>
 					</div>

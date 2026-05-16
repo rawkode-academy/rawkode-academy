@@ -49,8 +49,7 @@ export const AllVariants: Story = {
             <Badge variant="default">Default</Badge>
             <Badge variant="primary">Primary</Badge>
             <Badge variant="secondary">Secondary</Badge>
-            <Badge variant="tertiary">Tertiary</Badge>
-            <Badge variant="success">Success</Badge>
+                        <Badge variant="success">Success</Badge>
             <Badge variant="warning">Warning</Badge>
             <Badge variant="danger">Danger</Badge>
             <Badge variant="info">Info</Badge>
@@ -95,8 +94,7 @@ export const OutlineVariants: Story = {
             <Badge variant="default" :outline="true">Default</Badge>
             <Badge variant="primary" :outline="true">Primary</Badge>
             <Badge variant="secondary" :outline="true">Secondary</Badge>
-            <Badge variant="tertiary" :outline="true">Tertiary</Badge>
-            <Badge variant="success" :outline="true">Success</Badge>
+                        <Badge variant="success" :outline="true">Success</Badge>
             <Badge variant="warning" :outline="true">Warning</Badge>
             <Badge variant="danger" :outline="true">Danger</Badge>
             <Badge variant="info" :outline="true">Info</Badge>
@@ -140,15 +138,15 @@ export const StatusBadges: Story = {
 				template: `
           <div class="space-y-4">
             <div class="flex items-center gap-4">
-              <span class="text-gray-700 dark:text-gray-300">Status:</span>
+              <span class="text-secondary-content">Status:</span>
               <Badge variant="success" size="sm">Active</Badge>
             </div>
             <div class="flex items-center gap-4">
-              <span class="text-gray-700 dark:text-gray-300">Status:</span>
+              <span class="text-secondary-content">Status:</span>
               <Badge variant="warning" size="sm">Pending</Badge>
             </div>
             <div class="flex items-center gap-4">
-              <span class="text-gray-700 dark:text-gray-300">Status:</span>
+              <span class="text-secondary-content">Status:</span>
               <Badge variant="danger" size="sm">Inactive</Badge>
             </div>
           </div>
@@ -218,15 +216,15 @@ export const CountBadges: Story = {
 				template: `
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
-              <span class="text-gray-700 dark:text-gray-300">Notifications</span>
+              <span class="text-secondary-content">Notifications</span>
               <Badge variant="danger" size="xs" rounded="full">3</Badge>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-gray-700 dark:text-gray-300">Messages</span>
+              <span class="text-secondary-content">Messages</span>
               <Badge variant="primary" size="xs" rounded="full">12</Badge>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-gray-700 dark:text-gray-300">Updates</span>
+              <span class="text-secondary-content">Updates</span>
               <Badge variant="info" size="xs" rounded="full">99+</Badge>
             </div>
           </div>

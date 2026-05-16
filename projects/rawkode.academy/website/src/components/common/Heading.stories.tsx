@@ -138,7 +138,7 @@ export const PageExample: Story = {
             <Heading as="h2" size="xl" weight="medium" align="center">Learn Cloud Native Technologies</Heading>
             <div class="mt-12 space-y-6">
               <Heading as="h3">Featured Courses</Heading>
-              <p class="text-gray-600 dark:text-gray-300">Explore our comprehensive courses on Kubernetes, cloud engineering, and more.</p>
+              <p class="text-secondary-content">Explore our comprehensive courses on Kubernetes, cloud engineering, and more.</p>
             </div>
           </div>
         `,

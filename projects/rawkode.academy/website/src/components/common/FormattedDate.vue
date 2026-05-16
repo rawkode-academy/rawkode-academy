@@ -17,7 +17,7 @@
     </svg>
     <time
       :datetime="date.toISOString()"
-      class="text-xs font-normal text-gray-500 dark:text-gray-400"
+      class="text-xs font-normal text-muted"
     >
       {{ formattedDate }}
     </time>

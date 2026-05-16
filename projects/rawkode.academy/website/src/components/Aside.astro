@@ -48,8 +48,8 @@ switch (variant) {
 		break;
 	case "info":
 		styles.container =
-			"bg-gradient-to-r from-primary/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/30 text-primary dark:text-primary";
-		styles.icon = "text-primary dark:text-primary";
+			"bg-gradient-to-r from-primary/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/30 text-primary";
+		styles.icon = "text-primary";
 		styles.iconBg = "bg-primary/10 dark:bg-primary/20";
 		styles.border = "border-primary/20 dark:border-primary/60";
 		styles.glow = "shadow-primary/10 dark:shadow-primary/20";
@@ -58,7 +58,7 @@ switch (variant) {
 ---
 
 <div
-	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-all duration-200 hover:shadow-md group ${styles.glow}`}
+	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-smooth hover:shadow-md group ${styles.glow}`}
 >
 	<!-- Subtle accent line -->
 	<div class={`absolute left-0 top-0 bottom-0 w-0.5 ${styles.iconBg} opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
@@ -128,7 +128,7 @@ switch (variant) {
 
 	/* Refined link styling */
 	.aside :global(a) {
-		@apply font-medium underline decoration-1 underline-offset-2 transition-all duration-200;
+		@apply font-medium underline decoration-1 underline-offset-2 transition-smooth;
 	}
 
 	.aside.border-green-200 :global(a) {
@@ -148,7 +148,7 @@ switch (variant) {
 
 	.aside.border-primary\/20 :global(a) {
 		@apply text-primary decoration-primary/50 hover:text-primary/90 hover:decoration-primary;
-		@apply dark:text-primary dark:decoration-primary/50 dark:hover:text-primary/90 dark:hover:decoration-primary;
+		@apply dark:decoration-primary/50 dark:hover:text-primary/90 dark:hover:decoration-primary;
 	}
 
 	/* Subtle shadow on hover */

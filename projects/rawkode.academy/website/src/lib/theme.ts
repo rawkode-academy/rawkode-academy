@@ -1,164 +1,149 @@
 /**
- * Theme Management Utility
- * Handles theme switching between multiple color themes
+ * Theme utilities.
+ *
+ * The site has a single brand theme — Rawkode Blue (defined in `:root`
+ * and `html.dark` in `src/styles/global.css`). The only user-controlled
+ * knob is the colour-scheme preference: light, dark, or system.
+ *
+ * Concepts:
+ *   - `ColorScheme`             — the *applied* mode on the page (light | dark).
+ *   - `ColorSchemePreference`   — the user's *stored* choice
+ *                                 (light | dark | system). "system" defers
+ *                                 to the OS `prefers-color-scheme` media query.
  */
 
-export type Theme =
-	| "rawkode-green"
-	| "rawkode-blue"
-	| "catppuccin"
-	| "dracula"
-	| "solarized"
-	| "pride"
-	| "lgbtq";
+const PREF_STORAGE_KEY = "rawkode-color-scheme";
 
-const THEME_STORAGE_KEY = "rawkode-theme";
-const DEFAULT_THEME: Theme = "rawkode-green";
+const BRAND_COLORS = {
+	primary: "#5F5ED7",
+	secondary: "#00CEFF",
+	accent: "#111827",
+} as const;
 
-// All available themes for cycling/rotation
-export const ALL_THEMES: Theme[] = [
-	"rawkode-green",
-	"rawkode-blue",
-	"catppuccin",
-	"dracula",
-	"solarized",
-	"pride",
-	"lgbtq",
+export type ColorScheme = "light" | "dark";
+export type ColorSchemePreference = ColorScheme | "system";
+
+const DEFAULT_PREFERENCE: ColorSchemePreference = "system";
+
+const PREFERENCES: readonly ColorSchemePreference[] = [
+	"light",
+	"dark",
+	"system",
 ];
 
-/**
- * Get the current theme from localStorage or return default
- */
-export function getTheme(): Theme {
-	if (typeof window === "undefined") return DEFAULT_THEME;
+const isValidPreference = (
+	value: string | null,
+): value is ColorSchemePreference =>
+	value !== null && PREFERENCES.includes(value as ColorSchemePreference);
 
-	const stored = localStorage.getItem(THEME_STORAGE_KEY);
-	if (stored && ALL_THEMES.includes(stored as Theme)) {
-		return stored as Theme;
+const systemMediaQuery = (): MediaQueryList | null => {
+	if (typeof window === "undefined" || !window.matchMedia) return null;
+	return window.matchMedia("(prefers-color-scheme: dark)");
+};
+
+/** Resolve a preference to the applied colour scheme. */
+function resolvePreference(pref: ColorSchemePreference): ColorScheme {
+	if (pref === "system") {
+		return systemMediaQuery()?.matches ? "dark" : "light";
 	}
-
-	return DEFAULT_THEME;
+	return pref;
 }
 
 /**
- * Set the theme and persist to localStorage
+ * Read the stored colour-scheme preference (light, dark, or system).
+ * Defaults to "system" when nothing is stored.
  */
-export function setTheme(theme: Theme): void {
+export function getColorSchemePreference(): ColorSchemePreference {
+	if (typeof window === "undefined") return DEFAULT_PREFERENCE;
+	const stored = localStorage.getItem(PREF_STORAGE_KEY);
+	return isValidPreference(stored) ? stored : DEFAULT_PREFERENCE;
+}
+
+/**
+ * Read the *applied* colour scheme from the document — i.e. whether
+ * `html.dark` is currently set.
+ */
+export function getColorScheme(): ColorScheme {
+	if (typeof window === "undefined") return "light";
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+/** Apply a resolved scheme to the document without touching the preference. */
+function applyColorScheme(scheme: ColorScheme): void {
 	if (typeof window === "undefined") return;
-
-	// Update data attribute on root element
-	if (theme === "rawkode-green") {
-		document.documentElement.removeAttribute("data-theme");
-	} else {
-		document.documentElement.setAttribute("data-theme", theme);
-	}
-
-	// Persist to localStorage
-	localStorage.setItem(THEME_STORAGE_KEY, theme);
-
-	// Dispatch custom event for components to listen to
-	window.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
+	document.documentElement.classList.toggle("dark", scheme === "dark");
 }
 
 /**
- * Toggle between themes (cycles through all available themes)
+ * Set the colour-scheme preference, persist it, and apply the resolved
+ * scheme. Pass "system" to follow the OS preference.
  */
-export function toggleTheme(): Theme {
-	const current = getTheme();
-	const currentIndex = ALL_THEMES.indexOf(current);
-	const nextIndex = (currentIndex + 1) % ALL_THEMES.length;
-	const next = ALL_THEMES[nextIndex] || DEFAULT_THEME;
-	setTheme(next);
+export function setColorScheme(pref: ColorSchemePreference): void {
+	if (typeof window === "undefined") return;
+	localStorage.setItem(PREF_STORAGE_KEY, pref);
+	const resolved = resolvePreference(pref);
+	applyColorScheme(resolved);
+	window.dispatchEvent(
+		new CustomEvent("color-scheme-change", {
+			detail: { preference: pref, scheme: resolved },
+		}),
+	);
+}
+
+/**
+ * Cycle the preference: light → dark → system → light. Returns the new
+ * preference.
+ */
+export function toggleColorScheme(): ColorSchemePreference {
+	const current = getColorSchemePreference();
+	const index = PREFERENCES.indexOf(current);
+	const next = PREFERENCES[(index + 1) % PREFERENCES.length] ?? "system";
+	setColorScheme(next);
 	return next;
 }
 
+let systemMediaListener: ((event: MediaQueryListEvent) => void) | null = null;
+
 /**
- * Initialize theme on page load
- * Should be called as early as possible to avoid flash
+ * Initialise the colour scheme on page load. Apply the stored preference
+ * (or the default), then install a listener so OS theme changes are
+ * reflected while preference is "system".
+ *
+ * Call as early as possible — the inline `ThemeScript.astro` mirrors
+ * this so the right class is applied before paint.
  */
 export function initTheme(): void {
 	if (typeof window === "undefined") return;
 
-	const theme = getTheme();
-	if (theme !== "rawkode-green") {
-		document.documentElement.setAttribute("data-theme", theme);
+	const pref = getColorSchemePreference();
+	applyColorScheme(resolvePreference(pref));
+
+	const mq = systemMediaQuery();
+	if (!mq) return;
+
+	if (systemMediaListener) {
+		mq.removeEventListener("change", systemMediaListener);
 	}
+
+	systemMediaListener = (event) => {
+		if (getColorSchemePreference() !== "system") return;
+		const resolved: ColorScheme = event.matches ? "dark" : "light";
+		applyColorScheme(resolved);
+		window.dispatchEvent(
+			new CustomEvent("color-scheme-change", {
+				detail: { preference: "system", scheme: resolved },
+			}),
+		);
+	};
+
+	mq.addEventListener("change", systemMediaListener);
 }
 
-const THEME_COLORS: Record<
-	Theme,
-	{ primary: string; secondary: string; accent: string }
-> = {
-	"rawkode-green": {
-		primary: "#04B59C",
-		secondary: "#85FF95",
-		accent: "#23282D",
-	},
-	"rawkode-blue": {
-		primary: "#5F5ED7",
-		secondary: "#00CEFF",
-		accent: "#111827",
-	},
-	catppuccin: {
-		primary: "#CBA6F7",
-		secondary: "#F5C2E7",
-		accent: "#1E1E2E",
-	},
-	dracula: {
-		primary: "#BD93F9",
-		secondary: "#FF79C6",
-		accent: "#282A36",
-	},
-	solarized: {
-		primary: "#268BD2",
-		secondary: "#2AA198",
-		accent: "#002B36",
-	},
-	pride: {
-		primary: "#FF595E",
-		secondary: "#FFCA3A",
-		accent: "#6A4C93",
-	},
-	lgbtq: {
-		primary: "#5BCEFA",
-		secondary: "#F5A9B8",
-		accent: "#FFFFFF",
-	},
-};
-
-const THEME_DISPLAY_NAMES: Record<Theme, string> = {
-	"rawkode-green": "Rawkode Green",
-	"rawkode-blue": "Rawkode Blue",
-	catppuccin: "Catppuccin",
-	dracula: "Dracula",
-	solarized: "Solarized",
-	pride: "Pride",
-	lgbtq: "LGBTQ+",
-};
-
-/**
- * Get theme colors for current theme
- */
+/** Read the brand palette as hex strings. */
 export function getThemeColors(): {
 	primary: string;
 	secondary: string;
 	accent: string;
 } {
-	if (typeof window === "undefined") {
-		return {
-			primary: "#04B59C",
-			secondary: "#85FF95",
-			accent: "#23282D",
-		};
-	}
-
-	const theme = getTheme();
-	return THEME_COLORS[theme];
-}
-
-/**
- * Get theme display name
- */
-export function getThemeDisplayName(theme: Theme): string {
-	return THEME_DISPLAY_NAMES[theme];
+	return { ...BRAND_COLORS };
 }

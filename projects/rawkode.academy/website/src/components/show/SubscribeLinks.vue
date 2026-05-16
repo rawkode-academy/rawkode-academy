@@ -10,7 +10,7 @@
 				:href="link.url"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="glass-chip gap-2 rounded-lg px-4 py-2 text-sm font-medium text-secondary-content transition-all duration-200 hover:shadow-md hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+				class="glass-chip gap-2 rounded-lg px-4 py-2 text-sm font-medium text-secondary-content transition-smooth hover:shadow-md hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
 				@click="handleSubscribeClick(link)"
 			>
 				<font-awesome-icon :icon="getIcon(link.icon)" class="h-4 w-4" />

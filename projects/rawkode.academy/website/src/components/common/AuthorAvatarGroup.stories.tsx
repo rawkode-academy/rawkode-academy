@@ -201,7 +201,7 @@ export const InContext: Story = {
               <span class="text-sm text-gray-500">•</span>
               <span class="text-sm text-gray-500">5 min read</span>
             </div>
-            <p class="text-gray-700 dark:text-gray-300">
+            <p class="text-secondary-content">
               Learn how to effectively manage and scale your applications using Kubernetes deployments...
             </p>
           </article>
