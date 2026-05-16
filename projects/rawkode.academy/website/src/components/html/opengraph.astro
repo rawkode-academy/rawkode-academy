@@ -30,10 +30,10 @@ const openGraphImageUrl = `https://image.rawkode.academy/image?payload=${utf64.e
 	}),
 )}`;
 
-// Determine if we should show article specific meta tags
-const isPath = (path: string) => Astro.url.pathname.startsWith(path);
-const isBlogOrSeriesPath = isPath("/blog/") || isPath("/series/");
-const shouldShowArticleMeta = isArticle || isBlogOrSeriesPath;
+// Show article-specific meta tags only when the caller opts in via the
+// `isArticle` prop. The previous heuristic also matched `/blog/` (a route
+// that doesn't exist) and `/series/` (a CollectionPage — not an Article).
+const shouldShowArticleMeta = isArticle;
 
 // X / Twitter handles. site = brand; creator = first author with a handle
 // on article-meta pages. The card spec requires `@handle` form.
