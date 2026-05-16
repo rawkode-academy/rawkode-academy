@@ -796,6 +796,29 @@ describe("Crawlability and Sitemaps", () => {
 		);
 	});
 
+	it("configures the Workers assets binding to strip trailing slashes so canonical URLs serve directly", async () => {
+		// Astro's trailingSlash config is "never" and the canonical URL emitted
+		// in head.astro never carries a trailing slash. For prerendered routes
+		// (read, news, about, courses, …) Cloudflare's static-asset server
+		// would, by default, redirect /foo → /foo/ because Astro builds
+		// directory-format index.html files. Setting html_handling to
+		// "drop-trailing-slash" inverts that so /foo/ → /foo (301), matching
+		// the canonical URL and removing the unnecessary redirect hop.
+		const { readFile } = await import("node:fs/promises");
+		const { fileURLToPath } = await import("node:url");
+		const path = fileURLToPath(new URL("../../wrangler.jsonc", import.meta.url));
+		const raw = await readFile(path, "utf-8");
+		// wrangler.jsonc allows comments; strip them before JSON.parse.
+		const stripped = raw
+			.replace(/\/\/[^\n]*/g, "")
+			.replace(/\/\*[\s\S]*?\*\//g, "");
+		const config = JSON.parse(stripped) as {
+			assets?: { html_handling?: string };
+		};
+
+		expect(config.assets?.html_handling).toBe("drop-trailing-slash");
+	});
+
 	it("renders an OpenSearch description that points browsers at /search?q={searchTerms}", async () => {
 		const { renderOpenSearchDescription } = await import(
 			"../pages/opensearch.xml.ts"
