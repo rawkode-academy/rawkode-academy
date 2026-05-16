@@ -1,4 +1,5 @@
 ---
+import ThemeScript from "@/components/theme/ThemeScript.astro";
 import "@/styles/global.css";
 
 interface Props {
@@ -20,18 +21,7 @@ const { title, description } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0f" />
-    <script is:inline>
-      (function(){
-        try {
-          var stored = localStorage.getItem('theme');
-          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-          var isDark = stored ? (stored === 'dark') : prefersDark;
-          document.documentElement.classList.toggle('dark', !!isDark);
-          var metas = document.querySelectorAll('meta[name="theme-color"]');
-          metas.forEach(function (m) { if (!m.media) m.setAttribute('content', isDark ? '#0b0b0f' : '#ffffff'); });
-        } catch(_){}
-      })();
-    </script>
+    <ThemeScript />
   </head>
   <body class="h-full w-full bg-white dark:bg-black text-primary-content">
     <slot />
