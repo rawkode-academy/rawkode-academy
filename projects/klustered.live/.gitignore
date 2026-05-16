@@ -1,0 +1,14 @@
+# Astro
+dist/
+.astro/
+
+# Deno
+node_modules/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# Local env
+.env
+.env.local

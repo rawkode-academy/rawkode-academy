@@ -1,0 +1,22 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "klustered-live",
+	"compatibility_date": "2026-03-12",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist"
+	},
+	"workers_dev": true,
+	"preview_urls": true,
+	"observability": {
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		}
+	}
+}
