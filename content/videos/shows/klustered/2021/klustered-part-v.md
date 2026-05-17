@@ -3,13 +3,18 @@ id: zun7qn3xym7pzttsckp91ame
 slug: klustered-part-v
 title: Klustered (Part V)
 description: >-
-  .Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Jason DeTiberus joins to debug two broken clusters from Thomas Stromberg and
+  CloudNative Wales. Expect rogue processes, mangled resolv.conf, exhausted
+  inodes in /tmp, a rickrolled manifest symlink, and recursive bind mounts.
 publishedAt: 2021-03-18T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - etcd
+  - coredns
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -220,11 +225,13 @@ duration: 7245
 guests:
   - jason-detiberus
 resources:
-  - title: Kubernetes kubectl bash completion documentation
+  - title: kubectl autocomplete documentation
     type: url
+    url: 'https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-bash-linux/'
     category: documentation
   - title: kubeadm CoreDNS manifest source code
     type: url
+    url: 'https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/phases/addons/dns/manifests.go'
     category: code
 ---
 

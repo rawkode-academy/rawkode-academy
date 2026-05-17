@@ -3,13 +3,19 @@ id: hsykkz8ovuiwzlj438z8ddav
 slug: klustered-teams-polarsignals-and-pulumi
 title: Klustered Teams - PolarSignals & Pulumi
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams from Polar Signals and Pulumi tackle broken Kubernetes clusters,
+  chasing a controller manager pointed at the wrong API server address,
+  Postgres DNS resolution failures, and a containerd freezer cgroup trap
+  hiding on the worker nodes.
 publishedAt: 2022-03-17T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - coredns
+  - postgresql
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -93,10 +99,6 @@ chapters:
   - startTime: 5997
     title: Recap and Conclusion
 duration: 6155
-resources:
-  - title: rocketacademy/custard
-    type: url
-    url: 'https://github.com/rocketacademy/custard'
-    category: code
+resources: []
 ---
 

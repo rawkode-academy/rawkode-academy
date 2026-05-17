@@ -3,13 +3,19 @@ id: dpcat5afr4tp3p580cp0370w
 slug: alex-jones-and-alistair-hey
 title: Alex Jones & Alistair Hey
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Alex Jones and Alistair Hay break each other's Kubernetes clusters. Alex
+  hunts a disabled replica set controller, a blocking NetworkPolicy, and a
+  tampered cluster DNS IP. Alistair unwinds tc traffic-control delays, a rogue
+  kubectl alias, and dropping iptables rules.
 publishedAt: 2022-11-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - coredns
+  - teleport
+  - postgresql
 show: klustered
 chapters:
   - startTime: 124
@@ -100,11 +106,13 @@ resources:
   - title: Equinix Metal free credits link
     type: url
     category: other
-  - title: Teleport information link
+  - title: Teleport
     type: url
+    url: 'https://goteleport.com/'
     category: documentation
-  - title: webi.shell / web install
+  - title: webinstall.dev
     type: url
-    category: code
+    url: 'https://webinstall.dev/'
+    category: other
 ---
 

@@ -3,14 +3,16 @@ id: knjh17mds1g14mv1smmzoqoq
 slug: docker-kubernetes-and-php-laravel-edition-part-ii
 title: 'Docker, Kubernetes, & PHP: Laravel Edition (Part II)'
 description: >-
-  In this episode, joined by Ciaran McNulty, we take a look at the best
-  practices for developing Laravel PHP applications with Docker, Docker Compose,
-  and Kubernetes.
+  Ciaran McNulty returns to refine the Laravel dev environment from Part I:
+  tuning Docker for Mac volume performance, splitting Node.js asset compilation
+  (Webpack, Laravel Mix, Tailwind) out of the PHP container, and tidying the
+  Compose and Kubernetes manifests.
 publishedAt: 2020-09-23T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - docker
+  - docker-compose
   - kubernetes
   - laravel
   - php
@@ -36,9 +38,11 @@ guests:
 resources:
   - title: Ping CRM
     type: url
+    url: 'https://github.com/inertiajs/pingcrm'
     category: demos
   - title: Laravel Mix documentation
     type: url
+    url: 'https://laravel-mix.com/docs/6.0/installation'
     category: documentation
 ---
 

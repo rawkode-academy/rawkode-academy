@@ -3,13 +3,21 @@ id: r1erhp4o2yh4y37tpd8lruey
 slug: klustered-teams-control-plane-and-learnk8s
 title: 'Klustered Teams: Control Plane & Learnk8s'
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Control Plane and Learnk8s go head-to-head debugging each other's broken
+  Kubernetes clusters. Issues include a rogue iptables rule, an etcd read-only
+  manifest, a missing PATH, a tampered kubectl, jsPolicy webhooks, and a stuck
+  containerd task.
 publishedAt: 2021-09-16T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - teleport
+  - etcd
+  - cilium
+  - kube-vip
+  - jspolicy
+  - containerd
 show: klustered
 chapters:
   - startTime: 0
@@ -187,5 +195,25 @@ resources:
     type: url
     url: 'https://rawkode.live/teleport'
     category: other
+  - title: jsPolicy
+    type: url
+    url: 'https://jspolicy.com/'
+    category: documentation
+  - title: kube-vip
+    type: url
+    url: 'https://kube-vip.io/'
+    category: documentation
+  - title: Cilium
+    type: url
+    url: 'https://cilium.io/'
+    category: documentation
+  - title: containerd
+    type: url
+    url: 'https://containerd.io/'
+    category: documentation
+  - title: nerdctl
+    type: url
+    url: 'https://github.com/containerd/nerdctl'
+    category: code
 ---
 

@@ -3,13 +3,17 @@ id: l87s0mff9plb3tn1r8b1l3ie
 slug: rawkode-and-the-null-channel-vs-the-community
 title: Rawkode & The Null Channel Vs. The Community
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Rawkode teams up with Marek Houns (The Null Channel) to debug two
+  community-submitted broken clusters featuring a fake kubelet binary, a
+  restricted-bash shell, a custom Wordle game, blocked PATH tricks, etcd cert
+  trust failures, and a kernel namespace limit.
 publishedAt: 2022-04-21T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - etcd
 show: klustered
 chapters:
   - startTime: 0
@@ -130,15 +134,15 @@ guests:
 resources:
   - title: Teleport sponsor landing page
     type: url
-    url: 'https://Rawkode.live/Teleport'
+    url: 'https://rawkode.live/teleport'
     category: other
   - title: Equinix Metal sponsor landing page
     type: url
-    url: 'https://Rawkode.live/metal'
+    url: 'https://rawkode.live/metal'
     category: other
   - title: Rawkode Academy T-shirt competition page
     type: url
-    url: 'https://Rawkode.live/win'
+    url: 'https://rawkode.live/win'
     category: other
 ---
 

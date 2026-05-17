@@ -3,13 +3,21 @@ id: xakqjecrktz236keekzkj3t7
 slug: adobe-and-zapier
 title: Adobe & Zapier
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams from Adobe and Zapier debug each other's broken Kubernetes clusters.
+  Issues span admission webhooks, Cilium networking, image pull policies,
+  resource quotas, etcd manifests, kubelet permissions, and a CoreDNS ConfigMap
+  reverted by Cloud Custodian.
 publishedAt: 2022-04-29T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - coredns
+  - etcd
+  - postgresql
+  - cloudcustodian
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -208,10 +216,11 @@ duration: 5384
 resources:
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
   - title: Rawkode Academy t-shirt giveaway
     type: url
-    url: 'https://Rawkode.live/win'
+    url: 'https://rawkode.live/win'
     category: other
 ---
 

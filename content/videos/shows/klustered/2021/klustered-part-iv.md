@@ -3,13 +3,18 @@ id: pa7r65u76f3gfxp1ygtjgxu2
 slug: klustered-part-iv
 title: Klustered (Part IV)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Lee Briggs joins to debug two broken Kubernetes clusters live: missing kubelet
+  binaries, a renamed API server manifest, rogue validation and mutating
+  webhooks, a stopped containerd, and a Cilium CNI image pull policy bug.
 publishedAt: 2021-03-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - cilium
+  - etcd
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -82,6 +87,7 @@ guests:
 resources:
   - title: Teleport access platform
     type: url
+    url: https://goteleport.com/
     category: other
 ---
 

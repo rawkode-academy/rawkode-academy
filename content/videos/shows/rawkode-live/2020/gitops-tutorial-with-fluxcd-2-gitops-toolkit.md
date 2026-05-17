@@ -3,14 +3,18 @@ id: fhspicv0ccs7sce6vc047vt3
 slug: gitops-tutorial-with-fluxcd-2-gitops-toolkit
 title: GitOps Tutorial with FluxCD 2 (GitOps Toolkit)
 description: >-
-  GitOps is a way to do Kubernetes cluster management and application delivery.
-  It works by using Git as a single source of truth for declarative
-  infrastructure and applications.
+  Stefan Prodan walks through the GitOps Toolkit (Flux v2): bootstrapping with
+  gotk, the source, kustomize, helm, and notification controllers, then adding
+  Git and Helm repository sources, customizations with dependencies and health
+  checks, and Helm releases on Kubernetes.
 publishedAt: 2020-10-13T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - fluxcd
+  - kubernetes
+  - helm
+  - contour
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -110,16 +114,19 @@ resources:
   - title: >-
       GitOps Toolkit development guide for building a controller with
       Kubebuilder
+    url: 'https://fluxcd.io/flux/gitops-toolkit/source-watcher/'
     type: url
     category: documentation
   - title: >-
       GitOps Toolkit Kustomization custom resource definition health assessment
       documentation
+    url: 'https://fluxcd.io/flux/components/kustomize/kustomizations/#health-assessment'
     type: url
     category: documentation
   - title: >-
       GitOps Toolkit monitoring stack add-on with Prometheus and Grafana
       dashboards
+    url: 'https://github.com/fluxcd/flux2-monitoring-example'
     type: url
     category: code
 ---

@@ -3,13 +3,17 @@ id: ncbb7hjqxhn4oev9ezbtrgu8
 slug: klustered-teams-chainguard-vs-chainguard-2
 title: Klustered Teams - Chainguard Vs. Chainguard
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Two Chainguard teams race to repair broken Kubernetes clusters, digging into
+  containerd config, service selectors, Cilium CNI, Postgres StatefulSets,
+  corrupted kubelet certificates, and a kubeadm reset to bring the apps back.
 publishedAt: 2022-04-01T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - cilium
+  - postgresql
 show: klustered
 chapters:
   - startTime: 0
@@ -96,9 +100,11 @@ resources:
     category: other
   - title: Networking and Kubernetes
     type: url
+    url: 'https://www.oreilly.com/library/view/networking-and-kubernetes/9781492081647/'
     category: other
   - title: Sleuth Kit
     type: url
+    url: 'https://www.sleuthkit.org/'
     category: other
 ---
 

@@ -3,9 +3,9 @@ id: kpfeh5ghghzqkarckn9sxme0
 slug: docker-kubernetes-and-php-laravel-edition
 title: 'Docker, Kubernetes, and PHP: Laravel Edition'
 description: >-
-  In this episode, joined by Ciaran McNulty, we' take a look at the best
-  practices for developing Laravel PHP applications with Docker, Docker Compose,
-  and Kubernetes.
+  Ciaran McNulty joins David to containerize the Ping CRM Laravel app from
+  scratch: building a docker-compose stack with PHP-FPM, Nginx and MariaDB,
+  layering a Dockerfile with PHP extensions, then deploying to Kubernetes.
 publishedAt: 2020-09-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -52,6 +52,7 @@ guests:
 resources:
   - title: Inertia Ping CRM
     type: url
+    url: 'https://github.com/inertiajs/pingcrm'
     category: code
   - title: rawcode/php-examples
     type: url
@@ -59,9 +60,11 @@ resources:
     category: code
   - title: Refactoring Databases
     type: url
+    url: 'https://databaserefactoring.com/'
     category: other
   - title: The Twelve-Factor App manifesto
     type: url
+    url: 'https://12factor.net/'
     category: documentation
 ---
 

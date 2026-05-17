@@ -3,13 +3,19 @@ id: b5ezd2815ffos2t8d3h2qljv
 slug: 22-borko-vs-bojan
 title: 22. Borko Vs. Bojan
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Identical twins Borko and Bojan tackle broken Kubernetes clusters. Borko
+  hunts a malformed image name and a Cilium deny policy, then fixes a CoreDNS
+  rewrite. Bojan kills a cron job flushing iptables and repairs a bad Postgres
+  startup probe.
 publishedAt: 2022-03-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - coredns
+  - postgresql
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -107,7 +113,7 @@ guests:
 resources:
   - title: Teleport
     type: url
-    url: 'https://rokode.live/teleport'
+    url: 'https://goteleport.com/'
     category: other
 ---
 
