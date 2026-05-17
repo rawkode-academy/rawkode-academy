@@ -1,0 +1,41 @@
+{
+	"video_id": "rwhw1lpmbqe2tfflabrd0ys9",
+	"slug": "kubernetes-disaster-recovery",
+	"title": "Kubernetes Disaster Recovery",
+	"generated_at": "2026-05-17T12:47:32.992Z",
+	"known_technology_names": [
+		"Kubernetes",
+		"Velero"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "SeaweedFS",
+			"url": "https://github.com/seaweedfs/seaweedfs",
+			"category": "code",
+			"evidence_quote": "I'm using my preferred choice, which is SeaweedFS. It is a single go binary, very easy to operate, download, and run.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kopia",
+			"url": "https://github.com/kopia/kopia",
+			"category": "code",
+			"evidence_quote": "Next we have the uploader type of Kopia. This is now the default for Velero. You should not be using Restic anymore. It had corruption issues. Kopia is the way forward.",
+			"confidence": "high"
+		},
+		{
+			"title": "Spectro Cloud Palette",
+			"url": "https://www.spectrocloud.com/palette",
+			"category": "other",
+			"evidence_quote": "Then we'll use Spectro Cloud's Palette to solve the problem. Centralized backup locations, standardized policies via cluster profiles and workspace level backups that protect multiple clusters together",
+			"confidence": "high"
+		},
+		{
+			"title": "Spectro Cloud Palette Documentation",
+			"url": "https://docs.spectrocloud.com",
+			"category": "documentation",
+			"evidence_quote": "Head to docs.spectrocloud.com for examples of workspace backups, profile based policies, and real world scenarios.",
+			"confidence": "high"
+		}
+	]
+}

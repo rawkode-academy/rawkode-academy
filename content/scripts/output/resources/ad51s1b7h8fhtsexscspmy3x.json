@@ -1,0 +1,34 @@
+{
+	"video_id": "ad51s1b7h8fhtsexscspmy3x",
+	"slug": "improve-your-supply-chain-security-pipeline-with-scribe-security",
+	"title": "Improve Your Supply Chain Security Pipeline with Scribe Security",
+	"generated_at": "2026-05-17T12:57:52.564Z",
+	"known_technology_names": [],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "SLSA (Salsa) Framework",
+			"category": "documentation",
+			"evidence_quote": "Google introduced us to the Salsa framework for supply chain security and integrity validation back in 2021.",
+			"confidence": "high"
+		},
+		{
+			"title": "Directus Headless CMS",
+			"category": "code",
+			"evidence_quote": "I've forked a real open source project called Directus, which is a headless CMS that powers data frameworks with their Studio UI.",
+			"confidence": "high"
+		},
+		{
+			"title": "NIST Secure Software Development Framework (SSDF)",
+			"category": "documentation",
+			"evidence_quote": "And for this NIST secure software development framework, we have nine pending tasks or controls that we need to bring under compliance.",
+			"confidence": "high"
+		},
+		{
+			"title": "Scribe Security Action BOM",
+			"category": "code",
+			"evidence_quote": "Here, we're seeing use Scrape security action bomb.",
+			"confidence": "high"
+		}
+	]
+}

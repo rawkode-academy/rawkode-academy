@@ -1,0 +1,26 @@
+{
+	"video_id": "fg5n3s12kpi526uupu0w7tav",
+	"slug": "part-4-tutorial-3-collecting-metrics-with-telegraf",
+	"title": "Part 4 - Tutorial 3: Collecting Metrics with Telegraf",
+	"generated_at": "2026-05-17T12:45:58.872Z",
+	"known_technology_names": [
+		"InfluxDB",
+		"Telegraf"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "influxdata/telegraf GitHub Repository",
+			"url": "https://github.com/influxdata/telegraf",
+			"category": "code",
+			"evidence_quote": "The best thing you can do is go to the Telegraph repository. That's github.com/influxdata/telegraph.",
+			"confidence": "high"
+		},
+		{
+			"title": "Telegraf Plugins Reference",
+			"category": "documentation",
+			"evidence_quote": "From here, you can click on plugins. You will see inputs and outputs. Those are the two that you will use the most with inputs being the one that you wanna be, maybe you're perhaps more curious about and want to understand.",
+			"confidence": "high"
+		}
+	]
+}

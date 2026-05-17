@@ -1,0 +1,38 @@
+{
+	"video_id": "tfahqa0n2pld6jvnu7a8k5w9",
+	"slug": "restrict-access-to-secure-files-with-tetragon",
+	"title": "Restrict Access to Secure Files with Tetragon",
+	"generated_at": "2026-05-17T12:50:43.262Z",
+	"known_technology_names": [
+		"Tetragon"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Tetragon Tracing Policy Concepts",
+			"category": "documentation",
+			"evidence_quote": "Fortunately, the documentation has us pretty well covered too. So if we go to concepts, tracing policy, we can now begin to dive in to what a tracing policy is composed of.",
+			"confidence": "high"
+		},
+		{
+			"title": "Tetragon GitHub Examples",
+			"url": "https://github.com/cilium/tetragon",
+			"category": "code",
+			"evidence_quote": "You can find us on github.com/psyllium/tetragon and then find the examples folder.",
+			"confidence": "high"
+		},
+		{
+			"title": "di.net Linux Man Pages",
+			"url": "https://di.net",
+			"category": "documentation",
+			"evidence_quote": "You can look it up on the man page if you want or it is available on any good man page website like di.net.",
+			"confidence": "high"
+		},
+		{
+			"title": "Sourcegraph Linux Kernel Search",
+			"category": "other",
+			"evidence_quote": "You can use source graph to search the entire Linux code base.",
+			"confidence": "high"
+		}
+	]
+}

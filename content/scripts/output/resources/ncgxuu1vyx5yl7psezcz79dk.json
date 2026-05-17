@@ -1,0 +1,42 @@
+{
+	"video_id": "ncgxuu1vyx5yl7psezcz79dk",
+	"slug": "supply-chain-security-with-a-cli-valint",
+	"title": "Supply Chain Security with a CLI: valint",
+	"generated_at": "2026-05-17T12:56:33.629Z",
+	"known_technology_names": [],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Valint Installation Script",
+			"url": "https://get.scrapesecurity.com/install.sh",
+			"category": "code",
+			"evidence_quote": "You can grab it from get.scrapesecurity.com/install.sh, where if you put that through a shell, you will get your Valant in your local directory.",
+			"confidence": "high"
+		},
+		{
+			"title": "Scribe Security JFrog Container Registry",
+			"category": "other",
+			"evidence_quote": "Or you can pull the Valiant container image from their JFrog instance, which is scrapesecurity.jfrog.i0/scrape-docker-public-local/valiant latest.",
+			"confidence": "high"
+		},
+		{
+			"title": "Indigo (Blue Sky Go SDK)",
+			"category": "code",
+			"evidence_quote": "I'm in a directory and taking a look at Blue Sky Go SDK or program called Indigo.",
+			"confidence": "high"
+		},
+		{
+			"title": "Mongo Express",
+			"category": "code",
+			"evidence_quote": "we'll scan a git repository. Mongoexpressmongoexpress.git.",
+			"confidence": "high"
+		},
+		{
+			"title": "Sigstore",
+			"url": "https://sigstore.dev",
+			"category": "other",
+			"evidence_quote": "this will ask me to log in with Segstor.",
+			"confidence": "medium"
+		}
+	]
+}

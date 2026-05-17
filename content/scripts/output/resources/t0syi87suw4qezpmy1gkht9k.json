@@ -1,0 +1,21 @@
+{
+	"video_id": "t0syi87suw4qezpmy1gkht9k",
+	"slug": "developing-and-building-open-source-with-dagger-for-kargo",
+	"title": "Developing & Building Open Source with Dagger for Kargo",
+	"generated_at": "2026-05-17T12:51:11.791Z",
+	"known_technology_names": [
+		"Dagger"
+	],
+	"known_guest_names": [
+		"Kat Cosgrove"
+	],
+	"resources": [
+		{
+			"title": "Conductor",
+			"url": "https://ghcr.io/containercraft/conductor",
+			"category": "other",
+			"evidence_quote": "it's g h c r dot I o slash container craft slash conductor",
+			"confidence": "high"
+		}
+	]
+}
