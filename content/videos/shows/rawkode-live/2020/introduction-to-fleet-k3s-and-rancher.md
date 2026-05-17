@@ -95,5 +95,12 @@ chapters:
 duration: 4706
 guests:
   - bastian-hofmann
+resources:
+  - title: Installing Rancher documentation page
+    type: url
+    category: documentation
+  - title: Fleet documentation page
+    type: url
+    category: documentation
 ---
 

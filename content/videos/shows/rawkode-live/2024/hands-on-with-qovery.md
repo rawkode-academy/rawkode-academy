@@ -56,5 +56,15 @@ chapters:
 duration: 4628
 guests:
   - romaric-philogene
+resources:
+  - title: Qovery getting started guide
+    type: url
+    category: documentation
+  - title: Qovery AI agent on GitHub
+    type: url
+    category: code
+  - title: Grafana Helm chart
+    type: url
+    category: code
 ---
 

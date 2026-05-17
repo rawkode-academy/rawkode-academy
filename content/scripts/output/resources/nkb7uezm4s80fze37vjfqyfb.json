@@ -1,0 +1,38 @@
+{
+	"video_id": "nkb7uezm4s80fze37vjfqyfb",
+	"slug": "introduction-to-carvel",
+	"title": "Introduction to Carvel",
+	"generated_at": "2026-05-17T13:36:36.478Z",
+	"known_technology_names": [
+		"Carvel"
+	],
+	"known_guest_names": [
+		"Dmitriy Kalinin"
+	],
+	"resources": [
+		{
+			"title": "ytt Playground",
+			"category": "demos",
+			"evidence_quote": "So there is a there is a playground here that's interactive.",
+			"confidence": "high"
+		},
+		{
+			"title": "kapp-controller NGINX Helm example",
+			"category": "demos",
+			"evidence_quote": "There might be some some of them might be a little like, maybe Concourse Helm or something or NGINX Helm. Yeah. Yeah. NGINX Helm. Let's take a look at that.",
+			"confidence": "medium"
+		},
+		{
+			"title": "ytt load documentation",
+			"category": "documentation",
+			"evidence_quote": "Load. Oh, yeah. There it is. So I'll send you a link over here real quick.",
+			"confidence": "medium"
+		},
+		{
+			"title": "KubeCon Carvel talk",
+			"category": "other",
+			"evidence_quote": "So what I would recommend is there was a talk at KubeCon a few weeks ago. Is that correct?",
+			"confidence": "medium"
+		}
+	]
+}

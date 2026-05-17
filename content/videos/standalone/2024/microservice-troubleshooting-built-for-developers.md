@@ -55,5 +55,9 @@ chapters:
     title: Conclusion & Call to Action
 duration: 1223
 guests: []
+resources:
+  - title: OpenTelemetry Demo Application
+    type: url
+    category: demos
 ---
 

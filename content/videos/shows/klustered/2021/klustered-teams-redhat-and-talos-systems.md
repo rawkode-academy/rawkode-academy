@@ -103,5 +103,14 @@ guests:
   - christoph-blecker
   - james-harrington
   - jeffrey-sica
+resources:
+  - title: Teleport sponsor page
+    type: url
+    url: 'https://rawkode.live/Teleport'
+    category: other
+  - title: Rawkode Academy Discord server
+    type: url
+    url: 'https://rockode.chat'
+    category: other
 ---
 

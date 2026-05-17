@@ -103,5 +103,6 @@ chapters:
 duration: 8440
 guests:
   - guinevere-saenger
+resources: []
 ---
 

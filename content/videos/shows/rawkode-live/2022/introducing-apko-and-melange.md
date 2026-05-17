@@ -69,5 +69,18 @@ chapters:
 duration: 4453
 guests:
   - ariadne-conill
+resources:
+  - title: Google's Distroless project
+    type: url
+    category: code
+  - title: GNU hello world program
+    type: url
+    category: code
+  - title: apko examples/NGINX.yaml
+    type: url
+    category: demos
+  - title: melange examples/GNU hello.yaml
+    type: url
+    category: demos
 ---
 

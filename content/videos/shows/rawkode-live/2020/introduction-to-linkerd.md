@@ -120,5 +120,18 @@ chapters:
 duration: 4276
 guests:
   - thomas-rampelberg
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
+  - title: EmojiVoto demo application
+    type: url
+    category: demos
+  - title: Books app fault injection tutorial demo
+    type: url
+    category: demos
+  - title: Google SRE handbook
+    type: url
+    category: documentation
 ---
 

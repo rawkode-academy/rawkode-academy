@@ -1,0 +1,38 @@
+{
+	"video_id": "mbehnf2kqdrdmagxryh6e7tc",
+	"slug": "hands-on-introduction-to-okteto",
+	"title": "Hands-on Introduction to Okteto",
+	"generated_at": "2026-05-17T13:30:49.438Z",
+	"known_technology_names": [
+		"Okteto"
+	],
+	"known_guest_names": [
+		"Ramiro Berrelleza"
+	],
+	"resources": [
+		{
+			"title": "Okteto Quick Start Guide",
+			"category": "documentation",
+			"evidence_quote": "We will be working through the quick start guide, taking a few little segues as we go to look at some of the features that Okteto provides to you.",
+			"confidence": "high"
+		},
+		{
+			"title": "Okteto Movies sample application",
+			"category": "demos",
+			"evidence_quote": "Let's deploy the Okteto movies application.",
+			"confidence": "high"
+		},
+		{
+			"title": "Okteto Preview Environments documentation",
+			"category": "documentation",
+			"evidence_quote": "If you click on the preview environments menu on the left",
+			"confidence": "medium"
+		},
+		{
+			"title": "Docker samples voting app",
+			"category": "demos",
+			"evidence_quote": "One one that I like to demo is if you if you go find the Docker movie, the voting app.",
+			"confidence": "medium"
+		}
+	]
+}

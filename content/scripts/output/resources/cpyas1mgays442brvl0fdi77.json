@@ -1,0 +1,21 @@
+{
+	"video_id": "cpyas1mgays442brvl0fdi77",
+	"slug": "podmansh-and-infisical",
+	"title": "podmansh & Infisical",
+	"generated_at": "2026-05-17T13:18:10.977Z",
+	"known_technology_names": [
+		"Infisical",
+		"podman"
+	],
+	"known_guest_names": [
+		"Brian Ketelsen"
+	],
+	"resources": [
+		{
+			"title": "podmansh man page",
+			"category": "documentation",
+			"evidence_quote": "But this one page, by the way, is all of the documentation that exists, one man page.",
+			"confidence": "high"
+		}
+	]
+}

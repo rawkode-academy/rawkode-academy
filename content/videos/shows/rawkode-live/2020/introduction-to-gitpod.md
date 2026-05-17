@@ -127,5 +127,23 @@ chapters:
     title: Conclusion & Final Thoughts
 duration: 4645
 guests: []
+resources:
+  - title: Equinix Metal
+    type: url
+    url: 'https://metal.equinix.com'
+    category: other
+  - title: Eclipse Theia
+    type: url
+    category: code
+  - title: gitpod-io/gitpod repository
+    type: url
+    url: 'https://github.com/gitpod-io/gitpod'
+    category: code
+  - title: Gitpod docker images repository
+    type: url
+    category: code
+  - title: GitLab project Gitpod configuration
+    type: url
+    category: code
 ---
 

@@ -182,5 +182,10 @@ guests:
   - lewis-denham-parry
   - chris-nesbitt-smith
   - salman-iqbal
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://rawkode.live/teleport'
+    category: other
 ---
 

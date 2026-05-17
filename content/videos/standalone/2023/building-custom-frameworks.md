@@ -13,5 +13,22 @@ technologies:
   - kubescape
 duration: 966
 guests: []
+resources:
+  - title: ARMO Cloud
+    type: url
+    category: other
+  - title: Open Policy Agent
+    type: url
+    category: code
+  - title: Rego Playground
+    type: url
+    category: demos
+  - title: CUE Language
+    type: url
+    category: code
+  - title: Rawkode Academy Container Registry
+    type: url
+    url: 'https://ghcr.io/rawkodeacademy'
+    category: code
 ---
 

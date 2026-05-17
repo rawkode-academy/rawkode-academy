@@ -1,0 +1,25 @@
+{
+	"video_id": "a1djak0y4g0irt3wnrg17uwa",
+	"slug": "cka-tutorial-with-killer-sh-part-1",
+	"title": "CKA Tutorial with Killer.sh (Part 1)",
+	"generated_at": "2026-05-17T13:31:43.468Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Killer.sh CKA Exam Simulator",
+			"url": "https://killer.sh",
+			"category": "demos",
+			"evidence_quote": "So what is this simulator? This is Keller. Sh.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes nodeSelector documentation",
+			"category": "documentation",
+			"evidence_quote": "Alright, we are gonna use Kubernetes docs. Node selector.",
+			"confidence": "medium"
+		}
+	]
+}

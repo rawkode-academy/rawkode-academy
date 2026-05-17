@@ -14,5 +14,15 @@ duration: 4036
 guests:
   - pierre-tachoire
   - katie-hallett
+resources:
+  - title: LightPanda GitHub repository
+    type: url
+    category: code
+  - title: Vercel post on AI crawler traffic and JavaScript rendering
+    type: url
+    category: other
+  - title: Web Platform Tests
+    type: url
+    category: code
 ---
 

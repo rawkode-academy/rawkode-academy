@@ -122,5 +122,9 @@ guests:
   - saiyam-pathak
   - dinesh-majrekar
   - david-fogle
+resources:
+  - title: Teleport access platform
+    type: url
+    category: other
 ---
 

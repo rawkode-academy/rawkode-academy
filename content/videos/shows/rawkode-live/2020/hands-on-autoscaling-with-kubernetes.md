@@ -52,5 +52,12 @@ chapters:
 duration: 6125
 guests:
   - guy-templeton
+resources:
+  - title: Kubernetes Autoscaling by Example repository
+    type: url
+    category: code
+  - title: Prometheus Adapter documentation
+    type: url
+    category: documentation
 ---
 

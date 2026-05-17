@@ -1,0 +1,32 @@
+{
+	"video_id": "ln4np34ziqhps5xk39cwkjp0",
+	"slug": "introduction-to-influxdb-2-and-flux",
+	"title": "Introduction to InfluxDB 2 & Flux",
+	"generated_at": "2026-05-17T13:36:52.376Z",
+	"known_technology_names": [
+		"InfluxDB"
+	],
+	"known_guest_names": [
+		"Anais Dotis-Georgiou"
+	],
+	"resources": [
+		{
+			"title": "InfluxData Community Templates repository",
+			"category": "code",
+			"evidence_quote": "There is a community templates repo and InfluxData, and there's a bunch of temp we should actually test the template I just just merged yesterday.",
+			"confidence": "high"
+		},
+		{
+			"title": "InfluxDB 2 operational metrics template",
+			"category": "code",
+			"evidence_quote": "InfluxDB two operational metrics.",
+			"confidence": "medium"
+		},
+		{
+			"title": "rbx.app request bin",
+			"category": "demos",
+			"evidence_quote": "There's this thing called Rbox. App which is really cool. Which just gives you like an endpoint you can throw arbitrary payloads to.",
+			"confidence": "medium"
+		}
+	]
+}

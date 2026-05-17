@@ -75,5 +75,9 @@ chapters:
 duration: 5967
 guests:
   - hugo-santos
+resources:
+  - title: Cash App Hermit
+    type: url
+    category: code
 ---
 

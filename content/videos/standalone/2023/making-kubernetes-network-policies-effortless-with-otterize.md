@@ -79,5 +79,15 @@ chapters:
     title: Conclusion and Next Steps
 duration: 1271
 guests: []
+resources:
+  - title: Otterize iBack page
+    type: url
+    category: documentation
+  - title: Otterize HelmChart repository
+    type: url
+    category: code
+  - title: Weaveworks Sockshop demo
+    type: url
+    category: demos
 ---
 

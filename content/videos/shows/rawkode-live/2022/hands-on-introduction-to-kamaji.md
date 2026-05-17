@@ -91,5 +91,9 @@ chapters:
 duration: 4433
 guests:
   - adriano-pezzuto
+resources:
+  - title: Clastix Capsule
+    type: url
+    category: code
 ---
 

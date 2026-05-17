@@ -89,5 +89,18 @@ chapters:
 duration: 4348
 guests:
   - ilya-dmitrichenko
+resources:
+  - title: Cilium Star Wars demo application
+    type: url
+    category: demos
+  - title: Cilium 1.9 blog post
+    type: url
+    category: other
+  - title: Locking Down External Access with DNS-based Policies
+    type: url
+    category: documentation
+  - title: Kubernetes Without kube-proxy guide
+    type: url
+    category: documentation
 ---
 

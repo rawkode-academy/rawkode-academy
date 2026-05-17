@@ -96,5 +96,12 @@ duration: 6577
 guests:
   - leigh-capili
   - marcus-noble
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
+  - title: Artifact Hub
+    type: url
+    category: other
 ---
 

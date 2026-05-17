@@ -34,5 +34,9 @@ chapters:
     title: Conclusion
 duration: 488
 guests: []
+resources:
+  - title: 'Docker documentation: Building and running Spin applications'
+    type: url
+    category: documentation
 ---
 

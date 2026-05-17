@@ -42,5 +42,15 @@ chapters:
     title: Summary and Next Steps
 duration: 560
 guests: []
+resources:
+  - title: Bluesky API create session endpoint
+    type: url
+    category: documentation
+  - title: Bluesky API getPostThread XRPC endpoint
+    type: url
+    category: documentation
+  - title: Fermyon KV Explorer component
+    type: url
+    category: code
 ---
 

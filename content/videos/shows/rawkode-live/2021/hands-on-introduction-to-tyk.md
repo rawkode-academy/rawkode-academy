@@ -126,5 +126,18 @@ duration: 6051
 guests:
   - budha-bhattacharya
   - andy-smith
+resources:
+  - title: Tyk Getting Started guide
+    type: url
+    category: documentation
+  - title: Tyk Operator installation guide
+    type: url
+    category: documentation
+  - title: Tyk Operator httpbin sample manifest
+    type: url
+    category: code
+  - title: JSONPlaceholder users API demo endpoint
+    type: url
+    category: demos
 ---
 

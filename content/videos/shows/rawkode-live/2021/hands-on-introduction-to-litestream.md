@@ -91,5 +91,12 @@ chapters:
 duration: 3297
 guests:
   - ben-johnson
+resources:
+  - title: Litestream Getting Started guide
+    type: url
+    category: documentation
+  - title: Litestream Tips and Caveats section
+    type: url
+    category: documentation
 ---
 

@@ -31,5 +31,10 @@ chapters:
     title: Conclusion
 duration: 743
 guests: []
+resources:
+  - title: Spin Go SDK
+    type: url
+    url: 'https://github.com/spinframework/spin-go-sdk'
+    category: code
 ---
 

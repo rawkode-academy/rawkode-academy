@@ -111,5 +111,18 @@ chapters:
 duration: 5279
 guests:
   - karthik-satchitanand
+resources:
+  - title: Litmus documentation master version on Netlify
+    type: url
+    category: documentation
+  - title: Bank of Anthos demo application
+    type: url
+    category: demos
+  - title: Weaveworks Sock Shop microservices application
+    type: url
+    category: demos
+  - title: Principles of Chaos
+    type: url
+    category: documentation
 ---
 

@@ -113,5 +113,15 @@ chapters:
 duration: 4124
 guests:
   - vic-iglesias
+resources:
+  - title: Skaffold microservices example
+    type: url
+    category: demos
+  - title: Skaffold React reload example
+    type: url
+    category: demos
+  - title: Skaffold custom test example
+    type: url
+    category: demos
 ---
 

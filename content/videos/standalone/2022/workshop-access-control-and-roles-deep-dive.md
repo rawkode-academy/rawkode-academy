@@ -81,5 +81,10 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 5874
 guests: []
+resources:
+  - title: Workshop Course Materials (RBAC Deep Dive)
+    type: url
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
 ---
 

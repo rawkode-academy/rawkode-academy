@@ -101,5 +101,15 @@ chapters:
 duration: 5328
 guests:
   - marcel-van-lohuizen
+resources:
+  - title: CUE Kubernetes tutorial
+    type: url
+    category: documentation
+  - title: CUE GitHub Discussions
+    type: url
+    category: other
+  - title: Equinix Metal
+    type: url
+    category: other
 ---
 

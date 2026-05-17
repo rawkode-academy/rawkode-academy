@@ -1,0 +1,25 @@
+{
+	"video_id": "viahl5hfrft2mpg2sr7wxjtb",
+	"slug": "stateful-webassembly-apps-with-key-value-stores",
+	"title": "Stateful WebAssembly Apps with Key-Value Stores",
+	"generated_at": "2026-05-17T13:17:54.369Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Hurl",
+			"url": "https://hurl.dev",
+			"category": "other",
+			"evidence_quote": "If you're not familiar with HARL, go to hARL dot dev and you'll find a very cool text based description HTTP testing framework.",
+			"confidence": "high"
+		},
+		{
+			"title": "Fermyon URL shortener example",
+			"category": "documentation",
+			"evidence_quote": "So this extension of the URL shortener available on the fermion blog as an example of how to do it with their SDK can now be enriched.",
+			"confidence": "medium"
+		}
+	]
+}

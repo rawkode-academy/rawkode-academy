@@ -79,5 +79,9 @@ chapters:
 duration: 5695
 guests:
   - lee-briggs
+resources:
+  - title: Teleport access platform
+    type: url
+    category: other
 ---
 

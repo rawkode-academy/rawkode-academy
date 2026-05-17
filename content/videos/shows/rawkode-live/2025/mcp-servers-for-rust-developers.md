@@ -14,5 +14,9 @@ category: tutorial
 technologies: []
 show: rawkode-live
 duration: 5198
+resources:
+  - title: State of Kubernetes Report 2025
+    type: url
+    category: other
 ---
 

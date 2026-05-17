@@ -39,5 +39,21 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 3672
 guests: []
+resources:
+  - title: Rawkode Academy Courses Repository
+    type: url
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+  - title: Artifact Hub
+    type: url
+    url: 'https://artifacthub.io'
+    category: other
+  - title: Emissary Ingress
+    type: url
+    url: 'https://www.getambassador.io/products/emissary-ingress'
+    category: other
+  - title: Kubernetes Office Hours
+    type: url
+    category: other
 ---
 

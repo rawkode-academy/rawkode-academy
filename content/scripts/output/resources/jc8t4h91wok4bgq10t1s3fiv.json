@@ -1,0 +1,22 @@
+{
+	"video_id": "jc8t4h91wok4bgq10t1s3fiv",
+	"slug": "universal-blue-and-system-initiative",
+	"title": "Universal Blue & System Initiative",
+	"generated_at": "2026-05-17T13:18:16.075Z",
+	"known_technology_names": [
+		"System Initiative",
+		"Universal Blue"
+	],
+	"known_guest_names": [
+		"Brian Ketelsen"
+	],
+	"resources": [
+		{
+			"title": "Fleek",
+			"url": "https://getfleek.dev",
+			"category": "other",
+			"evidence_quote": "So that's it. Get fleek dot dev.",
+			"confidence": "high"
+		}
+	]
+}

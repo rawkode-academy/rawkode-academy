@@ -44,5 +44,15 @@ chapters:
 duration: 4025
 guests:
   - phil-estes
+resources:
+  - title: stargz snapshotter KubeCon talk
+    type: url
+    category: other
+  - title: containerd issue 4531
+    type: url
+    category: other
+  - title: Kata Containers
+    type: url
+    category: code
 ---
 

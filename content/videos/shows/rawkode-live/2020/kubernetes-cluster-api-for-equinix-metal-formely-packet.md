@@ -42,5 +42,21 @@ chapters:
 duration: 4110
 guests:
   - jason-detiberus
+resources:
+  - title: Cluster API Book Quick Start
+    type: url
+    category: documentation
+  - title: Cluster API Provider Packet repository
+    type: url
+    category: code
+  - title: Kubernetes SIGs Image Builder
+    type: url
+    category: code
+  - title: Cluster Addons project
+    type: url
+    category: code
+  - title: Cluster Autoscaler
+    type: url
+    category: code
 ---
 

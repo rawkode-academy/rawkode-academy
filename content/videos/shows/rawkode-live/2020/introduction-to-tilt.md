@@ -60,5 +60,21 @@ duration: 4185
 guests:
   - dan-bentley
   - ellen-korbes
+resources:
+  - title: 'Tilt tutorial: The First Fifteen Minutes'
+    type: url
+    category: documentation
+  - title: 'Tilt guide: Faster Development with Live Update'
+    type: url
+    category: documentation
+  - title: Tilt Helm Remote README
+    type: url
+    category: documentation
+  - title: 'Tilt API Reference: kustomize function'
+    type: url
+    category: documentation
+  - title: Tilt Extensions repository
+    type: url
+    category: code
 ---
 

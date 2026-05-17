@@ -1,0 +1,26 @@
+{
+	"video_id": "mgrp2hpv2alb27fi2sqj1ck4",
+	"slug": "introduction-to-kubeflow",
+	"title": "Introduction to Kubeflow",
+	"generated_at": "2026-05-17T13:30:05.608Z",
+	"known_technology_names": [
+		"Kubeflow"
+	],
+	"known_guest_names": [
+		"Michael Tanenbaum"
+	],
+	"resources": [
+		{
+			"title": "Grokking Deep Learning",
+			"category": "other",
+			"evidence_quote": "I'll be borrowing an analogy from Andrew Trask's grokking deep learning, which is published by Manning.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kaggle Chest X-Ray Pneumonia Dataset by Paul Timothy Mooney",
+			"category": "demos",
+			"evidence_quote": "we are going to be looking at chest X rays to determine if the, X-ray, presents with pneumonia or does not.",
+			"confidence": "medium"
+		}
+	]
+}

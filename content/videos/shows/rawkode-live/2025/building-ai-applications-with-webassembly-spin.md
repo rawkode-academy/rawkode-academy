@@ -16,5 +16,18 @@ show: rawkode-live
 duration: 6370
 guests:
   - thorsten-hans
+resources:
+  - title: Fermion Developer Home
+    type: url
+    category: documentation
+  - title: SpinCube documentation
+    type: url
+    category: documentation
+  - title: Thorsten Hans examples repository
+    type: url
+    category: code
+  - title: Ollama deployment guide
+    type: url
+    category: documentation
 ---
 

@@ -85,5 +85,13 @@ duration: 2729
 audioFileSize: 65493300
 guests:
   - frank-de-jonge
+resources:
+  - title: EventSauce
+    type: url
+    url: 'https://EventSauce.io'
+    category: code
+  - title: The Knowledge of Others
+    type: url
+    category: other
 ---
 

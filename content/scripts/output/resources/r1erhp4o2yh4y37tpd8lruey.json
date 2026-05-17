@@ -1,0 +1,24 @@
+{
+	"video_id": "r1erhp4o2yh4y37tpd8lruey",
+	"slug": "klustered-teams-control-plane-and-learnk8s",
+	"title": "Klustered Teams: Control Plane & Learnk8s",
+	"generated_at": "2026-05-17T13:22:53.201Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Andrew Martin",
+		"Lewis Denham-Parry",
+		"Chris Nesbitt-Smith",
+		"Salman Iqbal"
+	],
+	"resources": [
+		{
+			"title": "Teleport",
+			"url": "https://rawkode.live/teleport",
+			"category": "other",
+			"evidence_quote": "Remember to check out Teleport at Rawkodelive/Teleport.",
+			"confidence": "medium"
+		}
+	]
+}

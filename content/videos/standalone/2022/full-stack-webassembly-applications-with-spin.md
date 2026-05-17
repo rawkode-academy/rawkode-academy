@@ -2,7 +2,7 @@
 id: sx8a3ihcu4qum6du7ejlif7i
 slug: full-stack-webassembly-applications-with-spin
 title: Full Stack WebAssembly Applications with Spin
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2022-11-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -43,5 +43,15 @@ chapters:
     title: Farewell
 duration: 1698
 guests: []
+resources:
+  - title: Grain Programming Language
+    type: url
+    category: code
+  - title: Fermion Cloud
+    type: url
+    category: other
+  - title: Spin SDK
+    type: url
+    category: code
 ---
 

@@ -1,0 +1,46 @@
+{
+	"video_id": "ratw2atcqa376ktfpvj2joo4",
+	"slug": "kubernetes-security-with-identity-and-oidc",
+	"title": "Kubernetes Security with Identity & OIDC",
+	"generated_at": "2026-05-17T13:23:46.970Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Marc Boorshtein"
+	],
+	"resources": [
+		{
+			"title": "OpenUnison",
+			"url": "https://openunison.github.io/",
+			"category": "code",
+			"evidence_quote": "So you wanna learn how to, you know, simplify access to your clusters? Go to openunison.github.io.",
+			"confidence": "high"
+		},
+		{
+			"title": "CICD Proxy",
+			"url": "https://cicdproxy.github.io/",
+			"category": "code",
+			"evidence_quote": "And then if you're interested in\nusing our CICD proxy\nfor for managing access for your clusters from\nyour workflows, that is cicdproxy.github.io.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes and the Enterprise",
+			"category": "other",
+			"evidence_quote": "The last time we\nspoke, you actually dropped on this little nugget\nof knowledge that I didn't know before. And\nit's that you wrote a book on Kubernetes\nand the enterprise.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Kubernetes Security Days talk on certificate authentication",
+			"category": "other",
+			"evidence_quote": "I did talk about it at Kubernetes security\ndays couple years ago or security con, whatever\nthey're calling it these days.",
+			"confidence": "medium"
+		},
+		{
+			"title": "CICD Proxy Helm charts for kube-oidc-proxy impersonation",
+			"category": "code",
+			"evidence_quote": "It's a\nit's a deployment of the Kubo IDC proxy\nwith specialized Helm charts specifically for this use\ncase where it sets up an impersonating proxy.",
+			"confidence": "medium"
+		}
+	]
+}

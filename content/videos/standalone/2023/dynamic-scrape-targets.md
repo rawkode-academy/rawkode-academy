@@ -40,5 +40,6 @@ chapters:
     title: Summary and Conclusion
 duration: 610
 guests: []
+resources: []
 ---
 

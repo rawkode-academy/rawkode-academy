@@ -98,5 +98,18 @@ chapters:
 duration: 3299
 guests:
   - jeremy-tanner
+resources:
+  - title: WonderNetwork Global Latency Statistics
+    type: url
+    url: 'https://wondernetwork.com'
+    category: other
+  - title: Locoping
+    type: url
+    url: 'https://locoping.com'
+    category: other
+  - title: Simple Wikipedia (BGP)
+    type: url
+    url: 'https://simple.wikipedia.org/wiki/Border_Gateway_Protocol'
+    category: documentation
 ---
 

@@ -1,0 +1,26 @@
+{
+	"video_id": "usjlx0m96px21ont4ouar9a7",
+	"slug": "whats-new-in-teleport-8",
+	"title": "What's New in Teleport 8?",
+	"generated_at": "2026-05-17T13:19:23.014Z",
+	"known_technology_names": [
+		"Teleport"
+	],
+	"known_guest_names": [
+		"Steve Martin"
+	],
+	"resources": [
+		{
+			"title": "Teleport documentation: joining nodes",
+			"category": "documentation",
+			"evidence_quote": "Now the other the other thing which which I wanted to show, particularly with this console access, is the concept of using the auto join. So one of our features here, if you go into our documentation about, you know, joining nodes.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Teleport documentation: AWS console access",
+			"category": "documentation",
+			"evidence_quote": "Also, on the AWS console one, which I wrote part of that, so yell at me. Not but this steps you through really low really low level with, like, giving you read only access example and a power user example.",
+			"confidence": "medium"
+		}
+	]
+}

@@ -56,5 +56,15 @@ chapters:
 duration: 4335
 guests:
   - brian-ketelsen
+resources:
+  - title: Rawkode Academy InfluxDB course
+    type: url
+    category: other
+  - title: CueBlox dogfood directory
+    type: url
+    category: demos
+  - title: bketelsen/bkapi repository
+    type: url
+    category: code
 ---
 

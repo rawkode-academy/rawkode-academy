@@ -16,5 +16,21 @@ guests:
   - jimmy-zelinskie
 show: rawkode-live
 duration: 5427
+resources:
+  - title: Zanzibar paper
+    type: url
+    category: other
+  - title: GitHub permissions model video on AuthZed YouTube channel
+    type: url
+    category: other
+  - title: AuthZed examples repository schemas directory
+    type: url
+    category: code
+  - title: AuthZed Playground
+    type: url
+    category: demos
+  - title: SpiceDB Playground source
+    type: url
+    category: code
 ---
 

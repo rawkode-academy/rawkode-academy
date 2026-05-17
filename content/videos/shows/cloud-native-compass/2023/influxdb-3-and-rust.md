@@ -68,5 +68,18 @@ duration: 3368
 audioFileSize: 80837626
 guests:
   - paul-dix
+resources:
+  - title: Apache Arrow project
+    type: url
+    category: code
+  - title: Apache DataFusion project
+    type: url
+    category: code
+  - title: Flux community fork
+    type: url
+    category: code
+  - title: HashiCorp license change to BSL
+    type: url
+    category: other
 ---
 

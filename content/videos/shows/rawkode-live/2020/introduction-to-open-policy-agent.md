@@ -73,5 +73,15 @@ chapters:
 duration: 4450
 guests:
   - torin-sandall
+resources:
+  - title: OPA Playground
+    type: url
+    category: demos
+  - title: OPA VS Code plugin
+    type: url
+    category: code
+  - title: OPA policy testing documentation
+    type: url
+    category: documentation
 ---
 

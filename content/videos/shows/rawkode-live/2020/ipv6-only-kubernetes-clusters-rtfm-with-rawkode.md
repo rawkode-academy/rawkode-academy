@@ -40,5 +40,9 @@ chapters:
 duration: 6790
 guests:
   - arian-van-putten
+resources:
+  - title: Calico over IP Fabrics
+    type: url
+    category: documentation
 ---
 

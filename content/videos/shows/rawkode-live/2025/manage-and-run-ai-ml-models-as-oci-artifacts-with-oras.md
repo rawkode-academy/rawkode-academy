@@ -19,5 +19,18 @@ duration: 3995
 guests:
   - josh-duffney
   - feynman-zhou
+resources:
+  - title: Kubernetes blog post on OCI image volumes
+    type: url
+    category: other
+  - title: ORAS website
+    type: url
+    category: documentation
+  - title: Notation GitHub Action
+    type: url
+    category: code
+  - title: Cloud Native AI Model Spec repository
+    type: url
+    category: code
 ---
 

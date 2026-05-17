@@ -98,5 +98,12 @@ duration: 4306
 guests:
   - eric-smalling
   - carlos-santana
+resources:
+  - title: InfluxDB Complete Guide course
+    type: url
+    category: other
+  - title: Cloud Native TV search magic talk
+    type: url
+    category: other
 ---
 

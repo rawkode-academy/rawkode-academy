@@ -133,5 +133,23 @@ chapters:
 duration: 3590
 guests:
   - matti-ranta
+resources:
+  - title: Gitea from binary installation guide
+    type: url
+    category: documentation
+  - title: Gitea Helm chart
+    type: url
+    category: code
+  - title: Gitea comparison document
+    type: url
+    category: documentation
+  - title: Gitea CLI t repository
+    type: url
+    url: 'https://gitea.com/gitea/t'
+    category: code
+  - title: Codeberg
+    type: url
+    url: 'https://codeberg.org'
+    category: other
 ---
 

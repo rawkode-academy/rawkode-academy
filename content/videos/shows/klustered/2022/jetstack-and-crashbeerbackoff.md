@@ -115,5 +115,14 @@ chapters:
   - startTime: 5117
     title: 'Wrap-up, Thanks, and Reflections'
 duration: 5355
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://Rawkode.link/Teleport'
+    category: other
+  - title: Equinix Metal
+    type: url
+    url: 'https://Rawkode.link/metal'
+    category: other
 ---
 

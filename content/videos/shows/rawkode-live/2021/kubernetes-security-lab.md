@@ -157,5 +157,18 @@ chapters:
 duration: 5064
 guests:
   - rory-mccune
+resources:
+  - title: kind (Kubernetes in Docker)
+    type: url
+    category: code
+  - title: CIS Benchmarks
+    type: url
+    category: documentation
+  - title: Kube Hunter
+    type: url
+    category: code
+  - title: CyberArk kubeletctl
+    type: url
+    category: code
 ---
 

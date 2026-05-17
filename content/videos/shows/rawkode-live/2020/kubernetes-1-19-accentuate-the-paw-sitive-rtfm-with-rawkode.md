@@ -39,5 +39,15 @@ chapters:
 duration: 4405
 guests:
   - taylor-dolezal
+resources:
+  - title: kind project
+    type: url
+    category: code
+  - title: Kubernetes 1.19 release article
+    type: url
+    category: documentation
+  - title: seccomp operator
+    type: url
+    category: code
 ---
 

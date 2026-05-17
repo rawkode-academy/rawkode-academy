@@ -35,5 +35,21 @@ chapters:
     title: Conclusion and Integration Benefits
 duration: 834
 guests: []
+resources:
+  - title: 'Komodor Tutorial Part 1: Deploying the Agent'
+    type: url
+    category: other
+  - title: kube-prometheus
+    type: url
+    url: 'https://github.com/prometheus-operator/kube-prometheus'
+    category: code
+  - title: Sentry
+    type: url
+    url: 'https://sentry.io'
+    category: other
+  - title: Grafana
+    type: url
+    url: 'https://grafana.com'
+    category: other
 ---
 

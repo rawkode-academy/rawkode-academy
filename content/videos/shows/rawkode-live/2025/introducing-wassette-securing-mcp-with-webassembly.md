@@ -18,5 +18,15 @@ guests:
   - jiaxiao-zhou
   - josh-duffney
   - yosh-wuyts
+resources:
+  - title: GitHub MCP registry
+    type: url
+    category: other
+  - title: awesome WASM components repository
+    type: url
+    category: code
+  - title: QR code generator component
+    type: url
+    category: demos
 ---
 

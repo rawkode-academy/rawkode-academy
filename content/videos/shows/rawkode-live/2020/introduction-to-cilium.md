@@ -113,5 +113,21 @@ chapters:
 duration: 5382
 guests:
   - ilya-dmitrichenko
+resources:
+  - title: Cilium Quick Installation guide
+    type: url
+    category: documentation
+  - title: Cilium IPAM documentation
+    type: url
+    category: documentation
+  - title: Cilium connectivity test manifest
+    type: url
+    category: demos
+  - title: Cilium Star Wars demo
+    type: url
+    category: demos
+  - title: Introduction to Cilium and Hubble
+    type: url
+    category: documentation
 ---
 

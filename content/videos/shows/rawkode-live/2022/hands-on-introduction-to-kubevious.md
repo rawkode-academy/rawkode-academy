@@ -85,5 +85,6 @@ chapters:
 duration: 5432
 guests:
   - ruben-hakopian
+resources: []
 ---
 

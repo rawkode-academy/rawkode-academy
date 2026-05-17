@@ -92,5 +92,15 @@ chapters:
 duration: 4359
 guests:
   - elad-ben-israel
+resources:
+  - title: Cluster API project
+    type: url
+    category: code
+  - title: 'cdk8s Concepts: Escape Patches'
+    type: url
+    category: documentation
+  - title: Construct Catalog
+    type: url
+    category: other
 ---
 

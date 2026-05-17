@@ -104,5 +104,6 @@ duration: 6164
 guests:
   - russellwaite
   - marek-counts
+resources: []
 ---
 

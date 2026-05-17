@@ -38,5 +38,18 @@ chapters:
 duration: 5372
 guests:
   - derick-rethans
+resources:
+  - title: QCachegrind profiling viewer
+    type: url
+    category: other
+  - title: KCachegrind profiling viewer
+    type: url
+    category: other
+  - title: Composer dependency manager
+    type: url
+    category: other
+  - title: Zulu CMS project
+    type: url
+    category: code
 ---
 

@@ -1,0 +1,26 @@
+{
+	"video_id": "fvez8xw9it644rtfzl5xclpd",
+	"slug": "hands-on-introduction-to-parca",
+	"title": "Hands-on Introduction to Parca",
+	"generated_at": "2026-05-17T13:25:07.594Z",
+	"known_technology_names": [
+		"Parca"
+	],
+	"known_guest_names": [
+		"Frederic Branczyk"
+	],
+	"resources": [
+		{
+			"title": "Parca in Kubernetes tutorial",
+			"category": "documentation",
+			"evidence_quote": "you can hit the, like, Parca in Kubernetes tutorial five five minutes button, and you'll get the entire, basically, manuscript of what we're what we're doing here.",
+			"confidence": "high"
+		},
+		{
+			"title": "KubeCon Barcelona 2019 observability keynote by Frederic Branczyk and Tom Wilkie",
+			"category": "other",
+			"evidence_quote": "an invited keynote that I gave at KubeCon in Barcelona in 2019 where Tom Wilkie and I kind of gave, he's the VP of product at Grafana now.",
+			"confidence": "medium"
+		}
+	]
+}

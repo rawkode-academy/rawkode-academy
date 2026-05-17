@@ -86,5 +86,16 @@ duration: 4955
 guests:
   - kiran-mova
   - jeffry-molanus
+resources:
+  - title: MayaStore alpha features documentation
+    type: url
+    category: documentation
+  - title: MayaStore quick start guide
+    type: url
+    category: documentation
+  - title: Nixery.dev
+    type: url
+    url: 'https://nixery.dev'
+    category: demos
 ---
 

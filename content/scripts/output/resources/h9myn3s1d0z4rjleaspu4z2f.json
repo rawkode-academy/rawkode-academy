@@ -1,0 +1,44 @@
+{
+	"video_id": "h9myn3s1d0z4rjleaspu4z2f",
+	"slug": "hacking-kubernetes-ctf-edition",
+	"title": "Hacking Kubernetes: CTF Edition",
+	"generated_at": "2026-05-17T13:30:32.854Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Andrew Martin"
+	],
+	"resources": [
+		{
+			"title": "Kubernetes Simulator",
+			"category": "code",
+			"evidence_quote": "there is an open source project called Kubernetes simulator,",
+			"confidence": "high"
+		},
+		{
+			"title": "Hacking Kubernetes book",
+			"category": "other",
+			"evidence_quote": "there's a book coming out in November called Hacking Kubernetes.",
+			"confidence": "high"
+		},
+		{
+			"title": "Am I Contained",
+			"category": "code",
+			"evidence_quote": "AMI contained is the canonical internal container observability tool written by Jess Fraz,",
+			"confidence": "high"
+		},
+		{
+			"title": "Stern Kubernetes log tailing tool",
+			"category": "code",
+			"evidence_quote": "the the tool that I really love for logging is called Stern",
+			"confidence": "high"
+		},
+		{
+			"title": "Bane AppArmor profile tool",
+			"category": "code",
+			"evidence_quote": "Bain focuses on AppArmor,",
+			"confidence": "medium"
+		}
+	]
+}

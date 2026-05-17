@@ -60,5 +60,16 @@ chapters:
 duration: 6266
 guests:
   - ciaran-mcnulty
+resources:
+  - title: Rawkode/getsynced
+    type: url
+    url: 'https://getlab.com/Rawkode/getsynced'
+    category: code
+  - title: Matt Wynne's Example Mapping blog post
+    type: url
+    category: other
+  - title: John Smart's Feature Mapping
+    type: url
+    category: other
 ---
 

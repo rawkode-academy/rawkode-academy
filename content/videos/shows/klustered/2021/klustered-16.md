@@ -204,5 +204,12 @@ guests:
   - rachel-leekin
   - andy-holtzmann
   - software-math-guy
+resources:
+  - title: Rawkode Academy Discord server
+    type: url
+    category: other
+  - title: Teleport sponsor link
+    type: url
+    category: other
 ---
 

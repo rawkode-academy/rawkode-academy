@@ -48,5 +48,15 @@ chapters:
 duration: 5093
 guests:
   - fredrik-bjork
+resources:
+  - title: grafbase/grafbase GitHub releases
+    type: url
+    category: code
+  - title: Grafbase Getting Started guide
+    type: url
+    category: documentation
+  - title: Grafbase Resolvers documentation
+    type: url
+    category: documentation
 ---
 

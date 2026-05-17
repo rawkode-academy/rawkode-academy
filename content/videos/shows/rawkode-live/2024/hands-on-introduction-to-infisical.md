@@ -69,5 +69,9 @@ chapters:
 duration: 3202
 guests:
   - vlad-matsiiako
+resources:
+  - title: Infisical self-hosting instructions
+    type: url
+    category: documentation
 ---
 

@@ -65,5 +65,23 @@ chapters:
 duration: 5288
 guests:
   - avthar-sewrathan
+resources:
+  - title: Hello Timescale tutorial
+    type: url
+    category: documentation
+  - title: TimescaleDB Parallel Copy
+    type: url
+    category: code
+  - title: Setting automated retention policies
+    type: url
+    category: documentation
+  - title: Timescale newsletter
+    type: url
+    url: 'https://tstb.co/timescale-newsletter'
+    category: other
+  - title: Timescale Cloud free trial
+    type: url
+    url: 'https://tstb.co/getstartedcloud'
+    category: other
 ---
 

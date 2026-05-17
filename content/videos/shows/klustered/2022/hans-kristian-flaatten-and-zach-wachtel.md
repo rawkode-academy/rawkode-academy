@@ -94,5 +94,9 @@ duration: 5313
 guests:
   - hans-kristian-flaatten
   - zach-wachtel
+resources:
+  - title: Ship It podcast
+    type: url
+    category: other
 ---
 

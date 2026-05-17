@@ -1,0 +1,45 @@
+{
+	"video_id": "emlycwa6qjji1saoicrkwbpr",
+	"slug": "introduction-to-keptn-part-i",
+	"title": "Introduction to Keptn (Part I)",
+	"generated_at": "2026-05-17T13:38:42.995Z",
+	"known_technology_names": [
+		"Keptn"
+	],
+	"known_guest_names": [
+		"Jürgen Etzlstorfer"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"url": "https://metal.equinix.com",
+			"category": "other",
+			"evidence_quote": "If you wanna check out Equinix metal, there is a code, Rawkode dash live, you can use at metal.equinix.com.",
+			"confidence": "high"
+		},
+		{
+			"title": "Keptn tutorials",
+			"category": "documentation",
+			"evidence_quote": "The tutorials, I believe, is what we're gonna get started with today.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Keptn installation on k3s guide",
+			"category": "documentation",
+			"evidence_quote": "We also have the guide for the captain installation on k3s if you want to do that to connect it to Argo CD.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Sock Shop demo application",
+			"category": "demos",
+			"evidence_quote": "Since we are going to onboard let's call it sock shop since we are going to onboard a shopping cart.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Potato Head CNCF demo project",
+			"category": "demos",
+			"evidence_quote": "I have a very small Go application that I'm using sometimes. It's called the potato head. It's a CNCF demo project.",
+			"confidence": "medium"
+		}
+	]
+}

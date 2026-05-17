@@ -122,5 +122,22 @@ chapters:
 duration: 6650
 guests:
   - jurgen-etzlstorfer
+resources:
+  - title: Equinix Metal
+    type: url
+    url: 'https://metal.equinix.com'
+    category: other
+  - title: Keptn tutorials
+    type: url
+    category: documentation
+  - title: Keptn installation on k3s guide
+    type: url
+    category: documentation
+  - title: Sock Shop demo application
+    type: url
+    category: demos
+  - title: Potato Head CNCF demo project
+    type: url
+    category: demos
 ---
 

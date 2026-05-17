@@ -81,5 +81,12 @@ audioFileSize: 71086221
 guests:
   - marino-wijay
   - matt-turner
+resources:
+  - title: Network Foundations workshop
+    type: url
+    category: documentation
+  - title: Envoy Gateway
+    type: url
+    category: code
 ---
 

@@ -96,5 +96,15 @@ chapters:
 duration: 4674
 guests:
   - florian-forster
+resources:
+  - title: Zitadel Docker Compose self-hosting guide
+    type: url
+    category: documentation
+  - title: OAuth Proxy
+    type: url
+    category: code
+  - title: Zitadel Domain Discovery documentation
+    type: url
+    category: documentation
 ---
 

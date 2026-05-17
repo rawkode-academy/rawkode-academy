@@ -77,5 +77,6 @@ chapters:
 duration: 3498
 guests:
   - andrei-pokhilko
+resources: []
 ---
 

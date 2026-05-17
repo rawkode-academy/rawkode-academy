@@ -53,5 +53,18 @@ chapters:
     title: Conclusion
 duration: 577
 guests: []
+resources:
+  - title: 'Part 1: An Introduction to Time Series'
+    type: url
+    category: other
+  - title: 'Flux Workshop: Writing Your First Flux'
+    type: url
+    category: other
+  - title: InfluxDB 2 Templates
+    type: url
+    category: other
+  - title: Telegraf Data Collector
+    type: url
+    category: code
 ---
 

@@ -16,5 +16,18 @@ show: rawkode-live
 duration: 4318
 guests:
   - nicolas-takashi
+resources:
+  - title: Perses official documentation
+    type: url
+    category: documentation
+  - title: Perses community dashboards repository
+    type: url
+    category: code
+  - title: Perses dashboard as code GitHub Action
+    type: url
+    category: code
+  - title: Perses CLI
+    type: url
+    category: code
 ---
 

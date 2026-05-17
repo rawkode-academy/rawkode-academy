@@ -31,5 +31,12 @@ guests:
   - neil-cresswell
   - eli-holderness
   - abdellfetah-sghiouar
+resources:
+  - title: Kubernetes Podcast
+    type: url
+    category: other
+  - title: Docker Compose for Kubernetes
+    type: url
+    category: code
 ---
 

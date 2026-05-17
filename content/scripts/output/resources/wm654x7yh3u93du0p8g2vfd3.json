@@ -1,0 +1,32 @@
+{
+	"video_id": "wm654x7yh3u93du0p8g2vfd3",
+	"slug": "writing-a-kubernetes-controller",
+	"title": "Writing a Kubernetes Controller",
+	"generated_at": "2026-05-17T13:30:21.100Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Suhail Patel"
+	],
+	"resources": [
+		{
+			"title": "Kubernetes Admission Controllers documentation",
+			"category": "documentation",
+			"evidence_quote": "So if you could pull up maybe the admission controllers for Kubernetes.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes AdmissionReview API reference",
+			"category": "documentation",
+			"evidence_quote": "Nope. That's the admission review. We just want that struct. Right?",
+			"confidence": "medium"
+		},
+		{
+			"title": "Cloudflare CFSSL",
+			"category": "code",
+			"evidence_quote": "we going to use a tool called CFSSL.",
+			"confidence": "high"
+		}
+	]
+}

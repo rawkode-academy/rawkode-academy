@@ -58,5 +58,13 @@ chapters:
     title: Conclusion & Outro
 duration: 3728
 guests: []
+resources:
+  - title: Killer.sh CKA Exam Simulator
+    type: url
+    url: 'https://killer.sh'
+    category: demos
+  - title: Kubernetes nodeSelector documentation
+    type: url
+    category: documentation
 ---
 

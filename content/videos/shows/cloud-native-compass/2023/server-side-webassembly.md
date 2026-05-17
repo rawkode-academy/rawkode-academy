@@ -61,5 +61,20 @@ guests:
   - kate-goldenring
   - connor-hicks
   - kevin-hoffman
+resources:
+  - title: WasmCloud open source project
+    type: url
+    category: code
+  - title: Programming WebAssembly with Rust
+    type: url
+    category: other
+  - title: Fermion
+    type: url
+    url: 'https://fermion.com'
+    category: other
+  - title: Suborbital
+    type: url
+    url: 'https://suborbital.dev'
+    category: other
 ---
 

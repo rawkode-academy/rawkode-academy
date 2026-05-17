@@ -56,5 +56,12 @@ chapters:
 duration: 4339
 guests:
   - gianluca-mardente
+resources:
+  - title: Project Sveltos installation documentation
+    type: url
+    category: documentation
+  - title: Project Sveltos register cluster documentation
+    type: url
+    category: documentation
 ---
 

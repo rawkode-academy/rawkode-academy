@@ -82,5 +82,10 @@ chapters:
 duration: 5700
 guests:
   - kat-cosgrove
+resources:
+  - title: Conductor
+    type: url
+    url: 'https://ghcr.io/containercraft/conductor'
+    category: other
 ---
 

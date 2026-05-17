@@ -67,5 +67,18 @@ chapters:
 duration: 3565
 guests:
   - ramiro-berrelleza
+resources:
+  - title: Okteto Quick Start Guide
+    type: url
+    category: documentation
+  - title: Okteto Movies sample application
+    type: url
+    category: demos
+  - title: Okteto Preview Environments documentation
+    type: url
+    category: documentation
+  - title: Docker samples voting app
+    type: url
+    category: demos
 ---
 

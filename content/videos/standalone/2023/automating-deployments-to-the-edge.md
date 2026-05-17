@@ -88,5 +88,13 @@ chapters:
     title: Conclusion and Next Steps
 duration: 1288
 guests: []
+resources:
+  - title: Portainer in Production repository
+    type: url
+    category: code
+  - title: KeyCDN Website Speed Test
+    type: url
+    url: 'https://tools.keycdn.com/performance'
+    category: other
 ---
 

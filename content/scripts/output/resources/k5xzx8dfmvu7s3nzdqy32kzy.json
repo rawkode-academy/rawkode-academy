@@ -1,0 +1,25 @@
+{
+	"video_id": "k5xzx8dfmvu7s3nzdqy32kzy",
+	"slug": "helm-kustomize-and-pod-security-policies",
+	"title": "Helm, Kustomize, and Pod Security Policies",
+	"generated_at": "2026-05-17T13:17:59.046Z",
+	"known_technology_names": [
+		"Portainer"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Portainer Kubernetes repository",
+			"url": "https://github.com/portainer/k8s",
+			"category": "code",
+			"evidence_quote": "Well, you can go to github.com/protainer/kates. That's k8s.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Kustomize documentation",
+			"category": "documentation",
+			"evidence_quote": "Now customize offers a lot of ways for you to make tweaks, and I would encourage you to go and check out their documentation.",
+			"confidence": "medium"
+		}
+	]
+}

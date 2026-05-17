@@ -50,5 +50,9 @@ chapters:
     title: Conclusion and Next Steps
 duration: 561
 guests: []
+resources:
+  - title: Grafana Parca plugin
+    type: url
+    category: other
 ---
 

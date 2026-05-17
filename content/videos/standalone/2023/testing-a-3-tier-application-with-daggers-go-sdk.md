@@ -71,5 +71,10 @@ chapters:
     title: Conclusion & Key Takeaways
 duration: 1416
 guests: []
+resources:
+  - title: Hurl
+    type: url
+    url: 'https://hurl.dev'
+    category: documentation
 ---
 

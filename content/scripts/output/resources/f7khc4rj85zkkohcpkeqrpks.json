@@ -1,0 +1,25 @@
+{
+	"video_id": "f7khc4rj85zkkohcpkeqrpks",
+	"slug": "hands-on-introduction-to-k0rdent",
+	"title": "Hands-on Introduction to k0rdent",
+	"generated_at": "2026-05-17T13:26:34.142Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Martin Sadler",
+		"Karthik Satchitanand"
+	],
+	"resources": [
+		{
+			"title": "k0rdent Quick Starts documentation",
+			"category": "documentation",
+			"evidence_quote": "We're gonna click on documentation and quick starts",
+			"confidence": "high"
+		},
+		{
+			"title": "k0rdent Catalog",
+			"category": "code",
+			"evidence_quote": "So if you go to GitHub forward slash cordon. Catalog? Yep. Yep.",
+			"confidence": "medium"
+		}
+	]
+}

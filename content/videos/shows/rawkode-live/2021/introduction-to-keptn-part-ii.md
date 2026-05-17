@@ -81,5 +81,23 @@ chapters:
 duration: 4940
 guests:
   - jurgen-etzlstorfer
+resources:
+  - title: Google SRE Book
+    type: url
+    category: other
+  - title: Keptn Tutorial
+    type: url
+    url: 'https://tutorials.keptn.sh'
+    category: documentation
+  - title: Keptn Service Template
+    type: url
+    category: code
+  - title: Keptn Sandbox
+    type: url
+    category: code
+  - title: Keptn Slack
+    type: url
+    url: 'https://slack.keptn.sh'
+    category: other
 ---
 

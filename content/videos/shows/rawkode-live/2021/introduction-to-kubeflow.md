@@ -56,5 +56,12 @@ chapters:
 duration: 7820
 guests:
   - michael-tanenbaum
+resources:
+  - title: Grokking Deep Learning
+    type: url
+    category: other
+  - title: Kaggle Chest X-Ray Pneumonia Dataset by Paul Timothy Mooney
+    type: url
+    category: demos
 ---
 

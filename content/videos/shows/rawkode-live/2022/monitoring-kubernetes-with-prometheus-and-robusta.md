@@ -49,5 +49,15 @@ chapters:
 duration: 4716
 guests:
   - natan-yellin
+resources:
+  - title: Kube Watch
+    type: url
+    category: code
+  - title: Robusta custom automation tutorial
+    type: url
+    category: documentation
+  - title: Robusta Stack Overflow enricher source code
+    type: url
+    category: code
 ---
 

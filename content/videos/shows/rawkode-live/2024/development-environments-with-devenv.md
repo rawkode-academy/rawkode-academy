@@ -65,5 +65,12 @@ chapters:
 duration: 4213
 guests:
   - domen-kozar
+resources:
+  - title: Process Compose
+    type: url
+    category: code
+  - title: Devenv fly.io example
+    type: url
+    category: demos
 ---
 

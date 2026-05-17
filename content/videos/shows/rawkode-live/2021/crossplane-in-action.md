@@ -49,5 +49,21 @@ chapters:
 duration: 3334
 guests:
   - viktor-farcic
+resources:
+  - title: Crossplane Getting Started documentation
+    type: url
+    category: documentation
+  - title: Crossplane contrib providers
+    type: url
+    category: code
+  - title: Equinix Metal provider for Crossplane
+    type: url
+    category: code
+  - title: Civo provider for Crossplane
+    type: url
+    category: code
+  - title: SQL provider for Crossplane
+    type: url
+    category: code
 ---
 

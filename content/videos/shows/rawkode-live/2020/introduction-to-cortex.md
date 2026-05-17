@@ -67,5 +67,15 @@ chapters:
 duration: 4145
 guests:
   - ganesh-vernekar
+resources:
+  - title: Cortex Getting Started block storage documentation
+    type: url
+    category: documentation
+  - title: Cortex upstream Docker Compose demos
+    type: url
+    category: demos
+  - title: Thanos project
+    type: url
+    category: code
 ---
 

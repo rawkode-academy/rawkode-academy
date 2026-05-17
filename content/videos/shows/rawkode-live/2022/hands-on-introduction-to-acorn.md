@@ -95,5 +95,12 @@ chapters:
 duration: 5208
 guests:
   - darren-shepherd
+resources:
+  - title: Acorn getting started guide
+    type: url
+    category: documentation
+  - title: Jenkins on Acorn example
+    type: url
+    category: demos
 ---
 

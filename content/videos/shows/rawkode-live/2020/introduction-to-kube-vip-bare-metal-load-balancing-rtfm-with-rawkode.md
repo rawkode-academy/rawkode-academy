@@ -34,5 +34,9 @@ chapters:
 duration: 3078
 guests:
   - dan-finneran
+resources:
+  - title: kube-vip documentation
+    type: url
+    category: documentation
 ---
 

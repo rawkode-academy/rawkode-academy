@@ -84,5 +84,13 @@ duration: 4953
 guests:
   - marques-johansson
   - mahmoud-saada
+resources:
+  - title: Rawkode.chat Discord channel
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
+  - title: Kubernetes controller utils create pods code
+    type: url
+    category: code
 ---
 

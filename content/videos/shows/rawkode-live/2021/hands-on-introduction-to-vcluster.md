@@ -76,5 +76,15 @@ duration: 4078
 guests:
   - rich-burroughs
   - lukas-gentele
+resources:
+  - title: KubeCuddle podcast
+    type: url
+    category: other
+  - title: vCluster Getting Started Guide
+    type: url
+    category: documentation
+  - title: 'vCluster Operator Guide: Monitoring and Metrics'
+    type: url
+    category: documentation
 ---
 

@@ -93,5 +93,19 @@ chapters:
     title: Conclusion and Next Steps
 duration: 5069
 guests: []
+resources:
+  - title: Rawkode Academy courses repository
+    type: url
+    url: 'https://github.com/rockwoodacademy/courses'
+    category: code
+  - title: Teleport Linux get started guide
+    type: url
+    category: documentation
+  - title: Teleport reference config file documentation
+    type: url
+    category: documentation
+  - title: Teleport enhanced session recording documentation
+    type: url
+    category: documentation
 ---
 

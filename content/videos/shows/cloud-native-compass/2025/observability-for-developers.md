@@ -15,5 +15,21 @@ duration: 2922
 audioFileSize: 70129415
 guests:
   - adriana-villela
+resources:
+  - title: OpenTelemetry docs
+    type: url
+    category: documentation
+  - title: O'Reilly video course on observability with OpenTelemetry
+    type: url
+    category: other
+  - title: OpenTelemetry Collector Builder docs
+    type: url
+    category: documentation
+  - title: How to contribute to OpenTelemetry blog post
+    type: url
+    category: other
+  - title: Ted Young and Austin Parker book on OpenTelemetry
+    type: url
+    category: other
 ---
 

@@ -62,5 +62,15 @@ chapters:
 duration: 6446
 guests:
   - marc-boorshtein
+resources:
+  - title: 'Kubernetes: An Enterprise Guide, Second Edition'
+    type: url
+    category: other
+  - title: 'KubeCon 2020 Europe talk: I Can RBAC and So Can You'
+    type: url
+    category: other
+  - title: Fairwinds RBAC Manager
+    type: url
+    category: code
 ---
 

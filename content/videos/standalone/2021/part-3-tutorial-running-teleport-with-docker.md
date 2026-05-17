@@ -79,5 +79,9 @@ chapters:
     title: Conclusion and Next Steps
 duration: 872
 guests: []
+resources:
+  - title: 'Teleport documentation: Running Teleport with Docker'
+    type: url
+    category: documentation
 ---
 

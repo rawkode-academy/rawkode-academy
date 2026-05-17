@@ -63,5 +63,15 @@ chapters:
 duration: 4894
 guests:
   - matt-turner
+resources:
+  - title: Kubernetes kubectl plugins documentation
+    type: url
+    category: documentation
+  - title: Krew kubectl plugin manager
+    type: url
+    category: other
+  - title: Krew plugin index repository
+    type: url
+    category: code
 ---
 

@@ -1,0 +1,16 @@
+{
+	"video_id": "ob97b14ky0u0nqgxnhmsqg7s",
+	"slug": "mcp-servers-for-rust-developers",
+	"title": "MCP Servers for Rust Developers",
+	"generated_at": "2026-05-17T13:26:09.719Z",
+	"known_technology_names": [],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "State of Kubernetes Report 2025",
+			"category": "other",
+			"evidence_quote": "taking a look at the state of Kubernetes report for 2025",
+			"confidence": "high"
+		}
+	]
+}

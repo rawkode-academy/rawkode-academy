@@ -68,5 +68,18 @@ chapters:
 duration: 4640
 guests:
   - kevin-mcdermott
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
+  - title: Tekton Pipelines release documentation
+    type: url
+    category: documentation
+  - title: Tekton Catalog git-clone task
+    type: url
+    category: code
+  - title: Tekton Catalog
+    type: url
+    category: code
 ---
 

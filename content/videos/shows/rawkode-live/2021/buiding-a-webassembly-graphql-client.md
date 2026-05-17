@@ -105,5 +105,17 @@ duration: 7204
 guests:
   - connor-hicks
   - francis-gulotta
+resources:
+  - title: api.rawkode.dev GraphQL endpoint
+    type: url
+    url: 'https://api.rawkode.dev'
+    category: demos
+  - title: Shopify Scripts platform
+    type: url
+    category: other
+  - title: Rawkode.chat Discord
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
 ---
 

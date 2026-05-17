@@ -69,5 +69,20 @@ chapters:
 duration: 4700
 guests:
   - xuanyi-chew
+resources:
+  - title: Dgraph Docker image
+    type: url
+    category: code
+  - title: Dgraph DQL query language functions documentation
+    type: url
+    category: documentation
+  - title: Dgraph Discuss community forum
+    type: url
+    url: 'https://discuss.dgraph.io'
+    category: other
+  - title: Systems Conf
+    type: url
+    url: 'https://systemsconf.io'
+    category: other
 ---
 

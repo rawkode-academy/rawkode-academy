@@ -80,5 +80,10 @@ chapters:
 duration: 3618
 guests:
   - marcus-olsson
+resources:
+  - title: Equinix Metal
+    type: url
+    url: 'https://metal.equinix.com'
+    category: other
 ---
 

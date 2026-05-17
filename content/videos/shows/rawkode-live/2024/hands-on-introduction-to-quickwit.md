@@ -79,5 +79,18 @@ chapters:
 duration: 4754
 guests:
   - francois-massot
+resources:
+  - title: Quickwit Quick Start Guide
+    type: url
+    category: documentation
+  - title: Quickwit Common Crawl demo
+    type: url
+    category: demos
+  - title: Quickwit Helm chart
+    type: url
+    category: code
+  - title: Quickwit Grafana plugin
+    type: url
+    category: code
 ---
 

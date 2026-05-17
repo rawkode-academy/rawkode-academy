@@ -101,5 +101,18 @@ chapters:
 duration: 5295
 guests:
   - bartlomiej-plotka
+resources:
+  - title: Thanos Katacoda tutorials
+    type: url
+    category: demos
+  - title: bwplotka Katacoda demo resources
+    type: url
+    category: demos
+  - title: Site Reliability Engineering book
+    type: url
+    category: other
+  - title: CNCF SIG Observability meetings
+    type: url
+    category: other
 ---
 

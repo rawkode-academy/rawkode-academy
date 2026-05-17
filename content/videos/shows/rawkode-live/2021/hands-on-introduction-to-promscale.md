@@ -82,5 +82,15 @@ duration: 4461
 guests:
   - vineeth-pothulapati
   - mat-arye
+resources:
+  - title: Promscale design doc
+    type: url
+    category: documentation
+  - title: Getting started with Promscale doc
+    type: url
+    category: documentation
+  - title: Dan Liu post about getting more value from metrics
+    type: url
+    category: other
 ---
 

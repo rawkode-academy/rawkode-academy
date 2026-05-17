@@ -176,5 +176,17 @@ duration: 5965
 guests:
   - marino-wijay
   - john-anderson
+resources:
+  - title: Rawkode Academy Teleport sponsor link
+    type: url
+    category: other
+  - title: Rawkode Academy Equinix Metal sponsor link
+    type: url
+    url: 'https://rawkode.live/metal'
+    category: other
+  - title: Equinix Metal Console
+    type: url
+    url: 'https://console.equinix.com'
+    category: other
 ---
 

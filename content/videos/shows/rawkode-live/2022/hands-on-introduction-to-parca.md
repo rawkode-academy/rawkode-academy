@@ -122,5 +122,14 @@ chapters:
 duration: 5142
 guests:
   - frederic-branczyk
+resources:
+  - title: Parca in Kubernetes tutorial
+    type: url
+    category: documentation
+  - title: >-
+      KubeCon Barcelona 2019 observability keynote by Frederic Branczyk and Tom
+      Wilkie
+    type: url
+    category: other
 ---
 

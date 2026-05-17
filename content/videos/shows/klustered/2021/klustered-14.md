@@ -102,5 +102,9 @@ duration: 6357
 guests:
   - sid-palas
   - arian-van-putten
+resources:
+  - title: DevOps Directive YouTube channel
+    type: url
+    category: other
 ---
 

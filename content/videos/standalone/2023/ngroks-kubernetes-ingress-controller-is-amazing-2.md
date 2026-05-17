@@ -44,5 +44,13 @@ chapters:
     title: Conclusion
 duration: 485
 guests: []
+resources:
+  - title: ngrok/kubernetes-ngrok-controller
+    type: url
+    url: 'https://github.com/ngrok/kubernetes-ngrok-controller'
+    category: code
+  - title: ngrok Kubernetes Ingress Controller release blog
+    type: url
+    category: other
 ---
 

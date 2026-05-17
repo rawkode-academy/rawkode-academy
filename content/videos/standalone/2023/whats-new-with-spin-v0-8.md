@@ -30,5 +30,9 @@ chapters:
     title: Conclusion
 duration: 452
 guests: []
+resources:
+  - title: Spin 0.8 release blog
+    type: url
+    category: other
 ---
 

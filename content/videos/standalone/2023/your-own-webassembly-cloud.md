@@ -42,5 +42,13 @@ chapters:
     title: Conclusion
 duration: 1251
 guests: []
+resources:
+  - title: github.com/fermion/installer
+    type: url
+    url: 'https://github.com/fermion/installer'
+    category: code
+  - title: Spin 0.8 video
+    type: url
+    category: other
 ---
 

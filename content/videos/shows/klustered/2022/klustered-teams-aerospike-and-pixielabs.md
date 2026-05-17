@@ -129,5 +129,18 @@ chapters:
   - startTime: 12671
     title: Conclusion / Winners Announced
 duration: 6472
+resources:
+  - title: Equinix Metal Rawkode offer page
+    type: url
+    url: 'https://rawkode.live/metal'
+    category: other
+  - title: 'Pixie website, docs, blog, and community links'
+    type: url
+    url: 'https://px.dev'
+    category: documentation
+  - title: Pixie Slack community invite
+    type: url
+    url: 'https://slackin.px.dev'
+    category: other
 ---
 

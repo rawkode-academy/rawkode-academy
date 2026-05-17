@@ -1,0 +1,19 @@
+{
+	"video_id": "v32afbzo0mzowipaa30orbtz",
+	"slug": "testing-a-3-tier-application-with-daggers-go-sdk",
+	"title": "Testing a 3-Tier Application with Dagger's Go SDK",
+	"generated_at": "2026-05-17T13:18:34.221Z",
+	"known_technology_names": [
+		"Dagger"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Hurl",
+			"url": "https://hurl.dev",
+			"category": "documentation",
+			"evidence_quote": "If you're not familiar with huddle, go to huddle dot dev. That is h u r l dot dev.",
+			"confidence": "high"
+		}
+	]
+}

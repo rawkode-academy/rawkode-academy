@@ -82,5 +82,21 @@ chapters:
 duration: 3803
 guests:
   - ben-abbott
+resources:
+  - title: Teleport Public Roadmap
+    type: url
+    category: documentation
+  - title: Teleport Requests for Discussion (RFD)
+    type: url
+    category: documentation
+  - title: Why the Four Eyes Principle is Critical for Access
+    type: url
+    category: other
+  - title: Teleport Ansible Guide
+    type: url
+    category: documentation
+  - title: Teleport Upcoming Releases
+    type: url
+    category: documentation
 ---
 

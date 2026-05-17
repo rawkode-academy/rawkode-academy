@@ -67,5 +67,16 @@ chapters:
 duration: 5335
 guests:
   - solomon-hykes
+resources:
+  - title: Rawkode Discord server
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
+  - title: CUE interactive playground
+    type: url
+    category: demos
+  - title: sigstore project
+    type: url
+    category: code
 ---
 

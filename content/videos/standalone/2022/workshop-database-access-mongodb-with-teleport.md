@@ -99,5 +99,16 @@ chapters:
     title: Conclusion & Preview of Next Workshop
 duration: 2884
 guests: []
+resources:
+  - title: rawkode-academy/courses
+    type: url
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+  - title: MongoDB Atlas Documentation
+    type: url
+    category: documentation
+  - title: MongoDB Compass
+    type: url
+    category: other
 ---
 

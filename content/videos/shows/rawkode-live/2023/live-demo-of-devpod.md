@@ -81,5 +81,9 @@ chapters:
 duration: 3163
 guests:
   - lukas-gentele
+resources:
+  - title: Scaleway provider for DevPod
+    type: url
+    category: code
 ---
 

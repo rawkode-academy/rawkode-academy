@@ -55,5 +55,9 @@ chapters:
 duration: 1345
 guests:
   - brian-ketelsen
+resources:
+  - title: podmansh man page
+    type: url
+    category: documentation
 ---
 

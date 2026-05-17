@@ -1,0 +1,20 @@
+{
+	"video_id": "xn11gt75dscahop47hm3hznw",
+	"slug": "hands-on-introduction-to-wundergraph",
+	"title": "Hands-on Introduction to WunderGraph",
+	"generated_at": "2026-05-17T13:28:59.718Z",
+	"known_technology_names": [
+		"WunderGraph"
+	],
+	"known_guest_names": [
+		"Jens Neuse"
+	],
+	"resources": [
+		{
+			"title": "WunderGraph Next.js TypeScript Functions example",
+			"category": "demos",
+			"evidence_quote": "we have one example that's\n<v Speaker 1>Next. Js TypeScript\n<v Speaker 1>functions.",
+			"confidence": "medium"
+		}
+	]
+}

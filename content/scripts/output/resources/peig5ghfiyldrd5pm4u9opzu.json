@@ -1,0 +1,27 @@
+{
+	"video_id": "peig5ghfiyldrd5pm4u9opzu",
+	"slug": "22-leigh-capili-vs-marcus-noble",
+	"title": "22. Leigh Capili vs. Marcus Noble",
+	"generated_at": "2026-05-17T13:20:24.690Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Leigh Capili",
+		"Marcus Noble"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "So check out Rawkode. Livemetal.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Artifact Hub",
+			"category": "other",
+			"evidence_quote": "I basically just went through Artifact Hub and installed all the top helm charts.",
+			"confidence": "medium"
+		}
+	]
+}

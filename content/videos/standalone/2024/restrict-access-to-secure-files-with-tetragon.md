@@ -77,5 +77,20 @@ chapters:
     title: 'Conclusion, Security Layers, and Next Steps (Process Life Cycles)'
 duration: 1256
 guests: []
+resources:
+  - title: Tetragon Tracing Policy Concepts
+    type: url
+    category: documentation
+  - title: Tetragon GitHub Examples
+    type: url
+    url: 'https://github.com/cilium/tetragon'
+    category: code
+  - title: di.net Linux Man Pages
+    type: url
+    url: 'https://di.net'
+    category: documentation
+  - title: Sourcegraph Linux Kernel Search
+    type: url
+    category: other
 ---
 

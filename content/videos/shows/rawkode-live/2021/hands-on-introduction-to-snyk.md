@@ -85,5 +85,12 @@ chapters:
 duration: 5536
 guests:
   - matt-jarvis
+resources:
+  - title: n8n workflow automation project
+    type: url
+    category: code
+  - title: CNCF Cloud Native Security Whitepaper
+    type: url
+    category: documentation
 ---
 

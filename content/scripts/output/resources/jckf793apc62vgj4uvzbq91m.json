@@ -1,0 +1,25 @@
+{
+	"video_id": "jckf793apc62vgj4uvzbq91m",
+	"slug": "your-own-webassembly-cloud",
+	"title": "Your Own WebAssembly Cloud",
+	"generated_at": "2026-05-17T13:17:55.433Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "github.com/fermion/installer",
+			"url": "https://github.com/fermion/installer",
+			"category": "code",
+			"evidence_quote": "And you can go to github.com/fermion/installer, where you will find Terraform automation to run your own little fermion cloud on Amazon, Azure, Civo, Digital Ocean, GCP, and come in soon, and you'll see the demo on Tuesday, Equinix Medal.",
+			"confidence": "high"
+		},
+		{
+			"title": "Spin 0.8 video",
+			"category": "other",
+			"evidence_quote": "Why? Well, go check out the Spin watch new 0.8 video that I released last week.",
+			"confidence": "medium"
+		}
+	]
+}

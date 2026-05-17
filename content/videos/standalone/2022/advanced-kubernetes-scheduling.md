@@ -37,5 +37,18 @@ chapters:
     title: Conclusion and Summary
 duration: 3122
 guests: []
+resources:
+  - title: 'Kubernetes Documentation: PriorityClass'
+    type: url
+    category: documentation
+  - title: 'Kubernetes Documentation: Pod Scheduling Readiness'
+    type: url
+    category: documentation
+  - title: 'Kubernetes Enhancement Proposal: Dynamic Resource Allocation'
+    type: url
+    category: documentation
+  - title: 'Kubernetes Documentation: Topology Spread Constraints'
+    type: url
+    category: documentation
 ---
 

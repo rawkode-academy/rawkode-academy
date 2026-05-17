@@ -104,5 +104,10 @@ duration: 2978
 guests:
   - borko-djurkovic
   - bojan-djurkovic
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://rokode.live/teleport'
+    category: other
 ---
 

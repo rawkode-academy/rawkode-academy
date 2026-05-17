@@ -81,5 +81,15 @@ guests:
   - deepthi-sigireddi
   - alkin-tezuysal
   - open-source-database-evangelist
+resources:
+  - title: Vitess Operator
+    type: url
+    category: code
+  - title: Vitess Kubernetes Quick Start
+    type: url
+    category: documentation
+  - title: Vitess Point-in-Time Recovery documentation
+    type: url
+    category: documentation
 ---
 

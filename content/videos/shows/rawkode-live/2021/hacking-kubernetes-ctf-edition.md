@@ -113,5 +113,21 @@ chapters:
 duration: 3574
 guests:
   - andrew-martin
+resources:
+  - title: Kubernetes Simulator
+    type: url
+    category: code
+  - title: Hacking Kubernetes book
+    type: url
+    category: other
+  - title: Am I Contained
+    type: url
+    category: code
+  - title: Stern Kubernetes log tailing tool
+    type: url
+    category: code
+  - title: Bane AppArmor profile tool
+    type: url
+    category: code
 ---
 

@@ -39,5 +39,6 @@ chapters:
 duration: 1590
 guests:
   - michael-irwin
+resources: []
 ---
 

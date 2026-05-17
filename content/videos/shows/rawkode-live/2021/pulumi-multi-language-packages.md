@@ -68,5 +68,15 @@ chapters:
 duration: 5280
 guests:
   - lee-briggs
+resources:
+  - title: Pulumi Go boilerplate provider
+    type: url
+    category: code
+  - title: Rawkode Pulumi production app
+    type: url
+    category: code
+  - title: Pulumi Python boilerplate provider
+    type: url
+    category: code
 ---
 

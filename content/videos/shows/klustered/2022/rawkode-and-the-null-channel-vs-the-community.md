@@ -127,5 +127,18 @@ chapters:
 duration: 8754
 guests:
   - marek-counts
+resources:
+  - title: Teleport sponsor landing page
+    type: url
+    url: 'https://Rawkode.live/Teleport'
+    category: other
+  - title: Equinix Metal sponsor landing page
+    type: url
+    url: 'https://Rawkode.live/metal'
+    category: other
+  - title: Rawkode Academy T-shirt competition page
+    type: url
+    url: 'https://Rawkode.live/win'
+    category: other
 ---
 

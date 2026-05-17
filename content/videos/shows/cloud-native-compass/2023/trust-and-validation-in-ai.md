@@ -80,5 +80,19 @@ duration: 2591
 audioFileSize: 62183063
 guests:
   - jj-asghar
+resources:
+  - title: IBM watsonx.ai developer page
+    type: url
+    url: 'https://ibm.biz/dev-watsonx'
+    category: documentation
+  - title: The Pile AI dataset
+    type: url
+    category: other
+  - title: FOSSY working session Etherpad notes on AI data provenance
+    type: url
+    category: other
+  - title: Hugging Face
+    type: url
+    category: other
 ---
 

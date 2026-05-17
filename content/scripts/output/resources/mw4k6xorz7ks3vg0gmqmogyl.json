@@ -1,0 +1,36 @@
+{
+	"video_id": "mw4k6xorz7ks3vg0gmqmogyl",
+	"slug": "building-ai-applications-with-webassembly-spin",
+	"title": "Building AI Applications with WebAssembly & Spin",
+	"generated_at": "2026-05-17T13:25:41.868Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Thorsten Hans"
+	],
+	"resources": [
+		{
+			"title": "Fermion Developer Home",
+			"category": "documentation",
+			"evidence_quote": "we are looking at the Fermion Developer Home because I think that's a good like resource to get started",
+			"confidence": "high"
+		},
+		{
+			"title": "SpinCube documentation",
+			"category": "documentation",
+			"evidence_quote": "SpinCube documentation guides you through that.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Thorsten Hans examples repository",
+			"category": "code",
+			"evidence_quote": "I created a repository with like common patterns and how to implement them in spin with different languages.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Ollama deployment guide",
+			"category": "documentation",
+			"evidence_quote": "deployed OLAMA according to their guide, deployed DeepSeq.",
+			"confidence": "medium"
+		}
+	]
+}

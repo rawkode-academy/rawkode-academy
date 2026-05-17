@@ -132,5 +132,10 @@ guests:
   - christopher-hansen
   - ron-petty
   - hitesh-sharma
+resources:
+  - title: Equinix Metal
+    type: url
+    url: 'https://metal.equinix.com'
+    category: other
 ---
 

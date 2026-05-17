@@ -92,5 +92,22 @@ duration: 4891
 guests:
   - noel-georgi
   - RussellWaite
+resources:
+  - title: Rawkode.live YouTube channel
+    type: url
+    url: 'https://rawkode.live'
+    category: other
+  - title: Rawkode Discord server
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
+  - title: Rawkode.live destroy-it kubeconfig demo
+    type: url
+    url: 'https://rawkode.live/destroy-it'
+    category: demos
+  - title: Teleport sponsor link
+    type: url
+    url: 'https://rawkode.live/teleport'
+    category: other
 ---
 

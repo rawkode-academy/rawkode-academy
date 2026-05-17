@@ -19,5 +19,19 @@ duration: 3547
 guests:
   - oleksandr-dubenko
   - will-case
+resources:
+  - title: Headlamp website
+    type: url
+    url: 'https://headlamp.dev/'
+    category: documentation
+  - title: Headlamp documentation
+    type: url
+    category: documentation
+  - title: Artifact Hub Headlamp plugin registry
+    type: url
+    category: other
+  - title: Headlamp contributor guide
+    type: url
+    category: documentation
 ---
 

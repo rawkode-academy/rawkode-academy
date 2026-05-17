@@ -79,5 +79,6 @@ chapters:
 duration: 3267
 guests:
   - natan-yellin
+resources: []
 ---
 

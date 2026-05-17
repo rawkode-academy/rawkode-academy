@@ -104,5 +104,9 @@ chapters:
 duration: 5582
 guests:
   - jens-neuse
+resources:
+  - title: WunderGraph Next.js TypeScript Functions example
+    type: url
+    category: demos
 ---
 

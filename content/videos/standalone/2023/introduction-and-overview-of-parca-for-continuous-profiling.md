@@ -76,5 +76,9 @@ chapters:
     title: Conclusion & What's Coming Next (Grafana Integration)
 duration: 1226
 guests: []
+resources:
+  - title: Parca Quickstart Guide
+    type: url
+    category: documentation
 ---
 

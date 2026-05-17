@@ -145,5 +145,15 @@ chapters:
 duration: 4073
 guests:
   - rohit-ghumare
+resources:
+  - title: TechWorld with Nana YouTube channel
+    type: url
+    category: other
+  - title: Coursera Financial Aid
+    type: url
+    category: other
+  - title: solo.io Academy
+    type: url
+    category: documentation
 ---
 

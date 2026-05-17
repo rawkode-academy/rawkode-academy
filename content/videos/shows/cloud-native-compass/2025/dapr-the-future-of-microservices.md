@@ -16,5 +16,21 @@ duration: 3189
 audioFileSize: 76517386
 guests:
   - mark-fussell
+resources:
+  - title: State of Dapr Report 2025
+    type: url
+    category: other
+  - title: Carl Hewitt actor model paper
+    type: url
+    category: other
+  - title: Dapr Agents framework
+    type: url
+    category: code
+  - title: Diagrid Conductor
+    type: url
+    category: demos
+  - title: Diagrid Catalyst
+    type: url
+    category: demos
 ---
 

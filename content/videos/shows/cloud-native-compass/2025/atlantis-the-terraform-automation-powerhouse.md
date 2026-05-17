@@ -15,5 +15,15 @@ duration: 2371
 audioFileSize: 56911135
 guests:
   - jose-amengual
+resources:
+  - title: Project Atlantis
+    type: url
+    category: code
+  - title: Atlantis OpenTofu support blog post
+    type: url
+    category: other
+  - title: Atlantis Helm chart
+    type: url
+    category: code
 ---
 

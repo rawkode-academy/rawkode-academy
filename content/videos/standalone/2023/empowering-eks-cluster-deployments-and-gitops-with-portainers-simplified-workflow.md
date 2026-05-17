@@ -1,7 +1,5 @@
 ---
-id: >-
-  aopb87s3u3cgcitqacbz0glh
-  empowering-eks-cluster-deployments-and-gitops-with-portainers-simplified-workflow
+id: aopb87s3u3cgcitqacbz0glh
 slug: >-
   empowering-eks-cluster-deployments-and-gitops-with-portainers-simplified-workflow
 title: >-
@@ -41,5 +39,9 @@ chapters:
     title: Closing
 duration: 582
 guests: []
+resources:
+  - title: Google Cloud Platform microservice demo
+    type: url
+    category: demos
 ---
 

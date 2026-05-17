@@ -205,5 +205,13 @@ chapters:
   - startTime: 5303
     title: Outro
 duration: 5384
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
+  - title: Rawkode Academy t-shirt giveaway
+    type: url
+    url: 'https://Rawkode.live/win'
+    category: other
 ---
 

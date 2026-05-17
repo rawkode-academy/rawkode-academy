@@ -95,5 +95,18 @@ chapters:
 duration: 4373
 guests:
   - sy-brand
+resources:
+  - title: Exercism language tracks
+    type: url
+    category: other
+  - title: Catch2 testing framework
+    type: url
+    category: code
+  - title: C++ Patterns
+    type: url
+    category: documentation
+  - title: '#include <C++> Discord'
+    type: url
+    category: other
 ---
 

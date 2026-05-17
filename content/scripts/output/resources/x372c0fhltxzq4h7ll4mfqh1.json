@@ -1,0 +1,21 @@
+{
+	"video_id": "x372c0fhltxzq4h7ll4mfqh1",
+	"slug": "klustered-14",
+	"title": "Klustered #14",
+	"generated_at": "2026-05-17T13:22:19.383Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Sid Palas",
+		"Arian van Putten"
+	],
+	"resources": [
+		{
+			"title": "DevOps Directive YouTube channel",
+			"category": "other",
+			"evidence_quote": "So I have a YouTube channel called DevOps Directive where I cover a variety of topics from Docker to Kubernetes and all sorts of things. So go check that out if you have time.",
+			"confidence": "high"
+		}
+	]
+}

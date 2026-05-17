@@ -57,5 +57,12 @@ chapters:
 duration: 5756
 guests:
   - noel-georgi
+resources:
+  - title: Cilium Quick Start documentation
+    type: url
+    category: documentation
+  - title: Equinix Metal
+    type: url
+    category: other
 ---
 

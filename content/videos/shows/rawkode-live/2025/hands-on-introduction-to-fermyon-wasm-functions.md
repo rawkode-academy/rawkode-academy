@@ -16,5 +16,21 @@ show: rawkode-live
 duration: 4849
 guests:
   - thorsten-hans
+resources:
+  - title: Fermyon Wasm Functions announcement post
+    type: url
+    category: other
+  - title: Fermyon Wasm Functions documentation section
+    type: url
+    category: documentation
+  - title: Fermyon Wasm Functions quick start
+    type: url
+    category: documentation
+  - title: Spin JavaScript SDK repository
+    type: url
+    category: code
+  - title: Fermyon Wasm Functions samples repository
+    type: url
+    category: code
 ---
 

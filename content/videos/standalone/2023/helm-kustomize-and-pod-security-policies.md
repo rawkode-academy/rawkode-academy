@@ -53,5 +53,13 @@ chapters:
     title: Conclusion
 duration: 1107
 guests: []
+resources:
+  - title: Portainer Kubernetes repository
+    type: url
+    url: 'https://github.com/portainer/k8s'
+    category: code
+  - title: Kustomize documentation
+    type: url
+    category: documentation
 ---
 

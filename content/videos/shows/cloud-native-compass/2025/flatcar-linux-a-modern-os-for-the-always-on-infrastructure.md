@@ -43,5 +43,18 @@ guests:
   - thilo
   - mathieu-tortuyaux
   - james-le-cuirot
+resources:
+  - title: Flatcar Getting Started documentation
+    type: url
+    category: documentation
+  - title: Flatcar SysEx Bakery
+    type: url
+    category: code
+  - title: Flatcar Linux update operator
+    type: url
+    category: code
+  - title: libguestfs tools
+    type: url
+    category: other
 ---
 

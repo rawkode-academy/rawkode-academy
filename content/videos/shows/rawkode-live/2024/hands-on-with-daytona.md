@@ -57,5 +57,6 @@ chapters:
 duration: 3360
 guests:
   - ivan-burazin
+resources: []
 ---
 
