@@ -1,0 +1,18 @@
+---
+name: Equinix Metal
+logos:
+  icon: true
+website: 'https://deploy.equinix.com/'
+documentation: 'https://deploy.equinix.com/developers/docs/metal/'
+license: Commercial
+status: stable
+category: Provisioning
+subcategory: Cloud Provider
+aliases:
+  - Packet
+---
+Equinix Metal is a bare-metal-as-a-service offering that provisions dedicated physical hosts through an API, without a hypervisor sitting between the workload and the hardware. It began life as Packet, an API-first bare-metal startup that Equinix acquired in 2020 and rebranded the same year to slot the product into its global footprint of interconnection facilities.
+
+Unlike a typical public cloud, every machine is single-tenant and unshared, which removes the noisy-neighbour and virtualisation overhead that makes bare-metal attractive for latency-sensitive or throughput-bound workloads. Networking is the other differentiator: hosts ship with BGP-ready uplinks, support for bringing your own IP space, and direct access to the Equinix Fabric, so a deployment can peer with carriers, clouds, and exchanges from points of presence in dozens of metros worldwide. Common use cases include high-performance and HPC-style workloads, Kubernetes control planes and storage clusters that want predictable hardware, edge and CDN footprints, anycast services, and networking labs that need real BGP rather than an overlay simulation.
+
+In November 2024 Equinix announced that the public, self-serve Metal product would be wound down by 30 June 2026, with no new feature work and existing customers moved to month-to-month terms as their contracts expire. The Equinix Metal brand and the underlying interconnected bare-metal infrastructure remain part of the company's portfolio, but the consumer-grade compute offering is on a clear sunset path, so any new project should weigh that timeline against alternatives.

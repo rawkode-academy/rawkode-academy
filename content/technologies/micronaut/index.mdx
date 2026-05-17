@@ -1,0 +1,20 @@
+---
+name: Micronaut
+logos:
+  horizontal: true
+website: 'https://micronaut.io/'
+documentation: 'https://docs.micronaut.io/latest/guide/'
+source: 'https://github.com/micronaut-projects/micronaut-core'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+relatedTechnologies:
+  - java
+  - graalvm
+---
+Micronaut is a full-stack JVM framework for building modular, easily testable microservices and serverless applications. Its defining technical choice is that dependency injection, aspect-oriented programming, and configuration are all resolved at compile time through Java annotation processors, rather than at runtime through reflection and dynamic proxies. The framework generates the wiring code ahead of the JVM ever starting, which keeps startup times in the tens of milliseconds, holds memory usage to a small fraction of a traditional Java stack, and produces applications whose footprint stays roughly constant as the codebase grows.
+
+That compile-time model is what makes Micronaut a natural fit for serverless functions, scale-to-zero Knative services, and densely packed Kubernetes deployments, where cold starts and per-pod RAM directly shape cost and latency. Because almost no reflection survives into the runtime, Micronaut applications also compile cleanly to GraalVM native images, producing standalone executables that start in single-digit milliseconds and frequently run in 20 to 40 MB of memory. The framework ships first-class Gradle and Maven tooling for both JVM-mode JARs and native binaries, alongside extensions covering HTTP routing, reactive streams, JPA and SQL, messaging, observability, and cloud SDKs for AWS, GCP, Azure, and Oracle Cloud.
+
+Micronaut originated at Object Computing, Inc., as a successor to the team's earlier work on Grails, and is governed today by the Micronaut Foundation, a non-profit established in 2020 with a Technical Advisory Board that stewards the roadmap; the project has announced plans to move under the Commonhaus Foundation to broaden its open-source governance. Compared with Spring Boot, Micronaut trades a mature, reflection-heavy runtime for a leaner, AOT-friendly one; compared with Quarkus, it covers similar ground around fast startup and GraalVM but takes a different architectural path centred on annotation processors rather than build-time bytecode transformation, leaving teams to choose based on ecosystem fit and developer preference rather than any clear winner.

@@ -1,0 +1,22 @@
+---
+name: Spring
+logos:
+  icon: true
+website: 'https://spring.io/'
+documentation: 'https://spring.io/projects/spring-boot'
+source: 'https://github.com/spring-projects/spring-boot'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+aliases:
+  - Spring Boot
+  - Spring Framework
+relatedTechnologies:
+  - java
+---
+Spring is the dominant application framework for the Java ecosystem, built around the original Spring Framework that introduced dependency injection (DI) and aspect-oriented programming (AOP) to enterprise Java as a lighter alternative to the J2EE container model. The framework provides a comprehensive programming and configuration model for modern Java applications, focusing on the plumbing of enterprise systems, including transactions, data access, messaging, and web request handling, so application teams can concentrate on business logic. Spring Boot layers an opinionated convention-over-configuration experience on top, with auto-configuration, embedded servers, production-ready actuators, and a catalog of starter dependencies that turn a single Maven or Gradle coordinate into a runnable, batteries-included service.
+
+The Spring portfolio extends well beyond the core: Spring Data abstracts relational and non-relational stores, Spring Security handles authentication and authorization, Spring Batch covers large-scale job processing, and Spring Cloud provides the building blocks for distributed systems including service discovery, configuration servers, circuit breakers, and gateway routing. For cloud-native deployments, Spring Boot 3 absorbed the work pioneered by the Spring Native project and now ships first-class ahead-of-time (AOT) compilation support that produces GraalVM native images with sub-second startup and dramatically lower memory footprints, making Spring services competitive with Go and Node.js on Kubernetes for cold-start-sensitive and FaaS workloads.
+
+Spring originated as an open-source project from Rod Johnson's 2002 book before commercial stewardship passed through SpringSource, VMware's Pivotal subsidiary, and the rebranded VMware Tanzu, finally landing inside Broadcom after the 2023 VMware acquisition. Despite that corporate journey, the code remains Apache-2.0 licensed at github.com/spring-projects with a large independent contributor base, and Spring Boot is the default Java runtime for an enormous fraction of containerised microservices, which is why it shows up so often in Kubernetes deployment discussions and platform tooling demos.

@@ -1,0 +1,16 @@
+---
+name: Cloud Run
+logos:
+  icon: true
+website: 'https://cloud.google.com/run'
+documentation: 'https://cloud.google.com/run/docs'
+license: Commercial
+status: stable
+category: Serverless
+subcategory: Hosted Platform
+---
+Cloud Run is Google Cloud's managed serverless container platform, originally built on the Knative Serving API. It accepts any container image that listens for HTTP requests on a configurable port, so the runtime, language, and dependency story is entirely up to the image. Workloads scale automatically from zero to many instances based on inbound concurrency, and with request-based billing you are only charged for CPU and memory while a container is actively handling a request, metered at 100ms granularity.
+
+The product exposes two distinct workload shapes. A Service is a long-lived, request-driven deployment that can scale to zero and sits behind an HTTPS URL with revision-based traffic splitting inherited from Knative. A Job runs a container to completion for batch or scheduled work, is always instance-billed for the full execution time, and does not scale to zero in the same way. Underneath, workloads run in one of two execution environments: the first-generation gVisor sandbox, which gives faster cold starts and a smaller attack surface but reimplements syscalls in user space, and the second-generation gVisor-on-microVM environment, which provides a full Linux kernel, better CPU and network performance, and broader compatibility at the cost of slower starts.
+
+Cloud Run sits deliberately between Lambda-style FaaS and a full Kubernetes cluster. You bring a container instead of a function, but you do not run, patch, or scale the underlying nodes, and you do not write Deployments or Services. Because the surface area is the Knative Serving API, manifests remain largely portable: the same descriptor can target managed Cloud Run, Cloud Run on GKE, or a self-hosted Knative installation on any conformant cluster, which keeps an escape hatch open even though the day-to-day experience is fully managed by Google.

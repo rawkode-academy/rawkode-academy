@@ -1,0 +1,20 @@
+---
+name: Promtail
+logos:
+  icon: true
+website: 'https://grafana.com/docs/loki/latest/send-data/promtail/'
+documentation: 'https://grafana.com/docs/loki/latest/send-data/promtail/'
+source: 'https://github.com/grafana/loki/tree/v3.5.0/clients/cmd/promtail/'
+license: AGPL-3.0
+status: superseded
+category: Observability and Analysis
+subcategory: Logging
+relatedTechnologies:
+  - loki
+  - grafana
+---
+Promtail is the logging agent purpose-built by Grafana Labs to ship logs from local files into Loki. It tails files on disk, applies a pipeline of parsing and relabelling stages, and pushes batched log streams to a Loki distributor over HTTP, attaching the same kind of label set Loki uses for indexing. Each log line ends up with a small, well-chosen set of labels (job, namespace, pod, container) that match how operators already think about their workloads in Prometheus and Grafana.
+
+Configuration is service-discovery-driven and deliberately modelled on Prometheus. The same `kubernetes_sd_config`, `consul_sd_config`, and file-based discovery mechanisms, combined with `relabel_configs`, are used to decide which files to scrape and what labels to attach, so metrics and logs end up with matching metadata for joins and correlation in Grafana. The most common deployment pattern is a Kubernetes DaemonSet that mounts the node's `/var/log/pods` directory, discovers pods via the Kubernetes API, and forwards every container's stdout and stderr into Loki, all governed by a single scrape config that mirrors how Prometheus targets the same pods.
+
+As of February 2025 Grafana has deprecated Promtail and moved it into long-term support, with end of life scheduled for March 2026. Its functionality has been absorbed into Grafana Alloy, the unified OpenTelemetry-based collector that now handles logs, metrics, traces, and profiles in a single agent, and Grafana ships a `convert` command that translates Promtail YAML directly into Alloy configuration. Existing Promtail deployments will keep working for now, but new logging pipelines targeting Loki should start with Alloy rather than Promtail.

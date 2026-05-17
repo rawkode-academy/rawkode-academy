@@ -1,0 +1,15 @@
+---
+name: Kustomize
+website: 'https://kustomize.io/'
+documentation: 'https://kubectl.docs.kubernetes.io/references/kustomize/'
+source: 'https://github.com/kubernetes-sigs/kustomize'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+---
+Kustomize is a template-free configuration management tool for Kubernetes that customizes raw YAML manifests through declarative overlays. Rather than introducing a templating language or a parallel DSL, it operates directly on standard Kubernetes resources, leaving the original files untouched and producing the final manifests by composing layers at build time. The result is plain YAML that any Kubernetes-aware tool can validate, diff, and apply.
+
+The core model is built around bases and overlays. A base is a directory of resources together with a `kustomization.yaml` that lists them; an overlay is another directory that references one or more bases and applies modifications on top. Modifications come in two main forms: generators that produce ConfigMaps and Secrets from files or literals, and transformers that mutate existing resources, including strategic-merge patches, JSON 6902 patches, name and namespace prefixes, common labels and annotations, image tag overrides, and replica counts. Because overlays compose, the same base can be reused across environments such as dev, staging, and production with only the differences captured per overlay.
+
+Kustomize ships inside `kubectl` and is invoked via `kubectl apply -k` or `kubectl kustomize`, which means teams can adopt it without installing additional tooling on clusters or in CI. It is commonly used to manage per-environment variants of an application, to wrap upstream manifests from vendors or Helm renders with local policy and naming conventions, and as the rendering layer underneath GitOps controllers like Argo CD and Flux, both of which support Kustomize directories natively.

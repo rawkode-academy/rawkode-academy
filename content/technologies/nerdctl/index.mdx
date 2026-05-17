@@ -1,0 +1,17 @@
+---
+name: nerdctl
+logos:
+  horizontal: true
+website: 'https://github.com/containerd/nerdctl'
+documentation: 'https://github.com/containerd/nerdctl/blob/main/docs/command-reference.md'
+source: 'https://github.com/containerd/nerdctl'
+license: Apache-2.0
+status: stable
+category: Runtime
+subcategory: Container Runtime
+---
+nerdctl is a Docker-compatible command-line interface for containerd, shipped directly under the containerd organisation. It mirrors the familiar `docker run`, `docker build`, `docker compose`, and `docker image` surface area so that anyone with muscle memory from the Docker CLI can drive a containerd daemon without learning a new tool. Because it sits on top of containerd, it is the natural CLI for environments that have already standardised on containerd as their runtime, including Kubernetes nodes, where it provides a much more ergonomic interaction model than the lower-level `ctr` and `crictl` tools.
+
+Although nerdctl tracks the Docker CLI closely, it deliberately exposes capabilities that the Docker daemon does not surface. It supports rootless mode with near-native networking performance via bypass4netns, lazy-pulling of images through snapshotters like eStargz, Nydus, and OverlayBD so containers can start before their layers are fully downloaded, image encryption and decryption via ocicrypt, peer-to-peer image distribution through IPFS, and image signing and verification with cosign. Builds are powered by BuildKit, including multi-platform and cached builds, and there is a built-in `nerdctl compose` implementation that parses standard `docker-compose.yaml` files using compose-go.
+
+The typical use cases are running and debugging containers on Kubernetes nodes that use containerd, replacing the Docker CLI on workstations and CI runners that have moved off the Docker daemon, exercising containerd-specific features like lazy-pull and rootless networking, and acting as a thin developer-facing layer over containerd in tooling that does not want to depend on a separate Docker engine.
