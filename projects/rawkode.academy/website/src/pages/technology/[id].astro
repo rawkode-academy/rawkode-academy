@@ -400,28 +400,30 @@ const hasCommunityLinks =
 				)}
 			</div>
 
-			<div class="flex flex-wrap gap-2 items-center">
-				{hasContent && (
-					<a href="#complete-guide" class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
-						<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-						</svg>
-						Read the guide
-					</a>
-				)}
-				{technology.website && (
-					<a
-						href={technology.website}
-						target="_blank"
-						rel="noopener noreferrer"
-						class={`${hasContent ? 'btn-outline' : 'btn-solid'} inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold`}
-					>
-						<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-						</svg>
-						Official Website
-					</a>
-				)}
+			<div class="technology-cta-row">
+				<div class="flex flex-wrap gap-2 items-center">
+					{hasContent && (
+						<a href="#complete-guide" class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
+							<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+							</svg>
+							Read the guide
+						</a>
+					)}
+					{technology.website && (
+						<a
+							href={technology.website}
+							target="_blank"
+							rel="noopener noreferrer"
+							class={`${hasContent ? 'btn-outline' : 'btn-solid'} inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold`}
+						>
+							<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+							</svg>
+							Official Website
+						</a>
+					)}
+				</div>
 				{(technology.documentation || technology.source) && (
 					<div class="flex flex-wrap gap-x-4 gap-y-1 items-center text-sm">
 						{technology.documentation && (
@@ -932,6 +934,22 @@ const hasCommunityLinks =
 		filter: brightness(1.05);
 	}
 
+	.technology-cta-row {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.875rem;
+	}
+
+	@media (min-width: 640px) {
+		.technology-cta-row {
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 0.5rem 1.25rem;
+		}
+	}
+
 	.btn-outline {
 		color: var(--text-primary-content);
 		background: transparent;
@@ -996,8 +1014,13 @@ const hasCommunityLinks =
 
 	.main-content-grid {
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: 1.25rem;
 		align-items: start;
+	}
+
+	.main-content-grid > * {
+		min-width: 0;
 	}
 
 	.media-rail {
@@ -1006,6 +1029,8 @@ const hasCommunityLinks =
 	}
 
 	.guide-panel {
+		min-width: 0;
+		overflow-wrap: anywhere;
 		border: 1px solid rgba(148, 163, 184, 0.16);
 		background:
 			linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9)),
@@ -1013,6 +1038,22 @@ const hasCommunityLinks =
 		box-shadow:
 			0 18px 44px rgba(15, 23, 42, 0.06),
 			inset 0 1px 0 rgba(255, 255, 255, 0.82);
+	}
+
+	.guide-prose :global(pre) {
+		max-width: 100%;
+		overflow-x: auto;
+	}
+
+	.guide-prose :global(table) {
+		display: block;
+		max-width: 100%;
+		overflow-x: auto;
+	}
+
+	.guide-prose :global(img) {
+		max-width: 100%;
+		height: auto;
 	}
 
 	.guide-title {
