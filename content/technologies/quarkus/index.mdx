@@ -1,0 +1,20 @@
+---
+name: Quarkus
+logos:
+  icon: true
+website: 'https://quarkus.io/'
+documentation: 'https://quarkus.io/guides/'
+source: 'https://github.com/quarkusio/quarkus'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+relatedTechnologies:
+  - java
+  - graalvm
+---
+Quarkus is a Kubernetes-native Java framework tailored for GraalVM and OpenJDK HotSpot, marketed as "supersonic, subatomic Java." It reimagines the traditional Java application lifecycle by shifting as much work as possible to build time: dependency injection wiring, configuration parsing, ORM metadata, and bytecode generation all happen during compilation rather than at startup. The result is a runtime that boots in tens of milliseconds and runs in a fraction of the memory of a conventional Jakarta EE or Spring stack, making Java a credible target for serverless functions, scale-to-zero workloads, and densely packed Kubernetes deployments.
+
+The developer experience is built around a long-running dev mode (`quarkus:dev`) that watches sources, recompiles in the background, and live-reloads the running application on the next HTTP request, with continuous testing and a Dev UI for inspecting beans, configuration, and extensions. The same codebase compiles two ways: a fast JVM-mode JAR for traditional deployments, and a GraalVM native image that produces a standalone executable with near-instant startup and a memory footprint typically in the 20–50 MB range. That AOT path is what makes Quarkus particularly well suited to cold-start-sensitive environments like AWS Lambda, Knative, and KEDA-driven autoscaling.
+
+Functionality is delivered through a curated extension ecosystem covering CDI (via the ArC container), Hibernate ORM and Panache, RESTEasy Reactive, the MicroProfile specs (Config, Health, OpenAPI, Fault Tolerance), Vert.x, Kafka, gRPC, and integrations for most major datastores and identity providers. Quarkus is led by Red Hat and ships as the foundation of Red Hat build of Quarkus, but the project itself is vendor-neutral Apache-licensed open source with a broad contributor base and governance that welcomes upstream participation independent of any single distributor.
