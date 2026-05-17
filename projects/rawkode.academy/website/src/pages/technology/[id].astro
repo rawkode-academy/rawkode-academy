@@ -1040,6 +1040,25 @@ const hasCommunityLinks =
 			inset 0 1px 0 rgba(255, 255, 255, 0.82);
 	}
 
+	/* Mobile: kill card chrome on the long-form panels so content meets the
+	 * viewport edge instead of leaving a narrow gutter on either side. */
+	@media (max-width: 639px) {
+		.guide-panel,
+		.video-panel,
+		.matrix-rail-panel {
+			margin-inline: calc(-1 * var(--space-page));
+			border-radius: 0;
+			border-inline: 0;
+			box-shadow: none;
+		}
+
+		.technology-signal-panel {
+			border-radius: 0;
+			border-inline: 0;
+			box-shadow: none;
+		}
+	}
+
 	.guide-prose :global(pre) {
 		max-width: 100%;
 		overflow-x: auto;
