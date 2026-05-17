@@ -1,0 +1,106 @@
+---
+import { env } from "cloudflare:workers";
+import { desc, eq } from "drizzle-orm";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getDb, schema } from "@/db/client";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const db = getDb(env.DB);
+const registrations = await db
+	.select({
+		id: schema.registrations.id,
+		seasonId: schema.registrations.seasonId,
+		seasonName: schema.seasons.name,
+		displayName: schema.registrations.displayName,
+		email: schema.registrations.email,
+		message: schema.registrations.message,
+		status: schema.registrations.status,
+		submittedAt: schema.registrations.submittedAt,
+	})
+	.from(schema.registrations)
+	.leftJoin(schema.seasons, eq(schema.registrations.seasonId, schema.seasons.id))
+	.orderBy(desc(schema.registrations.submittedAt))
+	.all();
+
+function formatDate(value: Date | null): string {
+	if (!value) return "—";
+	return new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(value);
+}
+
+const statusClass: Record<string, string> = {
+	pending: "bg-amber-500/15 text-amber-200",
+	approved: "bg-emerald-500/15 text-emerald-200",
+	rejected: "bg-rose-500/15 text-rose-200",
+};
+---
+
+<PortalLayout title="Registrations" section="admin" nav={[...ADMIN_NAV]}>
+	<p class="text-sm text-slate-400">
+		Applications submitted via the public site's <code class="rounded bg-slate-800 px-1 py-0.5 text-xs">/apply</code> form. Approve or reject — approved entries can then be turned into competitors and added to teams.
+	</p>
+
+	<section class="overflow-hidden rounded-2xl border border-slate-800">
+		<table class="w-full text-left text-sm">
+			<thead class="bg-slate-900/60 text-xs uppercase tracking-wider text-slate-400">
+				<tr>
+					<th class="px-6 py-3">Submitted</th>
+					<th class="px-6 py-3">Season</th>
+					<th class="px-6 py-3">Applicant</th>
+					<th class="px-6 py-3">Email</th>
+					<th class="px-6 py-3">Status</th>
+					<th class="px-6 py-3 text-right">Actions</th>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-slate-800 bg-slate-950/40">
+				{
+					registrations.length === 0 ? (
+						<tr>
+							<td colspan="6" class="px-6 py-6 text-center text-sm text-slate-500">
+								No applications yet.
+							</td>
+						</tr>
+					) : (
+						registrations.map((r) => (
+							<tr>
+								<td class="px-6 py-3 text-slate-400">{formatDate(r.submittedAt)}</td>
+								<td class="px-6 py-3 text-slate-400">{r.seasonName}</td>
+								<td class="px-6 py-3">
+									<div class="text-slate-100">{r.displayName}</div>
+									{r.message && (
+										<div class="mt-1 text-xs text-slate-400">{r.message}</div>
+									)}
+								</td>
+								<td class="px-6 py-3 font-mono text-xs text-slate-300">{r.email}</td>
+								<td class="px-6 py-3">
+									<span class={`rounded-full px-2 py-0.5 text-xs capitalize ${statusClass[r.status]}`}>
+										{r.status}
+									</span>
+								</td>
+								<td class="px-6 py-3">
+									<div class="flex justify-end gap-3 text-xs">
+										{r.status !== "approved" && (
+											<form method="POST" action={`/api/admin/registrations/${r.id}/decide`}>
+												<input type="hidden" name="status" value="approved" />
+												<button class="text-emerald-300 underline-offset-4 hover:underline">
+													Approve
+												</button>
+											</form>
+										)}
+										{r.status !== "rejected" && (
+											<form method="POST" action={`/api/admin/registrations/${r.id}/decide`}>
+												<input type="hidden" name="status" value="rejected" />
+												<button class="text-rose-300 underline-offset-4 hover:underline">
+													Reject
+												</button>
+											</form>
+										)}
+									</div>
+								</td>
+							</tr>
+						))
+					)
+				}
+			</tbody>
+		</table>
+	</section>
+</PortalLayout>

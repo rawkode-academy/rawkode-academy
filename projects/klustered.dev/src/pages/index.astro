@@ -1,497 +1,65 @@
 ---
-export const prerender = false;
-
-import { css } from "styled-system/css";
 import "../styles/global.css";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
-import CompetitorRegistration from "@/components/compete/CompetitorRegistration.astro";
 
-const heroStyles = css({
-	minHeight: "100vh",
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-	justifyContent: "center",
-	background: "linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)",
-	position: "relative",
-	overflow: "hidden",
-	paddingBlock: "6rem",
-	paddingInline: "1rem",
-});
-
-const gridOverlay = css({
-	position: "absolute",
-	inset: 0,
-	backgroundImage: `
-		linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px)
-	`,
-	backgroundSize: "60px 60px",
-	pointerEvents: "none",
-});
-
-const glowOrb = css({
-	position: "absolute",
-	borderRadius: "50%",
-	filter: "blur(100px)",
-	opacity: 0.4,
-	animation: "pulse 8s ease-in-out infinite",
-});
-
-const contentWrapper = css({
-	position: "relative",
-	zIndex: 10,
-	textAlign: "center",
-	maxWidth: "800px",
-	width: "100%",
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-});
-
-const welcomeText = css({
-	fontSize: "clamp(1rem, 3vw, 1.5rem)",
-	fontWeight: 300,
-	color: "#a78bfa",
-	textTransform: "uppercase",
-	letterSpacing: "0.3em",
-	marginBottom: "1rem",
-	animation: "fadeInUp 0.8s ease-out",
-});
-
-const mainHeading = css({
-	fontSize: "clamp(3rem, 12vw, 10rem)",
-	fontWeight: 900,
-	lineHeight: 0.9,
-	letterSpacing: "-0.02em",
-	background: "linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #8b5cf6 100%)",
-	backgroundClip: "text",
-	color: "transparent",
-	marginBottom: "0.5rem",
-	animation: "fadeInUp 0.8s ease-out 0.1s both",
-});
-
-const yearText = css({
-	fontSize: "clamp(2rem, 8vw, 6rem)",
-	fontWeight: 200,
-	color: "#6366f1",
-	letterSpacing: "0.2em",
-	animation: "fadeInUp 0.8s ease-out 0.2s both",
-});
-
-const tagline = css({
-	marginTop: "2rem",
-	fontSize: "clamp(0.875rem, 2vw, 1.25rem)",
-	color: "#94a3b8",
-	maxWidth: "600px",
-	textAlign: "center",
-	lineHeight: 1.6,
-	animation: "fadeInUp 0.8s ease-out 0.3s both",
-});
-
-const k8sParticle = css({
-	position: "absolute",
-	top: 0,
-	width: "28px",
-	height: "28px",
-	pointerEvents: "none",
-	zIndex: 50,
-	animation: "floatK8s var(--duration) linear infinite",
-	animationDelay: "var(--delay)",
-});
-
-const k8sLogo = css({
-	position: "absolute",
-	inset: 0,
-	color: "#8b5cf6",
-	animation: "k8sLogoPhase var(--duration) linear infinite",
-	animationDelay: "var(--delay)",
-	"& svg": {
-		width: "100%",
-		height: "100%",
-	},
-});
-
-const k8sFragments = css({
-	position: "absolute",
-	inset: 0,
-	"& > div": {
-		position: "absolute",
-		left: "50%",
-		top: "50%",
-		width: "6px",
-		height: "6px",
-		marginLeft: "-3px",
-		marginTop: "-3px",
-		background: "#8b5cf6",
-		borderRadius: "2px",
-		opacity: 0,
-		animation: "fragmentScatter var(--duration) linear infinite",
-		animationDelay: "var(--delay)",
-	},
-});
-
-const ctaSection = css({
-	width: "100%",
-	display: "flex",
-	flexDirection: "column",
-	gap: "1rem",
-	marginTop: "4rem",
-	animation: "fadeInUp 0.8s ease-out 0.4s both",
-});
-
-const poweredByContainer = css({
-	marginTop: "4rem",
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-	gap: "0.75rem",
-	animation: "fadeInUp 0.8s ease-out 0.5s both",
-	textDecoration: "none",
-	transition: "transform 0.2s ease, filter 0.2s ease",
-	"&:hover": {
-		transform: "scale(1.05)",
-		"& svg": {
-			filter: "drop-shadow(0 0 30px rgba(139, 92, 246, 0.6))",
-		},
-	},
-});
-
-const poweredByLabel = css({
-	fontSize: "0.75rem",
-	fontWeight: 600,
-	color: "rgba(255, 255, 255, 0.5)",
-	letterSpacing: "0.2em",
-	textTransform: "uppercase",
-});
-
-const poweredByLogo = css({
-	width: "clamp(180px, 40vw, 280px)",
-	height: "auto",
-	filter: "drop-shadow(0 0 20px rgba(139, 92, 246, 0.4))",
-});
-
-const backgroundLogo = css({
-	position: "fixed",
-	top: "50%",
-	left: "50%",
-	transform: "translate(-50%, -50%)",
-	maxWidth: "min(80vw, 800px)",
-	height: "auto",
-	opacity: 0.15,
-	pointerEvents: "none",
-	zIndex: 1,
-});
-
-const featuredEpisodeSection = css({
-	width: "100%",
-	marginTop: "3rem",
-	animation: "fadeInUp 0.8s ease-out 0.45s both",
-});
-
-const featuredSectionHeader = css({
-	textAlign: "center",
-	marginBottom: "1.5rem",
-});
-
-const featuredSectionTitle = css({
-	fontSize: "1.25rem",
-	fontWeight: 700,
-	color: "white",
-	marginBottom: "0.5rem",
-});
-
-const featuredSectionSubtitle = css({
-	fontSize: "0.875rem",
-	color: "rgba(255, 255, 255, 0.6)",
-});
-
-const episodesGrid = css({
-	display: "grid",
-	gridTemplateColumns: "1fr",
-	gap: "1rem",
-	"@media (min-width: 640px)": {
-		gridTemplateColumns: "repeat(3, 1fr)",
-	},
-});
-
-const episodeCard = css({
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
-	gap: "0.75rem",
-	padding: "1.25rem 1rem",
-	background: "linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05))",
-	backdropFilter: "blur(10px)",
-	borderRadius: "1rem",
-	border: "1px solid rgba(99, 102, 241, 0.2)",
-	textDecoration: "none",
-	transition: "all 0.3s ease",
-	textAlign: "center",
-	"&:hover": {
-		transform: "translateY(-4px)",
-		borderColor: "rgba(139, 92, 246, 0.4)",
-		boxShadow: "0 20px 40px -10px rgba(139, 92, 246, 0.3)",
-		"& .play-icon": {
-			transform: "scale(1.1)",
-			background: "rgba(139, 92, 246, 0.3)",
-		},
-	},
-});
-
-const episodeBadge = css({
-	fontSize: "0.65rem",
-	fontWeight: 700,
-	color: "#a78bfa",
-	textTransform: "uppercase",
-	letterSpacing: "0.1em",
-	padding: "0.2rem 0.6rem",
-	background: "rgba(167, 139, 250, 0.1)",
-	borderRadius: "9999px",
-});
-
-const playIconWrapper = css({
-	flexShrink: 0,
-	width: "3rem",
-	height: "3rem",
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	borderRadius: "50%",
-	background: "rgba(139, 92, 246, 0.2)",
-	transition: "all 0.3s ease",
-});
-
-const episodeTitle = css({
-	fontSize: "0.9rem",
-	fontWeight: 600,
-	color: "white",
-	lineHeight: 1.3,
-});
-
-const episodeSubtitle = css({
-	fontSize: "0.75rem",
-	color: "rgba(255, 255, 255, 0.5)",
-});
+const user = Astro.locals.user;
+const roles = Astro.locals.roles;
 ---
 
+<!doctype html>
 <html lang="en">
 	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-		<link rel="apple-touch-icon" sizes="192x192" href="/logo-192.png" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<link rel="preload" as="image" type="image/webp" href="/background.webp" fetchpriority="high" />
-		<title>Klustered '26 - Live Kubernetes Debugging Competition</title>
-		<meta name="description" content="Where Kubernetes clusters meet their ultimate challenge. Watch experts debug sabotaged clusters live, with real chaos and no safety nets. Sign up to compete or spectate." />
-
-		<!-- OpenGraph -->
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://klustered.dev" />
-		<meta property="og:title" content="Klustered '26 - Live Kubernetes Debugging Competition" />
-		<meta property="og:description" content="Where Kubernetes clusters meet their ultimate challenge. Watch experts debug sabotaged clusters live, with real chaos and no safety nets. Sign up to compete or spectate." />
-		<meta property="og:image" content="https://klustered.dev/og-image.webp" />
-		<meta property="og:image:width" content="2848" />
-		<meta property="og:image:height" content="1504" />
-		<meta property="og:image:type" content="image/webp" />
-		<meta property="og:site_name" content="Klustered" />
-
-		<!-- Twitter Card -->
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="Klustered '26 - Live Kubernetes Debugging Competition" />
-		<meta name="twitter:description" content="Where Kubernetes clusters meet their ultimate challenge. Watch experts debug sabotaged clusters live, with real chaos and no safety nets. Sign up to compete or spectate." />
-		<meta name="twitter:image" content="https://klustered.dev/og-image.webp" />
-
-		<style>
-			@keyframes pulse {
-				0%, 100% { transform: scale(1); opacity: 0.4; }
-				50% { transform: scale(1.1); opacity: 0.6; }
-			}
-
-			@keyframes fadeInUp {
-				from {
-					opacity: 0;
-					transform: translateY(30px);
-				}
-				to {
-					opacity: 1;
-					transform: translateY(0);
-				}
-			}
-
-			@keyframes floatK8s {
-				0% {
-					transform: translateY(-5vh) rotate(0deg);
-				}
-				100% {
-					transform: translateY(105vh) rotate(360deg);
-				}
-			}
-
-			@keyframes k8sLogoPhase {
-				0% { opacity: 0; }
-				5% { opacity: 0.7; }
-				/* Explosion happens at var(--explode-point), default ~50% */
-				45% { opacity: 0.7; transform: scale(1); }
-				50% { opacity: 0; transform: scale(1.2); }
-				100% { opacity: 0; }
-			}
-
-			@keyframes fragmentScatter {
-				0%, 45% {
-					transform: translate(0, 0) rotate(0deg) scale(0);
-					opacity: 0;
-				}
-				48% {
-					transform: translate(0, 0) rotate(0deg) scale(1);
-					opacity: 1;
-				}
-				65% {
-					transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.5);
-					opacity: 0;
-				}
-				100% {
-					transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0);
-					opacity: 0;
-				}
-			}
-		</style>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="robots" content="noindex" />
+		<title>Klustered Portal</title>
 	</head>
-	<body>
-		<main class={heroStyles}>
-			<div class={gridOverlay}></div>
-
-			<div class={glowOrb} style="width: 600px; height: 600px; background: #8b5cf6; top: -200px; left: -200px;"></div>
-			<div class={glowOrb} style="width: 400px; height: 400px; background: #6366f1; bottom: -100px; right: -100px; animation-delay: -4s;"></div>
-			<div class={glowOrb} style="width: 300px; height: 300px; background: #a855f7; top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -2s;"></div>
-
-			<img src="/background.webp" alt="" class={backgroundLogo} aria-hidden="true" />
-
-			{Array.from({ length: 40 }).map((_, i) => {
-				const left = (i * 17 + 7) % 100;
-				const duration = 18 + (i % 7) * 2;
-				const delay = -((i * 2.7) % duration);
-				const fragments = [
-					{ tx: -45, ty: -30, rot: -180 },
-					{ tx: 0, ty: -50, rot: 90 },
-					{ tx: 45, ty: -30, rot: 180 },
-					{ tx: 50, ty: 15, rot: -90 },
-					{ tx: 30, ty: 45, rot: 270 },
-					{ tx: -30, ty: 45, rot: -270 },
-					{ tx: -50, ty: 15, rot: 120 },
-				];
-				return (
-					<div
-						class={k8sParticle}
-						style={`left: ${left}%; --delay: ${delay}s; --duration: ${duration}s;`}
-					>
-						<div class={k8sLogo} style={`--delay: ${delay}s; --duration: ${duration}s;`}>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.17 0.08 230.10 223.35">
-								<path fill="currentColor" d="M225.407 135.107L206.4 52.547a14.838 14.838 0 0 0-7.958-9.9l-76.935-36.73a14.825 14.825 0 0 0-12.771 0L31.808 42.669a14.838 14.838 0 0 0-7.961 9.895L4.873 135.129a14.668 14.668 0 0 0 1.995 11.185c.261.4.538.788.838 1.162l53.246 66.205a14.98 14.98 0 0 0 11.499 5.487l85.387-.02a14.986 14.986 0 0 0 11.5-5.48l53.227-66.211a14.72 14.72 0 0 0 2.842-12.347zm-9.197 3.866a13.677 13.677 0 0 1-.498 1.723 13.184 13.184 0 0 1-2.11 3.786l-47.299 58.838-1.486 1.852a13.305 13.305 0 0 1-3.24 2.865 13.945 13.945 0 0 1-1.474.822q-.513.237-1.045.43a13.873 13.873 0 0 1-1.383.445 13.473 13.473 0 0 1-1.989.379 12.988 12.988 0 0 1-1.41.082l-77.504.018h-.76a13.298 13.298 0 0 1-3.429-.472 13.925 13.925 0 0 1-3.855-1.679 13.424 13.424 0 0 1-2.576-2.132c-.233-.246-.468-.487-.68-.75l-48.805-60.679q-.408-.514-.765-1.066a13.102 13.102 0 0 1-1.343-2.726 13.505 13.505 0 0 1-.491-1.719 13.315 13.315 0 0 1 .004-5.809l17.394-75.675a13.598 13.598 0 0 1 7.295-9.07l70.508-33.685a13.589 13.589 0 0 1 11.705 0l70.519 33.67a13.602 13.602 0 0 1 7.293 9.073l17.422 75.674a13.282 13.282 0 0 1 .002 5.807z"/>
-								<path fill="currentColor" d="M185.814 127.106c-.36-.083-.874-.225-1.227-.29a35.642 35.642 0 0 0-4.046-.326 39.464 39.464 0 0 1-7.57-1.242 4.745 4.745 0 0 1-1.82-1.832l-1.704-.496a54.837 54.837 0 0 0-8.79-37.983c.436-.396 1.262-1.127 1.495-1.342a3.338 3.338 0 0 1 .792-2.39 39.495 39.495 0 0 1 6.277-4.41 35.095 35.095 0 0 0 3.507-2.046c.272-.202.644-.522.929-.75a4.242 4.242 0 1 0-5.256-6.6c-.288.227-.68.525-.936.747a35.004 35.004 0 0 0-2.789 2.95 39.533 39.533 0 0 1-5.69 5.148 4.69 4.69 0 0 1-2.56.278l-1.606 1.147a55.309 55.309 0 0 0-35.032-16.927c-.039-.561-.087-1.577-.102-1.884a3.344 3.344 0 0 1-1.377-2.11 39.533 39.533 0 0 1 .478-7.656 35.112 35.112 0 0 0 .575-4.012c.013-.34-.007-.834-.007-1.201a4.242 4.242 0 1 0-8.441.004c0 .04.009.078.01.118-.004.35-.021.774-.01 1.08a35.476 35.476 0 0 0 .576 4.015 39.475 39.475 0 0 1 .47 7.654 4.601 4.601 0 0 1-1.37 2.182l-.1 1.786a55.052 55.052 0 0 0-7.63 1.173 54.289 54.289 0 0 0-27.574 15.754q-.77-.531-1.526-1.082a3.333 3.333 0 0 1-2.506-.243 39.383 39.383 0 0 1-5.69-5.141 35.255 35.255 0 0 0-2.777-2.95c-.257-.22-.65-.52-.938-.75a5.03 5.03 0 0 0-2.942-1.11 4.066 4.066 0 0 0-3.363 1.49 4.473 4.473 0 0 0 1.038 6.222l.065.046c.276.226.616.515.872.702a35.256 35.256 0 0 0 3.499 2.048 39.367 39.367 0 0 1 6.276 4.412 4.69 4.69 0 0 1 .849 2.434l1.351 1.208a54.613 54.613 0 0 0-8.611 38.073l-1.767.514a5.835 5.835 0 0 1-1.814 1.827 39.39 39.39 0 0 1-7.565 1.247 35.266 35.266 0 0 0-4.049.326c-.324.06-.774.174-1.127.262l-.037.008-.06.018a4.236 4.236 0 1 0 1.875 8.224l.063-.01c.028-.006.052-.02.08-.025.348-.08.786-.163 1.092-.246a35.59 35.59 0 0 0 3.786-1.451 39.527 39.527 0 0 1 7.358-2.165 4.68 4.68 0 0 1 2.426.857l1.84-.315a54.922 54.922 0 0 0 24.34 30.387l-.769 1.84a4.188 4.188 0 0 1 .377 2.387 41.228 41.228 0 0 1-3.82 6.864 35.183 35.183 0 0 0-2.263 3.372c-.168.318-.381.805-.542 1.138a4.238 4.238 0 1 0 7.621 3.616l.007-.008v-.01c.16-.33.387-.763.522-1.072a34.903 34.903 0 0 0 1.218-3.868 29.517 29.517 0 0 1 3.268-7.582 3.43 3.43 0 0 1 1.819-.888l.957-1.73a54.617 54.617 0 0 0 38.946.099c.268.478.768 1.392.9 1.623a3.335 3.335 0 0 1 2.155 1.31 39.306 39.306 0 0 1 2.898 7.096 35.275 35.275 0 0 0 1.225 3.868c.137.312.36.75.522 1.082a4.24 4.24 0 1 0 7.63-3.607c-.161-.333-.383-.82-.55-1.136a35.06 35.06 0 0 0-2.263-3.364 39.372 39.372 0 0 1-3.742-6.7 3.314 3.314 0 0 1 .324-2.49 14.519 14.519 0 0 1-.703-1.703 54.92 54.92 0 0 0 24.328-30.605c.546.087 1.497.253 1.806.316a3.337 3.337 0 0 1 2.36-.877 39.476 39.476 0 0 1 7.36 2.165 35.135 35.135 0 0 0 3.788 1.462c.305.08.74.156 1.09.233.029.008.055.02.083.028l.06.009a4.236 4.236 0 1 0 1.878-8.224zm-40.1-42.987l-18.037 12.787-.063-.03a3.723 3.723 0 0 1-5.913-2.838l-.02-.01-1.253-22.103a43.85 43.85 0 0 1 25.285 12.194zm-33.978 24.228h6.788l4.22 5.276-1.513 6.58-6.096 2.934-6.114-2.94-1.516-6.583zm-6.386-35.648a44.672 44.672 0 0 1 4.503-.774l-1.255 22.137-.092.044a3.72 3.72 0 0 1-5.904 2.852l-.035.02-18.154-12.872a43.467 43.467 0 0 1 20.937-11.407zm-27.52 19.68l16.574 14.824-.018.09a3.72 3.72 0 0 1-1.462 6.395l-.017.072-21.245 6.13a43.454 43.454 0 0 1 6.168-27.51zm22.191 39.38l-8.441 20.397a43.696 43.696 0 0 1-17.536-21.948l21.783-3.7.037.049a3.655 3.655 0 0 1 .73-.065 3.72 3.72 0 0 1 3.364 5.185zm24.916 26.23a43.637 43.637 0 0 1-23.815-1.223l10.713-19.372h.018a3.725 3.725 0 0 1 6.557-.006h.08l10.74 19.404q-2.091.698-4.293 1.199zm13.841-5.751l-8.528-20.605.026-.037a3.725 3.725 0 0 1 1.803-4.823 3.685 3.685 0 0 1 1.425-.37 3.59 3.59 0 0 1 .855.063l.037-.046 21.977 3.714a43.53 43.53 0 0 1-17.595 22.105zm19.903-32.42l-21.352-6.15-.02-.09a3.725 3.725 0 0 1-1.46-6.395l-.008-.043 16.482-14.751a44.279 44.279 0 0 1 6.357 27.43z"/>
-							</svg>
-						</div>
-						<div class={k8sFragments} style={`--delay: ${delay}s; --duration: ${duration}s;`}>
-							{fragments.map((f, fi) => (
-								<div style={`--tx: ${f.tx}px; --ty: ${f.ty}px; --rot: ${f.rot}deg;`} />
-							))}
-						</div>
-					</div>
-				);
-			})}
-
-			<div class={contentWrapper}>
-				<p class={welcomeText}>Welcome to</p>
-				<h1 class={mainHeading}>Klustered</h1>
-				<p class={yearText}>'26</p>
-				<p class={tagline}>
-					Where Kubernetes clusters meet their ultimate challenge.
-					Live debugging. Real chaos. No safety nets.
+	<body class="min-h-dvh bg-slate-950 text-slate-100 antialiased">
+		<main class="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 px-6 py-16">
+			<div>
+				<p class="text-xs uppercase tracking-[0.2em] text-slate-400">Klustered</p>
+				<h1 class="mt-2 text-3xl font-semibold tracking-tight">Portal</h1>
+				<p class="mt-4 text-sm text-slate-300">
+					Admin and competitor portal for the Klustered game show.
 				</p>
-
-				<div class={ctaSection}>
-					<CompetitorRegistration />
-					<NewsletterCTA
-						headline="Want to watch instead?"
-						subtitle="Get notified about upcoming episodes and results."
-						badge="Viewer Updates"
-					/>
-				</div>
-
-				<div class={featuredEpisodeSection}>
-					<div class={featuredSectionHeader}>
-						<h2 class={featuredSectionTitle}>Watch Previous Episodes</h2>
-						<p class={featuredSectionSubtitle}>See what Klustered chaos looks like in action</p>
-					</div>
-					<div class={episodesGrid}>
-						<a
-							href="https://rawkode.academy/watch/klustered-part-i"
-							target="_blank"
-							rel="noopener noreferrer"
-							class={episodeCard}
-						>
-							<span class={episodeBadge}>The Original</span>
-							<div class:list={[playIconWrapper, "play-icon"]}>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #a78bfa; margin-left: 2px;">
-									<path d="M8 5v14l11-7z"/>
-								</svg>
-							</div>
-							<p class={episodeTitle}>Klustered Part I</p>
-							<p class={episodeSubtitle}>ft. Walid Shaari</p>
-						</a>
-
-						<a
-							href="https://rawkode.academy/watch/klustered-11"
-							target="_blank"
-							rel="noopener noreferrer"
-							class={episodeCard}
-						>
-							<span class={episodeBadge}>Fan Favorite</span>
-							<div class:list={[playIconWrapper, "play-icon"]}>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #a78bfa; margin-left: 2px;">
-									<path d="M8 5v14l11-7z"/>
-								</svg>
-							</div>
-							<p class={episodeTitle}>Kris Nova vs Thomas Stromberg</p>
-							<p class={episodeSubtitle}>Forensics Special</p>
-						</a>
-
-						<a
-							href="https://rawkode.academy/watch/klustered-teams-redhat-and-talos-systems"
-							target="_blank"
-							rel="noopener noreferrer"
-							class={episodeCard}
-						>
-							<span class={episodeBadge}>Brutality</span>
-							<div class:list={[playIconWrapper, "play-icon"]}>
-								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: #a78bfa; margin-left: 2px;">
-									<path d="M8 5v14l11-7z"/>
-								</svg>
-							</div>
-							<p class={episodeTitle}>Red Hat vs Talos Systems</p>
-							<p class={episodeSubtitle}>Who even needs chmod?</p>
-						</a>
-					</div>
-				</div>
-
-				<a href="https://rawkode.academy" target="_blank" rel="noopener noreferrer" class={poweredByContainer}>
-					<span class={poweredByLabel}>Powered by</span>
-					<svg class={poweredByLogo} viewBox="0 0 512 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<defs>
-							<linearGradient id="poweredByGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-								<stop offset="0%" stop-color="#c4b5fd" />
-								<stop offset="50%" stop-color="#a855f7" />
-								<stop offset="100%" stop-color="#8b5cf6" />
-							</linearGradient>
-						</defs>
-						<path fill="url(#poweredByGradient)" d="M93.3877 51.4242H58.2967V61.3828H93.3877C93.6991 61.3828 93.9325 61.6109 93.9325 61.9151V68.4526H58.2967V85.0248C58.2967 90.8023 63.1208 95.5156 69.0343 95.5156H104.125V61.9151C104.125 56.1376 99.3011 51.4242 93.3877 51.4242H93.3877ZM93.9325 85.5571H69.0343C68.7228 85.5571 68.4893 85.329 68.4893 85.0248V78.4873H93.9325V85.5571ZM397.751 61.9151V95.5156H387.636V61.9151C387.636 61.6109 387.402 61.3828 387.013 61.3828H370.051C369.74 61.3828 369.584 61.6109 369.584 61.9151V95.5156H359.314V61.9151C359.314 61.6109 359.08 61.3828 358.847 61.3828H341.807C341.496 61.3828 341.262 61.6109 341.262 61.9151V95.5156H331.069V51.4242H387.013C392.926 51.4242 397.751 56.1376 397.751 61.9151ZM310.144 51.4242H285.79C279.877 51.4242 275.053 56.1376 275.053 61.9151V85.0248C275.053 90.8023 279.877 95.5156 285.79 95.5156H320.881V85.5571H285.79C285.479 85.5571 285.245 85.329 285.245 85.0248V78.4873H320.881V61.9151C320.881 56.1376 316.057 51.4242 310.144 51.4242ZM310.688 68.4526H285.245V61.9151C285.245 61.6109 285.479 61.3828 285.79 61.3828H310.144C310.455 61.3828 310.689 61.6109 310.689 61.9151V68.4526H310.688ZM454 51.5766V102.509C454 108.287 449.254 113 443.34 113H415.719V102.965H443.34C443.574 102.965 443.807 102.813 443.807 102.509V95.5156H418.909C412.996 95.5156 408.172 90.8023 408.172 85.0248V51.5766H418.365V85.0248C418.365 85.329 418.598 85.5571 418.909 85.5571H443.34C443.574 85.5571 443.807 85.329 443.807 85.0248V51.5766H454ZM202.233 51.4242H167.142V61.3828H202.233C202.544 61.3828 202.778 61.6109 202.778 61.9151V68.4526H167.142V85.0248C167.142 90.8023 171.966 95.5156 177.879 95.5156H212.97V61.9151C212.97 56.1376 208.146 51.4242 202.233 51.4242H202.233ZM202.778 85.5571H177.879C177.568 85.5571 177.334 85.329 177.334 85.0248V78.4873H202.778V85.5571ZM256.538 51.4242H231.562C225.648 51.4242 220.824 56.1376 220.824 61.9151V85.0248C220.824 90.8023 225.648 95.5156 231.562 95.5156H266.73V36.981H256.538V51.4242ZM256.538 85.0248C256.538 85.329 256.304 85.5571 255.993 85.5571H231.562C231.25 85.5571 231.095 85.329 231.095 85.0248V61.9151C231.095 61.6109 231.25 61.3828 231.562 61.3828H255.993C256.304 61.3828 256.538 61.6109 256.538 61.9151V85.0248ZM122.951 85.5571H158.042V95.5156H122.951C117.037 95.5156 112.213 90.8023 112.213 85.0248V61.9151C112.213 56.1376 117.037 51.4242 122.951 51.4242H157.886V61.3828H122.951C122.639 61.3828 122.406 61.6109 122.406 61.9151V85.0248C122.406 85.329 122.639 85.5571 122.951 85.5571ZM237.123 38.5963V34.186H221.583C221.445 34.186 221.341 34.085 221.341 33.9504V31.055H237.123V23.7158C237.123 21.1571 234.987 19.0698 232.368 19.0698H221.583C218.964 19.0698 216.827 21.1571 216.827 23.7158V33.9504C216.827 36.5091 218.964 38.5964 221.583 38.5964H237.123L237.123 38.5963ZM221.341 23.7158C221.341 23.5811 221.445 23.4802 221.583 23.4802H232.368C232.506 23.4802 232.609 23.5811 232.609 23.7158V26.6111H221.341V23.7158H221.341ZM173.229 38.5963H184.015C186.634 38.5963 188.77 36.5091 188.77 33.9504V23.7158C188.77 21.1571 186.634 19.0698 184.015 19.0698H173.229C170.61 19.0698 168.474 21.1571 168.474 23.7158V33.9504C168.474 36.5091 170.61 38.5964 173.229 38.5964V38.5963ZM172.988 23.7158C172.988 23.5811 173.091 23.4802 173.229 23.4802H184.015C184.152 23.4802 184.256 23.5811 184.256 23.7158V33.9504C184.256 34.085 184.152 34.186 184.015 34.186H173.229C173.091 34.186 172.988 34.085 172.988 33.9504V23.7158V23.7158ZM160.79 19.0698H165.649V20.2144L157.654 28.8329L165.649 37.4516V38.5963H160.79L154.421 31.5527L150.108 35.9426V38.5963H145.594V14H150.108V30.1924L153.657 26.6111L160.79 19.0698L160.79 19.0698ZM100.847 19.0698H85.306V23.4802H100.847C100.985 23.4802 101.088 23.5811 101.088 23.7158V26.6111H85.306V33.9504C85.306 36.509 87.4425 38.5963 90.0612 38.5963H105.602V23.7158C105.602 21.1571 103.466 19.0698 100.847 19.0698L100.847 19.0698ZM101.088 34.186H90.0612C89.9235 34.186 89.8201 34.085 89.8201 33.9504V31.055H101.088V34.1861V34.186ZM197.268 38.5963H212.843V14H208.329V19.0698H197.268C194.649 19.0698 192.513 21.1571 192.513 23.7158V33.9504C192.513 36.5091 194.649 38.5964 197.268 38.5964V38.5963ZM197.061 23.7158C197.061 23.5811 197.13 23.4802 197.268 23.4802H208.088C208.226 23.4802 208.329 23.5811 208.329 23.7158V33.9504C208.329 34.085 208.226 34.186 208.088 34.186H197.268C197.13 34.186 197.061 34.085 197.061 33.9504V23.7158V23.7158ZM115.812 38.5963L107.955 19.0698H112.745L117.569 30.5838C119.258 26.7794 121.05 22.8404 122.704 19.0698H127.39L132.834 30.651C134.351 26.8467 135.901 22.8404 137.348 19.0698H142.138L134.626 38.5963H131.112L125.081 25.5338L119.292 38.5963H115.812H115.812ZM65.0315 27.5691C67.9777 24.0148 72.5215 18.4882 75.9637 14.2726H82.5662C79.1442 18.111 75.6285 22.0714 72.2198 26.1632L71.9526 26.4838L72.2278 26.798C72.6331 27.2605 80.173 35.7607 82.5739 38.4671H76.5869C75.8178 37.6005 74.9329 36.6141 74.0358 35.614C72.2854 33.6622 70.4753 31.6443 69.4067 30.386L69.021 29.932L68.6301 30.3819C67.4278 31.7657 66.2063 33.1543 65.0316 34.4845V27.5691H65.0315ZM62.8528 36.9899L58 42.5842V17.1245C58.001 15.5512 59.3069 14.2763 60.9172 14.2762L73.2043 14.2739C72.6212 14.9987 72.0306 15.7199 71.4543 16.4236C70.755 17.2777 70.0334 18.1587 69.3301 19.0401H62.8528V36.9899H62.8528Z" />
-					</svg>
-				</a>
 			</div>
-		</main>
 
+			{
+				user ? (
+					<div class="flex flex-col gap-3 text-sm">
+						<p class="text-slate-300">
+							Signed in as <strong>{user.name}</strong>.
+						</p>
+						<div class="flex flex-wrap gap-2">
+							{roles.includes("admin") && (
+								<a
+									href="/admin"
+									class="rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-4 py-1.5 text-xs font-medium text-fuchsia-200 transition hover:bg-fuchsia-500/20"
+								>
+									Admin dashboard
+								</a>
+							)}
+							<a
+								href="/me"
+								class="rounded-full border border-slate-700 bg-slate-800/60 px-4 py-1.5 text-xs font-medium text-slate-100 transition hover:bg-slate-700"
+							>
+								My competitor area
+							</a>
+							<form method="POST" action="/api/auth/sign-out">
+								<button class="rounded-full border border-slate-700 px-4 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-800">
+									Sign out
+								</button>
+							</form>
+						</div>
+					</div>
+				) : (
+					<a
+						href="/api/auth/sign-in"
+						class="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-200"
+					>
+						Sign in →
+					</a>
+				)
+			}
+		</main>
 	</body>
 </html>

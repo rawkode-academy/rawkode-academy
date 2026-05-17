@@ -1,0 +1,77 @@
+---
+import SiteLayout from "@/layouts/SiteLayout.astro";
+
+export const prerender = true;
+---
+
+<SiteLayout
+	title="About"
+	description="Klustered — the live Kubernetes troubleshooting game show."
+>
+	<section class="pt-12">
+		<p class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+			About
+		</p>
+		<h1 class="mt-2 text-4xl font-black tracking-tight md:text-5xl">
+			A game show for broken clusters.
+		</h1>
+	</section>
+
+	<section class="mt-10 grid gap-10 text-slate-300 md:grid-cols-2">
+		<div class="flex flex-col gap-4 text-base">
+			<p>
+				Klustered started as a live stream in 2021 with a simple premise:
+				take working Kubernetes clusters, break them on purpose, and ask real
+				engineers to fix them on stage in under an hour.
+			</p>
+			<p>
+				No editing. No retries. The cluster is sabotaged by someone the
+				competitor has never met — and the audience watches the debugging
+				live.
+			</p>
+			<p>
+				It's part competition, part education. Every fix becomes a master
+				class in Kubernetes internals, and every miss teaches the audience
+				what to look for next time.
+			</p>
+		</div>
+		<div
+			class="rounded-3xl border border-white/10 bg-gradient-to-br from-fuchsia-500/15 to-cyan-500/10 p-8"
+		>
+			<h2 class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-200">
+				The format
+			</h2>
+			<ul class="mt-4 flex flex-col gap-3 text-sm">
+				<li class="flex items-start gap-3">
+					<span class="mt-1 font-mono text-fuchsia-300">01</span>
+					<span>
+						<strong class="text-white">A working cluster</strong> is provisioned
+						and shared with a saboteur.
+					</span>
+				</li>
+				<li class="flex items-start gap-3">
+					<span class="mt-1 font-mono text-fuchsia-300">02</span>
+					<span>
+						<strong class="text-white">Sabotage happens.</strong> Anywhere from
+						control plane to admission controllers.
+					</span>
+				</li>
+				<li class="flex items-start gap-3">
+					<span class="mt-1 font-mono text-fuchsia-300">03</span>
+					<span>
+						<strong class="text-white">The competitor takes the kubeconfig</strong>
+						and has 60 minutes to restore service.
+					</span>
+				</li>
+				<li class="flex items-start gap-3">
+					<span class="mt-1 font-mono text-fuchsia-300">04</span>
+					<span>
+						<strong class="text-white">The post-mortem</strong> happens live
+						on air — the saboteur explains the puzzle, the competitor explains
+						the path.
+					</span>
+				</li>
+			</ul>
+		</div>
+	</section>
+</SiteLayout>

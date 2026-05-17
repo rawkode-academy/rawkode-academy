@@ -1,9 +1,16 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "klustered-dev-website",
-	"main": "./dist/_worker.js/index.js",
-	"compatibility_date": "2025-05-05",
+	"name": "klustered-dev",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-03-12",
 	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist",
+		"run_worker_first": true
+	},
+	"workers_dev": true,
+	"preview_urls": true,
 	"observability": {
 		"traces": {
 			"enabled": true,
@@ -14,32 +21,11 @@
 			"destinations": ["grafana-logs"]
 		}
 	},
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./dist",
-		"run_worker_first": true
-	},
-	"kv_namespaces": [
+	"d1_databases": [
 		{
-			"binding": "SESSION",
-			"id": "6c667fcff195414c8f15bf85aa0bc21d"
-		}
-	],
-	"routes": [
-		{
-			"pattern": "klustered.dev",
-			"custom_domain": true
-		}
-	],
-	"services": [
-		{
-			"binding": "IDENTITY",
-			"service": "rawkode-academy-identity"
-		},
-		{
-			"binding": "EMAIL_PREFERENCES",
-			"service": "platform-email-preferences-rpc",
-			"entrypoint": "EmailPreferences"
+			"binding": "DB",
+			"database_name": "klustered",
+			"database_id": "PLACEHOLDER-RUN-WRANGLER-D1-CREATE-KLUSTERED"
 		}
 	]
 }

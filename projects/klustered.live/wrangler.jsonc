@@ -1,0 +1,31 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "klustered-live",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-03-12",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist",
+		"run_worker_first": true
+	},
+	"workers_dev": true,
+	"preview_urls": true,
+	"observability": {
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "klustered",
+			"database_id": "PLACEHOLDER-RUN-WRANGLER-D1-CREATE-KLUSTERED"
+		}
+	]
+}

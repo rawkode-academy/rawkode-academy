@@ -1,20 +1,15 @@
-// @ts-check
 import cloudflare from "@astrojs/cloudflare";
-import vue from "@astrojs/vue";
+import mdx from "@astrojs/mdx";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-	output: "server",
-	adapter: cloudflare({
-		imageService: "cloudflare",
-		sessionKVBindingName: "SESSION",
-		platformProxy: {
-			enabled: true,
-		},
-	}),
-	integrations: [vue()],
 	site: "https://klustered.dev",
-	security: {
-		checkOrigin: true,
+	trailingSlash: "never",
+	output: "server",
+	adapter: cloudflare(),
+	integrations: [mdx()],
+	vite: {
+		plugins: [tailwindcss()],
 	},
 });

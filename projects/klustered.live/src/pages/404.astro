@@ -1,0 +1,25 @@
+---
+import SiteLayout from "@/layouts/SiteLayout.astro";
+
+export const prerender = true;
+---
+
+<SiteLayout title="404 — Lost in the cluster" description="We couldn't find that page.">
+	<section class="pt-24 text-center">
+		<p class="text-xs font-semibold uppercase tracking-[0.4em] text-fuchsia-400">
+			404
+		</p>
+		<h1
+			class="mt-4 bg-gradient-to-r from-fuchsia-400 via-pink-400 to-amber-300 bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-6xl"
+		>
+			Lost in the cluster.
+		</h1>
+		<p class="mt-4 text-slate-400">That page got `kubectl delete`d.</p>
+		<a
+			href="/"
+			class="mt-8 inline-flex rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+		>
+			Back to the home page
+		</a>
+	</section>
+</SiteLayout>

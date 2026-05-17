@@ -1,72 +1,68 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
+import { getDb, schema } from "@/db/client";
 import {
-	parseState,
 	exchangeCodeForTokens,
 	getUserInfo,
-	createSession,
+	parseState,
+	PKCE_COOKIE_NAME,
 	SESSION_COOKIE_NAME,
 	SESSION_DURATION_SECONDS,
-} from "@/lib/auth";
-import { PKCE_COOKIE_NAME } from "./sign-in";
+} from "@/lib/auth/server";
 
-export const GET: APIRoute = async (context) => {
-	const code = context.url.searchParams.get("code");
-	const state = context.url.searchParams.get("state");
-	const error = context.url.searchParams.get("error");
-	const codeVerifier = context.cookies.get(PKCE_COOKIE_NAME)?.value;
+export const prerender = false;
+
+export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+	const code = url.searchParams.get("code");
+	const stateParam = url.searchParams.get("state");
+	const error = url.searchParams.get("error");
 
 	if (error) {
-		console.error("[callback] OAuth error from provider:", error);
-		return context.redirect("/?error=auth_failed", 302);
+		return new Response(`Sign-in failed: ${error}`, { status: 400 });
+	}
+	if (!code || !stateParam) {
+		return new Response("Missing code or state", { status: 400 });
 	}
 
-	if (!code) {
-		console.error("[callback] No authorization code received");
-		return context.redirect("/?error=missing_code", 302);
-	}
+	const { returnTo } = parseState(stateParam);
 
+	const codeVerifier = cookies.get(PKCE_COOKIE_NAME)?.value;
 	if (!codeVerifier) {
-		console.error("[callback] No PKCE code verifier found in cookie");
-		return context.redirect("/?error=missing_pkce_verifier", 302);
+		return new Response("Missing PKCE verifier cookie", { status: 400 });
+	}
+	cookies.delete(PKCE_COOKIE_NAME, { path: "/" });
+
+	const tokens = await exchangeCodeForTokens(code, url.origin, codeVerifier);
+	if (!tokens?.access_token) {
+		return new Response("Token exchange failed", { status: 502 });
 	}
 
-	// Clear the PKCE cookie immediately
-	context.cookies.delete(PKCE_COOKIE_NAME, { path: "/" });
-
-	const { returnTo } = state ? parseState(state) : { returnTo: "/" };
-
-	// Exchange code for tokens with PKCE verifier
-	const tokens = await exchangeCodeForTokens(code, context.url.origin, codeVerifier);
-	if (!tokens) {
-		console.error("[callback] Token exchange failed");
-		return context.redirect("/?error=token_exchange_failed", 302);
-	}
-
-	// Get user info
 	const userInfo = await getUserInfo(tokens.access_token);
-	if (!userInfo) {
-		console.error("[callback] User info fetch failed");
-		return context.redirect("/?error=userinfo_failed", 302);
+	if (!userInfo?.sub) {
+		return new Response("Failed to fetch user info", { status: 502 });
 	}
 
-	// Create local session
+	const db = getDb(env.DB);
 	const sessionId = crypto.randomUUID();
-	const session = createSession(userInfo);
+	const expiresAt = new Date(Date.now() + SESSION_DURATION_SECONDS * 1000);
 
-	await context.locals.runtime.env.SESSION.put(
-		`session:${sessionId}`,
-		JSON.stringify(session),
-		{ expirationTtl: SESSION_DURATION_SECONDS },
-	);
+	await db.insert(schema.sessions).values({
+		id: sessionId,
+		userId: userInfo.sub,
+		userEmail: userInfo.email ?? "",
+		userName: userInfo.name ?? userInfo.email ?? "",
+		userImage: userInfo.picture ?? null,
+		expiresAt,
+		lastSeenAt: new Date(),
+	});
 
-	// Set session cookie
-	context.cookies.set(SESSION_COOKIE_NAME, sessionId, {
-		path: "/",
+	cookies.set(SESSION_COOKIE_NAME, sessionId, {
 		httpOnly: true,
-		secure: true,
+		secure: url.protocol === "https:",
 		sameSite: "lax",
+		path: "/",
 		maxAge: SESSION_DURATION_SECONDS,
 	});
 
-	return context.redirect(returnTo, 302);
+	return redirect(returnTo, 302);
 };

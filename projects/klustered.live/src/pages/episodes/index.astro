@@ -1,0 +1,96 @@
+---
+import SiteLayout from "@/layouts/SiteLayout.astro";
+import { getEpisodes, getSeasonFromEpisode, getSeasonsFromContent } from "@/lib/content";
+
+const url = new URL(Astro.request.url);
+const selectedSeason = url.searchParams.get("season");
+
+const allEpisodes = await getEpisodes();
+const seasons = await getSeasonsFromContent();
+
+const episodes = selectedSeason
+	? allEpisodes.filter((e) => getSeasonFromEpisode(e) === selectedSeason)
+	: allEpisodes;
+---
+
+<SiteLayout
+	title={selectedSeason ? `Episodes · ${selectedSeason}` : "Episodes"}
+	description="Every Klustered episode — pick a season."
+>
+	<section class="pt-12">
+		<p class="text-xs font-semibold uppercase tracking-[0.3em] text-fuchsia-400">
+			Archive
+		</p>
+		<h1 class="mt-2 text-4xl font-black tracking-tight md:text-5xl">
+			{episodes.length} episodes{selectedSeason ? ` · ${selectedSeason}` : ""}
+		</h1>
+
+		<div class="mt-6 flex flex-wrap gap-2">
+			<a
+				href="/episodes"
+				class={`rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition ${
+					!selectedSeason
+						? "bg-white text-slate-900"
+						: "border border-white/15 text-slate-300 hover:bg-white/10"
+				}`}
+			>
+				All
+			</a>
+			{
+				seasons.map((s) => (
+					<a
+						href={`/episodes?season=${s}`}
+						class={`rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition ${
+							selectedSeason === s
+								? "bg-white text-slate-900"
+								: "border border-white/15 text-slate-300 hover:bg-white/10"
+						}`}
+					>
+						{s}
+					</a>
+				))
+			}
+		</div>
+	</section>
+
+	<section class="mt-10 grid gap-4 sm:grid-cols-2">
+		{
+			episodes.map((e) => {
+				const slug = e.data.slug ?? e.id.split("/").pop();
+				return (
+					<a
+						href={`/episodes/${slug}`}
+						class="group flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:border-fuchsia-500/40 hover:bg-white/10"
+					>
+						<div class="flex items-center justify-between text-xs text-slate-400">
+							<span class="uppercase tracking-wider">
+								{getSeasonFromEpisode(e)}
+							</span>
+							<time datetime={e.data.publishedAt.toISOString()}>
+								{new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(
+									e.data.publishedAt,
+								)}
+							</time>
+						</div>
+						<h3 class="text-lg font-bold tracking-tight text-white group-hover:text-fuchsia-200">
+							{e.data.title}
+						</h3>
+						{e.data.description && (
+							<p class="line-clamp-2 text-sm text-slate-400">
+								{e.data.description.split("\n")[0]}
+							</p>
+						)}
+					</a>
+				);
+			})
+		}
+	</section>
+
+	{
+		episodes.length === 0 && (
+			<p class="mt-10 text-center text-sm text-slate-400">
+				No episodes in this season yet.
+			</p>
+		)
+	}
+</SiteLayout>
