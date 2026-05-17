@@ -3,12 +3,17 @@ id: eaev2s8b2r56vaeu61fr9qsr
 slug: klustered-12
 title: 'Klustered #12'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  KubeCon special part three. Jeffrey Sica and Chris Carty break clusters with a
+  modified kubelet, OPA Gatekeeper policies, a broken Cilium CNI, and a hidden
+  static pod manifest, then race to find and fix the sabotage live.
 publishedAt: 2021-05-08T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
+  - opa
+  - cilium
+  - postgresql
 show: klustered
 chapters:
   - startTime: 0
@@ -102,9 +107,11 @@ guests:
 resources:
   - title: Equinix Metal
     type: url
+    url: https://deploy.equinix.com/product/bare-metal/
     category: other
   - title: Kubernetes Office Hours
     type: url
+    url: https://www.kubernetes.dev/resources/office-hours/
     category: other
 ---
 

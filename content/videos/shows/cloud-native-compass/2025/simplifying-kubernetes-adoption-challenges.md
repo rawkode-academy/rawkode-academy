@@ -3,13 +3,22 @@ id: nv3julzu1xz6tcw457hjs5so
 slug: simplifying-kubernetes-adoption-challenges
 title: Simplifying Kubernetes Adoption Challenges
 description: >-
-  In this episode of Cloud Native Compass, host David Flanagan talks with Koray
-  Oksay, a Kubernetes consultant, trainer at Kubermatic, CNCF Ambassador, and
-  organizer of KCD Istanbul.
+  Koray Oksay (Kubermatic, CNCF Ambassador) joins David to discuss why
+  Kubernetes adoption still trips up teams: skipping container fundamentals,
+  picking between managed services and self-hosted clusters, navigating tooling
+  choices like Flux vs Argo CD, and structuring multi-cluster environments.
 publishedAt: 2025-03-13T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - kubernetes
+  - argo
+  - fluxcd
+  - crossplane
+  - cilium
+  - opa
+  - kyverno
+  - cert-manager
 show: cloud-native-compass
 duration: 2239
 audioFileSize: 53732551
@@ -51,9 +60,15 @@ guests:
 resources:
   - title: Kubernetes The Hard Way
     type: url
+    url: https://github.com/kelseyhightower/kubernetes-the-hard-way
     category: documentation
-  - title: CNCF and Kubernetes Slack channels
+  - title: CNCF Slack
     type: url
+    url: https://slack.cncf.io/
+    category: other
+  - title: Kubernetes Slack
+    type: url
+    url: https://slack.k8s.io/
     category: other
 ---
 

@@ -3,13 +3,16 @@ id: cpx1b17zh33oo8i72zptib9n
 slug: navigating-kairos-immutable-operating-systems-with-a-cloud-native-twist
 title: 'Navigating Kairos: Immutable Operating Systems with a Cloud Native Twist'
 description: >-
-  In this episode, we dive into the Kairos project, a CNCF initiative aimed at
-  converting any Linux distribution into an immutable operating system.
+  Mauro Morales and Dimitris Karakasilis explain how Kairos turns any Linux
+  distribution into an immutable, A/B-upgradeable OS shipped as an OCI image,
+  and where it fits alongside bootc and other immutable system efforts.
 publishedAt: 2025-12-18T10:00:00.000Z
 type: recorded
 category: interview
 technologies:
   - kairos
+  - bootc
+  - kubernetes
 show: cloud-native-compass
 duration: 2399
 audioFileSize: 57588862
@@ -48,11 +51,25 @@ guests:
   - mauro-morales
   - dimitris-karakasilis
 resources:
+  - title: Kairos website
+    type: url
+    url: https://kairos.io
+    category: documentation
+  - title: Kairos on GitHub
+    type: url
+    url: https://github.com/kairos-io/kairos
+    category: code
+  - title: kairos-init
+    type: url
+    url: https://github.com/kairos-io/kairos-init
+    category: code
   - title: SUSE Elemental Toolkit
     type: url
+    url: https://github.com/rancher/elemental-toolkit
     category: code
   - title: bootc project
     type: url
+    url: https://github.com/bootc-dev/bootc
     category: code
 ---
 

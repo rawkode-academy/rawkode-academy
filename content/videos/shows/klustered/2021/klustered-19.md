@@ -3,13 +3,18 @@ id: szryg6h4y89lh067p26a2g1f
 slug: klustered-19
 title: 'Klustered #19'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" #Kubernetes clusters ... on the clock.
+  Matt Turner and Borko debug two broken Kubernetes clusters live. Issues
+  include a missing API server, etcd resource limits, a decoy DaemonSet, DNS
+  policy, AppArmor blocking kubectl, etcd encryption misconfig, and a malicious
+  Postgres startup command.
 publishedAt: 2021-09-09T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - postgresql
+  - teleport
 show: klustered
 chapters:
   - startTime: 0

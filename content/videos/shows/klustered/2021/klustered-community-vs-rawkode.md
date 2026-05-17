@@ -3,13 +3,16 @@ id: a7z1litz91j0xw2nzuvxh240
 slug: klustered-community-vs-rawkode
 title: 'Klustered: Community vs. Rawkode'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" #Kubernetes clusters ... on the clock.
+  Rawkode debugs three broken Kubernetes clusters solo: Russell W's bash alias
+  and static manifest trick, Noel Georgi's eBPF kubelet redirect, and a
+  community-destroyed cluster needing CoreDNS repair.
 publishedAt: 2021-08-12T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - ebpf
+  - coredns
 show: klustered
 chapters:
   - startTime: 0

@@ -3,13 +3,19 @@ id: kmhmcc41uglftsqr66vbo0di
 slug: klustered-13
 title: 'Klustered #13'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Mahmoud Saada and Marques Johansson debug two broken Kubernetes clusters,
+  tackling a LimitRange blocking scaling, a bad image pull secret, resource
+  quota and taint issues, plus a Cilium outage caused by a containerd registry
+  mirror rewriting images to honky.io.
 publishedAt: 2021-06-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - containerd
+  - teleport
+  - postgresql
 show: klustered
 chapters:
   - startTime: 0
@@ -91,6 +97,19 @@ resources:
     category: other
   - title: Kubernetes controller utils create pods code
     type: url
+    url: 'https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/controller_utils.go'
     category: code
+  - title: Cilium documentation
+    type: url
+    url: 'https://docs.cilium.io/en/stable/'
+    category: documentation
+  - title: containerd registry configuration
+    type: url
+    url: 'https://github.com/containerd/containerd/blob/main/docs/cri/registry.md'
+    category: documentation
+  - title: Teleport documentation
+    type: url
+    url: 'https://goteleport.com/docs/'
+    category: documentation
 ---
 

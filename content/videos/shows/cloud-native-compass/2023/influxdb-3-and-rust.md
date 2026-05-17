@@ -71,15 +71,19 @@ guests:
 resources:
   - title: Apache Arrow project
     type: url
+    url: 'https://arrow.apache.org/'
     category: code
   - title: Apache DataFusion project
     type: url
+    url: 'https://datafusion.apache.org/'
     category: code
   - title: Flux community fork
     type: url
+    url: 'https://github.com/InfluxCommunity/flux'
     category: code
   - title: HashiCorp license change to BSL
     type: url
+    url: 'https://www.hashicorp.com/blog/hashicorp-adopts-business-source-license'
     category: other
 ---
 

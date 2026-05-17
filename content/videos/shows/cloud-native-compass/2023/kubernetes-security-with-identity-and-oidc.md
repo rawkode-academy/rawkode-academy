@@ -3,14 +3,16 @@ id: ratw2atcqa376ktfpvj2joo4
 slug: kubernetes-security-with-identity-and-oidc
 title: Kubernetes Security with Identity & OIDC
 description: >-
-  I interview Mark Boorshtein, the CTO of Tremolo Security, an open-source
-  identity management company that focuses on authentication, authorization,
-  identity, and automation.
+  Marc Boorshtein, CTO of Tremolo Security, explains why long-lived kubeconfig
+  certificates are an anti-pattern, how OIDC and impersonation deliver
+  revocable cluster access, and how workflow identity via OIDC JWTs replaces
+  static service account tokens in CI/CD pipelines.
 publishedAt: 2023-05-29T17:00:00.000Z
 type: recorded
 category: interview
 technologies:
   - kubernetes
+  - openunison
 show: cloud-native-compass
 chapters:
   - startTime: 0
