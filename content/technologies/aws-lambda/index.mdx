@@ -1,0 +1,14 @@
+---
+name: AWS Lambda
+website: 'https://aws.amazon.com/lambda/'
+documentation: 'https://docs.aws.amazon.com/lambda/'
+license: Commercial
+status: stable
+category: Serverless
+subcategory: Tools
+---
+AWS Lambda is Amazon's flagship serverless compute service and the function-as-a-service offering that effectively defined the category when it launched in 2014. You upload a function, declare its memory and timeout, and Lambda runs it on demand in a managed execution environment, scaling from zero to thousands of concurrent invocations without you provisioning servers, patching operating systems, or sizing fleets. Billing is per-millisecond of execution against the memory you request, so idle code costs nothing.
+
+The execution model is event-driven. Functions are invoked by events from across the AWS ecosystem (S3 object writes, DynamoDB streams, SQS and Kinesis messages, EventBridge rules, IoT topics, Cognito triggers, and many others) or synchronously through API Gateway, Application Load Balancer, or a Lambda Function URL. Managed runtimes are provided for Node.js, Python, Java, .NET, and Ruby, with the `provided.al2023` custom runtime covering Go, Rust, C++, and anything else that can produce a Linux binary. Both x86_64 and ARM64 (Graviton) architectures are supported, and functions can be packaged either as zip archives or as OCI container images up to 10 GB pulled from Amazon ECR, which is the usual route when dependencies are large, such as machine learning models or scientific libraries.
+
+Cold starts are the headline operational concern: the first invocation into a fresh environment pays for container setup and runtime initialisation, typically tens to hundreds of milliseconds for Node.js or Python and longer for the JVM or .NET, though SnapStart materially reduces that for Java, .NET, and Python by restoring a pre-initialised snapshot. Provisioned Concurrency keeps warm environments on standby for latency-sensitive paths at additional cost. Teams reach for Lambda when they want event glue between AWS services, lightweight HTTP APIs fronted by API Gateway or a Function URL, scheduled jobs via EventBridge, or background processing of queues and streams, particularly where traffic is spiky and scale-to-zero economics matter more than the steady-state efficiency of a long-running container.

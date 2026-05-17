@@ -1,0 +1,14 @@
+---
+name: Civo
+website: 'https://www.civo.com/'
+documentation: 'https://www.civo.com/docs'
+license: Commercial
+status: stable
+category: Provisioning
+subcategory: Cloud Provider
+---
+Civo is a UK-based cloud provider that positions itself squarely at developers, with a product surface and pricing model built around predictability and low operational overhead rather than the breadth of a hyperscaler. The company runs its own data centres and exposes infrastructure through a web console, a REST API, and a first-party CLI, with a deliberate focus on keeping the path from sign-up to running workload as short as possible.
+
+The flagship product is managed Kubernetes built on K3s, the lightweight distribution originally created at Rancher. Because K3s has a much smaller control-plane footprint than upstream Kubernetes, Civo is able to provision new clusters in around 90 seconds, and it offers the control plane at no charge so customers pay only for the underlying worker nodes, volumes, and any optional add-ons. Pricing across the platform is published as flat monthly or hourly rates with no egress or ingress fees, which makes cost modelling straightforward and removes the data-transfer surprises common with the larger clouds.
+
+Around Kubernetes, Civo offers a familiar set of supporting services: compute instances, block and object storage (with an S3-compatible API), managed databases, load balancers, and DNS. For AI and ML workloads it provides GPU compute on NVIDIA A100 hardware, along with newer Blackwell-class options, and it also markets a private-cloud product, CivoStack, for organisations that want the same operational model on their own infrastructure.

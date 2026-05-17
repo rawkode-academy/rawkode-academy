@@ -1,0 +1,15 @@
+---
+name: Hurl
+website: 'https://hurl.dev/'
+documentation: 'https://hurl.dev/docs/'
+source: 'https://github.com/Orange-OpenSource/hurl'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Continuous Integration & Delivery
+---
+Hurl is a command line tool that runs and tests HTTP requests defined in a simple plain text format. Built in Rust and distributed as a single static binary, it lets you describe a request, or a chain of requests, in a file that reads almost like the raw HTTP exchange itself: a method and URL, optional headers and body, then the expected response. The same file is both the request specification and the test, which makes Hurl files trivial to commit alongside the service they exercise and easy to diff when behaviour changes.
+
+The file format leans on familiar HTTP grammar and adds two key sections for testing. Captures pull values out of a response (a header, a JSON path, an XPath expression, a cookie) and bind them to variables that subsequent requests can reference, which is how authentication tokens, CSRF challenges, and resource IDs get threaded through a flow. Asserts run predicates against the response: status codes, headers, JSON or XML bodies, response duration, TLS certificate details, even raw bytes. Because assertions live next to the request they validate, a Hurl file doubles as executable documentation of how an API is supposed to behave.
+
+Hurl is most at home in integration and smoke tests run from CI. It outputs JUnit, TAP, and HTML reports out of the box, integrates cleanly with GitHub Actions, GitLab CI, and similar runners, and is fast enough to use as a post-deploy health check against production endpoints. Teams reach for it when bash and curl have become unmaintainable but a full test framework feels like overkill, and when REST, GraphQL, or SOAP contracts need to be pinned down in something a reviewer can actually read.

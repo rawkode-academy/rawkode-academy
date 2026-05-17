@@ -1,0 +1,14 @@
+---
+name: Spectro Cloud
+website: 'https://www.spectrocloud.com/'
+documentation: 'https://docs.spectrocloud.com/'
+license: Commercial
+status: stable
+category: Provisioning
+subcategory: Automation & Configuration
+---
+Spectro Cloud is a commercial vendor focused on Kubernetes lifecycle management at scale. Its flagship product, Palette, is an enterprise platform for provisioning, upgrading, and operating fleets of Kubernetes clusters across public cloud, private cloud, edge, and bare metal, with multi-cluster orchestration built on top of the upstream Cluster API project.
+
+The platform is organized around a declarative model called Cluster Profiles. A profile defines the full stack of a cluster, including the operating system, Kubernetes distribution, CNI, CSI, and any add-on application services, and is applied uniformly to every cluster derived from it. Palette continuously reconciles running clusters against their profile to prevent configuration drift, and changes such as patches or upgrades to a profile are rolled out to all clusters using it. The same model spans day 0 provisioning through day 2 operations across heterogeneous infrastructure, including managed services like EKS, AKS, and GKE alongside on-prem and edge deployments.
+
+Spectro Cloud is also the lead sponsor of Kairos, a CNCF Sandbox project that provides an immutable, image-based Linux meta-distribution aimed at edge Kubernetes. Kairos lets operators build bootable OS plus Kubernetes images and roll out atomic A/B upgrades by pushing new container images, and it underpins much of Palette's edge story while remaining an independent open-source project under CNCF governance.

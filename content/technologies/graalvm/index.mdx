@@ -1,0 +1,17 @@
+---
+name: GraalVM
+website: 'https://www.graalvm.org/'
+documentation: 'https://www.graalvm.org/latest/docs/'
+source: 'https://github.com/oracle/graal'
+license: GPL-2.0-with-classpath-exception
+status: stable
+category: App Definition and Development
+subcategory: Application Definition & Image Build
+relatedTechnologies:
+  - java
+---
+GraalVM is a high-performance JDK distribution that extends the Java platform with an advanced just-in-time compiler, ahead-of-time compilation via Native Image, and a polyglot runtime capable of executing JavaScript, Python, Ruby, R, and LLVM-based languages alongside Java. Originating from Oracle Labs and stewarded by Oracle, the project is developed in the open on GitHub and the Community Edition is released under GPL-2.0 with the Classpath Exception, so applications built on top of it are not encumbered by the GPL.
+
+The headline feature is Native Image, which performs closed-world static analysis of a Java application and compiles it ahead of time into a self-contained native binary. The result is a single executable that boots in milliseconds, consumes a fraction of the memory of a traditional JVM process, and ships in a much smaller container image because the JIT, class loader, and unreachable code are all stripped away. The Graal compiler itself also plugs into HotSpot as a top-tier JIT, delivering peak-performance gains for long-running workloads that stay on the JVM.
+
+These properties matter for cloud-native deployments where cold-start latency, per-pod memory footprint, and image size translate directly into cost and user-facing performance. Frameworks like Quarkus, Micronaut, and Spring Boot (with Spring Native and the AOT engine introduced in Spring Boot 3) lean heavily on GraalVM to compete with Go and Node.js on serverless platforms, Kubernetes, and edge runtimes, while the polyglot Truffle framework lets teams embed other languages into the same process when the use case calls for it.
