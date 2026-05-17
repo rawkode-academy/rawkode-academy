@@ -182,6 +182,43 @@ const breadcrumbElements = showEntry
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
+
+// Trim the raw video description to fit Google's ~160-char SERP cap. Cut on a
+// word boundary, prefer the first paragraph, drop markdown that won't render
+// in a meta tag.
+const META_DESCRIPTION_LIMIT = 160;
+const metaDescription = (() => {
+	const firstParagraph =
+		processedDescription.replace(/\r\n/g, "\n").split(/\n{2,}/)[0] ?? "";
+	const raw = firstParagraph
+		.replace(/[*_`]+/g, "")
+		.replace(/\s+/g, " ")
+		.trim();
+	if (!raw) return video.data.description ?? "";
+	if (raw.length <= META_DESCRIPTION_LIMIT) return raw;
+	const truncated = raw.slice(0, META_DESCRIPTION_LIMIT);
+	const lastSpace = truncated.lastIndexOf(" ");
+	return `${truncated.slice(0, lastSpace > 80 ? lastSpace : META_DESCRIPTION_LIMIT)}…`;
+})();
+
+const creatorRefs = hostEntries.length > 0
+	? hostEntries.map((host) => ({
+			name: host.data.name,
+			url: `https://rawkode.academy/people/${host.id}`,
+		}))
+	: undefined;
+
+const guestRefs = guestEntries.map((guest) => ({
+	name: guest.data.name,
+	url: `https://rawkode.academy/people/${guest.id}`,
+}));
+
+const partOfSeriesRef = showEntry
+	? {
+			name: showEntry.data.name,
+			url: `https://rawkode.academy/shows/${showEntry.id}`,
+		}
+	: undefined;
 const watchVideoSeoText = await buildWatchVideoSeoText({
 	captionUrl,
 	description: processedDescription,
@@ -221,7 +258,8 @@ if (isAuthenticated && user?.id) {
 
 <Page
 	title={video.data.title}
-	description={video.data.description}
+	description={metaDescription}
+	noindex={metaDescription.length < 30}
 	useImageDirectly={true}
 	image={{ image: new URL(thumbnailUrl) }}
 >
@@ -239,6 +277,9 @@ if (isAuthenticated && user?.id) {
 		isLiveBroadcast={video.data.type === "live"}
 		category={video.data.category}
 		clips={clips}
+		creators={creatorRefs}
+		guests={guestRefs}
+		partOfSeries={partOfSeriesRef}
 	/>
 	<link
 		slot="extra-head"
