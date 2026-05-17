@@ -14,6 +14,7 @@ technologies:
   - system-initiative
   - tilt
   - universal-blue
+show: alphabits
 chapters:
   - startTime: 0
     title: Introduction to AlphaBits

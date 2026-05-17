@@ -13,6 +13,7 @@ category: tutorial
 technologies:
   - infisical
   - podman
+show: alphabits
 chapters:
   - startTime: 0
     title: Introductions
