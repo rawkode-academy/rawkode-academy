@@ -1,0 +1,26 @@
+{
+	"video_id": "xbfhkuz66nc3g08axlx7zffb",
+	"slug": "hands-on-introduction-to-snyk",
+	"title": "Hands-on Introduction to Snyk",
+	"generated_at": "2026-05-17T13:31:27.505Z",
+	"known_technology_names": [
+		"Snyk"
+	],
+	"known_guest_names": [
+		"Matt Jarvis"
+	],
+	"resources": [
+		{
+			"title": "n8n workflow automation project",
+			"category": "code",
+			"evidence_quote": "I fought n a n. Are you familiar with the the project at all?",
+			"confidence": "medium"
+		},
+		{
+			"title": "CNCF Cloud Native Security Whitepaper",
+			"category": "documentation",
+			"evidence_quote": "the the cloud native security white paper, but that the the that CNCF six security did last year",
+			"confidence": "medium"
+		}
+	]
+}

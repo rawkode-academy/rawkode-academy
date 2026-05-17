@@ -1,0 +1,18 @@
+{
+	"video_id": "yfaj0ov3z8zu0sv4lp8songu",
+	"slug": "infrastructure-as-code-and-gitops",
+	"title": "Infrastructure as Code & GitOps",
+	"generated_at": "2026-05-17T13:28:24.722Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Steven Wade"
+	],
+	"resources": [
+		{
+			"title": "Pulumi provider boilerplate repository",
+			"category": "code",
+			"evidence_quote": "there's the provider boilerplate so this is the repository that allows you you'd basically just fork this and then tell it the Terraform provider",
+			"confidence": "high"
+		}
+	]
+}

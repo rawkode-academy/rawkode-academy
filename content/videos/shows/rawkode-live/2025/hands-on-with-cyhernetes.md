@@ -16,5 +16,9 @@ show: rawkode-live
 duration: 4057
 guests:
   - avital-tamir
+resources:
+  - title: Cyphernetes Operator
+    type: url
+    category: code
 ---
 

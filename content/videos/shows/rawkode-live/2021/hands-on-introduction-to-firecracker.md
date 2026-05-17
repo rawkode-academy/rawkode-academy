@@ -90,5 +90,18 @@ duration: 3735
 guests:
   - radu-weiss
   - gabriel-ionescu
+resources:
+  - title: Firecracker Quick Start Guide
+    type: url
+    category: documentation
+  - title: Firecracker Swagger API specification
+    type: url
+    category: documentation
+  - title: Firecracker Go SDK
+    type: url
+    category: code
+  - title: Weave Ignite
+    type: url
+    category: code
 ---
 

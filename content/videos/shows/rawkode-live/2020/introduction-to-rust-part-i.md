@@ -78,5 +78,12 @@ chapters:
 duration: 4745
 guests:
   - steve-klabnik
+resources:
+  - title: The Rust Programming Language book
+    type: url
+    category: documentation
+  - title: Rust Users Forum
+    type: url
+    category: other
 ---
 

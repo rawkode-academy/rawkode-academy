@@ -37,5 +37,15 @@ chapters:
     title: Final Q&A and Conclusion
 duration: 2981
 guests: []
+resources:
+  - title: Fermion official co-founders interview about Spin and Nomad
+    type: url
+    category: other
+  - title: Fermion Spin examples directory
+    type: url
+    category: code
+  - title: Fermion Platform open source repository
+    type: url
+    category: code
 ---
 

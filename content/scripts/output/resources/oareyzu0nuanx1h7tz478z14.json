@@ -1,0 +1,19 @@
+{
+	"video_id": "oareyzu0nuanx1h7tz478z14",
+	"slug": "automated-kubernetes-operations-with-komodor-and-vcluster",
+	"title": "Automated Kubernetes Operations with Komodor and vcluster",
+	"generated_at": "2026-05-17T13:17:38.887Z",
+	"known_technology_names": [
+		"Komodor",
+		"vCluster"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Kubernetes workshop chart from the Komodor LJOX repository",
+			"category": "code",
+			"evidence_quote": "Here I'm specifying one chart and that's what I want to deploy to Kubernetes workshop chart from the Komodor LJOX repository.",
+			"confidence": "medium"
+		}
+	]
+}

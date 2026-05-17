@@ -79,5 +79,6 @@ duration: 5261
 guests:
   - kyle-quest
   - ivan-velichko
+resources: []
 ---
 

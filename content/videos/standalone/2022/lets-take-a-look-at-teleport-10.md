@@ -90,5 +90,22 @@ chapters:
 duration: 2923
 guests:
   - ben-abbott
+resources:
+  - title: Teleport Upgrade Documentation
+    type: url
+    category: documentation
+  - title: Rawkode Academy Discord
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
+  - title: Teleport 10 Release Blog
+    type: url
+    category: documentation
+  - title: Teleport RFDs (Request For Discussion)
+    type: url
+    category: documentation
+  - title: Teleport Community Slack
+    type: url
+    category: other
 ---
 

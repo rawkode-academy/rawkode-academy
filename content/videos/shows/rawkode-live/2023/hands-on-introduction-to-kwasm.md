@@ -65,5 +65,9 @@ duration: 2955
 guests:
   - noel-georgi
   - philipp-strube
+resources:
+  - title: containerd Spin example
+    type: url
+    category: demos
 ---
 

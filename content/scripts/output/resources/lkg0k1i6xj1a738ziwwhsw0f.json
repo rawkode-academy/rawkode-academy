@@ -1,0 +1,21 @@
+{
+	"video_id": "lkg0k1i6xj1a738ziwwhsw0f",
+	"slug": "building-a-real-application-with-guidepad",
+	"title": "Building a Real Application with Guidepad",
+	"generated_at": "2026-05-17T13:27:16.871Z",
+	"known_technology_names": [
+		"Guidepad"
+	],
+	"known_guest_names": [
+		"Reginald Wilkerson",
+		"Mathew Citarella"
+	],
+	"resources": [
+		{
+			"title": "Guidepad demo repository",
+			"category": "code",
+			"evidence_quote": "So I showed you a plug in and I didn't mention plug ins. So let me let me do a quick aside on the plugin and tell you what that is. So, you can see this is a a repository. Right? It's called Guidepad demo.",
+			"confidence": "medium"
+		}
+	]
+}

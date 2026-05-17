@@ -73,5 +73,21 @@ chapters:
     title: A Cli Command To Check the Version of the Client and Server
 duration: 3954
 guests: []
+resources:
+  - title: rawcodeacademy/courses GitHub repository
+    type: url
+    url: 'https://github.com/rawcodeacademy/courses'
+    category: code
+  - title: Teleport configuration file reference
+    type: url
+    category: documentation
+  - title: jwt.io JWT debugger
+    type: url
+    url: 'https://jwt.io/'
+    category: other
+  - title: get.docker.io Docker install script
+    type: url
+    url: 'https://get.docker.io/'
+    category: code
 ---
 

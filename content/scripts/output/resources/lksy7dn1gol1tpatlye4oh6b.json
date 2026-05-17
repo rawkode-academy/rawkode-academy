@@ -1,0 +1,34 @@
+{
+	"video_id": "lksy7dn1gol1tpatlye4oh6b",
+	"slug": "introduction-to-vitess",
+	"title": "Introduction to Vitess",
+	"generated_at": "2026-05-17T13:30:48.558Z",
+	"known_technology_names": [
+		"Vitess"
+	],
+	"known_guest_names": [
+		"Deepthi Sigireddi",
+		"Alkin Tezuysal",
+		"Open Source Database Evangelist"
+	],
+	"resources": [
+		{
+			"title": "Vitess Operator",
+			"category": "code",
+			"evidence_quote": "especially because there is, an operator for Vitess,\nwhich is also open source.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Vitess Kubernetes Quick Start",
+			"category": "documentation",
+			"evidence_quote": "I see that there's a Kubernetes quick start.\nThere's the local install.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Vitess Point-in-Time Recovery documentation",
+			"category": "documentation",
+			"evidence_quote": "We actually have a\npoint in time recovery feature as well,\nwhich is documented on the website.",
+			"confidence": "medium"
+		}
+	]
+}

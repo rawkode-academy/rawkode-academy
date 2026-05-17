@@ -1,0 +1,33 @@
+{
+	"video_id": "oua0v79haem7e7klh0bwydsw",
+	"slug": "introduction-to-litmus-chaos",
+	"title": "Introduction to Litmus Chaos",
+	"generated_at": "2026-05-17T13:32:12.906Z",
+	"known_technology_names": [
+		"Litmus"
+	],
+	"known_guest_names": [
+		"Umasankar Mukkara",
+		"Karthik Satchitanand"
+	],
+	"resources": [
+		{
+			"title": "litmuschaos/litmus-helm repository",
+			"category": "code",
+			"evidence_quote": "We have a help repository at Litmus chaos slash Litmus help.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Litmus probe documentation",
+			"category": "documentation",
+			"evidence_quote": "Yeah. So the probe documentation is available here.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Chaos Carnival Kafka bootcamp demo steps",
+			"category": "demos",
+			"evidence_quote": "We recently ran this as a boot one of the boot camp sessions during kiosk carnival. So we have all that information here, so please feel free to take a look at this after we are done.",
+			"confidence": "medium"
+		}
+	]
+}

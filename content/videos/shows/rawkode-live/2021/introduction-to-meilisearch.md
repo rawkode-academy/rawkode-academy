@@ -78,5 +78,21 @@ duration: 3995
 guests:
   - frederic-harper
   - carolina-ferreira
+resources:
+  - title: 'Meilisearch documentation: Comparison to alternatives'
+    type: url
+    category: documentation
+  - title: 'Meilisearch documentation: API reference settings'
+    type: url
+    category: documentation
+  - title: 'Meilisearch documentation: Ranking rules relevancy guide'
+    type: url
+    category: documentation
+  - title: 'Meilisearch documentation: Official SDK libraries'
+    type: url
+    category: documentation
+  - title: movies.json sample dataset
+    type: url
+    category: demos
 ---
 

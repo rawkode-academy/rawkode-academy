@@ -1,0 +1,35 @@
+{
+	"video_id": "l87s0mff9plb3tn1r8b1l3ie",
+	"slug": "rawkode-and-the-null-channel-vs-the-community",
+	"title": "Rawkode & The Null Channel Vs. The Community",
+	"generated_at": "2026-05-17T13:19:42.127Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Marek Counts"
+	],
+	"resources": [
+		{
+			"title": "Teleport sponsor landing page",
+			"url": "https://Rawkode.live/Teleport",
+			"category": "other",
+			"evidence_quote": "You should go to Rawkode.live/Teleport to learn more.",
+			"confidence": "high"
+		},
+		{
+			"title": "Equinix Metal sponsor landing page",
+			"url": "https://Rawkode.live/metal",
+			"category": "other",
+			"evidence_quote": "You can find out more about Equinix Medal at Rawkode.live/metal.",
+			"confidence": "high"
+		},
+		{
+			"title": "Rawkode Academy T-shirt competition page",
+			"url": "https://Rawkode.live/win",
+			"category": "other",
+			"evidence_quote": "If\nyou wanna win a t shirt, which of\ncourse you do, you can go to Rawkode.live/win.",
+			"confidence": "medium"
+		}
+	]
+}

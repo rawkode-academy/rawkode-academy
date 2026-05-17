@@ -1,0 +1,46 @@
+{
+	"video_id": "ej38e2ppxfi1xzbwvoy3o4o2",
+	"slug": "introduction-to-keptn-part-ii",
+	"title": "Introduction to Keptn (Part II)",
+	"generated_at": "2026-05-17T13:33:39.350Z",
+	"known_technology_names": [
+		"Keptn"
+	],
+	"known_guest_names": [
+		"Jürgen Etzlstorfer"
+	],
+	"resources": [
+		{
+			"title": "Google SRE Book",
+			"category": "other",
+			"evidence_quote": "So if you're familiar with the SRE book from Google or if you're interested in this book, it's a great book.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Keptn Tutorial",
+			"url": "https://tutorials.keptn.sh",
+			"category": "documentation",
+			"evidence_quote": "If you want to walk through the tutorial, it's tutorials. Captain. Sh.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Keptn Service Template",
+			"category": "code",
+			"evidence_quote": "We usually recommend to get started with the the Keptn service template.",
+			"confidence": "high"
+		},
+		{
+			"title": "Keptn Sandbox",
+			"category": "code",
+			"evidence_quote": "the first part where where we ask the Keptn community to to provide their integrations is the Keptn sandbox.",
+			"confidence": "high"
+		},
+		{
+			"title": "Keptn Slack",
+			"url": "https://slack.keptn.sh",
+			"category": "other",
+			"evidence_quote": "please also reach out to us on slack.captain.sh",
+			"confidence": "medium"
+		}
+	]
+}

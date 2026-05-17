@@ -89,5 +89,16 @@ chapters:
   - startTime: 6114
     title: Conclusion & Wrap-up
 duration: 6269
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://rawkode.live/teleport'
+    category: other
+  - title: Networking and Kubernetes
+    type: url
+    category: other
+  - title: Sleuth Kit
+    type: url
+    category: other
 ---
 

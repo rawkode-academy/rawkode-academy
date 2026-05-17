@@ -89,5 +89,10 @@ chapters:
 duration: 6708
 guests:
   - william-lightning
+resources:
+  - title: Rawkode Chat
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
 ---
 

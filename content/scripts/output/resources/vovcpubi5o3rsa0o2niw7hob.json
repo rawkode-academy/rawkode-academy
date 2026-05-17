@@ -1,0 +1,20 @@
+{
+	"video_id": "vovcpubi5o3rsa0o2niw7hob",
+	"slug": "hands-on-introduction-to-infisical",
+	"title": "Hands-on Introduction to Infisical",
+	"generated_at": "2026-05-17T13:27:03.358Z",
+	"known_technology_names": [
+		"Infisical"
+	],
+	"known_guest_names": [
+		"Vlad Matsiiako"
+	],
+	"resources": [
+		{
+			"title": "Infisical self-hosting instructions",
+			"category": "documentation",
+			"evidence_quote": "we provide all the self hosting instructions within our documentation.",
+			"confidence": "medium"
+		}
+	]
+}

@@ -1,0 +1,31 @@
+{
+	"video_id": "cmcp750zcoi58w150z7e1ekp",
+	"slug": "example-mapping-by-example",
+	"title": "Example Mapping by Example",
+	"generated_at": "2026-05-17T13:37:37.191Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Ciaran McNulty"
+	],
+	"resources": [
+		{
+			"title": "Rawkode/getsynced",
+			"url": "https://getlab.com/Rawkode/getsynced",
+			"category": "code",
+			"evidence_quote": "So it's called get synced. It's on getlab.com/Rawkode/getsynced.",
+			"confidence": "high"
+		},
+		{
+			"title": "Matt Wynne's Example Mapping blog post",
+			"category": "other",
+			"evidence_quote": "Matt Wynn wrote about example mapping maybe five or six years ago",
+			"confidence": "medium"
+		},
+		{
+			"title": "John Smart's Feature Mapping",
+			"category": "other",
+			"evidence_quote": "There's also feature mapping, John Smart's feature mapping",
+			"confidence": "medium"
+		}
+	]
+}

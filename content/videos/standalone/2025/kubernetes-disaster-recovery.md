@@ -28,5 +28,9 @@ chapters:
     title: Restore
 duration: 1157
 guests: []
+resources:
+  - title: Spectro Cloud Palette documentation
+    type: url
+    category: documentation
 ---
 

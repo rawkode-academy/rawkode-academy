@@ -1,0 +1,20 @@
+{
+	"video_id": "xfzsftp8rjujzki3y0iaw75e",
+	"slug": "hands-on-introduction-to-gitea-actions",
+	"title": "Hands-on Introduction to Gitea Actions",
+	"generated_at": "2026-05-17T13:26:47.269Z",
+	"known_technology_names": [
+		"Gitea"
+	],
+	"known_guest_names": [
+		"Matti Ranta"
+	],
+	"resources": [
+		{
+			"title": "Tarte dot dev",
+			"category": "code",
+			"evidence_quote": "they have their Tarte dot dev project where you can actually run, like, macOS virtual machines, as, like, Docker containers kind of somewhat,",
+			"confidence": "medium"
+		}
+	]
+}

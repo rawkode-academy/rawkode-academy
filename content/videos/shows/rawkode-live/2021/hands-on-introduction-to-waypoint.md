@@ -111,5 +111,18 @@ chapters:
 duration: 4552
 guests:
   - taylor-dolezal
+resources:
+  - title: Waypoint GitOps repository
+    type: url
+    category: code
+  - title: EKS in Action repository
+    type: url
+    category: code
+  - title: Waypoint architecture.md
+    type: url
+    category: documentation
+  - title: Waypoint 0.6 GitHub milestone
+    type: url
+    category: other
 ---
 

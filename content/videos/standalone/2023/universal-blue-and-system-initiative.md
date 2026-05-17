@@ -51,5 +51,10 @@ chapters:
 duration: 1283
 guests:
   - brian-ketelsen
+resources:
+  - title: Fleek
+    type: url
+    url: 'https://getfleek.dev'
+    category: other
 ---
 

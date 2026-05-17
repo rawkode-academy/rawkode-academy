@@ -1,0 +1,18 @@
+{
+	"video_id": "hbkqmiw7xfe2dxrarck938yl",
+	"slug": "from-kubernetes-to-cloud-run-chainguards-journey",
+	"title": "From Kubernetes to Cloud Run: Chainguard's Journey",
+	"generated_at": "2026-05-17T13:22:45.711Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Jason Hall"
+	],
+	"resources": [
+		{
+			"title": "Chainguard blog article about migrating from Kubernetes and Knative to Cloud Run",
+			"category": "other",
+			"evidence_quote": "what prompted this conversation today is an article that you published to the ChainGuard blog about a migration, some cloud adoption, containers, and Cloud Run",
+			"confidence": "medium"
+		}
+	]
+}

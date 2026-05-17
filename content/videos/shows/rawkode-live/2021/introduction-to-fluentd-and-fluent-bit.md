@@ -113,5 +113,9 @@ duration: 5940
 guests:
   - anurag-gupta
   - eduardo-silva
+resources:
+  - title: Calyptia Config Visualizer
+    type: url
+    category: demos
 ---
 

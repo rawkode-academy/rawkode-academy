@@ -52,5 +52,24 @@ chapters:
     title: Conclusion
 duration: 1304
 guests: []
+resources:
+  - title: Kubescape GitHub Action
+    type: url
+    url: 'https://github.com/kubescape/github-action'
+    category: code
+  - title: Google Microservices Demo
+    type: url
+    url: 'https://github.com/GoogleCloudPlatform/microservices-demo'
+    category: demos
+  - title: Weaveworks Sock Shop
+    type: url
+    url: 'https://github.com/microservices-demo/microservices-demo'
+    category: demos
+  - title: NSA/CISA Kubernetes Hardening Guidance
+    type: url
+    category: documentation
+  - title: Klustered Automation Repository
+    type: url
+    category: code
 ---
 

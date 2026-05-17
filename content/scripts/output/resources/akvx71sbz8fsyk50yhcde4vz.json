@@ -1,0 +1,38 @@
+{
+	"video_id": "akvx71sbz8fsyk50yhcde4vz",
+	"slug": "managing-linux-in-real-time-with-saltstack",
+	"title": "Managing Linux in Real Time with SaltStack",
+	"generated_at": "2026-05-17T13:34:29.076Z",
+	"known_technology_names": [
+		"Salt"
+	],
+	"known_guest_names": [
+		"Edward Vielmetti"
+	],
+	"resources": [
+		{
+			"title": "Salt Pillar Modules documentation",
+			"category": "documentation",
+			"evidence_quote": "If we go to the documentation here,\n<v Speaker 0>I think this link\n<v Speaker 0>and click on pillar modules. So these are\n<v Speaker 0>all of the modules which support exposing pillar\n<v Speaker 0>data to the master.",
+			"confidence": "high"
+		},
+		{
+			"title": "Salt Targeting documentation",
+			"category": "documentation",
+			"evidence_quote": "So we could use the menu name, grains,\n<v Speaker 0>and other information to target our menus. So\n<v Speaker 0>let's take a look at the docs.\n<v Speaker 0>I mean, this page is is relatively big.",
+			"confidence": "high"
+		},
+		{
+			"title": "Salt State Modules documentation",
+			"category": "documentation",
+			"evidence_quote": "And we can take a look at, like,\n<v Speaker 0>there there's also why am I looking at\n<v Speaker 0>grains?\n<v Speaker 0>States.\n<v Speaker 0>There you go.\n<v Speaker 0>Alright. So state modules are the are the\n<v Speaker 0>things that we can do\n<v Speaker 0>with Salt.",
+			"confidence": "high"
+		},
+		{
+			"title": "Salt Bootstrap",
+			"category": "code",
+			"evidence_quote": "Salt provides something called Salt Bootstrap.\n<v Speaker 1>Right.\n<v Speaker 1>A very helpful script that takes care of\n<v Speaker 1>the whole install process.",
+			"confidence": "medium"
+		}
+	]
+}

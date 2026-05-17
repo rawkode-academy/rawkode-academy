@@ -92,5 +92,21 @@ duration: 3567
 guests:
   - edward-ionel
   - oss-technology-enthusiast
+resources:
+  - title: Mirantis Kubernetes cheat sheet
+    type: url
+    category: documentation
+  - title: Aqua Security Starboard extension
+    type: url
+    category: code
+  - title: Lens Resource Map extension
+    type: url
+    category: code
+  - title: BoardD open source technology
+    type: url
+    category: code
+  - title: Kubecost Lens extension
+    type: url
+    category: code
 ---
 

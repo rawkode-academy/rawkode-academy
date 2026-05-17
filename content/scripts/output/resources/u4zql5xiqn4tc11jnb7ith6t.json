@@ -1,0 +1,27 @@
+{
+	"video_id": "u4zql5xiqn4tc11jnb7ith6t",
+	"slug": "ambient-mesh-with-marino-wijay-and-matt-turner",
+	"title": "Ambient Mesh with Marino Wijay & Matt Turner",
+	"generated_at": "2026-05-17T13:23:53.884Z",
+	"known_technology_names": [
+		"Istio"
+	],
+	"known_guest_names": [
+		"Marino Wijay",
+		"Matt Turner"
+	],
+	"resources": [
+		{
+			"title": "Network Foundations workshop",
+			"category": "documentation",
+			"evidence_quote": "I've built a workshop called network foundations.",
+			"confidence": "high"
+		},
+		{
+			"title": "Envoy Gateway",
+			"category": "code",
+			"evidence_quote": "we've we're doing the main contributors to the reference implementation of that, which is, like, Envoy gateway.",
+			"confidence": "high"
+		}
+	]
+}

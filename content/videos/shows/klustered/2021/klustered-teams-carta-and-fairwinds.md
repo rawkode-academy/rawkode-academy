@@ -86,5 +86,13 @@ guests:
   - andy-suderman
   - luke-reed
   - raf-nijskens
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://rawkode.live/teleport'
+    category: other
+  - title: Fairwinds RBAC Lookup
+    type: url
+    category: code
 ---
 

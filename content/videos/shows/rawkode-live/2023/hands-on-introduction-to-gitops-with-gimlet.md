@@ -39,5 +39,18 @@ chapters:
 duration: 3822
 guests:
   - laszlo-fogas
+resources:
+  - title: Gimlet k3d guide
+    type: url
+    category: documentation
+  - title: Gimlet OneChart Helm chart
+    type: url
+    category: code
+  - title: Gimlet GitHub Action
+    type: url
+    category: code
+  - title: Gimlet YAML generator
+    type: url
+    category: other
 ---
 

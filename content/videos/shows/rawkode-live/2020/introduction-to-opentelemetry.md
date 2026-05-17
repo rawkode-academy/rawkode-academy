@@ -70,5 +70,12 @@ duration: 5212
 guests:
   - amy-tobey
   - liz-fong-jones
+resources:
+  - title: OpenTelemetry Go contrib gRPC instrumentation example
+    type: url
+    category: code
+  - title: OpenTelemetry Go trace API documentation
+    type: url
+    category: documentation
 ---
 

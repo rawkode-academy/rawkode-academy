@@ -43,4 +43,9 @@ duration: 2875
 audioFileSize: 68999671
 guests:
   - hazel-weakly
+resources:
+  - title: Eleanor Ostrom's principles for sustainable self-governing commons
+    type: url
+    category: other
 ---
+

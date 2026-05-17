@@ -77,5 +77,13 @@ chapters:
 duration: 5063
 guests:
   - senyo-simpson
+resources:
+  - title: Tokio Async in Depth tutorial
+    type: url
+    url: 'https://tokio.rs/tokio/tutorial/async'
+    category: documentation
+  - title: Complete Guide to InfluxDB course
+    type: url
+    category: other
 ---
 

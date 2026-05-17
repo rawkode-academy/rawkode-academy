@@ -2,7 +2,7 @@
 id: aqzmvsr41szkg2uqg0yp2cu4
 slug: keep-authentication-simple-with-portainers-oauth-connectors
 title: Keep Authentication Simple with Portainers OAuth Connectors
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2023-03-06T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -47,5 +47,12 @@ chapters:
     title: 'What''s Next: Advanced OAuth Configuration'
 duration: 546
 guests: []
+resources:
+  - title: GitHub OAuth Apps settings
+    type: url
+    category: other
+  - title: Google Cloud API and Services Credentials
+    type: url
+    category: other
 ---
 

@@ -1,0 +1,41 @@
+{
+	"video_id": "iujjbzvjr482rvlakapnby4u",
+	"slug": "introduction-to-tremor",
+	"title": "Introduction to Tremor",
+	"generated_at": "2026-05-17T13:33:18.991Z",
+	"known_technology_names": [
+		"Tremor"
+	],
+	"known_guest_names": [
+		"Anup Dhamala",
+		"Darach Ennis",
+		"Heinz Gies",
+		"Matthias Wahl"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal products",
+			"category": "other",
+			"evidence_quote": "So thank you Equinix metal. Feel free to check out the products.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Matthias Wahl's Bobconf SIMD talk",
+			"category": "other",
+			"evidence_quote": "Matthias just gave a talk on that. Literally. Literally on Bobconf, what, two weeks ago?",
+			"confidence": "medium"
+		},
+		{
+			"title": "Tremor RFC for Troy deployment language",
+			"category": "documentation",
+			"evidence_quote": "There is a RFC on our RFC sites about implementing Troy.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Vector project",
+			"category": "code",
+			"evidence_quote": "We have project called Vector. It's really good at log tailing, and we don't like spending our time doing log tailing. So we just recommend, hey. Folk use Vector.",
+			"confidence": "high"
+		}
+	]
+}

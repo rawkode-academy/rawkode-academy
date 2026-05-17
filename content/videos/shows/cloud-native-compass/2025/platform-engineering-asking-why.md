@@ -17,5 +17,6 @@ duration: 2636
 audioFileSize: 63253254
 guests:
   - evelyn-osman
+resources: []
 ---
 

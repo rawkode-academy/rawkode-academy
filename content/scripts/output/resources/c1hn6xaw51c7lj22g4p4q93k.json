@@ -1,0 +1,32 @@
+{
+	"video_id": "c1hn6xaw51c7lj22g4p4q93k",
+	"slug": "how-to-write-a-kubectl-plugin-from-scratch",
+	"title": "How to Write a kubectl Plugin from Scratch",
+	"generated_at": "2026-05-17T13:33:33.822Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Matt Turner"
+	],
+	"resources": [
+		{
+			"title": "Kubernetes kubectl plugins documentation",
+			"category": "documentation",
+			"evidence_quote": "You can find this documentation on the Kubernetes website.",
+			"confidence": "high"
+		},
+		{
+			"title": "Krew kubectl plugin manager",
+			"category": "other",
+			"evidence_quote": "And then we also want to take a look at using crew as a way to provide\na crew as a plug in manager for\ncontrol that would make it easier for other\npeople to install this plug in and get\nthe benefits of this.",
+			"confidence": "high"
+		},
+		{
+			"title": "Krew plugin index repository",
+			"category": "code",
+			"evidence_quote": "Yeah. There's a crew index\nwhich Right. Which I assume means Yeah. We\nneed to PR or something into this.",
+			"confidence": "medium"
+		}
+	]
+}

@@ -82,5 +82,15 @@ duration: 5620
 guests:
   - alessandro-de-maria
   - ricardo-amaro
+resources:
+  - title: Kapitan Reference Repository
+    type: url
+    category: code
+  - title: Kapitan Manifest Generator Documentation
+    type: url
+    category: documentation
+  - title: Weaveworks Sock Shop Example
+    type: url
+    category: demos
 ---
 

@@ -55,5 +55,15 @@ chapters:
     title: Conclusion & Final Thoughts
 duration: 1193
 guests: []
+resources:
+  - title: S3 Provider Service Demo
+    type: url
+    category: code
+  - title: CloudTrail Requirement Class
+    type: url
+    category: code
+  - title: Terraform Control Plane Implementation
+    type: url
+    category: code
 ---
 

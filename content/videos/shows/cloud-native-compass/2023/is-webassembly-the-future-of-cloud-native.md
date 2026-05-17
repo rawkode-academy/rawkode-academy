@@ -49,5 +49,10 @@ duration: 2588
 audioFileSize: 62100934
 guests:
   - laszlo-fogas
+resources:
+  - title: kwasm
+    type: url
+    url: 'https://kwasm.sh'
+    category: code
 ---
 

@@ -1,0 +1,42 @@
+{
+	"video_id": "kpfeh5ghghzqkarckn9sxme0",
+	"slug": "docker-kubernetes-and-php-laravel-edition",
+	"title": "Docker, Kubernetes, and PHP: Laravel Edition",
+	"generated_at": "2026-05-17T13:38:58.911Z",
+	"known_technology_names": [
+		"Docker",
+		"Kubernetes",
+		"Laravel",
+		"PHP"
+	],
+	"known_guest_names": [
+		"Ciaran McNulty"
+	],
+	"resources": [
+		{
+			"title": "Inertia Ping CRM",
+			"category": "code",
+			"evidence_quote": "Alex has suggested we take a look at anterior patent CRM. So we're gonna do a last minute switch.",
+			"confidence": "medium"
+		},
+		{
+			"title": "rawcode/php-examples",
+			"url": "https://gitlab.com/rawcode/php-examples",
+			"category": "code",
+			"evidence_quote": "It's available on gitlab.com/rawcode/php-examples.",
+			"confidence": "high"
+		},
+		{
+			"title": "Refactoring Databases",
+			"category": "other",
+			"evidence_quote": "Does it have you read the refactoring databases?",
+			"confidence": "high"
+		},
+		{
+			"title": "The Twelve-Factor App manifesto",
+			"category": "documentation",
+			"evidence_quote": "this is classic 12 factor manifesto stuff.",
+			"confidence": "medium"
+		}
+	]
+}

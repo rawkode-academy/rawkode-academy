@@ -14,5 +14,21 @@ technologies:
   - seaweedfs
 duration: 369
 guests: []
+resources:
+  - title: MinIO Community Edition Maintenance Mode Announcement
+    type: url
+    category: other
+  - title: Adam Jacobs' Analysis of MinIO License Enforcement
+    type: url
+    category: other
+  - title: MinIO vs Nutanix License Compliance Case
+    type: url
+    category: other
+  - title: MinIO vs Weka License Revocation Incident
+    type: url
+    category: other
+  - title: MinIO GitHub Community Concerns
+    type: url
+    category: other
 ---
 

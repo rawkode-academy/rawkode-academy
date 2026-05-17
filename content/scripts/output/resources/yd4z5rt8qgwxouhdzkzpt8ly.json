@@ -1,0 +1,20 @@
+{
+	"video_id": "yd4z5rt8qgwxouhdzkzpt8ly",
+	"slug": "hands-on-introduction-to-k0s",
+	"title": "Hands-on Introduction to K0s",
+	"generated_at": "2026-05-17T13:28:38.171Z",
+	"known_technology_names": [
+		"k0s"
+	],
+	"known_guest_names": [
+		"Jussi Nummelin"
+	],
+	"resources": [
+		{
+			"title": "k0s Getting Started Guide",
+			"category": "documentation",
+			"evidence_quote": "So we'll choose the the getting started guide here.",
+			"confidence": "medium"
+		}
+	]
+}

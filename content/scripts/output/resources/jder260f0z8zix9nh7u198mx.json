@@ -1,0 +1,26 @@
+{
+	"video_id": "jder260f0z8zix9nh7u198mx",
+	"slug": "klustered-part-iii",
+	"title": "Klustered (Part III)",
+	"generated_at": "2026-05-17T13:20:58.103Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Michael Hausenblas"
+	],
+	"resources": [
+		{
+			"title": "Klustered GitLab repository",
+			"category": "code",
+			"evidence_quote": "there is a clustered repository on gitlab.com.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Justin Garrison's Ansible playbook repository for breaking the cluster",
+			"category": "code",
+			"evidence_quote": "Justin has a repository of an Ansible playbook that he used to break this.",
+			"confidence": "medium"
+		}
+	]
+}

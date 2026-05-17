@@ -219,5 +219,12 @@ chapters:
 duration: 7245
 guests:
   - jason-detiberus
+resources:
+  - title: Kubernetes kubectl bash completion documentation
+    type: url
+    category: documentation
+  - title: kubeadm CoreDNS manifest source code
+    type: url
+    category: code
 ---
 

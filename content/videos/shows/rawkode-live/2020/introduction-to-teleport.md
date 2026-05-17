@@ -86,5 +86,15 @@ chapters:
 duration: 4880
 guests:
   - steven-martin
+resources:
+  - title: Teleport Quick Start / Getting Started guide
+    type: url
+    category: documentation
+  - title: gravitational/teleport Kubernetes agent Helm chart example
+    type: url
+    category: code
+  - title: Teleport documentation for OpenSSH integration
+    type: url
+    category: documentation
 ---
 

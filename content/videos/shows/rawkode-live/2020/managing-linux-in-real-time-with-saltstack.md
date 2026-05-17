@@ -70,5 +70,18 @@ chapters:
 duration: 6520
 guests:
   - edward-vielmetti
+resources:
+  - title: Salt Pillar Modules documentation
+    type: url
+    category: documentation
+  - title: Salt Targeting documentation
+    type: url
+    category: documentation
+  - title: Salt State Modules documentation
+    type: url
+    category: documentation
+  - title: Salt Bootstrap
+    type: url
+    category: code
 ---
 

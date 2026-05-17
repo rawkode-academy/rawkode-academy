@@ -1,0 +1,37 @@
+{
+	"video_id": "ce0y3h3wgv2vt9m4rcux1s7x",
+	"slug": "trust-and-validation-in-ai",
+	"title": "Trust and Validation in AI",
+	"generated_at": "2026-05-17T13:23:41.648Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"JJ Asghar"
+	],
+	"resources": [
+		{
+			"title": "IBM watsonx.ai developer page",
+			"url": "https://ibm.biz/dev-watsonx",
+			"category": "documentation",
+			"evidence_quote": "If you are interested in Watson x, I do need to plug the URL.\nIbm.biz/dev-watsonx.",
+			"confidence": "high"
+		},
+		{
+			"title": "The Pile AI dataset",
+			"category": "other",
+			"evidence_quote": "If you Google the pile AI,\nit is a massive dataset out there that\nis just, like, I think, 800 gigs last\ntime I looked at it",
+			"confidence": "high"
+		},
+		{
+			"title": "FOSSY working session Etherpad notes on AI data provenance",
+			"category": "other",
+			"evidence_quote": "This was actually a a wonderful\nworking session at Fosse.\nWe had this whole and I I can\nI can link to the Etherpad\nthat\ncaptured all the notes for this?",
+			"confidence": "medium"
+		},
+		{
+			"title": "Hugging Face",
+			"category": "other",
+			"evidence_quote": "Models in the open source ecosystem, something called\nHugging Face. If your audience doesn't know about\nit, the easiest thing to describe Hugging Face\nas is the GitHub of AI.",
+			"confidence": "medium"
+		}
+	]
+}

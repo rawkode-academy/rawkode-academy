@@ -1,0 +1,21 @@
+{
+	"video_id": "t6z7vbrzz03zq1xvwlugnyoz",
+	"slug": "kubernetes-services",
+	"title": "Kubernetes Services",
+	"generated_at": "2026-05-17T13:32:44.222Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Anaïs Urlichs",
+		"Philipp Strube"
+	],
+	"resources": [
+		{
+			"title": "OpenFaaS nodeinfo",
+			"category": "demos",
+			"evidence_quote": "what we're actually going to use is something from the open files project called node info,",
+			"confidence": "medium"
+		}
+	]
+}

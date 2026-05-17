@@ -1,0 +1,26 @@
+{
+	"video_id": "nif2kkr7kig9n82jxsjyd2ds",
+	"slug": "hands-on-introduction-to-kluctl",
+	"title": "Hands-on Introduction to kluctl",
+	"generated_at": "2026-05-17T13:24:32.605Z",
+	"known_technology_names": [
+		"Kluctl"
+	],
+	"known_guest_names": [
+		"Alexander Block"
+	],
+	"resources": [
+		{
+			"title": "podinfo Helm chart",
+			"category": "demos",
+			"evidence_quote": "There is the pod info chart.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Flux Kluctl controller",
+			"category": "code",
+			"evidence_quote": "there's also a GitOps based controller, the Flux Clue Cuddle controller, which is doing GitOps style deployments",
+			"confidence": "medium"
+		}
+	]
+}

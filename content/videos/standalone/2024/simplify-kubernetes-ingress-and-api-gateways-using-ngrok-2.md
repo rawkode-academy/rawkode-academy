@@ -61,5 +61,13 @@ chapters:
     title: Conclusion
 duration: 881
 guests: []
+resources:
+  - title: ngrok Kubernetes Operator
+    type: url
+    category: code
+  - title: ngrok Helm Chart Repository
+    type: url
+    url: 'https://charts.ngrok.com'
+    category: code
 ---
 

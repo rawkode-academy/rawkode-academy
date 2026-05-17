@@ -1,0 +1,36 @@
+{
+	"video_id": "szryg6h4y89lh067p26a2g1f",
+	"slug": "klustered-19",
+	"title": "Klustered #19",
+	"generated_at": "2026-05-17T13:20:53.827Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Borko Djurkovic",
+		"Matt Turner"
+	],
+	"resources": [
+		{
+			"title": "Teleport clustered sponsor link",
+			"url": "https://rawkode.live/teleport",
+			"category": "other",
+			"evidence_quote": "So if you want to support Clustard and Rockwood Live, check out Rawkode.live/teleport.",
+			"confidence": "high"
+		},
+		{
+			"title": "commandnotfound.com",
+			"url": "https://commandnotfound.com",
+			"category": "other",
+			"evidence_quote": "There's commandnotfound.com, which is really useful.",
+			"confidence": "high"
+		},
+		{
+			"title": "Rawkode Discord",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "The Discord is available at Rawkode.chat.",
+			"confidence": "medium"
+		}
+	]
+}

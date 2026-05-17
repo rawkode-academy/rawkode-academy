@@ -1,0 +1,22 @@
+{
+	"video_id": "sajnda4phubtk0zz60xpdfch",
+	"slug": "introduction-to-fluentd-and-fluent-bit",
+	"title": "Introduction to Fluentd & Fluent Bit",
+	"generated_at": "2026-05-17T13:30:32.852Z",
+	"known_technology_names": [
+		"Fluent Bit",
+		"Fluentd"
+	],
+	"known_guest_names": [
+		"Anurag Gupta",
+		"Eduardo Silva"
+	],
+	"resources": [
+		{
+			"title": "Calyptia Config Visualizer",
+			"category": "demos",
+			"evidence_quote": "if we actually have a a visualizer if you wanna try that out, config visualizer.",
+			"confidence": "medium"
+		}
+	]
+}

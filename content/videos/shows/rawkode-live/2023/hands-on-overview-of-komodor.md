@@ -52,5 +52,9 @@ chapters:
     title: Conclusion
 duration: 1579
 guests: []
+resources:
+  - title: Advanced scheduling video
+    type: url
+    category: demos
 ---
 

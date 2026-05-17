@@ -1,0 +1,25 @@
+{
+	"video_id": "f9qr4s42d566gqtkdzzknxn9",
+	"slug": "automating-deployments-to-the-edge",
+	"title": "Automating Deployments to the Edge",
+	"generated_at": "2026-05-17T13:17:55.482Z",
+	"known_technology_names": [
+		"Portainer"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Portainer in Production repository",
+			"category": "code",
+			"evidence_quote": "everything that I'm going to show you is available on the Portainer in production repository.",
+			"confidence": "high"
+		},
+		{
+			"title": "KeyCDN Website Speed Test",
+			"url": "https://tools.keycdn.com/performance",
+			"category": "other",
+			"evidence_quote": "You can go to tools.KeyCDN.com/performance,",
+			"confidence": "high"
+		}
+	]
+}

@@ -118,5 +118,9 @@ chapters:
 duration: 4918
 guests:
   - manish-goregaokar
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
 ---
 

@@ -1,0 +1,26 @@
+{
+	"video_id": "vctezk0aahkq0ey2o0pvftdg",
+	"slug": "hands-on-tutorial-of-project-sveltos",
+	"title": "Hands-on Tutorial of Project Sveltos",
+	"generated_at": "2026-05-17T13:27:35.435Z",
+	"known_technology_names": [
+		"Sveltos"
+	],
+	"known_guest_names": [
+		"Gianluca Mardente"
+	],
+	"resources": [
+		{
+			"title": "Project Sveltos installation documentation",
+			"category": "documentation",
+			"evidence_quote": "what I did, I went to the project Sveltos documentation, and this is pretty much like the install section.",
+			"confidence": "high"
+		},
+		{
+			"title": "Project Sveltos register cluster documentation",
+			"category": "documentation",
+			"evidence_quote": "even to register a cluster with Sveltos, the documentation is on the project Sveltos.",
+			"confidence": "medium"
+		}
+	]
+}

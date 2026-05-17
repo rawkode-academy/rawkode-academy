@@ -124,5 +124,15 @@ chapters:
     title: Closing Remarks
 duration: 3038
 guests: []
+resources:
+  - title: The Lives of the Noble Grecians and Romans
+    type: url
+    category: other
+  - title: Black Book of Admiralty
+    type: url
+    category: other
+  - title: The Early History of Data Networks
+    type: url
+    category: other
 ---
 

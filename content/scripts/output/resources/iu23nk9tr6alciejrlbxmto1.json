@@ -1,0 +1,38 @@
+{
+	"video_id": "iu23nk9tr6alciejrlbxmto1",
+	"slug": "hands-on-introduction-to-quickwit",
+	"title": "Hands-on Introduction to Quickwit",
+	"generated_at": "2026-05-17T13:27:14.846Z",
+	"known_technology_names": [
+		"Quickwit"
+	],
+	"known_guest_names": [
+		"Francois Massot"
+	],
+	"resources": [
+		{
+			"title": "Quickwit Quick Start Guide",
+			"category": "documentation",
+			"evidence_quote": "We're gonna go straight to the quick start guide.",
+			"confidence": "high"
+		},
+		{
+			"title": "Quickwit Common Crawl demo",
+			"category": "demos",
+			"evidence_quote": "we have a commoncall.Quickwit.i0 website where you can just search few things",
+			"confidence": "medium"
+		},
+		{
+			"title": "Quickwit Helm chart",
+			"category": "code",
+			"evidence_quote": "And, like, I I will make a demo on it. So and it's available on the GitHub repository.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Quickwit Grafana plugin",
+			"category": "code",
+			"evidence_quote": "we implemented, like, a graph on that plug in to to search through logs and traces.",
+			"confidence": "medium"
+		}
+	]
+}

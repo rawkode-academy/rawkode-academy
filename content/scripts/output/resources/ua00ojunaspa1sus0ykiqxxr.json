@@ -1,0 +1,33 @@
+{
+	"video_id": "ua00ojunaspa1sus0ykiqxxr",
+	"slug": "hands-on-introduction-to-promscale",
+	"title": "Hands-on Introduction to Promscale",
+	"generated_at": "2026-05-17T13:30:28.938Z",
+	"known_technology_names": [
+		"Promscale"
+	],
+	"known_guest_names": [
+		"Vineeth Pothulapati",
+		"Mat Arye"
+	],
+	"resources": [
+		{
+			"title": "Promscale design doc",
+			"category": "documentation",
+			"evidence_quote": "There's a link to our design doc Oh, yes. Which is Yeah. Which is actually a live public design doc that we had hosted online when we first started the project.",
+			"confidence": "high"
+		},
+		{
+			"title": "Getting started with Promscale doc",
+			"category": "documentation",
+			"evidence_quote": "And I think we can get started with getting started with Promscale doc for SQL queries.",
+			"confidence": "high"
+		},
+		{
+			"title": "Dan Liu post about getting more value from metrics",
+			"category": "other",
+			"evidence_quote": "So there is a a big post by Dan Liu about talking about a simple way to get more values from metrics.",
+			"confidence": "medium"
+		}
+	]
+}

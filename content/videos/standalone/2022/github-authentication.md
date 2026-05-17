@@ -35,5 +35,18 @@ chapters:
     title: Conclusion & Wrap-up
 duration: 1289
 guests: []
+resources:
+  - title: Teleport GitHub SSO Documentation
+    type: url
+    category: documentation
+  - title: Teleport RBAC Deep Dive
+    type: url
+    category: other
+  - title: Teleport Machine ID Q&A with Ben Adams
+    type: url
+    category: other
+  - title: Teleport Windows Desktop Access Video
+    type: url
+    category: other
 ---
 

@@ -33,5 +33,12 @@ chapters:
 duration: 5184
 guests:
   - ciaran-mcnulty
+resources:
+  - title: Ping CRM
+    type: url
+    category: demos
+  - title: Laravel Mix documentation
+    type: url
+    category: documentation
 ---
 

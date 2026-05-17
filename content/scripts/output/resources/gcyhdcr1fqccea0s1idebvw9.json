@@ -1,0 +1,30 @@
+{
+	"video_id": "gcyhdcr1fqccea0s1idebvw9",
+	"slug": "part-1-lecture-1-introduction-to-time-series",
+	"title": "Part 1 - Lecture 1: Introduction to Time Series",
+	"generated_at": "2026-05-17T13:19:07.041Z",
+	"known_technology_names": [
+		"InfluxDB"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "The Lives of the Noble Grecians and Romans",
+			"category": "other",
+			"evidence_quote": "An eyephant is documented in The Lies of the Noble Grecians and Romans by Roman historian Plutarch,",
+			"confidence": "high"
+		},
+		{
+			"title": "Black Book of Admiralty",
+			"category": "other",
+			"evidence_quote": "And this is from the Black Book of Admiralty.",
+			"confidence": "high"
+		},
+		{
+			"title": "The Early History of Data Networks",
+			"category": "other",
+			"evidence_quote": "A lot of these tidbits came from the early history of data networks. You can go and buy this book.",
+			"confidence": "high"
+		}
+	]
+}

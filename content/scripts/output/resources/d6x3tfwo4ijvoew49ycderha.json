@@ -1,0 +1,20 @@
+{
+	"video_id": "d6x3tfwo4ijvoew49ycderha",
+	"slug": "introduction-to-rust-part-ii",
+	"title": "Introduction to Rust (Part II)",
+	"generated_at": "2026-05-17T13:37:31.430Z",
+	"known_technology_names": [
+		"Rust"
+	],
+	"known_guest_names": [
+		"Manish Goregaokar"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "If you wanna check out Equinix Medal, please use the code Rawkode dash live.",
+			"confidence": "medium"
+		}
+	]
+}

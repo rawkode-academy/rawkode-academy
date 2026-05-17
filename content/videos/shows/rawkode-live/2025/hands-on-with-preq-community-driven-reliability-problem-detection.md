@@ -18,5 +18,6 @@ show: rawkode-live
 duration: 3847
 guests:
   - tony-meehan
+resources: []
 ---
 

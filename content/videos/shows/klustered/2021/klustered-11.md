@@ -62,5 +62,9 @@ duration: 4919
 guests:
   - thomas-stromberg
   - kris-nova
+resources:
+  - title: SleuthKit FLS
+    type: url
+    category: documentation
 ---
 

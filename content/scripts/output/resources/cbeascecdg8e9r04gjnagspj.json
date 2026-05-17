@@ -1,0 +1,26 @@
+{
+	"video_id": "cbeascecdg8e9r04gjnagspj",
+	"slug": "hands-on-introduction-to-kpt",
+	"title": "Hands-on Introduction to kpt",
+	"generated_at": "2026-05-17T13:25:13.663Z",
+	"known_technology_names": [
+		"kpt"
+	],
+	"known_guest_names": [
+		"Brian Grant"
+	],
+	"resources": [
+		{
+			"title": "kpt namespace provisioning UI guide",
+			"category": "documentation",
+			"evidence_quote": "the guide that I was gonna recommend was the namespace provisioning UI guide.",
+			"confidence": "medium"
+		},
+		{
+			"title": "kpt channel on the Kubernetes Slack",
+			"category": "other",
+			"evidence_quote": "please join us on the kpt channel on the Kubernetes Slack",
+			"confidence": "medium"
+		}
+	]
+}

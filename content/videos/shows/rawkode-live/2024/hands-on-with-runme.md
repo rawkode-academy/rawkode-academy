@@ -53,5 +53,19 @@ chapters:
 duration: 5435
 guests:
   - sebastian-tiedtke
+resources:
+  - title: Runme Getting Started page
+    type: url
+    category: documentation
+  - title: Stateful
+    type: url
+    url: 'https://stateful.com'
+    category: other
+  - title: Runme integrations documentation
+    type: url
+    category: documentation
+  - title: Dagger integration documentation
+    type: url
+    category: documentation
 ---
 

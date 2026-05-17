@@ -73,5 +73,18 @@ chapters:
 duration: 4005
 guests:
   - dmitriy-kalinin
+resources:
+  - title: ytt Playground
+    type: url
+    category: demos
+  - title: kapp-controller NGINX Helm example
+    type: url
+    category: demos
+  - title: ytt load documentation
+    type: url
+    category: documentation
+  - title: KubeCon Carvel talk
+    type: url
+    category: other
 ---
 

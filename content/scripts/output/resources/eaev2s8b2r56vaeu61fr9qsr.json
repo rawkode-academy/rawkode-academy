@@ -1,0 +1,25 @@
+{
+	"video_id": "eaev2s8b2r56vaeu61fr9qsr",
+	"slug": "klustered-12",
+	"title": "Klustered #12",
+	"generated_at": "2026-05-17T13:20:40.272Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Jeffrey Sica",
+		"Chris Carty"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "If you wanna check it out, use the code Rawkode.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes Office Hours",
+			"category": "other",
+			"evidence_quote": "if you're looking to learn more about Kubernetes, that's another great way to engage and interact with the community and learn a lot of fun stuff.",
+			"confidence": "medium"
+		}
+	]
+}

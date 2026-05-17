@@ -15,5 +15,17 @@ technologies:
   - cue
 duration: 1198
 guests: []
+resources:
+  - title: CUE Documentation
+    type: url
+    url: 'https://cue.dev/docs'
+    category: documentation
+  - title: CUE Central Registry
+    type: url
+    url: 'https://registry.cue.works'
+    category: other
+  - title: GitHub Actions package on CUE Registry
+    type: url
+    category: code
 ---
 

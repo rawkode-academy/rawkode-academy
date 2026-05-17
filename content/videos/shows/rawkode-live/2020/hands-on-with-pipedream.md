@@ -90,5 +90,22 @@ chapters:
     title: Conclusion & Farewell
 duration: 5299
 guests: []
+resources:
+  - title: Equinix Metal
+    type: url
+    url: 'https://metal.equinix.com'
+    category: other
+  - title: Pipedream REST API docs
+    type: url
+    category: documentation
+  - title: Pipedream workflow state docs
+    type: url
+    category: documentation
+  - title: SSLMate Cert Spotter API
+    type: url
+    category: other
+  - title: Pipedream parking tickets in San Francisco blog post
+    type: url
+    category: other
 ---
 

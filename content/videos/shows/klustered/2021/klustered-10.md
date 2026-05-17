@@ -98,5 +98,13 @@ duration: 5770
 guests:
   - walid-shaari
   - noel-georgi
+resources:
+  - title: Rawkode Discord
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
+  - title: Equinix Metal
+    type: url
+    category: other
 ---
 

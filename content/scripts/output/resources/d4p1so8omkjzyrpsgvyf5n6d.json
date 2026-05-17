@@ -1,0 +1,36 @@
+{
+	"video_id": "d4p1so8omkjzyrpsgvyf5n6d",
+	"slug": "buiding-a-webassembly-graphql-client",
+	"title": "Buiding a WebAssembly GraphQL Client",
+	"generated_at": "2026-05-17T13:30:18.821Z",
+	"known_technology_names": [
+		"Suborbital",
+		"WebAssembly & WASI"
+	],
+	"known_guest_names": [
+		"Connor Hicks",
+		"Francis Gulotta"
+	],
+	"resources": [
+		{
+			"title": "api.rawkode.dev GraphQL endpoint",
+			"url": "https://api.rawkode.dev",
+			"category": "demos",
+			"evidence_quote": "And it would go and hit API dot Rawkode.dev.",
+			"confidence": "high"
+		},
+		{
+			"title": "Shopify Scripts platform",
+			"category": "other",
+			"evidence_quote": "So we have this project, this this app called Scripts.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Rawkode.chat Discord",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "there is a Discord channel available at Rawkode.chat.",
+			"confidence": "high"
+		}
+	]
+}

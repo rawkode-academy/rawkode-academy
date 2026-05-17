@@ -84,5 +84,18 @@ duration: 4266
 guests:
   - rich-burroughs
   - lukas-gentele
+resources:
+  - title: jsPolicy Playground
+    type: url
+    category: demos
+  - title: jsPolicy Architecture docs page
+    type: url
+    category: documentation
+  - title: jsPolicy example policies repository
+    type: url
+    category: code
+  - title: jsPolicy SDK starter project
+    type: url
+    category: code
 ---
 

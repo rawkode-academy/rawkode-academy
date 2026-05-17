@@ -95,5 +95,21 @@ guests:
   - jim-bugwadia
   - founder-at-nirmata
   - shuting-zhao
+resources:
+  - title: Kubernetes Pod Security Standards documentation
+    type: url
+    category: documentation
+  - title: Bishop Fox Bad Pods repository
+    type: url
+    category: demos
+  - title: kyverno/policies repository
+    type: url
+    category: code
+  - title: OPA Gatekeeper
+    type: url
+    category: code
+  - title: kubectl neat
+    type: url
+    category: other
 ---
 

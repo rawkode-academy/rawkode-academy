@@ -74,5 +74,21 @@ duration: 4039
 guests:
   - daniel-bryant
   - peter-o-neill
+resources:
+  - title: Telepresence DNS resolution documentation
+    type: url
+    category: documentation
+  - title: Telepresence Docker for Intercepts documentation
+    type: url
+    category: documentation
+  - title: Telepresence RBAC documentation
+    type: url
+    category: documentation
+  - title: Telepresence and Linkerd documentation
+    type: url
+    category: documentation
+  - title: Ambassador Labs annotations standard
+    type: url
+    category: documentation
 ---
 

@@ -1,7 +1,5 @@
 ---
-id: >-
-  ni90hh70rr77srzpo199bbfv
-  building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode
+id: ni90hh70rr77srzpo199bbfv
 slug: >-
   building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode
 title: >-
@@ -44,5 +42,16 @@ chapters:
 duration: 6270
 guests:
   - ciaran-mcnulty
+resources:
+  - title: rawkode/php-examples
+    type: url
+    url: 'https://gitlab.com/rawkode/php-examples'
+    category: code
+  - title: Kick Ass Development Environments with Docker
+    type: url
+    category: other
+  - title: Kustomize documentation
+    type: url
+    category: documentation
 ---
 

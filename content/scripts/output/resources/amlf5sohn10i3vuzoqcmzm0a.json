@@ -1,0 +1,32 @@
+{
+	"video_id": "amlf5sohn10i3vuzoqcmzm0a",
+	"slug": "hands-on-introduction-to-skaffold",
+	"title": "Hands-on Introduction to Skaffold",
+	"generated_at": "2026-05-17T13:32:30.642Z",
+	"known_technology_names": [
+		"Skaffold"
+	],
+	"known_guest_names": [
+		"Vic Iglesias"
+	],
+	"resources": [
+		{
+			"title": "Skaffold microservices example",
+			"category": "demos",
+			"evidence_quote": "the microservices example is probably a nice representative one.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Skaffold React reload example",
+			"category": "demos",
+			"evidence_quote": "the React reload one caught my eye, and I think that's exactly what I was talking about earlier.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Skaffold custom test example",
+			"category": "demos",
+			"evidence_quote": "Custom test is the the one we recently added.",
+			"confidence": "medium"
+		}
+	]
+}

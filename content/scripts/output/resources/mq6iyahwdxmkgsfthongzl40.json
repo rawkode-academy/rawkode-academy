@@ -1,0 +1,32 @@
+{
+	"video_id": "mq6iyahwdxmkgsfthongzl40",
+	"slug": "hands-on-introduction-to-cdk8s",
+	"title": "Hands-on Introduction to cdk8s",
+	"generated_at": "2026-05-17T13:32:02.023Z",
+	"known_technology_names": [
+		"cdk8s"
+	],
+	"known_guest_names": [
+		"Elad Ben-Israel"
+	],
+	"resources": [
+		{
+			"title": "Cluster API project",
+			"category": "code",
+			"evidence_quote": "Well, I I do a lot of work on the cluster API project. So why don't we import their types?",
+			"confidence": "high"
+		},
+		{
+			"title": "cdk8s Concepts: Escape Patches",
+			"category": "documentation",
+			"evidence_quote": "You can go you can look at this at the at the documentation. It's actually something that, maybe documentation can help with. And the concepts escape patches.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Construct Catalog",
+			"category": "other",
+			"evidence_quote": "I shoved a little link to this little thing called we call construct catalog,",
+			"confidence": "medium"
+		}
+	]
+}

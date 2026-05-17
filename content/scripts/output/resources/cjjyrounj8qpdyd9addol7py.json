@@ -1,0 +1,20 @@
+{
+	"video_id": "cjjyrounj8qpdyd9addol7py",
+	"slug": "hands-on-introduction-to-namespace",
+	"title": "Hands-on Introduction to Namespace",
+	"generated_at": "2026-05-17T13:25:24.781Z",
+	"known_technology_names": [
+		"Namespace"
+	],
+	"known_guest_names": [
+		"Hugo Santos"
+	],
+	"resources": [
+		{
+			"title": "Cash App Hermit",
+			"category": "code",
+			"evidence_quote": "Cash App has\nsomething that over open source called Hermit",
+			"confidence": "medium"
+		}
+	]
+}

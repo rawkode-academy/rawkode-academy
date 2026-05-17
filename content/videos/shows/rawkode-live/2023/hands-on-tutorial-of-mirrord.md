@@ -68,5 +68,6 @@ duration: 3571
 guests:
   - eyal-bukchin
   - tal-zwick
+resources: []
 ---
 

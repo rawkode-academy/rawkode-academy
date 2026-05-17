@@ -1,0 +1,43 @@
+{
+	"video_id": "a7z1litz91j0xw2nzuvxh240",
+	"slug": "klustered-community-vs-rawkode",
+	"title": "Klustered: Community vs. Rawkode",
+	"generated_at": "2026-05-17T13:20:29.168Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Noel Georgi",
+		"Russell Waite"
+	],
+	"resources": [
+		{
+			"title": "Rawkode.live YouTube channel",
+			"url": "https://rawkode.live",
+			"category": "other",
+			"evidence_quote": "First,\ncheck out Rawkode.live.\nThat is the YouTube channel. Please subscribe.",
+			"confidence": "high"
+		},
+		{
+			"title": "Rawkode Discord server",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "There's also a Discord server available at Rawkode.chat.",
+			"confidence": "high"
+		},
+		{
+			"title": "Rawkode.live destroy-it kubeconfig demo",
+			"url": "https://rawkode.live/destroy-it",
+			"category": "demos",
+			"evidence_quote": "you'll also notice here,\nthere is a Rawkode.live/destroy-\nit.\nThis is a public\nKubeConfig\nto a Kubernetes cluster",
+			"confidence": "high"
+		},
+		{
+			"title": "Teleport sponsor link",
+			"url": "https://rawkode.live/teleport",
+			"category": "other",
+			"evidence_quote": "To support the show, go to raw Rawkode\nLive / Teleport.",
+			"confidence": "medium"
+		}
+	]
+}

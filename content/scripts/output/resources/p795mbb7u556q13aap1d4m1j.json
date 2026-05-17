@@ -1,0 +1,19 @@
+{
+	"video_id": "p795mbb7u556q13aap1d4m1j",
+	"slug": "writing-server-side-webassembly-with-python",
+	"title": "Writing Server Side WebAssembly with Python",
+	"generated_at": "2026-05-17T13:18:12.022Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "verimeon/spin-python-sdk",
+			"url": "https://github.com/verimeon/spin-python-sdk",
+			"category": "code",
+			"evidence_quote": "So if you go to github.com/verimeon/spin-python-sdk, you will find the crates directory, which has the Spin Python engine directory.",
+			"confidence": "medium"
+		}
+	]
+}

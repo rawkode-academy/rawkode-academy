@@ -107,5 +107,18 @@ chapters:
     title: End
 duration: 3073
 guests: []
+resources:
+  - title: Fermion Installer
+    type: url
+    url: 'https://github.com/fermion/installer'
+    category: code
+  - title: Deis Labs Hippo
+    type: url
+    url: 'https://github.com/deislabs/hippo'
+    category: code
+  - title: Deis Labs Bundle
+    type: url
+    url: 'https://github.com/deislabs/bundle'
+    category: code
 ---
 

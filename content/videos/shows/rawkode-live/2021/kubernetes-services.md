@@ -82,5 +82,9 @@ duration: 3154
 guests:
   - anais-urlichs
   - philipp-strube
+resources:
+  - title: OpenFaaS nodeinfo
+    type: url
+    category: demos
 ---
 

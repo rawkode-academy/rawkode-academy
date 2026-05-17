@@ -15,5 +15,15 @@ show: cloud-native-compass
 duration: 2518
 audioFileSize: 60425030
 guests: []
+resources:
+  - title: Rawkode Academy mono repository
+    type: url
+    category: code
+  - title: Comtrya dotfile management tool
+    type: url
+    category: code
+  - title: IBM Granite episode
+    type: url
+    category: other
 ---
 

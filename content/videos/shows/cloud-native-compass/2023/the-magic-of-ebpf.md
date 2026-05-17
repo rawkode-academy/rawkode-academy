@@ -80,5 +80,18 @@ duration: 1920
 audioFileSize: 46069483
 guests:
   - liz-rice
+resources:
+  - title: Learning eBPF
+    type: url
+    category: other
+  - title: eBPF Summit
+    type: url
+    category: other
+  - title: Iovisor BCC tools
+    type: url
+    category: code
+  - title: OpenSnoop and ExecSnoop
+    type: url
+    category: demos
 ---
 

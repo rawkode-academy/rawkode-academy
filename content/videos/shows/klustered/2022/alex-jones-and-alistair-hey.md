@@ -96,5 +96,15 @@ duration: 4621
 guests:
   - alex-jones
   - alistair-hey
+resources:
+  - title: Equinix Metal free credits link
+    type: url
+    category: other
+  - title: Teleport information link
+    type: url
+    category: documentation
+  - title: webi.shell / web install
+    type: url
+    category: code
 ---
 

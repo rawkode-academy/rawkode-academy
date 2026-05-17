@@ -1,0 +1,26 @@
+{
+	"video_id": "zun7qn3xym7pzttsckp91ame",
+	"slug": "klustered-part-v",
+	"title": "Klustered (Part V)",
+	"generated_at": "2026-05-17T13:20:45.908Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Jason DeTiberus"
+	],
+	"resources": [
+		{
+			"title": "Kubernetes kubectl bash completion documentation",
+			"category": "documentation",
+			"evidence_quote": "I've got the docs. Kubernetes completion source bash. Yeah. There's the docs.",
+			"confidence": "medium"
+		},
+		{
+			"title": "kubeadm CoreDNS manifest source code",
+			"category": "code",
+			"evidence_quote": "what I'm gonna do is I'm gonna look into the manifest code that we actually deploy from Cube ATM.",
+			"confidence": "medium"
+		}
+	]
+}

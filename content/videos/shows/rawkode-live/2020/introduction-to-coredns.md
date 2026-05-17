@@ -81,5 +81,12 @@ chapters:
 duration: 3590
 guests:
   - miek-gieben
+resources:
+  - title: CoreDNS example plugin repository
+    type: url
+    category: code
+  - title: Sysdig article on DNS request latency in Kubernetes
+    type: url
+    category: other
 ---
 

@@ -213,5 +213,9 @@ chapters:
 duration: 5811
 guests:
   - noel-georgi
+resources:
+  - title: kubectl neat
+    type: url
+    category: code
 ---
 

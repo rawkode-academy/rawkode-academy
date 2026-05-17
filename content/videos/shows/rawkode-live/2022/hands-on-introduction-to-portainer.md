@@ -69,5 +69,13 @@ chapters:
 duration: 4562
 guests:
   - neil-cresswell
+resources:
+  - title: CNCF Landscape
+    type: url
+    category: other
+  - title: Sosivio
+    type: url
+    url: 'https://sosiv.io'
+    category: other
 ---
 

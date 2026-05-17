@@ -1,0 +1,20 @@
+{
+	"video_id": "xn5lyqrxw1a9e6c39zsi17s2",
+	"slug": "klustered-17",
+	"title": "Klustered #17",
+	"generated_at": "2026-05-17T13:20:31.313Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Ádám Szücs-Mátyás",
+		"William Lightning"
+	],
+	"resources": [
+		{
+			"title": "Teleport",
+			"url": "https://rawkode.live/Teleport",
+			"category": "other",
+			"evidence_quote": "Remember to go check out Rawkode.live/Teleport.",
+			"confidence": "high"
+		}
+	]
+}

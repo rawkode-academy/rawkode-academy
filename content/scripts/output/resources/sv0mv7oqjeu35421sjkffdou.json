@@ -1,0 +1,26 @@
+{
+	"video_id": "sv0mv7oqjeu35421sjkffdou",
+	"slug": "jetstack-and-crashbeerbackoff",
+	"title": "Jetstack & CrashBeerBackOff",
+	"generated_at": "2026-05-17T13:19:52.928Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Teleport",
+			"url": "https://Rawkode.link/Teleport",
+			"category": "other",
+			"evidence_quote": "So go check out Teleport by visiting Rawkode.link/Teleport.",
+			"confidence": "high"
+		},
+		{
+			"title": "Equinix Metal",
+			"url": "https://Rawkode.link/metal",
+			"category": "other",
+			"evidence_quote": "And if you want to use that, go to Rawkode.link/metal.",
+			"confidence": "high"
+		}
+	]
+}

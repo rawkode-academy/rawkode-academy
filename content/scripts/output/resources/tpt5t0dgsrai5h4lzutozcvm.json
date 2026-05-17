@@ -1,0 +1,20 @@
+{
+	"video_id": "tpt5t0dgsrai5h4lzutozcvm",
+	"slug": "klustered-part-vi",
+	"title": "Klustered (Part VI)",
+	"generated_at": "2026-05-17T13:21:35.002Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Duffie Cooley"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "If you wanna check out Equinix Medal, you can use the code to Rawkode live.",
+			"confidence": "medium"
+		}
+	]
+}

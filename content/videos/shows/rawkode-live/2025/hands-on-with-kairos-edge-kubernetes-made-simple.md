@@ -19,5 +19,24 @@ duration: 5369
 guests:
   - mauro-morales
   - ettore-giacinto
+resources:
+  - title: Kairos website
+    type: url
+    url: 'https://kairos.io'
+    category: documentation
+  - title: Kairos Quick Start Guide
+    type: url
+    category: documentation
+  - title: Aurora Boot documentation
+    type: url
+    category: documentation
+  - title: Kairos community bundles repository
+    type: url
+    category: code
+  - title: >-
+      Lennart Poettering article about fitting systemd technologies into an
+      ideal Linux distribution
+    type: url
+    category: other
 ---
 

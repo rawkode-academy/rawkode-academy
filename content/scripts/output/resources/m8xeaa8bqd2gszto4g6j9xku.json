@@ -1,0 +1,25 @@
+{
+	"video_id": "m8xeaa8bqd2gszto4g6j9xku",
+	"slug": "ngroks-kubernetes-ingress-controller-is-amazing-2",
+	"title": "ngrok's Kubernetes Ingress Controller is AMAZING",
+	"generated_at": "2026-05-17T13:18:26.544Z",
+	"known_technology_names": [
+		"ngrok"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "ngrok/kubernetes-ngrok-controller",
+			"url": "https://github.com/ngrok/kubernetes-ngrok-controller",
+			"category": "code",
+			"evidence_quote": "For more details on how to install the ngrok controller,\nyou can go github.com/ngrok/kubernetes-ngrok-controller,",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok Kubernetes Ingress Controller release blog",
+			"category": "other",
+			"evidence_quote": "So if you want to\nlearn more, well, watch this video, but also\ncheck out the release blog on ngrok.com.",
+			"confidence": "medium"
+		}
+	]
+}

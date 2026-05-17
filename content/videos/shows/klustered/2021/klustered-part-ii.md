@@ -115,5 +115,9 @@ chapters:
 duration: 7085
 guests:
   - dan-finneran
+resources:
+  - title: Hubble UI
+    type: url
+    category: demos
 ---
 

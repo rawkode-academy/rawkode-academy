@@ -68,5 +68,12 @@ chapters:
 duration: 5627
 guests:
   - cyril-tovena
+resources:
+  - title: Weaveworks Sock Shop microservice demo
+    type: url
+    category: demos
+  - title: Grafana LogQL documentation
+    type: url
+    category: documentation
 ---
 

@@ -86,5 +86,9 @@ chapters:
 duration: 3066
 guests:
   - matti-ranta
+resources:
+  - title: Tarte dot dev
+    type: url
+    category: code
 ---
 

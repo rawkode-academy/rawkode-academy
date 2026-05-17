@@ -1,0 +1,39 @@
+{
+	"video_id": "czi3j87pkjuupnifphnpqnor",
+	"slug": "hands-on-introduction-to-firecracker",
+	"title": "Hands-on Introduction to Firecracker",
+	"generated_at": "2026-05-17T13:29:42.643Z",
+	"known_technology_names": [
+		"Firecracker"
+	],
+	"known_guest_names": [
+		"Radu Weiss",
+		"Gabriel Ionescu"
+	],
+	"resources": [
+		{
+			"title": "Firecracker Quick Start Guide",
+			"category": "documentation",
+			"evidence_quote": "there's also another link there which says you can go to the quick start guide.",
+			"confidence": "high"
+		},
+		{
+			"title": "Firecracker Swagger API specification",
+			"category": "documentation",
+			"evidence_quote": "I think it's in Swagger format, so it should be ingestible by clients.",
+			"confidence": "high"
+		},
+		{
+			"title": "Firecracker Go SDK",
+			"category": "code",
+			"evidence_quote": "Wrapping around the all the CRL request that David did, I'm using Firecracker SDK.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Weave Ignite",
+			"category": "code",
+			"evidence_quote": "There's Weave Ignite, which basically kinda has a docker like interface for Firecracker VMs.",
+			"confidence": "high"
+		}
+	]
+}

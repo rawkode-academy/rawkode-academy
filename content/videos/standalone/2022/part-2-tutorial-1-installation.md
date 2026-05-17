@@ -41,5 +41,12 @@ chapters:
     title: Conclusion
 duration: 539
 guests: []
+resources:
+  - title: InfluxData InfluxDB 2 Helm Chart
+    type: url
+    category: code
+  - title: Course Materials Installation Guide
+    type: url
+    category: documentation
 ---
 

@@ -1,0 +1,26 @@
+{
+	"video_id": "b3oefzhoncogvr5cyijfckcj",
+	"slug": "cloud-containers-and-kubernetes",
+	"title": "Cloud, Containers, & Kubernetes",
+	"generated_at": "2026-05-17T13:23:28.458Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Neil Cresswell",
+		"Eli Holderness",
+		"Abdellfetah Sghiouar"
+	],
+	"resources": [
+		{
+			"title": "Kubernetes Podcast",
+			"category": "other",
+			"evidence_quote": "I'm gonna do a shameless plug and ask people to go listen to the Kubernetes podcast.",
+			"confidence": "high"
+		},
+		{
+			"title": "Docker Compose for Kubernetes",
+			"category": "code",
+			"evidence_quote": "We we used to include Compose with a k in Protainer. So you you could take a Docker Compose file, and we we would auto deploy that against Kubernetes.",
+			"confidence": "medium"
+		}
+	]
+}

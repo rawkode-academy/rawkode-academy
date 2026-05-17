@@ -64,5 +64,12 @@ chapters:
 duration: 2896
 guests:
   - steve-martin
+resources:
+  - title: 'Teleport documentation: joining nodes'
+    type: url
+    category: documentation
+  - title: 'Teleport documentation: AWS console access'
+    type: url
+    category: documentation
 ---
 

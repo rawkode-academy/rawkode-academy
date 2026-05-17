@@ -104,5 +104,9 @@ chapters:
 duration: 5375
 guests:
   - steven-wade
+resources:
+  - title: Pulumi provider boilerplate repository
+    type: url
+    category: code
 ---
 

@@ -46,5 +46,12 @@ chapters:
     title: Conclusion
 duration: 754
 guests: []
+resources:
+  - title: Spin file server repository
+    type: url
+    category: code
+  - title: Astro website creation CLI
+    type: url
+    category: documentation
 ---
 

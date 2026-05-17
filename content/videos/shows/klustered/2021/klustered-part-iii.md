@@ -77,5 +77,12 @@ chapters:
 duration: 5765
 guests:
   - michael-hausenblas
+resources:
+  - title: Klustered GitLab repository
+    type: url
+    category: code
+  - title: Justin Garrison's Ansible playbook repository for breaking the cluster
+    type: url
+    category: code
 ---
 

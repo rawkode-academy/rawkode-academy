@@ -1,0 +1,28 @@
+{
+	"video_id": "kmhmcc41uglftsqr66vbo0di",
+	"slug": "klustered-13",
+	"title": "Klustered #13",
+	"generated_at": "2026-05-17T13:20:37.723Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Marques Johansson",
+		"Mahmoud Saada"
+	],
+	"resources": [
+		{
+			"title": "Rawkode.chat Discord channel",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "Please join the Discord channel, Rawkode.chat.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes controller utils create pods code",
+			"category": "code",
+			"evidence_quote": "in the Kubernetes project under package controller control controller utils, there is a function called create pods.",
+			"confidence": "medium"
+		}
+	]
+}

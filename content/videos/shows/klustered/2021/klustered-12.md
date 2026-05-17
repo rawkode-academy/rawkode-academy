@@ -99,5 +99,12 @@ duration: 5935
 guests:
   - jeffrey-sica
   - chris-carty
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
+  - title: Kubernetes Office Hours
+    type: url
+    category: other
 ---
 

@@ -1,0 +1,32 @@
+{
+	"video_id": "qatht83waplqejze8yf2865b",
+	"slug": "hands-on-introduction-to-schemahero",
+	"title": "Hands-on Introduction to SchemaHero",
+	"generated_at": "2026-05-17T13:24:15.214Z",
+	"known_technology_names": [
+		"SchemaHero"
+	],
+	"known_guest_names": [
+		"Mark Campbell"
+	],
+	"resources": [
+		{
+			"title": "SchemaHero Operatorless Mode documentation",
+			"category": "documentation",
+			"evidence_quote": "there's a page called operatorless mode is what we call it right now.",
+			"confidence": "high"
+		},
+		{
+			"title": "SchemaHero Reference for all Fields documentation",
+			"category": "documentation",
+			"evidence_quote": "There you go. The reference for all fields.",
+			"confidence": "medium"
+		},
+		{
+			"title": "SchemaHero channel on Kubernetes Slack",
+			"category": "other",
+			"evidence_quote": "hit us up on the Kubernetes Slack. There's a SchemaHero channel.",
+			"confidence": "high"
+		}
+	]
+}

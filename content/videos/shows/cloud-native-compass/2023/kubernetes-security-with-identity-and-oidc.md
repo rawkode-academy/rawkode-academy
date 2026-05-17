@@ -71,5 +71,23 @@ duration: 2326
 audioFileSize: 55827785
 guests:
   - marc-boorshtein
+resources:
+  - title: OpenUnison
+    type: url
+    url: 'https://openunison.github.io/'
+    category: code
+  - title: CICD Proxy
+    type: url
+    url: 'https://cicdproxy.github.io/'
+    category: code
+  - title: Kubernetes and the Enterprise
+    type: url
+    category: other
+  - title: Kubernetes Security Days talk on certificate authentication
+    type: url
+    category: other
+  - title: CICD Proxy Helm charts for kube-oidc-proxy impersonation
+    type: url
+    category: code
 ---
 

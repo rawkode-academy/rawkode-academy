@@ -95,5 +95,6 @@ chapters:
 duration: 5715
 guests:
   - walid-shaari
+resources: []
 ---
 

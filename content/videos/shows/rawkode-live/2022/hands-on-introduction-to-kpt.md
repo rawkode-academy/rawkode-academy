@@ -171,5 +171,12 @@ chapters:
 duration: 5674
 guests:
   - brian-grant
+resources:
+  - title: kpt namespace provisioning UI guide
+    type: url
+    category: documentation
+  - title: kpt channel on the Kubernetes Slack
+    type: url
+    category: other
 ---
 

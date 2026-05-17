@@ -1,0 +1,44 @@
+{
+	"video_id": "wqob01glppj9tkopb81c1cp5",
+	"slug": "introduction-to-n8n",
+	"title": "Introduction to n8n",
+	"generated_at": "2026-05-17T13:35:58.957Z",
+	"known_technology_names": [
+		"n8n"
+	],
+	"known_guest_names": [
+		"Tanay Pant"
+	],
+	"resources": [
+		{
+			"title": "TheCocktailDB API",
+			"category": "documentation",
+			"evidence_quote": "Let's use this API I discovered a few months back. It's called the cocktail d b API.",
+			"confidence": "high"
+		},
+		{
+			"title": "TheCocktailDB random cocktail endpoint",
+			"category": "demos",
+			"evidence_quote": "Look up a random cocktail.",
+			"confidence": "medium"
+		},
+		{
+			"title": "n8n Node Library documentation",
+			"category": "documentation",
+			"evidence_quote": "This is the node library here.",
+			"confidence": "medium"
+		},
+		{
+			"title": "n8n Getting Started documentation",
+			"category": "documentation",
+			"evidence_quote": "as always there is a getting started part of the documentation.",
+			"confidence": "medium"
+		},
+		{
+			"title": "BotFather Telegram bot creation flow",
+			"category": "documentation",
+			"evidence_quote": "So we need to start a chat with bot father.",
+			"confidence": "medium"
+		}
+	]
+}

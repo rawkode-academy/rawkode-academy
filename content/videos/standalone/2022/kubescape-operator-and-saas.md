@@ -46,5 +46,14 @@ chapters:
     title: Conclusion & What's Next
 duration: 1972
 guests: []
+resources:
+  - title: Kubescape Complete Guide Repository
+    type: url
+    url: 'https://github.com/rawkode-academy/kubescape-complete-guide'
+    category: code
+  - title: Kubescape Helm Charts
+    type: url
+    url: 'https://kubescape.github.io/helm-charts'
+    category: documentation
 ---
 

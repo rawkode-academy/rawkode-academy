@@ -1,0 +1,34 @@
+{
+	"video_id": "lb152fahj4mgnkhcx1lsnejr",
+	"slug": "klustered-teams-digitalocean-and-skyscanner",
+	"title": "Klustered Teams: DigitalOcean & Skyscanner",
+	"generated_at": "2026-05-17T13:20:46.253Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Billie Cleek",
+		"Collin Shoop",
+		"Jeremy Morris",
+		"Shahar Levy",
+		"Guy Templeton",
+		"Matteo Ruina",
+		"Alex Williams"
+	],
+	"resources": [
+		{
+			"title": "Teleport sponsor link",
+			"url": "https://rawkode.live/Teleport",
+			"category": "other",
+			"evidence_quote": "It's teleport. Go check it out. Rawkode.live/Teleport.",
+			"confidence": "high"
+		},
+		{
+			"title": "Rawkode Discord server",
+			"url": "https://Rawkode.chat",
+			"category": "other",
+			"evidence_quote": "We also have a Discord server available at Rawkode.chat,",
+			"confidence": "high"
+		}
+	]
+}

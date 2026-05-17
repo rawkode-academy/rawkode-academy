@@ -1,0 +1,24 @@
+{
+	"video_id": "aqzmvsr41szkg2uqg0yp2cu4",
+	"slug": "keep-authentication-simple-with-portainers-oauth-connectors",
+	"title": "Keep Authentication Simple with Portainers OAuth Connectors",
+	"generated_at": "2026-05-17T13:18:39.780Z",
+	"known_technology_names": [
+		"Portainer"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "GitHub OAuth Apps settings",
+			"category": "other",
+			"evidence_quote": "you can go to your GitHub organization where you can click settings, scroll all the way down to developer and select OAuth apps.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Google Cloud API and Services Credentials",
+			"category": "other",
+			"evidence_quote": "From Google Cloud, you're gonna want to go to API and services and credentials.",
+			"confidence": "medium"
+		}
+	]
+}

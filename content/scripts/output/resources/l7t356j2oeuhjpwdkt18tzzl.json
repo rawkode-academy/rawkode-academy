@@ -1,0 +1,32 @@
+{
+	"video_id": "l7t356j2oeuhjpwdkt18tzzl",
+	"slug": "klustered-teams-carta-and-fairwinds",
+	"title": "Klustered Teams: Carta & Fairwinds",
+	"generated_at": "2026-05-17T13:21:33.730Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Mahmoud Saada",
+		"Mario Loria",
+		"Rachel Sweeney",
+		"Andy Suderman",
+		"Luke Reed",
+		"Raf Nijskens"
+	],
+	"resources": [
+		{
+			"title": "Teleport",
+			"url": "https://rawkode.live/teleport",
+			"category": "other",
+			"evidence_quote": "If you want to support the show, you can go check out Rawkode.live/teleport",
+			"confidence": "high"
+		},
+		{
+			"title": "Fairwinds RBAC Lookup",
+			"category": "code",
+			"evidence_quote": "the RBAC lookup will help you find RBAC permissions that are difficult to discover.",
+			"confidence": "medium"
+		}
+	]
+}

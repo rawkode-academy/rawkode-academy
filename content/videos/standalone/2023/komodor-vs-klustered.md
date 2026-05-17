@@ -54,5 +54,6 @@ chapters:
     title: Recap and Final Thoughts
 duration: 1815
 guests: []
+resources: []
 ---
 

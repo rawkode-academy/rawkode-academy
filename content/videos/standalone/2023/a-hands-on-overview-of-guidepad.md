@@ -41,5 +41,13 @@ chapters:
     title: Conclusion & Next Steps
 duration: 852
 guests: []
+resources:
+  - title: Microlink API
+    type: url
+    url: 'https://microlink.io/'
+    category: other
+  - title: Guidepad Rawkode
+    type: url
+    category: code
 ---
 

@@ -2,7 +2,7 @@
 id: lkg0k1i6xj1a738ziwwhsw0f
 slug: building-a-real-application-with-guidepad
 title: Building a Real Application with Guidepad
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2024-07-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -62,5 +62,9 @@ duration: 6263
 guests:
   - reginald-wilkerson
   - mathew-citarella
+resources:
+  - title: Guidepad demo repository
+    type: url
+    category: code
 ---
 

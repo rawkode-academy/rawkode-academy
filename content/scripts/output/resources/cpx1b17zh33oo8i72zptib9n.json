@@ -1,0 +1,27 @@
+{
+	"video_id": "cpx1b17zh33oo8i72zptib9n",
+	"slug": "navigating-kairos-immutable-operating-systems-with-a-cloud-native-twist",
+	"title": "Navigating Kairos: Immutable Operating Systems with a Cloud Native Twist",
+	"generated_at": "2026-05-17T13:23:03.472Z",
+	"known_technology_names": [
+		"Kairos"
+	],
+	"known_guest_names": [
+		"Mauro Morales",
+		"Dimitris Karakasilis"
+	],
+	"resources": [
+		{
+			"title": "SUSE Elemental Toolkit",
+			"category": "code",
+			"evidence_quote": "I think there's also something related about, another project from SUSE called Elemental Toolkit.",
+			"confidence": "medium"
+		},
+		{
+			"title": "bootc project",
+			"category": "code",
+			"evidence_quote": "So there's the bootc project that's also in the CNCF.",
+			"confidence": "medium"
+		}
+	]
+}

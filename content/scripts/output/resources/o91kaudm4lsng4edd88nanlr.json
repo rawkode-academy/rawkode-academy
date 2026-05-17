@@ -1,0 +1,27 @@
+{
+	"video_id": "o91kaudm4lsng4edd88nanlr",
+	"slug": "hands-on-with-policy-reporter",
+	"title": "Hands-on with Policy Reporter",
+	"generated_at": "2026-05-17T13:30:07.667Z",
+	"known_technology_names": [
+		"Kyverno",
+		"Policy Reporter"
+	],
+	"known_guest_names": [
+		"Frank Jogeleit"
+	],
+	"resources": [
+		{
+			"title": "Falco Sidekick UI",
+			"category": "code",
+			"evidence_quote": "In FARGO, we have a tool called FARGO Sidekick. And FARGO Sidekick UI,",
+			"confidence": "high"
+		},
+		{
+			"title": "Kyverno Pod Security Policy replacement policies",
+			"category": "documentation",
+			"evidence_quote": "take a look at the pod security policy replacement policies from Kiverrno.",
+			"confidence": "medium"
+		}
+	]
+}

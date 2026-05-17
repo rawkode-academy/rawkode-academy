@@ -91,5 +91,15 @@ chapters:
 duration: 3834
 guests:
   - anais-dotis-georgiou
+resources:
+  - title: InfluxData Community Templates repository
+    type: url
+    category: code
+  - title: InfluxDB 2 operational metrics template
+    type: url
+    category: code
+  - title: rbx.app request bin
+    type: url
+    category: demos
 ---
 

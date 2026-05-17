@@ -106,5 +106,21 @@ chapters:
 duration: 4880
 guests:
   - ben-hirschberg
+resources:
+  - title: NSA CISA Kubernetes hardening framework
+    type: url
+    category: documentation
+  - title: Kubescape Rego library project
+    type: url
+    category: code
+  - title: Kubescape GitHub Action
+    type: url
+    category: code
+  - title: Kubescape Visual Studio Code extension
+    type: url
+    category: code
+  - title: Kubescape host sensor
+    type: url
+    category: code
 ---
 

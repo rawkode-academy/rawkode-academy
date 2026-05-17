@@ -71,5 +71,6 @@ chapters:
 duration: 3448
 guests:
   - ana-hobden
+resources: []
 ---
 

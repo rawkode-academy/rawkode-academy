@@ -29,5 +29,13 @@ chapters:
     title: Conclusion and Summary
 duration: 487
 guests: []
+resources:
+  - title: Hurl
+    type: url
+    url: 'https://hurl.dev'
+    category: other
+  - title: Fermyon URL shortener example
+    type: url
+    category: documentation
 ---
 

@@ -1,0 +1,25 @@
+{
+	"video_id": "xakqjecrktz236keekzkj3t7",
+	"slug": "adobe-and-zapier",
+	"title": "Adobe & Zapier",
+	"generated_at": "2026-05-17T13:19:53.022Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "You can also check out Equinix Medal by using the quote Rawkode.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Rawkode Academy t-shirt giveaway",
+			"url": "https://Rawkode.live/win",
+			"category": "other",
+			"evidence_quote": "So if you wanna win a t shirt today, go to Rawkode.live/win.",
+			"confidence": "high"
+		}
+	]
+}

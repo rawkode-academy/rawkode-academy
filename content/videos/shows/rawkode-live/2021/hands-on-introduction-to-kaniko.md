@@ -98,5 +98,15 @@ duration: 3200
 guests:
   - tejal-desai
   - google-cloud-platform
+resources:
+  - title: Kaniko Getting Started tutorial
+    type: url
+    category: documentation
+  - title: Kaniko build context documentation
+    type: url
+    category: documentation
+  - title: GitLab tutorial dedicated to Kaniko
+    type: url
+    category: documentation
 ---
 

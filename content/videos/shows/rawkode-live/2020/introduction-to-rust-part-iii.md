@@ -92,5 +92,23 @@ chapters:
 duration: 5615
 guests:
   - jane-lusby
+resources:
+  - title: Awesome Rust Mentors Project
+    type: url
+    category: code
+  - title: StructOpt crate
+    type: url
+    category: code
+  - title: Cargo Edit
+    type: url
+    category: code
+  - title: std.rs BufReader documentation
+    type: url
+    url: 'https://std.rs/buffreader'
+    category: documentation
+  - title: cheats.rs Rust cheat sheet
+    type: url
+    url: 'https://cheats.rs'
+    category: documentation
 ---
 

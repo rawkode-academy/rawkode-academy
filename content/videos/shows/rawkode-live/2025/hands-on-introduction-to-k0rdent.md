@@ -15,5 +15,12 @@ duration: 6422
 guests:
   - martin-sadler
   - karthik-satchitanand
+resources:
+  - title: k0rdent Quick Starts documentation
+    type: url
+    category: documentation
+  - title: k0rdent Catalog
+    type: url
+    category: code
 ---
 

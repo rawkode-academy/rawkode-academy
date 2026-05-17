@@ -48,5 +48,22 @@ duration: 1432
 guests:
   - catherine-paganini
   - jason-morgan
+resources:
+  - title: Cloud Native Glossary
+    type: url
+    category: documentation
+  - title: Cloud Native Maturity Model
+    type: url
+    category: documentation
+  - title: Linkerd Slack
+    type: url
+    url: 'https://slack.linkerd.io'
+    category: other
+  - title: Linkerd Getting Started Guide
+    type: url
+    category: documentation
+  - title: Service Mesh Academy
+    type: url
+    category: demos
 ---
 

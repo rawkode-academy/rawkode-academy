@@ -43,5 +43,6 @@ chapters:
 duration: 4398
 guests:
   - david-simmons
+resources: []
 ---
 

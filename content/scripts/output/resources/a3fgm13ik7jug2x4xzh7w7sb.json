@@ -1,0 +1,21 @@
+{
+	"video_id": "a3fgm13ik7jug2x4xzh7w7sb",
+	"slug": "hands-on-introduction-to-kwasm",
+	"title": "Hands-on Introduction to KWasm",
+	"generated_at": "2026-05-17T13:27:33.233Z",
+	"known_technology_names": [
+		"KWasm"
+	],
+	"known_guest_names": [
+		"Noel Georgi",
+		"Philipp Strube"
+	],
+	"resources": [
+		{
+			"title": "containerd Spin example",
+			"category": "demos",
+			"evidence_quote": "we start, I would say, very simple example from the container d repository.",
+			"confidence": "medium"
+		}
+	]
+}

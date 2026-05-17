@@ -100,5 +100,9 @@ duration: 4850
 guests:
   - leo-di-donato
   - lorenzo-fontana
+resources:
+  - title: Falco Sidekick
+    type: url
+    category: code
 ---
 

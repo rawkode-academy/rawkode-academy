@@ -1,0 +1,39 @@
+{
+	"video_id": "f7rvx2rb04zl2vhgoltwedf5",
+	"slug": "introducing-apko-and-melange",
+	"title": "Introducing apko & melange",
+	"generated_at": "2026-05-17T13:25:27.925Z",
+	"known_technology_names": [
+		"apko",
+		"melange"
+	],
+	"known_guest_names": [
+		"Ariadne Conill"
+	],
+	"resources": [
+		{
+			"title": "Google's Distroless project",
+			"category": "code",
+			"evidence_quote": "Of course, Google's Distroless project uses Bazel to build all of the base images",
+			"confidence": "high"
+		},
+		{
+			"title": "GNU hello world program",
+			"category": "code",
+			"evidence_quote": "we have the GNU hello world program that we're going to run-in a container.",
+			"confidence": "high"
+		},
+		{
+			"title": "apko examples/NGINX.yaml",
+			"category": "demos",
+			"evidence_quote": "So if we look at, examples slash NGINX.YAML.",
+			"confidence": "medium"
+		},
+		{
+			"title": "melange examples/GNU hello.yaml",
+			"category": "demos",
+			"evidence_quote": "so that's an example slash GNU hello dot YAML.",
+			"confidence": "medium"
+		}
+	]
+}

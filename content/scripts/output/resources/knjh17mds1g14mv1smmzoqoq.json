@@ -1,0 +1,29 @@
+{
+	"video_id": "knjh17mds1g14mv1smmzoqoq",
+	"slug": "docker-kubernetes-and-php-laravel-edition-part-ii",
+	"title": "Docker, Kubernetes, & PHP: Laravel Edition (Part II)",
+	"generated_at": "2026-05-17T13:37:45.682Z",
+	"known_technology_names": [
+		"Docker",
+		"Kubernetes",
+		"Laravel",
+		"PHP"
+	],
+	"known_guest_names": [
+		"Ciaran McNulty"
+	],
+	"resources": [
+		{
+			"title": "Ping CRM",
+			"category": "demos",
+			"evidence_quote": "So hello there. Welcome to Ping CRM.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Laravel Mix documentation",
+			"category": "documentation",
+			"evidence_quote": "Don't wanna rest the stream just to be us reading the mixed document.",
+			"confidence": "medium"
+		}
+	]
+}

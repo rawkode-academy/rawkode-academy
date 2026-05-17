@@ -2,7 +2,7 @@
 id: oareyzu0nuanx1h7tz478z14
 slug: automated-kubernetes-operations-with-komodor-and-vcluster
 title: Automated Kubernetes Operations with Komodor and vcluster
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -30,5 +30,9 @@ chapters:
     title: Summary and Conclusion
 duration: 358
 guests: []
+resources:
+  - title: Kubernetes workshop chart from the Komodor LJOX repository
+    type: url
+    category: code
 ---
 

@@ -91,5 +91,18 @@ chapters:
 duration: 5020
 guests:
   - connor-hicks
+resources:
+  - title: Atmo documentation
+    type: url
+    category: documentation
+  - title: Suborbital important API example
+    type: url
+    category: demos
+  - title: Go Binaries
+    type: url
+    category: other
+  - title: bit.ly/wasm survey
+    type: url
+    category: other
 ---
 

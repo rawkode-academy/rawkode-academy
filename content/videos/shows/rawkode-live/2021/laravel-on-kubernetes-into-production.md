@@ -92,5 +92,21 @@ chapters:
 duration: 5259
 guests:
   - alex-bowers
+resources:
+  - title: Alex Bowers Laravel example project
+    type: url
+    category: code
+  - title: Artifact Hub MariaDB Helm chart
+    type: url
+    category: other
+  - title: Mozilla SOPS
+    type: url
+    category: code
+  - title: Sealed Secrets
+    type: url
+    category: code
+  - title: Kapitan project
+    type: url
+    category: code
 ---
 

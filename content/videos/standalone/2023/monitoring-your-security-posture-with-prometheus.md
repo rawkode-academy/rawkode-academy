@@ -2,7 +2,7 @@
 id: cvahj7nb3ypukon4fm4mreaa
 slug: monitoring-your-security-posture-with-prometheus
 title: Monitoring Your Security Posture with Prometheus
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2023-01-31T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -41,5 +41,21 @@ chapters:
     title: Conclusion and Next Steps
 duration: 853
 guests: []
+resources:
+  - title: Kubescape Complete Guide Repository
+    type: url
+    url: 'https://github.com/rawkode-academy/kubescape-complete-guide'
+    category: code
+  - title: Kubescape Prometheus Exporter
+    type: url
+    url: 'https://github.com/kubescape/prometheus-exporter'
+    category: code
+  - title: ARMO Cloud Dashboard
+    type: url
+    url: 'https://cloud.armosec.io/'
+    category: other
+  - title: Kubescape Grafana Dashboard
+    type: url
+    category: other
 ---
 

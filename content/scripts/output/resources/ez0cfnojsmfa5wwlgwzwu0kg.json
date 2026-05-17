@@ -1,0 +1,33 @@
+{
+	"video_id": "ez0cfnojsmfa5wwlgwzwu0kg",
+	"slug": "introduction-to-kapitan",
+	"title": "Introduction to Kapitan",
+	"generated_at": "2026-05-17T13:29:17.029Z",
+	"known_technology_names": [
+		"Kapitan"
+	],
+	"known_guest_names": [
+		"Alessandro De Maria",
+		"Ricardo Amaro"
+	],
+	"resources": [
+		{
+			"title": "Kapitan Reference Repository",
+			"category": "code",
+			"evidence_quote": "if you follow the Kapitan reference, our reef reference repository to get started with Kapitan, which is in the community section",
+			"confidence": "medium"
+		},
+		{
+			"title": "Kapitan Manifest Generator Documentation",
+			"category": "documentation",
+			"evidence_quote": "just after Kapitan reference, there is a manifest generator documentation That could be a a good way to to kind of get started",
+			"confidence": "medium"
+		},
+		{
+			"title": "Weaveworks Sock Shop Example",
+			"category": "demos",
+			"evidence_quote": "I have replicated all the configuration for the WeWorks soft shop example that they have on on the repo.",
+			"confidence": "medium"
+		}
+	]
+}

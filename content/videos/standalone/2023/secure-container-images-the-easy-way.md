@@ -35,5 +35,15 @@ chapters:
     title: 'Conclusion: Benefits of Slim Toolkit'
 duration: 580
 guests: []
+resources:
+  - title: dog DNS lookup project
+    type: url
+    category: code
+  - title: Astro Dockerfile documentation
+    type: url
+    category: documentation
+  - title: Rawkode Academy website
+    type: url
+    category: demos
 ---
 

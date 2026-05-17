@@ -89,5 +89,10 @@ duration: 4709
 guests:
   - adam-szucs-matyas
   - william-lightning
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://rawkode.live/Teleport'
+    category: other
 ---
 

@@ -1,0 +1,28 @@
+{
+	"video_id": "mdv5rucpczre2hmjslcad38r",
+	"slug": "hands-on-with-faasd-and-inlets",
+	"title": "Hands-on with faasd & Inlets",
+	"generated_at": "2026-05-17T13:36:49.870Z",
+	"known_technology_names": [
+		"Inlets",
+		"OpenFaaS"
+	],
+	"known_guest_names": [
+		"Alex Ellis"
+	],
+	"resources": [
+		{
+			"title": "arkade",
+			"url": "https://get-arkade.dev",
+			"category": "code",
+			"evidence_quote": "So let's say if you go to get arcade.dev with a dash,",
+			"confidence": "medium"
+		},
+		{
+			"title": "Start With Why",
+			"category": "other",
+			"evidence_quote": "I mean, I'm reading this book called Start With Why. Have you read that?",
+			"confidence": "high"
+		}
+	]
+}

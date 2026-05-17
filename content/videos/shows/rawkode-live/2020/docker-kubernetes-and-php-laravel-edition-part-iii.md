@@ -146,5 +146,12 @@ duration: 5535
 guests:
   - ciaran-mcnulty
   - alex-bowers
+resources:
+  - title: Ping CRM
+    type: url
+    category: demos
+  - title: Laravel Dusk
+    type: url
+    category: code
 ---
 

@@ -48,5 +48,12 @@ chapters:
     title: Final Thoughts and Community Involvement
 guests:
   - koray-oksay
+resources:
+  - title: Kubernetes The Hard Way
+    type: url
+    category: documentation
+  - title: CNCF and Kubernetes Slack channels
+    type: url
+    category: other
 ---
 

@@ -61,5 +61,18 @@ duration: 2763
 audioFileSize: 66317724
 guests:
   - natan-silnitsky
+resources:
+  - title: Wix Engineering Blog
+    type: url
+    category: other
+  - title: Confluent Schema Registry
+    type: url
+    category: documentation
+  - title: Natan Silnitsky website
+    type: url
+    category: other
+  - title: ZIO Scala library
+    type: url
+    category: code
 ---
 

@@ -59,5 +59,12 @@ chapters:
     title: Conclusion and Farewell
 guests:
   - kat-cosgrove
+resources:
+  - title: Kubernetes website repository
+    type: url
+    category: code
+  - title: Kubernetes enhancements repository
+    type: url
+    category: code
 ---
 

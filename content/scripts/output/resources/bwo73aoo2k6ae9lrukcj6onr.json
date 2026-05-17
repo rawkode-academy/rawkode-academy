@@ -1,0 +1,24 @@
+{
+	"video_id": "bwo73aoo2k6ae9lrukcj6onr",
+	"slug": "integrating-spin-with-static-site-generators-ssgs",
+	"title": "Integrating Spin with Static Site Generators (SSGs)",
+	"generated_at": "2026-05-17T13:18:36.039Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Spin file server repository",
+			"category": "code",
+			"evidence_quote": "We're pulling this from a GitHub release artifact on the spin fail server repository.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Astro website creation CLI",
+			"category": "documentation",
+			"evidence_quote": "Here, I'm going to do a p n p m create astro at latest. This is gonna guide us through the astro website creation process.",
+			"confidence": "medium"
+		}
+	]
+}

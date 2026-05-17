@@ -46,5 +46,6 @@ chapters:
 duration: 781
 guests:
   - brian-ketelsen
+resources: []
 ---
 

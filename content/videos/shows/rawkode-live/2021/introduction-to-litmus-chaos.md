@@ -108,5 +108,15 @@ duration: 5350
 guests:
   - umasankar-mukkara
   - karthik-satchitanand
+resources:
+  - title: litmuschaos/litmus-helm repository
+    type: url
+    category: code
+  - title: Litmus probe documentation
+    type: url
+    category: documentation
+  - title: Chaos Carnival Kafka bootcamp demo steps
+    type: url
+    category: demos
 ---
 

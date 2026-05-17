@@ -1,0 +1,18 @@
+{
+	"video_id": "xtay8a6iyr4u6ow9kc6iojpe",
+	"slug": "living-documentation-with-bdd",
+	"title": "Living Documentation with BDD",
+	"generated_at": "2026-05-17T13:35:19.154Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Ciaran McNulty"
+	],
+	"resources": [
+		{
+			"title": "git sync Rust library",
+			"category": "code",
+			"evidence_quote": "I have been building out or, you know, failing to build out, but being guided by Kieran, a get library called get sync, retina rust",
+			"confidence": "medium"
+		}
+	]
+}

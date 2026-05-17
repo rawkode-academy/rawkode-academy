@@ -47,5 +47,13 @@ chapters:
 duration: 914
 guests:
   - brian-ketelsen
+resources:
+  - title: AlphaBits Podcast
+    type: url
+    url: 'https://alphabets.fm'
+    category: other
+  - title: aquaproj Registry
+    type: url
+    category: code
 ---
 

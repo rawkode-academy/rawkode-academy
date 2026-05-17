@@ -1,0 +1,31 @@
+{
+	"video_id": "xz2p2q4vt899p3n3gx5m3r43",
+	"slug": "hands-on-introduction-lightpanda",
+	"title": "Hands-on Introduction to lightpanda",
+	"generated_at": "2026-05-17T13:26:07.501Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Pierre Tachoire",
+		"Katie Hallett"
+	],
+	"resources": [
+		{
+			"title": "LightPanda GitHub repository",
+			"category": "code",
+			"evidence_quote": "you can get the last version on the nightly release on the GitHub repository",
+			"confidence": "high"
+		},
+		{
+			"title": "Vercel post on AI crawler traffic and JavaScript rendering",
+			"category": "other",
+			"evidence_quote": "Is just an interesting quote actually as we start thinking about the AI use cases that Vercel published at the end of last year saying on their network, all of these major AI crawlers, firstly, they represent about a third of Google bots volume already.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Web Platform Tests",
+			"category": "code",
+			"evidence_quote": "We are using the web platform test, which is common HTML tests to run on browsers.",
+			"confidence": "high"
+		}
+	]
+}

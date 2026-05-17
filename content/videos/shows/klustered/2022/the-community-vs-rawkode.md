@@ -161,5 +161,21 @@ chapters:
   - startTime: 5904
     title: 'Conclusion, Thank You, and Upcoming Schedule'
 duration: 5996
+resources:
+  - title: Teleport
+    type: url
+    url: 'https://rawkode.live/Teleport'
+    category: other
+  - title: Equinix Metal
+    type: url
+    url: 'https://rawkode.live/metal'
+    category: other
+  - title: Clustered playlist
+    type: url
+    category: other
+  - title: KubeHuddle
+    type: url
+    url: 'https://kubehuddle.com'
+    category: other
 ---
 

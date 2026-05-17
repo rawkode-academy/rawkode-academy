@@ -1,0 +1,26 @@
+{
+	"video_id": "c46r2bn411wdonadyion4cxd",
+	"slug": "introduction-to-coredns",
+	"title": "Introduction to CoreDNS",
+	"generated_at": "2026-05-17T13:37:19.750Z",
+	"known_technology_names": [
+		"CoreDNS"
+	],
+	"known_guest_names": [
+		"Miek Gieben"
+	],
+	"resources": [
+		{
+			"title": "CoreDNS example plugin repository",
+			"category": "code",
+			"evidence_quote": "And we have an example plug in, which is on CoreDNS slash example repo,",
+			"confidence": "high"
+		},
+		{
+			"title": "Sysdig article on DNS request latency in Kubernetes",
+			"category": "other",
+			"evidence_quote": "Sysdig had an article yesterday on exactly that.",
+			"confidence": "medium"
+		}
+	]
+}

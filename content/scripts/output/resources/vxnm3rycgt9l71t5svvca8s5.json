@@ -1,0 +1,46 @@
+{
+	"video_id": "vxnm3rycgt9l71t5svvca8s5",
+	"slug": "cncf-glossary-and-linkerd-with-catherine-paganini-and-jason-morgan",
+	"title": "CNCF Glossary & Linkerd with Catherine Paganini & Jason Morgan",
+	"generated_at": "2026-05-17T13:28:06.735Z",
+	"known_technology_names": [
+		"Linkerd"
+	],
+	"known_guest_names": [
+		"Catherine Paganini",
+		"Jason Morgan"
+	],
+	"resources": [
+		{
+			"title": "Cloud Native Glossary",
+			"category": "documentation",
+			"evidence_quote": "Link to the cloud native glossary.",
+			"confidence": "high"
+		},
+		{
+			"title": "Cloud Native Maturity Model",
+			"category": "documentation",
+			"evidence_quote": "the cartographers group is another group that created like the Cloud Native Maturity Model",
+			"confidence": "medium"
+		},
+		{
+			"title": "Linkerd Slack",
+			"url": "https://slack.linkerd.io",
+			"category": "other",
+			"evidence_quote": "I biased towards Slack, slack.linkerd.io.",
+			"confidence": "high"
+		},
+		{
+			"title": "Linkerd Getting Started Guide",
+			"category": "documentation",
+			"evidence_quote": "We have a website, linkerd.io, where you can learn more. That's where all our docs are. Our getting started guide, which is fantastic.",
+			"confidence": "high"
+		},
+		{
+			"title": "Service Mesh Academy",
+			"category": "demos",
+			"evidence_quote": "And we have Service Mesh Academy.",
+			"confidence": "high"
+		}
+	]
+}

@@ -64,5 +64,18 @@ chapters:
 duration: 4345
 guests:
   - carlisia-thompson
+resources:
+  - title: The Podlets podcast
+    type: url
+    category: other
+  - title: Velero resource page
+    type: url
+    category: documentation
+  - title: Velero roadmap.md
+    type: url
+    category: code
+  - title: Velero Tilt integration instructions
+    type: url
+    category: documentation
 ---
 

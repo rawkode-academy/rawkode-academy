@@ -1,0 +1,30 @@
+{
+	"video_id": "diok2rek56nt6nq7z3839qei",
+	"slug": "secure-container-images-the-easy-way",
+	"title": "Secure Container Images The EASY Way",
+	"generated_at": "2026-05-17T13:18:14.607Z",
+	"known_technology_names": [
+		"Slim Toolkit"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "dog DNS lookup project",
+			"category": "code",
+			"evidence_quote": "Let's kick it up a little bit and try Slim Toolkit on a real Rust project that I'm a big fan of called dog.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Astro Dockerfile documentation",
+			"category": "documentation",
+			"evidence_quote": "I've dropped one into the directory that I literally found by googling for astro build Dockerfile. It was the first hit in the astro docs.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Rawkode Academy website",
+			"category": "demos",
+			"evidence_quote": "So for our last trick, I'm taking a real production application. This is the Rawkode Academy website.",
+			"confidence": "medium"
+		}
+	]
+}

@@ -117,5 +117,6 @@ chapters:
   - startTime: 6333
     title: Conclusion and Farewell
 duration: 6382
+resources: []
 ---
 

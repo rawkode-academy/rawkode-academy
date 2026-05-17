@@ -76,5 +76,21 @@ duration: 4725
 guests:
   - daniel-mangum
   - marques-johansson
+resources:
+  - title: Provider Packet / Equinix Metal provider GitHub README
+    type: url
+    category: code
+  - title: Equinix Fabric API documentation
+    type: url
+    category: documentation
+  - title: Terraform Provider for Equinix examples
+    type: url
+    category: code
+  - title: TBS episode on provider SSH
+    type: url
+    category: other
+  - title: TVS playlist on the Crossplane YouTube channel
+    type: url
+    category: other
 ---
 

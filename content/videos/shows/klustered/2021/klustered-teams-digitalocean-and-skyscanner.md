@@ -165,5 +165,14 @@ guests:
   - guy-templeton
   - matteo-ruina
   - alex-williams
+resources:
+  - title: Teleport sponsor link
+    type: url
+    url: 'https://rawkode.live/Teleport'
+    category: other
+  - title: Rawkode Discord server
+    type: url
+    url: 'https://Rawkode.chat'
+    category: other
 ---
 

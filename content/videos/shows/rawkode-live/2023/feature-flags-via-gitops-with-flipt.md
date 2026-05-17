@@ -56,5 +56,15 @@ duration: 4088
 guests:
   - mark-phelps
   - george-macrorie
+resources:
+  - title: Flipt Labs repository
+    type: url
+    category: code
+  - title: Flipt Labs chatbot demo
+    type: url
+    category: demos
+  - title: ttl.sh ephemeral registry
+    type: url
+    category: other
 ---
 

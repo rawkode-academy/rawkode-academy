@@ -1,0 +1,28 @@
+{
+	"video_id": "lb438p217zya3imz0gaex2gb",
+	"slug": "introduction-to-fleet-k3s-and-rancher",
+	"title": "Introduction to Fleet, k3s, & Rancher",
+	"generated_at": "2026-05-17T13:36:45.966Z",
+	"known_technology_names": [
+		"Fleet",
+		"k3s",
+		"Rancher"
+	],
+	"known_guest_names": [
+		"Bastian Hofmann"
+	],
+	"resources": [
+		{
+			"title": "Installing Rancher documentation page",
+			"category": "documentation",
+			"evidence_quote": "Yeah. You can either start with this one or the installing Rancher one. It has the same commands to set up a k three s cluster.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Fleet documentation page",
+			"category": "documentation",
+			"evidence_quote": "Maybe I sent you another link in the private chat that would be maybe nice to just show the documentation page once for Fleet.",
+			"confidence": "medium"
+		}
+	]
+}

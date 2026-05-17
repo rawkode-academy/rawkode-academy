@@ -86,5 +86,18 @@ chapters:
 duration: 5335
 guests:
   - julius-volz
+resources:
+  - title: Prometheus Formatter Chrome extension
+    type: url
+    category: other
+  - title: Prometheus best practices docs page on histograms and summaries
+    type: url
+    category: documentation
+  - title: kube-prometheus Prometheus rules manifests
+    type: url
+    category: code
+  - title: Cortex monitoring project
+    type: url
+    category: code
 ---
 

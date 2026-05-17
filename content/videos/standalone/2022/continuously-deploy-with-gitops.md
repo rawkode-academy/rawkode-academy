@@ -42,5 +42,10 @@ chapters:
     title: Conclusion and Summary
 duration: 923
 guests: []
+resources:
+  - title: Portainer in Production Course Repository
+    type: url
+    url: 'https://github.com/rawkode-academy/portainer-in-production'
+    category: code
 ---
 

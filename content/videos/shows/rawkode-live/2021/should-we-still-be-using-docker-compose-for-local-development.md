@@ -88,5 +88,19 @@ chapters:
 duration: 6114
 guests:
   - bret-fisher
+resources:
+  - title: Compose CLI repository
+    type: url
+    category: code
+  - title: Podman Compose project
+    type: url
+    category: code
+  - title: Bret Fisher shell setup page
+    type: url
+    url: 'https://brettfisher.com/shell'
+    category: documentation
+  - title: SpaceVim editor distribution
+    type: url
+    category: code
 ---
 

@@ -55,5 +55,20 @@ chapters:
 duration: 6936
 guests:
   - marc-boorshtein
+resources:
+  - title: OpenUnison Helm Charts
+    type: url
+    url: 'https://github.com/OpenUnison/helmcharts'
+    category: code
+  - title: 'Kubernetes: An Enterprise Guide'
+    type: url
+    category: other
+  - title: Hurl
+    type: url
+    url: 'https://hurl.dev'
+    category: other
+  - title: k3s Dagger Module
+    type: url
+    category: code
 ---
 

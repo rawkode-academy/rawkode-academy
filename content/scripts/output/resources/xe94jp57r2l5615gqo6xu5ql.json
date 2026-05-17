@@ -1,0 +1,40 @@
+{
+	"video_id": "xe94jp57r2l5615gqo6xu5ql",
+	"slug": "should-we-still-be-using-docker-compose-for-local-development",
+	"title": "Should we still be using docker-compose for local development?",
+	"generated_at": "2026-05-17T13:33:53.046Z",
+	"known_technology_names": [
+		"Docker",
+		"Docker Compose"
+	],
+	"known_guest_names": [
+		"Bret Fisher"
+	],
+	"resources": [
+		{
+			"title": "Compose CLI repository",
+			"category": "code",
+			"evidence_quote": "The new one is Compose CLI, so Compose dash CLI.",
+			"confidence": "high"
+		},
+		{
+			"title": "Podman Compose project",
+			"category": "code",
+			"evidence_quote": "there is a Podman Compose. Feel free to check out that project.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Bret Fisher shell setup page",
+			"url": "https://brettfisher.com/shell",
+			"category": "documentation",
+			"evidence_quote": "I'm gonna put in the chat brettfisher.com/shell.",
+			"confidence": "high"
+		},
+		{
+			"title": "SpaceVim editor distribution",
+			"category": "code",
+			"evidence_quote": "look up SpaceVim, which is kinda like a Vim installer packager manager.",
+			"confidence": "medium"
+		}
+	]
+}

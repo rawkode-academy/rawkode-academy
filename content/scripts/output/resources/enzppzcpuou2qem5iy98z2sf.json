@@ -1,0 +1,32 @@
+{
+	"video_id": "enzppzcpuou2qem5iy98z2sf",
+	"slug": "hands-on-introduction-to-zitadel",
+	"title": "Hands-on Introduction to Zitadel",
+	"generated_at": "2026-05-17T13:27:01.715Z",
+	"known_technology_names": [
+		"ZITADEL"
+	],
+	"known_guest_names": [
+		"Florian Forster"
+	],
+	"resources": [
+		{
+			"title": "Zitadel Docker Compose self-hosting guide",
+			"category": "documentation",
+			"evidence_quote": "I would advise we use Docker Compose because it's basically the easiest to get started with.",
+			"confidence": "high"
+		},
+		{
+			"title": "OAuth Proxy",
+			"category": "code",
+			"evidence_quote": "I usually tend to use it for an an external tool like OAuth Proxy because it's just the binary on the config file and does a great job for showing people how how they can work.",
+			"confidence": "high"
+		},
+		{
+			"title": "Zitadel Domain Discovery documentation",
+			"category": "documentation",
+			"evidence_quote": "Domain discovery or discovery should should bring you up. Yeah. Domain discovery. Perfect.",
+			"confidence": "high"
+		}
+	]
+}

@@ -88,5 +88,18 @@ guests:
   - darach-ennis
   - heinz-gies
   - matthias-wahl
+resources:
+  - title: Equinix Metal products
+    type: url
+    category: other
+  - title: Matthias Wahl's Bobconf SIMD talk
+    type: url
+    category: other
+  - title: Tremor RFC for Troy deployment language
+    type: url
+    category: documentation
+  - title: Vector project
+    type: url
+    category: code
 ---
 

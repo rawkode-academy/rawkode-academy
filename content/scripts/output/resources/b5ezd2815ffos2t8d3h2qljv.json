@@ -1,0 +1,22 @@
+{
+	"video_id": "b5ezd2815ffos2t8d3h2qljv",
+	"slug": "22-borko-vs-bojan",
+	"title": "22. Borko Vs. Bojan",
+	"generated_at": "2026-05-17T13:19:22.790Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Borko Djurkovic",
+		"Bojan Djurkovic"
+	],
+	"resources": [
+		{
+			"title": "Teleport",
+			"url": "https://rokode.live/teleport",
+			"category": "other",
+			"evidence_quote": "So you'll see us using it, Go check it out by visiting rokode.live/teleport.",
+			"confidence": "high"
+		}
+	]
+}

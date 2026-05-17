@@ -37,5 +37,10 @@ chapters:
     title: Conclusion & Future Improvements
 duration: 899
 guests: []
+resources:
+  - title: verimeon/spin-python-sdk
+    type: url
+    url: 'https://github.com/verimeon/spin-python-sdk'
+    category: code
 ---
 

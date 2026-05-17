@@ -14,5 +14,20 @@ technologies:
   - kubernetes
 duration: 888
 guests: []
+resources:
+  - title: ngrok-operator GitHub Repository
+    type: url
+    url: 'https://github.com/ngrok/ngrok-operator'
+    category: code
+  - title: ngrok Helm Chart Repository
+    type: url
+    url: 'https://charts.ngrok.com'
+    category: code
+  - title: ngrok Traffic Policy Actions Documentation
+    type: url
+    category: documentation
+  - title: ngrok vs Firewall Game
+    type: url
+    category: demos
 ---
 

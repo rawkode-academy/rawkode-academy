@@ -1,0 +1,19 @@
+{
+	"video_id": "hsykkz8ovuiwzlj438z8ddav",
+	"slug": "klustered-teams-polarsignals-and-pulumi",
+	"title": "Klustered Teams - PolarSignals & Pulumi",
+	"generated_at": "2026-05-17T13:19:35.941Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "rocketacademy/custard",
+			"url": "https://github.com/rocketacademy/custard",
+			"category": "code",
+			"evidence_quote": "All the breakers notes are available on github.com/rocketacademy/custard,",
+			"confidence": "medium"
+		}
+	]
+}

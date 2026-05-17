@@ -53,5 +53,16 @@ chapters:
     title: Conclusion & Resources
 duration: 1479
 guests: []
+resources:
+  - title: Rawkode Academy GitLab
+    type: url
+    url: 'https://gitlab.com/RawkodeAcademy'
+    category: code
+  - title: Cloud Development Kit for Terraform (CDKTF)
+    type: url
+    category: code
+  - title: Cloud Development Kit for Kubernetes (cdk8s)
+    type: url
+    category: code
 ---
 

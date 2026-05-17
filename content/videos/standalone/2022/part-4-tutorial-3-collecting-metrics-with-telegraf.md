@@ -40,5 +40,13 @@ chapters:
     title: Summary and Conclusion
 duration: 718
 guests: []
+resources:
+  - title: influxdata/telegraf GitHub Repository
+    type: url
+    url: 'https://github.com/influxdata/telegraf'
+    category: code
+  - title: Telegraf Plugins Reference
+    type: url
+    category: documentation
 ---
 

@@ -49,5 +49,19 @@ chapters:
 duration: 9800
 guests:
   - ciaran-mcnulty
+resources:
+  - title: Inertia Ping CRM
+    type: url
+    category: code
+  - title: rawcode/php-examples
+    type: url
+    url: 'https://gitlab.com/rawcode/php-examples'
+    category: code
+  - title: Refactoring Databases
+    type: url
+    category: other
+  - title: The Twelve-Factor App manifesto
+    type: url
+    category: documentation
 ---
 

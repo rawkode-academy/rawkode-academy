@@ -175,5 +175,13 @@ chapters:
 duration: 5264
 guests:
   - alex-ellis
+resources:
+  - title: arkade
+    type: url
+    url: 'https://get-arkade.dev'
+    category: code
+  - title: Start With Why
+    type: url
+    category: other
 ---
 

@@ -15,5 +15,13 @@ chapters:
   - startTime: 0
     title: Holding screen
 duration: 5594
+resources:
+  - title: Equinix Metal Rawkode promo link
+    type: url
+    url: 'https://rawkode.live/metal'
+    category: other
+  - title: Teleport Rawkode promo link
+    type: url
+    category: other
 ---
 

@@ -1,0 +1,19 @@
+{
+	"video_id": "nl7ui50173lbqlmqxck2mw3q",
+	"slug": "parca-and-grafana",
+	"title": "Parca & Grafana",
+	"generated_at": "2026-05-17T13:18:46.792Z",
+	"known_technology_names": [
+		"Grafana",
+		"Parca"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Grafana Parca plugin",
+			"category": "other",
+			"evidence_quote": "Add the Parca plugin to your Grafana.",
+			"confidence": "high"
+		}
+	]
+}

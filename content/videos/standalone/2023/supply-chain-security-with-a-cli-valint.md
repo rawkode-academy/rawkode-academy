@@ -43,5 +43,23 @@ chapters:
     title: Conclusion
 duration: 884
 guests: []
+resources:
+  - title: Valint Installation Script
+    type: url
+    url: 'https://get.scrapesecurity.com/install.sh'
+    category: code
+  - title: Scribe Security JFrog Container Registry
+    type: url
+    category: other
+  - title: Indigo (Blue Sky Go SDK)
+    type: url
+    category: code
+  - title: Mongo Express
+    type: url
+    category: code
+  - title: Sigstore
+    type: url
+    url: 'https://sigstore.dev'
+    category: other
 ---
 

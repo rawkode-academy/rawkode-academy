@@ -47,5 +47,12 @@ chapters:
 guests:
   - mauro-morales
   - dimitris-karakasilis
+resources:
+  - title: SUSE Elemental Toolkit
+    type: url
+    category: code
+  - title: bootc project
+    type: url
+    category: code
 ---
 

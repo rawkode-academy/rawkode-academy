@@ -69,5 +69,6 @@ chapters:
 duration: 2710
 guests:
   - ihor-dvoretskyi
+resources: []
 ---
 

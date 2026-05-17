@@ -1,0 +1,20 @@
+{
+	"video_id": "st3tvvzjqscd51gam6o0h5jv",
+	"slug": "migrating-to-kubernetes",
+	"title": "Migrating to Kubernetes",
+	"generated_at": "2026-05-17T13:23:20.639Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Rachel Sweeney"
+	],
+	"resources": [
+		{
+			"title": "Argo CD",
+			"category": "code",
+			"evidence_quote": "but tools like Argo CD and Flux are two great ones to take a look at.",
+			"confidence": "high"
+		}
+	]
+}

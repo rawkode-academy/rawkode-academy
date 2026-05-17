@@ -77,5 +77,20 @@ chapters:
     title: Conclusion and Upcoming Workshops
 duration: 3603
 guests: []
+resources:
+  - title: Rawkode Academy Courses Repository
+    type: url
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+  - title: 'Teleport Documentation: Database Access with Self-hosted PostgreSQL'
+    type: url
+    category: documentation
+  - title: Beekeeper Studio
+    type: url
+    category: other
+  - title: Rawkode Academy Discord
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
 ---
 

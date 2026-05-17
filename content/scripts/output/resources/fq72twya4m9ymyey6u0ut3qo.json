@@ -1,0 +1,18 @@
+{
+	"video_id": "fq72twya4m9ymyey6u0ut3qo",
+	"slug": "building-and-running-spin-applications-with-docker",
+	"title": "Building & Running Spin Applications with Docker",
+	"generated_at": "2026-05-17T13:18:49.970Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Docker documentation: Building and running Spin applications",
+			"category": "documentation",
+			"evidence_quote": "the Barfolme new example from the Docker documentation of building and running Spin applications.",
+			"confidence": "high"
+		}
+	]
+}

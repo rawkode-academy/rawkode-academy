@@ -47,5 +47,15 @@ chapters:
     title: Reviewing the automated reports (PDF/CSV)
   - startTime: 985
     title: API Access & Exporting Audit Data
+resources:
+  - title: Spectro Cloud Palette
+    type: url
+    category: other
+  - title: Google Microservices Demo
+    type: url
+    category: demos
+  - title: CIS Kubernetes Benchmarks
+    type: url
+    category: documentation
 ---
 

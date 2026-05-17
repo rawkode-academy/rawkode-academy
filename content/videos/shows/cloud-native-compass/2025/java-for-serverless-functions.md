@@ -14,5 +14,6 @@ duration: 1777
 audioFileSize: 42648905
 guests:
   - otavio-santana
+resources: []
 ---
 

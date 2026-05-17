@@ -1,0 +1,20 @@
+{
+	"video_id": "qzf07xf4d395p3bm5ugkqxp0",
+	"slug": "ipv6-only-kubernetes-clusters-rtfm-with-rawkode",
+	"title": "IPv6 ONLY Kubernetes Clusters (RTFM with Rawkode)",
+	"generated_at": "2026-05-17T13:35:48.835Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Arian van Putten"
+	],
+	"resources": [
+		{
+			"title": "Calico over IP Fabrics",
+			"category": "documentation",
+			"evidence_quote": "there is a page on the Calico documentation called Calico over IP Fabrics, and it explains all the different trade offs you can make in setting up your Calico network",
+			"confidence": "high"
+		}
+	]
+}

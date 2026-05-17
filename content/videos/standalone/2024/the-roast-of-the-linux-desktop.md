@@ -49,5 +49,21 @@ chapters:
     title: Microsoft's Engagement with Open Source
 duration: 5350
 guests: []
+resources:
+  - title: Fedora Silverblue
+    type: url
+    category: other
+  - title: Universal Blue (uBlue)
+    type: url
+    category: code
+  - title: Microsoft PowerToys
+    type: url
+    category: code
+  - title: UniGet Package Manager
+    type: url
+    category: code
+  - title: Dev Home
+    type: url
+    category: code
 ---
 

@@ -68,5 +68,21 @@ chapters:
 duration: 5104
 guests:
   - tanay-pant
+resources:
+  - title: TheCocktailDB API
+    type: url
+    category: documentation
+  - title: TheCocktailDB random cocktail endpoint
+    type: url
+    category: demos
+  - title: n8n Node Library documentation
+    type: url
+    category: documentation
+  - title: n8n Getting Started documentation
+    type: url
+    category: documentation
+  - title: BotFather Telegram bot creation flow
+    type: url
+    category: documentation
 ---
 

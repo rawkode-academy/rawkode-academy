@@ -1,0 +1,30 @@
+{
+	"video_id": "dbs5yf9vg0tg7k73uo0gfivh",
+	"slug": "docker-kubernetes-and-php-laravel-edition-part-iii",
+	"title": "Docker, Kubernetes, & PHP: Laravel Edition (Part III)",
+	"generated_at": "2026-05-17T13:35:38.895Z",
+	"known_technology_names": [
+		"Docker",
+		"Kubernetes",
+		"Laravel",
+		"PHP"
+	],
+	"known_guest_names": [
+		"Ciaran McNulty",
+		"Alex Bowers"
+	],
+	"resources": [
+		{
+			"title": "Ping CRM",
+			"category": "demos",
+			"evidence_quote": "But not part of the Ping CRM project.",
+			"confidence": "high"
+		},
+		{
+			"title": "Laravel Dusk",
+			"category": "code",
+			"evidence_quote": "there's a browser based testing in Laravel, a package called Laravel Dusk",
+			"confidence": "medium"
+		}
+	]
+}

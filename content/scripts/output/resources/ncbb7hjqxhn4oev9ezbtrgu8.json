@@ -1,0 +1,31 @@
+{
+	"video_id": "ncbb7hjqxhn4oev9ezbtrgu8",
+	"slug": "klustered-teams-chainguard-vs-chainguard-2",
+	"title": "Klustered Teams - Chainguard Vs. Chainguard",
+	"generated_at": "2026-05-17T13:19:50.988Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Teleport",
+			"url": "https://rawkode.live/teleport",
+			"category": "other",
+			"evidence_quote": "Check it out at Rawkode.live/teleport.",
+			"confidence": "high"
+		},
+		{
+			"title": "Networking and Kubernetes",
+			"category": "other",
+			"evidence_quote": "I am the author of Networking and Kubernetes.",
+			"confidence": "high"
+		},
+		{
+			"title": "Sleuth Kit",
+			"category": "other",
+			"evidence_quote": "So, yeah, Sleuth Kit, old school forensics tool.",
+			"confidence": "medium"
+		}
+	]
+}

@@ -171,5 +171,15 @@ chapters:
 duration: 4346
 guests:
   - mark-campbell
+resources:
+  - title: SchemaHero Operatorless Mode documentation
+    type: url
+    category: documentation
+  - title: SchemaHero Reference for all Fields documentation
+    type: url
+    category: documentation
+  - title: SchemaHero channel on Kubernetes Slack
+    type: url
+    category: other
 ---
 

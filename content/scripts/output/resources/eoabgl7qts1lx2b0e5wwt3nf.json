@@ -1,0 +1,25 @@
+{
+	"video_id": "eoabgl7qts1lx2b0e5wwt3nf",
+	"slug": "event-sourcing",
+	"title": "Event Sourcing",
+	"generated_at": "2026-05-17T13:23:31.430Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Frank de Jonge"
+	],
+	"resources": [
+		{
+			"title": "EventSauce",
+			"url": "https://EventSauce.io",
+			"category": "code",
+			"evidence_quote": "If you need to build anything event sourced also in PHP, check out EventSauce or check out EventSauce.io.",
+			"confidence": "high"
+		},
+		{
+			"title": "The Knowledge of Others",
+			"category": "other",
+			"evidence_quote": "And it was a talk called the knowledge of others.",
+			"confidence": "medium"
+		}
+	]
+}

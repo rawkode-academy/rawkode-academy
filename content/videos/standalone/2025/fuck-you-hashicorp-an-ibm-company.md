@@ -16,5 +16,10 @@ technologies:
   - terraform
 duration: 403
 guests: []
+resources:
+  - title: Cloud Development Kit for Terraform (CDKTF)
+    type: url
+    url: 'https://github.com/hashicorp/terraform-cdk'
+    category: code
 ---
 

@@ -1,0 +1,24 @@
+{
+	"video_id": "fqasod5sk7o8fk3pnzng0thp",
+	"slug": "navigating-kubernetes-insights-challenges-and-the-release-cycle-with-kat-cosgrove",
+	"title": "Navigating Kubernetes: Insights, Challenges, and the Release Cycle with Kat Cosgrove",
+	"generated_at": "2026-05-17T13:22:39.822Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Kat Cosgrove"
+	],
+	"resources": [
+		{
+			"title": "Kubernetes website repository",
+			"category": "code",
+			"evidence_quote": "the trick is you go look in the Kubernetes website repo.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes enhancements repository",
+			"category": "code",
+			"evidence_quote": "you go to the Kubernetes enhancements repo and go look there.",
+			"confidence": "high"
+		}
+	]
+}

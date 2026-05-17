@@ -37,5 +37,6 @@ duration: 5032
 guests:
   - daniel-mangum
   - sascha-grunert
+resources: []
 ---
 

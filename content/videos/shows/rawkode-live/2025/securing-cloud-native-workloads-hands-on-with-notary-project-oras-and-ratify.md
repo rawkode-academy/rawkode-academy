@@ -19,5 +19,21 @@ show: rawkode-live
 duration: 5700
 guests:
   - yi-zha
+resources:
+  - title: Notary Project
+    type: url
+    category: code
+  - title: ORAS Project
+    type: url
+    category: code
+  - title: Ratify Project
+    type: url
+    category: code
+  - title: Notation CLI
+    type: url
+    category: code
+  - title: Notary Project specification
+    type: url
+    category: documentation
 ---
 

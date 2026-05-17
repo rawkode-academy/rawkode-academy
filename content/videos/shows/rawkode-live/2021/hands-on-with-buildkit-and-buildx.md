@@ -92,5 +92,19 @@ chapters:
 duration: 5436
 guests:
   - tonis-tiigi
+resources:
+  - title: 'Docker documentation: automatic platform ARGs in global scope'
+    type: url
+    category: documentation
+  - title: XX project
+    type: url
+    category: code
+  - title: bin format project
+    type: url
+    category: code
+  - title: Rawkode.chat Discord server
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
 ---
 

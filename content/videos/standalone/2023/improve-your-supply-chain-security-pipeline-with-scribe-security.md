@@ -37,5 +37,18 @@ chapters:
     title: Conclusion
 duration: 634
 guests: []
+resources:
+  - title: SLSA (Salsa) Framework
+    type: url
+    category: documentation
+  - title: Directus Headless CMS
+    type: url
+    category: code
+  - title: NIST Secure Software Development Framework (SSDF)
+    type: url
+    category: documentation
+  - title: Scribe Security Action BOM
+    type: url
+    category: code
 ---
 

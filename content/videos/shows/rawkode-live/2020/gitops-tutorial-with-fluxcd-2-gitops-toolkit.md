@@ -106,5 +106,21 @@ chapters:
 duration: 4575
 guests:
   - stefan-prodan
+resources:
+  - title: >-
+      GitOps Toolkit development guide for building a controller with
+      Kubebuilder
+    type: url
+    category: documentation
+  - title: >-
+      GitOps Toolkit Kustomization custom resource definition health assessment
+      documentation
+    type: url
+    category: documentation
+  - title: >-
+      GitOps Toolkit monitoring stack add-on with Prometheus and Grafana
+      dashboards
+    type: url
+    category: code
 ---
 

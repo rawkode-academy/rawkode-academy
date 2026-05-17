@@ -45,5 +45,15 @@ chapters:
     title: Conclusion & What's Next
 duration: 512
 guests: []
+resources:
+  - title: Tetragon Installation Documentation
+    type: url
+    category: documentation
+  - title: Tetragon GitHub Releases
+    type: url
+    category: code
+  - title: Tetragon Helm Chart
+    type: url
+    category: code
 ---
 

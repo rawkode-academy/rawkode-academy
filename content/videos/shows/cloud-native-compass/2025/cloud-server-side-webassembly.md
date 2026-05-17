@@ -20,7 +20,7 @@ chapters:
   - startTime: 25
     title: Technical Difficulties and Banter
   - startTime: 61
-    title: "Guest Introduction: Mikkel Mørk Hegnhøj"
+    title: 'Guest Introduction: Mikkel Mørk Hegnhøj'
   - startTime: 120
     title: WebAssembly Evolution and Spin 3.0
   - startTime: 302
@@ -51,5 +51,12 @@ chapters:
     title: Closing Remarks and Upcoming Events
 guests:
   - mikkel-mork-hegnhoj
+resources:
+  - title: Spin OpenTelemetry plugin
+    type: url
+    category: code
+  - title: Wasm I/O
+    type: url
+    category: other
 ---
 

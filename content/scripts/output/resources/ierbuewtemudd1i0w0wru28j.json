@@ -1,0 +1,30 @@
+{
+	"video_id": "ierbuewtemudd1i0w0wru28j",
+	"slug": "bluesky-embed-with-spin-webassembly",
+	"title": "BlueSky Embed with Spin WebAssembly",
+	"generated_at": "2026-05-17T13:18:42.997Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Bluesky API create session endpoint",
+			"category": "documentation",
+			"evidence_quote": "If they do exist, we grab them and we hit the create session endpoint on the blue sky API.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Bluesky API getPostThread XRPC endpoint",
+			"category": "documentation",
+			"evidence_quote": "Then we'd nest up our awaits again, this time using\n<v Speaker 0>the XRPC endpoint getPostThread",
+			"confidence": "medium"
+		},
+		{
+			"title": "Fermyon KV Explorer component",
+			"category": "code",
+			"evidence_quote": "However, we've added one additional component to this\n<v Speaker 0>deployment and that is the KV explorer,\n<v Speaker 0>which is available on the root internal\n<v Speaker 0>slash k v dash explorer.",
+			"confidence": "medium"
+		}
+	]
+}

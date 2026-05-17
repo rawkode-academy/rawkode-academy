@@ -90,5 +90,6 @@ chapters:
     title: Conclusion & Future Outlook
 duration: 3781
 guests: []
+resources: []
 ---
 

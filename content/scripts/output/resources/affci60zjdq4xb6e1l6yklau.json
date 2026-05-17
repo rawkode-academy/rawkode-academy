@@ -1,0 +1,20 @@
+{
+	"video_id": "affci60zjdq4xb6e1l6yklau",
+	"slug": "introduction-to-second-state",
+	"title": "Introduction to Second State",
+	"generated_at": "2026-05-17T13:33:45.350Z",
+	"known_technology_names": [
+		"Second State"
+	],
+	"known_guest_names": [
+		"Tim McCallum"
+	],
+	"resources": [
+		{
+			"title": "Jampack API docs",
+			"category": "documentation",
+			"evidence_quote": "If you just click on that API docs, we might start there.",
+			"confidence": "medium"
+		}
+	]
+}

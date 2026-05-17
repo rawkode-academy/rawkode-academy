@@ -37,5 +37,6 @@ chapters:
     title: Conclusion
 duration: 945
 guests: []
+resources: []
 ---
 

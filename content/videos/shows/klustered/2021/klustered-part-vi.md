@@ -161,5 +161,9 @@ chapters:
 duration: 8015
 guests:
   - duffie-cooley
+resources:
+  - title: Equinix Metal
+    type: url
+    category: other
 ---
 

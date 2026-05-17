@@ -1,0 +1,35 @@
+{
+	"video_id": "gpflupb79utj4zwvq76deu98",
+	"slug": "marino-wijay-and-john-anderson",
+	"title": "Marino Wijay & John Anderson",
+	"generated_at": "2026-05-17T13:19:23.774Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Marino Wijay",
+		"John Anderson"
+	],
+	"resources": [
+		{
+			"title": "Rawkode Academy Teleport sponsor link",
+			"category": "other",
+			"evidence_quote": "So go to rockload.liveteleport",
+			"confidence": "medium"
+		},
+		{
+			"title": "Rawkode Academy Equinix Metal sponsor link",
+			"url": "https://rawkode.live/metal",
+			"category": "other",
+			"evidence_quote": "keep the sponsors happy by going to Rawkode.live/metal",
+			"confidence": "high"
+		},
+		{
+			"title": "Equinix Metal Console",
+			"url": "https://console.equinix.com",
+			"category": "other",
+			"evidence_quote": "So you can go to console.equinix.com,",
+			"confidence": "medium"
+		}
+	]
+}

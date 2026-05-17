@@ -103,5 +103,12 @@ chapters:
 duration: 5556
 guests:
   - alexander-block
+resources:
+  - title: podinfo Helm chart
+    type: url
+    category: demos
+  - title: Flux Kluctl controller
+    type: url
+    category: code
 ---
 

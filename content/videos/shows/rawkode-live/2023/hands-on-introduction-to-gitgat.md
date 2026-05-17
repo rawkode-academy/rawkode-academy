@@ -105,5 +105,9 @@ chapters:
 duration: 4281
 guests:
   - barak-brudo
+resources:
+  - title: 'Linux Foundation LFS122x: GitHub Supply Chain Security using GitGat'
+    type: url
+    category: documentation
 ---
 

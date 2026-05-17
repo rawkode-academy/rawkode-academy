@@ -98,5 +98,10 @@ duration: 5872
 guests:
   - marek-counts
   - abdellfetah-sghiouar
+resources:
+  - title: Rawkode Discord server
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
 ---
 

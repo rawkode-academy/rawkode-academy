@@ -59,5 +59,9 @@ duration: 2470
 audioFileSize: 59289114
 guests:
   - rachel-sweeney
+resources:
+  - title: Argo CD
+    type: url
+    category: code
 ---
 

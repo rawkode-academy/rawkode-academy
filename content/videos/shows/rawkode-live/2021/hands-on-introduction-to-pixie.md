@@ -95,5 +95,21 @@ chapters:
 duration: 4066
 guests:
   - natalie-serrino
+resources:
+  - title: Pixie supported protocols documentation
+    type: url
+    category: documentation
+  - title: Pixie Grafana data source plugin
+    type: url
+    category: code
+  - title: Pixie Slack alert tutorial
+    type: url
+    category: documentation
+  - title: PixieScript operators reference documentation
+    type: url
+    category: documentation
+  - title: Pixie Socks Shop demo
+    type: url
+    category: demos
 ---
 

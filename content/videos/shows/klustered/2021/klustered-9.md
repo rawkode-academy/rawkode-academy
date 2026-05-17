@@ -97,5 +97,12 @@ chapters:
 duration: 5373
 guests:
   - marcos-nils
+resources:
+  - title: Play with Docker
+    type: url
+    category: demos
+  - title: Equinix Metal
+    type: url
+    category: other
 ---
 

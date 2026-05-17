@@ -72,5 +72,6 @@ chapters:
 duration: 5414
 guests:
   - todd-martin
+resources: []
 ---
 

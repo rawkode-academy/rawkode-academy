@@ -101,5 +101,15 @@ chapters:
 duration: 7705
 guests:
   - suhail-patel
+resources:
+  - title: Kubernetes Admission Controllers documentation
+    type: url
+    category: documentation
+  - title: Kubernetes AdmissionReview API reference
+    type: url
+    category: documentation
+  - title: Cloudflare CFSSL
+    type: url
+    category: code
 ---
 

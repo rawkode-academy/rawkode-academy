@@ -1,0 +1,38 @@
+{
+	"video_id": "jmjdponjje5ueukwqlprmcbq",
+	"slug": "hands-on-introduction-to-dapr",
+	"title": "Hands-on Introduction to Dapr",
+	"generated_at": "2026-05-17T13:28:24.423Z",
+	"known_technology_names": [
+		"Dapr"
+	],
+	"known_guest_names": [
+		"Mark Fussell"
+	],
+	"resources": [
+		{
+			"title": "Platform Engineering on Kubernetes",
+			"category": "other",
+			"evidence_quote": "now\nit's titled platform engineering on Kubernetes,",
+			"confidence": "high"
+		},
+		{
+			"title": "Dapr State Management JavaScript Quickstart",
+			"category": "documentation",
+			"evidence_quote": "And then we're just gonna do Dapr\nrun.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Dapr Outbox Pattern Documentation",
+			"category": "documentation",
+			"evidence_quote": "we need to take a look\nfor the, like, out outbox pattern.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Dapr State Stores Component Reference",
+			"category": "documentation",
+			"evidence_quote": "component\nreference,\n<v Speaker 1>state stores,",
+			"confidence": "high"
+		}
+	]
+}

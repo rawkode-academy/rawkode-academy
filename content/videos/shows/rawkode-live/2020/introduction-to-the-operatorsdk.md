@@ -64,5 +64,9 @@ chapters:
 duration: 2868
 guests:
   - dennis-kelly
+resources:
+  - title: add operator repository
+    type: url
+    category: code
 ---
 

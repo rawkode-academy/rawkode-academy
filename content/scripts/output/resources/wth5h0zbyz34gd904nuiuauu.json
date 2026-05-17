@@ -1,0 +1,16 @@
+{
+	"video_id": "wth5h0zbyz34gd904nuiuauu",
+	"slug": "monitoring-and-scaling-laravel-on-kubernetes-part-ii",
+	"title": "Monitoring & Scaling Laravel on Kubernetes (Part II)",
+	"generated_at": "2026-05-17T13:34:08.561Z",
+	"known_technology_names": [
+		"Kubernetes",
+		"Laravel",
+		"PHP"
+	],
+	"known_guest_names": [
+		"Alex Bowers",
+		"Leo Sjöberg"
+	],
+	"resources": []
+}

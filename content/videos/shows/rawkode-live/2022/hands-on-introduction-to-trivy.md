@@ -92,5 +92,21 @@ chapters:
 duration: 4105
 guests:
   - rory-mccune
+resources:
+  - title: Trivy Getting Started documentation
+    type: url
+    category: documentation
+  - title: Kubernetes Pod Security Standards
+    type: url
+    category: documentation
+  - title: Trivy GitHub Action
+    type: url
+    category: code
+  - title: Honeypop proof of concept exploit code
+    type: url
+    category: code
+  - title: RubyGems signing RFC
+    type: url
+    category: other
 ---
 

@@ -86,5 +86,21 @@ duration: 6965
 guests:
   - ciaran-mcnulty
   - alex-bowers
+resources:
+  - title: JoeDog Siege
+    type: url
+    category: other
+  - title: Prometheus Operator quick start bundle
+    type: url
+    category: documentation
+  - title: Prometheus Adapter
+    type: url
+    category: documentation
+  - title: Sean Hood OpenTelemetry package
+    type: url
+    category: code
+  - title: Alex Bowers Laravel example project
+    type: url
+    category: code
 ---
 

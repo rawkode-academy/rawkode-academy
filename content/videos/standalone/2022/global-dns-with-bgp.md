@@ -112,5 +112,24 @@ chapters:
     title: Conclusion and Outro
 duration: 3555
 guests: []
+resources:
+  - title: Rawkode Academy Courses
+    type: url
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+  - title: Equinix Metal
+    type: url
+    url: 'https://rawkode.link/metal'
+    category: other
+  - title: PacketHost Network Helpers
+    type: url
+    url: 'https://github.com/packethost/network-helpers'
+    category: code
+  - title: CoreDNS Plugins Documentation
+    type: url
+    category: documentation
+  - title: BIRD Internet Routing Daemon
+    type: url
+    category: other
 ---
 

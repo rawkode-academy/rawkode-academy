@@ -1,0 +1,26 @@
+{
+	"video_id": "lqoxvc2zwgos1jkwcst7aj6z",
+	"slug": "introduction-to-rust-part-i",
+	"title": "Introduction to Rust (Part I)",
+	"generated_at": "2026-05-17T13:37:05.120Z",
+	"known_technology_names": [
+		"Rust"
+	],
+	"known_guest_names": [
+		"Steve Klabnik"
+	],
+	"resources": [
+		{
+			"title": "The Rust Programming Language book",
+			"category": "documentation",
+			"evidence_quote": "the book, which is the Rust programming language, which is kind of the the default book for learning Rust",
+			"confidence": "high"
+		},
+		{
+			"title": "Rust Users Forum",
+			"category": "other",
+			"evidence_quote": "There's also the user forum at users.rustlang.org where you can ask questions,",
+			"confidence": "medium"
+		}
+	]
+}

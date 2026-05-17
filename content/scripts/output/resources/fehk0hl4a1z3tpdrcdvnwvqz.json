@@ -1,0 +1,21 @@
+{
+	"video_id": "fehk0hl4a1z3tpdrcdvnwvqz",
+	"slug": "hans-kristian-flaatten-and-zach-wachtel",
+	"title": "Hans Kristian Flaatten & Zach Wachtel",
+	"generated_at": "2026-05-17T13:19:55.363Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Hans Kristian Flaatten",
+		"Zach Wachtel"
+	],
+	"resources": [
+		{
+			"title": "Ship It podcast",
+			"category": "other",
+			"evidence_quote": "I blame the Ship It podcast.",
+			"confidence": "medium"
+		}
+	]
+}

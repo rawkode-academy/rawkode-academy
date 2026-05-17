@@ -2,7 +2,7 @@
 id: qz1c7g1dlbmnpf2ubudxvf2v
 slug: docker-build-cloud
 title: Docker Build Cloud
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2024-03-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -58,5 +58,6 @@ chapters:
 duration: 2397
 guests:
   - michael-irwin
+resources: []
 ---
 

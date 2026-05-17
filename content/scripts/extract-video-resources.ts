@@ -482,6 +482,27 @@ async function processVideo(
 	return { status: "ok", message: `${accepted.length} resources → ${relative(repoRoot, outFile)}` };
 }
 
+// Schema-shaped resource that lands in frontmatter. The candidate JSONs carry
+// `evidence_quote` and `confidence` for human review; those are intentionally
+// stripped here because the website's content collection schema does not accept
+// them.
+interface FrontmatterResource {
+	title: string;
+	type: "url" | "file" | "embed";
+	url?: string;
+	category?: Category;
+}
+
+function toFrontmatterResource(r: Resource): FrontmatterResource {
+	const out: FrontmatterResource = {
+		title: r.title,
+		type: "url",
+	};
+	if (r.url) out.url = r.url;
+	if (r.category) out.category = r.category;
+	return out;
+}
+
 async function applyCandidate(candidatePath: string): Promise<string> {
 	const candidate = JSON.parse(await readFile(candidatePath, "utf8")) as {
 		video_id: string;
@@ -502,21 +523,36 @@ async function applyCandidate(candidatePath: string): Promise<string> {
 	const raw = await readFile(target, "utf8");
 	const parsed = matter(raw);
 	const data = { ...(parsed.data as VideoFrontmatter) };
-	const existing = Array.isArray(data.resources) ? data.resources : [];
-	const merged = mergeResources(existing, candidate.resources);
-	data.resources = merged;
+	const existing = Array.isArray(data.resources)
+		? (data.resources as unknown[]).map((r) => {
+				const v = r as Partial<FrontmatterResource> &
+					Partial<Resource> & { type?: unknown };
+				return {
+					title: String(v.title ?? ""),
+					type:
+						v.type === "url" || v.type === "file" || v.type === "embed"
+							? (v.type as FrontmatterResource["type"])
+							: "url",
+					...(v.url ? { url: String(v.url) } : {}),
+					...(v.category ? { category: v.category as Category } : {}),
+				};
+			})
+		: [];
+	const additions = candidate.resources.map(toFrontmatterResource);
+	const merged = mergeFrontmatterResources(existing, additions);
+	data.resources = merged as unknown as Resource[];
 	const out = matter.stringify(parsed.content, data);
 	await writeFile(target, out, "utf8");
 	return `${candidate.video_id} → ${relative(repoRoot, target)} (${merged.length} total)`;
 }
 
-function mergeResources(
-	existing: Resource[],
-	additions: Resource[],
-): Resource[] {
+function mergeFrontmatterResources(
+	existing: FrontmatterResource[],
+	additions: FrontmatterResource[],
+): FrontmatterResource[] {
 	const keys = new Set<string>();
-	const out: Resource[] = [];
-	const key = (r: Resource): string =>
+	const out: FrontmatterResource[] = [];
+	const key = (r: FrontmatterResource): string =>
 		(r.url ?? "").toLowerCase().trim() || `title:${r.title.toLowerCase().trim()}`;
 	for (const r of existing) {
 		keys.add(key(r));
@@ -530,6 +566,7 @@ function mergeResources(
 	}
 	return out;
 }
+
 
 async function runExtract(opts: CliOpts) {
 	const videos = await loadVideos();

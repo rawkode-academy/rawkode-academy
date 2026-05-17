@@ -34,5 +34,18 @@ chapters:
     title: Conclusion and Summary
 duration: 581
 guests: []
+resources:
+  - title: Armo Platform
+    type: url
+    url: 'https://www.armosec.io/'
+    category: other
+  - title: Rego Playground
+    type: url
+    url: 'https://play.openpolicyagent.org/'
+    category: demos
+  - title: Open Policy Agent
+    type: url
+    url: 'https://www.openpolicyagent.org/'
+    category: documentation
 ---
 

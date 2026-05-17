@@ -56,5 +56,12 @@ chapters:
 duration: 2831
 guests:
   - frank-jogeleit
+resources:
+  - title: Falco Sidekick UI
+    type: url
+    category: code
+  - title: Kyverno Pod Security Policy replacement policies
+    type: url
+    category: documentation
 ---
 

@@ -68,5 +68,6 @@ chapters:
     title: Conclusion & Call to Action
 duration: 866
 guests: []
+resources: []
 ---
 

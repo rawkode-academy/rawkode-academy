@@ -1,0 +1,27 @@
+{
+	"video_id": "qsajojlbooovvzl4r05aabx8",
+	"slug": "introduction-to-opentelemetry",
+	"title": "Introduction to OpenTelemetry",
+	"generated_at": "2026-05-17T13:37:55.532Z",
+	"known_technology_names": [
+		"OpenTelemetry"
+	],
+	"known_guest_names": [
+		"Amy Tobey",
+		"Liz Fong-Jones"
+	],
+	"resources": [
+		{
+			"title": "OpenTelemetry Go contrib gRPC instrumentation example",
+			"category": "code",
+			"evidence_quote": "We moved that to OpenTelemetry Go contrib because",
+			"confidence": "medium"
+		},
+		{
+			"title": "OpenTelemetry Go trace API documentation",
+			"category": "documentation",
+			"evidence_quote": "so if you go to in your browser to go.OpenTelemetry.i0 and go to the hotel, which is the API documentation, and go to subdirectories trip API trace.",
+			"confidence": "medium"
+		}
+	]
+}

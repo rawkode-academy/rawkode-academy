@@ -93,5 +93,10 @@ chapters:
   - startTime: 5997
     title: Recap and Conclusion
 duration: 6155
+resources:
+  - title: rocketacademy/custard
+    type: url
+    url: 'https://github.com/rocketacademy/custard'
+    category: code
 ---
 

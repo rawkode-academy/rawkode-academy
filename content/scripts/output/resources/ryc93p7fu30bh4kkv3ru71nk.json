@@ -1,0 +1,18 @@
+{
+	"video_id": "ryc93p7fu30bh4kkv3ru71nk",
+	"slug": "rust-sdk-walkthrough",
+	"title": "Rust SDK Walkthrough",
+	"generated_at": "2026-05-17T13:17:37.033Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Fermion Discord",
+			"category": "other",
+			"evidence_quote": "or join the Fermion Discord.",
+			"confidence": "medium"
+		}
+	]
+}

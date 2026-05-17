@@ -42,5 +42,9 @@ chapters:
     title: Part 2 Result and Wrap Up
 duration: 7115
 guests: []
+resources:
+  - title: Advent of Code
+    type: url
+    category: demos
 ---
 

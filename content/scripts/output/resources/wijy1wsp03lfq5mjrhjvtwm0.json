@@ -1,0 +1,30 @@
+{
+	"video_id": "wijy1wsp03lfq5mjrhjvtwm0",
+	"slug": "making-kubernetes-network-policies-effortless-with-otterize",
+	"title": "Making Kubernetes Network Policies Effortless with Otterize",
+	"generated_at": "2026-05-17T13:17:38.866Z",
+	"known_technology_names": [
+		"Otterize"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Otterize iBack page",
+			"category": "documentation",
+			"evidence_quote": "You can find us at authorize.com,\nand the page we're looking at right now\nis the iBack page slash iBack.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Otterize HelmChart repository",
+			"category": "code",
+			"evidence_quote": "Here, we have the Otterize organization\non GitHub with a repository called HelmChart,\nwhich, you guessed it, has their HelmChart.",
+			"confidence": "high"
+		},
+		{
+			"title": "Weaveworks Sockshop demo",
+			"category": "demos",
+			"evidence_quote": "Here we have the Weaveworks Sockshop\ndemo.\nThis is a sample store built with multiple\nmicroservices",
+			"confidence": "high"
+		}
+	]
+}

@@ -55,5 +55,6 @@ chapters:
 duration: 5470
 guests:
   - jack-kleeman
+resources: []
 ---
 

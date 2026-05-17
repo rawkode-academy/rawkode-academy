@@ -1,0 +1,27 @@
+{
+	"video_id": "f85p38gkhu1pxtu1bnnixglq",
+	"slug": "hands-on-with-rust-async-await",
+	"title": "Hands-on with Rust: Async / Await",
+	"generated_at": "2026-05-17T13:33:24.878Z",
+	"known_technology_names": [
+		"Rust"
+	],
+	"known_guest_names": [
+		"Senyo Simpson"
+	],
+	"resources": [
+		{
+			"title": "Tokio Async in Depth tutorial",
+			"url": "https://tokio.rs/tokio/tutorial/async",
+			"category": "documentation",
+			"evidence_quote": "Tokyo has its own well, it has, like, a tutorial on, like, making your own executor.",
+			"confidence": "high"
+		},
+		{
+			"title": "Complete Guide to InfluxDB course",
+			"category": "other",
+			"evidence_quote": "courses where you can come and learn the complete guide to InfluxDB.",
+			"confidence": "medium"
+		}
+	]
+}

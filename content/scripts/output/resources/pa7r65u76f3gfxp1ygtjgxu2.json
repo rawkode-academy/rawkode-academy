@@ -1,0 +1,20 @@
+{
+	"video_id": "pa7r65u76f3gfxp1ygtjgxu2",
+	"slug": "klustered-part-iv",
+	"title": "Klustered (Part IV)",
+	"generated_at": "2026-05-17T13:21:14.303Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Lee Briggs"
+	],
+	"resources": [
+		{
+			"title": "Teleport access platform",
+			"category": "other",
+			"evidence_quote": "we are now using Teleport to aid us debugging these clusters. Really cool tool. You should check it out.",
+			"confidence": "high"
+		}
+	]
+}

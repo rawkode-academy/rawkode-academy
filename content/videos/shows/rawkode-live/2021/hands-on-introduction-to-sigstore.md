@@ -85,5 +85,12 @@ chapters:
 duration: 4098
 guests:
   - dan-lorenc
+resources:
+  - title: The Update Framework
+    type: url
+    category: documentation
+  - title: Verifiable supply chain metadata for Tekton
+    type: url
+    category: other
 ---
 

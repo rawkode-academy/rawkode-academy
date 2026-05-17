@@ -1,7 +1,5 @@
 ---
-id: >-
-  z7fzq9jqcn0m0noy4qkmevjq
-  simplify-production-debugging-with-ngrok-live-demo-and-traffic-policies-explained
+id: z7fzq9jqcn0m0noy4qkmevjq
 slug: >-
   simplify-production-debugging-with-ngrok-live-demo-and-traffic-policies-explained
 title: >-
@@ -19,5 +17,6 @@ technologies:
   - ngrok
 duration: 624
 guests: []
+resources: []
 ---
 

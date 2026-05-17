@@ -134,5 +134,6 @@ guests:
   - edidiong-asikpo
   - alexandre-gervais
   - andy-suderman
+resources: []
 ---
 

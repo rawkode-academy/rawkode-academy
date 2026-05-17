@@ -1,0 +1,24 @@
+{
+	"video_id": "e683nfwoau6e8epn8g9zmwn9",
+	"slug": "cloud-server-side-webassembly",
+	"title": "Cloud Server-Side WebAssembly",
+	"generated_at": "2026-05-17T13:22:40.367Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Mikkel Mørk Hegnhøj"
+	],
+	"resources": [
+		{
+			"title": "Spin OpenTelemetry plugin",
+			"category": "code",
+			"evidence_quote": "you could run a command called spin plugin install otel",
+			"confidence": "medium"
+		},
+		{
+			"title": "Wasm I/O",
+			"category": "other",
+			"evidence_quote": "Also, there's Wasserm.io just the week before, so if you rather go to Barcelona Thursday, Friday, and maybe stay over the weekend, I'll definitely recommend coming to Watson.io.",
+			"confidence": "medium"
+		}
+	]
+}

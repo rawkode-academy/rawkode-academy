@@ -129,5 +129,21 @@ chapters:
 duration: 4030
 guests:
   - kevin-hoffman
+resources:
+  - title: Programming WebAssembly with Rust
+    type: url
+    category: other
+  - title: WebAssembly Binary Toolkit
+    type: url
+    category: code
+  - title: WASC new actor template
+    type: url
+    category: code
+  - title: WASC new provider template
+    type: url
+    category: code
+  - title: waSCC demo YouTube playlist
+    type: url
+    category: demos
 ---
 

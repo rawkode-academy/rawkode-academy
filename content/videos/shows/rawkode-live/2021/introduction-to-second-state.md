@@ -39,5 +39,9 @@ chapters:
 duration: 5210
 guests:
   - tim-mccallum
+resources:
+  - title: Jampack API docs
+    type: url
+    category: documentation
 ---
 

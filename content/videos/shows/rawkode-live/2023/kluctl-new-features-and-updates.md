@@ -65,5 +65,6 @@ chapters:
 duration: 4744
 guests:
   - alexander-block
+resources: []
 ---
 

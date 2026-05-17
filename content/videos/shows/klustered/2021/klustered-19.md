@@ -88,5 +88,18 @@ duration: 5734
 guests:
   - borko-djurkovic
   - matt-turner
+resources:
+  - title: Teleport clustered sponsor link
+    type: url
+    url: 'https://rawkode.live/teleport'
+    category: other
+  - title: commandnotfound.com
+    type: url
+    url: 'https://commandnotfound.com'
+    category: other
+  - title: Rawkode Discord
+    type: url
+    url: 'https://rawkode.chat'
+    category: other
 ---
 
