@@ -3,8 +3,9 @@ id: f85p38gkhu1pxtu1bnnixglq
 slug: hands-on-with-rust-async-await
 title: 'Hands-on with Rust: Async / Await'
 description: >-
-  In this episode, Senyo and I will gets hands-on with Rust's async/await
-  features.
+  Senyo Simpson joins David to dig into Rust's async/await. They cover lazy
+  futures, the Tokio executor, spawn and join, then build a custom Future,
+  executor, and Waker from scratch to show what happens under the hood.
 publishedAt: 2021-08-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -78,12 +79,17 @@ duration: 5063
 guests:
   - senyo-simpson
 resources:
-  - title: Tokio Async in Depth tutorial
+  - title: Tokio
     type: url
-    url: 'https://tokio.rs/tokio/tutorial/async'
+    url: 'https://tokio.rs/'
     category: documentation
-  - title: Complete Guide to InfluxDB course
+  - title: reqwest HTTP client
     type: url
-    category: other
+    url: 'https://docs.rs/reqwest/'
+    category: documentation
+  - title: Async Book (Rust)
+    type: url
+    url: 'https://rust-lang.github.io/async-book/'
+    category: documentation
 ---
 

@@ -3,8 +3,9 @@ id: iujjbzvjr482rvlakapnby4u
 slug: introduction-to-tremor
 title: Introduction to Tremor
 description: >-
-  In this episode, we'll introduce you and teach you everything you need to get
-  started with the CNCF's sandbox project: Tremor
+  The Tremor team walk through the Rust-based event processing engine born at
+  Wayfair for load shedding at scale, then live-code a Discord bot using YAML
+  pipelines, the Trickle query language, and a custom UDP source.
 publishedAt: 2021-03-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -89,17 +90,20 @@ guests:
   - heinz-gies
   - matthias-wahl
 resources:
-  - title: Equinix Metal products
+  - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
   - title: Matthias Wahl's Bobconf SIMD talk
     type: url
     category: other
   - title: Tremor RFC for Troy deployment language
     type: url
+    url: 'https://github.com/tremor-rs/tremor-rfcs'
     category: documentation
   - title: Vector project
     type: url
+    url: 'https://vector.dev/'
     category: code
 ---
 

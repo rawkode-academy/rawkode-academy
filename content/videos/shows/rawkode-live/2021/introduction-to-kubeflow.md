@@ -3,9 +3,10 @@ id: mgrp2hpv2alb27fi2sqj1ck4
 slug: introduction-to-kubeflow
 title: Introduction to Kubeflow
 description: >-
-  In this episode, Michael will introduce us to Kubeflow's new features,
-  shipping in Kubeflow 1.3, and guide us through everything we need to get
-  started running our data science workloads on Kubernetes with Kubeflow.
+  Michael Tanenbaum walks through Kubeflow 1.3, covering the architecture,
+  Notebooks, and Pipelines, then trains an image classification model on the
+  Kaggle chest X-ray pneumonia dataset and automates the workflow with Kale,
+  Katib, and KFServing.
 publishedAt: 2021-03-30T17:00:00.000Z
 type: live
 category: tutorial
@@ -60,8 +61,10 @@ resources:
   - title: Grokking Deep Learning
     type: url
     category: other
+    url: https://www.manning.com/books/grokking-deep-learning
   - title: Kaggle Chest X-Ray Pneumonia Dataset by Paul Timothy Mooney
     type: url
-    category: demos
+    category: other
+    url: https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia
 ---
 

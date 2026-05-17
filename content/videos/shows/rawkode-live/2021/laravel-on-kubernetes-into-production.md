@@ -3,9 +3,10 @@ id: ufjrlupsc2rko3zckf49bwv6
 slug: laravel-on-kubernetes-into-production
 title: 'Laravel on Kubernetes: Into Production'
 description: >-
-  In this episode, we'll explore the "What next?" question that is often left in
-  developers heads after they've deployed their Laravel application to
-  Kubernetes.
+  Alex Bowers joins David to take a Laravel app from a basic deploy to a
+  production-grade Kubernetes setup, wiring up MariaDB via Helm, ConfigMaps and
+  Secrets, init-container migrations, CronJob schedulers, queue worker
+  Deployments, and update strategies.
 publishedAt: 2021-01-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -13,6 +14,11 @@ technologies:
   - kubernetes
   - laravel
   - php
+  - docker
+  - helm
+  - artifacthub
+  - sops
+  - kapitan
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -98,15 +104,19 @@ resources:
     category: code
   - title: Artifact Hub MariaDB Helm chart
     type: url
+    url: 'https://artifacthub.io/'
     category: other
   - title: Mozilla SOPS
     type: url
+    url: 'https://github.com/getsops/sops'
     category: code
   - title: Sealed Secrets
     type: url
+    url: 'https://github.com/bitnami-labs/sealed-secrets'
     category: code
   - title: Kapitan project
     type: url
+    url: 'https://kapitan.dev/'
     category: code
 ---
 

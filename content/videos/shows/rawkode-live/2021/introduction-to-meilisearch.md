@@ -3,8 +3,9 @@ id: sgekw05ckjl1lweoumx4kkp9
 slug: introduction-to-meilisearch
 title: Introduction to Meilisearch
 description: >-
-  In this episode, we'll get you up to speed with everything you need to know
-  about Meilisearch
+  Frédéric Harper and Carolina Ferreira from the Meilisearch team walk through
+  the Rust-based search engine: REST API, indexes, typo tolerance, ranking
+  rules, synonyms, faceted search, and deployment.
 publishedAt: 2021-02-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -81,15 +82,19 @@ guests:
 resources:
   - title: 'Meilisearch documentation: Comparison to alternatives'
     type: url
+    url: 'https://www.meilisearch.com/docs/resources/comparisons/alternatives'
     category: documentation
   - title: 'Meilisearch documentation: API reference settings'
     type: url
+    url: 'https://www.meilisearch.com/docs/reference/api/settings/list-all-settings'
     category: documentation
   - title: 'Meilisearch documentation: Ranking rules relevancy guide'
     type: url
+    url: 'https://www.meilisearch.com/docs/capabilities/full_text_search/relevancy/ranking_rules'
     category: documentation
   - title: 'Meilisearch documentation: Official SDK libraries'
     type: url
+    url: 'https://www.meilisearch.com/docs/resources/help/sdks'
     category: documentation
   - title: movies.json sample dataset
     type: url

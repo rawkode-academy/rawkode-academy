@@ -3,10 +3,10 @@ id: c3p1ypeqfmorfwwy2ypcrigm
 slug: hands-on-introduction-to-acorn
 title: Hands-on Introduction to Acorn
 description: >-
-  Acorn is an application packaging and deployment framework that simplifies
-  running apps on Kubernetes. Acorn is able to package up all of an applications
-  Docker images, configuration, and deployment specifications into a single
-  Acorn image artifact.
+  Darren Shepherd, chief architect at Acorn Labs and creator of k3s, walks
+  through Acorn: an Acornfile-driven way to package containers, secrets, and
+  ingress into an OCI artifact and deploy to Kubernetes without writing Helm
+  charts or raw YAML.
 publishedAt: 2022-08-25T17:00:00.000Z
 type: live
 category: tutorial

@@ -3,8 +3,9 @@ id: aqa3padkfm9asmv94ky774rc
 slug: introduction-to-suborbital
 title: Introduction to Suborbital
 description: >-
-  In this episode, we'll be taking at look at getting started with Suborbital; a
-  WebAssembly based functions runtime.
+  Connor Hicks walks through Suborbital's ATMO runtime, writing Rust functions
+  compiled to WebAssembly, composing them via the Directive YAML, and chaining
+  workflows with HTTP and cache access through the subo CLI.
 publishedAt: 2021-01-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -92,6 +93,10 @@ duration: 5020
 guests:
   - connor-hicks
 resources:
+  - title: Suborbital on GitHub
+    type: url
+    url: https://github.com/suborbital
+    category: code
   - title: Atmo documentation
     type: url
     category: documentation

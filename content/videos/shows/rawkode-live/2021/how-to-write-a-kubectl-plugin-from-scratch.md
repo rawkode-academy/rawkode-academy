@@ -3,8 +3,9 @@ id: c1hn6xaw51c7lj22g4p4q93k
 slug: how-to-write-a-kubectl-plugin-from-scratch
 title: How to Write a kubectl Plugin from Scratch
 description: >-
-  In this episode, we build a kubectl plugin from scratch. We aim to solve the
-  biggest problem in Kubernetes ... noun/verb ordering.
+  Matt Turner joins to write a kubectl plugin in Bash that swaps kubectl's
+  verb-noun ordering to noun-verb, then packages it for distribution through
+  the Krew plugin manager with a crew.yaml manifest and GitHub releases.
 publishedAt: 2021-01-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -66,12 +67,15 @@ guests:
 resources:
   - title: Kubernetes kubectl plugins documentation
     type: url
+    url: 'https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/'
     category: documentation
   - title: Krew kubectl plugin manager
     type: url
+    url: 'https://krew.sigs.k8s.io/'
     category: other
   - title: Krew plugin index repository
     type: url
+    url: 'https://github.com/kubernetes-sigs/krew-index'
     category: code
 ---
 
