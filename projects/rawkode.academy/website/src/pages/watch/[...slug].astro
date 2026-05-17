@@ -7,6 +7,7 @@ import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
+import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
@@ -104,6 +105,42 @@ const showId =
 			? (showRef as { id: string }).id
 			: null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
+
+// Compute "More from this show" — other episodes in the same show, latest first,
+// excluding the current video. Empty list if the video isn't part of a show.
+const SHOW_RELATED_LIMIT = 6;
+const showRelatedAll = showEntry
+	? videos
+			.filter((v) => {
+				if (v.data.slug === slug) return false;
+				const otherShowRef = v.data.show;
+				const otherShowId =
+					typeof otherShowRef === "string"
+						? otherShowRef
+						: otherShowRef && typeof otherShowRef === "object" && "id" in otherShowRef
+							? (otherShowRef as { id: string }).id
+							: null;
+				return otherShowId === showEntry.id;
+			})
+			.sort((a, b) => {
+				const aTime =
+					a.data.publishedAt instanceof Date
+						? a.data.publishedAt.getTime()
+						: new Date(a.data.publishedAt).getTime();
+				const bTime =
+					b.data.publishedAt instanceof Date
+						? b.data.publishedAt.getTime()
+						: new Date(b.data.publishedAt).getTime();
+				return bTime - aTime;
+			})
+	: [];
+const showRelatedVideos = showRelatedAll.slice(0, SHOW_RELATED_LIMIT).map((v) => ({
+	id: v.data.id,
+	title: v.data.title,
+	thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
+	slug: v.data.slug,
+	duration: typeof v.data.duration === "number" ? v.data.duration : undefined,
+}));
 
 // Normalize technology references (handles both string IDs and Astro reference objects)
 const normalizedTechIds = normalizeTechnologyReferences(
@@ -401,6 +438,15 @@ if (isAuthenticated && user?.id) {
 					videoId={video.data.id}
 					resources={video.data.resources ?? []}
 				/>
+
+				{/* More from this show — only renders when the video belongs to one. */}
+				{showEntry && showRelatedVideos.length > 0 && (
+					<ShowVideoSection
+						show={showEntry}
+						videos={showRelatedVideos}
+						totalVideos={showRelatedAll.length}
+					/>
+				)}
 
 				{/* More Videos by Technology */}
 				{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (

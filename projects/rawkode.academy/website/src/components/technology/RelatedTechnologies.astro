@@ -1,0 +1,61 @@
+---
+interface RelatedTech {
+	id: string;
+	name: string;
+	logoUrl: string | undefined;
+	subcategory?: string | undefined;
+}
+
+interface Props {
+	technologies: RelatedTech[];
+}
+
+const { technologies } = Astro.props;
+---
+
+{technologies.length > 0 && (
+	<section class="mt-8">
+		<h3 class="text-lg font-semibold text-primary-content mb-4">
+			Related technologies
+		</h3>
+		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+			{technologies.map((tech) => (
+				<a
+					href={`/technology/${tech.id.replace(/\/index$/, "")}`}
+					class="glass-interactive group flex items-center gap-3 rounded-lg p-3"
+				>
+					<div class="h-10 w-10 flex-shrink-0 overflow-hidden rounded">
+						<img
+							src={tech.logoUrl || "/apple-touch-icon.png"}
+							alt={tech.name}
+							class="h-full w-full object-contain"
+							loading="lazy"
+							onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+						/>
+					</div>
+					<div class="min-w-0 flex-1">
+						<div class="truncate font-medium text-secondary-content group-hover:text-primary-content transition-colors">
+							{tech.name}
+						</div>
+						{tech.subcategory && (
+							<div class="truncate text-xs text-muted">{tech.subcategory}</div>
+						)}
+					</div>
+					<svg
+						class="h-4 w-4 flex-shrink-0 text-muted group-hover:text-secondary-content transition-colors"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/>
+					</svg>
+				</a>
+			))}
+		</div>
+	</section>
+)}
