@@ -6,9 +6,8 @@ subtitle: >-
    Today we had some long conversations about Arc Bash and the future of
   scripting as well as platforms and the rise and fall of Kubernetes.
 description: >-
-   Today we had some long conversations about Arc Bash and the future of
-  scripting as well as platforms and the rise and fall of Kubernetes.\nThe fall
-  of Kubernetes. Hmm. I&#x27;ll have Claude write a new one
+  Today we had some long conversations about Arc Bash and the future of
+  scripting as well as platforms and the rise and fall of Kubernetes.
 publishedAt: 2025-10-10T17:00:00.000Z
 type: recorded
 category: interview

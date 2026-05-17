@@ -166,8 +166,11 @@ function cleanDescription(original: string): CleanResult {
 	if (!normalized) {
 		return { description: original, source: "todo", droppedParagraphs: 0, originalLength: 0 };
 	}
+	// YAML `>-` folded scalars collapse single line breaks to spaces and emit one `\n`
+	// per blank line in source. So every `\n` in the parsed string IS a paragraph
+	// boundary; split on `\n+` to also catch paragraphs separated by a single blank line.
 	const paragraphs = normalized
-		.split(/\n{2,}/)
+		.split(/\n+/)
 		.map((p) => p.replace(/\s+$/, ""));
 	let dropped = 0;
 	let lead: string | null = null;
