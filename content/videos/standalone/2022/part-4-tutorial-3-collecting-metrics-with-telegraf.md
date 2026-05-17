@@ -40,5 +40,21 @@ chapters:
     title: Summary and Conclusion
 duration: 718
 guests: []
+resources:
+  - title: influxdata/telegraf GitHub Repository
+    url: 'https://github.com/influxdata/telegraf'
+    category: code
+    evidence_quote: >-
+      The best thing you can do is go to the Telegraph repository. That's
+      github.com/influxdata/telegraph.
+    confidence: high
+  - title: Telegraf Plugins Reference
+    category: documentation
+    evidence_quote: >-
+      From here, you can click on plugins. You will see inputs and outputs.
+      Those are the two that you will use the most with inputs being the one
+      that you wanna be, maybe you're perhaps more curious about and want to
+      understand.
+    confidence: high
 ---
 

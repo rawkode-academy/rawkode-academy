@@ -59,5 +59,10 @@ duration: 2470
 audioFileSize: 59289114
 guests:
   - rachel-sweeney
+resources:
+  - title: Argo CD
+    category: code
+    evidence_quote: but tools like Argo CD and Flux are two great ones to take a look at.
+    confidence: high
 ---
 

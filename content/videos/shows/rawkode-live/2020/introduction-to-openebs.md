@@ -86,5 +86,21 @@ duration: 4955
 guests:
   - kiran-mova
   - jeffry-molanus
+resources:
+  - title: MayaStore alpha features documentation
+    category: documentation
+    evidence_quote: >-
+      So we have a documentation for my store as well. If you just go to the
+      alpha features, is right there.
+    confidence: medium
+  - title: MayaStore quick start guide
+    category: documentation
+    evidence_quote: 'it actually, the the quick start, talks about it, as well.'
+    confidence: medium
+  - title: Nixery.dev
+    url: 'https://nixery.dev'
+    category: demos
+    evidence_quote: This is awesome. I love that you're using Nexery.dev.
+    confidence: high
 ---
 

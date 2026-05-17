@@ -100,5 +100,13 @@ duration: 4850
 guests:
   - leo-di-donato
   - lorenzo-fontana
+resources:
+  - title: Falco Sidekick
+    category: code
+    evidence_quote: >-
+      we have a software in the Falco security organization which is called
+      Falco Sidekick that, you know, for example, can take, the Falco logs and
+      send them to Slack or send them to AWS SNS or these kind things.
+    confidence: medium
 ---
 

@@ -70,5 +70,17 @@ duration: 5212
 guests:
   - amy-tobey
   - liz-fong-jones
+resources:
+  - title: OpenTelemetry Go contrib gRPC instrumentation example
+    category: code
+    evidence_quote: We moved that to OpenTelemetry Go contrib because
+    confidence: medium
+  - title: OpenTelemetry Go trace API documentation
+    category: documentation
+    evidence_quote: >-
+      so if you go to in your browser to go.OpenTelemetry.i0 and go to the
+      hotel, which is the API documentation, and go to subdirectories trip API
+      trace.
+    confidence: medium
 ---
 

@@ -55,5 +55,12 @@ chapters:
     title: Conclusion & Call to Action
 duration: 1223
 guests: []
+resources:
+  - title: OpenTelemetry Demo Application
+    category: demos
+    evidence_quote: >-
+      We're using OpenTelemetry demo application, which comes with a single
+      manifest for deploying to a Kubernetes cluster.
+    confidence: high
 ---
 

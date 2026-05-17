@@ -141,5 +141,6 @@ chapters:
   - startTime: 5211
     title: Conclusion & Thanks
 duration: 5269
+resources: []
 ---
 

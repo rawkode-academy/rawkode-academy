@@ -22,5 +22,6 @@ chapters:
     title: Watch the Full Video
 duration: 43
 guests: []
+resources: []
 ---
 

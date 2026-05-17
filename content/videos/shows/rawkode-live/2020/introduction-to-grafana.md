@@ -80,5 +80,11 @@ chapters:
 duration: 3618
 guests:
   - marcus-olsson
+resources:
+  - title: Equinix Metal
+    url: 'https://metal.equinix.com'
+    category: other
+    evidence_quote: You can sign up today at metal.equinix.com.
+    confidence: medium
 ---
 

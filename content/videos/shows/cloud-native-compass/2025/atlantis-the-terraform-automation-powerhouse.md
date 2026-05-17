@@ -15,5 +15,24 @@ duration: 2371
 audioFileSize: 56911135
 guests:
   - jose-amengual
+resources:
+  - title: Project Atlantis
+    category: code
+    evidence_quote: >-
+      Today, we got to talk with one of the maintainers of Project Atlantis, a
+      Terraform pull request automation system.
+    confidence: high
+  - title: Atlantis OpenTofu support blog post
+    category: other
+    evidence_quote: >-
+      So that there's a blog post in our site about that. And then we release
+      Open Tofu official support.
+    confidence: medium
+  - title: Atlantis Helm chart
+    category: code
+    evidence_quote: >-
+      And we do offer a help chart for people that are running Kubernetes so
+      that they can install the help chart.
+    confidence: medium
 ---
 

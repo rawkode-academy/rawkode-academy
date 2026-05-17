@@ -48,5 +48,16 @@ chapters:
     title: Final Thoughts and Community Involvement
 guests:
   - koray-oksay
+resources:
+  - title: Kubernetes The Hard Way
+    category: documentation
+    evidence_quote: >-
+      my first recommendation is to follow Kubernetes the hard way from Kelsey
+      Hightower.
+    confidence: high
+  - title: CNCF and Kubernetes Slack channels
+    category: other
+    evidence_quote: One more thing that they could join the CNCF and Kubernetes Slack channels
+    confidence: high
 ---
 

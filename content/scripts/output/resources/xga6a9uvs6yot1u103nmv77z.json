@@ -1,0 +1,20 @@
+{
+	"video_id": "xga6a9uvs6yot1u103nmv77z",
+	"slug": "introduction-to-kube-vip-bare-metal-load-balancing-rtfm-with-rawkode",
+	"title": "Introduction to kube-vip: Bare Metal Load Balancing (RTFM with Rawkode)",
+	"generated_at": "2026-05-17T13:36:30.614Z",
+	"known_technology_names": [
+		"kube-vip"
+	],
+	"known_guest_names": [
+		"Dan Finneran"
+	],
+	"resources": [
+		{
+			"title": "kube-vip documentation",
+			"category": "documentation",
+			"evidence_quote": "So if you go to kubevip.io actually, I can pop it here, I think.",
+			"confidence": "medium"
+		}
+	]
+}

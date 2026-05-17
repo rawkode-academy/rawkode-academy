@@ -1,0 +1,26 @@
+{
+	"video_id": "jevfafsrta5dekkl6td02hhc",
+	"slug": "hands-on-introduction-to-loki",
+	"title": "Hands-on Introduction to Loki",
+	"generated_at": "2026-05-17T13:31:56.039Z",
+	"known_technology_names": [
+		"Loki"
+	],
+	"known_guest_names": [
+		"Cyril Tovena"
+	],
+	"resources": [
+		{
+			"title": "Weaveworks Sock Shop microservice demo",
+			"category": "demos",
+			"evidence_quote": "we do have the weave works sock shop microservice demo deployed to the cluster.",
+			"confidence": "high"
+		},
+		{
+			"title": "Grafana LogQL documentation",
+			"category": "documentation",
+			"evidence_quote": "And so there's a documentation on Grafana that is very extensive on on everything that you can do with LogQL.",
+			"confidence": "medium"
+		}
+	]
+}

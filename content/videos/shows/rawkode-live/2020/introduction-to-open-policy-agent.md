@@ -73,5 +73,23 @@ chapters:
 duration: 4450
 guests:
   - torin-sandall
+resources:
+  - title: OPA Playground
+    category: demos
+    evidence_quote: >-
+      The playground's a really nice way to just kinda click around and and see
+      stuff happen.
+    confidence: high
+  - title: OPA VS Code plugin
+    category: code
+    evidence_quote: >-
+      But pull requests are always welcome. So if somebody wants to come along
+      to the the Versus Code plugin and give us that, you know, we'd love to
+      take it.
+    confidence: medium
+  - title: OPA policy testing documentation
+    category: documentation
+    evidence_quote: There's a whole page on the in the documentation that that goes into that.
+    confidence: medium
 ---
 

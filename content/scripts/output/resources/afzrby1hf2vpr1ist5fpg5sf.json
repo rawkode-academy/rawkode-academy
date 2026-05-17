@@ -1,0 +1,22 @@
+{
+	"video_id": "afzrby1hf2vpr1ist5fpg5sf",
+	"slug": "klustered-15",
+	"title": "Klustered #15",
+	"generated_at": "2026-05-17T13:21:50.790Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Marek Counts",
+		"Abdellfetah Sghiouar"
+	],
+	"resources": [
+		{
+			"title": "Rawkode Discord server",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "So you can check that out at Rawkode.chat.",
+			"confidence": "high"
+		}
+	]
+}

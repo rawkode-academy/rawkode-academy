@@ -43,4 +43,13 @@ duration: 2875
 audioFileSize: 68999671
 guests:
   - hazel-weakly
+resources:
+  - title: Eleanor Ostrom's principles for sustainable self-governing commons
+    category: other
+    evidence_quote: >-
+      there's some really great research by Eleanor Ostrom, who talks about that
+      and who has about eight to 10 sort of properties and principles of
+      sustainable self governing, self organizing, shared common resource groups
+    confidence: medium
 ---
+

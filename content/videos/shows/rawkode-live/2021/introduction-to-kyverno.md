@@ -95,5 +95,28 @@ guests:
   - jim-bugwadia
   - founder-at-nirmata
   - shuting-zhao
+resources:
+  - title: Kubernetes Pod Security Standards documentation
+    category: documentation
+    evidence_quote: >-
+      Kubernetes actually has a page which defines pod security standards and
+      different levels of pod security.
+    confidence: high
+  - title: Bishop Fox Bad Pods repository
+    category: demos
+    evidence_quote: And here it provides the manifest for like kind of kind of bad parts.
+    confidence: high
+  - title: kyverno/policies repository
+    category: code
+    evidence_quote: So there's a kyverno slash policies as the underlying Git repo.
+    confidence: high
+  - title: OPA Gatekeeper
+    category: code
+    evidence_quote: 'check out Kyverno, check out the OPA gatekeeper and evaluate both of them'
+    confidence: medium
+  - title: kubectl neat
+    category: other
+    evidence_quote: Actually there is a plugin of kubectl called kubectl meet and
+    confidence: medium
 ---
 

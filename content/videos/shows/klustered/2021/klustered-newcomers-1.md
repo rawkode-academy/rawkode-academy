@@ -132,5 +132,6 @@ duration: 4350
 guests:
   - thom-crowe
   - jeremy-tanner
+resources: []
 ---
 

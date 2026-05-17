@@ -90,5 +90,28 @@ duration: 3735
 guests:
   - radu-weiss
   - gabriel-ionescu
+resources:
+  - title: Firecracker Quick Start Guide
+    category: documentation
+    evidence_quote: >-
+      there's also another link there which says you can go to the quick start
+      guide.
+    confidence: high
+  - title: Firecracker Swagger API specification
+    category: documentation
+    evidence_quote: 'I think it''s in Swagger format, so it should be ingestible by clients.'
+    confidence: high
+  - title: Firecracker Go SDK
+    category: code
+    evidence_quote: >-
+      Wrapping around the all the CRL request that David did, I'm using
+      Firecracker SDK.
+    confidence: medium
+  - title: Weave Ignite
+    category: code
+    evidence_quote: >-
+      There's Weave Ignite, which basically kinda has a docker like interface
+      for Firecracker VMs.
+    confidence: high
 ---
 

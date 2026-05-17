@@ -93,5 +93,34 @@ chapters:
     title: Conclusion and Next Steps
 duration: 5069
 guests: []
+resources:
+  - title: Rawkode Academy courses repository
+    url: 'https://github.com/rockwoodacademy/courses'
+    category: code
+    evidence_quote: >-
+      You can go to the Rawkode Academy GitHub page that is
+      github.com/rockwoodacademy. From there, you will see a courses repository
+      and we have a directory for the Teleport Complete Guide.
+    confidence: medium
+  - title: Teleport Linux get started guide
+    category: documentation
+    evidence_quote: >-
+      You can go to goteleport.com, click on doc docs, and we can just use the,
+      get started guide, click on Linux.
+    confidence: medium
+  - title: Teleport reference config file documentation
+    category: documentation
+    evidence_quote: >-
+      This is my favorite page in the docs. There we go. So if you're ever
+      trying to work at what you can and cannot configure, what I normally do is
+      go to set up reference config file, and this is everything the config file
+      accepts with some documentation on it.
+    confidence: high
+  - title: Teleport enhanced session recording documentation
+    category: documentation
+    evidence_quote: >-
+      So we search for enhanced session recording, this changes the way that
+      Teleport does session recording.
+    confidence: high
 ---
 

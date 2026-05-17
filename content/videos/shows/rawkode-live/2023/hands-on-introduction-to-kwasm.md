@@ -65,5 +65,12 @@ duration: 2955
 guests:
   - noel-georgi
   - philipp-strube
+resources:
+  - title: containerd Spin example
+    category: demos
+    evidence_quote: >-
+      we start, I would say, very simple example from the container d
+      repository.
+    confidence: medium
 ---
 

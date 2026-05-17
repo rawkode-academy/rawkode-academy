@@ -1,0 +1,45 @@
+{
+	"video_id": "sgekw05ckjl1lweoumx4kkp9",
+	"slug": "introduction-to-meilisearch",
+	"title": "Introduction to Meilisearch",
+	"generated_at": "2026-05-17T13:32:14.854Z",
+	"known_technology_names": [
+		"Meilisearch"
+	],
+	"known_guest_names": [
+		"Frédéric Harper",
+		"Carolina Ferreira"
+	],
+	"resources": [
+		{
+			"title": "Meilisearch documentation: Comparison to alternatives",
+			"category": "documentation",
+			"evidence_quote": "There's comparison to alternatives.",
+			"confidence": "high"
+		},
+		{
+			"title": "Meilisearch documentation: API reference settings",
+			"category": "documentation",
+			"evidence_quote": "In the API reference, there is a section called settings.",
+			"confidence": "high"
+		},
+		{
+			"title": "Meilisearch documentation: Ranking rules relevancy guide",
+			"category": "documentation",
+			"evidence_quote": "If you go into documentation and, like, the learn court I know right now it's a little bit all over the place because we we talk about different topic. But, like, if you could click on learn, I think it's a core concept relevancy and if you check ranking row.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Meilisearch documentation: Official SDK libraries",
+			"category": "documentation",
+			"evidence_quote": "But if you check on the sidebar on official's a SDK libraries on the four three links",
+			"confidence": "medium"
+		},
+		{
+			"title": "movies.json sample dataset",
+			"category": "demos",
+			"evidence_quote": "right right before the code you copy, there is a JSON file that you can download already populated for you.",
+			"confidence": "medium"
+		}
+	]
+}

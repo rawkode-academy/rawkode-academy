@@ -67,5 +67,23 @@ chapters:
 duration: 5335
 guests:
   - solomon-hykes
+resources:
+  - title: Rawkode Discord server
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: >-
+      If you want to chat with other cloud native enthusiasts, you can join us
+      on the Discord server at Rawkode.chat.
+    confidence: high
+  - title: CUE interactive playground
+    category: demos
+    evidence_quote: there is a an interactive Q playground that actually runs in WebAssembly.
+    confidence: medium
+  - title: sigstore project
+    category: code
+    evidence_quote: >-
+      Yeah. The sec store project, I think, is really exciting for that whole
+      supply chain thing right now.
+    confidence: medium
 ---
 

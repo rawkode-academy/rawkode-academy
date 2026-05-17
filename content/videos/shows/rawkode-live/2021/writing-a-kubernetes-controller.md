@@ -101,5 +101,18 @@ chapters:
 duration: 7705
 guests:
   - suhail-patel
+resources:
+  - title: Kubernetes Admission Controllers documentation
+    category: documentation
+    evidence_quote: So if you could pull up maybe the admission controllers for Kubernetes.
+    confidence: high
+  - title: Kubernetes AdmissionReview API reference
+    category: documentation
+    evidence_quote: Nope. That's the admission review. We just want that struct. Right?
+    confidence: medium
+  - title: Cloudflare CFSSL
+    category: code
+    evidence_quote: we going to use a tool called CFSSL.
+    confidence: high
 ---
 

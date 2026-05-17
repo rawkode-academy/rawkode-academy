@@ -1,0 +1,32 @@
+{
+	"video_id": "ny3894ofmg0wckadbxrcum2l",
+	"slug": "hands-on-introduction-to-cue",
+	"title": "Hands-on Introduction to CUE",
+	"generated_at": "2026-05-17T13:34:02.315Z",
+	"known_technology_names": [
+		"CUE"
+	],
+	"known_guest_names": [
+		"Marcel van Lohuizen"
+	],
+	"resources": [
+		{
+			"title": "CUE Kubernetes tutorial",
+			"category": "documentation",
+			"evidence_quote": "So we'll take a look at this Kubernetes tutorial here.",
+			"confidence": "high"
+		},
+		{
+			"title": "CUE GitHub Discussions",
+			"category": "other",
+			"evidence_quote": "GitHub discussions, there's you can ask questions there. That's our main portal for asking questions now.",
+			"confidence": "high"
+		},
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "If you wanna try Equinix Metal, then you can use the code, the raw code.",
+			"confidence": "medium"
+		}
+	]
+}

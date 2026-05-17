@@ -77,5 +77,14 @@ chapters:
 duration: 5765
 guests:
   - michael-hausenblas
+resources:
+  - title: Klustered GitLab repository
+    category: code
+    evidence_quote: there is a clustered repository on gitlab.com.
+    confidence: medium
+  - title: Justin Garrison's Ansible playbook repository for breaking the cluster
+    category: code
+    evidence_quote: Justin has a repository of an Ansible playbook that he used to break this.
+    confidence: medium
 ---
 

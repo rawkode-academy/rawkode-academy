@@ -47,5 +47,16 @@ chapters:
 guests:
   - mauro-morales
   - dimitris-karakasilis
+resources:
+  - title: SUSE Elemental Toolkit
+    category: code
+    evidence_quote: >-
+      I think there's also something related about, another project from SUSE
+      called Elemental Toolkit.
+    confidence: medium
+  - title: bootc project
+    category: code
+    evidence_quote: So there's the bootc project that's also in the CNCF.
+    confidence: medium
 ---
 

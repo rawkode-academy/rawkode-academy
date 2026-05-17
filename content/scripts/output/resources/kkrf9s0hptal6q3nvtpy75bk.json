@@ -1,0 +1,20 @@
+{
+	"video_id": "kkrf9s0hptal6q3nvtpy75bk",
+	"slug": "live-demo-of-devpod",
+	"title": "Live Demo of DevPod",
+	"generated_at": "2026-05-17T13:27:52.438Z",
+	"known_technology_names": [
+		"DevPod"
+	],
+	"known_guest_names": [
+		"Lukas Gentele"
+	],
+	"resources": [
+		{
+			"title": "Scaleway provider for DevPod",
+			"category": "code",
+			"evidence_quote": "from Pulumi has, over the weekend, apparently, created a scale way provider for for DevPod.",
+			"confidence": "medium"
+		}
+	]
+}

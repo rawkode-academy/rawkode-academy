@@ -80,5 +80,26 @@ duration: 1920
 audioFileSize: 46069483
 guests:
   - liz-rice
+resources:
+  - title: Learning eBPF
+    category: other
+    evidence_quote: 'And earlier this year, I published a book about eBPF called learning eBPF.'
+    confidence: high
+  - title: eBPF Summit
+    category: other
+    evidence_quote: >-
+      There is one thing I would like to mention, which is the upcoming eBPF
+      summit.
+    confidence: high
+  - title: Iovisor BCC tools
+    category: code
+    evidence_quote: I always do the same demos. And this is iovisor bPFCC tools demo.
+    confidence: medium
+  - title: OpenSnoop and ExecSnoop
+    category: demos
+    evidence_quote: >-
+      David mentioned the the tools and and things like OpenSnoop and ExecSnoop
+      that come from that project.
+    confidence: medium
 ---
 

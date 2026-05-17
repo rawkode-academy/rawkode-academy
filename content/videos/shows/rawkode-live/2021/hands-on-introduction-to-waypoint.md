@@ -111,5 +111,28 @@ chapters:
 duration: 4552
 guests:
   - taylor-dolezal
+resources:
+  - title: Waypoint GitOps repository
+    category: code
+    evidence_quote: >-
+      The the repository I'm gonna be working from today is on on my username. I
+      I can share these out a little bit later. My Waypoint GitOps repository.
+    confidence: medium
+  - title: EKS in Action repository
+    category: code
+    evidence_quote: >-
+      I've updated this EKS in action repository with examples for Terraform1.0
+      as well as added KMS keys
+    confidence: medium
+  - title: Waypoint architecture.md
+    category: documentation
+    evidence_quote: >-
+      definitely recommend checking out architecture.md in the root of of the
+      repository.
+    confidence: high
+  - title: Waypoint 0.6 GitHub milestone
+    category: other
+    evidence_quote: you'll see those things get added to the zero six milestone within GitHub.
+    confidence: medium
 ---
 

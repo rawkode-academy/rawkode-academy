@@ -61,5 +61,17 @@ chapters:
     title: Conclusion
 duration: 881
 guests: []
+resources:
+  - title: ngrok Kubernetes Operator
+    category: code
+    evidence_quote: Now we need to deploy the ngrok Kubernetes operator.
+    confidence: medium
+  - title: ngrok Helm Chart Repository
+    url: 'https://charts.ngrok.com'
+    category: code
+    evidence_quote: >-
+      Next up, we need to add the helm chart for the ngrok operator. This is
+      just available at charts.ngrok.com.
+    confidence: high
 ---
 

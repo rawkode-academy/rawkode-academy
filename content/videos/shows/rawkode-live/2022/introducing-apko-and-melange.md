@@ -69,5 +69,26 @@ chapters:
 duration: 4453
 guests:
   - ariadne-conill
+resources:
+  - title: Google's Distroless project
+    category: code
+    evidence_quote: >-
+      Of course, Google's Distroless project uses Bazel to build all of the base
+      images
+    confidence: high
+  - title: GNU hello world program
+    category: code
+    evidence_quote: >-
+      we have the GNU hello world program that we're going to run-in a
+      container.
+    confidence: high
+  - title: apko examples/NGINX.yaml
+    category: demos
+    evidence_quote: 'So if we look at, examples slash NGINX.YAML.'
+    confidence: medium
+  - title: melange examples/GNU hello.yaml
+    category: demos
+    evidence_quote: so that's an example slash GNU hello dot YAML.
+    confidence: medium
 ---
 

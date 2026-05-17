@@ -98,5 +98,18 @@ duration: 4306
 guests:
   - eric-smalling
   - carlos-santana
+resources:
+  - title: InfluxDB Complete Guide course
+    category: other
+    evidence_quote: >-
+      to get access to an InfluxDB Complete Guide course, which is currently in
+      flight.
+    confidence: medium
+  - title: Cloud Native TV search magic talk
+    category: other
+    evidence_quote: >-
+      If you watched the search magic on Cloud Native TV this afternoon, I
+      discussed the pending state on a pod.
+    confidence: medium
 ---
 

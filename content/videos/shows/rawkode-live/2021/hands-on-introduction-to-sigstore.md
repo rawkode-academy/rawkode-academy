@@ -85,5 +85,16 @@ chapters:
 duration: 4098
 guests:
   - dan-lorenc
+resources:
+  - title: The Update Framework
+    category: documentation
+    evidence_quote: >-
+      we followed the protocol defined by the update framework or TUF, which is
+      another graduated CNCF project.
+    confidence: high
+  - title: Verifiable supply chain metadata for Tekton
+    category: other
+    evidence_quote: Yeah. Verifiable supply chain metadata for Tekton. Exactly.
+    confidence: high
 ---
 

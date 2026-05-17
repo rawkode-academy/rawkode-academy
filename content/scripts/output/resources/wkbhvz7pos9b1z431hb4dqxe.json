@@ -1,0 +1,32 @@
+{
+	"video_id": "wkbhvz7pos9b1z431hb4dqxe",
+	"slug": "kubernetes-1-19-accentuate-the-paw-sitive-rtfm-with-rawkode",
+	"title": "Kubernetes 1.19: Accentuate the Paw-sitive (RTFM with Rawkode)",
+	"generated_at": "2026-05-17T13:36:50.493Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Taylor Dolezal"
+	],
+	"resources": [
+		{
+			"title": "kind project",
+			"category": "code",
+			"evidence_quote": "I'd absolutely recommend checking out the kind project by the fantastic Ben the elder that allows you to spin up Kubernetes in Docker, kind, k I n d.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes 1.19 release article",
+			"category": "documentation",
+			"evidence_quote": "it's pretty much the majority of this article, which is the release article that just tells you what's new.",
+			"confidence": "medium"
+		},
+		{
+			"title": "seccomp operator",
+			"category": "code",
+			"evidence_quote": "if you deploy the set comp operator, this profile is actually provided for you.",
+			"confidence": "medium"
+		}
+	]
+}

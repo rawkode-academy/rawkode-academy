@@ -106,5 +106,31 @@ chapters:
 duration: 4575
 guests:
   - stefan-prodan
+resources:
+  - title: >-
+      GitOps Toolkit development guide for building a controller with
+      Kubebuilder
+    category: documentation
+    evidence_quote: >-
+      And there is a development guide that we've published on the docs website
+      on how you can build a controller with cube builder that listens to a
+      source controller events.
+    confidence: medium
+  - title: >-
+      GitOps Toolkit Kustomization custom resource definition health assessment
+      documentation
+    category: documentation
+    evidence_quote: >-
+      If you go to toolkit components, customize controller, customization,
+      custom resource definition, and health health assessment is on your right.
+    confidence: high
+  - title: >-
+      GitOps Toolkit monitoring stack add-on with Prometheus and Grafana
+      dashboards
+    category: code
+    evidence_quote: >-
+      We have an add on for for the GitHub toolkit that's composed of Prometheus
+      and Grafana.
+    confidence: medium
 ---
 

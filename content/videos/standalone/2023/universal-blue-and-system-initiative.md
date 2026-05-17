@@ -51,5 +51,11 @@ chapters:
 duration: 1283
 guests:
   - brian-ketelsen
+resources:
+  - title: Fleek
+    url: 'https://getfleek.dev'
+    category: other
+    evidence_quote: So that's it. Get fleek dot dev.
+    confidence: high
 ---
 

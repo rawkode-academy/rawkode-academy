@@ -20,7 +20,7 @@ chapters:
   - startTime: 25
     title: Technical Difficulties and Banter
   - startTime: 61
-    title: "Guest Introduction: Mikkel Mørk Hegnhøj"
+    title: 'Guest Introduction: Mikkel Mørk Hegnhøj'
   - startTime: 120
     title: WebAssembly Evolution and Spin 3.0
   - startTime: 302
@@ -51,5 +51,17 @@ chapters:
     title: Closing Remarks and Upcoming Events
 guests:
   - mikkel-mork-hegnhoj
+resources:
+  - title: Spin OpenTelemetry plugin
+    category: code
+    evidence_quote: you could run a command called spin plugin install otel
+    confidence: medium
+  - title: Wasm I/O
+    category: other
+    evidence_quote: >-
+      Also, there's Wasserm.io just the week before, so if you rather go to
+      Barcelona Thursday, Friday, and maybe stay over the weekend, I'll
+      definitely recommend coming to Watson.io.
+    confidence: medium
 ---
 

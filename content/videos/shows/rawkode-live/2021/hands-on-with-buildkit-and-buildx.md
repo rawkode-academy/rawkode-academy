@@ -92,5 +92,27 @@ chapters:
 duration: 5436
 guests:
   - tonis-tiigi
+resources:
+  - title: 'Docker documentation: automatic platform ARGs in global scope'
+    category: documentation
+    evidence_quote: You can even click on the link to automatic platform arcs in GlobalScope.
+    confidence: high
+  - title: XX project
+    category: code
+    evidence_quote: >-
+      this XX project is, like, what I use, like, for more complicated cross
+      compilation flows.
+    confidence: high
+  - title: bin format project
+    category: code
+    evidence_quote: >-
+      If you just go back to the bin format project, I believe bin format
+      project uses uses bake
+    confidence: medium
+  - title: Rawkode.chat Discord server
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: 'Also, we have a very active Discord server available at Rawkode.chat.'
+    confidence: high
 ---
 

@@ -122,5 +122,35 @@ chapters:
 duration: 6650
 guests:
   - jurgen-etzlstorfer
+resources:
+  - title: Equinix Metal
+    url: 'https://metal.equinix.com'
+    category: other
+    evidence_quote: >-
+      If you wanna check out Equinix metal, there is a code, Rawkode dash live,
+      you can use at metal.equinix.com.
+    confidence: high
+  - title: Keptn tutorials
+    category: documentation
+    evidence_quote: 'The tutorials, I believe, is what we''re gonna get started with today.'
+    confidence: medium
+  - title: Keptn installation on k3s guide
+    category: documentation
+    evidence_quote: >-
+      We also have the guide for the captain installation on k3s if you want to
+      do that to connect it to Argo CD.
+    confidence: medium
+  - title: Sock Shop demo application
+    category: demos
+    evidence_quote: >-
+      Since we are going to onboard let's call it sock shop since we are going
+      to onboard a shopping cart.
+    confidence: medium
+  - title: Potato Head CNCF demo project
+    category: demos
+    evidence_quote: >-
+      I have a very small Go application that I'm using sometimes. It's called
+      the potato head. It's a CNCF demo project.
+    confidence: medium
 ---
 

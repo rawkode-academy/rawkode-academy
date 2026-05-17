@@ -69,5 +69,28 @@ chapters:
 duration: 4700
 guests:
   - xuanyi-chew
+resources:
+  - title: Dgraph Docker image
+    category: code
+    evidence_quote: >-
+      the only thing that we have done upfront is pull the Dgraph Docker image.
+      So that's Dgraph slash Dgraph and pull down the latest version.
+    confidence: high
+  - title: Dgraph DQL query language functions documentation
+    category: documentation
+    evidence_quote: Go to DQL. Go query language. Yeah. Functions. Ta da.
+    confidence: high
+  - title: Dgraph Discuss community forum
+    url: 'https://discuss.dgraph.io'
+    category: other
+    evidence_quote: >-
+      there's a website called discuss.dgraph.io, which is where the community
+      lives.
+    confidence: high
+  - title: Systems Conf
+    url: 'https://systemsconf.io'
+    category: other
+    evidence_quote: and systemsconf.io if you're interested in going systems programming.
+    confidence: high
 ---
 

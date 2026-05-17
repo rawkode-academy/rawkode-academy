@@ -77,5 +77,31 @@ chapters:
     title: 'Conclusion, Security Layers, and Next Steps (Process Life Cycles)'
 duration: 1256
 guests: []
+resources:
+  - title: Tetragon Tracing Policy Concepts
+    category: documentation
+    evidence_quote: >-
+      Fortunately, the documentation has us pretty well covered too. So if we go
+      to concepts, tracing policy, we can now begin to dive in to what a tracing
+      policy is composed of.
+    confidence: high
+  - title: Tetragon GitHub Examples
+    url: 'https://github.com/cilium/tetragon'
+    category: code
+    evidence_quote: >-
+      You can find us on github.com/psyllium/tetragon and then find the examples
+      folder.
+    confidence: high
+  - title: di.net Linux Man Pages
+    url: 'https://di.net'
+    category: documentation
+    evidence_quote: >-
+      You can look it up on the man page if you want or it is available on any
+      good man page website like di.net.
+    confidence: high
+  - title: Sourcegraph Linux Kernel Search
+    category: other
+    evidence_quote: You can use source graph to search the entire Linux code base.
+    confidence: high
 ---
 

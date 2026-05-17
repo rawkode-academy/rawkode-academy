@@ -122,5 +122,12 @@ guests:
   - saiyam-pathak
   - dinesh-majrekar
   - david-fogle
+resources:
+  - title: Teleport access platform
+    category: other
+    evidence_quote: >-
+      If you have a Kubernetes cluster, you should deploy it. Check it out. It's
+      great on bare metal too.
+    confidence: high
 ---
 

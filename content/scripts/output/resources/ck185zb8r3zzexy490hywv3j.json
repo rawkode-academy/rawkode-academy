@@ -1,0 +1,25 @@
+{
+	"video_id": "ck185zb8r3zzexy490hywv3j",
+	"slug": "ibm-and-nisum",
+	"title": "IBM & Nisum",
+	"generated_at": "2026-05-17T13:20:12.105Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Equinix Metal Rawkode promo link",
+			"url": "https://rawkode.live/metal",
+			"category": "other",
+			"evidence_quote": "So to say thank you to Equinix Metal and to try it for yourself, go to Rawkode.live/metal",
+			"confidence": "high"
+		},
+		{
+			"title": "Teleport Rawkode promo link",
+			"category": "other",
+			"evidence_quote": "Go to rockode.liveteleport because it keeps their sponsors happy and makes it possible to keep doing cluster.",
+			"confidence": "medium"
+		}
+	]
+}

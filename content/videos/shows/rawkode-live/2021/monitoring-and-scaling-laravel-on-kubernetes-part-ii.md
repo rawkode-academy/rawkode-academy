@@ -72,5 +72,6 @@ duration: 4580
 guests:
   - alex-bowers
   - leo-sjoberg
+resources: []
 ---
 

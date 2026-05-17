@@ -126,5 +126,29 @@ duration: 6051
 guests:
   - budha-bhattacharya
   - andy-smith
+resources:
+  - title: Tyk Getting Started guide
+    category: documentation
+    evidence_quote: >-
+      I also have access to the getting started gate available via the
+      documentation.
+    confidence: high
+  - title: Tyk Operator installation guide
+    category: documentation
+    evidence_quote: 'And there''s a link there installing Tyk operator, so let''s do that.'
+    confidence: high
+  - title: Tyk Operator httpbin sample manifest
+    category: code
+    evidence_quote: >-
+      And within there, there should be a samples directory. And then down the
+      bottom or somewhere in the middle, in fact, there's a h t t b bin dot
+      yaml.
+    confidence: high
+  - title: JSONPlaceholder users API demo endpoint
+    category: demos
+    evidence_quote: >-
+      I'm gonna be using this user information, which I've gotten from the
+      website, jasonplaceholdertykico.com.
+    confidence: medium
 ---
 

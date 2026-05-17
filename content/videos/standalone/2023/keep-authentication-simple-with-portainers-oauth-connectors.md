@@ -2,7 +2,7 @@
 id: aqzmvsr41szkg2uqg0yp2cu4
 slug: keep-authentication-simple-with-portainers-oauth-connectors
 title: Keep Authentication Simple with Portainers OAuth Connectors
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2023-03-06T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -47,5 +47,18 @@ chapters:
     title: 'What''s Next: Advanced OAuth Configuration'
 duration: 546
 guests: []
+resources:
+  - title: GitHub OAuth Apps settings
+    category: other
+    evidence_quote: >-
+      you can go to your GitHub organization where you can click settings,
+      scroll all the way down to developer and select OAuth apps.
+    confidence: medium
+  - title: Google Cloud API and Services Credentials
+    category: other
+    evidence_quote: >-
+      From Google Cloud, you're gonna want to go to API and services and
+      credentials.
+    confidence: medium
 ---
 

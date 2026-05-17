@@ -96,5 +96,22 @@ duration: 4621
 guests:
   - alex-jones
   - alistair-hey
+resources:
+  - title: Equinix Metal free credits link
+    category: other
+    evidence_quote: >-
+      There are links in the description below which will get you $200 of free
+      credits with Equinix Medal
+    confidence: high
+  - title: Teleport information link
+    category: documentation
+    evidence_quote: and some more information on Teleport. So go and click away and enjoy.
+    confidence: high
+  - title: webi.shell / web install
+    category: code
+    evidence_quote: >-
+      Web install is a really great project. If you've used it, they got sorry,
+      webby dot shell, I think it is.
+    confidence: medium
 ---
 

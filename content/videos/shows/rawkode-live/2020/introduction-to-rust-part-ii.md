@@ -118,5 +118,12 @@ chapters:
 duration: 4918
 guests:
   - manish-goregaokar
+resources:
+  - title: Equinix Metal
+    category: other
+    evidence_quote: >-
+      If you wanna check out Equinix Medal, please use the code Rawkode dash
+      live.
+    confidence: medium
 ---
 

@@ -81,5 +81,14 @@ chapters:
 duration: 3590
 guests:
   - miek-gieben
+resources:
+  - title: CoreDNS example plugin repository
+    category: code
+    evidence_quote: 'And we have an example plug in, which is on CoreDNS slash example repo,'
+    confidence: high
+  - title: Sysdig article on DNS request latency in Kubernetes
+    category: other
+    evidence_quote: Sysdig had an article yesterday on exactly that.
+    confidence: medium
 ---
 

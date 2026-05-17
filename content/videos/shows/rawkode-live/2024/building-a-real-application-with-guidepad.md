@@ -2,7 +2,7 @@
 id: lkg0k1i6xj1a738ziwwhsw0f
 slug: building-a-real-application-with-guidepad
 title: Building a Real Application with Guidepad
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2024-07-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -62,5 +62,13 @@ duration: 6263
 guests:
   - reginald-wilkerson
   - mathew-citarella
+resources:
+  - title: Guidepad demo repository
+    category: code
+    evidence_quote: >-
+      So I showed you a plug in and I didn't mention plug ins. So let me let me
+      do a quick aside on the plugin and tell you what that is. So, you can see
+      this is a a repository. Right? It's called Guidepad demo.
+    confidence: medium
 ---
 

@@ -67,5 +67,27 @@ chapters:
 duration: 3565
 guests:
   - ramiro-berrelleza
+resources:
+  - title: Okteto Quick Start Guide
+    category: documentation
+    evidence_quote: >-
+      We will be working through the quick start guide, taking a few little
+      segues as we go to look at some of the features that Okteto provides to
+      you.
+    confidence: high
+  - title: Okteto Movies sample application
+    category: demos
+    evidence_quote: Let's deploy the Okteto movies application.
+    confidence: high
+  - title: Okteto Preview Environments documentation
+    category: documentation
+    evidence_quote: If you click on the preview environments menu on the left
+    confidence: medium
+  - title: Docker samples voting app
+    category: demos
+    evidence_quote: >-
+      One one that I like to demo is if you if you go find the Docker movie, the
+      voting app.
+    confidence: medium
 ---
 

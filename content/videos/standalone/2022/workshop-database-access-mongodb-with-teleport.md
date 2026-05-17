@@ -99,5 +99,28 @@ chapters:
     title: Conclusion & Preview of Next Workshop
 duration: 2884
 guests: []
+resources:
+  - title: rawkode-academy/courses
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+    evidence_quote: >-
+      you will see that we are back with the Rawkode Academy slash courses
+      repository on github.com, where we have a directory called nine database
+      access MongoDB.
+    confidence: high
+  - title: MongoDB Atlas Documentation
+    category: documentation
+    evidence_quote: >-
+      So let's pop over to the MongoDB Atlas documentation, and we're just gonna
+      work through this.
+    confidence: high
+  - title: MongoDB Compass
+    category: other
+    evidence_quote: >-
+      I have never used MongoDB Compass before, but as you can tell by this
+      thing telling me, you did not do this from the Internet today. So let's
+      see if we can get the MongoDB Compass UI speaking to our Teleport exposed
+      secure MongoDB cluster.
+    confidence: high
 ---
 

@@ -48,5 +48,31 @@ duration: 1432
 guests:
   - catherine-paganini
   - jason-morgan
+resources:
+  - title: Cloud Native Glossary
+    category: documentation
+    evidence_quote: Link to the cloud native glossary.
+    confidence: high
+  - title: Cloud Native Maturity Model
+    category: documentation
+    evidence_quote: >-
+      the cartographers group is another group that created like the Cloud
+      Native Maturity Model
+    confidence: medium
+  - title: Linkerd Slack
+    url: 'https://slack.linkerd.io'
+    category: other
+    evidence_quote: 'I biased towards Slack, slack.linkerd.io.'
+    confidence: high
+  - title: Linkerd Getting Started Guide
+    category: documentation
+    evidence_quote: >-
+      We have a website, linkerd.io, where you can learn more. That's where all
+      our docs are. Our getting started guide, which is fantastic.
+    confidence: high
+  - title: Service Mesh Academy
+    category: demos
+    evidence_quote: And we have Service Mesh Academy.
+    confidence: high
 ---
 

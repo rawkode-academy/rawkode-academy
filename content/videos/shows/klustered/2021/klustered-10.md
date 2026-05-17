@@ -98,5 +98,15 @@ duration: 5770
 guests:
   - walid-shaari
   - noel-georgi
+resources:
+  - title: Rawkode Discord
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: join us in the Discord at Rawkode.chat.
+    confidence: high
+  - title: Equinix Metal
+    category: other
+    evidence_quote: 'I wanna thank my employer, Equinix Metal.'
+    confidence: medium
 ---
 

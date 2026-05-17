@@ -95,5 +95,16 @@ chapters:
 duration: 5208
 guests:
   - darren-shepherd
+resources:
+  - title: Acorn getting started guide
+    category: documentation
+    evidence_quote: this is actually the app from our getting started guide
+    confidence: high
+  - title: Jenkins on Acorn example
+    category: demos
+    evidence_quote: >-
+      somebody had asked me for a Jenkins, to do, what would it look like to run
+      Jenkins and Acorn.
+    confidence: medium
 ---
 

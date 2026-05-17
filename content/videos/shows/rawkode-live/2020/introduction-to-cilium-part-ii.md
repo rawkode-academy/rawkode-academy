@@ -89,5 +89,26 @@ chapters:
 duration: 4348
 guests:
   - ilya-dmitrichenko
+resources:
+  - title: Cilium Star Wars demo application
+    category: demos
+    evidence_quote: >-
+      This is a Star Wars inspired example. It has three microservices, a
+      duster, a tie fighter, and the x wing.
+    confidence: high
+  - title: Cilium 1.9 blog post
+    category: other
+    evidence_quote: >-
+      if you wanna pull up the blog, Cilium.io blog, there's the one nine blog
+      post.
+    confidence: high
+  - title: Locking Down External Access with DNS-based Policies
+    category: documentation
+    evidence_quote: document a lockdown external access with DNS based policies.
+    confidence: medium
+  - title: Kubernetes Without kube-proxy guide
+    category: documentation
+    evidence_quote: Kubernetes without Kube proxy. Let's make this work.
+    confidence: medium
 ---
 

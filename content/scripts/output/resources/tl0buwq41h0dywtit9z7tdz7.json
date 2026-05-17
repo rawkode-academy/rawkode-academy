@@ -1,0 +1,30 @@
+{
+	"video_id": "tl0buwq41h0dywtit9z7tdz7",
+	"slug": "acing-the-devops-interview",
+	"title": "Acing the DevOps Interview",
+	"generated_at": "2026-05-17T13:24:29.111Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Rohit Ghumare"
+	],
+	"resources": [
+		{
+			"title": "TechWorld with Nana YouTube channel",
+			"category": "other",
+			"evidence_quote": "there is a Nana,\nTech World with Nana.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Coursera Financial Aid",
+			"category": "other",
+			"evidence_quote": "So Coursera has the\nfinancial aid.",
+			"confidence": "medium"
+		},
+		{
+			"title": "solo.io Academy",
+			"category": "documentation",
+			"evidence_quote": "go to the solo.io\nacademy.",
+			"confidence": "medium"
+		}
+	]
+}

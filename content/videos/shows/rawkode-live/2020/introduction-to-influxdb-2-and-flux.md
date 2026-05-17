@@ -91,5 +91,22 @@ chapters:
 duration: 3834
 guests:
   - anais-dotis-georgiou
+resources:
+  - title: InfluxData Community Templates repository
+    category: code
+    evidence_quote: >-
+      There is a community templates repo and InfluxData, and there's a bunch of
+      temp we should actually test the template I just just merged yesterday.
+    confidence: high
+  - title: InfluxDB 2 operational metrics template
+    category: code
+    evidence_quote: InfluxDB two operational metrics.
+    confidence: medium
+  - title: rbx.app request bin
+    category: demos
+    evidence_quote: >-
+      There's this thing called Rbox. App which is really cool. Which just gives
+      you like an endpoint you can throw arbitrary payloads to.
+    confidence: medium
 ---
 

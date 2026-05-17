@@ -129,5 +129,21 @@ chapters:
   - startTime: 12671
     title: Conclusion / Winners Announced
 duration: 6472
+resources:
+  - title: Equinix Metal Rawkode offer page
+    url: 'https://rawkode.live/metal'
+    category: other
+    evidence_quote: Go to Rawkode.live/metal
+    confidence: high
+  - title: 'Pixie website, docs, blog, and community links'
+    url: 'https://px.dev'
+    category: documentation
+    evidence_quote: You should check out px.dev.
+    confidence: high
+  - title: Pixie Slack community invite
+    url: 'https://slackin.px.dev'
+    category: other
+    evidence_quote: I think that's slackin.px.dev.
+    confidence: high
 ---
 

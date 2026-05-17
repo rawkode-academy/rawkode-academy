@@ -34,5 +34,10 @@ chapters:
 duration: 3078
 guests:
   - dan-finneran
+resources:
+  - title: kube-vip documentation
+    category: documentation
+    evidence_quote: 'So if you go to kubevip.io actually, I can pop it here, I think.'
+    confidence: medium
 ---
 

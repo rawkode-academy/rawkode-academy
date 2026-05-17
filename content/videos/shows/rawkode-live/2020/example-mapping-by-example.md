@@ -60,5 +60,19 @@ chapters:
 duration: 6266
 guests:
   - ciaran-mcnulty
+resources:
+  - title: Rawkode/getsynced
+    url: 'https://getlab.com/Rawkode/getsynced'
+    category: code
+    evidence_quote: So it's called get synced. It's on getlab.com/Rawkode/getsynced.
+    confidence: high
+  - title: Matt Wynne's Example Mapping blog post
+    category: other
+    evidence_quote: Matt Wynn wrote about example mapping maybe five or six years ago
+    confidence: medium
+  - title: John Smart's Feature Mapping
+    category: other
+    evidence_quote: 'There''s also feature mapping, John Smart''s feature mapping'
+    confidence: medium
 ---
 

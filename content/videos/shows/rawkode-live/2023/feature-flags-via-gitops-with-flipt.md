@@ -56,5 +56,21 @@ duration: 4088
 guests:
   - mark-phelps
   - george-macrorie
+resources:
+  - title: Flipt Labs repository
+    category: code
+    evidence_quote: we created this re this repo called Fliptlabs.
+    confidence: high
+  - title: Flipt Labs chatbot demo
+    category: demos
+    evidence_quote: And so the one I'm gonna demo demonstrate is called chatbot.
+    confidence: high
+  - title: ttl.sh ephemeral registry
+    category: other
+    evidence_quote: >-
+      I'm gonna use if anyone's familiar with TTL, which is like a femoral
+      ephemeral registry, I'm gonna use that to sort of host it nice and
+      quickly.
+    confidence: medium
 ---
 

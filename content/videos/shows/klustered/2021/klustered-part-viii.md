@@ -213,5 +213,10 @@ chapters:
 duration: 5811
 guests:
   - noel-georgi
+resources:
+  - title: kubectl neat
+    category: code
+    evidence_quote: 'I have a lockout plug in, like, called qcutl neat.'
+    confidence: medium
 ---
 

@@ -92,5 +92,34 @@ duration: 3567
 guests:
   - edward-ionel
   - oss-technology-enthusiast
+resources:
+  - title: Mirantis Kubernetes cheat sheet
+    category: documentation
+    evidence_quote: >-
+      I'm immediately brought up to this Kubernetes cheat sheet, right, which is
+      which is quite powerful. And this one's built by Mirantis
+    confidence: medium
+  - title: Aqua Security Starboard extension
+    category: code
+    evidence_quote: You have the starboard extension by Aqua Security
+    confidence: high
+  - title: Lens Resource Map extension
+    category: code
+    evidence_quote: >-
+      currently, I have one extension added to this Kubernetes cluster, which is
+      the resource map
+    confidence: high
+  - title: BoardD open source technology
+    category: code
+    evidence_quote: >-
+      the open source technology, which is called BoardD. It's created by Team
+      Lens
+    confidence: medium
+  - title: Kubecost Lens extension
+    category: code
+    evidence_quote: >-
+      cube cost has a great one, which will tell you how much you're spending on
+      your Kubernetes clusters
+    confidence: medium
 ---
 

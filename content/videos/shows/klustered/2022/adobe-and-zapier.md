@@ -205,5 +205,15 @@ chapters:
   - startTime: 5303
     title: Outro
 duration: 5384
+resources:
+  - title: Equinix Metal
+    category: other
+    evidence_quote: You can also check out Equinix Medal by using the quote Rawkode.
+    confidence: medium
+  - title: Rawkode Academy t-shirt giveaway
+    url: 'https://Rawkode.live/win'
+    category: other
+    evidence_quote: 'So if you wanna win a t shirt today, go to Rawkode.live/win.'
+    confidence: high
 ---
 

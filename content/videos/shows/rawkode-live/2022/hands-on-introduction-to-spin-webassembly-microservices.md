@@ -37,5 +37,22 @@ chapters:
     title: Final Q&A and Conclusion
 duration: 2981
 guests: []
+resources:
+  - title: Fermion official co-founders interview about Spin and Nomad
+    category: other
+    evidence_quote: >-
+      the first piece of content I did with Fermion was an interview with the
+      two co founders.
+    confidence: medium
+  - title: Fermion Spin examples directory
+    category: code
+    evidence_quote: 'there''s a examples directory,'
+    confidence: medium
+  - title: Fermion Platform open source repository
+    category: code
+    evidence_quote: >-
+      You'll find the platform open source repository. You can run it yourself
+      on a EC two instance on Equinix metal or GCP, whatever you want.
+    confidence: medium
 ---
 

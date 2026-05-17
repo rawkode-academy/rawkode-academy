@@ -91,5 +91,18 @@ chapters:
 duration: 3297
 guests:
   - ben-johnson
+resources:
+  - title: Litestream Getting Started guide
+    category: documentation
+    evidence_quote: >-
+      And today, we're just gonna kinda run through the getting started guide to
+      give you all of idea of how you can start using Litestream for yourself.
+    confidence: medium
+  - title: Litestream Tips and Caveats section
+    category: documentation
+    evidence_quote: >-
+      We do have, like, a tips and caveat section inside of the Litestream
+      website that gives some tips for just running it with different settings
+    confidence: medium
 ---
 

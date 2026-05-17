@@ -219,5 +219,18 @@ chapters:
 duration: 7245
 guests:
   - jason-detiberus
+resources:
+  - title: Kubernetes kubectl bash completion documentation
+    category: documentation
+    evidence_quote: >-
+      I've got the docs. Kubernetes completion source bash. Yeah. There's the
+      docs.
+    confidence: medium
+  - title: kubeadm CoreDNS manifest source code
+    category: code
+    evidence_quote: >-
+      what I'm gonna do is I'm gonna look into the manifest code that we
+      actually deploy from Cube ATM.
+    confidence: medium
 ---
 

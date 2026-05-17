@@ -39,5 +39,35 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 3672
 guests: []
+resources:
+  - title: Rawkode Academy Courses Repository
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+    evidence_quote: >-
+      we have the new workshop pushed to the Rawkode Academy slash courses
+      repository on github.com. You will find a directory called eight
+      kubernetes with the README that we will be using for today's session.
+    confidence: high
+  - title: Artifact Hub
+    url: 'https://artifacthub.io'
+    category: other
+    evidence_quote: >-
+      The Teleport charts are not published through the Artifact Hub. If you're
+      not familiar with the Artifact Hub, there we go, Artifact Hub. This is
+      like the new Helm Hub or even a replacement or discovery mechanism
+    confidence: high
+  - title: Emissary Ingress
+    url: 'https://www.getambassador.io/products/emissary-ingress'
+    category: other
+    evidence_quote: >-
+      I'm a fan of emissaries, so I just swapped out. What that means is... we
+      have our ambassador, which is Emissary NGRIS, as a load balancer
+    confidence: high
+  - title: Kubernetes Office Hours
+    category: other
+    evidence_quote: >-
+      Carlos and I are hosting the Kubernetes office hours tomorrow. That is at
+      two p. M. GMT.
+    confidence: high
 ---
 

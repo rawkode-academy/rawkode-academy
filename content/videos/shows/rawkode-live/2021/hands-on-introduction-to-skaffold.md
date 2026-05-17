@@ -113,5 +113,20 @@ chapters:
 duration: 4124
 guests:
   - vic-iglesias
+resources:
+  - title: Skaffold microservices example
+    category: demos
+    evidence_quote: the microservices example is probably a nice representative one.
+    confidence: medium
+  - title: Skaffold React reload example
+    category: demos
+    evidence_quote: >-
+      the React reload one caught my eye, and I think that's exactly what I was
+      talking about earlier.
+    confidence: medium
+  - title: Skaffold custom test example
+    category: demos
+    evidence_quote: Custom test is the the one we recently added.
+    confidence: medium
 ---
 

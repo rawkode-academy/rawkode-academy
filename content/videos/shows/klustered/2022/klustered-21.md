@@ -89,5 +89,11 @@ chapters:
 duration: 6708
 guests:
   - william-lightning
+resources:
+  - title: Rawkode Chat
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: 'Rawkode Discord run by Carlos, Walid and others join at Rawkode.chat.'
+    confidence: high
 ---
 

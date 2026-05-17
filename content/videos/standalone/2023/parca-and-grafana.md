@@ -50,5 +50,10 @@ chapters:
     title: Conclusion and Next Steps
 duration: 561
 guests: []
+resources:
+  - title: Grafana Parca plugin
+    category: other
+    evidence_quote: Add the Parca plugin to your Grafana.
+    confidence: high
 ---
 

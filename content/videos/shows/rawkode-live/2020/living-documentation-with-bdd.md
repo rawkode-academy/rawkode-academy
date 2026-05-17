@@ -2,7 +2,7 @@
 id: xtay8a6iyr4u6ow9kc6iojpe
 slug: living-documentation-with-bdd
 title: Living Documentation with BDD
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2020-12-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -46,5 +46,12 @@ chapters:
 duration: 5010
 guests:
   - ciaran-mcnulty
+resources:
+  - title: git sync Rust library
+    category: code
+    evidence_quote: >-
+      I have been building out or, you know, failing to build out, but being
+      guided by Kieran, a get library called get sync, retina rust
+    confidence: medium
 ---
 

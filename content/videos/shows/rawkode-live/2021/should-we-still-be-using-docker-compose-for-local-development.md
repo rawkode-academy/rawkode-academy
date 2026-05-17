@@ -88,5 +88,23 @@ chapters:
 duration: 6114
 guests:
   - bret-fisher
+resources:
+  - title: Compose CLI repository
+    category: code
+    evidence_quote: 'The new one is Compose CLI, so Compose dash CLI.'
+    confidence: high
+  - title: Podman Compose project
+    category: code
+    evidence_quote: there is a Podman Compose. Feel free to check out that project.
+    confidence: medium
+  - title: Bret Fisher shell setup page
+    url: 'https://brettfisher.com/shell'
+    category: documentation
+    evidence_quote: I'm gonna put in the chat brettfisher.com/shell.
+    confidence: high
+  - title: SpaceVim editor distribution
+    category: code
+    evidence_quote: 'look up SpaceVim, which is kinda like a Vim installer packager manager.'
+    confidence: medium
 ---
 

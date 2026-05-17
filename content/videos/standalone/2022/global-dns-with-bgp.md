@@ -112,5 +112,41 @@ chapters:
     title: Conclusion and Outro
 duration: 3555
 guests: []
+resources:
+  - title: Rawkode Academy Courses
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+    evidence_quote: >-
+      There is a repository there called courses. You will find the global reach
+      BGP directory here. This is today's session with the README and some
+      Pulumi automation
+    confidence: high
+  - title: Equinix Metal
+    url: 'https://rawkode.link/metal'
+    category: other
+    evidence_quote: >-
+      If you wanna work along and do this on your own, there's a link below,
+      rawkode.linkmetal. This will take you to the Equinix Medal homepage
+    confidence: high
+  - title: PacketHost Network Helpers
+    url: 'https://github.com/packethost/network-helpers'
+    category: code
+    evidence_quote: >-
+      The network helpers available at github.com/packethost/network-helpers do
+      everything for you. They speak to the metadata API to pull out all the
+      peer information to configure BERT.
+    confidence: high
+  - title: CoreDNS Plugins Documentation
+    category: documentation
+    evidence_quote: >-
+      So if you come here to core dns. Go to plugins. Well, we got here, we've
+      got ACLs... there's a cache one here.
+    confidence: high
+  - title: BIRD Internet Routing Daemon
+    category: other
+    evidence_quote: >-
+      BERT is a BGP advertiser. BERT BGP. Here. So it's just open source
+      software that anyone can use.
+    confidence: medium
 ---
 

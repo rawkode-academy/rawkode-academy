@@ -132,5 +132,11 @@ guests:
   - christopher-hansen
   - ron-petty
   - hitesh-sharma
+resources:
+  - title: Equinix Metal
+    url: 'https://metal.equinix.com'
+    category: other
+    evidence_quote: 'If you want to try it bare metal cloud, you go to metal.equinix.com.'
+    confidence: high
 ---
 

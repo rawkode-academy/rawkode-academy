@@ -129,5 +129,31 @@ chapters:
 duration: 4030
 guests:
   - kevin-hoffman
+resources:
+  - title: Programming WebAssembly with Rust
+    category: other
+    evidence_quote: >-
+      if anyone is curious about the actual book that Kevin has written, it is
+      on the pragmatic bookshelf available here.
+    confidence: high
+  - title: WebAssembly Binary Toolkit
+    category: code
+    evidence_quote: 'there''s a toolkit, pronounced Webit or the WebAssembly binary toolkit.'
+    confidence: high
+  - title: WASC new actor template
+    category: code
+    evidence_quote: 'the the repo is called new actor template, new dash actor dash template.'
+    confidence: high
+  - title: WASC new provider template
+    category: code
+    evidence_quote: >-
+      There's a template to build a capability provider. So you can essentially
+      cargo generate yourself a custom one, and and you'll get it's I think it's
+      called new provider template.
+    confidence: high
+  - title: waSCC demo YouTube playlist
+    category: demos
+    evidence_quote: Let me see if I can get a link to the playlist.
+    confidence: medium
 ---
 

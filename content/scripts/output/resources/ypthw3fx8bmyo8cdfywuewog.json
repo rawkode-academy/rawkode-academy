@@ -1,0 +1,40 @@
+{
+	"video_id": "ypthw3fx8bmyo8cdfywuewog",
+	"slug": "server-side-webassembly",
+	"title": "Server-Side WebAssembly",
+	"generated_at": "2026-05-17T13:23:53.310Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Kate Goldenring",
+		"Connor Hicks",
+		"Kevin Hoffman"
+	],
+	"resources": [
+		{
+			"title": "WasmCloud open source project",
+			"category": "code",
+			"evidence_quote": "Created the WasmCloud open source project,",
+			"confidence": "high"
+		},
+		{
+			"title": "Programming WebAssembly with Rust",
+			"category": "other",
+			"evidence_quote": "wrote a book called programming web assembly with Rust,",
+			"confidence": "high"
+		},
+		{
+			"title": "Fermion",
+			"url": "https://fermion.com",
+			"category": "other",
+			"evidence_quote": "if you're curious about Fermion and on how it does serverless web assembly, that's simply fermion.com.",
+			"confidence": "high"
+		},
+		{
+			"title": "Suborbital",
+			"url": "https://suborbital.dev",
+			"category": "other",
+			"evidence_quote": "you can check all of that out at suborbital.dev.",
+			"confidence": "high"
+		}
+	]
+}

@@ -41,5 +41,16 @@ chapters:
     title: Conclusion
 duration: 539
 guests: []
+resources:
+  - title: InfluxData InfluxDB 2 Helm Chart
+    category: code
+    evidence_quote: 'Then the chart that we wish to install, InfluxData/InfluxDB2.'
+    confidence: high
+  - title: Course Materials Installation Guide
+    category: documentation
+    evidence_quote: >-
+      In the course materials, you will find a README.Md inside of the to dash
+      installing InfluxDB directory.
+    confidence: high
 ---
 

@@ -1,0 +1,18 @@
+{
+	"video_id": "s1mnje3g7rel848ryv470bix",
+	"slug": "hands-on-with-cyhernetes",
+	"title": "Hands-on with Cyhernetes",
+	"generated_at": "2026-05-17T13:26:23.903Z",
+	"known_technology_names": [],
+	"known_guest_names": [
+		"Avital Tamir"
+	],
+	"resources": [
+		{
+			"title": "Cyphernetes Operator",
+			"category": "code",
+			"evidence_quote": "The operator also exists on artifact hub, of course.",
+			"confidence": "medium"
+		}
+	]
+}

@@ -53,5 +53,25 @@ chapters:
 duration: 5435
 guests:
   - sebastian-tiedtke
+resources:
+  - title: Runme Getting Started page
+    category: documentation
+    evidence_quote: We're gonna go to the getting started page.
+    confidence: high
+  - title: Stateful
+    url: 'https://stateful.com'
+    category: other
+    evidence_quote: 'You can go on stateful.com, sign up for it, try it out.'
+    confidence: high
+  - title: Runme integrations documentation
+    category: documentation
+    evidence_quote: >-
+      Yeah. There is an integration section. So I think cloud renderers, AWS,
+      Cloud Run, Cloud Platform.
+    confidence: medium
+  - title: Dagger integration documentation
+    category: documentation
+    evidence_quote: 'For example, Dagger is in here too.'
+    confidence: medium
 ---
 

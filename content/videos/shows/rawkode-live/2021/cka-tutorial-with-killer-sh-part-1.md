@@ -58,5 +58,15 @@ chapters:
     title: Conclusion & Outro
 duration: 3728
 guests: []
+resources:
+  - title: Killer.sh CKA Exam Simulator
+    url: 'https://killer.sh'
+    category: demos
+    evidence_quote: So what is this simulator? This is Keller. Sh.
+    confidence: high
+  - title: Kubernetes nodeSelector documentation
+    category: documentation
+    evidence_quote: 'Alright, we are gonna use Kubernetes docs. Node selector.'
+    confidence: medium
 ---
 

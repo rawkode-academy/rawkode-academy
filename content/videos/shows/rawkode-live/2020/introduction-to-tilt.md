@@ -60,5 +60,28 @@ duration: 4185
 guests:
   - dan-bentley
   - ellen-korbes
+resources:
+  - title: 'Tilt tutorial: The First Fifteen Minutes'
+    category: documentation
+    evidence_quote: 'there''s a tutorial, the first fifteen minutes.'
+    confidence: high
+  - title: 'Tilt guide: Faster Development with Live Update'
+    category: documentation
+    evidence_quote: the first one is faster development with live update.
+    confidence: high
+  - title: Tilt Helm Remote README
+    category: documentation
+    evidence_quote: 'see the Helm remote read me just a bit below your mouse,'
+    confidence: medium
+  - title: 'Tilt API Reference: kustomize function'
+    category: documentation
+    evidence_quote: >-
+      Tilt to API reference. There should be a customized function in there
+      somewhere.
+    confidence: medium
+  - title: Tilt Extensions repository
+    category: code
+    evidence_quote: We have a we have a tilt extensions repo.
+    confidence: medium
 ---
 

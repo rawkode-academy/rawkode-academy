@@ -49,5 +49,34 @@ chapters:
     title: Microsoft's Engagement with Open Source
 duration: 5350
 guests: []
+resources:
+  - title: Fedora Silverblue
+    category: other
+    evidence_quote: >-
+      I am trying for Dora Silverblue right now, and I'm gonna kinda try and
+      explain why.
+    confidence: high
+  - title: Universal Blue (uBlue)
+    category: code
+    evidence_quote: >-
+      He works on the uBlue project, which is, like, trying to make it silver
+      Silver Blue more developer friendly
+    confidence: high
+  - title: Microsoft PowerToys
+    category: code
+    evidence_quote: >-
+      I set up this is this is PowerToys, PowerRun. This is how I run most
+      everything
+    confidence: high
+  - title: UniGet Package Manager
+    category: code
+    evidence_quote: >-
+      I use this this program called UniGet. So when it comes to Windows, the
+      only way I install anything in Windows is through UniGet.
+    confidence: high
+  - title: Dev Home
+    category: code
+    evidence_quote: Dev Home is a all in one tool for getting started developing on Windows.
+    confidence: high
 ---
 

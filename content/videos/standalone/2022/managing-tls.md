@@ -48,5 +48,13 @@ chapters:
     title: Conclusion
 duration: 921
 guests: []
+resources:
+  - title: Portainer in Production GitHub Repository
+    url: 'https://github.com/rawcodeacademy/portainer-in-production'
+    category: code
+    evidence_quote: >-
+      The code is available at
+      github.com/rawcodeacademy/portainer-in-production.
+    confidence: high
 ---
 

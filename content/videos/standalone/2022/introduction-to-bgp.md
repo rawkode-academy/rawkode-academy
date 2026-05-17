@@ -98,5 +98,30 @@ chapters:
 duration: 3299
 guests:
   - jeremy-tanner
+resources:
+  - title: WonderNetwork Global Latency Statistics
+    url: 'https://wondernetwork.com'
+    category: other
+    evidence_quote: >-
+      These figures I got from wonder network, which is a really cool website I
+      wasn't familiar with, But you can actually add all your own cities, which
+      I thought was nice.
+    confidence: high
+  - title: Locoping
+    url: 'https://locoping.com'
+    category: other
+    evidence_quote: >-
+      There's a website listed here too after we get past all this stuff called
+      loco ping. ... we can also use local ping, which will show gives us a web
+      interface to trace route as well.
+    confidence: medium
+  - title: Simple Wikipedia (BGP)
+    url: 'https://simple.wikipedia.org/wiki/Border_Gateway_Protocol'
+    category: documentation
+    evidence_quote: >-
+      Are you aware of Wikipedia Simple? ... you can swap out the language, e n,
+      for simple. And usually... you get a very simplified definition of the
+      thing that you're looking at.
+    confidence: high
 ---
 

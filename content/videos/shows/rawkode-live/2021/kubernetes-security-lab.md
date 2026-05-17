@@ -157,5 +157,30 @@ chapters:
 duration: 5064
 guests:
   - rory-mccune
+resources:
+  - title: kind (Kubernetes in Docker)
+    category: code
+    evidence_quote: >-
+      Kind is awesome. If you don't have anything with security, take that
+      because kind makes this work.
+    confidence: high
+  - title: CIS Benchmarks
+    category: documentation
+    evidence_quote: >-
+      working with CIS benchmarks, which if you do not come across, well worth
+      looking at.
+    confidence: medium
+  - title: Kube Hunter
+    category: code
+    evidence_quote: >-
+      these tools, like, Kube Hunter and some other tools, which will, like,
+      probe these.
+    confidence: medium
+  - title: CyberArk kubeletctl
+    category: code
+    evidence_quote: >-
+      There's also CyberArk. I've got a tool called Kubelet Cuddle, which will
+      automate that process.
+    confidence: medium
 ---
 

@@ -73,5 +73,34 @@ chapters:
     title: A Cli Command To Check the Version of the Client and Server
 duration: 3954
 guests: []
+resources:
+  - title: rawcodeacademy/courses GitHub repository
+    url: 'https://github.com/rawcodeacademy/courses'
+    category: code
+    evidence_quote: >-
+      If this is your first workshop, you can find all of these courses at
+      github.com/rawcodeacademy/courses.
+    confidence: high
+  - title: Teleport configuration file reference
+    category: documentation
+    evidence_quote: >-
+      My favorite page is reference. Go here, click and config fail. Everything
+      you can turn on is commented and documented on this file.
+    confidence: medium
+  - title: jwt.io JWT debugger
+    url: 'https://jwt.io/'
+    category: other
+    evidence_quote: >-
+      We're gonna go to jwt.io. This is like the de facto say if you're ever
+      doing JWT stuff and you just be able to debug why it's not working, just
+      go here because it has this thing where you paste it in
+    confidence: high
+  - title: get.docker.io Docker install script
+    url: 'https://get.docker.io/'
+    category: code
+    evidence_quote: >-
+      Now, whenever I need to install Docker, I go to get. Docker.io and I grab
+      this.
+    confidence: high
 ---
 

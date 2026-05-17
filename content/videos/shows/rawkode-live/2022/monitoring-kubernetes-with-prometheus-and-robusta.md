@@ -49,5 +49,25 @@ chapters:
 duration: 4716
 guests:
   - natan-yellin
+resources:
+  - title: Kube Watch
+    category: code
+    evidence_quote: >-
+      we took over Kube Watch as the official maintainers, and we'll be
+      announcing very soon Kube Watch version two.
+    confidence: medium
+  - title: Robusta custom automation tutorial
+    category: documentation
+    evidence_quote: >-
+      there's a tutorial there on the left that says custom automation. And that
+      tutorial shows you how to write your own playbook and to load into
+      Robusta.
+    confidence: medium
+  - title: Robusta Stack Overflow enricher source code
+    category: code
+    evidence_quote: >-
+      The source code for this, can you drop in the source code for the Stack
+      Overflow one so people know what they can go and copy?
+    confidence: medium
 ---
 

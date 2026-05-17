@@ -88,5 +88,23 @@ duration: 5734
 guests:
   - borko-djurkovic
   - matt-turner
+resources:
+  - title: Teleport clustered sponsor link
+    url: 'https://rawkode.live/teleport'
+    category: other
+    evidence_quote: >-
+      So if you want to support Clustard and Rockwood Live, check out
+      Rawkode.live/teleport.
+    confidence: high
+  - title: commandnotfound.com
+    url: 'https://commandnotfound.com'
+    category: other
+    evidence_quote: 'There''s commandnotfound.com, which is really useful.'
+    confidence: high
+  - title: Rawkode Discord
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: The Discord is available at Rawkode.chat.
+    confidence: medium
 ---
 

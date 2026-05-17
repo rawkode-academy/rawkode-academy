@@ -115,5 +115,10 @@ chapters:
 duration: 7085
 guests:
   - dan-finneran
+resources:
+  - title: Hubble UI
+    category: demos
+    evidence_quote: Jason is telling us to use the Hubble UI.
+    confidence: medium
 ---
 

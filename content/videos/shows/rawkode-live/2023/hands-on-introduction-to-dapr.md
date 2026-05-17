@@ -2,7 +2,7 @@
 id: jmjdponjje5ueukwqlprmcbq
 slug: hands-on-introduction-to-dapr
 title: Hands-on Introduction to Dapr
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2023-12-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -89,5 +89,31 @@ chapters:
 duration: 4632
 guests:
   - mark-fussell
+resources:
+  - title: Platform Engineering on Kubernetes
+    category: other
+    evidence_quote: |-
+      now
+      it's titled platform engineering on Kubernetes,
+    confidence: high
+  - title: Dapr State Management JavaScript Quickstart
+    category: documentation
+    evidence_quote: |-
+      And then we're just gonna do Dapr
+      run.
+    confidence: medium
+  - title: Dapr Outbox Pattern Documentation
+    category: documentation
+    evidence_quote: |-
+      we need to take a look
+      for the, like, out outbox pattern.
+    confidence: medium
+  - title: Dapr State Stores Component Reference
+    category: documentation
+    evidence_quote: |-
+      component
+      reference,
+      <v Speaker 1>state stores,
+    confidence: high
 ---
 

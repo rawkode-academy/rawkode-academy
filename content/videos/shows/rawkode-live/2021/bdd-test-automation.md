@@ -60,5 +60,6 @@ chapters:
 duration: 5375
 guests:
   - ciaran-mcnulty
+resources: []
 ---
 

@@ -75,5 +75,12 @@ chapters:
 duration: 5967
 guests:
   - hugo-santos
+resources:
+  - title: Cash App Hermit
+    category: code
+    evidence_quote: |-
+      Cash App has
+      something that over open source called Hermit
+    confidence: medium
 ---
 

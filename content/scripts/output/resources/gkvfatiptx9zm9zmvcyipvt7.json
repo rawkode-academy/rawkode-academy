@@ -1,0 +1,28 @@
+{
+	"video_id": "gkvfatiptx9zm9zmvcyipvt7",
+	"slug": "klustered-10",
+	"title": "Klustered #10",
+	"generated_at": "2026-05-17T13:22:01.540Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Walid Shaari",
+		"Noel Georgi"
+	],
+	"resources": [
+		{
+			"title": "Rawkode Discord",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "join us in the Discord at Rawkode.chat.",
+			"confidence": "high"
+		},
+		{
+			"title": "Equinix Metal",
+			"category": "other",
+			"evidence_quote": "I wanna thank my employer, Equinix Metal.",
+			"confidence": "medium"
+		}
+	]
+}

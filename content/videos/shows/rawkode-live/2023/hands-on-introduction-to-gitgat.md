@@ -105,5 +105,12 @@ chapters:
 duration: 4281
 guests:
   - barak-brudo
+resources:
+  - title: 'Linux Foundation LFS122x: GitHub Supply Chain Security using GitGat'
+    category: documentation
+    evidence_quote: >-
+      So Linux Foundation one two two x is the name of the course or, you know,
+      their name for it. It's GitHub Supply Chain Security using GitGap.
+    confidence: high
 ---
 

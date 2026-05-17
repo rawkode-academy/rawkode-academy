@@ -1,0 +1,21 @@
+{
+	"video_id": "xls03x1eryvd5y7lpzbwgblt",
+	"slug": "introduction-to-grafana",
+	"title": "Introduction to Grafana",
+	"generated_at": "2026-05-17T13:34:48.511Z",
+	"known_technology_names": [
+		"Grafana"
+	],
+	"known_guest_names": [
+		"Marcus Olsson"
+	],
+	"resources": [
+		{
+			"title": "Equinix Metal",
+			"url": "https://metal.equinix.com",
+			"category": "other",
+			"evidence_quote": "You can sign up today at metal.equinix.com.",
+			"confidence": "medium"
+		}
+	]
+}

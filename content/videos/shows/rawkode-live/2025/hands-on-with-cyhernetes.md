@@ -16,5 +16,10 @@ show: rawkode-live
 duration: 4057
 guests:
   - avital-tamir
+resources:
+  - title: Cyphernetes Operator
+    category: code
+    evidence_quote: 'The operator also exists on artifact hub, of course.'
+    confidence: medium
 ---
 

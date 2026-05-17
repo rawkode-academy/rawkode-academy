@@ -89,5 +89,19 @@ chapters:
   - startTime: 6114
     title: Conclusion & Wrap-up
 duration: 6269
+resources:
+  - title: Teleport
+    url: 'https://rawkode.live/teleport'
+    category: other
+    evidence_quote: Check it out at Rawkode.live/teleport.
+    confidence: high
+  - title: Networking and Kubernetes
+    category: other
+    evidence_quote: I am the author of Networking and Kubernetes.
+    confidence: high
+  - title: Sleuth Kit
+    category: other
+    evidence_quote: 'So, yeah, Sleuth Kit, old school forensics tool.'
+    confidence: medium
 ---
 

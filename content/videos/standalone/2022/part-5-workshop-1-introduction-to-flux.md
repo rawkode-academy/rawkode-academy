@@ -2,7 +2,7 @@
 id: o1184zljah5ebqa0sj8h0i43
 slug: part-5-workshop-1-introduction-to-flux
 title: 'Part 5 - Workshop 1: Introduction to Flux'
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -93,5 +93,25 @@ chapters:
     title: Conclusion and Next Steps
 duration: 3473
 guests: []
+resources:
+  - title: Rawkode Academy Courses Repository
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+    evidence_quote: >-
+      You can find the resources for this course at github dot com slash rockode
+      academy. I have started adding the materials to the courses repository.
+    confidence: high
+  - title: Flux VS Code Extension
+    category: other
+    evidence_quote: >-
+      you'll see that there is this Versus code extension from InfluxData. You
+      can add connections... local host.
+    confidence: high
+  - title: Rawkode Academy Discord
+    category: other
+    evidence_quote: >-
+      Use the Discord to ask for help. Use the comments to ask for help. I'm
+      here.
+    confidence: high
 ---
 

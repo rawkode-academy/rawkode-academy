@@ -18,5 +18,20 @@ guests:
   - jiaxiao-zhou
   - josh-duffney
   - yosh-wuyts
+resources:
+  - title: GitHub MCP registry
+    category: other
+    evidence_quote: Yeah. Just yesterday. Yeah. Added github.com/mcp.
+    confidence: medium
+  - title: awesome WASM components repository
+    category: code
+    evidence_quote: >-
+      I created a repo last week called awesome WASM components. If you look for
+      it on GitHub, you should find it.
+    confidence: high
+  - title: QR code generator component
+    category: demos
+    evidence_quote: I think I think it's created by Brian. It's called QR code generator.
+    confidence: medium
 ---
 

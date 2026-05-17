@@ -1,0 +1,25 @@
+{
+	"video_id": "jpgna191w3vhmazhx8q5gypb",
+	"slug": "klustered-teams-container-solutions-and-civo-cloud",
+	"title": "Klustered Teams: Container Solutions & Civo Cloud",
+	"generated_at": "2026-05-17T13:21:18.875Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Adrian Mouat",
+		"Charlotte Mach",
+		"Ricardo Torres da Costa",
+		"Saiyam Pathak",
+		"Dinesh Majrekar",
+		"David Fogle"
+	],
+	"resources": [
+		{
+			"title": "Teleport access platform",
+			"category": "other",
+			"evidence_quote": "If you have a Kubernetes cluster, you should deploy it. Check it out. It's great on bare metal too.",
+			"confidence": "high"
+		}
+	]
+}

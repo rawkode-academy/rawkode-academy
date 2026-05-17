@@ -1,0 +1,26 @@
+{
+	"video_id": "q6rdfil6z5qc6sx4jvomp320",
+	"slug": "hands-on-introduction-to-sigstore",
+	"title": "Hands-on Introduction to sigstore",
+	"generated_at": "2026-05-17T13:28:33.019Z",
+	"known_technology_names": [
+		"sigstore"
+	],
+	"known_guest_names": [
+		"Dan Lorenc"
+	],
+	"resources": [
+		{
+			"title": "The Update Framework",
+			"category": "documentation",
+			"evidence_quote": "we followed the protocol defined by the update framework or TUF, which is another graduated CNCF project.",
+			"confidence": "high"
+		},
+		{
+			"title": "Verifiable supply chain metadata for Tekton",
+			"category": "other",
+			"evidence_quote": "Yeah. Verifiable supply chain metadata for Tekton. Exactly.",
+			"confidence": "high"
+		}
+	]
+}

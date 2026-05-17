@@ -52,5 +52,31 @@ chapters:
     title: Conclusion
 duration: 1304
 guests: []
+resources:
+  - title: Kubescape GitHub Action
+    url: 'https://github.com/kubescape/github-action'
+    category: code
+    evidence_quote: There's now a GitHub action that automates this entire process for you.
+    confidence: high
+  - title: Google Microservices Demo
+    url: 'https://github.com/GoogleCloudPlatform/microservices-demo'
+    category: demos
+    evidence_quote: 'in this directory, we have the Google microservice demo'
+    confidence: high
+  - title: Weaveworks Sock Shop
+    url: 'https://github.com/microservices-demo/microservices-demo'
+    category: demos
+    evidence_quote: and the Weaveworks Sockshop demo
+    confidence: high
+  - title: NSA/CISA Kubernetes Hardening Guidance
+    category: documentation
+    evidence_quote: >-
+      However, we can say we want to scan, get the NSA framework in this
+      directory.
+    confidence: high
+  - title: Klustered Automation Repository
+    category: code
+    evidence_quote: So here I am in the GitHub repository for the clustered automation.
+    confidence: medium
 ---
 

@@ -204,5 +204,14 @@ guests:
   - rachel-leekin
   - andy-holtzmann
   - software-math-guy
+resources:
+  - title: Rawkode Academy Discord server
+    category: other
+    evidence_quote: you can join us on the Discord server available at Rawkode.chat.
+    confidence: medium
+  - title: Teleport sponsor link
+    category: other
+    evidence_quote: Please check out Rawkode.liveteleport
+    confidence: medium
 ---
 

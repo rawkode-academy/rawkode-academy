@@ -19,5 +19,38 @@ duration: 5369
 guests:
   - mauro-morales
   - ettore-giacinto
+resources:
+  - title: Kairos website
+    url: 'https://kairos.io'
+    category: documentation
+    evidence_quote: 'So for anyone who wants to learn more, you can go to kairos.io.'
+    confidence: high
+  - title: Kairos Quick Start Guide
+    category: documentation
+    evidence_quote: >-
+      And there is a quick start guide, which on Rawkode Live is my favorite
+      button because that's where we wanna show how to get started with the
+      project.
+    confidence: high
+  - title: Aurora Boot documentation
+    category: documentation
+    evidence_quote: >-
+      there is the Aurora boot two that you can point the image like this one,
+      and it will create an ISO out from this.
+    confidence: medium
+  - title: Kairos community bundles repository
+    category: code
+    evidence_quote: >-
+      And we have a community bundles repository where community can contribute
+      new bundles,
+    confidence: high
+  - title: >-
+      Lennart Poettering article about fitting systemd technologies into an
+      ideal Linux distribution
+    category: other
+    evidence_quote: >-
+      you know, Leonard Potter rings article that he wrote many years now, but
+      fitting all of this together to build, like, the ideal Linux distribution.
+    confidence: medium
 ---
 

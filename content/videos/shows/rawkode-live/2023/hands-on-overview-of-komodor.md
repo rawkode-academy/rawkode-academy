@@ -52,5 +52,10 @@ chapters:
     title: Conclusion
 duration: 1579
 guests: []
+resources:
+  - title: Advanced scheduling video
+    category: demos
+    evidence_quote: So thank you Komodor for sponsoring the advanced scheduling video.
+    confidence: medium
 ---
 

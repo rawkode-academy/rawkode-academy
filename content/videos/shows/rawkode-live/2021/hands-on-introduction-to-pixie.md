@@ -95,5 +95,34 @@ chapters:
 duration: 4066
 guests:
   - natalie-serrino
+resources:
+  - title: Pixie supported protocols documentation
+    category: documentation
+    evidence_quote: >-
+      And we have a list on our doc page, but I can just rattle off some
+      examples.
+    confidence: medium
+  - title: Pixie Grafana data source plugin
+    category: code
+    evidence_quote: So we do have a Grafana plugin that's available and open source.
+    confidence: high
+  - title: Pixie Slack alert tutorial
+    category: documentation
+    evidence_quote: >-
+      we have a tutorial to set up a Slack bot that can ping you with results
+      of, you know, pixel scripts.
+    confidence: high
+  - title: PixieScript operators reference documentation
+    category: documentation
+    evidence_quote: >-
+      So in operators, for example, you can click on ag and then see, you know,
+      that's what we did.
+    confidence: medium
+  - title: Pixie Socks Shop demo
+    category: demos
+    evidence_quote: >-
+      That's deploying the Pixie Socks shop demo. I guess that's a micro service
+      thing.
+    confidence: medium
 ---
 

@@ -39,5 +39,28 @@ chapters:
 duration: 3822
 guests:
   - laszlo-fogas
+resources:
+  - title: Gimlet k3d guide
+    category: documentation
+    evidence_quote: 'Usually, this is how you launch a cluster in our k three d guide.'
+    confidence: high
+  - title: Gimlet OneChart Helm chart
+    category: code
+    evidence_quote: >-
+      Basically, it's using a hand chart called one chart. This is our general
+      purpose web application
+    confidence: high
+  - title: Gimlet GitHub Action
+    category: code
+    evidence_quote: >-
+      there is a Gimlet, GitHub action, which would speak or talk back to Gimlet
+      like, hey. There's a new version.
+    confidence: medium
+  - title: Gimlet YAML generator
+    category: other
+    evidence_quote: >-
+      we have a YAML generator, which is basically the Helm chart and the the
+      screen that you've seen. You can use this online as well.
+    confidence: high
 ---
 

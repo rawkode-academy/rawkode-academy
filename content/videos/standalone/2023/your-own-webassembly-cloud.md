@@ -42,5 +42,21 @@ chapters:
     title: Conclusion
 duration: 1251
 guests: []
+resources:
+  - title: github.com/fermion/installer
+    url: 'https://github.com/fermion/installer'
+    category: code
+    evidence_quote: >-
+      And you can go to github.com/fermion/installer, where you will find
+      Terraform automation to run your own little fermion cloud on Amazon,
+      Azure, Civo, Digital Ocean, GCP, and come in soon, and you'll see the demo
+      on Tuesday, Equinix Medal.
+    confidence: high
+  - title: Spin 0.8 video
+    category: other
+    evidence_quote: >-
+      Why? Well, go check out the Spin watch new 0.8 video that I released last
+      week.
+    confidence: medium
 ---
 

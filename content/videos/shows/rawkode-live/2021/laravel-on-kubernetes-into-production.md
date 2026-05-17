@@ -92,5 +92,34 @@ chapters:
 duration: 5259
 guests:
   - alex-bowers
+resources:
+  - title: Alex Bowers Laravel example project
+    category: code
+    evidence_quote: >-
+      So it's on gethub.com username Alex bevers slash Laravel dash example dash
+      project.
+    confidence: high
+  - title: Artifact Hub MariaDB Helm chart
+    category: other
+    evidence_quote: >-
+      There's a helm chart says the artifact hub. Let's talk about that
+      actually.
+    confidence: medium
+  - title: Mozilla SOPS
+    category: code
+    evidence_quote: 'For production use cases you would use like SOPs, Fry Mozilla,'
+    confidence: high
+  - title: Sealed Secrets
+    category: code
+    evidence_quote: >-
+      Sealed secrets does the same. It stores a private key inside of your
+      Kubernetes cluster.
+    confidence: high
+  - title: Kapitan project
+    category: code
+    evidence_quote: >-
+      and then finally there's the Kapitan project which does secret management
+      and hooks up to all the key messes and vault.
+    confidence: high
 ---
 

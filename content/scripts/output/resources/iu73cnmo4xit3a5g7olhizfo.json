@@ -1,0 +1,20 @@
+{
+	"video_id": "iu73cnmo4xit3a5g7olhizfo",
+	"slug": "hands-on-introduction-to-kamaji",
+	"title": "Hands-on Introduction to Kamaji",
+	"generated_at": "2026-05-17T13:24:48.316Z",
+	"known_technology_names": [
+		"Kamaji"
+	],
+	"known_guest_names": [
+		"Adriano Pezzuto"
+	],
+	"resources": [
+		{
+			"title": "Clastix Capsule",
+			"category": "code",
+			"evidence_quote": "We started with Captule because we noticed that there is a missing gap in Kubernetes ecosystem, especially regarding the multi tenancy.",
+			"confidence": "medium"
+		}
+	]
+}

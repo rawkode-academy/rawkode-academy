@@ -19,5 +19,28 @@ show: rawkode-live
 duration: 5700
 guests:
   - yi-zha
+resources:
+  - title: Notary Project
+    category: code
+    evidence_quote: 'Those projects are Notary, OraS, and Ratify.'
+    confidence: high
+  - title: ORAS Project
+    category: code
+    evidence_quote: 'Those projects are Notary, OraS, and Ratify.'
+    confidence: high
+  - title: Ratify Project
+    category: code
+    evidence_quote: 'Those projects are Notary, OraS, and Ratify.'
+    confidence: high
+  - title: Notation CLI
+    category: code
+    evidence_quote: >-
+      I already downloaded Noteproject tool Notation, which is the CLI tool for
+      sign and verify content images and other artifacts.
+    confidence: high
+  - title: Notary Project specification
+    category: documentation
+    evidence_quote: 'but, you can check out, those values in Notreeable Project specification.'
+    confidence: medium
 ---
 

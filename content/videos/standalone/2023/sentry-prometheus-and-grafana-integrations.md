@@ -35,5 +35,32 @@ chapters:
     title: Conclusion and Integration Benefits
 duration: 834
 guests: []
+resources:
+  - title: 'Komodor Tutorial Part 1: Deploying the Agent'
+    category: other
+    evidence_quote: >-
+      If you haven't seen part one, pause this and go watch it now. In part one,
+      I show you how to deploy the Komodor agent to your Kubernetes cluster.
+    confidence: high
+  - title: kube-prometheus
+    url: 'https://github.com/prometheus-operator/kube-prometheus'
+    category: code
+    evidence_quote: This is this generic Kube Prometheus install.
+    confidence: high
+  - title: Sentry
+    url: 'https://sentry.io'
+    category: other
+    evidence_quote: >-
+      Sentry is something that if you're an application developer, you probably
+      already know. It's an open source tool that you integrate into your
+      application.
+    confidence: high
+  - title: Grafana
+    url: 'https://grafana.com'
+    category: other
+    evidence_quote: >-
+      Another tool that developers love to use -- well, I love to use, but I'll
+      speak for all developers now, is Grafana
+    confidence: high
 ---
 

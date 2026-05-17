@@ -105,5 +105,20 @@ duration: 7204
 guests:
   - connor-hicks
   - francis-gulotta
+resources:
+  - title: api.rawkode.dev GraphQL endpoint
+    url: 'https://api.rawkode.dev'
+    category: demos
+    evidence_quote: And it would go and hit API dot Rawkode.dev.
+    confidence: high
+  - title: Shopify Scripts platform
+    category: other
+    evidence_quote: 'So we have this project, this this app called Scripts.'
+    confidence: medium
+  - title: Rawkode.chat Discord
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: there is a Discord channel available at Rawkode.chat.
+    confidence: high
 ---
 

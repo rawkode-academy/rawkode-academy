@@ -82,5 +82,36 @@ chapters:
 duration: 3803
 guests:
   - ben-abbott
+resources:
+  - title: Teleport Public Roadmap
+    category: documentation
+    evidence_quote: >-
+      And we also made our roadmap public. And so you can go to our docs and see
+      what our roadmap is for the next three months.
+    confidence: high
+  - title: Teleport Requests for Discussion (RFD)
+    category: documentation
+    evidence_quote: >-
+      we have a request for discussion. And so you can go to our Git repo and
+      sort of understand, like, what our, like, versioning strategy is
+    confidence: high
+  - title: Why the Four Eyes Principle is Critical for Access
+    category: other
+    evidence_quote: >-
+      I had this book post today, which is why the four eyes principle is
+      critical for access.
+    confidence: high
+  - title: Teleport Ansible Guide
+    category: documentation
+    evidence_quote: >-
+      We have instructions here on sort of how to generate the host file in our
+      Ansible guide.
+    confidence: high
+  - title: Teleport Upcoming Releases
+    category: documentation
+    evidence_quote: >-
+      We have our upcoming releases page sort of describes, you know, Kubernetes
+      and database access support for machine ID.
+    confidence: high
 ---
 

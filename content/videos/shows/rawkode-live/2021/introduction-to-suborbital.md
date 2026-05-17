@@ -91,5 +91,29 @@ chapters:
 duration: 5020
 guests:
   - connor-hicks
+resources:
+  - title: Atmo documentation
+    category: documentation
+    evidence_quote: I just kind of relaunched the documentation for Atmo last weekend.
+    confidence: high
+  - title: Suborbital important API example
+    category: demos
+    evidence_quote: this is available in the Suborbital GitHub. It's called important API.
+    confidence: high
+  - title: Go Binaries
+    category: other
+    evidence_quote: >-
+      it's a service called Go Binaries. It will allow you to automatically
+      build and install any Go tool to your computer even if you don't have a Go
+      runtime or Go toolchain installed.
+    confidence: medium
+  - title: bit.ly/wasm survey
+    category: other
+    evidence_quote: >-
+      So the, the bit.ly/wasm survey, I wanna know, you know it it's it's really
+      just five or six questions about languages, capabilities, and, you know,
+      things that you would want to see from this type of framework and
+      platform.
+    confidence: medium
 ---
 

@@ -43,5 +43,15 @@ duration: 3371
 audioFileSize: 80894581
 guests:
   - jason-hall
+resources:
+  - title: >-
+      Chainguard blog article about migrating from Kubernetes and Knative to
+      Cloud Run
+    category: other
+    evidence_quote: >-
+      what prompted this conversation today is an article that you published to
+      the ChainGuard blog about a migration, some cloud adoption, containers,
+      and Cloud Run
+    confidence: medium
 ---
 

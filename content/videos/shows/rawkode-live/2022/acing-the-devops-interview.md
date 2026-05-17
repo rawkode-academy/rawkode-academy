@@ -145,5 +145,24 @@ chapters:
 duration: 4073
 guests:
   - rohit-ghumare
+resources:
+  - title: TechWorld with Nana YouTube channel
+    category: other
+    evidence_quote: |-
+      there is a Nana,
+      Tech World with Nana.
+    confidence: medium
+  - title: Coursera Financial Aid
+    category: other
+    evidence_quote: |-
+      So Coursera has the
+      financial aid.
+    confidence: medium
+  - title: solo.io Academy
+    category: documentation
+    evidence_quote: |-
+      go to the solo.io
+      academy.
+    confidence: medium
 ---
 

@@ -28,5 +28,13 @@ chapters:
     title: Restore
 duration: 1157
 guests: []
+resources:
+  - title: Spectro Cloud Palette documentation
+    category: documentation
+    evidence_quote: |-
+      Head to docs.spectrocloud.com
+      for examples of workspace backups, profile
+      based policies, and real world scenarios.
+    confidence: high
 ---
 

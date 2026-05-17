@@ -1,0 +1,18 @@
+{
+	"video_id": "asn46r4vc2cye6ihgp2zamoh",
+	"slug": "whats-new-with-spin-v0-8",
+	"title": "What's New with Spin (v0.8)",
+	"generated_at": "2026-05-17T13:18:16.936Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Spin 0.8 release blog",
+			"category": "other",
+			"evidence_quote": "I've literally copied and pasted all of this code from the release blog,",
+			"confidence": "medium"
+		}
+	]
+}

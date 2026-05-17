@@ -98,5 +98,11 @@ duration: 5872
 guests:
   - marek-counts
   - abdellfetah-sghiouar
+resources:
+  - title: Rawkode Discord server
+    url: 'https://rawkode.chat'
+    category: other
+    evidence_quote: So you can check that out at Rawkode.chat.
+    confidence: high
 ---
 

@@ -34,5 +34,26 @@ chapters:
     title: Conclusion and Summary
 duration: 581
 guests: []
+resources:
+  - title: Armo Platform
+    url: 'https://www.armosec.io/'
+    category: other
+    evidence_quote: >-
+      So go check out ARMOR platform. Use the custom controls and AI to help you
+      generate all the Regal that you need for your cluster.
+    confidence: high
+  - title: Rego Playground
+    url: 'https://play.openpolicyagent.org/'
+    category: demos
+    evidence_quote: >-
+      First, open a new tab in your browser and search for the Rego playground
+      and click go. This is an interactive playground that allows you to test
+      your Ragel policies.
+    confidence: high
+  - title: Open Policy Agent
+    url: 'https://www.openpolicyagent.org/'
+    category: documentation
+    evidence_quote: Regal is a language that is part of open policy agent.
+    confidence: high
 ---
 

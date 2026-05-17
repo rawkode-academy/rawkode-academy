@@ -16,5 +16,30 @@ show: rawkode-live
 duration: 4318
 guests:
   - nicolas-takashi
+resources:
+  - title: Perses official documentation
+    category: documentation
+    evidence_quote: >-
+      Like, this is official person's website. Okay. You have, like, under docs
+      section, we have some we have some user docs and and installation and
+      configuration and so on.
+    confidence: medium
+  - title: Perses community dashboards repository
+    category: code
+    evidence_quote: >-
+      person's niche community dashboards. Yeah. This is nice because I can even
+      show you the community dashboards. Like, this is a repo where we ported a
+      lot of Prometheus dashboard
+    confidence: medium
+  - title: Perses dashboard as code GitHub Action
+    category: code
+    evidence_quote: >-
+      we did something which is providing a Persis dashboard as code GitHub
+      action for people.
+    confidence: medium
+  - title: Perses CLI
+    category: code
+    evidence_quote: 'Like, this is the CLI, which allows us interact with the Persis instance.'
+    confidence: medium
 ---
 

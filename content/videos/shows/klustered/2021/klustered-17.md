@@ -89,5 +89,11 @@ duration: 4709
 guests:
   - adam-szucs-matyas
   - william-lightning
+resources:
+  - title: Teleport
+    url: 'https://rawkode.live/Teleport'
+    category: other
+    evidence_quote: Remember to go check out Rawkode.live/Teleport.
+    confidence: high
 ---
 

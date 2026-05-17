@@ -38,5 +38,30 @@ chapters:
 duration: 5372
 guests:
   - derick-rethans
+resources:
+  - title: QCachegrind profiling viewer
+    category: other
+    evidence_quote: >-
+      the way how I would view this is by using q cache client, or in my case, k
+      cache client.
+    confidence: high
+  - title: KCachegrind profiling viewer
+    category: other
+    evidence_quote: >-
+      the variant that I use is called k cache client, which is the same tool
+      but with a slightly different looking from that.
+    confidence: medium
+  - title: Composer dependency manager
+    category: other
+    evidence_quote: >-
+      we can actually profile composer itself before tackling something much
+      larger.
+    confidence: medium
+  - title: Zulu CMS project
+    category: code
+    evidence_quote: >-
+      Now that's just a project I found on GitHub called Zulu. It seems to be
+      like a CMS system built on Laravel or Symphony.
+    confidence: medium
 ---
 

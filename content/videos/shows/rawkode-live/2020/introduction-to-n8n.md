@@ -68,5 +68,28 @@ chapters:
 duration: 5104
 guests:
   - tanay-pant
+resources:
+  - title: TheCocktailDB API
+    category: documentation
+    evidence_quote: >-
+      Let's use this API I discovered a few months back. It's called the
+      cocktail d b API.
+    confidence: high
+  - title: TheCocktailDB random cocktail endpoint
+    category: demos
+    evidence_quote: Look up a random cocktail.
+    confidence: medium
+  - title: n8n Node Library documentation
+    category: documentation
+    evidence_quote: This is the node library here.
+    confidence: medium
+  - title: n8n Getting Started documentation
+    category: documentation
+    evidence_quote: as always there is a getting started part of the documentation.
+    confidence: medium
+  - title: BotFather Telegram bot creation flow
+    category: documentation
+    evidence_quote: So we need to start a chat with bot father.
+    confidence: medium
 ---
 

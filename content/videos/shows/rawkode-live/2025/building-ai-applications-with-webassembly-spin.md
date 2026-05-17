@@ -16,5 +16,26 @@ show: rawkode-live
 duration: 6370
 guests:
   - thorsten-hans
+resources:
+  - title: Fermion Developer Home
+    category: documentation
+    evidence_quote: >-
+      we are looking at the Fermion Developer Home because I think that's a good
+      like resource to get started
+    confidence: high
+  - title: SpinCube documentation
+    category: documentation
+    evidence_quote: SpinCube documentation guides you through that.
+    confidence: medium
+  - title: Thorsten Hans examples repository
+    category: code
+    evidence_quote: >-
+      I created a repository with like common patterns and how to implement them
+      in spin with different languages.
+    confidence: medium
+  - title: Ollama deployment guide
+    category: documentation
+    evidence_quote: 'deployed OLAMA according to their guide, deployed DeepSeq.'
+    confidence: medium
 ---
 

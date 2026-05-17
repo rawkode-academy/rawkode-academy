@@ -1,0 +1,27 @@
+{
+	"video_id": "llclhowidfbrvg93zt05v77m",
+	"slug": "klustered-18",
+	"title": "Klustered #18",
+	"generated_at": "2026-05-17T13:21:03.867Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [
+		"Eric Smalling",
+		"Carlos Santana"
+	],
+	"resources": [
+		{
+			"title": "InfluxDB Complete Guide course",
+			"category": "other",
+			"evidence_quote": "to get access to an InfluxDB Complete Guide course, which is currently in flight.",
+			"confidence": "medium"
+		},
+		{
+			"title": "Cloud Native TV search magic talk",
+			"category": "other",
+			"evidence_quote": "If you watched the search magic on Cloud Native TV this afternoon, I discussed the pending state on a pod.",
+			"confidence": "medium"
+		}
+	]
+}

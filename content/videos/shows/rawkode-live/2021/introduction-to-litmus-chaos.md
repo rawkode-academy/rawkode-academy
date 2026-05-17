@@ -108,5 +108,21 @@ duration: 5350
 guests:
   - umasankar-mukkara
   - karthik-satchitanand
+resources:
+  - title: litmuschaos/litmus-helm repository
+    category: code
+    evidence_quote: We have a help repository at Litmus chaos slash Litmus help.
+    confidence: medium
+  - title: Litmus probe documentation
+    category: documentation
+    evidence_quote: Yeah. So the probe documentation is available here.
+    confidence: medium
+  - title: Chaos Carnival Kafka bootcamp demo steps
+    category: demos
+    evidence_quote: >-
+      We recently ran this as a boot one of the boot camp sessions during kiosk
+      carnival. So we have all that information here, so please feel free to
+      take a look at this after we are done.
+    confidence: medium
 ---
 

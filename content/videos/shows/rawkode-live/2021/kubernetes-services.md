@@ -82,5 +82,12 @@ duration: 3154
 guests:
   - anais-urlichs
   - philipp-strube
+resources:
+  - title: OpenFaaS nodeinfo
+    category: demos
+    evidence_quote: >-
+      what we're actually going to use is something from the open files project
+      called node info,
+    confidence: medium
 ---
 

@@ -79,5 +79,28 @@ chapters:
 duration: 4754
 guests:
   - francois-massot
+resources:
+  - title: Quickwit Quick Start Guide
+    category: documentation
+    evidence_quote: We're gonna go straight to the quick start guide.
+    confidence: high
+  - title: Quickwit Common Crawl demo
+    category: demos
+    evidence_quote: >-
+      we have a commoncall.Quickwit.i0 website where you can just search few
+      things
+    confidence: medium
+  - title: Quickwit Helm chart
+    category: code
+    evidence_quote: >-
+      And, like, I I will make a demo on it. So and it's available on the GitHub
+      repository.
+    confidence: medium
+  - title: Quickwit Grafana plugin
+    category: code
+    evidence_quote: >-
+      we implemented, like, a graph on that plug in to to search through logs
+      and traces.
+    confidence: medium
 ---
 

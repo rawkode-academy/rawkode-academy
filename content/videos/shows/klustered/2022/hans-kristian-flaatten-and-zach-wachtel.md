@@ -94,5 +94,10 @@ duration: 5313
 guests:
   - hans-kristian-flaatten
   - zach-wachtel
+resources:
+  - title: Ship It podcast
+    category: other
+    evidence_quote: I blame the Ship It podcast.
+    confidence: medium
 ---
 

@@ -124,5 +124,22 @@ chapters:
     title: Closing Remarks
 duration: 3038
 guests: []
+resources:
+  - title: The Lives of the Noble Grecians and Romans
+    category: other
+    evidence_quote: >-
+      An eyephant is documented in The Lies of the Noble Grecians and Romans by
+      Roman historian Plutarch,
+    confidence: high
+  - title: Black Book of Admiralty
+    category: other
+    evidence_quote: And this is from the Black Book of Admiralty.
+    confidence: high
+  - title: The Early History of Data Networks
+    category: other
+    evidence_quote: >-
+      A lot of these tidbits came from the early history of data networks. You
+      can go and buy this book.
+    confidence: high
 ---
 

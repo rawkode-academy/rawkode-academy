@@ -77,5 +77,10 @@ chapters:
 duration: 3913
 guests:
   - jussi-nummelin
+resources:
+  - title: k0s Getting Started Guide
+    category: documentation
+    evidence_quote: So we'll choose the the getting started guide here.
+    confidence: medium
 ---
 

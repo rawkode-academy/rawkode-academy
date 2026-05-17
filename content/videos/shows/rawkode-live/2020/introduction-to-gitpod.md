@@ -127,5 +127,37 @@ chapters:
     title: Conclusion & Final Thoughts
 duration: 4645
 guests: []
+resources:
+  - title: Equinix Metal
+    url: 'https://metal.equinix.com'
+    category: other
+    evidence_quote: 'If you wanna check out Equinix metal, please visit metal.equinix.com'
+    confidence: high
+  - title: Eclipse Theia
+    category: code
+    evidence_quote: >-
+      So we took those ingredients and created, an online ID called Feya. We
+      moved that to the Eclipse Foundation
+    confidence: medium
+  - title: gitpod-io/gitpod repository
+    url: 'https://github.com/gitpod-io/gitpod'
+    category: code
+    evidence_quote: >-
+      Of course, the Gitpod is open source. So if you go to GitHub, Gitpod IO
+      Gitpod, which is a repository,
+    confidence: high
+  - title: Gitpod docker images repository
+    category: code
+    evidence_quote: >-
+      we have this, you know, docker images repository where we maintain those
+      that were proposed
+    confidence: medium
+  - title: GitLab project Gitpod configuration
+    category: code
+    evidence_quote: >-
+      the GitLab project itself. Like, you know, GitLab or GitLab is using
+      Gitpod for development. And so that configuration is also like, that's a
+      that's a huge project
+    confidence: medium
 ---
 

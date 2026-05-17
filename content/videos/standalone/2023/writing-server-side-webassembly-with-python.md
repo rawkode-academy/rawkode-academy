@@ -37,5 +37,13 @@ chapters:
     title: Conclusion & Future Improvements
 duration: 899
 guests: []
+resources:
+  - title: verimeon/spin-python-sdk
+    url: 'https://github.com/verimeon/spin-python-sdk'
+    category: code
+    evidence_quote: >-
+      So if you go to github.com/verimeon/spin-python-sdk, you will find the
+      crates directory, which has the Spin Python engine directory.
+    confidence: medium
 ---
 

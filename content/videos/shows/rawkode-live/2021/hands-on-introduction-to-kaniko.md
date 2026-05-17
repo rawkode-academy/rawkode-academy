@@ -98,5 +98,18 @@ duration: 3200
 guests:
   - tejal-desai
   - google-cloud-platform
+resources:
+  - title: Kaniko Getting Started tutorial
+    category: documentation
+    evidence_quote: I'm assuming we're just gonna go to the tutorial to get started.
+    confidence: medium
+  - title: Kaniko build context documentation
+    category: documentation
+    evidence_quote: you would see the link for Kaniko build context.
+    confidence: medium
+  - title: GitLab tutorial dedicated to Kaniko
+    category: documentation
+    evidence_quote: there is a tutorial dedicated to Kaniko on the GitLab.
+    confidence: medium
 ---
 

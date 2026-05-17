@@ -69,5 +69,10 @@ chapters:
 duration: 3202
 guests:
   - vlad-matsiiako
+resources:
+  - title: Infisical self-hosting instructions
+    category: documentation
+    evidence_quote: we provide all the self hosting instructions within our documentation.
+    confidence: medium
 ---
 

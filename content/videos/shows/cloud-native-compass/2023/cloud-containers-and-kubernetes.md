@@ -31,5 +31,19 @@ guests:
   - neil-cresswell
   - eli-holderness
   - abdellfetah-sghiouar
+resources:
+  - title: Kubernetes Podcast
+    category: other
+    evidence_quote: >-
+      I'm gonna do a shameless plug and ask people to go listen to the
+      Kubernetes podcast.
+    confidence: high
+  - title: Docker Compose for Kubernetes
+    category: code
+    evidence_quote: >-
+      We we used to include Compose with a k in Protainer. So you you could take
+      a Docker Compose file, and we we would auto deploy that against
+      Kubernetes.
+    confidence: medium
 ---
 

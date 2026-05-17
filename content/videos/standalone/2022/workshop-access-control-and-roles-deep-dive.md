@@ -81,5 +81,13 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 5874
 guests: []
+resources:
+  - title: Workshop Course Materials (RBAC Deep Dive)
+    url: 'https://github.com/rawkode-academy/courses'
+    category: code
+    evidence_quote: >-
+      all the README files are on GitHub. You can find them at
+      github.com/rockwoodacademy/courses. This is part 10, the RBAG deep dive
+    confidence: high
 ---
 

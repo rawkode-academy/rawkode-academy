@@ -49,5 +49,36 @@ chapters:
 duration: 3334
 guests:
   - viktor-farcic
+resources:
+  - title: Crossplane Getting Started documentation
+    category: documentation
+    evidence_quote: >-
+      Crossplane IO. Okay. So getting started is where you would usually go and
+      follow follow the instructions.
+    confidence: high
+  - title: Crossplane contrib providers
+    category: code
+    evidence_quote: >-
+      And then there is what did I want to do now? My keyboard is going crazy.
+      Crossplane contrib, which is where everybody else can contribute.
+    confidence: high
+  - title: Equinix Metal provider for Crossplane
+    category: code
+    evidence_quote: >-
+      So there there is an Equinix metal provider for Crossplane, so you can
+      spin up devices.
+    confidence: high
+  - title: Civo provider for Crossplane
+    category: code
+    evidence_quote: >-
+      Like, we recently worked with Civo folks and got a Civo provider, right,
+      And so on and so forth.
+    confidence: medium
+  - title: SQL provider for Crossplane
+    category: code
+    evidence_quote: >-
+      I use this one, provide us SQL that allows you to do something with your
+      databases no matter where the where they're running.
+    confidence: medium
 ---
 

@@ -171,5 +171,18 @@ chapters:
 duration: 4346
 guests:
   - mark-campbell
+resources:
+  - title: SchemaHero Operatorless Mode documentation
+    category: documentation
+    evidence_quote: there's a page called operatorless mode is what we call it right now.
+    confidence: high
+  - title: SchemaHero Reference for all Fields documentation
+    category: documentation
+    evidence_quote: There you go. The reference for all fields.
+    confidence: medium
+  - title: SchemaHero channel on Kubernetes Slack
+    category: other
+    evidence_quote: hit us up on the Kubernetes Slack. There's a SchemaHero channel.
+    confidence: high
 ---
 

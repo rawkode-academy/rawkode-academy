@@ -86,5 +86,28 @@ duration: 6965
 guests:
   - ciaran-mcnulty
   - alex-bowers
+resources:
+  - title: JoeDog Siege
+    category: other
+    evidence_quote: This is what I use to just it's by something called Joe dog siege.
+    confidence: medium
+  - title: Prometheus Operator quick start bundle
+    category: documentation
+    evidence_quote: Prometheus operator. Let's just deploy that. Quick start bundle bundle.
+    confidence: medium
+  - title: Prometheus Adapter
+    category: documentation
+    evidence_quote: >-
+      What I would have done next is deploy the Prometheus adapter to our
+      Kubernetes cluster.
+    confidence: medium
+  - title: Sean Hood OpenTelemetry package
+    category: code
+    evidence_quote: No is working on an open telemetry package. GitHub slash Sean hood slash.
+    confidence: medium
+  - title: Alex Bowers Laravel example project
+    category: code
+    evidence_quote: Alex Bowers slash Laravel example project probably.
+    confidence: medium
 ---
 

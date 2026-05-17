@@ -29,5 +29,19 @@ chapters:
     title: Conclusion and Summary
 duration: 487
 guests: []
+resources:
+  - title: Hurl
+    url: 'https://hurl.dev'
+    category: other
+    evidence_quote: >-
+      If you're not familiar with HARL, go to hARL dot dev and you'll find a
+      very cool text based description HTTP testing framework.
+    confidence: high
+  - title: Fermyon URL shortener example
+    category: documentation
+    evidence_quote: >-
+      So this extension of the URL shortener available on the fermion blog as an
+      example of how to do it with their SDK can now be enriched.
+    confidence: medium
 ---
 

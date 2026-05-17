@@ -171,5 +171,16 @@ chapters:
 duration: 5674
 guests:
   - brian-grant
+resources:
+  - title: kpt namespace provisioning UI guide
+    category: documentation
+    evidence_quote: >-
+      the guide that I was gonna recommend was the namespace provisioning UI
+      guide.
+    confidence: medium
+  - title: kpt channel on the Kubernetes Slack
+    category: other
+    evidence_quote: please join us on the kpt channel on the Kubernetes Slack
+    confidence: medium
 ---
 

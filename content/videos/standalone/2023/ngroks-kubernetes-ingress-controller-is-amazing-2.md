@@ -44,5 +44,20 @@ chapters:
     title: Conclusion
 duration: 485
 guests: []
+resources:
+  - title: ngrok/kubernetes-ngrok-controller
+    url: 'https://github.com/ngrok/kubernetes-ngrok-controller'
+    category: code
+    evidence_quote: |-
+      For more details on how to install the ngrok controller,
+      you can go github.com/ngrok/kubernetes-ngrok-controller,
+    confidence: high
+  - title: ngrok Kubernetes Ingress Controller release blog
+    category: other
+    evidence_quote: |-
+      So if you want to
+      learn more, well, watch this video, but also
+      check out the release blog on ngrok.com.
+    confidence: medium
 ---
 

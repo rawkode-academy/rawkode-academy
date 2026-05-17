@@ -106,5 +106,35 @@ chapters:
 duration: 4880
 guests:
   - ben-hirschberg
+resources:
+  - title: NSA CISA Kubernetes hardening framework
+    category: documentation
+    evidence_quote: >-
+      NSA CISA framework was released somewhere in August, I think, where
+      actually, you know, NSA, you know, created this great document.
+    confidence: medium
+  - title: Kubescape Rego library project
+    category: code
+    evidence_quote: >-
+      we have this regular library project, okay, where where actually all the
+      controls you can see, okay, all the controls written here in in Rego
+    confidence: medium
+  - title: Kubescape GitHub Action
+    category: code
+    evidence_quote: >-
+      someone decided to write a GitHub action, okay, based for Kubescape, and
+      it's we'll we'll have you know, hopefully, by next week, you'll have a a
+      published GitHub action also
+    confidence: medium
+  - title: Kubescape Visual Studio Code extension
+    category: code
+    evidence_quote: So we also released Kubescape Visual Studio extension.
+    confidence: medium
+  - title: Kubescape host sensor
+    category: code
+    evidence_quote: >-
+      we've created a project called host scan host sensor, which is actually a
+      high privileged daemon set
+    confidence: medium
 ---
 

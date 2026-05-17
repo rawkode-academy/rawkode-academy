@@ -2,7 +2,7 @@
 id: sx8a3ihcu4qum6du7ejlif7i
 slug: full-stack-webassembly-applications-with-spin
 title: Full Stack WebAssembly Applications with Spin
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2022-11-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -43,5 +43,25 @@ chapters:
     title: Farewell
 duration: 1698
 guests: []
+resources:
+  - title: Grain Programming Language
+    category: code
+    evidence_quote: >-
+      There's a lot to love about Grain and that is a truly WebAssembly native
+      language and that the only target is WebAssembly.
+    confidence: high
+  - title: Fermion Cloud
+    category: other
+    evidence_quote: >-
+      I have my application hosted on Fermion Cloud where I can do a 12 to minus
+      result.
+    confidence: high
+  - title: Spin SDK
+    category: code
+    evidence_quote: >-
+      Here, we are using the Spin SDK, which is quite nice. We are able to use a
+      procedural macro around our function, which says this is the entry point
+      or application that handles all the glue.
+    confidence: high
 ---
 

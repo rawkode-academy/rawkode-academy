@@ -37,5 +37,29 @@ chapters:
     title: Conclusion and Summary
 duration: 3122
 guests: []
+resources:
+  - title: 'Kubernetes Documentation: PriorityClass'
+    category: documentation
+    evidence_quote: >-
+      We can copy an example from a documentation like so. Here, we're using the
+      scheduling Kubernetes IOV one API. We're going to create a new priority
+      class
+    confidence: high
+  - title: 'Kubernetes Documentation: Pod Scheduling Readiness'
+    category: documentation
+    evidence_quote: I have enabled a feature gate called pod scheduling readiness.
+    confidence: high
+  - title: 'Kubernetes Enhancement Proposal: Dynamic Resource Allocation'
+    category: documentation
+    evidence_quote: >-
+      I'm kind of leaning on the example from the KEP here, which talks about
+      claiming cats
+    confidence: high
+  - title: 'Kubernetes Documentation: Topology Spread Constraints'
+    category: documentation
+    evidence_quote: >-
+      There's a relatively new feature in Kubernetes called topology spread
+      constraints.
+    confidence: high
 ---
 

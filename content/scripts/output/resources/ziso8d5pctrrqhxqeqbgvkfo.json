@@ -1,0 +1,20 @@
+{
+	"video_id": "ziso8d5pctrrqhxqeqbgvkfo",
+	"slug": "hands-on-introduction-to-gitgat",
+	"title": "Hands-on Introduction to GitGat",
+	"generated_at": "2026-05-17T13:28:11.284Z",
+	"known_technology_names": [
+		"Open Policy Agent (OPA)"
+	],
+	"known_guest_names": [
+		"Barak Brudo"
+	],
+	"resources": [
+		{
+			"title": "Linux Foundation LFS122x: GitHub Supply Chain Security using GitGat",
+			"category": "documentation",
+			"evidence_quote": "So Linux Foundation one two two x is the name of the course or, you know, their name for it. It's GitHub Supply Chain Security using GitGap.",
+			"confidence": "high"
+		}
+	]
+}

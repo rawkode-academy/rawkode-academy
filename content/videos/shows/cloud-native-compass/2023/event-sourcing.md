@@ -85,5 +85,17 @@ duration: 2729
 audioFileSize: 65493300
 guests:
   - frank-de-jonge
+resources:
+  - title: EventSauce
+    url: 'https://EventSauce.io'
+    category: code
+    evidence_quote: >-
+      If you need to build anything event sourced also in PHP, check out
+      EventSauce or check out EventSauce.io.
+    confidence: high
+  - title: The Knowledge of Others
+    category: other
+    evidence_quote: And it was a talk called the knowledge of others.
+    confidence: medium
 ---
 

@@ -29,5 +29,10 @@ chapters:
     title: Conclusion
 duration: 806
 guests: []
+resources:
+  - title: Fermion Discord
+    category: other
+    evidence_quote: or join the Fermion Discord.
+    confidence: medium
 ---
 

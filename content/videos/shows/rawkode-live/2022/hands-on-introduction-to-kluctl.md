@@ -103,5 +103,16 @@ chapters:
 duration: 5556
 guests:
   - alexander-block
+resources:
+  - title: podinfo Helm chart
+    category: demos
+    evidence_quote: There is the pod info chart.
+    confidence: medium
+  - title: Flux Kluctl controller
+    category: code
+    evidence_quote: >-
+      there's also a GitOps based controller, the Flux Clue Cuddle controller,
+      which is doing GitOps style deployments
+    confidence: medium
 ---
 

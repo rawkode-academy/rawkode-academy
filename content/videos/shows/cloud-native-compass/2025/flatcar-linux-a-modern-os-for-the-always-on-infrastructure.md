@@ -43,5 +43,31 @@ guests:
   - thilo
   - mathieu-tortuyaux
   - james-le-cuirot
+resources:
+  - title: Flatcar Getting Started documentation
+    category: documentation
+    evidence_quote: >-
+      Well, I guess reading the getting started documentation would be a great
+      entry point.
+    confidence: high
+  - title: Flatcar SysEx Bakery
+    category: code
+    evidence_quote: >-
+      And these we maintain these SIS Xs in the thing we call the SIS X bakery,
+      where we have a whole collection of these.
+    confidence: high
+  - title: Flatcar Linux update operator
+    category: code
+    evidence_quote: >-
+      There's also a reboot operator that we maintain ourselves, the FlatKal
+      Linux update operator.
+    confidence: high
+  - title: libguestfs tools
+    category: other
+    evidence_quote: >-
+      Maybe not that obscure, but I use the GuestFS tools quite a lot, like
+      GuestMount for mounting disk images or GuestFish for poking about in the
+      minutes of shell like interface.
+    confidence: high
 ---
 

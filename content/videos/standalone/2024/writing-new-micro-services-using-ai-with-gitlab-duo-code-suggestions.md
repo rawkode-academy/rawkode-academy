@@ -2,7 +2,7 @@
 id: czct26lrzw3y5ylu4tjvfsq5
 slug: writing-new-micro-services-using-ai-with-gitlab-duo-code-suggestions
 title: Writing New Micro-services Using AI with GitLab Duo Code Suggestions
-description: 'Video content coming soon.'
+description: Video content coming soon.
 publishedAt: 2024-04-18T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -92,5 +92,6 @@ chapters:
     title: Conclusion and Summary
 duration: 3068
 guests: []
+resources: []
 ---
 

@@ -68,5 +68,26 @@ duration: 3368
 audioFileSize: 80837626
 guests:
   - paul-dix
+resources:
+  - title: Apache Arrow project
+    category: code
+    evidence_quote: Apache Arrow is like an in memory columnar format specification.
+    confidence: high
+  - title: Apache DataFusion project
+    category: code
+    evidence_quote: 'Apache Data Fusion. Right now, it''s a subproject of Apache Arrow.'
+    confidence: high
+  - title: Flux community fork
+    category: code
+    evidence_quote: >-
+      we've actually created a separate community fork of Flux, that we're gonna
+      be pointing people to.
+    confidence: medium
+  - title: HashiCorp license change to BSL
+    category: other
+    evidence_quote: >-
+      Recently, HashiCorp announced their license change to the best the Bustle
+      license.
+    confidence: medium
 ---
 

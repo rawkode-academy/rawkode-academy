@@ -59,5 +59,14 @@ chapters:
     title: Conclusion and Farewell
 guests:
   - kat-cosgrove
+resources:
+  - title: Kubernetes website repository
+    category: code
+    evidence_quote: the trick is you go look in the Kubernetes website repo.
+    confidence: high
+  - title: Kubernetes enhancements repository
+    category: code
+    evidence_quote: you go to the Kubernetes enhancements repo and go look there.
+    confidence: high
 ---
 

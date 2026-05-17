@@ -91,5 +91,12 @@ chapters:
 duration: 4433
 guests:
   - adriano-pezzuto
+resources:
+  - title: Clastix Capsule
+    category: code
+    evidence_quote: >-
+      We started with Captule because we noticed that there is a missing gap in
+      Kubernetes ecosystem, especially regarding the multi tenancy.
+    confidence: medium
 ---
 

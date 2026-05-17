@@ -99,5 +99,16 @@ duration: 5935
 guests:
   - jeffrey-sica
   - chris-carty
+resources:
+  - title: Equinix Metal
+    category: other
+    evidence_quote: 'If you wanna check it out, use the code Rawkode.'
+    confidence: high
+  - title: Kubernetes Office Hours
+    category: other
+    evidence_quote: >-
+      if you're looking to learn more about Kubernetes, that's another great way
+      to engage and interact with the community and learn a lot of fun stuff.
+    confidence: medium
 ---
 
