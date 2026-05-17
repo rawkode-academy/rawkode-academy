@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card-shimmer">
+  <div class="glass-card-shimmer bleed-x-mobile">
     <!-- Tab Navigation -->
     <div class="border-b border-subtle relative z-10">
       <!-- Dropdown for Mobile -->

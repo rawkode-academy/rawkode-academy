@@ -266,7 +266,7 @@ const academyValues = [
 						{latestNews.map((item) => (
 							<a
 								href={`/news/${item.id}`}
-								class="soft-panel group block h-full p-4 sm:p-5"
+								class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
 							>
 								<div class="space-y-3">
 									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
@@ -312,7 +312,7 @@ const academyValues = [
 						{latestLearningPaths.map((path) => (
 							<a
 								href={`/learning-paths/${path.id}`}
-								class="soft-panel group block h-full p-4 sm:p-5"
+								class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
 							>
 								<div class="space-y-3">
 									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
@@ -358,7 +358,7 @@ const academyValues = [
 				{featuredVideo && (
 					<a
 						href={`/watch/${featuredVideo.data.slug}`}
-						class="soft-panel group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[20rem_minmax(0,1fr)] md:items-center lg:p-6"
+						class="soft-panel bleed-x-mobile group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[20rem_minmax(0,1fr)] md:items-center lg:p-6"
 					>
 						<div class="relative aspect-video overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5">
 							<img
@@ -395,9 +395,17 @@ const academyValues = [
 					{secondaryVideos.map((video) => (
 						<a
 							href={`/watch/${video.data.slug}`}
-							class="soft-panel group block h-full p-4 sm:p-5"
+							class="soft-panel bleed-x-mobile group block h-full overflow-hidden"
 						>
-							<div class="space-y-3">
+							<div class="relative aspect-video overflow-hidden bg-black/10 dark:bg-white/5">
+								<img
+									src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}
+									alt={video.data.title}
+									class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
+									loading="lazy"
+								/>
+							</div>
+							<div class="space-y-3 p-4 sm:p-5">
 								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
 									<span>{videoLabel(video)}</span>
 									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
@@ -440,7 +448,7 @@ const academyValues = [
 				{featuredArticle && (
 					<a
 						href={`/read/${featuredArticle.id}`}
-						class="soft-panel group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center lg:p-6"
+						class="soft-panel bleed-x-mobile group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center lg:p-6"
 					>
 						<div class="space-y-4 md:order-1">
 							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
@@ -485,7 +493,7 @@ const academyValues = [
 					{secondaryArticles.map((article) => (
 						<a
 							href={`/read/${article.id}`}
-							class="soft-panel group block h-full p-4 sm:p-5"
+							class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
 						>
 							<div class="space-y-3">
 								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
@@ -518,7 +526,7 @@ const academyValues = [
 
 				<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 					{academyValues.map((value, index) => (
-						<article class="soft-panel h-full p-5 sm:p-6">
+						<article class="soft-panel bleed-x-mobile h-full p-5 sm:p-6">
 							<div class="space-y-3">
 								<p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
 									{String(index + 1).padStart(2, "0")}

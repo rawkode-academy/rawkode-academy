@@ -12,19 +12,18 @@ type Props = {
 
 const { elements } = Astro.props;
 
-// Remove the last element (current page) - we only show the path
-const pathElements = elements.slice(0, -1);
+const lastIndex = elements.length - 1;
 ---
 
 <BreadcrumbJsonLd elements={elements} />
 
-{pathElements.length > 0 && (
+{elements.length > 0 && (
 	<nav class="breadcrumb" aria-label="Breadcrumb">
 		<ol>
-			{pathElements.map((el, i) => (
+			{elements.map((el, i) => (
 				<li>
 					{i === 0 ? (
-						<a href={el.link} class="home-link">
+						<a href={el.link} class="home-link" aria-label={el.title}>
 							<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 								<path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
 							</svg>
@@ -34,7 +33,11 @@ const pathElements = elements.slice(0, -1);
 							<svg class="chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 								<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
 							</svg>
-							<a href={el.link}>{el.title}</a>
+							{i === lastIndex ? (
+								<span class="current" aria-current="page">{el.title}</span>
+							) : (
+								<a href={el.link}>{el.title}</a>
+							)}
 						</>
 					)}
 				</li>
@@ -121,5 +124,21 @@ const pathElements = elements.slice(0, -1);
 	a:not(.home-link):hover {
 		color: rgb(var(--brand-primary));
 		background: rgb(var(--brand-primary) / 0.1);
+	}
+
+	.current {
+		color: var(--text-primary-content);
+		font-weight: 600;
+		padding: 0.25rem 0.5rem;
+		max-width: 16rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	@media (max-width: 640px) {
+		.current {
+			max-width: 10rem;
+		}
 	}
 </style>
