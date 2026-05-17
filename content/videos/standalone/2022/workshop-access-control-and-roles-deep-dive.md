@@ -2,7 +2,10 @@
 id: ecc8n8zd3p5xk96h52qdp2p7
 slug: workshop-access-control-and-roles-deep-dive
 title: Workshop - Access Control & Roles Deep Dive
-description: 'Find out more at https://rawkode.live/teleport'
+description: >-
+  Deep dive into Teleport RBAC: explore the editor, auditor, and access base
+  roles, modify user traits and logins, restrict access with node labels, build
+  elevated access approval workflows, and enforce session MFA.
 publishedAt: 2022-02-19T17:00:00.000Z
 type: recorded
 category: tutorial

@@ -3,13 +3,15 @@ id: v32afbzo0mzowipaa30orbtz
 slug: testing-a-3-tier-application-with-daggers-go-sdk
 title: Testing a 3-Tier Application with Dagger's Go SDK
 description: >-
-  In this video, I walk through how to get started with Dagger's Go SDK to build
-  and test a 3-tier application with Dagger, the future of CICD.
+  Build and test a Go backend, JavaScript frontend, and Postgres database using
+  Dagger's Go SDK. Covers composable pipelines, secret redaction, dependent
+  service containers, and running a Hurl test harness locally and in CI.
 publishedAt: 2023-05-25T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - dagger
+  - postgresql
 chapters:
   - startTime: 0
     title: Local Dev & Test without Dagger

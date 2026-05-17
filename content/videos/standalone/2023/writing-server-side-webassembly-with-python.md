@@ -3,8 +3,10 @@ id: p795mbb7u556q13aap1d4m1j
 slug: writing-server-side-webassembly-with-python
 title: Writing Server Side WebAssembly with Python
 description: >-
-  In this video, we explore all the common tasks you'll need to accomplish with
-  Fermyon's Spin Python SDK with TypeScript.
+  Walk through Fermyon's Spin Python SDK: installing the py2wasm plugin,
+  returning JSON, parsing headers, body, and query strings, and making outbound
+  HTTP requests, with tips for navigating the Rust source while LSP support is
+  pending.
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -38,9 +40,9 @@ chapters:
 duration: 899
 guests: []
 resources:
-  - title: verimeon/spin-python-sdk
+  - title: fermyon/spin-python-sdk
     type: url
-    url: 'https://github.com/verimeon/spin-python-sdk'
+    url: 'https://github.com/spinframework/spin-python-sdk'
     category: code
 ---
 

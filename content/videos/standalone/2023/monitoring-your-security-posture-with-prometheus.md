@@ -2,12 +2,17 @@
 id: cvahj7nb3ypukon4fm4mreaa
 slug: monitoring-your-security-posture-with-prometheus
 title: Monitoring Your Security Posture with Prometheus
-description: Video content coming soon.
+description: >-
+  Run Kubescape as an in-cluster operator, scrape its Prometheus metrics via a
+  ServiceMonitor, and import the Grafana dashboard to track cluster risk score,
+  framework failures, and control violations as your security posture changes.
 publishedAt: 2023-01-31T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - kubescape
+  - prometheus
+  - grafana
 chapters:
   - startTime: 0
     title: Introduction and Overview
@@ -56,6 +61,7 @@ resources:
     category: other
   - title: Kubescape Grafana Dashboard
     type: url
+    url: 'https://github.com/kubescape/prometheus-exporter/tree/main/dashboards'
     category: other
 ---
 

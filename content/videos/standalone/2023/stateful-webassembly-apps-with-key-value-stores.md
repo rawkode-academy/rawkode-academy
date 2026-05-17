@@ -10,6 +10,8 @@ type: recorded
 category: tutorial
 technologies:
   - spin
+  - rust
+  - webassembly
 chapters:
   - startTime: 0
     title: Introduction
@@ -36,6 +38,7 @@ resources:
     category: other
   - title: Fermyon URL shortener example
     type: url
+    url: 'https://spinframework.dev/v2/url-shortener-tutorial'
     category: documentation
 ---
 

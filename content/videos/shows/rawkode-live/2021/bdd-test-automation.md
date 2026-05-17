@@ -3,9 +3,10 @@ id: lz9asjenvnxctyheh2554ow8
 slug: bdd-test-automation
 title: BDD Test Automation
 description: >-
-  In this episode, we'll take a look at writing acceptance tests, in Rust, that
-  confirm the scenarios and examples we wrote in previous episodes are
-  implemented correctly.
+  Ciaran McNulty joins David to wire acceptance tests for a Git sync tool in
+  Rust with the Cucumber Rust crate, mapping Gherkin steps to step definitions,
+  matching parameters with cucumber expressions and regex, then driving the
+  Given/When/Then loop until the scenarios pass.
 publishedAt: 2021-01-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -60,6 +61,18 @@ chapters:
 duration: 5375
 guests:
   - ciaran-mcnulty
-resources: []
+resources:
+  - type: url
+    title: Cucumber Rust on GitHub
+    url: 'https://github.com/cucumber-rs/cucumber'
+    category: code
+  - type: url
+    title: Cucumber Rust Book
+    url: 'https://cucumber-rs.github.io/cucumber/main/'
+    category: documentation
+  - type: url
+    title: Gherkin Reference
+    url: 'https://cucumber.io/docs/gherkin/'
+    category: documentation
 ---
 

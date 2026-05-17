@@ -3,13 +3,20 @@ id: kuzv09qa7pptdqchkv2ci5p9
 slug: klustered-21
 title: Klustered 21
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Two broken clusters from Adyen and William. Debug a Cilium CNI image typo,
+  chase a rogue service rewriting resolv.conf, then unpick etcd client auth, a
+  validating webhook blocking a new ReplicaSet, and a server-side apply fix.
 publishedAt: 2022-03-05T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - etcd
+  - coredns
+  - helm
+  - postgresql
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -93,6 +100,22 @@ resources:
   - title: Rawkode Chat
     type: url
     url: 'https://rawkode.chat'
+    category: other
+  - title: Teleport
+    type: url
+    url: 'https://goteleport.com/'
+    category: other
+  - title: Cilium
+    type: url
+    url: 'https://cilium.io/'
+    category: other
+  - title: etcd documentation
+    type: url
+    url: 'https://etcd.io/docs/'
+    category: documentation
+  - title: CoreDNS
+    type: url
+    url: 'https://coredns.io/'
     category: other
 ---
 

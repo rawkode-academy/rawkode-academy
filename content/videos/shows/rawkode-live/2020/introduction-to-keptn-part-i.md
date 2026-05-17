@@ -3,14 +3,19 @@ id: emlycwa6qjji1saoicrkwbpr
 slug: introduction-to-keptn-part-i
 title: Introduction to Keptn (Part I)
 description: >-
-  In this episode, we take a look at on-boarding and deploying our first Keptn
-  managed service to our Kubernetes clusters, using Prometheus to provide safety
-  for continuous delivery through progressive delivery.
+  Jurgen Etzlstorfer introduces Keptn, the CNCF sandbox control plane for
+  delivery and operations. We install Istio and Keptn on Kubernetes, write a
+  shipyard, onboard a Helm-packaged service, and let Prometheus-backed SLO
+  quality gates gate the staging rollout.
 publishedAt: 2020-12-02T14:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - keptn
+  - kubernetes
+  - istio
+  - helm
+  - prometheus
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -129,12 +134,14 @@ resources:
     category: other
   - title: Keptn tutorials
     type: url
+    url: 'https://tutorials.keptn.sh/'
     category: documentation
   - title: Keptn installation on k3s guide
     type: url
     category: documentation
   - title: Sock Shop demo application
     type: url
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
   - title: Potato Head CNCF demo project
     type: url

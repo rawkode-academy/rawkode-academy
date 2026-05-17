@@ -3,15 +3,17 @@ id: etr47c1p01p3mefltqwanwhv
 slug: ebpf-for-runtime-enforcement
 title: eBPF for Runtime Enforcement
 description: >-
-  Tetragon is a flexible Kubernetes-aware security observability and runtime
-  enforcement tool that applies policy and filtering directly with eBPF,
-  allowing for reduced observation overhead, tracking of any process, and
-  real-time enforcement of policies.
+  Install Tetragon on a Linux host via the GitHub release and as a systemd
+  service, then deploy it to Kubernetes with Helm. Add a TracingPolicy that
+  hooks kernel probes to monitor module loading, and inspect events with the
+  tetra CLI.
 publishedAt: 2024-02-21T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - tetragon
+  - kubernetes
+  - helm
 chapters:
   - startTime: 0
     title: Introduction
@@ -48,12 +50,15 @@ guests: []
 resources:
   - title: Tetragon Installation Documentation
     type: url
+    url: 'https://tetragon.io/docs/installation/'
     category: documentation
   - title: Tetragon GitHub Releases
     type: url
+    url: 'https://github.com/cilium/tetragon/releases'
     category: code
   - title: Tetragon Helm Chart
     type: url
+    url: 'https://github.com/cilium/tetragon/tree/main/install/kubernetes/tetragon'
     category: code
 ---
 

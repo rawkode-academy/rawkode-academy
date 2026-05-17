@@ -3,14 +3,19 @@ id: a3fgm13ik7jug2x4xzh7w7sb
 slug: hands-on-introduction-to-kwasm
 title: Hands-on Introduction to KWasm
 description: >-
-  Kwasm is a Kubernetes Operator that adds WebAssembly support to your
-  Kubernetes nodes. It does so by using a container image that contains binaries
-  and configuration variables needed to run pure WebAssembly images.
+  Christopher and Sven from Liquid Reply walk through KWasm, the operator that
+  installs containerd Wasm shims onto nodes via annotations. We deploy it to a
+  kind cluster and a bare metal kubeadm cluster, then run WasmEdge and Spin
+  workloads.
 publishedAt: 2023-03-18T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - containerd
+  - kubernetes
   - kwasm
+  - spin
+  - wasm-edge-runtime
 show: rawkode-live
 chapters:
   - startTime: 163

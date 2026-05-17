@@ -3,13 +3,20 @@ id: afzrby1hf2vpr1ist5fpg5sf
 slug: klustered-15
 title: 'Klustered #15'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" #Kubernetes clusters ... on the clock.
+  Marek Counts and Abdel Sghiouar join David to debug two broken Kubernetes
+  clusters, fixing containerd socket paths, kubelet misconfigurations, a rogue
+  eBPF port blocker, a kubeconfig issue, and a Cilium NetworkPolicy blocking
+  Postgres egress.
 publishedAt: 2021-07-01T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - containerd
+  - ebpf
+  - postgresql
+  - coredns
 show: klustered
 chapters:
   - startTime: 0

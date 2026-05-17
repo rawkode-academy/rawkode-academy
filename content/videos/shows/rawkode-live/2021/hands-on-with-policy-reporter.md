@@ -3,14 +3,20 @@ id: o91kaudm4lsng4edd88nanlr
 slug: hands-on-with-policy-reporter
 title: Hands-on with Policy Reporter
 description: >-
-  In this episode, we take a look at a new open source project: Policy Reporter.
-  Policy Reporter brings visibility into Kyverno policy enforcement.
+  Frank Jogeleit joins to walk through Policy Reporter, the open source tool
+  that turns Kyverno PolicyReports into Prometheus metrics, a UI dashboard, and
+  notifications. We install it via Helm alongside kube-prometheus and explore
+  Grafana dashboards for policy violations.
 publishedAt: 2021-04-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - falco
+  - grafana
+  - helm
   - kyverno
   - policy-reporter
+  - prometheus
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -57,11 +63,13 @@ duration: 2831
 guests:
   - frank-jogeleit
 resources:
-  - title: Falco Sidekick UI
+  - title: Falcosidekick UI
     type: url
+    url: 'https://github.com/falcosecurity/falcosidekick-ui'
     category: code
   - title: Kyverno Pod Security Policy replacement policies
     type: url
+    url: 'https://kyverno.io/policies/pod-security/'
     category: documentation
 ---
 

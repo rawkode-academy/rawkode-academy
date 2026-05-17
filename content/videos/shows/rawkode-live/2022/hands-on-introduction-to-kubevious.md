@@ -3,13 +3,16 @@ id: nyxygq8akdwhroctp7hnmjnw
 slug: hands-on-introduction-to-kubevious
 title: Hands-on Introduction to Kubevious
 description: >-
-  Find Kubernetes challenging to understand? Ruben Hakopian and his team might
-  have found you a solution!
+  Ruben Hakopian walks through Kubevious, installing it via Helm and exploring
+  the application-centric UI, time machine, custom rules, and the Guard CLI for
+  catching Kubernetes misconfigurations before they hit the cluster.
 publishedAt: 2022-08-27T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubevious
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -85,6 +88,18 @@ chapters:
 duration: 5432
 guests:
   - ruben-hakopian
-resources: []
+resources:
+  - type: url
+    title: Kubevious
+    url: 'https://kubevious.io/'
+    category: documentation
+  - type: url
+    title: Kubevious documentation
+    url: 'https://kubevious.io/docs/'
+    category: documentation
+  - type: url
+    title: kubevious/kubevious on GitHub
+    url: 'https://github.com/kubevious/kubevious'
+    category: code
 ---
 

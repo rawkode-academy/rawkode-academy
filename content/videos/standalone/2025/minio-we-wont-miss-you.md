@@ -5,30 +5,37 @@ title: 'MinIO, we won''t miss you.'
 subtitle: >-
   MinIO just announced maintenance mode for their community edition — and
   honestly? Good riddance.
-description: This isn't about open source companies needing to make money. That's valid.
+description: >-
+  MinIO put their community edition into maintenance mode. We walk through how
+  they got here: silent AGPL relicensing in 2019 and 2021, the Weka
+  license-revocation stunt, gutting the May 2025 community console, and pushing
+  a $96K paywall for features that used to be free.
 publishedAt: 2025-12-04T00:00:00.000Z
 type: recorded
 category: editorial
 technologies:
   - minio
-  - seaweedfs
 duration: 369
 guests: []
 resources:
   - title: MinIO Community Edition Maintenance Mode Announcement
     type: url
+    url: 'https://github.com/minio/minio/issues/21714'
     category: other
   - title: Adam Jacobs' Analysis of MinIO License Enforcement
     type: url
     category: other
   - title: MinIO vs Nutanix License Compliance Case
     type: url
+    url: 'https://blog.min.io/nutanix-objects-violates-minios-open-source-license/'
     category: other
   - title: MinIO vs Weka License Revocation Incident
     type: url
+    url: 'https://blog.min.io/weka-violates-minios-open-source-licenses/'
     category: other
   - title: MinIO GitHub Community Concerns
     type: url
+    url: 'https://github.com/minio/minio/discussions/21326'
     category: other
 ---
 

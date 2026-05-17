@@ -3,13 +3,17 @@ id: rla2vnoi2ylmmpf1bjsb4djg
 slug: introduction-to-timescale
 title: Introduction to Timescale
 description: >-
-  In this episode, we'll be covering everything you need to know to get started
-  with Timescale.
+  Avthar Sewrathan explains how TimescaleDB packages Postgres with hypertables,
+  compression, and continuous aggregates. We launch a Forge instance, load NYC
+  taxi data with parallel copy, then run geospatial queries and visualize in
+  Grafana.
 publishedAt: 2021-02-09T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - timescale
+  - postgresql
+  - grafana
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -71,6 +75,7 @@ resources:
     category: documentation
   - title: TimescaleDB Parallel Copy
     type: url
+    url: 'https://github.com/timescale/timescaledb-parallel-copy'
     category: code
   - title: Setting automated retention policies
     type: url

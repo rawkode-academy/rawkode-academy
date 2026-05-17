@@ -3,12 +3,21 @@ id: xn5lyqrxw1a9e6c39zsi17s2
 slug: klustered-17
 title: 'Klustered #17'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" #Kubernetes clusters ... on the clock.
+  Adam Szücs-Mátyás and William Lightning debug two broken Kubernetes clusters.
+  Fixes cover cordoned nodes, a CoreDNS ConfigMap, a Harbor image redirect via
+  containerd, plus etcd permission and disk-full recovery from a loopback mount.
 publishedAt: 2021-08-20T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
+  - cilium
+  - coredns
+  - etcd
+  - postgresql
+  - teleport
+  - containerd
+  - harbor
 show: klustered
 chapters:
   - startTime: 0
@@ -92,7 +101,7 @@ guests:
 resources:
   - title: Teleport
     type: url
-    url: 'https://rawkode.live/Teleport'
+    url: 'https://goteleport.com/'
     category: other
 ---
 

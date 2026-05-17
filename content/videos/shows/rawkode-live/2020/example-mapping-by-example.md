@@ -3,14 +3,14 @@ id: cmcp750zcoi58w150z7e1ekp
 slug: example-mapping-by-example
 title: Example Mapping by Example
 description: >-
-  Example mapping is a technique for fleshing out and gaining clarity around the
-  acceptance criteria for a given story. It is based on the idea that multiple
-  examples of specific cases convey information better than a single bad
-  abstraction of a concept.
+  Ciaran McNulty walks David through Example Mapping and BDD applied to a real
+  Rust GitOps library, capturing rules and examples for cloning and reconciling
+  Git repositories before translating them into Gherkin scenarios.
 publishedAt: 2020-12-02T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -63,13 +63,15 @@ guests:
 resources:
   - title: Rawkode/getsynced
     type: url
-    url: 'https://getlab.com/Rawkode/getsynced'
     category: code
   - title: Matt Wynne's Example Mapping blog post
     type: url
+    url: 'https://cucumber.io/blog/bdd/example-mapping-introduction/'
     category: other
   - title: John Smart's Feature Mapping
     type: url
+    url: >-
+      https://johnfergusonsmart.com/feature-mapping-a-simpler-path-from-stories-to-executable-acceptance-criteria/
     category: other
 ---
 

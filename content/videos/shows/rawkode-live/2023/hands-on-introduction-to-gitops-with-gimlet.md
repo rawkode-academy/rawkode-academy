@@ -3,13 +3,18 @@ id: ddivo405dfsxz4vrvlr3xgmy
 slug: hands-on-introduction-to-gitops-with-gimlet
 title: Hands-on Introduction to GitOps with Gimlet
 description: >-
-  Adopting Kubernetes is a big endevaur. But it is the deployment platform
-  today.
+  Laszlo Fogas walks through Gimlet, a GitOps developer platform that pairs Flux
+  with the OneChart Helm chart and a UI. We install it on k3d, wire up GitHub,
+  deploy an app with Buildpacks, and add NGINX from the marketplace.
 publishedAt: 2023-08-26T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - gimlet
+  - fluxcd
+  - kubernetes
+  - helm
+  - buildpacks
 show: rawkode-live
 chapters:
   - startTime: 108
@@ -45,6 +50,7 @@ resources:
     category: documentation
   - title: Gimlet OneChart Helm chart
     type: url
+    url: 'https://github.com/gimlet-io/onechart'
     category: code
   - title: Gimlet GitHub Action
     type: url

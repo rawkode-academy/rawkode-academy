@@ -3,13 +3,15 @@ id: lksy7dn1gol1tpatlye4oh6b
 slug: introduction-to-vitess
 title: Introduction to Vitess
 description: >-
-  In this episode, we'll teach and guide you through everything you need to know
-  to get started with Vitess.
+  Vitess maintainers Deepthi Sigireddi and Alkin Tezuysal from PlanetScale walk
+  through the architecture (VTGate, VTTablet, topology), then deploy a sharded
+  MySQL cluster on Kubernetes with the operator and connect WordPress.
 publishedAt: 2021-02-26T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - vitess
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -84,9 +86,11 @@ guests:
 resources:
   - title: Vitess Operator
     type: url
+    url: 'https://github.com/planetscale/vitess-operator'
     category: code
   - title: Vitess Kubernetes Quick Start
     type: url
+    url: 'https://vitess.io/docs/get-started/kubernetes/'
     category: documentation
   - title: Vitess Point-in-Time Recovery documentation
     type: url

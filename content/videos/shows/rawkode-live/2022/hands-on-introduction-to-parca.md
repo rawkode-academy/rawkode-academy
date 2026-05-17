@@ -3,14 +3,17 @@ id: fvez8xw9it644rtfzl5xclpd
 slug: hands-on-introduction-to-parca
 title: Hands-on Introduction to Parca
 description: >-
-  In this episode, we show you how to start continuously profiling your
-  applications with Parca; an open-source project from the team at Polar
-  Signals.
+  Frederic Branczyk of Polar Signals joins to install Parca on a fresh
+  Kubernetes cluster, walk through the eBPF agent and server, and explore flame
+  graphs, profile comparisons, and pprof scraping for continuous profiling at
+  roughly one percent overhead.
 publishedAt: 2022-01-26T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - parca
+  - kubernetes
+  - ebpf
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -125,11 +128,13 @@ guests:
 resources:
   - title: Parca in Kubernetes tutorial
     type: url
+    url: 'https://www.parca.dev/docs/kubernetes/'
     category: documentation
   - title: >-
       KubeCon Barcelona 2019 observability keynote by Frederic Branczyk and Tom
       Wilkie
     type: url
+    url: 'https://www.youtube.com/watch?v=MkSdvPdS1oA'
     category: other
 ---
 

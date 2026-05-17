@@ -3,15 +3,16 @@ id: qsajojlbooovvzl4r05aabx8
 slug: introduction-to-opentelemetry
 title: Introduction to OpenTelemetry
 description: >-
-  Amy has worked in web operations for more than 20 years at companies of every
-  size, touching everything from kernel code to user interfaces. When she's not
-  working she can usually be found around her home in San Jose, caring for her
-  family, making music, or doing yoga in the sun.
+  Amy Tobey and Liz Fong-Jones join David to instrument a Go gRPC service
+  (Tinkerbell) with OpenTelemetry from scratch, wiring up the SDK, a stdout
+  exporter, a Honeycomb exporter, custom attributes, and database spans.
 publishedAt: 2020-11-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - opentelemetry
+  - grpc
+  - tinkerbell
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -73,9 +74,11 @@ guests:
 resources:
   - title: OpenTelemetry Go contrib gRPC instrumentation example
     type: url
+    url: 'https://github.com/open-telemetry/opentelemetry-go-contrib'
     category: code
   - title: OpenTelemetry Go trace API documentation
     type: url
+    url: 'https://pkg.go.dev/go.opentelemetry.io/otel/trace'
     category: documentation
 ---
 

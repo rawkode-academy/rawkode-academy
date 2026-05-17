@@ -3,13 +3,21 @@ id: ej38e2ppxfi1xzbwvoy3o4o2
 slug: introduction-to-keptn-part-ii
 title: Introduction to Keptn (Part II)
 description: >-
-  In this episode, we will continue with our look into Keptn; including
-  automatic remediation.
+  Juergen Etzlstorfer returns to walk through Keptn quality gates backed by
+  Prometheus SLIs, deploy to Kubernetes via Helm, then trigger automatic
+  remediation that scales pods on a response-time breach. Includes Litmus and
+  k3s notes.
 publishedAt: 2021-01-28T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - keptn
+  - prometheus
+  - kubernetes
+  - k3s
+  - litmus
+  - helm
+  - grafana
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -84,16 +92,19 @@ guests:
 resources:
   - title: Google SRE Book
     type: url
-    category: other
+    url: 'https://sre.google/sre-book/table-of-contents/'
+    category: documentation
   - title: Keptn Tutorial
     type: url
     url: 'https://tutorials.keptn.sh'
     category: documentation
   - title: Keptn Service Template
     type: url
+    url: 'https://github.com/keptn-sandbox/keptn-service-template-go'
     category: code
   - title: Keptn Sandbox
     type: url
+    url: 'https://github.com/keptn-sandbox'
     category: code
   - title: Keptn Slack
     type: url

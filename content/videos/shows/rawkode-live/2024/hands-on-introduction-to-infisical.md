@@ -3,8 +3,10 @@ id: vovcpubi5o3rsa0o2niw7hob
 slug: hands-on-introduction-to-infisical
 title: Hands-on Introduction to Infisical
 description: >-
-  ♾ Infisical is the open-source secret management platform: Sync secrets across
-  your team/infrastructure and prevent secret leaks.
+  Vlad Matsiiako gives a hands-on tour of Infisical, the open-source secrets
+  manager: projects, environments and folders, RBAC and approval policies,
+  versioning and audit logs, the Kubernetes operator and agent sidecar, secret
+  scanning, and self-hosting.
 publishedAt: 2024-03-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,6 +74,7 @@ guests:
 resources:
   - title: Infisical self-hosting instructions
     type: url
+    url: 'https://infisical.com/docs/self-hosting/overview'
     category: documentation
 ---
 

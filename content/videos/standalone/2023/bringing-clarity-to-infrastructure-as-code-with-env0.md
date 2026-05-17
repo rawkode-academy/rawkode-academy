@@ -3,13 +3,16 @@ id: t7zdnxgt54j4s3973zac3mjj
 slug: bringing-clarity-to-infrastructure-as-code-with-env0
 title: Bringing Clarity to Infrastructure as Code with Env0
 description: >-
-  Ever wanted to use Pulumi AND Terraform, but have some clear workflows to help
-  handle any dependencies?
+  Walk through env0 orchestrating a multi-IaC stack: Pulumi spins up a Civo
+  cluster, Terraform manages Cloudflare DNS, and CDKTF joins via workflows.
+  Covers template setup, dependencies, variable scanning, and GitLab merge
+  request plan previews.
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - env0
+  - gitlab
   - pulumi
   - terraform
 chapters:
@@ -60,9 +63,11 @@ resources:
     category: code
   - title: Cloud Development Kit for Terraform (CDKTF)
     type: url
+    url: 'https://developer.hashicorp.com/terraform/cdktf'
     category: code
   - title: Cloud Development Kit for Kubernetes (cdk8s)
     type: url
+    url: 'https://cdk8s.io/'
     category: code
 ---
 

@@ -3,14 +3,16 @@ id: ierbuewtemudd1i0w0wru28j
 slug: bluesky-embed-with-spin-webassembly
 title: BlueSky Embed with Spin WebAssembly
 description: >-
-  BlueSky is pretty cool, but you can't embed posts on to the web. So let's fix
-  that by writing a small backend service with Spin: the WebAssembly serverless
-  framework.
+  Build a Bluesky post embed with Spin and WebAssembly. We wire up a Lit web
+  component to a TypeScript Spin backend, handle CORS, cache auth tokens in the
+  key-value store, call createSession and getPostThread, and use the KV Explorer
+  to seed credentials on deploy.
 publishedAt: 2023-06-23T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - webassembly
 chapters:
   - startTime: 0
     title: Introduction
@@ -45,12 +47,15 @@ guests: []
 resources:
   - title: Bluesky API create session endpoint
     type: url
+    url: 'https://docs.bsky.app/docs/api/com-atproto-server-create-session'
     category: documentation
   - title: Bluesky API getPostThread XRPC endpoint
     type: url
+    url: 'https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread'
     category: documentation
   - title: Fermyon KV Explorer component
     type: url
+    url: 'https://github.com/fermyon/spin-kv-explorer'
     category: code
 ---
 

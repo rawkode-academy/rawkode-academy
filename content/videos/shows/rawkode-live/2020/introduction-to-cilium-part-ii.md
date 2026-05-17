@@ -3,13 +3,17 @@ id: mrdik35fprvp6caj44dpkhnz
 slug: introduction-to-cilium-part-ii
 title: Introduction to Cilium (Part II)
 description: >-
-  In this episode, joined by Ilya Dmitrichenko, we'll take a look at Cilium; a
-  CNI implementation for Kubernetes, integrated with eBPF.
+  Ilya Dmitrichenko joins David to install Cilium on a bare-metal Kubernetes
+  cluster, run the Star Wars demo, apply L3/L4 and L7 (HTTP) network policies,
+  explore Hubble UI, lock down DNS egress, and replace kube-proxy.
 publishedAt: 2020-11-12T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - cilium
+  - kubernetes
+  - ebpf
+  - envoy
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -93,14 +97,18 @@ resources:
   - title: Cilium Star Wars demo application
     type: url
     category: demos
+    url: 'https://github.com/cilium/star-wars-demo'
   - title: Cilium 1.9 blog post
     type: url
     category: other
+    url: 'https://cilium.io/blog/2020/11/10/cilium-19/'
   - title: Locking Down External Access with DNS-based Policies
     type: url
     category: documentation
+    url: 'https://docs.cilium.io/en/stable/security/policy/language/#dns-based'
   - title: Kubernetes Without kube-proxy guide
     type: url
     category: documentation
+    url: 'https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/'
 ---
 

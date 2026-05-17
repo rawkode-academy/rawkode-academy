@@ -3,10 +3,9 @@ id: dcbrb2qy3wm14ehhz2bgspfi
 slug: introduction-to-dgraph
 title: Introduction to Dgraph
 description: >-
-  Dgraph is a horizontally scalable and distributed GraphQL database with a
-  graph backend. It provides ACID transactions, consistent replication and
-  linearizable reads. It's built from ground up to perform for a rich set of
-  queries.
+  Xuanyi Chew, community engineer at Dgraph, walks through running Dgraph in
+  Docker, exploring the Ratel UI, writing queries and schemas in DQL versus
+  native GraphQL, and using the hosted Slash GraphQL service.
 publishedAt: 2020-11-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,6 +71,7 @@ guests:
 resources:
   - title: Dgraph Docker image
     type: url
+    url: 'https://hub.docker.com/r/dgraph/dgraph'
     category: code
   - title: Dgraph DQL query language functions documentation
     type: url

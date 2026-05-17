@@ -3,8 +3,10 @@ id: gz1nbyatbi6h3q1usddwkdqh
 slug: github-authentication
 title: GitHub Authentication
 description: >-
-  In this live demo, David will walk you through adding GitHub authentication to
-  your Teleport cluster.
+  Live walkthrough of configuring single sign on against GitHub teams and
+  organizations for an existing Teleport cluster: creating the OAuth app,
+  writing the GitHub connector YAML, fixing the team requirement, then granting
+  SSH access by editing a Teleport role.
 publishedAt: 2022-05-04T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -38,6 +40,7 @@ guests: []
 resources:
   - title: Teleport GitHub SSO Documentation
     type: url
+    url: 'https://goteleport.com/docs/admin-guides/access-controls/sso/github-sso/'
     category: documentation
   - title: Teleport RBAC Deep Dive
     type: url

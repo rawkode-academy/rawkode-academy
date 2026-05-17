@@ -3,9 +3,9 @@ id: xfzsftp8rjujzki3y0iaw75e
 slug: hands-on-introduction-to-gitea-actions
 title: Hands-on Introduction to Gitea Actions
 description: >-
-  Gitea is a painless self-hosted all-in-one software development service, it
-  includes Git hosting, code review, team collaboration, package registry and
-  CI/CD. It is similar to GitHub, Bitbucket and GitLab.
+  Matti Ranta joins David to walk through Gitea Actions end-to-end: installing
+  act-runner, registering it against Gitea Cloud, and writing a workflow for a
+  Go project. Also covers GitHub Actions compatibility, packages, and triggers.
 publishedAt: 2024-01-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -87,8 +87,21 @@ duration: 3066
 guests:
   - matti-ranta
 resources:
-  - title: Tarte dot dev
+  - title: Gitea Actions documentation
     type: url
+    url: 'https://docs.gitea.com/usage/actions/overview'
+    category: documentation
+  - title: act_runner
+    type: url
+    url: 'https://gitea.com/gitea/act_runner'
     category: code
+  - title: nektos/act
+    type: url
+    url: 'https://github.com/nektos/act'
+    category: code
+  - title: Tart
+    type: url
+    url: 'https://tart.run/'
+    category: other
 ---
 

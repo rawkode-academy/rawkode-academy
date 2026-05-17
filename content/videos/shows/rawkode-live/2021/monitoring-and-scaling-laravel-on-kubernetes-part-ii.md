@@ -3,15 +3,18 @@ id: wth5h0zbyz34gd904nuiuauu
 slug: monitoring-and-scaling-laravel-on-kubernetes-part-ii
 title: Monitoring & Scaling Laravel on Kubernetes (Part II)
 description: >-
-  In this episode, we'll take a look at auto-scaling our Laravel application
-  based on metrics.
+  Leo joins Alex and David to wire Prometheus middleware into Laravel, scrape
+  the metrics endpoint, deploy the Prometheus Adapter, and drive a Horizontal
+  Pod Autoscaler with custom metrics under load from Siege.
 publishedAt: 2021-03-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - docker
   - kubernetes
   - laravel
   - php
+  - prometheus
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -72,6 +75,18 @@ duration: 4580
 guests:
   - alex-bowers
   - leo-sjoberg
-resources: []
+resources:
+  - title: Prometheus Adapter for Kubernetes Metrics APIs
+    type: url
+    category: code
+    url: 'https://github.com/kubernetes-sigs/prometheus-adapter'
+  - title: Horizontal Pod Autoscaler
+    type: url
+    category: documentation
+    url: 'https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/'
+  - title: Siege HTTP load tester
+    type: url
+    category: code
+    url: 'https://github.com/JoeDog/siege'
 ---
 

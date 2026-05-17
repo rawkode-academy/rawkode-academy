@@ -3,13 +3,16 @@ id: t0syi87suw4qezpmy1gkht9k
 slug: developing-and-building-open-source-with-dagger-for-kargo
 title: Developing & Building Open Source with Dagger for Kargo
 description: >-
-  This live stream series will demonstrate how open source projects can leverage
-  Dagger to enhance their build automation and development environments.
+  Kat Cosgrove joins to Daggerize the Cargo project. We start with the Python
+  SDK, explore container composition and caching, debug async issues, and end
+  with a working Docker-in-Dagger setup running the Docker daemon as a service.
 publishedAt: 2024-08-08T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - dagger
+  - docker
+  - pulumi
 chapters:
   - startTime: 129
     title: Introduction to Daggerizing and Cargo
@@ -83,9 +86,13 @@ duration: 5700
 guests:
   - kat-cosgrove
 resources:
-  - title: Conductor
+  - title: Conductor (ContainerCraft dev container)
     type: url
     url: 'https://ghcr.io/containercraft/conductor'
     category: other
+  - title: Dagger documentation
+    type: url
+    url: 'https://docs.dagger.io/'
+    category: documentation
 ---
 

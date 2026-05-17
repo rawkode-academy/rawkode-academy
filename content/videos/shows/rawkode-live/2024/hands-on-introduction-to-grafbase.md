@@ -3,9 +3,10 @@ id: jufccm4nmljpvfjbskmoc03s
 slug: hands-on-introduction-to-grafbase
 title: Hands-on Introduction to Grafbase
 description: >-
-  Grafbase provides a modern developer experience to build and deploy high
-  performance GraphQL APIs close to your users. Compose and connect data sources
-  across microservices using GraphQL Federation.
+  Hands-on with Grafbase and founder Fredrik Bjork. We build standalone GraphQL
+  subgraphs with the TypeScript SDK, compose products and reviews into a
+  federated graph, extend types across teams, and deploy via the Grafbase Cloud
+  GitHub integration.
 publishedAt: 2024-02-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -51,12 +52,15 @@ guests:
 resources:
   - title: grafbase/grafbase GitHub releases
     type: url
+    url: 'https://github.com/grafbase/grafbase/releases'
     category: code
-  - title: Grafbase Getting Started guide
+  - title: Grafbase Quickstart guide
     type: url
+    url: 'https://grafbase.com/docs/quickstart'
     category: documentation
   - title: Grafbase Resolvers documentation
     type: url
+    url: 'https://grafbase.com/docs/resolvers'
     category: documentation
 ---
 

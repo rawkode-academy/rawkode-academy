@@ -3,10 +3,10 @@ id: vxnm3rycgt9l71t5svvca8s5
 slug: cncf-glossary-and-linkerd-with-catherine-paganini-and-jason-morgan
 title: CNCF Glossary & Linkerd with Catherine Paganini & Jason Morgan
 description: >-
-  The Cloud Native Glossary is a comprehensive list of terms related to
-  Kubernetes and Cloud Native concepts, translated into multiple languages. It
-  was created to make the concepts more accessible for both technical and
-  non-technical people.
+  Catherine Paganini and Jason Morgan explain how the vendor-neutral CNCF Cloud
+  Native Glossary makes cloud native terms accessible (and localised) for
+  non-technical audiences, then dig into Linkerd, service mesh trade-offs, and
+  Gateway API adoption.
 publishedAt: 2023-03-07T17:00:00.000Z
 type: live
 category: tutorial
@@ -51,19 +51,23 @@ guests:
 resources:
   - title: Cloud Native Glossary
     type: url
+    url: 'https://glossary.cncf.io/'
     category: documentation
   - title: Cloud Native Maturity Model
     type: url
+    url: 'https://maturitymodel.cncf.io/'
     category: documentation
   - title: Linkerd Slack
     type: url
-    url: 'https://slack.linkerd.io'
+    url: 'https://slack.linkerd.io/'
     category: other
   - title: Linkerd Getting Started Guide
     type: url
+    url: 'https://linkerd.io/2/getting-started/'
     category: documentation
   - title: Service Mesh Academy
     type: url
-    category: demos
+    url: 'https://buoyant.io/service-mesh-academy'
+    category: other
 ---
 

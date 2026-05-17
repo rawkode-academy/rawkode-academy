@@ -3,15 +3,15 @@ id: ln4np34ziqhps5xk39cwkjp0
 slug: introduction-to-influxdb-2-and-flux
 title: Introduction to InfluxDB 2 & Flux
 description: >-
-  InfluxDB is an open source time series platform. This includes APIs for
-  storing and querying data, processing it in the background for ETL or
-  monitoring and alerting purposes, user dashboards, and visualizing and
-  exploring the data and more.
+  Anais Dottis-Georgiou from InfluxData walks through InfluxDB 2 and Flux:
+  installing the OSS release, collecting metrics with Telegraf, exploring data,
+  building dashboards, downsampling via tasks, and configuring webhook alerts.
 publishedAt: 2020-11-18T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - influxdb
+  - telegraf
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -94,9 +94,12 @@ guests:
 resources:
   - title: InfluxData Community Templates repository
     type: url
+    url: 'https://github.com/influxdata/community-templates'
     category: code
-  - title: InfluxDB 2 operational metrics template
+  - title: InfluxDB 2 operational monitoring template
     type: url
+    url: >-
+      https://github.com/influxdata/community-templates/tree/master/influxdb2_operational_monitoring
     category: code
   - title: rbx.app request bin
     type: url

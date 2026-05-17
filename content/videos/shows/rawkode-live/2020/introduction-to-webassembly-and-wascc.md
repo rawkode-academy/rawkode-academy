@@ -3,15 +3,16 @@ id: flgpktp3odrmizcskj38xa0v
 slug: introduction-to-webassembly-and-wascc
 title: Introduction to WebAssembly & waSCC
 description: >-
-  WebAssembly (abbreviated Wasm) is a binary instruction format for a
-  stack-based virtual machine. Wasm is designed as a portable compilation target
-  for programming languages, enabling deployment on the web for client and
-  server applications.
+  Kevin Hoffman, author of Programming WebAssembly with Rust and tech lead of
+  waSCC, walks through WebAssembly beyond the browser: the WAT text format,
+  wasmtime, and waSCC's capability-secure actors, signed JWT entitlements, and
+  Lattice clustering.
 publishedAt: 2020-10-22T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - webassembly
+  - wasmcloud
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -132,15 +133,19 @@ guests:
 resources:
   - title: Programming WebAssembly with Rust
     type: url
+    url: 'https://pragprog.com/titles/khrust/programming-webassembly-with-rust/'
     category: other
   - title: WebAssembly Binary Toolkit
     type: url
+    url: 'https://github.com/WebAssembly/wabt'
     category: code
   - title: WASC new actor template
     type: url
+    url: 'https://github.com/wascc/new-actor-template'
     category: code
   - title: WASC new provider template
     type: url
+    url: 'https://github.com/wascc/new-provider-template'
     category: code
   - title: waSCC demo YouTube playlist
     type: url

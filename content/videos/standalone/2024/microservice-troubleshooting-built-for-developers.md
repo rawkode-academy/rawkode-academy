@@ -3,13 +3,17 @@ id: zh6x60pfsxnaglf391e673pj
 slug: microservice-troubleshooting-built-for-developers
 title: 'Microservice Troubleshooting, Built for Developers'
 description: >-
-  With one-click distributed tracing, Lumigo lets developers effortlessly find
-  and fix issues in serverless and containerized environments.
+  Deploy the Lumigo operator to Kubernetes with Helm, auto-instrument the
+  OpenTelemetry demo app, then walk the system map, transactions, timeline
+  traces, and issues view to debug a failing checkout.
 publishedAt: 2024-01-24T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - lumigo
+  - kubernetes
+  - helm
+  - opentelemetry
 chapters:
   - startTime: 0
     title: Introduction
@@ -58,6 +62,11 @@ guests: []
 resources:
   - title: OpenTelemetry Demo Application
     type: url
+    url: 'https://opentelemetry.io/docs/demo/'
     category: demos
+  - title: Lumigo Documentation
+    type: url
+    url: 'https://docs.lumigo.io/'
+    category: documentation
 ---
 

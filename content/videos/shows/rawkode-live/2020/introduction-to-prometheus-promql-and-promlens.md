@@ -3,8 +3,9 @@ id: chf9r0pa0ypqa70iucjn897m
 slug: introduction-to-prometheus-promql-and-promlens
 title: 'Introduction to Prometheus, PromQL, & PromLens'
 description: >-
-  In this episode, I am joined by Julius Volz; co-founder of Prometheus, and
-  founder of PromCon and PromLabs.
+  Julius Volz, Prometheus co-founder, walks through the data model and four
+  metric types, scraping node_exporter, writing PromQL in PromLens, and building
+  a predict_linear disk-fill alert.
 publishedAt: 2020-10-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -92,12 +93,15 @@ resources:
     category: other
   - title: Prometheus best practices docs page on histograms and summaries
     type: url
+    url: 'https://prometheus.io/docs/practices/histograms/'
     category: documentation
   - title: kube-prometheus Prometheus rules manifests
     type: url
+    url: 'https://github.com/prometheus-operator/kube-prometheus/tree/main/manifests'
     category: code
   - title: Cortex monitoring project
     type: url
-    category: code
+    url: 'https://cortexmetrics.io/'
+    category: other
 ---
 

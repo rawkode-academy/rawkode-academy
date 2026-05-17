@@ -3,13 +3,17 @@ id: j6uehaw57ynwqnbkjs3m1to6
 slug: klustered-part-ii
 title: Klustered (Part II)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Dan Finneran joins Rawkode to debug two broken Kubernetes clusters, unpicking
+  an etcd version mismatch, a bad kubelet flag, an etcd "no space" alarm and
+  quota, a block-all NetworkPolicy, and a PodSecurityPolicy affecting static
+  pods.
 publishedAt: 2021-02-25T12:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - cilium
 show: klustered
 chapters:
   - startTime: 0
@@ -118,6 +122,7 @@ guests:
 resources:
   - title: Hubble UI
     type: url
-    category: demos
+    url: 'https://docs.cilium.io/en/stable/observability/hubble/hubble-ui/'
+    category: documentation
 ---
 

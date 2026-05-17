@@ -3,14 +3,17 @@ id: s7ne8fr53irbz5wmwl6biim8
 slug: hands-on-introduction-to-dockerslim
 title: Hands-on Introduction to DockerSlim
 description: >-
-  DockerSlim is a tool for developers that provides a set of commands (build,
-  xray, lint and others) to simplify and optimize your developer experience with
-  containers. It makes your containers betters, smaller and more secure.
+  Martin Wimpress and Ivan Velichko join David to walk through DockerSlim's
+  build, xray, and probing workflow, then live-slim a CentOS+curl image and a
+  Node.js HTTP API before optimising a workload running on a kind Kubernetes
+  cluster.
 publishedAt: 2022-09-01T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - slim-toolkit
+  - docker
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -79,6 +82,14 @@ duration: 5261
 guests:
   - kyle-quest
   - ivan-velichko
-resources: []
+resources:
+  - title: Slim Toolkit (formerly DockerSlim)
+    type: url
+    url: 'https://slimtoolkit.org'
+    category: documentation
+  - title: slimtoolkit/slim on GitHub
+    type: url
+    url: 'https://github.com/slimtoolkit/slim'
+    category: code
 ---
 

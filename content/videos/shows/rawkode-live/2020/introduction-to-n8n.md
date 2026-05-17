@@ -3,9 +3,9 @@ id: wqob01glppj9tkopb81c1cp5
 slug: introduction-to-n8n
 title: Introduction to n8n
 description: >-
-  n8n (pronounced n-eight-n) helps you to interconnect every app with an API in
-  the world with each other to share and manipulate its data without a single
-  line of code.
+  Tanay Pant walks David through n8n, building workflows in the editor UI with
+  HTTP Request, Cron, Set, Webhook and Function nodes, then wiring up Philips
+  Hue, OpenWeatherMap and a Telegram bot via BotFather.
 publishedAt: 2020-11-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -71,18 +71,23 @@ guests:
 resources:
   - title: TheCocktailDB API
     type: url
+    url: 'https://www.thecocktaildb.com/api.php'
     category: documentation
   - title: TheCocktailDB random cocktail endpoint
     type: url
+    url: 'https://www.thecocktaildb.com/api/json/v1/1/random.php'
     category: demos
   - title: n8n Node Library documentation
     type: url
+    url: 'https://docs.n8n.io/integrations/'
     category: documentation
   - title: n8n Getting Started documentation
     type: url
+    url: 'https://docs.n8n.io/'
     category: documentation
   - title: BotFather Telegram bot creation flow
     type: url
+    url: 'https://core.telegram.org/bots/tutorial'
     category: documentation
 ---
 

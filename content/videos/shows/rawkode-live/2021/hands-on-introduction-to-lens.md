@@ -3,13 +3,18 @@ id: gy8w7dfqeaszt1c49v5k1ah0
 slug: hands-on-introduction-to-lens
 title: Hands-on Introduction to Lens
 description: >-
-  In this episode, Edwards walks us through everything we need to know to get
-  started with Lens, the Kubernetes IDE.
+  Edward from Mirantis tours Lens, the Kubernetes IDE: unified catalog, hotbar,
+  command palette, built-in Prometheus metrics, smart terminal context
+  switching, Helm chart deployment, extensions (Starboard, Resource Map), and
+  sharing clusters via Lens Spaces with ClusterConnect.
 publishedAt: 2021-08-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - lens
+  - kubernetes
+  - helm
+  - prometheus
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -96,12 +101,15 @@ resources:
   - title: Mirantis Kubernetes cheat sheet
     type: url
     category: documentation
+    url: 'https://www.mirantis.com/blog/kubernetes-cheat-sheet/'
   - title: Aqua Security Starboard extension
     type: url
     category: code
+    url: 'https://github.com/aquasecurity/starboard'
   - title: Lens Resource Map extension
     type: url
     category: code
+    url: 'https://github.com/nevalla/lens-resource-map-extension'
   - title: BoardD open source technology
     type: url
     category: code

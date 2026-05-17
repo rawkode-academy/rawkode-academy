@@ -3,13 +3,17 @@ id: l7t356j2oeuhjpwdkt18tzzl
 slug: klustered-teams-carta-and-fairwinds
 title: 'Klustered Teams: Carta & Fairwinds'
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams from Carta and Fairwinds debug each other's broken Kubernetes clusters
+  live, tackling admission webhooks, rogue pod re-creation, kubelet and
+  scheduler misconfigurations, an API server manifest typo, and a Cilium network
+  policy.
 publishedAt: 2021-08-05T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - teleport
+  - cilium
 show: klustered
 chapters:
   - startTime: 0
@@ -93,6 +97,7 @@ resources:
     category: other
   - title: Fairwinds RBAC Lookup
     type: url
+    url: 'https://github.com/FairwindsOps/rbac-lookup'
     category: code
 ---
 

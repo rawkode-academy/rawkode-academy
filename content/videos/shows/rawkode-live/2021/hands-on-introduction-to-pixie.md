@@ -2,7 +2,11 @@
 id: ymhs0sxdh5vb6uwi88xcfiuw
 slug: hands-on-introduction-to-pixie
 title: Hands-on Introduction to Pixie
-description: 'In this episode, we take a look at observability within Kubernetes with Pixie.'
+description: >-
+  Natalie Serrino walks through Pixie, the eBPF-powered Kubernetes observability
+  tool. We deploy Vizier with the etcd operator, explore PxL scripts, trace HTTP
+  and gRPC traffic, view flame graphs, and wire up a Slack alert via the Go
+  client.
 publishedAt: 2021-07-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -96,17 +100,21 @@ duration: 4066
 guests:
   - natalie-serrino
 resources:
-  - title: Pixie supported protocols documentation
+  - title: Pixie supported data sources documentation
     type: url
+    url: 'https://docs.px.dev/about-pixie/data-sources/'
     category: documentation
   - title: Pixie Grafana data source plugin
     type: url
+    url: 'https://github.com/pixie-io/grafana-plugin'
     category: code
   - title: Pixie Slack alert tutorial
     type: url
+    url: 'https://docs.px.dev/tutorials/integrations/slackbot-alert/'
     category: documentation
-  - title: PixieScript operators reference documentation
+  - title: PxL operators reference documentation
     type: url
+    url: 'https://docs.px.dev/reference/pxl/operators/'
     category: documentation
   - title: Pixie Socks Shop demo
     type: url

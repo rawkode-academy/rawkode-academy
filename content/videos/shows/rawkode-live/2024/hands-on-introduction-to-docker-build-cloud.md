@@ -3,15 +3,17 @@ id: n75jis3j9h700q4ltfja62ek
 slug: hands-on-introduction-to-docker-build-cloud
 title: Hands-on Introduction to Docker Build Cloud
 description: >-
-  Docker Build Cloud is a service that lets you build your container images
-  faster, both locally and in CI. Builds run on cloud infrastructure optimally
-  dimensioned for your workloads, no configuration required.
+  Michael Irwin from Docker walks David through Docker Build Cloud, a hosted
+  BuildKit service. They cover the shared remote cache, native AMD64/ARM64
+  builders, and wire it up with Buildx and Docker Compose on a React demo app.
 publishedAt: 2024-03-06T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - buildkit
   - docker
   - docker-build-cloud
+  - docker-compose
 show: rawkode-live
 chapters:
   - startTime: 89

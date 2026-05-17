@@ -3,13 +3,15 @@ id: wjbc4rn7siavu2yg490msojv
 slug: klustered-teams-armo-and-kong
 title: Klustered Teams - Armo & Kong
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams Kong and Armo trade broken clusters, debugging liveness probes, Postgres
+  ConfigMap init scripts, a malicious mutating webhook, a rogue NodePort
+  process, a fake kubectl alias, and a kubeconfig HTTP/HTTPS swap.
 publishedAt: 2022-03-24T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - postgresql
 show: klustered
 chapters:
   - startTime: 0

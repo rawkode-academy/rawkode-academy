@@ -3,15 +3,18 @@ id: fd5l8yd2xbh033dpnkvftg35
 slug: hands-on-introduction-to-krr-kubernetes-resource-recommendations
 title: Hands-on Introduction to KRR (Kubernetes Resource Recommendations)
 description: >-
-  Robusta KRR (Kubernetes Resource Recommender) is a CLI tool for optimizing
-  resource allocation in Kubernetes clusters. It gathers pod usage data from
-  Prometheus and recommends requests and limits for CPU and memory. This reduces
-  costs and improves performance.
+  Natan Yellin from Robusta walks David through KRR, a CLI that queries existing
+  Prometheus data to recommend CPU and memory requests and limits for Kubernetes
+  workloads. They compare it to the VPA, demo the simple strategy, and discuss
+  future directions.
 publishedAt: 2023-05-25T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - krr
+  - robusta
+  - kubernetes
+  - prometheus
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -79,6 +82,18 @@ chapters:
 duration: 3267
 guests:
   - natan-yellin
-resources: []
+resources:
+  - type: url
+    title: Robusta KRR on GitHub
+    category: code
+    url: 'https://github.com/robusta-dev/krr'
+  - type: url
+    title: Robusta
+    category: documentation
+    url: 'https://robusta.dev/'
+  - type: url
+    title: Prometheus
+    category: documentation
+    url: 'https://prometheus.io/'
 ---
 

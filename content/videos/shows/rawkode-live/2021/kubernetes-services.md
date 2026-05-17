@@ -3,8 +3,9 @@ id: t6z7vbrzz03zq1xvwlugnyoz
 slug: kubernetes-services
 title: Kubernetes Services
 description: >-
-  In this episode, we take a look at the different types of service provided by
-  Kubernetes and how they work under the hood.
+  Anaïs Urlichs and Philipp Strube join David to break down Kubernetes Services:
+  ClusterIP, NodePort, port versus targetPort, selectors and endpoints,
+  DNS-based service discovery, and load balancing across pods.
 publishedAt: 2021-01-13T17:00:00.000Z
 type: live
 category: tutorial

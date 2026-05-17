@@ -3,8 +3,9 @@ id: krr31oe2upl14q4rc7qufyls
 slug: nodejs-sdk-typescript
 title: NodeJS SDK (TypeScript)
 description: >-
-  In this video, we explore all the common tasks you'll need to accomplish with
-  Fermyon's Spin NodeJS SDK with TypeScript.
+  A walkthrough of Fermyon Spin's Node.js SDK in TypeScript: handling request
+  headers, ArrayBuffer bodies, JSON parsing with Zod for runtime safety, query
+  strings via qs, outbound fetch, and configuring allowed_outbound_hosts.
 publishedAt: 2023-02-02T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -39,6 +40,22 @@ chapters:
     title: Conclusion and Summary
 duration: 1103
 guests: []
-resources: []
+resources:
+  - type: url
+    title: Spin JavaScript/TypeScript components
+    category: documentation
+    url: 'https://spinframework.dev/v3/javascript-components'
+  - type: url
+    title: Spin outbound HTTP
+    category: documentation
+    url: 'https://spinframework.dev/v3/http-outbound'
+  - type: url
+    title: Zod
+    category: documentation
+    url: 'https://zod.dev/'
+  - type: url
+    title: qs query string parser
+    category: code
+    url: 'https://github.com/ljharb/qs'
 ---
 

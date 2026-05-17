@@ -3,13 +3,16 @@ id: wijy1wsp03lfq5mjrhjvtwm0
 slug: making-kubernetes-network-policies-effortless-with-otterize
 title: Making Kubernetes Network Policies Effortless with Otterize
 description: >-
-  Why make things complicated when they can be simple? Otterize is all about
-  making your life easier.
+  Otterize replaces hand-written Kubernetes NetworkPolicies with intent-based
+  access control: developers declare which services they call in ClientIntents
+  CRs, and the operator generates the policies. Demoed on Weaveworks Sock Shop,
+  with Otterize Cloud's access graph.
 publishedAt: 2023-11-29T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - otterize
+  - kubernetes
 chapters:
   - startTime: 0
     title: Introduction
@@ -82,12 +85,15 @@ guests: []
 resources:
   - title: Otterize iBack page
     type: url
+    url: 'https://docs.otterize.com/'
     category: documentation
   - title: Otterize HelmChart repository
     type: url
+    url: 'https://github.com/otterize/helm-charts'
     category: code
   - title: Weaveworks Sockshop demo
     type: url
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
 ---
 

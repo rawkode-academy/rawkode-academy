@@ -3,12 +3,21 @@ id: b3oefzhoncogvr5cyijfckcj
 slug: cloud-containers-and-kubernetes
 title: 'Cloud, Containers, & Kubernetes'
 description: >-
-  Joined by Eli (Scaleway), Neil (Portainer), and Abdel (Google), we discuss all
-  things cloud computing, containers, and Kubernetes.
+  Eli (Scaleway), Neil (Portainer), and Abdel (Google) join the inaugural Cloud
+  Native Compass to debate cloud pricing beyond the big three, whether Docker is
+  still trustworthy, WebAssembly's role alongside containers, and the rise of
+  internal developer portals like Backstage.
 publishedAt: 2023-05-21T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - kubernetes
+  - docker
+  - webassembly
+  - docker-compose
+  - backstage
+  - portainer
+  - envoy
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -33,9 +42,11 @@ guests:
   - abdellfetah-sghiouar
 resources:
   - title: Kubernetes Podcast
+    url: 'https://kubernetespodcast.com/'
     type: url
     category: other
-  - title: Docker Compose for Kubernetes
+  - title: Kompose (Docker Compose for Kubernetes)
+    url: 'https://github.com/kubernetes/kompose'
     type: url
     category: code
 ---

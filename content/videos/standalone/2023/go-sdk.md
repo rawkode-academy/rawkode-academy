@@ -3,8 +3,9 @@ id: xf99ugju3sc16q7f4iw3llv8
 slug: go-sdk
 title: Go SDK
 description: >-
-  In this video, we explore all the common tasks you'll need to accomplish with
-  Fermyon's Spin Go SDK.
+  Walk through the Spin Go SDK by writing an HTTP handler, reading request
+  headers, body, and query parameters, then making outbound HTTP requests and
+  allowlisting hosts in spin.toml.
 publishedAt: 2023-01-31T17:00:00.000Z
 type: recorded
 category: tutorial

@@ -3,13 +3,19 @@ id: fehk0hl4a1z3tpdrcdvnwvqz
 slug: hans-kristian-flaatten-and-zach-wachtel
 title: Hans Kristian Flaatten & Zach Wachtel
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Hans Kristian Flaatten and Zach Wachtel tackle two broken Kubernetes clusters,
+  debugging a bad kubeconfig IP, an encryption provider config, a disk IO
+  throttle cron job, plus Kyverno webhooks and a Cilium egress policy.
 publishedAt: 2022-10-28T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - teleport
+  - cilium
+  - kyverno
+  - etcd
+  - coredns
 show: klustered
 chapters:
   - startTime: 161
@@ -97,6 +103,7 @@ guests:
 resources:
   - title: Ship It podcast
     type: url
+    url: 'https://changelog.com/shipit'
     category: other
 ---
 

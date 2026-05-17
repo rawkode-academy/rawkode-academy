@@ -3,13 +3,19 @@ id: phimrqhbsfj1y0gl2as0s3ce
 slug: klustered-newcomers-1
 title: 'Klustered: Newcomers #1'
 description: >-
-  Klustered is a live debugging and competitive Kubernetes series that aims to
-  provide the best CKA, CKAD, and CKS training materials on YouTube.
+  Newcomers edition of Klustered. Jeremy, Jason, and Tom from Equinix Metal
+  debug a broken Kubernetes cluster with kubectl, fixing a port mismatch, a 1Mi
+  memory limit, a scheduler startup delay, a scaled-down Postgres StatefulSet,
+  and a service selector typo.
 publishedAt: 2021-05-27T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - teleport
+  - postgresql
+  - rust
 show: klustered
 chapters:
   - startTime: 0

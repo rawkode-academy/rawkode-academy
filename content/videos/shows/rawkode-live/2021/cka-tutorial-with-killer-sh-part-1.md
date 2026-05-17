@@ -3,10 +3,10 @@ id: a1djak0y4g0irt3wnrg17uwa
 slug: cka-tutorial-with-killer-sh-part-1
 title: CKA Tutorial with Killer.sh (Part 1)
 description: >-
-  Kubernetes is a portable, extensible, open-source platform for managing
-  containerized workloads and services, that facilitates both declarative
-  configuration and automation. It has a large, rapidly growing ecosystem.
-  Kubernetes services, support, and tools are widely
+  Rawkode tackles the Killer.sh CKA exam simulator live, working through kubectl
+  contexts, scheduling pods onto control plane nodes, scaling StatefulSets,
+  creating PVs and PVCs with hostPath, kubectl top, and manually scheduling pods
+  by stopping the scheduler.
 publishedAt: 2021-06-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -65,6 +65,7 @@ resources:
     category: demos
   - title: Kubernetes nodeSelector documentation
     type: url
+    url: 'https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/'
     category: documentation
 ---
 

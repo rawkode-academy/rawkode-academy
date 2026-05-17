@@ -3,13 +3,16 @@ id: jc8t4h91wok4bgq10t1s3fiv
 slug: universal-blue-and-system-initiative
 title: Universal Blue & System Initiative
 description: >-
-  In the first episode of AlphaBits, Brian and David explain why they're excited
-  about Universal Blue and System Intiative.
+  Brian shows his daily-driver Bluefin desktop, a Universal Blue image with
+  rpm-ostree rollbacks, Distrobox, Nix and Flatpak baked in. David then demos
+  System Initiative orchestrated via Tilt, dragging AWS resources onto a canvas
+  to model and deploy an EC2 stack live.
 publishedAt: 2023-08-03T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - system-initiative
+  - tilt
   - universal-blue
 chapters:
   - startTime: 0

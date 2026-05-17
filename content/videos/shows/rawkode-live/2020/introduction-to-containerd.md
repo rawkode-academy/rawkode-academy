@@ -3,14 +3,17 @@ id: a2fq3imoh0w5zz0vx1p9czm4
 slug: introduction-to-containerd
 title: Introduction to containerd
 description: >-
-  In this episode, joined by Phil Estes (@estes), maintainer for the containerd
-  project; we discuss the history and creation of containerd, as well as some
-  best practices for using and operating containerd.
+  Phil Estes, containerd maintainer, walks through how containerd was extracted
+  from Docker, its gRPC service architecture, snapshotters and CRI integration
+  versus CRI-O, plus hands-on debugging with ctr and microk8s.
 publishedAt: 2020-09-22T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - containerd
+  - docker
+  - kubernetes
+  - crio
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -50,9 +53,11 @@ resources:
     category: other
   - title: containerd issue 4531
     type: url
-    category: other
+    url: 'https://github.com/containerd/containerd/issues/4531'
+    category: code
   - title: Kata Containers
     type: url
+    url: 'https://katacontainers.io/'
     category: code
 ---
 

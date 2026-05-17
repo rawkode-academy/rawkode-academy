@@ -3,8 +3,10 @@ id: tq4z0nov4d8znm2y0pubx56b
 slug: kubernetes-cluster-api-for-equinix-metal-formely-packet
 title: Kubernetes Cluster API for Equinix Metal (Formely Packet)
 description: >-
-  In this episode, joined by my colleague Jason DeTiberus, we explore using the
-  Kubernetes Cluster API to deploy new Kubernetes clusters on Packet.
+  Jason DeTiberus joins to walk through declaratively defining Kubernetes
+  clusters with Cluster API, installing the Packet infrastructure provider,
+  generating a workload cluster config with clusterctl, and bootstrapping nodes
+  via kubeadm on Packet bare metal.
 publishedAt: 2020-08-26T15:30:00.000Z
 type: live
 category: tutorial
@@ -45,18 +47,23 @@ guests:
 resources:
   - title: Cluster API Book Quick Start
     type: url
+    url: 'https://cluster-api.sigs.k8s.io/user/quick-start.html'
     category: documentation
   - title: Cluster API Provider Packet repository
     type: url
+    url: 'https://github.com/kubernetes-sigs/cluster-api-provider-packet'
     category: code
   - title: Kubernetes SIGs Image Builder
     type: url
+    url: 'https://github.com/kubernetes-sigs/image-builder'
     category: code
   - title: Cluster Addons project
     type: url
+    url: 'https://github.com/kubernetes-sigs/cluster-addons'
     category: code
   - title: Cluster Autoscaler
     type: url
+    url: 'https://github.com/kubernetes/autoscaler'
     category: code
 ---
 

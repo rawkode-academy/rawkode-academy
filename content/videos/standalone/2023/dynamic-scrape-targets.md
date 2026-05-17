@@ -3,14 +3,17 @@ id: hmi73u4rxevdc9jb39tu1lxq
 slug: dynamic-scrape-targets
 title: Dynamic Scrape Targets
 description: >-
-  Parca provides first-class support for scraping your profile data from any
-  compatible pprof endpoint, so let's take a look at configuring our Parca
-  server to do just that.
+  Configure the Parca config map with a Prometheus-style scrape job that uses
+  Kubernetes service discovery, keeps pods by parca.dev annotations, and adds
+  the cluster role binding needed to scrape an InfluxDB 2 pprof endpoint.
 publishedAt: 2023-07-11T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - parca
+  - kubernetes
+  - prometheus
+  - influxdb
 chapters:
   - startTime: 0
     title: Introduction
@@ -40,6 +43,19 @@ chapters:
     title: Summary and Conclusion
 duration: 610
 guests: []
-resources: []
+resources:
+  - type: url
+    title: Parca scrape configuration documentation
+    category: documentation
+    url: 'https://www.parca.dev/docs/'
+  - type: url
+    title: Prometheus Kubernetes service discovery
+    category: documentation
+    url: >-
+      https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config
+  - type: url
+    title: InfluxDB 2 pprof endpoint
+    category: documentation
+    url: 'https://docs.influxdata.com/influxdb/v2/'
 ---
 

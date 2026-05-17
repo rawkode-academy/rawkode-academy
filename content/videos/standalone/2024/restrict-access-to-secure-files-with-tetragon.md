@@ -3,15 +3,16 @@ id: tfahqa0n2pld6jvnu7a8k5w9
 slug: restrict-access-to-secure-files-with-tetragon
 title: Restrict Access to Secure Files with Tetragon
 description: >-
-  Tetragon is a flexible Kubernetes-aware security observability and runtime
-  enforcement tool that applies policy and filtering directly with eBPF,
-  allowing for reduced observation overhead, tracking of any process, and
-  real-time enforcement of policies.
+  Write Tetragon TracingPolicy CRDs with kprobes to observe file access in a
+  Kubernetes cluster, then filter on sys_write and paths under /etc using
+  matchArgs, and enforce policy in-kernel with the SIGKILL and getURL match
+  actions.
 publishedAt: 2024-02-22T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - tetragon
+  - kubernetes
 chapters:
   - startTime: 0
     title: Introduction to File Access Enforcement with Tetragon
@@ -80,17 +81,19 @@ guests: []
 resources:
   - title: Tetragon Tracing Policy Concepts
     type: url
+    url: 'https://tetragon.io/docs/concepts/tracing-policy/'
     category: documentation
-  - title: Tetragon GitHub Examples
+  - title: Tetragon Tracing Policy Examples
     type: url
-    url: 'https://github.com/cilium/tetragon'
+    url: 'https://github.com/cilium/tetragon/tree/main/examples/tracingpolicy'
     category: code
-  - title: di.net Linux Man Pages
+  - title: linux.die.net Man Pages
     type: url
-    url: 'https://di.net'
+    url: 'https://linux.die.net/'
     category: documentation
-  - title: Sourcegraph Linux Kernel Search
+  - title: Sourcegraph
     type: url
+    url: 'https://sourcegraph.com/'
     category: other
 ---
 

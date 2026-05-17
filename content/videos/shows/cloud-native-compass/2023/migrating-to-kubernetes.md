@@ -3,14 +3,21 @@ id: st3tvvzjqscd51gam6o0h5jv
 slug: migrating-to-kubernetes
 title: Migrating to Kubernetes
 description: >-
-  In this episode, Rachel shares her journey into tech and how she ended up in
-  the Kubernetes space. She did not have a traditional IT background, but she
-  was always interested in computers and programming.
+  Rachel Sweeney shares Built Technologies' migration to Kubernetes: when (and
+  when not) to adopt it, taming developer experience with DevSpace, and the
+  ecosystem of Argo CD, Flux, Helm, Kustomize, KEDA, and Crossplane that powers
+  their platform.
 publishedAt: 2023-05-22T17:00:00.000Z
 type: recorded
 category: interview
 technologies:
   - kubernetes
+  - argo
+  - devspace
+  - fluxcd
+  - helm
+  - keda
+  - crossplane
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -62,6 +69,31 @@ guests:
 resources:
   - title: Argo CD
     type: url
+    url: 'https://argoproj.github.io/cd/'
+    category: code
+  - title: DevSpace
+    type: url
+    url: 'https://devspace.sh/'
+    category: code
+  - title: Flux
+    type: url
+    url: 'https://fluxcd.io/'
+    category: code
+  - title: Helm
+    type: url
+    url: 'https://helm.sh/'
+    category: code
+  - title: Kustomize
+    type: url
+    url: 'https://kustomize.io/'
+    category: code
+  - title: KEDA
+    type: url
+    url: 'https://keda.sh/'
+    category: code
+  - title: Crossplane
+    type: url
+    url: 'https://www.crossplane.io/'
     category: code
 ---
 

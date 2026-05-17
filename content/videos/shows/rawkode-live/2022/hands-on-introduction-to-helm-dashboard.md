@@ -3,15 +3,17 @@ id: lcz9j59zo663yngesf8a0k1m
 slug: hands-on-introduction-to-helm-dashboard
 title: Hands-on Introduction to helm-dashboard
 description: >-
-  The Helm Dashboard plugin offers a UI-driven way to view the installed Helm
-  charts, see their revision history and corresponding k8s resources. Also, you
-  can perform simple actions like roll back to a revision or upgrade to newer
-  version.
+  Andre Pokhilko from Komodor walks David through Helm Dashboard, an open source
+  Helm plugin that puts a focused web UI over the Helm CLI. The demo covers
+  release history, manifest and values diffs, rollbacks, reconfigure, and
+  Trivy/Checkov scanner integration.
 publishedAt: 2022-10-27T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - helm-dashboard
+  - helm
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -77,6 +79,26 @@ chapters:
 duration: 3498
 guests:
   - andrei-pokhilko
-resources: []
+resources:
+  - type: url
+    category: code
+    title: helm-dashboard on GitHub
+    url: 'https://github.com/komodorio/helm-dashboard'
+  - type: url
+    category: documentation
+    title: Helm
+    url: 'https://helm.sh/'
+  - type: url
+    category: other
+    title: Komodor
+    url: 'https://komodor.com/'
+  - type: url
+    category: other
+    title: Trivy
+    url: 'https://github.com/aquasecurity/trivy'
+  - type: url
+    category: other
+    title: Checkov
+    url: 'https://www.checkov.io/'
 ---
 

@@ -2,25 +2,17 @@
 id: gcyhdcr1fqccea0s1idebvw9
 slug: part-1-lecture-1-introduction-to-time-series
 title: 'Part 1 - Lecture 1: Introduction to Time Series'
-description: |-
-  Subsequent videos are only available to Incubating members. Join now:
-
-
-  https://www.youtube.com/channel/UCrber_mFvp_FEF7D9u8PDEA/join
-
-
-  - What is time series data?
-  - Why do I need a time series database?
-  - What value does time series data bring?
-  - How do I work with time series data?
-
-
-  #InfluxDB #TimeSeries
+description: >-
+  Lecture one of the InfluxDB 2 course. David traces the history of encoding and
+  sharding from ancient Rome, defines time series data (metrics versus events),
+  shows collection with Telegraf, and previews downsampling and Kubernetes
+  monitoring with InfluxDB.
 publishedAt: 2021-07-29T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - influxdb
+  - telegraf
 chapters:
   - startTime: 0
     title: Introduction
@@ -127,12 +119,15 @@ guests: []
 resources:
   - title: The Lives of the Noble Grecians and Romans
     type: url
+    url: 'https://www.gutenberg.org/ebooks/674'
     category: other
   - title: Black Book of Admiralty
     type: url
+    url: 'https://archive.org/details/monumentajuridi00twisgoog'
     category: other
   - title: The Early History of Data Networks
     type: url
+    url: 'https://spinroot.com/gerard/hist.html'
     category: other
 ---
 

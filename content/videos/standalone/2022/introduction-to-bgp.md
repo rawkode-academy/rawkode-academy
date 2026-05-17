@@ -3,21 +3,10 @@ id: cle88zfeqmv5z0rl6g7mi083
 slug: introduction-to-bgp
 title: Introduction to BGP
 description: >-
-  Want to follow along with some FREE Equinix Metal credits?
-
-
-  Checkout https://rawkode.academy/metal and use the code "rawkode"
-
-
-  ---
-
-
-  In this session, we'll introduce you to the vocabulary and software you need
-  to be able to understand the essentials of working with BGP.
-
-
-  We'll be guiding you through broadcasting your first BGP address with the help
-  of Equinix Metal, the bare metal cloud.
+  Rawkode and Jeremy Tanner introduce BGP, covering autonomous systems,
+  prefixes, anycast routing and CDN failover. They then deploy NGINX across two
+  Equinix Metal metros, configure the BIRD daemon, and verify anycast routing
+  with curl, traceroute and Locoping.
 publishedAt: 2022-07-14T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -105,7 +94,6 @@ resources:
     category: other
   - title: Locoping
     type: url
-    url: 'https://locoping.com'
     category: other
   - title: Simple Wikipedia (BGP)
     type: url

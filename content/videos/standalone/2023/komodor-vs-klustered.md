@@ -3,12 +3,16 @@ id: dcjov47ebu5lv9zvbe787zpj
 slug: komodor-vs-klustered
 title: Komodor Vs. Klustered
 description: >-
-  A team from Komodor take on the Klustered challenge; can they fix a
-  maliciously broken Kubernetes cluster with only their own tool?
+  Komodor's CTO and engineers debug a maliciously broken Kubernetes cluster
+  live, using their timeline to track down Cilium CNI RBAC, Flux GitOps
+  reconciliation, and a NetworkPolicy blocking Drupal from Postgres.
 publishedAt: 2023-12-13T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
+  - cilium
+  - fluxcd
+  - helm
   - komodor
   - kubernetes
 chapters:

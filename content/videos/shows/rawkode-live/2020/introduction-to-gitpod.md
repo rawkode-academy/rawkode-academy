@@ -3,24 +3,20 @@ id: l2iuanpln1slft075q8ahyon
 slug: introduction-to-gitpod
 title: Introduction to Gitpod
 description: >-
-  Gitpod is frictionless coding.
-
-
-  Whether you just want to hack, have code to review or feel like trying
-  something new on GitLab, GitHub, or Bitbucket, Gitpod launches a prebuilt dev
-  environment with a single click.
-
-
-  Because Gitpod is based on open-source tech like VS Code, Docker, and
-  Kubernetes, it is familiar, comprehensive, extensible, and easy to use. With
-  deep code-hosting platform integrations, tools for sharing and collaborating,
-  and a focus on usability, Gitpod contains your entire dev workflow in a
-  browser tab.
+  Chris (chief architect) and Sven (CEO) of Gitpod demo cloud dev environments
+  defined in code: .gitpod.yml, Dockerfile-based workspaces on Kubernetes, Go
+  and Rust projects, Docker Compose, port forwarding, OpenVSX extensions, and
+  pull request review workflows.
 publishedAt: 2020-12-15T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - gitpod
+  - docker
+  - docker-compose
+  - kubernetes
+  - rust
+  - gitlab
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -134,13 +130,15 @@ resources:
     category: other
   - title: Eclipse Theia
     type: url
+    url: 'https://theia-ide.org/'
     category: code
   - title: gitpod-io/gitpod repository
     type: url
     url: 'https://github.com/gitpod-io/gitpod'
     category: code
-  - title: Gitpod docker images repository
+  - title: Gitpod workspace images repository
     type: url
+    url: 'https://github.com/gitpod-io/workspace-images'
     category: code
   - title: GitLab project Gitpod configuration
     type: url

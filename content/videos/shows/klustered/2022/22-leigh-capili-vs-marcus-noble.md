@@ -3,13 +3,17 @@ id: peig5ghfiyldrd5pm4u9opzu
 slug: 22-leigh-capili-vs-marcus-noble
 title: 22. Leigh Capili vs. Marcus Noble
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Leigh Capili and Marcus Noble debug broken Kubernetes clusters: kubelet
+  systemd units, kubeconfig ports, admission webhooks from Kyverno, Pod Security
+  Policies, quotas, and a kubeadm certificate renewal gone wrong.
 publishedAt: 2022-04-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - kyverno
+  - helm
+  - artifacthub
 show: klustered
 chapters:
   - startTime: 0
@@ -102,6 +106,7 @@ resources:
     category: other
   - title: Artifact Hub
     type: url
+    url: 'https://artifacthub.io/'
     category: other
 ---
 

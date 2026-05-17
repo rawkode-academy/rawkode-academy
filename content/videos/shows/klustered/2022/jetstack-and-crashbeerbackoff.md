@@ -3,13 +3,16 @@ id: sv0mv7oqjeu35421sjkffdou
 slug: jetstack-and-crashbeerbackoff
 title: Jetstack & CrashBeerBackOff
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Team JetStack and Team CrashBeerBackOff tackle two broken Kubernetes clusters,
+  debugging containerd log limits, a disabled deployment controller, kubelet
+  service typos, and iptables NAT rules redirecting API server and DNS traffic.
 publishedAt: 2022-08-12T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -118,11 +121,11 @@ duration: 5355
 resources:
   - title: Teleport
     type: url
-    url: 'https://Rawkode.link/Teleport'
+    url: 'https://goteleport.com/'
     category: other
   - title: Equinix Metal
     type: url
-    url: 'https://Rawkode.link/metal'
+    url: 'https://deploy.equinix.com/'
     category: other
 ---
 

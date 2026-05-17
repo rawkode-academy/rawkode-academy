@@ -3,13 +3,17 @@ id: e88n95c3276uqeoi7per1v6r
 slug: monitoring-kubernetes-with-prometheus-and-robusta
 title: Monitoring Kubernetes with Prometheus & Robusta
 description: >-
-  Let’s take a look at some of the new features in Robusta that take your
-  Kubernetes and Prometheus monitoring to the next level.
+  Natan Yellin and Eric return to walk through Robusta's playbooks and
+  enrichers, demoing CrashLoopBackOff and OOMKill alerts, custom Stack Overflow
+  enrichment, and the Robusta SaaS platform on top of Prometheus and Kubernetes.
 publishedAt: 2022-12-14T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - robusta
+  - prometheus
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 168
@@ -52,9 +56,11 @@ guests:
 resources:
   - title: Kube Watch
     type: url
+    url: 'https://github.com/robusta-dev/kubewatch'
     category: code
   - title: Robusta custom automation tutorial
     type: url
+    url: 'https://docs.robusta.dev/master/playbook-reference/index.html'
     category: documentation
   - title: Robusta Stack Overflow enricher source code
     type: url

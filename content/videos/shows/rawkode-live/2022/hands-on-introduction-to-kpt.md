@@ -3,15 +3,17 @@ id: cbeascecdg8e9r04gjnagspj
 slug: hands-on-introduction-to-kpt
 title: Hands-on Introduction to kpt
 description: >-
-  kpt is a package-centric toolchain that enables a WYSIWYG configuration
-  authoring, automation, and delivery experience, which simplifies managing
-  Kubernetes platforms and KRM-driven infrastructure at scale by manipulating
-  declarative Configuration as Data, separated from the cod…
+  Brian Grant and Justin Santa Barbara from Google walk through kpt hands-on:
+  installing the CLI and Porch, registering blueprint and deployment Git repos,
+  authoring a namespace package with KRM functions, and driving it all from the
+  Backstage-based Config as Data UI.
 publishedAt: 2022-07-15T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kpt
+  - kubernetes
+  - backstage
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -174,9 +176,11 @@ guests:
 resources:
   - title: kpt namespace provisioning UI guide
     type: url
+    url: 'https://kpt.dev/guides/namespace-provisioning-ui'
     category: documentation
   - title: kpt channel on the Kubernetes Slack
     type: url
+    url: 'https://kubernetes.slack.com/messages/kpt'
     category: other
 ---
 

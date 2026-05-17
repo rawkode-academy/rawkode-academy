@@ -3,13 +3,16 @@ id: tpw7gzgjwcw3wwnx4wh7ot7c
 slug: why-webassembly-code-once-run-everywhere
 title: 'Why WebAssembly? Code Once, Run Everywhere'
 description: >-
-  Spin is a framework for building, deploying, and running fast, secure, and
-  composable cloud microservices with WebAssembly.
+  Kicking off the Fermyon Spin course with the why of WebAssembly. A Rust
+  password validator becomes a shared domain crate consumed by a Spin HTTP
+  backend and a JavaScript frontend, both compiled to Wasm.
 publishedAt: 2023-01-23T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - webassembly
+  - rust
 chapters:
   - startTime: 0
     title: Introduction to Course & Topic

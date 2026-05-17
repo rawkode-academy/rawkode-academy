@@ -3,13 +3,19 @@ id: tpt5t0dgsrai5h4lzutozcvm
 slug: klustered-part-vi
 title: Klustered (Part VI)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Duffie Cooley joins to debug two broken Kubernetes clusters: an
+  ImagePolicyWebhook, Kyverno ClusterPolicy, deny NetworkPolicy and kubelet
+  config typo on cluster 11; missing static manifests, immutable etcd DB,
+  vm.min_free_kbytes starvation and kubelet memory limits on cluster 13.
 publishedAt: 2021-03-25T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - kyverno
+  - coredns
+  - etcd
+  - containerd
 show: klustered
 chapters:
   - startTime: 0

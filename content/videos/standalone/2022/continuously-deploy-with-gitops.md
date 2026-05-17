@@ -3,14 +3,15 @@ id: xi7tekr74r3qfd7pv30lkp0s
 slug: continuously-deploy-with-gitops
 title: Continuously Deploy with GitOps
 description: >-
-  Welcome to the Portainer in Production course. In this video, I walk you
-  through continuously deploying your application from Git with Portainer
-  Stacks, using nothing more than a docker-compose.yml.
+  Bring GitOps to non-Kubernetes environments using Portainer Stacks backed by a
+  Git repository and a docker-compose.yml, with continuous delivery triggered by
+  either polling or GitHub webhooks.
 publishedAt: 2022-12-09T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - portainer
+  - docker-compose
 chapters:
   - startTime: 0
     title: Introduction
@@ -47,5 +48,13 @@ resources:
     type: url
     url: 'https://github.com/rawkode-academy/portainer-in-production'
     category: code
+  - title: Portainer Documentation
+    type: url
+    url: 'https://docs.portainer.io/'
+    category: documentation
+  - title: Docker Compose Documentation
+    type: url
+    url: 'https://docs.docker.com/compose/'
+    category: documentation
 ---
 

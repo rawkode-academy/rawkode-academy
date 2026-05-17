@@ -3,13 +3,16 @@ id: byfqy7h28x7wcs80mweqt6kb
 slug: klustered-11
 title: 'Klustered #11'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  KubeCon special part two with Thomas Stromberg and Kris Nova. Two broken
+  clusters: a malicious static pod manifest persisted via a systemd service and
+  LD_PRELOAD hook, and an etcd flooding attack that exhausted the database
+  quota.
 publishedAt: 2021-05-06T17:35:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
 show: klustered
 chapters:
   - startTime: 0
@@ -65,6 +68,15 @@ guests:
 resources:
   - title: SleuthKit FLS
     type: url
+    url: 'https://www.sleuthkit.org/sleuthkit/man/fls.html'
+    category: documentation
+  - title: etcd
+    type: url
+    url: 'https://etcd.io/'
+    category: documentation
+  - title: Kubernetes static pods
+    type: url
+    url: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/'
     category: documentation
 ---
 

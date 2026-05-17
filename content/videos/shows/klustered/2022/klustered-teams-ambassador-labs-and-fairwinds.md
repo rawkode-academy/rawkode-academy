@@ -3,13 +3,18 @@ id: vt7ini6wdrms1hbc8z9rk44u
 slug: klustered-teams-ambassador-labs-and-fairwinds
 title: Klustered Teams - Ambassador Labs & Fairwinds
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Ambassador Labs and Fairwinds break each other's Kubernetes clusters. Fixes
+  include OOM memory limits, a CoreDNS rewrite hijack pointing to a rogue
+  Postgres in kube-public, a hijacked kubectl shell function, node taints, and a
+  self-recreating NetworkPolicy.
 publishedAt: 2022-03-04T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - coredns
+  - postgresql
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -134,6 +139,14 @@ guests:
   - edidiong-asikpo
   - alexandre-gervais
   - andy-suderman
-resources: []
+resources:
+  - type: url
+    title: Teleport
+    url: 'https://goteleport.com/'
+    category: other
+  - type: url
+    title: Emissary-Ingress
+    url: 'https://emissary-ingress.dev/'
+    category: other
 ---
 

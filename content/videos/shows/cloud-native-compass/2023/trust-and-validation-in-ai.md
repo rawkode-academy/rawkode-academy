@@ -3,9 +3,10 @@ id: ce0y3h3wgv2vt9m4rcux1s7x
 slug: trust-and-validation-in-ai
 title: Trust and Validation in AI
 description: >-
-  1️⃣ The People Problem: Laura Santamaria raises an important concern about
-  verifying AI-generated outputs and tackling the challenge of the "people
-  problem" in AI development.
+  JJ Asgar joins to discuss IBM watsonx.ai and why enterprises distrust today's
+  black-box AI. The conversation covers training data provenance, The Pile,
+  Hugging Face, hallucinations, copyright, and the human problem of verifying AI
+  outputs.
 publishedAt: 2023-11-01T17:00:00.000Z
 type: recorded
 category: interview
@@ -87,12 +88,14 @@ resources:
     category: documentation
   - title: The Pile AI dataset
     type: url
+    url: 'https://pile.eleuther.ai/'
     category: other
   - title: FOSSY working session Etherpad notes on AI data provenance
     type: url
     category: other
   - title: Hugging Face
     type: url
+    url: 'https://huggingface.co/'
     category: other
 ---
 

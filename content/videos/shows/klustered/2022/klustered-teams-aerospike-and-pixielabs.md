@@ -3,13 +3,18 @@ id: jtqwn91v0x5dxjuy02z7a8j8
 slug: klustered-teams-aerospike-and-pixielabs
 title: Klustered Teams - Aerospike & PixieLabs
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams Aerospike and Pixie Labs tackle broken Kubernetes clusters via Teleport.
+  Aerospike untangles etcd auth, ImagePullPolicy and registry DNS; Pixie hits
+  etcd ports, a rogue manifest, kubelet run-once and containerd socket paths.
 publishedAt: 2022-04-14T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - containerd
+  - teleport
+  - pixie
 show: klustered
 chapters:
   - startTime: 0

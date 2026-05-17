@@ -3,13 +3,18 @@ id: nzngv0j5wn5xgxps9qrg2i2i
 slug: feature-flags-via-gitops-with-flipt
 title: Feature Flags via GitOps with Flipt
 description: >-
-  Flipt is an open-source, self-hosted feature flag application that allows you
-  to run experiments across services in your environment.
+  Mark Phelps and George MacRorie show how Flipt manages feature flags as code,
+  syncing flag state from a Git repository (Gitea) and OCI registries. Demo
+  covers variants, stickiness, gRPC and REST SDKs (Node, Python), and bundling
+  flags with ttl.sh.
 publishedAt: 2023-11-18T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - flipt
+  - gitea
+  - grpc
+  - docker-compose
 show: rawkode-live
 chapters:
   - startTime: 31
@@ -59,12 +64,15 @@ guests:
 resources:
   - title: Flipt Labs repository
     type: url
+    url: 'https://github.com/flipt-io/labs'
     category: code
   - title: Flipt Labs chatbot demo
     type: url
+    url: 'https://github.com/flipt-io/labs/tree/main/chatbot'
     category: demos
   - title: ttl.sh ephemeral registry
     type: url
+    url: 'https://ttl.sh'
     category: other
 ---
 

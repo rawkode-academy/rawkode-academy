@@ -3,10 +3,10 @@ id: quiidc7e2t4pu03cgvxtkxmi
 slug: hands-on-with-runme
 title: Hands-on with RUNME
 description: >-
-  Runme is a tool that makes runbooks actually runnable, making it easier to
-  follow step-by-step instructions. Shell/bash, Python, Ruby,
-  Javascript/Typescript, Lua, PHP, Perl, and many other runtimes are supported
-  via Runme's shebang feature.
+  Sebastian Tiedtke, CTO of Stateful, gives a hands-on tour of Runme: turning
+  Markdown into runnable notebooks via the CLI and VS Code, mixing shell, Python
+  and Deno cells, navigating cloud resources, and reproducible envs with dev
+  containers and Dagger.
 publishedAt: 2024-10-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -56,6 +56,7 @@ guests:
 resources:
   - title: Runme Getting Started page
     type: url
+    url: 'https://docs.runme.dev/getting-started/'
     category: documentation
   - title: Stateful
     type: url
@@ -66,6 +67,7 @@ resources:
     category: documentation
   - title: Dagger integration documentation
     type: url
+    url: 'https://docs.runme.dev/guide/dagger'
     category: documentation
 ---
 

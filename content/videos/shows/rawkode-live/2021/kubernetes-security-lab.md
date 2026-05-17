@@ -3,15 +3,18 @@ id: abih5lxnfz58vl1ariozmar5
 slug: kubernetes-security-lab
 title: Kubernetes Security Lab
 description: >-
-  Kubernetes is a portable, extensible, open-source platform for managing
-  containerized workloads and services, that facilitates both declarative
-  configuration and automation. It has a large, rapidly growing ecosystem.
-  Kubernetes services, support, and tools are widely
+  Rory McCune walks through a hands-on Kubernetes security lab built on kind,
+  attacking five deliberately vulnerable clusters: insecure API server port,
+  unauthenticated kubelet, unauthenticated etcd, privileged pod escape, and Helm
+  2's Tiller.
 publishedAt: 2021-04-15T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - docker
+  - helm
+  - etcd
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -160,15 +163,19 @@ guests:
 resources:
   - title: kind (Kubernetes in Docker)
     type: url
-    category: code
+    url: 'https://kind.sigs.k8s.io/'
+    category: documentation
   - title: CIS Benchmarks
     type: url
+    url: 'https://www.cisecurity.org/cis-benchmarks'
     category: documentation
   - title: Kube Hunter
     type: url
+    url: 'https://github.com/aquasecurity/kube-hunter'
     category: code
   - title: CyberArk kubeletctl
     type: url
+    url: 'https://github.com/cyberark/kubeletctl'
     category: code
 ---
 

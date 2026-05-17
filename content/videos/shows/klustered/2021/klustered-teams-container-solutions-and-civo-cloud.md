@@ -3,13 +3,18 @@ id: jpgna191w3vhmazhx8q5gypb
 slug: klustered-teams-container-solutions-and-civo-cloud
 title: 'Klustered Teams: Container Solutions & Civo Cloud'
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Container Solutions and Civo Cloud race to repair broken Kubernetes clusters,
+  fixing expired apiserver certs, a tab-corrupted scheduler manifest, a
+  malicious validating webhook, node taints, scheduler port mismatches, resource
+  quotas, and a containerd registry redirect.
 publishedAt: 2021-07-08T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - cilium
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -125,6 +130,7 @@ guests:
 resources:
   - title: Teleport access platform
     type: url
+    url: 'https://goteleport.com/'
     category: other
 ---
 

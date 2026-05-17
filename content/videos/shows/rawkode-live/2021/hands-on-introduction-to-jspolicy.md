@@ -3,13 +3,18 @@ id: p4bjwtw1dwufd4yipdrp7dhi
 slug: hands-on-introduction-to-jspolicy
 title: Hands-on Introduction to jsPolicy
 description: >-
-  In this episode, we take a look at jsPolicy. We'll see how to get started
-  writing validating and mutating policies in JavaScript for Kubernetes.
+  Lukas Gentele from Loft Labs joins to introduce jsPolicy, a Kubernetes
+  admission controller that lets you write validating, mutating, and controller
+  policies in JavaScript or TypeScript, with comparisons to OPA and Kyverno.
 publishedAt: 2021-09-14T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - jspolicy
+  - kubernetes
+  - kyverno
+  - opa
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -91,11 +96,14 @@ resources:
   - title: jsPolicy Architecture docs page
     type: url
     category: documentation
+    url: 'https://www.jspolicy.com/docs/architecture'
   - title: jsPolicy example policies repository
     type: url
     category: code
+    url: 'https://github.com/loft-sh/jspolicy/tree/main/examples'
   - title: jsPolicy SDK starter project
     type: url
     category: code
+    url: 'https://github.com/loft-sh/jspolicy-sdk'
 ---
 

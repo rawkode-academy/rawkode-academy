@@ -3,13 +3,17 @@ id: xv2v8qdigpu0kphaelrjmr5i
 slug: hands-on-introduction-to-vcluster
 title: Hands-on Introduction to vcluster
 description: >-
-  Curious about Kubernetes multi-tenancy? In this episode, we'll be guided
-  through everything we need to know about vcluster.
+  Rich Burroughs and Lukas Gentele from Loft Labs walk through vCluster, a newly
+  Kubernetes-certified distribution that runs a k3s control plane inside a
+  namespace and syncs workloads to the host, plus a live install via Helm.
 publishedAt: 2021-06-23T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - vcluster
+  - kubernetes
+  - k3s
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -79,9 +83,11 @@ guests:
 resources:
   - title: KubeCuddle podcast
     type: url
+    url: 'https://kubecuddle.com/'
     category: other
   - title: vCluster Getting Started Guide
     type: url
+    url: 'https://www.vcluster.com/docs/vcluster/'
     category: documentation
   - title: 'vCluster Operator Guide: Monitoring and Metrics'
     type: url

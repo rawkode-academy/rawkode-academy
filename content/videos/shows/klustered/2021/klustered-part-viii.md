@@ -3,13 +3,17 @@ id: dxx8gdculzrd3zyc6m8nuxms
 slug: klustered-part-viii
 title: Klustered (Part VIII)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Noel Georgi joins David to debug two broken Kubernetes clusters: a TLS 1.3
+  handshake mismatch blocking the API server, and rogue Cilium host network
+  policies plus a misconfigured native-routing-cidr breaking node readiness.
 publishedAt: 2021-04-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - cilium
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -216,6 +220,7 @@ guests:
 resources:
   - title: kubectl neat
     type: url
+    url: 'https://github.com/itaysk/kubectl-neat'
     category: code
 ---
 

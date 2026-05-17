@@ -11,6 +11,13 @@ type: recorded
 category: interview
 technologies:
   - webassembly
+  - kwasm
+  - spin
+  - wasm-edge-runtime
+  - wasmcloud
+  - docker
+  - kubernetes
+  - gimlet
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -52,7 +59,15 @@ guests:
 resources:
   - title: kwasm
     type: url
-    url: 'https://kwasm.sh'
+    url: 'https://kwasm.sh/'
     category: code
+  - title: WebAssembly
+    type: url
+    url: 'https://webassembly.org/'
+    category: documentation
+  - title: Gimlet
+    type: url
+    url: 'https://gimlet.io/'
+    category: other
 ---
 

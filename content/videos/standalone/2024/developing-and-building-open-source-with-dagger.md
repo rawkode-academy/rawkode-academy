@@ -3,14 +3,19 @@ id: g179fxks66spn3ni7749lzdd
 slug: developing-and-building-open-source-with-dagger
 title: Developing & Building Open Source with Dagger
 description: >-
-  This live stream series will demonstrate how open source projects can leverage
-  Dagger to enhance their build automation and development environments.
+  Mark Bernstein joins to Daggerize OpenUnison: writing a Dagger pipeline that
+  spins up an ephemeral k3s cluster and deploys the OpenUnison Helm charts,
+  swapping Podman for Docker along the way to make in-cluster testing work.
 publishedAt: 2024-08-15T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - dagger
   - openunison
+  - k3s
+  - helm
+  - docker
+  - podman
 chapters:
   - startTime: 0
     title: Intro & Apology
@@ -58,7 +63,7 @@ guests:
 resources:
   - title: OpenUnison Helm Charts
     type: url
-    url: 'https://github.com/OpenUnison/helmcharts'
+    url: 'https://github.com/OpenUnison/helm-charts'
     category: code
   - title: 'Kubernetes: An Enterprise Guide'
     type: url
@@ -67,8 +72,9 @@ resources:
     type: url
     url: 'https://hurl.dev'
     category: other
-  - title: k3s Dagger Module
+  - title: k3s Dagger Module (marcosnils)
     type: url
+    url: 'https://daggerverse.dev/mod/github.com/marcosnils/daggerverse/k3s'
     category: code
 ---
 

@@ -2,12 +2,14 @@
 id: nnnb1s0hvh5ypbwavjppy3ze
 slug: kluctl-new-features-and-updates
 title: Kluctl New Features & Updates
-description: Kluctl is the missing glue to put together large Kubernetes deployments.
+description: 'Alexander Block returns to walk through what''s new in Kluctl: the GitOps controller for pull-based deploys alongside the CLI, the WebUI for visibility, and a live demo bootstrapping a kind cluster and handing off to GitOps.'
 publishedAt: 2023-09-27T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kluctl
+  - helm
+  - fluxcd
 show: rawkode-live
 chapters:
   - startTime: 108
@@ -65,6 +67,22 @@ chapters:
 duration: 4744
 guests:
   - alexander-block
-resources: []
+resources:
+  - type: url
+    title: Kluctl documentation
+    url: 'https://kluctl.io/docs/'
+    category: documentation
+  - type: url
+    title: Kluctl on GitHub
+    url: 'https://github.com/kluctl/kluctl'
+    category: code
+  - type: url
+    title: Kluctl GitOps controller
+    url: 'https://kluctl.io/docs/gitops/'
+    category: documentation
+  - type: url
+    title: Kluctl Template Controller
+    url: 'https://github.com/kluctl/template-controller'
+    category: code
 ---
 

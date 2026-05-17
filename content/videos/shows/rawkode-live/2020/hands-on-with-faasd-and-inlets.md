@@ -3,9 +3,10 @@ id: mdv5rucpczre2hmjslcad38r
 slug: hands-on-with-faasd-and-inlets
 title: Hands-on with faasd & Inlets
 description: >-
-  faasd is OpenFaaS reimagined, but without the cost and complexity of
-  Kubernetes. It runs on a single host with very modest requirements, making it
-  fast and easy to manage.
+  Alex Ellis joins David to install faasd on Equinix Metal via cloud-init,
+  deploy a Go function, demo containerd pause for fast cold starts and async
+  callbacks, then expose a cluster service publicly using inlets-operator and
+  arkade.
 publishedAt: 2020-11-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -178,10 +179,11 @@ guests:
 resources:
   - title: arkade
     type: url
-    url: 'https://get-arkade.dev'
+    url: 'https://github.com/alexellis/arkade'
     category: code
   - title: Start With Why
     type: url
+    url: 'https://simonsinek.com/books/start-with-why/'
     category: other
 ---
 

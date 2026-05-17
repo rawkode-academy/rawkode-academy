@@ -3,13 +3,18 @@ id: ydqpwfanic1vdp76g6xaq23s
 slug: the-community-vs-rawkode
 title: The Community Vs. Rawkode
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Community volunteers each get ten minutes to debug two broken Kubernetes
+  clusters live. Cluster one hides a renamed etcd static pod manifest; cluster
+  two has a rogue process scaling a deployment to zero via a malicious kubectl
+  auth helper.
 publishedAt: 2022-06-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - containerd
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -164,18 +169,18 @@ duration: 5996
 resources:
   - title: Teleport
     type: url
-    url: 'https://rawkode.live/Teleport'
+    url: 'https://goteleport.com/'
     category: other
   - title: Equinix Metal
     type: url
-    url: 'https://rawkode.live/metal'
+    url: 'https://deploy.equinix.com/'
     category: other
-  - title: Clustered playlist
+  - title: Klustered playlist
     type: url
     category: other
   - title: KubeHuddle
     type: url
-    url: 'https://kubehuddle.com'
+    url: 'https://kubehuddle.com/'
     category: other
 ---
 

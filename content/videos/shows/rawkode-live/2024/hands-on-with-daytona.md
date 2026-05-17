@@ -2,12 +2,17 @@
 id: inel7yn0hye5yshls8n7o6n1
 slug: hands-on-with-daytona
 title: Hands-on with Daytona
-description: Daytona is a radically simple open source development environment manager.
+description: >-
+  Ivan Burazin demos Daytona, the open source dev environment manager. One
+  `daytona create` spins up a workspace from a Git repo and devcontainer,
+  running in local Docker or remote DigitalOcean with the same flow, plus public
+  port forwarding via a reverse proxy.
 publishedAt: 2024-09-25T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - daytona
+  - docker
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -57,6 +62,18 @@ chapters:
 duration: 3360
 guests:
   - ivan-burazin
-resources: []
+resources:
+  - title: Daytona on GitHub
+    type: url
+    url: 'https://github.com/daytonaio/daytona'
+    category: code
+  - title: Development Containers specification
+    type: url
+    url: 'https://containers.dev/'
+    category: documentation
+  - title: Headscale (open source Tailscale control server)
+    type: url
+    url: 'https://github.com/juanfont/headscale'
+    category: code
 ---
 

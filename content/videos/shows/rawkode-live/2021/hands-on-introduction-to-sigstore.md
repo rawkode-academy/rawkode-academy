@@ -3,13 +3,18 @@ id: q6rdfil6z5qc6sx4jvomp320
 slug: hands-on-introduction-to-sigstore
 title: Hands-on Introduction to sigstore
 description: >-
-  In this episode, Dan guides us through everything we need to get started with
-  Project sigstore.
+  Dan Lorenc walks through sigstore: signing and verifying container images with
+  cosign, keyless signing via OIDC, querying the Rekor transparency log, in-toto
+  build attestations, and enforcing signed images at admission with Kyverno.
 publishedAt: 2021-08-04T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - sigstore
+  - tuf
+  - in-toto
+  - kyverno
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -88,9 +93,11 @@ guests:
 resources:
   - title: The Update Framework
     type: url
+    url: 'https://theupdateframework.io/'
     category: documentation
   - title: Verifiable supply chain metadata for Tekton
     type: url
+    url: 'https://github.com/tektoncd/chains'
     category: other
 ---
 

@@ -3,14 +3,16 @@ id: dbs5yf9vg0tg7k73uo0gfivh
 slug: docker-kubernetes-and-php-laravel-edition-part-iii
 title: 'Docker, Kubernetes, & PHP: Laravel Edition (Part III)'
 description: >-
-  In this episode, joined by Ciaran McNulty & Alex Bowers, we take a look at the
-  best practices for developing Laravel PHP applications with Docker, Docker
-  Compose, and Kubernetes.
+  Ciaran McNulty and Alex Bowers join David to wire up a Laravel dev loop in
+  Docker Compose: fixing the npm watcher, running Artisan migrations, chasing
+  HMR port bindings, and refactoring the production Dockerfile for Composer
+  caching.
 publishedAt: 2020-10-06T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - docker
+  - docker-compose
   - kubernetes
   - laravel
   - php
@@ -149,9 +151,11 @@ guests:
 resources:
   - title: Ping CRM
     type: url
+    url: 'https://github.com/inertiajs/pingcrm'
     category: demos
   - title: Laravel Dusk
     type: url
-    category: code
+    url: 'https://laravel.com/docs/dusk'
+    category: documentation
 ---
 

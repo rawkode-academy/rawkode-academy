@@ -6,9 +6,10 @@ title: >-
   Building PHP Applications with Docker, Docker Compose, and Kubernetes (RTFM
   with Rawkode)
 description: >-
-  In this episode, joined by Ciaran McNulty, we take a look at the best
-  practices for developing Laravel PHP applications with Docker, Docker Compose,
-  and Kubernetes.
+  Ciaran McNulty joins to containerise a Slim Framework PHP app: NGINX and
+  PHP-FPM as separate containers, Compose 2.x for health-check dependencies, a
+  multi-stage Dockerfile, then Kubernetes with NGINX as a sidecar and
+  independently scaled via a service.
 publishedAt: 2020-09-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -52,6 +53,7 @@ resources:
     category: other
   - title: Kustomize documentation
     type: url
+    url: 'https://kustomize.io/'
     category: documentation
 ---
 

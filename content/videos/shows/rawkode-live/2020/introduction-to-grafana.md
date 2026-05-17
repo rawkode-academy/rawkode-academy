@@ -3,14 +3,17 @@ id: xls03x1eryvd5y7lpzbwgblt
 slug: introduction-to-grafana
 title: Introduction to Grafana
 description: >-
-  Grafana is open source visualization and analytics software. It allows you to
-  query, visualize, alert on, and explore your metrics no matter where they are
-  stored.
+  Marcus Olsson joins to introduce Grafana from scratch: installing it on
+  Equinix Metal, wiring up Prometheus and InfluxDB data sources, building
+  dashboards, configuring alert rules with webhook notifications, and importing
+  community dashboards.
 publishedAt: 2020-10-29T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - grafana
+  - prometheus
+  - influxdb
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -83,7 +86,23 @@ guests:
 resources:
   - title: Equinix Metal
     type: url
-    url: 'https://metal.equinix.com'
+    url: 'https://metal.equinix.com/'
     category: other
+  - title: Grafana downloads
+    type: url
+    url: 'https://grafana.com/grafana/download'
+    category: documentation
+  - title: Grafana community dashboards
+    type: url
+    url: 'https://grafana.com/grafana/dashboards/'
+    category: demos
+  - title: Prometheus
+    type: url
+    url: 'https://prometheus.io/'
+    category: documentation
+  - title: InfluxDB
+    type: url
+    url: 'https://www.influxdata.com/'
+    category: documentation
 ---
 

@@ -11,6 +11,8 @@ category: tutorial
 technologies:
   - fluent-bit
   - fluentd
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0

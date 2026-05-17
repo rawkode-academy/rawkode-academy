@@ -3,13 +3,18 @@ id: qatht83waplqejze8yf2865b
 slug: hands-on-introduction-to-schemahero
 title: Hands-on Introduction to SchemaHero
 description: >-
-  In this episode, we take a look at making your database migrations declarative
-  and cloud native with Kubernetes.
+  Mark Campbell from Replicated joins to demo SchemaHero, a Kubernetes operator
+  that turns database schemas into declarative custom resources. We install it
+  via Krew, run it against Postgres and MariaDB, review generated migrations,
+  and wire it into a Flux GitOps workflow.
 publishedAt: 2022-01-28T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - schemahero
+  - kubernetes
+  - postgresql
+  - fluxcd
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -180,6 +185,7 @@ resources:
     category: documentation
   - title: SchemaHero channel on Kubernetes Slack
     type: url
+    url: 'https://kubernetes.slack.com/messages/schemahero'
     category: other
 ---
 

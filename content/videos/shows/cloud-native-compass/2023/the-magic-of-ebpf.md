@@ -3,13 +3,16 @@ id: cxwpwr732hsc2olh2072h59i
 slug: the-magic-of-ebpf
 title: The Magic of eBPF
 description: >-
-  We're back with an exciting new episode of Cloud Native Compass, and this time
-  we're diving deep into the captivating world of eBPF.
+  Liz Rice explains how eBPF lets you safely run programs inside the Linux
+  kernel, why the verifier makes it safer than kernel modules, and how projects
+  like Cilium, Falco, and Pixie are using it for networking, security, and
+  observability.
 publishedAt: 2023-08-25T17:00:00.000Z
 type: recorded
 category: interview
 technologies:
   - ebpf
+  - cilium
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -83,15 +86,19 @@ guests:
 resources:
   - title: Learning eBPF
     type: url
+    url: 'https://www.oreilly.com/library/view/learning-ebpf/9781098135119/'
     category: other
-  - title: eBPF Summit
+  - title: eBPF Summit 2023
     type: url
+    url: 'https://ebpf.io/summit-2023/'
     category: other
   - title: Iovisor BCC tools
     type: url
+    url: 'https://github.com/iovisor/bcc'
     category: code
   - title: OpenSnoop and ExecSnoop
     type: url
+    url: 'https://github.com/iovisor/bcc/blob/master/tools/opensnoop_example.txt'
     category: demos
 ---
 

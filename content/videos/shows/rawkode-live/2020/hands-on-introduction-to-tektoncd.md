@@ -3,14 +3,16 @@ id: yefvbphvn4f2frn2g1n9srlh
 slug: hands-on-introduction-to-tektoncd
 title: Hands-on Introduction to TektonCD
 description: >-
-  Tekton is a powerful and flexible open-source framework for creating CI/CD
-  systems, allowing developers to build, test, and deploy across cloud providers
-  and on-premise systems.
+  Kevin McDermott walks through TektonCD on Kubernetes: installing pipelines,
+  triggers, and the dashboard, building Tasks and TaskRuns with parameters and
+  results, wiring up workspaces and the git-clone catalog task, and finishing
+  with a GitHub webhook driving an end-to-end image build.
 publishedAt: 2020-12-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - tektoncd
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -71,15 +73,19 @@ guests:
 resources:
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
   - title: Tekton Pipelines release documentation
     type: url
+    url: 'https://tekton.dev/docs/pipelines/install/'
     category: documentation
   - title: Tekton Catalog git-clone task
     type: url
+    url: 'https://github.com/tektoncd/catalog/tree/main/task/git-clone'
     category: code
   - title: Tekton Catalog
     type: url
+    url: 'https://github.com/tektoncd/catalog'
     category: code
 ---
 

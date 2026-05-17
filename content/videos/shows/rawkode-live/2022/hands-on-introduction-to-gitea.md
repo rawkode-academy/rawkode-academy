@@ -3,8 +3,9 @@ id: ytmz11lcuyrxd14ykxqb4wu2
 slug: hands-on-introduction-to-gitea
 title: Hands-on Introduction to Gitea
 description: >-
-  In this session, we take a look at Gitea - a self-hosted, pain-less, Git
-  solution.
+  David is joined by Matti (project owner) to install Gitea from binary on an
+  Equinix Metal Ubuntu box, walk the web installer with SQLite, then tour repos,
+  SSH signing, migrations, CI options, and the API.
 publishedAt: 2022-09-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -136,16 +137,19 @@ guests:
 resources:
   - title: Gitea from binary installation guide
     type: url
+    url: 'https://docs.gitea.com/installation/install-from-binary'
     category: documentation
   - title: Gitea Helm chart
     type: url
+    url: 'https://gitea.com/gitea/helm-gitea'
     category: code
   - title: Gitea comparison document
     type: url
+    url: 'https://docs.gitea.com/installation/comparison'
     category: documentation
-  - title: Gitea CLI t repository
+  - title: Gitea tea CLI repository
     type: url
-    url: 'https://gitea.com/gitea/t'
+    url: 'https://gitea.com/gitea/tea'
     category: code
   - title: Codeberg
     type: url

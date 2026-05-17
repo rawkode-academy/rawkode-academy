@@ -3,13 +3,17 @@ id: tzx0c1g2al9hmwgrzmhzpoap
 slug: klustered-teams-redhat-and-talos-systems
 title: 'Klustered Teams: RedHat & Talos Systems'
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams from Talos Systems and Red Hat break each other's Kubernetes clusters
+  and race to fix them, debugging expired certificates, etcd quorum loss and
+  snapshot restore, Cilium network policies, and a broken CNI loopback plugin.
 publishedAt: 2021-07-15T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - etcd
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -110,7 +114,7 @@ resources:
     category: other
   - title: Rawkode Academy Discord server
     type: url
-    url: 'https://rockode.chat'
+    url: 'https://rawkode.chat'
     category: other
 ---
 

@@ -3,13 +3,16 @@ id: klzxhw3ow8qzrua89xr91717
 slug: using-guidepad-io-to-primitives-to-simplify-future-facing-problems
 title: Using Guidepad.io to Primitives to Simplify Future Facing Problems
 description: >-
-  Terraform has been amazing for Infrastructure as Code; but can what got is
-  here, get us to where we need to be in the future? I don't think so.
+  Terraform's resource model only understands CRUD and polls for drift. Using
+  Guidepad primitives (environments, control planes, state machines,
+  requirements), we build an event-driven S3 provider in ~100 lines of Python
+  that reconciles from CloudTrail events.
 publishedAt: 2024-01-29T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - guidepad
+  - terraform
 chapters:
   - startTime: 0
     title: Introduction

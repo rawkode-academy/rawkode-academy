@@ -3,13 +3,19 @@ id: lb152fahj4mgnkhcx1lsnejr
 slug: klustered-teams-digitalocean-and-skyscanner
 title: 'Klustered Teams: DigitalOcean & Skyscanner'
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Skyscanner and DigitalOcean each take on a broken Kubernetes cluster. Fixes
+  span expired certs, etcd probes and resource limits, a kube-vip VIP, a rogue
+  validating webhook, kube-monkey, and Cilium with kube-proxy replacement.
 publishedAt: 2021-07-29T17:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - cilium
+  - kube-vip
+  - postgresql
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -168,11 +174,11 @@ guests:
 resources:
   - title: Teleport sponsor link
     type: url
-    url: 'https://rawkode.live/Teleport'
+    url: 'https://rawkode.live/teleport'
     category: other
   - title: Rawkode Discord server
     type: url
-    url: 'https://Rawkode.chat'
+    url: 'https://rawkode.chat'
     category: other
 ---
 

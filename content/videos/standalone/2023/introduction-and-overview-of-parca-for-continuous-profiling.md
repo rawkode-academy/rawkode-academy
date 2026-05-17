@@ -3,14 +3,16 @@ id: pixbg0khkdubmvl7ydy78v5y
 slug: introduction-and-overview-of-parca-for-continuous-profiling
 title: Introduction & Overview of Parca for Continuous Profiling
 description: >-
-  Want to understand the performance of your application, considering both your
-  own code and third-party dependencies? Let's me introduce you to Parca, the
-  open-source Continuous Profiling tool from the company, Polar Signals.
+  Diagnose a runaway CPU spike on Kubernetes with Parca, the open-source
+  continuous profiler from Polar Signals. Deploy the server and eBPF agent,
+  explore icicle graphs and pprof profiles, and pinpoint the offending code.
 publishedAt: 2023-06-05T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - parca
+  - ebpf
+  - kubernetes
 chapters:
   - startTime: 0
     title: Introduction
@@ -79,6 +81,7 @@ guests: []
 resources:
   - title: Parca Quickstart Guide
     type: url
+    url: 'https://www.parca.dev/docs/quickstart/'
     category: documentation
 ---
 

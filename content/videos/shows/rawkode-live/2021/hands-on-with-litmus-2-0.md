@@ -3,15 +3,19 @@ id: r6seigg9ay2yn6pwr591hbln
 slug: hands-on-with-litmus-2-0
 title: Hands-on with Litmus 2.0
 description: >-
-  Karthik Satchitanand is one of the maintainers of the CNCF sandbox project
-  LitmusChaos and a Co-Founder at ChaosNative. He is passionate about all things
-  Kubernetes, and is generally interested in DevOps, storage
-  performance/benchmarking & chaos engineering.
+  Litmus maintainer Karthik Satchitanand previews Litmus 2.0: the new
+  ChaosCenter portal, public and private ChaosHubs, resilience scoring, GitOps
+  sync, and probes. Demos chain chaos workflows against Bank of Anthos on
+  Kubernetes and EC2 failure against Sock Shop.
 publishedAt: 2021-07-28T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - litmus
+  - kubernetes
+  - argo
+  - prometheus
+  - grafana
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -112,17 +116,21 @@ duration: 5279
 guests:
   - karthik-satchitanand
 resources:
-  - title: Litmus documentation master version on Netlify
+  - title: Litmus documentation
     type: url
+    url: 'https://docs.litmuschaos.io/'
     category: documentation
   - title: Bank of Anthos demo application
     type: url
+    url: 'https://github.com/GoogleCloudPlatform/bank-of-anthos'
     category: demos
   - title: Weaveworks Sock Shop microservices application
     type: url
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
   - title: Principles of Chaos
     type: url
+    url: 'https://principlesofchaos.org/'
     category: documentation
 ---
 

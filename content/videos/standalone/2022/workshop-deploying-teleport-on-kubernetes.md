@@ -2,12 +2,19 @@
 id: dtax4c66pvgyj704bvojhsou
 slug: workshop-deploying-teleport-on-kubernetes
 title: Workshop - Deploying Teleport on Kubernetes
-description: 'Find out more at https://rawkode.live/teleport'
+description: >-
+  Hands-on workshop deploying Teleport on Kubernetes using the official Helm
+  charts. Covers the teleport-cluster chart with LoadBalancer and Ingress, the
+  kube-agent for connecting additional clusters, and exposing host SSH access
+  via a DaemonSet.
 publishedAt: 2022-01-19T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - teleport
+  - kubernetes
+  - helm
+  - artifacthub
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>
@@ -46,11 +53,11 @@ resources:
     category: code
   - title: Artifact Hub
     type: url
-    url: 'https://artifacthub.io'
+    url: 'https://artifacthub.io/'
     category: other
   - title: Emissary Ingress
     type: url
-    url: 'https://www.getambassador.io/products/emissary-ingress'
+    url: 'https://emissary-ingress.dev/'
     category: other
   - title: Kubernetes Office Hours
     type: url

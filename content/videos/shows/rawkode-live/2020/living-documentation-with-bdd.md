@@ -2,11 +2,15 @@
 id: xtay8a6iyr4u6ow9kc6iojpe
 slug: living-documentation-with-bdd
 title: Living Documentation with BDD
-description: Video content coming soon.
+description: >-
+  Ciaran McNulty joins David to apply BDD to the git-sync Rust library. They
+  turn example-mapping outcomes into Gherkin scenarios, refine wording, group
+  rules, and decide between library-level and CLI end-to-end acceptance tests.
 publishedAt: 2020-12-16T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 75
@@ -49,6 +53,7 @@ guests:
 resources:
   - title: git sync Rust library
     type: url
+    url: 'https://github.com/rawkode/gitsync'
     category: code
 ---
 

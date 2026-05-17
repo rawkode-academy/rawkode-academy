@@ -3,14 +3,15 @@ id: ivg9hwb376cu64psybqhd5k0
 slug: managing-tls
 title: Managing TLS
 description: >-
-  Welcome to the Portainer in Production course. In this video, I guide you
-  through configuring Portainer with TLS certificates provisioned with certbot
-  for LetsEncrypt.
+  Three ways to give Portainer real TLS certificates: keep the built-in self
+  signed certs, run Certbot on the host with a systemd timer for renewals, or
+  put Caddy in front as a reverse proxy that handles the ACME dance for you.
 publishedAt: 2022-12-09T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - portainer
+  - docker
 chapters:
   - startTime: 0
     title: Introduction and Course Overview
@@ -51,7 +52,23 @@ guests: []
 resources:
   - title: Portainer in Production GitHub Repository
     type: url
-    url: 'https://github.com/rawcodeacademy/portainer-in-production'
+    url: 'https://github.com/RawkodeAcademy/portainer-in-production'
     category: code
+  - title: Certbot
+    type: url
+    url: 'https://certbot.eff.org/'
+    category: documentation
+  - title: Let's Encrypt
+    type: url
+    url: 'https://letsencrypt.org/'
+    category: documentation
+  - title: Caddy Documentation
+    type: url
+    url: 'https://caddyserver.com/docs/'
+    category: documentation
+  - title: Portainer SSL Certificate Settings
+    type: url
+    url: 'https://docs.portainer.io/admin/settings#ssl-certificate'
+    category: documentation
 ---
 

@@ -3,8 +3,9 @@ id: nl7ui50173lbqlmqxck2mw3q
 slug: parca-and-grafana
 title: Parca & Grafana
 description: >-
-  Learn how to bake your Parca profiling information into Grafana to provide a
-  single pane of glass for all your observability data.
+  Add the Grafana Parca data source plugin, point it at your Parca server, and
+  debug a misbehaving app with flame graphs and function filters without leaving
+  Grafana.
 publishedAt: 2023-07-10T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -51,8 +52,9 @@ chapters:
 duration: 561
 guests: []
 resources:
-  - title: Grafana Parca plugin
+  - title: Grafana Parca data source documentation
     type: url
-    category: other
+    url: 'https://grafana.com/docs/grafana/latest/datasources/parca/'
+    category: documentation
 ---
 

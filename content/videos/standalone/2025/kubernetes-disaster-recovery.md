@@ -4,15 +4,18 @@ slug: kubernetes-disaster-recovery
 title: Kubernetes Disaster Recovery
 subtitle: ''
 description: >-
-  Kubernetes backups are simple in theory: etcd state plus persistent volumes.
-  The real challenge is managing this across 50 clusters without drifting
-  configs, scattered backup locations, and zero visibility.
+  Back up a stateful Postgres workload with Velero, simulate a namespace
+  disaster, and restore from S3 (SeaweedFS). Then scale the same pattern across
+  a fleet with scheduled, RBAC-controlled backups in Spectro Cloud Palette.
 publishedAt: 2025-11-25T14:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - kubernetes
   - velero
+  - postgresql
+  - seaweedfs
+  - etcd
 chapters:
   - startTime: 0
     title: Intro
@@ -31,6 +34,15 @@ guests: []
 resources:
   - title: Spectro Cloud Palette documentation
     type: url
+    url: 'https://docs.spectrocloud.com/'
+    category: documentation
+  - title: Velero documentation
+    type: url
+    url: 'https://velero.io/docs/'
+    category: documentation
+  - title: SeaweedFS
+    type: url
+    url: 'https://github.com/seaweedfs/seaweedfs'
     category: documentation
 ---
 

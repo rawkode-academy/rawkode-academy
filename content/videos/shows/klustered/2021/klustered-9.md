@@ -3,13 +3,18 @@ id: weym8gw0c6g1ol7qjtde1521
 slug: klustered-9
 title: 'Klustered #9'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Marcos Nils joins to debug two Kubernetes clusters: cluster 17 from Sascha
+  Grunert (a rogue node debugger pod and a containerd 'honk' error pointing at
+  BPF) and cluster 18 from Billie Cleek (CoreDNS NXDOMAIN rule and a malicious
+  mutating webhook).
 publishedAt: 2021-04-15T16:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - containerd
+  - coredns
+  - ebpf
 show: klustered
 chapters:
   - startTime: 0
@@ -100,9 +105,11 @@ guests:
 resources:
   - title: Play with Docker
     type: url
-    category: demos
+    url: 'https://labs.play-with-docker.com/'
+    category: other
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
 ---
 

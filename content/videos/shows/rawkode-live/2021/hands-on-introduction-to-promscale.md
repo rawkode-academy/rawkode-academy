@@ -3,13 +3,20 @@ id: ua00ojunaspa1sus0ykiqxxr
 slug: hands-on-introduction-to-promscale
 title: Hands-on Introduction to Promscale
 description: >-
-  In this episode, Vineeth and Mat will teach us everything we need to know to
-  get started with Promscale.
+  Mat and Vineeth from Timescale show how Promscale stores Prometheus metrics in
+  TimescaleDB, then deploy it on Kubernetes with TOBS and query the data using
+  both PromQL and SQL in Grafana.
 publishedAt: 2021-05-20T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - promscale
+  - timescale
+  - prometheus
+  - grafana
+  - postgresql
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -89,6 +96,7 @@ resources:
   - title: Getting started with Promscale doc
     type: url
     category: documentation
+    url: 'https://promscale-legacy-docs.timescale.com/'
   - title: Dan Liu post about getting more value from metrics
     type: url
     category: other

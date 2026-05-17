@@ -3,13 +3,16 @@ id: llclhowidfbrvg93zt05v77m
 slug: klustered-18
 title: 'Klustered #18'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" #Kubernetes clusters ... on the clock.
+  Eric Smalling and Carlos Santana race the clock to debug broken Kubernetes
+  clusters. Expect rogue static pods, ZomboCom surprises, broken Cilium network
+  policies, CoreDNS misfires, and a mutating admission webhook swapping images.
 publishedAt: 2021-08-26T18:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - coredns
 show: klustered
 chapters:
   - startTime: 0

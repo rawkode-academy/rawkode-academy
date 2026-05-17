@@ -3,9 +3,9 @@ id: lqoxvc2zwgos1jkwcst7aj6z
 slug: introduction-to-rust-part-i
 title: Introduction to Rust (Part I)
 description: >-
-  Rust is a multi-paradigm programming language designed for performance and
-  safety, especially safe concurrency. Rust is syntactically similar to C++ but
-  can guarantee memory safety by using a borrow checker to validate references.
+  Steve Klabnik, co-author of The Rust Programming Language book, joins to teach
+  Rust from scratch. Working through Rustlings exercises, they cover variables,
+  mutability, shadowing, functions, strings (&str vs String), and structs.
 publishedAt: 2020-12-02T17:00:00.000Z
 type: live
 category: tutorial
@@ -81,9 +81,15 @@ guests:
 resources:
   - title: The Rust Programming Language book
     type: url
+    url: 'https://doc.rust-lang.org/stable/book/'
     category: documentation
+  - title: Rustlings exercises
+    type: url
+    url: 'https://github.com/rust-lang/rustlings'
+    category: code
   - title: Rust Users Forum
     type: url
+    url: 'https://users.rust-lang.org/'
     category: other
 ---
 

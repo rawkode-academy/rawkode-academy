@@ -3,13 +3,18 @@ id: p2b72nkxzbj3rgb4v4knvo4y
 slug: introduction-to-cortex
 title: Introduction to Cortex
 description: >-
-  Cortex: horizontally scalable, highly available, multi-tenant, long term
-  storage for Prometheus.
+  Ganesh Vernekar joins to walk through Cortex: building from source, wiring
+  Prometheus remote_write, scaling it with Docker Compose and MinIO, the
+  single-binary vs microservices architecture, and how it compares to Thanos.
 publishedAt: 2020-11-04T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - cortex
+  - prometheus
+  - grafana
+  - thanos
+  - docker-compose
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -70,12 +75,15 @@ guests:
 resources:
   - title: Cortex Getting Started block storage documentation
     type: url
+    url: 'https://cortexmetrics.io/docs/getting-started/'
     category: documentation
   - title: Cortex upstream Docker Compose demos
     type: url
+    url: 'https://github.com/cortexproject/cortex/tree/master/development'
     category: demos
   - title: Thanos project
     type: url
+    url: 'https://github.com/thanos-io/thanos'
     category: code
 ---
 

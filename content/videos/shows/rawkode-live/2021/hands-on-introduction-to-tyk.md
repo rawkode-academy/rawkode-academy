@@ -3,8 +3,10 @@ id: shduj6ini35ebkqltlqfdagb
 slug: hands-on-introduction-to-tyk
 title: Hands-on Introduction to Tyk
 description: >-
-  In this episode, we'll be guided through everything we need to know to get
-  started with Tyk.
+  Andy Smith and Budha Bhattacharya from Tyk walk through the open-source API
+  gateway: installing it on Kubernetes with Helm, configuring keyless and
+  API-key auth, rate limits, the Tyk Operator, and stitching REST sources into a
+  GraphQL universal data graph.
 publishedAt: 2021-09-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -129,15 +131,20 @@ guests:
 resources:
   - title: Tyk Getting Started guide
     type: url
+    url: 'https://tyk.io/docs/getting-started/'
     category: documentation
   - title: Tyk Operator installation guide
     type: url
+    url: 'https://tyk.io/docs/tyk-stack/tyk-operator/installing-tyk-operator/'
     category: documentation
   - title: Tyk Operator httpbin sample manifest
     type: url
+    url: >-
+      https://github.com/TykTechnologies/tyk-operator/blob/legacy/config/samples/httpbin.yaml
     category: code
   - title: JSONPlaceholder users API demo endpoint
     type: url
+    url: 'https://jsonplaceholder.typicode.com/users'
     category: demos
 ---
 

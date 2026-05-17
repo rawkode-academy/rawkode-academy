@@ -3,14 +3,19 @@ id: q29r22us2pmcizlk0v0zifyb
 slug: kubescape-operator-and-saas
 title: Kubescape Operator & SaaS
 description: >-
-  Welcome to The Complete Gudie to Kubescape. In this course, you’ll learn
-  everything you need to leverage the great powers of Kubescape into your
-  platform to improve your Kubernetes security posture.
+  Deploy the Kubescape operator across AKS, EKS, and GKE with Pulumi, then use
+  Kubescape Cloud to triage configuration risks, CVEs, and RBAC across workloads
+  from Flux, Grafana, and Helm charts.
 publishedAt: 2022-12-20T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - kubescape
+  - kubernetes
+  - pulumi
+  - helm
+  - fluxcd
+  - grafana
 chapters:
   - startTime: 0
     title: Introduction

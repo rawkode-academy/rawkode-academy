@@ -2,12 +2,19 @@
 id: iu73cnmo4xit3a5g7olhizfo
 slug: hands-on-introduction-to-kamaji
 title: Hands-on Introduction to Kamaji
-description: Build and operate Kubernetes at scale with a fraction of operational burden.
+description: >-
+  Adriano Pezzuto walks through Kamaji, running tenant Kubernetes control planes
+  as pods inside a management cluster, then provisions a tenant and joins AWS
+  worker nodes via kubeadm and Cluster API conventions.
 publishedAt: 2022-08-13T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kamaji
+  - kubernetes
+  - etcd
+  - cluster-api
+  - capsule
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -92,8 +99,13 @@ duration: 4433
 guests:
   - adriano-pezzuto
 resources:
+  - title: Kamaji
+    type: url
+    category: documentation
+    url: 'https://kamaji.clastix.io/'
   - title: Clastix Capsule
     type: url
     category: code
+    url: 'https://github.com/projectcapsule/capsule'
 ---
 

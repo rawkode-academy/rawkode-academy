@@ -3,13 +3,15 @@ id: ncgxuu1vyx5yl7psezcz79dk
 slug: supply-chain-security-with-a-cli-valint
 title: 'Supply Chain Security with a CLI: valint'
 description: >-
-  Valint is a powerful tool that validates the integrity of your supply chain,
-  providing organizations with a way to enforce policies using the Scribe
-  Service, CI, or admission controller.
+  Tutorial on Valint, Scribe Security's supply chain CLI. Generate SLSA and
+  CycloneDX SBOMs for containers, Git repos, and Go projects, sign evidence with
+  Sigstore, push to OCI registries, and enforce cosign policies locally, in CI,
+  or as a Kubernetes admission controller.
 publishedAt: 2023-05-22T17:00:00.000Z
 type: recorded
 category: tutorial
-technologies: []
+technologies:
+  - sigstore
 chapters:
   - startTime: 0
     title: Introduction
@@ -46,20 +48,21 @@ guests: []
 resources:
   - title: Valint Installation Script
     type: url
-    url: 'https://get.scrapesecurity.com/install.sh'
     category: code
   - title: Scribe Security JFrog Container Registry
     type: url
     category: other
   - title: Indigo (Blue Sky Go SDK)
     type: url
+    url: 'https://github.com/bluesky-social/indigo'
     category: code
   - title: Mongo Express
     type: url
+    url: 'https://github.com/mongo-express/mongo-express'
     category: code
   - title: Sigstore
     type: url
-    url: 'https://sigstore.dev'
+    url: 'https://www.sigstore.dev/'
     category: other
 ---
 

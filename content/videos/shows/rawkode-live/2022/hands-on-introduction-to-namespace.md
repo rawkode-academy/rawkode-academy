@@ -3,12 +3,18 @@ id: cjjyrounj8qpdyd9addol7py
 slug: hands-on-introduction-to-namespace
 title: Hands-on Introduction to Namespace
 description: >-
-  The all-in-one developer platform: Namespace provides a unified experience
-  from development to production.
+  Hugo Santos walks through Namespace, an end-to-end application platform built
+  on Kubernetes. We bootstrap a local K3s cluster, define services in CUE, build
+  images with BuildKit, wire in MinIO, and explore module-based dependencies.
 publishedAt: 2022-12-01T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - buildkit
+  - cue
+  - k3s
+  - kubernetes
+  - minio
   - namespace
 show: rawkode-live
 chapters:
@@ -78,6 +84,7 @@ guests:
 resources:
   - title: Cash App Hermit
     type: url
+    url: 'https://github.com/cashapp/hermit'
     category: code
 ---
 

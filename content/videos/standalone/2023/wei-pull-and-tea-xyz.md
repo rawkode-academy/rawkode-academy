@@ -3,8 +3,9 @@ id: n9usdizv6skyhuv5603ivcuh
 slug: wei-pull-and-tea-xyz
 title: wei/pull and tea.xyz
 description: >-
-  In this episode of AlphaBits, Brian and David explain why they're excited
-  about wei/pull and tea.xyz.
+  Brian demos wei/pull, a GitHub app that auto-opens pull requests to keep forks
+  in sync with upstream. David then walks through tea.xyz (now pkgx), running
+  uninstalled commands, symlink shims, and resolving deps from README or t.yaml.
 publishedAt: 2023-08-24T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -46,6 +47,14 @@ chapters:
 duration: 781
 guests:
   - brian-ketelsen
-resources: []
+resources:
+  - type: url
+    title: wei/pull
+    category: code
+    url: 'https://github.com/wei/pull'
+  - type: url
+    title: pkgx (formerly tea.xyz)
+    category: documentation
+    url: 'https://pkgx.sh/'
 ---
 
