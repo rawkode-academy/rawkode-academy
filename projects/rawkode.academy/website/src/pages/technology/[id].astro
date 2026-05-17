@@ -281,12 +281,6 @@ const statusLabels: Record<string, string> = {
 	assess: "Watch",
 	trial: "Explore",
 };
-const groupingLabels: Record<string, string> = {
-	plumbing: "Plumbing",
-	platform: "Platform",
-	observability: "Observability",
-	security: "Security",
-};
 const trajectoryEmoji: Record<string, string> = {
 	rising: "↗️",
 	stable: "→",
@@ -295,9 +289,6 @@ const trajectoryEmoji: Record<string, string> = {
 
 const statusLabel = technology.matrix?.status
 	? statusLabels[technology.matrix.status] || technology.matrix.status
-	: "";
-const groupingLabel = technology.matrix?.grouping
-	? groupingLabels[technology.matrix.grouping] || technology.matrix.grouping
 	: "";
 const trajectoryIcon = technology.matrix?.trajectory
 	? trajectoryEmoji[technology.matrix.trajectory]
@@ -360,122 +351,107 @@ const hasCommunityLinks =
 		/>
 	</Fragment>
 	<div class="technology-stage page-px section-py section-pt-0">
-		<section class="w-full">
-			<div class="glass-panel technology-header-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
-				<div class="mb-6">
-					<Breadcrumb elements={[
-						{ title: 'Home', link: '/' },
-						{ title: 'Technologies', link: '/technology' },
-						{ title: technology.name, link: `/technology/${technology.id}` },
-					]} />
+		<section class="technology-hero w-full max-w-7xl mx-auto">
+			<div class="mb-5">
+				<Breadcrumb elements={[
+					{ title: 'Home', link: '/' },
+					{ title: 'Technologies', link: '/technology' },
+					{ title: technology.name, link: `/technology/${technology.id}` },
+				]} />
+			</div>
+
+			<div class="flex items-center gap-4 mb-4">
+				<div class="technology-hero-logo">
+					<img
+						src={technology.logo ? technology.logo : placeholderLogo}
+						alt={`${technology.name} Logo`}
+						class="w-full h-full object-contain"
+						onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
+					/>
 				</div>
+				<h1 class="technology-title m-0">{technology.name}</h1>
+			</div>
 
-				<div class="technology-header-grid">
-					<div class="technology-header-copy">
-						<div class="flex flex-wrap items-center gap-2 mb-3">
-							{technology.matrix && (
-								<a href="/technology/matrix" class="inline-flex flex-wrap items-center gap-2 group">
-									<span class={`matrix-badge matrix-badge-${technology.matrix.status}`}>
-										{statusLabel}
-									</span>
-									<span class="text-sm text-muted group-hover:text-primary transition-colors">
-										{groupingLabel}
-									</span>
-									{trajectoryIcon && (
-										<span class="text-sm" title={`Trajectory: ${technology.matrix.trajectory}`}>
-											{trajectoryIcon}
-										</span>
-									)}
-									<svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-									</svg>
-								</a>
-							)}
-							{technology.cncf?.status && (
-								<span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cncfStatusColors[technology.cncf.status]}`}>
-									<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-										<path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-									</svg>
-									CNCF {cncfStatusLabels[technology.cncf.status]}
-								</span>
-							)}
-							{technology.category && (
-								<span class="technology-taxonomy-pill">
-									{technology.category}{technology.subcategory && ` / ${technology.subcategory}`}
-								</span>
-							)}
-						</div>
+			<div class="flex flex-wrap items-center gap-2 mb-5">
+				{technology.matrix && (
+					<a
+						href="/technology/matrix"
+						class={`matrix-badge matrix-badge-${technology.matrix.status} matrix-badge-link`}
+						title={`Matrix: ${statusLabel}${trajectoryIcon ? ` · ${technology.matrix.trajectory}` : ""}`}
+					>
+						{statusLabel}
+						{trajectoryIcon && <span class="ml-1">{trajectoryIcon}</span>}
+					</a>
+				)}
+				{technology.cncf?.status && (
+					<span class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cncfStatusColors[technology.cncf.status]}`}>
+						CNCF {cncfStatusLabels[technology.cncf.status]}
+					</span>
+				)}
+				{(technology.subcategory || technology.category) && (
+					<span class="technology-taxonomy-pill" title={technology.category && technology.subcategory ? `${technology.category} / ${technology.subcategory}` : undefined}>
+						{technology.subcategory ?? technology.category}
+					</span>
+				)}
+				{technology.license && (
+					<span class="technology-taxonomy-pill">
+						{technology.license}
+					</span>
+				)}
+			</div>
 
-						<p class="technology-kicker">
-							{hasContent ? "Technology Guide" : "Technology Overview"}
-						</p>
-						<h1 class="technology-title">{technology.name}</h1>
-
-						<div class="flex flex-wrap gap-3 items-center">
-							{technology.website && (
-								<a
-									href={technology.website}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
-								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-									</svg>
-									Official Website
-								</a>
-							)}
-							{technology.documentation && (
-								<a
-									href={technology.documentation}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
-								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-									</svg>
-									Documentation
-								</a>
-							)}
-							{technology.source && (
-								<a
-									href={technology.source}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="btn-glass inline-flex items-center gap-2 px-5 py-2.5 rounded-xl"
-								>
-									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-									</svg>
-									Source Code
-								</a>
-							)}
-							{hasContent && (
-								<a href="#complete-guide" class="technology-guide-link">
-									Read the guide
-								</a>
-							)}
-						</div>
-
-						{technology.license && (
-							<p class="mt-4 text-sm text-muted">
-								License: <span class="font-medium text-secondary-content">{technology.license}</span>
-							</p>
+			<div class="flex flex-wrap gap-2 items-center">
+				{hasContent && (
+					<a href="#complete-guide" class="btn-solid inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold">
+						<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+						</svg>
+						Read the guide
+					</a>
+				)}
+				{technology.website && (
+					<a
+						href={technology.website}
+						target="_blank"
+						rel="noopener noreferrer"
+						class={`${hasContent ? 'btn-outline' : 'btn-solid'} inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold`}
+					>
+						<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+						</svg>
+						Official Website
+					</a>
+				)}
+				{(technology.documentation || technology.source) && (
+					<div class="flex flex-wrap gap-x-4 gap-y-1 items-center text-sm">
+						{technology.documentation && (
+							<a
+								href={technology.documentation}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-link inline-flex items-center gap-1.5"
+							>
+								<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+								</svg>
+								Documentation
+							</a>
+						)}
+						{technology.source && (
+							<a
+								href={technology.source}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="text-link inline-flex items-center gap-1.5"
+							>
+								<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+								</svg>
+								Source code
+							</a>
 						)}
 					</div>
-
-					<div class="technology-logo-shell">
-						<div class="glass-media-brand technology-logo-card">
-							<img
-								src={technology.logo ? technology.logo : placeholderLogo}
-								alt={`${technology.name} Logo`}
-								class="w-full h-full object-contain drop-shadow-lg"
-								onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
-							/>
-						</div>
-					</div>
-				</div>
+				)}
 			</div>
 		</section>
 
@@ -922,35 +898,72 @@ const hasCommunityLinks =
 		gap: clamp(1.5rem, 3vw, 2.5rem);
 	}
 
-	.technology-header-panel {
+	.technology-hero {
 		position: relative;
-		overflow: hidden;
 	}
 
-	.technology-header-panel::before {
-		content: "";
-		position: absolute;
-		inset: auto -5rem -7rem auto;
-		width: 16rem;
-		height: 16rem;
-		border-radius: 9999px;
-		background: radial-gradient(circle, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0));
-		pointer-events: none;
-	}
-
-	.technology-header-grid {
-		position: relative;
+	.technology-hero-logo {
+		flex-shrink: 0;
+		width: 3rem;
+		height: 3rem;
 		display: grid;
-		gap: clamp(1.5rem, 3vw, 3rem);
-		align-items: center;
+		place-items: center;
 	}
 
-	.technology-header-copy {
-		position: relative;
-		z-index: 1;
+	@media (min-width: 768px) {
+		.technology-hero-logo {
+			width: 4rem;
+			height: 4rem;
+		}
+	}
+
+	.technology-hero-logo img {
+		max-width: 100%;
+		max-height: 100%;
+	}
+
+	.matrix-badge-link {
+		text-decoration: none;
+		transition: transform 180ms ease, filter 180ms ease;
+	}
+
+	.matrix-badge-link:hover {
+		transform: translateY(-1px);
+		filter: brightness(1.05);
+	}
+
+	.btn-outline {
+		color: var(--text-primary-content);
+		background: transparent;
+		border: 1px solid rgba(148, 163, 184, 0.45);
+		transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+	}
+
+	.btn-outline:hover {
+		transform: translateY(-1px);
+		border-color: var(--brand-primary);
+		background: rgba(95, 94, 215, 0.04);
+	}
+
+	:global(.dark) .btn-outline {
+		border-color: rgba(148, 163, 184, 0.32);
+	}
+
+	.text-link {
+		color: var(--text-secondary-content);
+		font-weight: 500;
+		text-decoration: none;
+		transition: color 180ms ease;
+	}
+
+	.text-link:hover {
+		color: var(--brand-primary);
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 
 	.technology-kicker {
+		/* retained for the Field Guide kicker further down the page */
 		margin: 0 0 0.85rem;
 		font-size: 0.72rem;
 		font-weight: 700;
@@ -962,58 +975,23 @@ const hasCommunityLinks =
 	.technology-taxonomy-pill {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.4rem 0.75rem;
+		padding: 0.25rem 0.65rem;
 		border-radius: 9999px;
-		font-size: 0.76rem;
+		font-size: 0.72rem;
 		font-weight: 600;
-		color: rgb(31, 41, 55);
-		background: rgba(255, 255, 255, 0.72);
+		color: var(--text-secondary-content);
+		background: rgba(148, 163, 184, 0.12);
 		border: 1px solid rgba(148, 163, 184, 0.22);
 	}
 
 	.technology-title {
-		margin: 0 0 1rem;
-		font-size: clamp(2.2rem, 4.2vw, 3.8rem);
-		line-height: 0.98;
-		font-weight: 850;
-		letter-spacing: -0.05em;
-		color: rgb(15, 23, 42);
+		margin: 0;
+		font-size: clamp(2rem, 6vw, 3.2rem);
+		line-height: 1.04;
+		font-weight: 800;
+		letter-spacing: -0.04em;
+		color: var(--text-primary-content);
 		text-wrap: balance;
-	}
-
-	.technology-guide-link {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.72rem 1rem;
-		border-radius: 0.9rem;
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: rgb(15, 23, 42);
-		background: rgba(255, 255, 255, 0.7);
-		border: 1px solid rgba(148, 163, 184, 0.2);
-		transition:
-			transform 180ms ease,
-			border-color 180ms ease,
-			background 180ms ease;
-	}
-
-	.technology-guide-link:hover {
-		transform: translateY(-1px);
-		background: rgba(255, 255, 255, 0.94);
-		border-color: rgba(13, 148, 136, 0.24);
-	}
-
-	.technology-logo-shell {
-		display: grid;
-		place-items: center;
-	}
-
-	.technology-logo-card {
-		width: clamp(8.2rem, 18vw, 11rem);
-		height: clamp(8.2rem, 18vw, 11rem);
-		padding: 1.2rem;
-		border-radius: 2rem;
 	}
 
 	.main-content-grid {
