@@ -106,11 +106,8 @@ guests:
   - bojan-djurkovic
 resources:
   - title: Teleport
+    type: url
     url: 'https://rokode.live/teleport'
     category: other
-    evidence_quote: >-
-      So you'll see us using it, Go check it out by visiting
-      rokode.live/teleport.
-    confidence: high
 ---
 

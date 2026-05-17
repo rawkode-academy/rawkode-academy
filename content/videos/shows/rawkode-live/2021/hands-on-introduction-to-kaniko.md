@@ -100,16 +100,13 @@ guests:
   - google-cloud-platform
 resources:
   - title: Kaniko Getting Started tutorial
+    type: url
     category: documentation
-    evidence_quote: I'm assuming we're just gonna go to the tutorial to get started.
-    confidence: medium
   - title: Kaniko build context documentation
+    type: url
     category: documentation
-    evidence_quote: you would see the link for Kaniko build context.
-    confidence: medium
   - title: GitLab tutorial dedicated to Kaniko
+    type: url
     category: documentation
-    evidence_quote: there is a tutorial dedicated to Kaniko on the GitLab.
-    confidence: medium
 ---
 

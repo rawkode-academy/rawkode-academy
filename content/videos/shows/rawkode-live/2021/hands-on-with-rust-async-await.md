@@ -79,15 +79,11 @@ guests:
   - senyo-simpson
 resources:
   - title: Tokio Async in Depth tutorial
+    type: url
     url: 'https://tokio.rs/tokio/tutorial/async'
     category: documentation
-    evidence_quote: >-
-      Tokyo has its own well, it has, like, a tutorial on, like, making your own
-      executor.
-    confidence: high
   - title: Complete Guide to InfluxDB course
+    type: url
     category: other
-    evidence_quote: courses where you can come and learn the complete guide to InfluxDB.
-    confidence: medium
 ---
 

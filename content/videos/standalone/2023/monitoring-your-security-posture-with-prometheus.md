@@ -43,32 +43,19 @@ duration: 853
 guests: []
 resources:
   - title: Kubescape Complete Guide Repository
+    type: url
     url: 'https://github.com/rawkode-academy/kubescape-complete-guide'
     category: code
-    evidence_quote: >-
-      the just fail is here and available via the repository on the Rawkode
-      Academy. The link is in the description.
-    confidence: high
   - title: Kubescape Prometheus Exporter
+    type: url
     url: 'https://github.com/kubescape/prometheus-exporter'
     category: code
-    evidence_quote: >-
-      We run an operator and our cluster that uses Prometheus service monitors,
-      speaks to Kubescape, gets a result of our scans, writes them to Prometheus
-    confidence: high
   - title: ARMO Cloud Dashboard
+    type: url
     url: 'https://cloud.armosec.io/'
     category: other
-    evidence_quote: >-
-      When you run Kubescape, you get the ARMOR cloud dashboard. You can go and
-      see the report and results of all your scans.
-    confidence: high
   - title: Kubescape Grafana Dashboard
+    type: url
     category: other
-    evidence_quote: >-
-      Sometimes you just need a dashboard. We need to see multiple queries,
-      multiple metrics, and how they change together over time. So let's run the
-      download dashboard, just target.
-    confidence: high
 ---
 

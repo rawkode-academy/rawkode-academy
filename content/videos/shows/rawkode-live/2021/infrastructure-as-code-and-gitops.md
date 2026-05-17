@@ -106,10 +106,7 @@ guests:
   - steven-wade
 resources:
   - title: Pulumi provider boilerplate repository
+    type: url
     category: code
-    evidence_quote: >-
-      there's the provider boilerplate so this is the repository that allows you
-      you'd basically just fork this and then tell it the Terraform provider
-    confidence: high
 ---
 

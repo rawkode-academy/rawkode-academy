@@ -67,10 +67,7 @@ guests:
   - philipp-strube
 resources:
   - title: containerd Spin example
+    type: url
     category: demos
-    evidence_quote: >-
-      we start, I would say, very simple example from the container d
-      repository.
-    confidence: medium
 ---
 

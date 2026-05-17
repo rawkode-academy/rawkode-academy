@@ -57,10 +57,7 @@ guests:
   - brian-ketelsen
 resources:
   - title: podmansh man page
+    type: url
     category: documentation
-    evidence_quote: >-
-      But this one page, by the way, is all of the documentation that exists,
-      one man page.
-    confidence: high
 ---
 

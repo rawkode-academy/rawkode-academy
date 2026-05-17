@@ -88,10 +88,7 @@ guests:
   - matti-ranta
 resources:
   - title: Tarte dot dev
+    type: url
     category: code
-    evidence_quote: >-
-      they have their Tarte dot dev project where you can actually run, like,
-      macOS virtual machines, as, like, Docker containers kind of somewhat,
-    confidence: medium
 ---
 

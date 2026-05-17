@@ -104,11 +104,7 @@ guests:
   - arian-van-putten
 resources:
   - title: DevOps Directive YouTube channel
+    type: url
     category: other
-    evidence_quote: >-
-      So I have a YouTube channel called DevOps Directive where I cover a
-      variety of topics from Docker to Kubernetes and all sorts of things. So go
-      check that out if you have time.
-    confidence: high
 ---
 

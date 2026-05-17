@@ -113,29 +113,16 @@ guests:
   - karthik-satchitanand
 resources:
   - title: Litmus documentation master version on Netlify
+    type: url
     category: documentation
-    evidence_quote: >-
-      If you are happy beta testers for Litmus2.co, you you can take a look at
-      the Litmus docs that we have on Netify. That is the Litmus data Netify
-      app. Then go to the master version.
-    confidence: medium
   - title: Bank of Anthos demo application
+    type: url
     category: demos
-    evidence_quote: >-
-      There is an application called as Bank of Anthos, which you might be
-      familiar with, provided by Google Cloud Platform.
-    confidence: high
   - title: Weaveworks Sock Shop microservices application
+    type: url
     category: demos
-    evidence_quote: >-
-      A beams a beams scopes. I'm sorry. Beave Beaveworks SOCKSHOP microservices
-      application.
-    confidence: medium
   - title: Principles of Chaos
+    type: url
     category: documentation
-    evidence_quote: >-
-      Alright. Well, check out principles of chaos. Check out Litmus. Look
-      forward to two point o.
-    confidence: medium
 ---
 

@@ -84,22 +84,13 @@ guests:
   - ricardo-amaro
 resources:
   - title: Kapitan Reference Repository
+    type: url
     category: code
-    evidence_quote: >-
-      if you follow the Kapitan reference, our reef reference repository to get
-      started with Kapitan, which is in the community section
-    confidence: medium
   - title: Kapitan Manifest Generator Documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      just after Kapitan reference, there is a manifest generator documentation
-      That could be a a good way to to kind of get started
-    confidence: medium
   - title: Weaveworks Sock Shop Example
+    type: url
     category: demos
-    evidence_quote: >-
-      I have replicated all the configuration for the WeWorks soft shop example
-      that they have on on the repo.
-    confidence: medium
 ---
 

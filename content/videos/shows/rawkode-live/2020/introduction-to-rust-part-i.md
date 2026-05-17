@@ -80,16 +80,10 @@ guests:
   - steve-klabnik
 resources:
   - title: The Rust Programming Language book
+    type: url
     category: documentation
-    evidence_quote: >-
-      the book, which is the Rust programming language, which is kind of the the
-      default book for learning Rust
-    confidence: high
   - title: Rust Users Forum
+    type: url
     category: other
-    evidence_quote: >-
-      There's also the user forum at users.rustlang.org where you can ask
-      questions,
-    confidence: medium
 ---
 

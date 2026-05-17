@@ -75,25 +75,16 @@ guests:
   - dmitriy-kalinin
 resources:
   - title: ytt Playground
+    type: url
     category: demos
-    evidence_quote: So there is a there is a playground here that's interactive.
-    confidence: high
   - title: kapp-controller NGINX Helm example
+    type: url
     category: demos
-    evidence_quote: >-
-      There might be some some of them might be a little like, maybe Concourse
-      Helm or something or NGINX Helm. Yeah. Yeah. NGINX Helm. Let's take a look
-      at that.
-    confidence: medium
   - title: ytt load documentation
+    type: url
     category: documentation
-    evidence_quote: 'Load. Oh, yeah. There it is. So I''ll send you a link over here real quick.'
-    confidence: medium
   - title: KubeCon Carvel talk
+    type: url
     category: other
-    evidence_quote: >-
-      So what I would recommend is there was a talk at KubeCon a few weeks ago.
-      Is that correct?
-    confidence: medium
 ---
 

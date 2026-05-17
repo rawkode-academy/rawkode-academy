@@ -98,14 +98,10 @@ guests:
   - marcus-noble
 resources:
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: So check out Rawkode. Livemetal.
-    confidence: medium
   - title: Artifact Hub
+    type: url
     category: other
-    evidence_quote: >-
-      I basically just went through Artifact Hub and installed all the top helm
-      charts.
-    confidence: medium
 ---
 

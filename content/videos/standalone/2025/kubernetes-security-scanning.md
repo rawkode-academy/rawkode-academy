@@ -49,23 +49,13 @@ chapters:
     title: API Access & Exporting Audit Data
 resources:
   - title: Spectro Cloud Palette
+    type: url
     category: other
-    evidence_quote: >-
-      At the end of this video, you will see a demo with Spectral Cloud, where I
-      turn on all of my day two secondurity scanning operations with a toggle
-      box.
-    confidence: high
   - title: Google Microservices Demo
+    type: url
     category: demos
-    evidence_quote: >-
-      This is just using a Docker desktop with the Google microservices demo
-      deployed.
-    confidence: high
   - title: CIS Kubernetes Benchmarks
+    type: url
     category: documentation
-    evidence_quote: >-
-      It checks the cluster against the SIS benchmarks, which is basically the
-      global rule book if one were to exist for hardening Kubernetes.
-    confidence: high
 ---
 

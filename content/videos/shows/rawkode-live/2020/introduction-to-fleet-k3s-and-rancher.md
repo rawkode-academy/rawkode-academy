@@ -97,16 +97,10 @@ guests:
   - bastian-hofmann
 resources:
   - title: Installing Rancher documentation page
+    type: url
     category: documentation
-    evidence_quote: >-
-      Yeah. You can either start with this one or the installing Rancher one. It
-      has the same commands to set up a k three s cluster.
-    confidence: medium
   - title: Fleet documentation page
+    type: url
     category: documentation
-    evidence_quote: >-
-      Maybe I sent you another link in the private chat that would be maybe nice
-      to just show the documentation page once for Fleet.
-    confidence: medium
 ---
 

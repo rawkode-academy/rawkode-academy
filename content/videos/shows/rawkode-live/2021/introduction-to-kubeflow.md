@@ -58,16 +58,10 @@ guests:
   - michael-tanenbaum
 resources:
   - title: Grokking Deep Learning
+    type: url
     category: other
-    evidence_quote: >-
-      I'll be borrowing an analogy from Andrew Trask's grokking deep learning,
-      which is published by Manning.
-    confidence: high
   - title: Kaggle Chest X-Ray Pneumonia Dataset by Paul Timothy Mooney
+    type: url
     category: demos
-    evidence_quote: >-
-      we are going to be looking at chest X rays to determine if the, X-ray,
-      presents with pneumonia or does not.
-    confidence: medium
 ---
 

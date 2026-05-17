@@ -76,35 +76,19 @@ guests:
   - peter-o-neill
 resources:
   - title: Telepresence DNS resolution documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      if you click on DNS resolution, like, I think this is where a lot of the
-      magic happens.
-    confidence: high
   - title: Telepresence Docker for Intercepts documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      one that we've recently we've recently we've recently released is the the
-      Docker for Intercepts.
-    confidence: high
   - title: Telepresence RBAC documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      this kind of walks you through what is the bare minimum RBAC procedure
-      that you would need in order to use Telepresence.
-    confidence: high
   - title: Telepresence and Linkerd documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      One thing I just sort of snuck into the docs, I think it's brand new,
-      Peter. I think you and I are talking to Casey about it. Is Telepresence
-      and Linkerd?
-    confidence: medium
   - title: Ambassador Labs annotations standard
+    type: url
     category: documentation
-    evidence_quote: >-
-      Folks can pop along to a tilde.io and see we've got a bunch of sort of
-      standardized annotations.
-    confidence: medium
 ---
 

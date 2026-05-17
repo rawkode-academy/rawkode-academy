@@ -66,24 +66,16 @@ guests:
   - carlisia-thompson
 resources:
   - title: The Podlets podcast
+    type: url
     category: other
-    evidence_quote: 'I do I am a host of the the Podlets podcast,'
-    confidence: high
   - title: Velero resource page
+    type: url
     category: documentation
-    evidence_quote: Yeah. And there's a resource page on the Velero.
-    confidence: medium
   - title: Velero roadmap.md
+    type: url
     category: code
-    evidence_quote: >-
-      at the very root of our repository on GitHub, there is a road map dot m d
-      file.
-    confidence: high
   - title: Velero Tilt integration instructions
+    type: url
     category: documentation
-    evidence_quote: >-
-      We have an integration with the tilts. Some people might not know tilt,
-      but there is instruction in to set it up, and it is ridiculously easy.
-    confidence: medium
 ---
 

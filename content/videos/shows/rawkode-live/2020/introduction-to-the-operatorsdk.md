@@ -66,8 +66,7 @@ guests:
   - dennis-kelly
 resources:
   - title: add operator repository
+    type: url
     category: code
-    evidence_quote: So I'll just share a link on the screen as well to that repository.
-    confidence: medium
 ---
 

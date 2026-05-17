@@ -83,14 +83,10 @@ guests:
   - matt-turner
 resources:
   - title: Network Foundations workshop
+    type: url
     category: documentation
-    evidence_quote: I've built a workshop called network foundations.
-    confidence: high
   - title: Envoy Gateway
+    type: url
     category: code
-    evidence_quote: >-
-      we've we're doing the main contributors to the reference implementation of
-      that, which is, like, Envoy gateway.
-    confidence: high
 ---
 

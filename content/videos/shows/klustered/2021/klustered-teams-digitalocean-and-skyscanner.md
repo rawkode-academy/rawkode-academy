@@ -167,14 +167,12 @@ guests:
   - alex-williams
 resources:
   - title: Teleport sponsor link
+    type: url
     url: 'https://rawkode.live/Teleport'
     category: other
-    evidence_quote: It's teleport. Go check it out. Rawkode.live/Teleport.
-    confidence: high
   - title: Rawkode Discord server
+    type: url
     url: 'https://Rawkode.chat'
     category: other
-    evidence_quote: 'We also have a Discord server available at Rawkode.chat,'
-    confidence: high
 ---
 

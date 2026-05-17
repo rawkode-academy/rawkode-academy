@@ -44,24 +44,13 @@ duration: 560
 guests: []
 resources:
   - title: Bluesky API create session endpoint
+    type: url
     category: documentation
-    evidence_quote: >-
-      If they do exist, we grab them and we hit the create session endpoint on
-      the blue sky API.
-    confidence: medium
   - title: Bluesky API getPostThread XRPC endpoint
+    type: url
     category: documentation
-    evidence_quote: |-
-      Then we'd nest up our awaits again, this time using
-      <v Speaker 0>the XRPC endpoint getPostThread
-    confidence: medium
   - title: Fermyon KV Explorer component
+    type: url
     category: code
-    evidence_quote: |-
-      However, we've added one additional component to this
-      <v Speaker 0>deployment and that is the KV explorer,
-      <v Speaker 0>which is available on the root internal
-      <v Speaker 0>slash k v dash explorer.
-    confidence: medium
 ---
 

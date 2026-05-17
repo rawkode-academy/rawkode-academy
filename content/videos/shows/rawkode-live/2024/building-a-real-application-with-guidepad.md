@@ -64,11 +64,7 @@ guests:
   - mathew-citarella
 resources:
   - title: Guidepad demo repository
+    type: url
     category: code
-    evidence_quote: >-
-      So I showed you a plug in and I didn't mention plug ins. So let me let me
-      do a quick aside on the plugin and tell you what that is. So, you can see
-      this is a a repository. Right? It's called Guidepad demo.
-    confidence: medium
 ---
 

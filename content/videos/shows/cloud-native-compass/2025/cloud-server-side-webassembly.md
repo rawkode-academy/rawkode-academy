@@ -53,15 +53,10 @@ guests:
   - mikkel-mork-hegnhoj
 resources:
   - title: Spin OpenTelemetry plugin
+    type: url
     category: code
-    evidence_quote: you could run a command called spin plugin install otel
-    confidence: medium
   - title: Wasm I/O
+    type: url
     category: other
-    evidence_quote: >-
-      Also, there's Wasserm.io just the week before, so if you rather go to
-      Barcelona Thursday, Friday, and maybe stay over the weekend, I'll
-      definitely recommend coming to Watson.io.
-    confidence: medium
 ---
 

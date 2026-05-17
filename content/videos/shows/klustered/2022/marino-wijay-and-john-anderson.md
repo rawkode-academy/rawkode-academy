@@ -178,18 +178,15 @@ guests:
   - john-anderson
 resources:
   - title: Rawkode Academy Teleport sponsor link
+    type: url
     category: other
-    evidence_quote: So go to rockload.liveteleport
-    confidence: medium
   - title: Rawkode Academy Equinix Metal sponsor link
+    type: url
     url: 'https://rawkode.live/metal'
     category: other
-    evidence_quote: keep the sponsors happy by going to Rawkode.live/metal
-    confidence: high
   - title: Equinix Metal Console
+    type: url
     url: 'https://console.equinix.com'
     category: other
-    evidence_quote: 'So you can go to console.equinix.com,'
-    confidence: medium
 ---
 

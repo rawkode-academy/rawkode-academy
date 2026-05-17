@@ -84,23 +84,13 @@ guests:
   - mat-arye
 resources:
   - title: Promscale design doc
+    type: url
     category: documentation
-    evidence_quote: >-
-      There's a link to our design doc Oh, yes. Which is Yeah. Which is actually
-      a live public design doc that we had hosted online when we first started
-      the project.
-    confidence: high
   - title: Getting started with Promscale doc
+    type: url
     category: documentation
-    evidence_quote: >-
-      And I think we can get started with getting started with Promscale doc for
-      SQL queries.
-    confidence: high
   - title: Dan Liu post about getting more value from metrics
+    type: url
     category: other
-    evidence_quote: >-
-      So there is a a big post by Dan Liu about talking about a simple way to
-      get more values from metrics.
-    confidence: medium
 ---
 

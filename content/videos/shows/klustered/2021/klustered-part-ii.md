@@ -117,8 +117,7 @@ guests:
   - dan-finneran
 resources:
   - title: Hubble UI
+    type: url
     category: demos
-    evidence_quote: Jason is telling us to use the Hubble UI.
-    confidence: medium
 ---
 

@@ -135,30 +135,21 @@ guests:
   - matti-ranta
 resources:
   - title: Gitea from binary installation guide
+    type: url
     category: documentation
-    evidence_quote: So probably just from binary is likely the is one of the most common ways.
-    confidence: medium
   - title: Gitea Helm chart
+    type: url
     category: code
-    evidence_quote: >-
-      And we have a Helm chart exactly for that. So you can install the Helm
-      chart,
-    confidence: medium
   - title: Gitea comparison document
+    type: url
     category: documentation
-    evidence_quote: >-
-      in our docs, we have a a whole long comparison document that lists out the
-      differences between, Gitea, Gogs, GitLab, and, GitHub.
-    confidence: high
   - title: Gitea CLI t repository
+    type: url
     url: 'https://gitea.com/gitea/t'
     category: code
-    evidence_quote: 'gitea.com/gitea/t,'
-    confidence: high
   - title: Codeberg
+    type: url
     url: 'https://codeberg.org'
     category: other
-    evidence_quote: 'we recommend, right now, codeberg.org.'
-    confidence: high
 ---
 

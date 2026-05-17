@@ -207,13 +207,11 @@ chapters:
 duration: 5384
 resources:
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: You can also check out Equinix Medal by using the quote Rawkode.
-    confidence: medium
   - title: Rawkode Academy t-shirt giveaway
+    type: url
     url: 'https://Rawkode.live/win'
     category: other
-    evidence_quote: 'So if you wanna win a t shirt today, go to Rawkode.live/win.'
-    confidence: high
 ---
 

@@ -48,10 +48,7 @@ guests:
   - ciaran-mcnulty
 resources:
   - title: git sync Rust library
+    type: url
     category: code
-    evidence_quote: >-
-      I have been building out or, you know, failing to build out, but being
-      guided by Kieran, a get library called get sync, retina rust
-    confidence: medium
 ---
 

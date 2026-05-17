@@ -177,13 +177,11 @@ guests:
   - alex-ellis
 resources:
   - title: arkade
+    type: url
     url: 'https://get-arkade.dev'
     category: code
-    evidence_quote: 'So let''s say if you go to get arcade.dev with a dash,'
-    confidence: medium
   - title: Start With Why
+    type: url
     category: other
-    evidence_quote: 'I mean, I''m reading this book called Start With Why. Have you read that?'
-    confidence: high
 ---
 

@@ -115,10 +115,7 @@ guests:
   - eduardo-silva
 resources:
   - title: Calyptia Config Visualizer
+    type: url
     category: demos
-    evidence_quote: >-
-      if we actually have a a visualizer if you wanna try that out, config
-      visualizer.
-    confidence: medium
 ---
 

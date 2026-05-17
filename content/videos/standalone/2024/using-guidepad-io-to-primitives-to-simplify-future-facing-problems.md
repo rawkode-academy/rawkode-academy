@@ -57,20 +57,13 @@ duration: 1193
 guests: []
 resources:
   - title: S3 Provider Service Demo
+    type: url
     category: code
-    evidence_quote: 'It is called s three provider, and it is 105 lines long.'
-    confidence: high
   - title: CloudTrail Requirement Class
+    type: url
     category: code
-    evidence_quote: >-
-      Inside of our plugin, we have requirements dot py. In this, we define a
-      new class which extend requirement called CloudTrail requirement.
-    confidence: high
   - title: Terraform Control Plane Implementation
+    type: url
     category: code
-    evidence_quote: >-
-      If we pop open Terraform, we will see the code. Now all this does is give
-      Guidepad enough information to tell it how to execute Terraform programs.
-    confidence: medium
 ---
 

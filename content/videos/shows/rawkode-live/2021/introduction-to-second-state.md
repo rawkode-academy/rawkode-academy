@@ -41,8 +41,7 @@ guests:
   - tim-mccallum
 resources:
   - title: Jampack API docs
+    type: url
     category: documentation
-    evidence_quote: 'If you just click on that API docs, we might start there.'
-    confidence: medium
 ---
 

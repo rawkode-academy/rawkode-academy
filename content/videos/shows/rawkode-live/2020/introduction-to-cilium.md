@@ -115,26 +115,19 @@ guests:
   - ilya-dmitrichenko
 resources:
   - title: Cilium Quick Installation guide
+    type: url
     category: documentation
-    evidence_quote: Yeah. You wanna go to quick start. I think quick installation.
-    confidence: high
   - title: Cilium IPAM documentation
+    type: url
     category: documentation
-    evidence_quote: 'If you look in Cilium docs, the IPAM section,'
-    confidence: high
   - title: Cilium connectivity test manifest
+    type: url
     category: demos
-    evidence_quote: Yeah. The connectivity test.
-    confidence: medium
   - title: Cilium Star Wars demo
+    type: url
     category: demos
-    evidence_quote: there's a Star Wars demo if you like.
-    confidence: high
   - title: Introduction to Cilium and Hubble
+    type: url
     category: documentation
-    evidence_quote: >-
-      if I haven't read the introduction to Cilium and Hubble yet, you would
-      encourage that.
-    confidence: medium
 ---
 

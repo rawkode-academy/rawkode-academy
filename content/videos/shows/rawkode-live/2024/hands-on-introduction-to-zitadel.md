@@ -98,23 +98,13 @@ guests:
   - florian-forster
 resources:
   - title: Zitadel Docker Compose self-hosting guide
+    type: url
     category: documentation
-    evidence_quote: >-
-      I would advise we use Docker Compose because it's basically the easiest to
-      get started with.
-    confidence: high
   - title: OAuth Proxy
+    type: url
     category: code
-    evidence_quote: >-
-      I usually tend to use it for an an external tool like OAuth Proxy because
-      it's just the binary on the config file and does a great job for showing
-      people how how they can work.
-    confidence: high
   - title: Zitadel Domain Discovery documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      Domain discovery or discovery should should bring you up. Yeah. Domain
-      discovery. Perfect.
-    confidence: high
 ---
 

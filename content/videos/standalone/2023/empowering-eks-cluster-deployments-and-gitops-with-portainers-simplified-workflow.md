@@ -41,8 +41,7 @@ duration: 582
 guests: []
 resources:
   - title: Google Cloud Platform microservice demo
+    type: url
     category: demos
-    evidence_quote: Here I'm going to deploy the Google Cloud Platform microservice demo.
-    confidence: high
 ---
 

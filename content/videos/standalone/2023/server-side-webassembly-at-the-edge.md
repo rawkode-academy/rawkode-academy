@@ -109,21 +109,16 @@ duration: 3073
 guests: []
 resources:
   - title: Fermion Installer
+    type: url
     url: 'https://github.com/fermion/installer'
     category: code
-    evidence_quote: >-
-      you can find this and currently a pull request at
-      github.com/firmion/installer.
-    confidence: high
   - title: Deis Labs Hippo
+    type: url
     url: 'https://github.com/deislabs/hippo'
     category: code
-    evidence_quote: 'Hippo is a days lab project, which I believe is mostly dot net.'
-    confidence: high
   - title: Deis Labs Bundle
+    type: url
     url: 'https://github.com/deislabs/bundle'
     category: code
-    evidence_quote: deploying Hippo and Bundle from data slabs
-    confidence: high
 ---
 

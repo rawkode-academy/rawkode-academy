@@ -94,23 +94,13 @@ guests:
   - elad-ben-israel
 resources:
   - title: Cluster API project
+    type: url
     category: code
-    evidence_quote: >-
-      Well, I I do a lot of work on the cluster API project. So why don't we
-      import their types?
-    confidence: high
   - title: 'cdk8s Concepts: Escape Patches'
+    type: url
     category: documentation
-    evidence_quote: >-
-      You can go you can look at this at the at the documentation. It's actually
-      something that, maybe documentation can help with. And the concepts escape
-      patches.
-    confidence: medium
   - title: Construct Catalog
+    type: url
     category: other
-    evidence_quote: >-
-      I shoved a little link to this little thing called we call construct
-      catalog,
-    confidence: medium
 ---
 

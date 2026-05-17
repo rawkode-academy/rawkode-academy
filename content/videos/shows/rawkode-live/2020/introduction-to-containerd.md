@@ -46,23 +46,13 @@ guests:
   - phil-estes
 resources:
   - title: stargz snapshotter KubeCon talk
+    type: url
     category: other
-    evidence_quote: >-
-      There's a talk from KubeCon a few weeks ago on the star g z snapshot,
-      which does lazy image pull and anyway, it can do major speed up in
-      container startup time.
-    confidence: medium
   - title: containerd issue 4531
+    type: url
     category: other
-    evidence_quote: >-
-      I just found an issue from seventeen days ago, containerd issue four five
-      three one, if people wanna go look it up.
-    confidence: high
   - title: Kata Containers
+    type: url
     category: code
-    evidence_quote: >-
-      This is where you see Cata containers or Firecracker or gVisor or on my on
-      Windows, the run HCS tool or or shim that Microsoft has built
-    confidence: medium
 ---
 

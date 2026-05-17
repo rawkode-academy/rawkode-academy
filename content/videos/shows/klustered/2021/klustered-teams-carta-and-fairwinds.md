@@ -88,17 +88,11 @@ guests:
   - raf-nijskens
 resources:
   - title: Teleport
+    type: url
     url: 'https://rawkode.live/teleport'
     category: other
-    evidence_quote: >-
-      If you want to support the show, you can go check out
-      Rawkode.live/teleport
-    confidence: high
   - title: Fairwinds RBAC Lookup
+    type: url
     category: code
-    evidence_quote: >-
-      the RBAC lookup will help you find RBAC permissions that are difficult to
-      discover.
-    confidence: medium
 ---
 

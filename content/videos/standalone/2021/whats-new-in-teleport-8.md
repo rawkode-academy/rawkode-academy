@@ -66,19 +66,10 @@ guests:
   - steve-martin
 resources:
   - title: 'Teleport documentation: joining nodes'
+    type: url
     category: documentation
-    evidence_quote: >-
-      Now the other the other thing which which I wanted to show, particularly
-      with this console access, is the concept of using the auto join. So one of
-      our features here, if you go into our documentation about, you know,
-      joining nodes.
-    confidence: medium
   - title: 'Teleport documentation: AWS console access'
+    type: url
     category: documentation
-    evidence_quote: >-
-      Also, on the AWS console one, which I wrote part of that, so yell at me.
-      Not but this steps you through really low really low level with, like,
-      giving you read only access example and a power user example.
-    confidence: medium
 ---
 

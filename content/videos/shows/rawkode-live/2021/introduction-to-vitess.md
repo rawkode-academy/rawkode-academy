@@ -83,23 +83,13 @@ guests:
   - open-source-database-evangelist
 resources:
   - title: Vitess Operator
+    type: url
     category: code
-    evidence_quote: |-
-      especially because there is, an operator for Vitess,
-      which is also open source.
-    confidence: medium
   - title: Vitess Kubernetes Quick Start
+    type: url
     category: documentation
-    evidence_quote: |-
-      I see that there's a Kubernetes quick start.
-      There's the local install.
-    confidence: medium
   - title: Vitess Point-in-Time Recovery documentation
+    type: url
     category: documentation
-    evidence_quote: |-
-      We actually have a
-      point in time recovery feature as well,
-      which is documented on the website.
-    confidence: medium
 ---
 

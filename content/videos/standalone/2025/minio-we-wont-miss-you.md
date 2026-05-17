@@ -16,26 +16,19 @@ duration: 369
 guests: []
 resources:
   - title: MinIO Community Edition Maintenance Mode Announcement
+    type: url
     category: other
-    evidence_quote: Mineo just announced maintenance mode for their Community edition.
-    confidence: high
   - title: Adam Jacobs' Analysis of MinIO License Enforcement
+    type: url
     category: other
-    evidence_quote: >-
-      industry experts and a friend Adam Jacobs said, and the link is below,
-      this should drive everyone away from Mineo as a standard.
-    confidence: high
   - title: MinIO vs Nutanix License Compliance Case
+    type: url
     category: other
-    evidence_quote: there was the case of Menio versus Nutanix.
-    confidence: high
   - title: MinIO vs Weka License Revocation Incident
+    type: url
     category: other
-    evidence_quote: there was the case with Weka
-    confidence: high
   - title: MinIO GitHub Community Concerns
+    type: url
     category: other
-    evidence_quote: the community raised their concerns on GitHub
-    confidence: high
 ---
 

@@ -54,16 +54,10 @@ guests:
   - guy-templeton
 resources:
   - title: Kubernetes Autoscaling by Example repository
+    type: url
     category: code
-    evidence_quote: >-
-      So we're gonna take a look at github.com/gjtempletonslash, well, I'm not
-      gonna read that out. It's the Kubernetes auto scaling by example.
-    confidence: medium
   - title: Prometheus Adapter documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      You can have a look at the Prometheus adapter documentation for certain
-      more detail on how these work.
-    confidence: medium
 ---
 

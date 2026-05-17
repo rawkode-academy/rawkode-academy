@@ -58,16 +58,10 @@ guests:
   - gianluca-mardente
 resources:
   - title: Project Sveltos installation documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      what I did, I went to the project Sveltos documentation, and this is
-      pretty much like the install section.
-    confidence: high
   - title: Project Sveltos register cluster documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      even to register a cluster with Sveltos, the documentation is on the
-      project Sveltos.
-    confidence: medium
 ---
 

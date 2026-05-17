@@ -18,8 +18,7 @@ guests:
   - avital-tamir
 resources:
   - title: Cyphernetes Operator
+    type: url
     category: code
-    evidence_quote: 'The operator also exists on artifact hub, of course.'
-    confidence: medium
 ---
 

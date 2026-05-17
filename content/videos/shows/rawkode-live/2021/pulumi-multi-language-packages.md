@@ -70,22 +70,13 @@ guests:
   - lee-briggs
 resources:
   - title: Pulumi Go boilerplate provider
+    type: url
     category: code
-    evidence_quote: >-
-      We're gonna look at the Pulumi Go boilerplate provider. So this is on our
-      GitHub repo.
-    confidence: high
   - title: Rawkode Pulumi production app
+    type: url
     category: code
-    evidence_quote: >-
-      you already fought this into Rawkode Pulumi dash production app, which we
-      see here.
-    confidence: medium
   - title: Pulumi Python boilerplate provider
+    type: url
     category: code
-    evidence_quote: >-
-      And then there's the Python one as well. So if you do p y dash boiler p y
-      dash boilerplate.
-    confidence: medium
 ---
 

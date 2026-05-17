@@ -80,32 +80,19 @@ guests:
   - carolina-ferreira
 resources:
   - title: 'Meilisearch documentation: Comparison to alternatives'
+    type: url
     category: documentation
-    evidence_quote: There's comparison to alternatives.
-    confidence: high
   - title: 'Meilisearch documentation: API reference settings'
+    type: url
     category: documentation
-    evidence_quote: 'In the API reference, there is a section called settings.'
-    confidence: high
   - title: 'Meilisearch documentation: Ranking rules relevancy guide'
+    type: url
     category: documentation
-    evidence_quote: >-
-      If you go into documentation and, like, the learn court I know right now
-      it's a little bit all over the place because we we talk about different
-      topic. But, like, if you could click on learn, I think it's a core concept
-      relevancy and if you check ranking row.
-    confidence: medium
   - title: 'Meilisearch documentation: Official SDK libraries'
+    type: url
     category: documentation
-    evidence_quote: >-
-      But if you check on the sidebar on official's a SDK libraries on the four
-      three links
-    confidence: medium
   - title: movies.json sample dataset
+    type: url
     category: demos
-    evidence_quote: >-
-      right right before the code you copy, there is a JSON file that you can
-      download already populated for you.
-    confidence: medium
 ---
 

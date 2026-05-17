@@ -92,34 +92,20 @@ guests:
   - ben-abbott
 resources:
   - title: Teleport Upgrade Documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      we have sort of specific documentation around how to upgrade between nine
-      and ten and, like, end of life cycle.
-    confidence: high
   - title: Rawkode Academy Discord
+    type: url
     url: 'https://rawkode.chat'
     category: other
-    evidence_quote: You can join a Academy Discord. It's available at Rawkode.chat.
-    confidence: high
   - title: Teleport 10 Release Blog
+    type: url
     category: documentation
-    evidence_quote: >-
-      I do have the watch new IntelliPortem blog here. So maybe we could scroll
-      through this, and you can give us a bit of a an introduction to the other
-      stuff that's listed here.
-    confidence: high
   - title: Teleport RFDs (Request For Discussion)
+    type: url
     category: documentation
-    evidence_quote: >-
-      along with kind of being open call for GitHub, we have sort of RFDs. Ah.
-      We sort of discuss like how we're implementing our features.
-    confidence: high
   - title: Teleport Community Slack
+    type: url
     category: other
-    evidence_quote: >-
-      you can join our community Slack channel. It's avail it's a
-      scoteleport.com forward slash slack.
-    confidence: high
 ---
 

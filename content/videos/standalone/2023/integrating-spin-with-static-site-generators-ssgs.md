@@ -48,16 +48,10 @@ duration: 754
 guests: []
 resources:
   - title: Spin file server repository
+    type: url
     category: code
-    evidence_quote: >-
-      We're pulling this from a GitHub release artifact on the spin fail server
-      repository.
-    confidence: medium
   - title: Astro website creation CLI
+    type: url
     category: documentation
-    evidence_quote: >-
-      Here, I'm going to do a p n p m create astro at latest. This is gonna
-      guide us through the astro website creation process.
-    confidence: medium
 ---
 

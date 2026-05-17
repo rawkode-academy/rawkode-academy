@@ -50,14 +50,10 @@ guests:
   - koray-oksay
 resources:
   - title: Kubernetes The Hard Way
+    type: url
     category: documentation
-    evidence_quote: >-
-      my first recommendation is to follow Kubernetes the hard way from Kelsey
-      Hightower.
-    confidence: high
   - title: CNCF and Kubernetes Slack channels
+    type: url
     category: other
-    evidence_quote: One more thing that they could join the CNCF and Kubernetes Slack channels
-    confidence: high
 ---
 

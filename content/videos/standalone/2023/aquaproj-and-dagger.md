@@ -49,13 +49,11 @@ guests:
   - brian-ketelsen
 resources:
   - title: AlphaBits Podcast
+    type: url
     url: 'https://alphabets.fm'
     category: other
-    evidence_quote: check out the podcast available at alphabets.fm.
-    confidence: high
   - title: aquaproj Registry
+    type: url
     category: code
-    evidence_quote: 'and the registry, and the registry has all of the package definitions.'
-    confidence: high
 ---
 

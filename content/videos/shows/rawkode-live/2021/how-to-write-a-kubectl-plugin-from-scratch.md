@@ -65,24 +65,13 @@ guests:
   - matt-turner
 resources:
   - title: Kubernetes kubectl plugins documentation
+    type: url
     category: documentation
-    evidence_quote: You can find this documentation on the Kubernetes website.
-    confidence: high
   - title: Krew kubectl plugin manager
+    type: url
     category: other
-    evidence_quote: |-
-      And then we also want to take a look at using crew as a way to provide
-      a crew as a plug in manager for
-      control that would make it easier for other
-      people to install this plug in and get
-      the benefits of this.
-    confidence: high
   - title: Krew plugin index repository
+    type: url
     category: code
-    evidence_quote: |-
-      Yeah. There's a crew index
-      which Right. Which I assume means Yeah. We
-      need to PR or something into this.
-    confidence: medium
 ---
 

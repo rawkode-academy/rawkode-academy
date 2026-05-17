@@ -47,22 +47,13 @@ duration: 512
 guests: []
 resources:
   - title: Tetragon Installation Documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      From here, we're going to click on installation. Now we should note there
-      are multiple ways to install Tetragon.
-    confidence: high
   - title: Tetragon GitHub Releases
+    type: url
     category: code
-    evidence_quote: >-
-      So from here, we can see that we can grab Tetragon from the GitHub
-      releases.
-    confidence: high
   - title: Tetragon Helm Chart
+    type: url
     category: code
-    evidence_quote: >-
-      Now we're going to use Helm, so this isn't anything you haven't seen
-      before. We add the repository, do an update, and ask it to install.
-    confidence: high
 ---
 

@@ -63,24 +63,18 @@ guests:
   - kevin-hoffman
 resources:
   - title: WasmCloud open source project
+    type: url
     category: code
-    evidence_quote: 'Created the WasmCloud open source project,'
-    confidence: high
   - title: Programming WebAssembly with Rust
+    type: url
     category: other
-    evidence_quote: 'wrote a book called programming web assembly with Rust,'
-    confidence: high
   - title: Fermion
+    type: url
     url: 'https://fermion.com'
     category: other
-    evidence_quote: >-
-      if you're curious about Fermion and on how it does serverless web
-      assembly, that's simply fermion.com.
-    confidence: high
   - title: Suborbital
+    type: url
     url: 'https://suborbital.dev'
     category: other
-    evidence_quote: you can check all of that out at suborbital.dev.
-    confidence: high
 ---
 

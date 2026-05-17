@@ -87,14 +87,10 @@ guests:
   - matt-jarvis
 resources:
   - title: n8n workflow automation project
+    type: url
     category: code
-    evidence_quote: I fought n a n. Are you familiar with the the project at all?
-    confidence: medium
   - title: CNCF Cloud Native Security Whitepaper
+    type: url
     category: documentation
-    evidence_quote: >-
-      the the cloud native security white paper, but that the the that CNCF six
-      security did last year
-    confidence: medium
 ---
 

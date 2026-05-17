@@ -96,8 +96,7 @@ guests:
   - zach-wachtel
 resources:
   - title: Ship It podcast
+    type: url
     category: other
-    evidence_quote: I blame the Ship It podcast.
-    confidence: medium
 ---
 

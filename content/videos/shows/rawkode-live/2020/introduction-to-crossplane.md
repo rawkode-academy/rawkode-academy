@@ -78,35 +78,19 @@ guests:
   - marques-johansson
 resources:
   - title: Provider Packet / Equinix Metal provider GitHub README
+    type: url
     category: code
-    evidence_quote: >-
-      So do you wanna go to the provider packet kind of GitHub page, and we can
-      look at the read me, which will show you how to do your explicit
-      credentials for Equinix metal?
-    confidence: medium
   - title: Equinix Fabric API documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      I'm not gonna point to the API documentation, but you can feel free to go
-      and find that. And I'll put a link in the show notes.
-    confidence: medium
   - title: Terraform Provider for Equinix examples
+    type: url
     category: code
-    evidence_quote: >-
-      the Terraform provider for Equinix has some examples of how you can of how
-      you can use, say, the Google and the Amazon and Azure, like, link them all
-      up through their through Equinix Fiber to create one, like, humongous
-      cloud network.
-    confidence: high
   - title: TBS episode on provider SSH
+    type: url
     category: other
-    evidence_quote: And if folks there's also a TBS episode on provider SSH.
-    confidence: medium
   - title: TVS playlist on the Crossplane YouTube channel
+    type: url
     category: other
-    evidence_quote: >-
-      If you go and look at the the TVS playlist on the Crossplane YouTube
-      channel, there's a few different examples of bootstrapping new providers,
-    confidence: high
 ---
 

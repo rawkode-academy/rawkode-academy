@@ -58,16 +58,13 @@ guests:
   - romaric-philogene
 resources:
   - title: Qovery getting started guide
+    type: url
     category: documentation
-    evidence_quote: we'll go straight to the get and start to guide
-    confidence: medium
   - title: Qovery AI agent on GitHub
+    type: url
     category: code
-    evidence_quote: We have worked on the AI agent that is open source
-    confidence: medium
   - title: Grafana Helm chart
+    type: url
     category: code
-    evidence_quote: And we have their own chart. Okay. I love this product.
-    confidence: medium
 ---
 

@@ -50,11 +50,8 @@ duration: 921
 guests: []
 resources:
   - title: Portainer in Production GitHub Repository
+    type: url
     url: 'https://github.com/rawcodeacademy/portainer-in-production'
     category: code
-    evidence_quote: >-
-      The code is available at
-      github.com/rawcodeacademy/portainer-in-production.
-    confidence: high
 ---
 

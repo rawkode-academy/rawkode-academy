@@ -18,34 +18,19 @@ guests:
   - mark-fussell
 resources:
   - title: State of Dapr Report 2025
+    type: url
     category: other
-    evidence_quote: >-
-      we're just about to release now, I think called a state of DAPA report to
-      2025
-    confidence: high
   - title: Carl Hewitt actor model paper
+    type: url
     category: other
-    evidence_quote: >-
-      go back and look at the original paper from Carl Hewitt, who published all
-      about the actor model in the 70s
-    confidence: high
   - title: Dapr Agents framework
+    type: url
     category: code
-    evidence_quote: >-
-      One of my key asks from this is like, please go out and try out this Dapr
-      agents framework.
-    confidence: high
   - title: Diagrid Conductor
+    type: url
     category: demos
-    evidence_quote: >-
-      We have a service called Dagrid Conductor that allows you to manage and
-      operate DAPR on top of Kubernetes.
-    confidence: medium
   - title: Diagrid Catalyst
+    type: url
     category: demos
-    evidence_quote: >-
-      we have a very cool service called Diagrid Catalyst, which is think of it
-      as a serverless offering of Dapr.
-    confidence: medium
 ---
 

@@ -82,37 +82,17 @@ guests:
   - jj-asghar
 resources:
   - title: IBM watsonx.ai developer page
+    type: url
     url: 'https://ibm.biz/dev-watsonx'
     category: documentation
-    evidence_quote: |-
-      If you are interested in Watson x, I do need to plug the URL.
-      Ibm.biz/dev-watsonx.
-    confidence: high
   - title: The Pile AI dataset
+    type: url
     category: other
-    evidence_quote: |-
-      If you Google the pile AI,
-      it is a massive dataset out there that
-      is just, like, I think, 800 gigs last
-      time I looked at it
-    confidence: high
   - title: FOSSY working session Etherpad notes on AI data provenance
+    type: url
     category: other
-    evidence_quote: |-
-      This was actually a a wonderful
-      working session at Fosse.
-      We had this whole and I I can
-      I can link to the Etherpad
-      that
-      captured all the notes for this?
-    confidence: medium
   - title: Hugging Face
+    type: url
     category: other
-    evidence_quote: |-
-      Models in the open source ecosystem, something called
-      Hugging Face. If your audience doesn't know about
-      it, the easiest thing to describe Hugging Face
-      as is the GitHub of AI.
-    confidence: medium
 ---
 

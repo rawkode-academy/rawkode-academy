@@ -17,12 +17,10 @@ guests:
   - karthik-satchitanand
 resources:
   - title: k0rdent Quick Starts documentation
+    type: url
     category: documentation
-    evidence_quote: We're gonna click on documentation and quick starts
-    confidence: high
   - title: k0rdent Catalog
+    type: url
     category: code
-    evidence_quote: So if you go to GitHub forward slash cordon. Catalog? Yep. Yep.
-    confidence: medium
 ---
 

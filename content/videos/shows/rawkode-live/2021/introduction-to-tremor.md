@@ -90,25 +90,16 @@ guests:
   - matthias-wahl
 resources:
   - title: Equinix Metal products
+    type: url
     category: other
-    evidence_quote: So thank you Equinix metal. Feel free to check out the products.
-    confidence: medium
   - title: Matthias Wahl's Bobconf SIMD talk
+    type: url
     category: other
-    evidence_quote: >-
-      Matthias just gave a talk on that. Literally. Literally on Bobconf, what,
-      two weeks ago?
-    confidence: medium
   - title: Tremor RFC for Troy deployment language
+    type: url
     category: documentation
-    evidence_quote: There is a RFC on our RFC sites about implementing Troy.
-    confidence: medium
   - title: Vector project
+    type: url
     category: code
-    evidence_quote: >-
-      We have project called Vector. It's really good at log tailing, and we
-      don't like spending our time doing log tailing. So we just recommend, hey.
-      Folk use Vector.
-    confidence: high
 ---
 

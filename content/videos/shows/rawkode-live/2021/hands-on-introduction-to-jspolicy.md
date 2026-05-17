@@ -86,24 +86,16 @@ guests:
   - lukas-gentele
 resources:
   - title: jsPolicy Playground
+    type: url
     category: demos
-    evidence_quote: So this is like your JS policy playground
-    confidence: high
   - title: jsPolicy Architecture docs page
+    type: url
     category: documentation
-    evidence_quote: We do have the architecture on the docs page if I remember.
-    confidence: high
   - title: jsPolicy example policies repository
+    type: url
     category: code
-    evidence_quote: >-
-      In the in the project itself, there is a lot of, you know, example
-      policies
-    confidence: high
   - title: jsPolicy SDK starter project
+    type: url
     category: code
-    evidence_quote: >-
-      And you can find that project on GitHub, and it's essentially a starter
-      project.
-    confidence: high
 ---
 

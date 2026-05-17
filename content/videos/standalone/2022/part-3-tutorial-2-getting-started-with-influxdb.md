@@ -55,30 +55,16 @@ duration: 577
 guests: []
 resources:
   - title: 'Part 1: An Introduction to Time Series'
+    type: url
     category: other
-    evidence_quote: >-
-      We talked about this briefly in the very first part of this course, an
-      introduction to time series.
-    confidence: high
   - title: 'Flux Workshop: Writing Your First Flux'
+    type: url
     category: other
-    evidence_quote: >-
-      The next workshop will be this week, and it will be focusing on writing
-      your first flux. Make sure to catch that.
-    confidence: high
   - title: InfluxDB 2 Templates
+    type: url
     category: other
-    evidence_quote: >-
-      One of the coolest things about InfluxDB's latest version, version two, is
-      templates. We will be spending also a significant amount of time on using
-      the GetOps pattern to apply our telegraph configurations, our dashboards
-      and our tasks using InfluxDB two templates.
-    confidence: high
   - title: Telegraf Data Collector
+    type: url
     category: code
-    evidence_quote: >-
-      You can start to specify and configure Telegraph, or you could just say, I
-      will do this later, which is what we're going to choose now.
-    confidence: high
 ---
 

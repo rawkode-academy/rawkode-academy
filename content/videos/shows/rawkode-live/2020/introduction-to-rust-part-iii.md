@@ -94,28 +94,21 @@ guests:
   - jane-lusby
 resources:
   - title: Awesome Rust Mentors Project
+    type: url
     category: code
-    evidence_quote: you can find the awesome Rust mentors project on GitHub.
-    confidence: high
   - title: StructOpt crate
+    type: url
     category: code
-    evidence_quote: struct ops are great crate to just pull in for like little tools.
-    confidence: high
   - title: Cargo Edit
+    type: url
     category: code
-    evidence_quote: 'So look up Cargo Edit on GitHub or, like like, Google Cargo Edit.'
-    confidence: high
   - title: std.rs BufReader documentation
+    type: url
     url: 'https://std.rs/buffreader'
     category: documentation
-    evidence_quote: 'type in the the in the URL field, stood.rs/buffreader, b u f r e a d e r.'
-    confidence: high
   - title: cheats.rs Rust cheat sheet
+    type: url
     url: 'https://cheats.rs'
     category: documentation
-    evidence_quote: >-
-      There's this awesome website called cheats.rs, which, like, you can bring
-      it up right now.
-    confidence: high
 ---
 

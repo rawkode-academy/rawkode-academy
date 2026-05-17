@@ -32,10 +32,7 @@ duration: 358
 guests: []
 resources:
   - title: Kubernetes workshop chart from the Komodor LJOX repository
+    type: url
     category: code
-    evidence_quote: >-
-      Here I'm specifying one chart and that's what I want to deploy to
-      Kubernetes workshop chart from the Komodor LJOX repository.
-    confidence: medium
 ---
 

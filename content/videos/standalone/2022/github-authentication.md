@@ -37,28 +37,16 @@ duration: 1289
 guests: []
 resources:
   - title: Teleport GitHub SSO Documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      I have the browser here where I have the documentation on setting up
-      single sign on with GitHub
-    confidence: high
   - title: Teleport RBAC Deep Dive
+    type: url
     category: other
-    evidence_quote: >-
-      we actually did a Teleport Rback deep dive session, which you can find at
-      Rawkode.live if you just search for Teleport Rback.
-    confidence: high
   - title: Teleport Machine ID Q&A with Ben Adams
+    type: url
     category: other
-    evidence_quote: >-
-      go to this Q and A with Ben Adams from the Teleport team. We actually do a
-      demo and talk about machine ID in much more detail
-    confidence: high
   - title: Teleport Windows Desktop Access Video
+    type: url
     category: other
-    evidence_quote: >-
-      even desktop, Windows desktop, for example, which we did a video on
-      recently with Ben from that team
-    confidence: medium
 ---
 

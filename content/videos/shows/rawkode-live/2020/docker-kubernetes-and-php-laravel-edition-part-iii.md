@@ -148,12 +148,10 @@ guests:
   - alex-bowers
 resources:
   - title: Ping CRM
+    type: url
     category: demos
-    evidence_quote: But not part of the Ping CRM project.
-    confidence: high
   - title: Laravel Dusk
+    type: url
     category: code
-    evidence_quote: 'there''s a browser based testing in Laravel, a package called Laravel Dusk'
-    confidence: medium
 ---
 

@@ -64,8 +64,7 @@ guests:
   - kris-nova
 resources:
   - title: SleuthKit FLS
+    type: url
     category: documentation
-    evidence_quote: 'So FLS is part of SleuthKit, which is showing my age a little bit.'
-    confidence: medium
 ---
 

@@ -71,17 +71,11 @@ guests:
   - neil-cresswell
 resources:
   - title: CNCF Landscape
+    type: url
     category: other
-    evidence_quote: >-
-      Over time, and we still see it now, you know, go go log in to the CNCF
-      landscape.
-    confidence: medium
   - title: Sosivio
+    type: url
     url: 'https://sosiv.io'
     category: other
-    evidence_quote: >-
-      what we are actually doing is integrating with a product called SOSIVO, s
-      o s I v dot I o.
-    confidence: high
 ---
 

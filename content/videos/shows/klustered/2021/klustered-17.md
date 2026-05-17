@@ -91,9 +91,8 @@ guests:
   - william-lightning
 resources:
   - title: Teleport
+    type: url
     url: 'https://rawkode.live/Teleport'
     category: other
-    evidence_quote: Remember to go check out Rawkode.live/Teleport.
-    confidence: high
 ---
 

@@ -81,8 +81,7 @@ duration: 872
 guests: []
 resources:
   - title: 'Teleport documentation: Running Teleport with Docker'
+    type: url
     category: documentation
-    evidence_quote: we have an entire page dedicated as a to running Teleport with Docker
-    confidence: high
 ---
 

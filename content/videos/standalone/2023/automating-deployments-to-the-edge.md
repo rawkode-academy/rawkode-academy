@@ -90,15 +90,11 @@ duration: 1288
 guests: []
 resources:
   - title: Portainer in Production repository
+    type: url
     category: code
-    evidence_quote: >-
-      everything that I'm going to show you is available on the Portainer in
-      production repository.
-    confidence: high
   - title: KeyCDN Website Speed Test
+    type: url
     url: 'https://tools.keycdn.com/performance'
     category: other
-    evidence_quote: 'You can go to tools.KeyCDN.com/performance,'
-    confidence: high
 ---
 

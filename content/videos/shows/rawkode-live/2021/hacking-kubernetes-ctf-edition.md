@@ -115,26 +115,19 @@ guests:
   - andrew-martin
 resources:
   - title: Kubernetes Simulator
+    type: url
     category: code
-    evidence_quote: 'there is an open source project called Kubernetes simulator,'
-    confidence: high
   - title: Hacking Kubernetes book
+    type: url
     category: other
-    evidence_quote: there's a book coming out in November called Hacking Kubernetes.
-    confidence: high
   - title: Am I Contained
+    type: url
     category: code
-    evidence_quote: >-
-      AMI contained is the canonical internal container observability tool
-      written by Jess Fraz,
-    confidence: high
   - title: Stern Kubernetes log tailing tool
+    type: url
     category: code
-    evidence_quote: the the tool that I really love for logging is called Stern
-    confidence: high
   - title: Bane AppArmor profile tool
+    type: url
     category: code
-    evidence_quote: 'Bain focuses on AppArmor,'
-    confidence: medium
 ---
 

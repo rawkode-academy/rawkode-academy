@@ -51,23 +51,17 @@ guests:
   - ciaran-mcnulty
 resources:
   - title: Inertia Ping CRM
+    type: url
     category: code
-    evidence_quote: >-
-      Alex has suggested we take a look at anterior patent CRM. So we're gonna
-      do a last minute switch.
-    confidence: medium
   - title: rawcode/php-examples
+    type: url
     url: 'https://gitlab.com/rawcode/php-examples'
     category: code
-    evidence_quote: It's available on gitlab.com/rawcode/php-examples.
-    confidence: high
   - title: Refactoring Databases
+    type: url
     category: other
-    evidence_quote: Does it have you read the refactoring databases?
-    confidence: high
   - title: The Twelve-Factor App manifesto
+    type: url
     category: documentation
-    evidence_quote: this is classic 12 factor manifesto stuff.
-    confidence: medium
 ---
 

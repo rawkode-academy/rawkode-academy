@@ -67,18 +67,10 @@ guests:
   - domen-kozar
 resources:
   - title: Process Compose
+    type: url
     category: code
-    evidence_quote: >-
-      what you see here is is some a project called, process compose, which I
-      found is one of the best tools for this, like, kind of development
-      environments processes preview.
-    confidence: high
   - title: Devenv fly.io example
+    type: url
     category: demos
-    evidence_quote: >-
-      We have an example for fly.io where you just, like, configure their
-      registry and, like, you can then push these things to to fly.io, for
-      example.
-    confidence: medium
 ---
 

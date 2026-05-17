@@ -73,11 +73,8 @@ duration: 1416
 guests: []
 resources:
   - title: Hurl
+    type: url
     url: 'https://hurl.dev'
     category: documentation
-    evidence_quote: >-
-      If you're not familiar with huddle, go to huddle dot dev. That is h u r l
-      dot dev.
-    confidence: high
 ---
 

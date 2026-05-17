@@ -106,11 +106,7 @@ guests:
   - jens-neuse
 resources:
   - title: WunderGraph Next.js TypeScript Functions example
+    type: url
     category: demos
-    evidence_quote: |-
-      we have one example that's
-      <v Speaker 1>Next. Js TypeScript
-      <v Speaker 1>functions.
-    confidence: medium
 ---
 

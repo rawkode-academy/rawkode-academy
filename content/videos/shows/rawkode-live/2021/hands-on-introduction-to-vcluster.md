@@ -78,16 +78,13 @@ guests:
   - lukas-gentele
 resources:
   - title: KubeCuddle podcast
+    type: url
     category: other
-    evidence_quote: I also do a podcast about Kubernetes called KubeCuddle.
-    confidence: high
   - title: vCluster Getting Started Guide
+    type: url
     category: documentation
-    evidence_quote: We're gonna work through the getting started guide
-    confidence: high
   - title: 'vCluster Operator Guide: Monitoring and Metrics'
+    type: url
     category: documentation
-    evidence_quote: You see that they're operator guide monitoring and metrics.
-    confidence: medium
 ---
 

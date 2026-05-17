@@ -39,26 +39,16 @@ duration: 634
 guests: []
 resources:
   - title: SLSA (Salsa) Framework
+    type: url
     category: documentation
-    evidence_quote: >-
-      Google introduced us to the Salsa framework for supply chain security and
-      integrity validation back in 2021.
-    confidence: high
   - title: Directus Headless CMS
+    type: url
     category: code
-    evidence_quote: >-
-      I've forked a real open source project called Directus, which is a
-      headless CMS that powers data frameworks with their Studio UI.
-    confidence: high
   - title: NIST Secure Software Development Framework (SSDF)
+    type: url
     category: documentation
-    evidence_quote: >-
-      And for this NIST secure software development framework, we have nine
-      pending tasks or controls that we need to bring under compliance.
-    confidence: high
   - title: Scribe Security Action BOM
+    type: url
     category: code
-    evidence_quote: 'Here, we''re seeing use Scrape security action bomb.'
-    confidence: high
 ---
 

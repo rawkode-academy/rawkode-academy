@@ -51,9 +51,8 @@ guests:
   - laszlo-fogas
 resources:
   - title: kwasm
+    type: url
     url: 'https://kwasm.sh'
     category: code
-    evidence_quote: There is a project called k Wasm. It's available at kWasm.sh
-    confidence: high
 ---
 

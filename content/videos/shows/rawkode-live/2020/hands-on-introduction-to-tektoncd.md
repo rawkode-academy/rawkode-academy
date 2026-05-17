@@ -70,24 +70,16 @@ guests:
   - kevin-mcdermott
 resources:
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: I work for a company called Equinix Metal. They are a bare metal cloud.
-    confidence: high
   - title: Tekton Pipelines release documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      So the very first part I'm gonna install is this is just coming from the
-      the Tekton release documentation is the pipelines part.
-    confidence: high
   - title: Tekton Catalog git-clone task
+    type: url
     category: code
-    evidence_quote: And if we go and look at the get clone task
-    confidence: high
   - title: Tekton Catalog
+    type: url
     category: code
-    evidence_quote: >-
-      there is a catalog of tasks available. So Tekton has this whole big
-      catalogue with about five different build mechanisms.
-    confidence: high
 ---
 

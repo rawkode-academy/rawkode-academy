@@ -103,18 +103,13 @@ guests:
   - marcel-van-lohuizen
 resources:
   - title: CUE Kubernetes tutorial
+    type: url
     category: documentation
-    evidence_quote: So we'll take a look at this Kubernetes tutorial here.
-    confidence: high
   - title: CUE GitHub Discussions
+    type: url
     category: other
-    evidence_quote: >-
-      GitHub discussions, there's you can ask questions there. That's our main
-      portal for asking questions now.
-    confidence: high
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: 'If you wanna try Equinix Metal, then you can use the code, the raw code.'
-    confidence: medium
 ---
 

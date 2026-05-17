@@ -100,13 +100,11 @@ guests:
   - noel-georgi
 resources:
   - title: Rawkode Discord
+    type: url
     url: 'https://rawkode.chat'
     category: other
-    evidence_quote: join us in the Discord at Rawkode.chat.
-    confidence: high
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: 'I wanna thank my employer, Equinix Metal.'
-    confidence: medium
 ---
 

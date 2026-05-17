@@ -37,22 +37,13 @@ duration: 580
 guests: []
 resources:
   - title: dog DNS lookup project
+    type: url
     category: code
-    evidence_quote: >-
-      Let's kick it up a little bit and try Slim Toolkit on a real Rust project
-      that I'm a big fan of called dog.
-    confidence: medium
   - title: Astro Dockerfile documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      I've dropped one into the directory that I literally found by googling for
-      astro build Dockerfile. It was the first hit in the astro docs.
-    confidence: medium
   - title: Rawkode Academy website
+    type: url
     category: demos
-    evidence_quote: >-
-      So for our last trick, I'm taking a real production application. This is
-      the Rawkode Academy website.
-    confidence: medium
 ---
 

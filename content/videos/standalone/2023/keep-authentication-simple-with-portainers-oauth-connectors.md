@@ -49,16 +49,10 @@ duration: 546
 guests: []
 resources:
   - title: GitHub OAuth Apps settings
+    type: url
     category: other
-    evidence_quote: >-
-      you can go to your GitHub organization where you can click settings,
-      scroll all the way down to developer and select OAuth apps.
-    confidence: medium
   - title: Google Cloud API and Services Credentials
+    type: url
     category: other
-    evidence_quote: >-
-      From Google Cloud, you're gonna want to go to API and services and
-      credentials.
-    confidence: medium
 ---
 

@@ -18,34 +18,19 @@ show: rawkode-live
 duration: 5427
 resources:
   - title: Zanzibar paper
+    type: url
     category: other
-    evidence_quote: 'That was largely when Google published the Zanzibar paper,'
-    confidence: high
   - title: GitHub permissions model video on AuthZed YouTube channel
+    type: url
     category: other
-    evidence_quote: >-
-      I'll also just show there's some content on the Offset YouTube channel,
-      which was invaluable to me when I was learning the SpaceDB, which is the
-      session where you built think it was the GitHub permissions model video.
-    confidence: medium
   - title: AuthZed examples repository schemas directory
+    type: url
     category: code
-    evidence_quote: >-
-      Something that I also found useful is examples repository, particularly
-      the schemas directory.
-    confidence: high
   - title: AuthZed Playground
+    type: url
     category: demos
-    evidence_quote: >-
-      And we also have the SpaceDB or the offset playground, which allows you to
-      run tests against the models and definitions that you put together.
-    confidence: high
   - title: SpiceDB Playground source
+    type: url
     category: code
-    evidence_quote: >-
-      The Playground itself is open source, you could just run your own hosted
-      instance, or you could just do it all inside Versus Code in your own
-      editor.
-    confidence: medium
 ---
 

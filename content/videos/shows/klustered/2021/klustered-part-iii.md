@@ -79,12 +79,10 @@ guests:
   - michael-hausenblas
 resources:
   - title: Klustered GitLab repository
+    type: url
     category: code
-    evidence_quote: there is a clustered repository on gitlab.com.
-    confidence: medium
   - title: Justin Garrison's Ansible playbook repository for breaking the cluster
+    type: url
     category: code
-    evidence_quote: Justin has a repository of an Ansible playbook that he used to break this.
-    confidence: medium
 ---
 

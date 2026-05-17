@@ -83,10 +83,7 @@ guests:
   - lukas-gentele
 resources:
   - title: Scaleway provider for DevPod
+    type: url
     category: code
-    evidence_quote: >-
-      from Pulumi has, over the weekend, apparently, created a scale way
-      provider for for DevPod.
-    confidence: medium
 ---
 

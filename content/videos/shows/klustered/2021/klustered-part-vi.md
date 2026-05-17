@@ -163,10 +163,7 @@ guests:
   - duffie-cooley
 resources:
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: >-
-      If you wanna check out Equinix Medal, you can use the code to Rawkode
-      live.
-    confidence: medium
 ---
 

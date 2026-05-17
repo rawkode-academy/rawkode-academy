@@ -71,8 +71,7 @@ guests:
   - vlad-matsiiako
 resources:
   - title: Infisical self-hosting instructions
+    type: url
     category: documentation
-    evidence_quote: we provide all the self hosting instructions within our documentation.
-    confidence: medium
 ---
 

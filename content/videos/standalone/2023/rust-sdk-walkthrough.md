@@ -31,8 +31,7 @@ duration: 806
 guests: []
 resources:
   - title: Fermion Discord
+    type: url
     category: other
-    evidence_quote: or join the Fermion Discord.
-    confidence: medium
 ---
 

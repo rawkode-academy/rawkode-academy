@@ -115,18 +115,13 @@ guests:
   - vic-iglesias
 resources:
   - title: Skaffold microservices example
+    type: url
     category: demos
-    evidence_quote: the microservices example is probably a nice representative one.
-    confidence: medium
   - title: Skaffold React reload example
+    type: url
     category: demos
-    evidence_quote: >-
-      the React reload one caught my eye, and I think that's exactly what I was
-      talking about earlier.
-    confidence: medium
   - title: Skaffold custom test example
+    type: url
     category: demos
-    evidence_quote: Custom test is the the one we recently added.
-    confidence: medium
 ---
 

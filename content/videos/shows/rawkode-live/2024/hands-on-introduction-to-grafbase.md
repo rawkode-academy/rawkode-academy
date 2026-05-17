@@ -50,22 +50,13 @@ guests:
   - fredrik-bjork
 resources:
   - title: grafbase/grafbase GitHub releases
+    type: url
     category: code
-    evidence_quote: >-
-      but if you go to GitHub, Grafbase, Grafbase, there is a releases page with
-      binaries.
-    confidence: high
   - title: Grafbase Getting Started guide
+    type: url
     category: documentation
-    evidence_quote: >-
-      the getting started guide here will guide you through all the front ends
-      and everything that you need to know to build your first API.
-    confidence: medium
   - title: Grafbase Resolvers documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      Resolvers on the left. Mhmm. Section overview. And here should be an
-      example somewhere.
-    confidence: medium
 ---
 

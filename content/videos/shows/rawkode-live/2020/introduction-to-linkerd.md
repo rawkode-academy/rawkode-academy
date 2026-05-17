@@ -122,25 +122,16 @@ guests:
   - thomas-rampelberg
 resources:
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: 'If you wanna try out Equinix metal, can use the code Rawkode live.'
-    confidence: medium
   - title: EmojiVoto demo application
+    type: url
     category: demos
-    evidence_quote: >-
-      This is just a gRPC app that's got a couple microservices in it, and we'll
-      be able to walk through how to go and diagnose an issue because we've
-      actually got a bug in the application.
-    confidence: high
   - title: Books app fault injection tutorial demo
+    type: url
     category: demos
-    evidence_quote: But this is a different demo application that we'll need to install.
-    confidence: high
   - title: Google SRE handbook
+    type: url
     category: documentation
-    evidence_quote: >-
-      The Google SRA handbook says that a golden signal is kinda the most
-      important thing to pay attention to.
-    confidence: medium
 ---
 

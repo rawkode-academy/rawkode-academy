@@ -63,24 +63,16 @@ guests:
   - natan-silnitsky
 resources:
   - title: Wix Engineering Blog
+    type: url
     category: other
-    evidence_quote: >-
-      I discovered you via the Wix engineering blog, which turned out to be a
-      bit of a gold mine for engineering content.
-    confidence: high
   - title: Confluent Schema Registry
+    type: url
     category: documentation
-    evidence_quote: 'For instance, especially for events, have the Confluent schema registry.'
-    confidence: high
   - title: Natan Silnitsky website
+    type: url
     category: other
-    evidence_quote: >-
-      a lot of things I talked about today are on my website, so at
-      natansill.com.
-    confidence: high
   - title: ZIO Scala library
+    type: url
     category: code
-    evidence_quote: I definitely recommend to check out z o z I o library on top of Scala.
-    confidence: high
 ---
 

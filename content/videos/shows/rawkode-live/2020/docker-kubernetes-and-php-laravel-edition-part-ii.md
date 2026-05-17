@@ -35,12 +35,10 @@ guests:
   - ciaran-mcnulty
 resources:
   - title: Ping CRM
+    type: url
     category: demos
-    evidence_quote: So hello there. Welcome to Ping CRM.
-    confidence: medium
   - title: Laravel Mix documentation
+    type: url
     category: documentation
-    evidence_quote: Don't wanna rest the stream just to be us reading the mixed document.
-    confidence: medium
 ---
 

@@ -48,18 +48,12 @@ duration: 1972
 guests: []
 resources:
   - title: Kubescape Complete Guide Repository
+    type: url
     url: 'https://github.com/rawkode-academy/kubescape-complete-guide'
     category: code
-    evidence_quote: >-
-      All this code is available online at github.com slash Rawkode Academy.
-      There you will find a repository called the Kubescape complete guide.
-    confidence: high
   - title: Kubescape Helm Charts
+    type: url
     url: 'https://kubescape.github.io/helm-charts'
     category: documentation
-    evidence_quote: >-
-      Kubescape provide a wonderful helm chart that allows us to deploy their
-      cloud operator. You can find that at kubescape.github.i0/helm-charts.
-    confidence: high
 ---
 

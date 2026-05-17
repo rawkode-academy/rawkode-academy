@@ -81,10 +81,7 @@ guests:
   - lee-briggs
 resources:
   - title: Teleport access platform
+    type: url
     category: other
-    evidence_quote: >-
-      we are now using Teleport to aid us debugging these clusters. Really cool
-      tool. You should check it out.
-    confidence: high
 ---
 

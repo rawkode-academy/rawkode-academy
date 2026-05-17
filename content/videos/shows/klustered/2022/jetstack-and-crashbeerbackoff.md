@@ -117,14 +117,12 @@ chapters:
 duration: 5355
 resources:
   - title: Teleport
+    type: url
     url: 'https://Rawkode.link/Teleport'
     category: other
-    evidence_quote: So go check out Teleport by visiting Rawkode.link/Teleport.
-    confidence: high
   - title: Equinix Metal
+    type: url
     url: 'https://Rawkode.link/metal'
     category: other
-    evidence_quote: 'And if you want to use that, go to Rawkode.link/metal.'
-    confidence: high
 ---
 

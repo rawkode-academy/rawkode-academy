@@ -105,16 +105,12 @@ guests:
   - jeffrey-sica
 resources:
   - title: Teleport sponsor page
+    type: url
     url: 'https://rawkode.live/Teleport'
     category: other
-    evidence_quote: >-
-      If you wanna support the show, please go check out Teleport. You can do so
-      at Rawkode.live/Teleport.
-    confidence: high
   - title: Rawkode Academy Discord server
+    type: url
     url: 'https://rockode.chat'
     category: other
-    evidence_quote: there is also a Discord server that is available at rockode.chat.
-    confidence: medium
 ---
 

@@ -67,28 +67,21 @@ guests:
   - avthar-sewrathan
 resources:
   - title: Hello Timescale tutorial
+    type: url
     category: documentation
-    evidence_quote: It's getting started hello timescale because
-    confidence: high
   - title: TimescaleDB Parallel Copy
+    type: url
     category: code
-    evidence_quote: Because I'm not gonna have Timescale DB parallel copy. Right?
-    confidence: medium
   - title: Setting automated retention policies
+    type: url
     category: documentation
-    evidence_quote: >-
-      which is called setting automated retention policies. So that's the the
-      name in the docs that folks can search for.
-    confidence: medium
   - title: Timescale newsletter
+    type: url
     url: 'https://tstb.co/timescale-newsletter'
     category: other
-    evidence_quote: you can just go to the short link tstb.co/timescale- newsletter.
-    confidence: high
   - title: Timescale Cloud free trial
+    type: url
     url: 'https://tstb.co/getstartedcloud'
     category: other
-    evidence_quote: You can start a free trial at tstb.co/getstartedcloud.
-    confidence: high
 ---
 

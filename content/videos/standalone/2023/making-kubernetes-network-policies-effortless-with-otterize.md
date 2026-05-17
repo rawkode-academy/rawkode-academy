@@ -81,26 +81,13 @@ duration: 1271
 guests: []
 resources:
   - title: Otterize iBack page
+    type: url
     category: documentation
-    evidence_quote: |-
-      You can find us at authorize.com,
-      and the page we're looking at right now
-      is the iBack page slash iBack.
-    confidence: medium
   - title: Otterize HelmChart repository
+    type: url
     category: code
-    evidence_quote: |-
-      Here, we have the Otterize organization
-      on GitHub with a repository called HelmChart,
-      which, you guessed it, has their HelmChart.
-    confidence: high
   - title: Weaveworks Sockshop demo
+    type: url
     category: demos
-    evidence_quote: |-
-      Here we have the Weaveworks Sockshop
-      demo.
-      This is a sample store built with multiple
-      microservices
-    confidence: high
 ---
 

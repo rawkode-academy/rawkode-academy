@@ -41,23 +41,13 @@ guests:
   - taylor-dolezal
 resources:
   - title: kind project
+    type: url
     category: code
-    evidence_quote: >-
-      I'd absolutely recommend checking out the kind project by the fantastic
-      Ben the elder that allows you to spin up Kubernetes in Docker, kind, k I n
-      d.
-    confidence: high
   - title: Kubernetes 1.19 release article
+    type: url
     category: documentation
-    evidence_quote: >-
-      it's pretty much the majority of this article, which is the release
-      article that just tells you what's new.
-    confidence: medium
   - title: seccomp operator
+    type: url
     category: code
-    evidence_quote: >-
-      if you deploy the set comp operator, this profile is actually provided for
-      you.
-    confidence: medium
 ---
 

@@ -57,28 +57,18 @@ guests:
   - marc-boorshtein
 resources:
   - title: OpenUnison Helm Charts
+    type: url
     url: 'https://github.com/OpenUnison/helmcharts'
     category: code
-    evidence_quote: The actual Helm charts are GitHub.com/OpenUnison/helmcharts.
-    confidence: high
   - title: 'Kubernetes: An Enterprise Guide'
+    type: url
     category: other
-    evidence_quote: >-
-      I am also the coauthor of Kubernetes, an enterprise guide, first and
-      second edition, the third edition next month.
-    confidence: high
   - title: Hurl
+    type: url
     url: 'https://hurl.dev'
     category: other
-    evidence_quote: >-
-      I'll probably use hurl dot dev or something like that. It's a really cool
-      text based tool for making HTTP requests and assertions.
-    confidence: high
   - title: k3s Dagger Module
+    type: url
     category: code
-    evidence_quote: >-
-      This is the easiest k three s and say the container for Dagger I have ever
-      seen in my life. So that is a testament to Marcos' work.
-    confidence: high
 ---
 

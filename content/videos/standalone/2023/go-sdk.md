@@ -33,9 +33,8 @@ duration: 743
 guests: []
 resources:
   - title: Spin Go SDK
+    type: url
     url: 'https://github.com/spinframework/spin-go-sdk'
     category: code
-    evidence_quote: we pull in the Spin HTTP SDK.
-    confidence: high
 ---
 

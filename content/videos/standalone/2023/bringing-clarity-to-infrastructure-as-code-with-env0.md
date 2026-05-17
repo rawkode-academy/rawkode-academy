@@ -55,21 +55,14 @@ duration: 1479
 guests: []
 resources:
   - title: Rawkode Academy GitLab
+    type: url
     url: 'https://gitlab.com/RawkodeAcademy'
     category: code
-    evidence_quote: The code is available at gitlab.com/RawkodeAcademy
-    confidence: high
   - title: Cloud Development Kit for Terraform (CDKTF)
+    type: url
     category: code
-    evidence_quote: >-
-      I'm a big fan of Terraform CDK. So let's see an action as part of m zero's
-      workflow.
-    confidence: high
   - title: Cloud Development Kit for Kubernetes (cdk8s)
+    type: url
     category: code
-    evidence_quote: >-
-      using Pulumi c to spin up a Kubernetes cluster, Terraform to manage DNS
-      records, CDK to deploy to the Kubernetes cluster and so on.
-    confidence: high
 ---
 

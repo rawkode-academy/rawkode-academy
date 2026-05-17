@@ -52,8 +52,7 @@ duration: 561
 guests: []
 resources:
   - title: Grafana Parca plugin
+    type: url
     category: other
-    evidence_quote: Add the Parca plugin to your Grafana.
-    confidence: high
 ---
 

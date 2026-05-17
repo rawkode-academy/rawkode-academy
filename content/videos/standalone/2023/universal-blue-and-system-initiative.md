@@ -53,9 +53,8 @@ guests:
   - brian-ketelsen
 resources:
   - title: Fleek
+    type: url
     url: 'https://getfleek.dev'
     category: other
-    evidence_quote: So that's it. Get fleek dot dev.
-    confidence: high
 ---
 

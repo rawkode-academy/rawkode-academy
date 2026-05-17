@@ -84,9 +84,8 @@ guests:
   - kat-cosgrove
 resources:
   - title: Conductor
+    type: url
     url: 'https://ghcr.io/containercraft/conductor'
     category: other
-    evidence_quote: it's g h c r dot I o slash container craft slash conductor
-    confidence: high
 ---
 

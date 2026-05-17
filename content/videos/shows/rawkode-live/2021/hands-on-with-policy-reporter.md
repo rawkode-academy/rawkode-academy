@@ -58,12 +58,10 @@ guests:
   - frank-jogeleit
 resources:
   - title: Falco Sidekick UI
+    type: url
     category: code
-    evidence_quote: 'In FARGO, we have a tool called FARGO Sidekick. And FARGO Sidekick UI,'
-    confidence: high
   - title: Kyverno Pod Security Policy replacement policies
+    type: url
     category: documentation
-    evidence_quote: take a look at the pod security policy replacement policies from Kiverrno.
-    confidence: medium
 ---
 

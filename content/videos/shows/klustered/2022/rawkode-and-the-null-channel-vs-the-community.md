@@ -129,22 +129,16 @@ guests:
   - marek-counts
 resources:
   - title: Teleport sponsor landing page
+    type: url
     url: 'https://Rawkode.live/Teleport'
     category: other
-    evidence_quote: You should go to Rawkode.live/Teleport to learn more.
-    confidence: high
   - title: Equinix Metal sponsor landing page
+    type: url
     url: 'https://Rawkode.live/metal'
     category: other
-    evidence_quote: You can find out more about Equinix Medal at Rawkode.live/metal.
-    confidence: high
   - title: Rawkode Academy T-shirt competition page
+    type: url
     url: 'https://Rawkode.live/win'
     category: other
-    evidence_quote: |-
-      If
-      you wanna win a t shirt, which of
-      course you do, you can go to Rawkode.live/win.
-    confidence: medium
 ---
 

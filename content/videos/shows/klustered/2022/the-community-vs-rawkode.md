@@ -163,25 +163,19 @@ chapters:
 duration: 5996
 resources:
   - title: Teleport
+    type: url
     url: 'https://rawkode.live/Teleport'
     category: other
-    evidence_quote: 'If you''re not familiar with Teleport, please go to Rawkode.live/Teleport.'
-    confidence: high
   - title: Equinix Metal
+    type: url
     url: 'https://rawkode.live/metal'
     category: other
-    evidence_quote: 'If you wanna check out Equinix metal, go to Rawkode.live/metal.'
-    confidence: high
   - title: Clustered playlist
+    type: url
     category: other
-    evidence_quote: there is a cluster playlist with over 42 of these episodes.
-    confidence: medium
   - title: KubeHuddle
+    type: url
     url: 'https://kubehuddle.com'
     category: other
-    evidence_quote: >-
-      You can go to kubeadle.com where you can get information on our twenty
-      twenty two conference.
-    confidence: medium
 ---
 

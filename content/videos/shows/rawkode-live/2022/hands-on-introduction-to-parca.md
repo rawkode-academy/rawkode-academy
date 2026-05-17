@@ -124,19 +124,12 @@ guests:
   - frederic-branczyk
 resources:
   - title: Parca in Kubernetes tutorial
+    type: url
     category: documentation
-    evidence_quote: >-
-      you can hit the, like, Parca in Kubernetes tutorial five five minutes
-      button, and you'll get the entire, basically, manuscript of what we're
-      what we're doing here.
-    confidence: high
   - title: >-
       KubeCon Barcelona 2019 observability keynote by Frederic Branczyk and Tom
       Wilkie
+    type: url
     category: other
-    evidence_quote: >-
-      an invited keynote that I gave at KubeCon in Barcelona in 2019 where Tom
-      Wilkie and I kind of gave, he's the VP of product at Grafana now.
-    confidence: medium
 ---
 

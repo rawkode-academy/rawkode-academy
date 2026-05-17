@@ -36,10 +36,7 @@ duration: 488
 guests: []
 resources:
   - title: 'Docker documentation: Building and running Spin applications'
+    type: url
     category: documentation
-    evidence_quote: >-
-      the Barfolme new example from the Docker documentation of building and
-      running Spin applications.
-    confidence: high
 ---
 

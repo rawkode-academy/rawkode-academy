@@ -94,35 +94,20 @@ guests:
   - RussellWaite
 resources:
   - title: Rawkode.live YouTube channel
+    type: url
     url: 'https://rawkode.live'
     category: other
-    evidence_quote: |-
-      First,
-      check out Rawkode.live.
-      That is the YouTube channel. Please subscribe.
-    confidence: high
   - title: Rawkode Discord server
+    type: url
     url: 'https://rawkode.chat'
     category: other
-    evidence_quote: There's also a Discord server available at Rawkode.chat.
-    confidence: high
   - title: Rawkode.live destroy-it kubeconfig demo
+    type: url
     url: 'https://rawkode.live/destroy-it'
     category: demos
-    evidence_quote: |-
-      you'll also notice here,
-      there is a Rawkode.live/destroy-
-      it.
-      This is a public
-      KubeConfig
-      to a Kubernetes cluster
-    confidence: high
   - title: Teleport sponsor link
+    type: url
     url: 'https://rawkode.live/teleport'
     category: other
-    evidence_quote: |-
-      To support the show, go to raw Rawkode
-      Live / Teleport.
-    confidence: medium
 ---
 

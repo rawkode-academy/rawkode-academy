@@ -206,12 +206,10 @@ guests:
   - software-math-guy
 resources:
   - title: Rawkode Academy Discord server
+    type: url
     category: other
-    evidence_quote: you can join us on the Discord server available at Rawkode.chat.
-    confidence: medium
   - title: Teleport sponsor link
+    type: url
     category: other
-    evidence_quote: Please check out Rawkode.liveteleport
-    confidence: medium
 ---
 

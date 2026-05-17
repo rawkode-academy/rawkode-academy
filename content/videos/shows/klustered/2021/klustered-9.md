@@ -99,17 +99,10 @@ guests:
   - marcos-nils
 resources:
   - title: Play with Docker
+    type: url
     category: demos
-    evidence_quote: >-
-      I've co contributed and co authored play with Docker.com and .com, which
-      are, like, online based environments where you can try and play with open
-      Kubernetes.
-    confidence: medium
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: >-
-      You can try out Equinix metal. It is a bare metal cloud with $50 code
-      Rawkode live.
-    confidence: medium
 ---
 

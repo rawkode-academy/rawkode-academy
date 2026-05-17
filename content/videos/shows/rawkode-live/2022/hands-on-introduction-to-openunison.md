@@ -64,16 +64,13 @@ guests:
   - marc-boorshtein
 resources:
   - title: 'Kubernetes: An Enterprise Guide, Second Edition'
+    type: url
     category: other
-    evidence_quote: 'Coauthor of Kubernetes, an enterprise guide second edition.'
-    confidence: high
   - title: 'KubeCon 2020 Europe talk: I Can RBAC and So Can You'
+    type: url
     category: other
-    evidence_quote: 'I did a session on learning RBAC called I can RBAC and so can you,'
-    confidence: high
   - title: Fairwinds RBAC Manager
+    type: url
     category: code
-    evidence_quote: where I used OpenUnison with Fairwind's RBAC manager
-    confidence: medium
 ---
 

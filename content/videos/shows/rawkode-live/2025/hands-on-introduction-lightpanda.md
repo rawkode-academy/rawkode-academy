@@ -16,24 +16,13 @@ guests:
   - katie-hallett
 resources:
   - title: LightPanda GitHub repository
+    type: url
     category: code
-    evidence_quote: >-
-      you can get the last version on the nightly release on the GitHub
-      repository
-    confidence: high
   - title: Vercel post on AI crawler traffic and JavaScript rendering
+    type: url
     category: other
-    evidence_quote: >-
-      Is just an interesting quote actually as we start thinking about the AI
-      use cases that Vercel published at the end of last year saying on their
-      network, all of these major AI crawlers, firstly, they represent about a
-      third of Google bots volume already.
-    confidence: medium
   - title: Web Platform Tests
+    type: url
     category: code
-    evidence_quote: >-
-      We are using the web platform test, which is common HTML tests to run on
-      browsers.
-    confidence: high
 ---
 

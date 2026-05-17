@@ -55,15 +55,11 @@ duration: 1107
 guests: []
 resources:
   - title: Portainer Kubernetes repository
+    type: url
     url: 'https://github.com/portainer/k8s'
     category: code
-    evidence_quote: 'Well, you can go to github.com/protainer/kates. That''s k8s.'
-    confidence: medium
   - title: Kustomize documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      Now customize offers a lot of ways for you to make tweaks, and I would
-      encourage you to go and check out their documentation.
-    confidence: medium
 ---
 

@@ -45,23 +45,13 @@ duration: 1698
 guests: []
 resources:
   - title: Grain Programming Language
+    type: url
     category: code
-    evidence_quote: >-
-      There's a lot to love about Grain and that is a truly WebAssembly native
-      language and that the only target is WebAssembly.
-    confidence: high
   - title: Fermion Cloud
+    type: url
     category: other
-    evidence_quote: >-
-      I have my application hosted on Fermion Cloud where I can do a 12 to minus
-      result.
-    confidence: high
   - title: Spin SDK
+    type: url
     category: code
-    evidence_quote: >-
-      Here, we are using the Spin SDK, which is quite nice. We are able to use a
-      procedural macro around our function, which says this is the entry point
-      or application that handles all the glue.
-    confidence: high
 ---
 

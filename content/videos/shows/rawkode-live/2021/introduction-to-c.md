@@ -97,25 +97,16 @@ guests:
   - sy-brand
 resources:
   - title: Exercism language tracks
+    type: url
     category: other
-    evidence_quote: We are using Exorcism today.
-    confidence: high
   - title: Catch2 testing framework
+    type: url
     category: code
-    evidence_quote: >-
-      this is using the catch two testing framework, which is probably the most
-      popular testing framework for for open source projects right now
-    confidence: high
   - title: C++ Patterns
+    type: url
     category: documentation
-    evidence_quote: I think there's there's one called CPP patterns
-    confidence: medium
   - title: '#include <C++> Discord'
+    type: url
     category: other
-    evidence_quote: >-
-      There's also the the hash include c plus plus Discord, which is a Discord
-      community for c plus plus focused on making, like, a welcoming, inclusive
-      environment.
-    confidence: high
 ---
 

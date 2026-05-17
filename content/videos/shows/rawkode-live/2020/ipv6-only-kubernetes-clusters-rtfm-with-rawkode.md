@@ -42,11 +42,7 @@ guests:
   - arian-van-putten
 resources:
   - title: Calico over IP Fabrics
+    type: url
     category: documentation
-    evidence_quote: >-
-      there is a page on the Calico documentation called Calico over IP Fabrics,
-      and it explains all the different trade offs you can make in setting up
-      your Calico network
-    confidence: high
 ---
 

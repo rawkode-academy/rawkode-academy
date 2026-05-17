@@ -15,33 +15,20 @@ duration: 966
 guests: []
 resources:
   - title: ARMO Cloud
+    type: url
     category: other
-    evidence_quote: >-
-      I would encourage you and I can't stress this enough. I encourage you to
-      use ARMOR cloud, build your frameworks from there
-    confidence: high
   - title: Open Policy Agent
+    type: url
     category: code
-    evidence_quote: >-
-      If you're not familiar with Regal, it's the policy language from the Open
-      Policy Agent project.
-    confidence: high
   - title: Rego Playground
+    type: url
     category: demos
-    evidence_quote: That means you can actually use the Regal playground to test your policies
-    confidence: high
   - title: CUE Language
+    type: url
     category: code
-    evidence_quote: >-
-      I encourage you all to go and find Q tutorials online and improve your
-      data configuration lives.
-    confidence: high
   - title: Rawkode Academy Container Registry
+    type: url
     url: 'https://ghcr.io/rawkodeacademy'
     category: code
-    evidence_quote: >-
-      We call the start of function to check if our image starts with
-      ghcr.i0/RawkodeAcademy.
-    confidence: high
 ---
 

@@ -103,24 +103,16 @@ guests:
   - bartlomiej-plotka
 resources:
   - title: Thanos Katacoda tutorials
+    type: url
     category: demos
-    evidence_quote: >-
-      there is officially, like, katakobah.com/Thanos where we are publishing,
-      you know, production ready ready, let's say, tutorials and demos.
-    confidence: high
   - title: bwplotka Katacoda demo resources
+    type: url
     category: demos
-    evidence_quote: it is available on katakoda.com/bwplotka.
-    confidence: high
   - title: Site Reliability Engineering book
+    type: url
     category: other
-    evidence_quote: it was mentioned a couple of times in the SRE book as well.
-    confidence: medium
   - title: CNCF SIG Observability meetings
+    type: url
     category: other
-    evidence_quote: >-
-      we do all of those in the seek observability meetings, which are kind of
-      announced on the CNCF page.
-    confidence: medium
 ---
 

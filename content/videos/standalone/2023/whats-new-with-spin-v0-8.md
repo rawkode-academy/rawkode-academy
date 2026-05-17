@@ -32,8 +32,7 @@ duration: 452
 guests: []
 resources:
   - title: Spin 0.8 release blog
+    type: url
     category: other
-    evidence_quote: 'I''ve literally copied and pasted all of this code from the release blog,'
-    confidence: medium
 ---
 

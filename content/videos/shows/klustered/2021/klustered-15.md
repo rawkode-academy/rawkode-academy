@@ -100,9 +100,8 @@ guests:
   - abdellfetah-sghiouar
 resources:
   - title: Rawkode Discord server
+    type: url
     url: 'https://rawkode.chat'
     category: other
-    evidence_quote: So you can check that out at Rawkode.chat.
-    confidence: high
 ---
 

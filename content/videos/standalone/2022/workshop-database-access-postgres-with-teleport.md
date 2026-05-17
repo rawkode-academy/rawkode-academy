@@ -79,29 +79,18 @@ duration: 3603
 guests: []
 resources:
   - title: Rawkode Academy Courses Repository
+    type: url
     url: 'https://github.com/rawkode-academy/courses'
     category: code
-    evidence_quote: >-
-      You will find it at Rawkode Academy, which is the organization on GitHub.
-      And then there is a repository called courses.
-    confidence: high
   - title: 'Teleport Documentation: Database Access with Self-hosted PostgreSQL'
+    type: url
     category: documentation
-    evidence_quote: >-
-      Database access was self hosted Postgres. A lot of these steps are already
-      covered here. This is where you find all of your answers.
-    confidence: high
   - title: Beekeeper Studio
+    type: url
     category: other
-    evidence_quote: >-
-      I'm gonna use Beekeeper studio. I thought it looked good. That was my
-      reason for picking it. I thought it was the nicest looking of the clients
-      I was playing with earlier.
-    confidence: high
   - title: Rawkode Academy Discord
+    type: url
     url: 'https://rawkode.chat'
     category: other
-    evidence_quote: So my Discord is Rawkode.chat
-    confidence: high
 ---
 

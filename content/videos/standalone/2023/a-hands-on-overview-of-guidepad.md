@@ -43,17 +43,11 @@ duration: 852
 guests: []
 resources:
   - title: Microlink API
+    type: url
     url: 'https://microlink.io/'
     category: other
-    evidence_quote: >-
-      In order to enrich our bookmarks with metadata we're using the micro link
-      API.
-    confidence: high
   - title: Guidepad Rawkode
+    type: url
     category: code
-    evidence_quote: >-
-      This is my Guidepad plugin. A Guidepad plugin is a bunch of Python code
-      which you store and get and register with the Guidepad system.
-    confidence: high
 ---
 

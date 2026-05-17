@@ -58,18 +58,13 @@ guests:
   - brian-ketelsen
 resources:
   - title: Rawkode Academy InfluxDB course
+    type: url
     category: other
-    evidence_quote: 'We also have a course in flight on InfluxDB,'
-    confidence: medium
   - title: CueBlox dogfood directory
+    type: url
     category: demos
-    evidence_quote: >-
-      So the dog fit directory, if you just wanna learn what we're doing with
-      CueBlox is probably one of the best ways to do it.
-    confidence: medium
   - title: bketelsen/bkapi repository
+    type: url
     category: code
-    evidence_quote: 'this is the b k API repository under GitHub, b kettleson.'
-    confidence: medium
 ---
 

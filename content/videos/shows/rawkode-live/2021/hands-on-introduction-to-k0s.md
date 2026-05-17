@@ -79,8 +79,7 @@ guests:
   - jussi-nummelin
 resources:
   - title: k0s Getting Started Guide
+    type: url
     category: documentation
-    evidence_quote: So we'll choose the the getting started guide here.
-    confidence: medium
 ---
 

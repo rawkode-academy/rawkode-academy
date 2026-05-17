@@ -94,32 +94,19 @@ guests:
   - rory-mccune
 resources:
   - title: Trivy Getting Started documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      I'm gonna click on getting started and hope there's a That's always
-      installed.
-    confidence: medium
   - title: Kubernetes Pod Security Standards
+    type: url
     category: documentation
-    evidence_quote: >-
-      these are checks that are essentially based on a thing called Kubernetes
-      pod security standards
-    confidence: high
   - title: Trivy GitHub Action
+    type: url
     category: code
-    evidence_quote: >-
-      we have a a trivy action, and you see it just have a users, so it's gonna
-      use the trivy action
-    confidence: high
   - title: Honeypop proof of concept exploit code
+    type: url
     category: code
-    evidence_quote: >-
-      he wrote a thing called Honeypop, which was proof of concept exploit code
-      that didn't do that.
-    confidence: medium
   - title: RubyGems signing RFC
+    type: url
     category: other
-    evidence_quote: 'So the the there''s an RFC in for, like, actually signing the RubyGems.'
-    confidence: medium
 ---
 

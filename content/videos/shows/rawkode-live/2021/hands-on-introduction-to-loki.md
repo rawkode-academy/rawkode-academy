@@ -70,16 +70,10 @@ guests:
   - cyril-tovena
 resources:
   - title: Weaveworks Sock Shop microservice demo
+    type: url
     category: demos
-    evidence_quote: >-
-      we do have the weave works sock shop microservice demo deployed to the
-      cluster.
-    confidence: high
   - title: Grafana LogQL documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      And so there's a documentation on Grafana that is very extensive on on
-      everything that you can do with LogQL.
-    confidence: medium
 ---
 

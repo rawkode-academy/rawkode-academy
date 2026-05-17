@@ -44,26 +44,19 @@ guests:
   - jason-detiberus
 resources:
   - title: Cluster API Book Quick Start
+    type: url
     category: documentation
-    evidence_quote: So let's go straight to the quick start.
-    confidence: high
   - title: Cluster API Provider Packet repository
+    type: url
     category: code
-    evidence_quote: 'It will reach out to the cluster API provider packet repo,'
-    confidence: medium
   - title: Kubernetes SIGs Image Builder
+    type: url
     category: code
-    evidence_quote: 'there''s a Kubernetes SIGs project image builder,'
-    confidence: high
   - title: Cluster Addons project
+    type: url
     category: code
-    evidence_quote: how can we align with projects like the cluster add ons project
-    confidence: medium
   - title: Cluster Autoscaler
+    type: url
     category: code
-    evidence_quote: >-
-      You can throw in things like the cluster autoscaler into the mix and start
-      automating scaling of these clusters as well.
-    confidence: medium
 ---
 

@@ -72,41 +72,16 @@ guests:
   - edward-vielmetti
 resources:
   - title: Salt Pillar Modules documentation
+    type: url
     category: documentation
-    evidence_quote: |-
-      If we go to the documentation here,
-      <v Speaker 0>I think this link
-      <v Speaker 0>and click on pillar modules. So these are
-      <v Speaker 0>all of the modules which support exposing pillar
-      <v Speaker 0>data to the master.
-    confidence: high
   - title: Salt Targeting documentation
+    type: url
     category: documentation
-    evidence_quote: |-
-      So we could use the menu name, grains,
-      <v Speaker 0>and other information to target our menus. So
-      <v Speaker 0>let's take a look at the docs.
-      <v Speaker 0>I mean, this page is is relatively big.
-    confidence: high
   - title: Salt State Modules documentation
+    type: url
     category: documentation
-    evidence_quote: |-
-      And we can take a look at, like,
-      <v Speaker 0>there there's also why am I looking at
-      <v Speaker 0>grains?
-      <v Speaker 0>States.
-      <v Speaker 0>There you go.
-      <v Speaker 0>Alright. So state modules are the are the
-      <v Speaker 0>things that we can do
-      <v Speaker 0>with Salt.
-    confidence: high
   - title: Salt Bootstrap
+    type: url
     category: code
-    evidence_quote: |-
-      Salt provides something called Salt Bootstrap.
-      <v Speaker 1>Right.
-      <v Speaker 1>A very helpful script that takes care of
-      <v Speaker 1>the whole install process.
-    confidence: medium
 ---
 

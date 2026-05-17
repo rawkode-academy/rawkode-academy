@@ -86,15 +86,11 @@ guests:
   - mahmoud-saada
 resources:
   - title: Rawkode.chat Discord channel
+    type: url
     url: 'https://rawkode.chat'
     category: other
-    evidence_quote: 'Please join the Discord channel, Rawkode.chat.'
-    confidence: high
   - title: Kubernetes controller utils create pods code
+    type: url
     category: code
-    evidence_quote: >-
-      in the Kubernetes project under package controller control controller
-      utils, there is a function called create pods.
-    confidence: medium
 ---
 

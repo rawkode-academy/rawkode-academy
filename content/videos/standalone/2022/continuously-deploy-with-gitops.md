@@ -44,12 +44,8 @@ duration: 923
 guests: []
 resources:
   - title: Portainer in Production Course Repository
+    type: url
     url: 'https://github.com/rawkode-academy/portainer-in-production'
     category: code
-    evidence_quote: >-
-      in our repository available at
-      github.com/rawcodeacademy/retainer-in-production, there is a directory
-      called GitOps.
-    confidence: high
 ---
 

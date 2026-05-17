@@ -95,23 +95,14 @@ duration: 3473
 guests: []
 resources:
   - title: Rawkode Academy Courses Repository
+    type: url
     url: 'https://github.com/rawkode-academy/courses'
     category: code
-    evidence_quote: >-
-      You can find the resources for this course at github dot com slash rockode
-      academy. I have started adding the materials to the courses repository.
-    confidence: high
   - title: Flux VS Code Extension
+    type: url
     category: other
-    evidence_quote: >-
-      you'll see that there is this Versus code extension from InfluxData. You
-      can add connections... local host.
-    confidence: high
   - title: Rawkode Academy Discord
+    type: url
     category: other
-    evidence_quote: >-
-      Use the Discord to ask for help. Use the comments to ask for help. I'm
-      here.
-    confidence: high
 ---
 

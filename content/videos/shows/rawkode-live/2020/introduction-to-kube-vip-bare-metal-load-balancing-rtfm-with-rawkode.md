@@ -36,8 +36,7 @@ guests:
   - dan-finneran
 resources:
   - title: kube-vip documentation
+    type: url
     category: documentation
-    evidence_quote: 'So if you go to kubevip.io actually, I can pop it here, I think.'
-    confidence: medium
 ---
 

@@ -88,23 +88,13 @@ guests:
   - steven-martin
 resources:
   - title: Teleport Quick Start / Getting Started guide
+    type: url
     category: documentation
-    evidence_quote: >-
-      I believe today are we going through the getting started guide? Yes.
-      Right. Okay. So quick start.
-    confidence: medium
   - title: gravitational/teleport Kubernetes agent Helm chart example
+    type: url
     category: code
-    evidence_quote: >-
-      go to our GitHub, I'll show you the the the chart, I I mean. Is it
-      GoTeleport? Grab so gravitational. Gravitational. Gravitational. It'll
-      it'll change eventually. Teleport, that'll come up. First one. And then go
-      if you go into oh, look. There I am. I just added something. And you go to
-      examples, chart, and then the Teleport, cube agent.
-    confidence: high
   - title: Teleport documentation for OpenSSH integration
+    type: url
     category: documentation
-    evidence_quote: 'there is on our documentation, there is a method on how you do SSH.'
-    confidence: medium
 ---
 

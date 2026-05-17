@@ -17,23 +17,15 @@ duration: 1198
 guests: []
 resources:
   - title: CUE Documentation
+    type: url
     url: 'https://cue.dev/docs'
     category: documentation
-    evidence_quote: First place you'll wanna go to is queue.dev/docs.
-    confidence: high
   - title: CUE Central Registry
+    type: url
     url: 'https://registry.cue.works'
     category: other
-    evidence_quote: >-
-      This is the relatively new effort from the Q team to make it easier to
-      adopt Q for common workflows.
-    confidence: high
   - title: GitHub Actions package on CUE Registry
+    type: url
     category: code
-    evidence_quote: >-
-      If we search for GitHub actions and click on the package, you'll see that
-      we now have a bunch of definitions that we can import from the central
-      registry
-    confidence: high
 ---
 

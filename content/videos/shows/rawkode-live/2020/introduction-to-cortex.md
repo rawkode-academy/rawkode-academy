@@ -69,22 +69,13 @@ guests:
   - ganesh-vernekar
 resources:
   - title: Cortex Getting Started block storage documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      So in the document, you can click on documentation and and click on
-      getting started. We have all the steps that we can do. And click on block
-      storage, which is going to be the next default storage, which does not
-      involve an index tool.
-    confidence: high
   - title: Cortex upstream Docker Compose demos
+    type: url
     category: demos
-    evidence_quote: >-
-      Also, if you want to just run the upstream demos of con Docker Compose,
-      you could also do that. It's straightforward.
-    confidence: medium
   - title: Thanos project
+    type: url
     category: code
-    evidence_quote: But you could also have a look at Thanos.
-    confidence: high
 ---
 

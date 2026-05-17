@@ -59,16 +59,10 @@ guests:
   - noel-georgi
 resources:
   - title: Cilium Quick Start documentation
+    type: url
     category: documentation
-    evidence_quote: >-
-      So I'm just gonna pull up a serial manifest. It's, like, serial quick
-      start.
-    confidence: medium
   - title: Equinix Metal
+    type: url
     category: other
-    evidence_quote: >-
-      Thank you very much Equinix Medal. If you wanna check it out, you can get
-      $50 coupon by using Rawkode live.
-    confidence: medium
 ---
 

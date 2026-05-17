@@ -73,44 +73,21 @@ guests:
   - marc-boorshtein
 resources:
   - title: OpenUnison
+    type: url
     url: 'https://openunison.github.io/'
     category: code
-    evidence_quote: >-
-      So you wanna learn how to, you know, simplify access to your clusters? Go
-      to openunison.github.io.
-    confidence: high
   - title: CICD Proxy
+    type: url
     url: 'https://cicdproxy.github.io/'
     category: code
-    evidence_quote: |-
-      And then if you're interested in
-      using our CICD proxy
-      for for managing access for your clusters from
-      your workflows, that is cicdproxy.github.io.
-    confidence: high
   - title: Kubernetes and the Enterprise
+    type: url
     category: other
-    evidence_quote: |-
-      The last time we
-      spoke, you actually dropped on this little nugget
-      of knowledge that I didn't know before. And
-      it's that you wrote a book on Kubernetes
-      and the enterprise.
-    confidence: medium
   - title: Kubernetes Security Days talk on certificate authentication
+    type: url
     category: other
-    evidence_quote: |-
-      I did talk about it at Kubernetes security
-      days couple years ago or security con, whatever
-      they're calling it these days.
-    confidence: medium
   - title: CICD Proxy Helm charts for kube-oidc-proxy impersonation
+    type: url
     category: code
-    evidence_quote: |-
-      It's a
-      it's a deployment of the Kubo IDC proxy
-      with specialized Helm charts specifically for this use
-      case where it sets up an impersonating proxy.
-    confidence: medium
 ---
 

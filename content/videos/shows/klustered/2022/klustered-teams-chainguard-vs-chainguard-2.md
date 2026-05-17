@@ -91,17 +91,14 @@ chapters:
 duration: 6269
 resources:
   - title: Teleport
+    type: url
     url: 'https://rawkode.live/teleport'
     category: other
-    evidence_quote: Check it out at Rawkode.live/teleport.
-    confidence: high
   - title: Networking and Kubernetes
+    type: url
     category: other
-    evidence_quote: I am the author of Networking and Kubernetes.
-    confidence: high
   - title: Sleuth Kit
+    type: url
     category: other
-    evidence_quote: 'So, yeah, Sleuth Kit, old school forensics tool.'
-    confidence: medium
 ---
 

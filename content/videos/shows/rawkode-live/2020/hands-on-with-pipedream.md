@@ -92,33 +92,20 @@ duration: 5299
 guests: []
 resources:
   - title: Equinix Metal
+    type: url
     url: 'https://metal.equinix.com'
     category: other
-    evidence_quote: 'If you wanna check out Equinix Medal, you can visit medal.equinix.com,'
-    confidence: medium
   - title: Pipedream REST API docs
+    type: url
     category: documentation
-    evidence_quote: >-
-      Go to the REST API. This lists all of our API endpoints we expose in our
-      REST API.
-    confidence: high
   - title: Pipedream workflow state docs
+    type: url
     category: documentation
-    evidence_quote: >-
-      Workflow state using the variable dollar checkpoint lets you do that.
-      There's also step level state.
-    confidence: high
   - title: SSLMate Cert Spotter API
+    type: url
     category: other
-    evidence_quote: >-
-      SSL Mate is this great API. I think they operate a specific API, sorry,
-      called cert spotter
-    confidence: high
   - title: Pipedream parking tickets in San Francisco blog post
+    type: url
     category: other
-    evidence_quote: >-
-      I wrote up a blog post about how I used Pipedream to avoid parking tickets
-      in San Francisco.
-    confidence: medium
 ---
 

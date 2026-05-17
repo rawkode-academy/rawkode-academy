@@ -88,30 +88,16 @@ guests:
   - julius-volz
 resources:
   - title: Prometheus Formatter Chrome extension
+    type: url
     category: other
-    evidence_quote: >-
-      By the way, there is a Chrome plugin, which is really cool. It's called
-      Prometheus Formatter.
-    confidence: high
   - title: Prometheus best practices docs page on histograms and summaries
+    type: url
     category: documentation
-    evidence_quote: >-
-      There's a page in the Prometheus best practices docs that really goes
-      deeper into that comparison if if someone wants to look at that more.
-    confidence: medium
   - title: kube-prometheus Prometheus rules manifests
+    type: url
     category: code
-    evidence_quote: >-
-      If you go to if you search for cube dash Prometheus, which is a project
-      initially by oh, sorry. No. Like, Google. Yeah. Yeah. Dash dash
-      Prometheus. Yep. That's fine. And then press t, and then you press rules.
-      And then you go to the manifest slash Prometheus rules.
-    confidence: medium
   - title: Cortex monitoring project
+    type: url
     category: code
-    evidence_quote: >-
-      There's, for example, Cortex initially started by Weaveworks. Now it's
-      more dominant, I guess, lead led by Grafana Labs and others
-    confidence: medium
 ---
 

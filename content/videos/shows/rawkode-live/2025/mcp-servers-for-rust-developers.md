@@ -16,8 +16,7 @@ show: rawkode-live
 duration: 5198
 resources:
   - title: State of Kubernetes Report 2025
+    type: url
     category: other
-    evidence_quote: taking a look at the state of Kubernetes report for 2025
-    confidence: high
 ---
 

@@ -18,9 +18,8 @@ duration: 403
 guests: []
 resources:
   - title: Cloud Development Kit for Terraform (CDKTF)
+    type: url
     url: 'https://github.com/hashicorp/terraform-cdk'
     category: code
-    evidence_quote: 'HashiCorp, an IBM company, has archived the Terraform CDK repository.'
-    confidence: high
 ---
 

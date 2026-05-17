@@ -147,22 +147,13 @@ guests:
   - rohit-ghumare
 resources:
   - title: TechWorld with Nana YouTube channel
+    type: url
     category: other
-    evidence_quote: |-
-      there is a Nana,
-      Tech World with Nana.
-    confidence: medium
   - title: Coursera Financial Aid
+    type: url
     category: other
-    evidence_quote: |-
-      So Coursera has the
-      financial aid.
-    confidence: medium
   - title: solo.io Academy
+    type: url
     category: documentation
-    evidence_quote: |-
-      go to the solo.io
-      academy.
-    confidence: medium
 ---
 

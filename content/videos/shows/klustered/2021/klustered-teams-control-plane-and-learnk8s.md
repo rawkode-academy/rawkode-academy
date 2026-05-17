@@ -184,9 +184,8 @@ guests:
   - salman-iqbal
 resources:
   - title: Teleport
+    type: url
     url: 'https://rawkode.live/teleport'
     category: other
-    evidence_quote: Remember to check out Teleport at Rawkodelive/Teleport.
-    confidence: medium
 ---
 

@@ -44,10 +44,7 @@ duration: 7115
 guests: []
 resources:
   - title: Advent of Code
+    type: url
     category: demos
-    evidence_quote: >-
-      So this is advent of code here. If you're not familiar with it, every
-      December, someone goes out of their way.
-    confidence: high
 ---
 
