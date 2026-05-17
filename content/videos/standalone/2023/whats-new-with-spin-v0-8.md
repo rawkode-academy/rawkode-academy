@@ -3,9 +3,9 @@ id: asn46r4vc2cye6ihgp2zamoh
 slug: whats-new-with-spin-v0-8
 title: What's New with Spin (v0.8)
 description: >-
-  Spin, from @fermyontech (The #WebAssembly) framework released v0.8 this week
-  (Feb 2023) and ships with some fantastic quality of life improvements. Learn
-  more about Spin at https://github.com/fermyon/spin
+  A tour of Spin 0.8: the Itty-style JavaScript router for multi-path
+  components, TLS support for outbound Postgres and MySQL connections, and
+  first-class OCI registry push, sign with cosign, and verify workflows.
 publishedAt: 2023-02-21T17:00:00.000Z
 type: recorded
 category: tutorial

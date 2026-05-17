@@ -2,7 +2,7 @@
 id: cpyas1mgays442brvl0fdi77
 slug: podmansh-and-infisical
 title: podmansh & Infisical
-description: 'In this episode of AlphaBits, Brian and David demo podmansh and Infisical.'
+description: 'Brian demos podmansh, using Podman containers as Linux login shells configured via Quadlet systemd units with three isolation levels. David demos Infisical for secrets management, with CLI injection, GitHub sync, folder scoping, and SDKs.'
 publishedAt: 2023-08-10T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -58,6 +58,11 @@ guests:
 resources:
   - title: podmansh man page
     type: url
+    url: 'https://docs.podman.io/en/latest/markdown/podmansh.1.html'
+    category: documentation
+  - title: Infisical documentation
+    type: url
+    url: 'https://infisical.com/docs'
     category: documentation
 ---
 

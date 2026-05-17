@@ -3,15 +3,15 @@ id: pg8dyt42vac1gmldqsjnkswg
 slug: server-side-webassembly-at-the-edge
 title: Server Side WebAssembly at the Edge
 description: >-
-  In this video, I'll show you how to get started with the Fermyon Platform. A
-  Collection of Open Source components that allows you to run your own
-  server-side WASM binaries on Equinix Metal with low-latency routing, using
-  BGP.
+  Deploying the Fermyon Platform to Equinix Metal with Terraform, using BGP
+  anycast across Dallas and Amsterdam to route Spin WebAssembly applications to
+  the nearest metro for low-latency edge serving.
 publishedAt: 2023-03-07T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - terraform
 chapters:
   - startTime: 61
     title: Introduction and Episode Goal
@@ -108,17 +108,17 @@ chapters:
 duration: 3073
 guests: []
 resources:
-  - title: Fermion Installer
+  - title: Fermyon Installer
     type: url
-    url: 'https://github.com/fermion/installer'
+    url: 'https://github.com/fermyon/installer'
     category: code
   - title: Deis Labs Hippo
     type: url
     url: 'https://github.com/deislabs/hippo'
     category: code
-  - title: Deis Labs Bundle
+  - title: Deis Labs Bindle
     type: url
-    url: 'https://github.com/deislabs/bundle'
+    url: 'https://github.com/deislabs/bindle'
     category: code
 ---
 

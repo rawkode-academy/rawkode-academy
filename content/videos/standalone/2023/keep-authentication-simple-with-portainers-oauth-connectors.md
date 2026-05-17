@@ -2,7 +2,7 @@
 id: aqzmvsr41szkg2uqg0yp2cu4
 slug: keep-authentication-simple-with-portainers-oauth-connectors
 title: Keep Authentication Simple with Portainers OAuth Connectors
-description: Video content coming soon.
+description: Swap Portainer's local user management for single sign-on. Walk through configuring OAuth with GitHub and Google, registering client IDs and secrets, pre-adding users, and keeping internal login as a fallback when settings go wrong.
 publishedAt: 2023-03-06T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -50,9 +50,15 @@ guests: []
 resources:
   - title: GitHub OAuth Apps settings
     type: url
-    category: other
+    url: 'https://github.com/settings/developers'
+    category: documentation
   - title: Google Cloud API and Services Credentials
     type: url
-    category: other
+    url: 'https://console.cloud.google.com/apis/credentials'
+    category: documentation
+  - title: Portainer OAuth authentication documentation
+    type: url
+    url: 'https://docs.portainer.io/admin/settings/authentication/oauth'
+    category: documentation
 ---
 

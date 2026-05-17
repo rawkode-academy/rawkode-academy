@@ -6,8 +6,10 @@ subtitle: >-
   When it comes to Kubernetes tooling, the landscape is noisy and doesn't always
   have your back. Finding the right tools can be ... somewhat painful.
 description: >-
-  When it comes to Kubernetes tooling, the landscape is noisy and doesn't always
-  have your back. Finding the right tools can be ... somewhat painful.
+  Four tools for Kubernetes day-two security: kube-bench for CIS hygiene,
+  kube-hunter for red-team probing, Sonobuoy for CNCF conformance, and
+  Syft plus Grype for SBOMs and CVEs. Demo runs them by hand, then automates
+  via Spectro Cloud Palette.
 publishedAt: 2025-12-12T00:00:00.000Z
 type: recorded
 category: tutorial
@@ -50,12 +52,35 @@ chapters:
 resources:
   - title: Spectro Cloud Palette
     type: url
+    url: 'https://www.spectrocloud.com/product/palette'
     category: other
   - title: Google Microservices Demo
     type: url
+    url: 'https://github.com/GoogleCloudPlatform/microservices-demo'
     category: demos
   - title: CIS Kubernetes Benchmarks
     type: url
+    url: 'https://www.cisecurity.org/benchmark/kubernetes'
     category: documentation
+  - title: kube-bench
+    type: url
+    url: 'https://github.com/aquasecurity/kube-bench'
+    category: code
+  - title: kube-hunter
+    type: url
+    url: 'https://github.com/aquasecurity/kube-hunter'
+    category: code
+  - title: Sonobuoy
+    type: url
+    url: 'https://sonobuoy.io/'
+    category: documentation
+  - title: Syft
+    type: url
+    url: 'https://github.com/anchore/syft'
+    category: code
+  - title: Grype
+    type: url
+    url: 'https://github.com/anchore/grype'
+    category: code
 ---
 

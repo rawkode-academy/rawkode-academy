@@ -3,9 +3,9 @@ id: ovgas80n8hqlkknowpijiqbb
 slug: exploring-ngroks-traffic-policies-for-secure-application-development
 title: Exploring ngrok's Traffic Policies for Secure Application Development
 description: >-
-  In this video, you'll learn three exciting tricks to enhance your application
-  using ngrok. We'll cover how to protect an endpoint, restrict access based on
-  geolocation, and improve your application's security posture.
+  Using ngrok Traffic Policies and CEL expressions to lock down a Deno API:
+  restrict the /metrics endpoint to specific IPs, then geo-restrict /uk to
+  United Kingdom visitors with a custom CEL-interpolated 404 response.
 publishedAt: 2025-01-20T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -68,6 +68,34 @@ chapters:
     title: Conclusion & Call to Action
 duration: 866
 guests: []
-resources: []
+resources:
+  - title: ngrok Documentation
+    type: url
+    url: 'https://ngrok.com/docs'
+    category: documentation
+  - title: ngrok Traffic Policy
+    type: url
+    category: documentation
+  - title: Common Expression Language (CEL)
+    type: url
+    category: documentation
+  - title: Traffic Policy Connection Variables
+    type: url
+    category: documentation
+  - title: Traffic Policy HTTP Request Variables
+    type: url
+    category: documentation
+  - title: Traffic Policy Geo Variables
+    type: url
+    category: documentation
+  - title: Restrict IPs Action
+    type: url
+    category: documentation
+  - title: Deny Action
+    type: url
+    category: documentation
+  - title: Custom Response Action
+    type: url
+    category: documentation
 ---
 

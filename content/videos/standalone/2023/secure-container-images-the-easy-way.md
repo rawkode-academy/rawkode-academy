@@ -3,18 +3,10 @@ id: diok2rek56nt6nq7z3839qei
 slug: secure-container-images-the-easy-way
 title: Secure Container Images The EASY Way
 description: >-
-  Do you want smaller and more secure container images?
-
-
-  In this video, we take a look at Slim Toolkit - an open source application
-  that can handle sophisticated probing of your original container image to
-  understand the required files, and slims it ALL THE WAY DOWN to the minimum.
-
-
-  Container image reductions of 10x, 50x, and even 500x are entirely possible.
-
-
-  Let's see how
+  Slim Toolkit probes a running container with HTTP or exec probes to learn
+  which files the workload actually uses, then rebuilds a minimal image.
+  Demos shrink NGINX from 33MB to 12MB, a Rust dog image from 97MB to under
+  10MB, and an unoptimised Astro build from 1.4GB to 100MB.
 publishedAt: 2023-04-25T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -38,12 +30,15 @@ guests: []
 resources:
   - title: dog DNS lookup project
     type: url
+    url: 'https://github.com/ogham/dog'
     category: code
   - title: Astro Dockerfile documentation
     type: url
+    url: 'https://docs.astro.build/en/recipes/docker/'
     category: documentation
   - title: Rawkode Academy website
     type: url
+    url: 'https://rawkode.academy'
     category: demos
 ---
 
