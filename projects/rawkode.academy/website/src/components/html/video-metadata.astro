@@ -1,4 +1,14 @@
 ---
+interface PersonRef {
+	name: string;
+	url?: string;
+}
+
+interface SeriesRef {
+	name: string;
+	url: string;
+}
+
 interface Props {
 	title: string;
 	description: string;
@@ -14,6 +24,9 @@ interface Props {
 	category?: string | undefined;
 	isVideoList?: boolean;
 	clips?: Array<{ name: string; startOffset: number; endOffset?: number }>;
+	creators?: PersonRef[] | undefined;
+	guests?: PersonRef[] | undefined;
+	partOfSeries?: SeriesRef | undefined;
 }
 
 const {
@@ -31,7 +44,16 @@ const {
 	category,
 	isVideoList = false,
 	clips = [],
+	creators,
+	guests = [],
+	partOfSeries,
 } = Astro.props;
+
+// Default to the channel host if no specific creators are provided.
+const resolvedCreators: PersonRef[] =
+	creators && creators.length > 0
+		? creators
+		: [{ name: "David McKay", url: "https://rawkode.academy" }];
 
 // Format duration from seconds to ISO 8601
 function formatDuration(seconds: number): string {
@@ -111,11 +133,34 @@ const structuredData = isVideoList
 					height: 512,
 				},
 			},
-			creator: {
-				"@type": "Person",
-				name: "David McKay",
-				url: "https://rawkode.academy",
-			},
+			creator:
+				resolvedCreators.length === 1
+					? {
+							"@type": "Person",
+							name: resolvedCreators[0]!.name,
+							...(resolvedCreators[0]!.url
+								? { url: resolvedCreators[0]!.url }
+								: {}),
+						}
+					: resolvedCreators.map((person) => ({
+							"@type": "Person",
+							name: person.name,
+							...(person.url ? { url: person.url } : {}),
+						})),
+			...(guests.length > 0 && {
+				actor: guests.map((person) => ({
+					"@type": "Person",
+					name: person.name,
+					...(person.url ? { url: person.url } : {}),
+				})),
+			}),
+			...(partOfSeries && {
+				partOfSeries: {
+					"@type": "CreativeWorkSeries",
+					name: partOfSeries.name,
+					url: partOfSeries.url,
+				},
+			}),
 			hasPart: clips?.length
 				? clips.map((c) => ({
 						"@type": "Clip",
