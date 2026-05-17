@@ -3,13 +3,17 @@ id: ywd7rvmdaz445o5wf0snvwx9
 slug: part-2-tutorial-1-installation
 title: 'Part 2 - Tutorial 1: Installation'
 description: >-
-  Tutorial: Learn how to install and run #InfluxDB on macOS, Linux (Debian and
-  RedHat), Docker, and Kubernetes.
+  Walk through five ways to install InfluxDB 2: brew on macOS, the apt
+  repository on Debian/Ubuntu, the yum repo on Red Hat, the official Docker
+  image with a persistent volume, and the influxdata Helm chart on Kubernetes.
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - influxdb
+  - docker
+  - helm
+  - kubernetes
 chapters:
   - startTime: 0
     title: Introduction
@@ -45,6 +49,7 @@ resources:
   - title: InfluxData InfluxDB 2 Helm Chart
     type: url
     category: code
+    url: 'https://github.com/influxdata/helm-charts'
   - title: Course Materials Installation Guide
     type: url
     category: documentation

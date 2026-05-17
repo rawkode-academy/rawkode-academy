@@ -2,7 +2,7 @@
 id: oareyzu0nuanx1h7tz478z14
 slug: automated-kubernetes-operations-with-komodor-and-vcluster
 title: Automated Kubernetes Operations with Komodor and vcluster
-description: Video content coming soon.
+description: Integrate Komodor with vCluster to auto-deploy the Komodor agent into every ephemeral virtual cluster via Helm init charts, then use Komodor to observe and debug workloads (like a broken NGINX image pull) across each vCluster from a single UI.
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -31,8 +31,9 @@ chapters:
 duration: 358
 guests: []
 resources:
-  - title: Kubernetes workshop chart from the Komodor LJOX repository
+  - title: Komodor Helm charts repository (komodorio/helm-charts)
     type: url
+    url: https://github.com/komodorio/helm-charts
     category: code
 ---
 

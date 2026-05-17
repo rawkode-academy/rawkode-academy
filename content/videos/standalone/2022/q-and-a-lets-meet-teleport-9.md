@@ -2,7 +2,7 @@
 id: te9uhekxxgat60sku1r85kuv
 slug: q-and-a-lets-meet-teleport-9
 title: Q&A - Let's Meet Teleport 9
-description: 'Find out more at https://rawkode.live/teleport'
+description: Ben Abbott joins David to walk through Teleport 9, covering Machine ID for automated workloads with Ansible, new database access for Redis, MariaDB and SQL Server, moderated sessions, per-session MFA, and desktop access.
 publishedAt: 2022-04-07T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -87,6 +87,7 @@ resources:
     type: url
     category: documentation
   - title: Teleport Requests for Discussion (RFD)
+    url: https://github.com/gravitational/teleport/tree/master/rfd
     type: url
     category: documentation
   - title: Why the Four Eyes Principle is Critical for Access

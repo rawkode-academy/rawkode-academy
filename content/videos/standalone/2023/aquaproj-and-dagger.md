@@ -3,8 +3,9 @@ id: phhk3ymh8qjb3pzwmmtofefz
 slug: aquaproj-and-dagger
 title: aquaproj & Dagger
 description: >-
-  In this episode of AlphaBits, Brian and David explain why they're excited
-  about aquaproj and Dagger.
+  Brian demos aquaproj for pinning CLI tool versions per-project and globally
+  via its YAML registry, then David walks through a Go Dagger pipeline that
+  builds a container, runs Hurl HTTP tests, and visualises cached steps.
 publishedAt: 2023-08-17T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -50,10 +51,18 @@ guests:
 resources:
   - title: AlphaBits Podcast
     type: url
-    url: 'https://alphabets.fm'
     category: other
   - title: aquaproj Registry
     type: url
+    url: 'https://github.com/aquaproj/aqua-registry'
     category: code
+  - title: aquaproj Documentation
+    type: url
+    url: 'https://aquaproj.github.io/docs/'
+    category: documentation
+  - title: Dagger Documentation
+    type: url
+    url: 'https://docs.dagger.io/'
+    category: documentation
 ---
 

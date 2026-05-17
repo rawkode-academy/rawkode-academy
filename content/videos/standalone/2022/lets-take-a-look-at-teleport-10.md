@@ -3,8 +3,10 @@ id: m33ycy3p5m13rbpi3h4bkbv0
 slug: lets-take-a-look-at-teleport-10
 title: Let's Take a Look at Teleport 10
 description: >-
-  In this session, Ben, from Teleport, and I take a look at the new features
-  releases in Teleport 10.
+  Ben Abbott (DevRel at Teleport) walks through what's new in Teleport 10:
+  passwordless access via WebAuthn, FIDO and YubiKeys, resource-level access
+  requests, Machine ID for Kubernetes, new database integrations, and upgrade
+  guidance.
 publishedAt: 2022-07-30T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -93,6 +95,7 @@ guests:
 resources:
   - title: Teleport Upgrade Documentation
     type: url
+    url: 'https://goteleport.com/docs/management/operations/upgrading/'
     category: documentation
   - title: Rawkode Academy Discord
     type: url
@@ -103,9 +106,11 @@ resources:
     category: documentation
   - title: Teleport RFDs (Request For Discussion)
     type: url
+    url: 'https://github.com/gravitational/teleport/tree/master/rfd'
     category: documentation
   - title: Teleport Community Slack
     type: url
+    url: 'https://goteleport.com/slack'
     category: other
 ---
 

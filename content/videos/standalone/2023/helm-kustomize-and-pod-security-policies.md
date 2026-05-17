@@ -3,13 +3,17 @@ id: k5xzx8dfmvu7s3nzdqy32kzy
 slug: helm-kustomize-and-pod-security-policies
 title: 'Helm, Kustomize, and Pod Security Policies'
 description: >-
-  In this session, David guides you through installing Portainer to a Kubernetes
-  cluster with Helm and Kustomize.
+  Install Portainer on Kubernetes two ways (helm upgrade --install and kubectl
+  -k with Kustomize), then use Portainer's UI to enable pod security constraints
+  backed by an auto-installed Gatekeeper.
 publishedAt: 2023-03-14T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - portainer
+  - helm
+  - kubernetes
+  - opa
 chapters:
   - startTime: 0
     title: Introduction
@@ -60,6 +64,11 @@ resources:
     category: code
   - title: Kustomize documentation
     type: url
+    url: 'https://kubectl.docs.kubernetes.io/references/kustomize/'
     category: documentation
+  - title: Portainer Helm chart values.yaml
+    type: url
+    url: 'https://github.com/portainer/k8s/blob/master/charts/portainer/values.yaml'
+    category: code
 ---
 

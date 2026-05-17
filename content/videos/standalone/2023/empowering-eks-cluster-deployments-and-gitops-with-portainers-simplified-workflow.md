@@ -6,14 +6,15 @@ title: >-
   Empowering EKS Cluster Deployments and GitOps with Portainer's Simplified
   Workflow
 description: >-
-  Today, we'll be diving into the world of Kubernetes and GitOps, specifically
-  focusing on how Portainer simplifies the process of creating an EKS cluster
-  and adopting GitOps practices.
+  Provision an AWS EKS cluster from the Portainer UI, deploy the Google Cloud
+  Platform microservices demo via a Git manifest, then hit the cluster with
+  Portainer's in-browser kubectl shell, all in under ten minutes.
 publishedAt: 2023-08-24T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - portainer
+  - kubernetes
 chapters:
   - startTime: 0
     title: Portainer is TOO Easy
@@ -42,6 +43,7 @@ guests: []
 resources:
   - title: Google Cloud Platform microservice demo
     type: url
+    url: 'https://github.com/GoogleCloudPlatform/microservices-demo'
     category: demos
 ---
 

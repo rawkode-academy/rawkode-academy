@@ -2,7 +2,7 @@
 id: lxx8tfrfnnhiv1ur4h6t60t0
 slug: a-hands-on-overview-of-guidepad
 title: A Hands-on Overview of guidepad
-description: The Development Framework for managing complexity and expanding capabilities.
+description: David builds a Pocket-style bookmark app on Guidepad. Create and list entities from the CLI, auto-enrich URLs with Microlink metadata and ChatGPT summaries, then expose a filtered todo API by adding a read field to the type and deploying with a git push.
 publishedAt: 2023-06-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -46,7 +46,7 @@ resources:
     type: url
     url: 'https://microlink.io/'
     category: other
-  - title: Guidepad Rawkode
+  - title: Guidepad Rawkode plugin
     type: url
     category: code
 ---
