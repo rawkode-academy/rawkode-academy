@@ -3,10 +3,11 @@
 /**
  * Transcript-driven resource extraction for videos.
  *
- * For each video, fetch the public VTT, ask Gemini to extract concrete
- * linkable resources (docs, code, slides, demos, papers/books/posts), dedupe
- * against the URLs already attached to the video's technologies and guests,
- * and emit a JSON file per video for human review.
+ * For each video, fetch the public VTT, ask the Codex CLI (`codex exec`) to
+ * extract concrete linkable resources (docs, code, slides, demos,
+ * papers/books/posts), dedupe against the URLs already attached to the
+ * video's technologies and guests, and emit a JSON file per video for human
+ * review.
  *
  * Apply mode merges accepted JSON files into each video's frontmatter
  * `resources:` array, additive and idempotent.
@@ -20,7 +21,7 @@
  *   --max-parallel <n> Parallelism for extraction (default 5).
  *   --limit <n>        Only process the first N videos (debug).
  *   --only <slug>      Only process the video with this slug.
- *   --model <name>     Gemini model to pass to `gemini -m <name>`. Optional.
+ *   --model <name>     Model to pass to `codex exec -m <name>`. Optional.
  */
 
 import { readdir, readFile, writeFile, mkdir, access } from "node:fs/promises";
@@ -230,18 +231,34 @@ function buildPrompt(params: {
 		transcript,
 	} = params;
 	return [
-		"You are extracting concrete, linkable resources mentioned in a podcast/video transcript.",
+		"You extract concrete linkable resources from a video transcript. Be strict.",
 		"",
-		"RULES:",
-		"- Return ONLY a single JSON object, no prose before or after.",
-		"- The JSON shape is: {\"resources\": [{\"title\": string, \"url\": string|null, \"category\": \"documentation\"|\"code\"|\"slides\"|\"demos\"|\"other\", \"evidence_quote\": string, \"confidence\": \"high\"|\"medium\"|\"low\"}]}",
+		"OUTPUT: a single JSON object, no prose before or after.",
+		"SHAPE: {\"resources\": [{\"title\": string, \"url\": string|null, \"category\": \"documentation\"|\"code\"|\"slides\"|\"demos\"|\"other\", \"evidence_quote\": string, \"confidence\": \"high\"|\"medium\"|\"low\"}]}",
+		"",
+		"WHAT COUNTS AS A RESOURCE",
+		"A resource is one of:",
+		"- A specific repository or project the speaker names (e.g. 'kubernetes/kubernetes', 'rawkode-academy/courses').",
+		"- A specific documentation page, guide, or API reference (e.g. 'the Kubernetes Pod Security Standards docs page').",
+		"- A specific paper, RFC, book, blog post, talk, or video.",
+		"- A specific demo or example artifact (e.g. 'the OpenTelemetry demo application').",
+		"- A specific tool or product that is itself the LINK TARGET of the discussion — i.e. the speaker explicitly recommends going to look at it.",
+		"",
+		"WHAT DOES NOT COUNT (DROP THESE)",
+		"- Passing technology mentions. 'I'm using Postgres' / 'we run on AWS Lambda' / 'we deploy with Helm' — these are not resources, they are context. Drop them.",
+		"- The headlining technology of the video (already in KNOWN_TECHNOLOGIES).",
+		"- People mentioned only by name without a specific artifact (talk, post, repo) attached.",
+		"- Anything whose evidence quote is just 'we are using X' or 'X supports Y' — that is a mention, not a resource.",
+		"- Anything you cannot confidently name with a specific artifact identifier (a repo path, doc page title, post title, paper title).",
+		"",
+		"GUARDRAILS",
 		"- Each entry MUST include an evidence_quote taken verbatim from the transcript.",
-		"- A resource is concrete only if it is a specific page, doc, repo, paper, RFC, book, talk, post, tool, or product. Generic topics do not count.",
-		"- Skip anything covered by KNOWN_TECHNOLOGIES (those are already linked elsewhere). A specific docs page deep inside a known technology IS still a resource (e.g. a particular API reference page).",
-		"- Skip anything covered by KNOWN_GUESTS and KNOWN_HOSTS (their profiles are already linked elsewhere).",
-		"- Only emit `url` when the host and path are named clearly enough to identify (e.g. github.com/foo/bar, kubernetes.io/docs/...). Otherwise return url=null.",
-		"- Use confidence=low for ambiguous mentions; those will be dropped.",
-		"- Cap output at 10 resources. Choose the most useful, not the most numerous.",
+		"- Skip anything covered by KNOWN_TECHNOLOGIES or KNOWN_GUESTS (already linked elsewhere). A specific deep page inside a known technology IS still a resource (e.g. a particular API reference page).",
+		"- Only emit `url` when the host AND path are named with enough specificity to identify exactly (e.g. https://github.com/foo/bar, https://kubernetes.io/docs/concepts/...). If you would have to guess, return url=null.",
+		"- Every emitted url MUST start with `https://`. No bare hosts, no `http://`.",
+		"- Single-word generic titles ('Postgres', 'Helm', 'Jira') with url=null are forbidden — these are mentions, not resources. DROP them.",
+		"- Use confidence=low when in doubt; low entries are dropped automatically. Prefer omitting an entry over including a weak one.",
+		"- Hard cap: 5 resources per video. Quality over quantity. If only 0–2 real resources exist, return only those (or an empty array).",
 		"",
 		`TITLE: ${title}`,
 		`KNOWN_TECHNOLOGIES: ${knownTechnologyNames.join(", ") || "(none)"}`,
@@ -273,14 +290,14 @@ function extractJson(text: string): unknown | null {
 	}
 }
 
-function callGemini(prompt: string, model: string | null): Promise<string> {
+function callLlm(prompt: string, model: string | null): Promise<string> {
+	// Uses `codex exec` with prompt piped via stdin (avoids command-line length
+	// limits and shell-escaping issues for long transcripts).
 	return new Promise((resolve, reject) => {
-		const args: string[] = [];
-		if (model) {
-			args.push("-m", model);
-		}
-		args.push("-p", prompt);
-		const proc = spawn("gemini", args, { stdio: ["ignore", "pipe", "pipe"] });
+		const args: string[] = ["exec"];
+		if (model) args.push("-m", model);
+		args.push("-"); // read prompt from stdin
+		const proc = spawn("codex", args, { stdio: ["pipe", "pipe", "pipe"] });
 		let stdout = "";
 		let stderr = "";
 		proc.stdout.on("data", (chunk) => {
@@ -292,8 +309,10 @@ function callGemini(prompt: string, model: string | null): Promise<string> {
 		proc.on("error", reject);
 		proc.on("close", (code) => {
 			if (code === 0) resolve(stdout);
-			else reject(new Error(`gemini exited ${code}: ${stderr.trim()}`));
+			else reject(new Error(`codex exited ${code}: ${stderr.trim()}`));
 		});
+		proc.stdin.write(prompt);
+		proc.stdin.end();
 	});
 }
 
@@ -310,6 +329,18 @@ function isValidResource(value: unknown): value is Resource {
 	return true;
 }
 
+function normalizeUrl(url: string | undefined | null): string | null {
+	if (!url) return null;
+	const trimmed = url.trim();
+	if (!trimmed) return null;
+	if (/^https:\/\//i.test(trimmed)) return trimmed;
+	if (/^http:\/\//i.test(trimmed)) return `https://${trimmed.slice(7)}`;
+	if (trimmed.startsWith("/")) return trimmed;
+	// Bare host or host+path: prepend https://. Skip if it doesn't look like a host.
+	if (/^[a-z0-9.-]+\.[a-z]{2,}/i.test(trimmed)) return `https://${trimmed}`;
+	return null;
+}
+
 function filterAndDedupe(
 	candidates: Resource[],
 	knownHosts: Set<string>,
@@ -317,8 +348,14 @@ function filterAndDedupe(
 	const out: Resource[] = [];
 	const seenTitles = new Set<string>();
 	const seenUrls = new Set<string>();
-	for (const c of candidates) {
-		if (c.confidence === "low") continue;
+	for (const raw of candidates) {
+		if (raw.confidence === "low") continue;
+		const url = normalizeUrl(raw.url ?? null);
+		const c: Resource = { ...raw, url: url ?? undefined };
+		// Safety net: a single-word title with no URL is almost always a passing
+		// technology mention ("Postgres", "Helm"), not a real resource. Drop these.
+		const wordCount = c.title.trim().split(/\s+/).length;
+		if (wordCount <= 1 && !c.url) continue;
 		if (c.url) {
 			const host = urlHost(c.url);
 			if (host && knownHosts.has(host)) continue;
@@ -404,7 +441,7 @@ async function processVideo(
 
 	let raw: string;
 	try {
-		raw = await callGemini(prompt, opts.model);
+		raw = await callLlm(prompt, opts.model);
 	} catch (error) {
 		return {
 			status: "error",

@@ -1,0 +1,19 @@
+{
+	"video_id": "rwhw1lpmbqe2tfflabrd0ys9",
+	"slug": "kubernetes-disaster-recovery",
+	"title": "Kubernetes Disaster Recovery",
+	"generated_at": "2026-05-17T13:16:14.100Z",
+	"known_technology_names": [
+		"Kubernetes",
+		"Velero"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Spectro Cloud Palette documentation",
+			"category": "documentation",
+			"evidence_quote": "Head to docs.spectrocloud.com\nfor examples of workspace backups, profile\nbased policies, and real world scenarios.",
+			"confidence": "high"
+		}
+	]
+}

@@ -1,0 +1,35 @@
+{
+	"video_id": "sgs7tm99rldi3ev42yzacukd",
+	"slug": "kubernetes-security-scanning",
+	"title": "Kubernetes Security Scanning: The 4 Tools You Actually Need",
+	"generated_at": "2026-05-17T12:48:00.318Z",
+	"known_technology_names": [
+		"Kubernetes",
+		"kube-bench",
+		"kube-hunter",
+		"Sonobuoy",
+		"Syft",
+		"Grype"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Spectro Cloud Palette",
+			"category": "other",
+			"evidence_quote": "At the end of this video, you will see a demo with Spectral Cloud, where I turn on all of my day two secondurity scanning operations with a toggle box.",
+			"confidence": "high"
+		},
+		{
+			"title": "Google Microservices Demo",
+			"category": "demos",
+			"evidence_quote": "This is just using a Docker desktop with the Google microservices demo deployed.",
+			"confidence": "high"
+		},
+		{
+			"title": "CIS Kubernetes Benchmarks",
+			"category": "documentation",
+			"evidence_quote": "It checks the cluster against the SIS benchmarks, which is basically the global rule book if one were to exist for hardening Kubernetes.",
+			"confidence": "high"
+		}
+	]
+}

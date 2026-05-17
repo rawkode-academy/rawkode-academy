@@ -1,0 +1,24 @@
+{
+	"video_id": "ywd7rvmdaz445o5wf0snvwx9",
+	"slug": "part-2-tutorial-1-installation",
+	"title": "Part 2 - Tutorial 1: Installation",
+	"generated_at": "2026-05-17T12:46:51.019Z",
+	"known_technology_names": [
+		"InfluxDB"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "InfluxData InfluxDB 2 Helm Chart",
+			"category": "code",
+			"evidence_quote": "Then the chart that we wish to install, InfluxData/InfluxDB2.",
+			"confidence": "high"
+		},
+		{
+			"title": "Course Materials Installation Guide",
+			"category": "documentation",
+			"evidence_quote": "In the course materials, you will find a README.Md inside of the to dash installing InfluxDB directory.",
+			"confidence": "high"
+		}
+	]
+}

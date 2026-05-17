@@ -1,0 +1,19 @@
+{
+	"video_id": "xi7tekr74r3qfd7pv30lkp0s",
+	"slug": "continuously-deploy-with-gitops",
+	"title": "Continuously Deploy with GitOps",
+	"generated_at": "2026-05-17T12:45:48.273Z",
+	"known_technology_names": [
+		"Portainer"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Portainer in Production Course Repository",
+			"url": "https://github.com/rawkode-academy/portainer-in-production",
+			"category": "code",
+			"evidence_quote": "in our repository available at github.com/rawcodeacademy/retainer-in-production, there is a directory called GitOps.",
+			"confidence": "high"
+		}
+	]
+}
