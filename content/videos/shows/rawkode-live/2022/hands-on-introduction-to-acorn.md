@@ -6,61 +6,7 @@ description: >-
   Acorn is an application packaging and deployment framework that simplifies
   running apps on Kubernetes. Acorn is able to package up all of an applications
   Docker images, configuration, and deployment specifications into a single
-  Acorn image artifact. This artifact is publishable to any OCI container
-  registry allowing it to be deployed on any dev, test, or production
-  Kubernetes. The portability of Acorn images enables developers to develop
-  applications locally and move to production without having to switch tools or
-  technology stacks.
-
-
-  Developers create Acorn images by describing the application configuration in
-  an Acornfile. The Acornfile describes the whole application without all of the
-  boilerplate of Kubernetes YAML files. The Acorn CLI is used to build, deploy,
-  and operate Acorn images on any Kubernetes cluster.
-
-
-  ---
-
-
-  Introducing Acorn, a simple application deployment framework for Kubernetes
-  developed by the team at Acorn Labs in this episode!
-
-
-  Darren Shepherd, the Chief Architect at Acorn labs, is joining me live today.
-  Derek's been in the Kubernetes space for a while and works on K3s. His focus
-  has been on helping people deploy clusters, which was the main thing he did in
-  the last 5-6 years at Rancher. Sit back and listen to this conversation for a
-  live walkthrough of Acorn, its features, benefits, potential, and scope for
-  improvement.
-
-
-  To start with, however, Acorn is an application packaging and deployment
-  framework that simplifies running apps on Kubernetes. It can package all of an
-  application's Docker images, configuration, and deployment specifications into
-  a single Acorn image artefact, which is publishable to any OCI container
-  registry allowing it to be deployed on any dev, test, or production
-  Kubernetes. This portability of Acorn images enables developers to develop
-  applications locally and move to production without having to switch tools or
-  technology stacks.
-
-
-  Points to note:
-
-  ● Acorn took tons of inspiration from Docker, and Docker compose its user
-  experience. It would help people pick up and learn Docker quickly.
-
-  ● How K3s came from Rio: This was owing to the user's demand for raw access to
-  Kubernetes.
-
-  ● How do developers create Acorn images? By describing the application
-  configuration in an Acorn File. The Acorn File describes the whole application
-  without all of the boilerplate of Kubernetes YAML files. The Acorn CLI is used
-  to build, deploy, and operate Acorn images on any Kubernetes cluster.
-
-  ● Kubernetes improvement: There's a lot of power and flexibility in
-  Kubernetes. That leads to a lot of operational complexities. Creating a
-  fundamentally abstracted from Kubernetes, then we can drastically reduce the
-  operational side.
+  Acorn image artifact.
 publishedAt: 2022-08-25T17:00:00.000Z
 type: live
 category: tutorial

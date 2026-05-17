@@ -8,12 +8,7 @@ title: >-
 description: >-
   In this episode of Cloud Native Compass, hosts David Flanagan and Laura
   Santamaria dive deep into the complexities of the Kubernetes release cycle
-  with guest Kat Cosgrove. Kat, a sub-project lead for SIGrelease in the
-  Kubernetes project, shares her experiences and discusses issues such as
-  burnout, handling drive-by PRs, and the nuances of managing a fast-moving
-  open source project. They explore the structure of the release team, the
-  challenges of maintaining CI stability, and the ever-evolving nature of
-  contributing to Kubernetes.
+  with guest Kat Cosgrove.
 publishedAt: 2025-01-30T17:00:00.000Z
 type: recorded
 category: interview
@@ -59,7 +54,7 @@ chapters:
   - startTime: 2071
     title: Kubernetes 2.0 and Backwards Compatibility
   - startTime: 2227
-    title: Book, Movie, and Album Recommendations
+    title: 'Book, Movie, and Album Recommendations'
   - startTime: 2331
     title: Conclusion and Farewell
 guests:

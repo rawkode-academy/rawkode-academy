@@ -6,9 +6,6 @@ description: >-
   Join us for the live stream where we explore the code base and add a new
   feature to a production grade server side #WebAssembly application with
   #Fermyon Spin
-
-
-  https://www.youtube.com/watch?v=n2wdPgW8TNU
 publishedAt: 2023-02-24T17:00:00.000Z
 type: recorded
 category: tutorial

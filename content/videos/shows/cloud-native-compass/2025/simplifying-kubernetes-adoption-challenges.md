@@ -5,11 +5,7 @@ title: Simplifying Kubernetes Adoption Challenges
 description: >-
   In this episode of Cloud Native Compass, host David Flanagan talks with Koray
   Oksay, a Kubernetes consultant, trainer at Kubermatic, CNCF Ambassador, and
-  organizer of KCD Istanbul. From this episode, you'll learn how to overcome the
-  challenges of learning new technologies, how to find motivation, and how to
-  use real-world projects to improve skills. The guest shares personal
-  experiences—how he moved from struggling with Perl and Python to using them
-  effectively in production.
+  organizer of KCD Istanbul.
 publishedAt: 2025-03-13T17:00:00.000Z
 type: recorded
 category: interview
@@ -21,7 +17,7 @@ chapters:
   - startTime: 0
     title: Introduction and Missing Co-Host
   - startTime: 25
-    title: "Meet Koray: Background and Experience"
+    title: 'Meet Koray: Background and Experience'
   - startTime: 119
     title: Journey into Kubernetes and Cloud Native
   - startTime: 295
@@ -47,7 +43,7 @@ chapters:
   - startTime: 1621
     title: Cluster Management Best Practices
   - startTime: 2011
-    title: "Getting Started with Kubernetes: Tips and Resources"
+    title: 'Getting Started with Kubernetes: Tips and Resources'
   - startTime: 2363
     title: Final Thoughts and Community Involvement
 guests:

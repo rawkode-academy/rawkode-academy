@@ -5,8 +5,7 @@ title: Hands-on Introduction to Docker Build Cloud
 description: >-
   Docker Build Cloud is a service that lets you build your container images
   faster, both locally and in CI. Builds run on cloud infrastructure optimally
-  dimensioned for your workloads, no configuration required. The service uses a
-  remote build cache, ensuring fast builds anywhere and for all team members.
+  dimensioned for your workloads, no configuration required.
 publishedAt: 2024-03-06T17:00:00.000Z
 type: live
 category: tutorial
