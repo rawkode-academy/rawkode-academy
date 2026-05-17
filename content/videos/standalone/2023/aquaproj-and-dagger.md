@@ -12,6 +12,7 @@ category: tutorial
 technologies:
   - aquaproj
   - dagger
+show: alphabits
 chapters:
   - startTime: 0
     title: Introductions
