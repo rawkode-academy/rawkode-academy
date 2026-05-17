@@ -117,6 +117,17 @@ const { userId } = Astro.props;
 					maskAllInputs: true,
 					sampling: { rate: 0 },
 				},
+				loaded: (ph) => {
+					// Mirror the PostHog distinct id into a cookie so server-side
+					// event capture and the auth callback can stitch anonymous
+					// activity to the authenticated user.
+					try {
+						const id = ph.get_distinct_id?.();
+						if (id) {
+							document.cookie = `posthog_distinct_id=${encodeURIComponent(id)}; path=/; max-age=31536000; SameSite=Lax`;
+						}
+					} catch {}
+				},
 			});
 
 			const utm = getUtmParams();
