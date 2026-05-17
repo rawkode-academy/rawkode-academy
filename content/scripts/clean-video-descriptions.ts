@@ -307,11 +307,13 @@ Mode: ${applied ? "**applied**" : "dry run"}.
 - **${todo.length}** description(s) could not be confidently shortened — flagged for human rewrite.
 `;
 
+	const escapeCell = (s: string): string =>
+		s.replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 	const renderTable = (entries: VideoSummary[]): string => {
 		if (entries.length === 0) return "_None._\n";
 		const lines = entries.map(
 			(e) =>
-				`| \`${e.slug || e.id}\` | ${e.originalLength} → ${e.newLength} | ${e.droppedParagraphs} | ${e.preview.replace(/\|/g, "\\|")} | \`${e.path}\` |`,
+				`| \`${e.slug || e.id}\` | ${e.originalLength} → ${e.newLength} | ${e.droppedParagraphs} | ${escapeCell(e.preview)} | \`${e.path}\` |`,
 		);
 		return [
 			"| Video | Length | Dropped paragraphs | Preview | Path |",
