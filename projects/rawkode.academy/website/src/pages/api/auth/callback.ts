@@ -9,7 +9,12 @@ import {
 	SESSION_DURATION_SECONDS,
 	type StoredSession,
 } from "@/lib/auth/server";
-import { captureServerEvent, getDistinctId } from "@/server/analytics";
+import {
+	captureServerEvent,
+	getAnonDistinctIdFromCookies,
+	getDistinctId,
+	identifyServerUser,
+} from "@/server/analytics";
 
 export const GET: APIRoute = async (context) => {
 	const code = context.url.searchParams.get("code");
@@ -126,12 +131,30 @@ export const GET: APIRoute = async (context) => {
 		maxAge: SESSION_DURATION_SECONDS,
 	});
 
+	// Stitch the pre-auth anonymous session to the now-authenticated user
+	// so downstream PostHog queries see one identity across the funnel.
+	const anonId = getAnonDistinctIdFromCookies(context.request);
+	if (anonId && anonId !== userInfo.sub) {
+		await identifyServerUser(
+			{
+				distinctId: userInfo.sub,
+				anonId,
+				set: {
+					email: userInfo.email,
+					name: userInfo.name,
+				},
+			},
+			analytics,
+		);
+	}
+
 	await captureServerEvent(
 		{
 			event: "sign_in_completed",
 			properties: {
 				auth_method: "oidc",
 				return_to: returnTo,
+				...(anonId && anonId !== userInfo.sub ? { anon_id: anonId } : {}),
 			},
 			distinctId: userInfo.sub,
 		},

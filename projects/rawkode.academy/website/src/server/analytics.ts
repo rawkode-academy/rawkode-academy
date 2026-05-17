@@ -19,16 +19,26 @@ export type AnalyticsAttribution = {
 
 /**
  * Attempt to extract an anonymous distinct id from cookies.
- * Looks for a session cookie or generates a fingerprint.
+ * Prefers the PostHog distinct id (set client-side by the posthog component)
+ * so server- and client-emitted events share a single identity. Falls back to
+ * a generic `session_id` cookie for environments where PostHog hasn't booted.
  */
 export function getAnonDistinctIdFromCookies(req: Request): string | undefined {
 	const cookieHeader = req.headers.get("cookie");
 	if (!cookieHeader) return undefined;
 
-	// Look for session cookie
-	const match = cookieHeader.match(/(?:^|;\s*)session_id=([^;]+)/);
-	if (match?.[1]) {
-		return match[1];
+	const phMatch = cookieHeader.match(/(?:^|;\s*)posthog_distinct_id=([^;]+)/);
+	if (phMatch?.[1]) {
+		try {
+			return decodeURIComponent(phMatch[1]);
+		} catch {
+			return phMatch[1];
+		}
+	}
+
+	const sessionMatch = cookieHeader.match(/(?:^|;\s*)session_id=([^;]+)/);
+	if (sessionMatch?.[1]) {
+		return sessionMatch[1];
 	}
 
 	return undefined;
