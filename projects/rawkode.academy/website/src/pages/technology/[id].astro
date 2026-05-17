@@ -19,6 +19,7 @@ import {
 import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
+import RelatedTechnologies from "@/components/technology/RelatedTechnologies.astro";
 
 export interface Technology extends Omit<TechnologyData, "logos"> {
 	id: string;
@@ -227,6 +228,44 @@ const videoCount = technology.videos?.length ?? 0;
 const featuredVideos = (technology.videos ?? []).slice(0, 4);
 const categoryLabel =
 	technology.subcategory ?? technology.category ?? "Cloud Native";
+
+// Build the "Related technologies" rail. Prefer explicit relatedTechnologies
+// from frontmatter, then fall back to siblings in the same subcategory.
+const RELATED_TECH_LIMIT = 6;
+const explicitRelated = Array.isArray(
+	(technology as unknown as { relatedTechnologies?: string[] })
+		.relatedTechnologies,
+)
+	? ((technology as unknown as { relatedTechnologies?: string[] })
+			.relatedTechnologies as string[])
+	: [];
+
+const allTechItems = items;
+const techById = new Map(allTechItems.map((t) => [t.id, t]));
+
+const explicitMatches = explicitRelated
+	.map((relId) => techById.get(relId) ?? techById.get(`${relId}/index`))
+	.filter((t): t is (typeof allTechItems)[number] => Boolean(t));
+
+let siblingMatches: typeof allTechItems = [];
+if (technology.subcategory) {
+	siblingMatches = allTechItems.filter(
+		(t) =>
+			t.id !== id &&
+			!explicitMatches.some((e) => e.id === t.id) &&
+			t.data.subcategory === technology.subcategory,
+	);
+}
+
+const relatedTechSeed = [...explicitMatches, ...siblingMatches];
+const relatedTechnologies = relatedTechSeed
+	.slice(0, RELATED_TECH_LIMIT)
+	.map((entry) => ({
+		id: entry.id,
+		name: entry.data.name,
+		logoUrl: resolveTechnologyIconUrl(entry.id, entry.data.logos) ?? undefined,
+		subcategory: entry.data.subcategory,
+	}));
 
 const seoTitle =
 	technology.seo?.title ??
@@ -763,6 +802,14 @@ const hasCommunityLinks =
 				/>
 			</div>
 		</section>
+
+		{relatedTechnologies.length > 0 && (
+			<section class="w-full">
+				<div class="max-w-7xl mx-auto">
+					<RelatedTechnologies technologies={relatedTechnologies} />
+				</div>
+			</section>
+		)}
 
 		<!-- CTA Section -->
 		<section class="w-full">
