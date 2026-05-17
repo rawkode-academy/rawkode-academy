@@ -7,9 +7,10 @@ subtitle: >-
   the free and open-source tool that's revolutionizing how teams detect and
   prevent reliability issues before customers noti
 description: >-
-  Join us for an exclusive live stream as we explore Preq (pronounced "preek"),
-  the free and open-source tool that's revolutionizing how teams detect and
-  prevent reliability issues before customers notice!
+  Tony Meehan, CTO of Prequel, joins us to demo Preq: an open-source reliability
+  problem detector. We dig into Common Reliability Enumerations (CREs), running
+  community rules against logs and configs, and applying vulnerability-database
+  thinking to recurring software failures.
 publishedAt: 2025-06-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -18,6 +19,18 @@ show: rawkode-live
 duration: 3847
 guests:
   - tony-meehan
-resources: []
+resources:
+  - type: url
+    title: preq on GitHub
+    url: https://github.com/prequel-dev/preq
+    category: code
+  - type: url
+    title: Prequel documentation
+    url: https://docs.prequel.dev/
+    category: documentation
+  - type: url
+    title: Prequel
+    url: https://prequel.dev/
+    category: other
 ---
 

@@ -3,20 +3,16 @@ id: wdrgonuy73469iogpfz4afx3
 slug: part-3-tutorial-running-teleport-with-docker
 title: Part 3. Tutorial - Running Teleport with Docker
 description: >-
-  Find out more at https://rawkode.live/teleport
-
-
-  Learn how to run Teleport with Docker and Docker Compose.
-
-
-
-  Code:
-  https://github.com/rawkode-academy/courses/tree/main/teleport-complete-guide/3-running-teleport-with-docker
+  Run Teleport in containers: inspect the official image, generate a config with
+  the configure subcommand, mount it alongside a named volume for state, and
+  expose ports 3023, 3025, and 3080. Then wire up a multi-node lab with Docker
+  Compose and create the first user.
 publishedAt: 2021-11-03T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - docker
+  - docker-compose
   - teleport
 chapters:
   - startTime: 0
@@ -83,5 +79,10 @@ resources:
   - title: 'Teleport documentation: Running Teleport with Docker'
     type: url
     category: documentation
+    url: 'https://goteleport.com/docs/installation/docker/'
+  - title: 'Course code: Running Teleport with Docker'
+    type: url
+    category: code
+    url: 'https://github.com/rawkode-academy/courses/tree/main/teleport-complete-guide/3-running-teleport-with-docker'
 ---
 

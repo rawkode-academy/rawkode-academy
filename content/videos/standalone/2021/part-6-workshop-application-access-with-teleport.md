@@ -2,12 +2,18 @@
 id: n7tneoc9na93g1cpnfz7cx6i
 slug: part-6-workshop-application-access-with-teleport
 title: Part 6. Workshop - Application Access with Teleport
-description: 'Find out more at https://rawkode.live/teleport'
+description: >-
+  Live workshop covering Teleport application access: configure auth/proxy with
+  ACME, join a worker node, then expose NGINX and Grafana as Teleport apps.
+  Includes JWT inspection, path-based restrictions, and TSH CLI access.
 publishedAt: 2021-11-18T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - teleport
+  - pulumi
+  - docker
+  - grafana
 chapters:
   - startTime: 0
     title: <Untitled Chapter 1>
@@ -80,6 +86,7 @@ resources:
     category: code
   - title: Teleport configuration file reference
     type: url
+    url: 'https://goteleport.com/docs/reference/config/'
     category: documentation
   - title: jwt.io JWT debugger
     type: url

@@ -3,14 +3,21 @@ id: ejdg797b14vzlcxalspzht7o
 slug: hands-on-with-qovery
 title: Hands-on with Qovery
 description: >-
-  Qovery Engine is an open-source abstraction layer library that turns easy
-  application deployment on AWS, GCP, Azure, and other Cloud providers in just a
-  few minutes.
+  David goes hands-on with Qovery and CEO Romaric Philogene, deploying
+  applications to a Kubernetes cluster on AWS. They explore the Rust-based
+  engine, install the CLI, deploy services, run a Grafana Helm chart, and
+  export the environment to Terraform.
 publishedAt: 2024-10-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - docker
+  - grafana
+  - helm
+  - kubernetes
   - qovery
+  - rust
+  - terraform
 show: rawkode-live
 chapters:
   - startTime: 166
@@ -59,12 +66,15 @@ guests:
 resources:
   - title: Qovery getting started guide
     type: url
+    url: https://www.qovery.com/docs/getting-started/introduction
     category: documentation
   - title: Qovery AI agent on GitHub
     type: url
+    url: https://github.com/Qovery/qovery-skills
     category: code
   - title: Grafana Helm chart
     type: url
+    url: https://github.com/grafana/helm-charts
     category: code
 ---
 

@@ -3,8 +3,10 @@ id: pgrokuuhvovem0ajyew4tncu
 slug: part-2-tutorial-installing-teleport
 title: Part 2. Tutorial -  Installing Teleport
 description: >-
-  Learn how to install Teleport, as well as a high level overview of what
-  Teleport can do.
+  Three ways to install Teleport on Linux: the Debian APT repo, the Red Hat
+  YUM repo, and a curl script for other distros. Then start the server, create
+  the first user with tctl, set up 2FA, and try web SSH, the audit log, and
+  session replay.
 publishedAt: 2021-10-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -61,6 +63,10 @@ chapters:
     title: Conclusion and Next Steps (Workshop)
 duration: 842
 guests: []
-resources: []
+resources:
+  - type: url
+    category: documentation
+    title: Teleport documentation
+    url: 'https://goteleport.com/docs/'
 ---
 

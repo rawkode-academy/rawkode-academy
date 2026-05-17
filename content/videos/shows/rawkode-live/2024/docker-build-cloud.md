@@ -2,13 +2,15 @@
 id: qz1c7g1dlbmnpf2ubudxvf2v
 slug: docker-build-cloud
 title: Docker Build Cloud
-description: Video content coming soon.
+description: Michael Irwin demos Docker Build Cloud, covering managed builders, context transfer, shared cache, collaborative debugging via Docker Desktop, native multi-architecture builds for AMD64 and ARM64, CI integration with GitHub Actions, and pricing tiers.
 publishedAt: 2024-03-06T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - docker
   - docker-build-cloud
+  - docker-compose
+  - buildkit
 show: rawkode-live
 chapters:
   - startTime: 5
@@ -58,6 +60,22 @@ chapters:
 duration: 2397
 guests:
   - michael-irwin
-resources: []
+resources:
+  - type: url
+    title: Docker Build Cloud
+    category: documentation
+    url: 'https://www.docker.com/products/build-cloud/'
+  - type: url
+    title: Docker Build Cloud documentation
+    category: documentation
+    url: 'https://docs.docker.com/build-cloud/'
+  - type: url
+    title: BuildKit
+    category: documentation
+    url: 'https://docs.docker.com/build/buildkit/'
+  - type: url
+    title: Docker name generator (moby)
+    category: code
+    url: 'https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go'
 ---
 

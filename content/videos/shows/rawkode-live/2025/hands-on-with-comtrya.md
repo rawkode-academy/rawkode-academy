@@ -3,9 +3,10 @@ id: lo9o8fuuanvpurseh8sv6ef8
 slug: hands-on-with-comtrya
 title: Hands-on with Comtrya
 description: >-
-  Comtrya is a permissively licensed Open Source tool that is built 100% in
-  Rust. It allows you, as the user, to provision and configure your systems
-  through the use of simple configuration files using the YAML or TOML formats.
+  Todd Martin, primary maintainer of Comtrya, joins David to walk through this
+  Rust-based workstation configuration tool. They cover installation, writing
+  YAML/TOML manifests, dependencies, conditional logic, action variants, and
+  user, file, and git actions.
 publishedAt: 2025-01-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,6 +73,14 @@ chapters:
 duration: 5414
 guests:
   - todd-martin
-resources: []
+resources:
+  - type: url
+    title: Comtrya documentation
+    url: 'https://comtrya.dev'
+    category: documentation
+  - type: url
+    title: Comtrya on GitHub
+    url: 'https://github.com/comtrya/comtrya'
+    category: code
 ---
 

@@ -2,27 +2,7 @@
 id: hn0j9iu8ps7jaegq6iykq50c
 slug: part-4-workshop-server-access-with-teleport
 title: Part 4. Workshop - Server Access with Teleport
-description: |-
-  Find out more at https://rawkode.live/teleport
-
-  - Registering nodes with the cluster
-
-  - Using node labels
-
-  - Managing users
-   - Invites
-   - Roles
-   - Logins
-
-  - Using the Teleport Web UI
-   - SSH
-   - Sharing sessions
-   - Recorded sessions
-
-  - Using the Teleport CLI
-   - SSH
-   - Creating sessions
-   - Joining sessions
+description: Hands-on Teleport workshop covering agent node registration, static and dynamic labels, user and role management, eBPF enhanced session recording, and accessing servers through the Web UI and tsh CLI with shared and recorded sessions.
 publishedAt: 2021-11-05T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -96,16 +76,18 @@ guests: []
 resources:
   - title: Rawkode Academy courses repository
     type: url
-    url: 'https://github.com/rockwoodacademy/courses'
+    url: 'https://github.com/RawkodeAcademy/RawkodeAcademy'
     category: code
   - title: Teleport Linux get started guide
     type: url
     category: documentation
   - title: Teleport reference config file documentation
     type: url
+    url: 'https://goteleport.com/docs/reference/config'
     category: documentation
   - title: Teleport enhanced session recording documentation
     type: url
+    url: 'https://goteleport.com/docs/enroll-resources/server-access/guides/bpf-session-recording/'
     category: documentation
 ---
 
