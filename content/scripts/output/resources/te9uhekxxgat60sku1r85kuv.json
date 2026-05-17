@@ -1,0 +1,44 @@
+{
+	"video_id": "te9uhekxxgat60sku1r85kuv",
+	"slug": "q-and-a-lets-meet-teleport-9",
+	"title": "Q&A - Let's Meet Teleport 9",
+	"generated_at": "2026-05-17T12:46:00.106Z",
+	"known_technology_names": [
+		"Teleport"
+	],
+	"known_guest_names": [
+		"Ben Abbott"
+	],
+	"resources": [
+		{
+			"title": "Teleport Public Roadmap",
+			"category": "documentation",
+			"evidence_quote": "And we also made our roadmap public. And so you can go to our docs and see what our roadmap is for the next three months.",
+			"confidence": "high"
+		},
+		{
+			"title": "Teleport Requests for Discussion (RFD)",
+			"category": "documentation",
+			"evidence_quote": "we have a request for discussion. And so you can go to our Git repo and sort of understand, like, what our, like, versioning strategy is",
+			"confidence": "high"
+		},
+		{
+			"title": "Why the Four Eyes Principle is Critical for Access",
+			"category": "other",
+			"evidence_quote": "I had this book post today, which is why the four eyes principle is critical for access.",
+			"confidence": "high"
+		},
+		{
+			"title": "Teleport Ansible Guide",
+			"category": "documentation",
+			"evidence_quote": "We have instructions here on sort of how to generate the host file in our Ansible guide.",
+			"confidence": "high"
+		},
+		{
+			"title": "Teleport Upcoming Releases",
+			"category": "documentation",
+			"evidence_quote": "We have our upcoming releases page sort of describes, you know, Kubernetes and database access support for machine ID.",
+			"confidence": "high"
+		}
+	]
+}

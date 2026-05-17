@@ -1,0 +1,39 @@
+{
+	"video_id": "vsyhv7s6wvz4p9fuq507u28g",
+	"slug": "ngrok-operator-tutorial",
+	"title": "Unboxing the ngrok Kubernetes Operator",
+	"generated_at": "2026-05-17T12:48:34.715Z",
+	"known_technology_names": [
+		"ngrok",
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "ngrok-operator GitHub Repository",
+			"url": "https://github.com/ngrok/ngrok-operator",
+			"category": "code",
+			"evidence_quote": "The first step is to go to GitHub, where you'll find the organization ngrok and a repository called ngrok-operator.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok Helm Chart Repository",
+			"url": "https://charts.ngrok.com",
+			"category": "code",
+			"evidence_quote": "we need to add. The charts.ngrok.com repository. We can just paste this straight in and let Helm do its job.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok Traffic Policy Actions Documentation",
+			"category": "documentation",
+			"evidence_quote": "Here we have the ngrok documentation. We have a list of all of the actions that we can use as part of a traffic policy.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok vs Firewall Game",
+			"category": "demos",
+			"evidence_quote": "This is the ngrok versus the firewall game. As you can see, the ngrok logo at the bottom runs around firing with little bullets to destroy the firewall.",
+			"confidence": "medium"
+		}
+	]
+}

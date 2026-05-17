@@ -1,0 +1,33 @@
+{
+	"video_id": "t7zdnxgt54j4s3973zac3mjj",
+	"slug": "bringing-clarity-to-infrastructure-as-code-with-env0",
+	"title": "Bringing Clarity to Infrastructure as Code with Env0",
+	"generated_at": "2026-05-17T12:56:56.305Z",
+	"known_technology_names": [
+		"Env0",
+		"Pulumi",
+		"Terraform"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Rawkode Academy GitLab",
+			"url": "https://gitlab.com/RawkodeAcademy",
+			"category": "code",
+			"evidence_quote": "The code is available at gitlab.com/RawkodeAcademy",
+			"confidence": "high"
+		},
+		{
+			"title": "Cloud Development Kit for Terraform (CDKTF)",
+			"category": "code",
+			"evidence_quote": "I'm a big fan of Terraform CDK. So let's see an action as part of m zero's workflow.",
+			"confidence": "high"
+		},
+		{
+			"title": "Cloud Development Kit for Kubernetes (cdk8s)",
+			"category": "code",
+			"evidence_quote": "using Pulumi c to spin up a Kubernetes cluster, Terraform to manage DNS records, CDK to deploy to the Kubernetes cluster and so on.",
+			"confidence": "high"
+		}
+	]
+}

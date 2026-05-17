@@ -1,0 +1,30 @@
+{
+	"video_id": "klzxhw3ow8qzrua89xr91717",
+	"slug": "using-guidepad-io-to-primitives-to-simplify-future-facing-problems",
+	"title": "Using Guidepad.io to Primitives to Simplify Future Facing Problems",
+	"generated_at": "2026-05-17T12:51:55.179Z",
+	"known_technology_names": [
+		"Guidepad"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "S3 Provider Service Demo",
+			"category": "code",
+			"evidence_quote": "It is called s three provider, and it is 105 lines long.",
+			"confidence": "high"
+		},
+		{
+			"title": "CloudTrail Requirement Class",
+			"category": "code",
+			"evidence_quote": "Inside of our plugin, we have requirements dot py. In this, we define a new class which extend requirement called CloudTrail requirement.",
+			"confidence": "high"
+		},
+		{
+			"title": "Terraform Control Plane Implementation",
+			"category": "code",
+			"evidence_quote": "If we pop open Terraform, we will see the code. Now all this does is give Guidepad enough information to tell it how to execute Terraform programs.",
+			"confidence": "medium"
+		}
+	]
+}

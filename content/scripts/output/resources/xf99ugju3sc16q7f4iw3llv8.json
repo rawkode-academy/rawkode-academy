@@ -1,0 +1,19 @@
+{
+	"video_id": "xf99ugju3sc16q7f4iw3llv8",
+	"slug": "go-sdk",
+	"title": "Go SDK",
+	"generated_at": "2026-05-17T12:56:02.725Z",
+	"known_technology_names": [
+		"Spin"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Spin Go SDK",
+			"url": "https://github.com/spinframework/spin-go-sdk",
+			"category": "code",
+			"evidence_quote": "we pull in the Spin HTTP SDK.",
+			"confidence": "high"
+		}
+	]
+}

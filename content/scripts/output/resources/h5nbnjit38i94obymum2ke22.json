@@ -1,0 +1,19 @@
+{
+	"video_id": "h5nbnjit38i94obymum2ke22",
+	"slug": "fuck-you-hashicorp-an-ibm-company",
+	"title": "Fuck you, Hashicorp ... an IBM Company.",
+	"generated_at": "2026-05-17T12:48:13.461Z",
+	"known_technology_names": [
+		"Terraform"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Cloud Development Kit for Terraform (CDKTF)",
+			"url": "https://github.com/hashicorp/terraform-cdk",
+			"category": "code",
+			"evidence_quote": "HashiCorp, an IBM company, has archived the Terraform CDK repository.",
+			"confidence": "high"
+		}
+	]
+}

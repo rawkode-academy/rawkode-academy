@@ -1,0 +1,36 @@
+{
+	"video_id": "n3ub5yilclec48k398q64zi2",
+	"slug": "advanced-kubernetes-scheduling",
+	"title": "Advanced Kubernetes Scheduling",
+	"generated_at": "2026-05-17T12:45:35.285Z",
+	"known_technology_names": [
+		"Kubernetes"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Kubernetes Documentation: PriorityClass",
+			"category": "documentation",
+			"evidence_quote": "We can copy an example from a documentation like so. Here, we're using the scheduling Kubernetes IOV one API. We're going to create a new priority class",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes Documentation: Pod Scheduling Readiness",
+			"category": "documentation",
+			"evidence_quote": "I have enabled a feature gate called pod scheduling readiness.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes Enhancement Proposal: Dynamic Resource Allocation",
+			"category": "documentation",
+			"evidence_quote": "I'm kind of leaning on the example from the KEP here, which talks about claiming cats",
+			"confidence": "high"
+		},
+		{
+			"title": "Kubernetes Documentation: Topology Spread Constraints",
+			"category": "documentation",
+			"evidence_quote": "There's a relatively new feature in Kubernetes called topology spread constraints.",
+			"confidence": "high"
+		}
+	]
+}

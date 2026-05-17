@@ -1,0 +1,18 @@
+{
+	"video_id": "zh6x60pfsxnaglf391e673pj",
+	"slug": "microservice-troubleshooting-built-for-developers",
+	"title": "Microservice Troubleshooting, Built for Developers",
+	"generated_at": "2026-05-17T12:48:52.174Z",
+	"known_technology_names": [
+		"Lumigo"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "OpenTelemetry Demo Application",
+			"category": "demos",
+			"evidence_quote": "We're using OpenTelemetry demo application, which comes with a single manifest for deploying to a Kubernetes cluster.",
+			"confidence": "high"
+		}
+	]
+}

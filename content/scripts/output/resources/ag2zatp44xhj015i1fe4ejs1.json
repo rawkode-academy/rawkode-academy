@@ -1,0 +1,38 @@
+{
+	"video_id": "ag2zatp44xhj015i1fe4ejs1",
+	"slug": "workshop-database-access-postgres-with-teleport",
+	"title": "Workshop - Database Access (Postgres) with Teleport",
+	"generated_at": "2026-05-17T12:46:11.458Z",
+	"known_technology_names": [
+		"Teleport"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Rawkode Academy Courses Repository",
+			"url": "https://github.com/rawkode-academy/courses",
+			"category": "code",
+			"evidence_quote": "You will find it at Rawkode Academy, which is the organization on GitHub. And then there is a repository called courses.",
+			"confidence": "high"
+		},
+		{
+			"title": "Teleport Documentation: Database Access with Self-hosted PostgreSQL",
+			"category": "documentation",
+			"evidence_quote": "Database access was self hosted Postgres. A lot of these steps are already covered here. This is where you find all of your answers.",
+			"confidence": "high"
+		},
+		{
+			"title": "Beekeeper Studio",
+			"category": "other",
+			"evidence_quote": "I'm gonna use Beekeeper studio. I thought it looked good. That was my reason for picking it. I thought it was the nicest looking of the clients I was playing with earlier.",
+			"confidence": "high"
+		},
+		{
+			"title": "Rawkode Academy Discord",
+			"url": "https://rawkode.chat",
+			"category": "other",
+			"evidence_quote": "So my Discord is Rawkode.chat",
+			"confidence": "high"
+		}
+	]
+}

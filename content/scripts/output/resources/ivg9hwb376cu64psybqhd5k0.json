@@ -1,0 +1,19 @@
+{
+	"video_id": "ivg9hwb376cu64psybqhd5k0",
+	"slug": "managing-tls",
+	"title": "Managing TLS",
+	"generated_at": "2026-05-17T12:44:17.941Z",
+	"known_technology_names": [
+		"Portainer"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Portainer in Production GitHub Repository",
+			"url": "https://github.com/rawcodeacademy/portainer-in-production",
+			"category": "code",
+			"evidence_quote": "The code is available at github.com/rawcodeacademy/portainer-in-production.",
+			"confidence": "high"
+		}
+	]
+}
