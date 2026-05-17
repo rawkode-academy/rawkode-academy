@@ -390,6 +390,7 @@ html.dark {
 			);
 	}
 
+
 	.surface-divider {
 		border-color: var(--surface-border);
 	}
@@ -981,11 +982,17 @@ html.dark {
 	}
 
 	/* Mobile full-bleed escape hatch for card-style sections.
-	 * Cancels the parent `.content-px` mobile padding (px-3) so the card
-	 * stretches to the device edge; restores normal card chrome from `sm` up.
-	 * Pair with a class that provides border/radius (e.g. `glass-card-shimmer`). */
+	 * Pulls the element to the true viewport edges (escaping however many
+	 * layers of page-px sit between it and the viewport) and strips
+	 * horizontal chrome below sm. Restores normal card chrome from sm up. */
 	.bleed-x-mobile {
-		@apply -mx-3 rounded-none border-x-0 sm:mx-0 sm:rounded-2xl sm:border-x;
+		@apply rounded-none border-x-0 sm:rounded-2xl sm:border-x;
+	}
+
+	@media (max-width: 639px) {
+		.bleed-x-mobile {
+			margin-inline: calc(50% - 50vw);
+		}
 	}
 
 	/* Responsive Section Gap - for vertical spacing between sections */
