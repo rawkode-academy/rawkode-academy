@@ -1,7 +1,5 @@
 ---
-id: >-
-  ni90hh70rr77srzpo199bbfv
-  building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode
+id: ni90hh70rr77srzpo199bbfv
 slug: >-
   building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode
 title: >-
@@ -44,5 +42,21 @@ chapters:
 duration: 6270
 guests:
   - ciaran-mcnulty
+resources:
+  - title: rawkode/php-examples
+    url: 'https://gitlab.com/rawkode/php-examples'
+    category: code
+    evidence_quote: >-
+      created a PHP examples repository on get labs slash Rawkode slash PHP
+      hyphen examples.
+    confidence: high
+  - title: Kick Ass Development Environments with Docker
+    category: other
+    evidence_quote: it's my kick ass development environments with Docker talk.
+    confidence: high
+  - title: Kustomize documentation
+    category: documentation
+    evidence_quote: 'if you wanna read about that, it''s on customized.io.'
+    confidence: medium
 ---
 

@@ -1,7 +1,5 @@
 ---
-id: >-
-  d3u3h2ac951stfgdrlwvkysh
-  build-a-production-ready-kubernetes-cluster-with-spectro-cloud-palette-no-code-tutorial
+id: d3u3h2ac951stfgdrlwvkysh
 slug: >-
   build-a-production-ready-kubernetes-cluster-with-spectro-cloud-palette-no-code-tutorial
 title: >-

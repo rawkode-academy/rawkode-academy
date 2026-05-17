@@ -1,0 +1,36 @@
+{
+	"video_id": "ni90hh70rr77srzpo199bbfv",
+	"slug": "building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode",
+	"title": "Building PHP Applications with Docker, Docker Compose, and Kubernetes (RTFM with Rawkode)",
+	"generated_at": "2026-05-17T14:04:40.449Z",
+	"known_technology_names": [
+		"Docker",
+		"Docker Compose",
+		"Kubernetes",
+		"PHP"
+	],
+	"known_guest_names": [
+		"Ciaran McNulty"
+	],
+	"resources": [
+		{
+			"title": "rawkode/php-examples",
+			"url": "https://gitlab.com/rawkode/php-examples",
+			"category": "code",
+			"evidence_quote": "created a PHP examples repository on get labs slash Rawkode slash PHP hyphen examples.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kick Ass Development Environments with Docker",
+			"category": "other",
+			"evidence_quote": "it's my kick ass development environments with Docker talk.",
+			"confidence": "high"
+		},
+		{
+			"title": "Kustomize documentation",
+			"category": "documentation",
+			"evidence_quote": "if you wanna read about that, it's on customized.io.",
+			"confidence": "medium"
+		}
+	]
+}
