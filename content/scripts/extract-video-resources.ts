@@ -3,10 +3,11 @@
 /**
  * Transcript-driven resource extraction for videos.
  *
- * For each video, fetch the public VTT, ask Gemini to extract concrete
- * linkable resources (docs, code, slides, demos, papers/books/posts), dedupe
- * against the URLs already attached to the video's technologies and guests,
- * and emit a JSON file per video for human review.
+ * For each video, fetch the public VTT, ask the Codex CLI (`codex exec`) to
+ * extract concrete linkable resources (docs, code, slides, demos,
+ * papers/books/posts), dedupe against the URLs already attached to the
+ * video's technologies and guests, and emit a JSON file per video for human
+ * review.
  *
  * Apply mode merges accepted JSON files into each video's frontmatter
  * `resources:` array, additive and idempotent.
@@ -20,7 +21,7 @@
  *   --max-parallel <n> Parallelism for extraction (default 5).
  *   --limit <n>        Only process the first N videos (debug).
  *   --only <slug>      Only process the video with this slug.
- *   --model <name>     Gemini model to pass to `gemini -m <name>`. Optional.
+ *   --model <name>     Model to pass to `codex exec -m <name>`. Optional.
  */
 
 import { readdir, readFile, writeFile, mkdir, access } from "node:fs/promises";
@@ -289,14 +290,14 @@ function extractJson(text: string): unknown | null {
 	}
 }
 
-function callGemini(prompt: string, model: string | null): Promise<string> {
+function callLlm(prompt: string, model: string | null): Promise<string> {
+	// Uses `codex exec` with prompt piped via stdin (avoids command-line length
+	// limits and shell-escaping issues for long transcripts).
 	return new Promise((resolve, reject) => {
-		const args: string[] = [];
-		if (model) {
-			args.push("-m", model);
-		}
-		args.push("-p", prompt);
-		const proc = spawn("gemini", args, { stdio: ["ignore", "pipe", "pipe"] });
+		const args: string[] = ["exec"];
+		if (model) args.push("-m", model);
+		args.push("-"); // read prompt from stdin
+		const proc = spawn("codex", args, { stdio: ["pipe", "pipe", "pipe"] });
 		let stdout = "";
 		let stderr = "";
 		proc.stdout.on("data", (chunk) => {
@@ -308,8 +309,10 @@ function callGemini(prompt: string, model: string | null): Promise<string> {
 		proc.on("error", reject);
 		proc.on("close", (code) => {
 			if (code === 0) resolve(stdout);
-			else reject(new Error(`gemini exited ${code}: ${stderr.trim()}`));
+			else reject(new Error(`codex exited ${code}: ${stderr.trim()}`));
 		});
+		proc.stdin.write(prompt);
+		proc.stdin.end();
 	});
 }
 
@@ -438,7 +441,7 @@ async function processVideo(
 
 	let raw: string;
 	try {
-		raw = await callGemini(prompt, opts.model);
+		raw = await callLlm(prompt, opts.model);
 	} catch (error) {
 		return {
 			status: "error",
