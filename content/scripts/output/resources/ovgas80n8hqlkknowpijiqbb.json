@@ -1,0 +1,75 @@
+{
+	"video_id": "ovgas80n8hqlkknowpijiqbb",
+	"slug": "exploring-ngroks-traffic-policies-for-secure-application-development",
+	"title": "Exploring ngrok's Traffic Policies for Secure Application Development",
+	"generated_at": "2026-05-17T11:42:40.804Z",
+	"known_technology_names": [
+		"ngrok"
+	],
+	"known_guest_names": [],
+	"resources": [
+		{
+			"title": "Deno",
+			"url": null,
+			"category": "other",
+			"evidence_quote": "But what we have here is a Deno application configured with a router and some Prometheus metrics.",
+			"confidence": "high"
+		},
+		{
+			"title": "Prometheus",
+			"url": null,
+			"category": "other",
+			"evidence_quote": "But what we have here is a Deno application configured with a router and some Prometheus metrics.",
+			"confidence": "high"
+		},
+		{
+			"title": "GCP Cloud Shell",
+			"url": null,
+			"category": "other",
+			"evidence_quote": "Here, I have a GCP Cloud Shell where I can also curl ngrok",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok Traffic Policy Documentation",
+			"url": null,
+			"category": "documentation",
+			"evidence_quote": "This is the traffic policy page, which is currently in preview, but we like to fly things on the edge and unstable as often as we can.",
+			"confidence": "high"
+		},
+		{
+			"title": "Common Expression Language",
+			"url": null,
+			"category": "other",
+			"evidence_quote": "Now the secret sauce of traffic policies is the common expression language.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok HTTP Request Variables Documentation",
+			"url": null,
+			"category": "documentation",
+			"evidence_quote": "We can click on request variables. And now we have the understanding of an HTTP request.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok Connection Geo Variables Documentation",
+			"url": null,
+			"category": "documentation",
+			"evidence_quote": "we'll see that we have access to connection geo variables.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok Custom Response Action Documentation",
+			"url": null,
+			"category": "documentation",
+			"evidence_quote": "to get the properties that we need, we'll head back to the documentation and click on custom response.",
+			"confidence": "high"
+		},
+		{
+			"title": "ngrok JWT Validation Examples",
+			"url": null,
+			"category": "documentation",
+			"evidence_quote": "Go explore the documentation where you'll find examples of JWT validation for your endpoints.",
+			"confidence": "high"
+		}
+	]
+}
