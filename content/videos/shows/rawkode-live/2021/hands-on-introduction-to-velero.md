@@ -3,14 +3,16 @@ id: k85jwdt76e8iww8ljpoykkze
 slug: hands-on-introduction-to-velero
 title: Hands-on Introduction to Velero
 description: >-
-  In this episode, we'll get hands-on and teach you everything you need to know
-  to start leveraging the awesome powers of Velero in your Kubernetes
-  environments.
+  Velero maintainer Carlisia Thompson joins David to install Velero against a
+  MinIO S3 backend, back up Kubernetes objects and persistent volumes, then
+  simulate a disaster and restore the workload into a fresh namespace.
 publishedAt: 2021-04-20T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - velero
+  - kubernetes
+  - minio
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -68,13 +70,16 @@ resources:
   - title: The Podlets podcast
     type: url
     category: other
-  - title: Velero resource page
+  - title: Velero resources page
+    url: 'https://velero.io/resources/'
     type: url
     category: documentation
-  - title: Velero roadmap.md
+  - title: Velero ROADMAP.md
+    url: 'https://github.com/vmware-tanzu/velero/blob/main/ROADMAP.md'
     type: url
     category: code
   - title: Velero Tilt integration instructions
+    url: 'https://velero.io/docs/main/tilt/'
     type: url
     category: documentation
 ---

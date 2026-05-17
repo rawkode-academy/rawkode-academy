@@ -3,13 +3,21 @@ id: oua0v79haem7e7klh0bwydsw
 slug: introduction-to-litmus-chaos
 title: Introduction to Litmus Chaos
 description: >-
-  In this episode, we'll be guided through everything we need to know to get
-  started with Litmus Chaos.
+  Uma and Kartik from the Chaos Native team walk through Litmus, a
+  Kubernetes-native chaos engineering project. They cover the ChaosCenter
+  portal, workflows and probes, then demo Kafka chaos with Grafana and AWS EC2
+  termination.
 publishedAt: 2021-03-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - litmus
+  - kubernetes
+  - kafka
+  - argo
+  - helm
+  - grafana
+  - prometheus
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -111,9 +119,11 @@ guests:
 resources:
   - title: litmuschaos/litmus-helm repository
     type: url
+    url: 'https://github.com/litmuschaos/litmus-helm'
     category: code
   - title: Litmus probe documentation
     type: url
+    url: 'https://docs.litmuschaos.io/docs/concepts/probes'
     category: documentation
   - title: Chaos Carnival Kafka bootcamp demo steps
     type: url

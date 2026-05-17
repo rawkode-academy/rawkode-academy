@@ -3,12 +3,18 @@ id: hbkqmiw7xfe2dxrarck938yl
 slug: from-kubernetes-to-cloud-run-chainguards-journey
 title: 'From Kubernetes to Cloud Run: Chainguard''s Journey'
 description: >-
-  In this episode of the Cloud Native Compass podcast, hosts David Flanagan and
-  Laura Santamaria chat with Jason Hall, Principal Engineer at Chainguard.
+  Jason Hall walks through Chainguard's migration of its image-serving
+  infrastructure from Kubernetes and Knative to Google Cloud Run, covering
+  multi-region Terraform modules, least-privilege IAM, R2 for blob storage, and
+  BigQuery-backed event logging.
 publishedAt: 2025-01-16T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - kubernetes
+  - knative
+  - terraform
+  - opentofu
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -49,5 +55,9 @@ resources:
       Cloud Run
     type: url
     category: other
+  - title: chainguard-dev/terraform-infra-common
+    url: 'https://github.com/chainguard-dev/terraform-infra-common'
+    type: url
+    category: code
 ---
 

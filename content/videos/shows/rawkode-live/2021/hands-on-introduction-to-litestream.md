@@ -2,7 +2,10 @@
 id: fkojb4nty2dmx3byhpltqwnn
 slug: hands-on-introduction-to-litestream
 title: Hands-on Introduction to Litestream
-description: ".\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n01:30 - Introductions\n09:45 - Slides: SQLite Streaming Replication with Litestream\n19:0 - Installing Litestream\n25:00 - Creating a SQLite Database\n28:40 - Replicating SQLite with Litestream\n34:30 - Litestream Subcommands\n44:30 - Restoring SQLite with Litestream\n50:00 - Summary\n\n\U0001F465 About the Guests\n\nBen Johnson\n\n  Building @litestreamio to help developers run SQLite in production and at scale.\n\n\n\U0001F426 https://twitter.com/benbjohnson\n\U0001F9E9 https://github.com/benbjohnson\n\n\n\n\U0001F528 About the Technologies\n\nLitestream\n\nLitestream is a standalone streaming replication tool for SQLite. It runs as a background process and safely replicates changes incrementally to another file or S3. Litestream only communicates with SQLite through the SQLite API so it will not corrupt your database.\n\n\U0001F30F https://litestream.io/\n\U0001F426 https://twitter.com/litestreamio\n\U0001F9E9 https://github.com/benbjohnson/litestream"
+description: >-
+  Ben Johnson walks through Litestream, his streaming replication tool for
+  SQLite. We cover how it tails the WAL, ships segments to S3 or Azure, and
+  restores point-in-time copies, then install it and replicate a live database.
 publishedAt: 2021-06-22T17:00:00.000Z
 type: live
 category: tutorial
@@ -94,9 +97,11 @@ guests:
 resources:
   - title: Litestream Getting Started guide
     type: url
+    url: 'https://litestream.io/getting-started/'
     category: documentation
   - title: Litestream Tips and Caveats section
     type: url
+    url: 'https://litestream.io/tips/'
     category: documentation
 ---
 

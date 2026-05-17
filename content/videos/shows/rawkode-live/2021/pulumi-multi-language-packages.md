@@ -3,14 +3,16 @@ id: vuv2ktqhud7ol49f7cm9t9ex
 slug: pulumi-multi-language-packages
 title: 'Pulumi: Multi Language Packages'
 description: >-
-  In this episode, Lee will guide us through the latest changes in Pulumi that
-  allows building components in your language of choice and consuming them in
-  any other supported language.
+  Lee Briggs walks through Pulumi's multi-language component packages: writing a
+  schema.json, implementing a Kubernetes deployment component in Go from the
+  pulumi-component-provider-go-boilerplate, then generating and consuming SDKs
+  from TypeScript.
 publishedAt: 2021-05-27T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - pulumi
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -71,12 +73,14 @@ guests:
 resources:
   - title: Pulumi Go boilerplate provider
     type: url
+    url: 'https://github.com/pulumi/pulumi-component-provider-go-boilerplate'
     category: code
   - title: Rawkode Pulumi production app
     type: url
     category: code
   - title: Pulumi Python boilerplate provider
     type: url
+    url: 'https://github.com/pulumi/pulumi-component-provider-py-boilerplate'
     category: code
 ---
 

@@ -3,12 +3,23 @@ id: xgp6tiusatvjqsse8tour3hl
 slug: klustered-16
 title: 'Klustered #16'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" #Kubernetes clusters ... on the clock.
+  Rachel and Andy bring sabotaged Kubernetes clusters. Rachel's hides disabled
+  schedulers, a 1m CPU limit, and a mangled Service. Andy's stacks a fake
+  kubectl, swapped API server image, Cilium IPv4 masquerade flip, hosts file DNS
+  hijack, and read-only worker.
 publishedAt: 2021-07-23T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
+  - cilium
+  - teleport
+  - coredns
+  - etcd
+  - containerd
+  - kube-vip
+  - flatcar
+  - cluster-api
 show: klustered
 chapters:
   - startTime: 0
@@ -208,8 +219,10 @@ resources:
   - title: Rawkode Academy Discord server
     type: url
     category: other
-  - title: Teleport sponsor link
+    url: 'https://rawkode.chat/'
+  - title: Teleport
     type: url
     category: other
+    url: 'https://goteleport.com/'
 ---
 

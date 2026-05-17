@@ -3,12 +3,17 @@ id: yfaj0ov3z8zu0sv4lp8songu
 slug: infrastructure-as-code-and-gitops
 title: Infrastructure as Code & GitOps
 description: >-
-  In this episode, we'll take a look at the lifecycle of our Infrastructure as
-  Code (IaC) automation, focusing on the first-pass / bootstrapping.
+  Bootstrap a Kubernetes cluster on Equinix Metal with Pulumi, then hand
+  workloads over to FluxCD. Covers Pulumi project layout, stacks vs Terraform
+  workspaces, Flux install, Helm releases, and a live GitOps namespace demo.
 publishedAt: 2021-02-25T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - pulumi
+  - fluxcd
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0

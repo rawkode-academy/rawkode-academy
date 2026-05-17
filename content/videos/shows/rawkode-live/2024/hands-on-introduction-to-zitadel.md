@@ -3,9 +3,10 @@ id: enzppzcpuou2qem5iy98z2sf
 slug: hands-on-introduction-to-zitadel
 title: Hands-on Introduction to Zitadel
 description: >-
-  Most applications require user identity for access control, secure data
-  storage in the cloud, and to provide a consistent, personalized experience
-  across all of a user's devices.
+  Florian Forster, CEO and cofounder of Zitadel, walks through self-hosting the
+  identity platform with Docker Compose, wiring up an OAuth proxy, and the
+  event-sourced architecture behind audit trails, domain discovery, and
+  passkeys.
 publishedAt: 2024-01-31T17:00:00.000Z
 type: live
 category: tutorial
@@ -99,12 +100,15 @@ guests:
 resources:
   - title: Zitadel Docker Compose self-hosting guide
     type: url
+    url: 'https://zitadel.com/docs/self-hosting/deploy/compose'
     category: documentation
-  - title: OAuth Proxy
+  - title: OAuth2 Proxy
     type: url
+    url: 'https://github.com/oauth2-proxy/oauth2-proxy'
     category: code
-  - title: Zitadel Domain Discovery documentation
+  - title: Zitadel Domain Discovery guide
     type: url
+    url: 'https://zitadel.com/docs/guides/solution-scenarios/domain-discovery'
     category: documentation
 ---
 

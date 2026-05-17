@@ -3,13 +3,19 @@ id: dxxgafdnayd30spjingobsv8
 slug: klustered-part-vii
 title: Klustered (Part VII)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Guinevere Saenger joins to debug two broken clusters: a Cilium CNI failure
+  tangled with Kyverno mutating webhooks and a sneaky Pod Security Policy, then
+  a kubelet feature-gate error, an etcd request-size limit, and a CoreDNS
+  ConfigMap typo (clouster.local).
 publishedAt: 2021-04-01T18:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - kyverno
+  - etcd
+  - coredns
 show: klustered
 chapters:
   - startTime: 0

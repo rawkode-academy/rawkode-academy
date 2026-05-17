@@ -3,14 +3,17 @@ id: m8xeaa8bqd2gszto4g6j9xku
 slug: ngroks-kubernetes-ingress-controller-is-amazing-2
 title: ngrok's Kubernetes Ingress Controller is AMAZING
 description: >-
-  ngrok is the fastest way to host and secure your applications and services on
-  the internet. Learn how by following our getting started guide, or dive
-  straight into our products and offerings.
+  Walks through ngrok's Kubernetes Ingress Controller as an alternative to a
+  cloud load balancer on EKS. Installs the controller via Helm, exposes a
+  service through an Ingress, then layers on Google OAuth using an ngrok module
+  set CRD.
 publishedAt: 2023-09-22T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - ngrok
+  - kubernetes
+  - helm
 chapters:
   - startTime: 0
     title: Introduction
@@ -45,9 +48,9 @@ chapters:
 duration: 485
 guests: []
 resources:
-  - title: ngrok/kubernetes-ngrok-controller
+  - title: ngrok/kubernetes-ingress-controller
     type: url
-    url: 'https://github.com/ngrok/kubernetes-ngrok-controller'
+    url: 'https://github.com/ngrok/kubernetes-ingress-controller'
     category: code
   - title: ngrok Kubernetes Ingress Controller release blog
     type: url

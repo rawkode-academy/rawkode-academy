@@ -3,13 +3,20 @@ id: wogx7o39wy4eodmd70kbc8o9
 slug: klustered-20
 title: Klustered 20
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Russell and Marek return to break two clusters. Russell hides a recompiled
+  kubectl, a rogue process killing deployments, a CoreDNS ConfigMap edit, and a
+  kubelet that swaps images. Marek drops the kubelet port with UFW and removes
+  the scheduler manifest.
 publishedAt: 2022-02-04T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - coredns
+  - postgresql
+  - teleport
+  - kube-vip
 show: klustered
 chapters:
   - startTime: 0
@@ -104,6 +111,30 @@ duration: 6164
 guests:
   - russellwaite
   - marek-counts
-resources: []
+resources:
+  - type: url
+    title: Teleport
+    url: 'https://goteleport.com/'
+    category: other
+  - type: url
+    title: Cilium
+    url: 'https://cilium.io/'
+    category: documentation
+  - type: url
+    title: CoreDNS
+    url: 'https://coredns.io/'
+    category: documentation
+  - type: url
+    title: kube-vip
+    url: 'https://kube-vip.io/'
+    category: documentation
+  - type: url
+    title: PostgreSQL
+    url: 'https://www.postgresql.org/'
+    category: documentation
+  - type: url
+    title: UFW (Uncomplicated Firewall)
+    url: 'https://help.ubuntu.com/community/UFW'
+    category: documentation
 ---
 

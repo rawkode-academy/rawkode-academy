@@ -3,13 +3,16 @@ id: e0osaaguckezvjzf42dm6zbc
 slug: klustered-part-viii-ii
 title: Klustered (Part VIII-II)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Noel Georgi returns to debug Kluster 015, where a corrupted Cilium CNI binary
+  and a malicious systemd-collector-d binary hijacking the containerd shim leave
+  pods stuck. crictl, shim comparisons, and Rawkode service fixes restore it.
 publishedAt: 2021-04-09T13:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - containerd
 show: klustered
 chapters:
   - startTime: 0
@@ -60,9 +63,11 @@ guests:
 resources:
   - title: Cilium Quick Start documentation
     type: url
+    url: 'https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/'
     category: documentation
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
 ---
 

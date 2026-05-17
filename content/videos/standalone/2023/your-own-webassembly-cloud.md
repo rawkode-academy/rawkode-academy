@@ -3,14 +3,15 @@ id: jckf793apc62vgj4uvzbq91m
 slug: your-own-webassembly-cloud
 title: Your Own WebAssembly Cloud
 description: >-
-  In this video, I'll show you how to get started with the Fermyon Platform. A
-  Collection of Open Source components that allows you to run your own
-  server-side WASM binaries on ANY CLOUD.
+  Deploy a Spin app to Fermyon Cloud, then stand up your own self-hosted
+  WebAssembly platform on Civo with the fermyon/installer Terraform automation,
+  walking through Nomad, Consul, Vault, Traefik, Hippo, HEPL, and Bundle.
 publishedAt: 2023-02-25T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - terraform
 chapters:
   - startTime: 56
     title: Introduction
@@ -43,12 +44,13 @@ chapters:
 duration: 1251
 guests: []
 resources:
-  - title: github.com/fermion/installer
+  - title: fermyon/installer
     type: url
-    url: 'https://github.com/fermion/installer'
+    url: 'https://github.com/fermyon/installer'
     category: code
-  - title: Spin 0.8 video
+  - title: What's New with Spin v0.8
     type: url
+    url: 'https://rawkode.academy/watch/whats-new-with-spin-v0-8'
     category: other
 ---
 

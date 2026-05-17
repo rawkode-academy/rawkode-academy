@@ -3,8 +3,10 @@ id: hea5aobhyt84z99fvl9m92t6
 slug: hands-on-introduction-to-portainer
 title: Hands-on Introduction to Portainer
 description: >-
-  Easily deploy, configure and secure containers in minutes on Docker,
-  Kubernetes, Swarm and Nomad in any cloud, datacenter or device.
+  Co-founder Neil Cresswell joins David to demo Portainer as a universal manager
+  for Kubernetes, Docker, Swarm, and Nomad. Covers namespace policies, OPA
+  Gatekeeper integration, GitOps, edge compute, and lowering the barrier from
+  VMs to containers.
 publishedAt: 2022-10-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,6 +74,7 @@ guests:
 resources:
   - title: CNCF Landscape
     type: url
+    url: 'https://landscape.cncf.io/'
     category: other
   - title: Sosivio
     type: url

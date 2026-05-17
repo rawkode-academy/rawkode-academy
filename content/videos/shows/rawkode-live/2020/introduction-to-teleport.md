@@ -3,9 +3,10 @@ id: qamuh4bhe90e6gwbs5bsoufk
 slug: introduction-to-teleport
 title: Introduction to Teleport
 description: >-
-  Gravitational Teleport is a gateway for managing access to clusters of Linux
-  servers via SSH or the Kubernetes API. It is intended to be used instead of
-  traditional OpenSSH for organisations that need to:
+  Steven Martin walks through Teleport, the unified access plane for SSH nodes,
+  Kubernetes clusters, and web apps. We cover short-lived certificates, session
+  recording, and audit, then install Teleport, add a node, and connect a
+  Kubernetes cluster via the Helm chart.
 publishedAt: 2020-12-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -89,12 +90,15 @@ guests:
 resources:
   - title: Teleport Quick Start / Getting Started guide
     type: url
+    url: 'https://goteleport.com/docs/get-started/'
     category: documentation
   - title: gravitational/teleport Kubernetes agent Helm chart example
     type: url
+    url: 'https://github.com/gravitational/teleport/tree/master/examples/chart'
     category: code
   - title: Teleport documentation for OpenSSH integration
     type: url
+    url: 'https://goteleport.com/docs/enroll-resources/server-access/openssh/'
     category: documentation
 ---
 

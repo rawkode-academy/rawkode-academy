@@ -3,13 +3,18 @@ id: nbmmmzl4etklri5aruv7hbgq
 slug: klustered-part-i
 title: Klustered (Part I)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Rawkode and Walid Shaari debug two broken Kubernetes clusters deployed via
+  Cluster API on Equinix Metal. They track down a Cilium iptables misconfig,
+  swap-enabled kubelets, UFW interference, and a bad etcd endpoint.
 publishedAt: 2021-02-18T12:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cluster-api
+  - cilium
+  - etcd
+  - coredns
 show: klustered
 chapters:
   - startTime: 0

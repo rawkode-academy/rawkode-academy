@@ -3,14 +3,18 @@ id: e683nfwoau6e8epn8g9zmwn9
 slug: cloud-server-side-webassembly
 title: Cloud Server-Side WebAssembly
 description: >-
-  In this episode, David and Laura catch up with Mikkel Mørk Hegnhøj from
-  Fermyon to break down the latest in WebAssembly. They'll cover how it's
-  changing cloud computing, what's new with Spin and WASI, and why devs should
-  care. Tune in for some great insights!
+  Mikkel Mørk Hegnhøj from Fermyon joins David and Laura to unpack Spin 3.0,
+  WASI 0.3, and the WebAssembly component model. They cover running Wasm on
+  Kubernetes via SpinKube, polyglot components, and built-in OpenTelemetry.
 publishedAt: 2025-02-28T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - webassembly
+  - spin
+  - spinkube
+  - kubernetes
+  - opentelemetry
 show: cloud-native-compass
 duration: 2296
 audioFileSize: 55097401
@@ -54,9 +58,23 @@ guests:
 resources:
   - title: Spin OpenTelemetry plugin
     type: url
+    url: 'https://github.com/spinframework/spin-plugins'
     category: code
   - title: Wasm I/O
     type: url
+    url: 'https://wasm.io/'
     category: other
+  - title: Spin
+    type: url
+    url: 'https://spinframework.dev/'
+    category: documentation
+  - title: SpinKube
+    type: url
+    url: 'https://www.spinkube.dev/'
+    category: documentation
+  - title: Spin observability docs
+    type: url
+    url: 'https://spinframework.dev/v3/observing-apps'
+    category: documentation
 ---
 

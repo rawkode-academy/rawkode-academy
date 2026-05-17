@@ -2,12 +2,18 @@
 id: jmjdponjje5ueukwqlprmcbq
 slug: hands-on-introduction-to-dapr
 title: Hands-on Introduction to Dapr
-description: Video content coming soon.
+description: >-
+  Hands-on tour of Dapr's distributed application runtime: building blocks and
+  sidecar pattern, state management with the JavaScript SDK and Redis, outbox
+  pattern, then deploying the demo app to a Kind Kubernetes cluster with the
+  Dapr control plane installed via Helm.
 publishedAt: 2023-12-14T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - dapr
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 108
@@ -92,15 +98,22 @@ guests:
 resources:
   - title: Platform Engineering on Kubernetes
     type: url
+    url: 'https://www.manning.com/books/platform-engineering-on-kubernetes'
     category: other
   - title: Dapr State Management JavaScript Quickstart
     type: url
-    category: documentation
+    url: >-
+      https://github.com/dapr/quickstarts/tree/master/state_management/javascript/sdk
+    category: code
   - title: Dapr Outbox Pattern Documentation
     type: url
+    url: >-
+      https://docs.dapr.io/developing-applications/building-blocks/state-management/howto-outbox/
     category: documentation
   - title: Dapr State Stores Component Reference
     type: url
+    url: >-
+      https://docs.dapr.io/reference/components-reference/supported-state-stores/
     category: documentation
 ---
 

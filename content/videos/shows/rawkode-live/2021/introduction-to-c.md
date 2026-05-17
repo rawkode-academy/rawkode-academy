@@ -3,8 +3,9 @@ id: g3x1yu2xp7s1d9u19lp2rcoa
 slug: introduction-to-c
 title: Introduction to C++
 description: >-
-  In this episode, Sy will guide us through the basics of C++ by helping David
-  complete some exercises on Exercism.io.
+  Sy Brand walks David through modern C++ via Exercism's Hello World and Isogram
+  exercises, covering Catch2 tests, CMake builds, namespaces, std::string vs
+  string_view, std::unordered_set, range-based for loops, auto, and references.
 publishedAt: 2021-07-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -98,15 +99,19 @@ guests:
 resources:
   - title: Exercism language tracks
     type: url
+    url: 'https://exercism.org/tracks'
     category: other
   - title: Catch2 testing framework
     type: url
+    url: 'https://github.com/catchorg/Catch2'
     category: code
   - title: C++ Patterns
     type: url
+    url: 'https://cpppatterns.com/'
     category: documentation
   - title: '#include <C++> Discord'
     type: url
+    url: 'https://www.includecpp.org/'
     category: other
 ---
 

@@ -3,14 +3,19 @@ id: jevfafsrta5dekkl6td02hhc
 slug: hands-on-introduction-to-loki
 title: Hands-on Introduction to Loki
 description: >-
-  Cyril Tovena is a software engineer at Grafana Labs and a member of the Loki
-  team. He previously worked at Ubisoft, where he co-founded Agones, a platform
-  to scale dedicated game servers on top of Kubernetes.
+  Cyril Tovena from Grafana Labs walks through Loki hands-on: installing the
+  Loki stack on Kubernetes via Helm, shipping logs with Promtail, and querying
+  the Sock Shop demo with LogQL filters, parsers, and metric aggregations in
+  Grafana.
 publishedAt: 2021-04-29T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - loki
+  - grafana
+  - prometheus
+  - kubernetes
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -71,9 +76,11 @@ guests:
 resources:
   - title: Weaveworks Sock Shop microservice demo
     type: url
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
   - title: Grafana LogQL documentation
     type: url
+    url: 'https://grafana.com/docs/loki/latest/logql/'
     category: documentation
 ---
 

@@ -2,12 +2,18 @@
 id: u3iqqcgeoamsqzclierrpqdl
 slug: hands-on-introduction-to-dagger
 title: Hands-on Introduction to Dagger
-description: "In this episode, we get hands-on with Dagger.\n\n\n\U0001F37F Rawkode Live\n\nHosted by David McKay / \U0001F426 https://twitter.com/rawkode\nWebsite: https://rawkode.live\nDiscord Chat: https://rawkode.live/chat\n\n#RawkodeLive\n\n\U0001F570 Timeline\n\n00:00 - Holding Screen\n00:50 - Introductions\n03:20 - What is Dagger?\n07:45 - Why CUE and BuildKit\n10:45 - Installing Dagger\n16:00 - Dagger Example: Static Todo Deployment\n\n\U0001F465 About the Guests\n\nSolomon Hykes\n\n  Cofounder of Docker\n\n\n\U0001F426 https://twitter.com/solomonstre\n\U0001F9E9 https://github.com/shykes\n\n\n\n\U0001F528 About the Technologies\n\nDagger\n\nDagger is a programmable deployment system.\nUsing Dagger, software builders can automate the deployment of any application to any infrastructure, in just a few lines of code.\n\n\U0001F30F https://dagger.io/\n\n\U0001F9E9 https://github.com/dagger/dagger"
+description: >-
+  Solomon Hykes introduces Dagger, a programmable deployment system built on CUE
+  and BuildKit. We install the CLI, write a Dagger plan to deploy a static todo
+  app to S3, then extend it to multi-bucket and Netlify environments using
+  inputs and secrets.
 publishedAt: 2021-06-29T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - dagger
+  - cue
+  - buildkit
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -74,9 +80,7 @@ resources:
     category: other
   - title: CUE interactive playground
     type: url
+    url: 'https://cuelang.org/play/'
     category: demos
-  - title: sigstore project
-    type: url
-    category: code
 ---
 

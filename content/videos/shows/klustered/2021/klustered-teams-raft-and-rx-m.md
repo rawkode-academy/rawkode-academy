@@ -3,13 +3,17 @@ id: x19zjl7plya11i3eqjkt2zra
 slug: klustered-teams-raft-and-rx-m
 title: 'Klustered Teams: Raft & RX-M'
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Two teams, RXM and Raft, debug broken Kubernetes clusters. RXM chase an etcd
+  cert path typo and an API server namespace typo, then a missing Postgres
+  manifest. Raft fix an RBAC ClusterRole missing the create verb and work around
+  a broken scheduler.
 publishedAt: 2021-12-09T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - etcd
+  - postgresql
 show: klustered
 chapters:
   - startTime: 0
@@ -137,5 +141,21 @@ resources:
     type: url
     url: 'https://metal.equinix.com'
     category: other
+  - title: Teleport
+    type: url
+    url: 'https://goteleport.com/'
+    category: other
+  - title: Kubernetes
+    type: url
+    url: 'https://kubernetes.io/'
+    category: documentation
+  - title: etcd
+    type: url
+    url: 'https://etcd.io/'
+    category: documentation
+  - title: PostgreSQL
+    type: url
+    url: 'https://www.postgresql.org/'
+    category: documentation
 ---
 

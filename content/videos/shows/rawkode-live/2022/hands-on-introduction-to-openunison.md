@@ -3,21 +3,15 @@ id: bxlvg3jfdk6jqbfck4nmrcas
 slug: hands-on-introduction-to-openunison
 title: Hands-on Introduction to OpenUnison
 description: >-
-  OpenUnison combines the common identity management functions needed by most
-  applications including:
-
-
-  - SSO
-
-  - User Provisioning (with Workflows)
-
-  - Federation
-
-  - Web Services
+  Marc Boorshtein walks through OpenUnison as an identity portal for Kubernetes,
+  covering SSO into the dashboard and kubectl, the ou-control deployer, the
+  ou-login plugin, multi-cluster satellites, and Namespace and Virtual Cluster
+  as a Service demos.
 publishedAt: 2022-09-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - kubernetes
   - openunison
 show: rawkode-live
 chapters:
@@ -70,6 +64,7 @@ resources:
     type: url
     category: other
   - title: Fairwinds RBAC Manager
+    url: 'https://github.com/FairwindsOps/rbac-manager'
     type: url
     category: code
 ---

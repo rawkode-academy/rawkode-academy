@@ -3,14 +3,17 @@ id: qzf07xf4d395p3bm5ugkqxp0
 slug: ipv6-only-kubernetes-clusters-rtfm-with-rawkode
 title: IPv6 ONLY Kubernetes Clusters (RTFM with Rawkode)
 description: >-
-  In this episode, joined by Arian van Putten, we take a look at the steps
-  involved for creating / provisioning an IPv6 ONLY Kubernetes cluster on
-  Packet.
+  Arian van Putten walks through building an IPv6-only Kubernetes cluster on
+  Packet bare metal: provisioning nodes with Pulumi and TypeScript,
+  bootstrapping with kubeadm, installing Calico CNI, and announcing pod and
+  service IPv6 addresses to the upstream router via BGP.
 publishedAt: 2020-09-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - pulumi
+  - docker
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -43,6 +46,8 @@ guests:
 resources:
   - title: Calico over IP Fabrics
     type: url
+    url: >-
+      https://docs.tigera.io/calico/latest/reference/architecture/design/l3-interconnect-fabric
     category: documentation
 ---
 

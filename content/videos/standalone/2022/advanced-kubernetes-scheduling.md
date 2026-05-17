@@ -3,8 +3,10 @@ id: n3ub5yilclec48k398q64zi2
 slug: advanced-kubernetes-scheduling
 title: Advanced Kubernetes Scheduling
 description: >-
-  In this video, I guide you through some advanced Kubernetes scheduling
-  techniques; as well as covering a few of the basics.
+  A deep dive into Kubernetes pod scheduling, from nodeName and node selectors
+  through node and pod affinity, topology spread constraints, priority classes
+  and preemption, plus alpha features like scheduling gates and dynamic resource
+  allocation.
 publishedAt: 2022-12-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -40,15 +42,23 @@ guests: []
 resources:
   - title: 'Kubernetes Documentation: PriorityClass'
     type: url
+    url: >-
+      https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
     category: documentation
   - title: 'Kubernetes Documentation: Pod Scheduling Readiness'
     type: url
+    url: >-
+      https://kubernetes.io/docs/concepts/scheduling-eviction/pod-scheduling-readiness/
     category: documentation
   - title: 'Kubernetes Enhancement Proposal: Dynamic Resource Allocation'
     type: url
+    url: >-
+      https://github.com/kubernetes/enhancements/tree/master/keps/sig-node/3063-dynamic-resource-allocation
     category: documentation
   - title: 'Kubernetes Documentation: Topology Spread Constraints'
     type: url
+    url: >-
+      https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
     category: documentation
 ---
 

@@ -2,12 +2,20 @@
 id: u4zql5xiqn4tc11jnb7ith6t
 slug: ambient-mesh-with-marino-wijay-and-matt-turner
 title: Ambient Mesh with Marino Wijay & Matt Turner
-description: 'Curious about Istio''s new deployment mechanism, Ambient Mesh?'
+description: >-
+  Marino Wijay and Matt Turner unpack Istio Ambient Mesh, walking through
+  ztunnel, HBONE, and waypoint proxies, the trade-offs against sidecars, and how
+  eBPF, CNI plugins, and the Gateway API fit into Istio's post-graduation
+  future.
 publishedAt: 2023-08-04T17:00:00.000Z
 type: recorded
 category: interview
 technologies:
   - istio
+  - envoy
+  - cilium
+  - ebpf
+  - kubernetes
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -84,9 +92,11 @@ guests:
 resources:
   - title: Network Foundations workshop
     type: url
+    url: 'https://www.solo.io/academy'
     category: documentation
   - title: Envoy Gateway
     type: url
+    url: 'https://gateway.envoyproxy.io/'
     category: code
 ---
 

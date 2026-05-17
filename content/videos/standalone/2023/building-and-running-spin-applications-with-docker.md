@@ -3,14 +3,17 @@ id: fq72twya4m9ymyey6u0ut3qo
 slug: building-and-running-spin-applications-with-docker
 title: Building & Running Spin Applications with Docker
 description: >-
-  Since Spin 1.0, you can build and share your Spin applications as fully
-  compliant OCI images; even allowing Docker and Docker Compose to pull and run
-  them.
+  Spin 1.0 ships Spin apps as OCI artifacts. Push to GHCR with spin registry
+  push, run with spin up -f, then build a Dockerfile so docker run and docker
+  compose work, and sign the image with cosign keyless.
 publishedAt: 2023-04-27T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - docker
+  - docker-compose
+  - sigstore
 chapters:
   - startTime: 0
     title: Introduction
@@ -38,5 +41,14 @@ resources:
   - title: 'Docker documentation: Building and running Spin applications'
     type: url
     category: documentation
+    url: 'https://docs.docker.com/desktop/wasm/'
+  - title: Spin registry push and OCI artifacts
+    type: url
+    category: documentation
+    url: 'https://spinframework.dev/v3/registry-tutorial'
+  - title: Sigstore Cosign keyless signing
+    type: url
+    category: documentation
+    url: 'https://docs.sigstore.dev/cosign/signing/signing_with_blobs/'
 ---
 

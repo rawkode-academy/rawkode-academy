@@ -3,13 +3,17 @@ id: wpypzqdx7xd2yns85cx0daty
 slug: introduction-to-kyverno
 title: Introduction to Kyverno
 description: >-
-  In this episode, we'll get you up to speed with everything you need to get
-  started with Kyverno.
+  Jim Bugwadia and Shuting Zhao explain how Kyverno brings Kubernetes-native
+  policy management via validate, mutate, and generate rules. Covers the
+  admission controller, policy reports, comparisons with PodSecurityPolicies and
+  OPA Gatekeeper, and hands-on policy demos.
 publishedAt: 2021-02-19T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kyverno
+  - kubernetes
+  - opa
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -99,17 +103,22 @@ resources:
   - title: Kubernetes Pod Security Standards documentation
     type: url
     category: documentation
+    url: 'https://kubernetes.io/docs/concepts/security/pod-security-standards/'
   - title: Bishop Fox Bad Pods repository
     type: url
     category: demos
+    url: 'https://github.com/BishopFox/badPods'
   - title: kyverno/policies repository
     type: url
     category: code
+    url: 'https://github.com/kyverno/policies'
   - title: OPA Gatekeeper
     type: url
     category: code
+    url: 'https://github.com/open-policy-agent/gatekeeper'
   - title: kubectl neat
     type: url
     category: other
+    url: 'https://github.com/itaysk/kubectl-neat'
 ---
 

@@ -3,9 +3,10 @@ id: mz4qbj0rv0214w4idf272hhw
 slug: introduction-to-rust-part-iii
 title: Introduction to Rust (Part III)
 description: >-
-  Rust is a multi-paradigm programming language designed for performance and
-  safety, especially safe concurrency. Rust is syntactically similar to C++ but
-  can guarantee memory safety by using a borrow checker to validate references.
+  Jane Lusby walks David through writing a CLI anagram finder in Rust, covering
+  cargo project setup, editions, lifetimes, generics with impl Into and where
+  clauses, command-line parsing with structopt, and reading the system
+  dictionary with BufReader and iterators.
 publishedAt: 2020-12-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -95,20 +96,23 @@ guests:
 resources:
   - title: Awesome Rust Mentors Project
     type: url
+    url: 'https://github.com/RustBeginners/awesome-rust-mentors'
     category: code
   - title: StructOpt crate
     type: url
+    url: 'https://github.com/TeXitoi/structopt'
     category: code
   - title: Cargo Edit
     type: url
+    url: 'https://github.com/killercup/cargo-edit'
     category: code
   - title: std.rs BufReader documentation
     type: url
-    url: 'https://std.rs/buffreader'
+    url: 'https://doc.rust-lang.org/std/io/struct.BufReader.html'
     category: documentation
   - title: cheats.rs Rust cheat sheet
     type: url
-    url: 'https://cheats.rs'
+    url: 'https://cheats.rs/'
     category: documentation
 ---
 

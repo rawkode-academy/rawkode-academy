@@ -3,10 +3,9 @@ id: nrszh83p0vnfftsmbpfjinkw
 slug: hands-on-with-rust-lifetimes-and-ownership
 title: 'Hands-on with Rust: Lifetimes & Ownership'
 description: >-
-  Ana is a hacker working in the Rust and Nix ecosystems. She's from Lək̓ʷəŋən
-  territory in the Pacific Northwest, and holds a B.Sc. in Computer Science from
-  the University of Victoria. She takes care of a golden retriever named Nami
-  with her partner.
+  Ana Hobden joins David to work through Rust's borrow checker and lifetime
+  system using the Rustlings move-semantics exercises, covering ownership,
+  mutable references, scope, and when to reach for Box, Rc, and Arc.
 publishedAt: 2021-06-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -71,6 +70,14 @@ chapters:
 duration: 3448
 guests:
   - ana-hobden
-resources: []
+resources:
+  - type: url
+    title: Rustlings
+    url: 'https://github.com/rust-lang/rustlings'
+    category: code
+  - type: url
+    title: 'The Rust Programming Language: Understanding Ownership'
+    url: 'https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html'
+    category: documentation
 ---
 

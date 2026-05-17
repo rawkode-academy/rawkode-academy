@@ -3,14 +3,17 @@ id: x2f0csy494v9sk7kmp20jwlr
 slug: hands-on-autoscaling-with-kubernetes
 title: Hands-on Autoscaling with Kubernetes
 description: >-
-  Kubernetes (commonly stylized as k8s) is an open-source
-  container-orchestration system for automating computer application deployment,
-  scaling, and management.
+  Guy Templeton, co-chair of SIG Autoscaling, walks through Kubernetes
+  autoscaling end to end: horizontal pod autoscaling on resource, custom
+  (Prometheus adapter), and external (RabbitMQ) metrics, plus vertical pod
+  autoscaling.
 publishedAt: 2020-12-10T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - prometheus
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -55,9 +58,11 @@ guests:
 resources:
   - title: Kubernetes Autoscaling by Example repository
     type: url
+    url: 'https://github.com/gjtempleton/k8s-autoscaling-by-example'
     category: code
-  - title: Prometheus Adapter documentation
+  - title: Prometheus Adapter
     type: url
+    url: 'https://github.com/kubernetes-sigs/prometheus-adapter'
     category: documentation
 ---
 

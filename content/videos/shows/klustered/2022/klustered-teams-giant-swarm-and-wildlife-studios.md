@@ -3,13 +3,17 @@ id: mkpg23vllzcc5ld4672zgzgv
 slug: klustered-teams-giant-swarm-and-wildlife-studios
 title: Klustered Teams - Giant Swarm & Wildlife Studios
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Teams from Giant Swarm and Wildlife Studios swap broken Kubernetes clusters
+  and debug live, working through Cilium CNI sabotage, tampered pause images,
+  replaced kubectl binaries, broken DNS, etcd failures, and iptables policy
+  traps.
 publishedAt: 2022-02-17T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - etcd
 show: klustered
 chapters:
   - startTime: 0

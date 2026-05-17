@@ -3,32 +3,18 @@ id: p573rqpaddgcyckqamxoe83g
 slug: hands-on-introduction-to-devspace
 title: Hands-on Introduction to DevSpace
 description: >-
-  DevSpace is a client-only, open-source developer tool for Kubernetes:
-
-
-  - Build, test and debug applications directly inside Kubernetes
-
-  - Develop with hot reloading: updates your running containers without
-  rebuilding images or restarting containers
-
-  - Unify deployment workflows within your team and across dev, staging and
-  production
-
-  - Automate repetitive tasks for image building and deployment
-
-
-  How does it work?
-
-
-  DevSpace runs as a single binary CLI tool directly on your computer and
-  ideally, you use it straight from the terminal within your IDE. DevSpace does
-  not require a server-side component as it communicates directly to your
-  Kubernetes cluster using your kube-context, just like kubectl.
+  Leon from Loft joins David for a hands-on tour of DevSpace. They initialise a
+  Node.js project, deploy it to Kubernetes with a Helm chart, swap into dev
+  mode, watch file sync and hot reloading via nodemon, and explore pipelines,
+  dependencies, and the VS Code remote SSH integration.
 publishedAt: 2022-09-17T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - devspace
+  - kubernetes
+  - helm
+  - docker
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -101,6 +87,18 @@ chapters:
     title: Conclusion
 duration: 4017
 guests: []
-resources: []
+resources:
+  - type: url
+    title: DevSpace website
+    url: 'https://devspace.sh/'
+    category: documentation
+  - type: url
+    title: DevSpace documentation
+    url: 'https://devspace.sh/docs/getting-started/introduction'
+    category: documentation
+  - type: url
+    title: DevSpace Slack (kubernetes.slack.com
+    url: 'https://kubernetes.slack.com/messages/devspace'
+    category: other
 ---
 

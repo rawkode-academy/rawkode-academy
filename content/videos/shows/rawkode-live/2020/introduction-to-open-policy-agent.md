@@ -3,13 +3,16 @@ id: cwauu9hyqp49qiqdn5c2vq4i
 slug: introduction-to-open-policy-agent
 title: Introduction to Open Policy Agent
 description: >-
-  Torin Sandall is VP of Open Source at Styra and a co-creator of the Open
-  Policy Agent (OPA) project.
+  Torin Sandall walks through Open Policy Agent end-to-end: Rego basics in the
+  OPA Playground, Kubernetes admission policies for label and image-source
+  validation using iteration, running OPA locally with bundles and the REPL, and
+  writing unit tests for Rego policies.
 publishedAt: 2020-11-19T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
-  - open-policy-agent
+  - opa
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -76,12 +79,15 @@ guests:
 resources:
   - title: OPA Playground
     type: url
+    url: 'https://play.openpolicyagent.org/'
     category: demos
   - title: OPA VS Code plugin
     type: url
+    url: 'https://marketplace.visualstudio.com/items?itemName=tsandall.opa'
     category: code
   - title: OPA policy testing documentation
     type: url
+    url: 'https://www.openpolicyagent.org/docs/policy-testing'
     category: documentation
 ---
 

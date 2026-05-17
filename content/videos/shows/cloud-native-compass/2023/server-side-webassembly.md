@@ -3,12 +3,22 @@ id: ypthw3fx8bmyo8cdfywuewog
 slug: server-side-webassembly
 title: Server-Side WebAssembly
 description: >-
-  In this episode of the Cloud Native Compass podcast, the guests discuss
-  WebAssembly and server-side WebAssembly.
+  Kate Goldenring (Fermyon), Connor Hicks (Suborbital), and Kevin Hoffman
+  (Cosmonic/wasmCloud) explore server-side WebAssembly: WASI, the component
+  model, runtimes, and how Wasm sits alongside containers and Kubernetes.
 publishedAt: 2023-05-08T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - webassembly
+  - wasmcloud
+  - suborbital
+  - spin
+  - akri
+  - kubernetes
+  - docker
+  - containerd
+  - rust
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -62,19 +72,25 @@ guests:
   - connor-hicks
   - kevin-hoffman
 resources:
-  - title: WasmCloud open source project
+  - title: wasmCloud open source project
     type: url
+    url: 'https://wasmcloud.com'
     category: code
   - title: Programming WebAssembly with Rust
     type: url
+    url: 'https://pragprog.com/titles/khrust/programming-webassembly-with-rust/'
     category: other
-  - title: Fermion
+  - title: Fermyon
     type: url
-    url: 'https://fermion.com'
+    url: 'https://www.fermyon.com/'
     category: other
   - title: Suborbital
     type: url
     url: 'https://suborbital.dev'
+    category: other
+  - title: Cosmonic
+    type: url
+    url: 'https://cosmonic.com'
     category: other
 ---
 

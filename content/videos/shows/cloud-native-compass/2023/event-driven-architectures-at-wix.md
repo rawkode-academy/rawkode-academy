@@ -3,12 +3,16 @@ id: rzoehfxdwc2ldk4xbxgmcdb9
 slug: event-driven-architectures-at-wix
 title: Event-Driven Architectures at Wix
 description: >-
-  In this episode of the Cloud Native Compass, host David Flanagan interviews
-  Natan from Wix Engineering about event-driven architectures.
+  Natan Silnitsky shares how Wix operates 2,500+ microservices and 70 billion
+  Kafka events per day. We cover when to choose event-driven over RPC, schema
+  evolution with Confluent Schema Registry and protobuf, Kafka cost
+  optimisation, polyglot services, and ZIO on the JVM.
 publishedAt: 2023-06-19T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - kubernetes
+  - grpc
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -65,14 +69,18 @@ resources:
   - title: Wix Engineering Blog
     type: url
     category: other
+    url: 'https://www.wix.engineering/'
   - title: Confluent Schema Registry
     type: url
     category: documentation
+    url: 'https://docs.confluent.io/platform/current/schema-registry/index.html'
   - title: Natan Silnitsky website
     type: url
     category: other
+    url: 'https://www.natansil.com/'
   - title: ZIO Scala library
     type: url
     category: code
+    url: 'https://zio.dev/'
 ---
 

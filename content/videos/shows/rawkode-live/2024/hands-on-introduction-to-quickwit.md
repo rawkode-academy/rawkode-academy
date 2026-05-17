@@ -3,13 +3,20 @@ id: iu23nk9tr6alciejrlbxmto1
 slug: hands-on-introduction-to-quickwit
 title: Hands-on Introduction to Quickwit
 description: >-
-  Quickwit is the first engine to execute complex search and analytics queries
-  directly on cloud storage with sub-second latency.
+  Francois Massot walks through Quickwit hands-on: spinning up an index,
+  ingesting logs and OpenTelemetry traces on Kubernetes, querying via the UI and
+  CLI, and exploring the Grafana plugin plus Jaeger integration over 500M+
+  spans.
 publishedAt: 2024-01-20T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - quickwit
+  - kubernetes
+  - opentelemetry
+  - grafana
+  - jaeger
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 74
@@ -82,15 +89,19 @@ guests:
 resources:
   - title: Quickwit Quick Start Guide
     type: url
+    url: 'https://quickwit.io/docs/get-started/quickstart'
     category: documentation
   - title: Quickwit Common Crawl demo
     type: url
+    url: 'https://common-crawl.quickwit.io/'
     category: demos
   - title: Quickwit Helm chart
     type: url
+    url: 'https://github.com/quickwit-oss/helm-charts'
     category: code
   - title: Quickwit Grafana plugin
     type: url
+    url: 'https://github.com/quickwit-oss/quickwit-datasource'
     category: code
 ---
 

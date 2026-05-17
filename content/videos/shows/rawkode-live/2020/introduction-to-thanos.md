@@ -3,13 +3,17 @@ id: p78opknhykk7739gvc7kf5z5
 slug: introduction-to-thanos
 title: Introduction to Thanos
 description: >-
-  Bartek Plotka is a Principal Software Engineer at Red Hat with a background in
-  SRE, currently working on OpenShift Observability.
+  Bartek Plotka walks through Thanos, the CNCF project that extends Prometheus
+  with global query, HA deduplication, and long-term storage. Covers the
+  Sidecar, Querier, Store Gateway, and Compactor, plus a live demo running three
+  Prometheus servers against MinIO.
 publishedAt: 2020-11-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - thanos
+  - prometheus
+  - minio
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -110,9 +114,11 @@ resources:
     category: demos
   - title: Site Reliability Engineering book
     type: url
+    url: 'https://sre.google/books/'
     category: other
-  - title: CNCF SIG Observability meetings
+  - title: CNCF SIG Observability
     type: url
+    url: 'https://github.com/cncf/tag-observability'
     category: other
 ---
 

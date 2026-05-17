@@ -3,15 +3,18 @@ id: nif2kkr7kig9n82jxsjyd2ds
 slug: hands-on-introduction-to-kluctl
 title: Hands-on Introduction to kluctl
 description: >-
-  Kluctl is the missing glue that puts together your (and any third-party)
-  deployments into one large declarative Kubernetes deployment, while making it
-  fully manageable (deploy, diff, prune, delete, ...) via one unified command
-  line interface.
+  Alexander Block, creator of Kluctl, walks through the deployment problems it
+  was built to solve and demos targets, templated vars, and a diff-first
+  deploy/prune workflow that composes Helm charts and Kustomize on a kind
+  cluster.
 publishedAt: 2022-10-20T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kluctl
+  - kubernetes
+  - helm
+  - fluxcd
 show: rawkode-live
 chapters:
   - startTime: 161
@@ -106,9 +109,11 @@ guests:
 resources:
   - title: podinfo Helm chart
     type: url
+    url: 'https://github.com/stefanprodan/podinfo'
     category: demos
   - title: Flux Kluctl controller
     type: url
+    url: 'https://github.com/kluctl/flux-kluctl-controller'
     category: code
 ---
 

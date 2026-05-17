@@ -2,16 +2,13 @@
 id: f8kozfxzp1vtykj2na0sye5w
 slug: part-3-tutorial-2-getting-started-with-influxdb
 title: 'Part 3 - Tutorial 2: Getting Started with InfluxDB'
-description: |-
-  Learn how to navigate the InfluxDB 2 UI
-
-
-  #InfluxDB #Tutorial
+description: 'Walk through the InfluxDB 2 first-run setup (admin user, org, bucket), then tour the UI: Data (Telegraf plugins, scrapers, tokens), Explore, Boards, Tasks for Flux automation, Alerts, and Settings for variables, templates, and labels.'
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - influxdb
+  - telegraf
 chapters:
   - startTime: 0
     title: Intro
@@ -61,9 +58,11 @@ resources:
     type: url
     category: other
   - title: InfluxDB 2 Templates
+    url: https://docs.influxdata.com/influxdb/v2/tools/influxdb-templates/
     type: url
-    category: other
+    category: documentation
   - title: Telegraf Data Collector
+    url: https://github.com/influxdata/telegraf
     type: url
     category: code
 ---

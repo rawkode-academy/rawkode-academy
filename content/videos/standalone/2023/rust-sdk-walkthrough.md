@@ -3,13 +3,15 @@ id: ryc93p7fu30bh4kkv3ru71nk
 slug: rust-sdk-walkthrough
 title: Rust SDK Walkthrough
 description: >-
-  In this video, we explore all the common tasks you'll need to accomplish with
-  Fermyon's Spin Rust SDK.
+  A hands-on tour of Spin's Rust SDK: writing and routing an HTTP component,
+  reading headers, decoding the request body, parsing query strings, and making
+  outbound HTTP requests with allowed-domain configuration in spin.toml.
 publishedAt: 2023-01-27T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - rust
 chapters:
   - startTime: 0
     title: Introduction
@@ -30,8 +32,9 @@ chapters:
 duration: 806
 guests: []
 resources:
-  - title: Fermion Discord
+  - title: Fermyon Discord
     type: url
+    url: 'https://www.fermyon.com/discord'
     category: other
 ---
 

@@ -7,13 +7,21 @@ subtitle: >-
   We’ll walk through installing, configuring, customizing, and using it in real
   time.
 description: >-
-  Join us as we explore Headlamp — an extensible, user-friendly Kubernetes UI.
-  We’ll walk through installing, configuring, customizing, and using it in real
-  time.
+  Oleg and Will from Microsoft show how Headlamp's plugin model surfaces Flux,
+  Argo CD, Cilium Hubble, and Prometheus inside a Kubernetes UI, plus the new AI
+  assistant, OIDC auth, Artifact Hub plugin catalogue, and Backstage embedding.
 publishedAt: 2025-10-08T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - headlamp
+  - kubernetes
+  - fluxcd
+  - argo
+  - cilium
+  - backstage
+  - prometheus
+  - artifacthub
 show: rawkode-live
 duration: 3547
 guests:
@@ -26,12 +34,15 @@ resources:
     category: documentation
   - title: Headlamp documentation
     type: url
+    url: 'https://headlamp.dev/docs/latest/'
     category: documentation
   - title: Artifact Hub Headlamp plugin registry
     type: url
+    url: 'https://artifacthub.io/packages/search?kind=11'
     category: other
   - title: Headlamp contributor guide
     type: url
+    url: 'https://headlamp.dev/docs/latest/contributing/'
     category: documentation
 ---
 

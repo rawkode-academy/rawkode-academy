@@ -3,13 +3,18 @@ id: x372c0fhltxzq4h7ll4mfqh1
 slug: klustered-14
 title: 'Klustered #14'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock. #KubernetesTutorial
+  Sid Palas and Arian van Putten each break a cluster for the other to fix.
+  Cluster 31 hides a kubelet cgroup driver mismatch starving Postgres and
+  Cilium, while Cluster 32 spawns replicating "not-a-virus" pods across rogue
+  namespaces.
 publishedAt: 2021-06-10T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - postgresql
+  - docker
 show: klustered
 chapters:
   - startTime: 0
@@ -105,6 +110,7 @@ guests:
 resources:
   - title: DevOps Directive YouTube channel
     type: url
+    url: 'https://www.youtube.com/c/DevOpsDirective'
     category: other
 ---
 

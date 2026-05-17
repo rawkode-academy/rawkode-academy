@@ -3,14 +3,16 @@ id: jqetzwc4xdsjsvd2dg58hgpw
 slug: hands-on-introduction-to-spin-webassembly-microservices
 title: 'Hands-on Introduction to Spin: WebAssembly Microservices'
 description: >-
-  In this live stream, David will be onboarding himself with Fermyon's Spin
-  project, a WebAssembly framework for building microservices in your language
-  of choice.
+  David explores Fermyon's Spin, comparing its Nomad-based runtime to Kubernetes
+  via Krustlet, then builds a Rust HTTP microservice backed by Prisma and
+  CockroachDB, running it locally before deploying to Fermyon Cloud.
 publishedAt: 2022-11-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - spin
+  - webassembly
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 162
@@ -38,13 +40,14 @@ chapters:
 duration: 2981
 guests: []
 resources:
-  - title: Fermion official co-founders interview about Spin and Nomad
+  - title: Fermyon co-founders interview about Spin and Nomad
     type: url
     category: other
-  - title: Fermion Spin examples directory
+  - title: Spin examples directory
     type: url
+    url: 'https://github.com/spinframework/spin/tree/main/examples'
     category: code
-  - title: Fermion Platform open source repository
+  - title: Fermyon Platform open source repository
     type: url
     category: code
 ---

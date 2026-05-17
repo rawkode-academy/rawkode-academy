@@ -3,14 +3,16 @@ id: d52og3gdtmtu7w8nhkyg1uyt
 slug: kubescape-cli-and-github-action
 title: Kubescape CLI & GitHub Action
 description: >-
-  Welcome to The Complete Gudie to Kubescape. In this course, you'll learn
-  everything you need to leverage the great powers of Kubescape into your
-  platform to improve your Kubernetes security posture.
+  Use the Kubescape CLI to scan plain manifests, Kustomize overlays, and Helm
+  charts against frameworks like NSA/CISA, then wire the GitHub Action into CI
+  to publish pretty-printer, JUnit, and SARIF reports to Code Scanning.
 publishedAt: 2022-12-20T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - kubescape
+  - kubernetes
+  - helm
 chapters:
   - startTime: 0
     title: Introduction
@@ -67,9 +69,12 @@ resources:
     category: demos
   - title: NSA/CISA Kubernetes Hardening Guidance
     type: url
+    url: >-
+      https://media.defense.gov/2022/Aug/29/2003066362/-1/-1/0/CTR_KUBERNETES_HARDENING_GUIDANCE_1.2_20220829.PDF
     category: documentation
   - title: Klustered Automation Repository
     type: url
+    url: 'https://github.com/rawkode-academy/klustered'
     category: code
 ---
 

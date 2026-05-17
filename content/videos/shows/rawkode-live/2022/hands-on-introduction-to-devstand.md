@@ -3,13 +3,15 @@ id: ns56m0h117hrt9hyszmvahv8
 slug: hands-on-introduction-to-devstand
 title: Hands-on Introduction to DevStand
 description: >-
-  Free and open source canvas to visualize dependencies between microservice
-  configurations.
+  Max shows how DevStand lowers the Kubernetes barrier for application
+  developers, with a visual editor and VS Code extension that authors manifests,
+  ingress, and dependencies like Minio storage.
 publishedAt: 2022-10-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - devstand
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 162
@@ -90,6 +92,10 @@ chapters:
     title: Conclusion & Future Outlook
 duration: 3781
 guests: []
-resources: []
+resources:
+  - type: url
+    title: DevStand website
+    url: 'https://devstand.app'
+    category: documentation
 ---
 

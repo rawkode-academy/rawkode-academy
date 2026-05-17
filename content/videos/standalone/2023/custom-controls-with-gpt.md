@@ -3,14 +3,16 @@ id: wsxnftsmvohcoqr4izm8mur6
 slug: custom-controls-with-gpt
 title: Custom Controls with GPT
 description: >-
-  Rego is hard to write, but critical to writing your own Kubescape policies.
-  Can we make this easier? Armo Platform introcued GPT support to provide a text
-  based interface to making custom controls for Kubescape.
+  Armo Platform's ChatGPT integration turns plain-English prompts into Rego for
+  Kubescape custom controls. We build a "no latest tag" rule, then a
+  CAP_SYS_ADMIN deny, debug the generated policy in the Rego Playground, and run
+  it with `kubescape scan control --use-from`.
 publishedAt: 2023-03-30T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - kubescape
+  - opa
 chapters:
   - startTime: 0
     title: 'Introduction: ChatGPT, Kubescape, and the Rego Challenge'

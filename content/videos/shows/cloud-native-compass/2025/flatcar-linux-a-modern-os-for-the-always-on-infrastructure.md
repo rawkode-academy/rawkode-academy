@@ -3,14 +3,20 @@ id: luwalhnnh9j8wt1tab5de6wx
 slug: flatcar-linux-a-modern-os-for-the-always-on-infrastructure
 title: 'Flatcar Linux: A Modern OS for the Always-On Infrastructure'
 description: >-
-  In this episode, we dive deep into Flatcar Linux, an immutable Linux
-  distribution designed for always-on infrastructures. The discussion covers the
-  architecture and features of Flatcar, including its self-updating capabilities
-  and minimal attack surface.
+  Flatcar maintainers Thilo, Mathieu, and Chewy explain the immutable A/B
+  partition layout, Ignition provisioning, systemd-sysext for Kubernetes,
+  LUKS/TPM disk encryption, and how Nebraska coordinates monthly fleet updates
+  without SSH.
 publishedAt: 2025-10-15T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - flatcar
+  - kubernetes
+  - containerd
+  - docker
+  - prometheus
+  - kured
 show: cloud-native-compass
 chapters:
   - startTime: 0
@@ -46,15 +52,19 @@ guests:
 resources:
   - title: Flatcar Getting Started documentation
     type: url
+    url: 'https://www.flatcar.org/docs/latest/'
     category: documentation
-  - title: Flatcar SysEx Bakery
+  - title: Flatcar SysExt Bakery
     type: url
+    url: 'https://github.com/flatcar/sysext-bakery'
     category: code
   - title: Flatcar Linux update operator
     type: url
+    url: 'https://github.com/flatcar/flatcar-linux-update-operator'
     category: code
   - title: libguestfs tools
     type: url
+    url: 'https://libguestfs.org/'
     category: other
 ---
 

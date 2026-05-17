@@ -3,14 +3,16 @@ id: x7i5glnt55z23vrd3th0wgbb
 slug: introduction-to-the-operatorsdk
 title: Introduction to the OperatorSDK
 description: >-
-  This Operator SDK is a component of the Operator Framework, an open source
-  toolkit to manage Kubernetes native applications, called Operators, in an
-  effective, automated, and scalable way.
+  Dennis Kelly walks through the Operator SDK by building a Go-based "add"
+  operator: scaffolding a project, defining a custom resource, writing the
+  reconciler with controller-runtime, generating CRDs and RBAC, and deploying it
+  to a Kubernetes cluster.
 publishedAt: 2020-12-09T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
-  - operatorsdk
+  - operatorframework
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0

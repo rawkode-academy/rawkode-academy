@@ -3,13 +3,15 @@ id: fd8h2x0iq6qy06gui4vev807
 slug: the-roast-of-the-linux-desktop
 title: The Roast of the Linux Desktop
 description: >-
-  Linux Desktop, you're like that band that everyone insists is about to make it
-  big. You've been "the year of the Linux desktop" more times than Spinal Tap
-  has had drummers spontaneously combust.
+  David and Hayden trade OS war stories: David's Fedora/Universal Blue setup
+  versus Hayden's Windows 11 with WSL2. They demo workflows, debate paper cuts
+  like full-disk encryption, and ask whether the year of the Linux desktop will
+  ever actually arrive.
 publishedAt: 2024-07-17T17:00:00.000Z
 type: recorded
 category: tutorial
-technologies: []
+technologies:
+  - universal-blue
 chapters:
   - startTime: 0
     title: Introduction & Mobile OS Chat
@@ -52,18 +54,23 @@ guests: []
 resources:
   - title: Fedora Silverblue
     type: url
-    category: other
+    url: 'https://fedoraproject.org/atomic-desktops/silverblue/'
+    category: documentation
   - title: Universal Blue (uBlue)
     type: url
-    category: code
+    url: 'https://universal-blue.org/'
+    category: documentation
   - title: Microsoft PowerToys
     type: url
+    url: 'https://github.com/microsoft/PowerToys'
     category: code
   - title: UniGet Package Manager
     type: url
+    url: 'https://github.com/Devolutions/UniGetUI'
     category: code
   - title: Dev Home
     type: url
+    url: 'https://github.com/microsoft/devhome'
     category: code
 ---
 

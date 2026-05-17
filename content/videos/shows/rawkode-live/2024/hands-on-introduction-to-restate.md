@@ -3,13 +3,15 @@ id: i5nzkd2k3rgebh7w1o233lgn
 slug: hands-on-introduction-to-restate
 title: Hands-on Introduction to Restate
 description: >-
-  Restate is the platform for building resilient applications that tolerate all
-  infrastructure faults w/o the need for a PhD.
+  Jack Kleeman walks through Restate, a single-binary durable execution engine
+  written in Rust. We cover context.run, keyed state, suspending and resuming
+  workflows, context.promise, and live code a TypeScript write handler.
 publishedAt: 2024-09-11T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - restate
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 153
@@ -55,6 +57,18 @@ chapters:
 duration: 5470
 guests:
   - jack-kleeman
-resources: []
+resources:
+  - type: url
+    title: Restate
+    url: 'https://restate.dev/'
+    category: other
+  - type: url
+    title: Restate Documentation
+    url: 'https://docs.restate.dev/'
+    category: documentation
+  - type: url
+    title: Restate Examples
+    url: 'https://github.com/restatedev/examples'
+    category: code
 ---
 

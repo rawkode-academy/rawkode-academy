@@ -3,8 +3,10 @@ id: aby09ynwn40wa8dtsvxwf7ho
 slug: monitoring-and-scaling-laravel-on-kubernetes
 title: Monitoring & Scaling Laravel on Kubernetes
 description: >-
-  In this episode, we'll take a look at auto-scaling our Laravel application
-  based on metrics.
+  Continuing the Laravel-on-Kubernetes series, David is joined by Alex Bowers
+  and Ciaran McNulty to load-test with Siege, wire up a CPU-based HPA via
+  metrics-server, then layer Linkerd sidecars, Grafana dashboards, and a
+  Prometheus ServiceMonitor for custom application metrics.
 publishedAt: 2021-02-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -12,6 +14,9 @@ technologies:
   - kubernetes
   - laravel
   - php
+  - linkerd
+  - prometheus
+  - grafana
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -89,18 +94,23 @@ guests:
 resources:
   - title: JoeDog Siege
     type: url
+    url: 'https://www.joedog.org/'
     category: other
   - title: Prometheus Operator quick start bundle
     type: url
+    url: 'https://github.com/prometheus-operator/kube-prometheus'
     category: documentation
   - title: Prometheus Adapter
     type: url
+    url: 'https://github.com/kubernetes-sigs/prometheus-adapter'
     category: documentation
   - title: Sean Hood OpenTelemetry package
     type: url
+    url: 'https://github.com/SeanHood/laravel-opentelemetry'
     category: code
   - title: Alex Bowers Laravel example project
     type: url
+    url: 'https://github.com/alexbowers/laravel-example-project'
     category: code
 ---
 

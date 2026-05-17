@@ -2,7 +2,11 @@
 id: ycuvz85u2a7678qr5o4a488z
 slug: workshop-database-access-mongodb-with-teleport
 title: Workshop - Database Access (mongoDB) with Teleport
-description: 'Find out more at https://rawkode.live/teleport'
+description: >-
+  Use Teleport's database proxy to provide identity-aware, certificate-based
+  access to MongoDB. Covers configuring a self-hosted mongod with X.509 auth,
+  issuing certs via tctl, audit logging, and extending the same flow to MongoDB
+  Atlas and Compass.
 publishedAt: 2022-01-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -106,9 +110,11 @@ resources:
     category: code
   - title: MongoDB Atlas Documentation
     type: url
+    url: 'https://www.mongodb.com/docs/atlas/'
     category: documentation
   - title: MongoDB Compass
     type: url
+    url: 'https://www.mongodb.com/products/tools/compass'
     category: other
 ---
 

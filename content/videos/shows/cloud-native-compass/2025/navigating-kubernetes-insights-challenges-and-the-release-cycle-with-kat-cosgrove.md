@@ -6,13 +6,14 @@ title: >-
   Navigating Kubernetes: Insights, Challenges, and the Release Cycle with Kat
   Cosgrove
 description: >-
-  In this episode of Cloud Native Compass, hosts David Flanagan and Laura
-  Santamaria dive deep into the complexities of the Kubernetes release cycle
-  with guest Kat Cosgrove.
+  Kat Cosgrove joins David and Laura to unpack how SIG Release ships Kubernetes:
+  team structure, CI signal, bug triage, press embargoes, maintainer burnout,
+  and why a Kubernetes 2.0 is unlikely.
 publishedAt: 2025-01-30T17:00:00.000Z
 type: recorded
 category: interview
-technologies: []
+technologies:
+  - kubernetes
 show: cloud-native-compass
 duration: 2366
 audioFileSize: 56784493
@@ -62,9 +63,19 @@ guests:
 resources:
   - title: Kubernetes website repository
     type: url
+    url: 'https://github.com/kubernetes/website'
     category: code
   - title: Kubernetes enhancements repository
     type: url
+    url: 'https://github.com/kubernetes/enhancements'
     category: code
+  - title: SIG Release
+    type: url
+    url: 'https://github.com/kubernetes/sig-release'
+    category: code
+  - title: Cloud Native Compass
+    type: url
+    url: 'https://cloudnativecompass.fm/'
+    category: other
 ---
 

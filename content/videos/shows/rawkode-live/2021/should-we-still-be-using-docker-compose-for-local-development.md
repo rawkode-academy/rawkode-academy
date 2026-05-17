@@ -3,8 +3,9 @@ id: xe94jp57r2l5615gqo6xu5ql
 slug: should-we-still-be-using-docker-compose-for-local-development
 title: Should we still be using docker-compose for local development?
 description: >-
-  In this episode, Bret is going to guide us through everything we need to know
-  about Docker Compose v2
+  Bret Fisher walks through Docker Compose v2 and the new Compose Spec: the
+  rewritten Go CLI as a Docker plugin, profiles for grouping services,
+  depends_on with healthchecks, convert, contexts, and deploying to ECS and ACI.
 publishedAt: 2021-09-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -91,16 +92,18 @@ guests:
 resources:
   - title: Compose CLI repository
     type: url
+    url: 'https://github.com/docker/compose-cli'
     category: code
   - title: Podman Compose project
     type: url
+    url: 'https://github.com/containers/podman-compose'
     category: code
   - title: Bret Fisher shell setup page
     type: url
-    url: 'https://brettfisher.com/shell'
     category: documentation
   - title: SpaceVim editor distribution
     type: url
+    url: 'https://spacevim.org/'
     category: code
 ---
 

@@ -3,14 +3,16 @@ id: bwo73aoo2k6ae9lrukcj6onr
 slug: integrating-spin-with-static-site-generators-ssgs
 title: Integrating Spin with Static Site Generators (SSGs)
 description: >-
-  Fermyon's Spin allows you to integrate with your existing frontend-frameworks,
-  such as React, Svelte, Remix, NextJS, Astro, and Gatsby; by allowing you to
-  integrate their build command into the spin build pipeline.
+  Builds a multi-component Spin app, a JavaScript backend that calls OpenAI to
+  detect languages plus a static frontend, then swaps the vanilla HTML for an
+  Astro build to show how any SSG that produces a dist directory can be served
+  by Spin's static file server.
 publishedAt: 2023-06-07T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - webassembly
 chapters:
   - startTime: 0
     title: Introduction and Project Overview
@@ -49,9 +51,11 @@ guests: []
 resources:
   - title: Spin file server repository
     type: url
+    url: 'https://github.com/spinframework/spin-fileserver'
     category: code
   - title: Astro website creation CLI
     type: url
+    url: 'https://docs.astro.build/en/install-and-setup/'
     category: documentation
 ---
 

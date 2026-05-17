@@ -3,8 +3,9 @@ id: psekx95vb79ashjkm2ibmc3k
 slug: hands-on-with-pipedream
 title: Hands-on with Pipedream
 description: >-
-  Pipedream is a serverless integration and compute platform that makes it easy
-  to connect apps and develop event-driven workflows.
+  Hands-on tour of Pipedream with cofounder Dylan Sather, building event-driven
+  workflows in the UI that wire Twitter searches into Spotify playlists and pipe
+  Discord messages out to Twitter using Node.js code steps.
 publishedAt: 2020-12-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -97,15 +98,18 @@ resources:
     category: other
   - title: Pipedream REST API docs
     type: url
+    url: 'https://pipedream.com/docs/rest-api'
     category: documentation
   - title: Pipedream workflow state docs
     type: url
     category: documentation
   - title: SSLMate Cert Spotter API
     type: url
+    url: 'https://sslmate.com/certspotter/api'
     category: other
   - title: Pipedream parking tickets in San Francisco blog post
     type: url
+    url: 'https://pipedream.com/blog/avoiding-parking-tickets-with-pipedream/'
     category: other
 ---
 

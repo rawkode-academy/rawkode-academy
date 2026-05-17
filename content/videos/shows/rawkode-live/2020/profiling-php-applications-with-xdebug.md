@@ -3,10 +3,10 @@ id: ilwszy3zkvzjrijebbn58eps
 slug: profiling-php-applications-with-xdebug
 title: Profiling PHP Applications with Xdebug
 description: >-
-  In this episode, joined by Derick Rethans, we take a look at Xdebug and how it
-  help you profile your PHP applications, allowing you to use a profiling
-  front-end, like qcachegrind, to visualise your call graphs and dig into the
-  bottlenecks of your applications.
+  Derick Rethans walks through installing Xdebug via PECL, enabling its
+  profiler, and reading the resulting Cachegrind files in QCachegrind to find
+  hot paths, starting from hello-world and factorial scripts before profiling
+  Composer install on a real project.
 publishedAt: 2020-09-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -39,14 +39,16 @@ duration: 5372
 guests:
   - derick-rethans
 resources:
-  - title: QCachegrind profiling viewer
-    type: url
-    category: other
   - title: KCachegrind profiling viewer
+    type: url
+    url: 'https://kcachegrind.github.io/'
+    category: other
+  - title: QCachegrind profiling viewer
     type: url
     category: other
   - title: Composer dependency manager
     type: url
+    url: 'https://getcomposer.org/'
     category: other
   - title: Zulu CMS project
     type: url

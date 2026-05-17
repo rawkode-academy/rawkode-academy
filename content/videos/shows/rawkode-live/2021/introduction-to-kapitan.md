@@ -3,13 +3,15 @@ id: ez0cfnojsmfa5wwlgwzwu0kg
 slug: introduction-to-kapitan
 title: Introduction to Kapitan
 description: >-
-  In this episode, we take a look at the Kapitan project; a tool to help manage
-  the complexity of deploying with Kubernetes, Terraform, and other things.
+  Alessandro de Maria and Ricardo Amaro walk through Kapitan's inventory model,
+  targets and classes, the Kubernetes manifest generator, secret references, and
+  the kapitan-reference repository for getting started.
 publishedAt: 2021-02-05T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kapitan
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -85,12 +87,15 @@ guests:
 resources:
   - title: Kapitan Reference Repository
     type: url
+    url: 'https://github.com/kapicorp/kapitan-reference'
     category: code
   - title: Kapitan Manifest Generator Documentation
     type: url
+    url: 'https://generators.kapitan.dev/'
     category: documentation
   - title: Weaveworks Sock Shop Example
     type: url
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
 ---
 

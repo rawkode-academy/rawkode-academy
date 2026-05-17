@@ -2,12 +2,17 @@
 id: eyps5shz1242dx4h4oovg9jk
 slug: hands-on-tutorial-of-mirrord
 title: Hands-on Tutorial of mirrord
-description: Hands-on introduction to local Kubernetes development with mirrord
+description: >-
+  Aviram and Tal from MetalBear show how mirrord runs a local process inside a
+  remote Kubernetes pod's context, mirroring traffic, env vars and files, then
+  demo the VS Code extension, mirrord teams operator and L7 filtering.
 publishedAt: 2023-07-20T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - mirrord
+  - kubernetes
+  - rust
 show: rawkode-live
 chapters:
   - startTime: 168
@@ -68,6 +73,22 @@ duration: 3571
 guests:
   - eyal-bukchin
   - tal-zwick
-resources: []
+resources:
+  - title: mirrord website
+    type: url
+    url: 'https://metalbear.com/mirrord/'
+    category: documentation
+  - title: mirrord documentation
+    type: url
+    url: 'https://metalbear.com/mirrord/docs'
+    category: documentation
+  - title: mirrord source on GitHub
+    type: url
+    url: 'https://github.com/metalbear-co/mirrord'
+    category: code
+  - title: MetalBear Discord community
+    type: url
+    url: 'https://discord.com/invite/pSKEdmNZcK'
+    category: other
 ---
 

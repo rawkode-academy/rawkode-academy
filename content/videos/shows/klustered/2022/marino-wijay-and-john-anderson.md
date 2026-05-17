@@ -3,13 +3,20 @@ id: gpflupb79utj4zwvq76deu98
 slug: marino-wijay-and-john-anderson
 title: Marino Wijay & John Anderson
 description: >-
-  We use Teleport every week on Klustered and we encourage you to try it out
-  too. Check them out at https://rawkode.live/teleport
+  Marino Wijay and John Anderson fix a sabotaged cluster: Kyverno admission
+  webhooks, a Not Ready node with a bad kubelet eviction flag, controller
+  manager RBAC, a corrupt API server cert, and Cilium CNI mismatched with
+  containerd.
 publishedAt: 2022-05-13T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - kyverno
+  - cilium
+  - cni
+  - containerd
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -179,6 +186,7 @@ guests:
 resources:
   - title: Rawkode Academy Teleport sponsor link
     type: url
+    url: 'https://rawkode.live/teleport'
     category: other
   - title: Rawkode Academy Equinix Metal sponsor link
     type: url

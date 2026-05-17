@@ -3,14 +3,18 @@ id: ogx55a28acwbzuwd1d1ic3lm
 slug: introduction-to-linkerd
 title: Introduction to Linkerd
 description: >-
-  Linkerd is a service mesh for Kubernetes. It makes running services easier and
-  safer by giving you runtime debugging, observability, reliability, and
-  security—all without requiring any changes to your code.
+  Thomas Rampelberg from Buoyant walks through installing Linkerd 2 on
+  Kubernetes, exploring the dashboard and CLI (tap, stat, top), running the
+  EmojiVoto and Books demos, configuring service profiles for retries and
+  timeouts, traffic split fault injection, mTLS, and multi-cluster.
 publishedAt: 2020-11-04T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - linkerd
+  - kubernetes
+  - prometheus
+  - grafana
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -123,15 +127,19 @@ guests:
 resources:
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
   - title: EmojiVoto demo application
     type: url
+    url: 'https://github.com/BuoyantIO/emojivoto'
     category: demos
   - title: Books app fault injection tutorial demo
     type: url
+    url: 'https://linkerd.io/2/tasks/books/'
     category: demos
   - title: Google SRE handbook
     type: url
+    url: 'https://sre.google/sre-book/table-of-contents/'
     category: documentation
 ---
 

@@ -3,13 +3,18 @@ id: gkvfatiptx9zm9zmvcyipvt7
 slug: klustered-10
 title: 'Klustered #10'
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Walid Shaari and Noel Georgi join Rawkode to debug three broken Kubernetes
+  clusters, tackling kubelet failures, RBAC misconfigurations, a missing
+  scheduler role, an AlwaysDeny admission controller, mutating webhooks,
+  containerd registry rewrites, and CoreDNS Corefile sabotage.
 publishedAt: 2021-05-06T13:30:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - cilium
+  - containerd
+  - coredns
 show: klustered
 chapters:
   - startTime: 0
@@ -105,6 +110,7 @@ resources:
     category: other
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
 ---
 

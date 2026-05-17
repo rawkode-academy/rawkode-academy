@@ -3,14 +3,17 @@ id: c2q3win8puhpdiozuaenozl0
 slug: hands-on-introduction-to-kubescape
 title: Hands-on Introduction to Kubescape
 description: >-
-  Kubescape is a K8s open-source tool providing a multi-cloud K8s single pane of
-  glass, including risk analysis, security compliance, RBAC visualizer and image
-  vulnerabilities scanning.
+  Ben Hirschberg from ARMO walks through Kubescape, scanning clusters and YAML
+  against the NSA/CISA hardening framework, writing controls in Rego on OPA,
+  shifting left with the VS Code extension and GitHub Action, and the RBAC
+  visualizer in the hosted UI.
 publishedAt: 2022-02-22T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubescape
+  - kubernetes
+  - opa
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -110,17 +113,23 @@ resources:
   - title: NSA CISA Kubernetes hardening framework
     type: url
     category: documentation
+    url: >-
+      https://media.defense.gov/2022/Aug/29/2003066362/-1/-1/0/CTR_KUBERNETES_HARDENING_GUIDANCE_1.2_20220829.PDF
   - title: Kubescape Rego library project
     type: url
     category: code
+    url: 'https://github.com/kubescape/regolibrary'
   - title: Kubescape GitHub Action
     type: url
     category: code
+    url: 'https://github.com/kubescape/github-action'
   - title: Kubescape Visual Studio Code extension
     type: url
     category: code
+    url: 'https://github.com/kubescape/vscode-extension'
   - title: Kubescape host sensor
     type: url
     category: code
+    url: 'https://github.com/kubescape/host-scanner'
 ---
 

@@ -3,13 +3,15 @@ id: akvx71sbz8fsyk50yhcde4vz
 slug: managing-linux-in-real-time-with-saltstack
 title: Managing Linux in Real Time with SaltStack
 description: >-
-  In this episode, joined by my colleague Edward Vielmetti, we go through the
-  installation and configuration of a SaltStack cluster for managing a
-  heterogeneous collection of systems.
+  Edward Vielmetti joins to provision a mixed Ubuntu, CentOS and FreeBSD fleet
+  on Packet bare metal using Pulumi with TypeScript, then drive it with Salt:
+  bootstrap, grains, pillars, targeting, and state modules for cron, files and
+  SSH keys.
 publishedAt: 2020-09-17T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - pulumi
   - salt
 show: rawkode-live
 chapters:
@@ -73,15 +75,19 @@ guests:
 resources:
   - title: Salt Pillar Modules documentation
     type: url
+    url: 'https://docs.saltproject.io/en/latest/topics/pillar/'
     category: documentation
   - title: Salt Targeting documentation
     type: url
+    url: 'https://docs.saltproject.io/en/latest/topics/targeting/'
     category: documentation
   - title: Salt State Modules documentation
     type: url
+    url: 'https://docs.saltproject.io/en/latest/ref/states/all/'
     category: documentation
   - title: Salt Bootstrap
     type: url
+    url: 'https://github.com/saltstack/salt-bootstrap'
     category: code
 ---
 

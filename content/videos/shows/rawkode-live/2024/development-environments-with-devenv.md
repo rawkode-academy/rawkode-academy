@@ -3,8 +3,10 @@ id: mmc8esyg7i2qkrni256w8t5s
 slug: development-environments-with-devenv
 title: Development Environments with Devenv
 description: >-
-  Fast, Declarative, Reproducible and Composable Developer Environments using
-  Nix
+  Domen Kozar joins to walk through Devenv, the Nix-based tool for declarative
+  per-project dev environments. We cover devenv.nix structure, Rust language
+  support, running Postgres and Temporal as services, custom scripts, and
+  building containers.
 publishedAt: 2024-06-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -68,9 +70,11 @@ guests:
 resources:
   - title: Process Compose
     type: url
+    url: 'https://github.com/F1bonacc1/process-compose'
     category: code
   - title: Devenv fly.io example
     type: url
+    url: 'https://github.com/cachix/devenv/tree/main/examples/fly.io'
     category: demos
 ---
 

@@ -3,8 +3,10 @@ id: h9myn3s1d0z4rjleaspu4z2f
 slug: hacking-kubernetes-ctf-edition
 title: 'Hacking Kubernetes: CTF Edition'
 description: >-
-  In this episode, Andrew guides me through some #CTFs from his org, Control
-  Plane.
+  Andrew Martin of Control Plane walks David through Kubernetes CTF scenarios
+  from KubeCon: escaping via host mounts, killing crypto-miner deployments
+  through RBAC gaps, executing commands blindly via log streams, and pivoting
+  between containers via shared process namespaces.
 publishedAt: 2021-05-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -116,18 +118,23 @@ guests:
 resources:
   - title: Kubernetes Simulator
     type: url
+    url: 'https://github.com/controlplaneio/simulator'
     category: code
   - title: Hacking Kubernetes book
     type: url
+    url: 'https://www.oreilly.com/library/view/hacking-kubernetes/9781492081722/'
     category: other
   - title: Am I Contained
     type: url
+    url: 'https://github.com/genuinetools/amicontained'
     category: code
   - title: Stern Kubernetes log tailing tool
     type: url
+    url: 'https://github.com/stern/stern'
     category: code
   - title: Bane AppArmor profile tool
     type: url
+    url: 'https://github.com/genuinetools/bane'
     category: code
 ---
 

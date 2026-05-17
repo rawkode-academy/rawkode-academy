@@ -3,8 +3,10 @@ id: lb438p217zya3imz0gaex2gb
 slug: introduction-to-fleet-k3s-and-rancher
 title: 'Introduction to Fleet, k3s, & Rancher'
 description: >-
-  In this episode, I am joined by Bastian Hofmann (Field Engineer at Rancher);
-  Bastian will be introducing us to Fleet.
+  Bastian Hofmann from Rancher walks through k3s as a lightweight single-binary
+  Kubernetes, Rancher for multi-cluster management, and the new Fleet GitOps
+  engine in Rancher 2.5. Hands-on: provision clusters, install Rancher via Helm
+  and cert-manager, then deploy with Fleet.
 publishedAt: 2020-10-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -98,9 +100,11 @@ guests:
 resources:
   - title: Installing Rancher documentation page
     type: url
+    url: 'https://rancher.com/docs/'
     category: documentation
   - title: Fleet documentation page
     type: url
+    url: 'https://fleet.rancher.io/'
     category: documentation
 ---
 

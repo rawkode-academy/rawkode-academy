@@ -3,9 +3,9 @@ id: mq6iyahwdxmkgsfthongzl40
 slug: hands-on-introduction-to-cdk8s
 title: Hands-on Introduction to cdk8s
 description: >-
-  CDK8s is a software development framework for defining Kubernetes applications
-  and reusable abstractions using familiar programming languages and rich
-  object-oriented APIs.
+  Live walkthrough of cdk8s with creator Elad Ben Israel, covering the App and
+  Chart model, snapshot testing, cdk8s+, importing CRDs, wrapping Helm charts,
+  and JSON escape patches.
 publishedAt: 2021-04-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -93,14 +93,13 @@ duration: 4359
 guests:
   - elad-ben-israel
 resources:
-  - title: Cluster API project
-    type: url
-    category: code
   - title: 'cdk8s Concepts: Escape Patches'
     type: url
+    url: 'https://cdk8s.io/docs/latest/basics/escape-hatches/'
     category: documentation
   - title: Construct Catalog
     type: url
+    url: 'https://constructs.dev/'
     category: other
 ---
 

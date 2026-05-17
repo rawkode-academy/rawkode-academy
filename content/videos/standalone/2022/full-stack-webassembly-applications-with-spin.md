@@ -2,12 +2,18 @@
 id: sx8a3ihcu4qum6du7ejlif7i
 slug: full-stack-webassembly-applications-with-spin
 title: Full Stack WebAssembly Applications with Spin
-description: Video content coming soon.
+description: >-
+  Building a full-stack WebAssembly application with Spin: a Bartholomew CMS
+  frontend plus two API components, a Rust addition service and a Grain
+  subtraction service, all running locally with spin up and deployed to Fermyon
+  Cloud.
 publishedAt: 2022-11-29T17:00:00.000Z
 type: recorded
 category: tutorial
 technologies:
   - spin
+  - rust
+  - webassembly
 chapters:
   - startTime: 44
     title: 'Introduction: Spin and Full Stack WebAssembly'
@@ -46,12 +52,15 @@ guests: []
 resources:
   - title: Grain Programming Language
     type: url
-    category: code
-  - title: Fermion Cloud
+    category: documentation
+    url: 'https://grain-lang.org/'
+  - title: Fermyon Cloud
     type: url
     category: other
+    url: 'https://www.fermyon.com/cloud'
   - title: Spin SDK
     type: url
     category: code
+    url: 'https://github.com/spinframework/spin'
 ---
 

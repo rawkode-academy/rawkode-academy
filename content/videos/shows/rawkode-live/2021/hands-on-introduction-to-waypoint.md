@@ -3,13 +3,18 @@ id: wm4rgxicr5rl3zm6m1109dh0
 slug: hands-on-introduction-to-waypoint
 title: Hands-on Introduction to Waypoint
 description: >-
-  In this episode, Taylor will guide us through everything we need to know to
-  get started with Waypoint
+  Taylor Dolezal walks through HashiCorp Waypoint's build, deploy, and release
+  model, showing the HCL config, GitOps workflow, the server and runner
+  architecture, and three demos deploying to AWS Lambda, Kubernetes, and a
+  Minecraft server.
 publishedAt: 2021-08-14T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - waypoint
+  - kubernetes
+  - docker
+  - terraform
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -114,15 +119,19 @@ guests:
 resources:
   - title: Waypoint GitOps repository
     type: url
+    url: 'https://github.com/onlydole/waypoint-gitops'
     category: code
   - title: EKS in Action repository
     type: url
+    url: 'https://github.com/onlydole/eks-in-action'
     category: code
   - title: Waypoint architecture.md
     type: url
+    url: 'https://github.com/hashicorp/waypoint/blob/main/ARCHITECTURE.md'
     category: documentation
   - title: Waypoint 0.6 GitHub milestone
     type: url
+    url: 'https://github.com/hashicorp/waypoint/milestone/17'
     category: other
 ---
 

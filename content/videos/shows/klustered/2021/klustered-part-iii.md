@@ -3,13 +3,17 @@ id: jder260f0z8zix9nh7u198mx
 slug: klustered-part-iii
 title: Klustered (Part III)
 description: >-
-  Klustered is a series of live streams in which myself and a guest join forces
-  to fix "broken" Kubernetes clusters ... on the clock.
+  Michael Hausenblas joins to debug two broken Kubernetes clusters: Justin
+  Garrison's cluster with expired control-plane certificates and MetalLB
+  trouble, and SIG Honk's cluster with a malicious sshd, a swapped API server
+  image, and disabled controller-manager flags.
 publishedAt: 2021-03-04T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - metallb
+  - teleport
 show: klustered
 chapters:
   - startTime: 0
@@ -80,6 +84,7 @@ guests:
 resources:
   - title: Klustered GitLab repository
     type: url
+    url: 'https://gitlab.com/rawkode/klustered'
     category: code
   - title: Justin Garrison's Ansible playbook repository for breaking the cluster
     type: url
