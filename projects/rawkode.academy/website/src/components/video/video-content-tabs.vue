@@ -72,11 +72,61 @@
         role="tabpanel"
         aria-labelledby="video-tab-resources"
       >
-        <div class="prose prose-lg dark:prose-invert max-w-none">
-          <p class="text-muted">
-            Resources related to this video will be displayed here, including
-            links, downloads, and additional materials.
-          </p>
+        <div v-if="!resources || resources.length === 0" class="prose prose-lg dark:prose-invert max-w-none">
+          <p class="text-muted">No resources for this episode yet.</p>
+        </div>
+        <div v-else class="space-y-6">
+          <div v-for="group in groupedResources" :key="group.category">
+            <h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+              {{ categoryLabel(group.category) }}
+            </h3>
+            <div class="grid gap-3">
+              <a
+                v-for="(resource, idx) in group.items"
+                :key="resource.id || `${group.category}-${idx}`"
+                :href="resource.url || resource.filePath || '#'"
+                :target="resource.type === 'url' ? '_blank' : undefined"
+                :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
+                class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-smooth group"
+              >
+                <svg
+                  class="w-5 h-5 mt-0.5 text-muted group-hover:text-primary flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    :d="categoryIcon(group.category)"
+                  />
+                </svg>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-primary-content group-hover:text-primary">
+                    {{ resource.title }}
+                  </div>
+                  <div v-if="resource.description" class="text-sm text-muted mt-0.5">
+                    {{ resource.description }}
+                  </div>
+                </div>
+                <svg
+                  v-if="resource.type === 'url'"
+                  class="w-4 h-4 mt-1 text-muted group-hover:text-primary flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -96,6 +146,27 @@ const trackEvent = (event, properties) => {
 	}
 };
 
+const CATEGORY_ORDER = ["documentation", "code", "slides", "demos", "other"];
+
+const CATEGORY_ICONS = {
+	documentation:
+		"M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+	code: "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4",
+	slides: "M7 4v16M17 4v16M3 12h18M8 12h8",
+	demos:
+		"M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z",
+	other:
+		"M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1",
+};
+
+const CATEGORY_LABELS = {
+	documentation: "Documentation",
+	code: "Code",
+	slides: "Slides",
+	demos: "Demos",
+	other: "Additional Resources",
+};
+
 export default {
 	name: "VideoContentTabs",
 	components: {
@@ -106,6 +177,10 @@ export default {
 		videoId: {
 			type: String,
 			required: true,
+		},
+		resources: {
+			type: Array,
+			default: () => [],
 		},
 	},
 	data() {
@@ -118,6 +193,20 @@ export default {
 			],
 		};
 	},
+	computed: {
+		groupedResources() {
+			const groups = new Map();
+			for (const resource of this.resources || []) {
+				const category = resource.category || "other";
+				if (!groups.has(category)) groups.set(category, []);
+				groups.get(category).push(resource);
+			}
+			return CATEGORY_ORDER.filter((c) => groups.has(c)).map((category) => ({
+				category,
+				items: groups.get(category),
+			}));
+		},
+	},
 	methods: {
 		setActiveTab(tabId) {
 			const previousTab = this.activeTab;
@@ -128,6 +217,12 @@ export default {
 				previous_tab: previousTab,
 				video_id: this.videoId,
 			});
+		},
+		categoryIcon(category) {
+			return CATEGORY_ICONS[category] || CATEGORY_ICONS.other;
+		},
+		categoryLabel(category) {
+			return CATEGORY_LABELS[category] || CATEGORY_LABELS.other;
 		},
 	},
 };
