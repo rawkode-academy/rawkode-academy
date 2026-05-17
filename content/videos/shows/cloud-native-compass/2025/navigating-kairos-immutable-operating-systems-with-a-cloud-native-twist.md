@@ -2,10 +2,9 @@
 id: cpx1b17zh33oo8i72zptib9n
 slug: navigating-kairos-immutable-operating-systems-with-a-cloud-native-twist
 title: 'Navigating Kairos: Immutable Operating Systems with a Cloud Native Twist'
-description: |
-  Exploring Kairos: Turning Linux Distributions into Immutable Operating Systems
-
-  In this episode, we dive into the Kairos project, a CNCF initiative aimed at converting any Linux distribution into an immutable operating system. Hosts David and Laura chat with Mauro and Dimitris, maintainers of Kairos, discussing the motivations, technical aspects, and unique features of the project. Listeners get an inside look at the challenges and solutions involved in creating an immutable OS, the project's community, and its intriguing name origin. Whether you're a home lab enthusiast or an enterprise developer, this episode offers valuable insights into Linux immutability, system management, and future trends.
+description: >-
+  In this episode, we dive into the Kairos project, a CNCF initiative aimed at
+  converting any Linux distribution into an immutable operating system.
 publishedAt: 2025-12-18T10:00:00.000Z
 type: recorded
 category: interview
@@ -49,3 +48,4 @@ guests:
   - mauro-morales
   - dimitris-karakasilis
 ---
+

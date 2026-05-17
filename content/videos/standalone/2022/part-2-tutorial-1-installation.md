@@ -5,23 +5,6 @@ title: 'Part 2 - Tutorial 1: Installation'
 description: >-
   Tutorial: Learn how to install and run #InfluxDB on macOS, Linux (Debian and
   RedHat), Docker, and Kubernetes.
-
-
-  00:00 - Introduction
-
-  00:50 - Install on macOS with brew
-
-  01:50 - Install on Debian (+derivatives) with apt
-
-  04:12 - Install on RedHat with dnf
-
-  05:25 - Install with Docker
-
-  06:30 - Install with Helm on Kubernetes
-
-
-  Remember to join the Discord to ask questions or seek help:
-  https://rawkode.chat
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial

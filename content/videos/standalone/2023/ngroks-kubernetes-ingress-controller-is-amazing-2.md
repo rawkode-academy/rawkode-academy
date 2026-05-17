@@ -6,12 +6,6 @@ description: >-
   ngrok is the fastest way to host and secure your applications and services on
   the internet. Learn how by following our getting started guide, or dive
   straight into our products and offerings.
-
-
-  Leverage ngrok for your Kubernetes Ingress. Instantly add load balancing,
-  authentication, and observability to your services via ngrok Cloud Edge
-  modules using Custom Resource Definitions (CRDs) and Kubernetes-native
-  tooling.
 publishedAt: 2023-09-22T17:00:00.000Z
 type: recorded
 category: tutorial
