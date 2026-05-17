@@ -8,13 +8,62 @@ interface Props {
 	source?: string | undefined;
 	documentation?: string | undefined;
 	category?: string | undefined;
+	subcategory?: string | undefined;
+	license?: string | undefined;
+	cncfStatus?: string | undefined;
+	matrixStatus?: string | undefined;
+	siteName?: string | undefined;
+	siteUrl?: string | undefined;
 }
 
-const { name, url, description, image, website, source, documentation, category } = Astro.props;
+const {
+	name,
+	url,
+	description,
+	image,
+	website,
+	source,
+	documentation,
+	category,
+	subcategory,
+	license,
+	cncfStatus,
+	matrixStatus,
+	siteName = "Rawkode Academy",
+	siteUrl = "https://rawkode.academy",
+} = Astro.props;
 
 const sameAs = [website, source, documentation].filter(
 	(v): v is string => Boolean(v),
 );
+
+const keywords = [category, subcategory, cncfStatus ? `cncf ${cncfStatus}` : undefined]
+	.filter((v): v is string => Boolean(v))
+	.join(", ");
+
+const additionalProperty = [
+	matrixStatus
+		? {
+				"@type": "PropertyValue",
+				name: "Rawkode Academy matrix status",
+				value: matrixStatus,
+		  }
+		: undefined,
+	cncfStatus
+		? {
+				"@type": "PropertyValue",
+				name: "CNCF status",
+				value: cncfStatus,
+		  }
+		: undefined,
+	license
+		? {
+				"@type": "PropertyValue",
+				name: "License",
+				value: license,
+		  }
+		: undefined,
+].filter(Boolean);
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -24,7 +73,21 @@ const jsonLd = {
 	description,
 	...(image && { image }),
 	...(category && { applicationCategory: category }),
+	...(license && { license }),
+	...(keywords && { keywords }),
 	...(sameAs.length > 0 && { sameAs }),
+	...(documentation && { softwareHelp: documentation }),
+	creator: {
+		"@type": "Organization",
+		name: siteName,
+		url: siteUrl,
+	},
+	publisher: {
+		"@type": "Organization",
+		name: siteName,
+		url: siteUrl,
+	},
+	...(additionalProperty.length > 0 && { additionalProperty }),
 	// Required by Google for SoftwareApplication; permissive defaults
 	operatingSystem: "Any",
 	offers: {
