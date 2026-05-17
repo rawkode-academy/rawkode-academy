@@ -38,7 +38,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
 		<!-- Hero Section -->
 		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto">
+			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto bleed-x-mobile">
 				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
 					<!-- Hero Copy -->
 					<div class="flex-1 space-y-4">
@@ -92,7 +92,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 							return (
 								<a
 									href={`/people/${person.data.id}`}
-									class="people-card-link glass-card-shimmer card-hover flex flex-col overflow-hidden items-center text-center p-6"
+									class="people-card-link glass-card-shimmer card-hover bleed-x-mobile flex flex-col overflow-hidden items-center text-center p-6"
 									data-keywords={searchKeywords}
 								>
 									{/* Avatar */}

@@ -271,7 +271,7 @@ const relMeUrls = [
     <div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
         <!-- Profile Header -->
         <section class="w-full">
-            <div class="glass-panel rounded-3xl p-8 md:p-12 max-w-5xl mx-auto">
+            <div class="person-hero-card glass-panel rounded-3xl p-8 md:p-12 max-w-5xl mx-auto">
                 <div class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
                     <!-- Avatar -->
                     <div class="flex-shrink-0">
@@ -454,3 +454,15 @@ const relMeUrls = [
         )}
     </div>
 </Page>
+
+<style>
+    /* Mobile: hero card goes edge-to-edge so the small gutter is reclaimed. */
+    @media (max-width: 639px) {
+        .person-hero-card {
+            margin-inline: calc(50% - 50vw);
+            border-radius: 0;
+            border-inline: 0;
+            box-shadow: none;
+        }
+    }
+</style>
