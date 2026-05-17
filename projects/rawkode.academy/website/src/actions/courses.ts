@@ -10,6 +10,7 @@ import {
 	captureServerEvent,
 	getAttributionFromSource,
 	getDistinctId,
+	getEventAttribution,
 } from "../server/analytics";
 
 const SignupSchema = z.object({
@@ -113,6 +114,7 @@ export const signupForCourseUpdates = defineAction({
 			const analytics = env.ANALYTICS as Fetcher | undefined;
 			const attribution = getAttributionFromSource(source);
 			const campaign = parseCampaignAttribution(campaignAttribution);
+			const cookieAttribution = getEventAttribution(ctx.request);
 			await captureServerEvent(
 				{
 					event: GROWTH_EVENTS.COURSE_SIGNUP,
@@ -124,6 +126,7 @@ export const signupForCourseUpdates = defineAction({
 						...(source ? { source } : {}),
 						...attribution,
 						...campaign,
+						...cookieAttribution,
 					},
 				},
 				analytics,
@@ -144,6 +147,7 @@ export const signupForCourseUpdates = defineAction({
 						...(source ? { source } : {}),
 						...attribution,
 						...campaign,
+						...cookieAttribution,
 					},
 				},
 				analytics,

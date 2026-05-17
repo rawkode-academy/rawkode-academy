@@ -12,19 +12,20 @@ const { userId } = Astro.props;
 	let posthogInitialized = false;
 	let enableInFlight = false;
 
+	const UTM_KEYS = [
+		"utm_source",
+		"utm_medium",
+		"utm_campaign",
+		"utm_term",
+		"utm_content",
+	];
+
 	const getUtmParams = () => {
 		try {
 			const url = new URL(location.href);
 			const params = new URLSearchParams(url.search);
-			const keys = [
-				"utm_source",
-				"utm_medium",
-				"utm_campaign",
-				"utm_term",
-				"utm_content",
-			];
 			const out = {};
-			for (const key of keys) {
+			for (const key of UTM_KEYS) {
 				if (params.has(key)) {
 					out[key] = params.get(key);
 				}
@@ -33,6 +34,75 @@ const { userId } = Astro.props;
 		} catch {
 			return {};
 		}
+	};
+
+	const readCookie = (name) => {
+		try {
+			const match = document.cookie.match(
+				new RegExp(`(?:^|;\\s*)${name}=([^;]+)`),
+			);
+			return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+		} catch {
+			return undefined;
+		}
+	};
+
+	const writeCookie = (name, value, maxAgeSeconds) => {
+		try {
+			const encoded = encodeURIComponent(value);
+			document.cookie = `${name}=${encoded}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax`;
+		} catch {}
+	};
+
+	const buildAttribution = () => {
+		const utm = getUtmParams();
+		const data = {
+			landing_page: location.pathname,
+			initial_referrer: document.referrer || "",
+			...utm,
+			captured_at: new Date().toISOString(),
+		};
+		return { data, hasUtm: Object.keys(utm).length > 0 };
+	};
+
+	const persistAttributionCookies = () => {
+		const { data, hasUtm } = buildAttribution();
+		// First-touch: write once, persist a year. Identifies the original
+		// surface that brought the user. Required for cross-session funnel
+		// analysis.
+		if (!readCookie("rk_first_touch")) {
+			writeCookie("rk_first_touch", JSON.stringify(data), 60 * 60 * 24 * 365);
+		}
+		// Last-touch: overwrite when a new UTM hit lands. Useful for
+		// attributing the immediate campaign that drove an action.
+		if (hasUtm) {
+			writeCookie("rk_last_touch", JSON.stringify(data), 60 * 60 * 24 * 30);
+		}
+	};
+
+	const registerAttributionSuperProperties = () => {
+		try {
+			const utm = getUtmParams();
+			if (Object.keys(utm).length > 0) {
+				window.posthog.register({
+					...utm,
+					landing_page: location.pathname,
+				});
+			}
+			const firstTouch = readCookie("rk_first_touch");
+			if (firstTouch) {
+				const parsed = JSON.parse(firstTouch);
+				const onceProps = {};
+				for (const [k, v] of Object.entries(parsed)) {
+					if (typeof v === "string" && v) {
+						onceProps[`first_touch_${k}`] = v;
+					}
+				}
+				if (Object.keys(onceProps).length > 0) {
+					window.posthog.register_once(onceProps);
+				}
+			}
+		} catch {}
 	};
 
 	const bootstrapPostHog = () => {
@@ -109,6 +179,11 @@ const { userId } = Astro.props;
 		try {
 			bootstrapPostHog();
 
+			// Persist attribution cookies before init so the loaded callback,
+			// auth-callback, and server-side actions can read them on the very
+			// first visit.
+			persistAttributionCookies();
+
 			window.posthog.init(PH_KEY, {
 				api_host: PH_HOST,
 				autocapture: true,
@@ -130,10 +205,7 @@ const { userId } = Astro.props;
 				},
 			});
 
-			const utm = getUtmParams();
-			if (Object.keys(utm).length > 0) {
-				window.posthog.register(utm);
-			}
+			registerAttributionSuperProperties();
 
 			if (userId) {
 				window.posthog.identify(userId);
