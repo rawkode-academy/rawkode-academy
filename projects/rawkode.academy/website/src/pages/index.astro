@@ -395,9 +395,17 @@ const academyValues = [
 					{secondaryVideos.map((video) => (
 						<a
 							href={`/watch/${video.data.slug}`}
-							class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
+							class="soft-panel bleed-x-mobile group block h-full overflow-hidden"
 						>
-							<div class="space-y-3">
+							<div class="relative aspect-video overflow-hidden bg-black/10 dark:bg-white/5">
+								<img
+									src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}
+									alt={video.data.title}
+									class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
+									loading="lazy"
+								/>
+							</div>
+							<div class="space-y-3 p-4 sm:p-5">
 								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
 									<span>{videoLabel(video)}</span>
 									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
