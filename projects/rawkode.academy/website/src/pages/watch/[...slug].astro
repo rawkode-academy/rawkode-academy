@@ -360,6 +360,7 @@ if (isAuthenticated && user?.id) {
 				<VideoContentTabs
 					client:idle
 					videoId={video.data.id}
+					resources={video.data.resources ?? []}
 				/>
 
 				{/* More Videos by Technology */}
