@@ -3,15 +3,16 @@ id: kda08fq63i5ibx1panb4xixj
 slug: the-newcomers-guide-to-kubernetes
 title: The Newcomers Guide to Kubernetes
 description: >-
-  In this episode, joined by David Simmons, we'll take a look at Kubernetes from
-  a newcomers perspective! David has no prior Kubernetes experience and I'll be
-  doing my best to get him up and running, deploying his first application to
-  Kubernetes; in under an hour.
+  David Simmons joins with zero Kubernetes experience and gets walked through
+  kubectl, pods, deployments, multi-container pods, services, ConfigMaps,
+  Secrets, namespaces, port-forwarding, and DaemonSets on a Docker for Mac
+  cluster.
 publishedAt: 2020-09-24T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kubernetes
+  - docker
 show: rawkode-live
 chapters:
   - startTime: 0

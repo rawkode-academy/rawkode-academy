@@ -3,13 +3,16 @@ id: yd4z5rt8qgwxouhdzkzpt8ly
 slug: hands-on-introduction-to-k0s
 title: Hands-on Introduction to K0s
 description: >-
-  In this episode, Jussi will guide us through everything we need to know about
-  K0s.
+  Jussi Nummelin walks through k0s, the single-binary Kubernetes distribution
+  from Mirantis. We cover control plane isolation, single-node and HA install,
+  then drive multi-node deploys and upgrades with k0sctl plus a Terraform demo.
 publishedAt: 2021-08-12T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - k0s
+  - kubernetes
+  - terraform
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -78,8 +81,13 @@ duration: 3913
 guests:
   - jussi-nummelin
 resources:
-  - title: k0s Getting Started Guide
+  - title: k0s documentation
     type: url
+    url: 'https://docs.k0sproject.io/'
     category: documentation
+  - title: k0sctl on GitHub
+    type: url
+    url: 'https://github.com/k0sproject/k0sctl'
+    category: code
 ---
 

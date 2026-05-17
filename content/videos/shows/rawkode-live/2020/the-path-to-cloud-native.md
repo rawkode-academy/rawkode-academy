@@ -3,13 +3,14 @@ id: x4szsngpepdfp7umx1u35jrr
 slug: the-path-to-cloud-native
 title: The Path to Cloud Native
 description: >-
-  Cloud native computing is an approach in software development that utilizes
-  cloud computing to "build and run scalable applications in modern, dynamic
-  environments such as public, private, and hybrid clouds".
+  CNCF ambassador Ihor Dvoretskyi joins David to unpack cloud native adoption,
+  the role of Kubernetes, when microservices make sense versus a monolith,
+  stateful workloads, and the common pitfalls teams hit on the journey.
 publishedAt: 2020-10-20T17:00:00.000Z
 type: live
 category: tutorial
-technologies: []
+technologies:
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0

@@ -3,13 +3,17 @@ id: nf0c2zf2w370qg9s6d74ywjd
 slug: hands-on-introduction-to-kaniko
 title: Hands-on Introduction to Kaniko
 description: >-
-  In this episode, we'll guide you through everything you need to know to get
-  started with Kaniko
+  Tejal Desai (Kaniko maintainer at Google) walks through building container
+  images inside Kubernetes without Docker-in-Docker, covering the executor pod,
+  registry secrets, layer caching, snapshot modes, and Tekton/GitLab CI.
 publishedAt: 2021-04-23T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kaniko
+  - kubernetes
+  - tektoncd
+  - gitlab
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -102,11 +106,14 @@ resources:
   - title: Kaniko Getting Started tutorial
     type: url
     category: documentation
+    url: https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
   - title: Kaniko build context documentation
     type: url
     category: documentation
+    url: https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
   - title: GitLab tutorial dedicated to Kaniko
     type: url
     category: documentation
+    url: https://docs.gitlab.com/ci/docker/using_kaniko/
 ---
 

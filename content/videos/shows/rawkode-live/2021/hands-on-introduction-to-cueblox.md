@@ -3,14 +3,16 @@ id: wlmkeyi2ain92p240tlugp07
 slug: hands-on-introduction-to-cueblox
 title: Hands-on Introduction to CueBlox
 description: >-
-  In this episode, Brian and David will show you how to use CUE and CueBlox to
-  validate your arbitrary data with explicit schemata and serve it over REST and
-  GraphQL.
+  Brian Ketelsen and David walk through CueBlox: defining content schemas in
+  CUE, validating Markdown/YAML data, serving it as a GraphQL API, and
+  extending the workflow with HashiCorp-style plugins for image processing
+  and CDN sync.
 publishedAt: 2021-09-08T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - cueblox
+  - cue
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -62,9 +64,11 @@ resources:
     category: other
   - title: CueBlox dogfood directory
     type: url
+    url: 'https://github.com/cueblox/blox/tree/main/dogfood'
     category: demos
   - title: bketelsen/bkapi repository
     type: url
+    url: 'https://github.com/bketelsen/bkapi'
     category: code
 ---
 

@@ -2,9 +2,10 @@
 id: czi3j87pkjuupnifphnpqnor
 slug: hands-on-introduction-to-firecracker
 title: Hands-on Introduction to Firecracker
-description: >-
-  In this episode, Radu and Grabriel will walk us through everything we need to
-  know to get started with Firecracker.
+description: Radu and Gabriel from AWS demo Firecracker from the ground up: the
+  firecracker and jailer binaries, booting a microVM over the REST API on a Unix
+  socket, networking and device emulation, the Go SDK, plus a hands-on
+  snapshotting walkthrough comparing full and diff snapshots.
 publishedAt: 2021-05-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -94,14 +95,18 @@ resources:
   - title: Firecracker Quick Start Guide
     type: url
     category: documentation
+    url: https://github.com/firecracker-microvm/firecracker/blob/main/docs/getting-started.md
   - title: Firecracker Swagger API specification
     type: url
     category: documentation
+    url: https://github.com/firecracker-microvm/firecracker/blob/main/src/firecracker/swagger/firecracker.yaml
   - title: Firecracker Go SDK
     type: url
     category: code
+    url: https://github.com/firecracker-microvm/firecracker-go-sdk
   - title: Weave Ignite
     type: url
     category: code
+    url: https://github.com/weaveworks/ignite
 ---
 

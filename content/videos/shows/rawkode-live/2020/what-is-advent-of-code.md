@@ -3,9 +3,10 @@ id: g8ln43qrv5dyrv109fnk9led
 slug: what-is-advent-of-code
 title: What is Advent of Code?
 description: >-
-  Advent of Code is an Advent calendar of small programming puzzles for a
-  variety of skill sets and skill levels that can be solved in any programming
-  language you like.
+  David and Ian George (Orlando Go meetup organizer) tackle Advent of Code 2020
+  Day 7, the bag rules puzzle, live in Go. They cover the philosophy of the
+  puzzles, input parsing with fmt.Sscanf, and recursive logic for counting
+  containing and contained bags.
 publishedAt: 2020-12-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -45,6 +46,7 @@ guests: []
 resources:
   - title: Advent of Code
     type: url
-    category: demos
+    url: 'https://adventofcode.com/'
+    category: other
 ---
 

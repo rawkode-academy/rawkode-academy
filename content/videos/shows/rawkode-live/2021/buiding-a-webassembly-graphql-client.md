@@ -3,12 +3,14 @@ id: d4p1so8omkjzyrpsgvyf5n6d
 slug: buiding-a-webassembly-graphql-client
 title: Buiding a WebAssembly GraphQL Client
 description: >-
-  In this episode, joined by Connor and Francis, we'll attempt to build a
-  GraphQL client using WebAssembly, to hook into Connor's Suborbital project.
+  Connor Hicks and Francis Gulotta join David to add a GraphQL host capability
+  to Suborbital's Reactor, writing the Go-side client and exposing it to a Rust
+  Wasm module over the FFI boundary so sandboxed modules can call GraphQL APIs.
 publishedAt: 2021-07-06T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
+  - rust
   - suborbital
   - webassembly
 show: rawkode-live

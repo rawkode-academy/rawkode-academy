@@ -3,13 +3,19 @@ id: mbehnf2kqdrdmagxryh6e7tc
 slug: hands-on-introduction-to-okteto
 title: Hands-on Introduction to Okteto
 description: >-
-  In this episode, we'll guide you through everything you need to get started
-  developing on Kubernetes with Okteto.
+  Ramiro Berrelleza walks through Okteto Cloud and the okteto CLI, deploying
+  the Movies sample with Helm and BuildKit, then using okteto up to sync code
+  into a live Kubernetes pod. Plus Docker Compose support and preview
+  environments.
 publishedAt: 2021-05-19T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - okteto
+  - kubernetes
+  - helm
+  - buildkit
+  - docker-compose
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -71,14 +77,18 @@ resources:
   - title: Okteto Quick Start Guide
     type: url
     category: documentation
+    url: https://www.okteto.com/docs/get-started/dev-quickstart/
   - title: Okteto Movies sample application
     type: url
     category: demos
+    url: https://github.com/okteto/movies
   - title: Okteto Preview Environments documentation
     type: url
     category: documentation
+    url: https://www.okteto.com/docs/previews/
   - title: Docker samples voting app
     type: url
     category: demos
+    url: https://github.com/dockersamples/example-voting-app
 ---
 

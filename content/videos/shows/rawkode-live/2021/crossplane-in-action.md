@@ -3,13 +3,16 @@ id: i3y48lfgt09qvoupcis4dkov
 slug: crossplane-in-action
 title: Crossplane in Action
 description: >-
-  In this episode, Viktor guides us through a complete demo of Crossplane in
-  action.
+  Viktor Farcic walks through Crossplane as a control plane for everything,
+  contrasts it with Terraform and Pulumi, then live-demos provisioning a GKE
+  cluster, building composite resources, and watching drift detection rebuild
+  a deleted node group.
 publishedAt: 2021-09-09T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - crossplane
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -50,20 +53,25 @@ duration: 3334
 guests:
   - viktor-farcic
 resources:
-  - title: Crossplane Getting Started documentation
+  - title: Crossplane documentation
     type: url
+    url: 'https://docs.crossplane.io/'
     category: documentation
   - title: Crossplane contrib providers
     type: url
+    url: 'https://github.com/crossplane-contrib'
     category: code
   - title: Equinix Metal provider for Crossplane
     type: url
+    url: 'https://github.com/crossplane-contrib/provider-equinix-metal'
     category: code
   - title: Civo provider for Crossplane
     type: url
+    url: 'https://github.com/crossplane-contrib/provider-civo'
     category: code
   - title: SQL provider for Crossplane
     type: url
+    url: 'https://github.com/crossplane-contrib/provider-sql'
     category: code
 ---
 
