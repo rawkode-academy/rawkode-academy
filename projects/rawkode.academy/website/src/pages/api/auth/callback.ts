@@ -13,6 +13,7 @@ import {
 	captureServerEvent,
 	getAnonDistinctIdFromCookies,
 	getDistinctId,
+	getEventAttribution,
 	identifyServerUser,
 } from "@/server/analytics";
 
@@ -155,6 +156,7 @@ export const GET: APIRoute = async (context) => {
 				auth_method: "oidc",
 				return_to: returnTo,
 				...(anonId && anonId !== userInfo.sub ? { anon_id: anonId } : {}),
+				...getEventAttribution(context.request),
 			},
 			distinctId: userInfo.sub,
 		},
