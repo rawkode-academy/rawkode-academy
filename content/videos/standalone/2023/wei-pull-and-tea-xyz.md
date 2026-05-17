@@ -11,6 +11,7 @@ type: recorded
 category: tutorial
 technologies:
   - pkgx
+show: alphabits
 chapters:
   - startTime: 0
     title: Intro
