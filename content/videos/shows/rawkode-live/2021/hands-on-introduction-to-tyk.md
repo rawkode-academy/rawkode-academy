@@ -5,8 +5,8 @@ title: Hands-on Introduction to Tyk
 description: >-
   Andy Smith and Budha Bhattacharya from Tyk walk through the open-source API
   gateway: installing it on Kubernetes with Helm, configuring keyless and
-  API-key auth, rate limits, the Tyk Operator, and stitching REST sources into
-  a GraphQL universal data graph.
+  API-key auth, rate limits, the Tyk Operator, and stitching REST sources into a
+  GraphQL universal data graph.
 publishedAt: 2021-09-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -139,7 +139,8 @@ resources:
     category: documentation
   - title: Tyk Operator httpbin sample manifest
     type: url
-    url: 'https://github.com/TykTechnologies/tyk-operator/blob/legacy/config/samples/httpbin.yaml'
+    url: >-
+      https://github.com/TykTechnologies/tyk-operator/blob/legacy/config/samples/httpbin.yaml
     category: code
   - title: JSONPlaceholder users API demo endpoint
     type: url

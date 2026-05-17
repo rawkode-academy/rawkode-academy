@@ -4,8 +4,8 @@ slug: hands-on-introduction-to-quickwit
 title: Hands-on Introduction to Quickwit
 description: >-
   Francois Massot walks through Quickwit hands-on: spinning up an index,
-  ingesting logs and OpenTelemetry traces on Kubernetes, querying via the UI
-  and CLI, and exploring the Grafana plugin plus Jaeger integration over 500M+
+  ingesting logs and OpenTelemetry traces on Kubernetes, querying via the UI and
+  CLI, and exploring the Grafana plugin plus Jaeger integration over 500M+
   spans.
 publishedAt: 2024-01-20T17:00:00.000Z
 type: live

@@ -4,8 +4,8 @@ slug: kubescape-operator-and-saas
 title: Kubescape Operator & SaaS
 description: >-
   Deploy the Kubescape operator across AKS, EKS, and GKE with Pulumi, then use
-  Kubescape Cloud to triage configuration risks, CVEs, and RBAC across
-  workloads from Flux, Grafana, and Helm charts.
+  Kubescape Cloud to triage configuration risks, CVEs, and RBAC across workloads
+  from Flux, Grafana, and Helm charts.
 publishedAt: 2022-12-20T17:00:00.000Z
 type: recorded
 category: tutorial

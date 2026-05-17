@@ -2,7 +2,11 @@
 id: affci60zjdq4xb6e1l6yklau
 slug: introduction-to-second-state
 title: Introduction to Second State
-description: 'Tim McCallum joins to demo Second State''s serverless WebAssembly function-as-a-service. We write Rust, compile to Wasm, deploy via SSVM up, call functions through a Postman-documented REST API, hot-swap versions, and run an OCR / TensorFlow demo.'
+description: >-
+  Tim McCallum joins to demo Second State's serverless WebAssembly
+  function-as-a-service. We write Rust, compile to Wasm, deploy via SSVM up,
+  call functions through a Postman-documented REST API, hot-swap versions, and
+  run an OCR / TensorFlow demo.
 publishedAt: 2021-02-03T17:00:00.000Z
 type: live
 category: tutorial

@@ -58,23 +58,23 @@ guests:
 resources:
   - title: Spin OpenTelemetry plugin
     type: url
-    url: https://github.com/spinframework/spin-plugins
+    url: 'https://github.com/spinframework/spin-plugins'
     category: code
   - title: Wasm I/O
     type: url
-    url: https://wasm.io/
+    url: 'https://wasm.io/'
     category: other
   - title: Spin
     type: url
-    url: https://spinframework.dev/
+    url: 'https://spinframework.dev/'
     category: documentation
   - title: SpinKube
     type: url
-    url: https://www.spinkube.dev/
+    url: 'https://www.spinkube.dev/'
     category: documentation
   - title: Spin observability docs
     type: url
-    url: https://spinframework.dev/v3/observing-apps
+    url: 'https://spinframework.dev/v3/observing-apps'
     category: documentation
 ---
 

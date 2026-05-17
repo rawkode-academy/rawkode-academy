@@ -2,7 +2,11 @@
 id: xbfhkuz66nc3g08axlx7zffb
 slug: hands-on-introduction-to-snyk
 title: Hands-on Introduction to Snyk
-description: Matt Jarvis walks through Snyk hands-on, from importing a GitHub repo into the web UI and fixing dependency vulnerabilities via automated PRs, through Snyk Code data-flow analysis and VS Code, to container image scans, the CLI, and Kubernetes YAML IaC scanning.
+description: >-
+  Matt Jarvis walks through Snyk hands-on, from importing a GitHub repo into the
+  web UI and fixing dependency vulnerabilities via automated PRs, through Snyk
+  Code data-flow analysis and VS Code, to container image scans, the CLI, and
+  Kubernetes YAML IaC scanning.
 publishedAt: 2021-07-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -88,11 +92,11 @@ guests:
 resources:
   - title: n8n workflow automation project
     type: url
-    url: https://github.com/n8n-io/n8n
+    url: 'https://github.com/n8n-io/n8n'
     category: code
   - title: CNCF Cloud Native Security Whitepaper
     type: url
-    url: https://github.com/cncf/tag-security/tree/main/security-whitepaper
+    url: 'https://github.com/cncf/tag-security/tree/main/security-whitepaper'
     category: documentation
 ---
 

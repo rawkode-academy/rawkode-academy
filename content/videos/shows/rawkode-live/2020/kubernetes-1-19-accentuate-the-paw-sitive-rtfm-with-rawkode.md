@@ -49,7 +49,8 @@ resources:
   - title: Kubernetes 1.19 release article
     type: url
     category: documentation
-    url: 'https://kubernetes.io/blog/2020/08/26/kubernetes-release-1.19-accentuate-the-paw-sitive/'
+    url: >-
+      https://kubernetes.io/blog/2020/08/26/kubernetes-release-1.19-accentuate-the-paw-sitive/
   - title: seccomp operator
     type: url
     category: code

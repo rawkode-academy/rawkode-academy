@@ -120,7 +120,8 @@ resources:
   - title: >-
       GitOps Toolkit Kustomization custom resource definition health assessment
       documentation
-    url: 'https://fluxcd.io/flux/components/kustomize/kustomizations/#health-assessment'
+    url: >-
+      https://fluxcd.io/flux/components/kustomize/kustomizations/#health-assessment
     type: url
     category: documentation
   - title: >-

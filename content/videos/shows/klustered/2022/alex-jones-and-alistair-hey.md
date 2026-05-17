@@ -3,10 +3,10 @@ id: dpcat5afr4tp3p580cp0370w
 slug: alex-jones-and-alistair-hey
 title: Alex Jones & Alistair Hey
 description: >-
-  Alex Jones and Alistair Hay break each other's Kubernetes clusters. Alex
-  hunts a disabled replica set controller, a blocking NetworkPolicy, and a
-  tampered cluster DNS IP. Alistair unwinds tc traffic-control delays, a rogue
-  kubectl alias, and dropping iptables rules.
+  Alex Jones and Alistair Hay break each other's Kubernetes clusters. Alex hunts
+  a disabled replica set controller, a blocking NetworkPolicy, and a tampered
+  cluster DNS IP. Alistair unwinds tc traffic-control delays, a rogue kubectl
+  alias, and dropping iptables rules.
 publishedAt: 2022-11-11T17:00:00.000Z
 type: live
 category: tutorial

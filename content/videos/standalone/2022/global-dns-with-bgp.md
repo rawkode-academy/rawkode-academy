@@ -3,9 +3,9 @@ id: v0i31x8ecolt41m670pt9cto
 slug: global-dns-with-bgp
 title: Global DNS with BGP
 description: >-
-  Run CoreDNS in three metros on Equinix Metal and advertise a single anycast
-  IP over BGP with BIRD, then reproduce the whole setup with Pulumi and CUE so
-  the closest region answers every query.
+  Run CoreDNS in three metros on Equinix Metal and advertise a single anycast IP
+  over BGP with BIRD, then reproduce the whole setup with Pulumi and CUE so the
+  closest region answers every query.
 publishedAt: 2022-08-11T17:00:00.000Z
 type: recorded
 category: tutorial

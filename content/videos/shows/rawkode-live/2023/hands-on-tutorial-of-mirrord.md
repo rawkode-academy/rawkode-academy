@@ -2,7 +2,10 @@
 id: eyps5shz1242dx4h4oovg9jk
 slug: hands-on-tutorial-of-mirrord
 title: Hands-on Tutorial of mirrord
-description: Aviram and Tal from MetalBear show how mirrord runs a local process inside a remote Kubernetes pod's context, mirroring traffic, env vars and files, then demo the VS Code extension, mirrord teams operator and L7 filtering.
+description: >-
+  Aviram and Tal from MetalBear show how mirrord runs a local process inside a
+  remote Kubernetes pod's context, mirroring traffic, env vars and files, then
+  demo the VS Code extension, mirrord teams operator and L7 filtering.
 publishedAt: 2023-07-20T17:00:00.000Z
 type: live
 category: tutorial

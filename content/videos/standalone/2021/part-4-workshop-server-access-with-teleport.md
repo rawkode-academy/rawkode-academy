@@ -2,7 +2,11 @@
 id: hn0j9iu8ps7jaegq6iykq50c
 slug: part-4-workshop-server-access-with-teleport
 title: Part 4. Workshop - Server Access with Teleport
-description: Hands-on Teleport workshop covering agent node registration, static and dynamic labels, user and role management, eBPF enhanced session recording, and accessing servers through the Web UI and tsh CLI with shared and recorded sessions.
+description: >-
+  Hands-on Teleport workshop covering agent node registration, static and
+  dynamic labels, user and role management, eBPF enhanced session recording, and
+  accessing servers through the Web UI and tsh CLI with shared and recorded
+  sessions.
 publishedAt: 2021-11-05T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -87,7 +91,8 @@ resources:
     category: documentation
   - title: Teleport enhanced session recording documentation
     type: url
-    url: 'https://goteleport.com/docs/enroll-resources/server-access/guides/bpf-session-recording/'
+    url: >-
+      https://goteleport.com/docs/enroll-resources/server-access/guides/bpf-session-recording/
     category: documentation
 ---
 

@@ -61,10 +61,10 @@ resources:
   - title: Grokking Deep Learning
     type: url
     category: other
-    url: https://www.manning.com/books/grokking-deep-learning
+    url: 'https://www.manning.com/books/grokking-deep-learning'
   - title: Kaggle Chest X-Ray Pneumonia Dataset by Paul Timothy Mooney
     type: url
     category: other
-    url: https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia
+    url: 'https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia'
 ---
 

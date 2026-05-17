@@ -2,7 +2,11 @@
 id: o1184zljah5ebqa0sj8h0i43
 slug: part-5-workshop-1-introduction-to-flux
 title: 'Part 5 - Workshop 1: Introduction to Flux'
-description: 'Workshop on the Flux query language for InfluxDB 2: set up InfluxDB and Telegraf, write queries with from, range, filter, yield, group, window, and aggregateWindow, and run Flux from the InfluxDB UI, the CLI, and the VS Code extension.'
+description: >-
+  Workshop on the Flux query language for InfluxDB 2: set up InfluxDB and
+  Telegraf, write queries with from, range, filter, yield, group, window, and
+  aggregateWindow, and run Flux from the InfluxDB UI, the CLI, and the VS Code
+  extension.
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial

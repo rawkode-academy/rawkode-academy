@@ -5,8 +5,8 @@ title: Kubernetes Security Lab
 description: >-
   Rory McCune walks through a hands-on Kubernetes security lab built on kind,
   attacking five deliberately vulnerable clusters: insecure API server port,
-  unauthenticated kubelet, unauthenticated etcd, privileged pod escape, and
-  Helm 2's Tiller.
+  unauthenticated kubelet, unauthenticated etcd, privileged pod escape, and Helm
+  2's Tiller.
 publishedAt: 2021-04-15T17:00:00.000Z
 type: live
 category: tutorial

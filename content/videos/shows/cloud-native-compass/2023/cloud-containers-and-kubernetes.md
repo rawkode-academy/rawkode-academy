@@ -4,9 +4,9 @@ slug: cloud-containers-and-kubernetes
 title: 'Cloud, Containers, & Kubernetes'
 description: >-
   Eli (Scaleway), Neil (Portainer), and Abdel (Google) join the inaugural Cloud
-  Native Compass to debate cloud pricing beyond the big three, whether Docker
-  is still trustworthy, WebAssembly's role alongside containers, and the rise
-  of internal developer portals like Backstage.
+  Native Compass to debate cloud pricing beyond the big three, whether Docker is
+  still trustworthy, WebAssembly's role alongside containers, and the rise of
+  internal developer portals like Backstage.
 publishedAt: 2023-05-21T17:00:00.000Z
 type: recorded
 category: interview

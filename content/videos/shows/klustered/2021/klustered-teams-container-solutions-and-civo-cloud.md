@@ -3,10 +3,10 @@ id: jpgna191w3vhmazhx8q5gypb
 slug: klustered-teams-container-solutions-and-civo-cloud
 title: 'Klustered Teams: Container Solutions & Civo Cloud'
 description: >-
-  Container Solutions and Civo Cloud race to repair broken Kubernetes
-  clusters, fixing expired apiserver certs, a tab-corrupted scheduler
-  manifest, a malicious validating webhook, node taints, scheduler port
-  mismatches, resource quotas, and a containerd registry redirect.
+  Container Solutions and Civo Cloud race to repair broken Kubernetes clusters,
+  fixing expired apiserver certs, a tab-corrupted scheduler manifest, a
+  malicious validating webhook, node taints, scheduler port mismatches, resource
+  quotas, and a containerd registry redirect.
 publishedAt: 2021-07-08T17:30:00.000Z
 type: live
 category: tutorial

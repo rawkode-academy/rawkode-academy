@@ -84,7 +84,7 @@ guests:
 resources:
   - title: Klustered GitLab repository
     type: url
-    url: https://gitlab.com/rawkode/klustered
+    url: 'https://gitlab.com/rawkode/klustered'
     category: code
   - title: Justin Garrison's Ansible playbook repository for breaking the cluster
     type: url

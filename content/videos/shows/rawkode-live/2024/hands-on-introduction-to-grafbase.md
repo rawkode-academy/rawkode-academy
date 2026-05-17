@@ -3,10 +3,10 @@ id: jufccm4nmljpvfjbskmoc03s
 slug: hands-on-introduction-to-grafbase
 title: Hands-on Introduction to Grafbase
 description: >-
-  Hands-on with Grafbase and founder Fredrik Bjork. We build standalone
-  GraphQL subgraphs with the TypeScript SDK, compose products and reviews
-  into a federated graph, extend types across teams, and deploy via the
-  Grafbase Cloud GitHub integration.
+  Hands-on with Grafbase and founder Fredrik Bjork. We build standalone GraphQL
+  subgraphs with the TypeScript SDK, compose products and reviews into a
+  federated graph, extend types across teams, and deploy via the Grafbase Cloud
+  GitHub integration.
 publishedAt: 2024-02-21T17:00:00.000Z
 type: live
 category: tutorial

@@ -90,15 +90,15 @@ guests: []
 resources:
   - type: url
     title: DevSpace website
-    url: https://devspace.sh/
+    url: 'https://devspace.sh/'
     category: documentation
   - type: url
     title: DevSpace documentation
-    url: https://devspace.sh/docs/getting-started/introduction
+    url: 'https://devspace.sh/docs/getting-started/introduction'
     category: documentation
   - type: url
-    title: DevSpace Slack (kubernetes.slack.com #devspace)
-    url: https://kubernetes.slack.com/messages/devspace
+    title: DevSpace Slack (kubernetes.slack.com
+    url: 'https://kubernetes.slack.com/messages/devspace'
     category: other
 ---
 

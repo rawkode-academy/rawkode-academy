@@ -4,9 +4,9 @@ slug: hands-on-with-runme
 title: Hands-on with RUNME
 description: >-
   Sebastian Tiedtke, CTO of Stateful, gives a hands-on tour of Runme: turning
-  Markdown into runnable notebooks via the CLI and VS Code, mixing shell,
-  Python and Deno cells, navigating cloud resources, and reproducible envs
-  with dev containers and Dagger.
+  Markdown into runnable notebooks via the CLI and VS Code, mixing shell, Python
+  and Deno cells, navigating cloud resources, and reproducible envs with dev
+  containers and Dagger.
 publishedAt: 2024-10-04T17:00:00.000Z
 type: live
 category: tutorial

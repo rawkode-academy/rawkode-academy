@@ -2,7 +2,7 @@
 id: nnnb1s0hvh5ypbwavjppy3ze
 slug: kluctl-new-features-and-updates
 title: Kluctl New Features & Updates
-description: Alexander Block returns to walk through what's new in Kluctl: the GitOps controller for pull-based deploys alongside the CLI, the WebUI for visibility, and a live demo bootstrapping a kind cluster and handing off to GitOps.
+description: 'Alexander Block returns to walk through what''s new in Kluctl: the GitOps controller for pull-based deploys alongside the CLI, the WebUI for visibility, and a live demo bootstrapping a kind cluster and handing off to GitOps.'
 publishedAt: 2023-09-27T17:00:00.000Z
 type: live
 category: tutorial

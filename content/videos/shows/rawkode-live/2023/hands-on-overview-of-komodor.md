@@ -2,7 +2,11 @@
 id: l7vd0dst1evod87rrxy0zc1c
 slug: hands-on-overview-of-komodor
 title: Hands-on Overview of Komodor
-description: Hands-on tour of Komodor for Kubernetes troubleshooting. Installing the agent via Helm, browsing service and event timelines, best-practice checks, config-change diffs, deployment monitors to Slack, and log redaction with regex.
+description: >-
+  Hands-on tour of Komodor for Kubernetes troubleshooting. Installing the agent
+  via Helm, browsing service and event timelines, best-practice checks,
+  config-change diffs, deployment monitors to Slack, and log redaction with
+  regex.
 publishedAt: 2023-02-09T17:00:00.000Z
 type: live
 category: tutorial

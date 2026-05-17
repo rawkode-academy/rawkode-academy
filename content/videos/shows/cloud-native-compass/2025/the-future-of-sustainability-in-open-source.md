@@ -19,11 +19,11 @@ guests:
 resources:
   - title: Eleanor Ostrom's design principles for self-governed commons
     type: url
-    url: https://en.wikipedia.org/wiki/Elinor_Ostrom
+    url: 'https://en.wikipedia.org/wiki/Elinor_Ostrom'
     category: other
   - title: Nivenly Foundation
     type: url
-    url: https://nivenly.org/
+    url: 'https://nivenly.org/'
     category: other
   - title: CNCF Deaf and Hard of Hearing Working Group
     type: url

@@ -107,11 +107,11 @@ guests:
 resources:
   - title: Equinix Metal
     type: url
-    url: https://deploy.equinix.com/product/bare-metal/
+    url: 'https://deploy.equinix.com/product/bare-metal/'
     category: other
   - title: Kubernetes Office Hours
     type: url
-    url: https://www.kubernetes.dev/resources/office-hours/
+    url: 'https://www.kubernetes.dev/resources/office-hours/'
     category: other
 ---
 

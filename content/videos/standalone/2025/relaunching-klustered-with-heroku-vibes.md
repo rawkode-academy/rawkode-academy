@@ -3,7 +3,10 @@ id: mbi5212lbf8b3yvidkeamkkm
 slug: relaunching-klustered-with-heroku-vibes
 title: Relaunching Klustered ... with Heroku Vibes
 subtitle: Building and Launching a Marketing Page on Heroku with AI in Under 20 Minutes
-description: Building a marketing page for the Klustered relaunch with Heroku Vibes. Covers AI-assisted development, deployment to Heroku, wiring up interactive features, then debugging the rough edges before recapping what's next for the show.
+description: >-
+  Building a marketing page for the Klustered relaunch with Heroku Vibes. Covers
+  AI-assisted development, deployment to Heroku, wiring up interactive features,
+  then debugging the rough edges before recapping what's next for the show.
 publishedAt: 2025-12-02T00:00:00.000Z
 type: recorded
 category: tutorial

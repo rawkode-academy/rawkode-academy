@@ -2,7 +2,10 @@
 id: idafk86yfg7uq201z7v4p0wv
 slug: sentry-prometheus-and-grafana-integrations
 title: 'Sentry, Prometheus, & Grafana Integrations'
-description: 'Part 2 of the Komodor tutorial: wire Sentry, Prometheus Alertmanager, and Grafana alerting into Komodor so application exceptions and cluster alerts appear alongside Kubernetes events in the troubleshooting timeline.'
+description: >-
+  Part 2 of the Komodor tutorial: wire Sentry, Prometheus Alertmanager, and
+  Grafana alerting into Komodor so application exceptions and cluster alerts
+  appear alongside Kubernetes events in the troubleshooting timeline.
 publishedAt: 2023-02-14T17:00:00.000Z
 type: recorded
 category: tutorial

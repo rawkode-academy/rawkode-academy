@@ -101,15 +101,15 @@ resources:
   - title: Mirantis Kubernetes cheat sheet
     type: url
     category: documentation
-    url: https://www.mirantis.com/blog/kubernetes-cheat-sheet/
+    url: 'https://www.mirantis.com/blog/kubernetes-cheat-sheet/'
   - title: Aqua Security Starboard extension
     type: url
     category: code
-    url: https://github.com/aquasecurity/starboard
+    url: 'https://github.com/aquasecurity/starboard'
   - title: Lens Resource Map extension
     type: url
     category: code
-    url: https://github.com/nevalla/lens-resource-map-extension
+    url: 'https://github.com/nevalla/lens-resource-map-extension'
   - title: BoardD open source technology
     type: url
     category: code

@@ -63,11 +63,11 @@ guests:
 resources:
   - title: Cilium Quick Start documentation
     type: url
-    url: https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/
+    url: 'https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/'
     category: documentation
   - title: Equinix Metal
     type: url
-    url: https://deploy.equinix.com/
+    url: 'https://deploy.equinix.com/'
     category: other
 ---
 

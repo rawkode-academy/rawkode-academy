@@ -5,8 +5,8 @@ title: 'Klustered #16'
 description: >-
   Rachel and Andy bring sabotaged Kubernetes clusters. Rachel's hides disabled
   schedulers, a 1m CPU limit, and a mangled Service. Andy's stacks a fake
-  kubectl, swapped API server image, Cilium IPv4 masquerade flip, hosts file
-  DNS hijack, and read-only worker.
+  kubectl, swapped API server image, Cilium IPv4 masquerade flip, hosts file DNS
+  hijack, and read-only worker.
 publishedAt: 2021-07-23T17:00:00.000Z
 type: live
 category: tutorial

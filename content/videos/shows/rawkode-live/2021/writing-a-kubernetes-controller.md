@@ -2,7 +2,10 @@
 id: wm654x7yh3u93du0p8g2vfd3
 slug: writing-a-kubernetes-controller
 title: Writing a Kubernetes Controller
-description: 'Suhail Patel joins Rawkode to build a Kubernetes mutating admission webhook in Go that rewrites pod image tags expressed as semver constraints into concrete versions, with TLS certs generated via CFSSL and the Kubernetes CSR API.'
+description: >-
+  Suhail Patel joins Rawkode to build a Kubernetes mutating admission webhook in
+  Go that rewrites pod image tags expressed as semver constraints into concrete
+  versions, with TLS certs generated via CFSSL and the Kubernetes CSR API.
 publishedAt: 2021-02-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -104,15 +107,17 @@ guests:
 resources:
   - title: Kubernetes Admission Controllers documentation
     type: url
-    url: https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
+    url: >-
+      https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
     category: documentation
   - title: Dynamic Admission Control (mutating and validating webhooks)
     type: url
-    url: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+    url: >-
+      https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
     category: documentation
   - title: Cloudflare CFSSL
     type: url
-    url: https://github.com/cloudflare/cfssl
+    url: 'https://github.com/cloudflare/cfssl'
     category: code
 ---
 

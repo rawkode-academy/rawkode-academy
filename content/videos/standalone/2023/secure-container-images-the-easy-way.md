@@ -4,9 +4,9 @@ slug: secure-container-images-the-easy-way
 title: Secure Container Images The EASY Way
 description: >-
   Slim Toolkit probes a running container with HTTP or exec probes to learn
-  which files the workload actually uses, then rebuilds a minimal image.
-  Demos shrink NGINX from 33MB to 12MB, a Rust dog image from 97MB to under
-  10MB, and an unoptimised Astro build from 1.4GB to 100MB.
+  which files the workload actually uses, then rebuilds a minimal image. Demos
+  shrink NGINX from 33MB to 12MB, a Rust dog image from 97MB to under 10MB, and
+  an unoptimised Astro build from 1.4GB to 100MB.
 publishedAt: 2023-04-25T17:00:00.000Z
 type: recorded
 category: tutorial

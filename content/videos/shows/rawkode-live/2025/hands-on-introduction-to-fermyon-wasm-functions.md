@@ -7,9 +7,8 @@ subtitle: >-
   Hans, Sr. Cloud Advocate at Fermyon.
 description: >-
   Thorsten Hans walks through Fermyon Wasm Functions, the new fully managed
-  service that runs Spin apps on Akamai's globally distributed network.
-  Covers the aka plugin, deploying via OCI registry, and the built-in key
-  value store.
+  service that runs Spin apps on Akamai's globally distributed network. Covers
+  the aka plugin, deploying via OCI registry, and the built-in key value store.
 publishedAt: 2025-04-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -32,7 +31,7 @@ resources:
     category: documentation
   - title: Spin JavaScript SDK repository
     type: url
-    url: https://github.com/spinframework/spin-js-sdk
+    url: 'https://github.com/spinframework/spin-js-sdk'
     category: code
   - title: Fermyon Wasm Functions samples repository
     type: url

@@ -41,14 +41,14 @@ guests:
 resources:
   - title: KCachegrind profiling viewer
     type: url
-    url: https://kcachegrind.github.io/
+    url: 'https://kcachegrind.github.io/'
     category: other
   - title: QCachegrind profiling viewer
     type: url
     category: other
   - title: Composer dependency manager
     type: url
-    url: https://getcomposer.org/
+    url: 'https://getcomposer.org/'
     category: other
   - title: Zulu CMS project
     type: url

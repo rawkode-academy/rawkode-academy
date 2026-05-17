@@ -3,10 +3,10 @@ id: lcz9j59zo663yngesf8a0k1m
 slug: hands-on-introduction-to-helm-dashboard
 title: Hands-on Introduction to helm-dashboard
 description: >-
-  Andre Pokhilko from Komodor walks David through Helm Dashboard, an open
-  source Helm plugin that puts a focused web UI over the Helm CLI. The demo
-  covers release history, manifest and values diffs, rollbacks, reconfigure,
-  and Trivy/Checkov scanner integration.
+  Andre Pokhilko from Komodor walks David through Helm Dashboard, an open source
+  Helm plugin that puts a focused web UI over the Helm CLI. The demo covers
+  release history, manifest and values diffs, rollbacks, reconfigure, and
+  Trivy/Checkov scanner integration.
 publishedAt: 2022-10-27T17:00:00.000Z
 type: live
 category: tutorial

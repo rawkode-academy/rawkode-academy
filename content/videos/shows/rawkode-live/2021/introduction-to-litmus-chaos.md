@@ -5,8 +5,8 @@ title: Introduction to Litmus Chaos
 description: >-
   Uma and Kartik from the Chaos Native team walk through Litmus, a
   Kubernetes-native chaos engineering project. They cover the ChaosCenter
-  portal, workflows and probes, then demo Kafka chaos with Grafana and
-  AWS EC2 termination.
+  portal, workflows and probes, then demo Kafka chaos with Grafana and AWS EC2
+  termination.
 publishedAt: 2021-03-03T17:00:00.000Z
 type: live
 category: tutorial

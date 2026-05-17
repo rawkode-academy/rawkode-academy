@@ -2,7 +2,10 @@
 id: fkojb4nty2dmx3byhpltqwnn
 slug: hands-on-introduction-to-litestream
 title: Hands-on Introduction to Litestream
-description: Ben Johnson walks through Litestream, his streaming replication tool for SQLite. We cover how it tails the WAL, ships segments to S3 or Azure, and restores point-in-time copies, then install it and replicate a live database.
+description: >-
+  Ben Johnson walks through Litestream, his streaming replication tool for
+  SQLite. We cover how it tails the WAL, ships segments to S3 or Azure, and
+  restores point-in-time copies, then install it and replicate a live database.
 publishedAt: 2021-06-22T17:00:00.000Z
 type: live
 category: tutorial

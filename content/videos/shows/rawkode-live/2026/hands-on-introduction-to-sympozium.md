@@ -5,8 +5,8 @@ title: Hands-on Introduction to sympozium
 subtitle: 'Diving into Sympozium AI: The Future of Collaborative Intelligence'
 description: >-
   Alex Jones joins to introduce Sympozium, a Kubernetes-native coordination
-  layer for multi-agent AI systems. We walk through modelling agents as pods
-  and using CRDs and jobs to orchestrate structured handoffs and shared context.
+  layer for multi-agent AI systems. We walk through modelling agents as pods and
+  using CRDs and jobs to orchestrate structured handoffs and shared context.
 publishedAt: 2026-04-17T05:38:22.000Z
 type: live
 category: tutorial

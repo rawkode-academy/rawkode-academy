@@ -3,9 +3,9 @@ id: xv2v8qdigpu0kphaelrjmr5i
 slug: hands-on-introduction-to-vcluster
 title: Hands-on Introduction to vcluster
 description: >-
-  Rich Burroughs and Lukas Gentele from Loft Labs walk through vCluster, a
-  newly Kubernetes-certified distribution that runs a k3s control plane inside
-  a namespace and syncs workloads to the host, plus a live install via Helm.
+  Rich Burroughs and Lukas Gentele from Loft Labs walk through vCluster, a newly
+  Kubernetes-certified distribution that runs a k3s control plane inside a
+  namespace and syncs workloads to the host, plus a live install via Helm.
 publishedAt: 2021-06-23T17:00:00.000Z
 type: live
 category: tutorial

@@ -2,7 +2,11 @@
 id: gcyhdcr1fqccea0s1idebvw9
 slug: part-1-lecture-1-introduction-to-time-series
 title: 'Part 1 - Lecture 1: Introduction to Time Series'
-description: Lecture one of the InfluxDB 2 course. David traces the history of encoding and sharding from ancient Rome, defines time series data (metrics versus events), shows collection with Telegraf, and previews downsampling and Kubernetes monitoring with InfluxDB.
+description: >-
+  Lecture one of the InfluxDB 2 course. David traces the history of encoding and
+  sharding from ancient Rome, defines time series data (metrics versus events),
+  shows collection with Telegraf, and previews downsampling and Kubernetes
+  monitoring with InfluxDB.
 publishedAt: 2021-07-29T17:00:00.000Z
 type: recorded
 category: tutorial

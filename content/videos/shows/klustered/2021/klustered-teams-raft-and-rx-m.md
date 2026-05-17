@@ -5,8 +5,8 @@ title: 'Klustered Teams: Raft & RX-M'
 description: >-
   Two teams, RXM and Raft, debug broken Kubernetes clusters. RXM chase an etcd
   cert path typo and an API server namespace typo, then a missing Postgres
-  manifest. Raft fix an RBAC ClusterRole missing the create verb and work
-  around a broken scheduler.
+  manifest. Raft fix an RBAC ClusterRole missing the create verb and work around
+  a broken scheduler.
 publishedAt: 2021-12-09T17:00:00.000Z
 type: live
 category: tutorial

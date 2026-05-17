@@ -3,10 +3,10 @@ id: ny3894ofmg0wckadbxrcum2l
 slug: hands-on-introduction-to-cue
 title: Hands-on Introduction to CUE
 description: >-
-  Marcel van Lohuizen, creator of CUE, joins Rawkode for a hands-on
-  introduction to the data constraint language. They cover unification, the
-  type lattice, validation, and Kubernetes manifest generation, then work
-  through the official tutorial together.
+  Marcel van Lohuizen, creator of CUE, joins Rawkode for a hands-on introduction
+  to the data constraint language. They cover unification, the type lattice,
+  validation, and Kubernetes manifest generation, then work through the official
+  tutorial together.
 publishedAt: 2021-04-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -106,7 +106,8 @@ guests:
 resources:
   - title: CUE Kubernetes tutorial
     type: url
-    url: 'https://github.com/cue-lang/cue/blob/master/doc/tutorial/kubernetes/README.md'
+    url: >-
+      https://github.com/cue-lang/cue/blob/master/doc/tutorial/kubernetes/README.md
     category: documentation
   - title: CUE GitHub Discussions
     type: url

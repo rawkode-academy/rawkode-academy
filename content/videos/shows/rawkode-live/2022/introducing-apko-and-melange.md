@@ -72,19 +72,20 @@ guests:
 resources:
   - title: Google's Distroless project
     type: url
-    url: https://github.com/GoogleContainerTools/distroless
+    url: 'https://github.com/GoogleContainerTools/distroless'
     category: code
   - title: GNU hello world program
     type: url
-    url: https://www.gnu.org/software/hello/
+    url: 'https://www.gnu.org/software/hello/'
     category: code
   - title: apko examples/nginx.yaml
     type: url
-    url: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
+    url: 'https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml'
     category: demos
   - title: melange examples/gnu-hello.yaml
     type: url
-    url: https://github.com/chainguard-dev/melange/blob/main/examples/gnu-hello.yaml
+    url: >-
+      https://github.com/chainguard-dev/melange/blob/main/examples/gnu-hello.yaml
     category: demos
 ---
 

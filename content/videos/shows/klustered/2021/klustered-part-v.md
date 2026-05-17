@@ -227,11 +227,13 @@ guests:
 resources:
   - title: kubectl autocomplete documentation
     type: url
-    url: 'https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-bash-linux/'
+    url: >-
+      https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-bash-linux/
     category: documentation
   - title: kubeadm CoreDNS manifest source code
     type: url
-    url: 'https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/phases/addons/dns/manifests.go'
+    url: >-
+      https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/phases/addons/dns/manifests.go
     category: code
 ---
 

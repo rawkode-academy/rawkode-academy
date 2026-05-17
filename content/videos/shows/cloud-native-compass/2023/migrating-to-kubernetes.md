@@ -69,31 +69,31 @@ guests:
 resources:
   - title: Argo CD
     type: url
-    url: https://argoproj.github.io/cd/
+    url: 'https://argoproj.github.io/cd/'
     category: code
   - title: DevSpace
     type: url
-    url: https://devspace.sh/
+    url: 'https://devspace.sh/'
     category: code
   - title: Flux
     type: url
-    url: https://fluxcd.io/
+    url: 'https://fluxcd.io/'
     category: code
   - title: Helm
     type: url
-    url: https://helm.sh/
+    url: 'https://helm.sh/'
     category: code
   - title: Kustomize
     type: url
-    url: https://kustomize.io/
+    url: 'https://kustomize.io/'
     category: code
   - title: KEDA
     type: url
-    url: https://keda.sh/
+    url: 'https://keda.sh/'
     category: code
   - title: Crossplane
     type: url
-    url: https://www.crossplane.io/
+    url: 'https://www.crossplane.io/'
     category: code
 ---
 

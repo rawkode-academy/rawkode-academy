@@ -20,7 +20,8 @@ duration: 5427
 resources:
   - title: Zanzibar paper
     type: url
-    url: 'https://research.google/pubs/zanzibar-googles-consistent-global-authorization-system/'
+    url: >-
+      https://research.google/pubs/zanzibar-googles-consistent-global-authorization-system/
     category: other
   - title: GitHub permissions model video on AuthZed YouTube channel
     type: url

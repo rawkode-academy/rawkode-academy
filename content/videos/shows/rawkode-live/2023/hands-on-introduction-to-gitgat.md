@@ -5,8 +5,8 @@ title: Hands-on Introduction to GitGat
 description: >-
   Barak Brudo from Scribe Security walks through GitGat, an open source tool
   written in Rego on OPA that audits GitHub security posture: 2FA, branch
-  protection, signed commits, deploy and SSH keys. Runs locally or on a
-  schedule via GitHub Actions.
+  protection, signed commits, deploy and SSH keys. Runs locally or on a schedule
+  via GitHub Actions.
 publishedAt: 2023-03-09T17:00:00.000Z
 type: live
 category: tutorial

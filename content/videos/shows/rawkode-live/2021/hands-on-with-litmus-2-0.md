@@ -3,7 +3,10 @@ id: r6seigg9ay2yn6pwr591hbln
 slug: hands-on-with-litmus-2-0
 title: Hands-on with Litmus 2.0
 description: >-
-  Litmus maintainer Karthik Satchitanand previews Litmus 2.0: the new ChaosCenter portal, public and private ChaosHubs, resilience scoring, GitOps sync, and probes. Demos chain chaos workflows against Bank of Anthos on Kubernetes and EC2 failure against Sock Shop.
+  Litmus maintainer Karthik Satchitanand previews Litmus 2.0: the new
+  ChaosCenter portal, public and private ChaosHubs, resilience scoring, GitOps
+  sync, and probes. Demos chain chaos workflows against Bank of Anthos on
+  Kubernetes and EC2 failure against Sock Shop.
 publishedAt: 2021-07-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -115,19 +118,19 @@ guests:
 resources:
   - title: Litmus documentation
     type: url
-    url: https://docs.litmuschaos.io/
+    url: 'https://docs.litmuschaos.io/'
     category: documentation
   - title: Bank of Anthos demo application
     type: url
-    url: https://github.com/GoogleCloudPlatform/bank-of-anthos
+    url: 'https://github.com/GoogleCloudPlatform/bank-of-anthos'
     category: demos
   - title: Weaveworks Sock Shop microservices application
     type: url
-    url: https://github.com/microservices-demo/microservices-demo
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
   - title: Principles of Chaos
     type: url
-    url: https://principlesofchaos.org/
+    url: 'https://principlesofchaos.org/'
     category: documentation
 ---
 

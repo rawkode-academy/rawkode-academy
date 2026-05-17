@@ -151,11 +151,11 @@ guests:
 resources:
   - title: Ping CRM
     type: url
-    url: https://github.com/inertiajs/pingcrm
+    url: 'https://github.com/inertiajs/pingcrm'
     category: demos
   - title: Laravel Dusk
     type: url
-    url: https://laravel.com/docs/dusk
+    url: 'https://laravel.com/docs/dusk'
     category: documentation
 ---
 

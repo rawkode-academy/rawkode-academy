@@ -4,8 +4,8 @@ slug: how-to-write-a-kubectl-plugin-from-scratch
 title: How to Write a kubectl Plugin from Scratch
 description: >-
   Matt Turner joins to write a kubectl plugin in Bash that swaps kubectl's
-  verb-noun ordering to noun-verb, then packages it for distribution through
-  the Krew plugin manager with a crew.yaml manifest and GitHub releases.
+  verb-noun ordering to noun-verb, then packages it for distribution through the
+  Krew plugin manager with a crew.yaml manifest and GitHub releases.
 publishedAt: 2021-01-13T17:00:00.000Z
 type: live
 category: tutorial

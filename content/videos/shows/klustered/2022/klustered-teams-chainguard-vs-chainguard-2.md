@@ -100,7 +100,8 @@ resources:
     category: other
   - title: Networking and Kubernetes
     type: url
-    url: 'https://www.oreilly.com/library/view/networking-and-kubernetes/9781492081647/'
+    url: >-
+      https://www.oreilly.com/library/view/networking-and-kubernetes/9781492081647/
     category: other
   - title: Sleuth Kit
     type: url

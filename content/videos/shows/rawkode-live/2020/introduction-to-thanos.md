@@ -5,8 +5,8 @@ title: Introduction to Thanos
 description: >-
   Bartek Plotka walks through Thanos, the CNCF project that extends Prometheus
   with global query, HA deduplication, and long-term storage. Covers the
-  Sidecar, Querier, Store Gateway, and Compactor, plus a live demo running
-  three Prometheus servers against MinIO.
+  Sidecar, Querier, Store Gateway, and Compactor, plus a live demo running three
+  Prometheus servers against MinIO.
 publishedAt: 2020-11-11T17:00:00.000Z
 type: live
 category: tutorial

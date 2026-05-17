@@ -4,8 +4,8 @@ slug: whats-new-in-teleport-8
 title: What's New in Teleport 8?
 description: >-
   Steven Martin walks through what landed in Teleport 8: Windows desktop access
-  without RDP, single-port 443 connectivity, WebAuthn with Touch ID, EC2
-  node auto-join, dynamic app and database registration, and RDS auto-discovery.
+  without RDP, single-port 443 connectivity, WebAuthn with Touch ID, EC2 node
+  auto-join, dynamic app and database registration, and RDS auto-discovery.
 publishedAt: 2021-12-21T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -69,10 +69,12 @@ resources:
   - title: 'Teleport documentation: joining nodes'
     type: url
     category: documentation
-    url: 'https://goteleport.com/docs/enroll-resources/agents/join-services-to-your-cluster/'
+    url: >-
+      https://goteleport.com/docs/enroll-resources/agents/join-services-to-your-cluster/
   - title: 'Teleport documentation: AWS console access'
     type: url
     category: documentation
-    url: 'https://goteleport.com/docs/enroll-resources/application-access/cloud-apis/aws-console/'
+    url: >-
+      https://goteleport.com/docs/enroll-resources/application-access/cloud-apis/aws-console/
 ---
 

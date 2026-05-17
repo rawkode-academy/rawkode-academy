@@ -2,7 +2,11 @@
 id: lkg0k1i6xj1a738ziwwhsw0f
 slug: building-a-real-application-with-guidepad
 title: Building a Real Application with Guidepad
-description: 'Reggie Wilkerson and Matt Citarella, the founders of Guidepad, join David to build a real application on the platform: an AWS Lambda replacement that runs Node.js operations, walking through services, state plans, artifacts, and public interfaces.'
+description: >-
+  Reggie Wilkerson and Matt Citarella, the founders of Guidepad, join David to
+  build a real application on the platform: an AWS Lambda replacement that runs
+  Node.js operations, walking through services, state plans, artifacts, and
+  public interfaces.
 publishedAt: 2024-07-12T17:00:00.000Z
 type: live
 category: tutorial

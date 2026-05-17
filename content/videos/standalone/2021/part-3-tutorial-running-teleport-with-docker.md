@@ -83,6 +83,7 @@ resources:
   - title: 'Course code: Running Teleport with Docker'
     type: url
     category: code
-    url: 'https://github.com/rawkode-academy/courses/tree/main/teleport-complete-guide/3-running-teleport-with-docker'
+    url: >-
+      https://github.com/rawkode-academy/courses/tree/main/teleport-complete-guide/3-running-teleport-with-docker
 ---
 

@@ -2,7 +2,11 @@
 id: ymhs0sxdh5vb6uwi88xcfiuw
 slug: hands-on-introduction-to-pixie
 title: Hands-on Introduction to Pixie
-description: 'Natalie Serrino walks through Pixie, the eBPF-powered Kubernetes observability tool. We deploy Vizier with the etcd operator, explore PxL scripts, trace HTTP and gRPC traffic, view flame graphs, and wire up a Slack alert via the Go client.'
+description: >-
+  Natalie Serrino walks through Pixie, the eBPF-powered Kubernetes observability
+  tool. We deploy Vizier with the etcd operator, explore PxL scripts, trace HTTP
+  and gRPC traffic, view flame graphs, and wire up a Slack alert via the Go
+  client.
 publishedAt: 2021-07-08T17:00:00.000Z
 type: live
 category: tutorial

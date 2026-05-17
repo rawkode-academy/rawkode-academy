@@ -3,8 +3,8 @@ id: amlf5sohn10i3vuzoqcmzm0a
 slug: hands-on-introduction-to-skaffold
 title: Hands-on Introduction to Skaffold
 description: >-
-  Vic Iglesias guides Rawkode through Skaffold, Google's tool that automates
-  the build, push, and deploy loop for Kubernetes. Hands-on demos cover Go
+  Vic Iglesias guides Rawkode through Skaffold, Google's tool that automates the
+  build, push, and deploy loop for Kubernetes. Hands-on demos cover Go
   microservices, TypeScript file sync, Buildpacks with Python, Helm,
   multi-config modules, and React hot module reload.
 publishedAt: 2021-04-28T17:00:00.000Z
@@ -121,15 +121,18 @@ guests:
 resources:
   - title: Skaffold microservices example
     type: url
-    url: 'https://github.com/GoogleContainerTools/skaffold/tree/main/examples/microservices'
+    url: >-
+      https://github.com/GoogleContainerTools/skaffold/tree/main/examples/microservices
     category: demos
   - title: Skaffold React reload example
     type: url
-    url: 'https://github.com/GoogleContainerTools/skaffold/tree/main/examples/react-reload'
+    url: >-
+      https://github.com/GoogleContainerTools/skaffold/tree/main/examples/react-reload
     category: demos
   - title: Skaffold custom test example
     type: url
-    url: 'https://github.com/GoogleContainerTools/skaffold/tree/main/examples/custom-tests'
+    url: >-
+      https://github.com/GoogleContainerTools/skaffold/tree/main/examples/custom-tests
     category: demos
 ---
 

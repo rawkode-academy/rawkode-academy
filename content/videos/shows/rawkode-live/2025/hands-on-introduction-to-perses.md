@@ -22,19 +22,19 @@ guests:
   - nicolas-takashi
 resources:
   - title: Perses official documentation
-    url: https://perses.dev/perses/docs/
+    url: 'https://perses.dev/perses/docs/'
     type: url
     category: documentation
   - title: Perses community dashboards repository
-    url: https://github.com/perses/community-mixins
+    url: 'https://github.com/perses/community-mixins'
     type: url
     category: code
   - title: Perses dashboard as code GitHub Action
-    url: https://github.com/perses/cli-actions
+    url: 'https://github.com/perses/cli-actions'
     type: url
     category: code
   - title: Perses CLI
-    url: https://perses.dev/perses/docs/cli/
+    url: 'https://perses.dev/perses/docs/cli/'
     type: url
     category: documentation
 ---

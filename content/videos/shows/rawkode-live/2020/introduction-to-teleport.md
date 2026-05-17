@@ -90,15 +90,15 @@ guests:
 resources:
   - title: Teleport Quick Start / Getting Started guide
     type: url
-    url: https://goteleport.com/docs/get-started/
+    url: 'https://goteleport.com/docs/get-started/'
     category: documentation
   - title: gravitational/teleport Kubernetes agent Helm chart example
     type: url
-    url: https://github.com/gravitational/teleport/tree/master/examples/chart
+    url: 'https://github.com/gravitational/teleport/tree/master/examples/chart'
     category: code
   - title: Teleport documentation for OpenSSH integration
     type: url
-    url: https://goteleport.com/docs/enroll-resources/server-access/openssh/
+    url: 'https://goteleport.com/docs/enroll-resources/server-access/openssh/'
     category: documentation
 ---
 

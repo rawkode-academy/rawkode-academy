@@ -2,7 +2,10 @@
 id: czct26lrzw3y5ylu4tjvfsq5
 slug: writing-new-micro-services-using-ai-with-gitlab-duo-code-suggestions
 title: Writing New Micro-services Using AI with GitLab Duo Code Suggestions
-description: David uses GitLab Duo's chat and code suggestions to build a Python pipeline that extracts frames from a video with OpenCV, runs OCR via PyTesseract, classifies the text with OpenAI, and stores the results in SQLite.
+description: >-
+  David uses GitLab Duo's chat and code suggestions to build a Python pipeline
+  that extracts frames from a video with OpenCV, runs OCR via PyTesseract,
+  classifies the text with OpenAI, and stores the results in SQLite.
 publishedAt: 2024-04-18T17:00:00.000Z
 type: recorded
 category: tutorial

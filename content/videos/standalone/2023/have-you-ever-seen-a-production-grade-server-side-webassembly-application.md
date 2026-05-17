@@ -4,8 +4,8 @@ slug: have-you-ever-seen-a-production-grade-server-side-webassembly-application
 title: 'Have You Ever Seen a Production Grade, Server Side, WebAssembly Application?'
 description: >-
   Justin, a senior solutions engineer at Fermyon, built his own social network
-  on Spin. Join us as we explore the codebase, add a new feature, and talk
-  about writing real-world production-grade server-side WebAssembly with Spin.
+  on Spin. Join us as we explore the codebase, add a new feature, and talk about
+  writing real-world production-grade server-side WebAssembly with Spin.
 publishedAt: 2023-02-24T17:00:00.000Z
 type: recorded
 category: tutorial

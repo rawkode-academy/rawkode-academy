@@ -5,8 +5,8 @@ title: Crossplane in Action
 description: >-
   Viktor Farcic walks through Crossplane as a control plane for everything,
   contrasts it with Terraform and Pulumi, then live-demos provisioning a GKE
-  cluster, building composite resources, and watching drift detection rebuild
-  a deleted node group.
+  cluster, building composite resources, and watching drift detection rebuild a
+  deleted node group.
 publishedAt: 2021-09-09T17:00:00.000Z
 type: live
 category: tutorial

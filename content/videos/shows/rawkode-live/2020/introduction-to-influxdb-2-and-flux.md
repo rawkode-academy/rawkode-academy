@@ -98,7 +98,8 @@ resources:
     category: code
   - title: InfluxDB 2 operational monitoring template
     type: url
-    url: 'https://github.com/influxdata/community-templates/tree/master/influxdb2_operational_monitoring'
+    url: >-
+      https://github.com/influxdata/community-templates/tree/master/influxdb2_operational_monitoring
     category: code
   - title: rbx.app request bin
     type: url

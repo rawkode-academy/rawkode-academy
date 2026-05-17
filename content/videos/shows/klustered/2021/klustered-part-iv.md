@@ -87,7 +87,7 @@ guests:
 resources:
   - title: Teleport access platform
     type: url
-    url: https://goteleport.com/
+    url: 'https://goteleport.com/'
     category: other
 ---
 

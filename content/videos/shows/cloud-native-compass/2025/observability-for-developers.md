@@ -24,23 +24,24 @@ guests:
 resources:
   - title: OpenTelemetry docs
     type: url
-    url: https://opentelemetry.io/docs/
+    url: 'https://opentelemetry.io/docs/'
     category: documentation
-  - title: 'Fundamentals of Observability with OpenTelemetry (O''Reilly video course)'
+  - title: Fundamentals of Observability with OpenTelemetry (O'Reilly video course)
     type: url
-    url: https://www.oreilly.com/library/view/fundamentals-of-observability/0636920926597/
+    url: >-
+      https://www.oreilly.com/library/view/fundamentals-of-observability/0636920926597/
     category: other
   - title: Build a custom Collector with OpenTelemetry Collector Builder
     type: url
-    url: https://opentelemetry.io/docs/collector/extend/ocb/
+    url: 'https://opentelemetry.io/docs/collector/extend/ocb/'
     category: documentation
-  - title: 'Thinking about contributing to OpenTelemetry? Here''s how I did it.'
+  - title: Thinking about contributing to OpenTelemetry? Here's how I did it.
     type: url
-    url: https://opentelemetry.io/blog/2023/contributing-to-otel/
+    url: 'https://opentelemetry.io/blog/2023/contributing-to-otel/'
     category: other
-  - title: 'Learning OpenTelemetry by Ted Young and Austin Parker (O''Reilly)'
+  - title: Learning OpenTelemetry by Ted Young and Austin Parker (O'Reilly)
     type: url
-    url: https://www.oreilly.com/library/view/learning-opentelemetry/9781098147174/
+    url: 'https://www.oreilly.com/library/view/learning-opentelemetry/9781098147174/'
     category: other
 ---
 

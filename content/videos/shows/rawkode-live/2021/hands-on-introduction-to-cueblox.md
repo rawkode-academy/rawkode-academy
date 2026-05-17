@@ -4,9 +4,8 @@ slug: hands-on-introduction-to-cueblox
 title: Hands-on Introduction to CueBlox
 description: >-
   Brian Ketelsen and David walk through CueBlox: defining content schemas in
-  CUE, validating Markdown/YAML data, serving it as a GraphQL API, and
-  extending the workflow with HashiCorp-style plugins for image processing
-  and CDN sync.
+  CUE, validating Markdown/YAML data, serving it as a GraphQL API, and extending
+  the workflow with HashiCorp-style plugins for image processing and CDN sync.
 publishedAt: 2021-09-08T17:00:00.000Z
 type: live
 category: tutorial

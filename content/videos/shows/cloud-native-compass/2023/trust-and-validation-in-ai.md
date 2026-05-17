@@ -5,8 +5,8 @@ title: Trust and Validation in AI
 description: >-
   JJ Asgar joins to discuss IBM watsonx.ai and why enterprises distrust today's
   black-box AI. The conversation covers training data provenance, The Pile,
-  Hugging Face, hallucinations, copyright, and the human problem of verifying
-  AI outputs.
+  Hugging Face, hallucinations, copyright, and the human problem of verifying AI
+  outputs.
 publishedAt: 2023-11-01T17:00:00.000Z
 type: recorded
 category: interview

@@ -52,19 +52,19 @@ guests:
 resources:
   - title: Flatcar Getting Started documentation
     type: url
-    url: https://www.flatcar.org/docs/latest/
+    url: 'https://www.flatcar.org/docs/latest/'
     category: documentation
   - title: Flatcar SysExt Bakery
     type: url
-    url: https://github.com/flatcar/sysext-bakery
+    url: 'https://github.com/flatcar/sysext-bakery'
     category: code
   - title: Flatcar Linux update operator
     type: url
-    url: https://github.com/flatcar/flatcar-linux-update-operator
+    url: 'https://github.com/flatcar/flatcar-linux-update-operator'
     category: code
   - title: libguestfs tools
     type: url
-    url: https://libguestfs.org/
+    url: 'https://libguestfs.org/'
     category: other
 ---
 

@@ -68,15 +68,15 @@ guests:
 resources:
   - title: SleuthKit FLS
     type: url
-    url: https://www.sleuthkit.org/sleuthkit/man/fls.html
+    url: 'https://www.sleuthkit.org/sleuthkit/man/fls.html'
     category: documentation
   - title: etcd
     type: url
-    url: https://etcd.io/
+    url: 'https://etcd.io/'
     category: documentation
   - title: Kubernetes static pods
     type: url
-    url: https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/
+    url: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/'
     category: documentation
 ---
 

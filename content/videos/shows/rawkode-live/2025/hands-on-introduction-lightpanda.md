@@ -20,14 +20,14 @@ resources:
   - title: LightPanda GitHub repository
     type: url
     category: code
-    url: https://github.com/lightpanda-io/browser
+    url: 'https://github.com/lightpanda-io/browser'
   - title: Vercel post on AI crawler traffic and JavaScript rendering
     type: url
     category: other
-    url: https://vercel.com/blog/the-rise-of-the-ai-crawler
+    url: 'https://vercel.com/blog/the-rise-of-the-ai-crawler'
   - title: Web Platform Tests
     type: url
     category: code
-    url: https://github.com/web-platform-tests/wpt
+    url: 'https://github.com/web-platform-tests/wpt'
 ---
 

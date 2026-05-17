@@ -3,9 +3,9 @@ id: nkhgy2xrrgh6ljas65ds3nrd
 slug: hands-on-introduction-to-telepresence
 title: Hands-on Introduction to Telepresence
 description: >-
-  Daniel Bryant and Peter O'Neill from Ambassador Labs walk through Telepresence:
-  installing the CLI, connecting to a remote cluster, intercepting traffic to a
-  local service, and sharing preview URLs via Ambassador Cloud.
+  Daniel Bryant and Peter O'Neill from Ambassador Labs walk through
+  Telepresence: installing the CLI, connecting to a remote cluster, intercepting
+  traffic to a local service, and sharing preview URLs via Ambassador Cloud.
 publishedAt: 2021-05-18T17:00:00.000Z
 type: live
 category: tutorial

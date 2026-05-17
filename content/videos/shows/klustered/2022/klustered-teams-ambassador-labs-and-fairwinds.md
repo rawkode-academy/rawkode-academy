@@ -5,8 +5,8 @@ title: Klustered Teams - Ambassador Labs & Fairwinds
 description: >-
   Ambassador Labs and Fairwinds break each other's Kubernetes clusters. Fixes
   include OOM memory limits, a CoreDNS rewrite hijack pointing to a rogue
-  Postgres in kube-public, a hijacked kubectl shell function, node taints, and
-  a self-recreating NetworkPolicy.
+  Postgres in kube-public, a hijacked kubectl shell function, node taints, and a
+  self-recreating NetworkPolicy.
 publishedAt: 2022-03-04T17:00:00.000Z
 type: live
 category: tutorial

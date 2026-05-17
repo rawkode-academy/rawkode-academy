@@ -7,9 +7,9 @@ subtitle: >-
   have your back. Finding the right tools can be ... somewhat painful.
 description: >-
   Four tools for Kubernetes day-two security: kube-bench for CIS hygiene,
-  kube-hunter for red-team probing, Sonobuoy for CNCF conformance, and
-  Syft plus Grype for SBOMs and CVEs. Demo runs them by hand, then automates
-  via Spectro Cloud Palette.
+  kube-hunter for red-team probing, Sonobuoy for CNCF conformance, and Syft plus
+  Grype for SBOMs and CVEs. Demo runs them by hand, then automates via Spectro
+  Cloud Palette.
 publishedAt: 2025-12-12T00:00:00.000Z
 type: recorded
 category: tutorial

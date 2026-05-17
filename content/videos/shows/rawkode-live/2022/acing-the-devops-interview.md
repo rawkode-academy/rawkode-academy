@@ -95,14 +95,14 @@ guests:
 resources:
   - title: TechWorld with Nana YouTube channel
     type: url
-    url: https://www.youtube.com/@TechWorldwithNana
+    url: 'https://www.youtube.com/@TechWorldwithNana'
     category: other
   - title: Coursera Financial Aid
     type: url
     category: other
   - title: solo.io Academy
     type: url
-    url: https://www.solo.io/academy
+    url: 'https://www.solo.io/academy'
     category: documentation
 ---
 

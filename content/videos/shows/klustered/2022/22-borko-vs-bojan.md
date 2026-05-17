@@ -3,10 +3,10 @@ id: b5ezd2815ffos2t8d3h2qljv
 slug: 22-borko-vs-bojan
 title: 22. Borko Vs. Bojan
 description: >-
-  Identical twins Borko and Bojan tackle broken Kubernetes clusters. Borko
-  hunts a malformed image name and a Cilium deny policy, then fixes a CoreDNS
-  rewrite. Bojan kills a cron job flushing iptables and repairs a bad Postgres
-  startup probe.
+  Identical twins Borko and Bojan tackle broken Kubernetes clusters. Borko hunts
+  a malformed image name and a Cilium deny policy, then fixes a CoreDNS rewrite.
+  Bojan kills a cron job flushing iptables and repairs a bad Postgres startup
+  probe.
 publishedAt: 2022-03-11T17:00:00.000Z
 type: live
 category: tutorial

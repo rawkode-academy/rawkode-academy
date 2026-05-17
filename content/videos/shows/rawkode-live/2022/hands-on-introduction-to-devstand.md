@@ -4,8 +4,8 @@ slug: hands-on-introduction-to-devstand
 title: Hands-on Introduction to DevStand
 description: >-
   Max shows how DevStand lowers the Kubernetes barrier for application
-  developers, with a visual editor and VS Code extension that authors
-  manifests, ingress, and dependencies like Minio storage.
+  developers, with a visual editor and VS Code extension that authors manifests,
+  ingress, and dependencies like Minio storage.
 publishedAt: 2022-10-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -95,7 +95,7 @@ guests: []
 resources:
   - type: url
     title: DevStand website
-    url: https://devstand.app
+    url: 'https://devstand.app'
     category: documentation
 ---
 

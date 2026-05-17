@@ -3,9 +3,9 @@ id: my23g8vi21qfb16ei845jdjv
 slug: simplify-kubernetes-ingress-and-api-gateways-using-ngrok-2
 title: Simplify Kubernetes Ingress & API Gateways using ngrok
 description: >-
-  Install the ngrok Kubernetes operator via Helm, wire up GatewayClass,
-  Gateway, and HTTPRoute against a custom ngrok.dev domain, route to three
-  sample services, then enforce a sliding-window rate limit with an ngrok
+  Install the ngrok Kubernetes operator via Helm, wire up GatewayClass, Gateway,
+  and HTTPRoute against a custom ngrok.dev domain, route to three sample
+  services, then enforce a sliding-window rate limit with an ngrok
   TrafficPolicy.
 publishedAt: 2024-10-03T17:00:00.000Z
 type: recorded

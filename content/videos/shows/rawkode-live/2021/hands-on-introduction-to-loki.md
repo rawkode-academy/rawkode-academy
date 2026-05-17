@@ -76,11 +76,11 @@ guests:
 resources:
   - title: Weaveworks Sock Shop microservice demo
     type: url
-    url: https://github.com/microservices-demo/microservices-demo
+    url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
   - title: Grafana LogQL documentation
     type: url
-    url: https://grafana.com/docs/loki/latest/logql/
+    url: 'https://grafana.com/docs/loki/latest/logql/'
     category: documentation
 ---
 

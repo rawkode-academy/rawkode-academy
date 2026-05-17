@@ -2,7 +2,11 @@
 id: ogaami9wop6jhog6miiplwgd
 slug: timoni-cue-powered-package-management-for-kubernetes
 title: 'Timoni: CUE Powered Package Management for Kubernetes'
-description: Stefan Prodan joins to introduce Timoni, a Kubernetes package manager built on CUE and OCI artifacts. Modules and bundles replace Helm charts and YAML templating, distributed via container registries with Cosign signing and SOPS-encrypted values.
+description: >-
+  Stefan Prodan joins to introduce Timoni, a Kubernetes package manager built on
+  CUE and OCI artifacts. Modules and bundles replace Helm charts and YAML
+  templating, distributed via container registries with Cosign signing and
+  SOPS-encrypted values.
 publishedAt: 2023-11-17T17:00:00.000Z
 type: live
 category: tutorial

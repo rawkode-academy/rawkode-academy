@@ -2,7 +2,11 @@
 id: u3iqqcgeoamsqzclierrpqdl
 slug: hands-on-introduction-to-dagger
 title: Hands-on Introduction to Dagger
-description: Solomon Hykes introduces Dagger, a programmable deployment system built on CUE and BuildKit. We install the CLI, write a Dagger plan to deploy a static todo app to S3, then extend it to multi-bucket and Netlify environments using inputs and secrets.
+description: >-
+  Solomon Hykes introduces Dagger, a programmable deployment system built on CUE
+  and BuildKit. We install the CLI, write a Dagger plan to deploy a static todo
+  app to S3, then extend it to multi-bucket and Netlify environments using
+  inputs and secrets.
 publishedAt: 2021-06-29T17:00:00.000Z
 type: live
 category: tutorial

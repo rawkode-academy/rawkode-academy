@@ -2,7 +2,11 @@
 id: cpyas1mgays442brvl0fdi77
 slug: podmansh-and-infisical
 title: podmansh & Infisical
-description: 'Brian demos podmansh, using Podman containers as Linux login shells configured via Quadlet systemd units with three isolation levels. David demos Infisical for secrets management, with CLI injection, GitHub sync, folder scoping, and SDKs.'
+description: >-
+  Brian demos podmansh, using Podman containers as Linux login shells configured
+  via Quadlet systemd units with three isolation levels. David demos Infisical
+  for secrets management, with CLI injection, GitHub sync, folder scoping, and
+  SDKs.
 publishedAt: 2023-08-10T17:00:00.000Z
 type: recorded
 category: tutorial

@@ -4,8 +4,8 @@ slug: 22-leigh-capili-vs-marcus-noble
 title: 22. Leigh Capili vs. Marcus Noble
 description: >-
   Leigh Capili and Marcus Noble debug broken Kubernetes clusters: kubelet
-  systemd units, kubeconfig ports, admission webhooks from Kyverno, Pod
-  Security Policies, quotas, and a kubeadm certificate renewal gone wrong.
+  systemd units, kubeconfig ports, admission webhooks from Kyverno, Pod Security
+  Policies, quotas, and a kubeadm certificate renewal gone wrong.
 publishedAt: 2022-04-08T17:00:00.000Z
 type: live
 category: tutorial

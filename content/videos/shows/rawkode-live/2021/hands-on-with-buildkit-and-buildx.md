@@ -2,7 +2,11 @@
 id: zybh1hw8655u5i7j6njntv59
 slug: hands-on-with-buildkit-and-buildx
 title: Hands-on with BuildKit & buildx
-description: BuildKit maintainer Tõnis Tiigi joins David to rebuild a Go Dockerfile from scratch, covering multi-stage builds, cache mounts, local binary outputs, multi-platform builds with QEMU, declarative bake files in HCL, and cross-compilation with native toolchains.
+description: >-
+  BuildKit maintainer Tõnis Tiigi joins David to rebuild a Go Dockerfile from
+  scratch, covering multi-stage builds, cache mounts, local binary outputs,
+  multi-platform builds with QEMU, declarative bake files in HCL, and
+  cross-compilation with native toolchains.
 publishedAt: 2021-08-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -95,7 +99,8 @@ guests:
 resources:
   - title: 'Docker documentation: automatic platform ARGs in global scope'
     type: url
-    url: 'https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope'
+    url: >-
+      https://docs.docker.com/reference/dockerfile/#automatic-platform-args-in-the-global-scope
     category: documentation
   - title: XX project
     type: url

@@ -3,9 +3,9 @@ id: ua00ojunaspa1sus0ykiqxxr
 slug: hands-on-introduction-to-promscale
 title: Hands-on Introduction to Promscale
 description: >-
-  Mat and Vineeth from Timescale show how Promscale stores Prometheus metrics
-  in TimescaleDB, then deploy it on Kubernetes with TOBS and query the data
-  using both PromQL and SQL in Grafana.
+  Mat and Vineeth from Timescale show how Promscale stores Prometheus metrics in
+  TimescaleDB, then deploy it on Kubernetes with TOBS and query the data using
+  both PromQL and SQL in Grafana.
 publishedAt: 2021-05-20T17:00:00.000Z
 type: live
 category: tutorial

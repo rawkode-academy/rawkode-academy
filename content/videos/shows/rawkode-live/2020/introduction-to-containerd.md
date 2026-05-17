@@ -53,11 +53,11 @@ resources:
     category: other
   - title: containerd issue 4531
     type: url
-    url: https://github.com/containerd/containerd/issues/4531
+    url: 'https://github.com/containerd/containerd/issues/4531'
     category: code
   - title: Kata Containers
     type: url
-    url: https://katacontainers.io/
+    url: 'https://katacontainers.io/'
     category: code
 ---
 

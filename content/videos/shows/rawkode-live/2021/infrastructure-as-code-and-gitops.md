@@ -3,7 +3,9 @@ id: yfaj0ov3z8zu0sv4lp8songu
 slug: infrastructure-as-code-and-gitops
 title: Infrastructure as Code & GitOps
 description: >-
-  Bootstrap a Kubernetes cluster on Equinix Metal with Pulumi, then hand workloads over to FluxCD. Covers Pulumi project layout, stacks vs Terraform workspaces, Flux install, Helm releases, and a live GitOps namespace demo.
+  Bootstrap a Kubernetes cluster on Equinix Metal with Pulumi, then hand
+  workloads over to FluxCD. Covers Pulumi project layout, stacks vs Terraform
+  workspaces, Flux install, Helm releases, and a live GitOps namespace demo.
 publishedAt: 2021-02-25T17:00:00.000Z
 type: live
 category: tutorial

@@ -129,7 +129,8 @@ resources:
     category: documentation
   - title: Cilium connectivity test manifest
     type: url
-    url: 'https://github.com/cilium/cilium/tree/master/examples/kubernetes/connectivity-check'
+    url: >-
+      https://github.com/cilium/cilium/tree/master/examples/kubernetes/connectivity-check
     category: demos
   - title: Cilium Star Wars demo
     type: url

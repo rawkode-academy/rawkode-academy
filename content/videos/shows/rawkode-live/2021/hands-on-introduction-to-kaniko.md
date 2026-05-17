@@ -106,14 +106,14 @@ resources:
   - title: Kaniko Getting Started tutorial
     type: url
     category: documentation
-    url: https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
+    url: 'https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts'
   - title: Kaniko build context documentation
     type: url
     category: documentation
-    url: https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts
+    url: 'https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts'
   - title: GitLab tutorial dedicated to Kaniko
     type: url
     category: documentation
-    url: https://docs.gitlab.com/ci/docker/using_kaniko/
+    url: 'https://docs.gitlab.com/ci/docker/using_kaniko/'
 ---
 

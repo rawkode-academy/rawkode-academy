@@ -19,11 +19,11 @@ guests: []
 resources:
   - title: Rawkode Academy mono repository
     type: url
-    url: https://github.com/rawkode-academy/rawkode-academy
+    url: 'https://github.com/rawkode-academy/rawkode-academy'
     category: code
   - title: Comtrya dotfile management tool
     type: url
-    url: https://comtrya.dev
+    url: 'https://comtrya.dev'
     category: code
   - title: IBM Granite episode
     type: url

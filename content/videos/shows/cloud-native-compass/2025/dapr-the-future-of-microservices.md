@@ -21,22 +21,22 @@ guests:
 resources:
   - title: State of Dapr Report 2025
     type: url
-    url: https://www.diagrid.io/blog/state-of-dapr-2025
+    url: 'https://www.diagrid.io/blog/state-of-dapr-2025'
     category: other
   - title: Carl Hewitt actor model paper
     type: url
     category: other
   - title: Dapr Agents framework
     type: url
-    url: https://github.com/dapr/dapr-agents
+    url: 'https://github.com/dapr/dapr-agents'
     category: code
   - title: Diagrid Conductor
     type: url
-    url: https://www.diagrid.io/conductor
+    url: 'https://www.diagrid.io/conductor'
     category: other
   - title: Diagrid Catalyst
     type: url
-    url: https://www.diagrid.io/catalyst
+    url: 'https://www.diagrid.io/catalyst'
     category: other
 ---
 

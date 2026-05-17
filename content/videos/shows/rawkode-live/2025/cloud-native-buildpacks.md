@@ -7,8 +7,8 @@ subtitle: >-
   a practical session on CNBs. 
 description: >-
   Terence Lee, Heroku engineer and CNB maintainer, walks through Cloud Native
-  Buildpacks: turning source into OCI images without a Dockerfile, the lifecycle,
-  rebasing, and how pack fits into platform workflows.
+  Buildpacks: turning source into OCI images without a Dockerfile, the
+  lifecycle, rebasing, and how pack fits into platform workflows.
 publishedAt: 2025-07-02T17:00:00.000Z
 type: live
 category: tutorial

@@ -51,7 +51,8 @@ resources:
   - type: url
     title: Prometheus Kubernetes service discovery
     category: documentation
-    url: 'https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config'
+    url: >-
+      https://prometheus.io/docs/prometheus/latest/configuration/configuration/#kubernetes_sd_config
   - type: url
     title: InfluxDB 2 pprof endpoint
     category: documentation

@@ -49,11 +49,11 @@ guests:
   - brian-ketelsen
 resources:
   - type: url
-    name: wei/pull
+    title: wei/pull
     category: code
     url: 'https://github.com/wei/pull'
   - type: url
-    name: pkgx (formerly tea.xyz)
+    title: pkgx (formerly tea.xyz)
     category: documentation
     url: 'https://pkgx.sh/'
 ---

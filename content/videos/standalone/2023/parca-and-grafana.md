@@ -3,9 +3,9 @@ id: nl7ui50173lbqlmqxck2mw3q
 slug: parca-and-grafana
 title: Parca & Grafana
 description: >-
-  Add the Grafana Parca data source plugin, point it at your Parca server,
-  and debug a misbehaving app with flame graphs and function filters without
-  leaving Grafana.
+  Add the Grafana Parca data source plugin, point it at your Parca server, and
+  debug a misbehaving app with flame graphs and function filters without leaving
+  Grafana.
 publishedAt: 2023-07-10T17:00:00.000Z
 type: recorded
 category: tutorial

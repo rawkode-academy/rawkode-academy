@@ -4,8 +4,8 @@ slug: introduction-to-prometheus-promql-and-promlens
 title: 'Introduction to Prometheus, PromQL, & PromLens'
 description: >-
   Julius Volz, Prometheus co-founder, walks through the data model and four
-  metric types, scraping node_exporter, writing PromQL in PromLens, and
-  building a predict_linear disk-fill alert.
+  metric types, scraping node_exporter, writing PromQL in PromLens, and building
+  a predict_linear disk-fill alert.
 publishedAt: 2020-10-10T17:00:00.000Z
 type: live
 category: tutorial

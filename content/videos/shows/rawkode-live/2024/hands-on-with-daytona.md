@@ -2,7 +2,11 @@
 id: inel7yn0hye5yshls8n7o6n1
 slug: hands-on-with-daytona
 title: Hands-on with Daytona
-description: Ivan Burazin demos Daytona, the open source dev environment manager. One `daytona create` spins up a workspace from a Git repo and devcontainer, running in local Docker or remote DigitalOcean with the same flow, plus public port forwarding via a reverse proxy.
+description: >-
+  Ivan Burazin demos Daytona, the open source dev environment manager. One
+  `daytona create` spins up a workspace from a Git repo and devcontainer,
+  running in local Docker or remote DigitalOcean with the same flow, plus public
+  port forwarding via a reverse proxy.
 publishedAt: 2024-09-25T17:00:00.000Z
 type: live
 category: tutorial

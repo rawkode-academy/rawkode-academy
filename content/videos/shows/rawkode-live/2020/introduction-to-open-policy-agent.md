@@ -5,8 +5,8 @@ title: Introduction to Open Policy Agent
 description: >-
   Torin Sandall walks through Open Policy Agent end-to-end: Rego basics in the
   OPA Playground, Kubernetes admission policies for label and image-source
-  validation using iteration, running OPA locally with bundles and the REPL,
-  and writing unit tests for Rego policies.
+  validation using iteration, running OPA locally with bundles and the REPL, and
+  writing unit tests for Rego policies.
 publishedAt: 2020-11-19T17:00:00.000Z
 type: live
 category: tutorial

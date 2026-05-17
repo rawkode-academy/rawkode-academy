@@ -5,8 +5,8 @@ title: BlueSky Embed with Spin WebAssembly
 description: >-
   Build a Bluesky post embed with Spin and WebAssembly. We wire up a Lit web
   component to a TypeScript Spin backend, handle CORS, cache auth tokens in the
-  key-value store, call createSession and getPostThread, and use the KV
-  Explorer to seed credentials on deploy.
+  key-value store, call createSession and getPostThread, and use the KV Explorer
+  to seed credentials on deploy.
 publishedAt: 2023-06-23T17:00:00.000Z
 type: recorded
 category: tutorial

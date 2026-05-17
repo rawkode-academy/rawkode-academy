@@ -2,7 +2,11 @@
 id: aqzmvsr41szkg2uqg0yp2cu4
 slug: keep-authentication-simple-with-portainers-oauth-connectors
 title: Keep Authentication Simple with Portainers OAuth Connectors
-description: Swap Portainer's local user management for single sign-on. Walk through configuring OAuth with GitHub and Google, registering client IDs and secrets, pre-adding users, and keeping internal login as a fallback when settings go wrong.
+description: >-
+  Swap Portainer's local user management for single sign-on. Walk through
+  configuring OAuth with GitHub and Google, registering client IDs and secrets,
+  pre-adding users, and keeping internal login as a fallback when settings go
+  wrong.
 publishedAt: 2023-03-06T17:00:00.000Z
 type: recorded
 category: tutorial

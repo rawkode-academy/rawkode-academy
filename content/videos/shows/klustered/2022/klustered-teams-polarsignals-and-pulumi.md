@@ -3,10 +3,10 @@ id: hsykkz8ovuiwzlj438z8ddav
 slug: klustered-teams-polarsignals-and-pulumi
 title: Klustered Teams - PolarSignals & Pulumi
 description: >-
-  Teams from Polar Signals and Pulumi tackle broken Kubernetes clusters,
-  chasing a controller manager pointed at the wrong API server address,
-  Postgres DNS resolution failures, and a containerd freezer cgroup trap
-  hiding on the worker nodes.
+  Teams from Polar Signals and Pulumi tackle broken Kubernetes clusters, chasing
+  a controller manager pointed at the wrong API server address, Postgres DNS
+  resolution failures, and a containerd freezer cgroup trap hiding on the worker
+  nodes.
 publishedAt: 2022-03-17T17:00:00.000Z
 type: live
 category: tutorial

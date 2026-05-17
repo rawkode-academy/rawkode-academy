@@ -3,10 +3,10 @@ id: bxlvg3jfdk6jqbfck4nmrcas
 slug: hands-on-introduction-to-openunison
 title: Hands-on Introduction to OpenUnison
 description: >-
-  Marc Boorshtein walks through OpenUnison as an identity portal for
-  Kubernetes, covering SSO into the dashboard and kubectl, the ou-control
-  deployer, the ou-login plugin, multi-cluster satellites, and Namespace and
-  Virtual Cluster as a Service demos.
+  Marc Boorshtein walks through OpenUnison as an identity portal for Kubernetes,
+  covering SSO into the dashboard and kubectl, the ou-control deployer, the
+  ou-login plugin, multi-cluster satellites, and Namespace and Virtual Cluster
+  as a Service demos.
 publishedAt: 2022-09-03T17:00:00.000Z
 type: live
 category: tutorial

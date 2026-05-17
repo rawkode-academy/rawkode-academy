@@ -94,23 +94,23 @@ guests:
 resources:
   - title: JoeDog Siege
     type: url
-    url: https://www.joedog.org/
+    url: 'https://www.joedog.org/'
     category: other
   - title: Prometheus Operator quick start bundle
     type: url
-    url: https://github.com/prometheus-operator/kube-prometheus
+    url: 'https://github.com/prometheus-operator/kube-prometheus'
     category: documentation
   - title: Prometheus Adapter
     type: url
-    url: https://github.com/kubernetes-sigs/prometheus-adapter
+    url: 'https://github.com/kubernetes-sigs/prometheus-adapter'
     category: documentation
   - title: Sean Hood OpenTelemetry package
     type: url
-    url: https://github.com/SeanHood/laravel-opentelemetry
+    url: 'https://github.com/SeanHood/laravel-opentelemetry'
     category: code
   - title: Alex Bowers Laravel example project
     type: url
-    url: https://github.com/alexbowers/laravel-example-project
+    url: 'https://github.com/alexbowers/laravel-example-project'
     category: code
 ---
 

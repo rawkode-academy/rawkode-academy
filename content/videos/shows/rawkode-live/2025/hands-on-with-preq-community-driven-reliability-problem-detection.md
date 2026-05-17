@@ -22,15 +22,15 @@ guests:
 resources:
   - type: url
     title: preq on GitHub
-    url: https://github.com/prequel-dev/preq
+    url: 'https://github.com/prequel-dev/preq'
     category: code
   - type: url
     title: Prequel documentation
-    url: https://docs.prequel.dev/
+    url: 'https://docs.prequel.dev/'
     category: documentation
   - type: url
     title: Prequel
-    url: https://prequel.dev/
+    url: 'https://prequel.dev/'
     category: other
 ---
 

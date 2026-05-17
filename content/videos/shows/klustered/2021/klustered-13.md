@@ -97,7 +97,8 @@ resources:
     category: other
   - title: Kubernetes controller utils create pods code
     type: url
-    url: 'https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/controller_utils.go'
+    url: >-
+      https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/controller_utils.go
     category: code
   - title: Cilium documentation
     type: url

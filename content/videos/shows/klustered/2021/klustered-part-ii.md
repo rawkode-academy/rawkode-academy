@@ -3,10 +3,10 @@ id: j6uehaw57ynwqnbkjs3m1to6
 slug: klustered-part-ii
 title: Klustered (Part II)
 description: >-
-  Dan Finneran joins Rawkode to debug two broken Kubernetes clusters,
-  unpicking an etcd version mismatch, a bad kubelet flag, an etcd "no space"
-  alarm and quota, a block-all NetworkPolicy, and a PodSecurityPolicy
-  affecting static pods.
+  Dan Finneran joins Rawkode to debug two broken Kubernetes clusters, unpicking
+  an etcd version mismatch, a bad kubelet flag, an etcd "no space" alarm and
+  quota, a block-all NetworkPolicy, and a PodSecurityPolicy affecting static
+  pods.
 publishedAt: 2021-02-25T12:00:00.000Z
 type: live
 category: tutorial

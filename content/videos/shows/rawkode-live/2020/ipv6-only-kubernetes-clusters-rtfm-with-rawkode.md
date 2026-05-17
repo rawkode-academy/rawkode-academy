@@ -46,7 +46,8 @@ guests:
 resources:
   - title: Calico over IP Fabrics
     type: url
-    url: 'https://docs.tigera.io/calico/latest/reference/architecture/design/l3-interconnect-fabric'
+    url: >-
+      https://docs.tigera.io/calico/latest/reference/architecture/design/l3-interconnect-fabric
     category: documentation
 ---
 

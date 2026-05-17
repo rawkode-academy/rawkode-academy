@@ -69,18 +69,18 @@ resources:
   - title: Wix Engineering Blog
     type: url
     category: other
-    url: https://www.wix.engineering/
+    url: 'https://www.wix.engineering/'
   - title: Confluent Schema Registry
     type: url
     category: documentation
-    url: https://docs.confluent.io/platform/current/schema-registry/index.html
+    url: 'https://docs.confluent.io/platform/current/schema-registry/index.html'
   - title: Natan Silnitsky website
     type: url
     category: other
-    url: https://www.natansil.com/
+    url: 'https://www.natansil.com/'
   - title: ZIO Scala library
     type: url
     category: code
-    url: https://zio.dev/
+    url: 'https://zio.dev/'
 ---
 

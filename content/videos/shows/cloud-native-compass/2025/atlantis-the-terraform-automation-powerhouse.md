@@ -23,14 +23,14 @@ resources:
   - title: Project Atlantis
     type: url
     category: code
-    url: https://github.com/runatlantis/atlantis
+    url: 'https://github.com/runatlantis/atlantis'
   - title: Atlantis OpenTofu support blog post
     type: url
     category: other
-    url: https://www.runatlantis.io/blog/2024/integrating-atlantis-with-opentofu
+    url: 'https://www.runatlantis.io/blog/2024/integrating-atlantis-with-opentofu'
   - title: Atlantis Helm chart
     type: url
     category: code
-    url: https://github.com/runatlantis/helm-charts
+    url: 'https://github.com/runatlantis/helm-charts'
 ---
 

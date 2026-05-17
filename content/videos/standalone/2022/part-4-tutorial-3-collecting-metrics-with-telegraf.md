@@ -2,7 +2,11 @@
 id: fg5n3s12kpi526uupu0w7tav
 slug: part-4-tutorial-3-collecting-metrics-with-telegraf
 title: 'Part 4 - Tutorial 3: Collecting Metrics with Telegraf'
-description: 'Walk through Telegraf running against InfluxDB 2: remote TOML config, agent options like batch size, buffer limit, jitter and precision, fanning out to a second file output, and adding the Prometheus input plugin to scrape a local endpoint.'
+description: >-
+  Walk through Telegraf running against InfluxDB 2: remote TOML config, agent
+  options like batch size, buffer limit, jitter and precision, fanning out to a
+  second file output, and adding the Prometheus input plugin to scrape a local
+  endpoint.
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial

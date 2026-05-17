@@ -5,8 +5,8 @@ title: Hands-on with Qovery
 description: >-
   David goes hands-on with Qovery and CEO Romaric Philogene, deploying
   applications to a Kubernetes cluster on AWS. They explore the Rust-based
-  engine, install the CLI, deploy services, run a Grafana Helm chart, and
-  export the environment to Terraform.
+  engine, install the CLI, deploy services, run a Grafana Helm chart, and export
+  the environment to Terraform.
 publishedAt: 2024-10-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -66,15 +66,15 @@ guests:
 resources:
   - title: Qovery getting started guide
     type: url
-    url: https://www.qovery.com/docs/getting-started/introduction
+    url: 'https://www.qovery.com/docs/getting-started/introduction'
     category: documentation
   - title: Qovery AI agent on GitHub
     type: url
-    url: https://github.com/Qovery/qovery-skills
+    url: 'https://github.com/Qovery/qovery-skills'
     category: code
   - title: Grafana Helm chart
     type: url
-    url: https://github.com/grafana/helm-charts
+    url: 'https://github.com/grafana/helm-charts'
     category: code
 ---
 

@@ -3,10 +3,9 @@ id: q6rdfil6z5qc6sx4jvomp320
 slug: hands-on-introduction-to-sigstore
 title: Hands-on Introduction to sigstore
 description: >-
-  Dan Lorenc walks through sigstore: signing and verifying container images
-  with cosign, keyless signing via OIDC, querying the Rekor transparency log,
-  in-toto build attestations, and enforcing signed images at admission with
-  Kyverno.
+  Dan Lorenc walks through sigstore: signing and verifying container images with
+  cosign, keyless signing via OIDC, querying the Rekor transparency log, in-toto
+  build attestations, and enforcing signed images at admission with Kyverno.
 publishedAt: 2021-08-04T17:00:00.000Z
 type: live
 category: tutorial

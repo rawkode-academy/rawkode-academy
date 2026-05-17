@@ -5,8 +5,8 @@ title: Introduction to the OperatorSDK
 description: >-
   Dennis Kelly walks through the Operator SDK by building a Go-based "add"
   operator: scaffolding a project, defining a custom resource, writing the
-  reconciler with controller-runtime, generating CRDs and RBAC, and deploying
-  it to a Kubernetes cluster.
+  reconciler with controller-runtime, generating CRDs and RBAC, and deploying it
+  to a Kubernetes cluster.
 publishedAt: 2020-12-09T17:00:00.000Z
 type: live
 category: tutorial

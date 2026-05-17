@@ -95,7 +95,7 @@ guests:
 resources:
   - title: Suborbital on GitHub
     type: url
-    url: https://github.com/suborbital
+    url: 'https://github.com/suborbital'
     category: code
   - title: Atmo documentation
     type: url

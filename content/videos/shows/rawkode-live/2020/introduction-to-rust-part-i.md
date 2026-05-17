@@ -81,15 +81,15 @@ guests:
 resources:
   - title: The Rust Programming Language book
     type: url
-    url: https://doc.rust-lang.org/stable/book/
+    url: 'https://doc.rust-lang.org/stable/book/'
     category: documentation
   - title: Rustlings exercises
     type: url
-    url: https://github.com/rust-lang/rustlings
+    url: 'https://github.com/rust-lang/rustlings'
     category: code
   - title: Rust Users Forum
     type: url
-    url: https://users.rust-lang.org/
+    url: 'https://users.rust-lang.org/'
     category: other
 ---
 

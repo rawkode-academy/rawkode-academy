@@ -90,7 +90,8 @@ resources:
     category: documentation
   - title: 'Meilisearch documentation: Ranking rules relevancy guide'
     type: url
-    url: 'https://www.meilisearch.com/docs/capabilities/full_text_search/relevancy/ranking_rules'
+    url: >-
+      https://www.meilisearch.com/docs/capabilities/full_text_search/relevancy/ranking_rules
     category: documentation
   - title: 'Meilisearch documentation: Official SDK libraries'
     type: url

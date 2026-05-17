@@ -60,15 +60,15 @@ guests:
 resources:
   - title: Kubernetes The Hard Way
     type: url
-    url: https://github.com/kelseyhightower/kubernetes-the-hard-way
+    url: 'https://github.com/kelseyhightower/kubernetes-the-hard-way'
     category: documentation
   - title: CNCF Slack
     type: url
-    url: https://slack.cncf.io/
+    url: 'https://slack.cncf.io/'
     category: other
   - title: Kubernetes Slack
     type: url
-    url: https://slack.k8s.io/
+    url: 'https://slack.k8s.io/'
     category: other
 ---
 

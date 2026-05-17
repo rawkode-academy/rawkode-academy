@@ -5,8 +5,8 @@ title: 'Klustered Teams: Carta & Fairwinds'
 description: >-
   Teams from Carta and Fairwinds debug each other's broken Kubernetes clusters
   live, tackling admission webhooks, rogue pod re-creation, kubelet and
-  scheduler misconfigurations, an API server manifest typo, and a Cilium
-  network policy.
+  scheduler misconfigurations, an API server manifest typo, and a Cilium network
+  policy.
 publishedAt: 2021-08-05T17:30:00.000Z
 type: live
 category: tutorial

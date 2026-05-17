@@ -4,8 +4,8 @@ slug: unlocking-global-edge-services-with-ngrok
 title: Unlocking Global Edge Services with ngrok
 description: >-
   BGP routes the internet like Google Maps, but running your own POPs is hard.
-  ngrok's global load balancer spans 8 POPs with automatic failover, demoed
-  here with two Deno apps tunnelled from EU and US.
+  ngrok's global load balancer spans 8 POPs with automatic failover, demoed here
+  with two Deno apps tunnelled from EU and US.
 publishedAt: 2025-01-23T17:00:00.000Z
 type: recorded
 category: tutorial

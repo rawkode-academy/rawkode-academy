@@ -4,9 +4,9 @@ slug: introduction-to-carvel
 title: Introduction to Carvel
 description: >-
   Dmitriy Kalinin (VMware), maintainer of Carvel, walks through the suite
-  formerly known as k14s: kapp for diff-aware deployments, ytt's structural
-  YAML templating in Starlark, kapp-controller for GitOps, plus kbld and
-  imgpkg for image and bundle workflows.
+  formerly known as k14s: kapp for diff-aware deployments, ytt's structural YAML
+  templating in Starlark, kapp-controller for GitOps, plus kbld and imgpkg for
+  image and bundle workflows.
 publishedAt: 2020-09-30T17:00:00.000Z
 type: live
 category: tutorial

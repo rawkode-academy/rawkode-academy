@@ -3,10 +3,10 @@ id: hea5aobhyt84z99fvl9m92t6
 slug: hands-on-introduction-to-portainer
 title: Hands-on Introduction to Portainer
 description: >-
-  Co-founder Neil Cresswell joins David to demo Portainer as a universal
-  manager for Kubernetes, Docker, Swarm, and Nomad. Covers namespace policies,
-  OPA Gatekeeper integration, GitOps, edge compute, and lowering the barrier
-  from VMs to containers.
+  Co-founder Neil Cresswell joins David to demo Portainer as a universal manager
+  for Kubernetes, Docker, Swarm, and Nomad. Covers namespace policies, OPA
+  Gatekeeper integration, GitOps, edge compute, and lowering the barrier from
+  VMs to containers.
 publishedAt: 2022-10-15T17:00:00.000Z
 type: live
 category: tutorial

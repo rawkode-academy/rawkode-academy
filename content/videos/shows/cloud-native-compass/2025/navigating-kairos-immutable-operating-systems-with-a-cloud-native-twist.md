@@ -53,23 +53,23 @@ guests:
 resources:
   - title: Kairos website
     type: url
-    url: https://kairos.io
+    url: 'https://kairos.io'
     category: documentation
   - title: Kairos on GitHub
     type: url
-    url: https://github.com/kairos-io/kairos
+    url: 'https://github.com/kairos-io/kairos'
     category: code
   - title: kairos-init
     type: url
-    url: https://github.com/kairos-io/kairos-init
+    url: 'https://github.com/kairos-io/kairos-init'
     category: code
   - title: SUSE Elemental Toolkit
     type: url
-    url: https://github.com/rancher/elemental-toolkit
+    url: 'https://github.com/rancher/elemental-toolkit'
     category: code
   - title: bootc project
     type: url
-    url: https://github.com/bootc-dev/bootc
+    url: 'https://github.com/bootc-dev/bootc'
     category: code
 ---
 
