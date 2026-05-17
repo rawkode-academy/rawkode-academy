@@ -6,6 +6,7 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import Page from "@/wrappers/page.astro";
 import TechnologyJsonLd from "@/components/html/technology-jsonld.astro";
+import TechnologyArticleJsonLd from "@/components/html/technology-article-jsonld.astro";
 import type { GetStaticPaths } from "astro";
 import { getCollection, render } from "astro:content";
 import matter from "gray-matter";
@@ -234,16 +235,31 @@ const seoTitle =
 		? `${technology.name} Tutorials, Videos & Guides`
 		: `${technology.name} - ${categoryLabel}`);
 
+const cncfStatusLabel = (() => {
+	const status = (technology as any).cncf?.status as string | undefined;
+	if (!status) return undefined;
+	const labels: Record<string, string> = {
+		sandbox: "CNCF Sandbox",
+		incubating: "CNCF Incubating",
+		graduated: "CNCF Graduated",
+		archived: "CNCF Archived",
+	};
+	return labels[status] ?? `CNCF ${status}`;
+})();
+
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
 	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
 	const parts: string[] = [];
+	const projectQualifier = cncfStatusLabel
+		? `a ${cncfStatusLabel} ${categoryLabel} project`
+		: `a ${categoryLabel} project`;
 	if (videoCount > 0) {
 		parts.push(
-			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}`,
+			`${videoCount} video${videoCount === 1 ? "" : "s"} and tutorials covering ${technology.name}, ${projectQualifier}`,
 		);
 	} else {
-		parts.push(`${technology.name}, a ${categoryLabel} project`);
+		parts.push(`${technology.name}, ${projectQualifier}`);
 	}
 	if (cncfUseCase) parts.push(cncfUseCase);
 	parts.push(
@@ -340,8 +356,25 @@ const hasCommunityLinks =
 		website={technology.website}
 		source={technology.source}
 		documentation={technology.documentation}
-		category={categoryLabel}
+		category={technology.category ?? categoryLabel}
+		subcategory={technology.subcategory}
+		license={technology.license}
+		cncfStatus={cncfStatusLabel}
+		matrixStatus={technology.matrix?.status ? statusLabels[technology.matrix.status] ?? technology.matrix.status : undefined}
 	/>
+	{hasContent && (
+		<TechnologyArticleJsonLd
+			slot="extra-head"
+			headline={`${technology.name}: Complete Field Guide`}
+			description={seoDescription}
+			url={technologyUrl}
+			image={absoluteLogo}
+			about={technology.name}
+			keywords={[technology.name, technology.category, technology.subcategory, cncfStatusLabel]
+				.filter((v): v is string => Boolean(v))
+				.join(", ")}
+		/>
+	)}
 	<Fragment slot="extra-head">
 		<link
 			rel="alternate"

@@ -1,0 +1,64 @@
+---
+/**
+ * Wraps the "Complete Guide" / field-guide body on a technology page with
+ * TechArticle structured data. Helps Google qualify the long-form body
+ * separately from the SoftwareApplication entity for rich snippets and
+ * sitelink eligibility.
+ */
+interface Props {
+	headline: string;
+	description: string;
+	url: string;
+	image?: string | undefined;
+	siteName?: string | undefined;
+	siteUrl?: string | undefined;
+	about?: string | undefined;
+	keywords?: string | undefined;
+}
+
+const {
+	headline,
+	description,
+	url,
+	image,
+	about,
+	keywords,
+	siteName = "Rawkode Academy",
+	siteUrl = "https://rawkode.academy",
+} = Astro.props;
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "TechArticle",
+	headline,
+	description,
+	url,
+	mainEntityOfPage: {
+		"@type": "WebPage",
+		"@id": url,
+	},
+	...(image && { image }),
+	...(about && { about }),
+	...(keywords && { keywords }),
+	author: {
+		"@type": "Organization",
+		name: siteName,
+		url: siteUrl,
+	},
+	publisher: {
+		"@type": "Organization",
+		name: siteName,
+		url: siteUrl,
+		logo: {
+			"@type": "ImageObject",
+			url: `${siteUrl}/android-chrome-512x512.png`,
+		},
+	},
+};
+---
+
+<script
+	is:inline
+	type="application/ld+json"
+	set:html={JSON.stringify(jsonLd)}
+></script>
