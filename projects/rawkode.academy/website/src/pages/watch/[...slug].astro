@@ -173,12 +173,10 @@ const breadcrumbElements = showEntry
 			{ title: "Home", link: "/" },
 			{ title: "Videos", link: "/watch" },
 			{ title: showEntry.data.name, link: `/shows/${showEntry.id}` },
-			{ title: video.data.title, link: `/watch/${video.data.slug}` },
 		]
 	: [
 			{ title: "Home", link: "/" },
 			{ title: "Videos", link: "/watch" },
-			{ title: video.data.title, link: `/watch/${video.data.slug}` },
 		];
 
 const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
