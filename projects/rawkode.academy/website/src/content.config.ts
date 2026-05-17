@@ -7,6 +7,34 @@ import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 // Local, file-based content collections for videos, shows, and technologies.
 // These are populated by scripts/sync-graphql-content.ts during build or on demand.
 
+// Shared resource schema. Used by videos, articles, courses, and course modules.
+const resourceSchema = z.object({
+	id: z.string().optional(),
+	title: z.string(),
+	description: z.string().optional(),
+	type: z.enum(["url", "file", "embed"]),
+	url: z.union([z.url(), z.string().startsWith("/")]).optional(),
+	filePath: z.string().optional(),
+	embedConfig: z
+		.object({
+			container: z.enum(["webcontainer", "iframe"]),
+			src: z.string(),
+			height: z.string().default("600px"),
+			width: z.string().default("100%"),
+			files: z.record(z.string(), z.string()).optional(), // For WebContainer file system
+			import: z
+				.object({
+					localDir: z.string(), // Path relative to the content file
+				})
+				.optional(),
+			startCommand: z.string().optional(), // Command to run in WebContainer
+		})
+		.optional(),
+	category: z
+		.enum(["slides", "code", "documentation", "demos", "other"])
+		.default("other"),
+});
+
 const videos = defineCollection({
 	loader: glob({
 		pattern: ["**/*.{md,mdx}"],
@@ -47,6 +75,7 @@ const videos = defineCollection({
 			)
 			.default([]),
 		guests: z.array(reference("people")).default([]),
+		resources: z.array(resourceSchema).optional(),
 	}),
 });
 
@@ -103,34 +132,6 @@ const shows = defineCollection({
 });
 
 // HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
-
-// Shared resource schema for courses and course modules
-const resourceSchema = z.object({
-	id: z.string().optional(),
-	title: z.string(),
-	description: z.string().optional(),
-	type: z.enum(["url", "file", "embed"]),
-	url: z.union([z.url(), z.string().startsWith("/")]).optional(),
-	filePath: z.string().optional(),
-	embedConfig: z
-		.object({
-			container: z.enum(["webcontainer", "iframe"]),
-			src: z.string(),
-			height: z.string().default("600px"),
-			width: z.string().default("100%"),
-			files: z.record(z.string(), z.string()).optional(), // For WebContainer file system
-			import: z
-				.object({
-					localDir: z.string(), // Path relative to the content file
-				})
-				.optional(),
-			startCommand: z.string().optional(), // Command to run in WebContainer
-		})
-		.optional(),
-	category: z
-		.enum(["slides", "code", "documentation", "demos", "other"])
-		.default("other"),
-});
 
 const people = defineCollection({
 	loader: glob({
