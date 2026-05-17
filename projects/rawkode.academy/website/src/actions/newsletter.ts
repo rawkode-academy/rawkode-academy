@@ -7,6 +7,7 @@ import {
 	captureServerEvent,
 	getAttributionFromSource,
 	getDistinctId,
+	getEventAttribution,
 } from "@/server/analytics";
 
 /**
@@ -82,6 +83,7 @@ async function captureActivatedUserFromNewsletter({
 					: {}),
 				...attribution,
 				...campaign,
+				...getEventAttribution(context.request),
 			},
 		},
 		getAnalyticsBinding(),
@@ -116,6 +118,7 @@ async function captureNewsletterAnalytics({
 					: {}),
 				...getAttributionFromSource(source),
 				...campaign,
+				...getEventAttribution(context.request),
 			},
 		},
 		getAnalyticsBinding(),
