@@ -35,3 +35,8 @@ devenv.local.nix
 
 # macOS
 .DS_Store
+
+# Generated YouTube descriptions — built on demand from video frontmatter
+# (see content/scripts/build-youtube-description.ts), pasted into YouTube
+# by hand, not source of truth.
+content/scripts/output/youtube-descriptions/
