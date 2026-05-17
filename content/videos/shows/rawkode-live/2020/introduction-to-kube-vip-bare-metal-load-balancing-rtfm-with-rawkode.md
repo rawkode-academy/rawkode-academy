@@ -3,14 +3,16 @@ id: xga6a9uvs6yot1u103nmv77z
 slug: introduction-to-kube-vip-bare-metal-load-balancing-rtfm-with-rawkode
 title: 'Introduction to kube-vip: Bare Metal Load Balancing (RTFM with Rawkode)'
 description: >-
-  In this episode, joined by my colleague Dan Finneran, we take a practical look
-  at one of his open source projects, Plunder, and get hands on with the
-  kube-vip component.
+  Dan Finneran walks through kube-vip, his bare-metal load balancer for
+  Kubernetes. We cover Plunder for provisioning, then demo a control plane VIP
+  via Raft leader election and Service type LoadBalancer announced over BGP on
+  Equinix Metal.
 publishedAt: 2020-09-03T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - kube-vip
+  - kubernetes
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -37,6 +39,11 @@ guests:
 resources:
   - title: kube-vip documentation
     type: url
+    url: 'https://kube-vip.io/docs/'
     category: documentation
+  - title: kube-vip source code
+    type: url
+    url: 'https://github.com/kube-vip/kube-vip'
+    category: code
 ---
 

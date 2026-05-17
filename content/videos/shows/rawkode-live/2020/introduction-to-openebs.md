@@ -3,15 +3,17 @@ id: t9v6vfqfjcxjfohd2vrxpeet
 slug: introduction-to-openebs
 title: Introduction to OpenEBS
 description: >-
-  OpenEBS builds on Kubernetes to enable Stateful applications to easily access
-  Dynamic Local PVs or Replicated PVs. By using the Container Attached Storage
-  pattern users report lower costs, easier management, and more control for
-  their teams.
+  Paul Burt and Jeffry Molanus join Rawkode for OpenEBS and its new Mayastor
+  engine. They cover Container Attached Storage, DPDK/SPDK, huge pages, and
+  NVMe-oF replication via the Nexus, then deploy Mayastor on a Kubernetes
+  cluster and benchmark it with fio.
 publishedAt: 2020-10-21T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - openebs
+  - kubernetes
+  - nats
 show: rawkode-live
 chapters:
   - startTime: 0

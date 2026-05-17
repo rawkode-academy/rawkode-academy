@@ -3,14 +3,16 @@ id: jk9tbioqoc16ukeec1z9fi5h
 slug: introduction-to-the-kubernetes-seccomp-operator-rtfm-with-rawkode
 title: Introduction to the Kubernetes Seccomp Operator (RTFM with Rawkode)
 description: >-
-  In this episode, joined by Daniel Mangum and Sascha Grunert, we take a look at
-  the Seecomp Operator for Kubernetes; allowing for new security primitives for
-  your Kubernetes environments.
+  Daniel Mangum and Sascha Grunert walk through the Kubernetes seccomp operator:
+  what seccomp is, installing the operator, applying profiles to nginx pods,
+  tracing blocked syscalls with strace, and generating profiles with podman.
 publishedAt: 2020-09-10T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - security-profiles-operator
+  - kubernetes
+  - podman
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -37,6 +39,23 @@ duration: 5032
 guests:
   - daniel-mangum
   - sascha-grunert
-resources: []
+resources:
+  - type: url
+    title: kubernetes-sigs/security-profiles-operator
+    url: 'https://github.com/kubernetes-sigs/security-profiles-operator'
+    category: code
+  - type: url
+    title: Security Profiles Operator installation and usage
+    url: >-
+      https://github.com/kubernetes-sigs/security-profiles-operator/blob/main/installation-usage.md
+    category: documentation
+  - type: url
+    title: Kubernetes seccomp tutorial
+    url: 'https://kubernetes.io/docs/tutorials/security/seccomp/'
+    category: documentation
+  - type: url
+    title: podman generate seccomp profiles
+    url: 'https://docs.podman.io/en/latest/markdown/podman-generate.1.html'
+    category: documentation
 ---
 

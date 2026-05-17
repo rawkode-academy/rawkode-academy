@@ -3,15 +3,17 @@ id: dlz3w6ojomalhbj1j2anqgxd
 slug: introduction-to-falco
 title: Introduction to Falco
 description: >-
-  Falco, the open-source cloud-native runtime security project, is the de facto
-  Kubernetes threat detection engine. Falco was created by Sysdig in 2016 and is
-  the first runtime security project to join CNCF as an incubation-level
-  project.
+  Lorenzo Fontana and Leo Di Donato from Sysdig walk through Falco end-to-end:
+  installing it on a host, the kernel module vs eBPF driver, writing rules in
+  YAML, triggering syscall and Kubernetes audit alerts, and routing output via
+  Falcosidekick.
 publishedAt: 2020-10-30T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - falco
+  - kubernetes
+  - ebpf
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -101,8 +103,9 @@ guests:
   - leo-di-donato
   - lorenzo-fontana
 resources:
-  - title: Falco Sidekick
+  - title: Falcosidekick
     type: url
+    url: 'https://github.com/falcosecurity/falcosidekick'
     category: code
 ---
 

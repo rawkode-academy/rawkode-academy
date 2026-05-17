@@ -3,13 +3,18 @@ id: w6ui2iu1ib1yzoir8k1bolqa
 slug: introduction-to-cilium
 title: Introduction to Cilium
 description: >-
-  In this episode, joined by Ilya Dmitrichenko, we'll take a look at Cilium; a
-  CNI implementation for Kubernetes, integrated with eBPF.
+  Ilya Dmitrichenko joins David to install Cilium on a Cluster API cluster,
+  debug IPAM and stale CiliumNode CRDs, and walk through eBPF-powered kube-proxy
+  replacement, L7 policy, and Hubble visibility via the Star Wars demo.
 publishedAt: 2020-09-25T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - cilium
+  - ebpf
+  - kubernetes
+  - helm
+  - cluster-api
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -116,18 +121,23 @@ guests:
 resources:
   - title: Cilium Quick Installation guide
     type: url
+    url: 'https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/'
     category: documentation
   - title: Cilium IPAM documentation
     type: url
+    url: 'https://docs.cilium.io/en/stable/network/concepts/ipam/'
     category: documentation
   - title: Cilium connectivity test manifest
     type: url
+    url: 'https://github.com/cilium/cilium/tree/master/examples/kubernetes/connectivity-check'
     category: demos
   - title: Cilium Star Wars demo
     type: url
+    url: 'https://docs.cilium.io/en/stable/gettingstarted/demo/'
     category: demos
   - title: Introduction to Cilium and Hubble
     type: url
+    url: 'https://docs.cilium.io/en/stable/overview/intro/'
     category: documentation
 ---
 

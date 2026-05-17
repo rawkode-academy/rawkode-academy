@@ -3,8 +3,10 @@ id: wkbhvz7pos9b1z431hb4dqxe
 slug: kubernetes-1-19-accentuate-the-paw-sitive-rtfm-with-rawkode
 title: 'Kubernetes 1.19: Accentuate the Paw-sitive (RTFM with Rawkode)'
 description: >-
-  In this episode, joined by Taylor Dolezal, we take a hands-on look at some of
-  the latest features that landed in the latest release of Kubernetes; 1.19.
+  Taylor Dolezal joins to walk through Kubernetes 1.19, including the extended
+  12-month support window, storage capacity tracking, CSI volume health, Ingress
+  going GA, and live demos of structured logging with klog, immutable
+  ConfigMaps, and seccomp profiles.
 publishedAt: 2020-09-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -43,11 +45,14 @@ resources:
   - title: kind project
     type: url
     category: code
+    url: 'https://kind.sigs.k8s.io/'
   - title: Kubernetes 1.19 release article
     type: url
     category: documentation
+    url: 'https://kubernetes.io/blog/2020/08/26/kubernetes-release-1.19-accentuate-the-paw-sitive/'
   - title: seccomp operator
     type: url
     category: code
+    url: 'https://github.com/kubernetes-sigs/security-profiles-operator'
 ---
 

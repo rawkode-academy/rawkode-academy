@@ -3,9 +3,10 @@ id: d6x3tfwo4ijvoew49ycderha
 slug: introduction-to-rust-part-ii
 title: Introduction to Rust (Part II)
 description: >-
-  Rust is a multi-paradigm programming language designed for performance and
-  safety, especially safe concurrency. Rust is syntactically similar to C++ but
-  can guarantee memory safety by using a borrow checker to validate references.
+  Part two of the Rustlings walkthrough with Rust core team member Manish
+  Goregaokar. We cover if/else, match, move semantics and borrowing,
+  Option<T> with if let and while let, enum variants and pattern matching,
+  Clippy lints, and writing unit tests.
 publishedAt: 2020-12-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -121,6 +122,15 @@ guests:
 resources:
   - title: Equinix Metal
     type: url
+    url: 'https://deploy.equinix.com/'
     category: other
+  - title: Rustlings
+    type: url
+    url: 'https://github.com/rust-lang/rustlings'
+    category: code
+  - title: Clippy
+    type: url
+    url: 'https://github.com/rust-lang/rust-clippy'
+    category: code
 ---
 

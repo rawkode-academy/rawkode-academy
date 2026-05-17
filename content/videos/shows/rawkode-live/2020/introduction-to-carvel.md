@@ -3,8 +3,10 @@ id: nkb7uezm4s80fze37vjfqyfb
 slug: introduction-to-carvel
 title: Introduction to Carvel
 description: >-
-  In this episode, I am joined by Dmitriy Kalinin (VMware); the maintainer of
-  Carvel.
+  Dmitriy Kalinin (VMware), maintainer of Carvel, walks through the suite
+  formerly known as k14s: kapp for diff-aware deployments, ytt's structural
+  YAML templating in Starlark, kapp-controller for GitOps, plus kbld and
+  imgpkg for image and bundle workflows.
 publishedAt: 2020-09-30T17:00:00.000Z
 type: live
 category: tutorial
@@ -76,12 +78,14 @@ guests:
 resources:
   - title: ytt Playground
     type: url
+    url: 'https://carvel.dev/ytt/'
     category: demos
   - title: kapp-controller NGINX Helm example
     type: url
     category: demos
   - title: ytt load documentation
     type: url
+    url: 'https://carvel.dev/ytt/docs/latest/lang-ref-load/'
     category: documentation
   - title: KubeCon Carvel talk
     type: url

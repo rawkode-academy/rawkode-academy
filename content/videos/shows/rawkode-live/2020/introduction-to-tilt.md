@@ -3,13 +3,18 @@ id: qkzz0unysafq2cec03jmyhyr
 slug: introduction-to-tilt
 title: Introduction to Tilt
 description: >-
-  In this episode, joined by Dan Bentley and Ellen Korbes, we take a look at how
-  Tilt can make developing our applications against Kubernetes easier.
+  Dan Bentley and Ellen Korbes show how Tilt automates the inner loop for
+  Kubernetes development. We write a Tiltfile in Starlark, build a Docker image,
+  deploy via kubectl and Helm, and use live_update to sync changes without
+  rebuilds.
 publishedAt: 2020-09-23T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - tilt
+  - kubernetes
+  - docker
+  - helm
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -64,17 +69,22 @@ resources:
   - title: 'Tilt tutorial: The First Fifteen Minutes'
     type: url
     category: documentation
+    url: 'https://docs.tilt.dev/tutorial.html'
   - title: 'Tilt guide: Faster Development with Live Update'
     type: url
     category: documentation
+    url: 'https://docs.tilt.dev/live_update_tutorial.html'
   - title: Tilt Helm Remote README
     type: url
     category: documentation
+    url: 'https://github.com/tilt-dev/tilt-extensions/tree/master/helm_remote'
   - title: 'Tilt API Reference: kustomize function'
     type: url
     category: documentation
+    url: 'https://docs.tilt.dev/api.html#api.kustomize'
   - title: Tilt Extensions repository
     type: url
     category: code
+    url: 'https://github.com/tilt-dev/tilt-extensions'
 ---
 

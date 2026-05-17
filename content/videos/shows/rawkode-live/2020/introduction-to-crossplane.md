@@ -3,15 +3,16 @@ id: gh80b8535py01j2wjsqlc12z
 slug: introduction-to-crossplane
 title: Introduction to Crossplane
 description: >-
-  Crossplane, a Cloud Native Computing Foundation sandbox project, is an open
-  source Kubernetes add-on that extends any cluster with the ability to
-  provision and manage cloud infrastructure, services, and applications using
-  kubectl, GitOps, or any tool that works with the Kubernet…
+  Dan Mangum and Marques Johansson join Rawkode to introduce Crossplane,
+  contrast it with Terraform and Pulumi, install the Equinix Metal provider,
+  walk through CompositeResourceDefinitions and Compositions, and provision a
+  device that boots Tinkerbell.
 publishedAt: 2020-10-14T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - crossplane
+  - tinkerbell
 show: rawkode-live
 chapters:
   - startTime: 0
