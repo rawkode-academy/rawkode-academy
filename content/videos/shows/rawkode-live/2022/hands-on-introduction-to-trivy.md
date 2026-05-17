@@ -3,14 +3,19 @@ id: gstsdlvy9sstecquu9q1vf7f
 slug: hands-on-introduction-to-trivy
 title: Hands-on Introduction to Trivy
 description: >-
-  In this episode, we'll be taking a look at continuously scanning for
-  misconfiguration and vulnerabilities within your container images with Aqua's
-  open source project, Trivy.
+  Rory McCune joins to demo Trivy, Aqua Security's scanner for container
+  images, filesystems, Git repos, Kubernetes manifests, and Terraform.
+  Hands-on installation, image scanning, IaC checks, plus a GitHub Actions
+  pipeline that signs builds with cosign.
 publishedAt: 2022-02-05T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - trivy
+  - docker
+  - kubernetes
+  - terraform
+  - sigstore
 show: rawkode-live
 chapters:
   - startTime: 0
@@ -96,12 +101,15 @@ resources:
   - title: Trivy Getting Started documentation
     type: url
     category: documentation
+    url: https://trivy.dev/docs/
   - title: Kubernetes Pod Security Standards
     type: url
     category: documentation
+    url: https://kubernetes.io/docs/concepts/security/pod-security-standards/
   - title: Trivy GitHub Action
     type: url
     category: code
+    url: https://github.com/aquasecurity/trivy-action
   - title: Honeypop proof of concept exploit code
     type: url
     category: code

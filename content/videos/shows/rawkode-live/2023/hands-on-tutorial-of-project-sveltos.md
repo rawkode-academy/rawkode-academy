@@ -3,14 +3,20 @@ id: vctezk0aahkq0ey2o0pvftdg
 slug: hands-on-tutorial-of-project-sveltos
 title: Hands-on Tutorial of Project Sveltos
 description: >-
-  Sveltos Kubernetes add-on controller simplifies the deployment and management
-  of add-ons across numerous Kubernetes clusters. It offers support for Helm
-  charts, YAMLs, and Kustomize.
+  Live tutorial with Gianluca Mardente on Project Sveltos. He walks through
+  ClusterProfile add-on deployment, the classifier with Lua filters, dry-run and
+  event-driven framework, then demos rolling out Helm charts and Kustomize
+  across a Cluster API fleet alongside Flux and Argo CD.
 publishedAt: 2023-08-05T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - sveltos
+  - kubernetes
+  - helm
+  - cluster-api
+  - fluxcd
+  - argo
 show: rawkode-live
 chapters:
   - startTime: 108
@@ -59,8 +65,10 @@ guests:
 resources:
   - title: Project Sveltos installation documentation
     type: url
+    url: 'https://projectsveltos.io/getting_started/install/install/'
     category: documentation
   - title: Project Sveltos register cluster documentation
+    url: 'https://projectsveltos.io/register/register-cluster/'
     type: url
     category: documentation
 ---

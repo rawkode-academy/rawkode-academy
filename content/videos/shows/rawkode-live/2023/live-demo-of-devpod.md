@@ -3,13 +3,15 @@ id: kkrf9s0hptal6q3nvtpy75bk
 slug: live-demo-of-devpod
 title: Live Demo of DevPod
 description: >-
-  DevPod is infrastructure-independent and client-only, which makes it
-  incredibly easy to get started with.
+  Lukas Gentele from Loft Labs demos DevPod, walking through the UI and CLI,
+  the Docker provider, spinning up a workspace on Google Cloud, custom YAML
+  providers, devcontainer.json compatibility, and the inactivity timeout.
 publishedAt: 2023-05-24T17:00:00.000Z
 type: live
 category: tutorial
 technologies:
   - devpod
+  - docker
 show: rawkode-live
 chapters:
   - startTime: 0

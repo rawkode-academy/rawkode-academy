@@ -3,10 +3,10 @@ id: ziso8d5pctrrqhxqeqbgvkfo
 slug: hands-on-introduction-to-gitgat
 title: Hands-on Introduction to GitGat
 description: >-
-  SCM (Source Control Management) security is of high importance as it serves as
-  an entry point to the whole CI/CD pipeline. This repository contains policies
-  that verify SCM (currently GitHub's) organization/repositories/user accounts
-  security.
+  Barak Brudo from Scribe Security walks through GitGat, an open source tool
+  written in Rego on OPA that audits GitHub security posture: 2FA, branch
+  protection, signed commits, deploy and SSH keys. Runs locally or on a
+  schedule via GitHub Actions.
 publishedAt: 2023-03-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -106,6 +106,10 @@ duration: 4281
 guests:
   - barak-brudo
 resources:
+  - title: GitGat on GitHub
+    type: url
+    url: 'https://github.com/scribe-public/gitgat'
+    category: code
   - title: 'Linux Foundation LFS122x: GitHub Supply Chain Security using GitGat'
     type: url
     category: documentation

@@ -3,9 +3,9 @@ id: f7rvx2rb04zl2vhgoltwedf5
 slug: introducing-apko-and-melange
 title: Introducing apko & melange
 description: >-
-  Joined by Ariadne from Chainguard, we introduce the world to apko + melange -
-  a toolset for building distroless container images in a declarative fashion
-  with Alpine's APK.
+  Ariadne Conill, primary author of apko and melange, walks through assembling
+  distroless OCI images from APK packages: building an NGINX image with apko,
+  packaging GNU hello with melange, signing keys, SBOMs, and GitHub Actions.
 publishedAt: 2022-03-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,15 +72,19 @@ guests:
 resources:
   - title: Google's Distroless project
     type: url
+    url: https://github.com/GoogleContainerTools/distroless
     category: code
   - title: GNU hello world program
     type: url
+    url: https://www.gnu.org/software/hello/
     category: code
-  - title: apko examples/NGINX.yaml
+  - title: apko examples/nginx.yaml
     type: url
+    url: https://github.com/chainguard-dev/apko/blob/main/examples/nginx.yaml
     category: demos
-  - title: melange examples/GNU hello.yaml
+  - title: melange examples/gnu-hello.yaml
     type: url
+    url: https://github.com/chainguard-dev/melange/blob/main/examples/gnu-hello.yaml
     category: demos
 ---
 
