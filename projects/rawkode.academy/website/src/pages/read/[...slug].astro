@@ -113,13 +113,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 });
 const publishDate = dateFormatter.format(article.data.publishedAt);
-// Only show an "Updated" byline when there's a real update later than the
-// original publish date. Prevents identical-date noise on articles that
-// only changed metadata or had a same-day fix.
+// Only show an "Updated" byline when the update lands on a different
+// calendar day than the original publish date. Comparing dates (not
+// timestamps) avoids the "exactly 24h" edge case that strict ">" missed
+// when both frontmatter dates parse to midnight UTC. Also still filters
+// same-day metadata-only fixes.
+const sameCalendarDayUtc = (a: Date, b: Date): boolean =>
+	a.getUTCFullYear() === b.getUTCFullYear() &&
+	a.getUTCMonth() === b.getUTCMonth() &&
+	a.getUTCDate() === b.getUTCDate();
 const wasUpdated =
 	article.data.updatedAt &&
-	article.data.updatedAt.getTime() >
-		article.data.publishedAt.getTime() + 24 * 60 * 60 * 1000;
+	article.data.updatedAt.getTime() > article.data.publishedAt.getTime() &&
+	!sameCalendarDayUtc(article.data.updatedAt, article.data.publishedAt);
 const updateDate = wasUpdated
 	? dateFormatter.format(article.data.updatedAt as Date)
 	: undefined;
