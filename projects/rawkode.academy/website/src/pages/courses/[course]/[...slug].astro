@@ -60,6 +60,14 @@ if (module.data.draft) {
 	return Astro.redirect("/404");
 }
 
+// Google truncates SERP titles around 60 chars. Append the course title
+// for context only when the module title is short (e.g. "Introduction",
+// "Prerequisites") and the composite still fits; otherwise the module
+// title stands alone. Course context is always available in the
+// breadcrumb and JSON-LD.
+const composite = `${module.data.title} - ${course.data.title}`;
+const pageTitle = composite.length <= 58 ? composite : module.data.title;
+
 const { Content } = await render(module);
 
 const allResources = [
@@ -163,7 +171,7 @@ function formatDuration(minutes?: number) {
 ---
 
 <Page
-	title={`${module.data.title} - ${course.data.title}`}
+	title={pageTitle}
 	description={module.data.description}
 	image={imageUrl
 		? {
