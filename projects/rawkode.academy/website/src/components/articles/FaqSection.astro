@@ -1,0 +1,83 @@
+---
+import FaqJsonLd from "@/components/html/faq-jsonld.astro";
+
+export interface FaqEntry {
+	question: string;
+	answer: string;
+}
+
+interface Props {
+	questions?: FaqEntry[] | undefined;
+}
+
+const { questions } = Astro.props;
+const items = questions ?? [];
+// Google requires the answer text be visibly present on the page for
+// FAQ rich-result eligibility. If we ever ship JSON-LD without a
+// matching visible block, Google flags it as a structured-data policy
+// violation and may suppress all rich snippets on the page. Guard
+// both emissions on the same source list.
+const hasItems = items.length > 0;
+---
+
+{
+	hasItems && (
+		<>
+			<section
+				class="not-prose mt-12 pt-8 border-t border-glass"
+				aria-labelledby="article-faq-heading"
+			>
+				<h2
+					id="article-faq-heading"
+					class="text-2xl font-bold tracking-tight text-primary-content mb-6"
+				>
+					Frequently asked questions
+				</h2>
+				<ol class="list-none p-0 m-0 flex flex-col gap-2">
+					{items.map((item) => (
+						<li class="faq-item rounded-md border border-glass bg-white/40 dark:bg-gray-800/40">
+							<details>
+								<summary class="faq-summary flex items-center gap-3 px-5 py-4 cursor-pointer font-semibold text-primary-content">
+									<span
+										class="faq-toggle inline-flex items-center justify-center w-5 h-5 rounded-full bg-black/5 dark:bg-white/10 text-sm leading-none text-secondary-content shrink-0"
+										aria-hidden="true"
+									/>
+									<h3 class="m-0 text-base font-semibold">
+										{item.question}
+									</h3>
+								</summary>
+								<div class="px-5 pb-5 pl-[3.25rem] text-secondary-content leading-relaxed">
+									<p class="m-0">{item.answer}</p>
+								</div>
+							</details>
+						</li>
+					))}
+				</ol>
+			</section>
+			<FaqJsonLd questions={items} />
+		</>
+	)
+}
+
+<style>
+	@reference "../../styles/global.css";
+
+	/* Hide the browser's default disclosure marker in all engines so the
+	 * custom toggle is the only chrome. */
+	.faq-summary {
+		list-style: none;
+	}
+	.faq-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	/* +/- toggle handled in CSS so the markup stays static and
+	 * crawler-readable. The transition uses the project motion tokens. */
+	.faq-toggle::before {
+		content: "+";
+		transition: color var(--duration-fast) var(--ease-out);
+	}
+	details[open] .faq-toggle::before {
+		content: "−";
+	}
+</style>

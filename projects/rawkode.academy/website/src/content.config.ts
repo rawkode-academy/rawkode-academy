@@ -236,6 +236,20 @@ const articles = defineCollection({
 					}),
 				)
 				.optional(),
+			// Optional list of question/answer pairs to surface as a visible
+			// FAQ section on the article (and as `FAQPage` JSON-LD). Both
+			// fields are required when an entry is present. Google demands
+			// the answer text appear visibly on the page for FAQ rich-result
+			// eligibility, so the FaqSection component renders these in
+			// addition to emitting the structured data.
+			faq: z
+				.array(
+					z.object({
+						question: z.string().min(8),
+						answer: z.string().min(20),
+					}),
+				)
+				.optional(),
 			resources: z.array(resourceSchema).optional(),
 		}),
 });
