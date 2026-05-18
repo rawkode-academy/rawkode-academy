@@ -1,8 +1,8 @@
 ---
 title: "cgroups: From Chaos to Control"
+slug: cgroups-from-chaos-to-control
 description: "A deep dive into Linux cgroups v1 vs v2: the history, the architecture, and what it means for Kubernetes."
 type: guide
-slug: cgroups-from-chaos-to-control
 cover:
   image: "./cover.webp"
   alt: "Diagram showing the evolution from fragmented cgroupsv1 hierarchies to the unified cgroupsv2 tree"
@@ -24,9 +24,9 @@ import HierarchyExplorer from '@/components/articles/cgroups/HierarchyExplorer';
 import ResourceSimulator from '@/components/articles/cgroups/ResourceSimulator';
 import PodCgroupMapper from '@/components/articles/cgroups/PodCgroupMapper';
 
-Every Linux container's resource limits live, underneath, in a folder.
+Everything in Linux is a file ... and every Linux container's resource limits are no different. They're just files that live in a special directory.
 
-Inside that folder are files with names like `memory.max` and `cpu.weight`. When the kernel decides your container has used too much RAM, it isn't consulting a daemon or asking Kubernetes. It's reading a number out of a file you could have written yourself with `echo`. That's the whole mechanism. The story of how Linux got here, and the decade-long detour it took along the way, is the story of cgroups.
+Inside that directory are files with names like `memory.max` and `cpu.weight`. When the kernel decides your container has used too much RAM, it isn't consulting a daemon or asking Kubernetes. It's reading a number out of a file you could have written yourself with `echo`. That's the whole mechanism. The story of how Linux got here, and the decade-long detour it took along the way, is the story of cgroups.
 
 ---
 
