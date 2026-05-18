@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Tab = "v1" | "v2";
 
@@ -127,7 +127,7 @@ function TreeNodeRow({
 	expandedKeys: Set<string>;
 	toggleExpand: (key: string) => void;
 	pathPrefix: string;
-	accentColor?: string;
+	accentColor?: string | undefined;
 }) {
 	const nodeKey = `${pathPrefix}/${node.name}`;
 	const hasChildren = node.children && node.children.length > 0;
@@ -336,14 +336,26 @@ export default function HierarchyExplorer() {
 		});
 	}, []);
 
+	const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const showTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		return () => {
+			if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
+			if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
+		};
+	}, []);
+
 	const switchTab = useCallback(
 		(tab: Tab) => {
 			if (tab === activeTab) return;
+			if (fadeTimeoutRef.current) clearTimeout(fadeTimeoutRef.current);
+			if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
 			setTransitioning(true);
-			setTimeout(() => {
+			fadeTimeoutRef.current = setTimeout(() => {
 				setDisplayTab(tab);
 				setActiveTab(tab);
-				setTimeout(() => {
+				showTimeoutRef.current = setTimeout(() => {
 					setTransitioning(false);
 				}, 30);
 			}, 200);

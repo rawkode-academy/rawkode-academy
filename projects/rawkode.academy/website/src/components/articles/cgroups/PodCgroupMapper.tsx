@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 
 type QoSClass = "guaranteed" | "burstable" | "besteffort";
 
@@ -327,15 +327,21 @@ export default function PodCgroupMapper() {
 
 	const config = useMemo(() => qosConfigs[activeClass], [activeClass]);
 
+	const switchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		return () => { if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current); };
+	}, []);
+
 	const handleSwitch = useCallback(
 		(qos: QoSClass) => {
 			if (qos === activeClass) return;
+			if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
 			setTransitioning(true);
-			const timeout = setTimeout(() => {
+			switchTimeoutRef.current = setTimeout(() => {
 				setActiveClass(qos);
 				setTransitioning(false);
 			}, 150);
-			return () => clearTimeout(timeout);
 		},
 		[activeClass],
 	);
@@ -369,6 +375,7 @@ export default function PodCgroupMapper() {
 							key={qos}
 							type="button"
 							onClick={() => handleSwitch(qos)}
+							className="cgroup-qos-btn"
 							style={{
 								padding: "0.5rem 1rem",
 								borderRadius: "0.5rem",
@@ -379,7 +386,6 @@ export default function PodCgroupMapper() {
 								fontSize: "0.8125rem",
 								cursor: "pointer",
 								transition: "all 200ms ease",
-								outline: "none",
 								fontFamily: "inherit",
 							}}
 							onMouseEnter={(e) => {
@@ -563,6 +569,14 @@ export default function PodCgroupMapper() {
 					{config.annotation}
 				</p>
 			</div>
+
+			<style>{`
+				.cgroup-qos-btn:focus { outline: none; }
+				.cgroup-qos-btn:focus-visible {
+					outline: 2px solid rgba(148, 163, 184, 0.6);
+					outline-offset: 2px;
+				}
+			`}</style>
 		</div>
 	);
 }

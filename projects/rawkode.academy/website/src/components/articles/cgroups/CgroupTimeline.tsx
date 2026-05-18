@@ -338,7 +338,7 @@ function CgroupTimeline() {
 											type="button"
 											onClick={() => handleMilestoneClick(index)}
 											onKeyDown={(e) => handleKeyDown(e, index)}
-											className="w-full cursor-pointer border-0 bg-transparent p-0 text-left focus-visible:outline-none"
+											className="w-full cursor-pointer border-0 bg-transparent p-0 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/50 focus-visible:rounded-lg"
 											aria-expanded={isActive}
 											aria-label={`${yearLabel}: ${milestone.label}. Click for details.`}
 										>

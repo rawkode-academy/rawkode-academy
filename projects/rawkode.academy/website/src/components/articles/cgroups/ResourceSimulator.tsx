@@ -16,7 +16,7 @@ interface SliderConfig {
 	formatRaw: (value: number, version: CgroupVersion) => string;
 }
 
-const SLIDER_CONFIGS: Record<string, SliderConfig> = {
+const SLIDER_CONFIGS = {
 	cpu: {
 		label: "CPU",
 		v1Label: "cpu.cfs_quota_us",
@@ -62,7 +62,7 @@ const SLIDER_CONFIGS: Record<string, SliderConfig> = {
 		formatValue: (v) => `${v.toLocaleString()} read IOPS`,
 		formatRaw: (v) => `${v}`,
 	},
-};
+} satisfies Record<string, SliderConfig>;
 
 function Slider({
 	config,
@@ -100,7 +100,7 @@ function Slider({
 					step={config.step}
 					value={value}
 					onChange={(e) => onChange(Number(e.target.value))}
-					className="w-full h-2 appearance-none rounded-full cursor-pointer outline-none"
+					className="cgroup-sim-slider w-full h-2 appearance-none rounded-full cursor-pointer focus:outline-none focus-visible:outline-2 focus-visible:outline-slate-400/60 focus-visible:outline-offset-4"
 					style={{
 						background: `linear-gradient(to right, ${config.color} 0%, ${config.color} ${percentage}%, #334155 ${percentage}%, #334155 100%)`,
 					}}
@@ -312,9 +312,8 @@ export default function ResourceSimulator() {
 				</div>
 			</div>
 
-			{/* Slider thumb styling */}
 			<style>{`
-				input[type="range"]::-webkit-slider-thumb {
+				.cgroup-sim-slider::-webkit-slider-thumb {
 					-webkit-appearance: none;
 					appearance: none;
 					width: 16px;
@@ -326,11 +325,11 @@ export default function ResourceSimulator() {
 					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 					transition: border-color 0.15s, transform 0.15s;
 				}
-				input[type="range"]::-webkit-slider-thumb:hover {
+				.cgroup-sim-slider::-webkit-slider-thumb:hover {
 					transform: scale(1.15);
 					border-color: #94a3b8;
 				}
-				input[type="range"]::-moz-range-thumb {
+				.cgroup-sim-slider::-moz-range-thumb {
 					width: 16px;
 					height: 16px;
 					border-radius: 50%;
@@ -340,7 +339,7 @@ export default function ResourceSimulator() {
 					box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 					transition: border-color 0.15s, transform 0.15s;
 				}
-				input[type="range"]::-moz-range-thumb:hover {
+				.cgroup-sim-slider::-moz-range-thumb:hover {
 					transform: scale(1.15);
 					border-color: #94a3b8;
 				}
