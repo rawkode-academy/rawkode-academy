@@ -53,8 +53,6 @@ This is a kernel pseudo-filesystem mounted under `/sys`. On a cgroupsv2 host, `/
 
 `memory.max` is the memory limit. `cpu.pressure` reports whether tasks are stalling on CPU. `system.slice/` and `user.slice/` are sub-folders: child groups, with their own limits inside.
 
-That's everything. Group processes with a folder. Limit them with a file. Done.
-
 ---
 
 ## What a Cgroup Actually Is
@@ -72,6 +70,8 @@ This design is elegant. What went wrong is what always goes wrong in systems tha
 ---
 
 ## Try It Yourself
+
+> **Tested on:** Ubuntu 25.10, kernel 7.0.5, systemd 257, runc 1.3.4. Anything cgroupsv2 with these or newer should behave identically.
 
 The cleanest way to *feel* how cgroups work is to create one, cap it, and watch the kernel enforce the cap. Do this on a disposable Linux VM or lab host, not a production node. Any cgroupsv2 system will do:
 
@@ -127,10 +127,10 @@ Three primitives. A directory, a file write, a PID. That's the kernel interface 
 ## Now Block a Fork Bomb
 
 <Aside variant="danger">
-Do this on a disposable Linux VM or lab host you don't mind rebooting, not a production node or your laptop. If anything goes wrong (the cgroup isn't set up correctly, your shell isn't actually inside it, the limit isn't applied), the fork bomb at the end of this section will pin every CPU and exhaust the kernel's process table within seconds. Recovery means a hard reset. Read the whole section before running anything, and verify `cat /proc/self/cgroup` shows `0::/fork-demo` before you launch the bomb.
+	Look, don't be stupid, do not trust my code, do not say I didn't warn you. Only do this on a disposable Linux VM or lab host you don't mind rebooting, not a production node or your laptop. If anything goes wrong (the cgroup isn't set up correctly, your shell isn't actually inside it, the limit isn't applied), the fork bomb at the end of this section will pin every CPU and exhaust the kernel's process table within seconds. Recovery means a hard reset. Read the whole section before running anything, and verify `cat /proc/self/cgroup` shows `0::/fork-demo` before you launch the bomb 💣💥.
 </Aside>
 
-The memory demo killed a process. The `pids` controller does the opposite: it refuses to *create* the process. Same three primitives, same shape of interface, a different shape of "no."
+The memory demo killed a process after it allocated too much. The `pids` controller is more interesting: it refuses to *create* the process at all. Same files, same write-a-PID-and-go pattern, but the kernel says no at fork time rather than reclaim time.
 
 ```bash
 # sudo doesn't apply to shell redirection, so `sudo echo X > /sys/fs/...`
@@ -199,7 +199,7 @@ echo $$ > /sys/fs/cgroup/user.slice/cgroup.procs  # leave the cgroup
 rmdir /sys/fs/cgroup/fork-demo
 ```
 
-`memory.max` killed. `pids.max` blocked. Same three primitives, two different verbs the kernel uses to enforce them.
+Two cgroups, two different `<controller>.max` files, two completely different kinds of refusal: `memory.max` reclaims-then-kills, `pids.max` returns `EAGAIN` to `fork()`. The kernel exposes both behaviours through identical-looking interfaces, which is exactly the point of cgroups as an abstraction.
 
 ---
 
@@ -307,8 +307,6 @@ Compare that to cgroupsv2, where the same process gets one line:
 ```
 0::/kubepods.slice/kubepods-pod1a2b3c.slice/cri-containerd-a1b2c3d4e5f6.scope
 ```
-
-One line. One hierarchy. One source of truth.
 
 It's worth pausing here, because the original v1 design was textbook good engineering. Independent trees per controller is exactly how a senior engineer would propose this from scratch today: small, decoupled subsystems, each responsible for one resource, free to evolve on its own timeline. Every Cloud Native principle we now take for granted points at that shape. The decoupling is a feature when the consumer is a sysadmin grouping arbitrary processes for arbitrary policies, limiting CPU on one grouping while throttling I/O on another.
 
@@ -543,7 +541,7 @@ The kubelet has two options for managing the cgroup tree.
 
 **systemd driver:** the kubelet and runtime integrate with systemd, often through transient units, and systemd manages the cgroup tree. Single source of truth. Both the kubelet and system services are visible in the same hierarchy, managed by the same process.
 
-For kubeadm clusters, Kubernetes 1.22 made `systemd` the default when `cgroupDriver` is unset. The kubelet's own default is still `cgroupfs`, but Kubernetes recommends `systemd` when systemd is the init system, and Kubernetes requires the kubelet and runtime to use the systemd cgroup driver for cgroupsv2 support. If you're still on cgroupfs with systemd, you're running against the current.
+For kubeadm clusters, Kubernetes 1.22 made `systemd` the default when `cgroupDriver` is unset (We all remember this migration, and not fondly; right?). The kubelet's own default is still `cgroupfs`, but Kubernetes recommends `systemd` when systemd is the init system, and Kubernetes requires the kubelet and runtime to use the systemd cgroup driver for cgroupsv2 support. If you're still on cgroupfs with systemd, you're running against the grain.
 
 ### How Monitoring Reads Cgroups
 
@@ -593,4 +591,4 @@ One bonus from v2's unified hierarchy: BPF programs that attach to cgroup paths 
 
 cgroupsv1 is legacy. The kernel's authoritative cgroup documentation is now the v2 interface, Kubernetes deprecated cgroup v1 in 1.35, and new feature work targets v2. What's ahead is incremental: better NUMA-aware memory placement, finer delegation primitives for rootless containers. But the structural story is settled.
 
-It's just directories and files. All the way down.
+Much like Kubernetes is YAML and controllers, all the way down; cgroups are just directories and files, all the way down.
