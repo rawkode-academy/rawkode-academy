@@ -241,12 +241,14 @@ const articles = defineCollection({
 			// fields are required when an entry is present. Google demands
 			// the answer text appear visibly on the page for FAQ rich-result
 			// eligibility, so the FaqSection component renders these in
-			// addition to emitting the structured data.
+			// addition to emitting the structured data. Strings are trimmed
+			// before length validation so a frontmatter value made of spaces
+			// can't slip through as a placeholder.
 			faq: z
 				.array(
 					z.object({
-						question: z.string().min(8),
-						answer: z.string().min(20),
+						question: z.string().trim().min(8),
+						answer: z.string().trim().min(20),
 					}),
 				)
 				.optional(),
