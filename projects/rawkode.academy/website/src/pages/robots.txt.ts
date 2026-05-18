@@ -13,6 +13,9 @@ export const ROBOTS_DISALLOWS = [
 	"/_server-islands/",
 	"/api/",
 	"/graphql",
+	"/search",
+	"/home",
+	"/sign-in",
 ] as const;
 
 export const getRobotsTxt = (sitemapIndexURL: URL) => `

@@ -69,6 +69,15 @@ describe("/image", () => {
       );
     });
 
+    test("should set X-Robots-Tag: noindex so OG images don't get indexed as pages", async () => {
+      const response = await GET({
+        // @ts-ignore - not all properties are set for request
+        request: { url: "http://localhost:4321" },
+      });
+
+      expect(response.headers.get("X-Robots-Tag")).toEqual("noindex");
+    });
+
     test("should return 200 and return an etag which should not change when called twice", async () => {
       const defaultTemplate = await import("../templates/default");
       const expectedHash = defaultTemplate.template.hash();

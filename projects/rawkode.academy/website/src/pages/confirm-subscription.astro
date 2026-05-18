@@ -6,7 +6,7 @@ import { createLearnerId } from "@/actions/newsletter";
 const user = Astro.locals.user;
 
 if (!user) {
-	return Astro.redirect("/sign-in?returnTo=/confirm-subscription");
+	return Astro.redirect("/api/auth/sign-in?returnTo=/confirm-subscription");
 }
 
 const prefixedUserId = createLearnerId(user.id);

@@ -8,7 +8,7 @@ export const prerender = false;
 
 const user = Astro.locals.user;
 const pagePath = Astro.url.pathname;
-const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
 // Check for the cheatsheet cookie (indicates user has subscribed)
 const hasCheatsheetCookie =

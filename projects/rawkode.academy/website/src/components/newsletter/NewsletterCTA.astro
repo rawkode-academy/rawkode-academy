@@ -41,7 +41,7 @@ if (user && import.meta.env.PROD) {
 }
 
 const pagePath = Astro.url.pathname;
-const signInUrl = `/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
 // Check for the newsletter subscription cookie (server-side)
 const hasNewsletterCookie =

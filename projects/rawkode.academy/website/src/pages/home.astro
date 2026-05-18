@@ -8,7 +8,9 @@ export const prerender = false;
 const user = Astro.locals.user;
 
 if (!user) {
-	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent("/home")}`);
+	return Astro.redirect(
+		`/api/auth/sign-in?returnTo=${encodeURIComponent("/home")}`,
+	);
 }
 
 // No caching for personalized content
@@ -82,7 +84,7 @@ const watchPositionsMap = continueWatchingData.reduce(
 );
 ---
 
-<Page title="Home - Rawkode Academy" description="Your personalized dashboard">
+<Page title="Home - Rawkode Academy" description="Your personalized dashboard" noindex>
 	<div class="container-content content-px py-8">
 		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-primary-content mb-2">

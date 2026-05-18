@@ -11,7 +11,9 @@ export const prerender = false;
 const user = Astro.locals.user;
 
 if (!user) {
-	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent("/settings")}`);
+	return Astro.redirect(
+		`/api/auth/sign-in?returnTo=${encodeURIComponent("/settings")}`,
+	);
 }
 
 const prefixedUserId = createLearnerId(user.id);

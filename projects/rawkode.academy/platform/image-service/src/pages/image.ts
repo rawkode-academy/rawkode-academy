@@ -95,6 +95,7 @@ export const GET: APIRoute = async ({ request }) => {
       headers: {
         "Content-Type": "image/svg+xml",
         "Cache-Control": CACHE_CONTROL,
+        "X-Robots-Tag": "noindex",
         ETag: hashedTemplate.hash,
       },
       status: 200,
@@ -122,6 +123,7 @@ export const GET: APIRoute = async ({ request }) => {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": CACHE_CONTROL,
+      "X-Robots-Tag": "noindex",
       ETag: hashedTemplate.hash,
     },
     status: 200,

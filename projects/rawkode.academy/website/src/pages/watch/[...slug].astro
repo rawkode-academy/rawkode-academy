@@ -29,7 +29,7 @@ let video: (typeof videos)[0] | undefined = videos.find(
 
 // Handle 404 case if still not found
 if (!video) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 // Set cache headers for ISR
