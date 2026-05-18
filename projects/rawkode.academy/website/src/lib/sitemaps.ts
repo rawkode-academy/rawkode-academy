@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
+import { getCourseModuleSlug } from "@/utils/course-path";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const BUILD_TIME = new Date();
@@ -316,16 +317,19 @@ export async function getCourseSitemapEntries(): Promise<SitemapUrlEntry[]> {
 		priority: 0.7,
 	}));
 
-	const moduleEntries = modules.map((module) => ({
-		path: `/courses/${module.data.course.id}/${module.id}`,
-		lastmod: pickLastmod(
-			undefined,
-			module.data.updatedAt,
-			module.data.publishedAt,
-		),
-		changefreq: "weekly" as const,
-		priority: 0.6,
-	}));
+	const moduleEntries = modules.map((module) => {
+		const slug = getCourseModuleSlug(module.data.course.id, module.id);
+		return {
+			path: `/courses/${module.data.course.id}/${slug}`,
+			lastmod: pickLastmod(
+				undefined,
+				module.data.updatedAt,
+				module.data.publishedAt,
+			),
+			changefreq: "weekly" as const,
+			priority: 0.6,
+		};
+	});
 
 	return sortByPath([...courseEntries, ...moduleEntries]);
 }
