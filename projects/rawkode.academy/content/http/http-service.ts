@@ -7,6 +7,10 @@ export class Content extends WorkerEntrypoint<Env> {
 		"Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
 		"Access-Control-Allow-Headers": "Content-Type, Range",
 		"Access-Control-Expose-Headers": "Content-Length, Content-Range, Accept-Ranges",
+		// Stored R2 objects (captions, HLS manifests, thumbnails) are assets,
+		// not pages. Tell Google not to index them - otherwise they pile up
+		// under "Crawled - currently not indexed" in Search Console.
+		"X-Robots-Tag": "noindex",
 	};
 
 	async fetch(request: Request): Promise<Response> {
@@ -22,6 +26,18 @@ export class Content extends WorkerEntrypoint<Env> {
 		if (url.pathname === "/health") {
 			return new Response("ok", {
 				headers: { "Content-Type": "text/plain", ...this.corsHeaders },
+			});
+		}
+
+		// Tell crawlers to stay out. This whole subdomain serves R2 assets,
+		// none of which should appear as search results.
+		if (url.pathname === "/robots.txt") {
+			return new Response("User-agent: *\nDisallow: /\n", {
+				headers: {
+					"Content-Type": "text/plain; charset=utf-8",
+					"Cache-Control": "public, max-age=3600",
+					...this.corsHeaders,
+				},
 			});
 		}
 

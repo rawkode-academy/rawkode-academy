@@ -57,7 +57,7 @@ const computeImageUrl = async (module: CollectionEntry<"courseModules">) => {
 const { module, course } = Astro.props;
 
 if (module.data.draft) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 const { Content } = await render(module);
