@@ -56,7 +56,7 @@ const qosConfigs: Record<QoSClass, QoSConfig> = {
 			{ text: "# memory.max", type: "comment" },
 			{ text: "268435456             # 256Mi", type: "value" },
 			{ text: "", type: "blank" },
-			{ text: "# memory.min", type: "comment" },
+			{ text: "# memory.min (only when MemoryQoS alpha gate is on)", type: "comment" },
 			{
 				text: "268435456             # 256Mi (protected, requests == limits)",
 				type: "value",
@@ -66,7 +66,7 @@ const qosConfigs: Record<QoSClass, QoSConfig> = {
 			{ text: "# QoS: Guaranteed (requests == limits)", type: "comment" },
 		],
 		annotation:
-			"OOM score adjustment of -997 means this pod is nearly immune to the OOM killer. Guaranteed pods are the last to be evicted, making them ideal for critical workloads.",
+			"OOM score adjustment of -997 makes Guaranteed pods the last targets for the kernel OOM killer. memory.min is only written per-pod when the alpha MemoryQoS feature gate is enabled; with the default kubelet, requests influence scheduling and eviction but do not set memory.min on individual pod cgroups.",
 	},
 	burstable: {
 		label: "Burstable",
@@ -103,20 +103,20 @@ const qosConfigs: Record<QoSClass, QoSConfig> = {
 			{ text: "# memory.max", type: "comment" },
 			{ text: "536870912             # 512Mi", type: "value" },
 			{ text: "", type: "blank" },
-			{ text: "# memory.low", type: "comment" },
+			{ text: "# memory.low (only when MemoryQoS alpha gate is on, K8s 1.36+)", type: "comment" },
 			{
 				text: "134217728             # 128Mi (best-effort protection)",
 				type: "value",
 			},
 			{ text: "", type: "blank" },
 			{
-				text: "# OOM score adj: ~999 (based on memory request ratio)",
+				text: "# OOM score adj: ~999 (scaled by memory request ratio)",
 				type: "comment",
 			},
 			{ text: "# QoS: Burstable (requests < limits)", type: "comment" },
 		],
 		annotation:
-			"OOM score adjustment of ~999 is calculated from the pod's memory request ratio. Burstable pods use memory.low for best-effort protection -- the kernel tries to avoid reclaiming this memory but will if under extreme pressure.",
+			"OOM score is scaled by the memory request ratio. Under the alpha MemoryQoS gate with tiered reservation (K8s 1.36+), Burstable requests map to memory.low; without the gate, the per-pod cgroup gets no memory.low set.",
 	},
 	besteffort: {
 		label: "BestEffort",

@@ -828,18 +828,31 @@ html.dark {
 		margin-bottom: 1rem;
 	}
 
-	/* Code styling */
+	/* Inline code: brand-tinted chip with a hairline border */
 	.prose code {
 		font-family: var(--font-mono);
 		font-size: 0.875em;
-		padding: 0.2em 0.4em;
-		background: rgb(243 244 246); /* gray-100 */
-		border-radius: 0.375rem;
 		font-weight: 500;
+		padding: 0.15em 0.4em;
+		background: rgb(from rgb(var(--brand-primary)) r g b / 0.08);
+		border: 1px solid rgb(from rgb(var(--brand-primary)) r g b / 0.18);
+		border-radius: var(--radius-xs);
+		color: var(--text-primary-content);
+		overflow-wrap: anywhere;
 	}
 
 	:root.dark .prose code {
-		background: rgb(31 41 55); /* gray-800 */
+		background: rgb(from rgb(var(--brand-secondary)) r g b / 0.10);
+		border-color: rgb(from rgb(var(--brand-secondary)) r g b / 0.22);
+	}
+
+	/* Inline code inside headings: text-only, no chip */
+	.prose :is(h1, h2, h3, h4) code {
+		background: transparent;
+		border: 0;
+		padding: 0;
+		font-size: 0.92em;
+		color: inherit;
 	}
 
 	.prose pre {

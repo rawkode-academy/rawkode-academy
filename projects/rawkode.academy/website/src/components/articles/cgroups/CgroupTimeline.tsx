@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 
 interface Milestone {
 	year: number;
@@ -53,9 +53,9 @@ const milestones: Milestone[] = [
 	{
 		year: 2016,
 		month: "Mar",
-		label: "v2 in Linux 4.5",
+		label: "v2 declared stable",
 		detail:
-			"cgroups v2 merged as non-default/experimental in Linux kernel 4.5.",
+			"cgroups v2 is declared stable in Linux 4.5, dropping the experimental `__DEVEL__sane_behavior` mount flag it had carried since its initial appearance in 3.16 (Aug 2014).",
 		color: "green",
 	},
 	{
@@ -75,9 +75,9 @@ const milestones: Milestone[] = [
 	},
 	{
 		year: 2020,
-		label: "v2 declared stable",
+		label: "Docker supports v2",
 		detail:
-			"cgroups v2 reaches \"complete\" status in Linux 5.8 with full controller support.",
+			"Docker 20.10 ships with cgroups v2 support, closing the last major runtime gap for v2 adoption across the container ecosystem.",
 		color: "green",
 	},
 	{
@@ -116,9 +116,9 @@ const milestones: Milestone[] = [
 	},
 	{
 		year: 2025,
-		label: "v2 everywhere",
+		label: "v2 is the default",
 		detail:
-			"Most managed Kubernetes providers and major distributions now default to cgroups v2.",
+			"cgroups v2 is the default on new installs of every major distribution and managed Kubernetes provider. v1 still ships on older LTS hosts and specialised environments, but new deployments land on v2 unless explicitly opted out.",
 		color: "green",
 	},
 ];
@@ -162,31 +162,6 @@ function CgroupTimeline() {
 	const [activeIndex, setActiveIndex] = useState<number | null>(null);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const milestoneRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-	const scrollToYear = useCallback((targetYear: number) => {
-		const container = scrollRef.current;
-		if (!container) return;
-
-		const targetIndex = milestones.findIndex((m) => m.year >= targetYear);
-		const targetEl =
-			milestoneRefs.current[targetIndex >= 0 ? targetIndex : 0];
-		if (!targetEl) return;
-
-		const containerRect = container.getBoundingClientRect();
-		const targetRect = targetEl.getBoundingClientRect();
-		const offset =
-			targetRect.left -
-			containerRect.left -
-			containerRect.width / 2 +
-			targetRect.width / 2;
-
-		container.scrollBy({ left: offset, behavior: "smooth" });
-	}, []);
-
-	useEffect(() => {
-		const timer = setTimeout(() => scrollToYear(2016), 300);
-		return () => clearTimeout(timer);
-	}, [scrollToYear]);
 
 	const handleMilestoneClick = useCallback((index: number) => {
 		setActiveIndex((prev) => (prev === index ? null : index));

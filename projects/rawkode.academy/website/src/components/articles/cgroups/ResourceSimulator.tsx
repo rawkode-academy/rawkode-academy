@@ -21,7 +21,7 @@ const SLIDER_CONFIGS = {
 		label: "CPU",
 		v1Label: "cpu.cfs_quota_us",
 		v2Label: "cpu.max",
-		min: 0,
+		min: 5,
 		max: 100,
 		step: 5,
 		color: "#ef4444",
