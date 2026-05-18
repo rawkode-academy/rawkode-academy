@@ -102,7 +102,6 @@ const tags = (article.data.technologies ?? []).map((technologyId) => ({
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
 	{ title: "Articles", link: "/read" },
-	{ title: article.data.title, link: `/read/${article.id}` },
 ];
 
 const articleType = article.data.type || "tutorial";
