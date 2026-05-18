@@ -14,6 +14,8 @@ export const ROBOTS_DISALLOWS = [
 	"/api/",
 	"/graphql",
 	"/search",
+	"/home",
+	"/sign-in",
 ] as const;
 
 export const getRobotsTxt = (sitemapIndexURL: URL) => `
