@@ -60,11 +60,18 @@ if (module.data.draft) {
 	return Astro.redirect("/404");
 }
 
-// Google truncates SERP titles around 60 chars. Append the course title
-// for context only when the module title is short (e.g. "Introduction",
-// "Prerequisites") and the composite still fits; otherwise the module
-// title stands alone. Course context is always available in the
-// breadcrumb and JSON-LD.
+// Google truncates SERP titles around 60 chars (pixel-based, so the
+// real cutoff varies). Append the course title for context only when
+// the module title is short (e.g. "Introduction", "Prerequisites") and
+// the composite stays under 58 chars; that leaves a 2-char buffer for
+// pixel-width variance. Otherwise the module title stands alone -
+// course context is still available in the breadcrumb and JSON-LD.
+//
+// Note: head.astro's TITLE_MAX_LENGTH=60 is a separate gate that
+// controls whether ` | Rawkode Academy` is appended to the page
+// title. Anything longer than 42 chars (60 - 18) already has the
+// suffix dropped, so by the time we hit this 58-char rule the
+// suffix is never in play.
 const composite = `${module.data.title} - ${course.data.title}`;
 const pageTitle = composite.length <= 58 ? composite : module.data.title;
 
