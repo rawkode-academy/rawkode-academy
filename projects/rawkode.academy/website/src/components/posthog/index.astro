@@ -188,6 +188,18 @@ const { userId } = Astro.props;
 				api_host: PH_HOST,
 				autocapture: true,
 				respect_dnt: true,
+				// Capture Core Web Vitals (LCP, INP, CLS, FCP, TTFB) as
+				// $web_vitals events. GSC has no CWV data for the property
+				// because field-traffic volume is below the CrUX threshold;
+				// these events are our own measurement until that changes.
+				// network_timing is off: it piggybacks on session replay,
+				// which is sampled at 0 below, so enabling it would be a
+				// silent no-op and an event-volume risk if we ever raise
+				// the replay rate without revisiting this.
+				capture_performance: {
+					web_vitals: true,
+					network_timing: false,
+				},
 				session_recording: {
 					maskAllInputs: true,
 					sampling: { rate: 0 },
