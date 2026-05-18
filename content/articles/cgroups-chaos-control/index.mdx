@@ -24,7 +24,7 @@ import HierarchyExplorer from '@/components/articles/cgroups/HierarchyExplorer';
 import ResourceSimulator from '@/components/articles/cgroups/ResourceSimulator';
 import PodCgroupMapper from '@/components/articles/cgroups/PodCgroupMapper';
 
-Every Linux container you've ever run is, underneath, just a folder.
+Every Linux container's resource limits live, underneath, in a folder.
 
 Inside that folder are files with names like `memory.max` and `cpu.weight`. When the kernel decides your container has used too much RAM, it isn't consulting a daemon or asking Kubernetes. It's reading a number out of a file you could have written yourself with `echo`. That's the whole mechanism. The story of how Linux got here, and the decade-long detour it took along the way, is the story of cgroups.
 
@@ -63,7 +63,7 @@ Membership lives in a file: `cgroup.procs` contains the PIDs of processes in the
 
 The mental model is this: **a cgroup is a directory, process membership is a file entry, and every resource limit is a knob you turn by writing to a file.**
 
-The kernel reads these files and enforces the constraints. If a process in a cgroup tries to allocate memory beyond `memory.max`, the kernel either reclaims memory from that cgroup or kills a process in it. No daemon, no userspace agent. It's the kernel itself doing the enforcement.
+The kernel reads these files and enforces the constraints. If a process in a cgroup pushes memory usage toward `memory.max`, the kernel first tries to reclaim pages from that cgroup; if usage crosses `memory.high` along the way, allocations are throttled with backpressure; if reclaim can't keep up and usage hits `memory.max`, the kernel OOM-kills a process inside the cgroup. No daemon, no userspace agent. It's the kernel itself doing the enforcement.
 
 This design is elegant. What went wrong is what always goes wrong in systems that grow organically: nobody planned for containers.
 
@@ -73,7 +73,19 @@ This design is elegant. What went wrong is what always goes wrong in systems tha
 
 > **Tested on:** Ubuntu 25.10, kernel 7.0.5, systemd 257, runc 1.3.4. Anything cgroupsv2 with these or newer should behave identically.
 
-The cleanest way to *feel* how cgroups work is to create one, cap it, and watch the kernel enforce the cap. Do this on a disposable Linux VM or lab host, not a production node. Any cgroupsv2 system will do:
+The cleanest way to *feel* how cgroups work is to create one, cap it, and watch the kernel enforce the cap. Do this on a disposable Linux VM or lab host, not a production node. Any cgroupsv2 system will do.
+
+First, make sure the kernel will expose the controllers we want in our new cgroup. On v2, a child cgroup only sees a controller if its parent has enabled it in `cgroup.subtree_control`:
+
+```bash
+# Should list at least: memory pids (and probably cpu, io, cpuset)
+cat /sys/fs/cgroup/cgroup.subtree_control
+
+# If memory or pids is missing, enable them at the root:
+echo "+memory +pids" | sudo tee /sys/fs/cgroup/cgroup.subtree_control
+```
+
+Most modern distros enable these by default, but managed nodes and minimal images sometimes don't. With that out of the way:
 
 ```bash
 # Create the cgroup (it's literally a directory)
@@ -127,7 +139,7 @@ Three primitives. A directory, a file write, a PID. That's the kernel interface 
 ## Now Block a Fork Bomb
 
 <Aside variant="danger">
-	Look, don't be stupid, do not trust my code, do not say I didn't warn you. Only do this on a disposable Linux VM or lab host you don't mind rebooting, not a production node or your laptop. If anything goes wrong (the cgroup isn't set up correctly, your shell isn't actually inside it, the limit isn't applied), the fork bomb at the end of this section will pin every CPU and exhaust the kernel's process table within seconds. Recovery means a hard reset. Read the whole section before running anything, and verify `cat /proc/self/cgroup` shows `0::/fork-demo` before you launch the bomb 💣💥.
+	Look, don't be stupid, do not trust my code, do not say I didn't warn you. Only do this on a disposable Linux VM or lab host you don't mind rebooting, not a production node or your laptop. If anything goes wrong (the cgroup isn't set up correctly, your shell isn't actually inside it, the limit isn't applied), the spawn loop further down has nothing to stop it and will exhaust the kernel's process table within seconds. Recovery means a hard reset. Read the whole section before running anything, and verify `cat /proc/self/cgroup` shows `0::/fork-demo` before you launch the loop.
 </Aside>
 
 The memory demo killed a process after it allocated too much. The `pids` controller is more interesting: it refuses to *create* the process at all. Same files, same write-a-PID-and-go pattern, but the kernel says no at fork time rather than reclaim time.
@@ -135,7 +147,7 @@ The memory demo killed a process after it allocated too much. The `pids` control
 ```bash
 # sudo doesn't apply to shell redirection, so `sudo echo X > /sys/fs/...`
 # writes as your user and fails. Drop into a real root shell instead.
-sudo su
+sudo -i
 
 # Create the cgroup and cap it at 10 processes
 mkdir /sys/fs/cgroup/fork-demo
@@ -183,20 +195,14 @@ cat /sys/fs/cgroup/fork-demo/pids.events
 # max 4823
 ```
 
-That's how many `fork()` calls the kernel refused since the cgroup was created. Point it at an actual fork bomb from inside the same cgroup:
+That's how many `fork()` calls the kernel refused since the cgroup was created. Every denied `fork()` is one the rest of the system never had to deal with. Point a real fork bomb at this cgroup and the counter climbs into the millions while the host stays responsive, but I'm not going to print the bomb here, because copy-pasting one into the wrong shell is exactly how lab hosts become bricks. The `sleep` loop above already proves the mechanism: the kernel returns `EAGAIN` to `fork()` the moment `pids.current` hits `pids.max`, and it will do that whether the caller is a polite shell loop or a self-replicating function.
+
+Cleanup once the loop has exited. The root shell still belongs to `fork-demo`, and the kernel won't let us `rmdir` a cgroup with live members, so exit the shell first and remove the directory from the parent shell that spawned it:
 
 ```bash
-:(){ :|:& };:
-```
-
-The counter rockets into the millions in seconds. The rest of the system never notices. The wall holds.
-
-Cleanup once the loop has exited:
-
-```bash
-kill $(jobs -p)                                   # reap the sleeps
-echo $$ > /sys/fs/cgroup/user.slice/cgroup.procs  # leave the cgroup
-rmdir /sys/fs/cgroup/fork-demo
+kill $(jobs -p)   # reap the sleeps from inside the root shell
+exit              # drop out of the root shell; its PID leaves the cgroup with it
+sudo rmdir /sys/fs/cgroup/fork-demo
 ```
 
 Two cgroups, two different `<controller>.max` files, two completely different kinds of refusal: `memory.max` reclaims-then-kills, `pids.max` returns `EAGAIN` to `fork()`. The kernel exposes both behaviours through identical-looking interfaces, which is exactly the point of cgroups as an abstraction.
@@ -234,7 +240,7 @@ By the time the patch merged into [Linux 2.6.24](https://kernelnewbies.org/Linux
 
 By 2013, more than a dozen controllers existed. The original design had made a decision that seemed perfectly reasonable at the time: **controllers could live in independent trees.** CPU could get one tree. Memory could get another. Block I/O could get another. The promise was flexibility: you could organize processes differently for different resources.
 
-Almost nobody wanted that flexibility. And the cost would dominate the next decade.
+In practice, almost nobody used that flexibility. And the cost would dominate the next decade.
 
 ---
 
@@ -277,7 +283,7 @@ And you get... this:
 1:name=systemd:/docker/a1b2c3d4e5f6
 ```
 
-Twelve lines. The same container ID, repeated across many hierarchies. The exact list varied by distro and runtime because related controllers could be co-mounted, but the important part is the same: one process had multiple cgroup memberships.
+Twelve lines. The same container ID, repeated across many hierarchies. The exact list varied by distro and runtime because related controllers could be co-mounted, but the important part is the same: one process had multiple cgroup memberships. (A few of those names won't survive into v2 in the same form. `freezer`, for instance, was v1's way of pausing every process in a cgroup at once — useful for checkpoint/restore and as the prerequisite step to safely killing a process tree. v2 replaces it with `cgroup.freeze` and `cgroup.kill` on the unified hierarchy.)
 
 This is cgroupsv1. And it's a mess.
 
@@ -328,7 +334,7 @@ The structural problem cascaded into operational pain.
 
 **No unified view.** To answer "how much total resource is this container using?", monitoring tools had to read CPU from paths like `/sys/fs/cgroup/cpuacct/docker/<id>/cpuacct.usage`, memory from `/sys/fs/cgroup/memory/docker/<id>/memory.usage_in_bytes`, block I/O from `/sys/fs/cgroup/blkio/docker/<id>/blkio.throttle.io_service_bytes`, and stitch the answers together by correlating paths across hierarchies. cAdvisor, Prometheus node_exporter, and every other monitoring tool had to implement this stitching. It worked. It was fragile, slow, and ugly.
 
-(There were also smaller indignities. The `cpuset` controller's `clone_children` quirk, where child cgroups didn't inherit the parent's CPU and memory node assignments unless you set a special flag, broke expectations everywhere else.)
+(There were also smaller indignities. The `cpuset` controller's `cgroup.clone_children` flag, where child cgroups didn't inherit the parent's CPU and memory node assignments unless you flipped it on, broke expectations everywhere else. v2 dropped the flag entirely: children of a cpuset cgroup inherit their parent's `cpus` and `mems` by default, and that's that.)
 
 Tejun Heo saw the mess and [proposed a fix in early 2014](https://lkml.org/lkml/2014/3/13/503): a single unified hierarchy. That patchset would take two years to land and another four to stabilize.
 
@@ -377,6 +383,16 @@ echo "+cpu +memory" > /sys/fs/cgroup/cgroup.subtree_control
 
 This creates a clean permission model. A child cgroup can only use controllers its parent delegated. Container runtimes and systemd need exactly this when granting resource control to unprivileged processes (like rootless containers) without giving them access to controllers they shouldn't touch.
 
+### Atomic Kill
+
+v2 added a feature that v1 never had a clean answer for: killing every process in a cgroup, atomically, with one write:
+
+```bash
+echo 1 > /sys/fs/cgroup/some-group/cgroup.kill
+```
+
+The kernel walks the cgroup (and its descendants) and sends `SIGKILL` to every process in one pass. No racing the process tree, no chasing PIDs that fork while you're trying to enumerate them, no freezer-controller dance to pause the tree before you swing. Container runtimes use this to terminate a container cleanly; Kubernetes uses it indirectly through the runtime for pod shutdown.
+
 (Some workloads, like databases, JVMs, and game engines, need per-thread rather than per-process control. v2 supports this via `cgroup.type = threaded`, but it's a niche we won't dwell on here.)
 
 ---
@@ -413,7 +429,7 @@ The `cpu.weight` rescaling is a quality-of-life improvement. Instead of the biza
 
 The big behavioural change is `memory.high`. In v1, `memory.soft_limit_in_bytes` was almost useless. The kernel's reclaim behaviour around it was unpredictable and slow. In v2, `memory.high` actively **throttles allocations and triggers direct reclaim** when the cgroup hits this threshold. Most workloads feel this as backpressure rather than a kill, which is exactly the point. It is not a kill-prevention guarantee, though: if a process allocates faster than the kernel can reclaim, `memory.max` (or the global OOM killer) is still in play.
 
-`memory.low` and `memory.min` are entirely new concepts: memory *protection*. `memory.min` is a hard reclaim barrier within its **effective** range. The kernel propagates and caps `memory.min` against ancestor cgroups, so a child cannot protect more memory than its parents already protect. `memory.low` is best-effort protection on the same model. Together they let memory-sensitive workloads coexist with bursty ones on the same node without one starving the other.
+`memory.low` and `memory.min` are entirely new concepts: memory *protection*. `memory.min` is a hard reclaim barrier within its **effective** range: a child cannot protect more memory than its parents already protect, because the kernel caps the child's effective `memory.min` to whatever the ancestor chain allows. `memory.low` is best-effort protection on the same model; it shields the cgroup during system-wide reclaim, but under *local* cgroup reclaim (the cgroup is at its own `memory.high` or `memory.max`) the kernel will still reclaim from it. Together they let memory-sensitive workloads coexist with bursty ones on the same node without one starving the other.
 
 ### I/O
 
@@ -443,7 +459,7 @@ v2 standardised the verbs across all controllers:
 - `low` / `min`: protection (guaranteed minimums)
 - `current` / `stat`: usage and metrics
 
-Values in bytes, not pages. `"max"` as a string means unlimited. No more `_in_bytes` suffixes everywhere. Consistent naming: `<controller>.<metric>` end to end.
+Memory controller values are in bytes, not pages, so no more multiplying by the kernel's page size to know what you wrote. `"max"` as a string means unlimited. No more `_in_bytes` suffixes everywhere. Consistent naming: `<controller>.<metric>` end to end.
 
 ---
 
@@ -465,7 +481,7 @@ cat /sys/fs/cgroup/kubepods.slice/memory.pressure
 
 This is transformative for monitoring. Instead of waiting for an OOM kill to tell you something went wrong (reactive), you can watch pressure metrics climb and take action before it happens (proactive). `some avg10=5.20` means tasks were stalled on memory 5.2% of the last ten seconds. A yellow flag. Scale horizontally before pressure hits 20%. Throttle ingestion before I/O pressure spikes.
 
-Combined with `memory.events` (which counts OOM kills, reclaim activity, and high-watermark hits), you get much better visibility into the kernel's reclaim, throttling, and OOM behaviour for a specific workload, without having to attribute system-wide signals back to a guilty cgroup yourself.
+Combined with `memory.events` (which counts OOM kills, reclaim activity, and high-watermark hits), you get much better visibility into the kernel's reclaim, throttling, and OOM behaviour for a specific workload, without having to attribute system-wide signals back to a guilty cgroup yourself. `memory.events` isn't a one-off: most v2 controllers expose a `<controller>.events` file (`pids.events`, `cpu.stat` for usage and throttling counters, `io.stat`) on the same shape, so once you've learned to read one you've learned to read them all.
 
 ---
 
@@ -475,7 +491,7 @@ Everything we've talked about so far is what Kubernetes builds on. When you set 
 
 But before we look at the mapping, two pieces of vocabulary the kubelet uses heavily: **slices** and **scopes**.
 
-These are systemd's words for cgroups. On most modern Kubernetes Linux nodes, systemd is the host's cgroup manager. It creates, names, and manages cgroup directories on the kernel's behalf. A `.slice` is systemd's name for a cgroup used to *organise* other cgroups. A `.scope` is systemd's name for a cgroup whose processes were started outside the unit itself. That's why cgroup paths on nodes using the systemd cgroup driver look like systemd named them. Because systemd did.
+On most modern Kubernetes Linux nodes, systemd is the host's cgroup manager: it creates, names, and manages cgroup directories on the kernel's behalf, and everything else (the kubelet, the container runtime) integrates with it rather than writing to `/sys/fs/cgroup/` directly. `.slice` and `.scope` are simply systemd's naming conventions for those cgroups. A `.slice` is a cgroup used to *organise* other cgroups (an internal node in the tree). A `.scope` is a cgroup whose processes were started outside the unit itself (a leaf node containing externally-launched PIDs, like the ones a container runtime hands to systemd). That's why cgroup paths on nodes using the systemd cgroup driver look like systemd named them. Because systemd did.
 
 <PodCgroupMapper client:visible />
 
@@ -500,9 +516,9 @@ The kubelet manages the pod and QoS cgroups, the container runtime manages the c
 
 ### QoS Classes Shape Cgroups and OOM Priority
 
-Kubernetes Quality of Service classes shape the cgroup layout and the kernel OOM score adjustment. Node-pressure eviction is a little more nuanced: the kubelet ranks pods by whether usage exceeds requests, Pod priority, and usage relative to requests. QoS is still the useful mental model: BestEffort tends to go first, Guaranteed tends to go last.
+Kubernetes Quality of Service classes shape the cgroup layout and the kernel OOM score adjustment. Node-pressure eviction is a little more nuanced: the kubelet sorts pods first by whether their usage exceeds their requests (over-request pods go before under-request ones), then by Pod priority, then by how far usage has climbed past the request. QoS is still the useful mental model: BestEffort tends to go first, Guaranteed tends to go last.
 
-**Guaranteed** pods have CPU and memory requests equal to limits for every container, or the pod-level equivalent on Kubernetes versions where pod-level resources are enabled. They get their own slice directly under `kubepods.slice`. The kubelet sets their OOM score adjustment to -997, making them the last to be killed by the kernel OOM killer.
+**Guaranteed** pods have CPU and memory requests equal to limits for every container (or the equivalent pod-level resources, Kubernetes 1.32+). They get their own slice directly under `kubepods.slice`. The kubelet sets their OOM score adjustment to -997, making them the last to be killed by the kernel OOM killer.
 
 **Burstable** pods have at least one CPU or memory request or limit, but do not meet the Guaranteed rules. They go under `kubepods-burstable.slice`. Their OOM score is adjusted based on the ratio of memory request to node capacity: more request means lower score means killed later.
 
@@ -541,7 +557,23 @@ The kubelet has two options for managing the cgroup tree.
 
 **systemd driver:** the kubelet and runtime integrate with systemd, often through transient units, and systemd manages the cgroup tree. Single source of truth. Both the kubelet and system services are visible in the same hierarchy, managed by the same process.
 
-For kubeadm clusters, Kubernetes 1.22 made `systemd` the default when `cgroupDriver` is unset (We all remember this migration, and not fondly; right?). The kubelet's own default is still `cgroupfs`, but Kubernetes recommends `systemd` when systemd is the init system, and Kubernetes requires the kubelet and runtime to use the systemd cgroup driver for cgroupsv2 support. If you're still on cgroupfs with systemd, you're running against the grain.
+The paths look noticeably different. With the cgroupfs driver, the kubelet writes flat, kubelet-shaped directories:
+
+```
+/sys/fs/cgroup/kubepods/
+├── pod<uid>/
+│   └── <container-id>/
+├── burstable/
+│   └── pod<uid>/
+│       └── <container-id>/
+└── besteffort/
+    └── pod<uid>/
+        └── <container-id>/
+```
+
+With the systemd driver, the same logical tree comes out with systemd's `.slice`/`.scope` suffixes baked into every directory name — that's the layout shown earlier under "How Kubernetes Lays Out the Cgroup Tree." Same structure, different names; tools that grep by path need to handle both.
+
+For kubeadm clusters, Kubernetes 1.22 made `systemd` the recommended driver and switched kubeadm's own default to it (we all remember this migration, and not fondly; right?). The kubelet's standalone default is still `cgroupfs`, but Kubernetes recommends `systemd` whenever systemd is the init system, and requires the kubelet and runtime to use the systemd cgroup driver for cgroupsv2 support. If you're still on cgroupfs with systemd, you're running against the grain.
 
 ### How Monitoring Reads Cgroups
 
@@ -574,8 +606,8 @@ As of 2026, cgroupsv2 is the default on the mainstream modern Linux node images:
 
 - **Monitoring tools with hardcoded v1 paths.** Anything reading from `/sys/fs/cgroup/memory/docker/` is v1-specific and will break on v2. Most modern stacks handle both, but custom scripts and older agents may need updates.
 - **Container runtimes.** containerd 1.4+ and CRI-O 1.20+ have v2 support. Docker Engine 20.10+ works with v2 when using the systemd cgroup driver. runc 1.0.0+ has full v2 support; older versions are incomplete.
-- **JVM applications.** The JVM's cgroup-aware memory detection was rewritten for v2. JVMs older than JDK 15, 11.0.16, or 8u372 may not detect v2 memory limits correctly and could try to use more memory than allocated. This is one of the most common "my Java app OOMs on new nodes" issues.
-- **Hybrid mode.** Some systems mount both v1 and v2 simultaneously as a transitional state. It works but is explicitly a transition mechanism, not a destination. Pick one and commit.
+- **JVM applications.** The JVM's cgroup-aware memory detection was rewritten for v2. JDKs older than 15, 11.0.16, or 8u372 do not detect v2 memory limits at all; they fall back to host memory and will quietly try to use far more memory than the cgroup allows. This is one of the most common "my Java app OOMs on new nodes" issues, and in 2026 there is no excuse for still being on those JVM versions — upgrade.
+- **Hybrid mode.** Booting with `systemd.unified_cgroup_hierarchy=0` (or older distro defaults) mounts the v2 unified hierarchy alongside the legacy v1 per-controller hierarchies, so processes show up in both trees at once. It works, but it's explicitly a transition mechanism, not a destination — accounting splits across two interfaces and tools have to guess which one is authoritative. Pick one and commit.
 
 ### PSI in Practice
 
@@ -589,6 +621,6 @@ One bonus from v2's unified hierarchy: BPF programs that attach to cgroup paths 
 
 ## Where We're Going
 
-cgroupsv1 is legacy. The kernel's authoritative cgroup documentation is now the v2 interface, Kubernetes deprecated cgroup v1 in 1.35, and new feature work targets v2. What's ahead is incremental: better NUMA-aware memory placement, finer delegation primitives for rootless containers. But the structural story is settled.
+cgroupsv1 is legacy. The kernel's authoritative cgroup documentation is now the v2 interface, Kubernetes deprecated cgroup v1 in 1.35, and new feature work targets v2. v2's explicit controller delegation is also what makes rootless containers viable: systemd hands an unprivileged user their own subtree via a user-level `.slice`, with only the controllers the admin chose to delegate, and tools like Podman and rootless Docker drive resource limits inside it without ever touching root-owned cgroup files. What's ahead is incremental: better NUMA-aware memory placement, finer delegation primitives for those rootless trees. But the structural story is settled.
 
-Much like Kubernetes is YAML and controllers, all the way down; cgroups are just directories and files, all the way down.
+Much like Kubernetes is YAML and controllers, all the way down; cgroups are directories and files on the surface, with kernel code doing the work of every write underneath.
