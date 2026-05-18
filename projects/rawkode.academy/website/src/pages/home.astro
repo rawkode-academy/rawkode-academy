@@ -8,7 +8,9 @@ export const prerender = false;
 const user = Astro.locals.user;
 
 if (!user) {
-	return Astro.redirect(`/sign-in?returnTo=${encodeURIComponent("/home")}`);
+	return Astro.redirect(
+		`/api/auth/sign-in?returnTo=${encodeURIComponent("/home")}`,
+	);
 }
 
 // No caching for personalized content
