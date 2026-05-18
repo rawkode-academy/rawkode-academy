@@ -249,10 +249,13 @@ const articles = defineCollection({
 			// `updates[].date`.
 			.transform((data) => {
 				if (data.updatedAt) return data;
-				if (!data.updates || data.updates.length === 0) return data;
-				const latest = data.updates.reduce(
+				const updates = data.updates;
+				if (!updates || updates.length === 0) return data;
+				const first = updates[0];
+				if (!first) return data;
+				const latest = updates.reduce(
 					(acc, entry) => (entry.date > acc ? entry.date : acc),
-					data.updates[0].date,
+					first.date,
 				);
 				return { ...data, updatedAt: latest };
 			}),
