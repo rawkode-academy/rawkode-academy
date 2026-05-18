@@ -87,7 +87,6 @@ ${sortedVideos
 		return `  <url>
     <loc>${videoUrl}</loc>
     <lastmod>${publishedDate}</lastmod>
-    <changefreq>daily</changefreq>
     <video:video>
       <video:thumbnail_loc>${escapeXml(thumbnailUrl)}</video:thumbnail_loc>
       <video:title>${escapeXml(video.data.title)}</video:title>
