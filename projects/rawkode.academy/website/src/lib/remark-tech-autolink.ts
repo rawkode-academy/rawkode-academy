@@ -42,10 +42,18 @@ export interface AutolinkOptions {
 
 const DEFAULT_SKIP_PATH_SUBSTRINGS = ["/content/technologies/"];
 
-// Single- and two-letter ambiguity guards. Real two-or-more-letter
-// tech names (bun, ko, next, lit, ...) that overlap with English words
-// should be opted out per-call via skipNames, not hardcoded here.
-const DEFAULT_SKIP = ["d", "k", "go", "ko"];
+// Ambiguity guards: single/two-letter names and common English words
+// that happen to be tracked tech names. These false-positive too often
+// to be auto-linked sitewide. Per-call exclusions go in skipNames.
+const DEFAULT_SKIP = [
+	"d",
+	"k",
+	"go",
+	"ko",
+	"score",
+	"distribution",
+	"salt",
+];
 
 const SKIP_COMMENT_PATTERN = /<!--\s*no-autolink\s*-->/i;
 
