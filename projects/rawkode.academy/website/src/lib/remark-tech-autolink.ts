@@ -80,8 +80,8 @@ const SKIP_PARENT_TYPES = new Set([
 	"mdxjsEsm",
 ]);
 
-// If any top-level child of the document is one of these, the file uses
-// MDX features and we bail on the whole document. See the transform body
+// If any node in the document is one of these, the file uses MDX
+// features and we bail on the whole document. See the transform body
 // for why.
 const MDX_BAIL_TYPES = new Set([
 	"mdxjsEsm",
@@ -90,6 +90,16 @@ const MDX_BAIL_TYPES = new Set([
 	"mdxFlowExpression",
 	"mdxTextExpression",
 ]);
+
+function hasMdxNodes(node: Node): boolean {
+	if (MDX_BAIL_TYPES.has(node.type)) return true;
+	const children = (node as Parent).children;
+	if (!Array.isArray(children)) return false;
+	for (const child of children) {
+		if (hasMdxNodes(child)) return true;
+	}
+	return false;
+}
 
 function shouldSkipParent(parent: LinkableTextParent | undefined): boolean {
 	if (!parent) return true;
@@ -173,12 +183,18 @@ export function remarkTechAutolink(
 		// what most of the news / changelog / ADR corpus is. Articles
 		// with JSX miss out on autolinking for now and authors can hand-
 		// link as before.
-		const topChildren = tree.children as Node[] | undefined;
-		if (Array.isArray(topChildren)) {
-			for (const child of topChildren) {
-				if (MDX_BAIL_TYPES.has(child.type)) return;
-			}
+		//
+		// Two-layer detection because the tree-level check may miss
+		// nested MDX nodes and the source-level check may miss subtle
+		// MDX usage in trees that came from other parsers:
+		//   1. Source-level: any `import ... from "..."` line or any JSX
+		//      opening tag with a capitalized name (`<Foo`, `<Bar />`).
+		//   2. Tree-level: any mdast-mdx node type anywhere in the tree.
+		if (source) {
+			if (/^import\s.+\sfrom\s/m.test(source)) return;
+			if (/<[A-Z][A-Za-z0-9]*[\s/>]/.test(source)) return;
 		}
+		if (hasMdxNodes(tree as Node)) return;
 
 		// Re-create the global regex per document so the per-text `lastIndex`
 		// state doesn't leak across documents.
