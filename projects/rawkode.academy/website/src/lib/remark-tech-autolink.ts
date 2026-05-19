@@ -162,7 +162,16 @@ export function remarkTechAutolink(
 				}
 			}
 		}
-		console.error(`[remark-tech-autolink] enter path=${path || "(no path)"}`);
+		const treeChildren = (tree as Partial<Parent>).children;
+		const childTypes = Array.isArray(treeChildren)
+			? treeChildren
+				.slice(0, 20)
+				.map((c) => (c && typeof c === "object" ? (c as Node).type : "?"))
+				.join(",")
+			: "(no children)";
+		console.error(
+			`[remark-tech-autolink] enter path=${path || "(no path)"} treeType=${(tree as Node).type} childrenLen=${Array.isArray(treeChildren) ? treeChildren.length : -1} childTypes=${childTypes}`,
+		);
 
 		const source = readFileSource(file);
 		if (source && SKIP_COMMENT_PATTERN.test(source)) return;
