@@ -128,9 +128,16 @@ function readFilePath(file: unknown): string {
 	return "";
 }
 
+/**
+ * Standard unified plugin shape: a function that, when called by
+ * `unified` with no args, returns the per-file transformer. We can't
+ * pass a transformer directly to `.use()`; unified treats whatever is
+ * passed as a Plugin and calls it once to retrieve the Transformer,
+ * so a bare `(tree, file) => void` would silently become a no-op.
+ */
 export function remarkTechAutolink(
 	options: AutolinkOptions,
-): (tree: Root, file: unknown) => void {
+): () => (tree: Root, file: unknown) => void {
 	const minLength = options.minLength ?? 3;
 	const skip = new Set<string>(DEFAULT_SKIP);
 	for (const name of options.skipNames ?? []) {
@@ -142,110 +149,83 @@ export function remarkTechAutolink(
 	const skipPathSubstrings =
 		options.skipPathSubstrings ?? DEFAULT_SKIP_PATH_SUBSTRINGS;
 
-	console.error(
-		`[remark-tech-autolink] init: lookup=${options.lookup.size} pattern=${pattern ? "ok" : "EMPTY"} skip=${Array.from(skip).join(",")}`,
-	);
+	return function attach() {
+		return function transform(tree: Root, file: unknown): void {
+			if (!pattern) return;
+			const re = pattern;
 
-	return function transform(tree: Root, file: unknown): void {
-		if (!pattern) {
-			console.error("[remark-tech-autolink] no pattern; returning");
-			return;
-		}
-		const re = pattern;
-
-		const path = readFilePath(file);
-		if (path) {
-			for (const fragment of skipPathSubstrings) {
-				if (path.includes(fragment)) {
-					console.error(`[remark-tech-autolink] skip path=${path}`);
-					return;
+			const path = readFilePath(file);
+			if (path) {
+				for (const fragment of skipPathSubstrings) {
+					if (path.includes(fragment)) return;
 				}
 			}
-		}
-		const treeChildren = (tree as Partial<Parent>).children;
-		const childTypes = Array.isArray(treeChildren)
-			? treeChildren
-				.slice(0, 20)
-				.map((c) => (c && typeof c === "object" ? (c as Node).type : "?"))
-				.join(",")
-			: "(no children)";
-		console.error(
-			`[remark-tech-autolink] enter path=${path || "(no path)"} treeType=${(tree as Node).type} childrenLen=${Array.isArray(treeChildren) ? treeChildren.length : -1} childTypes=${childTypes}`,
-		);
 
-		const source = readFileSource(file);
-		if (source && SKIP_COMMENT_PATTERN.test(source)) return;
+			const source = readFileSource(file);
+			if (source && SKIP_COMMENT_PATTERN.test(source)) return;
 
-		const linked = new Set<string>();
-		let textNodesSeen = 0;
-		let matchesFound = 0;
-		let linksProduced = 0;
+			const linked = new Set<string>();
 
-		function buildReplacement(text: TextNode): Node[] | undefined {
-			const value = text.value;
-			if (!value) return undefined;
-			textNodesSeen++;
+			function buildReplacement(text: TextNode): Node[] | undefined {
+				const value = text.value;
+				if (!value) return undefined;
 
-			re.lastIndex = 0;
-			const newNodes: Node[] = [];
-			let cursor = 0;
-			let match = re.exec(value);
-			while (match) {
-				matchesFound++;
-				const matched = match[1] ?? match[0];
-				const start = match.index;
-				const techId = options.lookup.get(matched.toLowerCase());
-				if (techId && !linked.has(techId)) {
-					linked.add(techId);
-					linksProduced++;
-					if (start > cursor) {
+				re.lastIndex = 0;
+				const newNodes: Node[] = [];
+				let cursor = 0;
+				let match = re.exec(value);
+				while (match) {
+					const matched = match[1] ?? match[0];
+					const start = match.index;
+					const techId = options.lookup.get(matched.toLowerCase());
+					if (techId && !linked.has(techId)) {
+						linked.add(techId);
+						if (start > cursor) {
+							newNodes.push({
+								type: "text",
+								value: value.slice(cursor, start),
+							});
+						}
 						newNodes.push({
-							type: "text",
-							value: value.slice(cursor, start),
+							type: "link",
+							url: `/technology/${techId}`,
+							children: [{ type: "text", value: matched }],
 						});
+						cursor = start + matched.length;
 					}
-					newNodes.push({
-						type: "link",
-						url: `/technology/${techId}`,
-						children: [{ type: "text", value: matched }],
-					});
-					cursor = start + matched.length;
+					match = re.exec(value);
 				}
-				match = re.exec(value);
+
+				if (newNodes.length === 0) return undefined;
+				if (cursor < value.length) {
+					newNodes.push({ type: "text", value: value.slice(cursor) });
+				}
+				return newNodes;
 			}
 
-			if (newNodes.length === 0) return undefined;
-			if (cursor < value.length) {
-				newNodes.push({ type: "text", value: value.slice(cursor) });
-			}
-			return newNodes;
-		}
+			function walk(node: Node | undefined): void {
+				if (!node || typeof node !== "object") return;
+				if (typeof node.type !== "string") return;
+				if (IGNORE_TYPES.has(node.type)) return;
+				const children = (node as Partial<Parent>).children;
+				if (!Array.isArray(children)) return;
 
-		function walk(node: Node | undefined): void {
-			if (!node || typeof node !== "object") return;
-			if (typeof node.type !== "string") return;
-			if (IGNORE_TYPES.has(node.type)) return;
-			const children = (node as Partial<Parent>).children;
-			if (!Array.isArray(children)) return;
-
-			for (let i = 0; i < children.length; i++) {
-				const child = children[i];
-				if (!child || typeof child !== "object") continue;
-				if (child.type === "text") {
-					const replacement = buildReplacement(child as TextNode);
-					if (replacement) {
-						children.splice(i, 1, ...replacement);
-						i += replacement.length - 1;
+				for (let i = 0; i < children.length; i++) {
+					const child = children[i];
+					if (!child || typeof child !== "object") continue;
+					if (child.type === "text") {
+						const replacement = buildReplacement(child as TextNode);
+						if (replacement) {
+							children.splice(i, 1, ...replacement);
+							i += replacement.length - 1;
+						}
+					} else {
+						walk(child);
 					}
-				} else {
-					walk(child);
 				}
 			}
-		}
 
-		walk(tree);
-		console.error(
-			`[remark-tech-autolink] done path=${path || "(no path)"} textNodes=${textNodesSeen} matches=${matchesFound} links=${linksProduced}`,
-		);
+			walk(tree);
+		};
 	};
 }
