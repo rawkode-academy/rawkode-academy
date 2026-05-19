@@ -13,6 +13,8 @@ import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
 import { existsSync } from "node:fs";
 import rehypeExternalLinks from "rehype-external-links";
+import { loadTechLookup } from "./src/lib/load-tech-lookup";
+import { remarkTechAutolink } from "./src/lib/remark-tech-autolink";
 
 // Load CUE language grammar for syntax highlighting
 let cueLanguageGrammar: import("shiki").LanguageRegistration | undefined;
@@ -228,6 +230,13 @@ export default defineConfig({
 		checkOrigin: true,
 	},
 	markdown: {
+		// Cast: the plugin returns a unified Plugin shape that's correct at
+		// runtime, but our local mdast `Root` type doesn't structurally
+		// match Astro's `RemarkPlugin` parameter constraint.
+		remarkPlugins: [
+			// biome-ignore lint/suspicious/noExplicitAny: see comment above
+			remarkTechAutolink({ lookup: loadTechLookup() }) as any,
+		],
 		rehypePlugins: [
 			[
 				rehypeExternalLinks,
