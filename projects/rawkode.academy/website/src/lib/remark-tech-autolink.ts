@@ -8,7 +8,6 @@
  * Per-file opt-out: include the literal HTML comment
  * `<!-- no-autolink -->` anywhere in the body.
  */
-import type { Plugin } from "unified";
 import type { VFile } from "vfile";
 
 interface Node {
@@ -95,7 +94,7 @@ function buildPattern(
  */
 export function remarkTechAutolink(
 	options: AutolinkOptions,
-): Plugin<[], Root> {
+): () => (tree: Root, file: VFile) => void {
 	const minLength = options.minLength ?? 3;
 	const skip = new Set<string>(DEFAULT_SKIP);
 	for (const name of options.skipNames ?? []) {
@@ -110,6 +109,9 @@ export function remarkTechAutolink(
 	return function attach() {
 		return function transform(tree: Root, file: VFile): void {
 			if (!pattern) return;
+			// Hoist into a local so the non-null narrowing carries into
+			// the nested buildReplacement function below.
+			const re = pattern;
 
 			const path = file.path ?? "";
 			for (const fragment of skipPathSubstrings) {
@@ -125,10 +127,10 @@ export function remarkTechAutolink(
 				const value = text.value;
 				if (!value) return undefined;
 
-				pattern.lastIndex = 0;
+				re.lastIndex = 0;
 				const newNodes: Node[] = [];
 				let cursor = 0;
-				let match = pattern.exec(value);
+				let match = re.exec(value);
 				while (match) {
 					const matched = match[1] ?? match[0];
 					const start = match.index;
@@ -148,7 +150,7 @@ export function remarkTechAutolink(
 						});
 						cursor = start + matched.length;
 					}
-					match = pattern.exec(value);
+					match = re.exec(value);
 				}
 
 				if (newNodes.length === 0) return undefined;
