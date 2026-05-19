@@ -1,0 +1,345 @@
+---
+title: "apko + melange: Distroless OCI Images Your Scanner Can Actually Read"
+slug: apko-melange-tutorial
+description: "A working tutorial for apko and melange. Package a binary with melange, assemble it into a signed distroless image with apko, and ship it with an SBOM Trivy can actually parse."
+type: tutorial
+howto: false
+openGraph:
+  title: "apko + melange: Distroless OCI Images Your Scanner Can Actually Read"
+  subtitle: "Package, assemble, sign. No Dockerfile, no shell, no surprises."
+publishedAt: 2026-05-19
+draft: false
+authors:
+  - rawkode
+technologies:
+  - apko
+  - melange
+  - sigstore
+---
+
+Your container scanner is lying to you.
+
+The scanner isn't at fault. Trivy, Grype, Snyk, every CVE feed on Earth, they all identify software the same way: they read a package manager's database. `apt`, `apk`, `dpkg`, `rpm`, the language-level lockfiles. If your image is built with a `Dockerfile` that does `COPY ./my-binary /usr/local/bin/` and then `RUN curl | sh` for the SDK, the scanner sees an Alpine base layer it can read, and then a pile of files it can't attribute to anything. The CVE report comes back clean. Nothing is clean. The scanner just doesn't have a name for what's in the image.
+
+This is the problem [apko](/technology/apko) and [melange](/technology/melange) were built to fix. Every byte in the final image arrives through a package manager, with a name, a version, a checksum, and a CVE feed entry. Distroless by construction. Reproducible by design. Signed by default. The whole pipeline is two YAML files and two CLI invocations, and you can run it on your laptop right now.
+
+## See It For Yourself
+
+```bash
+# install melange and apko (macOS shown; Linux ships in most package managers)
+brew install melange apko
+
+# generate the apk-signing keypair
+melange keygen
+
+# build a Wolfi-based "hello, world" apk and a 2 MB OCI image
+melange build melange.yaml --arch amd64 --signing-key melange.rsa --runner docker
+apko build apko.yaml hello:latest hello.tar --keyring-append ./melange.rsa.pub --arch amd64
+docker load < hello.tar
+docker run --rm hello:latest
+# > Hello, world!
+```
+
+We'll build the two YAML files below. There are only forty lines between you and a signed, distroless, scanner-visible image.
+
+## Why Dockerfiles Lie to Your Scanner
+
+A scanner finding zero CVEs in a `Dockerfile`-built image is, statistically, more alarming than finding fifty. Fifty means the scanner can read what's in there. Zero means it can't.
+
+`Dockerfile` lets you do anything, which is the problem. A `RUN curl https://example.com/install.sh | sh` step pulls a binary that the package manager database doesn't know about. The scanner sees the layer hash, opens it, finds a file, has no idea what it is. It can't tell you the file is a vulnerable `libcurl`, or a sketchy `kubectl` plugin, or a backdoored Helm chart. It moves on.
+
+The fix is to build images where every file came through a package manager that records what it installed and where. That means no `RUN curl | sh`. No `COPY` from anywhere except controlled sources. No `apt-get install` running against a moving target. The image format has to enforce these constraints, not the build script.
+
+That's what apko does. There is no `RUN` step in apko. No `COPY` from the host. No shell available during the build. apko takes a YAML config that lists `apk` packages and produces an OCI tarball. The set of installable packages is the set of packages in your declared repositories. The scanner sees the apk database in the final image and gets a 100% match against every byte.
+
+When you need software that isn't packaged yet, that's melange's job.
+
+## Two Tools, One Job
+
+apko is the assembler. melange is the package builder. They split the work the way `apt` and `dpkg-buildpackage` split the Debian world, and for the same reasons.
+
+[apko](/technology/apko) takes a list of `apk` packages and produces a multi-arch OCI image with no shell, no package manager in the final layer, and a deterministic content hash. The whole tool is a thin shell over the `apk` resolver plus a tarball builder. It can't run arbitrary commands during the build because it never invokes a shell. It just resolves the dependency graph, fetches the packages, and writes the layers.
+
+[melange](/technology/melange) builds those `apk` packages from source. You give it a YAML that describes the source URL, the build steps, and the test command. melange runs those steps inside a clean sandbox (Docker, bubblewrap, QEMU, or Lima are all supported), produces a signed `.apk`, and puts it in `./packages/<arch>/`. You then point apko at that local repository and apko treats your package the same as anything from Wolfi.
+
+The reason these are two binaries instead of one: every melange-built package is just an `apk`, indistinguishable from the thousands of packages in the [Wolfi](https://github.com/wolfi-dev/os) base distribution. You can publish your apks to a private apk repository, share them across projects, and forget which build system produced them. apko consumes apks. It doesn't care whose pipeline made them.
+
+## Setting Up: Wolfi, Keys, Runners
+
+Install both tools:
+
+```bash
+# macOS
+brew install melange apko
+
+# Linux with Go installed
+go install chainguard.dev/melange@latest
+go install chainguard.dev/apko@latest
+
+# Or pull pre-built containers
+docker run --rm cgr.dev/chainguard/melange version
+docker run --rm cgr.dev/chainguard/apko version
+```
+
+melange signs every `.apk` it builds. Generate a keypair once, store the private key somewhere safe (a CI secret manager for production, your dotfiles for laptop work):
+
+```bash
+melange keygen
+# > generating keypair with a 4096 bit prime, please wait...
+# > wrote private key to melange.rsa
+# > wrote public key to melange.rsa.pub
+```
+
+melange runs the build steps inside a sandbox. Pick a runner based on what's available:
+
+- `--runner docker` is the easiest path on macOS and most laptops.
+- `--runner bubblewrap` is the lightest option on Linux CI. No daemon, no privileged container.
+- `--runner qemu` uses QEMU user-mode emulation to build arm64 packages natively on an amd64 host, without a cross-compiler.
+- `--runner lima` is the macOS-native Linux VM option if you don't want Docker Desktop.
+
+If you're not sure, start with `docker`. The build is hermetic regardless of the runner.
+
+## Building a Package with melange
+
+Let's package GNU `hello`. It's small, it builds with autotools, and there's no point packaging anything you already use until you've seen the shape of a working config.
+
+Save this as `melange.yaml`:
+
+```yaml
+package:
+  name: hello
+  version: 2.12.3
+  epoch: 0
+  description: "the GNU hello world program"
+  copyright:
+    - license: GPL-3.0-or-later
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+
+pipeline:
+  - uses: fetch
+    with:
+      uri: https://ftp.gnu.org/gnu/hello/hello-${{package.version}}.tar.gz
+      expected-sha256: 0d5f60154382fee10b114a1c34e785d8b1f492073ae2d3a6f7b147687b366aa0
+  - uses: autoconf/configure
+  - uses: autoconf/make
+  - uses: autoconf/make-install
+  - uses: strip
+
+test:
+  pipeline:
+    - runs: hello --version
+```
+
+Three blocks worth understanding:
+
+**`package`** is the metadata that ends up in the apk database. `name` and `version` are the identity. `epoch` is the build-of-build number, you bump it when the source is unchanged but the recipe changed. `copyright.license` is read by SBOM generators.
+
+**`environment`** is the build sandbox. apk packages, repositories, and keys go here. `build-base` is Wolfi's equivalent of Debian's `build-essential`. `busybox` gives us a usable shell inside the sandbox. `ca-certificates-bundle` lets the fetch step talk to HTTPS.
+
+**`pipeline`** is the sequence of build steps. Each step is a named "use" of a melange built-in pipeline plus its arguments. `fetch` downloads the tarball and checks the sha256. `autoconf/configure`, `autoconf/make`, `autoconf/make-install` run the conventional autotools chain. `strip` removes debug symbols from the output binaries.
+
+Build it:
+
+```bash
+melange build melange.yaml \
+  --arch amd64,arm64 \
+  --signing-key melange.rsa \
+  --runner docker
+```
+
+If everything worked, you'll have `./packages/amd64/hello-2.12.1-r0.apk` and `./packages/arm64/hello-2.12.1-r0.apk`. melange also wrote an `APKINDEX.tar.gz` next to them, which is the metadata file apko's apk resolver needs to find your package.
+
+The `test:` block at the bottom is melange's smoke test. After the package is built, melange installs it into a fresh sandbox and runs your test pipeline. `hello --version` exits zero, the build is considered successful. If the binary is broken, the build fails before the apk is published.
+
+## Assembling an Image with apko
+
+Now build the image. Save this as `apko.yaml`:
+
+```yaml
+contents:
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - ./melange.rsa.pub
+  repositories:
+    - https://packages.wolfi.dev/os
+    - "@local ./packages"
+  packages:
+    - wolfi-baselayout
+    - hello@local
+
+entrypoint:
+  command: /usr/bin/hello
+
+archs:
+  - amd64
+  - arm64
+
+annotations:
+  org.opencontainers.image.source: https://github.com/your-org/hello-distroless
+```
+
+The interesting line is `hello@local`. apko's apk resolver supports tagged repositories: `@local ./packages` declares a local repository tagged `local`, and `hello@local` tells the solver to pull `hello` specifically from that repo. Without the tag, the solver would try to find `hello` in `packages.wolfi.dev/os` and fail.
+
+`wolfi-baselayout` is the absolute minimum filesystem skeleton: `/etc`, `/usr`, `/var`, the standard directories, plus `/etc/passwd` and `/etc/group` so the container has a `nobody` user. It's about 100 KB. Everything else in the image is `hello` and its runtime dependencies.
+
+`entrypoint.command` is what runs when the container starts. There is no shell to wrap it. The container is `hello` and nothing else.
+
+Build:
+
+```bash
+apko build apko.yaml \
+  hello:latest hello.tar \
+  --keyring-append ./melange.rsa.pub \
+  --arch amd64,arm64 \
+  --sbom-path ./sboms
+```
+
+apko emits per-architecture OCI tarballs plus an OCI image index, all reproducible. Run the same command on a different machine with the same inputs and the layer digests match exactly. apko zeroes file timestamps and source-of-build metadata by default precisely to make this work.
+
+## Loading, Inspecting, Verifying
+
+Load and run:
+
+```bash
+docker load < hello.tar
+docker run --rm hello:latest-amd64
+# > Hello, world!
+
+# Note: the multi-arch tarball loads `hello:latest-amd64` and
+# `hello:latest-arm64` as separate Docker tags (one per arch). If
+# you ran the single-arch quick-start instead, the tag is just
+# `hello:latest` (no suffix).
+
+# Image size: somewhere between 1 and 2 MB.
+docker image ls hello
+# > REPOSITORY   TAG            SIZE
+# > hello        latest-amd64   1.43MB
+```
+
+Try to get a shell. You can't:
+
+```bash
+docker run --rm --entrypoint /bin/sh hello:latest-amd64
+# > docker: Error response from daemon: failed to create task: ... no such file or directory
+```
+
+There is no `/bin/sh`, no `/bin/bash`, no `busybox`, no nothing. An in-application RCE inside `hello` has nowhere to go. The classic post-exploitation playbook of "drop a webshell, spawn `bash`, pivot" relies on a shell existing in the container. apko removes that primitive.
+
+Inspect the SBOM:
+
+```bash
+ls ./sboms/
+# > sbom-amd64.spdx.json   sbom-arm64.spdx.json
+
+jq '.packages[].name' ./sboms/sbom-amd64.spdx.json | sort -u
+# > "ca-certificates-bundle"
+# > "hello"
+# > "wolfi-baselayout"
+```
+
+That's the whole image, attributed. Trivy can read this. Grype can read this. Every byte in the layer has a name and a version. If `wolfi-baselayout` gets a CVE next week, your scanner will tell you before you push.
+
+## Shipping It: Multi-Arch, Registry Publish, GitHub Actions
+
+For CI, switch from `apko build` (which writes a tarball) to `apko publish` (which pushes straight to a registry without a Docker daemon):
+
+```bash
+apko publish apko.yaml ghcr.io/your-org/hello:latest \
+  --keyring-append ./melange.rsa.pub \
+  --arch amd64,arm64 \
+  --sbom-path ./sboms
+```
+
+`apko publish` writes both the per-arch images and an OCI index pointing at them, in one call. There's no `manifest create` dance. `--sbom-path` works the same way it does in `apko build`, so the SPDX SBOMs travel with the image whether you push locally or from CI.
+
+In GitHub Actions, [Chainguard publishes reusable workflows](https://github.com/chainguard-dev/actions) that wire melange and apko together with [Sigstore](/technology/sigstore) keyless OIDC signing:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # for cosign keyless
+      packages: write  # for ghcr.io
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chainguard-dev/actions/melange-build@main
+        with:
+          config: melange.yaml
+          archs: amd64,arm64
+          sign-with-temporary-key: true
+      - uses: chainguard-images/actions/apko-publish@main
+        with:
+          config: apko.yaml
+          tag: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          archs: amd64,arm64
+          keyring-append: melange.rsa.pub
+          sbom-path: ./sboms
+      - uses: sigstore/cosign-installer@v3
+      - run: cosign sign --yes ghcr.io/${{ github.repository }}:${{ github.sha }}
+```
+
+`sign-with-temporary-key: true` is the keyless equivalent for melange: it mints an ephemeral signing key per CI run, signs the apks with it, and discards the private key. The public key travels with the SBOM. `cosign sign --yes` over the resulting image gets a Fulcio-issued certificate tied to the workflow's OIDC identity. No long-lived key sits in a GitHub secret.
+
+You can verify the signature anywhere [cosign](https://github.com/sigstore/cosign) runs:
+
+```bash
+cosign verify ghcr.io/your-org/hello:latest \
+  --certificate-identity-regexp 'https://github.com/your-org/.*' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+If the binary on the registry was built by a workflow in your org, you get a green check. If anyone replaces it, the signature breaks.
+
+## Where This Fits in 2026
+
+This stack is the spiritual successor to Google's [Distroless](https://github.com/GoogleContainerTools/distroless) project. Distroless v1 required ~300 lines of Bazel per image, with every package, version, and dependency pinned by hand. apko delegates that work to the `apk` solver, so you write a dozen lines of YAML instead. The resulting image is smaller (Distroless `static` is ~2 MB; an apko `wolfi-baselayout` image with a small binary is ~1.5 MB), reproducible by default, and built with the same toolchain Chainguard uses to ship its own commercial image catalog.
+
+Reach for apko when:
+
+- You ship Go, Rust, or C++ binaries that are already statically linked or have a small set of runtime dependencies.
+- You have a security or compliance team that wants SBOMs and signed images, and you don't want to bolt those on after the fact.
+- Your scanner reports are currently full of "unknown" rows and you'd like that to stop.
+
+Don't reach for apko when:
+
+- Your build genuinely needs `RUN` steps (compile-time secrets, pre-baked database state, anything that won't fit a melange pipeline). Build a melange package instead and feed it to apko.
+- You ship Go-only services and don't need image-level package management. [ko](/technology/ko) is the lighter tool for that case: it skips the apk layer entirely and just packs a Go binary.
+- You're committed to a base image from a vendor who doesn't ship Wolfi packages and you can't move off it.
+
+## Frequently asked questions
+
+### Do I need to use Wolfi, or can I build apko images on Alpine?
+
+You can point apko at any apk repository, so plain Alpine still works for legacy or compatibility reasons. Chainguard moved its own images to Wolfi because Wolfi is glibc-based, ships only modern package versions, and is curated specifically for container use. For new projects in 2026, prefer Wolfi unless you have a hard musl or Alpine-tooling dependency.
+
+### How is this different from a multi-stage Dockerfile with a scratch final image?
+
+A scratch image hides everything from your scanner. Trivy, Grype, and Snyk identify software by reading package manager databases, and a scratch image has none. apko produces an image whose entire contents come from apk packages, so every byte has a name, a version, and a CVE feed entry. You also get a signed SPDX SBOM at build time rather than reconstructing one after the fact.
+
+### Can apko replace my Dockerfile entirely?
+
+Only if everything you need exists as an apk package. apko has no `RUN`, no `COPY` from host, no arbitrary shell. That's the point: it guarantees reproducibility and scanner visibility by refusing to do those things. If you need `RUN` steps, that's melange's job: melange builds the apk, apko composes the image, and the two halves cover what a Dockerfile used to do.
+
+### How do I sign the final OCI image?
+
+melange signs the apk packages with an RSA keypair. To sign the resulting OCI image, use cosign, ideally with keyless OIDC signing in CI so no long-lived key sits in a GitHub secret. The `chainguard-dev` GitHub Actions wire this together: `melange-build` produces signed apks, `apko-publish` builds and pushes the image, and `cosign sign` attests it to the Sigstore Rekor transparency log.
+
+## What to do now
+
+1. Run the `hello` example end-to-end on your laptop. It takes ten minutes and the muscle memory matters.
+2. Pick one service you ship today. Look at its current Dockerfile. Count the `RUN` lines. Each one is a place your scanner is currently guessing.
+3. Try replacing it with an apko config. If you need a `RUN` step, that's a melange package. Build it.
+4. Wire up cosign keyless signing in CI. The biggest security win isn't the distroless image, it's having a verifiable chain of custody from source commit to running container.
+
+The whole pipeline is two YAML files, four CLI commands, and a couple of hours of work to convert your first service. The payoff is an image that your scanner can actually read, end to end, every release.
