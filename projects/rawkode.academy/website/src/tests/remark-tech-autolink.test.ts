@@ -146,13 +146,28 @@ describe("remarkTechAutolink", () => {
 	});
 
 	it("links Kubernetes in a plain paragraph adjacent to an MDX component", async () => {
-		// `mdast-util-find-and-replace` walks into MDX-element subtrees
-		// and skips their text by default. A plain Markdown paragraph
-		// outside the JSX should still get auto-linked normally.
+		// Text descendants of MDX JSX elements are in the ignore set, so
+		// a plain Markdown paragraph outside the JSX should still get
+		// auto-linked normally.
 		const out = await process(
 			'<Note>This Kubernetes tip is inside an MDX component.</Note>\n\nKubernetes is also mentioned in plain prose.\n',
 		);
-		// First-mention linking still fires for the plain paragraph.
+		expect(out).toContain("[Kubernetes](/technology/kubernetes)");
+	});
+
+	it("handles a document with mdxjsEsm imports at the top", async () => {
+		// Regression: trees with mdxjsEsm/mdxJsxFlowElement nodes used to
+		// crash the old find-and-replace implementation. Visit-based
+		// walker should sail through.
+		const source = [
+			"import Aside from '@/components/Aside.astro';",
+			"",
+			"<Aside>Hello.</Aside>",
+			"",
+			"This paragraph mentions Kubernetes once.",
+			"",
+		].join("\n");
+		const out = await process(source);
 		expect(out).toContain("[Kubernetes](/technology/kubernetes)");
 	});
 });
