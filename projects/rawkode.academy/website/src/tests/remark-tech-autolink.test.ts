@@ -14,11 +14,19 @@ const lookup = new Map<string, string>([
 	["go", "go"], // intentionally in lookup; default skip list excludes it
 ]);
 
+// `remarkTechAutolink` is a factory that returns a transformer rather
+// than a unified-style `Plugin`. At runtime unified accepts the
+// transformer fine, but its typed `.use()` overloads insist on Plugin
+// shape — cast at call sites in tests so the workaround doesn't leak
+// into the production-facing API of the plugin itself.
+// biome-ignore lint/suspicious/noExplicitAny: unified `.use()` overloads
+const asPluggable = (t: unknown): any => t;
+
 async function process(source: string): Promise<string> {
 	const file = await unified()
 		.use(remarkParse)
 		.use(remarkMdx)
-		.use(remarkTechAutolink({ lookup }))
+		.use(asPluggable(remarkTechAutolink({ lookup })))
 		.use(remarkStringify)
 		.process(source);
 	return String(file);
@@ -125,10 +133,12 @@ describe("remarkTechAutolink", () => {
 			.use(remarkParse)
 			.use(remarkMdx)
 			.use(
-				remarkTechAutolink({
-					lookup,
-					skipNames: ["apko"],
-				}),
+				asPluggable(
+					remarkTechAutolink({
+						lookup,
+						skipNames: ["apko"],
+					}),
+				),
 			)
 			.use(remarkStringify)
 			.process("Try apko for distroless builds.\n");
