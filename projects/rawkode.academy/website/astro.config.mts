@@ -230,7 +230,13 @@ export default defineConfig({
 		checkOrigin: true,
 	},
 	markdown: {
-		remarkPlugins: [remarkTechAutolink({ lookup: loadTechLookup() })],
+		// Cast: the plugin returns a unified Plugin shape that's correct at
+		// runtime, but our local mdast `Root` type doesn't structurally
+		// match Astro's `RemarkPlugin` parameter constraint.
+		remarkPlugins: [
+			// biome-ignore lint/suspicious/noExplicitAny: see comment above
+			remarkTechAutolink({ lookup: loadTechLookup() }) as any,
+		],
 		rehypePlugins: [
 			[
 				rehypeExternalLinks,
