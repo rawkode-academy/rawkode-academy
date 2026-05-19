@@ -21,8 +21,6 @@
  * matched case-insensitively with custom alnum boundaries so hyphenated
  * names like `kube-vip` and `cert-manager` work correctly.
  */
-import { SKIP, visit } from "unist-util-visit";
-
 // `@types/mdast` and `@types/unist` aren't installed, and we don't want to
 // pull them in just to type a single transformer. The shapes below are the
 // minimum the plugin actually touches.
@@ -165,66 +163,85 @@ export function remarkTechAutolink(
 		// generic. unist-util-visit's own types come from `@types/unist`,
 		// which isn't installed; the casts here keep the call type-safe
 		// against our local Node interface without pulling that in.
-		visit(
-			tree as unknown as Parameters<typeof visit>[0],
-			"text",
-			(rawNode, index, rawParent) => {
-				const node = rawNode as unknown as Text;
-				const parent = rawParent as LinkableTextParent | undefined;
-				if (index === undefined || index === null) return;
-				if (shouldSkipParent(parent)) return SKIP;
-
-				const original = node.value;
-				if (!original) return;
-
-				globalPattern.lastIndex = 0;
-				const segments: Array<
-					Text | { type: "link"; url: string; children: Text[] }
-				> = [];
-				let cursor = 0;
-				let didReplace = false;
-				let match: RegExpExecArray | null;
-
-				while ((match = globalPattern.exec(original)) !== null) {
-					const matched = match[1];
-					if (matched === undefined) break;
-					const techId = options.lookup.get(matched.toLowerCase());
-					if (!techId || linked.has(techId)) {
-						// Either not a tracked tech name or already linked
-						// once in this document — leave it as plain text
-						// but advance past it.
-						continue;
+		//
+		// Walk the tree ourselves rather than going through `visit` so we
+		// can track the full ancestor chain. Skipping based on the
+		// immediate parent only is not enough: MDX puts markdown subtrees
+		// (paragraph -> text) underneath JSX elements, and rewriting the
+		// text node mid-JSX produces a tree mdx-js can't compile.
+		const walk = (node: Node, ancestors: Node[]): void => {
+			if (ancestors.some((a) => SKIP_PARENT_TYPES.has(a.type))) {
+				return;
+			}
+			if (node.type !== "text") {
+				const children = (node as Parent).children;
+				if (Array.isArray(children)) {
+					const nextAncestors = [...ancestors, node];
+					for (const child of children.slice()) {
+						walk(child, nextAncestors);
 					}
+				}
+				return;
+			}
 
-					if (match.index > cursor) {
-						segments.push({
-							type: "text",
-							value: original.slice(cursor, match.index),
-						});
-					}
-					segments.push({
-						type: "link",
-						url: `/technology/${techId}`,
-						children: [{ type: "text", value: matched }],
-					});
-					linked.add(techId);
-					cursor = match.index + matched.length;
-					didReplace = true;
+			const textNode = node as Text;
+			const parent = ancestors[ancestors.length - 1] as
+				| LinkableTextParent
+				| undefined;
+			if (!parent || !Array.isArray((parent as Parent).children)) return;
+			if (shouldSkipParent(parent)) return;
+
+			const original = textNode.value;
+			if (!original) return;
+
+			globalPattern.lastIndex = 0;
+			const segments: Array<
+				Text | { type: "link"; url: string; children: Text[] }
+			> = [];
+			let cursor = 0;
+			let didReplace = false;
+			let match: RegExpExecArray | null;
+
+			while ((match = globalPattern.exec(original)) !== null) {
+				const matched = match[1];
+				if (matched === undefined) break;
+				const techId = options.lookup.get(matched.toLowerCase());
+				if (!techId || linked.has(techId)) {
+					// Not a tracked tech name, or already linked once in
+					// this document. Leave it as plain text but advance.
+					continue;
 				}
 
-				if (!didReplace) return;
-				if (cursor < original.length) {
+				if (match.index > cursor) {
 					segments.push({
 						type: "text",
-						value: original.slice(cursor),
+						value: original.slice(cursor, match.index),
 					});
 				}
+				segments.push({
+					type: "link",
+					url: `/technology/${techId}`,
+					children: [{ type: "text", value: matched }],
+				});
+				linked.add(techId);
+				cursor = match.index + matched.length;
+				didReplace = true;
+			}
 
-				const replacement = segments as Text[];
-				if (!parent) return;
-				parent.children.splice(index, 1, ...(replacement as Node[]));
-				return [SKIP, index + replacement.length];
-			},
-		);
+			if (!didReplace) return;
+			if (cursor < original.length) {
+				segments.push({
+					type: "text",
+					value: original.slice(cursor),
+				});
+			}
+
+			const parentChildren = (parent as Parent).children;
+			const index = parentChildren.indexOf(textNode as unknown as Node);
+			if (index < 0) return;
+			parentChildren.splice(index, 1, ...(segments as unknown as Node[]));
+		};
+
+		walk(tree as Node, []);
 	};
 }
