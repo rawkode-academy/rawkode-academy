@@ -31,10 +31,6 @@ interface Node {
 interface Parent extends Node {
 	children: Node[];
 }
-interface Text extends Node {
-	type: "text";
-	value: string;
-}
 interface Root extends Parent {
 	type: "root";
 }
@@ -179,6 +175,19 @@ export function remarkTechAutolink(
 				node.type === "toml");
 		// biome-ignore lint/suspicious/noExplicitAny: mdast types not in scope
 		const args: any = [tree, [[pattern, replace]], { ignore }];
-		findAndReplace(args[0], args[1], args[2]);
+		try {
+			findAndReplace(args[0], args[1], args[2]);
+		} catch (err) {
+			// Belt-and-braces: if find-and-replace hits a malformed
+			// subtree (e.g., a tree shape we haven't anticipated) we
+			// leave the document untouched rather than break the build.
+			// Worst case the article doesn't get autolinks; best case
+			// nothing of value is lost. Surface the failure so it's
+			// fixable later.
+			console.warn(
+				"[remark-tech-autolink] skipped document due to error:",
+				err instanceof Error ? err.message : err,
+			);
+		}
 	};
 }
