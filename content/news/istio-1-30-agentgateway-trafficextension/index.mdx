@@ -1,0 +1,34 @@
+---
+title: "Istio 1.30 adds experimental agentgateway and a TrafficExtension Lua API"
+description: "Istio 1.30.0 lands May 18 with an opt-in agentgateway Gateway API implementation aimed at AI agent traffic, a TrafficExtension API with Lua extensibility, CIDR-aware ServiceEntry for ambient mode, and a stricter default for XDS debug endpoint authentication."
+publishedAt: 2026-05-18
+authors:
+  - rawkode
+technologies:
+  - istio
+---
+
+Istio 1.30.0 shipped on May 18, 2026. Alongside the security patch wave, the release introduces two extensibility directions worth understanding before adoption.
+
+## TrafficExtension API
+
+1.30 introduces the `TrafficExtension` API with Lua support in the extensions package, per the change notes. The release does not formally deprecate `WasmPlugin`; both coexist in 1.30. If you're picking an extensibility surface today, weigh `TrafficExtension` against `WasmPlugin` rather than defaulting to the older API.
+
+## agentgateway, behind a feature flag
+
+A new experimental Gateway API implementation called `agentgateway` lands behind `PILOT_ENABLE_AGENTGATEWAY`. The project frames it as targeted at AI agent traffic. The flag is opt-in and the implementation is explicitly experimental, with API surface that may change.
+
+## Ambient and multicluster
+
+`ServiceEntry` resources can now use CIDR addresses (e.g., `10.0.0.0/24`); the entries propagate to `ztunnel` for longest-prefix-match routing in ambient mode. East-west gateways gain TLS passthrough listeners for non-HBONE ports. Multicluster waypoint routing is simplified for single-network setups, and remote secrets can now be loaded from disk via `PILOT_MULTICLUSTER_KUBECONFIG_PATH` instead of from in-cluster Secrets.
+
+## Operator-facing changes to plan around
+
+- Minimum supported Kubernetes is now 1.32; `istioctl` enforces it.
+- Default image registry moves to `registry.istio.io`.
+- New `--tls-min-version` flag for `istiod`.
+- CNI config file permissions tighten from 0644 to 0600 by default.
+- Sidecar service selection now prefers Kubernetes `Service` resources, falling back to the oldest non-Kubernetes service by creation time — a behaviour shift for multi-namespace deployments.
+- XDS debug endpoint authentication (`ENABLE_DEBUG_ENDPOINT_AUTH`) is on by default; tooling using plaintext port 15010 will break until reconfigured.
+
+**Sources:** [Announcing Istio 1.30](https://istio.io/latest/news/releases/1.30.x/announcing-1.30/), [1.30.0 change notes](https://istio.io/latest/news/releases/1.30.x/announcing-1.30/change-notes/), [1.30.0 upgrade notes](https://istio.io/latest/news/releases/1.30.x/announcing-1.30/upgrade-notes/) — May 18, 2026.
