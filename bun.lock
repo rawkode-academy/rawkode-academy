@@ -414,6 +414,7 @@
         "jose": "^6.2.2",
         "luxon": "^3.7.2",
         "marked": "^17.0.5",
+        "mdast-util-find-and-replace": "^3.0.2",
         "oslo": "^1.2.1",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",
