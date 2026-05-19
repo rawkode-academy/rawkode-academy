@@ -21,10 +21,25 @@
  * matched case-insensitively with custom alnum boundaries so hyphenated
  * names like `kube-vip` and `cert-manager` work correctly.
  */
-import type { Root, Text } from "mdast";
-import type { Plugin } from "unified";
-import type { Parent } from "unist";
-import { visit, SKIP } from "unist-util-visit";
+import { SKIP, visit } from "unist-util-visit";
+
+// `@types/mdast` and `@types/unist` aren't installed, and we don't want to
+// pull them in just to type a single transformer. The shapes below are the
+// minimum the plugin actually touches.
+interface Node {
+	type: string;
+	[key: string]: unknown;
+}
+interface Parent extends Node {
+	children: Node[];
+}
+interface Text extends Node {
+	type: "text";
+	value: string;
+}
+interface Root extends Parent {
+	type: "root";
+}
 
 export interface AutolinkOptions {
 	/** Map of lowercased canonical name -> technology id used in URLs. */
@@ -112,9 +127,17 @@ function readFileSource(file: unknown): string {
 	return "";
 }
 
+/**
+ * Plugin factory: returns a unified transformer suitable for
+ * `.use(remarkTechAutolink({ lookup }))`. The return shape is a plain
+ * `(tree, file) => void` function which is what `unified` expects for
+ * a transformer; we type the inner function with our minimal Root/Node
+ * shapes rather than the full `unified` Plugin type to avoid pulling in
+ * `@types/unist` / `@types/mdast`.
+ */
 export function remarkTechAutolink(
 	options: AutolinkOptions,
-): Plugin<[], Root> {
+): (tree: Root, file: unknown) => void {
 	const minLength = options.minLength ?? 3;
 	const skip = new Set<string>(DEFAULT_SKIP);
 	for (const name of options.skipNames ?? []) {
@@ -126,7 +149,7 @@ export function remarkTechAutolink(
 	const names = Array.from(options.lookup.keys());
 	const pattern = buildPattern(names, skip, minLength);
 
-	return function transform(tree, file) {
+	return function transform(tree: Root, file: unknown): void {
 		if (!pattern) return;
 
 		// Per-file opt-out by HTML comment in the original source.
@@ -138,56 +161,70 @@ export function remarkTechAutolink(
 		const globalPattern = new RegExp(pattern.source, "gi");
 		const linked = new Set<string>();
 
-		visit(tree, "text", (node: Text, index, parent) => {
-			if (index === undefined) return;
-			if (shouldSkipParent(parent as LinkableTextParent | undefined)) {
-				return SKIP;
-			}
-			const original = node.value;
-			if (!original) return;
+		// We pass our minimal `Root` shape through unist-util-visit's
+		// generic. unist-util-visit's own types come from `@types/unist`,
+		// which isn't installed; the casts here keep the call type-safe
+		// against our local Node interface without pulling that in.
+		visit(
+			tree as unknown as Parameters<typeof visit>[0],
+			"text",
+			(rawNode, index, rawParent) => {
+				const node = rawNode as unknown as Text;
+				const parent = rawParent as LinkableTextParent | undefined;
+				if (index === undefined || index === null) return;
+				if (shouldSkipParent(parent)) return SKIP;
 
-			globalPattern.lastIndex = 0;
-			const segments: Array<
-				Text | { type: "link"; url: string; children: Text[] }
-			> = [];
-			let cursor = 0;
-			let didReplace = false;
-			let match: RegExpExecArray | null;
+				const original = node.value;
+				if (!original) return;
 
-			while ((match = globalPattern.exec(original)) !== null) {
-				const matched = match[1];
-				if (matched === undefined) break;
-				const techId = options.lookup.get(matched.toLowerCase());
-				if (!techId || linked.has(techId)) {
-					// Either not a tracked tech name or already linked once in
-					// this document — leave it as plain text but advance past it.
-					continue;
+				globalPattern.lastIndex = 0;
+				const segments: Array<
+					Text | { type: "link"; url: string; children: Text[] }
+				> = [];
+				let cursor = 0;
+				let didReplace = false;
+				let match: RegExpExecArray | null;
+
+				while ((match = globalPattern.exec(original)) !== null) {
+					const matched = match[1];
+					if (matched === undefined) break;
+					const techId = options.lookup.get(matched.toLowerCase());
+					if (!techId || linked.has(techId)) {
+						// Either not a tracked tech name or already linked
+						// once in this document — leave it as plain text
+						// but advance past it.
+						continue;
+					}
+
+					if (match.index > cursor) {
+						segments.push({
+							type: "text",
+							value: original.slice(cursor, match.index),
+						});
+					}
+					segments.push({
+						type: "link",
+						url: `/technology/${techId}`,
+						children: [{ type: "text", value: matched }],
+					});
+					linked.add(techId);
+					cursor = match.index + matched.length;
+					didReplace = true;
 				}
 
-				if (match.index > cursor) {
+				if (!didReplace) return;
+				if (cursor < original.length) {
 					segments.push({
 						type: "text",
-						value: original.slice(cursor, match.index),
+						value: original.slice(cursor),
 					});
 				}
-				segments.push({
-					type: "link",
-					url: `/technology/${techId}`,
-					children: [{ type: "text", value: matched }],
-				});
-				linked.add(techId);
-				cursor = match.index + matched.length;
-				didReplace = true;
-			}
 
-			if (!didReplace) return;
-			if (cursor < original.length) {
-				segments.push({ type: "text", value: original.slice(cursor) });
-			}
-
-			const replacement = segments as Text[];
-			(parent as Parent).children.splice(index, 1, ...replacement);
-			return [SKIP, index + replacement.length];
-		});
+				const replacement = segments as Text[];
+				if (!parent) return;
+				parent.children.splice(index, 1, ...(replacement as Node[]));
+				return [SKIP, index + replacement.length];
+			},
+		);
 	};
 }

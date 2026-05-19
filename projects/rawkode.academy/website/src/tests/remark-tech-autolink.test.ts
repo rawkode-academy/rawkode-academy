@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { remark } from "remark";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
 import remarkMdx from "remark-mdx";
 import { remarkTechAutolink } from "@/lib/remark-tech-autolink";
 
@@ -13,9 +15,11 @@ const lookup = new Map<string, string>([
 ]);
 
 async function process(source: string): Promise<string> {
-	const file = await remark()
+	const file = await unified()
+		.use(remarkParse)
 		.use(remarkMdx)
 		.use(remarkTechAutolink({ lookup }))
+		.use(remarkStringify)
 		.process(source);
 	return String(file);
 }
@@ -117,7 +121,8 @@ describe("remarkTechAutolink", () => {
 	});
 
 	it("respects an explicit per-call skipNames override", async () => {
-		const file = await remark()
+		const file = await unified()
+			.use(remarkParse)
 			.use(remarkMdx)
 			.use(
 				remarkTechAutolink({
@@ -125,6 +130,7 @@ describe("remarkTechAutolink", () => {
 					skipNames: ["apko"],
 				}),
 			)
+			.use(remarkStringify)
 			.process("Try apko for distroless builds.\n");
 		expect(String(file)).not.toContain("/technology/apko");
 	});

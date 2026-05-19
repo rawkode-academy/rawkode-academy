@@ -26,11 +26,24 @@ function readTechName(mdxPath: string): string | undefined {
 	return undefined;
 }
 
+// Bun's @types/node defaults `readdirSync(dir, { withFileTypes: true })` to
+// `Dirent<NonSharedBuffer>[]`, but at runtime we get string paths because
+// no `encoding: 'buffer'` is passed. Capture both with a minimal alias and
+// route everything through the string-only shape we actually use.
+interface DirEntryName {
+	name: string;
+	isDirectory(): boolean;
+	isFile(): boolean;
+}
+
 export function loadTechLookup(dir: string): Map<string, string> {
 	const lookup = new Map<string, string>();
-	let entries: ReturnType<typeof readdirSync>;
+	let entries: DirEntryName[];
 	try {
-		entries = readdirSync(dir, { withFileTypes: true });
+		entries = readdirSync(dir, {
+			withFileTypes: true,
+			encoding: "utf8",
+		}) as unknown as DirEntryName[];
 	} catch {
 		return lookup;
 	}
@@ -47,8 +60,8 @@ export function loadTechLookup(dir: string): Map<string, string> {
 		} else {
 			continue;
 		}
-		// `readTechName` already swallows ENOENT, so no need to
-		// pre-flight with a statSync.
+		// `readTechName` already swallows ENOENT, so no need to pre-flight
+		// with a statSync.
 		const name = readTechName(mdxPath);
 		if (!name) continue;
 		const key = name.toLowerCase();
