@@ -107,11 +107,28 @@ const breadcrumbElements = [
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
-const publishDate = new Intl.DateTimeFormat("en-US", {
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	month: "short",
 	day: "numeric",
 	year: "numeric",
-}).format(article.data.publishedAt);
+});
+const publishDate = dateFormatter.format(article.data.publishedAt);
+// Only show an "Updated" byline when the update lands on a different
+// calendar day than the original publish date. Comparing dates (not
+// timestamps) avoids the "exactly 24h" edge case that strict ">" missed
+// when both frontmatter dates parse to midnight UTC. Also still filters
+// same-day metadata-only fixes.
+const sameCalendarDayUtc = (a: Date, b: Date): boolean =>
+	a.getUTCFullYear() === b.getUTCFullYear() &&
+	a.getUTCMonth() === b.getUTCMonth() &&
+	a.getUTCDate() === b.getUTCDate();
+const wasUpdated =
+	article.data.updatedAt &&
+	article.data.updatedAt.getTime() > article.data.publishedAt.getTime() &&
+	!sameCalendarDayUtc(article.data.updatedAt, article.data.publishedAt);
+const updateDate = wasUpdated
+	? dateFormatter.format(article.data.updatedAt as Date)
+	: undefined;
 ---
 
 <Page
@@ -192,9 +209,24 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 
 				<span class="byline-sep">·</span>
 
-				<time datetime={article.data.publishedAt.toString()} class="byline-date">
+				<time
+					datetime={article.data.publishedAt.toISOString()}
+					class="byline-date"
+				>
 					{publishDate}
 				</time>
+
+				{updateDate && article.data.updatedAt && (
+					<>
+						<span class="byline-sep">·</span>
+						<time
+							datetime={(article.data.updatedAt as Date).toISOString()}
+							class="byline-date byline-updated"
+						>
+							Updated {updateDate}
+						</time>
+					</>
+				)}
 
 				<span class="byline-sep">·</span>
 
