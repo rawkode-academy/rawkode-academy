@@ -80,6 +80,17 @@ const SKIP_PARENT_TYPES = new Set([
 	"mdxjsEsm",
 ]);
 
+// If any top-level child of the document is one of these, the file uses
+// MDX features and we bail on the whole document. See the transform body
+// for why.
+const MDX_BAIL_TYPES = new Set([
+	"mdxjsEsm",
+	"mdxJsxFlowElement",
+	"mdxJsxTextElement",
+	"mdxFlowExpression",
+	"mdxTextExpression",
+]);
+
 function shouldSkipParent(parent: LinkableTextParent | undefined): boolean {
 	if (!parent) return true;
 	return SKIP_PARENT_TYPES.has(parent.type);
@@ -153,6 +164,21 @@ export function remarkTechAutolink(
 		// Per-file opt-out by HTML comment in the original source.
 		const source = readFileSource(file);
 		if (source && SKIP_COMMENT_PATTERN.test(source)) return;
+
+		// Bail on MDX files entirely. Mutating text nodes inside trees
+		// that include JSX or ESM imports has triggered mdx-js compiler
+		// crashes ("Cannot read properties of undefined") in ways the
+		// ancestor-based skip didn't prevent. Until we have a fully
+		// JSX-safe rewriter, only autolink plain Markdown — which is
+		// what most of the news / changelog / ADR corpus is. Articles
+		// with JSX miss out on autolinking for now and authors can hand-
+		// link as before.
+		const topChildren = tree.children as Node[] | undefined;
+		if (Array.isArray(topChildren)) {
+			for (const child of topChildren) {
+				if (MDX_BAIL_TYPES.has(child.type)) return;
+			}
+		}
 
 		// Re-create the global regex per document so the per-text `lastIndex`
 		// state doesn't leak across documents.
