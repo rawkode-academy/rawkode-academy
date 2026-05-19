@@ -145,16 +145,14 @@ describe("remarkTechAutolink", () => {
 		expect(String(file)).not.toContain("/technology/apko");
 	});
 
-	it("bails entirely on MDX documents (avoids mdx-js compiler crashes)", async () => {
-		// Conservative safeguard: the plugin bails on any document that
-		// uses MDX-specific node types at the top level. Mutating inside
-		// JSX-containing trees triggers mdx-js compiler crashes that the
-		// ancestor-based skip doesn't fully prevent, so until the
-		// rewriter is JSX-safe we leave the whole document alone.
-		// Plain-Markdown mentions in an MDX document also get no link.
+	it("links Kubernetes in a plain paragraph adjacent to an MDX component", async () => {
+		// `mdast-util-find-and-replace` walks into MDX-element subtrees
+		// and skips their text by default. A plain Markdown paragraph
+		// outside the JSX should still get auto-linked normally.
 		const out = await process(
 			'<Note>This Kubernetes tip is inside an MDX component.</Note>\n\nKubernetes is also mentioned in plain prose.\n',
 		);
-		expect(out).not.toContain("/technology/kubernetes");
+		// First-mention linking still fires for the plain paragraph.
+		expect(out).toContain("[Kubernetes](/technology/kubernetes)");
 	});
 });

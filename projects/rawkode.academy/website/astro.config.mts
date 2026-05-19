@@ -13,17 +13,8 @@ import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
 import { existsSync } from "node:fs";
 import rehypeExternalLinks from "rehype-external-links";
-// remark-tech-autolink and its loader live alongside the website for a
-// future "auto cross-link tech mentions" pass, but the plugin currently
-// triggers mdx-js/rollup crashes on a subset of content files that I
-// can't reproduce locally (bun workspace install is broken in this
-// monorepo). Keep the imports referenced so dead-code elimination
-// doesn't drop them, but leave the plugin OFF the markdown pipeline
-// until we have a local repro and a JSX-safe rewriter.
 import { loadTechLookup } from "./src/lib/load-tech-lookup";
 import { remarkTechAutolink } from "./src/lib/remark-tech-autolink";
-void loadTechLookup;
-void remarkTechAutolink;
 
 // Load CUE language grammar for syntax highlighting
 let cueLanguageGrammar: import("shiki").LanguageRegistration | undefined;
@@ -239,11 +230,20 @@ export default defineConfig({
 		checkOrigin: true,
 	},
 	markdown: {
-		// `remarkTechAutolink` is intentionally NOT wired up here yet — see
-		// the comment above its import. The plugin and its loader ship in
-		// this PR as future infrastructure; turning it on will land in a
-		// follow-up once mdx-js/rollup crash on JSX-containing content
-		// files is fully understood and the rewriter is JSX-safe.
+		// `CONTENT_TECH_DIR` resolves to the technologies subdirectory when
+		// it exists; otherwise it falls back to the content package root.
+		// Either way, the loader needs the technologies folder itself.
+		remarkPlugins: CONTENT_TECH_DIR
+			? [
+					remarkTechAutolink({
+						lookup: loadTechLookup(
+							CONTENT_TECH_DIR.endsWith("technologies")
+								? CONTENT_TECH_DIR
+								: join(CONTENT_TECH_DIR, "technologies"),
+						),
+					}),
+				]
+			: [],
 		rehypePlugins: [
 			[
 				rehypeExternalLinks,
