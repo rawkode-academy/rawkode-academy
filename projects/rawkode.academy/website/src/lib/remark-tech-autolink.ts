@@ -5,16 +5,19 @@
  * article per technology is the established SEO heuristic; repeating
  * the same anchor lowers signal and looks spammy).
  *
- * Built on `unist-util-visit` (the canonical mdast tree walker). We
- * visit every text node, check that none of its ancestors are in the
- * ignore set (headings, links, code, MDX JSX, etc.), and splice the
- * text node into a sequence of `[text, link, text, link, ...]` in its
- * parent's children array.
+ * We previously tried `mdast-util-find-and-replace` and a direct
+ * `unist-util-visit-parents` walk; both crashed with
+ * `Cannot use 'in' operator to search for 'children' in undefined`
+ * on certain Astro-rendered trees, because visit-parents@6 throws when
+ * an intermediate node's `children` array contains a sparse/undefined
+ * entry (which can come from the markdown pipeline upstream). Plain
+ * recursion sidesteps that entirely and is the simplest correct walk
+ * for what we need: pre-order descent, splice-into-parent on text
+ * matches, and skip the ignore-set subtrees.
  *
  * Per-file opt-out: include the literal HTML comment
  * `<!-- no-autolink -->` anywhere in the body.
  */
-import { visitParents, SKIP } from "unist-util-visit-parents";
 
 interface Node {
 	type: string;
@@ -53,10 +56,6 @@ const DEFAULT_SKIP = [
 
 const SKIP_COMMENT_PATTERN = /<!--\s*no-autolink\s*-->/i;
 
-// Node types whose text descendants must never be auto-linked. The
-// first group is the standard markdown ignore set (matching what
-// `mdast-util-find-and-replace` uses by default); the second is the
-// MDX-specific subtree we never want to touch.
 const IGNORE_TYPES = new Set<string>([
 	"heading",
 	"link",
@@ -127,46 +126,17 @@ export function remarkTechAutolink(
 
 		const linked = new Set<string>();
 
-		// Collect (parent, index, replacement) tuples first, then apply
-		// them in reverse so each splice doesn't shift the indices of
-		// pending splices. Mutating during visit corrupts the traversal.
-		interface Replacement {
-			parent: Parent;
-			index: number;
-			nodes: Node[];
-		}
-		const replacements: Replacement[] = [];
-
-		// biome-ignore lint/suspicious/noExplicitAny: avoid pulling in mdast types
-		visitParents(tree as any, "text", (node: any, ancestors: any[]) => {
-			// If any ancestor is in the ignore set, skip this text node
-			// AND skip descent into siblings (we're at a leaf anyway, so
-			// the SKIP only matters when ignore-set entries are deeper).
-			for (const ancestor of ancestors) {
-				if (ancestor && IGNORE_TYPES.has(ancestor.type)) {
-					return SKIP;
-				}
-			}
-
-			const text = node as TextNode;
+		function buildReplacement(text: TextNode): Node[] | undefined {
 			const value = text.value;
-			if (!value) return;
+			if (!value) return undefined;
 
 			pattern.lastIndex = 0;
-			let match = pattern.exec(value);
-			if (!match) return;
-
-			const parent = ancestors[ancestors.length - 1] as Parent | undefined;
-			if (!parent || !Array.isArray(parent.children)) return;
-			const index = parent.children.indexOf(text);
-			if (index === -1) return;
-
 			const newNodes: Node[] = [];
 			let cursor = 0;
+			let match = pattern.exec(value);
 			while (match) {
 				const matched = match[1] ?? match[0];
 				const start = match.index;
-				const end = start + matched.length;
 				const techId = options.lookup.get(matched.toLowerCase());
 				if (techId && !linked.has(techId)) {
 					linked.add(techId);
@@ -180,28 +150,41 @@ export function remarkTechAutolink(
 						type: "link",
 						url: `/technology/${techId}`,
 						children: [{ type: "text", value: matched }],
-					} as Node);
-					cursor = end;
+					});
+					cursor = start + matched.length;
 				}
 				match = pattern.exec(value);
 			}
 
-			if (newNodes.length === 0) return;
+			if (newNodes.length === 0) return undefined;
 			if (cursor < value.length) {
 				newNodes.push({ type: "text", value: value.slice(cursor) });
 			}
-
-			replacements.push({ parent, index, nodes: newNodes });
-		});
-
-		// Apply in reverse so earlier splices don't shift later indices.
-		// Group by parent so multiple replacements within the same parent
-		// stay consistent (sort by descending index within each parent;
-		// since replacements were collected in document order, a simple
-		// reverse iteration is sufficient).
-		for (let i = replacements.length - 1; i >= 0; i--) {
-			const { parent, index, nodes } = replacements[i];
-			parent.children.splice(index, 1, ...nodes);
+			return newNodes;
 		}
+
+		function walk(node: Node | undefined): void {
+			if (!node || typeof node !== "object") return;
+			if (typeof node.type !== "string") return;
+			if (IGNORE_TYPES.has(node.type)) return;
+			const children = (node as Partial<Parent>).children;
+			if (!Array.isArray(children)) return;
+
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				if (!child || typeof child !== "object") continue;
+				if (child.type === "text") {
+					const replacement = buildReplacement(child as TextNode);
+					if (replacement) {
+						children.splice(i, 1, ...replacement);
+						i += replacement.length - 1;
+					}
+				} else {
+					walk(child);
+				}
+			}
+		}
+
+		walk(tree);
 	};
 }
