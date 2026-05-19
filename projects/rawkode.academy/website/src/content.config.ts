@@ -192,52 +192,73 @@ const articles = defineCollection({
 		base: resolveContentDirSync("articles"),
 	}),
 	schema: ({ image }) =>
-		z.object({
-			title: z.string(),
-			publishedAt: z.coerce.date(),
-			updatedAt: z.coerce.date().optional(),
-			// canonicalUrl: z.url().optional(),
-			subtitle: z.string().optional(),
-			description: z.string(),
-			authors: z.array(reference("people")).default(["rawkode"] as any),
-			categories: z.array(z.string()).default([]),
-			draft: z.boolean().default(false),
-			cover: z
-				.object({
-					image: image(),
-					alt: z.string(),
-				})
-				.optional(),
-			// Additional properties that are used in components
-			type: z
-				.enum(["tutorial", "article", "guide", "news"])
-				.default("tutorial"),
-			// Opt-in flag for emitting schema.org HowTo JSON-LD. Many tutorials
-			// in our corpus are deep-dive explainers rather than step-by-step
-			// procedures, and HowTo specifically wants procedural content — so
-			// gate the emission on an explicit author signal rather than the
-			// broad `type: "tutorial"` default.
-			howto: z.boolean().default(false),
-			series: reference("series").optional(),
-			technologies: z
-				.array(z.string().min(1))
-				.nonempty("At least one technology is required for each article"),
-			openGraph: z
-				.object({
-					title: z.string(),
-					subtitle: z.string().optional(),
-				})
-				.optional(),
-			updates: z
-				.array(
-					z.object({
-						date: z.coerce.date(),
-						description: z.string(),
-					}),
-				)
-				.optional(),
-			resources: z.array(resourceSchema).optional(),
-		}),
+		z
+			.object({
+				title: z.string(),
+				publishedAt: z.coerce.date(),
+				updatedAt: z.coerce.date().optional(),
+				// canonicalUrl: z.url().optional(),
+				subtitle: z.string().optional(),
+				description: z.string(),
+				authors: z.array(reference("people")).default(["rawkode"] as any),
+				categories: z.array(z.string()).default([]),
+				draft: z.boolean().default(false),
+				cover: z
+					.object({
+						image: image(),
+						alt: z.string(),
+					})
+					.optional(),
+				// Additional properties that are used in components
+				type: z
+					.enum(["tutorial", "article", "guide", "news"])
+					.default("tutorial"),
+				// Opt-in flag for emitting schema.org HowTo JSON-LD. Many tutorials
+				// in our corpus are deep-dive explainers rather than step-by-step
+				// procedures, and HowTo specifically wants procedural content — so
+				// gate the emission on an explicit author signal rather than the
+				// broad `type: "tutorial"` default.
+				howto: z.boolean().default(false),
+				series: reference("series").optional(),
+				technologies: z
+					.array(z.string().min(1))
+					.nonempty(
+						"At least one technology is required for each article",
+					),
+				openGraph: z
+					.object({
+						title: z.string(),
+						subtitle: z.string().optional(),
+					})
+					.optional(),
+				updates: z
+					.array(
+						z.object({
+							date: z.coerce.date(),
+							description: z.string(),
+						}),
+					)
+					.optional(),
+				resources: z.array(resourceSchema).optional(),
+			})
+			// Many articles track edits via the `updates` array rather than the
+			// `updatedAt` scalar (the kyverno article is the canonical example).
+			// Normalize so downstream code (JSON-LD `dateModified`, the visible
+			// "Updated" byline, RSS) sees a single source of truth: prefer an
+			// explicit `updatedAt` when set, otherwise derive from the latest
+			// `updates[].date`.
+			.transform((data) => {
+				if (data.updatedAt) return data;
+				const updates = data.updates;
+				if (!updates || updates.length === 0) return data;
+				const first = updates[0];
+				if (!first) return data;
+				const latest = updates.reduce(
+					(acc, entry) => (entry.date > acc ? entry.date : acc),
+					first.date,
+				);
+				return { ...data, updatedAt: latest };
+			}),
 });
 
 const technologies = defineCollection({
