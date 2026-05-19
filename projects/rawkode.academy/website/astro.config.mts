@@ -13,6 +13,8 @@ import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
 import { existsSync } from "node:fs";
 import rehypeExternalLinks from "rehype-external-links";
+import { loadTechLookup } from "./src/lib/load-tech-lookup";
+import { remarkTechAutolink } from "./src/lib/remark-tech-autolink";
 
 // Load CUE language grammar for syntax highlighting
 let cueLanguageGrammar: import("shiki").LanguageRegistration | undefined;
@@ -228,6 +230,20 @@ export default defineConfig({
 		checkOrigin: true,
 	},
 	markdown: {
+		// `CONTENT_TECH_DIR` resolves to the `technologies/` subdirectory when
+		// it exists; otherwise it falls back to the content package root.
+		// Either way, the loader needs the technologies folder itself.
+		remarkPlugins: CONTENT_TECH_DIR
+			? [
+					remarkTechAutolink({
+						lookup: loadTechLookup(
+							CONTENT_TECH_DIR.endsWith("technologies")
+								? CONTENT_TECH_DIR
+								: join(CONTENT_TECH_DIR, "technologies"),
+						),
+					}),
+				]
+			: [],
 		rehypePlugins: [
 			[
 				rehypeExternalLinks,
