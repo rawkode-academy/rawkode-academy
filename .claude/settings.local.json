@@ -123,7 +123,8 @@
       "Bash(curl -sL https://raw.githubusercontent.com/sustainable-computing-io/kepler/main/LICENSE)",
       "Bash(curl -sL https://raw.githubusercontent.com/sustainable-computing-io/kepler/main/LICENSES/Apache-2.0.txt)",
       "Bash(curl -sL https://raw.githubusercontent.com/lensapp/lens/master/LICENSE)",
-      "Bash(curl -sL https://api.github.com/repos/lensapp/lens)"
+      "Bash(curl -sL https://api.github.com/repos/lensapp/lens)",
+      "mcp__44250d65-44ab-4757-890c-015051bb22e5__exec"
     ]
   }
 }
