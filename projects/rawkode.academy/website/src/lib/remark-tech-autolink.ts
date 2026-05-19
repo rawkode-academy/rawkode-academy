@@ -142,36 +142,53 @@ export function remarkTechAutolink(
 	const skipPathSubstrings =
 		options.skipPathSubstrings ?? DEFAULT_SKIP_PATH_SUBSTRINGS;
 
+	console.error(
+		`[remark-tech-autolink] init: lookup=${options.lookup.size} pattern=${pattern ? "ok" : "EMPTY"} skip=${Array.from(skip).join(",")}`,
+	);
+
 	return function transform(tree: Root, file: unknown): void {
-		if (!pattern) return;
+		if (!pattern) {
+			console.error("[remark-tech-autolink] no pattern; returning");
+			return;
+		}
 		const re = pattern;
 
 		const path = readFilePath(file);
 		if (path) {
 			for (const fragment of skipPathSubstrings) {
-				if (path.includes(fragment)) return;
+				if (path.includes(fragment)) {
+					console.error(`[remark-tech-autolink] skip path=${path}`);
+					return;
+				}
 			}
 		}
+		console.error(`[remark-tech-autolink] enter path=${path || "(no path)"}`);
 
 		const source = readFileSource(file);
 		if (source && SKIP_COMMENT_PATTERN.test(source)) return;
 
 		const linked = new Set<string>();
+		let textNodesSeen = 0;
+		let matchesFound = 0;
+		let linksProduced = 0;
 
 		function buildReplacement(text: TextNode): Node[] | undefined {
 			const value = text.value;
 			if (!value) return undefined;
+			textNodesSeen++;
 
 			re.lastIndex = 0;
 			const newNodes: Node[] = [];
 			let cursor = 0;
 			let match = re.exec(value);
 			while (match) {
+				matchesFound++;
 				const matched = match[1] ?? match[0];
 				const start = match.index;
 				const techId = options.lookup.get(matched.toLowerCase());
 				if (techId && !linked.has(techId)) {
 					linked.add(techId);
+					linksProduced++;
 					if (start > cursor) {
 						newNodes.push({
 							type: "text",
@@ -218,5 +235,8 @@ export function remarkTechAutolink(
 		}
 
 		walk(tree);
+		console.error(
+			`[remark-tech-autolink] done path=${path || "(no path)"} textNodes=${textNodesSeen} matches=${matchesFound} links=${linksProduced}`,
+		);
 	};
 }
