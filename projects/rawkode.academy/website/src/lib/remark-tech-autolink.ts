@@ -120,6 +120,7 @@ export function remarkTechAutolink(
 
 	return function transform(tree: Root, file: unknown): void {
 		if (!pattern) return;
+		const re = pattern;
 
 		const source = readFileSource(file);
 		if (source && SKIP_COMMENT_PATTERN.test(source)) return;
@@ -130,10 +131,10 @@ export function remarkTechAutolink(
 			const value = text.value;
 			if (!value) return undefined;
 
-			pattern.lastIndex = 0;
+			re.lastIndex = 0;
 			const newNodes: Node[] = [];
 			let cursor = 0;
-			let match = pattern.exec(value);
+			let match = re.exec(value);
 			while (match) {
 				const matched = match[1] ?? match[0];
 				const start = match.index;
@@ -153,7 +154,7 @@ export function remarkTechAutolink(
 					});
 					cursor = start + matched.length;
 				}
-				match = pattern.exec(value);
+				match = re.exec(value);
 			}
 
 			if (newNodes.length === 0) return undefined;
