@@ -230,20 +230,7 @@ export default defineConfig({
 		checkOrigin: true,
 	},
 	markdown: {
-		// `CONTENT_TECH_DIR` resolves to the technologies subdirectory when
-		// it exists; otherwise it falls back to the content package root.
-		// Either way, the loader needs the technologies folder itself.
-		remarkPlugins: CONTENT_TECH_DIR
-			? [
-					remarkTechAutolink({
-						lookup: loadTechLookup(
-							CONTENT_TECH_DIR.endsWith("technologies")
-								? CONTENT_TECH_DIR
-								: join(CONTENT_TECH_DIR, "technologies"),
-						),
-					}),
-				]
-			: [],
+		remarkPlugins: [remarkTechAutolink({ lookup: loadTechLookup() })],
 		rehypePlugins: [
 			[
 				rehypeExternalLinks,

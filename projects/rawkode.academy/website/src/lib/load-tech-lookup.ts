@@ -1,16 +1,15 @@
 /**
- * Synchronously read every technology profile in the given directory and
- * produce a lookup `Map<lowercased-name, technology-id>` for use with the
- * `remarkTechAutolink` plugin at build time.
+ * Synchronously read every technology profile in the content collection
+ * and produce a lookup `Map<lowercased-name, technology-id>` for use with
+ * the `remarkTechAutolink` plugin at build time.
  *
- * The technologies collection lives in two physical layouts depending on
- * the entry — some are bare files (`{id}.mdx`), some are directories with
- * an `index.mdx` (so the directory can also hold logos and assets). We
- * handle both.
+ * Technology profiles use two layouts: bare `{id}.mdx` files, or
+ * directories with an `index.mdx` plus logos. Both are handled.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import matter from "gray-matter";
+import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 
 function readTechName(mdxPath: string): string | undefined {
 	try {
@@ -26,17 +25,16 @@ function readTechName(mdxPath: string): string | undefined {
 	return undefined;
 }
 
-// Bun's @types/node defaults `readdirSync(dir, { withFileTypes: true })` to
-// `Dirent<NonSharedBuffer>[]`, but at runtime we get string paths because
-// no `encoding: 'buffer'` is passed. Capture both with a minimal alias and
-// route everything through the string-only shape we actually use.
+// Bun's @types/node default for `readdirSync(dir, { withFileTypes: true })`
+// is `Dirent<NonSharedBuffer>[]`, but runtime returns string-named entries.
 interface DirEntryName {
 	name: string;
 	isDirectory(): boolean;
 	isFile(): boolean;
 }
 
-export function loadTechLookup(dir: string): Map<string, string> {
+export function loadTechLookup(): Map<string, string> {
+	const dir = resolveContentDirSync("technologies");
 	const lookup = new Map<string, string>();
 	let entries: DirEntryName[];
 	try {
@@ -60,13 +58,9 @@ export function loadTechLookup(dir: string): Map<string, string> {
 		} else {
 			continue;
 		}
-		// `readTechName` already swallows ENOENT, so no need to pre-flight
-		// with a statSync.
 		const name = readTechName(mdxPath);
 		if (!name) continue;
 		const key = name.toLowerCase();
-		// First win on conflicts; technology IDs are unique so collisions
-		// would only happen if two profiles declared the same display name.
 		if (!lookup.has(key)) {
 			lookup.set(key, id);
 		}

@@ -5,19 +5,11 @@
  * article per technology is the established SEO heuristic; repeating
  * the same anchor lowers signal and looks spammy).
  *
- * We previously tried `mdast-util-find-and-replace` and a direct
- * `unist-util-visit-parents` walk; both crashed with
- * `Cannot use 'in' operator to search for 'children' in undefined`
- * on certain Astro-rendered trees, because visit-parents@6 throws when
- * an intermediate node's `children` array contains a sparse/undefined
- * entry (which can come from the markdown pipeline upstream). Plain
- * recursion sidesteps that entirely and is the simplest correct walk
- * for what we need: pre-order descent, splice-into-parent on text
- * matches, and skip the ignore-set subtrees.
- *
  * Per-file opt-out: include the literal HTML comment
  * `<!-- no-autolink -->` anywhere in the body.
  */
+import type { Plugin } from "unified";
+import type { VFile } from "vfile";
 
 interface Node {
 	type: string;
@@ -49,20 +41,12 @@ export interface AutolinkOptions {
 	skipPathSubstrings?: ReadonlyArray<string>;
 }
 
-const DEFAULT_SKIP_PATH_SUBSTRINGS = [
-	"/content/technologies/",
-];
+const DEFAULT_SKIP_PATH_SUBSTRINGS = ["/content/technologies/"];
 
-const DEFAULT_SKIP = [
-	"go",
-	"ko",
-	"d",
-	"k",
-	"bun",
-	"act",
-	"lit",
-	"next",
-];
+// Single- and two-letter ambiguity guards. Real two-or-more-letter
+// tech names (bun, ko, next, lit, ...) that overlap with English words
+// should be opted out per-call via skipNames, not hardcoded here.
+const DEFAULT_SKIP = ["d", "k", "go", "ko"];
 
 const SKIP_COMMENT_PATTERN = /<!--\s*no-autolink\s*-->/i;
 
@@ -83,6 +67,10 @@ const IGNORE_TYPES = new Set<string>([
 	"mdxjsEsm",
 ]);
 
+function escapeRegex(input: string): string {
+	return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function buildPattern(
 	names: ReadonlyArray<string>,
 	skip: Set<string>,
@@ -99,45 +87,15 @@ function buildPattern(
 	);
 }
 
-function escapeRegex(input: string): string {
-	return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-interface FileWithValue {
-	value?: string;
-	contents?: string;
-	path?: string;
-	history?: string[];
-}
-
-function readFileSource(file: unknown): string {
-	const candidate = file as FileWithValue | undefined;
-	if (!candidate) return "";
-	if (typeof candidate.value === "string") return candidate.value;
-	if (typeof candidate.contents === "string") return candidate.contents;
-	return "";
-}
-
-function readFilePath(file: unknown): string {
-	const candidate = file as FileWithValue | undefined;
-	if (!candidate) return "";
-	if (typeof candidate.path === "string") return candidate.path;
-	if (Array.isArray(candidate.history) && typeof candidate.history[0] === "string") {
-		return candidate.history[0];
-	}
-	return "";
-}
-
 /**
- * Standard unified plugin shape: a function that, when called by
- * `unified` with no args, returns the per-file transformer. We can't
- * pass a transformer directly to `.use()`; unified treats whatever is
- * passed as a Plugin and calls it once to retrieve the Transformer,
- * so a bare `(tree, file) => void` would silently become a no-op.
+ * Returns a unified `Plugin`: when invoked by `.use()`, unified calls
+ * the outer function to retrieve the per-file transformer. Passing a
+ * bare `(tree, file) => void` would be treated as the Plugin itself
+ * and produce no transformer (silent no-op).
  */
 export function remarkTechAutolink(
 	options: AutolinkOptions,
-): () => (tree: Root, file: unknown) => void {
+): Plugin<[], Root> {
 	const minLength = options.minLength ?? 3;
 	const skip = new Set<string>(DEFAULT_SKIP);
 	for (const name of options.skipNames ?? []) {
@@ -150,18 +108,15 @@ export function remarkTechAutolink(
 		options.skipPathSubstrings ?? DEFAULT_SKIP_PATH_SUBSTRINGS;
 
 	return function attach() {
-		return function transform(tree: Root, file: unknown): void {
+		return function transform(tree: Root, file: VFile): void {
 			if (!pattern) return;
-			const re = pattern;
 
-			const path = readFilePath(file);
-			if (path) {
-				for (const fragment of skipPathSubstrings) {
-					if (path.includes(fragment)) return;
-				}
+			const path = file.path ?? "";
+			for (const fragment of skipPathSubstrings) {
+				if (path.includes(fragment)) return;
 			}
 
-			const source = readFileSource(file);
+			const source = typeof file.value === "string" ? file.value : "";
 			if (source && SKIP_COMMENT_PATTERN.test(source)) return;
 
 			const linked = new Set<string>();
@@ -170,10 +125,10 @@ export function remarkTechAutolink(
 				const value = text.value;
 				if (!value) return undefined;
 
-				re.lastIndex = 0;
+				pattern.lastIndex = 0;
 				const newNodes: Node[] = [];
 				let cursor = 0;
-				let match = re.exec(value);
+				let match = pattern.exec(value);
 				while (match) {
 					const matched = match[1] ?? match[0];
 					const start = match.index;
@@ -193,7 +148,7 @@ export function remarkTechAutolink(
 						});
 						cursor = start + matched.length;
 					}
-					match = re.exec(value);
+					match = pattern.exec(value);
 				}
 
 				if (newNodes.length === 0) return undefined;
