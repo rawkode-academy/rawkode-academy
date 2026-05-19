@@ -155,6 +155,32 @@ describe("remarkTechAutolink", () => {
 		expect(out).toContain("[Kubernetes](/technology/kubernetes)");
 	});
 
+	it("skips files under content/technologies/ so tech profiles don't self-link", async () => {
+		const file = await unified()
+			.use(remarkParse)
+			.use(remarkMdx)
+			.use(asPluggable(remarkTechAutolink({ lookup })))
+			.use(remarkStringify)
+			.process({
+				value: "apko is a tool from Chainguard.\n",
+				path: "/repo/content/technologies/apko/index.mdx",
+			});
+		expect(String(file)).not.toContain("/technology/apko");
+	});
+
+	it("links normally for files outside the skip list", async () => {
+		const file = await unified()
+			.use(remarkParse)
+			.use(remarkMdx)
+			.use(asPluggable(remarkTechAutolink({ lookup })))
+			.use(remarkStringify)
+			.process({
+				value: "apko is a tool from Chainguard.\n",
+				path: "/repo/content/articles/some-post/index.mdx",
+			});
+		expect(String(file)).toContain("[apko](/technology/apko)");
+	});
+
 	it("handles a document with mdxjsEsm imports at the top", async () => {
 		// Regression: trees with mdxjsEsm/mdxJsxFlowElement nodes used to
 		// crash the old find-and-replace implementation. Visit-based

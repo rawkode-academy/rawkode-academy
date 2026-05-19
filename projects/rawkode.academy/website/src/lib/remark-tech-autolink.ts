@@ -41,7 +41,17 @@ export interface AutolinkOptions {
 	skipNames?: ReadonlyArray<string>;
 	/** Minimum length of a tech name to be eligible. */
 	minLength?: number;
+	/**
+	 * Path-substring deny list. Any file whose vfile path contains one
+	 * of these substrings is skipped. Default: skip technology profile
+	 * pages so they don't self-link.
+	 */
+	skipPathSubstrings?: ReadonlyArray<string>;
 }
+
+const DEFAULT_SKIP_PATH_SUBSTRINGS = [
+	"/content/technologies/",
+];
 
 const DEFAULT_SKIP = [
 	"go",
@@ -96,6 +106,8 @@ function escapeRegex(input: string): string {
 interface FileWithValue {
 	value?: string;
 	contents?: string;
+	path?: string;
+	history?: string[];
 }
 
 function readFileSource(file: unknown): string {
@@ -103,6 +115,16 @@ function readFileSource(file: unknown): string {
 	if (!candidate) return "";
 	if (typeof candidate.value === "string") return candidate.value;
 	if (typeof candidate.contents === "string") return candidate.contents;
+	return "";
+}
+
+function readFilePath(file: unknown): string {
+	const candidate = file as FileWithValue | undefined;
+	if (!candidate) return "";
+	if (typeof candidate.path === "string") return candidate.path;
+	if (Array.isArray(candidate.history) && typeof candidate.history[0] === "string") {
+		return candidate.history[0];
+	}
 	return "";
 }
 
@@ -117,10 +139,19 @@ export function remarkTechAutolink(
 
 	const names = Array.from(options.lookup.keys());
 	const pattern = buildPattern(names, skip, minLength);
+	const skipPathSubstrings =
+		options.skipPathSubstrings ?? DEFAULT_SKIP_PATH_SUBSTRINGS;
 
 	return function transform(tree: Root, file: unknown): void {
 		if (!pattern) return;
 		const re = pattern;
+
+		const path = readFilePath(file);
+		if (path) {
+			for (const fragment of skipPathSubstrings) {
+				if (path.includes(fragment)) return;
+			}
+		}
 
 		const source = readFileSource(file);
 		if (source && SKIP_COMMENT_PATTERN.test(source)) return;
