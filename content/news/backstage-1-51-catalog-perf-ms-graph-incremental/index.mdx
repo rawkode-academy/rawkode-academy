@@ -1,0 +1,31 @@
+---
+title: "Backstage 1.51 takes catalog list queries from seconds to milliseconds"
+description: "Backstage v1.51.0 rewrites the entity listing and facets paths against PostgreSQL indexes, adds incremental Microsoft Graph ingestion, and ships breaking changes to navigation, OIDC defaults, and PortableSchema."
+publishedAt: 2026-05-20
+authors:
+  - rawkode
+technologies:
+  - backstage
+---
+
+Backstage v1.51.0 dropped on May 19. The catalog gets the largest gains, but the release also carries several breaking changes that platform teams will need to handle on upgrade.
+
+## Catalog query rewrites
+
+The entity listing endpoint now lets PostgreSQL walk the `(key, value, entity_id)` index in sorted order and short-circuit on `LIMIT`, which the release notes describe as "reducing typical paginated list times from seconds to milliseconds." The facets endpoint switches from `WHERE entity_id IN (subquery)` to an inner join, "with measured improvements from ~1.2x to 7x." A missing index on `relations.target_entity_ref` is now added, removing full sequential scans on orphan deletion, ancestry, and eager-pruning queries. Large installations are pointed at pre-deployment SQL so the migration does not block startup.
+
+One behavioural change to know about: entity pagination now excludes entities that lack the requested sort field, which changes total counts and navigation.
+
+## Incremental Microsoft Graph ingestion
+
+A new cursor-based Microsoft Graph user/group provider replaces the in-memory bulk load. Each burst processes a single page of up to 999 users or 100 groups, and the cursor is persisted so pod restarts resume from the last completed page. Disabled users are now filtered by default; ingesting them requires explicit configuration.
+
+## Breaking changes
+
+- `NavItemBlueprint` is removed from `@backstage/frontend-plugin-api`; navigation items are discovered from `PageBlueprint` extensions based on their `title` and `icon` params.
+- `PortableSchema.schema` is now a method — direct property access like `schema.type` is no longer supported.
+- OIDC default allow-list patterns are tightened; custom MCP clients need explicit entries.
+
+A new alpha TracingService unifies span emission across plugins and bridges OpenTelemetry context across async boundaries.
+
+**Source:** [Backstage v1.51.0](https://github.com/backstage/backstage/releases/tag/v1.51.0) — May 19, 2026.

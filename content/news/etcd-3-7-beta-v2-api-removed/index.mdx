@@ -1,0 +1,27 @@
+---
+title: "etcd cuts first 3.7 beta and removes the v2 API"
+description: "etcd v3.7.0-beta.0 deletes client/v2, v2discovery, and the v2 request path, adds Unix socket endpoints and FastLeaseKeepAlive, and reports up to 2x faster lease, user, and role operations."
+publishedAt: 2026-05-20
+authors:
+  - rawkode
+technologies:
+  - etcd
+---
+
+etcd published v3.7.0-beta.0 on May 19, the first beta on the 3.7 line. The cleanup is the headline: the v2 API and discovery code are gone.
+
+## The v2 era is finally over
+
+`client/v2`, `v2discovery`, `apply_v2.go`, and the v2 request path have all been removed, along with deprecated experimental flags. The v2 store has been off by default for years and unsupported for newer features, but anything still talking to it has to be on v3 before 3.7 ships GA.
+
+## Server changes
+
+The 3.7 line adds Unix socket endpoint support, FastLeaseKeepAlive that skips the applied-index wait on lease renewal, and a scheduler change that prioritizes `LeaseRevoke` requests during overload so leases expire on time. Lease and user/role operations are reported up to 2x faster. AuthStatus can now be retrieved without an authenticated session, and clientv3 supports JWT configuration directly.
+
+## Operator-facing changes
+
+`etcdctl` global flags are hidden from the default help to reduce noise, and every `etcdutl` command picks up a timeout flag for file lock acquisition. New metrics include `etcd_server_request_duration_seconds` and watch send-loop counters. Binaries are now built with Go 1.26.
+
+This is a beta — not for production — but the v2 removal is the part to plan for now.
+
+**Source:** [etcd v3.7.0-beta.0](https://github.com/etcd-io/etcd/releases/tag/v3.7.0-beta.0) — May 19, 2026.
