@@ -1,0 +1,34 @@
+---
+title: "SPIRE 1.15 promotes Sigstore attestation out of experimental and adds a Vault Key Manager"
+description: "SPIRE v1.15.0 graduates Sigstore support in the Kubernetes and Docker workload attestors, ships a HashiCorp Vault Key Manager plugin, and changes CLI JSON output in a way that will break parsers."
+publishedAt: 2026-05-20
+authors:
+  - rawkode
+technologies:
+  - spire
+---
+
+SPIRE v1.15.0 shipped on May 19. Two items stand out for anyone running it: Sigstore-backed attestation is no longer experimental, and there is a breaking change in CLI JSON output.
+
+## Sigstore graduates in the workload attestors
+
+The release notes are explicit: "The `sigstore` support in k8s and docker attestors was promoted out of experimental." That means matching workloads on cosign-style signature verification is now a supported configuration path for the Kubernetes and Docker workload attestors, not a feature-flag preview.
+
+## Vault Key Manager
+
+A new HashiCorp Vault Key Manager plugin lets SPIRE back its signing keys with Vault instead of the on-disk or cloud-KMS options. Combined with the existing Vault upstream authority plugin, this lets a Vault-centric organisation keep more of SPIRE's key material under Vault control.
+
+## Smaller additions
+
+- The Docker workload attestor now supports rootless Podman.
+- The `aws_iid` node attestor gains an `account_id` selector.
+- The Prometheus metrics sink supports TLS.
+- PROXY protocol is supported for rate limiting behind load balancers.
+- An experimental `spiffe_id` node selector allows aliasing individual nodes.
+- WIT-SVIDs support an `iss` claim.
+
+## Breaking change to watch
+
+CLI commands no longer wrap a single object in a JSON array on output. The release notes flag this as a potentially breaking change for anyone parsing the JSON output. Automation that consumes `spire-server` or `spire-agent` JSON expecting the outer array will need to be updated. The release also bumps cosign to v3 and Go to 1.26.3.
+
+**Source:** [SPIRE v1.15.0](https://github.com/spiffe/spire/releases/tag/v1.15.0) — May 19, 2026.

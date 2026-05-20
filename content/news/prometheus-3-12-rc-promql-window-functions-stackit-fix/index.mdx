@@ -1,0 +1,36 @@
+---
+title: "Prometheus 3.12 RC adds time-window PromQL functions and patches a STACKIT SD secret leak"
+description: "Prometheus v3.12.0-rc.0 introduces experimental start(), end(), range(), and step() PromQL functions, makes head-chunk lookup constant time in range queries, and closes a plaintext-secret exposure in the STACKIT service discovery via /-/config."
+publishedAt: 2026-05-20
+authors:
+  - rawkode
+technologies:
+  - prometheus
+---
+
+Prometheus v3.12.0-rc.0 was tagged on May 19 as the first release candidate for the 3.12 line. It mixes a security fix, four new PromQL helpers, and a head-chunk lookup rewrite that should reduce CPU on long range queries.
+
+## PromQL learns about its own window
+
+The release notes call out four new experimental functions: "Add `start()`, `end()`, `range()`, and `step()` experimental functions." These expose the evaluation window directly to expressions — useful when you need a query's behaviour to scale with the dashboard range it is rendered into, instead of being hard-coded.
+
+The `resets()` function and `rate()` / `irate()` / `increase()` now consider start-timestamp resets behind a feature flag, and the WAL learns to carry per-sample start timestamps under `st-storage`.
+
+## Performance
+
+The release notes describe the headline change as: "Make head chunk lookup in range queries constant time instead of quadratic time." Several mmap operations also skip stripes and series when no work is needed, and there is a FloatHistogram Kahan-add regression fix tied to Go 1.26.
+
+## Security
+
+GHSA-39j6-789q-qxvh closes a path where the STACKIT service discovery configuration "fixes secrets being exposed in plaintext via `/-/config` endpoint." Operators running STACKIT SD should plan to pick up the fix.
+
+## Operator-facing additions
+
+- Auto-reload-config is promoted to stable.
+- A new web interface, accessible from the Status menu, lets operators delete time series and clean tombstones.
+- `/api/v1/status/self_metrics` returns the server's own metrics as JSON.
+- DigitalOcean Managed Databases and Outscale VMs get new SD modules; AWS SD adds IPv6 EC2 discovery and external-ID support.
+
+This is an RC, not GA — useful to test against, but not to point production at.
+
+**Source:** [Prometheus 3.12.0-rc.0](https://github.com/prometheus/prometheus/releases/tag/v3.12.0-rc.0) — May 19, 2026.
