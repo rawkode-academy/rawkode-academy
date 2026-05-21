@@ -1,0 +1,24 @@
+---
+title: "Paper proposes OFU, a counter-based GPU efficiency metric validated on 608 production training jobs"
+description: "An arXiv paper submitted on May 20 introduces Overall FLOP Utilization, a precision-agnostic GPU efficiency metric derived from two on-chip counters, and reports r = 0.78 correlation with application-level MFU across 608 production training jobs on H100 and GB200."
+publishedAt: 2026-05-20
+authors:
+  - rawkode
+technologies: []
+---
+
+A paper submitted to arXiv on May 20 proposes Overall FLOP Utilization (OFU), a GPU efficiency metric derived from two on-chip counters — Tensor Pipe Activity and SM clock frequency — that needs no application-level instrumentation.
+
+## The metric
+
+OFU is positioned against application-reported MFU, which requires per-workload integration that fleet operators rarely get to control. The authors argue for a hardware-level signal that any GPU exposing the two counters can produce, including H100 and GB200 across precisions. The result is a single number per device, comparable across heterogeneous workloads.
+
+## How well it tracks MFU
+
+Across 608 production training jobs, OFU correlates with application-level MFU at r = 0.78, and predicts MFU within ≤2 percentage points after applying a tile-quantization correction. The paper reports that the metric has already surfaced efficiency regressions in production deployments rather than just being demonstrated on synthetic benchmarks.
+
+## Why this matters
+
+If a platform team has been falling back on `nvidia-smi` SM-active fraction to gauge GPU utilization across a multi-tenant fleet, OFU offers a signal grounded in tensor-pipe activity rather than coarse SM occupancy — without asking application teams to integrate anything.
+
+**Source:** [Instant GPU Efficiency Visibility at Fleet Scale (arXiv:2605.20799)](https://arxiv.org/abs/2605.20799) — May 20, 2026.
