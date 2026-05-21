@@ -1,0 +1,34 @@
+---
+title: "Flux 2.8.8 patches two go-git CVEs and stops helm-controller memory growth"
+description: "Flux v2.8.8 picks up go-git v5.19.1 to address CVE-2026-45571 and CVE-2026-45570, fixes an unbounded memory leak in helm-controller's Kubernetes client transport, and adds GCP sovereign cloud artifact registry support."
+publishedAt: 2026-05-20
+authors:
+  - rawkode
+technologies:
+  - fluxcd
+---
+
+Flux v2.8.8 shipped on May 20. It is a patch release, but the helm-controller memory fix and two go-git CVEs are reasons to pick it up.
+
+## go-git CVEs
+
+The release bumps go-git to v5.19.1 to address CVE-2026-45571 and CVE-2026-45570. Anything using source-controller's Git fetch path picks up the fix.
+
+## helm-controller memory leak
+
+The notes flag "unbounded memory growth caused by a Kubernetes client transport retry wrapper accumulating on every reconcile." Long-lived helm-controller pods reconciling many Helm releases have been the most exposed to this; the wrapper is now cleaned up between reconciles.
+
+## GCP sovereign cloud artifact registries
+
+Source-controller and image-reflector-controller now support GCP sovereign cloud artifact registries — a real gap for operators running on sovereign-region GKE who had been pointing pipelines at the standard `pkg.dev` endpoints.
+
+## Other patches worth noting
+
+- HTTP timeout for artifact fetching is now configurable, so reconciles cannot block indefinitely on a hung remote.
+- Helm release names longer than 53 characters no longer break the Helm test action.
+- Charts whose `crds/` directories contain non-CRD objects are no longer force-applied alongside CRDs.
+- OCIRepository tags now encode Helm semver build metadata correctly.
+
+Helm moves back to upstream v4.2.0 and the controllers ship against Kubernetes 1.36.1. No breaking changes are flagged for the v2.8.x upgrade path.
+
+**Source:** [Flux v2.8.8](https://github.com/fluxcd/flux2/releases/tag/v2.8.8) — May 20, 2026.
