@@ -1,4 +1,5 @@
 import type { CollectionEntry } from "astro:content";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export type VideoEntry = CollectionEntry<"videos">;
 
@@ -45,7 +46,7 @@ export async function listVideos(): Promise<VideoItem[]> {
 			type: data.type,
 			category: data.category,
 			streamUrl: `https://content.rawkode.academy/videos/${data.id}/stream.m3u8`,
-			thumbnailUrl: `https://content.rawkode.academy/videos/${data.id}/thumbnail.jpg`,
+			thumbnailUrl: getVideoThumbnailUrl(data.id),
 			technologies: (data.technologies ?? []).map((t: any) =>
 				typeof t === "string" ? t : t.id,
 			),

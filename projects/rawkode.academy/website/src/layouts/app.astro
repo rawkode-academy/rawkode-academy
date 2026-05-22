@@ -111,7 +111,13 @@ import { ThemeToggle } from "@/components/ui";
 			<!-- Right section - Theme Toggle & Profile -->
 			<div class="flex items-center gap-2">
 				<ThemeToggle client:load variant="icon" size="md" />
-				<UserHeader server:defer />
+				<UserHeader server:defer>
+					<span
+						slot="fallback"
+						aria-hidden="true"
+						class="inline-block h-9 w-[5.25rem] rounded-xl bg-white/30 dark:bg-gray-700/40 border border-white/30 dark:border-gray-500/40"
+					></span>
+				</UserHeader>
 			</div>
 		</div>
 	</nav>

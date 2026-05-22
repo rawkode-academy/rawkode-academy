@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import type { APIRoute } from "astro";
 import { getPublishedVideos } from "@/lib/content";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const MAX_VIDEO_DURATION_SECONDS = 28_800;
@@ -61,7 +62,7 @@ export const GET: APIRoute = async ({ site }) => {
 ${sortedVideos
 	.map((video) => {
 		const videoUrl = new URL(`/watch/${video.data.slug}`, siteUrl).href;
-		const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
+		const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 		const contentUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 		const duration = toVideoDurationValue(video.data.duration);
 		const publishedDate = new Date(video.data.publishedAt).toISOString();

@@ -193,7 +193,7 @@ const previousPartners: Partners = [
 	{
 		compact ? (
 			<div>
-				<p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary/75">
+				<p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
 					Current Partners
 				</p>
 			</div>
@@ -374,15 +374,11 @@ const previousPartners: Partners = [
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		color: color-mix(in srgb, var(--partner-fill-dark) 68%, rgb(15 23 42));
+		color: var(--text-secondary-content);
 		font-size: 0.72rem;
 		font-weight: 700;
 		letter-spacing: 0.18em;
 		text-transform: uppercase;
-	}
-
-	html.dark .partner-industry {
-		color: color-mix(in srgb, white 82%, var(--partner-fill-light) 18%);
 	}
 
 	.partner-meta-dot {

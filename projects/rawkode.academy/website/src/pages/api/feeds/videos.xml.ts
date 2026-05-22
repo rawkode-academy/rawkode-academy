@@ -3,6 +3,7 @@ import { getPublishedVideos } from "@/lib/content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../lib/feed-utils";
+import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 
 export async function GET(context: APIContext) {
 	// Get published videos only (filters out future-dated for scheduled publishing)
@@ -12,26 +13,32 @@ export async function GET(context: APIContext) {
 		technologies.map((t) => [t.id, t.data.name] as const),
 	);
 
+	const site = (context.site?.toString() || "https://rawkode.academy").replace(
+		/\/$/,
+		"",
+	);
+
 	return withRssMimeType(
 		await rss({
 			title: "Rawkode Academy - Videos",
 			description:
 				"Latest videos from Rawkode Academy covering Cloud Native, DevOps, and Modern Software Development",
-			site: context.site?.toString() || "https://rawkode.academy",
+			site,
 			items: sortedVideos.map((video) => {
 				const duration =
 					typeof video.data.duration === "number" ? video.data.duration : 0;
+				const itunesImageUrl = getVideoThumbnailJpegUrl(site, video.data.id);
 				return {
 					title: video.data.title,
 					description: video.data.description,
 					pubDate: new Date(video.data.publishedAt),
 					link: `/watch/${video.data.slug}/`,
 					customData: `
-						<enclosure url="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" type="image/jpeg" />
+						<enclosure url="${itunesImageUrl}" type="image/jpeg" />
 						<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60)
 							.toString()
 							.padStart(2, "0")}</itunes:duration>
-						<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" />
+						<itunes:image href="${itunesImageUrl}" />
 					`,
 					categories: (video.data.technologies as string[])
 						.map((id) => {

@@ -8,6 +8,7 @@ import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 // Fetch random technologies for hero
 const allTechnologies = await getCollection("technologies");
@@ -227,7 +228,10 @@ const academyValues = [
 		</section>
 	</HeroTypewriter>
 
-	<div id="newsletter-signup" class="page-px section-pt-0 scroll-mt-24">
+	<div
+		id="newsletter-signup"
+		class="page-px section-pt-0 scroll-mt-24 min-h-[22rem] sm:min-h-[18rem] lg:min-h-[14rem]"
+	>
 		<NewsletterCTA
 			variant="section"
 			class="mb-0 !pt-6 !pb-4 sm:!pt-8 sm:!pb-6 lg:!pt-10 lg:!pb-8"
@@ -272,9 +276,9 @@ const academyValues = [
 									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
 										<span>{formatPublishedDate(item.data.publishedAt)}</span>
 									</div>
-									<h4 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
+									<h3 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
 										{item.data.title}
-									</h4>
+									</h3>
 									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
 										{item.data.description}
 									</p>
@@ -320,9 +324,9 @@ const academyValues = [
 										<span aria-hidden="true">·</span>
 										<span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
 									</div>
-									<h4 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
+									<h3 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
 										{path.data.title}
-									</h4>
+									</h3>
 									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
 										{path.data.description}
 									</p>
@@ -362,7 +366,7 @@ const academyValues = [
 					>
 						<div class="relative aspect-video overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5">
 							<img
-								src={`https://content.rawkode.academy/videos/${featuredVideo.data.id}/thumbnail.jpg`}
+								src={getVideoThumbnailUrl(featuredVideo.data.id)}
 								alt={featuredVideo.data.title}
 								class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
 								loading="lazy"
@@ -399,7 +403,7 @@ const academyValues = [
 						>
 							<div class="relative aspect-video overflow-hidden bg-black/10 dark:bg-white/5">
 								<img
-									src={`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}
+									src={getVideoThumbnailUrl(video.data.id)}
 									alt={video.data.title}
 									class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
 									loading="lazy"
@@ -411,9 +415,9 @@ const academyValues = [
 									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
 									<span>{formatPublishedDate(video.data.publishedAt)}</span>
 								</div>
-								<h4 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
+								<h3 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
 									{video.data.title}
-								</h4>
+								</h3>
 								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
 									{summarizeVideo(video)}
 								</p>
@@ -501,9 +505,9 @@ const academyValues = [
 									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
 									<span>{formatPublishedDate(article.data.publishedAt)}</span>
 								</div>
-								<h4 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
+								<h3 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
 									{article.data.title}
-								</h4>
+								</h3>
 								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
 									{summarizeArticle(article)}
 								</p>

@@ -78,7 +78,7 @@ export function buildVideoItemListJsonLd(
 
 	const itemListElement = ordered.map((video, index) => {
 		const videoUrl = joinUrl(siteUrl, `/watch/${video.slug}`);
-		const thumbnailUrl = `${thumbnailBaseUrl}/${video.id}/thumbnail.jpg`;
+		const thumbnailUrl = `${thumbnailBaseUrl}/${video.id}/thumbnail.webp`;
 		const uploadDate = new Date(video.publishedAt).toISOString();
 		const isoDuration = secondsToIsoVideoDuration(video.duration);
 		const item: Record<string, unknown> = {

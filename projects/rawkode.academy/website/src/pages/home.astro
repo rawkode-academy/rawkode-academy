@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export const prerender = false;
 
@@ -63,7 +64,7 @@ const continueWatchingVideos = continueWatchingData
 			id: video.data.id,
 			title: video.data.title,
 			slug: video.data.slug,
-			thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+			thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 			streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 			duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 			publishedAt:
