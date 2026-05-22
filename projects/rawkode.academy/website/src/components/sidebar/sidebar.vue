@@ -23,41 +23,13 @@ const isMobileViewport = ref(false);
 const storageKey = "sidebar-collapsed";
 
 const baseItems: RawNavItem[] = [
-	{
-		name: "News",
-		href: "/news",
-		icon: MegaphoneIcon,
-	},
-	{
-		name: "Videos",
-		href: "/watch",
-		icon: VideoCameraIcon,
-	},
-	{
-		name: "Articles",
-		href: "/read",
-		icon: NewspaperIcon,
-	},
-	{
-		name: "Learning Paths",
-		href: "/learning-paths",
-		icon: MapIcon,
-	},
-	{
-		name: "Courses",
-		href: "/courses",
-		icon: AcademicCapIcon,
-	},
-	{
-		name: "Shows",
-		href: "/shows",
-		icon: TvIcon,
-	},
-	{
-		name: "People",
-		href: "/people",
-		icon: UsersIcon,
-	},
+	{ name: "News", href: "/news", icon: MegaphoneIcon },
+	{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
+	{ name: "Articles", href: "/read", icon: NewspaperIcon },
+	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
+	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
+	{ name: "Shows", href: "/shows", icon: TvIcon },
+	{ name: "People", href: "/people", icon: UsersIcon },
 	{
 		name: "Technologies",
 		href: "/technology",
@@ -66,12 +38,7 @@ const baseItems: RawNavItem[] = [
 			{
 				name: "Matrix",
 				href: "/technology/matrix",
-				children: [
-					{
-						name: "Advanced",
-						href: "/technology/matrix/advanced",
-					},
-				],
+				children: [{ name: "Advanced", href: "/technology/matrix/advanced" }],
 			},
 		],
 	},
@@ -95,9 +62,7 @@ onBeforeUnmount(() => {
 });
 
 function isCurrentPath(itemPath: string) {
-	if (itemPath === "/" && currentPath.value === "/") {
-		return true;
-	}
+	if (itemPath === "/" && currentPath.value === "/") return true;
 	return itemPath !== "/" && currentPath.value.startsWith(itemPath);
 }
 
@@ -151,168 +116,124 @@ const expandSidebar = () => {
 
 <template>
 	<aside
-		class="glass-panel sidebar-shell"
+		class="ed-sidebar"
 		:class="[
-			'fixed top-28 left-4 md:left-8 bottom-4 z-30 transition-card ease-[cubic-bezier(0.22,1,0.36,1)]',
-			'rounded-4xl',
-			isCollapsed ? 'hidden md:block md:w-[4.75rem]' : 'block w-64',
+			isCollapsed ? 'ed-sidebar--collapsed hidden md:block' : 'ed-sidebar--expanded',
 		]"
 		aria-label="Sidebar navigation"
 	>
-		<div class="relative z-10 flex h-full flex-col">
-			<nav class="sidebar-scroll flex-1 overflow-y-auto px-3 py-3">
-				<div v-if="isCollapsed" class="sidebar-rail-mark mb-3" aria-hidden="true">
-					<span class="sidebar-rail-bar sidebar-rail-bar-strong"></span>
-				</div>
-
-				<ul :class="isCollapsed ? 'space-y-2' : 'space-y-1.5'">
-					<li v-for="item in navItems" :key="item.href">
-						<NavItem
-							:item="item"
-							:isCollapsed="isCollapsed"
-							@expand="expandSidebar"
-						/>
-					</li>
-				</ul>
-			</nav>
+		<div class="ed-sidebar__index" aria-hidden="true">
+			<span class="ed-sidebar__index-mark">§</span>
+			<span v-if="!isCollapsed" class="ed-sidebar__index-label">Index</span>
 		</div>
+
+		<nav class="ed-sidebar__nav">
+			<ul class="ed-sidebar__list">
+				<li v-for="item in navItems" :key="item.href" class="ed-sidebar__item">
+					<NavItem
+						:item="item"
+						:isCollapsed="isCollapsed"
+						@expand="expandSidebar"
+					/>
+				</li>
+			</ul>
+		</nav>
 	</aside>
 
 	<div
-		v-show="!isCollapsed"
-		class="fixed inset-0 z-20 bg-[rgb(15_23_42_/_0.18)] backdrop-blur-[2px] md:hidden"
+		v-show="!isCollapsed && isMobileViewport"
+		class="ed-sidebar__scrim md:hidden"
 		@click="toggleCollapse"
 		aria-label="Close sidebar"
 	></div>
 </template>
 
 <style scoped>
-@reference "../../styles/global.css";
-
-.sidebar-shell {
-	isolation: isolate;
+.ed-sidebar {
+	position: fixed;
+	top: 64px; /* matches ed-topbar height */
+	left: 0;
+	bottom: 0;
+	z-index: 30;
+	background: var(--editorial-paper);
+	border-right: 1px solid var(--editorial-hairline);
+	display: flex;
+	flex-direction: column;
+	transition: width var(--duration-slow) var(--ease-standard);
 	overflow: hidden;
-	border-color: rgb(255 255 255 / 0.58);
-	background:
-		radial-gradient(
-			circle at top left,
-			rgb(var(--brand-primary) / 0.12),
-			transparent 42%
-		),
-		radial-gradient(
-			circle at bottom right,
-			rgb(var(--brand-secondary) / 0.1),
-			transparent 38%
-		),
-		linear-gradient(
-			180deg,
-			rgb(255 255 255 / 0.88) 0%,
-			rgb(248 250 252 / 0.78) 100%
-		);
-	box-shadow:
-		0 24px 52px -36px rgb(15 23 42 / 0.4),
-		inset 0 1px 0 rgb(255 255 255 / 0.72);
 }
 
-.sidebar-shell::before,
-.sidebar-shell::after {
-	content: "";
-	position: absolute;
-	pointer-events: none;
-	inset: 0;
+.ed-sidebar--expanded { width: 18rem; }
+.ed-sidebar--collapsed { width: 3.5rem; }
+
+@media (max-width: 767px) {
+	.ed-sidebar--expanded {
+		width: min(20rem, 88vw);
+		box-shadow: 0 0 0 1px var(--editorial-hairline);
+	}
 }
 
-.sidebar-shell::before {
-	background: linear-gradient(
-		180deg,
-		rgb(255 255 255 / 0.42) 0%,
-		transparent 22%,
-		transparent 78%,
-		rgb(15 23 42 / 0.04) 100%
-	);
-	opacity: 0.78;
+.ed-sidebar__index {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.875rem 1rem;
+	border-bottom: 1px solid var(--editorial-hairline);
+	font-family: var(--font-jetbrains-mono), monospace;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--editorial-ink-mute);
+	min-height: 44px;
 }
 
-.sidebar-shell::after {
-	inset: 12px;
-	border-radius: 1.55rem;
-	border: 1px solid rgb(255 255 255 / 0.35);
-	opacity: 0.7;
+.ed-sidebar--collapsed .ed-sidebar__index {
+	justify-content: center;
+	padding: 0.875rem 0;
 }
 
-html.dark .sidebar-shell {
-	border-color: rgb(148 163 184 / 0.16);
-	background:
-		radial-gradient(
-			circle at top left,
-			rgb(var(--brand-primary) / 0.16),
-			transparent 38%
-		),
-		radial-gradient(
-			circle at bottom right,
-			rgb(var(--brand-secondary) / 0.1),
-			transparent 38%
-		),
-		linear-gradient(
-			180deg,
-			rgb(6 11 24 / 0.92) 0%,
-			rgb(10 15 29 / 0.88) 100%
-		);
-	box-shadow:
-		0 28px 64px -38px rgb(2 6 23 / 0.88),
-		inset 0 1px 0 rgb(255 255 255 / 0.04);
+.ed-sidebar__index-mark {
+	font-family: var(--font-instrument-serif), serif;
+	font-style: italic;
+	font-size: 1rem;
+	color: var(--editorial-ink);
+	line-height: 1;
 }
 
-html.dark .sidebar-shell::before {
-	background: linear-gradient(
-		180deg,
-		rgb(255 255 255 / 0.05) 0%,
-		transparent 22%,
-		transparent 82%,
-		rgb(255 255 255 / 0.02) 100%
-	);
-	opacity: 0.8;
-}
-
-html.dark .sidebar-shell::after {
-	border-color: rgb(255 255 255 / 0.06);
-}
-
-.sidebar-rail-mark {
-	display: grid;
-	justify-items: center;
-	gap: 0.45rem;
-}
-
-.sidebar-rail-bar {
-	width: 2rem;
-	height: 0.14rem;
-	border-radius: 999px;
-	background: rgb(var(--brand-primary) / 0.24);
-}
-
-.sidebar-rail-bar-strong {
-	width: 2.5rem;
-	background: linear-gradient(
-		90deg,
-		rgb(var(--brand-primary)) 0%,
-		rgb(var(--brand-secondary)) 100%
-	);
-}
-
-.sidebar-scroll {
-	-webkit-mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
-	mask-image: linear-gradient(to bottom, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+.ed-sidebar__nav {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0.5rem 0;
 	scrollbar-width: thin;
-	scrollbar-color: rgb(var(--brand-primary) / 0.35) transparent;
+	scrollbar-color: var(--editorial-hairline-strong) transparent;
 }
 
-.sidebar-scroll::-webkit-scrollbar {
-	width: 6px;
+.ed-sidebar__nav::-webkit-scrollbar { width: 4px; }
+.ed-sidebar__nav::-webkit-scrollbar-thumb {
+	background: var(--editorial-hairline-strong);
 }
 
-.sidebar-scroll::-webkit-scrollbar-thumb {
-	border-radius: 999px;
-	background: rgb(var(--brand-primary) / 0.28);
+.ed-sidebar__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.ed-sidebar__item {
+	margin: 0;
+}
+
+.ed-sidebar__scrim {
+	position: fixed;
+	inset: 0;
+	z-index: 20;
+	background: oklch(0.18 0.02 60 / 0.45);
+}
+
+html.dark .ed-sidebar {
+	background: var(--surface-base);
 }
 </style>
