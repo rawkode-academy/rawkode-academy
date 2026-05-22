@@ -7,7 +7,10 @@ import {
 } from "astro:content";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
-import LearningPathHero from "@/components/learning-paths/LearningPathHero.astro";
+import ArticleHeader from "@/components/read/ArticleHeader.astro";
+import ArticleByline from "@/components/read/ArticleByline.astro";
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import MLabel from "@/components/ui/MLabel.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 
@@ -55,24 +58,35 @@ function formatDuration(minutes: number): string {
 	if (!minutes) {
 		return "Self-paced";
 	}
-
 	const hours = Math.floor(minutes / 60);
 	const mins = minutes % 60;
-
-	if (!hours) {
-		return `${mins}m`;
-	}
-
-	if (!mins) {
-		return `${hours}h`;
-	}
-
+	if (!hours) return `${mins}m`;
+	if (!mins) return `${hours}h`;
 	return `${hours}h ${mins}m`;
 }
 
 const durationLabel = formatDuration(learningPath.data.estimatedDuration);
 const outline = headings.filter((heading) => heading.depth === 2);
 const prerequisites = learningPath.data.prerequisites ?? [];
+
+// Dispatch number — position in chronological corpus of paths.
+const corpus = (await getCollection("learningPaths")).sort(
+	(a, b) => a.data.publishedAt.valueOf() - b.data.publishedAt.valueOf(),
+);
+const dispatchIndex = corpus.findIndex((p) => p.id === learningPath.id);
+const dispatchNum = String(
+	dispatchIndex >= 0 ? dispatchIndex + 1 : corpus.length,
+).padStart(3, "0");
+
+const difficultyLabel =
+	learningPath.data.difficulty.charAt(0).toUpperCase() +
+	learningPath.data.difficulty.slice(1);
+
+const publishDate = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "numeric",
+	year: "numeric",
+}).format(learningPath.data.publishedAt);
 
 const pageTitle = `${learningPath.data.title} | Learning Path`;
 const pageDescription = learningPath.data.description;
@@ -90,146 +104,345 @@ const pageDescription = learningPath.data.description;
 		authors={authors}
 		technologyLabels={technologyLabels}
 	/>
-	<nav class="mb-6">
-		<a
-			href="/learning-paths"
-			class="inline-flex items-center text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+
+	<div class="path-detail">
+		<ArticleHeader
+			breadcrumbs={[
+				{ label: "Learning Paths", href: "/learning-paths" },
+				{ label: difficultyLabel },
+				{ label: learningPath.data.title, current: true },
+			]}
+			dispatchNum={dispatchNum}
+			kicker="Learning path"
+			categoryTrail={difficultyLabel}
+			title={learningPath.data.title}
+			dek={learningPath.data.description}
+			readingTime={durationLabel}
 		>
-			<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
-			All Learning Paths
-		</a>
-	</nav>
+			<ArticleByline
+				authors={authors}
+				date={publishDate}
+				readingTime={durationLabel}
+				tags={technologyTags.map((t) => ({
+					label: t.label,
+					href: `/technology/${t.id}`,
+				}))}
+			/>
+		</ArticleHeader>
 
-	<LearningPathHero
-		title={learningPath.data.title}
-		description={learningPath.data.description}
-		difficulty={learningPath.data.difficulty}
-		durationLabel={durationLabel}
-		technologies={technologyTags}
-		prerequisites={prerequisites}
-		authors={authors}
-		publishedAt={learningPath.data.publishedAt}
-	/>
+		<section class="path-detail__stat-row">
+			<div class="path-detail__stat">
+				<MLabel>Difficulty</MLabel>
+				<span class="path-detail__stat-value">{difficultyLabel}</span>
+			</div>
+			<div class="path-detail__stat">
+				<MLabel>Estimated time</MLabel>
+				<span class="path-detail__stat-value">{durationLabel}</span>
+			</div>
+			<div class="path-detail__stat">
+				<MLabel>Modules</MLabel>
+				<span class="path-detail__stat-value">
+					{outline.length || "—"}
+				</span>
+			</div>
+			<div class="path-detail__stat">
+				<MLabel>Pace</MLabel>
+				<span class="path-detail__stat-value">Self-paced</span>
+			</div>
+		</section>
 
-	<section
-		id="learning-path-content"
-		class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
-	>
-		<article class="prose prose-lg max-w-none dark:prose-invert">
-			<Content />
-		</article>
-		<aside class="space-y-6">
-			<div class="rounded-2xl border border-surface bg-white dark:bg-gray-900 p-6 shadow-lg bleed-x-mobile">
-				<h2 class="text-sm font-semibold uppercase tracking-wide text-muted mb-3">
-					At a Glance
-				</h2>
-				<ul class="space-y-3 text-sm text-muted">
-					<li class="flex items-start gap-3">
-						<svg class="w-5 h-5 mt-0.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0-6v2m0 16v2m10-10h-2M6 12H4m15.364-7.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-12.728 1.414 1.414M16.95 16.95l1.414 1.414" />
-						</svg>
-						<div>
-							<p class="text-xs uppercase tracking-wide text-muted">Estimated time</p>
-							<p class="font-semibold text-primary-content">{durationLabel}</p>
-						</div>
-					</li>
-					<li class="flex items-start gap-3">
-						<svg class="w-5 h-5 mt-0.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 21.5 12.083 12.083 0 015.84 10.578L12 14z" />
-						</svg>
-						<div>
-							<p class="text-xs uppercase tracking-wide text-muted">Difficulty</p>
-							<p class="font-semibold text-primary-content">
-								{learningPath.data.difficulty.charAt(0).toUpperCase() + learningPath.data.difficulty.slice(1)}
-							</p>
-						</div>
-					</li>
-					{technologyTags.length > 0 && (
-						<li>
-							<p class="text-xs uppercase tracking-wide text-muted mb-2">Technologies</p>
-							<div class="flex flex-wrap gap-2">
-								{technologyTags.map((technology) => (
+		<section class="path-detail__body">
+			<article class="prose">
+				<Content />
+			</article>
+
+			<aside class="path-detail__aside">
+				{outline.length > 0 && (
+					<div class="path-detail__panel">
+						<MLabel tone="spruce">§ Curriculum</MLabel>
+						<ol class="path-detail__outline">
+							{outline.map((heading, index) => (
+								<li class="path-detail__outline-row">
+									<MLabel tone="muted">
+										§{String(index + 1).padStart(2, "0")}
+									</MLabel>
 									<a
-										href={`/technology/${technology.id}`}
-										rel="tag"
-										class="inline-flex items-center rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary hover:bg-secondary/25 hover:text-secondary dark:bg-secondary/20 dark:text-secondary/90 dark:hover:bg-secondary/30 transition-colors"
+										class="path-detail__outline-link"
+										href={`#${heading.slug}`}
 									>
-										{technology.label}
+										{heading.text}
 									</a>
-								))}
-							</div>
-						</li>
-					)}
-					{prerequisites.length > 0 && (
-						<li>
-							<p class="text-xs uppercase tracking-wide text-muted mb-2">Prerequisites</p>
-							<ul class="space-y-2">
-								{prerequisites.map((item) => (
-									<li class="flex items-start gap-2 text-sm">
-										<span class="mt-1 inline-flex h-1.5 w-1.5 rounded-full bg-primary"></span>
-										<span>{item}</span>
-									</li>
-								))}
-							</ul>
-						</li>
-					)}
-				</ul>
-			</div>
+								</li>
+							))}
+						</ol>
+					</div>
+				)}
 
-			{outline.length > 0 && (
-				<div class="rounded-2xl border border-surface bg-white dark:bg-gray-900 p-6 shadow-lg bleed-x-mobile">
-					<h2 class="text-sm font-semibold uppercase tracking-wide text-muted mb-3">
-						Curriculum Overview
-					</h2>
-					<ol class="space-y-3 text-sm text-muted">
-						{outline.map((heading, index) => (
-							<li class="flex items-start gap-3">
-								<span class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-									{index + 1}
-								</span>
-								<a href={`#${heading.slug}`} class="hover:text-primary transition-colors">
-									{heading.text}
+				{prerequisites.length > 0 && (
+					<div class="path-detail__panel">
+						<MLabel tone="spruce">§ Prerequisites</MLabel>
+						<ul class="path-detail__prereqs">
+							{prerequisites.map((item) => (
+								<li class="path-detail__prereq">
+									<span aria-hidden="true">▸</span>
+									<span>{item}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+
+				{technologyTags.length > 0 && (
+					<div class="path-detail__panel">
+						<MLabel tone="spruce">§ Technologies covered</MLabel>
+						<div class="path-detail__chips">
+							{technologyTags.map((technology) => (
+								<a
+									class="path-detail__chip"
+									href={`/technology/${technology.id}`}
+									rel="tag"
+								>
+									#{technology.label}
 								</a>
-							</li>
-						))}
-					</ol>
-				</div>
-			)}
-		</aside>
-	</section>
+							))}
+						</div>
+					</div>
+				)}
+			</aside>
+		</section>
 
-	<NewsletterCTA
-		class="mt-16"
-		audience="learning-paths"
-		badge="New paths weekly"
-		headline="Get notified when we ship new learning paths"
-		subtitle="Structured roadmaps for Cloud Native, AI infra, and platform engineering - delivered when they're ready."
-	/>
+		<NewsletterCTA
+			class="not-prose"
+			audience="learning-paths"
+			badge="New paths weekly"
+			headline="Get notified when we ship new learning paths"
+			subtitle="Structured roadmaps for cloud native, AI infra, and platform engineering, delivered when they're ready."
+		/>
 
-	<footer class="mt-16">
-		<div class="rounded-3xl border border-dashed border-surface p-8 text-center bleed-x-mobile">
-			<h2 class="text-2xl font-semibold text-primary-content mb-4">
-				Ready for another challenge?
-			</h2>
-			<p class="text-muted mb-6">
-				Explore more curated journeys, or jump back into the Rawkode Academy video library.
-			</p>
-			<div class="flex flex-wrap justify-center gap-4">
-				<a
-					href="/learning-paths"
-					class="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-white font-medium hover:bg-primary-dark transition-colors"
-				>
-					Browse Learning Paths
-				</a>
-				<a
-					href="/watch"
-					class="inline-flex items-center justify-center rounded-lg border border-surface px-5 py-2.5 text-secondary-content font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-				>
-					View All Videos
-				</a>
+		<footer class="path-detail__footer">
+			<div class="path-detail__footer-text">
+				<MLabel tone="spruce">§ Keep going</MLabel>
+				<h2 class="path-detail__footer-title">Pick another path.</h2>
+				<p class="path-detail__footer-body">
+					Browse the rest of the curriculum, or jump back into the video archive.
+				</p>
 			</div>
-		</div>
-	</footer>
+			<div class="path-detail__footer-actions">
+				<EditorialButton variant="solid" size="md" href="/learning-paths" arrow>
+					Browse paths
+				</EditorialButton>
+				<EditorialButton variant="outline" size="md" href="/watch">
+					Watch the archive
+				</EditorialButton>
+			</div>
+		</footer>
+	</div>
 </Page>
+
+<style>
+	.path-detail {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.path-detail__stat-row {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1.5rem;
+		padding: 1.75rem 2.5rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+	}
+
+	.path-detail__stat {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		padding-right: 1.5rem;
+		border-right: 1px solid var(--editorial-hairline);
+	}
+	.path-detail__stat:last-child {
+		border-right: none;
+	}
+
+	.path-detail__stat-value {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 1.875rem;
+		line-height: 1;
+		color: var(--editorial-ink);
+	}
+
+	.path-detail__body {
+		display: grid;
+		grid-template-columns: minmax(0, 3fr) minmax(0, 1.1fr);
+		gap: 3rem;
+		padding: 3rem 2.5rem 3rem;
+		max-width: 90rem;
+		margin: 0 auto;
+		align-items: start;
+	}
+
+	.path-detail__body :global(.prose) {
+		max-width: none;
+	}
+
+	.path-detail__aside {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		position: sticky;
+		top: 6rem;
+	}
+
+	.path-detail__panel {
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		padding: 1.25rem 1.25rem 1.4rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+	}
+
+	.path-detail__outline {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.path-detail__outline-row {
+		display: grid;
+		grid-template-columns: 2.5rem 1fr;
+		gap: 0.5rem;
+		padding: 0.55rem 0;
+		border-top: 1px solid var(--editorial-hairline);
+		align-items: baseline;
+	}
+	.path-detail__outline-row:first-child {
+		border-top: none;
+	}
+
+	.path-detail__outline-link {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		line-height: 1.35;
+		color: var(--editorial-ink);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+	.path-detail__outline-link:hover {
+		color: var(--editorial-spruce);
+	}
+
+	.path-detail__prereqs {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.path-detail__prereq {
+		display: grid;
+		grid-template-columns: 1rem 1fr;
+		gap: 0.5rem;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.85rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+	}
+	.path-detail__prereq > span:first-child {
+		color: var(--editorial-spruce);
+	}
+
+	.path-detail__chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.path-detail__chip {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.25rem 0.5rem;
+		color: var(--editorial-ink-soft);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
+	}
+	.path-detail__chip:hover {
+		color: var(--editorial-ink);
+		border-color: var(--editorial-ink);
+	}
+
+	.path-detail__footer {
+		display: grid;
+		grid-template-columns: minmax(0, 1.4fr) auto;
+		gap: 2rem;
+		align-items: end;
+		padding: 2.5rem 2.5rem 3rem;
+		border-top: 1px solid var(--editorial-ink);
+		background: var(--editorial-paper-deep);
+	}
+
+	.path-detail__footer-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.path-detail__footer-title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		line-height: 1;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.path-detail__footer-body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 36rem;
+	}
+
+	.path-detail__footer-actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	@media (max-width: 880px) {
+		.path-detail__stat-row {
+			grid-template-columns: repeat(2, 1fr);
+			padding: 1.25rem 1.25rem;
+		}
+		.path-detail__stat {
+			border-right: none;
+			padding-right: 0;
+		}
+		.path-detail__body {
+			grid-template-columns: 1fr;
+			padding: 2rem 1.25rem;
+			gap: 2rem;
+		}
+		.path-detail__aside { position: static; }
+		.path-detail__footer {
+			grid-template-columns: 1fr;
+			padding: 2rem 1.25rem;
+		}
+	}
+</style>
