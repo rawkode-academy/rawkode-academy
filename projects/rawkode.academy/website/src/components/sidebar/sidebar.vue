@@ -171,6 +171,13 @@ const expandSidebar = () => {
 		width: min(20rem, 88vw);
 		box-shadow: 0 0 0 1px var(--editorial-hairline);
 	}
+	/* On mobile the collapsed sidebar must hide entirely — the user
+	   reaches the nav via the hamburger button. The `hidden` utility
+	   alone can't win against the scoped `.ed-sidebar { display: flex }`
+	   selector, so explicitly override here. */
+	.ed-sidebar--collapsed {
+		display: none;
+	}
 }
 
 .ed-sidebar__index {

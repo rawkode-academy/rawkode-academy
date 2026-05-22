@@ -267,14 +267,17 @@ import { ThemeToggle } from "@/components/ui";
 			border-radius: 2px;
 		}
 
-		/* Floating action button — editorial replacement of the gradient blob. */
+		/* Floating action button — editorial replacement of the gradient blob.
+		   Lives only on mobile. Pinned bottom-right with a safe-area inset
+		   so it sits above the iOS home-bar; main content reserves matching
+		   padding below so the FAB doesn't cover interactive elements. */
 		.ed-fab {
 			position: fixed;
-			bottom: 1.25rem;
+			bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
 			right: 1.25rem;
 			z-index: 50;
-			width: 52px;
-			height: 52px;
+			width: 44px;
+			height: 44px;
 			background: var(--editorial-ink);
 			color: var(--editorial-paper);
 			border: 1px solid var(--editorial-ink);
@@ -285,7 +288,17 @@ import { ThemeToggle } from "@/components/ui";
 			transition: opacity var(--duration-base) var(--ease-standard);
 		}
 		.ed-fab:hover { opacity: 0.92; }
-		.ed-fab svg { width: 22px; height: 22px; }
+		.ed-fab svg { width: 18px; height: 18px; }
+
+		/* Reserve breathing room at the bottom on mobile so the FAB never
+		   covers interactive content (newsletter Subscribe button, CTAs at
+		   the foot of a section, etc.). 5rem clears the 44px FAB + its
+		   1.25rem inset + a small visual buffer. */
+		@media (max-width: 767px) {
+			#main-content {
+				padding-bottom: 5rem;
+			}
+		}
 	</style>
 
 	<script>

@@ -105,6 +105,15 @@ const watermark = episodeNum ? String(episodeNum) : null;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		/* Without an explicit z-index, the parent's two-layer `background`
+		   (repeating-linear-gradient + linear-gradient) composites *over*
+		   the absolutely-positioned img in Chromium, leaving the thumbnail
+		   dimmed to near-black. Forcing the img into its own painting layer
+		   restores the expected ordering. Overlays painted later in source
+		   order (top/bottom strips, watermark, play button) still appear
+		   above the img per the CSS painting-order rules for positioned
+		   descendants with z-index:auto. */
+		z-index: 1;
 	}
 
 	.video-still__backdrop {
