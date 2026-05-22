@@ -69,8 +69,11 @@ const props = withDefaults(
 );
 
 const handleSearchClick = () => {
-	if (typeof window === "undefined") return;
-	window.dispatchEvent(new CustomEvent(props.commandPaletteEvent));
+	if (typeof document === "undefined") return;
+	// The CommandPaletteWrapper listens on `document` (see
+	// useCommandPalette.ts), so dispatch there rather than on `window`.
+	// Dispatching on window silently fails — events don't cross trees.
+	document.dispatchEvent(new CustomEvent(props.commandPaletteEvent));
 };
 </script>
 

@@ -99,29 +99,15 @@ const showsJsonLd = showEntries.map((s) => {
 
                 <div class="relative mx-auto max-w-7xl content-px">
                         <!-- Header -->
-                        <div class="mb-12 text-center">
-                                <div class="mb-4 inline-flex items-center justify-center rounded-full bg-primary/10 px-4 py-2 dark:bg-primary/20">
-                                        <svg
-                                                class="mr-2 h-5 w-5 text-primary dark:text-secondary"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                                aria-hidden="true"
-                                        >
-                                                <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
-                                                />
-                                        </svg>
-                                        <span class="text-sm font-semibold text-primary dark:text-secondary">Original Series</span>
+                        <div class="shows-header">
+                                <div class="shows-header__meta">
+                                        <span class="shows-header__kicker">§ Original series</span>
                                 </div>
-                                <h1 class="text-4xl font-extrabold tracking-tight text-primary-content sm:text-5xl lg:text-6xl">
-                                        Shows
+                                <h1 class="shows-header__title">
+                                        Shows<span class="shows-header__title-soft"> — long-form programs from the academy</span>
                                 </h1>
-                                <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-                                        Discover our collection of shows, each bringing you in-depth content and expert insights from passionate hosts.
+                                <p class="shows-header__lede">
+                                        Recurring programs that go deeper than a single video. Each show carries its own hosts, cadence, and editorial style.
                                 </p>
                         </div>
 
@@ -134,7 +120,7 @@ const showsJsonLd = showEntries.map((s) => {
                                                 ))}
                                         </div>
                                 ) : (
-                                        <div class="mx-auto max-w-2xl rounded-2xl paper-card p-12 text-center">
+                                        <div class="mx-auto max-w-2xl border border-[var(--editorial-hairline)] bg-[var(--editorial-paper-deep)] p-12 text-center">
                                                 <svg
                                                         class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
                                                         fill="none"
@@ -161,3 +147,45 @@ const showsJsonLd = showEntries.map((s) => {
                 </div>
         </section>
 </Page>
+
+<style>
+	.shows-header {
+		text-align: left;
+		max-width: 60rem;
+		margin: 0 0 3rem;
+		padding-bottom: 2rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+	.shows-header__meta {
+		margin-bottom: 1rem;
+	}
+	.shows-header__kicker {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+	.shows-header__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.75rem, 6vw, 4.5rem);
+		line-height: 0.98;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+	.shows-header__title-soft {
+		color: var(--editorial-ink-soft);
+	}
+	.shows-header__lede {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.125rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 1.25rem 0 0;
+		max-width: 40rem;
+	}
+</style>

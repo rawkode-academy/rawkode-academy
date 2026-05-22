@@ -2,6 +2,8 @@
 import { getCollection } from "astro:content";
 import { env } from "cloudflare:workers";
 import VideoFeed from "@/components/video/video-feed.astro";
+import MLabel from "@/components/ui/MLabel.vue";
+import EditorialButton from "@/components/ui/EditorialButton.vue";
 import Page from "@/wrappers/page.astro";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -16,7 +18,6 @@ const results = normalizedQuery
 		})
 	: [];
 
-// Track search event if there's a query
 if (normalizedQuery) {
 	const analytics = env.ANALYTICS as Fetcher | undefined;
 	await captureServerEvent(
@@ -53,6 +54,15 @@ const feedVideos = results
 				? video.data.publishedAt.toISOString()
 				: String(video.data.publishedAt),
 	}));
+
+const suggestions = [
+	{ label: "Kubernetes", href: "/search?q=kubernetes" },
+	{ label: "Cilium", href: "/search?q=cilium" },
+	{ label: "GitOps", href: "/search?q=gitops" },
+	{ label: "eBPF", href: "/search?q=ebpf" },
+	{ label: "Talos", href: "/search?q=talos" },
+	{ label: "Open Telemetry", href: "/search?q=opentelemetry" },
+];
 ---
 
 <Page
@@ -63,19 +73,199 @@ const feedVideos = results
 	pageType="SearchResultsPage"
 	noindex
 >
-	{searchQuery.length === 0 ? (
-		<p class="text-center text-muted py-16">
-			Enter a search term to find videos.
-		</p>
-	) : feedVideos.length === 0 ? (
-		<p class="text-center text-muted py-16">
-			No videos matched "{searchQuery}".
-		</p>
-	) : (
-		<VideoFeed
-			title={`Search Results for "${searchQuery}"`}
-			description="Videos matching your search"
-			videos={feedVideos}
-		/>
-	)}
+	<div class="search-page">
+		<header class="search-page__header">
+			<MLabel tone="spruce">§ Search the archive</MLabel>
+			<h1 class="search-page__title">
+				{searchQuery ? `Results for ` : "Find a video"}
+				{searchQuery && <em class="search-page__query">"{searchQuery}"</em>}
+			</h1>
+			<p class="search-page__lede">
+				{searchQuery
+					? `Matched ${feedVideos.length} video${feedVideos.length === 1 ? "" : "s"} across the archive.`
+					: "Search lessons, talks, and sessions by title or description. Or press ⌘K anywhere on the site to open the command palette."}
+			</p>
+			<form class="search-page__form" method="get" action="/search">
+				<input
+					class="search-page__input"
+					type="search"
+					name="q"
+					value={searchQuery}
+					placeholder="kubernetes networking, eBPF, GitOps..."
+					autocomplete="off"
+					autofocus
+				/>
+				<EditorialButton variant="solid" size="md" arrow>Search</EditorialButton>
+			</form>
+
+			{!searchQuery && (
+				<div class="search-page__suggest">
+					<MLabel tone="muted">Try one of</MLabel>
+					<ul class="search-page__chips">
+						{suggestions.map((s) => (
+							<li>
+								<a class="search-page__chip" href={s.href}>#{s.label}</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+		</header>
+
+		<section class="search-page__results">
+			{searchQuery.length === 0 ? (
+				<div class="search-page__empty">
+					<MLabel>Type a query to begin.</MLabel>
+				</div>
+			) : feedVideos.length === 0 ? (
+				<div class="search-page__empty">
+					<MLabel>Nothing matched "{searchQuery}".</MLabel>
+					<p class="search-page__empty-body">
+						Try a broader keyword, or browse <a href="/watch">the full video library</a>.
+					</p>
+				</div>
+			) : (
+				<VideoFeed
+					title={`Matches for "${searchQuery}"`}
+					description={`${feedVideos.length} video${feedVideos.length === 1 ? "" : "s"} sorted newest first.`}
+					videos={feedVideos}
+				/>
+			)}
+		</section>
+	</div>
 </Page>
+
+<style>
+	.search-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.search-page__header {
+		max-width: 60rem;
+		margin: 0 auto;
+		padding: 3rem 2.5rem 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.search-page__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.5rem, 5vw, 4rem);
+		line-height: 0.98;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.search-page__query {
+		font-style: italic;
+		color: var(--editorial-spruce);
+	}
+
+	.search-page__lede {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.0625rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 40rem;
+	}
+
+	.search-page__form {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+		max-width: 36rem;
+	}
+
+	.search-page__input {
+		flex: 1;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.875rem;
+		padding: 0.75rem 0.875rem;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: var(--radius-sm);
+		color: var(--editorial-ink);
+	}
+	.search-page__input:focus-visible {
+		outline: 2px solid var(--editorial-ink);
+		outline-offset: 2px;
+	}
+
+	.search-page__suggest {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+		flex-wrap: wrap;
+		margin-top: 0.75rem;
+	}
+
+	.search-page__chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.search-page__chip {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.25rem 0.5rem;
+		color: var(--editorial-ink-soft);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
+	}
+	.search-page__chip:hover {
+		color: var(--editorial-ink);
+		border-color: var(--editorial-ink);
+	}
+
+	.search-page__results {
+		max-width: 90rem;
+		margin: 0 auto;
+		padding: 0 0 4rem;
+	}
+
+	.search-page__empty {
+		max-width: 60rem;
+		margin: 0 auto;
+		padding: 3rem 2.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.search-page__empty-body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9375rem;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+	}
+
+	.search-page__empty a {
+		color: var(--editorial-spruce);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	@media (max-width: 720px) {
+		.search-page__header { padding: 2rem 1.25rem 1.5rem; }
+		.search-page__form { flex-direction: column; }
+		.search-page__input { width: 100%; }
+	}
+</style>

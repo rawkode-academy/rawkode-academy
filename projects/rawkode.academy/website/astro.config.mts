@@ -219,6 +219,14 @@ export default defineConfig({
 			sourcemap: true,
 		},
 		resolve: {
+			// Bun's workspace setup can install duplicate React copies (e.g.
+			// ^19.2.4 + ^19.2.6) under node_modules/.bun. When Vite's
+			// optimizeDeps pulls in a transitive dep that resolves a *different*
+			// React from the one the page entry uses, hook calls throw
+			// `Cannot read properties of null (reading 'useState')` because
+			// React's internal dispatcher is wired to the other copy. Force
+			// dedupe so every importer sees one React instance.
+			dedupe: ["react", "react-dom"],
 			// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
 			// Without this, MessageChannel from node:worker_threads needs to be polyfilled.
 			// https://github.com/withastro/adapters/pull/436
