@@ -602,6 +602,15 @@ html.dark {
 	.prose p {
 		margin-bottom: 1.5rem;
 		text-wrap: pretty;
+		overflow-wrap: break-word;
+	}
+
+	.prose li,
+	.prose h1,
+	.prose h2,
+	.prose h3,
+	.prose h4 {
+		overflow-wrap: break-word;
 	}
 
 	/* Lead paragraph — slightly larger, ink (not ink-soft). */
