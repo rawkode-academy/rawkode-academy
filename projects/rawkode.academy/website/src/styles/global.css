@@ -133,43 +133,16 @@ body {
 	/* ────────────────────────────────────────────────────────────────
 	   Density tokens — control the editorial whitespace rhythm.
 
-	   The default ("regular") values reflect the airy editorial
-	   spacing used on hero-driven landing pages: 2.5–3.5rem of side
-	   padding on section wrappers, 2.25rem vertical gap between
-	   stacked sections, and ~4rem of breathing room at the foot.
+	   The defaults are spacious by design: editorial pages are
+	   meant to breathe. CSS rules consume `var(--space-section-pad-y)`
+	   etc. directly, so any page can swap density at runtime via
+	   `data-density="tight"` (denser detail pages, rare) without
+	   rewriting selectors. Mobile (<= 720px) collapses both scales
+	   to a phone-appropriate rhythm.
 
-	   Opt into the tighter rhythm with `data-density="tight"` on a
-	   page or section wrapper. Detail pages with 8+ stacked sections
-	   (e.g. /watch/[slug]) save 8–12rem of scrolling without
-	   touching the typography ramp. The kicker top margin shrinks
-	   too so the §-mark sits closer to the heading it labels.
-
-	   Token shape mirrors the radius / shadow scales: same names
-	   resolve to different magnitudes depending on the active
-	   density. CSS rules consume `var(--space-section-pad-y)` etc.
-	   directly, so a page can swap density at runtime without
-	   rewriting selectors.
+	   Token shape mirrors the radius / shadow scales: same names,
+	   different magnitudes depending on the active density.
 	   ────────────────────────────────────────────────────────── */
-	--space-section-pad-y: 2.5rem;
-	--space-section-pad-x: 2.5rem;
-	--space-section-gap: 2.25rem;
-	--space-section-gap-lg: 3rem;
-	--space-block-gap: 0.875rem;
-	--space-kicker-mb: 0.875rem;
-	--space-page-pad-bottom: 4rem;
-}
-
-[data-density="tight"] {
-	--space-section-pad-y: 1.75rem;
-	--space-section-pad-x: 2rem;
-	--space-section-gap: 1.5rem;
-	--space-section-gap-lg: 2rem;
-	--space-block-gap: 0.625rem;
-	--space-kicker-mb: 0.625rem;
-	--space-page-pad-bottom: 2.75rem;
-}
-
-[data-density="airy"] {
 	--space-section-pad-y: 4.5rem;
 	--space-section-pad-x: 3.5rem;
 	--space-section-gap: 4rem;
@@ -179,21 +152,30 @@ body {
 	--space-page-pad-bottom: 7rem;
 }
 
+[data-density="tight"] {
+	--space-section-pad-y: 2.25rem;
+	--space-section-pad-x: 2rem;
+	--space-section-gap: 2rem;
+	--space-section-gap-lg: 2.75rem;
+	--space-block-gap: 0.875rem;
+	--space-kicker-mb: 0.875rem;
+	--space-page-pad-bottom: 4rem;
+}
+
 @media (max-width: 720px) {
-	:root,
-	[data-density="airy"] {
-		--space-section-pad-y: 1.75rem;
+	:root {
+		--space-section-pad-y: 2.25rem;
 		--space-section-pad-x: 1.25rem;
-		--space-section-gap: 1.5rem;
-		--space-section-gap-lg: 2rem;
-		--space-page-pad-bottom: 2.5rem;
+		--space-section-gap: 1.75rem;
+		--space-section-gap-lg: 2.5rem;
+		--space-page-pad-bottom: 3rem;
 	}
 	[data-density="tight"] {
-		--space-section-pad-y: 1.25rem;
+		--space-section-pad-y: 1.5rem;
 		--space-section-pad-x: 1.25rem;
-		--space-section-gap: 1rem;
-		--space-section-gap-lg: 1.5rem;
-		--space-page-pad-bottom: 2rem;
+		--space-section-gap: 1.25rem;
+		--space-section-gap-lg: 1.75rem;
+		--space-page-pad-bottom: 2.25rem;
 	}
 }
 
