@@ -1,0 +1,154 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	time: string;
+	date: string;
+	kicker: string;
+	project?: string | undefined;
+	title: string;
+	source?: string | undefined;
+	tags?: string[];
+	hot?: boolean;
+}
+
+const {
+	href,
+	time,
+	date,
+	kicker,
+	project,
+	title,
+	source,
+	tags = [],
+	hot = false,
+} = Astro.props as Props;
+---
+
+<a class="news-row" href={href}>
+	<div class="news-row__time">
+		<MLabel tone="muted">{time}</MLabel>
+		<MLabel tone="muted"><span class="news-row__date">{date}</span></MLabel>
+	</div>
+	<MLabel tone={hot ? "amber" : "spruce"}>{kicker}</MLabel>
+	<div class="news-row__body">
+		<div class="news-row__project">
+			{project && <MLabel tone="ink">{project}</MLabel>}
+			{hot && <span class="news-row__hot">● HOT</span>}
+		</div>
+		<h3 class="news-row__title">{title}</h3>
+		<div class="news-row__meta">
+			{source && <MLabel><span class="news-row__source">via {source}</span></MLabel>}
+			{tags.map((t) => (
+				<span class="news-row__tag">#{t}</span>
+			))}
+		</div>
+	</div>
+	<span class="news-row__arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+	.news-row {
+		display: grid;
+		grid-template-columns: 100px 130px 1fr auto;
+		gap: 1.25rem;
+		align-items: baseline;
+		padding: 1.25rem 0;
+		text-decoration: none;
+		color: inherit;
+		transition: background-color var(--duration-base) var(--ease-standard);
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.news-row:hover {
+		background: var(--surface-card-muted);
+	}
+
+	.news-row__time {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.news-row__date :global(*) { font-size: 0.625rem !important; }
+
+	.news-row__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.news-row__project {
+		display: flex;
+		align-items: baseline;
+		gap: 0.625rem;
+		flex-wrap: wrap;
+	}
+
+	.news-row__hot {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.15rem 0.4rem;
+		color: var(--editorial-amber);
+		border: 1px solid var(--editorial-amber);
+		border-radius: 2px;
+	}
+
+	.news-row__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.4rem;
+		line-height: 1.12;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.news-row__meta {
+		display: flex;
+		gap: 0.625rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.news-row__source {
+		font-style: italic;
+		color: var(--editorial-ink-mute);
+	}
+
+	.news-row__tag {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.625rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.15rem 0.4rem;
+		color: var(--editorial-ink-soft);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
+	}
+
+	.news-row__arrow {
+		font-family: var(--font-jetbrains-mono), monospace;
+		color: var(--editorial-ink-mute);
+		font-size: 1rem;
+	}
+
+	@media (max-width: 720px) {
+		.news-row {
+			grid-template-columns: 1fr;
+			gap: 0.5rem;
+		}
+		.news-row__time {
+			flex-direction: row;
+			gap: 0.5rem;
+		}
+		.news-row__arrow { display: none; }
+	}
+</style>

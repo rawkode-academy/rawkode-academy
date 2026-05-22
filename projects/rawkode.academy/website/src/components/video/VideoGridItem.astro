@@ -1,0 +1,98 @@
+---
+import VideoStill from "./VideoStill.astro";
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	episodeNum?: string | number | undefined;
+	title: string;
+	series?: string | undefined;
+	duration?: string | undefined;
+	thumbnailUrl?: string | undefined;
+	author?: string | undefined;
+	date?: string | undefined;
+	viewerCount?: number | undefined;
+}
+
+const {
+	href,
+	episodeNum,
+	title,
+	series,
+	duration,
+	thumbnailUrl,
+	author,
+	date,
+	viewerCount,
+} = Astro.props as Props;
+---
+
+<a class="video-grid-item" href={href}>
+	<VideoStill
+		episodeNum={episodeNum}
+		title={title}
+		series={series}
+		duration={duration}
+		thumbnailUrl={thumbnailUrl}
+	/>
+
+	<div class="video-grid-item__body">
+		<MLabel tone="spruce">
+			{episodeNum ? `№${episodeNum}` : null}
+			{episodeNum && series ? " · " : ""}
+			{series}
+		</MLabel>
+		<h3 class="video-grid-item__title">{title}</h3>
+		<div class="video-grid-item__footer">
+			{author && <MLabel>{author}</MLabel>}
+			<MLabel>
+				{[date, viewerCount !== undefined ? `${viewerCount.toLocaleString()} views` : null]
+					.filter(Boolean)
+					.join(" · ")}
+			</MLabel>
+		</div>
+	</div>
+</a>
+
+<style>
+	.video-grid-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+		text-decoration: none;
+		color: inherit;
+		position: relative;
+	}
+
+	.video-grid-item__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.video-grid-item__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.4rem;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.video-grid-item:hover .video-grid-item__title {
+		color: var(--editorial-spruce);
+	}
+
+	.video-grid-item__footer {
+		display: flex;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+</style>

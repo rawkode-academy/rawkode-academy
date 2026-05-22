@@ -1,0 +1,76 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Item { title: string; meta?: string; href?: string }
+
+interface Props {
+	heading?: string;
+	items: Item[];
+}
+
+const { heading = "Trending this week", items } = Astro.props as Props;
+---
+
+<aside class="trending-panel">
+	<MLabel>{heading}</MLabel>
+	<div class="trending-panel__list">
+		{items.map((item, i) => (
+			<a class="trending-panel__item" href={item.href ?? "#"}>
+				<MLabel tone="spruce">{String(i + 1).padStart(2, "0")}</MLabel>
+				<div class="trending-panel__body">
+					<div class="trending-panel__title">{item.title}</div>
+					{item.meta && <MLabel>{item.meta}</MLabel>}
+				</div>
+			</a>
+		))}
+	</div>
+</aside>
+
+<style>
+	.trending-panel {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+	}
+
+	.trending-panel__list {
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+	}
+
+	.trending-panel__item {
+		display: grid;
+		grid-template-columns: 36px 1fr;
+		gap: 0.5rem;
+		padding: 0.875rem 1rem;
+		text-decoration: none;
+		color: inherit;
+		border-top: 1px solid var(--editorial-hairline-strong);
+		transition: background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.trending-panel__item:first-child {
+		border-top: none;
+	}
+
+	.trending-panel__item:hover {
+		background: var(--surface-card);
+	}
+
+	.trending-panel__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.trending-panel__title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		line-height: 1.3;
+		color: var(--editorial-ink);
+	}
+
+	.trending-panel__item:hover .trending-panel__title {
+		color: var(--editorial-spruce);
+	}
+</style>

@@ -1,0 +1,67 @@
+---
+interface Props {
+	pathCount: number;
+	lessonCount?: number | undefined;
+	learnerCount?: number | undefined;
+}
+
+const { pathCount, lessonCount, learnerCount } = Astro.props as Props;
+---
+
+<div class="paths-masthead">
+	<span class="paths-masthead__left">
+		Curricula · {pathCount} paths{lessonCount !== undefined ? ` · ${lessonCount} lessons` : ""}
+	</span>
+	<span class="paths-masthead__center">
+		Learning paths <span class="paths-masthead__center-muted">— curriculum, not chaos</span>
+	</span>
+	<span class="paths-masthead__right">
+		{learnerCount !== undefined ? `${learnerCount.toLocaleString()} engineers learning now` : "Self-paced · Cohort-supported"}
+	</span>
+</div>
+
+<style>
+	.paths-masthead {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		align-items: baseline;
+		gap: 2rem;
+		padding: 1.25rem 2.5rem;
+		border-bottom: 2px solid var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+	}
+
+	.paths-masthead__left { color: var(--editorial-ink-soft); }
+
+	.paths-masthead__center {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.5rem;
+		letter-spacing: -0.015em;
+		text-transform: none;
+		color: var(--editorial-ink);
+		text-align: center;
+	}
+
+	.paths-masthead__center-muted { color: var(--editorial-ink-mute); }
+
+	.paths-masthead__right {
+		color: var(--editorial-ink-soft);
+		text-align: right;
+	}
+
+	@media (max-width: 880px) {
+		.paths-masthead {
+			grid-template-columns: 1fr;
+			gap: 0.5rem;
+			padding: 1rem 1.25rem;
+			text-align: center;
+		}
+		.paths-masthead__left,
+		.paths-masthead__right { text-align: center; }
+	}
+</style>
