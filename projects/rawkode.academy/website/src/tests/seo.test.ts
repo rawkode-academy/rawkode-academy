@@ -20,14 +20,19 @@ const ARTICLE_CONTENT_DIR = resolve(
 	TESTS_DIR,
 	"../../../../../content/articles",
 );
+const NEWS_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/news");
+const LEARNING_PATH_CONTENT_DIR = resolve(
+	TESTS_DIR,
+	"../../../../../content/learning-paths",
+);
 const TECHNOLOGY_CONTENT_DIR = resolve(
 	TESTS_DIR,
 	"../../../../../content/technologies",
 );
 
-function readVideoFrontmatterFiles() {
+function readFrontmatterFiles(contentDir: string) {
 	return globSync("**/*.{md,mdx}", {
-		cwd: VIDEO_CONTENT_DIR,
+		cwd: contentDir,
 		absolute: true,
 	}).map((filePath) => ({
 		filePath,
@@ -38,17 +43,21 @@ function readVideoFrontmatterFiles() {
 	}));
 }
 
+function readVideoFrontmatterFiles() {
+	return readFrontmatterFiles(VIDEO_CONTENT_DIR);
+}
+
 function readArticleFrontmatterFiles() {
-	return globSync("**/*.{md,mdx}", {
-		cwd: ARTICLE_CONTENT_DIR,
-		absolute: true,
-	}).map((filePath) => ({
-		filePath,
-		data: matter(readFileSync(filePath, "utf-8")).data as Record<
-			string,
-			unknown
-		>,
-	}));
+	return readFrontmatterFiles(ARTICLE_CONTENT_DIR);
+}
+
+function readTechnologyTaxonomyFiles() {
+	return [
+		...readFrontmatterFiles(ARTICLE_CONTENT_DIR),
+		...readFrontmatterFiles(NEWS_CONTENT_DIR),
+		...readFrontmatterFiles(VIDEO_CONTENT_DIR),
+		...readFrontmatterFiles(LEARNING_PATH_CONTENT_DIR),
+	];
 }
 
 function readTechnologyIds() {
@@ -231,6 +240,43 @@ describe("SEO Validation", () => {
 							`${filePath} repeats technology '${technologyId}'`,
 						).toBe(false);
 						seen.add(technologyId);
+					}
+				}
+			}
+		});
+	});
+
+	describe("Linked Technology Taxonomy Guard", () => {
+		it("all content technology references resolve to technology pages", () => {
+			const contentEntries = readTechnologyTaxonomyFiles();
+			const technologyIds = readTechnologyIds();
+
+			expect(contentEntries.length).toBeGreaterThan(0);
+			expect(technologyIds.size).toBeGreaterThan(0);
+
+			for (const { filePath, data } of contentEntries) {
+				const technologies = Array.isArray(data.technologies)
+					? data.technologies
+					: [];
+				const seen = new Set<string>();
+
+				for (const technologyId of technologies) {
+					expect(
+						typeof technologyId,
+						`${filePath} has a non-string technology value`,
+					).toBe("string");
+
+					if (typeof technologyId === "string") {
+						const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
+						expect(
+							technologyIds.has(normalizedTechnologyId),
+							`${filePath} references unknown technology '${technologyId}'`,
+						).toBe(true);
+						expect(
+							seen.has(normalizedTechnologyId),
+							`${filePath} repeats technology '${technologyId}'`,
+						).toBe(false);
+						seen.add(normalizedTechnologyId);
 					}
 				}
 			}

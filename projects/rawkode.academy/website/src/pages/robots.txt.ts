@@ -16,6 +16,7 @@ export const ROBOTS_DISALLOWS = [
 	"/search",
 	"/home",
 	"/sign-in",
+	"/_partytown/",
 ] as const;
 
 export const getRobotsTxt = (sitemapIndexURL: URL) => `
