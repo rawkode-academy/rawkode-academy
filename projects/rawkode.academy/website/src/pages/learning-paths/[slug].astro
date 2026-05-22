@@ -105,7 +105,7 @@ const pageDescription = learningPath.data.description;
 		technologyLabels={technologyLabels}
 	/>
 
-	<div class="path-detail">
+	<div class="path-detail" data-density="tight">
 		<ArticleHeader
 			breadcrumbs={[
 				{ label: "Learning Paths", href: "/learning-paths" },
@@ -248,8 +248,8 @@ const pageDescription = learningPath.data.description;
 	.path-detail__stat-row {
 		display: grid;
 		grid-template-columns: repeat(4, 1fr);
-		gap: 1.5rem;
-		padding: 1.75rem 2.5rem;
+		gap: var(--space-block-gap);
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
 		border-bottom: 1px solid var(--editorial-hairline);
 		background: var(--editorial-paper-deep);
 	}
@@ -276,8 +276,8 @@ const pageDescription = learningPath.data.description;
 	.path-detail__body {
 		display: grid;
 		grid-template-columns: minmax(0, 3fr) minmax(0, 1.1fr);
-		gap: 3rem;
-		padding: 3rem 2.5rem 3rem;
+		gap: var(--space-section-gap-lg);
+		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
 		max-width: 90rem;
 		margin: 0 auto;
 		align-items: start;
