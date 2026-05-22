@@ -1,0 +1,30 @@
+---
+title: "Paper: Nf-PEAK attributes per-task energy on Kubernetes Nextflow runs with 6.6% MAPE"
+description: "arXiv:2605.22393, posted May 21, 2026 and accepted to IEEE CLOUD 2026, proposes Nf-PEAK, a containerized energy attribution tool for Nextflow scientific workflows on Kubernetes that the authors report outperforms Kepler under concurrent workloads."
+publishedAt: 2026-05-21
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - kepler
+---
+
+A new arXiv submission posted May 21, 2026 proposes Nf-PEAK, a process-based energy attribution method for Nextflow scientific workflows running on Kubernetes clusters. The paper is accepted to the 2026 IEEE 19th International Conference on Cloud Computing.
+
+## The gap it targets
+
+Intel RAPL exposes node-level energy counters, but per-process consumption is not directly observable from the kernel surface most operators have. That gap matters for any platform team asked to attribute energy or carbon to individual containerized tasks rather than to whole nodes. Nf-PEAK derives per-task energy by combining RAPL with per-task CPU and memory accounting, packaged as a container that drops into Nextflow's Kubernetes executor.
+
+## Reported accuracy
+
+The authors report a mean absolute percentage error of 6.6% against ground truth in isolated runs. Under contention — competing workloads saturating 8 of 32 hardware threads — MAPE rose to 10.9%. Results were validated across 2–8 node configurations.
+
+## Comparison with Kepler
+
+The paper directly benchmarks against [Kepler](https://github.com/sustainable-computing-io/kepler), the CNCF sandbox project for Kubernetes energy monitoring. The authors report Nf-PEAK outperforms Kepler, particularly when concurrent workloads run on the same node — a regime that matters for shared scientific clusters.
+
+## Why this matters
+
+If your platform owes per-task energy or carbon numbers for batch workloads, the existing CNCF tooling may not give defensible numbers under realistic node contention. The technique is Nextflow-shaped today, but the per-process RAPL plus task-accounting approach generalizes to other container-level workload managers on Kubernetes.
+
+**Source:** [Nf-PEAK: Process-Based Energy Attribution for Nextflow Workflows on Kubernetes Clusters](https://arxiv.org/abs/2605.22393) — May 21, 2026.

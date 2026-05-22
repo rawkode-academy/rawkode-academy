@@ -1,0 +1,30 @@
+---
+title: "NetEase Games reports 30-second LLM cold starts on Kubernetes with Fluid"
+description: "A CNCF end-user post from NetEase Games on May 21, 2026 details how layering Alluxio caching and Fluid prefetching cut 70B-class model cold-start time from 42 minutes against cross-region storage to under 30 seconds in production."
+publishedAt: 2026-05-21
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - fluid
+---
+
+NetEase Games published a CNCF end-user post on May 21, 2026 describing how it cut LLM inference cold-start time from 42 minutes to under 30 seconds on Kubernetes by routing model loads through Fluid, the CNCF incubating data-orchestration project.
+
+## The numbers NetEase reports
+
+The team reports model load time dropped from 42 minutes against cross-region direct storage access, to 14 minutes with a traditional Alluxio cache, to 3 minutes once Fluid's prefetching workflow was enabled, to roughly 1 minute average — with some inference services landing under 30 seconds — after further production tuning. The workloads are 70B-class models that pull "hundreds of gigabytes of weights" per pod startup.
+
+## What Fluid is doing
+
+Fluid sits between the dataset and the runtime: it injects sidecars through a webhook, exposes data via CSI, and provides data-aware scheduling so pods land where the warm cache is. The dataset abstraction is pluggable across JindoCache, Alluxio, and JuiceFS as the underlying runtime. Scheduled and event-driven prefetching warms the cache before pods need the weights. A single-namespace model cache is shared across teams, which removes duplicate copies of the same weights across the cluster.
+
+## Framework integration
+
+The post calls out specific integration with vLLM and SGLang for framework-level optimizations, and notes the pattern is used for inference services that span multiple regions.
+
+## Why this matters
+
+The bottleneck for elastic LLM serving on Kubernetes is rarely scheduling — it is moving hundreds of gigabytes of weights to a fresh node before autoscaling pays off. NetEase's numbers are self-reported, but the recipe is concrete and the underlying tools are open source.
+
+**Source:** [How NetEase Games achieved 30-second LLM cold starts on Kubernetes](https://www.cncf.io/blog/2026/05/21/how-netease-games-achieved-30-second-llm-cold-starts-on-kubernetes/) — May 21, 2026.
