@@ -1,4 +1,8 @@
-@import "tailwindcss";
+/* UnoCSS reset and generated utilities are injected by the @unocss/astro
+   integration via `injectReset: true` + the virtual `uno.css` module. This
+   file only carries project-level CSS variables and the @layer rules that
+   compose on top of those utilities. Theme tokens + @utility shortcuts now
+   live in `uno.config.ts`. */
 
 :root {
 	/* Rawkode Blue — canonical brand palette */
@@ -105,46 +109,12 @@ body::before {
 	pointer-events: none;
 }
 
-@theme {
-	/* Theme-aware colors using CSS custom properties */
-	--color-primary: rgb(var(--brand-primary));
-	--color-secondary: rgb(var(--brand-secondary));
-	--color-accent: rgb(var(--brand-accent));
-
-	/* Semantic color names */
-	--color-brand-primary: rgb(var(--brand-primary));
-	--color-brand-secondary: rgb(var(--brand-secondary));
-}
-
-@theme {
-	--font-display: var(--font-quicksand), sans-serif;
-	--font-body: var(--font-poppins), sans-serif;
-	--font-mono: var(--font-monaspace-neon), monospace;
-}
-
-@theme {
-	--spacing-page-sm: var(--space-page-sm);
-	--spacing-page: var(--space-page);
-	--spacing-page-lg: var(--space-page-lg);
-	--spacing-section-tight: var(--space-section-tight);
-	--spacing-section: var(--space-section);
-	--spacing-section-relaxed: var(--space-section-relaxed);
-	--spacing-stack-sm: var(--space-stack-sm);
-	--spacing-stack: var(--space-stack);
-	--spacing-stack-lg: var(--space-stack-lg);
-	--spacing-card: var(--space-card-pad);
-	--spacing-card-lg: var(--space-card-pad-lg);
-
-	/* Radius Scale — exposed as Tailwind's `rounded-xs/sm/md/lg/xl/2xl/3xl/4xl`.
-	   Sized so that:
-	     xs (6px)   — chips, small pills
-	     sm (8px)   — inputs, small buttons
-	     md (12px)  — secondary cards
-	     lg (16px)  — buttons, default surfaces
-	     xl (19.2px) — soft / muted panels, stat panels
-	     2xl (21.6px) — glass cards, section shells
-	     3xl (24px) — glass panels (hero-level)
-	     4xl (32px) — page-level shells (sidebar, footer container) */
+/* Design-system raw variables that aren't expressed as UnoCSS theme keys
+   but are still needed by hand-written CSS rules below. The matching
+   UnoCSS theme keys live in uno.config.ts (colors, fontFamily, spacing,
+   borderRadius, transitionDuration, transitionTimingFunction, boxShadow). */
+:root {
+	/* Radius scale — also exposed via UnoCSS theme so `rounded-xs..4xl` work. */
 	--radius-xs: 0.375rem;
 	--radius-sm: 0.5rem;
 	--radius-md: 0.75rem;
@@ -154,21 +124,18 @@ body::before {
 	--radius-3xl: 1.5rem;
 	--radius-4xl: 2rem;
 
-	/* Motion tokens — durations + easings used across the system.
-	   Exposed as Tailwind utilities: `duration-fast/base/slow/slower`
-	   and `ease-standard/out/in/spring`. */
-	--duration-fast: 120ms; /* micro-interactions, hover ticks */
-	--duration-base: 200ms; /* default transitions */
-	--duration-slow: 300ms; /* card hovers, layout shifts */
-	--duration-slower: 500ms; /* page-level moves */
+	/* Motion tokens — durations + easings. */
+	--duration-fast: 120ms;
+	--duration-base: 200ms;
+	--duration-slow: 300ms;
+	--duration-slower: 500ms;
 
-	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* Material standard */
-	--ease-out: cubic-bezier(0, 0, 0.2, 1); /* deceleration */
-	--ease-in: cubic-bezier(0.4, 0, 1, 1); /* acceleration */
-	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* gentle overshoot */
+	--ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+	--ease-out: cubic-bezier(0, 0, 0.2, 1);
+	--ease-in: cubic-bezier(0.4, 0, 1, 1);
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-	/* Shadow ramp — depth scale. The legacy `card-shadow` /
-	   `card-shadow-elevated` utilities now use these tokens. */
+	/* Shadow ramp — light mode. Dark-mode override below. */
 	--shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
 	--shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
 	--shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14);
@@ -1094,127 +1061,7 @@ html.dark {
 	}
 }
 
-/* Tailwind v4 @utility directives for custom text utilities */
-@utility text-primary-content {
-	color: rgb(17 24 39);
-
-	:root.dark & {
-		color: rgb(255 255 255);
-	}
-}
-
-@utility text-secondary-content {
-	color: rgb(55 65 81);
-
-	:root.dark & {
-		color: rgb(209 213 219);
-	}
-}
-
-@utility text-muted {
-	color: rgb(75 85 99);
-
-	:root.dark & {
-		color: rgb(156 163 175);
-	}
-}
-
-@utility link-muted {
-	color: rgb(75 85 99);
-	transition-property: color;
-	transition-timing-function: var(--ease-standard);
-	transition-duration: var(--duration-base);
-
-	:root.dark & {
-		color: rgb(156 163 175);
-	}
-
-	&:hover {
-		color: rgb(var(--brand-primary));
-	}
-}
-
-/* Focus ring — apply via `class="focus-ring"` on any focusable element
-   that needs a consistent brand-primary outline. Pairs with `:focus-visible`
-   so it only shows for keyboard navigation. */
-@utility focus-ring {
-	&:focus-visible {
-		outline: 2px solid rgb(var(--brand-primary));
-		outline-offset: 2px;
-		border-radius: var(--radius-sm);
-	}
-}
-
-/* Motion utilities — Tailwind v4 `@utility` so `@apply` works from
-   scoped Astro/Vue <style> blocks too. */
-@utility transition-fast {
-	transition: all var(--duration-fast) var(--ease-standard);
-}
-
-@utility transition-smooth {
-	transition: all var(--duration-base) var(--ease-standard);
-}
-
-@utility transition-card {
-	transition: all var(--duration-slow) var(--ease-standard);
-}
-
-@utility transition-spring {
-	transition: all var(--duration-slow) var(--ease-spring);
-}
-
-/* Property-specific colour transitions — for buttons / chips / links
-   where a `transition: all` would catch unrelated property changes. */
-@utility transition-colors-smooth {
-	transition-property: color, background-color, border-color, fill, stroke;
-	transition-duration: var(--duration-base);
-	transition-timing-function: var(--ease-standard);
-}
-
-@utility transition-colors-card {
-	transition-property: color, background-color, border-color, fill, stroke;
-	transition-duration: var(--duration-slow);
-	transition-timing-function: var(--ease-standard);
-}
-
-/* Shadow utilities — wired to the `--shadow-*` ramp so the light/dark
-   variants come from one place. Declared as `@utility` so `@apply`
-   works in scoped <style> blocks (e.g. `about/index.astro`'s
-   `.timeline-item`). `card-shadow` (= md) and `card-shadow-elevated`
-   (= lg) remain as backwards-compatible aliases. */
-@utility card-shadow-sm {
-	box-shadow: var(--shadow-sm);
-}
-
-@utility card-shadow {
-	box-shadow: var(--shadow-md);
-}
-
-@utility card-shadow-md {
-	box-shadow: var(--shadow-md);
-}
-
-@utility card-shadow-lg {
-	box-shadow: var(--shadow-lg);
-}
-
-@utility card-shadow-elevated {
-	box-shadow: var(--shadow-lg);
-}
-
-@utility card-shadow-xl {
-	box-shadow: var(--shadow-xl);
-}
-
-/* Brand-tinted surface borders. Replaces the `border-gray-200 dark:border-gray-700`
-   neutral pair across the codebase: on a rawkode-blue design system,
-   neutral grays felt off — the brand palette wants brand-tinted borders.
-   `--surface-border` resolves per mode (light: subtle purple at low
-   opacity, dark: more saturated purple at higher opacity). */
-@utility border-surface {
-	border-color: var(--surface-border);
-}
-
-@utility border-surface-strong {
-	border-color: var(--surface-border-strong);
-}
+/* Text-tone utilities, focus-ring, link-muted, transition-*, card-shadow-*,
+   border-surface(-strong) all live in `uno.config.ts` now — registered as
+   shortcuts / rules / preflights so `@apply` continues to work from scoped
+   Astro/Vue <style> blocks through `@unocss/transformer-directives`. */

@@ -3,7 +3,7 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
-import tailwindcss from "@tailwindcss/vite";
+import unocss from "@unocss/astro";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
@@ -121,6 +121,12 @@ export default defineConfig({
 		inlineStylesheets: "always",
 	},
 	integrations: [
+		// UnoCSS — Astro integration auto-discovers uno.config.ts and wires
+		// the transformer pipeline through Vite for .astro, .vue, .tsx, and
+		// scoped <style> blocks. `injectReset` opts into the Tailwind-equivalent
+		// preflight reset so removing @import "tailwindcss" doesn't strip
+		// base browser normalisation.
+		unocss({ injectReset: true }),
 		// Inline the SVG output so we don't depend on the generated file's
 		// on-disk path. Our article MDX lives outside the website project (in
 		// the sibling @rawkodeacademy/content package), and astro-d2 computes
@@ -150,7 +156,6 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			tailwindcss(),
 			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
 				? [
 						faroUploader({
