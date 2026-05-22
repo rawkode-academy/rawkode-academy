@@ -3,7 +3,6 @@ import { Image } from "astro:assets";
 import { type CollectionEntry, getEntries } from "astro:content";
 import AuthorAvatarGroup from "../common/AuthorAvatarGroup.vue";
 import BaseCard from "../common/BaseCard.vue";
-import FormattedDate from "../common/FormattedDate.vue";
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
@@ -17,56 +16,88 @@ const readingTime = calculateReadingTime(article.body || "");
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
+
+const formattedDate = new Intl.DateTimeFormat("en-US", {
+	year: "numeric",
+	month: "short",
+	day: "numeric",
+}).format(article.data.publishedAt);
 ---
 
 <BaseCard href={`/read/${article.id}`}>
-	<Fragment slot="cover">
-		<div class="absolute inset-0 bg-linear-to-tr from-primary/30 to-secondary/30 mix-blend-multiply z-10"></div>
-		{
-			article.data.cover ? (
-				<Image
-					class="w-full h-52 object-cover"
-					src={article.data.cover.image}
-					alt={article.data.cover.alt}
-					loading="lazy"
-				/>
-			) : (
-				<img
-					class="w-full h-52 object-cover"
-					src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"
-					alt="Default placeholder image for article without custom cover"
-					loading="lazy"
-				/>
-			)
-		}
-	</Fragment>
-	<Fragment slot="badge">
-		<span class={`${badgeConfig.bg} ${badgeConfig.text} text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm shadow-md`}>
-			{badgeConfig.label}
-		</span>
-	</Fragment>
+	{article.data.cover && (
+		<Fragment slot="cover">
+			<Image
+				src={article.data.cover.image}
+				alt={article.data.cover.alt}
+				loading="lazy"
+			/>
+		</Fragment>
+	)}
+
 	<Fragment slot="content">
-		<h2 class="mb-3 text-xl font-bold tracking-tight text-primary-content line-clamp-2">
-			{article.data.title}
-		</h2>
+		<div class="ed-card__meta">
+			<span class="ed-card__meta-tag">{badgeConfig.label}</span>
+			<span class="ed-card__meta-sep">·</span>
+			<span>{formattedDate}</span>
+			<span class="ed-card__meta-sep">·</span>
+			<span>{readingTime.text}</span>
+		</div>
+
+		<h2 class="ed-card__title">{article.data.title}</h2>
+
 		{article.data.openGraph?.subtitle && (
-			<p class="mb-4 font-light text-muted line-clamp-3">
-				{article.data.openGraph?.subtitle}
-			</p>
+			<p class="ed-card__body">{article.data.openGraph.subtitle}</p>
 		)}
 	</Fragment>
+
 	<Fragment slot="footer">
-		<div class="flex items-center justify-between">
-			<AuthorAvatarGroup authors={authors} />
-			<div class="flex items-center gap-3 text-sm text-muted">
-				<span class="flex items-center gap-1">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					{readingTime.text}
-				</span>
-				<FormattedDate date={article.data.publishedAt} showIcon={true} />
-			</div>
-		</div>
+		<AuthorAvatarGroup authors={authors} />
 	</Fragment>
 </BaseCard>
+
+<style>
+	.ed-card__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--editorial-ink-mute);
+		margin-bottom: 0.875rem;
+	}
+
+	.ed-card__meta-tag { color: var(--editorial-spruce); }
+	.ed-card__meta-sep { opacity: 0.4; }
+
+	.ed-card__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.5rem;
+		line-height: 1.08;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0 0 0.75rem;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.ed-card__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0 0 1rem;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+</style>
