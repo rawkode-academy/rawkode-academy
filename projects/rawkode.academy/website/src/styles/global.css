@@ -170,13 +170,13 @@ body {
 }
 
 [data-density="airy"] {
-	--space-section-pad-y: 3.5rem;
-	--space-section-pad-x: 3rem;
-	--space-section-gap: 3rem;
-	--space-section-gap-lg: 4rem;
-	--space-block-gap: 1.125rem;
-	--space-kicker-mb: 1.125rem;
-	--space-page-pad-bottom: 5.5rem;
+	--space-section-pad-y: 4.5rem;
+	--space-section-pad-x: 3.5rem;
+	--space-section-gap: 4rem;
+	--space-section-gap-lg: 5.5rem;
+	--space-block-gap: 1.5rem;
+	--space-kicker-mb: 1.5rem;
+	--space-page-pad-bottom: 7rem;
 }
 
 @media (max-width: 720px) {
