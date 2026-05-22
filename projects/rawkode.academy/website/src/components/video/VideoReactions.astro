@@ -155,7 +155,7 @@ const isAuthenticated = !!Astro.locals.user;
 
 				// Handle authentication errors
 				if (error.code === "UNAUTHORIZED") {
-					window.location.href = "/sign-in";
+					window.location.href = `/api/auth/sign-in?returnTo=${encodeURIComponent(window.location.pathname)}`;
 				}
 			}
 		} catch {

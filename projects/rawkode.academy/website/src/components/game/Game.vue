@@ -13,7 +13,7 @@
 			<div class="auth-content">
 				<h2 class="auth-title">AUTHENTICATION REQUIRED</h2>
 				<p class="auth-text">You must be logged in to access the cluster.</p>
-				<a href="/sign-in" class="auth-btn">
+				<a :href="signInUrl" class="auth-btn">
 					<span class="btn-text">[ AUTHENTICATE ]</span>
 				</a>
 			</div>
@@ -135,6 +135,7 @@ const isNewPlayer = ref(true);
 const isLoading = ref(true);
 const isAuthenticated = ref(false);
 const devMode = ref(false);
+const signInUrl = ref("/api/auth/sign-in");
 const combatStartTime = ref<number | null>(null);
 const playerProgress = ref<PlayerProgress | null>(null);
 const playerName = ref<string>("Player");
@@ -169,6 +170,8 @@ function idsToComebacks(ids: string[]): Comeback[] {
 
 // Load player progress on mount
 onMounted(async () => {
+	signInUrl.value = `/api/auth/sign-in?returnTo=${encodeURIComponent(window.location.pathname)}`;
+
 	// Check for dev auth bypass
 	const gameRoot = document.getElementById("game-root");
 	const disableAuth = gameRoot?.dataset.disableAuth === "true";

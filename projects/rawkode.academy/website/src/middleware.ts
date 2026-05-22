@@ -1,7 +1,14 @@
 import { sequence } from "astro:middleware";
 import { authMiddleware } from "./middleware/auth";
 import { corsMiddleware } from "./middleware/cors";
+import { legacyRoutesMiddleware } from "./middleware/legacy-routes";
 import { robotsMiddleware } from "./middleware/robots";
 
-// Apply CORS/auth first, then attach robots headers to internal endpoints.
-export const onRequest = sequence(corsMiddleware, authMiddleware, robotsMiddleware);
+// Resolve legacy public URLs before normal route handling, then attach
+// cross-origin, auth, and robots headers to the remaining responses.
+export const onRequest = sequence(
+	legacyRoutesMiddleware,
+	corsMiddleware,
+	authMiddleware,
+	robotsMiddleware,
+);

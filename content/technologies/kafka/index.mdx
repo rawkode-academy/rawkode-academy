@@ -1,0 +1,17 @@
+---
+name: Apache Kafka
+website: 'https://kafka.apache.org/'
+documentation: 'https://kafka.apache.org/documentation/'
+source: 'https://github.com/apache/kafka'
+license: Apache-2.0
+status: stable
+category: App Definition and Development
+subcategory: Streaming & Messaging
+matrix:
+  status: learn
+---
+Apache Kafka is a distributed event streaming platform for durable, high-throughput publish/subscribe workloads. It originated at LinkedIn, became an Apache Software Foundation project, and is widely used as the backbone for event-driven architectures, log aggregation, change-data capture, stream processing, and data integration pipelines.
+
+Kafka stores records in partitioned, ordered logs called topics. Producers append events, consumers track their own offsets, and brokers replicate partitions across a cluster for availability. Modern Kafka clusters can run without ZooKeeper through KRaft mode, where metadata is managed by Kafka's own quorum controllers. The broader ecosystem includes Kafka Connect for source and sink integration, Kafka Streams for application-level stream processing, Schema Registry implementations, and Kubernetes operators such as Strimzi.
+
+In cloud-native environments, Kafka is usually chosen when teams need replayable event history, strong ordering within partitions, back-pressure tolerance, and large-scale fan-out. It is heavier to operate than lightweight messaging systems such as NATS, but it remains a common foundation for data platforms and service-to-service event streams.
