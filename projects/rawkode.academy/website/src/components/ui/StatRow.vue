@@ -64,4 +64,24 @@ const cols = computed(() => props.stats.length);
 	font-size: 0.78rem;
 	color: var(--editorial-ink-mute);
 }
+
+@media (max-width: 560px) {
+	/* On phone widths a 4-column row at 42px italic crowds badly.
+	   Drop to two columns with a tighter numeral so values like "353+"
+	   stop running off the right edge of their cell. */
+	.stat-row {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.25rem 0;
+	}
+	.stat-row__cell {
+		padding-left: 1rem;
+	}
+	.stat-row__cell:nth-child(odd) {
+		padding-left: 0;
+		border-left: none;
+	}
+	.stat-row__num {
+		font-size: 2rem;
+	}
+}
 </style>
