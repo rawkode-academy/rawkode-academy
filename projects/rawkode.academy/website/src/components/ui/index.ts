@@ -7,7 +7,6 @@ export { default as ThemeToggle } from "./ThemeToggle.vue";
 export { default as Container } from "./Container.vue";
 export { default as Stack } from "./Stack.vue";
 export { default as Grid } from "./Grid.vue";
-export { default as GlassPanel } from "./GlassPanel.vue";
 export { default as HairlinePanel } from "./HairlinePanel.vue";
 
 // Editorial primitives — Phase 1

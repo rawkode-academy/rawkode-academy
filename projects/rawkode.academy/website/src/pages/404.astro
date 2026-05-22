@@ -1,42 +1,16 @@
 ---
 import MinimalLayout from "@/layouts/minimal.astro";
+import MastheadBar from "@/components/ui/MastheadBar.vue";
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import MLabel from "@/components/ui/MLabel.vue";
 
 export const prerender = true;
 
 const quickLinks = [
-	{
-		title: "Return home",
-		description: "Head back to the front page and resume your journey.",
-		href: "/",
-	},
-	{
-		title: "Browse courses",
-		description: "Deep dives, labs, and workshops from Rawkode Academy.",
-		href: "/courses",
-	},
-	{
-		title: "Learning paths",
-		description: "Opinionated roadmaps to master cloud native topics.",
-		href: "/learning-paths",
-	},
-	{
-		title: "Technology guides",
-		description: "Explore the tools, runtimes, and projects we teach.",
-		href: "/technology",
-	},
-];
-
-const supportLinks = [
-	{
-		title: "Search videos",
-		description: "Find a video by title or topic across the academy.",
-		href: "/search",
-	},
-	{
-		title: "Chat on Discord",
-		description: "Ask the community for a direct link or recommendation.",
-		href: "https://discord.gg/rawkode",
-	},
+	{ title: "Browse courses", href: "/courses" },
+	{ title: "Learning paths", href: "/learning-paths" },
+	{ title: "Technology guides", href: "/technology" },
+	{ title: "Dispatch (read)", href: "/read" },
 ];
 ---
 
@@ -45,108 +19,192 @@ const supportLinks = [
 	description="That page doesn't exist (or doesn't exist any more). Search the catalogue, jump into a course, or browse the technology guides."
 	noindex
 >
-	<main class="relative isolate min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-		<div class="pointer-events-none absolute inset-0">
-			<div class="absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/30 blur-3xl"></div>
-			<div class="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent"></div>
-			<div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.12),_transparent_55%)]"></div>
-		</div>
+	<main class="ed-404">
+		<MastheadBar left="Dispatch §404 · Not found" right="Lost in the cluster" />
 
-		<section class="relative z-10 px-6 py-24 sm:py-32">
-			<div class="mx-auto flex max-w-4xl flex-col items-center text-center">
-				<p class="text-xs uppercase tracking-[0.4em] text-primary/70">Lost in the cluster</p>
-				<h1 class="mt-6 text-4xl font-semibold leading-tight text-white sm:text-5xl">
-					We couldn't route that request.
-				</h1>
-				<p class="mt-4 text-lg text-slate-300">
-					The page you're looking for may have moved, or the URL has a typo. Let's get you
-					back to shipping something great.
-				</p>
-				<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
-					<a
-						href="/"
-						class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-secondary px-6 py-3 text-base font-semibold text-white shadow-lg shadow-primary/30 transition-smooth hover:scale-[1.01]"
-					>
-						<span>Back to homepage</span>
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
-						</svg>
-					</a>
-					<a
-						href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose"
-						class="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-6 py-3 text-base font-semibold text-white/90 transition-smooth hover:border-white/40"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Report an issue
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h4m0 0v4m0-4l-5 5m-1 6a9 9 0 110-18 9 9 0 010 18z" />
-						</svg>
-					</a>
-				</div>
-			</div>
+		<section class="ed-404__hero">
+			<MLabel tone="rust">
+				<span class="ed-404__dot" aria-hidden="true"></span>
+				§404 · Route not found
+			</MLabel>
 
-			<form action="/search" method="get" class="mx-auto mt-12 flex max-w-3xl items-center justify-between gap-2 rounded-3xl border border-white/10 bg-white/5 px-4 py-3 text-left backdrop-blur">
-				<div class="flex flex-1 flex-col">
-					<label for="not-found-search" class="text-xs uppercase tracking-[0.3em] text-white/60">Search videos</label>
+			<h1 class="ed-404__title">
+				This dispatch <span class="ed-404__title-soft">isn't here.</span>
+			</h1>
+
+			<p class="ed-404__lede">
+				The URL may have moved, or the typo is on us. Search the catalogue
+				or take one of the short paths below.
+			</p>
+
+			<form action="/search" method="get" class="ed-404__search">
+				<label for="not-found-search" class="ed-404__search-label">
+					<MLabel tone="ink">Search the catalogue</MLabel>
+				</label>
+				<div class="ed-404__search-row">
 					<input
 						type="search"
 						name="q"
 						id="not-found-search"
-						placeholder="Kubernetes operators, GraphQL, Talos…"
-						class="mt-2 bg-transparent text-base text-white placeholder:text-slate-400 focus:outline-none"
+						placeholder="kubernetes operators, eBPF, GraphQL…"
+						class="ed-404__search-input"
 						required
 					/>
+					<EditorialButton variant="solid" size="md" type="submit" arrow>
+						Search
+					</EditorialButton>
 				</div>
-				<button
-					type="submit"
-					class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white transition-smooth hover:bg-white/20"
-					aria-label="Search"
-				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-					</svg>
-				</button>
 			</form>
 
-			<div class="mx-auto mt-16 grid max-w-5xl gap-6 md:grid-cols-2">
-				{quickLinks.map((link) => (
-					<a
-						href={link.href}
-						class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur transition-smooth hover:border-white/30 hover:bg-white/10"
-					>
-						<div class="flex items-center justify-between gap-6">
-							<div>
-								<p class="text-sm uppercase tracking-[0.3em] text-primary/80">{link.title}</p>
-								<p class="mt-3 text-base text-slate-200">{link.description}</p>
-							</div>
-							<div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white transition-smooth group-hover:translate-x-1">
-								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-								</svg>
-							</div>
-						</div>
-					</a>
-				))}
-			</div>
-
-			<div class="mx-auto mt-16 grid max-w-4xl gap-6 md:grid-cols-2">
-				{supportLinks.map((link) => (
-					<a
-						href={link.href}
-						class="group flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 text-left backdrop-blur transition-smooth hover:border-white/30 hover:bg-white/10"
-					>
-						<p class="text-sm font-semibold tracking-wide text-white/80">{link.title}</p>
-						<p class="text-base text-slate-300">{link.description}</p>
-						<span class="inline-flex items-center gap-2 text-sm font-semibold text-primary/80">
-							<span>Open</span>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7-7 7" />
-							</svg>
-						</span>
-					</a>
-				))}
+			<div class="ed-404__actions">
+				<EditorialButton variant="outline" size="md" href="/">
+					Back to homepage
+				</EditorialButton>
+				<EditorialButton
+					variant="ghost"
+					size="md"
+					href="https://github.com/rawkode-academy/rawkode-academy/issues/new/choose"
+				>
+					Report a broken link
+				</EditorialButton>
 			</div>
 		</section>
+
+		<div class="ed-404__rail">
+			{quickLinks.map((link, i) => (
+				<a class={`ed-404__rail-item ${i === 0 ? "ed-404__rail-item--first" : ""}`} href={link.href}>
+					<MLabel tone="accent">§0{i + 1}</MLabel>
+					<span class="ed-404__rail-label">{link.title}</span>
+					<span class="ed-404__rail-arrow" aria-hidden="true">→</span>
+				</a>
+			))}
+		</div>
 	</main>
 </MinimalLayout>
+
+<style>
+	.ed-404 {
+		min-height: 100vh;
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+		display: flex;
+		flex-direction: column;
+	}
+
+	.ed-404__hero {
+		padding: 4rem 2.5rem 5rem;
+		max-width: 56rem;
+		margin: 0 auto;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.ed-404__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--editorial-rust);
+	}
+
+	.ed-404__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(3rem, 8vw, 6rem);
+		line-height: 0.95;
+		letter-spacing: -0.035em;
+		color: var(--editorial-ink);
+		margin: 0.5rem 0 0;
+	}
+
+	.ed-404__title-soft {
+		color: var(--editorial-ink-soft);
+	}
+
+	.ed-404__lede {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.125rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		max-width: 36rem;
+		margin: 0.5rem 0 1.5rem;
+		border-left: 1px solid var(--editorial-hairline-strong);
+		padding-left: 1.25rem;
+	}
+
+	.ed-404__search {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		max-width: 38rem;
+	}
+
+	.ed-404__search-row {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.ed-404__search-input {
+		flex: 1;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.875rem;
+		padding: 0.85rem 1rem;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: var(--radius-sm);
+		color: var(--editorial-ink);
+	}
+
+	.ed-404__search-input:focus-visible {
+		outline: 2px solid var(--editorial-ink);
+		outline-offset: 2px;
+	}
+
+	.ed-404__actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.ed-404__rail {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+		margin-top: auto;
+	}
+
+	.ed-404__rail-item {
+		display: flex;
+		align-items: baseline;
+		gap: 0.75rem;
+		padding: 1.1rem 1.25rem;
+		border-left: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		transition: background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.ed-404__rail-item--first { border-left: none; }
+	.ed-404__rail-item:hover  { background: var(--surface-card-muted); }
+
+	.ed-404__rail-label {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9375rem;
+		color: var(--editorial-ink);
+	}
+
+	.ed-404__rail-arrow {
+		margin-left: auto;
+		color: var(--editorial-ink-mute);
+	}
+
+	@media (max-width: 720px) {
+		.ed-404__hero { padding: 3rem 1.25rem; }
+		.ed-404__rail { grid-template-columns: 1fr; }
+		.ed-404__rail-item { border-left: none; border-top: 1px solid var(--editorial-hairline); }
+		.ed-404__rail-item--first { border-top: none; }
+	}
+</style>
