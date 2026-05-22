@@ -1,4 +1,7 @@
 ---
+import MLabel from "@/components/ui/MLabel.vue";
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+
 type AuthorSummary = {
 	name: string;
 	avatarUrl?: string | undefined;
@@ -35,131 +38,299 @@ const primaryHref = firstModuleSlug
 	: `/courses/${courseId}`;
 ---
 
-<section
-	class="relative overflow-hidden rounded-[2.5rem] border border-black/5 bg-white/55 px-6 py-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/8 dark:bg-slate-950/20 dark:shadow-[0_30px_80px_rgba(2,6,23,0.3)] sm:px-8 lg:px-10 lg:py-10"
->
-	<div class="pointer-events-none absolute inset-0">
-		<div class="absolute -left-16 top-0 h-56 w-56 rounded-full bg-primary/10 blur-3xl dark:bg-primary/12"></div>
-		<div class="absolute right-0 top-10 h-72 w-72 rounded-full bg-secondary/10 blur-3xl dark:bg-secondary/12"></div>
+<section class="courses-hero">
+	<div class="courses-hero__head">
+		<MLabel tone="spruce">Latest course</MLabel>
+		{publishedLabel && <MLabel>Published {publishedLabel}</MLabel>}
+		{availableModuleCount > 0 && availableModuleCount < moduleCount && (
+			<MLabel tone="amber">{availableModuleCount} live now</MLabel>
+		)}
 	</div>
 
-	<div class="relative space-y-8">
-		<div class="space-y-5">
-			<div class="flex flex-wrap gap-3">
-				<span class="hairline-chip text-primary">Latest course</span>
-				{publishedLabel && (
-					<span class="hairline-chip text-secondary-content">Published {publishedLabel}</span>
-				)}
-				{availableModuleCount > 0 && availableModuleCount < moduleCount && (
-					<span class="hairline-chip text-secondary-content">{availableModuleCount} live now</span>
-				)}
-			</div>
+	<h1 class="courses-hero__title">{courseName}</h1>
+	<p class="courses-hero__lede">{courseDescription}</p>
 
-			<div class="max-w-4xl space-y-4">
-				<h1
-					class="max-w-4xl text-4xl font-extrabold leading-[0.95] tracking-tight text-primary-content sm:text-5xl xl:text-6xl"
-				>
-					{courseName}
-				</h1>
-				<p class="max-w-[62ch] text-lg leading-8 text-secondary-content sm:text-xl">
-					{courseDescription}
-				</p>
-			</div>
-		</div>
-
-		<div class="flex flex-col gap-5 border-t border-black/8 pt-6 dark:border-white/8 lg:flex-row lg:items-center lg:justify-between">
-			{authors.length > 0 && (
-				<div class="flex flex-wrap items-center gap-3">
-					<div class="flex -space-x-3">
-						{authors.map((author) =>
-							author.avatarUrl ? (
-								<img
-									src={author.avatarUrl}
-									alt={author.name}
-									class="h-12 w-12 rounded-full border-2 border-white/80 object-cover shadow-sm dark:border-slate-950/80"
-									loading="lazy"
-								/>
-							) : (
-								<div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/80 bg-[var(--editorial-ink)] text-sm font-bold text-white shadow-sm dark:border-slate-950/80">
-									{author.name.charAt(0)}
-								</div>
-							),
-						)}
-					</div>
-					<div class="min-w-0">
-						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Taught by</p>
-						<p class="text-base font-semibold text-primary-content">
-							{authors.map((author) => author.name).join(", ")}
-						</p>
-					</div>
+	<div class="courses-hero__byline">
+		{authors.length > 0 && (
+			<div class="courses-hero__authors">
+				<div class="courses-hero__avatars">
+					{authors.map((author) =>
+						author.avatarUrl ? (
+							<img
+								src={author.avatarUrl}
+								alt={author.name}
+								class="courses-hero__avatar"
+								loading="lazy"
+							/>
+						) : (
+							<span class="courses-hero__avatar courses-hero__avatar--fallback">
+								{author.name.charAt(0)}
+							</span>
+						),
+					)}
 				</div>
-			)}
-
-			<div class="flex flex-wrap gap-4">
-				<a
-					href={primaryHref}
-					class="inline-flex min-h-11 items-center justify-center rounded-xl border border-primary/30 bg-[var(--editorial-ink)] text-[var(--editorial-paper)] px-7 py-3 text-lg font-medium text-white shadow-md transition-smooth hover:scale-105 hover:shadow-lg hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-primary/50"
-				>
-					{availableModuleCount > 0 ? "Start learning now" : "View course outline"}
-				</a>
-				<a
-					href="#all-courses"
-					class="inline-flex min-h-11 items-center justify-center rounded-xl border border-white/50 bg-white/50 px-6 py-3 text-lg font-medium text-primary-content shadow-md transition-smooth hover:scale-105 hover:bg-white/70 hover:shadow-lg focus-ring dark:border-gray-500/60 dark:bg-gray-700/60 dark:hover:bg-gray-600/70"
-				>
-					Browse all courses
-				</a>
-			</div>
-		</div>
-
-		<div class="grid gap-5 border-t border-black/8 pt-6 dark:border-white/8 sm:grid-cols-3">
-			<div class="space-y-2">
-				<div class="eyebrow-label tracking-[0.2em]">Curriculum</div>
-				<div>
-					<div class="text-3xl font-bold text-primary-content">{moduleCount}</div>
-					<p class="mt-1 text-sm text-secondary-content">Structured modules with clear progression.</p>
-				</div>
-			</div>
-
-			<div class="space-y-2">
-				<div class="eyebrow-label tracking-[0.2em]">Availability</div>
-				<div>
-					<div class="text-3xl font-bold text-primary-content">{availableModuleCount || moduleCount}</div>
-					<p class="mt-1 text-sm text-secondary-content">
-						{availableModuleCount > 0 ? "Ready to start today." : "Course outline in progress."}
-					</p>
-				</div>
-			</div>
-
-			<div class="space-y-2">
-				<div class="eyebrow-label tracking-[0.2em]">Level</div>
-				<div>
-					<div class="text-3xl font-bold text-primary-content">{difficulty}</div>
-					<p class="mt-1 text-sm text-secondary-content">Hands-on guidance without vendor fluff.</p>
-				</div>
-			</div>
-		</div>
-
-		{learningPath.length > 0 && (
-			<div class="border-t border-black/8 pt-6 dark:border-white/8">
-				<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-					<div class="max-w-2xl space-y-2">
-						<div class="eyebrow-label">What You’ll Cover</div>
-						<p class="text-sm leading-7 text-secondary-content sm:text-base">
-							The course is laid out as a practical path, not a pile of disconnected videos.
-						</p>
-					</div>
-					<p class="text-sm font-medium uppercase tracking-[0.2em] text-muted">Self-paced</p>
-				</div>
-
-				<div class="mt-5 grid gap-3 md:grid-cols-3">
-					{learningPath.slice(0, 3).map((step, index) => (
-						<div class="rounded-[1.25rem] border border-black/8 bg-white/35 px-4 py-4 dark:border-white/8 dark:bg-white/[0.03]">
-							<div class="text-sm font-semibold text-primary">0{index + 1}</div>
-							<p class="mt-2 text-sm leading-6 text-primary-content">{step}</p>
-						</div>
-					))}
+				<div class="courses-hero__author-meta">
+					<MLabel>Taught by</MLabel>
+					<span class="courses-hero__author-name">
+						{authors.map((author) => author.name).join(", ")}
+					</span>
 				</div>
 			</div>
 		)}
+
+		<div class="courses-hero__actions">
+			<EditorialButton variant="solid" size="md" href={primaryHref} arrow>
+				{availableModuleCount > 0 ? "Start learning" : "View outline"}
+			</EditorialButton>
+			<EditorialButton variant="outline" size="md" href="#all-courses">
+				Browse all courses
+			</EditorialButton>
+		</div>
 	</div>
+
+	<dl class="courses-hero__stats">
+		<div class="courses-hero__stat">
+			<dt><MLabel>Curriculum</MLabel></dt>
+			<dd class="courses-hero__stat-value">{moduleCount}</dd>
+			<p class="courses-hero__stat-note">
+				Structured modules with clear progression.
+			</p>
+		</div>
+		<div class="courses-hero__stat">
+			<dt><MLabel>Availability</MLabel></dt>
+			<dd class="courses-hero__stat-value">
+				{availableModuleCount || moduleCount}
+			</dd>
+			<p class="courses-hero__stat-note">
+				{availableModuleCount > 0
+					? "Ready to start today."
+					: "Course outline in progress."}
+			</p>
+		</div>
+		<div class="courses-hero__stat">
+			<dt><MLabel>Level</MLabel></dt>
+			<dd class="courses-hero__stat-value">{difficulty}</dd>
+			<p class="courses-hero__stat-note">
+				Hands-on guidance without vendor fluff.
+			</p>
+		</div>
+	</dl>
+
+	{learningPath.length > 0 && (
+		<div class="courses-hero__path">
+			<div class="courses-hero__path-head">
+				<div>
+					<MLabel tone="spruce">§ What you'll cover</MLabel>
+					<p class="courses-hero__path-body">
+						The course is laid out as a practical path, not a pile of disconnected videos.
+					</p>
+				</div>
+				<MLabel>Self-paced</MLabel>
+			</div>
+			<div class="courses-hero__path-grid">
+				{learningPath.slice(0, 3).map((step, index) => (
+					<div class="courses-hero__step">
+						<MLabel tone="spruce">§{String(index + 1).padStart(2, "0")}</MLabel>
+						<p class="courses-hero__step-body">{step}</p>
+					</div>
+				))}
+			</div>
+		</div>
+	)}
 </section>
+
+<style>
+	.courses-hero {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+		padding: 3.5rem 2.5rem 3rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+		max-width: 90rem;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.courses-hero__head {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.courses-hero__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.75rem, 6vw, 5rem);
+		line-height: 0.97;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.courses-hero__lede {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.1875rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 48rem;
+		text-wrap: pretty;
+	}
+
+	.courses-hero__byline {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.5rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.courses-hero__authors {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+	}
+
+	.courses-hero__avatars {
+		display: flex;
+		margin-right: 0.25rem;
+	}
+
+	.courses-hero__avatar {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 1px solid var(--editorial-hairline-strong);
+		margin-left: -8px;
+	}
+	.courses-hero__avatar:first-child {
+		margin-left: 0;
+	}
+
+	.courses-hero__avatar--fallback {
+		display: grid;
+		place-items: center;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 1rem;
+	}
+
+	.courses-hero__author-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.courses-hero__author-name {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		color: var(--editorial-ink);
+	}
+
+	.courses-hero__actions {
+		display: flex;
+		gap: 0.625rem;
+		flex-wrap: wrap;
+	}
+
+	.courses-hero__stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.5rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--editorial-hairline);
+		margin: 0;
+	}
+
+	.courses-hero__stat {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+	.courses-hero__stat dt { margin: 0; }
+	.courses-hero__stat dd { margin: 0; }
+
+	.courses-hero__stat-value {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 2rem;
+		line-height: 1;
+		color: var(--editorial-ink);
+		text-transform: capitalize;
+	}
+
+	.courses-hero__stat-note {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+	}
+
+	.courses-hero__path {
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.courses-hero__path-head {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: end;
+		gap: 1rem;
+	}
+
+	.courses-hero__path-body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		max-width: 36rem;
+		margin: 0.5rem 0 0;
+	}
+
+	.courses-hero__path-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0.75rem;
+	}
+
+	.courses-hero__step {
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		padding: 1rem 1.125rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.courses-hero__step-body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9375rem;
+		line-height: 1.45;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	@media (max-width: 880px) {
+		.courses-hero {
+			padding: 2.25rem 1.25rem;
+		}
+		.courses-hero__stats,
+		.courses-hero__path-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

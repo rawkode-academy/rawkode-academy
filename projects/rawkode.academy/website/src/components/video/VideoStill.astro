@@ -89,37 +89,38 @@ const watermark = episodeNum ? String(episodeNum) : null;
 		aspect-ratio: 16 / 9;
 		overflow: hidden;
 		border: 1px solid var(--editorial-hairline-strong);
-		background:
-			repeating-linear-gradient(
-				135deg,
-				transparent 0 7px,
-				oklch(1 0 0 / 0.025) 7px 8px
-			),
-			linear-gradient(135deg, var(--bg-from) 0%, var(--bg-to) 100%);
+		/* Solid ink fallback colour; the gradient-stripe backdrop
+		   only paints when there's no thumbnail (see the __backdrop
+		   rule). Keeping it off the parent avoids the painted-over
+		   image bug we hit earlier in some Chromium versions. */
+		background-color: var(--bg-to);
 		color: var(--editorial-paper);
-	}
-
-	.video-still__img {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		/* Without an explicit z-index, the parent's two-layer `background`
-		   (repeating-linear-gradient + linear-gradient) composites *over*
-		   the absolutely-positioned img in Chromium, leaving the thumbnail
-		   dimmed to near-black. Forcing the img into its own painting layer
-		   restores the expected ordering. Overlays painted later in source
-		   order (top/bottom strips, watermark, play button) still appear
-		   above the img per the CSS painting-order rules for positioned
-		   descendants with z-index:auto. */
-		z-index: 1;
 	}
 
 	.video-still__backdrop {
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
+		background-image: linear-gradient(
+				135deg,
+				var(--bg-from) 0%,
+				var(--bg-to) 100%
+			),
+			repeating-linear-gradient(
+				135deg,
+				transparent 0 7px,
+				oklch(1 0 0 / 0.025) 7px 8px
+			);
+	}
+
+	.video-still__img {
+		/* Sit in normal flow filling the aspect-ratio container; the
+		   editorial overlays are absolutely positioned on top.
+		   Mirror the OnAirPanel image treatment. */
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
 	}
 
 	.video-still__watermark {

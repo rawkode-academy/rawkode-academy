@@ -76,7 +76,7 @@
       <button
         type="submit"
         :disabled="loading"
-        class="flex w-full items-center justify-center rounded-full bg-[var(--editorial-ink)] px-4 py-3 font-semibold text-white shadow-lg transition-transform duration-200 hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60"
+        class="ed-btn ed-btn--solid ed-btn--md w-full disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <span v-if="loading" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
