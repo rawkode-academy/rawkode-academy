@@ -496,16 +496,16 @@ const pageDescription =
 	.landing-stack {
 		display: flex;
 		flex-direction: column;
-		gap: 4.5rem;
-		padding: 4rem 0 6rem;
+		gap: var(--space-section-gap-lg);
+		padding: var(--space-section-pad-y) 0 var(--space-page-pad-bottom);
 	}
 
 	.landing-section {
-		padding: 0 2.5rem;
+		padding: 0 var(--space-section-pad-x);
 	}
 
 	@media (max-width: 720px) {
 		.landing-section { padding: 0 1.25rem; }
-		.landing-stack { gap: 3rem; padding: 2.5rem 0 4rem; }
+		.landing-stack { gap: var(--space-section-gap); padding: 2.5rem 0 4rem; }
 	}
 </style>

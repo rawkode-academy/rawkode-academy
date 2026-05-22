@@ -240,16 +240,16 @@ const newsRows = rest
 	.news-page__top {
 		display: grid;
 		grid-template-columns: 1fr 24rem;
-		gap: 3rem;
-		padding: 2.5rem 2.5rem 2rem;
+		gap: var(--space-section-gap);
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
 	.news-page__feed {
 		display: grid;
 		grid-template-columns: 1fr 20rem;
-		gap: 3.5rem;
-		padding: 2.25rem 2.5rem;
+		gap: var(--space-section-gap-lg);
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
@@ -268,7 +268,7 @@ const newsRows = rest
 		justify-content: space-between;
 		align-items: center;
 		gap: 1.5rem;
-		padding: 1.5rem 2.5rem;
+		padding: 1.5rem var(--space-section-pad-x);
 		border-top: 1px solid var(--editorial-ink);
 		background: var(--editorial-paper-deep);
 	}
