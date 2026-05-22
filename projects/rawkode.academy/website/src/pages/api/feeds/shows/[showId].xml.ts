@@ -1,6 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { generateRssFeed } from "feedsmith";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 /**
  * Generate a squared podcast artwork URL using Cloudflare Image Resizing.
@@ -66,7 +67,7 @@ export async function GET(context: APIContext) {
 	const originalShowImageUrl = podcastConfig?.artworkUrl
 		? podcastConfig.artworkUrl
 		: firstVideo
-			? `https://content.rawkode.academy/videos/${firstVideo.data.id}/thumbnail.jpg`
+			? getVideoThumbnailUrl(firstVideo.data.id)
 			: "";
 	const showImageUrl = originalShowImageUrl
 		? getSquaredArtworkUrl(site, originalShowImageUrl)
@@ -79,7 +80,7 @@ export async function GET(context: APIContext) {
 			const duration =
 				typeof video.data.duration === "number" ? video.data.duration : 0;
 			const audioUrl = `https://content.rawkode.academy/videos/${video.data.id}/original.mp3`;
-			const originalThumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
+			const originalThumbnailUrl = getVideoThumbnailUrl(video.data.id);
 			const episodeUrl = `${site}/watch/${video.data.slug}/`;
 			const audioFileSize = video.data.audioFileSize || 0;
 			const chaptersUrl = `${site}/api/feeds/shows/${showId}/${video.data.slug}/chapters.json`;

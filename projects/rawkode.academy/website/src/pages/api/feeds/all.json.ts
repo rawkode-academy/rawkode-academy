@@ -1,6 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
@@ -90,7 +91,7 @@ export const GET: APIRoute = async ({ site }) => {
 			summary: video.data.description,
 			date_published: new Date(video.data.publishedAt).toISOString(),
 			tags: ["Video", ...tagNames],
-			image: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+			image: getVideoThumbnailUrl(video.data.id),
 		});
 	}
 

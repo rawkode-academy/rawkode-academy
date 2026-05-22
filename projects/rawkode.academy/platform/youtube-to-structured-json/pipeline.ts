@@ -27,6 +27,8 @@ const mimeType = (filename: string) => {
 			return "video/x-matroska";
 		case "jpg":
 			return "image/jpeg";
+		case "webp":
+			return "image/webp";
 		case "json":
 			return "application/json";
 		case "wav":
@@ -43,7 +45,7 @@ const uploadToR2 = async (local: string, remote: string) => {
 
 	const bytes = Deno.readFileSync(local);
 	const uploadCommand: PutObjectCommandInput = {
-		Bucket: "rawkode-academy-videos",
+		Bucket: "rawkode-academy-content",
 		Key: remote,
 		Body: bytes,
 		ContentLength: bytes.length,
@@ -85,14 +87,14 @@ const downloadVideo = async (youtubeId: string, cuid2: string) => {
 };
 
 const downloadThumbnail = async (youtubeId: string, cuid2: string) => {
-	if (!existsSync(`./pipeline/${youtubeId}/thumbnail.jpg`)) {
+	if (!existsSync(`./pipeline/${youtubeId}/thumbnail.webp`)) {
 		// Download thumbnail
 		new Deno.Command("yt-dlp", {
 			args: [
 				"--write-thumbnail",
 				"--skip-download",
 				"--convert-thumbnails",
-				"jpg",
+				"webp",
 				"-o",
 				`./pipeline/${youtubeId}/thumbnail`,
 				`https://www.youtube.com/watch?v=${youtubeId}`,
@@ -101,8 +103,8 @@ const downloadThumbnail = async (youtubeId: string, cuid2: string) => {
 	}
 
 	await uploadToR2(
-		`./pipeline/${youtubeId}/thumbnail.jpg`,
-		`${cuid2}/thumbnail.jpg`,
+		`./pipeline/${youtubeId}/thumbnail.webp`,
+		`${cuid2}/thumbnail.webp`,
 	);
 };
 

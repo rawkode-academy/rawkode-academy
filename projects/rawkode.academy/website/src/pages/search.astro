@@ -4,6 +4,7 @@ import { env } from "cloudflare:workers";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const normalizedQuery = searchQuery.toLowerCase();
@@ -44,7 +45,7 @@ const feedVideos = results
 		title: video.data.title,
 		description: video.data.description,
 		slug: video.data.slug,
-		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 		publishedAt:

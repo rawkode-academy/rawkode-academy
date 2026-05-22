@@ -21,7 +21,7 @@ describe("fetchRandomVideos", () => {
                   description: "This is a test video",
                   duration: 120,
                   publishedAt: "2023-01-01",
-                  thumbnailUrl: "https://example.com/thumbnail.jpg",
+                  thumbnailUrl: "https://example.com/thumbnail.webp",
                   chapters: [{ title: "Chapter 1" }],
                   technologies: [{ name: "TypeScript" }]
                 }
@@ -41,7 +41,7 @@ describe("fetchRandomVideos", () => {
       description: "This is a test video",
       duration: 120,
       publishedAt: "2023-01-01",
-      thumbnailUrl: "https://example.com/thumbnail.jpg"
+      thumbnailUrl: "https://example.com/thumbnail.webp"
     });
     expect(videos[0].chapters[0].title).toBe("Chapter 1");
     expect(videos[0].technologies[0].name).toBe("TypeScript");

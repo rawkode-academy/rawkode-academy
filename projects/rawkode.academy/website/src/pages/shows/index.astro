@@ -6,6 +6,7 @@ import ShowCard from "@/components/show/ShowCard.astro";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -48,7 +49,7 @@ const showsToRender: ShowSummary[] = await (async () => {
 			.map((v) => ({
 				video: {
 					title: v.data.title,
-					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
+					thumbnailUrl: getVideoThumbnailUrl(v.data.id),
 					publishedAt:
 						v.data.publishedAt instanceof Date
 							? v.data.publishedAt.toISOString()

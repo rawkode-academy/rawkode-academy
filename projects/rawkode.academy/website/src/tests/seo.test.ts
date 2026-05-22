@@ -1191,7 +1191,7 @@ describe("Structured Data Validation", () => {
 			name: "Hands-on with Kubernetes",
 			description: "A practical Kubernetes walkthrough with clip markers.",
 			thumbnailUrl: [
-				"https://content.rawkode.academy/videos/video-1/thumbnail.jpg",
+				"https://content.rawkode.academy/videos/video-1/thumbnail.webp",
 			],
 			uploadDate: "2026-03-26T10:00:00.000Z",
 			duration: "PT37M12S",
@@ -1487,7 +1487,7 @@ describe("Structured Data Validation", () => {
 		expect(firstItem["@type"]).toBe("VideoObject");
 		expect(firstItem.duration).toBe("PT1H1M1S");
 		expect(firstItem.thumbnailUrl).toBe(
-			"https://content.rawkode.academy/videos/new-id/thumbnail.jpg",
+			"https://content.rawkode.academy/videos/new-id/thumbnail.webp",
 		);
 		expect(firstItem.uploadDate).toBe("2026-05-15T08:00:00.000Z");
 
@@ -1571,7 +1571,7 @@ describe("Structured Data Validation", () => {
 					url: "https://rawkode.academy/watch/example-video/",
 					title: "Example video",
 					date_published: "2026-04-01T08:00:00.000Z",
-					image: "https://content.rawkode.academy/videos/x/thumbnail.jpg",
+					image: "https://content.rawkode.academy/videos/x/thumbnail.webp",
 				},
 			],
 		});
@@ -1589,7 +1589,7 @@ describe("Structured Data Validation", () => {
 		expect(authors[0]?.url).toBe("https://rawkode.academy/people/rawkode");
 		expect(items[1]?.date_modified).toBeUndefined();
 		expect(items[1]?.image).toBe(
-			"https://content.rawkode.academy/videos/x/thumbnail.jpg",
+			"https://content.rawkode.academy/videos/x/thumbnail.webp",
 		);
 
 		expect(() => JSON.stringify(feed)).not.toThrow();

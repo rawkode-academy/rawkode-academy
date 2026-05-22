@@ -3,12 +3,18 @@ import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles, withRssMimeType } from "../../../lib/feed-utils";
 import { createLogger } from "@/lib/logger";
+import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 
 import type { RSSFeedItem } from "@astrojs/rss";
 
 const logger = createLogger("feeds");
 
 export async function GET(context: APIContext) {
+	const site = (context.site?.toString() || "https://rawkode.academy").replace(
+		/\/$/,
+		"",
+	);
+
 	const [articles, videos, technologies, news] = await Promise.all([
 		getCollection("articles", ({ data }) => !data.draft),
 		getCollection("videos"),
@@ -100,10 +106,11 @@ export async function GET(context: APIContext) {
 			};
 
 			if (duration) {
+				const itunesImageUrl = getVideoThumbnailJpegUrl(site, video.data.id);
 				item.customData = `
-				<enclosure url="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" type="image/jpeg" />
+				<enclosure url="${itunesImageUrl}" type="image/jpeg" />
 				<itunes:duration>${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, "0")}</itunes:duration>
-				<itunes:image href="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" />
+				<itunes:image href="${itunesImageUrl}" />
 			`;
 			}
 

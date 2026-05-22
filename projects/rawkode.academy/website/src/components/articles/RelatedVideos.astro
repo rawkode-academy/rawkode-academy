@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 interface Props {
 	currentArticle: CollectionEntry<"articles">;
@@ -81,7 +82,7 @@ if (articleTechnologySet.size > 0) {
 			slug: item.video.data.slug,
 			title: item.video.data.title,
 			duration: item.video.data.duration,
-			thumbnailUrl: `https://content.rawkode.academy/videos/${item.video.data.id}/thumbnail.jpg`,
+			thumbnailUrl: getVideoThumbnailUrl(item.video.data.id),
 		}));
 }
 ---

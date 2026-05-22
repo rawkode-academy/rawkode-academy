@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import { createLogger } from "@/lib/logger";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { normalizeTechnologyReferences } from "./normalize-technology-refs";
 
 const logger = createLogger("videos");
@@ -32,7 +33,7 @@ export async function getVideosForTechnology(technologyId: string) {
 		return sortedVideos.map((video) => ({
 			id: video.data.id, // video asset ID
 			title: video.data.title,
-			thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+			thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 			slug: video.data.slug,
 			duration: video.data.duration,
 		}));

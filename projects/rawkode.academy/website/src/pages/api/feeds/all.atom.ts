@@ -1,6 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIContext } from "astro";
 import { renderAndSanitizeArticles } from "../../../lib/feed-utils";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 interface AtomEntry {
 	title: string;
@@ -69,7 +70,7 @@ export async function GET(context: APIContext) {
 			categories: (video.data.technologies as string[]).map(
 				(id) => techName.get(id) || id,
 			),
-			thumbnail: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+			thumbnail: getVideoThumbnailUrl(video.data.id),
 			type: "video",
 		};
 		if (typeof video.data.duration === "number") {

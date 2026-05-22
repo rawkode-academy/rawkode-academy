@@ -13,6 +13,7 @@ import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
 import { createLogger } from "@/lib/logger";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -55,7 +56,7 @@ const feedVideos = videosForShow
 	.map((video) => ({
 		id: video.data.id,
 		title: video.data.title,
-		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 		slug: video.data.slug,

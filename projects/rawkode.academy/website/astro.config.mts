@@ -113,6 +113,13 @@ export default defineConfig({
 		sessionKVBindingName: "SESSION",
 	}),
 	trailingSlash: "never",
+	build: {
+		// PSI flagged ~620 ms of render-blocking CSS on the homepage. Inlining
+		// every stylesheet pulls them out of the critical request chain at the
+		// cost of a larger HTML payload per request. For a cache-cold visitor
+		// (the PSI run target) this is a net win for FCP/LCP.
+		inlineStylesheets: "always",
+	},
 	integrations: [
 		// Inline the SVG output so we don't depend on the generated file's
 		// on-disk path. Our article MDX lives outside the website project (in
@@ -253,6 +260,7 @@ export default defineConfig({
 			cssVariable: "--font-quicksand",
 			weights: ["400", "700"],
 			styles: ["normal"],
+			display: "optional",
 		},
 		{
 			provider: fontProviders.google(),
@@ -260,6 +268,7 @@ export default defineConfig({
 			cssVariable: "--font-poppins",
 			weights: ["400", "600"],
 			styles: ["normal"],
+			display: "optional",
 		},
 		{
 			provider: fontProviders.fontsource(),
@@ -267,6 +276,7 @@ export default defineConfig({
 			cssVariable: "--font-monaspace-neon",
 			weights: ["400"],
 			styles: ["normal"],
+			display: "optional",
 		},
 	],
 });

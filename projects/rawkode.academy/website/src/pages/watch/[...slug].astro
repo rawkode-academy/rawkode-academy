@@ -15,6 +15,7 @@ import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export const prerender = false;
 
@@ -137,7 +138,7 @@ const showRelatedAll = showEntry
 const showRelatedVideos = showRelatedAll.slice(0, SHOW_RELATED_LIMIT).map((v) => ({
 	id: v.data.id,
 	title: v.data.title,
-	thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
+	thumbnailUrl: getVideoThumbnailUrl(v.data.id),
 	slug: v.data.slug,
 	duration: typeof v.data.duration === "number" ? v.data.duration : undefined,
 }));
@@ -216,7 +217,7 @@ const breadcrumbElements = showEntry
 			{ title: "Videos", link: "/watch" },
 		];
 
-const thumbnailUrl = `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`;
+const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
 

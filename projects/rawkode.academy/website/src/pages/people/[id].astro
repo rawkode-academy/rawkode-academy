@@ -8,6 +8,7 @@ import ShowCard from "@/components/show/ShowCard.astro";
 import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -81,7 +82,7 @@ const showSummaries: ShowSummary[] = await Promise.all(
 			episodes: showVideos.map((v) => ({
 				video: {
 					title: v.data.title,
-					thumbnailUrl: `https://content.rawkode.academy/videos/${v.data.id}/thumbnail.jpg`,
+					thumbnailUrl: getVideoThumbnailUrl(v.data.id),
 					publishedAt: v.data.publishedAt.toISOString(),
 				},
 			})),
@@ -94,7 +95,7 @@ const guestVideoFeed = guestVideos
 	.map((video) => ({
 		id: video.data.id,
 		title: video.data.title,
-		thumbnailUrl: `https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`,
+		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
 		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
 		slug: video.data.slug,

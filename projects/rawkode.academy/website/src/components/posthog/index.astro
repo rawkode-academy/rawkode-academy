@@ -192,14 +192,14 @@ const { userId } = Astro.props;
 				// $web_vitals events. GSC has no CWV data for the property
 				// because field-traffic volume is below the CrUX threshold;
 				// these events are our own measurement until that changes.
-				// network_timing is off: it piggybacks on session replay,
-				// which is sampled at 0 below, so enabling it would be a
-				// silent no-op and an event-volume risk if we ever raise
-				// the replay rate without revisiting this.
 				capture_performance: {
 					web_vitals: true,
 					network_timing: false,
 				},
+				// Skip loading rrweb-record entirely. We sample at 0 anyway,
+				// and the recorder bundle (12 KiB + ~390 ms main-thread time)
+				// is a measured PSI culprit. Flip to false to re-enable.
+				disable_session_recording: true,
 				session_recording: {
 					maskAllInputs: true,
 					sampling: { rate: 0 },
@@ -232,12 +232,36 @@ const { userId } = Astro.props;
 	};
 
 	const schedulePostHogEnable = () => {
-		const start = () => enablePostHogNow();
+		// Wait for first user interaction OR a generous idle window, whichever
+		// comes first. PSI flagged PostHog as a top main-thread blocker; the
+		// vast majority of sessions never need analytics during the initial
+		// paint, so we trade a small delay for a quieter critical path.
+		const INTERACTION_EVENTS = [
+			"pointerdown",
+			"keydown",
+			"scroll",
+			"touchstart",
+		];
+		let started = false;
+		const start = () => {
+			if (started) return;
+			started = true;
+			for (const ev of INTERACTION_EVENTS) {
+				window.removeEventListener(ev, start, { capture: true });
+			}
+			enablePostHogNow();
+		};
+		for (const ev of INTERACTION_EVENTS) {
+			window.addEventListener(ev, start, {
+				capture: true,
+				passive: true,
+			});
+		}
 		if ("requestIdleCallback" in window) {
-			window.requestIdleCallback(start, { timeout: 3000 });
+			window.requestIdleCallback(start, { timeout: 5000 });
 			return;
 		}
-		window.setTimeout(start, 1500);
+		window.setTimeout(start, 4000);
 	};
 
 	// Initialize PostHog lazily after page load.

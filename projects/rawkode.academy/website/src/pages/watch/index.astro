@@ -7,6 +7,7 @@ import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
 import Page from "@/wrappers/page.astro";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 const user = Astro.locals.user;
 
@@ -99,7 +100,7 @@ const feedVideos = allVideos.slice(start, end).map((v) => ({
 	title: v.title,
 	description: v.description,
 	slug: v.slug,
-	thumbnailUrl: `https://content.rawkode.academy/videos/${v.id}/thumbnail.jpg`,
+	thumbnailUrl: getVideoThumbnailUrl(v.id),
 	streamUrl: `https://content.rawkode.academy/videos/${v.id}/stream.m3u8`,
 	duration: typeof v.duration === "number" ? v.duration : 0,
 	publishedAt:
@@ -180,7 +181,7 @@ const hasNextPage = end < allVideos.length;
 			type="video"
 			title={featuredVideo.title}
 			description={featuredVideo.description}
-			thumbnailUrl={`https://content.rawkode.academy/videos/${featuredVideo.id}/thumbnail.jpg`}
+			thumbnailUrl={getVideoThumbnailUrl(featuredVideo.id)}
 			thumbnailAlt={`Thumbnail for ${featuredVideo.title}`}
 			date={(featuredVideo.publishedAt instanceof Date ? featuredVideo.publishedAt.toISOString() : String(featuredVideo.publishedAt))}
 			duration={featuredDuration !== null ? String(featuredDuration) : undefined}

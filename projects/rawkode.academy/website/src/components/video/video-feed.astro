@@ -1,5 +1,6 @@
 ---
 import VideoProgressBar from "@/components/video/VideoProgressBar.vue";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 interface Video {
 	id: string;
@@ -26,9 +27,7 @@ const videos: Video[] = passedVideos.map((v) => ({
 	title: v.title,
 	slug: v.slug,
 	publishedAt: v.publishedAt,
-	thumbnailUrl:
-		v.thumbnailUrl ||
-		`https://content.rawkode.academy/videos/${v.id}/thumbnail.jpg`,
+	thumbnailUrl: v.thumbnailUrl || getVideoThumbnailUrl(v.id),
 	streamUrl:
 		v.streamUrl || `https://content.rawkode.academy/videos/${v.id}/stream.m3u8`,
 	duration: v.duration ?? 0,

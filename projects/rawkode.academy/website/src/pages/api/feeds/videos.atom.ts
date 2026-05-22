@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
 import type { APIContext } from "astro";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export async function GET(context: APIContext) {
 	// Get published videos only (filters out future-dated for scheduled publishing)
@@ -47,16 +48,17 @@ ${sortedVideos
 			})
 			.join("\\n\\t\\t");
 
+		const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 		return `\t<entry>
 \t\t<title><![CDATA[${video.data.title}]]></title>
 \t\t<link href="${videoUrl}" rel="alternate" type="text/html"/>
-\t\t<link href="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" rel="enclosure" type="image/jpeg"/>
+\t\t<link href="${thumbnailUrl}" rel="enclosure" type="image/webp"/>
 \t\t<id>${videoUrl}</id>
 \t\t<published>${published}</published>
 \t\t<updated>${published}</updated>
 \t\t<summary><![CDATA[${video.data.description}]]></summary>
 \t\t<content type="html"><![CDATA[
-\t\t\t<img src="${`https://content.rawkode.academy/videos/${video.data.id}/thumbnail.jpg`}" alt="${video.data.title}" />
+\t\t\t<img src="${thumbnailUrl}" alt="${video.data.title}" />
 \t\t\t<p>${video.data.description}</p>
 \t\t\t<p>Duration: ${formattedDuration}</p>
 \t\t]]></content>

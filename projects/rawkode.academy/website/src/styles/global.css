@@ -297,9 +297,9 @@ html.dark {
 
 	.glass-chip {
 		@apply inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold;
-		background-color: color-mix(in srgb, var(--surface-card-muted) 78%, transparent);
-		border: 1px solid color-mix(in srgb, var(--surface-border) 78%, transparent);
-		color: inherit;
+		background-color: color-mix(in srgb, var(--surface-card) 92%, var(--surface-card-muted));
+		border: 1px solid color-mix(in srgb, var(--surface-border) 92%, transparent);
+		color: var(--text-primary-content);
 	}
 
 	.section-shell {
