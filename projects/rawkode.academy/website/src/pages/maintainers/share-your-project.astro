@@ -2,6 +2,8 @@
 import StatsSimple from "@/components/stats/simple.vue";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import Title from "@/components/title/center.astro";
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import MLabel from "@/components/ui/MLabel.vue";
 import Page from "@/wrappers/page.astro";
 
 // Define props for the layout
@@ -92,51 +94,24 @@ const faqItems = [
 	description="Showcase your open-source project to a passionate community of developers and tech enthusiasts on Rawkode Live."
 >
 	<!-- Hero Section -->
-	<div class="relative isolate px-6 pt-14 lg:px-8">
-		<div class="mx-auto max-w-4xl py-12 sm:py-16 lg:py-20">
-			<div class="hidden sm:mb-8 sm:flex sm:justify-center">
-				<div
-					class="relative rounded-full px-3 py-1 text-sm leading-6 text-muted ring-1 ring-gray-900/10 dark:ring-gray-700 hover:ring-gray-900/20 dark:hover:ring-gray-600"
-				>
-					Join over 100 projects that have been featured on Rawkode Live. <a
-						href="#booking"
-						class="font-semibold text-primary"
-						><span class="absolute inset-0" aria-hidden="true"></span>Book your slot <span
-							aria-hidden="true">&rarr;</span
-						></a
-					>
-				</div>
-			</div>
-			<div class="text-center">
-				<h1 class="text-4xl font-bold tracking-tight text-primary-content sm:text-6xl">
-					Showcase Your Open Source Project
-				</h1>
-				<p class="mt-6 text-lg leading-8 text-muted">
-					Get your project in front of thousands of developers, receive valuable feedback, and connect with potential contributors through a live, interactive session with David (Rawkode).
-				</p>
-				<div class="mt-10 flex items-center justify-center gap-x-6">
-					<a
-						href="#booking"
-						class="rounded-md bg-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-						>Book Your Slot</a
-					>
-					<a href="#process" class="text-sm font-semibold leading-6 text-secondary-content"
-						>Learn how it works <span aria-hidden="true">→</span></a
-					>
-				</div>
-			</div>
+	<header class="syp-hero">
+		<MLabel tone="spruce">§ Show &amp; Tell · Rawkode Live</MLabel>
+		<h1 class="syp-hero__title">Showcase your open-source project</h1>
+		<p class="syp-hero__lede">
+			Get your project in front of thousands of developers, receive valuable feedback, and connect with potential contributors through a live, interactive session with David Flanagan.
+		</p>
+		<div class="syp-hero__actions">
+			<EditorialButton variant="solid" size="md" href="#booking" arrow>
+				Book your slot
+			</EditorialButton>
+			<EditorialButton variant="outline" size="md" href="#process">
+				Learn how it works
+			</EditorialButton>
 		</div>
-		<div
-			class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
-			aria-hidden="true"
-		>
-			<div
-				class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-[var(--surface-card)] from-[rgba(var(--brand-primary),0.45)] to-[rgba(var(--brand-secondary),0.45)] opacity-30 sm:left-[calc(50%+36rem)] sm:w-288.75"
-				style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
-			>
-			</div>
-		</div>
-	</div>
+		<p class="syp-hero__hint">
+			Join over 100 projects that have been featured on Rawkode Live.
+		</p>
+	</header>
 
 	<!-- Stats Section -->
 	<div class="py-8">
@@ -355,3 +330,55 @@ const faqItems = [
 		};
 	</script>
 </Page>
+
+<style>
+	.syp-hero {
+		max-width: 60rem;
+		margin: 0 auto;
+		padding: 3.5rem 2.5rem 2.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.syp-hero__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.75rem, 6vw, 5rem);
+		line-height: 0.97;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.syp-hero__lede {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.125rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 48rem;
+	}
+
+	.syp-hero__actions {
+		display: flex;
+		gap: 0.625rem;
+		flex-wrap: wrap;
+		margin-top: 0.5rem;
+	}
+
+	.syp-hero__hint {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		letter-spacing: 0.08em;
+		color: var(--editorial-ink-mute);
+		margin: 1.25rem 0 0;
+	}
+
+	@media (max-width: 720px) {
+		.syp-hero { padding: 2rem 1.25rem 1.5rem; }
+	}
+</style>

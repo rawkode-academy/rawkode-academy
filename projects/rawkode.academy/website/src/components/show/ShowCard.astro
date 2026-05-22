@@ -1,6 +1,7 @@
 ---
 import type { ShowSummary } from "@/types/show";
 import { Image } from "astro:assets";
+import MLabel from "@/components/ui/MLabel.vue";
 
 interface Props {
 	show: ShowSummary;
@@ -34,105 +35,192 @@ const latestEpisodeDate = latestEpisodePublishedAt
 	: null;
 ---
 
-<a
-        href={`/shows/${show.id}`}
-        class="group flex h-full flex-col overflow-hidden rounded-xl paper-card transition-smooth hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
->
-        {show.cover ? (
-                <div class="relative aspect-video w-full overflow-hidden" style="background: var(--surface-card-muted)">
-                        <Image
-                                src={show.cover.image}
-                                alt={show.cover.alt}
-                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-                        />
-                        {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
-                                </div>
-                        )}
-                </div>
-        ) : thumbnailUrl ? (
-                <div class="relative aspect-video w-full overflow-hidden" style="background: var(--surface-card-muted)">
-                        <img
-                                src={thumbnailUrl}
-                                alt={`Latest episode from ${show.name}`}
-                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
-                                loading="lazy"
-                        />
-                        {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
-                                </div>
-                        )}
-                </div>
-        ) : (
-                <div class="relative aspect-video w-full bg-[var(--surface-card)]">
-                        <div class="flex h-full items-center justify-center">
-                                <svg
-                                        class="h-16 w-16 text-primary/30 dark:text-primary/20"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                >
-                                        <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="1.5"
-                                                d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
-                                        />
-                                </svg>
-                        </div>
-                        {episodes.length > 0 && (
-                                <div class="absolute bottom-2 right-2 rounded-md bg-black/75 px-2 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                                        {episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
-                                </div>
-                        )}
-                </div>
-        )}
-        <div class="flex flex-1 flex-col justify-between p-6">
-                <div class="space-y-2">
-                        <h3 class="line-clamp-2 text-xl font-semibold text-primary-content">
-                                {show.name}
-                        </h3>
-                        <p class="line-clamp-2 text-sm text-muted">
-                                {hostNames.length > 0 ? (
-                                        <>
-                                                <span class="font-medium">Hosted by:</span> {hostNames.join(", ")}
-                                        </>
-                                ) : (
-                                        "Hosts to be announced"
-                                )}
-                        </p>
-                        {latestEpisodeTitle && (
-                                <p class="line-clamp-2 text-xs text-muted">
-                                        Latest: {latestEpisodeTitle}
-                                        {latestEpisodeDate && (
-                                                <>
-                                                        {" "}
-                                                        <span aria-hidden="true">·</span> {latestEpisodeDate}
-                                                </>
-                                        )}
-                                </p>
-                        )}
-                </div>
-                <div class="mt-4 flex items-center text-sm font-medium text-primary dark:text-secondary">
-                        <span>View episodes</span>
-                        <svg
-                                class="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                aria-hidden="true"
-                        >
-                                <path
-                                        d="M7.5 5L12.5 10L7.5 15"
-                                        stroke="currentColor"
-                                        stroke-width="1.5"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                />
-                        </svg>
-                </div>
-        </div>
+<a href={`/shows/${show.id}`} class="show-card">
+	<div class="show-card__frame">
+		{show.cover ? (
+			<Image
+				src={show.cover.image}
+				alt={show.cover.alt}
+				class="show-card__img"
+			/>
+		) : thumbnailUrl ? (
+			<img
+				src={thumbnailUrl}
+				alt={`Latest episode from ${show.name}`}
+				class="show-card__img"
+				loading="lazy"
+			/>
+		) : (
+			<div class="show-card__placeholder" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="1.5"
+						d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
+					/>
+				</svg>
+			</div>
+		)}
+		{episodes.length > 0 && (
+			<span class="show-card__count">
+				{episodes.length} {episodes.length === 1 ? "episode" : "episodes"}
+			</span>
+		)}
+	</div>
+
+	<div class="show-card__body">
+		<h3 class="show-card__title">{show.name}</h3>
+		<p class="show-card__hosts">
+			{hostNames.length > 0 ? (
+				<>
+					<MLabel>Hosted by</MLabel>
+					<span class="show-card__host-list">{hostNames.join(", ")}</span>
+				</>
+			) : (
+				<MLabel>Hosts to be announced</MLabel>
+			)}
+		</p>
+		{latestEpisodeTitle && (
+			<p class="show-card__latest">
+				<MLabel tone="muted">Latest</MLabel>
+				<span class="show-card__latest-title">{latestEpisodeTitle}</span>
+				{latestEpisodeDate && (
+					<MLabel tone="muted">{latestEpisodeDate}</MLabel>
+				)}
+			</p>
+		)}
+		<div class="show-card__cta">
+			<MLabel tone="ink">View episodes →</MLabel>
+		</div>
+	</div>
 </a>
+
+<style>
+	.show-card {
+		display: flex;
+		flex-direction: column;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		transition: border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.show-card:hover {
+		border-color: var(--editorial-ink);
+	}
+
+	.show-card__frame {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		background: var(--editorial-ink);
+		overflow: hidden;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.show-card__img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform var(--duration-slow) var(--ease-standard);
+	}
+
+	.show-card:hover .show-card__img {
+		transform: scale(1.02);
+	}
+
+	.show-card__placeholder {
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: center;
+		color: var(--editorial-paper);
+		opacity: 0.25;
+	}
+	.show-card__placeholder svg {
+		width: 56px;
+		height: 56px;
+	}
+
+	.show-card__count {
+		position: absolute;
+		bottom: 10px;
+		right: 10px;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.66rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-paper);
+		background: oklch(0 0 0 / 0.65);
+		padding: 0.2rem 0.5rem;
+	}
+
+	.show-card__body {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 1.25rem;
+	}
+
+	.show-card__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.5rem;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.show-card:hover .show-card__title {
+		color: var(--editorial-spruce);
+	}
+
+	.show-card__hosts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: baseline;
+		margin: 0;
+	}
+
+	.show-card__host-list {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		color: var(--editorial-ink);
+	}
+
+	.show-card__latest {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin: 0;
+		padding-top: 0.75rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.show-card__latest-title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		line-height: 1.4;
+		color: var(--editorial-ink-soft);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.show-card__cta {
+		margin-top: auto;
+		padding-top: 0.5rem;
+	}
+</style>
