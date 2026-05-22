@@ -56,9 +56,12 @@ const levelTopics = [
 		})),
 ];
 
-function totalLessons(p: (typeof learningPaths)[number]): number {
-	const modules = (p.data as { modules?: unknown[] }).modules;
-	return Array.isArray(modules) ? modules.length : 0;
+// Lesson counts aren't on the learningPaths schema; approximate by
+// counting H2 headings in the body. Good enough for masthead totals.
+function lessonCount(p: (typeof learningPaths)[number]): number {
+	const body = p.body ?? "";
+	const matches = body.match(/^##\s+/gm);
+	return matches?.length ?? 0;
 }
 
 function formatHours(minutes?: number): string | undefined {
@@ -67,7 +70,7 @@ function formatHours(minutes?: number): string | undefined {
 	return `${h}`;
 }
 
-const allLessons = learningPaths.reduce((acc, p) => acc + totalLessons(p), 0);
+const allLessons = learningPaths.reduce((acc, p) => acc + lessonCount(p), 0);
 
 const [featured, ...rest] = learningPaths;
 
@@ -105,7 +108,7 @@ const pageDescription =
 					description={featured.data.description}
 					level={featured.data.difficulty}
 					hours={formatHours(featured.data.estimatedDuration)}
-					lessons={totalLessons(featured) || undefined}
+					lessons={lessonCount(featured) || undefined}
 				/>
 			</section>
 		)}
@@ -120,7 +123,7 @@ const pageDescription =
 					description={path.data.description}
 					level={path.data.difficulty}
 					hours={formatHours(path.data.estimatedDuration)}
-					lessons={totalLessons(path) || undefined}
+					lessons={lessonCount(path) || undefined}
 				/>
 			))}
 		</div>

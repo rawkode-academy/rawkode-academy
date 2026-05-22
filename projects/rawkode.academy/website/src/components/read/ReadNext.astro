@@ -1,11 +1,11 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
 interface Props {
 	articles: CollectionEntry<"articles">[];
-	totalCount?: number;
+	totalCount?: number | undefined;
 }
 
 const { articles, totalCount } = Astro.props as Props;
@@ -16,9 +16,20 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 });
 
-const items = articles.slice(0, 3).map((a, i) => ({
+// Derive dispatch numbers from the article's position in the full
+// sorted corpus so they stay stable + match other surfaces (/read index,
+// article header). Cached at module level; getCollection is memoised
+// across renders inside Astro.
+const corpus = (
+	await getCollection("articles", ({ data }) => !data.draft)
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const indexById = new Map<string, number>(
+	corpus.map((a, i) => [a.id, corpus.length - i]),
+);
+
+const items = articles.slice(0, 3).map((a) => ({
 	href: `/read/${a.id}`,
-	dispatchNum: String(100 - i).padStart(3, "0"),
+	dispatchNum: String(indexById.get(a.id) ?? corpus.length).padStart(3, "0"),
 	kicker: getTypeBadgeConfig(a.data.type || "tutorial").label,
 	title: a.data.title,
 	date: dateFormatter.format(a.data.publishedAt),

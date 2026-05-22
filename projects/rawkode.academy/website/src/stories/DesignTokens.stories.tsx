@@ -362,49 +362,39 @@ export const BorderRadius: Story = {
 	),
 };
 
-export const Gradients: Story = {
+export const Surfaces: Story = {
 	render: () => (
 		<div className="space-y-8">
 			<div>
-				<h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-					Gradient Patterns
+				<h2 className="text-2xl font-bold text-primary-content mb-6">
+					Editorial Surfaces
 				</h2>
+				<p className="text-sm text-secondary-content mb-6 max-w-2xl">
+					Editorial design uses flat surfaces with 1px hairline borders —
+					no gradients, no backdrop blur, no depth shadows. The four
+					primary surface tokens cover ~95% of cases.
+				</p>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-							Primary to Secondary
-						</p>
-						<div className="w-full h-24 bg-linear-to-r rounded-lg" />
-						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-r 						</code>
-					</div>
-					<div>
-						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-							Primary to Tertiary
-						</p>
-						<div className="w-full h-24 bg-linear-to-r to-tertiary rounded-lg" />
-						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-r to-tertiary
-						</code>
-					</div>
-					<div>
-						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-							Secondary to Quaternary
-						</p>
-						<div className="w-full h-24 bg-linear-to-r to-quaternary rounded-lg" />
-						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-r to-quaternary
-						</code>
-					</div>
-					<div>
-						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-							Diagonal Gradient
-						</p>
-						<div className="w-full h-24 bg-linear-to-br to-tertiary rounded-lg" />
-						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-br to-tertiary
-						</code>
-					</div>
+					{[
+						["Paper", "var(--editorial-paper)", "Default page background"],
+						["Paper deep", "var(--editorial-paper-deep)", "Secondary surface — card backgrounds, video frames"],
+						["Surface card muted", "var(--surface-card-muted)", "Hover state, subtle wells"],
+						["Ink", "var(--editorial-ink)", "Solid ink background (CTAs, panels)"],
+					].map(([name, value, note]) => (
+						<div key={name}>
+							<p className="text-sm font-medium text-primary-content mb-2">
+								{name}
+							</p>
+							<div
+								className="w-full h-24 rounded-sm border border-[var(--editorial-hairline)]"
+								style={{ background: value }}
+							/>
+							<code className="text-xs text-muted block mt-2">
+								{value}
+							</code>
+							<p className="text-xs text-muted mt-1">{note}</p>
+						</div>
+					))}
 				</div>
 			</div>
 		</div>
