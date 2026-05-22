@@ -259,27 +259,29 @@ export default defineConfig({
 		],
 	},
 	fonts: [
+		// Editorial trio — "engineering journal meets terminal":
+		// Instrument Serif (display, italic) / Inter Tight (body) / JetBrains Mono (labels & metadata).
 		{
 			provider: fontProviders.google(),
-			name: "Quicksand",
-			cssVariable: "--font-quicksand",
-			weights: ["400", "700"],
-			styles: ["normal"],
-			display: "optional",
-		},
-		{
-			provider: fontProviders.google(),
-			name: "Poppins",
-			cssVariable: "--font-poppins",
-			weights: ["400", "600"],
-			styles: ["normal"],
-			display: "optional",
-		},
-		{
-			provider: fontProviders.fontsource(),
-			name: "Monaspace Neon",
-			cssVariable: "--font-monaspace-neon",
+			name: "Instrument Serif",
+			cssVariable: "--font-instrument-serif",
 			weights: ["400"],
+			styles: ["normal", "italic"],
+			display: "optional",
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Inter Tight",
+			cssVariable: "--font-inter-tight",
+			weights: ["300", "400", "500", "600", "700"],
+			styles: ["normal"],
+			display: "optional",
+		},
+		{
+			provider: fontProviders.google(),
+			name: "JetBrains Mono",
+			cssVariable: "--font-jetbrains-mono",
+			weights: ["400", "500", "600"],
 			styles: ["normal"],
 			display: "optional",
 		},

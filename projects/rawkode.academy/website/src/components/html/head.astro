@@ -32,27 +32,20 @@ const normalizedTitle =
 ---
 
 <style is:global>
-	@reference "../../styles/global.css";
-
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		@apply font-display;
-	}
-
-	body {
-		font-family: var(--font-body);
-	}
-
+	/* Body font + mono fallbacks. Heading font + body backdrop are owned
+	   by global.css (@layer base + body{}). UnoCSS handles class-level
+	   `font-display`/`font-body`/`font-mono` via theme. */
 	pre,
 	code,
 	kbd,
 	samp,
 	tt {
-		@apply font-mono;
+		font-family:
+			var(--font-jetbrains-mono),
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			monospace;
 	}
 </style>
 
@@ -60,9 +53,9 @@ const normalizedTitle =
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="color-scheme" content="light dark" />
-	<Font cssVariable="--font-quicksand" />
-	<Font cssVariable="--font-poppins" preload />
-	<Font cssVariable="--font-monaspace-neon" />
+	<Font cssVariable="--font-instrument-serif" preload />
+	<Font cssVariable="--font-inter-tight" preload />
+	<Font cssVariable="--font-jetbrains-mono" />
 
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

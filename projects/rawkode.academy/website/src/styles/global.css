@@ -5,37 +5,41 @@
    live in `uno.config.ts`. */
 
 :root {
-	/* Rawkode Blue — canonical brand palette */
-	--brand-primary: 95 94 215; /* Purple #5F5ED7 */
-	--brand-secondary: 0 206 255; /* Cyan #00CEFF */
-	--brand-accent: 17 24 39; /* Dark Blue-Gray #111827 */
+	/* Editorial palette — "engineering journal meets terminal".
+	   Token *names* are preserved from the previous Rawkode Blue system
+	   so ~300 call sites keep working; only the values change.
+
+	   The triplets below are sRGB approximations of oklch design values,
+	   used by the legacy `rgb(var(--x))` and `rgba(var(--x), 0.x)` pattern
+	   throughout the codebase. New primitives should prefer the direct
+	   `--editorial-*` oklch tokens below for precision. */
+	--brand-primary: 47 135 114; /* spruce  — oklch(0.52 0.09 165) */
+	--brand-secondary: 218 142 58; /* amber   — oklch(0.72 0.15 65) */
+	--brand-accent: 176 102 76; /* rust    — oklch(0.55 0.13 40) */
+
+	/* Editorial direct-color palette (preferred for new primitives) */
+	--editorial-paper: oklch(0.97 0.008 85);
+	--editorial-paper-deep: oklch(0.93 0.012 85);
+	--editorial-ink: oklch(0.18 0.02 60);
+	--editorial-ink-soft: oklch(0.36 0.015 60);
+	--editorial-ink-mute: oklch(0.58 0.012 60);
+	--editorial-hairline: oklch(0.18 0.02 60 / 0.12);
+	--editorial-hairline-strong: oklch(0.18 0.02 60 / 0.22);
+	--editorial-spruce: oklch(0.52 0.09 165);
+	--editorial-spruce-dim: oklch(0.52 0.09 165 / 0.12);
+	--editorial-amber: oklch(0.72 0.15 65);
+	--editorial-amber-dim: oklch(0.72 0.15 65 / 0.14);
+	--editorial-rust: oklch(0.55 0.13 40);
+	--editorial-violet: oklch(0.50 0.13 290);
 
 	/* Light-mode surface tokens */
 	color-scheme: light dark;
-	--surface-base: #eef2ff;
-	--surface-overlay: rgba(255, 255, 255, 0.94);
-	--surface-card: rgba(255, 255, 255, 0.88);
-	--surface-card-muted: rgba(95, 94, 215, 0.08);
-	--surface-border: rgba(95, 94, 215, 0.16);
-	--surface-border-strong: rgba(0, 206, 255, 0.32);
-
-	--app-backdrop:
-		radial-gradient(
-			circle at 10% 20%,
-			rgba(var(--brand-primary), 0.35) 0%,
-			transparent 40%
-		),
-		radial-gradient(
-			circle at 90% 10%,
-			rgba(var(--brand-secondary), 0.25) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.18) 0%,
-			transparent 50%
-		),
-		linear-gradient(140deg, #ecf2ff 0%, #f7f4ff 35%, #f1fbff 70%, #fdf2ff 100%);
+	--surface-base: var(--editorial-paper);
+	--surface-overlay: oklch(0.97 0.008 85 / 0.94);
+	--surface-card: var(--editorial-paper-deep);
+	--surface-card-muted: oklch(0.18 0.02 60 / 0.04);
+	--surface-border: var(--editorial-hairline);
+	--surface-border-strong: var(--editorial-hairline-strong);
 
 	/* Layout Spacing Tokens */
 	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
@@ -50,63 +54,44 @@
 	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
 	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
 
-	/* Semantic text-tone tokens — mirrored from the `@utility` blocks
-	   below so scoped Astro/Vue `<style>` blocks can reach them via
-	   `color: var(--text-primary-content)` etc. The `@utility` classes
-	   remain the primary surface; these vars are for scoped styles
-	   that can't use `@apply`. */
-	--text-primary-content: rgb(17 24 39);
-	--text-secondary-content: rgb(55 65 81);
-	--text-muted: rgb(75 85 99);
+	/* Semantic text-tone tokens — mirrored into UnoCSS theme so
+	   `text-primary-content` works as both a class and a CSS variable. */
+	--text-primary-content: var(--editorial-ink);
+	--text-secondary-content: var(--editorial-ink-soft);
+	--text-muted: var(--editorial-ink-mute);
 }
 
 html.dark {
-	--surface-base: #040712;
-	--surface-overlay: rgba(4, 7, 18, 0.92);
-	--surface-card: rgba(8, 12, 25, 0.9);
-	--surface-card-muted: rgba(0, 206, 255, 0.12);
-	--surface-border: rgba(95, 94, 215, 0.35);
-	--surface-border-strong: rgba(0, 206, 255, 0.45);
+	/* Dark-mode editorial palette — ink-dark ground with paper-dark surfaces.
+	   The triplet legacy tokens stay; only the value brightens slightly for
+	   contrast on dark. */
+	--editorial-paper: oklch(0.22 0.012 280); /* paper-dark */
+	--editorial-paper-deep: oklch(0.26 0.014 280);
+	--editorial-ink: oklch(0.92 0.008 85); /* light text on dark */
+	--editorial-ink-soft: oklch(0.74 0.008 85);
+	--editorial-ink-mute: oklch(0.58 0.008 85);
+	--editorial-hairline: oklch(1 0 0 / 0.10);
+	--editorial-hairline-strong: oklch(1 0 0 / 0.18);
 
-	/* Dark-mode text tones — mirror the `:root.dark &` blocks in
-	   the `@utility text-*` declarations below. */
-	--text-primary-content: rgb(255 255 255);
-	--text-secondary-content: rgb(209 213 219);
-	--text-muted: rgb(156 163 175);
+	--surface-base: oklch(0.14 0.01 280); /* ink-dark ground */
+	--surface-overlay: oklch(0.14 0.01 280 / 0.92);
+	--surface-card: var(--editorial-paper-deep);
+	--surface-card-muted: oklch(1 0 0 / 0.04);
+	--surface-border: var(--editorial-hairline);
+	--surface-border-strong: var(--editorial-hairline-strong);
 
-	--app-backdrop:
-		radial-gradient(
-			circle at 20% 10%,
-			rgba(var(--brand-primary), 0.5) 0%,
-			transparent 35%
-		),
-		radial-gradient(
-			circle at 85% 15%,
-			rgba(var(--brand-secondary), 0.35) 0%,
-			transparent 45%
-		),
-		radial-gradient(
-			circle at 15% 90%,
-			rgba(var(--brand-primary), 0.28) 0%,
-			transparent 45%
-		), linear-gradient(145deg, #030510 0%, #050b1f 55%, #081430 100%);
+	--text-primary-content: var(--editorial-ink);
+	--text-secondary-content: var(--editorial-ink-soft);
+	--text-muted: var(--editorial-ink-mute);
 }
 
 body {
 	position: relative;
 	min-height: 100vh;
 	background-color: var(--surface-base);
-	color: inherit;
+	color: var(--text-primary-content);
 	overflow-x: hidden;
-}
-
-body::before {
-	content: "";
-	position: fixed;
-	inset: 0;
-	background: var(--app-backdrop);
-	z-index: -1;
-	pointer-events: none;
+	font-family: var(--font-inter-tight), "Inter", -apple-system, system-ui, sans-serif;
 }
 
 /* Design-system raw variables that aren't expressed as UnoCSS theme keys
@@ -114,15 +99,16 @@ body::before {
    UnoCSS theme keys live in uno.config.ts (colors, fontFamily, spacing,
    borderRadius, transitionDuration, transitionTimingFunction, boxShadow). */
 :root {
-	/* Radius scale — also exposed via UnoCSS theme so `rounded-xs..4xl` work. */
-	--radius-xs: 0.375rem;
-	--radius-sm: 0.5rem;
-	--radius-md: 0.75rem;
-	--radius-lg: 1rem;
-	--radius-xl: 1.2rem;
-	--radius-2xl: 1.35rem;
-	--radius-3xl: 1.5rem;
-	--radius-4xl: 2rem;
+	/* Radius scale — collapsed to editorial sharpness (2px–8px). The names
+	   are preserved so consumers don't break; only the magnitudes drop. */
+	--radius-xs: 2px;
+	--radius-sm: 2px;
+	--radius-md: 3px;
+	--radius-lg: 3px;
+	--radius-xl: 4px;
+	--radius-2xl: 4px;
+	--radius-3xl: 6px;
+	--radius-4xl: 8px;
 
 	/* Motion tokens — durations + easings. */
 	--duration-fast: 120ms;
@@ -135,11 +121,22 @@ body::before {
 	--ease-in: cubic-bezier(0.4, 0, 1, 1);
 	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-	/* Shadow ramp — light mode. Dark-mode override below. */
-	--shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
-	--shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
-	--shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14);
-	--shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.18);
+	/* "Shadow" ramp — editorial design uses hairline borders, not depth.
+	   The token names survive so `card-shadow-*` shortcuts in uno.config.ts
+	   keep working, but each step now resolves to a 1px ink ring at varying
+	   opacity. Add depth only where the design explicitly calls for it. */
+	--shadow-sm: 0 0 0 1px oklch(0.18 0.02 60 / 0.06);
+	--shadow-md: 0 0 0 1px oklch(0.18 0.02 60 / 0.10);
+	--shadow-lg: 0 0 0 1px oklch(0.18 0.02 60 / 0.16);
+	--shadow-xl: 0 0 0 1px oklch(0.18 0.02 60 / 0.20);
+}
+
+html.dark {
+	/* Dark-mode hairline ramp — white at low opacity on ink-dark ground. */
+	--shadow-sm: 0 0 0 1px oklch(1 0 0 / 0.06);
+	--shadow-md: 0 0 0 1px oklch(1 0 0 / 0.10);
+	--shadow-lg: 0 0 0 1px oklch(1 0 0 / 0.16);
+	--shadow-xl: 0 0 0 1px oklch(1 0 0 / 0.20);
 }
 
 /* Dark-mode shadow ramp — deeper, no light bleed. */
@@ -151,428 +148,302 @@ html.dark {
 }
 
 @layer base {
-	/* Heading ramp — display font, semantic colour, balanced tracking.
-	   Component-level utility classes still override these by specificity.
-	   The prose-content variants live further down in @layer components. */
+	/* Editorial heading ramp — h1/h2 in serif italic at display sizes,
+	   h3/h4 in Inter Tight semibold. Negative letter-spacing pulls the
+	   display sizes tight without going into "decorative" territory. */
 	h1 {
-		@apply text-3xl md:text-4xl font-extrabold tracking-tight text-primary-content;
-		font-family: var(--font-display);
-		letter-spacing: -0.02em;
+		@apply text-4xl md:text-5xl text-primary-content;
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		line-height: 1.02;
+		letter-spacing: -0.035em;
 	}
 
 	h2 {
-		@apply text-2xl md:text-3xl font-bold tracking-tight text-primary-content;
-		font-family: var(--font-display);
-		letter-spacing: -0.015em;
+		@apply text-3xl md:text-4xl text-primary-content;
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		line-height: 1.05;
+		letter-spacing: -0.025em;
 	}
 
 	h3 {
-		@apply text-xl md:text-2xl font-semibold text-primary-content;
-		font-family: var(--font-display);
-		letter-spacing: -0.01em;
+		@apply text-xl md:text-2xl text-primary-content;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-weight: 500;
+		line-height: 1.2;
+		letter-spacing: -0.015em;
 	}
 
 	h4 {
-		@apply text-lg md:text-xl font-semibold text-primary-content;
-		font-family: var(--font-display);
-		letter-spacing: -0.005em;
+		@apply text-lg md:text-xl text-primary-content;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-weight: 500;
+		line-height: 1.25;
+		letter-spacing: -0.01em;
 	}
 }
 
 @layer components {
-	/* Glass Morphism Components */
+	/* ════════════════════════════════════════════════════════════════
+	   Editorial surfaces — paper panels with hairline borders.
+	   Class names preserved from the previous glass system so consumers
+	   don't break; bodies rebuilt for the editorial vocabulary. New
+	   primitives should prefer `.paper-panel` / `.paper-card` /
+	   `.hairline-chip` (defined below) which use the editorial palette
+	   semantics directly.
+	   ════════════════════════════════════════════════════════════════ */
+
+	/* Paper surfaces — the editorial replacements. */
+	.paper-panel,
 	.glass-panel {
-		@apply border rounded-3xl;
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card) 88%, white 12%) 0%,
-				color-mix(in srgb, var(--surface-card) 94%, rgb(var(--brand-primary) / 0.05) 6%) 100%
-			);
-		border-color: color-mix(in srgb, var(--surface-border) 92%, transparent);
-		box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-3xl);
 	}
 
-	.glass-card {
-		@apply border rounded-2xl;
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card) 90%, white 10%) 0%,
-				color-mix(in srgb, var(--surface-card) 96%, rgb(var(--brand-primary) / 0.04) 4%) 100%
-			);
-		border-color: color-mix(in srgb, var(--surface-border) 94%, transparent);
-		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
-	}
-
-	/* Glass card with shimmer effect overlay */
+	.paper-card,
+	.glass-card,
 	.glass-card-shimmer {
-		@apply relative overflow-hidden border rounded-2xl;
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card) 90%, white 10%) 0%,
-				color-mix(in srgb, var(--surface-card) 96%, rgb(var(--brand-primary) / 0.04) 4%) 100%
-			);
-		border-color: color-mix(in srgb, var(--surface-border) 94%, transparent);
-		box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-2xl);
 	}
 
-	.glass-card-shimmer::before {
-		content: "";
-		@apply pointer-events-none absolute left-5 right-5 top-0;
-		height: 1px;
-		background: linear-gradient(
-			90deg,
-			rgb(var(--brand-primary) / 0.22) 0%,
-			transparent 38%,
-			transparent 62%,
-			rgb(var(--brand-secondary) / 0.18) 100%
-		);
+	.paper-card-muted {
+		background: var(--surface-card-muted);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-xl);
 	}
 
-	html.dark .glass-card-shimmer::before {
-		background: linear-gradient(
-			90deg,
-			rgb(var(--brand-primary) / 0.28) 0%,
-			transparent 38%,
-			transparent 62%,
-			rgb(var(--brand-secondary) / 0.22) 100%
-		);
-	}
-
-	/* Interactive element inside glass cards */
+	/* Interactive surface chip — used inside paper cards. Editorial keeps
+	   the 1px hairline and swaps the rounded glass blur for a flat ink
+	   tint on hover. */
 	.glass-interactive {
-		@apply backdrop-blur-md rounded-lg transition-all;
-		background: rgba(255, 255, 255, 0.3);
-		border: 1px solid rgba(255, 255, 255, 0.4);
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-lg);
+		transition: all var(--duration-base) var(--ease-standard);
 	}
 
 	.glass-interactive:hover {
-		background: rgba(255, 255, 255, 0.5);
-		@apply shadow-md scale-105;
+		background: var(--surface-card-muted);
+		border-color: var(--surface-border-strong);
 	}
 
-	html.dark .glass-interactive {
-		background: rgba(31, 41, 55, 0.3);
-		border-color: rgba(75, 85, 99, 0.4);
-	}
-
-	html.dark .glass-interactive:hover {
-		background: rgba(55, 65, 81, 0.5);
-	}
-
+	/* Hairline chip — replaces the glass-chip pill. Editorial chips are
+	   tighter (8/10 padding), mono-fonted, hairline-bordered. */
+	.hairline-chip,
 	.glass-chip {
-		@apply inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold;
-		background-color: color-mix(in srgb, var(--surface-card) 92%, var(--surface-card-muted));
-		border: 1px solid color-mix(in srgb, var(--surface-border) 92%, transparent);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0.6rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-pill, 9999px);
 		color: var(--text-primary-content);
 	}
 
+	/* Section shells — paper panel with optional 2px-ink heavy variant
+	   for masthead-style sections. */
 	.section-shell {
-		@apply relative overflow-hidden rounded-2xl border;
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card) 88%, white 12%) 0%,
-				color-mix(in srgb, var(--surface-card) 96%, rgb(var(--brand-primary) / 0.04) 4%) 100%
-			);
-		border-color: color-mix(in srgb, var(--surface-border) 94%, transparent);
-		box-shadow: none;
-	}
-
-	.section-shell::before {
-		content: "";
-		@apply pointer-events-none absolute left-6 right-6 top-0;
-		height: 1px;
-		background:
-			linear-gradient(
-				90deg,
-				rgb(var(--brand-primary) / 0.24) 0%,
-				transparent 42%,
-				transparent 58%,
-				rgb(var(--brand-secondary) / 0.18) 100%
-			);
-		opacity: 1;
-	}
-
-	.section-shell > * {
 		position: relative;
-		z-index: 1;
-	}
-
-	html.dark .section-shell {
-		background:
-			linear-gradient(
-				180deg,
-				rgba(10, 16, 28, 0.58) 0%,
-				rgba(6, 11, 22, 0.7) 100%
-			);
-	}
-
-	html.dark .section-shell::before {
-		background:
-			linear-gradient(
-				90deg,
-				rgb(var(--brand-primary) / 0.3) 0%,
-				transparent 42%,
-				transparent 58%,
-				rgb(var(--brand-secondary) / 0.2) 100%
-			);
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-2xl);
+		padding: var(--space-card-pad);
 	}
 
 	.section-shell-muted {
-		@apply relative overflow-hidden rounded-xl border;
-		background-color: color-mix(in srgb, var(--surface-card) 72%, transparent);
-		border-color: color-mix(in srgb, var(--surface-border) 86%, transparent);
-		box-shadow: none;
-	}
-
-	html.dark .section-shell-muted {
-		background-color: rgba(15, 23, 42, 0.22);
-	}
-
-	.eyebrow-label {
-		@apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em];
-		color: rgb(var(--brand-primary));
+		position: relative;
+		background: var(--surface-card-muted);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-xl);
+		padding: var(--space-card-pad);
 	}
 
 	.soft-panel {
-		@apply rounded-xl border;
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card-muted) 78%, transparent) 0%,
-				color-mix(in srgb, var(--surface-card) 68%, transparent) 100%
-			);
-		border-color: color-mix(in srgb, var(--surface-border) 78%, transparent);
+		background: var(--surface-card-muted);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-xl);
 	}
 
-	html.dark .soft-panel {
-		background:
-			linear-gradient(
-				180deg,
-				color-mix(in srgb, var(--surface-card-muted) 42%, transparent) 0%,
-				rgba(8, 13, 26, 0.34) 100%
-			);
+	/* Eyebrow label — small mono uppercase tag used above section
+	   headings. Editorial vocabulary equivalent of the kicker. */
+	.eyebrow-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--editorial-spruce);
 	}
 
+	html.dark .eyebrow-label {
+		color: oklch(0.72 0.09 165);
+	}
 
 	.surface-divider {
 		border-color: var(--surface-border);
 	}
 
-	/* Branded media container for logos/icons within glass cards - glass-like with subtle brand tint */
+	/* Media frame — used as the surface for logos / icons. Editorial
+	   keeps a flat paperDeep background with a single hairline below. */
 	.glass-media-brand {
-		@apply backdrop-blur-sm;
-		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary) / 0.15) 0%,
-			rgb(var(--brand-secondary) / 0.1) 100%
-		);
+		background: var(--surface-card);
 		border-bottom: 1px solid var(--surface-border);
 	}
 
-	html.dark .glass-media-brand {
-		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary) / 0.2) 0%,
-			rgb(var(--brand-secondary) / 0.15) 100%
-		);
-	}
-
-	/* Card Base Styles - legacy, prefer glass-card-shimmer */
+	/* Card base + hover — editorial hover thickens the top hairline
+	   instead of scaling the card. */
 	.card-base {
-		@apply bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl border border-white/40 dark:border-gray-600/50;
+		background: var(--surface-card);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-xl);
 	}
-
-	/* Shadow utilities — defined as `@utility` at the end of file so
-	   `@apply card-shadow-{sm,md,lg,xl}` works in scoped Astro/Vue
-	   <style> blocks too. */
 
 	.card-hover {
-		transition-property: background-color, box-shadow, transform;
-		transition-duration: var(--duration-slow);
+		transition-property: border-color, box-shadow;
+		transition-duration: var(--duration-base);
 		transition-timing-function: var(--ease-standard);
+		position: relative;
 	}
 
-	.card-hover:hover {
-		@apply bg-white/60 dark:bg-gray-700/70 scale-[1.02];
-		box-shadow: var(--shadow-lg);
+	.card-hover::before {
+		content: "";
+		position: absolute;
+		top: -1px;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: var(--editorial-ink);
+		opacity: 0;
+		transition: opacity var(--duration-base) var(--ease-standard);
+		pointer-events: none;
 	}
 
-	/* Border Utilities - Semantic */
-	.border-subtle {
-		border-color: rgba(255, 255, 255, 0.2);
+	.card-hover:hover::before {
+		opacity: 1;
 	}
 
-	html.dark .border-subtle {
-		border-color: rgba(107, 114, 128, 0.5);
+	html.dark .card-hover::before {
+		background: var(--editorial-ink);
 	}
 
-	/* Border Utilities - Legacy glass variants */
-	.border-glass {
-		@apply border border-white/40 dark:border-gray-600/50;
+	/* Border utilities — preserved names, mapped to editorial hairlines. */
+	.border-subtle,
+	.border-glass,
+	.border-glass-subtle {
+		border-color: var(--surface-border);
 	}
 
 	.border-glass-strong {
-		@apply border border-white/50 dark:border-gray-500/60;
+		border-color: var(--surface-border-strong);
 	}
 
-	.border-glass-subtle {
-		@apply border border-white/20 dark:border-gray-600/30;
-	}
-
-	/* Surface Background Utilities */
+	/* Surface background — flat paper. */
 	.bg-surface {
-		background: rgba(255, 255, 255, 0.4);
+		background: var(--surface-card);
 	}
 
-	html.dark .bg-surface {
-		background: rgba(31, 41, 55, 0.4);
-	}
-
-	/* Button Variants */
+	/* ════════════════════════════════════════════════════════════════
+	   Button variants — editorial mono uppercase buttons. Token names
+	   `.btn-glass` and `.btn-solid` are preserved for the 60-odd
+	   consumers; bodies are rebuilt for the editorial vocabulary.
+	   Prefer the new EditorialButton.vue primitive for greenfield code.
+	   ════════════════════════════════════════════════════════════════ */
 	.btn-glass {
-		@apply inline-flex items-center justify-center px-4 py-2 rounded-lg;
-		@apply text-sm font-medium transition-all duration-200;
-		@apply backdrop-blur-md;
-		background: rgba(255, 255, 255, 0.3);
-		border: 1px solid rgba(255, 255, 255, 0.4);
-		color: rgb(var(--brand-primary));
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.625rem;
+		padding: 0.85rem 1.25rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		background: transparent;
+		color: var(--text-primary-content);
+		border: 1px solid var(--surface-border-strong);
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+		transition: border-color var(--duration-base) var(--ease-standard);
 	}
 
 	.btn-glass:hover {
-		background: rgba(255, 255, 255, 0.5);
-		@apply shadow-md scale-105;
-	}
-
-	html.dark .btn-glass {
-		background: rgba(31, 41, 55, 0.3);
-		border-color: rgba(75, 85, 99, 0.4);
-	}
-
-	html.dark .btn-glass:hover {
-		background: rgba(55, 65, 81, 0.5);
+		border-color: var(--editorial-ink);
 	}
 
 	.btn-solid {
-		@apply inline-flex items-center justify-center px-4 py-2 rounded-lg;
-		@apply text-sm font-medium transition-all duration-200;
-		background: rgb(var(--brand-primary));
-		color: white;
-		border: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.625rem;
+		padding: 0.85rem 1.25rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		border: 1px solid var(--editorial-ink);
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+		transition: opacity var(--duration-base) var(--ease-standard);
 	}
 
 	.btn-solid:hover {
-		@apply shadow-lg scale-105;
-		filter: brightness(1.1);
+		opacity: 0.92;
 	}
 
-	/* Link Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
-
-	/* Gradient Presets — brand-aware hero washes derived from the active theme */
-	.bg-gradient-hero {
-		background:
-			radial-gradient(
-				circle at 12% 18%,
-				rgb(var(--brand-primary) / 0.18) 0%,
-				transparent 48%
-			),
-			radial-gradient(
-				circle at 88% 12%,
-				rgb(var(--brand-secondary) / 0.14) 0%,
-				transparent 52%
-			),
-			linear-gradient(
-				145deg,
-				color-mix(in srgb, var(--surface-base) 92%, rgb(var(--brand-primary) / 0.05)) 0%,
-				color-mix(in srgb, var(--surface-base) 96%, rgb(var(--brand-secondary) / 0.04)) 100%
-			);
-	}
-
-	html.dark .bg-gradient-hero {
-		background:
-			radial-gradient(
-				circle at 18% 12%,
-				rgb(var(--brand-primary) / 0.32) 0%,
-				transparent 48%
-			),
-			radial-gradient(
-				circle at 86% 18%,
-				rgb(var(--brand-secondary) / 0.22) 0%,
-				transparent 52%
-			),
-			linear-gradient(
-				145deg,
-				color-mix(in srgb, var(--surface-base) 86%, rgb(var(--brand-primary) / 0.18)) 0%,
-				color-mix(in srgb, var(--surface-base) 92%, rgb(var(--brand-accent) / 0.4)) 100%
-			);
-	}
-
+	/* ════════════════════════════════════════════════════════════════
+	   Gradient utilities — preserved names, all collapsed to flat paper
+	   or paperDeep. Editorial design uses no gradients. After Phase 3
+	   completes, grep + delete these once consumer count hits zero.
+	   ════════════════════════════════════════════════════════════════ */
+	.bg-gradient-hero,
 	.bg-gradient-hero-alt {
-		background: linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--surface-base) 94%, rgb(var(--brand-primary) / 0.06)) 0%,
-			color-mix(in srgb, var(--surface-overlay) 88%, rgb(var(--brand-secondary) / 0.04)) 100%
-		);
+		background: var(--surface-base);
 	}
 
-	html.dark .bg-gradient-hero-alt {
-		background: linear-gradient(
-			180deg,
-			color-mix(in srgb, var(--surface-base) 90%, rgb(var(--brand-primary) / 0.22)) 0%,
-			color-mix(in srgb, var(--surface-overlay) 86%, rgb(var(--brand-accent) / 0.35)) 100%
-		);
-	}
-
-	/* Brand gradient: canonical 135° diagonal sweep, primary → secondary */
 	.bg-gradient-primary {
-		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary)) 0%,
-			rgb(var(--brand-secondary)) 100%
-		);
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
 	}
 
-	/* Secondary gradient: reverse sweep so it complements primary visually */
 	.bg-gradient-secondary {
-		background: linear-gradient(
-			315deg,
-			rgb(var(--brand-secondary)) 0%,
-			rgb(var(--brand-primary)) 100%
-		);
+		background: var(--editorial-spruce);
+		color: var(--editorial-paper);
 	}
 
-	/* Subtle brand gradient for cards */
 	.bg-gradient-card {
-		background: linear-gradient(
-			135deg,
-			rgba(var(--brand-primary), 0.05) 0%,
-			rgba(var(--brand-secondary), 0.03) 100%
-		);
+		background: var(--surface-card);
 	}
 
-	.dark .bg-gradient-card {
-		background: linear-gradient(
-			135deg,
-			rgba(var(--brand-primary), 0.1) 0%,
-			rgba(var(--brand-secondary), 0.05) 100%
-		);
-	}
-
-	/* Text Color Utilities - defined as @utility at end of file for Tailwind v4 compatibility */
-
-	/* Animation Utilities — defined as `@utility` at the end of file
-	   so `@apply transition-card`/`-smooth`/`-fast`/`-spring` works in
-	   scoped Astro/Vue <style> blocks. */
-
-	/* Prose styles for article content - Enhanced Typography */
+	/* ════════════════════════════════════════════════════════════════
+	   Editorial .prose ramp — Inter Tight body over Instrument Serif
+	   italic display headings, JetBrains Mono code chips. Hairline
+	   blockquote (single 2px ink border-left, no gradient fill).
+	   ════════════════════════════════════════════════════════════════ */
 	.prose {
-		font-family: var(--font-body);
-		font-size: 1.125rem; /* 18px base for comfortable reading */
-		line-height: 1.75; /* Optimal for long-form reading */
-		color: rgb(55 65 81); /* gray-700 */
+		font-family: var(--font-inter-tight), "Inter", sans-serif;
+		font-size: 1.125rem;
+		line-height: 1.7;
+		color: var(--text-secondary-content);
 		font-feature-settings:
 			"kern" 1,
 			"liga" 1,
@@ -581,89 +452,66 @@ html.dark {
 		-moz-osx-font-smoothing: grayscale;
 	}
 
-	:root.dark .prose {
-		color: rgb(209 213 219); /* gray-300 */
-	}
-
-	/* Headings - Use display font with refined tracking */
+	/* Display headings — serif italic h1/h2, sans medium h3/h4 */
 	.prose h1 {
-		font-family: var(--font-display);
-		font-size: clamp(1.875rem, 4vw, 2.5rem);
-		font-weight: 800;
-		letter-spacing: -0.025em;
-		line-height: 1.2;
-		color: rgb(17 24 39); /* gray-900 */
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: clamp(2.25rem, 5vw, 3.5rem);
+		font-weight: 400;
+		letter-spacing: -0.035em;
+		line-height: 1.02;
+		color: var(--text-primary-content);
 		margin-top: 2.5rem;
 		margin-bottom: 1.25rem;
 	}
 
-	:root.dark .prose h1 {
-		color: rgb(255 255 255);
-	}
-
 	.prose h2 {
-		font-family: var(--font-display);
-		font-size: clamp(1.5rem, 3vw, 2rem);
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		line-height: 1.25;
-		color: rgb(17 24 39);
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+		font-weight: 400;
+		letter-spacing: -0.025em;
+		line-height: 1.08;
+		color: var(--text-primary-content);
 		margin-top: 2.25rem;
 		margin-bottom: 1rem;
 	}
 
-	:root.dark .prose h2 {
-		color: rgb(255 255 255);
-	}
-
 	.prose h3 {
-		font-family: var(--font-display);
+		font-family: var(--font-inter-tight), sans-serif;
+		font-weight: 500;
 		font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-		font-weight: 600;
 		letter-spacing: -0.015em;
-		line-height: 1.3;
-		color: rgb(17 24 39);
+		line-height: 1.25;
+		color: var(--text-primary-content);
 		margin-top: 2rem;
 		margin-bottom: 0.875rem;
 	}
 
-	:root.dark .prose h3 {
-		color: rgb(255 255 255);
-	}
-
 	.prose h4 {
-		font-family: var(--font-display);
+		font-family: var(--font-inter-tight), sans-serif;
+		font-weight: 500;
 		font-size: clamp(1.125rem, 2vw, 1.25rem);
-		font-weight: 600;
 		letter-spacing: -0.01em;
-		line-height: 1.35;
-		color: rgb(17 24 39);
+		line-height: 1.3;
+		color: var(--text-primary-content);
 		margin-top: 1.75rem;
 		margin-bottom: 0.75rem;
 	}
 
-	:root.dark .prose h4 {
-		color: rgb(255 255 255);
-	}
-
-	/* Paragraphs with proper measure */
 	.prose p {
-		margin-bottom: 1.75rem;
-		text-wrap: pretty; /* Better line breaks */
+		margin-bottom: 1.5rem;
+		text-wrap: pretty;
 	}
 
-	/* Lead paragraph - first paragraph gets emphasis */
+	/* Lead paragraph — slightly larger, ink (not ink-soft). */
 	.prose > p:first-of-type {
 		font-size: 1.25rem;
-		line-height: 1.7;
-		color: rgb(31 41 55); /* Darker for emphasis */
+		line-height: 1.55;
+		color: var(--text-primary-content);
 	}
 
-	:root.dark .prose > p:first-of-type {
-		color: rgb(229 231 235); /* Lighter in dark mode */
-	}
-
-	/* Lists with elegant styling */
+	/* Lists — mono numerals (ol), small ink square bullet (ul). */
 	.prose ul {
 		list-style: none;
 		margin-bottom: 1.5rem;
@@ -673,18 +521,17 @@ html.dark {
 	.prose ul > li {
 		position: relative;
 		padding-left: 0.5rem;
-		margin-bottom: 0.625rem;
+		margin-bottom: 0.5rem;
 	}
 
 	.prose ul > li::before {
 		content: "";
 		position: absolute;
-		left: -2rem;
-		top: 0.6em;
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: rgb(var(--brand-primary));
+		left: -1.5rem;
+		top: 0.7em;
+		width: 4px;
+		height: 4px;
+		background: var(--editorial-ink);
 	}
 
 	.prose li > p {
@@ -701,48 +548,45 @@ html.dark {
 
 	.prose li > ul,
 	.prose li > ol {
-		margin-top: 0.75rem;
-		margin-bottom: 0.75rem;
+		margin-top: 0.625rem;
+		margin-bottom: 0.625rem;
 	}
 
 	.prose ol {
 		list-style: none;
 		counter-reset: prose-counter;
 		margin-bottom: 1.5rem;
-		padding-left: 2rem;
+		padding-left: 2.5rem;
 	}
 
 	.prose ol > li {
 		position: relative;
 		padding-left: 0.5rem;
-		margin-bottom: 0.625rem;
+		margin-bottom: 0.5rem;
 		counter-increment: prose-counter;
 	}
 
 	.prose ol > li::before {
-		content: counter(prose-counter) ".";
+		content: counter(prose-counter, decimal-leading-zero);
 		position: absolute;
-		left: -2rem;
-		width: 1.5rem;
-		font-weight: 600;
-		font-feature-settings: "tnum" 1;
-		color: rgb(var(--brand-primary));
+		left: -2.25rem;
+		width: 1.75rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75em;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		color: var(--editorial-ink-mute);
+		top: 0.25em;
 	}
 
 	.prose li {
-		line-height: 1.7;
+		line-height: 1.65;
 	}
 
-	/* Bold and emphasis */
 	.prose strong,
 	.prose b {
 		font-weight: 600;
-		color: rgb(17 24 39);
-	}
-
-	:root.dark .prose strong,
-	:root.dark .prose b {
-		color: rgb(255 255 255);
+		color: var(--text-primary-content);
 	}
 
 	.prose em,
@@ -750,41 +594,30 @@ html.dark {
 		font-style: italic;
 	}
 
-	/* Links with brand color */
+	/* Links — ink with thin underline, ink-soft on hover. */
 	.prose a {
-		color: rgb(var(--brand-primary));
+		color: var(--text-primary-content);
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
-		text-underline-offset: 2px;
-		transition: all 0.2s ease;
+		text-underline-offset: 3px;
+		text-decoration-color: var(--editorial-hairline-strong);
+		transition: text-decoration-color var(--duration-base) var(--ease-standard);
 	}
 
 	.prose a:hover {
-		text-decoration-thickness: 2px;
-		text-decoration-color: rgb(var(--brand-secondary));
+		text-decoration-color: var(--editorial-ink);
 	}
 
-	/* Enhanced blockquotes */
+	/* Blockquote — single 2px ink border-left, no fill, serif italic. */
 	.prose blockquote {
-		position: relative;
 		margin: 2rem 0;
-		padding: 1.5rem 1.5rem 1.5rem 2rem;
-		border-left: 4px solid rgb(var(--brand-primary));
-		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary) / 0.05) 0%,
-			rgb(var(--brand-secondary) / 0.03) 100%
-		);
-		border-radius: 0 0.75rem 0.75rem 0;
+		padding: 0.25rem 0 0.25rem 1.5rem;
+		border-left: 2px solid var(--editorial-ink);
+		font-family: var(--font-instrument-serif), serif;
 		font-style: italic;
-	}
-
-	:root.dark .prose blockquote {
-		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary) / 0.1) 0%,
-			rgb(var(--brand-secondary) / 0.05) 100%
-		);
+		font-size: 1.25rem;
+		line-height: 1.4;
+		color: var(--text-primary-content);
 	}
 
 	.prose blockquote p {
@@ -792,105 +625,89 @@ html.dark {
 	}
 
 	.prose blockquote p:not(:last-child) {
-		margin-bottom: 1rem;
+		margin-bottom: 0.75rem;
 	}
 
-	/* Inline code: brand-tinted chip with a hairline border */
+	/* Inline code — mono, hairline-bordered paperDeep chip. */
 	.prose code {
-		font-family: var(--font-mono);
-		font-size: 0.875em;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.85em;
 		font-weight: 500;
-		padding: 0.15em 0.4em;
-		background: rgb(from rgb(var(--brand-primary)) r g b / 0.08);
-		border: 1px solid rgb(from rgb(var(--brand-primary)) r g b / 0.18);
+		padding: 0.1em 0.4em;
+		background: var(--surface-card-muted);
+		border: 1px solid var(--surface-border);
 		border-radius: var(--radius-xs);
 		color: var(--text-primary-content);
 		overflow-wrap: anywhere;
 	}
 
-	:root.dark .prose code {
-		background: rgb(from rgb(var(--brand-secondary)) r g b / 0.10);
-		border-color: rgb(from rgb(var(--brand-secondary)) r g b / 0.22);
-	}
-
-	/* Inline code inside headings: text-only, no chip */
 	.prose :is(h1, h2, h3, h4) code {
 		background: transparent;
 		border: 0;
 		padding: 0;
-		font-size: 0.92em;
+		font-size: 0.85em;
 		color: inherit;
 	}
 
+	/* Pre block — paperDeep with hairline border, no rounded shoulders. */
 	.prose pre {
-		background: rgb(243 244 246);
-		border-radius: 0.75rem;
+		background: var(--surface-card-muted);
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-sm);
 		padding: 1.25rem;
 		margin-bottom: 1.5rem;
 		overflow-x: auto;
 	}
 
-	:root.dark .prose pre {
-		background: rgb(17 24 39); /* gray-900 */
-	}
-
 	.prose pre code {
 		background: transparent;
+		border: 0;
 		padding: 0;
 		font-size: 0.875rem;
 		font-weight: 400;
 	}
 
-	/* Expressive Code blocks (wrapped in figure) need margin */
 	.prose .expressive-code,
 	.prose figure:has(pre) {
 		margin-bottom: 1.5rem;
 	}
 
-	/* Images with subtle shadow */
+	/* Images — paperDeep frame, 2px hairline, no shadow. */
 	.prose img {
-		border-radius: 0.75rem;
+		border: 1px solid var(--surface-border);
+		border-radius: var(--radius-sm);
 		margin: 2rem 0;
 		max-width: 100%;
 		height: auto;
-		box-shadow: 0 4px 20px rgb(0 0 0 / 0.08);
 	}
 
-	:root.dark .prose img {
-		box-shadow: 0 4px 20px rgb(0 0 0 / 0.3);
-	}
-
-	/* Elegant horizontal rules */
+	/* HR — single hairline, no gradient. */
 	.prose hr {
 		border: none;
 		margin: 3rem auto;
 		width: 100%;
 		max-width: 200px;
 		height: 1px;
-		background: linear-gradient(
-			90deg,
-			transparent 0%,
-			rgb(var(--brand-primary) / 0.4) 20%,
-			rgb(var(--brand-primary)) 50%,
-			rgb(var(--brand-primary) / 0.4) 80%,
-			transparent 100%
-		);
+		background: var(--editorial-ink);
+		opacity: 0.5;
 	}
 
-	/* Alternative decorative HR with dots */
 	.prose hr.dots {
 		background: none;
 		text-align: center;
+		opacity: 1;
 	}
 
 	.prose hr.dots::before {
-		content: "• • •";
-		color: rgb(var(--brand-primary));
-		letter-spacing: 1em;
+		content: "§ § §";
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		color: var(--editorial-ink-mute);
+		letter-spacing: 0.8em;
 		font-size: 1rem;
 	}
 
-	/* Tables */
+	/* Tables — flat, hairline grid. */
 	.prose table {
 		width: 100%;
 		margin-bottom: 1.5rem;
@@ -901,35 +718,24 @@ html.dark {
 	.prose th {
 		text-align: left;
 		font-weight: 600;
-		font-family: var(--font-display);
-		color: rgb(17 24 39);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75em;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: var(--text-primary-content);
 		padding: 0.875rem 1rem;
-		border-bottom: 2px solid rgb(var(--brand-primary) / 0.3);
-	}
-
-	:root.dark .prose th {
-		color: rgb(255 255 255);
-		border-bottom-color: rgb(var(--brand-primary) / 0.4);
+		border-bottom: 1px solid var(--editorial-ink);
 	}
 
 	.prose td {
 		padding: 0.875rem 1rem;
-		border-bottom: 1px solid rgb(229 231 235); /* gray-200 */
-	}
-
-	:root.dark .prose td {
-		border-bottom-color: rgb(55 65 81); /* gray-700 */
+		border-bottom: 1px solid var(--surface-border);
 	}
 
 	.prose tbody tr:hover {
-		background: rgb(var(--brand-primary) / 0.03);
+		background: var(--surface-card-muted);
 	}
 
-	:root.dark .prose tbody tr:hover {
-		background: rgb(var(--brand-primary) / 0.08);
-	}
-
-	/* First and last child margins */
 	.prose > *:first-child {
 		margin-top: 0;
 	}
@@ -938,20 +744,18 @@ html.dark {
 		margin-bottom: 0;
 	}
 
-	/* Pull quote utility class for special callouts */
+	/* Pull quote — serif italic display centered. */
 	.prose .pull-quote {
-		font-family: var(--font-display);
-		font-size: 1.5rem;
-		font-weight: 500;
-		line-height: 1.4;
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 2rem;
+		font-weight: 400;
+		line-height: 1.15;
+		letter-spacing: -0.02em;
 		text-align: center;
-		color: rgb(var(--brand-primary));
-		margin: 2.5rem 0;
+		color: var(--text-primary-content);
+		margin: 3rem 0;
 		padding: 0 2rem;
-	}
-
-	:root.dark .prose .pull-quote {
-		color: rgb(var(--brand-secondary));
 	}
 }
 

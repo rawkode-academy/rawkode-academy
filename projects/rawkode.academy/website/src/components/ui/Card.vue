@@ -40,7 +40,15 @@
 import { computed } from "vue";
 
 interface Props {
-	variant?: "glass" | "solid" | "gradient" | "bordered" | "flat";
+	variant?:
+		| "paper"
+		| "paper-muted"
+		| "editorial"
+		| "glass" /* legacy alias of paper */
+		| "solid"
+		| "gradient" /* legacy alias of paper-muted */
+		| "bordered"
+		| "flat";
 	padding?: "none" | "sm" | "md" | "lg";
 	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
 	shadow?: "none" | "sm" | "md" | "lg" | "elevated";
@@ -52,10 +60,10 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-	variant: "glass",
+	variant: "paper",
 	padding: "md",
 	rounded: "xl",
-	shadow: "md",
+	shadow: "none",
 	hover: true,
 	headerPadding: "md",
 	footerPadding: "md",
@@ -65,13 +73,20 @@ const tag = computed(() => (props.href ? "a" : "div"));
 
 const baseClasses = "relative overflow-hidden flex flex-col h-full";
 
+// Editorial Card: paper surfaces with hairline borders, no backdrop blur.
+// Class names from the old Rawkode Blue API (`glass`, `gradient`, `solid`,
+// `bordered`, `flat`) are preserved and map to the closest editorial surface.
 const variantClasses = {
-	glass: "card-base backdrop-blur-2xl",
-	solid:
-		"bg-white dark:bg-gray-800 border border-surface",
-	gradient: "bg-gradient-card border-glass",
-	bordered: "bg-transparent border-glass-strong",
-	flat: "bg-gray-50 dark:bg-gray-900",
+	paper: "paper-card",
+	"paper-muted": "paper-card-muted",
+	editorial:
+		"bg-transparent border-t border-[var(--editorial-hairline)] rounded-none",
+	glass: "paper-card",
+	solid: "paper-card",
+	gradient: "paper-card-muted",
+	bordered:
+		"bg-transparent border border-[var(--editorial-hairline-strong)]",
+	flat: "bg-[var(--surface-card-muted)]",
 };
 
 const paddingClasses = {
@@ -125,7 +140,7 @@ const contentClasses = computed(() => {
 const footerClasses = computed(() => {
 	return [
 		paddingClasses[props.footerPadding],
-		"mt-auto border-t border-glass-subtle",
+		"mt-auto border-t border-[var(--editorial-hairline)]",
 	].join(" ");
 });
 </script>

@@ -1,14 +1,22 @@
 <template>
+	<!--
+		Deprecated alias of HairlinePanel. Editorial design uses flat paper
+		surfaces with 1px hairlines, no backdrop-blur, no depth shadows.
+		The component remains so existing call-sites keep rendering;
+		`blur` and `shadow` props are accepted-but-ignored. Migrate to
+		HairlinePanel in new code. Will be removed in Phase 4.
+	-->
 	<div :class="panelClasses">
 		<slot />
 	</div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 
 interface Props {
 	variant?: "light" | "medium" | "dark";
+	/** @deprecated editorial design has no blur; prop is accepted but ignored */
 	blur?: "sm" | "md" | "lg" | "xl" | "2xl";
 	padding?: "none" | "sm" | "md" | "lg" | "xl";
 	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
@@ -23,23 +31,21 @@ const props = withDefaults(defineProps<Props>(), {
 	padding: "md",
 	rounded: "2xl",
 	border: true,
-	shadow: true,
+	shadow: false,
 });
 
-const baseClasses = "relative";
+if (import.meta.env.DEV) {
+	onMounted(() => {
+		console.warn(
+			"[deprecation] GlassPanel is a thin alias of HairlinePanel post-rebrand. Prefer HairlinePanel for new code; this component will be removed in Phase 4.",
+		);
+	});
+}
 
 const variantClasses = {
-	light: "bg-white/30 dark:bg-gray-800/30",
-	medium: "bg-white/50 dark:bg-gray-800/50",
-	dark: "bg-white/70 dark:bg-gray-800/70",
-};
-
-const blurClasses = {
-	sm: "backdrop-blur-sm",
-	md: "backdrop-blur-md",
-	lg: "backdrop-blur-lg",
-	xl: "backdrop-blur-xl",
-	"2xl": "backdrop-blur-2xl",
+	light: "bg-[var(--editorial-paper)]",
+	medium: "bg-[var(--editorial-paper-deep)]",
+	dark: "bg-[var(--surface-card-muted)]",
 };
 
 const paddingClasses = {
@@ -60,18 +66,14 @@ const roundedClasses = {
 	"3xl": "rounded-3xl",
 };
 
-const borderClass = "border-glass";
-const shadowClass = "card-shadow";
-
 const panelClasses = computed(() => {
 	return [
-		baseClasses,
+		"relative",
 		variantClasses[props.variant],
-		blurClasses[props.blur],
 		paddingClasses[props.padding],
 		roundedClasses[props.rounded],
-		props.border && borderClass,
-		props.shadow && shadowClass,
+		props.border && "border border-[var(--editorial-hairline)]",
+		props.shadow && "card-shadow",
 		props.class,
 	]
 		.filter(Boolean)

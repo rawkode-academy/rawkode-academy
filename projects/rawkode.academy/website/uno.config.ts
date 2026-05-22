@@ -33,19 +33,26 @@ export default defineConfig({
 			"brand-secondary": "rgb(var(--brand-secondary) / <alpha-value>)",
 		},
 		fontFamily: {
-			display: "var(--font-quicksand), sans-serif",
-			body: "var(--font-poppins), sans-serif",
-			mono: "var(--font-monaspace-neon), monospace",
+			// Editorial trio. Display = serif (italic-by-default headings).
+			// Body = neo-grotesque. Mono = code/metadata.
+			display:
+				"var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif",
+			body: "var(--font-inter-tight), 'Inter', -apple-system, system-ui, sans-serif",
+			mono: "var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+			serif:
+				"var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif",
+			sans: "var(--font-inter-tight), 'Inter', -apple-system, system-ui, sans-serif",
 		},
 		borderRadius: {
-			xs: "0.375rem",
-			sm: "0.5rem",
-			md: "0.75rem",
-			lg: "1rem",
-			xl: "1.2rem",
-			"2xl": "1.35rem",
-			"3xl": "1.5rem",
-			"4xl": "2rem",
+			// Editorial radii — sharp 2px corners. Names preserved for back-compat.
+			xs: "2px",
+			sm: "2px",
+			md: "3px",
+			lg: "3px",
+			xl: "4px",
+			"2xl": "4px",
+			"3xl": "6px",
+			"4xl": "8px",
 		},
 		duration: {
 			fast: "120ms",
@@ -80,12 +87,11 @@ export default defineConfig({
 		},
 	},
 	shortcuts: {
-		// Text-tone utilities — port of the `@utility text-*` blocks.
-		// Light values come from gray-900/700/600; dark values from white/gray-300/400.
-		"text-primary-content": "text-[rgb(17_24_39)] dark:text-white",
-		"text-secondary-content":
-			"text-[rgb(55_65_81)] dark:text-[rgb(209_213_219)]",
-		"text-muted": "text-[rgb(75_85_99)] dark:text-[rgb(156_163_175)]",
+		// Text-tone utilities — back the `text-*-content` classes with the
+		// editorial CSS variables so light/dark swap follows --editorial-ink/-soft/-mute.
+		"text-primary-content": "text-[var(--editorial-ink)]",
+		"text-secondary-content": "text-[var(--editorial-ink-soft)]",
+		"text-muted": "text-[var(--editorial-ink-mute)]",
 	},
 	rules: [
 		// Motion utilities — `@apply transition-*` from scoped style blocks.
