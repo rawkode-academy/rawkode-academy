@@ -1,84 +1,118 @@
 ---
 import LiveDot from "@/components/ui/LiveDot.vue";
 import MLabel from "@/components/ui/MLabel.vue";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+
+interface Video {
+	id: string;
+	slug: string;
+	title: string;
+	publishedAt: Date;
+	durationSeconds?: number | undefined;
+}
 
 interface ScheduleItem {
-	date: string; // e.g. "TUE 22"
+	href: string;
+	dateLabel: string; // e.g. "TUE 22 APR" or "Thu 24"
 	title: string;
-	time: string; // e.g. "18:00 UTC"
+	timeLabel: string; // e.g. "18:00 UTC" when upcoming, runtime when past
+	upcoming: boolean;
 }
 
 interface Props {
-	sessionMark?: string;
-	elapsed?: string;
-	title?: string;
-	chapter?: string;
-	body?: string;
-	viewers?: number;
+	state: "live" | "upcoming" | "fallback";
+	video: Video;
 	schedule?: ScheduleItem[];
-	terminalLines?: string[];
 }
 
-const {
-	sessionMark = "§48.03",
-	elapsed = "01:42:08 ELAPSED",
-	title = "Tracing packets with eBPF",
-	chapter = "Chapter 3",
-	body = "Attaching kprobes to the network stack. Live Q&A after.",
-	viewers = 1284,
-	schedule = [
-		{ date: "TUE 22", title: "Debugging networking: from packet to pod", time: "18:00 UTC" },
-		{ date: "WED 23", title: "Kubernetes without Helm — ten months in", time: "18:00 UTC" },
-		{ date: "THU 24", title: "Dispatch №049 — eBPF continued", time: "18:00 UTC" },
-	],
-	terminalLines = [
-		`$ sudo bpftrace -e 'tracepoint:net:net_dev_xmit {`,
-		`  @bytes[comm] = sum(args->len);`,
-		`}'`,
-		`Attaching 1 probe…`,
-		`^C`,
-		`@bytes[curl]:     2841094`,
-		`@bytes[systemd]:  140210`,
-		`@bytes[kubelet]:  89412`,
-		`~/work/ebpf-demos ❯`,
-	],
-} = Astro.props as Props;
+const { state, video, schedule = [] } = Astro.props as Props;
+
+const thumbnailUrl = getVideoThumbnailUrl(video.id);
+
+const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
+	weekday: "short",
+	month: "short",
+	day: "2-digit",
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+	timeZone: "UTC",
+});
+
+const headerLabel =
+	state === "live"
+		? "On air now"
+		: state === "upcoming"
+			? `Up next — ${dateTimeFormatter.format(video.publishedAt)} UTC`
+			: "Now playing";
+
+const headerTone: "amber" | "spruce" | "ink" =
+	state === "live" ? "amber" : state === "upcoming" ? "spruce" : "ink";
+
+const primaryCtaLabel =
+	state === "live"
+		? "Watch live →"
+		: state === "upcoming"
+			? "Set reminder →"
+			: "Watch now →";
+
+const formatDuration = (s?: number) => {
+	if (typeof s !== "number" || s <= 0) return undefined;
+	const h = Math.floor(s / 3600);
+	const m = Math.floor((s % 3600) / 60);
+	if (h > 0) return `${h}h ${m}m`;
+	return `${m}m`;
+};
+
+const subLabel =
+	state === "live" || state === "upcoming"
+		? undefined
+		: formatDuration(video.durationSeconds);
 ---
 
 <aside class="on-air">
 	<div class="on-air__header">
-		<MLabel tone="amber">
-			<LiveDot color="amber" />
-			Live · {sessionMark}
+		<MLabel tone={headerTone}>
+			{state === "live" && <LiveDot color="amber" />}
+			{headerLabel}
 		</MLabel>
-		<span class="on-air__elapsed">{elapsed}</span>
+		{subLabel && <span class="on-air__elapsed">{subLabel}</span>}
 	</div>
 
-	<div class="on-air__screen" aria-label="Live session terminal preview">
-		<div class="on-air__terminal" aria-hidden="true">
-			{terminalLines.map((line, i) => (
-				<div class={`on-air__line on-air__line--${i}`}>{line}</div>
-			))}
-			<div class="on-air__cursor" aria-hidden="true"></div>
+	<a class="on-air__screen" href={`/watch/${video.slug}`} aria-label={`Open ${video.title}`}>
+		<img class="on-air__thumb" src={thumbnailUrl} alt={video.title} loading="eager" />
+		{state === "live" && (
+			<div class="on-air__rec">
+				<span class="on-air__rec-dot" aria-hidden="true"></span>
+				REC · LIVE
+			</div>
+		)}
+	</a>
+
+	<h3 class="on-air__title">{video.title}</h3>
+
+	<a class="on-air__cta" href={`/watch/${video.slug}`}>
+		<MLabel tone="ink">{primaryCtaLabel}</MLabel>
+	</a>
+
+	{schedule.length > 0 && (
+		<div class="on-air__next">
+			<MLabel tone="ink">
+				{schedule.some((s) => s.upcoming) ? "Next up" : "Catch up"}
+			</MLabel>
+			<ul class="on-air__schedule">
+				{schedule.map((item) => (
+					<li class="on-air__slot">
+						<a class="on-air__slot-link" href={item.href}>
+							<MLabel tone={item.upcoming ? "rust" : "muted"}>{item.dateLabel}</MLabel>
+							<span class="on-air__slot-title">{item.title}</span>
+							<span class="on-air__slot-time">{item.timeLabel}</span>
+						</a>
+					</li>
+				))}
+			</ul>
 		</div>
-		<div class="on-air__rec">REC ● {viewers.toLocaleString()} VIEWERS</div>
-	</div>
-
-	<h3 class="on-air__title">{title}</h3>
-	<p class="on-air__body">{chapter} — {body}</p>
-
-	<div class="on-air__next">
-		<MLabel tone="ink">Next up</MLabel>
-		<ul class="on-air__schedule">
-			{schedule.map((item) => (
-				<li class="on-air__slot">
-					<MLabel tone="rust">{item.date}</MLabel>
-					<span class="on-air__slot-title">{item.title}</span>
-					<span class="on-air__slot-time">{item.time}</span>
-				</li>
-			))}
-		</ul>
-	</div>
+	)}
 </aside>
 
 <style>
@@ -96,6 +130,7 @@ const {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: 1rem;
 	}
 
 	.on-air__elapsed {
@@ -103,6 +138,7 @@ const {
 		font-size: 11px;
 		color: var(--editorial-ink-mute);
 		letter-spacing: 0.1em;
+		text-transform: uppercase;
 	}
 
 	.on-air__screen {
@@ -111,65 +147,51 @@ const {
 		overflow: hidden;
 		background: oklch(0.12 0.01 280);
 		border: 1px solid var(--editorial-hairline-strong);
-		background-image: repeating-linear-gradient(
-			135deg,
-			oklch(0.12 0.01 280) 0,
-			oklch(0.12 0.01 280) 8px,
-			oklch(0.22 0.01 60) 8px,
-			oklch(0.22 0.01 60) 9px
-		);
+		display: block;
 	}
 
-	.on-air__terminal {
-		position: absolute;
-		inset: 18px;
-		padding: 12px 16px;
-		background: oklch(0.12 0.01 280 / 0.92);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 11px;
-		line-height: 1.6;
-		color: var(--editorial-paper);
-		overflow: hidden;
+	.on-air__thumb {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transition: transform var(--duration-slow) var(--ease-standard);
 	}
 
-	.on-air__line { color: var(--editorial-paper); }
-	.on-air__line--0,
-	.on-air__line--2 { color: var(--editorial-amber); }
-	.on-air__line--1 { color: oklch(0.8 0.1 165); }
-	.on-air__line--3,
-	.on-air__line--4 { color: oklch(0.7 0 0); margin-top: 6px; }
-	.on-air__line--5,
-	.on-air__line--6 { margin-top: 0; }
-	.on-air__line--7 { color: oklch(0.7 0 0); margin-top: 6px; }
-
-	.on-air__cursor {
-		display: inline-block;
-		width: 8px;
-		height: 14px;
-		background: var(--editorial-paper);
-		vertical-align: -2px;
-		margin-top: 6px;
-		animation: rk-cursor 1s steps(2) infinite;
-	}
-
-	@keyframes rk-cursor {
-		0%, 50%   { opacity: 1; }
-		51%, 100% { opacity: 0; }
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.on-air__cursor { animation: none; }
+	.on-air__screen:hover .on-air__thumb {
+		transform: scale(1.02);
 	}
 
 	.on-air__rec {
 		position: absolute;
-		top: 10px;
+		top: 12px;
 		right: 12px;
+		padding: 4px 8px;
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 10px;
 		color: var(--editorial-paper);
-		opacity: 0.85;
+		background: oklch(0 0 0 / 0.65);
 		letter-spacing: 0.12em;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.on-air__rec-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--editorial-amber);
+		animation: rk-pulse 1.6s ease-in-out infinite;
+	}
+
+	@keyframes rk-pulse {
+		0%, 100% { opacity: 1; transform: scale(1); }
+		50% { opacity: 0.65; transform: scale(0.9); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.on-air__rec-dot { animation: none; }
 	}
 
 	.on-air__title {
@@ -180,48 +202,66 @@ const {
 		line-height: 1.08;
 		letter-spacing: -0.02em;
 		color: var(--editorial-ink);
-		margin: 0.5rem 0 0.25rem;
+		margin: 0.5rem 0 0;
 	}
 
-	.on-air__body {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.9rem;
-		line-height: 1.45;
-		color: var(--editorial-ink-soft);
-		margin: 0;
+	.on-air__cta {
+		text-decoration: none;
+		display: inline-flex;
+		padding-top: 0.125rem;
 	}
 
 	.on-air__next {
 		margin-top: auto;
 		padding-top: 1rem;
 		border-top: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
 	}
 
 	.on-air__schedule {
 		list-style: none;
 		padding: 0;
-		margin: 0.625rem 0 0;
+		margin: 0;
 	}
 
 	.on-air__slot {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+	.on-air__slot:first-child {
+		border-top: none;
+	}
+
+	.on-air__slot-link {
 		display: grid;
-		grid-template-columns: 58px 1fr auto;
+		grid-template-columns: 64px 1fr auto;
 		gap: 0.75rem;
 		padding: 0.625rem 0;
 		align-items: baseline;
 		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 0.84rem;
 		color: var(--editorial-ink);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard);
 	}
 
-	.on-air__slot:not(:first-child) {
-		border-top: 1px solid var(--editorial-hairline);
+	.on-air__slot-link:hover .on-air__slot-title {
+		color: var(--editorial-spruce);
+	}
+
+	.on-air__slot-title {
+		color: var(--editorial-ink);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
 	}
 
 	.on-air__slot-time {
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 11px;
 		color: var(--editorial-ink-mute);
-		letter-spacing: 0.1em;
+		letter-spacing: 0.08em;
 	}
 </style>

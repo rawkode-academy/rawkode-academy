@@ -8,38 +8,68 @@ import OnAirPanel from "@/components/landing/OnAirPanel.astro";
 
 interface Stat { value: string; label: string }
 
+interface HeroVideo {
+	id: string;
+	slug: string;
+	title: string;
+	publishedAt: Date;
+	durationSeconds?: number | undefined;
+}
+
+interface ScheduleItem {
+	href: string;
+	dateLabel: string;
+	title: string;
+	timeLabel: string;
+	upcoming: boolean;
+}
+
 interface Props {
-	dispatchNum?: number | string;
-	dispatchDayTime?: string; // e.g. "Thursday 22:27"
-	onAirTitle?: string;
-	viewers?: number;
+	state: "live" | "upcoming" | "fallback";
+	video: HeroVideo;
+	schedule?: ScheduleItem[];
 	stats?: Stat[];
 }
 
 const {
-	dispatchNum = "048",
-	dispatchDayTime = "Thursday 22:27",
-	onAirTitle = "Tracing packets with eBPF",
-	viewers = 1284,
-	stats = [
-		{ value: "339", label: "Lessons" },
-		{ value: "42k", label: "Engineers" },
-		{ value: "112", label: "Dispatches" },
-		{ value: "2019", label: "Since" },
-	],
+	state,
+	video,
+	schedule = [],
+	stats = [],
 } = Astro.props as Props;
+
+// Right-column kicker copy: only the "live now" state runs the amber
+// On-air ribbon. The upcoming + fallback states get a quieter mono kicker.
+const heroDateFormatter = new Intl.DateTimeFormat("en-US", {
+	weekday: "short",
+	month: "short",
+	day: "2-digit",
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+	timeZone: "UTC",
+});
+const upcomingLabel =
+	state === "upcoming" ? heroDateFormatter.format(video.publishedAt) : null;
 ---
 
 <section class="landing-hero">
-	<div class="landing-hero__kicker">
-		<LiveDot color="amber" />
-		<MLabel tone="amber">On air now</MLabel>
-		<span class="landing-hero__kicker-meta">
-			— {onAirTitle} · {viewers.toLocaleString()} watching
-		</span>
-		<span class="landing-hero__kicker-rule" aria-hidden="true"></span>
-		<MLabel tone="muted">Dispatch №{dispatchNum} · {dispatchDayTime}</MLabel>
-	</div>
+	{state === "live" && (
+		<div class="landing-hero__kicker landing-hero__kicker--live">
+			<LiveDot color="amber" />
+			<MLabel tone="amber">On air now</MLabel>
+			<span class="landing-hero__kicker-meta">— {video.title}</span>
+			<span class="landing-hero__kicker-rule" aria-hidden="true"></span>
+		</div>
+	)}
+	{state === "upcoming" && (
+		<div class="landing-hero__kicker">
+			<MLabel tone="spruce">Up next</MLabel>
+			<span class="landing-hero__kicker-meta">— {video.title}</span>
+			<span class="landing-hero__kicker-rule" aria-hidden="true"></span>
+			<MLabel tone="muted">{upcomingLabel} UTC</MLabel>
+		</div>
+	)}
 
 	<div class="landing-hero__grid">
 		<div class="landing-hero__editorial">
@@ -64,14 +94,14 @@ const {
 					Start watching — free
 				</EditorialButton>
 				<EditorialButton variant="outline" size="lg" href="#newsletter-signup">
-					Weekly field notes
+					Get the newsletter
 				</EditorialButton>
 			</div>
 
 			<StatRow stats={stats} />
 		</div>
 
-		<OnAirPanel viewers={viewers} title={onAirTitle} />
+		<OnAirPanel state={state} video={video} schedule={schedule} />
 	</div>
 </section>
 
@@ -95,8 +125,16 @@ const {
 		color: var(--editorial-ink-mute);
 	}
 
+	.landing-hero__kicker--live {
+		border-bottom-color: var(--editorial-amber);
+		border-bottom-width: 1px;
+	}
+
 	.landing-hero__kicker-meta {
 		color: inherit;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.landing-hero__kicker-rule {

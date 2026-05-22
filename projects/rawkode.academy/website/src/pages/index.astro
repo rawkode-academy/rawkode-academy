@@ -15,7 +15,7 @@ import ValuesGrid from "@/components/landing/ValuesGrid.astro";
 import PartnerLogos from "@/components/partner/logos.astro";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 
-// ─── Data fetching (preserved from prior landing page) ──────────────
+// ─── Data fetching ──────────────────────────────────────────────
 
 const allNews = await getCollection("news");
 const latestNews = allNews
@@ -28,8 +28,16 @@ const latestArticles = allArticles
 	.slice(0, 4);
 const [featuredArticle, ...secondaryArticles] = latestArticles;
 
-const allVideos = await getPublishedVideos();
-const latestVideos = allVideos.slice(0, 4);
+// All videos (including future-dated) — we need them for hero state.
+const allVideosRaw = await getCollection("videos");
+const allVideosSorted = allVideosRaw.sort(
+	(a, b) =>
+		new Date(b.data.publishedAt).getTime() -
+		new Date(a.data.publishedAt).getTime(),
+);
+// Published-only convenience (for the Videos section below).
+const publishedVideos = await getPublishedVideos();
+const latestVideos = publishedVideos.slice(0, 4);
 const [featuredVideo, ...secondaryVideos] = latestVideos;
 
 const allLearningPaths = await getCollection("learningPaths");
@@ -38,6 +46,130 @@ const latestLearningPaths = allLearningPaths
 	.slice(0, 4);
 
 const allCourses = await getCollection("courses");
+
+// ─── Hero video state ───────────────────────────────────────────
+// Live: publishedAt within [now - 90min, now]
+// Upcoming: publishedAt within (now, now + 24h]
+// Fallback: most recent published video ("Now playing")
+
+const now = new Date();
+const NINETY_MIN_MS = 90 * 60 * 1000;
+const TWENTY_FOUR_H_MS = 24 * 60 * 60 * 1000;
+
+type HeroState = "live" | "upcoming" | "fallback";
+
+interface HeroVideo {
+	id: string;
+	slug: string;
+	title: string;
+	publishedAt: Date;
+	durationSeconds?: number | undefined;
+}
+
+const toHeroVideo = (
+	v: (typeof allVideosRaw)[number],
+): HeroVideo => ({
+	id: v.data.id,
+	slug: v.data.slug,
+	title: v.data.title,
+	publishedAt: new Date(v.data.publishedAt),
+	...(typeof v.data.duration === "number"
+		? { durationSeconds: v.data.duration }
+		: {}),
+});
+
+// Most recent video whose publishedAt sits within the live window.
+const liveVideo = allVideosSorted.find((v) => {
+	const t = new Date(v.data.publishedAt).getTime();
+	const delta = now.getTime() - t;
+	return delta >= 0 && delta <= NINETY_MIN_MS;
+});
+
+// Earliest upcoming within 24h.
+const upcomingVideos = allVideosSorted
+	.filter((v) => {
+		const t = new Date(v.data.publishedAt).getTime();
+		const delta = t - now.getTime();
+		return delta > 0 && delta <= TWENTY_FOUR_H_MS;
+	})
+	.sort(
+		(a, b) =>
+			new Date(a.data.publishedAt).getTime() -
+			new Date(b.data.publishedAt).getTime(),
+	);
+const nextUpcoming = upcomingVideos[0];
+
+// Fallback = most recent published (could equal featuredVideo — accepted overlap).
+const fallbackVideo = publishedVideos[0];
+
+let heroState: HeroState;
+let heroVideo: HeroVideo | undefined;
+if (liveVideo) {
+	heroState = "live";
+	heroVideo = toHeroVideo(liveVideo);
+} else if (nextUpcoming) {
+	heroState = "upcoming";
+	heroVideo = toHeroVideo(nextUpcoming);
+} else if (fallbackVideo) {
+	heroState = "fallback";
+	heroVideo = toHeroVideo(allVideosRaw.find((v) => v.data.id === fallbackVideo.data.id)!);
+}
+
+// "Next up" schedule rows: prefer upcoming, fall back to recent past.
+// Skip the hero video so the panel doesn't duplicate it.
+const allUpcoming = allVideosSorted.filter(
+	(v) => new Date(v.data.publishedAt).getTime() > now.getTime(),
+);
+const allRecentPast = publishedVideos.filter(
+	(v) => !heroVideo || v.data.id !== heroVideo.id,
+);
+
+const upcomingForSchedule = allUpcoming
+	.filter((v) => !heroVideo || v.data.id !== heroVideo.id)
+	.sort(
+		(a, b) =>
+			new Date(a.data.publishedAt).getTime() -
+			new Date(b.data.publishedAt).getTime(),
+	);
+
+const dateOnly = new Intl.DateTimeFormat("en-US", {
+	weekday: "short",
+	day: "2-digit",
+	month: "short",
+	timeZone: "UTC",
+});
+const timeOnly = new Intl.DateTimeFormat("en-US", {
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+	timeZone: "UTC",
+});
+
+const formatDurationShort = (s?: number | null) => {
+	if (typeof s !== "number" || s <= 0) return "";
+	const h = Math.floor(s / 3600);
+	const m = Math.floor((s % 3600) / 60);
+	if (h > 0) return `${h}h ${m}m`;
+	return `${m}m`;
+};
+
+const scheduleSource =
+	upcomingForSchedule.length > 0 ? upcomingForSchedule : allRecentPast;
+const scheduleRows = scheduleSource.slice(0, 3).map((v) => {
+	const publishedAt = new Date(v.data.publishedAt);
+	const isUpcoming = publishedAt.getTime() > now.getTime();
+	return {
+		href: `/watch/${v.data.slug}`,
+		dateLabel: dateOnly.format(publishedAt).toUpperCase(),
+		title: v.data.title,
+		timeLabel: isUpcoming
+			? `${timeOnly.format(publishedAt)} UTC`
+			: formatDurationShort(
+					typeof v.data.duration === "number" ? v.data.duration : null,
+				),
+		upcoming: isUpcoming,
+	};
+});
 
 // ─── Helpers ─────────────────────────────────────────────────────
 
@@ -59,7 +191,11 @@ const formatDuration = (seconds?: number | null) => {
 };
 
 const formatPublishedDate = (date: Date) =>
-	date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+	date.toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	});
 
 const formatLearningPathDuration = (minutes: number): string => {
 	if (!minutes) return "Self-paced";
@@ -157,23 +293,51 @@ const secondaryArticleItems = secondaryArticles.map((article) => {
 });
 
 const academyValues = [
-	{ title: "Authenticity", description: "We show the trade-offs, the rough edges, and the decisions we'd still make again." },
-	{ title: "Organic Content", description: "Much of the curriculum comes from problems we're solving in public, not invented demos." },
-	{ title: "Embracing Failure", description: "Mistakes stay in the session because the recovery is usually more useful than the perfect path." },
-	{ title: "Hands-On", description: "Less talking about code, more terminal time, real code, and live builds you can follow end to end." },
-	{ title: "Forward Thinking", description: "We test new tools early, evaluate them honestly, and show where they fit." },
-	{ title: "Open & Closed Source", description: "We cover open source and vendors with the same standard: what works, what costs, and what saves time." },
+	{
+		title: "Authenticity",
+		description:
+			"We show the trade-offs, the rough edges, and the decisions we'd still make again.",
+	},
+	{
+		title: "Organic Content",
+		description:
+			"Much of the curriculum comes from problems we're solving in public, not invented demos.",
+	},
+	{
+		title: "Embracing Failure",
+		description:
+			"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
+	},
+	{
+		title: "Hands-On",
+		description:
+			"Less talking about code, more terminal time, real code, and live builds you can follow end to end.",
+	},
+	{
+		title: "Forward Thinking",
+		description:
+			"We test new tools early, evaluate them honestly, and show where they fit.",
+	},
+	{
+		title: "Open & Closed Source",
+		description:
+			"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
+	},
 ];
 
-// Stat counts wired to real content collections
-const totalSeconds = allVideos.reduce(
-	(acc, v) => acc + (typeof v.data.duration === "number" && v.data.duration > 0 ? v.data.duration : 0),
+// Stat row — all wired to real content collections.
+const totalSeconds = publishedVideos.reduce(
+	(acc, v) =>
+		acc +
+		(typeof v.data.duration === "number" && v.data.duration > 0
+			? v.data.duration
+			: 0),
 	0,
 );
 const totalHours = Math.floor(totalSeconds / 3600);
 
 const heroStats = [
-	{ value: `${allVideos.length}`, label: "Lessons" },
+	{ value: `${publishedVideos.length}`, label: "Lessons" },
 	{ value: `${totalHours}+`, label: "Hours" },
 	{ value: `${allCourses.length}`, label: "Courses" },
 	{ value: "2019", label: "Since" },
@@ -185,10 +349,14 @@ const pageDescription =
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<LandingHero
-		stats={heroStats}
-		onAirTitle={featuredVideo?.data.title ?? "Tracing packets with eBPF"}
-	/>
+	{heroVideo && (
+		<LandingHero
+			state={heroState!}
+			video={heroVideo}
+			schedule={scheduleRows}
+			stats={heroStats}
+		/>
+	)}
 
 	<NewsletterStrip />
 
@@ -237,7 +405,11 @@ const pageDescription =
 					meta={[
 						videoLabel(featuredVideo),
 						formatPublishedDate(featuredVideo.data.publishedAt),
-						formatDuration(typeof featuredVideo.data.duration === "number" ? featuredVideo.data.duration : undefined),
+						formatDuration(
+							typeof featuredVideo.data.duration === "number"
+								? featuredVideo.data.duration
+								: undefined,
+						),
 					]}
 					title={featuredVideo.data.title}
 					body={summarizeVideo(featuredVideo)}
@@ -264,15 +436,19 @@ const pageDescription =
 
 				<FeaturedFeature
 					href={`/read/${featuredArticle.id}`}
-					meta={[articleLabel(featuredArticle), formatPublishedDate(featuredArticle.data.publishedAt)]}
+					meta={[
+						articleLabel(featuredArticle),
+						formatPublishedDate(featuredArticle.data.publishedAt),
+					]}
 					title={featuredArticle.data.title}
 					body={summarizeArticle(featuredArticle)}
 					cta="Read article"
 					{...(featuredArticle.data.cover
 						? {
-							mediaImage: featuredArticle.data.cover.image,
-							mediaAlt: featuredArticle.data.cover.alt ?? featuredArticle.data.title,
-						}
+								mediaImage: featuredArticle.data.cover.image,
+								mediaAlt:
+									featuredArticle.data.cover.alt ?? featuredArticle.data.title,
+							}
 						: { mediaPlaceholder: true })}
 				/>
 

@@ -1,23 +1,17 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
-
-interface Props {
-	subscriberCount?: number;
-}
-
-const { subscriberCount = 6840 } = Astro.props as Props;
 ---
 
 <div class="wire-subscribe">
-	<MLabel tone="spruce">The Wire · Daily digest</MLabel>
+	<MLabel tone="spruce">Rawkode Academy newsletter</MLabel>
 	<h3 class="wire-subscribe__title">One email. The signal, never the noise.</h3>
 	<p class="wire-subscribe__copy">
-		The top six items of the day, edited by humans.
-		{subscriberCount.toLocaleString()} subscribers.
+		Tutorials, deep dives, and the cloud-native stories worth reading,
+		delivered without the noise.
 	</p>
 	<form
 		class="wire-subscribe__form"
-		action="https://email.rawkode.academy/subscribe?list=wire"
+		action="https://email.rawkode.academy/subscribe"
 		method="post"
 	>
 		<input
