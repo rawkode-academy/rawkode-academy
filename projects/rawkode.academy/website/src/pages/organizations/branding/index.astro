@@ -193,7 +193,7 @@ const defaultLogoGradient =
       >
         {logoPreviewAssets.map((logo) => (
           <article class={`relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-white/15 bg-white/90 dark:bg-white/5 backdrop-blur-2xl p-7 flex flex-col gap-6 card-shadow-lg ${logo.cardClass ?? ""}`}>
-            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-primary/10 dark:from-white/10 pointer-events-none"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent dark:from-white/10 pointer-events-none"></div>
             <div class="relative flex flex-col gap-6 items-center text-center">
               <h3 class="text-lg font-semibold text-primary-content">{logo.name}</h3>
               <div class="flex flex-col items-center gap-5 w-full">

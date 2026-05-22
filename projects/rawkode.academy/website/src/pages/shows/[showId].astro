@@ -158,7 +158,7 @@ function formatDuration(seconds: number) {
 
         <!-- Hero -->
         <section class="relative overflow-hidden" style="border-bottom: 1px solid var(--surface-border)">
-                <div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/5 dark:from-primary/20 dark:to-secondary/10" aria-hidden="true"></div>
+                <div class="absolute inset-0 bg-[var(--surface-card)]" aria-hidden="true"></div>
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)]" aria-hidden="true"></div>
 
                 <div class="relative mx-auto max-w-7xl content-px pb-12 pt-8">
@@ -182,7 +182,7 @@ function formatDuration(seconds: number) {
                                                 <div class="flex flex-wrap items-center gap-2">
                                                         <span class="text-sm text-muted">Hosted by</span>
                                                         {hostNames.map((host) => (
-                                                                <span class="glass-chip text-sm font-medium text-primary-content">
+                                                                <span class="hairline-chip text-sm font-medium text-primary-content">
                                                                         {host}
                                                                 </span>
                                                         ))}
@@ -283,7 +283,7 @@ function formatDuration(seconds: number) {
                                         videos={feedVideos}
                                 />
                         ) : (
-                                <div class="mx-auto max-w-2xl rounded-2xl glass-card p-12 text-center bleed-x-mobile">
+                                <div class="mx-auto max-w-2xl rounded-2xl paper-card p-12 text-center bleed-x-mobile">
                                         <svg
                                                 class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
                                                 fill="none"

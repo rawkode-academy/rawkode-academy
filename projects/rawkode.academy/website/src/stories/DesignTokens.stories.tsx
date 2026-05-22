@@ -374,36 +374,35 @@ export const Gradients: Story = {
 						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 							Primary to Secondary
 						</p>
-						<div className="w-full h-24 bg-linear-to-r from-primary to-secondary rounded-lg" />
+						<div className="w-full h-24 bg-linear-to-r rounded-lg" />
 						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-r from-primary to-secondary
-						</code>
+							bg-linear-to-r 						</code>
 					</div>
 					<div>
 						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 							Primary to Tertiary
 						</p>
-						<div className="w-full h-24 bg-linear-to-r from-primary to-tertiary rounded-lg" />
+						<div className="w-full h-24 bg-linear-to-r to-tertiary rounded-lg" />
 						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-r from-primary to-tertiary
+							bg-linear-to-r to-tertiary
 						</code>
 					</div>
 					<div>
 						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 							Secondary to Quaternary
 						</p>
-						<div className="w-full h-24 bg-linear-to-r from-secondary to-quaternary rounded-lg" />
+						<div className="w-full h-24 bg-linear-to-r to-quaternary rounded-lg" />
 						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-r from-secondary to-quaternary
+							bg-linear-to-r to-quaternary
 						</code>
 					</div>
 					<div>
 						<p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 							Diagonal Gradient
 						</p>
-						<div className="w-full h-24 bg-linear-to-br from-primary via-secondary to-tertiary rounded-lg" />
+						<div className="w-full h-24 bg-linear-to-br to-tertiary rounded-lg" />
 						<code className="text-xs text-gray-500 dark:text-gray-400">
-							bg-linear-to-br from-primary via-secondary to-tertiary
+							bg-linear-to-br to-tertiary
 						</code>
 					</div>
 				</div>

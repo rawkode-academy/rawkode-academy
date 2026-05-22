@@ -138,12 +138,12 @@ const formattedPosition = computed(() => {
 				<Transition name="fade" mode="out-in">
 					<article
 						:key="`${activeTestimonial.author.name}-${activeIndex}`"
-						class="glass-card-shimmer relative overflow-hidden rounded-[2rem] p-5 sm:p-6 lg:px-8 lg:py-7"
+						class="paper-card relative overflow-hidden rounded-[2rem] p-5 sm:p-6 lg:px-8 lg:py-7"
 					>
 						<div v-if="hasMultiple" class="absolute left-0 right-0 top-0 h-1 bg-white/60 dark:bg-white/10">
 							<div
 								:key="`progress-${progressKey}`"
-								class="progress-fill h-full w-full origin-left bg-linear-to-r from-primary to-secondary"
+								class="progress-fill h-full w-full origin-left bg-[var(--editorial-ink)]"
 								:class="{ 'is-paused': isPaused }"
 								:style="{ '--testimonial-progress-duration': autoplayDuration }"
 							></div>
@@ -197,7 +197,7 @@ const formattedPosition = computed(() => {
 				v-if="hasMultiple"
 				class="mt-5 flex justify-center"
 			>
-				<div class="glass-card inline-flex min-h-12 items-center gap-1 rounded-full px-2 py-2 shadow-sm">
+				<div class="paper-card inline-flex min-h-12 items-center gap-1 rounded-full px-2 py-2 shadow-sm">
 					<button
 						type="button"
 						class="grid h-10 w-10 place-items-center rounded-full text-muted motion-safe:transition-colors-smooth hover:bg-white/55 hover:text-primary dark:hover:bg-white/10 focus-ring"

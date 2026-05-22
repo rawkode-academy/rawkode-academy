@@ -66,7 +66,7 @@ const isAuthenticated = !!Astro.locals.user;
 ---
 
 <div
-	class="glass-card-shimmer p-3 sm:p-4"
+	class="paper-card p-3 sm:p-4"
 	data-video-id={videoId}
 	data-authenticated={isAuthenticated}
 >
@@ -74,7 +74,7 @@ const isAuthenticated = !!Astro.locals.user;
 		{
 			DEFAULT_REACTIONS.map((reaction) => (
 				<button
-					class="reaction-btn glass-interactive flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
+					class="reaction-btn paper-card-muted flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
 					data-emoji={reaction.emoji}
 					aria-label={`${reaction.label} reaction`}
 				>
@@ -83,15 +83,15 @@ const isAuthenticated = !!Astro.locals.user;
 				</button>
 			))
 		}
-		<button class="add-emoji reaction-btn glass-interactive flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-gray-300/60 dark:!border-gray-600/60" aria-label="Add custom emoji"
+		<button class="add-emoji reaction-btn paper-card-muted flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-gray-300/60 dark:!border-gray-600/60" aria-label="Add custom emoji"
 			>+</button
 		>
 	</div>
 
-	<div class="emoji-picker hidden mt-3 p-2 sm:p-3 glass-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10">
+	<div class="emoji-picker hidden mt-3 p-2 sm:p-3 paper-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10">
 		{
 			EXTRA_EMOJIS.map((emoji) => (
-				<button class="emoji-option glass-interactive p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
+				<button class="emoji-option paper-card-muted p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
 					{emoji}
 				</button>
 			))

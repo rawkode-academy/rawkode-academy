@@ -36,24 +36,27 @@ const props = withDefaults(defineProps<Props>(), {
 
 const tag = computed(() => (props.href ? "a" : "button"));
 
+// Editorial button — mono uppercase, hairline borders, no shadow/scale.
+// Prefer `EditorialButton.vue` (ui/) for greenfield code; this stays for
+// the long tail of legacy `<Button>` consumers.
 const baseClasses =
-	"inline-flex items-center justify-center font-medium rounded-xl transition-smooth focus-ring backdrop-blur-md shadow-md hover:shadow-lg hover:scale-105";
+	"inline-flex items-center justify-center gap-2 font-mono font-semibold uppercase tracking-[0.14em] rounded-[2px] transition-colors-smooth focus-ring";
 
 const variantClasses = {
 	primary:
-		"text-white bg-gradient-primary hover:brightness-110 border border-primary/30 dark:border-primary/50",
+		"bg-[var(--editorial-ink)] text-[var(--editorial-paper)] border border-[var(--editorial-ink)] hover:opacity-92",
 	secondary:
-		"text-gray-900 bg-white/50 dark:bg-gray-700/60 backdrop-blur-lg border border-white/50 dark:border-gray-500/60 hover:bg-white/70 dark:hover:bg-gray-600/70 dark:text-white",
+		"bg-transparent text-[var(--text-primary-content)] border border-[var(--editorial-hairline-strong)] hover:border-[var(--editorial-ink)]",
 	ghost:
-		"text-gray-700 hover:text-gray-900 hover:bg-white/60 dark:hover:bg-gray-600/60 dark:text-gray-200 dark:hover:text-white border border-transparent hover:border-white/30 dark:hover:border-gray-500/40",
+		"bg-transparent text-[var(--text-primary-content)] border border-transparent hover:bg-[var(--surface-card-muted)]",
 	danger:
-		"text-white bg-gradient-to-r from-red-600/90 to-red-700/90 hover:from-red-700/95 hover:to-red-800/95 border border-red-500/30 dark:from-red-500/90 dark:to-red-600/90 dark:hover:from-red-600/95 dark:hover:to-red-700/95 dark:border-red-400/50",
+		"bg-[var(--editorial-rust)] text-[var(--editorial-paper)] border border-[var(--editorial-rust)] hover:opacity-92",
 };
 
 const sizeClasses = {
-	sm: "text-sm px-3 py-2",
-	md: "text-base px-5 py-2.5",
-	lg: "text-lg px-6 py-3",
+	sm: "text-[11px] px-3.5 py-2",
+	md: "text-xs px-5 py-3",
+	lg: "text-[13px] px-6 py-3.5",
 };
 
 const buttonClasses = computed(() => {

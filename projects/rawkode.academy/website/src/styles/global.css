@@ -189,24 +189,18 @@ html.dark {
 @layer components {
 	/* ════════════════════════════════════════════════════════════════
 	   Editorial surfaces — paper panels with hairline borders.
-	   Class names preserved from the previous glass system so consumers
-	   don't break; bodies rebuilt for the editorial vocabulary. New
-	   primitives should prefer `.paper-panel` / `.paper-card` /
-	   `.hairline-chip` (defined below) which use the editorial palette
-	   semantics directly.
+	   The legacy `.glass-*` / `.btn-glass` / `.btn-solid` /
+	   `.bg-gradient-*` aliases have been fully retired from the source
+	   tree; only the editorial vocabulary remains.
 	   ════════════════════════════════════════════════════════════════ */
 
-	/* Paper surfaces — the editorial replacements. */
-	.paper-panel,
-	.glass-panel {
+	.paper-panel {
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
 		border-radius: var(--radius-3xl);
 	}
 
-	.paper-card,
-	.glass-card,
-	.glass-card-shimmer {
+	.paper-card {
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
 		border-radius: var(--radius-2xl);
@@ -216,27 +210,16 @@ html.dark {
 		background: var(--surface-card-muted);
 		border: 1px solid var(--surface-border);
 		border-radius: var(--radius-xl);
+		transition: border-color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard);
 	}
 
-	/* Interactive surface chip — used inside paper cards. Editorial keeps
-	   the 1px hairline and swaps the rounded glass blur for a flat ink
-	   tint on hover. */
-	.glass-interactive {
+	.paper-card-muted:hover {
 		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
-		border-radius: var(--radius-lg);
-		transition: all var(--duration-base) var(--ease-standard);
-	}
-
-	.glass-interactive:hover {
-		background: var(--surface-card-muted);
 		border-color: var(--surface-border-strong);
 	}
 
-	/* Hairline chip — replaces the glass-chip pill. Editorial chips are
-	   tighter (8/10 padding), mono-fonted, hairline-bordered. */
-	.hairline-chip,
-	.glass-chip {
+	.hairline-chip {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -299,13 +282,6 @@ html.dark {
 		border-color: var(--surface-border);
 	}
 
-	/* Media frame — used as the surface for logos / icons. Editorial
-	   keeps a flat paperDeep background with a single hairline below. */
-	.glass-media-brand {
-		background: var(--surface-card);
-		border-bottom: 1px solid var(--surface-border);
-	}
-
 	/* Card base + hover — editorial hover thickens the top hairline
 	   instead of scaling the card. */
 	.card-base {
@@ -342,15 +318,9 @@ html.dark {
 		background: var(--editorial-ink);
 	}
 
-	/* Border utilities — preserved names, mapped to editorial hairlines. */
-	.border-subtle,
-	.border-glass,
-	.border-glass-subtle {
+	/* Border utility — editorial hairline. */
+	.border-subtle {
 		border-color: var(--surface-border);
-	}
-
-	.border-glass-strong {
-		border-color: var(--surface-border-strong);
 	}
 
 	/* Surface background — flat paper. */
@@ -358,81 +328,129 @@ html.dark {
 		background: var(--surface-card);
 	}
 
-	/* ════════════════════════════════════════════════════════════════
-	   Button variants — editorial mono uppercase buttons. Token names
-	   `.btn-glass` and `.btn-solid` are preserved for the 60-odd
-	   consumers; bodies are rebuilt for the editorial vocabulary.
-	   Prefer the new EditorialButton.vue primitive for greenfield code.
-	   ════════════════════════════════════════════════════════════════ */
-	.btn-glass {
+	/* Editorial button — global versions of the EditorialButton.vue
+	   primitive, so legacy templates that previously used .btn-glass /
+	   .btn-solid can adopt the new vocabulary via plain class names. */
+	.ed-btn {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.625rem;
-		padding: 0.85rem 1.25rem;
 		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
-		background: transparent;
-		color: var(--text-primary-content);
-		border: 1px solid var(--surface-border-strong);
+		line-height: 1;
 		border-radius: var(--radius-sm);
+		border: 1px solid transparent;
 		cursor: pointer;
-		transition: border-color var(--duration-base) var(--ease-standard);
+		text-decoration: none;
+		transition:
+			border-color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard),
+			opacity var(--duration-base) var(--ease-standard);
+		white-space: nowrap;
 	}
 
-	.btn-glass:hover {
+	.ed-btn--sm { padding: 0.6rem 0.95rem; font-size: 0.6875rem; }
+	.ed-btn--md { padding: 0.85rem 1.25rem; font-size: 0.75rem; }
+	.ed-btn--lg { padding: 1rem 1.5rem;     font-size: 0.8125rem; }
+
+	.ed-btn--solid {
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
 		border-color: var(--editorial-ink);
 	}
+	.ed-btn--solid:hover { opacity: 0.92; }
 
-	.btn-solid {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.625rem;
-		padding: 0.85rem 1.25rem;
+	.ed-btn--outline {
+		background: transparent;
+		color: var(--text-primary-content);
+		border-color: var(--editorial-hairline-strong);
+	}
+	.ed-btn--outline:hover { border-color: var(--editorial-ink); }
+
+	.ed-btn--ghost {
+		background: transparent;
+		color: var(--text-primary-content);
+	}
+	.ed-btn--ghost:hover { background: var(--surface-card-muted); }
+
+	.ed-btn:focus-visible {
+		outline: 2px solid var(--editorial-ink);
+		outline-offset: 2px;
+	}
+
+	/* Editorial aside callout — used by React AsideWrapper in MDX. */
+	.ed-aside {
+		display: grid;
+		grid-template-columns: 4px 28px 1fr;
+		gap: 0.875rem;
+		align-items: start;
+		padding: 0.875rem 1rem;
+		margin: 1.25rem 0;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-sm);
+		color: var(--editorial-ink);
+	}
+
+	.ed-aside__rail {
+		width: 2px;
+		align-self: stretch;
+		background: var(--editorial-ink-mute);
+		margin-left: -1rem;
+		margin-block: -0.875rem;
+	}
+
+	.ed-aside--tip .ed-aside__rail     { background: var(--editorial-spruce); }
+	.ed-aside--caution .ed-aside__rail { background: var(--editorial-amber); }
+	.ed-aside--danger .ed-aside__rail  { background: var(--editorial-rust); }
+	.ed-aside--info .ed-aside__rail    { background: var(--editorial-ink); }
+
+	.ed-aside__icon {
+		width: 28px; height: 28px;
+		display: grid; place-items: center;
+		margin-top: 0.1rem;
+		color: var(--editorial-ink);
+	}
+	.ed-aside--tip .ed-aside__icon     { color: var(--editorial-spruce); }
+	.ed-aside--caution .ed-aside__icon { color: var(--editorial-amber); }
+	.ed-aside--danger .ed-aside__icon  { color: var(--editorial-rust); }
+
+	.ed-aside__body {
+		min-width: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	.ed-aside__label {
+		display: block;
 		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 600;
+		font-size: 0.65rem;
+		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-		border: 1px solid var(--editorial-ink);
-		border-radius: var(--radius-sm);
-		cursor: pointer;
-		transition: opacity var(--duration-base) var(--ease-standard);
+		color: var(--editorial-ink-mute);
+		margin-bottom: 0.35rem;
 	}
+	.ed-aside--tip .ed-aside__label     { color: var(--editorial-spruce); }
+	.ed-aside--caution .ed-aside__label { color: var(--editorial-amber); }
+	.ed-aside--danger .ed-aside__label  { color: var(--editorial-rust); }
+	.ed-aside--info .ed-aside__label    { color: var(--editorial-ink); }
 
-	.btn-solid:hover {
-		opacity: 0.92;
-	}
+	.ed-aside p { margin: 0; }
+	.ed-aside p + p { margin-top: 0.5rem; }
 
-	/* ════════════════════════════════════════════════════════════════
-	   Gradient utilities — preserved names, all collapsed to flat paper
-	   or paperDeep. Editorial design uses no gradients. After Phase 3
-	   completes, grep + delete these once consumer count hits zero.
-	   ════════════════════════════════════════════════════════════════ */
-	.bg-gradient-hero,
-	.bg-gradient-hero-alt {
-		background: var(--surface-base);
+	.ed-aside a {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		text-decoration-color: var(--editorial-hairline-strong);
 	}
-
-	.bg-gradient-primary {
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-	}
-
-	.bg-gradient-secondary {
-		background: var(--editorial-spruce);
-		color: var(--editorial-paper);
-	}
-
-	.bg-gradient-card {
-		background: var(--surface-card);
-	}
+	.ed-aside a:hover { text-decoration-color: currentColor; }
 
 	/* ════════════════════════════════════════════════════════════════
 	   Editorial .prose ramp — Inter Tight body over Instrument Serif

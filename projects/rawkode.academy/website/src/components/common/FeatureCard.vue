@@ -1,7 +1,7 @@
 <template>
   <div
     :class="[
-      'glass-card-shimmer card-shadow card-hover p-6',
+      'paper-card card-shadow card-hover p-6',
       className
     ]"
   >

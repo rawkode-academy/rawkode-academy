@@ -344,7 +344,7 @@ const trackSignInClick = () => {
 							<a
 								:href="signInUrl"
 								@click="trackSignInClick"
-								class="inline-flex items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide text-white bg-gradient-primary shadow-lg hover:shadow-xl border border-white/40 dark:border-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-smooth"
+								class="inline-flex items-center justify-center w-full rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide text-white bg-[var(--editorial-ink)] text-[var(--editorial-paper)] shadow-lg hover:shadow-xl border border-white/40 dark:border-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-smooth"
 							>
 								Sign in instead
 							</a>

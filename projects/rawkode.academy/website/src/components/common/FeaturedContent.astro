@@ -91,7 +91,7 @@ const truncatedDescription = truncateDescription(
 <section class={`section-py-tight ${sectionClass}`.trim()}>
 	<!-- Mobile/Tablet layout - matches desktop aesthetic -->
 	<a href={href} class="lg:hidden block group">
-		<div class="glass-card-shimmer overflow-hidden rounded-2xl bleed-x-mobile">
+		<div class="paper-card overflow-hidden rounded-2xl bleed-x-mobile">
 			<!-- Image section -->
 			<div class="relative aspect-[16/9] overflow-hidden">
 				{typeof thumbnailUrl === "string" ? (
@@ -131,7 +131,7 @@ const truncatedDescription = truncateDescription(
 			<!-- Content section -->
 			<div class="relative p-5 space-y-4">
 				<!-- Accent line -->
-				<div class="absolute top-0 left-5 right-5 h-px bg-gradient-to-r from-primary via-secondary to-primary opacity-50"></div>
+				<div class="absolute top-0 left-5 right-5 h-px bg-[var(--editorial-ink)] opacity-50"></div>
 
 				<!-- Featured label -->
 				<div class="flex items-center gap-2">
@@ -159,7 +159,7 @@ const truncatedDescription = truncateDescription(
 				<div class="flex items-center gap-4 text-xs text-muted pt-1">
 					{author && (
 						<div class="flex items-center gap-2">
-							<div class="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-[0.6rem] font-bold">
+							<div class="w-6 h-6 rounded-full bg-[var(--surface-card)] flex items-center justify-center text-white text-[0.6rem] font-bold">
 								{author.charAt(0)}
 							</div>
 							<span class="text-primary-content font-medium">{author}</span>
@@ -197,12 +197,12 @@ const truncatedDescription = truncateDescription(
 
 	<!-- Hero layout for lg+ viewports: Side-by-side with prominent image -->
 	<a href={href} class="hidden lg:block group">
-		<div class="glass-card-shimmer flex rounded-[2rem] overflow-hidden min-h-[400px] xl:min-h-[450px]">
+		<div class="paper-card flex rounded-[2rem] overflow-hidden min-h-[400px] xl:min-h-[450px]">
 			
 			<!-- Left: Content Panel -->
 			<div class="relative flex flex-col justify-center p-8 xl:p-12 bg-surface/50 w-[40%] xl:w-[35%] shrink-0">
 				<!-- Decorative accent line -->
-				<div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary via-secondary to-primary/50"></div>
+				<div class="absolute top-0 left-0 w-1 h-full bg-[var(--editorial-ink)]"></div>
 				
 				<!-- Decorative dots pattern -->
 				<div class="absolute top-8 right-8 grid grid-cols-3 gap-1.5 opacity-20">
@@ -247,13 +247,13 @@ const truncatedDescription = truncateDescription(
 					)}
 
 					<!-- Divider -->
-					<div class="w-12 h-0.5 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
+					<div class="w-12 h-0.5 bg-[var(--surface-card)] rounded-full"></div>
 
 					<!-- Meta info -->
 					<div class="flex flex-wrap items-center gap-4 text-sm text-muted">
 						{author && (
 							<div class="flex items-center gap-2">
-								<div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold ring-2 ring-surface-card">
+								<div class="w-7 h-7 rounded-full bg-[var(--surface-card)] flex items-center justify-center text-white text-xs font-bold ring-2 ring-surface-card">
 									{author.charAt(0)}
 								</div>
 								<span class="font-medium text-primary-content">{author}</span>

@@ -382,7 +382,7 @@ if (isAuthenticated && user?.id) {
 				/>
 
 				{/* Server-rendered episode description for UX and crawlability */}
-				<section class="glass-card-shimmer bleed-x-mobile p-4 sm:p-6">
+				<section class="paper-card bleed-x-mobile p-4 sm:p-6">
 					<div class="space-y-1">
 						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
 							Overview
@@ -406,7 +406,7 @@ if (isAuthenticated && user?.id) {
 								<a
 									Astro.key={tech.id}
 									href={`/technology/${tech.id.replace(/\/index$/, '')}`}
-									class="glass-interactive inline-flex items-center gap-2 px-3 py-2 group"
+									class="paper-card-muted inline-flex items-center gap-2 px-3 py-2 group"
 								>
 									<div class="w-5 h-5 sm:w-6 sm:h-6 relative overflow-hidden rounded">
 										<img

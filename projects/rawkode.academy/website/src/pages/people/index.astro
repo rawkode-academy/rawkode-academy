@@ -38,11 +38,11 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
 		<!-- Hero Section -->
 		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto bleed-x-mobile">
+			<div class="paper-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto bleed-x-mobile">
 				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
 					<!-- Hero Copy -->
 					<div class="flex-1 space-y-4">
-						<span class="glass-chip">
+						<span class="hairline-chip">
 							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 							</svg>
@@ -92,7 +92,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 							return (
 								<a
 									href={`/people/${person.data.id}`}
-									class="people-card-link glass-card-shimmer card-hover bleed-x-mobile flex flex-col overflow-hidden items-center text-center p-6"
+									class="people-card-link paper-card card-hover bleed-x-mobile flex flex-col overflow-hidden items-center text-center p-6"
 									data-keywords={searchKeywords}
 								>
 									{/* Avatar */}
@@ -122,7 +122,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 				
 				<!-- Empty State -->
 				<div id="people-empty-state" class="hidden">
-					<div class="glass-card-shimmer rounded-2xl p-12 text-center max-w-md mx-auto">
+					<div class="paper-card rounded-2xl p-12 text-center max-w-md mx-auto">
 						<svg class="w-12 h-12 mx-auto text-muted mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
 						</svg>

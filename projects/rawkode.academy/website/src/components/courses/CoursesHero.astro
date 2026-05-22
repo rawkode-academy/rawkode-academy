@@ -46,12 +46,12 @@ const primaryHref = firstModuleSlug
 	<div class="relative space-y-8">
 		<div class="space-y-5">
 			<div class="flex flex-wrap gap-3">
-				<span class="glass-chip text-primary">Latest course</span>
+				<span class="hairline-chip text-primary">Latest course</span>
 				{publishedLabel && (
-					<span class="glass-chip text-secondary-content">Published {publishedLabel}</span>
+					<span class="hairline-chip text-secondary-content">Published {publishedLabel}</span>
 				)}
 				{availableModuleCount > 0 && availableModuleCount < moduleCount && (
-					<span class="glass-chip text-secondary-content">{availableModuleCount} live now</span>
+					<span class="hairline-chip text-secondary-content">{availableModuleCount} live now</span>
 				)}
 			</div>
 
@@ -80,7 +80,7 @@ const primaryHref = firstModuleSlug
 									loading="lazy"
 								/>
 							) : (
-								<div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/80 bg-gradient-to-br from-primary to-secondary text-sm font-bold text-white shadow-sm dark:border-slate-950/80">
+								<div class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white/80 bg-[var(--surface-card)] text-sm font-bold text-white shadow-sm dark:border-slate-950/80">
 									{author.name.charAt(0)}
 								</div>
 							),
@@ -98,7 +98,7 @@ const primaryHref = firstModuleSlug
 			<div class="flex flex-wrap gap-4">
 				<a
 					href={primaryHref}
-					class="inline-flex min-h-11 items-center justify-center rounded-xl border border-primary/30 bg-gradient-primary px-7 py-3 text-lg font-medium text-white shadow-md transition-smooth hover:scale-105 hover:shadow-lg hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-primary/50"
+					class="inline-flex min-h-11 items-center justify-center rounded-xl border border-primary/30 bg-[var(--editorial-ink)] text-[var(--editorial-paper)] px-7 py-3 text-lg font-medium text-white shadow-md transition-smooth hover:scale-105 hover:shadow-lg hover:brightness-110 focus:outline-none focus:ring-4 focus:ring-primary/50"
 				>
 					{availableModuleCount > 0 ? "Start learning now" : "View course outline"}
 				</a>

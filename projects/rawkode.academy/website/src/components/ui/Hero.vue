@@ -156,10 +156,10 @@ const sectionClasses = computed(() => {
 	const backgroundClasses: Record<string, string> = {
 		none: "",
 		gradient:
-			"bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20",
-		"gradient-hero": "bg-gradient-hero",
-		"gradient-hero-alt": "bg-gradient-hero-alt",
-		blobs: "bg-gradient-hero-alt",
+			"bg-[var(--surface-card)]",
+		"gradient-hero": "bg-[var(--surface-base)]",
+		"gradient-hero-alt": "bg-[var(--surface-base)]",
+		blobs: "bg-[var(--surface-base)]",
 	};
 
 	return [baseClasses, backgroundClasses[props.background], props.class]
@@ -196,7 +196,7 @@ const contentAreaClasses = computed(() => {
 });
 
 const gradientClass = computed(() => {
-	return "absolute inset-0 bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20";
+	return "absolute inset-0 bg-[var(--surface-card)]";
 });
 
 const subtitleClasses = computed(() => {

@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card-shimmer bleed-x-mobile">
+  <div class="paper-card bleed-x-mobile">
     <!-- Tab Navigation -->
     <div class="border-b border-subtle relative z-10">
       <!-- Dropdown for Mobile -->
@@ -8,7 +8,7 @@
         <select
           id="tabs-mobile"
           name="tabs-mobile"
-          class="glass-interactive block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
+          class="paper-card-muted block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
           :value="activeTab"
           @change="setActiveTab($event.target.value)"
         >
