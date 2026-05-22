@@ -1,136 +1,136 @@
 <template>
-  <div class="paper-card bleed-x-mobile">
-    <!-- Tab Navigation -->
-    <div class="border-b border-subtle relative z-10">
-      <!-- Dropdown for Mobile -->
-      <div class="sm:hidden px-2 pt-2 pb-3">
-        <label for="tabs-mobile" class="sr-only">Select a tab</label>
-        <select
-          id="tabs-mobile"
-          name="tabs-mobile"
-          class="paper-card-muted block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
-          :value="activeTab"
-          @change="setActiveTab($event.target.value)"
-        >
-          <option v-for="tab in tabs" :key="tab.id" :value="tab.id">
-            {{ tab.label }}
-          </option>
-        </select>
-      </div>
+ <div class="paper-card bleed-x-mobile">
+ <!-- Tab Navigation -->
+ <div class="border-b border-subtle relative z-10">
+ <!-- Dropdown for Mobile -->
+ <div class="sm:hidden px-2 pt-2 pb-3">
+ <label for="tabs-mobile" class="sr-only">Select a tab</label>
+ <select
+ id="tabs-mobile"
+ name="tabs-mobile"
+ class="paper-card-muted block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content"
+ :value="activeTab"
+ @change="setActiveTab($event.target.value)"
+ >
+ <option v-for="tab in tabs" :key="tab.id" :value="tab.id">
+ {{ tab.label }}
+ </option>
+ </select>
+ </div>
 
-      <!-- Tab bar for sm and up -->
-      <nav class="hidden sm:flex -mb-px overflow-x-auto" role="tablist">
-        <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          :id="`video-tab-${tab.id}`"
-          :class="[
-            'tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
-            activeTab === tab.id
-              ? 'border-primary text-primary dark:text-primary'
-              : 'border-transparent text-muted hover:text-primary-content',
-          ]"
-          role="tab"
-          :aria-selected="activeTab === tab.id"
-          :aria-controls="`video-panel-${tab.id}`"
-          @click="setActiveTab(tab.id)"
-        >
-          {{ tab.label }}
-        </button>
-      </nav>
-    </div>
+ <!-- Tab bar for sm and up -->
+ <nav class="hidden sm:flex -mb-px overflow-x-auto" role="tablist">
+ <button
+ v-for="tab in tabs"
+ :key="tab.id"
+ :id="`video-tab-${tab.id}`"
+ :class="[
+ 'tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors',
+ activeTab === tab.id
+ ? 'border-primary text-primary dark:text-primary'
+ : 'border-transparent text-muted hover:text-primary-content',
+ ]"
+ role="tab"
+ :aria-selected="activeTab === tab.id"
+ :aria-controls="`video-panel-${tab.id}`"
+ @click="setActiveTab(tab.id)"
+ >
+ {{ tab.label }}
+ </button>
+ </nav>
+ </div>
 
-    <!-- Tab Content -->
-    <div class="p-4 sm:p-6 relative z-10">
-      <!-- Comments Panel -->
-      <div
-        v-show="activeTab === 'comments'"
-        id="video-panel-comments"
-        role="tabpanel"
-        aria-labelledby="video-tab-comments"
-      >
-        <VideoComments :video-id="videoId" />
-      </div>
+ <!-- Tab Content -->
+ <div class="p-4 sm:p-6 relative z-10">
+ <!-- Comments Panel -->
+ <div
+ v-show="activeTab === 'comments'"
+ id="video-panel-comments"
+ role="tabpanel"
+ aria-labelledby="video-tab-comments"
+ >
+ <VideoComments :video-id="videoId" />
+ </div>
 
-      <!-- Transcript Panel -->
-      <div
-        v-show="activeTab === 'transcript'"
-        id="video-panel-transcript"
-        role="tabpanel"
-        aria-labelledby="video-tab-transcript"
-      >
-        <VideoTranscript
-          :video-id="videoId"
-          :is-active="activeTab === 'transcript'"
-        />
-      </div>
+ <!-- Transcript Panel -->
+ <div
+ v-show="activeTab === 'transcript'"
+ id="video-panel-transcript"
+ role="tabpanel"
+ aria-labelledby="video-tab-transcript"
+ >
+ <VideoTranscript
+ :video-id="videoId"
+ :is-active="activeTab === 'transcript'"
+ />
+ </div>
 
-      <!-- Resources Panel -->
-      <div
-        v-show="activeTab === 'resources'"
-        id="video-panel-resources"
-        role="tabpanel"
-        aria-labelledby="video-tab-resources"
-      >
-        <div v-if="!resources || resources.length === 0" class="prose prose-lg dark:prose-invert max-w-none">
-          <p class="text-muted">No resources for this episode yet.</p>
-        </div>
-        <div v-else class="space-y-6">
-          <div v-for="group in groupedResources" :key="group.category">
-            <h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
-              {{ categoryLabel(group.category) }}
-            </h3>
-            <div class="grid gap-3">
-              <a
-                v-for="(resource, idx) in group.items"
-                :key="resource.id || `${group.category}-${idx}`"
-                :href="resource.url || resource.filePath || '#'"
-                :target="resource.type === 'url' ? '_blank' : undefined"
-                :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
-                class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-smooth group"
-              >
-                <svg
-                  class="w-5 h-5 mt-0.5 text-muted group-hover:text-primary flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    :d="categoryIcon(group.category)"
-                  />
-                </svg>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium text-primary-content group-hover:text-primary">
-                    {{ resource.title }}
-                  </div>
-                  <div v-if="resource.description" class="text-sm text-muted mt-0.5">
-                    {{ resource.description }}
-                  </div>
-                </div>
-                <svg
-                  v-if="resource.type === 'url'"
-                  class="w-4 h-4 mt-1 text-muted group-hover:text-primary flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+ <!-- Resources Panel -->
+ <div
+ v-show="activeTab === 'resources'"
+ id="video-panel-resources"
+ role="tabpanel"
+ aria-labelledby="video-tab-resources"
+ >
+ <div v-if="!resources || resources.length === 0" class="prose prose-lg dark:prose-invert max-w-none">
+ <p class="text-muted">No resources for this episode yet.</p>
+ </div>
+ <div v-else class="space-y-6">
+ <div v-for="group in groupedResources" :key="group.category">
+ <h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+ {{ categoryLabel(group.category) }}
+ </h3>
+ <div class="grid gap-3">
+ <a
+ v-for="(resource, idx) in group.items"
+ :key="resource.id || `${group.category}-${idx}`"
+ :href="resource.url || resource.filePath || '#'"
+ :target="resource.type === 'url' ? '_blank' : undefined"
+ :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
+ class="flex items-start gap-3 p-3 rounded-sm bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-smooth group"
+ >
+ <svg
+ class="w-5 h-5 mt-0.5 text-muted group-hover:text-primary flex-shrink-0"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ :d="categoryIcon(group.category)"
+ />
+ </svg>
+ <div class="flex-1 min-w-0">
+ <div class="font-medium text-primary-content group-hover:text-primary">
+ {{ resource.title }}
+ </div>
+ <div v-if="resource.description" class="text-sm text-muted mt-0.5">
+ {{ resource.description }}
+ </div>
+ </div>
+ <svg
+ v-if="resource.type === 'url'"
+ class="w-4 h-4 mt-1 text-muted group-hover:text-primary flex-shrink-0"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+ />
+ </svg>
+ </a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 </template>
 
 <script>
@@ -231,38 +231,38 @@ export default {
 <style scoped>
 /* Hide scrollbar on tab navigation */
 nav::-webkit-scrollbar {
-  display: none;
+ display: none;
 }
 
 nav {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+ -ms-overflow-style: none;
+ scrollbar-width: none;
 }
 
 /* Additional spacing for prose paragraphs */
 .prose :deep(p) {
-  margin-bottom: 1.5rem;
+ margin-bottom: 1.5rem;
 }
 
 /* Clean, professional link styles */
 .prose :deep(a) {
-  color: rgb(59 130 246);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  text-decoration-thickness: 1px;
-  transition: all 0.2s ease;
+ color: rgb(59 130 246);
+ text-decoration: underline;
+ text-underline-offset: 2px;
+ text-decoration-thickness: 1px;
+ transition: all 0.2s ease;
 }
 
 .prose :deep(a:hover) {
-  color: rgb(37 99 235);
-  text-decoration-thickness: 2px;
+ color: rgb(37 99 235);
+ text-decoration-thickness: 2px;
 }
 
 .dark .prose :deep(a) {
-  color: rgb(96 165 250);
+ color: rgb(96 165 250);
 }
 
 .dark .prose :deep(a:hover) {
-  color: rgb(147 197 253);
+ color: rgb(147 197 253);
 }
 </style>

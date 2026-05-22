@@ -54,89 +54,89 @@ const getAdrNumber = (id: string): string => {
 	description="Lightweight records of the architectural decisions behind Rawkode Academy - context, consequences, and the trade-offs we accepted."
 	pageType="CollectionPage"
 >
-  <div class="max-w-(--breakpoint-xl) mx-auto">
-    <h1 class="text-5xl font-extrabold mb-6 text-primary-content">
-      Architecture Decision Records
-    </h1>
+ <div class="max-w-(--breakpoint-xl) mx-auto">
+ <h1 class="text-5xl font-extrabold mb-6 text-primary-content">
+ Architecture Decision Records
+ </h1>
 
-    <p class="mb-10 text-lg text-secondary-content">
-      This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
-    </p>
+ <p class="mb-10 text-lg text-secondary-content">
+ This page lists all architecture decisions made in this project. ADRs are a lightweight method to document architectural decisions including their context and consequences.
+ </p>
 
-    <div class="grid gap-6 lg:gap-8">
-      {allAdrs.map((adr) => {
-        const authorData = adrAuthors.find(a => a.id === adr.id);
-        const authors = authorData?.authors || [];
-        const adrNumber = getAdrNumber(adr.id);
+ <div class="grid gap-6 lg:gap-8">
+ {allAdrs.map((adr) => {
+ const authorData = adrAuthors.find(a => a.id === adr.id);
+ const authors = authorData?.authors || [];
+ const adrNumber = getAdrNumber(adr.id);
 
-        return (
-          <a href={`/adrs/${adr.id}`} class="block">
-            <div class="transition-card ease-in-out transform hover:-translate-y-1 hover:shadow-xl rounded-xl overflow-hidden backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 border border-surface shadow-md">
-              <div class="p-6">
-                <div class="flex items-center gap-4 mb-4">
-                  <h2 class="text-2xl font-bold text-primary-content my-auto">
-                    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
-                  </h2>
-                </div>
+ return (
+ <a href={`/adrs/${adr.id}`} class="block">
+ <div class="transition-card ease-in-out transform hover: rounded-sm overflow-hidden bg-white/30 dark:bg-gray-800/30 border border-surface shadow-md">
+ <div class="p-6">
+ <div class="flex items-center gap-4 mb-4">
+ <h2 class="text-2xl font-bold text-primary-content my-auto">
+ <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
+ </h2>
+ </div>
 
-                <div class="flex flex-wrap items-center gap-4 mt-2">
-                  <div class="flex items-center text-sm text-muted">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    {formatDate(adr.data.adoptedAt)}
-                  </div>
+ <div class="flex flex-wrap items-center gap-4 mt-2">
+ <div class="flex items-center text-sm text-muted">
+ <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+ </svg>
+ {formatDate(adr.data.adoptedAt)}
+ </div>
 
-                  <div class="flex items-center">
-                    <span class="adr-status">Adopted</span>
-                  </div>
+ <div class="flex items-center">
+ <span class="adr-status">Adopted</span>
+ </div>
 
-                  {authors.length > 0 && (
-                    <div class="flex items-center">
-                      <div class="flex -space-x-3 mr-2">
-                        {authors.filter(author => author && author.data).slice(0, 3).map((author, index) => (
-                          <div class="relative" style={`z-index: ${10 - index}`}>
-                            <img
-                              class="w-8 h-8 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
-                              src={author.data.avatarUrl}
-                              alt={`Profile picture of ${author.data.name}`}
-                              title={author.data.name}
-                            />
-                          </div>
-                        ))}
-                        {authors.filter(author => author && author.data).length > 3 && (
-                          <div class="relative z-0">
-                            <div class="w-8 h-8 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
-                              +{authors.filter(author => author && author.data).length - 3}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <span class="text-sm text-muted">
-                        {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </a>
-        );
-      })}
-    </div>
-  </div>
+ {authors.length > 0 && (
+ <div class="flex items-center">
+ <div class="flex -space-x-3 mr-2">
+ {authors.filter(author => author && author.data).slice(0, 3).map((author, index) => (
+ <div class="relative" style={`z-index: ${10 - index}`}>
+ <img
+ class="w-8 h-8 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
+ src={author.data.avatarUrl}
+ alt={`Profile picture of ${author.data.name}`}
+ title={author.data.name}
+ />
+ </div>
+ ))}
+ {authors.filter(author => author && author.data).length > 3 && (
+ <div class="relative z-0">
+ <div class="w-8 h-8 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
+ +{authors.filter(author => author && author.data).length - 3}
+ </div>
+ </div>
+ )}
+ </div>
+ <span class="text-sm text-muted">
+ {authors.filter(author => author && author.data).map(author => author.data.name).join(", ")}
+ </span>
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
+ </a>
+ );
+ })}
+ </div>
+ </div>
 </Page>
 
 <style>
-  .adr-status {
-    font-family: var(--font-jetbrains-mono), monospace;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 0.25rem 0.5rem;
-    color: var(--editorial-spruce);
-    border: 1px solid var(--editorial-spruce);
-    border-radius: 2px;
-  }
+ .adr-status {
+ font-family: var(--font-jetbrains-mono), monospace;
+ font-size: 0.6875rem;
+ font-weight: 500;
+ letter-spacing: 0.12em;
+ text-transform: uppercase;
+ padding: 0.25rem 0.5rem;
+ color: var(--editorial-spruce);
+ border: 1px solid var(--editorial-spruce);
+ border-radius: 2px;
+ }
 </style>

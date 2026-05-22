@@ -1,131 +1,131 @@
 <template>
-  <div class="h-full flex flex-col bg-gray-900 text-gray-100">
-    <!-- Header -->
-    <div class="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
-      <div class="flex items-center gap-4">
-        <h3 class="text-lg font-semibold">{{ title }}</h3>
-        <div v-if="status === 'booting'" class="flex items-center gap-2 text-sm text-gray-400">
-          <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
-          <span>Starting container...</span>
-        </div>
-        <div v-else-if="status === 'installing'" class="flex items-center gap-2 text-sm text-primary">
-          <div class="animate-pulse">●</div>
-          <span>Installing dependencies...</span>
-        </div>
-        <div v-else-if="status === 'ready'" class="flex items-center gap-2 text-sm text-green-400">
-          <div>●</div>
-          <span>Ready</span>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button
-          @click="restart"
-          :disabled="status !== 'ready'"
-          class="p-2 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          title="Restart"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
-      </div>
-    </div>
+ <div class="h-full flex flex-col bg-gray-900 text-gray-100">
+ <!-- Header -->
+ <div class="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
+ <div class="flex items-center gap-4">
+ <h3 class="text-lg font-semibold">{{ title }}</h3>
+ <div v-if="status === 'booting'" class="flex items-center gap-2 text-sm text-gray-400">
+ <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+ <span>Starting container...</span>
+ </div>
+ <div v-else-if="status === 'installing'" class="flex items-center gap-2 text-sm text-primary">
+ <div class="animate-pulse">●</div>
+ <span>Installing dependencies...</span>
+ </div>
+ <div v-else-if="status === 'ready'" class="flex items-center gap-2 text-sm text-green-400">
+ <div>●</div>
+ <span>Ready</span>
+ </div>
+ </div>
+ <div class="flex items-center gap-2">
+ <button
+ @click="restart"
+ :disabled="status !== 'ready'"
+ class="p-2 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+ title="Restart"
+ >
+ <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+ </svg>
+ </button>
+ </div>
+ </div>
 
-    <!-- Split View -->
-    <div class="flex-1 flex overflow-hidden">
-      <!-- Editor -->
-      <div class="w-1/2 flex flex-col border-r border-gray-700">
-        <div class="p-2 bg-gray-800 border-b border-gray-700 relative z-10">
-          <select
-            v-model="selectedFile"
-            class="w-full px-3 py-1 bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 focus:border-primary focus:outline-none cursor-pointer transition-colors"
-            :disabled="fileList.length === 0"
-          >
-            <option v-if="fileList.length === 0" value="">No files loaded</option>
-            <option v-for="file in fileList" :key="file" :value="file">
-              {{ file }}
-            </option>
-          </select>
-        </div>
-        <div class="flex-1 relative">
-          <textarea
-            v-if="selectedFile && fileContents[selectedFile] !== undefined"
-            v-model="fileContents[selectedFile]"
-            @input="onFileChange"
-            class="absolute inset-0 w-full h-full p-4 bg-gray-900 text-gray-100 font-mono text-sm resize-none focus:outline-none"
-            :placeholder="`Edit ${selectedFile}...`"
-            spellcheck="false"
-          ></textarea>
-          <div v-else class="absolute inset-0 w-full h-full p-4 bg-gray-900 text-gray-500 font-mono text-sm">
-            Select a file to edit
-          </div>
-        </div>
-      </div>
+ <!-- Split View -->
+ <div class="flex-1 flex overflow-hidden">
+ <!-- Editor -->
+ <div class="w-1/2 flex flex-col border-r border-gray-700">
+ <div class="p-2 bg-gray-800 border-b border-gray-700 relative z-10">
+ <select
+ v-model="selectedFile"
+ class="w-full px-3 py-1 bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 focus:border-primary focus:outline-none cursor-pointer transition-colors"
+ :disabled="fileList.length === 0"
+ >
+ <option v-if="fileList.length === 0" value="">No files loaded</option>
+ <option v-for="file in fileList" :key="file" :value="file">
+ {{ file }}
+ </option>
+ </select>
+ </div>
+ <div class="flex-1 relative">
+ <textarea
+ v-if="selectedFile && fileContents[selectedFile] !== undefined"
+ v-model="fileContents[selectedFile]"
+ @input="onFileChange"
+ class="absolute inset-0 w-full h-full p-4 bg-gray-900 text-gray-100 font-mono text-sm resize-none focus:outline-none"
+ :placeholder="`Edit ${selectedFile}...`"
+ spellcheck="false"
+ ></textarea>
+ <div v-else class="absolute inset-0 w-full h-full p-4 bg-gray-900 text-gray-500 font-mono text-sm">
+ Select a file to edit
+ </div>
+ </div>
+ </div>
 
-      <!-- Preview -->
-      <div class="w-1/2 flex flex-col">
-        <div class="p-2 bg-gray-800 border-b border-gray-700">
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-400">Preview:</span>
-            <a 
-              v-if="previewUrl"
-              :href="previewUrl" 
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary transition-all cursor-pointer flex items-center gap-1"
-              @click.stop
-            >
-              {{ previewUrl }}
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-              </svg>
-            </a>
-            <span v-else class="text-sm text-gray-500 italic">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
-          </div>
-        </div>
-        <div class="flex-1 relative bg-white dark:bg-gray-900">
-          <iframe
-            v-if="previewUrl"
-            :src="previewUrl"
-            class="absolute inset-0 w-full h-full"
-            frameborder="0"
-          ></iframe>
-          <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500">
-            <div class="text-center">
-              <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <p>Waiting for server...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+ <!-- Preview -->
+ <div class="w-1/2 flex flex-col">
+ <div class="p-2 bg-gray-800 border-b border-gray-700">
+ <div class="flex items-center gap-2">
+ <span class="text-sm text-gray-400">Preview:</span>
+ <a 
+ v-if="previewUrl"
+ :href="previewUrl" 
+ target="_blank"
+ rel="noopener noreferrer"
+ class="text-sm text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary transition-all cursor-pointer flex items-center gap-1"
+ @click.stop
+ >
+ {{ previewUrl }}
+ <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+ </svg>
+ </a>
+ <span v-else class="text-sm text-gray-500 italic">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
+ </div>
+ </div>
+ <div class="flex-1 relative bg-white dark:bg-gray-900">
+ <iframe
+ v-if="previewUrl"
+ :src="previewUrl"
+ class="absolute inset-0 w-full h-full"
+ frameborder="0"
+ ></iframe>
+ <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500">
+ <div class="text-center">
+ <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+ </svg>
+ <p>Waiting for server...</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Terminal -->
-    <div class="h-48 flex-shrink-0 bg-black border-t border-gray-700 overflow-hidden flex flex-col">
-      <div class="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-        <span class="text-sm text-gray-400">Terminal</span>
-        <button
-          @click="clearTerminal"
-          class="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-        >
-          Clear
-        </button>
-      </div>
-      <div
-        ref="terminalOutput"
-        class="h-[calc(100%-2rem)] overflow-y-auto p-2 font-mono text-xs"
-      >
-        <div
-          v-for="(line, index) in terminalLines"
-          :key="index"
-          :class="getTerminalLineClass(line)"
-          v-html="formatTerminalLine(line)"
-        ></div>
-      </div>
-    </div>
-  </div>
+ <!-- Terminal -->
+ <div class="h-48 flex-shrink-0 bg-black border-t border-gray-700 overflow-hidden flex flex-col">
+ <div class="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
+ <span class="text-sm text-gray-400">Terminal</span>
+ <button
+ @click="clearTerminal"
+ class="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+ >
+ Clear
+ </button>
+ </div>
+ <div
+ ref="terminalOutput"
+ class="h-[calc(100%-2rem)] overflow-y-auto p-2 font-mono text-xs"
+ >
+ <div
+ v-for="(line, index) in terminalLines"
+ :key="index"
+ :class="getTerminalLineClass(line)"
+ v-html="formatTerminalLine(line)"
+ ></div>
+ </div>
+ </div>
+ </div>
 </template>
 
 <script setup lang="ts">

@@ -138,7 +138,7 @@ const formattedPosition = computed(() => {
 				<Transition name="fade" mode="out-in">
 					<article
 						:key="`${activeTestimonial.author.name}-${activeIndex}`"
-						class="paper-card relative overflow-hidden rounded-[2rem] p-5 sm:p-6 lg:px-8 lg:py-7"
+						class="paper-card relative overflow-hidden rounded-sm p-5 sm:p-6 lg:px-8 lg:py-7"
 					>
 						<div v-if="hasMultiple" class="absolute left-0 right-0 top-0 h-1 bg-white/60 dark:bg-white/10">
 							<div

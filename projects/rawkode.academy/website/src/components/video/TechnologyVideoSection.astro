@@ -70,13 +70,13 @@ const hasMoreVideos = totalVideos && totalVideos > videos.length;
 			{videos.map((video) => (
 				<a
 					href={`/watch/${video.slug}`}
-					class="group block paper-card-muted rounded-lg overflow-hidden"
+					class="group block paper-card-muted rounded-sm overflow-hidden"
 				>
 					<div class="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
 						<img
 							src={video.thumbnailUrl}
 							alt={video.title}
-							class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+							class="w-full h-full object-cover group-hover:scale-105 "
 							loading="lazy"
 						/>
 						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">

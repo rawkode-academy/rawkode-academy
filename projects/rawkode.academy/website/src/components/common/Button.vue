@@ -1,16 +1,16 @@
 <template>
-  <component
-    :is="tag"
-    :href="href"
-    :type="!href ? type : undefined"
-    :disabled="!href ? disabled : undefined"
-    :class="buttonClasses"
-    v-bind="$attrs"
-  >
-    <slot name="icon-left" />
-    <slot />
-    <slot name="icon-right" />
-  </component>
+ <component
+ :is="tag"
+ :href="href"
+ :type="!href ? type : undefined"
+ :disabled="!href ? disabled : undefined"
+ :class="buttonClasses"
+ v-bind="$attrs"
+ >
+ <slot name="icon-left" />
+ <slot />
+ <slot name="icon-right" />
+ </component>
 </template>
 
 <script setup lang="ts">

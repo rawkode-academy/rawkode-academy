@@ -93,59 +93,59 @@ const showsJsonLd = showEntries.map((s) => {
 		listUrl={new URL("/shows", Astro.site ?? Astro.url).href}
 		listName="Rawkode Academy Shows"
 	/>
-        <section class="relative overflow-hidden py-16 sm:py-20">
-                <!-- Background gradient -->
-                <div class="absolute inset-0 bg-transparent" aria-hidden="true"></div>
+ <section class="relative overflow-hidden py-16 sm:py-20">
+ <!-- Background gradient -->
+ <div class="absolute inset-0 bg-transparent" aria-hidden="true"></div>
 
-                <div class="relative mx-auto max-w-7xl content-px">
-                        <!-- Header -->
-                        <div class="shows-header">
-                                <div class="shows-header__meta">
-                                        <span class="shows-header__kicker">§ Original series</span>
-                                </div>
-                                <h1 class="shows-header__title">
-                                        Shows<span class="shows-header__title-soft"> — long-form programs from the academy</span>
-                                </h1>
-                                <p class="shows-header__lede">
-                                        Recurring programs that go deeper than a single video. Each show carries its own hosts, cadence, and editorial style.
-                                </p>
-                        </div>
+ <div class="relative mx-auto max-w-7xl content-px">
+ <!-- Header -->
+ <div class="shows-header">
+ <div class="shows-header__meta">
+ <span class="shows-header__kicker">§ Original series</span>
+ </div>
+ <h1 class="shows-header__title">
+ Shows<span class="shows-header__title-soft"> — long-form programs from the academy</span>
+ </h1>
+ <p class="shows-header__lede">
+ Recurring programs that go deeper than a single video. Each show carries its own hosts, cadence, and editorial style.
+ </p>
+ </div>
 
-                        <!-- Content -->
-                        <div class="mt-16">
-                                {hasShows ? (
-                                        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                                                {showsToRender.map((show) => (
-                                                        <ShowCard show={show} />
-                                                ))}
-                                        </div>
-                                ) : (
-                                        <div class="mx-auto max-w-2xl border border-[var(--editorial-hairline)] bg-[var(--editorial-paper-deep)] p-12 text-center">
-                                                <svg
-                                                        class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                        aria-hidden="true"
-                                                >
-                                                        <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="1.5"
-                                                                d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
-                                                        />
-                                                </svg>
-                                                <p class="mt-4 text-lg font-medium text-secondary-content">
-                                                        No shows available yet
-                                                </p>
-                                                <p class="mt-2 text-sm text-muted">
-                                                        We're working on bringing you exciting new content. Check back soon!
-                                                </p>
-                                        </div>
-                                )}
-                        </div>
-                </div>
-        </section>
+ <!-- Content -->
+ <div class="mt-16">
+ {hasShows ? (
+ <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+ {showsToRender.map((show) => (
+ <ShowCard show={show} />
+ ))}
+ </div>
+ ) : (
+ <div class="mx-auto max-w-2xl border border-[var(--editorial-hairline)] bg-[var(--editorial-paper-deep)] p-12 text-center">
+ <svg
+ class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
+ fill="none"
+ viewBox="0 0 24 24"
+ stroke="currentColor"
+ aria-hidden="true"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="1.5"
+ d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
+ />
+ </svg>
+ <p class="mt-4 text-lg font-medium text-secondary-content">
+ No shows available yet
+ </p>
+ <p class="mt-2 text-sm text-muted">
+ We're working on bringing you exciting new content. Check back soon!
+ </p>
+ </div>
+ )}
+ </div>
+ </div>
+ </section>
 </Page>
 
 <style>

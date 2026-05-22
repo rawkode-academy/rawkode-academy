@@ -33,47 +33,47 @@ export const prerender = false;
 ---
 
 <MinimalLayout title={title} noindex>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-    #app {
-      width: 100vw;
-      height: 100vh;
-    }
-    .error {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      color: #ef4444;
-      font-size: 1.25rem;
-      text-align: center;
-      padding: 2rem;
-    }
-    .error a {
-      color: #60a5fa;
-      text-decoration: underline;
-    }
-  </style>
-  
-  {error ? (
-    <div class="error">
-      <div>
-        <p>{error}</p>
-        <p><a href="javascript:history.back()">Go back</a></p>
-      </div>
-    </div>
-  ) : (
-    <div id="app">
-      <WebContainerEmbed
-        client:only="vue"
-        title={title}
-        files={files}
-        startCommand={startCommand}
-      />
-    </div>
-  )}
+ <style>
+ body {
+ margin: 0;
+ padding: 0;
+ overflow: hidden;
+ }
+ #app {
+ width: 100vw;
+ height: 100vh;
+ }
+ .error {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ height: 100vh;
+ color: #ef4444;
+ font-size: 1.25rem;
+ text-align: center;
+ padding: 2rem;
+ }
+ .error a {
+ color: #60a5fa;
+ text-decoration: underline;
+ }
+ </style>
+ 
+ {error ? (
+ <div class="error">
+ <div>
+ <p>{error}</p>
+ <p><a href="javascript:history.back()">Go back</a></p>
+ </div>
+ </div>
+ ) : (
+ <div id="app">
+ <WebContainerEmbed
+ client:only="vue"
+ title={title}
+ files={files}
+ startCommand={startCommand}
+ />
+ </div>
+ )}
 </MinimalLayout>

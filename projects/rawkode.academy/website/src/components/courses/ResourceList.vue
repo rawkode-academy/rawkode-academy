@@ -70,7 +70,7 @@
 
 						<div class="flex items-start justify-end pt-1">
 							<svg
-								class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+								class="h-4 w-4 group-hover:translate-x-0.5"
 								:class="resource.type === 'embed' ? 'text-secondary' : 'text-primary'"
 								fill="none"
 								stroke="currentColor"
@@ -118,9 +118,9 @@ interface Resource {
 				import?:
 					| {
 							localDir: string;
-					  }
+					 }
 					| undefined;
-		  }
+		 }
 		| undefined;
 	category: "slides" | "code" | "documentation" | "demos" | "other";
 }

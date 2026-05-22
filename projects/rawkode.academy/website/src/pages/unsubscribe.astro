@@ -128,7 +128,7 @@ if (Astro.request.method === "POST" && user) {
 				</p>
 
 				{unsubscribeResult?.success === false && (
-					<div class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 max-w-md">
+					<div class="mb-6 p-4 rounded-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 max-w-md">
 						{unsubscribeResult.message}
 					</div>
 				)}
@@ -141,13 +141,13 @@ if (Astro.request.method === "POST" && user) {
 							value={email || ""}
 							placeholder="Enter your email address"
 							required
-							class="w-full py-3 px-4 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-primary-content placeholder-neutral-400 dark:placeholder-neutral-500 focus-ring"
+							class="w-full py-3 px-4 rounded-sm border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-primary-content placeholder-neutral-400 dark:placeholder-neutral-500 focus-ring"
 						/>
 					)}
 					
 					<button
 						type="submit"
-						class="w-full py-3 px-6 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+						class="w-full py-3 px-6 rounded-sm bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
 					>
 						Unsubscribe
 					</button>

@@ -22,7 +22,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 
 		<div class="grid gap-8 md:grid-cols-2">
 			<!-- All Content Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg p-6 border-surface border">
+			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
 				<h2 class="text-2xl font-semibold mb-4 text-secondary">All Content</h2>
 				<p class="text-secondary-content mb-4">Get articles, news, and videos in one feed</p>
 				<div class="space-y-3">
@@ -48,7 +48,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			</div>
 
 			<!-- Articles Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg p-6 border-surface border">
+			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
 				<h2 class="text-2xl font-semibold mb-4 text-secondary">Articles</h2>
 				<p class="text-secondary-content mb-4">Subscribe to our latest articles and tutorials</p>
 				<div class="space-y-3">
@@ -76,7 +76,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			</div>
 
 			<!-- News Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg p-6 border-surface border">
+			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
 				<h2 class="text-2xl font-semibold mb-4 text-secondary">News</h2>
 				<p class="text-secondary-content mb-4">Cloud native, Kubernetes, and AI infrastructure news for engineers</p>
 				<div class="space-y-3">
@@ -102,7 +102,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			</div>
 
 			<!-- Videos Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg p-6 border-surface border">
+			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
 				<h2 class="text-2xl font-semibold mb-4 text-secondary">Videos</h2>
 				<p class="text-secondary-content mb-4">Subscribe to our latest video content</p>
 				<div class="space-y-3">
@@ -129,7 +129,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 
 			<!-- Podcast Feeds -->
 			{publishedShows.length > 0 && publishedShows.map((show) => (
-				<div class="bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg p-6 border-surface border">
+				<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
 					<h2 class="text-2xl font-semibold mb-4 text-secondary">{show.data.name}</h2>
 					<p class="text-secondary-content mb-4">{show.data.description || `Subscribe to ${show.data.name} podcast`}</p>
 					<div class="space-y-3">
@@ -144,7 +144,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			))}
 
 			<!-- How to Subscribe -->
-			<div class="bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg p-6 border-surface border">
+			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
 				<h2 class="text-2xl font-semibold mb-4 text-secondary">How to Subscribe</h2>
 				<ol class="list-decimal list-inside space-y-2 text-secondary-content">
 					<li>Copy the feed URL you want to subscribe to</li>
@@ -155,7 +155,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			</div>
 		</div>
 
-		<div class="mt-12 p-6 bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg border-surface border">
+		<div class="mt-12 p-6 bg-white/40 dark:bg-gray-800/60 rounded-sm border-surface border">
 			<h2 class="text-xl font-semibold mb-3 text-secondary">Subscribe to everything in one click</h2>
 			<p class="text-secondary-content mb-3">
 				Import our OPML file into your feed reader (Feedly, Inoreader, NetNewsWire, etc.)
@@ -173,7 +173,7 @@ const publishedShows = shows.filter((show) => show.data.publish);
 			</a>
 		</div>
 
-		<div class="mt-12 p-6 bg-white/40 dark:bg-gray-800/60 backdrop-blur rounded-lg border-surface border">
+		<div class="mt-12 p-6 bg-white/40 dark:bg-gray-800/60 rounded-sm border-surface border">
 			<h2 class="text-xl font-semibold mb-3 text-secondary">Feed Formats</h2>
 			<div class="space-y-2 text-secondary-content">
 				<p><strong>RSS 2.0:</strong> The most widely supported feed format, compatible with virtually all feed readers.</p>

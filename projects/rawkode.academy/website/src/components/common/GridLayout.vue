@@ -1,7 +1,7 @@
 <template>
-  <div :class="computedClasses">
-    <slot />
-  </div>
+ <div :class="computedClasses">
+ <slot />
+ </div>
 </template>
 
 <script setup lang="ts">
