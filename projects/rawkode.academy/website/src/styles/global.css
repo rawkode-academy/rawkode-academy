@@ -59,6 +59,15 @@
 	--text-primary-content: var(--editorial-ink);
 	--text-secondary-content: var(--editorial-ink-soft);
 	--text-muted: var(--editorial-ink-mute);
+
+	/* UnoCSS preflight sets `* { border-color: var(--un-default-border-color, #e5e7eb) }`
+	   unlayered, which wins against any layered `.prose code { border: 1px
+	   solid var(--surface-border) }` rule and turns every `border` shorthand
+	   into a bright gray-200 outline — visible as a glaring chip on dark
+	   surfaces (inline `<code>`, kbd, etc.). Pinning the preflight default
+	   to our editorial hairline aligns every default-border consumer with
+	   the active scheme. */
+	--un-default-border-color: var(--editorial-hairline);
 }
 
 html.dark {
