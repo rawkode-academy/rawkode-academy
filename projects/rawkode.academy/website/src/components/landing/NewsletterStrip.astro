@@ -1,0 +1,93 @@
+---
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import MLabel from "@/components/ui/MLabel.vue";
+---
+
+<section id="newsletter-signup" class="newsletter-strip">
+	<div class="newsletter-strip__left">
+		<MLabel tone="accent">§NL · Weekly dispatch</MLabel>
+		<p class="newsletter-strip__copy">
+			Tutorials, deep dives, and curated events.
+			<span class="newsletter-strip__copy-soft">No spam, unsubscribe anytime.</span>
+		</p>
+	</div>
+
+	<form
+		class="newsletter-strip__form"
+		action="https://email.rawkode.academy/subscribe"
+		method="post"
+	>
+		<input
+			class="newsletter-strip__input"
+			type="email"
+			name="email"
+			required
+			autocomplete="email"
+			placeholder="you@your-domain.dev"
+			aria-label="Email address"
+		/>
+		<EditorialButton variant="solid" size="md" arrow>Subscribe</EditorialButton>
+	</form>
+</section>
+
+<style>
+	.newsletter-strip {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		align-items: center;
+		gap: 2rem;
+		padding: 1.25rem 2.5rem;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+		scroll-margin-top: 6rem;
+	}
+
+	.newsletter-strip__left {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.newsletter-strip__copy {
+		margin: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		color: var(--editorial-ink);
+	}
+
+	.newsletter-strip__copy-soft {
+		color: var(--editorial-ink-mute);
+		margin-left: 0.25rem;
+	}
+
+	.newsletter-strip__form {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.newsletter-strip__input {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.85rem;
+		padding: 0.85rem 1rem;
+		min-width: 18rem;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: var(--radius-sm);
+		color: var(--editorial-ink);
+	}
+
+	.newsletter-strip__input:focus-visible {
+		outline: 2px solid var(--editorial-ink);
+		outline-offset: 2px;
+	}
+
+	@media (max-width: 720px) {
+		.newsletter-strip {
+			grid-template-columns: 1fr;
+			padding: 1.25rem 1.5rem;
+		}
+		.newsletter-strip__input { min-width: 0; flex: 1; }
+	}
+</style>

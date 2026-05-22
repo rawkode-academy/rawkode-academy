@@ -1,0 +1,197 @@
+---
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import LiveDot from "@/components/ui/LiveDot.vue";
+import MLabel from "@/components/ui/MLabel.vue";
+import SectionMark from "@/components/ui/SectionMark.vue";
+import StatRow from "@/components/ui/StatRow.vue";
+import OnAirPanel from "@/components/landing/OnAirPanel.astro";
+
+interface Stat { value: string; label: string }
+
+interface Props {
+	dispatchNum?: number | string;
+	dispatchDayTime?: string; // e.g. "Thursday 22:27"
+	onAirTitle?: string;
+	viewers?: number;
+	stats?: Stat[];
+}
+
+const {
+	dispatchNum = "048",
+	dispatchDayTime = "Thursday 22:27",
+	onAirTitle = "Tracing packets with eBPF",
+	viewers = 1284,
+	stats = [
+		{ value: "339", label: "Lessons" },
+		{ value: "42k", label: "Engineers" },
+		{ value: "112", label: "Dispatches" },
+		{ value: "2019", label: "Since" },
+	],
+} = Astro.props as Props;
+---
+
+<section class="landing-hero">
+	<div class="landing-hero__kicker">
+		<LiveDot color="amber" />
+		<MLabel tone="amber">On air now</MLabel>
+		<span class="landing-hero__kicker-meta">
+			— {onAirTitle} · {viewers.toLocaleString()} watching
+		</span>
+		<span class="landing-hero__kicker-rule" aria-hidden="true"></span>
+		<MLabel tone="muted">Dispatch №{dispatchNum} · {dispatchDayTime}</MLabel>
+	</div>
+
+	<div class="landing-hero__grid">
+		<div class="landing-hero__editorial">
+			<SectionMark num={0} label="Hands-on cloud native" dot tone="rust" />
+
+			<h1 class="landing-hero__h1">Cloud native</h1>
+			<h2 class="landing-hero__h2">is complex.</h2>
+			<h2 class="landing-hero__h2 landing-hero__h2--soft">
+				It doesn't <span class="landing-hero__accent">need to be hard.</span>
+			</h2>
+
+			<div class="landing-hero__lede">
+				<p>
+					Hands-on lessons, candid trade-offs, and real build sessions
+					for engineers who want signal instead of slideware. Taught
+					by people who actually run this stuff.
+				</p>
+			</div>
+
+			<div class="landing-hero__actions">
+				<EditorialButton variant="solid" size="lg" href="/watch" arrow>
+					Start watching — free
+				</EditorialButton>
+				<EditorialButton variant="outline" size="lg" href="#newsletter-signup">
+					Weekly field notes
+				</EditorialButton>
+			</div>
+
+			<StatRow stats={stats} />
+		</div>
+
+		<OnAirPanel viewers={viewers} title={onAirTitle} />
+	</div>
+</section>
+
+<style>
+	.landing-hero {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.landing-hero__kicker {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.875rem 2.5rem;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.landing-hero__kicker-meta {
+		color: inherit;
+	}
+
+	.landing-hero__kicker-rule {
+		flex: 1;
+		height: 1px;
+		background: var(--editorial-hairline);
+	}
+
+	.landing-hero__grid {
+		display: grid;
+		grid-template-columns: 1.35fr 1fr;
+		min-height: 520px;
+	}
+
+	.landing-hero__editorial {
+		padding: 3.5rem 2.5rem;
+		border-right: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.landing-hero__editorial > :global(.section-mark) {
+		margin-bottom: 1.75rem;
+	}
+
+	.landing-hero__h1 {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(4rem, 9vw, 7rem);
+		line-height: 0.88;
+		letter-spacing: -0.035em;
+		margin: 0 0 2px;
+		color: var(--editorial-ink);
+	}
+
+	.landing-hero__h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-style: normal;
+		font-weight: 500;
+		font-size: clamp(2.25rem, 4.5vw, 3.4rem);
+		line-height: 1.02;
+		letter-spacing: -0.025em;
+		margin: 0 0 2px;
+		color: var(--editorial-ink);
+	}
+
+	.landing-hero__h2--soft {
+		font-weight: 400;
+		color: var(--editorial-ink-soft);
+		margin-bottom: 2rem;
+	}
+
+	.landing-hero__accent {
+		color: var(--editorial-rust);
+		font-weight: 500;
+	}
+
+	.landing-hero__lede {
+		border-left: 1px solid var(--editorial-hairline-strong);
+		padding-left: 1.25rem;
+		max-width: 36rem;
+		margin-bottom: 2.25rem;
+	}
+
+	.landing-hero__lede p {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.125rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		text-wrap: pretty;
+	}
+
+	.landing-hero__actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-bottom: 3rem;
+	}
+
+	@media (max-width: 960px) {
+		.landing-hero__grid {
+			grid-template-columns: 1fr;
+		}
+		.landing-hero__editorial {
+			border-right: none;
+			border-bottom: 1px solid var(--editorial-hairline);
+			padding: 2.25rem 1.5rem;
+		}
+		.landing-hero__kicker {
+			padding: 0.875rem 1.5rem;
+			flex-wrap: wrap;
+		}
+		.landing-hero__kicker-rule { display: none; }
+	}
+</style>

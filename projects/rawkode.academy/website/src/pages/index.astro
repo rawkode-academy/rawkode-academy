@@ -1,59 +1,74 @@
 ---
-import { Image } from "astro:assets";
-import HeroTypewriter from "@/components/hero/typewriter.tsx";
-import PartnerLogos from "@/components/partner/logos.astro";
-import TestimonialSlider from "@/components/testimonial/slider.astro";
-import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
-import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
-// Fetch random technologies for hero
-const allTechnologies = await getCollection("technologies");
-const heroLogos = allTechnologies
-	.filter((tech) => tech.data.logos?.icon === true)
-	.map((tech) => ({
-		name: tech.data.name,
-		iconUrl: resolveTechnologyIconUrl(tech.id, tech.data.logos) || "",
-	}))
-	.filter((logo) => logo.iconUrl)
-	.sort(() => Math.random() - 0.5)
-	.slice(0, 4);
+import Page from "@/wrappers/page.astro";
 
-// Fetch latest news
+import LandingHero from "@/components/landing/LandingHero.astro";
+import NewsletterStrip from "@/components/landing/NewsletterStrip.astro";
+import SectionHeader from "@/components/landing/SectionHeader.astro";
+import EditorialCardRail from "@/components/landing/EditorialCardRail.astro";
+import FeaturedFeature from "@/components/landing/FeaturedFeature.astro";
+import SecondaryGrid from "@/components/landing/SecondaryGrid.astro";
+import ValuesGrid from "@/components/landing/ValuesGrid.astro";
+import PartnerLogos from "@/components/partner/logos.astro";
+import TestimonialSlider from "@/components/testimonial/slider.astro";
+
+// ─── Data fetching (preserved from prior landing page) ──────────────
+
 const allNews = await getCollection("news");
 const latestNews = allNews
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4);
 
-// Fetch latest content
 const allArticles = await getCollection("articles", ({ data }) => !data.draft);
 const latestArticles = allArticles
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4);
 const [featuredArticle, ...secondaryArticles] = latestArticles;
 
-// Get published videos only (filters out future-dated for scheduled publishing)
 const allVideos = await getPublishedVideos();
-const latestVideos = allVideos.slice(0, 4); // Already sorted by getPublishedVideos
+const latestVideos = allVideos.slice(0, 4);
 const [featuredVideo, ...secondaryVideos] = latestVideos;
 
-// Fetch latest learning paths
 const allLearningPaths = await getCollection("learningPaths");
 const latestLearningPaths = allLearningPaths
 	.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 	.slice(0, 4);
 
-function formatLearningPathDuration(minutes: number): string {
+const allCourses = await getCollection("courses");
+
+// ─── Helpers ─────────────────────────────────────────────────────
+
+const formatLabel = (value?: string | null) => {
+	if (!value) return null;
+	return value.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const formatDuration = (seconds?: number | null) => {
+	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
+		return "--:--";
+	}
+	const h = Math.floor(seconds / 3600);
+	const m = Math.floor((seconds % 3600) / 60);
+	const s = seconds % 60;
+	return h > 0
+		? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+		: `${m}:${String(s).padStart(2, "0")}`;
+};
+
+const formatPublishedDate = (date: Date) =>
+	date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+
+const formatLearningPathDuration = (minutes: number): string => {
 	if (!minutes) return "Self-paced";
 	const h = Math.floor(minutes / 60);
 	const m = minutes % 60;
 	if (!h) return `${m}m`;
 	if (!m) return `${h}h`;
 	return `${h}h ${m}m`;
-}
+};
 
 const difficultyDisplayLabel: Record<string, string> = {
 	beginner: "Beginner",
@@ -61,523 +76,260 @@ const difficultyDisplayLabel: Record<string, string> = {
 	advanced: "Advanced",
 };
 
-// Social proof stats - simplified metrics
-const allCourses = await getCollection("courses");
-const totalContent = allVideos.length + allArticles.length + allCourses.length;
-
-// Calculate total hours from video durations (duration is in seconds)
-const totalSeconds = allVideos.reduce((acc, video) => {
-	const duration = video.data.duration;
-	return acc + (typeof duration === "number" && duration > 0 ? duration : 0);
-}, 0);
-const totalHours = Math.floor(totalSeconds / 3600);
-
-const socialProofStats = [
-	{ icon: "📚", value: `${totalContent}+`, label: "Resources" },
-	{ icon: "⏱️", value: `${totalHours}+`, label: "Hours of Video" },
-	{ icon: "👥", value: "30K+", label: "Learners" },
-];
-
-const pageTitle = "Cloud Native & Kubernetes Education";
-const pageDescription =
-	"Master Cloud Native technologies and Kubernetes with Rawkode Academy's expert-led courses, articles, and live streams. Stay ahead in a fast-evolving landscape.";
-
-const formatLabel = (value?: string | null) => {
-	if (!value) {
-		return null;
-	}
-
-	return value
-		.replace(/[-_]/g, " ")
-		.replace(/\b\w/g, (char) => char.toUpperCase());
-};
-
-// Format duration helper
-const formatDuration = (seconds?: number | null) => {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = seconds % 60;
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
-			.toString()
-			.padStart(2, "0")}`;
-	}
-	return `${minutes}:${secs.toString().padStart(2, "0")}`;
-};
-
-const formatPublishedDate = (date: Date) =>
-	date.toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-
 const compactCopy = (text: string, maxLength: number) => {
 	const normalized = text.replace(/\s+/g, " ").trim();
 	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
-
-	if (firstSentence && firstSentence.length <= maxLength) {
-		return firstSentence;
-	}
-
-	if (normalized.length <= maxLength) {
-		return normalized;
-	}
-
+	if (firstSentence && firstSentence.length <= maxLength) return firstSentence;
+	if (normalized.length <= maxLength) return normalized;
 	return `${normalized.slice(0, maxLength).trimEnd()}…`;
 };
 
+// ─── Section payloads ────────────────────────────────────────────
+
+const newsItems = latestNews.map((item) => ({
+	href: `/news/${item.id}`,
+	meta: [formatPublishedDate(item.data.publishedAt)],
+	title: item.data.title,
+	body: compactCopy(item.data.description, 160),
+}));
+
+const learningPathItems = latestLearningPaths.map((path) => ({
+	href: `/learning-paths/${path.id}`,
+	meta: [
+		difficultyDisplayLabel[path.data.difficulty] ?? path.data.difficulty,
+		formatLearningPathDuration(path.data.estimatedDuration),
+	],
+	title: path.data.title,
+	body: compactCopy(path.data.description, 160),
+}));
+
+const videoLabel = (video: (typeof latestVideos)[number]) =>
+	formatLabel(video.data.category) ||
+	(video.data.type === "live" ? "Live Session" : "Recorded Session");
+
 const summarizeVideo = (video: (typeof latestVideos)[number]) =>
 	compactCopy(video.data.subtitle || video.data.description, 180);
+
+const articleLabel = (article: (typeof latestArticles)[number]) =>
+	formatLabel(article.data.type) || "Article";
 
 const summarizeArticle = (article: (typeof latestArticles)[number]) =>
 	compactCopy(
 		article.data.openGraph?.subtitle ||
 			article.data.subtitle ||
 			article.data.description,
-		160,
+		180,
 	);
 
-const videoLabel = (video: (typeof latestVideos)[number]) =>
-	formatLabel(video.data.category) ||
-	(video.data.type === "live" ? "Live Session" : "Recorded Session");
+const secondaryVideoItems = secondaryVideos.map((video) => ({
+	href: `/watch/${video.data.slug}`,
+	meta: [
+		videoLabel(video),
+		formatPublishedDate(video.data.publishedAt),
+		formatDuration(
+			typeof video.data.duration === "number" ? video.data.duration : undefined,
+		),
+	],
+	title: video.data.title,
+	body: summarizeVideo(video),
+	mediaSrc: getVideoThumbnailUrl(video.data.id),
+}));
 
-const articleLabel = (article: (typeof latestArticles)[number]) =>
-	formatLabel(article.data.type) || "Article";
+const secondaryArticleItems = secondaryArticles.map((article) => {
+	const item: {
+		href: string;
+		meta: string[];
+		title: string;
+		body: string;
+		mediaImage?: ImageMetadata;
+		mediaAlt?: string;
+	} = {
+		href: `/read/${article.id}`,
+		meta: [articleLabel(article), formatPublishedDate(article.data.publishedAt)],
+		title: article.data.title,
+		body: summarizeArticle(article),
+	};
+	if (article.data.cover) {
+		item.mediaImage = article.data.cover.image;
+		item.mediaAlt = article.data.cover.alt ?? article.data.title;
+	}
+	return item;
+});
 
 const academyValues = [
-	{
-		title: "Authenticity",
-		description:
-			"We show the trade-offs, the rough edges, and the decisions we'd still make again.",
-	},
-	{
-		title: "Organic Content",
-		description:
-			"Much of the curriculum comes from problems we're solving in public, not invented demos.",
-	},
-	{
-		title: "Embracing Failure",
-		description:
-			"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
-	},
-	{
-		title: "Hands-On",
-		description:
-			"Less talking about code, more terminal time, real code, and live builds you can follow end to end.",
-	},
-	{
-		title: "Forward Thinking",
-		description:
-			"We test new tools early, evaluate them honestly, and show where they fit.",
-	},
-	{
-		title: "Open & Closed Source",
-		description:
-			"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
-	},
-] as const;
+	{ title: "Authenticity", description: "We show the trade-offs, the rough edges, and the decisions we'd still make again." },
+	{ title: "Organic Content", description: "Much of the curriculum comes from problems we're solving in public, not invented demos." },
+	{ title: "Embracing Failure", description: "Mistakes stay in the session because the recovery is usually more useful than the perfect path." },
+	{ title: "Hands-On", description: "Less talking about code, more terminal time, real code, and live builds you can follow end to end." },
+	{ title: "Forward Thinking", description: "We test new tools early, evaluate them honestly, and show where they fit." },
+	{ title: "Open & Closed Source", description: "We cover open source and vendors with the same standard: what works, what costs, and what saves time." },
+];
+
+// Stat counts wired to real content collections
+const totalSeconds = allVideos.reduce(
+	(acc, v) => acc + (typeof v.data.duration === "number" && v.data.duration > 0 ? v.data.duration : 0),
+	0,
+);
+const totalHours = Math.floor(totalSeconds / 3600);
+
+const heroStats = [
+	{ value: `${allVideos.length}`, label: "Lessons" },
+	{ value: `${totalHours}+`, label: "Hours" },
+	{ value: `${allCourses.length}`, label: "Courses" },
+	{ value: "2019", label: "Since" },
+];
+
+const pageTitle = "Cloud Native & Kubernetes Education";
+const pageDescription =
+	"Hands-on cloud native education from Rawkode Academy. Courses, articles, deep-dive videos, and live builds for engineers shipping production systems.";
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-	<HeroTypewriter
-		client:only="react"
-		highlight="hard"
-		logos={heroLogos}
-		primaryButton={{
-			text: "Start Watching Free",
-			link: "/watch",
-		}}
-		secondaryButton={{
-			text: "Get Weekly Insights",
-			link: "#newsletter-signup",
-		}}
-		rotatedPrefixes={[
-			"Cloud Native",
-			"Kubernetes",
-			"Platform Engineering",
-			"Observability",
-			"WebAssembly",
-			"GitOps",
-			"SRE",
-			"Microservices",
-		]}
-		suffix="may be complex, but it doesn't need to be hard."
-		socialProof={socialProofStats}
-	>
-		{/* SSR fallback: HeroTypewriter is `client:only` so its h1 lives only
-		    in the client bundle. Without this fallback, the initial HTML has
-		    zero h1 elements, bad for SEO and screen-reader users on first
-		    paint. Astro renders this fallback during SSR and React replaces
-		    it once the typewriter hydrates. */}
-		<section slot="fallback" class="page-px section-py-tight">
-			<div class="mx-auto max-w-6xl text-center">
-				<h1 class="text-primary-content text-4xl md:text-5xl font-semibold tracking-tight">
-					Cloud Native, Kubernetes, and Platform Engineering, made approachable.
-				</h1>
-				<p class="mt-6 text-lg md:text-xl text-secondary-content max-w-3xl mx-auto">
-					Hands-on cloud native education from Rawkode Academy. Courses,
-					articles, deep-dive videos, and live builds for engineers shipping
-					production systems.
-				</p>
-			</div>
+	<LandingHero
+		stats={heroStats}
+		onAirTitle={featuredVideo?.data.title ?? "Tracing packets with eBPF"}
+	/>
+
+	<NewsletterStrip />
+
+	<div class="landing-stack">
+		{newsItems.length > 0 && (
+			<section class="landing-section">
+				<SectionHeader
+					num={1}
+					kicker="Field notes"
+					title="Cloud Native News"
+					body="Curated stories from across the cloud native ecosystem."
+					ctaLabel="All news →"
+					ctaHref="/news"
+				/>
+				<EditorialCardRail items={newsItems} />
+			</section>
+		)}
+
+		{learningPathItems.length > 0 && (
+			<section class="landing-section">
+				<SectionHeader
+					num={2}
+					kicker="Learn"
+					title="Learning Paths"
+					body="Curated, structured roadmaps for mastering Cloud Native. Start here when you want a guided journey instead of a single tutorial."
+					ctaLabel="All paths →"
+					ctaHref="/learning-paths"
+				/>
+				<EditorialCardRail items={learningPathItems} />
+			</section>
+		)}
+
+		{featuredVideo && (
+			<section class="landing-section">
+				<SectionHeader
+					num={3}
+					kicker="Watch"
+					title="Videos"
+					body="New sessions, reviews, and walkthroughs from the sharp end of cloud native engineering."
+					ctaLabel="Browse videos →"
+					ctaHref="/watch"
+				/>
+
+				<FeaturedFeature
+					href={`/watch/${featuredVideo.data.slug}`}
+					meta={[
+						videoLabel(featuredVideo),
+						formatPublishedDate(featuredVideo.data.publishedAt),
+						formatDuration(typeof featuredVideo.data.duration === "number" ? featuredVideo.data.duration : undefined),
+					]}
+					title={featuredVideo.data.title}
+					body={summarizeVideo(featuredVideo)}
+					cta="Watch session"
+					mediaSrc={getVideoThumbnailUrl(featuredVideo.data.id)}
+				/>
+
+				{secondaryVideoItems.length > 0 && (
+					<SecondaryGrid items={secondaryVideoItems} withMedia />
+				)}
+			</section>
+		)}
+
+		{featuredArticle && (
+			<section class="landing-section">
+				<SectionHeader
+					num={4}
+					kicker="Read"
+					title="Writing"
+					body="Architecture notes, breakdowns, and context for the parts that need more than a runtime."
+					ctaLabel="Browse articles →"
+					ctaHref="/read"
+				/>
+
+				<FeaturedFeature
+					href={`/read/${featuredArticle.id}`}
+					meta={[articleLabel(featuredArticle), formatPublishedDate(featuredArticle.data.publishedAt)]}
+					title={featuredArticle.data.title}
+					body={summarizeArticle(featuredArticle)}
+					cta="Read article"
+					{...(featuredArticle.data.cover
+						? {
+							mediaImage: featuredArticle.data.cover.image,
+							mediaAlt: featuredArticle.data.cover.alt ?? featuredArticle.data.title,
+						}
+						: { mediaPlaceholder: true })}
+				/>
+
+				{secondaryArticleItems.length > 0 && (
+					<SecondaryGrid items={secondaryArticleItems} withMedia />
+				)}
+			</section>
+		)}
+
+		<section class="landing-section">
+			<SectionHeader
+				num={5}
+				kicker="Values"
+				title="How we teach"
+				body="We teach in public, in context, and close to the sharp edges."
+			/>
+			<ValuesGrid values={academyValues} />
 		</section>
-	</HeroTypewriter>
 
-	<div
-		id="newsletter-signup"
-		class="page-px section-pt-0 scroll-mt-24 min-h-[22rem] sm:min-h-[18rem] lg:min-h-[14rem]"
-	>
-		<NewsletterCTA
-			variant="section"
-			class="mb-0 !pt-6 !pb-4 sm:!pt-8 sm:!pb-6 lg:!pt-10 lg:!pb-8"
-			badge="Weekly Cloud Native insights"
-			headline="Get cloud native insights weekly"
-			subtitle="Tutorials, deep dives, and curated events. No spam, unsubscribe anytime."
-		/>
-	</div>
+		<section class="landing-section">
+			<SectionHeader
+				num={6}
+				kicker="Praise"
+				title="Field reports"
+				body="Notes from engineers learning in public alongside us."
+			/>
+			<TestimonialSlider type="viewer" blurb="" />
+		</section>
 
-	<div class="page-px section-py-tight !pt-4 sm:!pt-6 lg:!pt-8">
-		<div class="mx-auto max-w-6xl space-y-16 sm:space-y-20 lg:space-y-24">
-			{latestNews.length > 0 && (
-				<section class="space-y-8">
-					<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-						<div class="space-y-3">
-							<div class="eyebrow-label">News</div>
-							<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-								Cloud Native News
-							</h2>
-							<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-								Curated stories from across the cloud native ecosystem.
-							</p>
-						</div>
-						<div class="md:pb-1">
-							<a
-								href="/news"
-								class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-							>
-								All news
-								<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</a>
-						</div>
-					</div>
-
-					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						{latestNews.map((item) => (
-							<a
-								href={`/news/${item.id}`}
-								class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
-							>
-								<div class="space-y-3">
-									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-										<span>{formatPublishedDate(item.data.publishedAt)}</span>
-									</div>
-									<h3 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
-										{item.data.title}
-									</h3>
-									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-										{item.data.description}
-									</p>
-								</div>
-							</a>
-						))}
-					</div>
-				</section>
-			)}
-
-			{latestLearningPaths.length > 0 && (
-				<section class="space-y-8">
-					<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-						<div class="space-y-3">
-							<div class="eyebrow-label">Learn</div>
-							<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-								Learning Paths
-							</h2>
-							<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-								Curated, structured roadmaps for mastering Cloud Native. Start here when you want a guided journey instead of a single tutorial.
-							</p>
-						</div>
-						<div class="md:pb-1">
-							<a
-								href="/learning-paths"
-								class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-							>
-								All learning paths
-								<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</a>
-						</div>
-					</div>
-
-					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-						{latestLearningPaths.map((path) => (
-							<a
-								href={`/learning-paths/${path.id}`}
-								class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
-							>
-								<div class="space-y-3">
-									<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-										<span>{difficultyDisplayLabel[path.data.difficulty] ?? path.data.difficulty}</span>
-										<span aria-hidden="true">·</span>
-										<span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
-									</div>
-									<h3 class="text-lg font-semibold leading-snug tracking-tight text-primary-content transition-colors group-hover:text-primary line-clamp-2">
-										{path.data.title}
-									</h3>
-									<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-										{path.data.description}
-									</p>
-								</div>
-							</a>
-						))}
-					</div>
-				</section>
-			)}
-
-			<section class="space-y-8">
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div class="space-y-3">
-						<div class="eyebrow-label">Watch</div>
-						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-							Videos
-						</h2>
-						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-							New sessions, reviews, and walkthroughs from the sharp end of cloud native engineering.
-						</p>
-					</div>
-					<div class="md:pb-1">
-						<a
-							href="/watch"
-							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-						>
-							Browse videos
-							<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-						</a>
-					</div>
-				</div>
-
-				{featuredVideo && (
-					<a
-						href={`/watch/${featuredVideo.data.slug}`}
-						class="soft-panel bleed-x-mobile group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[20rem_minmax(0,1fr)] md:items-center lg:p-6"
-					>
-						<div class="relative aspect-video overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5">
-							<img
-								src={getVideoThumbnailUrl(featuredVideo.data.id)}
-								alt={featuredVideo.data.title}
-								class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
-								loading="lazy"
-							/>
-						</div>
-
-						<div class="space-y-4">
-							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-								<span>{videoLabel(featuredVideo)}</span>
-								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-								<span>{formatPublishedDate(featuredVideo.data.publishedAt)}</span>
-								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-								<span>{formatDuration(typeof featuredVideo.data.duration === "number" ? featuredVideo.data.duration : undefined)}</span>
-							</div>
-							<h3 class="max-w-[18ch] text-balance text-[clamp(1.85rem,2.4vw,2.75rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-primary-content transition-colors group-hover:text-primary">
-								{featuredVideo.data.title}
-							</h3>
-							<p class="max-w-[40rem] text-base leading-8 text-secondary-content">
-								{summarizeVideo(featuredVideo)}
-							</p>
-							<div class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-								Watch video
-								<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</div>
-						</div>
-					</a>
-				)}
-
-				<div class="grid gap-4 md:grid-cols-3">
-					{secondaryVideos.map((video) => (
-						<a
-							href={`/watch/${video.data.slug}`}
-							class="soft-panel bleed-x-mobile group block h-full overflow-hidden"
-						>
-							<div class="relative aspect-video overflow-hidden bg-black/10 dark:bg-white/5">
-								<img
-									src={getVideoThumbnailUrl(video.data.id)}
-									alt={video.data.title}
-									class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
-									loading="lazy"
-								/>
-							</div>
-							<div class="space-y-3 p-4 sm:p-5">
-								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-									<span>{videoLabel(video)}</span>
-									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-									<span>{formatPublishedDate(video.data.publishedAt)}</span>
-								</div>
-								<h3 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
-									{video.data.title}
-								</h3>
-								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-									{summarizeVideo(video)}
-								</p>
-							</div>
-						</a>
-					))}
-				</div>
-			</section>
-
-			<section class="space-y-8">
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div class="space-y-3">
-						<div class="eyebrow-label">Read</div>
-						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-							Writing
-						</h2>
-						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-							Architecture notes, breakdowns, and context for the parts that need more than a runtime.
-						</p>
-					</div>
-					<div class="md:pb-1">
-						<a
-							href="/read"
-							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-						>
-							Browse articles
-							<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-						</a>
-					</div>
-				</div>
-
-				{featuredArticle && (
-					<a
-						href={`/read/${featuredArticle.id}`}
-						class="soft-panel bleed-x-mobile group grid gap-6 overflow-hidden p-4 sm:p-5 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center lg:p-6"
-					>
-						<div class="space-y-4 md:order-1">
-							<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-								<span>{articleLabel(featuredArticle)}</span>
-								<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-								<span>{formatPublishedDate(featuredArticle.data.publishedAt)}</span>
-							</div>
-							<h3 class="max-w-[18ch] text-balance text-[clamp(1.85rem,2.4vw,2.7rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-primary-content transition-colors group-hover:text-primary">
-								{featuredArticle.data.title}
-							</h3>
-							<p class="max-w-[38rem] text-base leading-8 text-secondary-content">
-								{summarizeArticle(featuredArticle)}
-							</p>
-							<div class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
-								Read article
-								<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-							</div>
-						</div>
-
-						<div class="overflow-hidden rounded-[1.15rem] bg-black/10 dark:bg-white/5 md:order-2">
-							<div class="relative aspect-[16/10] overflow-hidden">
-								{featuredArticle.data.cover ? (
-									<Image
-										src={featuredArticle.data.cover.image}
-										alt={featuredArticle.data.cover.alt}
-										class="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 group-hover:scale-[1.02]"
-										loading="lazy"
-									/>
-								) : (
-									<div class="flex h-full w-full items-end bg-[linear-gradient(135deg,rgba(var(--brand-primary),0.9),rgba(var(--brand-secondary),0.68))] p-6">
-										<p class="max-w-[18rem] text-2xl font-semibold leading-tight text-white">
-											{featuredArticle.data.title}
-										</p>
-									</div>
-								)}
-							</div>
-						</div>
-					</a>
-				)}
-
-				<div class="grid gap-4 md:grid-cols-3">
-					{secondaryArticles.map((article) => (
-						<a
-							href={`/read/${article.id}`}
-							class="soft-panel bleed-x-mobile group block h-full p-4 sm:p-5"
-						>
-							<div class="space-y-3">
-								<div class="flex flex-wrap items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted">
-									<span>{articleLabel(article)}</span>
-									<span class="h-1 w-1 rounded-full" style="background-color: var(--surface-border-strong)"></span>
-									<span>{formatPublishedDate(article.data.publishedAt)}</span>
-								</div>
-								<h3 class="max-w-[18ch] text-xl font-semibold tracking-tight text-primary-content transition-colors group-hover:text-primary">
-									{article.data.title}
-								</h3>
-								<p class="line-clamp-3 text-sm leading-7 text-secondary-content">
-									{summarizeArticle(article)}
-								</p>
-							</div>
-						</a>
-					))}
-				</div>
-			</section>
-
-			<section class="space-y-8">
-				<div class="space-y-3">
-					<div class="eyebrow-label">Values</div>
-					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						How we teach
-					</h2>
-					<p class="max-w-[38rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-						We teach in public, in context, and close to the sharp edges.
-					</p>
-				</div>
-
-				<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-					{academyValues.map((value, index) => (
-						<article class="soft-panel bleed-x-mobile h-full p-5 sm:p-6">
-							<div class="space-y-3">
-								<p class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-									{String(index + 1).padStart(2, "0")}
-								</p>
-								<h3 class="max-w-[16ch] text-xl font-semibold leading-[1.08] tracking-[-0.04em] text-primary-content">
-									{value.title}
-								</h3>
-								<p class="text-sm leading-7 text-secondary-content sm:text-base">
-									{value.description}
-								</p>
-							</div>
-						</article>
-					))}
-				</div>
-			</section>
-
-			<section>
-				<TestimonialSlider type="viewer" blurb="Feedback from viewers learning in public with us." />
-			</section>
-
-			<section class="space-y-8">
-				<div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div class="max-w-3xl space-y-3">
-						<div class="eyebrow-label">Partners</div>
-						<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-							Supporting the academy
-						</h2>
-						<p class="max-w-[40rem] text-base leading-7 text-secondary-content sm:text-lg sm:leading-8">
-							Teams that fund the work while leaving us free to speak plainly about the tools.
-						</p>
-					</div>
-					<div class="md:pb-1">
-						<a
-							href="/organizations/partnerships"
-							title="Partner with Rawkode"
-							class="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary-content"
-						>
-							Partner with Rawkode
-							<svg aria-hidden="true" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-							</svg>
-						</a>
-					</div>
-				</div>
-
-				<PartnerLogos compact />
-			</section>
-		</div>
+		<section class="landing-section">
+			<SectionHeader
+				num={7}
+				kicker="Partners"
+				title="Supporting the academy"
+				body="Teams that fund the work while leaving us free to speak plainly about the tools."
+				ctaLabel="Partner with us →"
+				ctaHref="/organizations/partnerships"
+			/>
+			<PartnerLogos compact />
+		</section>
 	</div>
 </Page>
+
+<style>
+	.landing-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 4.5rem;
+		padding: 4rem 0 6rem;
+	}
+
+	.landing-section {
+		padding: 0 2.5rem;
+	}
+
+	@media (max-width: 720px) {
+		.landing-section { padding: 0 1.25rem; }
+		.landing-stack { gap: 3rem; padding: 2.5rem 0 4rem; }
+	}
+</style>

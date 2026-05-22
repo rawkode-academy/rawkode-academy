@@ -1,0 +1,227 @@
+---
+import LiveDot from "@/components/ui/LiveDot.vue";
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface ScheduleItem {
+	date: string; // e.g. "TUE 22"
+	title: string;
+	time: string; // e.g. "18:00 UTC"
+}
+
+interface Props {
+	sessionMark?: string;
+	elapsed?: string;
+	title?: string;
+	chapter?: string;
+	body?: string;
+	viewers?: number;
+	schedule?: ScheduleItem[];
+	terminalLines?: string[];
+}
+
+const {
+	sessionMark = "§48.03",
+	elapsed = "01:42:08 ELAPSED",
+	title = "Tracing packets with eBPF",
+	chapter = "Chapter 3",
+	body = "Attaching kprobes to the network stack. Live Q&A after.",
+	viewers = 1284,
+	schedule = [
+		{ date: "TUE 22", title: "Debugging networking: from packet to pod", time: "18:00 UTC" },
+		{ date: "WED 23", title: "Kubernetes without Helm — ten months in", time: "18:00 UTC" },
+		{ date: "THU 24", title: "Dispatch №049 — eBPF continued", time: "18:00 UTC" },
+	],
+	terminalLines = [
+		`$ sudo bpftrace -e 'tracepoint:net:net_dev_xmit {`,
+		`  @bytes[comm] = sum(args->len);`,
+		`}'`,
+		`Attaching 1 probe…`,
+		`^C`,
+		`@bytes[curl]:     2841094`,
+		`@bytes[systemd]:  140210`,
+		`@bytes[kubelet]:  89412`,
+		`~/work/ebpf-demos ❯`,
+	],
+} = Astro.props as Props;
+---
+
+<aside class="on-air">
+	<div class="on-air__header">
+		<MLabel tone="amber">
+			<LiveDot color="amber" />
+			Live · {sessionMark}
+		</MLabel>
+		<span class="on-air__elapsed">{elapsed}</span>
+	</div>
+
+	<div class="on-air__screen" aria-label="Live session terminal preview">
+		<div class="on-air__terminal" aria-hidden="true">
+			{terminalLines.map((line, i) => (
+				<div class={`on-air__line on-air__line--${i}`}>{line}</div>
+			))}
+			<div class="on-air__cursor" aria-hidden="true"></div>
+		</div>
+		<div class="on-air__rec">REC ● {viewers.toLocaleString()} VIEWERS</div>
+	</div>
+
+	<h3 class="on-air__title">{title}</h3>
+	<p class="on-air__body">{chapter} — {body}</p>
+
+	<div class="on-air__next">
+		<MLabel tone="ink">Next up</MLabel>
+		<ul class="on-air__schedule">
+			{schedule.map((item) => (
+				<li class="on-air__slot">
+					<MLabel tone="rust">{item.date}</MLabel>
+					<span class="on-air__slot-title">{item.title}</span>
+					<span class="on-air__slot-time">{item.time}</span>
+				</li>
+			))}
+		</ul>
+	</div>
+</aside>
+
+<style>
+	.on-air {
+		background: var(--editorial-paper-deep);
+		padding: 1.75rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.125rem;
+		position: relative;
+		border-left: 1px solid var(--editorial-hairline);
+	}
+
+	.on-air__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.on-air__elapsed {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 11px;
+		color: var(--editorial-ink-mute);
+		letter-spacing: 0.1em;
+	}
+
+	.on-air__screen {
+		position: relative;
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: oklch(0.12 0.01 280);
+		border: 1px solid var(--editorial-hairline-strong);
+		background-image: repeating-linear-gradient(
+			135deg,
+			oklch(0.12 0.01 280) 0,
+			oklch(0.12 0.01 280) 8px,
+			oklch(0.22 0.01 60) 8px,
+			oklch(0.22 0.01 60) 9px
+		);
+	}
+
+	.on-air__terminal {
+		position: absolute;
+		inset: 18px;
+		padding: 12px 16px;
+		background: oklch(0.12 0.01 280 / 0.92);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 11px;
+		line-height: 1.6;
+		color: var(--editorial-paper);
+		overflow: hidden;
+	}
+
+	.on-air__line { color: var(--editorial-paper); }
+	.on-air__line--0,
+	.on-air__line--2 { color: var(--editorial-amber); }
+	.on-air__line--1 { color: oklch(0.8 0.1 165); }
+	.on-air__line--3,
+	.on-air__line--4 { color: oklch(0.7 0 0); margin-top: 6px; }
+	.on-air__line--5,
+	.on-air__line--6 { margin-top: 0; }
+	.on-air__line--7 { color: oklch(0.7 0 0); margin-top: 6px; }
+
+	.on-air__cursor {
+		display: inline-block;
+		width: 8px;
+		height: 14px;
+		background: var(--editorial-paper);
+		vertical-align: -2px;
+		margin-top: 6px;
+		animation: rk-cursor 1s steps(2) infinite;
+	}
+
+	@keyframes rk-cursor {
+		0%, 50%   { opacity: 1; }
+		51%, 100% { opacity: 0; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.on-air__cursor { animation: none; }
+	}
+
+	.on-air__rec {
+		position: absolute;
+		top: 10px;
+		right: 12px;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 10px;
+		color: var(--editorial-paper);
+		opacity: 0.85;
+		letter-spacing: 0.12em;
+	}
+
+	.on-air__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.625rem;
+		line-height: 1.08;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0.5rem 0 0.25rem;
+	}
+
+	.on-air__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+	}
+
+	.on-air__next {
+		margin-top: auto;
+		padding-top: 1rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.on-air__schedule {
+		list-style: none;
+		padding: 0;
+		margin: 0.625rem 0 0;
+	}
+
+	.on-air__slot {
+		display: grid;
+		grid-template-columns: 58px 1fr auto;
+		gap: 0.75rem;
+		padding: 0.625rem 0;
+		align-items: baseline;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.84rem;
+		color: var(--editorial-ink);
+	}
+
+	.on-air__slot:not(:first-child) {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.on-air__slot-time {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 11px;
+		color: var(--editorial-ink-mute);
+		letter-spacing: 0.1em;
+	}
+</style>

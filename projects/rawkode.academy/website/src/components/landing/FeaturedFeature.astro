@@ -1,0 +1,148 @@
+---
+import { Image } from "astro:assets";
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	meta: string[];
+	title: string;
+	body: string;
+	cta?: string;
+	mediaSrc?: string;
+	mediaAlt?: string;
+	mediaImage?: ImageMetadata;
+	mediaPlaceholder?: boolean;
+}
+
+const {
+	href,
+	meta,
+	title,
+	body,
+	cta = "Watch session",
+	mediaSrc,
+	mediaAlt = title,
+	mediaImage,
+	mediaPlaceholder = false,
+} = Astro.props as Props;
+---
+
+<a class="featured" href={href}>
+	<div class="featured__copy">
+		<div class="featured__meta">
+			{meta.map((m, i) => (
+				<>
+					{i > 0 && <span class="featured__meta-sep">·</span>}
+					<MLabel tone="muted">{m}</MLabel>
+				</>
+			))}
+		</div>
+
+		<h3 class="featured__title">{title}</h3>
+		<p class="featured__body">{body}</p>
+
+		<div class="featured__cta">
+			<EditorialButton variant="outline" size="md" arrow>{cta}</EditorialButton>
+		</div>
+	</div>
+
+	<div class="featured__media">
+		{mediaImage && (
+			<Image
+				src={mediaImage}
+				alt={mediaAlt}
+				class="featured__img"
+				widths={[480, 720, 960]}
+				sizes="(max-width: 900px) 100vw, 30rem"
+				loading="lazy"
+			/>
+		)}
+		{!mediaImage && mediaSrc && (
+			<img class="featured__img" src={mediaSrc} alt={mediaAlt} loading="lazy" />
+		)}
+		{!mediaImage && !mediaSrc && mediaPlaceholder && (
+			<div class="featured__placeholder">
+				<span>{title}</span>
+			</div>
+		)}
+	</div>
+</a>
+
+<style>
+	.featured {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 30rem;
+		gap: 2.5rem;
+		padding: 2rem 0;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		align-items: center;
+	}
+
+	.featured__meta {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		margin-bottom: 0.875rem;
+	}
+
+	.featured__meta-sep { color: var(--editorial-ink-mute); opacity: 0.5; }
+
+	.featured__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2rem, 4vw, 3rem);
+		line-height: 1.0;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0 0 1rem;
+		max-width: 16ch;
+	}
+
+	.featured__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		line-height: 1.55;
+		color: var(--editorial-ink-soft);
+		max-width: 40rem;
+		margin: 0 0 1.25rem;
+	}
+
+	.featured__cta { display: inline-flex; }
+
+	.featured__media {
+		aspect-ratio: 16 / 10;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		overflow: hidden;
+	}
+
+	.featured__img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.featured__placeholder {
+		width: 100%;
+		height: 100%;
+		display: grid;
+		place-items: end;
+		padding: 1.25rem;
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink);
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 1.5rem;
+		line-height: 1.05;
+	}
+
+	@media (max-width: 880px) {
+		.featured { grid-template-columns: 1fr; }
+	}
+</style>

@@ -1,0 +1,123 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface CardItem {
+	href: string;
+	meta?: string[];
+	title: string;
+	body?: string;
+}
+
+interface Props {
+	items: CardItem[];
+}
+
+const { items } = Astro.props as Props;
+---
+
+<div class="card-rail">
+	{items.map((item) => (
+		<a class="card-rail__item" href={item.href}>
+			{item.meta && item.meta.length > 0 && (
+				<div class="card-rail__meta">
+					{item.meta.map((m, i) => (
+						<>
+							{i > 0 && <span class="card-rail__meta-sep">·</span>}
+							<MLabel tone="muted">{m}</MLabel>
+						</>
+					))}
+				</div>
+			)}
+
+			<h3 class="card-rail__title">{item.title}</h3>
+			{item.body && <p class="card-rail__body">{item.body}</p>}
+		</a>
+	))}
+</div>
+
+<style>
+	.card-rail {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 0;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.card-rail__item {
+		padding: 1.5rem 1.5rem 1.75rem;
+		border-left: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+		position: relative;
+		transition: background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.card-rail__item:first-child {
+		border-left: none;
+	}
+
+	.card-rail__item::before {
+		content: "";
+		position: absolute;
+		top: -1px;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: var(--editorial-ink);
+		opacity: 0;
+		transition: opacity var(--duration-base) var(--ease-standard);
+		pointer-events: none;
+	}
+
+	.card-rail__item:hover { background: var(--surface-card-muted); }
+	.card-rail__item:hover::before { opacity: 1; }
+
+	.card-rail__meta {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.card-rail__meta-sep {
+		color: var(--editorial-ink-mute);
+		opacity: 0.5;
+	}
+
+	.card-rail__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.45rem;
+		line-height: 1.12;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.card-rail__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	@media (max-width: 960px) {
+		.card-rail { grid-template-columns: repeat(2, 1fr); }
+		.card-rail__item:nth-child(3) { border-top: 1px solid var(--editorial-hairline); }
+	}
+
+	@media (max-width: 560px) {
+		.card-rail { grid-template-columns: 1fr; }
+		.card-rail__item { border-left: none; border-top: 1px solid var(--editorial-hairline); }
+		.card-rail__item:first-child { border-top: none; }
+	}
+</style>

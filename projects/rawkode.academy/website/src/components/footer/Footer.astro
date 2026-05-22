@@ -101,22 +101,20 @@ const aboutSection: FooterSection = {
 };
 ---
 
-<footer class="relative mt-16 px-4 pb-10">
-    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-64 blur-[180px] opacity-40 bg-gradient-to-t from-primary/30 via-transparent to-secondary/20 dark:from-primary/40"></div>
-    <div class="glass-panel relative mx-auto max-w-7xl overflow-hidden rounded-4xl">
-        <div class="px-4 py-12 sm:px-6 lg:px-10">
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
+<footer class="ed-footer">
+    <div class="ed-footer__inner">
+        <div class="ed-footer__cols">
             <!-- Learning Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class="ed-footer__col-title">
                     {learningSections.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class="ed-footer__list">
                     {learningSections.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class="ed-footer__link"
                             >
                                 {link.name}
                             </a>
@@ -127,15 +125,15 @@ const aboutSection: FooterSection = {
 
             <!-- Organizations Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class="ed-footer__col-title">
                     {organizationSection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class="ed-footer__list">
                     {organizationSection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class="ed-footer__link"
                             >
                                 {link.name}
                             </a>
@@ -146,17 +144,17 @@ const aboutSection: FooterSection = {
 
             <!-- Community Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class="ed-footer__col-title">
                     {communitySection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class="ed-footer__list">
                     {communitySection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
                                 target={link.external ? "_blank" : "_self"}
                                 rel={link.external ? "noopener noreferrer" : undefined}
-                                class="link-muted text-sm flex items-center gap-1"
+                                class="ed-footer__link"
                             >
                                 {link.name}
                                 {link.external && (
@@ -172,15 +170,15 @@ const aboutSection: FooterSection = {
 
             <!-- Contributors Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class="ed-footer__col-title">
                     {contributorsSection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class="ed-footer__list">
                     {contributorsSection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class="ed-footer__link"
                             >
                                 {link.name}
                             </a>
@@ -191,15 +189,15 @@ const aboutSection: FooterSection = {
 
             <!-- About Section -->
             <div>
-                <h3 class="text-sm font-semibold text-primary-content tracking-wider uppercase mb-4">
+                <h3 class="ed-footer__col-title">
                     {aboutSection.title}
                 </h3>
-                <ul class="space-y-3">
+                <ul class="ed-footer__list">
                     {aboutSection.links.map((link) => (
                         <li>
                             <a
                                 href={link.href}
-                                class="link-muted text-sm"
+                                class="ed-footer__link"
                             >
                                 {link.name}
                             </a>
@@ -209,13 +207,13 @@ const aboutSection: FooterSection = {
             </div>
         </div>
 
-        <!-- Bottom section with logo and social links -->
-        <div class="mt-8 pt-8 border-t border-subtle">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="flex items-center mb-4 md:mb-0">
-                    <a href="/" class="text-muted focus-ring rounded-md" aria-label="return to the home page">
+        <!-- Bottom section: dispatch masthead + logo + social -->
+        <div class="ed-footer__masthead">
+            <div class="ed-footer__masthead-row">
+                <div class="ed-footer__logo">
+                    <a href="/" class="focus-ring" aria-label="return to the home page">
                         <svg
-                            class="fill-current h-6"
+                            class="ed-footer__logo-svg"
                             id="Layer_1"
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 559.671 143.20864"
@@ -226,15 +224,15 @@ const aboutSection: FooterSection = {
                         </svg>
                     </a>
                 </div>
-                <div class="text-sm text-muted">
-                    © {currentYear} Rawkode Academy. All rights reserved.
+                <div class="ed-footer__copy">
+                    Dispatch №{currentYear - 2018} · © {currentYear} Rawkode Academy
                 </div>
-                <div class="flex space-x-6 mt-4 md:mt-0">
+                <div class="ed-footer__social">
                     <a
                         href="https://github.com/rawkode-academy/rawkode-academy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted focus-ring rounded-md p-0.5"
+                        class="ed-footer__social-link focus-ring"
                         aria-label="GitHub"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -245,7 +243,7 @@ const aboutSection: FooterSection = {
                         href="https://x.com/RawkodeAcademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted focus-ring rounded-md p-0.5"
+                        class="ed-footer__social-link focus-ring"
                         aria-label="X (Twitter)"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -256,7 +254,7 @@ const aboutSection: FooterSection = {
                         href="https://bsky.app/profile/rawkode.academy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted focus-ring rounded-md p-0.5"
+                        class="ed-footer__social-link focus-ring"
                         aria-label="Bluesky"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -267,7 +265,7 @@ const aboutSection: FooterSection = {
                         href="https://uk.linkedin.com/company/rawkodeacademy"
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="link-muted focus-ring rounded-md p-0.5"
+                        class="ed-footer__social-link focus-ring"
                         aria-label="LinkedIn"
                     >
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -280,3 +278,134 @@ const aboutSection: FooterSection = {
         </div>
     </div>
 </footer>
+
+<style>
+    .ed-footer {
+        margin-top: 4rem;
+        background: var(--editorial-paper-deep);
+        border-top: 1px solid var(--editorial-hairline);
+    }
+
+    .ed-footer__inner {
+        max-width: 90rem;
+        margin: 0 auto;
+        padding: 3rem 2.5rem 1.75rem;
+    }
+
+    .ed-footer__cols {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0;
+        border-top: 1px solid var(--editorial-hairline);
+        border-bottom: 1px solid var(--editorial-hairline);
+    }
+
+    .ed-footer__cols > div {
+        padding: 1.5rem 1.25rem;
+        border-left: 1px solid var(--editorial-hairline);
+    }
+
+    .ed-footer__cols > div:first-child {
+        border-left: none;
+    }
+
+    .ed-footer__col-title {
+        font-family: var(--font-instrument-serif), serif;
+        font-style: italic;
+        font-weight: 400;
+        font-size: 1.05rem;
+        letter-spacing: -0.01em;
+        color: var(--editorial-ink);
+        margin: 0 0 0.875rem;
+    }
+
+    .ed-footer__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .ed-footer__link {
+        font-family: var(--font-jetbrains-mono), monospace;
+        font-size: 0.74rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--editorial-ink-mute);
+        text-decoration: none;
+        transition: color var(--duration-base) var(--ease-standard);
+    }
+
+    .ed-footer__link:hover {
+        color: var(--editorial-ink);
+    }
+
+    .ed-footer__masthead {
+        padding-top: 1.5rem;
+    }
+
+    .ed-footer__masthead-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .ed-footer__logo-svg {
+        height: 1.5rem;
+        fill: var(--editorial-ink);
+    }
+
+    .ed-footer__copy {
+        text-align: center;
+        font-family: var(--font-jetbrains-mono), monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--editorial-ink-mute);
+    }
+
+    .ed-footer__social {
+        display: flex;
+        gap: 1.25rem;
+    }
+
+    .ed-footer__social-link {
+        color: var(--editorial-ink-mute);
+        padding: 0.25rem;
+        transition: color var(--duration-base) var(--ease-standard);
+    }
+
+    .ed-footer__social-link:hover {
+        color: var(--editorial-ink);
+    }
+
+    @media (max-width: 960px) {
+        .ed-footer__cols {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .ed-footer__cols > div {
+            border-top: 1px solid var(--editorial-hairline);
+        }
+        .ed-footer__cols > div:nth-child(odd) {
+            border-left: none;
+        }
+        .ed-footer__cols > div:nth-child(-n+2) {
+            border-top: none;
+        }
+        .ed-footer__masthead-row {
+            grid-template-columns: 1fr;
+            text-align: center;
+            justify-items: center;
+            gap: 0.875rem;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .ed-footer__cols { grid-template-columns: 1fr; }
+        .ed-footer__cols > div { border-left: none !important; border-top: 1px solid var(--editorial-hairline); }
+        .ed-footer__cols > div:first-child { border-top: none; }
+    }
+</style>
