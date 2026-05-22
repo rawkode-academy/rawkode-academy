@@ -135,7 +135,34 @@ export default defineConfig({
 		// that never ships in dist. Inlining avoids the broken file reference.
 		...(d2Available ? [d2({ inline: true })] : []),
 		expressiveCode({
-			themes: ["catppuccin-mocha", "catppuccin-latte"],
+			// Editorial palette: Ayu Light for the paper scheme, Catppuccin
+			// Mocha for the dark scheme. First entry is the default.
+			themes: ["catppuccin-mocha", "ayu-light"],
+			themeCssRoot: ":root",
+			themeCssSelector: (theme) =>
+				theme.name === "ayu-light" ? ":root:not(.dark)" : "html.dark",
+			styleOverrides: {
+				borderRadius: "var(--radius-sm)",
+				borderColor: "var(--editorial-hairline-strong)",
+				borderWidth: "1px",
+				codeFontFamily:
+					"var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+				codeFontSize: "13px",
+				codeLineHeight: "1.7",
+				frames: {
+					editorActiveTabBackground: "transparent",
+					editorActiveTabBorderColor: "transparent",
+					editorActiveTabIndicatorBottomColor: "transparent",
+					editorActiveTabIndicatorTopColor: "var(--editorial-spruce)",
+					editorTabBarBackground: "oklch(0.18 0.012 280)",
+					editorTabBarBorderBottomColor: "oklch(1 0 0 / 0.08)",
+					frameBoxShadowCssValue: "none",
+					terminalBackground: "oklch(0.14 0.012 280)",
+					terminalTitlebarBackground: "oklch(0.18 0.012 280)",
+					terminalTitlebarBorderBottomColor: "oklch(1 0 0 / 0.08)",
+					terminalTitlebarDotsForeground: "oklch(1 0 0 / 0.18)",
+				},
+			},
 			...(cueLanguageGrammar && {
 				shiki: {
 					langs: [cueLanguageGrammar],

@@ -1,0 +1,184 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	kicker: string;
+	dispatchNum: number | string;
+	title: string;
+	dek: string;
+	tags?: string[];
+	author?: string | undefined;
+	date: string;
+	readingTime: string;
+	pullQuote?: string | undefined;
+}
+
+const {
+	href,
+	kicker,
+	dispatchNum,
+	title,
+	dek,
+	tags = [],
+	author,
+	date,
+	readingTime,
+	pullQuote,
+} = Astro.props as Props;
+---
+
+<article class="featured-article">
+	<a class="featured-article__main" href={href}>
+		<MLabel tone="spruce">
+			<span class="featured-article__dot" aria-hidden="true"></span>
+			§00 · Featured · Dispatch №{dispatchNum}
+		</MLabel>
+
+		<h1 class="featured-article__title">{title}</h1>
+		<p class="featured-article__dek">{dek}</p>
+
+		<div class="featured-article__meta">
+			<span class="featured-article__tag featured-article__tag--accent">{kicker}</span>
+			{tags.map((t) => (
+				<span class="featured-article__tag">#{t}</span>
+			))}
+			{author && <MLabel>{author}</MLabel>}
+			<MLabel>{date}</MLabel>
+			<MLabel>{readingTime} read</MLabel>
+		</div>
+	</a>
+
+	{pullQuote && (
+		<aside class="featured-article__aside">
+			<span class="featured-article__quote-mark" aria-hidden="true">&ldquo;</span>
+			<p class="featured-article__quote">{pullQuote}</p>
+			<MLabel>From the lede</MLabel>
+			<div class="featured-article__aside-footer">
+				<MLabel tone="ink">Read tutorial →</MLabel>
+				<MLabel>{readingTime}</MLabel>
+			</div>
+		</aside>
+	)}
+</article>
+
+<style>
+	.featured-article {
+		display: grid;
+		grid-template-columns: 1.5fr 1fr;
+		gap: 3rem;
+		align-items: start;
+		padding: 3.25rem 2.5rem 3rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.featured-article__main {
+		text-decoration: none;
+		color: inherit;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.featured-article__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--editorial-spruce);
+	}
+
+	.featured-article__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.75rem, 6vw, 5.25rem);
+		line-height: 0.95;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.featured-article__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.1875rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 45rem;
+		text-wrap: pretty;
+	}
+
+	.featured-article__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		align-items: center;
+		margin-top: 0.25rem;
+	}
+
+	.featured-article__tag {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.2rem 0.45rem;
+		color: var(--editorial-ink-soft);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
+		display: inline-block;
+	}
+
+	.featured-article__tag--accent {
+		color: var(--editorial-spruce);
+		border-color: var(--editorial-hairline-strong);
+	}
+
+	.featured-article__aside {
+		position: relative;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		padding: 2rem 1.75rem;
+	}
+
+	.featured-article__quote-mark {
+		position: absolute;
+		top: 0.75rem;
+		left: 1.125rem;
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 5rem;
+		line-height: 0.6;
+		color: var(--editorial-spruce);
+	}
+
+	.featured-article__quote {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 1.5rem;
+		line-height: 1.25;
+		color: var(--editorial-ink);
+		margin: 2.25rem 0 1.125rem;
+		text-wrap: pretty;
+	}
+
+	.featured-article__aside-footer {
+		display: flex;
+		justify-content: space-between;
+		padding-top: 1rem;
+		margin-top: 1.125rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	@media (max-width: 880px) {
+		.featured-article {
+			grid-template-columns: 1fr;
+			padding: 2rem 1.25rem;
+			gap: 2rem;
+		}
+		.featured-article__title {
+			font-size: clamp(2.25rem, 8vw, 3.5rem);
+		}
+	}
+</style>

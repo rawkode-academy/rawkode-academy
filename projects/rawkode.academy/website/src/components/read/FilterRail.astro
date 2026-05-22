@@ -1,0 +1,94 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Topic { label: string; count: number; href?: string }
+
+interface Props {
+	topics: Topic[];
+	activeIndex?: number;
+	sortLabel?: string;
+}
+
+const { topics, activeIndex = 0, sortLabel = "Newest first ↓" } = Astro.props as Props;
+---
+
+<div class="filter-rail">
+	<MLabel>Filter</MLabel>
+	{topics.map((t, i) => (
+		<a
+			class={`filter-rail__chip ${i === activeIndex ? "filter-rail__chip--active" : ""}`}
+			href={t.href ?? "#"}
+		>
+			{t.label}
+			<span class="filter-rail__count">{t.count}</span>
+		</a>
+	))}
+	<span class="filter-rail__spacer"></span>
+	<MLabel>Sort: <span class="filter-rail__sort">{sortLabel}</span></MLabel>
+</div>
+
+<style>
+	.filter-rail {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		padding: 1.125rem 2.5rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.filter-rail__chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.625rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-soft);
+		background: transparent;
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.filter-rail__chip:hover {
+		color: var(--editorial-ink);
+		border-color: var(--editorial-ink);
+	}
+
+	.filter-rail__chip--active {
+		color: var(--editorial-paper);
+		background: var(--editorial-ink);
+		border-color: var(--editorial-ink);
+	}
+
+	.filter-rail__count {
+		font-size: 0.625rem;
+		opacity: 0.55;
+	}
+
+	.filter-rail__chip--active .filter-rail__count {
+		opacity: 0.8;
+	}
+
+	.filter-rail__spacer {
+		flex: 1;
+		min-width: 1rem;
+	}
+
+	.filter-rail__sort {
+		color: var(--editorial-ink);
+	}
+
+	@media (max-width: 720px) {
+		.filter-rail {
+			padding: 1rem 1.25rem;
+		}
+	}
+</style>

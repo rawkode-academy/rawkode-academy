@@ -1,0 +1,94 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	dispatchNum: number | string;
+	kicker: string;
+	title: string;
+	dek: string;
+	author?: string | undefined;
+	date: string;
+	readingTime: string;
+}
+
+const {
+	href,
+	dispatchNum,
+	kicker,
+	title,
+	dek,
+	author,
+	date,
+	readingTime,
+} = Astro.props as Props;
+---
+
+<a class="article-grid-item" href={href}>
+	<div class="article-grid-item__head">
+		<MLabel tone="spruce">№{dispatchNum} · {kicker}</MLabel>
+		<MLabel>{readingTime}</MLabel>
+	</div>
+	<h2 class="article-grid-item__title">{title}</h2>
+	<p class="article-grid-item__dek">{dek}</p>
+	<div class="article-grid-item__footer">
+		{author && <MLabel>{author}</MLabel>}
+		<MLabel>{date}</MLabel>
+	</div>
+</a>
+
+<style>
+	.article-grid-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+		padding: 2rem 1.75rem 2rem 0;
+		text-decoration: none;
+		color: inherit;
+		position: relative;
+		transition: background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.article-grid-item:hover {
+		background: var(--surface-card-muted);
+	}
+
+	.article-grid-item__head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+	}
+
+	.article-grid-item__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.85rem;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.article-grid-item__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		text-wrap: pretty;
+		display: -webkit-box;
+		-webkit-line-clamp: 4;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.article-grid-item__footer {
+		display: flex;
+		justify-content: space-between;
+		padding-top: 0.875rem;
+		margin-top: auto;
+		border-top: 1px solid var(--editorial-hairline-strong);
+	}
+</style>
