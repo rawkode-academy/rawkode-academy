@@ -1,0 +1,16 @@
+# WARNING - UNPROTECTED ASSETS
+
+Do not put any sensitive information in this folder.
+
+While the markdown content is subject to full authorization checks,
+the static assets are not. This limitation is due to the extensive
+use of CND (e.g., Cloudflare) to deliver static assets with the best
+possible performance.
+
+With some careful URL-construction, files placed in the __static__
+folder can be fetched via the API by potentially unauthorized users.
+This includes anonymous users, bots, and crawlers. The caching duration
+of these assets is also very long (up to 1 year).
+
+If you wish to store private files alongside the content, make sure
+to place them outside of the __static__ folder.
