@@ -1,0 +1,80 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.6", import: ["@extends", "@external", "@key"])
+
+type Bracket {
+  id: String
+  seasonId: String
+  slug: String
+  name: String
+  kind: String
+  format: String
+  status: String
+  maxEntries: Int
+  cadenceDays: Int
+  startsAt: DateTime
+  registrationClosesAt: DateTime
+  matches: [BracketMatch!]
+  entries: [MatchSide!]
+}
+
+type BracketMatch {
+  id: String
+  bracketId: String
+  roundNumber: Int
+  positionInRound: Int
+  status: String
+  scheduledAt: DateTime
+  startedAt: DateTime
+  endedAt: DateTime
+  sideA: MatchSide
+  sideB: MatchSide
+  winner: MatchSide
+  scenarioTitle: String
+}
+
+type BracketSeason {
+  id: String
+  slug: String
+  name: String
+  status: String
+  startDate: DateTime
+  endDate: DateTime
+  brackets: [Bracket!]
+}
+
+type BracketStanding {
+  id: String
+  displayName: String
+  wins: Int
+  losses: Int
+}
+
+"""
+A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+"""
+scalar DateTime
+
+type MatchSide {
+  kind: String
+  id: String
+  displayName: String
+  seed: Int
+}
+
+type Query {
+  bracket(id: String!): Bracket
+  bracketBySlug(showId: String!, seasonSlug: String!, bracketSlug: String!): Bracket
+}
+
+type Show
+  @key(fields: "id")
+  @extends
+{
+  id: String @external
+  seasons: [BracketSeason!]
+  brackets(seasonSlug: String, status: String): [Bracket!]
+  schedule(seasonSlug: String): [BracketMatch!]
+  liveMatch: BracketMatch
+  leaderboard(seasonSlug: String): [BracketStanding!]
+  openBrackets: [Bracket!]
+}
