@@ -31,14 +31,14 @@ const expandedWidth = ref(defaultExpandedWidth);
 
 const baseItems: RawNavItem[] = [
 	{ name: "News", href: "/news", icon: MegaphoneIcon },
-	{ name: "Technology Matrix", href: "/technology/matrix", icon: Squares2X2Icon },
 	{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
 	{ name: "Articles", href: "/read", icon: NewspaperIcon },
-	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
+	{ name: "Technology Matrix", href: "/technology/matrix", icon: Squares2X2Icon },
 	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
+	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
 	{ name: "Shows", href: "/shows", icon: TvIcon },
-	{ name: "People", href: "/people", icon: UsersIcon },
 	{ name: "Technologies", href: "/technology", icon: CubeIcon },
+	{ name: "People", href: "/people", icon: UsersIcon },
 ];
 
 onMounted(() => {
