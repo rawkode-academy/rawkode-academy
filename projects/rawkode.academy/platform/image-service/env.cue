@@ -48,8 +48,8 @@ tasks: {
 	}
 
 	build: schema.#Task & {
-		command: "bun"
-		args: ["run", "build"]
+		command: "sh"
+		args: ["-lc", "bun run build"]
 		env: PATH: _taskPath
 		inputs: [
 			"astro.config.ts",
@@ -61,8 +61,8 @@ tasks: {
 	}
 
 	test: schema.#Task & {
-		command: "bun"
-		args: ["run", "test"]
+		command: "sh"
+		args: ["-lc", "bun run test"]
 		env: PATH: _taskPath
 		inputs: [
 			"package.json",
@@ -74,8 +74,8 @@ tasks: {
 	deploy: schema.#TaskGroup & {
 		type: "group"
 		main: schema.#Task & {
-			command: "bun"
-			args: ["x", "wrangler", "deploy", "--config", "./dist/server/wrangler.json"]
+			command: "sh"
+			args: ["-lc", "bun x wrangler deploy --config ./dist/server/wrangler.json"]
 			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
@@ -85,8 +85,8 @@ tasks: {
 			]
 		}
 		preview: schema.#Task & {
-			command: "bun"
-			args: ["x", "wrangler", "versions", "upload", "--config", "./dist/server/wrangler.json"]
+			command: "sh"
+			args: ["-lc", "bun x wrangler versions upload --config ./dist/server/wrangler.json"]
 			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
