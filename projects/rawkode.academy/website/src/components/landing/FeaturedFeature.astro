@@ -28,52 +28,58 @@ const {
 } = Astro.props as Props;
 ---
 
-<a class="featured" href={href}>
-	<div class="featured__copy">
-		<div class="featured__meta">
-			{meta.map((m, i) => (
-				<>
-					{i > 0 && <span class="featured__meta-sep">·</span>}
-					<MLabel tone="muted">{m}</MLabel>
-				</>
-			))}
-		</div>
-
-		<h3 class="featured__title">{title}</h3>
-		<p class="featured__body">{body}</p>
-
-		<div class="featured__cta">
-			<EditorialButton variant="outline" size="md" arrow>{cta}</EditorialButton>
-		</div>
-	</div>
-
-	<div class="featured__media">
-		{mediaImage && (
-			<Image
-				src={mediaImage}
-				alt={mediaAlt}
-				class="featured__img"
-				widths={[480, 720, 960]}
-				sizes="(max-width: 900px) 100vw, 30rem"
-				loading="lazy"
-			/>
-		)}
-		{!mediaImage && mediaSrc && (
-			<img class="featured__img" src={mediaSrc} alt={mediaAlt} loading="lazy" />
-		)}
-		{!mediaImage && !mediaSrc && mediaPlaceholder && (
-			<div class="featured__placeholder">
-				<span>{title}</span>
+<div class="featured-frame">
+	<a class="featured" href={href}>
+		<div class="featured__copy">
+			<div class="featured__meta">
+				{meta.map((m, i) => (
+					<>
+						{i > 0 && <span class="featured__meta-sep">·</span>}
+						<MLabel tone="muted">{m}</MLabel>
+					</>
+				))}
 			</div>
-		)}
-	</div>
-</a>
+
+			<h3 class="featured__title">{title}</h3>
+			<p class="featured__body">{body}</p>
+
+			<div class="featured__cta">
+				<EditorialButton variant="outline" size="md" arrow>{cta}</EditorialButton>
+			</div>
+		</div>
+
+		<div class="featured__media">
+			{mediaImage && (
+				<Image
+					src={mediaImage}
+					alt={mediaAlt}
+					class="featured__img"
+					widths={[480, 720, 960]}
+					sizes="(max-width: 900px) 100vw, 30rem"
+					loading="lazy"
+				/>
+			)}
+			{!mediaImage && mediaSrc && (
+				<img class="featured__img" src={mediaSrc} alt={mediaAlt} loading="lazy" />
+			)}
+			{!mediaImage && !mediaSrc && mediaPlaceholder && (
+				<div class="featured__placeholder">
+					<span>{title}</span>
+				</div>
+			)}
+		</div>
+	</a>
+</div>
 
 <style>
+	.featured-frame {
+		container-type: inline-size;
+	}
+
 	.featured {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 30rem;
-		gap: 2.5rem;
+		grid-template-columns: minmax(18rem, 0.92fr) minmax(24rem, 1.2fr);
+		gap: clamp(1.5rem, 4cqw, 2.5rem);
 		padding: 2rem 0;
 		border-top: 1px solid var(--editorial-hairline);
 		border-bottom: 1px solid var(--editorial-hairline);
@@ -82,10 +88,16 @@ const {
 		align-items: center;
 	}
 
+	.featured__copy {
+		min-width: 0;
+	}
+
 	.featured__meta {
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
+		flex-wrap: wrap;
+		row-gap: 0.375rem;
 		margin-bottom: 0.875rem;
 	}
 
@@ -100,7 +112,7 @@ const {
 		letter-spacing: -0.025em;
 		color: var(--editorial-ink);
 		margin: 0 0 1rem;
-		max-width: 16ch;
+		max-width: 15ch;
 	}
 
 	.featured__body {
@@ -142,7 +154,37 @@ const {
 		line-height: 1.05;
 	}
 
-	@media (max-width: 880px) {
-		.featured { grid-template-columns: 1fr; }
+	@container (max-width: 760px) {
+		.featured {
+			grid-template-columns: 1fr;
+			gap: 1.25rem;
+			padding: 1.5rem 0;
+			align-items: start;
+		}
+
+		.featured__media {
+			order: -1;
+			aspect-ratio: 16 / 9;
+		}
+
+		.featured__title {
+			max-width: 24ch;
+			font-size: clamp(2rem, 8cqw, 2.75rem);
+		}
+
+		.featured__body {
+			max-width: 58ch;
+		}
+	}
+
+	@container (max-width: 460px) {
+		.featured__meta {
+			align-items: flex-start;
+			gap: 0.375rem;
+		}
+
+		.featured__meta-sep {
+			display: none;
+		}
 	}
 </style>
