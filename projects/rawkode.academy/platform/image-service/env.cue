@@ -8,7 +8,7 @@ name: "rawkode-academy-platform-image-service"
 
 let _t = tasks
 let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
-let _workerName = "rawkode-academy-image-service"
+let _previewWorkerName = "rawkode-academy-image-service-preview"
 let _workersDevSubdomain = "rawkodeacademy"
 
 env: {
@@ -88,7 +88,7 @@ tasks: {
 		}
 		preview: schema.#Task & {
 			command: "sh"
-			args: ["-lc", "alias=\"pr-$(printf '%s' \"${GITHUB_REF_NAME:-preview}\" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g;s/--*/-/g;s/^-*//;s/-*$//' | cut -c1-30)\"; nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler versions upload --preview-alias \"$alias\" --config ./dist/server/wrangler.json && echo \"Version Preview URL: https://${alias}-\(_workerName).\(_workersDevSubdomain).workers.dev\""]
+			args: ["-lc", "node -e 'const fs = require(\"fs\"); const config = JSON.parse(fs.readFileSync(\"./dist/server/wrangler.json\", \"utf8\")); config.name = \"\(_previewWorkerName)\"; config.workers_dev = true; delete config.routes; fs.writeFileSync(\"./dist/server/wrangler.preview.json\", JSON.stringify(config));' && nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./dist/server/wrangler.preview.json && echo \"Version Preview URL: https://\(_previewWorkerName).\(_workersDevSubdomain).workers.dev\""]
 			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
