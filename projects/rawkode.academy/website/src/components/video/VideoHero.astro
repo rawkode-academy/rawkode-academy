@@ -36,6 +36,16 @@ const {
 
 const primaryLabel =
 	primaryCtaLabel ?? (live ? "Join the stream →" : "Watch session →");
+const metaParts = [
+	episodeNum ? `№${episodeNum}` : null,
+	live ? "Live" : series,
+	duration,
+	date,
+	author,
+	viewerCount !== undefined
+		? `${viewerCount.toLocaleString()} ${live ? "watching" : "views"}`
+		: null,
+].filter(Boolean);
 ---
 
 <section class="video-hero">
@@ -54,11 +64,12 @@ const primaryLabel =
 
 	<div class="video-hero__meta">
 		<div class="video-hero__copy">
-			<MLabel>
-				{[author, date, viewerCount !== undefined ? `${viewerCount.toLocaleString()} ${live ? "watching" : "views"}` : null]
-					.filter(Boolean)
-					.join(" · ")}
-			</MLabel>
+			{metaParts.length > 0 && (
+				<MLabel tone={live ? "amber" : "spruce"}>
+					{metaParts.join(" · ")}
+				</MLabel>
+			)}
+			<h2 class="video-hero__title">{title}</h2>
 			<p class="video-hero__description">{description}</p>
 		</div>
 		<div class="video-hero__actions">
@@ -96,6 +107,19 @@ const primaryLabel =
 		display: flex;
 		flex-direction: column;
 		gap: 0.625rem;
+	}
+
+	.video-hero__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.25rem, 5vw, 4rem);
+		line-height: 0.95;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+		max-width: 18ch;
+		text-wrap: balance;
 	}
 
 	.video-hero__description {

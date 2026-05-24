@@ -13,9 +13,6 @@ interface Props {
 const {
 	episodeNum,
 	title,
-	series,
-	duration,
-	live = false,
 	big = false,
 	thumbnailUrl,
 	accent = "spruce",
@@ -37,7 +34,6 @@ const palettes = [
 ];
 const epNum = parseInt(String(episodeNum ?? "0"), 10) || 0;
 const palette = palettes[epNum % palettes.length] as [string, string];
-const watermark = episodeNum ? String(episodeNum) : null;
 ---
 
 <div class={`video-still ${big ? "video-still--big" : ""}`} style={`--accent: ${accentVar}; --bg-from: ${palette[0]}; --bg-to: ${palette[1]};`}>
@@ -45,41 +41,6 @@ const watermark = episodeNum ? String(episodeNum) : null;
 		<img class="video-still__img" src={thumbnailUrl} alt={title ?? ""} loading="lazy" />
 	) : (
 		<div class="video-still__backdrop" aria-hidden="true"></div>
-	)}
-
-	{watermark && (
-		<span class="video-still__watermark" aria-hidden="true">{watermark}</span>
-	)}
-
-	<span class="video-still__play" aria-hidden="true">
-		<svg viewBox="0 0 16 16">
-			<path d="M4 2l10 6-10 6V2z" />
-		</svg>
-	</span>
-
-	<div class="video-still__top">
-		{live ? (
-			<span class="video-still__live">
-				<span class="video-still__live-dot" aria-hidden="true"></span>
-				Live
-			</span>
-		) : series ? (
-			<span class="video-still__series">{series}</span>
-		) : (
-			<span></span>
-		)}
-		{duration && <span class="video-still__duration">{duration}</span>}
-	</div>
-
-	{big && title && (
-		<div class="video-still__bottom">
-			{(series || episodeNum) && (
-				<span class="video-still__kicker">
-					{episodeNum && <>№{episodeNum}</>}{episodeNum && series ? " · " : ""}{series}
-				</span>
-			)}
-			<h3 class="video-still__title">{title}</h3>
-		</div>
 	)}
 </div>
 
@@ -95,6 +56,14 @@ const watermark = episodeNum ? String(episodeNum) : null;
 		 image bug we hit earlier in some Chromium versions. */
 		background-color: var(--bg-to);
 		color: var(--editorial-paper);
+		transition:
+			border-color var(--duration-base) var(--ease-standard),
+			filter var(--duration-base) var(--ease-standard);
+	}
+
+	.video-still:hover {
+		border-color: var(--accent);
+		filter: saturate(1.04);
 	}
 
 	.video-still__backdrop {
@@ -114,148 +83,9 @@ const watermark = episodeNum ? String(episodeNum) : null;
 	}
 
 	.video-still__img {
-		/* Sit in normal flow filling the aspect-ratio container; the
-		 editorial overlays are absolutely positioned on top.
-		 Mirror the OnAirPanel image treatment. */
 		display: block;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-	}
-
-	.video-still__watermark {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 120px;
-		line-height: 1;
-		color: oklch(1 0 0 / 0.06);
-		user-select: none;
-		pointer-events: none;
-	}
-
-	.video-still--big .video-still__watermark {
-		font-size: 280px;
-	}
-
-	.video-still__play {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		width: 52px;
-		height: 52px;
-		background: oklch(1 0 0 / 0.92);
-		display: grid;
-		place-items: center;
-		border-radius: 50%;
-	}
-
-	.video-still--big .video-still__play {
-		width: 88px;
-		height: 88px;
-	}
-
-	.video-still__play svg {
-		width: 16px;
-		height: 16px;
-		fill: var(--editorial-ink);
-	}
-
-	.video-still--big .video-still__play svg {
-		width: 26px;
-		height: 26px;
-	}
-
-	.video-still__top {
-		position: absolute;
-		top: 0.75rem;
-		left: 0.875rem;
-		right: 0.875rem;
-		display: flex;
-		justify-content: space-between;
-		gap: 0.5rem;
-	}
-
-	.video-still__live {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
-		background: var(--editorial-paper);
-		color: var(--editorial-amber);
-		padding: 0.25rem 0.5rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.66rem;
-		font-weight: 600;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-
-	.video-still__live-dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--editorial-amber);
-		animation: rk-pulse 1.6s ease-in-out infinite;
-	}
-
-	@keyframes rk-pulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.7; transform: scale(0.92); }
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.video-still__live-dot { animation: none; }
-	}
-
-	.video-still__series {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.66rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: oklch(1 0 0 / 0.7);
-	}
-
-	.video-still__duration {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.66rem;
-		letter-spacing: 0.08em;
-		color: oklch(1 0 0 / 0.85);
-		background: oklch(0 0 0 / 0.5);
-		padding: 0.18rem 0.45rem;
-	}
-
-	.video-still__bottom {
-		position: absolute;
-		bottom: 1.125rem;
-		left: 1.125rem;
-		right: 1.125rem;
-	}
-
-	.video-still__kicker {
-		display: inline-block;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--accent);
-		margin-bottom: 0.5rem;
-	}
-
-	.video-still__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 2.25rem;
-		line-height: 1;
-		letter-spacing: -0.02em;
-		color: var(--editorial-paper);
-		margin: 0;
-		text-wrap: balance;
 	}
 </style>
