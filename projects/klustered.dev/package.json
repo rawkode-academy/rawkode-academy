@@ -8,9 +8,11 @@
 		"preview": "astro preview",
 		"check": "astro check",
 		"db:generate": "drizzle-kit generate",
-		"db:migrate": "wrangler d1 migrations apply DB",
+		"db:migrate": "wrangler d1 migrations apply DB --remote",
 		"db:migrate:local": "wrangler d1 migrations apply DB --local",
-		"db:seed": "bun scripts/seed.ts"
+		"db:seed": "bun scripts/seed.ts",
+		"db:seed:production": "bun scripts/seed-production.ts",
+		"db:grant-role": "bun scripts/grant-role.ts"
 	},
 	"dependencies": {
 		"@astrojs/check": "0.9.8",

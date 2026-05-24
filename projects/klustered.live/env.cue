@@ -45,6 +45,7 @@ tasks: {
 			"package.json",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 	}
 
@@ -57,6 +58,7 @@ tasks: {
 			"package.json",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 
 		outputs: [

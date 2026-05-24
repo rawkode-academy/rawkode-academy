@@ -1,5 +1,5 @@
 import { eq, or, inArray, asc } from "drizzle-orm";
-import { getDb, schema, type Database } from "@/db/client";
+import { schema, type Database } from "@/db/client";
 
 export async function getCompetitorForUser(db: Database, userId: string) {
 	return await db

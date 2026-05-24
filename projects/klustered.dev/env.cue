@@ -45,6 +45,7 @@ tasks: {
 			"package.json",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 	}
 
@@ -54,9 +55,11 @@ tasks: {
 
 		inputs: [
 			"astro.config.mjs",
+			"migrations/**",
 			"package.json",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 
 		outputs: [

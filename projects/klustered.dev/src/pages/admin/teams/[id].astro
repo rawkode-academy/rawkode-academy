@@ -1,6 +1,6 @@
 ---
 import { env } from "cloudflare:workers";
-import { eq, and, asc } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getDb, schema } from "@/db/client";
 import { ADMIN_NAV } from "@/lib/nav";

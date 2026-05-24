@@ -9,8 +9,18 @@
 		"directory": "./dist",
 		"run_worker_first": true
 	},
-	"workers_dev": true,
+	"workers_dev": false,
 	"preview_urls": true,
+	"routes": [
+		{
+			"pattern": "klustered.live",
+			"custom_domain": true
+		},
+		{
+			"pattern": "www.klustered.live",
+			"custom_domain": true
+		}
+	],
 	"observability": {
 		"traces": {
 			"enabled": true,
@@ -25,7 +35,7 @@
 		{
 			"binding": "DB",
 			"database_name": "klustered",
-			"database_id": "PLACEHOLDER-RUN-WRANGLER-D1-CREATE-KLUSTERED"
+			"migrations_dir": "../klustered.dev/migrations"
 		}
 	]
 }
