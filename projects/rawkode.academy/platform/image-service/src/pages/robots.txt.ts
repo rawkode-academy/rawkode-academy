@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 
 const BODY = `User-agent: *
+Allow: /image
 Disallow: /
 `;
 

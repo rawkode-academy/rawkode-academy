@@ -1,14 +1,7 @@
 ---
 import { getCollection, getEntry } from "astro:content";
-import { marked } from "marked";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
-
-marked.setOptions({
-	breaks: true,
-	gfm: true,
-	pedantic: false,
-});
 
 const changelogEntries = await getCollection("changelog");
 
@@ -16,15 +9,30 @@ const sortedChangelog = changelogEntries.sort((a, b) => {
 	return b.data.date.getTime() - a.data.date.getTime();
 });
 
+const cleanTitle = (title: string) =>
+	title
+		.replace(/\p{Extended_Pictographic}/gu, "")
+		.trim()
+		.replace(/^(New Feature|Feature|Improvement|Fix|Breaking):\s*/i, "")
+		.trim();
+
+const cleanSummary = (description: string) =>
+	(description.split("\n\n")[0] ?? "")
+		.replace(/\s*(What's New|Why This Matters):.*$/is, "")
+		.replace(/\p{Extended_Pictographic}/gu, "")
+		.replace(/\*\*/g, "")
+		.replace(/\s+/g, " ")
+		.trim();
+
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
-		const renderedContent = marked(entry.body || "");
 		const authorEntry = await getEntry(entry.data.author);
 
 		return {
 			...entry.data,
 			id: entry.id,
-			renderedContent: String(renderedContent),
+			title: cleanTitle(entry.data.title),
+			summary: cleanSummary(entry.data.description),
 			author: {
 				name: authorEntry?.data.name || "Unknown",
 				avatar_url: authorEntry?.data.avatarUrl || "",
@@ -36,35 +44,17 @@ const processedChangelog = await Promise.all(
 
 <Page
 	title="Changelog"
-	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
+	description="Rawkode Academy product updates, fixes, and content changes."
 >
 	<EditorialShell
-		eyebrow="Product notes"
+		eyebrow="Updates"
 		title="Changelog"
-		lede="A running record of the features, fixes, and content updates shipped across Rawkode Academy."
+		lede="Product updates, fixes, and content changes."
 		compact
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#latest">Latest updates</a>
 			<a class="editorial-button editorial-button--secondary" href="https://github.com/rawkode-academy">GitHub</a>
 		</div>
-
-		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">{changelogEntries.length}</span>
-					<span class="editorial-stat__label">Updates</span>
-				</div>
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">Open</span>
-					<span class="editorial-stat__label">Source</span>
-				</div>
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">Live</span>
-					<span class="editorial-stat__label">Project record</span>
-				</div>
-			</div>
-		</section>
 
 		<section id="latest" class="editorial-section changelog-list">
 			{
@@ -73,12 +63,9 @@ const processedChangelog = await Promise.all(
 						<p class="editorial-card__body">No changelog entries yet.</p>
 					</div>
 				) : (
-					processedChangelog.map((entry, index) => (
+					processedChangelog.map((entry) => (
 						<article class="changelog-entry">
 							<div class="changelog-entry__meta">
-								<span class="editorial-pill">
-									No{String(processedChangelog.length - index).padStart(3, "0")}
-								</span>
 								<span class="editorial-pill">{entry.type}</span>
 								<time datetime={entry.date.toISOString()}>
 									{entry.date.toLocaleDateString("en-US", {
@@ -89,7 +76,15 @@ const processedChangelog = await Promise.all(
 								</time>
 							</div>
 							<h2>{entry.title}</h2>
-							<div class="editorial-prose changelog-entry__body" set:html={entry.renderedContent} />
+							<p class="changelog-entry__summary">{entry.summary}</p>
+							{entry.pullRequest && (
+								<a
+									class="changelog-entry__link"
+									href={`https://github.com/rawkode-academy/rawkode-academy/pull/${entry.pullRequest}`}
+								>
+									View pull request
+								</a>
+							)}
 							<footer class="changelog-entry__byline">
 								{entry.author.avatar_url && (
 									<img
@@ -113,12 +108,16 @@ const processedChangelog = await Promise.all(
 	.changelog-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0;
+		gap: 0.25rem;
 	}
 
 	.changelog-entry {
 		border-top: 1px solid var(--editorial-hairline);
-		padding: 2rem 0;
+		display: grid;
+		grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+		column-gap: clamp(1.5rem, 4vw, 4rem);
+		row-gap: 0.75rem;
+		padding: clamp(1.5rem, 3vw, 2.5rem) 0;
 	}
 
 	.changelog-entry:first-child {
@@ -129,9 +128,10 @@ const processedChangelog = await Promise.all(
 	.changelog-entry__meta {
 		display: flex;
 		flex-wrap: wrap;
+		align-content: start;
 		align-items: center;
 		gap: 0.5rem;
-		margin-bottom: 0.9rem;
+		grid-row: span 4;
 	}
 
 	.changelog-entry__meta time,
@@ -151,16 +151,29 @@ const processedChangelog = await Promise.all(
 		line-height: 1.05;
 		letter-spacing: 0;
 		color: var(--editorial-ink);
-		margin: 0 0 1rem;
+		margin: 0;
 		text-wrap: balance;
 	}
 
-	.changelog-entry__body {
-		max-width: 46rem;
+	.changelog-entry__summary {
+		max-width: 48rem;
+		margin: 0;
+		color: var(--editorial-ink-soft);
+		font-size: 1rem;
+		line-height: 1.65;
 	}
 
-	.changelog-entry__body :global(p:last-child) {
-		margin-bottom: 0;
+	.changelog-entry__link {
+		width: fit-content;
+		color: var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-decoration: none;
+		text-transform: uppercase;
+		border-bottom: 1px solid var(--editorial-hairline-strong);
+		padding-bottom: 0.22rem;
 	}
 
 	.changelog-entry__byline {
@@ -180,7 +193,17 @@ const processedChangelog = await Promise.all(
 
 	@media (max-width: 700px) {
 		.changelog-entry {
+			display: block;
 			padding: 1.5rem 0;
+		}
+
+		.changelog-entry__meta {
+			margin-bottom: 0.75rem;
+		}
+
+		.changelog-entry__summary,
+		.changelog-entry__link {
+			margin-top: 0.85rem;
 		}
 	}
 </style>

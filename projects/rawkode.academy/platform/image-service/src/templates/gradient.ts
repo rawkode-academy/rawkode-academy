@@ -2,68 +2,73 @@ import { DEFAULT_PAYLOAD } from "@/lib/payload";
 import { createHash, type Template } from "@/lib/template";
 import { html } from "satori-html";
 
+const truncate = (value: string | undefined, maxLength: number) => {
+	if (!value) {
+		return "";
+	}
+
+	const normalized = value.replace(/\s+/g, " ").trim();
+
+	if (normalized.length <= maxLength) {
+		return normalized;
+	}
+
+	return `${normalized.slice(0, maxLength - 1).trim()}...`;
+};
+
 export const template: Template = {
-  font: {
-    name: "Quicksand",
-    weight: 500,
-    style: "normal",
-  },
+	font: {
+		name: "Inter",
+		weight: 700,
+		style: "normal",
+	},
 
-  hash() {
-    // we call the render method with a stable input to calculate the hash
-    return createHash(this.render(DEFAULT_PAYLOAD));
-  },
+	hash() {
+		return createHash(this.render(DEFAULT_PAYLOAD));
+	},
 
-  render(payload) {
-    // Modern logo with gradient
-    const logo = `<svg width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10 20C10 14.4772 14.4772 10 20 10H120C125.523 10 130 14.4772 130 20V20C130 25.5228 125.523 30 120 30H20C14.4772 30 10 25.5228 10 20V20Z" fill="url(#paint0_linear)"/>
-      <path d="M30 20H40" stroke="white" stroke-width="2" stroke-linecap="round"/>
-      <path d="M35 15V25" stroke="white" stroke-width="2" stroke-linecap="round"/>
-      <path d="M50 15H120" stroke="white" stroke-width="2" stroke-linecap="round"/>
-      <path d="M50 25H100" stroke="white" stroke-width="2" stroke-linecap="round"/>
-      <defs>
-        <linearGradient id="paint0_linear" x1="10" y1="20" x2="130" y2="20" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#6366F1"/>
-          <stop offset="1" stop-color="#8B5CF6"/>
-        </linearGradient>
-      </defs>
-    </svg>`;
+	render(payload) {
+		const eyebrow = truncate(payload.subtitle, 72) || "Rawkode Academy";
+		const summary = truncate(payload.text, 105);
 
-    return html(`
-      <div style="display: flex; flex-direction: column; width: 1200px; height: 630px; background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #EC4899 100%); color: white; font-family: Inter;">
-        <!-- Top accent line -->
-        <div style="height: 8px; background: rgba(255, 255, 255, 0.2); display: flex;"></div>
+		return html(`
+			<div style="display: flex; width: 1200px; height: 630px; background: #f4f1ea; color: #17130f; font-family: Inter;">
+				<div style="display: flex; width: 100%; height: 100%; padding: 54px 60px; flex-direction: column; border: 1px solid #d8d2c7;">
+					<div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+						<div style="display: flex; align-items: center;">
+							<div style="display: flex; width: 36px; height: 36px; background: #17130f; border-radius: 4px; margin-right: 16px;"></div>
+							<div style="display: flex; flex-direction: column;">
+								<div style="display: flex; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; color: #17130f;">Rawkode</div>
+								<div style="display: flex; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; color: #17130f; margin-top: -4px;">Academy</div>
+							</div>
+						</div>
+						<div style="display: flex; font-size: 18px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2d7e67;">rawkode.academy</div>
+					</div>
 
-        <div style="display: flex; padding: 60px; flex-direction: column; height: 100%; position: relative;">
-          <!-- Background decorative elements -->
-          <div style="position: absolute; width: 600px; height: 600px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); top: -200px; right: -200px; display: flex;"></div>
-          <div style="position: absolute; width: 400px; height: 400px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); bottom: -100px; left: -100px; display: flex;"></div>
+					<div style="display: flex; width: 100%; height: 1px; background: #d8d2c7; margin-top: 38px;"></div>
 
-          <!-- Logo -->
-          <div style="display: flex; margin-bottom: 60px; z-index: 1;">
-            ${logo}
-          </div>
+					<div style="display: flex; flex: 1; flex-direction: column; justify-content: center; padding-right: 80px; padding-bottom: 24px;">
+						<div style="display: flex; align-items: center; margin-bottom: 22px;">
+							<div style="display: flex; width: 10px; height: 10px; border-radius: 999px; background: #2d7e67; margin-right: 16px;"></div>
+							<div style="display: flex; font-size: 20px; font-weight: 700; color: #2d7e67; letter-spacing: 0.12em; text-transform: uppercase;">${eyebrow}</div>
+						</div>
 
-          <!-- Main content -->
-          <div style="display: flex; flex-direction: column; flex: 1; justify-content: center; z-index: 1;">
-            <div style="width: 80px; height: 6px; background: rgba(255, 255, 255, 0.6); margin-bottom: 32px; display: flex;"></div>
-            <h1 style="font-size: 72px; font-weight: 700; color: white; margin: 0 0 32px 0; line-height: 1.1; max-width: 800px; letter-spacing: -0.02em; display: flex;">
-              ${payload.title}
-            </h1>
-            <p style="font-size: 28px; color: rgba(255, 255, 255, 0.8); margin: 0; line-height: 1.5; max-width: 600px; display: flex;">
-              ${payload.subtitle}
-            </p>
-          </div>
+						<div style="display: flex; font-size: 60px; font-weight: 700; line-height: 1.02; letter-spacing: -0.035em; color: #17130f; max-width: 1000px;">
+							${payload.title}
+						</div>
 
-          <!-- Footer -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 60px; z-index: 1;">
-            <div style="font-size: 18px; color: rgba(255, 255, 255, 0.7); font-weight: 500; display: flex;">
-              Rawkode Academy
-            </div>
-          </div>
-        </div>
-      </div>
-    `);
-  },
+						${
+							summary
+								? `<div style="display: flex; margin-top: 22px; max-width: 780px; font-size: 24px; font-weight: 700; line-height: 1.28; letter-spacing: -0.012em; color: #5d574f;">${summary}</div>`
+								: ""
+						}
+					</div>
+
+					<div style="display: flex; align-items: center; width: 100%; border-top: 1px solid #d8d2c7; padding-top: 18px;">
+						<div style="display: flex; font-size: 20px; font-weight: 700; color: #17130f;">Practical cloud native learning.</div>
+					</div>
+				</div>
+			</div>
+		`);
+	},
 };
