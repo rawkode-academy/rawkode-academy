@@ -3,6 +3,15 @@ import { getCollection } from "astro:content";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
+import NewsMasthead from "@/components/news/NewsMasthead.astro";
+import NewsLead from "@/components/news/NewsLead.astro";
+import CVEAlert from "@/components/news/CVEAlert.astro";
+import NewsRow from "@/components/news/NewsRow.astro";
+import TrendingPanel from "@/components/news/TrendingPanel.astro";
+import WireSubscribeCard from "@/components/news/WireSubscribeCard.astro";
+import FilterRail from "@/components/read/FilterRail.astro";
+import MLabel from "@/components/ui/MLabel.vue";
+
 export const prerender = true;
 
 const [allNews, allTechnologies] = await Promise.all([
@@ -14,24 +23,12 @@ allNews.sort(
 	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
 
-// Build a lookup from the raw tech id used in news frontmatter (e.g. "kubernetes")
-// to the canonical display name on the technologies collection (e.g. "Kubernetes").
+const [leadStory, ...rest] = allNews;
+
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
 	const rawId = technology.id.replace(/\/index$/, "");
 	technologyNameById.set(rawId, technology.data.name);
-}
-
-const pageTitle = "Cloud Native News";
-const pageDescription =
-	"Cloud native, Kubernetes, and AI infrastructure news for engineers - release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
-
-function formatDisplayDate(date: Date): string {
-	return new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	}).format(date);
 }
 
 function formatTechnologyLabel(value: string): string {
@@ -47,6 +44,100 @@ function formatTechnologyLabel(value: string): string {
 		)
 		.join(" ");
 }
+
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+});
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "2-digit",
+});
+
+const now = new Date();
+const isToday = (d: Date) =>
+	d.getFullYear() === now.getFullYear() &&
+	d.getMonth() === now.getMonth() &&
+	d.getDate() === now.getDate();
+const isYesterday = (d: Date) => {
+	const y = new Date(now);
+	y.setDate(now.getDate() - 1);
+	return (
+		d.getFullYear() === y.getFullYear() &&
+		d.getMonth() === y.getMonth() &&
+		d.getDate() === y.getDate()
+	);
+};
+
+const formatRelativeDate = (date: Date) => {
+	if (isToday(date)) return "Today";
+	if (isYesterday(date)) return "Yesterday";
+	return dateFormatter.format(date);
+};
+
+const kickerFor = (story: (typeof allNews)[number]): string => {
+	const tags = story.data.technologies ?? [];
+	if (tags.some((t) => /cve|security/i.test(t))) return "CVE";
+	if (tags.some((t) => /cncf|graduation/i.test(t))) return "CNCF";
+	if (/release|ship|gen|alpha|beta|GA|stable|launch/i.test(story.data.title))
+		return "Release";
+	if (/acquire|acquisition/i.test(story.data.title)) return "Acquisition";
+	return "Field";
+};
+
+const isHot = (story: (typeof allNews)[number]) =>
+	/cve|critical|urgent|patch immediately|9\.[0-9]|10\.0/i.test(
+		`${story.data.title} ${story.data.description}`,
+	);
+
+const cveMatch = (s: (typeof allNews)[number]) =>
+	(`${s.data.title} ${s.data.description}`.match(/CVE-\d{4}-\d{3,5}/i) || [
+		null,
+	])[0];
+
+const cveStory = rest.find((s) => cveMatch(s));
+
+const cveSeverityMatch = cveStory
+	? `${cveStory.data.title} ${cveStory.data.description}`.match(
+			/CVSS\s+([\d.]+)/i,
+		)
+	: null;
+
+const topicCounts = new Map<string, number>();
+for (const story of allNews) {
+	for (const tech of story.data.technologies ?? []) {
+		topicCounts.set(tech, (topicCounts.get(tech) ?? 0) + 1);
+	}
+}
+const topTopics = Array.from(topicCounts.entries())
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 7)
+	.map(([id]) => ({
+		label: formatTechnologyLabel(id),
+		href: `/technology/${id}`,
+	}));
+
+const topics = topTopics;
+
+const pageTitle = "Cloud Native News";
+const pageDescription =
+	"Cloud native, Kubernetes, and AI infrastructure news for engineers: release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
+
+const leadStoryTags = leadStory
+	? (leadStory.data.technologies ?? []).slice(0, 3)
+	: [];
+
+const trendingItems = allNews.slice(0, 5).map((s) => ({
+	title: s.data.title,
+	meta: formatRelativeDate(s.data.publishedAt),
+	href: `/news/${s.id}`,
+}));
+
+const newsRows = rest
+	.filter((s) => s.id !== cveStory?.id)
+	.slice(0, 10);
 ---
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
@@ -55,82 +146,149 @@ function formatTechnologyLabel(value: string): string {
 			stories={allNews}
 			listUrl={new URL("/news", Astro.site ?? Astro.url).href}
 		/>
-		<link
-			rel="alternate"
-			type="application/rss+xml"
-			title="Rawkode Academy - News (RSS)"
-			href="/api/feeds/news.xml"
-		/>
-		<link
-			rel="alternate"
-			type="application/atom+xml"
-			title="Rawkode Academy - News (Atom)"
-			href="/api/feeds/news.atom"
-		/>
-		<link
-			rel="alternate"
-			type="application/feed+json"
-			title="Rawkode Academy - News (JSON Feed)"
-			href="/api/feeds/news.json"
-		/>
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - News (RSS)" href="/api/feeds/news.xml" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - News (Atom)" href="/api/feeds/news.atom" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-4xl">
-			<header class="mb-6 border-b border-black/10 pb-5 dark:border-white/10 sm:mb-8 sm:pb-6">
-				<div class="eyebrow-label">Cloud Native News</div>
-				<h1 class="mt-3 font-display text-3xl font-semibold tracking-tight text-primary-content sm:text-4xl">
-					Latest stories
-				</h1>
-			</header>
 
-			{
-				allNews.length > 0 ? (
-					<ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
-						{
-							allNews.map((story) => (
-								<li class="py-5 sm:py-6">
-									<article class="space-y-2">
-										<div class="flex flex-wrap items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-											<time datetime={story.data.publishedAt.toISOString()}>
-												{formatDisplayDate(story.data.publishedAt)}
-											</time>
-											{
-												story.data.technologies[0] && (
-													<>
-														<span>/</span>
-														<a
-															href={`/technology/${story.data.technologies[0]}`}
-															class="transition-colors hover:text-primary"
-														>
-															{formatTechnologyLabel(story.data.technologies[0])}
-														</a>
-													</>
-												)
-											}
-										</div>
+	<div class="news-page">
+		<NewsMasthead updatedAt={leadStory?.data.publishedAt} />
 
-										<h2 class="font-display text-2xl font-semibold leading-tight tracking-tight text-primary-content sm:text-[1.9rem]">
-											<a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
-												{story.data.title}
-											</a>
-										</h2>
+		<section class="news-page__top">
+			{leadStory && (
+				<NewsLead
+					href={`/news/${leadStory.id}`}
+					kicker={kickerFor(leadStory)}
+					time={timeFormatter.format(leadStory.data.publishedAt)}
+					title={leadStory.data.title}
+					description={leadStory.data.description}
+					tags={leadStoryTags}
+				/>
+			)}
+			{cveStory && cveMatch(cveStory) && (
+				<CVEAlert
+					id={cveMatch(cveStory) ?? "CVE"}
+					severity={cveSeverityMatch?.[1] ?? "—"}
+					project={
+						formatTechnologyLabel(
+							(cveStory.data.technologies ?? [])[0] ?? "runtime",
+						)
+					}
+					title={cveStory.data.title}
+					description={cveStory.data.description}
+					publishedAt={formatRelativeDate(cveStory.data.publishedAt)}
+					href={`/news/${cveStory.id}`}
+				/>
+			)}
+		</section>
 
-										<p class="max-w-[66ch] text-base leading-8 text-secondary-content">
-											{story.data.description}
-										</p>
-									</article>
-								</li>
-							))
-						}
-					</ul>
-				) : (
-					<section class="border-y border-black/10 py-8 dark:border-white/10">
-						<p class="text-base leading-8 text-secondary-content">
-							No news published yet.
-						</p>
-					</section>
-				)
-			}
-		</div>
-	</section>
+		<FilterRail topics={topics} />
+
+		<section class="news-page__feed">
+			<div>
+				<MLabel>Timeline · {newsRows.length} of {allNews.length}</MLabel>
+				<div class="news-page__rows">
+					{newsRows.map((s) => (
+						<NewsRow
+							href={`/news/${s.id}`}
+							time={timeFormatter.format(s.data.publishedAt)}
+							date={formatRelativeDate(s.data.publishedAt)}
+							kicker={kickerFor(s)}
+							project={
+								(s.data.technologies ?? [])[0]
+									? formatTechnologyLabel(s.data.technologies[0]!)
+									: undefined
+							}
+							title={s.data.title}
+							tags={(s.data.technologies ?? []).slice(0, 2)}
+							hot={isHot(s)}
+						/>
+					))}
+				</div>
+				<div class="news-page__rows-footer">
+					<MLabel tone="ink">← Older items · {allNews.length} total</MLabel>
+				</div>
+			</div>
+
+			<aside class="news-page__aside">
+				<TrendingPanel items={trendingItems} />
+				<WireSubscribeCard />
+			</aside>
+		</section>
+
+		<footer class="news-page__footer">
+			<MLabel>
+				<a class="news-page__link" href="/api/feeds/news.xml">RSS</a> ·
+				<a class="news-page__link" href="/api/feeds/news.atom">Atom</a> ·
+				<a class="news-page__link" href="https://hachyderm.io/@rawkode">@rawkode</a>
+			</MLabel>
+			<MLabel tone="ink">Archive · By project · By year</MLabel>
+		</footer>
+	</div>
 </Page>
+
+<style>
+	.news-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.news-page__top {
+		display: grid;
+		grid-template-columns: 1fr 24rem;
+		gap: var(--space-section-gap);
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.news-page__feed {
+		display: grid;
+		grid-template-columns: 1fr 20rem;
+		gap: var(--space-section-gap-lg);
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.news-page__rows-footer {
+		padding-top: 1.125rem;
+	}
+
+	.news-page__aside {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.news-page__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.5rem;
+		padding: 1.5rem var(--space-section-pad-x);
+		border-top: 1px solid var(--editorial-ink);
+		background: var(--editorial-paper-deep);
+	}
+
+	.news-page__link {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		text-decoration-color: var(--editorial-hairline-strong);
+	}
+	.news-page__link:hover { text-decoration-color: currentColor; }
+
+	@media (max-width: 960px) {
+		.news-page__top,
+		.news-page__feed {
+			grid-template-columns: 1fr;
+			padding: 1.75rem 1.25rem;
+			gap: 2rem;
+		}
+		.news-page__footer {
+			flex-direction: column;
+			align-items: flex-start;
+			padding: 1.25rem;
+		}
+	}
+</style>

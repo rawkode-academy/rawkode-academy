@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Card from "../ui/Card.vue";
-import Badge from "../common/Badge.vue";
 
 interface Author {
 	name: string;
@@ -24,11 +23,7 @@ defineProps<Props>();
 </script>
 
 <template>
-	<Card :href="`/read/${id}`" variant="glass" padding="none">
-		<template #badge>
-			<Badge variant="primary" size="sm">Article</Badge>
-		</template>
-
+	<Card :href="`/read/${id}`" variant="paper" padding="none">
 		<template #media>
 			<img
 				v-if="cover"
@@ -46,69 +41,124 @@ defineProps<Props>();
 			/>
 		</template>
 
-		<template #overlay>
-			<div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-secondary/20 mix-blend-multiply"></div>
-		</template>
-
 		<div class="p-6">
-			<h2 class="mb-3 text-xl font-bold tracking-tight text-primary-content line-clamp-2">
-				{{ title }}
-			</h2>
-			<p v-if="subtitle" class="mb-4 font-light text-secondary-content line-clamp-3">
-				{{ subtitle }}
-			</p>
+			<div class="ed-card__meta">
+				<span class="ed-card__meta-tag">Article</span>
+				<span class="ed-card__meta-sep">·</span>
+				<span>{{ new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(publishedAt)) }}</span>
+				<span v-if="readingTimeText" class="ed-card__meta-sep">·</span>
+				<span v-if="readingTimeText">{{ readingTimeText }}</span>
+			</div>
+			<h2 class="ed-card__title">{{ title }}</h2>
+			<p v-if="subtitle" class="ed-card__body">{{ subtitle }}</p>
 		</div>
 
 		<template #footer>
-			<div class="flex items-center justify-between">
-				<div class="flex items-center space-x-3">
-					<div class="flex -space-x-3">
-						<div
-							v-for="(author, index) in authors.slice(0, 3)"
-							:key="author.handle"
-							class="relative"
-							:style="`z-index: ${10 - index}`"
-						>
-							<img
-								class="w-10 h-10 rounded-full object-cover border-2 border-primary p-0.5 bg-white dark:bg-gray-800"
-								:src="`https://avatars.githubusercontent.com/${author.handle}`"
-								:alt="`Profile picture of ${author.name}`"
-								loading="lazy"
-							/>
-							<span
-								v-if="index === 0"
-								class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-secondary rounded-full border-2 border-white dark:border-gray-700"
-							></span>
-						</div>
-						<div v-if="authors.length > 3" class="relative" style="z-index: 0;">
-							<div class="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 border-2 border-primary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-primary dark:text-secondary font-medium">
-								+{{ authors.length - 3 }}
-							</div>
-						</div>
+			<div class="ed-card__footer">
+				<div class="ed-card__avatars">
+					<div
+						v-for="(author, index) in authors.slice(0, 3)"
+						:key="author.handle"
+						class="ed-card__avatar"
+						:style="`z-index: ${10 - index}`"
+					>
+						<img
+							:src="`https://avatars.githubusercontent.com/${author.handle}`"
+							:alt="`Profile picture of ${author.name}`"
+							loading="lazy"
+						/>
 					</div>
-					<div class="font-medium text-primary-content">
-						<div class="text-sm">{{ authors.map(a => a.name).join(", ") }}</div>
+					<div v-if="authors.length > 3" class="ed-card__avatar ed-card__avatar--more">
+						+{{ authors.length - 3 }}
 					</div>
 				</div>
-				<div class="flex items-center gap-3 text-xs text-muted">
-					<div v-if="readingTimeText" class="flex items-center gap-1">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						{{ readingTimeText }}
-					</div>
-					<div class="flex items-center gap-1">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-						</svg>
-						{{ new Intl.DateTimeFormat('en-US', {
-							year: 'numeric',
-							month: 'short',
-							day: 'numeric'
-						}).format(new Date(publishedAt)) }}
-					</div>
-				</div>
+				<div class="ed-card__authors">{{ authors.map(a => a.name).join(", ") }}</div>
 			</div>
 		</template>
 	</Card>
 </template>
+
+<style scoped>
+.ed-card__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+	font-family: var(--font-jetbrains-mono), monospace;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--editorial-ink-mute);
+	margin-bottom: 0.875rem;
+}
+.ed-card__meta-tag { color: var(--editorial-spruce); }
+.ed-card__meta-sep { opacity: 0.4; }
+
+.ed-card__title {
+	font-family: var(--font-instrument-serif), serif;
+	font-style: italic;
+	font-weight: 400;
+	font-size: 1.5rem;
+	line-height: 1.08;
+	letter-spacing: -0.025em;
+	color: var(--editorial-ink);
+	margin: 0 0 0.75rem;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.ed-card__body {
+	font-family: var(--font-inter-tight), sans-serif;
+	font-size: 0.9rem;
+	line-height: 1.5;
+	color: var(--editorial-ink-soft);
+	margin: 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.ed-card__footer {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0 1.5rem 1rem;
+}
+
+.ed-card__avatars {
+	display: flex;
+}
+
+.ed-card__avatar {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	border: 1px solid var(--editorial-hairline);
+	background: var(--editorial-paper-deep);
+	overflow: hidden;
+	margin-left: -8px;
+	position: relative;
+}
+
+.ed-card__avatar:first-child { margin-left: 0; }
+
+.ed-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.ed-card__avatar--more {
+	display: grid;
+	place-items: center;
+	font-family: var(--font-jetbrains-mono), monospace;
+	font-size: 0.65rem;
+	color: var(--editorial-ink-mute);
+}
+
+.ed-card__authors {
+	font-family: var(--font-inter-tight), sans-serif;
+	font-size: 0.8rem;
+	color: var(--editorial-ink-soft);
+}
+</style>

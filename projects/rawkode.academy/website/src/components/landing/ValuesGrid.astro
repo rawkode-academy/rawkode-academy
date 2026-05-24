@@ -1,0 +1,76 @@
+---
+interface Value { title: string; description: string }
+
+interface Props {
+	values: Value[];
+}
+
+const { values } = Astro.props as Props;
+---
+
+<div class="values-grid">
+	{values.map((v) => (
+		<article class="values-grid__item">
+			<h3 class="values-grid__title">{v.title}</h3>
+			<p class="values-grid__body">{v.description}</p>
+		</article>
+	))}
+</div>
+
+<style>
+	.values-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.values-grid__item {
+		padding: 1.5rem 1.5rem 2rem;
+		border-left: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.values-grid__item:first-child,
+	.values-grid__item:nth-child(4) { border-left: none; }
+
+	.values-grid__item:nth-child(n+4) {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.values-grid__title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-weight: 500;
+		font-size: 1.25rem;
+		line-height: 1.2;
+		letter-spacing: -0.015em;
+		color: var(--editorial-ink);
+		margin: 0;
+		max-width: 18ch;
+	}
+
+	.values-grid__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.92rem;
+		line-height: 1.55;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+	}
+
+	@media (max-width: 880px) {
+		.values-grid { grid-template-columns: repeat(2, 1fr); }
+		.values-grid__item { border-left: none; border-top: 1px solid var(--editorial-hairline); }
+		.values-grid__item:first-child { border-top: none; }
+		.values-grid__item:nth-child(2) { border-top: none; border-left: 1px solid var(--editorial-hairline); }
+		.values-grid__item:nth-child(odd) { border-left: none; }
+	}
+
+	@media (max-width: 560px) {
+		.values-grid { grid-template-columns: 1fr; }
+		.values-grid__item { border-left: none !important; border-top: 1px solid var(--editorial-hairline); }
+		.values-grid__item:first-child { border-top: none; }
+	}
+</style>

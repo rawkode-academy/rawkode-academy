@@ -1,65 +1,65 @@
 <template>
-  <div class="transcript-wrapper">
-    <!-- Search bar -->
-    <div v-if="transcriptLoaded && !error" class="mb-4">
-      <div class="relative">
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search transcript..."
-          aria-label="Search transcript"
-          class="w-full px-4 py-2 pl-10 border border-surface rounded-lg bg-white dark:bg-gray-800 text-primary-content focus-ring"
-        />
-        <svg
-          class="absolute left-3 top-2.5 w-5 h-5 text-muted"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          ></path>
-        </svg>
-      </div>
-      <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-muted">
-        <span>{{ searchResultsText }}</span>
-      </div>
-    </div>
+ <div class="transcript-wrapper">
+ <!-- Search bar -->
+ <div v-if="transcriptLoaded && !error" class="mb-4">
+ <div class="relative">
+ <input
+ v-model="searchQuery"
+ type="text"
+ placeholder="Search transcript..."
+ aria-label="Search transcript"
+ class="w-full px-4 py-2 pl-10 border border-surface rounded-sm bg-white dark:bg-gray-800 text-primary-content focus-ring"
+ />
+ <svg
+ class="absolute left-3 top-2.5 w-5 h-5 text-muted"
+ fill="none"
+ stroke="currentColor"
+ viewBox="0 0 24 24"
+ >
+ <path
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ stroke-width="2"
+ d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+ ></path>
+ </svg>
+ </div>
+ <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-muted">
+ <span>{{ searchResultsText }}</span>
+ </div>
+ </div>
 
-    <!-- Loading state -->
-    <SkeletonTranscript v-if="loading" />
+ <!-- Loading state -->
+ <SkeletonTranscript v-if="loading" />
 
-    <!-- Error state -->
-    <div v-if="error" class="text-center py-8">
-      <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
-    </div>
+ <!-- Error state -->
+ <div v-if="error" class="text-center py-8">
+ <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+ </div>
 
-    <!-- Transcript content with scrollable container -->
-    <div v-if="transcriptLoaded && !error" class="transcript-container" aria-live="polite">
-      <div
-        v-for="(paragraph, index) in paragraphs"
-        :key="index"
-        class="transcript-paragraph mb-6"
-      >
-        <div class="text-sm text-primary dark:text-primary font-mono mb-2">
-          {{ paragraph[0].start }}
-        </div>
-        <div class="text-primary-content leading-relaxed">
-          <span
-            v-for="(cue, cueIndex) in paragraph"
-            :key="`${index}-${cueIndex}`"
-            :data-start="cue.start"
-            class="transcript-segment"
-            v-html="highlightText(cue.text)"
-          ></span>
-          {{ ' ' }}
-        </div>
-      </div>
-    </div>
-  </div>
+ <!-- Transcript content with scrollable container -->
+ <div v-if="transcriptLoaded && !error" class="transcript-container" aria-live="polite">
+ <div
+ v-for="(paragraph, index) in paragraphs"
+ :key="index"
+ class="transcript-paragraph mb-6"
+ >
+ <div class="text-sm text-primary dark:text-primary font-mono mb-2">
+ {{ paragraph[0].start }}
+ </div>
+ <div class="text-primary-content leading-relaxed">
+ <span
+ v-for="(cue, cueIndex) in paragraph"
+ :key="`${index}-${cueIndex}`"
+ :data-start="cue.start"
+ class="transcript-segment"
+ v-html="highlightText(cue.text)"
+ ></span>
+ {{ ' ' }}
+ </div>
+ </div>
+ </div>
+ </div>
 </template>
 
 <script>
@@ -227,52 +227,52 @@ export default {
 <style scoped>
 /* Transcript container styles */
 .transcript-container {
-  max-height: 600px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
+ max-height: 600px;
+ overflow-y: auto;
+ padding-right: 0.5rem;
 }
 
 /* Custom scrollbar for transcript */
 .transcript-container::-webkit-scrollbar {
-  width: 8px;
+ width: 8px;
 }
 
 .transcript-container::-webkit-scrollbar-track {
-  background: rgb(229 231 235);
-  border-radius: 4px;
+ background: rgb(229 231 235);
+ border-radius: 4px;
 }
 
 .dark .transcript-container::-webkit-scrollbar-track {
-  background: rgb(55 65 81);
+ background: rgb(55 65 81);
 }
 
 .transcript-container::-webkit-scrollbar-thumb {
-  background: rgb(156 163 175);
-  border-radius: 4px;
+ background: rgb(156 163 175);
+ border-radius: 4px;
 }
 
 .transcript-container::-webkit-scrollbar-thumb:hover {
-  background: rgb(107 114 128);
+ background: rgb(107 114 128);
 }
 
 .dark .transcript-container::-webkit-scrollbar-thumb {
-  background: rgb(75 85 99);
+ background: rgb(75 85 99);
 }
 
 .dark .transcript-container::-webkit-scrollbar-thumb:hover {
-  background: rgb(107 114 128);
+ background: rgb(107 114 128);
 }
 
 /* Highlight for search results */
 :deep(.transcript-highlight) {
-  background-color: rgb(254 240 138);
-  color: rgb(0 0 0);
-  padding: 0 2px;
-  border-radius: 2px;
+ background-color: rgb(254 240 138);
+ color: rgb(0 0 0);
+ padding: 0 2px;
+ border-radius: 2px;
 }
 
 .dark :deep(.transcript-highlight) {
-  background-color: rgb(251 191 36);
-  color: rgb(0 0 0);
+ background-color: rgb(251 191 36);
+ color: rgb(0 0 0);
 }
 </style>

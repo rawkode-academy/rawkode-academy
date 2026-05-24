@@ -1,0 +1,179 @@
+---
+import VideoStill from "./VideoStill.astro";
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	episodeNum?: string | number | undefined;
+	title: string;
+	series?: string | undefined;
+	duration?: string | undefined;
+	live?: boolean;
+	thumbnailUrl?: string | undefined;
+	description: string;
+	author?: string | undefined;
+	date?: string | undefined;
+	viewerCount?: number | undefined;
+	primaryCtaLabel?: string | undefined;
+	secondaryCtaLabel?: string | undefined;
+}
+
+const {
+	href,
+	episodeNum,
+	title,
+	series,
+	duration,
+	live = false,
+	thumbnailUrl,
+	description,
+	author,
+	date,
+	viewerCount,
+	primaryCtaLabel,
+	secondaryCtaLabel,
+} = Astro.props as Props;
+
+const primaryLabel =
+	primaryCtaLabel ?? (live ? "Join the stream →" : "Watch session →");
+const metaParts = [
+	episodeNum ? `№${episodeNum}` : null,
+	live ? "Live" : series,
+	duration,
+	date,
+	author,
+	viewerCount !== undefined
+		? `${viewerCount.toLocaleString()} ${live ? "watching" : "views"}`
+		: null,
+].filter(Boolean);
+---
+
+<section class="video-hero">
+	<a class="video-hero__still" href={href}>
+		<VideoStill
+			episodeNum={episodeNum}
+			title={title}
+			series={series}
+			duration={duration}
+			live={live}
+			thumbnailUrl={thumbnailUrl}
+			big
+			accent={live ? "amber" : "spruce"}
+		/>
+	</a>
+
+	<div class="video-hero__meta">
+		<div class="video-hero__copy">
+			{metaParts.length > 0 && (
+				<MLabel tone={live ? "amber" : "spruce"}>
+					{metaParts.join(" · ")}
+				</MLabel>
+			)}
+			<h2 class="video-hero__title">{title}</h2>
+			<p class="video-hero__description">{description}</p>
+		</div>
+		<div class="video-hero__actions">
+			<a class="video-hero__cta-primary" href={href}>{primaryLabel}</a>
+			{secondaryCtaLabel && (
+				<button class="video-hero__cta-secondary" type="button">{secondaryCtaLabel}</button>
+			)}
+		</div>
+	</div>
+</section>
+
+<style>
+	.video-hero {
+		padding: 2.5rem 2.5rem 2rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.video-hero__still {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.video-hero__meta {
+		display: grid;
+		grid-template-columns: 1.7fr 1fr;
+		gap: 2rem;
+		align-items: start;
+	}
+
+	.video-hero__copy {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+	}
+
+	.video-hero__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.25rem, 5vw, 4rem);
+		line-height: 0.95;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+		max-width: 18ch;
+		text-wrap: balance;
+	}
+
+	.video-hero__description {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.0625rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 45rem;
+		text-wrap: pretty;
+	}
+
+	.video-hero__actions {
+		display: flex;
+		gap: 0.625rem;
+		justify-content: flex-end;
+		flex-wrap: wrap;
+	}
+
+	.video-hero__cta-primary,
+	.video-hero__cta-secondary {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		padding: 0.875rem 1.25rem;
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.625rem;
+		transition: opacity var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.video-hero__cta-primary {
+		background: var(--editorial-amber);
+		color: var(--editorial-ink);
+		border: 1px solid var(--editorial-amber);
+	}
+	.video-hero__cta-primary:hover { opacity: 0.92; }
+
+	.video-hero__cta-secondary {
+		background: transparent;
+		color: var(--editorial-ink);
+		border: 1px solid var(--editorial-hairline-strong);
+	}
+	.video-hero__cta-secondary:hover { border-color: var(--editorial-ink); }
+
+	@media (max-width: 880px) {
+		.video-hero { padding: 1.5rem 1.25rem; }
+		.video-hero__meta { grid-template-columns: 1fr; }
+		.video-hero__actions { justify-content: flex-start; }
+	}
+</style>

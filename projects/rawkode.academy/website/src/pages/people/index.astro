@@ -2,6 +2,7 @@
 export const prerender = true;
 
 import PersonItemListJsonLd from "@/components/html/person-itemlist-jsonld.astro";
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 
@@ -26,7 +27,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 
 <Page
 	title="People"
-	description="Meet the hosts, guests, contributors, and instructors behind Rawkode Academy - the people creating and curating our cloud native content."
+	description="Meet the hosts, guests, contributors, and instructors behind Rawkode Academy."
 	pageType="CollectionPage"
 >
 	<PersonItemListJsonLd
@@ -35,101 +36,54 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 		listUrl={new URL("/people", Astro.site ?? Astro.url).href}
 		listName="Rawkode Academy People"
 	/>
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
-		<!-- Hero Section -->
-		<section class="w-full">
-			<div class="glass-panel rounded-3xl p-6 md:p-8 max-w-7xl mx-auto bleed-x-mobile">
-				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-					<!-- Hero Copy -->
-					<div class="flex-1 space-y-4">
-						<span class="glass-chip">
-							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-							</svg>
-							Community
-						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
-							Meet the People
-						</h1>
-						<p class="text-muted max-w-xl">
-							Hosts, guests, and contributors who make Rawkode Academy possible.
-						</p>
-					</div>
+	<div class="people-page">
+		<CollectionMasthead title="People" dek="Hosts, guests, and contributors." />
 
-					<!-- Search Controls -->
-					<div class="w-full lg:w-96 space-y-3">
-						<label for="people-search" class="block text-sm font-medium text-secondary-content">
-							Search people
-						</label>
-						<div class="relative">
-							<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-							</svg>
-							<input
-								id="people-search"
-								type="search"
-								placeholder="Type a name…"
-								class="w-full rounded-xl py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 dark:placeholder-gray-500 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
-								autocomplete="off"
-							/>
-						</div>
-						<p class="text-sm text-muted">
-							Showing <span class="font-medium text-secondary-content" data-people-visible-count>{people.length}</span> of {people.length} people
-						</p>
-					</div>
-				</div>
-			</div>
+		<section class="people-page__tools" aria-label="People search">
+			<label class="people-page__label" for="people-search">Search people</label>
+			<input
+				id="people-search"
+				type="search"
+				placeholder="Name"
+				class="people-page__search-input"
+				autocomplete="off"
+			/>
+			<p class="people-page__count">
+				Showing <span data-people-visible-count>{people.length}</span> of {people.length}
+			</p>
 		</section>
 
-		<!-- People Grid -->
-		<section id="people" class="w-full">
-			<div class="max-w-7xl mx-auto">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-					{
-						sortedPeople.map((person) => {
-							const searchKeywords = person.data.name.toLowerCase();
-							
-							return (
-								<a
-									href={`/people/${person.data.id}`}
-									class="people-card-link glass-card-shimmer card-hover bleed-x-mobile flex flex-col overflow-hidden items-center text-center p-6"
-									data-keywords={searchKeywords}
-								>
-									{/* Avatar */}
-									<div class="relative w-24 h-24 mb-4">
-										<img
-											src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
-											alt={`${person.data.name}`}
-											class="w-full h-full object-cover rounded-full shadow-md border-2 border-white/50 dark:border-gray-700/50"
-											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-										/>
-									</div>
-									
-									{/* Content */}
-									<div class="flex-1 flex flex-col gap-2 relative z-10 w-full">
-										<h3 class="text-lg font-bold text-primary-content truncate">
-											{person.data.name}
-										</h3>
-                                        {person.data.twitter && (
-                                            <span class="text-sm text-muted truncate">@{person.data.twitter.split('/').pop()}</span>
-                                        )}
-									</div>
-								</a>
-							);
-						})
-					}
-				</div>
-				
-				<!-- Empty State -->
-				<div id="people-empty-state" class="hidden">
-					<div class="glass-card-shimmer rounded-2xl p-12 text-center max-w-md mx-auto">
-						<svg class="w-12 h-12 mx-auto text-muted mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-						</svg>
-						<p class="text-muted font-medium">No people match your search</p>
-						<p class="text-sm text-muted mt-1">Try a different name</p>
-					</div>
-				</div>
+		<section id="people" class="people-page__grid-section" aria-label="People">
+			<div class="people-page__grid">
+				{
+					sortedPeople.map((person) => {
+						const searchKeywords = person.data.name.toLowerCase();
+						const handle = person.data.twitter?.split("/").pop();
+
+						return (
+							<a
+								href={`/people/${person.data.id}`}
+								class="people-card-link"
+								data-keywords={searchKeywords}
+							>
+								<img
+									src={person.data.avatarUrl ?? "/apple-touch-icon.png"}
+									alt={person.data.name}
+									class="people-card-link__avatar"
+									loading="lazy"
+									onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+								/>
+								<span class="people-card-link__name">{person.data.name}</span>
+								{handle && <span class="people-card-link__handle">@{handle}</span>}
+							</a>
+						);
+					})
+				}
+			</div>
+
+			<div id="people-empty-state" class="people-page__empty hidden">
+				<h2>No people match your search</h2>
+				<p>Try a different name.</p>
 			</div>
 		</section>
 
@@ -171,3 +125,168 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 		</script>
 	</div>
 </Page>
+
+<style>
+	.people-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.people-page__tools {
+		display: grid;
+		grid-template-columns: auto minmax(14rem, 26rem) 1fr;
+		align-items: center;
+		gap: 0.875rem 1rem;
+		padding: 1rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.people-page__label,
+	.people-page__count {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.people-page__search-input {
+		width: 100%;
+		min-height: 2.75rem;
+		border: 1px solid var(--editorial-hairline-strong);
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink);
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		padding: 0.625rem 0.75rem;
+		border-radius: 0;
+		outline: none;
+	}
+
+	.people-page__search-input:focus {
+		border-color: var(--editorial-ink);
+		box-shadow: 0 0 0 2px var(--editorial-paper), 0 0 0 3px var(--editorial-ink);
+	}
+
+	.people-page__search-input::placeholder {
+		color: var(--editorial-ink-mute);
+	}
+
+	.people-page__count {
+		justify-self: end;
+		margin: 0;
+	}
+
+	.people-page__count span {
+		color: var(--editorial-ink);
+	}
+
+	.people-page__grid-section {
+		padding: 2rem var(--space-section-pad-x) 3rem;
+	}
+
+	.people-page__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+		gap: 1rem;
+	}
+
+	.people-card-link {
+		display: grid;
+		grid-template-rows: auto auto 1fr;
+		justify-items: center;
+		min-width: 0;
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		color: inherit;
+		text-align: center;
+		text-decoration: none;
+		padding: 1.125rem 0.875rem;
+		transition: border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.people-card-link:hover {
+		border-color: var(--editorial-ink);
+	}
+
+	.people-card-link__avatar {
+		width: 4.25rem;
+		height: 4.25rem;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 1px solid var(--editorial-hairline-strong);
+		margin-bottom: 0.875rem;
+	}
+
+	.people-card-link__name {
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.975rem;
+		font-weight: 700;
+		line-height: 1.25;
+		color: var(--editorial-ink);
+	}
+
+	.people-card-link__handle {
+		width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.8125rem;
+		color: var(--editorial-ink-soft);
+		margin-top: 0.2rem;
+	}
+
+	.people-page__empty {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		padding: 2rem;
+		max-width: 28rem;
+		margin: 0 auto;
+		text-align: center;
+	}
+
+	.people-page__empty h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.people-page__empty p {
+		font-family: var(--font-inter-tight), sans-serif;
+		color: var(--editorial-ink-soft);
+		margin: 0.5rem 0 0;
+	}
+
+	@media (max-width: 720px) {
+		.people-page__tools {
+			grid-template-columns: 1fr;
+			padding: 0.875rem 1rem 1rem;
+		}
+		.people-page__count {
+			justify-self: start;
+		}
+		.people-page__grid-section {
+			padding: 1.25rem 1rem 2.5rem;
+		}
+		.people-page__grid {
+			grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
+			gap: 0.75rem;
+		}
+		.people-card-link {
+			padding: 1rem 0.75rem;
+		}
+		.people-card-link__avatar {
+			width: 3.5rem;
+			height: 3.5rem;
+		}
+	}
+</style>

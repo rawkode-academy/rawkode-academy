@@ -1,0 +1,235 @@
+---
+import EditorialButton from "@/components/ui/EditorialButton.vue";
+import LiveDot from "@/components/ui/LiveDot.vue";
+import MLabel from "@/components/ui/MLabel.vue";
+import StatRow from "@/components/ui/StatRow.vue";
+import OnAirPanel from "@/components/landing/OnAirPanel.astro";
+
+interface Stat { value: string; label: string }
+
+interface HeroVideo {
+	id: string;
+	slug: string;
+	title: string;
+	publishedAt: Date;
+	durationSeconds?: number | undefined;
+}
+
+interface ScheduleItem {
+	href: string;
+	dateLabel: string;
+	title: string;
+	timeLabel: string;
+	upcoming: boolean;
+}
+
+interface Props {
+	state: "live" | "upcoming" | "fallback";
+	video: HeroVideo;
+	schedule?: ScheduleItem[];
+	stats?: Stat[];
+}
+
+const {
+	state,
+	video,
+	schedule = [],
+	stats = [],
+} = Astro.props as Props;
+
+// Right-column kicker copy: only the "live now" state runs the amber
+// On-air ribbon. The upcoming + fallback states get a quieter mono kicker.
+const heroDateFormatter = new Intl.DateTimeFormat("en-US", {
+	weekday: "short",
+	month: "short",
+	day: "2-digit",
+	hour: "2-digit",
+	minute: "2-digit",
+	hour12: false,
+	timeZone: "UTC",
+});
+const upcomingLabel =
+	state === "upcoming" ? heroDateFormatter.format(video.publishedAt) : null;
+---
+
+<section class="landing-hero">
+	{state === "live" && (
+		<div class="landing-hero__kicker landing-hero__kicker--live">
+			<LiveDot color="amber" />
+			<MLabel tone="amber">On air now</MLabel>
+			<span class="landing-hero__kicker-meta">— {video.title}</span>
+			<span class="landing-hero__kicker-rule" aria-hidden="true"></span>
+		</div>
+	)}
+	{state === "upcoming" && (
+		<div class="landing-hero__kicker">
+			<MLabel tone="spruce">Up next</MLabel>
+			<span class="landing-hero__kicker-meta">— {video.title}</span>
+			<span class="landing-hero__kicker-rule" aria-hidden="true"></span>
+			<MLabel tone="muted">{upcomingLabel} UTC</MLabel>
+		</div>
+	)}
+
+	<div class="landing-hero__grid">
+		<div class="landing-hero__editorial">
+			<MLabel class="landing-hero__label" tone="rust">Hands-on cloud native</MLabel>
+
+			<h1 class="landing-hero__h1">Cloud native</h1>
+			<h2 class="landing-hero__h2">is complex.</h2>
+			<h2 class="landing-hero__h2 landing-hero__h2--soft">
+				It doesn't <span class="landing-hero__accent">need to be hard.</span>
+			</h2>
+
+			<div class="landing-hero__lede">
+				<p>
+					Hands-on lessons, candid trade-offs, and real build sessions
+					for engineers who want signal instead of slideware. Taught
+					by people who actually run this stuff.
+				</p>
+			</div>
+
+			<div class="landing-hero__actions">
+				<EditorialButton variant="solid" size="lg" href="/watch" arrow>
+					Start watching free
+				</EditorialButton>
+				<EditorialButton variant="outline" size="lg" href="/technology/matrix" arrow>
+					Technology Matrix
+				</EditorialButton>
+			</div>
+
+			<StatRow stats={stats} />
+		</div>
+
+		<OnAirPanel state={state} video={video} schedule={schedule} />
+	</div>
+</section>
+
+<style>
+	.landing-hero {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.landing-hero__kicker {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		padding: 0.875rem var(--space-section-pad-x);
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.landing-hero__kicker--live {
+		border-bottom-color: var(--editorial-amber);
+		border-bottom-width: 1px;
+	}
+
+	.landing-hero__kicker-meta {
+		color: inherit;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.landing-hero__kicker-rule {
+		flex: 1;
+		height: 1px;
+		background: var(--editorial-hairline);
+	}
+
+	.landing-hero__grid {
+		display: grid;
+		grid-template-columns: 1.35fr 1fr;
+		align-items: start;
+	}
+
+	.landing-hero__editorial {
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		border-right: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.landing-hero__label {
+		width: fit-content;
+		margin-bottom: 1.75rem;
+	}
+
+	.landing-hero__h1 {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(4rem, 9vw, 7rem);
+		line-height: 0.88;
+		letter-spacing: -0.035em;
+		margin: 0 0 2px;
+		color: var(--editorial-ink);
+	}
+
+	.landing-hero__h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-style: normal;
+		font-weight: 500;
+		font-size: clamp(2.25rem, 4.5vw, 3.4rem);
+		line-height: 1.02;
+		letter-spacing: -0.025em;
+		margin: 0 0 2px;
+		color: var(--editorial-ink);
+	}
+
+	.landing-hero__h2--soft {
+		font-weight: 400;
+		color: var(--editorial-ink-soft);
+		margin-bottom: 2rem;
+	}
+
+	.landing-hero__accent {
+		color: var(--editorial-rust);
+		font-weight: 500;
+	}
+
+	.landing-hero__lede {
+		border-left: 1px solid var(--editorial-hairline-strong);
+		padding-left: 1.25rem;
+		max-width: 36rem;
+		margin-bottom: 2.25rem;
+	}
+
+	.landing-hero__lede p {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.125rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		text-wrap: pretty;
+	}
+
+	.landing-hero__actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		margin-bottom: 3rem;
+	}
+
+	@media (max-width: 960px) {
+		.landing-hero__grid {
+			grid-template-columns: 1fr;
+		}
+		.landing-hero__editorial {
+			border-right: none;
+			border-bottom: 1px solid var(--editorial-hairline);
+			padding: 2.25rem 1.5rem;
+		}
+		.landing-hero__kicker {
+			padding: 0.875rem 1.5rem;
+			flex-wrap: wrap;
+		}
+		.landing-hero__kicker-rule { display: none; }
+	}
+</style>

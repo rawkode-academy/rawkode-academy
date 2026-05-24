@@ -97,121 +97,121 @@ function formatLearningPathDuration(minutes: number): string {
 ---
 
 <div class="space-y-12">
-  <!-- Learning Paths Section -->
-  {hasLearningPaths && (
-    <section>
-      <SectionHeader
-        title={`${technologyName} learning paths`}
-        showSeparator={false}
-        class="mb-6"
-      />
-      <div class="grid gap-6 md:grid-cols-2">
-        {learningPaths.map((path) => (
-          <a
-            href={`/learning-paths/${path.id}`}
-            class="group block rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 p-6 shadow-sm hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
-          >
-            <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted mb-2">
-              <span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
-              <span aria-hidden="true">·</span>
-              <span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
-            </div>
-            <h3 class="font-display text-xl font-semibold leading-tight tracking-tight text-primary-content group-hover:text-primary transition-colors">
-              {path.data.title}
-            </h3>
-            <p class="mt-2 max-w-[60ch] text-sm leading-6 text-secondary-content">
-              {path.data.description}
-            </p>
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
+ <!-- Learning Paths Section -->
+ {hasLearningPaths && (
+ <section>
+ <SectionHeader
+ title={`${technologyName} learning paths`}
+ showSeparator={false}
+ class="mb-6"
+ />
+ <div class="grid gap-6 md:grid-cols-2">
+ {learningPaths.map((path) => (
+ <a
+ href={`/learning-paths/${path.id}`}
+ class="group block rounded-sm border border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 p-6 shadow-sm hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+ >
+ <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted mb-2">
+ <span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
+ <span aria-hidden="true">·</span>
+ <span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
+ </div>
+ <h3 class="font-display text-xl font-semibold leading-tight tracking-tight text-primary-content group-hover:text-primary transition-colors">
+ {path.data.title}
+ </h3>
+ <p class="mt-2 max-w-[60ch] text-sm leading-6 text-secondary-content">
+ {path.data.description}
+ </p>
+ </a>
+ ))}
+ </div>
+ </section>
+ )}
 
-  <!-- News Section -->
-  {hasNews && (
-    <section>
-      <SectionHeader
-        title={`Recent ${technologyName} news`}
-        showSeparator={false}
-        class="mb-6"
-      />
-      <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
-        {allNews.map((story) => (
-          <li class="py-5 sm:py-6">
-            <article class="space-y-2">
-              <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-                <time datetime={story.data.publishedAt.toISOString()}>
-                  {newsDateFormatter.format(story.data.publishedAt)}
-                </time>
-              </div>
-              <h3 class="font-display text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
-                <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
-                  {story.data.title}
-                </a>
-              </h3>
-              <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
-                {story.data.description}
-              </p>
-            </article>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )}
+ <!-- News Section -->
+ {hasNews && (
+ <section>
+ <SectionHeader
+ title={`Recent ${technologyName} news`}
+ showSeparator={false}
+ class="mb-6"
+ />
+ <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
+ {allNews.map((story) => (
+ <li class="py-5 sm:py-6">
+ <article class="space-y-2">
+ <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
+ <time datetime={story.data.publishedAt.toISOString()}>
+ {newsDateFormatter.format(story.data.publishedAt)}
+ </time>
+ </div>
+ <h3 class="font-display text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
+ <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
+ {story.data.title}
+ </a>
+ </h3>
+ <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
+ {story.data.description}
+ </p>
+ </article>
+ </li>
+ ))}
+ </ul>
+ </section>
+ )}
 
-  <!-- Articles Section -->
-  {hasArticles && (
-    <section>
-      <SectionHeader
-        title={`Articles about ${technologyName}`}
-        showSeparator={false}
-        class="mb-6"
-      />
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {articles.map((article) => (
-          <ArticleCard article={article} />
-        ))}
-      </div>
-    </section>
-  )}
+ <!-- Articles Section -->
+ {hasArticles && (
+ <section>
+ <SectionHeader
+ title={`Articles about ${technologyName}`}
+ showSeparator={false}
+ class="mb-6"
+ />
+ <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+ {articles.map((article) => (
+ <ArticleCard article={article} />
+ ))}
+ </div>
+ </section>
+ )}
 
-  <!-- Videos Section -->
-  {hasVideos && (
-    <section>
-      <SectionHeader
-        title={`Videos about ${technologyName}`}
-        showSeparator={false}
-        class="mb-6"
-      />
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {videos.map((video) => (
-          <a
-            href={`/watch/${video.slug}`}
-            class="group relative block overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 aspect-video"
-          >
-            <img
-              src={video.thumbnailUrl}
-              alt={video.title}
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div class="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-              <h3 class="font-semibold line-clamp-2">{video.title}</h3>
-            </div>
-          </a>
-        ))}
-      </div>
-    </section>
-  )}
+ <!-- Videos Section -->
+ {hasVideos && (
+ <section>
+ <SectionHeader
+ title={`Videos about ${technologyName}`}
+ showSeparator={false}
+ class="mb-6"
+ />
+ <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+ {videos.map((video) => (
+ <a
+ href={`/watch/${video.slug}`}
+ class="group relative block overflow-hidden rounded-sm bg-gray-100 dark:bg-gray-800 aspect-video"
+ >
+ <img
+ src={video.thumbnailUrl}
+ alt={video.title}
+ class="w-full h-full object-cover group-hover:scale-105 "
+ loading="lazy"
+ />
+ <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+ <div class="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group- ">
+ <h3 class="font-semibold line-clamp-2">{video.title}</h3>
+ </div>
+ </a>
+ ))}
+ </div>
+ </section>
+ )}
 
-  <!-- Empty State -->
-  {isEmpty && (
-    <div class="text-center py-12">
-      <p class="text-muted">
-        No content found for {technologyName} yet. Check back soon!
-      </p>
-    </div>
-  )}
+ <!-- Empty State -->
+ {isEmpty && (
+ <div class="text-center py-12">
+ <p class="text-muted">
+ No content found for {technologyName} yet. Check back soon!
+ </p>
+ </div>
+ )}
 </div>

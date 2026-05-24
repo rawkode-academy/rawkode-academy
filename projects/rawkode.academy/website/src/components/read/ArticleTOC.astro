@@ -1,0 +1,173 @@
+---
+import type { MarkdownHeading } from "astro";
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	headings: MarkdownHeading[];
+	tools?: string[];
+}
+
+const { headings, tools = [] } = Astro.props as Props;
+
+const sections = headings
+	.filter((h) => h.depth === 2)
+	.map((h, i) => ({
+		num: `§${String(i + 1).padStart(2, "0")}`,
+		slug: h.slug,
+		text: h.text,
+	}));
+---
+
+<aside class="article-toc">
+	<div class="article-toc__inner">
+		<MLabel>Contents</MLabel>
+		<nav class="article-toc__nav">
+			{sections.map((s, i) => (
+				<a
+					class={`article-toc__link ${i === 0 ? "article-toc__link--first" : ""}`}
+					href={`#${s.slug}`}
+					data-toc-slug={s.slug}
+				>
+					<span class="article-toc__num">{s.num}</span>
+					<span class="article-toc__text">{s.text}</span>
+				</a>
+			))}
+		</nav>
+
+		{tools.length > 0 && (
+			<div class="article-toc__tools">
+				<MLabel>Tools used</MLabel>
+				<ul class="article-toc__tools-list">
+					{tools.map((t) => (
+						<li>
+							<MLabel>{t}</MLabel>
+						</li>
+					))}
+				</ul>
+			</div>
+		)}
+	</div>
+</aside>
+
+<script>
+	// Highlight the active section as the user scrolls.
+	const links = document.querySelectorAll<HTMLAnchorElement>(
+		".article-toc__link",
+	);
+	const headingsBySlug = new Map<string, HTMLElement>();
+	for (const link of links) {
+		const slug = link.dataset.tocSlug;
+		if (!slug) continue;
+		const el = document.getElementById(slug);
+		if (el) headingsBySlug.set(slug, el);
+	}
+
+	if (headingsBySlug.size > 0 && "IntersectionObserver" in window) {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						const slug = entry.target.id;
+						for (const link of links) {
+							link.classList.toggle(
+								"article-toc__link--active",
+								link.dataset.tocSlug === slug,
+							);
+						}
+					}
+				}
+			},
+			{ rootMargin: "0px 0px -70% 0px", threshold: 0 },
+		);
+
+		for (const el of headingsBySlug.values()) observer.observe(el);
+	}
+</script>
+
+<style>
+	.article-toc {
+		position: sticky;
+		top: 5rem;
+		align-self: start;
+	}
+
+	.article-toc__inner {
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+	}
+
+	.article-toc__nav {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.article-toc__link {
+		display: flex;
+		gap: 0.625rem;
+		align-items: baseline;
+		padding: 0.625rem 0;
+		text-decoration: none;
+		border-top: 1px solid var(--editorial-hairline-strong);
+		transition: color var(--duration-base) var(--ease-standard);
+		color: inherit;
+	}
+
+	.article-toc__link--first {
+		border-top-color: var(--editorial-ink);
+	}
+
+	.article-toc__num {
+		min-width: 2rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		color: var(--editorial-ink-mute);
+		text-transform: uppercase;
+	}
+
+	.article-toc__text {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		font-weight: 400;
+		line-height: 1.35;
+		color: var(--editorial-ink-soft);
+	}
+
+	.article-toc__link:hover .article-toc__num,
+	.article-toc__link--active .article-toc__num {
+		color: var(--editorial-spruce);
+	}
+
+	.article-toc__link:hover .article-toc__text,
+	.article-toc__link--active .article-toc__text {
+		color: var(--editorial-ink);
+		font-weight: 500;
+	}
+
+	.article-toc__tools {
+		margin-top: 1rem;
+		padding-top: 0.875rem;
+		border-top: 1px solid var(--editorial-hairline-strong);
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.article-toc__tools-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+
+	@media (max-width: 960px) {
+		.article-toc {
+			position: static;
+			margin-bottom: 1.5rem;
+		}
+	}
+</style>

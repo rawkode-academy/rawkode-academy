@@ -3,6 +3,8 @@ import { getCollection, getEntries } from "astro:content";
 import CourseCard from "@/components/courses/CourseCard.astro";
 import CoursesHero from "@/components/courses/CoursesHero.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import MLabel from "@/components/ui/MLabel.vue";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
 
@@ -62,8 +64,13 @@ const pageDescription =
 		listUrl={new URL("/courses", Astro.site ?? Astro.url).href}
 		listName="Cloud Native Courses"
 	/>
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-7xl">
+	<div class="courses-page">
+		<CollectionMasthead
+			title="Courses"
+			dek="Structured courses and labs."
+		/>
+
+		<section class="courses-page__featured">
 			{featuredCourse ? (
 				<CoursesHero
 					courseId={featuredCourse.id}
@@ -78,89 +85,93 @@ const pageDescription =
 					publishedLabel={featuredPublishedLabel}
 				/>
 			) : (
-				<div class="section-shell card-padding-lg text-center">
-					<div class="mx-auto max-w-3xl space-y-5">
-						<div class="eyebrow-label justify-center">Courses</div>
-						<h1 class="text-4xl font-extrabold tracking-tight text-primary-content md:text-5xl">
-							Cloud native courses are on the way
-						</h1>
-						<p class="text-lg leading-8 text-secondary-content">
-							We’re building practical, engineering-first courses that stay close to the tools,
-							trade-offs, and deployment paths teams actually use.
-						</p>
-					</div>
+				<div class="courses-page__empty">
+					<h2>Courses are on the way</h2>
+					<p>Practical, engineering-first courses are being built now.</p>
 				</div>
 			)}
-		</div>
-	</section>
+		</section>
 
-	<section id="all-courses" class="page-px section-py-tight">
-		<div class="mx-auto max-w-7xl">
-			<div class="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-				<div class="max-w-3xl space-y-3">
-					<div class="eyebrow-label">Course Library</div>
-					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						{libraryCourses.length > 0 ? "Explore the rest of the library" : "More courses are on the way"}
-					</h2>
-					<p class="text-base leading-7 text-secondary-content sm:text-lg">
-						{libraryCourses.length > 0
-							? "Each course is built from real implementation work, not generic marketing decks. Pick the next topic that matches the problems you’re solving now."
-							: "We’re building out the library with the same engineering-first approach: practical modules, implementation detail, and zero marketing padding."}
-					</p>
-				</div>
-				<p class="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-					{libraryCourses.length} more course{libraryCourses.length === 1 ? "" : "s"}
-				</p>
-			</div>
+		<section id="all-courses" class="courses-page__library">
+			<header class="courses-page__section-head">
+				<h2>All courses</h2>
+				<MLabel>{libraryCourses.length} more course{libraryCourses.length === 1 ? "" : "s"}</MLabel>
+			</header>
 
 			{libraryCourses.length > 0 ? (
-				<div class="grid grid-auto-cards gap-6">
+				<div class="courses-page__grid">
 					{libraryCourses.map((course) => (
 						<CourseCard course={course} />
 					))}
 				</div>
 			) : (
-				<div class="section-shell-muted card-padding text-center">
-					<h2 class="text-2xl font-bold text-primary-content">More courses launching soon</h2>
-					<p class="mt-3 text-secondary-content">
-						Stay tuned for upcoming Kubernetes, platform engineering, and identity deep dives.
-					</p>
+				<div class="courses-page__empty">
+					<h2>More courses launching soon</h2>
+					<p>Kubernetes, platform engineering, and identity deep dives are next.</p>
 				</div>
 			)}
-		</div>
-	</section>
-
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-5xl">
-			<div class="section-shell card-padding-lg text-center">
-				<div class="mx-auto max-w-3xl space-y-5">
-					<div class="eyebrow-label justify-center">Stay in the Loop</div>
-					<h2 class="text-3xl font-bold tracking-tight text-primary-content md:text-4xl">
-						Get notified when new lessons ship
-					</h2>
-					<p class="text-base leading-7 text-secondary-content sm:text-lg">
-						Follow the academy for new course releases, module drops, and the implementation notes
-						that usually make the best lessons.
-					</p>
-				</div>
-
-				<div class="mt-8 flex flex-wrap justify-center gap-4">
-					<a
-						href="/watch"
-						class="inline-flex min-h-11 items-center justify-center rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
-					>
-						Start with free videos
-					</a>
-					<a
-						href="https://github.com/rawkode-academy"
-						target="_blank"
-						rel="noreferrer"
-						class="inline-flex min-h-11 items-center justify-center rounded-full border border-white/60 bg-white/70 px-6 py-3 text-sm font-semibold text-primary shadow-sm transition-colors-smooth hover:bg-white dark:border-white/10 dark:bg-gray-900/55 dark:text-white dark:hover:bg-gray-900/80"
-					>
-						Follow on GitHub
-					</a>
-				</div>
-			</div>
-		</div>
-	</section>
+		</section>
+	</div>
 </Page>
+
+<style>
+	.courses-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.courses-page__featured {
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.courses-page__library {
+		padding: 2rem var(--space-section-pad-x) 3rem;
+	}
+
+	.courses-page__section-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.courses-page__section-head h2,
+	.courses-page__empty h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.375rem, 2vw, 1.875rem);
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: 0;
+		margin: 0;
+	}
+
+	.courses-page__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+		gap: 1.25rem;
+	}
+
+	.courses-page__empty {
+		padding: 2rem var(--space-section-pad-x);
+	}
+
+	.courses-page__empty p {
+		font-family: var(--font-inter-tight), sans-serif;
+		color: var(--editorial-ink-soft);
+		margin: 0.5rem 0 0;
+	}
+
+	@media (max-width: 720px) {
+		.courses-page__library {
+			padding: 1.5rem 1rem 2.5rem;
+		}
+		.courses-page__section-head {
+			flex-direction: column;
+			gap: 0.375rem;
+		}
+		.courses-page__empty {
+			padding: 1.5rem 1rem;
+		}
+	}
+</style>

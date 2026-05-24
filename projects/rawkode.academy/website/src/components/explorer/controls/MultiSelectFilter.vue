@@ -1,74 +1,74 @@
 <template>
-  <div ref="triggerRef" class="multi-select-filter">
-    <button
-      type="button"
-      class="filter-toggle"
-      :class="{ 'has-selection': selected.length > 0 }"
-      @click="toggleDropdown"
-    >
-      <span class="filter-label">{{ label }}</span>
-      <span v-if="selected.length > 0" class="selection-badge">
-        {{ selected.length }}
-      </span>
-      <svg
-        class="toggle-icon"
-        :class="{ 'is-open': isOpen }"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
-    </button>
+ <div ref="triggerRef" class="multi-select-filter">
+ <button
+ type="button"
+ class="filter-toggle"
+ :class="{ 'has-selection': selected.length > 0 }"
+ @click="toggleDropdown"
+ >
+ <span class="filter-label">{{ label }}</span>
+ <span v-if="selected.length > 0" class="selection-badge">
+ {{ selected.length }}
+ </span>
+ <svg
+ class="toggle-icon"
+ :class="{ 'is-open': isOpen }"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ >
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+ </svg>
+ </button>
 
-    <Teleport to="body">
-      <Transition name="dropdown">
-        <div
-          v-if="isOpen"
-          ref="dropdownRef"
-          class="filter-dropdown"
-          :style="dropdownStyle"
-          @click.stop
-        >
-          <!-- Select all / clear -->
-          <div class="dropdown-actions">
-            <button type="button" class="action-btn" @click="selectAll">
-              Select all
-            </button>
-            <button
-              type="button"
-              class="action-btn"
-              :disabled="selected.length === 0"
-              @click="clearSelection"
-            >
-              Clear
-            </button>
-          </div>
+ <Teleport to="body">
+ <Transition name="dropdown">
+ <div
+ v-if="isOpen"
+ ref="dropdownRef"
+ class="filter-dropdown"
+ :style="dropdownStyle"
+ @click.stop
+ >
+ <!-- Select all / clear -->
+ <div class="dropdown-actions">
+ <button type="button" class="action-btn" @click="selectAll">
+ Select all
+ </button>
+ <button
+ type="button"
+ class="action-btn"
+ :disabled="selected.length === 0"
+ @click="clearSelection"
+ >
+ Clear
+ </button>
+ </div>
 
-          <!-- Options -->
-          <div class="dropdown-options">
-            <label
-              v-for="value in values"
-              :key="value"
-              class="option-item"
-            >
-              <input
-                type="checkbox"
-                :checked="selected.includes(value)"
-                class="option-checkbox"
-                @change="toggleValue(value)"
-              />
-              <span
-                class="option-color"
-                :style="{ backgroundColor: getValueColor(value) }"
-              ></span>
-              <span class="option-label">{{ getValueLabel(value) }}</span>
-            </label>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-  </div>
+ <!-- Options -->
+ <div class="dropdown-options">
+ <label
+ v-for="value in values"
+ :key="value"
+ class="option-item"
+ >
+ <input
+ type="checkbox"
+ :checked="selected.includes(value)"
+ class="option-checkbox"
+ @change="toggleValue(value)"
+ />
+ <span
+ class="option-color"
+ :style="{ backgroundColor: getValueColor(value) }"
+ ></span>
+ <span class="option-label">{{ getValueLabel(value) }}</span>
+ </label>
+ </div>
+ </div>
+ </Transition>
+ </Teleport>
+ </div>
 </template>
 
 <script setup lang="ts">
@@ -208,157 +208,157 @@ onUnmounted(() => {
 
 <style scoped>
 .multi-select-filter {
-  position: relative;
+ position: relative;
 }
 
 .filter-toggle {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--surface-card-muted);
-  border: 1px solid var(--surface-border);
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary-content);
-  cursor: pointer;
-  transition: all 0.15s ease;
+ display: flex;
+ align-items: center;
+ width: 100%;
+ gap: 0.5rem;
+ padding: 0.5rem 0.75rem;
+ background: var(--surface-card-muted);
+ border: 1px solid var(--surface-border);
+ border-radius: 8px;
+ font-size: 0.8rem;
+ font-weight: 600;
+ color: var(--text-secondary-content);
+ cursor: pointer;
+ transition: all 0.15s ease;
 }
 
 .filter-toggle:hover {
-  border-color: rgb(var(--brand-primary) / 0.5);
-  color: var(--text-primary-content);
+ border-color: rgb(var(--brand-primary) / 0.5);
+ color: var(--text-primary-content);
 }
 
 .filter-toggle.has-selection {
-  border-color: rgb(var(--brand-primary));
-  background: rgb(var(--brand-primary) / 0.1);
+ border-color: rgb(var(--brand-primary));
+ background: rgb(var(--brand-primary) / 0.1);
 }
 
 .filter-label {
-  flex: 1;
-  text-align: left;
+ flex: 1;
+ text-align: left;
 }
 
 .selection-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 0.375rem;
-  background: rgb(var(--brand-primary));
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 700;
-  border-radius: 9999px;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ min-width: 20px;
+ height: 20px;
+ padding: 0 0.375rem;
+ background: rgb(var(--brand-primary));
+ color: white;
+ font-size: 0.65rem;
+ font-weight: 700;
+ border-radius: 9999px;
 }
 
 .toggle-icon {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.2s ease;
+ width: 14px;
+ height: 14px;
+ transition: transform 0.2s ease;
 }
 
 .toggle-icon.is-open {
-  transform: rotate(180deg);
+ transform: rotate(180deg);
 }
 </style>
 
 <style>
 /* Dropdown styles - global because teleported to body */
 .filter-dropdown {
-  z-index: 9999;
-  background: var(--surface-card);
-  border: 1px solid var(--surface-border);
-  border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+ z-index: 9999;
+ background: var(--surface-card);
+ border: 1px solid var(--surface-border);
+ border-radius: 10px;
+ box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
 }
 
 .filter-dropdown .dropdown-actions {
-  display: flex;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--surface-border);
+ display: flex;
+ gap: 0.5rem;
+ padding: 0.5rem;
+ border-bottom: 1px solid var(--surface-border);
 }
 
 .filter-dropdown .action-btn {
-  flex: 1;
-  padding: 0.375rem 0.5rem;
-  background: var(--surface-card-muted);
-  border: none;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-secondary-content);
-  cursor: pointer;
-  transition: all 0.15s ease;
+ flex: 1;
+ padding: 0.375rem 0.5rem;
+ background: var(--surface-card-muted);
+ border: none;
+ border-radius: 6px;
+ font-size: 0.7rem;
+ font-weight: 600;
+ color: var(--text-secondary-content);
+ cursor: pointer;
+ transition: all 0.15s ease;
 }
 
 .filter-dropdown .action-btn:hover:not(:disabled) {
-  background: var(--surface-border);
-  color: var(--text-primary-content);
+ background: var(--surface-border);
+ color: var(--text-primary-content);
 }
 
 .filter-dropdown .action-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+ opacity: 0.5;
+ cursor: not-allowed;
 }
 
 .filter-dropdown .dropdown-options {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 0.5rem;
+ flex: 1;
+ min-height: 0;
+ overflow-y: auto;
+ padding: 0.5rem;
 }
 
 .filter-dropdown .option-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.1s ease;
+ display: flex;
+ align-items: center;
+ gap: 0.5rem;
+ padding: 0.5rem;
+ border-radius: 6px;
+ cursor: pointer;
+ transition: background 0.1s ease;
 }
 
 .filter-dropdown .option-item:hover {
-  background: var(--surface-card-muted);
+ background: var(--surface-card-muted);
 }
 
 .filter-dropdown .option-checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: rgb(var(--brand-primary));
-  cursor: pointer;
+ width: 18px;
+ height: 18px;
+ accent-color: rgb(var(--brand-primary));
+ cursor: pointer;
 }
 
 .filter-dropdown .option-color {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  flex-shrink: 0;
+ width: 14px;
+ height: 14px;
+ border-radius: 4px;
+ flex-shrink: 0;
 }
 
 .filter-dropdown .option-label {
-  font-size: 0.875rem;
-  color: var(--text-primary-content);
+ font-size: 0.875rem;
+ color: var(--text-primary-content);
 }
 
 /* Transition */
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+ transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .dropdown-enter-from,
 .dropdown-leave-to {
-  opacity: 0;
-  transform: translateY(-0.5rem);
+ opacity: 0;
+ transform: translateY(-0.5rem);
 }
 </style>

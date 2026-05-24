@@ -1,0 +1,58 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	subscriberCount?: number;
+	archiveHref?: string;
+}
+
+const { subscriberCount = 8210, archiveHref = "/read?page=2" } = Astro.props as Props;
+---
+
+<div class="read-footer">
+	<MLabel>
+		<a class="read-footer__link" href="/api/feeds/articles.xml">RSS</a> ·
+		<a class="read-footer__link" href="/api/feeds/articles.atom">Atom</a> ·
+		<a class="read-footer__link" href="#newsletter-signup">Email digest</a> ·
+		{subscriberCount.toLocaleString()} subscribers
+	</MLabel>
+	<a class="read-footer__archive" href={archiveHref}>
+		<MLabel tone="ink">← Older dispatches · Archive</MLabel>
+	</a>
+</div>
+
+<style>
+	.read-footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.5rem;
+		padding: 1.5rem 2.5rem;
+		border-top: 1px solid var(--editorial-ink);
+		background: var(--editorial-paper-deep);
+	}
+
+	.read-footer__link {
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		text-decoration-thickness: 1px;
+		text-decoration-color: var(--editorial-hairline-strong);
+	}
+
+	.read-footer__link:hover {
+		text-decoration-color: currentColor;
+	}
+
+	.read-footer__archive {
+		text-decoration: none;
+	}
+
+	@media (max-width: 720px) {
+		.read-footer {
+			flex-direction: column;
+			align-items: flex-start;
+			padding: 1.25rem;
+		}
+	}
+</style>

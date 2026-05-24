@@ -1,26 +1,21 @@
 ---
 import { getCollection, getEntry } from "astro:content";
-import Button from "@/components/common/Button.vue";
-import { Hero } from "@/components/ui";
 import { marked } from "marked";
-import PageWrapper from "../../wrappers/page.astro";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import Page from "@/wrappers/page.astro";
 
-// Configure marked for better GitLab-style rendering
 marked.setOptions({
 	breaks: true,
 	gfm: true,
 	pedantic: false,
 });
 
-// Get all changelog entries from the content collection
 const changelogEntries = await getCollection("changelog");
 
-// Sort by date (newest first)
 const sortedChangelog = changelogEntries.sort((a, b) => {
 	return b.data.date.getTime() - a.data.date.getTime();
 });
 
-// Process entries to render markdown and fetch author data
 const processedChangelog = await Promise.all(
 	sortedChangelog.map(async (entry) => {
 		const renderedContent = marked(entry.body || "");
@@ -37,97 +32,155 @@ const processedChangelog = await Promise.all(
 		};
 	}),
 );
-
-const typeColors = {
-	feature: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-	fix: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-	chore: "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary",
-	docs: "bg-secondary/10 text-secondary dark:bg-secondary/20 dark:text-secondary",
-	breaking:
-		"bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-};
 ---
 
-<PageWrapper
+<Page
 	title="Changelog"
 	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
 >
-	<!-- Hero Section -->
-	<Hero
+	<EditorialShell
+		eyebrow="Product notes"
 		title="Changelog"
-		subtitle="Stay up to date with the latest updates, features, and improvements to Rawkode Academy."
-		badge="What's New"
-		background="blobs"
-		pattern="grid"
-		wave={true}
-		stats={[
-			{ label: `${changelogEntries.length} Updates` },
-			{ label: 'Weekly Releases' },
-			{ label: 'Open Source' }
-		]}
-		client:load
+		lede="A running record of the features, fixes, and content updates shipped across Rawkode Academy."
+		compact
 	>
-		<Fragment slot="actions">
-			<Button href="#latest" variant="primary" size="lg">View Latest</Button>
-			<Button href="https://github.com/rawkode-academy" variant="ghost" size="lg">GitHub</Button>
-		</Fragment>
-	</Hero>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="#latest">Latest updates</a>
+			<a class="editorial-button editorial-button--secondary" href="https://github.com/rawkode-academy">GitHub</a>
+		</div>
 
-	<div id="latest" class="max-w-4xl mx-auto px-4 py-8">
-
-		{
-			processedChangelog.length === 0 ? (
-				<div class="text-center py-12">
-					<p class="text-muted">
-						No changelog entries found.
-					</p>
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">{changelogEntries.length}</span>
+					<span class="editorial-stat__label">Updates</span>
 				</div>
-			) : (
-				<div class="space-y-8">
-					{processedChangelog.map((entry) => (
-						<article class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-surface">
-							<div class="flex items-start justify-between mb-4">
-								<div class="flex-1">
-									<div class="flex items-center gap-3 mb-2">
-										<span
-											class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeColors[entry.type as keyof typeof typeColors] || typeColors.chore}`}
-										>
-											{entry.type}
-										</span>
-									</div>
-									<h2 class="text-xl font-semibold text-primary-content mb-2">
-										{entry.title}
-									</h2>
-									<div
-										class="text-muted mb-3 prose prose-sm dark:prose-invert max-w-none [&>p]:mb-4 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>li]:mb-1"
-										set:html={entry.renderedContent}
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">Open</span>
+					<span class="editorial-stat__label">Source</span>
+				</div>
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">Live</span>
+					<span class="editorial-stat__label">Project record</span>
+				</div>
+			</div>
+		</section>
+
+		<section id="latest" class="editorial-section changelog-list">
+			{
+				processedChangelog.length === 0 ? (
+					<div class="editorial-card">
+						<p class="editorial-card__body">No changelog entries yet.</p>
+					</div>
+				) : (
+					processedChangelog.map((entry, index) => (
+						<article class="changelog-entry">
+							<div class="changelog-entry__meta">
+								<span class="editorial-pill">
+									No{String(processedChangelog.length - index).padStart(3, "0")}
+								</span>
+								<span class="editorial-pill">{entry.type}</span>
+								<time datetime={entry.date.toISOString()}>
+									{entry.date.toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})}
+								</time>
+							</div>
+							<h2>{entry.title}</h2>
+							<div class="editorial-prose changelog-entry__body" set:html={entry.renderedContent} />
+							<footer class="changelog-entry__byline">
+								{entry.author.avatar_url && (
+									<img
+										src={entry.author.avatar_url}
+										alt=""
+										class="changelog-entry__avatar"
+										loading="lazy"
 									/>
-								</div>
-							</div>
-
-							<div class="flex items-center justify-between text-sm text-muted">
-								<div class="flex items-center gap-4">
-									<time datetime={entry.date.toISOString()}>
-										{entry.date.toLocaleDateString("en-US", {
-											year: "numeric",
-											month: "long",
-											day: "numeric",
-										})}
-									</time>
-									<div class="flex items-center gap-2">
-										<img
-											src={entry.author.avatar_url}
-											alt={entry.author.name}
-											class="w-5 h-5 rounded-full"
-										/>
-										<span>by {entry.author.name}</span>
-									</div>
-								</div>
-							</div>
+								)}
+								<span>by {entry.author.name}</span>
+							</footer>
 						</article>
-					))}
-				</div>
-			)
+					))
+				)
+			}
+		</section>
+	</EditorialShell>
+</Page>
+
+<style>
+	.changelog-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.changelog-entry {
+		border-top: 1px solid var(--editorial-hairline);
+		padding: 2rem 0;
+	}
+
+	.changelog-entry:first-child {
+		border-top: 0;
+		padding-top: 0;
+	}
+
+	.changelog-entry__meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.9rem;
+	}
+
+	.changelog-entry__meta time,
+	.changelog-entry__byline {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.changelog-entry h2 {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 1.75rem;
+		font-weight: 750;
+		line-height: 1.05;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0 0 1rem;
+		text-wrap: balance;
+	}
+
+	.changelog-entry__body {
+		max-width: 46rem;
+	}
+
+	.changelog-entry__body :global(p:last-child) {
+		margin-bottom: 0;
+	}
+
+	.changelog-entry__byline {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1.2rem;
+	}
+
+	.changelog-entry__avatar {
+		width: 1.4rem;
+		height: 1.4rem;
+		border-radius: 999px;
+		object-fit: cover;
+		border: 1px solid var(--editorial-hairline-strong);
+	}
+
+	@media (max-width: 700px) {
+		.changelog-entry {
+			padding: 1.5rem 0;
 		}
-	</div>
-</PageWrapper>
+	}
+</style>

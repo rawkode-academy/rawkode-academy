@@ -3,7 +3,7 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
-import tailwindcss from "@tailwindcss/vite";
+import unocss from "@unocss/astro";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
@@ -121,6 +121,12 @@ export default defineConfig({
 		inlineStylesheets: "always",
 	},
 	integrations: [
+		// UnoCSS — Astro integration auto-discovers uno.config.ts and wires
+		// the transformer pipeline through Vite for .astro, .vue, .tsx, and
+		// scoped <style> blocks. `injectReset` opts into the Tailwind-equivalent
+		// preflight reset so removing @import "tailwindcss" doesn't strip
+		// base browser normalisation.
+		unocss({ injectReset: true }),
 		// Inline the SVG output so we don't depend on the generated file's
 		// on-disk path. Our article MDX lives outside the website project (in
 		// the sibling @rawkodeacademy/content package), and astro-d2 computes
@@ -129,7 +135,34 @@ export default defineConfig({
 		// that never ships in dist. Inlining avoids the broken file reference.
 		...(d2Available ? [d2({ inline: true })] : []),
 		expressiveCode({
-			themes: ["catppuccin-mocha", "catppuccin-latte"],
+			// Editorial palette: Ayu Light for the paper scheme, Catppuccin
+			// Mocha for the dark scheme. First entry is the default.
+			themes: ["catppuccin-mocha", "ayu-light"],
+			themeCssRoot: ":root",
+			themeCssSelector: (theme) =>
+				theme.name === "ayu-light" ? ":root:not(.dark)" : "html.dark",
+			styleOverrides: {
+				borderRadius: "var(--radius-sm)",
+				borderColor: "var(--editorial-hairline-strong)",
+				borderWidth: "1px",
+				codeFontFamily:
+					"var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+				codeFontSize: "13px",
+				codeLineHeight: "1.7",
+				frames: {
+					editorActiveTabBackground: "transparent",
+					editorActiveTabBorderColor: "transparent",
+					editorActiveTabIndicatorBottomColor: "transparent",
+					editorActiveTabIndicatorTopColor: "var(--editorial-spruce)",
+					editorTabBarBackground: "oklch(0.18 0.012 280)",
+					editorTabBarBorderBottomColor: "oklch(1 0 0 / 0.08)",
+					frameBoxShadowCssValue: "none",
+					terminalBackground: "oklch(0.14 0.012 280)",
+					terminalTitlebarBackground: "oklch(0.18 0.012 280)",
+					terminalTitlebarBorderBottomColor: "oklch(1 0 0 / 0.08)",
+					terminalTitlebarDotsForeground: "oklch(1 0 0 / 0.18)",
+				},
+			},
 			...(cueLanguageGrammar && {
 				shiki: {
 					langs: [cueLanguageGrammar],
@@ -150,7 +183,6 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			tailwindcss(),
 			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
 				? [
 						faroUploader({
@@ -187,6 +219,14 @@ export default defineConfig({
 			sourcemap: true,
 		},
 		resolve: {
+			// Bun's workspace setup can install duplicate React copies (e.g.
+			// ^19.2.4 + ^19.2.6) under node_modules/.bun. When Vite's
+			// optimizeDeps pulls in a transitive dep that resolves a *different*
+			// React from the one the page entry uses, hook calls throw
+			// `Cannot read properties of null (reading 'useState')` because
+			// React's internal dispatcher is wired to the other copy. Force
+			// dedupe so every importer sees one React instance.
+			dedupe: ["react", "react-dom"],
 			// Use react-dom/server.edge instead of react-dom/server.browser for React 19.
 			// Without this, MessageChannel from node:worker_threads needs to be polyfilled.
 			// https://github.com/withastro/adapters/pull/436
@@ -254,27 +294,29 @@ export default defineConfig({
 		],
 	},
 	fonts: [
+		// Editorial trio — "engineering journal meets terminal":
+		// Instrument Serif (display, italic) / Inter Tight (body) / JetBrains Mono (labels & metadata).
 		{
 			provider: fontProviders.google(),
-			name: "Quicksand",
-			cssVariable: "--font-quicksand",
-			weights: ["400", "700"],
-			styles: ["normal"],
-			display: "optional",
-		},
-		{
-			provider: fontProviders.google(),
-			name: "Poppins",
-			cssVariable: "--font-poppins",
-			weights: ["400", "600"],
-			styles: ["normal"],
-			display: "optional",
-		},
-		{
-			provider: fontProviders.fontsource(),
-			name: "Monaspace Neon",
-			cssVariable: "--font-monaspace-neon",
+			name: "Instrument Serif",
+			cssVariable: "--font-instrument-serif",
 			weights: ["400"],
+			styles: ["normal", "italic"],
+			display: "optional",
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Inter Tight",
+			cssVariable: "--font-inter-tight",
+			weights: ["300", "400", "500", "600", "700"],
+			styles: ["normal"],
+			display: "optional",
+		},
+		{
+			provider: fontProviders.google(),
+			name: "JetBrains Mono",
+			cssVariable: "--font-jetbrains-mono",
+			weights: ["400", "500", "600"],
 			styles: ["normal"],
 			display: "optional",
 		},

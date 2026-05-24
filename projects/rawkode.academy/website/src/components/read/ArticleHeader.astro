@@ -1,0 +1,153 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface BreadcrumbItem { label: string; href?: string; current?: boolean }
+
+interface Props {
+	breadcrumbs?: BreadcrumbItem[];
+	dispatchNum: number | string;
+	kicker: string;
+	categoryTrail?: string | undefined;
+	title: string;
+	dek?: string | undefined;
+	readingTime?: string | undefined;
+	eyebrow?: string | undefined;
+	hideDispatchMeta?: boolean | undefined;
+}
+
+const {
+	breadcrumbs = [],
+	dispatchNum,
+	kicker,
+	categoryTrail,
+	title,
+	dek,
+	readingTime,
+	eyebrow,
+	hideDispatchMeta = true,
+} = Astro.props as Props;
+
+const visibleBreadcrumbs = breadcrumbs.filter((item) => !item.current);
+const eyebrowText =
+	eyebrow ?? `${kicker}${categoryTrail ? ` · ${categoryTrail}` : ""}`;
+---
+
+{visibleBreadcrumbs.length > 0 && (
+	<div class="article-breadcrumb">
+		{visibleBreadcrumbs.map((b, i) => (
+			<>
+				{i > 0 && <span class="article-breadcrumb__sep">/</span>}
+				{b.href ? (
+					<a class="article-breadcrumb__link" href={b.href}>{b.label}</a>
+				) : (
+					<span class="article-breadcrumb__leaf">{b.label}</span>
+				)}
+			</>
+		))}
+		<span class="article-breadcrumb__spacer"></span>
+		{!hideDispatchMeta && (
+			<span class="article-breadcrumb__meta">
+				Dispatch №{dispatchNum}{readingTime ? ` · ${readingTime}` : ""}
+			</span>
+		)}
+	</div>
+)}
+
+<header class="article-header">
+	<div class="article-header__inner">
+		<MLabel tone="spruce">
+			<span class="article-header__dot" aria-hidden="true"></span>
+			{eyebrowText}
+		</MLabel>
+
+		<h1 class="article-header__title" set:html={title}></h1>
+
+		{dek && <p class="article-header__dek">{dek}</p>}
+
+		<slot />
+	</div>
+</header>
+
+<style>
+	.article-breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		padding: 0.875rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.article-breadcrumb__link {
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+	.article-breadcrumb__link:hover { color: var(--editorial-ink); }
+
+	.article-breadcrumb__leaf { color: var(--editorial-ink-soft); }
+	.article-breadcrumb__leaf--current { color: var(--editorial-ink); }
+
+	.article-breadcrumb__sep { opacity: 0.6; }
+	.article-breadcrumb__spacer { flex: 1; }
+	.article-breadcrumb__meta { color: var(--editorial-ink-mute); }
+
+	.article-header {
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.article-header__inner {
+		max-width: 70rem;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.article-header__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--editorial-spruce);
+	}
+
+	.article-header__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.75rem, 6.5vw, 5.5rem);
+		line-height: 0.97;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.article-header__title :global(em) {
+		font-style: italic;
+		color: var(--editorial-spruce);
+	}
+
+	.article-header__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.375rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 48rem;
+		text-wrap: pretty;
+	}
+
+	@media (max-width: 720px) {
+		.article-breadcrumb,
+		.article-header { padding-left: 1.25rem; padding-right: 1.25rem; }
+		.article-header { padding-top: 2.5rem; padding-bottom: 2rem; }
+		.article-header__inner { gap: 1rem; }
+		.article-breadcrumb__meta { display: none; }
+	}
+</style>

@@ -1,10 +1,11 @@
 ---
 import { getCollection, getEntries, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
-import AdrJsonLd from "@/components/html/adr-jsonld.astro";
-import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import { createLogger } from "@/lib/logger";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
@@ -18,16 +19,14 @@ export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
 		const adrs = await getCollection("adrs");
 
-		return adrs.map((adr) => {
-			return {
-				params: {
-					slug: adr.id,
-				},
-				props: {
-					adr,
-				},
-			};
-		});
+		return adrs.map((adr) => ({
+			params: {
+				slug: adr.id,
+			},
+			props: {
+				adr,
+			},
+		}));
 	};
 
 const { adr } = Astro.props;
@@ -48,125 +47,76 @@ const formatDate = (date: Date): string => {
 	}).format(date);
 };
 
-// Extract the ADR number from the ID using a regex to ensure it's 4 digits
 const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
+const adoptedLabel = adr.data.adoptedAt ? formatDate(adr.data.adoptedAt) : "Not adopted";
+const validAuthors = authors.filter((author) => author && author.data);
 ---
 
-<Page title={`ADR-${adrNumber}: ${adr.data.title}`} description={`Architecture Decision Record: ${adr.data.title}`}>
-  <AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
-  <h1 class="text-5xl font-extrabold dark:text-white">
-    <span class="text-secondary dark:text-secondary">ADR-{adrNumber}:</span> {adr.data.title}
-  </h1>
+<Page
+	title={`ADR-${adrNumber}: ${adr.data.title}`}
+	description={`Architecture Decision Record: ${adr.data.title}`}
+>
+	<AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
+	<EditorialShell
+		eyebrow={`ADR-${adrNumber}`}
+		title={adr.data.title}
+		lede={`Architecture decision record adopted on ${adoptedLabel}.`}
+		compact
+	>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button editorial-button--secondary" href="/adrs">All ADRs</a>
+		</div>
 
-  <div class="relative max-w-full overflow-x-hidden">
-    <article class="format prose dark:format-invert w-full max-w-full">
-      <header class="mb-8 lg:mb-10 not-format">
-        <!-- Metadata card with glass morphism effect -->
-        <div
-          class="relative backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 rounded-xl p-6 border border-surface shadow-lg"
-        >
-          <div class="flex flex-col gap-4">
-            <!-- Author section -->
-            {authors.length > 0 && (
-              <div class="flex flex-col">
-                <div class="flex flex-wrap gap-2 mb-2">
-                  <div class="flex -space-x-4">
-                    {authors.filter(author => author && author.data).slice(0, 4).map((author, index) => (
-                      <div class="relative" style={`z-index: ${10 - index}`}>
-                        <img
-                          class="w-16 h-16 min-w-16 rounded-full object-cover border-2 border-secondary bg-white dark:bg-gray-800"
-                          src={author.data.avatarUrl}
-                          alt={`Profile picture of ${author.data.name}`}
-                        />
-                        {index === 0 && (
-                          <span class="absolute bottom-0 right-0 h-4 w-4 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"></span>
-                        )}
-                      </div>
-                    ))}
-                    {authors.filter(author => author && author.data).length > 4 && (
-                      <div class="relative z-0">
-                        <div class="w-16 h-16 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary bg-white dark:bg-gray-800 flex items-center justify-center text-sm text-secondary dark:text-secondary font-medium">
-                          +{authors.filter(author => author && author.data).length - 4}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  {authors.filter(author => author && author.data).map((author) => (
-                    <div class="inline-flex items-center bg-primary/10 dark:bg-primary/20 rounded-full px-3 py-1">
-                      <a
-                        href={author.data.github}
-                        target="_blank"
-                        rel="author noopener noreferrer"
-                        class="text-sm font-medium text-secondary dark:text-secondary hover:text-secondary/90 dark:hover:text-secondary/90 transition-colors"
-                      >
-                        {author.data.name}
-                      </a>
-                      <span class="mx-1 text-secondary dark:text-secondary">•</span>
-                      <span class="text-xs text-secondary dark:text-secondary">@{author.id}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+		<section class="editorial-section adr-detail-meta">
+			<div class="editorial-grid editorial-grid--3">
+				<div class="editorial-card">
+					<p class="editorial-meta">Status</p>
+					<h2 class="editorial-card__title">Adopted</h2>
+				</div>
+				<div class="editorial-card">
+					<p class="editorial-meta">Date</p>
+					<h2 class="editorial-card__title">{adoptedLabel}</h2>
+				</div>
+				<div class="editorial-card">
+					<p class="editorial-meta">Authors</p>
+					<h2 class="editorial-card__title">
+						{validAuthors.length > 0 ? validAuthors.map((author) => author.data.name).join(", ") : "Unknown"}
+					</h2>
+				</div>
+			</div>
+		</section>
 
-            {authors.length > 0 && <div class="w-full h-px bg-gray-200 dark:bg-gray-700 my-2"></div>}
-
-            <!-- Status section -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div class="mt-2 md:mt-0">
-                {adr.data.adoptedAt ? (
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-green-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span class="ml-2 text-sm font-medium text-green-700 dark:text-green-400">
-                      Adopted on {formatDate(adr.data.adoptedAt)}
-                    </span>
-                  </div>
-                ) : (
-                  <div class="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-yellow-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-
-                    <span class="ml-2 text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                      Adopted on {formatDate(adr.data.adoptedAt)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div class="prose dark:prose-invert max-w-none">
-        <Content />
-      </div>
-    </article>
-  </div>
+		<section class="editorial-section">
+			<article class="editorial-prose adr-content">
+				<Content />
+			</article>
+		</section>
+	</EditorialShell>
 </Page>
+
+<style>
+	.adr-detail-meta {
+		padding-bottom: 1.5rem;
+	}
+
+	.adr-content {
+		max-width: 52rem;
+	}
+
+	.adr-content :global(h1:first-child) {
+		display: none;
+	}
+
+	.adr-content :global(table) {
+		display: block;
+		overflow-x: auto;
+		border-collapse: collapse;
+		width: 100%;
+	}
+
+	.adr-content :global(th),
+	.adr-content :global(td) {
+		border: 1px solid var(--editorial-hairline);
+		padding: 0.6rem;
+	}
+</style>

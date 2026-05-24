@@ -1,0 +1,91 @@
+---
+interface Props {
+	episodeNum?: string | number | undefined;
+	title?: string | undefined;
+	series?: string | undefined;
+	duration?: string | undefined;
+	live?: boolean;
+	big?: boolean;
+	thumbnailUrl?: string | undefined;
+	accent?: "spruce" | "amber" | "rust" | "violet";
+}
+
+const {
+	episodeNum,
+	title,
+	big = false,
+	thumbnailUrl,
+	accent = "spruce",
+} = Astro.props as Props;
+
+const accentVar = {
+	spruce: "var(--editorial-spruce)",
+	amber: "var(--editorial-amber)",
+	rust: "var(--editorial-rust)",
+	violet: "var(--editorial-violet)",
+}[accent];
+
+// Pick a gradient backdrop per episode number when there's no thumbnail.
+const palettes = [
+	["oklch(0.22 0.04 165)", "oklch(0.14 0.02 280)"],
+	["oklch(0.20 0.03 60)", "oklch(0.14 0.01 280)"],
+	["oklch(0.22 0.05 40)", "oklch(0.14 0.02 280)"],
+	["oklch(0.20 0.04 290)", "oklch(0.14 0.01 280)"],
+];
+const epNum = parseInt(String(episodeNum ?? "0"), 10) || 0;
+const palette = palettes[epNum % palettes.length] as [string, string];
+---
+
+<div class={`video-still ${big ? "video-still--big" : ""}`} style={`--accent: ${accentVar}; --bg-from: ${palette[0]}; --bg-to: ${palette[1]};`}>
+	{thumbnailUrl ? (
+		<img class="video-still__img" src={thumbnailUrl} alt={title ?? ""} loading="lazy" />
+	) : (
+		<div class="video-still__backdrop" aria-hidden="true"></div>
+	)}
+</div>
+
+<style>
+	.video-still {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		border: 1px solid var(--editorial-hairline-strong);
+		/* Solid ink fallback colour; the gradient-stripe backdrop
+		 only paints when there's no thumbnail (see the __backdrop
+		 rule). Keeping it off the parent avoids the painted-over
+		 image bug we hit earlier in some Chromium versions. */
+		background-color: var(--bg-to);
+		color: var(--editorial-paper);
+		transition:
+			border-color var(--duration-base) var(--ease-standard),
+			filter var(--duration-base) var(--ease-standard);
+	}
+
+	.video-still:hover {
+		border-color: var(--accent);
+		filter: saturate(1.04);
+	}
+
+	.video-still__backdrop {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		background-image: linear-gradient(
+				135deg,
+				var(--bg-from) 0%,
+				var(--bg-to) 100%
+			),
+			repeating-linear-gradient(
+				135deg,
+				transparent 0 7px,
+				oklch(1 0 0 / 0.025) 7px 8px
+			);
+	}
+
+	.video-still__img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+</style>

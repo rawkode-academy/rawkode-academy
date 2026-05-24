@@ -1,57 +1,42 @@
 ---
+import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
-import { Hero } from "@/components/ui";
-import Button from "@/components/common/Button.vue";
-import monogramSvgRaw from "@/components/branding/logos/monogram.svg?raw";
-import monogramSvgFile from "@/components/branding/logos/monogram.svg?url";
-import wordmarkSvgRaw from "@/components/branding/logos/wordmark.svg?raw";
-import wordmarkSvgFile from "@/components/branding/logos/wordmark.svg?url";
 import iconSvgRaw from "@/components/branding/logos/logo.svg?raw";
-import iconSvgFile from "@/components/branding/logos/logo.svg?url";
+import monogramSvgRaw from "@/components/branding/logos/monogram.svg?raw";
+import wordmarkSvgRaw from "@/components/branding/logos/wordmark.svg?raw";
 
 export const prerender = true;
 
-const colorThemes = [
+const colors = [
 	{
-		name: "Rawkode Blue",
-		badge: "Canonical",
-		description:
-			"The single brand identity for Rawkode and Rawkode Academy. Used across every Rawkode property: website, content, livestreams, merch, and partner lockups.",
-		gradient: "from-[#5F5ED7]/60 via-transparent to-[#00CEFF]/50",
-		colors: [
-			{
-				label: "Purple",
-				hex: "#5F5ED7",
-				usage: "Primary actions, headlines, brand-primary surfaces",
-			},
-			{
-				label: "Cyan",
-				hex: "#00CEFF",
-				usage: "Secondary highlights, CTA gradients, status glows",
-			},
-			{
-				label: "Dark Blue-Gray",
-				hex: "#111827",
-				usage: "Typography on light, deep backgrounds in dark mode",
-			},
-		],
+		label: "Purple",
+		hex: "#5F5ED7",
+		usage: "Primary brand color, action states, and partner lockups.",
+	},
+	{
+		label: "Cyan",
+		hex: "#00CEFF",
+		usage: "Secondary highlights, gradients, and accent surfaces.",
+	},
+	{
+		label: "Ink",
+		hex: "#111827",
+		usage: "Typography on light surfaces and deep brand backgrounds.",
 	},
 ];
 
 const brandGradients = [
 	{
 		id: "rawkode-blue",
-		name: "Rawkode Blue Gradient",
-		angleLabel: "135°",
+		name: "Rawkode Blue",
+		angleLabel: "135 deg",
 		angleDeg: 135,
 		description:
-			"The canonical brand gradient. Purple into cyan on a 135° sweep, top-left to bottom-right. Used across hero washes, logo lockups, and CTAs.",
+			"The canonical brand gradient: purple into cyan, top-left to bottom-right.",
 		stops: [
 			{ label: "Purple", hex: "#5F5ED7", offset: "0%" },
 			{ label: "Cyan", hex: "#00CEFF", offset: "100%" },
 		],
-		usage:
-			"Use for any Rawkode lockup, hero panel, button gradient, or partner co-brand surface.",
 		background: "linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)",
 	},
 ];
@@ -60,43 +45,32 @@ const logoAssets = [
 	{
 		slug: "monogram",
 		name: "Monogram",
+		format: "square",
 		description:
-			"Use for avatars, favicons, stickers, or anywhere the brand needs to fit in a square. Keep plenty of breathing room so the M shape stays crisp.",
-		previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
-		assetClass: "brand-logo--padded",
+			"Use for avatars, favicons, social icons, and tight square placements.",
 		asset: monogramSvgRaw,
-		downloadUrl: monogramSvgFile,
 		downloadName: "Rawkode-Academy-Monogram.svg",
-		useCases: [
-			"Avatars & profile badges",
-			"Social icons",
-			"Overlays on content",
-		],
+		useCases: ["Avatars", "Favicons", "Social badges"],
 	},
 	{
 		slug: "icon",
 		name: "Icon",
+		format: "square",
 		description:
-			"Square logo built for UI chrome, app tiles, or partner lockups that need a bold geometric mark.",
-		previewWrapper: "w-40 h-40 md:w-48 md:h-48 shrink-0",
-		assetClass: "",
+			"Use for app tiles, partner lockups, product UI, and compact brand moments.",
 		asset: iconSvgRaw,
-		downloadUrl: iconSvgFile,
 		downloadName: "Rawkode-Academy-Icon.svg",
-		useCases: ["Product UI", "Square partner placements", "Small merch runs"],
+		useCases: ["App tiles", "Partner cards", "Product UI"],
 	},
 	{
 		slug: "wordmark",
 		name: "Wordmark",
+		format: "wide",
 		description:
-			"Full logotype for hero sections, brochures, and anywhere legibility is critical. Only scale proportionally; never stretch.",
-		previewWrapper: "w-full h-24 md:h-28",
-		assetClass: "brand-logo--wide",
-		cardClass: "md:min-w-[320px]",
+			"Use when the full Rawkode Academy name needs to be legible at a glance.",
 		asset: wordmarkSvgRaw,
-		downloadUrl: wordmarkSvgFile,
 		downloadName: "Rawkode-Academy-Wordmark.svg",
-		useCases: ["Headers & banners", "Email signatures", "Printed materials"],
+		useCases: ["Headers", "Banners", "Print"],
 	},
 ];
 
@@ -121,7 +95,7 @@ const logoDownloadJson = JSON.stringify(
 	logoPreviewAssets.map((logo) => ({
 		slug: logo.slug,
 		svg: logo.asset,
-		downloadName: logo.downloadName ?? `${logo.name}.svg`,
+		downloadName: logo.downloadName,
 	})),
 ).replace(/</g, "\\u003C");
 
@@ -131,7 +105,7 @@ const gradientDownloadJson = JSON.stringify(
 		name: gradient.name,
 		angle: gradient.angleDeg,
 		stops: gradient.stops.map((stop) => ({
-			offset: stop.offset ?? "",
+			offset: stop.offset,
 			color: stop.hex,
 		})),
 	})),
@@ -143,502 +117,506 @@ const defaultLogoGradient =
 	"linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)";
 ---
 
-<Page title="Branding" description="Official Rawkode Academy brand assets: logos, colors, and usage guidelines for partners.">
-  <Hero title="Branding Guidelines" subtitle="Our brand assets, color system, and recommended usage for partners" badge="Partner Resources" background="blobs" pattern="grid" wave={true} client:load>
-    <Fragment slot="actions">
-      <Button variant="primary" href="#assets">View Assets</Button>
-    </Fragment>
-  </Hero>
+<Page
+	title="Branding"
+	description="Official Rawkode Academy logos, colors, and usage rules for partners and collaborators."
+>
+	<EditorialShell
+		eyebrow="Partner resources"
+		title="Branding"
+		lede="Official Rawkode Academy artwork, color values, and simple usage rules. Keep it consistent, legible, and uncluttered."
+	>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="#assets">Download assets</a>
+			<a class="editorial-button editorial-button--secondary" href="#usage">Usage rules</a>
+		</div>
 
-  <section id="assets" class="relative py-20 overflow-hidden" style="background: var(--app-backdrop);">
-    <div class="pointer-events-none absolute inset-0">
-      <div class="absolute inset-0 bg-[rgba(255,255,255,0.82)] dark:bg-[rgba(2,8,23,0.9)] backdrop-blur-xl"></div>
-      <div class="absolute -left-20 top-0 w-[32rem] h-[32rem] blur-[140px]" style="background: rgba(var(--brand-primary), 0.22);"></div>
-      <div class="absolute right-[-8rem] bottom-[-6rem] w-[34rem] h-[34rem] blur-[140px]" style="background: rgba(var(--brand-secondary), 0.2);"></div>
-    </div>
-    <div class="relative max-w-6xl mx-auto px-4">
-      <div class="max-w-3xl">
-        <h2 class="text-3xl font-semibold text-primary-content mb-4">Logo assets</h2>
-        <p class="mb-8 text-secondary-content">Our master artwork ships in black so you can tint it for any surface. Inline the SVGs and apply <code class="bg-black/30 px-1 rounded text-white">currentColor</code> to match the Rawkode Blue palette without exporting variants.</p>
-      </div>
+		<section id="assets" class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Logo assets</p>
+				<h2 class="editorial-section__title">Use the right lockup for the space</h2>
+				<p class="editorial-section__lede">
+					Preview the source artwork as a solid mark or with the canonical Rawkode Blue gradient, then download the variant you need.
+				</p>
+				<div class="branding-preview-controls" data-logo-preview-controls>
+					<button type="button" class="logo-preview-toggle" data-preview-mode="solid" aria-pressed="true">
+						Solid
+					</button>
+					{brandGradients.map((gradient) => (
+						<button
+							type="button"
+							class="logo-preview-toggle"
+							data-preview-mode="gradient"
+							data-gradient-id={gradient.id}
+							data-gradient-style={gradient.background}
+							aria-pressed="false"
+						>
+							Gradient
+						</button>
+					))}
+				</div>
+			</div>
+			<div
+				class="branding-logo-grid"
+				data-logo-preview
+				data-preview-mode="solid"
+				data-active-gradient-id={defaultGradientId ?? ""}
+				style={`--logo-preview-gradient:${defaultLogoGradient};`}
+			>
+				{logoPreviewAssets.map((logo) => (
+					<article class={`editorial-card brand-asset brand-asset--${logo.format}`}>
+						<div class="brand-asset__preview">
+							<div
+								class={`brand-logo ${logo.format === "square" ? "brand-logo--padded" : "brand-logo--wide"}`}
+								style={`--logo-mask:${logo.maskUrl};`}
+								set:html={logo.asset}
+							/>
+						</div>
+						<div class="brand-asset__copy">
+							<h3 class="editorial-card__title">{logo.name}</h3>
+							<p class="editorial-card__body">{logo.description}</p>
+							<div class="editorial-pill-row">
+								{logo.useCases.map((useCase) => <span class="editorial-pill">{useCase}</span>)}
+							</div>
+							<button
+								type="button"
+								class="logo-download-link"
+								data-logo-download
+								data-logo-slug={logo.slug}
+							>
+								Download SVG
+							</button>
+						</div>
+					</article>
+				))}
+			</div>
+		</section>
 
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div class="space-y-1">
-          <p class="eyebrow-label">Preview treatments</p>
-          <p class="text-sm text-secondary-content max-w-xl">Toggle between the solid fill and the official Rawkode Blue gradient to see how the lockups glow when you tint them.</p>
-        </div>
-        <div class="flex flex-wrap gap-3" data-logo-preview-controls>
-          <button type="button" class="logo-preview-toggle focus-ring" data-preview-mode="solid" aria-pressed="true">Solid Fill</button>
-          {brandGradients.map((gradient) => (
-            <button
-              type="button"
-              class="logo-preview-toggle focus-ring"
-              data-preview-mode="gradient"
-              data-gradient-id={gradient.id}
-              data-gradient-style={gradient.background}
-              aria-pressed="false"
-            >
-              Gradient · {gradient.name}
-            </button>
-          ))}
-        </div>
-      </div>
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Color</p>
+				<h2 class="editorial-section__title">One canonical palette</h2>
+				<p class="editorial-section__lede">
+					Rawkode Blue is the single brand treatment across the academy, streams, partner materials, and product surfaces.
+				</p>
+			</div>
+			<div class="editorial-grid">
+				{brandGradients.map((gradient) => (
+					<article class="brand-gradient">
+						<div class="brand-gradient__swatch" style={`background:${gradient.background}`}>
+							<span>{gradient.angleLabel}</span>
+							<strong>{gradient.name}</strong>
+						</div>
+						<p class="editorial-card__body">{gradient.description}</p>
+					</article>
+				))}
+				<div class="brand-color-grid">
+					{colors.map((color) => (
+						<article class="editorial-card brand-color">
+							<div class="brand-color__swatch" style={`background:${color.hex}`} />
+							<div>
+								<h3 class="editorial-card__title">{color.label}</h3>
+								<p class="editorial-meta">{color.hex}</p>
+								<p class="editorial-card__body">{color.usage}</p>
+							</div>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
 
-      <div
-        class="grid md:grid-cols-3 gap-8 mb-14"
-        data-logo-preview
-        data-preview-mode="solid"
-        data-active-gradient-id={defaultGradientId ?? ""}
-        style={`--logo-preview-gradient:${defaultLogoGradient};`}
-      >
-        {logoPreviewAssets.map((logo) => (
-          <article class={`relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-white/15 bg-white/90 dark:bg-white/5 backdrop-blur-2xl p-7 flex flex-col gap-6 card-shadow-lg ${logo.cardClass ?? ""}`}>
-            <div class="absolute inset-0 bg-gradient-to-br from-white/60 via-transparent to-primary/10 dark:from-white/10 pointer-events-none"></div>
-            <div class="relative flex flex-col gap-6 items-center text-center">
-              <h3 class="text-lg font-semibold text-primary-content">{logo.name}</h3>
-              <div class="flex flex-col items-center gap-5 w-full">
-                <div class={`p-4 rounded-2xl bg-white border border-gray-100 dark:bg-white/5 dark:border-white/20 flex items-center justify-center overflow-hidden ${logo.previewWrapper} mx-auto`}>
-                  <div class={`brand-logo ${logo.assetClass ?? ""}`} style={`--logo-mask:${logo.maskUrl};`} set:html={logo.asset}></div>
-                </div>
-                <p class="text-sm text-secondary-content max-w-sm leading-relaxed mx-auto pb-1">{logo.description}</p>
-                <button type="button" class="logo-download-link focus-ring" data-logo-download data-logo-slug={logo.slug}>
-                  Download SVG
-                </button>
-              </div>
-              <ul class="text-xs uppercase tracking-wide text-muted space-y-2 w-full text-center md:text-left pt-2">
-                {logo.useCases.map((useCase) => (
-                  <li class="flex items-center gap-2 justify-center md:justify-start">
-                    <span class="inline-flex w-2.5 h-2.5 rounded-full bg-gray-900 dark:bg-white/70"></span>
-                    {useCase}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div class="space-y-4 mb-14">
-        <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-primary-content">Official gradient</h3>
-          <p class="text-secondary-content">The Rawkode Blue gradient runs purple into cyan on a 135° sweep, top-left to bottom-right. Use it for hero panels, gradient logos, button gradients, and any glowing dividers.</p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-6">
-          {brandGradients.map((gradient) => (
-            <article class="rounded-2xl overflow-hidden border border-gray-200/60 dark:border-white/15 card-shadow-lg">
-              <div class="p-6 text-white" style={`background:${gradient.background}`}>
-                <div class="flex items-center justify-between gap-4 flex-wrap">
-                  <div>
-                    <p class="text-xs tracking-[0.2em] uppercase text-white/80">{gradient.angleLabel} sweep</p>
-                    <h4 class="text-2xl font-semibold">{gradient.name}</h4>
-                  </div>
-                  <div class="flex gap-3">
-                    {gradient.stops.map((stop) => (
-                      <div class="px-3 py-2 rounded-full bg-white/20 text-sm font-semibold">{stop.hex}</div>
-                    ))}
-                  </div>
-                </div>
-                <p class="text-sm text-white/80 mt-4 max-w-2xl">{gradient.description}</p>
-              </div>
-              <div class="bg-white/90 dark:bg-gray-900/70 p-4">
-                <p class="text-sm text-secondary-content">{gradient.usage}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <div class="space-y-4">
-        <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-primary-content">Core color palette</h3>
-          <p class="text-secondary-content">Rawkode has a single canonical brand identity: Rawkode Blue. All Rawkode properties (website, content, livestreams, merch, partner co-brands) use this palette. Partners must stick to this treatment, no custom palettes.</p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-6">
-          {colorThemes.map((theme) => (
-            <article class="relative rounded-2xl overflow-hidden border border-gray-200/70 dark:border-white/10 bg-white/90 dark:bg-white/10 backdrop-blur-2xl p-6 card-shadow-lg">
-              <div class={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-70 pointer-events-none`}></div>
-              <div class="relative flex flex-col gap-5">
-                <div>
-                  <p class="eyebrow-label">{theme.badge}</p>
-                  <h4 class="text-2xl font-semibold text-primary-content">{theme.name}</h4>
-                  <p class="text-sm text-secondary-content mt-1">{theme.description}</p>
-                </div>
-                <div class="grid gap-4 sm:grid-cols-3">
-                  {theme.colors.map((color) => (
-                    <div class="rounded-xl border border-gray-200 dark:border-white/20 bg-white dark:bg-white/10 overflow-hidden">
-                      <div class="h-16" style={`background:${color.hex}`}></div>
-                      <div class="p-3">
-                        <div class="text-sm font-semibold text-primary-content">{color.label}</div>
-                        <div class="text-xs text-secondary-content">{color.hex}</div>
-                        <p class="text-xs text-muted mt-1">{color.usage}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <h3 class="text-lg font-semibold mb-3 text-primary-content">How to theme our black SVGs</h3>
-      <p class="mb-6 text-secondary-content">We keep only the black source file in the repo and theme it with CSS. Inline SVGs work best; when using an <code>&lt;img/&gt;</code>, use <code>filter</code> or CSS masking if needed. Prefer the following approach for inline SVGs:</p>
-
-      <pre class="bg-gray-100 dark:bg-gray-900 p-4 rounded-md overflow-x-auto"><code>{`/* Define colors as variables */
-:root {
-  --brand-primary: #5F5ED7;   /* Rawkode Blue, purple */
-  --brand-secondary: #00CEFF; /* Rawkode Blue, cyan */
-  --brand-on-surface: #111827; /* deep blue-gray */
-}
-
-/* Inline svg -- set svg children to currentColor */
-.brand-logo svg * {
+		<section id="usage" class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Usage</p>
+				<h2 class="editorial-section__title">Keep the mark simple</h2>
+				<p class="editorial-section__lede">
+					The brand works best with contrast, room to breathe, and no extra effects competing with the logo.
+				</p>
+			</div>
+			<div class="editorial-grid editorial-grid--2">
+				<article class="editorial-card">
+					<h3 class="editorial-card__title">Rules</h3>
+					<ul class="editorial-list">
+						<li>Keep clearspace around the mark on all sides.</li>
+						<li>Do not stretch, skew, outline, or add shadows to the logo.</li>
+						<li>Use the wordmark where the full name needs to be understood quickly.</li>
+						<li>Use the monogram or icon in constrained square placements.</li>
+						<li>Avoid busy backgrounds unless there is enough contrast.</li>
+					</ul>
+				</article>
+				<article class="editorial-card">
+					<h3 class="editorial-card__title">Inline SVG tinting</h3>
+					<div class="editorial-prose branding-code">
+						<pre><code>{`.brand-logo svg * {
   fill: currentColor !important;
   stroke: currentColor !important;
 }
 
-/* Usage: tint the svg by setting color */
-.brand-logo--primary { color: var(--brand-primary); }
-.brand-logo--dark { color: var(--brand-on-surface); }`}</code></pre>
-
-      <h3 class="text-lg font-semibold mt-10 text-primary-content">Clearspace and sizing: rules</h3>
-      <ul class="list-disc pl-6 text-secondary-content">
-        <li>Always maintain a minimum clearspace equal to the height of the monogram on all sides.</li>
-        <li>Do not place the wordmark on low-contrast or busy patterns.</li>
-        <li>For co-branding, use the black monogram with a white stroke on dark backgrounds or the black mark on light backgrounds.</li>
-      </ul>
-
-    </div>
-  </section>
+.brand-logo--primary {
+  color: #5F5ED7;
+}`}</code></pre>
+					</div>
+				</article>
+			</div>
+		</section>
+	</EditorialShell>
 </Page>
 
 <script type="module" is:inline define:vars={{ logoDownloadJson, gradientDownloadJson, defaultGradientId }}>
-  const previewRoot = document.querySelector("[data-logo-preview]");
-  const previewControls = document.querySelector("[data-logo-preview-controls]");
+	const previewRoot = document.querySelector("[data-logo-preview]");
+	const previewControls = document.querySelector("[data-logo-preview-controls]");
+	const logoDownloadEntries = JSON.parse(logoDownloadJson);
+	const gradientDownloadEntries = JSON.parse(gradientDownloadJson);
+	const logoDownloadData = new Map(Array.isArray(logoDownloadEntries) ? logoDownloadEntries.map((entry) => [entry.slug, entry]) : []);
+	const gradientDownloadData = new Map(Array.isArray(gradientDownloadEntries) ? gradientDownloadEntries.map((entry) => [entry.id, entry]) : []);
+	const gradientIdFromAstro = defaultGradientId;
 
-  const logoDownloadEntries = JSON.parse(logoDownloadJson);
-  const gradientDownloadEntries = JSON.parse(gradientDownloadJson);
+	if (previewRoot && gradientIdFromAstro && !previewRoot.dataset.activeGradientId && gradientDownloadData.size) {
+		previewRoot.dataset.activeGradientId = gradientIdFromAstro;
+	}
 
-  const logoDownloadData = new Map(
-    Array.isArray(logoDownloadEntries) ? logoDownloadEntries.map((entry) => [entry.slug, entry]) : [],
-  );
-  const gradientDownloadData = new Map(
-    Array.isArray(gradientDownloadEntries) ? gradientDownloadEntries.map((entry) => [entry.id, entry]) : [],
-  );
-  const gradientIdFromAstro = defaultGradientId;
+	const setPressedState = (activeButton) => {
+		document.querySelectorAll("[data-logo-preview-controls] .logo-preview-toggle").forEach((btn) => {
+			btn.setAttribute("aria-pressed", btn === activeButton ? "true" : "false");
+		});
+	};
 
-  if (previewRoot && gradientIdFromAstro && !previewRoot.dataset.activeGradientId && gradientDownloadData.size) {
-    previewRoot.dataset.activeGradientId = gradientIdFromAstro;
-  }
+	const applyPreviewMode = (button) => {
+		if (!previewRoot) return;
+		const mode = button?.dataset.previewMode ?? "solid";
+		previewRoot.dataset.previewMode = mode;
 
-  const setPressedState = (activeButton) => {
-    document.querySelectorAll("[data-logo-preview-controls] .logo-preview-toggle").forEach((btn) => {
-      btn.setAttribute("aria-pressed", btn === activeButton ? "true" : "false");
-    });
-  };
+		if (mode === "gradient") {
+			const gradientId = button?.dataset.gradientId || previewRoot.dataset.activeGradientId || gradientIdFromAstro;
+			if (gradientId) previewRoot.dataset.activeGradientId = gradientId;
+			const style = button?.dataset.gradientStyle;
+			if (style) previewRoot.style.setProperty("--logo-preview-gradient", style);
+		}
 
-  const applyPreviewMode = (button) => {
-    if (!previewRoot) {
-      return;
-    }
+		if (button) setPressedState(button);
+	};
 
-    const mode = button?.dataset.previewMode ?? "solid";
-    previewRoot.dataset.previewMode = mode;
+	const resolveButtonFromEvent = (event, selector) => {
+		const target = event.target;
+		if (!(target instanceof Element)) return null;
+		return target.closest(selector);
+	};
 
-    if (mode === "gradient") {
-      const gradientId = button?.dataset.gradientId || previewRoot.dataset.activeGradientId || gradientIdFromAstro;
-      if (gradientId) {
-        previewRoot.dataset.activeGradientId = gradientId;
-      }
-      const style = button?.dataset.gradientStyle;
-      if (style) {
-        previewRoot.style.setProperty("--logo-preview-gradient", style);
-      }
-    }
+	if (previewControls) {
+		previewControls.addEventListener("click", (event) => {
+			const button = resolveButtonFromEvent(event, ".logo-preview-toggle");
+			if (!button) return;
+			event.preventDefault();
+			applyPreviewMode(button);
+		});
+	}
 
-    if (button) {
-      setPressedState(button);
-    }
-  };
+	const insertBeforeClose = (svg, markup) => {
+		const closeIndex = svg.lastIndexOf("</svg>");
+		if (closeIndex === -1) return svg;
+		return `${svg.slice(0, closeIndex)}${markup}${svg.slice(closeIndex)}`;
+	};
 
-  const resolveButtonFromEvent = (event, selector) => {
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      return null;
-    }
-    return target.closest(selector);
-  };
+	const createStyleMarkup = (content) => `<style>${content}</style>`;
+	const paintableSelector = ":is(path, circle, rect, polygon, polyline, line, ellipse, g, text, use)";
 
-  if (previewControls) {
-    previewControls.addEventListener("click", (event) => {
-      const button = resolveButtonFromEvent(event, ".logo-preview-toggle");
-      if (!button) return;
-      event.preventDefault();
-      applyPreviewMode(button);
-    });
-  }
+	const applySolidFill = (svg, color) => {
+		const style = `${paintableSelector} { fill: ${color} !important; stroke: ${color} !important; }`;
+		return insertBeforeClose(svg, createStyleMarkup(style));
+	};
 
-  const insertBeforeClose = (svg, markup) => {
-    const closeIndex = svg.lastIndexOf("</svg>");
-    if (closeIndex === -1) return svg;
-    return `${svg.slice(0, closeIndex)}${markup}${svg.slice(closeIndex)}`;
-  };
+	const applyGradientFill = (svg, gradient) => {
+		const gradientId = `grad-${Math.random().toString(36).slice(2, 9)}`;
+		const stopsMarkup = gradient.stops
+			.map((stop) => `<stop offset="${stop.offset || "0%"}" stop-color="${stop.color}" />`)
+			.join("");
+		const gradientMarkup = `<defs><linearGradient id="${gradientId}" gradientUnits="objectBoundingBox" gradientTransform="rotate(${gradient.angle}, 0.5, 0.5)">${stopsMarkup}</linearGradient></defs>`;
+		const style = `${paintableSelector} { fill: url(#${gradientId}) !important; stroke: url(#${gradientId}) !important; }`;
+		return insertBeforeClose(insertBeforeClose(svg, gradientMarkup), createStyleMarkup(style));
+	};
 
-  const createStyleMarkup = (content) => `<style>${content}</style>`;
+	const normalizeColorValue = (value) => {
+		if (!value) return "#000000";
+		const trimmed = value.trim();
+		if (trimmed.startsWith("#")) return trimmed;
+		const rgbMatch = trimmed.match(/(\d+(\.\d+)?)/g);
+		if (rgbMatch && rgbMatch.length >= 3) {
+			const [r, g, b] = rgbMatch;
+			const toHex = (component) =>
+				Math.max(0, Math.min(255, Math.round(parseFloat(component))))
+					.toString(16)
+					.padStart(2, "0");
+			return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+		}
+		return trimmed;
+	};
 
-  const paintableSelector = ":is(path, circle, rect, polygon, polyline, line, ellipse, g, text, use)";
+	const buildFilename = (baseName, suffix) => {
+		if (!suffix) return baseName;
+		const cleanSuffix = suffix.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+		if (!cleanSuffix) return baseName;
+		const lastDot = baseName.lastIndexOf(".");
+		if (lastDot === -1) return `${baseName}--${cleanSuffix}`;
+		return `${baseName.slice(0, lastDot)}--${cleanSuffix}${baseName.slice(lastDot)}`;
+	};
 
-  const applySolidFill = (svg, color) => {
-    const style = `${paintableSelector} { fill: ${color} !important; stroke: ${color} !important; }`;
-    return insertBeforeClose(svg, createStyleMarkup(style));
-  };
+	const triggerDownload = (svgContent, filename) => {
+		const blob = new Blob([svgContent], { type: "image/svg+xml" });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = filename;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		setTimeout(() => URL.revokeObjectURL(url), 500);
+	};
 
-  const applyGradientFill = (svg, gradient) => {
-    const gradientId = `grad-${Math.random().toString(36).slice(2, 9)}`;
-    const stopsMarkup = gradient.stops
-      .map((stop) => `<stop offset="${stop.offset || "0%"}" stop-color="${stop.color}" />`)
-      .join("");
-    const gradientMarkup = `<defs><linearGradient id="${gradientId}" gradientUnits="objectBoundingBox" gradientTransform="rotate(${gradient.angle}, 0.5, 0.5)">${stopsMarkup}</linearGradient></defs>`;
-    const style = `${paintableSelector} { fill: url(#${gradientId}) !important; stroke: url(#${gradientId}) !important; }`;
-    return insertBeforeClose(insertBeforeClose(svg, gradientMarkup), createStyleMarkup(style));
-  };
+	const resolveSolidColor = () => {
+		if (!previewRoot) return "#000000";
+		const color = getComputedStyle(previewRoot).getPropertyValue("--brand-logo-surface");
+		return normalizeColorValue(color || "#000000");
+	};
 
-  const normalizeColorValue = (value) => {
-    if (!value) return "#000000";
-    const trimmed = value.trim();
-    if (trimmed.startsWith("#")) return trimmed;
-    const rgbMatch = trimmed.match(/(\d+(\.\d+)?)/g);
-    if (rgbMatch && rgbMatch.length >= 3) {
-      const [r, g, b] = rgbMatch;
-      const toHex = (component) =>
-        Math.max(0, Math.min(255, Math.round(parseFloat(component))))
-          .toString(16)
-          .padStart(2, "0");
-      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-    }
-    return trimmed;
-  };
+	document.addEventListener("click", (event) => {
+		const button = resolveButtonFromEvent(event, "[data-logo-download]");
+		if (!button || !previewRoot) return;
+		const slug = button.dataset.logoSlug;
+		const logo = slug ? logoDownloadData.get(slug) : null;
+		if (!logo) return;
 
-  const buildFilename = (baseName, suffix) => {
-    if (!suffix) return baseName;
-    const cleanSuffix = suffix.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    if (!cleanSuffix) return baseName;
-    const lastDot = baseName.lastIndexOf(".");
-    if (lastDot === -1) {
-      return `${baseName}--${cleanSuffix}`;
-    }
-    const name = baseName.slice(0, lastDot);
-    const ext = baseName.slice(lastDot);
-    return `${name}--${cleanSuffix}${ext}`;
-  };
+		const mode = previewRoot.dataset.previewMode ?? "solid";
+		let svgContent = logo.svg;
+		let filenameSuffix = "";
 
-  const triggerDownload = (svgContent, filename) => {
-    const blob = new Blob([svgContent], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(url), 500);
-  };
+		if (mode === "gradient") {
+			const gradientId = previewRoot.dataset.activeGradientId ?? gradientIdFromAstro;
+			const gradient = gradientId ? gradientDownloadData.get(gradientId) : null;
+			if (!gradient) return;
+			svgContent = applyGradientFill(logo.svg, gradient);
+			filenameSuffix = gradient.name;
+		} else {
+			const color = resolveSolidColor();
+			svgContent = applySolidFill(logo.svg, color);
+			filenameSuffix = color;
+		}
 
-  const resolveSolidColor = () => {
-    if (!previewRoot) return "#000000";
-    const color = getComputedStyle(previewRoot).getPropertyValue("--brand-logo-surface");
-    return normalizeColorValue(color || "#000000");
-  };
+		triggerDownload(svgContent, buildFilename(logo.downloadName, filenameSuffix));
+	});
 
-  document.addEventListener("click", (event) => {
-    const button = resolveButtonFromEvent(event, "[data-logo-download]");
-    if (!button || !previewRoot) {
-      return;
-    }
-
-    const slug = button.dataset.logoSlug;
-    const logo = slug ? logoDownloadData.get(slug) : null;
-    if (!logo) return;
-
-    const mode = previewRoot.dataset.previewMode ?? "solid";
-    let svgContent = logo.svg;
-    let filenameSuffix = "";
-
-    if (mode === "gradient") {
-      const gradientId = previewRoot.dataset.activeGradientId ?? gradientIdFromAstro;
-      const gradient = gradientId ? gradientDownloadData.get(gradientId) : null;
-      if (!gradient) return;
-      svgContent = applyGradientFill(logo.svg, gradient);
-      filenameSuffix = gradient.name;
-    } else {
-      const color = resolveSolidColor();
-      svgContent = applySolidFill(logo.svg, color);
-      filenameSuffix = color;
-    }
-
-    triggerDownload(svgContent, buildFilename(logo.downloadName, filenameSuffix));
-  });
-
-  // Ensure our default button state reflects initial data attributes
-  if (previewRoot) {
-    const activeButton =
-      document.querySelector('[data-logo-preview-controls] .logo-preview-toggle[aria-pressed="true"]') ??
-      document.querySelector('[data-logo-preview-controls] .logo-preview-toggle');
-    if (activeButton) {
-      applyPreviewMode(activeButton);
-    }
-  }
+	if (previewRoot) {
+		const activeButton =
+			document.querySelector('[data-logo-preview-controls] .logo-preview-toggle[aria-pressed="true"]') ??
+			document.querySelector("[data-logo-preview-controls] .logo-preview-toggle");
+		if (activeButton) applyPreviewMode(activeButton);
+	}
 </script>
 
 <style is:global>
-  .logo-preview-toggle {
-    border: 1px solid rgba(15, 23, 42, 0.15);
-    background: rgba(255, 255, 255, 0.85);
-    color: #0f172a;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.65rem 1.15rem;
-    border-radius: 999px;
-    transition: var(--duration-base) var(--ease-standard);
-  }
+	.branding-preview-controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
+	}
 
-  .logo-preview-toggle[aria-pressed="true"] {
-    background: rgba(15, 23, 42, 0.9);
-    color: white;
-    border-color: rgba(15, 23, 42, 0.9);
-    box-shadow: var(--shadow-md);
-  }
+	.logo-preview-toggle,
+	.logo-download-link {
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 4px;
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+		cursor: pointer;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.65rem 0.8rem;
+	}
 
-  html.dark .logo-preview-toggle {
-    background: rgba(15, 23, 42, 0.6);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.3);
-  }
+	.logo-preview-toggle[aria-pressed="true"],
+	.logo-download-link:hover {
+		background: var(--editorial-ink);
+		border-color: var(--editorial-ink);
+		color: var(--editorial-paper);
+	}
 
-  html.dark .logo-preview-toggle[aria-pressed="true"] {
-    background: rgb(var(--brand-secondary) / 0.2);
-    border-color: rgb(var(--brand-secondary) / 0.45);
-    color: white;
-  }
+	.logo-download-link {
+		width: fit-content;
+		margin-top: 1rem;
+	}
 
-  .logo-download-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    padding: 0.45rem 1.3rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border: 1px solid rgba(15, 23, 42, 0.15);
-    background: linear-gradient(135deg, rgba(var(--brand-primary), 0.12), rgba(var(--brand-secondary), 0.12));
-    color: #0f172a;
-    text-decoration: none;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    transition: transform var(--duration-base) var(--ease-standard), box-shadow var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard);
-  }
+	.branding-logo-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		--brand-logo-surface: var(--editorial-ink);
+	}
 
-  .logo-download-link:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-    border-color: rgba(15, 23, 42, 0.3);
-  }
+	.brand-asset--wide {
+		grid-column: 1 / -1;
+	}
 
-  html.dark .logo-download-link {
-    border-color: rgba(255, 255, 255, 0.25);
-    background: linear-gradient(135deg, rgba(var(--brand-primary), 0.3), rgba(var(--brand-secondary), 0.25));
-    color: white;
-  }
+	.brand-asset__preview {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 12rem;
+		border: 1px solid var(--editorial-hairline);
+		border-radius: 4px;
+		background: var(--editorial-paper);
+		padding: 1.25rem;
+	}
 
-  html.dark .logo-download-link:hover {
-    box-shadow: var(--shadow-lg);
-    border-color: rgba(255, 255, 255, 0.4);
-  }
+	.brand-asset--wide .brand-asset__preview {
+		min-height: 8rem;
+	}
 
-  :root {
-    --brand-logo-surface: rgb(var(--brand-accent));
-  }
+	.brand-asset__copy {
+		margin-top: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
 
-  html.dark {
-    --brand-logo-surface: #f8fafc;
-  }
+	.brand-logo svg * {
+		fill: currentColor !important;
+		stroke: currentColor !important;
+	}
 
-  /* Make brand svgs themeable */
-  .brand-logo svg * {
-    fill: currentColor !important;
-    stroke: currentColor !important;
-  }
+	.brand-logo {
+		--logo-padding: 0;
+		color: var(--brand-logo-surface);
+		width: 100%;
+		height: 100%;
+		min-height: 7rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		position: relative;
+		isolation: isolate;
+		padding: var(--logo-padding);
+	}
 
-  .brand-logo {
-    --logo-padding: 0px;
-    color: var(--brand-logo-surface);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    position: relative;
-    isolation: isolate;
-    padding: var(--logo-padding);
-  }
+	.brand-logo--padded {
+		--logo-padding: 1rem;
+	}
 
-  .brand-logo--padded {
-    --logo-padding: clamp(0.75rem, 2vw, 1.5rem);
-  }
+	.brand-logo::after {
+		content: "";
+		position: absolute;
+		inset: var(--logo-padding);
+		opacity: 0;
+		pointer-events: none;
+		z-index: 1;
+	}
 
-  .brand-logo::after {
-    content: "";
-    position: absolute;
-    inset: var(--logo-padding);
-    border-radius: inherit;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    z-index: 1;
-  }
+	.brand-logo svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		position: relative;
+		z-index: 2;
+		transition: opacity 0.2s ease;
+	}
 
-  .brand-logo svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    position: relative;
-    z-index: 2;
-    transition: opacity 0.2s ease;
-  }
+	.brand-logo--wide svg {
+		width: 100%;
+		height: auto;
+	}
 
-  .brand-logo--wide svg {
-    width: 100%;
-    height: auto;
-  }
+	[data-preview-mode="gradient"] .brand-logo {
+		color: transparent;
+	}
 
-  [data-preview-mode="gradient"] .brand-logo {
-    color: transparent;
-  }
+	[data-preview-mode="gradient"] .brand-logo svg {
+		opacity: 0;
+	}
 
-  [data-preview-mode="gradient"] .brand-logo svg {
-    opacity: 0;
-  }
+	[data-preview-mode="gradient"] .brand-logo::after {
+		opacity: 1;
+		background: var(--logo-preview-gradient, linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%));
+		mask-image: var(--logo-mask);
+		mask-repeat: no-repeat;
+		mask-position: center;
+		mask-size: contain;
+		-webkit-mask-image: var(--logo-mask);
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		-webkit-mask-size: contain;
+	}
 
-  [data-preview-mode="gradient"] .brand-logo::after {
-    opacity: 1;
-    background: var(--logo-preview-gradient, linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%));
-    mask-image: var(--logo-mask);
-    -webkit-mask-image: var(--logo-mask);
-    mask-repeat: no-repeat;
-    -webkit-mask-repeat: no-repeat;
-    mask-position: center;
-    -webkit-mask-position: center;
-    mask-size: contain;
-    -webkit-mask-size: contain;
-  }
+	.brand-gradient {
+		border: 1px solid var(--editorial-hairline);
+		border-radius: 6px;
+		overflow: hidden;
+		background: var(--editorial-paper-deep);
+	}
 
+	.brand-gradient__swatch {
+		min-height: 9rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		gap: 0.35rem;
+		padding: 1rem;
+		color: white;
+	}
 
+	.brand-gradient__swatch span {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		opacity: 0.82;
+	}
 
+	.brand-gradient__swatch strong {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 1.5rem;
+		line-height: 1;
+	}
+
+	.brand-gradient > .editorial-card__body {
+		padding: 1rem;
+	}
+
+	.brand-color-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.brand-color {
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.brand-color > div:last-child {
+		padding: 1rem;
+	}
+
+	.brand-color__swatch {
+		height: 5rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.branding-code pre {
+		margin: 0;
+	}
+
+	@media (max-width: 760px) {
+		.branding-logo-grid,
+		.brand-color-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.brand-asset--wide {
+			grid-column: auto;
+		}
+	}
 </style>

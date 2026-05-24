@@ -55,21 +55,21 @@ const technologies = learningPath.data.technologies.slice(0, 3);
 
 <BaseCard
 	href={`/learning-paths/${slug}`}
-	class="hover:shadow-xl hover:scale-[1.01] transition-transform"
+	class="hover: hover:scale-[1.01] transition-transform"
 >
 	<Fragment slot="content">
 		<div class="flex flex-wrap items-center gap-2 mb-4">
 			<Badge
 				variant={getDifficultyVariant(learningPath.data.difficulty)}
 				size="sm"
-				class="backdrop-blur-sm shadow-sm"
+				class=" shadow-sm"
 			>
 				{difficultyLabel}
 			</Badge>
 			<Badge
 				variant="info"
 				size="sm"
-				class="backdrop-blur-sm shadow-sm"
+				class=" shadow-sm"
 			>
 				{formatDuration(learningPath.data.estimatedDuration)}
 			</Badge>

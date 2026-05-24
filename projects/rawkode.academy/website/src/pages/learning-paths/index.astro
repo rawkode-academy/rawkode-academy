@@ -1,8 +1,12 @@
 ---
 import { getCollection, getEntries } from "astro:content";
-import LearningPathCard from "@/components/learning-paths/LearningPathCard.astro";
 import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
+
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import PathCard from "@/components/learning-paths/PathCard.astro";
+import FilterRail from "@/components/read/FilterRail.astro";
+import MLabel from "@/components/ui/MLabel.vue";
 
 export const prerender = true;
 
@@ -33,6 +37,59 @@ const itemListPaths = await Promise.all(
 	}),
 );
 
+// Level counts
+const levelCounts = new Map<string, number>();
+for (const p of learningPaths) {
+	const k = (p.data.difficulty || "beginner").toLowerCase();
+	levelCounts.set(k, (levelCounts.get(k) ?? 0) + 1);
+}
+
+const levelTopics = [
+	{ label: "All", count: learningPaths.length, href: "/learning-paths" },
+	...Array.from(levelCounts.entries())
+		.sort((a, b) => b[1] - a[1])
+		.map(([id, count]) => ({
+			label: `${id.charAt(0).toUpperCase()}${id.slice(1)}`,
+			count,
+			href: `/learning-paths?level=${encodeURIComponent(id)}`,
+		})),
+];
+
+const requestedLevel = Astro.url.searchParams.get("level")?.toLowerCase();
+const selectedLevel =
+	requestedLevel && levelCounts.has(requestedLevel) ? requestedLevel : undefined;
+const visiblePaths = selectedLevel
+	? learningPaths.filter(
+			(path) => (path.data.difficulty || "beginner").toLowerCase() === selectedLevel,
+		)
+	: learningPaths;
+const activeLevelIndex = selectedLevel
+	? Math.max(
+			0,
+			levelTopics.findIndex(
+				(topic) => topic.href === `/learning-paths?level=${encodeURIComponent(selectedLevel)}`,
+			),
+		)
+	: 0;
+
+// Lesson counts aren't on the learningPaths schema; approximate by
+// counting H2 headings in the body. Good enough for masthead totals.
+function lessonCount(p: (typeof learningPaths)[number]): number {
+	const body = p.body ?? "";
+	const matches = body.match(/^##\s+/gm);
+	return matches?.length ?? 0;
+}
+
+function formatHours(minutes?: number): string | undefined {
+	if (!minutes) return undefined;
+	const h = Math.round(minutes / 60);
+	return `${h}`;
+}
+
+const visibleLessons = visiblePaths.reduce((acc, p) => acc + lessonCount(p), 0);
+
+const [featured, ...rest] = visiblePaths;
+
 const pageTitle = "Learning Paths";
 const pageDescription =
 	"Curated, video-driven journeys to help you level up your Kubernetes, platform engineering, and cloud native skills.";
@@ -45,28 +102,119 @@ const pageDescription =
 		listUrl={new URL("/learning-paths", Astro.site ?? Astro.url).href}
 		listName="Rawkode Academy Learning Paths"
 	/>
-	<section class="relative overflow-hidden rounded-3xl border border-surface bg-white dark:bg-gray-900 bleed-x-mobile">
-		<div class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/20 dark:from-primary/20 dark:to-secondary/30"></div>
-		<div class="relative z-10 px-6 py-16 md:px-10 lg:px-16">
-			<div class="max-w-3xl">
-				<p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary mb-4">
-					Guided Learning
-				</p>
-				<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-primary-content mb-4">
-					Learning Paths
-				</h1>
-				<p class="text-lg text-muted leading-relaxed">
-					Each path bundles Rawkode Academy videos into a focused curriculum with clear outcomes, prerequisites, and the context you need to succeed. Start with the challenge you're facing and follow along step-by-step.
-				</p>
-			</div>
-		</div>
-	</section>
 
-	<section class="mt-12">
-		<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-			{learningPaths.map((learningPath) => (
-				<LearningPathCard learningPath={learningPath} />
+	<div class="paths-page">
+		<CollectionMasthead
+			title="Learning Paths"
+			dek="Curated lesson sequences."
+		/>
+
+		{featured && (
+			<section class="paths-page__featured">
+				<div class="paths-page__featured-head">
+					<MLabel tone="spruce">§01 · Featured path</MLabel>
+					<MLabel>Most recent</MLabel>
+				</div>
+				<PathCard
+					big
+					href={`/learning-paths/${featured.id}`}
+					title={featured.data.title}
+					description={featured.data.description}
+					level={featured.data.difficulty}
+					hours={formatHours(featured.data.estimatedDuration)}
+					lessons={lessonCount(featured) || undefined}
+				/>
+			</section>
+		)}
+
+		<FilterRail
+			topics={levelTopics}
+			label="Level"
+			ariaLabel="Learning path levels"
+			activeIndex={activeLevelIndex}
+		/>
+
+		<div class="paths-page__grid">
+			{rest.map((path) => (
+				<PathCard
+					href={`/learning-paths/${path.id}`}
+					title={path.data.title}
+					description={path.data.description}
+					level={path.data.difficulty}
+					hours={formatHours(path.data.estimatedDuration)}
+					lessons={lessonCount(path) || undefined}
+				/>
 			))}
 		</div>
-	</section>
+
+		<footer class="paths-page__footer">
+			<MLabel>
+				{visiblePaths.length} path{visiblePaths.length === 1 ? "" : "s"} · {visibleLessons.toLocaleString()} lessons
+			</MLabel>
+			{selectedLevel && (
+				<MLabel tone="ink">
+					<a class="paths-page__link" href="/learning-paths">All learning paths</a>
+				</MLabel>
+			)}
+		</footer>
+	</div>
 </Page>
+
+<style>
+	.paths-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.paths-page__featured {
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.paths-page__featured-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		margin-bottom: 1.125rem;
+	}
+
+	.paths-page__grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.75rem;
+		padding: 2rem 2.5rem 3rem;
+	}
+
+	.paths-page__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.5rem;
+		padding: 1.5rem var(--space-section-pad-x);
+		border-top: 1px solid var(--editorial-ink);
+		background: var(--editorial-paper-deep);
+	}
+
+	.paths-page__link {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+	}
+
+	@media (max-width: 880px) {
+		.paths-page__featured,
+		.paths-page__grid,
+		.paths-page__footer {
+			padding-left: 1.25rem;
+			padding-right: 1.25rem;
+		}
+		.paths-page__grid {
+			grid-template-columns: 1fr;
+		}
+		.paths-page__footer {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+</style>

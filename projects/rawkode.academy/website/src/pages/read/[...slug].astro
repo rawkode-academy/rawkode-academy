@@ -7,18 +7,26 @@ import {
 	getEntries,
 	render,
 } from "astro:content";
-import RelatedArticles from "@/components/articles/RelatedArticles.astro";
-import Resources from "@/components/articles/Resources.astro";
-import TableOfContents from "@/components/articles/TableOfContents.astro";
-import Updates from "@/components/articles/Updates.astro";
-import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-import SeriesLink from "@/components/series/SeriesLink.astro";
+import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+
 import Page from "@/wrappers/page.astro";
+
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
 import { buildHowToJsonLd } from "@/lib/howto-jsonld";
+
+import RelatedArticles from "@/components/articles/RelatedArticles.astro";
+import Resources from "@/components/articles/Resources.astro";
+import Updates from "@/components/articles/Updates.astro";
 import RelatedVideos from "@/components/articles/RelatedVideos.astro";
+import SeriesLink from "@/components/series/SeriesLink.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
-import type { GetStaticPaths, GetStaticPathsResult } from "astro";
+
+import ArticleHeader from "@/components/read/ArticleHeader.astro";
+import ArticleByline from "@/components/read/ArticleByline.astro";
+import ArticleTOC from "@/components/read/ArticleTOC.astro";
+import EndSlug from "@/components/read/EndSlug.astro";
+import ReadNext from "@/components/read/ReadNext.astro";
+
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
@@ -70,8 +78,10 @@ const howToJsonLd = article.data.howto
 			body: article.body ?? "",
 		})
 	: undefined;
+
 const readingTime = calculateReadingTime(article.body || "");
 
+// Technology → readable label
 const allTechnologies = await getCollection("technologies");
 const technologyNameById = new Map<string, string>();
 for (const technology of allTechnologies) {
@@ -94,46 +104,67 @@ function formatTechnologyLabel(value: string): string {
 }
 
 const tags = (article.data.technologies ?? []).map((technologyId) => ({
-	id: technologyId,
 	label: formatTechnologyLabel(technologyId),
 	href: `/technology/${technologyId}`,
 }));
-
-const breadcrumbElements = [
-	{ title: "Home", link: "/" },
-	{ title: "Articles", link: "/read" },
-];
 
 const articleType = article.data.type || "tutorial";
 const badgeConfig = getTypeBadgeConfig(articleType);
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	month: "short",
-	day: "numeric",
+	day: "2-digit",
 	year: "numeric",
 });
 const publishDate = dateFormatter.format(article.data.publishedAt);
-// Only show an "Updated" byline when the update lands on a different
-// calendar day than the original publish date. Comparing dates (not
-// timestamps) avoids the "exactly 24h" edge case that strict ">" missed
-// when both frontmatter dates parse to midnight UTC. Also still filters
-// same-day metadata-only fixes.
+
 const sameCalendarDayUtc = (a: Date, b: Date): boolean =>
 	a.getUTCFullYear() === b.getUTCFullYear() &&
 	a.getUTCMonth() === b.getUTCMonth() &&
 	a.getUTCDate() === b.getUTCDate();
+
 const wasUpdated =
 	article.data.updatedAt &&
 	article.data.updatedAt.getTime() > article.data.publishedAt.getTime() &&
 	!sameCalendarDayUtc(article.data.updatedAt, article.data.publishedAt);
+
 const updateDate = wasUpdated
 	? dateFormatter.format(article.data.updatedAt as Date)
 	: undefined;
+
+// Dispatch number — articles ordered desc by date give this a meaningful index.
+const allArticles = (await getCollection("articles", ({ data }) => !data.draft))
+	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const indexInCorpus = allArticles.findIndex((a) => a.id === article.id);
+const dispatchNum = String(allArticles.length - indexInCorpus).padStart(3, "0");
+
+// Next 3 articles, skipping the current one.
+const readNextArticles = allArticles
+	.filter((a) => a.id !== article.id)
+	.slice(0, 3);
+
+// Breadcrumb trail.
+const breadcrumbs = [
+	{ label: "Read", href: "/read" },
+	{ label: badgeConfig.label, href: `/read?type=${articleType}` },
+	{ label: article.data.title, current: true },
+];
+
+// Category trail under the kicker (e.g. "Containers · supply-chain")
+const categoryTrail = tags.slice(0, 2).map((t) => t.label).join(" · ") || undefined;
+
+// Tools list for the sticky TOC sidebar.
+const tools = (article.data.technologies ?? [])
+	.slice(0, 5)
+	.map((id) => formatTechnologyLabel(id));
+
+const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 ---
 
 <Page
 	title={`${article.data.openGraph?.title || article.data.title}`}
-	subtitle={article.data.openGraph?.subtitle}
+	subtitle={subtitle}
 	description={article.data.description}
 	image={imageUrl ? {
 		image: imageUrl,
@@ -154,336 +185,95 @@ const updateDate = wasUpdated
 	) : (
 		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
 	)}
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/rss+xml"
-		title="Rawkode Academy - Articles (RSS)"
-		href="/api/feeds/articles.xml"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/atom+xml"
-		title="Rawkode Academy - Articles (Atom)"
-		href="/api/feeds/articles.atom"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/feed+json"
-		title="Rawkode Academy - Articles (JSON Feed)"
-		href="/api/feeds/articles.json"
-	/>
+	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
+	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
+	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
 
 	<div class="article-page">
-		<!-- Breadcrumb -->
-		<Breadcrumb elements={breadcrumbElements} />
+		<ArticleHeader
+			breadcrumbs={breadcrumbs}
+			dispatchNum={dispatchNum}
+			kicker={badgeConfig.label}
+			categoryTrail={categoryTrail}
+			title={article.data.title}
+			dek={subtitle}
+			readingTime={readingTime.text}
+		>
+			<ArticleByline
+				authors={authors}
+				date={publishDate}
+				updatedDate={updateDate}
+				readingTime={readingTime.text}
+				tags={tags}
+			/>
+		</ArticleHeader>
 
-		<!-- Article Header -->
-		<header class="article-header">
-			<!-- Title -->
-			<h1>{article.data.title}</h1>
-
-			<!-- Byline: Author + Meta in one row -->
-			<div class="byline">
-				<div class="byline-authors">
-					{authors.map((author) => (
-						<a
-							href={`/people/${author.data.id}`}
-							rel="author"
-							class="author"
-						>
-							{author.data.avatarUrl && (
-								<img
-									src={author.data.avatarUrl}
-									alt=""
-									class="author-avatar"
-									loading="lazy"
-								/>
-							)}
-							<span class="author-name">{author.data.name}</span>
-						</a>
-					))}
-				</div>
-
-				<span class="byline-sep">·</span>
-
-				<time
-					datetime={article.data.publishedAt.toISOString()}
-					class="byline-date"
-				>
-					{publishDate}
-				</time>
-
-				{updateDate && article.data.updatedAt && (
-					<>
-						<span class="byline-sep">·</span>
-						<time
-							datetime={(article.data.updatedAt as Date).toISOString()}
-							class="byline-date byline-updated"
-						>
-							Updated {updateDate}
-						</time>
-					</>
+		<div class="article-body">
+			<div class="article-body__main">
+				{maybeSeries && (
+					<div class="article-body__series">
+						<SeriesLink series={maybeSeries} />
+					</div>
 				)}
 
-				<span class="byline-sep">·</span>
+				<article class="prose article-prose">
+					<Updates updates={article.data.updates} />
+					<Content />
+				</article>
 
-				<span class="byline-read">{readingTime.text}</span>
+				<EndSlug dispatchNum={dispatchNum} date={publishDate} />
 
-				<span class="byline-type">
-					{badgeConfig.label}
-				</span>
-			</div>
-
-			<!-- Series -->
-			{maybeSeries && (
-				<div class="series-link">
-					<SeriesLink series={maybeSeries} />
-				</div>
-			)}
-		</header>
-
-		<!-- Content -->
-		<div class="article-content">
-			<TableOfContents headings={headings} />
-
-			<article class="prose">
-				<Updates updates={article.data.updates} />
-				<Content />
-
-				{tags.length > 0 && (
-					<footer class="tags-footer not-prose">
-						<span class="tags-label">Tagged in</span>
-						<ul class="tags-list">
-							{tags.map((tag) => (
-								<li>
-									<a href={tag.href} class="tag" rel="tag">
-										{tag.label}
-									</a>
-								</li>
-							))}
-						</ul>
-					</footer>
-				)}
-
-				<NewsletterCTA class="my-12 not-prose" />
 				<Resources resources={article.data.resources} />
+				<NewsletterCTA class="not-prose my-12" />
 				<RelatedArticles currentArticle={article} limit={3} />
 				<RelatedVideos currentArticle={article} limit={3} />
-			</article>
+			</div>
+
+			<ArticleTOC headings={headings} tools={tools} />
 		</div>
+
+		<ReadNext articles={readNextArticles} totalCount={allArticles.length} />
 	</div>
 </Page>
 
 <style>
 	.article-page {
-		max-width: 100%;
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
 	}
 
-	/* Header - needs right padding for TOC */
-	.article-header {
-		margin-bottom: 2rem;
-		padding-right: 4rem;
+	.article-body {
+		max-width: 82.5rem;
+		margin: 0 auto;
+		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 16rem;
+		gap: 4rem;
 	}
 
-	@media (max-width: 767px) {
-		.article-header {
-			padding-right: 0;
-		}
+	.article-body__main {
+		max-width: 50rem;
+		/* Grid items default to min-content sizing on their main axis;
+		 a long word or wide code block could otherwise push the column
+		 wider than the viewport. */
+		min-width: 0;
 	}
 
-	h1 {
-		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
-		font-weight: 800;
-		line-height: 1.2;
-		letter-spacing: -0.02em;
-		color: rgb(17 24 39);
-		margin: 0 0 1rem;
+	.article-body__series {
+		margin-bottom: 1.5rem;
+		padding-bottom: 1.25rem;
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	:root.dark h1 {
-		color: white;
-	}
-
-	/* Byline */
-	.byline {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.625rem;
-		font-size: 0.875rem;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .byline {
-		color: rgb(156 163 175);
-	}
-
-	.byline-authors {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.author {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		font-weight: 500;
-		transition: color 0.15s;
-	}
-
-	:root.dark .author {
-		color: white;
-	}
-
-	.author:hover {
-		color: rgb(var(--brand-primary));
-	}
-
-	.author-avatar {
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.byline-sep {
-		color: rgb(209 213 219);
-	}
-
-	:root.dark .byline-sep {
-		color: rgb(75 85 99);
-	}
-
-	.byline-date,
-	.byline-read {
-		white-space: nowrap;
-	}
-
-	.byline-type {
-		padding: 0.25rem 0.625rem;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: rgb(var(--brand-primary));
-		background: rgb(var(--brand-primary) / 0.1);
-		border-radius: 4px;
-	}
-
-	:root.dark .byline-type {
-		background: rgb(var(--brand-primary) / 0.2);
-	}
-
-	/* Series */
-	.series-link {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid var(--surface-border);
-	}
-
-	/* Content */
-	.article-content {
-		position: relative;
-	}
-
-	.prose {
+	.article-prose {
 		width: 100%;
-		margin-bottom: 6rem;
-		padding-right: 4rem;
 	}
 
-	@media (max-width: 767px) {
-		.prose {
-			padding-right: 0;
+	@media (max-width: 960px) {
+		.article-body {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+			padding: 2.5rem 1.25rem 3rem;
 		}
-	}
-
-	/* Prose overrides */
-	:global(.prose pre),
-	:global(.prose code),
-	:global(.prose table),
-	:global(.prose img),
-	:global(.prose iframe) {
-		max-width: 100%;
-		overflow-x: auto;
-	}
-
-	:global(.prose p),
-	:global(.prose li),
-	:global(.prose h1),
-	:global(.prose h2),
-	:global(.prose h3),
-	:global(.prose h4) {
-		overflow-wrap: break-word;
-		word-break: break-word;
-	}
-
-	:global(.prose pre) {
-		white-space: pre-wrap;
-	}
-
-	.tags-footer {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.75rem;
-		margin: 2rem 0 0;
-		padding-top: 1.5rem;
-		border-top: 1px solid rgb(0 0 0 / 0.1);
-	}
-
-	:root.dark .tags-footer {
-		border-top-color: rgb(255 255 255 / 0.1);
-	}
-
-	.tags-label {
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .tags-label {
-		color: rgb(156 163 175);
-	}
-
-	.tags-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.tag {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		border: 1px solid rgb(0 0 0 / 0.1);
-		font-size: 0.85rem;
-		font-weight: 500;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		transition: color 0.15s, border-color 0.15s, background-color 0.15s;
-	}
-
-	:root.dark .tag {
-		color: rgb(229 231 235);
-		border-color: rgb(255 255 255 / 0.1);
-	}
-
-	.tag:hover {
-		color: rgb(var(--brand-primary));
-		border-color: rgb(var(--brand-primary) / 0.4);
-		background-color: rgb(var(--brand-primary) / 0.05);
 	}
 </style>

@@ -336,12 +336,12 @@ function enemyRespond(insultId: string) {
 
 	// Enemy chance scales with progression - earlier layers are forgiving, later layers challenge
 	const layerChance: Record<string, number> = {
-		External: 0.2,    // Very forgiving - player is learning
+		External: 0.2, // Very forgiving - player is learning
 		App: 0.35,
 		ServiceMesh: 0.5,
 		KubeSystem: 0.65,
 		ApiServer: 0.8,
-		Host: 0.9,        // Boss tier - nearly always blocks (player needs effective insults)
+		Host: 0.9, // Boss tier - nearly always blocks (player needs effective insults)
 	};
 	const chance = layerChance[props.enemy.layer] ?? 0.4;
 	const knowsEffective = knownEffective.length > 0 && Math.random() < chance;
