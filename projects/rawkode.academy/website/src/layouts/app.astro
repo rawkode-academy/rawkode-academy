@@ -134,6 +134,26 @@ import { ThemeToggle } from "@/components/ui";
 	<CommandPaletteWrapper client:only="react" />
 
 	<style>
+		:global(:root) {
+			--ed-sidebar-collapsed-width: 3.5rem;
+			--ed-sidebar-expanded-width: 18rem;
+			--ed-sidebar-current-width: var(--ed-sidebar-expanded-width);
+		}
+
+		@media (min-width: 768px) {
+			#main-content,
+			#footer-container {
+				margin-left: var(--ed-sidebar-current-width);
+			}
+		}
+
+		@media (max-width: 767px) {
+			#main-content,
+			#footer-container {
+				margin-left: 0;
+			}
+		}
+
 		/* ────────────────────────────────────────────────────────────
 		   Editorial top bar — flat paper with single hairline border,
 		   replaces the paper-panel + radial-gradient header. */
@@ -378,30 +398,61 @@ import { ThemeToggle } from "@/components/ui";
 			});
 		}
 
-		// Function to update main content margin based on sidebar state
+		const sidebarWidthStorageKey = "sidebar-expanded-width";
+		const defaultSidebarWidth = 288;
+		const minSidebarWidth = 224;
+		const maxSidebarWidth = 440;
+
+		function maxSidebarWidthForViewport() {
+			return Math.min(
+				maxSidebarWidth,
+				Math.max(minSidebarWidth, Math.floor(window.innerWidth * 0.42)),
+			);
+		}
+
+		function clampSidebarWidth(width: number) {
+			return Math.min(
+				Math.max(width, minSidebarWidth),
+				maxSidebarWidthForViewport(),
+			);
+		}
+
+		function readSidebarExpandedWidth() {
+			const stored = Number.parseInt(
+				localStorage.getItem(sidebarWidthStorageKey) || "",
+				10,
+			);
+			const width = Number.isFinite(stored) ? stored : defaultSidebarWidth;
+			return clampSidebarWidth(width);
+		}
+
+		// Function to update main content offset based on sidebar state
 		function updateMainContentMargin() {
 			const mainContent = document.getElementById("main-content");
 			const footerContainer = document.getElementById("footer-container");
 			const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
+			const isMobile = window.innerWidth < 768;
+			const expandedWidth = `${readSidebarExpandedWidth()}px`;
+			const currentWidth =
+				isMobile || isCollapsed
+					? "var(--ed-sidebar-collapsed-width, 3.5rem)"
+					: expandedWidth;
+
+			document.documentElement.style.setProperty(
+				"--ed-sidebar-expanded-width",
+				expandedWidth,
+			);
+			document.documentElement.style.setProperty(
+				"--ed-sidebar-current-width",
+				currentWidth,
+			);
 
 			if (mainContent) {
-				if (isCollapsed) {
-					mainContent.classList.remove("md:ml-72");
-					mainContent.classList.add("md:ml-14");
-				} else {
-					mainContent.classList.remove("md:ml-14");
-					mainContent.classList.add("md:ml-72");
-				}
+				mainContent.classList.remove("md:ml-72", "md:ml-14");
 			}
 
 			if (footerContainer) {
-				if (isCollapsed) {
-					footerContainer.classList.remove("md:ml-72");
-					footerContainer.classList.add("md:ml-14");
-				} else {
-					footerContainer.classList.remove("md:ml-14");
-					footerContainer.classList.add("md:ml-72");
-				}
+				footerContainer.classList.remove("md:ml-72", "md:ml-14");
 			}
 		}
 
@@ -431,9 +482,13 @@ import { ThemeToggle } from "@/components/ui";
 
 		// Listen for sidebar state changes from other sources
 		window.addEventListener("storage", (e) => {
-			if (e.key === "sidebar-collapsed") {
+			if (
+				e.key === "sidebar-collapsed" ||
+				e.key === sidebarWidthStorageKey
+			) {
 				updateMainContentMargin();
 			}
 		});
+		window.addEventListener("resize", updateMainContentMargin, { passive: true });
 	</script>
 </div>
