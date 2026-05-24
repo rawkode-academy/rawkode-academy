@@ -27,7 +27,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.deploy.main]
+		tasks: [_t.test, _t.build, _t.deploy.main]
 	}
 
 	pullRequest: {
@@ -35,7 +35,7 @@ ci: pipelines: {
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.deploy.preview]
+		tasks: [_t.test, _t.build, _t.deploy.preview]
 		annotations: "Preview URL": schema.#TaskCaptureRef & {
 			cuenvTask:    "deploy.preview"
 			cuenvCapture: "previewUrl"
@@ -76,7 +76,6 @@ tasks: {
 		main: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "deploy", "--config", "./dist/server/wrangler.json"]
-			dependsOn: [_t.test, _t.build]
 			inputs: [
 				"astro.config.ts",
 				"package.json",
@@ -87,7 +86,6 @@ tasks: {
 		preview: schema.#Task & {
 			command: "bun"
 			args: ["x", "wrangler", "versions", "upload", "--config", "./dist/server/wrangler.json"]
-			dependsOn: [_t.test, _t.build]
 			inputs: [
 				"astro.config.ts",
 				"package.json",
