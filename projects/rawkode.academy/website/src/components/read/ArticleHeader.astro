@@ -11,6 +11,8 @@ interface Props {
 	title: string;
 	dek?: string | undefined;
 	readingTime?: string | undefined;
+	eyebrow?: string | undefined;
+	hideDispatchMeta?: boolean | undefined;
 }
 
 const {
@@ -21,7 +23,12 @@ const {
 	title,
 	dek,
 	readingTime,
+	eyebrow,
+	hideDispatchMeta = false,
 } = Astro.props as Props;
+
+const eyebrowText =
+	eyebrow ?? `§${dispatchNum} · ${kicker}${categoryTrail ? ` · ${categoryTrail}` : ""}`;
 ---
 
 {breadcrumbs.length > 0 && (
@@ -37,9 +44,11 @@ const {
 			</>
 		))}
 		<span class="article-breadcrumb__spacer"></span>
-		<span class="article-breadcrumb__meta">
-			Dispatch №{dispatchNum}{readingTime ? ` · ${readingTime}` : ""}
-		</span>
+		{!hideDispatchMeta && (
+			<span class="article-breadcrumb__meta">
+				Dispatch №{dispatchNum}{readingTime ? ` · ${readingTime}` : ""}
+			</span>
+		)}
 	</div>
 )}
 
@@ -47,7 +56,7 @@ const {
 	<div class="article-header__inner">
 		<MLabel tone="spruce">
 			<span class="article-header__dot" aria-hidden="true"></span>
-			§{dispatchNum} · {kicker}{categoryTrail ? ` · ${categoryTrail}` : ""}
+			{eyebrowText}
 		</MLabel>
 
 		<h1 class="article-header__title" set:html={title}></h1>

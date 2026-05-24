@@ -69,7 +69,7 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 
 const readingTime = calculateReadingTime(article.body || "");
 
-// Editorial kicker — pick a single mono label for the dispatch type.
+// Plain article category, without issue/dispatch language.
 const kickerFor = (a: typeof article): string => {
 	const techs = a.data.technologies ?? [];
 	if (techs.some((t) => /cve|security/i.test(t))) return "CVE";
@@ -77,9 +77,14 @@ const kickerFor = (a: typeof article): string => {
 	if (/release|ship|gen|alpha|beta|GA|stable|launch/i.test(a.data.title))
 		return "Release";
 	if (/acquire|acquisition/i.test(a.data.title)) return "Acquisition";
-	return "Dispatch";
+	return "News";
 };
 const kicker = kickerFor(article);
+const breadcrumbItems = [
+	{ label: "News", href: "/news" },
+	...(kicker === "News" ? [] : [{ label: kicker }]),
+	{ label: article.data.title, current: true },
+];
 
 // Dispatch number = position in the corpus, oldest = 001
 const corpus = (await getCollection("news")).sort(
@@ -126,14 +131,12 @@ const categoryTrail = tags[0]?.label;
 
 	<div class="news-detail">
 		<ArticleHeader
-			breadcrumbs={[
-				{ label: "The Wire", href: "/news" },
-				{ label: kicker },
-				{ label: article.data.title, current: true },
-			]}
+			breadcrumbs={breadcrumbItems}
 			dispatchNum={dispatchNum}
 			kicker={kicker}
 			categoryTrail={categoryTrail}
+			eyebrow={[kicker, categoryTrail].filter(Boolean).join(" · ")}
+			hideDispatchMeta={true}
 			title={article.data.title}
 			dek={article.data.description}
 			readingTime={readingTime.text}
@@ -155,7 +158,7 @@ const categoryTrail = tags[0]?.label;
 				class="my-12 not-prose"
 				audience="news"
 				badge="Cloud Native news weekly"
-				headline="Stay on top of the cloud-native release wire"
+				headline="Stay on top of cloud-native releases"
 				subtitle="Kubernetes, AI infra, and CNCF moves, delivered when they matter."
 			/>
 

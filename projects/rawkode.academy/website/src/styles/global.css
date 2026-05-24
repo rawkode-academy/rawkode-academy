@@ -794,17 +794,18 @@ html.dark {
 		margin-bottom: 0.75rem;
 	}
 
-	/* Inline code — mono, hairline-bordered paperDeep chip. */
+	/* Inline code — mono, but still part of the sentence. */
 	.prose code {
 		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.85em;
-		font-weight: 500;
-		padding: 0.1em 0.4em;
-		background: var(--surface-card-muted);
-		border: 1px solid var(--surface-border);
-		border-radius: var(--radius-xs);
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.3;
+		padding: 0.02em 0.12em 0.04em;
+		background: transparent;
+		border: 0;
+		border-radius: 2px;
 		color: var(--text-primary-content);
-		overflow-wrap: anywhere;
+		overflow-wrap: break-word;
 	}
 
 	.prose :is(h1, h2, h3, h4) code {
@@ -1035,3 +1036,25 @@ html.dark {
    border-surface(-strong) all live in `uno.config.ts` now — registered as
    shortcuts / rules / preflights so `@apply` continues to work from scoped
    Astro/Vue <style> blocks through `@unocss/transformer-directives`. */
+
+/* Keep prose inline code sentence-sized. This must remain unlayered so it
+   wins over UnoCSS reset's unlayered `code { font-size: 1em; }`. */
+.prose code {
+	font-family: var(--font-jetbrains-mono), monospace;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.3;
+	padding: 0.02em 0.12em 0.04em;
+	background: transparent;
+	border: 0;
+	border-radius: 2px;
+	color: var(--text-primary-content);
+	overflow-wrap: break-word;
+}
+
+.prose pre code {
+	font-size: 0.875rem;
+	font-weight: 400;
+	padding: 0;
+	background: transparent;
+}
