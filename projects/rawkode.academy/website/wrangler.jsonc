@@ -47,6 +47,10 @@
 			"service": "rawkode-academy-identity"
 		},
 		{
+			"binding": "BRACKETS_WRITE",
+			"service": "platform-brackets-write-model"
+		},
+		{
 			"binding": "EMAIL_PREFERENCES",
 			"service": "platform-email-preferences-rpc",
 			"entrypoint": "EmailPreferences"

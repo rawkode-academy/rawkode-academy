@@ -1,0 +1,53 @@
+---
+import type { ShowNavItem } from "@/lib/shows/types";
+
+interface Props {
+	showId: string;
+	nav: ShowNavItem[];
+	// The active page slug, or null for the show hub (Episodes) tab.
+	active?: string | null;
+}
+
+const { showId, nav, active = null } = Astro.props;
+
+const tabs = [
+	{ slug: null as string | null, label: "Episodes", href: `/shows/${showId}` },
+	...nav.map((item) => ({
+		slug: item.slug,
+		label: item.label,
+		href: `/shows/${showId}/${item.slug}`,
+	})),
+];
+---
+
+<nav
+	aria-label="Show sections"
+	class="border-b"
+	style="border-color: var(--surface-border)"
+>
+	<div class="mx-auto max-w-7xl content-px">
+		<ul class="flex gap-1 overflow-x-auto" role="list">
+			{
+				tabs.map((tab) => {
+					const isActive = tab.slug === active;
+					return (
+						<li>
+							<a
+								href={tab.href}
+								aria-current={isActive ? "page" : undefined}
+								class:list={[
+									"focus-ring inline-flex items-center whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors-smooth",
+									isActive
+										? "border-primary text-primary-content"
+										: "border-transparent text-muted hover:text-primary-content",
+								]}
+							>
+								{tab.label}
+							</a>
+						</li>
+					);
+				})
+			}
+		</ul>
+	</div>
+</nav>
