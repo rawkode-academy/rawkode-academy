@@ -1,6 +1,6 @@
 import type { ImageServicePayload } from "@/types/image-service";
 
-export const IMAGE_SERVICE_TEMPLATE_VERSION = "2026-05-24-3";
+export const IMAGE_SERVICE_TEMPLATE_VERSION = "2026-05-24-4";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();

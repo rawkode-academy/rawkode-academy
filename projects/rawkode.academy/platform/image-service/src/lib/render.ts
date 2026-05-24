@@ -91,8 +91,8 @@ export const renderOpenGraphHtml = (payload: Payload): string => {
         background: var(--ink);
         color: var(--paper);
       }
-      .mark { width: 76px; height: 76px; display: grid; place-items: center; border: 1px solid oklch(0.97 0.008 85 / 0.34); }
-      .mark svg { width: 52px; height: 52px; }
+      .mark { width: 72px; height: 72px; display: grid; place-items: center; }
+      .mark svg { width: 58px; height: 58px; }
       main {
         display: grid;
         grid-template-columns: ${image ? "1fr 356px" : "1fr"};
@@ -146,9 +146,9 @@ export const renderOpenGraphHtml = (payload: Payload): string => {
       }
       footer {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: auto minmax(0, 1fr);
         align-items: center;
-        gap: 28px;
+        gap: 34px;
         padding: 0 58px;
         border-top: 1px solid var(--hairline-strong);
         border-right: 1px solid var(--hairline-strong);
@@ -163,13 +163,16 @@ export const renderOpenGraphHtml = (payload: Payload): string => {
       .footer-meta {
         display: flex;
         align-items: center;
-        gap: 16px;
+        justify-self: end;
+        gap: 13px;
         color: var(--ink-mute);
         font-family: "JetBrains Mono", ui-monospace, monospace;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
       }
-      .dot { width: 7px; height: 7px; background: var(--rust); }
+      .dot { flex: 0 0 auto; width: 7px; height: 7px; background: var(--rust); }
     </style>
   </head>
   <body>
