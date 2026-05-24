@@ -3,8 +3,7 @@ import { getCollection, getEntries } from "astro:content";
 import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
-import PathsMasthead from "@/components/learning-paths/PathsMasthead.astro";
-import PathsLede from "@/components/learning-paths/PathsLede.astro";
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
 import PathCard from "@/components/learning-paths/PathCard.astro";
 import FilterRail from "@/components/read/FilterRail.astro";
 import MLabel from "@/components/ui/MLabel.vue";
@@ -50,11 +49,28 @@ const levelTopics = [
 	...Array.from(levelCounts.entries())
 		.sort((a, b) => b[1] - a[1])
 		.map(([id, count]) => ({
-			label: id.toUpperCase(),
+			label: `${id.charAt(0).toUpperCase()}${id.slice(1)}`,
 			count,
 			href: `/learning-paths?level=${encodeURIComponent(id)}`,
 		})),
 ];
+
+const requestedLevel = Astro.url.searchParams.get("level")?.toLowerCase();
+const selectedLevel =
+	requestedLevel && levelCounts.has(requestedLevel) ? requestedLevel : undefined;
+const visiblePaths = selectedLevel
+	? learningPaths.filter(
+			(path) => (path.data.difficulty || "beginner").toLowerCase() === selectedLevel,
+		)
+	: learningPaths;
+const activeLevelIndex = selectedLevel
+	? Math.max(
+			0,
+			levelTopics.findIndex(
+				(topic) => topic.href === `/learning-paths?level=${encodeURIComponent(selectedLevel)}`,
+			),
+		)
+	: 0;
 
 // Lesson counts aren't on the learningPaths schema; approximate by
 // counting H2 headings in the body. Good enough for masthead totals.
@@ -70,11 +86,11 @@ function formatHours(minutes?: number): string | undefined {
 	return `${h}`;
 }
 
-const allLessons = learningPaths.reduce((acc, p) => acc + lessonCount(p), 0);
+const visibleLessons = visiblePaths.reduce((acc, p) => acc + lessonCount(p), 0);
 
-const [featured, ...rest] = learningPaths;
+const [featured, ...rest] = visiblePaths;
 
-const pageTitle = "Learning Paths — curriculum, not chaos";
+const pageTitle = "Learning Paths";
 const pageDescription =
 	"Curated, video-driven journeys to help you level up your Kubernetes, platform engineering, and cloud native skills.";
 ---
@@ -88,12 +104,10 @@ const pageDescription =
 	/>
 
 	<div class="paths-page">
-		<PathsMasthead
-			pathCount={learningPaths.length}
-			lessonCount={allLessons || undefined}
+		<CollectionMasthead
+			title="Learning Paths"
+			dek="Curated lesson sequences."
 		/>
-
-		<PathsLede />
 
 		{featured && (
 			<section class="paths-page__featured">
@@ -113,7 +127,12 @@ const pageDescription =
 			</section>
 		)}
 
-		<FilterRail topics={levelTopics} activeIndex={0} sortLabel="Recommended ↓" />
+		<FilterRail
+			topics={levelTopics}
+			label="Level"
+			ariaLabel="Learning path levels"
+			activeIndex={activeLevelIndex}
+		/>
 
 		<div class="paths-page__grid">
 			{rest.map((path) => (
@@ -130,9 +149,13 @@ const pageDescription =
 
 		<footer class="paths-page__footer">
 			<MLabel>
-				{learningPaths.length} paths · {allLessons.toLocaleString()} lessons total
+				{visiblePaths.length} path{visiblePaths.length === 1 ? "" : "s"} · {visibleLessons.toLocaleString()} lessons
 			</MLabel>
-			<MLabel tone="ink">Suggest a path · Roadmap →</MLabel>
+			{selectedLevel && (
+				<MLabel tone="ink">
+					<a class="paths-page__link" href="/learning-paths">All learning paths</a>
+				</MLabel>
+			)}
 		</footer>
 	</div>
 </Page>
@@ -170,6 +193,13 @@ const pageDescription =
 		padding: 1.5rem var(--space-section-pad-x);
 		border-top: 1px solid var(--editorial-ink);
 		background: var(--editorial-paper-deep);
+	}
+
+	.paths-page__link {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
 	}
 
 	@media (max-width: 880px) {

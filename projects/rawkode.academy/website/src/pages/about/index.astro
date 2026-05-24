@@ -1,6 +1,5 @@
 ---
-import Button from "@/components/common/Button.vue";
-import { Hero } from "@/components/ui";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -9,320 +8,250 @@ const stats = [
 	{
 		value: "60K+",
 		label: "Developers reached",
-		description:
-			"Learners who've tuned into our live streams, workshops, and asynchronous paths since 2019.",
 	},
 	{
 		value: "500+",
-		label: "Hours of hands-on content",
-		description:
-			"From Rawkode Live experiments to deep dives on Kubernetes, WASM, and platform engineering.",
+		label: "Hours of content",
 	},
 	{
 		value: "90+",
 		label: "Projects featured",
-		description:
-			"Open-source tools explored with the maintainers and contributors who build them.",
 	},
 ];
 
 const missionPillars = [
 	{
-		title: "Hands-on & honest",
-		description:
-			"We build in the open, share the messy bits, and keep cameras rolling when things go sideways so everyone can see the real troubleshooting process.",
+		title: "Hands-on and honest",
+		body: "We show the work as it happens, including the mistakes, dead ends, and fixes that make technical learning real.",
 	},
 	{
 		title: "Maintainer-first",
-		description:
-			"Creators and core contributors sit beside us to explain the 'why' behind their decisions, the trade-offs they made, and what's coming next.",
+		body: "We bring creators and contributors into the room so learners hear the decisions, constraints, and trade-offs from the people closest to the project.",
 	},
 	{
 		title: "Future-looking",
-		description:
-			"We scout emerging runtimes, infrastructure patterns, and developer workflows so you can chart a path long before it's mainstream.",
+		body: "We track emerging runtimes, infrastructure patterns, and developer workflows before they become default practice.",
 	},
 ];
 
 const timeline = [
 	{
-		period: "2003–2014",
-		title: "Full-stack builder & accidental SRE",
-		description:
-			"David cut his teeth on ticketing systems for horse racing tracks across the UK, touching everything from custom kernels in C to QT point-of-sale apps and early Windows CE devices. Puppet automation in 2004 cemented a lifelong obsession with operational excellence.",
+		period: "2003-2014",
+		title: "Full-stack builder and accidental SRE",
+		body: "David worked across ticketing systems, custom kernels, QT point-of-sale apps, early mobile devices, and automation that shaped a long-running interest in reliable systems.",
 	},
 	{
-		period: "2014–2016",
-		title: "Scaling TeamRock (now LouderSound)",
-		description:
-			"As Director of Development, he led the shift from virtual machines to containerized workloads on AWS just in time for an enormous traffic spike following the passing of Lemmy Kilmister. The bet on containers paid off, proving how resilient modern infrastructure could be.",
+		period: "2014-2016",
+		title: "Scaling TeamRock",
+		body: "As Director of Development, he helped move workloads from virtual machines to containers on AWS during a period of intense traffic growth.",
 	},
 	{
-		period: "2016–2019",
+		period: "2016-2019",
 		title: "Developer advocate at InfluxData",
-		description:
-			"Helping operators adopt InfluxDB and Telegraf for Kubernetes metrics meant speaking at meetups, writing tutorials, and working directly with engineering teams to simplify deployments, well before metrics-server replaced Heapster on clusters.",
+		body: "Working with Kubernetes metrics, Telegraf, and operators made education, live demos, and direct technical support a daily practice.",
 	},
 	{
 		period: "2019",
-		title: "Rawkode Academy officially launches",
-		description:
-			'The first video, "Last Week in Kubernetes," sets the tone: live, hands-on exploration guided by curiosity. From there the Academy became a permanent home for transparent learning.',
-	},
-	{
-		period: "2021",
-		title: "Klustered arrives",
-		description:
-			"We invited friends and experts to debug intentionally broken Kubernetes clusters in real time. The format celebrated problem-solving under pressure and quickly became a community favorite.",
+		title: "Rawkode Academy launches",
+		body: "The first video set the tone for live, practical exploration of cloud native tools and the people behind them.",
 	},
 	{
 		period: "Today",
-		title: "Still experimenting, still sharing",
-		description:
-			"Rawkode Academy blends live streams, deep-dive series, and research-backed learning paths to help individuals and engineering organizations keep pace with cloud native change.",
+		title: "Still experimenting in public",
+		body: "The academy now mixes shows, articles, partnerships, consulting, and training around the same core idea: learn by doing the real work.",
 	},
 ];
 
-const signatureFormats = [
+const formats = [
 	{
 		title: "Rawkode Live",
-		description:
-			"Pair-programming sessions with maintainers and contributors where we explore new releases, ship proof-of-concepts, and fix bugs the honest way.",
-		chips: ["Live coding", "Maintainer access", "Transparent problem-solving"],
+		body: "Live sessions with maintainers and practitioners exploring releases, ideas, bugs, and production patterns.",
+		items: ["Live coding", "Maintainer access", "Real troubleshooting"],
 	},
 	{
 		title: "Klustered",
-		description:
-			"A chaos-friendly challenge series where experts race to repair sabotaged Kubernetes clusters. Every run reveals new observability, networking, and reliability tactics.",
-		chips: ["Kubernetes", "Incident response", "Game show energy"],
+		body: "A Kubernetes troubleshooting format where experts repair deliberately broken clusters under pressure.",
+		items: ["Kubernetes", "Incident response", "Operational intuition"],
 	},
 	{
 		title: "Learning paths",
-		description:
-			"Structured, research-backed collections of shows, articles, and labs that turn sprawling topics like Platform Engineering or WASM into actionable skill trees.",
-		chips: ["Self-paced", "Curated resources", "Actionable outcomes"],
+		body: "Curated sequences of articles, shows, and courses that turn broad topics into practical progression.",
+		items: ["Self-paced", "Curated resources", "Actionable outcomes"],
 	},
 ];
 ---
 
-<style>
- @reference "../../styles/global.css";
+<Page
+	title="About Rawkode Academy"
+	description="The story, mission, and formats behind Rawkode Academy and its practical cloud native education."
+	pageType="AboutPage"
+>
+	<EditorialShell
+		eyebrow="About"
+		title="Cloud native education built in public"
+		lede="Rawkode Academy helps engineers understand modern infrastructure by watching real people build, break, debug, and explain real systems."
+	>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="/watch">Watch latest</a>
+			<a class="editorial-button editorial-button--secondary" href="/organizations/partnerships">Work with us</a>
+		</div>
 
- .section-shell {
- @apply relative py-16 md:py-24;
- }
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				{stats.map((stat) => (
+					<div class="editorial-stat">
+						<span class="editorial-stat__value">{stat.value}</span>
+						<span class="editorial-stat__label">{stat.label}</span>
+					</div>
+				))}
+			</div>
+		</section>
 
- .section-shell::before {
- content: "";
- @apply pointer-events-none absolute inset-0 mx-auto max-w-6xl bg-[var(--surface-card)] blur-[140px] opacity-60;
- }
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Mission</p>
+				<h2 class="editorial-section__title">Make complex systems easier to learn without pretending they are simple</h2>
+				<p class="editorial-section__lede">
+					We care about the full path from curiosity to production confidence: context, trade-offs, tooling, mistakes, and repetition.
+				</p>
+			</div>
+			<div class="editorial-grid editorial-grid--3">
+				{missionPillars.map((pillar) => (
+					<article class="editorial-card">
+						<h3 class="editorial-card__title">{pillar.title}</h3>
+						<p class="editorial-card__body">{pillar.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
 
- .timeline-line {
- @apply absolute left-5 md:left-1/2 h-full w-px -translate-x-1/2 bg-[var(--surface-card)] dark:via-gray-800/60;
- }
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Story</p>
+				<h2 class="editorial-section__title">A builder's path into teaching</h2>
+			</div>
+			<div class="about-timeline">
+				{timeline.map((item) => (
+					<article class="about-timeline__item">
+						<p class="editorial-meta">{item.period}</p>
+						<h3 class="editorial-card__title">{item.title}</h3>
+						<p class="editorial-card__body">{item.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
 
- .timeline-item {
- @apply relative flex flex-col gap-3 bg-white/60 p-6 text-left text-secondary-content dark:bg-gray-900/60;
- border: 1px solid rgb(255 255 255 / 0.25);
- backdrop-filter: blur(22px);
- }
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Formats</p>
+				<h2 class="editorial-section__title">How we teach</h2>
+				<p class="editorial-section__lede">
+					Everything is built around practical exposure to tools, maintainers, and trade-offs.
+				</p>
+			</div>
+			<div class="editorial-grid editorial-grid--3">
+				{formats.map((format) => (
+					<article class="editorial-card">
+						<h3 class="editorial-card__title">{format.title}</h3>
+						<p class="editorial-card__body">{format.body}</p>
+						<div class="editorial-pill-row">
+							{format.items.map((item) => <span class="editorial-pill">{item}</span>)}
+						</div>
+					</article>
+				))}
+			</div>
+		</section>
 
- .dark .timeline-item {
- border-color: rgb(255 255 255 / 0.08);
- }
-</style>
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Origin clips</p>
+				<h2 class="editorial-section__title">Two moments that shaped the academy</h2>
+			</div>
+			<div class="editorial-grid editorial-grid--2">
+				<article class="editorial-card about-video">
+					<div class="about-video__frame">
+						<iframe
+							src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
+							title="Last Week in Kubernetes"
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+							allowfullscreen
+						></iframe>
+					</div>
+					<h3 class="editorial-card__title">Last Week in Kubernetes</h3>
+					<p class="editorial-card__body">The first format that proved live, curious exploration could work.</p>
+				</article>
+				<article class="editorial-card about-video">
+					<div class="about-video__frame">
+						<iframe
+							src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
+							title="Klustered Episode One"
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+							allowfullscreen
+						></iframe>
+					</div>
+					<h3 class="editorial-card__title">Klustered</h3>
+					<p class="editorial-card__body">Kubernetes troubleshooting turned into shared, high-signal learning.</p>
+				</article>
+			</div>
+		</section>
 
-<Page title="About Rawkode Academy" description="The story, mission, and formats behind Rawkode Academy. How we make hands-on cloud native and Kubernetes education for working engineers." pageType="AboutPage">
- <Hero
- background="gradient-hero"
- pattern="dots"
- size="xl"
- align="center"
- badge="Our Story"
- title="Cloud Native education built in public"
- subtitle="We document the wins, losses, and aha moments that come from exploring the rapidly changing infrastructure landscape."
- >
- <Fragment slot="actions">
- <div class="flex flex-wrap items-center justify-center gap-4">
- <Button href="/shows" variant="primary" size="lg">Explore our shows</Button>
- <Button href="/watch" variant="ghost" size="lg">Catch the latest episode</Button>
- </div>
- </Fragment>
- <Fragment slot="stats">
- <span>Founded in 2019</span>
- <span class="inline-flex items-center gap-1 text-primary">
- <span class="h-2 w-2 rounded-full bg-primary"></span>
- Independent & community-funded
- </span>
- </Fragment>
- </Hero>
-
- <section class="section-shell">
- <div class="relative z-10 mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-[1.1fr_0.9fr]">
- <div class="paper-panel p-8 dark: bleed-x-mobile">
- <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Mission</p>
- <h2 class="mt-4 text-3xl font-semibold text-primary-content">Empower developers to navigate constant change</h2>
- <p class="mt-4 text-lg text-muted">
- Rawkode Academy exists to make complex cloud native topics approachable without sanding off the hard edges. We combine
- research, real production experience, and a lot of humility to show exactly how we learn.
- </p>
- <p class="mt-6 text-muted">
- Whether you're a solo builder trying to keep up or leading a platform team, we want you to feel like you have a front-row seat to
- every experiment, refactor, and architectural debate.
- </p>
- </div>
- <div class="space-y-6">
- {missionPillars.map((pillar) => (
- <div class="paper-panel p-6 bleed-x-mobile">
- <h3 class="text-xl font-semibold text-primary-content">{pillar.title}</h3>
- <p class="mt-2 text-muted">{pillar.description}</p>
- </div>
- ))}
- </div>
- </div>
- </section>
-
- <section class="py-16 sm:py-20">
- <div class="mx-auto max-w-6xl px-4">
- <div class="text-center">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Impact</p>
- <h2 class="mt-4 text-3xl font-semibold text-primary-content">Proof that curiosity scales</h2>
- <p class="mt-3 text-lg text-muted">
- We obsess over doing the work in public. These numbers are a snapshot of what that persistence has unlocked so far.
- </p>
- </div>
- <div class="mt-12 grid gap-6 md:grid-cols-3">
- {stats.map((stat) => (
- <div class="paper-panel p-8 text-center bleed-x-mobile">
- <p class="text-4xl font-semibold text-primary-content">{stat.value}</p>
- <p class="mt-2 text-lg font-medium text-secondary-content">{stat.label}</p>
- <p class="mt-3 text-sm text-muted">{stat.description}</p>
- </div>
- ))}
- </div>
- </div>
- </section>
-
- <section class="relative overflow-hidden bg-gradient-to-b from-transparent to-transparent py-20">
- <div class="mx-auto max-w-5xl px-4">
- <div class="text-center">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Founder's journey</p>
- <h2 class="mt-4 text-3xl font-semibold text-primary-content">Two decades of building, sharing, and mentoring</h2>
- <p class="mt-3 text-lg text-muted">
- Every experiment inside Rawkode Academy is rooted in lessons learned from running production systems, leading teams, and collaborating with
- the maintainers who shape our industry.
- </p>
- </div>
- <div class="mt-12 relative">
- <div class="timeline-line"></div>
- <div class="space-y-10">
- {timeline.map((item) => (
- <div class="relative grid gap-4 md:grid-cols-2 md:items-center">
- <div class="order-2 md:order-1 md:pr-8">
- <div class="timeline-item">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">{item.period}</p>
- <h3 class="text-2xl font-semibold text-primary-content">{item.title}</h3>
- <p class="text-muted">{item.description}</p>
- </div>
- </div>
- <div class="order-1 md:order-2">
- <div class="flex items-center justify-center">
- <div class="hidden h-4 w-4 rounded-full bg-[var(--surface-card)] md:block"></div>
- </div>
- </div>
- </div>
- ))}
- </div>
- </div>
- </div>
- </section>
-
- <section class="py-20">
- <div class="mx-auto max-w-6xl px-4">
- <div class="text-center">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Signature formats</p>
- <h2 class="mt-4 text-3xl font-semibold text-primary-content">Where experimentation meets entertainment</h2>
- <p class="mt-3 text-lg text-muted">
- We mix long-running shows with limited series to meet people where they learn best.
- </p>
- </div>
- <div class="mt-12 grid gap-6 md:grid-cols-3">
- {signatureFormats.map((format) => (
- <div class="paper-panel flex h-full flex-col p-6 bleed-x-mobile">
- <div class="flex-1">
- <h3 class="text-xl font-semibold text-primary-content">{format.title}</h3>
- <p class="mt-3 text-muted">{format.description}</p>
- </div>
- <div class="mt-4 flex flex-wrap gap-2">
- {format.chips.map((chip) => (
- <span class="hairline-chip text-xs font-medium text-secondary-content">{chip}</span>
- ))}
- </div>
- </div>
- ))}
- </div>
- </div>
- </section>
-
- <section class="section-shell">
- <div class="relative z-10 mx-auto max-w-6xl px-4">
- <div class="text-center">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Moments we love</p>
- <h2 class="mt-4 text-3xl font-semibold text-primary-content">The clips that started it all</h2>
- <p class="mt-3 text-lg text-muted">
- These two episodes capture the spirit of Rawkode Academy: curiosity, collaboration, and just enough chaos to keep everyone honest.
- </p>
- </div>
- <div class="mt-12 grid gap-8 md:grid-cols-2">
- <div class="paper-panel overflow-hidden p-0 bleed-x-mobile">
- <div class="aspect-video">
- <iframe
- class="h-full w-full"
- src="https://www.youtube-nocookie.com/embed/ebei2vbn2o8?si=f5-J_6DpjxW39xn7"
- title="Last Week in Kubernetes"
- allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
- allowfullscreen
- ></iframe>
- </div>
- <div class="p-6">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2019</p>
- <h3 class="mt-2 text-2xl font-semibold text-primary-content">Last Week in Kubernetes</h3>
- <p class="mt-2 text-muted">The pilot episode that proved live, unfiltered exploration resonated with our audience.</p>
- </div>
- </div>
- <div class="paper-panel overflow-hidden p-0 bleed-x-mobile">
- <div class="aspect-video">
- <iframe
- class="h-full w-full"
- src="https://www.youtube-nocookie.com/embed/teB22ZuV_z8"
- title="Klustered Episode One"
- allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
- allowfullscreen
- ></iframe>
- </div>
- <div class="p-6">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">2021</p>
- <h3 class="mt-2 text-2xl font-semibold text-primary-content">Klustered with Walid Shaari</h3>
- <p class="mt-2 text-muted">A bold game show experiment that turned Kubernetes troubleshooting into an adrenaline rush.</p>
- </div>
- </div>
- </div>
- </div>
- </section>
-
- <section class="relative isolate overflow-hidden py-20">
- <div class="pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent opacity-50 blur-3xl"></div>
- <div class="relative mx-auto max-w-5xl border border-white/30 bg-white/80 px-8 py-12 text-center dark:border-white/10 dark:bg-gray-900/80 dark:">
- <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Join the community</p>
- <h2 class="mt-4 text-3xl font-semibold text-primary-content">Bring Rawkode Academy into your week</h2>
- <p class="mt-3 text-lg text-muted">
- Subscribe to our shows, share your projects, or invite us to collaborate with your engineering organization. Together we'll keep the
- Cloud Native ecosystem open, welcoming, and practical.
- </p>
- <div class="mt-8 flex flex-wrap justify-center gap-4">
- <Button href="/shows" variant="primary" size="lg">See upcoming shows</Button>
- <Button href="/maintainers/share-your-project" variant="ghost" size="lg">Share your project</Button>
- </div>
- </div>
- </section>
+		<section class="editorial-section">
+			<div class="editorial-callout">
+				<div>
+					<h2 class="editorial-section__title">Bring Rawkode Academy into your week</h2>
+					<p class="editorial-card__body">
+						Watch the latest episode, share a project, or work with us on partner content, training, and technical enablement.
+					</p>
+				</div>
+				<div class="editorial-button-row">
+					<a class="editorial-button" href="/watch">Watch</a>
+					<a class="editorial-button" href="/maintainers/share-your-project">Share a project</a>
+				</div>
+			</div>
+		</section>
+	</EditorialShell>
 </Page>
+
+<style>
+	.about-timeline {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.about-timeline__item {
+		border-left: 2px solid var(--editorial-spruce);
+		padding-left: 1rem;
+	}
+
+	.about-video {
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.about-video__frame {
+		aspect-ratio: 16 / 9;
+		background: var(--editorial-ink);
+	}
+
+	.about-video iframe {
+		width: 100%;
+		height: 100%;
+		border: 0;
+		display: block;
+	}
+
+	.about-video .editorial-card__title,
+	.about-video .editorial-card__body {
+		margin-left: 1rem;
+		margin-right: 1rem;
+	}
+
+	.about-video .editorial-card__title {
+		margin-top: 1rem;
+	}
+
+	.about-video .editorial-card__body {
+		margin-bottom: 1rem;
+	}
+</style>

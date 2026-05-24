@@ -18,12 +18,11 @@
 				<path d="m20 20-4.35-4.35" />
 			</svg>
 			<span class="cmd-bar__pill-prompt">
-				<span class="cmd-bar__pill-caret">›</span>
-				{{ searchPlaceholder }}
-				<span class="cmd-bar__pill-cursor">_</span>
+				Search academy
 			</span>
+			<span class="cmd-bar__pill-hint">{{ searchPlaceholder }}</span>
 			<span class="cmd-bar__keycaps">
-				<kbd>⌘</kbd><kbd>K</kbd>
+				<kbd>⌘K</kbd>
 			</span>
 		</button>
 
@@ -130,43 +129,64 @@ const handleSearchClick = () => {
 	flex: 1;
 	max-width: 720px;
 	margin: 0 auto;
-	height: 42px;
+	height: 40px;
 	display: flex;
 	align-items: center;
-	gap: 0.75rem;
-	padding: 0 0.875rem 0 1rem;
-	background: var(--editorial-paper-deep);
+	gap: 0.65rem;
+	padding: 0 0.6rem 0 0.8rem;
+	background: var(--editorial-paper);
 	border: 1px solid var(--editorial-hairline);
-	border-radius: var(--radius-sm);
+	border-radius: 4px;
 	cursor: pointer;
 	font: inherit;
-	color: var(--editorial-ink-mute);
-	transition: border-color var(--duration-base) var(--ease-standard);
+	color: var(--editorial-ink-soft);
+	box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--editorial-paper-deep) 50%, transparent);
+	transition:
+		background-color var(--duration-base) var(--ease-standard),
+		border-color var(--duration-base) var(--ease-standard),
+		color var(--duration-base) var(--ease-standard);
 }
 
-.cmd-bar__pill:hover { border-color: var(--editorial-hairline-strong); }
+.cmd-bar__pill:hover {
+	background: var(--editorial-paper-deep);
+	border-color: var(--editorial-hairline-strong);
+	color: var(--editorial-ink);
+}
 
 .cmd-bar__pill-prompt {
-	flex: 1;
+	flex: 0 0 auto;
 	font-family: var(--font-jetbrains-mono), monospace;
-	font-size: 13px;
-	letter-spacing: 0.05em;
+	font-size: 0.76rem;
+	font-weight: 650;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 	text-align: left;
-	color: var(--editorial-ink-mute);
+	color: var(--editorial-ink);
+	white-space: nowrap;
 }
 
-.cmd-bar__pill-caret { color: var(--editorial-ink); margin-right: 0.25rem; }
-.cmd-bar__pill-cursor { color: var(--editorial-rust); margin-left: 0.4rem; }
+.cmd-bar__pill-hint {
+	flex: 1;
+	min-width: 0;
+	font-family: var(--font-inter-tight), system-ui, sans-serif;
+	font-size: 0.84rem;
+	line-height: 1;
+	color: var(--editorial-ink-mute);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
 
 .cmd-bar__keycaps { display: flex; gap: 0.25rem; }
 .cmd-bar__keycaps kbd {
 	font-family: var(--font-jetbrains-mono), monospace;
-	font-size: 11px;
-	padding: 0.2rem 0.45rem;
+	font-size: 0.66rem;
+	font-weight: 650;
+	padding: 0.18rem 0.42rem;
 	border: 1px solid var(--editorial-hairline-strong);
 	border-radius: 2px;
-	color: var(--editorial-ink-soft);
-	background: transparent;
+	color: var(--editorial-ink);
+	background: var(--editorial-paper-deep);
 }
 
 .cmd-bar__nav {

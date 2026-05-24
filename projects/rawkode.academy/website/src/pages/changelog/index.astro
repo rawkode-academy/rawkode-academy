@@ -1,9 +1,8 @@
 ---
 import { getCollection, getEntry } from "astro:content";
-import EditorialButton from "@/components/ui/EditorialButton.vue";
-import MLabel from "@/components/ui/MLabel.vue";
 import { marked } from "marked";
-import PageWrapper from "../../wrappers/page.astro";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
+import Page from "@/wrappers/page.astro";
 
 marked.setOptions({
 	breaks: true,
@@ -33,247 +32,155 @@ const processedChangelog = await Promise.all(
 		};
 	}),
 );
-
-// Mono kicker tone for each change type, used by the editorial chip.
-const typeTone: Record<string, "amber" | "spruce" | "rust" | "ink"> = {
-	feature: "spruce",
-	fix: "rust",
-	chore: "ink",
-	docs: "spruce",
-	breaking: "amber",
-};
 ---
 
-<PageWrapper
+<Page
 	title="Changelog"
 	description="Stay up to date with the latest changes and improvements to Rawkode Academy."
 >
-	<div class="changelog-page">
-		<header class="changelog-header">
-			<MLabel tone="spruce">§ What's new</MLabel>
-			<h1 class="changelog-header__title">Changelog</h1>
-			<p class="changelog-header__lede">
-				The running record of what's shipped on the academy — features, fixes, docs, and the occasional breaking change.
-			</p>
-			<div class="changelog-header__actions">
-				<EditorialButton variant="solid" size="md" href="#latest" arrow>
-					View latest
-				</EditorialButton>
-				<EditorialButton variant="outline" size="md" href="https://github.com/rawkode-academy">
-					On GitHub
-				</EditorialButton>
-			</div>
-			<dl class="changelog-header__stats">
-				<div class="changelog-header__stat">
-					<dt><MLabel>Updates</MLabel></dt>
-					<dd class="changelog-header__stat-value">{changelogEntries.length}</dd>
-				</div>
-				<div class="changelog-header__stat">
-					<dt><MLabel>Cadence</MLabel></dt>
-					<dd class="changelog-header__stat-value">Weekly</dd>
-				</div>
-				<div class="changelog-header__stat">
-					<dt><MLabel>Source</MLabel></dt>
-					<dd class="changelog-header__stat-value">Open</dd>
-				</div>
-			</dl>
-		</header>
+	<EditorialShell
+		eyebrow="Product notes"
+		title="Changelog"
+		lede="A running record of the features, fixes, and content updates shipped across Rawkode Academy."
+		compact
+	>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="#latest">Latest updates</a>
+			<a class="editorial-button editorial-button--secondary" href="https://github.com/rawkode-academy">GitHub</a>
+		</div>
 
-		<div id="latest" class="changelog-body">
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">{changelogEntries.length}</span>
+					<span class="editorial-stat__label">Updates</span>
+				</div>
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">Open</span>
+					<span class="editorial-stat__label">Source</span>
+				</div>
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">Live</span>
+					<span class="editorial-stat__label">Project record</span>
+				</div>
+			</div>
+		</section>
+
+		<section id="latest" class="editorial-section changelog-list">
 			{
 				processedChangelog.length === 0 ? (
-					<div class="changelog-empty">
-						<MLabel>No changelog entries yet.</MLabel>
+					<div class="editorial-card">
+						<p class="editorial-card__body">No changelog entries yet.</p>
 					</div>
 				) : (
-					<div class="changelog-entries">
-						{processedChangelog.map((entry, i) => (
-							<article class="changelog-entry">
-								<div class="changelog-entry__head">
-									<MLabel tone="muted">
-										§{String(processedChangelog.length - i).padStart(3, "0")}
-									</MLabel>
-									<MLabel tone={typeTone[entry.type] ?? "ink"}>
-										{entry.type}
-									</MLabel>
-									<time
-										class="changelog-entry__date"
-										datetime={entry.date.toISOString()}
-									>
-										{entry.date.toLocaleDateString("en-US", {
-											year: "numeric",
-											month: "long",
-											day: "numeric",
-										})}
-									</time>
-								</div>
-								<h2 class="changelog-entry__title">{entry.title}</h2>
-								<div
-									class="prose changelog-entry__body"
-									set:html={entry.renderedContent}
-								/>
-								<footer class="changelog-entry__byline">
-									{entry.author.avatar_url && (
-										<img
-											src={entry.author.avatar_url}
-											alt=""
-											class="changelog-entry__avatar"
-											loading="lazy"
-										/>
-									)}
-									<MLabel>by {entry.author.name}</MLabel>
-								</footer>
-							</article>
-						))}
-					</div>
+					processedChangelog.map((entry, index) => (
+						<article class="changelog-entry">
+							<div class="changelog-entry__meta">
+								<span class="editorial-pill">
+									No{String(processedChangelog.length - index).padStart(3, "0")}
+								</span>
+								<span class="editorial-pill">{entry.type}</span>
+								<time datetime={entry.date.toISOString()}>
+									{entry.date.toLocaleDateString("en-US", {
+										year: "numeric",
+										month: "long",
+										day: "numeric",
+									})}
+								</time>
+							</div>
+							<h2>{entry.title}</h2>
+							<div class="editorial-prose changelog-entry__body" set:html={entry.renderedContent} />
+							<footer class="changelog-entry__byline">
+								{entry.author.avatar_url && (
+									<img
+										src={entry.author.avatar_url}
+										alt=""
+										class="changelog-entry__avatar"
+										loading="lazy"
+									/>
+								)}
+								<span>by {entry.author.name}</span>
+							</footer>
+						</article>
+					))
 				)
 			}
-		</div>
-	</div>
-</PageWrapper>
+		</section>
+	</EditorialShell>
+</Page>
 
 <style>
-	.changelog-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.changelog-header {
-		max-width: 60rem;
-		margin: 0 auto;
-		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
+	.changelog-list {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.changelog-header__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: clamp(3rem, 6vw, 5rem);
-		line-height: 0.95;
-		letter-spacing: -0.025em;
-		color: var(--editorial-ink);
-		margin: 0;
-	}
-
-	.changelog-header__lede {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.125rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
-		max-width: 40rem;
-		margin: 0;
-	}
-
-	.changelog-header__actions {
-		display: flex;
-		gap: 0.75rem;
-		flex-wrap: wrap;
-		margin-top: 0.5rem;
-	}
-
-	.changelog-header__stats {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1.5rem;
-		margin: 1.75rem 0 0;
-		padding-top: 1.5rem;
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.changelog-header__stat dt { margin: 0; }
-	.changelog-header__stat dd { margin: 0; }
-	.changelog-header__stat-value {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-size: 1.875rem;
-		line-height: 1;
-		color: var(--editorial-ink);
-		margin-top: 0.4rem;
-	}
-
-	.changelog-body {
-		max-width: 60rem;
-		margin: 0 auto;
-		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
-	}
-
-	.changelog-empty {
-		padding: 3rem 0;
-		text-align: center;
-	}
-
-	.changelog-entries {
-		display: flex;
-		flex-direction: column;
+		gap: 0;
 	}
 
 	.changelog-entry {
-		padding: 2rem 0;
 		border-top: 1px solid var(--editorial-hairline);
+		padding: 2rem 0;
 	}
-	.changelog-entry:first-child { border-top: none; padding-top: 0; }
 
-	.changelog-entry__head {
+	.changelog-entry:first-child {
+		border-top: 0;
+		padding-top: 0;
+	}
+
+	.changelog-entry__meta {
 		display: flex;
-		align-items: center;
-		gap: 1rem;
 		flex-wrap: wrap;
-		margin-bottom: 0.875rem;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.9rem;
 	}
 
-	.changelog-entry__date {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		letter-spacing: 0.14em;
+	.changelog-entry__meta time,
+	.changelog-entry__byline {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--editorial-ink-mute);
-		margin-left: auto;
 	}
 
-	.changelog-entry__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.875rem;
+	.changelog-entry h2 {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 1.75rem;
+		font-weight: 750;
 		line-height: 1.05;
-		letter-spacing: -0.02em;
+		letter-spacing: 0;
 		color: var(--editorial-ink);
-		margin: 0 0 0.875rem;
+		margin: 0 0 1rem;
 		text-wrap: balance;
 	}
 
-	.changelog-entry__body { max-width: none; }
-	.changelog-entry__body :global(p:last-child) { margin-bottom: 0; }
+	.changelog-entry__body {
+		max-width: 46rem;
+	}
+
+	.changelog-entry__body :global(p:last-child) {
+		margin-bottom: 0;
+	}
 
 	.changelog-entry__byline {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding-top: 1rem;
-		margin-top: 1rem;
-		border-top: 1px solid var(--editorial-hairline);
+		margin-top: 1.2rem;
 	}
 
 	.changelog-entry__avatar {
-		width: 22px;
-		height: 22px;
-		border-radius: 50%;
+		width: 1.4rem;
+		height: 1.4rem;
+		border-radius: 999px;
 		object-fit: cover;
 		border: 1px solid var(--editorial-hairline-strong);
 	}
 
-	@media (max-width: 720px) {
-		.changelog-header,
-		.changelog-body {
-			padding-left: 1.25rem;
-			padding-right: 1.25rem;
-		}
-		.changelog-header__stats {
-			grid-template-columns: 1fr 1fr;
+	@media (max-width: 700px) {
+		.changelog-entry {
+			padding: 1.5rem 0;
 		}
 	}
 </style>

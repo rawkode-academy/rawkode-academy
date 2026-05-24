@@ -1,6 +1,7 @@
 ---
 export const prerender = true;
 
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -20,18 +21,20 @@ let technologies: Technology[] = [];
 try {
 	const items = await getCollection("technologies");
 
-	technologies = items.map((e) => {
-		const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
+	technologies = items
+		.map((e) => {
+			const logo = resolveTechnologyIconUrl(e.id, e.data.logos);
 
-		const tech: Technology = {
-			id: e.id,
-			name: e.data.name,
-			...(logo && { logo }),
-			...(e.data.website && { website: e.data.website }),
-			...(e.data.documentation && { documentation: e.data.documentation }),
-		};
-		return tech;
-	});
+			const tech: Technology = {
+				id: e.id,
+				name: e.data.name,
+				...(logo && { logo }),
+				...(e.data.website && { website: e.data.website }),
+				...(e.data.documentation && { documentation: e.data.documentation }),
+			};
+			return tech;
+		})
+		.sort((a, b) => a.name.localeCompare(b.name));
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
 }
@@ -39,107 +42,57 @@ try {
 
 <Page
 	title="Cloud Native Technologies"
-	description="300+ cloud native technologies - Kubernetes, GitOps, service mesh, observability, security, identity, and more - with tutorials, deep dives, and references."
+	description="Cloud native technologies with tutorials, deep dives, and references."
 	pageType="CollectionPage"
 >
-	<div class="flex flex-col stack-gap-lg section-py section-pt-0 page-px">
-		<!-- Hero Section -->
-		<section class="w-full">
-			<div class="paper-panel rounded-sm p-6 md:p-8 max-w-7xl mx-auto bleed-x-mobile">
-				<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-					<!-- Hero Copy -->
-					<div class="flex-1 space-y-4">
-						<span class="hairline-chip">
-							<svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-							</svg>
-							Technology Hub
-						</span>
-						<h1 class="text-3xl md:text-4xl font-extrabold text-primary-content">
-							Explore technologies
-						</h1>
-						<p class="text-secondary-content max-w-xl">
-							Browse Rawkode Academy's catalogue of tools and platforms. Start typing to find what you're looking for.
-						</p>
-					</div>
+	<div class="technology-page">
+		<CollectionMasthead title="Technologies" dek="Tools and platforms." />
 
-					<!-- Search Controls -->
-					<div class="w-full lg:w-96 space-y-3">
-						<label for="technology-search" class="block text-sm font-medium text-secondary-content">
-							Search technologies
-						</label>
-						<div class="relative">
-							<svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-								<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-							</svg>
-							<input
-								id="technology-search"
-								type="search"
-								placeholder="e.g. Grafana, Crossplane, Kubernetes..."
-								class="w-full rounded-sm py-3 pl-12 pr-4 text-base text-primary-content placeholder-gray-400 dark:placeholder-gray-500 bg-white/60 dark:bg-gray-800/60 border border-white/40 dark:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition"
-								autocomplete="off"
-							/>
-						</div>
-						<p class="text-sm text-muted">
-							Showing <span class="font-medium text-secondary-content" data-tech-visible-count>{technologies.length}</span> of {technologies.length} technologies
-						</p>
-					</div>
-				</div>
-			</div>
+		<section class="technology-page__tools" aria-label="Technology search">
+			<label class="technology-page__label" for="technology-search">Search technologies</label>
+			<input
+				id="technology-search"
+				type="search"
+				placeholder="Name"
+				class="technology-page__search-input"
+				autocomplete="off"
+			/>
+			<p class="technology-page__count">
+				Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length}
+			</p>
 		</section>
 
-		<!-- Technologies Grid -->
-		<section id="technologies" class="w-full">
-			<div class="max-w-7xl mx-auto">
-				<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-					{
-						technologies.map((tech) => {
-							const searchKeywords = tech.name.toLowerCase();
-							
-							return (
-								<a
-									href={`/technology/${tech.id}`}
-									class="tech-card-link paper-card card-hover bleed-x-mobile flex flex-col overflow-hidden"
-									data-keywords={searchKeywords}
-								>
-									{/* Logo Container */}
-									<div class="paper-card-muted h-36 flex items-center justify-center p-6">
-										<img
-											src={tech.logo ?? '/apple-touch-icon.png'}
-											alt={`${tech.name} Logo`}
-											class="w-20 h-20 object-contain drop-"
-											onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-										/>
-									</div>
-									
-									{/* Content */}
-									<div class="flex-1 p-5 flex flex-col gap-3 relative z-10">
-										<h3 class="text-lg font-bold text-primary-content">
-											{tech.name}
-										</h3>
-										<span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
-											Learn more
-											<svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-												<path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-											</svg>
-										</span>
-									</div>
-								</a>
-							);
-						})
-					}
-				</div>
-				
-				<!-- Empty State -->
-				<div id="technology-empty-state" class="hidden">
-					<div class="paper-card rounded-sm p-12 text-center max-w-md mx-auto">
-						<svg class="w-12 h-12 mx-auto text-muted mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-							<path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-						</svg>
-						<p class="text-muted font-medium">No technologies match your search</p>
-						<p class="text-sm text-gray-500 dark:text-gray-500 mt-1">Try a different term</p>
-					</div>
-				</div>
+		<section id="technologies" class="technology-page__grid-section" aria-label="Technologies">
+			<div class="technology-page__grid">
+				{
+					technologies.map((tech) => {
+						const searchKeywords = tech.name.toLowerCase();
+
+						return (
+							<a
+								href={`/technology/${tech.id}`}
+								class="tech-card-link"
+								data-keywords={searchKeywords}
+							>
+								<span class="tech-card-link__logo-wrap">
+									<img
+										src={tech.logo ?? "/apple-touch-icon.png"}
+										alt={`${tech.name} logo`}
+										class="tech-card-link__logo"
+										loading="lazy"
+										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+									/>
+								</span>
+								<span class="tech-card-link__name">{tech.name}</span>
+							</a>
+						);
+					})
+				}
+			</div>
+
+			<div id="technology-empty-state" class="technology-page__empty hidden">
+				<h2>No technologies match your search</h2>
+				<p>Try a different term.</p>
 			</div>
 		</section>
 
@@ -181,3 +134,165 @@ try {
 		</script>
 	</div>
 </Page>
+
+<style>
+	.technology-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.technology-page__tools {
+		display: grid;
+		grid-template-columns: auto minmax(14rem, 28rem) 1fr;
+		align-items: center;
+		gap: 0.875rem 1rem;
+		padding: 1rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.technology-page__label,
+	.technology-page__count {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.technology-page__search-input {
+		width: 100%;
+		min-height: 2.75rem;
+		border: 1px solid var(--editorial-hairline-strong);
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink);
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		padding: 0.625rem 0.75rem;
+		border-radius: 0;
+		outline: none;
+	}
+
+	.technology-page__search-input:focus {
+		border-color: var(--editorial-ink);
+		box-shadow: 0 0 0 2px var(--editorial-paper), 0 0 0 3px var(--editorial-ink);
+	}
+
+	.technology-page__search-input::placeholder {
+		color: var(--editorial-ink-mute);
+	}
+
+	.technology-page__count {
+		justify-self: end;
+		margin: 0;
+	}
+
+	.technology-page__count span {
+		color: var(--editorial-ink);
+	}
+
+	.technology-page__grid-section {
+		padding: 2rem var(--space-section-pad-x) 3rem;
+	}
+
+	.technology-page__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+		gap: 1rem;
+	}
+
+	.tech-card-link {
+		display: grid;
+		grid-template-columns: 3.25rem minmax(0, 1fr);
+		align-items: center;
+		gap: 0.875rem;
+		min-width: 0;
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		color: inherit;
+		text-decoration: none;
+		padding: 0.875rem;
+		transition: border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.tech-card-link:hover {
+		border-color: var(--editorial-ink);
+	}
+
+	.tech-card-link__logo-wrap {
+		display: grid;
+		place-items: center;
+		width: 3.25rem;
+		height: 3.25rem;
+		background: var(--editorial-paper);
+		border: 1px solid var(--editorial-hairline);
+	}
+
+	.tech-card-link__logo {
+		width: 2rem;
+		height: 2rem;
+		object-fit: contain;
+	}
+
+	.tech-card-link__name {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.975rem;
+		font-weight: 700;
+		line-height: 1.25;
+		color: var(--editorial-ink);
+	}
+
+	.technology-page__empty {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		padding: 2rem;
+		max-width: 28rem;
+		margin: 0 auto;
+		text-align: center;
+	}
+
+	.technology-page__empty h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.technology-page__empty p {
+		font-family: var(--font-inter-tight), sans-serif;
+		color: var(--editorial-ink-soft);
+		margin: 0.5rem 0 0;
+	}
+
+	@media (max-width: 720px) {
+		.technology-page__tools {
+			grid-template-columns: 1fr;
+			padding: 0.875rem 1rem 1rem;
+		}
+		.technology-page__count {
+			justify-self: start;
+		}
+		.technology-page__grid-section {
+			padding: 1.25rem 1rem 2.5rem;
+		}
+		.technology-page__grid {
+			grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+			gap: 0.75rem;
+		}
+		.tech-card-link {
+			grid-template-columns: 2.75rem minmax(0, 1fr);
+			gap: 0.625rem;
+			padding: 0.75rem;
+		}
+		.tech-card-link__logo-wrap {
+			width: 2.75rem;
+			height: 2.75rem;
+		}
+	}
+</style>

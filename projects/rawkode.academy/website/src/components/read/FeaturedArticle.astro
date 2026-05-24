@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import MLabel from "@/components/ui/MLabel.vue";
 
 interface Props {
@@ -7,11 +8,15 @@ interface Props {
 	dispatchNum: number | string;
 	title: string;
 	dek: string;
-	tags?: string[];
 	author?: string | undefined;
 	date: string;
 	readingTime: string;
-	pullQuote?: string | undefined;
+	cover?:
+		| {
+				image: ImageMetadata;
+				alt: string;
+		  }
+		| undefined;
 }
 
 const {
@@ -20,64 +25,90 @@ const {
 	dispatchNum,
 	title,
 	dek,
-	tags = [],
 	author,
 	date,
 	readingTime,
-	pullQuote,
+	cover,
 } = Astro.props as Props;
 ---
 
 <article class="featured-article">
-	<a class="featured-article__main" href={href}>
-		<MLabel tone="spruce">
-			<span class="featured-article__dot" aria-hidden="true"></span>
-			§00 · Featured · Dispatch №{dispatchNum}
-		</MLabel>
+	<a class="featured-article__link" href={href}>
+		{cover && (
+			<div class="featured-article__media">
+				<Image
+					src={cover.image}
+					alt={cover.alt}
+					class="featured-article__image"
+					widths={[480, 720, 960, 1280]}
+					sizes="(max-width: 880px) 100vw, 42vw"
+					loading="eager"
+				/>
+			</div>
+		)}
 
-		<h1 class="featured-article__title">{title}</h1>
-		<p class="featured-article__dek">{dek}</p>
+		<div class="featured-article__main">
+			<MLabel tone="spruce">
+				<span class="featured-article__dot" aria-hidden="true"></span>
+				Featured · Dispatch №{dispatchNum}
+			</MLabel>
 
-		<div class="featured-article__meta">
-			<span class="featured-article__tag featured-article__tag--accent">{kicker}</span>
-			{tags.map((t) => (
-				<span class="featured-article__tag">#{t}</span>
-			))}
-			{author && <MLabel>{author}</MLabel>}
-			<MLabel>{date}</MLabel>
-			<MLabel>{readingTime}</MLabel>
+			<h1 class="featured-article__title">{title}</h1>
+			<p class="featured-article__dek">{dek}</p>
+
+			<div class="featured-article__meta">
+				<span>{kicker}</span>
+				<span aria-hidden="true">·</span>
+				<span>{readingTime}</span>
+				<span aria-hidden="true">·</span>
+				<span>{date}</span>
+				{author && <span class="featured-article__author">By {author}</span>}
+			</div>
+
+			<span class="featured-article__cta">Read feature</span>
 		</div>
 	</a>
-
-	{pullQuote && (
-		<aside class="featured-article__aside">
-			<span class="featured-article__quote-mark" aria-hidden="true">&ldquo;</span>
-			<p class="featured-article__quote">{pullQuote}</p>
-			<MLabel>From the lede</MLabel>
-			<div class="featured-article__aside-footer">
-				<MLabel tone="ink">Read tutorial →</MLabel>
-				<MLabel>{readingTime}</MLabel>
-			</div>
-		</aside>
-	)}
 </article>
 
 <style>
 	.featured-article {
-		display: grid;
-		grid-template-columns: 1.5fr 1fr;
-		gap: 3rem;
-		align-items: start;
-		padding: 3.25rem 2.5rem 3rem;
+		padding: clamp(1.5rem, 4vw, 3rem) 2.5rem;
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.featured-article__main {
+	.featured-article__link {
+		display: grid;
+		grid-template-columns: minmax(17rem, 0.88fr) minmax(0, 1.12fr);
+		gap: clamp(1.5rem, 4vw, 4rem);
+		align-items: center;
 		text-decoration: none;
 		color: inherit;
+	}
+
+	.featured-article__main {
 		display: flex;
 		flex-direction: column;
 		gap: 1.25rem;
+	}
+
+	.featured-article__media {
+		position: relative;
+		overflow: hidden;
+		aspect-ratio: 16 / 10;
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+	}
+
+	.featured-article__image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transition: transform 420ms var(--ease-standard);
+	}
+
+	.featured-article__link:hover .featured-article__image {
+		transform: scale(1.025);
 	}
 
 	.featured-article__dot {
@@ -91,8 +122,8 @@ const {
 		font-family: var(--font-instrument-serif), serif;
 		font-style: italic;
 		font-weight: 400;
-		font-size: clamp(2.75rem, 6vw, 5.25rem);
-		line-height: 0.95;
+		font-size: clamp(2.5rem, 5.5vw, 5rem);
+		line-height: 0.92;
 		letter-spacing: -0.025em;
 		color: var(--editorial-ink);
 		margin: 0;
@@ -101,84 +132,90 @@ const {
 
 	.featured-article__dek {
 		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.1875rem;
+		font-size: clamp(1rem, 1.5vw, 1.1875rem);
 		line-height: 1.45;
 		color: var(--editorial-ink-soft);
 		margin: 0;
-		max-width: 45rem;
+		max-width: 42rem;
 		text-wrap: pretty;
 	}
 
 	.featured-article__meta {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: 0.5rem;
 		align-items: center;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		line-height: 1.4;
+		text-transform: uppercase;
+		color: var(--editorial-ink-soft);
 		margin-top: 0.25rem;
 	}
 
-	.featured-article__tag {
+	.featured-article__meta span:first-child {
+		color: var(--editorial-spruce);
+	}
+
+	.featured-article__author {
+		width: 100%;
+		color: var(--editorial-ink-mute);
+	}
+
+	.featured-article__cta {
+		align-self: flex-start;
 		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.65rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		padding: 0.2rem 0.45rem;
-		color: var(--editorial-ink-soft);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
-		display: inline-block;
-	}
-
-	.featured-article__tag--accent {
-		color: var(--editorial-spruce);
-		border-color: var(--editorial-hairline-strong);
-	}
-
-	.featured-article__aside {
-		position: relative;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
-		padding: 2rem 1.75rem;
-	}
-
-	.featured-article__quote-mark {
-		position: absolute;
-		top: 0.75rem;
-		left: 1.125rem;
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-size: 5rem;
-		line-height: 0.6;
-		color: var(--editorial-spruce);
-	}
-
-	.featured-article__quote {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-size: 1.5rem;
-		line-height: 1.25;
 		color: var(--editorial-ink);
-		margin: 2.25rem 0 1.125rem;
-		text-wrap: pretty;
-	}
-
-	.featured-article__aside-footer {
-		display: flex;
-		justify-content: space-between;
-		padding-top: 1rem;
-		margin-top: 1.125rem;
-		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid currentColor;
+		padding-bottom: 0.125rem;
 	}
 
 	@media (max-width: 880px) {
 		.featured-article {
+			padding: 1.25rem;
+		}
+		.featured-article__link {
 			grid-template-columns: 1fr;
-			padding: 2rem 1.25rem;
-			gap: 2rem;
+			gap: 1rem;
+		}
+		.featured-article__media {
+			aspect-ratio: 16 / 8.5;
 		}
 		.featured-article__title {
-			font-size: clamp(2.25rem, 8vw, 3.5rem);
+			font-size: clamp(2rem, 10vw, 3rem);
+			line-height: 0.96;
+		}
+		.featured-article__dek {
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		.featured-article__main {
+			gap: 0.875rem;
+		}
+		.featured-article__author,
+		.featured-article__cta {
+			display: none;
+		}
+	}
+
+	@media (max-width: 420px) {
+		.featured-article {
+			padding: 1rem;
+		}
+		.featured-article__media {
+			aspect-ratio: 16 / 7.5;
+		}
+		.featured-article__meta {
+			font-size: 0.625rem;
+			letter-spacing: 0.08em;
 		}
 	}
 </style>

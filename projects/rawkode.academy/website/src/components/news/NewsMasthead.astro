@@ -2,92 +2,55 @@
 interface Props {
 	updatedAt?: Date | string | undefined;
 }
-
-const { updatedAt } = Astro.props as Props;
-const updatedDate =
-	updatedAt instanceof Date ? updatedAt : updatedAt ? new Date(updatedAt) : null;
-const updatedLabel = updatedDate
-	? new Intl.DateTimeFormat("en-US", {
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: false,
-		}).format(updatedDate)
-	: undefined;
 ---
 
-<div class="news-masthead">
-	<span class="news-masthead__left">The Wire · Updated continuously</span>
-	<span class="news-masthead__center">
-		News <span class="news-masthead__center-muted">— from the cloud-native ecosystem</span>
-	</span>
-	<span class="news-masthead__right">
-		<span class="news-masthead__dot" aria-hidden="true"></span>
-		Last updated {updatedLabel ?? "—"}
-	</span>
-</div>
+<header class="news-masthead">
+	<h1 class="news-masthead__title">Latest News</h1>
+	<p class="news-masthead__dek">Cloud native updates.</p>
+</header>
 
 <style>
 	.news-masthead {
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
+		display: flex;
 		align-items: baseline;
-		gap: 2rem;
-		padding: 1.25rem var(--space-section-pad-x);
-		border-bottom: 2px solid var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1.125rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.news-masthead__left { color: var(--editorial-ink-soft); }
-
-	.news-masthead__center {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.5rem;
-		letter-spacing: -0.015em;
-		text-transform: none;
+	.news-masthead__title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0;
 		color: var(--editorial-ink);
-		text-align: center;
+		margin: 0;
 	}
 
-	.news-masthead__center-muted { color: var(--editorial-ink-mute); }
-
-	.news-masthead__right {
+	.news-masthead__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.4;
 		color: var(--editorial-ink-soft);
 		text-align: right;
-		display: inline-flex;
-		justify-content: flex-end;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.news-masthead__dot {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		background: var(--editorial-spruce);
-		animation: rk-pulse 1.6s ease-in-out infinite;
-	}
-
-	@keyframes rk-pulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.7; transform: scale(0.92); }
+		margin: 0;
 	}
 
 	@media (max-width: 880px) {
 		.news-masthead {
-			grid-template-columns: 1fr;
-			gap: 0.5rem;
-			padding: 1rem 1.25rem;
-			text-align: center;
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.25rem;
+			padding: 0.875rem 1rem;
 		}
-		.news-masthead__left,
-		.news-masthead__right {
-			text-align: center;
-			justify-content: center;
+		.news-masthead__title {
+			font-size: 1.875rem;
+		}
+		.news-masthead__dek {
+			font-size: 0.875rem;
+			text-align: left;
 		}
 	}
 </style>

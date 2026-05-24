@@ -1,186 +1,179 @@
 ---
 import { getCollection } from "astro:content";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
 const shows = await getCollection("shows");
 const publishedShows = shows.filter((show) => show.data.publish);
+
+const feedGroups = [
+	{
+		title: "All content",
+		body: "Articles, news, videos, and podcasts in one combined feed.",
+		links: [
+			{ label: "RSS", href: "/api/feeds/all.xml" },
+			{ label: "Atom", href: "/api/feeds/all.atom" },
+			{ label: "JSON", href: "/api/feeds/all.json" },
+		],
+	},
+	{
+		title: "Articles",
+		body: "Essays, tutorials, and field notes from the academy.",
+		links: [
+			{ label: "RSS", href: "/api/feeds/articles.xml" },
+			{ label: "Atom", href: "/api/feeds/articles.atom" },
+			{ label: "JSON", href: "/api/feeds/articles.json" },
+		],
+	},
+	{
+		title: "News",
+		body: "Cloud native, Kubernetes, and AI infrastructure news for engineers.",
+		links: [
+			{ label: "RSS", href: "/api/feeds/news.xml" },
+			{ label: "Atom", href: "/api/feeds/news.atom" },
+			{ label: "JSON", href: "/api/feeds/news.json" },
+		],
+	},
+	{
+		title: "Videos",
+		body: "New episodes, live sessions, and video releases.",
+		links: [
+			{ label: "RSS", href: "/api/feeds/videos.xml" },
+			{ label: "Atom", href: "/api/feeds/videos.atom" },
+			{ label: "JSON", href: "/api/feeds/videos.json" },
+		],
+	},
+];
+
+const formatNotes = [
+	"RSS 2.0 is the broadest reader-compatible format.",
+	"Atom 1.0 is a structured XML format with richer metadata.",
+	"JSON Feed is useful for modern readers and programmatic consumers.",
+	"OPML lets you import many feeds into a reader at once.",
+];
 ---
 
 <Page
-	title="RSS, Atom & JSON Feeds"
-	description="Subscribe to Rawkode Academy via RSS, Atom, or JSON Feed to follow new articles, news, videos, and podcasts in your reader of choice."
+	title="Feeds"
+	description="Subscribe to Rawkode Academy via RSS, Atom, JSON Feed, or OPML."
 >
-	<div class="container mx-auto px-4 py-12">
-		<h1 class="text-4xl font-bold mb-8">RSS & Atom Feeds</h1>
-		
-		<p class="text-lg text-secondary-content mb-8">
-			Subscribe to our RSS or Atom feeds to stay updated with the latest content from Rawkode Academy.
-			Choose from individual feeds for articles and videos, or subscribe to the combined feed for all content.
-		</p>
-
-		<div class="grid gap-8 md:grid-cols-2">
-			<!-- All Content Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
-				<h2 class="text-2xl font-semibold mb-4 text-secondary">All Content</h2>
-				<p class="text-secondary-content mb-4">Get articles, news, and videos in one feed</p>
-				<div class="space-y-3">
-					<a href="/api/feeds/all.xml" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path>
-						</svg>
-						RSS Feed
-					</a>
-					<a href="/api/feeds/all.atom" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"></path>
-						</svg>
-						Atom Feed
-					</a>
-					<a href="/api/feeds/all.json" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v2H7V5zm0 4h6v2H7V9zm0 4h4v2H7v-2z" clip-rule="evenodd"></path>
-						</svg>
-						JSON Feed
-					</a>
-				</div>
-			</div>
-
-			<!-- Articles Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
-				<h2 class="text-2xl font-semibold mb-4 text-secondary">Articles</h2>
-				<p class="text-secondary-content mb-4">Subscribe to our latest articles and tutorials</p>
-				<div class="space-y-3">
-					<a href="/api/feeds/articles.xml" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-							<path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a1 1 0 100-2H6V7h5a1 1 0 011 1v5h2V8a3 3 0 00-3-3H4z" clip-rule="evenodd"></path>
-						</svg>
-						RSS Feed
-					</a>
-					<a href="/api/feeds/articles.atom" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-							<path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 00-2 2v6a2 2 0 002 2h2a1 1 0 100-2H6V7h5a1 1 0 011 1v5h2V8a3 3 0 00-3-3H4z" clip-rule="evenodd"></path>
-						</svg>
-						Atom Feed
-					</a>
-					<a href="/api/feeds/articles.json" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v2H7V5zm0 4h6v2H7V9zm0 4h4v2H7v-2z" clip-rule="evenodd"></path>
-						</svg>
-						JSON Feed
-					</a>
-				</div>
-			</div>
-
-			<!-- News Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
-				<h2 class="text-2xl font-semibold mb-4 text-secondary">News</h2>
-				<p class="text-secondary-content mb-4">Cloud native, Kubernetes, and AI infrastructure news for engineers</p>
-				<div class="space-y-3">
-					<a href="/api/feeds/news.xml" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3 1h2v2H5V6zm2 4H5v2h2v-2zm2-4h6v2H9V6zm6 4H9v2h6v-2z" clip-rule="evenodd"></path>
-						</svg>
-						RSS Feed
-					</a>
-					<a href="/api/feeds/news.atom" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3 1h2v2H5V6zm2 4H5v2h2v-2zm2-4h6v2H9V6zm6 4H9v2h6v-2z" clip-rule="evenodd"></path>
-						</svg>
-						Atom Feed
-					</a>
-					<a href="/api/feeds/news.json" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v2H7V5zm0 4h6v2H7V9zm0 4h4v2H7v-2z" clip-rule="evenodd"></path>
-						</svg>
-						JSON Feed
-					</a>
-				</div>
-			</div>
-
-			<!-- Videos Feeds -->
-			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
-				<h2 class="text-2xl font-semibold mb-4 text-secondary">Videos</h2>
-				<p class="text-secondary-content mb-4">Subscribe to our latest video content</p>
-				<div class="space-y-3">
-					<a href="/api/feeds/videos.xml" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
-						</svg>
-						RSS Feed
-					</a>
-					<a href="/api/feeds/videos.atom" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
-						</svg>
-						Atom Feed
-					</a>
-					<a href="/api/feeds/videos.json" class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-							<path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm3 1h6v2H7V5zm0 4h6v2H7V9zm0 4h4v2H7v-2z" clip-rule="evenodd"></path>
-						</svg>
-						JSON Feed
-					</a>
-				</div>
-			</div>
-
-			<!-- Podcast Feeds -->
-			{publishedShows.length > 0 && publishedShows.map((show) => (
-				<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
-					<h2 class="text-2xl font-semibold mb-4 text-secondary">{show.data.name}</h2>
-					<p class="text-secondary-content mb-4">{show.data.description || `Subscribe to ${show.data.name} podcast`}</p>
-					<div class="space-y-3">
-						<a href={`/api/feeds/shows/${show.data.id}.xml`} class="flex items-center gap-3 text-primary hover:text-primary/90 transition-colors">
-							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-								<path fill-rule="evenodd" d="M18 3a1 1 0 00-1.447-.894L8.763 6H5a3 3 0 000 6h.28l1.771 5.316A1 1 0 008 18h1a1 1 0 001-1v-4.382l6.553 3.276A1 1 0 0018 15V3z" clip-rule="evenodd"></path>
-							</svg>
-							Podcast RSS Feed
-						</a>
-					</div>
-				</div>
-			))}
-
-			<!-- How to Subscribe -->
-			<div class="bg-white/40 dark:bg-gray-800/60 rounded-sm p-6 border-surface border">
-				<h2 class="text-2xl font-semibold mb-4 text-secondary">How to Subscribe</h2>
-				<ol class="list-decimal list-inside space-y-2 text-secondary-content">
-					<li>Copy the feed URL you want to subscribe to</li>
-					<li>Open your preferred feed reader (Feedly, Inoreader, etc.)</li>
-					<li>Add a new subscription and paste the feed URL</li>
-					<li>Enjoy automatic updates from Rawkode Academy!</li>
-				</ol>
-			</div>
+	<EditorialShell
+		eyebrow="Subscribe"
+		title="Feeds"
+		lede="Use RSS, Atom, JSON Feed, or OPML to follow new Rawkode Academy articles, news, videos, and shows in your reader."
+		compact
+	>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="/feeds.opml">Download OPML</a>
+			<a class="editorial-button editorial-button--secondary" href="#show-feeds">Show feeds</a>
 		</div>
 
-		<div class="mt-12 p-6 bg-white/40 dark:bg-gray-800/60 rounded-sm border-surface border">
-			<h2 class="text-xl font-semibold mb-3 text-secondary">Subscribe to everything in one click</h2>
-			<p class="text-secondary-content mb-3">
-				Import our OPML file into your feed reader (Feedly, Inoreader, NetNewsWire, etc.)
-				to subscribe to all feeds at once - global feeds, every podcast, plus per-technology
-				and per-contributor feeds, organised in folders.
-			</p>
-			<a
-				href="/feeds.opml"
-				class="inline-flex items-center gap-3 text-primary hover:text-primary/90 transition-colors"
-			>
-				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-					<path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-				</svg>
-				Download feeds.opml
-			</a>
-		</div>
-
-		<div class="mt-12 p-6 bg-white/40 dark:bg-gray-800/60 rounded-sm border-surface border">
-			<h2 class="text-xl font-semibold mb-3 text-secondary">Feed Formats</h2>
-			<div class="space-y-2 text-secondary-content">
-				<p><strong>RSS 2.0:</strong> The most widely supported feed format, compatible with virtually all feed readers.</p>
-				<p><strong>Atom 1.0:</strong> A more modern and technically superior format with better support for content types and metadata.</p>
-				<p><strong>JSON Feed 1.1:</strong> A modern JSON-based feed format supported by NetNewsWire, Feedbin, Inoreader, and others. Easier to consume programmatically.</p>
-				<p><strong>OPML 2.0:</strong> An XML format feed readers use to import multiple subscriptions in one go. Our OPML at <code>/feeds.opml</code> lists every feed we publish, grouped into folders.</p>
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Main feeds</p>
+				<h2 class="editorial-section__title">Choose the feed you actually want</h2>
+				<p class="editorial-section__lede">
+					Subscribe to everything, or keep articles, news, and videos separate.
+				</p>
 			</div>
-		</div>
-	</div>
+			<div class="editorial-grid editorial-grid--2">
+				{feedGroups.map((group) => (
+					<article class="editorial-card feed-card">
+						<h3 class="editorial-card__title">{group.title}</h3>
+						<p class="editorial-card__body">{group.body}</p>
+						<div class="feed-card__links">
+							{group.links.map((link) => (
+								<a class="feed-link" href={link.href}>{link.label}</a>
+							))}
+						</div>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section id="show-feeds" class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Podcasts</p>
+				<h2 class="editorial-section__title">Show feeds</h2>
+				<p class="editorial-section__lede">
+					Each published show has its own podcast RSS feed.
+				</p>
+			</div>
+			<div class="editorial-grid editorial-grid--2">
+				{publishedShows.length > 0 ? (
+					publishedShows.map((show) => (
+						<article class="editorial-card feed-card">
+							<h3 class="editorial-card__title">{show.data.name}</h3>
+							<p class="editorial-card__body">{show.data.description || `Subscribe to ${show.data.name}.`}</p>
+							<div class="feed-card__links">
+								<a class="feed-link" href={`/api/feeds/shows/${show.data.id}.xml`}>Podcast RSS</a>
+							</div>
+						</article>
+					))
+				) : (
+					<article class="editorial-card">
+						<p class="editorial-card__body">No podcast feeds are published yet.</p>
+					</article>
+				)}
+			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">OPML</p>
+				<h2 class="editorial-section__title">Import everything at once</h2>
+				<p class="editorial-section__lede">
+					Import our OPML file into Feedly, Inoreader, NetNewsWire, or another feed reader to subscribe to all available feeds in one step.
+				</p>
+			</div>
+			<div class="editorial-card">
+				<a class="editorial-button" href="/feeds.opml">Download feeds.opml</a>
+			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Formats</p>
+				<h2 class="editorial-section__title">What each format is for</h2>
+			</div>
+			<div class="editorial-card">
+				<ul class="editorial-list">
+					{formatNotes.map((note) => <li>{note}</li>)}
+				</ul>
+			</div>
+		</section>
+	</EditorialShell>
 </Page>
+
+<style>
+	.feed-card__links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+
+	.feed-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2rem;
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 4px;
+		padding: 0.45rem 0.65rem;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink);
+		text-decoration: none;
+	}
+
+	.feed-link:hover {
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		border-color: var(--editorial-ink);
+	}
+</style>

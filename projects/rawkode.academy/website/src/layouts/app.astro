@@ -67,7 +67,7 @@ import { ThemeToggle } from "@/components/ui";
 				</a>
 			</div>
 
-			<!-- Center section - Editorial command pill -->
+			<!-- Center section - search trigger -->
 			<div class="ed-topbar__center">
 				<button
 					type="button"
@@ -81,10 +81,9 @@ import { ThemeToggle } from "@/components/ui";
 						<path d="m20 20-4.35-4.35" />
 					</svg>
 					<span class="ed-topbar__pill-prompt">
-						<span class="ed-topbar__pill-caret">›</span>
-						Search lessons, topics, instructors
-						<span class="ed-topbar__pill-cursor">_</span>
+						Search academy
 					</span>
+					<span class="ed-topbar__pill-hint">Lessons, articles, people</span>
 					<span class="ed-topbar__keycaps">
 						<kbd id="command-shortcut">⌘K</kbd>
 					</span>
@@ -93,13 +92,27 @@ import { ThemeToggle } from "@/components/ui";
 
 			<!-- Right section - Theme Toggle & Profile -->
 			<div class="ed-topbar__right">
-				<ThemeToggle client:load variant="icon" size="md" />
+				<button
+					type="button"
+					id="mobile-search-trigger"
+					class="ed-topbar__icon-btn ed-topbar__mobile-search focus-ring md:hidden"
+					aria-label="Search videos, articles, and technologies"
+					aria-haspopup="dialog"
+				>
+					<svg class="w-5 h-5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+						<circle cx="11" cy="11" r="7" />
+						<path d="m20 20-4.35-4.35" />
+					</svg>
+				</button>
+				<span class="ed-topbar__theme-toggle">
+					<ThemeToggle client:load variant="icon" size="md" />
+				</span>
 				<UserHeader server:defer>
 					<span
 						slot="fallback"
 						aria-hidden="true"
 						class="ed-topbar__user-fallback"
-					></span>
+					>Sign in</span>
 				</UserHeader>
 			</div>
 		</div>
@@ -119,23 +132,6 @@ import { ThemeToggle } from "@/components/ui";
 	</div>
 
 	<CommandPaletteWrapper client:only="react" />
-
-	<!-- Floating Action Button for mobile search -->
-	<button
-		type="button"
-		id="fab-search"
-		class="ed-fab md:hidden focus-ring"
-		aria-label="Open search"
-		aria-haspopup="dialog"
-	>
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-		</svg>
-	</button>
 
 	<style>
 		/* ────────────────────────────────────────────────────────────
@@ -167,6 +163,13 @@ import { ThemeToggle } from "@/components/ui";
 			}
 		}
 
+		@media (max-width: 380px) {
+			.ed-topbar__inner {
+				gap: 0.35rem;
+				padding: 0 0.75rem;
+			}
+		}
+
 		.ed-topbar__left {
 			display: flex;
 			align-items: center;
@@ -190,6 +193,13 @@ import { ThemeToggle } from "@/components/ui";
 			background: var(--surface-card-muted);
 		}
 
+		.ed-topbar__mobile-search {
+			border: 1px solid var(--editorial-hairline);
+			background: var(--editorial-paper);
+			min-width: 2.25rem;
+			min-height: 2.25rem;
+		}
+
 		.ed-topbar__mark {
 			display: flex;
 			align-items: center;
@@ -203,10 +213,16 @@ import { ThemeToggle } from "@/components/ui";
 			fill: currentColor;
 		}
 
+		@media (max-width: 380px) {
+			.ed-topbar__logo-svg {
+				height: 1.3rem;
+			}
+		}
+
 		.ed-topbar__center {
 			display: none;
 			flex: 1;
-			max-width: 36rem;
+			max-width: 34rem;
 		}
 
 		@media (min-width: 768px) {
@@ -215,47 +231,72 @@ import { ThemeToggle } from "@/components/ui";
 
 		.ed-topbar__pill {
 			flex: 1;
-			height: 38px;
+			height: 40px;
 			display: flex;
 			align-items: center;
-			gap: 0.75rem;
-			padding: 0 0.75rem 0 0.875rem;
-			background: var(--editorial-paper-deep);
+			gap: 0.65rem;
+			padding: 0 0.6rem 0 0.8rem;
+			background: var(--editorial-paper);
 			border: 1px solid var(--editorial-hairline);
-			border-radius: var(--radius-sm);
+			border-radius: 4px;
 			cursor: pointer;
 			font: inherit;
-			color: var(--editorial-ink-mute);
-			transition: border-color var(--duration-base) var(--ease-standard);
+			color: var(--editorial-ink-soft);
+			box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--editorial-paper-deep) 50%, transparent);
+			transition:
+				background-color var(--duration-base) var(--ease-standard),
+				border-color var(--duration-base) var(--ease-standard),
+				color var(--duration-base) var(--ease-standard);
 			text-align: left;
+			min-width: 0;
 		}
 
-		.ed-topbar__pill:hover { border-color: var(--editorial-hairline-strong); }
-		.ed-topbar__pill-icon { color: var(--editorial-ink-mute); flex-shrink: 0; }
+		.ed-topbar__pill:hover {
+			background: var(--editorial-paper-deep);
+			border-color: var(--editorial-hairline-strong);
+			color: var(--editorial-ink);
+		}
+
+		.ed-topbar__pill-icon {
+			color: currentColor;
+			flex-shrink: 0;
+		}
 
 		.ed-topbar__pill-prompt {
-			flex: 1;
+			flex: 0 0 auto;
 			font-family: var(--font-jetbrains-mono), monospace;
-			font-size: 12.5px;
-			letter-spacing: 0.04em;
+			font-size: 0.76rem;
+			font-weight: 650;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--editorial-ink);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.ed-topbar__pill-hint {
+			flex: 1;
+			min-width: 0;
+			font-family: var(--font-inter-tight), system-ui, sans-serif;
+			font-size: 0.84rem;
+			line-height: 1;
 			color: var(--editorial-ink-mute);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
 		}
 
-		.ed-topbar__pill-caret { color: var(--editorial-ink); margin-right: 0.2rem; }
-		.ed-topbar__pill-cursor { color: var(--editorial-rust); margin-left: 0.35rem; }
-
 		.ed-topbar__keycaps { display: flex; gap: 0.25rem; flex-shrink: 0; }
 		.ed-topbar__keycaps kbd {
 			font-family: var(--font-jetbrains-mono), monospace;
-			font-size: 10.5px;
-			padding: 0.15rem 0.4rem;
+			font-size: 0.66rem;
+			font-weight: 650;
+			padding: 0.18rem 0.42rem;
 			border: 1px solid var(--editorial-hairline-strong);
 			border-radius: 2px;
-			color: var(--editorial-ink-soft);
-			background: transparent;
+			color: var(--editorial-ink);
+			background: var(--editorial-paper-deep);
 		}
 
 		.ed-topbar__right {
@@ -265,45 +306,44 @@ import { ThemeToggle } from "@/components/ui";
 			flex-shrink: 0;
 		}
 
-		.ed-topbar__user-fallback {
-			display: inline-block;
-			height: 32px;
-			width: 5rem;
-			border: 1px solid var(--editorial-hairline);
-			background: var(--editorial-paper-deep);
-			border-radius: 2px;
+		.ed-topbar__theme-toggle {
+			display: inline-flex;
 		}
 
-		/* Floating action button — editorial replacement of the gradient blob.
-		   Lives only on mobile. Pinned bottom-right with a safe-area inset
-		   so it sits above the iOS home-bar; main content reserves matching
-		   padding below so the FAB doesn't cover interactive elements. */
-		.ed-fab {
-			position: fixed;
-			bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
-			right: 1.25rem;
-			z-index: 50;
-			width: 44px;
-			height: 44px;
+		.ed-topbar__user-fallback {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			min-height: 38px;
+			padding: 0.625rem 1rem;
+			font-family: var(--font-jetbrains-mono), monospace;
+			font-size: 0.75rem;
+			font-weight: 600;
+			letter-spacing: 0.14em;
+			line-height: 1;
+			text-transform: uppercase;
 			background: var(--editorial-ink);
 			color: var(--editorial-paper);
 			border: 1px solid var(--editorial-ink);
 			border-radius: 2px;
-			display: grid;
-			place-items: center;
-			cursor: pointer;
-			transition: opacity var(--duration-base) var(--ease-standard);
 		}
-		.ed-fab:hover { opacity: 0.92; }
-		.ed-fab svg { width: 18px; height: 18px; }
 
-		/* Reserve breathing room at the bottom on mobile so the FAB never
-		   covers interactive content (newsletter Subscribe button, CTAs at
-		   the foot of a section, etc.). 5rem clears the 44px FAB + its
-		   1.25rem inset + a small visual buffer. */
-		@media (max-width: 767px) {
-			#main-content {
-				padding-bottom: 5rem;
+		@media (max-width: 420px) {
+			.ed-topbar__right {
+				gap: 0.4rem;
+			}
+
+			.ed-topbar__user-fallback {
+				min-height: 36px;
+				padding-inline: 0.75rem;
+				font-size: 0.6875rem;
+			}
+		}
+
+		@media (max-width: 340px) {
+			.ed-topbar__theme-toggle {
+				display: none;
 			}
 		}
 	</style>
@@ -330,10 +370,9 @@ import { ThemeToggle } from "@/components/ui";
 			});
 		}
 
-		// Add FAB search button handler
-		const fabSearch = document.getElementById("fab-search");
-		if (fabSearch) {
-			fabSearch.addEventListener("click", (e) => {
+		const mobileSearchTrigger = document.getElementById("mobile-search-trigger");
+		if (mobileSearchTrigger) {
+			mobileSearchTrigger.addEventListener("click", (e) => {
 				e.preventDefault();
 				openCommandPalette();
 			});

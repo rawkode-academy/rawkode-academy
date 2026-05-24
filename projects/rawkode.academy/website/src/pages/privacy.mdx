@@ -1,75 +1,81 @@
 ---
 layout: "@/wrappers/page.astro"
 title: "Privacy Policy"
-description: "Learn how Rawkode Academy collects, uses, and protects your personal information."
+description: "How Rawkode Academy collects, uses, and protects personal information."
 ---
 
-<div class="prose max-w-3xl mx-auto px-4 py-8">
+import EditorialShell from "@/components/ui/EditorialShell.astro";
 
-# Privacy Policy
+<EditorialShell
+	eyebrow="Legal"
+	title="Privacy Policy"
+	lede="A plain-language summary of what we collect, why we collect it, and how to contact us about your data."
+	compact
+>
+	<section class="editorial-section editorial-section--split">
+		<div class="editorial-section__header">
+			<p class="editorial-kicker">Summary</p>
+			<h2 class="editorial-section__title">We keep data collection limited and purposeful</h2>
+			<p class="editorial-section__lede">Last updated: December 2025.</p>
+		</div>
+		<div class="editorial-card">
+			<ul class="editorial-list">
+				<li>Analytics only runs after consent.</li>
+				<li>Newsletter email addresses are used for updates you requested.</li>
+				<li>Account data is used to provide signed-in learning features.</li>
+				<li>You can ask us to access, correct, or delete your personal data.</li>
+			</ul>
+		</div>
+	</section>
 
-*Last updated: December 2025*
+	<section class="editorial-section">
+		<div class="editorial-prose privacy-prose">
+			<h2>Information We Collect</h2>
+			<h3>Analytics Data</h3>
+			<p>When you consent to analytics, we collect anonymized usage data including pages visited, time spent on site, and general geographic region. This data is collected via PostHog and helps us understand how visitors use the site.</p>
 
-Rawkode Academy is committed to protecting your privacy. This policy explains what information we collect, how we use it, and your rights regarding your data.
+			<h3>Newsletter Subscriptions</h3>
+			<p>If you subscribe to our newsletter, we collect your email address. We use it to send updates about new content, courses, and community events.</p>
 
-## Information We Collect
+			<h3>Account Information</h3>
+			<p>If you create an account, we store the information provided during sign-up, including your email address and any profile information you choose to add.</p>
 
-### Analytics Data
+			<h2>How We Use Your Information</h2>
+			<ul>
+				<li>Improve the website and learning content based on usage patterns.</li>
+				<li>Send newsletters and updates to subscribers.</li>
+				<li>Provide personalized learning experiences for registered users.</li>
+				<li>Respond to inquiries and support requests.</li>
+				<li>Keep services secure and functioning properly.</li>
+			</ul>
 
-When you consent to analytics, we collect anonymized usage data including pages visited, time spent on site, and general geographic region. This data is collected via PostHog and helps us understand how visitors use our site to improve the learning experience.
+			<h2>Third-Party Services</h2>
+			<h3>Analytics</h3>
+			<p>We use PostHog for analytics, which only activates after consent via our cookie banner. No analytics tracking occurs without permission.</p>
 
-### Newsletter Subscriptions
+			<h3>Video Content</h3>
+			<p>We host our own video content. When you watch videos, we collect playback analytics such as play, pause, seek, and completion events to understand viewing patterns and improve content.</p>
 
-If you subscribe to our newsletter, we collect your email address. This is used solely to send you updates about new content, courses, and community events.
+			<h3>Authentication</h3>
+			<p>We use secure third-party authentication providers. When you sign in through one of those providers, their privacy policies also apply.</p>
 
-### Account Information
+			<h2>Data Retention</h2>
+			<p>Analytics data is retained in aggregate form and does not contain personally identifiable information. Newsletter subscriptions remain active until you unsubscribe. Account data is retained while your account remains active.</p>
 
-If you create an account, we store the information provided during sign-up, including your email address and any profile information you choose to add.
+			<h2>Your Rights</h2>
+			<ul>
+				<li>Decline analytics tracking through the consent banner.</li>
+				<li>Unsubscribe from the newsletter at any time.</li>
+				<li>Request access to your personal data.</li>
+				<li>Request correction or deletion of your data.</li>
+				<li>Withdraw consent for data processing.</li>
+			</ul>
 
-## How We Use Your Information
+			<h2>Cookies</h2>
+			<p>We use minimal cookies required for site functionality. Analytics cookies are only set after consent. You can manage cookie preferences through the consent banner or your browser settings.</p>
 
-We use the information we collect to:
-
-- Improve our website and learning content based on usage patterns
-- Send newsletters and updates to subscribers
-- Provide personalized learning experiences for registered users
-- Respond to your inquiries and support requests
-- Ensure the security and proper functioning of our services
-
-## Third-Party Services
-
-### Analytics
-
-We use PostHog for analytics, which only activates after you provide consent via our cookie banner. No tracking occurs without your explicit permission.
-
-### Video Content
-
-We host our own video content. When you watch videos on our site, we collect playback analytics (play, pause, seek, and completion events) to understand viewing patterns and improve our content. This data is associated with your session but not linked to personally identifiable information unless you are signed in.
-
-### Authentication
-
-We use secure third-party authentication providers. When you sign in, you are subject to those providers' privacy policies.
-
-## Data Retention
-
-Analytics data is retained in aggregate form and does not contain personally identifiable information. Newsletter subscriptions remain active until you unsubscribe. Account data is retained for as long as your account is active. You can request deletion of your data at any time by contacting us.
-
-## Your Rights
-
-You have the right to:
-
-- Decline analytics tracking via our consent banner
-- Unsubscribe from our newsletter at any time
-- Request access to your personal data
-- Request correction or deletion of your data
-- Withdraw consent for data processing
-
-## Cookies
-
-We use minimal cookies necessary for site functionality. Analytics cookies are only set after you provide consent. You can manage your cookie preferences through our consent banner or your browser settings.
-
-## Contact Us
-
-If you have questions about this privacy policy or wish to exercise your data rights, please contact us at [team@rawkode.academy](mailto:team@rawkode.academy).
-
-</div>
+			<h2>Contact Us</h2>
+			<p>If you have questions about this privacy policy or want to exercise your data rights, contact <a href="mailto:team@rawkode.academy">team@rawkode.academy</a>.</p>
+		</div>
+	</section>
+</EditorialShell>

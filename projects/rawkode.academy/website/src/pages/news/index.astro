@@ -114,20 +114,16 @@ for (const story of allNews) {
 const topTopics = Array.from(topicCounts.entries())
 	.sort((a, b) => b[1] - a[1])
 	.slice(0, 7)
-	.map(([id, count]) => ({
-		label: formatTechnologyLabel(id).toUpperCase(),
-		count,
+	.map(([id]) => ({
+		label: formatTechnologyLabel(id),
 		href: `/technology/${id}`,
 	}));
 
-const topics = [
-	{ label: "All", count: allNews.length, href: "/news" },
-	...topTopics,
-];
+const topics = topTopics;
 
-const pageTitle = "The Wire — Cloud Native News";
+const pageTitle = "The Wire: Cloud Native News";
 const pageDescription =
-	"Cloud native, Kubernetes, and AI infrastructure news for engineers — release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
+	"Cloud native, Kubernetes, and AI infrastructure news for engineers: release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
 
 const leadStoryTags = leadStory
 	? (leadStory.data.technologies ?? []).slice(0, 3)
@@ -186,7 +182,7 @@ const newsRows = rest
 			)}
 		</section>
 
-		<FilterRail topics={topics} activeIndex={0} sortLabel="Newest ↓" />
+		<FilterRail topics={topics} />
 
 		<section class="news-page__feed">
 			<div>

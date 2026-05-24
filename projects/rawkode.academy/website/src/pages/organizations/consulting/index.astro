@@ -1,11 +1,6 @@
 ---
-import Badge from "@/components/common/Badge.vue";
-import Button from "@/components/common/Button.vue";
-import FeatureCard from "@/components/common/FeatureCard.vue";
-import GridLayout from "@/components/common/GridLayout.vue";
-import { Hero } from "@/components/ui";
-import FAQ from "@/components/faq/consulting-list.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -14,971 +9,196 @@ const consultingFAQs = [
 	{
 		question: "What technologies and platforms do you specialize in?",
 		answer:
-			"We specialize in cloud native infrastructure and software development technologies, with particular expertise in: Infrastructure as Code using Terraform and Pulumi, Kubernetes for both developers and operators, Site Reliability Engineering (SRE) practices, Observability with modern monitoring stacks, Platform Engineering and internal developer platforms, GitOps workflows and continuous delivery, and Software development in Rust and Go with DDD, BDD, and TDD practices.",
+			"We specialize in cloud native infrastructure, Kubernetes, Infrastructure as Code with Terraform and Pulumi, GitOps with Flux and Argo CD, observability, SRE practices, platform engineering, and software development in Rust and Go.",
 	},
 	{
 		question: "Do you offer remote consulting services?",
 		answer:
-			"Yes, we provide fully remote consulting services to clients worldwide. We use collaborative tools and structured processes that have proven effective for distributed teams. For certain engagements, we can also arrange for on-site work if required, though this may involve additional travel expenses.",
+			"Yes. Most consulting is remote-first. We use structured discovery, shared working sessions, and written handover notes so distributed teams can keep momentum between calls.",
 	},
 	{
-		question:
-			"Can you help with migrating our infrastructure to Infrastructure as Code?",
+		question: "Can you help with migrating our infrastructure to Infrastructure as Code?",
 		answer:
-			"Absolutely! We specialize in helping organizations migrate their existing infrastructure to Infrastructure as Code using Terraform or Pulumi. Our process involves a careful assessment of your current environment, creating a migration strategy, implementing the IaC solution with proper testing, and training your team on best practices. We handle everything from basic VM deployments to complex multi-cloud architectures.",
+			"Yes. We can assess your existing estate, define a migration path, implement Terraform or Pulumi modules with your team, and leave you with reviewable workflows and operating guidance.",
 	},
 	{
 		question: "How quickly can you start a consulting engagement?",
 		answer:
-			"Our typical lead time is 2-4 weeks from contract signing to project kickoff, depending on the scope of work and our current commitments. For urgent needs, we may be able to accommodate faster timelines – please discuss your timeframe during our initial consultation. We maintain a limited number of active engagements to ensure high-quality delivery for all clients.",
+			"Typical lead time is 2-4 weeks after scope is agreed. Short advisory sessions may start sooner when availability allows.",
 	},
 	{
-		question: "I have additional questions about consulting services",
+		question: "I have additional questions about consulting services.",
 		answer:
-			"We'd be happy to discuss your specific technical challenges and answer any questions you may have. Schedule a consultation with our team to explore how we can help with your infrastructure, platform engineering, or software development needs.",
+			"Book a conversation with us and we will map the problem, constraints, and likely engagement shape before proposing a scope.",
 	},
+];
+
+const focusAreas = [
+	{
+		title: "Platform engineering",
+		body: "Design the internal platform, workflows, and team interfaces that let developers ship without waiting on bespoke operations work.",
+		items: ["Golden paths", "Self-service infrastructure", "Developer experience reviews"],
+	},
+	{
+		title: "Kubernetes and GitOps",
+		body: "Get clusters, delivery pipelines, and operational practices into a repeatable state with practical Flux, Argo CD, and Kubernetes guidance.",
+		items: ["Cluster architecture", "Delivery workflows", "Production readiness"],
+	},
+	{
+		title: "Infrastructure as Code",
+		body: "Move infrastructure changes into a tested, reviewable system your team can maintain after the engagement ends.",
+		items: ["Terraform and Pulumi", "Module design", "Migration planning"],
+	},
+	{
+		title: "Reliability and observability",
+		body: "Create the feedback loops needed to operate services confidently, from useful signals to incident learning.",
+		items: ["SLOs and alerting", "Tracing and metrics", "Runbooks and reviews"],
+	},
+	{
+		title: "Software architecture",
+		body: "Review services, boundaries, and delivery practices with a bias toward code that is easier to change.",
+		items: ["Rust and Go", "DDD and testing", "Architecture reviews"],
+	},
+	{
+		title: "Developer tooling",
+		body: "Remove workflow drag from local setup, CI, environments, and release processes.",
+		items: ["CI/CD cleanup", "Local environments", "Automation strategy"],
+	},
+];
+
+const engagementSteps = [
+	{
+		title: "Diagnose",
+		body: "We start with your current system, constraints, team shape, and business pressure. The first output is a clear problem map, not a generic roadmap.",
+	},
+	{
+		title: "Build together",
+		body: "We work alongside your team on the highest-leverage changes: design sessions, pairing, implementation, reviews, and operational proof.",
+	},
+	{
+		title: "Leave capability",
+		body: "Every engagement ends with documented decisions, working examples, and transfer sessions so the team can keep improving without us.",
+	},
+];
+
+const outcomes = [
+	"Sharper platform and infrastructure strategy",
+	"Working implementation, not just recommendations",
+	"Cleaner delivery and GitOps workflows",
+	"Better observability and incident response",
+	"Team enablement through pairing and handover",
 ];
 ---
 
-<style>
-	@reference "../../../styles/global.css";
-
-	.section-separator {
-		@apply py-16 md:py-20;
-	}
-
-	.section-highlight {
-		@apply bg-gray-50 dark:bg-gray-900 relative overflow-hidden;
-	}
-
-	.section-highlight::before {
-		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-[var(--editorial-ink)];
-	}
-
-	.section-highlight::after {
-		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-[var(--surface-card)] blur-2xl;
-	}
-</style>
-
 <Page
-	title="Technical Consulting Services"
-	description="Expert technical consulting for developer experience, cloud native technologies, and software architecture to accelerate your technical initiatives and upskill your teams."
+	title="Technical Consulting"
+	description="Hands-on cloud native, platform engineering, reliability, and software architecture consulting for engineering teams."
 >
-	<FAQJsonLD questions={consultingFAQs} slot="head" />
-	<!-- Hero Section -->
-	<Hero
-		title="Expert Technical Consulting"
-		subtitle="Accelerate your technical initiatives with expert guidance and hands-on implementation."
-		badge="Consulting Services"
-		background="blobs"
-		pattern="grid"
-		wave={true}
-		stats={[
-			{ label: '20+ Years Experience' },
-			{ label: 'Cloud Native Focus' },
-			{ label: 'Hands-on Approach' }
-		]}
-		client:load
+	<FAQJsonLD questions={consultingFAQs} slot="extra-head" />
+	<EditorialShell
+		eyebrow="Organizations"
+		title="Consulting"
+		lede="Hands-on cloud native and platform engineering help for teams who need working systems, sharper decisions, and durable team capability."
 	>
-		<Fragment slot="actions">
-			<Button href="#services" variant="primary" size="lg">Our Services</Button>
-			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Schedule Consultation</Button>
-		</Fragment>
-	</Hero>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="/organizations/lets-chat">Talk to us</a>
+			<a class="editorial-button editorial-button--secondary" href="#services">See focus areas</a>
+		</div>
 
-	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
-		<p class="text-xl text-secondary-content mb-8 leading-relaxed">
-			Rawkode Academy offers specialized technical consulting services focused
-			on cloud infrastructure, Kubernetes, platform engineering, and cloud
-			engineering. We help you implement Infrastructure as Code with Terraform
-			and Pulumi, optimize Kubernetes environments, establish GitOps workflows,
-			implement SRE practices, and build comprehensive observability solutions.
-		</p>
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">2-4w</span>
+					<span class="editorial-stat__label">Typical start window</span>
+				</div>
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">Remote</span>
+					<span class="editorial-stat__label">Default delivery mode</span>
+				</div>
+				<div class="editorial-stat">
+					<span class="editorial-stat__value">Build</span>
+					<span class="editorial-stat__label">Advice plus implementation</span>
+				</div>
+			</div>
+		</section>
 
-		<GridLayout cols={{ default: 1, md: 3 }} gap={6} class="text-left mt-12">
-			<FeatureCard
-				title="Cloud Native Expertise"
-				description="Deep experience with Kubernetes, Terraform, Pulumi, and GitOps workflows to help you build robust, scalable infrastructure and delivery pipelines."
-			>
-				<svg
-					slot="icon"
-					class="w-6 h-6 text-primary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-					></path>
-				</svg>
-			</FeatureCard>
-
-			<FeatureCard
-				title="GitOps & Continuous Delivery"
-				description="Implement GitOps practices and continuous delivery pipelines using tools like Flux and ArgoCD to enable declarative, git-based infrastructure and application deployments."
-				iconBgColor="bg-secondary/10"
-			>
-				<svg
-					slot="icon"
-					class="w-6 h-6 text-secondary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-					></path>
-				</svg>
-			</FeatureCard>
-
-			<FeatureCard
-				title="Reliability & Observability"
-				description="Establish SRE practices and comprehensive observability solutions that improve system reliability, incident response, and operational visibility."
-				iconBgColor="bg-tertiary/10"
-			>
-				<svg
-					slot="icon"
-					class="w-6 h-6 text-tertiary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-					></path>
-				</svg>
-			</FeatureCard>
-		</GridLayout>
-	</div>
-
-	<section id="services" class="bg-white dark:bg-gray-800 py-16">
-		<div class="container mx-auto px-4">
-			<div class="max-w-(--breakpoint-md) mx-auto mb-12 text-center">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our Consulting Services
-				</h2>
-				<p class="text-lg text-muted">
-					Tailored expertise to address your specific technical challenges
+		<section id="services" class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Focus areas</p>
+				<h2 class="editorial-section__title">Where we can help</h2>
+				<p class="editorial-section__lede">
+					We fit around your team instead of replacing it. Engagements can be advisory, implementation-heavy, or a focused blend of both.
 				</p>
 			</div>
-
-			<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-				<!-- Service 1 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm transition-card"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-primary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-primary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Developer Experience Optimization
-						</h3>
-					</div>
-					<p class="mb-4 text-muted">
-						Improve your development workflows, tooling, and environments to
-						boost developer productivity and satisfaction.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>CI/CD pipeline optimization</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Development environment setup</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Docker and containerization strategies</span
-							>
-						</li>
-					</ul>
-				</div>
-
-				<!-- Service 2 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm transition-card"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-secondary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-secondary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Cloud Native Architecture
-						</h3>
-					</div>
-					<p class="mb-4 text-muted">
-						Design, implement, and optimize cloud-native architectures that
-						leverage Kubernetes and modern infrastructure patterns.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Kubernetes deployment strategies</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Microservices architecture design</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-secondary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Service mesh implementation</span
-							>
-						</li>
-					</ul>
-				</div>
-
-				<!-- Service 3 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm transition-card"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-tertiary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-tertiary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Platform Engineering
-						</h3>
-					</div>
-					<p class="mb-4 text-muted">
-						Build internal developer platforms that streamline operations and
-						empower engineering teams to focus on value delivery.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Self-service infrastructure portals</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>GitOps and Infrastructure as Code</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-tertiary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Developer tooling standardization</span
-							>
-						</li>
-					</ul>
-				</div>
-
-				<!-- Service 4 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm transition-card"
-				>
-					<div class="flex items-center mb-4">
-						<div class="bg-primary/10 shrink-0 p-3 rounded-full mr-4">
-							<svg
-								class="w-6 h-6 text-primary"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-								></path>
-							</svg>
-						</div>
-						<h3 class="text-xl font-bold text-primary-content">
-							Technical Team Development
-						</h3>
-					</div>
-					<p class="mb-4 text-muted">
-						Upskill your engineering teams with targeted workshops, pair
-						programming, and knowledge transfer sessions.
-					</p>
-					<ul class="space-y-2 mb-4">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Custom technical workshops</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Mentoring and technical guidance</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-primary mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Technology architecture reviews</span
-							>
-						</li>
-					</ul>
-				</div>
+			<div class="editorial-grid editorial-grid--2">
+				{focusAreas.map((area) => (
+					<article class="editorial-card">
+						<h3 class="editorial-card__title">{area.title}</h3>
+						<p class="editorial-card__body">{area.body}</p>
+						<ul class="editorial-list">
+							{area.items.map((item) => <li>{item}</li>)}
+						</ul>
+					</article>
+				))}
 			</div>
-		</div>
-	</section>
+		</section>
 
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Engagement Models
-				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
-					Flexible consulting arrangements designed to meet your specific needs
-					and timeline
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Method</p>
+				<h2 class="editorial-section__title">Practical by default</h2>
+				<p class="editorial-section__lede">
+					The work should improve the system and the team at the same time.
 				</p>
 			</div>
-
-			<div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-				<!-- Engagement Model 1 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm hover: transition-card"
-				>
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-primary-content">
-							Technology Assessment
-						</h3>
-						<Badge variant="primary" size="sm">1-2 weeks</Badge>
-					</div>
-					<p class="mb-4 text-muted">
-						Comprehensive analysis of your current technology stack,
-						architecture, and development workflows with actionable
-						recommendations.
-					</p>
-
-					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-primary-content"
-							>$10,000</span
-						>
-						<span class="text-muted"> fixed price</span>
-					</div>
-
-					<ul class="space-y-2 mb-6">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Deep-dive technical discovery</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Prioritized recommendations</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Detailed documentation</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Executive presentation</span
-							>
-						</li>
-					</ul>
-
-					<a
-						href="/organizations/lets-chat"
-						class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-sm transition-colors-card"
-					>
-						Book Assessment
-					</a>
-				</div>
-
-				<!-- Engagement Model 2 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border-2 border-secondary dark:border-secondary shadow-md hover: transition-card relative"
-				>
-					<div
-						class="absolute top-0 right-0 px-3 py-1 bg-secondary text-white text-xs font-semibold rounded-bl-lg rounded-tr-lg"
-					>
-						Popular Choice
-					</div>
-
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-primary-content">
-							Implementation Sprint
-						</h3>
-						<Badge variant="secondary" size="sm">2-4 weeks</Badge>
-					</div>
-					<p class="mb-4 text-muted">
-						Hands-on implementation of specific technical initiatives with your
-						team, delivering immediate improvement to your systems.
-					</p>
-
-					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-primary-content"
-							>$25,000</span
-						>
-						<span class="text-muted"> fixed price</span>
-					</div>
-
-					<ul class="space-y-2 mb-6">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Focused technical project</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Direct hands-on coding</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Knowledge transfer sessions</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Complete documentation</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>2 weeks of follow-up support</span
-							>
-						</li>
-					</ul>
-
-					<a
-						href="/organizations/lets-chat"
-						class="block w-full text-center py-2 px-4 bg-secondary hover:bg-primary text-white rounded-sm transition-colors-card"
-					>
-						Book Sprint
-					</a>
-				</div>
-
-				<!-- Engagement Model 3 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm hover: transition-card"
-				>
-					<div class="flex justify-between items-start mb-4">
-						<h3 class="text-xl font-bold text-primary-content">
-							Staff Augmentation
-						</h3>
-						<Badge variant="secondary" size="sm">Flexible</Badge>
-					</div>
-					<p class="mb-4 text-muted">
-						Embed our expertise within your team on a recurring basis to provide
-						ongoing guidance, implementation, and support.
-					</p>
-
-					<div class="mt-6 mb-4">
-						<span class="text-2xl font-bold text-primary-content"
-							>$2,400</span
-						>
-						<span class="text-muted"> per day</span>
-					</div>
-
-					<ul class="space-y-2 mb-6">
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Minimum 5-day commitment</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Flexible scheduling</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Direct collaboration with your team</span
-							>
-						</li>
-						<li class="flex items-start">
-							<svg
-								class="w-5 h-5 text-green-500 mt-0.5 mr-2"
-								fill="currentColor"
-								viewBox="0 0 20 20"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-									clip-rule="evenodd"></path>
-							</svg>
-							<span class="text-secondary-content"
-								>Volume discounts available</span
-							>
-						</li>
-					</ul>
-
-					<a
-						href="/organizations/lets-chat"
-						class="block w-full text-center py-2 px-4 bg-primary hover:bg-secondary text-white rounded-sm transition-colors-card"
-					>
-						Discuss Options
-					</a>
-				</div>
+			<div class="editorial-grid editorial-grid--3">
+				{engagementSteps.map((step, index) => (
+					<article class="editorial-card editorial-card--paper">
+						<p class="editorial-meta">Step {String(index + 1).padStart(2, "0")}</p>
+						<h3 class="editorial-card__title">{step.title}</h3>
+						<p class="editorial-card__body">{step.body}</p>
+					</article>
+				))}
 			</div>
-		</div>
-	</section>
+		</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our Approach
-				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
-					A collaborative process designed to deliver practical solutions and
-					lasting capabilities
-				</p>
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Outcomes</p>
+				<h2 class="editorial-section__title">What good looks like</h2>
 			</div>
+			<div class="editorial-card">
+				<ul class="editorial-list">
+					{outcomes.map((outcome) => <li>{outcome}</li>)}
+				</ul>
+			</div>
+		</section>
 
-			<div class="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-				<!-- Step 1 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						1
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Discovery
-					</h3>
-					<p class="text-muted">
-						We start by understanding your specific challenges, technical
-						environment, and team capabilities.
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Questions</p>
+				<h2 class="editorial-section__title">Consulting FAQ</h2>
+			</div>
+			<div class="editorial-faq">
+				{consultingFAQs.map((item, index) => (
+					<details open={index === 0}>
+						<summary>{item.question}</summary>
+						<p>{item.answer}</p>
+					</details>
+				))}
+			</div>
+		</section>
+
+		<section class="editorial-section">
+			<div class="editorial-callout">
+				<div>
+					<h2 class="editorial-section__title">Have a specific technical problem?</h2>
+					<p class="editorial-card__body">
+						Send us the context. We will tell you whether a short advisory session, a focused implementation sprint, or training would be the right fit.
 					</p>
 				</div>
-
-				<!-- Step 2 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						2
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Planning
-					</h3>
-					<p class="text-muted">
-						Together we define clear objectives, determine success metrics, and
-						create an actionable implementation plan.
-					</p>
-				</div>
-
-				<!-- Step 3 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-tertiary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						3
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Execution
-					</h3>
-					<p class="text-muted">
-						Our experts work alongside your team to implement solutions, sharing
-						knowledge throughout the process.
-					</p>
-				</div>
-
-				<!-- Step 4 -->
-				<div
-					class="bg-white dark:bg-gray-800 p-6 rounded-sm border border-surface shadow-sm relative"
-				>
-					<div
-						class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold text-lg"
-					>
-						4
-					</div>
-					<h3 class="text-lg font-bold text-primary-content mb-3 mt-2">
-						Transition
-					</h3>
-					<p class="text-muted">
-						We ensure your team is fully equipped to maintain and extend the
-						implemented solutions with comprehensive documentation.
-					</p>
-				</div>
+				<a class="editorial-button" href="/organizations/lets-chat">Start a conversation</a>
 			</div>
-		</div>
-	</section>
-
-	<!-- <TestimonialSlider type="consulting" blurb="Hear directly from the companies we've helped" /> -->
-
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content"
-				>
-					Ready to Start?
-				</h2>
-				<p
-					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
-				>
-					Schedule a no-obligation consultation to discuss your technical
-					challenges and explore how we can help
-				</p>
-				<div class="flex flex-col sm:flex-row justify-center gap-4">
-					<a
-						href="/organizations/lets-chat"
-						class="inline-flex items-center justify-center px-6 py-4 text-base font-medium text-white bg-primary hover:bg-secondary rounded-sm transition-card shadow-md hover:"
-					>
-						Schedule Your Consultation
-						<svg
-							class="w-5 h-5 ml-2"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-								clip-rule="evenodd"></path>
-						</svg>
-					</a>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl tracking-tight font-extrabold text-primary-content"
-				>
-					Frequently Asked Questions
-				</h2>
-				<p class="text-lg text-muted">
-					Learn more about our consulting services
-				</p>
-			</div>
-			<FAQ client:load />
-		</div>
-	</section>
+		</section>
+	</EditorialShell>
 </Page>

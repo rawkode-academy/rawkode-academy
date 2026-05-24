@@ -1,7 +1,7 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
 
-interface SeriesItem { label: string; count: number; href?: string }
+interface SeriesItem { label: string; href: string; count?: number }
 
 interface Props {
 	label?: string;
@@ -14,72 +14,89 @@ const {
 	label = "Series",
 	items,
 	activeIndex = 0,
-	rightLabel,
 } = Astro.props as Props;
 ---
 
 <div class="series-filter">
-	<MLabel>{label}</MLabel>
-	{items.map((t, i) => (
-		<a
-			class={`series-filter__chip ${i === activeIndex ? "series-filter__chip--active" : ""}`}
-			href={t.href ?? "#"}
-		>
-			{t.label}
-			<span class="series-filter__count">{t.count}</span>
-		</a>
-	))}
-	<span class="series-filter__spacer"></span>
-	{rightLabel && <MLabel><span set:html={rightLabel}></span></MLabel>}
+	<div class="series-filter__label">
+		<MLabel>{label}</MLabel>
+	</div>
+	<nav class="series-filter__links" aria-label="Video series">
+		{items.map((t, i) => (
+			<a
+				class={`series-filter__link ${i === activeIndex ? "series-filter__link--active" : ""}`}
+				href={t.href}
+				aria-current={i === activeIndex ? "page" : undefined}
+			>
+				{t.label}
+			</a>
+		))}
+	</nav>
 </div>
 
 <style>
 	.series-filter {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-		padding: 1.125rem 2.5rem;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: baseline;
+		gap: 1.25rem;
+		padding: 0.875rem 2.5rem 0.75rem;
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.series-filter__chip {
+	.series-filter__links {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.375rem 1rem;
+		min-width: 0;
+	}
+
+	.series-filter__link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.625rem;
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.14em;
+		font-weight: 600;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--editorial-ink-soft);
-		background: transparent;
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
 		text-decoration: none;
 		transition: color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard),
-			background-color var(--duration-base) var(--ease-standard);
+			text-decoration-color var(--duration-base) var(--ease-standard);
 	}
 
-	.series-filter__chip:hover {
+	.series-filter__link:hover {
 		color: var(--editorial-ink);
-		border-color: var(--editorial-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
 	}
 
-	.series-filter__chip--active {
-		color: var(--editorial-paper);
-		background: var(--editorial-ink);
-		border-color: var(--editorial-ink);
+	.series-filter__link--active {
+		color: var(--editorial-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.35em;
 	}
-
-	.series-filter__count { font-size: 0.625rem; opacity: 0.55; }
-	.series-filter__chip--active .series-filter__count { opacity: 0.8; }
-
-	.series-filter__spacer { flex: 1; min-width: 1rem; }
 
 	@media (max-width: 720px) {
-		.series-filter { padding: 1rem 1.25rem; }
+		.series-filter {
+			grid-template-columns: 1fr;
+			gap: 0.5rem;
+			padding: 0.75rem 1rem 0.625rem;
+		}
+		.series-filter__links {
+			flex-wrap: nowrap;
+			gap: 0.875rem;
+			margin-inline: -1rem;
+			padding-inline: 1rem;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			scrollbar-width: none;
+		}
+		.series-filter__links::-webkit-scrollbar {
+			display: none;
+		}
 	}
 </style>

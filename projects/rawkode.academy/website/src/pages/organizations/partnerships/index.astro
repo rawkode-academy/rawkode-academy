@@ -1,16 +1,17 @@
 ---
-import Button from "@/components/common/Button.vue";
-import { Hero } from "@/components/ui";
-import FAQ from "@/components/faq/list.vue";
-import FeatureListIcons from "@/components/feature/list-icons.vue";
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
-import PartnerLogos from "@/components/partner/logos.astro";
-import Pricing from "@/components/partner/pricing/cards.vue";
-import Featured from "@/components/partner/pricing/featured.vue";
-import VsConference from "@/components/partner/vs-conference.astro";
-import Stats from "@/components/stats/simple.vue";
-import TestimonialSlider from "@/components/testimonial/slider.astro";
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
 import Page from "@/wrappers/page.astro";
+import controlplaneLogo from "../../../components/partner/logos/controlplane.svg?raw";
+import fermyonLogo from "../../../components/partner/logos/fermyon.svg?raw";
+import guidepadLogo from "../../../components/partner/logos/guidepad.svg?raw";
+import herokuLogo from "../../../components/partner/logos/heroku.svg?raw";
+import microsoftLogo from "../../../components/partner/logos/microsoft.svg?raw";
+import ngrokLogo from "../../../components/partner/logos/ngrok.svg?raw";
+import spectrocloudLogo from "../../../components/partner/logos/spectrocloud.svg?raw";
+import teleportLogo from "../../../components/partner/logos/teleport.svg?raw";
+import wundergraphLogo from "../../../components/partner/logos/wundergraph.svg?raw";
+import zitadelLogo from "../../../components/partner/logos/zitadel.svg?raw";
 
 export const prerender = true;
 
@@ -18,347 +19,1229 @@ const partnershipFAQs = [
 	{
 		question: "What is the minimum partnership duration?",
 		answer:
-			"Our partnerships are structured as annual engagements to ensure we can deliver meaningful results. Developer marketing and education require a strategic, long-term approach to build awareness, trust, and adoption. Our experience shows that sustained engagement over time yields significantly better outcomes than short-term campaigns.",
+			"Partnerships are structured as annual engagements because developer trust compounds through repeated technical proof, not one campaign burst. We still plan the work in quarterly cycles so each quarter has clear deliverables and reporting.",
 	},
 	{
 		question: "What are the payment terms for partnerships?",
 		answer:
-			"For Nip and Dram partnerships, we typically require annual payment upfront. For Blend and Malt partnerships, we offer flexible payment options including quarterly or semi-annual installments. We're happy to discuss payment structures that align with your budgeting cycles during our consultation.",
+			"Nip and Dram are typically paid annually upfront. Blend and Malt can be paid annually, semi-annually, or quarterly depending on procurement needs. We confirm the commercial structure during the fit call.",
+	},
+	{
+		question: "Do you replace our internal DevRel team?",
+		answer:
+			"No. We assist and extend internal DevRel, marketing, product, and engineering teams. Partners use Rawkode Academy for external practitioner credibility, content production capacity, technical feedback, and distribution into a relevant developer audience.",
 	},
 	{
 		question: "How do you measure partnership success?",
 		answer:
-			"We provide comprehensive analytics and reporting tailored to your specific goals. Metrics typically include content engagement (views, watch time, interactions), developer sentiment, community growth, and when possible, product adoption indicators. All partnerships include regular performance reviews to ensure we're delivering value and to refine our approach as needed. For partners at the Blend and Malt tiers, we also provide deeper insights into developer behavior and preferences, helping you refine your product and go-to-market strategy.",
+			"We align on success measures before work starts. Reporting can include views, watch time, retention, referral traffic with UTM links, developer questions, docs friction, product feedback, content reuse, and partner-defined adoption indicators.",
+	},
+	{
+		question: "Can our team reuse the content?",
+		answer:
+			"Yes. Partnership planning includes the assets your sales, marketing, DevRel, and product teams can reuse, such as clips, tutorials, demo paths, workshop material, launch recaps, and technical feedback summaries.",
 	},
 	{
 		question: "How do you qualify potential partners?",
 		answer:
-			"We partner with companies that offer genuine value to developers and align with our mission of advancing developer education. We evaluate potential partners based on their technology's innovation, market relevance, and potential impact on the developer community. We're selective in our partnerships to ensure we can authentically advocate for your products.",
+			"We look for developer tools and cloud native companies with useful technology, technical access for review, and a willingness to teach through real usage. We are not a fit for scripted praise, paid mentions with no technical review, or guaranteed pipeline claims from a single asset.",
 	},
 	{
 		question: "I have additional questions about partnerships",
 		answer:
-			"We'd be happy to discuss your specific needs and answer any questions you may have. Schedule a consultation with our partnership team to explore how we can work together to achieve your developer marketing and education goals.",
+			"Book a fit call and we can talk through your product, audience, timing, internal team shape, and the smallest useful partnership tier.",
 	},
 ];
+
+const proofStats = [
+	{ value: "90+", label: "Technologies covered" },
+	{ value: "400+", label: "Videos, articles, and lessons" },
+	{ value: "1M+", label: "Developer views" },
+];
+
+const partnerProofs = [
+	{
+		company: "Fermyon",
+		label: "Developer education",
+		headline: "Hands-on challenges moved developers from awareness to use.",
+		body: "Rawkode Academy introduced developers to server-side WebAssembly, promoted Spin and Fermyon Cloud, and created Advent of Spin challenges that gave developers a practical way to try the technology.",
+		quote:
+			"We saw notable results in developers joining our community and using our services.",
+		source: "Head of DevRel at Fermyon",
+	},
+	{
+		company: "Guidepad",
+		label: "Product positioning",
+		headline: "Strategy, demo videos, and market guidance for an early-stage platform.",
+		body: "Guidepad used the partnership for cloud native positioning, product strategy, and demo assets while the company was still sharpening its market story.",
+		quote:
+			"The guidance and insights consistently elevate our product and strategy.",
+		source: "Reggie Wilkerson, Co-Founder and CEO at Guidepad",
+	},
+];
+
+const capabilities = [
+	{
+		title: "Technical proof",
+		body: "Tutorials, livestreams, workshops, and product walkthroughs built around real developer workflows instead of abstract positioning.",
+		items: ["Tutorials", "Live builds", "Workshops"],
+	},
+	{
+		title: "DevRel assistance",
+		body: "Extra content capacity, launch support, practitioner feedback, and campaign execution that supports your internal team without replacing it.",
+		items: ["Content support", "Launch coverage", "Team enablement"],
+	},
+	{
+		title: "Product signal",
+		body: "Developer experience feedback, docs friction, demo path review, and market context from people who build with cloud native tools in public.",
+		items: ["DX review", "Docs feedback", "Positioning"],
+	},
+];
+
+const first90Days = [
+	{
+		title: "Fit and focus",
+		timing: "Days 1-14",
+		body: "Confirm the developer audience, product moments, internal owners, technical access, and success measures.",
+	},
+	{
+		title: "Technical proof",
+		timing: "Days 15-45",
+		body: "Shape the demo path, plan the first tutorial or live build, and capture product or documentation feedback.",
+	},
+	{
+		title: "Distribution and signal",
+		timing: "Days 46-90",
+		body: "Publish, package reusable assets, report what developers responded to, and choose the next quarter's focus.",
+	},
+];
+
+const measurementSignals = [
+	{
+		title: "Content performance",
+		body: "Views, watch time, retention, engagement, and the topics developers keep returning to.",
+	},
+	{
+		title: "Qualified traffic",
+		body: "Referral traffic, UTM-tagged links, campaign landing pages, and partner-owned conversion points where available.",
+	},
+	{
+		title: "Developer signal",
+		body: "Questions, objections, docs gaps, product friction, and feedback that can help DevRel, product, and engineering teams.",
+	},
+	{
+		title: "Reusable assets",
+		body: "Clips, tutorials, demos, recaps, workshop material, and internal enablement notes your team can keep using.",
+	},
+];
+
+const partnershipTiers = [
+	{
+		label: "Visibility Partner",
+		name: "Nip",
+		price: "12,000",
+		cadence: "Quarterly rhythm",
+		summary:
+			"A focused visibility layer for teams that want steady awareness with a relevant developer audience.",
+		bestFor: "Best for staying present without a heavy program.",
+		featured: false,
+		features: [
+			"Partner placement across the academy",
+			"One technical livestream per quarter",
+			"Quarterly short-form clip pack",
+			"Social distribution for each release",
+			"Quarterly performance report",
+		],
+	},
+	{
+		label: "Launch Partner",
+		name: "Dram",
+		price: "24,000",
+		cadence: "1 video per quarter",
+		summary:
+			"Launch and tutorial support for teams that need repeatable product stories developers can inspect.",
+		bestFor: "Best for feature launches and repeatable demo paths.",
+		featured: true,
+		features: [
+			"Everything in Nip",
+			"One produced technical video per quarter",
+			"Launch or tutorial plan",
+			"One technical article or tutorial per quarter",
+			"Quarterly strategy session",
+		],
+	},
+	{
+		label: "Adoption Partner",
+		name: "Blend",
+		price: "48,000",
+		cadence: "1 video every 2 months",
+		summary:
+			"Deeper collaboration for teams turning awareness into education, adoption, and internal learning.",
+		bestFor: "Best for multi-format adoption campaigns.",
+		featured: false,
+		features: [
+			"Everything in Dram",
+			"One produced technical video every two months",
+			"Workshop or live build program",
+			"Priority calendar placement",
+			"Monthly working session",
+		],
+	},
+	{
+		label: "Strategic Partner",
+		name: "Malt",
+		price: "96,000",
+		cadence: "1 video per month",
+		summary:
+			"Category-level partnership for teams that want annual planning, executive context, and deeper market signal.",
+		bestFor: "Best for teams shaping a category or major roadmap.",
+		featured: false,
+		features: [
+			"Everything in Blend",
+			"One produced technical video per month",
+			"Annual category narrative and content roadmap",
+			"Executive advisory sessions",
+			"Custom reporting and co-marketing plan",
+		],
+	},
+];
+
+const comparisonPoints = [
+	{
+		title: "Conference sponsorship",
+		body: "Useful for presence, but the value fades quickly. A partnership creates technical assets and feedback loops that keep working after launch week.",
+	},
+	{
+		title: "Podcast or newsletter buys",
+		body: "Good reach, limited proof. Rawkode Academy turns attention into demos, tutorials, workshops, and product questions your team can use.",
+	},
+	{
+		title: "Paid ads",
+		body: "Fast distribution, low trust. Technical education gives developers a reason to inspect, try, and discuss the product.",
+	},
+	{
+		title: "Internal DevRel",
+		body: "We do not replace your team. We extend it with external practitioner credibility, production capacity, and market feedback.",
+	},
+];
+
+const goodFit = [
+	"Cloud native, infrastructure, platform, security, or developer tooling product",
+	"DevRel, marketing, product, or engineering owner who can collaborate",
+	"Access to technical review, demos, docs, or roadmap context",
+	"Interest in annual education, not a one-off paid mention",
+];
+
+const poorFit = [
+	"Scripted praise with no technical inspection",
+	"Guaranteed pipeline attribution from one asset",
+	"No access to product, docs, or a technical reviewer",
+	"Campaigns that only need broad consumer awareness",
+];
+
+const currentPartnerLogos = [
+	{
+		name: "Spectro Cloud",
+		url: "https://spectrocloud.com",
+		logo: spectrocloudLogo,
+	},
+	{
+		name: "Teleport",
+		url: "https://goteleport.com",
+		logo: teleportLogo,
+	},
+];
+
+const previousPartnerLogos = [
+	{
+		name: "ControlPlane",
+		url: "https://controlplane.io",
+		logo: controlplaneLogo,
+	},
+	{
+		name: "Fermyon",
+		url: "https://www.fermyon.com",
+		logo: fermyonLogo,
+	},
+	{
+		name: "Guidepad",
+		url: "https://guidepad.io",
+		logo: guidepadLogo,
+	},
+	{
+		name: "Heroku",
+		url: "https://heroku.com",
+		logo: herokuLogo,
+	},
+	{
+		name: "Microsoft Azure",
+		url: "https://azure.com",
+		logo: microsoftLogo,
+	},
+	{
+		name: "ngrok",
+		url: "https://ngrok.com",
+		logo: ngrokLogo,
+	},
+	{
+		name: "WunderGraph",
+		url: "https://wundergraph.com",
+		logo: wundergraphLogo,
+	},
+	{
+		name: "Zitadel",
+		url: "https://zitadel.com",
+		logo: zitadelLogo,
+	},
+];
+
+function withPartnerUtm(url: string): string {
+	const u = new URL(url);
+	u.searchParams.set("utm_source", "rawkode-academy");
+	u.searchParams.set("utm_medium", "partner-logo");
+	u.searchParams.set("utm_campaign", "partnerships-page");
+	return u.toString();
+}
 ---
-
-<style>
-	@reference "../../../styles/global.css";
-
-	.section-separator {
-		@apply py-16 md:py-20;
-	}
-
-	.section-highlight {
-		@apply bg-gray-50 dark:bg-gray-900 relative overflow-hidden;
-	}
-
-	.section-highlight::before {
-		content: "";
-		@apply absolute top-0 left-0 w-full h-1 bg-[var(--editorial-ink)];
-	}
-
-	.section-highlight::after {
-		content: "";
-		@apply absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-[var(--surface-card)] blur-2xl;
-	}
-</style>
 
 <Page
 	title="Strategic Technology Partnerships"
-	description="Partner with Rawkode Academy to accelerate developer adoption, improve product experience, and drive growth through expert technical content and strategic guidance."
+	description="Partner with Rawkode Academy to accelerate developer adoption through technical content, DevRel assistance, and developer experience feedback."
 >
-	<FAQJsonLD questions={partnershipFAQs} slot="head" />
-	<!-- Hero Section -->
-	<Hero
-		title="Strategic Technology Partnerships"
-		subtitle="Accelerate developer adoption and product growth through authentic technical content and strategic guidance."
-		badge="Partner With Us"
-		background="blobs"
-		pattern="grid"
-		wave={true}
-		stats={[
-			{ label: '100K+ Developers' },
-			{ label: 'Global Reach' },
-			{ label: 'Proven Results' }
-		]}
-		client:load
-	>
-		<Fragment slot="actions">
-			<Button href="#benefits" variant="primary" size="lg">Explore Benefits</Button>
-			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Become a Partner</Button>
-		</Fragment>
-	</Hero>
+	<FAQJsonLD questions={partnershipFAQs} slot="extra-head" />
 
-	<div class="max-w-5xl mx-auto mb-16 text-center pt-16">
-		<p class="text-xl text-secondary-content mb-8 leading-relaxed">
-			At Rawkode Academy, we connect cutting-edge technologies with the
-			developers who bring them to life. Our expertise bridges the critical gap
-			between technical innovation and developer understanding.
-		</p>
+	<div class="partnerships-page">
+		<CollectionMasthead
+			title="Partnerships"
+			dek="DevRel support programs."
+		/>
 
-		<div class="mt-12 grid gap-8 text-left md:grid-cols-3">
-			<div class="border-t border-black/10 pt-5 dark:border-white/10">
-				<div class="flex items-center mb-4">
-					<div class="mr-4 rounded-full bg-primary/10 p-3">
-						<svg
-							class="w-6 h-6 text-primary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-						</svg>
-					</div>
-					<h3 class="text-lg font-bold">Amplify Your Reach</h3>
-				</div>
-				<p class="text-muted">
-					Extend your message to our engaged community of developers and
-					technical decision-makers through authentic, expert-led content.
+		<section class="partnerships-hero">
+			<div class="partnerships-hero__copy">
+				<p class="partnerships-kicker">
+					For DevRel, marketing, and developer tools teams
 				</p>
-			</div>
-
-			<div class="border-t border-black/10 pt-5 dark:border-white/10">
-				<div class="flex items-center mb-4">
-					<div class="mr-4 rounded-full bg-secondary/10 p-3">
-						<svg
-							class="w-6 h-6 text-secondary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-							></path>
-						</svg>
-					</div>
-					<h3 class="text-lg font-bold">Accelerate Adoption</h3>
-				</div>
-				<p class="text-muted">
-					Remove barriers to entry through strategic educational content that
-					showcases your product's unique value and practical applications.
+				<h2>Turn developer attention into product adoption.</h2>
+				<p>
+					Rawkode Academy helps cloud native and developer tools teams create
+					hands-on tutorials, livestreams, workshops, and technical feedback
+					loops that make products easier to understand, trust, and adopt.
 				</p>
-			</div>
-
-			<div class="border-t border-black/10 pt-5 dark:border-white/10">
-				<div class="flex items-center mb-4">
-					<div class="mr-4 rounded-full bg-tertiary/10 p-3">
-						<svg
-							class="w-6 h-6 text-tertiary"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-							></path>
-						</svg>
-					</div>
-					<h3 class="text-lg font-bold">Strategic Growth</h3>
-				</div>
-				<p class="text-muted">
-					Refine your developer experience and go-to-market approach with expert
-					guidance that drives measurable business outcomes.
+				<p class="partnerships-fit-line">
+					We assist internal DevRel teams with external credibility, production
+					capacity, and audience access.
 				</p>
-			</div>
-		</div>
-	</div>
-
-	<section id="benefits" class="bg-white dark:bg-gray-800 py-16">
-		<FeatureListIcons />
-	</section>
-
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="text-center mb-10">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Proven Developer Engagement
-				</h2>
-				<p class="text-lg text-muted max-w-3xl mx-auto">
-					Our strategic partnerships deliver measurable results for technology
-					companies worldwide
-				</p>
-			</div>
-			<Stats
-				title=""
-				stats={[
-					{
-						label: "Technologies Covered",
-						value: "90+",
-					},
-					{
-						label: "Hours of Content Produced",
-						value: "500+",
-					},
-					{
-						label: "Developer Views",
-						value: "1M+",
-					},
-				]}
-			/>
-
-			<TestimonialSlider
-				type="partner"
-				blurb="Hear directly from the companies that have partnered with us"
-			/>
-		</div>
-	</section>
-
-	<section
-		class="section-highlight section-separator bg-[var(--surface-card)] from-white to-gray-50"
-	>
-		<div class="py-2 px-4 mx-auto lg:px-6 max-w-7xl">
-			<div class="mb-12 lg:mb-16 text-center">
-				<h2
-					class="mb-4 text-3xl font-bold tracking-tight text-primary-content md:text-4xl"
-				>
-					Our <span class="text-primary">Trusted</span> Partners
-				</h2>
-				<p
-					class="text-gray-600 sm:text-xl dark:text-gray-400 max-w-3xl mx-auto"
-				>
-					Join these innovative companies who trust Rawkode Academy to connect
-					their technologies with developers worldwide.
-				</p>
-			</div>
-
-			<div class="relative">
-				<div
-					class="absolute inset-0 via-transparent rounded-sm"
-				>
-				</div>
-				<div class="relative">
-					<PartnerLogos />
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<section class="bg-white dark:bg-gray-800 py-16">
-		<div class="container mx-auto px-4">
-			<VsConference />
-		</div>
-	</section>
-
-	<section class="section-highlight section-separator">
-		<div class="py-12 px-4 mx-auto max-w-(--breakpoint-xl) lg:py-16 lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-12">
-				<h2
-					class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content"
-				>
-					Partnership Tiers
-				</h2>
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
-					Whether you're looking to increase brand awareness, educate developers
-					about your technology, or develop a comprehensive go-to-market
-					strategy, we offer flexible partnership options to meet your specific
-					goals.
-				</p>
-			</div>
-
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-10">
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">
-					The Rawkode Academy is proudly brought to you from Glasgow, Scotland.
-					Our partnership tiers are named after traditional Scottish whisky
-					measurements, reflecting our heritage of quality, craftsmanship, and
-					attention to detail.
-				</p>
-				<p class="mb-5 text-gray-600 sm:text-xl dark:text-gray-300">🏴󠁧󠁢󠁳󠁣󠁴󠁿 🥃</p>
-			</div>
-
-			<div class="mx-auto max-w-6xl">
-				<Featured />
-				<Pricing />
-			</div>
-		</div>
-	</section>
-
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center">
-				<div class="inline-block p-2 mb-6 bg-primary/10 rounded-full">
-					<svg
-						class="w-8 h-8 text-primary"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-						></path>
-					</svg>
-				</div>
-
-				<h2
-					class="mb-6 text-4xl tracking-tight font-extrabold text-primary-content"
-				>
-					Ready to Transform Your <span class="text-primary"
-						>Developer Strategy</span
-					>?
-				</h2>
-				<p
-					class="mb-10 text-xl text-muted max-w-3xl mx-auto"
-				>
-					Schedule a consultation to explore how a strategic partnership can
-					align with your specific business objectives and connect your
-					technology with our passionate developer community.
-				</p>
-				<div class="flex flex-col sm:flex-row justify-center gap-4">
-					<a
-						href="/organizations/lets-chat"
-						class="inline-flex items-center justify-center px-6 py-4 text-base font-medium text-white bg-primary hover:bg-secondary rounded-sm transition-card shadow-md hover:"
-					>
-						Schedule Your Consultation
-						<svg
-							class="w-5 h-5 ml-2"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								fill-rule="evenodd"
-								d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-								clip-rule="evenodd"></path>
-						</svg>
+				<div class="partnerships-actions">
+					<a class="partnerships-button partnerships-button--primary" href="/organizations/lets-chat">
+						Book a 30-minute fit call
+					</a>
+					<a class="partnerships-button partnerships-button--secondary" href="#tiers">
+						Compare tiers
 					</a>
 				</div>
 			</div>
-		</div>
-	</section>
 
-	<section class="bg-white dark:bg-gray-800 section-separator">
-		<div class="px-4 py-12 mx-auto max-w-(--breakpoint-xl) lg:py-16">
-			<div class="mx-auto max-w-(--breakpoint-md) text-center mb-8">
-				<h2
-					class="mb-4 text-3xl tracking-tight font-extrabold text-primary-content"
-				>
-					Frequently Asked Questions
-				</h2>
-				<p class="text-lg text-muted">
-					Learn more about partnering with Rawkode Academy
+			<dl class="partnerships-proof" aria-label="Partnership proof">
+				{proofStats.map((stat) => (
+					<div>
+						<dt>{stat.value}</dt>
+						<dd>{stat.label}</dd>
+					</div>
+				))}
+			</dl>
+		</section>
+
+		<section class="partnerships-section partnerships-section--proof">
+			<header class="partnerships-section__head partnerships-section__head--inline">
+				<div>
+					<p class="partnerships-kicker">Partner proof</p>
+					<h2>Proof that lives beyond launch week.</h2>
+				</div>
+				<p>
+					The work is designed to become reusable education, product signal, and
+					market context, not a single sponsored impression.
+				</p>
+			</header>
+
+			<div class="partnerships-case-grid">
+				{partnerProofs.map((proof) => (
+					<article class="partnerships-case">
+						<p class="partnerships-case__label">
+							{proof.company} / {proof.label}
+						</p>
+						<h3>{proof.headline}</h3>
+						<p>{proof.body}</p>
+						<blockquote>
+							<p>{proof.quote}</p>
+							<cite>{proof.source}</cite>
+						</blockquote>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section id="benefits" class="partnerships-section">
+			<header class="partnerships-section__head">
+				<p class="partnerships-kicker">What we do</p>
+				<h2>Ship technical proof developers believe.</h2>
+			</header>
+
+			<div class="partnerships-capabilities">
+				{capabilities.map((capability, index) => (
+					<article class="partnerships-capability">
+						<span class="partnerships-capability__number">
+							{String(index + 1).padStart(2, "0")}
+						</span>
+						<h3>{capability.title}</h3>
+						<p>{capability.body}</p>
+						<ul>
+							{capability.items.map((item) => (
+								<li>{item}</li>
+							))}
+						</ul>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section id="tiers" class="partnerships-section partnerships-section--deep">
+			<header class="partnerships-section__head partnerships-section__head--inline">
+				<div>
+					<p class="partnerships-kicker">Partnership tiers</p>
+					<h2>Choose the video cadence and support level.</h2>
+				</div>
+				<p>
+					All tiers are annual and can mix content creation, strategy,
+					developer education, and developer experience feedback.
+				</p>
+			</header>
+
+			<div class="partnerships-tiers">
+				{partnershipTiers.map((tier) => (
+					<article class:list={["partnerships-tier", tier.featured && "partnerships-tier--featured"]}>
+						{tier.featured && <span class="partnerships-tier__flag">Recommended</span>}
+						<p class="partnerships-tier__label">{tier.label}</p>
+						<h3>{tier.name}</h3>
+						<p class="partnerships-tier__price">{tier.price}</p>
+						<p class="partnerships-tier__term">USD annually / {tier.cadence}</p>
+						<p class="partnerships-tier__summary">{tier.summary}</p>
+						<p class="partnerships-tier__best">{tier.bestFor}</p>
+						<ul>
+							{tier.features.map((feature) => (
+								<li>{feature}</li>
+							))}
+						</ul>
+						<a href="/organizations/lets-chat">Discuss {tier.label}</a>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section partnerships-section--deep">
+			<header class="partnerships-section__head">
+				<p class="partnerships-kicker">First 90 days</p>
+				<h2>Start with focus, then publish and learn.</h2>
+			</header>
+
+			<div class="partnerships-workflow">
+				{first90Days.map((step, index) => (
+					<article>
+						<span>{String(index + 1).padStart(2, "0")} / {step.timing}</span>
+						<h3>{step.title}</h3>
+						<p>{step.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section">
+			<header class="partnerships-section__head partnerships-section__head--inline">
+				<div>
+					<p class="partnerships-kicker">Measurement</p>
+					<h2>Make success visible to every team involved.</h2>
+				</div>
+				<p>
+					Reporting connects awareness, education, reusable assets, and product
+					feedback so DevRel, marketing, sales, and product can all use the
+					work.
+				</p>
+			</header>
+
+			<div class="partnerships-measurement">
+				{measurementSignals.map((signal) => (
+					<article>
+						<h3>{signal.title}</h3>
+						<p>{signal.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section partnerships-section--compare">
+			<div class="partnerships-compare__copy">
+				<p class="partnerships-kicker">Why this format</p>
+				<h2>More useful than one-off visibility.</h2>
+				<p>
+					Sponsorship can create a moment. Technical education creates proof,
+					reuse, and feedback your team can keep compounding.
 				</p>
 			</div>
-			<FAQ client:load items={partnershipFAQs} title="Partnership FAQ" />
-		</div>
-	</section>
+			<div class="partnerships-compare__points">
+				{comparisonPoints.map((point) => (
+					<article>
+						<h3>{point.title}</h3>
+						<p>{point.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section">
+			<header class="partnerships-section__head">
+				<p class="partnerships-kicker">Fit</p>
+				<h2>Designed for teams that want technical trust.</h2>
+			</header>
+
+			<div class="partnerships-fit-grid">
+				<article class="partnerships-fit-card">
+					<h3>Good fit</h3>
+					<ul>
+						{goodFit.map((item) => (
+							<li>{item}</li>
+						))}
+					</ul>
+				</article>
+				<article class="partnerships-fit-card">
+					<h3>Not a fit</h3>
+					<ul>
+						{poorFit.map((item) => (
+							<li>{item}</li>
+						))}
+					</ul>
+				</article>
+			</div>
+		</section>
+
+		<section class="partnerships-section partnerships-section--credibility">
+			<div class="partnerships-credibility__copy">
+				<p class="partnerships-kicker">Partner history</p>
+				<h2>Companies we have worked with.</h2>
+				<p>
+					Current and past partners span platform engineering, identity,
+					WebAssembly, cloud security, and developer experience.
+				</p>
+			</div>
+
+			<div class="partnerships-logo-groups">
+				<article class="partnerships-logo-group">
+					<h3>Current partners</h3>
+					<div class="partnerships-logo-grid partnerships-logo-grid--current">
+						{currentPartnerLogos.map((partner) => (
+							<a
+								class="partnerships-logo-card partnerships-logo-card--current"
+								href={withPartnerUtm(partner.url)}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label={`Visit ${partner.name}`}
+							>
+								<span class="partnerships-logo-mark">
+									<Fragment set:html={partner.logo} />
+								</span>
+								<span class="partnerships-logo-name">{partner.name}</span>
+							</a>
+						))}
+					</div>
+				</article>
+
+				<article class="partnerships-logo-group">
+					<h3>Previously supported by</h3>
+					<div class="partnerships-logo-grid partnerships-logo-grid--previous">
+						{previousPartnerLogos.map((partner) => (
+							<a
+								class="partnerships-logo-card partnerships-logo-card--previous"
+								href={withPartnerUtm(partner.url)}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label={`Visit ${partner.name}`}
+							>
+								<span class="partnerships-logo-mark">
+									<Fragment set:html={partner.logo} />
+								</span>
+								<span class="partnerships-logo-name">{partner.name}</span>
+							</a>
+						))}
+					</div>
+				</article>
+			</div>
+		</section>
+
+		<section class="partnerships-cta">
+			<div>
+				<p class="partnerships-kicker">Next step</p>
+				<h2>Book a 30-minute fit call.</h2>
+				<p>
+					We will look at your product, audience, internal team shape, and goals,
+					then recommend the smallest useful partnership tier.
+				</p>
+			</div>
+			<a class="partnerships-button partnerships-button--primary" href="/organizations/lets-chat">
+				Book a 30-minute fit call
+			</a>
+		</section>
+
+		<section class="partnerships-section partnerships-section--faq">
+			<header class="partnerships-section__head">
+				<p class="partnerships-kicker">FAQ</p>
+				<h2>Partnership questions.</h2>
+			</header>
+
+			<div class="partnerships-faq">
+				{partnershipFAQs.map((item) => (
+					<details>
+						<summary>{item.question}</summary>
+						<p>{item.answer}</p>
+					</details>
+				))}
+			</div>
+		</section>
+	</div>
 </Page>
+
+<style>
+	.partnerships-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.partnerships-hero {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(18rem, 28rem);
+		gap: 2rem;
+		align-items: end;
+		padding: 3rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.partnerships-hero__copy {
+		max-width: 52rem;
+	}
+
+	.partnerships-kicker,
+	.partnerships-case__label,
+	.partnerships-tier__label {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		margin: 0 0 0.75rem;
+	}
+
+	.partnerships-hero h2,
+	.partnerships-section h2,
+	.partnerships-cta h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(2rem, 4vw, 3.5rem);
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.partnerships-hero p:not(.partnerships-kicker),
+	.partnerships-section__head > p:not(.partnerships-kicker),
+	.partnerships-compare__copy p:not(.partnerships-kicker),
+	.partnerships-cta p:not(.partnerships-kicker) {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.05rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 1rem 0 0;
+		max-width: 44rem;
+	}
+
+	.partnerships-fit-line {
+		max-width: 38rem !important;
+		padding-left: 1rem;
+		border-left: 3px solid var(--editorial-spruce);
+	}
+
+	.partnerships-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+	}
+
+	.partnerships-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		padding: 0.625rem 1rem;
+		border: 1px solid var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-align: center;
+		text-decoration: none;
+		transition: background-color var(--duration-base) var(--ease-standard),
+			color var(--duration-base) var(--ease-standard);
+	}
+
+	.partnerships-button--primary {
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+	}
+
+	.partnerships-button--primary:hover {
+		background: var(--editorial-spruce);
+		border-color: var(--editorial-spruce);
+	}
+
+	.partnerships-button--secondary {
+		background: transparent;
+		color: var(--editorial-ink);
+	}
+
+	.partnerships-button--secondary:hover {
+		background: var(--editorial-paper-deep);
+	}
+
+	.partnerships-proof {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 0;
+		margin: 0;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.partnerships-proof div {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: baseline;
+		gap: 1rem;
+		padding: 1rem 0;
+	}
+
+	.partnerships-proof div + div {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.partnerships-proof dt {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.75rem, 4vw, 2.625rem);
+		font-weight: 700;
+		line-height: 1;
+		color: var(--editorial-ink);
+	}
+
+	.partnerships-proof dd {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+		margin: 0;
+	}
+
+	.partnerships-section {
+		padding: 3rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.partnerships-section--deep,
+	.partnerships-section--proof {
+		background: var(--editorial-paper-deep);
+	}
+
+	.partnerships-section--split,
+	.partnerships-section--compare,
+	.partnerships-section--credibility,
+	.partnerships-cta {
+		display: grid;
+		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+		gap: 2rem;
+		align-items: start;
+	}
+
+	.partnerships-section__head {
+		margin-bottom: 1.5rem;
+		max-width: 56rem;
+	}
+
+	.partnerships-section__head--inline {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		gap: 2rem;
+		max-width: none;
+	}
+
+	.partnerships-section__head--inline > p {
+		max-width: 28rem;
+	}
+
+	.partnerships-case-grid,
+	.partnerships-capabilities,
+	.partnerships-workflow,
+	.partnerships-measurement,
+	.partnerships-fit-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.partnerships-capabilities,
+	.partnerships-workflow {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.partnerships-tiers {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.partnerships-case,
+	.partnerships-capability,
+	.partnerships-workflow article,
+	.partnerships-measurement article,
+	.partnerships-tier,
+	.partnerships-fit-card,
+	.partnerships-logo-group,
+	.partnerships-faq details {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+	}
+
+	.partnerships-case,
+	.partnerships-capability,
+	.partnerships-workflow article,
+	.partnerships-measurement article,
+	.partnerships-fit-card,
+	.partnerships-logo-group {
+		padding: 1.25rem;
+	}
+
+	.partnerships-case h3,
+	.partnerships-capability h3,
+	.partnerships-workflow h3,
+	.partnerships-measurement h3,
+	.partnerships-tier h3,
+	.partnerships-fit-card h3,
+	.partnerships-logo-group h3,
+	.partnerships-compare__points h3 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		line-height: 1.15;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.partnerships-capability h3,
+	.partnerships-workflow h3,
+	.partnerships-tier h3 {
+		margin-top: 0.875rem;
+	}
+
+	.partnerships-case p,
+	.partnerships-capability p,
+	.partnerships-workflow p,
+	.partnerships-measurement p,
+	.partnerships-tier__summary,
+	.partnerships-tier__best,
+	.partnerships-fit-card li,
+	.partnerships-credibility__copy p:not(.partnerships-kicker),
+	.partnerships-compare__points p,
+	.partnerships-faq p {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0.75rem 0 0;
+	}
+
+	.partnerships-case blockquote {
+		margin: 1.25rem 0 0;
+		padding-top: 1rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.partnerships-case blockquote p {
+		font-size: 1.05rem;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.partnerships-case cite {
+		display: block;
+		margin-top: 0.75rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-style: normal;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.partnerships-capability__number,
+	.partnerships-workflow span,
+	.partnerships-tier__flag {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+
+	.partnerships-capability ul,
+	.partnerships-tier ul,
+	.partnerships-fit-card ul {
+		list-style: none;
+		padding: 0;
+		margin: 1rem 0 0;
+	}
+
+	.partnerships-capability ul,
+	.partnerships-tier ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.partnerships-capability li,
+	.partnerships-tier li {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink);
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		padding: 0.25rem 0.45rem;
+	}
+
+	.partnerships-fit-card li {
+		position: relative;
+		margin-top: 0.85rem;
+		padding-left: 1rem;
+	}
+
+	.partnerships-fit-card li::before {
+		content: "";
+		position: absolute;
+		top: 0.65em;
+		left: 0;
+		width: 0.35rem;
+		height: 0.35rem;
+		background: var(--editorial-spruce);
+	}
+
+	.partnerships-section--credibility {
+		background: var(--editorial-paper-deep);
+	}
+
+	.partnerships-credibility__copy h2 {
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		line-height: 1.05;
+	}
+
+	.partnerships-logo-groups {
+		display: grid;
+		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+		gap: 1rem;
+		min-width: 0;
+	}
+
+	.partnerships-logo-grid {
+		display: grid;
+		gap: 0.75rem;
+		margin: 1rem 0 0;
+	}
+
+	.partnerships-logo-grid--current {
+		grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+	}
+
+	.partnerships-logo-grid--previous {
+		grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+	}
+
+	.partnerships-logo-card {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.75rem;
+		min-width: 0;
+		min-height: 6rem;
+		padding: 0.9rem;
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink);
+		text-decoration: none;
+		overflow: hidden;
+		transition:
+			border-color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.partnerships-logo-card:hover {
+		border-color: var(--editorial-spruce);
+		background: var(--editorial-paper);
+	}
+
+	.partnerships-logo-card--previous {
+		min-height: 5.25rem;
+		padding: 0.75rem;
+	}
+
+	.partnerships-logo-mark {
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		width: 100%;
+		max-width: 12rem;
+		height: 2.75rem;
+		overflow: hidden;
+	}
+
+	.partnerships-logo-card--previous .partnerships-logo-mark {
+		max-width: 8.25rem;
+		height: 2rem;
+	}
+
+	.partnerships-logo-name {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.66rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.partnerships-tier {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+		padding: 1.25rem;
+	}
+
+	.partnerships-tier--featured {
+		border-color: var(--editorial-spruce);
+		box-shadow: inset 0 0 0 1px var(--editorial-spruce);
+	}
+
+	.partnerships-tier__flag {
+		width: fit-content;
+		color: var(--editorial-paper);
+		background: var(--editorial-spruce);
+		padding: 0.25rem 0.45rem;
+		margin-bottom: 0.75rem;
+	}
+
+	.partnerships-tier__label {
+		margin-bottom: 0;
+	}
+
+	.partnerships-tier__price {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 2rem;
+		font-weight: 700;
+		line-height: 1;
+		color: var(--editorial-ink);
+		margin: 0.875rem 0 0;
+	}
+
+	.partnerships-tier__term {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		line-height: 1.35;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+		margin: 0.35rem 0 0;
+	}
+
+	.partnerships-tier__best {
+		color: var(--editorial-ink) !important;
+	}
+
+	.partnerships-tier a {
+		margin-top: auto;
+		padding-top: 1.25rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+	}
+
+	.partnerships-compare__points {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.partnerships-compare__points article {
+		padding: 1.25rem;
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+	}
+
+	.partnerships-cta {
+		align-items: center;
+		padding: 2rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+	}
+
+	.partnerships-cta h2,
+	.partnerships-cta .partnerships-kicker,
+	.partnerships-cta p {
+		color: inherit !important;
+	}
+
+	.partnerships-cta p {
+		opacity: 0.72;
+	}
+
+	.partnerships-cta .partnerships-button {
+		justify-self: end;
+		border-color: var(--editorial-paper);
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.partnerships-faq {
+		display: grid;
+		gap: 0.75rem;
+		max-width: 56rem;
+	}
+
+	.partnerships-faq details {
+		padding: 1rem 1.125rem;
+	}
+
+	.partnerships-faq summary {
+		cursor: pointer;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		font-weight: 700;
+		line-height: 1.3;
+		color: var(--editorial-ink);
+	}
+
+	@media (max-width: 1180px) {
+		.partnerships-tiers {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 980px) {
+		.partnerships-hero,
+		.partnerships-section--split,
+		.partnerships-section--compare,
+		.partnerships-section--credibility,
+		.partnerships-cta,
+		.partnerships-section__head--inline {
+			grid-template-columns: 1fr;
+			display: grid;
+		}
+
+		.partnerships-case-grid,
+		.partnerships-capabilities,
+		.partnerships-workflow,
+		.partnerships-measurement,
+		.partnerships-fit-grid,
+		.partnerships-compare__points,
+		.partnerships-logo-groups,
+		.partnerships-tiers {
+			grid-template-columns: 1fr;
+		}
+
+		.partnerships-cta .partnerships-button {
+			justify-self: start;
+		}
+	}
+
+	@media (max-width: 720px) {
+		.partnerships-hero,
+		.partnerships-section,
+		.partnerships-cta {
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
+
+		.partnerships-hero {
+			padding-top: 2rem;
+			padding-bottom: 2rem;
+		}
+
+		.partnerships-section {
+			padding-top: 2rem;
+			padding-bottom: 2rem;
+		}
+
+		.partnerships-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.partnerships-button {
+			width: 100%;
+			min-height: 3rem;
+		}
+
+		.partnerships-proof div {
+			grid-template-columns: 1fr;
+			gap: 0.35rem;
+		}
+
+		.partnerships-logo-grid--previous {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0.65rem;
+		}
+
+		.partnerships-logo-card--previous {
+			min-height: 4.75rem;
+			padding: 0.65rem;
+		}
+
+		.partnerships-logo-card--previous .partnerships-logo-mark {
+			max-width: 6.75rem;
+			height: 1.75rem;
+		}
+	}
+</style>
+
+<style is:global>
+	.partnerships-section--credibility .partnerships-logo-mark > svg {
+		display: block;
+		width: 100% !important;
+		height: 100% !important;
+		max-width: 100% !important;
+		max-height: 100% !important;
+		color: inherit;
+		flex: 0 0 100%;
+	}
+</style>

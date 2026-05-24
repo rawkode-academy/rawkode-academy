@@ -1,94 +1,106 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
 
-interface Topic { label: string; count: number; href?: string }
+interface Topic { label: string; href: string; count?: number }
 
 interface Props {
 	topics: Topic[];
+	label?: string;
+	ariaLabel?: string;
 	activeIndex?: number;
 	sortLabel?: string;
 }
 
-const { topics, activeIndex = 0, sortLabel = "Newest first ↓" } = Astro.props as Props;
+const {
+	topics,
+	label = "Topics",
+	ariaLabel = "Article topics",
+	activeIndex,
+} = Astro.props as Props;
 ---
 
-<div class="filter-rail">
-	<MLabel>Filter</MLabel>
-	{topics.map((t, i) => (
-		<a
-			class={`filter-rail__chip ${i === activeIndex ? "filter-rail__chip--active" : ""}`}
-			href={t.href ?? "#"}
-		>
-			{t.label}
-			<span class="filter-rail__count">{t.count}</span>
-		</a>
-	))}
-	<span class="filter-rail__spacer"></span>
-	<MLabel>Sort: <span class="filter-rail__sort">{sortLabel}</span></MLabel>
-</div>
+<nav class="filter-rail" aria-label={ariaLabel}>
+	<div class="filter-rail__label">
+		<MLabel>{label}</MLabel>
+	</div>
+
+	<div class="filter-rail__links">
+		{topics.map((t, i) => (
+			<a
+				class={`filter-rail__link ${i === activeIndex ? "filter-rail__link--active" : ""}`}
+				href={t.href}
+				aria-current={i === activeIndex ? "page" : undefined}
+			>
+				{t.label}
+			</a>
+		))}
+	</div>
+</nav>
 
 <style>
 	.filter-rail {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-		padding: 1.125rem 2.5rem;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		align-items: baseline;
+		gap: 1.25rem;
+		padding: 0.875rem 2.5rem 0.75rem;
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.filter-rail__chip {
+	.filter-rail__links {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.375rem 1rem;
+		min-width: 0;
+	}
+
+	.filter-rail__link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.375rem 0.625rem;
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		font-weight: 600;
+		letter-spacing: 0.08em;
 		color: var(--editorial-ink-soft);
-		background: transparent;
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
 		text-decoration: none;
+		text-transform: uppercase;
+		white-space: nowrap;
 		transition: color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard),
-			background-color var(--duration-base) var(--ease-standard);
+			text-decoration-color var(--duration-base) var(--ease-standard);
 	}
 
-	.filter-rail__chip:hover {
+	.filter-rail__link:hover {
 		color: var(--editorial-ink);
-		border-color: var(--editorial-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
 	}
 
-	.filter-rail__chip--active {
-		color: var(--editorial-paper);
-		background: var(--editorial-ink);
-		border-color: var(--editorial-ink);
-	}
-
-	.filter-rail__count {
-		font-size: 0.625rem;
-		opacity: 0.55;
-	}
-
-	.filter-rail__chip--active .filter-rail__count {
-		opacity: 0.8;
-	}
-
-	.filter-rail__spacer {
-		flex: 1;
-		min-width: 1rem;
-	}
-
-	.filter-rail__sort {
+	.filter-rail__link--active {
 		color: var(--editorial-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.35em;
 	}
 
 	@media (max-width: 720px) {
 		.filter-rail {
-			padding: 1rem 1.25rem;
+			grid-template-columns: 1fr;
+			gap: 0.5rem;
+			padding: 0.75rem 1rem 0.625rem;
+		}
+		.filter-rail__label {
+			display: block;
+		}
+		.filter-rail__links {
+			flex-wrap: nowrap;
+			gap: 0.875rem;
+			margin-inline: -1rem;
+			padding-inline: 1rem;
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			scrollbar-width: none;
 		}
 	}
 </style>

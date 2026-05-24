@@ -32,43 +32,75 @@ if (user) {
 
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-const page = parseInt(Astro.url.searchParams.get("page") || "1", 10);
+const page = Math.max(
+	1,
+	parseInt(Astro.url.searchParams.get("page") || "1", 10) || 1,
+);
 const videosPerPage = 15;
 
 const allVideos = (await getPublishedVideos()).map((v) => v.data);
 
-const totalCount = allVideos.length;
-const totalSeconds = allVideos.reduce((acc, v) => {
-	const d = v.duration;
-	return acc + (typeof d === "number" && d > 0 ? d : 0);
-}, 0);
-const totalHours = Math.max(1, Math.round(totalSeconds / 3600));
+const totalVideoCount = allVideos.length;
+const seriesKeyFor = (video: (typeof allVideos)[number]) =>
+	(video.category || video.type || "Library").toString();
 
-// Pagination
-const featuredVideo = page === 1 ? (allVideos[0] ?? null) : null;
-const start = page === 1 ? 1 : (page - 1) * videosPerPage;
-const end = start + videosPerPage;
-const feedVideos = allVideos.slice(start, end);
-const hasNextPage = end < allVideos.length;
-
-// Series counts — derived from `category` when present, fallback to `type`.
+// Series counts are derived from `category` when present, falling back to `type`.
 const seriesCounts = new Map<string, number>();
 for (const v of allVideos) {
-	const key = (v.category || v.type || "Library").toString();
+	const key = seriesKeyFor(v);
 	seriesCounts.set(key, (seriesCounts.get(key) ?? 0) + 1);
 }
+
+const requestedSeries = Astro.url.searchParams.get("series") || undefined;
+const selectedSeries =
+	requestedSeries && seriesCounts.has(requestedSeries) ? requestedSeries : undefined;
+const visibleVideos = selectedSeries
+	? allVideos.filter((video) => seriesKeyFor(video) === selectedSeries)
+	: allVideos;
+const visibleCount = visibleVideos.length;
+
+// Pagination. Page one promotes the newest visible video, then starts the grid after it.
+const featuredVideo = page === 1 ? (visibleVideos[0] ?? null) : null;
+const start = page === 1 ? 1 : 1 + (page - 1) * videosPerPage;
+const end = start + videosPerPage;
+const feedVideos = visibleVideos.slice(start, end);
+const hasNextPage = end < visibleVideos.length;
+
 const topSeries = Array.from(seriesCounts.entries())
 	.sort((a, b) => b[1] - a[1])
 	.slice(0, 7);
 
+const navSeries =
+	selectedSeries && !topSeries.some(([label]) => label === selectedSeries)
+		? [
+				...topSeries,
+				[selectedSeries, seriesCounts.get(selectedSeries) ?? 0] as [
+					string,
+					number,
+				],
+			]
+		: topSeries;
+
+const watchPathFor = (targetPage = 1) => {
+	const params = new URLSearchParams();
+	if (selectedSeries) params.set("series", selectedSeries);
+	if (targetPage > 1) params.set("page", String(targetPage));
+	const query = params.toString();
+	return `/watch${query ? `?${query}` : ""}`;
+};
+
 const seriesItems = [
-	{ label: "All", count: totalCount, href: "/watch" },
-	...topSeries.map(([label, count]) => ({
-		label: label.replace(/[-_]/g, " ").toUpperCase(),
+	{ label: "All", count: totalVideoCount, href: "/watch" },
+	...navSeries.map(([label, count]) => ({
+		label: label.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 		count,
 		href: `/watch?series=${encodeURIComponent(label)}`,
 	})),
 ];
+
+const activeSeriesIndex = selectedSeries
+	? Math.max(0, 1 + navSeries.findIndex(([label]) => label === selectedSeries))
+	: 0;
 
 // Helpers
 const formatDuration = (seconds?: number | null) => {
@@ -94,7 +126,7 @@ const formatLabel = (value?: string | null) =>
 		: undefined;
 
 const dispatchNumFor = (idx: number) =>
-	String(totalCount - idx).padStart(3, "0");
+	String(visibleCount - idx).padStart(3, "0");
 
 const featuredEpisodeNum = featuredVideo ? dispatchNumFor(0) : undefined;
 const featuredSeries = featuredVideo
@@ -104,7 +136,7 @@ const featuredSeries = featuredVideo
 
 <Page
 	title="Cloud Native & Kubernetes Videos"
-	description="Watch hands-on cloud native and Kubernetes tutorials, deep dives, and live builds — practical content for engineers shipping production systems."
+	description="Watch hands-on cloud native and Kubernetes tutorials, deep dives, and live builds for engineers shipping production systems."
 	pageType="CollectionPage"
 >
 	{page > 1 && (
@@ -116,11 +148,11 @@ const featuredSeries = featuredVideo
 		<link
 			slot="extra-head"
 			rel="prev"
-			href={page === 2 ? "/watch" : `/watch?page=${page - 1}`}
+			href={watchPathFor(page - 1)}
 		/>
 	)}
 	{hasNextPage && (
-		<link slot="extra-head" rel="next" href={`/watch?page=${page + 1}`} />
+		<link slot="extra-head" rel="next" href={watchPathFor(page + 1)} />
 	)}
 	<VideoMetadata
 		slot="extra-head"
@@ -152,10 +184,8 @@ const featuredSeries = featuredVideo
 
 	<div class="watch-page">
 		<VideoMasthead
-			leftLabel={`Video Library · ${totalHours.toLocaleString()} hours`}
-			title="Videos"
-			titleTail="lessons, talks, dispatches"
-			rightLabel={`${totalCount.toLocaleString()} episodes`}
+			title="Latest Videos"
+			dek="Tutorials, talks, and live builds."
 		/>
 
 		{featuredVideo && (
@@ -177,11 +207,10 @@ const featuredSeries = featuredVideo
 						: new Date(featuredVideo.publishedAt),
 				)}
 				primaryCtaLabel="Watch session →"
-				secondaryCtaLabel="Save for later"
 			/>
 		)}
 
-		<SeriesFilter items={seriesItems} activeIndex={0} rightLabel={`View: <span style=\"color: var(--editorial-ink)\">Grid ▦</span>`} />
+		<SeriesFilter items={seriesItems} activeIndex={activeSeriesIndex} />
 
 		<div class="watch-grid">
 			{feedVideos.map((v, idx) => (
@@ -190,9 +219,15 @@ const featuredSeries = featuredVideo
 					episodeNum={dispatchNumFor(start + idx)}
 					title={v.title}
 					series={formatLabel(v.category || v.type) || undefined}
-					duration={formatDuration(typeof v.duration === "number" ? v.duration : undefined)}
+					duration={formatDuration(
+						typeof v.duration === "number" ? v.duration : undefined,
+					)}
 					thumbnailUrl={getVideoThumbnailUrl(v.id)}
-					date={dateFormatter.format(v.publishedAt instanceof Date ? v.publishedAt : new Date(v.publishedAt))}
+					date={dateFormatter.format(
+						v.publishedAt instanceof Date
+							? v.publishedAt
+							: new Date(v.publishedAt),
+					)}
 				/>
 			))}
 		</div>
@@ -201,17 +236,17 @@ const featuredSeries = featuredVideo
 			<MLabel>
 				<a class="watch-footer__link" href="/api/feeds/videos.xml">RSS</a> ·
 				<a class="watch-footer__link" href="/api/feeds/videos.json">JSON Feed</a> ·
-				Browse all {totalCount.toLocaleString()} →
+				<a class="watch-footer__link" href="/watch">All videos</a>
 			</MLabel>
 			<div class="watch-footer__pager">
 				{page > 1 && (
-					<a class="watch-footer__pager-btn" href={page === 2 ? "/watch" : `/watch?page=${page - 1}`}>
+					<a class="watch-footer__pager-btn" href={watchPathFor(page - 1)}>
 						<MLabel tone="ink">← Previous</MLabel>
 					</a>
 				)}
 				<MLabel>Page {page}</MLabel>
 				{hasNextPage && (
-					<a class="watch-footer__pager-btn" href={`/watch?page=${page + 1}`}>
+					<a class="watch-footer__pager-btn" href={watchPathFor(page + 1)}>
 						<MLabel tone="ink">Next →</MLabel>
 					</a>
 				)}

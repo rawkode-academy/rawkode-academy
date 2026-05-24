@@ -1,95 +1,64 @@
 ---
 interface Props {
-	leftLabel: string;
+	leftLabel?: string | undefined;
 	title: string;
+	dek?: string | undefined;
 	titleTail?: string | undefined;
 	liveCount?: number | undefined;
 	rightLabel?: string | undefined;
 }
 
-const { leftLabel, title, titleTail, liveCount, rightLabel } = Astro.props as Props;
+const { title, dek, titleTail } = Astro.props as Props;
+const description = dek ?? titleTail;
 ---
 
-<div class="video-masthead">
-	<span class="video-masthead__left">{leftLabel}</span>
-	<span class="video-masthead__center">
-		{title}
-		{titleTail && <span class="video-masthead__center-muted"> — {titleTail}</span>}
-	</span>
-	<span class="video-masthead__right">
-		{liveCount !== undefined && liveCount > 0 ? (
-			<>
-				<span class="video-masthead__dot" aria-hidden="true"></span>
-				<span class="video-masthead__live">On air now</span>
-				<span>— {liveCount.toLocaleString()} watching</span>
-			</>
-		) : (
-			rightLabel
-		)}
-	</span>
-</div>
+<header class="video-masthead">
+	<h1 class="video-masthead__title">{title}</h1>
+	{description && <p class="video-masthead__dek">{description}</p>}
+</header>
 
 <style>
 	.video-masthead {
-		display: grid;
-		grid-template-columns: 1fr auto 1fr;
+		display: flex;
 		align-items: baseline;
-		gap: 2rem;
-		padding: 1.25rem 2.5rem;
-		border-bottom: 2px solid var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1.125rem 2.5rem;
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.video-masthead__left { color: var(--editorial-ink-soft); }
-
-	.video-masthead__center {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.5rem;
-		letter-spacing: -0.015em;
-		text-transform: none;
+	.video-masthead__title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0;
 		color: var(--editorial-ink);
-		text-align: center;
+		margin: 0;
 	}
 
-	.video-masthead__center-muted { color: var(--editorial-ink-mute); }
-
-	.video-masthead__right {
+	.video-masthead__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.4;
 		color: var(--editorial-ink-soft);
 		text-align: right;
-		display: inline-flex;
-		gap: 0.5rem;
-		justify-content: flex-end;
-		align-items: center;
-	}
-
-	.video-masthead__dot {
-		width: 7px;
-		height: 7px;
-		border-radius: 50%;
-		background: var(--editorial-amber);
-		animation: rk-pulse 1.6s ease-in-out infinite;
-	}
-
-	.video-masthead__live { color: var(--editorial-amber); font-weight: 600; }
-
-	@keyframes rk-pulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.7; transform: scale(0.92); }
+		margin: 0;
 	}
 
 	@media (max-width: 880px) {
 		.video-masthead {
-			grid-template-columns: 1fr;
-			gap: 0.5rem;
-			padding: 1rem 1.25rem;
-			text-align: center;
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.25rem;
+			padding: 0.875rem 1rem;
 		}
-		.video-masthead__left,
-		.video-masthead__right { text-align: center; justify-content: center; }
+		.video-masthead__title {
+			font-size: 1.875rem;
+		}
+		.video-masthead__dek {
+			font-size: 0.875rem;
+			text-align: left;
+		}
 	}
 </style>

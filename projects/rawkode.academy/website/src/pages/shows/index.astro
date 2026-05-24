@@ -4,6 +4,7 @@ export const prerender = false;
 import { getCollection, getEntries } from "astro:content";
 import ShowCard from "@/components/show/ShowCard.astro";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
+import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -84,7 +85,7 @@ const showsJsonLd = showEntries.map((s) => {
 
 <Page
 	title="Shows"
-	description="Browse the live and recurring shows from Rawkode Academy - interviews, deep dives, and hands-on streams covering the cloud native ecosystem."
+	description="Browse the live and recurring shows from Rawkode Academy: interviews, deep dives, and hands-on streams covering the cloud native ecosystem."
 	pageType="CollectionPage"
 >
 	<ShowItemListJsonLd
@@ -93,99 +94,74 @@ const showsJsonLd = showEntries.map((s) => {
 		listUrl={new URL("/shows", Astro.site ?? Astro.url).href}
 		listName="Rawkode Academy Shows"
 	/>
- <section class="relative overflow-hidden py-16 sm:py-20">
- <!-- Background gradient -->
- <div class="absolute inset-0 bg-transparent" aria-hidden="true"></div>
+	<div class="shows-page">
+		<CollectionMasthead title="Shows" dek="Long-form programs." />
 
- <div class="relative mx-auto max-w-7xl content-px">
- <!-- Header -->
- <div class="shows-header">
- <div class="shows-header__meta">
- <span class="shows-header__kicker">§ Original series</span>
- </div>
- <h1 class="shows-header__title">
- Shows<span class="shows-header__title-soft"> — long-form programs from the academy</span>
- </h1>
- <p class="shows-header__lede">
- Recurring programs that go deeper than a single video. Each show carries its own hosts, cadence, and editorial style.
- </p>
- </div>
-
- <!-- Content -->
- <div class="mt-16">
- {hasShows ? (
- <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
- {showsToRender.map((show) => (
- <ShowCard show={show} />
- ))}
- </div>
- ) : (
- <div class="mx-auto max-w-2xl border border-[var(--editorial-hairline)] bg-[var(--editorial-paper-deep)] p-12 text-center">
- <svg
- class="mx-auto h-16 w-16 text-primary/30 dark:text-primary/20"
- fill="none"
- viewBox="0 0 24 24"
- stroke="currentColor"
- aria-hidden="true"
- >
- <path
- stroke-linecap="round"
- stroke-linejoin="round"
- stroke-width="1.5"
- d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z"
- />
- </svg>
- <p class="mt-4 text-lg font-medium text-secondary-content">
- No shows available yet
- </p>
- <p class="mt-2 text-sm text-muted">
- We're working on bringing you exciting new content. Check back soon!
- </p>
- </div>
- )}
- </div>
- </div>
- </section>
+		<section class="shows-page__grid-section" aria-label="Shows">
+			{hasShows ? (
+				<div class="shows-page__grid">
+					{showsToRender.map((show) => (
+						<ShowCard show={show} />
+					))}
+				</div>
+			) : (
+				<div class="shows-page__empty">
+					<h2>No shows available yet</h2>
+					<p>New programs will appear here when they are ready.</p>
+				</div>
+			)}
+		</section>
+	</div>
 </Page>
 
 <style>
-	.shows-header {
-		text-align: left;
-		max-width: 60rem;
-		margin: 0 0 3rem;
-		padding-bottom: 2rem;
-		border-bottom: 1px solid var(--editorial-hairline);
+	.shows-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
 	}
-	.shows-header__meta {
-		margin-bottom: 1rem;
+
+	.shows-page__grid-section {
+		padding: 2rem var(--space-section-pad-x) 3rem;
 	}
-	.shows-header__kicker {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
+
+	.shows-page__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+		gap: 1.25rem;
 	}
-	.shows-header__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: clamp(2.75rem, 6vw, 4.5rem);
-		line-height: 0.98;
-		letter-spacing: -0.025em;
+
+	.shows-page__empty {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		padding: 2rem;
+		max-width: 36rem;
+	}
+
+	.shows-page__empty h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.375rem, 2vw, 1.875rem);
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: 0;
 		color: var(--editorial-ink);
 		margin: 0;
-		text-wrap: balance;
 	}
-	.shows-header__title-soft {
-		color: var(--editorial-ink-soft);
-	}
-	.shows-header__lede {
+
+	.shows-page__empty p {
 		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.125rem;
-		line-height: 1.5;
 		color: var(--editorial-ink-soft);
-		margin: 1.25rem 0 0;
-		max-width: 40rem;
+		margin: 0.5rem 0 0;
+	}
+
+	@media (max-width: 720px) {
+		.shows-page__grid-section {
+			padding: 1.5rem 1rem 2.5rem;
+		}
+		.shows-page__grid {
+			grid-template-columns: 1fr;
+		}
+		.shows-page__empty {
+			padding: 1.5rem;
+		}
 	}
 </style>

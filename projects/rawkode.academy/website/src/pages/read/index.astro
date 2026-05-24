@@ -20,7 +20,13 @@ export const prerender = true;
 const allArticles = (await getCollection("articles", ({ data }) => !data.draft))
 	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
-const [featured, ...rest] = allArticles;
+const featured = allArticles.find((article) => article.data.cover) ?? allArticles[0];
+const featuredIndex = featured
+	? allArticles.findIndex((article) => article.id === featured.id)
+	: -1;
+const rest = featured
+	? allArticles.filter((article) => article.id !== featured.id)
+	: [];
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
 
 // Topics — derived from technologies referenced across the corpus.
@@ -34,26 +40,14 @@ for (const article of allArticles) {
 const topTopics = Array.from(topicCounts.entries())
 	.sort((a, b) => b[1] - a[1])
 	.slice(0, 8)
-	.map(([id, count]) => ({
-		label: id.replace(/[-_]/g, " ").toUpperCase(),
-		count,
+	.map(([id]) => ({
+		label: id
+			.replace(/[-_]/g, " ")
+			.replace(/\b\w/g, (char) => char.toUpperCase()),
 		href: `/technology/${id}`,
 	}));
 
-const topics = [
-	{ label: "All", count: allArticles.length, href: "/read" },
-	...topTopics,
-];
-
-// Issue number — months since launch, used as the dispatch index.
-const launchDate = new Date("2019-01-01");
-const issueNum = Math.max(
-	1,
-	(new Date().getFullYear() - launchDate.getFullYear()) * 12 +
-		(new Date().getMonth() - launchDate.getMonth()),
-)
-	.toString()
-	.padStart(3, "0");
+const topics = topTopics;
 
 // ─── Helpers ───────────────────────────────────────────────────
 
@@ -82,21 +76,14 @@ const articleAuthorName = async (
 const dispatchNumFor = (idx: number) =>
 	String(allArticles.length - idx).padStart(3, "0");
 
-// Featured pull-quote: prefer the openGraph subtitle, else first sentence of body.
-const pullQuote = (() => {
-	if (!featured) return undefined;
-	if (featured.data.openGraph?.subtitle) return featured.data.openGraph.subtitle;
-	const body = (featured.body ?? "").trim();
-	const match = body.match(/^[^#\n]+/);
-	return match ? compactCopy(match[0], 220) : featured.data.description;
-})();
+const dispatchNumForArticle = (article: (typeof allArticles)[number]) =>
+	dispatchNumFor(allArticles.findIndex((candidate) => candidate.id === article.id));
 
 // Pre-resolve authors for the grid (Astro can't await in JSX iteration cleanly).
 const restWithMeta = await Promise.all(
-	rest.map(async (article, idx) => ({
+	rest.map(async (article) => ({
 		article,
-		idx: idx + 1,
-		dispatchNum: dispatchNumFor(idx + 1),
+		dispatchNum: dispatchNumForArticle(article),
 		author: await articleAuthorName(article),
 		readingTime: calculateReadingTime(article.body || "").text,
 	})),
@@ -120,31 +107,26 @@ const pageDescription =
 	</Fragment>
 
 	<div class="read-page">
-		<ReadMasthead
-			issueNum={issueNum}
-			shownCount={allArticles.length}
-			totalCount={allArticles.length}
-		/>
+		<ReadMasthead />
 
 		{featured && (
 			<FeaturedArticle
 				href={`/read/${featured.id}`}
 				kicker={getTypeBadgeConfig(featured.data.type || "tutorial").label}
-				dispatchNum={dispatchNumFor(0)}
+				dispatchNum={dispatchNumFor(featuredIndex)}
 				title={featured.data.title}
-				dek={
-					featured.data.openGraph?.subtitle ||
-					featured.data.description
-				}
-				tags={(featured.data.technologies ?? []).slice(0, 3)}
+				dek={compactCopy(
+					featured.data.openGraph?.subtitle || featured.data.description,
+					180,
+				)}
 				author={featuredAuthors.map((a) => a.data.name).join(", ") || undefined}
 				date={dateFormatter.format(featured.data.publishedAt)}
 				readingTime={calculateReadingTime(featured.body || "").text}
-				pullQuote={pullQuote}
+				cover={featured.data.cover}
 			/>
 		)}
 
-		<FilterRail topics={topics} activeIndex={0} />
+		<FilterRail topics={topics} />
 
 		<div class="read-grid">
 			{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => (
@@ -157,11 +139,12 @@ const pageDescription =
 						article.data.openGraph?.subtitle ||
 							article.data.subtitle ||
 							article.data.description,
-						200,
+						130,
 					)}
 					author={author}
 					date={dateFormatter.format(article.data.publishedAt)}
 					readingTime={readingTime}
+					cover={article.data.cover}
 				/>
 			))}
 		</div>
@@ -178,44 +161,21 @@ const pageDescription =
 
 	.read-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		column-gap: 1.75rem;
-		padding: 0.5rem 2.5rem 3rem;
-	}
-
-	.read-grid > :global(.article-grid-item) {
-		border-right: 1px solid var(--editorial-hairline);
-	}
-
-	.read-grid > :global(.article-grid-item):nth-child(3n) {
-		border-right: none;
-	}
-
-	.read-grid > :global(.article-grid-item):nth-child(n + 4) {
-		border-top: 1px solid var(--editorial-hairline);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0;
+		padding: 1.5rem 2.5rem 4rem;
 	}
 
 	@media (max-width: 960px) {
-		.read-grid { grid-template-columns: repeat(2, 1fr); padding: 0.5rem 1.5rem 2rem; }
-		.read-grid > :global(.article-grid-item):nth-child(3n) {
-			border-right: 1px solid var(--editorial-hairline);
-		}
-		.read-grid > :global(.article-grid-item):nth-child(2n) {
-			border-right: none;
-		}
-		.read-grid > :global(.article-grid-item):nth-child(n + 3) {
-			border-top: 1px solid var(--editorial-hairline);
+		.read-grid {
+			grid-template-columns: 1fr;
+			padding: 1rem 1.5rem 3rem;
 		}
 	}
 
 	@media (max-width: 640px) {
-		.read-grid { grid-template-columns: 1fr; padding: 0 1.25rem 2rem; }
-		.read-grid > :global(.article-grid-item) {
-			border-right: none !important;
-			border-top: 1px solid var(--editorial-hairline);
-		}
-		.read-grid > :global(.article-grid-item):first-child {
-			border-top: none;
+		.read-grid {
+			padding: 0.375rem 1rem 2.5rem;
 		}
 	}
 </style>
