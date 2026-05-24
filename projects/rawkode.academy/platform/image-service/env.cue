@@ -50,8 +50,8 @@ tasks: {
 	}
 
 	build: schema.#Task & {
-		command: "bun"
-		args: ["run", "build"]
+		command: "cuenv"
+		args: ["exec", "--", "bun", "run", "build"]
 		inputs: [
 			"astro.config.ts",
 			"package.json",
@@ -62,8 +62,8 @@ tasks: {
 	}
 
 	test: schema.#Task & {
-		command: "bun"
-		args: ["run", "test"]
+		command: "cuenv"
+		args: ["exec", "--", "bun", "run", "test"]
 		inputs: [
 			"package.json",
 			"src/**",
@@ -74,8 +74,8 @@ tasks: {
 	deploy: schema.#TaskGroup & {
 		type: "group"
 		main: schema.#Task & {
-			command: "bun"
-			args: ["x", "wrangler", "deploy", "--config", "./dist/server/wrangler.json"]
+			command: "cuenv"
+			args: ["exec", "--", "bun", "x", "wrangler", "deploy", "--config", "./dist/server/wrangler.json"]
 			inputs: [
 				"astro.config.ts",
 				"package.json",
@@ -84,8 +84,8 @@ tasks: {
 			]
 		}
 		preview: schema.#Task & {
-			command: "bun"
-			args: ["x", "wrangler", "versions", "upload", "--config", "./dist/server/wrangler.json"]
+			command: "cuenv"
+			args: ["exec", "--", "bun", "x", "wrangler", "versions", "upload", "--config", "./dist/server/wrangler.json"]
 			inputs: [
 				"astro.config.ts",
 				"package.json",
