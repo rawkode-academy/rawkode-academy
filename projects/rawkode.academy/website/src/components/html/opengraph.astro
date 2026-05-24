@@ -1,6 +1,6 @@
 ---
-import * as utf64 from "utf64";
 import type { CollectionEntry } from "astro:content";
+import { resolveOpenGraphImage } from "@/lib/open-graph";
 
 const {
 	title,
@@ -23,35 +23,14 @@ const openGraphDescription =
 	description ??
 	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
 
-// Static fallback served from our own origin. Used when the caller hasn't
-// passed an image and we'd otherwise rely on the dynamic image service
-// (image.rawkode.academy) - that service has been returning 403 site-wide,
-// which broke every social-share preview on the affected pages. Falling
-// back to the brand icon means the preview is at least branded rather than
-// broken. Pages that have a real image (article covers, etc.) still go
-// through the dynamic service to get a per-page card.
-const staticFallbackImageUrl = new URL(
-	"/android-chrome-512x512.png",
-	openGraphUrl,
-).href;
-
-const openGraphImageUrl = image
-	? `https://image.rawkode.academy/image?payload=${utf64.encode(
-			JSON.stringify({
-				...image,
-				title,
-				subtitle,
-				format: "png",
-				template: "gradient",
-			}),
-		)}`
-	: staticFallbackImageUrl;
-
-// The static fallback is the brand icon at known dimensions; declaring
-// them lets social platforms render the preview without fetching the
-// asset and inspecting it first.
-const usingStaticFallback = !image;
-const ogImageAlt = usingStaticFallback ? "Rawkode Academy" : title;
+const openGraphImage = resolveOpenGraphImage({
+	title,
+	subtitle,
+	description: openGraphDescription,
+	image,
+	pageUrl: openGraphUrl,
+	useImageDirectly,
+});
 
 // Show article-specific meta tags only when the caller opts in via the
 // `isArticle` prop. The previous heuristic also matched `/blog/` (a route
@@ -92,16 +71,14 @@ const firstAuthorMastodon = shouldShowArticleMeta
 <meta property="og:title" content={title} />
 <meta property="og:description" content={openGraphDescription} />
 <meta property="og:url" content={openGraphUrl} />
-<meta
-	property="og:image"
-	content={useImageDirectly ? image?.image : openGraphImageUrl}
-/>
-<meta property="og:image:alt" content={ogImageAlt} />
-{usingStaticFallback && (
+<meta property="og:image" content={openGraphImage.url} />
+<meta property="og:image:secure_url" content={openGraphImage.url} />
+<meta property="og:image:alt" content={openGraphImage.alt} />
+{openGraphImage.type && (
 	<>
-		<meta property="og:image:type" content="image/png" />
-		<meta property="og:image:width" content="512" />
-		<meta property="og:image:height" content="512" />
+		<meta property="og:image:type" content={openGraphImage.type} />
+		<meta property="og:image:width" content={String(openGraphImage.width)} />
+		<meta property="og:image:height" content={String(openGraphImage.height)} />
 	</>
 )}
 {firstAuthorMastodon && (
@@ -152,11 +129,8 @@ const firstAuthorMastodon = shouldShowArticleMeta
 <meta property="twitter:url" content={openGraphUrl} />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={openGraphDescription} />
-<meta
-	name="twitter:image"
-	content={useImageDirectly ? image?.image : openGraphImageUrl}
-/>
-<meta name="twitter:image:alt" content={ogImageAlt} />
+<meta name="twitter:image" content={openGraphImage.url} />
+<meta name="twitter:image:alt" content={openGraphImage.alt} />
 
 {!shouldShowArticleMeta && (
 	<script
@@ -167,7 +141,7 @@ const firstAuthorMastodon = shouldShowArticleMeta
 			"@type": pageType,
 			name: title,
 			description: openGraphDescription,
-			image: useImageDirectly ? image?.image : openGraphImageUrl,
+			image: openGraphImage.url,
 			url: openGraphUrl.toString(),
 			publisher: {
 				"@type": "Organization",
