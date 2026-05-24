@@ -1,0 +1,112 @@
+---
+import type { Bracket } from "../queries";
+
+interface Props {
+	showId: string;
+	openBrackets: Bracket[];
+	submitted: boolean;
+}
+
+const { showId, openBrackets, submitted } = Astro.props;
+const hasTeamBracket = openBrackets.some((b) => b.kind === "team");
+const actionUrl = `/api/shows/${showId}/apply`;
+---
+
+<div class="mx-auto max-w-xl">
+	{
+		submitted && (
+			<div
+				class="mb-6 rounded-sm border p-4 text-sm text-primary-content"
+				style="border-color: var(--surface-border); background: var(--surface-raised)"
+			>
+				Thanks for applying. We will be in touch once your entry is reviewed.
+			</div>
+		)
+	}
+
+	{
+		openBrackets.length === 0 ? (
+			<div class="rounded-sm paper-card p-12 text-center">
+				<p class="text-lg font-medium text-secondary-content">
+					Applications are closed
+				</p>
+				<p class="mt-2 text-sm text-muted">
+					There are no brackets open for entry right now.
+				</p>
+			</div>
+		) : (
+			<form method="POST" action={actionUrl} class="flex flex-col gap-4">
+				<label class="flex flex-col gap-1 text-sm">
+					<span class="font-medium text-primary-content">Bracket</span>
+					<select
+						name="bracketId"
+						required
+						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
+						style="border-color: var(--surface-border)"
+					>
+						{openBrackets.map((b) => (
+							<option value={b.id}>
+								{b.name} ({b.kind})
+							</option>
+						))}
+					</select>
+				</label>
+
+				<label class="flex flex-col gap-1 text-sm">
+					<span class="font-medium text-primary-content">Display name</span>
+					<input
+						type="text"
+						name="displayName"
+						required
+						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
+						style="border-color: var(--surface-border)"
+					/>
+				</label>
+
+				<label class="flex flex-col gap-1 text-sm">
+					<span class="font-medium text-primary-content">Email</span>
+					<input
+						type="email"
+						name="email"
+						required
+						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
+						style="border-color: var(--surface-border)"
+					/>
+				</label>
+
+				{hasTeamBracket && (
+					<label class="flex flex-col gap-1 text-sm">
+						<span class="font-medium text-primary-content">
+							Team name (team brackets)
+						</span>
+						<input
+							type="text"
+							name="teamName"
+							class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
+							style="border-color: var(--surface-border)"
+						/>
+					</label>
+				)}
+
+				<label class="flex flex-col gap-1 text-sm">
+					<span class="font-medium text-primary-content">
+						Anything else? (optional)
+					</span>
+					<textarea
+						name="message"
+						rows="3"
+						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
+						style="border-color: var(--surface-border)"
+					/>
+				</label>
+
+				<button
+					type="submit"
+					class="focus-ring mt-2 rounded-sm bg-primary px-5 py-2.5 font-semibold text-white"
+				>
+					Apply to compete
+				</button>
+			</form>
+		)
+	}
+</div>

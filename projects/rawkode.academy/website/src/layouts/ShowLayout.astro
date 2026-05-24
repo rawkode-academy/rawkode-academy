@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import ShowNav from "@/components/show/ShowNav.astro";
+import type { ShowNavItem } from "@/lib/shows/types";
+import Page from "@/wrappers/page.astro";
+
+interface Props {
+	show: CollectionEntry<"shows">;
+	nav: ShowNavItem[];
+	active?: string | null;
+	title: string;
+	description?: string | undefined;
+}
+
+const { show, nav, active = null, title, description } = Astro.props;
+const activeTab = nav.find((n) => n.slug === active);
+
+const breadcrumbElements = [
+	{ title: "Home", link: "/" },
+	{ title: "Shows", link: "/shows" },
+	{ title: show.data.name, link: `/shows/${show.data.id}` },
+	...(activeTab
+		? [
+				{
+					title: activeTab.label,
+					link: `/shows/${show.data.id}/${activeTab.slug}`,
+				},
+			]
+		: []),
+];
+---
+
+<Page title={title} description={description ?? show.data.description ?? title}>
+	<section
+		class="relative overflow-hidden"
+		style="border-bottom: 1px solid var(--surface-border)"
+	>
+		<div
+			class="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/5 dark:from-primary/20 dark:to-secondary/10"
+			aria-hidden="true"
+		>
+		</div>
+		<div class="relative mx-auto max-w-7xl content-px pb-6 pt-8">
+			<Breadcrumb elements={breadcrumbElements} />
+			<h1
+				class="mt-6 text-3xl font-extrabold tracking-tight text-primary-content sm:text-4xl"
+			>
+				{show.data.name}
+			</h1>
+		</div>
+	</section>
+
+	<ShowNav showId={show.data.id} nav={nav} active={active} />
+
+	<section class="section-py" style="background: var(--surface-base)">
+		<div class="mx-auto max-w-7xl content-px">
+			<slot />
+		</div>
+	</section>
+</Page>
