@@ -49,7 +49,7 @@ tasks: {
 
 	build: schema.#Task & {
 		command: "sh"
-		args: ["-lc", "nix shell nixpkgs#bun -c bun run build"]
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run build"]
 		env: PATH: _taskPath
 		inputs: [
 			"astro.config.ts",
@@ -62,7 +62,7 @@ tasks: {
 
 	test: schema.#Task & {
 		command: "sh"
-		args: ["-lc", "nix shell nixpkgs#bun -c bun run test"]
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
 		env: PATH: _taskPath
 		inputs: [
 			"package.json",
@@ -75,7 +75,7 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			command: "sh"
-			args: ["-lc", "nix shell nixpkgs#bun -c bun x wrangler deploy --config ./dist/server/wrangler.json"]
+			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./dist/server/wrangler.json"]
 			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
@@ -86,7 +86,7 @@ tasks: {
 		}
 		preview: schema.#Task & {
 			command: "sh"
-			args: ["-lc", "nix shell nixpkgs#bun -c bun x wrangler versions upload --config ./dist/server/wrangler.json"]
+			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler versions upload --config ./dist/server/wrangler.json"]
 			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
