@@ -6,9 +6,6 @@ schema.#Project
 
 name: "rawkode-academy-platform-image-service"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
-
 let _t = tasks
 
 env: {
