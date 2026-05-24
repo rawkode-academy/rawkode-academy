@@ -14,6 +14,8 @@ import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import ShowNav from "@/components/show/ShowNav.astro";
+import { getShowNav, hasExtension } from "@/lib/shows/registry";
 
 const logger = createLogger("shows");
 const { showId } = Astro.params;
@@ -97,6 +99,10 @@ const breadcrumbElements = [
 ];
 
 const pageTitle = `${showEntry.data.name} Episodes`;
+
+const showNav = hasExtension(showEntry.data.id)
+	? getShowNav(showEntry.data.id)
+	: [];
 
 const latestEpisode = feedVideos[0];
 const totalDurationSeconds = feedVideos.reduce((sum, v) => sum + v.duration, 0);
@@ -272,6 +278,10 @@ function formatDuration(seconds: number) {
  </div>
  </div>
  </section>
+
+ {showNav.length > 0 && (
+ <ShowNav showId={showEntry.data.id} nav={showNav} active={null} />
+ )}
 
  <!-- Episodes -->
  <section class="section-py" style="background: var(--surface-base)">

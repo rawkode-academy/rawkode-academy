@@ -1,0 +1,71 @@
+---
+import type { BracketMatch } from "../queries";
+
+interface Props {
+	matches: BracketMatch[];
+}
+
+const { matches } = Astro.props;
+
+const scheduled = matches
+	.filter((m) => m.status !== "cancelled")
+	.sort((a, b) => {
+		const at = a.scheduledAt
+			? Date.parse(a.scheduledAt)
+			: Number.MAX_SAFE_INTEGER;
+		const bt = b.scheduledAt
+			? Date.parse(b.scheduledAt)
+			: Number.MAX_SAFE_INTEGER;
+		return at - bt;
+	});
+
+function fmt(iso?: string | null): string {
+	if (!iso) return "TBD";
+	return new Date(iso).toLocaleString("en-GB", {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
+---
+
+{
+	scheduled.length === 0 ? (
+		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
+			<p class="text-lg font-medium text-secondary-content">
+				Nothing scheduled yet
+			</p>
+			<p class="mt-2 text-sm text-muted">
+				Match times appear here once brackets are drawn.
+			</p>
+		</div>
+	) : (
+		<ul class="flex flex-col gap-3" role="list">
+			{scheduled.map((m) => (
+				<li class="flex flex-wrap items-center justify-between gap-3 rounded-sm paper-card p-4">
+					<div class="flex items-center gap-3">
+						<span class="font-medium text-primary-content">
+							{m.sideA?.displayName ?? "TBD"}
+						</span>
+						<span class="text-xs text-muted">vs</span>
+						<span class="font-medium text-primary-content">
+							{m.sideB?.displayName ?? "TBD"}
+						</span>
+					</div>
+					<div class="flex items-center gap-3 text-sm text-muted">
+						{m.scenarioTitle && <span>{m.scenarioTitle}</span>}
+						<span>{fmt(m.scheduledAt)}</span>
+						{m.status === "live" && (
+							<span class="font-semibold text-secondary">● LIVE</span>
+						)}
+						{m.status === "completed" && (
+							<span class="text-xs">{m.winner?.displayName} won</span>
+						)}
+					</div>
+				</li>
+			))}
+		</ul>
+	)
+}

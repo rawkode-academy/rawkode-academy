@@ -1,10 +1,5 @@
 import { execSync } from "node:child_process";
-import {
-	copyFileSync,
-	existsSync,
-	mkdirSync,
-	writeFileSync,
-} from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,13 +13,11 @@ const PLATFORM_SERVICES = [
 	"emoji-reactions",
 	"email-preferences",
 	"watch-history",
+	"brackets",
 ];
 
 // Helper function to collect schema from a service directory
-function collectServiceSchema(
-	serviceDir: string,
-	schemaName: string,
-): boolean {
+function collectServiceSchema(serviceDir: string, schemaName: string): boolean {
 	const readModelDir = join(serviceDir, "read-model");
 	const schemaPath = join(readModelDir, "schema.gql");
 	const publishPath = join(readModelDir, "publish.ts");

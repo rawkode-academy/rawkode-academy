@@ -19,6 +19,8 @@ const SUBGRAPHS = [
 	"emoji-reactions",
 	"email-preferences",
 	"watch-history",
+	// Show domain services
+	"brackets",
 	// Secret of Kubernetes Island game services
 	"ski-achievements",
 	"ski-leaderboard",
@@ -32,18 +34,20 @@ async function composeSupergraph() {
 	// Check what schema files exist
 	let schemaFiles: string[];
 	try {
-		schemaFiles = readdirSync(schemasDir).filter((f) =>
-			f.endsWith(".graphql"),
-		);
+		schemaFiles = readdirSync(schemasDir).filter((f) => f.endsWith(".graphql"));
 	} catch {
 		console.error(`Error: schemas directory not found at ${schemasDir}`);
-		console.error("Run the collect-schemas step first to gather subgraph SDLs.");
+		console.error(
+			"Run the collect-schemas step first to gather subgraph SDLs.",
+		);
 		process.exit(1);
 	}
 
 	if (schemaFiles.length === 0) {
 		console.error("No schema files found in schemas directory.");
-		console.error("Run the collect-schemas step first to gather subgraph SDLs.");
+		console.error(
+			"Run the collect-schemas step first to gather subgraph SDLs.",
+		);
 		process.exit(1);
 	}
 
@@ -107,9 +111,7 @@ async function composeSupergraph() {
 	console.log("Supergraph successfully composed!");
 	console.log(`  Output: ${outputPath}`);
 	console.log(`  Subgraphs: ${services.length}`);
-	console.log(
-		`  Size: ${(result.supergraphSdl.length / 1024).toFixed(2)} KB`,
-	);
+	console.log(`  Size: ${(result.supergraphSdl.length / 1024).toFixed(2)} KB`);
 }
 
 composeSupergraph().catch((error) => {

@@ -1,0 +1,55 @@
+---
+import type { Standing } from "../queries";
+
+interface Props {
+	standings: Standing[];
+}
+
+const { standings } = Astro.props;
+---
+
+{
+	standings.length === 0 ? (
+		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
+			<p class="text-lg font-medium text-secondary-content">
+				No results yet
+			</p>
+			<p class="mt-2 text-sm text-muted">
+				Standings update as matches are completed.
+			</p>
+		</div>
+	) : (
+		<div class="mx-auto max-w-2xl overflow-hidden rounded-sm paper-card">
+			<table class="w-full text-left text-sm">
+				<thead>
+					<tr
+						class="border-b text-xs uppercase tracking-wide text-muted"
+						style="border-color: var(--surface-border)"
+					>
+						<th class="px-4 py-3">#</th>
+						<th class="px-4 py-3">Competitor</th>
+						<th class="px-4 py-3 text-right">W</th>
+						<th class="px-4 py-3 text-right">L</th>
+					</tr>
+				</thead>
+				<tbody>
+					{standings.map((row, i) => (
+						<tr
+							class="border-b last:border-0"
+							style="border-color: var(--surface-border)"
+						>
+							<td class="px-4 py-3 text-muted">{i + 1}</td>
+							<td class="px-4 py-3 font-medium text-primary-content">
+								{row.displayName}
+							</td>
+							<td class="px-4 py-3 text-right text-primary-content">
+								{row.wins}
+							</td>
+							<td class="px-4 py-3 text-right text-muted">{row.losses}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	)
+}

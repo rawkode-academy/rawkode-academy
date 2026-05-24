@@ -15,6 +15,8 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	"emoji-reactions": "EMOJI_REACTIONS",
 	"email-preferences": "EMAIL_PREFERENCES",
 	"watch-history": "WATCH_HISTORY",
+	// Show domain services
+	brackets: "BRACKETS",
 };
 
 export interface ServiceBindingTransportContext {
@@ -36,9 +38,7 @@ export interface ServiceBindingTransportContext {
  * - Automatic authentication between workers
  * - Lower latency than HTTP
  */
-export function createServiceBindingTransport(
-	env: Env,
-): Transport {
+export function createServiceBindingTransport(env: Env): Transport {
 	return {
 		getSubgraphExecutor({ subgraphName }) {
 			const bindingKey = SUBGRAPH_BINDING_MAP[subgraphName];
@@ -64,8 +64,7 @@ export function createServiceBindingTransport(
 				const { document, variables, context } = executionRequest;
 
 				// Serialize GraphQL query
-				const query =
-					typeof document === "string" ? document : print(document);
+				const query = typeof document === "string" ? document : print(document);
 
 				// Build headers with auth context for subgraph
 				const headers: HeadersInit = {

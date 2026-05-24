@@ -243,6 +243,37 @@ import {
 - React `client:only="react"` should be reserved for genuinely interactive surfaces. SEO falls off otherwise.
 - Long-form prose flows through `.prose` styles in `global.css` (editorial ramp: serif italic h1/h2, hairline blockquote/code chip, mono numbered lists).
 
+## Show Extensions & Plugins
+
+Shows (`/shows/[showId]`) can expose extra pages and endpoints via a generic
+plugin system. A show feature is built **once as a reusable plugin** (e.g.
+Bracket, and later Quiz/Poll) and each show is just an instance with config.
+
+**Host** (`src/lib/shows/`):
+- `types.ts` — `ShowExtension` (`pages`, `endpoints`), `ShowPageModule`
+  (`slug`, `label`, `load(ctx)`, `Component`, `meta`, `cache`), `ShowPlugin`
+  (a `(config) => ShowExtension` factory).
+- `registry.ts` — maps `showId -> ShowExtension`; `getShowExtension`,
+  `getShowNav`, `hasExtension`.
+- `client.ts` — `queryShowsApi` helper for federated GraphQL reads.
+- Routing: `src/pages/shows/[showId]/[...slug].astro` (pages) and
+  `src/pages/api/shows/[showId]/[...slug].ts` (endpoints) dispatch from the
+  registry into `ShowLayout` + `ShowNav`. The hub `[showId].astro` renders the
+  nav when `hasExtension(showId)`.
+
+`load(ctx)` runs server-side before the layout (so it resolves data **and**
+title); `Component` receives the data as props.
+
+**Writing a plugin:** export a `ShowPlugin<Config>` factory under
+`src/lib/shows/plugins/<name>/` returning `{ showId, pages, endpoints }`. Reads
+go through `queryShowsApi` to the federated API; writes go through a platform
+service's write-model bound on the worker (see Bracket).
+
+**Bracket plugin** (`src/lib/shows/plugins/bracket/`): reads bracket data from
+the federated `Show` entity (served by the `platform/brackets` CQRS service),
+writes registrations via the `BRACKETS_WRITE` service binding. Klustered is the
+first instance: `src/shows/klustered/index.ts` = `bracketPlugin({ showId: "klustered" })`.
+
 ## Resources
 
 - Editorial primitives: `src/components/ui/`

@@ -166,7 +166,8 @@ import (
 
 	let _t = tasks
 
-	// CI pipeline with workflow_dispatch enabled
+	// CI pipeline with workflow_dispatch enabled. The deploy tasks depend on
+	// `migrate` by name (when present), so migrations apply before any deploy.
 	ci: pipelines: {
 		default: {
 			environment: "production"
@@ -175,30 +176,48 @@ import (
 				defaultBranch: true
 				manual:        true
 			}
-			tasks: [_t.deploy]
+			tasks: [
+				if _hasMigrations {schema.#TaskSequence & [_t.migrate, _t.deploy]},
+				if !_hasMigrations {_t.deploy},
+			]
 		}
 	}
 
-	// Auto-generated deploy tasks based on enabled features
-	tasks: deploy: {
-		type: "group"
+	// A service owns migrations when it has a data-model, a read-model, and a
+	// "DB" D1 binding (migrations_dir is auto-injected for DB on the read-model).
+	_dbBindings: [for db in _bindings.d1Databases if db.binding == "DB" {db}]
+	_hasMigrations: includeDataModel && includeReadModel && len(_dbBindings) > 0
 
-		if includeReadModel {
-			read: schema.#Task & {
+	// Auto-generated deploy tasks based on enabled features. Services that own a
+	// D1 schema also get a `migrate` task, ordered before deploy in the pipeline.
+	tasks: {
+		if _hasMigrations {
+			migrate: schema.#Task & {
 				command: "bun"
-				args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+				args: [
+					"x", "wrangler", "d1", "migrations", "apply", "DB",
+					"--remote", "--config", "./read-model/wrangler.jsonc",
+				]
 			}
 		}
-		if includeWriteModel {
-			write: schema.#Task & {
-				command: "bun"
-				args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+
+		deploy: {
+			type: "group"
+
+			if includeReadModel {
+				read: schema.#Task & {
+					command: "bun"
+					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]				}
 			}
-		}
-		if includeHttp {
-			http: schema.#Task & {
-				command: "bun"
-				args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+			if includeWriteModel {
+				write: schema.#Task & {
+					command: "bun"
+					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]				}
+			}
+			if includeHttp {
+				http: schema.#Task & {
+					command: "bun"
+					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]				}
 			}
 		}
 	}

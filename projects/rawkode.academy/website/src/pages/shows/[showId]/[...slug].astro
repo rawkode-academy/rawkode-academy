@@ -1,0 +1,54 @@
+---
+export const prerender = false;
+
+import { getCollection } from "astro:content";
+import ShowLayout from "@/layouts/ShowLayout.astro";
+import { getShowExtension, getShowNav } from "@/lib/shows/registry";
+import type { ShowEnv } from "@/lib/shows/types";
+
+const { showId, slug } = Astro.params;
+
+if (!showId) return new Response(null, { status: 404 });
+
+const shows = await getCollection("shows");
+const show = shows.find((s) => s.data.id === showId);
+if (!show) return new Response(null, { status: 404 });
+
+const ext = getShowExtension(showId);
+const page = ext?.pages.find((p) => p.slug === (slug ?? ""));
+if (!ext || !page) return new Response(null, { status: 404 });
+
+const env = (Astro.locals as { runtime?: { env?: ShowEnv } }).runtime?.env ?? {};
+
+const data = page.load
+	? await page.load({
+			showId,
+			slug: page.slug,
+			params: Astro.params,
+			request: Astro.request,
+			url: Astro.url,
+			env,
+		})
+	: {};
+
+const meta = page.meta?.(data) ?? {
+	title: `${show.data.name} — ${page.label}`,
+};
+
+if (page.cache) {
+	Astro.response.headers.set("Cache-Control", page.cache);
+}
+
+const nav = getShowNav(showId);
+const Component = page.Component;
+---
+
+<ShowLayout
+	show={show}
+	nav={nav}
+	active={page.slug}
+	title={meta.title}
+	description={meta.description}
+>
+	<Component {...data} />
+</ShowLayout>
