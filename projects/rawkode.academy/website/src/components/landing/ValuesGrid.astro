@@ -1,6 +1,4 @@
 ---
-import SectionMark from "@/components/ui/SectionMark.vue";
-
 interface Value { title: string; description: string }
 
 interface Props {
@@ -11,9 +9,8 @@ const { values } = Astro.props as Props;
 ---
 
 <div class="values-grid">
-	{values.map((v, i) => (
+	{values.map((v) => (
 		<article class="values-grid__item">
-			<SectionMark num={i + 1} tone="accent" />
 			<h3 class="values-grid__title">{v.title}</h3>
 			<p class="values-grid__body">{v.description}</p>
 		</article>

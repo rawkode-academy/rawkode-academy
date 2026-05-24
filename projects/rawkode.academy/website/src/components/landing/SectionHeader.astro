@@ -1,9 +1,7 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
-import SectionMark from "@/components/ui/SectionMark.vue";
 
 interface Props {
-	num: number | string;
 	kicker: string;
 	title: string;
 	body?: string;
@@ -11,12 +9,12 @@ interface Props {
 	ctaHref?: string;
 }
 
-const { num, kicker, title, body, ctaLabel, ctaHref } = Astro.props as Props;
+const { kicker, title, body, ctaLabel, ctaHref } = Astro.props as Props;
 ---
 
 <header class="ed-section-head">
 	<div class="ed-section-head__rule" aria-hidden="true">
-		<SectionMark num={num} label={kicker} tone="accent" />
+		<MLabel tone="accent">{kicker}</MLabel>
 		<span class="ed-section-head__rule-line"></span>
 		{ctaHref && (
 			<a class="ed-section-head__cta" href={ctaHref}>

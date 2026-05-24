@@ -299,12 +299,12 @@ const academyValues = [
 			"We show the trade-offs, the rough edges, and the decisions we'd still make again.",
 	},
 	{
-		title: "Organic Content",
+		title: "Real Projects",
 		description:
 			"Much of the curriculum comes from problems we're solving in public, not invented demos.",
 	},
 	{
-		title: "Embracing Failure",
+		title: "Honest Mistakes",
 		description:
 			"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
 	},
@@ -314,7 +314,7 @@ const academyValues = [
 			"Less talking about code, more terminal time, real code, and live builds you can follow end to end.",
 	},
 	{
-		title: "Forward Thinking",
+		title: "Early Evaluation",
 		description:
 			"We test new tools early, evaluate them honestly, and show where they fit.",
 	},
@@ -364,10 +364,9 @@ const pageDescription =
 		{newsItems.length > 0 && (
 			<section class="landing-section">
 				<SectionHeader
-					num={1}
-					kicker="Field notes"
-					title="Cloud Native News"
-					body="Curated stories from across the cloud native ecosystem."
+					kicker="News"
+					title="Latest News"
+					body="Recent updates from across the cloud native ecosystem."
 					ctaLabel="All news →"
 					ctaHref="/news"
 				/>
@@ -378,10 +377,9 @@ const pageDescription =
 		{learningPathItems.length > 0 && (
 			<section class="landing-section">
 				<SectionHeader
-					num={2}
-					kicker="Learn"
+					kicker="Learning Paths"
 					title="Learning Paths"
-					body="Curated, structured roadmaps for mastering Cloud Native. Start here when you want a guided journey instead of a single tutorial."
+					body="Structured routes through related lessons, articles, and videos."
 					ctaLabel="All paths →"
 					ctaHref="/learning-paths"
 				/>
@@ -392,10 +390,9 @@ const pageDescription =
 		{featuredVideo && (
 			<section class="landing-section">
 				<SectionHeader
-					num={3}
-					kicker="Watch"
-					title="Videos"
-					body="New sessions, reviews, and walkthroughs from the sharp end of cloud native engineering."
+					kicker="Videos"
+					title="Latest Videos"
+					body="Recent sessions, walkthroughs, and practical demos."
 					ctaLabel="Browse videos →"
 					ctaHref="/watch"
 				/>
@@ -426,10 +423,9 @@ const pageDescription =
 		{featuredArticle && (
 			<section class="landing-section">
 				<SectionHeader
-					num={4}
-					kicker="Read"
-					title="Writing"
-					body="Architecture notes, breakdowns, and context for the parts that need more than a runtime."
+					kicker="Articles"
+					title="Latest Articles"
+					body="Technical guides, architecture notes, and written explanations."
 					ctaLabel="Browse articles →"
 					ctaHref="/read"
 				/>
@@ -460,30 +456,27 @@ const pageDescription =
 
 		<section class="landing-section">
 			<SectionHeader
-				num={5}
-				kicker="Values"
+				kicker="Teaching Approach"
 				title="How we teach"
-				body="We teach in public, in context, and close to the sharp edges."
+				body="Practical lessons based on real systems, trade-offs, and mistakes."
 			/>
 			<ValuesGrid values={academyValues} />
 		</section>
 
 		<section class="landing-section">
 			<SectionHeader
-				num={6}
-				kicker="Praise"
-				title="Field reports"
-				body="Notes from engineers learning in public alongside us."
+				kicker="Testimonials"
+				title="What engineers say"
+				body="Feedback from people learning with Rawkode Academy."
 			/>
 			<TestimonialSlider type="viewer" blurb="" />
 		</section>
 
 		<section class="landing-section">
 			<SectionHeader
-				num={7}
 				kicker="Partners"
-				title="Supporting the academy"
-				body="Teams that fund the work while leaving us free to speak plainly about the tools."
+				title="Partners"
+				body="Companies that support free cloud native education."
 				ctaLabel="Partner with us →"
 				ctaHref="/organizations/partnerships"
 			/>

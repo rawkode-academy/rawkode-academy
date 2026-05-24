@@ -123,8 +123,9 @@ const expandSidebar = () => {
 		aria-label="Sidebar navigation"
 	>
 		<div class="ed-sidebar__index" aria-hidden="true">
-			<span class="ed-sidebar__index-mark">§</span>
-			<span v-if="!isCollapsed" class="ed-sidebar__index-label">Index</span>
+			<span class="ed-sidebar__index-label">
+				{{ isCollapsed ? "Nav" : "Navigation" }}
+			</span>
 		</div>
 
 		<nav class="ed-sidebar__nav">
@@ -198,14 +199,6 @@ const expandSidebar = () => {
 .ed-sidebar--collapsed .ed-sidebar__index {
 	justify-content: center;
 	padding: 0.875rem 0;
-}
-
-.ed-sidebar__index-mark {
-	font-family: var(--font-instrument-serif), serif;
-	font-style: italic;
-	font-size: 1rem;
-	color: var(--editorial-ink);
-	line-height: 1;
 }
 
 .ed-sidebar__nav {

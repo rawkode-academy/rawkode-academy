@@ -2,7 +2,6 @@
 import EditorialButton from "@/components/ui/EditorialButton.vue";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import MLabel from "@/components/ui/MLabel.vue";
-import SectionMark from "@/components/ui/SectionMark.vue";
 import StatRow from "@/components/ui/StatRow.vue";
 import OnAirPanel from "@/components/landing/OnAirPanel.astro";
 
@@ -73,7 +72,7 @@ const upcomingLabel =
 
 	<div class="landing-hero__grid">
 		<div class="landing-hero__editorial">
-			<SectionMark num={0} label="Hands-on cloud native" dot tone="rust" />
+			<MLabel class="landing-hero__label" tone="rust">Hands-on cloud native</MLabel>
 
 			<h1 class="landing-hero__h1">Cloud native</h1>
 			<h2 class="landing-hero__h2">is complex.</h2>
@@ -157,7 +156,8 @@ const upcomingLabel =
 		gap: 0;
 	}
 
-	.landing-hero__editorial > :global(.section-mark) {
+	.landing-hero__label {
+		width: fit-content;
 		margin-bottom: 1.75rem;
 	}
 
