@@ -1,8 +1,14 @@
 /// <reference types="vitest" />
-import { getViteConfig } from "astro/config";
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
 
-export default getViteConfig({
+export default defineConfig({
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   test: {
     teardownTimeout: 1_000,
   },
-} as any);
+});
