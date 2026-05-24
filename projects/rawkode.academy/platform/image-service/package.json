@@ -3,29 +3,25 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "prebuild": "just copy-wasm",
-    "prestart": "just copy-wasm",
+    "dev": "astro dev",
     "start": "astro dev",
     "format": "deno fmt .",
-    "build": "deno fmt --check . && astro check && astro build",
+    "build": "astro check && astro build",
     "test": "vitest run"
   },
   "dependencies": {
-    "@astrojs/check": "0.9.4",
-    "@resvg/resvg-wasm": "2.6.2",
-    "astro": "5.18.1",
-    "js-sha256": "0.11.0",
-    "satori": "0.12.0",
-    "satori-html": "0.3.2",
-    "typescript": "5.8.2",
-    "utf64": "1.0.3",
-    "yoga-wasm-web": "0.3.3"
+    "@astrojs/check": "^0.9.9",
+    "@cloudflare/playwright": "^1.3.0",
+    "astro": "^6.3.7",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.94.0"
   },
   "devDependencies": {
-    "@astrojs/cloudflare": "12.1.0",
-    "@astrojs/ts-plugin": "1.10.4",
-    "deno": "2.2.4",
-    "vitest": "2.1.9"
+    "@astrojs/cloudflare": "^13.5.4",
+    "@astrojs/ts-plugin": "1.10.9",
+    "@cloudflare/workers-types": "^4.20260524.1",
+    "deno": "2.7.14",
+    "vitest": "4.1.7"
   },
   "trustedDependencies": [
     "deno",

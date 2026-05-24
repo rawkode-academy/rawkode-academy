@@ -1,6 +1,6 @@
 # Image service
 
-Generate images (`svg` & `png`) with a given set of parameters.
+Generate Open Graph PNG images from JSON payloads.
 
 ## Local development
 
@@ -9,36 +9,37 @@ bun install
 bun run start
 ```
 
-Open browser at
-`http://localhost:4321/image?payload=MAformatAFApngACAtextAFAYHenloCWdisWisWdoggoAN`
+Render a preview page:
 
-### Templates
+```bash
+open 'http://localhost:4321/preview'
+```
 
-Templates are located in [src/templates/](src/templates/). Adding e.g.
-[`template=80s`](http://localhost:4321/image?payload=MAformatAFApngACAtextAFAYHenloCWdisWisWdoggoACAtemplateAFA80sAN)
-as a query parameter selects another template.
+Render a PNG through the image endpoint:
+
+```bash
+curl \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{"title":"Rawkode Academy","text":"Cloud native learning that gets to the point.","template":"gradient"}' \
+  --output image.png \
+  http://localhost:4321/image
+```
+
+Production Open Graph URLs use
+`GET /image?v=<template-version>&payload=<base64url-json>`. The `v` query
+parameter is part of the public URL so template changes invalidate external
+caches.
 
 ## Running the service
 
-This works only on Cloudflare Workers Paid Tier, as it is too large. Free Tier
-only allows 1MB of code.
+The deployed Worker uses Cloudflare Browser Run to screenshot generated HTML at
+1200x630. PNG responses are cached for 72 hours with the Worker Cache API.
 
 ## Template Previews
 
-When changes are made to this repository in a pull request, a GitHub Action will automatically:
-
-1. Generate preview images for all templates
-2. Post these images as a comment on the pull request
-
-This makes it easy to review visual changes to templates without having to run the service locally.
-
-### Running Template Previews Locally
-
-To generate template previews locally:
+To validate the HTML templates locally:
 
 ```bash
-# Run the template preview test
 bun test src/test/template-preview.test.ts
 ```
-
-This will output preview data that can be used to generate images.

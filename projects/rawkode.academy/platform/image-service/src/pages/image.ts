@@ -1,131 +1,137 @@
-// @ts-expect-error .wasm files are not typed
-import yogaWasm from "@/wasm/yoga.wasm";
-// @ts-expect-error .wasm files are not typed
-import resvgWasm from "@/wasm/resvg.wasm";
-import { initWasm, Resvg } from "@resvg/resvg-wasm";
-import initYoga from "yoga-wasm-web";
-import satori, { init } from "satori/wasm";
 import type { APIRoute } from "astro";
-import { loadGoogleFont } from "@/lib/fonts";
 import {
-  DEFAULT_HASHED_TEMPLATE,
-  type HashedTemplate,
-  type Template,
-} from "@/lib/template";
-import { getPayloadFromSearchParams } from "@/lib/payload";
+  CACHE_SECONDS,
+  canonicalPayloadJson,
+  encodePayload,
+  type Payload,
+  PayloadError,
+  payloadFromRequest,
+  TEMPLATE_VERSION,
+} from "@/lib/payload";
+import { renderOpenGraphHtml } from "@/lib/render";
 
-// Code is mostly taken from https://github.com/kvnang/workers-og
+type ImageContext = Parameters<APIRoute>[0];
+type RenderPng = (payload: Payload) => Promise<ArrayBuffer>;
 
-const initResvgWasm = async () => {
+const CACHE_CONTROL = `public, max-age=${CACHE_SECONDS}`;
+
+const digestHex = async (value: string): Promise<string> => {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+
+  return Array.from(
+    new Uint8Array(digest),
+    (byte) => byte.toString(16).padStart(2, "0"),
+  ).join("");
+};
+
+const canonicalImageRequest = (request: Request, payload: Payload): Request => {
+  const url = new URL(request.url);
+
+  url.pathname = "/image";
+  url.search = "";
+  url.searchParams.set("v", TEMPLATE_VERSION);
+  url.searchParams.set("payload", encodePayload(payload));
+
+  return new Request(url, { method: "GET" });
+};
+
+const responseHeaders = (etag: string): HeadersInit => ({
+  "Content-Type": "image/png",
+  "Cache-Control": CACHE_CONTROL,
+  "CDN-Cache-Control": CACHE_CONTROL,
+  "X-Robots-Tag": "noindex",
+  ETag: etag,
+});
+
+const maybeCache = (): Cache | undefined => {
+  if (typeof caches === "undefined") {
+    return undefined;
+  }
+
+  return (caches as unknown as { default: Cache }).default;
+};
+
+const getExecutionContext = (context: ImageContext): ExecutionContext => {
+  const locals = context.locals as {
+    cfContext?: ExecutionContext;
+    runtime?: { cfContext?: ExecutionContext };
+  };
+
+  const cfContext = locals.cfContext ?? locals.runtime?.cfContext;
+
+  if (!cfContext) {
+    throw new Error("Cloudflare execution context is unavailable");
+  }
+
+  return cfContext;
+};
+
+export const renderScreenshot: RenderPng = async (payload) => {
+  const { env } = await import("cloudflare:workers");
+  const { launch } = await import("@cloudflare/playwright");
+  const browser = await launch(env.BROWSER);
+
   try {
-    await initWasm(resvgWasm as WebAssembly.Module);
-  } catch (err) {
-    if (err instanceof Error && err.message.includes("Already initialized")) {
-      return;
-    }
-    throw err;
-  }
-};
-
-const initYogaWasm = async () => {
-  const yoga = await initYoga(yogaWasm);
-  init(yoga);
-};
-
-const templateModules = import.meta.glob<{ template: Template }>(
-  "/src/templates/*.ts",
-  { eager: true },
-);
-
-const templates: { [name: string]: HashedTemplate } = {};
-
-const loadTemplates = async () => {
-  // only load templates once
-  if (Object.keys(templates).length === 0) {
-    for (const [path, module] of Object.entries(templateModules)) {
-      const match = path.match(/\/([^\/]+)\.ts$/);
-
-      if (match) {
-        const name = match[1];
-
-        if (name && module.template) {
-          templates[name] = {
-            hash: module.template.hash(),
-            template: module.template,
-          };
-        }
-      }
-    }
-  }
-};
-
-// cache for one day
-// When changing to higher caching times, consider adding "immutable, no-transform"
-
-const CACHE_CONTROL = "public, max-age=86400";
-
-export const GET: APIRoute = async ({ request }) => {
-  await Promise.all([initResvgWasm(), initYogaWasm(), loadTemplates()]);
-
-  const searchParams = new URLSearchParams(new URL(request.url).search);
-  const payload = getPayloadFromSearchParams(searchParams);
-
-  const hashedTemplate = templates[payload.template] ?? DEFAULT_HASHED_TEMPLATE;
-  const template = hashedTemplate.template;
-  const content = template.render(payload);
-
-  const svg = await satori(content, {
-    width: 1200,
-    height: 630,
-    fonts: [
-      {
-        name: template.font.name,
-        data: await loadGoogleFont({
-          family: template.font.name,
-          weight: template.font.weight,
-        }),
-        weight: template.font.weight,
-        style: template.font.style,
-      },
-    ],
-  });
-
-  if (payload.format === "svg") {
-    return new Response(svg, {
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Cache-Control": CACHE_CONTROL,
-        "X-Robots-Tag": "noindex",
-        ETag: hashedTemplate.hash,
-      },
-      status: 200,
+    const page = await browser.newPage({
+      viewport: { width: 1200, height: 630 },
+      deviceScaleFactor: 1,
     });
+
+    await page.setContent(renderOpenGraphHtml(payload), {
+      waitUntil: "networkidle",
+    });
+
+    const screenshot = await page.screenshot({
+      type: "png",
+      fullPage: false,
+    });
+
+    return new Uint8Array(screenshot).buffer;
+  } finally {
+    await browser.close();
+  }
+};
+
+export const createImageResponse = async (
+  context: ImageContext,
+  renderPng: RenderPng = renderScreenshot,
+): Promise<Response> => {
+  let payload: Payload;
+
+  try {
+    payload = await payloadFromRequest(context.request);
+  } catch (error) {
+    if (error instanceof PayloadError) {
+      return Response.json({ error: error.message }, { status: 400 });
+    }
+
+    throw error;
   }
 
-  const resvg = new Resvg(svg, {
-    fitTo: {
-      mode: "width",
-      value: 1200,
-    },
-  });
+  const cache = maybeCache();
+  const cacheKey = canonicalImageRequest(context.request, payload);
+  const cachedResponse = await cache?.match(cacheKey);
 
-  const pngData = resvg.render();
-  const pngBuffer = pngData.asPng();
+  if (cachedResponse) {
+    return cachedResponse;
+  }
 
-  const body = new ReadableStream({
-    async start(controller) {
-      controller.enqueue(pngBuffer);
-      controller.close();
-    },
-  });
-
-  return new Response(body, {
-    headers: {
-      "Content-Type": "image/png",
-      "Cache-Control": CACHE_CONTROL,
-      "X-Robots-Tag": "noindex",
-      ETag: hashedTemplate.hash,
-    },
+  const cfContext = getExecutionContext(context);
+  const etag = `"${TEMPLATE_VERSION}-${await digestHex(
+    canonicalPayloadJson(payload),
+  )}"`;
+  const response = new Response(await renderPng(payload), {
     status: 200,
+    headers: responseHeaders(etag),
   });
+
+  cfContext.waitUntil(
+    cache?.put(cacheKey, response.clone()) ?? Promise.resolve(),
+  );
+
+  return response;
 };
+
+export const GET: APIRoute = (context) => createImageResponse(context);
+export const POST: APIRoute = (context) => createImageResponse(context);

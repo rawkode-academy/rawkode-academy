@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "rawkode-academy-image-service",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-05-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "keep_vars": false,
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist"
+  },
+  "browser": {
+    "binding": "BROWSER"
+  },
+  "routes": [
+    {
+      "pattern": "image.rawkode.academy",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "traces": {
+      "enabled": true,
+      "destinations": ["grafana-traces"]
+    },
+    "logs": {
+      "enabled": true,
+      "destinations": ["grafana-logs"]
+    }
+  }
+}

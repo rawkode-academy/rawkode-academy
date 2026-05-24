@@ -1,6 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import * as utf64 from "utf64";
+import {
+	encodeImageServicePayload,
+	IMAGE_SERVICE_TEMPLATE_VERSION,
+} from "@/lib/image-service-payload";
 import { buildNewsArticleJsonLd } from "@/lib/news-jsonld";
 import { calculateReadingTime } from "@/utils/reading-time";
 
@@ -23,13 +26,12 @@ const wordCount = (article.body || "")
 
 // Reuse the dynamic OG image generator so social cards and the structured
 // data image stay in lockstep without a second pipeline.
-const imageUrl = `https://image.rawkode.academy/image?payload=${utf64.encode(
-	JSON.stringify({
-		title: article.data.title,
-		format: "png",
-		template: "gradient",
-	}),
-)}`;
+const imagePayload = encodeImageServicePayload({
+	title: article.data.title,
+	format: "png",
+	template: "gradient",
+});
+const imageUrl = `https://image.rawkode.academy/image?v=${IMAGE_SERVICE_TEMPLATE_VERSION}&payload=${imagePayload}`;
 
 const jsonLd = buildNewsArticleJsonLd({
 	article: {
