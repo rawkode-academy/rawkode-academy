@@ -5,6 +5,7 @@ import {
 	MapIcon,
 	MegaphoneIcon,
 	NewspaperIcon,
+	Squares2X2Icon,
 	TvIcon,
 	VideoCameraIcon,
 	UsersIcon,
@@ -30,24 +31,14 @@ const expandedWidth = ref(defaultExpandedWidth);
 
 const baseItems: RawNavItem[] = [
 	{ name: "News", href: "/news", icon: MegaphoneIcon },
+	{ name: "Technology Matrix", href: "/technology/matrix", icon: Squares2X2Icon },
 	{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
 	{ name: "Articles", href: "/read", icon: NewspaperIcon },
 	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
 	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
 	{ name: "Shows", href: "/shows", icon: TvIcon },
 	{ name: "People", href: "/people", icon: UsersIcon },
-	{
-		name: "Technologies",
-		href: "/technology",
-		icon: CubeIcon,
-		children: [
-			{
-				name: "Matrix",
-				href: "/technology/matrix",
-				children: [{ name: "Advanced", href: "/technology/matrix/advanced" }],
-			},
-		],
-	},
+	{ name: "Technologies", href: "/technology", icon: CubeIcon },
 ];
 
 onMounted(() => {
@@ -74,6 +65,13 @@ onBeforeUnmount(() => {
 
 function isCurrentPath(itemPath: string) {
 	if (itemPath === "/" && currentPath.value === "/") return true;
+	if (itemPath === "/technology") {
+		return (
+			currentPath.value === "/technology" ||
+			(currentPath.value.startsWith("/technology/") &&
+				!currentPath.value.startsWith("/technology/matrix"))
+		);
+	}
 	return itemPath !== "/" && currentPath.value.startsWith(itemPath);
 }
 

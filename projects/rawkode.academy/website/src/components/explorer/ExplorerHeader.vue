@@ -30,7 +30,6 @@
  :title="preset.description"
  @click="$emit('applyPreset', preset.id)"
  >
- <span class="preset-icon">{{ preset.icon }}</span>
  <span class="preset-name">{{ preset.name }}</span>
  </button>
  </div>
@@ -109,7 +108,7 @@ const availablePresets = computed(() => {
  padding: 1rem;
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
- border-radius: 12px;
+ border-radius: 8px;
  margin-bottom: 1.5rem;
  flex-wrap: wrap;
 }
@@ -128,7 +127,7 @@ const availablePresets = computed(() => {
  gap: 0.25rem;
  padding: 0.25rem;
  background: var(--surface-card-muted);
- border-radius: 10px;
+ border-radius: 8px;
 }
 
 .view-btn {
@@ -138,7 +137,7 @@ const availablePresets = computed(() => {
  padding: 0.5rem 0.75rem;
  background: transparent;
  border: none;
- border-radius: 8px;
+ border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
  color: var(--text-secondary-content);
@@ -152,8 +151,8 @@ const availablePresets = computed(() => {
 }
 
 .view-btn.active {
- background: rgb(var(--brand-primary));
- color: white;
+ background: var(--editorial-ink);
+ color: var(--editorial-paper);
 }
 
 .view-icon {
@@ -163,7 +162,7 @@ const availablePresets = computed(() => {
 /* Preset selector */
 .preset-selector {
  display: flex;
- gap: 0.375rem;
+ gap: 0.5rem;
  flex-wrap: wrap;
 }
 
@@ -174,7 +173,7 @@ const availablePresets = computed(() => {
  padding: 0.5rem 0.875rem;
  background: var(--surface-card-muted);
  border: 1px solid transparent;
- border-radius: 9999px;
+ border-radius: 6px;
  font-size: 0.75rem;
  font-weight: 600;
  color: var(--text-secondary-content);
@@ -188,13 +187,9 @@ const availablePresets = computed(() => {
 }
 
 .preset-btn.active {
- background: rgb(var(--brand-primary) / 0.15);
- border-color: rgb(var(--brand-primary));
- color: rgb(var(--brand-primary));
-}
-
-.preset-icon {
- font-size: 0.875rem;
+ background: var(--editorial-paper-deep);
+ border-color: var(--editorial-hairline-strong);
+ color: var(--editorial-ink);
 }
 
 /* Controls toggle */
@@ -205,7 +200,7 @@ const availablePresets = computed(() => {
  padding: 0.5rem 0.875rem;
  background: var(--surface-card-muted);
  border: 1px solid var(--surface-border);
- border-radius: 8px;
+ border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
  color: var(--text-secondary-content);
@@ -219,7 +214,7 @@ const availablePresets = computed(() => {
 }
 
 .controls-toggle.has-filters {
- border-color: rgb(var(--brand-primary));
+ border-color: var(--editorial-spruce);
 }
 
 .toggle-icon {
@@ -234,8 +229,8 @@ const availablePresets = computed(() => {
  min-width: 20px;
  height: 20px;
  padding: 0 0.375rem;
- background: rgb(var(--brand-primary));
- color: white;
+ background: var(--editorial-spruce);
+ color: var(--editorial-paper);
  font-size: 0.7rem;
  font-weight: 700;
  border-radius: 9999px;
@@ -247,19 +242,19 @@ const availablePresets = computed(() => {
  align-items: center;
  gap: 0.5rem;
  padding: 0.5rem 0.875rem;
- background: rgb(var(--brand-primary));
+ background: var(--editorial-ink);
  border: none;
- border-radius: 8px;
+ border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
- color: white;
+ color: var(--editorial-paper);
  cursor: pointer;
  transition: all 0.15s ease;
 }
 
 .share-btn:hover {
- transform: translateY(-1px);
- box-shadow: 0 4px 12px rgb(var(--brand-primary) / 0.3);
+ background: var(--editorial-spruce);
+ box-shadow: none;
 }
 
 .share-icon {
@@ -285,8 +280,6 @@ const availablePresets = computed(() => {
  justify-content: center;
  }
 
- .toggle-label,
- .share-label,
  .view-name {
  display: none;
  }

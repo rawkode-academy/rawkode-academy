@@ -219,6 +219,9 @@ provide("explorer", explorer);
 // Initialize from URL on mount
 onMounted(() => {
 	urlState.initFromUrl();
+	if (window.matchMedia("(max-width: 768px)").matches) {
+		showControls.value = false;
+	}
 });
 </script>
 
@@ -226,7 +229,7 @@ onMounted(() => {
 .technology-explorer {
  display: flex;
  flex-direction: column;
- min-height: calc(100vh - 200px);
+ min-height: calc(100vh - 220px);
 }
 
 .explorer-main {
@@ -254,7 +257,7 @@ onMounted(() => {
  padding: 1rem;
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
- border-radius: 12px;
+ border-radius: 8px;
  position: sticky;
  top: 1rem;
  overflow: visible;
@@ -290,7 +293,7 @@ onMounted(() => {
  padding: 3rem;
  background: var(--surface-card);
  border: 2px dashed var(--surface-border);
- border-radius: 16px;
+ border-radius: 8px;
  text-align: center;
 }
 
@@ -323,9 +326,9 @@ onMounted(() => {
  align-items: center;
  gap: 0.5rem;
  padding: 0.75rem 1.25rem;
- background: rgb(var(--brand-primary));
- color: white;
- border-radius: 9999px;
+ background: var(--editorial-ink);
+ color: var(--editorial-paper);
+ border-radius: 6px;
  font-size: 0.875rem;
  font-weight: 600;
  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -363,7 +366,7 @@ onMounted(() => {
  z-index: 50;
  max-height: 70vh;
  overflow-y: auto;
- border-radius: 16px 16px 0 0;
+ border-radius: 8px 8px 0 0;
  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
  }
 
@@ -373,7 +376,7 @@ onMounted(() => {
  }
 
  .controls-content {
- border-radius: 16px 16px 0 0;
+ border-radius: 8px 8px 0 0;
  }
 
  .explorer-canvas {

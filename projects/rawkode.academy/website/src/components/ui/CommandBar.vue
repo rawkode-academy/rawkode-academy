@@ -55,10 +55,10 @@ const props = withDefaults(
 		logoHref: "/",
 		searchPlaceholder: "Search lessons, topics, instructors",
 		links: () => [
+			{ label: "Matrix", href: "/technology/matrix" },
 			{ label: "Courses", href: "/courses" },
-			{ label: "Live", href: "/watch" },
-			{ label: "Dispatch", href: "/read" },
-			{ label: "Schedule", href: "/shows" },
+			{ label: "Videos", href: "/watch" },
+			{ label: "Articles", href: "/read" },
 		],
 		ctaLabel: "Sign in",
 		ctaHref: "/settings",

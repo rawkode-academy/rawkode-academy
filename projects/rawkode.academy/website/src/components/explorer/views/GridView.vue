@@ -23,7 +23,6 @@
  <!-- Manila folder tab -->
  <div class="row-tabs">
  <div class="row-tab" :style="{ '--tab-color': getYAxisColor(yValue) }">
- <span class="tab-icon">{{ getYAxisIcon(yValue) }}</span>
  <span class="tab-title">{{ getYAxisLabel(yValue) }}</span>
  <span class="tab-count">{{ getRowCount(yValue) }}</span>
  </div>
@@ -39,6 +38,8 @@
  v-for="xValue in xAxisValues"
  :key="`${String(yValue)}-${String(xValue)}`"
  class="grid-cell"
+ :class="{ 'grid-cell--empty': getCellTechnologies(yValue, xValue).length === 0 }"
+ :data-column="getXAxisLabel(xValue)"
  :style="{ '--cell-color': getXAxisColor(xValue) }"
  >
  <div class="cell-content">
@@ -155,20 +156,6 @@ const getYAxisColor = (value: string | null): string => {
 	return getDimensionColor(props.yAxis, value);
 };
 
-const getYAxisIcon = (value: string | null): string => {
-	// Return emoji icons for known groupings
-	if (props.yAxis === "matrix.grouping") {
-		const icons: Record<string, string> = {
-			plumbing: "🔧",
-			platform: "🏗️",
-			observability: "📊",
-			security: "🔒",
-		};
-		return value ? (icons[value] ?? "📦") : "📦";
-	}
-	return "📦";
-};
-
 const getRowCount = (yValue: string | null): number => {
 	const row = props.gridData.get(yValue);
 	if (!row) return 0;
@@ -227,7 +214,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  justify-content: center;
  padding: 0.75rem 0.5rem;
  background: var(--header-color);
- border-radius: 8px 8px 0 0;
+ border-radius: 6px 6px 0 0;
  color: white;
  text-align: center;
 }
@@ -236,7 +223,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  font-size: 0.75rem;
  font-weight: 700;
  text-transform: uppercase;
- letter-spacing: 0.04em;
+ letter-spacing: 0.08em;
 }
 
 .header-count {
@@ -271,22 +258,18 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
  border-bottom: none;
- border-radius: 10px 10px 0 0;
+ border-radius: 8px 8px 0 0;
  margin-left: 1rem;
  position: relative;
  z-index: 1;
  margin-bottom: -1px;
 }
 
-.tab-icon {
- font-size: 1rem;
-}
-
 .tab-title {
  font-size: 0.75rem;
  font-weight: 700;
  text-transform: uppercase;
- letter-spacing: 0.04em;
+ letter-spacing: 0.08em;
  color: var(--text-primary-content);
 }
 
@@ -296,7 +279,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  padding: 0.125rem 0.375rem;
  background: var(--tab-color);
  color: white;
- border-radius: 4px;
+ border-radius: 3px;
  min-width: 1.25rem;
  text-align: center;
 }
@@ -306,7 +289,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  gap: 0;
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
- border-radius: 12px;
+ border-radius: 8px;
  overflow: hidden;
 }
 
@@ -338,7 +321,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  height: 36px;
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
- border-radius: 10px;
+ border-radius: 8px;
  text-decoration: none;
  transition: all 0.2s ease;
 }
@@ -523,6 +506,10 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  flex-direction: column;
  align-items: flex-start;
  gap: 0.5rem;
+ }
+
+ .grid-cell--empty {
+ display: none;
  }
 
  .grid-cell:first-child {

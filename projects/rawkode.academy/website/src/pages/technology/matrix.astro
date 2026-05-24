@@ -5,7 +5,6 @@ import { getCollection } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
-import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 
 // Helper to normalize technology references from videos
 function normalizeTechnologyRef(value: unknown): string | undefined {
@@ -51,19 +50,6 @@ const pipelineStages = MATRIX_STATUS_VALUES.filter(
 	(s) => s !== "graveyard" && s !== "guilty-pleasure" && s !== "skip",
 );
 
-// Category display metadata
-const categoryIcons: Record<string, string> = {
-	Provisioning: "🔧",
-	"App Definition and Development": "💻",
-	"Orchestration & Management": "🎯",
-	Runtime: "⚡",
-	"Observability and Analysis": "📊",
-	Platform: "🏗️",
-	Wasm: "🌐",
-	Serverless: "☁️",
-	CNAI: "🤖",
-};
-
 const categoryDescriptions: Record<string, string> = {
 	Provisioning: "Infrastructure automation and setup",
 	"App Definition and Development": "Build, package, and deploy applications",
@@ -83,6 +69,16 @@ const stageLabels = Object.fromEntries(
 const stageDescriptions = Object.fromEntries(
 	DIMENSIONS["matrix.status"].values.map((v) => [v.value, v.description]),
 );
+
+const stageCopy: Record<string, string> = {
+	skip: "Not recommended here.",
+	watch: "Worth tracking, not ready to recommend.",
+	explore: "Worth testing in a non-critical project.",
+	learn: "Useful to understand, even if you never adopt it.",
+	adopt: "Safe to use when it fits the problem.",
+	advocate: "Strong default or important technology to learn.",
+	graveyard: "Retired, abandoned, or no longer relevant.",
+};
 
 const trajectoryEmoji: Record<Trajectory, string> = {
 	rising: "↗",
@@ -129,7 +125,7 @@ const pipelineLanes = categories.map((category) => ({
 	category,
 	label: category,
 	description: categoryDescriptions[category] || "Cloud native technologies",
-	icon: categoryIcons[category] || "📦",
+	count: matrixTechnologies.filter((t) => t.category === category).length,
 	stages: Object.fromEntries(
 		pipelineStages.map((stage) => [
 			stage,
@@ -185,6 +181,16 @@ const graveyardTechnologies = allTechnologies
 		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
 		videoCount: videoCountsByTech.get(tech.id) || 0,
 	}));
+
+const legendStages = [
+	"skip",
+	...pipelineStages,
+	"graveyard",
+].map((stage) => ({
+	stage,
+	label: stageLabels[stage] ?? stage,
+	copy: stageCopy[stage] ?? stageDescriptions[stage] ?? "",
+}));
 ---
 
 <Page
@@ -201,18 +207,13 @@ const graveyardTechnologies = allTechnologies
 			<div class="hero-content">
 				<div class="hero-badge hairline-chip">
 					<span class="badge-dot"></span>
-					<span>{matrixTechnologies.length} Technologies Mapped</span>
+					<span>{matrixTechnologies.length} technologies mapped</span>
 				</div>
-				<h1 class="hero-title">
-					Technology <span class="title-accent">Matrix</span>
-				</h1>
+				<h1 class="hero-title">Technology Matrix</h1>
 				<p class="hero-subtitle text-secondary-content">
-					My opinionated journey through cloud native technologies.
-					<br class="hidden md:block" />
-					From first glance to full advocacy.
+					Compare cloud native tools by adoption stage, confidence, and trajectory.
 				</p>
 
-				<!-- Mini pipeline preview / Filter links to Advanced Mode -->
 				<div class="hero-pipeline-preview" role="group" aria-label="Explore by stage">
 					<a
 						href="/technology/matrix/advanced?fs=skip"
@@ -239,13 +240,17 @@ const graveyardTechnologies = allTechnologies
 					</a>
 				</div>
 
-				<!-- Advanced Mode CTA -->
-				<a href="/technology/matrix/advanced" class="advanced-mode-link">
-					<span>Advanced Mode</span>
-					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-					</svg>
-				</a>
+				<div class="hero-actions">
+					<a href="/technology/matrix/advanced" class="advanced-mode-link">
+						<span>Advanced filters</span>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+						</svg>
+					</a>
+					<a href="/technology" class="matrix-secondary-link">
+						<span>All technologies</span>
+					</a>
+				</div>
 			</div>
 		</Container>
 	</section>
@@ -255,30 +260,22 @@ const graveyardTechnologies = allTechnologies
 		<Container size="xl" padding="lg">
 			<details class="legend-details">
 				<summary class="legend-summary">
-					<span class="legend-icon">📖</span>
-					<span class="legend-title">How to Read This Matrix</span>
+					<span class="legend-title">Stage definitions</span>
 					<svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 					</svg>
 				</summary>
 				<div class="legend-content">
 					<p class="legend-intro">
-						This matrix represents my personal journey with cloud native technologies. Each stage reflects where a technology sits in my evaluation and adoption process, from first impression to full advocacy. It's opinionated, based on my experience, and constantly evolving.
+						Stages are practical recommendations, not universal truth. Use them as a starting point for evaluation.
 					</p>
 					<div class="legend-stages">
-						{pipelineStages.map((stage) => (
+						{legendStages.map(({ stage, label, copy }) => (
 							<div class={`legend-stage legend-stage-${stage}`}>
 								<div class="stage-indicator"></div>
 								<div class="stage-info">
-									<span class="stage-name">{stageLabels[stage]}</span>
-									<span class="stage-desc">{
-										stage === "watch" ? "Something here piqued my interest. I want to learn more and I'm keeping an eye on its development." :
-										stage === "explore" ? "I think people should kick the tyres on this. While I can't recommend it yet, I believe it has a lot to teach you." :
-										stage === "learn" ? "A technology I think will be useful to you even if you don't adopt it. Learn it and expand your mind." :
-										stage === "adopt" ? "Safe to adopt if it fits your needs. I'd confidently use this in real projects." :
-										stage === "advocate" ? "I suggest everyone learn and utilise this technology. I'm actively championing it." :
-										stageDescriptions[stage]
-									}</span>
+									<span class="stage-name">{label}</span>
+									<span class="stage-desc">{copy}</span>
 								</div>
 							</div>
 						))}
@@ -289,16 +286,6 @@ const graveyardTechnologies = allTechnologies
 	</section>
 
 	<Container size="xl" padding="lg">
-		<!-- Matrix Updates CTA -->
-		<NewsletterCTA
-			server:defer
-			class="mb-8"
-			audience="matrix"
-			badge="Matrix updates in your inbox"
-			headline="Track my technology journey"
-			subtitle="Get notified when I move technologies through the matrix, with new discoveries, changed opinions, and spicy takes."
-		/>
-
 		<div class="matrix-content">
 
 			<!-- Pipeline Header -->
@@ -322,9 +309,9 @@ const graveyardTechnologies = allTechnologies
 					<div class="lane-wrapper" style={`--lane-index: ${laneIdx}`} data-lane={lane.category}>
 						<div class="lane-tabs">
 							<div class="lane-tab">
-								<span class="lane-icon">{lane.icon}</span>
 								<span class="lane-title">{lane.label}</span>
 								<span class="lane-desc text-muted">{lane.description}</span>
+								<span class="lane-count">{lane.count}</span>
 							</div>
 						</div>
 						<div class="lane paper-card">
@@ -381,11 +368,11 @@ const graveyardTechnologies = allTechnologies
 				<div class="other-section">
 					<div class="other-header">
 						<div class="other-title-group">
-							<h2 class="other-title">Not in Active Rotation</h2>
-							<p class="other-subtitle text-muted">Technologies I'm skipping or have moved on from</p>
+							<h2 class="other-title">Skipped and retired</h2>
+							<p class="other-subtitle text-muted">Technologies marked skip or no longer active.</p>
 						</div>
 						<a href="/technology/matrix/advanced" class="other-advanced-link">
-							<span>Explore in Advanced Mode</span>
+							<span>Open advanced filters</span>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
 							</svg>
@@ -548,13 +535,13 @@ const graveyardTechnologies = allTechnologies
 	/* ===== LEGEND ===== */
 	.matrix-legend {
 		padding: 0;
-		margin-bottom: 2rem;
+		margin-bottom: 1.5rem;
 	}
 
 	.legend-details {
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
-		border-radius: 12px;
+		border-radius: 8px;
 		overflow: hidden;
 	}
 
@@ -579,10 +566,6 @@ const graveyardTechnologies = allTechnologies
 	.legend-summary::marker {
 		display: none;
 		content: "";
-	}
-
-	.legend-icon {
-		font-size: 1.25rem;
 	}
 
 	.legend-title {
@@ -624,7 +607,7 @@ const graveyardTechnologies = allTechnologies
 		align-items: flex-start;
 		gap: 0.75rem;
 		padding: 0.75rem;
-		border-radius: 8px;
+		border-radius: 6px;
 		background: var(--surface-card-muted);
 	}
 
@@ -642,6 +625,7 @@ const graveyardTechnologies = allTechnologies
 	.legend-stage-learn .stage-indicator { background: rgb(59, 130, 246); }
 	.legend-stage-adopt .stage-indicator { background: rgb(34, 197, 94); }
 	.legend-stage-advocate .stage-indicator { background: rgb(var(--brand-primary)); }
+	.legend-stage-graveyard .stage-indicator { background: rgb(107, 114, 128); }
 
 	.legend-stage .stage-info {
 		display: flex;
@@ -680,8 +664,9 @@ const graveyardTechnologies = allTechnologies
 	/* ===== HERO ===== */
 	.matrix-hero {
 		position: relative;
-		padding: 4rem 0 3rem;
+		padding: clamp(2rem, 5vw, 4.5rem) 0 clamp(1.75rem, 4vw, 3rem);
 		overflow: hidden;
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
 	.hero-background {
@@ -693,10 +678,11 @@ const graveyardTechnologies = allTechnologies
 	.hero-gradient {
 		position: absolute;
 		inset: 0;
-		background:
-			radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--brand-primary) / 0.15), transparent),
-			radial-gradient(ellipse 60% 40% at 80% 50%, rgb(var(--brand-secondary) / 0.1), transparent),
-			radial-gradient(ellipse 50% 30% at 20% 80%, rgb(var(--brand-primary) / 0.08), transparent);
+		background: linear-gradient(
+			135deg,
+			color-mix(in oklab, var(--editorial-paper-deep) 74%, transparent),
+			color-mix(in oklab, var(--editorial-paper) 92%, transparent)
+		);
 	}
 
 	.hero-grid {
@@ -706,20 +692,20 @@ const graveyardTechnologies = allTechnologies
 			linear-gradient(var(--surface-border) 1px, transparent 1px),
 			linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
 		background-size: 60px 60px;
-		mask-image: radial-gradient(ellipse at center, black, transparent 70%);
+		opacity: 0.55;
 	}
 
 	.hero-content {
 		position: relative;
 		z-index: 1;
-		text-align: center;
+		text-align: left;
 	}
 
 	.hero-badge {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 	}
 
 	.badge-dot {
@@ -727,20 +713,18 @@ const graveyardTechnologies = allTechnologies
 		height: 6px;
 		background: rgb(var(--brand-primary));
 		border-radius: 50%;
-		animation: pulse 2s ease-in-out infinite;
-	}
-
-	@keyframes pulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.5; transform: scale(1.2); }
 	}
 
 	.hero-title {
-		font-size: clamp(2.5rem, 6vw, 4rem);
-		font-weight: 800;
-		letter-spacing: -0.03em;
-		line-height: 1.1;
-		margin: 0 0 1rem;
+		max-width: 52rem;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: clamp(3rem, 8vw, 7rem);
+		font-style: italic;
+		font-weight: 500;
+		letter-spacing: 0;
+		line-height: 0.95;
+		margin: 0 0 0.85rem;
+		color: var(--editorial-ink);
 	}
 
 	.title-accent {
@@ -751,34 +735,34 @@ const graveyardTechnologies = allTechnologies
 	}
 
 	.hero-subtitle {
-		font-size: 1.125rem;
-		margin: 0 0 2.5rem;
-		line-height: 1.6;
+		max-width: 42rem;
+		font-size: clamp(1rem, 1.8vw, 1.35rem);
+		margin: 0 0 1.75rem;
+		line-height: 1.45;
 	}
 
 	/* Hero Pipeline Preview */
 	.hero-pipeline-preview {
-		display: flex;
-		justify-content: center;
-		gap: 0.25rem;
-		flex-wrap: wrap;
-		max-width: 600px;
-		margin: 0 auto;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(5.75rem, 1fr));
+		gap: 0.5rem;
+		max-width: 58rem;
+		margin: 0;
 	}
 
 	.preview-stage {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		padding: 0.75rem 1rem;
-		border-radius: 8px;
-		min-width: 70px;
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		align-items: flex-start;
+		padding: 0.85rem 0.9rem;
+		border-radius: 6px;
+		min-width: 0;
+		transition: border-color 0.2s ease, background-color 0.2s ease;
 		border: 1px solid var(--surface-border);
 	}
 
 	.preview-stage:hover {
-		transform: translateY(-2px);
+		border-color: var(--editorial-hairline-strong);
 	}
 
 	.preview-count {
@@ -790,7 +774,7 @@ const graveyardTechnologies = allTechnologies
 		font-size: 0.65rem;
 		font-weight: 600;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
 		opacity: 0.8;
 	}
 
@@ -828,7 +812,7 @@ const graveyardTechnologies = allTechnologies
 	}
 
 	.preview-stage:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		box-shadow: none;
 	}
 
 	.preview-stage:focus-visible {
@@ -837,24 +821,34 @@ const graveyardTechnologies = allTechnologies
 	}
 
 	/* Advanced Mode link */
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+	}
+
 	.advanced-mode-link {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		margin-top: 1.5rem;
-		padding: 0.625rem 1.25rem;
-		background: rgb(var(--brand-primary));
-		color: white;
-		font-size: 0.85rem;
-		font-weight: 600;
-		border-radius: 9999px;
+		padding: 0.75rem 1rem;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		border: 1px solid var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		border-radius: 3px;
 		text-decoration: none;
-		transition: all 0.2s ease;
+		transition: background-color 0.2s ease, border-color 0.2s ease;
 	}
 
 	.advanced-mode-link:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgb(var(--brand-primary) / 0.3);
+		background: var(--editorial-spruce);
+		border-color: var(--editorial-spruce);
 	}
 
 	.advanced-mode-link svg {
@@ -863,6 +857,23 @@ const graveyardTechnologies = allTechnologies
 
 	.advanced-mode-link:hover svg {
 		transform: translateX(3px);
+	}
+
+	.matrix-secondary-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.75rem 1rem;
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 3px;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		text-decoration: none;
+		color: var(--editorial-ink);
+		background: var(--editorial-paper);
 	}
 
 	/* ===== MATRIX CONTENT ===== */
@@ -900,13 +911,10 @@ const graveyardTechnologies = allTechnologies
 		display: flex;
 		align-items: stretch;
 		height: 100%;
-		filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-		transition: transform 0.2s ease;
+		transition: background-color 0.2s ease;
 	}
 
 	.stage-arrow:hover {
-		transform: translateY(-2px);
-		filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15));
 		z-index: 10;
 	}
 
@@ -915,45 +923,20 @@ const graveyardTechnologies = allTechnologies
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		align-items: center;
-		padding: 1rem 1.5rem 1rem 2.5rem; /* Left padding for notch */
+		align-items: flex-start;
+		padding: 0.85rem 1rem;
 		background: var(--stage-color);
-		clip-path: polygon(
-			0% 0%,
-			calc(100% - 1.2rem) 0%,
-			100% 50%,
-			calc(100% - 1.2rem) 100%,
-			0% 100%,
-			1.2rem 50%
-		);
-		transition: all 0.2s ease;
+		border-radius: 6px;
 	}
 
 	/* First stage: Flat left */
 	.header-stage:first-child .stage-content {
-		padding-left: 1.5rem;
-		clip-path: polygon(
-			0% 0%,
-			calc(100% - 1.2rem) 0%,
-			100% 50%,
-			calc(100% - 1.2rem) 100%,
-			0% 100%
-		);
-		border-top-left-radius: 8px;
-		border-bottom-left-radius: 8px;
+		padding-left: 1rem;
 	}
 
 	/* Last stage: Pointed right */
 	.header-stage:last-child .stage-content {
-		clip-path: polygon(
-			0% 0%,
-			100% 0%,
-			100% 50%,
-			100% 100%,
-			0% 100%,
-			1.2rem 50%
-		);
-		padding-right: 1.5rem;
+		padding-right: 1rem;
 	}
 
 	/* Stage colors */
@@ -963,21 +946,8 @@ const graveyardTechnologies = allTechnologies
 	.header-learn .stage-content { background: rgb(59, 130, 246); }
 	.header-adopt .stage-content { background: rgb(22, 163, 74); }
 	
-	/* Advocate: Special cool styling */
 	.header-advocate .stage-content {
-		background: linear-gradient(
-			135deg,
-			rgb(var(--brand-primary)) 0%,
-			rgb(var(--brand-secondary)) 100%
-		);
-		background-size: 200% 200%;
-		animation: shimmer 3s ease infinite;
-	}
-
-	@keyframes shimmer {
-		0% { background-position: 0% 50%; }
-		50% { background-position: 100% 50%; }
-		100% { background-position: 0% 50%; }
+		background: rgb(var(--brand-primary));
 	}
 
 	.stage-label {
@@ -985,7 +955,7 @@ const graveyardTechnologies = allTechnologies
 		font-weight: 800;
 		color: white;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
 		text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 	}
 
@@ -1040,22 +1010,18 @@ const graveyardTechnologies = allTechnologies
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
 		border-bottom: none;
-		border-radius: 10px 10px 0 0;
+		border-radius: 8px 8px 0 0;
 		margin-left: 1rem;
 		position: relative;
 		z-index: 1;
 		margin-bottom: -1px;
 	}
 
-	.lane-icon {
-		font-size: 1rem;
-	}
-
 	.lane-title {
 		font-size: 0.75rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		letter-spacing: 0.04em;
+		letter-spacing: 0.08em;
 		color: rgb(17, 24, 39);
 	}
 
@@ -1068,6 +1034,22 @@ const graveyardTechnologies = allTechnologies
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	.lane-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.5rem;
+		height: 1.5rem;
+		padding: 0 0.4rem;
+		border-radius: 4px;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.68rem;
+		font-weight: 700;
+		color: var(--editorial-ink);
 	}
 
 	.lane {
@@ -1284,16 +1266,16 @@ const graveyardTechnologies = allTechnologies
 
 	@media (max-width: 768px) {
 		.matrix-hero {
-			padding: 3rem 0 2rem;
+			padding: 2rem 0 1.75rem;
 		}
 
 		.hero-pipeline-preview {
 			gap: 0.375rem;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 
 		.preview-stage {
 			padding: 0.5rem 0.75rem;
-			min-width: 50px;
 		}
 
 		.preview-count {
@@ -1302,6 +1284,16 @@ const graveyardTechnologies = allTechnologies
 
 		.preview-label {
 			font-size: 0.55rem;
+		}
+
+		.hero-actions {
+			flex-direction: column;
+		}
+
+		.advanced-mode-link,
+		.matrix-secondary-link {
+			width: 100%;
+			justify-content: center;
 		}
 
 		.pipeline-header {

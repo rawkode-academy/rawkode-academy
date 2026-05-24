@@ -11,14 +11,6 @@ import {
 } from "@/lib/explorer/data-layer";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import TechnologyExplorer from "@/components/explorer/TechnologyExplorer.vue";
-import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
-
-const breadcrumbElements = [
-	{ title: "Home", link: "/" },
-	{ title: "Technology", link: "/technology" },
-	{ title: "Matrix", link: "/technology/matrix" },
-	{ title: "Advanced Mode", link: "/technology/matrix/advanced" },
-];
 
 // Helper to normalize technology references from videos
 function normalizeTechnologyRef(value: unknown): string | undefined {
@@ -74,10 +66,9 @@ const totalTechnologies = normalizedTechnologies.length;
 ---
 
 <Page
-	title="Technology Matrix - Advanced Mode"
-	description="Explore cloud native and platform engineering technologies with interactive visualizations. Filter by CNCF status, category, adoption stage, and more."
+	title="Advanced Technology Matrix"
+	description="Filter and compare cloud native and platform engineering technologies by adoption stage, category, confidence, and trajectory."
 >
-	<!-- Hero Section -->
 	<section class="explorer-hero">
 		<div class="hero-background">
 			<div class="hero-gradient"></div>
@@ -85,38 +76,35 @@ const totalTechnologies = normalizedTechnologies.length;
 		</div>
 		<Container size="xl" padding="lg">
 			<div class="hero-content">
-				<Breadcrumb elements={breadcrumbElements} />
+				<a href="/technology/matrix" class="back-link">Technology Matrix</a>
 				<div class="hero-badge hairline-chip">
 					<span class="badge-dot"></span>
-					<span>{totalTechnologies} Technologies</span>
+					<span>{totalTechnologies} technologies</span>
 				</div>
-				<h1 class="hero-title">
-					<span class="title-accent">Advanced</span> Mode
-				</h1>
+				<h1 class="hero-title">Advanced Technology Matrix</h1>
 				<p class="hero-subtitle text-secondary-content">
-					Interactive visualization of cloud native technologies.
-					<br class="hidden md:block" />
-					Filter, group, and explore by any dimension.
+					Filter and compare tools by adoption stage, category, confidence, and trajectory.
 				</p>
 			</div>
 		</Container>
 	</section>
 
 	<Container size="xl" padding="lg">
-		<!-- Vue Explorer Component -->
-		<TechnologyExplorer
-			client:load
-			technologies={JSON.parse(technologiesJson)}
-		/>
+		<div class="explorer-shell">
+			<TechnologyExplorer
+				client:load
+				technologies={JSON.parse(technologiesJson)}
+			/>
+		</div>
 	</Container>
 </Page>
 
 <style>
-	/* ===== HERO ===== */
 	.explorer-hero {
 		position: relative;
-		padding: 3rem 0 2rem;
+		padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(1.5rem, 3vw, 2.5rem);
 		overflow: hidden;
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
 	.hero-background {
@@ -128,10 +116,11 @@ const totalTechnologies = normalizedTechnologies.length;
 	.hero-gradient {
 		position: absolute;
 		inset: 0;
-		background:
-			radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--brand-primary) / 0.15), transparent),
-			radial-gradient(ellipse 60% 40% at 80% 50%, rgb(var(--brand-secondary) / 0.1), transparent),
-			radial-gradient(ellipse 50% 30% at 20% 80%, rgb(var(--brand-primary) / 0.08), transparent);
+		background: linear-gradient(
+			135deg,
+			color-mix(in oklab, var(--editorial-paper-deep) 74%, transparent),
+			color-mix(in oklab, var(--editorial-paper) 92%, transparent)
+		);
 	}
 
 	.hero-grid {
@@ -141,13 +130,25 @@ const totalTechnologies = normalizedTechnologies.length;
 			linear-gradient(var(--surface-border) 1px, transparent 1px),
 			linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
 		background-size: 60px 60px;
-		mask-image: radial-gradient(ellipse at center, black, transparent 70%);
+		opacity: 0.55;
 	}
 
 	.hero-content {
 		position: relative;
 		z-index: 1;
-		text-align: center;
+		text-align: left;
+	}
+
+	.back-link {
+		display: inline-flex;
+		margin-bottom: 1rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		text-decoration: none;
+		color: var(--editorial-spruce);
 	}
 
 	.hero-badge {
@@ -162,39 +163,34 @@ const totalTechnologies = normalizedTechnologies.length;
 		height: 6px;
 		background: rgb(var(--brand-primary));
 		border-radius: 50%;
-		animation: pulse 2s ease-in-out infinite;
-	}
-
-	@keyframes pulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.5; transform: scale(1.2); }
 	}
 
 	.hero-title {
-		font-size: clamp(2rem, 5vw, 3rem);
-		font-weight: 800;
-		letter-spacing: -0.03em;
-		line-height: 1.1;
+		max-width: 58rem;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: clamp(2.75rem, 7vw, 6rem);
+		font-style: italic;
+		font-weight: 500;
+		letter-spacing: 0;
+		line-height: 0.95;
 		margin: 0 0 0.75rem;
-	}
-
-	.title-accent {
-		background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-secondary)));
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+		color: var(--editorial-ink);
 	}
 
 	.hero-subtitle {
-		font-size: 1rem;
+		max-width: 44rem;
+		font-size: clamp(1rem, 1.8vw, 1.28rem);
 		margin: 0;
-		line-height: 1.6;
+		line-height: 1.45;
 	}
 
-	/* Responsive */
+	.explorer-shell {
+		padding: clamp(1.25rem, 3vw, 2rem) 0 4rem;
+	}
+
 	@media (max-width: 768px) {
 		.explorer-hero {
-			padding: 2rem 0 1.5rem;
+			padding: 1.75rem 0 1.5rem;
 		}
 	}
 </style>

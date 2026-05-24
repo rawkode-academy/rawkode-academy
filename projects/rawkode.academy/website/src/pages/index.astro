@@ -14,6 +14,7 @@ import SecondaryGrid from "@/components/landing/SecondaryGrid.astro";
 import ValuesGrid from "@/components/landing/ValuesGrid.astro";
 import PartnerLogos from "@/components/partner/logos.astro";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
+import { DIMENSIONS } from "@/lib/explorer/dimensions";
 
 // ─── Data fetching ──────────────────────────────────────────────
 
@@ -46,6 +47,32 @@ const latestLearningPaths = allLearningPaths
 	.slice(0, 4);
 
 const allCourses = await getCollection("courses");
+const allTechnologies = await getCollection("technologies");
+
+const matrixTechnologies = allTechnologies.filter((technology) =>
+	Boolean(technology.data.matrix?.status),
+);
+const matrixCategories = new Set(
+	matrixTechnologies
+		.map((technology) => technology.data.category)
+		.filter(Boolean),
+);
+const matrixStatusLabels = Object.fromEntries(
+	DIMENSIONS["matrix.status"].values.map((value) => [value.value, value.label]),
+);
+const matrixStatusCounts = new Map<string, number>();
+for (const technology of matrixTechnologies) {
+	const status = technology.data.matrix?.status;
+	if (!status) continue;
+	matrixStatusCounts.set(status, (matrixStatusCounts.get(status) ?? 0) + 1);
+}
+const matrixHomeStages = ["watch", "explore", "learn", "adopt", "advocate"].map(
+	(status) => ({
+		status,
+		label: matrixStatusLabels[status] ?? status,
+		count: matrixStatusCounts.get(status) ?? 0,
+	}),
+);
 
 // ─── Hero video state ───────────────────────────────────────────
 // Live: publishedAt within [now - 90min, now]
@@ -358,6 +385,50 @@ const pageDescription =
 		/>
 	)}
 
+	<section class="landing-section landing-section--matrix" aria-labelledby="matrix-home-title">
+		<div class="matrix-home">
+			<div class="matrix-home__copy">
+				<h2 id="matrix-home-title">Technology Matrix</h2>
+				<p>
+					Compare {matrixTechnologies.length} cloud native tools by adoption
+					stage, confidence, and trajectory.
+				</p>
+				<div class="matrix-home__actions">
+					<a href="/technology/matrix" class="matrix-home__primary">
+						Open matrix <span aria-hidden="true">→</span>
+					</a>
+					<a href="/technology/matrix/advanced" class="matrix-home__secondary">
+						Advanced filters <span aria-hidden="true">→</span>
+					</a>
+				</div>
+			</div>
+
+			<div class="matrix-home__panel" aria-label="Technology matrix summary">
+				<div class="matrix-home__totals">
+					<div>
+						<strong>{matrixTechnologies.length}</strong>
+						<span>Tools mapped</span>
+					</div>
+					<div>
+						<strong>{matrixCategories.size}</strong>
+						<span>Categories</span>
+					</div>
+				</div>
+				<div class="matrix-home__stages">
+					{matrixHomeStages.map((stage) => (
+						<a
+							href={`/technology/matrix/advanced?fs=${stage.status}`}
+							class={`matrix-home__stage matrix-home__stage--${stage.status}`}
+						>
+							<strong>{stage.count}</strong>
+							<span>{stage.label}</span>
+						</a>
+					))}
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<NewsletterStrip />
 
 	<div class="landing-stack">
@@ -497,8 +568,184 @@ const pageDescription =
 		padding: 0 var(--space-section-pad-x);
 	}
 
+	.landing-section--matrix {
+		padding: 0;
+	}
+
+	.matrix-home {
+		display: grid;
+		grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
+		gap: clamp(2rem, 5vw, 5rem);
+		align-items: center;
+		padding: clamp(2rem, 6vw, 4.5rem) var(--space-section-pad-x);
+		background:
+			linear-gradient(
+				90deg,
+				color-mix(in oklab, var(--editorial-paper-deep) 72%, transparent),
+				color-mix(in oklab, var(--editorial-paper) 90%, transparent)
+			);
+		border-block: 1px solid var(--editorial-hairline);
+	}
+
+	.matrix-home__copy {
+		max-width: 42rem;
+	}
+
+	.matrix-home h2 {
+		margin: 0 0 0.85rem;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: clamp(2.75rem, 7vw, 6rem);
+		font-style: italic;
+		font-weight: 500;
+		line-height: 0.95;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+	}
+
+	.matrix-home p {
+		max-width: 34rem;
+		margin: 0;
+		font-size: clamp(1.08rem, 1.8vw, 1.35rem);
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+	}
+
+	.matrix-home__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.85rem;
+		margin-top: 1.65rem;
+	}
+
+	.matrix-home__primary,
+	.matrix-home__secondary {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.55rem;
+		min-height: 3rem;
+		padding: 0.75rem 1.05rem;
+		border: 1px solid var(--editorial-ink);
+		border-radius: 3px;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.74rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		text-decoration: none;
+		transition:
+			background-color var(--duration-base) var(--ease-standard),
+			color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.matrix-home__primary {
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+	}
+
+	.matrix-home__secondary {
+		background: transparent;
+		color: var(--editorial-ink);
+	}
+
+	.matrix-home__primary:hover,
+	.matrix-home__secondary:hover {
+		background: var(--editorial-spruce);
+		border-color: var(--editorial-spruce);
+		color: var(--editorial-paper);
+	}
+
+	.matrix-home__panel {
+		display: grid;
+		gap: 1rem;
+		min-width: 0;
+	}
+
+	.matrix-home__totals {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+	}
+
+	.matrix-home__totals > div {
+		padding: 1rem;
+	}
+
+	.matrix-home__totals > div + div {
+		border-left: 1px solid var(--editorial-hairline);
+	}
+
+	.matrix-home__totals strong,
+	.matrix-home__stage strong {
+		display: block;
+		font-family: var(--font-jetbrains-mono), monospace;
+		color: var(--editorial-ink);
+	}
+
+	.matrix-home__totals strong {
+		font-size: clamp(1.6rem, 4vw, 2.65rem);
+		line-height: 1;
+	}
+
+	.matrix-home__totals span,
+	.matrix-home__stage span {
+		display: block;
+		margin-top: 0.35rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.68rem;
+		font-weight: 650;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.matrix-home__stages {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 0.5rem;
+	}
+
+	.matrix-home__stage {
+		display: block;
+		min-width: 0;
+		padding: 0.9rem 0.75rem;
+		background: var(--editorial-paper);
+		border: 1px solid var(--editorial-hairline);
+		border-top: 3px solid var(--stage-color, var(--editorial-spruce));
+		text-decoration: none;
+	}
+
+	.matrix-home__stage--watch { --stage-color: oklch(0.66 0.13 55); }
+	.matrix-home__stage--explore { --stage-color: oklch(0.68 0.12 85); }
+	.matrix-home__stage--learn { --stage-color: oklch(0.58 0.13 245); }
+	.matrix-home__stage--adopt { --stage-color: oklch(0.58 0.13 155); }
+	.matrix-home__stage--advocate { --stage-color: var(--editorial-spruce); }
+
+	.matrix-home__stage:hover {
+		border-color: var(--editorial-hairline-strong);
+		background: var(--editorial-paper-deep);
+	}
+
 	@media (max-width: 720px) {
 		.landing-section { padding: 0 1.25rem; }
+		.landing-section--matrix { padding: 0; }
 		.landing-stack { gap: var(--space-section-gap); padding: 2.5rem 0 4rem; }
+		.matrix-home {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+			padding: 2.25rem 1.25rem;
+		}
+		.matrix-home__actions {
+			flex-direction: column;
+		}
+		.matrix-home__primary,
+		.matrix-home__secondary {
+			width: 100%;
+		}
+		.matrix-home__stages {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 	}
 </style>
