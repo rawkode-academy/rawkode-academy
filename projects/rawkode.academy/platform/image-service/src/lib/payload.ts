@@ -2,16 +2,19 @@ import * as utf64 from "utf64";
 
 export interface Payload {
   format: "svg" | "png";
-	title: string;
-	subtitle: string | undefined;
+  title: string;
+  subtitle: string | undefined;
+  text: string | undefined;
   template: string;
   image: URL | undefined;
 }
 
 export const DEFAULT_PAYLOAD: Payload = {
   format: "svg",
-	title: "Hello, World!",
-	subtitle: "The best way to learn and keep up to date with Cloud Native, Kubernetes, & WebAssembly",
+  title: "Hello, World!",
+  subtitle:
+    "The best way to learn and keep up to date with Cloud Native, Kubernetes, & WebAssembly",
+  text: undefined,
   template: "gradient",
   image: undefined,
 };
@@ -27,7 +30,7 @@ export const getPayloadFromSearchParams = (
 
     try {
       const payload: Partial<Payload> = JSON.parse(decodedPayload);
-			return { ...DEFAULT_PAYLOAD, ...payload };
+      return { ...DEFAULT_PAYLOAD, ...payload };
     } catch (error) {
       return DEFAULT_PAYLOAD;
     }
