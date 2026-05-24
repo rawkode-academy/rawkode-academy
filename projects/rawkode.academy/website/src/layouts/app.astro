@@ -10,14 +10,12 @@ import { ThemeToggle } from "@/components/ui";
 <SkipLink />
 
 <div class="antialiased">
-	<nav
-		class="glass-panel rounded-2xl px-4 py-2.5 fixed left-4 right-4 md:left-8 md:right-8 top-4 z-50 before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-60 dark:before:from-white/5 before:pointer-events-none before:rounded-2xl"
-	>
-		<div class="relative z-10 flex items-center justify-between gap-4">
+	<nav class="ed-topbar">
+		<div class="ed-topbar__inner">
 			<!-- Left section - Logo and Sidebar Toggle -->
-			<div class="flex items-center gap-3">
+			<div class="ed-topbar__left">
 				<button
-					class="p-2 text-gray-600 rounded-xl cursor-pointer hover:text-gray-900 hover:bg-white/50 dark:hover:bg-gray-700/50 hover:backdrop-blur-md dark:text-gray-400 dark:hover:text-white transition-smooth hover:scale-110 focus-ring hidden md:block"
+					class="ed-topbar__icon-btn focus-ring hidden md:block"
 					id="sidebar-toggle-btn"
 					aria-label="Toggle sidebar"
 				>
@@ -37,7 +35,7 @@ import { ThemeToggle } from "@/components/ui";
 				</button>
 
 				<button
-					class="p-2 text-gray-600 rounded-xl cursor-pointer md:hidden hover:text-gray-900 hover:bg-white/50 dark:hover:bg-gray-700/50 hover:backdrop-blur-md dark:text-gray-400 dark:hover:text-white transition-smooth hover:scale-110 focus-ring"
+					class="ed-topbar__icon-btn focus-ring md:hidden"
 					id="mobile-sidebar-btn"
 					aria-label="Toggle mobile menu"
 				>
@@ -54,12 +52,13 @@ import { ThemeToggle } from "@/components/ui";
 					</svg>
 				</button>
 
-				<a href="/" aria-label="return to the home page" class="flex focus-ring rounded-md">
+				<a href="/" aria-label="return to the home page" class="ed-topbar__mark focus-ring">
 					<svg
-						class="text-primary-content h-7"
+						class="ed-topbar__logo-svg"
 						fill="currentColor"
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 559.671 143.20864"
+						aria-hidden="true"
 					>
 						<path
 							d="M50.01386,54.13608H.41927v14.40559H50.01386c.43999,0,.76999,.32999,.76999,.76999v9.4568H.41927v23.97255c0,8.35746,6.81796,15.17558,15.17558,15.17558h49.5946v-48.60493c0-8.35746-6.81812-15.17558-15.17558-15.17558Zm.76999,49.37492H15.59485c-.44015,0-.77015-.32983-.77015-.76999v-9.4568H50.78385v10.22679Zm429.3892-34.19934v48.60493h-14.29528v-48.60493c0-.43999-.32999-.76999-.8803-.76999h-23.97239c-.43951,0-.65983,.32999-.65983,.76999v48.60493h-14.51511v-48.60493c0-.43999-.32999-.76999-.65983-.76999h-24.08271c-.44015,0-.76999,.32999-.76999,.76999v48.60493h-14.40559V54.13608h79.06546c8.35762,0,15.17558,6.81812,15.17558,15.17558Zm-123.81568-15.17558h-34.41918c-8.35746,0-15.17542,6.81812-15.17542,15.17558v33.42935c0,8.35746,6.81796,15.17558,15.17542,15.17558h49.5946v-14.40559h-49.5946c-.43999,0-.76999-.32983-.76999-.76999v-9.4568h50.36458v-23.97255c0-8.35746-6.81796-15.17558-15.17542-15.17558Zm.76999,24.63238h-35.95915v-9.4568c0-.43999,.32999-.76999,.76999-.76999h34.41918c.43999,0,.76999,.32999,.76999,.76999v9.4568Zm202.54364-24.41191v73.67667c0,8.35746-6.70781,15.17542-15.06526,15.17542h-39.03798v-14.51559h39.03798c.32983,0,.65983-.21984,.65983-.65983v-10.11663h-35.18916c-8.35746,0-15.17494-6.81812-15.17494-15.17558V54.35655h14.40559v48.38446c0,.44015,.32936,.76999,.76935,.76999h34.52933c.32983,0,.65983-.32983,.65983-.76999V54.35655h14.40544Zm-355.82524-.22047h-49.5946v14.40559h49.5946c.43999,0,.76999,.32999,.76999,.76999v9.4568h-50.36458v23.97255c0,8.35746,6.81796,15.17558,15.17558,15.17558h49.5946v-48.60493c0-8.35746-6.81812-15.17558-15.17558-15.17558Zm.76999,49.37492h-35.189c-.44015,0-.77015-.32983-.77015-.76999v-9.4568h35.95915v10.22679Zm75.97961-49.37492h-35.29852c-8.35746,0-15.17558,6.81812-15.17558,15.17558v33.42935c0,8.35746,6.81812,15.17558,15.17558,15.17558h49.70412V33.24315h-14.40559v20.89293Zm0,48.60493c0,.44015-.32983,.76999-.76935,.76999h-34.52917c-.44015,0-.65983-.32983-.65983-.76999v-33.42935c0-.43999,.21968-.76999,.65983-.76999h34.52917c.43951,0,.76935,.32999,.76935,.76999v33.42935Zm-188.79995,.76999h49.5946v14.40559h-49.5946c-8.35746,0-15.17542-6.81812-15.17542-15.17558v-33.42935c0-8.35746,6.81796-15.17558,15.17542-15.17558h49.37492v14.40559h-49.37492c-.43999,0-.76999,.32999-.76999,.76999v33.42935c0,.44015,.32999,.76999,.76999,.76999ZM253.15692,35.57989v-6.37973h-21.96389c-.19465,0-.34083-.14619-.34083-.34083v-4.18837h22.30473V14.0544c0-3.70135-3.01921-6.72072-6.72056-6.72072h-15.24333c-3.70119,0-6.72056,3.01937-6.72056,6.72072v14.80494c0,3.70119,3.01937,6.72056,6.72056,6.72056h21.96389Zm-22.30473-21.5255c0-.19481,.14619-.34083,.34083-.34083h15.24333c.19465,0,.34083,.14603,.34083,.34083v4.18821h-15.925v-4.18821Zm-67.99774,21.5255h15.24333c3.70135,0,6.72056-3.01937,6.72056-6.72056V14.0544c0-3.70135-3.01921-6.72072-6.72056-6.72072h-15.24333c-3.70119,0-6.72056,3.01937-6.72056,6.72072v14.80494c0,3.70119,3.01937,6.72056,6.72056,6.72056Zm-.34083-21.5255c0-.19481,.14619-.34083,.34083-.34083h15.24333c.19465,0,.34083,.14603,.34083,.34083v14.80494c0,.19465-.14619,.34083-.34083,.34083h-15.24333c-.19465,0-.34083-.14619-.34083-.34083V14.0544Zm-17.23908-6.72072h6.86675v1.65571l-11.29871,12.46724,11.29871,12.4674v1.65587h-6.86675l-9.00134-10.189-6.0958,6.35023v3.83877h-6.37973V0h6.37973V23.4232l5.01607-5.18059,10.08108-10.90893Zm-84.71872,0h-21.96389v6.37988h21.96389c.19465,0,.34083,.14603,.34083,.34083v4.18821h-22.30473v10.61672c0,3.70119,3.01953,6.72056,6.72056,6.72056h21.96389V14.0544c0-3.70135-3.01937-6.72072-6.72056-6.72072Zm.34083,21.86649h-15.58417c-.19465,0-.34083-.14619-.34083-.34083v-4.18837h15.925v4.52921Zm135.93188,6.37973h22.01283V0h-6.37988V7.33368h-15.63295c-3.70103,0-6.72056,3.01937-6.72056,6.72072v14.80494c0,3.70119,3.01953,6.72056,6.72056,6.72056Zm-.29221-21.5255c0-.19481,.0974-.34083,.29221-.34083h15.29196c.19497,0,.34099,.14603,.34099,.34083v14.80494c0,.19465-.14603,.34083-.34099,.34083h-15.29196c-.19481,0-.29221-.14619-.29221-.34083V14.0544Zm-114.82995,21.5255l-11.10374-28.24621h6.76934l6.81812,16.65561c2.38616-5.50325,4.91882-11.20115,7.25636-16.65561h6.62316l7.69476,16.75286c2.14273-5.50309,4.33424-11.29839,6.37957-16.75286h6.7695l-10.61656,28.24621h-4.96761l-8.52261-18.89559-8.18146,18.89559h-4.91882ZM9.93776,19.62843C14.10159,14.4869,20.5234,6.49243,25.38834,.3944h9.33134c-4.83641,5.55235-9.80513,11.28133-14.62272,17.20034l-.37766,.46375,.38898,.4545c.57279,.66907,11.22904,12.96494,14.62224,16.87991h-8.4614c-1.08707-1.2535-2.3377-2.68044-3.60554-4.12716-2.47384-2.82328-5.03217-5.74237-6.54233-7.5626l-.54521-.65664-.55238,.65074c-1.69923,2.0018-3.42556,4.01046-5.08589,5.93463v-10.00344Zm-3.07931,13.62764L0,41.34857V4.5198C.00143,2.24396,1.84701,.39966,4.12285,.3995l17.3655-.00335c-.82403,1.04849-1.65874,2.09172-2.4732,3.10976-.98839,1.23548-2.00818,2.50987-3.00215,3.78489H6.85846v25.96527Z"
@@ -68,55 +67,52 @@ import { ThemeToggle } from "@/components/ui";
 				</a>
 			</div>
 
-			<!-- Center section - Search -->
-			<div class="hidden md:flex flex-1 max-w-xl mx-4">
+			<!-- Center section - search trigger -->
+			<div class="ed-topbar__center">
 				<button
 					type="button"
 					id="topbar-search-trigger"
 					aria-haspopup="dialog"
 					aria-label="Search videos, articles, and technologies"
-					class="relative w-full bg-white/30 dark:bg-gray-700/50 backdrop-blur-md border border-white/30 dark:border-gray-500/50 text-primary-content text-sm rounded-xl focus-ring block pl-10 pr-20 py-2 shadow-inner transition-smooth hover:bg-white/40 dark:hover:bg-gray-600/60 text-left"
+					class="ed-topbar__pill focus-ring"
 				>
-					<div
-						class="flex absolute inset-y-0 left-0 items-center pl-4 pointer-events-none"
-					>
-						<svg
-							class="w-4 h-4 text-gray-400"
-							fill="currentColor"
-							viewBox="0 0 20 20"
-						>
-							<path
-								fill-rule="evenodd"
-								clip-rule="evenodd"
-								d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-							></path>
-						</svg>
-					</div>
-					<span class="block truncate text-gray-400 dark:text-gray-300">
-						Search videos, articles, technologies...
+					<svg class="ed-topbar__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+						<circle cx="11" cy="11" r="7" />
+						<path d="m20 20-4.35-4.35" />
+					</svg>
+					<span class="ed-topbar__pill-prompt">
+						Search academy
 					</span>
-					<div
-						class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
-					>
-						<kbd
-							class="hidden sm:inline-flex items-center px-2 py-1 text-xs font-semibold text-gray-500 bg-white/50 dark:bg-gray-600/70 backdrop-blur-md border border-white/30 dark:border-gray-500/50 rounded-md shadow-sm dark:text-gray-200"
-							id="command-shortcut"
-						>
-							⌘K
-						</kbd>
-					</div>
+					<span class="ed-topbar__pill-hint">Lessons, articles, people</span>
+					<span class="ed-topbar__keycaps">
+						<kbd id="command-shortcut">⌘K</kbd>
+					</span>
 				</button>
 			</div>
 
 			<!-- Right section - Theme Toggle & Profile -->
-			<div class="flex items-center gap-2">
-				<ThemeToggle client:load variant="icon" size="md" />
+			<div class="ed-topbar__right">
+				<button
+					type="button"
+					id="mobile-search-trigger"
+					class="ed-topbar__icon-btn ed-topbar__mobile-search focus-ring md:hidden"
+					aria-label="Search videos, articles, and technologies"
+					aria-haspopup="dialog"
+				>
+					<svg class="w-5 h-5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+						<circle cx="11" cy="11" r="7" />
+						<path d="m20 20-4.35-4.35" />
+					</svg>
+				</button>
+				<span class="ed-topbar__theme-toggle">
+					<ThemeToggle client:load variant="icon" size="md" />
+				</span>
 				<UserHeader server:defer>
 					<span
 						slot="fallback"
 						aria-hidden="true"
-						class="inline-block h-9 w-[5.25rem] rounded-xl bg-white/30 dark:bg-gray-700/40 border border-white/30 dark:border-gray-500/40"
-					></span>
+						class="ed-topbar__user-fallback"
+					>Sign in</span>
 				</UserHeader>
 			</div>
 		</div>
@@ -126,7 +122,7 @@ import { ThemeToggle } from "@/components/ui";
 
 	<div class="flex flex-col min-h-screen">
 		<div class="flex overflow-hidden flex-1">
-			<main id="main-content" class="w-full h-auto pt-28 page-px md:ml-72 overflow-x-hidden transition-card">
+			<main id="main-content" class="w-full h-auto pt-16 md:ml-72 overflow-x-hidden transition-card">
                                 <slot />
                         </main>
                 </div>
@@ -137,22 +133,240 @@ import { ThemeToggle } from "@/components/ui";
 
 	<CommandPaletteWrapper client:only="react" />
 
-	<!-- Floating Action Button for mobile search -->
-	<button
-		type="button"
-		id="fab-search"
-		class="md:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-primary/90 to-secondary/90 backdrop-blur-xl text-white rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.4)] transform hover:scale-105 transition-smooth focus-ring flex items-center justify-center border border-white/20"
-		aria-label="Open search"
-		aria-haspopup="dialog"
-	>
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-		</svg>
-	</button>
+	<style>
+		:global(:root) {
+			--ed-sidebar-collapsed-width: 3.5rem;
+			--ed-sidebar-expanded-width: 18rem;
+			--ed-sidebar-current-width: var(--ed-sidebar-expanded-width);
+		}
+
+		@media (min-width: 768px) {
+			#main-content,
+			#footer-container {
+				margin-left: var(--ed-sidebar-current-width);
+			}
+		}
+
+		@media (max-width: 767px) {
+			#main-content,
+			#footer-container {
+				margin-left: 0;
+			}
+		}
+
+		/* ────────────────────────────────────────────────────────────
+		   Editorial top bar — flat paper with single hairline border,
+		   replaces the paper-panel + radial-gradient header. */
+		.ed-topbar {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			z-index: 50;
+			background: var(--editorial-paper);
+			border-bottom: 1px solid var(--editorial-hairline);
+		}
+
+		.ed-topbar__inner {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1.5rem;
+			padding: 0 2rem;
+			height: 64px;
+		}
+
+		@media (max-width: 767px) {
+			.ed-topbar__inner {
+				gap: 0.5rem;
+				padding: 0 1rem;
+			}
+		}
+
+		@media (max-width: 380px) {
+			.ed-topbar__inner {
+				gap: 0.35rem;
+				padding: 0 0.75rem;
+			}
+		}
+
+		.ed-topbar__left {
+			display: flex;
+			align-items: center;
+			gap: 0.875rem;
+			flex-shrink: 0;
+		}
+
+		.ed-topbar__icon-btn {
+			padding: 0.5rem;
+			color: var(--editorial-ink-soft);
+			background: transparent;
+			border: none;
+			cursor: pointer;
+			border-radius: 2px;
+			transition: color var(--duration-base) var(--ease-standard),
+				background-color var(--duration-base) var(--ease-standard);
+		}
+
+		.ed-topbar__icon-btn:hover {
+			color: var(--editorial-ink);
+			background: var(--surface-card-muted);
+		}
+
+		.ed-topbar__mobile-search {
+			border: 1px solid var(--editorial-hairline);
+			background: var(--editorial-paper);
+			min-width: 2.25rem;
+			min-height: 2.25rem;
+		}
+
+		.ed-topbar__mark {
+			display: flex;
+			align-items: center;
+			text-decoration: none;
+			color: var(--editorial-ink);
+		}
+
+		.ed-topbar__logo-svg {
+			height: 1.5rem;
+			width: auto;
+			fill: currentColor;
+		}
+
+		@media (max-width: 380px) {
+			.ed-topbar__logo-svg {
+				height: 1.3rem;
+			}
+		}
+
+		.ed-topbar__center {
+			display: none;
+			flex: 1;
+			max-width: 34rem;
+		}
+
+		@media (min-width: 768px) {
+			.ed-topbar__center { display: flex; }
+		}
+
+		.ed-topbar__pill {
+			flex: 1;
+			height: 40px;
+			display: flex;
+			align-items: center;
+			gap: 0.65rem;
+			padding: 0 0.6rem 0 0.8rem;
+			background: var(--editorial-paper);
+			border: 1px solid var(--editorial-hairline);
+			border-radius: 4px;
+			cursor: pointer;
+			font: inherit;
+			color: var(--editorial-ink-soft);
+			box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--editorial-paper-deep) 50%, transparent);
+			transition:
+				background-color var(--duration-base) var(--ease-standard),
+				border-color var(--duration-base) var(--ease-standard),
+				color var(--duration-base) var(--ease-standard);
+			text-align: left;
+			min-width: 0;
+		}
+
+		.ed-topbar__pill:hover {
+			background: var(--editorial-paper-deep);
+			border-color: var(--editorial-hairline-strong);
+			color: var(--editorial-ink);
+		}
+
+		.ed-topbar__pill-icon {
+			color: currentColor;
+			flex-shrink: 0;
+		}
+
+		.ed-topbar__pill-prompt {
+			flex: 0 0 auto;
+			font-family: var(--font-jetbrains-mono), monospace;
+			font-size: 0.76rem;
+			font-weight: 650;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--editorial-ink);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.ed-topbar__pill-hint {
+			flex: 1;
+			min-width: 0;
+			font-family: var(--font-inter-tight), system-ui, sans-serif;
+			font-size: 0.84rem;
+			line-height: 1;
+			color: var(--editorial-ink-mute);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.ed-topbar__keycaps { display: flex; gap: 0.25rem; flex-shrink: 0; }
+		.ed-topbar__keycaps kbd {
+			font-family: var(--font-jetbrains-mono), monospace;
+			font-size: 0.66rem;
+			font-weight: 650;
+			padding: 0.18rem 0.42rem;
+			border: 1px solid var(--editorial-hairline-strong);
+			border-radius: 2px;
+			color: var(--editorial-ink);
+			background: var(--editorial-paper-deep);
+		}
+
+		.ed-topbar__right {
+			display: flex;
+			align-items: center;
+			gap: 0.625rem;
+			flex-shrink: 0;
+		}
+
+		.ed-topbar__theme-toggle {
+			display: inline-flex;
+		}
+
+		.ed-topbar__user-fallback {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			min-height: 38px;
+			padding: 0.625rem 1rem;
+			font-family: var(--font-jetbrains-mono), monospace;
+			font-size: 0.75rem;
+			font-weight: 600;
+			letter-spacing: 0.14em;
+			line-height: 1;
+			text-transform: uppercase;
+			background: var(--editorial-ink);
+			color: var(--editorial-paper);
+			border: 1px solid var(--editorial-ink);
+			border-radius: 2px;
+		}
+
+		@media (max-width: 420px) {
+			.ed-topbar__right {
+				gap: 0.4rem;
+			}
+
+			.ed-topbar__user-fallback {
+				min-height: 36px;
+				padding-inline: 0.75rem;
+				font-size: 0.6875rem;
+			}
+		}
+
+		@media (max-width: 340px) {
+			.ed-topbar__theme-toggle {
+				display: none;
+			}
+		}
+	</style>
 
 	<script>
 		// Update keyboard shortcut display based on platform
@@ -176,39 +390,69 @@ import { ThemeToggle } from "@/components/ui";
 			});
 		}
 
-		// Add FAB search button handler
-		const fabSearch = document.getElementById("fab-search");
-		if (fabSearch) {
-			fabSearch.addEventListener("click", (e) => {
+		const mobileSearchTrigger = document.getElementById("mobile-search-trigger");
+		if (mobileSearchTrigger) {
+			mobileSearchTrigger.addEventListener("click", (e) => {
 				e.preventDefault();
 				openCommandPalette();
 			});
 		}
 
-		// Function to update main content margin based on sidebar state
+		const sidebarWidthStorageKey = "sidebar-expanded-width";
+		const defaultSidebarWidth = 288;
+		const minSidebarWidth = 224;
+		const maxSidebarWidth = 440;
+
+		function maxSidebarWidthForViewport() {
+			return Math.min(
+				maxSidebarWidth,
+				Math.max(minSidebarWidth, Math.floor(window.innerWidth * 0.42)),
+			);
+		}
+
+		function clampSidebarWidth(width: number) {
+			return Math.min(
+				Math.max(width, minSidebarWidth),
+				maxSidebarWidthForViewport(),
+			);
+		}
+
+		function readSidebarExpandedWidth() {
+			const stored = Number.parseInt(
+				localStorage.getItem(sidebarWidthStorageKey) || "",
+				10,
+			);
+			const width = Number.isFinite(stored) ? stored : defaultSidebarWidth;
+			return clampSidebarWidth(width);
+		}
+
+		// Function to update main content offset based on sidebar state
 		function updateMainContentMargin() {
 			const mainContent = document.getElementById("main-content");
 			const footerContainer = document.getElementById("footer-container");
 			const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
+			const isMobile = window.innerWidth < 768;
+			const expandedWidth = `${readSidebarExpandedWidth()}px`;
+			const currentWidth =
+				isMobile || isCollapsed
+					? "var(--ed-sidebar-collapsed-width, 3.5rem)"
+					: expandedWidth;
+
+			document.documentElement.style.setProperty(
+				"--ed-sidebar-expanded-width",
+				expandedWidth,
+			);
+			document.documentElement.style.setProperty(
+				"--ed-sidebar-current-width",
+				currentWidth,
+			);
 
 			if (mainContent) {
-				if (isCollapsed) {
-					mainContent.classList.remove("md:ml-72");
-					mainContent.classList.add("md:ml-24");
-				} else {
-					mainContent.classList.remove("md:ml-24");
-					mainContent.classList.add("md:ml-72");
-				}
+				mainContent.classList.remove("md:ml-72", "md:ml-14");
 			}
 
 			if (footerContainer) {
-				if (isCollapsed) {
-					footerContainer.classList.remove("md:ml-72");
-					footerContainer.classList.add("md:ml-24");
-				} else {
-					footerContainer.classList.remove("md:ml-24");
-					footerContainer.classList.add("md:ml-72");
-				}
+				footerContainer.classList.remove("md:ml-72", "md:ml-14");
 			}
 		}
 
@@ -238,9 +482,13 @@ import { ThemeToggle } from "@/components/ui";
 
 		// Listen for sidebar state changes from other sources
 		window.addEventListener("storage", (e) => {
-			if (e.key === "sidebar-collapsed") {
+			if (
+				e.key === "sidebar-collapsed" ||
+				e.key === sidebarWidthStorageKey
+			) {
 				updateMainContentMargin();
 			}
 		});
+		window.addEventListener("resize", updateMainContentMargin, { passive: true });
 	</script>
 </div>

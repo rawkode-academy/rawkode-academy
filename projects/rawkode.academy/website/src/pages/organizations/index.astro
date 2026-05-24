@@ -65,7 +65,7 @@ const services = [
 	@reference "../../styles/global.css";
 
 	.service-card {
-		@apply bg-white dark:bg-gray-800 rounded-xl border border-surface p-8 transition-card hover:shadow-xl hover:border-primary/50 dark:hover:border-primary/50;
+		@apply bg-white dark:bg-gray-800 rounded-sm border border-surface p-8 transition-card hover: hover:border-primary/50 dark:hover:border-primary/50;
 	}
 
 	.service-icon {
@@ -150,7 +150,7 @@ const services = [
 				</p>
 			</div>
 
-    <div class="grid md:grid-cols-3 gap-8">
+ <div class="grid md:grid-cols-3 gap-8">
 				<div class="text-center">
 					<div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
 						<svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,31 +205,31 @@ const services = [
 			<div class="grid md:grid-cols-3 gap-8">
 				{services.map((service) => (
 					<div class="service-card">
-            <div class="mb-6">
-              {service.icon === 'rocket' && (
-                <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-              )}
-              {service.icon === 'wrench' && (
-                <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-              )}
+ <div class="mb-6">
+ {service.icon === 'rocket' && (
+ <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+ </svg>
+ )}
+ {service.icon === 'wrench' && (
+ <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+ </svg>
+ )}
 							{service.icon === 'information' && (
 								<svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z"></path>
 								</svg>
 							)}
-              {service.icon === 'academic' && (
-                <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
-                  <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
-                </svg>
-              )}
-            </div>
+ {service.icon === 'academic' && (
+ <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
+ <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
+ </svg>
+ )}
+ </div>
 
 						<h3 class="text-2xl font-bold text-primary-content mb-3">
 							{service.title}
@@ -239,16 +239,16 @@ const services = [
 							{service.description}
 						</p>
 
-            <ul class="space-y-3 mb-8">
-              {service.features.map((feature) => (
-                <li class="flex items-center text-secondary-content">
-                  <svg class="w-5 h-5 text-green-500 flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
+ <ul class="space-y-3 mb-8">
+ {service.features.map((feature) => (
+ <li class="flex items-center text-secondary-content">
+ <svg class="w-5 h-5 text-green-500 flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
+ <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+ </svg>
+ {feature}
+ </li>
+ ))}
+ </ul>
 
 						<a
 							href={service.link}
@@ -284,7 +284,7 @@ const services = [
 	</section>
 
 	<!-- CTA Section -->
-	<section class="py-20 bg-gradient-to-r from-primary to-secondary text-white">
+	<section class="py-20 bg-[var(--editorial-ink)] text-white">
 		<div class="max-w-4xl mx-auto px-4 text-center">
 			<h2 class="text-3xl md:text-4xl font-bold mb-6">
 				Ready to Accelerate Your Cloud Native Journey?
@@ -295,7 +295,7 @@ const services = [
 			<div class="flex flex-col sm:flex-row justify-center gap-4">
 				<a
 					href="/organizations/lets-chat"
-					class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-white text-primary rounded-lg hover:bg-gray-100 transition-smooth shadow-lg hover:shadow-xl"
+					class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-white text-primary rounded-sm hover:bg-gray-100 transition-smooth hover:"
 				>
 					Schedule a Call
 					<svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
@@ -304,7 +304,7 @@ const services = [
 				</a>
 				<a
 					href="#services"
-					class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-transparent border-2 border-white text-white rounded-lg hover:bg-white/10 transition-smooth"
+					class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-transparent border-2 border-white text-white rounded-sm hover:bg-white/10 transition-smooth"
 				>
 					View Services
 				</a>

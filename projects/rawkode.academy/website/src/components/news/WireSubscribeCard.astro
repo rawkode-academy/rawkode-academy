@@ -1,0 +1,103 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+---
+
+<div class="wire-subscribe">
+	<MLabel tone="spruce">Rawkode Academy newsletter</MLabel>
+	<h3 class="wire-subscribe__title">One email. The signal, never the noise.</h3>
+	<p class="wire-subscribe__copy">
+		Tutorials, deep dives, and the cloud-native stories worth reading,
+		delivered without the noise.
+	</p>
+	<form
+		class="wire-subscribe__form"
+		action="https://email.rawkode.academy/subscribe"
+		method="post"
+	>
+		<input
+			class="wire-subscribe__input"
+			type="email"
+			name="email"
+			required
+			autocomplete="email"
+			placeholder="you@where-you.work"
+			aria-label="Email address"
+		/>
+		<button class="wire-subscribe__submit" type="submit">Subscribe</button>
+	</form>
+</div>
+
+<style>
+	.wire-subscribe {
+		padding: 1.5rem 1.25rem;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.wire-subscribe :global(.m-label) {
+		color: var(--editorial-spruce);
+	}
+
+	.wire-subscribe__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.375rem;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: var(--editorial-paper);
+		margin: 0;
+	}
+
+	.wire-subscribe__copy {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: oklch(1 0 0 / 0.65);
+		margin: 0 0 0.625rem;
+	}
+
+	.wire-subscribe__form {
+		display: flex;
+		border: 1px solid oklch(1 0 0 / 0.25);
+	}
+
+	.wire-subscribe__input {
+		flex: 1;
+		padding: 0.625rem 0.75rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		color: var(--editorial-paper);
+		background: transparent;
+		border: none;
+	}
+
+	.wire-subscribe__input::placeholder {
+		color: oklch(1 0 0 / 0.45);
+	}
+
+	.wire-subscribe__input:focus-visible {
+		outline: 2px solid var(--editorial-spruce);
+		outline-offset: -2px;
+	}
+
+	.wire-subscribe__submit {
+		background: var(--editorial-spruce);
+		color: var(--editorial-paper);
+		border: none;
+		padding: 0 0.875rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+
+	.wire-subscribe__submit:hover {
+		opacity: 0.92;
+	}
+</style>

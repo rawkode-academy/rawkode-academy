@@ -264,7 +264,7 @@ function formatDuration(minutes?: number) {
 								Pause, replay, and keep the notes and resources beside you as you work through the module.
 							</p>
 						</div>
-						<div class="overflow-hidden rounded-[1.5rem] bg-black/5 dark:bg-white/5">
+						<div class="overflow-hidden rounded-sm bg-black/5 dark:bg-white/5">
 							<VideoPlayer
 								video={module.data.video.id}
 								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
@@ -309,7 +309,7 @@ function formatDuration(minutes?: number) {
 										<p class="font-semibold text-primary-content transition-colors group-hover:text-primary">
 											{previousModule.data.title}
 										</p>
-										<span class="text-primary transition-transform duration-200 group-hover:-translate-x-0.5">←</span>
+										<span class="text-primary group-hover:-translate-x-0.5">←</span>
 									</div>
 								</a>
 							)}
@@ -324,7 +324,7 @@ function formatDuration(minutes?: number) {
 										<p class="font-semibold text-primary-content transition-colors group-hover:text-primary">
 											{nextModule.data.title}
 										</p>
-										<span class="text-primary transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+										<span class="text-primary group-hover:translate-x-0.5">→</span>
 									</div>
 								</a>
 							)}

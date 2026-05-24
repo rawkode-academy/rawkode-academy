@@ -68,7 +68,7 @@ onUnmounted(() => {
 		<div
 			ref="dropdownRef"
 			:class="[
-				'absolute right-0 top-full z-50 mt-2 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl transition-smooth',
+				'absolute right-0 top-full z-50 mt-2 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-sm transition-smooth',
 				dropdownOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
 			]">
 			<div class="py-3 px-4">

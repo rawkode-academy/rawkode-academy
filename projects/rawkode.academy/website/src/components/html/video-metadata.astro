@@ -200,7 +200,7 @@ const structuredData = isVideoList
 
 <!-- Preload video thumbnail to improve LCP on detail pages -->
 {!isVideoList && thumbnailUrl && (
-  <link rel="preload" as="image" href={thumbnailUrl} fetchpriority="high" />
+ <link rel="preload" as="image" href={thumbnailUrl} fetchpriority="high" />
 )}
 
 <!-- Video-specific meta tags -->

@@ -61,7 +61,7 @@ const ariaLabel = computed(
 		:aria-label="ariaLabel"
 	>
 		<div
-			:class="['w-full bg-black/40 backdrop-blur-sm dark:bg-black/60', heightClass]"
+			:class="['w-full bg-black/40 dark:bg-black/60', heightClass]"
 		>
 			<div
 				:class="[

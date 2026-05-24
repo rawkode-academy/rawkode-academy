@@ -1,16 +1,16 @@
 <template>
-  <section
-    :class="[
-      'w-full',
-      paddingClass,
-      backgroundClass,
-      className
-    ]"
-  >
-    <div :class="containerClass">
-      <slot />
-    </div>
-  </section>
+ <section
+ :class="[
+ 'w-full',
+ paddingClass,
+ backgroundClass,
+ className
+ ]"
+ >
+ <div :class="containerClass">
+ <slot />
+ </div>
+ </section>
 </template>
 
 <script setup lang="ts">

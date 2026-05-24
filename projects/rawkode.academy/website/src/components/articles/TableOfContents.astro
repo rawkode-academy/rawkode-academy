@@ -34,7 +34,7 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 <!-- Mobile toggle -->
 <button
 	id="toc-mobile-toggle"
-	class="md:hidden fixed top-24 right-0 z-50 p-2.5 rounded-l-xl shadow-lg"
+	class="md:hidden fixed top-24 right-0 z-50 p-2.5 rounded-l-xl "
 	style="background: var(--surface-card); border: 1px solid var(--surface-border); border-right: none;"
 	aria-label="Toggle table of contents"
 >
@@ -152,12 +152,9 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	.toc-glass {
 		position: absolute;
 		inset: 0;
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
-		border-radius: 1rem;
-		box-shadow: var(--shadow-lg);
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-sm);
 	}
 
 	.toc-content-wrapper {
@@ -196,49 +193,38 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	.toc-track {
 		position: absolute;
 		left: 50%;
-		width: 3px;
+		width: 1px;
 		transform: translateX(-50%);
-		background: rgb(var(--brand-primary) / 0.12);
-		border-radius: 2px;
+		background: var(--editorial-hairline);
 		z-index: 0;
-		/* Default position, will be updated by JS */
 		top: calc(0.5rem + 7px);
 		bottom: calc(0.5rem + 7px);
 	}
 
-	/* Animated progress fill - starts from first dot center */
+	/* Animated progress fill — flat ink, no glow. */
 	.toc-progress {
 		position: absolute;
 		left: 50%;
-		width: 3px;
+		width: 1px;
 		height: 0;
 		transform: translateX(-50%);
-		background: linear-gradient(180deg, 
-			rgb(var(--brand-primary)) 0%, 
-			rgb(var(--brand-secondary)) 100%
-		);
-		border-radius: 2px;
+		background: var(--editorial-ink);
 		z-index: 1;
 		transition: height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-		/* Will be positioned via JS to match first dot center */
 		top: calc(0.5rem + 7px);
-		box-shadow: 0 0 6px 1px rgb(var(--brand-primary) / 0.4);
 	}
 
-	/* Glowing effect on the progress line tip */
+	/* Progress tip — small solid dot, no glow. */
 	.toc-progress::after {
 		content: '';
 		position: absolute;
-		bottom: -4px;
+		bottom: -3px;
 		left: 50%;
 		transform: translateX(-50%);
-		width: 10px;
-		height: 10px;
-		background: rgb(var(--brand-primary));
+		width: 6px;
+		height: 6px;
+		background: var(--editorial-ink);
 		border-radius: 50%;
-		box-shadow: 0 0 12px 4px rgb(var(--brand-primary) / 0.7);
-		opacity: 1;
-		transition: opacity 0.25s ease;
 	}
 
 	.toc-dot {
@@ -273,41 +259,39 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		transform: scale(1.2);
 	}
 
-	/* Passed state - sections already scrolled past */
+	/* Passed state — flat ink dot. */
 	.toc-dot.passed {
-		border-color: rgb(var(--brand-primary));
-		background: rgb(var(--brand-primary));
-		box-shadow: 0 0 6px 2px rgb(var(--brand-primary) / 0.3);
+		border-color: var(--editorial-ink);
+		background: var(--editorial-ink);
 	}
 
 	.toc-dot.passed .toc-dot-inner {
-		background: white;
+		background: var(--editorial-paper);
 		width: 6px;
 		height: 6px;
 	}
 
-	/* Active state - current section */
+	/* Active state — ink-bordered ring, no glow. */
 	.toc-dot.active {
-		border-color: rgb(var(--brand-primary));
+		border-color: var(--editorial-ink);
 		border-width: 2px;
-		background: var(--surface-card);
-		transform: scale(1.25);
-		box-shadow: 0 0 10px 3px rgb(var(--brand-primary) / 0.5);
+		background: var(--editorial-paper-deep);
+		transform: scale(1.2);
 	}
 
 	.toc-dot.active .toc-dot-inner {
-		background: rgb(var(--brand-primary));
+		background: var(--editorial-ink);
 		width: 6px;
 		height: 6px;
-		animation: dot-pulse 1.5s ease-in-out infinite;
+		animation: dot-pulse 1.8s ease-in-out infinite;
 	}
 
 	.toc-dot.active .toc-dot-ring {
 		position: absolute;
-		inset: -6px;
-		border: 2px solid rgb(var(--brand-primary) / 0.5);
+		inset: -5px;
+		border: 1px solid var(--editorial-hairline-strong);
 		border-radius: 50%;
-		animation: ring-pulse 1.5s ease-out infinite;
+		animation: ring-pulse 1.8s ease-out infinite;
 	}
 
 	@keyframes dot-pulse {
@@ -335,17 +319,18 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 	}
 
 	.toc-header {
-		padding-bottom: 0.75rem;
-		margin-bottom: 0.75rem;
-		border-bottom: 1px solid var(--surface-border);
+		padding-bottom: 0.625rem;
+		margin-bottom: 0.625rem;
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
 	.toc-label {
+		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 0.625rem;
-		font-weight: 700;
+		font-weight: 500;
 		text-transform: uppercase;
-		letter-spacing: 0.15em;
-		color: rgb(var(--brand-primary));
+		letter-spacing: 0.18em;
+		color: var(--editorial-spruce);
 	}
 
 	.toc-list {
@@ -362,54 +347,44 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		display: flex;
 		align-items: flex-start;
 		gap: 0.625rem;
-		padding: 0.5rem 0.625rem;
+		padding: 0.45rem 0.625rem;
 		margin: 0 -0.625rem;
-		border-radius: 0.5rem;
+		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 0.8125rem;
-		font-weight: 500;
-		color: rgb(107 114 128);
+		font-weight: 400;
+		color: var(--editorial-ink-mute);
 		text-decoration: none;
 		line-height: 1.4;
-		transition: all 0.15s ease;
-	}
-
-	:root.dark .toc-link {
-		color: rgb(156 163 175);
+		transition: color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard);
+		border-left: 1px solid transparent;
 	}
 
 	.toc-link:hover {
-		color: rgb(var(--brand-primary));
-		background: rgb(var(--brand-primary) / 0.08);
-	}
-
-	:root.dark .toc-link:hover {
-		background: rgb(var(--brand-primary) / 0.12);
+		color: var(--editorial-ink);
+		background: var(--surface-card-muted);
 	}
 
 	.toc-link.active {
-		color: rgb(var(--brand-primary));
-		background: rgb(var(--brand-primary) / 0.1);
-	}
-
-	:root.dark .toc-link.active {
-		background: rgb(var(--brand-primary) / 0.15);
+		color: var(--editorial-ink);
+		background: var(--surface-card-muted);
+		border-left-color: var(--editorial-ink);
+		font-weight: 500;
 	}
 
 	.toc-marker {
 		flex-shrink: 0;
-		width: 6px;
-		height: 6px;
-		margin-top: 0.4em;
-		border-radius: 50%;
+		width: 4px;
+		height: 4px;
+		margin-top: 0.55em;
 		background: currentColor;
-		opacity: 0.4;
-		transition: all 0.15s ease;
+		opacity: 0.5;
+		transition: opacity var(--duration-base) var(--ease-standard);
 	}
 
 	.toc-link.active .toc-marker {
-		background: rgb(var(--brand-primary));
+		background: var(--editorial-ink);
 		opacity: 1;
-		box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.2);
 	}
 
 	.toc-text {
@@ -429,27 +404,22 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 
 	.toc-sublink {
 		display: block;
-		padding: 0.3rem 0.625rem;
+		padding: 0.25rem 0.625rem;
 		margin: 0 -0.625rem;
+		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 0.75rem;
-		color: rgb(107 114 128);
+		color: var(--editorial-ink-mute);
 		text-decoration: none;
 		line-height: 1.4;
-		border-radius: 0.375rem;
-		transition: all 0.15s ease;
-	}
-
-	:root.dark .toc-sublink {
-		color: rgb(156 163 175);
+		transition: color var(--duration-base) var(--ease-standard);
 	}
 
 	.toc-sublink:hover {
-		color: rgb(var(--brand-secondary));
-		background: rgb(var(--brand-secondary) / 0.08);
+		color: var(--editorial-ink-soft);
 	}
 
 	.toc-sublink.active {
-		color: rgb(var(--brand-secondary));
+		color: var(--editorial-ink);
 	}
 
 	/* Mobile styles */

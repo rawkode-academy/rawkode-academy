@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import { type CollectionEntry, getCollection, getEntries } from "astro:content";
 import AuthorAvatarGroup from "../common/AuthorAvatarGroup.vue";
-import Badge from "../common/Badge.vue";
 import BaseCard from "../common/BaseCard.vue";
 import FormattedDate from "../common/FormattedDate.vue";
 
@@ -13,95 +12,170 @@ type Props = {
 const { course } = Astro.props;
 const authors = await getEntries(course.data.authors);
 
-// Get course modules count (including drafts)
 const courseModules = (await getCollection("courseModules")).filter(
 	(module) => module.data.course.id === course.id,
 );
 
 const totalModules = courseModules.length;
-
-// Function to get difficulty badge variant
-function getDifficultyVariant(
-	difficulty: string,
-): "success" | "warning" | "danger" | "default" {
-	switch (difficulty) {
-		case "beginner":
-			return "success";
-		case "intermediate":
-			return "warning";
-		case "advanced":
-			return "danger";
-		default:
-			return "default";
-	}
-}
 ---
 
 <BaseCard href={`/courses/${course.id}`} class="group">
-	<Fragment slot="cover">
-		<div class="absolute inset-0 z-10 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-transparent"></div>
-		{
-			course.data.cover ? (
-				<Image
-					class="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-					src={course.data.cover.image}
-					alt={course.data.cover.alt}
-					loading="lazy"
-				/>
-			) : (
-				<div class="flex h-48 w-full items-end bg-gradient-to-br from-primary via-primary/80 to-secondary p-6">
-					<div class="max-w-[14rem]">
-						<p class="text-xs font-semibold uppercase tracking-[0.22em] text-white/75">Course</p>
-						<p class="mt-3 text-2xl font-bold leading-tight text-white">{course.data.title}</p>
-					</div>
-				</div>
-			)
-		}
-		<div class="absolute left-4 right-4 top-4 z-20 flex flex-wrap items-start justify-between gap-2">
-			<Badge
-				variant={getDifficultyVariant(course.data.difficulty)}
-				size="sm"
-				class="shadow-md"
-			>
-				{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
-			</Badge>
-			<Badge
-				variant="default"
-				size="sm"
-				class="bg-white/90 text-secondary-content shadow-md dark:bg-gray-900/85"
-			>
-				{totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}
-			</Badge>
-		</div>
-	</Fragment>
+	{course.data.cover ? (
+		<Fragment slot="cover">
+			<Image
+				src={course.data.cover.image}
+				alt={course.data.cover.alt}
+				loading="lazy"
+			/>
+		</Fragment>
+	) : (
+		<Fragment slot="cover">
+			<div class="ed-course-cover">
+				<p class="ed-course-cover__kicker">§ Course</p>
+				<p class="ed-course-cover__title">{course.data.title}</p>
+			</div>
+		</Fragment>
+	)}
+
 	<Fragment slot="content">
-		<div class="flex h-full flex-col gap-4">
-			<div class="space-y-3">
-				<h2 class="text-2xl font-bold tracking-tight text-primary-content transition-colors group-hover:text-primary">
-					{course.data.title}
-				</h2>
-				<p class="line-clamp-4 text-sm leading-7 text-secondary-content sm:text-base">
-					{course.data.description}
+		<div class="ed-course-card__meta">
+			<span class="ed-course-card__meta-tag">
+				{course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
+			</span>
+			<span class="ed-course-card__meta-sep">·</span>
+			<span>{totalModules === 1 ? `${totalModules} module` : `${totalModules} modules`}</span>
+		</div>
+
+		<h2 class="ed-course-card__title">{course.data.title}</h2>
+		<p class="ed-course-card__body">{course.data.description}</p>
+
+		{course.data.learningPath.length > 0 && (
+			<div class="ed-course-card__path">
+				<p class="ed-course-card__path-label">You'll cover</p>
+				<p class="ed-course-card__path-list">
+					{course.data.learningPath.slice(0, 2).join(" · ")}
 				</p>
 			</div>
-
-			{course.data.learningPath.length > 0 && (
-				<div class="border-t border-black/10 pt-4 dark:border-white/10">
-					<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">You’ll cover</p>
-					<p class="mt-2 line-clamp-2 text-sm leading-6 text-primary-content">
-						{course.data.learningPath.slice(0, 2).join(" • ")}
-					</p>
-				</div>
-			)}
-		</div>
+		)}
 	</Fragment>
+
 	<Fragment slot="footer">
-		<div class="flex items-center justify-between gap-4">
+		<div class="ed-course-card__footer">
 			<AuthorAvatarGroup authors={authors} showActiveIndicator={false} />
-			<div class="text-right">
-				<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Published</p>
+			<div class="ed-course-card__published">
+				<span class="ed-course-card__published-label">Published</span>
 				<FormattedDate date={course.data.publishedAt} format="short" />
 			</div>
 		</div>
 	</Fragment>
 </BaseCard>
+
+<style>
+	.ed-course-cover {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		width: 100%;
+		height: 100%;
+		padding: 1.25rem;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+	}
+	.ed-course-cover__kicker {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		color: oklch(1 0 0 / 0.6);
+		margin: 0 0 0.5rem;
+	}
+	.ed-course-cover__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.5rem;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		margin: 0;
+	}
+
+	.ed-course-card__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--editorial-ink-mute);
+		margin-bottom: 0.875rem;
+	}
+
+	.ed-course-card__meta-tag { color: var(--editorial-rust); }
+	.ed-course-card__meta-sep { opacity: 0.4; }
+
+	.ed-course-card__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.5rem;
+		line-height: 1.05;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0 0 0.75rem;
+	}
+
+	.ed-course-card__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0 0 1rem;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.ed-course-card__path {
+		padding-top: 0.875rem;
+		border-top: 1px solid var(--editorial-hairline);
+		margin-bottom: 0.5rem;
+	}
+	.ed-course-card__path-label {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		text-transform: uppercase;
+		letter-spacing: 0.18em;
+		color: var(--editorial-ink-mute);
+		margin: 0 0 0.4rem;
+	}
+	.ed-course-card__path-list {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.85rem;
+		color: var(--editorial-ink);
+		margin: 0;
+		line-height: 1.4;
+	}
+
+	.ed-course-card__footer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+	}
+	.ed-course-card__published {
+		text-align: right;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.7rem;
+		color: var(--editorial-ink-mute);
+	}
+	.ed-course-card__published-label {
+		display: block;
+		text-transform: uppercase;
+		letter-spacing: 0.16em;
+		margin-bottom: 0.15rem;
+	}
+</style>

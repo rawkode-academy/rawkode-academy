@@ -1,0 +1,126 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	kicker?: string;
+	time?: string | undefined;
+	title: string;
+	description: string;
+	source?: string | undefined;
+	readingTime?: string | undefined;
+	tags?: string[];
+}
+
+const {
+	href,
+	kicker = "Release",
+	time,
+	title,
+	description,
+	source,
+	readingTime,
+	tags = [],
+} = Astro.props as Props;
+---
+
+<a class="news-lead" href={href}>
+	<MLabel tone="amber">
+		<span class="news-lead__dot" aria-hidden="true"></span>
+		{time ? `${time} · ` : ""}LEAD STORY · {kicker}
+	</MLabel>
+
+	<h1 class="news-lead__title">{title}</h1>
+	<p class="news-lead__description">{description}</p>
+
+	<div class="news-lead__actions">
+		<span class="news-lead__cta">Read full release →</span>
+		{source && <MLabel>via {source}{readingTime ? ` · ${readingTime}` : ""}</MLabel>}
+		<span class="news-lead__spacer"></span>
+		{tags.length > 0 && (
+			<div class="news-lead__tags">
+				{tags.map((t) => (
+					<span class="news-lead__tag">#{t}</span>
+				))}
+			</div>
+		)}
+	</div>
+</a>
+
+<style>
+	.news-lead {
+		display: flex;
+		flex-direction: column;
+		gap: 1.125rem;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.news-lead__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--editorial-amber);
+	}
+
+	.news-lead__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.25rem, 5vw, 4.5rem);
+		line-height: 0.96;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.news-lead__description {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.1875rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 47rem;
+		text-wrap: pretty;
+	}
+
+	.news-lead__actions {
+		display: flex;
+		gap: 0.875rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.news-lead__cta {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		padding: 0.75rem 1.125rem;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		border-radius: var(--radius-sm);
+	}
+
+	.news-lead__spacer { flex: 1; min-width: 1rem; }
+
+	.news-lead__tags {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.news-lead__tag {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.2rem 0.45rem;
+		color: var(--editorial-ink-soft);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
+	}
+</style>

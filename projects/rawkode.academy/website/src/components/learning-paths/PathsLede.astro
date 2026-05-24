@@ -1,0 +1,71 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+---
+
+<section class="paths-lede">
+	<MLabel tone="spruce">
+		<span class="paths-lede__dot" aria-hidden="true"></span>
+		§00 · Why paths
+	</MLabel>
+	<h1 class="paths-lede__title">
+		A curriculum is a promise <span class="paths-lede__title-soft">that the order matters.</span>
+	</h1>
+	<p class="paths-lede__body">
+		Picking lessons one at a time is fine for browsing. Picking them in the
+		right order is how you actually become competent at the thing. Each path
+		here was built by someone who teaches this for a living and watched, in
+		detail, where students get stuck.
+	</p>
+</section>
+
+<style>
+	.paths-lede {
+		padding: 3.25rem 2.5rem 2.25rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		gap: 1.125rem;
+	}
+
+	.paths-lede__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--editorial-spruce);
+	}
+
+	.paths-lede__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.75rem, 6vw, 5.25rem);
+		line-height: 0.94;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		max-width: 70rem;
+		text-wrap: balance;
+	}
+
+	.paths-lede__title-soft {
+		font-style: normal;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.72em;
+		font-weight: 400;
+		color: var(--editorial-ink-soft);
+	}
+
+	.paths-lede__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.1875rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		max-width: 55rem;
+		text-wrap: pretty;
+	}
+
+	@media (max-width: 720px) {
+		.paths-lede { padding: 2.25rem 1.25rem 1.5rem; }
+	}
+</style>

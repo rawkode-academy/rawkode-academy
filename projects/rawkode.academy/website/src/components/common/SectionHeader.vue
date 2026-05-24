@@ -1,22 +1,12 @@
 <template>
-  <div :class="[wrapperClasses, className]">
-    <div class="h-10 w-1 bg-gradient-to-b from-primary to-secondary rounded-full"></div>
-    <div :class="textClasses">
-      <h2 class="text-2xl md:text-3xl font-bold text-primary-content">
-        {{ title }}
-      </h2>
-      <p
-        v-if="subtitle"
-        class="text-base text-secondary-content mt-2 max-w-2xl"
-      >
-        {{ subtitle }}
-      </p>
-    </div>
-    <div
-      v-if="showSeparator"
-      class="ml-4 h-px grow bg-gradient-to-r from-primary/30 to-transparent"
-    ></div>
-  </div>
+	<div :class="[wrapperClasses, className]">
+		<div class="ed-section-bar"></div>
+		<div :class="textClasses">
+			<h2 class="ed-section-title">{{ title }}</h2>
+			<p v-if="subtitle" class="ed-section-subtitle">{{ subtitle }}</p>
+		</div>
+		<div v-if="showSeparator" class="ed-section-rule"></div>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -45,25 +35,40 @@ const textClasses = computed(() => [
 	"flex flex-col",
 	props.centered ? "items-center text-center" : "",
 ]);
-const subtitle = props.subtitle;
-const showSeparator = props.showSeparator;
-const title = props.title;
 </script>
 
 <style scoped>
-.bg-gradient-to-b {
-  background-image: linear-gradient(
-    to bottom,
-    rgb(var(--brand-primary)),
-    rgb(var(--brand-secondary))
-  );
+.ed-section-bar {
+	width: 2px;
+	height: 2.5rem;
+	background: var(--editorial-ink);
+	flex-shrink: 0;
 }
 
-.bg-gradient-to-r {
-  background-image: linear-gradient(
-    to right,
-    rgb(var(--brand-primary)),
-    transparent
-  );
+.ed-section-title {
+	font-family: var(--font-instrument-serif), serif;
+	font-style: italic;
+	font-weight: 400;
+	font-size: clamp(1.5rem, 3vw, 2.25rem);
+	line-height: 1.05;
+	letter-spacing: -0.025em;
+	color: var(--editorial-ink);
+	margin: 0;
+}
+
+.ed-section-subtitle {
+	margin-top: 0.4rem;
+	font-family: var(--font-inter-tight), sans-serif;
+	font-size: 0.95rem;
+	color: var(--editorial-ink-soft);
+	max-width: 40rem;
+}
+
+.ed-section-rule {
+	margin-left: 1rem;
+	height: 1px;
+	flex-grow: 1;
+	background: var(--editorial-hairline);
+	align-self: center;
 }
 </style>

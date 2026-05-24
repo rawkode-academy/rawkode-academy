@@ -1,6 +1,5 @@
 ---
 import { getCollection, getEntry } from "astro:content";
-import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
@@ -9,6 +8,8 @@ import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import MLabel from "@/components/ui/MLabel.vue";
+import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -19,52 +20,34 @@ import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 
 export const prerender = false;
 
-// Get the slug from URL params
 const { slug } = Astro.params;
 
-// First, try to get video from the collection (build-time data)
 const videos = await getCollection("videos");
 let video: (typeof videos)[0] | undefined = videos.find(
 	(v) => v.data.slug === slug,
 );
 
-// Handle 404 case if still not found
 if (!video) {
 	return new Response(null, { status: 404 });
 }
 
-// Set cache headers for ISR
-// Individual video pages can cache longer since they change less frequently
-// Client cache: 10 minutes, Edge cache: 2 hours, Serve stale for 48 hours
 Astro.response.headers.set(
 	"Cache-Control",
 	"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
 );
 Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
-
-// Add cache tags for targeted invalidation
-// Use video-specific tag to purge individual videos
 Astro.response.headers.set(
 	"Cache-Tag",
 	`video-${video.data.slug}, videos-page, video-detail`,
 );
-
-// Add build timestamp for debugging
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-// Configure Marked to handle single newlines as breaks
-const marked = new Marked({
-	breaks: true,
-	gfm: true,
-});
-// Convert literal \n escape sequences to actual newlines before processing
+const marked = new Marked({ breaks: true, gfm: true });
 const processedDescription = video.data.description.replace(/\\n/g, "\n");
 const renderedDescriptionHtml = marked.parse(processedDescription);
 
-// Fetch chapters for key moments (clips) JSON-LD
 type Chapter = { startTime: number; title: string };
-let clips: Array<{ name: string; startOffset: number; endOffset?: number }> =
-	[];
+let clips: Array<{ name: string; startOffset: number; endOffset?: number }> = [];
 const durationSec: number | null =
 	typeof video.data.duration === "number" ? video.data.duration : null;
 
@@ -87,7 +70,16 @@ if (chapterSource.length > 0) {
 	});
 }
 
-// Format date to readable format
+const formatRuntime = (s?: number | null): string => {
+	if (typeof s !== "number" || s <= 0) return "—";
+	const h = Math.floor(s / 3600);
+	const m = Math.floor((s % 3600) / 60);
+	const sec = s % 60;
+	return h > 0
+		? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+		: `${m}:${String(sec).padStart(2, "0")}`;
+};
+
 const formatDate = (date: Date | string) => {
 	const d = typeof date === "string" ? new Date(date) : date;
 	return d.toLocaleDateString("en-US", {
@@ -95,6 +87,11 @@ const formatDate = (date: Date | string) => {
 		month: "long",
 		day: "numeric",
 	});
+};
+
+const formatLabel = (value?: string | null) => {
+	if (!value) return null;
+	return value.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 // Resolve referenced show and technologies
@@ -107,8 +104,6 @@ const showId =
 			: null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
 
-// Compute "More from this show" — other episodes in the same show, latest first,
-// excluding the current video. Empty list if the video isn't part of a show.
 const SHOW_RELATED_LIMIT = 6;
 const showRelatedAll = showEntry
 	? videos
@@ -143,10 +138,7 @@ const showRelatedVideos = showRelatedAll.slice(0, SHOW_RELATED_LIMIT).map((v) =>
 	duration: typeof v.data.duration === "number" ? v.data.duration : undefined,
 }));
 
-// Normalize technology references (handles both string IDs and Astro reference objects)
-const normalizedTechIds = normalizeTechnologyReferences(
-	video.data.technologies,
-);
+const normalizedTechIds = normalizeTechnologyReferences(video.data.technologies);
 const techEntries = (
 	await Promise.all(
 		normalizedTechIds.map(async (id) => {
@@ -159,7 +151,6 @@ const techEntries = (
 	)
 ).filter((t): t is NonNullable<typeof t> => Boolean(t));
 
-// Fetch videos for each technology (excluding current video)
 const videosPerTechnology = await Promise.all(
 	techEntries.map(async (tech) => {
 		const techId = tech.id.replace(/\/index$/, "");
@@ -206,24 +197,10 @@ const guestEntries = Array.isArray(video.data.guests)
 		).filter((g): g is NonNullable<typeof g> => Boolean(g))
 	: [];
 
-const breadcrumbElements = showEntry
-	? [
-			{ title: "Home", link: "/" },
-			{ title: "Videos", link: "/watch" },
-			{ title: showEntry.data.name, link: `/shows/${showEntry.id}` },
-		]
-	: [
-			{ title: "Home", link: "/" },
-			{ title: "Videos", link: "/watch" },
-		];
-
 const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
 
-// Trim the raw video description to fit Google's ~160-char SERP cap. Cut on a
-// word boundary, prefer the first paragraph, drop markdown that won't render
-// in a meta tag.
 const META_DESCRIPTION_LIMIT = 160;
 const metaDescription = (() => {
 	const firstParagraph =
@@ -263,7 +240,6 @@ const watchVideoSeoText = await buildWatchVideoSeoText({
 	chapters: chapterSource,
 });
 
-// Get user authentication status and watch position
 const user = Astro.locals.user;
 const isAuthenticated = !!user;
 
@@ -292,6 +268,14 @@ if (isAuthenticated && user?.id) {
 		// Silently fail - not critical
 	}
 }
+
+// Editorial header bits
+const categoryLabel =
+	formatLabel(video.data.category) ||
+	(video.data.type === "live" ? "Live session" : "Recorded session");
+const isLive = video.data.type === "live";
+const runtimeLabel = formatRuntime(durationSec);
+const publishedLabel = formatDate(video.data.publishedAt);
 ---
 
 <Page
@@ -319,148 +303,291 @@ if (isAuthenticated && user?.id) {
 		guests={guestRefs}
 		partOfSeries={partOfSeriesRef}
 	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/rss+xml"
-		title="Rawkode Academy - Videos (RSS)"
-		href="/api/feeds/videos.xml"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/atom+xml"
-		title="Rawkode Academy - Videos (Atom)"
-		href="/api/feeds/videos.atom"
-	/>
-	<link
-		slot="extra-head"
-		rel="alternate"
-		type="application/feed+json"
-		title="Rawkode Academy - Videos (JSON Feed)"
-		href="/api/feeds/videos.json"
-	/>
-	<div class="min-h-screen">
-		<div class="container-content content-px py-4 sm:py-6 lg:py-8">
-			{/* Breadcrumb */}
-			<div class="section-mb">
-				<Breadcrumb elements={breadcrumbElements} />
+	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
+	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
+	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
+
+	<div class="watch-detail">
+		<div class="watch-detail__breadcrumb">
+			<a class="watch-detail__crumb" href="/watch">Watch</a>
+			<span class="watch-detail__sep">/</span>
+			{showEntry ? (
+				<>
+					<a class="watch-detail__crumb" href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
+					<span class="watch-detail__sep">/</span>
+				</>
+			) : (
+				<>
+					<span class="watch-detail__crumb">{categoryLabel}</span>
+					<span class="watch-detail__sep">/</span>
+				</>
+			)}
+			<span class="watch-detail__crumb watch-detail__crumb--current">{video.data.title}</span>
+			<span class="watch-detail__spacer"></span>
+			<span class="watch-detail__meta">{runtimeLabel}</span>
+		</div>
+
+		<header class="watch-detail__header">
+			<MLabel tone={isLive ? "amber" : "spruce"}>
+				{isLive && <LiveDot color="amber" />}
+				{isLive ? "Live · " : ""}{categoryLabel}{showEntry ? ` · ${showEntry.data.name}` : ""}
+			</MLabel>
+			<h1 class="watch-detail__title">{video.data.title}</h1>
+			<div class="watch-detail__byline">
+				<time
+					datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)}
+				>
+					<MLabel>{publishedLabel}</MLabel>
+				</time>
+				<MLabel>{runtimeLabel}</MLabel>
 			</div>
+		</header>
 
-			{/* Hero Section with Title */}
-			<div class="section-mb">
-				<h1 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-primary-content mb-2 sm:mb-3 tracking-tight">{video.data.title}</h1>
-				<div class="flex flex-wrap items-center card-gap text-sm text-muted">
-					<time datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)} class="flex items-center gap-1.5 sm:gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-						</svg>
-						{formatDate(video.data.publishedAt)}
-					</time>
-					<span class="opacity-50">•</span>
-					<span>{Math.floor((durationSec ?? 0) / 60)} min watch</span>
-				</div>
-			</div>
+		<div class="watch-detail__player-frame">
+			<VideoPlayer
+				client:only="vue"
+				video={video.data.id}
+				thumbnailUrl={thumbnailUrl}
+				initialPosition={initialPosition}
+				isAuthenticated={isAuthenticated}
+			/>
+		</div>
 
-			{/* Main Content */}
-			<div class="section-gap">
-				{/* Video Player */}
-				<div class="relative w-full aspect-video rounded-xl overflow-hidden card-shadow-elevated">
-					<VideoPlayer
-						client:only="vue"
-						video={video.data.id}
-						thumbnailUrl={thumbnailUrl}
-						initialPosition={initialPosition}
-						isAuthenticated={isAuthenticated}
-					/>
-				</div>
+		<div class="watch-detail__body">
+			<VideoReactions server:defer videoId={video.data.slug} />
 
-				{/* Video Controls & Social Features */}
-				<VideoReactions
-					server:defer
-					videoId={video.data.slug}
-				/>
+			<section class="watch-detail__overview">
+				<MLabel tone="spruce">§ Overview</MLabel>
+				<h2 class="watch-detail__overview-title">About this video</h2>
+				<div class="prose" set:html={renderedDescriptionHtml} />
+			</section>
 
-				{/* Server-rendered episode description for UX and crawlability */}
-				<section class="glass-card-shimmer bleed-x-mobile p-4 sm:p-6">
-					<div class="space-y-1">
-						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-							Overview
-						</p>
-						<h2 class="text-xl font-semibold text-primary-content">
-							About this video
-						</h2>
+			{techEntries.length > 0 && (
+				<section class="watch-detail__tech">
+					<MLabel tone="spruce">§ Technologies featured</MLabel>
+					<div class="watch-detail__tech-grid">
+						{techEntries.map((tech) => (
+							<a
+								href={`/technology/${tech.id.replace(/\/index$/, "")}`}
+								class="watch-detail__tech-chip"
+							>
+								<span class="watch-detail__tech-icon">
+									<img
+										src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || "/apple-touch-icon.png"}
+										alt={tech.data.name}
+										onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+									/>
+								</span>
+								<span class="watch-detail__tech-name">{tech.data.name}</span>
+								<span class="watch-detail__tech-arrow" aria-hidden="true">→</span>
+							</a>
+						))}
 					</div>
-					<div
-						class="prose prose-lg mt-6 max-w-none dark:prose-invert"
-						set:html={renderedDescriptionHtml}
-					/>
 				</section>
+			)}
 
-				{/* Technologies Section */}
-				{techEntries.length > 0 && (
-					<div>
-						<h3 class="text-base font-medium text-secondary-content mb-3">Technologies featured in this video</h3>
-						<div class="flex flex-wrap gap-2">
-							{techEntries.map((tech) => (
-								<a
-									Astro.key={tech.id}
-									href={`/technology/${tech.id.replace(/\/index$/, '')}`}
-									class="glass-interactive inline-flex items-center gap-2 px-3 py-2 group"
-								>
-									<div class="w-5 h-5 sm:w-6 sm:h-6 relative overflow-hidden rounded">
-										<img
-											src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || '/apple-touch-icon.png'}
-											alt={tech.data.name}
-											class="w-full h-full object-contain"
-											onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
-										/>
-									</div>
-									<span class="text-sm font-medium text-secondary-content group-hover:text-primary-content transition-colors">
-										{tech.data.name}
-									</span>
-									<svg class="w-4 h-4 text-muted group-hover:text-secondary-content transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-									</svg>
-								</a>
-							))}
-						</div>
-					</div>
-				)}
+			<VideoCast hosts={hostEntries} guests={guestEntries} />
 
-				{/* Cast & Speakers */}
-				<VideoCast hosts={hostEntries} guests={guestEntries} />
+			<NewsletterCTA class="!my-0" />
 
-				{/* Newsletter Signup - High Value Placement */}
-				<NewsletterCTA class="!my-0" />
-				{/* Tabbed Content: Transcript, Comments & Resources */}
-				<VideoContentTabs
-					client:idle
-					videoId={video.data.id}
-					resources={video.data.resources ?? []}
+			<VideoContentTabs
+				client:idle
+				videoId={video.data.id}
+				resources={video.data.resources ?? []}
+			/>
+
+			{showEntry && showRelatedVideos.length > 0 && (
+				<ShowVideoSection
+					show={showEntry}
+					videos={showRelatedVideos}
+					totalVideos={showRelatedAll.length}
 				/>
+			)}
 
-				{/* More from this show — only renders when the video belongs to one. */}
-				{showEntry && showRelatedVideos.length > 0 && (
-					<ShowVideoSection
-						show={showEntry}
-						videos={showRelatedVideos}
-						totalVideos={showRelatedAll.length}
-					/>
-				)}
-
-				{/* More Videos by Technology */}
-				{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (
-					<TechnologyVideoSection
-						technology={technology}
-						videos={videos}
-						totalVideos={totalVideos}
-					/>
-				))}
-			</div>
-
+			{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (
+				<TechnologyVideoSection
+					technology={technology}
+					videos={videos}
+					totalVideos={totalVideos}
+				/>
+			))}
 		</div>
 	</div>
 </Page>
 
-<!-- Prose styles are defined in the global design system -->
+<style>
+	.watch-detail {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.watch-detail__breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		padding: 0.75rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.watch-detail__crumb {
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+	.watch-detail__crumb:hover { color: var(--editorial-ink); }
+	.watch-detail__crumb--current {
+		color: var(--editorial-ink);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 40ch;
+	}
+
+	.watch-detail__sep { opacity: 0.6; }
+	.watch-detail__spacer { flex: 1; }
+	.watch-detail__meta { color: var(--editorial-ink-mute); }
+
+	.watch-detail__header {
+		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		max-width: 90rem;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-block-gap);
+	}
+
+	.watch-detail__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2.25rem, 5vw, 3.75rem);
+		line-height: 1;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.watch-detail__byline {
+		display: flex;
+		gap: 1.25rem;
+		align-items: center;
+		padding-top: 0.5rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-detail__player-frame {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		background: oklch(0.1 0 0);
+		border-top: 1px solid var(--editorial-hairline-strong);
+		border-bottom: 1px solid var(--editorial-hairline-strong);
+		overflow: hidden;
+		max-width: 90rem;
+		margin: 0 auto;
+		width: 100%;
+	}
+
+	.watch-detail__player-frame :global(> *) {
+		position: absolute;
+		inset: 0;
+	}
+
+	.watch-detail__body {
+		max-width: 90rem;
+		margin: 0 auto;
+		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-section-gap);
+	}
+
+	.watch-detail__overview {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-block-gap);
+	}
+
+	.watch-detail__overview-title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.75rem;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0 0 0.5rem;
+	}
+
+	.watch-detail__overview .prose { max-width: 48rem; }
+
+	.watch-detail__tech {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-block-gap);
+		padding-top: var(--space-section-gap);
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-detail__tech-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.625rem;
+	}
+
+	.watch-detail__tech-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		color: var(--editorial-ink);
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		border-radius: var(--radius-sm);
+		transition: border-color var(--duration-base) var(--ease-standard),
+			color var(--duration-base) var(--ease-standard);
+	}
+	.watch-detail__tech-chip:hover {
+		border-color: var(--editorial-ink);
+		color: var(--editorial-spruce);
+	}
+
+	.watch-detail__tech-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
+	.watch-detail__tech-icon img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
+	.watch-detail__tech-arrow {
+		font-family: var(--font-jetbrains-mono), monospace;
+		color: var(--editorial-ink-mute);
+		font-size: 0.85rem;
+	}
+
+	@media (max-width: 720px) {
+		.watch-detail__breadcrumb,
+		.watch-detail__header,
+		.watch-detail__body {
+			padding-left: 1.25rem;
+			padding-right: 1.25rem;
+		}
+		.watch-detail__breadcrumb { gap: 0.4rem; }
+		.watch-detail__crumb--current { max-width: 18ch; }
+	}
+</style>

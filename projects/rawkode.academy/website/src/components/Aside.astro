@@ -11,152 +11,102 @@ interface Props {
 }
 
 const { variant } = Astro.props as Props;
-
-// Define styles based on variant
-const styles = {
-	container: "",
-	icon: "",
-	iconBg: "",
-	border: "",
-	glow: "",
-};
-
-switch (variant) {
-	case "tip":
-		styles.container =
-			"bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/40 dark:to-emerald-950/40 text-green-900 dark:text-green-100";
-		styles.icon = "text-green-700 dark:text-green-300";
-		styles.iconBg = "bg-green-100 dark:bg-green-900/50";
-		styles.border = "border-green-200 dark:border-green-800";
-		styles.glow = "shadow-green-100 dark:shadow-green-900/20";
-		break;
-	case "caution":
-		styles.container =
-			"bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-yellow-950/40 text-amber-900 dark:text-amber-100";
-		styles.icon = "text-amber-700 dark:text-amber-300";
-		styles.iconBg = "bg-amber-100 dark:bg-amber-900/50";
-		styles.border = "border-amber-200 dark:border-amber-800";
-		styles.glow = "shadow-amber-100 dark:shadow-amber-900/20";
-		break;
-	case "danger":
-		styles.container =
-			"bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/40 text-red-900 dark:text-red-100";
-		styles.icon = "text-red-700 dark:text-red-300";
-		styles.iconBg = "bg-red-100 dark:bg-red-900/50";
-		styles.border = "border-red-200 dark:border-red-800";
-		styles.glow = "shadow-red-100 dark:shadow-red-900/20";
-		break;
-	case "info":
-		styles.container =
-			"bg-gradient-to-r from-primary/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/30 text-primary";
-		styles.icon = "text-primary";
-		styles.iconBg = "bg-primary/10 dark:bg-primary/20";
-		styles.border = "border-primary/20 dark:border-primary/60";
-		styles.glow = "shadow-primary/10 dark:shadow-primary/20";
-		break;
-}
 ---
 
-<div
-	class={`aside my-3 rounded-lg border ${styles.border} ${styles.container} px-4 py-3 relative overflow-hidden transition-smooth hover:shadow-md group ${styles.glow}`}
->
-	<!-- Subtle accent line -->
-	<div class={`absolute left-0 top-0 bottom-0 w-0.5 ${styles.iconBg} opacity-60 group-hover:opacity-100 transition-opacity duration-200`}></div>
-	
-	<!-- Content with inline icon -->
-	<div class="flex items-start gap-3">
-		<div class={`${styles.iconBg} ${styles.icon} p-1.5 rounded-md flex-shrink-0 transition-transform duration-200 group-hover:scale-105`}>
-			{
-				variant === "tip" && (
-					<LightBulbIcon
-						class="h-4 w-4"
-						aria-hidden="true"
-						client:only="vue"
-					/>
-				)
-			}
-			{
-				variant === "caution" && (
-					<ExclamationTriangleIcon
-						class="h-4 w-4"
-						aria-hidden="true"
-						client:only="vue"
-					/>
-				)
-			}
-			{
-				variant === "danger" && (
-					<FireIcon
-						class="h-4 w-4"
-						aria-hidden="true"
-						client:only="vue"
-					/>
-				)
-			}
-			{
-				variant === "info" && (
-					<InformationCircleIcon
-						class="h-4 w-4"
-						aria-hidden="true"
-						client:only="vue"
-					/>
-				)
-			}
-		</div>
-		<div class="flex-1 min-w-0 prose-p:my-0 -mt-0.5">
-			<div class="flex items-center gap-2 mb-1">
-				<span class="text-[10px] font-semibold tracking-wider opacity-60 uppercase">
-					{variant}
-				</span>
-			</div>
-			<slot />
-		</div>
+<div class={`aside aside--${variant}`}>
+	<div class="aside__rail" aria-hidden="true"></div>
+	<div class="aside__icon" aria-hidden="true">
+		{variant === "tip" && <LightBulbIcon class="h-4 w-4" client:only="vue" />}
+		{variant === "caution" && <ExclamationTriangleIcon class="h-4 w-4" client:only="vue" />}
+		{variant === "danger" && <FireIcon class="h-4 w-4" client:only="vue" />}
+		{variant === "info" && <InformationCircleIcon class="h-4 w-4" client:only="vue" />}
+	</div>
+	<div class="aside__body">
+		<span class="aside__label">§ {variant}</span>
+		<slot />
 	</div>
 </div>
 
 <style>
-	@reference "../styles/global.css";
-
-	/* Ensure proper prose spacing */
-	.aside :global(p) {
-		@apply leading-relaxed;
-	}
-
-	.aside :global(p:not(:first-child)) {
-		@apply mt-2;
-	}
-
-	/* Refined link styling */
-	.aside :global(a) {
-		@apply font-medium underline decoration-1 underline-offset-2 transition-smooth;
-	}
-
-	.aside.border-green-200 :global(a) {
-		@apply text-green-700 decoration-green-500/50 hover:text-green-800 hover:decoration-green-600;
-		@apply dark:text-green-300 dark:decoration-green-400/50 dark:hover:text-green-200 dark:hover:decoration-green-300;
-	}
-
-	.aside.border-amber-200 :global(a) {
-		@apply text-amber-700 decoration-amber-500/50 hover:text-amber-800 hover:decoration-amber-600;
-		@apply dark:text-amber-300 dark:decoration-amber-400/50 dark:hover:text-amber-200 dark:hover:decoration-amber-300;
-	}
-
-	.aside.border-red-200 :global(a) {
-		@apply text-red-700 decoration-red-500/50 hover:text-red-800 hover:decoration-red-600;
-		@apply dark:text-red-300 dark:decoration-red-400/50 dark:hover:text-red-200 dark:hover:decoration-red-300;
-	}
-
-	.aside.border-primary\/20 :global(a) {
-		@apply text-primary decoration-primary/50 hover:text-primary/90 hover:decoration-primary;
-		@apply dark:decoration-primary/50 dark:hover:text-primary/90 dark:hover:decoration-primary;
-	}
-
-	/* Subtle shadow on hover */
 	.aside {
-		box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+		display: grid;
+		grid-template-columns: 4px 28px 1fr;
+		gap: 0.875rem;
+		align-items: start;
+		padding: 0.875rem 1rem;
+		margin: 1.25rem 0;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-sm);
+		color: var(--editorial-ink);
 	}
 
-	.aside:hover {
-		box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+	.aside__rail {
+		width: 2px;
+		align-self: stretch;
+		justify-self: start;
+		background: var(--editorial-ink-mute);
+		margin-left: -1rem;
+		margin-block: -0.875rem;
+	}
+
+	.aside--tip .aside__rail { background: var(--editorial-spruce); }
+	.aside--caution .aside__rail { background: var(--editorial-amber); }
+	.aside--danger .aside__rail { background: var(--editorial-rust); }
+	.aside--info .aside__rail { background: var(--editorial-ink); }
+
+	.aside__icon {
+		width: 28px;
+		height: 28px;
+		display: grid;
+		place-items: center;
+		color: var(--editorial-ink);
+		margin-top: 0.1rem;
+	}
+
+	.aside--tip .aside__icon { color: var(--editorial-spruce); }
+	.aside--caution .aside__icon { color: var(--editorial-amber); }
+	.aside--danger .aside__icon { color: var(--editorial-rust); }
+
+	.aside__body {
+		min-width: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	.aside__label {
+		display: block;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--editorial-ink-mute);
+		margin-bottom: 0.35rem;
+	}
+
+	.aside--tip .aside__label { color: var(--editorial-spruce); }
+	.aside--caution .aside__label { color: var(--editorial-amber); }
+	.aside--danger .aside__label { color: var(--editorial-rust); }
+
+	.aside :global(p) {
+		margin: 0;
+	}
+
+	.aside :global(p + p) {
+		margin-top: 0.5rem;
+	}
+
+	.aside :global(a) {
+		color: inherit;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 2px;
+		text-decoration-color: var(--editorial-hairline-strong);
+	}
+
+	.aside :global(a):hover {
+		text-decoration-color: currentColor;
 	}
 </style>

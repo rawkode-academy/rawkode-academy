@@ -15,150 +15,203 @@ bun run sync:content  # Sync GraphQL content
 
 ## Component Library & Design System
 
-### Theme: Rawkode Blue
+### Theme: Editorial — "Engineering journal meets terminal"
 
-The website ships a single brand theme — **Rawkode Blue** — with light and dark colour schemes. Users toggle light/dark; the brand palette is fixed.
+The website ships a single design system: warm paper surfaces with deep ink type, italic serif display headings, geometric sans body, and mono microcopy. Light and dark colour schemes share the same vocabulary — values invert, names do not.
+
+#### Atomic CSS engine
+
+UnoCSS (via `@unocss/astro` + `@unocss/vite` for Storybook). Configuration lives in `uno.config.ts` at the project root: theme tokens, shortcuts, rules, transformers (`directives`, `variant-group`). `@apply`, `theme()`, `@screen` directives all work in scoped Astro/Vue `<style>` blocks via `@unocss/transformer-directives`.
+
+There is **no `tailwind.config.ts`**. There is **no `@tailwindcss/vite` plugin**. If you are reaching for either, stop — extend `uno.config.ts` instead.
 
 #### Palette
 
-- **Primary**: `#5F5ED7` (Purple)
-- **Secondary**: `#00CEFF` (Cyan)
-- **Accent**: `#111827` (Dark Blue-Gray)
-- **Brand gradient**: 135° from `--brand-primary` → `--brand-secondary`
+- **Paper** `oklch(0.97 0.008 85)` — light surface
+- **Paper-deep** `oklch(0.93 0.012 85)` — secondary light surface (card backgrounds, video frames)
+- **Ink** `oklch(0.18 0.02 60)` — primary text on light
+- **Ink-soft** `oklch(0.36 0.015 60)` — body text on light
+- **Ink-mute** `oklch(0.58 0.012 60)` — tertiary / meta on light
+- **Hairline** `oklch(0.18 0.02 60 / 0.12)` — default 1px border
+- **Hairline-strong** `oklch(0.18 0.02 60 / 0.22)` — emphasis border
+- **Spruce** `oklch(0.52 0.09 165)` — primary accent (links, section marks, command-bar caret)
+- **Amber** `oklch(0.72 0.15 65)` — "live" / on-air / breaking
+- **Rust** `oklch(0.55 0.13 40)` — secondary accent (difficulty tags, kickers)
+- **Violet** `oklch(0.50 0.13 290)` — third accent (reserved for variant work)
 
-#### Using brand colours in components
+Dark mode replaces paper with `oklch(0.14 0.01 280)` (ink-dark), surface-card with `oklch(0.26 0.014 280)` (paper-dark), and the ink/hairline triplet flips to whites at varying opacity. The token *names* survive: `--surface-card`, `--editorial-ink`, etc. consume the active mode automatically.
 
-Always reach for semantic Tailwind classes — never hardcode hex values:
+#### Token surfaces
 
-```vue
-<!-- ✅ Good -->
-<div class="bg-primary text-white">
-  <h1 class="text-primary-content">Title</h1>
-  <p class="text-secondary-content">Description</p>
-  <button class="bg-gradient-primary">Click me</button>
-</div>
+Every editorial value is exposed two ways:
 
-<!-- ❌ Bad -->
-<div class="bg-[#5F5ED7] text-white">
-  <h1 class="text-gray-900 dark:text-white">Title</h1>
-</div>
-```
+1. **Direct oklch CSS variable** — preferred for new code. `--editorial-paper`, `--editorial-paper-deep`, `--editorial-ink`, `--editorial-ink-soft`, `--editorial-ink-mute`, `--editorial-hairline`, `--editorial-hairline-strong`, `--editorial-spruce`, `--editorial-amber`, `--editorial-rust`, `--editorial-violet`.
+2. **Legacy RGB triplet** — kept for the `rgb(var(--brand-primary) / 0.x)` and `rgba(var(--brand-primary), 0.x)` patterns left over from Rawkode Blue. Values now resolve to editorial colours: `--brand-primary` = spruce, `--brand-secondary` = amber, `--brand-accent` = rust.
 
-#### Brand colour classes
+UnoCSS theme keys mirror the direct palette as classes:
 
-| Class | Description |
+| Class | Resolves to |
 |-------|-------------|
-| `text-primary` / `bg-primary` / `border-primary` | Uses `--brand-primary` |
-| `text-secondary` / `bg-secondary` / `border-secondary` | Uses `--brand-secondary` |
-| `text-primary-content` | Primary text colour (gray-900 / white) |
-| `text-secondary-content` | Secondary text colour (gray-700 / gray-300) |
-| `text-muted` | Muted text colour (gray-600 / gray-400) |
+| `text-primary` / `bg-primary` | spruce |
+| `text-secondary` / `bg-secondary` | amber |
+| `text-accent` / `bg-accent` | rust |
+| `text-primary-content` | `--editorial-ink` (light) / `--editorial-ink` (dark, flipped) |
+| `text-secondary-content` | `--editorial-ink-soft` |
+| `text-muted` | `--editorial-ink-mute` |
 
-The text-tone names are also exposed as **CSS custom properties** at `:root` and `html.dark` (`--text-primary-content`, `--text-secondary-content`, `--text-muted`) so scoped Astro/Vue `<style>` blocks can reach them via `var()`:
+#### Typography
 
-```vue
-<style scoped>
-.popover-title {
-  /* Use this from scoped styles since @utility classes can't be @apply'd here */
-  color: var(--text-primary-content);
-}
-</style>
-```
+The trio:
 
-When applying as a class on an element, prefer the `text-*` utility. The CSS var is for cases where you need the colour value inside a CSS rule (gradients, computed colours, etc.).
-| `bg-gradient-primary` | 135° brand gradient (primary → secondary) |
-| `bg-gradient-secondary` | 315° brand gradient (reverse sweep) |
-| `bg-gradient-hero` / `bg-gradient-hero-alt` | Brand-tinted hero washes (mode-aware) |
-| `bg-gradient-card` | Subtle brand gradient for cards |
-| `border-glass` | Glass morphism border |
-| `card-shadow` / `card-shadow-elevated` | Surface shadows |
-| `card-hover` | Card hover interactions |
+- **Display** — `Instrument Serif`, italic by default for h1/h2 and headline-scale text. Negative letter-spacing on display sizes pulls the line tight. CSS variable `--font-instrument-serif` (loaded via Astro's font integration).
+- **Body** — `Inter Tight`, weight 300–700. CSS variable `--font-inter-tight`.
+- **Mono** — `JetBrains Mono`, weights 400–600. CSS variable `--font-jetbrains-mono`. Used for `MLabel`, `KickerStrip`, code blocks, meta strips, keycaps, runtime overlays.
 
-#### Radius scale
+The `@layer base` heading ramp in `global.css` sets `h1`/`h2` to Instrument Serif italic and `h3`/`h4` to Inter Tight medium with tight tracking. Component-level utility classes still override these by specificity.
 
-Use the radius scale tokens instead of `rounded-[1.35rem]` style literals:
+UnoCSS theme keys: `font-display` (= Instrument Serif), `font-body` / `font-sans` (= Inter Tight), `font-mono` (= JetBrains Mono), `font-serif` (= Instrument Serif).
 
-| Token | Class | Value | Use for |
-|-------|-------|-------|---------|
-| `--radius-xs`   | `rounded-xs`   | 0.375rem | Chips, small pills |
-| `--radius-sm`   | `rounded-sm`   | 0.5rem   | Inputs, small buttons |
-| `--radius-md`   | `rounded-md`   | 0.75rem  | Secondary cards |
-| `--radius-lg`   | `rounded-lg`   | 1rem     | Buttons, default surfaces |
-| `--radius-xl`   | `rounded-xl`   | 1.2rem   | Soft / muted panels, stat panels |
-| `--radius-2xl`  | `rounded-2xl`  | 1.35rem  | Glass cards, section shells |
-| `--radius-3xl`  | `rounded-3xl`  | 1.5rem   | Glass panels (hero-level) |
-| `--radius-4xl`  | `rounded-4xl`  | 2rem     | Page-level shells (sidebar, footer container) |
-| `--radius-pill` | `rounded-full` | 9999px   | Pills, avatars |
+#### Radii
+
+Collapsed and sharp. Editorial design uses 2–8px corners, not pillowy 1rem+.
+
+| Token | Class | Value |
+|-------|-------|-------|
+| `--radius-xs` | `rounded-xs` | 2px |
+| `--radius-sm` | `rounded-sm` | 2px |
+| `--radius-md` | `rounded-md` | 3px |
+| `--radius-lg` | `rounded-lg` | 3px |
+| `--radius-xl` | `rounded-xl` | 4px |
+| `--radius-2xl` | `rounded-2xl` | 4px |
+| `--radius-3xl` | `rounded-3xl` | 6px |
+| `--radius-4xl` | `rounded-4xl` | 8px |
+| `--radius-pill` | `rounded-full` | 9999px (chips only) |
+
+#### Shadow / depth
+
+Editorial doesn't use drop shadows — it uses hairline borders. The `--shadow-*` ramp resolves to a single 1px ink ring at increasing opacity:
+
+| Token | Value |
+|-------|-------|
+| `--shadow-sm` | `0 0 0 1px oklch(0.18 0.02 60 / 0.06)` |
+| `--shadow-md` | `0 0 0 1px oklch(0.18 0.02 60 / 0.10)` |
+| `--shadow-lg` | `0 0 0 1px oklch(0.18 0.02 60 / 0.16)` |
+| `--shadow-xl` | `0 0 0 1px oklch(0.18 0.02 60 / 0.20)` |
+
+Dark mode flips to white-at-low-opacity. The `card-shadow-{sm,md,lg,xl}` shortcuts in `uno.config.ts` resolve to these tokens.
 
 #### Motion
 
-Durations and easings live as CSS custom properties on `:root`. Compose them yourself for one-off transitions, or use the pre-baked utility classes for common cases:
+| Token | Value | Use |
+|-------|-------|-----|
+| `--duration-fast` | 120ms | micro-interactions |
+| `--duration-base` | 200ms | default transitions |
+| `--duration-slow` | 300ms | layout shifts |
+| `--duration-slower` | 500ms | page-level moves |
+| `--ease-standard` | `cubic-bezier(0.4, 0, 0.2, 1)` | default |
+| `--ease-out` | deceleration | enter |
+| `--ease-in` | acceleration | exit |
+| `--ease-spring` | gentle overshoot | rare |
 
-| Token | Value | Use for |
-|-------|-------|---------|
-| `--duration-fast`   | 120ms | Micro-interactions, hover ticks |
-| `--duration-base`   | 200ms | Default transitions |
-| `--duration-slow`   | 300ms | Card hovers, layout shifts |
-| `--duration-slower` | 500ms | Page-level moves |
-| `--ease-standard`   | `cubic-bezier(0.4, 0, 0.2, 1)` | Material standard — default |
-| `--ease-out`        | `cubic-bezier(0, 0, 0.2, 1)`   | Deceleration |
-| `--ease-in`         | `cubic-bezier(0.4, 0, 1, 1)`   | Acceleration |
-| `--ease-spring`     | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Gentle overshoot |
-
-Pre-built utility classes: `transition-fast`, `transition-smooth` (base), `transition-card` (slow), `transition-spring`. For property-specific colour transitions (buttons / chips / links where `transition: all` would catch unrelated property changes), use `transition-colors-smooth` or `transition-colors-card`.
-
-#### Shadow ramp
-
-| Token | Use for |
-|-------|---------|
-| `--shadow-sm` | Subtle elevation (chips, hover-on-light surfaces) |
-| `--shadow-md` | Default card shadow |
-| `--shadow-lg` | Elevated cards, modals, hovered interactive surfaces |
-| `--shadow-xl` | Floating panels, sheets |
-
-Light and dark modes have separate shadow ramps — the variables swap automatically under `html.dark`. The legacy `.card-shadow` / `.card-shadow-elevated` classes now resolve to `--shadow-md` / `--shadow-lg`.
+Pre-built: `transition-fast`, `transition-smooth` (= base), `transition-card` (= slow), `transition-spring`. Property-specific colour variants: `transition-colors-smooth`, `transition-colors-card`.
 
 #### Focus ring
 
-Add `class="focus-ring"` to any focusable element that needs a consistent keyboard-only focus outline. The utility uses `:focus-visible` so the ring only appears for keyboard navigation, not mouse clicks. The ring colour is `--brand-primary` with a 2px outline and 2px offset.
+Add `class="focus-ring"`. Renders a 2px outline in `--brand-primary` (spruce) at `:focus-visible` only, so mouse clicks don't trigger it.
 
-The header chrome (sidebar toggle, mobile menu, logo link, search trigger, FAB) and the `Button.vue` / `Button.astro` primitives have already been migrated to `focus-ring` — keep new components on the same pattern instead of hand-rolling `focus:outline-none focus:ring-4 focus:ring-*` boilerplate.
+#### Headings (recap)
 
-#### Heading ramp
+| Tag | Family | Style | Weight | Size |
+|-----|--------|-------|--------|------|
+| h1 | Instrument Serif | italic | 400 | 4xl → 5xl |
+| h2 | Instrument Serif | italic | 400 | 3xl → 4xl |
+| h3 | Inter Tight | normal | 500 | xl → 2xl |
+| h4 | Inter Tight | normal | 500 | lg → xl |
 
-The `@layer base` styles in `global.css` give every page-level `<h1>`–`<h4>` a consistent display-font ramp without needing utility classes on every heading:
+Negative letter-spacing tightens display sizes (`-0.035em` on h1, `-0.025em` on h2).
 
-| Tag | Size              | Weight     | Family            |
-|-----|-------------------|------------|-------------------|
-| h1  | text-3xl md:4xl   | extrabold  | `--font-display`  |
-| h2  | text-2xl md:3xl   | bold       | `--font-display`  |
-| h3  | text-xl md:2xl    | semibold   | `--font-display`  |
-| h4  | text-lg md:xl     | semibold   | `--font-display`  |
+#### Components
 
-Colour is `text-primary-content` (theme-aware). Negative letter-spacing tightens the headlines without going into "decorative" territory.
+##### Editorial primitives (`src/components/ui/`)
 
-Component-level utility classes (`<h2 class="text-4xl …">`) still override these base styles by specificity. The richer prose typography lives separately in `@layer components > .prose h1…h4` for long-form article content.
+| Component | Use |
+|-----------|-----|
+| `MLabel.vue` | Mono uppercase label, 11px, 0.14em tracking. Tones: `muted`, `soft`, `ink`, `accent`, `amber`, `rust`, `spruce`. |
+| `LiveDot.vue` | 7px pulsing dot with halo ring. `color` prop: `amber` (default), `spruce`, `rust`, `ink`. Respects `prefers-reduced-motion`. |
+| `SectionMark.vue` | `§NN · Label`. Numbers zero-pad to two digits. Optional leading dot. |
+| `KickerStrip.vue` | Full-width hairline-bordered band with `LiveDot` + meta text + flex divider + right meta. Variant: `heavy` (2px ink top border). |
+| `CommandBar.vue` | Editorial header: ink-square sigil + wordmark, command pill with `⌘K`, secondary nav, "Sign in" CTA. Dispatches `open-command-palette` CustomEvent. |
+| `MastheadBar.vue` | Newspaper-style heavy-border strip with left/right MLabels and an optional centered serif italic quote. |
+| `EditorialButton.vue` | `variant`: `solid` (ink on paper), `outline` (hairline border), `ghost`. `size`: `sm/md/lg`. `arrow` prop adds a trailing `→`. Renders `<a>` if `href` is set, `<button>` otherwise. |
+| `StatRow.vue` | N-column band with serif italic numerals and `MLabel` captions. Hairline column dividers. |
+| `SectionRail.vue` | Anchor rail (e.g. `§01..§06`). Hairline-bordered grid; each cell hovers to `--surface-card-muted`. |
+| `HairlinePanel.vue` | Paper / paper-deep / muted / ink surface with 1px hairline. Optional `heavy` variant uses 2px ink border. |
 
-#### Colouring SVGs
+Every editorial primitive has a `*.stories.tsx` under the same folder. Run `bun run storybook` to explore.
 
-Tailwind v4's default `fill-black` / `fill-white` / `fill-gray-*` utilities **don't work reliably** in this codebase — our `@theme` block interacts badly with the default colour palette and SVGs end up rendering `fill: white` regardless of the class. The workaround is to set `fill="currentColor"` on the SVG and drive the colour through a `text-*` class:
+##### Shared primitives (refactored, not new)
 
-```astro
-<!-- ❌ Don't — `fill-black dark:fill-white` renders white-on-white in light mode -->
-<svg class="fill-black dark:fill-white">…</svg>
+- `Card.vue` — default variant is now `paper` (alias: `glass`). Hover thickens the top edge to a 2px ink line instead of scaling. Variants: `paper`, `paper-muted`, `editorial` (no background, top hairline only — used in news rails), `solid`, `bordered`, `flat`. The `gradient` variant is kept as an alias of `paper-muted`.
+- `Hero.vue` — keeps its `centered` / `split` / `full-width` layouts. For the landing-page Variant A composition, use `src/components/landing/LandingHero.astro` (which assembles primitives directly).
+- `BaseCard.vue` — the spine of `ArticleCard.astro` and `CourseCard.astro`. Top hairline thickens on hover; cover frame is a 16:10 paper-deep block.
+- `ThemeToggle.vue` — unchanged plumbing (`getColorScheme`, `setColorScheme`, `color-scheme-change` event in `src/lib/theme.ts`). The visual treatment lives in the component itself.
 
-<!-- ✅ Do — route through `color` which works correctly -->
-<svg fill="currentColor" class="text-primary-content">…</svg>
-```
+##### Landing components (`src/components/landing/`)
 
-#### Light / Dark / System mode
+Composition components consumed only by `src/pages/index.astro`:
+
+- `LandingHero.astro` — Variant A: serif italic h1 over sans h2/h2-soft, kicker, lede, two CTAs, `StatRow`, `OnAirPanel` right column.
+- `OnAirPanel.astro` — live session frame: terminal placeholder + REC overlay + "Next up" schedule.
+- `NewsletterStrip.astro` — single-line hairline band.
+- `SectionHeader.astro` — `§NN · kicker / Serif italic title / Body / optional CTA`.
+- `EditorialCardRail.astro` — 4-column hairline grid, no images.
+- `FeaturedFeature.astro` — large feature: serif title left, 16:10 media right, mono meta, CTA. Handles `mediaImage` (Astro `<Image>`), `mediaSrc` (raw URL), or `mediaPlaceholder`.
+- `SecondaryGrid.astro` — 3-column hairline grid with optional 16:10 media.
+- `ValuesGrid.astro` — 3×2 hairline grid with `§0N` SectionMarks.
+
+##### Editorialised content cards
+
+- `src/components/articles/ArticleCard.astro` — mono category · date · reading time meta strip, serif italic title, AuthorAvatarGroup footer.
+- `src/components/courses/CourseCard.astro` — rust-toned difficulty + module count, serif italic title, learning-path list, ink-on-paper masthead for coverless courses.
+- `src/components/video/video-feed.astro` — paper-deep 16:9 thumbnails with mono `MM:SS` runtime overlay and serif italic titles. Used on `/watch`.
+
+#### Legacy class aliases
+
+The following class names from the Rawkode Blue era still work — they're aliased to editorial surfaces in `global.css`:
+
+| Legacy class | Now resolves to |
+|--------------|-----------------|
+| `.glass-panel`, `.glass-card`, `.glass-card-shimmer` | paper card (`--surface-card` + hairline + small radius) |
+| `.glass-interactive` | flat paper with hairline; hover swaps to `--surface-card-muted` |
+| `.glass-chip` | hairline pill, mono uppercase |
+| `.section-shell`, `.section-shell-muted`, `.soft-panel` | paper / muted paper with hairline |
+| `.btn-glass` | mono uppercase outline button (hairline border) |
+| `.btn-solid` | mono uppercase ink button on paper |
+| `.bg-gradient-hero`, `.bg-gradient-hero-alt` | flat `var(--surface-base)` |
+| `.bg-gradient-primary` | flat ink on paper |
+| `.bg-gradient-secondary` | flat spruce on paper |
+| `.bg-gradient-card` | flat `var(--surface-card)` |
+| `.border-glass`, `.border-glass-subtle` | hairline |
+| `.border-glass-strong` | hairline-strong |
+
+**Prefer the editorial primitives in new code.** The aliases exist so the 35-ish existing consumers don't all need to be touched at once; migrate them as you work on their owning routes.
+
+#### Anti-patterns
+
+- Don't `backdrop-blur-*`. Editorial doesn't blur.
+- Don't `from-primary` / `to-secondary` linear-gradient washes. Use flat surfaces.
+- Don't add box-shadows for elevation. Use hairline borders.
+- Don't `rounded-2xl` and above for cards. Editorial is sharp.
+- Don't hardcode hex values. Reach for `--editorial-*` or the semantic `text-*` / `bg-*` classes.
+- Don't write `rgb(95 94 215 / 0.x)` (the old Rawkode Blue purple). The triplet is now spruce; you almost always want `var(--editorial-spruce)` instead.
+- Don't reach for `react-type-animation` or other type-on effects. The editorial system is static.
+
+## Light / Dark / System mode
 
 Two concepts:
 
-- **Preference** (`ColorSchemePreference`) — the user's stored choice: `"light"`, `"dark"`, or `"system"`. `"system"` follows the OS `prefers-color-scheme` media query.
-- **Applied scheme** (`ColorScheme`) — the resolved value on the page: `"light"` or `"dark"`.
-
-The site exposes a cycling sun/moon/monitor toggle (`<ThemeToggle />`) and an "Appearance" sub-page in the command palette with all three options. Both wrap the same module:
+- **Preference** (`ColorSchemePreference`) — stored user choice: `"light"` | `"dark"` | `"system"`.
+- **Applied scheme** (`ColorScheme`) — resolved value on the page: `"light"` | `"dark"`.
 
 ```typescript
 import {
@@ -167,323 +220,34 @@ import {
   setColorScheme,           // takes preference, persists + applies
   toggleColorScheme,        // cycles light → dark → system → light
 } from "@/lib/theme";
-
-// Read the user's preference
-const pref = getColorSchemePreference(); // "light" | "dark" | "system"
-
-// Read the applied scheme on the page right now
-const applied = getColorScheme(); // "light" | "dark"
-
-// Set the preference (persists to localStorage and updates html.dark)
-setColorScheme("system");
-
-// Cycle through preferences
-const next = toggleColorScheme();
-
-// Listen for changes (fires on user toggle AND on OS theme change when pref === "system")
-window.addEventListener("color-scheme-change", (event) => {
-  console.log(
-    "preference:", event.detail.preference,
-    "applied:", event.detail.scheme,
-  );
-});
 ```
 
-When the preference is `"system"`, `theme.ts` installs a `prefers-color-scheme` listener so the page automatically follows OS theme changes without a reload.
+`window.addEventListener("color-scheme-change", e => { e.detail.preference; e.detail.scheme })` fires on user toggle and on OS theme change when preference is `"system"`. `ThemeScript.astro` sits in `<head>` and applies the persisted scheme before paint.
 
-`ThemeScript.astro` should sit in the document `<head>` to apply the persisted scheme before paint:
-
-```astro
----
-import ThemeScript from "@/components/theme/ThemeScript.astro";
----
-
-<html>
-  <head>
-    <ThemeScript />
-    <!-- other head content -->
-  </head>
-  <body>
-    <!-- content -->
-  </body>
-</html>
-```
-
-Drop the `<ThemeToggle />` component anywhere you need the user-facing switch:
-
-```vue
-<script setup>
-import { ThemeToggle } from "@/components/ui";
-</script>
-
-<template>
-  <ThemeToggle />                                        <!-- icon -->
-  <ThemeToggle :showLabel="true" />                      <!-- icon + label -->
-  <ThemeToggle variant="button" size="lg" :showLabel="true" />
-</template>
-```
-
-## Component Library
-
-### Core Components
-
-#### Card Component
-
-A unified card component with multiple variants, replacing all individual card implementations.
-
-```vue
-<script setup>
-import { Card } from "@/components/ui";
-import Badge from "@/components/common/Badge.vue";
-</script>
-
-<template>
-  <!-- Basic glass card -->
-  <Card variant="glass">
-    <h3>Card Title</h3>
-    <p>Card content</p>
-  </Card>
-
-  <!-- Card with media and footer -->
-  <Card variant="glass" padding="none" href="/article/123">
-    <template #badge>
-      <Badge variant="primary">Featured</Badge>
-    </template>
-
-    <template #media>
-      <img src="/image.jpg" alt="Cover" />
-    </template>
-
-    <template #overlay>
-      <div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-secondary/20"></div>
-    </template>
-
-    <div class="p-6">
-      <h3>Article Title</h3>
-      <p>Article description</p>
-    </div>
-
-    <template #footer>
-      <div class="flex items-center justify-between">
-        <span>Author</span>
-        <span>Date</span>
-      </div>
-    </template>
-  </Card>
-</template>
-```
-
-**Props:**
-- `variant`: `"glass"` | `"solid"` | `"gradient"` | `"bordered"` | `"flat"` (default: `"glass"`)
-- `padding`: `"none"` | `"sm"` | `"md"` | `"lg"` (default: `"md"`)
-- `rounded`: `"none"` | `"sm"` | `"md"` | `"lg"` | `"xl"` | `"2xl"` | `"3xl"` (default: `"xl"`)
-- `shadow`: `"none"` | `"sm"` | `"md"` | `"lg"` | `"elevated"` (default: `"md"`)
-- `hover`: `boolean` (default: `true`)
-- `href`: `string` (optional, renders as link)
-
-**Slots:**
-- `badge` - Top-left badge overlay
-- `media` - Image or media content
-- `overlay` - Overlay on top of media
-- `header` - Header section
-- `default` - Main content
-- `footer` - Footer section
-
-#### Hero Component
-
-A unified hero section component with multiple layouts.
-
-```vue
-<script setup>
-import { Hero } from "@/components/ui";
-import Button from "@/components/common/Button.vue";
-</script>
-
-<template>
-  <!-- Centered hero -->
-  <Hero
-    layout="centered"
-    background="gradient-hero"
-    pattern="grid"
-    size="lg"
-    badge="Free Course"
-    badgeVariant="success"
-  >
-    <template #title>
-      Cloud Native & Kubernetes Education
-    </template>
-
-    <template #subtitle>
-      Master Cloud Native technologies with expert-led courses.
-    </template>
-
-    <template #actions>
-      <Button variant="primary" size="lg">Get Started</Button>
-      <Button variant="secondary" size="lg">Learn More</Button>
-    </template>
-  </Hero>
-
-  <!-- Split layout with media -->
-  <Hero layout="split" background="gradient-hero" align="left">
-    <template #title>Build Production-Ready Apps</template>
-    <template #subtitle>Learn modern best practices.</template>
-
-    <template #actions>
-      <Button variant="primary" size="lg">Start Learning</Button>
-    </template>
-
-    <template #media>
-      <img src="/preview.png" alt="Course Preview" />
-    </template>
-  </Hero>
-</template>
-```
-
-**Props:**
-- `layout`: `"centered"` | `"split"` | `"full-width"` (default: `"centered"`)
-- `background`: `"none"` | `"gradient"` | `"gradient-hero"` | `"gradient-hero-alt"` | `"blobs"` (default: `"gradient-hero"`)
-- `pattern`: `"none"` | `"grid"` | `"dots"` (default: `"none"`)
-- `size`: `"sm"` | `"md"` | `"lg"` | `"xl"` (default: `"lg"`)
-- `align`: `"left"` | `"center"` | `"right"` (default: `"center"`)
-- `titleTag`: `"h1"` | `"h2"` | `"h3"` (default: `"h1"`)
-- `titleSize`: `"xl"` | `"2xl"` | `"3xl"` | `"4xl"` (default: `"4xl"`)
-- `badge`: `string` (optional)
-- `badgeVariant`: Badge variant (default: `"primary"`)
-- `wave`: `boolean` (default: `false`)
-
-**Slots:**
-- `breadcrumb` - Breadcrumb navigation
-- `badge` - Custom badge (overrides badge prop)
-- `title` - Title content (overrides title prop)
-- `subtitle` - Subtitle content (overrides subtitle prop)
-- `actions` - Action buttons
-- `stats` - Statistics or metadata
-- `media` - Media content (for split layout)
-- `background` - Custom background decorations
-- `default` - Additional custom content
-
-### Layout Components
-
-#### Container
-
-```vue
-<Container size="xl" padding="lg">
-  <!-- Content -->
-</Container>
-```
-
-**Props:**
-- `size`: `"sm"` | `"md"` | `"lg"` | `"xl"` | `"2xl"` | `"full"` (default: `"xl"`)
-- `padding`: `"none"` | `"sm"` | `"md"` | `"lg"` (default: `"md"`)
-
-#### Stack
-
-```vue
-<Stack direction="vertical" spacing="md" align="center">
-  <div>Item 1</div>
-  <div>Item 2</div>
-  <div>Item 3</div>
-</Stack>
-```
-
-**Props:**
-- `direction`: `"vertical"` | `"horizontal"` (default: `"vertical"`)
-- `spacing`: `"none"` | `"xs"` | `"sm"` | `"md"` | `"lg"` | `"xl"` | `"2xl"` (default: `"md"`)
-- `align`: `"start"` | `"center"` | `"end"` | `"stretch"` (default: `"stretch"`)
-- `justify`: `"start"` | `"center"` | `"end"` | `"between"` | `"around"` | `"evenly"` (default: `"start"`)
-- `wrap`: `boolean` (default: `false`)
-
-#### Grid
-
-```vue
-<Grid :cols="1" :colsMd="2" :colsLg="3" gap="md">
-  <Card>Card 1</Card>
-  <Card>Card 2</Card>
-  <Card>Card 3</Card>
-</Grid>
-```
-
-**Props:**
-- `cols`: `1` | `2` | `3` | `4` | `5` | `6` | `"auto-fit"` | `"auto-fill"` (default: `1`)
-- `colsMd`: `1` | `2` | `3` | `4` | `5` | `6` (optional)
-- `colsLg`: `1` | `2` | `3` | `4` | `5` | `6` (optional)
-- `gap`: `"none"` | `"xs"` | `"sm"` | `"md"` | `"lg"` | `"xl"` | `"2xl"` (default: `"md"`)
-
-#### GlassPanel
-
-```vue
-<GlassPanel variant="medium" blur="xl" padding="lg" rounded="2xl">
-  <!-- Glass morphism content -->
-</GlassPanel>
-```
-
-**Props:**
-- `variant`: `"light"` | `"medium"` | `"dark"` (default: `"medium"`)
-- `blur`: `"sm"` | `"md"` | `"lg"` | `"xl"` | `"2xl"` (default: `"xl"`)
-- `padding`: `"none"` | `"sm"` | `"md"` | `"lg"` | `"xl"` (default: `"md"`)
-- `rounded`: `"none"` | `"sm"` | `"md"` | `"lg"` | `"xl"` | `"2xl"` | `"3xl"` (default: `"2xl"`)
-- `border`: `boolean` (default: `true`)
-- `shadow`: `boolean` (default: `true`)
-
-## Migration Guide
-
-### Migrating from Old Card Components
-
-**Before:**
-```vue
-<a :href="`/read/${id}`" class="h-full">
-  <article class="p-0 bg-white/40 dark:bg-gray-800/60 backdrop-blur-2xl rounded-xl overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] ...">
-    <!-- Complex inline styles -->
-  </article>
-</a>
-```
-
-**After:**
-```vue
-<Card :href="`/read/${id}`" variant="glass" padding="none">
-  <template #media>
-    <img :src="cover" :alt="alt" />
-  </template>
-  <!-- Cleaner, reusable structure -->
-</Card>
-```
-
-### Migrating Colors
-
-Replace all hardcoded color values with semantic classes:
-
-| Old | New |
-|-----|-----|
-| `text-purple-500` / `text-blue-600` | `text-primary` |
-| `bg-[#04B59C]` | `bg-primary` |
-| `border-purple-500` | `border-primary` |
-| `text-gray-900 dark:text-white` | `text-primary-content` |
-| `text-gray-700 dark:text-gray-300` | `text-secondary-content` |
-| Complex gradient inline styles | `bg-gradient-primary` or `bg-gradient-secondary` |
-
-## Best Practices
-
-1. **Always use semantic color classes** - Never hardcode hex values or specific color names
-2. **Use the Card component** for all card-like UI elements
-3. **Use the Hero component** for all hero sections
-4. **Use layout components** (Container, Stack, Grid) for consistent spacing
-5. **Test both themes** - Ensure your components look good in both rawkode-green and rawkode-blue
-6. **Follow the atomic design** - Build complex components from simpler ones
-7. **Document new components** - Add Storybook stories for all new UI components
+`<ThemeToggle />` drops the cycling icon toggle anywhere.
 
 ## Development Workflow
 
-1. Check existing components in `src/components/ui/` before creating new ones
-2. Use Storybook to develop and test components in isolation
-3. Run type checking: `astro check`
-4. Run linting: `biome format --write`
-5. Test theme switching manually with both themes
-6. Ensure components are responsive and accessible
+1. Look in `src/components/ui/` before building new primitives.
+2. Use Storybook to develop in isolation.
+3. `astro check` runs as part of `bun run build`. The vitest suite is run separately via `bun run test`.
+4. Biome formats: `bun run format`. Tabs, double quotes.
+5. Test both light and dark schemes manually before shipping.
+6. Be responsive and accessible — the editorial system inherits the same constraints, only the surface treatment changed.
+
+## Project-Specific Conventions
+
+- Commit format: `feat(rawkode.academy/website): description`. See root CLAUDE.md for the full type list.
+- Indentation: tabs. YAML: spaces.
+- Astro: prop bindings to Vue components use plain `prop={value}` syntax, **not** Vue's `:prop=` (Astro errors on the colon-prefixed form).
+- React `client:only="react"` should be reserved for genuinely interactive surfaces. SEO falls off otherwise.
+- Long-form prose flows through `.prose` styles in `global.css` (editorial ramp: serif italic h1/h2, hairline blockquote/code chip, mono numbered lists).
 
 ## Resources
 
-- Component Library: `src/components/ui/`
-- Theme Utilities: `src/lib/theme.ts`
-- Global Styles: `src/styles/global.css`
-- Storybook: Run `npm run storybook`
-- Documentation: This file + inline JSDoc comments
+- Editorial primitives: `src/components/ui/`
+- Landing composition: `src/components/landing/`
+- Theme utilities: `src/lib/theme.ts`
+- Global styles: `src/styles/global.css`
+- UnoCSS config: `uno.config.ts`
+- Storybook: `bun run storybook`

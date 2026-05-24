@@ -103,7 +103,7 @@
 								/>
 								<div
 									v-else
-									class="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-sm font-bold text-white"
+									class="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--editorial-ink)] text-sm font-bold text-white"
 								>
 									{{ author.name.charAt(0) }}
 								</div>

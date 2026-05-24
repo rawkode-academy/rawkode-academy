@@ -1,0 +1,138 @@
+---
+import { Image } from "astro:assets";
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Item {
+	href: string;
+	meta?: string[];
+	title: string;
+	body?: string;
+	mediaSrc?: string;
+	mediaImage?: ImageMetadata;
+	mediaAlt?: string;
+}
+
+interface Props {
+	items: Item[];
+	withMedia?: boolean;
+}
+
+const { items, withMedia = false } = Astro.props as Props;
+---
+
+<div class={`sec-grid ${withMedia ? "sec-grid--media" : ""}`}>
+	{items.map((item) => (
+		<a class="sec-grid__item" href={item.href}>
+			{withMedia && (
+				<div class="sec-grid__media">
+					{item.mediaImage && (
+						<Image
+							src={item.mediaImage}
+							alt={item.mediaAlt ?? item.title}
+							class="sec-grid__img"
+							widths={[320, 480, 640]}
+							sizes="(max-width: 900px) 100vw, 22rem"
+							loading="lazy"
+						/>
+					)}
+					{!item.mediaImage && item.mediaSrc && (
+						<img class="sec-grid__img" src={item.mediaSrc} alt={item.mediaAlt ?? item.title} loading="lazy" />
+					)}
+				</div>
+			)}
+
+			<div class="sec-grid__body">
+				{item.meta && item.meta.length > 0 && (
+					<div class="sec-grid__meta">
+						{item.meta.map((m, i) => (
+							<>
+								{i > 0 && <span class="sec-grid__meta-sep">·</span>}
+								<MLabel tone="muted">{m}</MLabel>
+							</>
+						))}
+					</div>
+				)}
+
+				<h3 class="sec-grid__title">{item.title}</h3>
+				{item.body && <p class="sec-grid__body-text">{item.body}</p>}
+			</div>
+		</a>
+	))}
+</div>
+
+<style>
+	.sec-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 0;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.sec-grid__item {
+		padding: 1.5rem;
+		border-left: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		position: relative;
+		transition: background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.sec-grid__item:first-child { border-left: none; }
+	.sec-grid__item:hover { background: var(--surface-card-muted); }
+
+	.sec-grid__media {
+		aspect-ratio: 16 / 10;
+		background: var(--editorial-paper-deep);
+		border: 1px solid var(--editorial-hairline);
+		overflow: hidden;
+		margin-bottom: 1rem;
+	}
+
+	.sec-grid__img {
+		width: 100%; height: 100%;
+		object-fit: cover; display: block;
+	}
+
+	.sec-grid__body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+	}
+
+	.sec-grid__meta {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.sec-grid__meta-sep { color: var(--editorial-ink-mute); opacity: 0.5; }
+
+	.sec-grid__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.3rem;
+		line-height: 1.12;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.sec-grid__body-text {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	@media (max-width: 880px) {
+		.sec-grid { grid-template-columns: 1fr; }
+		.sec-grid__item { border-left: none; border-top: 1px solid var(--editorial-hairline); }
+		.sec-grid__item:first-child { border-top: none; }
+	}
+</style>

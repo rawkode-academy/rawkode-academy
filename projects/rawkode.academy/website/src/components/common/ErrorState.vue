@@ -7,7 +7,7 @@
 	>
 		<div
 			:class="[
-				'rounded-lg p-6 w-full',
+				'rounded-sm p-6 w-full',
 				variant === 'error'
 					? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
 					: 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800',

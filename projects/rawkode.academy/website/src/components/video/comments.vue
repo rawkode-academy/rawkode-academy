@@ -1,92 +1,92 @@
 <template>
-  <div class="comments-section mt-8">
-    <h3 class="text-xl font-semibold mb-4 text-primary-content">
-      Comments {{ !loading ? `(${comments.length})` : '' }}
-    </h3>
+ <div class="comments-section mt-8">
+ <h3 class="text-xl font-semibold mb-4 text-primary-content">
+ Comments {{ !loading ? `(${comments.length})` : '' }}
+ </h3>
 
-    <div v-if="loading" class="space-y-2">
-      <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
-    </div>
+ <div v-if="loading" class="space-y-2">
+ <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
+ </div>
 
-    <ErrorState 
-      v-else-if="error"
-      :message="error"
-      :on-retry="fetchComments"
-      retry-text="Retry loading comments"
-    />
+ <ErrorState 
+ v-else-if="error"
+ :message="error"
+ :on-retry="fetchComments"
+ retry-text="Retry loading comments"
+ />
 
-    <div v-else-if="comments.length === 0" class="text-center py-8 text-muted">
-      <p>No comments yet. Join the discussion on Discord!</p>
-      <a
-        v-if="discordInviteUrl"
-        :href="discordInviteUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="inline-flex items-center mt-2 text-primary hover:text-primary/90"
-      >
-        Join the discussion on Discord
-        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
-        </svg>
-      </a>
-    </div>
+ <div v-else-if="comments.length === 0" class="text-center py-8 text-muted">
+ <p>No comments yet. Join the discussion on Discord!</p>
+ <a
+ v-if="discordInviteUrl"
+ :href="discordInviteUrl"
+ target="_blank"
+ rel="noopener noreferrer"
+ class="inline-flex items-center mt-2 text-primary hover:text-primary/90"
+ >
+ Join the discussion on Discord
+ <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
+ </svg>
+ </a>
+ </div>
 
-    <div v-else class="space-y-4">
-      <div
-        v-for="comment in comments"
-        :key="comment.id"
-        class="bg-white dark:bg-gray-800 border border-surface rounded-lg p-4"
-      >
-        <div class="flex items-start space-x-3">
-          <div class="flex-shrink-0">
-            <img
-              v-if="comment.avatar_url"
-              :src="comment.avatar_url"
-              :alt="comment.author"
-              class="h-8 w-8 rounded-full"
-              loading="lazy"
-            />
-            <div
-              v-else
-              class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium"
-            >
-              {{ comment.author.charAt(0).toUpperCase() }}
-            </div>
-          </div>
+ <div v-else class="space-y-4">
+ <div
+ v-for="comment in comments"
+ :key="comment.id"
+ class="bg-white dark:bg-gray-800 border border-surface rounded-sm p-4"
+ >
+ <div class="flex items-start space-x-3">
+ <div class="flex-shrink-0">
+ <img
+ v-if="comment.avatar_url"
+ :src="comment.avatar_url"
+ :alt="comment.author"
+ class="h-8 w-8 rounded-full"
+ loading="lazy"
+ />
+ <div
+ v-else
+ class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium"
+ >
+ {{ comment.author.charAt(0).toUpperCase() }}
+ </div>
+ </div>
 
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center space-x-2 mb-1">
-              <h4 class="text-sm font-medium text-primary-content">
-                {{ comment.author }}
-              </h4>
-              <span class="text-xs text-muted">
-                {{ formatDate(comment.timestamp) }}
-              </span>
-            </div>
+ <div class="flex-1 min-w-0">
+ <div class="flex items-center space-x-2 mb-1">
+ <h4 class="text-sm font-medium text-primary-content">
+ {{ comment.author }}
+ </h4>
+ <span class="text-xs text-muted">
+ {{ formatDate(comment.timestamp) }}
+ </span>
+ </div>
 
-            <div
-              class="text-sm text-secondary-content prose prose-sm max-w-none dark:prose-invert"
-              v-html="formatContent(comment.content)"
-            ></div>
-          </div>
-        </div>
-      </div>
+ <div
+ class="text-sm text-secondary-content prose prose-sm max-w-none dark:prose-invert"
+ v-html="formatContent(comment.content)"
+ ></div>
+ </div>
+ </div>
+ </div>
 
-      <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-surface">
-        <a
-          :href="discordInviteUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center text-primary hover:text-primary/90"
-        >
-          Want to share your thoughts? Join the discussion on Discord
-          <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
+ <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-surface">
+ <a
+ :href="discordInviteUrl"
+ target="_blank"
+ rel="noopener noreferrer"
+ class="inline-flex items-center text-primary hover:text-primary/90"
+ >
+ Want to share your thoughts? Join the discussion on Discord
+ <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
+ </svg>
+ </a>
+ </div>
+ </div>
+ </div>
 </template>
 
 <script setup lang="ts">
@@ -181,10 +181,10 @@ onMounted(() => {
 <style scoped>
 @reference "../../styles/global.css";
 .comments-section {
-  max-width: 100%;
+ max-width: 100%;
 }
 
 .prose code {
-  @apply bg-gray-100 dark:bg-gray-700 px-1 rounded text-sm;
+ @apply bg-gray-100 dark:bg-gray-700 px-1 rounded text-sm;
 }
 </style>

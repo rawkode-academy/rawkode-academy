@@ -1,0 +1,143 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import MLabel from "@/components/ui/MLabel.vue";
+import { getTypeBadgeConfig } from "@/utils/article-types";
+
+interface Props {
+	articles: CollectionEntry<"articles">[];
+	totalCount?: number | undefined;
+}
+
+const { articles, totalCount } = Astro.props as Props;
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "2-digit",
+	year: "numeric",
+});
+
+// Derive dispatch numbers from the article's position in the full
+// sorted corpus so they stay stable + match other surfaces (/read index,
+// article header). Cached at module level; getCollection is memoised
+// across renders inside Astro.
+const corpus = (
+	await getCollection("articles", ({ data }) => !data.draft)
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const indexById = new Map<string, number>(
+	corpus.map((a, i) => [a.id, corpus.length - i]),
+);
+
+const items = articles.slice(0, 3).map((a) => ({
+	href: `/read/${a.id}`,
+	dispatchNum: String(indexById.get(a.id) ?? corpus.length).padStart(3, "0"),
+	kicker: getTypeBadgeConfig(a.data.type || "tutorial").label,
+	title: a.data.title,
+	date: dateFormatter.format(a.data.publishedAt),
+	readingTime: a.body
+		? `${Math.max(1, Math.round(a.body.split(/\s+/).length / 220))} min`
+		: undefined,
+}));
+---
+
+<footer class="read-next">
+	<div class="read-next__inner">
+		<div class="read-next__head">
+			<MLabel tone="spruce">Read next</MLabel>
+			<div class="read-next__rule" aria-hidden="true"></div>
+			{totalCount !== undefined && (
+				<MLabel>{items.length} of {totalCount}</MLabel>
+			)}
+		</div>
+
+		<div class="read-next__grid">
+			{items.map((item, i) => (
+				<a
+					class={`read-next__item ${i === items.length - 1 ? "read-next__item--last" : ""}`}
+					href={item.href}
+				>
+					<MLabel tone="spruce">№{item.dispatchNum} · {item.kicker}</MLabel>
+					<h3 class="read-next__title">{item.title}</h3>
+					<MLabel>{item.date}{item.readingTime ? ` · ${item.readingTime}` : ""}</MLabel>
+				</a>
+			))}
+		</div>
+	</div>
+</footer>
+
+<style>
+	.read-next {
+		background: var(--editorial-paper-deep);
+		padding: 2.5rem 2.5rem 3.5rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.read-next__inner {
+		max-width: 82.5rem;
+		margin: 0 auto;
+	}
+
+	.read-next__head {
+		display: flex;
+		align-items: baseline;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.read-next__rule {
+		flex: 1;
+		height: 1px;
+		background: var(--editorial-hairline);
+	}
+
+	.read-next__grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 2rem;
+	}
+
+	.read-next__item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.625rem;
+		padding-right: 1.5rem;
+		border-right: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+
+	.read-next__item--last {
+		border-right: none;
+	}
+
+	.read-next__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.625rem;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.read-next__item:hover .read-next__title {
+		color: var(--editorial-spruce);
+	}
+
+	@media (max-width: 880px) {
+		.read-next__grid {
+			grid-template-columns: 1fr;
+		}
+		.read-next__item {
+			border-right: none;
+			padding-right: 0;
+			padding-bottom: 1rem;
+			border-bottom: 1px solid var(--editorial-hairline);
+		}
+		.read-next__item--last {
+			border-bottom: none;
+		}
+	}
+</style>

@@ -5,11 +5,10 @@
 			<!-- Gradient overlay -->
 			<div v-if="background === 'gradient'" :class="gradientClass"></div>
 
-			<!-- Blob decorations -->
-			<div v-if="background === 'blobs'" class="absolute inset-0">
-				<div class="absolute top-0 left-1/4 w-96 h-96 bg-secondary/20 rounded-full opacity-20 blur-3xl"></div>
-				<div class="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/20 rounded-full opacity-20 blur-3xl"></div>
-			</div>
+			<!-- Editorial design has no blur-blob backdrops. Kept as a
+			     no-op for backwards compatibility with pages that pass
+			     `background="blobs"`. -->
+			<template v-if="background === 'blobs'"></template>
 
 			<!-- Grid pattern -->
 			<div v-if="pattern === 'grid'" class="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -31,10 +30,11 @@
 						<slot name="breadcrumb" />
 					</div>
 
-					<!-- Badge -->
+					<!-- Editorial kicker — mono uppercase label with optional
+					     leading §-mark. Replaces the legacy rounded Badge pill. -->
 					<div v-if="$slots.badge || badge" class="mb-4">
 						<slot name="badge">
-							<Badge v-if="badge" :variant="badgeVariant" size="md">{{ badge }}</Badge>
+							<span v-if="badge" class="hero-kicker">§ {{ badge }}</span>
 						</slot>
 					</div>
 
@@ -84,24 +84,15 @@
 			</div>
 		</div>
 
-		<!-- Bottom wave decoration -->
-		<div v-if="wave" class="absolute bottom-0 left-0 right-0">
-			<svg
-				class="w-full h-8 md:h-16 text-white dark:text-gray-800"
-				preserveAspectRatio="none"
-				viewBox="0 0 1440 64"
-				fill="currentColor"
-			>
-				<path d="M0,32L48,37.3C96,43,192,53,288,56C384,59,480,53,576,48C672,43,768,37,864,32C960,27,1056,21,1152,21.3C1248,21,1344,27,1392,29.3L1440,32L1440,64L1392,64C1344,64,1248,64,1152,64C1056,64,960,64,864,64C768,64,672,64,576,64C480,64,384,64,288,64C192,64,96,64,48,64L0,64Z"></path>
-			</svg>
-		</div>
+		<!-- Editorial design has no wave decoration. Kept as a no-op for
+		     backwards compatibility with pages that pass `wave={true}`. -->
+		<template v-if="wave"></template>
 	</section>
 </template>
 
 <script setup lang="ts">
 import type { Component } from "vue";
 import { computed } from "vue";
-import Badge from "../common/Badge.vue";
 import Heading from "../common/Heading.vue";
 
 interface Stat {
@@ -156,10 +147,10 @@ const sectionClasses = computed(() => {
 	const backgroundClasses: Record<string, string> = {
 		none: "",
 		gradient:
-			"bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20",
-		"gradient-hero": "bg-gradient-hero",
-		"gradient-hero-alt": "bg-gradient-hero-alt",
-		blobs: "bg-gradient-hero-alt",
+			"bg-[var(--surface-card)]",
+		"gradient-hero": "bg-[var(--surface-base)]",
+		"gradient-hero-alt": "bg-[var(--surface-base)]",
+		blobs: "bg-[var(--surface-base)]",
 	};
 
 	return [baseClasses, backgroundClasses[props.background], props.class]
@@ -196,7 +187,7 @@ const contentAreaClasses = computed(() => {
 });
 
 const gradientClass = computed(() => {
-	return "absolute inset-0 bg-gradient-to-br from-primary/10 via-white to-secondary/10 dark:from-primary/20 dark:via-gray-900 dark:to-secondary/20";
+	return "absolute inset-0 bg-[var(--surface-card)]";
 });
 
 const subtitleClasses = computed(() => {
@@ -247,5 +238,15 @@ const actionsClasses = computed(() => {
 	color: rgb(var(--brand-primary));
 	background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
 	background-size: 20px 20px;
+}
+
+.hero-kicker {
+	display: inline-block;
+	font-family: var(--font-jetbrains-mono), monospace;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--editorial-spruce);
 }
 </style>

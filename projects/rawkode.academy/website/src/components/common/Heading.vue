@@ -1,7 +1,7 @@
 <template>
-  <component :is="tag" :class="headingClasses">
-    <slot />
-  </component>
+ <component :is="tag" :class="headingClasses">
+ <slot />
+ </component>
 </template>
 
 <script setup lang="ts">

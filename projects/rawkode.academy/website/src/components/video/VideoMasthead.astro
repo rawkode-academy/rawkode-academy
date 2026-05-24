@@ -1,0 +1,64 @@
+---
+interface Props {
+	leftLabel?: string | undefined;
+	title: string;
+	dek?: string | undefined;
+	titleTail?: string | undefined;
+	liveCount?: number | undefined;
+	rightLabel?: string | undefined;
+}
+
+const { title, dek, titleTail } = Astro.props as Props;
+const description = dek ?? titleTail;
+---
+
+<header class="video-masthead">
+	<h1 class="video-masthead__title">{title}</h1>
+	{description && <p class="video-masthead__dek">{description}</p>}
+</header>
+
+<style>
+	.video-masthead {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1.125rem 2.5rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.video-masthead__title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.video-masthead__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.4;
+		color: var(--editorial-ink-soft);
+		text-align: right;
+		margin: 0;
+	}
+
+	@media (max-width: 880px) {
+		.video-masthead {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.25rem;
+			padding: 0.875rem 1rem;
+		}
+		.video-masthead__title {
+			font-size: 1.875rem;
+		}
+		.video-masthead__dek {
+			font-size: 0.875rem;
+			text-align: left;
+		}
+	}
+</style>

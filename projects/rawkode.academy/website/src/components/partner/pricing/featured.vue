@@ -44,7 +44,7 @@ const maltPricingPlan: PricingPlan = {
 
 <template>
 	<div
-		class="my-4 mb-12 border-4 border-secondary bg-white rounded-lg shadow lg:grid lg:grid-cols-3 dark:bg-gray-800 transition-card hover:shadow-2xl hover:drop-shadow-2xl hover:scale-[1.02] relative">
+		class="my-4 mb-12 border-4 border-secondary bg-white rounded-sm shadow lg:grid lg:grid-cols-3 dark:bg-gray-800 transition-card hover: hover:drop- hover:scale-[1.02] relative">
 		<div
 			class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-secondary text-white px-4 py-1 rounded-full text-sm font-bold">
 			Premier Partnership
@@ -81,7 +81,7 @@ const maltPricingPlan: PricingPlan = {
 					Maximize your developer engagement and product adoption with our most comprehensive partnership tier
 				</div>
 				<a href="/organizations/lets-chat"
-					class="flex justify-center text-white bg-secondary hover:bg-primary focus:ring-4 focus:ring-secondary/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors-card">
+					class="flex justify-center text-white bg-secondary hover:bg-primary focus:ring-4 focus:ring-secondary/30 font-medium rounded-sm text-sm px-5 py-3 text-center transition-colors-card">
 					{{ maltPricingPlan.ctaText }}
 				</a>
 			</div>

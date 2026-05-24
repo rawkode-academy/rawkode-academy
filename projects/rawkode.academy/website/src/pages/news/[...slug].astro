@@ -5,10 +5,12 @@ import {
 	getEntries,
 	render,
 } from "astro:content";
-import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
+import ArticleHeader from "@/components/read/ArticleHeader.astro";
+import ArticleByline from "@/components/read/ArticleByline.astro";
 import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import RelatedNews from "@/components/news/RelatedNews.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
+import MLabel from "@/components/ui/MLabel.vue";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -59,12 +61,6 @@ const tags = (article.data.technologies ?? []).map((technologyId) => ({
 	href: `/technology/${technologyId}`,
 }));
 
-const breadcrumbElements = [
-	{ title: "Home", link: "/" },
-	{ title: "News", link: "/news" },
-	{ title: article.data.title, link: `/news/${article.id}` },
-];
-
 const publishDate = new Intl.DateTimeFormat("en-US", {
 	month: "short",
 	day: "numeric",
@@ -72,6 +68,34 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 }).format(article.data.publishedAt);
 
 const readingTime = calculateReadingTime(article.body || "");
+
+// Plain article category, without issue/dispatch language.
+const kickerFor = (a: typeof article): string => {
+	const techs = a.data.technologies ?? [];
+	if (techs.some((t) => /cve|security/i.test(t))) return "CVE";
+	if (techs.some((t) => /cncf|graduation/i.test(t))) return "CNCF";
+	if (/release|ship|gen|alpha|beta|GA|stable|launch/i.test(a.data.title))
+		return "Release";
+	if (/acquire|acquisition/i.test(a.data.title)) return "Acquisition";
+	return "News";
+};
+const kicker = kickerFor(article);
+const breadcrumbItems = [
+	{ label: "News", href: "/news" },
+	...(kicker === "News" ? [] : [{ label: kicker }]),
+	{ label: article.data.title, current: true },
+];
+
+// Dispatch number = position in the corpus, oldest = 001
+const corpus = (await getCollection("news")).sort(
+	(a, b) => a.data.publishedAt.valueOf() - b.data.publishedAt.valueOf(),
+);
+const dispatchIndex = corpus.findIndex((a) => a.id === article.id);
+const dispatchNum = String(
+	dispatchIndex >= 0 ? dispatchIndex + 1 : corpus.length,
+).padStart(3, "0");
+
+const categoryTrail = tags[0]?.label;
 ---
 
 <Page
@@ -104,47 +128,28 @@ const readingTime = calculateReadingTime(article.body || "");
 			href="/api/feeds/news.json"
 		/>
 	</Fragment>
-	<div class="article-page">
-		<Breadcrumb elements={breadcrumbElements} />
 
-		<header class="article-header">
-			<h1>{article.data.title}</h1>
+	<div class="news-detail">
+		<ArticleHeader
+			breadcrumbs={breadcrumbItems}
+			dispatchNum={dispatchNum}
+			kicker={kicker}
+			categoryTrail={categoryTrail}
+			eyebrow={[kicker, categoryTrail].filter(Boolean).join(" · ")}
+			hideDispatchMeta={true}
+			title={article.data.title}
+			dek={article.data.description}
+			readingTime={readingTime.text}
+		>
+			<ArticleByline
+				authors={authors}
+				date={publishDate}
+				readingTime={readingTime.text}
+				tags={tags.map((t) => ({ label: t.label, href: t.href }))}
+			/>
+		</ArticleHeader>
 
-			<div class="byline">
-				<div class="byline-authors">
-					{authors.map((author) => (
-						<a
-							href={`/people/${author.data.id}`}
-							rel="author"
-							class="author"
-						>
-							{author.data.avatarUrl && (
-								<img
-									src={author.data.avatarUrl}
-									alt=""
-									class="author-avatar"
-									loading="lazy"
-								/>
-							)}
-							<span class="author-name">{author.data.name}</span>
-						</a>
-					))}
-				</div>
-
-				<span class="byline-sep">&middot;</span>
-
-				<time datetime={article.data.publishedAt.toString()} class="byline-date">
-					{publishDate}
-				</time>
-
-				<span class="byline-sep">&middot;</span>
-
-				<span class="byline-read">{readingTime.text}</span>
-
-			</div>
-		</header>
-
-		<div class="article-content">
+		<div class="news-detail__body">
 			<article class="prose">
 				<Content />
 			</article>
@@ -153,190 +158,57 @@ const readingTime = calculateReadingTime(article.body || "");
 				class="my-12 not-prose"
 				audience="news"
 				badge="Cloud Native news weekly"
-				headline="Stay on top of the cloud-native release wire"
-				subtitle="Kubernetes, AI infra, and CNCF moves - delivered when they matter."
+				headline="Stay on top of cloud-native releases"
+				subtitle="Kubernetes, AI infra, and CNCF moves, delivered when they matter."
 			/>
 
 			{tags.length > 0 && (
-				<footer class="tags-footer">
-					<span class="tags-label">Tagged in</span>
-					<ul class="tags-list">
+				<footer class="news-detail__tags">
+					<MLabel>Tagged in</MLabel>
+					<ul class="news-detail__taglist">
 						{tags.map((tag) => (
 							<li>
-								<a href={tag.href} class="tag" rel="tag">
-									{tag.label}
+								<a class="news-detail__tag" href={tag.href} rel="tag">
+									#{tag.label}
 								</a>
 							</li>
 						))}
 					</ul>
 				</footer>
 			)}
-
-			<RelatedNews currentStory={article} limit={3} />
 		</div>
+
+		<RelatedNews currentStory={article} limit={3} />
 	</div>
 </Page>
 
 <style>
-	.article-page {
-		max-width: 100%;
+	.news-detail {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
 	}
 
-	.article-header {
-		margin-bottom: 2rem;
-		padding-right: 4rem;
+	.news-detail__body {
+		max-width: 70rem;
+		margin: 0 auto;
+		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
 	}
 
-	@media (max-width: 767px) {
-		.article-header {
-			padding-right: 0;
-		}
+	.news-detail__body :global(.prose) {
+		max-width: 46rem;
 	}
 
-	h1 {
-		font-size: clamp(1.75rem, 4.5vw, 2.5rem);
-		font-weight: 800;
-		line-height: 1.2;
-		letter-spacing: -0.02em;
-		color: rgb(17 24 39);
-		margin: 0 0 1rem;
-	}
-
-	:root.dark h1 {
-		color: white;
-	}
-
-	.byline {
+	.news-detail__tags {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem 0.625rem;
-		font-size: 0.875rem;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .byline {
-		color: rgb(156 163 175);
-	}
-
-	.byline-authors {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-	}
-
-	.author {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		color: rgb(17 24 39);
-		text-decoration: none;
-		font-weight: 500;
-		transition: color 0.15s;
-	}
-
-	:root.dark .author {
-		color: white;
-	}
-
-	.author:hover {
-		color: rgb(var(--brand-primary));
-	}
-
-	.author-avatar {
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.byline-sep {
-		color: rgb(209 213 219);
-	}
-
-	:root.dark .byline-sep {
-		color: rgb(75 85 99);
-	}
-
-	.byline-date,
-	.byline-read {
-		white-space: nowrap;
-	}
-
-
-	.article-content {
-		position: relative;
-	}
-
-	.prose {
-		width: 100%;
-		margin-bottom: 6rem;
-		padding-right: 4rem;
-	}
-
-	@media (max-width: 767px) {
-		.prose {
-			padding-right: 0;
-		}
-	}
-
-	:global(.prose pre),
-	:global(.prose code),
-	:global(.prose table),
-	:global(.prose img),
-	:global(.prose iframe) {
-		max-width: 100%;
-		overflow-x: auto;
-	}
-
-	:global(.prose p),
-	:global(.prose li),
-	:global(.prose h1),
-	:global(.prose h2),
-	:global(.prose h3),
-	:global(.prose h4) {
-		overflow-wrap: break-word;
-		word-break: break-word;
-	}
-
-	:global(.prose pre) {
-		white-space: pre-wrap;
-	}
-
-	.tags-footer {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.5rem 0.75rem;
-		margin: 2rem 0 3rem;
+		gap: 0.75rem 1rem;
+		margin-top: 2.5rem;
 		padding-top: 1.5rem;
-		border-top: 1px solid rgb(0 0 0 / 0.1);
-		padding-right: 4rem;
+		border-top: 1px solid var(--editorial-hairline);
 	}
 
-	:root.dark .tags-footer {
-		border-top-color: rgb(255 255 255 / 0.1);
-	}
-
-	@media (max-width: 767px) {
-		.tags-footer {
-			padding-right: 0;
-		}
-	}
-
-	.tags-label {
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		color: rgb(107 114 128);
-	}
-
-	:root.dark .tags-label {
-		color: rgb(156 163 175);
-	}
-
-	.tags-list {
+	.news-detail__taglist {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
@@ -345,27 +217,29 @@ const readingTime = calculateReadingTime(article.body || "");
 		padding: 0;
 	}
 
-	.tag {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		border: 1px solid rgb(0 0 0 / 0.1);
-		font-size: 0.85rem;
+	.news-detail__tag {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
 		font-weight: 500;
-		color: rgb(17 24 39);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.2rem 0.5rem;
+		color: var(--editorial-ink-soft);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: 2px;
 		text-decoration: none;
-		transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+		transition: color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
 	}
 
-	:root.dark .tag {
-		color: rgb(229 231 235);
-		border-color: rgb(255 255 255 / 0.1);
+	.news-detail__tag:hover {
+		color: var(--editorial-ink);
+		border-color: var(--editorial-ink);
 	}
 
-	.tag:hover {
-		color: rgb(var(--brand-primary));
-		border-color: rgb(var(--brand-primary) / 0.4);
-		background-color: rgb(var(--brand-primary) / 0.05);
+	@media (max-width: 720px) {
+		.news-detail__body {
+			padding: 2rem 1.25rem 3rem;
+		}
 	}
 </style>

@@ -150,7 +150,7 @@ const formatTechName = (id: string) => {
 			<div class="space-y-3">
 				<!-- Academy Newsletter -->
 				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					class="flex items-center justify-between p-4 rounded-sm bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
 				>
 					<div class="flex-1 pr-4">
 						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
@@ -191,7 +191,7 @@ const formatTechName = (id: string) => {
 
 				<!-- Technology Matrix Updates -->
 				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					class="flex items-center justify-between p-4 rounded-sm bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
 				>
 					<div class="flex-1 pr-4">
 						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
@@ -232,7 +232,7 @@ const formatTechName = (id: string) => {
 
 				<!-- Kubernetes Release Updates -->
 				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					class="flex items-center justify-between p-4 rounded-sm bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
 				>
 					<div class="flex-1 pr-4">
 						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
@@ -284,7 +284,7 @@ const formatTechName = (id: string) => {
 				<div
 					v-for="techId in techSubs"
 					:key="techId"
-					class="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					class="flex items-center justify-between p-3 rounded-sm bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
 				>
 					<span class="text-sm font-medium text-neutral-900 dark:text-white">
 						{{ formatTechName(techId) }}
@@ -311,7 +311,7 @@ const formatTechName = (id: string) => {
 			<div class="space-y-3">
 				<!-- Marketing Emails -->
 				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					class="flex items-center justify-between p-4 rounded-sm bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
 				>
 					<div class="flex-1 pr-4">
 						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
@@ -349,7 +349,7 @@ const formatTechName = (id: string) => {
 
 				<!-- Service Notifications -->
 				<div
-					class="flex items-center justify-between p-4 rounded-xl bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
+					class="flex items-center justify-between p-4 rounded-sm bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-neutral-800"
 				>
 					<div class="flex-1 pr-4">
 						<h4 class="text-base font-medium text-neutral-900 dark:text-white">
@@ -389,7 +389,7 @@ const formatTechName = (id: string) => {
 		<!-- Success Message -->
 		<div
 			v-if="showSuccess"
-			class="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm"
+			class="flex items-center gap-2 p-3 rounded-sm bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm"
 		>
 			<svg
 				class="w-5 h-5 flex-shrink-0"
@@ -410,7 +410,7 @@ const formatTechName = (id: string) => {
 		<!-- Error Message -->
 		<div
 			v-if="error"
-			class="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm"
+			class="flex items-center gap-2 p-3 rounded-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-sm"
 		>
 			<svg
 				class="w-5 h-5 flex-shrink-0"
@@ -444,7 +444,7 @@ const formatTechName = (id: string) => {
 			</div>
 			<div
 				v-else
-				class="p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
+				class="p-4 rounded-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
 			>
 				<p class="text-sm text-red-700 dark:text-red-300 mb-3">
 					Are you sure you want to unsubscribe from all emails? You will stop
@@ -455,7 +455,7 @@ const formatTechName = (id: string) => {
 						type="button"
 						:disabled="isUnsubscribingAll"
 						@click="unsubscribeFromAll"
-						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50 disabled:cursor-wait"
+						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-sm disabled:opacity-50 disabled:cursor-wait"
 					>
 						{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
 					</button>
@@ -463,7 +463,7 @@ const formatTechName = (id: string) => {
 						type="button"
 						:disabled="isUnsubscribingAll"
 						@click="showUnsubscribeConfirm = false"
-						class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg"
+						class="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-sm"
 					>
 						Cancel
 					</button>

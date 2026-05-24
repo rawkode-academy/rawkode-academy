@@ -1,186 +1,181 @@
 ---
 import { getCollection, getEntries } from "astro:content";
-import ArticleCard from "@/components/articles/ArticleCard.astro";
-import FeaturedContent from "@/components/common/FeaturedContent.astro";
-import SectionHeader from "@/components/common/SectionHeader.vue";
-import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
+
 import Page from "@/wrappers/page.astro";
+import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
+
+import ReadMasthead from "@/components/read/ReadMasthead.astro";
+import FeaturedArticle from "@/components/read/FeaturedArticle.astro";
+import FilterRail from "@/components/read/FilterRail.astro";
+import ArticleGridItem from "@/components/read/ArticleGridItem.astro";
+import ReadFooter from "@/components/read/ReadFooter.astro";
+
+import { calculateReadingTime } from "@/utils/reading-time";
+import { getTypeBadgeConfig } from "@/utils/article-types";
 
 export const prerender = true;
 
-const allArticles = await getCollection("articles");
+// ─── Data ──────────────────────────────────────────────────────
 
-// Sort articles by publication date
-allArticles.sort(
-	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+const allArticles = (await getCollection("articles", ({ data }) => !data.draft))
+	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+
+const featured = allArticles.find((article) => article.data.cover) ?? allArticles[0];
+const featuredIndex = featured
+	? allArticles.findIndex((article) => article.id === featured.id)
+	: -1;
+const rest = featured
+	? allArticles.filter((article) => article.id !== featured.id)
+	: [];
+const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
+
+// Topics — derived from technologies referenced across the corpus.
+const topicCounts = new Map<string, number>();
+for (const article of allArticles) {
+	for (const tech of article.data.technologies ?? []) {
+		topicCounts.set(tech, (topicCounts.get(tech) ?? 0) + 1);
+	}
+}
+
+const topTopics = Array.from(topicCounts.entries())
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 8)
+	.map(([id]) => ({
+		label: id
+			.replace(/[-_]/g, " ")
+			.replace(/\b\w/g, (char) => char.toUpperCase()),
+		href: `/technology/${id}`,
+	}));
+
+const topics = topTopics;
+
+// ─── Helpers ───────────────────────────────────────────────────
+
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "2-digit",
+	year: "numeric",
+});
+
+const compactCopy = (text: string, maxLength: number) => {
+	const normalized = text.replace(/\s+/g, " ").trim();
+	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
+	if (firstSentence && firstSentence.length <= maxLength) return firstSentence;
+	if (normalized.length <= maxLength) return normalized;
+	return `${normalized.slice(0, maxLength).trimEnd()}…`;
+};
+
+const articleAuthorName = async (
+	article: (typeof allArticles)[number],
+): Promise<string | undefined> => {
+	const authors = await getEntries(article.data.authors);
+	if (authors.length === 0) return undefined;
+	return authors.map((a) => a.data.name).join(", ");
+};
+
+const dispatchNumFor = (idx: number) =>
+	String(allArticles.length - idx).padStart(3, "0");
+
+const dispatchNumForArticle = (article: (typeof allArticles)[number]) =>
+	dispatchNumFor(allArticles.findIndex((candidate) => candidate.id === article.id));
+
+// Pre-resolve authors for the grid (Astro can't await in JSX iteration cleanly).
+const restWithMeta = await Promise.all(
+	rest.map(async (article) => ({
+		article,
+		dispatchNum: dispatchNumForArticle(article),
+		author: await articleAuthorName(article),
+		readingTime: calculateReadingTime(article.body || "").text,
+	})),
 );
 
-// Featured posts are the first 3
-const featuredPosts = allArticles.slice(0, 3);
-const latestPost = featuredPosts[0];
-
-const latestPostAuthors = latestPost
-	? await getEntries(latestPost.data.authors)
-	: [];
-
-// Get remaining posts (skip the first one since it's featured)
-const remainingPosts = allArticles.slice(1);
-
-const pageTitle = "Cloud Native & Kubernetes Articles";
+const pageTitle = "Field Notes — Articles from Rawkode Academy";
 const pageDescription =
-	"Deep dive into cloud native technologies, Kubernetes, observability, and more. Articles written by practitioners for practitioners at Rawkode Academy.";
+	"Long-form essays, tutorials, and field reports on cloud native engineering — Kubernetes, eBPF, containers, supply chain.";
 ---
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
-  <Fragment slot="extra-head">
-    <ArticleItemListJsonLd
-      articles={allArticles.filter((article) => !article.data.draft)}
-      listUrl={new URL("/read", Astro.site ?? Astro.url).href}
-      listName="Cloud Native & Kubernetes Articles"
-    />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="Rawkode Academy - Articles (RSS)"
-      href="/api/feeds/articles.xml"
-    />
-    <link
-      rel="alternate"
-      type="application/feed+json"
-      title="Rawkode Academy - Articles (JSON Feed)"
-      href="/api/feeds/articles.json"
-    />
-    <link
-      rel="alternate"
-      type="application/atom+xml"
-      title="Rawkode Academy - Articles (Atom)"
-      href="/api/feeds/articles.atom"
-    />
-  </Fragment>
-  <style>
-    @reference "../../styles/global.css";
+	<Fragment slot="extra-head">
+		<ArticleItemListJsonLd
+			articles={allArticles}
+			listUrl={new URL("/read", Astro.site ?? Astro.url).href}
+			listName={pageTitle}
+		/>
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
+	</Fragment>
 
-    /* Core styles */
-    .primary-gradient {
-      @apply bg-linear-to-r from-primary to-secondary;
-    }
+	<div class="read-page">
+		<ReadMasthead />
 
-    .text-gradient {
-      @apply bg-clip-text text-transparent bg-linear-to-r from-primary to-secondary;
-    }
+		{featured && (
+			<FeaturedArticle
+				href={`/read/${featured.id}`}
+				kicker={getTypeBadgeConfig(featured.data.type || "tutorial").label}
+				dispatchNum={dispatchNumFor(featuredIndex)}
+				title={featured.data.title}
+				dek={compactCopy(
+					featured.data.openGraph?.subtitle || featured.data.description,
+					180,
+				)}
+				author={featuredAuthors.map((a) => a.data.name).join(", ") || undefined}
+				date={dateFormatter.format(featured.data.publishedAt)}
+				readingTime={calculateReadingTime(featured.body || "").text}
+				cover={featured.data.cover}
+			/>
+		)}
 
-    .article-card {
-      @apply transition-card hover:-translate-y-2 hover:shadow-xl;
-    }
+		<FilterRail topics={topics} />
 
-    .terminal {
-      @apply font-mono rounded-lg overflow-hidden border border-surface;
-    }
+		<div class="read-grid">
+			{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => (
+				<ArticleGridItem
+					href={`/read/${article.id}`}
+					dispatchNum={dispatchNum}
+					kicker={getTypeBadgeConfig(article.data.type || "tutorial").label}
+					title={article.data.title}
+					dek={compactCopy(
+						article.data.openGraph?.subtitle ||
+							article.data.subtitle ||
+							article.data.description,
+						130,
+					)}
+					author={author}
+					date={dateFormatter.format(article.data.publishedAt)}
+					readingTime={readingTime}
+					cover={article.data.cover}
+				/>
+			))}
+		</div>
 
-    .terminal-header {
-      @apply flex items-center p-2 bg-gray-100 dark:bg-gray-800 border-b border-surface;
-    }
-
-    .terminal-body {
-      @apply p-4 bg-white dark:bg-gray-900;
-    }
-
-    .terminal-prompt::before {
-      content: "$ ";
-      @apply text-primary;
-    }
-
-    .terminal-output {
-      @apply pl-4 my-2;
-    }
-
-    /* Animation */
-    @keyframes gradientShift {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-    }
-
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.5);
-      pointer-events: none;
-    }
-
-    /* Filter button styles */
-    .filter-btn {
-      @apply px-3 py-1 rounded-full text-sm font-medium transition-smooth;
-    }
-
-    .filter-btn:not(.active) {
-      @apply bg-gray-100 text-secondary-content dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700;
-    }
-
-    .filter-btn.active {
-      @apply bg-primary text-white;
-    }
-
-    /* Scrolling animation */
-    .scroll-prompt {
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      60% {
-        transform: translateY(-5px);
-      }
-    }
-  </style>
-
-  <!-- Featured Content Section -->
-  {latestPost && (
-    <FeaturedContent
-      type="article"
-      title={latestPost.data.title}
-      description={latestPost.data.openGraph?.subtitle || latestPost.data.description}
-      thumbnailUrl={typeof latestPost.data.cover?.image === 'string' ? latestPost.data.cover.image : latestPost.data.cover?.image?.src || "https://flowbite.s3.amazonaws.com/blocks/marketing-ui/blog/office-laptops.png"}
-      thumbnailAlt={latestPost.data.cover?.alt || "Article cover image"}
-      author={latestPostAuthors.map(author => author.data.name).join(", ")}
-      date={latestPost.data.publishedAt.toISOString()}
-      href={`/read/${latestPost.id}`}
-      ctaText="Read Article"
-      articleType={latestPost.data.type}
-    />
-  )}
-
-  <!-- Main Content -->
-  <section class="py-16 bg-gray-50 dark:bg-gray-900">
-    <div class="container mx-auto px-4 md:px-6">
-      <!-- All Articles -->
-      <div>
-        <SectionHeader title="All Articles" />
-
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {remainingPosts.map(article => (
-            <div class="article-card h-full">
-              <ArticleCard article={article} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
+		<ReadFooter />
+	</div>
 </Page>
+
+<style>
+	.read-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.read-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0;
+		padding: 1.5rem 2.5rem 4rem;
+	}
+
+	@media (max-width: 960px) {
+		.read-grid {
+			grid-template-columns: 1fr;
+			padding: 1rem 1.5rem 3rem;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.read-grid {
+			padding: 0.375rem 1rem 2.5rem;
+		}
+	}
+</style>

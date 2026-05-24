@@ -1,0 +1,56 @@
+---
+interface Props {
+	updatedAt?: Date | string | undefined;
+}
+---
+
+<header class="news-masthead">
+	<h1 class="news-masthead__title">Latest News</h1>
+	<p class="news-masthead__dek">Cloud native updates.</p>
+</header>
+
+<style>
+	.news-masthead {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1.125rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.news-masthead__title {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.news-masthead__dek {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.4;
+		color: var(--editorial-ink-soft);
+		text-align: right;
+		margin: 0;
+	}
+
+	@media (max-width: 880px) {
+		.news-masthead {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 0.25rem;
+			padding: 0.875rem 1rem;
+		}
+		.news-masthead__title {
+			font-size: 1.875rem;
+		}
+		.news-masthead__dek {
+			font-size: 0.875rem;
+			text-align: left;
+		}
+	}
+</style>

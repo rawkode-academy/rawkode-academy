@@ -40,3 +40,6 @@ devenv.local.nix
 # (see content/scripts/build-youtube-description.ts), pasted into YouTube
 # by hand, not source of truth.
 content/scripts/output/youtube-descriptions/
+
+# Local Claude Code agent state
+**/.claude/scheduled_tasks.lock

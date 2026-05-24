@@ -67,7 +67,7 @@ const pageDescription =
 				</div>
 
 				<!-- Release Info Banner -->
-				<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200 dark:border-blue-800/50">
+				<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-sm sm:rounded-sm p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200 dark:border-blue-800/50">
 					<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
 						<div>
 							<h2 class="text-base sm:text-lg font-semibold text-primary-content">Release Date: December 17, 2025</h2>
@@ -84,7 +84,7 @@ const pageDescription =
 				</div>
 
 				<!-- Cheatsheet Content Card -->
-				<div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 lg:p-12 mb-8 sm:mb-12">
+				<div class="paper-panel rounded-sm sm:rounded-sm p-4 sm:p-6 md:p-8 lg:p-12 mb-8 sm:mb-12">
 					<h2 class="text-xl sm:text-2xl font-bold text-primary-content mb-6 sm:mb-8">
 						What's New in Kubernetes 1.35
 					</h2>
@@ -95,13 +95,13 @@ const pageDescription =
 							<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-3 sm:mb-4 flex items-center gap-2">
 								<span class="text-red-500">🚨</span> Breaking Changes (Action Required!)
 							</h3>
-							<div class="bg-red-50 dark:bg-red-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-red-200 dark:border-red-800/50 space-y-5 sm:space-y-6">
+							<div class="bg-red-50 dark:bg-red-900/20 rounded-sm sm:rounded-sm p-4 sm:p-6 border border-red-200 dark:border-red-800/50 space-y-5 sm:space-y-6">
 
 								<!-- cgroup v1 -->
 								<div>
 									<h4 class="font-semibold text-primary-content mb-2 text-sm sm:text-base">cgroup v1 Support Disabled by Default</h4>
 									<p class="text-muted text-xs sm:text-sm mb-3">The Kubelet config <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">failCgroupV1</code> now defaults to <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">true</code>. If a node boots with legacy cgroup v1 hierarchy, the Kubelet <strong>crashes immediately on startup</strong>.</p>
-									<div class="bg-gray-900 rounded-lg p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto space-y-1 sm:space-y-2">
+									<div class="bg-gray-900 rounded-sm p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto space-y-1 sm:space-y-2">
 										<div>
 											<p class="text-gray-400"># Check if your nodes use cgroups v2</p>
 											<p class="text-green-400 break-all">stat -fc %T /sys/fs/cgroup/</p>
@@ -114,7 +114,7 @@ const pageDescription =
 								<div>
 									<h4 class="font-semibold text-primary-content mb-2 text-sm sm:text-base">containerd 1.x End of Support</h4>
 									<p class="text-muted text-xs sm:text-sm mb-3">Kubernetes 1.35 is the <strong>last version</strong> to support containerd 1.7. You must upgrade to containerd 2.0+ before upgrading to Kubernetes 1.36.</p>
-									<div class="bg-gray-900 rounded-lg p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto">
+									<div class="bg-gray-900 rounded-sm p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto">
 										<p class="text-gray-400"># Monitor affected nodes with this metric</p>
 										<p class="text-green-400">kubelet_cri_losing_support</p>
 									</div>
@@ -133,14 +133,14 @@ const pageDescription =
 							<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-3 sm:mb-4 flex items-center gap-2">
 								<span class="text-green-500">🎓</span> Graduating to Stable (GA)
 							</h3>
-							<div class="bg-green-50 dark:bg-green-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-green-200 dark:border-green-800/50">
+							<div class="bg-green-50 dark:bg-green-900/20 rounded-sm sm:rounded-sm p-4 sm:p-6 border border-green-200 dark:border-green-800/50">
 								<ul class="space-y-4 text-primary-content">
 									<li class="flex items-start gap-2 sm:gap-3">
 										<span class="text-green-500 mt-0.5 sm:mt-1 font-bold flex-shrink-0">✓</span>
 										<div class="min-w-0">
 											<strong class="text-sm sm:text-base">In-place Pod Resource Updates</strong>
 											<p class="text-xs sm:text-sm text-muted mt-1">Adjust CPU and memory without restarting pods! No more recreating stateful workloads for vertical scaling.</p>
-											<div class="bg-gray-900 rounded-lg p-2 sm:p-3 mt-2 font-mono text-[10px] sm:text-xs overflow-x-auto">
+											<div class="bg-gray-900 rounded-sm p-2 sm:p-3 mt-2 font-mono text-[10px] sm:text-xs overflow-x-auto">
 												<p class="text-green-400 whitespace-nowrap">kubectl patch pod my-pod --subresource='resize' -p '&#123;"spec":&#123;"containers":[&#123;"name":"app","resources":&#123;"requests":&#123;"memory":"512Mi"&#125;&#125;&#125;]&#125;&#125;'</p>
 											</div>
 										</div>
@@ -161,7 +161,7 @@ const pageDescription =
 							<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-3 sm:mb-4 flex items-center gap-2">
 								<span class="text-purple-500">🤖</span> AI/ML & Scheduler Enhancements
 							</h3>
-							<div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-purple-200 dark:border-purple-800/50">
+							<div class="bg-purple-50 dark:bg-purple-900/20 rounded-sm sm:rounded-sm p-4 sm:p-6 border border-purple-200 dark:border-purple-800/50">
 								<ul class="space-y-4 text-primary-content">
 									<li class="flex items-start gap-2 sm:gap-3">
 										<span class="text-purple-500 mt-0.5 sm:mt-1 font-bold flex-shrink-0">α</span>
@@ -186,7 +186,7 @@ const pageDescription =
 							<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-3 sm:mb-4 flex items-center gap-2">
 								<span class="text-blue-500">🔐</span> Security
 							</h3>
-							<div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-blue-200 dark:border-blue-800/50">
+							<div class="bg-blue-50 dark:bg-blue-900/20 rounded-sm sm:rounded-sm p-4 sm:p-6 border border-blue-200 dark:border-blue-800/50">
 								<ul class="space-y-4 text-primary-content">
 									<li class="flex items-start gap-2 sm:gap-3">
 										<span class="text-blue-500 mt-0.5 sm:mt-1 font-bold flex-shrink-0">β</span>
@@ -211,7 +211,7 @@ const pageDescription =
 							<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-3 sm:mb-4 flex items-center gap-2">
 								<span class="text-purple-500">✓</span> Migration Checklist
 							</h3>
-							<div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg sm:rounded-xl p-4 sm:p-6 border border-purple-200 dark:border-purple-800/50">
+							<div class="bg-purple-50 dark:bg-purple-900/20 rounded-sm sm:rounded-sm p-4 sm:p-6 border border-purple-200 dark:border-purple-800/50">
 								<ul class="space-y-3">
 									<li class="flex items-start gap-2 sm:gap-3">
 										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
@@ -244,28 +244,28 @@ const pageDescription =
 							</h3>
 							<!-- Mobile: Card view -->
 							<div class="block sm:hidden space-y-3">
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-surface">
+								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">GA</span>
 										<span class="text-xs text-muted">true (locked)</span>
 									</div>
 									<p class="font-mono text-xs text-primary-content break-all">InPlacePodVerticalScaling</p>
 								</div>
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-surface">
+								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">GA</span>
 										<span class="text-xs text-muted">true (locked)</span>
 									</div>
 									<p class="font-mono text-xs text-primary-content break-all">StructuredAuthenticationConfiguration</p>
 								</div>
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-surface">
+								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">Beta</span>
 										<span class="text-xs text-muted">true</span>
 									</div>
 									<p class="font-mono text-xs text-primary-content break-all">UserNamespacesSupport</p>
 								</div>
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-surface">
+								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">Beta</span>
 										<span class="text-xs text-muted">true</span>
@@ -313,7 +313,7 @@ const pageDescription =
 
 				<!-- CTA -->
 				<div class="text-center">
-					<div class="glass-panel rounded-xl sm:rounded-2xl p-5 sm:p-8">
+					<div class="paper-panel rounded-sm sm:rounded-sm p-5 sm:p-8">
 						<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-2">
 							Continue Your Cloud Native Journey
 						</h3>
@@ -323,13 +323,13 @@ const pageDescription =
 						<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
 							<a
 								href="/"
-								class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-primary text-white text-sm sm:text-base font-semibold hover:bg-primary/90 transition-colors"
+								class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-sm sm:rounded-sm bg-primary text-white text-sm sm:text-base font-semibold hover:bg-primary/90 transition-colors"
 							>
 								Back to Academy
 							</a>
 							<a
 								href="/watch"
-								class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border-2 border-surface text-primary-content text-sm sm:text-base font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+								class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-sm sm:rounded-sm border-2 border-surface text-primary-content text-sm sm:text-base font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
 							>
 								Watch Kubernetes Videos
 							</a>
@@ -362,7 +362,7 @@ const pageDescription =
 
 			<!-- Additional context -->
 			<div class="mx-auto max-w-4xl mt-10 sm:mt-12 md:mt-16">
-				<div class="glass-panel rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8">
+				<div class="paper-panel rounded-sm sm:rounded-sm p-5 sm:p-6 md:p-8">
 					<h2 class="text-lg sm:text-xl font-semibold text-primary-content mb-4">
 						Why You Need This Cheat Sheet
 					</h2>

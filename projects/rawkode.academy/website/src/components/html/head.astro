@@ -32,27 +32,20 @@ const normalizedTitle =
 ---
 
 <style is:global>
-	@reference "../../styles/global.css";
-
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		@apply font-display;
-	}
-
-	body {
-		font-family: var(--font-body);
-	}
-
+	/* Body font + mono fallbacks. Heading font + body backdrop are owned
+	 by global.css (@layer base + body{}). UnoCSS handles class-level
+	 `font-display`/`font-body`/`font-mono` via theme. */
 	pre,
 	code,
 	kbd,
 	samp,
 	tt {
-		@apply font-mono;
+		font-family:
+			var(--font-jetbrains-mono),
+			ui-monospace,
+			SFMono-Regular,
+			Menlo,
+			monospace;
 	}
 </style>
 
@@ -60,19 +53,27 @@ const normalizedTitle =
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="color-scheme" content="light dark" />
-	<Font cssVariable="--font-quicksand" />
-	<Font cssVariable="--font-poppins" preload />
-	<Font cssVariable="--font-monaspace-neon" />
+	<Font cssVariable="--font-instrument-serif" preload />
+	<Font cssVariable="--font-inter-tight" preload />
+	<Font cssVariable="--font-jetbrains-mono" />
 
+	{/*
+		Editorial favicons — light scheme shows ink on paper (icon-dark.svg),
+		dark scheme shows paper on ink (icon-light.svg). Modern browsers pick
+		the matching SVG via the `media` attribute; PNG fallbacks remain for
+		legacy and pinned-tab contexts (still on the prior brand pending regen).
+	*/}
+	<link rel="icon" type="image/svg+xml" href="/icon-dark.svg" media="(prefers-color-scheme: light)" />
+	<link rel="icon" type="image/svg+xml" href="/icon-light.svg" media="(prefers-color-scheme: dark)" />
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 	<link rel="manifest" href="/site.webmanifest" />
-	<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
-	<meta name="msapplication-TileColor" content="#da532c" />
-	<!-- Theme color for light/dark to match UI backgrounds -->
-	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0f" />
+	<link rel="mask-icon" href="/icon-dark.svg" color="#23282d" />
+	<meta name="msapplication-TileColor" content="#f8f5ef" />
+	{/* Theme color tracks the editorial palette: paper for light, ink-dark for dark. */}
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f5ef" />
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b23" />
 	<meta
 		name="description"
 		content={Astro.props.description ||

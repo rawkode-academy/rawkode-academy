@@ -1,0 +1,229 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	href: string;
+	title: string;
+	description: string;
+	level: string;
+	hours?: number | string | undefined;
+	lessons?: number | undefined;
+	projects?: number | undefined;
+	enrolled?: number | undefined;
+	monogram?: string | undefined;
+	big?: boolean;
+}
+
+const {
+	href,
+	title,
+	description,
+	level,
+	hours,
+	lessons,
+	projects,
+	enrolled,
+	monogram,
+	big = false,
+} = Astro.props as Props;
+
+const levelColorMap: Record<string, string> = {
+	beginner: "var(--editorial-spruce)",
+	foundations: "var(--editorial-spruce)",
+	intermediate: "var(--editorial-rust)",
+	advanced: "var(--editorial-violet)",
+};
+const levelKey = level.toLowerCase();
+const lvlColor = levelColorMap[levelKey] ?? "var(--editorial-ink)";
+
+const coverBgMap: Record<string, string> = {
+	beginner: "oklch(0.22 0.06 165)",
+	foundations: "oklch(0.22 0.06 165)",
+	intermediate: "oklch(0.20 0.06 40)",
+	advanced: "oklch(0.18 0.06 290)",
+};
+const coverFrom = coverBgMap[levelKey] ?? "oklch(0.22 0.04 165)";
+
+const mark =
+	monogram ?? (title.match(/[A-Za-z]/)?.[0] ?? "§").toUpperCase();
+---
+
+<a class={`path-card ${big ? "path-card--big" : ""}`} href={href}>
+	<div class="path-card__cover" style={`--cover-from: ${coverFrom}; --lvl-color: ${lvlColor};`}>
+		<span class="path-card__mark" aria-hidden="true">{mark}</span>
+		<span class="path-card__level">{level}</span>
+		<div class="path-card__cover-meta">
+			<span>§ Path</span>
+			{lessons !== undefined && <><span>·</span><span>{lessons} lessons</span></>}
+			{hours !== undefined && <><span>·</span><span>{hours}h total</span></>}
+		</div>
+	</div>
+
+	<div class="path-card__body">
+		<h3 class="path-card__title">{title}</h3>
+		<p class="path-card__description">{description}</p>
+
+		<div class="path-card__stats">
+			{[
+				lessons !== undefined ? [lessons, "Lessons"] : null,
+				projects !== undefined ? [projects, "Projects"] : null,
+				enrolled !== undefined
+					? [enrolled.toLocaleString(), "Enrolled"]
+					: null,
+			]
+				.filter(Boolean)
+				.map((stat) => (
+					<div class="path-card__stat">
+						<div class="path-card__stat-num">{(stat as [string, string])[0]}</div>
+						<MLabel><span class="path-card__stat-label">{(stat as [string, string])[1]}</span></MLabel>
+					</div>
+				))}
+		</div>
+	</div>
+</a>
+
+<style>
+	.path-card {
+		display: flex;
+		flex-direction: column;
+		background: var(--editorial-paper);
+		border: 1px solid var(--editorial-hairline);
+		text-decoration: none;
+		color: inherit;
+		position: relative;
+		overflow: hidden;
+		transition: border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.path-card:hover {
+		border-color: var(--editorial-ink);
+	}
+
+	.path-card__cover {
+		position: relative;
+		overflow: hidden;
+		height: 12rem;
+		background:
+			repeating-linear-gradient(
+				45deg,
+				transparent 0 6px,
+				oklch(1 0 0 / 0.03) 6px 7px
+			),
+			linear-gradient(135deg, var(--cover-from) 0%, oklch(0.10 0.01 280) 100%);
+	}
+
+	.path-card--big .path-card__cover {
+		height: 16rem;
+	}
+
+	.path-card__mark {
+		position: absolute;
+		top: 50%;
+		left: 1.75rem;
+		transform: translateY(-50%);
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 9.5rem;
+		line-height: 0.85;
+		color: oklch(1 0 0 / 0.18);
+		letter-spacing: -0.04em;
+	}
+
+	.path-card--big .path-card__mark {
+		font-size: 14rem;
+	}
+
+	.path-card__level {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		padding: 0.3rem 0.625rem;
+		background: oklch(1 0 0 / 0.92);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--lvl-color);
+	}
+
+	.path-card__cover-meta {
+		position: absolute;
+		bottom: 1rem;
+		left: 1.5rem;
+		right: 1.5rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.65rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: oklch(1 0 0 / 0.55);
+		display: flex;
+		gap: 1.125rem;
+	}
+
+	.path-card__body {
+		padding: 1.25rem 1.5rem 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.875rem;
+	}
+
+	.path-card--big .path-card__body {
+		padding: 1.75rem;
+	}
+
+	.path-card__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.625rem;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.path-card--big .path-card__title {
+		font-size: 2.375rem;
+		letter-spacing: -0.025em;
+	}
+
+	.path-card__description {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+		text-wrap: pretty;
+	}
+
+	.path-card--big .path-card__description {
+		font-size: 1rem;
+	}
+
+	.path-card__stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		padding-top: 0.875rem;
+		border-top: 1px solid var(--editorial-hairline-strong);
+		gap: 0.5rem;
+	}
+
+	.path-card__stat-num {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-size: 1.25rem;
+		line-height: 1;
+		color: var(--editorial-ink);
+	}
+
+	.path-card--big .path-card__stat-num {
+		font-size: 1.625rem;
+	}
+
+	.path-card__stat-label {
+		font-size: 0.625rem !important;
+	}
+</style>

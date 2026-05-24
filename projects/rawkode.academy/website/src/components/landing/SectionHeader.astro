@@ -1,0 +1,75 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+interface Props {
+	kicker: string;
+	title: string;
+	body?: string;
+	ctaLabel?: string;
+	ctaHref?: string;
+}
+
+const { kicker, title, body, ctaLabel, ctaHref } = Astro.props as Props;
+---
+
+<header class="ed-section-head">
+	<div class="ed-section-head__rule" aria-hidden="true">
+		<MLabel tone="accent">{kicker}</MLabel>
+		<span class="ed-section-head__rule-line"></span>
+		{ctaHref && (
+			<a class="ed-section-head__cta" href={ctaHref}>
+				<MLabel tone="ink">{ctaLabel ?? "All →"}</MLabel>
+			</a>
+		)}
+	</div>
+
+	<h2 class="ed-section-head__title">{title}</h2>
+	{body && <p class="ed-section-head__body">{body}</p>}
+</header>
+
+<style>
+	.ed-section-head {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.ed-section-head__rule {
+		display: flex;
+		align-items: baseline;
+		gap: 1rem;
+		padding-bottom: 0.625rem;
+	}
+
+	.ed-section-head__rule-line {
+		flex: 1;
+		height: 1px;
+		background: var(--editorial-hairline);
+	}
+
+	.ed-section-head__cta {
+		text-decoration: none;
+	}
+
+	.ed-section-head__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(2rem, 4vw, 3rem);
+		line-height: 1.05;
+		letter-spacing: -0.025em;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.ed-section-head__body {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		line-height: 1.55;
+		color: var(--editorial-ink-soft);
+		max-width: 40rem;
+		margin: 0;
+		text-wrap: pretty;
+	}
+</style>
