@@ -73,11 +73,11 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).not.toContain("descriptionHtml={renderedDescriptionHtml}");
 	});
 
-	it("keeps the watch tabs focused on supplemental content", () => {
+	it("keeps the watch tabs focused on supplemental content with resources selected by default", () => {
 		const source = readProjectFile("src/components/video/video-content-tabs.vue");
 
 		expect(source).not.toContain("descriptionHtml");
 		expect(source).not.toContain('label: "Description"');
-		expect(source).toContain('activeTab: "comments"');
+		expect(source).toContain('activeTab: "resources"');
 	});
 });

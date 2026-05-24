@@ -12,7 +12,12 @@
  :value="activeTab"
  @change="setActiveTab($event.target.value)"
  >
- <option v-for="tab in tabs" :key="tab.id" :value="tab.id">
+ <option
+ v-for="tab in tabs"
+ :key="tab.id"
+ :value="tab.id"
+ :selected="activeTab === tab.id"
+ >
  {{ tab.label }}
  </option>
  </select>
@@ -185,7 +190,7 @@ export default {
 	},
 	data() {
 		return {
-			activeTab: "comments",
+			activeTab: "resources",
 			tabs: [
 				{ id: "comments", label: "Comments" },
 				{ id: "transcript", label: "Transcript" },
