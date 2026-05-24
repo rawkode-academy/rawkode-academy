@@ -44,7 +44,7 @@ const headerLabel =
 		? "On air now"
 		: state === "upcoming"
 			? `Up next — ${dateTimeFormatter.format(video.publishedAt)} UTC`
-			: "Now playing";
+			: "Latest video";
 
 const headerTone: "amber" | "spruce" | "ink" =
 	state === "live" ? "amber" : state === "upcoming" ? "spruce" : "ink";
@@ -118,12 +118,14 @@ const subLabel =
 <style>
 	.on-air {
 		background: var(--editorial-paper-deep);
-		padding: 1.75rem;
+		padding: clamp(1.25rem, 2.2vw, 1.75rem);
 		display: flex;
 		flex-direction: column;
 		gap: 1.125rem;
 		position: relative;
 		border-left: 1px solid var(--editorial-hairline);
+		align-self: start;
+		min-width: 0;
 	}
 
 	.on-air__header {
@@ -212,7 +214,7 @@ const subLabel =
 	}
 
 	.on-air__next {
-		margin-top: auto;
+		margin-top: 0.25rem;
 		padding-top: 1rem;
 		border-top: 1px solid var(--editorial-hairline);
 		display: flex;
@@ -263,5 +265,29 @@ const subLabel =
 		font-size: 11px;
 		color: var(--editorial-ink-mute);
 		letter-spacing: 0.08em;
+	}
+
+	@media (max-width: 960px) {
+		.on-air {
+			border-left: none;
+			border-top: 1px solid var(--editorial-hairline);
+			padding: 1.5rem;
+		}
+
+		.on-air__screen {
+			aspect-ratio: 16 / 9;
+		}
+	}
+
+	@media (max-width: 520px) {
+		.on-air__slot-link {
+			grid-template-columns: 1fr;
+			gap: 0.35rem;
+			align-items: start;
+		}
+
+		.on-air__slot-time {
+			font-size: 10px;
+		}
 	}
 </style>
