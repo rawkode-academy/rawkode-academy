@@ -35,6 +35,7 @@
 		{
 			"binding": "DB",
 			"database_name": "klustered",
+			"preview_database_id": "klustered-local",
 			"migrations_dir": "../klustered.dev/migrations"
 		}
 	]

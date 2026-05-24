@@ -6,7 +6,10 @@
 		"dev": "astro dev",
 		"build": "astro check && astro build",
 		"preview": "astro preview",
-		"check": "astro check"
+		"check": "astro check",
+		"db:migrate:local": "wrangler d1 migrations apply DB --local",
+		"db:seed": "bun ../klustered.dev/scripts/seed.ts",
+		"db:setup:local": "wrangler d1 migrations apply DB --local && bun ../klustered.dev/scripts/seed.ts"
 	},
 	"dependencies": {
 		"@astrojs/check": "0.9.8",

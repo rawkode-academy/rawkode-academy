@@ -11,6 +11,7 @@
 		"db:migrate": "wrangler d1 migrations apply DB --remote",
 		"db:migrate:local": "wrangler d1 migrations apply DB --local",
 		"db:seed": "bun scripts/seed.ts",
+		"db:setup:local": "wrangler d1 migrations apply DB --local && bun scripts/seed.ts",
 		"db:seed:production": "bun scripts/seed-production.ts",
 		"db:grant-role": "bun scripts/grant-role.ts"
 	},

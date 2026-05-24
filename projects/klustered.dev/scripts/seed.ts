@@ -7,7 +7,7 @@
  * Writes the SQL to a tempfile and runs `wrangler d1 execute DB --local --file`.
  * Targets the local miniflare D1 — never the remote production database.
  */
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -48,6 +48,50 @@ const brackets = [
 
 const matches = [
 	{ id: "mch-1", bracket_id: "brk-2026", round_number: 1, position_in_round: 1, scheduled_at: Date.UTC(2026, 5, 18, 18, 0), status: "scheduled", team_a_id: "team-a", team_b_id: "team-b", scenario_id: "scn-1", judge_user_id: null, winner_team_id: null, started_at: null, ended_at: null },
+	{
+		id: "mch-2",
+		bracket_id: "brk-2026",
+		round_number: 1,
+		position_in_round: 2,
+		scheduled_at: Date.UTC(2026, 4, 16, 18, 0),
+		status: "completed",
+		team_a_id: "team-a",
+		team_b_id: "team-b",
+		scenario_id: "scn-2",
+		judge_user_id: "usr-rawkode",
+		winner_team_id: "team-b",
+		started_at: Date.UTC(2026, 4, 16, 18, 0),
+		ended_at: Date.UTC(2026, 4, 16, 18, 43, 12),
+	},
+];
+
+const match_results = [
+	{
+		id: "res-1",
+		match_id: "mch-2",
+		winner_team_id: "team-b",
+		time_to_resolve_seconds: 2592,
+		score_a: 0,
+		score_b: 1,
+		notes: "Local seed result for leaderboard smoke tests.",
+		recorded_at: Date.UTC(2026, 4, 16, 18, 43, 12),
+		recorded_by_user_id: "usr-rawkode",
+	},
+];
+
+const registrations = [
+	{
+		id: "reg-local-1",
+		season_id: "ssn-2026",
+		user_id: null,
+		display_name: "Casey Cluster",
+		email: "casey@example.test",
+		message: "I want to debug a broken admission controller live.",
+		status: "pending",
+		submitted_at: Date.UTC(2026, 4, 1, 10, 30),
+		reviewed_at: null,
+		reviewed_by_user_id: null,
+	},
 ];
 
 function sqlEscape(value: string | number | boolean | null | string[]): string {
@@ -73,13 +117,17 @@ for (const tm of team_members) statements.push(insert("team_members", tm));
 for (const sc of scenarios) statements.push(insert("scenarios", sc));
 for (const b of brackets) statements.push(insert("brackets", b));
 for (const m of matches) statements.push(insert("matches", m));
+for (const r of match_results) statements.push(insert("match_results", r));
+for (const r of registrations) statements.push(insert("registrations", r));
 
 const dir = mkdtempSync(join(tmpdir(), "klustered-seed-"));
 const file = join(dir, "seed.sql");
 writeFileSync(file, statements.join("\n"));
 
-execSync(`bunx wrangler d1 execute DB --local --file ${JSON.stringify(file)}`, {
-	stdio: "inherit",
-});
+execFileSync(
+	"./node_modules/.bin/wrangler",
+	["d1", "execute", "DB", "--local", "--file", file],
+	{ stdio: "inherit" },
+);
 
 console.log(`Seeded ${statements.length} rows.`);

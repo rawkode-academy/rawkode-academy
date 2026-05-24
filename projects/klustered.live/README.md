@@ -17,4 +17,15 @@ cuenv task build    # or: bun run build
 cuenv task check    # or: bun run check
 ```
 
+Set up the local D1 database before opening `/schedule`, `/leaderboard`, or
+`/apply`:
+
+```sh
+bun run db:setup:local
+```
+
+That command applies the shared Klustered migrations with Wrangler's local D1
+mode and seeds local-only launch data for public site smoke testing. It does not
+touch the remote Cloudflare D1 database.
+
 The companion admin + competitor portal lives at `../klustered.dev/`.

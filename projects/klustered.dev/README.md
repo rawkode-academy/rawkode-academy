@@ -20,4 +20,14 @@ cuenv task db.generate
 cuenv task db.migrate
 ```
 
+Set up the local D1 database before using portal or public pages that read
+seasons, teams, matches, registrations, schedule, or leaderboard data:
+
+```sh
+bun run db:setup:local
+```
+
+That command runs the Wrangler local D1 migration flow and then seeds local-only
+data. It does not touch the remote Cloudflare D1 database.
+
 The companion public site lives at `../klustered.live/`.
