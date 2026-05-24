@@ -1,5 +1,5 @@
 export interface ImageServicePayload {
 	text: string;
-	format: "svg" | "png";
+	format: "png";
 	image: URL | undefined;
 }

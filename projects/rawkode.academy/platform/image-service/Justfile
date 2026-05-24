@@ -1,3 +1,0 @@
-copy-wasm:
-    cp node_modules/@resvg/resvg-wasm/index_bg.wasm src/wasm/resvg.wasm
-    cp node_modules/yoga-wasm-web/dist/yoga.wasm src/wasm/yoga.wasm

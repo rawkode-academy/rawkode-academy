@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import * as utf64 from "utf64";
+import {
+	decodeImageServicePayload,
+	IMAGE_SERVICE_TEMPLATE_VERSION,
+} from "@/lib/image-service-payload";
 import {
 	OPEN_GRAPH_IMAGE_HEIGHT,
 	OPEN_GRAPH_IMAGE_WIDTH,
@@ -12,7 +15,7 @@ const payloadFromUrl = (url: string) => {
 		throw new Error("Missing image payload");
 	}
 
-	return JSON.parse(utf64.decode(payload));
+	return decodeImageServicePayload(payload);
 };
 
 describe("resolveOpenGraphImage", () => {
@@ -23,7 +26,11 @@ describe("resolveOpenGraphImage", () => {
 			pageUrl: new URL("https://rawkode.academy/read"),
 		});
 
-		expect(image.url).toMatch("https://image.rawkode.academy/image?payload=");
+		expect(image.url).toContain("https://image.rawkode.academy/image?");
+		expect(new URL(image.url).searchParams.get("payload")).toBeTruthy();
+		expect(new URL(image.url).searchParams.get("v")).toBe(
+			IMAGE_SERVICE_TEMPLATE_VERSION,
+		);
 		expect(image.type).toBe("image/png");
 		expect(image.width).toBe(OPEN_GRAPH_IMAGE_WIDTH);
 		expect(image.height).toBe(OPEN_GRAPH_IMAGE_HEIGHT);

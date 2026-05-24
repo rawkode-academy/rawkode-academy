@@ -1,5 +1,8 @@
-import * as utf64 from "utf64";
 import type { ImageServicePayload } from "@/types/image-service";
+import {
+	encodeImageServicePayload,
+	IMAGE_SERVICE_TEMPLATE_VERSION,
+} from "@/lib/image-service-payload";
 
 export const OPEN_GRAPH_IMAGE_WIDTH = 1200;
 export const OPEN_GRAPH_IMAGE_HEIGHT = 630;
@@ -67,7 +70,8 @@ export const resolveOpenGraphImage = ({
 	};
 
 	const url = new URL(IMAGE_SERVICE_URL);
-	url.searchParams.set("payload", utf64.encode(JSON.stringify(payload)));
+	url.searchParams.set("v", IMAGE_SERVICE_TEMPLATE_VERSION);
+	url.searchParams.set("payload", encodeImageServicePayload(payload));
 
 	return {
 		url: url.href,
