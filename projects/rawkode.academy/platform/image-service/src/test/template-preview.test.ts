@@ -29,7 +29,10 @@ describe("Template Previews", () => {
 
       expect(html).toContain("<!doctype html>");
       expect(html).toContain(SAMPLE_TEXT);
-      expect(html).toContain(templateName);
+      expect(html).toContain("Rawkode Academy");
+      expect(html).not.toContain(
+        `<span class="template">${templateName}</span>`,
+      );
     });
   }
 });
