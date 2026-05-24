@@ -24,22 +24,23 @@ const {
 	dek,
 	readingTime,
 	eyebrow,
-	hideDispatchMeta = false,
+	hideDispatchMeta = true,
 } = Astro.props as Props;
 
+const visibleBreadcrumbs = breadcrumbs.filter((item) => !item.current);
 const eyebrowText =
-	eyebrow ?? `§${dispatchNum} · ${kicker}${categoryTrail ? ` · ${categoryTrail}` : ""}`;
+	eyebrow ?? `${kicker}${categoryTrail ? ` · ${categoryTrail}` : ""}`;
 ---
 
-{breadcrumbs.length > 0 && (
+{visibleBreadcrumbs.length > 0 && (
 	<div class="article-breadcrumb">
-		{breadcrumbs.map((b, i) => (
+		{visibleBreadcrumbs.map((b, i) => (
 			<>
 				{i > 0 && <span class="article-breadcrumb__sep">/</span>}
-				{b.href && !b.current ? (
+				{b.href ? (
 					<a class="article-breadcrumb__link" href={b.href}>{b.label}</a>
 				) : (
-					<span class={`article-breadcrumb__leaf ${b.current ? "article-breadcrumb__leaf--current" : ""}`}>{b.label}</span>
+					<span class="article-breadcrumb__leaf">{b.label}</span>
 				)}
 			</>
 		))}
