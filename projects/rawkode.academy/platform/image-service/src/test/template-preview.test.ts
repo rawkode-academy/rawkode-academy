@@ -29,7 +29,9 @@ describe("Template Previews", () => {
 
       expect(html).toContain("<!doctype html>");
       expect(html).toContain(SAMPLE_TEXT);
+      expect(html).toContain("Cloud Native Education");
       expect(html).toContain("Rawkode Academy");
+      expect(html).not.toContain("OG/1200");
       expect(html).not.toContain(
         `<span class="template">${templateName}</span>`,
       );

@@ -7,7 +7,7 @@ export interface Payload {
   image: URL | undefined;
 }
 
-export const TEMPLATE_VERSION = "2026-05-24-2";
+export const TEMPLATE_VERSION = "2026-05-24-3";
 export const CACHE_SECONDS = 60 * 60 * 24 * 3;
 
 export const DEFAULT_PAYLOAD: Payload = {
