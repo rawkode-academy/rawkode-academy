@@ -7,6 +7,7 @@ schema.#Project
 name: "rawkode-academy-platform-image-service"
 
 let _t = tasks
+let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
 env: {
 	environment: production: {
@@ -47,8 +48,9 @@ tasks: {
 	}
 
 	build: schema.#Task & {
-		command: "cuenv"
-		args: ["exec", "--path", "../../../..", "--", "bun", "run", "build"]
+		command: "bun"
+		args: ["run", "build"]
+		env: PATH: _taskPath
 		inputs: [
 			"astro.config.ts",
 			"package.json",
@@ -59,8 +61,9 @@ tasks: {
 	}
 
 	test: schema.#Task & {
-		command: "cuenv"
-		args: ["exec", "--path", "../../../..", "--", "bun", "run", "test"]
+		command: "bun"
+		args: ["run", "test"]
+		env: PATH: _taskPath
 		inputs: [
 			"package.json",
 			"src/**",
@@ -71,8 +74,9 @@ tasks: {
 	deploy: schema.#TaskGroup & {
 		type: "group"
 		main: schema.#Task & {
-			command: "cuenv"
-			args: ["exec", "--path", "../../../..", "--", "bun", "x", "wrangler", "deploy", "--config", "./dist/server/wrangler.json"]
+			command: "bun"
+			args: ["x", "wrangler", "deploy", "--config", "./dist/server/wrangler.json"]
+			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
 				"package.json",
@@ -81,8 +85,9 @@ tasks: {
 			]
 		}
 		preview: schema.#Task & {
-			command: "cuenv"
-			args: ["exec", "--path", "../../../..", "--", "bun", "x", "wrangler", "versions", "upload", "--config", "./dist/server/wrangler.json"]
+			command: "bun"
+			args: ["x", "wrangler", "versions", "upload", "--config", "./dist/server/wrangler.json"]
+			env: PATH: _taskPath
 			inputs: [
 				"astro.config.ts",
 				"package.json",
