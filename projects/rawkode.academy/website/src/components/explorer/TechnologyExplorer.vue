@@ -14,6 +14,14 @@
 
  <!-- Main content area -->
  <div class="explorer-main" :class="{ 'controls-collapsed': !showControls }">
+ <button
+ v-if="showControls"
+ type="button"
+ class="controls-backdrop"
+ aria-label="Close advanced filters"
+ @click="closeControls"
+ />
+
  <!-- Controls sidebar (collapsible on mobile) -->
  <aside
  class="explorer-controls"
@@ -21,6 +29,20 @@
  :aria-hidden="!showControls"
  >
  <div class="controls-content">
+ <div class="controls-drawer-header">
+ <h2>Advanced filters</h2>
+ <button
+ type="button"
+ class="controls-close"
+ aria-label="Close advanced filters"
+ @click="closeControls"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+ </svg>
+ </button>
+ </div>
+
  <!-- Axis selectors -->
  <div class="control-section">
  <h3 class="control-label">Axes</h3>
@@ -113,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, provide } from "vue";
+import { ref, computed, onBeforeUnmount, onMounted, provide } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { useExplorerState } from "@/composables/useExplorerState";
 import { useUrlState } from "@/composables/useUrlState";
@@ -165,6 +187,10 @@ const {
 	selectTech,
 	toggleControls,
 } = explorer;
+
+const closeControls = () => {
+	showControls.value = false;
+};
 
 // URL state sync
 const urlState = useUrlState(explorer);
@@ -222,7 +248,18 @@ onMounted(() => {
 	if (window.matchMedia("(max-width: 768px)").matches) {
 		showControls.value = false;
 	}
+	window.addEventListener("keydown", handleKeydown);
 });
+
+onBeforeUnmount(() => {
+	window.removeEventListener("keydown", handleKeydown);
+});
+
+function handleKeydown(event: KeyboardEvent) {
+	if (event.key === "Escape" && showControls.value) {
+		closeControls();
+	}
+}
 </script>
 
 <style scoped>
@@ -236,6 +273,7 @@ onMounted(() => {
  display: flex;
  flex: 1;
  gap: 1.5rem;
+ position: relative;
 }
 
 .explorer-controls {
@@ -261,6 +299,10 @@ onMounted(() => {
  position: sticky;
  top: 1rem;
  overflow: visible;
+}
+
+.controls-drawer-header {
+ display: none;
 }
 
 .control-section {
@@ -357,6 +399,16 @@ onMounted(() => {
  flex-direction: column;
  }
 
+ .controls-backdrop {
+ position: fixed;
+ inset: 0;
+ z-index: 49;
+ display: block;
+ background: color-mix(in oklab, var(--editorial-ink) 42%, transparent);
+ border: 0;
+ cursor: pointer;
+ }
+
  .explorer-controls {
  width: 100%;
  position: fixed;
@@ -364,7 +416,7 @@ onMounted(() => {
  left: 0;
  right: 0;
  z-index: 50;
- max-height: 70vh;
+ max-height: min(82vh, 680px);
  overflow-y: auto;
  border-radius: 8px 8px 0 0;
  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
@@ -377,6 +429,48 @@ onMounted(() => {
 
  .controls-content {
  border-radius: 8px 8px 0 0;
+ padding-top: 0;
+ }
+
+ .controls-drawer-header {
+ position: sticky;
+ top: 0;
+ z-index: 1;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 1rem;
+ margin: 0 -1rem;
+ padding: 0.875rem 1rem;
+ background: var(--surface-card);
+ border-bottom: 1px solid var(--surface-border);
+ }
+
+ .controls-drawer-header h2 {
+ margin: 0;
+ font-size: 0.82rem;
+ font-weight: 800;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ color: var(--text-primary-content);
+ }
+
+ .controls-close {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 2.5rem;
+ height: 2.5rem;
+ background: var(--surface-card-muted);
+ border: 1px solid var(--surface-border);
+ border-radius: 6px;
+ color: var(--text-primary-content);
+ cursor: pointer;
+ }
+
+ .controls-close svg {
+ width: 1.15rem;
+ height: 1.15rem;
  }
 
  .explorer-canvas {
