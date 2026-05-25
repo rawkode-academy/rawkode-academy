@@ -1,6 +1,7 @@
 // Thin helper for show plugins to query the federated GraphQL API server-side.
 
-const GRAPHQL_ENDPOINT = "https://api.rawkode.academy/graphql";
+// The Hive gateway serves GraphQL at the root path (graphqlEndpoint: "/").
+const GRAPHQL_ENDPOINT = "https://api.rawkode.academy/";
 
 export async function queryShowsApi<T>(
 	query: string,
