@@ -1,13 +1,16 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { bracketsWrite } from "@/lib/brackets-write";
+import { getBracketsDb } from "@/db/client";
+import {
+	type ApplicationDecision,
+	decideApplication,
+} from "@/lib/admin-bracket-commands";
 
 export const prerender = false;
 
 const VALID = ["approved", "rejected"] as const;
-type Decision = (typeof VALID)[number];
 
-function isDecision(v: string): v is Decision {
+function isDecision(v: string): v is ApplicationDecision {
 	return (VALID as readonly string[]).includes(v);
 }
 
@@ -25,11 +28,17 @@ export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
 		return new Response("invalid status", { status: 400 });
 	}
 
-	await bracketsWrite(env).decideApplication({
-		applicationId: id,
-		decision: status,
-		reviewedByUserId: locals.user?.id ?? "",
-	});
+	try {
+		await decideApplication(getBracketsDb(env.BRACKETS), {
+			applicationId: id,
+			decision: status,
+			reviewedByUserId: locals.user?.id ?? "",
+		});
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "could not update application";
+		return new Response(message, { status: 400 });
+	}
 
 	return redirect("/admin/registrations", 303);
 };

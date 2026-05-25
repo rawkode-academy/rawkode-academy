@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { bracketsWrite } from "@/lib/brackets-write";
+import { getBracketsDb } from "@/db/client";
+import { deleteBracketEntry } from "@/lib/admin-bracket-commands";
 
 export const prerender = false;
 
@@ -15,7 +16,13 @@ export const POST: APIRoute = async ({ params, locals, redirect }) => {
 		return new Response("missing bracket or entry id", { status: 400 });
 	}
 
-	await bracketsWrite(env).deleteBracketEntry({ id: entryId });
+	try {
+		await deleteBracketEntry(getBracketsDb(env.BRACKETS), { bracketId, entryId });
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "could not delete entry";
+		return new Response(message, { status: 400 });
+	}
 
 	return redirect(`/admin/brackets/${bracketId}`, 303);
 };
