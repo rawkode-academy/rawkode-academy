@@ -20,7 +20,6 @@ const schemaForPrinting = schema as unknown as SchemaInput;
 const sdl = printSchemaWithDirectives(
 	// GraphQL is installed in both the workspace root and the website app.
 	// Double assertion keeps the tooling happy despite the duplicate installations.
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	lexicographicSortSchema(schemaForPrinting),
 	{
 		pathToDirectivesInExtensions: [""],

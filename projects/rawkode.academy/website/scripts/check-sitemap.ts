@@ -3,7 +3,6 @@
   Check sitemap URLs for status 200 and canonical correctness.
   Usage: deno run --allow-net scripts/check-sitemap.ts --base https://rawkode.academy [--limit 400] [--concurrency 10]
 */
-import process from "node:process";
 import { flagValue, integerFlag } from "./lib/args.ts";
 import { normalizeUrl } from "./lib/url.ts";
 
@@ -101,7 +100,7 @@ export const SUPPLEMENTAL_URL_CHECKS: readonly SupplementalUrlCheck[] = [
 ] as const;
 
 function parseArgs(): Args {
-	const argv = process.argv.slice(2);
+	const argv = Deno.args;
 	return {
 		base: flagValue(argv, "--base", "https://rawkode.academy")!,
 		limit: integerFlag(argv, "--limit", 400),
@@ -460,15 +459,13 @@ async function run() {
 
 	printSummary(summary);
 	if (hasBlockingFailures(summary)) {
-		process.exit(2);
+		Deno.exit(2);
 	}
 }
 
-const isMainModule = process.argv[1]?.endsWith("check-sitemap.ts");
-
-if (isMainModule) {
+if (import.meta.main) {
 	run().catch((error) => {
 		console.error("Failed:", error);
-		process.exit(1);
+		Deno.exit(1);
 	});
 }
