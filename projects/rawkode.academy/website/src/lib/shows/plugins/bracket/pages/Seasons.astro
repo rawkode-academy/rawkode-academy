@@ -1,0 +1,93 @@
+---
+import type { BracketSeason } from "../queries";
+
+interface Props {
+	showId: string;
+	seasons: BracketSeason[];
+}
+
+const { showId, seasons } = Astro.props;
+
+function fmt(iso?: string | null): string {
+	if (!iso) return "TBD";
+	return new Date(iso).toLocaleDateString("en-GB", {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+	});
+}
+
+function fmtRange(season: BracketSeason): string {
+	if (!season.startDate && !season.endDate) return "Dates TBD";
+	if (season.startDate && season.endDate) {
+		return `${fmt(season.startDate)} - ${fmt(season.endDate)}`;
+	}
+	return season.startDate
+		? `Starts ${fmt(season.startDate)}`
+		: `Ends ${fmt(season.endDate)}`;
+}
+---
+
+{
+	seasons.length === 0 ? (
+		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
+			<p class="text-lg font-medium text-secondary-content">No seasons yet</p>
+			<p class="mt-2 text-sm text-muted">
+				Seasons appear here once Klustered is ready for signups.
+			</p>
+		</div>
+	) : (
+		<div class="grid gap-5">
+			{seasons.map((season) => (
+				<section class="rounded-sm paper-card p-5">
+					<div class="flex flex-wrap items-start justify-between gap-3">
+						<div>
+							<p class="font-mono text-xs uppercase text-muted">
+								{season.slug}
+							</p>
+							<h2 class="mt-1 text-2xl font-bold text-primary-content">
+								{season.name}
+							</h2>
+							<p class="mt-2 text-sm text-muted">{fmtRange(season)}</p>
+						</div>
+						<span class="hairline-chip text-xs font-medium uppercase text-muted">
+							{season.status}
+						</span>
+					</div>
+
+					{season.brackets.length > 0 && (
+						<div class="mt-5 grid gap-3 md:grid-cols-2">
+							{season.brackets.map((bracket) => (
+								<a
+									href={`/shows/${showId}/brackets`}
+									class="focus-ring rounded-sm border p-4 transition-colors hover:border-primary"
+									style="border-color: var(--surface-border)"
+								>
+									<div class="flex items-start justify-between gap-3">
+										<div>
+											<h3 class="font-semibold text-primary-content">
+												{bracket.name}
+											</h3>
+											<p class="mt-1 text-sm text-muted">
+												{bracket.kind === "team"
+													? `Team (${bracket.teamSize ?? 4})`
+													: "Individual"}
+											</p>
+										</div>
+										<span class="text-xs uppercase text-muted">
+											{bracket.status}
+										</span>
+									</div>
+									<p class="mt-3 text-sm text-muted">
+										Starts {fmt(bracket.startsAt)}
+									</p>
+								</a>
+							))}
+						</div>
+					)}
+				</section>
+			))}
+		</div>
+	)
+}

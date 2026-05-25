@@ -55,7 +55,6 @@ function fmt(iso?: string | null): string {
 						</span>
 					</div>
 					<div class="flex items-center gap-3 text-sm text-muted">
-						{m.scenarioTitle && <span>{m.scenarioTitle}</span>}
 						<span>{fmt(m.scheduledAt)}</span>
 						{m.status === "live" && (
 							<span class="font-semibold text-secondary">● LIVE</span>

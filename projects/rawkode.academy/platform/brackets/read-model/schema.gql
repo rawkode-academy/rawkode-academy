@@ -12,7 +12,7 @@ type Bracket {
   maxEntries: Int
   teamSize: Int
   cadenceDays: Int
-  startsAt: DateTime
+  startsAt: DateTime!
   registrationClosesAt: DateTime
   matches: [BracketMatch!]
   entries: [MatchSide!]
@@ -30,7 +30,6 @@ type BracketMatch {
   sideA: MatchSide
   sideB: MatchSide
   winner: MatchSide
-  scenarioTitle: String
 }
 
 type BracketSeason {
@@ -41,13 +40,6 @@ type BracketSeason {
   startDate: DateTime
   endDate: DateTime
   brackets: [Bracket!]
-}
-
-type BracketStanding {
-  id: String
-  displayName: String
-  wins: Int
-  losses: Int
 }
 
 """
@@ -86,6 +78,11 @@ type MyTeam {
 }
 
 type Query {
+  seasons(showId: String!): [BracketSeason!]
+  brackets(showId: String!, seasonSlug: String, status: String): [Bracket!]
+  schedule(showId: String!, seasonSlug: String): [BracketMatch!]
+  liveMatch(showId: String!): BracketMatch
+  openBrackets(showId: String!): [Bracket!]
   myBracketParticipation(showId: String!): MyParticipation
   bracket(id: String!): Bracket
   bracketBySlug(showId: String!, seasonSlug: String!, bracketSlug: String!): Bracket
@@ -100,7 +97,6 @@ type Show
   brackets(seasonSlug: String, status: String): [Bracket!]
   schedule(seasonSlug: String): [BracketMatch!]
   liveMatch: BracketMatch
-  leaderboard(seasonSlug: String): [BracketStanding!]
   openBrackets: [Bracket!]
   myParticipation: MyParticipation
 }

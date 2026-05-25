@@ -18,6 +18,7 @@ const bracket = await db
 		teamSize: schema.brackets.teamSize,
 		seasonId: schema.brackets.seasonId,
 		seasonName: schema.seasons.name,
+		startsAt: schema.brackets.startsAt,
 	})
 	.from(schema.brackets)
 	.leftJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
@@ -56,7 +57,10 @@ const teams = await db
 const teamMap = Object.fromEntries(teams.map((t) => [t.id, t.name]));
 
 const entries = await db
-	.select({ id: schema.bracketEntries.id, displayName: schema.bracketEntries.displayName })
+	.select({
+		id: schema.bracketEntries.id,
+		displayName: schema.bracketEntries.displayName,
+	})
 	.from(schema.bracketEntries)
 	.where(eq(schema.bracketEntries.bracketId, bracket.id))
 	.orderBy(asc(schema.bracketEntries.seed))
@@ -76,7 +80,9 @@ const entryCount = entries.length;
 const canGenerate = matches.length === 0 && entryCount >= 2;
 
 const sideName = (teamId: string | null, entryId: string | null): string =>
-	(teamId ? teamMap[teamId] : null) ?? (entryId ? entryMap[entryId] : null) ?? "TBD";
+	(teamId ? teamMap[teamId] : null) ??
+	(entryId ? entryMap[entryId] : null) ??
+	"TBD";
 
 function formatScheduled(value: Date | null): string {
 	if (!value) return "TBD";
@@ -94,6 +100,7 @@ function formatScheduled(value: Date | null): string {
 		<span class="text-slate-300">Season: <strong>{bracket.seasonName}</strong></span>
 		<span class="text-slate-300">Status: <strong class="capitalize">{bracket.status}</strong></span>
 		<span class="text-slate-300">Kind: <strong>{bracket.kind === "team" ? `Team (${bracket.teamSize})` : "Individual"}</strong></span>
+		<span class="text-slate-300">Starts: <strong>{formatScheduled(bracket.startsAt)}</strong></span>
 		<span class="text-slate-300">Entries in bracket: <strong>{entryCount}</strong></span>
 		{
 			canGenerate && (

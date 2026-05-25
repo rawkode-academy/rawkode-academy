@@ -702,12 +702,15 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		name: string;
 		slug: string;
 		kind?: "solo" | "team";
-		startsAt?: number | null;
+		startsAt: number;
 		registrationClosesAt?: number | null;
 		maxEntries?: number;
 		teamSize?: number;
 		cadenceDays?: number;
 	}): Promise<{ id: string }> {
+		if (!Number.isFinite(input.startsAt)) {
+			throw new Error("startsAt required");
+		}
 		const id = `bracket-${crypto.randomUUID()}`;
 		await this.db.insert(s.brackets).values({
 			id,
@@ -715,34 +718,13 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			name: input.name,
 			slug: input.slug,
 			kind: input.kind ?? "team",
-			startsAt: input.startsAt ? new Date(input.startsAt) : null,
+			startsAt: new Date(input.startsAt),
 			registrationClosesAt: input.registrationClosesAt
 				? new Date(input.registrationClosesAt)
 				: null,
 			maxEntries: input.maxEntries ?? 16,
-			teamSize: input.teamSize ?? 2,
+			teamSize: input.teamSize ?? 4,
 			cadenceDays: input.cadenceDays ?? 7,
-		});
-		return { id };
-	}
-
-	async createScenario(input: {
-		slug: string;
-		title: string;
-		description: string;
-		difficulty?: "easy" | "medium" | "hard";
-		tags?: string[];
-		notes?: string | null;
-	}): Promise<{ id: string }> {
-		const id = `scn-${crypto.randomUUID()}`;
-		await this.db.insert(s.scenarios).values({
-			id,
-			slug: input.slug,
-			title: input.title,
-			description: input.description,
-			difficulty: input.difficulty ?? "medium",
-			tags: input.tags ?? [],
-			notes: input.notes ?? null,
 		});
 		return { id };
 	}
@@ -771,11 +753,6 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 
 	async deleteBracket(input: { id: string }): Promise<{ ok: true }> {
 		await this.db.delete(s.brackets).where(eq(s.brackets.id, input.id));
-		return { ok: true };
-	}
-
-	async deleteScenario(input: { id: string }): Promise<{ ok: true }> {
-		await this.db.delete(s.scenarios).where(eq(s.scenarios.id, input.id));
 		return { ok: true };
 	}
 
@@ -878,7 +855,6 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		matchId: string;
 		entryAId?: string | null;
 		entryBId?: string | null;
-		scenarioId?: string | null;
 		judgeUserId?: string | null;
 		scheduledAt?: number | null;
 		status?: "scheduled" | "live" | "completed" | "cancelled";
@@ -903,7 +879,6 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			patch.entryBId = input.entryBId;
 			patch.teamBId = await teamFor(input.entryBId);
 		}
-		if (input.scenarioId !== undefined) patch.scenarioId = input.scenarioId;
 		if (input.judgeUserId !== undefined) patch.judgeUserId = input.judgeUserId;
 		if (input.scheduledAt !== undefined) {
 			patch.scheduledAt = input.scheduledAt

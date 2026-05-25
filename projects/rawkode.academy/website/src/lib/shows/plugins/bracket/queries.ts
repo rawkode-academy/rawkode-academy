@@ -1,5 +1,3 @@
-import { queryShowsApi } from "@/lib/shows/client";
-
 export interface BracketSide {
 	kind?: string;
 	id?: string;
@@ -18,7 +16,6 @@ export interface BracketMatch {
 	sideA?: BracketSide | null;
 	sideB?: BracketSide | null;
 	winner?: BracketSide | null;
-	scenarioTitle?: string | null;
 }
 
 export interface Bracket {
@@ -30,10 +27,20 @@ export interface Bracket {
 	status: string;
 	maxEntries: number;
 	teamSize?: number;
-	startsAt?: string | null;
+	startsAt: string;
 	registrationClosesAt?: string | null;
 	entries: BracketSide[];
 	matches: BracketMatch[];
+}
+
+export interface BracketSeason {
+	id: string;
+	slug: string;
+	name: string;
+	status: string;
+	startDate?: string | null;
+	endDate?: string | null;
+	brackets: Bracket[];
 }
 
 export interface MyTeam {
@@ -63,11 +70,43 @@ export interface BracketsReadBinding {
 	fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 }
 
-export interface Standing {
-	id: string;
-	displayName: string;
-	wins: number;
-	losses: number;
+type BracketsReadResult<T> = { data?: T; errors?: unknown };
+
+export function requireBracketsReadBinding(env: {
+	BRACKETS_READ?: unknown;
+}): BracketsReadBinding {
+	const readModel = env.BRACKETS_READ;
+	if (
+		!readModel ||
+		(typeof readModel !== "object" && typeof readModel !== "function") ||
+		typeof (readModel as { fetch?: unknown }).fetch !== "function"
+	) {
+		throw new Error("BRACKETS_READ service binding is required");
+	}
+	return readModel as BracketsReadBinding;
+}
+
+async function queryBracketsRead<T>(
+	readModel: BracketsReadBinding,
+	query: string,
+	variables: Record<string, unknown> = {},
+): Promise<T> {
+	const response = await readModel.fetch("https://internal/", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ query, variables }),
+	});
+	if (!response.ok) {
+		throw new Error(`BRACKETS_READ query failed with ${response.status}`);
+	}
+	const json = (await response.json()) as BracketsReadResult<T>;
+	if (json.errors) {
+		throw new Error("BRACKETS_READ returned GraphQL errors");
+	}
+	if (!json.data) {
+		throw new Error("BRACKETS_READ returned no data");
+	}
+	return json.data;
 }
 
 const MATCH_FIELDS = `
@@ -78,16 +117,22 @@ const MATCH_FIELDS = `
 	scheduledAt
 	startedAt
 	endedAt
-	scenarioTitle
 	sideA { kind id displayName seed }
 	sideB { kind id displayName seed }
 	winner { kind id displayName seed }
 `;
 
-export async function loadBrackets(showId: string): Promise<Bracket[]> {
-	const data = await queryShowsApi<{ showById?: { brackets?: Bracket[] } }>(
-		`query ShowBrackets($id: String!) {
-			showById(id: $id) {
+export async function loadSeasons(
+	showId: string,
+	readModel: BracketsReadBinding,
+): Promise<BracketSeason[]> {
+	const data = await queryBracketsRead<{
+		seasons?: BracketSeason[];
+	}>(
+		readModel,
+		`query ShowSeasons($showId: String!) {
+			seasons(showId: $showId) {
+				id slug name status startDate endDate
 				brackets {
 					id slug name kind format status maxEntries teamSize startsAt registrationClosesAt
 					entries { kind id displayName seed }
@@ -95,74 +140,72 @@ export async function loadBrackets(showId: string): Promise<Bracket[]> {
 				}
 			}
 		}`,
-		{ id: showId },
+		{ showId },
 	);
-	return data?.showById?.brackets ?? [];
+	return data.seasons ?? [];
 }
 
-export async function loadSchedule(showId: string): Promise<BracketMatch[]> {
-	const data = await queryShowsApi<{
-		showById?: { schedule?: BracketMatch[] };
-	}>(
-		`query ShowSchedule($id: String!) {
-			showById(id: $id) { schedule { ${MATCH_FIELDS} } }
-		}`,
-		{ id: showId },
-	);
-	return data?.showById?.schedule ?? [];
-}
-
-export async function loadLeaderboard(showId: string): Promise<Standing[]> {
-	const data = await queryShowsApi<{ showById?: { leaderboard?: Standing[] } }>(
-		`query ShowLeaderboard($id: String!) {
-			showById(id: $id) { leaderboard { id displayName wins losses } }
-		}`,
-		{ id: showId },
-	);
-	return data?.showById?.leaderboard ?? [];
-}
-
-export async function loadOpenBrackets(showId: string): Promise<Bracket[]> {
-	const data = await queryShowsApi<{ showById?: { openBrackets?: Bracket[] } }>(
-		`query ShowOpenBrackets($id: String!) {
-			showById(id: $id) {
-				openBrackets { id slug name kind maxEntries teamSize registrationClosesAt }
+export async function loadBrackets(
+	showId: string,
+	readModel: BracketsReadBinding,
+): Promise<Bracket[]> {
+	const data = await queryBracketsRead<{ brackets?: Bracket[] }>(
+		readModel,
+		`query ShowBrackets($showId: String!) {
+			brackets(showId: $showId) {
+				id slug name kind format status maxEntries teamSize startsAt registrationClosesAt
+				entries { kind id displayName seed }
+				matches { ${MATCH_FIELDS} }
 			}
 		}`,
-		{ id: showId },
+		{ showId },
 	);
-	return data?.showById?.openBrackets ?? [];
+	return data.brackets ?? [];
 }
 
-function participationFromBrackets(brackets: Bracket[]): MyParticipation {
-	return {
-		brackets: brackets.map((bracket) => ({
-			bracketId: bracket.id,
-			bracketSlug: bracket.slug,
-			bracketName: bracket.name,
-			bracketKind: bracket.kind,
-			teamSize: bracket.teamSize ?? 2,
-			registrationClosesAt: bracket.registrationClosesAt ?? null,
-			applied: false,
-			team: null,
-		})),
-	};
+export async function loadSchedule(
+	showId: string,
+	readModel: BracketsReadBinding,
+): Promise<BracketMatch[]> {
+	const data = await queryBracketsRead<{
+		schedule?: BracketMatch[];
+	}>(
+		readModel,
+		`query ShowSchedule($showId: String!) {
+			schedule(showId: $showId) { ${MATCH_FIELDS} }
+		}`,
+		{ showId },
+	);
+	return data.schedule ?? [];
+}
+
+export async function loadOpenBrackets(
+	showId: string,
+	readModel: BracketsReadBinding,
+): Promise<Bracket[]> {
+	const data = await queryBracketsRead<{
+		openBrackets?: Bracket[];
+	}>(
+		readModel,
+		`query ShowOpenBrackets($showId: String!) {
+			openBrackets(showId: $showId) {
+				id slug name kind format status maxEntries teamSize startsAt registrationClosesAt
+				entries { kind id displayName seed }
+				matches { ${MATCH_FIELDS} }
+			}
+		}`,
+		{ showId },
+	);
+	return data.openBrackets ?? [];
 }
 
 export async function loadMyParticipation(
 	showId: string,
 	options: {
-		readModel?: BracketsReadBinding | null;
+		readModel: BracketsReadBinding;
 		user?: { id: string } | null;
-	} = {},
+	},
 ): Promise<MyParticipation> {
-	const loadFallback = async () =>
-		participationFromBrackets(await loadOpenBrackets(showId));
-
-	if (!options.readModel) {
-		return loadFallback();
-	}
-
 	const headers: Record<string, string> = {
 		"Content-Type": "application/json",
 	};
@@ -170,50 +213,57 @@ export async function loadMyParticipation(
 		headers["X-Gateway-User-Id"] = options.user.id;
 	}
 
-	try {
-		const response = await options.readModel.fetch("https://internal/", {
-			method: "POST",
-			headers,
-			body: JSON.stringify({
-				query: `query MyBracketParticipation($showId: String!) {
-					myBracketParticipation(showId: $showId) {
-						brackets {
-							bracketId
-							bracketSlug
-							bracketName
-							bracketKind
-							teamSize
-							registrationClosesAt
-							applied
-							team { id name slug isCaptain memberCount }
-						}
+	const response = await options.readModel.fetch("https://internal/", {
+		method: "POST",
+		headers,
+		body: JSON.stringify({
+			query: `query MyBracketParticipation($showId: String!) {
+				myBracketParticipation(showId: $showId) {
+					brackets {
+						bracketId
+						bracketSlug
+						bracketName
+						bracketKind
+						teamSize
+						registrationClosesAt
+						applied
+						team { id name slug isCaptain memberCount }
 					}
-				}`,
-				variables: { showId },
-			}),
-		});
-		if (!response.ok) {
-			return loadFallback();
-		}
-		const json = (await response.json()) as {
-			data?: { myBracketParticipation?: MyParticipation };
-		};
-		return json.data?.myBracketParticipation ?? loadFallback();
-	} catch {
-		return loadFallback();
+				}
+			}`,
+			variables: { showId },
+		}),
+	});
+	if (!response.ok) {
+		throw new Error(
+			`BRACKETS_READ participation query failed with ${response.status}`,
+		);
 	}
+	const json = (await response.json()) as {
+		data?: { myBracketParticipation?: MyParticipation };
+		errors?: unknown;
+	};
+	if (json.errors) {
+		throw new Error("BRACKETS_READ returned participation errors");
+	}
+	if (!json.data?.myBracketParticipation) {
+		throw new Error("BRACKETS_READ returned no participation data");
+	}
+	return json.data.myBracketParticipation;
 }
 
 export async function loadLiveMatch(
 	showId: string,
+	readModel: BracketsReadBinding,
 ): Promise<BracketMatch | null> {
-	const data = await queryShowsApi<{
-		showById?: { liveMatch?: BracketMatch | null };
+	const data = await queryBracketsRead<{
+		liveMatch?: BracketMatch | null;
 	}>(
-		`query ShowLiveMatch($id: String!) {
-			showById(id: $id) { liveMatch { ${MATCH_FIELDS} } }
+		readModel,
+		`query ShowLiveMatch($showId: String!) {
+			liveMatch(showId: $showId) { ${MATCH_FIELDS} }
 		}`,
-		{ id: showId },
+		{ showId },
 	);
-	return data?.showById?.liveMatch ?? null;
+	return data.liveMatch ?? null;
 }

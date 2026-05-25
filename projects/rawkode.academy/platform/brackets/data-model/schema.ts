@@ -66,20 +66,6 @@ export const competitors = sqliteTable(
 	],
 );
 
-export const scenarios = sqliteTable("scenarios", {
-	id: text("id").primaryKey(),
-	slug: text("slug").notNull().unique(),
-	title: text("title").notNull(),
-	description: text("description").notNull(),
-	difficulty: text("difficulty", { enum: ["easy", "medium", "hard"] })
-		.notNull()
-		.default("medium"),
-	tags: text("tags", { mode: "json" }).$type<string[]>().notNull().default([]),
-	notes: text("notes"),
-	createdAt: createdAt(),
-	updatedAt: updatedAt(),
-});
-
 export const brackets = sqliteTable(
 	"brackets",
 	{
@@ -98,12 +84,12 @@ export const brackets = sqliteTable(
 		status: text("status", { enum: ["draft", "active", "finished"] })
 			.notNull()
 			.default("draft"),
-		startsAt: integer("starts_at", { mode: "timestamp_ms" }),
+		startsAt: integer("starts_at", { mode: "timestamp_ms" }).notNull(),
 		registrationClosesAt: integer("registration_closes_at", {
 			mode: "timestamp_ms",
 		}),
 		maxEntries: integer("max_entries").notNull().default(16),
-		teamSize: integer("team_size").notNull().default(2),
+		teamSize: integer("team_size").notNull().default(4),
 		cadenceDays: integer("cadence_days").notNull().default(7),
 		createdAt: createdAt(),
 		updatedAt: updatedAt(),
@@ -252,9 +238,6 @@ export const matches = sqliteTable("matches", {
 		onDelete: "set null",
 	}),
 	entryBId: text("entry_b_id").references(() => bracketEntries.id, {
-		onDelete: "set null",
-	}),
-	scenarioId: text("scenario_id").references(() => scenarios.id, {
 		onDelete: "set null",
 	}),
 	judgeUserId: text("judge_user_id"),
