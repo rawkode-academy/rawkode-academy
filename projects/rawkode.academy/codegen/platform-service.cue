@@ -192,6 +192,9 @@ import (
 	// D1 schema also get a `migrate` task, ordered before deploy in the pipeline.
 	// `hermetic: false` so tasks inherit the activated devenv-runtime PATH that
 	// provides `bun` (cuenv v0.42.0 hermetic spawns drop it -> ENOENT on `bun`).
+	// `inputs` drive cuenv change-detection: without them the deploy/migrate
+	// tasks are never "affected" and CI skips them. data-model/** is shared by
+	// the read and write workers (and gates migrations).
 	tasks: {
 		if _hasMigrations {
 			migrate: schema.#Task & {
@@ -201,6 +204,7 @@ import (
 					"x", "wrangler", "d1", "migrations", "apply", "DB",
 					"--remote", "--config", "./read-model/wrangler.jsonc",
 				]
+				inputs: ["data-model/**", "read-model/wrangler.jsonc"]
 			}
 		}
 
@@ -212,6 +216,7 @@ import (
 					hermetic: false
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+					inputs: ["read-model/**", "data-model/**", "package.json"]
 				}
 			}
 			if includeWriteModel {
@@ -219,6 +224,7 @@ import (
 					hermetic: false
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+					inputs: ["write-model/**", "data-model/**", "package.json"]
 				}
 			}
 			if includeHttp {
@@ -226,6 +232,7 @@ import (
 					hermetic: false
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+					inputs: ["http/**", "data-model/**", "package.json"]
 				}
 			}
 		}
