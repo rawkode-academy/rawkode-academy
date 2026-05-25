@@ -37,7 +37,7 @@
 		"knip": "./node_modules/.bin/knip",
 		"lint": "deno task lint:deno && deno task lint:oxlint && deno task lint:fallow",
 		"lint:deno": "deno lint",
-		"lint:fallow": "deno run --no-lock --allow-read --allow-env --allow-run npm:fallow@2.79.0 audit",
+		"lint:fallow": "sh -c 'if [ -n \"${FALLOW_BASE:-}\" ]; then BASE=\"$FALLOW_BASE\"; elif [ -n \"${GITHUB_BASE_REF:-}\" ]; then BASE=$(git rev-parse HEAD^1); else BASE=origin/main; fi; deno run --no-lock --allow-read --allow-env --allow-run npm:fallow@2.79.0 audit --base \"$BASE\"'",
 		"lint:oxlint": "nix shell nixpkgs#oxlint -c oxlint --deny-warnings --ignore-path .gitignore scripts",
 		"preview": "./node_modules/.bin/astro preview",
 		"quality": "deno task format:check && deno task lint",
