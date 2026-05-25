@@ -165,11 +165,12 @@ import (
 	}
 
 	let _t = tasks
+	let _wranglerWithNode24 = "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler"
 	let _ciDeployCommands = [
-		if _hasMigrations {"bun x wrangler d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"},
-		if includeReadModel {"bun x wrangler deploy --config ./read-model/wrangler.jsonc"},
-		if includeWriteModel {"bun x wrangler deploy --config ./write-model/wrangler.jsonc"},
-		if includeHttp {"bun x wrangler deploy --config ./http/wrangler.jsonc"},
+		if _hasMigrations {_wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"},
+		if includeReadModel {_wranglerWithNode24 + " deploy --config ./read-model/wrangler.jsonc"},
+		if includeWriteModel {_wranglerWithNode24 + " deploy --config ./write-model/wrangler.jsonc"},
+		if includeHttp {_wranglerWithNode24 + " deploy --config ./http/wrangler.jsonc"},
 	]
 	let _serviceDefinitionInputs = ["env.cue", "service.cue", "../../codegen/platform-service.cue"]
 	let _ciDeployInputSets = [
@@ -204,8 +205,9 @@ import (
 
 	// Auto-generated deploy tasks based on enabled features. Services that own a
 	// D1 schema also get a `migrate` task, ordered before deploy in the pipeline.
-	// `hermetic: false` so tasks inherit the activated devenv-runtime PATH that
-	// provides `bun` (cuenv v0.42.0 hermetic spawns drop it -> ENOENT on `bun`).
+	// Run Wrangler through a Nix-provided Node 24 toolchain because Wrangler 4
+	// rejects the GitHub runner's Node 20 default.
+	// `hermetic: false` so tasks inherit the activated environment and secrets.
 	// `inputs` drive cuenv change-detection: without them the deploy/migrate
 	// tasks are never "affected" and CI skips them. data-model/** is shared by
 	// the read and write workers (and gates migrations).
@@ -214,7 +216,7 @@ import (
 			hermetic: false
 			dir: from: "caller"
 			command: "sh"
-			args: ["-c", strings.Join(_ciDeployCommands, "\n")]
+			args: ["-lc", strings.Join(_ciDeployCommands, "\n")]
 			inputs: list.Concat(_ciDeployInputSets)
 		}
 
@@ -222,11 +224,8 @@ import (
 			migrate: schema.#Task & {
 				hermetic: false
 				dir: from: "caller"
-				command: "bun"
-				args: [
-					"x", "wrangler", "d1", "migrations", "apply", "DB",
-					"--remote", "--config", "./read-model/wrangler.jsonc",
-				]
+				command: "sh"
+				args: ["-lc", _wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"]
 				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", "read-model/wrangler.jsonc"]])
 			}
 		}
@@ -238,8 +237,8 @@ import (
 				read: schema.#Task & {
 					hermetic: false
 					dir: from: "caller"
-					command: "bun"
-					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+					command: "sh"
+					args: ["-lc", _wranglerWithNode24 + " deploy --config ./read-model/wrangler.jsonc"]
 					inputs: list.Concat([_serviceDefinitionInputs, ["read-model/**", "data-model/**", "package.json"]])
 				}
 			}
@@ -247,8 +246,8 @@ import (
 				write: schema.#Task & {
 					hermetic: false
 					dir: from: "caller"
-					command: "bun"
-					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+					command: "sh"
+					args: ["-lc", _wranglerWithNode24 + " deploy --config ./write-model/wrangler.jsonc"]
 					inputs: list.Concat([_serviceDefinitionInputs, ["write-model/**", "data-model/**", "package.json"]])
 				}
 			}
@@ -256,8 +255,8 @@ import (
 				http: schema.#Task & {
 					hermetic: false
 					dir: from: "caller"
-					command: "bun"
-					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+					command: "sh"
+					args: ["-lc", _wranglerWithNode24 + " deploy --config ./http/wrangler.jsonc"]
 					inputs: list.Concat([_serviceDefinitionInputs, ["http/**", "data-model/**", "package.json"]])
 				}
 			}
