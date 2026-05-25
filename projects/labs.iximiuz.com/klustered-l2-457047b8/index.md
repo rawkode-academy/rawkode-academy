@@ -168,9 +168,9 @@ tasks:
       fi
 
       if grep -q -- "--controllers=" "$CONTROLLER_MANAGER_MANIFEST"; then
-        sed -i.bak 's#^\([[:space:]]*- --controllers=\).*#\1*,-replicaset-controller#' "$CONTROLLER_MANAGER_MANIFEST"
+        sed -i 's#^\([[:space:]]*- --controllers=\).*#\1*,-replicaset-controller#' "$CONTROLLER_MANAGER_MANIFEST"
       else
-        sed -i.bak '/^[[:space:]]*- kube-controller-manager$/a\    - --controllers=*,-replicaset-controller' "$CONTROLLER_MANAGER_MANIFEST"
+        sed -i '/^[[:space:]]*- kube-controller-manager$/a\    - --controllers=*,-replicaset-controller' "$CONTROLLER_MANAGER_MANIFEST"
       fi
 
       sleep 15
@@ -442,7 +442,7 @@ Inspect the controller-manager static pod manifest and remove `,-replicaset-cont
 
 ```bash
 grep -n -- "--controllers" /etc/kubernetes/manifests/kube-controller-manager*.yaml
-sed -i.bak 's/,-replicaset-controller//g' /etc/kubernetes/manifests/kube-controller-manager*.yaml
+sed -i 's/,-replicaset-controller//g' /etc/kubernetes/manifests/kube-controller-manager*.yaml
 grep -n -- "--controllers" /etc/kubernetes/manifests/kube-controller-manager*.yaml
 ```
 
