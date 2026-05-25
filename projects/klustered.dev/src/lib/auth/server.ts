@@ -3,8 +3,8 @@
  *
  * Mirrors projects/rawkode.academy/website/src/lib/auth/server.ts and reuses
  * the same Better Auth deployment at id.rawkode.academy — Klustered is just
- * another OIDC client (`klustered-dev`). Roles are resolved separately from
- * the klustered D1 `user_roles` table; this module only validates identity.
+ * another OIDC client (`klustered-dev`). Sessions are stored in the SESSION KV;
+ * admin authorization is an allowlist of OIDC subs (see the middleware).
  */
 
 const ID_PROVIDER_URL = "https://id.rawkode.academy";
@@ -110,7 +110,11 @@ export async function exchangeCodeForTokens(
 
 	if (!tokenResponse.ok) {
 		const errorBody = await tokenResponse.text();
-		console.error("[auth] Token exchange failed:", tokenResponse.status, errorBody);
+		console.error(
+			"[auth] Token exchange failed:",
+			tokenResponse.status,
+			errorBody,
+		);
 		return null;
 	}
 
@@ -145,4 +149,42 @@ export function getSignInUrl(returnTo?: string): string {
 
 export function getSignOutUrl(): string {
 	return "/api/auth/sign-out";
+}
+
+// Sessions live in the SESSION KV namespace (same approach as the website), not
+// in a database. Klustered.dev runs its own OIDC flow because it is on a
+// different domain than rawkode.academy, so it cannot share better-auth cookies.
+const SESSION_KV_PREFIX = "session:";
+
+export async function getLocalSession(
+	sessionId: string,
+	sessionKv: KVNamespace,
+): Promise<StoredSession | null> {
+	const data = await sessionKv.get(`${SESSION_KV_PREFIX}${sessionId}`);
+	if (!data) return null;
+	const session = JSON.parse(data) as StoredSession;
+	if (session.expiresAt < Date.now()) {
+		await sessionKv.delete(`${SESSION_KV_PREFIX}${sessionId}`);
+		return null;
+	}
+	return session;
+}
+
+export async function putLocalSession(
+	sessionId: string,
+	session: StoredSession,
+	sessionKv: KVNamespace,
+): Promise<void> {
+	await sessionKv.put(
+		`${SESSION_KV_PREFIX}${sessionId}`,
+		JSON.stringify(session),
+		{ expiration: Math.floor(session.expiresAt / 1000) },
+	);
+}
+
+export async function deleteLocalSession(
+	sessionId: string,
+	sessionKv: KVNamespace,
+): Promise<void> {
+	await sessionKv.delete(`${SESSION_KV_PREFIX}${sessionId}`);
 }

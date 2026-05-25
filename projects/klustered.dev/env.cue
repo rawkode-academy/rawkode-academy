@@ -55,7 +55,6 @@ tasks: {
 
 		inputs: [
 			"astro.config.mjs",
-			"migrations/**",
 			"package.json",
 			"public/**",
 			"src/**",
@@ -77,50 +76,6 @@ tasks: {
 			"src/**",
 			"tsconfig.json",
 		]
-	}
-
-	db: schema.#TaskGroup & {
-		type: "group"
-		generate: schema.#Task & {
-			command: "bun"
-			args: ["run", "db:generate"]
-
-			inputs: [
-				"drizzle.config.ts",
-				"src/db/schema.ts",
-			]
-
-			outputs: [
-				"migrations/**",
-			]
-		}
-		migrate: schema.#Task & {
-			command: "bun"
-			args: ["run", "db:migrate"]
-
-			inputs: [
-				"migrations/**",
-				"wrangler.jsonc",
-			]
-		}
-		"migrate-local": schema.#Task & {
-			command: "bun"
-			args: ["run", "db:migrate:local"]
-
-			inputs: [
-				"migrations/**",
-				"wrangler.jsonc",
-			]
-		}
-		seed: schema.#Task & {
-			command: "bun"
-			args: ["run", "db:seed"]
-
-			inputs: [
-				"scripts/seed.ts",
-				"wrangler.jsonc",
-			]
-		}
 	}
 
 	deploy: schema.#TaskGroup & {

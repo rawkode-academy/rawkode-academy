@@ -4,11 +4,21 @@ Admin + competitor portal for the Klustered game show. Lives at `https://kluster
 
 ## Stack
 
-- Bun + Astro 5 (matches `projects/rawkode.academy/website`)
-- Tailwind v4
+- Bun + Astro 6 (matches `projects/rawkode.academy/website`)
+- UnoCSS (`preset-wind3`)
 - Cloudflare Workers (SSR via `@astrojs/cloudflare`)
-- Cloudflare D1 + Drizzle ORM
-- Shared Better Auth deployment with `rawkode.academy`
+- Reads the `platform-brackets` D1 (owned by `platform/brackets`) via `env.BRACKETS`;
+  all writes go through the brackets write-model over the `BRACKETS_WRITE` service binding
+- Auth via id.rawkode.academy (OIDC client `klustered-dev`); sessions in the `SESSION` KV
+
+This portal owns no database of its own. The bracket domain belongs to the
+`platform/brackets` service, and auth is delegated to id.rawkode.academy.
+
+## Authorization
+
+Admins are an explicit allowlist of id.rawkode.academy user ids (OIDC subs), set
+via the `KLUSTERED_ADMIN_IDS` var in `wrangler.jsonc`. Any other authenticated
+user is a competitor and can manage their own details under `/me`.
 
 ## Development
 
@@ -16,18 +26,4 @@ Admin + competitor portal for the Klustered game show. Lives at `https://kluster
 cuenv task dev       # or: bun run dev
 cuenv task build     # or: bun run build
 cuenv task check     # or: bun run check
-cuenv task db.generate
-cuenv task db.migrate
 ```
-
-Set up the local D1 database before using portal or public pages that read
-seasons, teams, matches, registrations, schedule, or leaderboard data:
-
-```sh
-bun run db:setup:local
-```
-
-That command runs the Wrangler local D1 migration flow and then seeds local-only
-data. It does not touch the remote Cloudflare D1 database.
-
-The companion public site lives at `../klustered.live/`.

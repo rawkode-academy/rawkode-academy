@@ -1,8 +1,10 @@
 import { defineMiddleware } from "astro:middleware";
 import { env } from "cloudflare:workers";
-import { and, eq, gt } from "drizzle-orm";
-import { getDb, schema } from "@/db/client";
-import { SESSION_COOKIE_NAME, getSignInUrl } from "@/lib/auth/server";
+import {
+	getLocalSession,
+	SESSION_COOKIE_NAME,
+	getSignInUrl,
+} from "@/lib/auth/server";
 
 export type Role = "admin" | "competitor";
 
@@ -26,43 +28,32 @@ const PUBLIC_PREFIXES = ["/api/auth/"];
 const ADMIN_PREFIX = "/admin";
 const COMPETITOR_PREFIX = "/me";
 
+// Admins are an explicit allowlist of id.rawkode.academy user ids (OIDC subs),
+// set via the KLUSTERED_ADMIN_IDS var. Everyone else who authenticates is a
+// competitor and can manage their own details under /me.
+function adminIds(): string[] {
+	return (env.KLUSTERED_ADMIN_IDS ?? "")
+		.split(",")
+		.map((id) => id.trim())
+		.filter(Boolean);
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
 	context.locals.user = null;
 	context.locals.roles = [];
 
 	const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
 	if (sessionId) {
-		const db = getDb(env.DB);
-		const row = await db
-			.select()
-			.from(schema.sessions)
-			.where(
-				and(
-					eq(schema.sessions.id, sessionId),
-					gt(schema.sessions.expiresAt, new Date()),
-				),
-			)
-			.get();
-
-		if (row) {
+		const session = await getLocalSession(sessionId, env.SESSION);
+		if (session) {
 			context.locals.user = {
-				id: row.userId,
-				email: row.userEmail,
-				name: row.userName,
-				image: row.userImage,
+				id: session.user.id,
+				email: session.user.email,
+				name: session.user.name,
+				image: session.user.image,
 			};
-
-			const roleRows = await db
-				.select({ role: schema.userRoles.role })
-				.from(schema.userRoles)
-				.where(eq(schema.userRoles.userId, row.userId))
-				.all();
-			context.locals.roles = roleRows.map((r) => r.role as Role);
-
-			await db
-				.update(schema.sessions)
-				.set({ lastSeenAt: new Date() })
-				.where(eq(schema.sessions.id, sessionId));
+			const isAdmin = adminIds().includes(session.user.id);
+			context.locals.roles = isAdmin ? ["admin", "competitor"] : ["competitor"];
 		} else {
 			context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
 		}
@@ -81,7 +72,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
 		return context.redirect(getSignInUrl(pathname), 302);
 	}
 
-	if (pathname.startsWith(ADMIN_PREFIX) && !context.locals.roles.includes("admin")) {
+	if (
+		pathname.startsWith(ADMIN_PREFIX) &&
+		!context.locals.roles.includes("admin")
+	) {
 		return new Response("Forbidden", { status: 403 });
 	}
 

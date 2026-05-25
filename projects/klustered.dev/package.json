@@ -6,15 +6,7 @@
 		"dev": "astro dev",
 		"build": "astro check && astro build",
 		"preview": "astro preview",
-		"check": "astro check",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "wrangler d1 migrations apply DB --remote",
-		"db:migrate:local": "wrangler d1 migrations apply DB --local",
-		"db:seed": "bun scripts/seed.ts",
-		"db:setup:local": "wrangler d1 migrations apply DB --local && bun scripts/seed.ts",
-		"db:seed:production": "bun scripts/seed-production.ts",
-		"db:grant-role": "bun scripts/grant-role.ts",
-		"db:migrate:brackets": "bun scripts/migrate-to-platform-brackets.ts"
+		"check": "astro check"
 	},
 	"dependencies": {
 		"@astrojs/check": "0.9.8",
@@ -30,7 +22,6 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20251208.0",
-		"drizzle-kit": "^0.31.6",
 		"wrangler": "^4.77.0"
 	}
 }

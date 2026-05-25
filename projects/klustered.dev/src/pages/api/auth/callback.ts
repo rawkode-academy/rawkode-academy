@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { getDb, schema } from "@/db/client";
 import {
 	exchangeCodeForTokens,
 	getUserInfo,
 	parseState,
 	PKCE_COOKIE_NAME,
+	putLocalSession,
 	SESSION_COOKIE_NAME,
 	SESSION_DURATION_SECONDS,
 } from "@/lib/auth/server";
@@ -42,19 +42,23 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
 		return new Response("Failed to fetch user info", { status: 502 });
 	}
 
-	const db = getDb(env.DB);
 	const sessionId = crypto.randomUUID();
-	const expiresAt = new Date(Date.now() + SESSION_DURATION_SECONDS * 1000);
+	const expiresAt = Date.now() + SESSION_DURATION_SECONDS * 1000;
 
-	await db.insert(schema.sessions).values({
-		id: sessionId,
-		userId: userInfo.sub,
-		userEmail: userInfo.email ?? "",
-		userName: userInfo.name ?? userInfo.email ?? "",
-		userImage: userInfo.picture ?? null,
-		expiresAt,
-		lastSeenAt: new Date(),
-	});
+	await putLocalSession(
+		sessionId,
+		{
+			userId: userInfo.sub,
+			user: {
+				id: userInfo.sub,
+				email: userInfo.email ?? "",
+				name: userInfo.name ?? userInfo.email ?? "",
+				image: userInfo.picture ?? null,
+			},
+			expiresAt,
+		},
+		env.SESSION,
+	);
 
 	cookies.set(SESSION_COOKIE_NAME, sessionId, {
 		httpOnly: true,

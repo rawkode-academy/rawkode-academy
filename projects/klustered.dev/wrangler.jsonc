@@ -29,17 +29,20 @@
 	},
 	"d1_databases": [
 		{
-			"binding": "DB",
-			"database_name": "klustered",
-			"preview_database_id": "klustered-local",
-			"migrations_dir": "./migrations"
-		},
-		{
 			"binding": "BRACKETS",
 			"database_name": "platform-brackets",
 			"database_id": "d8241042-0b2b-4d7a-881f-eff9df812c62"
 		}
 	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "bc9a0074b45b43b5825ca58e586f9dd3"
+		}
+	],
+	"vars": {
+		"KLUSTERED_ADMIN_IDS": "HmYDQjc3JVFo7visJIL5FneGFzNAJjDT"
+	},
 	"services": [
 		{
 			"binding": "BRACKETS_WRITE",

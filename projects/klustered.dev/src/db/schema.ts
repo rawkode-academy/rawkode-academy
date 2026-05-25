@@ -1,7 +1,6 @@
-// Bracket-domain tables here mirror the platform/brackets data-model (the
-// service owns them; the admin only reads `env.BRACKETS` through this schema and
-// writes via the write-model). `sessions` + `user_roles` are auth, owned by the
-// admin and read/written against `env.DB`.
+// These tables mirror the platform/brackets data-model. The service owns them;
+// the admin only reads them (via `env.BRACKETS`) through this schema and writes
+// via the write-model. Auth is not in a database (id.rawkode.academy + SESSION KV).
 import { sql } from "drizzle-orm";
 import {
 	integer,
@@ -263,27 +262,3 @@ export const registrations = sqliteTable("registrations", {
 	reviewedAt: integer("reviewed_at", { mode: "timestamp_ms" }),
 	reviewedByUserId: text("reviewed_by_user_id"),
 });
-
-// Auth tables live in `env.DB` (the klustered D1), not in platform-brackets.
-export const sessions = sqliteTable("sessions", {
-	id: text("id").primaryKey(),
-	userId: text("user_id").notNull(),
-	userEmail: text("user_email").notNull(),
-	userName: text("user_name").notNull(),
-	userImage: text("user_image"),
-	expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
-	createdAt: createdAt(),
-	lastSeenAt: integer("last_seen_at", { mode: "timestamp_ms" })
-		.default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-		.notNull(),
-});
-
-export const userRoles = sqliteTable(
-	"user_roles",
-	{
-		userId: text("user_id").notNull(),
-		role: text("role", { enum: ["admin", "competitor"] }).notNull(),
-		createdAt: createdAt(),
-	},
-	(t) => [primaryKey({ columns: [t.userId, t.role] })],
-);
