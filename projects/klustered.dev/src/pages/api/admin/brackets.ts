@@ -15,17 +15,29 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 	const name = String(form.get("name") ?? "").trim();
 	const kindRaw = String(form.get("kind") ?? "team").trim();
 	const kind = kindRaw === "solo" ? "solo" : "team";
+	const startsAtRaw = String(form.get("startsAt") ?? "").trim();
+	const startsAt = startsAtRaw ? new Date(startsAtRaw).getTime() : Number.NaN;
 	const teamSizeRaw = Number.parseInt(
-		String(form.get("teamSize") ?? "2").trim(),
+		String(form.get("teamSize") ?? "4").trim(),
 		10,
 	);
-	const teamSize = Number.isFinite(teamSizeRaw) && teamSizeRaw > 1 ? teamSizeRaw : 2;
+	const teamSize =
+		Number.isFinite(teamSizeRaw) && teamSizeRaw > 1 ? teamSizeRaw : 4;
 
-	if (!seasonId || !slug || !name) {
-		return new Response("seasonId, slug, name required", { status: 400 });
+	if (!seasonId || !slug || !name || !Number.isFinite(startsAt)) {
+		return new Response("seasonId, slug, name, startsAt required", {
+			status: 400,
+		});
 	}
 
-	await bracketsWrite(env).createBracket({ seasonId, slug, name, kind, teamSize });
+	await bracketsWrite(env).createBracket({
+		seasonId,
+		slug,
+		name,
+		kind,
+		startsAt,
+		teamSize,
+	});
 
 	return redirect("/admin/brackets", 303);
 };

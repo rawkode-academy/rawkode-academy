@@ -26,6 +26,17 @@ function roundsOf(matches: BracketMatch[]): [number, BracketMatch[]][] {
 }
 
 const sideLabel = (s: BracketMatch["sideA"]) => s?.displayName ?? "TBD";
+
+function fmt(iso?: string | null): string {
+	if (!iso) return "TBD";
+	return new Date(iso).toLocaleString("en-GB", {
+		weekday: "short",
+		day: "numeric",
+		month: "short",
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
 ---
 
 {
@@ -46,6 +57,9 @@ const sideLabel = (s: BracketMatch["sideA"]) => s?.displayName ?? "TBD";
 						</h2>
 						<span class="hairline-chip text-xs font-medium uppercase text-muted">
 							{bracket.kind} · {bracket.status}
+						</span>
+						<span class="text-sm text-muted">
+							Starts {fmt(bracket.startsAt)}
 						</span>
 					</div>
 					<div class="flex gap-6 overflow-x-auto pb-2">

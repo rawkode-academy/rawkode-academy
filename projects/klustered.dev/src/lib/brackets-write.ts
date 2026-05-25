@@ -80,22 +80,13 @@ export interface BracketsWrite {
 		name: string;
 		slug: string;
 		kind?: "solo" | "team";
-		startsAt?: number | null;
+		startsAt: number;
 		registrationClosesAt?: number | null;
 		maxEntries?: number;
 		teamSize?: number;
 		cadenceDays?: number;
 	}): Promise<{ id: string }>;
 	deleteBracket(input: { id: string }): Promise<{ ok: true }>;
-	createScenario(input: {
-		slug: string;
-		title: string;
-		description: string;
-		difficulty?: "easy" | "medium" | "hard";
-		tags?: string[];
-		notes?: string | null;
-	}): Promise<{ id: string }>;
-	deleteScenario(input: { id: string }): Promise<{ ok: true }>;
 	createBracketBreak(input: {
 		bracketId: string;
 		label: string;
@@ -130,7 +121,6 @@ export interface BracketsWrite {
 		matchId: string;
 		entryAId?: string | null;
 		entryBId?: string | null;
-		scenarioId?: string | null;
 		judgeUserId?: string | null;
 		scheduledAt?: number | null;
 		status?: "scheduled" | "live" | "completed" | "cancelled";

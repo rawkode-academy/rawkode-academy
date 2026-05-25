@@ -11,12 +11,12 @@ interface Props {
 const { showId, nav, active = null } = Astro.props;
 
 const tabs = [
-	{ slug: null as string | null, label: "Episodes", href: `/shows/${showId}` },
 	...nav.map((item) => ({
 		slug: item.slug,
 		label: item.label,
 		href: `/shows/${showId}/${item.slug}`,
 	})),
+	{ slug: null as string | null, label: "Episodes", href: `/shows/${showId}` },
 ];
 ---
 

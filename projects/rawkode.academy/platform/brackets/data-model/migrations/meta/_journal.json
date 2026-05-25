@@ -15,6 +15,13 @@
 			"when": 1779667200000,
 			"tag": "0001_bracket_scoped_applications",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1779734400000,
+			"tag": "0002_remove_scenarios_and_default_team_size",
+			"breakpoints": true
 		}
 	]
 }

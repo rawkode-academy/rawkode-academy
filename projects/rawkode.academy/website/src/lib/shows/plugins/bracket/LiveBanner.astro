@@ -17,11 +17,6 @@ const { match } = Astro.props;
 					{match.sideA?.displayName ?? "TBD"} vs{" "}
 					{match.sideB?.displayName ?? "TBD"}
 				</span>
-				{match.scenarioTitle && (
-					<span class="hidden opacity-80 sm:inline">
-						· {match.scenarioTitle}
-					</span>
-				)}
 			</div>
 		</div>
 	)

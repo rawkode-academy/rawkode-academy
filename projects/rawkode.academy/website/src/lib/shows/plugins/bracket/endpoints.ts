@@ -1,5 +1,9 @@
 import type { ShowEndpointModule, ShowPageContext } from "@/lib/shows/types";
-import { loadLiveMatch, loadSchedule } from "./queries";
+import {
+	loadLiveMatch,
+	loadSchedule,
+	requireBracketsReadBinding,
+} from "./queries";
 
 interface BracketsWriteBinding {
 	selfRegisterCompetitor(input: {
@@ -75,7 +79,10 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 		{
 			slug: "live",
 			handler: async (ctx: ShowPageContext) => {
-				const match = await loadLiveMatch(ctx.showId);
+				const match = await loadLiveMatch(
+					ctx.showId,
+					requireBracketsReadBinding(ctx.env),
+				);
 				return Response.json(
 					{ live: match },
 					{
@@ -89,9 +96,9 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 		{
 			slug: "schedule.ics",
 			handler: async (ctx: ShowPageContext) => {
-				const matches = (await loadSchedule(ctx.showId)).filter(
-					(m) => m.scheduledAt && m.status !== "cancelled",
-				);
+				const matches = (
+					await loadSchedule(ctx.showId, requireBracketsReadBinding(ctx.env))
+				).filter((m) => m.scheduledAt && m.status !== "cancelled");
 				const lines = [
 					"BEGIN:VCALENDAR",
 					"VERSION:2.0",
@@ -107,9 +114,7 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 						`DTSTAMP:${toICSDate(new Date().toISOString())}`,
 						`DTSTART:${start}`,
 						`SUMMARY:${escapeICS(title)}`,
-						m.scenarioTitle
-							? `DESCRIPTION:${escapeICS(m.scenarioTitle)}`
-							: "DESCRIPTION:",
+						"DESCRIPTION:",
 						"END:VEVENT",
 					);
 				}

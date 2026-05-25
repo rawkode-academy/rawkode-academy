@@ -27,14 +27,10 @@ const bracket = await db
 const teams = await db
 	.select({ id: schema.teams.id, name: schema.teams.name })
 	.from(schema.teams)
-	.where(bracket ? eq(schema.teams.bracketId, bracket.id) : eq(schema.teams.id, "_"))
+	.where(
+		bracket ? eq(schema.teams.bracketId, bracket.id) : eq(schema.teams.id, "_"),
+	)
 	.orderBy(asc(schema.teams.name))
-	.all();
-
-const scenarios = await db
-	.select({ id: schema.scenarios.id, title: schema.scenarios.title })
-	.from(schema.scenarios)
-	.orderBy(asc(schema.scenarios.title))
 	.all();
 
 const result = await db
@@ -118,23 +114,6 @@ function toDatetimeLocal(value: Date | null): string {
 					value={toDatetimeLocal(match.scheduledAt)}
 					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
 				/>
-			</label>
-
-			<label class="flex flex-col gap-1">
-				<span class="text-xs text-slate-400">Scenario</span>
-				<select
-					name="scenarioId"
-					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
-				>
-					<option value="">— TBD —</option>
-					{
-						scenarios.map((s) => (
-							<option value={s.id} selected={match.scenarioId === s.id}>
-								{s.title}
-							</option>
-						))
-					}
-				</select>
 			</label>
 
 			<label class="flex flex-col gap-1">
