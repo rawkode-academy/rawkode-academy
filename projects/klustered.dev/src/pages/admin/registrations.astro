@@ -1,25 +1,47 @@
 ---
 import { env } from "cloudflare:workers";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb, schema } from "@/db/client";
 import { ADMIN_NAV } from "@/lib/nav";
 
 const db = getBracketsDb(env.BRACKETS);
-const registrations = await db
+const applications = await db
 	.select({
-		id: schema.registrations.id,
-		seasonId: schema.registrations.seasonId,
+		id: schema.bracketApplications.id,
+		seasonId: schema.brackets.seasonId,
 		seasonName: schema.seasons.name,
-		displayName: schema.registrations.displayName,
-		email: schema.registrations.email,
-		message: schema.registrations.message,
-		status: schema.registrations.status,
-		submittedAt: schema.registrations.submittedAt,
+		bracketName: schema.brackets.name,
+		bracketKind: schema.brackets.kind,
+		displayName: schema.competitors.displayName,
+		userId: schema.competitors.userId,
+		status: schema.bracketApplications.status,
+		submittedAt: schema.bracketApplications.createdAt,
+		teamId: schema.teams.id,
+		teamName: schema.teams.name,
 	})
-	.from(schema.registrations)
-	.leftJoin(schema.seasons, eq(schema.registrations.seasonId, schema.seasons.id))
-	.orderBy(desc(schema.registrations.submittedAt))
+	.from(schema.bracketApplications)
+	.innerJoin(
+		schema.brackets,
+		eq(schema.bracketApplications.bracketId, schema.brackets.id),
+	)
+	.innerJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
+	.innerJoin(
+		schema.competitors,
+		eq(schema.bracketApplications.competitorId, schema.competitors.id),
+	)
+	.leftJoin(
+		schema.teamMembers,
+		and(
+			eq(schema.teamMembers.bracketId, schema.bracketApplications.bracketId),
+			eq(
+				schema.teamMembers.competitorId,
+				schema.bracketApplications.competitorId,
+			),
+		),
+	)
+	.leftJoin(schema.teams, eq(schema.teamMembers.teamId, schema.teams.id))
+	.orderBy(desc(schema.bracketApplications.createdAt))
 	.all();
 
 function formatDate(value: Date | null): string {
@@ -36,7 +58,7 @@ const statusClass: Record<string, string> = {
 
 <PortalLayout title="Registrations" section="admin" nav={[...ADMIN_NAV]}>
 	<p class="text-sm text-slate-400">
-		Applications submitted via the public site's <code class="rounded bg-slate-800 px-1 py-0.5 text-xs">/apply</code> form. Approve or reject — approved entries can then be turned into competitors and added to teams.
+		Applications submitted by signed-in members on the public site. Approving an application seeds it into the bracket when the required competitor or team exists.
 	</p>
 
 	<section class="overflow-hidden rounded-2xl border border-slate-800">
@@ -45,32 +67,40 @@ const statusClass: Record<string, string> = {
 				<tr>
 					<th class="px-6 py-3">Submitted</th>
 					<th class="px-6 py-3">Season</th>
+					<th class="px-6 py-3">Bracket</th>
 					<th class="px-6 py-3">Applicant</th>
-					<th class="px-6 py-3">Email</th>
 					<th class="px-6 py-3">Status</th>
 					<th class="px-6 py-3 text-right">Actions</th>
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-slate-800 bg-slate-950/40">
 				{
-					registrations.length === 0 ? (
+					applications.length === 0 ? (
 						<tr>
 							<td colspan="6" class="px-6 py-6 text-center text-sm text-slate-500">
 								No applications yet.
 							</td>
 						</tr>
 					) : (
-						registrations.map((r) => (
+						applications.map((r) => {
+							const canApprove = r.bracketKind !== "team" || Boolean(r.teamId);
+							return (
 							<tr>
 								<td class="px-6 py-3 text-slate-400">{formatDate(r.submittedAt)}</td>
 								<td class="px-6 py-3 text-slate-400">{r.seasonName}</td>
 								<td class="px-6 py-3">
-									<div class="text-slate-100">{r.displayName}</div>
-									{r.message && (
-										<div class="mt-1 text-xs text-slate-400">{r.message}</div>
-									)}
+									<div class="text-slate-100">{r.bracketName}</div>
+									<div class="mt-1 text-xs capitalize text-slate-400">{r.bracketKind}</div>
 								</td>
-								<td class="px-6 py-3 font-mono text-xs text-slate-300">{r.email}</td>
+								<td class="px-6 py-3">
+									<div class="text-slate-100">{r.displayName}</div>
+									{r.teamName ? (
+										<div class="mt-1 text-xs text-slate-400">Team: {r.teamName}</div>
+									) : r.bracketKind === "team" ? (
+										<div class="mt-1 text-xs text-amber-300">No team yet</div>
+									) : null}
+									{r.userId && <div class="mt-1 font-mono text-xs text-slate-500">{r.userId}</div>}
+								</td>
 								<td class="px-6 py-3">
 									<span class={`rounded-full px-2 py-0.5 text-xs capitalize ${statusClass[r.status]}`}>
 										{r.status}
@@ -78,13 +108,16 @@ const statusClass: Record<string, string> = {
 								</td>
 								<td class="px-6 py-3">
 									<div class="flex justify-end gap-3 text-xs">
-										{r.status !== "approved" && (
+										{r.status !== "approved" && canApprove && (
 											<form method="POST" action={`/api/admin/registrations/${r.id}/decide`}>
 												<input type="hidden" name="status" value="approved" />
 												<button class="text-emerald-300 underline-offset-4 hover:underline">
 													Approve
 												</button>
 											</form>
+										)}
+										{r.status !== "approved" && !canApprove && (
+											<span class="text-slate-500">Awaiting team</span>
 										)}
 										{r.status !== "rejected" && (
 											<form method="POST" action={`/api/admin/registrations/${r.id}/decide`}>
@@ -97,7 +130,8 @@ const statusClass: Record<string, string> = {
 									</div>
 								</td>
 							</tr>
-						))
+							);
+						})
 					)
 				}
 			</tbody>

@@ -76,7 +76,6 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 		apply: {
 			slug: "apply",
 			label: "Apply",
-			hidden: true,
 			load: async (ctx) => {
 				const readModel = requireBracketsReadBinding(ctx.env);
 				return {

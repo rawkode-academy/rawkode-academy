@@ -106,7 +106,12 @@ export const bracketApplications = sqliteTable(
 		competitorId: text("competitor_id")
 			.notNull()
 			.references(() => competitors.id, { onDelete: "cascade" }),
+		status: text("status", { enum: ["pending", "approved", "rejected"] })
+			.notNull()
+			.default("pending"),
 		createdAt: createdAt(),
+		reviewedAt: integer("reviewed_at", { mode: "timestamp_ms" }),
+		reviewedByUserId: text("reviewed_by_user_id"),
 	},
 	(t) => [
 		uniqueIndex("bracket_applications_bracket_competitor_unique").on(

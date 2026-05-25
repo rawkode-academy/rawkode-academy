@@ -4,11 +4,11 @@ import { bracketsWrite } from "@/lib/brackets-write";
 
 export const prerender = false;
 
-const VALID = ["approved", "rejected"] as const;
-type Decision = (typeof VALID)[number];
+const VALID_STATUS = ["interest", "active", "finished"] as const;
+type Status = (typeof VALID_STATUS)[number];
 
-function isDecision(v: string): v is Decision {
-	return (VALID as readonly string[]).includes(v);
+function isStatus(value: string): value is Status {
+	return (VALID_STATUS as readonly string[]).includes(value);
 }
 
 export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
@@ -21,15 +21,11 @@ export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
 
 	const form = await request.formData();
 	const status = String(form.get("status") ?? "").trim();
-	if (!isDecision(status)) {
+	if (!isStatus(status)) {
 		return new Response("invalid status", { status: 400 });
 	}
 
-	await bracketsWrite(env).decideApplication({
-		applicationId: id,
-		decision: status,
-		reviewedByUserId: locals.user?.id ?? "",
-	});
+	await bracketsWrite(env).updateSeason({ id, status });
 
-	return redirect("/admin/registrations", 303);
+	return redirect("/admin/seasons", 303);
 };

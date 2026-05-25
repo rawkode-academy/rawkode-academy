@@ -170,12 +170,22 @@ function formatDateTime(value: Date | null): string {
 									{b.kind === "team" ? `Team (${b.teamSize})` : "Individual"}
 								</td>
 								<td class="px-6 py-3">
-									<span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300 capitalize">
-										{b.status}
-									</span>
+									<form method="POST" action={`/api/admin/brackets/${b.id}/update`} class="flex items-center gap-2">
+										<select
+											name="status"
+											class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+										>
+											<option value="draft" selected={b.status === "draft"}>Draft</option>
+											<option value="active" selected={b.status === "active"}>Active</option>
+											<option value="finished" selected={b.status === "finished"}>Finished</option>
+										</select>
+										<button class="text-xs text-fuchsia-300 underline-offset-4 hover:underline">
+											Save
+										</button>
+									</form>
 								</td>
 								<td class="px-6 py-3 text-right">
-									<form method="POST" action={`/api/admin/brackets/${b.id}/delete`}>
+									<form method="POST" action={`/api/admin/brackets/${b.id}/delete`} onsubmit="return confirm('Delete this bracket?')">
 										<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
 											Delete
 										</button>
