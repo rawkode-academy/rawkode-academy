@@ -1,13 +1,7 @@
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { createProjectFileReader } from "./read-project-file";
 
-const TEST_DIR = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = resolve(TEST_DIR, "../..");
-
-const readProjectFile = (relativePath: string): string =>
-	readFileSync(resolve(PROJECT_ROOT, relativePath), "utf-8");
+const readProjectFile = createProjectFileReader(import.meta.url, "../..");
 
 describe("Core Web Vitals Guardrails", () => {
 	it("loads PostHog lazily after idle time", () => {
@@ -33,9 +27,11 @@ describe("Core Web Vitals Guardrails", () => {
 		const source = readProjectFile("src/components/html/head.astro");
 		const preloadedFonts = source.match(/<Font[^>]*preload[^>]*>/g) ?? [];
 
-		expect(preloadedFonts).toHaveLength(1);
-		expect(source).toContain('<Font cssVariable="--font-poppins" preload />');
-		expect(source).not.toContain("--font-monaspace-neon\" preload");
+		expect(preloadedFonts).toEqual([
+			'<Font cssVariable="--font-inter-tight" preload />',
+		]);
+		expect(source).toContain('<Font cssVariable="--font-instrument-serif" />');
+		expect(source).toContain('<Font cssVariable="--font-jetbrains-mono" />');
 	});
 
 	it("avoids eager preconnects to non-critical analytics domains", () => {
@@ -54,10 +50,11 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).not.toContain("@astrojs/partytown");
 	});
 
-	it("uses @reference instead of re-importing global CSS in head", () => {
+	it("keeps global CSS out of the production head", () => {
 		const source = readProjectFile("src/components/html/head.astro");
 
-		expect(source).toContain('@reference "@/styles/global.css";');
+		expect(source).toContain("import.meta.env.DEV");
+		expect(source).toContain('href="/src/styles/global.css"');
 		expect(source).not.toContain('@import "@/styles/global.css";');
 	});
 

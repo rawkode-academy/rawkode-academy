@@ -5,8 +5,8 @@
  * article per technology is the established SEO heuristic; repeating
  * the same anchor lowers signal and looks spammy).
  *
- * Per-file opt-out: include the literal HTML comment
- * `<!-- no-autolink -->` anywhere in the body.
+ * Per-file opt-out: include `<!-- no-autolink -->` in Markdown or an
+ * MDX JSX comment containing `no-autolink`.
  */
 import type { VFile } from "vfile";
 
@@ -55,7 +55,8 @@ const DEFAULT_SKIP = [
 	"salt",
 ];
 
-const SKIP_COMMENT_PATTERN = /<!--\s*no-autolink\s*-->/i;
+const SKIP_COMMENT_PATTERN =
+	/<!--\s*no-autolink\s*-->|\{\/\*\s*no-autolink\s*\*\/\}/i;
 
 const IGNORE_TYPES = new Set<string>([
 	"heading",
@@ -94,6 +95,128 @@ function buildPattern(
 	);
 }
 
+function buildSkipSet(skipNames: ReadonlyArray<string> = []): Set<string> {
+	return new Set([
+		...DEFAULT_SKIP,
+		...skipNames.map((name) => name.toLowerCase()),
+	]);
+}
+
+function shouldSkipFile(
+	file: VFile,
+	skipPathSubstrings: ReadonlyArray<string>,
+): boolean {
+	const path = file.path ?? "";
+	if (skipPathSubstrings.some((fragment) => path.includes(fragment))) {
+		return true;
+	}
+
+	const source = typeof file.value === "string" ? file.value : "";
+	return source !== "" && SKIP_COMMENT_PATTERN.test(source);
+}
+
+interface LinkState {
+	pattern: RegExp;
+	lookup: Map<string, string>;
+	linked: Set<string>;
+}
+
+function isNode(value: Node | undefined): value is Node {
+	return Boolean(
+		value && typeof value === "object" && typeof value.type === "string",
+	);
+}
+
+function isParent(node: Node): node is Parent {
+	return Array.isArray((node as Partial<Parent>).children);
+}
+
+function appendLinkReplacement(
+	nodes: Node[],
+	value: string,
+	cursor: number,
+	start: number,
+	matched: string,
+	techId: string,
+): number {
+	if (start > cursor) {
+		nodes.push({
+			type: "text",
+			value: value.slice(cursor, start),
+		});
+	}
+
+	nodes.push({
+		type: "link",
+		url: `/technology/${techId}`,
+		children: [{ type: "text", value: matched }],
+	});
+
+	return start + matched.length;
+}
+
+function buildReplacement(
+	text: TextNode,
+	state: LinkState,
+): Node[] | undefined {
+	const value = text.value;
+	if (!value) return undefined;
+
+	state.pattern.lastIndex = 0;
+	const nodes: Node[] = [];
+	let cursor = 0;
+	let match = state.pattern.exec(value);
+	while (match) {
+		const matched = match[1] ?? match[0];
+		const techId = state.lookup.get(matched.toLowerCase());
+		if (techId && !state.linked.has(techId)) {
+			state.linked.add(techId);
+			cursor = appendLinkReplacement(
+				nodes,
+				value,
+				cursor,
+				match.index,
+				matched,
+				techId,
+			);
+		}
+		match = state.pattern.exec(value);
+	}
+
+	if (nodes.length === 0) return undefined;
+	if (cursor < value.length) {
+		nodes.push({ type: "text", value: value.slice(cursor) });
+	}
+	return nodes;
+}
+
+function replaceTextChild(
+	parent: Parent,
+	index: number,
+	text: TextNode,
+	state: LinkState,
+): number {
+	const replacement = buildReplacement(text, state);
+	if (!replacement) return index;
+
+	parent.children.splice(index, 1, ...replacement);
+	return index + replacement.length - 1;
+}
+
+function walk(node: Node | undefined, state: LinkState): void {
+	if (!isNode(node) || IGNORE_TYPES.has(node.type) || !isParent(node)) return;
+
+	for (let i = 0; i < node.children.length; i++) {
+		const child = node.children[i];
+		if (!isNode(child)) continue;
+		if (child.type === "text") {
+			i = replaceTextChild(node, i, child as TextNode, state);
+			continue;
+		}
+		walk(child, state);
+	}
+}
+
 /**
  * Returns a unified `Plugin`: when invoked by `.use()`, unified calls
  * the outer function to retrieve the per-file transformer. Passing a
@@ -104,11 +227,7 @@ export function remarkTechAutolink(
 	options: AutolinkOptions,
 ): () => (tree: Root, file: VFile) => void {
 	const minLength = options.minLength ?? 3;
-	const skip = new Set<string>(DEFAULT_SKIP);
-	for (const name of options.skipNames ?? []) {
-		skip.add(name.toLowerCase());
-	}
-
+	const skip = buildSkipSet(options.skipNames);
 	const names = Array.from(options.lookup.keys());
 	const pattern = buildPattern(names, skip, minLength);
 	const skipPathSubstrings =
@@ -116,81 +235,12 @@ export function remarkTechAutolink(
 
 	return function attach() {
 		return function transform(tree: Root, file: VFile): void {
-			if (!pattern) return;
-			// Hoist into a local so the non-null narrowing carries into
-			// the nested buildReplacement function below.
-			const re = pattern;
-
-			const path = file.path ?? "";
-			for (const fragment of skipPathSubstrings) {
-				if (path.includes(fragment)) return;
-			}
-
-			const source = typeof file.value === "string" ? file.value : "";
-			if (source && SKIP_COMMENT_PATTERN.test(source)) return;
-
-			const linked = new Set<string>();
-
-			function buildReplacement(text: TextNode): Node[] | undefined {
-				const value = text.value;
-				if (!value) return undefined;
-
-				re.lastIndex = 0;
-				const newNodes: Node[] = [];
-				let cursor = 0;
-				let match = re.exec(value);
-				while (match) {
-					const matched = match[1] ?? match[0];
-					const start = match.index;
-					const techId = options.lookup.get(matched.toLowerCase());
-					if (techId && !linked.has(techId)) {
-						linked.add(techId);
-						if (start > cursor) {
-							newNodes.push({
-								type: "text",
-								value: value.slice(cursor, start),
-							});
-						}
-						newNodes.push({
-							type: "link",
-							url: `/technology/${techId}`,
-							children: [{ type: "text", value: matched }],
-						});
-						cursor = start + matched.length;
-					}
-					match = re.exec(value);
-				}
-
-				if (newNodes.length === 0) return undefined;
-				if (cursor < value.length) {
-					newNodes.push({ type: "text", value: value.slice(cursor) });
-				}
-				return newNodes;
-			}
-
-			function walk(node: Node | undefined): void {
-				if (!node || typeof node !== "object") return;
-				if (typeof node.type !== "string") return;
-				if (IGNORE_TYPES.has(node.type)) return;
-				const children = (node as Partial<Parent>).children;
-				if (!Array.isArray(children)) return;
-
-				for (let i = 0; i < children.length; i++) {
-					const child = children[i];
-					if (!child || typeof child !== "object") continue;
-					if (child.type === "text") {
-						const replacement = buildReplacement(child as TextNode);
-						if (replacement) {
-							children.splice(i, 1, ...replacement);
-							i += replacement.length - 1;
-						}
-					} else {
-						walk(child);
-					}
-				}
-			}
-
-			walk(tree);
+			if (!pattern || shouldSkipFile(file, skipPathSubstrings)) return;
+			walk(tree, {
+				pattern,
+				lookup: options.lookup,
+				linked: new Set<string>(),
+			});
 		};
 	};
 }

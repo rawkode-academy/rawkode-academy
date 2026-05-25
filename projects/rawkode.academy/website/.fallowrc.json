@@ -6,5 +6,8 @@
 		"scripts/publish-subgraph.ts",
 		"scripts/sync-technologies.ts",
 		"scripts/validate-seo.ts"
+	],
+	"dynamicallyLoaded": [
+		"src/tests/mocks/*.ts"
 	]
 }

@@ -1,7 +1,20 @@
 /// <reference types="vitest" />
-import { getViteConfig } from "astro/config";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
 
-export default getViteConfig({
+const PROJECT_ROOT = dirname(fileURLToPath(import.meta.url));
+const sourceRoot = resolve(PROJECT_ROOT, "src");
+
+export default defineConfig({
+	resolve: {
+		alias: {
+			"@": sourceRoot,
+			"@games": resolve(PROJECT_ROOT, "../games"),
+			"astro:content": resolve(sourceRoot, "tests/mocks/astro-content.ts"),
+			"astro:middleware": resolve(sourceRoot, "tests/mocks/astro-middleware.ts"),
+		},
+	},
 	test: {
 		include: ["src/**/*.{spec,test}.{ts,tsx}"],
 		mockReset: true,
@@ -20,4 +33,4 @@ export default getViteConfig({
 		},
 		setupFiles: ["./src/tests/setup.ts"],
 	},
-} as any);
+});

@@ -10,16 +10,9 @@ prerequisites:
   - "Experience with container runtimes (containerd, CRI) and troubleshooting with `crictl`/`ctr`."
   - "Familiarity with etcd administration (`etcdctl`, snapshots, compaction) and TLS fundamentals."
 technologies:
-  - "Kubernetes"
-  - "kubectl"
+  - "kubernetes"
   - "containerd"
   - "etcd"
-  - "systemd"
-  - "journalctl"
-  - "iptables"
-  - "tc"
-  - "Linux"
-  - "GitOps"
 publishedAt: "2025-10-01"
 authors:
   - "rawkode"

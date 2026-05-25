@@ -1,39 +1,44 @@
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { createProjectFileReader } from "../read-project-file";
 
-const TEST_DIR = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = resolve(TEST_DIR, "../../..");
-const COMPONENTS_DIR = resolve(PROJECT_ROOT, "src/components/common");
+const readProjectFile = createProjectFileReader(import.meta.url, "../../..");
 
 const readComponent = (name: string): string =>
-	readFileSync(resolve(COMPONENTS_DIR, name), "utf-8");
+	readProjectFile(`src/components/common/${name}`);
 
 describe("Skeleton Components", () => {
 	it("provide accessible loading semantics", () => {
-		const skeleton = readComponent("Skeleton.vue");
-		const skeletonText = readComponent("SkeletonText.vue");
-		const skeletonCard = readComponent("SkeletonCard.vue");
-		const skeletonList = readComponent("SkeletonList.vue");
+		const components = [
+			"SkeletonText.vue",
+			"SkeletonComment.vue",
+			"SkeletonTranscript.vue",
+			"SkeletonList.tsx",
+		].map(readComponent);
 
-		for (const source of [skeleton, skeletonText, skeletonCard, skeletonList]) {
+		for (const source of components) {
 			expect(source).toContain('role="status"');
 			expect(source).toContain("sr-only");
-			expect(source).toContain("ariaLabel");
+			expect(source).toMatch(/aria-label|ariaLabel/);
 		}
 	});
 
-	it("keeps deterministic structure for card and list variants", () => {
-		const skeletonCard = readComponent("SkeletonCard.vue");
-		const skeletonList = readComponent("SkeletonList.vue");
+	it("keeps deterministic structure for comment, transcript, and list variants", () => {
+		const skeletonComment = readComponent("SkeletonComment.vue");
+		const skeletonTranscript = readComponent("SkeletonTranscript.vue");
+		const skeletonList = readComponent("SkeletonList.tsx");
 
-		expect(skeletonCard).toContain('import SkeletonText from "./SkeletonText.vue";');
-		expect(skeletonCard).toContain("showDescription");
-		expect(skeletonCard).toContain("showFooter");
+		expect(skeletonComment).toContain(
+			'import SkeletonText from "./SkeletonText.vue";',
+		);
+		expect(skeletonComment).toContain("lastLineWidth");
 
-		expect(skeletonList).toContain('v-for="index in items"');
+		expect(skeletonTranscript).toContain("getTimestampWidth");
+		expect(skeletonTranscript).toContain("getParagraphLines");
+		expect(skeletonTranscript).toContain("getLastLineWidth");
+
+		expect(skeletonList).toContain("Array.from({ length: items })");
 		expect(skeletonList).toContain("getTitleWidth");
-		expect(skeletonList).toContain("getSubtitleWidth");
+		expect(skeletonList).toContain("showSubtitle");
+		expect(skeletonList).toContain("showAction");
 	});
 });
