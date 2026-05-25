@@ -199,6 +199,7 @@ import (
 		if _hasMigrations {
 			migrate: schema.#Task & {
 				hermetic: false
+                                dir: from: "caller"
 				command:  "bun"
 				args: [
 					"x", "wrangler", "d1", "migrations", "apply", "DB",
@@ -214,6 +215,7 @@ import (
 			if includeReadModel {
 				read: schema.#Task & {
 					hermetic: false
+                                        dir: from: "caller"
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
 					inputs: ["read-model", "data-model", "package.json"]
@@ -222,6 +224,7 @@ import (
 			if includeWriteModel {
 				write: schema.#Task & {
 					hermetic: false
+                                        dir: from: "caller"
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
 					inputs: ["write-model", "data-model", "package.json"]
@@ -231,6 +234,7 @@ import (
 				http: schema.#Task & {
 					hermetic: false
 					command:  "bun"
+                                        dir: from: "caller"
 					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 					inputs: ["http", "data-model", "package.json"]
 				}
