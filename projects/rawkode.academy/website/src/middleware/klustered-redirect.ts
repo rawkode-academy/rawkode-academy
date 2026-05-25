@@ -10,7 +10,7 @@ const SHOW_BASE = "/shows/klustered";
 
 function mapPath(pathname: string): string {
 	if (pathname === "/schedule.ics") return "/api/shows/klustered/schedule.ics";
-	if (/^\/(brackets|schedule|leaderboard|apply)\/?$/.test(pathname)) {
+	if (/^\/(seasons|brackets|schedule|apply)\/?$/.test(pathname)) {
 		return `${SHOW_BASE}/${pathname.replace(/^\/|\/$/g, "")}`;
 	}
 	// Everything else (home, about, rules, sponsors, episodes/*) lands on the hub.

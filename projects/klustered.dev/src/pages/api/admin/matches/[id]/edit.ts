@@ -29,7 +29,6 @@ export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
 	const form = await request.formData();
 	const teamAId = nullable(form.get("teamAId"));
 	const teamBId = nullable(form.get("teamBId"));
-	const scenarioId = nullable(form.get("scenarioId"));
 	const judgeUserId = nullable(form.get("judgeUserId"));
 	const scheduledAtRaw = nullable(form.get("scheduledAt"));
 	const status = String(form.get("status") ?? "").trim();
@@ -72,7 +71,6 @@ export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
 		matchId: id,
 		entryAId,
 		entryBId,
-		scenarioId,
 		judgeUserId,
 		scheduledAt,
 		status,

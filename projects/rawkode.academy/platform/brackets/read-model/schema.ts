@@ -179,19 +179,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 						? resolveSide(m.winnerTeamId, m.winnerEntryId)
 						: null,
 			}),
-			scenarioTitle: t.field({
-				type: "String",
-				nullable: true,
-				resolve: async (m) => {
-					if (!m.scenarioId) return null;
-					const scenario = await db
-						.select({ title: s.scenarios.title })
-						.from(s.scenarios)
-						.where(eq(s.scenarios.id, m.scenarioId))
-						.get();
-					return scenario?.title ?? null;
-				},
-			}),
 		}),
 	});
 
@@ -209,7 +196,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 			cadenceDays: t.exposeInt("cadenceDays"),
 			startsAt: t.field({
 				type: "DateTime",
-				nullable: true,
 				resolve: (b) => b.startsAt,
 			}),
 			registrationClosesAt: t.field({
@@ -263,22 +249,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 			}),
 		}),
 	});
-
-	const standingRef = builder
-		.objectRef<{
-			id: string;
-			displayName: string;
-			wins: number;
-			losses: number;
-		}>("BracketStanding")
-		.implement({
-			fields: (t) => ({
-				id: t.exposeString("id"),
-				displayName: t.exposeString("displayName"),
-				wins: t.exposeInt("wins"),
-				losses: t.exposeInt("losses"),
-			}),
-		});
 
 	const myTeamRef = builder.objectRef<MyTeam>("MyTeam").implement({
 		fields: (t) => ({
@@ -345,44 +315,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 	const showLiveMatch = async (showId: string) => {
 		const matches = await showSchedule(showId);
 		return matches.find((m) => m.status === "live") ?? null;
-	};
-
-	const showLeaderboard = async (
-		showId: string,
-		seasonSlug?: string | null,
-	) => {
-		const matches = (await showSchedule(showId, seasonSlug)).filter(
-			(m) => m.status === "completed",
-		);
-		const table = new Map<
-			string,
-			{ id: string; displayName: string; wins: number; losses: number }
-		>();
-		const bump = async (
-			teamId: string | null,
-			entryId: string | null,
-			key: "wins" | "losses",
-		) => {
-			const side = await resolveSide(teamId, entryId);
-			if (!side) return;
-			const cur = table.get(side.id) ?? {
-				id: side.id,
-				displayName: side.displayName,
-				wins: 0,
-				losses: 0,
-			};
-			cur[key] += 1;
-			table.set(side.id, cur);
-		};
-		for (const m of matches) {
-			const winnerIsA =
-				(m.winnerEntryId && m.winnerEntryId === m.entryAId) ||
-				(m.winnerTeamId && m.winnerTeamId === m.teamAId);
-			await bump(m.winnerTeamId, m.winnerEntryId, "wins");
-			if (winnerIsA) await bump(m.teamBId, m.entryBId, "losses");
-			else await bump(m.teamAId, m.entryAId, "losses");
-		}
-		return [...table.values()].sort((a, b) => b.wins - a.wins);
 	};
 
 	const openBrackets = async (showId: string) => {
@@ -511,11 +443,6 @@ const createBuilder = (env: { DB: D1Database }) => {
 					nullable: true,
 					resolve: (show) => showLiveMatch(show.id),
 				}),
-				leaderboard: t.field({
-					type: [standingRef],
-					args: { seasonSlug: t.arg({ type: "String", required: false }) },
-					resolve: (show, args) => showLeaderboard(show.id, args.seasonSlug),
-				}),
 				openBrackets: t.field({
 					type: [bracketRef],
 					resolve: (show) => openBrackets(show.id),
@@ -531,6 +458,40 @@ const createBuilder = (env: { DB: D1Database }) => {
 
 	builder.queryType({
 		fields: (t) => ({
+			seasons: t.field({
+				type: [seasonRef],
+				args: { showId: t.arg({ type: "String", required: true }) },
+				resolve: (_root, args) => seasonsForShow(args.showId),
+			}),
+			brackets: t.field({
+				type: [bracketRef],
+				args: {
+					showId: t.arg({ type: "String", required: true }),
+					seasonSlug: t.arg({ type: "String", required: false }),
+					status: t.arg({ type: "String", required: false }),
+				},
+				resolve: (_root, args) =>
+					showBrackets(args.showId, args.seasonSlug, args.status),
+			}),
+			schedule: t.field({
+				type: [matchRef],
+				args: {
+					showId: t.arg({ type: "String", required: true }),
+					seasonSlug: t.arg({ type: "String", required: false }),
+				},
+				resolve: (_root, args) => showSchedule(args.showId, args.seasonSlug),
+			}),
+			liveMatch: t.field({
+				type: matchRef,
+				nullable: true,
+				args: { showId: t.arg({ type: "String", required: true }) },
+				resolve: (_root, args) => showLiveMatch(args.showId),
+			}),
+			openBrackets: t.field({
+				type: [bracketRef],
+				args: { showId: t.arg({ type: "String", required: true }) },
+				resolve: (_root, args) => openBrackets(args.showId),
+			}),
 			myBracketParticipation: t.field({
 				type: myParticipationRef,
 				args: { showId: t.arg({ type: "String", required: true }) },
