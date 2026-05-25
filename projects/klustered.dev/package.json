@@ -13,7 +13,8 @@
 		"db:seed": "bun scripts/seed.ts",
 		"db:setup:local": "wrangler d1 migrations apply DB --local && bun scripts/seed.ts",
 		"db:seed:production": "bun scripts/seed-production.ts",
-		"db:grant-role": "bun scripts/grant-role.ts"
+		"db:grant-role": "bun scripts/grant-role.ts",
+		"db:migrate:brackets": "bun scripts/migrate-to-platform-brackets.ts"
 	},
 	"dependencies": {
 		"@astrojs/check": "0.9.8",
