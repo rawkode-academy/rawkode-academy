@@ -322,6 +322,124 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			.where(eq(s.bracketBreaks.id, input.id));
 		return { ok: true };
 	}
+
+	// ---- competitors ----
+
+	async createCompetitor(input: {
+		seasonId: string;
+		personSlug: string;
+		displayName: string;
+		bio?: string | null;
+		userId?: string | null;
+	}): Promise<{ id: string }> {
+		const id = `cmp-${crypto.randomUUID()}`;
+		await this.db.insert(s.competitors).values({
+			id,
+			seasonId: input.seasonId,
+			personSlug: input.personSlug,
+			displayName: input.displayName,
+			bio: input.bio ?? null,
+			userId: input.userId ?? null,
+		});
+		return { id };
+	}
+
+	async deleteCompetitor(input: { id: string }): Promise<{ ok: true }> {
+		await this.db.delete(s.competitors).where(eq(s.competitors.id, input.id));
+		return { ok: true };
+	}
+
+	// ---- teams ----
+
+	async createTeam(input: {
+		seasonId: string;
+		slug: string;
+		name: string;
+	}): Promise<{ id: string }> {
+		const id = `team-${crypto.randomUUID()}`;
+		await this.db.insert(s.teams).values({
+			id,
+			seasonId: input.seasonId,
+			slug: input.slug,
+			name: input.name,
+		});
+		return { id };
+	}
+
+	async deleteTeam(input: { id: string }): Promise<{ ok: true }> {
+		await this.db.delete(s.teams).where(eq(s.teams.id, input.id));
+		return { ok: true };
+	}
+
+	async addTeamMember(input: {
+		teamId: string;
+		competitorId: string;
+		role?: string | null;
+	}): Promise<{ ok: true }> {
+		await this.db.insert(s.teamMembers).values({
+			teamId: input.teamId,
+			competitorId: input.competitorId,
+			role: input.role ?? null,
+		});
+		return { ok: true };
+	}
+
+	async removeTeamMember(input: {
+		teamId: string;
+		competitorId: string;
+	}): Promise<{ ok: true }> {
+		await this.db
+			.delete(s.teamMembers)
+			.where(
+				and(
+					eq(s.teamMembers.teamId, input.teamId),
+					eq(s.teamMembers.competitorId, input.competitorId),
+				),
+			);
+		return { ok: true };
+	}
+
+	// ---- matches ----
+
+	async editMatch(input: {
+		matchId: string;
+		entryAId?: string | null;
+		entryBId?: string | null;
+		scenarioId?: string | null;
+		judgeUserId?: string | null;
+		scheduledAt?: number | null;
+		status?: "scheduled" | "live" | "completed" | "cancelled";
+	}): Promise<{ ok: true }> {
+		// Team ids are derived from the chosen entries.
+		const teamFor = async (entryId: string | null | undefined) => {
+			if (!entryId) return null;
+			const entry = await this.db
+				.select({ teamId: s.bracketEntries.teamId })
+				.from(s.bracketEntries)
+				.where(eq(s.bracketEntries.id, entryId))
+				.get();
+			return entry?.teamId ?? null;
+		};
+
+		const patch: Partial<typeof s.matches.$inferInsert> = {};
+		if (input.entryAId !== undefined) {
+			patch.entryAId = input.entryAId;
+			patch.teamAId = await teamFor(input.entryAId);
+		}
+		if (input.entryBId !== undefined) {
+			patch.entryBId = input.entryBId;
+			patch.teamBId = await teamFor(input.entryBId);
+		}
+		if (input.scenarioId !== undefined) patch.scenarioId = input.scenarioId;
+		if (input.judgeUserId !== undefined) patch.judgeUserId = input.judgeUserId;
+		if (input.scheduledAt !== undefined) {
+			patch.scheduledAt = input.scheduledAt ? new Date(input.scheduledAt) : null;
+		}
+		if (input.status !== undefined) patch.status = input.status;
+
+		await this.db.update(s.matches).set(patch).where(eq(s.matches.id, input.matchId));
+		return { ok: true };
+	}
 }
 
 export default BracketsWriteModel;
