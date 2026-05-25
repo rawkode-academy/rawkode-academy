@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-read --allow-write=subgraph --allow-env
+#!/usr/bin/env -S deno run --sloppy-imports --allow-read --allow-write=subgraph --allow-env
 /**
  * Generate SDL for the website federated subgraph.
  * Output: website/subgraph/schema.gql
@@ -8,7 +8,7 @@ import { lexicographicSortSchema } from "graphql";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { getSchema } from "../src/subgraph/schema";
+import { getSchema } from "../src/subgraph/schema.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outDir = join(__dirname, "..", "subgraph");
@@ -32,7 +32,7 @@ writeFileSync(outFile, sdl);
 console.log(`✅ Subgraph SDL written: ${outFile}`);
 
 console.log("\nNext: publish to Cosmo (example)\n");
-console.log("bunx wgc subgraph publish website-content \\");
+console.log("wgc subgraph publish website-content \\");
 console.log("  --namespace production \\");
 console.log("  --schema website/subgraph/schema.gql \\");
 console.log("  --routing-url https://rawkode.academy/graphql\n");

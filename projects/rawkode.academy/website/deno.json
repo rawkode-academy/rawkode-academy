@@ -24,6 +24,9 @@
 			"worker-configuration.d.ts"
 		]
 	},
+	"imports": {
+		"@/": "./src/"
+	},
 	"tasks": {
 		"build-storybook": "./node_modules/.bin/storybook build",
 		"build": "./node_modules/.bin/astro check && ./node_modules/.bin/astro build",
@@ -43,7 +46,7 @@
 		"quality": "deno task format:check && deno task lint",
 		"start": "deno task dev",
 		"storybook": "./node_modules/.bin/storybook dev -p 6006",
-		"subgraph:sdl": "deno run --no-lock --allow-read --allow-write=subgraph --allow-env scripts/publish-subgraph.ts",
+		"subgraph:sdl": "deno run --no-lock --sloppy-imports --allow-read --allow-write=subgraph --allow-env scripts/publish-subgraph.ts",
 		"sync:content": "./node_modules/.bin/tsx scripts/sync-graphql-content.ts",
 		"sync:technologies": "deno run --no-lock --allow-read --allow-write --allow-env=GRAPHQL_ENDPOINT --allow-net scripts/sync-technologies.ts",
 		"test": "./node_modules/.bin/vitest run",
