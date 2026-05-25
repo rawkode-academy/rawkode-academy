@@ -22,7 +22,7 @@
 			"service": "rawkode-tools-observability-collector"
 		}
 	],
-	"workers_dev": false,
+	"workers_dev": true,
 	"placement": {
 		"mode": "smart"
 	},
