@@ -5,6 +5,7 @@
 */
 import { flagValue, integerFlag } from "./lib/args.ts";
 import { normalizeUrl } from "./lib/url.ts";
+import process from "node:process";
 
 type Args = {
 	base: string;
@@ -100,7 +101,7 @@ export const SUPPLEMENTAL_URL_CHECKS: readonly SupplementalUrlCheck[] = [
 ] as const;
 
 function parseArgs(): Args {
-	const argv = Deno.args;
+	const argv = process.argv.slice(2);
 	return {
 		base: flagValue(argv, "--base", "https://rawkode.academy")!,
 		limit: integerFlag(argv, "--limit", 400),
@@ -459,13 +460,15 @@ async function run() {
 
 	printSummary(summary);
 	if (hasBlockingFailures(summary)) {
-		Deno.exit(2);
+		process.exit(2);
 	}
 }
 
-if (import.meta.main) {
+const isMainModule = process.argv[1]?.endsWith("check-sitemap.ts");
+
+if (isMainModule) {
 	run().catch((error) => {
 		console.error("Failed:", error);
-		Deno.exit(1);
+		process.exit(1);
 	});
 }
