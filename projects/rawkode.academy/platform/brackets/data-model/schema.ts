@@ -1,5 +1,6 @@
 // Multi-tenant bracket schema: `showId` on `seasons` is the tenant key; every
-// other table derives its show through its season.
+// other table derives its show through its season. Brackets, entries, matches,
+// and results are all scoped beneath a season.
 import { sql } from "drizzle-orm";
 import {
 	integer,
