@@ -331,6 +331,8 @@ const createBuilder = (env: { DB: D1Database }) => {
 		showId: string,
 		userId?: string | null,
 	): Promise<MyParticipation> => {
+		// The read worker relies on X-Gateway-User-Id being forwarded into GraphQL
+		// context so returning members see their submitted applications.
 		const brackets = await openBrackets(showId);
 		const rows: MyBracketParticipation[] = [];
 

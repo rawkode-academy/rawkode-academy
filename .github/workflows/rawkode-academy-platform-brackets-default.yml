@@ -76,7 +76,10 @@ jobs:
       env:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: default'
-      run: cuenv ci --pipeline default --path projects/rawkode.academy/platform/brackets
+      run: |-
+        cuenv task --path projects/rawkode.academy/platform/brackets migrate
+        cuenv task --path projects/rawkode.academy/platform/brackets deploy.read
+        cuenv task --path projects/rawkode.academy/platform/brackets deploy.write
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}

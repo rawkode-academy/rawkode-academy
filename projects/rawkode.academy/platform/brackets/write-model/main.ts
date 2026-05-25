@@ -42,8 +42,8 @@ function slugify(value: string): string {
 /**
  * Command surface for the brackets domain. Callers (the klustered.dev admin and
  * the public apply form, via service bindings) invoke these RPC methods; no
- * caller writes D1 directly. Durable multi-step operations (generate, record
- * result) are delegated to Cloudflare Workflows.
+ * public caller writes D1 directly. Durable multi-step operations (generate,
+ * record result) are delegated to Cloudflare Workflows.
  */
 export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 	private get db(): Db {
@@ -470,8 +470,9 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			competitor.id,
 		);
 		if (existingMembership) {
-			if (existingMembership.teamId !== team.id)
+			if (existingMembership.teamId !== team.id) {
 				throw new Error("already on a team");
+			}
 			await this.ensureBracketApplication(bracket.id, competitor.id);
 			return { teamId: team.id, seasonId: team.seasonId };
 		}
@@ -657,10 +658,7 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 				teamName: s.teams.name,
 			})
 			.from(s.bracketApplications)
-			.innerJoin(
-				s.brackets,
-				eq(s.bracketApplications.bracketId, s.brackets.id),
-			)
+			.innerJoin(s.brackets, eq(s.bracketApplications.bracketId, s.brackets.id))
 			.innerJoin(
 				s.competitors,
 				eq(s.bracketApplications.competitorId, s.competitors.id),
@@ -972,10 +970,7 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 				.select()
 				.from(s.teams)
 				.where(
-					and(
-						eq(s.teams.id, input.teamId),
-						eq(s.teams.bracketId, bracket.id),
-					),
+					and(eq(s.teams.id, input.teamId), eq(s.teams.bracketId, bracket.id)),
 				)
 				.get();
 			if (!team) throw new Error("team not found");
