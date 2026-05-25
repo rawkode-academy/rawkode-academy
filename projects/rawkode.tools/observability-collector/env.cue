@@ -22,7 +22,7 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
@@ -32,17 +32,20 @@ ci: pipelines: {
 
 tasks: {
 	dev: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "dev"]
 	}
 
 	deploy: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "deploy"]
 	}
 
 	typegen: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "types", "--env-interface", "CloudflareBindings"]
 	}
 }

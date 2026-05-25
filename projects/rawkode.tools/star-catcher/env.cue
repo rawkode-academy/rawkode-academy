@@ -22,7 +22,7 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
@@ -34,7 +34,8 @@ tasks: {
 	cloudflare: schema.#TaskGroup & {
 		type: "group"
 		types: schema.#Task & {
-			command: "bun"
+			hermetic: false
+			command:  "bun"
 			args: ["x", "wrangler", "types"]
 			inputs: ["wrangler.jsonc"]
 			outputs: ["worker-configuration.d.ts"]
@@ -42,13 +43,15 @@ tasks: {
 	}
 
 	dev: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "dev"]
 		dependsOn: [_t.cloudflare.types]
 	}
 
 	deploy: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.cloudflare.types]
 	}
