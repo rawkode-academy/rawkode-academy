@@ -1,0 +1,27 @@
+---
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { COMPETITOR_NAV } from "@/lib/nav";
+
+const roles = Astro.locals.roles;
+---
+
+<PortalLayout title="My competitor area" section="me" nav={[...COMPETITOR_NAV]}>
+	{
+		roles.includes("admin") && (
+			<a
+				href="/admin"
+				class="inline-flex w-fit items-center gap-2 rounded-full border border-fuchsia-500/40 bg-fuchsia-500/10 px-4 py-1.5 text-xs font-medium text-fuchsia-200 transition hover:bg-fuchsia-500/20"
+			>
+				Open admin dashboard →
+			</a>
+		)
+	}
+
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+		<p>Your matches, schedule, and competitor profile live here.</p>
+		<p class="mt-3 text-slate-400">
+			Use Matches for upcoming and past fixtures. Use Profile to confirm which
+			public Klustered competitor record is linked to your account.
+		</p>
+	</section>
+</PortalLayout>

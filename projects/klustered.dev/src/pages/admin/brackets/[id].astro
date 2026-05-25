@@ -1,0 +1,136 @@
+---
+import { env } from "cloudflare:workers";
+import { asc, eq } from "drizzle-orm";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getBracketsDb, schema } from "@/db/client";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const bracketId = Astro.params.id!;
+const db = getBracketsDb(env.BRACKETS);
+
+const bracket = await db
+	.select({
+		id: schema.brackets.id,
+		slug: schema.brackets.slug,
+		name: schema.brackets.name,
+		status: schema.brackets.status,
+		seasonId: schema.brackets.seasonId,
+		seasonName: schema.seasons.name,
+	})
+	.from(schema.brackets)
+	.leftJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
+	.where(eq(schema.brackets.id, bracketId))
+	.get();
+
+if (!bracket) {
+	return Astro.redirect("/admin/brackets", 303);
+}
+
+const matches = await db
+	.select({
+		id: schema.matches.id,
+		roundNumber: schema.matches.roundNumber,
+		positionInRound: schema.matches.positionInRound,
+		status: schema.matches.status,
+		scheduledAt: schema.matches.scheduledAt,
+		teamAId: schema.matches.teamAId,
+		teamBId: schema.matches.teamBId,
+		winnerTeamId: schema.matches.winnerTeamId,
+	})
+	.from(schema.matches)
+	.where(eq(schema.matches.bracketId, bracketId))
+	.orderBy(asc(schema.matches.roundNumber), asc(schema.matches.positionInRound))
+	.all();
+
+const teams = await db
+	.select({ id: schema.teams.id, name: schema.teams.name })
+	.from(schema.teams)
+	.where(eq(schema.teams.seasonId, bracket.seasonId))
+	.all();
+
+const teamMap = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+const rounds = matches.reduce<Record<number, typeof matches>>((acc, m) => {
+	(acc[m.roundNumber] ??= []).push(m);
+	return acc;
+}, {});
+const roundNumbers = Object.keys(rounds)
+	.map((n) => Number(n))
+	.sort((a, b) => a - b);
+
+const teamCount = teams.length;
+const canGenerate = matches.length === 0 && teamCount >= 2;
+
+function formatScheduled(value: Date | null): string {
+	if (!value) return "TBD";
+	return new Intl.DateTimeFormat("en", {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(value);
+}
+---
+
+<PortalLayout title={bracket.name} section="admin" nav={[...ADMIN_NAV]}>
+	<a href="/admin/brackets" class="text-xs text-slate-400 hover:underline">← All brackets</a>
+
+	<section class="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 px-6 py-4 text-sm">
+		<span class="text-slate-300">Season: <strong>{bracket.seasonName}</strong></span>
+		<span class="text-slate-300">Status: <strong class="capitalize">{bracket.status}</strong></span>
+		<span class="text-slate-300">Teams in season: <strong>{teamCount}</strong></span>
+		{
+			canGenerate && (
+				<form
+					method="POST"
+					action={`/api/admin/brackets/${bracket.id}/generate`}
+					class="ml-auto"
+				>
+					<button class="rounded-lg bg-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-fuchsia-400">
+						Generate round 1
+					</button>
+				</form>
+			)
+		}
+	</section>
+
+	{
+		roundNumbers.length === 0 ? (
+			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-400">
+				No matches yet. {canGenerate ? "Click Generate round 1 to seed the bracket from this season's teams." : "Add at least two teams to this season before generating round 1."}
+			</section>
+		) : (
+			<section class="flex flex-col gap-6">
+				{roundNumbers.map((r) => (
+					<div>
+						<h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+							Round {r}
+						</h3>
+						<ul class="mt-3 flex flex-col gap-2">
+							{rounds[r].map((m) => (
+								<li class="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm">
+									<div class="flex flex-wrap items-center justify-between gap-3">
+										<div class="flex items-center gap-2">
+											<span class={`font-medium ${m.winnerTeamId === m.teamAId ? "text-emerald-300" : "text-slate-100"}`}>
+												{m.teamAId ? teamMap[m.teamAId] ?? m.teamAId : "TBD"}
+											</span>
+											<span class="text-slate-500">vs</span>
+											<span class={`font-medium ${m.winnerTeamId === m.teamBId ? "text-emerald-300" : "text-slate-100"}`}>
+												{m.teamBId ? teamMap[m.teamBId] ?? m.teamBId : "TBD"}
+											</span>
+										</div>
+										<div class="flex items-center gap-3 text-xs text-slate-400">
+											<span>{formatScheduled(m.scheduledAt)}</span>
+											<span class="rounded-full bg-slate-800 px-2 py-0.5 capitalize">{m.status}</span>
+											<a href={`/admin/matches/${m.id}`} class="text-fuchsia-300 hover:underline">
+												Edit
+											</a>
+										</div>
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
+				))}
+			</section>
+		)
+	}
+</PortalLayout>

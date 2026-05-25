@@ -1,43 +1,29 @@
-# Astro Starter Kit: Minimal
+# klustered.dev
+
+Admin + competitor portal for the Klustered game show. Lives at `https://klustered.dev`.
+
+## Stack
+
+- Bun + Astro 6 (matches `projects/rawkode.academy/website`)
+- UnoCSS (`preset-wind3`)
+- Cloudflare Workers (SSR via `@astrojs/cloudflare`)
+- Reads the `platform-brackets` D1 (owned by `platform/brackets`) via `env.BRACKETS`;
+  all writes go through the brackets write-model over the `BRACKETS_WRITE` service binding
+- Auth via id.rawkode.academy (OIDC client `klustered-dev`); sessions in the `SESSION` KV
+
+This portal owns no database of its own. The bracket domain belongs to the
+`platform/brackets` service, and auth is delegated to id.rawkode.academy.
+
+## Authorization
+
+Admins are an explicit allowlist of id.rawkode.academy user ids (OIDC subs), set
+via the `KLUSTERED_ADMIN_IDS` var in `wrangler.jsonc`. Any other authenticated
+user is a competitor and can manage their own details under `/me`.
+
+## Development
 
 ```sh
-npm create astro@latest -- --template minimal
+cuenv task dev       # or: bun run dev
+cuenv task build     # or: bun run build
+cuenv task check     # or: bun run check
 ```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

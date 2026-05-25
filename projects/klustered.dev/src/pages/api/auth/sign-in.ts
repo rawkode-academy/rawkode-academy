@@ -1,23 +1,22 @@
 import type { APIRoute } from "astro";
-import { buildAuthorizationUrl } from "@/lib/auth";
+import { buildAuthorizationUrl, PKCE_COOKIE_NAME } from "@/lib/auth/server";
 
-export const PKCE_COOKIE_NAME = "pkce_verifier";
+export const prerender = false;
 
-export const GET: APIRoute = async (context) => {
-	const returnTo = context.url.searchParams.get("returnTo") || "/";
-	const { url, codeVerifier } = await buildAuthorizationUrl(
-		context.url.origin,
+export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+	const returnTo = url.searchParams.get("returnTo") || "/";
+	const { url: authUrl, codeVerifier } = await buildAuthorizationUrl(
+		url.origin,
 		returnTo,
 	);
 
-	// Store code verifier in a secure, short-lived cookie for the callback
-	context.cookies.set(PKCE_COOKIE_NAME, codeVerifier, {
-		path: "/",
+	cookies.set(PKCE_COOKIE_NAME, codeVerifier, {
 		httpOnly: true,
-		secure: true,
+		secure: url.protocol === "https:",
 		sameSite: "lax",
-		maxAge: 60 * 10, // 10 minutes - enough time for auth flow
+		path: "/",
+		maxAge: 60 * 10,
 	});
 
-	return context.redirect(url, 302);
+	return redirect(authUrl, 302);
 };
