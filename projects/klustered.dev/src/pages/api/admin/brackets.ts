@@ -16,7 +16,13 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 	const kindRaw = String(form.get("kind") ?? "team").trim();
 	const kind = kindRaw === "solo" ? "solo" : "team";
 	const startsAtRaw = String(form.get("startsAt") ?? "").trim();
-	const startsAt = startsAtRaw ? new Date(startsAtRaw).getTime() : Number.NaN;
+	const startsAtDate = String(form.get("startsAtDate") ?? "").trim();
+	const startsAtTime = String(form.get("startsAtTime") ?? "19:00").trim();
+	const startsAtValue =
+		startsAtRaw || (startsAtDate ? `${startsAtDate}T${startsAtTime}` : "");
+	const startsAt = startsAtValue
+		? new Date(startsAtValue).getTime()
+		: Number.NaN;
 	const teamSizeRaw = Number.parseInt(
 		String(form.get("teamSize") ?? "4").trim(),
 		10,
