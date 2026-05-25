@@ -1,0 +1,121 @@
+---
+import "../styles/global.css";
+import type { Role } from "../middleware";
+
+interface NavLink {
+	href: string;
+	label: string;
+}
+
+interface Props {
+	title: string;
+	section?: "admin" | "me";
+	nav?: NavLink[];
+}
+
+const { title, section, nav = [] } = Astro.props;
+const user = Astro.locals.user!;
+const roles: Role[] = Astro.locals.roles;
+const pathname = Astro.url.pathname;
+
+const activeHref = (() => {
+	const exact = nav.find((l) => l.href === pathname);
+	if (exact) return exact.href;
+	return nav
+		.filter((l) => l.href !== "/" && pathname.startsWith(`${l.href}/`))
+		.sort((a, b) => b.href.length - a.href.length)[0]?.href;
+})();
+---
+
+<!doctype html>
+<html lang="en" class="bg-slate-950">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="robots" content="noindex" />
+		<title>{title} · Klustered</title>
+		<meta name="theme-color" content="#020617" />
+	</head>
+	<body class="min-h-dvh bg-slate-950 text-slate-100 antialiased">
+		<a
+			href="#portal-main"
+			class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-900"
+		>
+			Skip to content
+		</a>
+
+		<div class="grid min-h-dvh grid-cols-1 md:grid-cols-[16rem_1fr]">
+			<aside
+				class="border-b border-slate-800 bg-slate-900/60 px-6 py-6 md:border-b-0 md:border-r"
+			>
+				<a href="/" class="flex items-baseline gap-2">
+					<span class="text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-400">
+						Klustered
+					</span>
+					{
+						section === "admin" ? (
+							<span class="text-xs uppercase tracking-[0.2em] text-slate-400">
+								/ Admin
+							</span>
+						) : section === "me" ? (
+							<span class="text-xs uppercase tracking-[0.2em] text-slate-400">
+								/ Me
+							</span>
+						) : null
+					}
+				</a>
+
+				{
+					nav.length > 0 && (
+						<nav class="mt-6 flex flex-col gap-1" aria-label="Portal sections">
+							{nav.map((link) => {
+								const active = activeHref === link.href;
+								return (
+									<a
+										href={link.href}
+										aria-current={active ? "page" : undefined}
+										class={`rounded-lg px-3 py-1.5 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-400 ${
+											active
+												? "bg-fuchsia-500/15 text-fuchsia-200"
+												: "text-slate-300 hover:bg-slate-800/60 hover:text-slate-100"
+										}`}
+									>
+										{link.label}
+									</a>
+								);
+							})}
+						</nav>
+					)
+				}
+
+				<div class="mt-8 border-t border-slate-800 pt-6 text-xs text-slate-400">
+					<p class="font-medium text-slate-200">{user.name}</p>
+					<p class="mt-1 truncate">{user.email}</p>
+					{
+						roles.length > 0 && (
+							<div class="mt-2 flex flex-wrap gap-1">
+								{roles.map((r) => (
+									<span class="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] uppercase tracking-wider text-slate-300">
+										{r}
+									</span>
+								))}
+							</div>
+						)
+					}
+					<form method="POST" action="/api/auth/sign-out" class="mt-4">
+						<button class="text-slate-400 underline-offset-4 hover:text-slate-100 hover:underline">
+							Sign out
+						</button>
+					</form>
+				</div>
+			</aside>
+
+			<main id="portal-main" class="flex flex-col gap-6 px-6 py-8 md:px-10 md:py-10">
+				<header>
+					<h1 class="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
+				</header>
+				<slot />
+			</main>
+		</div>
+	</body>
+</html>

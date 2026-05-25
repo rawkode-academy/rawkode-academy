@@ -1,0 +1,268 @@
+---
+import { env } from "cloudflare:workers";
+import { asc, eq } from "drizzle-orm";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getBracketsDb, schema } from "@/db/client";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const matchId = Astro.params.id!;
+const db = getBracketsDb(env.BRACKETS);
+
+const match = await db
+	.select()
+	.from(schema.matches)
+	.where(eq(schema.matches.id, matchId))
+	.get();
+
+if (!match) {
+	return Astro.redirect("/admin/matches", 303);
+}
+
+const bracket = await db
+	.select()
+	.from(schema.brackets)
+	.where(eq(schema.brackets.id, match.bracketId))
+	.get();
+
+const teams = await db
+	.select({ id: schema.teams.id, name: schema.teams.name })
+	.from(schema.teams)
+	.where(bracket ? eq(schema.teams.seasonId, bracket.seasonId) : eq(schema.teams.id, "_"))
+	.orderBy(asc(schema.teams.name))
+	.all();
+
+const scenarios = await db
+	.select({ id: schema.scenarios.id, title: schema.scenarios.title })
+	.from(schema.scenarios)
+	.orderBy(asc(schema.scenarios.title))
+	.all();
+
+const result = await db
+	.select()
+	.from(schema.matchResults)
+	.where(eq(schema.matchResults.matchId, matchId))
+	.get();
+
+const teamMap = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+function toDatetimeLocal(value: Date | null): string {
+	if (!value) return "";
+	const d = new Date(value);
+	const offset = d.getTimezoneOffset();
+	const local = new Date(d.getTime() - offset * 60000);
+	return local.toISOString().slice(0, 16);
+}
+---
+
+<PortalLayout title="Match" section="admin" nav={[...ADMIN_NAV]}>
+	<a href={`/admin/brackets/${match.bracketId}`} class="text-xs text-slate-400 hover:underline">
+		← {bracket?.name ?? "Bracket"}
+	</a>
+
+	<a
+		href={`/admin/matches/${match.id}/live`}
+		class="inline-flex w-fit items-center gap-2 rounded-full bg-rose-500/20 px-4 py-1.5 text-xs font-semibold text-rose-200 transition hover:bg-rose-500/30"
+	>
+		Open live control →
+	</a>
+
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+			Schedule & assignments
+		</h2>
+
+		<form
+			method="POST"
+			action={`/api/admin/matches/${match.id}/edit`}
+			class="mt-3 grid gap-4 sm:grid-cols-2"
+		>
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Team A</span>
+				<select
+					name="teamAId"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				>
+					<option value="">— TBD —</option>
+					{
+						teams.map((t) => (
+							<option value={t.id} selected={match.teamAId === t.id}>
+								{t.name}
+							</option>
+						))
+					}
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Team B</span>
+				<select
+					name="teamBId"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				>
+					<option value="">— TBD —</option>
+					{
+						teams.map((t) => (
+							<option value={t.id} selected={match.teamBId === t.id}>
+								{t.name}
+							</option>
+						))
+					}
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Scheduled (local)</span>
+				<input
+					type="datetime-local"
+					name="scheduledAt"
+					value={toDatetimeLocal(match.scheduledAt)}
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				/>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Scenario</span>
+				<select
+					name="scenarioId"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				>
+					<option value="">— TBD —</option>
+					{
+						scenarios.map((s) => (
+							<option value={s.id} selected={match.scenarioId === s.id}>
+								{s.title}
+							</option>
+						))
+					}
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Status</span>
+				<select
+					name="status"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				>
+					{
+						["scheduled", "live", "completed", "cancelled"].map((s) => (
+							<option value={s} selected={match.status === s}>
+								{s}
+							</option>
+						))
+					}
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Judge (user id)</span>
+				<input
+					name="judgeUserId"
+					value={match.judgeUserId ?? ""}
+					placeholder="Better Auth user.id"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				/>
+			</label>
+
+			<div class="sm:col-span-2">
+				<button
+					class="rounded-lg bg-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-fuchsia-400"
+				>
+					Save
+				</button>
+			</div>
+		</form>
+	</section>
+
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+			Result
+		</h2>
+
+		{
+			result ? (
+				<div class="mt-3 text-sm text-slate-300">
+					<p>
+						Winner: <strong>{result.winnerTeamId ? teamMap[result.winnerTeamId] ?? result.winnerTeamId : "—"}</strong>
+					</p>
+					<p>Score: {result.scoreA ?? "—"} – {result.scoreB ?? "—"}</p>
+					<p>Time to resolve: {result.timeToResolveSeconds ?? "—"} s</p>
+					{result.notes && <p class="mt-2 text-slate-400">{result.notes}</p>}
+				</div>
+			) : null
+		}
+
+		<form
+			method="POST"
+			action={`/api/admin/matches/${match.id}/result`}
+			class="mt-3 grid gap-4 sm:grid-cols-2"
+		>
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Winner</span>
+				<select
+					name="winnerTeamId"
+					required
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				>
+					{match.teamAId && (
+						<option value={match.teamAId} selected={result?.winnerTeamId === match.teamAId}>
+							{teamMap[match.teamAId] ?? match.teamAId}
+						</option>
+					)}
+					{match.teamBId && (
+						<option value={match.teamBId} selected={result?.winnerTeamId === match.teamBId}>
+							{teamMap[match.teamBId] ?? match.teamBId}
+						</option>
+					)}
+				</select>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Time to resolve (s)</span>
+				<input
+					type="number"
+					name="timeToResolveSeconds"
+					value={result?.timeToResolveSeconds ?? ""}
+					min="0"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				/>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Score A</span>
+				<input
+					type="number"
+					name="scoreA"
+					value={result?.scoreA ?? ""}
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				/>
+			</label>
+
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-slate-400">Score B</span>
+				<input
+					type="number"
+					name="scoreB"
+					value={result?.scoreB ?? ""}
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				/>
+			</label>
+
+			<label class="flex flex-col gap-1 sm:col-span-2">
+				<span class="text-xs text-slate-400">Notes</span>
+				<textarea
+					name="notes"
+					rows="3"
+					class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+				>{result?.notes ?? ""}</textarea>
+			</label>
+
+			<div class="sm:col-span-2">
+				<button
+					class="rounded-lg bg-emerald-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-400"
+				>
+					Record result
+				</button>
+			</div>
+		</form>
+	</section>
+</PortalLayout>

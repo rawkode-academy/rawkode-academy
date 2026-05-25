@@ -1,21 +1,25 @@
 import type { APIRoute } from "astro";
-import { SESSION_COOKIE_NAME } from "@/lib/auth";
+import { env } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "@/db/client";
+import { SESSION_COOKIE_NAME } from "@/lib/auth/server";
 
-export const GET: APIRoute = async (context) => {
-	const sessionId = context.cookies.get(SESSION_COOKIE_NAME)?.value;
+export const prerender = false;
 
-	if (sessionId) {
-		// Delete session from KV
-		await context.locals.runtime.env.SESSION.delete(`session:${sessionId}`);
-	}
+async function clearSession(sessionId: string | undefined) {
+	if (!sessionId) return;
+	const db = getDb(env.DB);
+	await db.delete(schema.sessions).where(eq(schema.sessions.id, sessionId));
+}
 
-	// Clear session cookie
-	context.cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
-
-	const returnTo = context.url.searchParams.get("returnTo") || "/";
-	return context.redirect(returnTo, 302);
+export const POST: APIRoute = async ({ cookies, redirect }) => {
+	await clearSession(cookies.get(SESSION_COOKIE_NAME)?.value);
+	cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
+	return redirect("/", 302);
 };
 
-export const POST: APIRoute = async (context) => {
-	return GET(context);
+export const GET: APIRoute = async ({ cookies, redirect }) => {
+	await clearSession(cookies.get(SESSION_COOKIE_NAME)?.value);
+	cookies.delete(SESSION_COOKIE_NAME, { path: "/" });
+	return redirect("/", 302);
 };

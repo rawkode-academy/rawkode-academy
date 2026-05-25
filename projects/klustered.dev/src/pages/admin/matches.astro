@@ -1,0 +1,103 @@
+---
+import { env } from "cloudflare:workers";
+import { asc, eq } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getBracketsDb, schema } from "@/db/client";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const db = getBracketsDb(env.BRACKETS);
+
+const teamA = alias(schema.teams, "team_a");
+const teamB = alias(schema.teams, "team_b");
+
+const matches = await db
+	.select({
+		id: schema.matches.id,
+		bracketId: schema.matches.bracketId,
+		bracketName: schema.brackets.name,
+		roundNumber: schema.matches.roundNumber,
+		positionInRound: schema.matches.positionInRound,
+		status: schema.matches.status,
+		scheduledAt: schema.matches.scheduledAt,
+		teamAName: teamA.name,
+		teamBName: teamB.name,
+		winnerTeamId: schema.matches.winnerTeamId,
+	})
+	.from(schema.matches)
+	.leftJoin(schema.brackets, eq(schema.matches.bracketId, schema.brackets.id))
+	.leftJoin(teamA, eq(schema.matches.teamAId, teamA.id))
+	.leftJoin(teamB, eq(schema.matches.teamBId, teamB.id))
+	.orderBy(
+		asc(schema.matches.scheduledAt),
+		asc(schema.matches.roundNumber),
+		asc(schema.matches.positionInRound),
+	)
+	.all();
+
+function formatScheduled(value: Date | null): string {
+	if (!value) return "TBD";
+	return new Intl.DateTimeFormat("en", {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}).format(value);
+}
+---
+
+<PortalLayout title="Matches" section="admin" nav={[...ADMIN_NAV]}>
+	<p class="text-sm text-slate-400">
+		Matches are created via the bracket "Generate round 1" action. Click into a
+		match to edit its schedule, scenario, judge, or record a result.
+	</p>
+
+	<section class="overflow-hidden rounded-2xl border border-slate-800">
+		<table class="w-full text-left text-sm">
+			<thead class="bg-slate-900/60 text-xs uppercase tracking-wider text-slate-400">
+				<tr>
+					<th class="px-6 py-3">When</th>
+					<th class="px-6 py-3">Bracket</th>
+					<th class="px-6 py-3">Round</th>
+					<th class="px-6 py-3">Match-up</th>
+					<th class="px-6 py-3">Status</th>
+					<th class="px-6 py-3 text-right">Actions</th>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-slate-800 bg-slate-950/40">
+				{
+					matches.length === 0 ? (
+						<tr>
+							<td colspan="6" class="px-6 py-6 text-center text-sm text-slate-500">
+								No matches yet.
+							</td>
+						</tr>
+					) : (
+						matches.map((m) => (
+							<tr>
+								<td class="px-6 py-3 text-slate-300">{formatScheduled(m.scheduledAt)}</td>
+								<td class="px-6 py-3 text-slate-400">{m.bracketName}</td>
+								<td class="px-6 py-3 text-slate-400">
+									R{m.roundNumber} · #{m.positionInRound}
+								</td>
+								<td class="px-6 py-3">
+									<span class="text-slate-100">{m.teamAName ?? "TBD"}</span>
+									<span class="mx-2 text-slate-500">vs</span>
+									<span class="text-slate-100">{m.teamBName ?? "TBD"}</span>
+								</td>
+								<td class="px-6 py-3">
+									<span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-300 capitalize">
+										{m.status}
+									</span>
+								</td>
+								<td class="px-6 py-3 text-right">
+									<a href={`/admin/matches/${m.id}`} class="text-xs text-fuchsia-300 hover:underline">
+										Edit
+									</a>
+								</td>
+							</tr>
+						))
+					)
+				}
+			</tbody>
+		</table>
+	</section>
+</PortalLayout>

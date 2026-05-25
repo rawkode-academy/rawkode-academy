@@ -1,0 +1,1 @@
+ALTER TABLE `competitors` ADD `user_id` text;
