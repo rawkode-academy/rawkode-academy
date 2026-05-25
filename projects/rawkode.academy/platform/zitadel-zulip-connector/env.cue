@@ -20,7 +20,7 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
@@ -30,7 +30,8 @@ ci: pipelines: {
 
 tasks: {
 	deploy: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "deploy"]
 	}
 }

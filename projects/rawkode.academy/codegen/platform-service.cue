@@ -30,7 +30,7 @@ import (
 	additionalDevDependencies: {[string]: string} | *{}
 
 	// Computed values
-	_nameParts:  strings.Split(serviceName, "-")
+	_nameParts: strings.Split(serviceName, "-")
 	_pascalName: strings.Join([for p in _nameParts {strings.ToTitle(p)}], "")
 
 	// Auto-inject ANALYTICS service binding
@@ -172,7 +172,7 @@ import (
 		default: {
 			environment: "production"
 			when: {
-				branch:        ["main"]
+				branch: ["main"]
 				defaultBranch: true
 				manual:        true
 			}
@@ -190,10 +190,13 @@ import (
 
 	// Auto-generated deploy tasks based on enabled features. Services that own a
 	// D1 schema also get a `migrate` task, ordered before deploy in the pipeline.
+	// `hermetic: false` so tasks inherit the activated devenv-runtime PATH that
+	// provides `bun` (cuenv v0.42.0 hermetic spawns drop it -> ENOENT on `bun`).
 	tasks: {
 		if _hasMigrations {
 			migrate: schema.#Task & {
-				command: "bun"
+				hermetic: false
+				command:  "bun"
 				args: [
 					"x", "wrangler", "d1", "migrations", "apply", "DB",
 					"--remote", "--config", "./read-model/wrangler.jsonc",
@@ -206,18 +209,24 @@ import (
 
 			if includeReadModel {
 				read: schema.#Task & {
-					command: "bun"
-					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]				}
+					hermetic: false
+					command:  "bun"
+					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
+				}
 			}
 			if includeWriteModel {
 				write: schema.#Task & {
-					command: "bun"
-					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]				}
+					hermetic: false
+					command:  "bun"
+					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
+				}
 			}
 			if includeHttp {
 				http: schema.#Task & {
-					command: "bun"
-					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]				}
+					hermetic: false
+					command:  "bun"
+					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
+				}
 			}
 		}
 	}

@@ -8,11 +8,15 @@ name: "rawkode-academy-api"
 
 let _t = tasks
 
+// Run tasks non-hermetically so bun resolves on PATH (cuenv v0.42.0 hermetic
+// task spawn cannot find bare commands like `bun`).
+tasks: [string]: hermetic: false
+
 ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}

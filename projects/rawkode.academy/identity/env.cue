@@ -12,7 +12,7 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
@@ -24,7 +24,8 @@ tasks: {
 	auth: schema.#TaskGroup & {
 		type: "group"
 		generate: schema.#Task & {
-			command: "bun"
+			hermetic: false
+			command:  "bun"
 			args: ["x", "@better-auth/cli", "generate", "--config", "./src/lib/auth.config.ts", "--output", "./src/db/schema.ts", "-y"]
 		}
 	}
@@ -32,7 +33,8 @@ tasks: {
 	bun: schema.#TaskGroup & {
 		type: "group"
 		dev: schema.#Task & {
-			command: "bun"
+			hermetic: false
+			command:  "bun"
 			args: ["x", "wrangler", "dev"]
 			inputs: [
 				"astro.config.mjs",
@@ -46,13 +48,15 @@ tasks: {
 	migrations: schema.#TaskGroup & {
 		type: "group"
 		remote: schema.#Task & {
-			command: "bun"
+			hermetic: false
+			command:  "bun"
 			args: ["x", "wrangler", "d1", "migrations", "apply", "identity", "--remote"]
 		}
 	}
 
 	build: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["run", "build"]
 		inputs: [
 			"astro.config.mjs",
@@ -63,7 +67,8 @@ tasks: {
 	}
 
 	deploy: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.migrations.remote, _t.build]
 		inputs: [
