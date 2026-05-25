@@ -17,3 +17,6 @@ env: {
 ci:      _service.ci
 tasks:   _service.tasks
 codegen: _service.codegen
+
+// Keep the default CI deploy task affected when the shared service generator
+// changes but GitHub only reports this project path to the workflow.

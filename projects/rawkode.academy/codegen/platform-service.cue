@@ -165,16 +165,24 @@ import (
 	}
 
 	let _t = tasks
-	let _deployPipelineTasks = [
-		if includeReadModel {_t.deploy.read},
-		if includeWriteModel {_t.deploy.write},
-		if includeHttp {_t.deploy.http},
+	let _ciDeployCommands = [
+		if _hasMigrations {"bun x wrangler d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"},
+		if includeReadModel {"bun x wrangler deploy --config ./read-model/wrangler.jsonc"},
+		if includeWriteModel {"bun x wrangler deploy --config ./write-model/wrangler.jsonc"},
+		if includeHttp {"bun x wrangler deploy --config ./http/wrangler.jsonc"},
 	]
 	let _serviceDefinitionInputs = ["env.cue", "service.cue", "../../codegen/platform-service.cue"]
+	let _ciDeployInputSets = [
+		_serviceDefinitionInputs,
+		if includeDataModel {["data-model/**"]},
+		if includeReadModel {["read-model/**"]},
+		if includeWriteModel {["write-model/**"]},
+		if includeHttp {["http/**"]},
+		["package.json"],
+	]
 
-	// CI pipeline with workflow_dispatch enabled. The pipeline schedules concrete
-	// deploy tasks instead of the deploy group so cuenv's affected-task detection
-	// sees each worker's declared inputs.
+	// CI pipeline with workflow_dispatch enabled. Use one named task here so
+	// cuenv's affected-task detection has a concrete task with globbed inputs.
 	ci: pipelines: {
 		default: {
 			environment: "production"
@@ -184,8 +192,7 @@ import (
 				manual:        true
 			}
 			tasks: [
-				if _hasMigrations {_t.migrate},
-				for task in _deployPipelineTasks {task},
+				_t.ciDeploy,
 			]
 		}
 	}
@@ -203,6 +210,14 @@ import (
 	// tasks are never "affected" and CI skips them. data-model/** is shared by
 	// the read and write workers (and gates migrations).
 	tasks: {
+		ciDeploy: schema.#Task & {
+			hermetic: false
+			dir: from: "caller"
+			command: "sh"
+			args: ["-c", strings.Join(_ciDeployCommands, "\n")]
+			inputs: list.Concat(_ciDeployInputSets)
+		}
+
 		if _hasMigrations {
 			migrate: schema.#Task & {
 				hermetic: false

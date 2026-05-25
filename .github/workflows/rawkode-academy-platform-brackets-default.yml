@@ -77,9 +77,9 @@ jobs:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: default'
       run: |-
-        cuenv task --path projects/rawkode.academy/platform/brackets migrate
-        cuenv task --path projects/rawkode.academy/platform/brackets deploy.read
-        cuenv task --path projects/rawkode.academy/platform/brackets deploy.write
+        cuenv exec --path projects/rawkode.academy -- bun x wrangler d1 migrations apply DB --remote --config projects/rawkode.academy/platform/brackets/read-model/wrangler.jsonc
+        cuenv exec --path projects/rawkode.academy -- bun x wrangler deploy --config projects/rawkode.academy/platform/brackets/read-model/wrangler.jsonc
+        cuenv exec --path projects/rawkode.academy -- bun x wrangler deploy --config projects/rawkode.academy/platform/brackets/write-model/wrangler.jsonc
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
