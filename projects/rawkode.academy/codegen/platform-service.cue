@@ -199,8 +199,8 @@ import (
 		if _hasMigrations {
 			migrate: schema.#Task & {
 				hermetic: false
-                                dir: from: "caller"
-				command:  "bun"
+				dir: from: "caller"
+				command: "bun"
 				args: [
 					"x", "wrangler", "d1", "migrations", "apply", "DB",
 					"--remote", "--config", "./read-model/wrangler.jsonc",
@@ -215,8 +215,8 @@ import (
 			if includeReadModel {
 				read: schema.#Task & {
 					hermetic: false
-                                        dir: from: "caller"
-					command:  "bun"
+					dir: from: "caller"
+					command: "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
 					inputs: ["read-model", "data-model", "package.json"]
 				}
@@ -224,8 +224,8 @@ import (
 			if includeWriteModel {
 				write: schema.#Task & {
 					hermetic: false
-                                        dir: from: "caller"
-					command:  "bun"
+					dir: from: "caller"
+					command: "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
 					inputs: ["write-model", "data-model", "package.json"]
 				}
@@ -233,8 +233,8 @@ import (
 			if includeHttp {
 				http: schema.#Task & {
 					hermetic: false
-					command:  "bun"
-                                        dir: from: "caller"
+					dir: from: "caller"
+					command: "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
 					inputs: ["http", "data-model", "package.json"]
 				}
@@ -438,16 +438,10 @@ import (
 			}]
 		}
 
-		if len(_bindings.workflows) > 0 {
-			workflows: [for wf in _bindings.workflows {
-				binding:    wf.binding
-				name:       wf.name
-				class_name: wf.className
-				if wf.scriptName != _|_ {
-					script_name: wf.scriptName
-				}
-			}]
-		}
+		// Workflows are intentionally NOT bound in the shared base. A Cloudflare
+		// Workflow can only be owned by a single worker, and in our CQRS layout
+		// the write-model owns and invokes them (read models never mutate). The
+		// binding is emitted only on _writeModelWrangler below.
 
 		if len(_bindings.routes) > 0 {
 			routes: [for route in _bindings.routes {
@@ -510,9 +504,21 @@ import (
 		}
 	}
 
+	// The write-model is the sole owner of any Workflows. Read models never
+	// mutate, so they neither bind nor export workflow classes.
 	_writeModelWrangler: _baseWrangler & {
 		name: "\(servicePrefix)-\(serviceName)-write-model"
 		main: "./main.ts"
+		if len(_bindings.workflows) > 0 {
+			workflows: [for wf in _bindings.workflows {
+				binding:    wf.binding
+				name:       wf.name
+				class_name: wf.className
+				if wf.scriptName != _|_ {
+					script_name: wf.scriptName
+				}
+			}]
+		}
 	}
 
 	_httpWrangler: _baseWrangler & {
@@ -527,26 +533,36 @@ import (
 	// TypeScript files
 	// ========================================================================
 
-	_envInterface: strings.Join([
+	// Base Env bindings shared by every worker. Workflows are deliberately
+	// excluded here: only the write-model owns them (see _writeEnvInterface).
+	_envBindings: [
 		for db in _bindings.d1Databases {"\(db.binding): D1Database;"},
 		for secret in _bindings.secretStoreSecrets {"\(secret.binding): SecretsStoreSecret;"},
 		for kv in _bindings.kvNamespaces {"\(kv.binding): KVNamespace;"},
 		for bucket in _bindings.r2Buckets {"\(bucket.binding): R2Bucket;"},
 		for svc in _bindings.services {"\(svc.binding): Service;"},
-		for wf in _bindings.workflows {"\(wf.binding): Workflow;"},
 		if _bindings.ai != _|_ {"\(_bindings.ai.binding): Ai;"},
 		for k, _ in _bindings.vars {"\(k): string;"},
-	], "\n\t")
+	]
 
-	// Workflow re-exports for read-model/main.ts
-	_workflowExports: strings.Join([
-		for wf in _bindings.workflows {"export { \(wf.className) } from \"../write-model/\(wf.binding)\";"},
+	// Env for read-model/http: no workflow bindings. list.Concat materializes the
+	// comprehension list into a concrete [...string]; passing _envBindings straight
+	// to strings.Join leaves it non-concrete (vars is an open struct).
+	_envInterface: strings.Join(list.Concat([_envBindings]), "\n\t")
+
+	// Env for the write-model: base bindings plus the Workflow handles it owns.
+	_workflowEnvBindings: [for wf in _bindings.workflows {"\(wf.binding): Workflow;"}]
+	_writeEnvInterface:   strings.Join(list.Concat([_envBindings, _workflowEnvBindings]), "\n\t")
+
+	// Workflow class re-exports for write-model/main.ts. The owning worker must
+	// export each Workflow class referenced by its wrangler `class_name`.
+	_writeWorkflowExports: strings.Join([
+		for wf in _bindings.workflows {"export { \(wf.className) } from \"./\(wf.binding)\";"},
 	], "\n")
 
 	_readModelMainTs: """
 		import { createYoga } from "graphql-yoga";
 		import { getSchema } from "./schema";
-		\(_workflowExports)
 
 		export interface Env {
 			\(_envInterface)
@@ -593,9 +609,10 @@ import (
 
 	_writeModelMainTs: """
 		import { WorkerEntrypoint } from "cloudflare:workers";
+		\(_writeWorkflowExports)
 
 		export interface Env {
-			\(_envInterface)
+			\(_writeEnvInterface)
 		}
 
 		export class \(_pascalName)WriteModel extends WorkerEntrypoint<Env> {
