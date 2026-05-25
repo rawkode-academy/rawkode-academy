@@ -10,6 +10,7 @@ export interface ShowPageContext {
 	request: Request;
 	url: URL;
 	env: ShowEnv;
+	locals: App.Locals;
 }
 
 export interface ShowPageMeta {

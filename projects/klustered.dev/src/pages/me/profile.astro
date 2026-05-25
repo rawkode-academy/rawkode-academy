@@ -87,9 +87,15 @@ const person = competitor ? await getPerson(competitor.personSlug) : undefined;
 					)}
 				</dl>
 				{competitor.bio && <p class="mt-4 text-slate-400">{competitor.bio}</p>}
-				<p class="mt-4 text-xs text-slate-500">
-					Bio + public profile fields live in <code class="rounded bg-slate-800 px-1 py-0.5">content/people/{competitor.personSlug}.mdx</code> — open a PR to edit them.
-				</p>
+				{person ? (
+					<p class="mt-4 text-xs text-slate-500">
+						Bio + public profile fields live in <code class="rounded bg-slate-800 px-1 py-0.5">content/people/{competitor.personSlug}.mdx</code> — open a PR to edit them.
+					</p>
+				) : (
+					<p class="mt-4 text-xs text-slate-500">
+						This self-service competitor record does not have a public content profile yet.
+					</p>
+				)}
 			</section>
 		) : (
 			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">

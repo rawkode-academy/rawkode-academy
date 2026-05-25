@@ -1,0 +1,64 @@
+---
+import { env } from "cloudflare:workers";
+import { eq } from "drizzle-orm";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getBracketsDb, schema } from "@/db/client";
+import { COMPETITOR_NAV } from "@/lib/nav";
+
+const token = Astro.params.token!;
+const db = getBracketsDb(env.BRACKETS);
+
+const invite = await db
+	.select({
+		token: schema.teamInvites.token,
+		revokedAt: schema.teamInvites.revokedAt,
+		teamName: schema.teams.name,
+		seasonName: schema.seasons.name,
+		bracketName: schema.brackets.name,
+		bracketStatus: schema.brackets.status,
+		registrationClosesAt: schema.brackets.registrationClosesAt,
+	})
+	.from(schema.teamInvites)
+	.innerJoin(schema.teams, eq(schema.teamInvites.teamId, schema.teams.id))
+	.innerJoin(schema.brackets, eq(schema.teamInvites.bracketId, schema.brackets.id))
+	.innerJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
+	.where(eq(schema.teamInvites.token, token))
+	.get();
+
+const valid = Boolean(
+	invite &&
+		!invite.revokedAt &&
+		invite.bracketStatus !== "finished" &&
+		(!invite.registrationClosesAt ||
+			invite.registrationClosesAt.getTime() > Date.now()),
+);
+---
+
+<PortalLayout title="Join team" section="me" nav={[...COMPETITOR_NAV]}>
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-300">
+		{
+			!valid ? (
+				<>
+					<h2 class="text-lg font-semibold text-slate-100">Invite unavailable</h2>
+					<p class="mt-2 text-slate-400">
+						This invite link is invalid or has been revoked.
+					</p>
+				</>
+			) : (
+				<>
+					<h2 class="text-lg font-semibold text-slate-100">
+						Join {invite?.teamName}
+					</h2>
+					<p class="mt-2 text-slate-400">
+						{invite?.seasonName} / {invite?.bracketName}
+					</p>
+					<form method="POST" action={`/api/join/${token}`} class="mt-5">
+						<button class="rounded-lg bg-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-fuchsia-400">
+							Join team
+						</button>
+					</form>
+				</>
+			)
+		}
+	</section>
+</PortalLayout>

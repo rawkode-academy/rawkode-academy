@@ -34,7 +34,12 @@ const members = await db
 	.where(eq(schema.teamMembers.teamId, teamId))
 	.all();
 
-const memberIds = new Set(members.map((m) => m.competitorId));
+const bracketMemberships = await db
+	.select({ competitorId: schema.teamMembers.competitorId })
+	.from(schema.teamMembers)
+	.where(eq(schema.teamMembers.bracketId, team.bracketId))
+	.all();
+const bracketMemberIds = new Set(bracketMemberships.map((m) => m.competitorId));
 
 const seasonCompetitors = await db
 	.select({
@@ -47,7 +52,7 @@ const seasonCompetitors = await db
 	.orderBy(asc(schema.competitors.displayName))
 	.all();
 
-const eligible = seasonCompetitors.filter((c) => !memberIds.has(c.id));
+const eligible = seasonCompetitors.filter((c) => !bracketMemberIds.has(c.id));
 ---
 
 <PortalLayout title={team.name} section="admin" nav={[...ADMIN_NAV]}>

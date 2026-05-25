@@ -18,6 +18,7 @@ if (!match) return Astro.redirect("/admin/matches", 303);
 const teams = await db
 	.select({ id: schema.teams.id, name: schema.teams.name })
 	.from(schema.teams)
+	.where(eq(schema.teams.bracketId, match.bracketId))
 	.orderBy(asc(schema.teams.name))
 	.all();
 const teamName = Object.fromEntries(teams.map((t) => [t.id, t.name]));
@@ -175,4 +176,3 @@ function formatElapsed(ms: number): string {
 		}
 	})();
 </script>
-

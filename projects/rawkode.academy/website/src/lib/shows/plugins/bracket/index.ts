@@ -11,8 +11,9 @@ import Schedule from "./pages/Schedule.astro";
 import {
 	loadBrackets,
 	loadLeaderboard,
-	loadOpenBrackets,
+	loadMyParticipation,
 	loadSchedule,
+	type BracketsReadBinding,
 } from "./queries";
 
 export type BracketPageSlug = "brackets" | "schedule" | "leaderboard" | "apply";
@@ -62,11 +63,19 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 		apply: {
 			slug: "apply",
 			label: "Apply",
-			load: async (ctx) => ({
-				showId,
-				openBrackets: await loadOpenBrackets(showId),
-				submitted: ctx.url.searchParams.get("submitted") === "1",
-			}),
+			load: async (ctx) => {
+				const readModel =
+					(ctx.env.BRACKETS_READ as BracketsReadBinding | undefined) ?? null;
+				return {
+					showId,
+					isSignedIn: Boolean(ctx.locals.user),
+					participation: await loadMyParticipation(showId, {
+						readModel,
+						user: ctx.locals.user ? { id: ctx.locals.user.id } : null,
+					}),
+					submitted: ctx.url.searchParams.get("submitted") === "1",
+				};
+			},
 			meta: () => ({ title: "Apply to compete" }),
 			Component: Apply,
 		},

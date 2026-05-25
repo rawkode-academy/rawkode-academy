@@ -1,19 +1,12 @@
 import type { ShowEndpointModule, ShowPageContext } from "@/lib/shows/types";
 import { loadLiveMatch, loadSchedule } from "./queries";
 
-// The write-model RPC surface this plugin needs. Bound on the website worker
-// as BRACKETS_WRITE -> platform-brackets-write-model.
 interface BracketsWriteBinding {
-	submitRegistration(input: {
-		showId: string;
+	selfRegisterCompetitor(input: {
 		bracketId: string;
 		displayName: string;
-		email: string;
-		teamName?: string | null;
-		preferredSlot?: number | null;
-		message?: string | null;
-		userId?: string | null;
-	}): Promise<{ id: string }>;
+		userId: string;
+	}): Promise<{ competitorId: string; seasonId: string; bracketKind: string }>;
 }
 
 function escapeICS(value: string): string {
@@ -41,33 +34,33 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 				if (!write) {
 					return new Response("registration unavailable", { status: 503 });
 				}
+				const user = ctx.locals.user;
+				if (!user) {
+					const returnTo = `/shows/${showId}/apply`;
+					return new Response(null, {
+						status: 303,
+						headers: {
+							Location: `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`,
+						},
+					});
+				}
 
 				const form = await ctx.request.formData();
 				const bracketId = String(form.get("bracketId") ?? "").trim();
-				const displayName = String(form.get("displayName") ?? "").trim();
-				const email = String(form.get("email") ?? "").trim();
-				const teamName = String(form.get("teamName") ?? "").trim() || null;
-				const message = String(form.get("message") ?? "").trim() || null;
-				const slotRaw = String(form.get("preferredSlot") ?? "").trim();
-				const preferredSlot = slotRaw ? Number.parseInt(slotRaw, 10) : null;
+				const displayName =
+					user.name?.trim() || user.email?.split("@")[0]?.trim() || user.id;
 
-				if (!bracketId || !displayName || !email) {
-					return new Response("bracketId, displayName, email required", {
+				if (!bracketId) {
+					return new Response("bracketId required", {
 						status: 400,
 					});
 				}
 
 				try {
-					await write.submitRegistration({
-						showId,
+					await write.selfRegisterCompetitor({
 						bracketId,
 						displayName,
-						email,
-						teamName,
-						preferredSlot: Number.isFinite(preferredSlot)
-							? preferredSlot
-							: null,
-						message,
+						userId: user.id,
 					});
 				} catch {
 					return new Response("could not submit application", { status: 400 });

@@ -11,6 +11,7 @@ export const ADMIN_NAV = [
 
 export const COMPETITOR_NAV = [
 	{ href: "/me", label: "Overview" },
+	{ href: "/me/team", label: "Team" },
 	{ href: "/me/matches", label: "My matches" },
 	{ href: "/me/profile", label: "Profile" },
 ] as const;
