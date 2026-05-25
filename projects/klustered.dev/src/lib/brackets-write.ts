@@ -5,6 +5,35 @@
 export const SHOW_ID = "klustered";
 
 export interface BracketsWrite {
+	selfRegisterCompetitor(input: {
+		bracketId: string;
+		userId: string;
+		displayName: string;
+	}): Promise<{ competitorId: string; seasonId: string; bracketKind: string }>;
+	formTeam(input: {
+		bracketId: string;
+		name: string;
+		userId: string;
+	}): Promise<{ teamId: string; token: string }>;
+	joinTeamViaInvite(input: {
+		token: string;
+		userId: string;
+		displayName: string;
+	}): Promise<{ teamId: string; seasonId: string }>;
+	renameTeam(input: {
+		teamId: string;
+		name: string;
+		userId: string;
+	}): Promise<{ ok: true }>;
+	createTeamInvite(input: {
+		teamId: string;
+		userId: string;
+	}): Promise<{ token: string }>;
+	revokeTeamInvite(input: {
+		token: string;
+		userId: string;
+	}): Promise<{ ok: true }>;
+	leaveTeam(input: { teamId: string; userId: string }): Promise<{ ok: true }>;
 	submitRegistration(input: {
 		showId: string;
 		bracketId: string;
@@ -54,6 +83,7 @@ export interface BracketsWrite {
 		startsAt?: number | null;
 		registrationClosesAt?: number | null;
 		maxEntries?: number;
+		teamSize?: number;
 		cadenceDays?: number;
 	}): Promise<{ id: string }>;
 	deleteBracket(input: { id: string }): Promise<{ ok: true }>;
@@ -82,7 +112,7 @@ export interface BracketsWrite {
 	}): Promise<{ id: string }>;
 	deleteCompetitor(input: { id: string }): Promise<{ ok: true }>;
 	createTeam(input: {
-		seasonId: string;
+		bracketId: string;
 		slug: string;
 		name: string;
 	}): Promise<{ id: string }>;

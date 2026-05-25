@@ -1,11 +1,19 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
+import { createId } from "@paralleldrive/cuid2";
 import * as s from "../data-model/schema";
 import {
+	CreateTeamInvite,
 	DecideRegistration,
+	FormTeam,
 	GenerateBracket,
+	JoinTeamViaInvite,
+	LeaveTeam,
 	RecordResult,
+	RenameTeam,
+	RevokeTeamInvite,
+	SelfRegisterCompetitor,
 	SetMatchLiveState,
 	SubmitRegistration,
 } from "../data-model/integrations/zod";
@@ -43,6 +51,449 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 
 	async fetch(): Promise<Response> {
 		return new Response("ok", { headers: { "Content-Type": "text/plain" } });
+	}
+
+	private async getBracket(bracketId: string) {
+		const bracket = await this.db
+			.select()
+			.from(s.brackets)
+			.where(eq(s.brackets.id, bracketId))
+			.get();
+		if (!bracket || bracket.status === "finished") {
+			throw new Error("bracket not open");
+		}
+		return bracket;
+	}
+
+	private async getOpenBracket(bracketId: string) {
+		const bracket = await this.getBracket(bracketId);
+		if (
+			bracket.registrationClosesAt &&
+			bracket.registrationClosesAt.getTime() <= Date.now()
+		) {
+			throw new Error("registration closed");
+		}
+		return bracket;
+	}
+
+	private async uniqueCompetitorSlug(
+		seasonId: string,
+		displayName: string,
+	): Promise<string> {
+		const base = slugify(displayName) || "competitor";
+		for (let attempt = 0; attempt < 100; attempt++) {
+			const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
+			const existing = await this.db
+				.select({ id: s.competitors.id })
+				.from(s.competitors)
+				.where(
+					and(
+						eq(s.competitors.seasonId, seasonId),
+						eq(s.competitors.personSlug, slug),
+					),
+				)
+				.get();
+			if (!existing) return slug;
+		}
+		return `${base}-${createId()}`;
+	}
+
+	private async uniqueTeamSlug(
+		bracketId: string,
+		name: string,
+		exceptTeamId?: string,
+	): Promise<string> {
+		const base = slugify(name) || "team";
+		for (let attempt = 0; attempt < 100; attempt++) {
+			const slug = attempt === 0 ? base : `${base}-${attempt + 1}`;
+			const existing = await this.db
+				.select({ id: s.teams.id })
+				.from(s.teams)
+				.where(and(eq(s.teams.bracketId, bracketId), eq(s.teams.slug, slug)))
+				.get();
+			if (!existing || existing.id === exceptTeamId) return slug;
+		}
+		return `${base}-${createId()}`;
+	}
+
+	private async getOrCreateCompetitor(input: {
+		seasonId: string;
+		userId: string;
+		displayName: string;
+	}) {
+		const existing = await this.db
+			.select()
+			.from(s.competitors)
+			.where(
+				and(
+					eq(s.competitors.seasonId, input.seasonId),
+					eq(s.competitors.userId, input.userId),
+				),
+			)
+			.get();
+		if (existing) return existing;
+
+		const id = `cmp-${crypto.randomUUID()}`;
+		const personSlug = await this.uniqueCompetitorSlug(
+			input.seasonId,
+			input.displayName,
+		);
+		try {
+			await this.db.insert(s.competitors).values({
+				id,
+				seasonId: input.seasonId,
+				personSlug,
+				displayName: input.displayName,
+				userId: input.userId,
+			});
+		} catch {
+			const concurrent = await this.db
+				.select()
+				.from(s.competitors)
+				.where(
+					and(
+						eq(s.competitors.seasonId, input.seasonId),
+						eq(s.competitors.userId, input.userId),
+					),
+				)
+				.get();
+			if (concurrent) return concurrent;
+			throw new Error("could not create competitor");
+		}
+
+		const created = await this.db
+			.select()
+			.from(s.competitors)
+			.where(eq(s.competitors.id, id))
+			.get();
+		if (!created) throw new Error("could not create competitor");
+		return created;
+	}
+
+	private async ensureBracketApplication(
+		bracketId: string,
+		competitorId: string,
+	): Promise<void> {
+		await this.db
+			.insert(s.bracketApplications)
+			.values({
+				id: `app-${crypto.randomUUID()}`,
+				bracketId,
+				competitorId,
+			})
+			.onConflictDoNothing({
+				target: [
+					s.bracketApplications.bracketId,
+					s.bracketApplications.competitorId,
+				],
+			});
+	}
+
+	private async requireApplied(
+		bracketId: string,
+		competitorId: string,
+	): Promise<void> {
+		const application = await this.db
+			.select({ id: s.bracketApplications.id })
+			.from(s.bracketApplications)
+			.where(
+				and(
+					eq(s.bracketApplications.bracketId, bracketId),
+					eq(s.bracketApplications.competitorId, competitorId),
+				),
+			)
+			.get();
+		if (!application) throw new Error("apply before forming a team");
+	}
+
+	private async membershipForCompetitor(
+		bracketId: string,
+		competitorId: string,
+	) {
+		return this.db
+			.select()
+			.from(s.teamMembers)
+			.where(
+				and(
+					eq(s.teamMembers.bracketId, bracketId),
+					eq(s.teamMembers.competitorId, competitorId),
+				),
+			)
+			.get();
+	}
+
+	private async memberCount(teamId: string): Promise<number> {
+		const members = await this.db
+			.select({ competitorId: s.teamMembers.competitorId })
+			.from(s.teamMembers)
+			.where(eq(s.teamMembers.teamId, teamId))
+			.all();
+		return members.length;
+	}
+
+	private async requireTeamActor(
+		teamId: string,
+		userId: string,
+		requireCaptain = false,
+	) {
+		const team = await this.db
+			.select()
+			.from(s.teams)
+			.where(eq(s.teams.id, teamId))
+			.get();
+		if (!team) throw new Error("team not found");
+
+		const competitor = await this.db
+			.select()
+			.from(s.competitors)
+			.where(
+				and(
+					eq(s.competitors.seasonId, team.seasonId),
+					eq(s.competitors.userId, userId),
+				),
+			)
+			.get();
+		if (!competitor) throw new Error("competitor not found");
+
+		const membership = await this.db
+			.select()
+			.from(s.teamMembers)
+			.where(
+				and(
+					eq(s.teamMembers.teamId, teamId),
+					eq(s.teamMembers.competitorId, competitor.id),
+				),
+			)
+			.get();
+		if (!membership) throw new Error("not a team member");
+		if (requireCaptain && membership.role !== "captain") {
+			throw new Error("captain only");
+		}
+
+		return { team, competitor, membership };
+	}
+
+	private async mintTeamInvite(input: {
+		teamId: string;
+		bracketId: string;
+		createdByUserId: string;
+	}): Promise<{ token: string }> {
+		await this.db
+			.update(s.teamInvites)
+			.set({ revokedAt: new Date() })
+			.where(
+				and(
+					eq(s.teamInvites.teamId, input.teamId),
+					isNull(s.teamInvites.revokedAt),
+				),
+			);
+		const token = createId();
+		await this.db.insert(s.teamInvites).values({
+			token,
+			teamId: input.teamId,
+			bracketId: input.bracketId,
+			createdByUserId: input.createdByUserId,
+		});
+		return { token };
+	}
+
+	// ---- self-service applications and teams ----
+
+	async selfRegisterCompetitor(input: unknown): Promise<{
+		competitorId: string;
+		seasonId: string;
+		bracketKind: "solo" | "team";
+	}> {
+		const data = SelfRegisterCompetitor.parse(input);
+		const bracket = await this.getOpenBracket(data.bracketId);
+		const competitor = await this.getOrCreateCompetitor({
+			seasonId: bracket.seasonId,
+			userId: data.userId,
+			displayName: data.displayName,
+		});
+		await this.ensureBracketApplication(bracket.id, competitor.id);
+		return {
+			competitorId: competitor.id,
+			seasonId: bracket.seasonId,
+			bracketKind: bracket.kind,
+		};
+	}
+
+	async formTeam(input: unknown): Promise<{ teamId: string; token: string }> {
+		const data = FormTeam.parse(input);
+		const bracket = await this.getOpenBracket(data.bracketId);
+		if (bracket.kind !== "team") throw new Error("team bracket required");
+
+		const competitor = await this.db
+			.select()
+			.from(s.competitors)
+			.where(
+				and(
+					eq(s.competitors.seasonId, bracket.seasonId),
+					eq(s.competitors.userId, data.userId),
+				),
+			)
+			.get();
+		if (!competitor) throw new Error("competitor not found");
+		await this.requireApplied(bracket.id, competitor.id);
+
+		const existingMembership = await this.membershipForCompetitor(
+			bracket.id,
+			competitor.id,
+		);
+		if (existingMembership) throw new Error("already on a team");
+
+		const teamId = `team-${crypto.randomUUID()}`;
+		const slug = await this.uniqueTeamSlug(bracket.id, data.name);
+		await this.db.insert(s.teams).values({
+			id: teamId,
+			seasonId: bracket.seasonId,
+			bracketId: bracket.id,
+			name: data.name,
+			slug,
+		});
+		await this.db.insert(s.teamMembers).values({
+			teamId,
+			bracketId: bracket.id,
+			competitorId: competitor.id,
+			role: "captain",
+		});
+		const invite = await this.mintTeamInvite({
+			teamId,
+			bracketId: bracket.id,
+			createdByUserId: data.userId,
+		});
+		return { teamId, token: invite.token };
+	}
+
+	async joinTeamViaInvite(
+		input: unknown,
+	): Promise<{ teamId: string; seasonId: string }> {
+		const data = JoinTeamViaInvite.parse(input);
+		const invite = await this.db
+			.select()
+			.from(s.teamInvites)
+			.where(eq(s.teamInvites.token, data.token))
+			.get();
+		if (!invite || invite.revokedAt) throw new Error("invite not valid");
+
+		const team = await this.db
+			.select()
+			.from(s.teams)
+			.where(eq(s.teams.id, invite.teamId))
+			.get();
+		if (!team) throw new Error("team not found");
+
+		const bracket = await this.getOpenBracket(invite.bracketId);
+		if (bracket.kind !== "team") throw new Error("team bracket required");
+
+		const competitor = await this.getOrCreateCompetitor({
+			seasonId: team.seasonId,
+			userId: data.userId,
+			displayName: data.displayName,
+		});
+
+		const existingMembership = await this.membershipForCompetitor(
+			bracket.id,
+			competitor.id,
+		);
+		if (existingMembership) {
+			if (existingMembership.teamId !== team.id)
+				throw new Error("already on a team");
+			await this.ensureBracketApplication(bracket.id, competitor.id);
+			return { teamId: team.id, seasonId: team.seasonId };
+		}
+
+		if ((await this.memberCount(team.id)) >= bracket.teamSize) {
+			throw new Error("team full");
+		}
+
+		await this.db.insert(s.teamMembers).values({
+			teamId: team.id,
+			bracketId: bracket.id,
+			competitorId: competitor.id,
+			role: "member",
+		});
+		await this.ensureBracketApplication(bracket.id, competitor.id);
+		return { teamId: team.id, seasonId: team.seasonId };
+	}
+
+	async renameTeam(input: unknown): Promise<{ ok: true }> {
+		const data = RenameTeam.parse(input);
+		const { team } = await this.requireTeamActor(
+			data.teamId,
+			data.userId,
+			true,
+		);
+		const slug = await this.uniqueTeamSlug(team.bracketId, data.name, team.id);
+		await this.db
+			.update(s.teams)
+			.set({ name: data.name, slug })
+			.where(eq(s.teams.id, data.teamId));
+		return { ok: true };
+	}
+
+	async createTeamInvite(input: unknown): Promise<{ token: string }> {
+		const data = CreateTeamInvite.parse(input);
+		const { team } = await this.requireTeamActor(
+			data.teamId,
+			data.userId,
+			true,
+		);
+		return this.mintTeamInvite({
+			teamId: team.id,
+			bracketId: team.bracketId,
+			createdByUserId: data.userId,
+		});
+	}
+
+	async revokeTeamInvite(input: unknown): Promise<{ ok: true }> {
+		const data = RevokeTeamInvite.parse(input);
+		const invite = await this.db
+			.select()
+			.from(s.teamInvites)
+			.where(eq(s.teamInvites.token, data.token))
+			.get();
+		if (!invite) return { ok: true };
+		await this.requireTeamActor(invite.teamId, data.userId, true);
+		await this.db
+			.update(s.teamInvites)
+			.set({ revokedAt: new Date() })
+			.where(eq(s.teamInvites.token, data.token));
+		return { ok: true };
+	}
+
+	async leaveTeam(input: unknown): Promise<{ ok: true }> {
+		const data = LeaveTeam.parse(input);
+		const { team, competitor, membership } = await this.requireTeamActor(
+			data.teamId,
+			data.userId,
+		);
+		const count = await this.memberCount(team.id);
+		if (membership.role === "captain" && count > 1) {
+			throw new Error("captain cannot leave while team has members");
+		}
+		await this.db
+			.delete(s.teamMembers)
+			.where(
+				and(
+					eq(s.teamMembers.teamId, team.id),
+					eq(s.teamMembers.competitorId, competitor.id),
+				),
+			);
+		if (count <= 1) {
+			await this.db
+				.update(s.teamInvites)
+				.set({ revokedAt: new Date() })
+				.where(
+					and(
+						eq(s.teamInvites.teamId, team.id),
+						isNull(s.teamInvites.revokedAt),
+					),
+				);
+			await this.db.delete(s.teams).where(eq(s.teams.id, team.id));
+		}
+		return { ok: true };
 	}
 
 	// ---- registrations ----
@@ -127,7 +578,11 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 
 		const preferredSlot = registration.preferredSlot;
 		let seed: number | null = null;
-		if (preferredSlot && preferredSlot > 0 && preferredSlot <= bracket.maxEntries) {
+		if (
+			preferredSlot &&
+			preferredSlot > 0 &&
+			preferredSlot <= bracket.maxEntries
+		) {
 			const existingSlot = await db
 				.select({ id: s.bracketEntries.id })
 				.from(s.bracketEntries)
@@ -166,12 +621,16 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			await db.insert(s.teams).values({
 				id: teamId,
 				seasonId: registration.seasonId,
+				bracketId: bracket.id,
 				name: teamName,
 				slug: `${slugify(teamName)}-${registration.id.slice(-6)}`,
 			});
-			await db
-				.insert(s.teamMembers)
-				.values({ teamId, competitorId, role: "captain" });
+			await db.insert(s.teamMembers).values({
+				teamId,
+				bracketId: bracket.id,
+				competitorId,
+				role: "captain",
+			});
 		}
 
 		await db.insert(s.bracketEntries).values({
@@ -204,7 +663,9 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 
 	async setMatchLiveState(input: unknown): Promise<{ ok: true }> {
 		const data = SetMatchLiveState.parse(input);
-		const patch: Partial<typeof s.matches.$inferInsert> = { status: data.state };
+		const patch: Partial<typeof s.matches.$inferInsert> = {
+			status: data.state,
+		};
 		if (data.state === "live") patch.startedAt = new Date();
 		await this.db
 			.update(s.matches)
@@ -244,6 +705,7 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		startsAt?: number | null;
 		registrationClosesAt?: number | null;
 		maxEntries?: number;
+		teamSize?: number;
 		cadenceDays?: number;
 	}): Promise<{ id: string }> {
 		const id = `bracket-${crypto.randomUUID()}`;
@@ -258,6 +720,7 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 				? new Date(input.registrationClosesAt)
 				: null,
 			maxEntries: input.maxEntries ?? 16,
+			teamSize: input.teamSize ?? 2,
 			cadenceDays: input.cadenceDays ?? 7,
 		});
 		return { id };
@@ -352,14 +815,17 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 	// ---- teams ----
 
 	async createTeam(input: {
-		seasonId: string;
+		bracketId: string;
 		slug: string;
 		name: string;
 	}): Promise<{ id: string }> {
+		const bracket = await this.getBracket(input.bracketId);
+		if (bracket.kind !== "team") throw new Error("team bracket required");
 		const id = `team-${crypto.randomUUID()}`;
 		await this.db.insert(s.teams).values({
 			id,
-			seasonId: input.seasonId,
+			seasonId: bracket.seasonId,
+			bracketId: bracket.id,
 			slug: input.slug,
 			name: input.name,
 		});
@@ -376,8 +842,15 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		competitorId: string;
 		role?: string | null;
 	}): Promise<{ ok: true }> {
+		const team = await this.db
+			.select()
+			.from(s.teams)
+			.where(eq(s.teams.id, input.teamId))
+			.get();
+		if (!team) throw new Error("team not found");
 		await this.db.insert(s.teamMembers).values({
 			teamId: input.teamId,
+			bracketId: team.bracketId,
 			competitorId: input.competitorId,
 			role: input.role ?? null,
 		});
@@ -433,11 +906,16 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		if (input.scenarioId !== undefined) patch.scenarioId = input.scenarioId;
 		if (input.judgeUserId !== undefined) patch.judgeUserId = input.judgeUserId;
 		if (input.scheduledAt !== undefined) {
-			patch.scheduledAt = input.scheduledAt ? new Date(input.scheduledAt) : null;
+			patch.scheduledAt = input.scheduledAt
+				? new Date(input.scheduledAt)
+				: null;
 		}
 		if (input.status !== undefined) patch.status = input.status;
 
-		await this.db.update(s.matches).set(patch).where(eq(s.matches.id, input.matchId));
+		await this.db
+			.update(s.matches)
+			.set(patch)
+			.where(eq(s.matches.id, input.matchId));
 		return { ok: true };
 	}
 }

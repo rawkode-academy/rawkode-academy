@@ -43,6 +43,14 @@
 			"service": "platform-watch-history-write-model"
 		},
 		{
+			"binding": "BRACKETS_READ",
+			"service": "platform-brackets-read-model"
+		},
+		{
+			"binding": "BRACKETS_WRITE",
+			"service": "platform-brackets-write-model"
+		},
+		{
 			"binding": "IDENTITY",
 			"service": "rawkode-academy-identity"
 		},

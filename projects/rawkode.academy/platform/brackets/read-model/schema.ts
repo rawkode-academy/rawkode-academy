@@ -3,7 +3,7 @@ import schemaBuilder from "@pothos/core";
 import directivesPlugin from "@pothos/plugin-directives";
 import drizzlePlugin from "@pothos/plugin-drizzle";
 import federationPlugin from "@pothos/plugin-federation";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { DateTimeResolver } from "graphql-scalars";
 import type { GraphQLSchema } from "graphql";
@@ -11,15 +11,43 @@ import * as s from "../data-model/schema";
 
 export interface PothosTypes {
 	DrizzleSchema: typeof s;
+	Context: BracketsReadContext;
 	Scalars: {
 		DateTime: { Input: Date; Output: Date };
 	};
 }
 
+export interface BracketsReadContext {
+	userId: string | null;
+}
+
 type MatchRow = typeof s.matches.$inferSelect;
 type BracketRow = typeof s.brackets.$inferSelect;
 type SeasonRow = typeof s.seasons.$inferSelect;
-type Side = { kind: "team" | "entry"; id: string; displayName: string; seed: number | null };
+type Side = {
+	kind: "team" | "entry";
+	id: string;
+	displayName: string;
+	seed: number | null;
+};
+type MyTeam = {
+	id: string;
+	name: string;
+	slug: string;
+	isCaptain: boolean;
+	memberCount: number;
+};
+type MyBracketParticipation = {
+	bracketId: string;
+	bracketSlug: string;
+	bracketName: string;
+	bracketKind: string;
+	teamSize: number;
+	registrationClosesAt: Date | null;
+	applied: boolean;
+	team: MyTeam | null;
+};
+type MyParticipation = { brackets: MyBracketParticipation[] };
 
 const createBuilder = (env: { DB: D1Database }) => {
 	const db = drizzle(env.DB);
@@ -36,7 +64,10 @@ const createBuilder = (env: { DB: D1Database }) => {
 	const seasonsForShow = (showId: string) =>
 		db.select().from(s.seasons).where(eq(s.seasons.showId, showId)).all();
 
-	const seasonIdsForShow = async (showId: string, seasonSlug?: string | null) => {
+	const seasonIdsForShow = async (
+		showId: string,
+		seasonSlug?: string | null,
+	) => {
 		const rows = await seasonsForShow(showId);
 		return rows
 			.filter((r) => (seasonSlug ? r.slug === seasonSlug : true))
@@ -87,7 +118,12 @@ const createBuilder = (env: { DB: D1Database }) => {
 				.where(eq(s.teams.id, teamId))
 				.get();
 			if (team)
-				return { kind: "team", id: team.id, displayName: team.name, seed: null };
+				return {
+					kind: "team",
+					id: team.id,
+					displayName: team.name,
+					seed: null,
+				};
 		}
 		return null;
 	};
@@ -169,6 +205,7 @@ const createBuilder = (env: { DB: D1Database }) => {
 			format: t.exposeString("format"),
 			status: t.exposeString("status"),
 			maxEntries: t.exposeInt("maxEntries"),
+			teamSize: t.exposeInt("teamSize"),
 			cadenceDays: t.exposeInt("cadenceDays"),
 			startsAt: t.field({
 				type: "DateTime",
@@ -228,15 +265,62 @@ const createBuilder = (env: { DB: D1Database }) => {
 	});
 
 	const standingRef = builder
-		.objectRef<{ id: string; displayName: string; wins: number; losses: number }>(
-			"BracketStanding",
-		)
+		.objectRef<{
+			id: string;
+			displayName: string;
+			wins: number;
+			losses: number;
+		}>("BracketStanding")
 		.implement({
 			fields: (t) => ({
 				id: t.exposeString("id"),
 				displayName: t.exposeString("displayName"),
 				wins: t.exposeInt("wins"),
 				losses: t.exposeInt("losses"),
+			}),
+		});
+
+	const myTeamRef = builder.objectRef<MyTeam>("MyTeam").implement({
+		fields: (t) => ({
+			id: t.exposeString("id"),
+			name: t.exposeString("name"),
+			slug: t.exposeString("slug"),
+			isCaptain: t.exposeBoolean("isCaptain"),
+			memberCount: t.exposeInt("memberCount"),
+		}),
+	});
+
+	const myBracketParticipationRef = builder
+		.objectRef<MyBracketParticipation>("MyBracketParticipation")
+		.implement({
+			fields: (t) => ({
+				bracketId: t.exposeString("bracketId"),
+				bracketSlug: t.exposeString("bracketSlug"),
+				bracketName: t.exposeString("bracketName"),
+				bracketKind: t.exposeString("bracketKind"),
+				teamSize: t.exposeInt("teamSize"),
+				registrationClosesAt: t.field({
+					type: "DateTime",
+					nullable: true,
+					resolve: (p) => p.registrationClosesAt,
+				}),
+				applied: t.exposeBoolean("applied"),
+				team: t.field({
+					type: myTeamRef,
+					nullable: true,
+					resolve: (p) => p.team,
+				}),
+			}),
+		});
+
+	const myParticipationRef = builder
+		.objectRef<MyParticipation>("MyParticipation")
+		.implement({
+			fields: (t) => ({
+				brackets: t.field({
+					type: [myBracketParticipationRef],
+					resolve: (p) => p.brackets,
+				}),
 			}),
 		});
 
@@ -263,7 +347,10 @@ const createBuilder = (env: { DB: D1Database }) => {
 		return matches.find((m) => m.status === "live") ?? null;
 	};
 
-	const showLeaderboard = async (showId: string, seasonSlug?: string | null) => {
+	const showLeaderboard = async (
+		showId: string,
+		seasonSlug?: string | null,
+	) => {
 		const matches = (await showSchedule(showId, seasonSlug)).filter(
 			(m) => m.status === "completed",
 		);
@@ -308,6 +395,92 @@ const createBuilder = (env: { DB: D1Database }) => {
 		);
 	};
 
+	const myParticipation = async (
+		showId: string,
+		userId?: string | null,
+	): Promise<MyParticipation> => {
+		const brackets = await openBrackets(showId);
+		const rows: MyBracketParticipation[] = [];
+
+		for (const bracket of brackets) {
+			let applied = false;
+			let team: MyTeam | null = null;
+
+			const competitor = userId
+				? await db
+						.select()
+						.from(s.competitors)
+						.where(
+							and(
+								eq(s.competitors.seasonId, bracket.seasonId),
+								eq(s.competitors.userId, userId),
+							),
+						)
+						.get()
+				: null;
+
+			if (competitor) {
+				const application = await db
+					.select({ id: s.bracketApplications.id })
+					.from(s.bracketApplications)
+					.where(
+						and(
+							eq(s.bracketApplications.bracketId, bracket.id),
+							eq(s.bracketApplications.competitorId, competitor.id),
+						),
+					)
+					.get();
+				applied = Boolean(application);
+
+				if (bracket.kind === "team") {
+					const membership = await db
+						.select({
+							role: s.teamMembers.role,
+							teamId: s.teamMembers.teamId,
+							teamName: s.teams.name,
+							teamSlug: s.teams.slug,
+						})
+						.from(s.teamMembers)
+						.innerJoin(s.teams, eq(s.teamMembers.teamId, s.teams.id))
+						.where(
+							and(
+								eq(s.teamMembers.bracketId, bracket.id),
+								eq(s.teamMembers.competitorId, competitor.id),
+							),
+						)
+						.get();
+					if (membership) {
+						const members = await db
+							.select({ competitorId: s.teamMembers.competitorId })
+							.from(s.teamMembers)
+							.where(eq(s.teamMembers.teamId, membership.teamId))
+							.all();
+						team = {
+							id: membership.teamId,
+							name: membership.teamName,
+							slug: membership.teamSlug,
+							isCaptain: membership.role === "captain",
+							memberCount: members.length,
+						};
+					}
+				}
+			}
+
+			rows.push({
+				bracketId: bracket.id,
+				bracketSlug: bracket.slug,
+				bracketName: bracket.name,
+				bracketKind: bracket.kind,
+				teamSize: bracket.teamSize,
+				registrationClosesAt: bracket.registrationClosesAt,
+				applied,
+				team,
+			});
+		}
+
+		return { brackets: rows };
+	};
+
 	// ---- federation: extend the Show entity owned by the website subgraph ----
 
 	builder
@@ -347,6 +520,10 @@ const createBuilder = (env: { DB: D1Database }) => {
 					type: [bracketRef],
 					resolve: (show) => openBrackets(show.id),
 				}),
+				myParticipation: t.field({
+					type: myParticipationRef,
+					resolve: (show, _args, ctx) => myParticipation(show.id, ctx.userId),
+				}),
 			}),
 		});
 
@@ -354,6 +531,11 @@ const createBuilder = (env: { DB: D1Database }) => {
 
 	builder.queryType({
 		fields: (t) => ({
+			myBracketParticipation: t.field({
+				type: myParticipationRef,
+				args: { showId: t.arg({ type: "String", required: true }) },
+				resolve: (_root, args, ctx) => myParticipation(args.showId, ctx.userId),
+			}),
 			bracket: t.field({
 				type: bracketRef,
 				nullable: true,
@@ -370,7 +552,10 @@ const createBuilder = (env: { DB: D1Database }) => {
 					bracketSlug: t.arg({ type: "String", required: true }),
 				},
 				resolve: async (_root, args) => {
-					const seasonIds = await seasonIdsForShow(args.showId, args.seasonSlug);
+					const seasonIds = await seasonIdsForShow(
+						args.showId,
+						args.seasonSlug,
+					);
 					if (seasonIds.length === 0) return null;
 					return db
 						.select()

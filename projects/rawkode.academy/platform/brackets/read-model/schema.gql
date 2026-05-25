@@ -10,6 +10,7 @@ type Bracket {
   format: String
   status: String
   maxEntries: Int
+  teamSize: Int
   cadenceDays: Int
   startsAt: DateTime
   registrationClosesAt: DateTime
@@ -61,7 +62,31 @@ type MatchSide {
   seed: Int
 }
 
+type MyBracketParticipation {
+  bracketId: String
+  bracketSlug: String
+  bracketName: String
+  bracketKind: String
+  teamSize: Int
+  registrationClosesAt: DateTime
+  applied: Boolean
+  team: MyTeam
+}
+
+type MyParticipation {
+  brackets: [MyBracketParticipation!]
+}
+
+type MyTeam {
+  id: String
+  name: String
+  slug: String
+  isCaptain: Boolean
+  memberCount: Int
+}
+
 type Query {
+  myBracketParticipation(showId: String!): MyParticipation
   bracket(id: String!): Bracket
   bracketBySlug(showId: String!, seasonSlug: String!, bracketSlug: String!): Bracket
 }
@@ -77,4 +102,5 @@ type Show
   liveMatch: BracketMatch
   leaderboard(seasonSlug: String): [BracketStanding!]
   openBrackets: [Bracket!]
+  myParticipation: MyParticipation
 }

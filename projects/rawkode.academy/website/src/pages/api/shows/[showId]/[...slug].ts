@@ -5,7 +5,7 @@ import type { ShowEnv } from "@/lib/shows/types";
 
 export const prerender = false;
 
-export const ALL: APIRoute = async ({ params, request, url }) => {
+export const ALL: APIRoute = async ({ locals, params, request, url }) => {
 	const { showId, slug } = params;
 	if (!showId) return new Response(null, { status: 404 });
 
@@ -20,5 +20,6 @@ export const ALL: APIRoute = async ({ params, request, url }) => {
 		request,
 		url,
 		env: env as unknown as ShowEnv,
+		locals,
 	});
 };

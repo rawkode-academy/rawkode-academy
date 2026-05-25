@@ -14,6 +14,8 @@ const bracket = await db
 		slug: schema.brackets.slug,
 		name: schema.brackets.name,
 		status: schema.brackets.status,
+		kind: schema.brackets.kind,
+		teamSize: schema.brackets.teamSize,
 		seasonId: schema.brackets.seasonId,
 		seasonName: schema.seasons.name,
 	})
@@ -35,7 +37,10 @@ const matches = await db
 		scheduledAt: schema.matches.scheduledAt,
 		teamAId: schema.matches.teamAId,
 		teamBId: schema.matches.teamBId,
+		entryAId: schema.matches.entryAId,
+		entryBId: schema.matches.entryBId,
 		winnerTeamId: schema.matches.winnerTeamId,
+		winnerEntryId: schema.matches.winnerEntryId,
 	})
 	.from(schema.matches)
 	.where(eq(schema.matches.bracketId, bracketId))
@@ -45,10 +50,19 @@ const matches = await db
 const teams = await db
 	.select({ id: schema.teams.id, name: schema.teams.name })
 	.from(schema.teams)
-	.where(eq(schema.teams.seasonId, bracket.seasonId))
+	.where(eq(schema.teams.bracketId, bracket.id))
 	.all();
 
 const teamMap = Object.fromEntries(teams.map((t) => [t.id, t.name]));
+
+const entries = await db
+	.select({ id: schema.bracketEntries.id, displayName: schema.bracketEntries.displayName })
+	.from(schema.bracketEntries)
+	.where(eq(schema.bracketEntries.bracketId, bracket.id))
+	.orderBy(asc(schema.bracketEntries.seed))
+	.all();
+
+const entryMap = Object.fromEntries(entries.map((e) => [e.id, e.displayName]));
 
 const rounds = matches.reduce<Record<number, typeof matches>>((acc, m) => {
 	(acc[m.roundNumber] ??= []).push(m);
@@ -58,8 +72,11 @@ const roundNumbers = Object.keys(rounds)
 	.map((n) => Number(n))
 	.sort((a, b) => a - b);
 
-const teamCount = teams.length;
-const canGenerate = matches.length === 0 && teamCount >= 2;
+const entryCount = entries.length;
+const canGenerate = matches.length === 0 && entryCount >= 2;
+
+const sideName = (teamId: string | null, entryId: string | null): string =>
+	(teamId ? teamMap[teamId] : null) ?? (entryId ? entryMap[entryId] : null) ?? "TBD";
 
 function formatScheduled(value: Date | null): string {
 	if (!value) return "TBD";
@@ -76,7 +93,8 @@ function formatScheduled(value: Date | null): string {
 	<section class="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 px-6 py-4 text-sm">
 		<span class="text-slate-300">Season: <strong>{bracket.seasonName}</strong></span>
 		<span class="text-slate-300">Status: <strong class="capitalize">{bracket.status}</strong></span>
-		<span class="text-slate-300">Teams in season: <strong>{teamCount}</strong></span>
+		<span class="text-slate-300">Kind: <strong>{bracket.kind === "team" ? `Team (${bracket.teamSize})` : "Individual"}</strong></span>
+		<span class="text-slate-300">Entries in bracket: <strong>{entryCount}</strong></span>
 		{
 			canGenerate && (
 				<form
@@ -95,7 +113,7 @@ function formatScheduled(value: Date | null): string {
 	{
 		roundNumbers.length === 0 ? (
 			<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-sm text-slate-400">
-				No matches yet. {canGenerate ? "Click Generate round 1 to seed the bracket from this season's teams." : "Add at least two teams to this season before generating round 1."}
+				No matches yet. {canGenerate ? "Click Generate round 1 to schedule matches from existing bracket entries." : "Seed at least two bracket entries before generating round 1."}
 			</section>
 		) : (
 			<section class="flex flex-col gap-6">
@@ -109,12 +127,12 @@ function formatScheduled(value: Date | null): string {
 								<li class="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-sm">
 									<div class="flex flex-wrap items-center justify-between gap-3">
 										<div class="flex items-center gap-2">
-											<span class={`font-medium ${m.winnerTeamId === m.teamAId ? "text-emerald-300" : "text-slate-100"}`}>
-												{m.teamAId ? teamMap[m.teamAId] ?? m.teamAId : "TBD"}
+											<span class={`font-medium ${(m.winnerTeamId && m.winnerTeamId === m.teamAId) || (m.winnerEntryId && m.winnerEntryId === m.entryAId) ? "text-emerald-300" : "text-slate-100"}`}>
+												{sideName(m.teamAId, m.entryAId)}
 											</span>
 											<span class="text-slate-500">vs</span>
-											<span class={`font-medium ${m.winnerTeamId === m.teamBId ? "text-emerald-300" : "text-slate-100"}`}>
-												{m.teamBId ? teamMap[m.teamBId] ?? m.teamBId : "TBD"}
+											<span class={`font-medium ${(m.winnerTeamId && m.winnerTeamId === m.teamBId) || (m.winnerEntryId && m.winnerEntryId === m.entryBId) ? "text-emerald-300" : "text-slate-100"}`}>
+												{sideName(m.teamBId, m.entryBId)}
 											</span>
 										</div>
 										<div class="flex items-center gap-3 text-xs text-slate-400">
