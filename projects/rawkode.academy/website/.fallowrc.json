@@ -1,0 +1,10 @@
+{
+	"entry": [
+		"scripts/check-cwv.ts",
+		"scripts/check-sitemap.ts",
+		"scripts/orphan-check.ts",
+		"scripts/publish-subgraph.ts",
+		"scripts/sync-technologies.ts",
+		"scripts/validate-seo.ts"
+	]
+}

@@ -29,6 +29,14 @@ type CrawlResult = {
 	maxDepth: number;
 };
 
+type CrawlState = {
+	queue: QueueItem[];
+	seen: Set<string>;
+	incoming: Map<string, number>;
+	depthMap: Map<string, number>;
+	errors: string[];
+};
+
 function parseArgs(): Args {
 	const argv = process.argv.slice(2);
 	return {
@@ -76,60 +84,84 @@ function extractLinks(html: string, baseUrl: string) {
 }
 
 function recordInternalLink(
-	queue: QueueItem[],
-	incoming: Map<string, number>,
-	seen: Set<string>,
+	state: CrawlState,
 	href: string,
 	depth: number,
 ) {
 	const normalized = normalizeUrl(href);
-	incoming.set(normalized, (incoming.get(normalized) || 0) + 1);
-	if (!seen.has(normalized)) {
-		queue.push({ url: normalized, depth: depth + 1 });
+	state.incoming.set(normalized, (state.incoming.get(normalized) || 0) + 1);
+	if (!state.seen.has(normalized)) {
+		state.queue.push({ url: normalized, depth: depth + 1 });
 	}
+}
+
+function shouldVisit(
+	item: QueueItem,
+	seen: Set<string>,
+	crawlDepth: number,
+): boolean {
+	return !seen.has(item.url) && item.depth <= crawlDepth;
+}
+
+async function crawlPage(
+	state: CrawlState,
+	item: QueueItem,
+	baseHost: string,
+) {
+	state.seen.add(item.url);
+	state.depthMap.set(item.url, item.depth);
+	try {
+		const html = await fetchHtml(item.url);
+		for (const href of extractLinks(html, item.url)) {
+			if (isInternal(baseHost, href)) {
+				recordInternalLink(state, href, item.depth);
+			}
+		}
+	} catch (error) {
+		state.errors.push(`${item.url}: ${error}`);
+	}
+}
+
+function crawlResult(
+	args: Args,
+	start: string,
+	state: CrawlState,
+): CrawlResult {
+	const visited = Array.from(state.seen);
+	return {
+		visited,
+		deepPages: visited.filter((url) =>
+			(state.depthMap.get(url) ?? 0) > args.maxDepth
+		),
+		orphans: visited.filter((url) =>
+			(state.incoming.get(url) || 0) === 0 && url !== start
+		),
+		depthMap: state.depthMap,
+		errors: state.errors,
+		limit: args.limit,
+		maxDepth: args.maxDepth,
+	};
 }
 
 async function crawl(args: Args): Promise<CrawlResult> {
 	const baseHost = new URL(args.base).host.replace(/^www\./, "");
 	const start = normalizeUrl(args.base);
-	const queue: QueueItem[] = [{ url: start, depth: 0 }];
-	const seen = new Set<string>();
-	const incoming = new Map<string, number>();
-	const depthMap = new Map<string, number>();
-	const errors: string[] = [];
+	const state: CrawlState = {
+		queue: [{ url: start, depth: 0 }],
+		seen: new Set<string>(),
+		incoming: new Map<string, number>(),
+		depthMap: new Map<string, number>(),
+		errors: [],
+	};
 
-	while (queue.length && seen.size < args.limit) {
-		const item = queue.shift()!;
-		if (seen.has(item.url) || item.depth > args.crawlDepth) continue;
-
-		seen.add(item.url);
-		depthMap.set(item.url, item.depth);
-		try {
-			const html = await fetchHtml(item.url);
-			for (const href of extractLinks(html, item.url)) {
-				if (isInternal(baseHost, href)) {
-					recordInternalLink(queue, incoming, seen, href, item.depth);
-				}
-			}
-		} catch (error) {
-			errors.push(`${item.url}: ${error}`);
+	while (state.queue.length && state.seen.size < args.limit) {
+		const item = state.queue.shift()!;
+		if (shouldVisit(item, state.seen, args.crawlDepth)) {
+			await crawlPage(state, item, baseHost);
 		}
 	}
 
-	const visited = Array.from(seen);
-	return {
-		visited,
-		deepPages: visited.filter((url) =>
-			(depthMap.get(url) ?? 0) > args.maxDepth
-		),
-		orphans: visited.filter((url) =>
-			(incoming.get(url) || 0) === 0 && url !== start
-		),
-		depthMap,
-		errors,
-		limit: args.limit,
-		maxDepth: args.maxDepth,
-	};
+	return crawlResult(args, start, state);
 }
 
 function printList(title: string, items: string[]) {
@@ -144,19 +176,30 @@ function report(result: CrawlResult) {
 		`Crawled ${result.visited.length} pages (limit ${result.limit}, maxDepth ${result.maxDepth}).`,
 	);
 
-	if (result.errors.length) {
-		printList(`Errors (${result.errors.length}):`, result.errors);
-	}
+	printOptionalList(`Errors (${result.errors.length}):`, result.errors);
+	printOptionalList(
+		`\nPotential orphans (${result.orphans.length}):`,
+		result.orphans,
+		"\nNo orphans detected at this crawl depth.",
+	);
+	printDeepPages(result);
+}
 
-	if (result.orphans.length) {
-		printList(
-			`\nPotential orphans (${result.orphans.length}):`,
-			result.orphans,
-		);
-	} else {
-		console.log("\nNo orphans detected at this crawl depth.");
+function printOptionalList(
+	title: string,
+	items: string[],
+	emptyMessage?: string,
+) {
+	if (items.length > 0) {
+		printList(title, items);
+		return;
 	}
+	if (emptyMessage) {
+		console.log(emptyMessage);
+	}
+}
 
+function printDeepPages(result: CrawlResult) {
 	if (result.deepPages.length) {
 		console.log(
 			`\nPages deeper than ${result.maxDepth} clicks from home (${result.deepPages.length}):`,

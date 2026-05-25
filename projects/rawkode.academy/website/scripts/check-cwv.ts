@@ -47,6 +47,19 @@ type PageSpeedMetrics = Omit<
 	"url" | "strategy" | "passed" | "failures"
 >;
 
+type InteractionMetric = {
+	inpOrTbtMs: number | null;
+	inpSource: "INP" | "TBT";
+};
+
+type ThresholdCheck = {
+	label: string;
+	value: number | null;
+	display: string;
+	limit: number;
+	limitLabel: string;
+};
+
 const DEFAULT_PAGES = [
 	"/",
 	"/watch",
@@ -142,13 +155,17 @@ function retryDelayMs(response: Response, attempt: number): number {
 	return retryAfterMs ?? backoffMs;
 }
 
+function shouldRetry(response: Response, attempt: number): boolean {
+	return isRetryable(response) && attempt < MAX_RETRIES;
+}
+
 async function fetchPageSpeed(endpoint: URL): Promise<PageSpeedResponse> {
 	for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
 		const response = await fetch(endpoint, {
 			headers: { Accept: "application/json" },
 		});
 		if (response.ok) return await response.json() as PageSpeedResponse;
-		if (!isRetryable(response) || attempt === MAX_RETRIES) {
+		if (!shouldRetry(response, attempt)) {
 			throw new Error(
 				`PageSpeed API failed (${response.status} ${response.statusText})`,
 			);
@@ -159,43 +176,71 @@ async function fetchPageSpeed(endpoint: URL): Promise<PageSpeedResponse> {
 	throw new Error("PageSpeed API failed after retries");
 }
 
-function pageSpeedMetrics(data: PageSpeedResponse): PageSpeedMetrics {
-	const audits = data.lighthouseResult?.audits ?? {};
-	const performanceScoreRaw = data.lighthouseResult?.categories?.performance
-		?.score;
+function performanceScore(data: PageSpeedResponse): number | null {
+	const score = data.lighthouseResult?.categories?.performance?.score;
+	return typeof score === "number" ? score * 100 : null;
+}
+
+function interactionMetric(
+	audits: Record<string, { numericValue?: number }>,
+): InteractionMetric {
 	const inpMs = getAuditNumericValue(audits, "interaction-to-next-paint") ??
 		getAuditNumericValue(audits, "experimental-interaction-to-next-paint");
-	const tbtMs = getAuditNumericValue(audits, "total-blocking-time");
+	return inpMs !== null ? { inpOrTbtMs: inpMs, inpSource: "INP" } : {
+		inpOrTbtMs: getAuditNumericValue(audits, "total-blocking-time"),
+		inpSource: "TBT",
+	};
+}
+
+function pageSpeedMetrics(data: PageSpeedResponse): PageSpeedMetrics {
+	const audits = data.lighthouseResult?.audits ?? {};
+	const interaction = interactionMetric(audits);
 
 	return {
 		lcpMs: getAuditNumericValue(audits, "largest-contentful-paint"),
 		cls: getAuditNumericValue(audits, "cumulative-layout-shift"),
-		inpOrTbtMs: inpMs ?? tbtMs,
-		inpSource: inpMs !== null ? "INP" : "TBT",
-		performanceScore: typeof performanceScoreRaw === "number"
-			? performanceScoreRaw * 100
-			: null,
+		...interaction,
+		performanceScore: performanceScore(data),
 	};
 }
 
+function nullableValue<T>(value: T | null): value is T {
+	return value !== null;
+}
+
+function thresholdFailure(check: ThresholdCheck): string | null {
+	if (check.value !== null && check.value <= check.limit) return null;
+	return `${check.label} ${check.display} > ${check.limitLabel}`;
+}
+
+function displayMs(value: number | null): string {
+	return value === null ? "missing" : `${value}ms`;
+}
+
 function thresholdFailures(metrics: PageSpeedMetrics): string[] {
-	const failures: string[] = [];
-	const lcpDisplay = metrics.lcpMs === null ? "missing" : `${metrics.lcpMs}ms`;
-	const inpOrTbtDisplay = metrics.inpOrTbtMs === null
-		? "missing"
-		: `${metrics.inpOrTbtMs}ms`;
-
-	if (metrics.lcpMs === null || metrics.lcpMs > 2500) {
-		failures.push(`LCP ${lcpDisplay} > 2500ms`);
-	}
-	if (metrics.cls === null || metrics.cls > 0.1) {
-		failures.push(`CLS ${metrics.cls ?? "missing"} > 0.1`);
-	}
-	if (metrics.inpOrTbtMs === null || metrics.inpOrTbtMs > 200) {
-		failures.push(`${metrics.inpSource} ${inpOrTbtDisplay} > 200ms`);
-	}
-
-	return failures;
+	return [
+		thresholdFailure({
+			label: "LCP",
+			value: metrics.lcpMs,
+			display: displayMs(metrics.lcpMs),
+			limit: 2500,
+			limitLabel: "2500ms",
+		}),
+		thresholdFailure({
+			label: "CLS",
+			value: metrics.cls,
+			display: String(metrics.cls ?? "missing"),
+			limit: 0.1,
+			limitLabel: "0.1",
+		}),
+		thresholdFailure({
+			label: metrics.inpSource,
+			value: metrics.inpOrTbtMs,
+			display: displayMs(metrics.inpOrTbtMs),
+			limit: 200,
+			limitLabel: "200ms",
+		}),
+	].filter(nullableValue);
 }
 
 async function runPageSpeed(

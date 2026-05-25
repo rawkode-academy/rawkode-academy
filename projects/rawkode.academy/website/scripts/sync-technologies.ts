@@ -60,19 +60,19 @@ function parseArgs(): Args {
 	};
 }
 
-function sanitizeIcon(logo?: string | null): string {
-	let icon = (logo || "").trim();
-
-	if (
-		(icon.startsWith('"') && icon.endsWith('"')) ||
-		(icon.startsWith("'") && icon.endsWith("'"))
-	) {
-		icon = icon.slice(1, -1);
-	}
-
-	return /^\.\/["']?https?:\/\//i.test(icon)
-		? icon.replace(/^\.\/["']?/i, "")
+function stripWrappingQuotes(icon: string): string {
+	const quote = icon.at(0);
+	return (quote === '"' || quote === "'") && icon.endsWith(quote)
+		? icon.slice(1, -1)
 		: icon;
+}
+
+function stripAccidentalRemotePrefix(icon: string): string {
+	return icon.replace(/^\.\/(["']?https?:\/\/)/i, "$1");
+}
+
+function sanitizeIcon(logo?: string | null): string {
+	return stripAccidentalRemotePrefix(stripWrappingQuotes((logo || "").trim()));
 }
 
 function formatYamlDescription(description: string): string {
@@ -88,23 +88,44 @@ function formatYamlDescription(description: string): string {
 }
 
 function iconReference(icon: string): string {
-	return /^\.|\//.test(icon) || /^https?:/i.test(icon) ? icon : `./${icon}`;
+	if (/^\.|\//.test(icon) || /^https?:/i.test(icon)) return icon;
+	return `./${icon}`;
 }
 
-function technologyDocument(tech: Tech): string {
-	const name = tech.name || tech.id;
-	const description = (tech.description || "").trim() || name;
-	const website = tech.website || "https://rawkode.academy";
-	const documentation = tech.documentation || "";
+function optionalDocumentationLine(documentation: string): string[] {
+	return documentation ? [`documentation: ${q(documentation)}`] : [];
+}
+
+function technologyName(tech: Tech): string {
+	return tech.name || tech.id;
+}
+
+function technologyDescription(tech: Tech, name: string): string {
+	return (tech.description || "").trim() || name;
+}
+
+function technologyWebsite(tech: Tech): string {
+	return tech.website || "https://rawkode.academy";
+}
+
+function frontmatterLines(tech: Tech): string[] {
+	const name = technologyName(tech);
+	const description = technologyDescription(tech, name);
 	const icon = sanitizeIcon(tech.logo);
 
-	const lines = [
-		"---",
+	return [
 		`name: ${q(name)}`,
 		`description: ${formatYamlDescription(description)}`,
 		`icon: ${q(iconReference(icon))}`,
-		`website: ${q(website)}`,
-		...(documentation ? [`documentation: ${q(documentation)}`] : []),
+		`website: ${q(technologyWebsite(tech))}`,
+		...optionalDocumentationLine(tech.documentation || ""),
+	];
+}
+
+function technologyDocument(tech: Tech): string {
+	const lines = [
+		"---",
+		...frontmatterLines(tech),
 		"categories: []",
 		"status: active",
 		"---",

@@ -16,13 +16,20 @@ on:
     - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/**
     - projects/rawkode.academy/platform/email-preferences/**
+    - projects/rawkode.academy/website/.fallowrc.json
+    - projects/rawkode.academy/website/.fallowrc.json/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/astro.config.mts/**
+    - projects/rawkode.academy/website/deno.json
+    - projects/rawkode.academy/website/deno.json/**
     - projects/rawkode.academy/website/env.cue
+    - projects/rawkode.academy/website/graphql-codegen.ts
+    - projects/rawkode.academy/website/graphql-codegen.ts/**
     - projects/rawkode.academy/website/package.json
     - projects/rawkode.academy/website/package.json/**
     - projects/rawkode.academy/website/public/**
     - projects/rawkode.academy/website/schema/**
+    - projects/rawkode.academy/website/scripts/**
     - projects/rawkode.academy/website/src/**
   workflow_dispatch: {}
 concurrency:

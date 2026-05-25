@@ -24,7 +24,7 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.deploy.main]
+		tasks: [_t.quality, _t.deploy.main]
 	}
 
 	pullRequest: {
@@ -32,7 +32,7 @@ ci: pipelines: {
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.deploy.preview]
+		tasks: [_t.quality, _t.deploy.preview]
 		annotations: "Preview URL": schema.#TaskCaptureRef & {
 			cuenvTask:    "deploy.preview"
 			cuenvCapture: "previewUrl"
@@ -49,6 +49,7 @@ let _runtimeInputs = [
 ]
 
 let _qualityInputs = [
+	".fallowrc.json",
 	"astro.config.mts",
 	"deno.json",
 	"graphql-codegen.ts",
