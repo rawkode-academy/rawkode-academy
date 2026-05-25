@@ -4,6 +4,7 @@
   Usage: deno run --allow-net scripts/check-sitemap.ts --base https://rawkode.academy [--limit 400] [--concurrency 10]
 */
 import process from "node:process";
+import { normalizeUrl } from "./lib/url.ts";
 
 type Args = {
 	base: string;
@@ -146,15 +147,6 @@ function extractTagAttribute(
 	}
 
 	return null;
-}
-
-function normalizeUrl(url: string): string {
-	const parsed = new URL(url);
-	let pathname = parsed.pathname;
-	if (pathname.length > 1 && pathname.endsWith("/")) {
-		pathname = pathname.slice(0, -1);
-	}
-	return `${parsed.protocol}//${parsed.host}${pathname}`;
 }
 
 function normalizeRobots(robots: string | null): string | null {

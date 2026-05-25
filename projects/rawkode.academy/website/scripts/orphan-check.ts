@@ -4,6 +4,8 @@
   Usage: deno run --allow-net scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000
 */
 import process from "node:process";
+import { flagValue, integerFlag } from "./lib/args.ts";
+import { normalizeUrl } from "./lib/url.ts";
 
 type Args = {
 	base: string;
@@ -12,123 +14,164 @@ type Args = {
 	crawlDepth: number;
 };
 
+type QueueItem = {
+	url: string;
+	depth: number;
+};
+
+type CrawlResult = {
+	visited: string[];
+	deepPages: string[];
+	orphans: string[];
+	depthMap: Map<string, number>;
+	errors: string[];
+	limit: number;
+	maxDepth: number;
+};
+
 function parseArgs(): Args {
 	const argv = process.argv.slice(2);
-	const get = (k: string, d?: string) => {
-		const i = argv.indexOf(k);
-		return i >= 0 ? argv[i + 1] : d;
-	};
 	return {
-		base: get("--base", "https://rawkode.academy")!,
-		maxDepth: parseInt(get("--maxDepth", "3")!, 10),
-		limit: parseInt(get("--limit", "1000")!, 10),
-		crawlDepth: parseInt(get("--crawlDepth", "7")!, 10),
+		base: flagValue(argv, "--base", "https://rawkode.academy")!,
+		maxDepth: integerFlag(argv, "--maxDepth", 3),
+		limit: integerFlag(argv, "--limit", 1000),
+		crawlDepth: integerFlag(argv, "--crawlDepth", 7),
 	};
 }
 
 function isInternal(baseHost: string, href: string) {
 	try {
-		const u = new URL(href, `https://${baseHost}`);
-		return u.host === baseHost && u.protocol.startsWith("http");
+		const url = new URL(href, `https://${baseHost}`);
+		return url.host === baseHost && url.protocol.startsWith("http");
 	} catch {
 		return false;
 	}
 }
 
-function normalize(url: string) {
-	const u = new URL(url);
-	let p = u.pathname;
-	if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
-	return `${u.protocol}//${u.host}${p}`;
-}
-
 async function fetchHtml(url: string) {
-	const res = await fetch(url, { headers: { Accept: "text/html" } });
-	if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-	return await res.text();
+	const response = await fetch(url, { headers: { Accept: "text/html" } });
+	if (!response.ok) {
+		throw new Error(`${response.status} ${response.statusText}`);
+	}
+	return await response.text();
 }
 
 function extractLinks(html: string, baseUrl: string) {
-	const re = /<a\s+[^>]*href=["']([^"'#]+)["'][^>]*>/gi;
-	const out: string[] = [];
-	let m: RegExpExecArray | null;
+	const links: string[] = [];
 	const base = new URL(baseUrl);
-	while ((m = re.exec(html))) {
+	const re = /<a\s+[^>]*href=["']([^"'#]+)["'][^>]*>/gi;
+	let match: RegExpExecArray | null;
+
+	while ((match = re.exec(html))) {
 		try {
-			const href = m[1];
-			if (!href) continue; // noUncheckedIndexedAccess safety
-			const abs = new URL(href, base).href;
-			out.push(abs);
+			const href = match[1];
+			if (!href) continue;
+			links.push(new URL(href, base).href);
 		} catch {
 			continue;
 		}
 	}
-	return out;
+
+	return links;
 }
 
-async function run() {
-	const { base, maxDepth, limit, crawlDepth } = parseArgs();
-	const baseHost = new URL(base).host.replace(/^www\./, "");
-	const start = normalize(base);
+function recordInternalLink(
+	queue: QueueItem[],
+	incoming: Map<string, number>,
+	seen: Set<string>,
+	href: string,
+	depth: number,
+) {
+	const normalized = normalizeUrl(href);
+	incoming.set(normalized, (incoming.get(normalized) || 0) + 1);
+	if (!seen.has(normalized)) {
+		queue.push({ url: normalized, depth: depth + 1 });
+	}
+}
 
-	const queue: { url: string; depth: number }[] = [{ url: start, depth: 0 }];
+async function crawl(args: Args): Promise<CrawlResult> {
+	const baseHost = new URL(args.base).host.replace(/^www\./, "");
+	const start = normalizeUrl(args.base);
+	const queue: QueueItem[] = [{ url: start, depth: 0 }];
 	const seen = new Set<string>();
 	const incoming = new Map<string, number>();
 	const depthMap = new Map<string, number>();
 	const errors: string[] = [];
 
-	while (queue.length && seen.size < limit) {
-		const { url, depth } = queue.shift()!;
-		if (seen.has(url) || depth > crawlDepth) continue;
-		seen.add(url);
-		depthMap.set(url, depth);
+	while (queue.length && seen.size < args.limit) {
+		const item = queue.shift()!;
+		if (seen.has(item.url) || item.depth > args.crawlDepth) continue;
+
+		seen.add(item.url);
+		depthMap.set(item.url, item.depth);
 		try {
-			const html = await fetchHtml(url);
-			const links = extractLinks(html, url);
-			for (const l of links) {
-				if (!isInternal(baseHost, l)) continue;
-				const n = normalize(l);
-				incoming.set(n, (incoming.get(n) || 0) + 1);
-				if (!seen.has(n)) queue.push({ url: n, depth: depth + 1 });
+			const html = await fetchHtml(item.url);
+			for (const href of extractLinks(html, item.url)) {
+				if (isInternal(baseHost, href)) {
+					recordInternalLink(queue, incoming, seen, href, item.depth);
+				}
 			}
-		} catch (e) {
-			errors.push(`${url}: ${e}`);
+		} catch (error) {
+			errors.push(`${item.url}: ${error}`);
 		}
 	}
 
-	// Collect potential orphans (no incoming except from itself/home) and deep pages
 	const visited = Array.from(seen);
-	const deepPages = visited.filter((u) => (depthMap.get(u) ?? 0) > maxDepth);
+	return {
+		visited,
+		deepPages: visited.filter((url) =>
+			(depthMap.get(url) ?? 0) > args.maxDepth
+		),
+		orphans: visited.filter((url) =>
+			(incoming.get(url) || 0) === 0 && url !== start
+		),
+		depthMap,
+		errors,
+		limit: args.limit,
+		maxDepth: args.maxDepth,
+	};
+}
 
-	const orphans = visited.filter(
-		(u) => (incoming.get(u) || 0) === 0 && u !== start,
-	);
-
-	console.log(
-		`Crawled ${visited.length} pages (limit ${limit}, maxDepth ${maxDepth}).`,
-	);
-	if (errors.length) {
-		console.log(`Errors (${errors.length}):`);
-		for (const e of errors) console.log(`  - ${e}`);
+function printList(title: string, items: string[]) {
+	console.log(title);
+	for (const item of items) {
+		console.log(`  - ${item}`);
 	}
-	if (orphans.length) {
-		console.log(`\nPotential orphans (${orphans.length}):`);
-		for (const u of orphans) console.log(`  - ${u}`);
+}
+
+function report(result: CrawlResult) {
+	console.log(
+		`Crawled ${result.visited.length} pages (limit ${result.limit}, maxDepth ${result.maxDepth}).`,
+	);
+
+	if (result.errors.length) {
+		printList(`Errors (${result.errors.length}):`, result.errors);
+	}
+
+	if (result.orphans.length) {
+		printList(
+			`\nPotential orphans (${result.orphans.length}):`,
+			result.orphans,
+		);
 	} else {
 		console.log("\nNo orphans detected at this crawl depth.");
 	}
 
-	if (deepPages.length) {
+	if (result.deepPages.length) {
 		console.log(
-			`\nPages deeper than ${maxDepth} clicks from home (${deepPages.length}):`,
+			`\nPages deeper than ${result.maxDepth} clicks from home (${result.deepPages.length}):`,
 		);
-		for (const u of deepPages) {
-			console.log(`  - ${u} (depth ${depthMap.get(u)})`);
+		for (const url of result.deepPages) {
+			console.log(`  - ${url} (depth ${result.depthMap.get(url)})`);
 		}
 	}
 }
 
-run().catch((e) => {
-	console.error(e);
+async function run() {
+	report(await crawl(parseArgs()));
+}
+
+run().catch((error) => {
+	console.error(error);
 	process.exit(1);
 });

@@ -1,106 +1,114 @@
-#!/usr/bin/env -S deno run --allow-read
+#!/usr/bin/env -S deno run --allow-read --allow-env=__MINIMATCH_TESTING_PLATFORM__
 import { glob } from "glob";
 import { readFile } from "node:fs/promises";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 
-interface ValidationError {
+type Frontmatter = Record<string, unknown>;
+
+type ValidationError = {
 	file: string;
 	errors: string[];
+};
+
+type ValidationTarget = {
+	pattern: string;
+	validate: (filePath: string) => Promise<string[]>;
+};
+
+function textValue(data: Frontmatter, key: string): string {
+	const value = data[key];
+	return value === null || value === undefined ? "" : String(value);
 }
 
-async function validateArticle(filePath: string): Promise<string[]> {
-	const errors: string[] = [];
+function hasValue(data: Frontmatter, key: string): boolean {
+	const value = data[key];
+	return Array.isArray(value) ? value.length > 0 : Boolean(value);
+}
+
+function validateTextLength(
+	errors: string[],
+	value: string,
+	label: string,
+	min?: number,
+	max?: number,
+) {
+	if (min !== undefined && value.length < min) {
+		errors.push(`${label} too short (${value.length} chars, min ${min})`);
+	}
+	if (max !== undefined && value.length > max) {
+		errors.push(`${label} too long (${value.length} chars, max ${max})`);
+	}
+}
+
+async function readFrontmatter(filePath: string): Promise<Frontmatter> {
 	const content = await readFile(filePath, "utf-8");
-	const { data } = matter(content);
+	return matter(content).data as Frontmatter;
+}
 
-	// Title validation
-	if (!data.title) {
-		errors.push("Missing title");
-	} else {
-		if (data.title.length < 10) {
-			errors.push(`Title too short (${data.title.length} chars, min 10)`);
-		}
-		if (data.title.length > 60) {
-			errors.push(`Title too long (${data.title.length} chars, max 60)`);
-		}
+function validateRequiredText(
+	errors: string[],
+	data: Frontmatter,
+	key: string,
+	missingMessage: string,
+	lengthLabel: string,
+	min?: number,
+	max?: number,
+) {
+	const value = textValue(data, key);
+	if (!value) {
+		errors.push(missingMessage);
+		return;
 	}
+	validateTextLength(errors, value, lengthLabel, min, max);
+}
 
-	// Description validation
-	if (!data.description) {
-		errors.push("Missing description");
-	} else {
-		if (data.description.length < 50) {
-			errors.push(
-				`Description too short (${data.description.length} chars, min 50)`,
-			);
-		}
-		if (data.description.length > 160) {
-			errors.push(
-				`Description too long (${data.description.length} chars, max 160)`,
-			);
-		}
-	}
+function validateArticleData(data: Frontmatter): string[] {
+	const errors: string[] = [];
+	validateRequiredText(errors, data, "title", "Missing title", "Title", 10, 60);
+	validateRequiredText(
+		errors,
+		data,
+		"description",
+		"Missing description",
+		"Description",
+		50,
+		160,
+	);
 
-	// OpenGraph validation
-	if (!data.openGraph) {
+	const openGraph = data.openGraph as Frontmatter | undefined;
+	if (!openGraph) {
 		errors.push("Missing OpenGraph data");
 	} else {
-		if (!data.openGraph.title) {
-			errors.push("Missing OpenGraph title");
-		}
-		if (!data.openGraph.subtitle) {
-			errors.push("Missing OpenGraph subtitle");
-		}
+		if (!openGraph.title) errors.push("Missing OpenGraph title");
+		if (!openGraph.subtitle) errors.push("Missing OpenGraph subtitle");
 	}
 
-	// Date validation
-	if (!data.publishedAt) {
-		errors.push("Missing publishedAt date");
-	}
+	if (!data.publishedAt) errors.push("Missing publishedAt date");
+	if (!hasValue(data, "authors")) errors.push("Missing authors");
 
-	// Author validation
-	if (!data.authors || data.authors.length === 0) {
-		errors.push("Missing authors");
-	}
-
-	// Cover image validation
-	if (data.cover && !data.cover.alt) {
-		errors.push("Cover image missing alt text");
-	}
-
+	const cover = data.cover as Frontmatter | undefined;
+	if (cover && !cover.alt) errors.push("Cover image missing alt text");
 	return errors;
 }
 
-async function validateCourse(filePath: string): Promise<string[]> {
+function validateCourseData(data: Frontmatter): string[] {
 	const errors: string[] = [];
-	const content = await readFile(filePath, "utf-8");
-	const { data } = matter(content);
+	validateRequiredText(errors, data, "title", "Missing title", "Title");
+	validateRequiredText(
+		errors,
+		data,
+		"description",
+		"Missing description",
+		"Description",
+		50,
+	);
 
-	// Title validation
-	if (!data.title) {
-		errors.push("Missing title");
-	}
-
-	// Description validation
-	if (!data.description) {
-		errors.push("Missing description");
-	} else if (data.description.length < 50) {
-		errors.push(
-			`Description too short (${data.description.length} chars, min 50)`,
-		);
-	}
-
-	// Date validation
-	if (!data.publishedAt) {
-		errors.push("Missing publishedAt date");
-	}
-
-	// Difficulty validation
+	if (!data.publishedAt) errors.push("Missing publishedAt date");
 	if (
 		!data.difficulty ||
-		!["beginner", "intermediate", "advanced"].includes(data.difficulty)
+		!["beginner", "intermediate", "advanced"].includes(String(data.difficulty))
 	) {
 		errors.push("Invalid or missing difficulty level");
 	}
@@ -108,33 +116,26 @@ async function validateCourse(filePath: string): Promise<string[]> {
 	return errors;
 }
 
-async function validateVideo(filePath: string): Promise<string[]> {
+function validateVideoData(data: Frontmatter): string[] {
 	const errors: string[] = [];
-	const content = await readFile(filePath, "utf-8");
-	const { data } = matter(content);
-
-	if (!data.id || String(data.id).trim().length === 0) {
+	if (textValue(data, "id").trim().length === 0) {
 		errors.push("Missing video id");
 	}
-
-	if (!data.slug || String(data.slug).trim().length === 0) {
+	if (textValue(data, "slug").trim().length === 0) {
 		errors.push("Missing slug");
 	}
-
-	if (!data.title || String(data.title).trim().length < 5) {
+	if (textValue(data, "title").trim().length < 5) {
 		errors.push("Missing or too-short title");
 	}
 
-	if (!data.description) {
+	const description = textValue(data, "description").trim();
+	if (!description) {
 		errors.push("Missing description");
-	} else if (String(data.description).trim().length < 20) {
+	} else if (description.length < 20) {
 		errors.push("Description too short (min 20 chars)");
 	}
 
-	if (!data.publishedAt) {
-		errors.push("Missing publishedAt date");
-	}
-
+	if (!data.publishedAt) errors.push("Missing publishedAt date");
 	if (typeof data.duration !== "number" || data.duration <= 0) {
 		errors.push("Missing or invalid duration");
 	}
@@ -142,59 +143,75 @@ async function validateVideo(filePath: string): Promise<string[]> {
 	return errors;
 }
 
+async function validateFrontmatterFile(
+	filePath: string,
+	validate: (data: Frontmatter) => string[],
+): Promise<string[]> {
+	return validate(await readFrontmatter(filePath));
+}
+
+function validationTargets(contentRoot: string): ValidationTarget[] {
+	return [
+		{
+			pattern: `${contentRoot}/articles/**/*.{md,mdx}`,
+			validate: (file) => validateFrontmatterFile(file, validateArticleData),
+		},
+		{
+			pattern: `${contentRoot}/courses/**/*.{md,mdx}`,
+			validate: (file) => validateFrontmatterFile(file, validateCourseData),
+		},
+		{
+			pattern: `${contentRoot}/videos/**/*.{md,mdx}`,
+			validate: (file) => validateFrontmatterFile(file, validateVideoData),
+		},
+	];
+}
+
+async function collectValidationErrors(
+	targets: ValidationTarget[],
+): Promise<ValidationError[]> {
+	const validationErrors: ValidationError[] = [];
+
+	for (const target of targets) {
+		for (const file of await glob(target.pattern)) {
+			const errors = await target.validate(file);
+			if (errors.length > 0) {
+				validationErrors.push({ file, errors });
+			}
+		}
+	}
+
+	return validationErrors;
+}
+
+function reportValidationErrors(validationErrors: ValidationError[]) {
+	if (validationErrors.length === 0) {
+		console.log("✅ All SEO validations passed!");
+		return;
+	}
+
+	console.error("❌ SEO validation errors found:\n");
+	for (const { file, errors } of validationErrors) {
+		console.error(`📄 ${file}:`);
+		for (const error of errors) {
+			console.error(`   - ${error}`);
+		}
+		console.error("");
+	}
+	console.error(`Total files with errors: ${validationErrors.length}`);
+}
+
 async function main() {
 	console.log("🔍 Validating SEO requirements...\n");
 
-	const validationErrors: ValidationError[] = [];
 	const contentRoot = fileURLToPath(
 		new URL("../../../../content", import.meta.url),
 	);
-
-	// Validate articles
-	const articleFiles = await glob(`${contentRoot}/articles/**/*.{md,mdx}`);
-	for (const file of articleFiles) {
-		const errors = await validateArticle(file);
-		if (errors.length > 0) {
-			validationErrors.push({ file, errors });
-		}
-	}
-
-	// Validate courses
-	const courseFiles = await glob(`${contentRoot}/courses/**/*.{md,mdx}`);
-	for (const file of courseFiles) {
-		const errors = await validateCourse(file);
-		if (errors.length > 0) {
-			validationErrors.push({ file, errors });
-		}
-	}
-
-	// Validate videos
-	const videoFiles = await glob(`${contentRoot}/videos/**/*.{md,mdx}`);
-	for (const file of videoFiles) {
-		const errors = await validateVideo(file);
-		if (errors.length > 0) {
-			validationErrors.push({ file, errors });
-		}
-	}
-
-	// Report results
-	if (validationErrors.length === 0) {
-		console.log("✅ All SEO validations passed!");
-		process.exit(0);
-	} else {
-		console.error("❌ SEO validation errors found:\n");
-
-		for (const { file, errors } of validationErrors) {
-			console.error(`📄 ${file}:`);
-			for (const error of errors) {
-				console.error(`   - ${error}`);
-			}
-			console.error("");
-		}
-
-		console.error(`Total files with errors: ${validationErrors.length}`);
-		process.exit(1);
-	}
+	const validationErrors = await collectValidationErrors(
+		validationTargets(contentRoot),
+	);
+	reportValidationErrors(validationErrors);
+	process.exit(validationErrors.length === 0 ? 0 : 1);
 }
 
 main().catch((error) => {

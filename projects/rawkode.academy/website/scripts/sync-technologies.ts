@@ -13,31 +13,18 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import process from "node:process";
+import { flagValue, integerFlag } from "./lib/args.ts";
 
 type Args = { endpoint: string; limit: number; outDir: string };
 
-function q(v: string): string {
-	if (v === "" || /[:[\]{}#&*!|>'"%@`-]|^\s|\s$/.test(v)) {
-		return JSON.stringify(v);
-	}
-	return v;
-}
-
-function parseArgs(): Args {
-	const argv = process.argv.slice(2);
-	const get = (k: string, d?: string) => {
-		const i = argv.indexOf(k);
-		return i >= 0 ? argv[i + 1] : d;
-	};
-	const endpoint = get("--endpoint") ||
-		process.env.GRAPHQL_ENDPOINT ||
-		"https://api.rawkode.academy/graphql";
-	const limit = parseInt(get("--limit", "1000")!, 10);
-	const require = createRequire(import.meta.url);
-	const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
-	const outDir = join(dirname(pkgPath), "technologies");
-	return { endpoint, limit, outDir };
-}
+type Tech = {
+	id: string;
+	name: string;
+	description?: string | null;
+	website?: string | null;
+	documentation?: string | null;
+	logo?: string | null;
+};
 
 const query = gql /* GraphQL */`
   query GetTechnologies($limit: Int) {
@@ -52,83 +39,118 @@ const query = gql /* GraphQL */`
   }
 `;
 
-type Tech = {
-	id: string;
-	name: string;
-	description?: string | null;
-	website?: string | null;
-	documentation?: string | null;
-	logo?: string | null;
-};
+function q(value: string): string {
+	if (value === "" || /[:[\]{}#&*!|>'"%@`-]|^\s|\s$/.test(value)) {
+		return JSON.stringify(value);
+	}
+	return value;
+}
+
+function parseArgs(): Args {
+	const argv = process.argv.slice(2);
+	const require = createRequire(import.meta.url);
+	const pkgPath = require.resolve("@rawkodeacademy/content/package.json");
+
+	return {
+		endpoint: flagValue(argv, "--endpoint") ||
+			process.env.GRAPHQL_ENDPOINT ||
+			"https://api.rawkode.academy/graphql",
+		limit: integerFlag(argv, "--limit", 1000),
+		outDir: join(dirname(pkgPath), "technologies"),
+	};
+}
+
+function sanitizeIcon(logo?: string | null): string {
+	let icon = (logo || "").trim();
+
+	if (
+		(icon.startsWith('"') && icon.endsWith('"')) ||
+		(icon.startsWith("'") && icon.endsWith("'"))
+	) {
+		icon = icon.slice(1, -1);
+	}
+
+	return /^\.\/["']?https?:\/\//i.test(icon)
+		? icon.replace(/^\.\/["']?/i, "")
+		: icon;
+}
+
+function formatYamlDescription(description: string): string {
+	if (!description.includes("\n")) {
+		return q(description);
+	}
+
+	const indented = description
+		.split("\n")
+		.map((line) => `  ${line}`)
+		.join("\n");
+	return `|\n${indented}`;
+}
+
+function iconReference(icon: string): string {
+	return /^\.|\//.test(icon) || /^https?:/i.test(icon) ? icon : `./${icon}`;
+}
+
+function technologyDocument(tech: Tech): string {
+	const name = tech.name || tech.id;
+	const description = (tech.description || "").trim() || name;
+	const website = tech.website || "https://rawkode.academy";
+	const documentation = tech.documentation || "";
+	const icon = sanitizeIcon(tech.logo);
+
+	const lines = [
+		"---",
+		`name: ${q(name)}`,
+		`description: ${formatYamlDescription(description)}`,
+		`icon: ${q(iconReference(icon))}`,
+		`website: ${q(website)}`,
+		...(documentation ? [`documentation: ${q(documentation)}`] : []),
+		"categories: []",
+		"status: active",
+		"---",
+		"",
+	];
+
+	return lines.join("\n");
+}
+
+async function fetchTechnologies(
+	endpoint: string,
+	limit: number,
+): Promise<Tech[]> {
+	const client = new GraphQLClient(endpoint);
+	const response = await client.request<{ getTechnologies: Tech[] }>(query, {
+		limit,
+	});
+	return response.getTechnologies || [];
+}
+
+async function writeTechnology(outDir: string, tech: Tech) {
+	const file = join(outDir, `${tech.id}.mdx`);
+	await mkdir(dirname(file), { recursive: true });
+	await writeFile(file, technologyDocument(tech), "utf8");
+}
 
 async function main() {
 	const { endpoint, limit, outDir } = parseArgs();
 	console.log(`Syncing technologies from ${endpoint} -> ${outDir}`);
 
-	const client = new GraphQLClient(endpoint);
-	const res = await client.request<{ getTechnologies: Tech[] }>(query, {
-		limit,
-	});
-	const items = res.getTechnologies || [];
+	const items = await fetchTechnologies(endpoint, limit);
 	console.log(`Fetched ${items.length} technologies`);
 
 	await mkdir(outDir, { recursive: true });
 
 	let written = 0;
-	for (const t of items) {
-		if (!t || !t.id) continue;
-		const file = join(outDir, `${t.id}.mdx`);
-		const name = t.name || t.id;
-		const description = (t.description || "").trim() || name;
-		const website = t.website || "https://rawkode.academy";
-		// Sanitize icon input (remove wrapping quotes, accidental ./ on remote)
-		let icon = (t.logo || "").trim();
-		if (
-			(icon.startsWith('"') && icon.endsWith('"')) ||
-			(icon.startsWith("'") && icon.endsWith("'"))
-		) {
-			icon = icon.slice(1, -1);
-		}
-		if (/^\.\/["']?https?:\/\//i.test(icon)) {
-			icon = icon.replace(/^\.\/["']?/i, "");
-		}
-		const documentation = t.documentation || "";
-
-		const desc = description.includes("\n")
-			? `|\n${
-				description
-					.split("\n")
-					.map((l) => `  ${l}`)
-					.join("\n")
-			}`
-			: q(description);
-
-		const lines = [
-			"---",
-			`name: ${q(name)}`,
-			`description: ${desc}`,
-			// Prefer local icon if later downloaded; otherwise keep remote.
-			// If the icon is a simple basename (no scheme or leading slash), prefix with ./ to work with image().
-			/^\.|\//.test(icon) || /^https?:/i.test(icon)
-				? `icon: ${q(icon)}`
-				: `icon: ${q("./" + icon)}`,
-			`website: ${q(website)}`,
-			...(documentation ? [`documentation: ${q(documentation)}`] : []),
-			"categories: []",
-			"status: active",
-			"---",
-			"",
-		];
-
-		await mkdir(dirname(file), { recursive: true });
-		await writeFile(file, lines.join("\n"), "utf8");
+	for (const tech of items) {
+		if (!tech?.id) continue;
+		await writeTechnology(outDir, tech);
 		written++;
 	}
 
 	console.log(`Wrote ${written} files.`);
 }
 
-main().catch((err) => {
-	console.error("sync-technologies failed:", err);
+main().catch((error) => {
+	console.error("sync-technologies failed:", error);
 	process.exit(1);
 });
