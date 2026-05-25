@@ -127,7 +127,7 @@ Track these metrics in Google Search Console:
 3. **Transcript/Captions**
    - Keep `captions/en.vtt` published for each video id
    - Watch pages now expose a transcript preview from the caption file in server-rendered HTML
-   - Missing video metadata is checked via `bun run test:seo` and `bun run validate:seo`
+   - Missing video metadata is checked via `deno task test:seo` and `deno task validate:seo`
 
 ## Content Operations Checklist
 

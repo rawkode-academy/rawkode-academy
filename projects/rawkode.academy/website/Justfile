@@ -2,30 +2,30 @@
 	just --list
 
 dev:
-	bun run dev
+	deno task dev
 
 format:
 	nixfmt .
-	bun run format
+	deno task format
 
 build:
-	bun run build
+	deno task build
 
 test:
-	bun run test
+	deno task test
 
 test-with-logs:
-	bun run test --reporter=default --no-file-parallelism --disable-console-intercept
+	deno task test --reporter=default --no-file-parallelism --disable-console-intercept
 
 deploy:
 	#!/usr/bin/env bash
 	dagger call deploy --git-head $(git rev-parse --abbrev-ref HEAD) --cloudflare-api-token op://sa.rawkode.academy/cloudflare/password
 
 preview:
-	bun run preview
+	deno task preview
 
 codegen:
-	bun run graphql-codegen --config graphql-codegen.ts
+	deno task codegen
 
 # Invalidate the videos-latest cache tag on Cloudflare
 invalidate-videos-cache:
@@ -43,5 +43,5 @@ invalidate-videos-cache:
 generate-subgraph-sdl:
 	#!/usr/bin/env bash
 	set -euo pipefail
-	bun run subgraph:sdl
+	deno task subgraph:sdl
 	echo "SDL generated at subgraph/schema.gql"

@@ -5,12 +5,12 @@
 ```bash
 cuenv task dev        # Start Astro dev server (preferred)
 cuenv task build      # Type check + build
-bun run test          # Run vitest
-bun run test:watch    # Watch mode
-bun run format        # Biome format
-bun run storybook     # Component development
-bun run codegen       # GraphQL codegen
-bun run sync:content  # Sync GraphQL content
+deno task test        # Run vitest
+deno task test:watch  # Watch mode
+deno task format      # Deno format
+deno task storybook   # Component development
+deno task codegen     # GraphQL codegen
+deno task sync:content  # Sync GraphQL content
 ```
 
 ## Component Library & Design System
@@ -147,7 +147,7 @@ Negative letter-spacing tightens display sizes (`-0.035em` on h1, `-0.025em` on 
 | `SectionRail.vue` | Anchor rail (e.g. `§01..§06`). Hairline-bordered grid; each cell hovers to `--surface-card-muted`. |
 | `HairlinePanel.vue` | Paper / paper-deep / muted / ink surface with 1px hairline. Optional `heavy` variant uses 2px ink border. |
 
-Every editorial primitive has a `*.stories.tsx` under the same folder. Run `bun run storybook` to explore.
+Every editorial primitive has a `*.stories.tsx` under the same folder. Run `deno task storybook` to explore.
 
 ##### Shared primitives (refactored, not new)
 
@@ -230,8 +230,8 @@ import {
 
 1. Look in `src/components/ui/` before building new primitives.
 2. Use Storybook to develop in isolation.
-3. `astro check` runs as part of `bun run build`. The vitest suite is run separately via `bun run test`.
-4. Biome formats: `bun run format`. Tabs, double quotes.
+3. `astro check` runs as part of `deno task build`. The vitest suite is run separately via `deno task test`.
+4. Deno formats: `deno task format`. Tabs, double quotes.
 5. Test both light and dark schemes manually before shipping.
 6. Be responsive and accessible — the editorial system inherits the same constraints, only the surface treatment changed.
 
@@ -281,4 +281,4 @@ first instance: `src/shows/klustered/index.ts` = `bracketPlugin({ showId: "klust
 - Theme utilities: `src/lib/theme.ts`
 - Global styles: `src/styles/global.css`
 - UnoCSS config: `uno.config.ts`
-- Storybook: `bun run storybook`
+- Storybook: `deno task storybook`

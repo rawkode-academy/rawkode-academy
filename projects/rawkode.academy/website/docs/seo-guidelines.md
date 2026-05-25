@@ -123,7 +123,7 @@ The test suite examines:
 ### Running the Tests
 
 ```
-bun test src/components/html/seo.test.ts
+deno task test:seo
 ```
 
 ## Implementation Notes

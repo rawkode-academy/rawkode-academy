@@ -21,8 +21,8 @@ cuenv task dev
 
 ### Without Nix
 
-If you want to get up and running manually, install Bun and the workspace
-dependencies first.
+If you want to get up and running manually, install Deno and Bun, then install
+the workspace dependencies.
 
 ```shell {"name": "install"}
 bun install
@@ -31,7 +31,7 @@ bun install
 Then start the local dev server:
 
 ```shell {"name": "dev"}
-bun run dev
+deno task dev
 ```
 
 `astro dev` already runs through Cloudflare's native Vite plugin and `workerd`
@@ -41,20 +41,20 @@ maintain here.
 ## Checks, Linting, & Formatting
 
 ```shell {"name": "check"}
-bun run format
-bun run build
+deno task quality
+deno task build
 ```
 
 ## Testing
 
 ```shell {"name": "test"}
-bun run test
+deno task test
 ```
 
 ## Core Web Vitals Monitoring
 
 ```shell {"name": "cwv"}
-bun run check:cwv
+deno task check:cwv
 ```
 
 Set `PAGESPEED_API_KEY` to avoid API rate limiting in CI and local checks.
@@ -62,7 +62,7 @@ Set `PAGESPEED_API_KEY` to avoid API rate limiting in CI and local checks.
 We also provide a useful logging / debugging configuration for tests:
 
 ```shell {"name": "test-debug"}
-bun run test \
+deno task test \
 	--reporter=basic \
 	--no-file-parallelism \
 	--disable-console-intercept
@@ -71,7 +71,7 @@ bun run test \
 ## Deploy
 
 ```shell {"name": "deploy"}
-op run -- bunx wrangler deploy
+op run -- deno task wrangler:deploy
 ```
 
 ## Analytics
