@@ -60,6 +60,10 @@ const entries = await db
 	.select({
 		id: schema.bracketEntries.id,
 		displayName: schema.bracketEntries.displayName,
+		seed: schema.bracketEntries.seed,
+		status: schema.bracketEntries.status,
+		competitorId: schema.bracketEntries.competitorId,
+		teamId: schema.bracketEntries.teamId,
 	})
 	.from(schema.bracketEntries)
 	.where(eq(schema.bracketEntries.bracketId, bracket.id))
@@ -67,6 +71,16 @@ const entries = await db
 	.all();
 
 const entryMap = Object.fromEntries(entries.map((e) => [e.id, e.displayName]));
+const competitors = await db
+	.select({
+		id: schema.competitors.id,
+		displayName: schema.competitors.displayName,
+		personSlug: schema.competitors.personSlug,
+	})
+	.from(schema.competitors)
+	.where(eq(schema.competitors.seasonId, bracket.seasonId))
+	.orderBy(asc(schema.competitors.displayName))
+	.all();
 
 const rounds = matches.reduce<Record<number, typeof matches>>((acc, m) => {
 	(acc[m.roundNumber] ??= []).push(m);
@@ -78,6 +92,11 @@ const roundNumbers = Object.keys(rounds)
 
 const entryCount = entries.length;
 const canGenerate = matches.length === 0 && entryCount >= 2;
+const canManageEntries = matches.length === 0;
+const enteredCompetitorIds = new Set(entries.map((e) => e.competitorId).filter(Boolean));
+const enteredTeamIds = new Set(entries.map((e) => e.teamId).filter(Boolean));
+const availableCompetitors = competitors.filter((c) => !enteredCompetitorIds.has(c.id));
+const availableTeams = teams.filter((t) => !enteredTeamIds.has(t.id));
 
 const sideName = (teamId: string | null, entryId: string | null): string =>
 	(teamId ? teamMap[teamId] : null) ??
@@ -98,7 +117,20 @@ function formatScheduled(value: Date | null): string {
 
 	<section class="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 px-6 py-4 text-sm">
 		<span class="text-slate-300">Season: <strong>{bracket.seasonName}</strong></span>
-		<span class="text-slate-300">Status: <strong class="capitalize">{bracket.status}</strong></span>
+		<form method="POST" action={`/api/admin/brackets/${bracket.id}/update`} class="flex items-center gap-2 text-slate-300">
+			<span>Status:</span>
+			<select
+				name="status"
+				class="rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+			>
+				<option value="draft" selected={bracket.status === "draft"}>Draft</option>
+				<option value="active" selected={bracket.status === "active"}>Active</option>
+				<option value="finished" selected={bracket.status === "finished"}>Finished</option>
+			</select>
+			<button class="text-xs text-fuchsia-300 underline-offset-4 hover:underline">
+				Save
+			</button>
+		</form>
 		<span class="text-slate-300">Kind: <strong>{bracket.kind === "team" ? `Team (${bracket.teamSize})` : "Individual"}</strong></span>
 		<span class="text-slate-300">Starts: <strong>{formatScheduled(bracket.startsAt)}</strong></span>
 		<span class="text-slate-300">Entries in bracket: <strong>{entryCount}</strong></span>
@@ -115,6 +147,125 @@ function formatScheduled(value: Date | null): string {
 				</form>
 			)
 		}
+	</section>
+
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+		<div class="flex flex-wrap items-start justify-between gap-4">
+			<div>
+				<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+					Entries
+				</h2>
+				<p class="mt-1 text-sm text-slate-500">
+					Seed approved applicants, teams, or competitors before generating matches.
+				</p>
+			</div>
+			{!canManageEntries && (
+				<span class="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-400">
+					Locked after generation
+				</span>
+			)}
+		</div>
+
+		<div class="mt-4 overflow-hidden rounded-lg border border-slate-800">
+			<table class="w-full text-left text-sm">
+				<thead class="bg-slate-950/60 text-xs uppercase tracking-wider text-slate-400">
+					<tr>
+						<th class="px-4 py-2">Seed</th>
+						<th class="px-4 py-2">Entry</th>
+						<th class="px-4 py-2">Status</th>
+						<th class="px-4 py-2 text-right">Actions</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-slate-800 bg-slate-950/30">
+					{entries.length === 0 ? (
+						<tr>
+							<td colspan="4" class="px-4 py-4 text-center text-sm text-slate-500">
+								No entries seeded yet.
+							</td>
+						</tr>
+					) : (
+						entries.map((entry) => (
+							<tr>
+								<td class="px-4 py-2 font-mono text-xs text-slate-400">
+									{entry.seed}
+								</td>
+								<td class="px-4 py-2 text-slate-100">{entry.displayName}</td>
+								<td class="px-4 py-2">
+									<span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs capitalize text-slate-300">
+										{entry.status}
+									</span>
+								</td>
+								<td class="px-4 py-2 text-right">
+									{canManageEntries && (
+										<form method="POST" action={`/api/admin/brackets/${bracket.id}/entries/${entry.id}/delete`} onsubmit="return confirm('Remove this bracket entry?')">
+											<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
+												Remove
+											</button>
+										</form>
+									)}
+								</td>
+							</tr>
+						))
+					)}
+				</tbody>
+			</table>
+		</div>
+
+		{canManageEntries && (
+			<form
+				method="POST"
+				action={`/api/admin/brackets/${bracket.id}/entries`}
+				class="mt-4 grid gap-3 sm:grid-cols-4"
+			>
+				<label class="flex flex-col gap-1 sm:col-span-2">
+					<span class="text-xs text-slate-400">
+						{bracket.kind === "team" ? "Team" : "Competitor"}
+					</span>
+					{bracket.kind === "team" ? (
+						<select
+							name="teamId"
+							required
+							class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+						>
+							<option value="">Select team</option>
+							{availableTeams.map((team) => (
+								<option value={team.id}>{team.name}</option>
+							))}
+						</select>
+					) : (
+						<select
+							name="competitorId"
+							required
+							class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+						>
+							<option value="">Select competitor</option>
+							{availableCompetitors.map((competitor) => (
+								<option value={competitor.id}>{competitor.displayName}</option>
+							))}
+						</select>
+					)}
+				</label>
+				<label class="flex flex-col gap-1">
+					<span class="text-xs text-slate-400">Seed</span>
+					<input
+						type="number"
+						name="seed"
+						min="1"
+						max={entries.length + Math.max(availableCompetitors.length, availableTeams.length) + 1}
+						placeholder={String(entryCount + 1)}
+						class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+					/>
+				</label>
+				<div class="flex items-end">
+					<button
+						class="rounded-lg bg-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-fuchsia-400 disabled:cursor-not-allowed disabled:bg-slate-700"
+						disabled={bracket.kind === "team" ? availableTeams.length === 0 : availableCompetitors.length === 0}
+					>
+						Add entry
+					</button>
+				</div>
+			</form>
+		)}
 	</section>
 
 	{

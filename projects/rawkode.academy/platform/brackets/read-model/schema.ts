@@ -353,7 +353,10 @@ const createBuilder = (env: { DB: D1Database }) => {
 
 			if (competitor) {
 				const application = await db
-					.select({ id: s.bracketApplications.id })
+					.select({
+						id: s.bracketApplications.id,
+						status: s.bracketApplications.status,
+					})
 					.from(s.bracketApplications)
 					.where(
 						and(
@@ -362,7 +365,7 @@ const createBuilder = (env: { DB: D1Database }) => {
 						),
 					)
 					.get();
-				applied = Boolean(application);
+				applied = Boolean(application && application.status !== "rejected");
 
 				if (bracket.kind === "team") {
 					const membership = await db

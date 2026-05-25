@@ -49,6 +49,11 @@ export interface BracketsWrite {
 		decision: "approved" | "rejected";
 		reviewedByUserId: string;
 	}): Promise<{ ok: true }>;
+	decideApplication(input: {
+		applicationId: string;
+		decision: "approved" | "rejected";
+		reviewedByUserId: string;
+	}): Promise<{ ok: true }>;
 	generateBracket(input: {
 		bracketId: string;
 		startsAt?: number | null;
@@ -74,6 +79,14 @@ export interface BracketsWrite {
 		startDate?: number | null;
 		endDate?: number | null;
 	}): Promise<{ id: string }>;
+	updateSeason(input: {
+		id: string;
+		slug?: string | null;
+		name?: string | null;
+		status?: "interest" | "active" | "finished" | null;
+		startDate?: number | null;
+		endDate?: number | null;
+	}): Promise<{ ok: true }>;
 	deleteSeason(input: { id: string }): Promise<{ ok: true }>;
 	createBracket(input: {
 		seasonId: string;
@@ -86,7 +99,20 @@ export interface BracketsWrite {
 		teamSize?: number;
 		cadenceDays?: number;
 	}): Promise<{ id: string }>;
+	updateBracket(input: {
+		id: string;
+		status?: "draft" | "active" | "finished" | null;
+		startsAt?: number | null;
+		registrationClosesAt?: number | null;
+	}): Promise<{ ok: true }>;
 	deleteBracket(input: { id: string }): Promise<{ ok: true }>;
+	createBracketEntry(input: {
+		bracketId: string;
+		competitorId?: string | null;
+		teamId?: string | null;
+		seed?: number | null;
+	}): Promise<{ id: string }>;
+	deleteBracketEntry(input: { id: string }): Promise<{ ok: true }>;
 	createBracketBreak(input: {
 		bracketId: string;
 		label: string;

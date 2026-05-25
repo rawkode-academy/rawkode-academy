@@ -5,6 +5,7 @@ import { createId } from "@paralleldrive/cuid2";
 import * as s from "../data-model/schema";
 import {
 	CreateTeamInvite,
+	DecideApplication,
 	DecideRegistration,
 	FormTeam,
 	GenerateBracket,
@@ -174,6 +175,33 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		bracketId: string,
 		competitorId: string,
 	): Promise<void> {
+		const existing = await this.db
+			.select({
+				id: s.bracketApplications.id,
+				status: s.bracketApplications.status,
+			})
+			.from(s.bracketApplications)
+			.where(
+				and(
+					eq(s.bracketApplications.bracketId, bracketId),
+					eq(s.bracketApplications.competitorId, competitorId),
+				),
+			)
+			.get();
+		if (existing) {
+			if (existing.status === "rejected") {
+				await this.db
+					.update(s.bracketApplications)
+					.set({
+						status: "pending",
+						reviewedAt: null,
+						reviewedByUserId: null,
+					})
+					.where(eq(s.bracketApplications.id, existing.id));
+			}
+			return;
+		}
+
 		await this.db
 			.insert(s.bracketApplications)
 			.values({
@@ -194,7 +222,10 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		competitorId: string,
 	): Promise<void> {
 		const application = await this.db
-			.select({ id: s.bracketApplications.id })
+			.select({
+				id: s.bracketApplications.id,
+				status: s.bracketApplications.status,
+			})
 			.from(s.bracketApplications)
 			.where(
 				and(
@@ -203,7 +234,9 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 				),
 			)
 			.get();
-		if (!application) throw new Error("apply before forming a team");
+		if (!application || application.status === "rejected") {
+			throw new Error("apply before forming a team");
+		}
 	}
 
 	private async membershipForCompetitor(
@@ -229,6 +262,45 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			.where(eq(s.teamMembers.teamId, teamId))
 			.all();
 		return members.length;
+	}
+
+	private async nextAvailableSeed(
+		bracketId: string,
+		maxEntries: number,
+		preferredSeed?: number | null,
+	): Promise<number> {
+		if (preferredSeed && preferredSeed > 0 && preferredSeed <= maxEntries) {
+			const existingSlot = await this.db
+				.select({ id: s.bracketEntries.id })
+				.from(s.bracketEntries)
+				.where(
+					and(
+						eq(s.bracketEntries.bracketId, bracketId),
+						eq(s.bracketEntries.seed, preferredSeed),
+					),
+				)
+				.get();
+			if (!existingSlot) return preferredSeed;
+		}
+
+		const lastEntry = await this.db
+			.select({ seed: s.bracketEntries.seed })
+			.from(s.bracketEntries)
+			.where(eq(s.bracketEntries.bracketId, bracketId))
+			.orderBy(desc(s.bracketEntries.seed))
+			.get();
+		const seed = (lastEntry?.seed ?? 0) + 1;
+		if (seed > maxEntries) throw new Error("bracket full");
+		return seed;
+	}
+
+	private async requireEntriesEditable(bracketId: string): Promise<void> {
+		const match = await this.db
+			.select({ id: s.matches.id })
+			.from(s.matches)
+			.where(eq(s.matches.bracketId, bracketId))
+			.get();
+		if (match) throw new Error("entries locked after matches are generated");
 	}
 
 	private async requireTeamActor(
@@ -551,6 +623,101 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		return { ok: true };
 	}
 
+	async decideApplication(input: unknown): Promise<{ ok: true }> {
+		const data = DecideApplication.parse(input);
+
+		if (data.decision === "approved") {
+			await this.createBracketEntryFromApplication(data.applicationId);
+		}
+
+		await this.db
+			.update(s.bracketApplications)
+			.set({
+				status: data.decision,
+				reviewedAt: new Date(),
+				reviewedByUserId: data.reviewedByUserId,
+			})
+			.where(eq(s.bracketApplications.id, data.applicationId));
+
+		return { ok: true };
+	}
+
+	private async createBracketEntryFromApplication(
+		applicationId: string,
+	): Promise<void> {
+		const application = await this.db
+			.select({
+				id: s.bracketApplications.id,
+				bracketId: s.bracketApplications.bracketId,
+				competitorId: s.bracketApplications.competitorId,
+				bracketKind: s.brackets.kind,
+				maxEntries: s.brackets.maxEntries,
+				competitorName: s.competitors.displayName,
+				teamId: s.teams.id,
+				teamName: s.teams.name,
+			})
+			.from(s.bracketApplications)
+			.innerJoin(
+				s.brackets,
+				eq(s.bracketApplications.bracketId, s.brackets.id),
+			)
+			.innerJoin(
+				s.competitors,
+				eq(s.bracketApplications.competitorId, s.competitors.id),
+			)
+			.leftJoin(
+				s.teamMembers,
+				and(
+					eq(s.teamMembers.bracketId, s.bracketApplications.bracketId),
+					eq(s.teamMembers.competitorId, s.bracketApplications.competitorId),
+				),
+			)
+			.leftJoin(s.teams, eq(s.teamMembers.teamId, s.teams.id))
+			.where(eq(s.bracketApplications.id, applicationId))
+			.get();
+		if (!application) throw new Error("application not found");
+
+		const existing = await this.db
+			.select({ id: s.bracketEntries.id })
+			.from(s.bracketEntries)
+			.where(
+				application.bracketKind === "team"
+					? and(
+							eq(s.bracketEntries.bracketId, application.bracketId),
+							eq(s.bracketEntries.teamId, application.teamId ?? ""),
+						)
+					: and(
+							eq(s.bracketEntries.bracketId, application.bracketId),
+							eq(s.bracketEntries.competitorId, application.competitorId),
+						),
+			)
+			.get();
+		if (existing) return;
+
+		if (application.bracketKind === "team" && !application.teamId) {
+			throw new Error("team required before approving application");
+		}
+
+		await this.requireEntriesEditable(application.bracketId);
+		const seed = await this.nextAvailableSeed(
+			application.bracketId,
+			application.maxEntries,
+		);
+		await this.db.insert(s.bracketEntries).values({
+			id: `entry-${application.id}`,
+			bracketId: application.bracketId,
+			competitorId:
+				application.bracketKind === "solo" ? application.competitorId : null,
+			teamId: application.bracketKind === "team" ? application.teamId : null,
+			displayName:
+				application.bracketKind === "team"
+					? (application.teamName ?? application.competitorName)
+					: application.competitorName,
+			seed,
+			status: "confirmed",
+		});
+	}
+
 	private async createBracketEntryFromRegistration(
 		registrationId: string,
 	): Promise<void> {
@@ -697,6 +864,33 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 		return { id };
 	}
 
+	async updateSeason(input: {
+		id: string;
+		slug?: string | null;
+		name?: string | null;
+		status?: "interest" | "active" | "finished" | null;
+		startDate?: number | null;
+		endDate?: number | null;
+	}): Promise<{ ok: true }> {
+		const patch: Partial<typeof s.seasons.$inferInsert> = {};
+		if (input.slug) patch.slug = input.slug;
+		if (input.name) patch.name = input.name;
+		if (input.status) patch.status = input.status;
+		if (input.startDate !== undefined) {
+			patch.startDate = input.startDate ? new Date(input.startDate) : null;
+		}
+		if (input.endDate !== undefined) {
+			patch.endDate = input.endDate ? new Date(input.endDate) : null;
+		}
+		if (Object.keys(patch).length > 0) {
+			await this.db
+				.update(s.seasons)
+				.set(patch)
+				.where(eq(s.seasons.id, input.id));
+		}
+		return { ok: true };
+	}
+
 	async createBracket(input: {
 		seasonId: string;
 		name: string;
@@ -727,6 +921,107 @@ export class BracketsWriteModel extends WorkerEntrypoint<Env> {
 			cadenceDays: input.cadenceDays ?? 7,
 		});
 		return { id };
+	}
+
+	async updateBracket(input: {
+		id: string;
+		status?: "draft" | "active" | "finished" | null;
+		startsAt?: number | null;
+		registrationClosesAt?: number | null;
+	}): Promise<{ ok: true }> {
+		const patch: Partial<typeof s.brackets.$inferInsert> = {};
+		if (input.status) patch.status = input.status;
+		if (input.startsAt !== undefined) {
+			if (!input.startsAt) throw new Error("startsAt required");
+			patch.startsAt = new Date(input.startsAt);
+		}
+		if (input.registrationClosesAt !== undefined) {
+			patch.registrationClosesAt = input.registrationClosesAt
+				? new Date(input.registrationClosesAt)
+				: null;
+		}
+		if (Object.keys(patch).length > 0) {
+			await this.db
+				.update(s.brackets)
+				.set(patch)
+				.where(eq(s.brackets.id, input.id));
+		}
+		return { ok: true };
+	}
+
+	async createBracketEntry(input: {
+		bracketId: string;
+		competitorId?: string | null;
+		teamId?: string | null;
+		seed?: number | null;
+	}): Promise<{ id: string }> {
+		const bracket = await this.getBracket(input.bracketId);
+		await this.requireEntriesEditable(bracket.id);
+		const seed = await this.nextAvailableSeed(
+			bracket.id,
+			bracket.maxEntries,
+			input.seed,
+		);
+
+		let competitorId: string | null = null;
+		let teamId: string | null = null;
+		let displayName: string;
+		if (bracket.kind === "team") {
+			if (!input.teamId) throw new Error("teamId required");
+			const team = await this.db
+				.select()
+				.from(s.teams)
+				.where(
+					and(
+						eq(s.teams.id, input.teamId),
+						eq(s.teams.bracketId, bracket.id),
+					),
+				)
+				.get();
+			if (!team) throw new Error("team not found");
+			teamId = team.id;
+			displayName = team.name;
+		} else {
+			if (!input.competitorId) throw new Error("competitorId required");
+			const competitor = await this.db
+				.select()
+				.from(s.competitors)
+				.where(
+					and(
+						eq(s.competitors.id, input.competitorId),
+						eq(s.competitors.seasonId, bracket.seasonId),
+					),
+				)
+				.get();
+			if (!competitor) throw new Error("competitor not found");
+			competitorId = competitor.id;
+			displayName = competitor.displayName;
+		}
+
+		const id = `entry-${crypto.randomUUID()}`;
+		await this.db.insert(s.bracketEntries).values({
+			id,
+			bracketId: bracket.id,
+			competitorId,
+			teamId,
+			displayName,
+			seed,
+			status: "confirmed",
+		});
+		return { id };
+	}
+
+	async deleteBracketEntry(input: { id: string }): Promise<{ ok: true }> {
+		const entry = await this.db
+			.select({ bracketId: s.bracketEntries.bracketId })
+			.from(s.bracketEntries)
+			.where(eq(s.bracketEntries.id, input.id))
+			.get();
+		if (entry) await this.requireEntriesEditable(entry.bracketId);
+		await this.db
+			.delete(s.bracketEntries)
+			.where(eq(s.bracketEntries.id, input.id));
+		return { ok: true };
 	}
 
 	async createBracketBreak(input: {
