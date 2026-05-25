@@ -204,7 +204,7 @@ import (
 					"x", "wrangler", "d1", "migrations", "apply", "DB",
 					"--remote", "--config", "./read-model/wrangler.jsonc",
 				]
-				inputs: ["data-model/**", "read-model/wrangler.jsonc"]
+				inputs: ["data-model", "read-model/wrangler.jsonc"]
 			}
 		}
 
@@ -216,7 +216,7 @@ import (
 					hermetic: false
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
-					inputs: ["read-model/**", "data-model/**", "package.json"]
+					inputs: ["read-model", "data-model", "package.json"]
 				}
 			}
 			if includeWriteModel {
@@ -224,7 +224,7 @@ import (
 					hermetic: false
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
-					inputs: ["write-model/**", "data-model/**", "package.json"]
+					inputs: ["write-model", "data-model", "package.json"]
 				}
 			}
 			if includeHttp {
@@ -232,7 +232,7 @@ import (
 					hermetic: false
 					command:  "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
-					inputs: ["http/**", "data-model/**", "package.json"]
+					inputs: ["http", "data-model", "package.json"]
 				}
 			}
 		}
