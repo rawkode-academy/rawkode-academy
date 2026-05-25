@@ -165,9 +165,16 @@ import (
 	}
 
 	let _t = tasks
+	let _deployPipelineTasks = [
+		if includeReadModel {_t.deploy.read},
+		if includeWriteModel {_t.deploy.write},
+		if includeHttp {_t.deploy.http},
+	]
+	let _serviceDefinitionInputs = ["env.cue", "service.cue", "../../codegen/platform-service.cue"]
 
-	// CI pipeline with workflow_dispatch enabled. The deploy tasks depend on
-	// `migrate` by name (when present), so migrations apply before any deploy.
+	// CI pipeline with workflow_dispatch enabled. The pipeline schedules concrete
+	// deploy tasks instead of the deploy group so cuenv's affected-task detection
+	// sees each worker's declared inputs.
 	ci: pipelines: {
 		default: {
 			environment: "production"
@@ -177,8 +184,8 @@ import (
 				manual:        true
 			}
 			tasks: [
-				if _hasMigrations {schema.#TaskSequence & [_t.migrate, _t.deploy]},
-				if !_hasMigrations {_t.deploy},
+				if _hasMigrations {_t.migrate},
+				for task in _deployPipelineTasks {task},
 			]
 		}
 	}
@@ -205,7 +212,7 @@ import (
 					"x", "wrangler", "d1", "migrations", "apply", "DB",
 					"--remote", "--config", "./read-model/wrangler.jsonc",
 				]
-				inputs: ["data-model", "read-model/wrangler.jsonc"]
+				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", "read-model/wrangler.jsonc"]])
 			}
 		}
 
@@ -218,7 +225,7 @@ import (
 					dir: from: "caller"
 					command: "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./read-model/wrangler.jsonc"]
-					inputs: ["read-model", "data-model", "package.json"]
+					inputs: list.Concat([_serviceDefinitionInputs, ["read-model/**", "data-model/**", "package.json"]])
 				}
 			}
 			if includeWriteModel {
@@ -227,7 +234,7 @@ import (
 					dir: from: "caller"
 					command: "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./write-model/wrangler.jsonc"]
-					inputs: ["write-model", "data-model", "package.json"]
+					inputs: list.Concat([_serviceDefinitionInputs, ["write-model/**", "data-model/**", "package.json"]])
 				}
 			}
 			if includeHttp {
@@ -236,7 +243,7 @@ import (
 					dir: from: "caller"
 					command: "bun"
 					args: ["x", "wrangler", "deploy", "--config", "./http/wrangler.jsonc"]
-					inputs: ["http", "data-model", "package.json"]
+					inputs: list.Concat([_serviceDefinitionInputs, ["http/**", "data-model/**", "package.json"]])
 				}
 			}
 		}
@@ -552,7 +559,7 @@ import (
 
 	// Env for the write-model: base bindings plus the Workflow handles it owns.
 	_workflowEnvBindings: [for wf in _bindings.workflows {"\(wf.binding): Workflow;"}]
-	_writeEnvInterface:   strings.Join(list.Concat([_envBindings, _workflowEnvBindings]), "\n\t")
+	_writeEnvInterface: strings.Join(list.Concat([_envBindings, _workflowEnvBindings]), "\n\t")
 
 	// Workflow class re-exports for write-model/main.ts. The owning worker must
 	// export each Workflow class referenced by its wrangler `class_name`.
@@ -574,6 +581,8 @@ import (
 					schema: getSchema(env),
 					graphqlEndpoint: "/",
 					context: ({ request }) => ({
+						// The gateway forwards the authenticated member id for
+						// per-user participation queries.
 						userId: request.headers.get("X-Gateway-User-Id"),
 					}),
 				});
