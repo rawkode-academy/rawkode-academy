@@ -1,6 +1,10 @@
 package cuenv
 
-import "github.com/cuenv/cuenv/schema"
+import (
+	"list"
+
+	"github.com/cuenv/cuenv/schema"
+)
 
 schema.#Project
 
@@ -10,6 +14,7 @@ runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks
+let _denoTaskArgs = ["shell", "nixpkgs#deno", "-c", "deno", "task"]
 
 env: {
 	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
@@ -61,16 +66,16 @@ let _qualityInputs = [
 tasks: {
 	dev: schema.#Task & {
 		hermetic: false
-		command:  "deno"
-		args: ["task", "dev"]
+		command:  "nix"
+		args: list.Concat([_denoTaskArgs, ["dev"]])
 
 		inputs: _runtimeInputs
 	}
 
 	build: schema.#Task & {
 		hermetic: false
-		command:  "deno"
-		args: ["task", "build"]
+		command:  "nix"
+		args: list.Concat([_denoTaskArgs, ["build"]])
 
 		inputs: _runtimeInputs
 
@@ -83,34 +88,34 @@ tasks: {
 		type: "group"
 		format: schema.#Task & {
 			hermetic: false
-			command:  "deno"
-			args: ["task", "format:check"]
+			command:  "nix"
+			args: list.Concat([_denoTaskArgs, ["format:check"]])
 			inputs: _qualityInputs
 		}
 		denoLint: schema.#Task & {
 			hermetic: false
-			command:  "deno"
-			args: ["task", "lint:deno"]
+			command:  "nix"
+			args: list.Concat([_denoTaskArgs, ["lint:deno"]])
 			inputs: _qualityInputs
 		}
 		oxlint: schema.#Task & {
 			hermetic: false
-			command:  "deno"
-			args: ["task", "lint:oxlint"]
+			command:  "nix"
+			args: list.Concat([_denoTaskArgs, ["lint:oxlint"]])
 			inputs: _qualityInputs
 		}
 		fallow: schema.#Task & {
 			hermetic: false
-			command:  "deno"
-			args: ["task", "lint:fallow"]
+			command:  "nix"
+			args: list.Concat([_denoTaskArgs, ["lint:fallow"]])
 			inputs: _qualityInputs
 		}
 	}
 
 	test: schema.#Task & {
 		hermetic: false
-		command:  "deno"
-		args: ["task", "test"]
+		command:  "nix"
+		args: list.Concat([_denoTaskArgs, ["test"]])
 		inputs: [
 			"deno.json",
 			"package.json",
@@ -123,14 +128,14 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			hermetic: false
-			command:  "deno"
-			args: ["task", "wrangler:deploy"]
+			command:  "nix"
+			args: list.Concat([_denoTaskArgs, ["wrangler:deploy"]])
 			dependsOn: [_t.build]
 		}
 		preview: schema.#Task & {
 			hermetic: false
-			command:  "deno"
-			args: ["task", "wrangler:preview"]
+			command:  "nix"
+			args: list.Concat([_denoTaskArgs, ["wrangler:preview"]])
 			dependsOn: [_t.build]
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
