@@ -17,9 +17,14 @@ This also requires choosing **team vs individual** when a bracket is created.
 
 ## Decisions (from brainstorming)
 
-1. **Apply targets a bracket.** Only one season is ever live at a time, so the
-   Apply tab lists the live season's open bracket(s); team/individual is the
-   existing `brackets.kind` (`solo` | `team`).
+1. **Apply targets a specific bracket.** A season has **multiple brackets**
+   (e.g. S26 "Summer 2026" has a Solo bracket *and* a Team bracket). The Apply
+   tab lists every open bracket of the live season as its own card;
+   team/individual is the existing `brackets.kind` (`solo` | `team`). A
+   competitor is season-scoped, so per-bracket intent ("entered Solo", "entered
+   Team", or both) is tracked separately in a new `bracket_applications` table.
+   Assumption: at most one Team bracket per season (so team formation is
+   unambiguous) — see open questions.
 2. **Apply creates a competitor instantly** (idempotent), linked by `userId`
    (OIDC `sub`). No pending-approval gate. The bracket itself (entries + matches)
    is still built **live on stream by the admin** — that is out of scope here
@@ -37,9 +42,14 @@ This also requires choosing **team vs individual** when a bracket is created.
 
 | Stage | Where | Writes to |
 |-------|-------|-----------|
-| Apply | website Apply tab | `competitors` only |
-| Form / join teams | klustered.dev `/me`, `/join/{token}` | `teams`, `teamMembers`, `team_invites` |
+| Apply | website Apply tab | `competitors`, `bracket_applications` |
+| Form / join teams | klustered.dev `/me`, `/join/{token}` | `teams`, `teamMembers`, `team_invites`, `bracket_applications` |
 | Build bracket live | klustered.dev admin (existing, **out of scope**) | `bracketEntries`, `matches` |
+
+The admin builds each bracket live by drawing from the season's
+`bracket_applications` (Solo bracket: applicant competitors; Team bracket: the
+formed `teams`). That seeding UI is out of scope here; this change only produces
+the data it draws from.
 
 ## How auth/reads work today (verified)
 
@@ -70,6 +80,16 @@ to forward the request's `Cookie` header on the one authenticated read.
 
 #### Schema (`data-model/schema.ts` + migration)
 
+- New table `bracket_applications` (per-bracket intent; the season competitor is
+  shared across that season's brackets):
+  - `id` text pk
+  - `bracketId` → `brackets.id` (cascade)
+  - `competitorId` → `competitors.id` (cascade)
+  - `createdAt` timestamp
+  - unique `(bracketId, competitorId)`
+  - This is the explicit "entered this bracket" record. It is **not** a
+    `bracketEntry` (no seed; the bracket is still built live). The legacy
+    `registrations` table is not reused.
 - New table `team_invites`:
   - `token` text pk (cuid2, opaque)
   - `teamId` → `teams.id` (cascade)
@@ -89,23 +109,31 @@ and these methods additionally validate invariants.
 
 - `selfRegisterCompetitor({ bracketId, userId, displayName }) → { competitorId, seasonId, bracketKind }`
   - Resolve bracket → season.
-  - If a competitor with `(seasonId, userId)` exists, return it (**idempotent**).
-  - Else generate a unique `personSlug` from `displayName` (slugify + numeric
-    dedupe within the season) and insert the competitor with `userId`.
-- `formTeam({ seasonId, name, userId }) → { teamId, token }`
-  - Find caller's competitor in the season; error if none.
-  - Reject if the competitor is already on a team this season (one team per
+  - If a competitor with `(seasonId, userId)` exists, reuse it; else generate a
+    unique `personSlug` from `displayName` (slugify + numeric dedupe within the
+    season) and insert the competitor with `userId`.
+  - Upsert `bracket_applications (bracketId, competitorId)` (**idempotent** on
+    the unique key). This is what records "entered this specific bracket".
+- `formTeam({ bracketId, name, userId }) → { teamId, token }`
+  - Resolve bracket → season; verify `bracket.kind = "team"`.
+  - Find caller's competitor in the season; error if none (they must have
+    applied first).
+  - Reject if the competitor is already on a team in this season (one team per
     competitor per season — enforced in logic; no DB unique exists).
   - Create the team (slug = slugify(name), deduped), add caller as
-    `teamMembers` with `role = "captain"`, mint a `team_invites` token.
+    `teamMembers` with `role = "captain"`, ensure
+    `bracket_applications (bracketId, competitorId)`, mint a `team_invites`
+    token (storing `teamId` + `seasonId`).
 - `joinTeamViaInvite({ token, userId, displayName }) → { teamId, seasonId }`
-  - Validate token exists and `revokedAt` is null.
-  - Resolve team + season. Ensure a competitor exists for `userId` (create like
+  - Validate token exists and `revokedAt` is null. Resolve team + season, and
+    the season's Team bracket (the `kind = "team"` bracket; assumes exactly one).
+  - Ensure a competitor exists for `userId` (create like
     `selfRegisterCompetitor` if missing).
   - Reject if competitor already on a team this season, or if the team already
-    has `bracket.teamSize` members. (Team size: read the relevant team bracket's
-    `teamSize`; see open question below if a season can host multiple brackets.)
-  - Add as `teamMembers` (`role = "member"`); idempotent if already a member.
+    has `teamBracket.teamSize` members.
+  - Add as `teamMembers` (`role = "member"`), ensure
+    `bracket_applications (teamBracketId, competitorId)`. Idempotent if already
+    a member.
 - `renameTeam({ teamId, name, userId }) → { ok }` — captain only.
 - `createTeamInvite({ teamId, userId }) → { token }` — regenerate; captain/member only.
 - `revokeTeamInvite({ token, userId }) → { ok }` — set `revokedAt`.
@@ -118,12 +146,23 @@ Add a shared `slugify`/dedupe helper used by competitor and team creation.
 
 - `main.ts`: build a Yoga context from request headers, reading
   `X-Gateway-User-Id` (and name/email if useful) into `ctx.user`.
-- New JWT/header-gated field, e.g. extend the `Show` entity:
-  `myParticipation(showId via entity): MyParticipation` returning, for the live
-  season's open brackets, whether the caller is a registered competitor and
-  which team they are on (and `bracketKind`). Returns null/empty when
-  unauthenticated. Used by the website Apply tab to render "✓ Registered" and
-  the correct manage-link.
+- New header-gated field on the federated `Show` entity, e.g.
+  `myParticipation`, returning a **per-bracket** list for the live season's open
+  brackets:
+  ```graphql
+  type MyParticipation { brackets: [MyBracketParticipation!]! }
+  type MyBracketParticipation {
+    bracketId: String!
+    bracketSlug: String!
+    bracketKind: String!     # solo | team
+    applied: Boolean!        # from bracket_applications
+    team: MyTeam             # null unless team bracket and on a team
+  }
+  type MyTeam { id: String!  name: String!  slug: String!  isCaptain: Boolean!  memberCount: Int! }
+  ```
+  Returns empty/`applied: false` when unauthenticated (no `X-Gateway-User-Id`).
+  The Apply tab uses this to render each bracket card's state (Apply vs
+  "✓ Entered") and the correct manage-link.
 
 ### B. `rawkode.academy/website` (Apply tab)
 
@@ -138,10 +177,12 @@ Add a shared `slugify`/dedupe helper used by competitor and team creation.
   all input fields.
   - Signed-out → "Sign in to apply" (link to the website OIDC sign-in with
     `returnTo` back to the apply tab).
-  - Signed-in → one card per open bracket: season name, **Team**/**Individual**
-    badge, **Apply** button (POST). If `myParticipation` shows already
-    registered → "✓ Registered" plus a CTA to `https://klustered.dev/me`
-    ("Set up your team" for team kind, "Manage your profile" for solo).
+  - Signed-in → one card per open bracket (S26 shows two: Solo and Team), each
+    with the bracket name, **Team**/**Individual** badge, and an **Apply** button
+    (POST) targeting that bracket. If `myParticipation` shows `applied` for that
+    bracket → "✓ Entered" plus a CTA to `https://klustered.dev/me`: for a Team
+    bracket, "Set up your team" (and, if not yet on a team, nudge to do so); for
+    Solo, "Manage your profile". A user can enter Solo, Team, or both.
   - Editorial design system (see `website/CLAUDE.md`): hairline cards, mono
     labels, no shadows/blur. No em-dashes in copy.
 - **`apply` endpoint** (`src/lib/shows/plugins/bracket/endpoints.ts`): read the
@@ -159,13 +200,16 @@ Add a shared `slugify`/dedupe helper used by competitor and team creation.
   and, shown when Team, a `teamSize` input (default 2). Pass both to
   `bracketsWrite(env).createBracket({ ..., kind, teamSize })`.
 - **`/me/team`** (new page + nav entry in `src/lib/nav.ts`):
-  - Determine the competitor's live-season bracket kind (direct D1 read — the
-    established klustered.dev pattern).
-  - Team edition, no team yet → "Name your team" form → POST → `formTeam` →
-    redirect to the team view.
-  - Team edition, on a team → show team name (rename if captain), roster, the
-    copyable invite link, and captain controls (regenerate / revoke link).
-  - Solo edition → "You're registered for {season} (Individual)" only.
+  - Resolve the live season's **Team bracket** (the `kind = "team"` bracket;
+    direct D1 read — the established klustered.dev pattern). `teamSize` comes
+    from this bracket. The page is only relevant when such a bracket is open;
+    otherwise show "No team bracket is open."
+  - Entered the Team bracket, no team yet → "Name your team" form → POST →
+    `formTeam({ bracketId: teamBracketId })` → redirect to the team view.
+  - On a team → show team name (rename if captain), roster, the copyable invite
+    link, and captain controls (regenerate / revoke link).
+  - Show Solo-bracket status (entered / not) separately on `/me`, since a
+    competitor may be in both brackets.
 - **`/join/[token]`** (new page + API):
   - Add `/join` to the auth-required prefixes in `src/middleware.ts` so
     unauthenticated visitors are bounced to sign-in with `returnTo`.
@@ -176,39 +220,40 @@ Add a shared `slugify`/dedupe helper used by competitor and team creation.
   `content/people/{slug}.mdx`" note so it does not show for self-applied
   competitors whose `personSlug` has no content profile (the `getPerson` lookup
   is already best-effort; the copy is the only issue).
-- **Mirror schema** in `src/db/schema.ts`: add `team_invites` and
-  `brackets.teamSize` so klustered.dev's direct D1 reads compile. (klustered.dev
-  reads D1 directly; those reads stay as-is and are not migrated to GraphQL in
-  this change.)
+- **Mirror schema** in `src/db/schema.ts`: add `bracket_applications`,
+  `team_invites`, and `brackets.teamSize` so klustered.dev's direct D1 reads
+  compile. (klustered.dev reads D1 directly; those reads stay as-is and are not
+  migrated to GraphQL in this change.)
 
 ## Data flow
 
 ```
-Apply (website)
-  user → Apply button → /api/shows/klustered/apply
+Apply (website) — per bracket (S26 shows Solo + Team cards)
+  user → Apply button on a bracket → /api/shows/klustered/apply
     → BRACKETS_WRITE.selfRegisterCompetitor({ bracketId, userId, displayName })
-    → competitor (idempotent) → redirect back
+    → season competitor (idempotent) + bracket_applications(bracketId) → redirect
   Apply tab read → queryShowsApi(myParticipation, cookies) → gateway validates
     Better Auth cookie via IDENTITY → forwards X-Gateway-User-Id → brackets
-    subgraph → "✓ Registered" + link to klustered.dev/me
+    subgraph → per-bracket "✓ Entered" + link to klustered.dev/me
 
-Form team (klustered.dev)
-  captain → /me/team → formTeam → team + captain member + invite token
-    → copyable klustered.dev/join/{token}
+Form team (klustered.dev, Team bracket only)
+  captain → /me/team → formTeam({ teamBracketId }) → team + captain member
+    + bracket_applications + invite token → copyable klustered.dev/join/{token}
 
 Join (klustered.dev)
   colleague → /join/{token} → sign in → joinTeamViaInvite
-    → competitor (if missing) + teamMember → /me/team
+    → competitor (if missing) + teamMember + bracket_applications → /me/team
 
 Build bracket live (admin, out of scope)
-  admin draws formed teams/competitors into bracketEntries + matches on stream
+  admin draws applicants (Solo) / formed teams (Team) into bracketEntries
+    + matches on stream
 ```
 
 ## Deploy order (service-binding rule)
 
-1. `platform/brackets` — schema migration (`team_invites`, `brackets.teamSize`),
-   new write commands, read-model participation field. Deploy + apply D1
-   migrations first.
+1. `platform/brackets` — schema migration (`bracket_applications`,
+   `team_invites`, `brackets.teamSize`), new write commands, read-model
+   participation field. Deploy + apply D1 migrations first.
 2. `rawkode.academy/website` — add `BRACKETS_WRITE` binding, Apply rewrite,
    cookie-forwarding read.
 3. `klustered.dev` — admin `kind`/`teamSize`, `/me/team`, `/join/{token}`,
@@ -220,11 +265,14 @@ must be live before the website binding lands.
 ## Testing
 
 - **brackets write-model**: unit/integration tests for `selfRegisterCompetitor`
-  (idempotency, slug dedupe), `formTeam` (one-team-per-season, captain role),
-  `joinTeamViaInvite` (token valid/revoked, team-full cap, already-on-team),
+  (competitor idempotency + slug dedupe + `bracket_applications` upsert, incl.
+  applying to both Solo and Team in one season), `formTeam`
+  (one-team-per-season, captain role, kind=team guard), `joinTeamViaInvite`
+  (token valid/revoked, team-full cap, already-on-team, records application),
   `renameTeam`/`revokeTeamInvite` ownership. Follow the existing `tests/` setup.
-- **brackets read-model**: `myParticipation` returns correctly for
-  authenticated vs anonymous (header present/absent), reflects team membership.
+- **brackets read-model**: `myParticipation` returns the correct per-bracket
+  list for authenticated vs anonymous (header present/absent), reflects
+  per-bracket `applied` and team membership.
 - **website**: Apply tab renders signed-out / signed-in / registered states;
   endpoint calls `selfRegisterCompetitor` with session identity; anonymous read
   path unaffected.
@@ -241,11 +289,15 @@ must be live before the website binding lands.
 
 ## Open questions (resolve during planning)
 
-1. **Multiple brackets per season.** Apply targets a bracket and competitors are
-   season-scoped. If a live season ever has both a solo and a team bracket, how
-   is team-size / kind resolved for a competitor on `/me/team`? Current
-   assumption: one bracket per live season. Confirm we can rely on that, or pick
-   a rule (e.g., team features key off the season's team bracket).
+1. **One Team bracket per season (teams are season-scoped).** Seasons have
+   multiple brackets (Solo + Team for S26), and `teams`/`teamMembers` reference
+   `seasonId`, not `bracketId`. Team formation therefore assumes exactly one
+   `kind = "team"` bracket per season. If you ever want two Team brackets in one
+   season (e.g. "Team Beginner" + "Team Pro"), `teams` must become
+   bracket-scoped (add `teams.bracketId`), which also touches the admin teams UI
+   and `generateBracket`'s "this season's teams" query. Decision needed: keep
+   season-scoped teams + the one-Team-bracket assumption now, or make teams
+   bracket-scoped up front.
 2. **Captain leaving.** If a captain `leaveTeam`s, do we promote the oldest
    member, block until reassigned, or dissolve the team?
 3. **Where `myParticipation` hangs.** As a field on the federated `Show` entity
