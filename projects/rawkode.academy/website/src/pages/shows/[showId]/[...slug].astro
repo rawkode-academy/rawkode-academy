@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 
+import { env } from "cloudflare:workers";
 import { getCollection } from "astro:content";
 import ShowLayout from "@/layouts/ShowLayout.astro";
 import { getShowExtension, getShowNav } from "@/lib/shows/registry";
@@ -18,8 +19,6 @@ const ext = getShowExtension(showId);
 const page = ext?.pages.find((p) => p.slug === (slug ?? ""));
 if (!ext || !page) return new Response(null, { status: 404 });
 
-const env = (Astro.locals as { runtime?: { env?: ShowEnv } }).runtime?.env ?? {};
-
 const data = page.load
 	? await page.load({
 			showId,
@@ -27,7 +26,7 @@ const data = page.load
 			params: Astro.params,
 			request: Astro.request,
 			url: Astro.url,
-			env,
+			env: env as unknown as ShowEnv,
 		})
 	: {};
 
