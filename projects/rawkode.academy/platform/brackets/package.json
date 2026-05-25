@@ -12,7 +12,7 @@
     "@pothos/plugin-federation": "^4.3.2",
     "@sindresorhus/slugify": "^2.2.1",
     "drizzle-kit": "^0.30.6",
-    "drizzle-orm": "^0.38.4",
+    "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.6.1",
     "graphql": "^16.10.0",
     "graphql-scalars": "^1.24.2",
