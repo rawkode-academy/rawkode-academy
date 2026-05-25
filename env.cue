@@ -80,6 +80,14 @@ ci: provider: github: {
 	}
 }
 
+vcs: "cuenv-skills": {
+	url:       "https://github.com/cuenv/cuenv.git"
+	reference: "main"
+	vendor:    false
+	subdir:    ".agents/skills"
+	path:      ".agents/skills"
+}
+
 env: {
 	environment: production: {
 		CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce"
