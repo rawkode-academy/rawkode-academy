@@ -29,7 +29,13 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.quality, _t.deploy.main]
+		tasks: [
+			_t.quality.format,
+			_t.quality.denoLint,
+			_t.quality.oxlint,
+			_t.quality.fallow,
+			_t.deploy.main,
+		]
 	}
 
 	pullRequest: {
@@ -37,7 +43,13 @@ ci: pipelines: {
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.quality, _t.deploy.preview]
+		tasks: [
+			_t.quality.format,
+			_t.quality.denoLint,
+			_t.quality.oxlint,
+			_t.quality.fallow,
+			_t.deploy.preview,
+		]
 		annotations: "Preview URL": schema.#TaskCaptureRef & {
 			cuenvTask:    "deploy.preview"
 			cuenvCapture: "previewUrl"
@@ -130,13 +142,25 @@ tasks: {
 			hermetic: false
 			command:  "nix"
 			args: list.Concat([_denoTaskArgs, ["wrangler:deploy"]])
-			dependsOn: [_t.build]
+			dependsOn: [
+				_t.build,
+				_t.quality.format,
+				_t.quality.denoLint,
+				_t.quality.oxlint,
+				_t.quality.fallow,
+			]
 		}
 		preview: schema.#Task & {
 			hermetic: false
 			command:  "nix"
 			args: list.Concat([_denoTaskArgs, ["wrangler:preview"]])
-			dependsOn: [_t.build]
+			dependsOn: [
+				_t.build,
+				_t.quality.format,
+				_t.quality.denoLint,
+				_t.quality.oxlint,
+				_t.quality.fallow,
+			]
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
 			}
