@@ -77,9 +77,13 @@ jobs:
         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: default'
       run: |-
-        cuenv exec --path projects -- nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler d1 migrations apply DB --remote --config projects/rawkode.academy/platform/brackets/read-model/wrangler.jsonc
-        cuenv exec --path projects -- nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config projects/rawkode.academy/platform/brackets/read-model/wrangler.jsonc
-        cuenv exec --path projects -- nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config projects/rawkode.academy/platform/brackets/write-model/wrangler.jsonc
+        cuenv env print --path projects -e production -o env > "$RUNNER_TEMP/brackets.env"
+        set -a
+        . "$RUNNER_TEMP/brackets.env"
+        set +a
+        nix shell nixpkgs#bun nixpkgs#nodejs_24 -c env CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" bun x wrangler d1 migrations apply DB --remote --config projects/rawkode.academy/platform/brackets/read-model/wrangler.jsonc
+        nix shell nixpkgs#bun nixpkgs#nodejs_24 -c env CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" bun x wrangler deploy --config projects/rawkode.academy/platform/brackets/read-model/wrangler.jsonc
+        nix shell nixpkgs#bun nixpkgs#nodejs_24 -c env CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" bun x wrangler deploy --config projects/rawkode.academy/platform/brackets/write-model/wrangler.jsonc
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
