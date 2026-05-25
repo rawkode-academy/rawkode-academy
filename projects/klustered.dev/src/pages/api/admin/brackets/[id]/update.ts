@@ -1,13 +1,16 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { bracketsWrite } from "@/lib/brackets-write";
+import { getBracketsDb } from "@/db/client";
+import {
+	type BracketStatus,
+	updateBracketStatus,
+} from "@/lib/admin-bracket-commands";
 
 export const prerender = false;
 
 const VALID_STATUS = ["draft", "active", "finished"] as const;
-type Status = (typeof VALID_STATUS)[number];
 
-function isStatus(value: string): value is Status {
+function isStatus(value: string): value is BracketStatus {
 	return (VALID_STATUS as readonly string[]).includes(value);
 }
 
@@ -25,7 +28,7 @@ export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
 		return new Response("invalid status", { status: 400 });
 	}
 
-	await bracketsWrite(env).updateBracket({ id, status });
+	await updateBracketStatus(getBracketsDb(env.BRACKETS), { id, status });
 
 	return redirect(request.headers.get("Referer") ?? "/admin/brackets", 303);
 };

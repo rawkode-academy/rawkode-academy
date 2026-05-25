@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { bracketsWrite } from "@/lib/brackets-write";
+import { getBracketsDb } from "@/db/client";
+import { createBracketEntry } from "@/lib/admin-bracket-commands";
 
 export const prerender = false;
 
@@ -18,12 +19,18 @@ export const POST: APIRoute = async ({ params, request, locals, redirect }) => {
 	const seedRaw = Number.parseInt(String(form.get("seed") ?? "").trim(), 10);
 	const seed = Number.isFinite(seedRaw) && seedRaw > 0 ? seedRaw : null;
 
-	await bracketsWrite(env).createBracketEntry({
-		bracketId,
-		competitorId,
-		teamId,
-		seed,
-	});
+	try {
+		await createBracketEntry(getBracketsDb(env.BRACKETS), {
+			bracketId,
+			competitorId,
+			teamId,
+			seed,
+		});
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "could not create entry";
+		return new Response(message, { status: 400 });
+	}
 
 	return redirect(`/admin/brackets/${bracketId}`, 303);
 };
