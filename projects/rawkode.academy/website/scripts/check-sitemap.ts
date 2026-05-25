@@ -4,6 +4,7 @@
   Usage: deno run --allow-net scripts/check-sitemap.ts --base https://rawkode.academy [--limit 400] [--concurrency 10]
 */
 import process from "node:process";
+import { flagValue, integerFlag } from "./lib/args.ts";
 import { normalizeUrl } from "./lib/url.ts";
 
 type Args = {
@@ -41,6 +42,26 @@ type UrlCheckResult = {
 	status: number;
 };
 
+type SupplementalUrlCheckResult = UrlCheckResult & {
+	expectedRobots: string | null;
+};
+
+type PageCheckResult = {
+	pageResults: UrlCheckResult[];
+	pageErrorCount: number;
+};
+
+type SitemapIssues = {
+	missingSitemaps: string[];
+	disallowedSitemapUrls: string[];
+};
+
+type RunSummary = SitemapIssues & PageCheckResult & {
+	supplementalResults: SupplementalUrlCheckResult[];
+	supplementalFailures: SupplementalUrlCheckResult[];
+	pageFailures: UrlCheckResult[];
+};
+
 export const REQUIRED_SITEMAP_PATHS = [
 	"/sitemaps/pages.xml",
 	"/sitemaps/articles.xml",
@@ -56,7 +77,7 @@ export const REQUIRED_SITEMAP_PATHS = [
 	"/sitemaps/adrs.xml",
 ] as const;
 
-export const DISALLOWED_SITEMAP_PATH_PREFIXES = [
+const DISALLOWED_SITEMAP_PATH_PREFIXES = [
 	"/admin",
 	"/private",
 	"/settings",
@@ -81,14 +102,11 @@ export const SUPPLEMENTAL_URL_CHECKS: readonly SupplementalUrlCheck[] = [
 
 function parseArgs(): Args {
 	const argv = process.argv.slice(2);
-	const get = (flag: string) => {
-		const i = argv.indexOf(flag);
-		return i !== -1 ? argv[i + 1] : undefined;
+	return {
+		base: flagValue(argv, "--base", "https://rawkode.academy")!,
+		limit: integerFlag(argv, "--limit", 400),
+		concurrency: integerFlag(argv, "--concurrency", 10),
 	};
-	const base = get("--base") || "https://rawkode.academy";
-	const limit = parseInt(get("--limit") || "400", 10);
-	const concurrency = parseInt(get("--concurrency") || "10", 10);
-	return { base, limit, concurrency };
 }
 
 async function fetchText(url: string) {
@@ -99,7 +117,7 @@ async function fetchText(url: string) {
 	return await response.text();
 }
 
-export function extractLocsFromXml(xml: string): string[] {
+function extractLocsFromXml(xml: string): string[] {
 	const locs: string[] = [];
 	const re = /<loc>\s*([^<]+?)\s*<\/loc>/gi;
 	let match: RegExpExecArray | null;
@@ -125,25 +143,15 @@ function extractTagAttribute(
 	for (const match of html.matchAll(tagPattern)) {
 		const tag = match[0];
 		const hasRequiredAttributes = Object.entries(requiredAttributes).every(
-			([name, value]) => {
-				const attributePattern = new RegExp(
-					`${name}\\s*=\\s*["']${value}["']`,
-					"i",
-				);
-				return attributePattern.test(tag);
-			},
+			([name, value]) =>
+				new RegExp(`${name}\\s*=\\s*["']${value}["']`, "i").test(tag),
 		);
-
-		if (!hasRequiredAttributes) {
-			continue;
-		}
+		if (!hasRequiredAttributes) continue;
 
 		const targetMatch = tag.match(
 			new RegExp(`${targetAttribute}\\s*=\\s*["']([^"']+)["']`, "i"),
 		);
-		if (targetMatch?.[1]) {
-			return targetMatch[1];
-		}
+		if (targetMatch?.[1]) return targetMatch[1];
 	}
 
 	return null;
@@ -165,6 +173,20 @@ export function buildSupplementalUrlChecks(base: string): UrlExpectation[] {
 	}));
 }
 
+async function readChildSitemapUrls(sitemapLocs: string[]): Promise<string[]> {
+	const pageUrls: string[] = [];
+
+	for (const loc of sitemapLocs) {
+		try {
+			pageUrls.push(...extractLocsFromXml(await fetchText(loc)));
+		} catch (error) {
+			console.warn(`Failed to read child sitemap ${loc}:`, error);
+		}
+	}
+
+	return Array.from(new Set(pageUrls));
+}
+
 async function getSitemapFetchResult(
 	base: string,
 ): Promise<SitemapFetchResult> {
@@ -177,36 +199,20 @@ async function getSitemapFetchResult(
 		try {
 			const xml = await fetchText(sitemapUrl);
 			const locs = extractLocsFromXml(xml);
-			if (locs.length === 0) {
-				continue;
-			}
+			if (locs.length === 0) continue;
 
 			const looksLikeIndex = xml.includes("<sitemapindex") ||
 				locs.some((loc) => /sitemap.*\.xml/i.test(loc));
-			if (!looksLikeIndex) {
-				return {
-					indexUrl: sitemapUrl,
-					sitemapLocs: [sitemapUrl],
-					pageUrls: Array.from(new Set(locs)),
-				};
-			}
-
-			const sitemapLocs = Array.from(new Set(locs));
-			const pageUrls: string[] = [];
-
-			for (const loc of sitemapLocs) {
-				try {
-					const childXml = await fetchText(loc);
-					pageUrls.push(...extractLocsFromXml(childXml));
-				} catch (error) {
-					console.warn(`Failed to read child sitemap ${loc}:`, error);
-				}
-			}
+			const sitemapLocs = looksLikeIndex
+				? Array.from(new Set(locs))
+				: [sitemapUrl];
 
 			return {
 				indexUrl: sitemapUrl,
 				sitemapLocs,
-				pageUrls: Array.from(new Set(pageUrls)),
+				pageUrls: looksLikeIndex
+					? await readChildSitemapUrls(sitemapLocs)
+					: Array.from(new Set(locs)),
 			};
 		} catch {
 			continue;
@@ -216,95 +222,111 @@ async function getSitemapFetchResult(
 	throw new Error("Could not fetch sitemap index or sitemap.xml");
 }
 
+function pageMetadata(
+	html: string,
+): Pick<UrlCheckResult, "canonical" | "robots"> {
+	return {
+		canonical: extractTagAttribute(html, "link", { rel: "canonical" }, "href"),
+		robots: extractTagAttribute(html, "meta", { name: "robots" }, "content"),
+	};
+}
+
+function canonicalStatus(
+	canonical: string | null,
+	expectedCanonical: string,
+	apexHost: string,
+): Pick<UrlCheckResult, "canonicalOk" | "hostOk"> {
+	if (!canonical) {
+		return { canonicalOk: false, hostOk: false };
+	}
+	return {
+		canonicalOk: normalizeUrl(canonical) === normalizeUrl(expectedCanonical),
+		hostOk: new URL(canonical).hostname.replace(/^www\./, "") === apexHost,
+	};
+}
+
+function robotsStatus(robots: string | null, expectedRobots?: string): boolean {
+	return expectedRobots == null ||
+		normalizeRobots(robots) === normalizeRobots(expectedRobots);
+}
+
+function uncheckedUrlResult(url: string, status: number): UrlCheckResult {
+	return {
+		url,
+		ok: status === 200,
+		canonical: null,
+		canonicalOk: false,
+		hostOk: false,
+		robots: null,
+		robotsOk: true,
+		status,
+	};
+}
+
 async function checkUrl(
 	url: string,
 	apexHost: string,
 	expectation?: UrlExpectation,
 ): Promise<UrlCheckResult> {
 	const response = await fetch(url, { headers: { Accept: "text/html" } });
-	const ok = response.status === 200;
 	const contentType = response.headers.get("content-type") || "";
-
-	let canonical: string | null = null;
-	let canonicalOk = false;
-	let hostOk = false;
-	let robots: string | null = null;
-	let robotsOk = expectation?.expectedRobots == null;
-
-	if (ok && contentType.includes("text/html")) {
-		const html = await response.text();
-		canonical = extractTagAttribute(html, "link", { rel: "canonical" }, "href");
-		robots = extractTagAttribute(html, "meta", { name: "robots" }, "content");
-
-		const expectedCanonical = expectation?.expectedCanonical ?? url;
-		if (canonical) {
-			canonicalOk = normalizeUrl(canonical) === normalizeUrl(expectedCanonical);
-			hostOk = new URL(canonical).hostname.replace(/^www\./, "") === apexHost;
-		}
-
-		if (expectation?.expectedRobots) {
-			robotsOk =
-				normalizeRobots(robots) === normalizeRobots(expectation.expectedRobots);
-		}
+	if (response.status !== 200 || !contentType.includes("text/html")) {
+		return uncheckedUrlResult(url, response.status);
 	}
 
+	const metadata = pageMetadata(await response.text());
+	const expectedCanonical = expectation?.expectedCanonical ?? url;
 	return {
-		url,
-		ok,
-		canonical,
-		canonicalOk,
-		hostOk,
-		robots,
-		robotsOk,
-		status: response.status,
+		...uncheckedUrlResult(url, response.status),
+		...metadata,
+		...canonicalStatus(metadata.canonical, expectedCanonical, apexHost),
+		robotsOk: robotsStatus(metadata.robots, expectation?.expectedRobots),
 	};
 }
 
-export async function run() {
-	const { base, limit, concurrency } = parseArgs();
-	const apexHost = new URL(base).hostname.replace(/^www\./, "");
-
-	console.log(
-		`Checking sitemap for ${base} (limit=${limit}, concurrency=${concurrency})`,
-	);
-
-	const { indexUrl, sitemapLocs, pageUrls } = await getSitemapFetchResult(base);
-	const limitedPageUrls = pageUrls.slice(0, limit);
-	console.log(`Fetched sitemap index: ${indexUrl}`);
-	console.log(
-		`Found ${sitemapLocs.length} child sitemaps and ${pageUrls.length} URLs`,
-	);
-
+function findSitemapIssues(
+	sitemapLocs: string[],
+	pageUrls: string[],
+): SitemapIssues {
 	const sitemapPaths = new Set(sitemapLocs.map((loc) => new URL(loc).pathname));
-	const missingSitemaps = REQUIRED_SITEMAP_PATHS.filter(
-		(path) => !sitemapPaths.has(path),
-	);
-	const disallowedSitemapUrls = pageUrls.filter((url) => {
-		const pathname = new URL(url).pathname;
-		return DISALLOWED_SITEMAP_PATH_PREFIXES.some((prefix) =>
-			pathname.startsWith(prefix)
-		);
-	});
+	return {
+		missingSitemaps: REQUIRED_SITEMAP_PATHS.filter(
+			(path) => !sitemapPaths.has(path),
+		),
+		disallowedSitemapUrls: pageUrls.filter((url) => {
+			const pathname = new URL(url).pathname;
+			return DISALLOWED_SITEMAP_PATH_PREFIXES.some((prefix) =>
+				pathname.startsWith(prefix)
+			);
+		}),
+	};
+}
 
+function logPageResult(result: UrlCheckResult) {
+	const indicator = result.ok && result.canonicalOk && result.hostOk
+		? "OK"
+		: "WARN";
+	console.log(`${indicator} ${result.url} [${result.status}]`);
+}
+
+async function checkPageUrls(
+	urls: string[],
+	concurrency: number,
+	apexHost: string,
+): Promise<PageCheckResult> {
 	const pageResults: UrlCheckResult[] = [];
 	let pageErrorCount = 0;
 	let pageIndex = 0;
 
 	async function worker() {
-		while (pageIndex < limitedPageUrls.length) {
-			const currentIndex = pageIndex++;
-			const url = limitedPageUrls[currentIndex];
-			if (!url) {
-				continue;
-			}
+		while (pageIndex < urls.length) {
+			const url = urls[pageIndex++];
+			if (!url) continue;
 
 			try {
 				const result = await checkUrl(url, apexHost);
 				pageResults.push(result);
-				const indicator = result.ok && result.canonicalOk && result.hostOk
-					? "OK"
-					: "WARN";
-				console.log(`${indicator} ${url} [${result.status}]`);
+				logPageResult(result);
 			} catch (error) {
 				pageErrorCount += 1;
 				console.log(`FAIL ${url} -> ${error}`);
@@ -313,17 +335,54 @@ export async function run() {
 	}
 
 	await Promise.all(Array.from({ length: concurrency }, worker));
+	return { pageResults, pageErrorCount };
+}
 
-	const supplementalChecks = buildSupplementalUrlChecks(base);
-	const supplementalResults = await Promise.all(
-		supplementalChecks.map((check) =>
+async function checkSupplementalUrls(
+	base: string,
+	apexHost: string,
+): Promise<SupplementalUrlCheckResult[]> {
+	return await Promise.all(
+		buildSupplementalUrlChecks(base).map((check) =>
 			checkUrl(check.url, apexHost, check).then((result) => ({
 				...result,
 				expectedRobots: check.expectedRobots ?? null,
 			}))
 		),
 	);
+}
 
+function printList(title: string, items: string[]) {
+	if (items.length === 0) return;
+	console.log(title);
+	for (const item of items) {
+		console.log(`  - ${item}`);
+	}
+}
+
+function printSupplementalResults(results: SupplementalUrlCheckResult[]) {
+	if (results.length === 0) return;
+	console.log("\nSupplemental checks:");
+
+	for (const result of results) {
+		const indicator =
+			result.ok && result.canonicalOk && result.hostOk && result.robotsOk
+				? "OK"
+				: "WARN";
+		console.log(
+			`  ${indicator} ${result.url} [${result.status}] canonical=${
+				result.canonical ?? "missing"
+			} robots=${result.robots ?? "missing"}`,
+		);
+	}
+}
+
+function summarize(
+	pageResults: UrlCheckResult[],
+	pageErrorCount: number,
+	issues: SitemapIssues,
+	supplementalResults: SupplementalUrlCheckResult[],
+): RunSummary {
 	const pageFailures = pageResults.filter(
 		(result) => !result.ok || !result.canonicalOk || !result.hostOk,
 	);
@@ -332,52 +391,75 @@ export async function run() {
 			!result.ok || !result.canonicalOk || !result.hostOk || !result.robotsOk,
 	);
 
+	return {
+		...issues,
+		pageResults,
+		pageErrorCount,
+		supplementalResults,
+		pageFailures,
+		supplementalFailures,
+	};
+}
+
+function printSummary(summary: RunSummary) {
 	console.log("\nSummary:");
-	console.log(`  Total sitemap URLs checked: ${pageResults.length}`);
-	console.log(`  Required sitemap files missing: ${missingSitemaps.length}`);
+	console.log(`  Total sitemap URLs checked: ${summary.pageResults.length}`);
 	console.log(
-		`  Disallowed URLs in sitemap set: ${disallowedSitemapUrls.length}`,
+		`  Required sitemap files missing: ${summary.missingSitemaps.length}`,
 	);
-	console.log(`  Canonical/page failures: ${pageFailures.length}`);
-	console.log(`  Page fetch errors: ${pageErrorCount}`);
-	console.log(`  Supplemental URL failures: ${supplementalFailures.length}`);
+	console.log(
+		`  Disallowed URLs in sitemap set: ${summary.disallowedSitemapUrls.length}`,
+	);
+	console.log(`  Canonical/page failures: ${summary.pageFailures.length}`);
+	console.log(`  Page fetch errors: ${summary.pageErrorCount}`);
+	console.log(
+		`  Supplemental URL failures: ${summary.supplementalFailures.length}`,
+	);
 
-	if (missingSitemaps.length > 0) {
-		console.log("\nMissing required sitemap files:");
-		for (const path of missingSitemaps) {
-			console.log(`  - ${path}`);
-		}
-	}
+	printList("\nMissing required sitemap files:", summary.missingSitemaps);
+	printList(
+		"\nDisallowed URLs present in sitemap set:",
+		summary.disallowedSitemapUrls,
+	);
+	printSupplementalResults(summary.supplementalResults);
+}
 
-	if (disallowedSitemapUrls.length > 0) {
-		console.log("\nDisallowed URLs present in sitemap set:");
-		for (const url of disallowedSitemapUrls) {
-			console.log(`  - ${url}`);
-		}
-	}
+function hasBlockingFailures(summary: RunSummary): boolean {
+	return summary.missingSitemaps.length > 0 ||
+		summary.disallowedSitemapUrls.length > 0 ||
+		summary.pageFailures.length > 0 ||
+		summary.pageErrorCount > 0 ||
+		summary.supplementalFailures.length > 0;
+}
 
-	if (supplementalResults.length > 0) {
-		console.log("\nSupplemental checks:");
-		for (const result of supplementalResults) {
-			const indicator =
-				result.ok && result.canonicalOk && result.hostOk && result.robotsOk
-					? "OK"
-					: "WARN";
-			console.log(
-				`  ${indicator} ${result.url} [${result.status}] canonical=${
-					result.canonical ?? "missing"
-				} robots=${result.robots ?? "missing"}`,
-			);
-		}
-	}
+async function run() {
+	const { base, limit, concurrency } = parseArgs();
+	const apexHost = new URL(base).hostname.replace(/^www\./, "");
 
-	if (
-		missingSitemaps.length > 0 ||
-		disallowedSitemapUrls.length > 0 ||
-		pageFailures.length > 0 ||
-		pageErrorCount > 0 ||
-		supplementalFailures.length > 0
-	) {
+	console.log(
+		`Checking sitemap for ${base} (limit=${limit}, concurrency=${concurrency})`,
+	);
+
+	const { indexUrl, sitemapLocs, pageUrls } = await getSitemapFetchResult(base);
+	console.log(`Fetched sitemap index: ${indexUrl}`);
+	console.log(
+		`Found ${sitemapLocs.length} child sitemaps and ${pageUrls.length} URLs`,
+	);
+
+	const pageCheck = await checkPageUrls(
+		pageUrls.slice(0, limit),
+		concurrency,
+		apexHost,
+	);
+	const summary = summarize(
+		pageCheck.pageResults,
+		pageCheck.pageErrorCount,
+		findSitemapIssues(sitemapLocs, pageUrls),
+		await checkSupplementalUrls(base, apexHost),
+	);
+
+	printSummary(summary);
+	if (hasBlockingFailures(summary)) {
 		process.exit(2);
 	}
 }
