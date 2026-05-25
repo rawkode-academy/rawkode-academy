@@ -1,0 +1,11 @@
+version = 4
+
+[vcs.cuenv-skills]
+url = "https://github.com/cuenv/cuenv.git"
+reference = "main"
+commit = "4f21b63258a0068cdf8c080f180106c807a6216d"
+tree = "c8e936625512de7644437551b64b0ff85cd1a006"
+vendor = false
+path = ".agents/skills"
+subdir = ".agents/skills"
+subtree = "5259ceafa1f8965f304b9270241c7e6134908968"
