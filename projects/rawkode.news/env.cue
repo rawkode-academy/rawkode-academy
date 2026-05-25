@@ -11,7 +11,6 @@ hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks
 
-
 ci: pipelines: {
 	default: {
 		environment: "production"
@@ -34,7 +33,8 @@ ci: pipelines: {
 
 tasks: {
 	dev: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["run", "dev"]
 
 		inputs: [
@@ -47,7 +47,8 @@ tasks: {
 	}
 
 	build: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["run", "build"]
 
 		inputs: [
@@ -65,12 +66,14 @@ tasks: {
 	deploy: schema.#TaskGroup & {
 		type: "group"
 		main: schema.#Task & {
-			command: "bun"
+			hermetic: false
+			command:  "bun"
 			args: ["x", "wrangler", "deploy"]
 			dependsOn: [_t.build]
 		}
 		preview: schema.#Task & {
-			command: "bun"
+			hermetic: false
+			command:  "bun"
 			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]
 		}

@@ -10,12 +10,14 @@ let _t = tasks
 
 tasks: {
 	codegen: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["panda", "codegen"]
 	}
 
 	dev: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["astro", "dev"]
 		dependsOn: [_t.codegen]
 
@@ -29,7 +31,8 @@ tasks: {
 	}
 
 	build: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["astro", "build"]
 		dependsOn: [_t.codegen]
 
@@ -43,7 +46,8 @@ tasks: {
 	}
 
 	preview: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["astro", "preview"]
 	}
 }

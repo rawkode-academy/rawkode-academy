@@ -25,7 +25,8 @@ env: {
 
 tasks: {
 	run: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["run", "start"]
 	}
 }

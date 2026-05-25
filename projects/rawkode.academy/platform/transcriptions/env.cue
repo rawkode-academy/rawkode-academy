@@ -28,7 +28,7 @@ ci: pipelines: {
 	default: {
 		environment: "production"
 		when: {
-			branch:        ["main"]
+			branch: ["main"]
 			defaultBranch: true
 			manual:        true
 		}
@@ -38,15 +38,18 @@ ci: pipelines: {
 
 tasks: {
 	deploy: schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["x", "wrangler", "deploy", "--config", "./wrangler.jsonc"]
 	}
 	"check-missing": schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["scripts/schedule_missing.ts"]
 	}
 	"schedule-missing": schema.#Task & {
-		command: "bun"
+		hermetic: false
+		command:  "bun"
 		args: ["scripts/schedule_missing.ts", "--execute"]
 	}
 }
