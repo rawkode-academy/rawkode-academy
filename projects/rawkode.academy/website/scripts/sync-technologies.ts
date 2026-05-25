@@ -1,19 +1,27 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run --allow-read --allow-write --allow-env=GRAPHQL_ENDPOINT --allow-net
 
 /*
   Fetch technologies from the existing GraphQL endpoint and
   populate the workspace package: @rawkodeacademy/content-technologies
 
   Usage:
-    bun scripts/sync-technologies.ts [--endpoint <url>] [--limit <n>]
+    deno run --allow-read --allow-write --allow-env=GRAPHQL_ENDPOINT --allow-net scripts/sync-technologies.ts [--endpoint <url>] [--limit <n>]
 */
 
-import { GraphQLClient, gql } from "graphql-request";
+import { gql, GraphQLClient } from "graphql-request";
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
+import { dirname, join } from "node:path";
+import process from "node:process";
 
 type Args = { endpoint: string; limit: number; outDir: string };
+
+function q(v: string): string {
+	if (v === "" || /[:[\]{}#&*!|>'"%@`-]|^\s|\s$/.test(v)) {
+		return JSON.stringify(v);
+	}
+	return v;
+}
 
 function parseArgs(): Args {
 	const argv = process.argv.slice(2);
@@ -21,8 +29,7 @@ function parseArgs(): Args {
 		const i = argv.indexOf(k);
 		return i >= 0 ? argv[i + 1] : d;
 	};
-	const endpoint =
-		get("--endpoint") ||
+	const endpoint = get("--endpoint") ||
 		process.env.GRAPHQL_ENDPOINT ||
 		"https://api.rawkode.academy/graphql";
 	const limit = parseInt(get("--limit", "1000")!, 10);
@@ -87,19 +94,13 @@ async function main() {
 		}
 		const documentation = t.documentation || "";
 
-		function q(v: string): string {
-			// Quote strings that contain special YAML characters or leading/trailing spaces
-			if (v === "" || /[:\-\[\]\{\}\#\&\*\!\|\>\'\"\%\@\`]|^\s|\s$/.test(v)) {
-				return JSON.stringify(v);
-			}
-			return v;
-		}
-
 		const desc = description.includes("\n")
-			? `|\n${description
+			? `|\n${
+				description
 					.split("\n")
 					.map((l) => `  ${l}`)
-					.join("\n")}`
+					.join("\n")
+			}`
 			: q(description);
 
 		const lines = [

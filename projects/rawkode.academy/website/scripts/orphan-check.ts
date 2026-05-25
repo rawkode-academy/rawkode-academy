@@ -1,8 +1,9 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run --allow-net
 /*
   Crawl internal links to find orphans and pages deeper than a given click depth.
-  Usage: bun scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000
+  Usage: deno run --allow-net scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000
 */
+import process from "node:process";
 
 type Args = {
 	base: string;
@@ -58,7 +59,9 @@ function extractLinks(html: string, baseUrl: string) {
 			if (!href) continue; // noUncheckedIndexedAccess safety
 			const abs = new URL(href, base).href;
 			out.push(abs);
-		} catch {}
+		} catch {
+			continue;
+		}
 	}
 	return out;
 }
@@ -119,8 +122,9 @@ async function run() {
 		console.log(
 			`\nPages deeper than ${maxDepth} clicks from home (${deepPages.length}):`,
 		);
-		for (const u of deepPages)
+		for (const u of deepPages) {
 			console.log(`  - ${u} (depth ${depthMap.get(u)})`);
+		}
 	}
 }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run --allow-read --allow-write=subgraph --allow-env
 /**
  * Generate SDL for the website federated subgraph.
  * Output: website/subgraph/schema.gql

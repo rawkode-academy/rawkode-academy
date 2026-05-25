@@ -40,34 +40,81 @@ ci: pipelines: {
 	}
 }
 
+let _runtimeInputs = [
+	"astro.config.mts",
+	"deno.json",
+	"package.json",
+	"public/**",
+	"src/**",
+]
+
+let _qualityInputs = [
+	"astro.config.mts",
+	"deno.json",
+	"graphql-codegen.ts",
+	"package.json",
+	"scripts/**",
+	"src/**",
+]
+
 tasks: {
 	dev: schema.#Task & {
 		hermetic: false
-		command:  "bun"
-		args: ["run", "dev"]
+		command:  "deno"
+		args: ["task", "dev"]
 
-		inputs: [
-			"astro.config.mts",
-			"package.json",
-			"public/**",
-			"src/**",
-		]
+		inputs: _runtimeInputs
 	}
 
 	build: schema.#Task & {
 		hermetic: false
-		command:  "bun"
-		args: ["run", "build"]
+		command:  "deno"
+		args: ["task", "build"]
 
-		inputs: [
-			"astro.config.mts",
-			"package.json",
-			"public/**",
-			"src/**",
-		]
+		inputs: _runtimeInputs
 
 		outputs: [
 			"dist/**",
+		]
+	}
+
+	quality: schema.#TaskGroup & {
+		type: "group"
+		format: schema.#Task & {
+			hermetic: false
+			command:  "deno"
+			args: ["task", "format:check"]
+			inputs: _qualityInputs
+		}
+		denoLint: schema.#Task & {
+			hermetic: false
+			command:  "deno"
+			args: ["task", "lint:deno"]
+			inputs: _qualityInputs
+		}
+		oxlint: schema.#Task & {
+			hermetic: false
+			command:  "deno"
+			args: ["task", "lint:oxlint"]
+			inputs: _qualityInputs
+		}
+		fallow: schema.#Task & {
+			hermetic: false
+			command:  "deno"
+			args: ["task", "lint:fallow"]
+			inputs: _qualityInputs
+		}
+	}
+
+	test: schema.#Task & {
+		hermetic: false
+		command:  "deno"
+		args: ["task", "test"]
+		inputs: [
+			"deno.json",
+			"package.json",
+			"src/**",
+			"vitest.config.*",
 		]
 	}
 
@@ -75,14 +122,14 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			hermetic: false
-			command:  "bun"
-			args: ["x", "wrangler", "deploy"]
+			command:  "deno"
+			args: ["task", "wrangler:deploy"]
 			dependsOn: [_t.build]
 		}
 		preview: schema.#Task & {
 			hermetic: false
-			command:  "bun"
-			args: ["x", "wrangler", "versions", "upload"]
+			command:  "deno"
+			args: ["task", "wrangler:preview"]
 			dependsOn: [_t.build]
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"

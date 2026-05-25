@@ -1,8 +1,9 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run --allow-net
 /*
   Check sitemap URLs for status 200 and canonical correctness.
-  Usage: bun scripts/check-sitemap.ts --base https://rawkode.academy [--limit 400] [--concurrency 10]
+  Usage: deno run --allow-net scripts/check-sitemap.ts --base https://rawkode.academy [--limit 400] [--concurrency 10]
 */
+import process from "node:process";
 
 type Args = {
 	base: string;
@@ -166,8 +167,8 @@ export function buildSupplementalUrlChecks(base: string): UrlExpectation[] {
 		expectedCanonical: new URL(check.expectedCanonicalPath, base).href,
 		...(check.expectedRobots
 			? {
-					expectedRobots: check.expectedRobots,
-				}
+				expectedRobots: check.expectedRobots,
+			}
 			: {}),
 	}));
 }
@@ -188,8 +189,7 @@ async function getSitemapFetchResult(
 				continue;
 			}
 
-			const looksLikeIndex =
-				xml.includes("<sitemapindex") ||
+			const looksLikeIndex = xml.includes("<sitemapindex") ||
 				locs.some((loc) => /sitemap.*\.xml/i.test(loc));
 			if (!looksLikeIndex) {
 				return {
@@ -217,7 +217,7 @@ async function getSitemapFetchResult(
 				pageUrls: Array.from(new Set(pageUrls)),
 			};
 		} catch {
-			// Try the next candidate.
+			continue;
 		}
 	}
 
@@ -290,7 +290,7 @@ export async function run() {
 	const disallowedSitemapUrls = pageUrls.filter((url) => {
 		const pathname = new URL(url).pathname;
 		return DISALLOWED_SITEMAP_PATH_PREFIXES.some((prefix) =>
-			pathname.startsWith(prefix),
+			pathname.startsWith(prefix)
 		);
 	});
 
@@ -309,8 +309,9 @@ export async function run() {
 			try {
 				const result = await checkUrl(url, apexHost);
 				pageResults.push(result);
-				const indicator =
-					result.ok && result.canonicalOk && result.hostOk ? "OK" : "WARN";
+				const indicator = result.ok && result.canonicalOk && result.hostOk
+					? "OK"
+					: "WARN";
 				console.log(`${indicator} ${url} [${result.status}]`);
 			} catch (error) {
 				pageErrorCount += 1;
@@ -327,7 +328,7 @@ export async function run() {
 			checkUrl(check.url, apexHost, check).then((result) => ({
 				...result,
 				expectedRobots: check.expectedRobots ?? null,
-			})),
+			}))
 		),
 	);
 
@@ -371,7 +372,9 @@ export async function run() {
 					? "OK"
 					: "WARN";
 			console.log(
-				`  ${indicator} ${result.url} [${result.status}] canonical=${result.canonical ?? "missing"} robots=${result.robots ?? "missing"}`,
+				`  ${indicator} ${result.url} [${result.status}] canonical=${
+					result.canonical ?? "missing"
+				} robots=${result.robots ?? "missing"}`,
 			);
 		}
 	}

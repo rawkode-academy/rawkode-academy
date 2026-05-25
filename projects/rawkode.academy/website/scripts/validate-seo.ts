@@ -1,6 +1,7 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run --allow-read
 import { glob } from "glob";
 import { readFile } from "node:fs/promises";
+import process from "node:process";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 
@@ -145,7 +146,9 @@ async function main() {
 	console.log("🔍 Validating SEO requirements...\n");
 
 	const validationErrors: ValidationError[] = [];
-	const contentRoot = fileURLToPath(new URL("../../../../content", import.meta.url));
+	const contentRoot = fileURLToPath(
+		new URL("../../../../content", import.meta.url),
+	);
 
 	// Validate articles
 	const articleFiles = await glob(`${contentRoot}/articles/**/*.{md,mdx}`);

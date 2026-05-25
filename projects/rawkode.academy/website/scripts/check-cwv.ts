@@ -1,11 +1,13 @@
-#!/usr/bin/env bun
+#!/usr/bin/env -S deno run --allow-net --allow-env=PAGESPEED_API_KEY
 /*
   Core Web Vitals guardrail check using PageSpeed Insights.
   Usage:
-    bun scripts/check-cwv.ts --base https://rawkode.academy
-    bun scripts/check-cwv.ts --base https://rawkode.academy --pages /,/watch,/read
-    bun scripts/check-cwv.ts --base https://rawkode.academy --strategies mobile,desktop
+    deno run --allow-net --allow-env=PAGESPEED_API_KEY scripts/check-cwv.ts --base https://rawkode.academy
+    deno run --allow-net --allow-env=PAGESPEED_API_KEY scripts/check-cwv.ts --base https://rawkode.academy --pages /,/watch,/read
+    deno run --allow-net --allow-env=PAGESPEED_API_KEY scripts/check-cwv.ts --base https://rawkode.academy --strategies mobile,desktop
 */
+
+import process from "node:process";
 
 export {};
 
@@ -70,18 +72,18 @@ function parseArgs(): Args {
 
 	const pages = pagesArg
 		? pagesArg
-				.split(",")
-				.map((value) => value.trim())
-				.filter(Boolean)
+			.split(",")
+			.map((value) => value.trim())
+			.filter(Boolean)
 		: DEFAULT_PAGES;
 
 	const strategies = (strategiesArg
 		? strategiesArg
-				.split(",")
-				.map((value) => value.trim().toLowerCase())
-				.filter((value): value is Strategy =>
-					value === "mobile" || value === "desktop",
-				)
+			.split(",")
+			.map((value) => value.trim().toLowerCase())
+			.filter((value): value is Strategy =>
+				value === "mobile" || value === "desktop"
+			)
 		: DEFAULT_STRATEGIES) as Strategy[];
 
 	return { base, pages, strategies, apiKey };
@@ -149,7 +151,9 @@ async function runPageSpeed(
 		const status = response.status;
 		const retryable = status === 429 || status >= 500;
 		if (!retryable || attempt === maxRetries) {
-			throw new Error(`PageSpeed API failed (${response.status} ${response.statusText})`);
+			throw new Error(
+				`PageSpeed API failed (${response.status} ${response.statusText})`,
+			);
 		}
 
 		const retryAfterMs = parseRetryAfterMs(response.headers.get("Retry-After"));
@@ -164,21 +168,21 @@ async function runPageSpeed(
 	const data = (await response.json()) as PageSpeedResponse;
 	const audits = (data?.lighthouseResult?.audits ??
 		{}) as Record<string, { numericValue?: number }>;
-	const performanceScoreRaw = data?.lighthouseResult?.categories?.performance?.score;
-	const performanceScore =
-		typeof performanceScoreRaw === "number" ? performanceScoreRaw * 100 : null;
+	const performanceScoreRaw = data?.lighthouseResult?.categories?.performance
+		?.score;
+	const performanceScore = typeof performanceScoreRaw === "number"
+		? performanceScoreRaw * 100
+		: null;
 
 	const lcpMs = getAuditNumericValue(audits, "largest-contentful-paint");
 	const cls = getAuditNumericValue(audits, "cumulative-layout-shift");
-	const inpMs =
-		getAuditNumericValue(audits, "interaction-to-next-paint") ??
+	const inpMs = getAuditNumericValue(audits, "interaction-to-next-paint") ??
 		getAuditNumericValue(audits, "experimental-interaction-to-next-paint");
 	const tbtMs = getAuditNumericValue(audits, "total-blocking-time");
 	const inpOrTbtMs = inpMs ?? tbtMs;
 	const inpSource: "INP" | "TBT" = inpMs !== null ? "INP" : "TBT";
 	const lcpDisplay = lcpMs === null ? "missing" : `${lcpMs}ms`;
-	const inpOrTbtDisplay =
-		inpOrTbtMs === null ? "missing" : `${inpOrTbtMs}ms`;
+	const inpOrTbtDisplay = inpOrTbtMs === null ? "missing" : `${inpOrTbtMs}ms`;
 
 	const failures: string[] = [];
 	if (lcpMs === null || lcpMs > 2500) {
@@ -240,7 +244,11 @@ async function run() {
 
 				const marker = result.passed ? "PASS" : "FAIL";
 				console.log(
-					`${marker} [${strategy}] ${url} | LCP ${fmtMs(result.lcpMs)} | CLS ${fmtCls(result.cls)} | ${result.inpSource} ${fmtMs(result.inpOrTbtMs)} | Score ${fmtScore(result.performanceScore)}`,
+					`${marker} [${strategy}] ${url} | LCP ${fmtMs(result.lcpMs)} | CLS ${
+						fmtCls(result.cls)
+					} | ${result.inpSource} ${fmtMs(result.inpOrTbtMs)} | Score ${
+						fmtScore(result.performanceScore)
+					}`,
 				);
 				if (!result.passed) {
 					for (const failure of result.failures) {
