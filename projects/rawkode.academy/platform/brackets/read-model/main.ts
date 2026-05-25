@@ -15,9 +15,6 @@ export default {
 		const yoga = createYoga({
 			schema: getSchema(env),
 			graphqlEndpoint: "/",
-			context: ({ request }) => ({
-				userId: request.headers.get("X-Gateway-User-Id"),
-			}),
 		});
 
 		return yoga.fetch(request, env, ctx);
