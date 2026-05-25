@@ -165,7 +165,7 @@ import (
 	}
 
 	let _t = tasks
-	let _wranglerWithNode24 = "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler"
+	let _wranglerWithNode24 = "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c env CLOUDFLARE_API_TOKEN=\"$CLOUDFLARE_API_TOKEN\" CLOUDFLARE_ACCOUNT_ID=\"$CLOUDFLARE_ACCOUNT_ID\" bun x wrangler"
 	let _ciDeployCommands = [
 		if _hasMigrations {_wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"},
 		if includeReadModel {_wranglerWithNode24 + " deploy --config ./read-model/wrangler.jsonc"},
