@@ -47,3 +47,49 @@ export const SetMatchLiveState = z.object({
 	state: z.enum(["live", "scheduled", "cancelled"]),
 });
 export type SetMatchLiveState = z.infer<typeof SetMatchLiveState>;
+
+export const SelfRegisterCompetitor = z.object({
+	bracketId: z.string().min(1),
+	userId: z.string().min(1),
+	displayName: z.string().min(1),
+});
+export type SelfRegisterCompetitor = z.infer<typeof SelfRegisterCompetitor>;
+
+export const FormTeam = z.object({
+	bracketId: z.string().min(1),
+	name: z.string().min(1),
+	userId: z.string().min(1),
+});
+export type FormTeam = z.infer<typeof FormTeam>;
+
+export const JoinTeamViaInvite = z.object({
+	token: z.string().min(1),
+	userId: z.string().min(1),
+	displayName: z.string().min(1),
+});
+export type JoinTeamViaInvite = z.infer<typeof JoinTeamViaInvite>;
+
+export const RenameTeam = z.object({
+	teamId: z.string().min(1),
+	name: z.string().min(1),
+	userId: z.string().min(1),
+});
+export type RenameTeam = z.infer<typeof RenameTeam>;
+
+export const CreateTeamInvite = z.object({
+	teamId: z.string().min(1),
+	userId: z.string().min(1),
+});
+export type CreateTeamInvite = z.infer<typeof CreateTeamInvite>;
+
+export const RevokeTeamInvite = z.object({
+	token: z.string().min(1),
+	userId: z.string().min(1),
+});
+export type RevokeTeamInvite = z.infer<typeof RevokeTeamInvite>;
+
+export const LeaveTeam = z.object({
+	teamId: z.string().min(1),
+	userId: z.string().min(1),
+});
+export type LeaveTeam = z.infer<typeof LeaveTeam>;

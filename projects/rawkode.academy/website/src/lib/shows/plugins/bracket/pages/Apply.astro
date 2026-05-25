@@ -1,31 +1,42 @@
 ---
-import type { Bracket } from "../queries";
+import type { MyParticipation } from "../queries";
 
 interface Props {
 	showId: string;
-	openBrackets: Bracket[];
+	isSignedIn: boolean;
+	participation: MyParticipation;
 	submitted: boolean;
 }
 
-const { showId, openBrackets, submitted } = Astro.props;
-const hasTeamBracket = openBrackets.some((b) => b.kind === "team");
+const { showId, isSignedIn, participation, submitted } = Astro.props;
+const cards = participation.brackets;
+const applyPath = `/shows/${showId}/apply`;
+const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(applyPath)}`;
 const actionUrl = `/api/shows/${showId}/apply`;
+const manageUrl = (kind: string) =>
+	kind === "team"
+		? "https://klustered.dev/me/team"
+		: "https://klustered.dev/me/profile";
+const manageLabel = (kind: string, hasTeam: boolean) => {
+	if (kind !== "team") return "Manage your profile";
+	return hasTeam ? "Manage your team" : "Set up your team";
+};
 ---
 
-<div class="mx-auto max-w-xl">
+<div class="mx-auto max-w-3xl">
 	{
 		submitted && (
 			<div
 				class="mb-6 rounded-sm border p-4 text-sm text-primary-content"
 				style="border-color: var(--surface-border); background: var(--surface-raised)"
 			>
-				Thanks for applying. We will be in touch once your entry is reviewed.
+				You are entered. Manage your Klustered details in the competitor portal.
 			</div>
 		)
 	}
 
 	{
-		openBrackets.length === 0 ? (
+		cards.length === 0 ? (
 			<div class="rounded-sm paper-card p-12 text-center">
 				<p class="text-lg font-medium text-secondary-content">
 					Applications are closed
@@ -35,78 +46,65 @@ const actionUrl = `/api/shows/${showId}/apply`;
 				</p>
 			</div>
 		) : (
-			<form method="POST" action={actionUrl} class="flex flex-col gap-4">
-				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-medium text-primary-content">Bracket</span>
-					<select
-						name="bracketId"
-						required
-						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
-						style="border-color: var(--surface-border)"
+			<div class="grid gap-4 md:grid-cols-2">
+				{cards.map((card) => (
+					<section
+						class="rounded-sm border p-5"
+						style="border-color: var(--surface-border); background: var(--surface-raised)"
 					>
-						{openBrackets.map((b) => (
-							<option value={b.id}>
-								{b.name} ({b.kind})
-							</option>
-						))}
-					</select>
-				</label>
+						<div class="flex items-start justify-between gap-4">
+							<div>
+								<p class="font-mono text-xs uppercase text-muted">
+									{card.bracketKind === "team" ? "Team" : "Individual"}
+								</p>
+								<h2 class="mt-1 text-xl font-semibold text-primary-content">
+									{card.bracketName}
+								</h2>
+							</div>
+							{card.applied && (
+								<span class="rounded-sm border px-2 py-1 font-mono text-xs uppercase text-primary-content" style="border-color: var(--surface-border)">
+									Entered
+								</span>
+							)}
+						</div>
 
-				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-medium text-primary-content">Display name</span>
-					<input
-						type="text"
-						name="displayName"
-						required
-						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
-						style="border-color: var(--surface-border)"
-					/>
-				</label>
+						{card.bracketKind === "team" && (
+							<p class="mt-3 text-sm text-muted">
+								Teams are capped at {card.teamSize} competitors.
+							</p>
+						)}
 
-				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-medium text-primary-content">Email</span>
-					<input
-						type="email"
-						name="email"
-						required
-						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
-						style="border-color: var(--surface-border)"
-					/>
-				</label>
-
-				{hasTeamBracket && (
-					<label class="flex flex-col gap-1 text-sm">
-						<span class="font-medium text-primary-content">
-							Team name (team brackets)
-						</span>
-						<input
-							type="text"
-							name="teamName"
-							class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
-							style="border-color: var(--surface-border)"
-						/>
-					</label>
-				)}
-
-				<label class="flex flex-col gap-1 text-sm">
-					<span class="font-medium text-primary-content">
-						Anything else? (optional)
-					</span>
-					<textarea
-						name="message"
-						rows="3"
-						class="rounded-sm border bg-transparent px-3 py-2 text-primary-content"
-						style="border-color: var(--surface-border)"
-					/>
-				</label>
-
-				<button
-					type="submit"
-					class="focus-ring mt-2 rounded-sm bg-primary px-5 py-2.5 font-semibold text-white"
-				>
-					Apply to compete
-				</button>
-			</form>
+						<div class="mt-5">
+							{!isSignedIn ? (
+								<a
+									href={signInUrl}
+									class="focus-ring inline-flex rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
+								>
+									Sign in to apply
+								</a>
+							) : card.applied ? (
+								<a
+									href={manageUrl(card.bracketKind)}
+									class="focus-ring inline-flex rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content"
+									style="border-color: var(--surface-border)"
+								>
+									{manageLabel(card.bracketKind, Boolean(card.team))}
+								</a>
+							) : (
+								<form method="POST" action={actionUrl}>
+									<input type="hidden" name="bracketId" value={card.bracketId} />
+									<button
+										type="submit"
+										class="focus-ring rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
+									>
+										Apply
+									</button>
+								</form>
+							)}
+						</div>
+					</section>
+				))}
+			</div>
 		)
 	}
 </div>

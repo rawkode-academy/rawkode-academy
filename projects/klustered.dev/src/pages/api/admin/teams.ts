@@ -10,15 +10,15 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
 	}
 
 	const form = await request.formData();
-	const seasonId = String(form.get("seasonId") ?? "").trim();
+	const bracketId = String(form.get("bracketId") ?? "").trim();
 	const slug = String(form.get("slug") ?? "").trim();
 	const name = String(form.get("name") ?? "").trim();
 
-	if (!seasonId || !slug || !name) {
-		return new Response("seasonId, slug, name required", { status: 400 });
+	if (!bracketId || !slug || !name) {
+		return new Response("bracketId, slug, name required", { status: 400 });
 	}
 
-	await bracketsWrite(env).createTeam({ seasonId, slug, name });
+	await bracketsWrite(env).createTeam({ bracketId, slug, name });
 
 	return redirect("/admin/teams", 303);
 };

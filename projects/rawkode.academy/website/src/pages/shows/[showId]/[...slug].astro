@@ -27,6 +27,7 @@ const data = page.load
 			request: Astro.request,
 			url: Astro.url,
 			env: env as unknown as ShowEnv,
+			locals: Astro.locals,
 		})
 	: {};
 

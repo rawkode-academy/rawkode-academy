@@ -27,7 +27,7 @@ const bracket = await db
 const teams = await db
 	.select({ id: schema.teams.id, name: schema.teams.name })
 	.from(schema.teams)
-	.where(bracket ? eq(schema.teams.seasonId, bracket.seasonId) : eq(schema.teams.id, "_"))
+	.where(bracket ? eq(schema.teams.bracketId, bracket.id) : eq(schema.teams.id, "_"))
 	.orderBy(asc(schema.teams.name))
 	.all();
 

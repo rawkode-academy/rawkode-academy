@@ -1,6 +1,6 @@
 ---
 import { env } from "cloudflare:workers";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import PortalLayout from "@/layouts/PortalLayout.astro";
 import { getBracketsDb, schema } from "@/db/client";
 import { SHOW_ID } from "@/lib/brackets-write";
@@ -14,10 +14,13 @@ const teams = await db
 		slug: schema.teams.slug,
 		name: schema.teams.name,
 		seasonId: schema.teams.seasonId,
+		bracketId: schema.teams.bracketId,
 		seasonName: schema.seasons.name,
+		bracketName: schema.brackets.name,
 	})
 	.from(schema.teams)
 	.leftJoin(schema.seasons, eq(schema.teams.seasonId, schema.seasons.id))
+	.leftJoin(schema.brackets, eq(schema.teams.bracketId, schema.brackets.id))
 	.orderBy(desc(schema.teams.createdAt))
 	.all();
 
@@ -34,11 +37,16 @@ const countByTeam = memberCounts.reduce<Record<string, number>>((acc, row) => {
 	return acc;
 }, {});
 
-const seasons = await db
-	.select({ id: schema.seasons.id, name: schema.seasons.name })
-	.from(schema.seasons)
-	.where(eq(schema.seasons.showId, SHOW_ID))
-	.orderBy(desc(schema.seasons.createdAt))
+const teamBrackets = await db
+	.select({
+		id: schema.brackets.id,
+		name: schema.brackets.name,
+		seasonName: schema.seasons.name,
+	})
+	.from(schema.brackets)
+	.innerJoin(schema.seasons, eq(schema.brackets.seasonId, schema.seasons.id))
+	.where(and(eq(schema.seasons.showId, SHOW_ID), eq(schema.brackets.kind, "team")))
+	.orderBy(desc(schema.brackets.createdAt))
 	.all();
 ---
 
@@ -48,8 +56,8 @@ const seasons = await db
 			New team
 		</h2>
 		{
-			seasons.length === 0 ? (
-				<p class="mt-3 text-sm text-slate-400">Create a season first.</p>
+			teamBrackets.length === 0 ? (
+				<p class="mt-3 text-sm text-slate-400">Create a Team bracket first.</p>
 			) : (
 				<form
 					method="POST"
@@ -57,14 +65,14 @@ const seasons = await db
 					class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
 				>
 					<label class="flex flex-col gap-1">
-						<span class="text-xs text-slate-400">Season</span>
+						<span class="text-xs text-slate-400">Team bracket</span>
 						<select
-							name="seasonId"
+							name="bracketId"
 							required
 							class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
 						>
-							{seasons.map((s) => (
-								<option value={s.id}>{s.name}</option>
+							{teamBrackets.map((b) => (
+								<option value={b.id}>{b.seasonName} / {b.name}</option>
 							))}
 						</select>
 					</label>
@@ -104,6 +112,7 @@ const seasons = await db
 					<th class="px-6 py-3">Name</th>
 					<th class="px-6 py-3">Slug</th>
 					<th class="px-6 py-3">Season</th>
+					<th class="px-6 py-3">Bracket</th>
 					<th class="px-6 py-3">Members</th>
 					<th class="px-6 py-3 text-right">Actions</th>
 				</tr>
@@ -112,7 +121,7 @@ const seasons = await db
 				{
 					teams.length === 0 ? (
 						<tr>
-							<td colspan="5" class="px-6 py-6 text-center text-sm text-slate-500">
+							<td colspan="6" class="px-6 py-6 text-center text-sm text-slate-500">
 								No teams yet.
 							</td>
 						</tr>
@@ -126,6 +135,7 @@ const seasons = await db
 								</td>
 								<td class="px-6 py-3 font-mono text-xs text-slate-400">{t.slug}</td>
 								<td class="px-6 py-3 text-slate-400">{t.seasonName ?? t.seasonId}</td>
+								<td class="px-6 py-3 text-slate-400">{t.bracketName ?? t.bracketId}</td>
 								<td class="px-6 py-3 text-slate-300">{countByTeam[t.id] ?? 0}</td>
 								<td class="px-6 py-3 text-right">
 									<form method="POST" action={`/api/admin/teams/${t.id}/delete`}>

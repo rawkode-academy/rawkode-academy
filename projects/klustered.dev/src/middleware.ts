@@ -27,6 +27,7 @@ declare global {
 const PUBLIC_PREFIXES = ["/api/auth/"];
 const ADMIN_PREFIX = "/admin";
 const COMPETITOR_PREFIX = "/me";
+const JOIN_PREFIX = "/join";
 
 // Admins are an explicit allowlist of id.rawkode.academy user ids (OIDC subs),
 // set via the KLUSTERED_ADMIN_IDS var. Everyone else who authenticates is a
@@ -66,7 +67,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	}
 
 	const requiresAuth =
-		pathname.startsWith(ADMIN_PREFIX) || pathname.startsWith(COMPETITOR_PREFIX);
+		pathname.startsWith(ADMIN_PREFIX) ||
+		pathname.startsWith(COMPETITOR_PREFIX) ||
+		pathname.startsWith(JOIN_PREFIX);
 
 	if (requiresAuth && !context.locals.user) {
 		return context.redirect(getSignInUrl(pathname), 302);

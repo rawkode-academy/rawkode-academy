@@ -56,38 +56,14 @@ export const competitors = sqliteTable(
 		updatedAt: updatedAt(),
 	},
 	(t) => [
-		uniqueIndex("competitors_season_person_unique").on(t.seasonId, t.personSlug),
+		uniqueIndex("competitors_season_person_unique").on(
+			t.seasonId,
+			t.personSlug,
+		),
+		uniqueIndex("competitors_season_user_unique")
+			.on(t.seasonId, t.userId)
+			.where(sql`${t.userId} is not null`),
 	],
-);
-
-export const teams = sqliteTable(
-	"teams",
-	{
-		id: text("id").primaryKey(),
-		seasonId: text("season_id")
-			.notNull()
-			.references(() => seasons.id, { onDelete: "cascade" }),
-		name: text("name").notNull(),
-		slug: text("slug").notNull(),
-		createdAt: createdAt(),
-		updatedAt: updatedAt(),
-	},
-	(t) => [uniqueIndex("teams_season_slug_unique").on(t.seasonId, t.slug)],
-);
-
-export const teamMembers = sqliteTable(
-	"team_members",
-	{
-		teamId: text("team_id")
-			.notNull()
-			.references(() => teams.id, { onDelete: "cascade" }),
-		competitorId: text("competitor_id")
-			.notNull()
-			.references(() => competitors.id, { onDelete: "cascade" }),
-		role: text("role"),
-		createdAt: createdAt(),
-	},
-	(t) => [primaryKey({ columns: [t.teamId, t.competitorId] })],
 );
 
 export const scenarios = sqliteTable("scenarios", {
@@ -113,7 +89,9 @@ export const brackets = sqliteTable(
 			.references(() => seasons.id, { onDelete: "cascade" }),
 		name: text("name").notNull(),
 		slug: text("slug").notNull(),
-		kind: text("kind", { enum: ["solo", "team"] }).notNull().default("team"),
+		kind: text("kind", { enum: ["solo", "team"] })
+			.notNull()
+			.default("team"),
 		format: text("format", { enum: ["single_elimination"] })
 			.notNull()
 			.default("single_elimination"),
@@ -125,12 +103,88 @@ export const brackets = sqliteTable(
 			mode: "timestamp_ms",
 		}),
 		maxEntries: integer("max_entries").notNull().default(16),
+		teamSize: integer("team_size").notNull().default(2),
 		cadenceDays: integer("cadence_days").notNull().default(7),
 		createdAt: createdAt(),
 		updatedAt: updatedAt(),
 	},
 	(t) => [uniqueIndex("brackets_season_slug_unique").on(t.seasonId, t.slug)],
 );
+
+export const bracketApplications = sqliteTable(
+	"bracket_applications",
+	{
+		id: text("id").primaryKey(),
+		bracketId: text("bracket_id")
+			.notNull()
+			.references(() => brackets.id, { onDelete: "cascade" }),
+		competitorId: text("competitor_id")
+			.notNull()
+			.references(() => competitors.id, { onDelete: "cascade" }),
+		createdAt: createdAt(),
+	},
+	(t) => [
+		uniqueIndex("bracket_applications_bracket_competitor_unique").on(
+			t.bracketId,
+			t.competitorId,
+		),
+	],
+);
+
+export const teams = sqliteTable(
+	"teams",
+	{
+		id: text("id").primaryKey(),
+		seasonId: text("season_id")
+			.notNull()
+			.references(() => seasons.id, { onDelete: "cascade" }),
+		bracketId: text("bracket_id")
+			.notNull()
+			.references(() => brackets.id, { onDelete: "cascade" }),
+		name: text("name").notNull(),
+		slug: text("slug").notNull(),
+		createdAt: createdAt(),
+		updatedAt: updatedAt(),
+	},
+	(t) => [uniqueIndex("teams_bracket_slug_unique").on(t.bracketId, t.slug)],
+);
+
+export const teamMembers = sqliteTable(
+	"team_members",
+	{
+		teamId: text("team_id")
+			.notNull()
+			.references(() => teams.id, { onDelete: "cascade" }),
+		bracketId: text("bracket_id")
+			.notNull()
+			.references(() => brackets.id, { onDelete: "cascade" }),
+		competitorId: text("competitor_id")
+			.notNull()
+			.references(() => competitors.id, { onDelete: "cascade" }),
+		role: text("role"),
+		createdAt: createdAt(),
+	},
+	(t) => [
+		primaryKey({ columns: [t.teamId, t.competitorId] }),
+		uniqueIndex("team_members_bracket_competitor_unique").on(
+			t.bracketId,
+			t.competitorId,
+		),
+	],
+);
+
+export const teamInvites = sqliteTable("team_invites", {
+	token: text("token").primaryKey(),
+	teamId: text("team_id")
+		.notNull()
+		.references(() => teams.id, { onDelete: "cascade" }),
+	bracketId: text("bracket_id")
+		.notNull()
+		.references(() => brackets.id, { onDelete: "cascade" }),
+	createdByUserId: text("created_by_user_id").notNull(),
+	createdAt: createdAt(),
+	revokedAt: integer("revoked_at", { mode: "timestamp_ms" }),
+});
 
 export const bracketBreaks = sqliteTable("bracket_breaks", {
 	id: text("id").primaryKey(),
@@ -168,7 +222,10 @@ export const bracketEntries = sqliteTable(
 			t.bracketId,
 			t.competitorId,
 		),
-		uniqueIndex("bracket_entries_bracket_team_unique").on(t.bracketId, t.teamId),
+		uniqueIndex("bracket_entries_bracket_team_unique").on(
+			t.bracketId,
+			t.teamId,
+		),
 	],
 );
 
@@ -185,8 +242,12 @@ export const matches = sqliteTable("matches", {
 	})
 		.notNull()
 		.default("scheduled"),
-	teamAId: text("team_a_id").references(() => teams.id, { onDelete: "set null" }),
-	teamBId: text("team_b_id").references(() => teams.id, { onDelete: "set null" }),
+	teamAId: text("team_a_id").references(() => teams.id, {
+		onDelete: "set null",
+	}),
+	teamBId: text("team_b_id").references(() => teams.id, {
+		onDelete: "set null",
+	}),
 	entryAId: text("entry_a_id").references(() => bracketEntries.id, {
 		onDelete: "set null",
 	}),
