@@ -23,6 +23,13 @@ export const DecideRegistration = z.object({
 });
 export type DecideRegistration = z.infer<typeof DecideRegistration>;
 
+export const DecideApplication = z.object({
+	applicationId: z.string().min(1),
+	decision: z.enum(["approved", "rejected"]),
+	reviewedByUserId: z.string().min(1),
+});
+export type DecideApplication = z.infer<typeof DecideApplication>;
+
 export const GenerateBracket = z.object({
 	bracketId: z.string().min(1),
 	// Optional override of the first match time; defaults to bracket.startsAt.

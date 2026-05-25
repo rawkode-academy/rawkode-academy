@@ -30,7 +30,7 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 				class="mb-6 rounded-sm border p-4 text-sm text-primary-content"
 				style="border-color: var(--surface-border); background: var(--surface-raised)"
 			>
-				You are entered. Manage your Klustered details in the competitor portal.
+				Application saved. Current entry status is reflected below.
 			</div>
 		)
 	}
@@ -97,7 +97,7 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 										type="submit"
 										class="focus-ring rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
 									>
-										Apply
+										Apply for {card.bracketKind === "team" ? "Team" : "Individual"}
 									</button>
 								</form>
 							)}
