@@ -78,6 +78,13 @@
       "when": 1771891200000,
       "tag": "0011_add_rawkode_cloud_oauth",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1779703500000,
+      "tag": "0012_add_verification_expires_at_index",
+      "breakpoints": true
     }
   ]
 }

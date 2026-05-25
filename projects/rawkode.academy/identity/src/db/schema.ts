@@ -87,7 +87,10 @@ export const verification = sqliteTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("verification_identifier_idx").on(table.identifier)],
+  (table) => [
+    index("verification_identifier_idx").on(table.identifier),
+    index("verification_expiresAt_idx").on(table.expiresAt),
+  ],
 );
 
 export const jwks = sqliteTable("jwks", {
