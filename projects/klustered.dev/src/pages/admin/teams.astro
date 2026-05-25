@@ -1,0 +1,144 @@
+---
+import { env } from "cloudflare:workers";
+import { desc, eq } from "drizzle-orm";
+import PortalLayout from "@/layouts/PortalLayout.astro";
+import { getBracketsDb, schema } from "@/db/client";
+import { SHOW_ID } from "@/lib/brackets-write";
+import { ADMIN_NAV } from "@/lib/nav";
+
+const db = getBracketsDb(env.BRACKETS);
+
+const teams = await db
+	.select({
+		id: schema.teams.id,
+		slug: schema.teams.slug,
+		name: schema.teams.name,
+		seasonId: schema.teams.seasonId,
+		seasonName: schema.seasons.name,
+	})
+	.from(schema.teams)
+	.leftJoin(schema.seasons, eq(schema.teams.seasonId, schema.seasons.id))
+	.orderBy(desc(schema.teams.createdAt))
+	.all();
+
+const memberCounts = await db
+	.select({
+		teamId: schema.teamMembers.teamId,
+		count: schema.teamMembers.competitorId,
+	})
+	.from(schema.teamMembers)
+	.all();
+
+const countByTeam = memberCounts.reduce<Record<string, number>>((acc, row) => {
+	acc[row.teamId] = (acc[row.teamId] ?? 0) + 1;
+	return acc;
+}, {});
+
+const seasons = await db
+	.select({ id: schema.seasons.id, name: schema.seasons.name })
+	.from(schema.seasons)
+	.where(eq(schema.seasons.showId, SHOW_ID))
+	.orderBy(desc(schema.seasons.createdAt))
+	.all();
+---
+
+<PortalLayout title="Teams" section="admin" nav={[...ADMIN_NAV]}>
+	<section class="rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+		<h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+			New team
+		</h2>
+		{
+			seasons.length === 0 ? (
+				<p class="mt-3 text-sm text-slate-400">Create a season first.</p>
+			) : (
+				<form
+					method="POST"
+					action="/api/admin/teams"
+					class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+				>
+					<label class="flex flex-col gap-1">
+						<span class="text-xs text-slate-400">Season</span>
+						<select
+							name="seasonId"
+							required
+							class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+						>
+							{seasons.map((s) => (
+								<option value={s.id}>{s.name}</option>
+							))}
+						</select>
+					</label>
+					<label class="flex flex-col gap-1">
+						<span class="text-xs text-slate-400">Slug</span>
+						<input
+							name="slug"
+							required
+							pattern="[a-z0-9-]+"
+							class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+						/>
+					</label>
+					<label class="flex flex-col gap-1">
+						<span class="text-xs text-slate-400">Name</span>
+						<input
+							name="name"
+							required
+							class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-1.5 text-sm text-slate-100 focus:border-fuchsia-500 focus:outline-none"
+						/>
+					</label>
+					<div class="flex items-end">
+						<button
+							class="rounded-lg bg-fuchsia-500 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-fuchsia-400"
+						>
+							Create
+						</button>
+					</div>
+				</form>
+			)
+		}
+	</section>
+
+	<section class="overflow-hidden rounded-2xl border border-slate-800">
+		<table class="w-full text-left text-sm">
+			<thead class="bg-slate-900/60 text-xs uppercase tracking-wider text-slate-400">
+				<tr>
+					<th class="px-6 py-3">Name</th>
+					<th class="px-6 py-3">Slug</th>
+					<th class="px-6 py-3">Season</th>
+					<th class="px-6 py-3">Members</th>
+					<th class="px-6 py-3 text-right">Actions</th>
+				</tr>
+			</thead>
+			<tbody class="divide-y divide-slate-800 bg-slate-950/40">
+				{
+					teams.length === 0 ? (
+						<tr>
+							<td colspan="5" class="px-6 py-6 text-center text-sm text-slate-500">
+								No teams yet.
+							</td>
+						</tr>
+					) : (
+						teams.map((t) => (
+							<tr>
+								<td class="px-6 py-3">
+									<a href={`/admin/teams/${t.id}`} class="text-fuchsia-300 hover:underline">
+										{t.name}
+									</a>
+								</td>
+								<td class="px-6 py-3 font-mono text-xs text-slate-400">{t.slug}</td>
+								<td class="px-6 py-3 text-slate-400">{t.seasonName ?? t.seasonId}</td>
+								<td class="px-6 py-3 text-slate-300">{countByTeam[t.id] ?? 0}</td>
+								<td class="px-6 py-3 text-right">
+									<form method="POST" action={`/api/admin/teams/${t.id}/delete`}>
+										<button class="text-xs text-rose-400 underline-offset-4 hover:underline">
+											Delete
+										</button>
+									</form>
+								</td>
+							</tr>
+						))
+					)
+				}
+			</tbody>
+		</table>
+	</section>
+</PortalLayout>

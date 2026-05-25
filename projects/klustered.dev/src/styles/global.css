@@ -1,1 +1,2 @@
-@layer reset, base, tokens, recipes, utilities;
+/* UnoCSS (@unocss/astro) injects utilities and the preflight reset; this file
+   is kept for any project-specific base CSS. */
