@@ -15,10 +15,11 @@
   languages.typescript.enable = true;
 
   packages = with pkgs; [
-    biome
     bun
     d2
+    deno
     nixfmt-rfc-style
+    oxlint
   ];
 
   enterShell = ''
