@@ -1,0 +1,25 @@
+---
+title: "Crossplane 2.3 makes local rendering match the in-cluster reconciler"
+description: "Crossplane 2.3.0 rewires crossplane render onto the real composite reconciler, adds per-resource reconciliation annotations, and ships alpha deletion protection for Provider packages."
+publishedAt: 2026-05-26
+authors:
+  - rawkode
+technologies:
+  - crossplane
+---
+
+Crossplane 2.3.0 shipped on May 26, 2026, led by a change to how `crossplane render` produces output during local development.
+
+## Render parity
+
+`crossplane render` now drives the actual composite reconciler instead of a parallel re-implementation, so what you see locally matches what the control plane will reconcile in-cluster. The command pulls the Crossplane container image by default to do this. The long-standing gap between dry-run rendering and real reconciliation is the kind of thing that turns a clean local diff into a surprise in production.
+
+## Per-resource reconciliation control
+
+Two annotations move reconciliation tuning from the controller flag down to individual resources. `crossplane.io/poll-interval` overrides the controller-wide poll for a single resource (for example `24h` on a resource that rarely drifts), and `crossplane.io/reconcile-requested-at` forces an immediate reconcile whenever its value changes. This is stable for composite resources; managed resources need a provider built against the updated runtime to honour it.
+
+## Provider deletion protection
+
+A new alpha flag, `--enable-provider-deletion-protection`, has Crossplane create `ClusterUsage` resources that block accidental deletion of Provider packages through the existing Usage webhook. The release also adds `commonAnnotations` propagation from Compositions to composed resources and lets a CompositeResourceDefinition expose a scale subresource.
+
+**Source:** [Crossplane v2.3.0 release notes](https://github.com/crossplane/crossplane/releases/tag/v2.3.0) — May 26, 2026

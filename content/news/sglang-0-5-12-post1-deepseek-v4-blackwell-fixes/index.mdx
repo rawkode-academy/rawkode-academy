@@ -1,0 +1,24 @@
+---
+title: "SGLang 0.5.12.post1 fixes a silent DeepSeek V4 accuracy regression on Blackwell"
+description: "A 12-fix patch restores SGLang's DeepSeek V4 GSM8K accuracy from 0.825 to 0.960 under HiSparse compression and clears garbled decode output on B200 and B300."
+publishedAt: 2026-05-26
+authors:
+  - rawkode
+technologies: []
+---
+
+SGLang published v0.5.12.post1 on May 26, 2026, a stability patch that cherry-picks 12 fixes onto the 0.5.12 branch, most of them aimed at DeepSeek V4.
+
+## The accuracy fix is the one to read
+
+Per the release notes, GSM8K accuracy for DeepSeek V4 is restored from 0.825 to 0.960 when HiSparse compression is enabled — a quiet quality drop that would not crash anything and would not show up without an eval harness. If you turned that compression on, the patch is a correctness fix, not housekeeping.
+
+## Blackwell decode and disaggregation
+
+The patch clears garbled text during single-token decoding on B200 and B300, resolves a disaggregation-mode crash with EAGLE/MTP speculative decoding around 2,000 concurrent requests, and fixes a scheduler crash under NSA prefill with context parallelism. It also removes the `pp_size=1` restriction, enabling pipeline parallelism for the model.
+
+## Build and startup
+
+The CUTLASS DSL dependency is bumped for CUDA 13 and sm_103/B300 support, and the runtime now warms token-count buckets at startup to remove reported 20-to-40-second cold-bucket stalls.
+
+**Source:** [SGLang v0.5.12.post1 release notes](https://github.com/sgl-project/sglang/releases/tag/v0.5.12.post1) — May 26, 2026
