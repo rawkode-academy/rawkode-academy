@@ -1,5 +1,11 @@
 import { relations, sql } from "drizzle-orm";
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -254,6 +260,40 @@ export const invitation = sqliteTable(
   ],
 );
 
+export const accessAssignment = sqliteTable(
+  "access_assignment",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    clientId: text("client_id").notNull(),
+    role: text("role").notNull(),
+    grantedByUserId: text("granted_by_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    reason: text("reason"),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("accessAssignment_userClientRole_unique").on(
+      table.userId,
+      table.clientId,
+      table.role,
+    ),
+    index("accessAssignment_userId_idx").on(table.userId),
+    index("accessAssignment_clientId_idx").on(table.clientId),
+    index("accessAssignment_role_idx").on(table.role),
+  ],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -263,6 +303,12 @@ export const userRelations = relations(user, ({ many }) => ({
   teamMembers: many(teamMember),
   members: many(member),
   invitations: many(invitation),
+  accessAssignments: many(accessAssignment, {
+    relationName: "accessAssignmentUser",
+  }),
+  grantedAccessAssignments: many(accessAssignment, {
+    relationName: "accessAssignmentGranter",
+  }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -362,3 +408,19 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const accessAssignmentRelations = relations(
+  accessAssignment,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [accessAssignment.userId],
+      references: [user.id],
+      relationName: "accessAssignmentUser",
+    }),
+    grantedBy: one(user, {
+      fields: [accessAssignment.grantedByUserId],
+      references: [user.id],
+      relationName: "accessAssignmentGranter",
+    }),
+  }),
+);
