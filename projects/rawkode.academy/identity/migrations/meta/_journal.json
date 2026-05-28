@@ -85,6 +85,13 @@
       "when": 1779703500000,
       "tag": "0012_add_verification_expires_at_index",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1779982680000,
+      "tag": "0013_add_access_assignments",
+      "breakpoints": true
     }
   ]
 }

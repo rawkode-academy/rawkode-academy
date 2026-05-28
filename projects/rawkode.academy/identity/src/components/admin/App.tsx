@@ -7,6 +7,7 @@ import { Layout } from "./Layout";
 import { OrganizationList, OrganizationCreate, OrganizationEdit, OrganizationShow } from "./organizations";
 import { MemberList, MemberCreate } from "./members";
 import { TeamList, TeamCreate } from "./teams";
+import { AccessList } from "./access";
 
 export function AdminApp() {
 	return (
@@ -43,6 +44,21 @@ export function AdminApp() {
 						},
 					},
 					{
+						name: "access-assignments",
+						list: "/access",
+						meta: {
+							label: "Access",
+						},
+					},
+					{
+						name: "access-applications",
+						list: "/access-applications",
+						meta: {
+							label: "Access Applications",
+							hide: true,
+						},
+					},
+					{
 						name: "users",
 						list: "/users",
 						meta: {
@@ -73,6 +89,7 @@ export function AdminApp() {
 							<Route index element={<TeamList />} />
 							<Route path="create" element={<TeamCreate />} />
 						</Route>
+						<Route path="/access" element={<AccessList />} />
 					</Route>
 				</Routes>
 			</Refine>

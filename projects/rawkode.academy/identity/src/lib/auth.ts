@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { jwt, oidcProvider, organization } from "better-auth/plugins";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "../db/schema";
 import {
@@ -12,6 +12,7 @@ import {
 	contributor,
 	member,
 } from "./access-control";
+import { getUserAccessClaims } from "./access-claims";
 import { captureAuthEvent } from "./analytics";
 
 type SecretsStoreSecret =
@@ -80,6 +81,31 @@ export const createAuth = async (env: AuthEnv) => {
 			oidcProvider({
 				loginPage: "/auth/sign-in/social",
 				useJWTPlugin: true,
+				scopes: ["openid", "profile", "email", "offline_access", "roles", "groups"],
+				metadata: {
+					scopes_supported: [
+						"openid",
+						"profile",
+						"email",
+						"offline_access",
+						"roles",
+						"groups",
+					],
+					claims_supported: [
+						"sub",
+						"aud",
+						"email",
+						"email_verified",
+						"name",
+						"picture",
+						"roles",
+						"groups",
+						"https://rawkode.academy/roles",
+						"https://rawkode.academy/client_id",
+					],
+				},
+				getAdditionalUserInfoClaim: async (user, _scopes, client) =>
+					getUserAccessClaims(db, user.id, client.clientId),
 				trustedClients: [
 					{
 						clientId: "rawkode-academy-website",
@@ -215,6 +241,7 @@ export const createAuth = async (env: AuthEnv) => {
 			"http://localhost:4322",
 			"https://rawkode.chat",
 			"http://localhost:3000",
+			"https://code.rawkode.academy",
 		],
 
 		databaseHooks: {
