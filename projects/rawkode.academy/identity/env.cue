@@ -6,6 +6,9 @@ schema.#Project
 
 name: "rawkode-academy-identity"
 
+runtime: schema.#DevenvRuntime
+hooks: onEnter: devenv: schema.#Devenv
+
 let _t = tasks
 
 ci: pipelines: {
