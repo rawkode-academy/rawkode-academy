@@ -9,7 +9,7 @@ resources:
 
 images:
   - name: ghcr.io/comtrya/comtrya-server
-    digest: sha256:722c13bd242bb6935944b7e6447dd73a5b10b6951429e8ff481927c7d0221650
+    digest: sha256:f039fc72f8094ebf7068ef649030edbcb13a5cb3e785c5243915663bb1726a61
   - name: ghcr.io/comtrya/comtrya-frontend
     digest: sha256:db9998e872658d7d048980db2abb574e7ef19399081d3ebad96f3b18a3658beb
 
@@ -32,9 +32,9 @@ patches:
       metadata:
         name: comtrya-server-config
       data:
-        COMTRYA_CONFIG_REPO_URL: https://github.com/rawkode-academy/rawkode-academy.git
+        COMTRYA_CONFIG_REPO_URL: https://codeberg.org/rawkode-academy/comtrya
         COMTRYA_CONFIG_REPO_REF: main
-        COMTRYA_CONFIG_REPO_PATH: projects/code.rawkode.academy/config
+        COMTRYA_CONFIG_REPO_PATH: ""
         COMTRYA_CONFIG_REPO_USERNAME: null
   - patch: |-
       apiVersion: v1
