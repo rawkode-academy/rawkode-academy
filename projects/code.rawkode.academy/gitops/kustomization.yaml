@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: code-rawkode-academy
+resources:
+  - github.com/comtrya/comtrya/opt/kubernetes/base?ref=4659865d49577b5269b394f315ee95737ff0aad6
+  - namespace.yaml
+  - external-secret.yaml
+  - httproute.yaml
+
+images:
+  - name: ghcr.io/comtrya/comtrya-server
+    digest: sha256:3938d1404b38f4769dbbdf79eaa9546cc7c62fb73c0069b74bf099896f6d0fce
+  - name: ghcr.io/comtrya/comtrya-frontend
+    digest: sha256:6f0db8db82bb7a33e450c31f748b8e715e6e6255736510e52d5432c6f0048333
+
+patches:
+  - patch: |-
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: comtrya
+      $patch: delete
+  - patch: |-
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: comtrya-server-secrets
+      $patch: delete
+  - patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: comtrya-server-config
+      data:
+        COMTRYA_CONFIG_REPO_URL: https://github.com/rawkode-academy/rawkode-academy.git
+        COMTRYA_CONFIG_REPO_REF: main
+        COMTRYA_CONFIG_REPO_PATH: projects/code.rawkode.academy/config
+        COMTRYA_CONFIG_REPO_USERNAME: null
+  - patch: |-
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: comtrya-data
+      spec:
+        storageClassName: openebs-single-replica
+        resources:
+          requests:
+            storage: 20Gi

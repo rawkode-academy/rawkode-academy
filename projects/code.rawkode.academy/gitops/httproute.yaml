@@ -1,0 +1,44 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: code-rawkode-academy
+  namespace: code-rawkode-academy
+spec:
+  parentRefs:
+    - name: rawkode-cloud
+      namespace: gateway
+      sectionName: https-code-rawkode-academy
+  hostnames:
+    - code.rawkode.academy
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /graphql
+        - path:
+            type: PathPrefix
+            value: /api
+        - path:
+            type: PathPrefix
+            value: /auth
+        - path:
+            type: PathPrefix
+            value: /_extensions
+        - path:
+            type: PathPrefix
+            value: /git
+        - path:
+            type: PathPrefix
+            value: /events
+        - path:
+            type: PathPrefix
+            value: /healthz
+        - path:
+            type: PathPrefix
+            value: /readyz
+      backendRefs:
+        - name: comtrya-server
+          port: 80
+    - backendRefs:
+        - name: comtrya-frontend
+          port: 80
