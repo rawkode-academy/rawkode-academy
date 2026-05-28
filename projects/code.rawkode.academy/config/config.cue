@@ -19,7 +19,10 @@ oidc: issuers: [{
 	clientID:    "comtrya"
 	clientKind:  "public"
 	redirectURL: "https://code.rawkode.academy/auth/oidc/rawkode/callback"
-	allowed: domains: ["rawkode.academy"]
+	allowed: {
+		domains: ["rawkode.academy"]
+		groups:  ["admin", "maintainer"]
+	}
 }]
 
 storage: repositories: {
