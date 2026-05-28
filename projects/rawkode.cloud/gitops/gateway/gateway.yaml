@@ -36,6 +36,17 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-code-rawkode-academy
+      protocol: HTTPS
+      port: 443
+      hostname: code.rawkode.academy
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: code-rawkode-academy-tls
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: teleport-passthrough
       protocol: TLS
       port: 443
