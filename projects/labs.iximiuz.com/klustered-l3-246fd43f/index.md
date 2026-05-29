@@ -26,6 +26,9 @@ tasks:
   klustered_break:
     init: true
     machine: cplane-01
+    # This task builds a container image, which easily exceeds the default 10s
+    # task timeout. Give it plenty of room.
+    timeout_seconds: 600
     run: |
       # 1. Create PV with root-owned data
       mkdir -p /var/data/klustered
@@ -56,10 +59,17 @@ tasks:
             storage: 1Gi
       EOF
 
-      # 2. Build custom Go web server with random port baked into binary
+      # 2. Build the custom Go web server (random port baked into the binary)
+      #    and load it straight into the node's containerd, no registry needed.
+      #    The kubelet reads images from the "k8s.io" containerd namespace.
+      IMAGE_TAG="klustered-l3:local"
+      CONTAINERD_NS="k8s.io"
+
+      # Re-entrant: if the image is already in containerd, reuse it. This keeps
+      # the baked-in port stable across re-runs and skips the expensive rebuild.
+      if ! nerdctl --namespace "${CONTAINERD_NS}" image inspect "${IMAGE_TAG}" >/dev/null 2>&1; then
       WORKDIR=$(mktemp -d)
       PORT=$((RANDOM % 50000 + 10000))
-      IMAGE_TAG="ttl.sh/klustered-l3-$(head -c 8 /dev/urandom | xxd -p):2h"
 
       cat > ${WORKDIR}/main.go << GOEOF
       package main
@@ -104,15 +114,15 @@ tasks:
       ENTRYPOINT ["/server"]
       DEOF
 
-      # Ensure a container build tool is available (node uses containerd, install nerdctl if needed)
-      if ! command -v nerdctl &>/dev/null && ! command -v docker &>/dev/null && ! command -v podman &>/dev/null; then
+      # The node uses containerd; install nerdctl if it isn't present
+      if ! command -v nerdctl &>/dev/null; then
         NERDCTL_VERSION="2.0.2"
         curl -sSL "https://github.com/containerd/nerdctl/releases/download/v${NERDCTL_VERSION}/nerdctl-${NERDCTL_VERSION}-linux-amd64.tar.gz" \
           | tar -xz -C /usr/local/bin nerdctl
       fi
 
-      # nerdctl requires buildkitd; install and start it if missing
-      if command -v nerdctl &>/dev/null && ! pgrep -x buildkitd > /dev/null; then
+      # nerdctl build needs buildkitd; install and start it if missing
+      if ! pgrep -x buildkitd > /dev/null; then
         if ! command -v buildkitd &>/dev/null; then
           BUILDKIT_VERSION="0.17.3"
           curl -sSL "https://github.com/moby/buildkit/releases/download/v${BUILDKIT_VERSION}/buildkit-v${BUILDKIT_VERSION}.linux-amd64.tar.gz" \
@@ -122,15 +132,13 @@ tasks:
         sleep 3
       fi
 
-      BUILDER=$(command -v nerdctl || command -v docker || command -v podman)
+      # Build directly into the k8s.io containerd namespace (no registry push)
+      nerdctl --namespace "${CONTAINERD_NS}" build -t ${IMAGE_TAG} ${WORKDIR}
 
-      # Build and push to ttl.sh (2 hour TTL)
-      ${BUILDER} build -t ${IMAGE_TAG} ${WORKDIR}
-      ${BUILDER} push ${IMAGE_TAG}
-
-      # Clean up ALL build artifacts and buildkitd
+      # Clean up build artifacts and buildkitd
       rm -rf ${WORKDIR}
       pkill -x buildkitd 2>/dev/null || true
+      fi
 
       # 3. Deploy app as non-root (UID 1000) so it can't read the root:root 700 data (BEFORE MAP is applied)
       kubectl apply -f - <<EOF
@@ -151,6 +159,7 @@ tasks:
             containers:
             - name: klustered
               image: ${IMAGE_TAG}
+              imagePullPolicy: IfNotPresent
               securityContext:
                 runAsUser: 1000
                 runAsGroup: 1000
@@ -291,7 +300,7 @@ If you get a permission or auth error, double-check you actually became root bef
 
 ## Hard Mode
 
-You're on `cplane-01`. The `klustered` Deployment and its `NodePort` Service already exist, but `curl http://localhost:30000` gives you nothing. There are **three independent traps** between you and a climbing counter, and they surface in layers: the pod won't stay up, then traffic won't reach it, then the app can't read its own data.
+You're on `cplane-01`. The `klustered` Deployment and its `NodePort` Service already exist, but `curl http://localhost:30000` gives you nothing. There are **three independent traps** between you and a climbing counter, and they surface in layers: the Deployment can't get a pod running at all, then traffic won't reach the pod once it does, then the app can't read its own data.
 
 Reach for the usual tools (`kubectl get`, `describe`, `logs`, `get events`), and don't trust the Deployment template alone, what's been admitted to the cluster may not match what you wrote. Keep the **App** tab open in another window.
 
@@ -303,7 +312,7 @@ Stop reading here if you want the full challenge.
 
 There are **three planted bugs** standing between you and a working counter. They surface in this order:
 
-1. The pod is admitted, then immediately killed.
+1. The Deployment can't get a pod created at all.
 2. The pod runs, but nothing reaches it on `30000`.
 3. Traffic reaches the app, but the app can't read its data.
 
@@ -321,34 +330,41 @@ curl -s http://localhost:30000
 
 **What to notice:**
 
-- Is the `klustered` pod `Running`, or is it cycling through `Error` / `CrashLoopBackOff` / `OOMKilled`?
+- Is there a `klustered` pod at all? If `kubectl get pods` comes back empty, why isn't the Deployment producing one?
 - Does the `klustered` Service have endpoints? (`kubectl get endpoints klustered`)
 - Does `curl http://localhost:30000` return anything at all?
 
-The pod won't be healthy yet, and that's the first thread to pull.
+There won't be a pod yet, and that's the first thread to pull.
 
 ---
 
-### Step 1: The Pod That Starves on Startup
+### Step 1: The Pod That Never Gets Created
 
-Run `kubectl get pods`. The `klustered` pod keeps dying, `kubectl describe pod -l app=klustered` will show it being `OOMKilled` almost as soon as it starts. That's strange: the Deployment asks for a sensible `256Mi` limit, which is plenty for a tiny Go binary.
+Run `kubectl get pods` and you'll find nothing, not `Pending`, not `CrashLoopBackOff`, simply no pod. But the `klustered` Deployment is right there. A Deployment with zero pods means its ReplicaSet is trying to create them and being refused, and the controller records exactly why.
 
 ```bash
-kubectl describe pod -l app=klustered
-kubectl get pod -l app=klustered -o jsonpath='{.items[0].spec.containers[0].resources}{"\n"}'
-kubectl get deploy klustered -o jsonpath='{.spec.template.spec.containers[0].resources}{"\n"}'
+kubectl get pods
+kubectl get deploy,rs -l app=klustered
+kubectl describe rs -l app=klustered
 ```
 
-**What to notice:** the live pod's memory limit and the Deployment template's memory limit do **not** match. Something rewrote the pod on its way into the cluster.
+**What to notice:** the ReplicaSet carries a `FailedCreate` event (and the Deployment shows a `ReplicaFailure` condition) with a message like:
+
+```
+Pod "klustered-..." is invalid: spec.containers[0].resources.requests:
+  Invalid value: "128Mi": must be less than or equal to memory limit of 1Mi
+```
+
+The Deployment template asks for a `128Mi` request and a `256Mi` limit, which is perfectly valid. Yet the pod the ReplicaSet tries to create ends up with a `1Mi` limit, smaller than its own `128Mi` request, so the API server rejects it outright. Something rewrote the pod's resources on its way into the cluster.
 
 ::hint-box
 ---
 :summary: "Hint 1: Where to Look"
 ---
 
-The Deployment template says `256Mi`, but the running pod's limit is `1Mi`, far too little for the process to start. Nobody edited the Deployment, so the change happened **at admission time**, as the pod was created.
+The pod never reaches the scheduler, the API server refuses to even persist it, so there's nothing to `kubectl logs` or `describe pod`. The story lives one level up, in the ReplicaSet's events.
 
-Kubernetes has admission resources that can rewrite objects before they're stored. Go looking for one that mutates pods:
+Nobody edited the Deployment (its template still says `256Mi`), so the change happened **at admission time**, as the pod was being created. Kubernetes has admission resources that can rewrite objects before they're stored. Go looking for one that mutates pods:
 
 ```bash
 kubectl get mutatingadmissionpolicies,mutatingadmissionpolicybindings
@@ -361,9 +377,9 @@ kubectl get mutatingadmissionpolicies,mutatingadmissionpolicybindings
 :summary: "Hint 2: The Concept"
 ---
 
-A [`MutatingAdmissionPolicy`](https://kubernetes.io/docs/reference/access-authn-authz/mutating-admission-policy/) lets the API server rewrite incoming objects using CEL, no webhook server required. This cluster has one called `resource-enforcer` bound to the `default` namespace. On every pod `CREATE` it overwrites each container's resources so the memory limit becomes `1Mi`.
+A [`MutatingAdmissionPolicy`](https://kubernetes.io/docs/reference/access-authn-authz/mutating-admission-policy/) lets the API server rewrite incoming objects using CEL, no webhook server required. This cluster has one called `resource-enforcer` bound to the `default` namespace. On every pod `CREATE` it overwrites each container's memory **limit** to `1Mi`, but it leaves the `128Mi` **request** untouched.
 
-That's why the loop never ends: the ReplicaSet creates a replacement pod, the policy crushes its memory to `1Mi`, the kernel `OOMKills` it, and the ReplicaSet tries again. The Deployment template is innocent; the mutation happens to the pod, not the template.
+That combination is invalid: a request can never exceed its limit. So the API server rejects every pod the ReplicaSet submits, which is why you never see even a `Pending` pod, only a stream of `FailedCreate` events. The Deployment template is innocent; the mutation happens to the pod, not the template.
 
 ::
 
@@ -379,14 +395,13 @@ kubectl delete mutatingadmissionpolicybinding resource-enforcer-binding
 kubectl delete mutatingadmissionpolicy resource-enforcer
 ```
 
-Existing pods were already mutated, so delete the current one and let the ReplicaSet create a fresh, unmutated replacement:
+The ReplicaSet has been retrying on a loop this whole time, so once the policy is gone its next attempt succeeds on its own, no pod to delete, there was never one to begin with. Within a few seconds a pod appears, keeps its real `256Mi` limit, and reaches `Running`:
 
 ```bash
-kubectl delete pod -l app=klustered
 kubectl get pod -l app=klustered -o jsonpath='{.items[0].spec.containers[0].resources}{"\n"}'
 ```
 
-The new pod should keep its `256Mi` limit and finally reach `Running`. Now try `curl http://localhost:30000` again, it still won't answer. On to the next layer.
+(Impatient? `kubectl rollout restart deploy klustered` nudges the controller.) Now try `curl http://localhost:30000` again, it still won't answer. On to the next layer.
 
 ::
 
