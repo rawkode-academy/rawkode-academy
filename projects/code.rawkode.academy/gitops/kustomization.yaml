@@ -9,9 +9,9 @@ resources:
 
 images:
   - name: ghcr.io/comtrya/comtrya-server
-    digest: sha256:6566fa8969e98dac19a4573c0de873b858d1cd05fa06a4df8d7e3b95d365f398
+    digest: sha256:3b218de4fd621a3ceb4621671fbaad7b0a0528687b9e8f5564212ce89585574f
   - name: ghcr.io/comtrya/comtrya-frontend
-    digest: sha256:90b0fc52c2052bc36db8e5e43ee5c5755db398cdb24275282ca3cbcdfa862575
+    digest: sha256:0144c2fcaea6d8416d19318a903032f4bfe4d9610e9d8badc0c7c238476ebf8b
 
 patches:
   - patch: |-
