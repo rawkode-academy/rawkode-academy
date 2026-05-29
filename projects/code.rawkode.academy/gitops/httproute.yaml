@@ -11,6 +11,32 @@ spec:
   hostnames:
     - code.rawkode.academy
   rules:
+    # Git smart-HTTP under the unified /r/<repo> URL -> kernel.
+    # - POST /r/... covers git-upload-pack / git-receive-pack (core match).
+    # - GET /r/.../info/refs?service=git-* covers the advertisement
+    #   (queryParams match — EXTENDED Gateway-API feature; confirm Cilium
+    #   honors it on this cluster, else info/refs falls through to the SPA
+    #   and clone/fetch break). Everything else under /r/ is browse -> SPA.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /r
+          method: POST
+        - path:
+            type: PathPrefix
+            value: /r
+          queryParams:
+            - name: service
+              value: git-upload-pack
+        - path:
+            type: PathPrefix
+            value: /r
+          queryParams:
+            - name: service
+              value: git-receive-pack
+      backendRefs:
+        - name: comtrya-server
+          port: 80
     - matches:
         - path:
             type: PathPrefix
@@ -24,9 +50,6 @@ spec:
         - path:
             type: PathPrefix
             value: /_extensions
-        - path:
-            type: PathPrefix
-            value: /git
         - path:
             type: PathPrefix
             value: /events
