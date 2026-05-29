@@ -316,11 +316,11 @@ There are **three planted bugs** standing between you and a working counter. The
 2. The pod runs, but nothing reaches it on `30000`.
 3. Traffic reaches the app, but the app can't read its data.
 
-For each step, try the **observation prompts** first. Only open the hint blocks when you're stuck. They spoil the answer in stages: nudge, then concept, then fix.
+Each step gives you only the **symptom** and a question to sit with. Everything investigative, the commands to run, the concept behind the trap, and the fix, lives in the hint blocks, revealed in that order: where to look, then why, then how. Open them one at a time, and only when you're genuinely stuck.
 
 ### Step 0: Get the Lay of the Land
 
-Before changing anything, look at what exists.
+Before changing anything, survey what exists. The usual first moves all work here:
 
 ```bash
 kubectl get pods,svc,deploy
@@ -328,47 +328,29 @@ kubectl get events --sort-by=.lastTimestamp
 curl -s http://localhost:30000
 ```
 
-**What to notice:**
-
-- Is there a `klustered` pod at all? If `kubectl get pods` comes back empty, why isn't the Deployment producing one?
-- Does the `klustered` Service have endpoints? (`kubectl get endpoints klustered`)
-- Does `curl http://localhost:30000` return anything at all?
-
-There won't be a pod yet, and that's the first thread to pull.
+Read that output closely before touching anything: which objects exist, which are missing, and what is `curl` actually telling you? Each of the three steps below starts from one of these observations.
 
 ---
 
-### Step 1: The Pod That Never Gets Created
+### Step 1: A Deployment With No Pods
 
-Run `kubectl get pods` and you'll find nothing, not `Pending`, not `CrashLoopBackOff`, simply no pod. But the `klustered` Deployment is right there. A Deployment with zero pods means its ReplicaSet is trying to create them and being refused, and the controller records exactly why.
+`curl http://localhost:30000` is silent, and `kubectl get pods` comes back empty, not `Pending`, not `CrashLoopBackOff`, no pod at all. Yet the `klustered` Deployment is sitting right there.
 
-```bash
-kubectl get pods
-kubectl get deploy,rs -l app=klustered
-kubectl describe rs -l app=klustered
-```
-
-**What to notice:** the ReplicaSet carries a `FailedCreate` event (and the Deployment shows a `ReplicaFailure` condition) with a message like:
-
-```
-Pod "klustered-..." is invalid: spec.containers[0].resources.requests:
-  Invalid value: "128Mi": must be less than or equal to memory limit of 1Mi
-```
-
-The Deployment template asks for a `128Mi` request and a `256Mi` limit, which is perfectly valid. Yet the pod the ReplicaSet tries to create ends up with a `1Mi` limit, smaller than its own `128Mi` request, so the API server rejects it outright. Something rewrote the pod's resources on its way into the cluster.
+Why would a healthy-looking Deployment produce **zero** pods, not even a pending one? Start there.
 
 ::hint-box
 ---
 :summary: "Hint 1: Where to Look"
 ---
 
-The pod never reaches the scheduler, the API server refuses to even persist it, so there's nothing to `kubectl logs` or `describe pod`. The story lives one level up, in the ReplicaSet's events.
-
-Nobody edited the Deployment (its template still says `256Mi`), so the change happened **at admission time**, as the pod was being created. Kubernetes has admission resources that can rewrite objects before they're stored. Go looking for one that mutates pods:
+A Deployment with no pods means its ReplicaSet is trying to create them and being refused. The pod never reaches the scheduler, so there's nothing to `kubectl logs` or `describe pod`; the story lives one level up, in the ReplicaSet's own events.
 
 ```bash
-kubectl get mutatingadmissionpolicies,mutatingadmissionpolicybindings
+kubectl get deploy,rs -l app=klustered
+kubectl describe rs -l app=klustered
 ```
+
+Look for a `FailedCreate` event (and a `ReplicaFailure` condition on the Deployment). It quotes the exact reason the API server rejected the pod, read that message closely before opening the next hint.
 
 ::
 
@@ -377,9 +359,22 @@ kubectl get mutatingadmissionpolicies,mutatingadmissionpolicybindings
 :summary: "Hint 2: The Concept"
 ---
 
-A [`MutatingAdmissionPolicy`](https://kubernetes.io/docs/reference/access-authn-authz/mutating-admission-policy/) lets the API server rewrite incoming objects using CEL, no webhook server required. This cluster has one called `resource-enforcer` bound to the `default` namespace. On every pod `CREATE` it overwrites each container's memory **limit** to `1Mi`, but it leaves the `128Mi` **request** untouched.
+The rejection message is the whole clue:
 
-That combination is invalid: a request can never exceed its limit. So the API server rejects every pod the ReplicaSet submits, which is why you never see even a `Pending` pod, only a stream of `FailedCreate` events. The Deployment template is innocent; the mutation happens to the pod, not the template.
+```
+Pod "klustered-..." is invalid: spec.containers[0].resources.requests:
+  Invalid value: "128Mi": must be less than or equal to memory limit of 1Mi
+```
+
+The pod's memory **request** (`128Mi`, straight from the Deployment template) is larger than its **limit** (`1Mi`), and a request can never exceed its limit. But the template's limit is `256Mi`, nobody wrote `1Mi`. So something rewrote the pod **at admission time**, as it was being created.
+
+That something is a [`MutatingAdmissionPolicy`](https://kubernetes.io/docs/reference/access-authn-authz/mutating-admission-policy/): it lets the API server rewrite incoming objects using CEL, no webhook server required. Find it with:
+
+```bash
+kubectl get mutatingadmissionpolicies,mutatingadmissionpolicybindings
+```
+
+This cluster has one called `resource-enforcer` bound to the `default` namespace; on every pod `CREATE` it overwrites each container's memory limit to `1Mi` while leaving the request untouched. The Deployment template is innocent, the mutation hits the pod, not the template, which is why every pod the ReplicaSet submits is rejected and you never see even a `Pending` one.
 
 ::
 
@@ -407,9 +402,18 @@ kubectl get pod -l app=klustered -o jsonpath='{.items[0].spec.containers[0].reso
 
 ---
 
-### Step 2: A Service Knocking on the Wrong Door
+### Step 2: Connection Refused on 30000
 
-The pod is `Running` and the Service has an endpoint, but `curl http://localhost:30000` is refused. Traffic is being routed to the pod, it's just arriving at a port where nothing is listening.
+The pod is finally `Running`, but `curl http://localhost:30000` still fails, this time with `Connection refused` rather than silence. The traffic is reaching the pod; it's just landing somewhere nothing is listening.
+
+If the routing works but the door is shut, which port is the app **actually** listening on, and how would you even find out when the container is `FROM scratch` (no shell, no `ss`, no `netstat`)?
+
+::hint-box
+---
+:summary: "Hint 1: Where to Look"
+---
+
+Confirm the routing first, then start questioning the port:
 
 ```bash
 kubectl get svc klustered -o yaml
@@ -417,11 +421,13 @@ kubectl get endpoints klustered
 curl -v http://localhost:30000     # "Connection refused" = reached the pod, no listener on that port
 ```
 
-**What to notice:** the Service forwards to `targetPort: 666` (matching the Deployment's `containerPort: 666`). But `containerPort` is just a label, it does not force the process to bind `666`. So which port is the binary **actually** listening on? It was built `FROM scratch`, so there is no shell, no `ss`, no `netstat` inside the container. You have to discover the bind from the outside. This is the real skill of the step: **finding a rogue port binding when you can't ask the process directly.**
+The Service forwards to `targetPort: 666`, which matches the Deployment's `containerPort: 666`. That agreement looks reassuring, but ask yourself whether `containerPort` actually *forces* the process to bind `666`.
+
+::
 
 ::hint-box
 ---
-:summary: "Hint 1: The Concept (containerPort is a lie)"
+:summary: "Hint 2: The Concept (containerPort is a lie)"
 ---
 
 A Service has three port fields, and conflating them is the whole trap:
@@ -436,7 +442,7 @@ A Service has three port fields, and conflating them is the whole trap:
 
 ::hint-box
 ---
-:summary: "Hint 2: The Quick Way (ephemeral debug container)"
+:summary: "Hint 3: The Quick Way (ephemeral debug container)"
 ---
 
 You can't `exec` into a `scratch` image, but you can attach an [ephemeral debug container](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/#ephemeral-container) that **shares the target's network namespace**, then run socket tools from there:
@@ -452,7 +458,7 @@ kubectl debug -it ${POD} --image=nicolaka/netshoot --target=klustered -- ss -tln
 
 ::hint-box
 ---
-:summary: "Hint 3: The Deep Way (procfs) and the tcp6 trap"
+:summary: "Hint 4: The Deep Way (procfs) and the tcp6 trap"
 ---
 
 Every listening socket is visible from the **node** in procfs, no tools required in the container. First find the container's host PID, then read its per-namespace socket tables:
@@ -483,7 +489,7 @@ done
 
 ::hint-box
 ---
-:summary: "Hint 4: The Fix"
+:summary: "Hint 5: The Fix"
 ---
 
 Point the Service's `targetPort` at the port you discovered (replace `<PORT>`):
@@ -505,23 +511,23 @@ This time you'll get a reply from the app, but it isn't the page you wanted. One
 
 ---
 
-### Step 3: The App Can't Read Its Own Data
+### Step 3: An Error Instead of the Page
 
-Traffic now reaches the app, but instead of the page and counter you get an error:
+Traffic reaches the app now, but instead of the page and counter you get a terse error:
 
 ```bash
 curl -s http://localhost:30000
 # Failed to read data
 ```
 
-The data lives on a `PersistentVolume` backed by a `hostPath`, and the file is definitely there. The question to ask is: **what identity is the process running as, and does that identity have permission to read the file?**
+The app is up and reachable, yet it can't read its own data file. What identity is the process running as, and is that identity actually allowed to read the file on disk?
 
 ::hint-box
 ---
 :summary: "Hint 1: Where to Look"
 ---
 
-Two things decide whether a read succeeds: the UID the process runs as, and the ownership/mode of the file. Look at both.
+The data lives on a `hostPath`-backed `PersistentVolume`, and the file is definitely on disk, so this isn't a missing-file problem. Two things decide whether a read succeeds: the UID the process runs as, and the ownership/mode of the file. Look at both.
 
 The identity comes from the container's `securityContext`:
 
