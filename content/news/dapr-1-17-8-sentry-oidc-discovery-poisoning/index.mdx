@@ -1,0 +1,23 @@
+---
+title: "Dapr 1.17.8 patches OIDC discovery poisoning in the Sentry identity service"
+description: "Dapr runtime 1.17.8 stops an attacker from injecting an arbitrary issuer and JWKS URL into Sentry's OIDC discovery document via X-Forwarded-Host, and fixes a workflow retention reminder that could fire indefinitely."
+publishedAt: 2026-05-28
+authors:
+  - rawkode
+technologies:
+  - dapr
+---
+
+Dapr runtime 1.17.8 was published on May 28, 2026. It fixes a header-injection flaw in the Sentry identity service's OIDC discovery endpoint and a workflow bug that could leave a retention reminder firing forever.
+
+## OIDC discovery poisoning in Sentry
+
+Dapr's Sentry component serves an OIDC discovery document at `/.well-known/openid-configuration`. When operators enabled it with `--oidc-enabled --jwt-enabled` but did not pin `--jwt-issuer` or set `--oidc-allowed-hosts`, the discovery response trusted the `X-Forwarded-Host` header. An attacker with network access could inject an arbitrary issuer and JWKS URL into that document, which is cached for up to an hour. Relying parties performing dynamic discovery without a pinned issuer would then fetch signing keys from an attacker-controlled server and could accept forged tokens.
+
+The fix only honours `X-Forwarded-Host` when `--oidc-allowed-hosts` is configured. Operators who cannot upgrade immediately should pin `--jwt-issuer` (preferred) or set `--oidc-allowed-hosts`. The issue is classified CWE-346 (Origin Validation Error).
+
+## Workflow retention reminder leak
+
+A second fix targets workflows scheduled with a deterministic instance ID. Re-scheduling the same ID after the previous run reached a terminal state could leave that run's retention reminder firing on a one-second retry loop instead of draining, producing stuck workflows and a climbing `dapr_runtime_workflow_operation_count` failure metric. The retentioner now treats a superseded run as a drain signal rather than a hard failure, so the reminders clear after upgrade.
+
+**Sources:** [Dapr v1.17.8](https://github.com/dapr/dapr/releases/tag/v1.17.8) — May 28, 2026.

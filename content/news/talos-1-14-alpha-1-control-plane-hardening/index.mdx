@@ -1,0 +1,29 @@
+---
+title: "Talos Linux 1.14 alpha tightens default hardening for the control plane"
+description: "Talos v1.14.0-alpha.1 mounts /var noexec, requires TLS 1.3 for etcd and kube-apiserver, adds encrypted DNS over DoT/DoH, and supports btrfs for user volumes."
+publishedAt: 2026-05-28
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - etcd
+---
+
+Sidero Labs published Talos Linux v1.14.0-alpha.1 on May 28, 2026. The pre-release previews a set of default-hardening changes for the OS and the Kubernetes control plane. Because it is an alpha, the specifics can still change before GA.
+
+## Hardening defaults
+
+- The EPHEMERAL volume mounted at `/var` now carries `noexec` alongside the existing `nosuid` and `nodev`, blocking binary execution from `/var`.
+- etcd and kube-apiserver now require a TLS 1.3 minimum, and Talos drops its custom cipher-suite settings in favour of the 1.3 defaults.
+- Encrypted DNS arrives through DNS over TLS and DNS over HTTPS, configurable per nameserver.
+- NTP can now use Network Time Security (NTS).
+
+## Storage and components
+
+btrfs joins the supported filesystems for user volumes when installed through a system extension. The image bundles Linux 6.18.33, Kubernetes 1.36.1, and containerd 2.3.1, and the build moves to Go 1.26.3. The release carries 220 commits in total.
+
+## Why this matters
+
+`noexec` on `/var` and a TLS 1.3 floor for etcd and the API server are the kind of defaults that are painful to retrofit on a running fleet; landing them in the OS means operators inherit them without writing policy. Validate the `noexec` change against any workloads that execute binaries from `/var` before depending on it, and treat the rest as a preview until 1.14 reaches GA.
+
+**Sources:** [Talos v1.14.0-alpha.1](https://github.com/siderolabs/talos/releases/tag/v1.14.0-alpha.1) — May 28, 2026.

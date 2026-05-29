@@ -1,0 +1,29 @@
+---
+title: "Argo CD ships coordinated 3.4.3 and 3.3.11 security patches"
+description: "Argo CD v3.4.3 and v3.3.11, released May 28, close a DOMPurify XSS pulled in through the UI's redoc API viewer (CVE-2026-41240) and fix a nil-pointer crash in the GitOps Engine webhook-mutation path."
+publishedAt: 2026-05-28
+authors:
+  - rawkode
+technologies:
+  - argo
+---
+
+Argo CD published patch releases v3.4.3 and v3.3.11 on May 28, 2026. The wave is small but security-relevant: one transitive XSS fix and one nil-pointer crash fix in the GitOps Engine, plus a handful of controller and CLI corrections.
+
+## The CVE
+
+Argo CD's UI bundles redoc to render its embedded API reference, and redoc pulls in DOMPurify. Both releases bump that dependency to dompurify v3.4.0 to close CVE-2026-41240, a cross-site scripting flaw in DOMPurify. The exposure sits in the browser-side rendering path rather than the API server, but anyone exposing the Argo CD UI should pick up the patch.
+
+## Nil-pointer crash in webhook mutations
+
+The GitOps Engine library that Argo CD builds on could hit a nil-pointer dereference while removing a webhook mutation, crashing the consuming process. Both branches carry the fix, along with a guard against an `InvalidSpecError` race that could occur while the application controller starts up.
+
+## Other fixes worth tracking
+
+- `argocd app wait` now returns immediately when the application is already in its desired state, instead of blocking.
+- Repository depth is honoured in the change-detection and fetch paths, so shallow-clone settings actually take effect.
+- Labels on deletion-hook resources are truncated to stay within Kubernetes label limits.
+
+Operators on 3.4.x and 3.3.x should schedule these patches. The dompurify bump is the only change gated behind a CVE, but the GitOps Engine crash fix is the one most likely to bite an unattended controller.
+
+**Sources:** [Argo CD v3.4.3](https://github.com/argoproj/argo-cd/releases/tag/v3.4.3), [Argo CD v3.3.11](https://github.com/argoproj/argo-cd/releases/tag/v3.3.11) — May 28, 2026.
