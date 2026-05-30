@@ -1,0 +1,43 @@
+---
+title: "vLLM 0.22 hardens DeepSeek V4, picks Model Runner V2 as default for Qwen3, and lands an experimental Rust frontend"
+description: "vLLM v0.22.0 shipped on May 29 with 459 commits from 230 contributors. Headlines: NVFP4 fused MoE and CUDA graphs for DeepSeek V4, an MRv2 oracle that takes over for Qwen3 dense models, an in-tree Rust frontend, and Cutlass FP8 batch invariance the project credits with a 28.9% latency drop."
+publishedAt: 2026-05-29
+authors:
+  - rawkode
+technologies: []
+---
+
+vLLM v0.22.0 dropped on May 29, 2026 at 10:28 UTC with 459 commits from 230 contributors — 63 of them new. The release puts real weight behind two stories vLLM has been telegraphing for months: DeepSeek V4 going from "supported" to "first class," and Model Runner V2 quietly becoming the default for an expanding list of model families.
+
+## DeepSeek V4 stops being a fast-follow and becomes a target
+
+The release notes pull DeepSeek V4 into its own package and add NVFP4 fused MoE, full and piecewise CUDA graph paths, and MTP speculative decoding. That is the full performance kit landing in a single version — quantized expert routing, graph capture for the entire decode path, and multi-token speculation — not an incremental nudge.
+
+## Model Runner V2 starts winning the oracle
+
+MRv2 is no longer the opt-in path it was in 0.21. v0.22 ships an oracle that picks MRv2 for Qwen3 dense models by default and falls back to MRv1 only when needed. The runner also gained sleep-mode weight reload and shared KV-cache layers. Operators running fleets that span model families should expect MRv2 to keep absorbing them release by release.
+
+## Rust frontend lands in-tree
+
+An experimental Rust frontend is now in the tree, alongside a Data Parallel Supervisor for DP serving. The project flags it experimental, but landing the code in-tree commits the maintainers to a path away from the all-Python serving stack.
+
+## Cutlass FP8 batch invariance: 28.9% per the project
+
+Batch-invariant inference picked up Cutlass FP8 kernels. The release notes credit the combination with a 28.9% end-to-end latency improvement. The number is the project's own; there is no independent corroboration yet. Treat it as the upper bound vLLM is willing to claim on its preferred workload.
+
+## Multi-tier KV cache offloading
+
+The KV offloading framework extends beyond CPU memory with a Python filesystem secondary tier, DSv4 support, and Mooncake disk offloading. For long-context serving where prefill cost dominates, the disk tier is the operationally interesting one — it widens what fits without a tensor-parallel bump.
+
+## Deprecations and breaking-class removals
+
+There is no formal breaking-changes section, but the deprecations list is consequential:
+
+- Old import locations for `get_tokenizer` and `resolve_hf_chat_template` are gone.
+- Environment-variable knobs for MoE and linear backends now route through `--moe-backend` and `--linear-backend` flags.
+- Deprecated MLA prefill arguments are removed.
+- Dead CUDA kernels and legacy code have been cleaned out.
+
+Pin your CUDA toolchain and check call sites before the next image bump.
+
+**Source:** [vLLM v0.22.0 release notes](https://github.com/vllm-project/vllm/releases/tag/v0.22.0) — May 29, 2026.

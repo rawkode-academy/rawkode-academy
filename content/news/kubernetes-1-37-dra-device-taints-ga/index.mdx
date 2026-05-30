@@ -1,0 +1,25 @@
+---
+title: "DRA Device Taints and Tolerations graduates to GA, targeting Kubernetes 1.37"
+description: "KEP-5055 was merged on May 29 documenting Device Taints and Tolerations going GA in v1.37. The feature has been beta since 1.36 — the team simply missed updating the maturity stage at the time — so this is a paperwork graduation, not a code change."
+publishedAt: 2026-05-29
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+[KEP-5055](https://github.com/kubernetes/enhancements/pull/6040) was merged into kubernetes/enhancements on May 29, 2026 with the v1.37 milestone, moving DRA Device Taints and Tolerations from beta to GA. The author's note on the PR is blunt: "No functional changes, just the graduation." The feature was already beta in 1.36; SIG Scheduling missed updating the maturity stage at the time, and this PR catches it up.
+
+## What the feature actually does
+
+Device taints sit parallel to node taints, but they apply directly to DRA-managed devices instead of nodes. An admin who sees a misbehaving accelerator can taint that specific device and have the scheduler stop placing claims on it, without yanking the hardware out of the resource pool or marking a whole node unschedulable. Tolerations on a ResourceClaim opt a workload into taking a tainted device anyway, which is the escape hatch for diagnostics and forced placement.
+
+The pairing with the rest of the DRA story landed in 1.36 is the point: prioritized device lists, partitionable devices, device binding conditions, and resource health status already let claims describe what they want and surface what is wrong. Device taints close the loop by giving operators a first-class way to say "do not allocate this one."
+
+## What graduation actually changes
+
+For operators running 1.36, nothing breaks. Feature-gate code paths are already running in production behind the beta flag. GA in 1.37 means the API is stable, the feature gate is on by default, and the contract for taint keys, effects, and toleration matching will not move again.
+
+For platform teams who held off in 1.36 waiting for stability signals, this is the green light to wire taints into hardware-health controllers — node problem detector style — without worrying that the field shape will shift under a controller you ship.
+
+**Source:** [KEP-5055: DRA Device Taints and Tolerations: graduation to GA](https://github.com/kubernetes/enhancements/pull/6040) — merged May 29, 2026.

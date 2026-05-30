@@ -1,0 +1,35 @@
+---
+title: "Kueue 0.18 adds counter-based quota for partitionable DRA devices and automates MultiKueue quota sync"
+description: "Kueue v0.18.0 shipped on May 29 with counter-based quota tracking for partitionable DRA devices, an automation gate that syncs manager ClusterQueue quotas to the sum of workers, KueueDRAIntegration promoted to beta, and an alpha that lets admitted workloads migrate between ResourceFlavors."
+publishedAt: 2026-05-29
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kueue v0.18.0 was tagged on May 29, 2026 at 15:14 UTC. The release lines up tightly with the DRA story in Kubernetes 1.36 and 1.37, and it pushes Kueue further into the role of a real fleet-level scheduler for batch and AI workloads.
+
+## Counter-based quota for partitionable DRA devices
+
+The headline feature is counter-based quota for partitionable DRA devices, configured via a new `counterMappings` field. This is what makes NVIDIA MIG and similar partitioning models work as quota units: the cluster queue can account for partitioned slices of a physical device as discrete allocatable counts rather than pretending the whole device is one indivisible unit. Without this, partitionable DRA devices were either undercounted or had to be modeled by hand.
+
+## MultiKueue quota automation
+
+MultiKueue gets an automation feature gate, `MultiKueueManagerQuotaAutomation`, that keeps the manager ClusterQueue's quota equal to the sum of the workers' quotas. Operators running multi-cluster fan-out have been wiring this by hand or by external controller; the manager now does it on its own.
+
+The MultiKueue path also picked up circuit-breaking timeouts for hung watch connections with 1-10 minute backoff, and a dispatcher fix that allows workload re-admission after eviction — the kind of long-tail correctness fix you only notice when you're running it at fleet scale.
+
+## DRA integration goes beta, concurrent admission lands as alpha
+
+`KueueDRAIntegration` is now beta, which signals it is ready for serious testing on real GPU pools rather than synthetic clusters. Alongside it, an alpha for concurrent admission lets Kueue migrate admitted workloads between ResourceFlavors to chase available capacity — instead of waiting for a workload to finish, it can be re-pinned to a flavor where capacity is freeing up. For mixed-accelerator fleets, that is a genuinely new behavior.
+
+## Things that will bite on upgrade
+
+- All integration webhooks now exclude `kube-system` and Kueue's own install namespace. If anyone was relying on either being matched, behavior changes.
+- The maximum number of PodSets per Workload moves from 8 to 10 — a quiet ceiling lift that some jobs were hitting.
+- In-tree integrations must replace `GetEventRecorderFor` with `GetEventRecorder`. Out-of-tree code that copied the old call will need a one-line update.
+- Function signatures including `RunWithPodSetsInfo` now require a k8s client parameter.
+- The metric label `detailed_reason` was renamed to `underlying_cause`. Existing dashboards and alerts that match on the old label will silently stop matching.
+
+**Source:** [Kueue v0.18.0 release notes](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.0) — May 29, 2026.
