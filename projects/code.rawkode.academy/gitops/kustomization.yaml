@@ -2,16 +2,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: code-rawkode-academy
 resources:
-  - github.com/comtrya/comtrya/opt/kubernetes/base?ref=a11ec753dcde03b11c81df4422d6bca40057c911
+  - github.com/comtrya/comtrya/opt/kubernetes/base?ref=a67737479ff6bf201300b2e8d173ea3e6c88ffc6
   - namespace.yaml
   - external-secret.yaml
   - httproute.yaml
 
 images:
   - name: ghcr.io/comtrya/comtrya-server
-    digest: sha256:eaa41487af2cb5906f017ceb4073e614df089a1ae158221810c2aabfe7db1261
+    digest: sha256:378cdc50f2a5a57d4a1156f867cf5b7794d731dc7e3d69e146266f872fdd817a
   - name: ghcr.io/comtrya/comtrya-frontend
-    digest: sha256:c608a6baaf2893dd9ec5453110cf14a5355afafc60efa41a7dea425d87ccfb29
+    digest: sha256:759aff605e8d626d2389113bf83c80c6ac4efd852e1015f465bfc81888315312
 
 patches:
   - patch: |-
