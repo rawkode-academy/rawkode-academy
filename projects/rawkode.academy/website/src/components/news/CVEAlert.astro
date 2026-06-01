@@ -44,10 +44,17 @@ const {
 
 <style>
 	.cve-alert {
-		background: oklch(0.18 0.07 40);
-		color: var(--editorial-paper);
+		--cve-alert-bg: oklch(0.17 0.055 35);
+		--cve-alert-foreground: oklch(0.97 0.01 85);
+		--cve-alert-foreground-soft: oklch(0.92 0.018 75);
+		--cve-alert-foreground-muted: oklch(0.87 0.012 75);
+		--cve-alert-accent: oklch(0.91 0.12 52);
+		--cve-alert-rule: oklch(0.92 0.018 75 / 0.34);
+
+		background: var(--cve-alert-bg);
+		color: var(--cve-alert-foreground);
 		padding: 1.5rem 1.4rem;
-		border: 1px solid oklch(0.6 0.16 30);
+		border: 1px solid oklch(0.76 0.13 40);
 	}
 
 	.cve-alert__head {
@@ -58,11 +65,11 @@ const {
 	}
 
 	.cve-alert__head :global(.m-label) {
-		color: oklch(0.85 0.13 40) !important;
+		color: var(--cve-alert-accent) !important;
 	}
 
 	.cve-alert__head :global(.m-label):last-child {
-		color: oklch(1 0 0 / 0.6) !important;
+		color: var(--cve-alert-foreground-muted) !important;
 	}
 
 	.cve-alert__warn {
@@ -74,7 +81,7 @@ const {
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 0.6875rem;
 		letter-spacing: 0.12em;
-		color: oklch(0.85 0.13 40);
+		color: var(--cve-alert-foreground-soft);
 		margin-bottom: 0.625rem;
 	}
 
@@ -85,9 +92,7 @@ const {
 		font-size: 1.625rem;
 		line-height: 1.1;
 		letter-spacing: -0.02em;
-		/* Override the @layer base h2 ink color — this h2 sits on a
-		 rust-toned dark panel, so it needs the paper foreground. */
-		color: var(--editorial-paper);
+		color: var(--cve-alert-foreground);
 		margin: 0 0 0.875rem;
 		text-wrap: balance;
 	}
@@ -96,7 +101,7 @@ const {
 		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 0.875rem;
 		line-height: 1.5;
-		color: oklch(1 0 0 / 0.78);
+		color: var(--cve-alert-foreground-soft);
 		margin: 0 0 1.125rem;
 		text-wrap: pretty;
 	}
@@ -106,11 +111,11 @@ const {
 		justify-content: space-between;
 		align-items: baseline;
 		padding-top: 0.875rem;
-		border-top: 1px solid oklch(1 0 0 / 0.18);
+		border-top: 1px solid var(--cve-alert-rule);
 	}
 
 	.cve-alert__footer :global(.m-label) {
-		color: oklch(1 0 0 / 0.55) !important;
+		color: var(--cve-alert-foreground-muted) !important;
 	}
 
 	.cve-alert__cta {
@@ -119,7 +124,7 @@ const {
 		font-weight: 500;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
-		color: var(--editorial-paper);
+		color: var(--cve-alert-accent);
 		text-decoration: none;
 	}
 	.cve-alert__cta:hover { text-decoration: underline; text-underline-offset: 3px; }
