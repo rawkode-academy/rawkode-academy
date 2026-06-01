@@ -1,0 +1,68 @@
+---
+title: "Cloud Native and AI Infrastructure Digest: June 1, 2026"
+description: "Fresh analysis covers the Miasma npm supply-chain attack, vLLM serving on DGX Spark, vLLM-Omni GGUF quantization, and CNCF guidance on dynamic Swift service configuration."
+publishedAt: 2026-06-01
+authors:
+  - rawkode
+technologies:
+  - security
+  - ai-infrastructure
+  - vllm
+  - cncf
+---
+
+### Miasma abuses npm trusted publishing across Red Hat cloud packages
+
+SafeDep and Wiz published June 1 research on Miasma, a supply-chain attack against packages in the `@redhat-cloud-services` npm namespace.
+
+SafeDep reports that the attacker used short-lived `oidc-*` branches in three RedHatInsights repositories, rewrote trusted publishing workflows, and published tampered packages with valid npm provenance. The important failure mode is not "no provenance"; it is provenance that proves the artifact came from a registered repository and workflow path while missing the branch-authorization boundary operators expected.
+
+The injected package payload ran through `preinstall`, downloaded Bun when needed, and scanned for cloud, Kubernetes, npm, GitHub, Vault, and password-manager credentials. Wiz lists affected package versions separately and says most malicious versions had been revoked by its 13:00 UTC update, with two remaining at the time of writing.
+
+For platform teams, the operational takeaway is to treat trusted publishing configuration as a deployable security boundary: bind publish workflows to protected branches or environments where the registry supports it, and add package-install controls that can block known-bad versions before CI executes lifecycle scripts.
+
+**Sources:** [SafeDep](https://safedep.io/redhat-cloud-services-hit-by-mini-shai-hulud-npm-worm/), [Wiz](https://www.wiz.io/blog/miasma-supply-chain-attack-targeting-redhat-npm-packages) - June 1, 2026
+
+---
+
+### vLLM publishes DGX Spark serving guidance for Nemotron-3-Super
+
+The vLLM project published a June 1 deployment guide for running `nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4` through vLLM on NVIDIA DGX Spark.
+
+The guide is useful because DGX Spark is not a normal data-center GPU target. Its GB10 Grace Blackwell SoC exposes a unified 128 GB CPU/GPU memory pool, so vLLM settings such as `--gpu-memory-utilization`, `--max-model-len`, and `--max-num-seqs` affect the operating system, container runtime, model weights, and KV cache together.
+
+The published example uses the OpenAI-compatible vLLM server image, `--max-model-len 131072`, `--gpu-memory-utilization 0.85`, `--max-num-seqs 4`, and model-specific parser flags. vLLM reports a five-scenario single-Spark evaluation with median decode throughput in the 22.7 to 23.7 tokens/sec range after warm-up, and explicitly frames the result as recipe-specific rather than a general DGX Spark ceiling.
+
+This matters for local and small-batch inference work because the post turns "will this fit?" into a runbook shape: pin an image, pre-stage weights, warm JIT paths before first use, and watch KV-cache plus TTFT metrics from `/metrics`.
+
+**Source:** [vLLM](https://vllm.ai/blog/2026-06-01-vllm-dgx-spark) - June 1, 2026
+
+---
+
+### vLLM-Omni documents GGUF quantization for diffusion serving
+
+The vLLM-Omni documentation added June 1 guidance for GGUF quantization in diffusion-serving paths.
+
+The implementation loads pre-quantized diffusion transformer weights from GGUF while keeping the rest of the pipeline on the base Hugging Face checkpoint for tokenizer, text encoder, scheduler, and VAE state. The docs list validated adapter paths for Qwen-Image, Z-Image, and FLUX.2-klein, while multi-stage omni, TTS, BAGEL, and GLM-Image paths remain unvalidated or require model-specific adapters.
+
+For serving, the documented online path passes `--diffusion-quantization-config '{"method":"gguf","gguf_model":"..."}'` to `vllm serve --omni`. Hardware support is documented for NVIDIA Ampere, Ada/Hopper, and Blackwell GPUs, with ROCm marked unverified and Ascend marked unsupported.
+
+The practical value is clearer failure behavior: unsupported models should fail with an adapter error instead of silently using a generic tensor-name mapper.
+
+**Source:** [vLLM-Omni](https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/quantization/gguf/) - June 1, 2026
+
+---
+
+### CNCF covers dynamic configuration patterns for Swift services on Kubernetes
+
+CNCF published a June 1 technical post on Swift Configuration for cloud native Swift services.
+
+The post focuses on operational configuration mechanics rather than language marketing: ordered configuration providers, dot-notation keys that map across files and environment variables, ConfigMap-style file reloading, and immutable snapshots so a request does not observe half of one configuration version and half of another.
+
+The Kubernetes-specific detail is the torn-read problem during hot reload. Swift Configuration's provider model replaces a complete snapshot atomically and keeps the previous valid snapshot when a reload is malformed, which is the behavior platform teams generally want from ConfigMap-mounted runtime configuration.
+
+This is niche, but it is technically useful for teams running Swift services on Kubernetes because it gives the runtime a first-class model for precedence, reloads, and consistent reads instead of ad hoc `ProcessInfo.environment` plus hand-rolled file parsing.
+
+**Source:** [CNCF](https://www.cncf.io/blog/2026/06/01/dynamic-configuration-for-cloud-native-swift-services/) - June 1, 2026
+
+---
