@@ -509,37 +509,6 @@ html.dark {
 	}
 	.ed-aside a:hover { text-decoration-color: currentColor; }
 
-	/* ════════════════════════════════════════════════════════════════
-	   Article body — Instrument Serif paragraphs on /read/[slug] pages.
-	   The general `.prose` rules below still use Inter Tight for body
-	   on changelog / ADRs / etc.; `.article-prose` opts long-form
-	   articles into the serif reading body per the read-pages design. */
-	.article-prose {
-		font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
-		font-size: 1.125rem;
-		line-height: 1.55;
-		color: var(--editorial-ink-soft);
-	}
-
-	.article-prose > p:first-of-type {
-		font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
-		font-size: 1.375rem;
-		line-height: 1.45;
-		color: var(--editorial-ink);
-	}
-
-	.article-prose p,
-	.article-prose li {
-		font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
-	}
-
-	.article-prose strong,
-	.article-prose b,
-	.article-prose em,
-	.article-prose i {
-		font-family: inherit;
-	}
-
 	/* Section headings inside articles: the chat described them as
 	   "§NN ·" mono kicker beside a serif italic h2. Render h2/h3 with
 	   the section-mark prefix using a CSS counter so MDX stays clean. */
@@ -553,8 +522,15 @@ html.dark {
 		grid-template-columns: auto 1fr;
 		column-gap: 0.875rem;
 		align-items: baseline;
-		margin-top: 3rem;
-		margin-bottom: 1.125rem;
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(1.875rem, 3vw, 2.5rem);
+		line-height: 1.08;
+		letter-spacing: -0.02em;
+		color: var(--text-primary-content);
+		margin-top: 3.25rem;
+		margin-bottom: 1rem;
 	}
 
 	.article-prose h2::before {
@@ -568,6 +544,7 @@ html.dark {
 		color: var(--editorial-spruce);
 		line-height: 1.4;
 		grid-column: 1;
+		white-space: nowrap;
 	}
 
 	.article-prose h2 > * {
@@ -923,6 +900,74 @@ html.dark {
 		color: var(--text-primary-content);
 		margin: 3rem 0;
 		padding: 0 2rem;
+	}
+
+	/* Shared content prose for news, article, and video detail pages.
+	   Keep the editorial heading voice, but make body copy, rhythm, and
+	   inline code consistent across all content formats. */
+	.content-prose {
+		max-width: 48rem;
+		font-family: var(--font-inter-tight), "Inter", sans-serif;
+		color: var(--text-secondary-content);
+	}
+
+	.content-prose p,
+	.content-prose li {
+		font-family: var(--font-inter-tight), "Inter", sans-serif;
+		font-size: clamp(1.0625rem, 1.4vw, 1.1875rem);
+		line-height: 1.72;
+		color: var(--text-secondary-content);
+	}
+
+	.content-prose > p:first-of-type {
+		font-size: clamp(1.125rem, 1.8vw, 1.25rem);
+		line-height: 1.62;
+		color: var(--text-primary-content);
+	}
+
+	.content-prose :is(h2, h3, h4) {
+		text-wrap: balance;
+	}
+
+	.content-prose h2 {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: clamp(1.875rem, 3vw, 2.5rem);
+		line-height: 1.08;
+		letter-spacing: -0.02em;
+		color: var(--text-primary-content);
+		margin-top: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.content-prose h3 {
+		font-family: var(--font-inter-tight), "Inter", sans-serif;
+		font-style: normal;
+		font-weight: 650;
+		font-size: clamp(1.25rem, 2vw, 1.5rem);
+		line-height: 1.22;
+		letter-spacing: 0;
+		color: var(--text-primary-content);
+		margin-top: 2.5rem;
+		margin-bottom: 0.875rem;
+	}
+
+	.content-prose hr {
+		margin: 2.5rem 0;
+		max-width: 9rem;
+		background: var(--editorial-hairline-strong);
+		opacity: 1;
+	}
+
+	.content-prose :not(pre) > code {
+		font-size: 0.86em;
+		font-weight: 600;
+		padding: 0.04em 0.22em 0.08em;
+		background: var(--surface-card-muted);
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-xs);
+		overflow-wrap: anywhere;
 	}
 }
 

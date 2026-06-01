@@ -359,7 +359,7 @@ const publishedLabel = formatDate(video.data.publishedAt);
 			<section class="watch-detail__overview">
 				<MLabel tone="spruce">§ Overview</MLabel>
 				<h2 class="watch-detail__overview-title">About this video</h2>
-				<div class="prose" set:html={renderedDescriptionHtml} />
+				<div class="prose content-prose" set:html={renderedDescriptionHtml} />
 			</section>
 
 			{techEntries.length > 0 && (
