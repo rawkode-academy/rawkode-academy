@@ -593,7 +593,7 @@ html.dark {
 
 	/* ════════════════════════════════════════════════════════════════
 	   Editorial .prose ramp — Inter Tight body over Instrument Serif
-	   italic display headings, JetBrains Mono code chips. Hairline
+	   italic display headings, sentence-sized JetBrains Mono code. Hairline
 	   blockquote (single 2px ink border-left, no gradient fill).
 	   ════════════════════════════════════════════════════════════════ */
 	.prose {
@@ -797,15 +797,19 @@ html.dark {
 	/* Inline code — mono, but still part of the sentence. */
 	.prose code {
 		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 16px;
-		font-weight: 600;
-		line-height: 1.3;
-		padding: 0.02em 0.12em 0.04em;
-		background: transparent;
+		font-size: 0.85em;
+		font-weight: 500;
+		line-height: inherit;
+		padding: 0 0.12em 0.03em;
+		background: color-mix(in oklab, currentColor 4%, transparent);
 		border: 0;
 		border-radius: 2px;
-		color: var(--text-primary-content);
-		overflow-wrap: break-word;
+		color: inherit;
+		overflow-wrap: anywhere;
+		word-break: normal;
+		hyphens: none;
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
 	}
 
 	.prose :is(h1, h2, h3, h4) code {
@@ -813,6 +817,7 @@ html.dark {
 		border: 0;
 		padding: 0;
 		font-size: 0.85em;
+		font-weight: inherit;
 		color: inherit;
 	}
 
@@ -832,6 +837,7 @@ html.dark {
 		padding: 0;
 		font-size: 0.875rem;
 		font-weight: 400;
+		overflow-wrap: normal;
 	}
 
 	.prose .expressive-code,
@@ -1041,15 +1047,28 @@ html.dark {
    wins over UnoCSS reset's unlayered `code { font-size: 1em; }`. */
 .prose code {
 	font-family: var(--font-jetbrains-mono), monospace;
-	font-size: 16px;
-	font-weight: 600;
-	line-height: 1.3;
-	padding: 0.02em 0.12em 0.04em;
-	background: transparent;
+	font-size: 0.85em;
+	font-weight: 500;
+	line-height: inherit;
+	padding: 0 0.12em 0.03em;
+	background: color-mix(in oklab, currentColor 4%, transparent);
 	border: 0;
 	border-radius: 2px;
-	color: var(--text-primary-content);
-	overflow-wrap: break-word;
+	color: inherit;
+	overflow-wrap: anywhere;
+	word-break: normal;
+	hyphens: none;
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+}
+
+.prose :is(h1, h2, h3, h4) code {
+	font-size: 0.85em;
+	font-weight: inherit;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	color: inherit;
 }
 
 .prose pre code {
@@ -1057,4 +1076,6 @@ html.dark {
 	font-weight: 400;
 	padding: 0;
 	background: transparent;
+	border: 0;
+	overflow-wrap: normal;
 }
