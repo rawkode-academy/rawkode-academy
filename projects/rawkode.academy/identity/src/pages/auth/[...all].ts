@@ -1,8 +1,8 @@
+import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
 import { createAuth } from "../../lib/auth";
 
 const handler: APIRoute = async (context) => {
-	const env = context.locals.runtime.env;
 	const auth = await createAuth(env);
 	const url = new URL(context.request.url);
 	const pathname = url.pathname;

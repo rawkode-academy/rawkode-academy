@@ -12,15 +12,14 @@
     "auth:generate": "bunx @better-auth/cli generate --config ./src/lib/auth.config.ts --output ./src/db/schema.ts -y"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.4",
-    "@astrojs/cloudflare": "^12.6.5",
-    "@astrojs/react": "^4.4.2",
-    "@astrojs/tailwind": "^6.0.2",
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/cloudflare": "^13.6.0",
+    "@astrojs/react": "^5.0.6",
     "@refinedev/core": "^5.0.7",
     "@refinedev/react-router": "^2.0.3",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-query": "^5.90.12",
-    "astro": "^5.16.1",
+    "astro": "^6.4.2",
     "better-auth": "^1.4.3",
     "cloudevents": "^10.0.0",
     "drizzle-orm": "^0.45.2",
@@ -30,11 +29,10 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250426.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "drizzle-kit": "^0.30.6",
     "typescript": "^5.9.2",
-    "wrangler": "^4.32.0"
+    "wrangler": "^4.96.0"
   }
 }

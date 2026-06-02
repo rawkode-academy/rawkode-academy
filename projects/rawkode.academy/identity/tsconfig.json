@@ -2,8 +2,7 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "types": ["@cloudflare/workers-types/2023-07-01"]
+    "moduleResolution": "bundler"
   },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist", "node_modules"]

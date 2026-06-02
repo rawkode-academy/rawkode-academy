@@ -5,7 +5,7 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"workers_dev": true,
 	"preview_urls": true,
-	"main": "./dist/_worker.js/index.js",
+	"main": "@astrojs/cloudflare/entrypoints/server",
 	"assets": {
 		"binding": "ASSETS",
 		"directory": "./dist",
