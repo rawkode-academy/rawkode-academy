@@ -408,12 +408,20 @@ const { eyebrow, title, lede, compact = false } = Astro.props as Props;
 	}
 
 	.editorial-prose code {
-		border: 1px solid var(--editorial-hairline);
-		border-radius: 4px;
-		padding: 0.1rem 0.3rem;
-		background: var(--editorial-paper-deep);
-		color: var(--editorial-ink);
-		font-size: 0.9em;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.85em;
+		font-weight: 500;
+		line-height: inherit;
+		padding: 0 0.12em 0.03em;
+		background: color-mix(in oklab, currentColor 4%, transparent);
+		border: 0;
+		border-radius: 2px;
+		color: inherit;
+		overflow-wrap: anywhere;
+		word-break: normal;
+		hyphens: none;
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
 	}
 
 	.editorial-prose pre {
@@ -422,6 +430,13 @@ const { eyebrow, title, lede, compact = false } = Astro.props as Props;
 		border-radius: 6px;
 		background: var(--editorial-paper-deep);
 		padding: 1rem;
+	}
+
+	.editorial-prose pre code {
+		padding: 0;
+		background: transparent;
+		border: 0;
+		overflow-wrap: normal;
 	}
 
 	@media (min-width: 720px) {

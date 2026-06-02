@@ -11,15 +11,15 @@ technologies:
   - cncf
 ---
 
-### Miasma abuses npm trusted publishing across Red Hat cloud packages
+### Miasma turns npm trusted publishing against Red Hat cloud packages
 
-SafeDep and Wiz published June 1 research on Miasma, a supply-chain attack against packages in the `@redhat-cloud-services` npm namespace.
+SafeDep and Wiz disclosed Miasma on June 1: an npm supply-chain attack against packages in the `@redhat-cloud-services` namespace.
 
-SafeDep reports that the attacker used short-lived `oidc-*` branches in three RedHatInsights repositories, rewrote trusted publishing workflows, and published tampered packages with valid npm provenance. The important failure mode is not "no provenance"; it is provenance that proves the artifact came from a registered repository and workflow path while missing the branch-authorization boundary operators expected.
+The attacker did not bypass provenance. They made provenance point at the wrong thing. According to SafeDep, short-lived `oidc-*` branches were added to three RedHatInsights repositories, trusted-publishing workflows were changed, and modified packages were pushed with valid npm provenance. The missing control was branch authorization: the registry could prove which repository and workflow produced the artifact, but not that the publish came from a protected branch operators trusted.
 
-The injected package payload ran through `preinstall`, downloaded Bun when needed, and scanned for cloud, Kubernetes, npm, GitHub, Vault, and password-manager credentials. Wiz lists affected package versions separately and says most malicious versions had been revoked by its 13:00 UTC update, with two remaining at the time of writing.
+The malicious packages executed during `preinstall`. They downloaded Bun when it was not already present, then scanned for cloud, Kubernetes, npm, GitHub, Vault, and password-manager credentials. Wiz says most affected versions had been revoked by its 13:00 UTC update, with two still remaining at publication time.
 
-For platform teams, the operational takeaway is to treat trusted publishing configuration as a deployable security boundary: bind publish workflows to protected branches or environments where the registry supports it, and add package-install controls that can block known-bad versions before CI executes lifecycle scripts.
+Platform teams should treat trusted-publishing configuration as production infrastructure. Bind publish workflows to protected branches or environments wherever the registry supports it, and block known-bad package versions before CI can run lifecycle scripts.
 
 **Sources:** [SafeDep](https://safedep.io/redhat-cloud-services-hit-by-mini-shai-hulud-npm-worm/), [Wiz](https://www.wiz.io/blog/miasma-supply-chain-attack-targeting-redhat-npm-packages) - June 1, 2026
 

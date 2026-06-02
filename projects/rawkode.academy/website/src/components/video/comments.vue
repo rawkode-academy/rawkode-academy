@@ -166,10 +166,7 @@ const formatContent = (content: string): string => {
 	return content
 		.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
 		.replace(/\*(.*?)\*/g, "<em>$1</em>")
-		.replace(
-			/`(.*?)`/g,
-			'<code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">$1</code>',
-		)
+		.replace(/`(.*?)`/g, "<code>$1</code>")
 		.replace(/\n/g, "<br>");
 };
 
@@ -182,9 +179,5 @@ onMounted(() => {
 @reference "../../styles/global.css";
 .comments-section {
  max-width: 100%;
-}
-
-.prose code {
- @apply bg-gray-100 dark:bg-gray-700 px-1 rounded text-sm;
 }
 </style>
