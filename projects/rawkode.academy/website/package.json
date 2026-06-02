@@ -25,9 +25,9 @@
 	},
 	"dependencies": {
 		"@astrojs/check": "0.9.8",
-		"@astrojs/cloudflare": "13.1.10",
+		"@astrojs/cloudflare": "13.6.0",
 		"@astrojs/mdx": "5.0.3",
-		"@astrojs/node": "10.0.5",
+		"@astrojs/node": "10.1.2",
 		"@astrojs/react": "5.0.2",
 		"@astrojs/rss": "4.0.18",
 		"@astrojs/sitemap": "3.7.2",
