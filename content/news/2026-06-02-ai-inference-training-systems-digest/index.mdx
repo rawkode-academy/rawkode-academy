@@ -1,0 +1,48 @@
+---
+title: "AI Inference and Training Systems Digest: June 2, 2026"
+description: "Three June 1 systems papers: OptCC bounds AllReduce slowdown under degraded networks, Albireo attacks tensor-parallel inference overheads, and ConServe schedules agentic serving by conversation."
+publishedAt: 2026-06-02
+authors:
+  - rawkode
+technologies:
+  - ai-infrastructure
+  - hpc
+  - vllm
+  - gpu
+---
+
+### OptCC bounds AllReduce slowdown when a server's network degrades
+
+Researchers published June 1 work on OptCC, a fault-tolerant AllReduce algorithm that keeps collective communication near full speed when one server in a GPU cluster loses network bandwidth.
+
+When a NIC or link degrades, NCCL reroutes traffic through the remaining interfaces, but the slow server then bottlenecks the entire ring and every training step pays for it. OptCC is a four-stage pipelined AllReduce backed by an information-theoretic lower bound on completion time under asymmetric bandwidth. The authors report that with one server at 50% bandwidth loss, OptCC completes within 2-6% of NCCL's fault-free ring, while prior approaches add up to 57% overhead; the relative overhead scales as O(1/p) for p GPUs when the degraded server retains at least half its bandwidth.
+
+For large training jobs this changes the operational question from "drain and reschedule the node" to "ride out transient degradation," since a single flaky link no longer taxes the whole collective.
+
+**Source:** [arXiv 2606.01680](https://arxiv.org/abs/2606.01680) - June 1, 2026
+
+---
+
+### Albireo targets tensor-parallel inference's non-scalable overheads
+
+A June 1 paper introduces Albireo, an inference system that attacks the sublinear scaling of tensor parallelism without changing model architecture.
+
+Tensor parallelism lets large models span GPUs but scales sublinearly because inter-GPU communication and serial runtime work — scheduling, I/O, and sampling — do not shrink as devices are added. Albireo overlaps scheduling and I/O with compute and adds sequence-parallel sampling, trading the higher communication cost of larger TP degrees for better memory efficiency and lower KV-cache contention. Measured against vLLM, the authors report up to 1.9x throughput (2x in their production setting), 48% lower latency, 28% higher GPU utilization, and 54% lower energy across several models and benchmarks.
+
+The framing is the useful part: TP degree becomes a tunable that shapes KV-cache pressure and tail latency, not just a way to make weights fit.
+
+**Source:** [arXiv 2606.01927](https://arxiv.org/abs/2606.01927) - June 1, 2026
+
+---
+
+### ConServe schedules agentic serving by conversation instead of by turn
+
+A June 1 paper proposes ConServe, which raises the scheduling unit for LLM agents from individual inference turns to whole conversations.
+
+Per-turn schedulers have to predict quantities — remaining turns, output length — that are not observable when the decision is made, which makes mis-scheduling common in multi-turn workloads. ConServe instead models a conversation as a compute-bound prefill followed by a long memory-bound tail: it routes the first-turn prefill to high-throughput prefiller hardware, transfers the KV cache once, and pins the conversation to a single decoder for its tail, using only directly observable signals such as input length and KV occupancy. The authors report a 51.08% reduction in p95 time-to-first-effective-token over per-turn prediction baselines, alongside 7.51% better energy efficiency, rising by a further 22.75% when the two phases are mapped onto heterogeneous GPU tiers.
+
+Removing the prediction step removes a class of scheduling error that disproportionately hurts tail latency as agent conversations lengthen.
+
+**Source:** [arXiv 2606.01839](https://arxiv.org/abs/2606.01839) - June 1, 2026
+
+---
