@@ -112,11 +112,15 @@ const session = await auth.api.getSession({
 			const logoutBtn = document.getElementById('logout-btn');
 			if (logoutBtn) {
 				logoutBtn.addEventListener('click', async () => {
+					// Better Auth parses the JSON body of sign-out POSTs; sending
+					// the Content-Type header with no body throws and 500s, so the
+					// session is never cleared. Always send a body.
 					await fetch('/auth/sign-out', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
-						}
+						},
+						body: '{}'
 					});
 					window.location.reload();
 				});
