@@ -150,7 +150,7 @@ const categoryTrail = tags[0]?.label;
 		</ArticleHeader>
 
 		<div class="news-detail__body">
-			<article class="prose">
+			<article class="prose news-prose">
 				<Content />
 			</article>
 
@@ -189,13 +189,44 @@ const categoryTrail = tags[0]?.label;
 	}
 
 	.news-detail__body {
-		max-width: 70rem;
+		max-width: 54rem;
 		margin: 0 auto;
 		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
 	}
 
 	.news-detail__body :global(.prose) {
-		max-width: 46rem;
+		max-width: 100%;
+	}
+
+	.news-detail__body :global(.news-prose) {
+		font-size: 1rem;
+		line-height: 1.72;
+		color: var(--editorial-ink);
+	}
+
+	.news-detail__body :global(.news-prose h3) {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-style: normal;
+		font-size: clamp(1.35rem, 2vw, 1.625rem);
+		font-weight: 650;
+		letter-spacing: 0;
+		line-height: 1.18;
+		color: var(--editorial-ink);
+		margin: 0 0 1.25rem;
+		text-wrap: balance;
+	}
+
+	.news-detail__body :global(.news-prose h3:not(:first-child)) {
+		margin-top: 2.75rem;
+	}
+
+	.news-detail__body :global(.news-prose p),
+	.news-detail__body :global(.news-prose > p:first-of-type),
+	.news-detail__body :global(.news-prose li) {
+		font-size: 1rem;
+		line-height: 1.72;
+		color: var(--editorial-ink);
+		margin-bottom: 1rem;
 	}
 
 	.news-detail__tags {
@@ -240,6 +271,10 @@ const categoryTrail = tags[0]?.label;
 	@media (max-width: 720px) {
 		.news-detail__body {
 			padding: 2rem 1.25rem 3rem;
+		}
+
+		.news-detail__body :global(.news-prose h3) {
+			font-size: 1.25rem;
 		}
 	}
 </style>
