@@ -1,5 +1,6 @@
+import { env } from "cloudflare:workers";
 import type { APIContext } from "astro";
-import { createAuth, type AuthEnv } from "./auth";
+import { createAuth } from "./auth";
 import { isAdmin } from "./admin-config";
 
 interface AdminAuthResult {
@@ -22,7 +23,6 @@ export type AdminAuthCheck = AdminAuthResult | AdminAuthError;
 export async function checkAdminAuth(
 	context: APIContext,
 ): Promise<AdminAuthCheck> {
-	const env = context.locals.runtime.env as AuthEnv;
 	const auth = await createAuth(env);
 
 	const session = await auth.api.getSession({

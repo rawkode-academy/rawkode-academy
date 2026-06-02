@@ -1,12 +1,12 @@
 ---
-import { createAuth, type AuthEnv } from "../../lib/auth";
+import { env } from "cloudflare:workers";
+import { createAuth } from "../../lib/auth";
 import { isAdmin } from "../../lib/admin-config";
 import { AdminApp } from "../../components/admin/App";
 import "../../styles/admin.css";
 
 export const prerender = false;
 
-const env = Astro.locals.runtime.env as AuthEnv;
 const auth = await createAuth(env);
 
 const session = await auth.api.getSession({

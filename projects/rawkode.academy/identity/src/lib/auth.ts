@@ -15,9 +15,6 @@ import {
 import { getUserAccessClaims } from "./access-claims";
 import { captureAuthEvent } from "./analytics";
 
-type SecretsStoreSecret =
-	import("@cloudflare/workers-types").SecretsStoreSecret;
-
 export interface AuthEnv {
 	DB: D1Database;
 	AUTH_SECRET: SecretsStoreSecret;

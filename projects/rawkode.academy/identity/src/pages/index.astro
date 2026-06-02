@@ -1,9 +1,9 @@
 ---
+import { env } from "cloudflare:workers";
 import { createAuth } from "../lib/auth";
 
 export const prerender = false;
 
-const env = Astro.locals.runtime.env;
 const auth = await createAuth(env);
 const session = await auth.api.getSession({
 	headers: Astro.request.headers,

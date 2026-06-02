@@ -1,9 +1,9 @@
+import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { sql, eq, or, asc, desc, like } from "drizzle-orm";
 import * as schema from "../../../db/schema";
 import { checkAdminAuth } from "../../../lib/admin-auth";
-import type { AuthEnv } from "../../../lib/auth";
 
 export const prerender = false;
 
@@ -17,7 +17,6 @@ export const GET: APIRoute = async (context) => {
 		return authCheck.response;
 	}
 
-	const env = context.locals.runtime.env as AuthEnv;
 	const db = drizzle(env.DB, { schema });
 	const url = new URL(context.request.url);
 
