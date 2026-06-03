@@ -1,0 +1,49 @@
+---
+title: "AI Inference and Serving Digest: June 3, 2026"
+description: "vLLM-Omni integrates Intel's AutoRound for 4-bit multimodal serving, plus two fresh systems papers on token-drift scheduling and edge/fog prefill-decode disaggregation."
+publishedAt: 2026-06-03
+authors:
+  - rawkode
+technologies:
+  - ai-infrastructure
+  - inference
+  - vllm
+  - quantization
+  - scheduling
+---
+
+### vLLM-Omni integrates Intel AutoRound for 4-bit multimodal serving
+
+The vLLM-Omni project published a June 2 post documenting integration of AutoRound, Intel's post-training quantization algorithm, for serving multimodal, diffusion, and video-generation models at 4-bit weight precision.
+
+AutoRound tunes rounding and clipping per quantized tensor rather than rounding naively, and vLLM-Omni detects the quantization metadata from the checkpoint at load time, so there is no separate runtime flag to set. The project reports up to a 62% checkpoint reduction, compressing Qwen3-Omni-30B-A3B from 66 GB to 25 GB, and says FLUX.1-dev then fits on a single GPU instead of four. On quality, it reports Qwen3-Omni-30B scoring slightly above its BF16 baseline on OmniBench and a ~1.3% drop on TIIF-Bench for text-to-image. The project also reports a 1.55x–1.67x throughput gain for a W4A16 plus CFG-parallel configuration over sequential BF16 serving, validated across Intel XPU (B60) and NVIDIA GPUs.
+
+The headroom claim is the part worth checking against your own pipeline: the speedup comes less from cheaper dequantization than from the freed memory enabling CFG-parallel execution, so it depends on the model and decoding path.
+
+**Source:** [vLLM-Omni](https://vllm.ai/blog/2026-06-02-vllm-omni-autoround) - June 2, 2026
+
+---
+
+### DriftSched targets token-length drift in multi-tenant LLM scheduling
+
+A June 2 arXiv preprint introduces DriftSched, a scheduler for multi-tenant LLM inference that corrects for the gap between admission-time output-length estimates and the lengths sequences actually reach.
+
+The authors frame the problem as runtime token drift: when observed output lengths deviate from the estimate used at admission, requests get misclassified, queues fall out of balance, and tail latency climbs. DriftSched combines workload classification, token-budget estimation, tenant-aware queuing, and a feedback loop that compensates for drift during execution. On NVIDIA L4 GPUs the authors report that adaptive bias correction cuts length-estimation error by 38.8% (MAE) and 40.5% (RMSE), and that shortest-job-first scheduling lowers median end-to-end latency by roughly 42% over FIFO, with P99 latency about 16% lower under sustained contention.
+
+The contribution for platform teams is treating the length estimate as a value to be corrected online rather than trusted at admission, which is where most queue-based inference schedulers currently break under mixed tenants.
+
+**Source:** [arXiv](https://arxiv.org/abs/2606.02982) - June 2, 2026
+
+---
+
+### E2LLM splits prefill and decode roles across heterogeneous edge devices
+
+A June 2 arXiv preprint, E2LLM, proposes serving LLMs across clusters of resource-constrained edge and fog devices by replicating full models across device groups and assigning each group a prefill or decode role based on its efficiency.
+
+Rather than splitting a model across weak devices, E2LLM clusters devices using a genetic algorithm and partitions work with dynamic programming, then specialises groups so that compute-heavy prefill and latency-sensitive decode land on the hardware best suited to each. The authors report that the approach cuts average waiting time by over 50% under high demand compared with a Splitwise baseline.
+
+This is the prefill/decode disaggregation pattern from datacenter serving applied to a setting where the nodes are heterogeneous and individually too small to host a model alone.
+
+**Source:** [arXiv](https://arxiv.org/abs/2606.03770) - June 2, 2026
+
+---
