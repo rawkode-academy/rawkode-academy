@@ -35,8 +35,8 @@ ci: pipelines: {
 
 tasks: {
 	deploy: schema.#Task & {
-		command:  "bun"
-		args: ["x", "wrangler", "deploy", "--config", "./wrangler.jsonc"]
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./wrangler.jsonc"]
 	}
 	"check-missing": schema.#Task & {
 		command:  "bun"
