@@ -32,7 +32,7 @@ tasks: {
 		inputs: [
 			"scripts/collect-schemas.ts",
 			"../platform/*/read-model/schema.gql",
-			"../website/schema/*.gql",
+			"../website/src/subgraph/**",
 		]
 
 		outputs: [

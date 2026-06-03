@@ -8,6 +8,9 @@ name: "rawkode-academy-platform-transcriptions"
 
 let _t = tasks
 
+// Run tasks non-hermetically so bun resolves on PATH in CI.
+tasks: [string]: hermetic: false
+
 env: {
 	SERVICE_NAME: "transcriptions"
 
@@ -32,17 +35,14 @@ ci: pipelines: {
 
 tasks: {
 	deploy: schema.#Task & {
-		hermetic: false
 		command:  "bun"
 		args: ["x", "wrangler", "deploy", "--config", "./wrangler.jsonc"]
 	}
 	"check-missing": schema.#Task & {
-		hermetic: false
 		command:  "bun"
 		args: ["scripts/schedule_missing.ts"]
 	}
 	"schedule-missing": schema.#Task & {
-		hermetic: false
 		command:  "bun"
 		args: ["scripts/schedule_missing.ts", "--execute"]
 	}

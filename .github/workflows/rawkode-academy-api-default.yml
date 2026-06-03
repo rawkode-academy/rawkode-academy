@@ -24,7 +24,7 @@ on:
     - projects/rawkode.academy/api/wrangler.jsonc
     - projects/rawkode.academy/api/wrangler.jsonc/**
     - projects/rawkode.academy/platform/*/read-model/schema.gql
-    - projects/rawkode.academy/website/schema/*.gql
+    - projects/rawkode.academy/website/src/subgraph/**
   workflow_dispatch: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
