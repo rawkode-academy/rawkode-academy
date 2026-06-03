@@ -3,7 +3,10 @@ function usage(code = 1) {
     [
       "Usage:",
       "  bun scripts/schedule_one.ts <id> [language]",
-      "  bun scripts/schedule_one.ts --id <id> [--language en]",
+      "  bun scripts/schedule_one.ts --id <id> [--language en] [--force]",
+      "",
+      "Options:",
+      "  --force            Regenerate captions even if captions/en.vtt exists.",
       "",
       "Requires:",
       "  Wrangler CLI configured with Cloudflare credentials",
@@ -16,6 +19,7 @@ function parseArgs(argv: string[]) {
   const args = argv.slice(2);
   let id = "";
   let language = "en";
+  let force = false;
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -30,6 +34,10 @@ function parseArgs(argv: string[]) {
       language = args[++i];
       continue;
     }
+    if (a === "--force") {
+      force = true;
+      continue;
+    }
     if (!a.startsWith("-")) {
       if (!id) id = a;
       else language = a;
@@ -41,13 +49,23 @@ function parseArgs(argv: string[]) {
 
   if (!id) usage();
 
-  return { id, language };
+  return {
+    id,
+    language,
+    force,
+  };
 }
 
-async function triggerTranscription(id: string, language: string) {
-  console.log(`Triggering transcription: id=${id} language=${language}`);
+async function triggerTranscription(
+  id: string,
+  language: string,
+  force: boolean,
+) {
+  console.log(
+    `Triggering transcription: id=${id} language=${language} force=${force}`,
+  );
 
-  const params = JSON.stringify({ id, language });
+  const params = JSON.stringify({ id, language, force });
   const proc = Bun.spawn(
     ["bunx", "wrangler", "workflows", "trigger", "transcribe", params],
     { stdout: "pipe", stderr: "pipe" },
@@ -66,8 +84,8 @@ async function triggerTranscription(id: string, language: string) {
 }
 
 async function main() {
-  const { id, language } = parseArgs(process.argv);
-  await triggerTranscription(id, language);
+  const { id, language, force } = parseArgs(process.argv);
+  await triggerTranscription(id, language, force);
 }
 
 main().catch((err) => {

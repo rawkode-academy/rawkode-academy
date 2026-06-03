@@ -6,6 +6,7 @@ export interface ShowItem {
 	id: string;
 	name: string;
 	description: string | undefined;
+	terms?: string[] | undefined;
 	hosts: string[];
 }
 
@@ -19,6 +20,7 @@ export async function listShows(): Promise<ShowItem[]> {
 			id: data.id,
 			name: data.name,
 			description: data.description,
+			terms: data.terms,
 			hosts: (data.hosts ?? []).map((h: any) =>
 				typeof h === "string" ? h : h.id,
 			),

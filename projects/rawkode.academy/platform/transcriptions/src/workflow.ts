@@ -13,28 +13,64 @@ type Env = {
 export type Params = {
 	id: string;
 	language: string;
+	force?: boolean;
 };
 
 const GET_VIDEO_DETAILS = gql`
   query GetVideoDetails($id: String!) {
     videoByID(id: $id) {
       id
+      title
+      terms
       streamUrl
       thumbnailUrl
+      episode {
+        code
+        terms
+        show {
+          name
+          terms
+        }
+      }
+      guests {
+        name
+        terms
+      }
       technologies {
         id
         name
         terms
       }
     }
-  }
+	}
 `;
+
+const DEFAULT_KEYTERMS = [
+	"David Flanagan",
+	"Flanagan",
+	"Rawkode",
+	"Rawkode Academy",
+	"Kubernetes",
+	"cloud native",
+	"platform engineering",
+];
 
 interface VideoResponse {
 	videoByID: {
 		id: string;
+		title: string;
+		terms?: string[] | null;
 		streamUrl?: string | null;
 		thumbnailUrl?: string | null;
+		episode?: {
+			code: string;
+			terms?: string[] | null;
+			show?: {
+				name: string;
+				terms?: string[] | null;
+			} | null;
+		} | null;
+		guests: { name: string; terms?: string[] | null }[];
 		technologies: { id: string; name: string; terms: string[] | null }[];
 	} | null;
 }
@@ -47,6 +83,24 @@ type TranscriptWord = {
 	end?: number;
 	confidence?: number;
 };
+
+function normalizeKeyterms(terms: Array<string | null | undefined>): string[] {
+	const seen = new Set<string>();
+	const normalized: string[] = [];
+
+	for (const term of terms) {
+		const trimmed = term?.trim();
+		if (!trimmed) continue;
+
+		const key = trimmed.toLocaleLowerCase();
+		if (seen.has(key)) continue;
+
+		seen.add(key);
+		normalized.push(trimmed);
+	}
+
+	return normalized;
+}
 
 function extractVideoId(
 	streamUrl?: string | null,
@@ -79,6 +133,23 @@ async function fetchVideoDetails(
 	}
 
 	const allTerms: string[] = [];
+	allTerms.push(data.videoByID.title);
+	allTerms.push(...(data.videoByID.terms ?? []));
+
+	if (data.videoByID.episode) {
+		allTerms.push(data.videoByID.episode.code);
+		allTerms.push(...(data.videoByID.episode.terms ?? []));
+		if (data.videoByID.episode.show) {
+			allTerms.push(data.videoByID.episode.show.name);
+			allTerms.push(...(data.videoByID.episode.show.terms ?? []));
+		}
+	}
+
+	for (const guest of data.videoByID.guests) {
+		allTerms.push(guest.name);
+		allTerms.push(...(guest.terms ?? []));
+	}
+
 	for (const tech of data.videoByID.technologies) {
 		allTerms.push(tech.name);
 		if (tech.terms) {
@@ -88,7 +159,7 @@ async function fetchVideoDetails(
 
 	return {
 		videoId,
-		keyterms: [...new Set(allTerms)],
+		keyterms: normalizeKeyterms(allTerms),
 	};
 }
 
@@ -285,7 +356,7 @@ function stitchWebVTTChunks(chunks: string[]): string {
 
 export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-		const { id, language } = event.payload;
+		const { id, language, force = false } = event.payload;
 		const env = this.env;
 
 		const { videoId, keyterms: videoTerms } = await step.do(
@@ -295,6 +366,7 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 
 		// Check if captions already exist
 		const captionsExist = await step.do("check if captions exist", async () => {
+			if (force) return false;
 			const captionsKey = `videos/${videoId}/captions/en.vtt`;
 			const existingCaptions = await env.TRANSCRIPTIONS_BUCKET.head(captionsKey);
 			return existingCaptions !== null;
@@ -304,13 +376,11 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 			return { success: true, skipped: true };
 		}
 
-		const keyterms = [
-			"Flanagan",
-			"Rawkode",
-			"Rawkode Academy",
-			"Kubernetes",
+		const keyterms = normalizeKeyterms([
+			...DEFAULT_KEYTERMS,
 			...videoTerms,
-		];
+		]);
+		const keytermPrompt = keyterms.join(",");
 
 		const deepgramKey = await step.do(
 			"transcribe with Workers AI nova-3",
@@ -340,7 +410,7 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 							audioResponse.headers.get("content-type") ?? "audio/mpeg",
 					},
 					language,
-					keyterm: keyterms.join(","),
+					keyterm: keytermPrompt,
 					smart_format: true,
 					detect_entities: true,
 					diarize: true,

@@ -17,6 +17,7 @@ export interface VideoItem {
 	title: string;
 	subtitle: string | undefined;
 	description: string;
+	terms?: string[] | undefined;
 	publishedAt: Date;
 	duration: number | undefined;
 	type: VideoType | undefined;
@@ -41,6 +42,7 @@ export async function listVideos(): Promise<VideoItem[]> {
 			title: data.title,
 			subtitle: data.subtitle,
 			description: data.description,
+			terms: data.terms,
 			publishedAt: data.publishedAt,
 			duration: data.duration,
 			type: data.type,

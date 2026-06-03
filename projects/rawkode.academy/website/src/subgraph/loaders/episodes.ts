@@ -5,6 +5,7 @@ export interface EpisodeItem {
 	code: string;
 	videoId: string;
 	showId: string;
+	terms?: string[] | undefined;
 }
 
 function deriveEpisodeCode(videoSlug: string): string {
@@ -26,6 +27,7 @@ export async function listEpisodes(): Promise<EpisodeItem[]> {
 			code: deriveEpisodeCode(v.slug),
 			videoId: v.id,
 			showId: v.show as string,
+			terms: v.terms,
 		}));
 }
 

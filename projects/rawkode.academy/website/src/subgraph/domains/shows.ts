@@ -7,6 +7,11 @@ export function registerShows(builder: InstanceType<typeof SchemaBuilder<{}>>) {
 		fields: (t: any) => ({
 			id: t.exposeString("id"),
 			name: t.exposeString("name"),
+			terms: t.field({
+				type: ["String"],
+				nullable: true,
+				resolve: (s: ShowItem) => s.terms ?? null,
+			}),
 		}),
 	});
 

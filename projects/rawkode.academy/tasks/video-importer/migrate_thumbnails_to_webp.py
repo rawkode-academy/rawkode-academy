@@ -7,10 +7,10 @@ For each `videos/<cuid>/thumbnail.jpg` in the content bucket:
   2. convert to WebP via `cwebp -q 85`
   3. upload as `videos/<cuid>/thumbnail.webp` with ContentType image/webp
   4. verify the new object exists
-  5. delete the original `.jpg`
+  5. optionally delete the original `.jpg`
 
-Idempotent: a CUID whose `.webp` already exists is skipped (and the leftover
-`.jpg`, if still present, is deleted).
+Idempotent: a CUID whose `.webp` already exists is skipped. By default the
+leftover `.jpg`, if still present, is deleted; pass `--keep-jpg` to preserve it.
 """
 
 import argparse
@@ -87,7 +87,7 @@ class ThumbnailWebpMigrator:
                 raise RuntimeError(f"cwebp failed: {result.stderr.strip()}")
             return out_path.read_bytes()
 
-    def migrate_one(self, video_id, dry_run=False):
+    def migrate_one(self, video_id, dry_run=False, delete_jpg=True):
         jpg_key = KEY_TEMPLATE_JPG.format(id=video_id)
         webp_key = KEY_TEMPLATE_WEBP.format(id=video_id)
 
@@ -95,10 +95,11 @@ class ThumbnailWebpMigrator:
             if dry_run:
                 logger.info(f"[skip] {webp_key} already exists")
                 return "skipped"
-            try:
-                self.client.delete_object(Bucket=self.bucket, Key=jpg_key)
-            except ClientError:
-                pass
+            if delete_jpg:
+                try:
+                    self.client.delete_object(Bucket=self.bucket, Key=jpg_key)
+                except ClientError:
+                    pass
             logger.info(f"[skip] {webp_key} already exists")
             return "skipped"
 
@@ -127,18 +128,19 @@ class ThumbnailWebpMigrator:
         if not self.object_exists(webp_key):
             raise RuntimeError(f"verification failed: {webp_key} not found after PUT")
 
-        self.client.delete_object(Bucket=self.bucket, Key=jpg_key)
+        if delete_jpg:
+            self.client.delete_object(Bucket=self.bucket, Key=jpg_key)
         logger.info(
             f"[ok] {jpg_key} ({len(jpg_bytes)}B) -> {webp_key} ({len(webp_bytes)}B)"
         )
         return "converted"
 
-    def run(self, video_ids, dry_run=False, workers=8):
+    def run(self, video_ids, dry_run=False, workers=8, delete_jpg=True):
         stats = {"converted": 0, "skipped": 0, "failed": 0}
 
         with ThreadPoolExecutor(max_workers=workers) as pool:
             futures = {
-                pool.submit(self.migrate_one, vid, dry_run): vid for vid in video_ids
+                pool.submit(self.migrate_one, vid, dry_run, delete_jpg): vid for vid in video_ids
             }
             for fut in as_completed(futures):
                 vid = futures[fut]
@@ -171,6 +173,17 @@ def main():
         default=8,
         help="Concurrent worker threads (default: 8)",
     )
+    parser.add_argument(
+        "--video-id",
+        action="append",
+        default=[],
+        help="Only migrate this video ID. Can be repeated.",
+    )
+    parser.add_argument(
+        "--keep-jpg",
+        action="store_true",
+        help="Keep the original thumbnail.jpg after creating thumbnail.webp",
+    )
     args = parser.parse_args()
 
     endpoint = os.environ.get("CONTENT_ENDPOINT")
@@ -198,12 +211,21 @@ def main():
         logger.error("cwebp not found on PATH (install libwebp: `brew install webp`)")
         sys.exit(1)
 
-    logger.info(f"Fetching video IDs from {GRAPHQL_URL}...")
-    video_ids = fetch_video_ids()
-    logger.info(f"Got {len(video_ids)} video IDs")
+    if args.video_id:
+        video_ids = args.video_id
+        logger.info(f"Using {len(video_ids)} explicit video ID(s)")
+    else:
+        logger.info(f"Fetching video IDs from {GRAPHQL_URL}...")
+        video_ids = fetch_video_ids()
+        logger.info(f"Got {len(video_ids)} video IDs")
 
     migrator = ThumbnailWebpMigrator(endpoint, access_key, secret_key, bucket)
-    stats = migrator.run(video_ids, dry_run=args.dry_run, workers=args.workers)
+    stats = migrator.run(
+        video_ids,
+        dry_run=args.dry_run,
+        workers=args.workers,
+        delete_jpg=not args.keep_jpg,
+    )
     if stats["failed"] > 0:
         sys.exit(1)
 
