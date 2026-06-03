@@ -16,6 +16,7 @@ type Episode @key(fields: "id") {
   code: String
   id: String
   show: Show
+  terms: [String!]
   video: Video
 }
 
@@ -32,7 +33,9 @@ type Person @key(fields: "id") {
   hostedShows: [Show!]
   id: String
   links: [PersonLink!]
+  name: String
   surname: String
+  terms: [String!]
 }
 
 type PersonLink {
@@ -62,6 +65,7 @@ type Show @key(fields: "id") {
   hosts: [Person!]
   id: String
   name: String
+  terms: [String!]
 }
 
 type Technology @key(fields: "id") {
@@ -97,6 +101,7 @@ type Video @key(fields: "id") {
   streamUrl: String
   subtitle: String
   technologies: [Technology!]
+  terms: [String!]
   thumbnailUrl: String
   title: String
   type: VideoType
