@@ -1,6 +1,6 @@
 ---
-import VideoStill from "./VideoStill.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import VideoStill from "./VideoStill.astro";
 
 interface Props {
 	href: string;
@@ -85,22 +85,25 @@ const metaParts = [
 	.video-hero {
 		padding: 2.5rem 2.5rem 2rem;
 		border-bottom: 1px solid var(--editorial-hairline);
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
+		display: grid;
+		grid-template-columns: minmax(20rem, 40rem) minmax(0, 1fr);
+		gap: 2rem;
+		align-items: start;
 	}
 
 	.video-hero__still {
 		display: block;
 		text-decoration: none;
 		color: inherit;
+		width: 100%;
+		max-width: 40rem;
 	}
 
 	.video-hero__meta {
-		display: grid;
-		grid-template-columns: 1.7fr 1fr;
-		gap: 2rem;
-		align-items: start;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		min-width: 0;
 	}
 
 	.video-hero__copy {
@@ -135,7 +138,7 @@ const metaParts = [
 	.video-hero__actions {
 		display: flex;
 		gap: 0.625rem;
-		justify-content: flex-end;
+		justify-content: flex-start;
 		flex-wrap: wrap;
 	}
 
@@ -172,8 +175,12 @@ const metaParts = [
 	.video-hero__cta-secondary:hover { border-color: var(--editorial-ink); }
 
 	@media (max-width: 880px) {
-		.video-hero { padding: 1.5rem 1.25rem; }
-		.video-hero__meta { grid-template-columns: 1fr; }
-		.video-hero__actions { justify-content: flex-start; }
+		.video-hero {
+			grid-template-columns: 1fr;
+			padding: 1.5rem 1.25rem;
+		}
+		.video-hero__still {
+			max-width: none;
+		}
 	}
 </style>
