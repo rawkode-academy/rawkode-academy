@@ -7,8 +7,24 @@ description: >-
   David Desmarais-Michaud joins Rawkode to introduce Yoke, a Kubernetes package
   manager that replaces templated YAML with code compiled to WebAssembly. They
   build and deploy Flights, compare Yoke with Helm and Timoni, explore drift
-  detection, and dig into Air Traffic Controller, Airways, Argo CD integration,
+  detection, and dig into Air Traffic Controller, Airways, ArgoCD integration,
   and migration paths for platform teams.
+terms:
+  - Yoke
+  - YokeCD
+  - Flight
+  - Flights
+  - Air Traffic Controller
+  - ATC
+  - Airways
+  - wazero
+  - Timoni
+  - CUE
+  - ArgoCD
+  - drift
+  - turbulence
+  - takeoff
+  - black box
 publishedAt: 2026-06-03T00:00:00.000Z
 type: live
 category: tutorial

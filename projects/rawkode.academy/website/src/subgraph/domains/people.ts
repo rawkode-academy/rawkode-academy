@@ -10,6 +10,12 @@ export function registerPeople(
 			id: t.exposeString("id"),
 			forename: t.exposeString("forename"),
 			surname: t.exposeString("surname"),
+			name: t.exposeString("name"),
+			terms: t.field({
+				type: ["String"],
+				nullable: true,
+				resolve: (p: PersonItem) => p.terms ?? null,
+			}),
 		}),
 	});
 

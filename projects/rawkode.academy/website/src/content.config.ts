@@ -46,6 +46,7 @@ const videos = defineCollection({
 		title: z.string().trim().min(5),
 		subtitle: z.string().optional(),
 		description: z.string().trim().min(20),
+		terms: z.array(z.string().trim().min(1)).optional(),
 		publishedAt: z.coerce.date(),
 		duration: z.number().positive(),
 		audioFileSize: z.number().positive().optional(), // bytes, for podcast enclosure
@@ -89,6 +90,7 @@ const shows = defineCollection({
 			id: z.string(),
 			name: z.string(),
 			description: z.string().optional(),
+			terms: z.array(z.string().trim().min(1)).optional(),
 			hosts: z.array(reference("people")).default([]),
 			publish: z.boolean().default(false),
 			cover: z
@@ -141,6 +143,7 @@ const people = defineCollection({
 	schema: z.object({
 		name: z.string(),
 		id: z.string(),
+		terms: z.array(z.string().trim().min(1)).optional(),
 		github: z.string().optional(),
 		twitter: z.string().optional(),
 		bluesky: z.string().optional(),

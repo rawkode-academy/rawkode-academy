@@ -25,6 +25,11 @@ export function registerEpisodes(
 		fields: (t: any) => ({
 			id: t.exposeString("id"),
 			code: t.exposeString("code"),
+			terms: t.field({
+				type: ["String"],
+				nullable: true,
+				resolve: (ep: EpisodeItem) => ep.terms ?? null,
+			}),
 			video: t.field({
 				type: VideoRef,
 				nullable: true,

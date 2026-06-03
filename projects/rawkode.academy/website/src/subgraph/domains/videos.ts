@@ -40,6 +40,11 @@ export function registerVideos(
 			}),
 			slug: t.exposeString("slug"),
 			description: t.exposeString("description"),
+			terms: t.field({
+				type: ["String"],
+				nullable: true,
+				resolve: (v: VideoItem) => v.terms ?? null,
+			}),
 			publishedAt: t.field({
 				type: "Date",
 				resolve: (v: VideoItem) => v.publishedAt,

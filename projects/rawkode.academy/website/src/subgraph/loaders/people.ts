@@ -12,6 +12,7 @@ export interface PersonItem {
 	name: string;
 	forename: string;
 	surname: string;
+	terms?: string[] | undefined;
 	biography: string;
 	links: PersonLink[];
 }
@@ -38,6 +39,7 @@ export async function listPeople(): Promise<PersonItem[]> {
 			name: data.name,
 			forename: data.forename ?? parsed.forename,
 			surname: data.surname ?? parsed.surname,
+			terms: data.terms,
 			biography: e.body ?? "",
 			links: data.links ?? [],
 		} satisfies PersonItem;

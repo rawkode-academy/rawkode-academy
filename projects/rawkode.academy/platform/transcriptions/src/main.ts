@@ -11,6 +11,7 @@ export interface Env {
 type Payload = {
 	id: string;
 	language: string;
+	force?: boolean;
 };
 
 export default {

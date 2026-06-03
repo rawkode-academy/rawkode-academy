@@ -41,7 +41,7 @@ class ProcessingState:
         'thumbnail_downloaded',
         'video_uploaded_content',
         'audio_uploaded_content',
-        'thumbnail_uploaded_content',
+        'thumbnail_webp_uploaded_content',
         'cloud_run_triggered',
         'completed'
     ]
@@ -520,7 +520,7 @@ class YouTubeToR2:
             raise Exception(f"Audio extraction failed: {error_msg}")
 
     def download_thumbnail(self, video_info, output_dir):
-        """Download the best quality thumbnail."""
+        """Download the best quality thumbnail as a temporary conversion source."""
         thumbnails = video_info.get('thumbnails', [])
         if not thumbnails:
             logger.warning("No thumbnails found")
@@ -548,6 +548,32 @@ class YouTubeToR2:
         except Exception as e:
             logger.error(f"Error downloading thumbnail: {str(e)}")
             return None
+
+    def convert_thumbnail_to_webp(self, thumbnail_path, output_dir):
+        """Convert thumbnail to WebP for the website CDN URL convention."""
+        output_path = os.path.join(output_dir, 'thumbnail.webp')
+        logger.info("Converting thumbnail to WebP")
+
+        try:
+            subprocess.run(
+                [
+                    'ffmpeg',
+                    '-y',
+                    '-i', thumbnail_path,
+                    '-c:v', 'libwebp',
+                    '-q:v', '85',
+                    output_path,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            logger.info(f"WebP thumbnail saved to: {output_path}")
+            return output_path
+        except subprocess.CalledProcessError as e:
+            error_msg = e.stderr or str(e)
+            logger.error(f"Thumbnail WebP conversion failed: {error_msg}")
+            raise Exception(f"Thumbnail WebP conversion failed: {error_msg}")
 
     def upload_to_r2(self, local_path, bucket, r2_key, content_type='application/octet-stream'):
         """Upload file to Cloudflare R2."""
@@ -755,7 +781,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     logger.info("Skipping thumbnail download - already completed")
                     thumbnail_path = None
                     # Re-download if needed for upload
-                    if (not state.is_step_completed('thumbnail_uploaded_content')):
+                    if not state.is_step_completed('thumbnail_webp_uploaded_content'):
                         thumbnail_path = self.download_thumbnail(video_info, temp_dir)
 
                 # Upload video to CONTENT bucket
@@ -783,19 +809,20 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                 else:
                     logger.info("Skipping audio upload to content bucket - already completed")
 
-                # Upload thumbnail to CONTENT bucket if it exists
+                # Upload thumbnail to CONTENT bucket if it exists. The website expects
+                # thumbnail.webp; the downloaded JPEG is only a temporary source.
                 if thumbnail_path:
-                    # Upload to CONTENT bucket
-                    if not state.is_step_completed('thumbnail_uploaded_content'):
+                    if not state.is_step_completed('thumbnail_webp_uploaded_content'):
+                        thumbnail_webp_path = self.convert_thumbnail_to_webp(thumbnail_path, temp_dir)
                         self.upload_to_r2(
-                            thumbnail_path,
+                            thumbnail_webp_path,
                             self.content_bucket,
-                            f"videos/{video_cuid}/thumbnail.jpg",
-                            'image/jpeg'
+                            f"videos/{video_cuid}/thumbnail.webp",
+                            'image/webp'
                         )
-                        state.mark_step_completed('thumbnail_uploaded_content')
+                        state.mark_step_completed('thumbnail_webp_uploaded_content')
                     else:
-                        logger.info("Skipping thumbnail upload to content bucket - already completed")
+                        logger.info("Skipping WebP thumbnail upload to content bucket - already completed")
 
                 # Trigger Cloud Run job
                 if not state.is_step_completed('cloud_run_triggered') or force_cloud_run:
@@ -829,7 +856,7 @@ VALUES ('{cuid}', '{title}', '{subtitle}', '{slug}', '{description}', {duration}
                     'content_paths': {
                         'video': f"videos/{video_cuid}/original.mkv",
                         'audio': f"videos/{video_cuid}/original.mp3",
-                        'thumbnail': f"videos/{video_cuid}/thumbnail.jpg"
+                        'thumbnail': f"videos/{video_cuid}/thumbnail.webp"
                     },
                     'cloud_run_operation': operation_name if not skip_cloud_run else None,
                     'sql_insert': sql_insert,
