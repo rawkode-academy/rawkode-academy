@@ -1,12 +1,11 @@
-import type { TranscribeWorkflow } from "./workflow";
+import type { Params } from "./workflow";
 export * from "./workflow";
 
 export interface Env {
 	AI: Ai;
-	DEEPGRAM_API_TOKEN: SecretsStoreSecret;
 	HTTP_TRANSCRIPTION_TOKEN: SecretsStoreSecret;
 	TRANSCRIPTIONS_BUCKET: R2Bucket;
-	TRANSCRIPTION_WORKFLOW: Workflow<TranscribeWorkflow>;
+	TRANSCRIPTION_WORKFLOW: Workflow<Params>;
 }
 
 type Payload = {

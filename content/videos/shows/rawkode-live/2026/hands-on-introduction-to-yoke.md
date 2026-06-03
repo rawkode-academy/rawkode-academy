@@ -1,13 +1,14 @@
 ---
 id: xg0khxsg9ehtad69xotx43fm
 slug: hands-on-introduction-to-yoke
-title: Hands-on Introduction to yoke
+title: Hands-on Introduction to Yoke
 subtitle: Kubernetes package management as code with WebAssembly Flights.
 description: >-
-  David explores Yoke, a Kubernetes package manager that treats packages as code
-  instead of templated YAML. We look at WebAssembly Flights, how Yoke compares
-  with Helm, where YokeCD fits with Argo CD, and what Air Traffic Controller
-  could mean for platform teams building higher-level Kubernetes APIs.
+  David Desmarais-Michaud joins Rawkode to introduce Yoke, a Kubernetes package
+  manager that replaces templated YAML with code compiled to WebAssembly. They
+  build and deploy Flights, compare Yoke with Helm and Timoni, explore drift
+  detection, and dig into Air Traffic Controller, Airways, Argo CD integration,
+  and migration paths for platform teams.
 publishedAt: 2026-06-03T00:00:00.000Z
 type: live
 category: tutorial

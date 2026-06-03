@@ -3,16 +3,10 @@ import {
 	type WorkflowStep,
 	type WorkflowEvent,
 } from "cloudflare:workers";
-import {
-	createClient,
-	webvtt,
-	type SyncPrerecordedResponse,
-} from "@deepgram/sdk";
 import { gql, request } from "graphql-request";
 
 type Env = {
 	AI: Ai;
-	DEEPGRAM_API_TOKEN: SecretsStoreSecret;
 	TRANSCRIPTIONS_BUCKET: R2Bucket;
 };
 
@@ -44,6 +38,15 @@ interface VideoResponse {
 		technologies: { id: string; name: string; terms: string[] | null }[];
 	} | null;
 }
+
+type Nova3Response = Ai_Cf_Deepgram_Nova_3_Output;
+
+type TranscriptWord = {
+	word?: string;
+	start?: number;
+	end?: number;
+	confidence?: number;
+};
 
 function extractVideoId(
 	streamUrl?: string | null,
@@ -87,6 +90,113 @@ async function fetchVideoDetails(
 		videoId,
 		keyterms: [...new Set(allTerms)],
 	};
+}
+
+function formatVttTimestamp(seconds: number): string {
+	const totalMilliseconds = Math.max(0, Math.round(seconds * 1000));
+	const milliseconds = totalMilliseconds % 1000;
+	const totalSeconds = Math.floor(totalMilliseconds / 1000);
+	const secs = totalSeconds % 60;
+	const totalMinutes = Math.floor(totalSeconds / 60);
+	const minutes = totalMinutes % 60;
+	const hours = Math.floor(totalMinutes / 60);
+
+	return `${hours.toString().padStart(2, "0")}:${minutes
+		.toString()
+		.padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${milliseconds
+		.toString()
+		.padStart(3, "0")}`;
+}
+
+function escapeVttText(text: string): string {
+	return text
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;");
+}
+
+function getTranscriptWords(response: Nova3Response): TranscriptWord[] {
+	return (
+		response.results?.channels?.flatMap((channel) =>
+			channel.alternatives?.at(0)?.words ?? []
+		) ?? []
+	);
+}
+
+function webvtt(response: Nova3Response): string {
+	const words = getTranscriptWords(response).filter(
+		(word): word is Required<Pick<TranscriptWord, "word" | "start" | "end">> &
+			TranscriptWord =>
+			typeof word.word === "string" &&
+			typeof word.start === "number" &&
+			typeof word.end === "number",
+	);
+
+	if (words.length === 0) {
+		const transcript =
+			response.results?.channels?.at(0)?.alternatives?.at(0)?.transcript?.trim();
+
+		if (!transcript) {
+			throw new Error("Workers AI nova-3 response did not include transcript words");
+		}
+
+		return [
+			"WEBVTT",
+			"",
+			"00:00:00.000 --> 00:00:01.000",
+			escapeVttText(transcript),
+			"",
+		].join("\n");
+	}
+
+	const cues: string[] = ["WEBVTT", ""];
+	let cueWords: typeof words = [];
+	let cueStart = words[0].start;
+	let cueEnd = words[0].end;
+
+	const flushCue = () => {
+		if (cueWords.length === 0) return;
+		const text = cueWords.map((word) => word.word).join(" ");
+		cues.push(
+			`${formatVttTimestamp(cueStart)} --> ${formatVttTimestamp(cueEnd)}`,
+			escapeVttText(text),
+			"",
+		);
+		cueWords = [];
+	};
+
+	for (const word of words) {
+		if (cueWords.length === 0) {
+			cueStart = word.start;
+		}
+
+		cueWords.push(word);
+		cueEnd = word.end;
+
+		const duration = cueEnd - cueStart;
+		const hasSentenceBreak = /[.!?]$/.test(word.word);
+		if (duration >= 6 || cueWords.length >= 16 || hasSentenceBreak) {
+			flushCue();
+		}
+	}
+
+	flushCue();
+	return cues.join("\n");
+}
+
+function isValidNova3Response(response: unknown): response is Nova3Response {
+	if (!response || typeof response !== "object") return false;
+
+	const result = response as Nova3Response;
+	const alternatives = result.results?.channels?.flatMap(
+		(channel) => channel.alternatives ?? [],
+	);
+
+	return Array.isArray(alternatives) &&
+		alternatives.some((alternative) =>
+			typeof alternative.transcript === "string" ||
+			Array.isArray(alternative.words)
+		);
 }
 
 // Split WebVTT into chunks based on line breaks, targeting ~50k tokens per chunk
@@ -202,10 +312,8 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 			...videoTerms,
 		];
 
-		const deepgram = createClient(await env.DEEPGRAM_API_TOKEN.get());
-
 		const deepgramKey = await step.do(
-			"transcribe with Deepgram",
+			"transcribe with Workers AI nova-3",
 			{
 				retries: {
 					limit: 7,
@@ -215,57 +323,50 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 				timeout: "24 hours",
 			},
 			async () => {
-				const deepgramResponse =
-					(await deepgram.listen.prerecorded.transcribeUrl(
-						{
-							url: `https://content.rawkode.academy/videos/${videoId}/original.mp3`,
-						},
-						{
-							model: "nova-3",
-							language,
-							keyterm: keyterms,
-							smart_format: true,
-							detect_entities: true,
-							diarize: true,
-							paragraphs: true,
-							profanity_filter: false,
-							punctuate: true,
-							utterances: true,
-							replace: ["rawcode:Rawkode"],
-						},
-					)) as {
-						result: SyncPrerecordedResponse | null;
-						error: { message: string;[key: string]: any } | null;
-					};
+				const audioResponse = await fetch(
+					`https://content.rawkode.academy/videos/${videoId}/original.mp3`,
+				);
 
-				// Improved error handling for the Deepgram step
-				if (deepgramResponse.error) {
-					console.error(
-						`Deepgram transcription failed for video ${videoId}. Error:`,
-						JSON.stringify(deepgramResponse.error, null, 2), // Log the full error object
-					);
+				if (!audioResponse.ok || !audioResponse.body) {
 					throw new Error(
-						`Deepgram transcription failed for video ${videoId}: ${deepgramResponse.error.message}`,
+						`Failed to fetch MP3 for video ${videoId}: ${audioResponse.status} ${audioResponse.statusText}`,
 					);
 				}
 
-				// Also check if the result is missing, even if no explicit error is set
-				if (!deepgramResponse.result) {
+				const deepgramResponse = await env.AI.run("@cf/deepgram/nova-3", {
+					audio: {
+						body: audioResponse.body,
+						contentType:
+							audioResponse.headers.get("content-type") ?? "audio/mpeg",
+					},
+					language,
+					keyterm: keyterms.join(","),
+					smart_format: true,
+					detect_entities: true,
+					diarize: true,
+					paragraphs: true,
+					profanity_filter: false,
+					punctuate: true,
+					utterances: true,
+					replace: "rawcode:Rawkode",
+				});
+
+				if (!isValidNova3Response(deepgramResponse)) {
 					console.error(
-						`Deepgram transcription returned no result for video ${videoId}. Full response:`,
-						JSON.stringify(deepgramResponse, null, 2), // Log the full response
+						`Workers AI nova-3 returned no transcript for video ${videoId}. Full response:`,
+						JSON.stringify(deepgramResponse, null, 2),
 					);
 					throw new Error(
-						`Deepgram transcription returned no result for video ${videoId}.`,
+						`Workers AI nova-3 returned no transcript for video ${videoId}.`,
 					);
 				}
 
-				// Store the Deepgram response in R2 to avoid serialization issues
+				// Store the nova-3 response in R2 to avoid serialization issues
 				// Cloudflare Workflows has size limits on serialized step data
 				const deepgramKey = `videos/${videoId}/transcription/deepgram.json`;
 				await env.TRANSCRIPTIONS_BUCKET.put(
 					deepgramKey,
-					JSON.stringify(deepgramResponse.result),
+					JSON.stringify(deepgramResponse),
 					{
 						httpMetadata: { contentType: "application/json" },
 					},
@@ -275,16 +376,16 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 			},
 		);
 
-		// Save the original Deepgram WebVTT
+		// Save the original nova-3 WebVTT
 		await step.do(
 			"save deepgram WebVTT",
 			async () => {
 				const r2Response = await env.TRANSCRIPTIONS_BUCKET.get(deepgramKey);
 				if (!r2Response) {
-					throw new Error("Failed to retrieve Deepgram response from R2");
+					throw new Error("Failed to retrieve nova-3 response from R2");
 				}
 
-				const deepgramResponse = await r2Response.json() as SyncPrerecordedResponse;
+				const deepgramResponse = await r2Response.json() as Nova3Response;
 				const deepgramVtt = webvtt(deepgramResponse);
 
 				const deepgramVttKey = `videos/${videoId}/captions/en.deepgram.vtt`;
@@ -310,10 +411,10 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 			async () => {
 				const r2Response = await env.TRANSCRIPTIONS_BUCKET.get(deepgramKey);
 				if (!r2Response) {
-					throw new Error("Failed to retrieve Deepgram response from R2");
+					throw new Error("Failed to retrieve nova-3 response from R2");
 				}
 
-				const deepgramResponse = await r2Response.json() as SyncPrerecordedResponse;
+				const deepgramResponse = await r2Response.json() as Nova3Response;
 				const vttContent = webvtt(deepgramResponse);
 
 				// Split WebVTT into chunks
@@ -340,7 +441,9 @@ ${chunk}`;
 								max_tokens: 120000,
 							});
 
-							return response.response || chunk; // Fallback to original if AI fails
+							return typeof response.response === "string"
+								? response.response
+								: chunk; // Fallback to original if AI fails
 						} catch (error) {
 							console.error(`Error processing chunk ${index}:`, error);
 							return chunk; // Return original chunk if processing fails
@@ -362,44 +465,4 @@ ${chunk}`;
 
 		return { success: true };
 	}
-}
-
-// Helper function to validate Deepgram response structure
-function isValidDeepgramResponse(
-	response: any,
-): response is SyncPrerecordedResponse {
-	return (
-		response &&
-		typeof response === "object" &&
-		response.metadata &&
-		typeof response.metadata === "object" &&
-		typeof response.metadata.transaction_key === "string" &&
-		typeof response.metadata.request_id === "string" &&
-		typeof response.metadata.sha256 === "string" &&
-		typeof response.metadata.created === "string" &&
-		typeof response.metadata.duration === "number" &&
-		typeof response.metadata.channels === "number" &&
-		Array.isArray(response.metadata.models) &&
-		response.results &&
-		typeof response.results === "object" &&
-		Array.isArray(response.results.channels) &&
-		response.results.channels.every(
-			(channel: any) =>
-				Array.isArray(channel.alternatives) &&
-				channel.alternatives.every(
-					(alt: any) =>
-						typeof alt.transcript === "string" &&
-						typeof alt.confidence === "number" &&
-						Array.isArray(alt.words) &&
-						alt.words.every(
-							(word: any) =>
-								typeof word.word === "string" &&
-								typeof word.start === "number" &&
-								typeof word.end === "number" &&
-								typeof word.confidence === "number" &&
-								typeof word.punctuated_word === "string",
-						),
-				),
-		)
-	);
 }
