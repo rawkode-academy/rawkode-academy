@@ -15,9 +15,6 @@ env: {
 		CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://sa.rawkode.academy/cloudflare/api-tokens/workers"
 		}
-		DEEPGRAM_API_KEY: schema.#OnePasswordRef & {
-			ref: "op://Employee/Deepgram/api-tokens/restate"
-		}
 		HTTP_TRANSCRIPTION_TOKEN: schema.#OnePasswordRef & {
 			ref: "op://Employee/w3etxulw37bsqb2rsna5px7y4u/http-tokens/http-transcription-token"
 		}

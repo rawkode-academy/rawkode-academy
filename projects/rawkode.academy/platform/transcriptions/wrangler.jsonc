@@ -42,10 +42,5 @@
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
 			"secret_name": "HTTP_TRANSCRIPTION_TOKEN",
 		},
-		{
-			"binding": "DEEPGRAM_API_TOKEN",
-			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
-			"secret_name": "DEEPGRAM_API_TOKEN",
-		},
 	]
 }
