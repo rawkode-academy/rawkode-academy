@@ -4,6 +4,11 @@ import {
 	type WorkflowEvent,
 } from "cloudflare:workers";
 import { gql, request } from "graphql-request";
+import {
+	asCloudflareNova3Input,
+	buildNova3Input,
+	correctTranscriptText,
+} from "./nova3";
 
 type Env = {
 	AI: Ai;
@@ -79,6 +84,7 @@ type Nova3Response = Ai_Cf_Deepgram_Nova_3_Output;
 
 type TranscriptWord = {
 	word?: string;
+	punctuated_word?: string;
 	start?: number;
 	end?: number;
 	confidence?: number;
@@ -215,7 +221,7 @@ function webvtt(response: Nova3Response): string {
 			"WEBVTT",
 			"",
 			"00:00:00.000 --> 00:00:01.000",
-			escapeVttText(transcript),
+			escapeVttText(correctTranscriptText(transcript)),
 			"",
 		].join("\n");
 	}
@@ -227,10 +233,12 @@ function webvtt(response: Nova3Response): string {
 
 	const flushCue = () => {
 		if (cueWords.length === 0) return;
-		const text = cueWords.map((word) => word.word).join(" ");
+		const text = cueWords
+			.map((word) => word.punctuated_word ?? word.word)
+			.join(" ");
 		cues.push(
 			`${formatVttTimestamp(cueStart)} --> ${formatVttTimestamp(cueEnd)}`,
-			escapeVttText(text),
+			escapeVttText(correctTranscriptText(text)),
 			"",
 		);
 		cueWords = [];
@@ -380,7 +388,6 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 			...DEFAULT_KEYTERMS,
 			...videoTerms,
 		]);
-		const keytermPrompt = keyterms.join(",");
 
 		const deepgramKey = await step.do(
 			"transcribe with Workers AI nova-3",
@@ -403,23 +410,17 @@ export class TranscribeWorkflow extends WorkflowEntrypoint<Env, Params> {
 					);
 				}
 
-				const deepgramResponse = await env.AI.run("@cf/deepgram/nova-3", {
-					audio: {
-						body: audioResponse.body,
-						contentType:
-							audioResponse.headers.get("content-type") ?? "audio/mpeg",
-					},
-					language,
-					keyterm: keytermPrompt,
-					smart_format: true,
-					detect_entities: true,
-					diarize: true,
-					paragraphs: true,
-					profanity_filter: false,
-					punctuate: true,
-					utterances: true,
-					replace: "rawcode:Rawkode",
-				});
+				const deepgramResponse = await env.AI.run(
+					"@cf/deepgram/nova-3",
+					asCloudflareNova3Input(
+						buildNova3Input({
+							audioBody: audioResponse.body,
+							contentType: audioResponse.headers.get("content-type"),
+							language,
+							keyterms,
+						}),
+					),
+				);
 
 				if (!isValidNova3Response(deepgramResponse)) {
 					console.error(
