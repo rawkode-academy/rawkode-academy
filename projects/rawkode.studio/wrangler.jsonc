@@ -1,0 +1,45 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"name": "rawkode-studio",
+	"compatibility_date": "2026-03-12",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist"
+	},
+	"workers_dev": true,
+	"preview_urls": true,
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+			"destinations": [
+				"posthog-eu"
+			]
+		},
+		"traces": {
+			"enabled": true,
+			"destinations": []
+		}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "replace-with-rawkode-studio-session-kv-id"
+		},
+		{
+			"binding": "LIVE_EVENTS",
+			"id": "replace-with-rawkode-studio-live-events-kv-id"
+		}
+	],
+	"routes": [
+		{
+			"pattern": "rawkode.studio",
+			"custom_domain": true
+		}
+	]
+}

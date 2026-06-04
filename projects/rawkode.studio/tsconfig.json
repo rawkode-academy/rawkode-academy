@@ -1,0 +1,11 @@
+{
+	"extends": "astro/tsconfigs/strict",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["src/*"]
+		},
+		"types": ["@cloudflare/workers-types"]
+	},
+	"include": [".astro/types.d.ts", "src/**/*", "astro.config.ts", "vitest.config.ts"]
+}

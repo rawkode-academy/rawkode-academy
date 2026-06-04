@@ -1,0 +1,13 @@
+---
+import StudioConsole from "@/components/studio/StudioConsole.vue";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+const user = Astro.locals.user;
+---
+
+<BaseLayout
+	title="Operator Studio | Rawkode Studio"
+	description="Private browser control room for producing Rawkode Live."
+>
+	<StudioConsole operatorName={user?.name ?? "Rawkode"} client:load />
+</BaseLayout>

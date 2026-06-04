@@ -1,0 +1,33 @@
+{
+	"name": "rawkode-studio",
+	"type": "module",
+	"version": "0.1.0",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro check && astro build",
+		"preview": "astro preview",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"types:cf": "wrangler types worker-configuration.d.ts --env-interface Env"
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^13.1.10",
+		"@astrojs/vue": "^6.0.1",
+		"@tailwindcss/vite": "^4.2.2",
+		"astro": "^6.1.3",
+		"typescript": "^6.0.2",
+		"vite": "^7.3.1",
+		"vue": "^3.5.31"
+	},
+	"devDependencies": {
+		"@astrojs/check": "^0.9.8",
+		"@cloudflare/workers-types": "^4.20260405.1",
+		"@types/bun": "^1.3.11",
+		"@vitejs/plugin-vue": "^6.0.5",
+		"vitest": "^4.1.2",
+		"wrangler": "^4.80.0"
+	},
+	"overrides": {
+		"vite": "^7.3.1"
+	}
+}

@@ -1,0 +1,11 @@
+---
+import PublicLivePage from "@/components/live/PublicLivePage.vue";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+	title="Rawkode Live | Rawkode Studio"
+	description="Watch Rawkode Live from Rawkode Studio with Cloudflare Stream playback and Waddle chat."
+>
+	<PublicLivePage client:load />
+</BaseLayout>

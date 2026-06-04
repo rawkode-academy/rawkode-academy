@@ -1,0 +1,8 @@
+dist/
+.astro/
+.devenv/
+.wrangler/
+node_modules/
+.env
+.env.production
+qa/results/
