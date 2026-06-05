@@ -1,0 +1,42 @@
+---
+title: "Envoy, Istio, and NCCL ship operator-facing fixes"
+description: "Envoy and Istio published June 4 security and mesh patch releases, while NVIDIA NCCL 2.30.7-1 added zero-SM collectives and symmetric-memory improvements for GPU communication."
+publishedAt: 2026-06-05
+authors:
+  - rawkode
+technologies:
+  - envoy
+  - istio
+---
+
+Envoy, Istio, and NCCL all shipped changes in the last 24 hours that affect production operators: proxy memory-exhaustion fixes, Istio Gateway API and ambient repairs, and lower-overhead GPU collective paths.
+
+## Envoy patches HTTP/2 header accounting and OAuth2 filter bugs
+
+Envoy v1.38.1 was tagged on June 4 with security fixes also backported across the currently supported 1.37 and 1.36 release lines. The headline fix is CVE-2026-47774: HTTP/2 streams now reset when decoded header data exceeds configured limits, and uncompressed cookies count against both request-header byte and header-count limits.
+
+The release also applies the nghttp2 CVE-2026-27135 patch and fixes two OAuth2 filter issues: a timing side channel in HMAC verification and a crash path where AES-CBC token-cookie decryption could appear to succeed with the wrong secret. Operators should also note two behavior changes in v1.38.1: upstream transport failure details are no longer sent in downstream response bodies, and load-balancer rebuild coalescing during EDS batch updates is now opt-in.
+
+**Source:** [Envoy v1.38.1 release notes](https://www.envoyproxy.io/docs/envoy/v1.38.1/version_history/v1.38/v1.38.1) - June 4, 2026
+
+---
+
+## Istio 1.30.1 adds Gateway API checks and ambient fixes
+
+Istio 1.30.1 shipped on June 4 with the Envoy CVE-2026-47774 fix plus several operator-visible repairs in Gateway API, ambient mode, and multicluster handling. The release adds `istioctl analyze` check `IST0176` for stale Gateway API CRDs, because older CRDs can cause istiod to filter resources silently after an Istio 1.30 upgrade.
+
+Gateway API handling gets fixes for `BackendTLSPolicy` conflicts, HTTPS `ListenerSet` certificate delivery with manually deployed gateways, and invalid `HTTPRoute` or `GRPCRoute` header filter reporting. Ambient mode fixes include a multi-network waypoint routing bug, a CNI `concurrent map writes` panic, and a traffic-distribution leak where one not-ready-service setting could affect unrelated services using the same preset.
+
+**Source:** [Istio 1.30.1 release notes](https://istio.io/latest/news/releases/1.30.x/announcing-1.30.1/) - June 4, 2026
+
+---
+
+## NCCL 2.30.7-1 adds zero-SM collectives
+
+NVIDIA published NCCL v2.30.7-1 on June 4 with new hierarchical zero-SM `AllGather` and `All2all` collectives. The release notes describe an inter-node path through an RMA CPU proxy and an intra-node path through copy engines, enabled with the `NCCL_CTA_POLICY_ZERO` flag, so communication can overlap with GPU compute more cleanly.
+
+The release also expands GIN with an experimental GPU Push Interface backend, stronger signal and fence semantics, traffic-class control, and resource-sharing knobs. Symmetric-memory changes include RMA plugin restructuring, asymmetric buffer sizes during window registration, CUDA graph capture support for window registration, and batched copy-engine operations in the RMA put/wait path; experimental MPS plus MLOPart support allows up to two ranks per physical GPU.
+
+**Source:** [NVIDIA NCCL v2.30.7-1 release](https://github.com/NVIDIA/nccl/releases/tag/v2.30.7-1) - June 4, 2026
+
+---
