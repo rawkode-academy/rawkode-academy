@@ -15,7 +15,7 @@ tagz:
 difficulty: medium
 
 createdAt: 2026-06-02
-updatedAt: 2026-06-02
+updatedAt: 2026-06-05
 
 cover: __static__/cover.png
 
@@ -135,7 +135,7 @@ tasks:
 
       # 5. Deploy the app. Three breaks live in this one template and surface in
       #    lifecycle order as each is cleared:
-      #    BREAK 2 (Commands & resources): an infeasible CPU request keeps the pod
+      #    BREAK 2 (Resources): an infeasible CPU request keeps the pod
       #    Pending, the scheduler can never reserve 64 cores on this node.
       #    BREAK 3 (Multi-container / init): the wait-for-db init container polls
       #    "postgresql", but the Service is named "postgres", so it loops forever.
@@ -230,7 +230,7 @@ The application is running, connected to the database, and serving `v2`. Well do
 ## Two Ways to Play
 
 - **Hard mode.** Just get it working and ship `v2`. No hints, no peeking.
-- **Guided mode.** Work through each break step by step, with the concept behind it explained before the fix.
+- **Guided mode.** Work through each break step by step, gathering evidence before each fix is revealed.
 
 Pick your path below.
 
@@ -268,7 +268,7 @@ Stop reading here if you want the full challenge.
 
 There are **four planted breaks** standing between you and a working app, plus a **final step** to perform the `v1 -> v2` upgrade the series is named after.
 
-Each step gives you the **symptom** first, and a question to sit with. The investigative commands, the concept behind the break, and the fix live in the hint blocks, revealed in that order: where to look, then why, then how. Open them one at a time, and only when you're genuinely stuck.
+Each step gives you the **symptom** first, and a question to sit with. The hint blocks are staged: where to look, what the evidence means, then how to change it. Before opening a fix block, make yourself name the exact field and value that looked wrong in your own output.
 
 ### Step 0: Get the Lay of the Land
 
@@ -304,6 +304,7 @@ A `Pending` pod carries the scheduler's verdict with it. Read the pod's events, 
 ```bash
 kubectl describe pod -l app=klustered
 kubectl get deploy klustered -o jsonpath='{.spec.template.spec.containers[0].resources}{"\n"}'
+kubectl describe node
 ```
 
 The `Events` section will tell you, in the scheduler's own words, why it couldn't place the pod. Let that reason point you at the right field in the spec.
@@ -315,9 +316,9 @@ The `Events` section will tell you, in the scheduler's own words, why it couldn'
 :summary: "Hint 2: The Concept"
 ---
 
-A container's `resources.requests` is a **scheduling guarantee**, not a wish. The scheduler will only place a pod on a node that can reserve the full request for it, and a single pod's request can never exceed one node's allocatable capacity. When nothing fits, the pod stays `Pending` indefinitely, no eviction, no crash, just a `FailedScheduling` event repeating.
+A container's `resources.requests` is a **scheduling input**, not just a wish. The scheduler will only place a pod on a node that can reserve the full request for it, and a single pod's request can never exceed one node's allocatable capacity. When nothing fits, the pod stays `Pending` indefinitely, no eviction, no crash, just a `FailedScheduling` event repeating.
 
-Here the CPU request is far larger than this node can offer, so it can never be satisfied. (Resources are one way a pod's own spec can wedge it; a bogus `command`/`args` that overrides the image entrypoint is another, so it's worth a glance at those fields too whenever a pod misbehaves for no external reason.)
+Don't fix this from the word `Pending` alone. Use the scheduler event to identify which resource does not fit, then compare the request in the Deployment with the node's allocatable capacity. Once you can point to the impossible number, you have the field to change.
 
 ::
 
@@ -362,7 +363,11 @@ kubectl logs -l app=klustered -c wait-for-db
 kubectl get deploy klustered -o jsonpath='{.spec.template.spec.initContainers[0].command}{"\n"}'
 ```
 
-It's clearly waiting on something. Look at exactly what host and port it's trying to reach, then check that against the Services that actually exist (`kubectl get svc`).
+It's clearly waiting on something. Look at exactly what host and port it's trying to reach, then check that literal name against the Services that actually exist:
+
+```bash
+kubectl get svc
+```
 
 ::
 
@@ -371,9 +376,9 @@ It's clearly waiting on something. Look at exactly what host and port it's tryin
 :summary: "Hint 2: The Concept"
 ---
 
-Init containers run **to completion, in order**, before any app container starts. If one never exits, the pod is parked at `Init:0/1` forever. This one waits for the database with `until nc -z <host> 5432; do sleep 2; done`, a perfectly reasonable gate, but the host it's dialing has to actually resolve.
+Init containers run **to completion, in order**, before any app container starts. If one never exits, the pod is parked at `Init:0/1` forever. This one waits for the database with `until nc -z <host> 5432; do sleep 2; done`, a reasonable gate only if `<host>` resolves and accepts a connection.
 
-Service DNS names are **literal**. A name that's close to the real Service but not exact resolves to nothing, `nc` fails every iteration, and the loop never ends. Compare the host in the command to the name of the Postgres Service character by character.
+Service DNS names are **literal**. Before opening the fix, write down the hostname from the init command and the actual `metadata.name` of the Postgres Service. If those strings differ, `nc` will fail every iteration and the loop will never end.
 
 ::
 
@@ -412,7 +417,7 @@ kubectl describe pod -l app=klustered
 kubectl get deploy klustered -o jsonpath='{.spec.template.spec.containers[0]}{"\n"}'
 ```
 
-`describe` will show you why the pod isn't ready. Then look at the container: which port does it say it serves on, and is everything that's supposed to talk to that port actually pointed at it?
+`describe` will show you why the pod isn't ready. Then compare the related fields: which port is the readiness probe testing, which port does the Service target, and which port does the app manifest declare? Treat `containerPort` as a clue, not proof that the process is listening there.
 
 ::
 
@@ -423,7 +428,7 @@ kubectl get deploy klustered -o jsonpath='{.spec.template.spec.containers[0]}{"\
 
 A pod joins its Service's endpoint list only once it is **Ready**, and readiness is decided by the readiness probe. Point that probe at a port (or socket) nothing is listening on and it fails forever: the pod never goes `Ready`, never lands in the endpoints, and the Service quietly routes to nothing. There's no error on the Service itself, just an empty endpoint list and a `curl` that hangs or refuses.
 
-The app serves on its declared `containerPort`. The readiness probe is checking somewhere else. One of the two is pointed at the wrong place, and since the app is the thing actually listening, it's the probe that needs to move.
+`containerPort` does not make a process bind a port; it documents the port Kubernetes objects are expected to use. In this lab, the Service and the app declaration agree, while the readiness probe is testing a different socket. The field keeping the pod out of endpoints is the probe port.
 
 ::
 
@@ -468,7 +473,7 @@ kubectl logs deploy/klustered
 kubectl logs deploy/database
 ```
 
-The app's log spells out exactly how Postgres is turning it away. That phrasing is the difference between "I can't find the database" and "the database won't let me in", and it points you at which part of the database's configuration to interrogate, not its networking.
+The app's log spells out exactly how Postgres is turning it away. That phrasing is the difference between "I can't find the database" and "the database won't let me in". Decide which category you are seeing before you inspect anything else.
 
 ::
 
@@ -477,16 +482,23 @@ The app's log spells out exactly how Postgres is turning it away. That phrasing 
 :summary: "Hint 2: The Concept"
 ---
 
-The app authenticates to Postgres as a fixed user and password. Postgres sets that superuser password exactly once, when it first initialises an empty data directory, from the `POSTGRES_PASSWORD` env var. If the value it was initialised with isn't the one the app sends, every connection is rejected with an authentication error, while the database itself stays perfectly healthy. That's why nothing looked wrong until now.
+The app authenticates to Postgres as a fixed user and password. Postgres sets that superuser password when it first initialises an empty data directory, from the `POSTGRES_PASSWORD` env var. If the value it was initialised with isn't the one the app sends, every connection is rejected with an authentication error, while the database itself stays perfectly healthy. That's why nothing looked wrong until now.
 
-So inspect how that env var is built:
+So inspect how that env var is built, but pause on the output before opening the fix:
 
 ```bash
 kubectl get deploy database -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}{" = "}{.value}{.valueFrom.secretKeyRef.key}{"\n"}{end}'
 kubectl get secret postgres-credentials -o jsonpath='{.data.password}' | base64 -d; echo
 ```
 
-Notice anything odd about `POSTGRES_PASSWORD`? It's declared **twice**: once correctly from the Secret, and once as a stray literal. When the same env name appears more than once, Kubernetes keeps the **last** one, so the literal silently wins and the Secret value is thrown away. The Secret holds exactly what the app expects; the literal is the impostor.
+Answer these from what you see:
+
+- How many `POSTGRES_PASSWORD` entries are present?
+- Which entry comes from the Secret?
+- Which entry is a plain literal?
+- Which value will the container actually receive?
+
+Kubernetes accepts the duplicate-name list, and duplicate names are easy to miss because the pod still becomes healthy. In this manifest, list order is the trap.
 
 ::
 
@@ -532,7 +544,7 @@ This is the goal of the level. The cluster is healthy, the app is serving a quot
 
 A Deployment's pod template is the source of truth for what runs. Change the image tag and Kubernetes performs a rolling update: it creates a new ReplicaSet, scales it up, scales the old one down, and keeps the old pods serving until the new ones are `Ready`. If a rollout ever seems to hang, `kubectl rollout status` tells you why, and `kubectl rollout undo` walks it back.
 
-Watch the new pod become `Ready` before the old one goes away, that's readiness gating the rollout, the same mechanism you fixed in Step 3. It's worth remembering that a bad `command`/`args` or an infeasible resource request in the new template (exactly the breaks from Steps 1 and 3) can silently stall a rollout: the old pods keep serving while the new ReplicaSet never goes `Ready`.
+Watch the new pod become `Ready` before the old one goes away, that's readiness gating the rollout, the same mechanism you fixed in Step 3. It's worth remembering that a bad pod template can stall a rollout: an infeasible resource request like Step 1, or a failing readiness probe like Step 3, leaves the old pods serving while the new ReplicaSet never goes `Ready`.
 
 ::
 
