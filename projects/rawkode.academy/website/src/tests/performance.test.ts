@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -16,6 +16,24 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).toContain("requestIdleCallback");
 		expect(source).toContain("respect_dnt: true");
 		expect(source).not.toContain("type=\"text/partytown\"");
+	});
+
+	it("emits explicit canonical PostHog pageviews without consent hooks", () => {
+		const source = readProjectFile("src/components/posthog/index.astro");
+		const globals = readProjectFile("src/types/global.d.ts");
+
+		expect(source).toContain("capture_pageview: false");
+		expect(source).toContain('window.posthog.capture("page_view"');
+		expect(source).toContain("path: location.pathname");
+		expect(source).toContain("title: document.title");
+		expect(source).toContain("url: location.href");
+		expect(source).toContain('referrer: document.referrer || ""');
+		expect(source).not.toContain("enablePostHog");
+		expect(globals).not.toContain("enablePostHog");
+		expect(globals).not.toContain("enableGrafanaFaro");
+		expect(
+			existsSync(resolve(PROJECT_ROOT, "src/components/consent/banner.astro")),
+		).toBe(false);
 	});
 
 	it("loads Grafana SDKs lazily via dynamic imports", () => {

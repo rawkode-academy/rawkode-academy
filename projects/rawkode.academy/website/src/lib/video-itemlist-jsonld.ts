@@ -13,11 +13,13 @@ export interface BuildVideoItemListJsonLdInput {
 	listName: string;
 	videos: ReadonlyArray<VideoListEntry>;
 	thumbnailBaseUrl?: string;
+	videoBaseUrl?: string;
 	limit?: number;
 }
 
 const DEFAULT_LIMIT = 20;
 const DEFAULT_THUMBNAIL_BASE = "https://content.rawkode.academy/videos";
+const DEFAULT_VIDEO_BASE = "https://content.rawkode.academy/videos";
 const PUBLISHER_NAME = "Rawkode Academy";
 
 function joinUrl(base: string, path: string): string {
@@ -69,6 +71,7 @@ export function buildVideoItemListJsonLd(
 		listName,
 		videos,
 		thumbnailBaseUrl = DEFAULT_THUMBNAIL_BASE,
+		videoBaseUrl = DEFAULT_VIDEO_BASE,
 		limit = DEFAULT_LIMIT,
 	} = input;
 
@@ -79,6 +82,7 @@ export function buildVideoItemListJsonLd(
 	const itemListElement = ordered.map((video, index) => {
 		const videoUrl = joinUrl(siteUrl, `/watch/${video.slug}`);
 		const thumbnailUrl = `${thumbnailBaseUrl}/${video.id}/thumbnail.webp`;
+		const contentUrl = `${videoBaseUrl}/${video.id}/stream.m3u8`;
 		const uploadDate = new Date(video.publishedAt).toISOString();
 		const isoDuration = secondsToIsoVideoDuration(video.duration);
 		const item: Record<string, unknown> = {
@@ -87,6 +91,7 @@ export function buildVideoItemListJsonLd(
 			description: video.description,
 			thumbnailUrl,
 			uploadDate,
+			contentUrl,
 			url: videoUrl,
 			mainEntityOfPage: { "@type": "WebPage", "@id": videoUrl },
 			publisher: {

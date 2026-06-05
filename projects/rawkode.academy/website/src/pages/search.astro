@@ -7,6 +7,7 @@ import EditorialButton from "@/components/ui/EditorialButton.vue";
 import Page from "@/wrappers/page.astro";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
 const normalizedQuery = searchQuery.toLowerCase();
@@ -18,7 +19,7 @@ const results = normalizedQuery
 		})
 	: [];
 
-if (normalizedQuery) {
+if (shouldCaptureSearchAnalytics(searchQuery)) {
 	const analytics = env.ANALYTICS as Fetcher | undefined;
 	await captureServerEvent(
 		{

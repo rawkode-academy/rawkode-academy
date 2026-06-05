@@ -9,6 +9,8 @@ interface Props {
 	documentation?: string | undefined;
 	category?: string | undefined;
 	subcategory?: string | undefined;
+	aliases?: string[] | undefined;
+	terms?: string[] | undefined;
 	license?: string | undefined;
 	cncfStatus?: string | undefined;
 	matrixStatus?: string | undefined;
@@ -26,6 +28,8 @@ const {
 	documentation,
 	category,
 	subcategory,
+	aliases = [],
+	terms = [],
 	license,
 	cncfStatus,
 	matrixStatus,
@@ -37,8 +41,15 @@ const sameAs = [website, source, documentation].filter(
 	(v): v is string => Boolean(v),
 );
 
-const keywords = [category, subcategory, cncfStatus ? `cncf ${cncfStatus}` : undefined]
+const keywords = [
+	category,
+	subcategory,
+	cncfStatus,
+	...aliases,
+	...terms,
+]
 	.filter((v): v is string => Boolean(v))
+	.filter((value, index, values) => values.indexOf(value) === index)
 	.join(", ");
 
 const additionalProperty = [

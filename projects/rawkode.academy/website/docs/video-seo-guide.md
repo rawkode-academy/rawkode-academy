@@ -61,7 +61,8 @@ appear in Google Video Search results.
 - ✅ **videoFrameSize** - Resolution
 - ✅ **inLanguage** - Language code
 - ✅ **isAccessibleForFree** - No paywall
-- ✅ **hasPart** - For chapters (ready to implement)
+- ✅ **hasPart** - For chapter clips on watch pages
+- ✅ **ItemList contentUrl** - Video listing pages include the HLS content URL for each embedded VideoObject
 
 ## Best Practices Followed
 
@@ -129,6 +130,10 @@ Track these metrics in Google Search Console:
    - Watch pages now expose a transcript preview from the caption file in server-rendered HTML
    - Missing video metadata is checked via `bun run test:seo` and `bun run validate:seo`
 
+4. **Video Processing Follow-Up**
+   - Google Search Console can still report "Video not processed" for HLS-backed videos even when `contentUrl` is present.
+   - Treat those as a future media pipeline or embeddable player decision, not a schema-only warning.
+
 ## Content Operations Checklist
 
 - Every video entry must provide `id`, `slug`, `title`, `description`, `publishedAt`, and `duration`
@@ -136,7 +141,7 @@ Track these metrics in Google Search Console:
 - Publish `captions/en.vtt` alongside the video asset if you want transcript text indexed on the watch page
 - Keep chapter titles clean because they are exposed as `Clip` labels in structured data and deep-link with `?t=<seconds>`
 
-4. **Live Stream Support**
+5. **Live Stream Support**
    - Update isLiveBroadcast for live content
    - Add publication/expiration dates for live events
 
