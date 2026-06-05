@@ -5,7 +5,7 @@ This document defines the canonical pageview event and property mapping for SEO 
 ## Canonical Event
 
 - Use `page_view` as the source of truth for active website SEO reporting.
-- The event is emitted explicitly in `src/components/posthog/index.astro` after consent.
+- The event is emitted explicitly in `src/components/posthog/index.astro` after the lazy PostHog initializer runs.
 - PostHog automatic pageview capture is disabled with `capture_pageview: false`, so `page_view` is the intentional website baseline.
 
 ## Legacy Event Policy

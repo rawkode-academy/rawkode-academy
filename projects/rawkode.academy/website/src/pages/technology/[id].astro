@@ -56,6 +56,8 @@ export const getStaticPaths = (async () => {
 								documentation: e.data.documentation,
 								website: e.data.website,
 								source: e.data.source,
+								aliases: e.data.aliases,
+								terms: e.data.terms,
 								license: e.data.license,
 								category: e.data.category,
 								subcategory: e.data.subcategory,
@@ -111,6 +113,8 @@ export const getStaticPaths = (async () => {
 								documentation: fm.documentation,
 								website: fm.website,
 								source: fm.source,
+								aliases: fm.aliases,
+								terms: fm.terms,
 								license: fm.license,
 								category: fm.category,
 								subcategory: fm.subcategory,
@@ -180,6 +184,8 @@ if (!technology) {
 				documentation: e.data.documentation,
 				website: e.data.website,
 				source: e.data.source,
+				aliases: e.data.aliases,
+				terms: e.data.terms,
 				license: e.data.license,
 				category: e.data.category,
 				subcategory: e.data.subcategory,
@@ -203,6 +209,8 @@ if (!technology) {
 				documentation: fm.documentation,
 				website: fm.website,
 				source: fm.source,
+				aliases: fm.aliases,
+				terms: fm.terms,
 				license: fm.license,
 				category: fm.category,
 				subcategory: fm.subcategory,
@@ -320,6 +328,16 @@ const absoluteLogo = technology.logo
 		? technology.logo
 		: new URL(technology.logo, Astro.site).href
 	: undefined;
+const technologyKeywords = [
+	technology.name,
+	technology.category,
+	technology.subcategory,
+	cncfStatusLabel,
+	...(technology.aliases ?? []),
+	...(technology.terms ?? []),
+]
+	.filter((v): v is string => Boolean(v))
+	.filter((value, index, values) => values.indexOf(value) === index);
 
 // Status display helpers
 const statusLabels: Record<string, string> = {
@@ -397,6 +415,8 @@ const hasCommunityLinks =
 		documentation={technology.documentation}
 		category={technology.category ?? categoryLabel}
 		subcategory={technology.subcategory}
+		aliases={technology.aliases}
+		terms={technology.terms}
 		license={technology.license}
 		cncfStatus={cncfStatusLabel}
 		matrixStatus={technology.matrix?.status ? statusLabels[technology.matrix.status] ?? technology.matrix.status : undefined}
@@ -409,9 +429,7 @@ const hasCommunityLinks =
 			url={technologyUrl}
 			image={absoluteLogo}
 			about={technology.name}
-			keywords={[technology.name, technology.category, technology.subcategory, cncfStatusLabel]
-				.filter((v): v is string => Boolean(v))
-				.join(", ")}
+			keywords={technologyKeywords.join(", ")}
 		/>
 	)}
 	<Fragment slot="extra-head">

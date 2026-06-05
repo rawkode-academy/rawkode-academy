@@ -13,6 +13,8 @@ import {
 	buildVideoSummaryParagraphs,
 	buildWatchVideoSeoText,
 } from "@/utils/watch-video-seo";
+import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
+import { buildVideoClips } from "@/lib/video-clips";
 
 const TESTS_DIR = dirname(fileURLToPath(import.meta.url));
 const VIDEO_CONTENT_DIR = resolve(TESTS_DIR, "../../../../../content/videos");
@@ -280,6 +282,34 @@ describe("SEO Validation", () => {
 					}
 				}
 			}
+		});
+	});
+
+	describe("Technology Structured Data", () => {
+		it("passes technology aliases and terms into JSON-LD keywords", () => {
+			const pageSource = readFileSync(
+				resolve(TESTS_DIR, "../pages/technology/[id].astro"),
+				"utf-8",
+			);
+			const jsonLdSource = readFileSync(
+				resolve(TESTS_DIR, "../components/html/technology-jsonld.astro"),
+				"utf-8",
+			);
+			const kubeVipFrontmatter = matter(
+				readFileSync(
+					resolve(TECHNOLOGY_CONTENT_DIR, "kube-vip/index.mdx"),
+					"utf-8",
+				),
+			).data as Record<string, unknown>;
+
+			expect(pageSource).toContain("...(technology.aliases ?? [])");
+			expect(pageSource).toContain("...(technology.terms ?? [])");
+			expect(pageSource).toContain("aliases={technology.aliases}");
+			expect(pageSource).toContain("terms={technology.terms}");
+			expect(jsonLdSource).toContain("...aliases");
+			expect(jsonLdSource).toContain("...terms");
+			expect(kubeVipFrontmatter.aliases).toEqual(["kubevip", "kube vip"]);
+			expect(kubeVipFrontmatter.terms).toEqual(["kubevip", "kube vip"]);
 		});
 	});
 
@@ -880,6 +910,15 @@ describe("Crawlability and Sitemaps", () => {
 			'<Url type="application/opensearchdescription+xml" rel="self" template="https://rawkode.academy/opensearch.xml"/>',
 		);
 		expect(xml).toContain("https://rawkode.academy/favicon-16x16.png");
+	});
+
+	it("does not capture SearchAction placeholder queries as real searches", () => {
+		expect(shouldCaptureSearchAnalytics("kubernetes")).toBe(true);
+		expect(shouldCaptureSearchAnalytics("  Zitadel  ")).toBe(true);
+		expect(shouldCaptureSearchAnalytics("")).toBe(false);
+		expect(shouldCaptureSearchAnalytics("   ")).toBe(false);
+		expect(shouldCaptureSearchAnalytics("{search_term_string}")).toBe(false);
+		expect(shouldCaptureSearchAnalytics("{SEARCH_TERM_STRING}")).toBe(false);
 	});
 });
 
@@ -1489,12 +1528,33 @@ describe("Structured Data Validation", () => {
 		expect(firstItem.thumbnailUrl).toBe(
 			"https://content.rawkode.academy/videos/new-id/thumbnail.webp",
 		);
+		expect(firstItem.contentUrl).toBe(
+			"https://content.rawkode.academy/videos/new-id/stream.m3u8",
+		);
+		expect(firstItem.embedUrl).toBeUndefined();
 		expect(firstItem.uploadDate).toBe("2026-05-15T08:00:00.000Z");
 
 		const secondItem = elements[1]?.item as Record<string, unknown>;
 		expect(secondItem.duration).toBe("PT2M");
 
 		expect(() => JSON.stringify(jsonLd)).not.toThrow();
+	});
+
+	it("adds a final clip endOffset from video duration when chapters are present", () => {
+		const clips = buildVideoClips(
+			[
+				{ title: "Scale up", startTime: 900 },
+				{ title: "Intro", startTime: 0 },
+				{ title: "Wrap up", startTime: 1320 },
+			],
+			1800,
+		);
+
+		expect(clips).toEqual([
+			{ name: "Intro", startOffset: 0, endOffset: 900 },
+			{ name: "Scale up", startOffset: 900, endOffset: 1320 },
+			{ name: "Wrap up", startOffset: 1320, endOffset: 1800 },
+		]);
 	});
 
 	it("builds OPML with top-level feeds, grouped sub-feeds, and escaped attributes", async () => {
