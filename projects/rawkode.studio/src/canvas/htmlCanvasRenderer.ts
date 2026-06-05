@@ -33,6 +33,19 @@ export interface DrawHtmlOptions {
   html: string;
   bounds: Bounds;
   opacity: number;
+  transform?: HtmlDrawTransform;
+}
+
+export interface HtmlDrawTransform {
+  clipHeightRatio?: number;
+  clipWidthRatio?: number;
+  filter?: string;
+  opacity?: number;
+  rotateRadians?: number;
+  scaleX?: number;
+  scaleY?: number;
+  translateX?: number;
+  translateY?: number;
 }
 
 export async function drawHtmlFragment(
@@ -42,17 +55,48 @@ export async function drawHtmlFragment(
   const safeHtml = sanitizeHtmlFragment(options.html);
   const svg = buildSvgDocument(safeHtml, options.bounds.width, options.bounds.height);
   const image = await getCachedSvgImage(svg);
+  const transform = options.transform ?? {};
+  const scaleX = transform.scaleX ?? 1;
+  const scaleY = transform.scaleY ?? 1;
+  const width = options.bounds.width;
+  const height = options.bounds.height;
 
   context.save();
-  context.globalAlpha *= options.opacity;
+  context.globalAlpha *= options.opacity * (transform.opacity ?? 1);
+  context.filter = transform.filter ?? "none";
+  context.translate(
+    options.bounds.x + width / 2 + (transform.translateX ?? 0),
+    options.bounds.y + height / 2 + (transform.translateY ?? 0),
+  );
+  context.rotate(transform.rotateRadians ?? 0);
+  context.scale(scaleX, scaleY);
+  clipTransformedHtml(context, width, height, transform);
   context.drawImage(
     image,
-    options.bounds.x,
-    options.bounds.y,
-    options.bounds.width,
-    options.bounds.height,
+    -width / 2,
+    -height / 2,
+    width,
+    height,
   );
   context.restore();
+}
+
+function clipTransformedHtml(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  transform: HtmlDrawTransform,
+): void {
+  const clipWidth = width * (transform.clipWidthRatio ?? 1);
+  const clipHeight = height * (transform.clipHeightRatio ?? 1);
+
+  if (clipWidth >= width && clipHeight >= height) {
+    return;
+  }
+
+  context.beginPath();
+  context.rect(-width / 2, height / 2 - clipHeight, clipWidth, clipHeight);
+  context.clip();
 }
 
 function getCachedSvgImage(svg: string): Promise<HTMLImageElement> {

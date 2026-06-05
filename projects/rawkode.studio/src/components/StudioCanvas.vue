@@ -1,28 +1,51 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, watch } from "vue";
+import { animate } from "motion";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { renderProgramCanvas } from "../canvas/programRenderer";
-import type { CanvasResolution, StudioLayer } from "../types";
+import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
+import { getHitTestLayerStack } from "../studio/layerStack";
+import type { ActiveOverlay, ActiveSceneStinger, CanvasResolution, StudioLayer } from "../types";
+
+type MotionAnimationControls = ReturnType<typeof animate>;
 
 const props = defineProps<{
+  activeOverlays?: Record<string, ActiveOverlay>;
+  activeStinger?: ActiveSceneStinger;
   layers: StudioLayer[];
+  mediaStreams?: Map<string, MediaStream>;
   resolution: CanvasResolution;
   isPlaying: boolean;
   isRecording: boolean;
-  selectedLayerId?: string;
+  title: string;
+  subtitle?: string;
+  interactive?: boolean;
 }>();
 
 const emit = defineEmits<{
+  exported: [];
+  "recording-change": [recording: boolean];
   "select-layer": [id: string];
   "update-layer-bounds": [id: string, bounds: StudioLayer["bounds"]];
 }>();
 
 const canvasElement = ref<HTMLCanvasElement | null>(null);
+const frameElement = ref<HTMLElement | null>(null);
+const canvasDisplaySize = ref({ width: 0, height: 0 });
+const canRecordLocally = typeof MediaRecorder !== "undefined";
 const isDragging = ref(false);
-let frameRequest = 0;
+const isLocalRecording = ref(false);
+const overlayPhaseStarts = new Map<string, { phase: ActiveOverlay["phase"]; startedAt: number }>();
+const overlayTransitionProgresses = new Map<string, number>();
+const overlayAnimations = new Map<string, MotionAnimationControls>();
 let bufferCanvas: HTMLCanvasElement | undefined;
-let paintQueued = false;
-let paintInProgress = false;
-let paintPending = false;
+let frameResizeObserver: ResizeObserver | undefined;
+let mediaRecorder: MediaRecorder | undefined;
+let recordedChunks: BlobPart[] = [];
+let recordingOwnedTracks: MediaStreamTrack[] = [];
+const mediaVideoElements = new Map<string, HTMLVideoElement>();
+let stingerAnimation: MotionAnimationControls | undefined;
+let stingerProgress: number | undefined;
+let stingerStartedAt: number | undefined;
 let dragState:
   | {
       layerId: string;
@@ -31,26 +54,12 @@ let dragState:
       offsetY: number;
     }
   | undefined;
-
-function queuePaint(): void {
-  if (paintQueued || paintInProgress) {
-    paintPending = true;
-    return;
-  }
-
-  paintQueued = true;
-  frameRequest = requestAnimationFrame(async (timestamp) => {
-    paintQueued = false;
-    paintInProgress = true;
-    await paint(timestamp);
-    paintInProgress = false;
-
-    if (paintPending || props.isPlaying) {
-      paintPending = false;
-      queuePaint();
-    }
-  });
-}
+const renderLoop = useCanvasRenderLoop(paint, () => props.isPlaying);
+const canvasStyle = computed(() => ({
+  width: canvasDisplaySize.value.width > 0 ? `${canvasDisplaySize.value.width}px` : "100%",
+  height: canvasDisplaySize.value.height > 0 ? `${canvasDisplaySize.value.height}px` : "auto",
+  aspectRatio: `${props.resolution.width} / ${props.resolution.height}`,
+}));
 
 async function paint(timestamp = performance.now()): Promise<void> {
   const canvas = canvasElement.value;
@@ -80,9 +89,16 @@ async function paint(timestamp = performance.now()): Promise<void> {
 
   bufferContext.setTransform(ratio, 0, 0, ratio, 0, 0);
   await renderProgramCanvas(bufferContext, {
+    activeOverlays: props.activeOverlays,
+    activeStinger: props.activeStinger,
     layers: props.layers,
+    mediaVideoElements: getMediaVideoElements(),
+    overlayTransitionProgresses: getOverlayTransitionProgresses(),
+    overlayTransitionStarts: getOverlayTransitionStarts(),
     resolution: props.resolution,
     isRecording: props.isRecording,
+    stingerProgress,
+    stingerStartedAt,
     timestamp,
   });
   bufferContext.setTransform(1, 0, 0, 1, 0, 0);
@@ -115,13 +131,108 @@ function exportPng(): void {
   link.download = "rawkode-studio-program.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
+  emit("exported");
 }
 
 function captureCanvasStream(): MediaStream | undefined {
   return canvasElement.value?.captureStream(props.resolution.fps);
 }
 
+function toggleLocalRecording(): void {
+  if (isLocalRecording.value) {
+    stopLocalRecording();
+    return;
+  }
+
+  startLocalRecording();
+}
+
+function startLocalRecording(): void {
+  if (typeof MediaRecorder === "undefined") {
+    return;
+  }
+
+  const recordingStream = createRecordingStream();
+  if (!recordingStream) {
+    return;
+  }
+
+  const mimeType = getSupportedRecordingMimeType();
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+  mediaRecorder.addEventListener("dataavailable", (event) => {
+    if (event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
+  });
+  mediaRecorder.addEventListener("stop", downloadRecording);
+  mediaRecorder.start();
+  isLocalRecording.value = true;
+  emit("recording-change", true);
+}
+
+function stopLocalRecording(): void {
+  if (!mediaRecorder || mediaRecorder.state === "inactive") {
+    finishLocalRecording();
+    return;
+  }
+
+  mediaRecorder.stop();
+}
+
+function downloadRecording(): void {
+  const mimeType = mediaRecorder?.mimeType || "video/webm";
+  const blob = new Blob(recordedChunks, { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.download = `rawkode-studio-program-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
+  link.href = url;
+  link.click();
+  URL.revokeObjectURL(url);
+  finishLocalRecording();
+}
+
+function finishLocalRecording(): void {
+  for (const track of recordingOwnedTracks) {
+    track.stop();
+  }
+  recordingOwnedTracks = [];
+  mediaRecorder = undefined;
+  recordedChunks = [];
+  isLocalRecording.value = false;
+  emit("recording-change", false);
+}
+
+function createRecordingStream(): MediaStream | undefined {
+  const canvasStream = captureCanvasStream();
+  if (!canvasStream) {
+    return undefined;
+  }
+
+  const audioTracks = [...(props.mediaStreams?.values() ?? [])]
+    .flatMap((stream) => stream.getAudioTracks())
+    .filter((track) => track.readyState === "live")
+    .map((track) => track.clone());
+  recordingOwnedTracks = [...canvasStream.getTracks(), ...audioTracks];
+
+  return new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
+}
+
+function getSupportedRecordingMimeType(): string {
+  if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
+    return "";
+  }
+
+  return ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((type) =>
+    MediaRecorder.isTypeSupported(type)
+  ) ?? "";
+}
+
 function onPointerDown(event: PointerEvent): void {
+  if (!props.interactive) {
+    return;
+  }
+
   const canvasPoint = getCanvasPoint(event);
   const layer = canvasPoint ? getLayerAtPoint(canvasPoint.x, canvasPoint.y) : undefined;
   if (!canvasPoint || !layer) {
@@ -141,6 +252,10 @@ function onPointerDown(event: PointerEvent): void {
 }
 
 function onPointerMove(event: PointerEvent): void {
+  if (!props.interactive) {
+    return;
+  }
+
   if (!dragState || dragState.pointerId !== event.pointerId) {
     return;
   }
@@ -168,7 +283,7 @@ function onPointerMove(event: PointerEvent): void {
     x,
     y,
   });
-  queuePaint();
+  renderLoop.queuePaint();
 }
 
 function onPointerUp(event: PointerEvent): void {
@@ -195,10 +310,7 @@ function getCanvasPoint(event: PointerEvent): { x: number; y: number } | undefin
 }
 
 function getLayerAtPoint(x: number, y: number): StudioLayer | undefined {
-  return [...props.layers]
-    .filter((layer) => layer.enabled && layer.type !== "background")
-    .sort((left, right) => getLayerZIndex(right) - getLayerZIndex(left))
-    .find((layer) => isInsideBounds(x, y, layer));
+  return getHitTestLayerStack(props.layers).find((layer) => isInsideBounds(x, y, layer));
 }
 
 function isInsideBounds(x: number, y: number, layer: StudioLayer): boolean {
@@ -210,22 +322,6 @@ function isInsideBounds(x: number, y: number, layer: StudioLayer): boolean {
   );
 }
 
-function getLayerZIndex(layer: StudioLayer): number {
-  if (typeof layer.zIndex === "number") {
-    return layer.zIndex;
-  }
-
-  if (layer.type === "camera") {
-    return 10;
-  }
-
-  if (layer.type === "html") {
-    return 30;
-  }
-
-  return 0;
-}
-
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -233,7 +329,7 @@ function clamp(value: number, min: number, max: number): number {
 watch(
   () => props.isPlaying,
   () => {
-    queuePaint();
+    renderLoop.queuePaint();
   },
   { immediate: true },
 );
@@ -241,42 +337,283 @@ watch(
 watch(
   () => [props.layers, props.isRecording, props.resolution],
   () => {
+    updateCanvasDisplaySize();
     if (!props.isPlaying) {
-      queuePaint();
+      renderLoop.queuePaint();
     }
   },
   { deep: true },
 );
 
+watch(
+  () => props.activeOverlays ?? {},
+  (activeOverlays) => {
+    syncOverlayPhaseStarts(activeOverlays);
+    renderLoop.queuePaint();
+  },
+  { deep: true, immediate: true },
+);
+
+watch(
+  () => props.mediaStreams,
+  (streams) => {
+    syncMediaVideoElements(streams ?? new Map());
+    renderLoop.queuePaint();
+  },
+  { immediate: true },
+);
+
+watch(
+  () => getActiveStingerKey(props.activeStinger),
+  (nextKey) => {
+    stingerStartedAt = nextKey ? performance.now() : undefined;
+    syncStingerAnimation(nextKey);
+    renderLoop.queuePaint();
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  frameResizeObserver = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (!entry) {
+      return;
+    }
+
+    updateCanvasDisplaySize(entry.contentRect.width, entry.contentRect.height);
+  });
+
+  if (frameElement.value) {
+    frameResizeObserver.observe(frameElement.value);
+    updateCanvasDisplaySize();
+  }
+});
+
 onBeforeUnmount(() => {
-  cancelAnimationFrame(frameRequest);
+  if (isLocalRecording.value) {
+    stopLocalRecording();
+  }
+  clearMediaVideoElements();
+  stopOverlayAnimations();
+  stopStingerAnimation();
+  frameResizeObserver?.disconnect();
+  renderLoop.stop();
 });
 
 defineExpose({
   captureCanvasStream,
   exportPng,
 });
+
+function syncOverlayPhaseStarts(activeOverlays: Record<string, ActiveOverlay>): void {
+  const now = performance.now();
+
+  for (const [layerId, overlay] of Object.entries(activeOverlays)) {
+    const existing = overlayPhaseStarts.get(layerId);
+    if (existing?.phase === overlay.phase) {
+      continue;
+    }
+
+    overlayPhaseStarts.set(layerId, {
+      phase: overlay.phase,
+      startedAt: now,
+    });
+    startOverlayAnimation(layerId, overlay);
+  }
+
+  for (const layerId of [...overlayPhaseStarts.keys()]) {
+    if (!activeOverlays[layerId]) {
+      overlayPhaseStarts.delete(layerId);
+      stopOverlayAnimation(layerId);
+      overlayTransitionProgresses.delete(layerId);
+    }
+  }
+}
+
+function getOverlayTransitionStarts(): Map<string, number> {
+  return new Map([...overlayPhaseStarts.entries()].map(([layerId, value]) => [layerId, value.startedAt]));
+}
+
+function getOverlayTransitionProgresses(): Map<string, number> {
+  return new Map(overlayTransitionProgresses);
+}
+
+function getMediaVideoElements(): Map<string, HTMLVideoElement> {
+  return new Map(mediaVideoElements);
+}
+
+function syncMediaVideoElements(streams: Map<string, MediaStream>): void {
+  for (const [sourceId, stream] of streams) {
+    const existing = mediaVideoElements.get(sourceId);
+    if (existing?.srcObject === stream) {
+      continue;
+    }
+
+    const video = existing ?? document.createElement("video");
+    video.autoplay = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.srcObject = stream;
+    mediaVideoElements.set(sourceId, video);
+    video.play().catch(() => {
+      renderLoop.queuePaint();
+    });
+  }
+
+  for (const [sourceId, video] of mediaVideoElements) {
+    if (streams.has(sourceId)) {
+      continue;
+    }
+
+    video.pause();
+    video.srcObject = null;
+    mediaVideoElements.delete(sourceId);
+  }
+}
+
+function clearMediaVideoElements(): void {
+  for (const video of mediaVideoElements.values()) {
+    video.pause();
+    video.srcObject = null;
+  }
+  mediaVideoElements.clear();
+}
+
+function startOverlayAnimation(layerId: string, overlay: ActiveOverlay): void {
+  stopOverlayAnimation(layerId);
+
+  if (overlay.phase === "visible") {
+    overlayTransitionProgresses.set(layerId, 1);
+    return;
+  }
+
+  const transition = overlay.phase === "entering" ? overlay.lifecycle.enter : overlay.lifecycle.exit;
+  const duration = transition?.durationSeconds ?? 0;
+
+  if (duration <= 0) {
+    overlayTransitionProgresses.set(layerId, 1);
+    return;
+  }
+
+  overlayTransitionProgresses.set(layerId, 0);
+  const controls = animate(0, 1, {
+    duration,
+    ease: "circInOut",
+    onUpdate(value) {
+      overlayTransitionProgresses.set(layerId, value);
+      renderLoop.queuePaint();
+    },
+    onComplete() {
+      overlayTransitionProgresses.set(layerId, 1);
+      overlayAnimations.delete(layerId);
+      renderLoop.queuePaint();
+    },
+  });
+  overlayAnimations.set(layerId, controls);
+}
+
+function stopOverlayAnimation(layerId: string): void {
+  overlayAnimations.get(layerId)?.stop();
+  overlayAnimations.delete(layerId);
+}
+
+function stopOverlayAnimations(): void {
+  for (const layerId of [...overlayAnimations.keys()]) {
+    stopOverlayAnimation(layerId);
+  }
+}
+
+function syncStingerAnimation(nextKey: string): void {
+  stopStingerAnimation();
+
+  if (!nextKey || !props.activeStinger) {
+    stingerProgress = undefined;
+    return;
+  }
+
+  stingerProgress = 0;
+  stingerAnimation = animate(0, 1, {
+    duration: props.activeStinger.effect.durationSeconds ?? 2,
+    ease: "circInOut",
+    onUpdate(value) {
+      stingerProgress = value;
+      renderLoop.queuePaint();
+    },
+    onComplete() {
+      stingerProgress = 1;
+      stingerAnimation = undefined;
+      renderLoop.queuePaint();
+    },
+  });
+}
+
+function stopStingerAnimation(): void {
+  stingerAnimation?.stop();
+  stingerAnimation = undefined;
+}
+
+function getActiveStingerKey(stinger: ActiveSceneStinger | undefined): string {
+  if (!stinger) {
+    return "";
+  }
+
+  return `${stinger.fromSceneId}:${stinger.toSceneId}:${stinger.effect.transition}`;
+}
+
+function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, height = frameElement.value?.clientHeight ?? 0): void {
+  if (width <= 0 || height <= 0) {
+    return;
+  }
+
+  const aspectRatio = props.resolution.width / props.resolution.height;
+  const widthLimitedHeight = width / aspectRatio;
+
+  canvasDisplaySize.value =
+    widthLimitedHeight <= height
+      ? {
+          width,
+          height: widthLimitedHeight,
+        }
+      : {
+          width: height * aspectRatio,
+          height,
+        };
+}
 </script>
 
 <template>
-  <section class="canvas-deck" aria-label="Program canvas">
+  <section class="canvas-deck" :aria-label="title">
     <div class="canvas-toolbar">
       <div>
-        <strong>Program Canvas</strong>
-        <span>HTML compositor</span>
+        <strong>{{ title }}</strong>
+        <span>{{ subtitle ?? "HTML compositor" }}</span>
       </div>
-      <div class="canvas-meter" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-        <span />
+      <div class="canvas-actions">
+        <button class="secondary-button compact" type="button" @click="exportPng">
+          Export PNG
+        </button>
+        <button
+          class="record-button compact"
+          :class="{ active: isLocalRecording }"
+          type="button"
+          :disabled="!canRecordLocally"
+          @click="toggleLocalRecording"
+        >
+          {{ isLocalRecording ? "Stop" : "Record" }}
+        </button>
+        <div class="canvas-meter" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     </div>
-    <div class="canvas-frame">
+    <div ref="frameElement" class="canvas-frame">
       <canvas
         ref="canvasElement"
-        :class="{ dragging: isDragging }"
-        :style="{ aspectRatio: `${resolution.width} / ${resolution.height}` }"
+        :class="{ dragging: isDragging, interactive }"
+        :style="canvasStyle"
         @pointerdown="onPointerDown"
         @pointermove="onPointerMove"
         @pointerup="onPointerUp"

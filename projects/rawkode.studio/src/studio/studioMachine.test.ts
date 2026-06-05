@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { StudioSource } from "../types";
 import { createInitialStudioState } from "./seed";
-import { compileScenes, defineScene, layouts, people } from "./scenes/sceneDsl";
+import { actions, compileScenes, defineScene, layouts, media, overlays, people, transitions } from "./scenes/sceneDsl";
 import { getScene, getSceneLayers, getSelectedLayer, reduceStudioState } from "./studioMachine";
 
 describe("studioMachine", () => {
@@ -15,45 +15,197 @@ describe("studioMachine", () => {
     ]);
   });
 
-  it("cuts selected scenes directly to program while designing", () => {
-    const state = reduceStudioState(createInitialStudioState(), {
+  it("seeds each scene with a distinct outgoing stinger", () => {
+    expect(createInitialStudioState().scenes.map((scene) => [scene.id, scene.stinger])).toEqual([
+      [
+        "intro",
+        {
+          direction: "left",
+          durationSeconds: 2,
+          kind: "motion-transition",
+          transition: "slide",
+        },
+      ],
+      [
+        "monologue",
+        {
+          durationSeconds: 2,
+          kind: "motion-transition",
+          transition: "fade",
+        },
+      ],
+      [
+        "guests",
+        {
+          axis: "y",
+          durationSeconds: 2,
+          kind: "motion-transition",
+          transition: "flip",
+        },
+      ],
+      [
+        "screenshare",
+        {
+          durationSeconds: 2,
+          kind: "motion-transition",
+          transition: "typewriter",
+        },
+      ],
+      [
+        "outro",
+        {
+          direction: "right",
+          durationSeconds: 2,
+          kind: "motion-transition",
+          transition: "cube-spin",
+        },
+      ],
+    ]);
+  });
+
+  it("switches selected scenes to program at stinger midpoint while designing", () => {
+    const transitioning = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
 
-    expect(state.previewSceneId).toBe("monologue");
-    expect(state.programSceneId).toBe("monologue");
-    expect(getSelectedLayer(state)?.id).toBe("monologue-lower-third");
-    expect(state.status).toBe("Monologue on program");
+    expect(transitioning.previewSceneId).toBe("monologue");
+    expect(transitioning.programSceneId).toBe("intro");
+    expect(transitioning.activeStinger).toMatchObject({
+      fromSceneId: "intro",
+      toSceneId: "monologue",
+    });
+    expect(getSelectedLayer(transitioning)?.id).toBe("monologue-lower-third");
+    expect(transitioning.status).toBe("Monologue transition started");
+
+    const midpoint = reduceStudioState(transitioning, { type: "stinger.midpoint" });
+    expect(midpoint.programSceneId).toBe("monologue");
+    expect(midpoint.activeStinger).toBeDefined();
+    expect(midpoint.status).toBe("Monologue on program");
+
+    expect(reduceStudioState(midpoint, { type: "stinger.finished" }).activeStinger).toBeUndefined();
   });
 
-  it("stages scene changes during recording until take", () => {
+  it("keeps recording scene changes on the old program until stinger midpoint", () => {
     const recording = reduceStudioState(createInitialStudioState(), {
       type: "recording.toggle",
     });
-    const staged = reduceStudioState(recording, {
+    const transitioning = reduceStudioState(recording, {
       type: "scene.select",
       sceneId: "screenshare",
     });
 
-    expect(staged.phase).toBe("recording");
-    expect(staged.previewSceneId).toBe("screenshare");
-    expect(staged.programSceneId).toBe("intro");
-    expect(staged.status).toBe("Screenshare staged");
+    expect(transitioning.phase).toBe("recording");
+    expect(transitioning.previewSceneId).toBe("screenshare");
+    expect(transitioning.programSceneId).toBe("intro");
+    expect(transitioning.status).toBe("Screenshare transition started");
 
-    const taken = reduceStudioState(staged, { type: "scene.take" });
-    expect(taken.programSceneId).toBe("screenshare");
-    expect(taken.status).toBe("Screenshare taken to program");
+    const midpoint = reduceStudioState(transitioning, { type: "stinger.midpoint" });
+    expect(midpoint.programSceneId).toBe("screenshare");
+    expect(midpoint.status).toBe("Screenshare on program");
+  });
+
+  it("compiles Remotion scenes and motion-transition stingers from TypeScript scene definitions", () => {
+    const state = createInitialStudioState();
+    const document = compileScenes({
+      definitions: [
+        defineScene({
+          id: "intro",
+          name: "Intro",
+          transition: "fade",
+          stinger: transitions.fade(0.9),
+          layout: layouts.remotion("rawkode-intro", {
+            title: "Rawkode Live",
+            subtitle: "Composable cloud native systems",
+          }),
+        }),
+        defineScene({
+          id: "monologue",
+          name: "Monologue",
+          transition: "cut",
+          stinger: transitions.slide("left", 0.35),
+          layout: layouts.solo(people.selector("hosts")),
+        }),
+      ],
+      resolution: state.resolution,
+      sources: state.sources,
+    });
+
+    expect(document.scenes[0].stinger).toEqual({
+      kind: "motion-transition",
+      transition: "fade",
+      durationSeconds: 0.9,
+    });
+    expect(document.layers.find((layer) => layer.id === "intro-remotion")).toMatchObject({
+      id: "intro-remotion",
+      name: "Intro",
+      type: "remotion",
+      sourceId: "source-rawkode-intro",
+      settings: {
+        remotion: {
+          compositionId: "rawkode-intro",
+          title: "Rawkode Live",
+          subtitle: "Composable cloud native systems",
+        },
+      },
+    });
+    expect(document.scenes[1].stinger).toEqual({
+      direction: "left",
+      kind: "motion-transition",
+      transition: "slide",
+      durationSeconds: 0.35,
+    });
+  });
+
+  it("activates a scene stinger when switching away from the current program scene", () => {
+    const initial = createInitialStudioState();
+    const state = {
+      ...initial,
+      scenes: initial.scenes.map((scene) =>
+        scene.id === "intro"
+          ? {
+              ...scene,
+              stinger: {
+                kind: "motion-transition" as const,
+                transition: "wipe" as const,
+                direction: "right" as const,
+                durationSeconds: 0.9,
+              },
+            }
+          : scene,
+      ),
+    };
+    const switched = reduceStudioState(state, {
+      type: "scene.select",
+      sceneId: "monologue",
+    });
+
+    expect(switched.programSceneId).toBe("intro");
+    expect(switched.activeStinger).toEqual({
+      fromSceneId: "intro",
+      toSceneId: "monologue",
+      effect: {
+        kind: "motion-transition",
+        transition: "wipe",
+        direction: "right",
+        durationSeconds: 0.9,
+      },
+    });
+
+    const midpoint = reduceStudioState(switched, { type: "stinger.midpoint" });
+    expect(midpoint.programSceneId).toBe("monologue");
+    expect(midpoint.activeStinger).toEqual(switched.activeStinger);
+    expect(reduceStudioState(midpoint, { type: "stinger.finished" }).activeStinger).toBeUndefined();
   });
 
   it("does not move locked layers", () => {
     const state = reduceStudioState(createInitialStudioState(), {
       type: "layer.bounds.update",
-      layerId: "intro-video",
+      layerId: "intro-remotion",
       bounds: { x: 400, y: 300, width: 300, height: 200 },
     });
 
-    expect(state.layers.find((layer) => layer.id === "intro-video")?.bounds).toEqual({
+    expect(state.layers.find((layer) => layer.id === "intro-remotion")?.bounds).toEqual({
       x: 0,
       y: 0,
       width: 1920,
@@ -61,17 +213,277 @@ describe("studioMachine", () => {
     });
   });
 
-  it("duplicates scenes with independent layer instances", () => {
-    const state = reduceStudioState(createInitialStudioState(), {
-      type: "scene.duplicate",
+  it("runs media end hooks that change scenes", () => {
+    const initial = createInitialStudioState();
+    const state = {
+      ...initial,
+      layers: initial.layers.map((layer) =>
+        layer.id === "intro-remotion"
+          ? {
+              ...layer,
+              settings: {
+                ...layer.settings,
+                media: {
+                  onEnd: [actions.changeScene("monologue")],
+                },
+              },
+            }
+          : layer,
+      ),
+    };
+    const changed = reduceStudioState(state, {
+      type: "media.finished",
+      layerId: "intro-remotion",
+    });
+
+    expect(changed.previewSceneId).toBe("monologue");
+    expect(changed.programSceneId).toBe("intro");
+    expect(changed.activeStinger?.toSceneId).toBe("monologue");
+    expect(changed.status).toBe("Intro finished; changing to Monologue");
+
+    const midpoint = reduceStudioState(changed, { type: "stinger.midpoint" });
+    expect(midpoint.programSceneId).toBe("monologue");
+    expect(midpoint.status).toBe("Monologue on program");
+  });
+
+  it("queues named hooks from media end actions", () => {
+    const initial = createInitialStudioState();
+    const state = {
+      ...initial,
+      layers: initial.layers.map((layer) =>
+        layer.id === "intro-remotion"
+          ? {
+              ...layer,
+              settings: {
+                ...layer.settings,
+                media: {
+                  onEnd: [actions.runHook("fade-intro-audio")],
+                },
+              },
+            }
+          : layer,
+      ),
+    };
+    const updated = reduceStudioState(state, {
+      type: "media.finished",
+      layerId: "intro-remotion",
+    });
+
+    expect(updated.lastHookId).toBe("fade-intro-audio");
+    expect(updated.status).toBe("Intro finished; hook fade-intro-audio queued");
+  });
+
+  it("compiles audio media layers with typed finish hooks", () => {
+    const state = createInitialStudioState();
+    const sources: StudioSource[] = [
+      ...state.sources,
+      {
+        id: "source-intro-bed",
+        name: "Intro Bed",
+        type: "audio",
+        status: "ready",
+      },
+    ];
+    const document = compileScenes({
+      definitions: [
+        defineScene({
+          id: "intro",
+          name: "Intro",
+          transition: "fade",
+          layout: layouts.remotion("rawkode-intro", {
+            title: "Rawkode Live",
+            onEnd: actions.changeScene("monologue"),
+          }),
+          media: [
+            media.audio("intro-bed", "source-intro-bed", {
+              name: "Intro Bed",
+              onEnd: actions.runHook("duck-background-music"),
+            }),
+          ],
+        }),
+      ],
+      resolution: state.resolution,
+      sources,
+    });
+    const remotionLayer = document.layers.find((layer) => layer.id === "intro-remotion");
+    const audio = document.layers.find((layer) => layer.id === "intro-intro-bed");
+
+    expect(remotionLayer?.settings?.media?.onEnd).toEqual([actions.changeScene("monologue")]);
+    expect(remotionLayer?.settings?.remotion).toMatchObject({
+      compositionId: "rawkode-intro",
+      title: "Rawkode Live",
+    });
+    expect(audio).toMatchObject({
+      id: "intro-intro-bed",
+      name: "Intro Bed",
+      type: "audio",
+      sourceId: "source-intro-bed",
+      locked: true,
+    });
+    expect(audio?.settings?.media?.onEnd).toEqual([actions.runHook("duck-background-music")]);
+  });
+
+  it("compiles lower-third enter, visible, and exit timing from scene code", () => {
+    const state = createInitialStudioState();
+    const document = compileScenes({
+      definitions: [
+        defineScene({
+          id: "monologue",
+          name: "Monologue",
+          transition: "cut",
+          layout: layouts.solo(people.selector("hosts"), {
+            lowerThird: overlays.lowerThird({
+              enter: transitions.fade(0.22),
+              visibleSeconds: 9,
+              exit: transitions.fade(0.18),
+            }),
+          }),
+        }),
+      ],
+      resolution: state.resolution,
+      sources: state.sources,
+    });
+    const lowerThird = document.layers.find((layer) => layer.id === "monologue-lower-third");
+
+    expect(lowerThird?.settings?.overlay).toEqual({
+      role: "lower-third",
+      lifecycle: {
+        enter: {
+          kind: "motion-transition",
+          transition: "fade",
+          durationSeconds: 0.22,
+        },
+        visibleSeconds: 9,
+        exit: {
+          kind: "motion-transition",
+          transition: "fade",
+          durationSeconds: 0.18,
+        },
+      },
+    });
+  });
+
+  it("compiles hidden lower-third layers for Remotion scenes", () => {
+    const state = createInitialStudioState();
+    const introLayers = getSceneLayers(state, "intro");
+    const outroLayers = getSceneLayers(state, "outro");
+
+    expect(introLayers.map((layer) => layer.id)).toEqual(["intro-remotion", "intro-lower-third"]);
+    expect(outroLayers.map((layer) => layer.id)).toEqual(["outro-remotion", "outro-lower-third"]);
+    expect(introLayers.find((layer) => layer.id === "intro-lower-third")).toMatchObject({
+      enabled: false,
+      sourceId: "source-lower-third",
+      type: "html",
+    });
+    expect(outroLayers.find((layer) => layer.id === "outro-lower-third")).toMatchObject({
+      enabled: false,
+      sourceId: "source-lower-third",
+      type: "html",
+    });
+  });
+
+  it("offers the production overlay transition catalogue as scene-code helpers", () => {
+    expect(transitions.slide("left", 0.25)).toEqual({
+      direction: "left",
+      kind: "motion-transition",
+      transition: "slide",
+      durationSeconds: 0.25,
+    });
+    expect(transitions.fade(0.2)).toEqual({
+      kind: "motion-transition",
+      transition: "fade",
+      durationSeconds: 0.2,
+    });
+    expect(transitions.flip("y", 0.34)).toEqual({
+      axis: "y",
+      kind: "motion-transition",
+      transition: "flip",
+      durationSeconds: 0.34,
+    });
+    expect(transitions.typewriter(0.8)).toEqual({
+      kind: "motion-transition",
+      transition: "typewriter",
+      durationSeconds: 0.8,
+    });
+    expect(transitions.cubeSpin("right", 0.45)).toEqual({
+      direction: "right",
+      kind: "motion-transition",
+      transition: "cube-spin",
+      durationSeconds: 0.45,
+    });
+    expect(transitions.wipe("up", 0.3)).toEqual({
+      direction: "up",
+      kind: "motion-transition",
+      transition: "wipe",
+      durationSeconds: 0.3,
+    });
+    expect(transitions.scale(0.24)).toEqual({
+      kind: "motion-transition",
+      transition: "scale",
+      durationSeconds: 0.24,
+    });
+    expect(transitions.blur(0.26)).toEqual({
+      kind: "motion-transition",
+      transition: "blur",
+      durationSeconds: 0.26,
+    });
+    expect(transitions.glitch(0.3)).toEqual({
+      kind: "motion-transition",
+      transition: "glitch",
+      durationSeconds: 0.3,
+    });
+    expect(transitions.pop(0.18)).toEqual({
+      kind: "motion-transition",
+      transition: "pop",
+      durationSeconds: 0.18,
+    });
+  });
+
+  it("tracks lower-third overlay phases until the exit transition completes", () => {
+    const monologue = reduceStudioState(createInitialStudioState(), {
+      type: "scene.select",
       sceneId: "monologue",
     });
-    const copiedScene = getScene(state, "monologue-copy");
+    const shown = reduceStudioState(
+      reduceStudioState(monologue, {
+        type: "lowerThird.comment.update",
+        value: "Show this comment",
+      }),
+      { type: "lowerThird.show" },
+    );
 
-    expect(copiedScene?.name).toBe("Monologue Copy");
-    expect(copiedScene?.layerIds).not.toContain("monologue-lower-third");
-    expect(copiedScene?.layerIds.some((id) => id.startsWith("monologue-lower-third-copy"))).toBe(true);
-    expect(state.programSceneId).toBe("monologue-copy");
+    expect(shown.activeOverlays["monologue-lower-third"]).toMatchObject({
+      layerId: "monologue-lower-third",
+      phase: "entering",
+      lifecycle: {
+        enter: {
+          direction: "up",
+          kind: "motion-transition",
+          transition: "slide",
+          durationSeconds: 0.22,
+        },
+        visibleSeconds: 8,
+      },
+    });
+
+    const visible = reduceStudioState(shown, {
+      type: "overlay.entered",
+      layerId: "monologue-lower-third",
+    });
+    expect(visible.activeOverlays["monologue-lower-third"]?.phase).toBe("visible");
+
+    const exiting = reduceStudioState(visible, {
+      type: "overlay.expire",
+      layerId: "monologue-lower-third",
+    });
+    expect(exiting.activeOverlays["monologue-lower-third"]?.phase).toBe("exiting");
+
+    const hidden = reduceStudioState(exiting, {
+      type: "overlay.exited",
+      layerId: "monologue-lower-third",
+    });
+    expect(hidden.activeOverlays["monologue-lower-third"]).toBeUndefined();
+    expect(hidden.layers.find((layer) => layer.id === "monologue-lower-third")?.enabled).toBe(false);
   });
 
   it("uses scene-owned camera layer instances for monologue and guests layouts", () => {
@@ -98,6 +510,8 @@ describe("studioMachine", () => {
 
     expect(screen?.bounds.width).toBeGreaterThan(1600);
     expect(screen?.bounds.height).toBeGreaterThan(780);
+    expect(screen?.sourceId).toBe("source-host-screen-share");
+    expect(state.activeScreenShareSourceId).toBe("source-host-screen-share");
     expect(cameras.map((layer) => layer.id)).toEqual([
       "screenshare-host-camera",
       "screenshare-guest-camera",
@@ -107,6 +521,22 @@ describe("studioMachine", () => {
     expect(enabledCameras).toHaveLength(3);
     expect(enabledCameras.every((camera) => camera.bounds.width < 320 && camera.bounds.height < 220)).toBe(true);
     expect(cameras.find((layer) => layer.id === "screenshare-producer-camera")?.enabled).toBe(false);
+  });
+
+  it("switches the screenshare scene to a runtime captured screen source", () => {
+    const state = reduceStudioState(createInitialStudioState(), {
+      type: "screenShare.source.select",
+      sourceId: "source-runtime-screen-1",
+      name: "Guest laptop",
+    });
+    const screen = getSceneLayers(state, "screenshare").find((layer) => layer.type === "screen");
+
+    expect(state.activeScreenShareSourceId).toBe("source-runtime-screen-1");
+    expect(screen).toMatchObject({
+      label: "Guest laptop",
+      sourceId: "source-runtime-screen-1",
+    });
+    expect(state.status).toBe("Guest laptop selected");
   });
 
   it("expands guests dynamic grid when a camera is hidden", () => {
@@ -215,31 +645,7 @@ describe("studioMachine", () => {
     expect(enabledCameras.every((layer) => layer.bounds.height === 162)).toBe(true);
   });
 
-  it("updates the active scene lower third after duplication", () => {
-    const copied = reduceStudioState(createInitialStudioState(), {
-      type: "scene.duplicate",
-      sceneId: "monologue",
-    });
-    const updatedDraft = reduceStudioState(copied, {
-      type: "lowerThird.comment.update",
-      value: "Only on the duplicated monologue",
-    });
-    const shown = reduceStudioState(updatedDraft, { type: "lowerThird.show" });
-    const copiedLowerThirdId = getScene(shown, "monologue-copy")?.layerIds.find((id) =>
-      id.startsWith("monologue-lower-third-copy"),
-    );
-
-    expect(copiedLowerThirdId).toBeDefined();
-    expect(shown.selectedLayerId).toBe(copiedLowerThirdId);
-    expect(shown.layers.find((layer) => layer.id === copiedLowerThirdId)?.html).toContain(
-      "Only on the duplicated monologue",
-    );
-    expect(shown.layers.find((layer) => layer.id === "monologue-lower-third")?.html).not.toContain(
-      "Only on the duplicated monologue",
-    );
-  });
-
-  it("reorders scene layers and updates z-index for rendering", () => {
+  it("reorders scene layers by updating the canonical layer order", () => {
     const state = reduceStudioState(
       reduceStudioState(createInitialStudioState(), {
         type: "scene.select",
@@ -254,7 +660,6 @@ describe("studioMachine", () => {
     const scene = getScene(state, "guests");
 
     expect(scene?.layerIds.indexOf("guests-lower-third")).toBe(4);
-    expect(state.layers.find((layer) => layer.id === "guests-lower-third")?.zIndex).toBe(40);
   });
 
   it("moves layers by drag/drop target placement", () => {
@@ -280,7 +685,6 @@ describe("studioMachine", () => {
       "guests-second-guest-camera",
       "guests-producer-camera",
     ]);
-    expect(state.layers.find((layer) => layer.id === "guests-lower-third")?.zIndex).toBe(20);
   });
 
   it("renders comment input into the active scene lower third layer through an event", () => {
@@ -300,6 +704,44 @@ describe("studioMachine", () => {
     expect(withComment.htmlDraft).toContain("Drag this into the programme");
     expect(withComment.layers.find((layer) => layer.id === "monologue-lower-third")?.html).toContain(
       "Drag this into the programme",
+    );
+  });
+
+  it("renders lower thirds into fullscreen video scenes", () => {
+    const introComment = reduceStudioState(
+      reduceStudioState(createInitialStudioState(), {
+        type: "lowerThird.comment.update",
+        value: "Opening question from chat",
+      }),
+      { type: "lowerThird.show" },
+    );
+    const outro = reduceStudioState(createInitialStudioState(), {
+      type: "scene.select",
+      sceneId: "outro",
+    });
+    const outroComment = reduceStudioState(
+      reduceStudioState(outro, {
+        type: "lowerThird.comment.update",
+        value: "Final audience note",
+      }),
+      { type: "lowerThird.show" },
+    );
+
+    expect(introComment.selectedLayerId).toBe("intro-lower-third");
+    expect(introComment.layers.find((layer) => layer.id === "intro-lower-third")).toMatchObject({
+      enabled: true,
+      type: "html",
+    });
+    expect(introComment.layers.find((layer) => layer.id === "intro-lower-third")?.html).toContain(
+      "Opening question from chat",
+    );
+    expect(outroComment.selectedLayerId).toBe("outro-lower-third");
+    expect(outroComment.layers.find((layer) => layer.id === "outro-lower-third")).toMatchObject({
+      enabled: true,
+      type: "html",
+    });
+    expect(outroComment.layers.find((layer) => layer.id === "outro-lower-third")?.html).toContain(
+      "Final audience note",
     );
   });
 

@@ -1,6 +1,6 @@
 import { buildLowerThirdHtml } from "../lowerThird";
 import type { CanvasResolution, StudioSource, StudioState } from "../types";
-import { compileScenes, defineScene, layouts, people } from "./scenes/sceneDsl";
+import { compileScenes, defineScene, layouts, overlays, people, transitions } from "./scenes/sceneDsl";
 
 export function createInitialStudioState(): StudioState {
   const resolution: CanvasResolution = {
@@ -15,52 +15,80 @@ export function createInitialStudioState(): StudioState {
       defineScene({
         id: "intro",
         name: "Intro",
+        stinger: transitions.slide("left", 2),
         transition: "fade",
-        layout: layouts.fullscreenVideo("source-intro-video", {
-          color: "#39d5c5",
-          label: "Rawkode Live",
+        layout: layouts.remotion("rawkode-intro", {
+          title: "Rawkode Live",
+          subtitle: "Composable cloud native systems",
+          lowerThird: overlays.lowerThird({
+            enabled: false,
+            enter: transitions.slide("up", 0.22),
+            visibleSeconds: 8,
+            exit: transitions.fade(0.16),
+          }),
         }),
       }),
       defineScene({
         id: "monologue",
         name: "Monologue",
+        stinger: transitions.fade(2),
         transition: "cut",
         layout: layouts.solo(people.selector("hosts"), {
-          lowerThird: true,
+          lowerThird: overlays.lowerThird({
+            enter: transitions.slide("up", 0.22),
+            visibleSeconds: 8,
+            exit: transitions.fade(0.16),
+          }),
         }),
       }),
       defineScene({
         id: "guests",
         name: "Guests",
+        stinger: transitions.flip("y", 2),
         transition: "cut",
         layout: layouts.dynamicGrid(
           [people.selector("hosts"), people.selector("guests"), people.selector("producer")],
           {
-            lowerThird: true,
+            lowerThird: overlays.lowerThird({
+              enter: transitions.slide("up", 0.22),
+              visibleSeconds: 10,
+              exit: transitions.fade(0.16),
+            }),
           },
         ),
       }),
       defineScene({
         id: "screenshare",
         name: "Screenshare",
+        stinger: transitions.typewriter(2),
         transition: "cut",
         layout: layouts.screenshare(
-          "source-screen-share",
+          "source-host-screen-share",
           [people.selector("hosts"), people.selector("guests"), people.selector("producer")],
           {
-            lowerThird: {
+            lowerThird: overlays.lowerThird({
               enabled: false,
-            },
+              enter: transitions.slide("up", 0.22),
+              visibleSeconds: 8,
+              exit: transitions.fade(0.16),
+            }),
           },
         ),
       }),
       defineScene({
         id: "outro",
         name: "Outro",
+        stinger: transitions.cubeSpin("right", 2),
         transition: "fade",
-        layout: layouts.fullscreenVideo("source-outro-video", {
-          color: "#ff9167",
-          label: "Thanks for watching",
+        layout: layouts.remotion("rawkode-outro", {
+          title: "Thanks for watching",
+          subtitle: "Rawkode Live",
+          lowerThird: overlays.lowerThird({
+            enabled: false,
+            enter: transitions.slide("up", 0.22),
+            visibleSeconds: 8,
+            exit: transitions.fade(0.16),
+          }),
         }),
       }),
     ],
@@ -71,18 +99,20 @@ export function createInitialStudioState(): StudioState {
 
   return {
     resolution,
+    activeScreenShareSourceId: "source-host-screen-share",
     phase: "designing",
     sources,
     scenes: document.scenes,
     layers: document.layers,
     previewSceneId: "intro",
     programSceneId: "intro",
-    selectedLayerId: "intro-video",
+    selectedLayerId: "intro-remotion",
     htmlDraft: "",
     lowerThird: {
       speaker: "Rawkode Live",
       comment: "Composable cloud native systems",
     },
+    activeOverlays: {},
     isPlaying: true,
     isRecording: false,
     status: "Intro on program",
@@ -92,15 +122,15 @@ export function createInitialStudioState(): StudioState {
 function createInitialSources(): StudioSource[] {
   return [
     {
-      id: "source-intro-video",
-      name: "Intro Video",
-      type: "video",
+      id: "source-rawkode-intro",
+      name: "Rawkode Intro",
+      type: "remotion",
       status: "ready",
     },
     {
-      id: "source-outro-video",
-      name: "Outro Video",
-      type: "video",
+      id: "source-rawkode-outro",
+      name: "Rawkode Outro",
+      type: "remotion",
       status: "ready",
     },
     {
@@ -146,10 +176,11 @@ function createInitialSources(): StudioSource[] {
       label: "Producer",
     },
     {
-      id: "source-screen-share",
+      id: "source-host-screen-share",
       name: "Screen Share",
       type: "screen",
-      status: "ready",
+      status: "missing",
+      color: "#39d5c5",
     },
     {
       id: "source-lower-third",

@@ -1,9 +1,68 @@
-export type LayerType = "background" | "camera" | "html" | "screen" | "video";
+export type LayerType = "audio" | "background" | "camera" | "html" | "remotion" | "screen" | "video";
 export type PeopleRole = "guests" | "hosts" | "producer";
-export type SourceType = "camera" | "comment" | "graphic" | "html" | "screen" | "video" | "browser";
+export type SourceType = "audio" | "camera" | "comment" | "graphic" | "html" | "remotion" | "screen" | "video" | "browser";
 export type StudioPhase = "designing" | "previewing" | "live" | "recording";
-export type SceneLayout = "dynamic-grid" | "freeform" | "fullscreen-video" | "screenshare" | "solo";
-export type SceneTransition = "cut" | "fade";
+export type SceneLayout = "dynamic-grid" | "freeform" | "remotion" | "screenshare" | "solo";
+export type TransitionAxis = "x" | "y";
+export type TransitionDirection = "down" | "left" | "right" | "up";
+export type SceneTransition =
+  | "blur"
+  | "cube-spin"
+  | "cut"
+  | "fade"
+  | "flip"
+  | "glitch"
+  | "pop"
+  | "scale"
+  | "slide"
+  | "typewriter"
+  | "wipe";
+
+export type SceneAction =
+  | { type: "changeScene"; sceneId: string }
+  | { type: "runHook"; hookId: string };
+
+export type SceneSwitchEffect = {
+  kind: "motion-transition";
+  transition: SceneTransition;
+  axis?: TransitionAxis;
+  direction?: TransitionDirection;
+  durationSeconds?: number;
+};
+
+export type OverlayRole = "banner" | "comment" | "lower-third" | "ticker";
+
+export interface OverlayTransitionEffect {
+  kind: "motion-transition";
+  transition: SceneTransition;
+  axis?: TransitionAxis;
+  direction?: TransitionDirection;
+  durationSeconds?: number;
+}
+
+export type RemotionCompositionId = "rawkode-intro" | "rawkode-outro";
+
+export interface OverlayLifecycle {
+  enter?: OverlayTransitionEffect;
+  exit?: OverlayTransitionEffect;
+  visibleSeconds?: number;
+}
+
+export interface LayerSettings {
+  media?: {
+    onEnd?: SceneAction[];
+  };
+  overlay?: {
+    role: OverlayRole;
+    lifecycle: OverlayLifecycle;
+  };
+  remotion?: {
+    compositionId: RemotionCompositionId;
+    title: string;
+    subtitle?: string;
+  };
+  [key: string]: unknown;
+}
 
 export interface Bounds {
   x: number;
@@ -31,12 +90,11 @@ export interface StudioLayer {
   enabled: boolean;
   locked?: boolean;
   opacity: number;
-  zIndex?: number;
   bounds: Bounds;
   color?: string;
   label?: string;
   html?: string;
-  settings?: Record<string, unknown>;
+  settings?: LayerSettings;
 }
 
 export interface ScenePreset {
@@ -44,6 +102,7 @@ export interface ScenePreset {
   name: string;
   layerIds: string[];
   layout?: SceneLayout;
+  stinger?: SceneSwitchEffect;
   transition?: SceneTransition;
 }
 
@@ -60,8 +119,21 @@ export interface LowerThirdDraft {
   comment: string;
 }
 
+export interface ActiveSceneStinger {
+  effect: SceneSwitchEffect;
+  fromSceneId: string;
+  toSceneId: string;
+}
+
+export interface ActiveOverlay {
+  layerId: string;
+  lifecycle: OverlayLifecycle;
+  phase: "entering" | "visible" | "exiting";
+}
+
 export interface StudioState {
   resolution: CanvasResolution;
+  activeScreenShareSourceId: string;
   phase: StudioPhase;
   sources: StudioSource[];
   scenes: StudioScene[];
@@ -71,6 +143,9 @@ export interface StudioState {
   selectedLayerId: string;
   htmlDraft: string;
   lowerThird: LowerThirdDraft;
+  activeOverlays: Record<string, ActiveOverlay>;
+  activeStinger?: ActiveSceneStinger;
+  lastHookId?: string;
   isPlaying: boolean;
   isRecording: boolean;
   status: string;
