@@ -17,7 +17,7 @@ difficulty: medium
 createdAt: 2026-06-02
 updatedAt: 2026-06-05
 
-cover: __static__/cover.png
+cover: __static__/cover-cache-bust.png
 
 playground:
   name: my-k8s-omni-2a60b16f
