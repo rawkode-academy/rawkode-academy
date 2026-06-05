@@ -17,6 +17,7 @@ import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 
 export const prerender = false;
 
@@ -47,7 +48,7 @@ const processedDescription = video.data.description.replace(/\\n/g, "\n");
 const renderedDescriptionHtml = marked.parse(processedDescription);
 
 type Chapter = { startTime: number; title: string };
-let clips: Array<{ name: string; startOffset: number; endOffset?: number }> = [];
+let clips: VideoClip[] = [];
 const durationSec: number | null =
 	typeof video.data.duration === "number" ? video.data.duration : null;
 
@@ -59,15 +60,7 @@ const chapterSource: Chapter[] = Array.isArray(video.data.chapters)
 	: [];
 
 if (chapterSource.length > 0) {
-	chapterSource.sort((a, b) => a.startTime - b.startTime);
-	clips = chapterSource.map((c, i) => {
-		const next = chapterSource[i + 1];
-		return {
-			name: c.title,
-			startOffset: c.startTime,
-			...(next ? { endOffset: next.startTime } : {}),
-		};
-	});
+	clips = buildVideoClips(chapterSource, durationSec);
 }
 
 const formatRuntime = (s?: number | null): string => {

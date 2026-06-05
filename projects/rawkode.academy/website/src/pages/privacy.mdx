@@ -16,11 +16,11 @@ import EditorialShell from "@/components/ui/EditorialShell.astro";
 		<div class="editorial-section__header">
 			<p class="editorial-kicker">Summary</p>
 			<h2 class="editorial-section__title">We keep data collection limited and purposeful</h2>
-			<p class="editorial-section__lede">Last updated: December 2025.</p>
+			<p class="editorial-section__lede">Last updated: June 2026.</p>
 		</div>
 		<div class="editorial-card">
 			<ul class="editorial-list">
-				<li>Analytics only runs after consent.</li>
+				<li>Analytics runs automatically to help improve the site.</li>
 				<li>Newsletter email addresses are used for updates you requested.</li>
 				<li>Account data is used to provide signed-in learning features.</li>
 				<li>You can ask us to access, correct, or delete your personal data.</li>
@@ -32,7 +32,7 @@ import EditorialShell from "@/components/ui/EditorialShell.astro";
 		<div class="editorial-prose privacy-prose">
 			<h2>Information We Collect</h2>
 			<h3>Analytics Data</h3>
-			<p>When you consent to analytics, we collect anonymized usage data including pages visited, time spent on site, and general geographic region. This data is collected via PostHog and helps us understand how visitors use the site.</p>
+			<p>We collect usage data including pages visited, time spent on site, browser and device metadata, and general geographic region. This data is collected via PostHog and Grafana Faro and helps us understand how visitors use the site and where the site needs reliability or performance improvements.</p>
 
 			<h3>Newsletter Subscriptions</h3>
 			<p>If you subscribe to our newsletter, we collect your email address. We use it to send updates about new content, courses, and community events.</p>
@@ -51,7 +51,7 @@ import EditorialShell from "@/components/ui/EditorialShell.astro";
 
 			<h2>Third-Party Services</h2>
 			<h3>Analytics</h3>
-			<p>We use PostHog for analytics, which only activates after consent via our cookie banner. No analytics tracking occurs without permission.</p>
+			<p>We use PostHog for product analytics and Grafana Faro for browser observability. PostHog is configured to respect browser Do Not Track signals, and session recording is disabled.</p>
 
 			<h3>Video Content</h3>
 			<p>We host our own video content. When you watch videos, we collect playback analytics such as play, pause, seek, and completion events to understand viewing patterns and improve content.</p>
@@ -64,15 +64,14 @@ import EditorialShell from "@/components/ui/EditorialShell.astro";
 
 			<h2>Your Rights</h2>
 			<ul>
-				<li>Decline analytics tracking through the consent banner.</li>
 				<li>Unsubscribe from the newsletter at any time.</li>
 				<li>Request access to your personal data.</li>
 				<li>Request correction or deletion of your data.</li>
-				<li>Withdraw consent for data processing.</li>
+				<li>Use browser privacy controls such as Do Not Track where supported.</li>
 			</ul>
 
 			<h2>Cookies</h2>
-			<p>We use minimal cookies required for site functionality. Analytics cookies are only set after consent. You can manage cookie preferences through the consent banner or your browser settings.</p>
+			<p>We use cookies for site functionality, analytics attribution, and anonymous visitor stitching. You can manage cookies through your browser settings.</p>
 
 			<h2>Contact Us</h2>
 			<p>If you have questions about this privacy policy or want to exercise your data rights, contact <a href="mailto:team@rawkode.academy">team@rawkode.academy</a>.</p>

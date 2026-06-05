@@ -10,7 +10,7 @@ const { userId } = Astro.props;
 	const PH_KEY = "phc_8BUP734dzskih8urQFkFL1qxT5veRDm6zzXwROZND4M";
 	const PH_HOST = "https://eu.i.posthog.com";
 	let posthogInitialized = false;
-	let enableInFlight = false;
+	let initInFlight = false;
 
 	const UTM_KEYS = [
 		"utm_source",
@@ -171,11 +171,20 @@ const { userId } = Astro.props;
 		})(document, window.posthog || []);
 	};
 
-	const enablePostHogNow = () => {
-		if (posthogInitialized || enableInFlight) {
+	const captureCanonicalPageView = () => {
+		window.posthog.capture("page_view", {
+			path: location.pathname,
+			title: document.title,
+			url: location.href,
+			referrer: document.referrer || "",
+		});
+	};
+
+	const initializePostHog = () => {
+		if (posthogInitialized || initInFlight) {
 			return;
 		}
-		enableInFlight = true;
+		initInFlight = true;
 		try {
 			bootstrapPostHog();
 
@@ -187,6 +196,7 @@ const { userId } = Astro.props;
 			window.posthog.init(PH_KEY, {
 				api_host: PH_HOST,
 				autocapture: true,
+				capture_pageview: false,
 				respect_dnt: true,
 				// Capture Core Web Vitals (LCP, INP, CLS, FCP, TTFB) as
 				// $web_vitals events. GSC has no CWV data for the property
@@ -223,11 +233,12 @@ const { userId } = Astro.props;
 				window.posthog.identify(userId);
 			}
 
+			captureCanonicalPageView();
 			posthogInitialized = true;
 		} catch (error) {
 			console.warn("Failed to initialize PostHog:", error);
 		} finally {
-			enableInFlight = false;
+			initInFlight = false;
 		}
 	};
 
@@ -249,7 +260,7 @@ const { userId } = Astro.props;
 			for (const ev of INTERACTION_EVENTS) {
 				window.removeEventListener(ev, start, { capture: true });
 			}
-			enablePostHogNow();
+			initializePostHog();
 		};
 		for (const ev of INTERACTION_EVENTS) {
 			window.addEventListener(ev, start, {
