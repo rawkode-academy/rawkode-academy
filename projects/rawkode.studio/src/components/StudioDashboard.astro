@@ -1,0 +1,148 @@
+---
+import { actions } from "astro:actions";
+import type { StudioDashboard } from "../server/studio";
+
+interface Props {
+	createSessionError?: string | null;
+	dashboard: StudioDashboard;
+	invite?: {
+		expiresAt: number;
+		inviteUrl: string;
+		sessionId: string;
+		sessionTitle: string;
+	} | null;
+	inviteError?: string | null;
+}
+
+const {
+	createSessionError = null,
+	dashboard,
+	invite = null,
+	inviteError = null,
+} = Astro.props;
+---
+
+<section class="dashboard-grid">
+	<div class="dashboard-panel dashboard-primary">
+		<div>
+			<p class="eyebrow">Recording-first production</p>
+			<h1>Studio rooms for Rawkode shows</h1>
+			<p>
+				Host, guest, and producer rooms are backed by rawkode.academy identity
+				and prepared for RealtimeKit recording handoff into the Rawkode VOD pipeline.
+			</p>
+		</div>
+		<div class="dashboard-actions">
+			<a class="button primary" href="/host">Open host room</a>
+			<a class="button" href="/producer">Open producer room</a>
+		</div>
+	</div>
+
+	<div class="dashboard-panel">
+		<p class="eyebrow">Identity</p>
+		<h2>{dashboard.user ? "Signed in" : "Not signed in"}</h2>
+		{
+			dashboard.user ? (
+				<p>{dashboard.user.username ?? dashboard.user.name}</p>
+			) : (
+				<a class="button primary" href="/login">Sign in with GitHub</a>
+			)
+		}
+	</div>
+</section>
+
+{
+	dashboard.user ? (
+		<section class="studio-management" aria-label="Studio management">
+			<form class="studio-form-panel" method="POST" action={actions.createSession}>
+				<div>
+					<p class="eyebrow">New room</p>
+					<h2>Create from content</h2>
+				</div>
+				<label>
+					Content video ID
+					<input
+						name="videoId"
+						placeholder="rawkode-live/2026/example"
+						autocomplete="off"
+					/>
+				</label>
+				<div class="field-grid two">
+					<label>
+						Show
+						<input name="show" placeholder="Rawkode Live" autocomplete="off" />
+					</label>
+					<label>
+						Title
+						<input name="title" placeholder="Episode title" autocomplete="off" />
+					</label>
+				</div>
+				<label>
+					Starts at
+					<input name="startsAt" type="datetime-local" />
+				</label>
+				{
+					createSessionError ? (
+						<p class="form-error" role="alert">{createSessionError}</p>
+					) : null
+				}
+				<button class="button primary" type="submit">Create room</button>
+			</form>
+
+			<div class="studio-form-panel">
+				<p class="eyebrow">Guest invite</p>
+				{
+					invite ? (
+						<div class="invite-result">
+							<h2>{invite.sessionTitle}</h2>
+							<label>
+								Invite URL
+								<input readonly value={invite.inviteUrl} />
+							</label>
+							<p>
+								Expires {new Date(invite.expiresAt * 1000).toLocaleString()}
+							</p>
+							<a class="button" href={invite.inviteUrl}>Open invite</a>
+						</div>
+					) : (
+						<p>No guest invite issued.</p>
+					)
+				}
+				{
+					inviteError ? (
+						<p class="form-error" role="alert">{inviteError}</p>
+					) : null
+				}
+			</div>
+		</section>
+	) : null
+}
+
+<section class="session-list" aria-label="Studio sessions">
+	{
+		dashboard.sessions.length === 0 ? (
+			<p class="session-empty">No Studio sessions are available.</p>
+		) : dashboard.sessions.map((session) => (
+			<article class="session-row" id={`session-${session.id}`}>
+				<div>
+					<p class="eyebrow">{session.show}</p>
+					<h2>{session.title}</h2>
+					<p>{new Date(session.startsAt).toLocaleString()}</p>
+				</div>
+				<div class="session-status">
+					<span>{session.status}</span>
+					<span>{session.recordingStatus}</span>
+				</div>
+				<div class="session-actions">
+					<a class="button" href={`/studio/${session.id}/host`}>Host</a>
+					<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
+					<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+					<form method="POST" action={actions.createInvite}>
+						<input name="sessionId" type="hidden" value={session.id} />
+						<button class="button" type="submit">Guest invite</button>
+					</form>
+				</div>
+			</article>
+		))
+	}
+</section>

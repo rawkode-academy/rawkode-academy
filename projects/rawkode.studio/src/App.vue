@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue";
 import PeopleRail from "./components/PeopleRail.vue";
+import RealtimeKitRoom from "./components/RealtimeKitRoom.vue";
 import SceneSwitcher from "./components/SceneSwitcher.vue";
 import StudioCanvas from "./components/StudioCanvas.vue";
 import StudioWidgets from "./components/StudioWidgets.vue";
@@ -9,6 +10,14 @@ import type { ActiveOverlay, StudioSource } from "./types";
 
 type CaptureStatus = "blocked" | "missing" | "ready" | "requesting" | "unavailable";
 
+const props = defineProps<{
+  inviteToken?: string;
+  providerStatus?: string;
+  recordingStatus?: string;
+  roomRole?: string;
+  sessionId?: string;
+  sessionTitle?: string;
+}>();
 const {
   state,
   send,
@@ -33,6 +42,15 @@ let resizeStartHeight = 0;
 const activeStingerKey = computed(() => {
   const stinger = state.value.activeStinger;
   return stinger ? `${stinger.fromSceneId}:${stinger.toSceneId}:${getEffectKey(stinger.effect)}` : "";
+});
+const roomSubtitle = computed(() =>
+  [props.roomRole, "Browser production console"].filter(Boolean).join(" / "),
+);
+const roomRole = computed(() => {
+  const role = props.roomRole?.toLowerCase();
+  return role === "host" || role === "producer" || role === "program" || role === "guest"
+    ? role
+    : "guest";
 });
 const studioLayoutStyle = computed(() => ({
   "--widgets-height": `${widgetHeight.value}px`,
@@ -482,10 +500,20 @@ function clampWidgetHeight(height: number): number {
       <div class="brand-block">
         <span class="brand-mark" aria-hidden="true">RS</span>
         <div>
-          <h1>Rawkode Studio</h1>
-          <span>Browser production console</span>
+          <h1>{{ props.sessionTitle ?? "Rawkode Studio" }}</h1>
+          <span>{{ roomSubtitle }}</span>
         </div>
       </div>
+      <div class="top-bar-status">
+        <span v-if="props.providerStatus">{{ props.providerStatus }}</span>
+        <span v-if="props.recordingStatus">{{ props.recordingStatus }}</span>
+      </div>
+      <RealtimeKitRoom
+        v-if="props.sessionId"
+        :invite-token="props.inviteToken"
+        :role="roomRole"
+        :session-id="props.sessionId"
+      />
     </header>
 
     <PeopleRail :sources="sourcesForUi" @connect-source="startHostCapture" />
@@ -507,6 +535,7 @@ function clampWidgetHeight(height: number): number {
         :resolution="state.resolution"
         :is-playing="state.isPlaying"
         :is-recording="state.isRecording"
+        :session-id="props.sessionId"
         @recording-change="setRecording"
         @exported="markProgramExported"
       />

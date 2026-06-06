@@ -1,0 +1,52 @@
+---
+import App from "../../../App.vue";
+import StudioLayout from "../../../layouts/StudioLayout.astro";
+import {
+	getStudioSession,
+	resolveStudioInvite,
+	userCanManageStudioSession,
+} from "../../../server/studio";
+import { env } from "cloudflare:workers";
+
+if (!Astro.locals.user) {
+	return Astro.redirect(`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+const sessionId = Astro.params.sessionId ?? "";
+const session = await getStudioSession(env, sessionId);
+if (!session) {
+	return new Response("Studio session not found", { status: 404 });
+}
+const inviteToken = Astro.url.searchParams.get("invite");
+const resolvedInvite = inviteToken
+	? await resolveStudioInvite(env, inviteToken, Astro.locals.user)
+	: null;
+const canManage = await userCanManageStudioSession(env, session, Astro.locals.user);
+if (!canManage && resolvedInvite?.session.id !== session.id) {
+	return new Response("Guest invite token is required", { status: 403 });
+}
+const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Meeting pending";
+---
+
+<StudioLayout
+	title={`Guest ${session.title} | Rawkode Studio`}
+	active="guest"
+	bodyClass="studio-canvas-page"
+>
+	<section
+		class="studio-canvas-shell"
+		aria-label="Guest studio room"
+		data-meeting-id={session.realtimeKitMeetingId ?? ""}
+		data-session-id={session.id}
+	>
+		<App
+			client:only="vue"
+			inviteToken={inviteToken ?? undefined}
+			providerStatus={providerStatus}
+			recordingStatus={session.recordingStatus}
+			roomRole="Guest"
+			sessionId={session.id}
+			sessionTitle={session.title}
+		/>
+	</section>
+</StudioLayout>

@@ -1,0 +1,63 @@
+---
+import "../styles.css";
+
+interface Props {
+	active?: "dashboard" | "guest" | "host" | "producer" | "recordings";
+	bodyClass?: string;
+	title: string;
+}
+
+const { active = "dashboard", bodyClass = "", title } = Astro.props;
+const user = Astro.locals.user;
+const navItems = [
+	{ id: "dashboard", href: "/", label: "Dashboard" },
+	{ id: "host", href: "/host", label: "Host" },
+	{ id: "producer", href: "/producer", label: "Producer" },
+];
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title}</title>
+	</head>
+	<body class={bodyClass}>
+		<header class="studio-site-header">
+			<a class="studio-site-brand" href="/">
+				<span class="brand-mark">RK</span>
+				<span>Rawkode Studio</span>
+			</a>
+			<nav class="studio-site-nav" aria-label="Studio">
+				{
+					navItems.map((item) => (
+						<a
+							aria-current={active === item.id ? "page" : undefined}
+							href={item.href}
+						>
+							{item.label}
+						</a>
+					))
+				}
+			</nav>
+			<div class="studio-site-user">
+				{
+					user ? (
+						<>
+							<span>{user.username ?? user.name}</span>
+							<form method="post" action="/api/auth/sign-out">
+								<button type="submit">Sign out</button>
+							</form>
+						</>
+					) : (
+						<a href="/login">Sign in</a>
+					)
+				}
+			</div>
+		</header>
+		<main class="studio-site-main">
+			<slot />
+		</main>
+	</body>
+</html>

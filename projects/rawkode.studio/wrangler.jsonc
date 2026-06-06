@@ -1,0 +1,75 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "rawkode-academy-studio",
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-06-05",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": "./dist",
+		"html_handling": "drop-trailing-slash"
+	},
+	"workers_dev": true,
+	"preview_urls": true,
+	"observability": {
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		}
+	},
+	"routes": [
+		{
+			"pattern": "studio.rawkode.academy",
+			"custom_domain": true
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "f3a5e01c10b144f5964d060cefa1b70c"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "STUDIO_DB",
+			"database_name": "rawkode-academy-studio",
+			"migrations_dir": "./data-model"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "RECORDINGS",
+			"bucket_name": "rawkode-academy-content"
+		}
+	],
+	"vars": {
+		"RAWKODE_GRAPHQL_URL": "https://api.rawkode.academy/",
+		"RECORDINGS_BUCKET_NAME": "rawkode-academy-content",
+		"STUDIO_OPERATOR_GITHUB_HANDLES": "rawkode",
+		"REALTIMEKIT_HOST_PRESET": "rawkode-studio-host",
+		"REALTIMEKIT_PRODUCER_PRESET": "rawkode-studio-producer",
+		"REALTIMEKIT_GUEST_PRESET": "rawkode-studio-guest",
+		"REALTIMEKIT_PROGRAM_PRESET": "rawkode-studio-program"
+	},
+	"secrets_store_secrets": [
+		{
+			"binding": "CLOUDFLARE_ACCOUNT_ID",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "CLOUDFLARE_ACCOUNT_ID"
+		},
+		{
+			"binding": "CLOUDFLARE_API_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "REALTIMEKIT_API_TOKEN"
+		},
+		{
+			"binding": "REALTIMEKIT_APP_ID",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "REALTIMEKIT_APP_ID"
+		}
+	]
+}

@@ -2,11 +2,53 @@
 import { animate } from "motion";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { renderProgramCanvas } from "../canvas/programRenderer";
+import {
+  createRecordingFallbackBlob,
+  type RecordingFallbackChunk,
+} from "../recording/fallbackBlob";
+import {
+  appendRecordingUploadChunk,
+  createRecordingUploadBuffer,
+  flushRecordingUploadRemainder,
+  type RecordingUploadBuffer,
+} from "../recording/multipartBuffer";
+import {
+  appendRecordingBackupChunk,
+  createRecordingBackup,
+  deleteRecordingBackup,
+  readRecordingBackupChunks,
+  type RecordingBackup,
+} from "../recording/recordingBackup";
+import {
+  getRecordingHandoffStatusLabel,
+  getRecordingHandoffStatusUrl,
+  parseRecordingHandoff,
+  type RecordingHandoff,
+} from "../recording/handoff";
 import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
 import { getHitTestLayerStack } from "../studio/layerStack";
 import type { ActiveOverlay, ActiveSceneStinger, CanvasResolution, StudioLayer } from "../types";
 
 type MotionAnimationControls = ReturnType<typeof animate>;
+type RecordingUploadStatus = "failed" | "idle" | "local" | "ready" | "uploading";
+
+interface RecordingUploadPart {
+  etag: string;
+  partNumber: number;
+}
+
+interface RecordingUpload {
+  failedMessage: string;
+  partSizeBytes: number;
+  parts: RecordingUploadPart[];
+  buffer: RecordingUploadBuffer;
+  nextPartNumber: number;
+  recordingId: string;
+  sessionId: string;
+  sourceFormat: "webm";
+  uploadChain: Promise<void>;
+  uploadId: string;
+}
 
 const props = defineProps<{
   activeOverlays?: Record<string, ActiveOverlay>;
@@ -16,6 +58,7 @@ const props = defineProps<{
   resolution: CanvasResolution;
   isPlaying: boolean;
   isRecording: boolean;
+  sessionId?: string;
   title: string;
   subtitle?: string;
   interactive?: boolean;
@@ -33,15 +76,25 @@ const frameElement = ref<HTMLElement | null>(null);
 const canvasDisplaySize = ref({ width: 0, height: 0 });
 const canRecordLocally = typeof MediaRecorder !== "undefined";
 const isDragging = ref(false);
+const isFinishingRecording = ref(false);
 const isLocalRecording = ref(false);
+const isStartingRecording = ref(false);
+const recordingUploadError = ref("");
+const recordingUploadStatus = ref<RecordingUploadStatus>("idle");
+const completedRecording = ref<RecordingHandoff | null>(null);
 const overlayPhaseStarts = new Map<string, { phase: ActiveOverlay["phase"]; startedAt: number }>();
 const overlayTransitionProgresses = new Map<string, number>();
 const overlayAnimations = new Map<string, MotionAnimationControls>();
 let bufferCanvas: HTMLCanvasElement | undefined;
 let frameResizeObserver: ResizeObserver | undefined;
 let mediaRecorder: MediaRecorder | undefined;
-let recordedChunks: BlobPart[] = [];
+let recordedChunks: RecordingFallbackChunk[] = [];
+let recordingBackup: RecordingBackup | undefined;
+let recordingChunkIndex = 0;
+let recordingFinishPromise: Promise<void> | undefined;
+let recordingUpload: RecordingUpload | undefined;
 let recordingOwnedTracks: MediaStreamTrack[] = [];
+let isComponentUnmounted = false;
 const mediaVideoElements = new Map<string, HTMLVideoElement>();
 let stingerAnimation: MotionAnimationControls | undefined;
 let stingerProgress: number | undefined;
@@ -60,6 +113,29 @@ const canvasStyle = computed(() => ({
   height: canvasDisplaySize.value.height > 0 ? `${canvasDisplaySize.value.height}px` : "auto",
   aspectRatio: `${props.resolution.width} / ${props.resolution.height}`,
 }));
+const recordingStatusText = computed(() => {
+  if (recordingUploadStatus.value === "uploading") {
+    return "Uploading recording";
+  }
+  if (recordingUploadStatus.value === "ready") {
+    if (completedRecording.value) {
+      return getRecordingHandoffStatusLabel(completedRecording.value);
+    }
+    return "Recording uploaded";
+  }
+  if (recordingUploadStatus.value === "local") {
+    return isLocalRecording.value ? "Local recording" : "Saved locally";
+  }
+  if (recordingUploadStatus.value === "failed") {
+    return recordingUploadError.value;
+  }
+  return "";
+});
+const recordingStatusHref = computed(() =>
+  completedRecording.value
+    ? getRecordingHandoffStatusUrl(completedRecording.value)
+    : "",
+);
 
 async function paint(timestamp = performance.now()): Promise<void> {
   const canvas = canvasElement.value;
@@ -138,58 +214,197 @@ function captureCanvasStream(): MediaStream | undefined {
   return canvasElement.value?.captureStream(props.resolution.fps);
 }
 
-function toggleLocalRecording(): void {
+async function toggleLocalRecording(): Promise<void> {
+  if (isFinishingRecording.value || isStartingRecording.value) {
+    return;
+  }
   if (isLocalRecording.value) {
     stopLocalRecording();
     return;
   }
 
-  startLocalRecording();
+  await startLocalRecording();
 }
 
-function startLocalRecording(): void {
-  if (typeof MediaRecorder === "undefined") {
+async function startLocalRecording(): Promise<void> {
+  if (isStartingRecording.value || isLocalRecording.value) {
     return;
   }
-
-  const recordingStream = createRecordingStream();
-  if (!recordingStream) {
-    return;
-  }
-
-  const mimeType = getSupportedRecordingMimeType();
-  recordedChunks = [];
-  mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
-  mediaRecorder.addEventListener("dataavailable", (event) => {
-    if (event.data.size > 0) {
-      recordedChunks.push(event.data);
+  isStartingRecording.value = true;
+  try {
+    if (typeof MediaRecorder === "undefined") {
+      return;
     }
+
+    const recordingStream = createRecordingStream();
+    if (!recordingStream) {
+      return;
+    }
+
+    const mimeType = getSupportedRecordingMimeType();
+    recordedChunks = [];
+    recordingChunkIndex = 0;
+    recordingBackup = await createRecordingBackup(mimeType || "video/webm").catch(
+      (error: unknown) => {
+        recordingUploadError.value = toErrorMessage(error);
+        return undefined;
+      },
+    );
+    if (await cleanupPendingRecordingStartAfterUnmount()) {
+      return;
+    }
+
+    recordingUploadStatus.value = "idle";
+    recordingUploadError.value = "";
+    completedRecording.value = null;
+    recordingUpload = recordingBackup
+      ? await createRecordingUpload(mimeType).catch((error: unknown) => {
+          recordingUploadStatus.value = "local";
+          recordingUploadError.value = toErrorMessage(error);
+          return undefined;
+        })
+      : undefined;
+    if (await cleanupPendingRecordingStartAfterUnmount()) {
+      return;
+    }
+
+    mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+    mediaRecorder.addEventListener("dataavailable", (event) => {
+      if (event.data.size > 0) {
+        const chunkIndex = recordingChunkIndex;
+        recordingChunkIndex += 1;
+        if (recordingBackup && !recordingBackup.failedMessage) {
+          appendRecordingBackupChunk(recordingBackup, chunkIndex, event.data).catch(
+            () => {
+              recordedChunks.push({ chunk: event.data, chunkIndex });
+            },
+          );
+        } else {
+          recordedChunks.push({ chunk: event.data, chunkIndex });
+        }
+        if (recordingUpload) {
+          queueRecordingChunk(event.data);
+        }
+      }
+    });
+    mediaRecorder.addEventListener("stop", () => {
+      queueFinishRecordingArtifact();
+    });
+    mediaRecorder.start(5000);
+    isLocalRecording.value = true;
+    emit("recording-change", true);
+  } catch (error) {
+    recordingUploadStatus.value = "failed";
+    recordingUploadError.value = toErrorMessage(error);
+    await abortRecordingUpload(recordingUpload);
+    await deleteRecordingBackup(recordingBackup).catch((backupError: unknown) => {
+      console.warn("Unable to delete recording backup", backupError);
+    });
+    finishLocalRecording();
+  } finally {
+    isStartingRecording.value = false;
+  }
+}
+
+async function cleanupPendingRecordingStartAfterUnmount(): Promise<boolean> {
+  if (!isComponentUnmounted) {
+    return false;
+  }
+
+  await cleanupPendingRecordingStart();
+  return true;
+}
+
+async function cleanupPendingRecordingStart(): Promise<void> {
+  await abortRecordingUpload(recordingUpload);
+  await deleteRecordingBackup(recordingBackup).catch((error: unknown) => {
+    console.warn("Unable to delete recording backup", error);
   });
-  mediaRecorder.addEventListener("stop", downloadRecording);
-  mediaRecorder.start();
-  isLocalRecording.value = true;
-  emit("recording-change", true);
+  finishLocalRecording();
 }
 
 function stopLocalRecording(): void {
-  if (!mediaRecorder || mediaRecorder.state === "inactive") {
+  if (isFinishingRecording.value) {
+    return;
+  }
+  if (!mediaRecorder) {
     finishLocalRecording();
+    return;
+  }
+
+  isFinishingRecording.value = true;
+  if (mediaRecorder.state === "inactive") {
+    queueFinishRecordingArtifact();
     return;
   }
 
   mediaRecorder.stop();
 }
 
-function downloadRecording(): void {
+function queueFinishRecordingArtifact(): void {
+  if (!recordingFinishPromise) {
+    recordingFinishPromise = finishRecordingArtifact().finally(() => {
+      recordingFinishPromise = undefined;
+    });
+  }
+  void recordingFinishPromise;
+}
+
+async function finishRecordingArtifact(): Promise<void> {
   const mimeType = mediaRecorder?.mimeType || "video/webm";
-  const blob = new Blob(recordedChunks, { type: mimeType });
+  isFinishingRecording.value = true;
+  try {
+    if (recordingUpload) {
+      completedRecording.value = await completeRecordingUpload(recordingUpload);
+      recordingUploadStatus.value = "ready";
+    } else {
+      const localBlob = await readRecordingFallbackBlob(mimeType);
+      if (localBlob) {
+        downloadRecording(localBlob);
+      }
+    }
+  } catch (error) {
+    recordingUploadStatus.value = "failed";
+    recordingUploadError.value = toErrorMessage(error);
+    await abortRecordingUpload(recordingUpload);
+    const localBlob = await readRecordingFallbackBlob(mimeType);
+    if (localBlob) {
+      downloadRecording(localBlob);
+    }
+  } finally {
+    await deleteRecordingBackup(recordingBackup).catch((error: unknown) => {
+      console.warn("Unable to delete recording backup", error);
+    });
+    finishLocalRecording();
+  }
+}
+
+function downloadRecording(blob: Blob): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.download = `rawkode-studio-program-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
   link.href = url;
   link.click();
   URL.revokeObjectURL(url);
-  finishLocalRecording();
+  if (recordingUploadStatus.value !== "failed") {
+    recordingUploadStatus.value = "local";
+  }
+}
+
+async function readRecordingFallbackBlob(mimeType: string): Promise<Blob | null> {
+  const backupChunks = await readRecordingBackupChunks(recordingBackup).catch((error: unknown) => {
+    recordingUploadError.value = toErrorMessage(error);
+    return [];
+  });
+  const chunksByIndex = new Map<number, RecordingFallbackChunk>();
+  for (const row of backupChunks) {
+    chunksByIndex.set(row.chunkIndex, row);
+  }
+  for (const row of recordedChunks) {
+    chunksByIndex.set(row.chunkIndex, row);
+  }
+
+  return createRecordingFallbackBlob([...chunksByIndex.values()], mimeType);
 }
 
 function finishLocalRecording(): void {
@@ -199,8 +414,159 @@ function finishLocalRecording(): void {
   recordingOwnedTracks = [];
   mediaRecorder = undefined;
   recordedChunks = [];
+  recordingBackup = undefined;
+  recordingFinishPromise = undefined;
+  recordingUpload = undefined;
+  isFinishingRecording.value = false;
   isLocalRecording.value = false;
+  isStartingRecording.value = false;
   emit("recording-change", false);
+}
+
+async function createRecordingUpload(mimeType: string): Promise<RecordingUpload | undefined> {
+  if (!props.sessionId) {
+    return undefined;
+  }
+  const sourceFormat = getRecordingSourceFormat(mimeType);
+  const response = await fetch("/api/studio/recording-upload", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "create",
+      sessionId: props.sessionId,
+      sourceFormat,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorResponse(response));
+  }
+  const upload = await response.json() as {
+    partSizeBytes: number;
+    recordingId: string;
+    sessionId: string;
+    sourceFormat: "webm";
+    uploadId: string;
+  };
+
+  return {
+    failedMessage: "",
+    partSizeBytes: upload.partSizeBytes,
+    parts: [],
+    buffer: createRecordingUploadBuffer("video/webm"),
+    nextPartNumber: 1,
+    recordingId: upload.recordingId,
+    sessionId: upload.sessionId,
+    sourceFormat: upload.sourceFormat,
+    uploadChain: Promise.resolve(),
+    uploadId: upload.uploadId,
+  };
+}
+
+function queueRecordingChunk(chunk: Blob): void {
+  const upload = recordingUpload;
+  if (!upload || upload.failedMessage) {
+    return;
+  }
+
+  for (const part of appendRecordingUploadChunk(
+    upload.buffer,
+    chunk,
+    upload.partSizeBytes,
+  )) {
+    queueRecordingPart(upload, part);
+  }
+}
+
+function queueRecordingPart(upload: RecordingUpload, part: Blob): void {
+  if (part.size === 0) {
+    return;
+  }
+
+  const partNumber = upload.nextPartNumber;
+  upload.nextPartNumber += 1;
+  recordingUploadStatus.value = "uploading";
+  upload.uploadChain = upload.uploadChain
+    .then(async () => {
+      if (upload.failedMessage) {
+        return;
+      }
+      const uploadedPart = await uploadRecordingPart(upload, partNumber, part);
+      upload.parts.push(uploadedPart);
+    })
+    .catch((error: unknown) => {
+      upload.failedMessage = toErrorMessage(error);
+    });
+}
+
+async function uploadRecordingPart(
+  upload: RecordingUpload,
+  partNumber: number,
+  part: Blob,
+): Promise<RecordingUploadPart> {
+  const params = new URLSearchParams({
+    partNumber: String(partNumber),
+    recordingId: upload.recordingId,
+    sessionId: upload.sessionId,
+    sourceFormat: upload.sourceFormat,
+    uploadId: upload.uploadId,
+  });
+  const response = await fetch(`/api/studio/recording-upload?${params.toString()}`, {
+    method: "PUT",
+    body: part,
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorResponse(response));
+  }
+
+  return await response.json() as RecordingUploadPart;
+}
+
+async function completeRecordingUpload(upload: RecordingUpload): Promise<RecordingHandoff> {
+  const finalPart = flushRecordingUploadRemainder(upload.buffer);
+  if (finalPart) {
+    queueRecordingPart(upload, finalPart);
+  }
+  await upload.uploadChain;
+  if (upload.failedMessage) {
+    throw new Error(upload.failedMessage);
+  }
+
+  const response = await fetch("/api/studio/recording-upload", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "complete",
+      parts: upload.parts,
+      recordingId: upload.recordingId,
+      sessionId: upload.sessionId,
+      sourceFormat: upload.sourceFormat,
+      uploadId: upload.uploadId,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorResponse(response));
+  }
+  return parseRecordingHandoff(await response.json().catch(() => null));
+}
+
+async function abortRecordingUpload(upload: RecordingUpload | undefined): Promise<void> {
+  if (!upload) {
+    return;
+  }
+
+  const params = new URLSearchParams({
+    recordingId: upload.recordingId,
+    sessionId: upload.sessionId,
+    sourceFormat: upload.sourceFormat,
+    uploadId: upload.uploadId,
+  });
+  await fetch(`/api/studio/recording-upload?${params.toString()}`, {
+    method: "DELETE",
+  }).catch(() => undefined);
 }
 
 function createRecordingStream(): MediaStream | undefined {
@@ -218,6 +584,10 @@ function createRecordingStream(): MediaStream | undefined {
   return new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
 }
 
+function getRecordingSourceFormat(_mimeType: string): "webm" {
+  return "webm";
+}
+
 function getSupportedRecordingMimeType(): string {
   if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
     return "";
@@ -226,6 +596,15 @@ function getSupportedRecordingMimeType(): string {
   return ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"].find((type) =>
     MediaRecorder.isTypeSupported(type)
   ) ?? "";
+}
+
+async function readErrorResponse(response: Response): Promise<string> {
+  const body = await response.json().catch(() => null) as { error?: string } | null;
+  return body?.error ?? `Studio recording request failed with ${response.status}`;
+}
+
+function toErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Studio recording request failed.";
 }
 
 function onPointerDown(event: PointerEvent): void {
@@ -390,8 +769,11 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  isComponentUnmounted = true;
   if (isLocalRecording.value) {
     stopLocalRecording();
+  } else if (isStartingRecording.value) {
+    void cleanupPendingRecordingStart();
   }
   clearMediaVideoElements();
   stopOverlayAnimations();
@@ -596,11 +978,33 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
           class="record-button compact"
           :class="{ active: isLocalRecording }"
           type="button"
-          :disabled="!canRecordLocally"
+          :disabled="!canRecordLocally || isFinishingRecording || isStartingRecording"
           @click="toggleLocalRecording"
         >
-          {{ isLocalRecording ? "Stop" : "Record" }}
+          {{
+            isFinishingRecording
+              ? "Saving"
+              : isStartingRecording
+                ? "Starting"
+                : isLocalRecording
+                  ? "Stop"
+                  : "Record"
+          }}
         </button>
+        <span
+          v-if="recordingStatusText"
+          class="recording-upload-state"
+          :class="{ error: recordingUploadStatus === 'failed' }"
+        >
+          {{ recordingStatusText }}
+        </span>
+        <a
+          v-if="recordingStatusHref"
+          class="secondary-button compact recording-status-link"
+          :href="recordingStatusHref"
+        >
+          Status
+        </a>
         <div class="canvas-meter" aria-hidden="true">
           <span />
           <span />

@@ -12,8 +12,8 @@
     "esModuleInterop": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "types": ["vite/client"]
+    "types": ["astro/client", "vite/client", "@cloudflare/workers-types"]
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "vite.config.ts"],
+  "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.vue", "astro.config.mts", "vite.config.ts"],
   "references": []
 }

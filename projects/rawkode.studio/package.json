@@ -4,14 +4,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit",
+    "dev": "astro dev --host 127.0.0.1 --port 4323",
+    "build": "astro build",
+    "check": "astro check",
+    "d1:create": "bun x wrangler d1 create rawkode-academy-studio",
+    "deploy": "bun x wrangler deploy",
+    "deploy:dry-run": "bun x wrangler deploy --dry-run",
+    "migrate": "bun x wrangler d1 migrations apply rawkode-academy-studio --remote",
     "test": "vitest run",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "astro preview --host 127.0.0.1 --port 4323"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^13.1.10",
+    "@astrojs/vue": "^6.0.1",
     "@remotion/player": "^4.0.473",
+    "astro": "^6.4.2",
     "motion": "^12.40.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -19,9 +26,12 @@
     "vue": "^3.5.35"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@cloudflare/workers-types": "^4.20250426.0",
     "@vitejs/plugin-vue": "^6.0.7",
     "vite": "^7.3.5",
     "vitest": "^4.1.8",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.96.0"
   }
 }
