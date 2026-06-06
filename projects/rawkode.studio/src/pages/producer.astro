@@ -1,0 +1,53 @@
+---
+import StudioLayout from "../layouts/StudioLayout.astro";
+import {
+	isStudioSessionActive,
+	listStudioSessions,
+	userIsConfiguredStudioOperator,
+} from "../server/studio";
+import { env } from "cloudflare:workers";
+
+if (!Astro.locals.user) {
+	return Astro.redirect(`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+if (!userIsConfiguredStudioOperator(env, Astro.locals.user)) {
+	return Astro.redirect("/");
+}
+
+const sessions = (await listStudioSessions(env)).filter(isStudioSessionActive);
+---
+
+<StudioLayout title="Producer | Rawkode Studio" active="producer">
+	<section class="role-panel">
+		<p class="eyebrow">Producer</p>
+		<h1>Producer rooms</h1>
+		<p>Switch scenes, manage program output, and prepare recording handoff.</p>
+	</section>
+
+	<section class="session-list" aria-label="Producer studio sessions">
+		{
+			sessions.map((session) => (
+				<article class="session-row">
+					<div>
+						<p class="eyebrow">{session.show}</p>
+						<h2>{session.title}</h2>
+						<p>{new Date(session.startsAt).toLocaleString()}</p>
+					</div>
+					<div class="session-status">
+						<span>{session.status}</span>
+						<span>{session.recordingStatus}</span>
+					</div>
+					<div class="session-actions">
+						<a class="button primary" href={`/studio/${session.id}/producer`}>
+							Open producer room
+						</a>
+						<a class="button" href={`/studio/${session.id}/recordings`}>
+							Recordings
+						</a>
+					</div>
+				</article>
+			))
+		}
+	</section>
+</StudioLayout>

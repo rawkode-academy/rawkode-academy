@@ -63,7 +63,7 @@ chapters:
     title: Challenge 2 Fixed & Wrap Up
 duration: 4919
 guests:
-  - thomas-stromberg
+  - tstromberg
   - kris-nova
 resources:
   - title: SleuthKit FLS

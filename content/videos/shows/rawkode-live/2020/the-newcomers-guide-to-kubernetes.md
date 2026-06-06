@@ -43,7 +43,7 @@ chapters:
     title: DaemonSets
 duration: 4398
 guests:
-  - david-simmons
+  - davidgs
 resources: []
 ---
 

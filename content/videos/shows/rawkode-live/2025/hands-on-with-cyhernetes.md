@@ -18,7 +18,7 @@ technologies:
 show: rawkode-live
 duration: 4057
 guests:
-  - avital-tamir
+  - avitaltamir
 resources:
   - title: Cyphernetes on GitHub
     type: url

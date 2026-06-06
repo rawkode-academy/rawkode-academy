@@ -129,7 +129,7 @@ chapters:
     title: Conclusion
 duration: 4030
 guests:
-  - kevin-hoffman
+  - kevinhoffman
 resources:
   - title: Programming WebAssembly with Rust
     type: url

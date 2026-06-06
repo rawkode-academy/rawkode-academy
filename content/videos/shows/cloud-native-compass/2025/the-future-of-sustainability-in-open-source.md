@@ -15,7 +15,7 @@ show: cloud-native-compass
 duration: 2875
 audioFileSize: 68999671
 guests:
-  - hazel-weakly
+  - hazelweakly
 resources:
   - title: Eleanor Ostrom's design principles for self-governed commons
     type: url

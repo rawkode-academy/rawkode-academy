@@ -86,7 +86,7 @@ chapters:
     title: Conclusion and Summary of Benefits
 duration: 4880
 guests:
-  - steven-martin
+  - stevengravy
 resources:
   - title: Teleport Quick Start / Getting Started guide
     type: url

@@ -72,7 +72,7 @@ chapters:
     title: Conclusion and Call to Action
 duration: 5414
 guests:
-  - todd-martin
+  - martintc
 resources:
   - type: url
     title: Comtrya documentation

@@ -17,9 +17,9 @@ technologies:
 show: rawkode-live
 duration: 5559
 guests:
-  - jiaxiao-zhou
-  - josh-duffney
-  - yosh-wuyts
+  - mossaka
+  - duffney
+  - yoshuawuyts
 resources:
   - title: Wassette on GitHub
     type: url

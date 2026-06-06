@@ -68,7 +68,7 @@ chapters:
     title: Conclusion and Thank You
 duration: 4453
 guests:
-  - ariadne-conill
+  - ariadne-cg
 resources:
   - title: Google's Distroless project
     type: url

@@ -166,7 +166,7 @@ chapters:
     title: Wrap-up and Thanks
 duration: 8015
 guests:
-  - duffie-cooley
+  - mauilion
 resources:
   - title: Equinix Metal
     type: url

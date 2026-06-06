@@ -77,7 +77,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 4745
 guests:
-  - steve-klabnik
+  - steveklabnik
 resources:
   - title: The Rust Programming Language book
     type: url

@@ -80,7 +80,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 3590
 guests:
-  - miek-gieben
+  - miekg
 resources:
   - title: CoreDNS example plugin repository
     type: url

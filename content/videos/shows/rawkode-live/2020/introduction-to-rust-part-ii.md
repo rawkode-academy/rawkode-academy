@@ -118,7 +118,7 @@ chapters:
     title: Conclusion & Thanks
 duration: 4918
 guests:
-  - manish-goregaokar
+  - manishearth
 resources:
   - title: Equinix Metal
     type: url

@@ -67,7 +67,7 @@ chapters:
 duration: 3368
 audioFileSize: 80837626
 guests:
-  - paul-dix
+  - pauldix
 resources:
   - title: Apache Arrow project
     type: url

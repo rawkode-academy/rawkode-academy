@@ -223,7 +223,7 @@ chapters:
     title: Conclusion & Thanks
 duration: 7245
 guests:
-  - jason-detiberus
+  - detiber
 resources:
   - title: kubectl autocomplete documentation
     type: url

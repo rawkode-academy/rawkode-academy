@@ -59,7 +59,7 @@ chapters:
     title: Discussion and Conclusion
 duration: 1345
 guests:
-  - brian-ketelsen
+  - bketelsen
 resources:
   - title: podmansh man page
     type: url

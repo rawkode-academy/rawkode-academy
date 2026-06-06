@@ -68,7 +68,7 @@ chapters:
     title: Farewell
 duration: 5288
 guests:
-  - avthar-sewrathan
+  - avthars
 resources:
   - title: Hello Timescale tutorial
     type: url

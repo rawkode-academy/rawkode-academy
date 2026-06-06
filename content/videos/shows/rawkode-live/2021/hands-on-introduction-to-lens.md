@@ -95,8 +95,7 @@ chapters:
     title: Final Farewell
 duration: 3567
 guests:
-  - edward-ionel
-  - oss-technology-enthusiast
+  - eionel
 resources:
   - title: Mirantis Kubernetes cheat sheet
     type: url

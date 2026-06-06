@@ -54,7 +54,7 @@ chapters:
     title: Conclusion & Wrap-up
 duration: 1283
 guests:
-  - brian-ketelsen
+  - bketelsen
 resources:
   - title: Fleek
     type: url

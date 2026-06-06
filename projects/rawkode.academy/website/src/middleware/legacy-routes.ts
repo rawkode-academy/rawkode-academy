@@ -1,4 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
+import { resolveLegacyPersonRedirect } from "./legacy-person-redirects";
 
 type LegacyRouteResult =
 	| {
@@ -30,6 +31,15 @@ export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {
 			kind: "redirect",
 			status: 301,
 			location: new URL(permanentTarget, url).toString(),
+		};
+	}
+
+	const personTarget = resolveLegacyPersonRedirect(pathname);
+	if (personTarget) {
+		return {
+			kind: "redirect",
+			status: 301,
+			location: new URL(personTarget, url).toString(),
 		};
 	}
 

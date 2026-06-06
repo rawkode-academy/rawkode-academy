@@ -66,7 +66,7 @@ chapters:
     title: Conclusion and Call to Action
 duration: 4744
 guests:
-  - alexander-block
+  - codablock
 resources:
   - type: url
     title: Kluctl documentation

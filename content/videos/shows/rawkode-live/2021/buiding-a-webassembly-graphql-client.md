@@ -105,8 +105,8 @@ chapters:
     title: Final Remarks and Sign Off
 duration: 7204
 guests:
-  - connor-hicks
-  - francis-gulotta
+  - cohix
+  - reconbot
 resources:
   - title: api.rawkode.dev GraphQL endpoint
     type: url

@@ -55,7 +55,7 @@ chapters:
 duration: 2588
 audioFileSize: 62100934
 guests:
-  - laszlo-fogas
+  - laszlocph
 resources:
   - title: kwasm
     type: url

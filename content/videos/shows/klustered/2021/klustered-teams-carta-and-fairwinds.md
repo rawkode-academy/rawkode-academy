@@ -84,12 +84,12 @@ chapters:
     title: Wrap-up & Conclusion
 duration: 5929
 guests:
-  - mahmoud-saada
-  - mario-loria
+  - saada
+  - inanimate
   - rachel-sweeney
-  - andy-suderman
-  - luke-reed
-  - raf-nijskens
+  - sudermanjr
+  - lucasreed
+  - denraf
 resources:
   - title: Teleport
     type: url

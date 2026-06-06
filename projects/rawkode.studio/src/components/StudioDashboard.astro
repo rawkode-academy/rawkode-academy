@@ -1,0 +1,198 @@
+---
+import { actions } from "astro:actions";
+import {
+	isStudioSessionActive,
+	type StudioDashboard,
+	type StudioEventSummary,
+} from "../server/studio";
+
+interface Props {
+	createSessionError?: string | null;
+	dashboard: StudioDashboard;
+	endSessionError?: string | null;
+	invite?: {
+		expiresAt: number;
+		inviteUrl: string;
+		sessionId: string;
+		sessionTitle: string;
+	} | null;
+	inviteError?: string | null;
+}
+
+const {
+	createSessionError = null,
+	dashboard,
+	endSessionError = null,
+	invite = null,
+	inviteError = null,
+} = Astro.props;
+
+function eventTiming(event: StudioEventSummary): string {
+	if (!event.startsAt) return "Unscheduled";
+	return new Date(event.startsAt).toLocaleString();
+}
+
+function eventState(event: StudioEventSummary): string {
+	if (!event.startsAt) return "Event";
+	return Date.parse(event.startsAt) >= Date.now() ? "Upcoming" : "Previous";
+}
+---
+
+{
+	!dashboard.user ? (
+		<section class="signed-out-panel" aria-label="Rawkode Studio sign in">
+			<h1>Welcome to Rawkode Studio</h1>
+			<a class="button primary" href="/login">Log in</a>
+		</section>
+	) : (
+		<>
+			<section class="dashboard-grid">
+				<div class="dashboard-panel dashboard-primary">
+					<div>
+						<p class="eyebrow">
+							{dashboard.isOperator ? "Host / Producer" : "Participant"}
+						</p>
+						<h1>
+							{
+								dashboard.isOperator
+									? "Upcoming events"
+									: "Your events"
+							}
+						</h1>
+					</div>
+					<p>
+						{
+							dashboard.isOperator
+								? "Create and end RealtimeKit sessions for scheduled Rawkode events."
+								: "Join active Studio rooms for events where your GitHub handle is listed."
+						}
+					</p>
+				</div>
+
+				<div class="dashboard-panel">
+					<p class="eyebrow">Identity</p>
+					<h2>{dashboard.user.username ?? dashboard.user.name}</h2>
+				</div>
+			</section>
+
+			{
+				dashboard.contentError ? (
+					<p class="form-error" role="alert">{dashboard.contentError}</p>
+				) : null
+			}
+			{
+				createSessionError ? (
+					<p class="form-error" role="alert">{createSessionError}</p>
+				) : null
+			}
+			{
+				endSessionError ? (
+					<p class="form-error" role="alert">{endSessionError}</p>
+				) : null
+			}
+			{
+				inviteError ? (
+					<p class="form-error" role="alert">{inviteError}</p>
+				) : null
+			}
+			{
+				invite ? (
+					<section class="studio-form-panel" aria-label="Guest invite">
+						<p class="eyebrow">Guest invite</p>
+						<h2>{invite.sessionTitle}</h2>
+						<label>
+							Invite URL
+							<input readonly value={invite.inviteUrl} />
+						</label>
+						<p>Expires {new Date(invite.expiresAt * 1000).toLocaleString()}</p>
+						<a class="button" href={invite.inviteUrl}>Open invite</a>
+					</section>
+				) : null
+			}
+
+			<section class="session-list" aria-label={dashboard.isOperator ? "Upcoming events" : "Assigned events"}>
+				{
+					dashboard.events.length === 0 ? (
+						<p class="session-empty">
+							{
+								dashboard.isOperator
+									? "No upcoming content events are available."
+									: "No previous or upcoming events are assigned to this GitHub handle."
+							}
+						</p>
+					) : dashboard.events.map((event) => {
+						const activeSessions = event.sessions.filter(isStudioSessionActive);
+						return (
+							<article class="session-row" id={`event-${event.id}`}>
+								<div>
+									<p class="eyebrow">{event.show} / {eventState(event)}</p>
+									<h2>{event.title}</h2>
+									<p>{eventTiming(event)}</p>
+								</div>
+								<div class="session-status">
+									<span>{event.sessions.length} RTK sessions</span>
+									<span>{activeSessions.length} active</span>
+								</div>
+								<div class="session-actions">
+									{
+										dashboard.isOperator ? (
+											<form method="POST" action={actions.createSession}>
+												<input name="videoId" type="hidden" value={event.id} />
+												<button class="button primary" type="submit">
+													Create RTK session
+												</button>
+											</form>
+										) : activeSessions.length === 0 ? (
+											<span class="session-muted">No active room</span>
+										) : null
+									}
+								</div>
+								{
+									event.sessions.length > 0 ? (
+										<div class="event-session-list">
+											{event.sessions.map((session) => (
+												<div class="event-session-row">
+													<div>
+														<strong>{session.id}</strong>
+														<span>{session.status}</span>
+													</div>
+													<div class="session-actions">
+														{
+															dashboard.isOperator ? (
+																<>
+																	<a class="button" href={`/studio/${session.id}/host`}>Host</a>
+																	<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
+																	<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+																	<form method="POST" action={actions.createInvite}>
+																		<input name="sessionId" type="hidden" value={session.id} />
+																		<button class="button" type="submit">Guest invite</button>
+																	</form>
+																	{
+																		isStudioSessionActive(session) ? (
+																			<form method="POST" action={actions.endSession}>
+																				<input name="sessionId" type="hidden" value={session.id} />
+																				<button class="button" type="submit">End session</button>
+																			</form>
+																		) : null
+																	}
+																</>
+															) : isStudioSessionActive(session) ? (
+																<a class="button primary" href={`/studio/${session.id}/guest`}>
+																	Join room
+																</a>
+															) : null
+														}
+													</div>
+												</div>
+											))}
+										</div>
+									) : null
+								}
+							</article>
+						);
+					})
+				}
+			</section>
+		</>
+	)
+}

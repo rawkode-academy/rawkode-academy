@@ -82,7 +82,7 @@ chapters:
 duration: 1920
 audioFileSize: 46069483
 guests:
-  - liz-rice
+  - lizrice
 resources:
   - title: Learning eBPF
     type: url

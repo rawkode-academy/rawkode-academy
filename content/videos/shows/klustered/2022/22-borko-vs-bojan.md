@@ -108,8 +108,8 @@ chapters:
     title: 'Debugging V1 Database Connection: Checking Postgres Deployment'
 duration: 2978
 guests:
-  - borko-djurkovic
-  - bojan-djurkovic
+  - borkod
+  - bojand
 resources:
   - title: Teleport
     type: url

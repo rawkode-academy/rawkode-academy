@@ -84,7 +84,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 5700
 guests:
-  - kat-cosgrove
+  - katcosgrove
 resources:
   - title: Conductor (ContainerCraft dev container)
     type: url

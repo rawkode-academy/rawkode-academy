@@ -16,6 +16,6 @@ technologies:
 show: rawkode-live
 duration: 3715
 guests:
-  - steve-klabnik
+  - steveklabnik
 ---
 

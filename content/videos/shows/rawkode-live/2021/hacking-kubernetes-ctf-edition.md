@@ -114,7 +114,7 @@ chapters:
     title: Final Remarks
 duration: 3574
 guests:
-  - andrew-martin
+  - sublimino
 resources:
   - title: Kubernetes Simulator
     type: url

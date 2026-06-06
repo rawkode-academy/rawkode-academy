@@ -108,7 +108,7 @@ chapters:
     title: Conclusion and Thanks
 duration: 5375
 guests:
-  - steven-wade
+  - swade1987
 resources:
   - title: Pulumi provider boilerplate repository
     type: url

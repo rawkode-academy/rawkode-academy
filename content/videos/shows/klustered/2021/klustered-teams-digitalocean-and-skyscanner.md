@@ -164,13 +164,13 @@ chapters:
     title: Outro and Sponsor Thanks
 duration: 7050
 guests:
-  - billie-cleek
-  - collin-shoop
-  - jeremy-morris
+  - bhcleek
+  - collinshoop
+  - morrislaw
   - shahar-levy
-  - guy-templeton
-  - matteo-ruina
-  - alex-williams
+  - gjtempleton
+  - maruina
+  - smirl
 resources:
   - title: Teleport sponsor link
     type: url

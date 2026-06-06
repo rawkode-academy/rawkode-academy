@@ -69,7 +69,7 @@ chapters:
     title: Conclusion and Future Topics
 duration: 3448
 guests:
-  - ana-hobden
+  - hoverbear
 resources:
   - type: url
     title: Rustlings

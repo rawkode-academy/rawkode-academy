@@ -83,7 +83,7 @@ chapters:
     title: Conclusion
 duration: 5695
 guests:
-  - lee-briggs
+  - jaxxstorm
 resources:
   - title: Teleport access platform
     type: url

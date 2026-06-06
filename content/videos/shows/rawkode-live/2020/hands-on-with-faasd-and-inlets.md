@@ -175,7 +175,7 @@ chapters:
     title: Wrap-up and Thank You
 duration: 5264
 guests:
-  - alex-ellis
+  - alexellis
 resources:
   - title: arkade
     type: url

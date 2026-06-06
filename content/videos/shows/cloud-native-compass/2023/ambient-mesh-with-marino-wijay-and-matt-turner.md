@@ -87,8 +87,8 @@ chapters:
 duration: 2962
 audioFileSize: 71086221
 guests:
-  - marino-wijay
-  - matt-turner
+  - distributethe6ix
+  - mt165
 resources:
   - title: Network Foundations workshop
     type: url

@@ -18,7 +18,7 @@ technologies:
 show: rawkode-live
 duration: 5583
 guests:
-  - terence-lee
+  - hone
 resources:
   - type: url
     title: Cloud Native Buildpacks

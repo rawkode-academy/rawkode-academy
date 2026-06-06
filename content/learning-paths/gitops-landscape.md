@@ -10,15 +10,13 @@ prerequisites:
   - "Working knowledge of Git workflows (branches, PRs) and CI/CD automation."
   - "Optional: exposure to CUE, GitOps controllers (Flux/Argo), or multi-cluster operations." 
 technologies:
-  - "Kubernetes"
-  - "Timoni"
-  - "CUE"
-  - "Kluctl"
-  - "FluxCD"
-  - "GitOps Toolkit"
-  - "Gimlet"
-  - "Sveltos"
-  - "GitOps"
+  - kubernetes
+  - timoni
+  - cue
+  - kluctl
+  - fluxcd
+  - gimlet
+  - sveltos
 publishedAt: "2025-10-01"
 authors:
   - "rawkode"

@@ -124,7 +124,7 @@ chapters:
     title: Conclusion & Call to Action
 duration: 5142
 guests:
-  - frederic-branczyk
+  - brancz
 resources:
   - title: Parca in Kubernetes tutorial
     type: url

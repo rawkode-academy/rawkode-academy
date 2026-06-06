@@ -15,7 +15,7 @@ technologies:
 show: rawkode-live
 duration: 5510
 guests:
-  - alex-jones
+  - alexsjones
 resources:
   - type: url
     title: Sympozium

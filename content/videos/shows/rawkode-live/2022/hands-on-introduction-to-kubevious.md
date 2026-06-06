@@ -87,7 +87,7 @@ chapters:
     title: Conclusion
 duration: 5432
 guests:
-  - ruben-hakopian
+  - rubenhak
 resources:
   - type: url
     title: Kubevious

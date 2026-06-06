@@ -181,7 +181,7 @@ chapters:
     title: Closing Remarks & Thanks
 duration: 5965
 guests:
-  - marino-wijay
+  - distributethe6ix
   - john-anderson
 resources:
   - title: Rawkode Academy Teleport sponsor link

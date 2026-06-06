@@ -104,7 +104,7 @@ chapters:
     title: Custom File Permissions Check Example (Using State)
 duration: 4281
 guests:
-  - barak-brudo
+  - mrblightning
 resources:
   - title: GitGat on GitHub
     type: url

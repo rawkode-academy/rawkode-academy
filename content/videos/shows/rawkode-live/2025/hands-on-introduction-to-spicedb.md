@@ -14,7 +14,7 @@ category: tutorial
 technologies:
   - spicedb
 guests:
-  - jimmy-zelinskie
+  - jzelinskie
 show: rawkode-live
 duration: 5427
 resources:

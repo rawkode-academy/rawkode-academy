@@ -96,7 +96,7 @@ chapters:
     title: 'Conclusion and Call to Action (Community, Free Tier)'
 duration: 4674
 guests:
-  - florian-forster
+  - fforootd
 resources:
   - title: Zitadel Docker Compose self-hosting guide
     type: url

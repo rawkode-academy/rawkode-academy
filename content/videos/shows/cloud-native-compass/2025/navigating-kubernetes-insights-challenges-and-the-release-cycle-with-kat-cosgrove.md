@@ -59,7 +59,7 @@ chapters:
   - startTime: 2331
     title: Conclusion and Farewell
 guests:
-  - kat-cosgrove
+  - katcosgrove
 resources:
   - title: Kubernetes website repository
     type: url

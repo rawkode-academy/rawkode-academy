@@ -47,7 +47,7 @@ chapters:
     title: Conclusion
 duration: 781
 guests:
-  - brian-ketelsen
+  - bketelsen
 resources:
   - type: url
     title: wei/pull

@@ -159,7 +159,7 @@ chapters:
     title: Outro
 duration: 5064
 guests:
-  - rory-mccune
+  - raesene
 resources:
   - title: kind (Kubernetes in Docker)
     type: url

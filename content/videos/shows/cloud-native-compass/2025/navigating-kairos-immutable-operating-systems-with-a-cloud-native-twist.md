@@ -48,8 +48,8 @@ chapters:
   - startTime: 2355
     title: Final Thoughts and Farewell
 guests:
-  - mauro-morales
-  - dimitris-karakasilis
+  - mauromorales
+  - jimmykarily
 resources:
   - title: Kairos website
     type: url

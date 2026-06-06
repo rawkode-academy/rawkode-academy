@@ -46,7 +46,7 @@ chapters:
     title: Can I proxy / pull through cache other registries with containerd?
 duration: 4025
 guests:
-  - phil-estes
+  - estesp
 resources:
   - title: stargz snapshotter KubeCon talk
     type: url

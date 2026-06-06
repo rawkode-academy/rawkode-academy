@@ -85,7 +85,7 @@ chapters:
     title: Conclusion and Thank You
 duration: 3066
 guests:
-  - matti-ranta
+  - techknowlogick
 resources:
   - title: Gitea Actions documentation
     type: url

@@ -6,6 +6,7 @@ export interface User {
 	emailVerified: boolean;
 	name: string;
 	image: string | null;
+	username: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }

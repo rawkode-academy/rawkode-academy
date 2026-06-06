@@ -20,8 +20,8 @@ technologies:
 show: rawkode-live
 duration: 6422
 guests:
-  - martin-sadler
-  - karthik-satchitanand
+  - martinsadler
+  - ksatchit
 resources:
   - title: k0rdent Quick Starts documentation
     type: url

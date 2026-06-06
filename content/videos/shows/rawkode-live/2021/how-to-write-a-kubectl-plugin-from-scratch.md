@@ -63,7 +63,7 @@ chapters:
     title: Conclusion
 duration: 4894
 guests:
-  - matt-turner
+  - mt165
 resources:
   - title: Kubernetes kubectl plugins documentation
     type: url

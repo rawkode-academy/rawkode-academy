@@ -25,6 +25,7 @@ export interface ServiceBindingTransportContext {
 		id: string;
 		email: string;
 		name?: string;
+		username?: string | null;
 	};
 }
 
@@ -76,6 +77,9 @@ export function createServiceBindingTransport(env: Env): Transport {
 				if (ctx?.user) {
 					headers["X-Gateway-User-Id"] = ctx.user.id;
 					headers["X-Gateway-User-Email"] = ctx.user.email;
+					if (ctx.user.username) {
+						headers["X-Gateway-User-Username"] = ctx.user.username;
+					}
 					if (ctx.user.name) {
 						headers["X-Gateway-User-Name"] = ctx.user.name;
 					}

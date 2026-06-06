@@ -87,8 +87,8 @@ chapters:
     title: Conclusion & How to Get Involved
 duration: 4461
 guests:
-  - vineeth-pothulapati
-  - mat-arye
+  - vineethreddy02
+  - cevian
 resources:
   - title: Promscale design doc
     type: url

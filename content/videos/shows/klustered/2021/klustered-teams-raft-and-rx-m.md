@@ -132,10 +132,10 @@ chapters:
     title: Outro and Thanks
 duration: 4833
 guests:
-  - christian-laxina
-  - christopher-hansen
-  - ron-petty
-  - hitesh-sharma
+  - clacsinarx-m
+  - christopherhanson
+  - ronaldpetty
+  - teshsharma
 resources:
   - title: Equinix Metal
     type: url

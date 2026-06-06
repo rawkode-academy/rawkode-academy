@@ -101,7 +101,7 @@ chapters:
     title: Wrap-up & Thank You
 duration: 5373
 guests:
-  - marcos-nils
+  - marcosnils
 resources:
   - title: Play with Docker
     type: url

@@ -18,7 +18,7 @@ technologies: []
 show: rawkode-live
 duration: 3847
 guests:
-  - tony-meehan
+  - tonymeehan
 resources:
   - type: url
     title: preq on GitHub

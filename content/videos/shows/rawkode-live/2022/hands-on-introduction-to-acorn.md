@@ -94,7 +94,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 5208
 guests:
-  - darren-shepherd
+  - ibuildthecloud
 resources:
   - title: Acorn getting started guide
     type: url

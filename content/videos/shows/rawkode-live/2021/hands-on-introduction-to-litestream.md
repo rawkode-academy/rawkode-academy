@@ -93,7 +93,7 @@ chapters:
     title: Conclusion and Wrap Up
 duration: 3297
 guests:
-  - ben-johnson
+  - benbjohnson
 resources:
   - title: Litestream Getting Started guide
     type: url

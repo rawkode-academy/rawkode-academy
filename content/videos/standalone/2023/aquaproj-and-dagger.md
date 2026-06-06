@@ -48,7 +48,7 @@ chapters:
     title: Conclusion
 duration: 914
 guests:
-  - brian-ketelsen
+  - bketelsen
 resources:
   - title: AlphaBits Podcast
     type: url

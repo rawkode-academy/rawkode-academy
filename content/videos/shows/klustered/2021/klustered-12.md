@@ -102,8 +102,8 @@ chapters:
     title: Conclusion & Wrap Up
 duration: 5935
 guests:
-  - jeffrey-sica
-  - chris-carty
+  - jeefy
+  - cartyc
 resources:
   - title: Equinix Metal
     type: url

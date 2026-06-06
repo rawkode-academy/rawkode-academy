@@ -18,7 +18,7 @@ show: cloud-native-compass
 duration: 2371
 audioFileSize: 56911135
 guests:
-  - jose-amengual
+  - jamengual
 resources:
   - title: Project Atlantis
     type: url
