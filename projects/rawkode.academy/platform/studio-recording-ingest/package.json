@@ -1,0 +1,25 @@
+{
+  "name": "studio-recording-ingest",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "d1:create": "bun x wrangler d1 create platform-studio-recording-ingest",
+    "deploy": "bun x wrangler deploy",
+    "deploy:dry-run": "bun x wrangler deploy --dry-run",
+    "migrate": "bun x wrangler d1 migrations apply platform-studio-recording-ingest --remote",
+    "notify:create": "bun x wrangler r2 bucket notification create rawkode-academy-content --event-type object-create --queue platform-studio-recording-ingest --prefix \"studio/recordings/\" --suffix \"/ready.json\"",
+    "notify:list": "bun x wrangler r2 bucket notification list rawkode-academy-content",
+    "queues:create": "bun x wrangler queues create platform-studio-recording-ingest && bun x wrangler queues create platform-studio-recording-ingest-dlq",
+    "test": "vitest run",
+    "verify:live": "bun run scripts/verify-live.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250426.0",
+    "@types/bun": "latest",
+    "@types/node": "^22.15.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8",
+    "wrangler": "^4.13.2"
+  }
+}
