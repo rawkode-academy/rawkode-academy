@@ -525,8 +525,9 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	.watch-detail__upcoming-player {
 		position: absolute;
 		inset: 0;
-		display: grid;
-		place-items: center;
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
 		padding: clamp(1.25rem, 4vw, 3rem);
 		overflow: hidden;
 	}
@@ -537,46 +538,44 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		filter: saturate(0.85) brightness(0.55);
-		transform: scale(1.02);
+		filter: saturate(1.02) brightness(0.9);
 	}
 
 	.watch-detail__upcoming-scrim {
 		position: absolute;
 		inset: 0;
 		background:
-			linear-gradient(135deg, oklch(0.16 0.04 82 / 0.88), oklch(0.09 0.02 240 / 0.78)),
-			radial-gradient(circle at 50% 50%, transparent 0, oklch(0.08 0.02 240 / 0.78) 70%);
+			linear-gradient(180deg, oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.58)),
+			radial-gradient(circle at 50% 44%, transparent 0 44%, oklch(0.05 0.02 240 / 0.42) 100%);
 	}
 
 	.watch-detail__upcoming-card {
 		position: relative;
 		z-index: 1;
-		max-width: 42rem;
-		padding: clamp(1rem, 3vw, 2rem);
-		border: 1px solid oklch(0.88 0.08 82 / 0.32);
-		background: oklch(0.13 0.03 82 / 0.78);
-		backdrop-filter: blur(18px);
+		max-width: min(34rem, 100%);
+		padding: clamp(0.875rem, 2vw, 1.375rem);
+		border: 1px solid oklch(0.88 0.08 82 / 0.24);
+		background: oklch(0.1 0.02 260 / 0.68);
+		backdrop-filter: blur(14px);
 		color: oklch(0.96 0.03 82);
-		text-align: center;
+		text-align: left;
 		box-shadow: 0 1.5rem 4rem oklch(0 0 0 / 0.35);
 	}
 
 	.watch-detail__upcoming-card h2 {
-		margin: 0.75rem 0 0;
-		font-family: var(--font-instrument-serif), serif;
-		font-size: clamp(2rem, 4vw, 3rem);
-		font-style: italic;
-		font-weight: 400;
-		line-height: 1;
-		letter-spacing: -0.02em;
+		margin: 0.625rem 0 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1.125rem, 2.2vw, 1.75rem);
+		font-weight: 700;
+		line-height: 1.05;
+		letter-spacing: 0;
 	}
 
 	.watch-detail__upcoming-card p {
-		margin: 1rem auto 0;
-		max-width: 34rem;
+		margin: 0.625rem 0 0;
+		max-width: 30rem;
 		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(0.95rem, 2vw, 1.125rem);
+		font-size: clamp(0.875rem, 1.5vw, 1rem);
 		line-height: 1.5;
 		color: oklch(0.92 0.03 82 / 0.86);
 	}
