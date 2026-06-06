@@ -69,8 +69,8 @@ chapters:
     title: Conclusion and Q&A
 duration: 5212
 guests:
-  - amy-tobey
-  - liz-fong-jones
+  - tobert
+  - lizthegrey
 resources:
   - title: OpenTelemetry Go contrib gRPC instrumentation example
     type: url

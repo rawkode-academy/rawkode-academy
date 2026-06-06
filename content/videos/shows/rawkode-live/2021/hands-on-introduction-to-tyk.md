@@ -126,8 +126,8 @@ chapters:
     title: Wrap-up
 duration: 6051
 guests:
-  - budha-bhattacharya
-  - andy-smith
+  - hellobudha
+  - rewsmith
 resources:
   - title: Tyk Getting Started guide
     type: url

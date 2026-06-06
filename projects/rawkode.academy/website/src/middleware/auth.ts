@@ -37,6 +37,7 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 					emailVerified: true,
 					name: localSession.user.name,
 					image: localSession.user.image,
+					username: localSession.user.username ?? null,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					sub: localSession.user.id,

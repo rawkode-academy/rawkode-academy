@@ -98,8 +98,8 @@ chapters:
     title: Conclusion and Thanks
 duration: 5313
 guests:
-  - hans-kristian-flaatten
-  - zach-wachtel
+  - starefossen
+  - zwachtel11
 resources:
   - title: Ship It podcast
     type: url

@@ -79,7 +79,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 3913
 guests:
-  - jussi-nummelin
+  - jnummelin
 resources:
   - title: k0s documentation
     type: url

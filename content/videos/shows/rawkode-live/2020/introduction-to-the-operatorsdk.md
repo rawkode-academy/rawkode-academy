@@ -65,7 +65,7 @@ chapters:
     title: Conclusion
 duration: 2868
 guests:
-  - dennis-kelly
+  - dennovondiesel
 resources:
   - title: add operator repository
     type: url

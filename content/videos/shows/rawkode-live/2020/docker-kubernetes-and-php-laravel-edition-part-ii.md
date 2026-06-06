@@ -34,7 +34,7 @@ chapters:
       development
 duration: 5184
 guests:
-  - ciaran-mcnulty
+  - ciaranmcnulty
 resources:
   - title: Ping CRM
     type: url

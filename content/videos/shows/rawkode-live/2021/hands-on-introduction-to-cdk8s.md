@@ -91,7 +91,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 4359
 guests:
-  - elad-ben-israel
+  - eladb
 resources:
   - title: 'cdk8s Concepts: Escape Patches'
     type: url

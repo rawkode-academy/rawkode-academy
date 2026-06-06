@@ -70,7 +70,7 @@ chapters:
     title: Conclusion and Call to Action
 duration: 3202
 guests:
-  - vlad-matsiiako
+  - vmatsiiako
 resources:
   - title: Infisical self-hosting instructions
     type: url

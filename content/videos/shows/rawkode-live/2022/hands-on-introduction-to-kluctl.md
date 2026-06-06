@@ -105,7 +105,7 @@ chapters:
     title: Conclusion
 duration: 5556
 guests:
-  - alexander-block
+  - codablock
 resources:
   - title: podinfo Helm chart
     type: url

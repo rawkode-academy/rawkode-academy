@@ -93,7 +93,7 @@ chapters:
     title: Conclusion and Final Remarks
 duration: 5582
 guests:
-  - jens-neuse
+  - jensneuse
 resources:
   - title: WunderGraph Next.js TypeScript Functions example
     type: url

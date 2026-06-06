@@ -1,0 +1,37 @@
+---
+import { actions } from "astro:actions";
+import StudioDashboard from "../components/StudioDashboard.astro";
+import StudioLayout from "../layouts/StudioLayout.astro";
+import { loadStudioDashboard } from "../server/studio";
+import { env } from "cloudflare:workers";
+
+const createSessionResult = Astro.getActionResult(actions.createSession);
+if (createSessionResult?.data?.sessionId) {
+	return Astro.redirect(
+		`/studio/${encodeURIComponent(createSessionResult.data.sessionId)}/host`,
+		303,
+	);
+}
+
+const inviteResult = Astro.getActionResult(actions.createInvite);
+const endSessionResult = Astro.getActionResult(actions.endSession);
+const dashboard = await loadStudioDashboard(Astro.locals.user, env);
+const invite = inviteResult?.data
+	? {
+			expiresAt: inviteResult.data.invite.expiresAt,
+			inviteUrl: new URL(inviteResult.data.inviteUrl, Astro.url.origin).toString(),
+			sessionId: inviteResult.data.session.id,
+			sessionTitle: inviteResult.data.session.title,
+		}
+	: null;
+---
+
+<StudioLayout title="Rawkode Studio" active="dashboard">
+	<StudioDashboard
+		createSessionError={createSessionResult?.error?.message}
+		dashboard={dashboard}
+		endSessionError={endSessionResult?.error?.message}
+		invite={invite}
+		inviteError={inviteResult?.error?.message}
+	/>
+</StudioLayout>

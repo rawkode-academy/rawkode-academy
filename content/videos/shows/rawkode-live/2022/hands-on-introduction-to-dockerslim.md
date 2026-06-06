@@ -80,8 +80,8 @@ chapters:
     title: Wrap Up and Community
 duration: 5261
 guests:
-  - kyle-quest
-  - ivan-velichko
+  - kcq
+  - iximiuz
 resources:
   - title: Slim Toolkit (formerly DockerSlim)
     type: url

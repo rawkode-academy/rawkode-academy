@@ -86,7 +86,7 @@ chapters:
     title: Conclusion & Preview of Next Session
 duration: 3299
 guests:
-  - jeremy-tanner
+  - jeremytanner
 resources:
   - title: WonderNetwork Global Latency Statistics
     type: url

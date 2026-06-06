@@ -115,7 +115,7 @@ chapters:
     title: Conclusion
 duration: 4552
 guests:
-  - taylor-dolezal
+  - onlydole
 resources:
   - title: Waypoint GitOps repository
     type: url

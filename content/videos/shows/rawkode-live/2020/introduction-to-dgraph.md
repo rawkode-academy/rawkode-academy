@@ -67,7 +67,7 @@ chapters:
     title: Conclusion
 duration: 4700
 guests:
-  - xuanyi-chew
+  - chewxy
 resources:
   - title: Dgraph Docker image
     type: url

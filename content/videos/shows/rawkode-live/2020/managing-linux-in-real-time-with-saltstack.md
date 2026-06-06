@@ -71,7 +71,7 @@ chapters:
     title: Provisioning all our machines with SSH keys from our custom grain data
 duration: 6520
 guests:
-  - edward-vielmetti
+  - vielmetti
 resources:
   - title: Salt Pillar Modules documentation
     type: url

@@ -121,12 +121,12 @@ chapters:
     title: Final Wrap-up
 duration: 4880
 guests:
-  - adrian-mouat
-  - charlotte-mach
-  - ricardo-torres-da-costa
-  - saiyam-pathak
-  - dinesh-majrekar
-  - david-fogle
+  - amouat
+  - charlottemach
+  - rgdacosta
+  - saiyam1814
+  - dmajrekar
+  - birdiesanders
 resources:
   - title: Teleport access platform
     type: url

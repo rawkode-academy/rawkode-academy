@@ -101,8 +101,8 @@ chapters:
     title: Pod Still Creating & Admission Denied (LimitRange forbidden)
 duration: 5770
 guests:
-  - walid-shaari
-  - noel-georgi
+  - walidshaari
+  - frezbo
 resources:
   - title: Rawkode Discord
     type: url

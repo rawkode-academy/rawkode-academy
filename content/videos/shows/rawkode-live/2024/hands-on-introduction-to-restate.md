@@ -56,7 +56,7 @@ chapters:
     title: Conclusion and Planning Part Two
 duration: 5470
 guests:
-  - jack-kleeman
+  - jackkleeman
 resources:
   - type: url
     title: Restate

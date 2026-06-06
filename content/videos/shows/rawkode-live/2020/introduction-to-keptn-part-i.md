@@ -126,7 +126,7 @@ chapters:
     title: Closing Remarks & Thanks
 duration: 6650
 guests:
-  - jurgen-etzlstorfer
+  - jetzlstorfer
 resources:
   - title: Equinix Metal
     type: url

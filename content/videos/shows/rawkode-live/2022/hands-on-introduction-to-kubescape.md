@@ -108,7 +108,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 4880
 guests:
-  - ben-hirschberg
+  - slashben
 resources:
   - title: NSA CISA Kubernetes hardening framework
     type: url

@@ -48,7 +48,7 @@ chapters:
     title: Deploying to Kubernetes
 duration: 9800
 guests:
-  - ciaran-mcnulty
+  - ciaranmcnulty
 resources:
   - title: Inertia Ping CRM
     type: url

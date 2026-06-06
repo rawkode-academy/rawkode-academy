@@ -41,6 +41,34 @@ describe("legacy route resolver", () => {
 		});
 	});
 
+	it("permanently redirects legacy people slugs to GitHub-handle slugs", () => {
+		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/people/adrian-mouat")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/people/amouat",
+		});
+		expect(
+			resolveLegacyRoute(
+				new URL(
+					"https://rawkode.academy/people/open-source-database-evangelist",
+				),
+			),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/people/askdba",
+		});
+		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/people/marino-wijay")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/people/distributethe6ix",
+		});
+	});
+
 	it("returns an empty noindex response for stale Partytown worker probes", () => {
 		expect(
 			resolveLegacyRoute(

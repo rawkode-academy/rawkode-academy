@@ -96,7 +96,7 @@ chapters:
     title: Summary & Wrap-up
 duration: 4706
 guests:
-  - bastian-hofmann
+  - bashofmann
 resources:
   - title: Installing Rancher documentation page
     type: url

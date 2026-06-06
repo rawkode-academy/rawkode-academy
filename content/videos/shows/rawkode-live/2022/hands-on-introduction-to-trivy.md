@@ -96,7 +96,7 @@ chapters:
     title: Conclusion & Farewell
 duration: 4105
 guests:
-  - rory-mccune
+  - raesene
 resources:
   - title: Trivy Getting Started documentation
     type: url

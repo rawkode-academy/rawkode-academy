@@ -81,7 +81,7 @@ chapters:
     title: Conclusion
 duration: 3267
 guests:
-  - natan-yellin
+  - aantn
 resources:
   - type: url
     title: Robusta KRR on GitHub

@@ -75,8 +75,8 @@ chapters:
     title: Conclusion and Future Plans
 duration: 4725
 guests:
-  - daniel-mangum
-  - marques-johansson
+  - hasheddan
+  - displague
 resources:
   - title: Provider Packet / Equinix Metal provider GitHub README
     type: url

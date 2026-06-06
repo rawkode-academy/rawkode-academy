@@ -1,0 +1,46 @@
+---
+import StudioLayout from "../../layouts/StudioLayout.astro";
+import { resolveStudioInvite } from "../../server/studio";
+import { env } from "cloudflare:workers";
+
+const inviteToken = Astro.params.inviteToken ?? "";
+const resolvedInvite = await resolveStudioInvite(
+	env,
+	inviteToken,
+	Astro.locals.user,
+);
+const session = resolvedInvite?.session ?? null;
+---
+
+<StudioLayout title="Guest | Rawkode Studio" active="guest">
+	<section class="role-panel">
+		<p class="eyebrow">Guest invite</p>
+		<h1>{session ? session.title : "Invite unavailable"}</h1>
+		<p>
+			{
+				session
+					? `Invite ${inviteToken} is ready for GitHub-backed identity verification.`
+					: `Invite ${inviteToken} does not match a Studio session.`
+			}
+		</p>
+		{
+			Astro.locals.user && session ? (
+				<a
+					class="button primary"
+					href={`/studio/${session.id}/guest?invite=${encodeURIComponent(inviteToken)}`}
+				>
+					Join room
+				</a>
+			) : !Astro.locals.user ? (
+				<a
+					class="button primary"
+					href={`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`}
+				>
+					Sign in to join
+				</a>
+			) : (
+				<a class="button" href="/">Back to Studio</a>
+			)
+		}
+	</section>
+</StudioLayout>

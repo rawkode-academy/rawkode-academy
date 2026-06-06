@@ -136,8 +136,8 @@ chapters:
     title: Checking Containerd and Kubelet Status/Logs
 duration: 4350
 guests:
-  - thom-crowe
-  - jeremy-tanner
+  - thomcrowe
+  - jeremytanner
 resources: []
 ---
 

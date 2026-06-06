@@ -133,7 +133,7 @@ chapters:
     title: Final Remarks & Advanced Features Recap
 duration: 3590
 guests:
-  - matti-ranta
+  - techknowlogick
 resources:
   - title: Gitea from binary installation guide
     type: url

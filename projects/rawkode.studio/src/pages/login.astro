@@ -1,0 +1,15 @@
+---
+import StudioLayout from "../layouts/StudioLayout.astro";
+
+const returnTo = Astro.url.searchParams.get("returnTo") || "/";
+const loginUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`;
+---
+
+<StudioLayout title="Sign in | Rawkode Studio">
+	<section class="auth-panel">
+		<p class="eyebrow">rawkode.academy identity</p>
+		<h1>Sign in to Studio</h1>
+		<p>Guests, hosts, and producers use their GitHub-backed Rawkode identity.</p>
+		<a class="button primary" href={loginUrl}>Continue with GitHub</a>
+	</section>
+</StudioLayout>

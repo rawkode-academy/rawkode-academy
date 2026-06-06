@@ -100,8 +100,8 @@ chapters:
     title: Thank You & Wrap-up
 duration: 4621
 guests:
-  - alex-jones
-  - alistair-hey
+  - alexsjones
+  - waterdrips
 resources:
   - title: Equinix Metal free credits link
     type: url

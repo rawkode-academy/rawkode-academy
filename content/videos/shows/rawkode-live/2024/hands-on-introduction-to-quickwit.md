@@ -85,7 +85,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 4754
 guests:
-  - francois-massot
+  - fmassot
 resources:
   - title: Quickwit Quick Start Guide
     type: url

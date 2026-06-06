@@ -1,5 +1,6 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
 import type { Env } from "./main.js";
+import { isPublicContentKey } from "./public-key-policy.js";
 
 export class Content extends WorkerEntrypoint<Env> {
 	private corsHeaders = {
@@ -39,6 +40,10 @@ export class Content extends WorkerEntrypoint<Env> {
 					...this.corsHeaders,
 				},
 			});
+		}
+
+		if (!isPublicContentKey(key)) {
+			return new Response("Not Found", { status: 404, headers: this.corsHeaders });
 		}
 
 		// Handle HEAD requests (podcast clients check file size)

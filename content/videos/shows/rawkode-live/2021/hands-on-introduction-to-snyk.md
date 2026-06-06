@@ -88,7 +88,7 @@ chapters:
     title: Conclusion and Recap
 duration: 5536
 guests:
-  - matt-jarvis
+  - snyk-matt
 resources:
   - title: n8n workflow automation project
     type: url

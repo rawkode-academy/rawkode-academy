@@ -74,8 +74,8 @@ chapters:
     title: Summary & Closing Remarks
 duration: 4039
 guests:
-  - daniel-bryant
-  - peter-o-neill
+  - danielbryantuk
+  - peteroneilljr
 resources:
   - title: Telepresence DNS resolution documentation
     type: url

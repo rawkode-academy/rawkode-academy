@@ -15,7 +15,7 @@ show: cloud-native-compass
 duration: 1777
 audioFileSize: 42648905
 guests:
-  - otavio-santana
+  - otaviojava
 resources:
   - type: url
     title: Otavio Santana's website

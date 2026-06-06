@@ -100,8 +100,8 @@ chapters:
     title: Conclusion and Thank You
 duration: 4850
 guests:
-  - leo-di-donato
-  - lorenzo-fontana
+  - leodido
+  - fntlnz
 resources:
   - title: Falcosidekick
     type: url

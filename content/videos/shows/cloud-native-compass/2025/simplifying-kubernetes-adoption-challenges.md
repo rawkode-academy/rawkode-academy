@@ -56,7 +56,7 @@ chapters:
   - startTime: 2363
     title: Final Thoughts and Community Involvement
 guests:
-  - koray-oksay
+  - koksay
 resources:
   - title: Kubernetes The Hard Way
     type: url

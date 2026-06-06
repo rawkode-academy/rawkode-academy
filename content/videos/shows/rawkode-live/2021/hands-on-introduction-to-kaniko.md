@@ -100,8 +100,7 @@ chapters:
     title: Conclusion & Farewell
 duration: 3200
 guests:
-  - tejal-desai
-  - google-cloud-platform
+  - tejal29
 resources:
   - title: Kaniko Getting Started tutorial
     type: url

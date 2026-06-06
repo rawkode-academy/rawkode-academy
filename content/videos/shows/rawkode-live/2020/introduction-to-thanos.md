@@ -104,7 +104,7 @@ chapters:
     title: Final Wrap-up
 duration: 5295
 guests:
-  - bartlomiej-plotka
+  - bwplotka
 resources:
   - title: Thanos Katacoda tutorials
     type: url

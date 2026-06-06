@@ -97,12 +97,30 @@ export const createAuth = async (env: AuthEnv) => {
 						"picture",
 						"roles",
 						"groups",
+						"username",
+						"preferred_username",
 						"https://rawkode.academy/roles",
 						"https://rawkode.academy/client_id",
 					],
 				},
-				getAdditionalUserInfoClaim: async (user, _scopes, client) =>
-					getUserAccessClaims(db, user.id, client.clientId),
+				getAdditionalUserInfoClaim: async (user, _scopes, client) => {
+					const [accessClaims, userRecord] = await Promise.all([
+						getUserAccessClaims(db, user.id, client.clientId),
+						db.query.user.findFirst({
+							where: eq(schema.user.id, user.id),
+						}),
+					]);
+					const username = userRecord?.username ?? (user as { username?: string }).username;
+					return {
+						...accessClaims,
+						...(username
+							? {
+									username,
+									preferred_username: username,
+								}
+							: {}),
+					};
+				},
 				trustedClients: [
 					{
 						clientId: "rawkode-academy-website",
@@ -144,6 +162,22 @@ export const createAuth = async (env: AuthEnv) => {
 						redirectUrls: [
 							"https://rawkode.news/api/auth/callback",
 							"http://localhost:4321/api/auth/callback",
+						],
+						disabled: false,
+						skipConsent: true,
+						metadata: null,
+					},
+					{
+						clientId: "rawkode-studio",
+						name: "Rawkode Studio",
+						type: "public",
+						// Workaround for https://github.com/better-auth/better-auth/issues/6651
+						// Better Auth incorrectly requires a secret for ID token signing even for public clients
+						clientSecret: "pkce-public-client-placeholder",
+						redirectUrls: [
+							"https://rawkode.studio/api/auth/callback",
+							"https://studio.rawkode.academy/api/auth/callback",
+							"http://localhost:4323/api/auth/callback",
 						],
 						disabled: false,
 						skipConsent: true,

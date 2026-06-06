@@ -71,7 +71,7 @@ chapters:
     title: Final Thoughts and Conclusion
 duration: 4145
 guests:
-  - ganesh-vernekar
+  - codesome
 resources:
   - title: Cortex Getting Started block storage documentation
     type: url

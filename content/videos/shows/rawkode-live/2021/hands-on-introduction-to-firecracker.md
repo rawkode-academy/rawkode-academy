@@ -90,8 +90,8 @@ chapters:
     title: Conclusion & Thank You
 duration: 3735
 guests:
-  - radu-weiss
-  - gabriel-ionescu
+  - raduweiss
+  - gc-plp
 resources:
   - title: Firecracker Quick Start Guide
     type: url

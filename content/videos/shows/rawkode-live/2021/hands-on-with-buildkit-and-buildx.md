@@ -95,7 +95,7 @@ chapters:
     title: Q&A and Conclusion
 duration: 5436
 guests:
-  - tonis-tiigi
+  - tonistiigi
 resources:
   - title: 'Docker documentation: automatic platform ARGs in global scope'
     type: url

@@ -71,8 +71,8 @@ chapters:
     title: Conclusion & Wrap-up
 duration: 3571
 guests:
-  - eyal-bukchin
-  - tal-zwick
+  - eyalb181
+  - t4lz
 resources:
   - title: mirrord website
     type: url

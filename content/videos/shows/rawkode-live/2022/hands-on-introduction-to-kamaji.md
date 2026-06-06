@@ -97,7 +97,7 @@ chapters:
     title: Conclusion and Edge/IoT Discussion
 duration: 4433
 guests:
-  - adriano-pezzuto
+  - bsctl
 resources:
   - title: Kamaji
     type: url

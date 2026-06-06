@@ -63,8 +63,8 @@ chapters:
     title: Looking at the available build-in functions
 duration: 4185
 guests:
-  - dan-bentley
-  - ellen-korbes
+  - dbentley
+  - vkorbes
 resources:
   - title: 'Tilt tutorial: The First Fifteen Minutes'
     type: url

@@ -27,8 +27,11 @@ type LearningResources {
 }
 
 type Person @key(fields: "id") {
+  avatarUrl: String
   biography: String
   forename: String
+  githubHandle: String
+  githubUrl: String
   guestAppearances: [Video!]
   hostedShows: [Show!]
   id: String
@@ -55,6 +58,7 @@ type Query {
   getRandomVideos(limit: Int = 5): [Video!]
   getTechnologies(limit: Int = 15, offset: Int = 0): [Technology!]
   me: Person
+  personByGithub(username: String!): Person
   showById(id: String!): Show
   simpleSearch(limit: Int = 15, term: String!): [Video!]
   videoByID(id: String!): Video

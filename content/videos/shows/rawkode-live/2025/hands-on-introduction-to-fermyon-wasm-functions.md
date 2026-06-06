@@ -18,7 +18,7 @@ technologies:
 show: rawkode-live
 duration: 4849
 guests:
-  - thorsten-hans
+  - thorstenhans
 resources:
   - title: Fermyon Wasm Functions announcement post
     type: url

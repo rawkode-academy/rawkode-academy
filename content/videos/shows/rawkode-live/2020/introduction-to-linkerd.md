@@ -123,7 +123,7 @@ chapters:
     title: Conclusion & Thanks
 duration: 4276
 guests:
-  - thomas-rampelberg
+  - grampelberg
 resources:
   - title: Equinix Metal
     type: url

@@ -1,0 +1,65 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "platform-studio-recording-ingest",
+	"main": "src/main.ts",
+	"compatibility_date": "2026-06-06",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": true,
+	"keep_vars": false,
+	"minify": true,
+	"observability": {
+		"traces": {
+			"enabled": true,
+			"destinations": [
+				"grafana-traces"
+			]
+		},
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true,
+			"head_sampling_rate": 1,
+			"destinations": [
+				"grafana-logs"
+			]
+		}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "platform-studio-recording-ingest",
+			"database_id": "53159084-61e6-425d-9660-8f350a08f036",
+			"migrations_dir": "./data-model"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "RECORDINGS",
+			"bucket_name": "rawkode-academy-content"
+		}
+	],
+	"queues": {
+		"consumers": [
+			{
+				"queue": "platform-studio-recording-ingest",
+				"max_batch_size": 5,
+				"max_batch_timeout": 30,
+				"max_retries": 5,
+				"dead_letter_queue": "platform-studio-recording-ingest-dlq"
+			}
+		]
+	},
+	"vars": {
+		"GCP_PROJECT_ID": "rawkode-academy-production",
+		"GCP_REGION": "europe-west2",
+		"GCP_TRANSCODING_JOB": "transcoding-job"
+	},
+	"secrets_store_secrets": [
+		{
+			"binding": "GCP_SERVICE_ACCOUNT_JSON",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GCP_SERVICE_ACCOUNT_JSON"
+		}
+	]
+}

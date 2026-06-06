@@ -92,7 +92,7 @@ chapters:
     title: Conclusion
 duration: 5615
 guests:
-  - jane-lusby
+  - yaahc
 resources:
   - title: Awesome Rust Mentors Project
     type: url

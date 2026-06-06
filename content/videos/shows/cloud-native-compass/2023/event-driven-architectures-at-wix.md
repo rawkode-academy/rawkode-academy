@@ -64,7 +64,7 @@ chapters:
 duration: 2763
 audioFileSize: 66317724
 guests:
-  - natan-silnitsky
+  - natansil
 resources:
   - title: Wix Engineering Blog
     type: url

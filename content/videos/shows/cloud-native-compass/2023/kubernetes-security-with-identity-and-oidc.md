@@ -72,7 +72,7 @@ chapters:
 duration: 2326
 audioFileSize: 55827785
 guests:
-  - marc-boorshtein
+  - mlbiam
 resources:
   - title: OpenUnison
     type: url

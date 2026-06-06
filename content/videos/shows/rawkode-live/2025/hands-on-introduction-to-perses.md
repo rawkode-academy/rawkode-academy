@@ -19,7 +19,7 @@ technologies:
 show: rawkode-live
 duration: 4318
 guests:
-  - nicolas-takashi
+  - nicolastakashi
 resources:
   - title: Perses official documentation
     url: 'https://perses.dev/perses/docs/'

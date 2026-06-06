@@ -51,7 +51,7 @@ chapters:
     title: Conclusion and Final Thoughts
 duration: 3334
 guests:
-  - viktor-farcic
+  - vfarcic
 resources:
   - title: Crossplane documentation
     type: url

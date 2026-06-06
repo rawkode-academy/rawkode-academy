@@ -91,7 +91,7 @@ chapters:
     title: Farewell & Sign-off
 duration: 4073
 guests:
-  - rohit-ghumare
+  - rohitg00
 resources:
   - title: TechWorld with Nana YouTube channel
     type: url

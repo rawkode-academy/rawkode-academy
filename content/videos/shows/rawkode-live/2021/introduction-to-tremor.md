@@ -85,10 +85,10 @@ chapters:
     title: Conclusion & Thank You
 duration: 5620
 guests:
-  - anup-dhamala
-  - darach-ennis
-  - heinz-gies
-  - matthias-wahl
+  - anupdhml
+  - darach
+  - licenser
+  - mfelsche
 resources:
   - title: Equinix Metal
     type: url

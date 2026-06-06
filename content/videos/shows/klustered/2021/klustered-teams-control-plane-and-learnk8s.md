@@ -186,10 +186,10 @@ chapters:
     title: Conclusion & Farewell
 duration: 4132
 guests:
-  - andrew-martin
-  - lewis-denham-parry
-  - chris-nesbitt-smith
-  - salman-iqbal
+  - sublimino
+  - denhamparry
+  - chrisns
+  - salmaniqbal
 resources:
   - title: Teleport
     type: url

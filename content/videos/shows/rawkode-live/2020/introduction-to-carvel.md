@@ -74,7 +74,7 @@ chapters:
     title: Conclusion & Resources
 duration: 4005
 guests:
-  - dmitriy-kalinin
+  - cppforlife
 resources:
   - title: ytt Playground
     type: url

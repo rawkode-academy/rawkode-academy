@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "types": ["astro/client", "vite/client", "@cloudflare/workers-types"]
+  },
+  "include": ["src/**/*.astro", "src/**/*.ts", "src/**/*.vue", "astro.config.mts", "vite.config.ts"],
+  "references": []
+}

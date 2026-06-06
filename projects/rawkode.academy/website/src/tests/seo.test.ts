@@ -881,8 +881,8 @@ describe("Crawlability and Sitemaps", () => {
 		// "drop-trailing-slash" inverts that so /foo/ → /foo (301), matching
 		// the canonical URL and removing the unnecessary redirect hop.
 		const { readFile } = await import("node:fs/promises");
-		const { fileURLToPath } = await import("node:url");
-		const path = fileURLToPath(new URL("../../wrangler.jsonc", import.meta.url));
+		const { join } = await import("node:path");
+		const path = join(process.cwd(), "wrangler.jsonc");
 		const raw = await readFile(path, "utf-8");
 		// wrangler.jsonc allows comments; strip them before JSON.parse.
 		const stripped = raw

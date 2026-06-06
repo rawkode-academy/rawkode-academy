@@ -55,7 +55,7 @@ chapters:
     title: Conclusion
 duration: 6446
 guests:
-  - marc-boorshtein
+  - mlbiam
 resources:
   - title: 'Kubernetes: An Enterprise Guide, Second Edition'
     type: url

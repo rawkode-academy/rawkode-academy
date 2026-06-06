@@ -1,0 +1,125 @@
+---
+import StudioLayout from "../../../layouts/StudioLayout.astro";
+import {
+	listStudioRecordings,
+	getStudioSession,
+	getStudioSessionWatchUrl,
+	userCanManageStudioSession,
+} from "../../../server/studio";
+import { env } from "cloudflare:workers";
+
+if (!Astro.locals.user) {
+	return Astro.redirect(`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+const sessionId = Astro.params.sessionId ?? "";
+const session = await getStudioSession(env, sessionId);
+if (!session) {
+	return new Response("Studio session not found", { status: 404 });
+}
+if (!(await userCanManageStudioSession(env, session, Astro.locals.user))) {
+	return new Response("Studio session management access is required", {
+		status: 403,
+	});
+}
+const readyMarkerKey = `studio/recordings/${sessionId}/<recording-id>/ready.json`;
+const recordings = await listStudioRecordings(env, session.id);
+const publicVodUrl = getStudioSessionWatchUrl(session);
+---
+
+<StudioLayout title={`Recordings ${session.title} | Rawkode Studio`} active="recordings">
+	<section class="role-panel">
+		<p class="eyebrow">Recording handoff</p>
+		<h1>{session.title}</h1>
+		<p>
+			Recordings publish a ready marker at <code>{readyMarkerKey}</code> before
+			the R2 event notification enqueues transcoding.
+		</p>
+		<div class="recording-contract">
+			<dl>
+				<div>
+					<dt>SESSION_ID</dt>
+					<dd>{session.id}</dd>
+				</div>
+				<div>
+					<dt>RECORDING_PREFIX</dt>
+					<dd><code>{session.recordingPrefix}</code></dd>
+				</div>
+				<div>
+					<dt>VIDEO_ID</dt>
+					<dd>{session.contentVideoId ?? `${session.showId}/${session.id}`}</dd>
+				</div>
+				{
+					publicVodUrl ? (
+						<div>
+							<dt>WATCH_URL</dt>
+							<dd><a href={publicVodUrl}>Rawkode watch page</a></dd>
+						</div>
+					) : null
+				}
+				<div>
+					<dt>SOURCE_KEY</dt>
+					<dd>private R2 recording object path</dd>
+				</div>
+				<div>
+					<dt>OUTPUT_PREFIX</dt>
+					<dd><code>videos/&lt;VIDEO_ID&gt;/</code></dd>
+				</div>
+			</dl>
+		</div>
+	</section>
+
+	<section class="recording-list" aria-label="Studio recordings">
+		{
+			recordings.length === 0 ? (
+				<p class="recording-empty">No recordings have been handed off yet.</p>
+			) : (
+				recordings.map((recording) => (
+					<article class="recording-row">
+						<div>
+							<p class="eyebrow">{recording.status}</p>
+							<h2>{recording.recordingId}</h2>
+							<p>
+								<code>{recording.readyMarkerKey}</code>
+							</p>
+						</div>
+						<dl>
+							<div>
+								<dt>Output</dt>
+								<dd>
+									<code>{recording.outputPrefix}</code>
+								</dd>
+							</div>
+							<div>
+								<dt>Transcode</dt>
+								<dd>
+									{recording.transcode?.status ?? "waiting"}
+									{recording.transcode?.streamUrl ? (
+										<>
+											{" "}
+											<a href={recording.transcode.streamUrl}>stream</a>
+										</>
+									) : null}
+									{publicVodUrl && recording.status === "vod-ready" ? (
+										<>
+											{" "}
+											<a href={publicVodUrl}>watch</a>
+										</>
+									) : null}
+								</dd>
+							</div>
+							<div>
+								<dt>Handoff</dt>
+								<dd>{recording.handoffStatus}</dd>
+							</div>
+							<div>
+								<dt>Updated</dt>
+								<dd>{new Date(recording.updatedAt * 1000).toLocaleString()}</dd>
+							</div>
+						</dl>
+					</article>
+				))
+			)
+		}
+	</section>
+</StudioLayout>

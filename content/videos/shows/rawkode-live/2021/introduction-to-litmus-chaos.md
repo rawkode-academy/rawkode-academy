@@ -114,8 +114,8 @@ chapters:
     title: Conclusion and Farewell
 duration: 5350
 guests:
-  - umasankar-mukkara
-  - karthik-satchitanand
+  - umamukkara
+  - ksatchit
 resources:
   - title: litmuschaos/litmus-helm repository
     type: url

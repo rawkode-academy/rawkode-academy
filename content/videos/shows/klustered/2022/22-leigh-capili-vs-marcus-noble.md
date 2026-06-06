@@ -98,8 +98,8 @@ chapters:
     title: T-Shirt Giveaway
 duration: 6577
 guests:
-  - leigh-capili
-  - marcus-noble
+  - stealthybox
+  - averagemarcus
 resources:
   - title: Equinix Metal
     type: url

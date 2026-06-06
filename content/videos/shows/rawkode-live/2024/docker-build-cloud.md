@@ -63,7 +63,7 @@ chapters:
     title: Final Q&A & Conclusion
 duration: 2397
 guests:
-  - michael-irwin
+  - mikesir87
 resources:
   - type: url
     title: Docker Build Cloud

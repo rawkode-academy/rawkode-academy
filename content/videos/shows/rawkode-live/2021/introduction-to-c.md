@@ -95,7 +95,7 @@ chapters:
     title: Farewell
 duration: 4373
 guests:
-  - sy-brand
+  - tartanllama
 resources:
   - title: Exercism language tracks
     type: url

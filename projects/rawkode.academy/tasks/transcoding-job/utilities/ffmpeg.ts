@@ -26,6 +26,13 @@ type TranscodeResult = {
   bitrate: number;
 };
 
+type FfmpegErrorEmitter = {
+  on(
+    event: "error",
+    listener: (err: Error, stdout: string, stderr: string) => void,
+  ): unknown;
+};
+
 export const getResolution = (localFile: string): Promise<Resolution> => {
   return new Promise((resolve, reject) => {
     ffmpeg.ffprobe(localFile, (err: Error | null, metadata: FfprobeData) => {
@@ -67,7 +74,7 @@ export const generateMasterPlaylist = (transcodeResults: TranscodeResult[]) => {
   return playlist.join("\n");
 };
 
-export const transcode = async ( // Make the outer function async
+export const transcode = async (
   inputUrl: URL,
   preset: Preset,
 ): Promise<TranscodeResult> => {
@@ -98,8 +105,6 @@ export const transcode = async ( // Make the outer function async
       `Error creating directory ${resolutionOutputDir}:`,
       mkdirError,
     );
-    // Rethrow or handle appropriately. Since this function returns a Promise,
-    // throwing here will cause the promise returned by transcode to reject.
     throw new Error(
       `Failed to create output directory: ${
         mkdirError instanceof Error ? mkdirError.message : String(mkdirError)
@@ -107,10 +112,9 @@ export const transcode = async ( // Make the outer function async
     );
   }
 
-  return new Promise<TranscodeResult>((resolve, reject) => { // Remove async from executor
-    // ffmpeg setup starts here, inside the promise executor
-    ffmpeg(inputPathname)
-      .videoCodec("libx264") // Using libx264 as libx265 might not be universally supported
+  return new Promise<TranscodeResult>((resolve, reject) => {
+    const command = ffmpeg(inputPathname)
+      .videoCodec("libx264")
       .audioCodec("aac")
       .videoBitrate(`${preset.bitrate}k`)
       .audioBitrate("128k")
@@ -144,7 +148,7 @@ export const transcode = async ( // Make the outer function async
           `Input is ${data.audio} audio with ${data.video} video`,
         );
       })
-      .on("end", () => { // Remove async from here
+      .on("end", () => {
         console.log(
           `FFmpeg (${preset.resolution}p) finished successfully. Verifying resolution...`,
         );
@@ -156,8 +160,8 @@ export const transcode = async ( // Make the outer function async
             resolve({
               width,
               height,
-              m3u8Path: m3u8Path, // Use path calculated outside
-              m3u8Filename: m3u8Filename, // Use filename calculated outside
+              m3u8Path,
+              m3u8Filename,
               bitrate: preset.bitrate,
             });
           })
@@ -175,19 +179,23 @@ export const transcode = async ( // Make the outer function async
               ),
             );
           });
-      })
-      .on("error", (err: Error, stderr: string) => {
-        // Ensure err is treated as Error type for message access
+      });
+
+    (command as unknown as FfmpegErrorEmitter).on(
+      "error",
+      (err: Error, _stdout: string, stderr: string) => {
         const errMsg = err instanceof Error ? err.message : String(err);
         console.error(`FFmpeg (${preset.resolution}p) error:`, errMsg);
-        console.error("FFmpeg stderr:", stderr); // Log stderr for detailed info
+        console.error("FFmpeg stderr:", stderr);
         reject(
           new Error(
             `FFmpeg error during ${preset.resolution}p transcode: ${errMsg}\nStderr: ${stderr}`,
           ),
         );
-      })
-      .run();
+      },
+    );
+
+    command.run();
   });
 };
 

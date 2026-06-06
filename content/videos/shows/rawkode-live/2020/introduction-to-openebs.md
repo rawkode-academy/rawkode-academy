@@ -86,8 +86,8 @@ chapters:
     title: Conclusion and Future Outlook
 duration: 4955
 guests:
-  - kiran-mova
-  - jeffry-molanus
+  - kmova
+  - gila
 resources:
   - title: MayaStore alpha features documentation
     type: url

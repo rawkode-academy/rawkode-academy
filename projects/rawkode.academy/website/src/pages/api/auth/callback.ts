@@ -112,6 +112,7 @@ export const GET: APIRoute = async (context) => {
 			email: userInfo.email || "",
 			name: userInfo.name || "",
 			image: userInfo.picture || null,
+			username: userInfo.username ?? userInfo.preferred_username ?? null,
 		},
 		expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000,
 	};

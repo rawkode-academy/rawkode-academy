@@ -98,7 +98,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 4066
 guests:
-  - natalie-serrino
+  - nserrino
 resources:
   - title: Pixie supported data sources documentation
     type: url

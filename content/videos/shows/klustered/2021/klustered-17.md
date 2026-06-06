@@ -96,8 +96,8 @@ chapters:
     title: Conclusion
 duration: 4709
 guests:
-  - adam-szucs-matyas
-  - william-lightning
+  - szucsitg
+  - kassah
 resources:
   - title: Teleport
     type: url

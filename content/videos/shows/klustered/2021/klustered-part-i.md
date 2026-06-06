@@ -99,7 +99,7 @@ chapters:
     title: 'Discussion, Realism of Problems, and Conclusion'
 duration: 5715
 guests:
-  - walid-shaari
+  - walidshaari
 resources: []
 ---
 

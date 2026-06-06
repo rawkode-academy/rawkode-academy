@@ -25,7 +25,7 @@ technologies:
 show: rawkode-live
 duration: 5700
 guests:
-  - yi-zha
+  - yizha1
 resources:
   - title: Notary Project
     type: url

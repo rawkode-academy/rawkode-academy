@@ -52,7 +52,7 @@ chapters:
     title: Conclusion and Call to Action
 duration: 5435
 guests:
-  - sebastian-tiedtke
+  - sourishkrout
 resources:
   - title: Runme Getting Started page
     type: url

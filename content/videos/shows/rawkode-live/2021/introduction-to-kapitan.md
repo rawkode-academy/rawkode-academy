@@ -82,8 +82,8 @@ chapters:
     title: Conclusion and Community
 duration: 5620
 guests:
-  - alessandro-de-maria
-  - ricardo-amaro
+  - ademariag
+  - ramaro
 resources:
   - title: Kapitan Reference Repository
     type: url

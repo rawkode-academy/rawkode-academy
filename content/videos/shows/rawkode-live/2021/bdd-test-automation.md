@@ -60,7 +60,7 @@ chapters:
     title: Reflection and Conclusion
 duration: 5375
 guests:
-  - ciaran-mcnulty
+  - ciaranmcnulty
 resources:
   - type: url
     title: Cucumber Rust on GitHub

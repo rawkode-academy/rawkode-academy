@@ -82,7 +82,7 @@ chapters:
     title: Outro
 duration: 3163
 guests:
-  - lukas-gentele
+  - lukasgentele
 resources:
   - title: Scaleway provider for DevPod
     type: url

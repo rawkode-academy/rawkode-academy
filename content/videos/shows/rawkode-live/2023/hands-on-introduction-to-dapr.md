@@ -94,7 +94,7 @@ chapters:
     title: Conclusion and Call to Action
 duration: 4632
 guests:
-  - mark-fussell
+  - mfussell
 resources:
   - title: Platform Engineering on Kubernetes
     type: url

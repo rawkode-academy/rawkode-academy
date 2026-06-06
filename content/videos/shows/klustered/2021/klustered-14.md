@@ -105,8 +105,8 @@ chapters:
     title: Explanation of Cluster 2 Brokenness & Conclusion
 duration: 6357
 guests:
-  - sid-palas
-  - arian-van-putten
+  - sidpalas
+  - arianvp
 resources:
   - title: DevOps Directive YouTube channel
     type: url

@@ -146,8 +146,8 @@ chapters:
     title: Conclusion
 duration: 5535
 guests:
-  - ciaran-mcnulty
-  - alex-bowers
+  - ciaranmcnulty
+  - alexbowers
 resources:
   - title: Ping CRM
     type: url

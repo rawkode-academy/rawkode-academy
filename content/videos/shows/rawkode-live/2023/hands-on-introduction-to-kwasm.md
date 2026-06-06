@@ -68,8 +68,8 @@ chapters:
     title: Conclusion and Get Involved
 duration: 2955
 guests:
-  - noel-georgi
-  - philipp-strube
+  - frezbo
+  - pst
 resources:
   - title: containerd Spin example
     type: url

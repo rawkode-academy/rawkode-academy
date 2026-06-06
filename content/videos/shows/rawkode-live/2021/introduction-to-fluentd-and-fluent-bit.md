@@ -113,8 +113,8 @@ chapters:
     title: Conclusion & Project Announcements
 duration: 5940
 guests:
-  - anurag-gupta
-  - eduardo-silva
+  - agup006
+  - edsiper
 resources:
   - title: Calyptia Config Visualizer
     type: url

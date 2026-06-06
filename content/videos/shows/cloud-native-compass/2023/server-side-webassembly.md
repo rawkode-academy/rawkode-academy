@@ -69,8 +69,8 @@ duration: 2975
 audioFileSize: 71404079
 guests:
   - kate-goldenring
-  - connor-hicks
-  - kevin-hoffman
+  - cohix
+  - kevinhoffman
 resources:
   - title: wasmCloud open source project
     type: url

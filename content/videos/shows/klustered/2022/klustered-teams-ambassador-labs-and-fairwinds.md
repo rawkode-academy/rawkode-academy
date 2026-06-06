@@ -135,10 +135,10 @@ chapters:
     title: Conclusion & Thanks
 duration: 4990
 guests:
-  - daniel-bryant
-  - edidiong-asikpo
-  - alexandre-gervais
-  - andy-suderman
+  - danielbryantuk
+  - didicodes
+  - alexgervais
+  - sudermanjr
 resources:
   - type: url
     title: Teleport

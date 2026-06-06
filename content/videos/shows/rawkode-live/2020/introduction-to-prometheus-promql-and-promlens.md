@@ -86,7 +86,7 @@ chapters:
     title: Conclusion
 duration: 5335
 guests:
-  - julius-volz
+  - juliusv
 resources:
   - title: Prometheus Formatter Chrome extension
     type: url

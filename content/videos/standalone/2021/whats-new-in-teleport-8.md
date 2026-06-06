@@ -64,7 +64,7 @@ chapters:
     title: Farewell & Outro
 duration: 2896
 guests:
-  - steve-martin
+  - stevengravy
 resources:
   - title: 'Teleport documentation: joining nodes'
     type: url

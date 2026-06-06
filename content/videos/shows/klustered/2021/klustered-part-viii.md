@@ -216,7 +216,7 @@ chapters:
     title: Force Deleting Postgres Pod
 duration: 5811
 guests:
-  - noel-georgi
+  - frezbo
 resources:
   - title: kubectl neat
     type: url

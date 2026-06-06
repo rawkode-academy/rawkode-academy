@@ -37,7 +37,7 @@ chapters:
     title: Profiling our complex composer configuration with much gains
 duration: 5372
 guests:
-  - derick-rethans
+  - derickr
 resources:
   - title: KCachegrind profiling viewer
     type: url

@@ -172,7 +172,7 @@ chapters:
     title: Conclusion and Thanks
 duration: 5674
 guests:
-  - brian-grant
+  - bgrant0607
 resources:
   - title: kpt namespace provisioning UI guide
     type: url

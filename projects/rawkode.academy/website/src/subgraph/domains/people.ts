@@ -1,5 +1,9 @@
 import type SchemaBuilder from "@pothos/core";
-import { type PersonItem, getPersonById } from "../loaders/people";
+import {
+	type PersonItem,
+	getPersonByGithub,
+	getPersonById,
+} from "../loaders/people";
 
 export function registerPeople(
 	builder: InstanceType<typeof SchemaBuilder<{}>>,
@@ -16,6 +20,21 @@ export function registerPeople(
 				nullable: true,
 				resolve: (p: PersonItem) => p.terms ?? null,
 			}),
+			githubHandle: t.field({
+				type: "String",
+				nullable: true,
+				resolve: (p: PersonItem) => p.githubHandle ?? null,
+			}),
+			githubUrl: t.field({
+				type: "String",
+				nullable: true,
+				resolve: (p: PersonItem) => p.githubUrl ?? null,
+			}),
+			avatarUrl: t.field({
+				type: "String",
+				nullable: true,
+				resolve: (p: PersonItem) => p.avatarUrl ?? null,
+			}),
 		}),
 	});
 
@@ -25,13 +44,22 @@ export function registerPeople(
 	});
 
 	builder.queryFields((t: any) => ({
+		personByGithub: t.field({
+			type: PersonRef,
+			nullable: true,
+			args: {
+				username: t.arg.string({ required: true }),
+			},
+			resolve: async (_root: any, args: { username: string }) =>
+				getPersonByGithub(args.username),
+		}),
 		me: t.field({
 			type: PersonRef,
 			nullable: true,
 			resolve: async (_root: any, _args: any, context: any) => {
-				const userId = context?.user?.id;
-				if (!userId) return null;
-				return getPersonById(userId);
+				const username = context?.user?.username;
+				if (!username) return null;
+				return getPersonByGithub(username);
 			},
 		}),
 	}));

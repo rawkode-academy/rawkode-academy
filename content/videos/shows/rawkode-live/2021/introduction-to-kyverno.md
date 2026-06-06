@@ -96,9 +96,8 @@ chapters:
     title: Conclusion & Community Resources
 duration: 4695
 guests:
-  - jim-bugwadia
-  - founder-at-nirmata
-  - shuting-zhao
+  - jimbugwadia
+  - realshuting
 resources:
   - title: Kubernetes Pod Security Standards documentation
     type: url

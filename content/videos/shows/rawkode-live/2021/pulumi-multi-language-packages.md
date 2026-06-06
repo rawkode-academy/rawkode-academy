@@ -69,7 +69,7 @@ chapters:
     title: Outro
 duration: 5280
 guests:
-  - lee-briggs
+  - jaxxstorm
 resources:
   - title: Pulumi Go boilerplate provider
     type: url

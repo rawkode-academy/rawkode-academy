@@ -44,7 +44,7 @@ chapters:
     title: Permanent and ephemeral storage / state / persistence
 duration: 5210
 guests:
-  - tim-mccallum
+  - tpmccallum
 resources:
   - title: Jampack API docs
     type: url

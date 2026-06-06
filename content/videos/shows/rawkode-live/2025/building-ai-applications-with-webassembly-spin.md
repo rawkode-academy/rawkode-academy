@@ -17,7 +17,7 @@ technologies:
 show: rawkode-live
 duration: 6370
 guests:
-  - thorsten-hans
+  - thorstenhans
 resources:
   - title: Fermyon Developer Home
     type: url

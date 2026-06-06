@@ -81,8 +81,8 @@ chapters:
     title: Conclusion
 duration: 3154
 guests:
-  - anais-urlichs
-  - philipp-strube
+  - anaisurlichs
+  - pst
 resources:
   - title: OpenFaaS nodeinfo
     type: url

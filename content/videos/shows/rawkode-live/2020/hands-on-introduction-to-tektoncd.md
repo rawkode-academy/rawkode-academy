@@ -69,7 +69,7 @@ chapters:
     title: Conclusion
 duration: 4640
 guests:
-  - kevin-mcdermott
+  - bigkevmcd
 resources:
   - title: Equinix Metal
     type: url

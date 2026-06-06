@@ -56,7 +56,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 7820
 guests:
-  - michael-tanenbaum
+  - tbaums
 resources:
   - title: Grokking Deep Learning
     type: url

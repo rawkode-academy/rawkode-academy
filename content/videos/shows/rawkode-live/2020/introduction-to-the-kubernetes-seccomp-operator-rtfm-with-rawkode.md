@@ -37,8 +37,8 @@ chapters:
     title: Using podman to generate seccomp profiles
 duration: 5032
 guests:
-  - daniel-mangum
-  - sascha-grunert
+  - hasheddan
+  - saschagrunert
 resources:
   - type: url
     title: kubernetes-sigs/security-profiles-operator

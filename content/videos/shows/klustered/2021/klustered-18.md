@@ -99,8 +99,8 @@ chapters:
     title: Conclusion
 duration: 4306
 guests:
-  - eric-smalling
-  - carlos-santana
+  - ericsmalling
+  - csantanapr
 resources:
   - title: InfluxDB Complete Guide course
     type: url

@@ -95,7 +95,7 @@ chapters:
     title: Wrap Up & Debrief
 duration: 6708
 guests:
-  - william-lightning
+  - kassah
 resources:
   - title: Rawkode Chat
     type: url

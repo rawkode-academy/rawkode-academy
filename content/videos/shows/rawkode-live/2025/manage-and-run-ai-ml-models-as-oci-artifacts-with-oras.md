@@ -21,8 +21,8 @@ technologies:
 show: rawkode-live
 duration: 3995
 guests:
-  - josh-duffney
-  - feynman-zhou
+  - duffney
+  - feynmanzhou
 resources:
   - title: Kubernetes blog post on OCI image volumes
     type: url

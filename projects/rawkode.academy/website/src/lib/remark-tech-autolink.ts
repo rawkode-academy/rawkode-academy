@@ -5,8 +5,8 @@
  * article per technology is the established SEO heuristic; repeating
  * the same anchor lowers signal and looks spammy).
  *
- * Per-file opt-out: include the literal HTML comment
- * `<!-- no-autolink -->` anywhere in the body.
+ * Per-file opt-out: include `<!-- no-autolink -->` in Markdown or the
+ * equivalent MDX block comment marker anywhere in the body.
  */
 import type { VFile } from "vfile";
 
@@ -55,7 +55,8 @@ const DEFAULT_SKIP = [
 	"salt",
 ];
 
-const SKIP_COMMENT_PATTERN = /<!--\s*no-autolink\s*-->/i;
+const SKIP_COMMENT_PATTERN =
+	/(?:<!--\s*no-autolink\s*-->|{\s*\/\*\s*no-autolink\s*\*\/\s*})/i;
 
 const IGNORE_TYPES = new Set<string>([
 	"heading",

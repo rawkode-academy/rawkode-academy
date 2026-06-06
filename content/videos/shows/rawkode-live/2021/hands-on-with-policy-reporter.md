@@ -61,7 +61,7 @@ chapters:
     title: Community & Closing
 duration: 2831
 guests:
-  - frank-jogeleit
+  - fjogeleit
 resources:
   - title: Falcosidekick UI
     type: url

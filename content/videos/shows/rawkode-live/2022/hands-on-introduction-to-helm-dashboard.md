@@ -78,7 +78,7 @@ chapters:
     title: Existing Solutions
 duration: 3498
 guests:
-  - andrei-pokhilko
+  - undera
 resources:
   - type: url
     category: code

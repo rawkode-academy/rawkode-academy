@@ -97,7 +97,7 @@ chapters:
     title: Conclusion
 duration: 5259
 guests:
-  - alex-bowers
+  - alexbowers
 resources:
   - title: Alex Bowers Laravel example project
     type: url

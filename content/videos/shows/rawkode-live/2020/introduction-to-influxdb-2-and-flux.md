@@ -90,7 +90,7 @@ chapters:
     title: 'Getting Help (Slack, Community Forum)'
 duration: 3834
 guests:
-  - anais-dotis-georgiou
+  - anaisdg
 resources:
   - title: InfluxData Community Templates repository
     type: url

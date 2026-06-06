@@ -23,6 +23,9 @@ export interface BuildNewsArticleJsonLdInput {
 
 const PUBLISHER_NAME = "Rawkode Academy";
 const PUBLISHER_LOGO_PATH = "/android-chrome-512x512.png";
+const TECHNOLOGY_KEYWORD_OVERRIDES = new Map<string, string>([
+	["cncf", "CNCF"],
+]);
 
 function joinUrl(base: string, path: string): string {
 	return new URL(path, base).href;
@@ -33,9 +36,10 @@ function formatTechnologyKeyword(technology: string): string {
 		.split(/[-/]/g)
 		.filter(Boolean)
 		.map((segment) =>
-			segment.length <= 3
+			TECHNOLOGY_KEYWORD_OVERRIDES.get(segment.toLowerCase()) ??
+			(segment.length <= 3
 				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
+				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`),
 		)
 		.join(" ");
 }

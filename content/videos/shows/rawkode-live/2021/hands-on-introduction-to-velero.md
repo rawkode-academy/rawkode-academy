@@ -65,7 +65,7 @@ chapters:
     title: Restoring a Backup
 duration: 4345
 guests:
-  - carlisia-thompson
+  - carlisia
 resources:
   - title: The Podlets podcast
     type: url

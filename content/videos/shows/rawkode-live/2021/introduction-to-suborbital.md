@@ -91,7 +91,7 @@ chapters:
     title: Conclusion and Thanks
 duration: 5020
 guests:
-  - connor-hicks
+  - cohix
 resources:
   - title: Suborbital on GitHub
     type: url

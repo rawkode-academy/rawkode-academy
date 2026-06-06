@@ -88,8 +88,8 @@ chapters:
     title: Investigating Persistent Honk Image Issue (Static Pod Manifest)
 duration: 4953
 guests:
-  - marques-johansson
-  - mahmoud-saada
+  - displague
+  - saada
 resources:
   - title: Rawkode.chat Discord channel
     type: url

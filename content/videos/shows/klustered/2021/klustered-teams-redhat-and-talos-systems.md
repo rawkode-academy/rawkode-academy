@@ -100,13 +100,13 @@ chapters:
     title: Post-Challenge Discussion and Wrap-up
 duration: 6609
 guests:
-  - andrew-rynhard
-  - andrey-smirnov
-  - spencer-smith
-  - sean-mccord
-  - christoph-blecker
-  - james-harrington
-  - jeffrey-sica
+  - andrewrynhard
+  - smira
+  - rsmitty
+  - ulexus
+  - cblecker
+  - jharrington22
+  - jeefy
 resources:
   - title: Teleport sponsor page
     type: url

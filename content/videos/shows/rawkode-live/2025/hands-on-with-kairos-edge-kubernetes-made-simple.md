@@ -23,8 +23,8 @@ technologies:
 show: rawkode-live
 duration: 5369
 guests:
-  - mauro-morales
-  - ettore-giacinto
+  - mauromorales
+  - mudler
 resources:
   - title: Kairos website
     type: url

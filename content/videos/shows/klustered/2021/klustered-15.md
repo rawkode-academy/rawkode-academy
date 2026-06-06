@@ -103,8 +103,8 @@ chapters:
     title: Wrap Up & Conclusion
 duration: 5872
 guests:
-  - marek-counts
-  - abdellfetah-sghiouar
+  - klaven
+  - boredabdel
 resources:
   - title: Rawkode Discord server
     type: url

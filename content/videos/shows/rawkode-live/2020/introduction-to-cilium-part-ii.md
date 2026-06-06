@@ -92,7 +92,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 4348
 guests:
-  - ilya-dmitrichenko
+  - errordeveloper
 resources:
   - title: Cilium Star Wars demo application
     type: url

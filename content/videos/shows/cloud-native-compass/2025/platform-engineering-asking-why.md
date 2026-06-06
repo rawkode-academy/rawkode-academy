@@ -22,7 +22,7 @@ show: cloud-native-compass
 duration: 2636
 audioFileSize: 63253254
 guests:
-  - evelyn-osman
+  - evelynosman
 resources:
   - type: url
     title: Start With Why by Simon Sinek

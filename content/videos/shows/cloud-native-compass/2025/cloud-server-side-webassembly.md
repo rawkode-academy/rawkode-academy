@@ -54,7 +54,7 @@ chapters:
   - startTime: 2260
     title: Closing Remarks and Upcoming Events
 guests:
-  - mikkel-mork-hegnhoj
+  - mikkelhegn
 resources:
   - title: Spin OpenTelemetry plugin
     type: url

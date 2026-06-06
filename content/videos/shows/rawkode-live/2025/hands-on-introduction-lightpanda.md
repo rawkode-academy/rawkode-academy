@@ -14,7 +14,7 @@ technologies: []
 show: rawkode-live
 duration: 4036
 guests:
-  - pierre-tachoire
+  - krichprollsch
   - katie-hallett
 resources:
   - title: LightPanda GitHub repository

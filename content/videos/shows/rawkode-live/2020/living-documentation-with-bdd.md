@@ -49,7 +49,7 @@ chapters:
     title: Conclusion and Next Steps
 duration: 5010
 guests:
-  - ciaran-mcnulty
+  - ciaranmcnulty
 resources:
   - title: git sync Rust library
     type: url

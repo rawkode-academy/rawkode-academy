@@ -114,7 +114,7 @@ chapters:
     title: Conclusion & Thank You
 duration: 5279
 guests:
-  - karthik-satchitanand
+  - ksatchit
 resources:
   - title: Litmus documentation
     type: url

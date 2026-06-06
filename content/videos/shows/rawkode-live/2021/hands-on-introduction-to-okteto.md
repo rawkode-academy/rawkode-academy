@@ -71,7 +71,7 @@ chapters:
     title: Conclusion & Community Call to Action
 duration: 3565
 guests:
-  - ramiro-berrelleza
+  - rberrelleza
 resources:
   - title: Okteto Quick Start Guide
     type: url

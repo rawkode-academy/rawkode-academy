@@ -43,7 +43,7 @@ chapters:
     title: Conclusion
 duration: 3822
 guests:
-  - laszlo-fogas
+  - laszlocph
 resources:
   - title: Gimlet k3d guide
     type: url

@@ -93,8 +93,8 @@ chapters:
     title: 'Conclusion, Thanks & Future Episodes'
 duration: 4891
 guests:
-  - noel-georgi
-  - RussellWaite
+  - frezbo
+  - russellwaite
 resources:
   - title: Rawkode.live YouTube channel
     type: url

@@ -89,7 +89,7 @@ chapters:
     title: Conclusion
 duration: 4098
 guests:
-  - dan-lorenc
+  - dlorenc
 resources:
   - title: The Update Framework
     type: url

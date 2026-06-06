@@ -17,7 +17,7 @@ show: cloud-native-compass
 duration: 3189
 audioFileSize: 76517386
 guests:
-  - mark-fussell
+  - mfussell
 resources:
   - title: State of Dapr Report 2025
     type: url

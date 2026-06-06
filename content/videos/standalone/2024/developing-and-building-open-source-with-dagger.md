@@ -59,7 +59,7 @@ chapters:
     title: Outro
 duration: 6936
 guests:
-  - marc-boorshtein
+  - mlbiam
 resources:
   - title: OpenUnison Helm Charts
     type: url

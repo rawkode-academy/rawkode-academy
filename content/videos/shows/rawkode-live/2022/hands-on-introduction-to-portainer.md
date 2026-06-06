@@ -70,7 +70,7 @@ chapters:
     title: Conclusion and Thank You
 duration: 4562
 guests:
-  - neil-cresswell
+  - ncresswell
 resources:
   - title: CNCF Landscape
     type: url

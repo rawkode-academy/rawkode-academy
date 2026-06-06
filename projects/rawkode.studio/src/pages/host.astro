@@ -1,0 +1,52 @@
+---
+import StudioLayout from "../layouts/StudioLayout.astro";
+import {
+	isStudioSessionActive,
+	listStudioSessions,
+	userIsConfiguredStudioOperator,
+} from "../server/studio";
+import { env } from "cloudflare:workers";
+
+if (!Astro.locals.user) {
+	return Astro.redirect(`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
+}
+
+if (!userIsConfiguredStudioOperator(env, Astro.locals.user)) {
+	return Astro.redirect("/");
+}
+
+const sessions = (await listStudioSessions(env)).filter(isStudioSessionActive);
+---
+
+<StudioLayout title="Host | Rawkode Studio" active="host">
+	<section class="role-panel">
+		<p class="eyebrow">Host</p>
+		<h1>Host rooms</h1>
+		<p>Open the scheduled show room and manage your camera, screen share, and lower thirds.</p>
+	</section>
+
+	<section class="session-list" aria-label="Host studio sessions">
+		{
+			sessions.map((session) => (
+				<article class="session-row">
+					<div>
+						<p class="eyebrow">{session.show}</p>
+						<h2>{session.title}</h2>
+						<p>{new Date(session.startsAt).toLocaleString()}</p>
+					</div>
+					<div class="session-status">
+						<span>{session.status}</span>
+						<span>
+							{session.realtimeKitMeetingId ? "RealtimeKit ready" : "Meeting pending"}
+						</span>
+					</div>
+					<div class="session-actions">
+						<a class="button primary" href={`/studio/${session.id}/host`}>
+							Open host room
+						</a>
+					</div>
+				</article>
+			))
+		}
+	</section>
+</StudioLayout>

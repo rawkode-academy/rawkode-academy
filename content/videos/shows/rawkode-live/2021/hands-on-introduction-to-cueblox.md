@@ -56,7 +56,7 @@ chapters:
     title: Conclusion and Call to Action
 duration: 4335
 guests:
-  - brian-ketelsen
+  - bketelsen
 resources:
   - title: Rawkode Academy InfluxDB course
     type: url

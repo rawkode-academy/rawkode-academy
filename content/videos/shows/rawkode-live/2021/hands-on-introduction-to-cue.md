@@ -102,7 +102,7 @@ chapters:
     title: Conclusion & Final Q&A
 duration: 5328
 guests:
-  - marcel-van-lohuizen
+  - mpvl
 resources:
   - title: CUE Kubernetes tutorial
     type: url

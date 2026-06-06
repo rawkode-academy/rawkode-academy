@@ -78,8 +78,8 @@ chapters:
     title: Conclusion and Final Remarks
 duration: 4078
 guests:
-  - rich-burroughs
-  - lukas-gentele
+  - richburroughs
+  - lukasgentele
 resources:
   - title: KubeCuddle podcast
     type: url

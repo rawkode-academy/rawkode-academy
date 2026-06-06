@@ -67,7 +67,7 @@ chapters:
     title: Conclusion and Future Plans
 duration: 5104
 guests:
-  - tanay-pant
+  - tanay1337
 resources:
   - title: TheCocktailDB API
     type: url

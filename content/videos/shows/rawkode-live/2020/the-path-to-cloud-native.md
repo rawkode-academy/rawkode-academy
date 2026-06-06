@@ -69,7 +69,7 @@ chapters:
     title: Conclusion
 duration: 2710
 guests:
-  - ihor-dvoretskyi
+  - idvoretskyi
 resources: []
 ---
 

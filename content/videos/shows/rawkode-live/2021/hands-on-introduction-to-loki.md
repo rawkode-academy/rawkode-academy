@@ -72,7 +72,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 5627
 guests:
-  - cyril-tovena
+  - cyriltovena
 resources:
   - title: Weaveworks Sock Shop microservice demo
     type: url

@@ -10,13 +10,13 @@ prerequisites:
   - "Familiarity with container security concepts (CVE remediation, least privilege)."
   - "Optional: basic Rego or policy-as-code exposure."
 technologies:
-  - "Kubescape"
-  - "Kyverno"
-  - "Cilium"
-  - "Hubble"
-  - "OPA / Rego"
-  - "jsPolicy"
-  - "Policy Reporter"
+  - kubescape
+  - kyverno
+  - cilium
+  - hubble
+  - opa
+  - jspolicy
+  - policy-reporter
 publishedAt: "2025-10-01"
 authors:
   - "rawkode"

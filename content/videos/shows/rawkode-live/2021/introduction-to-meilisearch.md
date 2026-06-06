@@ -77,8 +77,8 @@ chapters:
     title: Conclusion and Community
 duration: 3995
 guests:
-  - frederic-harper
-  - carolina-ferreira
+  - fharper
+  - carofg
 resources:
   - title: 'Meilisearch documentation: Comparison to alternatives'
     type: url

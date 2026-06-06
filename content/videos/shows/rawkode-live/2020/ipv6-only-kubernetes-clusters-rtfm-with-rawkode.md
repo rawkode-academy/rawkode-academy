@@ -42,7 +42,7 @@ chapters:
     title: Announcing Kubernetes service IPv6 addresses with BGP
 duration: 6790
 guests:
-  - arian-van-putten
+  - arianvp
 resources:
   - title: Calico over IP Fabrics
     type: url

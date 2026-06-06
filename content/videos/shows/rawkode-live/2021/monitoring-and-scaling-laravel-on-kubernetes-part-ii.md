@@ -73,8 +73,8 @@ chapters:
     title: Observing Pod Scale Down & Conclusion
 duration: 4580
 guests:
-  - alex-bowers
-  - leo-sjoberg
+  - alexbowers
+  - phroggyy
 resources:
   - title: Prometheus Adapter for Kubernetes Metrics APIs
     type: url

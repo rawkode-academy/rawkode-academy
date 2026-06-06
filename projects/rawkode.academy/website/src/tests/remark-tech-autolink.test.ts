@@ -94,9 +94,9 @@ describe("remarkTechAutolink", () => {
 		expect(out).not.toContain("/technology/go");
 	});
 
-	it("honors the no-autolink HTML comment opt-out", async () => {
+	it("honors the no-autolink MDX comment opt-out", async () => {
 		const out = await process(
-			"<!-- no-autolink -->\nThis is about Kubernetes and apko.\n",
+			"{/* no-autolink */}\nThis is about Kubernetes and apko.\n",
 		);
 		expect(out).not.toContain("/technology/");
 	});

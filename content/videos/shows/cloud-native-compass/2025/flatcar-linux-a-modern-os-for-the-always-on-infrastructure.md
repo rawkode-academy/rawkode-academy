@@ -47,8 +47,8 @@ duration: 3080
 audioFileSize: 73924995
 guests:
   - thilo
-  - mathieu-tortuyaux
-  - james-le-cuirot
+  - tormath1
+  - chewi
 resources:
   - title: Flatcar Getting Started documentation
     type: url

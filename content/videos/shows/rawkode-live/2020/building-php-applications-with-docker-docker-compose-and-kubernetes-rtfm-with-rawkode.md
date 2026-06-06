@@ -42,7 +42,7 @@ chapters:
     title: Deploying our application to Kubernetes
 duration: 6270
 guests:
-  - ciaran-mcnulty
+  - ciaranmcnulty
 resources:
   - title: rawkode/php-examples
     type: url

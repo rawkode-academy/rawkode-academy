@@ -40,7 +40,7 @@ chapters:
     title: Q&A Period / Technical Difficulties
 duration: 1590
 guests:
-  - michael-irwin
+  - mikesir87
 resources: []
 ---
 
