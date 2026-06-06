@@ -11,6 +11,7 @@ on:
     - content/videos/**
     - cue.mod/**
     - projects/rawkode.academy/platform/video-thumbnails/env.cue
+    - projects/rawkode.academy/platform/video-thumbnails/env.cue/**
     - projects/rawkode.academy/platform/video-thumbnails/package.json
     - projects/rawkode.academy/platform/video-thumbnails/package.json/**
     - projects/rawkode.academy/platform/video-thumbnails/schema/**
