@@ -272,7 +272,7 @@ describe("thumbnail workflow helpers", () => {
 		expect(put?.value).toEqual(new Uint8Array([1, 2, 3]));
 		expect(put?.options.httpMetadata).toMatchObject({
 			contentType: "image/webp",
-			cacheControl: "public, max-age=31536000, immutable",
+			cacheControl: "public, max-age=3600, s-maxage=3600",
 		});
 		expect(put?.options.customMetadata).toMatchObject({
 			commitSha: "test-sha",

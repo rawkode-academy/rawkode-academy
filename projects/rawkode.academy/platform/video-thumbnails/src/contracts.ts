@@ -1,7 +1,7 @@
 export const THUMBNAIL_WIDTH = 1280;
 export const THUMBNAIL_HEIGHT = 720;
 export const THUMBNAIL_CONTENT_TYPE = "image/webp";
-export const THUMBNAIL_CACHE_CONTROL = "public, max-age=31536000, immutable";
+export const THUMBNAIL_CACHE_CONTROL = "public, max-age=3600, s-maxage=3600";
 
 export interface ThumbnailVideo {
 	id: string;
