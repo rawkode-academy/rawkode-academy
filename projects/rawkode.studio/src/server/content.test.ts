@@ -12,23 +12,87 @@ afterEach(() => {
 
 describe("Studio content graph", () => {
 	it("uses GitHub handles as person IDs when resolving content videos", async () => {
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(async () =>
-				new Response(
-					JSON.stringify({
-						data: {
-							videoByID: {
-								id: "video-123",
-								slug: "future-episode",
-								title: "Future episode",
-								publishedAt: null,
+		const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
+			new Response(
+				JSON.stringify({
+					data: {
+						videoByID: {
+							id: "video-123",
+							slug: "future-episode",
+							title: "Future episode",
+							publishedAt: null,
+							guests: [
+								{
+									id: "SteveKlabnik",
+									name: "Steve Klabnik",
+								},
+							],
+							episode: {
+								show: {
+									id: "rawkode-live",
+									name: "Rawkode Live",
+									hosts: [
+										{
+											id: "Rawkode",
+											name: "Rawkode",
+										},
+									],
+								},
+							},
+						},
+						episodeByVideoId: null,
+					},
+				}),
+			),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		const video = await getStudioContentVideo(
+			{ RAWKODE_GRAPHQL_URL: "https://content.example/graphql" } as StudioEnv,
+			"video-123",
+		);
+
+		const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body ?? "{}")) as {
+			query?: string;
+		};
+		expect(request.query).not.toContain("githubHandle");
+		expect(request.query).not.toContain("avatarUrl");
+		expect(video?.guests[0]).toMatchObject({
+			githubHandle: "steveklabnik",
+			id: "steveklabnik",
+			avatarUrl: null,
+		});
+		expect(video?.slug).toBe("future-episode");
+		expect(video?.show?.hosts[0]).toMatchObject({
+			githubHandle: "rawkode",
+			id: "rawkode",
+			avatarUrl: null,
+		});
+	});
+
+	it("lists content events from all videos with normalized participants", async () => {
+		const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
+			new Response(
+				JSON.stringify({
+					data: {
+						getAllVideos: [
+							{
+								id: "video-2",
+								slug: "later-event",
+								title: "Later event",
+								publishedAt: "2026-08-02T10:00:00.000Z",
+								guests: [],
+								episode: null,
+							},
+							{
+								id: "video-1",
+								slug: "first-event",
+								title: "First event",
+								publishedAt: "2026-08-01T10:00:00.000Z",
 								guests: [
 									{
-										id: "steve-klabnik",
-										name: "Steve Klabnik",
-										githubHandle: "SteveKlabnik",
-										avatarUrl: "https://example.com/steve.png",
+										id: "GuestHandle",
+										name: "Guest Person",
 									},
 								],
 								episode: {
@@ -37,88 +101,19 @@ describe("Studio content graph", () => {
 										name: "Rawkode Live",
 										hosts: [
 											{
-												id: "rawkode-person",
+												id: "Rawkode",
 												name: "Rawkode",
-												githubHandle: "Rawkode",
-												avatarUrl: "https://example.com/rawkode.png",
 											},
 										],
 									},
 								},
 							},
-							episodeByVideoId: null,
-						},
-					}),
-				),
+						],
+					},
+				}),
 			),
 		);
-
-		const video = await getStudioContentVideo(
-			{ RAWKODE_GRAPHQL_URL: "https://content.example/graphql" } as StudioEnv,
-			"video-123",
-		);
-
-		expect(video?.guests[0]).toMatchObject({
-			githubHandle: "steveklabnik",
-			id: "steveklabnik",
-		});
-		expect(video?.slug).toBe("future-episode");
-		expect(video?.show?.hosts[0]).toMatchObject({
-			githubHandle: "rawkode",
-			id: "rawkode",
-		});
-	});
-
-	it("lists content events from all videos with normalized participants", async () => {
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(async () =>
-				new Response(
-					JSON.stringify({
-						data: {
-							getAllVideos: [
-								{
-									id: "video-2",
-									slug: "later-event",
-									title: "Later event",
-									publishedAt: "2026-08-02T10:00:00.000Z",
-									guests: [],
-									episode: null,
-								},
-								{
-									id: "video-1",
-									slug: "first-event",
-									title: "First event",
-									publishedAt: "2026-08-01T10:00:00.000Z",
-									guests: [
-										{
-											id: "guest-person",
-											name: "Guest Person",
-											githubHandle: "GuestHandle",
-											avatarUrl: null,
-										},
-									],
-									episode: {
-										show: {
-											id: "rawkode-live",
-											name: "Rawkode Live",
-											hosts: [
-												{
-													id: "rawkode-person",
-													name: "Rawkode",
-													githubHandle: "Rawkode",
-													avatarUrl: null,
-												},
-											],
-										},
-									},
-								},
-							],
-						},
-					}),
-				),
-			),
-		);
+		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(
 			getStudioContentEvents({
@@ -136,6 +131,11 @@ describe("Studio content graph", () => {
 				id: "video-2",
 			},
 		]);
+		const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body ?? "{}")) as {
+			query?: string;
+		};
+		expect(request.query).not.toContain("githubHandle");
+		expect(request.query).not.toContain("avatarUrl");
 	});
 
 	it("resolves people by normalized GitHub handle", async () => {
@@ -147,10 +147,8 @@ describe("Studio content graph", () => {
 				JSON.stringify({
 					data: {
 						personByGithub: {
-							id: "rawkode-person",
+							id: body.variables?.username,
 							name: "Rawkode Academy",
-							githubHandle: body.variables?.username,
-							avatarUrl: "https://example.com/rawkode.png",
 						},
 					},
 				}),
@@ -169,8 +167,13 @@ describe("Studio content graph", () => {
 				method: "POST",
 			}),
 		);
+		const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body ?? "{}")) as {
+			query?: string;
+		};
+		expect(request.query).not.toContain("githubHandle");
+		expect(request.query).not.toContain("avatarUrl");
 		expect(person).toEqual({
-			avatarUrl: "https://example.com/rawkode.png",
+			avatarUrl: null,
 			githubHandle: "rawkode",
 			id: "rawkode",
 			name: "Rawkode Academy",
