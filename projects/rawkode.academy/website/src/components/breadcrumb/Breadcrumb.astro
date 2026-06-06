@@ -12,15 +12,15 @@ type Props = {
 
 const { elements } = Astro.props;
 
-const lastIndex = elements.length - 1;
+const visibleElements = elements.slice(0, -1);
 ---
 
 <BreadcrumbJsonLd elements={elements} />
 
-{elements.length > 0 && (
+{visibleElements.length > 0 && (
 	<nav class="breadcrumb" aria-label="Breadcrumb">
 		<ol>
-			{elements.map((el, i) => (
+			{visibleElements.map((el, i) => (
 				<li>
 					{i === 0 ? (
 						<a href={el.link} class="home-link" aria-label={el.title}>
@@ -33,11 +33,7 @@ const lastIndex = elements.length - 1;
 							<svg class="chevron" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
 								<path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
 							</svg>
-							{i === lastIndex ? (
-								<span class="current" aria-current="page">{el.title}</span>
-							) : (
-								<a href={el.link}>{el.title}</a>
-							)}
+							<a href={el.link}>{el.title}</a>
 						</>
 					)}
 				</li>
@@ -126,19 +122,4 @@ const lastIndex = elements.length - 1;
 		background: rgb(var(--brand-primary) / 0.1);
 	}
 
-	.current {
-		color: var(--text-primary-content);
-		font-weight: 600;
-		padding: 0.25rem 0.5rem;
-		max-width: 16rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	@media (max-width: 640px) {
-		.current {
-			max-width: 10rem;
-		}
-	}
 </style>

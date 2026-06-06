@@ -318,15 +318,12 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 			{showEntry ? (
 				<>
 					<a class="watch-detail__crumb" href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
-					<span class="watch-detail__sep">/</span>
 				</>
 			) : (
 				<>
 					<span class="watch-detail__crumb">{categoryLabel}</span>
-					<span class="watch-detail__sep">/</span>
 				</>
 			)}
-			<span class="watch-detail__crumb watch-detail__crumb--current">{video.data.title}</span>
 			<span class="watch-detail__spacer"></span>
 			<span class="watch-detail__meta">{runtimeLabel}</span>
 		</div>
@@ -349,23 +346,12 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 
 		<div class="watch-detail__player-frame">
 			{isUpcomingLive ? (
-				<section class="watch-detail__upcoming-player" aria-label="Upcoming stream details">
-					<img
-						class="watch-detail__upcoming-thumbnail"
-						src={thumbnailUrl}
-						alt=""
-						loading="eager"
-					/>
-					<div class="watch-detail__upcoming-scrim"></div>
-					<div class="watch-detail__upcoming-card">
-						<MLabel tone="amber">Upcoming Stream</MLabel>
-						<h2>This session has not started yet.</h2>
-						<p>
-							The video player will appear when the live stream is available.
-							Join us on <time datetime={video.data.publishedAt.toISOString()}>{scheduledLabel}</time>.
-						</p>
-					</div>
-				</section>
+				<img
+					class="watch-detail__upcoming-thumbnail"
+					src={thumbnailUrl}
+					alt=""
+					loading="eager"
+				/>
 			) : (
 				<VideoPlayer
 					client:only="vue"
@@ -376,6 +362,21 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 				/>
 			)}
 		</div>
+
+		{isUpcomingLive && (
+			<section class="watch-detail__upcoming-panel" aria-label="Upcoming stream details">
+				<div class="watch-detail__upcoming-panel-inner">
+					<MLabel tone="amber">Upcoming Stream</MLabel>
+					<div class="watch-detail__upcoming-copy">
+						<h2>This session has not started yet.</h2>
+						<p>
+							The video player will appear when the live stream is available.
+							Join us on <time datetime={video.data.publishedAt.toISOString()}>{scheduledLabel}</time>.
+						</p>
+					</div>
+				</div>
+			</section>
+		)}
 
 		<div class="watch-detail__body">
 			<VideoReactions server:defer videoId={video.data.slug} />
@@ -464,14 +465,6 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 		transition: color var(--duration-base) var(--ease-standard);
 	}
 	.watch-detail__crumb:hover { color: var(--editorial-ink); }
-	.watch-detail__crumb--current {
-		color: var(--editorial-ink);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		max-width: 40ch;
-	}
-
 	.watch-detail__sep { opacity: 0.6; }
 	.watch-detail__spacer { flex: 1; }
 	.watch-detail__meta { color: var(--editorial-ink-mute); }
@@ -522,62 +515,45 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 		inset: 0;
 	}
 
-	.watch-detail__upcoming-player {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: flex-end;
-		justify-content: flex-start;
-		padding: clamp(1.25rem, 4vw, 3rem);
-		overflow: hidden;
-	}
-
 	.watch-detail__upcoming-thumbnail {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		filter: saturate(1.02) brightness(0.9);
 	}
 
-	.watch-detail__upcoming-scrim {
-		position: absolute;
-		inset: 0;
-		background:
-			linear-gradient(180deg, oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.58)),
-			radial-gradient(circle at 50% 44%, transparent 0 44%, oklch(0.05 0.02 240 / 0.42) 100%);
+	.watch-detail__upcoming-panel {
+		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.watch-detail__upcoming-card {
-		position: relative;
-		z-index: 1;
-		max-width: min(34rem, 100%);
-		padding: clamp(0.875rem, 2vw, 1.375rem);
-		border: 1px solid oklch(0.88 0.08 82 / 0.24);
-		background: oklch(0.1 0.02 260 / 0.68);
-		backdrop-filter: blur(14px);
-		color: oklch(0.96 0.03 82);
-		text-align: left;
-		box-shadow: 0 1.5rem 4rem oklch(0 0 0 / 0.35);
+	.watch-detail__upcoming-panel-inner {
+		max-width: 90rem;
+		margin: 0 auto;
+		padding: clamp(1.25rem, 3vw, 2rem) var(--space-section-pad-x);
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr);
+		align-items: start;
+		gap: clamp(1rem, 3vw, 2rem);
 	}
 
-	.watch-detail__upcoming-card h2 {
-		margin: 0.625rem 0 0;
+	.watch-detail__upcoming-copy h2 {
+		margin: 0;
 		font-family: var(--font-inter-tight), sans-serif;
 		font-size: clamp(1.125rem, 2.2vw, 1.75rem);
 		font-weight: 700;
 		line-height: 1.05;
 		letter-spacing: 0;
+		color: var(--editorial-ink);
 	}
 
-	.watch-detail__upcoming-card p {
+	.watch-detail__upcoming-copy p {
 		margin: 0.625rem 0 0;
-		max-width: 30rem;
+		max-width: 48rem;
 		font-family: var(--font-inter-tight), sans-serif;
 		font-size: clamp(0.875rem, 1.5vw, 1rem);
 		line-height: 1.5;
-		color: oklch(0.92 0.03 82 / 0.86);
+		color: var(--editorial-ink-soft);
 	}
 
 	.watch-detail__body {
@@ -665,11 +641,14 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	@media (max-width: 720px) {
 		.watch-detail__breadcrumb,
 		.watch-detail__header,
-		.watch-detail__body {
+		.watch-detail__body,
+		.watch-detail__upcoming-panel-inner {
 			padding-left: 1.25rem;
 			padding-right: 1.25rem;
 		}
 		.watch-detail__breadcrumb { gap: 0.4rem; }
-		.watch-detail__crumb--current { max-width: 18ch; }
+		.watch-detail__upcoming-panel-inner {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
