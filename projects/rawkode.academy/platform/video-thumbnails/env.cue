@@ -83,6 +83,7 @@ tasks: {
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy"]
 			env: PATH: _taskPath
 			inputs: [
+				"env.cue",
 				"package.json",
 				"src/**",
 				"wrangler.jsonc",
@@ -95,6 +96,7 @@ tasks: {
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 			env: PATH: _taskPath
 			inputs: [
+				"env.cue",
 				"package.json",
 				"src/**",
 				"wrangler.jsonc",
@@ -108,8 +110,11 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run trigger:missing:dry-run"]
 		env: PATH: _taskPath
 		inputs: [
+			"env.cue",
 			"package.json",
 			"scripts/**",
+			"src/**",
+			"wrangler.jsonc",
 			"../../../../content/people/**",
 			"../../../../content/technologies/**",
 			"../../../../content/videos/**",
@@ -122,8 +127,11 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run trigger:missing"]
 		env: PATH: _taskPath
 		inputs: [
+			"env.cue",
 			"package.json",
 			"scripts/**",
+			"src/**",
+			"wrangler.jsonc",
 			"../../../../content/people/**",
 			"../../../../content/technologies/**",
 			"../../../../content/videos/**",
