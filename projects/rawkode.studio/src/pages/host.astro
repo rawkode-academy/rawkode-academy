@@ -1,13 +1,21 @@
 ---
 import StudioLayout from "../layouts/StudioLayout.astro";
-import { listStudioSessionsForUser } from "../server/studio";
+import {
+	isStudioSessionActive,
+	listStudioSessions,
+	userIsConfiguredStudioOperator,
+} from "../server/studio";
 import { env } from "cloudflare:workers";
 
 if (!Astro.locals.user) {
 	return Astro.redirect(`/login?returnTo=${encodeURIComponent(Astro.url.pathname)}`);
 }
 
-const sessions = await listStudioSessionsForUser(env, Astro.locals.user);
+if (!userIsConfiguredStudioOperator(env, Astro.locals.user)) {
+	return Astro.redirect("/");
+}
+
+const sessions = (await listStudioSessions(env)).filter(isStudioSessionActive);
 ---
 
 <StudioLayout title="Host | Rawkode Studio" active="host">

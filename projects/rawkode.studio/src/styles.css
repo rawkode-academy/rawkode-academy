@@ -220,6 +220,23 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+.signed-out-panel {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+}
+
+.signed-out-panel h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(32px, 6vw, 56px);
+  line-height: 1.05;
+  text-align: center;
+}
+
 .studio-management {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
@@ -301,6 +318,54 @@ textarea:focus-visible {
   margin: 0;
   padding: 16px;
   color: #a7b6bf;
+}
+
+.session-muted {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  color: #a7b6bf;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.event-session-list {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 8px;
+  min-width: 0;
+}
+
+.event-session-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.event-session-row > div:first-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.event-session-row strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 13px;
+  text-overflow: ellipsis;
+}
+
+.event-session-row span {
+  color: #8ff3e9;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .session-status span {
@@ -439,7 +504,8 @@ textarea:focus-visible {
   .dashboard-grid,
   .studio-management,
   .recording-row,
-  .session-row {
+  .session-row,
+  .event-session-row {
     grid-template-columns: 1fr;
   }
 

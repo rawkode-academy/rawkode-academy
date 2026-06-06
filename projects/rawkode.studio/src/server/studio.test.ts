@@ -7,6 +7,7 @@ import {
 	createStudioInvite,
 	createStudioRecordingUpload,
 	createStudioSession,
+	endStudioSession,
 	issueStudioParticipantToken,
 	markStudioRecordingReady,
 	uploadStudioRecordingPart,
@@ -75,6 +76,7 @@ type StudioDbMockOptions = Partial<{
 	recording_status: "failed" | "idle" | "recording" | "transcoding" | "uploaded" | "vod-ready";
 	show_id: string;
 	show_title: string;
+	status: "complete" | "live" | "recording" | "scheduled";
 	title: string;
 }> & {
 	inviteRows?: StudioInviteDbRow[];
@@ -111,95 +113,99 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		...overrides,
 	};
 	const db = {
-		prepare: (sql: string) => ({
-			bind: (...params: unknown[]) => ({
-				all: async () => ({
-					results: sql.includes("FROM studio_recordings")
-						? recordingRows.filter((row) => row.session_id === params[0])
-						: sql.includes("FROM studio_sessions")
-							? [sessionRow]
-							: [],
-				}),
-				first: async () => {
-					if (sql.includes("FROM studio_invites")) {
-						const tokenHash = String(params[0] ?? "");
-						const userId = String(params[1] ?? "");
-						return inviteRows.find((row) =>
-							row.token_hash === tokenHash &&
-							!row.revoked_at &&
-							row.expires_at > Math.floor(Date.now() / 1000) &&
-							(
-								row.max_uses === 0 ||
-								row.used_count < row.max_uses ||
-								redemptionRows.some((redemption) =>
-									redemption.token_hash === row.token_hash &&
-									redemption.user_id === userId
+		prepare: (sql: string) => {
+			const all = async (...params: unknown[]) => ({
+				results: sql.includes("FROM studio_recordings")
+					? recordingRows.filter((row) => row.session_id === params[0])
+					: sql.includes("FROM studio_sessions")
+						? [sessionRow]
+						: [],
+			});
+			return {
+				all: async () => all(),
+				bind: (...params: unknown[]) => ({
+					all: async () => all(...params),
+					first: async () => {
+						if (sql.includes("FROM studio_invites")) {
+							const tokenHash = String(params[0] ?? "");
+							const userId = String(params[1] ?? "");
+							return inviteRows.find((row) =>
+								row.token_hash === tokenHash &&
+								!row.revoked_at &&
+								row.expires_at > Math.floor(Date.now() / 1000) &&
+								(
+									row.max_uses === 0 ||
+									row.used_count < row.max_uses ||
+									redemptionRows.some((redemption) =>
+										redemption.token_hash === row.token_hash &&
+										redemption.user_id === userId
+									)
 								)
-							)
-						) ?? null;
-					}
-					if (sql.includes("FROM studio_invite_redemptions")) {
-						const tokenHash = String(params[0] ?? "");
-						const userId = String(params[1] ?? "");
-						const redemption = redemptionRows.find((row) =>
-							row.token_hash === tokenHash && row.user_id === userId
-						);
-						return redemption ? { user_id: redemption.user_id } : null;
-					}
-					return sql.includes("FROM studio_sessions") ? sessionRow : null;
-				},
-				run: async () => {
-					writes.push({ sql, params });
-					if (sql.includes("INSERT INTO studio_recordings")) {
-						const now = Math.floor(Date.now() / 1000);
-						const recordingId = String(params[0]);
-						const nextRow: StudioRecordingDbRow = {
-							recording_id: recordingId,
-							session_id: String(params[1]),
-							video_id: String(params[2]),
-							source_bucket: String(params[3]),
-							source_key: String(params[4]),
-							source_etag: String(params[5]),
-							source_format: params[6] as StudioRecordingDbRow["source_format"],
-							output_prefix: String(params[7]),
-							ready_marker_key: String(params[8]),
-							status: "marker-pending",
-							created_at: now,
-							updated_at: now,
-						};
-						const existingIndex = recordingRows.findIndex((row) =>
-							row.recording_id === recordingId
-						);
-						if (existingIndex >= 0) {
-							recordingRows[existingIndex] = {
-								...recordingRows[existingIndex],
-								...nextRow,
-								created_at: recordingRows[existingIndex].created_at,
+							) ?? null;
+						}
+						if (sql.includes("FROM studio_invite_redemptions")) {
+							const tokenHash = String(params[0] ?? "");
+							const userId = String(params[1] ?? "");
+							const redemption = redemptionRows.find((row) =>
+								row.token_hash === tokenHash && row.user_id === userId
+							);
+							return redemption ? { user_id: redemption.user_id } : null;
+						}
+						return sql.includes("FROM studio_sessions") ? sessionRow : null;
+					},
+					run: async () => {
+						writes.push({ sql, params });
+						if (sql.includes("INSERT INTO studio_recordings")) {
+							const now = Math.floor(Date.now() / 1000);
+							const recordingId = String(params[0]);
+							const nextRow: StudioRecordingDbRow = {
+								recording_id: recordingId,
+								session_id: String(params[1]),
+								video_id: String(params[2]),
+								source_bucket: String(params[3]),
+								source_key: String(params[4]),
+								source_etag: String(params[5]),
+								source_format: params[6] as StudioRecordingDbRow["source_format"],
+								output_prefix: String(params[7]),
+								ready_marker_key: String(params[8]),
+								status: "marker-pending",
+								created_at: now,
+								updated_at: now,
 							};
-						} else {
-							recordingRows.unshift(nextRow);
+							const existingIndex = recordingRows.findIndex((row) =>
+								row.recording_id === recordingId
+							);
+							if (existingIndex >= 0) {
+								recordingRows[existingIndex] = {
+									...recordingRows[existingIndex],
+									...nextRow,
+									created_at: recordingRows[existingIndex].created_at,
+								};
+							} else {
+								recordingRows.unshift(nextRow);
+							}
 						}
-					}
-					if (sql.includes("UPDATE studio_recordings")) {
-						const recordingId = String(params[0]);
-						const row = recordingRows.find((candidate) =>
-							candidate.recording_id === recordingId
-						);
-						if (row) {
-							row.status = "ready";
-							row.updated_at = Math.floor(Date.now() / 1000);
+						if (sql.includes("UPDATE studio_recordings")) {
+							const recordingId = String(params[0]);
+							const row = recordingRows.find((candidate) =>
+								candidate.recording_id === recordingId
+							);
+							if (row) {
+								row.status = "ready";
+								row.updated_at = Math.floor(Date.now() / 1000);
+							}
 						}
-					}
-					if (sql.includes("UPDATE studio_sessions")) {
-						sessionRow.recording_status = sql.includes("recording_status = ?")
-							? params[0] as NonNullable<StudioDbMockOptions["recording_status"]>
-							: "uploaded";
-						sessionRow.updated_at = Math.floor(Date.now() / 1000);
-					}
-					return { meta: { changes: 1, rows_written: 1 } };
-				},
-			}),
-		}),
+						if (sql.includes("UPDATE studio_sessions")) {
+							sessionRow.recording_status = sql.includes("recording_status = ?")
+								? params[0] as NonNullable<StudioDbMockOptions["recording_status"]>
+								: "uploaded";
+							sessionRow.updated_at = Math.floor(Date.now() / 1000);
+						}
+						return { meta: { changes: 1, rows_written: 1 } };
+					},
+				}),
+			};
+		},
 	} as unknown as D1Database;
 
 	return { db, writes };
@@ -844,8 +850,155 @@ describe("Studio operations", () => {
 
 	it("does not expose Studio sessions on anonymous dashboards", async () => {
 		await expect(loadStudioDashboard(undefined, {} as StudioEnv)).resolves.toMatchObject({
+			events: [],
+			isOperator: false,
 			sessions: [],
 			user: null,
+		});
+	});
+
+	it("shows operators all upcoming content events with their RTK sessions", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "future-video",
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+			title: "Future Rawkode Live episode",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () =>
+				new Response(
+					JSON.stringify({
+						data: {
+							getAllVideos: [
+								{
+									id: "past-video",
+									slug: "past-event",
+									title: "Past event",
+									publishedAt: "2025-08-01T10:00:00.000Z",
+									guests: [],
+									episode: {
+										show: {
+											id: "rawkode-live",
+											name: "Rawkode Live",
+											hosts: [],
+										},
+									},
+								},
+								{
+									id: "future-video",
+									slug: "future-event",
+									title: "Future event",
+									publishedAt: "2026-08-01T10:00:00.000Z",
+									guests: [],
+									episode: {
+										show: {
+											id: "rawkode-live",
+											name: "Rawkode Live",
+											hosts: [],
+										},
+									},
+								},
+							],
+						},
+					}),
+				),
+			),
+		);
+
+		await expect(
+			loadStudioDashboard(user, {
+				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+				STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+			} as StudioEnv),
+		).resolves.toMatchObject({
+			events: [
+				{
+					id: "future-video",
+					sessions: [
+						{
+							id: "rawkode-live-next",
+							realtimeKitMeetingId: "meeting-1",
+							status: "live",
+						},
+					],
+				},
+			],
+			isOperator: true,
+		});
+	});
+
+	it("shows non-operators only assigned events and active sessions for those events", async () => {
+		const studioDb = createStudioDbMock({
+			content_guests_json: JSON.stringify([
+				{
+					id: "guest",
+					name: "Guest",
+					githubHandle: "guest",
+					avatarUrl: null,
+				},
+			]),
+			content_video_id: "assigned-video",
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () =>
+				new Response(
+					JSON.stringify({
+						data: {
+							getAllVideos: [
+								{
+									id: "assigned-video",
+									slug: "assigned-event",
+									title: "Assigned event",
+									publishedAt: "2026-08-01T10:00:00.000Z",
+									guests: [
+										{
+											id: "guest",
+											name: "Guest",
+											githubHandle: "guest",
+											avatarUrl: null,
+										},
+									],
+									episode: null,
+								},
+								{
+									id: "unassigned-video",
+									slug: "unassigned-event",
+									title: "Unassigned event",
+									publishedAt: "2026-08-02T10:00:00.000Z",
+									guests: [],
+									episode: null,
+								},
+							],
+						},
+					}),
+				),
+			),
+		);
+
+		await expect(
+			loadStudioDashboard(guestUser, {
+				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+				STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+			} as StudioEnv),
+		).resolves.toMatchObject({
+			events: [
+				{
+					id: "assigned-video",
+					sessions: [
+						{
+							id: "rawkode-live-next",
+							status: "live",
+						},
+					],
+				},
+			],
+			isOperator: false,
 		});
 	});
 
@@ -1722,6 +1875,104 @@ describe("Studio operations", () => {
 		});
 	});
 
+	it("lets content-listed guests join an active session without an invite token", async () => {
+		const studioDb = createStudioDbMock({
+			content_guests_json: JSON.stringify([
+				{
+					id: "guest",
+					name: "Guest",
+					githubHandle: "guest",
+					avatarUrl: null,
+				},
+			]),
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+		});
+		const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = String(input);
+			if (url === "https://content.example/graphql") {
+				return new Response(
+					JSON.stringify({
+						data: {
+							personByGithub: {
+								id: "guest",
+								name: "Content Guest",
+								githubHandle: "guest",
+								avatarUrl: "https://example.com/guest.png",
+							},
+						},
+					}),
+				);
+			}
+
+			expect(url).toBe(
+				"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/participants",
+			);
+			const body = JSON.parse(String(init?.body ?? "{}")) as {
+				preset_name?: string;
+			};
+			expect(body.preset_name).toBe("guest-preset");
+			return new Response(
+				JSON.stringify({
+					success: true,
+					result: {
+						id: "participant-guest",
+						token: "guest-token",
+					},
+				}),
+			);
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(
+			issueStudioParticipantToken(
+				{
+					CLOUDFLARE_ACCOUNT_ID: "account-1",
+					REALTIMEKIT_API_TOKEN: "token-1",
+					REALTIMEKIT_APP_ID: "app-1",
+					REALTIMEKIT_GUEST_PRESET: "guest-preset",
+					RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+					STUDIO_DB: studioDb.db,
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+				} as StudioEnv,
+				guestUser,
+				{
+					role: "guest",
+					sessionId: "rawkode-live-next",
+				},
+			),
+		).resolves.toMatchObject({
+			meetingId: "meeting-1",
+			token: "guest-token",
+		});
+	});
+
+	it("rejects participant tokens for ended sessions", async () => {
+		const studioDb = createStudioDbMock({
+			realtimekit_meeting_id: "meeting-1",
+			status: "complete",
+		});
+
+		await expect(
+			issueStudioParticipantToken(
+				{
+					CLOUDFLARE_ACCOUNT_ID: "account-1",
+					REALTIMEKIT_API_TOKEN: "token-1",
+					REALTIMEKIT_APP_ID: "app-1",
+					STUDIO_DB: studioDb.db,
+				} as StudioEnv,
+				user,
+				{
+					role: "host",
+					sessionId: "rawkode-live-next",
+				},
+			),
+		).rejects.toMatchObject({
+			code: "session-ended",
+			status: 409,
+		});
+	});
+
 	it("lets a previously redeemed guest resolve a full single-use invite again", async () => {
 		const tokenHash = await hashInviteToken("guest-invite");
 		const studioDb = createStudioDbMock({
@@ -1921,6 +2172,54 @@ describe("Studio operations", () => {
 			"Rawkode Academy",
 			"https://example.com/rawkode.png",
 		]);
+	});
+
+	it("ends RealtimeKit sessions and marks Studio sessions complete", async () => {
+		const studioDb = createStudioDbMock({
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+		});
+		const fetchMock = vi.fn(async () =>
+			new Response(JSON.stringify({ success: true, result: {} })),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(
+			endStudioSession(
+				{
+					CLOUDFLARE_ACCOUNT_ID: "account-1",
+					REALTIMEKIT_API_TOKEN: "token-1",
+					REALTIMEKIT_APP_ID: "app-1",
+					STUDIO_DB: studioDb.db,
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+				} as StudioEnv,
+				user,
+				{
+					sessionId: "rawkode-live-next",
+				},
+			),
+		).resolves.toEqual({
+			sessionId: "rawkode-live-next",
+			status: "complete",
+		});
+		expect(fetchMock).toHaveBeenNthCalledWith(
+			1,
+			"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/active-session/kick-all",
+			expect.objectContaining({ method: "POST" }),
+		);
+		expect(fetchMock).toHaveBeenNthCalledWith(
+			2,
+			"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1",
+			expect.objectContaining({
+				body: JSON.stringify({ status: "INACTIVE" }),
+				method: "PATCH",
+			}),
+		);
+		expect(
+			studioDb.writes.find((write) =>
+				write.sql.includes("SET status = ?")
+			)?.params,
+		).toEqual(["complete", "rawkode-live-next"]);
 	});
 
 	it("hashes invite tokens instead of storing raw bearer tokens", async () => {

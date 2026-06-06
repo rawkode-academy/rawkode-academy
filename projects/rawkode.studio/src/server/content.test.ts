@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StudioEnv } from "../env";
 import {
+	getStudioContentEvents,
 	getStudioContentPersonByGithub,
 	getStudioContentVideo,
 } from "./content";
@@ -66,6 +67,75 @@ describe("Studio content graph", () => {
 			githubHandle: "rawkode",
 			id: "rawkode",
 		});
+	});
+
+	it("lists content events from all videos with normalized participants", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () =>
+				new Response(
+					JSON.stringify({
+						data: {
+							getAllVideos: [
+								{
+									id: "video-2",
+									slug: "later-event",
+									title: "Later event",
+									publishedAt: "2026-08-02T10:00:00.000Z",
+									guests: [],
+									episode: null,
+								},
+								{
+									id: "video-1",
+									slug: "first-event",
+									title: "First event",
+									publishedAt: "2026-08-01T10:00:00.000Z",
+									guests: [
+										{
+											id: "guest-person",
+											name: "Guest Person",
+											githubHandle: "GuestHandle",
+											avatarUrl: null,
+										},
+									],
+									episode: {
+										show: {
+											id: "rawkode-live",
+											name: "Rawkode Live",
+											hosts: [
+												{
+													id: "rawkode-person",
+													name: "Rawkode",
+													githubHandle: "Rawkode",
+													avatarUrl: null,
+												},
+											],
+										},
+									},
+								},
+							],
+						},
+					}),
+				),
+			),
+		);
+
+		await expect(
+			getStudioContentEvents({
+				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			} as StudioEnv),
+		).resolves.toMatchObject([
+			{
+				id: "video-1",
+				guests: [{ githubHandle: "guesthandle", id: "guesthandle" }],
+				show: {
+					hosts: [{ githubHandle: "rawkode", id: "rawkode" }],
+				},
+			},
+			{
+				id: "video-2",
+			},
+		]);
 	});
 
 	it("resolves people by normalized GitHub handle", async () => {

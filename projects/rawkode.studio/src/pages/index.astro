@@ -14,6 +14,7 @@ if (createSessionResult?.data?.sessionId) {
 }
 
 const inviteResult = Astro.getActionResult(actions.createInvite);
+const endSessionResult = Astro.getActionResult(actions.endSession);
 const dashboard = await loadStudioDashboard(Astro.locals.user, env);
 const invite = inviteResult?.data
 	? {
@@ -29,6 +30,7 @@ const invite = inviteResult?.data
 	<StudioDashboard
 		createSessionError={createSessionResult?.error?.message}
 		dashboard={dashboard}
+		endSessionError={endSessionResult?.error?.message}
 		invite={invite}
 		inviteError={inviteResult?.error?.message}
 	/>

@@ -80,6 +80,33 @@ async function realtimeKitFetch<T>(
 	return data;
 }
 
+async function realtimeKitFetchOptional<T>(
+	config: RealtimeKitConfig,
+	pathname: string,
+	init: RequestInit,
+): Promise<T | null> {
+	const response = await fetch(
+		`https://api.cloudflare.com/client/v4/accounts/${config.accountId}/realtime/kit/${config.appId}${pathname}`,
+		{
+			...init,
+			headers: {
+				Authorization: `Bearer ${config.apiToken}`,
+				"Content-Type": "application/json",
+				...(init.headers ?? {}),
+			},
+		},
+	);
+	const body = (await response.json().catch(() => ({}))) as CloudflareEnvelope<T>;
+	if (!response.ok || body.success === false) {
+		const message =
+			body.errors?.map((error) => error.message).join("; ") ||
+			`RealtimeKit API returned ${response.status}`;
+		throw new Error(message);
+	}
+
+	return body.data ?? body.result ?? null;
+}
+
 export async function createRealtimeKitMeeting(
 	config: RealtimeKitConfig,
 	input: { sessionId: string; title: string },
@@ -104,6 +131,25 @@ export async function createRealtimeKitMeeting(
 		title: data.title,
 		recordOnStart: data.record_on_start,
 	};
+}
+
+export async function endRealtimeKitSession(
+	config: RealtimeKitConfig,
+	meetingId: string,
+): Promise<void> {
+	await realtimeKitFetchOptional(
+		config,
+		`/meetings/${meetingId}/active-session/kick-all`,
+		{ method: "POST" },
+	).catch(() => undefined);
+	await realtimeKitFetchOptional(
+		config,
+		`/meetings/${meetingId}`,
+		{
+			method: "PATCH",
+			body: JSON.stringify({ status: "INACTIVE" }),
+		},
+	);
 }
 
 export async function addRealtimeKitParticipant(

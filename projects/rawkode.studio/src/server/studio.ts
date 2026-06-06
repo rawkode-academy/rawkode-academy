@@ -1,4 +1,8 @@
 import type { StudioEnv, StudioUser } from "../env";
+import {
+	getStudioContentEvents,
+	type StudioContentVideo,
+} from "./content";
 import type { RealtimeKitMeeting } from "./realtimekit";
 
 export type StudioRole = "guest" | "host" | "producer" | "program";
@@ -41,6 +45,18 @@ export interface StudioSessionRecord extends StudioSessionSummary {
 	updatedAt: number;
 }
 
+export interface StudioEventSummary {
+	id: string;
+	title: string;
+	show: string;
+	showId: string;
+	startsAt: string | null;
+	contentVideoSlug: string | null;
+	hosts: StudioPersonSummary[];
+	guests: StudioPersonSummary[];
+	sessions: StudioSessionSummary[];
+}
+
 export interface StudioRecordingReadyMarker {
 	contractVersion: 1;
 	videoId: string;
@@ -77,6 +93,9 @@ export interface StudioRecordingSummary {
 }
 
 export interface StudioDashboard {
+	events: StudioEventSummary[];
+	isOperator: boolean;
+	contentError: string | null;
 	user: StudioUser | null;
 	sessions: StudioSessionSummary[];
 }
@@ -251,6 +270,27 @@ function rowToSession(row: StudioSessionRow): StudioSessionRecord {
 	};
 }
 
+function isUpcomingEvent(event: StudioContentVideo, now = Date.now()): boolean {
+	return event.publishedAt ? Date.parse(event.publishedAt) >= now : false;
+}
+
+function contentVideoToEvent(
+	video: StudioContentVideo,
+	sessions: StudioSessionSummary[],
+): StudioEventSummary {
+	return {
+		id: video.id,
+		title: video.title,
+		show: video.show?.name ?? "Rawkode",
+		showId: video.show?.id ?? "rawkode",
+		startsAt: video.publishedAt,
+		contentVideoSlug: video.slug,
+		hosts: video.show?.hosts ?? [],
+		guests: video.guests,
+		sessions,
+	};
+}
+
 function getDb(env: StudioEnv | undefined): D1Database | null {
 	return env?.STUDIO_DB ?? null;
 }
@@ -258,6 +298,16 @@ function getDb(env: StudioEnv | undefined): D1Database | null {
 function isMissingStudioInviteTableError(error: unknown): boolean {
 	return error instanceof Error &&
 		error.message.includes("no such table: studio_invites");
+}
+
+function isMissingStudioSessionsTableError(error: unknown): boolean {
+	return error instanceof Error &&
+		error.message.includes("no such table: studio_sessions");
+}
+
+function isMissingStudioRecordingsTableError(error: unknown): boolean {
+	return error instanceof Error &&
+		error.message.includes("no such table: studio_recordings");
 }
 
 function normalizeEtag(value: string): string {
@@ -271,6 +321,28 @@ export function getStudioUserGithubHandle(user: StudioUser): string | null {
 
 export function getStudioUserId(user: StudioUser): string {
 	return getStudioUserGithubHandle(user) ?? user.id;
+}
+
+function personMatchesUser(person: StudioPersonSummary, user: StudioUser): boolean {
+	const userGithub = getStudioUserGithubHandle(user);
+	const userId = getStudioUserId(user);
+	return (
+		person.id === userId ||
+		(Boolean(userGithub) && person.githubHandle === userGithub)
+	);
+}
+
+export function userIsListedOnStudioSession(
+	session: StudioSessionRecord,
+	user: StudioUser,
+): boolean {
+	return [...session.hosts, ...session.guests].some((person) =>
+		personMatchesUser(person, user)
+	);
+}
+
+export function isStudioSessionActive(session: StudioSessionSummary): boolean {
+	return Boolean(session.realtimeKitMeetingId) && session.status !== "complete";
 }
 
 export function getStudioSessionWatchUrl(
@@ -491,35 +563,85 @@ export async function listStudioSessions(
 	const db = getDb(env);
 	if (!db) return [fallbackSession()];
 
-	const { results } = await db
-		.prepare(
-			`SELECT id,
-			        content_video_id,
-			        content_video_slug,
-			        title,
-			        show_id,
-			        show_title,
-			        content_hosts_json,
-			        content_guests_json,
-			        starts_at,
-			        status,
-			        recording_status,
-			        realtimekit_meeting_id,
-			        recording_prefix,
-			        created_by_id,
-			        created_by_github,
-			        created_at,
-			        updated_at
-			   FROM studio_sessions
-			  ORDER BY starts_at ASC, created_at ASC
-			  LIMIT 50`,
-		)
-		.all<StudioSessionRow>();
+	let results: StudioSessionRow[] | undefined;
+	try {
+		({ results } = await db
+			.prepare(
+				`SELECT id,
+				        content_video_id,
+				        content_video_slug,
+				        title,
+				        show_id,
+				        show_title,
+				        content_hosts_json,
+				        content_guests_json,
+				        starts_at,
+				        status,
+				        recording_status,
+				        realtimekit_meeting_id,
+				        recording_prefix,
+				        created_by_id,
+				        created_by_github,
+				        created_at,
+				        updated_at
+				   FROM studio_sessions
+				  ORDER BY starts_at ASC, created_at ASC
+				  LIMIT 50`,
+			)
+			.all<StudioSessionRow>());
+	} catch (error) {
+		if (isMissingStudioSessionsTableError(error)) return [];
+		throw error;
+	}
 
 	return await withDerivedSessionRecordingStatuses(
 		env,
 		(results ?? []).map(rowToSession),
 	);
+}
+
+function groupSessionsByContentVideoId(
+	sessions: StudioSessionSummary[],
+): Map<string, StudioSessionSummary[]> {
+	const grouped = new Map<string, StudioSessionSummary[]>();
+	for (const session of sessions) {
+		if (!session.contentVideoId) continue;
+		const existing = grouped.get(session.contentVideoId) ?? [];
+		existing.push(session);
+		grouped.set(session.contentVideoId, existing);
+	}
+	return grouped;
+}
+
+function sortSessionsForEvent(
+	sessions: StudioSessionSummary[],
+): StudioSessionSummary[] {
+	return [...sessions].sort((left, right) =>
+		right.startsAt.localeCompare(left.startsAt) ||
+		right.id.localeCompare(left.id)
+	);
+}
+
+function contentEventIncludesUser(event: StudioContentVideo, user: StudioUser): boolean {
+	return [
+		...(event.show?.hosts ?? []),
+		...event.guests,
+	].some((person) => personMatchesUser(person, user));
+}
+
+async function loadContentEvents(env: StudioEnv | undefined): Promise<{
+	error: string | null;
+	events: StudioContentVideo[];
+}> {
+	if (!env) return { error: null, events: [] };
+	try {
+		return { error: null, events: await getStudioContentEvents(env) };
+	} catch (error) {
+		return {
+			error: error instanceof Error ? error.message : "Rawkode content graph failed",
+			events: [],
+		};
+	}
 }
 
 export async function listStudioSessionsForUser(
@@ -532,46 +654,52 @@ export async function listStudioSessionsForUser(
 		return userOwnsStudioSession(session, user) ? [session] : [];
 	}
 
-	const { results } = await db
-		.prepare(
-			`SELECT id,
-			        content_video_id,
-			        content_video_slug,
-			        title,
-			        show_id,
-			        show_title,
-			        content_hosts_json,
-			        content_guests_json,
-			        starts_at,
-			        status,
-			        recording_status,
-			        realtimekit_meeting_id,
-			        recording_prefix,
-			        created_by_id,
-			        created_by_github,
-			        created_at,
-			        updated_at
-			   FROM studio_sessions
-			  WHERE created_by_id = ?
-			     OR created_by_github = ?
-			     OR EXISTS (
-			          SELECT 1
-			            FROM studio_participants
-			           WHERE studio_participants.session_id = studio_sessions.id
-			             AND (studio_participants.user_id = ?
-			              OR studio_participants.github_handle = ?)
-			             AND studio_participants.role IN ('host', 'producer', 'program')
-			        )
-			  ORDER BY starts_at ASC, created_at ASC
-			  LIMIT 50`,
-		)
-		.bind(
-			getStudioUserId(user),
-			getStudioUserGithubHandle(user),
-			getStudioUserId(user),
-			getStudioUserGithubHandle(user),
-		)
-		.all<StudioSessionRow>();
+	let results: StudioSessionRow[] | undefined;
+	try {
+		({ results } = await db
+			.prepare(
+				`SELECT id,
+				        content_video_id,
+				        content_video_slug,
+				        title,
+				        show_id,
+				        show_title,
+				        content_hosts_json,
+				        content_guests_json,
+				        starts_at,
+				        status,
+				        recording_status,
+				        realtimekit_meeting_id,
+				        recording_prefix,
+				        created_by_id,
+				        created_by_github,
+				        created_at,
+				        updated_at
+				   FROM studio_sessions
+				  WHERE created_by_id = ?
+				     OR created_by_github = ?
+				     OR EXISTS (
+				          SELECT 1
+				            FROM studio_participants
+				           WHERE studio_participants.session_id = studio_sessions.id
+				             AND (studio_participants.user_id = ?
+				              OR studio_participants.github_handle = ?)
+				             AND studio_participants.role IN ('host', 'producer', 'program')
+				        )
+				  ORDER BY starts_at ASC, created_at ASC
+				  LIMIT 50`,
+			)
+			.bind(
+				getStudioUserId(user),
+				getStudioUserGithubHandle(user),
+				getStudioUserId(user),
+				getStudioUserGithubHandle(user),
+			)
+			.all<StudioSessionRow>());
+	} catch (error) {
+		if (isMissingStudioSessionsTableError(error)) return [];
+		throw error;
+	}
 
 	return await withDerivedSessionRecordingStatuses(
 		env,
@@ -589,30 +717,36 @@ export async function getStudioSession(
 		return session.id === sessionId ? session : null;
 	}
 
-	const row = await db
-		.prepare(
-			`SELECT id,
-			        content_video_id,
-			        content_video_slug,
-			        title,
-			        show_id,
-			        show_title,
-			        content_hosts_json,
-			        content_guests_json,
-			        starts_at,
-			        status,
-			        recording_status,
-			        realtimekit_meeting_id,
-			        recording_prefix,
-			        created_by_id,
-			        created_by_github,
-			        created_at,
-			        updated_at
-			   FROM studio_sessions
-			  WHERE id = ?`,
-		)
-		.bind(sessionId)
-		.first<StudioSessionRow>();
+	let row: StudioSessionRow | null;
+	try {
+		row = await db
+			.prepare(
+				`SELECT id,
+				        content_video_id,
+				        content_video_slug,
+				        title,
+				        show_id,
+				        show_title,
+				        content_hosts_json,
+				        content_guests_json,
+				        starts_at,
+				        status,
+				        recording_status,
+				        realtimekit_meeting_id,
+				        recording_prefix,
+				        created_by_id,
+				        created_by_github,
+				        created_at,
+				        updated_at
+				   FROM studio_sessions
+				  WHERE id = ?`,
+			)
+			.bind(sessionId)
+			.first<StudioSessionRow>();
+	} catch (error) {
+		if (isMissingStudioSessionsTableError(error)) return null;
+		throw error;
+	}
 
 	if (!row) return null;
 	const [session] = await withDerivedSessionRecordingStatuses(env, [rowToSession(row)]);
@@ -626,26 +760,32 @@ export async function listStudioRecordings(
 	const db = getDb(env);
 	if (!db) return [];
 
-	const { results } = await db
-		.prepare(
-			`SELECT recording_id,
-			        session_id,
-			        video_id,
-			        source_bucket,
-			        source_key,
-			        source_etag,
-			        source_format,
-			        output_prefix,
-			        ready_marker_key,
-			        status,
-			        created_at,
-			        updated_at
-			   FROM studio_recordings
-			  WHERE session_id = ?
-			  ORDER BY created_at DESC, updated_at DESC`,
-		)
-		.bind(sessionId)
-		.all<StudioRecordingRow>();
+	let results: StudioRecordingRow[] | undefined;
+	try {
+		({ results } = await db
+			.prepare(
+				`SELECT recording_id,
+				        session_id,
+				        video_id,
+				        source_bucket,
+				        source_key,
+				        source_etag,
+				        source_format,
+				        output_prefix,
+				        ready_marker_key,
+				        status,
+				        created_at,
+				        updated_at
+				   FROM studio_recordings
+				  WHERE session_id = ?
+				  ORDER BY created_at DESC, updated_at DESC`,
+			)
+			.bind(sessionId)
+			.all<StudioRecordingRow>());
+	} catch (error) {
+		if (isMissingStudioRecordingsTableError(error)) return [];
+		throw error;
+	}
 
 	const recordings = (results ?? []).map(rowToRecording);
 	return await Promise.all(recordings.map(async (recording) => {
@@ -663,6 +803,7 @@ export async function userCanManageStudioSession(
 	session: StudioSessionRecord,
 	user: StudioUser,
 ): Promise<boolean> {
+	if (env && userIsConfiguredStudioOperator(env, user)) return true;
 	if (userOwnsStudioSession(session, user)) return true;
 
 	const db = getDb(env);
@@ -681,6 +822,13 @@ export async function userCanManageStudioSession(
 		.first<{ role: StudioRole }>();
 
 	return Boolean(row);
+}
+
+export function userCanJoinStudioSessionAsGuest(
+	session: StudioSessionRecord,
+	user: StudioUser,
+): boolean {
+	return userIsListedOnStudioSession(session, user);
 }
 
 export async function saveStudioSession(
@@ -772,6 +920,27 @@ export async function saveStudioSessionRecordingStatus(
 		.run();
 }
 
+export async function saveStudioSessionStatus(
+	env: StudioEnv,
+	sessionId: string,
+	status: StudioSessionStatus,
+): Promise<void> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to persist Studio session status");
+	}
+
+	await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = ?,
+			        updated_at = unixepoch()
+			  WHERE id = ?`,
+		)
+		.bind(status, sessionId)
+		.run();
+}
+
 export function buildStudioSession(input: {
 	contentVideoId?: string | null;
 	contentVideoSlug?: string | null;
@@ -783,6 +952,7 @@ export function buildStudioSession(input: {
 	show: string;
 	showId?: string;
 	startsAt?: string;
+	status?: StudioSessionStatus;
 	title: string;
 }): StudioSessionRecord {
 	const createdAt = nowSeconds();
@@ -801,7 +971,7 @@ export function buildStudioSession(input: {
 		show: input.show,
 		showId: input.showId ?? (slugify(input.show) || "studio"),
 		startsAt: input.startsAt ?? new Date().toISOString(),
-		status: "scheduled",
+		status: input.status ?? "scheduled",
 		hosts: mergePeople(input.hosts ?? [], [createdByHost]),
 		guests: input.guests ?? [],
 		recordingStatus: "idle",
@@ -1142,10 +1312,40 @@ export async function loadStudioDashboard(
 	user: StudioUser | undefined,
 	env?: StudioEnv,
 ): Promise<StudioDashboard> {
+	if (!user) {
+		return {
+			contentError: null,
+			events: [],
+			isOperator: false,
+			user: null,
+			sessions: [],
+		};
+	}
+
+	const isOperator = env ? userIsConfiguredStudioOperator(env, user) : false;
+	const [{ error: contentError, events: contentEvents }, allSessions] =
+		await Promise.all([
+			loadContentEvents(env),
+			listStudioSessions(env),
+		]);
+	const sessionsByContentVideoId = groupSessionsByContentVideoId(allSessions);
+	const visibleEvents = isOperator
+		? contentEvents.filter((event) => isUpcomingEvent(event))
+		: contentEvents.filter((event) => contentEventIncludesUser(event, user));
+	const events = visibleEvents.map((event) =>
+		contentVideoToEvent(
+			event,
+			sortSessionsForEvent(sessionsByContentVideoId.get(event.id) ?? []),
+		)
+	);
+
 	return {
-		user: user ?? null,
-		sessions: user
-			? await listStudioSessionsForUser(env, user)
-			: [],
+		contentError,
+		events,
+		isOperator,
+		user,
+		sessions: isOperator
+			? allSessions
+			: allSessions.filter((session) => userIsListedOnStudioSession(session, user)),
 	};
 }

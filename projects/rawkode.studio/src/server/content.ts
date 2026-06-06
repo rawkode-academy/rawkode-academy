@@ -36,6 +36,7 @@ type GraphQLVideo = {
 	publishedAt?: string | null;
 	slug?: string | null;
 	title?: string | null;
+	type?: string | null;
 };
 
 type GraphQLShow = {
@@ -85,6 +86,36 @@ const studioContentVideoQuery = `
 	}
 `;
 
+const studioContentEventsQuery = `
+	query StudioContentEvents {
+		getAllVideos {
+			id
+			slug
+			title
+			publishedAt
+			type
+			guests {
+				id
+				name
+				githubHandle
+				avatarUrl
+			}
+			episode {
+				show {
+					id
+					name
+					hosts {
+						id
+						name
+						githubHandle
+						avatarUrl
+					}
+				}
+			}
+		}
+	}
+`;
+
 const studioPersonByGithubQuery = `
 	query StudioPersonByGithub($username: String!) {
 		personByGithub(username: $username) {
@@ -95,6 +126,37 @@ const studioPersonByGithubQuery = `
 		}
 	}
 `;
+
+function normalizeVideo(video: GraphQLVideo | null | undefined): StudioContentVideo | null {
+	if (!video?.id || !video.title) {
+		return null;
+	}
+
+	const show = video.episode?.show ?? null;
+	return {
+		guests: normalizePeople(video.guests ?? []),
+		id: video.id,
+		publishedAt: video.publishedAt ?? null,
+		show: show?.id && show.name
+			? {
+					hosts: normalizePeople(show.hosts ?? []),
+					id: show.id,
+					name: show.name,
+				}
+			: null,
+		slug: normalizeSlug(video.slug),
+		title: video.title,
+	};
+}
+
+function sortContentVideos(
+	left: StudioContentVideo,
+	right: StudioContentVideo,
+): number {
+	const leftTime = left.publishedAt ? Date.parse(left.publishedAt) : Number.MAX_SAFE_INTEGER;
+	const rightTime = right.publishedAt ? Date.parse(right.publishedAt) : Number.MAX_SAFE_INTEGER;
+	return leftTime - rightTime || left.title.localeCompare(right.title);
+}
 
 export async function getStudioContentVideo(
 	env: StudioEnv,
@@ -127,25 +189,46 @@ export async function getStudioContentVideo(
 	}
 
 	const video = payload.data?.videoByID;
-	if (!video?.id || !video.title) {
-		return null;
+	const normalized = normalizeVideo({
+		...video,
+		episode: {
+			show: video?.episode?.show ?? payload.data?.episodeByVideoId?.show ?? null,
+		},
+	});
+	return normalized;
+}
+
+export async function getStudioContentEvents(
+	env: StudioEnv,
+): Promise<StudioContentVideo[]> {
+	const endpoint = env.RAWKODE_GRAPHQL_URL ?? "https://api.rawkode.academy/";
+	const response = await fetch(endpoint, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			query: studioContentEventsQuery,
+		}),
+	});
+	if (!response.ok) {
+		throw new Error(`Rawkode content graph returned ${response.status}`);
 	}
 
-	const show = video.episode?.show ?? payload.data?.episodeByVideoId?.show ?? null;
-	return {
-		guests: normalizePeople(video.guests ?? []),
-		id: video.id,
-		publishedAt: video.publishedAt ?? null,
-		show: show?.id && show.name
-			? {
-					hosts: normalizePeople(show.hosts ?? []),
-					id: show.id,
-					name: show.name,
-				}
-			: null,
-		slug: normalizeSlug(video.slug),
-		title: video.title,
+	const payload = (await response.json()) as {
+		data?: {
+			getAllVideos?: GraphQLVideo[] | null;
+		};
+		errors?: Array<{ message?: string }>;
 	};
+	if (payload.errors?.length) {
+		throw new Error(payload.errors[0]?.message ?? "Rawkode content graph failed");
+	}
+
+	return (payload.data?.getAllVideos ?? [])
+		.map(normalizeVideo)
+		.filter((video): video is StudioContentVideo => Boolean(video))
+		.sort(sortContentVideos);
 }
 
 export async function getStudioContentPersonByGithub(

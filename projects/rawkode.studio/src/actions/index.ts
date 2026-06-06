@@ -5,6 +5,7 @@ import type { StudioEnv } from "../env";
 import {
 	createStudioInvite,
 	createStudioSession,
+	endStudioSession,
 	issueStudioParticipantToken,
 	markStudioRecordingReady,
 	StudioOperationError,
@@ -87,6 +88,21 @@ export const server = {
 					meeting: result.meeting,
 					status: result.status,
 				};
+			} catch (error) {
+				toActionError(error);
+			}
+		},
+	}),
+
+	endSession: defineAction({
+		input: z.object({
+			sessionId: z.string().min(1),
+		}),
+		handler: async (input, context) => {
+			const user = requireUser(context);
+			const studioEnv = env as StudioEnv;
+			try {
+				return await endStudioSession(studioEnv, user, input);
 			} catch (error) {
 				toActionError(error);
 			}

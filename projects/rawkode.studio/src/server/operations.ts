@@ -7,6 +7,7 @@ import {
 import {
 	addRealtimeKitParticipant,
 	createRealtimeKitMeeting,
+	endRealtimeKitSession,
 	getRealtimeKitConfig,
 	type RealtimeKitRole,
 } from "./realtimekit";
@@ -21,15 +22,18 @@ import {
 	getStudioUserGithubHandle,
 	getStudioUserId,
 	hashInviteToken,
+	isStudioSessionActive,
 	redeemStudioInvite,
 	resolveStudioInvite,
 	saveRecordingReadyMarker,
 	saveStudioSessionRecordingStatus,
+	saveStudioSessionStatus,
 	saveStudioSession,
 	upsertStudioParticipant,
 	userCanManageStudioSession,
+	userCanJoinStudioSessionAsGuest,
 	userIsConfiguredStudioOperator,
-type StudioInvite,
+	type StudioInvite,
 	type StudioRole,
 } from "./studio";
 
@@ -39,6 +43,7 @@ export class StudioOperationError extends Error {
 		| "content-unavailable"
 		| "not-found"
 		| "provider-not-configured"
+		| "session-ended"
 		| "storage-not-configured"
 		| "unauthorized";
 	readonly status: number;
@@ -72,6 +77,10 @@ export interface CreateStudioInviteInput {
 	expiresInHours?: number;
 	maxUses?: number;
 	role?: StudioRole;
+	sessionId: string;
+}
+
+export interface EndStudioSessionInput {
 	sessionId: string;
 }
 
@@ -342,6 +351,7 @@ export async function createStudioSession(
 		show,
 		showId,
 		startsAt,
+		status: meeting ? "live" : "scheduled",
 		title,
 	});
 	await saveStudioSession(env, session);
@@ -397,6 +407,24 @@ export async function createStudioInvite(
 	};
 }
 
+export async function endStudioSession(
+	env: StudioEnv,
+	user: StudioUser,
+	input: EndStudioSessionInput,
+) {
+	const session = await requireSessionManager(env, user, input.sessionId);
+	if (session.realtimeKitMeetingId) {
+		const config = requireConfiguredRealtimeKit(env);
+		await endRealtimeKitSession(config, session.realtimeKitMeetingId);
+	}
+	await saveStudioSessionStatus(env, session.id, "complete");
+
+	return {
+		sessionId: session.id,
+		status: "complete" as const,
+	};
+}
+
 export async function issueStudioParticipantToken(
 	env: StudioEnv,
 	user: StudioUser,
@@ -415,25 +443,28 @@ export async function issueStudioParticipantToken(
 	if (input.role === "guest") {
 		if (!canManage) {
 			if (!input.inviteToken) {
-				throw new StudioOperationError(
-					"unauthorized",
-					"Guest invite token is required to join this Studio session.",
-					403,
-				);
+				if (!userCanJoinStudioSessionAsGuest(session, user)) {
+					throw new StudioOperationError(
+						"unauthorized",
+						"Guest invite token is required to join this Studio session.",
+						403,
+					);
+				}
+			} else {
+				const resolvedInvite = await resolveStudioInvite(env, input.inviteToken, user);
+				if (
+					!resolvedInvite ||
+					resolvedInvite.session.id !== session.id ||
+					resolvedInvite.invite.role !== "guest"
+				) {
+					throw new StudioOperationError(
+						"unauthorized",
+						"Guest invite token is invalid or expired.",
+						403,
+					);
+				}
+				inviteToRedeem = resolvedInvite.invite;
 			}
-			const resolvedInvite = await resolveStudioInvite(env, input.inviteToken, user);
-			if (
-				!resolvedInvite ||
-				resolvedInvite.session.id !== session.id ||
-				resolvedInvite.invite.role !== "guest"
-			) {
-				throw new StudioOperationError(
-					"unauthorized",
-					"Guest invite token is invalid or expired.",
-					403,
-				);
-			}
-			inviteToRedeem = resolvedInvite.invite;
 		}
 	} else if (!canManage) {
 		throw new StudioOperationError(
@@ -447,6 +478,13 @@ export async function issueStudioParticipantToken(
 			"provider-not-configured",
 			"RealtimeKit meeting has not been created for this session.",
 			503,
+		);
+	}
+	if (!isStudioSessionActive(session)) {
+		throw new StudioOperationError(
+			"session-ended",
+			"Studio session has ended.",
+			409,
 		);
 	}
 

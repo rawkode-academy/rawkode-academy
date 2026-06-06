@@ -5,6 +5,7 @@ import {
 	getStudioSession,
 	resolveStudioInvite,
 	userCanManageStudioSession,
+	userCanJoinStudioSessionAsGuest,
 } from "../../../server/studio";
 import { env } from "cloudflare:workers";
 
@@ -22,7 +23,8 @@ const resolvedInvite = inviteToken
 	? await resolveStudioInvite(env, inviteToken, Astro.locals.user)
 	: null;
 const canManage = await userCanManageStudioSession(env, session, Astro.locals.user);
-if (!canManage && resolvedInvite?.session.id !== session.id) {
+const canJoinAsEventParticipant = userCanJoinStudioSessionAsGuest(session, Astro.locals.user);
+if (!canManage && !canJoinAsEventParticipant && resolvedInvite?.session.id !== session.id) {
 	return new Response("Guest invite token is required", { status: 403 });
 }
 const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Meeting pending";
