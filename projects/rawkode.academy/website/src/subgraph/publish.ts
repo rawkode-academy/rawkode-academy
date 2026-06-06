@@ -16,6 +16,6 @@ const schemaAsString = printSchemaWithDirectives(
 );
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-writeFileSync(`${__dirname}/schema.gql`, schemaAsString);
+writeFileSync(`${__dirname}/schema.gql`, `${schemaAsString}\n`);
 
 logger.info("GraphQL schema published to src/subgraph/schema.gql");

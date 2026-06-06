@@ -16,6 +16,7 @@ const isoDateTime = z.string().refine((value) => !Number.isNaN(Date.parse(value)
 });
 const optionalText = z.preprocess(
 	(value) => {
+		if (value == null) return undefined;
 		if (typeof value !== "string") return value;
 		const trimmed = value.trim();
 		return trimmed.length > 0 ? trimmed : undefined;
@@ -24,6 +25,7 @@ const optionalText = z.preprocess(
 );
 const optionalIsoDateTime = z.preprocess(
 	(value) => {
+		if (value == null) return undefined;
 		if (typeof value !== "string") return value;
 		const trimmed = value.trim();
 		return trimmed.length > 0 ? trimmed : undefined;
@@ -33,6 +35,7 @@ const optionalIsoDateTime = z.preprocess(
 const optionalPositiveInt = (max: number) =>
 	z.preprocess(
 		(value) => {
+			if (value == null) return undefined;
 			if (typeof value === "string") {
 				const trimmed = value.trim();
 				if (!trimmed) return undefined;

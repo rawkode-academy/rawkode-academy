@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "wrangler dev",
-		"deploy": "wrangler deploy",
+		"deploy": "bun run build && wrangler deploy",
 		"collect-schemas": "bun run scripts/collect-schemas.ts",
 		"compose": "bun run scripts/compose.ts",
 		"build": "bun run collect-schemas && bun run compose",

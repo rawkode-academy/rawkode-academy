@@ -56,8 +56,8 @@ type Query {
   getAllVideos: [Video!]
   getLatestVideos(limit: Int = 15, offset: Int = 0): [Video!]
   getRandomVideos(limit: Int = 5): [Video!]
-  getUpcomingVideos(limit: Int = 15, offset: Int = 0): [Video!]
   getTechnologies(limit: Int = 15, offset: Int = 0): [Technology!]
+  getUpcomingVideos(limit: Int = 15, offset: Int = 0): [Video!]
   me: Person
   personByGithub(username: String!): Person
   showById(id: String!): Show

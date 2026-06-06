@@ -28,7 +28,7 @@ const sdl = printSchemaWithDirectives(
 );
 
 mkdirSync(outDir, { recursive: true });
-writeFileSync(outFile, sdl);
+writeFileSync(outFile, `${sdl}\n`);
 console.log(`✅ Subgraph SDL written: ${outFile}`);
 
 console.log("\nNext: publish to Cosmo (example)\n");

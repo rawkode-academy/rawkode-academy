@@ -864,47 +864,31 @@ describe("Studio operations", () => {
 			status: "live",
 			title: "Future Rawkode Live episode",
 		});
-		vi.stubGlobal(
-			"fetch",
-			vi.fn(async () =>
-				new Response(
-					JSON.stringify({
-						data: {
-							getAllVideos: [
-								{
-									id: "past-video",
-									slug: "past-event",
-									title: "Past event",
-									publishedAt: "2025-08-01T10:00:00.000Z",
-									guests: [],
-									episode: {
-										show: {
-											id: "rawkode-live",
-											name: "Rawkode Live",
-											hosts: [],
-										},
+		const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
+			new Response(
+				JSON.stringify({
+					data: {
+						getUpcomingVideos: [
+							{
+								id: "future-video",
+								slug: "future-event",
+								title: "Future event",
+								publishedAt: "2026-08-01T10:00:00.000Z",
+								guests: [],
+								episode: {
+									show: {
+										id: "rawkode-live",
+										name: "Rawkode Live",
+										hosts: [],
 									},
 								},
-								{
-									id: "future-video",
-									slug: "future-event",
-									title: "Future event",
-									publishedAt: "2026-08-01T10:00:00.000Z",
-									guests: [],
-									episode: {
-										show: {
-											id: "rawkode-live",
-											name: "Rawkode Live",
-											hosts: [],
-										},
-									},
-								},
-							],
-						},
-					}),
-				),
+							},
+						],
+					},
+				}),
 			),
 		);
+		vi.stubGlobal("fetch", fetchMock);
 
 		await expect(
 			loadStudioDashboard(user, {
@@ -927,6 +911,11 @@ describe("Studio operations", () => {
 			],
 			isOperator: true,
 		});
+		const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body ?? "{}")) as {
+			query?: string;
+		};
+		expect(request.query).toContain("getUpcomingVideos");
+		expect(request.query).not.toContain("getAllVideos");
 	});
 
 	it("shows non-operators only assigned events and active sessions for those events", async () => {
@@ -1108,7 +1097,7 @@ describe("Studio operations", () => {
 
 	it("creates Studio sessions from content graph video metadata", async () => {
 		const studioDb = createStudioDbMock();
-		const fetchMock = vi.fn(async () =>
+		const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
 			new Response(
 				JSON.stringify({
 					data: {
