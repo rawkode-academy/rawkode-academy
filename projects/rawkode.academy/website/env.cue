@@ -14,6 +14,7 @@ let _queueNames = "rawkode-academy-notifications"
 
 env: {
 	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
+	REALTIMEKIT_APP_ID: "37ec99f0-db09-44b9-b86f-36ccdd6f672e"
 	DISABLE_GAME_AUTH: true
 }
 
