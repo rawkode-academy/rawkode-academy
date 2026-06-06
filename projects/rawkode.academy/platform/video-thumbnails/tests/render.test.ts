@@ -88,4 +88,15 @@ describe("thumbnail html renderer", () => {
 		));
 		expect(html).toContain("technology-svg");
 	});
+
+	it("accepts SVG files with XML and doctype preamble", () => {
+		const url = technologyIconDataUrl(`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h10v10H0z"/></svg>`);
+
+		expect(url).toContain("data:image/svg+xml;base64,");
+		expect(atob(url.replace("data:image/svg+xml;base64,", ""))).toBe(
+			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M0 0h10v10H0z"/></svg>',
+		);
+	});
 });

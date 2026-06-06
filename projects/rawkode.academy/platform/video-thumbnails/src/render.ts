@@ -21,8 +21,40 @@ export function escapeHtml(value: string): string {
 		.replaceAll("'", "&#39;");
 }
 
+function stripSvgPreamble(svg: string): string {
+	let value = svg.trimStart();
+
+	while (true) {
+		const trimmed = value.trimStart();
+		const lower = trimmed.toLowerCase();
+
+		if (lower.startsWith("<?xml")) {
+			const end = trimmed.indexOf("?>");
+			if (end === -1) throw new Error("Technology icon XML declaration is not closed");
+			value = trimmed.slice(end + 2);
+			continue;
+		}
+
+		if (lower.startsWith("<!doctype")) {
+			const end = trimmed.indexOf(">");
+			if (end === -1) throw new Error("Technology icon doctype is not closed");
+			value = trimmed.slice(end + 1);
+			continue;
+		}
+
+		if (trimmed.startsWith("<!--")) {
+			const end = trimmed.indexOf("-->");
+			if (end === -1) throw new Error("Technology icon comment is not closed");
+			value = trimmed.slice(end + 3);
+			continue;
+		}
+
+		return trimmed.trim();
+	}
+}
+
 export function technologyIconDataUrl(svg: string): string {
-	const trimmed = svg.trim();
+	const trimmed = stripSvgPreamble(svg);
 	if (!/^<svg[\s>]/i.test(trimmed)) {
 		throw new Error("Technology icon must be inline SVG");
 	}
