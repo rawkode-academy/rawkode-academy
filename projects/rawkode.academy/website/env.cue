@@ -109,7 +109,7 @@ tasks: {
 			command:  "sh"
 			args: [
 				"-lc",
-				"bun run sync:realtimekit-webhook && bun run build && bun x wrangler deploy --config ./dist/server/wrangler.json",
+				"bun run build && bun x wrangler deploy --config ./dist/server/wrangler.json && bun run sync:realtimekit-webhook && bun run build && bun x wrangler deploy --config ./dist/server/wrangler.json",
 			]
 			dependsOn: [_t.queues.ensure]
 			inputs: [

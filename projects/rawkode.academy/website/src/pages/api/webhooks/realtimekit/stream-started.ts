@@ -180,6 +180,11 @@ async function resolveLiveVideo(payload: RealtimeKitWebhookPayload) {
 	return { video, livestream };
 }
 
+export const HEAD: APIRoute = async () => new Response(null, { status: 204 });
+
+export const GET: APIRoute = async () =>
+	json({ ok: true, webhook: "realtimekit.stream-started" });
+
 export const POST: APIRoute = async ({ request }) => {
 	const webhookId = readEnvString(env.REALTIMEKIT_WEBHOOK_ID);
 	if (!webhookId) {
