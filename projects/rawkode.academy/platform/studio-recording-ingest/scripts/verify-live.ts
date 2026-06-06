@@ -47,6 +47,7 @@ const steps: VerificationStep[] = [
 			secretsStoreId,
 			"--per-page",
 			"100",
+			"--remote",
 		],
 		expect: ["GCP_SERVICE_ACCOUNT_JSON"],
 	},
