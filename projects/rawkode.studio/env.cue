@@ -10,6 +10,7 @@ runtime: schema.#DevenvRuntime
 hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks
+let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
 env: {
 	environment: production: {
@@ -58,8 +59,9 @@ tasks: {
 
 	build: schema.#Task & {
 		hermetic: false
-		command:  "bun"
-		args: ["run", "build"]
+		command:  "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run build"]
+		env: PATH: _taskPath
 		inputs: [
 			"astro.config.mts",
 			"package.json",
@@ -71,8 +73,9 @@ tasks: {
 
 	check: schema.#Task & {
 		hermetic: false
-		command:  "bun"
-		args: ["run", "check"]
+		command:  "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
+		env: PATH: _taskPath
 		inputs: [
 			"astro.config.mts",
 			"package.json",
@@ -84,8 +87,9 @@ tasks: {
 
 	test: schema.#Task & {
 		hermetic: false
-		command:  "bun"
-		args: ["run", "test"]
+		command:  "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
+		env: PATH: _taskPath
 		inputs: [
 			"data-model/**",
 			"package.json",
@@ -98,8 +102,9 @@ tasks: {
 		type: "group"
 		remote: schema.#Task & {
 			hermetic: false
-			command:  "bun"
-			args: ["run", "migrate"]
+			command:  "sh"
+			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]
+			env: PATH: _taskPath
 			inputs: [
 				"data-model/**",
 				"wrangler.jsonc",
@@ -111,8 +116,9 @@ tasks: {
 		type: "group"
 		main: schema.#Task & {
 			hermetic: false
-			command:  "bun"
-			args: ["run", "deploy"]
+			command:  "sh"
+			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy"]
+			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			inputs: [
 				"astro.config.mts",
@@ -124,8 +130,9 @@ tasks: {
 		}
 		preview: schema.#Task & {
 			hermetic: false
-			command:  "bun"
-			args: ["x", "wrangler", "versions", "upload"]
+			command:  "sh"
+			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler versions upload"]
+			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"

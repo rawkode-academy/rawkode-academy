@@ -31,6 +31,14 @@ ci: pipelines: {
 		}
 		tasks: [_t.check, _t.test, _t.deploy]
 	}
+
+	pullRequest: {
+		environment: "production"
+		when: {
+			pullRequest: true
+		}
+		tasks: [_t.check, _t.test, _t."deploy.dry-run"]
+	}
 }
 
 tasks: {
@@ -62,6 +70,18 @@ tasks: {
 	deploy: schema.#Task & {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./wrangler.jsonc"]
+		env: PATH: _taskPath
+		inputs: [
+			"data-model/**",
+			"package.json",
+			"src/**",
+			"wrangler.jsonc",
+		]
+	}
+
+	"deploy.dry-run": schema.#Task & {
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 		env: PATH: _taskPath
 		inputs: [
 			"data-model/**",

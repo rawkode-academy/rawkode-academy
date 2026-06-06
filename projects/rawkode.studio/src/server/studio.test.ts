@@ -711,9 +711,13 @@ describe("Studio operations", () => {
 			bucket_name: "rawkode-academy-content",
 		});
 		expect(wrangler.vars).toMatchObject({
+			CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce",
 			RAWKODE_GRAPHQL_URL: "https://api.rawkode.academy/",
 			RECORDINGS_BUCKET_NAME: "rawkode-academy-content",
 		});
+		expect(wrangler.secrets_store_secrets).not.toContainEqual(
+			expect.objectContaining({ binding: "CLOUDFLARE_ACCOUNT_ID" }),
+		);
 		expect(packageJson.scripts).toMatchObject({
 			deploy: "bun x wrangler deploy",
 			migrate: "bun x wrangler d1 migrations apply rawkode-academy-studio --remote",
@@ -721,7 +725,8 @@ describe("Studio operations", () => {
 		expect(envCue).toContain("CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef");
 		expect(envCue).toContain("op://sa.rawkode.academy/cloudflare/api-tokens/workers");
 		expect(envCue).toContain("tasks: [_t.migrations.remote, _t.check, _t.test, _t.deploy.main]");
-		expect(envCue).toContain('args: ["run", "migrate"]');
+		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]');
+		expect(envCue).toContain("env: PATH: _taskPath");
 	});
 
 	it("initializes the RealtimeKit room bridge with media defaults and compatible join APIs", () => {

@@ -47,6 +47,7 @@
 		}
 	],
 	"vars": {
+		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
 		"RAWKODE_GRAPHQL_URL": "https://api.rawkode.academy/",
 		"RECORDINGS_BUCKET_NAME": "rawkode-academy-content",
 		"STUDIO_OPERATOR_GITHUB_HANDLES": "rawkode",
@@ -56,11 +57,6 @@
 		"REALTIMEKIT_PROGRAM_PRESET": "rawkode-studio-program"
 	},
 	"secrets_store_secrets": [
-		{
-			"binding": "CLOUDFLARE_ACCOUNT_ID",
-			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
-			"secret_name": "CLOUDFLARE_ACCOUNT_ID"
-		},
 		{
 			"binding": "CLOUDFLARE_API_TOKEN",
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
