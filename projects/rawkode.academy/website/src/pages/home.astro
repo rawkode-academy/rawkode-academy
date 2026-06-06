@@ -71,6 +71,7 @@ const continueWatchingVideos = continueWatchingData
 				video.data.publishedAt instanceof Date
 					? video.data.publishedAt.toISOString()
 					: String(video.data.publishedAt),
+			type: video.data.type,
 		};
 	})
 	.filter((v): v is NonNullable<typeof v> => v !== null);

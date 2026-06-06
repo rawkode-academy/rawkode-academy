@@ -76,7 +76,9 @@ export function renderVideoThumbnailHtml({
 	const guests = normalizeGuests(params.guests);
 	const layout = guestLayout(guests.length);
 	const label = escapeHtml(params.show?.name ?? "Hands-on");
-	const title = escapeHtml(params.video.title);
+	const tagline = params.video.tagline?.trim()
+		? escapeHtml(params.video.tagline.trim())
+		: "";
 	const technologyName = escapeHtml(params.technology.name);
 	const technologyIconSrc = technologyIconDataUrl(technologyIconSvg);
 
@@ -94,7 +96,7 @@ export function renderVideoThumbnailHtml({
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=1280,height=720,initial-scale=1" />
-    <title>${title} Thumbnail</title>
+    <title>${label} Thumbnail</title>
     <style>
       :root { color-scheme: dark; --iroh:#7c7cff; --cyan:#65e8ff; --ink:#03050a; }
       * { box-sizing: border-box; }
@@ -116,7 +118,7 @@ export function renderVideoThumbnailHtml({
         transform: scale(1.03);
         filter: saturate(1.14) contrast(1.04);
       }
-      .black-layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .56); }
+      .black-layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .46); }
       .vignette {
         position: absolute;
         inset: -1px;
@@ -180,7 +182,7 @@ export function renderVideoThumbnailHtml({
         display: flex;
         flex-direction: column;
         gap: 10px;
-        max-width: 610px;
+        max-width: 560px;
       }
       .label {
         width: max-content;
@@ -195,11 +197,11 @@ export function renderVideoThumbnailHtml({
         font-weight: 800;
         box-shadow: 0 12px 24px rgba(0, 0, 0, .24);
       }
-      .title {
+      .tagline {
         color: #fff;
-        font-size: 55px;
-        line-height: .98;
-        font-weight: 900;
+        font-size: 39px;
+        line-height: 1.04;
+        font-weight: 860;
         letter-spacing: 0;
         text-shadow: 0 5px 28px rgba(0, 0, 0, .72);
         text-wrap: balance;
@@ -250,7 +252,7 @@ export function renderVideoThumbnailHtml({
     </style>
   </head>
   <body>
-    <main class="thumbnail" role="img" aria-label="${label} ${title} thumbnail">
+    <main class="thumbnail" role="img" aria-label="${label} ${technologyName} thumbnail">
       <div class="bg"></div>
       <div class="black-layer"></div>
       <div class="vignette"></div>
@@ -262,7 +264,7 @@ export function renderVideoThumbnailHtml({
       </section>
       <section class="kicker">
         <div class="label">${label}</div>
-        <div class="title">${title}</div>
+        ${tagline ? `<div class="tagline">${tagline}</div>` : ""}
       </section>
       <section class="guests" data-count="${layout.count}" aria-label="Guests">
         ${guestMarkup}

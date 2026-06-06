@@ -63,6 +63,7 @@ function browserScreenshotHtml(options: BrowserRunScreenshotOptions | undefined)
 
 const params: ThumbnailWorkflowParams = {
 	videoId: "video123",
+	tagline: "Peer-to-peer apps, built from first principles",
 	technology: {
 		id: "iroh",
 		name: "Iroh",
@@ -81,6 +82,7 @@ const renderParams: ThumbnailRenderParams = {
 		id: "video123",
 		slug: "hands-on-introduction-to-iroh",
 		title: "Hands-on Introduction to Iroh",
+		tagline: "Peer-to-peer apps, built from first principles",
 		description: "A hands-on introduction to Iroh.",
 		publishedAt: "2026-07-09T17:00:00.000Z",
 	},
@@ -154,7 +156,8 @@ describe("thumbnail workflow helpers", () => {
 		const prompt = buildBackgroundPrompt(renderParams);
 		expect(prompt).toContain("Iroh");
 		expect(prompt).toContain("peer-to-peer");
-		expect(prompt).toContain("No readable text");
+		expect(prompt).toContain("no letters");
+		expect(prompt).toContain("no UI screenshots");
 	});
 
 	it("skips existing thumbnails unless forced", async () => {
@@ -182,6 +185,7 @@ describe("thumbnail workflow helpers", () => {
 			video: {
 				id: "video123",
 				title: "Hands-on Introduction to Iroh",
+				tagline: "Peer-to-peer apps, built from first principles",
 			},
 			show: {
 				name: "Rawkode Live",
@@ -230,7 +234,8 @@ describe("thumbnail workflow helpers", () => {
 		expect(browser.action).toBe("screenshot");
 		const html = browserScreenshotHtml(browser.options);
 		expect(html).toContain("Rawkode Live");
-		expect(html).toContain("Hands-on Introduction to Iroh");
+		expect(html).toContain("Peer-to-peer apps, built from first principles");
+		expect(html).not.toContain("Hands-on Introduction to Iroh");
 		expect(html).toContain("Rawkode Academy");
 		expect(html).toContain("https://github.com/b5.png?size=512");
 		expect(browser.options?.screenshotOptions).toMatchObject({ type: "webp" });

@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 
 interface Props {
 	currentArticle: CollectionEntry<"articles">;
@@ -26,20 +27,6 @@ const normalizeTechnologyId = (value: unknown): string | null => {
 	return raw.replace(/\/index$/, "");
 };
 
-const formatDuration = (seconds?: number | null) => {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = seconds % 60;
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-	}
-	return `${minutes}:${secs.toString().padStart(2, "0")}`;
-};
-
 const articleTechnologyIds = Array.isArray(currentArticle.data.technologies)
 	? currentArticle.data.technologies
 			.map(normalizeTechnologyId)
@@ -51,6 +38,8 @@ let relatedVideos: {
 	slug: string;
 	title: string;
 	duration: number;
+	publishedAt: Date;
+	type?: string | undefined;
 	thumbnailUrl: string;
 }[] = [];
 
@@ -82,6 +71,8 @@ if (articleTechnologySet.size > 0) {
 			slug: item.video.data.slug,
 			title: item.video.data.title,
 			duration: item.video.data.duration,
+			publishedAt: item.video.data.publishedAt,
+			type: item.video.data.type,
 			thumbnailUrl: getVideoThumbnailUrl(item.video.data.id),
 		}));
 }
@@ -106,7 +97,7 @@ if (articleTechnologySet.size > 0) {
 							loading="lazy"
 						/>
 						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-							{formatDuration(video.duration)}
+							{formatVideoRuntimeLabel(video)}
 						</div>
 					</div>
 					<div class="p-3">

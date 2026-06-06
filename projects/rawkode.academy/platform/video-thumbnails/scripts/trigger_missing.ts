@@ -11,6 +11,7 @@ interface ParsedArgs {
 	concurrency: number;
 	dryRun: boolean;
 	force: boolean;
+	forceChangedContent: boolean;
 	max?: number;
 	repoRoot: string;
 }
@@ -38,6 +39,8 @@ function usage(code = 1): never {
 			"Options:",
 			"  --dry-run        List jobs without triggering Workflows",
 			"  --force          Trigger jobs even when thumbnail.webp already exists",
+			"  --force-changed-content",
+			"                   Force changed content/videos files even when thumbnail.webp exists",
 			"  --concurrency N  Number of concurrent HEAD checks (default: 10)",
 			"  --max N          Limit the number of Workflow triggers",
 			"  --repo-root DIR  Override repository root",
@@ -57,6 +60,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
 	let concurrency = 10;
 	let dryRun = false;
 	let force = false;
+	let forceChangedContent = false;
 	let max: number | undefined;
 	let repoRoot = defaultRepoRoot;
 
@@ -69,6 +73,10 @@ export function parseArgs(argv: string[]): ParsedArgs {
 		}
 		if (arg === "--force") {
 			force = true;
+			continue;
+		}
+		if (arg === "--force-changed-content") {
+			forceChangedContent = true;
 			continue;
 		}
 		if (arg === "--concurrency") {
@@ -92,7 +100,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
 		usage();
 	}
 
-	return { concurrency, dryRun, force, max, repoRoot };
+	return { concurrency, dryRun, force, forceChangedContent, max, repoRoot };
 }
 
 function parsePositiveInt(value: string | undefined, flag: string): number {
@@ -122,6 +130,51 @@ async function currentCommitSha(): Promise<string> {
 	return stdout.trim();
 }
 
+async function changedVideoContentPaths(repoRoot: string): Promise<Set<string>> {
+	const before = process.env.GITHUB_EVENT_BEFORE;
+	const sha = process.env.GITHUB_SHA;
+	const zeroSha = /^0+$/.test(before ?? "");
+	const range = before && sha && !zeroSha ? `${before}..${sha}` : "HEAD^..HEAD";
+	const proc = Bun.spawn(
+		[
+			"git",
+			"-C",
+			repoRoot,
+			"diff",
+			"--name-only",
+			"--diff-filter=ACMRT",
+			range,
+			"--",
+			"content/videos",
+		],
+		{ stdout: "pipe", stderr: "pipe" },
+	);
+	const [stdout, stderr, exitCode] = await Promise.all([
+		new Response(proc.stdout).text(),
+		new Response(proc.stderr).text(),
+		proc.exited,
+	]);
+
+	if (exitCode !== 0) {
+		console.warn(`Unable to resolve changed video content paths: ${stderr.trim()}`);
+		return new Set();
+	}
+
+	return new Set(stdout.split("\n").map((line) => line.trim()).filter(Boolean));
+}
+
+function markChangedContentJobs(
+	jobs: ThumbnailWorkflowParams[],
+	changedPaths: Set<string>,
+): ThumbnailWorkflowParams[] {
+	if (changedPaths.size === 0) return jobs;
+	return jobs.map((job) =>
+		job.source.contentPath && changedPaths.has(job.source.contentPath)
+			? { ...job, force: true }
+			: job,
+	);
+}
+
 async function thumbnailExists(job: ThumbnailWorkflowParams): Promise<boolean> {
 	try {
 		const response = await fetch(thumbnailUrl(job.videoId), { method: "HEAD" });
@@ -139,11 +192,15 @@ async function checkMissingInBatches(
 	if (force) return jobs;
 
 	const missing: ThumbnailWorkflowParams[] = [];
-	const total = jobs.length;
+	const jobsToCheck = jobs.filter((job) => !job.force);
+	missing.push(...jobs.filter((job) => job.force));
+	const total = jobsToCheck.length;
 	let completed = 0;
 
-	for (let i = 0; i < jobs.length; i += concurrency) {
-		const batch = jobs.slice(i, i + concurrency);
+	if (total === 0) return missing;
+
+	for (let i = 0; i < jobsToCheck.length; i += concurrency) {
+		const batch = jobsToCheck.slice(i, i + concurrency);
 		const results = await Promise.all(
 			batch.map(async (job): Promise<MissingCheckResult> => {
 				const exists = await thumbnailExists(job);
@@ -207,11 +264,18 @@ async function main() {
 	const commitSha = process.env.GITHUB_SHA || await currentCommitSha();
 
 	console.log("Discovering video content...");
-	const { jobs, skipped } = await discoverThumbnailJobs(args.repoRoot, {
+	const { jobs: discoveredJobs, skipped } = await discoverThumbnailJobs(args.repoRoot, {
 		commitSha,
 		force: args.force,
 	});
+	const changedPaths = args.forceChangedContent
+		? await changedVideoContentPaths(args.repoRoot)
+		: new Set<string>();
+	const jobs = markChangedContentJobs(discoveredJobs, changedPaths);
 	console.log(`Discovered ${jobs.length} triggerable video thumbnail job(s)`);
+	if (changedPaths.size > 0) {
+		console.log(`Forcing ${changedPaths.size} changed video content file(s)`);
+	}
 	logSkipped(skipped);
 
 	console.log(`\nChecking existing thumbnails (concurrency: ${args.concurrency})...`);

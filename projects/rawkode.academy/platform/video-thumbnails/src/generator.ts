@@ -145,6 +145,7 @@ export async function fetchVideoThumbnailDetails(
 			id: video.id,
 			slug: video.slug,
 			title: video.title,
+			tagline: params.tagline,
 			description: video.description ?? undefined,
 			publishedAt: video.publishedAt ?? undefined,
 		},
@@ -163,7 +164,7 @@ export function buildBackgroundPrompt(params: ThumbnailRenderParams): string {
 		...(params.show?.terms ?? []),
 		params.technology.name,
 		...(params.technology.terms ?? []),
-		params.video.title,
+		params.video.tagline ?? "",
 		params.video.description ?? "",
 	]
 		.map((term) => term.trim())
@@ -171,12 +172,12 @@ export function buildBackgroundPrompt(params: ThumbnailRenderParams): string {
 		.join(", ");
 
 	return [
-		`Create a 16:9 background image for a developer livestream thumbnail about ${params.technology.name}.`,
-		`Use technology-relevant visual metaphors from this context: ${terms}.`,
-		"Make it abstract, cinematic, and technical: systems diagrams, packets, nodes, terminals, traces, topology, depth, and high-contrast lighting are appropriate when relevant.",
+		`Create a 16:9 background-only image for a developer livestream thumbnail about ${params.technology.name}.`,
+		`Use the meaning of this context for visual direction only: ${terms}.`,
+		"Make it abstract, cinematic, and technical: unlabeled packet flows, nodes, topology lines, traces, depth, and high-contrast lighting are appropriate when relevant.",
 		"Palette: deep black and charcoal, with technology-colored highlights, cool cyan, and small white accents.",
-		"No readable text, no logos, no product marks, no human faces, no UI screenshots, and no watermarks.",
-		"The image must work behind a semi-transparent black overlay and a centered technology logo.",
+		"Do not include any readable or pseudo-readable typography: no letters, no words, no numbers, no captions, no labels, no code snippets, no terminal text, no dashboard text, no chart labels, no UI screenshots, no watermarks, no logos, no product marks, and no human faces.",
+		"The image must be a clean background layer that works behind a semi-transparent black overlay and a centered technology logo.",
 	].join(" ");
 }
 

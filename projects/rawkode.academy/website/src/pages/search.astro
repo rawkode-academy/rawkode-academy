@@ -54,6 +54,7 @@ const feedVideos = results
 			video.data.publishedAt instanceof Date
 				? video.data.publishedAt.toISOString()
 				: String(video.data.publishedAt),
+		type: video.data.type,
 	}));
 
 const suggestions = [

@@ -36,6 +36,8 @@ export async function getVideosForTechnology(technologyId: string) {
 			thumbnailUrl: getVideoThumbnailUrl(video.data.id),
 			slug: video.data.slug,
 			duration: video.data.duration,
+			publishedAt: video.data.publishedAt,
+			type: video.data.type,
 		}));
 	} catch (error) {
 		logger.warn(`Failed to fetch videos for technology ${technologyId}`, {

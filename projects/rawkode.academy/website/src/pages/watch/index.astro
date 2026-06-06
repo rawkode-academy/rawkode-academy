@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import { getPublishedVideos, getUpcomingVideos } from "@/lib/content";
+import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { getCollection } from "astro:content";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
@@ -117,19 +118,6 @@ const activeSeriesIndex = selectedSeries
 	? Math.max(0, 1 + navSeries.findIndex(([label]) => label === selectedSeries))
 	: 0;
 
-// Helpers
-const formatDuration = (seconds?: number | null) => {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const h = Math.floor(seconds / 3600);
-	const m = Math.floor((seconds % 3600) / 60);
-	const s = seconds % 60;
-	return h > 0
-		? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-		: `${m}:${String(s).padStart(2, "0")}`;
-};
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	month: "short",
 	day: "2-digit",
@@ -145,6 +133,16 @@ const formatDateTimeAttribute = (date: Date | string) =>
 
 const dispatchNumFor = (idx: number) =>
 	String(visibleCount - idx).padStart(3, "0");
+
+const runtimeLabelFor = (video: (typeof allVideos)[number]) =>
+	formatVideoRuntimeLabel(
+		{
+			duration: typeof video.duration === "number" ? video.duration : undefined,
+			publishedAt: video.publishedAt,
+			type: video.type,
+		},
+		renderedAt,
+	);
 
 const featuredEpisodeNum = featuredVideo ? dispatchNumFor(0) : undefined;
 const featuredSeries = featuredVideo
@@ -246,6 +244,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 								<VideoStill
 									title={v.title}
 									series="Upcoming stream"
+									thumbnailUrl={getVideoThumbnailUrl(v.id)}
 									technologyLogos={technologyLogosFor(v)}
 									accent="amber"
 								/>
@@ -271,11 +270,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 				episodeNum={featuredEpisodeNum}
 				title={featuredVideo.title}
 				series={featuredSeries}
-				duration={formatDuration(
-					typeof featuredVideo.duration === "number"
-						? featuredVideo.duration
-						: undefined,
-				)}
+				duration={runtimeLabelFor(featuredVideo)}
 				thumbnailUrl={getVideoThumbnailUrl(featuredVideo.id)}
 				description={featuredVideo.description}
 				date={dateFormatter.format(
@@ -296,9 +291,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 					episodeNum={dispatchNumFor(start + idx)}
 					title={v.title}
 					series={formatLabel(v.category || v.type) || undefined}
-					duration={formatDuration(
-						typeof v.duration === "number" ? v.duration : undefined,
-					)}
+					duration={runtimeLabelFor(v)}
 					thumbnailUrl={getVideoThumbnailUrl(v.id)}
 					date={dateFormatter.format(
 						v.publishedAt instanceof Date
