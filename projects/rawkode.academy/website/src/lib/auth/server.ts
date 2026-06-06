@@ -18,6 +18,7 @@ export interface StoredSession {
 		email: string;
 		name: string;
 		image: string | null;
+		username?: string | null;
 	};
 	expiresAt: number;
 }
@@ -134,6 +135,8 @@ export async function getUserInfo(
 	email?: string;
 	name?: string;
 	picture?: string;
+	username?: string;
+	preferred_username?: string;
 } | null> {
 	const userinfoUrl = `${ID_PROVIDER_URL}/auth/oauth2/userinfo`;
 
@@ -183,6 +186,7 @@ export interface User {
 	emailVerified: boolean;
 	name: string;
 	image: string | null;
+	username: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }

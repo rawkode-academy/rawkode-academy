@@ -4,11 +4,32 @@ import type { APIRoute } from "astro";
 import { createYoga } from "graphql-yoga";
 import { getSchema } from "../subgraph/schema";
 
+function createContext(request: Request) {
+	const userId = request.headers.get("X-Gateway-User-Id");
+	if (!userId) {
+		return {
+			user: null,
+			isAuthenticated: false,
+		};
+	}
+
+	return {
+		user: {
+			id: userId,
+			email: request.headers.get("X-Gateway-User-Email"),
+			name: request.headers.get("X-Gateway-User-Name"),
+			username: request.headers.get("X-Gateway-User-Username"),
+		},
+		isAuthenticated: true,
+	};
+}
+
 // Single federated subgraph endpoint for the website.
 // Compose additional domain modules under src/subgraph/domains/*
 const yoga = createYoga({
 	schema: getSchema(),
 	graphqlEndpoint: "/graphql",
+	context: ({ request }) => createContext(request),
 });
 
 export const GET: APIRoute = async ({ request }) => {
