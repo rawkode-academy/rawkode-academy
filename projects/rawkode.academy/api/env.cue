@@ -58,7 +58,14 @@ tasks: {
 		args: ["x", "wrangler", "deploy"]
 		dependsOn: [_t.compose]
 
+		// Keep API deploy affected when the source schemas that compose the
+		// bundled supergraph change. The generated supergraph is not committed.
 		inputs: [
+			"scripts/collect-schemas.ts",
+			"scripts/compose.ts",
+			"schemas/**",
+			"../platform/*/read-model/schema.gql",
+			"../website/src/subgraph/**",
 			"src/**",
 			"supergraph.graphql",
 			"wrangler.jsonc",
