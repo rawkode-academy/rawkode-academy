@@ -65,6 +65,7 @@ function toActionError(error: unknown): never {
 
 export const server = {
 	createSession: defineAction({
+		accept: "form",
 		input: z
 			.object({
 				showId: optionalText,
@@ -95,6 +96,7 @@ export const server = {
 	}),
 
 	endSession: defineAction({
+		accept: "form",
 		input: z.object({
 			sessionId: z.string().min(1),
 		}),
@@ -148,6 +150,7 @@ export const server = {
 	}),
 
 	createInvite: defineAction({
+		accept: "form",
 		input: z.object({
 			expiresInHours: optionalPositiveInt(24 * 30),
 			maxUses: optionalPositiveInt(25),
