@@ -20,6 +20,7 @@ const WRANGLER_CONFIG_PATH = fileURLToPath(
 
 interface CloudflareEnvelope<T> {
 	success?: boolean;
+	error?: { message?: string };
 	errors?: Array<{ message?: string }>;
 	data?: T;
 	result?: T;
@@ -36,6 +37,16 @@ interface RealtimeKitWebhook {
 	events: string[];
 	name: string;
 	url: string;
+}
+
+class CloudflareApiError extends Error {
+	status: number;
+
+	constructor(message: string, status: number) {
+		super(message);
+		this.name = "CloudflareApiError";
+		this.status = status;
+	}
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -86,12 +97,15 @@ async function realtimeKitFetch<T>(
 		.json()
 		.catch(() => ({}))) as CloudflareEnvelope<T>;
 	if (!response.ok || body.success === false) {
+		const method = init.method ?? "GET";
 		const message =
 			body.errors
 				?.map((error) => error.message)
 				.filter(Boolean)
-				.join("; ") || `Cloudflare API returned ${response.status}`;
-		throw new Error(message);
+				.join("; ") ||
+			body.error?.message ||
+			`Cloudflare API ${method} ${pathname} returned ${response.status}`;
+		throw new CloudflareApiError(message, response.status);
 	}
 
 	const data = body.data ?? body.result;
@@ -148,10 +162,14 @@ function persistWebhookId(webhookId: string): void {
 
 async function main(): Promise<void> {
 	const appId = await getRealtimeKitAppId();
-	const webhooks = normalizeArray<RealtimeKitWebhook>(
-		await realtimeKitFetch<unknown>(`/${appId}/webhooks`),
-		"webhooks",
-	);
+	const webhooks = await realtimeKitFetch<unknown>(`/${appId}/webhooks`)
+		.then((body) => normalizeArray<RealtimeKitWebhook>(body, "webhooks"))
+		.catch((error) => {
+			if (error instanceof CloudflareApiError && error.status === 404) {
+				return [];
+			}
+			throw error;
+		});
 	const existing =
 		webhooks.find((webhook) => webhook.name === WEBHOOK_NAME) ??
 		webhooks.find((webhook) => webhook.url === WEBHOOK_URL);
