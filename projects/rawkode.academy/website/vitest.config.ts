@@ -1,7 +1,33 @@
 /// <reference types="vitest" />
-import { getViteConfig } from "astro/config";
+import { fileURLToPath } from "node:url";
+import { defineConfig } from "vitest/config";
 
-export default getViteConfig({
+export default defineConfig({
+	plugins: [
+		{
+			name: "vitest-astro-virtual-modules",
+			resolveId(id) {
+				if (id === "astro:content" || id === "astro:middleware") {
+					return `\0${id}`;
+				}
+				return undefined;
+			},
+			load(id) {
+				if (id === "\0astro:content") {
+					return "export const getCollection = async () => []; export const getEntry = async () => undefined;";
+				}
+				if (id === "\0astro:middleware") {
+					return "export const defineMiddleware = (handler) => handler;";
+				}
+				return undefined;
+			},
+		},
+	],
+	resolve: {
+		alias: {
+			"@": fileURLToPath(new URL("./src", import.meta.url)),
+		},
+	},
 	test: {
 		include: ["src/**/*.{spec,test}.{ts,tsx}"],
 		mockReset: true,
@@ -20,4 +46,4 @@ export default getViteConfig({
 		},
 		setupFiles: ["./src/tests/setup.ts"],
 	},
-} as any);
+});

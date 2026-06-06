@@ -47,13 +47,14 @@ describe("Core Web Vitals Guardrails", () => {
 		);
 	});
 
-	it("preloads only the primary body font", () => {
+	it("preloads only the critical editorial fonts", () => {
 		const source = readProjectFile("src/components/html/head.astro");
 		const preloadedFonts = source.match(/<Font[^>]*preload[^>]*>/g) ?? [];
 
-		expect(preloadedFonts).toHaveLength(1);
-		expect(source).toContain('<Font cssVariable="--font-poppins" preload />');
-		expect(source).not.toContain("--font-monaspace-neon\" preload");
+		expect(preloadedFonts).toHaveLength(2);
+		expect(source).toContain('<Font cssVariable="--font-instrument-serif" preload />');
+		expect(source).toContain('<Font cssVariable="--font-inter-tight" preload />');
+		expect(source).not.toContain('--font-jetbrains-mono" preload');
 	});
 
 	it("avoids eager preconnects to non-critical analytics domains", () => {
@@ -72,11 +73,12 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).not.toContain("@astrojs/partytown");
 	});
 
-	it("uses @reference instead of re-importing global CSS in head", () => {
+	it("keeps global CSS out of the production head", () => {
 		const source = readProjectFile("src/components/html/head.astro");
 
-		expect(source).toContain('@reference "@/styles/global.css";');
 		expect(source).not.toContain('@import "@/styles/global.css";');
+		expect(source).toContain('import.meta.env.DEV');
+		expect(source).toContain('href="/src/styles/global.css"');
 	});
 
 	it("keeps transcript payloads out of the idle watch-page island", () => {
