@@ -6,6 +6,7 @@ import { getCollection } from "astro:content";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import Page from "@/wrappers/page.astro";
+import { formatStreamingCountdown } from "@/lib/streaming-countdown";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import {
 	resolveTechnologyHorizontalLogoUrl,
@@ -48,6 +49,7 @@ const videosPerPage = 15;
 const allVideos = (await getPublishedVideos()).map((v) => v.data);
 const upcomingVideos = (await getUpcomingVideos()).map((v) => v.data);
 const visibleUpcomingVideos = upcomingVideos.slice(0, 6);
+const renderedAt = new Date();
 const technologyEntries = await getCollection("technologies");
 const technologyById = new Map(
 	technologyEntries.map((technology) => [
@@ -136,23 +138,13 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	day: "2-digit",
 });
 
-const upcomingDateFormatter = new Intl.DateTimeFormat("en-GB", {
-	weekday: "short",
-	month: "short",
-	day: "numeric",
-	hour: "2-digit",
-	minute: "2-digit",
-	timeZone: "Europe/London",
-	timeZoneName: "short",
-});
-
-const formatUpcomingDate = (date: Date | string) =>
-	upcomingDateFormatter.format(date instanceof Date ? date : new Date(date));
-
 const formatLabel = (value?: string | null) =>
 	value
 		? value.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
 		: undefined;
+
+const formatDateTimeAttribute = (date: Date | string) =>
+	(date instanceof Date ? date : new Date(date)).toISOString();
 
 const dispatchNumFor = (idx: number) =>
 	String(visibleCount - idx).padStart(3, "0");
@@ -269,13 +261,16 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 								<VideoStill
 									title={v.title}
 									series="Upcoming stream"
+									thumbnailUrl={getVideoThumbnailUrl(v.id)}
 									technologyLogos={technologyLogosFor(v)}
 									accent="amber"
 								/>
 							</div>
 							<div class="watch-upcoming__copy">
 								<MLabel tone="amber">
-									{formatUpcomingDate(v.publishedAt)}
+									<time datetime={formatDateTimeAttribute(v.publishedAt)}>
+										{formatStreamingCountdown(v.publishedAt, renderedAt)}
+									</time>
 								</MLabel>
 								<h3>{v.title}</h3>
 								<p>{v.description}</p>

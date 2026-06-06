@@ -7,12 +7,17 @@ import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
+import VideoStill from "@/components/video/VideoStill.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 import LiveDot from "@/components/ui/LiveDot.vue";
 import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
-import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { formatStreamingCountdown } from "@/lib/streaming-countdown";
+import {
+	resolveTechnologyHorizontalLogoUrl,
+	resolveTechnologyIconUrl,
+} from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
@@ -143,6 +148,40 @@ const techEntries = (
 		}),
 	)
 ).filter((t): t is NonNullable<typeof t> => Boolean(t));
+
+const fallbackTechnologyLogos = techEntries
+	.map((technology) => {
+		const horizontalSrc = resolveTechnologyHorizontalLogoUrl(
+			technology.id,
+			technology.data.logos,
+		);
+		if (horizontalSrc) {
+			return {
+				src: horizontalSrc,
+				name: technology.data.name,
+				kind: "horizontal" as const,
+			};
+		}
+
+		const iconSrc = resolveTechnologyIconUrl(
+			technology.id,
+			technology.data.logos,
+		);
+		return iconSrc
+			? {
+					src: iconSrc,
+					name: technology.data.name,
+					kind: "icon" as const,
+				}
+			: undefined;
+	})
+	.filter(
+		(
+			logo,
+		): logo is { src: string; name: string; kind: "horizontal" | "icon" } =>
+			Boolean(logo),
+	)
+	.slice(0, 1);
 
 const videosPerTechnology = await Promise.all(
 	techEntries.map(async (tech) => {
@@ -280,6 +319,10 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	minute: "2-digit",
 	timeZoneName: "short",
 }).format(video.data.publishedAt);
+const streamingCountdownLabel = formatStreamingCountdown(
+	video.data.publishedAt,
+	now,
+);
 ---
 
 <Page
@@ -350,19 +393,21 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 		<div class="watch-detail__player-frame">
 			{isUpcomingLive ? (
 				<section class="watch-detail__upcoming-player" aria-label="Upcoming stream details">
-					<img
-						class="watch-detail__upcoming-thumbnail"
-						src={thumbnailUrl}
-						alt=""
-						loading="eager"
-					/>
+					<div class="watch-detail__upcoming-still" aria-hidden="true">
+						<VideoStill
+							title={video.data.title}
+							thumbnailUrl={thumbnailUrl}
+							technologyLogos={fallbackTechnologyLogos}
+							accent="amber"
+						/>
+					</div>
 					<div class="watch-detail__upcoming-scrim"></div>
 					<div class="watch-detail__upcoming-card">
 						<MLabel tone="amber">Upcoming Stream</MLabel>
 						<h2>This session has not started yet.</h2>
 						<p>
 							The video player will appear when the live stream is available.
-							Join us on <time datetime={video.data.publishedAt.toISOString()}>{scheduledLabel}</time>.
+							<time datetime={video.data.publishedAt.toISOString()} title={scheduledLabel}>{streamingCountdownLabel}</time>.
 						</p>
 					</div>
 				</section>
@@ -531,14 +576,18 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 		overflow: hidden;
 	}
 
-	.watch-detail__upcoming-thumbnail {
+	.watch-detail__upcoming-still {
 		position: absolute;
 		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
+		pointer-events: none;
 		filter: saturate(0.85) brightness(0.55);
 		transform: scale(1.02);
+	}
+
+	.watch-detail__upcoming-still :global(.video-still) {
+		width: 100%;
+		height: 100%;
+		border: 0;
 	}
 
 	.watch-detail__upcoming-scrim {
