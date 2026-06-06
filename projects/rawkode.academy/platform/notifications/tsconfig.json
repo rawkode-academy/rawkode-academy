@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"allowImportingTsExtensions": true,
+		"forceConsistentCasingInFileNames": true,
+		"lib": ["ESNext"],
+		"module": "NodeNext",
+		"moduleDetection": "force",
+		"moduleResolution": "nodenext",
+		"noEmit": true,
+		"noFallthroughCasesInSwitch": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ESNext",
+		"types": ["@cloudflare/workers-types"],
+		"verbatimModuleSyntax": true
+	},
+	"include": ["src/**/*.ts", "tests/**/*.ts"]
+}

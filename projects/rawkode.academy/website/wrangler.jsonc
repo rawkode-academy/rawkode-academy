@@ -33,6 +33,30 @@
 			"custom_domain": true
 		}
 	],
+	"vars": {
+		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce",
+		"NOTIFICATIONS_VAPID_PUBLIC_KEY": "BDgtSVztEoFZDmO0Iz-MpBNaYv8ukGIQQYS8SwUBt7vMLXQT60-zjsyMTY8opukUBHoptdgm2u-uonWthz6e1SE"
+	},
+	"secrets_store_secrets": [
+		{
+			"binding": "REALTIMEKIT_API_TOKEN",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "REALTIMEKIT_API_TOKEN"
+		},
+		{
+			"binding": "REALTIMEKIT_APP_ID",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "REALTIMEKIT_APP_ID"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"binding": "STREAM_NOTIFICATIONS",
+				"queue": "rawkode-academy-notifications"
+			}
+		]
+	},
 	"services": [
 		{
 			"binding": "EMOJI_REACTIONS",
@@ -62,6 +86,11 @@
 		{
 			"binding": "ANALYTICS",
 			"service": "rawkode-tools-observability-collector"
+		},
+		{
+			"binding": "NOTIFICATIONS",
+			"service": "platform-notifications",
+			"entrypoint": "Notifications"
 		},
 		{
 			"binding": "SKI_PLAYER_STATS",

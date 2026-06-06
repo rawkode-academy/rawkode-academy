@@ -20,6 +20,7 @@
 		"check:orphans": "bun scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000",
 		"check:cwv": "bun scripts/check-cwv.ts --base https://rawkode.academy",
 		"sync:technologies": "bun scripts/sync-technologies.ts",
+		"sync:realtimekit-webhook": "bun scripts/sync-realtimekit-webhook.ts",
 		"subgraph:sdl": "bun scripts/publish-subgraph.ts",
 		"knip": "knip"
 	},
@@ -75,6 +76,7 @@
 		"jose": "^6.2.2",
 		"luxon": "^3.7.2",
 		"marked": "^17.0.5",
+		"notifications": "workspace:*",
 		"oslo": "^1.2.1",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4",
