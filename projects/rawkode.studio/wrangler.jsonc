@@ -23,7 +23,7 @@
 	},
 	"routes": [
 		{
-			"pattern": "studio.rawkode.academy",
+			"pattern": "rawkode.studio",
 			"custom_domain": true
 		}
 	],

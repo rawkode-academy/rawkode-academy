@@ -694,7 +694,7 @@ describe("Studio operations", () => {
 
 		expect(wrangler.name).toBe("rawkode-academy-studio");
 		expect(wrangler.routes).toContainEqual({
-			pattern: "studio.rawkode.academy",
+			pattern: "rawkode.studio",
 			custom_domain: true,
 		});
 		expect(wrangler.kv_namespaces).toContainEqual(

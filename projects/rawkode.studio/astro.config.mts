@@ -3,7 +3,7 @@ import vue from "@astrojs/vue";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-	site: "https://studio.rawkode.academy",
+	site: "https://rawkode.studio",
 	output: "server",
 	trailingSlash: "never",
 	adapter: cloudflare(),
