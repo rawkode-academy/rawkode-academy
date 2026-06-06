@@ -7,6 +7,7 @@ interface Props {
 	live?: boolean;
 	big?: boolean;
 	thumbnailUrl?: string | undefined;
+	technologyIcons?: { src: string; name: string }[] | undefined;
 	accent?: "spruce" | "amber" | "rust" | "violet";
 }
 
@@ -15,6 +16,7 @@ const {
 	title,
 	big = false,
 	thumbnailUrl,
+	technologyIcons = [],
 	accent = "spruce",
 } = Astro.props as Props;
 
@@ -37,11 +39,30 @@ const palette = palettes[epNum % palettes.length] as [string, string];
 ---
 
 <div class={`video-still ${big ? "video-still--big" : ""}`} style={`--accent: ${accentVar}; --bg-from: ${palette[0]}; --bg-to: ${palette[1]};`}>
+	<div class="video-still__backdrop" aria-hidden="true">
+		<div class="video-still__placeholder">
+			{technologyIcons.length > 0 ? (
+				<div class="video-still__logos">
+					{technologyIcons.slice(0, 3).map((icon) => (
+						<span class="video-still__logo">
+							<img src={icon.src} alt="" title={icon.name} loading="lazy" />
+						</span>
+					))}
+				</div>
+			) : (
+				<span class="video-still__placeholder-label">Stream scheduled</span>
+			)}
+		</div>
+	</div>
 	{thumbnailUrl ? (
-		<img class="video-still__img" src={thumbnailUrl} alt={title ?? ""} loading="lazy" />
-	) : (
-		<div class="video-still__backdrop" aria-hidden="true"></div>
-	)}
+		<img
+			class="video-still__img"
+			src={thumbnailUrl}
+			alt={title ?? ""}
+			loading="lazy"
+			onerror="this.hidden = true; this.closest('.video-still')?.classList.add('video-still--fallback')"
+		/>
+	) : null}
 </div>
 
 <style>
@@ -70,6 +91,7 @@ const palette = palettes[epNum % palettes.length] as [string, string];
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
+		z-index: 0;
 		background-image: linear-gradient(
 				135deg,
 				var(--bg-from) 0%,
@@ -82,7 +104,51 @@ const palette = palettes[epNum % palettes.length] as [string, string];
 			);
 	}
 
+	.video-still__placeholder {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+	}
+
+	.video-still__logos {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.625rem;
+	}
+
+	.video-still__logo {
+		display: grid;
+		place-items: center;
+		width: clamp(2.5rem, 20%, 4rem);
+		aspect-ratio: 1;
+		border: 1px solid oklch(1 0 0 / 0.18);
+		background: oklch(1 0 0 / 0.08);
+		backdrop-filter: blur(10px);
+	}
+
+	.video-still__logo img {
+		display: block;
+		width: 68%;
+		height: 68%;
+		object-fit: contain;
+	}
+
+	.video-still__placeholder-label {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: oklch(1 0 0 / 0.72);
+	}
+
 	.video-still__img {
+		position: relative;
+		z-index: 1;
 		display: block;
 		width: 100%;
 		height: 100%;
