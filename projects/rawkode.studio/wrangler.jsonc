@@ -58,7 +58,7 @@
 	},
 	"secrets_store_secrets": [
 		{
-			"binding": "CLOUDFLARE_API_TOKEN",
+			"binding": "REALTIMEKIT_API_TOKEN",
 			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
 			"secret_name": "REALTIMEKIT_API_TOKEN"
 		},

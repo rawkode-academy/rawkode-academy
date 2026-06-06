@@ -32,7 +32,7 @@ function readEnvString(env: unknown, key: string): string | undefined {
 
 export function getRealtimeKitConfig(env: unknown): RealtimeKitConfig | null {
 	const accountId = readEnvString(env, "CLOUDFLARE_ACCOUNT_ID");
-	const apiToken = readEnvString(env, "CLOUDFLARE_API_TOKEN");
+	const apiToken = readEnvString(env, "REALTIMEKIT_API_TOKEN");
 	const appId = readEnvString(env, "REALTIMEKIT_APP_ID");
 	if (!accountId || !apiToken || !appId) return null;
 

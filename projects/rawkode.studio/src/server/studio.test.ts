@@ -719,6 +719,21 @@ describe("Studio operations", () => {
 		expect(wrangler.secrets_store_secrets).not.toContainEqual(
 			expect.objectContaining({ binding: "CLOUDFLARE_ACCOUNT_ID" }),
 		);
+		expect(wrangler.secrets_store_secrets).not.toContainEqual(
+			expect.objectContaining({ binding: "CLOUDFLARE_API_TOKEN" }),
+		);
+		expect(wrangler.secrets_store_secrets).toContainEqual(
+			expect.objectContaining({
+				binding: "REALTIMEKIT_API_TOKEN",
+				secret_name: "REALTIMEKIT_API_TOKEN",
+			}),
+		);
+		expect(wrangler.secrets_store_secrets).toContainEqual(
+			expect.objectContaining({
+				binding: "REALTIMEKIT_APP_ID",
+				secret_name: "REALTIMEKIT_APP_ID",
+			}),
+		);
 		expect(packageJson.scripts).toMatchObject({
 			deploy: "bun x wrangler deploy",
 			migrate: "bun x wrangler d1 migrations apply rawkode-academy-studio --remote",
@@ -1868,7 +1883,7 @@ describe("Studio operations", () => {
 		const result = await issueStudioParticipantToken(
 			{
 				CLOUDFLARE_ACCOUNT_ID: "account-1",
-				CLOUDFLARE_API_TOKEN: "token-1",
+				REALTIMEKIT_API_TOKEN: "token-1",
 				REALTIMEKIT_APP_ID: "app-1",
 				REALTIMEKIT_HOST_PRESET: "host-preset",
 				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",

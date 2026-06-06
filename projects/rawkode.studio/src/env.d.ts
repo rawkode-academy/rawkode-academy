@@ -24,7 +24,7 @@ export interface StudioEnv {
 	RECORDINGS?: R2Bucket;
 	RECORDINGS_BUCKET_NAME?: string;
 	CLOUDFLARE_ACCOUNT_ID?: string;
-	CLOUDFLARE_API_TOKEN?: string;
+	REALTIMEKIT_API_TOKEN?: string;
 	REALTIMEKIT_APP_ID?: string;
 	REALTIMEKIT_GUEST_PRESET?: string;
 	REALTIMEKIT_HOST_PRESET?: string;
