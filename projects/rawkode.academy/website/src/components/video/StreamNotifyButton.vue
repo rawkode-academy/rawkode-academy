@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
 import { actions } from "astro:actions";
 import {
 	BellIcon,
 	CheckCircleIcon,
 	ExclamationTriangleIcon,
 } from "@heroicons/vue/24/outline";
+import { computed, onMounted, ref } from "vue";
+import { getNotificationServiceWorkerRegistration } from "@/lib/notification-service-worker";
 
 const props = defineProps<{
 	videoSlug: string;
@@ -84,9 +85,7 @@ function hasWebPushSupport(): boolean {
 }
 
 async function getRegistration(): Promise<ServiceWorkerRegistration> {
-	return navigator.serviceWorker.register("/notification-service-worker.js", {
-		scope: "/",
-	});
+	return getNotificationServiceWorkerRegistration(navigator.serviceWorker);
 }
 
 async function checkExistingSubscription() {
