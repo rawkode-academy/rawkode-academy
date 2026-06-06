@@ -1,4 +1,4 @@
 - Use conventional commits
     - fix(rawkode.cloud): thing
     - where () is the project/directory we're working on
-
+- Before running dependency installs, Bun workspace commands, tests, or generated CI checks, run `cuenv sync -A` from the git root.
