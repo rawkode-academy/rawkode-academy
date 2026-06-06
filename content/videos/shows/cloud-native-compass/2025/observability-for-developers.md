@@ -20,7 +20,7 @@ show: cloud-native-compass
 duration: 2922
 audioFileSize: 70129415
 guests:
-  - adriana-villela
+  - avillela
 resources:
   - title: OpenTelemetry docs
     type: url

@@ -84,7 +84,7 @@ chapters:
 duration: 2729
 audioFileSize: 65493300
 guests:
-  - frank-de-jonge
+  - frankdejonge
 resources:
   - title: EventSauce
     type: url

@@ -59,7 +59,7 @@ chapters:
     title: Conclusion and Future Steps
 duration: 6266
 guests:
-  - ciaran-mcnulty
+  - ciaranmcnulty
 resources:
   - title: Rawkode/getsynced
     type: url

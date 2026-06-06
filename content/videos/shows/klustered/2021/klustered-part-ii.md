@@ -118,7 +118,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 7085
 guests:
-  - dan-finneran
+  - thebsdbox
 resources:
   - title: Hubble UI
     type: url

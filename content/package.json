@@ -11,6 +11,7 @@
   "scripts": {
     "categorize": "bun run scripts/categorize.ts",
     "enrich-advocates": "bun run scripts/enrich-advocates.ts",
+    "audit-people": "bun run scripts/audit-people.ts",
     "audit-references": "bun run scripts/audit-references.ts",
     "extract-video-resources": "bun run scripts/extract-video-resources.ts"
   },

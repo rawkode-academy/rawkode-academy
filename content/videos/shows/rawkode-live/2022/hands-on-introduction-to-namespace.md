@@ -80,7 +80,7 @@ chapters:
     title: Conclusion & Future Outlook
 duration: 5967
 guests:
-  - hugo-santos
+  - hugosantos
 resources:
   - title: Cash App Hermit
     type: url

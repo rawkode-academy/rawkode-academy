@@ -59,7 +59,7 @@ chapters:
     title: Cluster Fixed & Conclusion
 duration: 5756
 guests:
-  - noel-georgi
+  - frezbo
 resources:
   - title: Cilium Quick Start documentation
     type: url

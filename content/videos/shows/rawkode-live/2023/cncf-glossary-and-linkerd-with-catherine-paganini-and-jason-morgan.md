@@ -46,8 +46,8 @@ chapters:
     title: Conclusion & Thank You
 duration: 1432
 guests:
-  - catherine-paganini
-  - jason-morgan
+  - cathpag
+  - jasonmorgan
 resources:
   - title: Cloud Native Glossary
     type: url

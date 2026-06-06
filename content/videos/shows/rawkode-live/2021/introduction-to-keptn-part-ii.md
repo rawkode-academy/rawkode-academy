@@ -88,7 +88,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 4940
 guests:
-  - jurgen-etzlstorfer
+  - jetzlstorfer
 resources:
   - title: Google SRE Book
     type: url

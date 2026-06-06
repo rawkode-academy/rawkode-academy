@@ -80,7 +80,7 @@ chapters:
 duration: 2591
 audioFileSize: 62183063
 guests:
-  - jj-asghar
+  - jjasghar
 resources:
   - title: IBM watsonx.ai developer page
     type: url

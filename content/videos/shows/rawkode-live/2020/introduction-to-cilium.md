@@ -117,7 +117,7 @@ chapters:
     title: Conclusion and Future Steps (Addressing Remaining Issues)
 duration: 5382
 guests:
-  - ilya-dmitrichenko
+  - errordeveloper
 resources:
   - title: Cilium Quick Installation guide
     type: url

@@ -110,7 +110,7 @@ chapters:
 duration: 6164
 guests:
   - russellwaite
-  - marek-counts
+  - klaven
 resources:
   - type: url
     title: Teleport

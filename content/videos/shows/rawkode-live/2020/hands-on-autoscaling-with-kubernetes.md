@@ -54,7 +54,7 @@ chapters:
     title: Conclusion & Community
 duration: 6125
 guests:
-  - guy-templeton
+  - gjtempleton
 resources:
   - title: Kubernetes Autoscaling by Example repository
     type: url

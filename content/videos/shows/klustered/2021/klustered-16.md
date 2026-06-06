@@ -212,9 +212,8 @@ chapters:
     title: Discussion and Conclusion
 duration: 6325
 guests:
-  - rachel-leekin
-  - andy-holtzmann
-  - software-math-guy
+  - rleekin
+  - andy-v-h
 resources:
   - title: Rawkode Academy Discord server
     type: url

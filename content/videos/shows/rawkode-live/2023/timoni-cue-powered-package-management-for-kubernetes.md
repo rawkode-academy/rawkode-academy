@@ -19,7 +19,7 @@ technologies:
 show: rawkode-live
 duration: 7580
 guests:
-  - stefan-prodan
+  - stefanprodan
 resources:
   - title: Timoni comparison with Helm page
     type: url

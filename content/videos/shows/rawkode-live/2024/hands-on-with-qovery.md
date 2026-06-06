@@ -62,7 +62,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 4628
 guests:
-  - romaric-philogene
+  - evoxmusic
 resources:
   - title: Qovery getting started guide
     type: url

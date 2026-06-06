@@ -59,8 +59,8 @@ chapters:
     title: Conclusion and Farewell
 duration: 4088
 guests:
-  - mark-phelps
-  - george-macrorie
+  - markphelps
+  - georgemac
 resources:
   - title: Flipt Labs repository
     type: url

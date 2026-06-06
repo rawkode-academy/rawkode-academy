@@ -43,7 +43,7 @@ chapters:
     title: Creating the Kubernetes cluster
 duration: 4110
 guests:
-  - jason-detiberus
+  - detiber
 resources:
   - title: Cluster API Book Quick Start
     type: url

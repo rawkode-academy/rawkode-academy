@@ -61,7 +61,7 @@ chapters:
     title: Conclusion & Goodbye
 duration: 4339
 guests:
-  - gianluca-mardente
+  - gianlucam76
 resources:
   - title: Project Sveltos installation documentation
     type: url

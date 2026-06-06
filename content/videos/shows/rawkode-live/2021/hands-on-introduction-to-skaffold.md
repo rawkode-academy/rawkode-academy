@@ -117,7 +117,7 @@ chapters:
     title: Get Involved with Skaffold
 duration: 4124
 guests:
-  - vic-iglesias
+  - viglesiasce
 resources:
   - title: Skaffold microservices example
     type: url

@@ -103,7 +103,7 @@ chapters:
     title: Farewell
 duration: 7705
 guests:
-  - suhail-patel
+  - suhailpatel
 resources:
   - title: Kubernetes Admission Controllers documentation
     type: url

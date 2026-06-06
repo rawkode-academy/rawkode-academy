@@ -91,8 +91,8 @@ chapters:
     title: Final Words & Thanks
 duration: 5734
 guests:
-  - borko-djurkovic
-  - matt-turner
+  - borkod
+  - mt165
 resources:
   - title: Teleport clustered sponsor link
     type: url

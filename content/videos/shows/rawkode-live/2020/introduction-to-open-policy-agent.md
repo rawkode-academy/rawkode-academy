@@ -75,7 +75,7 @@ chapters:
     title: Conclusion and Thanks
 duration: 4450
 guests:
-  - torin-sandall
+  - tsandall
 resources:
   - title: OPA Playground
     type: url

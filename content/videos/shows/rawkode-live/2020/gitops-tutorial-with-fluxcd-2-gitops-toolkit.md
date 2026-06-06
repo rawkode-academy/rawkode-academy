@@ -109,7 +109,7 @@ chapters:
     title: Summary and Conclusion
 duration: 4575
 guests:
-  - stefan-prodan
+  - stefanprodan
 resources:
   - title: >-
       GitOps Toolkit development guide for building a controller with

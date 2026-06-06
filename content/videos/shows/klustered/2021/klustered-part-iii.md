@@ -80,7 +80,7 @@ chapters:
     title: Final Wrap-up
 duration: 5765
 guests:
-  - michael-hausenblas
+  - mhausenblas
 resources:
   - title: Klustered GitLab repository
     type: url

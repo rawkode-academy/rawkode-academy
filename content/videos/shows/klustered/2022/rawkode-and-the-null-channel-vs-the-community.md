@@ -130,7 +130,7 @@ chapters:
     title: Wrap-up & Conclusion
 duration: 8754
 guests:
-  - marek-counts
+  - klaven
 resources:
   - title: Teleport sponsor landing page
     type: url

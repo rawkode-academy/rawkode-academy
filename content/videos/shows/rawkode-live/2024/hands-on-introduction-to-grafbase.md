@@ -48,7 +48,7 @@ chapters:
     title: Conclusion and Farewell
 duration: 5093
 guests:
-  - fredrik-bjork
+  - fbjork
 resources:
   - title: grafbase/grafbase GitHub releases
     type: url

@@ -82,7 +82,7 @@ chapters:
     title: Closing
 duration: 3618
 guests:
-  - marcus-olsson
+  - marcusolsson
 resources:
   - title: Equinix Metal
     type: url

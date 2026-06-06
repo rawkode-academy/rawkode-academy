@@ -40,7 +40,7 @@ chapters:
     title: Seccomp Demo
 duration: 4405
 guests:
-  - taylor-dolezal
+  - onlydole
 resources:
   - title: kind project
     type: url

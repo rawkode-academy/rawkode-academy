@@ -175,7 +175,7 @@ chapters:
     title: Community Involvement & Conclusion
 duration: 4346
 guests:
-  - mark-campbell
+  - marccampbell
 resources:
   - title: SchemaHero Operatorless Mode documentation
     type: url

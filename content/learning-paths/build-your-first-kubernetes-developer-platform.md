@@ -10,15 +10,13 @@ prerequisites:
   - "Familiarity with Visual Studio Code or another code editor."
   - "Exposure to CI/CD or GitOps workflows is helpful."
 technologies:
-  - "Platform Engineering"
-  - "Kubernetes"
-  - "Portainer"
-  - "DevStand"
-  - "Crossplane"
-  - "HashiCorp Waypoint"
-  - "Robusta"
-  - "Prometheus"
-  - "GitOps"
+  - kubernetes
+  - portainer
+  - devstand
+  - crossplane
+  - waypoint
+  - robusta
+  - prometheus
 publishedAt: "2025-10-01"
 authors:
   - "rawkode"

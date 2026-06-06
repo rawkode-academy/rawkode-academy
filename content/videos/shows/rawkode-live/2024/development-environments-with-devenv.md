@@ -66,7 +66,7 @@ chapters:
     title: Conclusion and Resources
 duration: 4213
 guests:
-  - domen-kozar
+  - domenkozar
 resources:
   - title: Process Compose
     type: url

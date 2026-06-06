@@ -37,9 +37,9 @@ chapters:
 duration: 3931
 audioFileSize: 94345022
 guests:
-  - neil-cresswell
+  - ncresswell
   - eli-holderness
-  - abdellfetah-sghiouar
+  - boredabdel
 resources:
   - title: Kubernetes Podcast
     url: 'https://kubernetespodcast.com/'

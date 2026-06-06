@@ -80,9 +80,8 @@ chapters:
     title: Conclusion
 duration: 4990
 guests:
-  - deepthi-sigireddi
-  - alkin-tezuysal
-  - open-source-database-evangelist
+  - deepthi
+  - askdba
 resources:
   - title: Vitess Operator
     type: url

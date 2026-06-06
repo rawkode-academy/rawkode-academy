@@ -35,7 +35,7 @@ chapters:
       BGP)
 duration: 3078
 guests:
-  - dan-finneran
+  - thebsdbox
 resources:
   - title: kube-vip documentation
     type: url

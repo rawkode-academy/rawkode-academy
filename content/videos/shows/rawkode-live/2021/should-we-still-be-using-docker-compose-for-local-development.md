@@ -88,7 +88,7 @@ chapters:
     title: Conclusion and Wrap-up
 duration: 6114
 guests:
-  - bret-fisher
+  - bretfisher
 resources:
   - title: Compose CLI repository
     type: url

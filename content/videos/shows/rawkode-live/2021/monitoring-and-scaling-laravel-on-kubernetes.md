@@ -89,8 +89,8 @@ chapters:
     title: Conclusion & Wrap-up
 duration: 6965
 guests:
-  - ciaran-mcnulty
-  - alex-bowers
+  - ciaranmcnulty
+  - alexbowers
 resources:
   - title: JoeDog Siege
     type: url

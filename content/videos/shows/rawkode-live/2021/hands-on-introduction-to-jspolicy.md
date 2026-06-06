@@ -87,8 +87,8 @@ chapters:
     title: Closing Remarks
 duration: 4266
 guests:
-  - rich-burroughs
-  - lukas-gentele
+  - richburroughs
+  - lukasgentele
 resources:
   - title: jsPolicy Playground
     type: url
