@@ -11,3 +11,12 @@ node_modules/
 /package.json
 /tsconfig.json
 /biome.json
+
+# BEGIN cuenv codegen
+README.md
+biome.json
+drizzle.config.ts
+http/wrangler.jsonc
+package.json
+tsconfig.json
+# END cuenv codegen
