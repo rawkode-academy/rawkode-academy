@@ -88,6 +88,18 @@ export async function getPublishedVideos(): Promise<VideoItem[]> {
 		.sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
 }
 
+export async function getUpcomingVideos(
+	limit = 15,
+	offset = 0,
+): Promise<VideoItem[]> {
+	const list = await listVideos();
+	const now = new Date();
+	return list
+		.filter((v) => v.type === "live" && v.publishedAt > now)
+		.sort((a, b) => a.publishedAt.getTime() - b.publishedAt.getTime())
+		.slice(offset, offset + limit);
+}
+
 export async function getLatestVideos(
 	limit = 15,
 	offset = 0,
