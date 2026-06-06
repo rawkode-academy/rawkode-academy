@@ -3,9 +3,10 @@ import { DateResolver } from "graphql-scalars";
 import {
 	type VideoItem,
 	getVideoById,
-	getPublishedVideos,
+	getUpcomingVideos,
 	getLatestVideos,
 	getRandomVideos,
+	listVideos,
 	searchVideos,
 } from "../loaders/videos";
 
@@ -87,7 +88,7 @@ export function registerVideos(
 			}),
 			getAllVideos: t.field({
 				type: [VideoRef],
-				resolve: async () => getPublishedVideos(),
+				resolve: async () => listVideos(),
 			}),
 			getLatestVideos: t.field({
 				type: [VideoRef],
@@ -99,6 +100,17 @@ export function registerVideos(
 					_root: any,
 					args: { limit?: number; offset?: number },
 				) => getLatestVideos(args.limit ?? 15, args.offset ?? 0),
+			}),
+			getUpcomingVideos: t.field({
+				type: [VideoRef],
+				args: {
+					limit: t.arg.int({ required: false, defaultValue: 15 }),
+					offset: t.arg.int({ required: false, defaultValue: 0 }),
+				},
+				resolve: async (
+					_root: any,
+					args: { limit?: number; offset?: number },
+				) => getUpcomingVideos(args.limit ?? 15, args.offset ?? 0),
 			}),
 			getRandomVideos: t.field({
 				type: [VideoRef],

@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import { getPublishedVideos } from "@/lib/content";
+import { getPublishedVideos, getUpcomingVideos } from "@/lib/content";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import Page from "@/wrappers/page.astro";
@@ -39,6 +39,8 @@ const page = Math.max(
 const videosPerPage = 15;
 
 const allVideos = (await getPublishedVideos()).map((v) => v.data);
+const upcomingVideos = (await getUpcomingVideos()).map((v) => v.data);
+const [nextUpcomingVideo, ...otherUpcomingVideos] = upcomingVideos;
 
 const totalVideoCount = allVideos.length;
 const seriesKeyFor = (video: (typeof allVideos)[number]) =>
@@ -120,6 +122,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	day: "2-digit",
 });
 
+const upcomingDateFormatter = new Intl.DateTimeFormat("en-GB", {
+	weekday: "short",
+	month: "short",
+	day: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+	timeZone: "Europe/London",
+	timeZoneName: "short",
+});
+
+const formatUpcomingDate = (date: Date | string) =>
+	upcomingDateFormatter.format(date instanceof Date ? date : new Date(date));
+
 const formatLabel = (value?: string | null) =>
 	value
 		? value.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
@@ -187,6 +202,39 @@ const featuredSeries = featuredVideo
 			title="Latest Videos"
 			dek="Tutorials, talks, and live builds."
 		/>
+
+		{nextUpcomingVideo && (
+			<section class="watch-upcoming" aria-labelledby="watch-upcoming-title">
+				<div class="watch-upcoming__header">
+					<MLabel tone="amber">Upcoming Streams</MLabel>
+					<h2 id="watch-upcoming-title">Next live sessions</h2>
+				</div>
+
+				<VideoHero
+					href={`/watch/${nextUpcomingVideo.slug}`}
+					title={nextUpcomingVideo.title}
+					series="Upcoming stream"
+					thumbnailUrl={getVideoThumbnailUrl(nextUpcomingVideo.id)}
+					description={nextUpcomingVideo.description}
+					date={formatUpcomingDate(nextUpcomingVideo.publishedAt)}
+					primaryCtaLabel="View stream →"
+				/>
+
+				{otherUpcomingVideos.length > 0 && (
+					<div class="watch-upcoming__grid">
+						{otherUpcomingVideos.slice(0, 5).map((v) => (
+							<VideoGridItem
+								href={`/watch/${v.slug}`}
+								title={v.title}
+								series="Upcoming stream"
+								thumbnailUrl={getVideoThumbnailUrl(v.id)}
+								date={formatUpcomingDate(v.publishedAt)}
+							/>
+						))}
+					</div>
+				)}
+			</section>
+		)}
 
 		{featuredVideo && (
 			<VideoHero
@@ -261,6 +309,37 @@ const featuredSeries = featuredVideo
 		color: var(--editorial-ink);
 	}
 
+	.watch-upcoming {
+		border-bottom: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+	}
+
+	.watch-upcoming__header {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		gap: 1.5rem;
+		padding: 2rem 2.5rem 0;
+	}
+
+	.watch-upcoming__header h2 {
+		margin: 0;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: clamp(2.25rem, 5vw, 4rem);
+		font-style: italic;
+		font-weight: 400;
+		line-height: 0.95;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+	}
+
+	.watch-upcoming__grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 2rem 1.75rem;
+		padding: 0 2.5rem 2.5rem;
+	}
+
 	.watch-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -298,9 +377,23 @@ const featuredSeries = featuredVideo
 	}
 
 	@media (max-width: 960px) {
-		.watch-grid { grid-template-columns: repeat(2, 1fr); padding: 1.5rem 1.25rem 2rem; }
+		.watch-upcoming__grid,
+		.watch-grid {
+			grid-template-columns: repeat(2, 1fr);
+			padding-inline: 1.25rem;
+		}
+
+		.watch-grid {
+			padding-top: 1.5rem;
+			padding-bottom: 2rem;
+		}
+
+		.watch-upcoming__header {
+			padding-inline: 1.25rem;
+		}
 	}
 	@media (max-width: 640px) {
+		.watch-upcoming__grid,
 		.watch-grid { grid-template-columns: 1fr; }
 		.watch-footer {
 			flex-direction: column;

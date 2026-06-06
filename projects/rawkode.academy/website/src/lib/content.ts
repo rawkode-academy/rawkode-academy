@@ -15,3 +15,15 @@ export async function getPublishedVideos() {
 			new Date(a.data.publishedAt).getTime(),
 	);
 }
+
+export async function getUpcomingVideos() {
+	const now = new Date();
+	const videos = await getCollection("videos", ({ data }) => {
+		return data.type === "live" && data.publishedAt > now;
+	});
+	return videos.sort(
+		(a, b) =>
+			new Date(a.data.publishedAt).getTime() -
+			new Date(b.data.publishedAt).getTime(),
+	);
+}
