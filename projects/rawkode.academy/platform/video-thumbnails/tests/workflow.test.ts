@@ -154,10 +154,38 @@ function createEnv(
 describe("thumbnail workflow helpers", () => {
 	it("builds technology-specific background prompts", () => {
 		const prompt = buildBackgroundPrompt(renderParams);
-		expect(prompt).toContain("Iroh");
-		expect(prompt).toContain("peer-to-peer");
+		expect(prompt).toContain("distributed peer network");
+		expect(prompt).toContain("packet trails");
+		expect(prompt).toContain("center 460 by 360 pixel area");
 		expect(prompt).toContain("no letters");
 		expect(prompt).toContain("no UI screenshots");
+		expect(prompt).not.toContain("Iroh");
+		expect(prompt).not.toContain("Hands-on Introduction to Iroh");
+		expect(prompt).not.toContain("Peer-to-peer apps, built from first principles");
+		expect(prompt).not.toContain("Rawkode Live");
+	});
+
+	it("keeps Odin names out of the background prompt", () => {
+		const prompt = buildBackgroundPrompt({
+			...renderParams,
+			video: {
+				...renderParams.video,
+				title: "Hands-on Introduction to Odin",
+				tagline: "Data-oriented systems programming, hands-on",
+			},
+			technology: {
+				...renderParams.technology,
+				id: "odin",
+				name: "Odin",
+				terms: ["data-oriented", "systems programming"],
+			},
+		});
+
+		expect(prompt).toContain("memory layout grids");
+		expect(prompt).toContain("geometric data blocks");
+		expect(prompt).not.toContain("Odin");
+		expect(prompt).not.toContain("Hands-on Introduction to Odin");
+		expect(prompt).not.toContain("Data-oriented systems programming, hands-on");
 	});
 
 	it("skips existing thumbnails unless forced", async () => {

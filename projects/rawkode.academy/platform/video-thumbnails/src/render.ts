@@ -115,10 +115,22 @@ export function renderVideoThumbnailHtml({
         background-image: url("${backgroundImageDataUrl}");
         background-size: cover;
         background-position: center;
-        transform: scale(1.03);
-        filter: saturate(1.14) contrast(1.04);
+        transform: scale(1.08);
+        filter: blur(2.4px) saturate(1.14) contrast(1.04);
       }
       .black-layer { position: absolute; inset: 0; background: rgba(0, 0, 0, .46); }
+      .center-shield {
+        position: absolute;
+        left: 50%;
+        top: 47%;
+        transform: translate(-50%, -50%);
+        width: 660px;
+        height: 390px;
+        border-radius: 999px;
+        background: radial-gradient(ellipse at center, rgba(0, 0, 0, .7) 0 34%, rgba(0, 0, 0, .5) 50%, rgba(0, 0, 0, .18) 68%, transparent 82%);
+        filter: blur(14px);
+        pointer-events: none;
+      }
       .vignette {
         position: absolute;
         inset: -1px;
@@ -255,6 +267,7 @@ export function renderVideoThumbnailHtml({
     <main class="thumbnail" role="img" aria-label="${label} ${technologyName} thumbnail">
       <div class="bg"></div>
       <div class="black-layer"></div>
+      <div class="center-shield"></div>
       <div class="vignette"></div>
       <div class="brand" aria-label="Rawkode Academy">${RAWKODE_WORDMARK_SVG}</div>
       <section class="center" aria-label="${technologyName} technology icon">

@@ -87,6 +87,10 @@ Body`);
 				"2",
 				"--max",
 				"5",
+				"--video-id",
+				"abc123",
+				"--video-id",
+				"def456",
 			]),
 		).toMatchObject({
 			concurrency: 2,
@@ -94,6 +98,7 @@ Body`);
 			force: true,
 			forceChangedContent: true,
 			max: 5,
+			videoIds: ["abc123", "def456"],
 		});
 	});
 });
