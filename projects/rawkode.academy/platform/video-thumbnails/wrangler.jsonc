@@ -19,9 +19,6 @@
 			"destinations": ["grafana-logs"]
 		}
 	},
-	"vars": {
-		"CLOUDFLARE_ACCOUNT_ID": "0aeb879de8e3cdde5fb3d413025222ce"
-	},
 	"r2_buckets": [
 		{
 			"binding": "CONTENT_BUCKET",
@@ -31,19 +28,15 @@
 	"ai": {
 		"binding": "AI"
 	},
+	"browser": {
+		"binding": "BROWSER"
+	},
 	"workflows": [
 		{
 			"name": "generate-video-thumbnail",
 			"binding": "GENERATE_VIDEO_THUMBNAIL",
 			"class_name": "GenerateVideoThumbnailWorkflow",
 			"script_name": "src/workflow.ts"
-		}
-	],
-	"secrets_store_secrets": [
-		{
-			"binding": "BROWSER_RENDERING_API_TOKEN",
-			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
-			"secret_name": "BROWSER_RENDERING_API_TOKEN"
 		}
 	]
 }

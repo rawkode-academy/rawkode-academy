@@ -9,7 +9,7 @@ export default {
 			return Response.json({
 				ok: true,
 				service: "video-thumbnails",
-				account: Boolean(env.CLOUDFLARE_ACCOUNT_ID),
+				browser: Boolean(env.BROWSER),
 			});
 		}
 
