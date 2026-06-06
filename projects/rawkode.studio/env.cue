@@ -36,7 +36,7 @@ ci: pipelines: {
 		when: {
 			pullRequest: true
 		}
-		tasks: [_t.check, _t.test, _t.deploy.dry-run]
+		tasks: [_t.check, _t.test, _t.deploy."dry-run"]
 	}
 }
 
@@ -134,7 +134,7 @@ tasks: {
 				pattern: "Version Preview URL: (.+)"
 			}
 		}
-		dry-run: schema.#Task & {
+		"dry-run": schema.#Task & {
 			hermetic: false
 			command:  "sh"
 			args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
