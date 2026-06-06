@@ -679,6 +679,7 @@ describe("Studio operations", () => {
 			name?: string;
 			r2_buckets?: Array<Record<string, string>>;
 			routes?: Array<Record<string, string | boolean>>;
+			secrets_store_secrets?: Array<Record<string, string>>;
 			vars?: Record<string, string>;
 		};
 		const envCue = readFileSync(
@@ -725,7 +726,9 @@ describe("Studio operations", () => {
 		expect(envCue).toContain("CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef");
 		expect(envCue).toContain("op://sa.rawkode.academy/cloudflare/api-tokens/workers");
 		expect(envCue).toContain("tasks: [_t.migrations.remote, _t.check, _t.test, _t.deploy.main]");
+		expect(envCue).toContain("tasks: [_t.check, _t.test, _t.deploy.dry-run]");
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]');
+		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]');
 		expect(envCue).toContain("env: PATH: _taskPath");
 	});
 
