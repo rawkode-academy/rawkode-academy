@@ -69,7 +69,11 @@ function base64UrlToUint8Array(value: string): Uint8Array {
 	return output;
 }
 
-function hasPushSupport(): boolean {
+function hasNotificationSupport(): boolean {
+	return Boolean(props.publicKey && "Notification" in window);
+}
+
+function hasWebPushSupport(): boolean {
 	return Boolean(
 		props.publicKey &&
 			window.isSecureContext &&
@@ -86,11 +90,15 @@ async function getRegistration(): Promise<ServiceWorkerRegistration> {
 }
 
 async function checkExistingSubscription() {
-	if (!hasPushSupport()) {
+	if (!props.publicKey) {
 		state.value = "unsupported";
-		message.value = props.publicKey
-			? "This browser cannot receive push notifications."
-			: "Notifications are not configured yet.";
+		message.value = "Notifications are not configured yet.";
+		return;
+	}
+
+	if (!hasNotificationSupport()) {
+		state.value = "unsupported";
+		message.value = "This browser cannot receive notifications.";
 		return;
 	}
 
@@ -102,6 +110,12 @@ async function checkExistingSubscription() {
 
 	if (Notification.permission !== "granted") {
 		state.value = "ready";
+		return;
+	}
+
+	if (!hasWebPushSupport()) {
+		state.value = "unsupported";
+		message.value = "This browser cannot receive push notifications.";
 		return;
 	}
 
@@ -128,23 +142,42 @@ async function enableNotifications() {
 	if (state.value === "loading" || state.value === "enabled") return;
 	message.value = null;
 
-	if (!hasPushSupport()) {
+	if (!props.publicKey) {
 		state.value = "unsupported";
-		message.value = props.publicKey
-			? "This browser cannot receive push notifications."
-			: "Notifications are not configured yet.";
+		message.value = "Notifications are not configured yet.";
+		return;
+	}
+
+	if (!hasNotificationSupport()) {
+		state.value = "unsupported";
+		message.value = "This browser cannot receive notifications.";
+		return;
+	}
+
+	if (Notification.permission === "denied") {
+		state.value = "denied";
+		message.value = "Allow notifications in your browser settings to use this.";
 		return;
 	}
 
 	state.value = "loading";
 	try {
-		const permission = await Notification.requestPermission();
+		const permission =
+			Notification.permission === "granted"
+				? Notification.permission
+				: await Notification.requestPermission();
 		if (permission !== "granted") {
 			state.value = permission === "denied" ? "denied" : "ready";
 			message.value =
 				permission === "denied"
 					? "Allow notifications in your browser settings to use this."
 					: "Notifications were not enabled.";
+			return;
+		}
+
+		if (!hasWebPushSupport()) {
+			state.value = "unsupported";
+			message.value = "This browser cannot receive push notifications.";
 			return;
 		}
 
