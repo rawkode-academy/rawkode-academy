@@ -7,7 +7,10 @@ import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import Page from "@/wrappers/page.astro";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import {
+	resolveTechnologyHorizontalLogoUrl,
+	resolveTechnologyIconUrl,
+} from "@/utils/resolve-technology-icon";
 
 import VideoMasthead from "@/components/video/VideoMasthead.astro";
 import VideoHero from "@/components/video/VideoHero.astro";
@@ -155,20 +158,43 @@ const featuredSeries = featuredVideo
 	? formatLabel(featuredVideo.category || featuredVideo.type)
 	: undefined;
 
-const technologyIconsFor = (video: (typeof upcomingVideos)[number]) =>
+const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 	(video.technologies ?? [])
 		.map((technologyRef) => {
 			const technology = technologyById.get(String(technologyRef));
 			if (!technology) return undefined;
 
-			const src = resolveTechnologyIconUrl(
+			const horizontalSrc = resolveTechnologyHorizontalLogoUrl(
 				technology.id,
 				technology.data.logos,
 			);
-			return src ? { src, name: technology.data.name } : undefined;
+			if (horizontalSrc) {
+				return {
+					src: horizontalSrc,
+					name: technology.data.name,
+					kind: "horizontal" as const,
+				};
+			}
+
+			const iconSrc = resolveTechnologyIconUrl(
+				technology.id,
+				technology.data.logos,
+			);
+			return iconSrc
+				? {
+						src: iconSrc,
+						name: technology.data.name,
+						kind: "icon" as const,
+					}
+				: undefined;
 		})
-		.filter((icon): icon is { src: string; name: string } => Boolean(icon))
-		.slice(0, 3);
+		.filter(
+			(
+				logo,
+			): logo is { src: string; name: string; kind: "horizontal" | "icon" } =>
+				Boolean(logo),
+		)
+		.slice(0, 1);
 ---
 
 <Page
@@ -240,7 +266,7 @@ const technologyIconsFor = (video: (typeof upcomingVideos)[number]) =>
 									title={v.title}
 									series="Upcoming stream"
 									thumbnailUrl={getVideoThumbnailUrl(v.id)}
-									technologyIcons={technologyIconsFor(v)}
+									technologyLogos={technologyLogosFor(v)}
 									accent="amber"
 								/>
 							</div>

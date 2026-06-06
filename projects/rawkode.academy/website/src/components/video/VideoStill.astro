@@ -7,7 +7,7 @@ interface Props {
 	live?: boolean;
 	big?: boolean;
 	thumbnailUrl?: string | undefined;
-	technologyIcons?: { src: string; name: string }[] | undefined;
+	technologyLogos?: { src: string; name: string; kind: "horizontal" | "icon" }[] | undefined;
 	accent?: "spruce" | "amber" | "rust" | "violet";
 }
 
@@ -16,7 +16,7 @@ const {
 	title,
 	big = false,
 	thumbnailUrl,
-	technologyIcons = [],
+	technologyLogos = [],
 	accent = "spruce",
 } = Astro.props as Props;
 
@@ -36,19 +36,20 @@ const palettes = [
 ];
 const epNum = parseInt(String(episodeNum ?? "0"), 10) || 0;
 const palette = palettes[epNum % palettes.length] as [string, string];
+const primaryLogo = technologyLogos[0];
 ---
 
 <div class={`video-still ${big ? "video-still--big" : ""}`} style={`--accent: ${accentVar}; --bg-from: ${palette[0]}; --bg-to: ${palette[1]};`}>
 	<div class="video-still__backdrop" aria-hidden="true">
 		<div class="video-still__placeholder">
-			{technologyIcons.length > 0 ? (
-				<div class="video-still__logos">
-					{technologyIcons.slice(0, 3).map((icon) => (
-						<span class="video-still__logo">
-							<img src={icon.src} alt="" title={icon.name} loading="lazy" />
-						</span>
-					))}
-				</div>
+			{primaryLogo ? (
+				<img
+					class={`video-still__logo video-still__logo--${primaryLogo.kind}`}
+					src={primaryLogo.src}
+					alt=""
+					title={primaryLogo.name}
+					loading="lazy"
+				/>
 			) : (
 				<span class="video-still__placeholder-label">Stream scheduled</span>
 			)}
@@ -113,28 +114,20 @@ const palette = palettes[epNum % palettes.length] as [string, string];
 		padding: 1rem;
 	}
 
-	.video-still__logos {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.625rem;
-	}
-
 	.video-still__logo {
-		display: grid;
-		place-items: center;
-		width: clamp(2.5rem, 20%, 4rem);
-		aspect-ratio: 1;
-		border: 1px solid oklch(1 0 0 / 0.18);
-		background: oklch(1 0 0 / 0.08);
-		backdrop-filter: blur(10px);
+		display: block;
+		object-fit: contain;
+		filter: drop-shadow(0 0.5rem 1.25rem oklch(0 0 0 / 0.28));
 	}
 
-	.video-still__logo img {
-		display: block;
-		width: 68%;
-		height: 68%;
-		object-fit: contain;
+	.video-still__logo--horizontal {
+		width: min(72%, 9rem);
+		max-height: 42%;
+	}
+
+	.video-still__logo--icon {
+		width: min(38%, 4rem);
+		max-height: 62%;
 	}
 
 	.video-still__placeholder-label {
