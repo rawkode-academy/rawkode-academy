@@ -80,28 +80,40 @@ const studioContentVideoQuery = `
 	}
 `;
 
-const studioContentEventsQuery = `
-	query StudioContentEvents {
-		getAllVideos {
+const studioContentEventFields = `
+	id
+	slug
+	title
+	publishedAt
+	type
+	guests {
+		id
+		name
+	}
+	episode {
+		show {
 			id
-			slug
-			title
-			publishedAt
-			type
-			guests {
+			name
+			hosts {
 				id
 				name
 			}
-			episode {
-				show {
-					id
-					name
-					hosts {
-						id
-						name
-					}
-				}
-			}
+		}
+	}
+`;
+
+const studioContentEventsQuery = `
+	query StudioContentEvents {
+		getAllVideos {
+			${studioContentEventFields}
+		}
+	}
+`;
+
+const studioUpcomingContentEventsQuery = `
+	query StudioUpcomingContentEvents($limit: Int!) {
+		getUpcomingVideos(limit: $limit) {
+			${studioContentEventFields}
 		}
 	}
 `;
@@ -144,6 +156,57 @@ function sortContentVideos(
 	const leftTime = left.publishedAt ? Date.parse(left.publishedAt) : Number.MAX_SAFE_INTEGER;
 	const rightTime = right.publishedAt ? Date.parse(right.publishedAt) : Number.MAX_SAFE_INTEGER;
 	return leftTime - rightTime || left.title.localeCompare(right.title);
+}
+
+function firstGraphQLError(payload: {
+	errors?: Array<{ message?: string }>;
+}): string | null {
+	return payload.errors?.[0]?.message ?? null;
+}
+
+function isMissingUpcomingVideosField(message: string | null): boolean {
+	return message?.includes('Cannot query field "getUpcomingVideos"') ?? false;
+}
+
+async function fetchStudioContentEvents(
+	env: StudioEnv,
+	input: {
+		query: string;
+		resultKey: "getAllVideos" | "getUpcomingVideos";
+		variables?: Record<string, unknown>;
+	},
+): Promise<StudioContentVideo[]> {
+	const endpoint = env.RAWKODE_GRAPHQL_URL ?? "https://api.rawkode.academy/";
+	const response = await fetch(endpoint, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			query: input.query,
+			variables: input.variables,
+		}),
+	});
+	if (!response.ok) {
+		throw new Error(`Rawkode content graph returned ${response.status}`);
+	}
+
+	const payload = (await response.json()) as {
+		data?: {
+			getAllVideos?: GraphQLVideo[] | null;
+			getUpcomingVideos?: GraphQLVideo[] | null;
+		};
+		errors?: Array<{ message?: string }>;
+	};
+	const graphQLError = firstGraphQLError(payload);
+	if (graphQLError) {
+		throw new Error(graphQLError);
+	}
+
+	return (payload.data?.[input.resultKey] ?? [])
+		.map(normalizeVideo)
+		.filter((video): video is StudioContentVideo => Boolean(video))
+		.sort(sortContentVideos);
 }
 
 export async function getStudioContentVideo(
@@ -189,34 +252,31 @@ export async function getStudioContentVideo(
 export async function getStudioContentEvents(
 	env: StudioEnv,
 ): Promise<StudioContentVideo[]> {
-	const endpoint = env.RAWKODE_GRAPHQL_URL ?? "https://api.rawkode.academy/";
-	const response = await fetch(endpoint, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			query: studioContentEventsQuery,
-		}),
+	return fetchStudioContentEvents(env, {
+		query: studioContentEventsQuery,
+		resultKey: "getAllVideos",
 	});
-	if (!response.ok) {
-		throw new Error(`Rawkode content graph returned ${response.status}`);
-	}
+}
 
-	const payload = (await response.json()) as {
-		data?: {
-			getAllVideos?: GraphQLVideo[] | null;
-		};
-		errors?: Array<{ message?: string }>;
-	};
-	if (payload.errors?.length) {
-		throw new Error(payload.errors[0]?.message ?? "Rawkode content graph failed");
+export async function getStudioUpcomingContentEvents(
+	env: StudioEnv,
+	limit = 25,
+): Promise<StudioContentVideo[]> {
+	try {
+		return await fetchStudioContentEvents(env, {
+			query: studioUpcomingContentEventsQuery,
+			resultKey: "getUpcomingVideos",
+			variables: { limit },
+		});
+	} catch (error) {
+		if (
+			error instanceof Error &&
+			isMissingUpcomingVideosField(error.message)
+		) {
+			return getStudioContentEvents(env);
+		}
+		throw error;
 	}
-
-	return (payload.data?.getAllVideos ?? [])
-		.map(normalizeVideo)
-		.filter((video): video is StudioContentVideo => Boolean(video))
-		.sort(sortContentVideos);
 }
 
 export async function getStudioContentPersonByGithub(

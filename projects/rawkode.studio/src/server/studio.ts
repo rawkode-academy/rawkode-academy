@@ -1,6 +1,7 @@
 import type { StudioEnv, StudioUser } from "../env";
 import {
 	getStudioContentEvents,
+	getStudioUpcomingContentEvents,
 	type StudioContentVideo,
 } from "./content";
 import type { RealtimeKitMeeting } from "./realtimekit";
@@ -629,13 +630,19 @@ function contentEventIncludesUser(event: StudioContentVideo, user: StudioUser): 
 	].some((person) => personMatchesUser(person, user));
 }
 
-async function loadContentEvents(env: StudioEnv | undefined): Promise<{
+async function loadContentEvents(
+	env: StudioEnv | undefined,
+	options: { upcomingOnly?: boolean } = {},
+): Promise<{
 	error: string | null;
 	events: StudioContentVideo[];
 }> {
 	if (!env) return { error: null, events: [] };
 	try {
-		return { error: null, events: await getStudioContentEvents(env) };
+		const events = options.upcomingOnly
+			? await getStudioUpcomingContentEvents(env)
+			: await getStudioContentEvents(env);
+		return { error: null, events };
 	} catch (error) {
 		return {
 			error: error instanceof Error ? error.message : "Rawkode content graph failed",
@@ -1325,7 +1332,7 @@ export async function loadStudioDashboard(
 	const isOperator = env ? userIsConfiguredStudioOperator(env, user) : false;
 	const [{ error: contentError, events: contentEvents }, allSessions] =
 		await Promise.all([
-			loadContentEvents(env),
+			loadContentEvents(env, { upcomingOnly: isOperator }),
 			listStudioSessions(env),
 		]);
 	const sessionsByContentVideoId = groupSessionsByContentVideoId(allSessions);
