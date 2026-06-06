@@ -55,6 +55,8 @@ const steps: VerificationStep[] = [
 			"secret",
 			"list",
 			realtimeKitSecretStoreId,
+			"--per-page",
+			"100",
 		],
 		expect: ["REALTIMEKIT_API_TOKEN", "REALTIMEKIT_APP_ID"],
 	},
