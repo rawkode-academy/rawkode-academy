@@ -55,8 +55,6 @@ const studioContentVideoQuery = `
 			guests {
 				id
 				name
-				githubHandle
-				avatarUrl
 			}
 			episode {
 				show {
@@ -65,8 +63,6 @@ const studioContentVideoQuery = `
 					hosts {
 						id
 						name
-						githubHandle
-						avatarUrl
 					}
 				}
 			}
@@ -78,8 +74,6 @@ const studioContentVideoQuery = `
 				hosts {
 					id
 					name
-					githubHandle
-					avatarUrl
 				}
 			}
 		}
@@ -97,8 +91,6 @@ const studioContentEventsQuery = `
 			guests {
 				id
 				name
-				githubHandle
-				avatarUrl
 			}
 			episode {
 				show {
@@ -107,8 +99,6 @@ const studioContentEventsQuery = `
 					hosts {
 						id
 						name
-						githubHandle
-						avatarUrl
 					}
 				}
 			}
@@ -121,8 +111,6 @@ const studioPersonByGithubQuery = `
 		personByGithub(username: $username) {
 			id
 			name
-			githubHandle
-			avatarUrl
 		}
 	}
 `;
@@ -273,8 +261,8 @@ function normalizePeople(people: GraphQLPerson[]): StudioContentPerson[] {
 	const seen = new Set<string>();
 	const normalized: StudioContentPerson[] = [];
 	for (const person of people) {
-		const githubHandle = normalizeGithubHandle(person.githubHandle);
-		const id = githubHandle ?? person.id;
+		const githubHandle = normalizeGithubHandle(person.githubHandle ?? person.id);
+		const id = githubHandle ?? person.id?.trim();
 		const name = person.name ?? githubHandle ?? person.id;
 		if (!id || !name || seen.has(id)) {
 			continue;
