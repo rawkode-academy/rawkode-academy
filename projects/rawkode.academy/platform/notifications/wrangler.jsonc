@@ -1,0 +1,50 @@
+{
+	"$schema": "https://unpkg.com/wrangler/config-schema.json",
+	"name": "platform-notifications",
+	"main": "src/main.ts",
+	"workers_dev": true,
+	"compatibility_date": "2026-06-06",
+	"compatibility_flags": ["nodejs_compat"],
+	"keep_vars": true,
+	"minify": true,
+	"observability": {
+		"traces": {
+			"enabled": true,
+			"destinations": ["grafana-traces"]
+		},
+		"logs": {
+			"enabled": true,
+			"destinations": ["grafana-logs"]
+		}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "platform-notifications",
+			"database_id": "cb21d53f-d9f8-4a9c-9ed3-cace65946567",
+			"migrations_dir": "data-model/migrations"
+		}
+	],
+	"queues": {
+		"consumers": [
+			{
+				"queue": "rawkode-academy-notifications",
+				"max_batch_size": 10,
+				"max_batch_timeout": 5,
+				"max_retries": 5,
+				"retry_delay": 60
+			}
+		]
+	},
+	"vars": {
+		"VAPID_SUBJECT": "mailto:david@rawkode.email",
+		"VAPID_PUBLIC_KEY": "BDgtSVztEoFZDmO0Iz-MpBNaYv8ukGIQQYS8SwUBt7vMLXQT60-zjsyMTY8opukUBHoptdgm2u-uonWthz6e1SE"
+	},
+	"secrets_store_secrets": [
+		{
+			"binding": "VAPID_PRIVATE_KEY",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "VAPID_PRIVATE_KEY"
+		}
+	]
+}

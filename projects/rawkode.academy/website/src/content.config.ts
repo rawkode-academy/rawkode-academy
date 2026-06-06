@@ -52,6 +52,14 @@ const videos = defineCollection({
 		duration: z.number().positive(),
 		audioFileSize: z.number().positive().optional(), // bytes, for podcast enclosure
 		type: z.enum(["live", "recorded"]).optional(),
+		realtimeKit: z
+			.object({
+				streamId: z.string().trim().min(1).optional(),
+				meetingId: z.string().trim().min(1).optional(),
+				livestreamName: z.string().trim().min(1).optional(),
+				roomName: z.string().trim().min(1).optional(),
+			})
+			.optional(),
 		category: z
 			.enum(["editorial", "tutorial", "review", "interview", "announcement"])
 			.optional(),

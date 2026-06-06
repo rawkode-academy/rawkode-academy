@@ -6,6 +6,8 @@
  */
 
 import type { EmailPreferences } from "email-preferences/rpc/rpc-service.js";
+import type { Notifications } from "notifications/src/main.js";
+import type { SendSubjectInput } from "notifications/src/contracts.js";
 import type { SkiAchievements } from "ski-achievements/http/http-service.js";
 import type { SkiLeaderboard } from "ski-leaderboard/http/http-service.js";
 import type { SkiPlayerLearnedPhrases } from "ski-player-learned-phrases/http/http-service.js";
@@ -18,8 +20,10 @@ export interface TypedEnv {
 	WATCH_HISTORY: Fetcher;
 	IDENTITY: Fetcher;
 	ANALYTICS: Fetcher;
+	STREAM_NOTIFICATIONS: Queue<SendSubjectInput>;
 	ASSETS: Fetcher;
 	EMAIL_PREFERENCES: Service<typeof EmailPreferences>;
+	NOTIFICATIONS: Service<typeof Notifications>;
 	SKI_ACHIEVEMENTS: Service<typeof SkiAchievements>;
 	SKI_LEADERBOARD: Service<typeof SkiLeaderboard>;
 	SKI_PLAYER_LEARNED_PHRASES: Service<typeof SkiPlayerLearnedPhrases>;

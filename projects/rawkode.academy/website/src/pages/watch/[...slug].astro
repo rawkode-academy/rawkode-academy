@@ -7,6 +7,7 @@ import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
+import StreamNotifyButton from "@/components/video/StreamNotifyButton.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 import LiveDot from "@/components/ui/LiveDot.vue";
@@ -19,6 +20,7 @@ import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import { env } from "cloudflare:workers";
 
 export const prerender = false;
 
@@ -280,6 +282,7 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	minute: "2-digit",
 	timeZoneName: "short",
 }).format(video.data.publishedAt);
+const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 ---
 
 <Page
@@ -373,6 +376,11 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 							The video player will appear when the live stream is available.
 							Join us on <time datetime={video.data.publishedAt.toISOString()}>{scheduledLabel}</time>.
 						</p>
+						<StreamNotifyButton
+							client:visible
+							videoSlug={video.data.slug}
+							publicKey={notificationsPublicKey}
+						/>
 					</div>
 				</div>
 			</section>
