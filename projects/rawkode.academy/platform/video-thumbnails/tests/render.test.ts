@@ -48,6 +48,8 @@ describe("thumbnail html renderer", () => {
 		expect(html).toContain("Rawkode Live");
 		expect(html).toContain("Peer-to-peer apps, built from first principles");
 		expect(html).not.toContain("Hands-on Introduction to Iroh");
+		expect(html).toContain("center-shield");
+		expect(html).toContain("blur(2.4px)");
 		expect(html).toContain("technology-svg");
 		expect(html).toContain("data:image/svg+xml;base64,");
 		expect(html).toContain("https://github.com/b5.png?size=512");

@@ -159,25 +159,24 @@ export async function fetchVideoThumbnailDetails(
 }
 
 export function buildBackgroundPrompt(params: ThumbnailRenderParams): string {
-	const terms = [
-		params.show?.name ?? "",
-		...(params.show?.terms ?? []),
-		params.technology.name,
-		...(params.technology.terms ?? []),
-		params.video.tagline ?? "",
-		params.video.description ?? "",
-	]
-		.map((term) => term.trim())
-		.filter(Boolean)
-		.join(", ");
+	const technologyId = params.technology.id.toLowerCase();
+	const technologyName = params.technology.name.toLowerCase();
+	const visualMotif =
+		technologyId.includes("iroh") || technologyName.includes("iroh")
+			? "distributed peer network, encrypted connection arcs, packet trails, mesh topology, flowing data paths"
+			: technologyId.includes("odin") || technologyName.includes("odin")
+				? "systems programming, memory layout grids, compiler pipeline silhouettes, low-level runtime architecture, geometric data blocks"
+				: "abstract software architecture, network topology, execution traces, data flow paths, geometric systems patterns";
 
 	return [
-		`Create a 16:9 background-only image for a developer livestream thumbnail about ${params.technology.name}.`,
-		`Use the meaning of this context for visual direction only: ${terms}.`,
-		"Make it abstract, cinematic, and technical: unlabeled packet flows, nodes, topology lines, traces, depth, and high-contrast lighting are appropriate when relevant.",
+		"Create a 16:9 abstract background-only image for a developer livestream thumbnail.",
+		`Use this nonverbal visual motif only: ${visualMotif}.`,
+		"Make it cinematic and technical with unlabeled flows, nodes, topology lines, traces, depth, and high-contrast lighting.",
+		"Leave the center 460 by 360 pixel area intentionally dark, empty, and low-detail because a real technology logo will be placed there later.",
+		"Put visual detail in the outer thirds and edges. Do not draw a central emblem, badge, icon, mark, sign, label, screen, dashboard, terminal, chart, or product identity.",
 		"Palette: deep black and charcoal, with technology-colored highlights, cool cyan, and small white accents.",
-		"Do not include any readable or pseudo-readable typography: no letters, no words, no numbers, no captions, no labels, no code snippets, no terminal text, no dashboard text, no chart labels, no UI screenshots, no watermarks, no logos, no product marks, and no human faces.",
-		"The image must be a clean background layer that works behind a semi-transparent black overlay and a centered technology logo.",
+		"Absolutely no readable or pseudo-readable typography: no letters, no words, no numbers, no captions, no labels, no code snippets, no terminal text, no dashboard text, no chart labels, no UI screenshots, no watermarks, no logos, no wordmarks, no icons, no product marks, and no human faces.",
+		"The image must be only a clean background texture behind a semi-transparent black overlay.",
 	].join(" ");
 }
 

@@ -14,6 +14,7 @@ interface ParsedArgs {
 	forceChangedContent: boolean;
 	max?: number;
 	repoRoot: string;
+	videoIds: string[];
 }
 
 interface MissingCheckResult {
@@ -44,12 +45,14 @@ function usage(code = 1): never {
 			"  --concurrency N  Number of concurrent HEAD checks (default: 10)",
 			"  --max N          Limit the number of Workflow triggers",
 			"  --repo-root DIR  Override repository root",
+			"  --video-id ID    Only consider a specific video id. Repeatable",
 			"  -h, --help       Show this help message",
 			"",
 			"Examples:",
 			"  bun scripts/trigger_missing.ts --dry-run",
 			"  bun scripts/trigger_missing.ts --max 5",
 			"  bun scripts/trigger_missing.ts --force --max 1",
+			"  bun scripts/trigger_missing.ts --force --video-id abc123",
 		].join("\n"),
 	);
 	process.exit(code);
@@ -63,6 +66,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
 	let forceChangedContent = false;
 	let max: number | undefined;
 	let repoRoot = defaultRepoRoot;
+	const videoIds: string[] = [];
 
 	for (let i = 0; i < args.length; i++) {
 		const arg = args[i];
@@ -96,11 +100,28 @@ export function parseArgs(argv: string[]): ParsedArgs {
 			repoRoot = resolve(value);
 			continue;
 		}
+		if (arg === "--video-id") {
+			const value = args[++i]?.trim();
+			if (!value) {
+				console.error("--video-id requires a video id");
+				usage();
+			}
+			videoIds.push(value);
+			continue;
+		}
 		console.error(`Unknown argument: ${arg}`);
 		usage();
 	}
 
-	return { concurrency, dryRun, force, forceChangedContent, max, repoRoot };
+	return {
+		concurrency,
+		dryRun,
+		force,
+		forceChangedContent,
+		max,
+		repoRoot,
+		videoIds,
+	};
 }
 
 function parsePositiveInt(value: string | undefined, flag: string): number {
@@ -272,7 +293,13 @@ async function main() {
 		? await changedVideoContentPaths(args.repoRoot)
 		: new Set<string>();
 	const jobs = markChangedContentJobs(discoveredJobs, changedPaths);
+	const filteredJobs = args.videoIds.length > 0
+		? jobs.filter((job) => args.videoIds.includes(job.videoId))
+		: jobs;
 	console.log(`Discovered ${jobs.length} triggerable video thumbnail job(s)`);
+	if (args.videoIds.length > 0) {
+		console.log(`Filtering to ${filteredJobs.length} requested video id(s)`);
+	}
 	if (changedPaths.size > 0) {
 		console.log(`Forcing ${changedPaths.size} changed video content file(s)`);
 	}
@@ -280,7 +307,7 @@ async function main() {
 
 	console.log(`\nChecking existing thumbnails (concurrency: ${args.concurrency})...`);
 	const missing = await checkMissingInBatches(
-		jobs,
+		filteredJobs,
 		args.concurrency,
 		args.force,
 	);
