@@ -35,8 +35,7 @@
 		{
 			"name": "generate-video-thumbnail",
 			"binding": "GENERATE_VIDEO_THUMBNAIL",
-			"class_name": "GenerateVideoThumbnailWorkflow",
-			"script_name": "src/workflow.ts"
+			"class_name": "GenerateVideoThumbnailWorkflow"
 		}
 	]
 }
