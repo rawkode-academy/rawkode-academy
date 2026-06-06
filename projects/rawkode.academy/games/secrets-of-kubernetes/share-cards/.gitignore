@@ -10,3 +10,11 @@ node_modules/
 /package.json
 /tsconfig.json
 /biome.json
+
+# BEGIN cuenv codegen
+README.md
+biome.json
+http/wrangler.jsonc
+package.json
+tsconfig.json
+# END cuenv codegen

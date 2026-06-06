@@ -17,3 +17,11 @@ node_modules/
 # this directory. The website inlines the SVGs into HTML, so these on-disk
 # copies are dead weight — never commit them.
 /articles/**/index-*.svg
+
+# BEGIN cuenv codegen
+README.md
+biome.json
+http/wrangler.jsonc
+package.json
+tsconfig.json
+# END cuenv codegen

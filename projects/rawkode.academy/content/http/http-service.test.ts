@@ -5,6 +5,7 @@ describe("content public key policy", () => {
 	it("keeps VOD outputs public", () => {
 		expect(isPublicContentKey("videos/video-123/stream.m3u8")).toBe(true);
 		expect(isPublicContentKey("videos/video-123/original.mp3")).toBe(true);
+		expect(isPublicContentKey("videos/video-123/thumbnail.webp")).toBe(true);
 		expect(isPublicContentKey("videos/video-123/transcode-status.json")).toBe(true);
 	});
 

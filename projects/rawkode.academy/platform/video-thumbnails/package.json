@@ -1,0 +1,21 @@
+{
+  "name": "rawkode-academy-video-thumbnails",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "deploy": "bun x wrangler deploy --config ./wrangler.jsonc",
+    "deploy:dry-run": "bun x wrangler deploy --dry-run --config ./wrangler.jsonc",
+    "test": "vitest run",
+    "trigger:missing": "bun scripts/trigger_missing.ts",
+    "trigger:missing:dry-run": "bun scripts/trigger_missing.ts --dry-run"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260602.1",
+    "@types/bun": "latest",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.8",
+    "wrangler": "^4.96.0"
+  }
+}

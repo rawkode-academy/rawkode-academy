@@ -322,6 +322,17 @@
         "wrangler": "^4.96.0",
       },
     },
+    "projects/rawkode.academy/platform/video-thumbnails": {
+      "name": "rawkode-academy-video-thumbnails",
+      "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260602.1",
+        "@types/bun": "latest",
+        "@types/node": "^24.10.1",
+        "typescript": "^5.9.3",
+        "vitest": "^4.1.8",
+        "wrangler": "^4.96.0",
+      },
+    },
     "projects/rawkode.academy/platform/watch-history": {
       "name": "watch-history",
       "dependencies": {
@@ -3486,6 +3497,8 @@
     "range-parser": ["range-parser@1.2.1", "", {}, "sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg=="],
 
     "rawkode-academy-transcriptions": ["rawkode-academy-transcriptions@workspace:projects/rawkode.academy/platform/transcriptions"],
+
+    "rawkode-academy-video-thumbnails": ["rawkode-academy-video-thumbnails@workspace:projects/rawkode.academy/platform/video-thumbnails"],
 
     "rawkode-news": ["rawkode-news@workspace:projects/rawkode.news"],
 

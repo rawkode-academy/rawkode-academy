@@ -13,3 +13,15 @@ read-model/main.ts
 read-model/publish.ts
 read-model/schema.gql
 write-model/wrangler.jsonc
+
+# BEGIN cuenv codegen
+README.md
+biome.json
+drizzle.config.ts
+package.json
+read-model/main.ts
+read-model/publish.ts
+read-model/wrangler.jsonc
+tsconfig.json
+write-model/wrangler.jsonc
+# END cuenv codegen

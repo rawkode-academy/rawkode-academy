@@ -15,3 +15,15 @@ node_modules/
 /package.json
 /tsconfig.json
 /biome.json
+
+# BEGIN cuenv codegen
+README.md
+biome.json
+drizzle.config.ts
+http/wrangler.jsonc
+package.json
+read-model/main.ts
+read-model/publish.ts
+read-model/wrangler.jsonc
+tsconfig.json
+# END cuenv codegen
