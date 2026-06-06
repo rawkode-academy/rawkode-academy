@@ -4,9 +4,9 @@ const iconModules = import.meta.glob<{ default: ImageMetadata }>(
 	"../../../../../content/technologies/*/icon.svg",
 	{ eager: true },
 );
-const horizontalModules = import.meta.glob<{ default: ImageMetadata }>(
+const horizontalModules = import.meta.glob<string>(
 	"../../../../../content/technologies/*/horizontal.svg",
-	{ eager: true },
+	{ eager: true, import: "default", query: "?url" },
 );
 
 interface ImageMetadata {
@@ -35,8 +35,8 @@ for (const [path, module] of Object.entries(iconModules)) {
 const horizontalUrlMap: Record<string, string> = {};
 for (const [path, module] of Object.entries(horizontalModules)) {
 	const match = path.match(/\/technologies\/([^/]+)\/horizontal\.svg$/);
-	if (match?.[1] && module.default?.src) {
-		horizontalUrlMap[match[1]] = module.default.src;
+	if (match?.[1] && module) {
+		horizontalUrlMap[match[1]] = module;
 	}
 }
 
