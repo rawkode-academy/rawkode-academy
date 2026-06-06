@@ -37,6 +37,16 @@ ci: pipelines: {
 		}
 		tasks: [_t.check, _t.test, _t.deploy."dry-run"]
 	}
+
+	"regenerate-iroh-odin": {
+		environment: "production"
+		when: {
+			branch: ["main"]
+			defaultBranch: true
+			manual:        true
+		}
+		tasks: [_t."regenerate-iroh-odin"]
+	}
 }
 
 tasks: {
@@ -125,6 +135,23 @@ tasks: {
 		hermetic: false
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun scripts/trigger_missing.ts --force-changed-content"]
+		env: PATH: _taskPath
+		inputs: [
+			"env.cue",
+			"package.json",
+			"scripts/**",
+			"src/**",
+			"wrangler.jsonc",
+			"../../../../content/people/**",
+			"../../../../content/technologies/**",
+			"../../../../content/videos/**",
+		]
+	}
+
+	"regenerate-iroh-odin": schema.#Task & {
+		hermetic: false
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun scripts/trigger_missing.ts --force --video-id 7564ecf9c5c00c7ceea52daf --video-id 7f1dfedcbf38a19375306862"]
 		env: PATH: _taskPath
 		inputs: [
 			"env.cue",
