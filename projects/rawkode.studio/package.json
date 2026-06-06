@@ -12,6 +12,7 @@
     "deploy:dry-run": "bun x wrangler deploy --dry-run",
     "migrate": "bun x wrangler d1 migrations apply rawkode-academy-studio --remote",
     "test": "vitest run",
+    "verify:live": "bun run scripts/verify-live.ts",
     "preview": "astro preview --host 127.0.0.1 --port 4323"
   },
   "dependencies": {

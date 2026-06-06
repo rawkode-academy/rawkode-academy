@@ -29,6 +29,7 @@
 		{
 			"binding": "DB",
 			"database_name": "platform-studio-recording-ingest",
+			"database_id": "53159084-61e6-425d-9660-8f350a08f036",
 			"migrations_dir": "./data-model"
 		}
 	],
@@ -54,9 +55,11 @@
 		"GCP_REGION": "europe-west2",
 		"GCP_TRANSCODING_JOB": "transcoding-job"
 	},
-	"secrets": {
-		"required": [
-			"GCP_SERVICE_ACCOUNT_JSON"
-		]
-	}
+	"secrets_store_secrets": [
+		{
+			"binding": "GCP_SERVICE_ACCOUNT_JSON",
+			"store_id": "492e5e40b9d64ebeac7e7a77db91ff6e",
+			"secret_name": "GCP_SERVICE_ACCOUNT_JSON"
+		}
+	]
 }

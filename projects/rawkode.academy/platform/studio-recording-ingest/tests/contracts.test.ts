@@ -209,12 +209,28 @@ describe("studio recording ingest contracts", () => {
 	it("uses Bun-managed Wrangler scripts for Cloudflare resource commands", () => {
 		const wrangler = JSON.parse(
 			readFileSync("wrangler.jsonc", "utf8"),
-		) as { secrets?: { required?: string[] } };
+		) as {
+			d1_databases?: Array<Record<string, string>>;
+			secrets_store_secrets?: Array<Record<string, string>>;
+		};
 		const packageJson = JSON.parse(
 			readFileSync("package.json", "utf8"),
 		) as { scripts?: Record<string, string> };
 
-		expect(wrangler.secrets?.required).toContain("GCP_SERVICE_ACCOUNT_JSON");
+		expect(wrangler.secrets_store_secrets).toContainEqual(
+			expect.objectContaining({
+				binding: "GCP_SERVICE_ACCOUNT_JSON",
+				secret_name: "GCP_SERVICE_ACCOUNT_JSON",
+				store_id: "492e5e40b9d64ebeac7e7a77db91ff6e",
+			}),
+		);
+		expect(wrangler.d1_databases).toContainEqual(
+			expect.objectContaining({
+				binding: "DB",
+				database_name: "platform-studio-recording-ingest",
+				database_id: "53159084-61e6-425d-9660-8f350a08f036",
+			}),
+		);
 		expect(packageJson.scripts).toMatchObject({
 			"d1:create": "bun x wrangler d1 create platform-studio-recording-ingest",
 			deploy: "bun x wrangler deploy",
@@ -226,6 +242,15 @@ describe("studio recording ingest contracts", () => {
 			"notify:list": "bun x wrangler r2 bucket notification list rawkode-academy-content",
 			"verify:live": "bun run scripts/verify-live.ts",
 		});
+		expect(readFileSync("scripts/verify-live.ts", "utf8")).toContain(
+			"53159084-61e6-425d-9660-8f350a08f036",
+		);
+		expect(readFileSync("scripts/verify-live.ts", "utf8")).toContain(
+			"GCP_SERVICE_ACCOUNT_JSON",
+		);
+		expect(readFileSync("scripts/verify-live.ts", "utf8")).toContain(
+			"secrets-store",
+		);
 		expect(packageJson.scripts?.["notify:create"]).toContain(
 			"--event-type object-create",
 		);

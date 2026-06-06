@@ -35,7 +35,7 @@ Create the Cloudflare resources, apply the D1 migration, deploy the Worker, then
 bun run d1:create
 bun run queues:create
 bun run migrate
-bun x wrangler secret put GCP_SERVICE_ACCOUNT_JSON
+bun x wrangler secrets-store secret create 492e5e40b9d64ebeac7e7a77db91ff6e --name GCP_SERVICE_ACCOUNT_JSON --scopes workers
 bun run deploy
 bun run notify:create
 bun run verify:live
@@ -49,9 +49,9 @@ The Worker needs:
 - `GCP_PROJECT_ID`: Google Cloud project containing the transcode job, currently `rawkode-academy-production`.
 - `GCP_REGION`: Cloud Run job region, currently `europe-west2`.
 - `GCP_TRANSCODING_JOB`: Cloud Run job name, currently `transcoding-job`.
-- `GCP_SERVICE_ACCOUNT_JSON`: Worker secret containing service account JSON with permission to run that Cloud Run job.
+- `GCP_SERVICE_ACCOUNT_JSON`: Secrets Store binding containing service account JSON with permission to run that Cloud Run job.
 
-The deployable `wrangler.jsonc` uses `database_name` instead of a hardcoded D1 UUID so the checked-in config does not contain fake resource IDs. Run `bun run notify:list` after `bun run notify:create` to verify the R2 rule points `object-create` events under `studio/recordings/` and ending in `/ready.json` at the queue.
+The deployable `wrangler.jsonc` pins the production D1 UUID because Wrangler requires `database_id` for remote migration operations. Run `bun run verify:live` after deployment to verify Cloudflare auth, D1 schema, queue/DLQ, Worker deployment, the `GCP_SERVICE_ACCOUNT_JSON` Secrets Store entry, the R2 ready-marker notification, and the Cloud Run transcoding job.
 
 ## Transcode Status
 

@@ -4,7 +4,7 @@ interface VerificationStep {
 	name: string;
 }
 
-const secretsStoreId = "492e5e40b9d64ebeac7e7a77db91ff6e";
+const realtimeKitSecretStoreId = "492e5e40b9d64ebeac7e7a77db91ff6e";
 
 const steps: VerificationStep[] = [
 	{
@@ -12,31 +12,41 @@ const steps: VerificationStep[] = [
 		command: ["bun", "x", "wrangler", "whoami"],
 	},
 	{
-		name: "D1 database",
-		command: ["bun", "x", "wrangler", "d1", "list"],
-		expect: ["platform-studio-recording-ingest", "53159084-61e6-425d-9660-8f350a08f036"],
+		name: "Worker deployment",
+		command: ["bun", "x", "wrangler", "deployments", "status", "--config", "./wrangler.jsonc"],
 	},
 	{
-		name: "D1 schema",
+		name: "Session KV namespace",
+		command: ["bun", "x", "wrangler", "kv", "namespace", "list"],
+		expect: ["rawkode-academy-sessions", "f3a5e01c10b144f5964d060cefa1b70c"],
+	},
+	{
+		name: "Studio D1 database",
+		command: ["bun", "x", "wrangler", "d1", "list"],
+		expect: ["rawkode-academy-studio", "1fe3facd-0c47-43e2-b89d-f402e457db32"],
+	},
+	{
+		name: "Studio D1 schema",
 		command: [
 			"bun",
 			"x",
 			"wrangler",
 			"d1",
 			"execute",
-			"platform-studio-recording-ingest",
+			"rawkode-academy-studio",
 			"--remote",
 			"--command",
 			"SELECT name FROM sqlite_master WHERE type = 'table';",
 		],
-		expect: ["studio_recording_ingest_events"],
+		expect: ["studio_sessions", "studio_recordings", "studio_invites"],
 	},
 	{
-		name: "Worker deployment",
-		command: ["bun", "x", "wrangler", "deployments", "status", "--config", "./wrangler.jsonc"],
+		name: "Content R2 bucket",
+		command: ["bun", "x", "wrangler", "r2", "bucket", "list"],
+		expect: ["rawkode-academy-content"],
 	},
 	{
-		name: "GCP service-account Secrets Store entry",
+		name: "RealtimeKit Secrets Store entries",
 		command: [
 			"bun",
 			"x",
@@ -44,52 +54,9 @@ const steps: VerificationStep[] = [
 			"secrets-store",
 			"secret",
 			"list",
-			secretsStoreId,
+			realtimeKitSecretStoreId,
 		],
-		expect: ["GCP_SERVICE_ACCOUNT_JSON"],
-	},
-	{
-		name: "Queues",
-		command: ["bun", "x", "wrangler", "queues", "list"],
-		expect: [
-			"platform-studio-recording-ingest",
-			"platform-studio-recording-ingest-dlq",
-		],
-	},
-	{
-		name: "R2 ready-marker notification",
-		command: [
-			"bun",
-			"x",
-			"wrangler",
-			"r2",
-			"bucket",
-			"notification",
-			"list",
-			"rawkode-academy-content",
-		],
-		expect: [
-			"platform-studio-recording-ingest",
-			"studio/recordings/",
-			"/ready.json",
-		],
-	},
-	{
-		name: "Cloud Run transcoding job",
-		command: [
-			"gcloud",
-			"run",
-			"jobs",
-			"describe",
-			"transcoding-job",
-			"--project",
-			"rawkode-academy-production",
-			"--region",
-			"europe-west2",
-			"--format",
-			"value(metadata.name)",
-		],
-		expect: ["transcoding-job"],
+		expect: ["REALTIMEKIT_API_TOKEN", "REALTIMEKIT_APP_ID"],
 	},
 ];
 

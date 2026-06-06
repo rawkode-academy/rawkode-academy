@@ -704,6 +704,7 @@ describe("Studio operations", () => {
 			expect.objectContaining({
 				binding: "STUDIO_DB",
 				database_name: "rawkode-academy-studio",
+				database_id: "1fe3facd-0c47-43e2-b89d-f402e457db32",
 				migrations_dir: "./data-model",
 			}),
 		);
@@ -737,6 +738,7 @@ describe("Studio operations", () => {
 		expect(packageJson.scripts).toMatchObject({
 			deploy: "bun x wrangler deploy",
 			migrate: "bun x wrangler d1 migrations apply rawkode-academy-studio --remote",
+			"verify:live": "bun run scripts/verify-live.ts",
 		});
 		expect(envCue).toContain("CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef");
 		expect(envCue).toContain("op://sa.rawkode.academy/cloudflare/api-tokens/workers");

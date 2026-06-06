@@ -37,6 +37,7 @@
 		{
 			"binding": "STUDIO_DB",
 			"database_name": "rawkode-academy-studio",
+			"database_id": "1fe3facd-0c47-43e2-b89d-f402e457db32",
 			"migrations_dir": "./data-model"
 		}
 	],

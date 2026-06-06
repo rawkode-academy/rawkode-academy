@@ -9,6 +9,7 @@ bun run dev
 bun run check
 bun run test
 bun run build
+bun run verify:live
 ```
 
 ## Runtime Bindings
@@ -40,3 +41,7 @@ Guest joins use opaque invite tokens stored as SHA-256 hashes in D1. Invite URLs
 Studio room pages include a Vue room bridge that requests a participant token from `/api/studio/participant-token` and loads the Cloudflare RealtimeKit client/UI from jsDelivr on demand. Local fallback sessions intentionally stop at the provider-not-configured response until a persisted session has a RealtimeKit meeting ID.
 
 The browser production canvas remains a Vue island inside Astro pages. Hosts, producers, and guests authenticate through `rawkode.academy` identity, where the GitHub handle is the user ID used to attach people metadata.
+
+## Live Verification
+
+Run `bun run verify:live` through the production `cuenv` environment to verify Cloudflare auth, the deployed Worker, session KV, Studio D1 schema, content R2 bucket, and RealtimeKit Secrets Store entries without printing secret values.
