@@ -12,6 +12,8 @@ terms:
 publishedAt: 2026-07-09T17:00:00.000Z
 type: live
 category: tutorial
+technologies:
+  - iroh
 show: rawkode-live
 duration: 3600
 guests:
