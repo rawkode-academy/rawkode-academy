@@ -11,13 +11,6 @@ import {
 } from "../src/generator";
 import type { Env } from "../src/env";
 
-class FakeSecret {
-	constructor(private readonly value: string) {}
-	async get() {
-		return this.value;
-	}
-}
-
 class FakeR2Bucket {
 	heads = new Map<string, unknown>();
 	puts = new Map<string, { value: Uint8Array; options: R2PutOptions }>();
@@ -39,6 +32,33 @@ class FakeR2Bucket {
 		this.puts.set(key, { value: bytes, options: options ?? {} });
 		return null;
 	}
+}
+
+class FakeBrowserRun {
+	action?: string;
+	options?: BrowserRunScreenshotOptions;
+
+	constructor(private readonly response = new Response(new Uint8Array([1, 2, 3]), {
+		headers: { "content-type": "image/webp" },
+	})) {}
+
+	async fetch() {
+		throw new Error("Unexpected BrowserRun fetch call");
+	}
+
+	async quickAction(
+		action: "screenshot",
+		options: BrowserRunScreenshotOptions,
+	): Promise<Response> {
+		this.action = action;
+		this.options = options;
+		return this.response;
+	}
+}
+
+function browserScreenshotHtml(options: BrowserRunScreenshotOptions | undefined): string {
+	if (!options || !("html" in options)) return "";
+	return options.html;
 }
 
 const params: ThumbnailWorkflowParams = {
@@ -115,15 +135,15 @@ function graphqlVideoResponse() {
 	});
 }
 
-function createEnv(bucket = new FakeR2Bucket()): Env {
+function createEnv(
+	bucket = new FakeR2Bucket(),
+	browser = new FakeBrowserRun(),
+): Env {
 	return {
 		AI: {
 			run: async () => ({ image: btoa("fake-png") }),
 		} as unknown as Ai,
-		BROWSER_RENDERING_API_TOKEN: new FakeSecret(
-			"browser-token",
-		) as unknown as SecretsStoreSecret,
-		CLOUDFLARE_ACCOUNT_ID: "account-1",
+		BROWSER: browser as unknown as BrowserRun,
 		CONTENT_BUCKET: bucket as unknown as R2Bucket,
 		GENERATE_VIDEO_THUMBNAIL: {} as Workflow<ThumbnailWorkflowParams>,
 	};
@@ -191,18 +211,15 @@ describe("thumbnail workflow helpers", () => {
 
 	it("generates HTML, captures WebP, and writes the canonical R2 object", async () => {
 		const bucket = new FakeR2Bucket();
-		const env = createEnv(bucket);
-		let requestBody: Record<string, unknown> | undefined;
+		const browser = new FakeBrowserRun();
+		const env = createEnv(bucket, browser);
 
 		const result = await generateAndStoreThumbnail(env, params, {
-			fetch: async (input, init) => {
+			fetch: async (input) => {
 				const url = String(input);
 				if (url === "https://api.rawkode.academy") return graphqlVideoResponse();
 
-				requestBody = JSON.parse(String(init?.body));
-				return new Response(new Uint8Array([1, 2, 3]), {
-					headers: { "content-type": "image/webp" },
-				});
+				throw new Error(`Unexpected fetch: ${url}`);
 			},
 		});
 
@@ -210,11 +227,13 @@ describe("thumbnail workflow helpers", () => {
 			key: "videos/video123/thumbnail.webp",
 			size: 3,
 		});
-		expect(String(requestBody?.html)).toContain("Rawkode Live");
-		expect(String(requestBody?.html)).toContain("Hands-on Introduction to Iroh");
-		expect(String(requestBody?.html)).toContain("Rawkode Academy");
-		expect(String(requestBody?.html)).toContain("https://github.com/b5.png?size=512");
-		expect(requestBody?.screenshotOptions).toMatchObject({ type: "webp" });
+		expect(browser.action).toBe("screenshot");
+		const html = browserScreenshotHtml(browser.options);
+		expect(html).toContain("Rawkode Live");
+		expect(html).toContain("Hands-on Introduction to Iroh");
+		expect(html).toContain("Rawkode Academy");
+		expect(html).toContain("https://github.com/b5.png?size=512");
+		expect(browser.options?.screenshotOptions).toMatchObject({ type: "webp" });
 
 		const put = bucket.puts.get("videos/video123/thumbnail.webp");
 		expect(put?.value).toEqual(new Uint8Array([1, 2, 3]));
@@ -247,17 +266,20 @@ describe("thumbnail workflow helpers", () => {
 	});
 
 	it("fails clearly when Browser Rendering fails", async () => {
-		const env = createEnv();
+		const env = createEnv(
+			new FakeR2Bucket(),
+			new FakeBrowserRun(new Response("nope", {
+				status: 500,
+				statusText: "Internal Error",
+			})),
+		);
 
 		await expect(
 			generateAndStoreThumbnail(env, params, {
 				fetch: async (input) => {
 					const url = String(input);
 					if (url === "https://api.rawkode.academy") return graphqlVideoResponse();
-					return new Response("nope", {
-						status: 500,
-						statusText: "Internal Error",
-					});
+					throw new Error(`Unexpected fetch: ${url}`);
 				},
 			}),
 		).rejects.toThrow("Browser Rendering screenshot failed");

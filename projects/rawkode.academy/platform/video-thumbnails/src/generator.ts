@@ -230,50 +230,33 @@ async function resolveTechnologyIconSvg(
 	return response.text();
 }
 
-async function readSecret(secret: SecretsStoreSecret): Promise<string> {
-	const value = await secret.get();
-	if (!value) throw new Error("Browser Rendering API token is empty");
-	return value;
-}
-
 async function captureThumbnailWebp(
-	env: Pick<Env, "BROWSER_RENDERING_API_TOKEN" | "CLOUDFLARE_ACCOUNT_ID">,
+	env: Pick<Env, "BROWSER">,
 	html: string,
-	fetcher: Fetcher,
 ): Promise<Uint8Array> {
-	const token = await readSecret(env.BROWSER_RENDERING_API_TOKEN);
-	const response = await fetcher(
-		`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/browser-rendering/screenshot?cacheTTL=0`,
-		{
-			method: "POST",
-			headers: {
-				"Authorization": `Bearer ${token}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				html,
-				viewport: {
-					width: THUMBNAIL_WIDTH,
-					height: THUMBNAIL_HEIGHT,
-				},
-				gotoOptions: {
-					waitUntil: "networkidle0",
-					timeout: 60_000,
-				},
-				waitForSelector: {
-					selector: ".thumbnail",
-					visible: true,
-					timeout: 10_000,
-				},
-				screenshotOptions: {
-					type: "webp",
-					quality: 92,
-					fullPage: false,
-				},
-				waitForTimeout: 500,
-			}),
+	const response = await env.BROWSER.quickAction("screenshot", {
+		html,
+		viewport: {
+			width: THUMBNAIL_WIDTH,
+			height: THUMBNAIL_HEIGHT,
 		},
-	);
+		gotoOptions: {
+			waitUntil: "networkidle0",
+			timeout: 60_000,
+		},
+		waitForSelector: {
+			selector: ".thumbnail",
+			visible: true,
+			timeout: 10_000,
+		},
+		screenshotOptions: {
+			type: "webp",
+			quality: 92,
+			fullPage: false,
+		},
+		waitForTimeout: 500,
+		cacheTTL: 0,
+	});
 
 	if (!response.ok) {
 		throw new Error(
@@ -300,7 +283,7 @@ export async function generateAndStoreThumbnail(
 		backgroundImageDataUrl,
 		technologyIconSvg,
 	});
-	const webp = await captureThumbnailWebp(env, html, deps.fetch);
+	const webp = await captureThumbnailWebp(env, html);
 	const key = thumbnailKey(params.videoId);
 
 	await env.CONTENT_BUCKET.put(key, webp, {
