@@ -11,6 +11,7 @@ import {
 	resolveTechnologyHorizontalLogoUrl,
 	resolveTechnologyIconUrl,
 } from "@/utils/resolve-technology-icon";
+import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
 import VideoMasthead from "@/components/video/VideoMasthead.astro";
 import VideoHero from "@/components/video/VideoHero.astro";
@@ -49,7 +50,10 @@ const upcomingVideos = (await getUpcomingVideos()).map((v) => v.data);
 const visibleUpcomingVideos = upcomingVideos.slice(0, 6);
 const technologyEntries = await getCollection("technologies");
 const technologyById = new Map(
-	technologyEntries.map((technology) => [technology.id, technology]),
+	technologyEntries.map((technology) => [
+		technology.id.replace(/\/index$/, ""),
+		technology,
+	]),
 );
 
 const totalVideoCount = allVideos.length;
@@ -159,9 +163,9 @@ const featuredSeries = featuredVideo
 	: undefined;
 
 const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
-	(video.technologies ?? [])
-		.map((technologyRef) => {
-			const technology = technologyById.get(String(technologyRef));
+	normalizeTechnologyReferences(video.technologies)
+		.map((technologyId) => {
+			const technology = technologyById.get(technologyId);
 			if (!technology) return undefined;
 
 			const horizontalSrc = resolveTechnologyHorizontalLogoUrl(
@@ -265,7 +269,6 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 								<VideoStill
 									title={v.title}
 									series="Upcoming stream"
-									thumbnailUrl={getVideoThumbnailUrl(v.id)}
 									technologyLogos={technologyLogosFor(v)}
 									accent="amber"
 								/>
