@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getNotificationServiceWorkerRegistration } from "@/lib/notification-service-worker";
 import {
 	buildStreamNotification,
 	isUpcomingLiveVideo,
@@ -60,5 +61,22 @@ describe("stream notifications", () => {
 		expect(streamNotificationSubjectKey("hands-on-introduction-to-iroh")).toBe(
 			"stream:hands-on-introduction-to-iroh",
 		);
+	});
+
+	it("waits for an active service worker before subscribing", async () => {
+		const activeRegistration = {
+			active: {},
+		} as ServiceWorkerRegistration;
+		const installingRegistration = {
+			active: null,
+		} as ServiceWorkerRegistration;
+		const serviceWorker = {
+			register: async () => installingRegistration,
+			ready: Promise.resolve(activeRegistration),
+		} satisfies Pick<ServiceWorkerContainer, "ready" | "register">;
+
+		await expect(
+			getNotificationServiceWorkerRegistration(serviceWorker),
+		).resolves.toBe(activeRegistration);
 	});
 });
