@@ -8,10 +8,7 @@ import VideoMetadata from "@/components/html/video-metadata.astro";
 import Page from "@/wrappers/page.astro";
 import { formatStreamingCountdown } from "@/lib/streaming-countdown";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import {
-	resolveTechnologyHorizontalLogoUrl,
-	resolveTechnologyIconUrl,
-} from "@/utils/resolve-technology-icon";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 
 import VideoMasthead from "@/components/video/VideoMasthead.astro";
@@ -160,18 +157,6 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 			const technology = technologyById.get(technologyId);
 			if (!technology) return undefined;
 
-			const horizontalSrc = resolveTechnologyHorizontalLogoUrl(
-				technology.id,
-				technology.data.logos,
-			);
-			if (horizontalSrc) {
-				return {
-					src: horizontalSrc,
-					name: technology.data.name,
-					kind: "horizontal" as const,
-				};
-			}
-
 			const iconSrc = resolveTechnologyIconUrl(
 				technology.id,
 				technology.data.logos,
@@ -187,7 +172,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 		.filter(
 			(
 				logo,
-			): logo is { src: string; name: string; kind: "horizontal" | "icon" } =>
+			): logo is { src: string; name: string; kind: "icon" } =>
 				Boolean(logo),
 		)
 		.slice(0, 1);
@@ -261,7 +246,6 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 								<VideoStill
 									title={v.title}
 									series="Upcoming stream"
-									thumbnailUrl={getVideoThumbnailUrl(v.id)}
 									technologyLogos={technologyLogosFor(v)}
 									accent="amber"
 								/>
