@@ -201,6 +201,7 @@ export async function discoverThumbnailJobs(
 
 		jobs.push({
 			videoId: id,
+			tagline: readString(frontmatter, "tagline") ?? undefined,
 			technology,
 			source: {
 				commitSha: options.commitSha,

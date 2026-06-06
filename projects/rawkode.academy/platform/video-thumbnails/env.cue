@@ -124,7 +124,7 @@ tasks: {
 	"schedule-missing": schema.#Task & {
 		hermetic: false
 		command: "sh"
-		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run trigger:missing"]
+		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun scripts/trigger_missing.ts --force-changed-content"]
 		env: PATH: _taskPath
 		inputs: [
 			"env.cue",

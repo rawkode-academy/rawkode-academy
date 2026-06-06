@@ -7,6 +7,7 @@ const baseParams: ThumbnailRenderParams = {
 		id: "video123",
 		slug: "hands-on-introduction-to-iroh",
 		title: "Hands-on Introduction to Iroh",
+		tagline: "Peer-to-peer apps, built from first principles",
 		description: "A hands-on introduction to Iroh.",
 		publishedAt: "2026-07-09T17:00:00.000Z",
 	},
@@ -45,7 +46,8 @@ describe("thumbnail html renderer", () => {
 		expect(html).toContain("data:image/png;base64,abc");
 		expect(html).toContain('aria-label="Rawkode Academy"');
 		expect(html).toContain("Rawkode Live");
-		expect(html).toContain("Hands-on Introduction to Iroh");
+		expect(html).toContain("Peer-to-peer apps, built from first principles");
+		expect(html).not.toContain("Hands-on Introduction to Iroh");
 		expect(html).toContain("technology-svg");
 		expect(html).toContain("data:image/svg+xml;base64,");
 		expect(html).toContain("https://github.com/b5.png?size=512");

@@ -18,6 +18,7 @@ import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
+import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 
 export const prerender = false;
 
@@ -62,16 +63,6 @@ const chapterSource: Chapter[] = Array.isArray(video.data.chapters)
 if (chapterSource.length > 0) {
 	clips = buildVideoClips(chapterSource, durationSec);
 }
-
-const formatRuntime = (s?: number | null): string => {
-	if (typeof s !== "number" || s <= 0) return "—";
-	const h = Math.floor(s / 3600);
-	const m = Math.floor((s % 3600) / 60);
-	const sec = s % 60;
-	return h > 0
-		? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
-		: `${m}:${String(sec).padStart(2, "0")}`;
-};
 
 const formatDate = (date: Date | string) => {
 	const d = typeof date === "string" ? new Date(date) : date;
@@ -129,6 +120,8 @@ const showRelatedVideos = showRelatedAll.slice(0, SHOW_RELATED_LIMIT).map((v) =>
 	thumbnailUrl: getVideoThumbnailUrl(v.data.id),
 	slug: v.data.slug,
 	duration: typeof v.data.duration === "number" ? v.data.duration : undefined,
+	publishedAt: v.data.publishedAt,
+	type: v.data.type,
 }));
 
 const normalizedTechIds = normalizeTechnologyReferences(video.data.technologies);
@@ -269,7 +262,14 @@ const categoryLabel =
 	formatLabel(video.data.category) ||
 	(video.data.type === "live" ? "Live session" : "Recorded session");
 const isLive = video.data.type === "live";
-const runtimeLabel = formatRuntime(durationSec);
+const runtimeLabel = formatVideoRuntimeLabel(
+	{
+		duration: durationSec,
+		publishedAt: video.data.publishedAt,
+		type: video.data.type,
+	},
+	now,
+);
 const publishedLabel = formatDate(video.data.publishedAt);
 const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	weekday: "long",

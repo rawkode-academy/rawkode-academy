@@ -44,6 +44,7 @@ const videos = defineCollection({
 		id: z.string().trim().min(1), // video asset ID (used for CDN URLs, PostHog events)
 		slug: z.string().trim().min(1), // human-readable URL identifier
 		title: z.string().trim().min(5),
+		tagline: z.string().trim().min(1).optional(),
 		subtitle: z.string().optional(),
 		description: z.string().trim().min(20),
 		terms: z.array(z.string().trim().min(1)).optional(),

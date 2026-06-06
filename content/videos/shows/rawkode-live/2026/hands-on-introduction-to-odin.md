@@ -2,6 +2,7 @@
 id: 7564ecf9c5c00c7ceea52daf
 slug: hands-on-introduction-to-odin
 title: Hands-on Introduction to Odin
+tagline: Data-oriented systems programming, hands-on
 subtitle: A hands-on introduction to Odin with Peter Mbanugo.
 description: >-
   Peter Mbanugo joins Rawkode to introduce Odin, walking through the language,

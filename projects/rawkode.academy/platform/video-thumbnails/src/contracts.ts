@@ -7,6 +7,7 @@ export interface ThumbnailVideo {
 	id: string;
 	slug: string;
 	title: string;
+	tagline?: string;
 	description?: string;
 	publishedAt?: string;
 }
@@ -40,6 +41,7 @@ export interface ThumbnailSource {
 
 export interface ThumbnailWorkflowParams {
 	videoId: string;
+	tagline?: string;
 	technology: ThumbnailTechnology;
 	source: ThumbnailSource;
 	force?: boolean;

@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 
 interface Props {
 	show: CollectionEntry<"shows">;
@@ -9,27 +10,13 @@ interface Props {
 		thumbnailUrl: string;
 		slug: string;
 		duration: number | undefined;
+		publishedAt?: Date | string | undefined;
+		type?: string | undefined;
 	}>;
 	totalVideos?: number;
 }
 
 const { show, videos, totalVideos } = Astro.props;
-
-const formatDuration = (seconds?: number | null) => {
-	if (typeof seconds !== "number" || seconds <= 0 || Number.isNaN(seconds)) {
-		return "--:--";
-	}
-	const hours = Math.floor(seconds / 3600);
-	const minutes = Math.floor((seconds % 3600) / 60);
-	const secs = seconds % 60;
-
-	if (hours > 0) {
-		return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
-			.toString()
-			.padStart(2, "0")}`;
-	}
-	return `${minutes}:${secs.toString().padStart(2, "0")}`;
-};
 
 const hasMoreVideos =
 	typeof totalVideos === "number" && totalVideos > videos.length;
@@ -76,7 +63,7 @@ const hasMoreVideos =
 							loading="lazy"
 						/>
 						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-							{formatDuration(video.duration)}
+							{formatVideoRuntimeLabel(video)}
 						</div>
 					</div>
 					<div class="p-3">

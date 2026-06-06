@@ -14,6 +14,7 @@ describe("content discovery", () => {
 		const frontmatter = parseFrontmatter(`---
 id: abc123
 title: Hands-on Introduction to Iroh
+tagline: Peer-to-peer apps, built from first principles
 description: >-
   Brendan O'Brien joins Rawkode
   to introduce Iroh.
@@ -26,6 +27,9 @@ Body`);
 
 		expect(frontmatter.id).toBe("abc123");
 		expect(frontmatter.title).toBe("Hands-on Introduction to Iroh");
+		expect(frontmatter.tagline).toBe(
+			"Peer-to-peer apps, built from first principles",
+		);
 		expect(frontmatter.description).toBe(
 			"Brendan O'Brien joins Rawkode to introduce Iroh.",
 		);
@@ -43,6 +47,7 @@ Body`);
 
 		expect(job).toMatchObject({
 			videoId: "7f1dfedcbf38a19375306862",
+			tagline: "Peer-to-peer apps, built from first principles",
 			source: {
 				commitSha: "test-sha",
 				trigger: "github-actions",
@@ -69,6 +74,7 @@ Body`);
 			concurrency: 10,
 			dryRun: false,
 			force: false,
+			forceChangedContent: false,
 		});
 		expect(
 			parseArgs([
@@ -76,6 +82,7 @@ Body`);
 				"script",
 				"--dry-run",
 				"--force",
+				"--force-changed-content",
 				"--concurrency",
 				"2",
 				"--max",
@@ -85,6 +92,7 @@ Body`);
 			concurrency: 2,
 			dryRun: true,
 			force: true,
+			forceChangedContent: true,
 			max: 5,
 		});
 	});
