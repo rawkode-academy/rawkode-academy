@@ -9,6 +9,10 @@ import type {
 } from "./types.js";
 import { validateCredentialOrThrow } from "./validation.js";
 
+function toSecondPrecisionISOString(date: Date): string {
+	return new Date(Math.floor(date.getTime() / 1000) * 1000).toISOString();
+}
+
 export function buildAchievement(params: BuildAchievementParams): Achievement {
 	return {
 		id: params.id,
@@ -43,11 +47,11 @@ export function buildCredential(
 			type: ["AchievementSubject"],
 			achievement: params.achievement,
 		},
-		validFrom: params.validFrom.toISOString(),
+		validFrom: toSecondPrecisionISOString(params.validFrom),
 	};
 
 	if (params.validUntil) {
-		credential.validUntil = params.validUntil.toISOString();
+		credential.validUntil = toSecondPrecisionISOString(params.validUntil);
 	}
 
 	return credential;

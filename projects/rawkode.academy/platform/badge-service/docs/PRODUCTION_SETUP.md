@@ -14,8 +14,9 @@ For local development, this creates `http/.dev.vars` with the keys automatically
 
 ### Required Environment Variables
 
-- `BADGE_ISSUER_RSA_PRIVATE_KEY` - PEM-encoded private key (newlines escaped as \n)
-- `BADGE_ISSUER_RSA_PUBLIC_KEY` - PEM-encoded public key (newlines escaped as \n)
+- `BADGE_ISSUER_RSA_PRIVATE_KEY` - PEM-encoded private key in Secrets Store
+- `BADGE_ISSUER_RSA_PUBLIC_KEY` - PEM-encoded public key in Secrets Store
+- `BADGE_ISSUER_TOKEN` - Bearer token required for `POST /issue`
 - `BADGE_ISSUER_URL` - Base URL for badge verification
 
 ### Security Notes

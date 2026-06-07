@@ -15,7 +15,11 @@ import {
 	createIssuerProfile,
 	createSignedCredential,
 } from "../lib/openbadges/credential.js";
-import { getPublicKeyJWK, loadRSAKeys } from "../lib/openbadges/crypto.js";
+import {
+	getPublicKeyJWK,
+	issuerKeyId,
+	loadRSAKeys,
+} from "../lib/openbadges/crypto.js";
 import type { AchievementCredential } from "../lib/openbadges/types.js";
 import type { Env } from "./main.js";
 import { IssueBadgeRequestSchema } from "./schemas.js";
@@ -23,8 +27,23 @@ import { IssueBadgeRequestSchema } from "./schemas.js";
 const CORS_HEADERS = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-	"Access-Control-Allow-Headers": "Content-Type",
+	"Access-Control-Allow-Headers": "Authorization, Content-Type",
 };
+
+type SecretString = string | { get(): Promise<string> };
+
+async function readSecretString(
+	value: SecretString | undefined,
+): Promise<string | null> {
+	if (typeof value === "string" && value.trim()) return value.trim();
+	if (typeof value === "string") return null;
+	const secret = await value?.get();
+	return typeof secret === "string" && secret.trim() ? secret.trim() : null;
+}
+
+function toSecondPrecision(date: Date): Date {
+	return new Date(Math.floor(date.getTime() / 1000) * 1000);
+}
 
 export class BadgeService extends WorkerEntrypoint<Env> {
 	async fetch(request: Request): Promise<Response> {
@@ -54,6 +73,10 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 			return this.handleGetIssuer();
 		}
 
+		if (method === "GET" && pathname === "/issuer/key-1") {
+			return this.handleGetIssuerKey();
+		}
+
 		const jsonMatch = pathname.match(/^\/badge\/([^/]+)\/json$/);
 		if (method === "GET" && jsonMatch) {
 			return this.handleGetBadgeJson(jsonMatch[1]);
@@ -68,26 +91,6 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 			status: 404,
 			headers: { "Content-Type": "application/json", ...CORS_HEADERS },
 		});
-	}
-
-	private async validateUser(
-		userId: string,
-	): Promise<{ valid: boolean; email?: string }> {
-		try {
-			const response = await this.env.IDENTITY.fetch(
-				`https://id.rawkode.academy/api/user/${userId}`,
-			);
-
-			if (response.status === 200) {
-				const user = (await response.json()) as { email?: string };
-				return { valid: true, email: user.email };
-			}
-
-			return { valid: false };
-		} catch (error) {
-			console.error("Failed to validate user:", error);
-			return { valid: false };
-		}
 	}
 
 	private async trackAnalyticsEvent(
@@ -123,28 +126,49 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 		}
 	}
 
+	private async requireIssueAuthorization(
+		request: Request,
+	): Promise<Response | null> {
+		const expectedToken = await readSecretString(this.env.BADGE_ISSUER_TOKEN);
+		if (!expectedToken) {
+			return new Response(
+				JSON.stringify({ error: "Badge issuer token is not configured" }),
+				{
+					status: 500,
+					headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+				},
+			);
+		}
+
+		const authHeader = request.headers.get("Authorization") ?? "";
+		const providedToken = authHeader.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+
+		if (providedToken !== expectedToken) {
+			return new Response(JSON.stringify({ error: "Unauthorized" }), {
+				status: 401,
+				headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+			});
+		}
+
+		return null;
+	}
+
 	private async handleIssueBadge(request: Request): Promise<Response> {
 		try {
+			const authError = await this.requireIssueAuthorization(request);
+			if (authError) return authError;
+
 			const body = await request.json();
 			const validated = IssueBadgeRequestSchema.parse(body);
 
 			const {
 				userId,
+				recipientEmail,
 				achievementType,
 				achievementName,
 				achievementDescription,
 				validUntil,
 			} = validated;
-
-			const userValidation = await this.validateUser(userId);
-			if (!userValidation.valid) {
-				return new Response(JSON.stringify({ error: "User not found" }), {
-					status: 404,
-					headers: { "Content-Type": "application/json", ...CORS_HEADERS },
-				});
-			}
-
-			const userEmail = userValidation.email ?? `${userId}@rawkode.academy`;
 
 			const keys = await loadRSAKeys(this.env);
 
@@ -169,15 +193,17 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				creatorProfile: issuerProfile,
 			});
 
-			const validFromDate = new Date();
-			const validUntilDate = validUntil ?? undefined;
+			const validFromDate = toSecondPrecision(new Date());
+			const validUntilDate = validUntil
+				? toSecondPrecision(validUntil)
+				: undefined;
 
 			const signedJWT = await createSignedCredential(
 				{
 					id: `${this.env.BADGE_ISSUER_URL}/badge/${badgeId}`,
 					name: achievementName,
 					issuerProfile,
-					recipientEmail: userEmail,
+					recipientEmail,
 					achievement,
 					validFrom: validFromDate,
 					validUntil: validUntilDate,
@@ -262,16 +288,10 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				credentialSubject: decoded.credentialSubject,
 				validFrom: decoded.validFrom,
 				...(decoded.validUntil && { validUntil: decoded.validUntil }),
-				proof: [
-					{
-						type: "DataIntegrityProof",
-						cryptosuite: "eddsa-rdfc-2022",
-						created: decoded.validFrom,
-						verificationMethod: `${decoded.issuer.id}#key-1`,
-						proofPurpose: "assertionMethod",
-						proofValue: badge.credentialJson,
-					},
-				],
+				proof: {
+					type: "JwtProof2020",
+					jwt: badge.credentialJson,
+				},
 			};
 
 			return new Response(JSON.stringify(credential), {
@@ -316,12 +336,12 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				subtitle: achievementDescription,
 			});
 
-			const svgContent = await fetchBadgeImage(imageUrl);
+			const image = await fetchBadgeImage(imageUrl);
 
-			return new Response(svgContent, {
+			return new Response(image.body, {
 				status: 200,
 				headers: {
-					"Content-Type": "image/svg+xml",
+					"Content-Type": image.contentType,
 					"Cache-Control": "public, max-age=3600",
 					...CORS_HEADERS,
 				},
@@ -354,7 +374,7 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 			const issuerDocument = {
 				...issuerProfile,
 				publicKey: {
-					id: `${this.env.BADGE_ISSUER_URL}/issuer#key-1`,
+					id: issuerKeyId(this.env.BADGE_ISSUER_URL),
 					type: "JsonWebKey2020",
 					controller: issuerProfile.id,
 					publicKeyJwk: jwk,
@@ -379,4 +399,29 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 		}
 	}
 
+	private async handleGetIssuerKey(): Promise<Response> {
+		try {
+			const keys = await loadRSAKeys(this.env);
+			const jwk = await getPublicKeyJWK(
+				keys.publicKey,
+				this.env.BADGE_ISSUER_URL,
+			);
+
+			return new Response(JSON.stringify(jwk), {
+				status: 200,
+				headers: {
+					"Content-Type": "application/jwk+json",
+					"Cache-Control": "public, max-age=86400",
+					...CORS_HEADERS,
+				},
+			});
+		} catch (error) {
+			console.error("Failed to get issuer key:", error);
+			const message = error instanceof Error ? error.message : "Unknown error";
+			return new Response(JSON.stringify({ error: message }), {
+				status: 500,
+				headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+			});
+		}
+	}
 }

@@ -4,11 +4,28 @@
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/issue` | Issue badge to user | No (internal) |
+| POST | `/issue` | Issue badge to user | Bearer token |
 | GET | `/issuer` | Get issuer profile with JWK | No |
+| GET | `/issuer/key-1` | Get issuer public JWK | No |
 | GET | `/badge/:id/json` | Get credential JSON-LD | No |
-| GET | `/badge/:id/image` | Get badge SVG image | No |
+| GET | `/badge/:id/image` | Get badge image | No |
 | GET | `/health` | Health check | No |
+
+### POST /issue
+
+Issues are internal-only. Callers must provide `Authorization: Bearer <BADGE_ISSUER_TOKEN>` and the recipient email to embed in the credential subject.
+
+**Request:**
+```json
+{
+  "userId": "user_123",
+  "recipientEmail": "learner@example.com",
+  "achievementType": "course-completion",
+  "achievementName": "Kubernetes Basics",
+  "achievementDescription": "Completed the Kubernetes Basics course",
+  "validUntil": "2027-01-01T00:00:00Z"
+}
+```
 
 ### GET /badge/:id/json
 
@@ -62,8 +79,8 @@ External validators can fetch public key from `/issuer` endpoint. Example with N
 ```javascript
 import { jwtVerify, importSPKI } from 'jose';
 
-const issuerData = await fetch('http://localhost:8787/issuer').then(r => r.json());
-const publicKey = await importSPKI(issuerData.publicKey.publicKeyJwk, 'RS256');
+const jwk = await fetch('http://localhost:8787/issuer/key-1').then(r => r.json());
+const publicKey = await importJWK(jwk, 'RS256');
 const { payload } = await jwtVerify(signedJWT, publicKey);
 ```
 

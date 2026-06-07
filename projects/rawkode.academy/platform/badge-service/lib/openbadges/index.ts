@@ -6,6 +6,7 @@ export {
 } from "./credential.js";
 
 export {
+	issuerKeyId,
 	loadRSAKeys,
 	getPublicKeyJWK,
 	signCredentialAsJWT,

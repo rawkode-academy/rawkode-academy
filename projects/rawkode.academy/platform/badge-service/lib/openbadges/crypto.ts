@@ -3,32 +3,56 @@ import type { JWK } from "jose";
 import { KeyManagementError, SigningError } from "./errors.js";
 import type { AchievementCredential, RSAKeys } from "./types.js";
 
+type SecretString = string | { get(): Promise<string> };
+
 export interface BadgeKeyEnv {
-	BADGE_ISSUER_RSA_PRIVATE_KEY: string;
-	BADGE_ISSUER_RSA_PUBLIC_KEY: string;
+	BADGE_ISSUER_RSA_PRIVATE_KEY: SecretString;
+	BADGE_ISSUER_RSA_PUBLIC_KEY: SecretString;
+}
+
+async function readSecretString(
+	value: SecretString | undefined,
+	name: string,
+): Promise<string> {
+	if (typeof value === "string" && value.trim()) {
+		return value.trim().replaceAll("\\n", "\n");
+	}
+
+	if (typeof value === "string") {
+		throw new KeyManagementError(`${name} environment variable is not set`);
+	}
+
+	const secret = await value?.get();
+	if (typeof secret === "string" && secret.trim()) {
+		return secret.trim().replaceAll("\\n", "\n");
+	}
+
+	throw new KeyManagementError(`${name} environment variable is not set`);
+}
+
+export function issuerKeyId(issuerUrl: string): string {
+	return `${issuerUrl}/issuer/key-1`;
 }
 
 export async function loadRSAKeys(env: BadgeKeyEnv): Promise<RSAKeys> {
-	const { BADGE_ISSUER_RSA_PRIVATE_KEY, BADGE_ISSUER_RSA_PUBLIC_KEY } = env;
-
-	if (!BADGE_ISSUER_RSA_PRIVATE_KEY) {
-		throw new KeyManagementError(
-			"BADGE_ISSUER_RSA_PRIVATE_KEY environment variable is not set",
-		);
-	}
-
-	if (!BADGE_ISSUER_RSA_PUBLIC_KEY) {
-		throw new KeyManagementError(
-			"BADGE_ISSUER_RSA_PUBLIC_KEY environment variable is not set",
-		);
-	}
-
 	try {
-		const privateKey = await importPKCS8(BADGE_ISSUER_RSA_PRIVATE_KEY, "RS256");
-		const publicKey = await importSPKI(BADGE_ISSUER_RSA_PUBLIC_KEY, "RS256");
+		const privatePem = await readSecretString(
+			env.BADGE_ISSUER_RSA_PRIVATE_KEY,
+			"BADGE_ISSUER_RSA_PRIVATE_KEY",
+		);
+		const publicPem = await readSecretString(
+			env.BADGE_ISSUER_RSA_PUBLIC_KEY,
+			"BADGE_ISSUER_RSA_PUBLIC_KEY",
+		);
+		const privateKey = await importPKCS8(privatePem, "RS256");
+		const publicKey = await importSPKI(publicPem, "RS256");
 
 		return { privateKey, publicKey };
 	} catch (error) {
+		if (error instanceof KeyManagementError) {
+			throw error;
+		}
+
 		const message =
 			error instanceof Error ? error.message : "Unknown error occurred";
 		throw new KeyManagementError(`Failed to import RSA keys: ${message}`);
@@ -42,7 +66,7 @@ export async function getPublicKeyJWK(
 	const jwk = await exportJWK(publicKey);
 	return {
 		...jwk,
-		kid: `${issuerUrl}/issuer#key-1`,
+		kid: issuerKeyId(issuerUrl),
 	} as JWK & { kid: string };
 }
 
@@ -67,7 +91,7 @@ export async function signCredentialAsJWT(
 		}).setProtectedHeader({
 			alg: "RS256",
 			typ: "JWT",
-			kid: `${issuerUrl}/issuer#key-1`,
+			kid: issuerKeyId(issuerUrl),
 		});
 
 		return await jwt.sign(privateKey);

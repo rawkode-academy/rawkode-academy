@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const IssueBadgeRequestSchema = z.object({
 	userId: z.string().min(1, "userId is required"),
+	recipientEmail: z.string().email("recipientEmail must be a valid email"),
 	achievementType: z.string().min(1, "achievementType is required"),
 	achievementName: z.string().min(1, "achievementName is required"),
 	achievementDescription: z

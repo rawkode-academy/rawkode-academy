@@ -39,10 +39,7 @@ export interface CredentialSubject {
 }
 
 export interface JWTProof {
-	type: "DataIntegrityProof";
-	created: string;
-	verificationMethod: string;
-	proofPurpose: "assertionMethod";
+	type: "JwtProof2020";
 	jwt: string;
 }
 
@@ -55,7 +52,7 @@ export interface AchievementCredential {
 	credentialSubject: CredentialSubject;
 	validFrom: string;
 	validUntil?: string;
-	proof?: JWTProof[];
+	proof?: JWTProof;
 }
 
 export interface BuildAchievementParams {

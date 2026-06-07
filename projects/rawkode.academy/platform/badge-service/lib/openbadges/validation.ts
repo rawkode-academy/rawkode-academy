@@ -7,9 +7,14 @@ const ImageSchema = z.object({
 	type: z.literal("Image"),
 });
 
+const arrayContaining = (value: string) =>
+	z.array(z.string()).refine((values) => values.includes(value), {
+		message: `must include ${value}`,
+	});
+
 const ProfileSchema = z.object({
 	id: z.string(),
-	type: z.array(z.string()).min(1),
+	type: arrayContaining("Profile"),
 	name: z.string().min(1),
 	url: z.string().optional(),
 	email: z.string().email().optional(),
@@ -23,7 +28,7 @@ const CriteriaSchema = z.object({
 
 const AchievementSchema = z.object({
 	id: z.string(),
-	type: z.array(z.string()).min(1),
+	type: arrayContaining("Achievement"),
 	creator: ProfileSchema,
 	name: z.string().min(1),
 	description: z.string(),
@@ -33,28 +38,43 @@ const AchievementSchema = z.object({
 
 const CredentialSubjectSchema = z.object({
 	id: z.string(),
-	type: z.array(z.string()).min(1),
+	type: arrayContaining("AchievementSubject"),
 	achievement: AchievementSchema,
 });
 
 const ProofSchema = z.object({
-	type: z.string(),
-	created: z.string().datetime().optional(),
-	verificationMethod: z.string().optional(),
-	proofPurpose: z.string().optional(),
-	jwt: z.string().optional(),
+	type: z.literal("JwtProof2020"),
+	jwt: z.string().min(1),
 });
 
 const AchievementCredentialSchema = z.object({
-	"@context": z.array(z.string()).min(2),
+	"@context": z
+		.array(z.string())
+		.refine(
+			(values) =>
+				values.includes("https://www.w3.org/ns/credentials/v2") &&
+				values.includes(
+					"https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json",
+				),
+			{ message: "must include W3C VC v2 and OpenBadge v3 contexts" },
+		),
 	id: z.string(),
-	type: z.array(z.string()).min(1),
+	type: z
+		.array(z.string())
+		.refine(
+			(values) =>
+				values.includes("VerifiableCredential") &&
+				values.includes("AchievementCredential"),
+			{
+				message: "must include VerifiableCredential and AchievementCredential",
+			},
+		),
 	name: z.string().min(1),
 	issuer: ProfileSchema,
 	credentialSubject: CredentialSubjectSchema,
 	validFrom: z.string().datetime(),
 	validUntil: z.string().datetime().optional(),
-	proof: z.array(ProofSchema).optional(),
+	proof: ProofSchema.optional(),
 });
 
 export interface ValidationResult {

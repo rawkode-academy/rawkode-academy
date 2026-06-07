@@ -1,5 +1,3 @@
-import { encode } from "utf64";
-
 export const DEFAULT_IMAGE_SERVICE_BASE_URL = "https://image.rawkode.academy";
 
 export interface BadgeImageParams {
@@ -9,20 +7,39 @@ export interface BadgeImageParams {
 	baseUrl?: string;
 }
 
+export interface BadgeImage {
+	body: ArrayBuffer | string;
+	contentType: string;
+}
+
+const encodePayload = (payload: unknown): string => {
+	const bytes = new TextEncoder().encode(JSON.stringify(payload));
+	let binary = "";
+
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+
+	return btoa(binary)
+		.replaceAll("+", "-")
+		.replaceAll("/", "_")
+		.replace(/=+$/u, "");
+};
+
 export function generateBadgeImageUrl(params: BadgeImageParams): string {
 	const payload = {
 		title: params.title,
 		subtitle: params.subtitle,
-		format: "svg",
+		format: "png",
 		template: params.template ?? "gradient",
 	};
 
 	const baseUrl = params.baseUrl ?? DEFAULT_IMAGE_SERVICE_BASE_URL;
-	const encodedPayload = encode(JSON.stringify(payload));
+	const encodedPayload = encodePayload(payload);
 	return `${baseUrl}/image?payload=${encodedPayload}`;
 }
 
-export async function fetchBadgeImage(url: string): Promise<string> {
+export async function fetchBadgeImage(url: string): Promise<BadgeImage> {
 	try {
 		const response = await fetch(url);
 
@@ -30,12 +47,18 @@ export async function fetchBadgeImage(url: string): Promise<string> {
 			throw new Error(`Image service returned status ${response.status}`);
 		}
 
-		return await response.text();
+		return {
+			body: await response.arrayBuffer(),
+			contentType: response.headers.get("Content-Type") ?? "image/png",
+		};
 	} catch (error) {
 		const message =
 			error instanceof Error ? error.message : "Unknown error occurred";
 		console.error(`Failed to fetch badge image: ${message}`);
-		return createFallbackSvg();
+		return {
+			body: createFallbackSvg(),
+			contentType: "image/svg+xml",
+		};
 	}
 }
 

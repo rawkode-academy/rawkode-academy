@@ -1,6 +1,7 @@
 import { generateKeyPairSync } from "node:crypto";
 import { writeFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const { publicKey, privateKey } = generateKeyPairSync("rsa", {
 	modulusLength: 2048,
@@ -36,7 +37,8 @@ BADGE_ISSUER_RSA_PUBLIC_KEY="${publicKeyEscaped}"
 BADGE_ISSUER_URL="http://localhost:8787"
 `;
 
-const envPath = join(import.meta.dir, "..", "http", ".dev.vars");
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const envPath = join(scriptDir, "..", "http", ".dev.vars");
 const envExists = existsSync(envPath);
 
 if (envExists) {

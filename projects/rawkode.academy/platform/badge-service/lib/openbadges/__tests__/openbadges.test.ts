@@ -1,4 +1,9 @@
-import { decodeJwt, exportPKCS8, exportSPKI } from "jose";
+import {
+	decodeJwt,
+	decodeProtectedHeader,
+	exportPKCS8,
+	exportSPKI,
+} from "jose";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
 	DEFAULT_IMAGE_SERVICE_BASE_URL,
@@ -15,6 +20,7 @@ import {
 	buildCredential,
 	createIssuerProfile,
 	createSignedCredential,
+	issuerKeyId,
 	loadRSAKeys,
 	signCredentialAsJWT,
 	validateCredential,
@@ -26,8 +32,8 @@ const TEST_ISSUER_URL = "https://badges.rawkode.academy";
 let TEST_RSA_PRIVATE_KEY: string;
 let TEST_RSA_PUBLIC_KEY: string;
 
-beforeAll(async () => {
-	const { privateKey, publicKey } = await crypto.subtle.generateKey(
+async function generateTestRSAKeyPair(): Promise<CryptoKeyPair> {
+	return (await crypto.subtle.generateKey(
 		{
 			name: "RSASSA-PKCS1-v1_5",
 			modulusLength: 2048,
@@ -36,7 +42,11 @@ beforeAll(async () => {
 		},
 		true,
 		["sign", "verify"],
-	);
+	)) as CryptoKeyPair;
+}
+
+beforeAll(async () => {
+	const { privateKey, publicKey } = await generateTestRSAKeyPair();
 	TEST_RSA_PRIVATE_KEY = await exportPKCS8(privateKey);
 	TEST_RSA_PUBLIC_KEY = await exportSPKI(publicKey);
 });
@@ -179,6 +189,35 @@ describe("buildCredential", () => {
 
 		expect(credential.validUntil).toBeUndefined();
 	});
+
+	it("should serialize validFrom and validUntil at whole-second precision", () => {
+		const issuerProfile: Profile = {
+			id: `${TEST_ISSUER_URL}/issuer`,
+			type: ["Profile"],
+			name: "Rawkode Academy",
+		};
+
+		const achievement = buildAchievement({
+			id: `${TEST_ISSUER_URL}/achievements/test`,
+			name: "Test",
+			description: "Test achievement",
+			imageUrl: "https://example.com/image.svg",
+			creatorProfile: issuerProfile,
+		});
+
+		const credential = buildCredential({
+			id: `${TEST_ISSUER_URL}/credentials/cred123`,
+			name: "Test",
+			issuerProfile,
+			recipientEmail: "user@example.com",
+			achievement,
+			validFrom: new Date("2024-01-01T00:00:00.987Z"),
+			validUntil: new Date("2025-01-01T00:00:00.654Z"),
+		});
+
+		expect(credential.validFrom).toBe("2024-01-01T00:00:00.000Z");
+		expect(credential.validUntil).toBe("2025-01-01T00:00:00.000Z");
+	});
 });
 
 describe("validateCredential", () => {
@@ -275,6 +314,22 @@ describe("loadRSAKeys", () => {
 		await expect(loadRSAKeys(env)).rejects.toThrow(KeyManagementError);
 		await expect(loadRSAKeys(env)).rejects.toThrow("Failed to import RSA keys");
 	});
+
+	it("should load RSA keys from Secrets Store bindings with escaped newlines", async () => {
+		const env = {
+			BADGE_ISSUER_RSA_PRIVATE_KEY: {
+				get: async () => TEST_RSA_PRIVATE_KEY.replaceAll("\n", "\\n"),
+			},
+			BADGE_ISSUER_RSA_PUBLIC_KEY: {
+				get: async () => TEST_RSA_PUBLIC_KEY.replaceAll("\n", "\\n"),
+			},
+		};
+
+		const keys = await loadRSAKeys(env);
+
+		expect(keys.privateKey.type).toBe("private");
+		expect(keys.publicKey.type).toBe("public");
+	});
 });
 
 describe("generateBadgeImageUrl", () => {
@@ -328,16 +383,7 @@ describe("generateBadgeImageUrl", () => {
 
 describe("signCredentialAsJWT", () => {
 	it("should not include iat claim in signed JWT", async () => {
-		const { privateKey } = await crypto.subtle.generateKey(
-			{
-				name: "RSASSA-PKCS1-v1_5",
-				modulusLength: 2048,
-				publicExponent: new Uint8Array([1, 0, 1]),
-				hash: "SHA-256",
-			},
-			true,
-			["sign", "verify"],
-		);
+		const { privateKey } = await generateTestRSAKeyPair();
 
 		const issuerProfile: Profile = {
 			id: `${TEST_ISSUER_URL}/issuer`,
@@ -372,6 +418,7 @@ describe("signCredentialAsJWT", () => {
 			TEST_ISSUER_URL,
 		);
 		const payload = decodeJwt(jwt);
+		const header = decodeProtectedHeader(jwt);
 
 		expect(payload.iat).toBeUndefined();
 		expect(payload.iss).toBe(issuerProfile.id);
@@ -379,19 +426,11 @@ describe("signCredentialAsJWT", () => {
 		expect(payload.sub).toBe("mailto:user@example.com");
 		expect(payload.nbf).toBe(Math.floor(validFrom.getTime() / 1000));
 		expect(payload.exp).toBe(Math.floor(validUntil.getTime() / 1000));
+		expect(header.kid).toBe(issuerKeyId(TEST_ISSUER_URL));
 	});
 
 	it("should not include exp claim when validUntil is not set", async () => {
-		const { privateKey } = await crypto.subtle.generateKey(
-			{
-				name: "RSASSA-PKCS1-v1_5",
-				modulusLength: 2048,
-				publicExponent: new Uint8Array([1, 0, 1]),
-				hash: "SHA-256",
-			},
-			true,
-			["sign", "verify"],
-		);
+		const { privateKey } = await generateTestRSAKeyPair();
 
 		const issuerProfile: Profile = {
 			id: `${TEST_ISSUER_URL}/issuer`,
@@ -429,16 +468,7 @@ describe("signCredentialAsJWT", () => {
 
 describe("createSignedCredential", () => {
 	it("should produce a signed JWT for valid params", async () => {
-		const { privateKey } = await crypto.subtle.generateKey(
-			{
-				name: "RSASSA-PKCS1-v1_5",
-				modulusLength: 2048,
-				publicExponent: new Uint8Array([1, 0, 1]),
-				hash: "SHA-256",
-			},
-			true,
-			["sign", "verify"],
-		);
+		const { privateKey } = await generateTestRSAKeyPair();
 
 		const issuerProfile: Profile = {
 			id: `${TEST_ISSUER_URL}/issuer`,
@@ -474,16 +504,7 @@ describe("createSignedCredential", () => {
 	});
 
 	it("should throw CredentialValidationError for invalid params", async () => {
-		const { privateKey } = await crypto.subtle.generateKey(
-			{
-				name: "RSASSA-PKCS1-v1_5",
-				modulusLength: 2048,
-				publicExponent: new Uint8Array([1, 0, 1]),
-				hash: "SHA-256",
-			},
-			true,
-			["sign", "verify"],
-		);
+		const { privateKey } = await generateTestRSAKeyPair();
 
 		const invalidParams = {
 			id: "not-a-valid-uri",
