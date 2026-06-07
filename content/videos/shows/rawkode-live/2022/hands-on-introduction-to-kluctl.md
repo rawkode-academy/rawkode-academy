@@ -7,6 +7,10 @@ description: >-
   was built to solve and demos targets, templated vars, and a diff-first
   deploy/prune workflow that composes Helm charts and Kustomize on a kind
   cluster.
+whatYouWillLearn:
+  - "Describe multi-environment, multi-cluster deployments with a small CLI around Helm and Kustomize."
+  - "Use templated variables and layered configuration to shape deployment targets."
+  - "Preview changes with diff and dry-run before applying or pruning resources."
 publishedAt: 2022-10-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -116,4 +120,3 @@ resources:
     url: 'https://github.com/kluctl/flux-kluctl-controller'
     category: code
 ---
-
