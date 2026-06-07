@@ -7,6 +7,10 @@ description: >-
   cloud load balancer on EKS. Installs the controller via Helm, exposes a
   service through an Ingress, then layers on Google OAuth using an ngrok module
   set CRD.
+whatYouWillLearn:
+  - "Expose a Kubernetes service through ngrok without creating a cloud load balancer."
+  - "Install the ngrok ingress controller with Helm and verify the created resources."
+  - "Attach an ngrok module set to enforce Google OAuth access."
 publishedAt: 2023-09-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -56,4 +60,3 @@ resources:
     type: url
     category: other
 ---
-
