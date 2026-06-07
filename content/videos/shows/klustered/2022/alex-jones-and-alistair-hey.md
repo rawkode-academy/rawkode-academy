@@ -7,6 +7,10 @@ description: >-
   a disabled replica set controller, a blocking NetworkPolicy, and a tampered
   cluster DNS IP. Alistair unwinds tc traffic-control delays, a rogue kubectl
   alias, and dropping iptables rules.
+whatYouWillLearn:
+  - "Troubleshoot Kubernetes control-plane failures by reviewing API server messages for webhook and scheduling-related breakage."
+  - "Recover a broken cluster by checking replica set and node controller behavior after file or binary tampering."
+  - "Diagnose and clear network faults by testing DNS, flushing tc traffic controls, and validating iptables plus NodePort access."
 publishedAt: 2022-11-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -115,4 +119,3 @@ resources:
     url: 'https://webinstall.dev/'
     category: other
 ---
-
