@@ -8,6 +8,10 @@ description: >-
   why Google's Zanzibar paper reframes authorization, how to model schemas with
   relations and permissions, caveats, and using the zed CLI and Playground to
   test real applications.
+whatYouWillLearn:
+  - "Model permissions with relations and permissions instead of hand-rolled ad hoc checks"
+  - "Use the zed CLI and Playground to test schema behavior before shipping"
+  - "Apply caveats and expiring relationships for contextual access and time-bound authorization"
 publishedAt: 2025-04-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -39,4 +43,3 @@ resources:
     url: 'https://github.com/authzed/playground'
     category: code
 ---
-
