@@ -7,6 +7,10 @@ description: >-
   through Acorn: an Acornfile-driven way to package containers, secrets, and
   ingress into an OCI artifact and deploy to Kubernetes without writing Helm
   charts or raw YAML.
+whatYouWillLearn:
+  - "Package applications as OCI artifacts with embedded metadata and referenced containers"
+  - "Generate secrets automatically for development, then bind existing Kubernetes secrets in production"
+  - "Isolate every app in its own namespace while keeping core Kubernetes objects"
 publishedAt: 2022-08-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -103,4 +107,3 @@ resources:
     type: url
     category: demos
 ---
-
