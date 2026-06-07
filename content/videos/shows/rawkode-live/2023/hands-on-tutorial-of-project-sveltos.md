@@ -7,6 +7,10 @@ description: >-
   ClusterProfile add-on deployment, the classifier with Lua filters, dry-run and
   event-driven framework, then demos rolling out Helm charts and Kustomize
   across a Cluster API fleet alongside Flux and Argo CD.
+whatYouWillLearn:
+  - "Deploy add-ons across managed Kubernetes clusters with ClusterProfile intent."
+  - "Use classifiers and Lua filters to match cluster state dynamically."
+  - "Preview changes with dry run before triggering event-driven rollouts."
 publishedAt: 2023-08-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,4 +76,3 @@ resources:
     type: url
     category: documentation
 ---
-
