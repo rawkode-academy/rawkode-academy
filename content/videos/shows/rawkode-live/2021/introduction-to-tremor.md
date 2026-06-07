@@ -6,6 +6,10 @@ description: >-
   The Tremor team walk through the Rust-based event processing engine born at
   Wayfair for load shedding at scale, then live-code a Discord bot using YAML
   pipelines, the Trickle query language, and a custom UDP source.
+whatYouWillLearn:
+  - "Explain Tremor's sources, pipelines, and sinks as a Rust event processor"
+  - "Configure Discord bot plugins in YAML and wire them through Tremor"
+  - "Add a UDP source, route it through a custom Trickle pipeline"
 publishedAt: 2021-03-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -106,4 +110,3 @@ resources:
     url: 'https://vector.dev/'
     category: code
 ---
-
