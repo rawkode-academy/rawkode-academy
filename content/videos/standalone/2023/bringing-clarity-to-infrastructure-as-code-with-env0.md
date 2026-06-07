@@ -7,6 +7,10 @@ description: >-
   cluster, Terraform manages Cloudflare DNS, and CDKTF joins via workflows.
   Covers template setup, dependencies, variable scanning, and GitLab merge
   request plan previews.
+whatYouWillLearn:
+  - "Orchestrate Pulumi, Terraform, and CDKTF stacks with explicit dependencies."
+  - "Scan code for new variables and surface them in Env0 templates."
+  - "Preview GitLab merge requests with plans, then deploy automatically after merge."
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -70,4 +74,3 @@ resources:
     url: 'https://cdk8s.io/'
     category: code
 ---
-
