@@ -3,12 +3,15 @@ import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
 import type { StudioEnv } from "../env";
 import {
+	confirmStudioStream,
 	createStudioInvite,
 	createStudioSession,
 	endStudioSession,
 	issueStudioParticipantToken,
 	markStudioRecordingReady,
+	startStudioStream,
 	StudioOperationError,
+	stopStudioStream,
 } from "../server/operations";
 
 const isoDateTime = z.string().refine((value) => !Number.isNaN(Date.parse(value)), {
@@ -74,6 +77,7 @@ export const server = {
 				showId: optionalText,
 				show: optionalText,
 				startsAt: optionalIsoDateTime,
+				streamEnvironment: z.enum(["test", "prod"]).default("test"),
 				title: optionalText,
 				videoId: optionalText,
 			})
@@ -92,6 +96,54 @@ export const server = {
 					meeting: result.meeting,
 					status: result.status,
 				};
+			} catch (error) {
+				toActionError(error);
+			}
+		},
+	}),
+
+	startStream: defineAction({
+		input: z.object({
+			sessionId: z.string().min(1),
+			streamToken: z.string().min(1).optional(),
+		}),
+		handler: async (input, context) => {
+			const user = requireUser(context);
+			const studioEnv = env as StudioEnv;
+			try {
+				return await startStudioStream(studioEnv, user, input);
+			} catch (error) {
+				toActionError(error);
+			}
+		},
+	}),
+
+	confirmStream: defineAction({
+		input: z.object({
+			sessionId: z.string().min(1),
+			streamToken: z.string().min(1).optional(),
+		}),
+		handler: async (input, context) => {
+			const user = requireUser(context);
+			const studioEnv = env as StudioEnv;
+			try {
+				return await confirmStudioStream(studioEnv, user, input);
+			} catch (error) {
+				toActionError(error);
+			}
+		},
+	}),
+
+	stopStream: defineAction({
+		input: z.object({
+			sessionId: z.string().min(1),
+			streamToken: z.string().min(1).optional(),
+		}),
+		handler: async (input, context) => {
+			const user = requireUser(context);
+			const studioEnv = env as StudioEnv;
+			try {
+				return await stopStudioStream(studioEnv, user, input);
 			} catch (error) {
 				toActionError(error);
 			}

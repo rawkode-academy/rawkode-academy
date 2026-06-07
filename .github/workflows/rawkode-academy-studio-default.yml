@@ -9,6 +9,7 @@ on:
     paths:
     - .github/workflows/rawkode-academy-studio-default.yml
     - cue.mod/**
+    - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.studio/astro.config.mts
     - projects/rawkode.studio/astro.config.mts/**
     - projects/rawkode.studio/data-model/**

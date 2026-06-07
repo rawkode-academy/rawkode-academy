@@ -9,6 +9,10 @@ import { useStudioMachine } from "./studio/useStudioMachine";
 import type { ActiveOverlay, StudioSource } from "./types";
 
 type CaptureStatus = "blocked" | "missing" | "ready" | "requesting" | "unavailable";
+type RoomMediaPayload = {
+  sources: StudioSource[];
+  streams: Map<string, MediaStream>;
+};
 
 const props = defineProps<{
   inviteToken?: string;
@@ -17,6 +21,8 @@ const props = defineProps<{
   roomRole?: string;
   sessionId?: string;
   sessionTitle?: string;
+  streamEnvironment?: "prod" | "test";
+  streamStatus?: string;
 }>();
 const {
   state,
@@ -27,6 +33,8 @@ const {
 const overlayTimers = new Map<string, number>();
 const overlayTimerPhases = new Map<string, ActiveOverlay["phase"]>();
 const hostMediaStream = shallowRef<MediaStream | undefined>();
+const roomMediaStreams = shallowRef(new Map<string, MediaStream>());
+const roomMediaSources = shallowRef(new Map<string, StudioSource>());
 const screenShareSources = ref<StudioSource[]>([]);
 const screenShareStreams = shallowRef(new Map<string, MediaStream>());
 const screenShareCaptureStates = ref<Record<string, { error: string; status: CaptureStatus }>>({});
@@ -52,13 +60,23 @@ const roomRole = computed(() => {
     ? role
     : "guest";
 });
+const canPublishLive = computed(() =>
+  roomRole.value === "host" || roomRole.value === "producer" || roomRole.value === "program",
+);
+const localCameraSourceId = computed(() =>
+  roomRole.value === "producer" || roomRole.value === "program"
+    ? "source-producer-camera"
+    : roomRole.value === "guest"
+      ? "source-guest-camera"
+      : "source-host-camera",
+);
 const studioLayoutStyle = computed(() => ({
   "--widgets-height": `${widgetHeight.value}px`,
 }));
 const mediaStreams = computed(() => {
-  const streams = new Map<string, MediaStream>();
+  const streams = new Map<string, MediaStream>(roomMediaStreams.value);
   if (hostMediaStream.value) {
-    streams.set("source-host-camera", hostMediaStream.value);
+    streams.set(localCameraSourceId.value, hostMediaStream.value);
   }
   for (const [sourceId, stream] of screenShareStreams.value) {
     streams.set(sourceId, stream);
@@ -70,7 +88,7 @@ const sourcesForUi = computed(() =>
   [
     ...state.value.sources
       .filter((source) => source.type !== "screen")
-      .map((source) => (source.id === "source-host-camera" ? withHostCaptureState(source) : source)),
+      .map(withRuntimeMediaState),
     ...screenShareSources.value.map(withScreenShareCaptureState),
   ],
 );
@@ -244,7 +262,20 @@ function handleHostTrackEnded(): void {
   hostCaptureError.value = "Camera or microphone stream ended";
 }
 
-function withHostCaptureState(source: StudioSource): StudioSource {
+function syncRoomMediaStreams(payload: RoomMediaPayload): void {
+  roomMediaStreams.value = new Map(payload.streams);
+  roomMediaSources.value = new Map(payload.sources.map((source) => [source.id, source]));
+}
+
+function withRuntimeMediaState(source: StudioSource): StudioSource {
+  if (source.id === localCameraSourceId.value) {
+    return withLocalCaptureState(source);
+  }
+
+  return withRoomMediaState(source);
+}
+
+function withLocalCaptureState(source: StudioSource): StudioSource {
   return {
     ...source,
     settings: {
@@ -253,6 +284,41 @@ function withHostCaptureState(source: StudioSource): StudioSource {
       captureStatus: hostCaptureStatus.value,
     },
   };
+}
+
+function withRoomMediaState(source: StudioSource): StudioSource {
+  if (!isRoomMediaSource(source)) {
+    return source;
+  }
+
+  const stream = roomMediaStreams.value.get(source.id);
+  const roomSource = roomMediaSources.value.get(source.id);
+  if (!stream && !roomSource) {
+    return {
+      ...source,
+      status: "missing",
+      settings: {
+        ...source.settings,
+        captureStatus: "missing",
+      },
+    };
+  }
+
+  return {
+    ...source,
+    ...roomSource,
+    settings: {
+      ...source.settings,
+      ...roomSource?.settings,
+      captureStatus: stream ? "ready" : "missing",
+    },
+    status: stream ? "ready" : "missing",
+  };
+}
+
+function isRoomMediaSource(source: StudioSource): boolean {
+  return source.type === "camera" &&
+    source.roles?.some((role) => role === "hosts" || role === "guests" || role === "producer") === true;
 }
 
 function withScreenShareCaptureState(source: StudioSource): StudioSource {
@@ -507,12 +573,15 @@ function clampWidgetHeight(height: number): number {
       <div class="top-bar-status">
         <span v-if="props.providerStatus">{{ props.providerStatus }}</span>
         <span v-if="props.recordingStatus">{{ props.recordingStatus }}</span>
+        <span v-if="props.streamEnvironment">{{ props.streamEnvironment }} stream</span>
+        <span v-if="props.streamStatus">{{ props.streamStatus }}</span>
       </div>
       <RealtimeKitRoom
         v-if="props.sessionId"
         :invite-token="props.inviteToken"
         :role="roomRole"
         :session-id="props.sessionId"
+        @media-streams-change="syncRoomMediaStreams"
       />
     </header>
 
@@ -536,6 +605,9 @@ function clampWidgetHeight(height: number): number {
         :is-playing="state.isPlaying"
         :is-recording="state.isRecording"
         :session-id="props.sessionId"
+        :can-publish-live="canPublishLive"
+        :stream-environment="props.streamEnvironment"
+        :stream-status="props.streamStatus"
         @recording-change="setRecording"
         @exported="markProgramExported"
       />

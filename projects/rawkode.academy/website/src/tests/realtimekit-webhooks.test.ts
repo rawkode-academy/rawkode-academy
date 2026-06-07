@@ -5,6 +5,7 @@ import {
 	realtimeKitVideoMatchesPayload,
 	verifyRealtimeKitWebhookSignature,
 } from "@/lib/realtimekit-webhooks";
+import { POST as realtimeKitStreamStartedWebhook } from "@/pages/api/webhooks/realtimekit/stream-started";
 
 function bytesToBase64(bytes: Uint8Array): string {
 	let binary = "";
@@ -167,5 +168,30 @@ describe("RealtimeKit webhook helpers", () => {
 				spkiToPem(publicKey),
 			),
 		).toBe(false);
+	});
+
+	it("keeps the legacy RealtimeKit live webhook side-effect free", async () => {
+		const response = await realtimeKitStreamStartedWebhook({
+			request: new Request("https://rawkode.academy/api/webhooks/realtimekit/stream-started", {
+				method: "POST",
+				body: JSON.stringify({
+					event: "livestreaming.statusUpdate",
+					streamId: "stream-123",
+					status: "LIVE",
+				}),
+			}),
+		} as Parameters<typeof realtimeKitStreamStartedWebhook>[0]);
+		const body = await response.json() as {
+			ignored?: boolean;
+			queued?: boolean;
+			reason?: string;
+		};
+
+		expect(response.status).toBe(202);
+		expect(body).toMatchObject({
+			ignored: true,
+			reason: "Studio Cloudflare Stream confirmation owns live notifications.",
+		});
+		expect(body.queued).toBeUndefined();
 	});
 });
