@@ -7,6 +7,10 @@ description: >-
   and BuildKit. We install the CLI, write a Dagger plan to deploy a static todo
   app to S3, then extend it to multi-bucket and Netlify environments using
   inputs and secrets.
+whatYouWillLearn:
+  - "Set up Dagger from scratch with CLI commands, including initializing the environment and running the first Dagger plan."
+  - "Use CUE to declare deployment graphs and BuildKit to execute pipeline operations, including container build and deploy steps."
+  - "Build a todo app deployment plan to S3 with outputs, then switch to a multi-target environment for Netlify."
 publishedAt: 2021-06-29T17:00:00.000Z
 type: live
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     url: 'https://cuelang.org/play/'
     category: demos
 ---
-
