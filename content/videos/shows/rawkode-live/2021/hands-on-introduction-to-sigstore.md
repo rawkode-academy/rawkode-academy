@@ -6,6 +6,10 @@ description: >-
   Dan Lorenc walks through sigstore: signing and verifying container images with
   cosign, keyless signing via OIDC, querying the Rekor transparency log, in-toto
   build attestations, and enforcing signed images at admission with Kyverno.
+whatYouWillLearn:
+  - "Sign and verify container images with cosign across OCI registries."
+  - "Use OIDC-backed keyless signing to issue certificates without private keys."
+  - "Query Rekor attestations and enforce signed images with Kyverno policies."
 publishedAt: 2021-08-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -100,4 +104,3 @@ resources:
     url: 'https://github.com/tektoncd/chains'
     category: other
 ---
-
