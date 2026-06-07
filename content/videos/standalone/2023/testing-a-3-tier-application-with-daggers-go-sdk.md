@@ -6,6 +6,10 @@ description: >-
   Build and test a Go backend, JavaScript frontend, and Postgres database using
   Dagger's Go SDK. Covers composable pipelines, secret redaction, dependent
   service containers, and running a Hurl test harness locally and in CI.
+whatYouWillLearn:
+  - "Build Dagger pipelines as Go code instead of YAML definitions"
+  - "Pass host secrets into pipelines through redacted secret references"
+  - "Wire a Postgres service container into the Hurl test harness"
 publishedAt: 2023-05-25T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -79,4 +83,3 @@ resources:
     url: 'https://hurl.dev'
     category: documentation
 ---
-
