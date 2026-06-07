@@ -7,6 +7,10 @@ description: >-
   a malformed image name and a Cilium deny policy, then fixes a CoreDNS rewrite.
   Bojan kills a cron job flushing iptables and repairs a bad Postgres startup
   probe.
+whatYouWillLearn:
+  - "Track pod status and events to spot malformed image names and safely correct container image references."
+  - "Resolve failing DNS resolution by auditing Cilium deny policies, patching CoreDNS rewrites, and bouncing CoreDNS pods."
+  - "Repair broken Postgres startup probes by editing YAML indentation carefully, then validate application health and database connectivity."
 publishedAt: 2022-03-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -116,4 +120,3 @@ resources:
     url: 'https://goteleport.com/'
     category: other
 ---
-
