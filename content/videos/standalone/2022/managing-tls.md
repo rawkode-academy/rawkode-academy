@@ -6,6 +6,10 @@ description: >-
   Three ways to give Portainer real TLS certificates: keep the built-in self
   signed certs, run Certbot on the host with a systemd timer for renewals, or
   put Caddy in front as a reverse proxy that handles the ACME dance for you.
+whatYouWillLearn:
+  - "Configure Portainer's built-in SSL certificate settings and force HTTPS only."
+  - "Provision Let's Encrypt certificates with Certbot standalone on the host."
+  - "Use Caddy as a reverse proxy that renews TLS automatically."
 publishedAt: 2022-12-09T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -71,4 +75,3 @@ resources:
     url: 'https://docs.portainer.io/admin/settings#ssl-certificate'
     category: documentation
 ---
-
