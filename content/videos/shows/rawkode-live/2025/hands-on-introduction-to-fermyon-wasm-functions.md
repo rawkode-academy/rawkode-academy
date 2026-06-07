@@ -9,6 +9,10 @@ description: >-
   Thorsten Hans walks through Fermyon Wasm Functions, the new fully managed
   service that runs Spin apps on Akamai's globally distributed network. Covers
   the aka plugin, deploying via OCI registry, and the built-in key value store.
+whatYouWillLearn:
+  - "Deploy Spin apps as OCI artifacts through Fermyon Wasm Functions registry."
+  - "Use the built-in key value store for globally distributed application state."
+  - "Manage apps from the extended Spin CLI, including deploy and inspection."
 publishedAt: 2025-04-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -37,4 +41,3 @@ resources:
     type: url
     category: code
 ---
-

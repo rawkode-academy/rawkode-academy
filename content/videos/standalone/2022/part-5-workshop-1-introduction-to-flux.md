@@ -7,6 +7,10 @@ description: >-
   Telegraf, write queries with from, range, filter, yield, group, window, and
   aggregateWindow, and run Flux from the InfluxDB UI, the CLI, and the VS Code
   extension.
+whatYouWillLearn:
+  - "Set up InfluxDB and Telegraf, then query the workshop bucket with Flux."
+  - "Use from, range, filter, and yield to shape Flux query results."
+  - "Group, flatten, and aggregate metrics to compare CPU series over time."
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -111,4 +115,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

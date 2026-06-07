@@ -7,6 +7,10 @@ description: >-
   clusters, tackling kubelet failures, RBAC misconfigurations, a missing
   scheduler role, an AlwaysDeny admission controller, mutating webhooks,
   containerd registry rewrites, and CoreDNS Corefile sabotage.
+whatYouWillLearn:
+  - "Reproduce and fix broken node reporting by restarting kubelet services, checking describe node output, and validating worker registration."
+  - "Detect RBAC and scheduler failures by decoding Kubernetes API errors, finding missing roles, and repairing role bindings."
+  - "Diagnose image and DNS failures by tracing webhook mutations, containerd registry rewrites, and CoreDNS Corefile misconfigurations."
 publishedAt: 2021-05-06T13:30:00.000Z
 type: live
 category: tutorial
@@ -113,4 +117,3 @@ resources:
     url: 'https://deploy.equinix.com/'
     category: other
 ---
-

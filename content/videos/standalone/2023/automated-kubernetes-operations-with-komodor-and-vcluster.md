@@ -7,6 +7,10 @@ description: >-
   ephemeral virtual cluster via Helm init charts, then use Komodor to observe
   and debug workloads (like a broken NGINX image pull) across each vCluster from
   a single UI.
+whatYouWillLearn:
+  - "Komodor can be injected into every vCluster through Helm init charts"
+  - "The same release name becomes the cluster label inside Komodor"
+  - "Broken workloads surface quickly in Komodor, including image pull failures"
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -40,4 +44,3 @@ resources:
     url: 'https://github.com/komodorio/helm-charts'
     category: code
 ---
-

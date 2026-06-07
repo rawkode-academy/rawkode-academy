@@ -7,6 +7,10 @@ description: >-
   against the NSA/CISA hardening framework, writing controls in Rego on OPA,
   shifting left with the VS Code extension and GitHub Action, and the RBAC
   visualizer in the hosted UI.
+whatYouWillLearn:
+  - "Scan Kubernetes clusters, YAML, and Helm charts for NSA/CISA hardening failures"
+  - "Interpret framework risk scores by weighting failed resources and control severity"
+  - "Create exceptions for accepted findings so recurring privileged workloads stop skewing results"
 publishedAt: 2022-02-22T17:00:00.000Z
 type: live
 category: tutorial
@@ -132,4 +136,3 @@ resources:
     category: code
     url: 'https://github.com/kubescape/host-scanner'
 ---
-

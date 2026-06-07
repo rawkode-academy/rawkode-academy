@@ -6,6 +6,10 @@ description: >-
   David uses GitLab Duo's chat and code suggestions to build a Python pipeline
   that extracts frames from a video with OpenCV, runs OCR via PyTesseract,
   classifies the text with OpenAI, and stores the results in SQLite.
+whatYouWillLearn:
+  - "Use GitLab Duo to turn a hardcoded frame extractor into a CLI tool."
+  - "Reduce frame output by sampling every ten seconds instead of every frame."
+  - "Combine OCR, OpenAI analysis, and SQLite inserts into one pipeline."
 publishedAt: 2024-04-18T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -97,4 +101,3 @@ duration: 3068
 guests: []
 resources: []
 ---
-

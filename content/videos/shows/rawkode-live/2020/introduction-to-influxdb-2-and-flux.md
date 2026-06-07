@@ -6,6 +6,10 @@ description: >-
   Anais Dottis-Georgiou from InfluxData walks through InfluxDB 2 and Flux:
   installing the OSS release, collecting metrics with Telegraf, exploring data,
   building dashboards, downsampling via tasks, and configuring webhook alerts.
+whatYouWillLearn:
+  - "Set up InfluxDB 2 and Telegraf on a fresh Linux server for collecting time-series metrics in practice."
+  - "Create and query buckets, measurements, tags, and fields in InfluxDB while preparing dashboard-ready time-series data."
+  - "Build dashboards and downsampling tasks with Flux, then configure webhook alerts from threshold-based query checks."
 publishedAt: 2020-11-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -105,4 +109,3 @@ resources:
     type: url
     category: demos
 ---
-

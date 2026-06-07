@@ -6,6 +6,10 @@ description: >-
   Ciaran McNulty walks David through Example Mapping and BDD applied to a real
   Rust GitOps library, capturing rules and examples for cloning and reconciling
   Git repositories before translating them into Gherkin scenarios.
+whatYouWillLearn:
+  - "How to apply BDD and example mapping to turn uncertain product behavior into concrete, testable rules."
+  - "How to identify and document Git repo cloning and reconciliation edge cases before writing implementation details."
+  - "How to transform example maps into Gherkin syntax and connect scenarios with a practical Rust implementation plan."
 publishedAt: 2020-12-02T17:00:00.000Z
 type: live
 category: tutorial
@@ -74,4 +78,3 @@ resources:
       https://johnfergusonsmart.com/feature-mapping-a-simpler-path-from-stories-to-executable-acceptance-criteria/
     category: other
 ---
-

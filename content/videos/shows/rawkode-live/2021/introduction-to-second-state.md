@@ -7,6 +7,10 @@ description: >-
   function-as-a-service. We write Rust, compile to Wasm, deploy via SSVM up,
   call functions through a Postman-documented REST API, hot-swap versions, and
   run an OCR / TensorFlow demo.
+whatYouWillLearn:
+  - "Deploy Rust and WebAssembly functions through a documented REST API."
+  - "Hot-swap deployed Wasm versions while keeping the same endpoint."
+  - "Use stateless functions with ephemeral storage and OCR demos."
 publishedAt: 2021-02-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -50,4 +54,3 @@ resources:
     type: url
     category: documentation
 ---
-

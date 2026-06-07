@@ -6,6 +6,10 @@ description: >-
   Rawkode and Walid Shaari debug two broken Kubernetes clusters deployed via
   Cluster API on Equinix Metal. They track down a Cilium iptables misconfig,
   swap-enabled kubelets, UFW interference, and a bad etcd endpoint.
+whatYouWillLearn:
+  - "Trace Cilium CNI failures by comparing control-plane manifests, daemonset logs, and iptables state when pods will not schedule."
+  - "Diagnose Kubernetes control plane issues by auditing swap settings, kubelet configuration flags, and service status across all nodes."
+  - "Restore API server connectivity by fixing etcd endpoints, validating node firewall rules, and correcting cluster CIDR parameters."
 publishedAt: 2021-02-18T12:00:00.000Z
 type: live
 category: tutorial
@@ -102,4 +106,3 @@ guests:
   - walidshaari
 resources: []
 ---
-

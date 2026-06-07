@@ -7,6 +7,10 @@ description: >-
   ztunnel, HBONE, and waypoint proxies, the trade-offs against sidecars, and how
   eBPF, CNI plugins, and the Gateway API fit into Istio's post-graduation
   future.
+whatYouWillLearn:
+  - "How Ambient Mesh removes sidecars while keeping Istio's control plane"
+  - "How ztunnel and HBONE provide layer 4 mTLS between nodes"
+  - "How waypoint proxies enforce layer 7 policy, tracing, and Gateway API traffic rules"
 publishedAt: 2023-08-04T17:00:00.000Z
 type: recorded
 category: interview
@@ -99,4 +103,3 @@ resources:
     url: 'https://gateway.envoyproxy.io/'
     category: code
 ---
-

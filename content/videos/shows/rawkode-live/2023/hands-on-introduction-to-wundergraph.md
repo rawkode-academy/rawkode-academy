@@ -6,6 +6,10 @@ description: >-
   Jens Neuse joins David for a hands-on tour of WunderGraph, introspecting data
   sources, defining GraphQL and TypeScript operations, generating type-safe
   clients, and demoing cross-API joins, input validation, and RBAC directives.
+whatYouWillLearn:
+  - "Generate type-safe TypeScript clients from WunderGraph operations for front-end consumption."
+  - "Compose cross-API joins by exporting fields into internal variables and _join."
+  - "Add input validation and RBAC directives directly in code-backed operations."
 publishedAt: 2023-01-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -99,4 +103,3 @@ resources:
     type: url
     category: demos
 ---
-

@@ -7,6 +7,10 @@ description: >-
   rpm-ostree rollbacks, Distrobox, Nix and Flatpak baked in. David then demos
   System Initiative orchestrated via Tilt, dragging AWS resources onto a canvas
   to model and deploy an EC2 stack live.
+whatYouWillLearn:
+  - "Tracks Universal Blue as an image-based Fedora desktop with rollbacks."
+  - "Shows how Just files install Flatpaks, Distrobox, Nix, and DevBox tooling."
+  - "Uses System Initiative and Tilt to model AWS resources on a visual canvas."
 publishedAt: 2023-08-03T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -61,4 +65,3 @@ resources:
     url: 'https://getfleek.dev'
     category: other
 ---
-

@@ -7,6 +7,10 @@ description: >-
   through firecracker and jailer binaries, booting a microVM over the REST API
   on a Unix socket, networking and device emulation, the Go SDK, plus a
   hands-on snapshotting walkthrough comparing full and diff snapshots.
+whatYouWillLearn:
+  - "Build and run Firecracker microVMs by downloading binaries and starting VMs through the REST API socket."
+  - "Explore Firecracker internals like one-process-per-VM architecture, jailer separation, and device emulation for networking."
+  - "Compare full and dirty-page snapshots by capturing, restoring, and validating VM state during the demo."
 publishedAt: 2021-05-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -110,4 +114,3 @@ resources:
     category: code
     url: https://github.com/weaveworks/ignite
 ---
-

@@ -7,6 +7,10 @@ description: >-
   kubectl, pods, deployments, multi-container pods, services, ConfigMaps,
   Secrets, namespaces, port-forwarding, and DaemonSets on a Docker for Mac
   cluster.
+whatYouWillLearn:
+  - "Walk through kubectl commands to create and inspect pods from YAML specs in a local Kubernetes cluster."
+  - "Build and update multi-container pods with sidecar patterns, then observe replica-based rollout behavior."
+  - "Configure ConfigMaps and secrets, expose a container via port-forwarding, and manage scope with namespaces."
 publishedAt: 2020-09-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -46,4 +50,3 @@ guests:
   - davidgs
 resources: []
 ---
-

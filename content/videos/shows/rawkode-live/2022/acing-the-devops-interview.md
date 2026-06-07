@@ -7,6 +7,10 @@ description: >-
   networking, containers, Kubernetes, cloud, CI/CD, infrastructure as code and
   monitoring, plus advice on landing remote DevOps roles, DSA prep, and a look
   at MLOps.
+whatYouWillLearn:
+  - "Build a DevOps foundation with Linux commands and basic networking first."
+  - "Move from containers to Kubernetes orchestration so deployments can scale reliably."
+  - "Use cloud providers, CI/CD, and monitoring to ship and observe applications."
 publishedAt: 2022-08-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -105,4 +109,3 @@ resources:
     url: 'https://www.solo.io/academy'
     category: documentation
 ---
-

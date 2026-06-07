@@ -6,6 +6,10 @@ description: >-
   Tejal Desai (Kaniko maintainer at Google) walks through building container
   images inside Kubernetes without Docker-in-Docker, covering the executor pod,
   registry secrets, layer caching, snapshot modes, and Tekton/GitLab CI.
+whatYouWillLearn:
+  - "Set up and run a Kaniko executor pod in Kubernetes for secure container image builds without Docker-in-Docker."
+  - "Build, debug, and rerun image pipelines using Kubernetes manifests, Docker registry secrets, and live pod logs."
+  - "Tune Kaniko performance with cache flags, snapshot strategies, reproducible builds, and multi-platform CI integration."
 publishedAt: 2021-04-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -115,4 +119,3 @@ resources:
     category: documentation
     url: 'https://docs.gitlab.com/ci/docker/using_kaniko/'
 ---
-

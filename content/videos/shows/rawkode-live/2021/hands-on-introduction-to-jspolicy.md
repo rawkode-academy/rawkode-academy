@@ -6,6 +6,10 @@ description: >-
   Lukas Gentele from Loft Labs joins to introduce jsPolicy, a Kubernetes
   admission controller that lets you write validating, mutating, and controller
   policies in JavaScript or TypeScript, with comparisons to OPA and Kyverno.
+whatYouWillLearn:
+  - "Understand how jsPolicy uses JavaScript or TypeScript policies as Kubernetes validating and mutating admission controllers."
+  - "Compare jsPolicy's policy model to OPA, Kyverno, and Gatekeeper across dynamic admission control."
+  - "Follow the hands-on setup flow, create policy objects, run through Helm install, and test live policy behavior."
 publishedAt: 2021-09-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -106,4 +110,3 @@ resources:
     category: code
     url: 'https://github.com/loft-sh/jspolicy-sdk'
 ---
-

@@ -7,6 +7,10 @@ description: >-
   include OOM memory limits, a CoreDNS rewrite hijack pointing to a rogue
   Postgres in kube-public, a hijacked kubectl shell function, node taints, and a
   self-recreating NetworkPolicy.
+whatYouWillLearn:
+  - "Identify OOMKilled application pods, confirm missing memory limits, and tune container resources for stable V2 startup."
+  - "Find rogue CoreDNS rewrite rules, patch kube-public DNS config, and verify pod DNS resolution for Postgres endpoints."
+  - "Discover and fix malformed kubeconfig key ordering, then validate cluster auth and pod scheduling from clean kubectl state."
 publishedAt: 2022-03-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -149,4 +153,3 @@ resources:
     url: 'https://emissary-ingress.dev/'
     category: other
 ---
-

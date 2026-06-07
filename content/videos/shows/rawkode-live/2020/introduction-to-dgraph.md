@@ -6,6 +6,10 @@ description: >-
   Xuanyi Chew, community engineer at Dgraph, walks through running Dgraph in
   Docker, exploring the Ratel UI, writing queries and schemas in DQL versus
   native GraphQL, and using the hosted Slash GraphQL service.
+whatYouWillLearn:
+  - "Set up and run a local Dgraph instance with Docker, then use Ratel to issue basic DQL queries."
+  - "Model entities with DQL schemas, add index directives, and define types to support performant relationship queries."
+  - "Compare Dgraph DQL and native GraphQL workflows, then run equivalent queries and mutations in Slash GraphQL."
 publishedAt: 2020-11-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -85,4 +89,3 @@ resources:
     url: 'https://systemsconf.io'
     category: other
 ---
-

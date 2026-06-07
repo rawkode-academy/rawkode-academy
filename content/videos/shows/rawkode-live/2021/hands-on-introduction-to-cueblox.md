@@ -6,6 +6,10 @@ description: >-
   Brian Ketelsen and David walk through CueBlox: defining content schemas in
   CUE, validating Markdown/YAML data, serving it as a GraphQL API, and extending
   the workflow with HashiCorp-style plugins for image processing and CDN sync.
+whatYouWillLearn:
+  - "Define CUE schemata for markdown and YAML content so CueBlox can validate article data automatically."
+  - "Initialize a CueBlox repo, generate a GraphQL endpoint from schemata, and run queries against real stored content."
+  - "Wire prebuild and postbuild plugins for image processing and CDN/static sync to automate asset and data publishing."
 publishedAt: 2021-09-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -70,4 +74,3 @@ resources:
     url: 'https://github.com/bketelsen/bkapi'
     category: code
 ---
-

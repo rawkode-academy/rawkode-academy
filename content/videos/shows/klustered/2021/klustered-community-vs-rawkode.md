@@ -6,6 +6,10 @@ description: >-
   Rawkode debugs three broken Kubernetes clusters solo: Russell W's bash alias
   and static manifest trick, Noel Georgi's eBPF kubelet redirect, and a
   community-destroyed cluster needing CoreDNS repair.
+whatYouWillLearn:
+  - "Rebuild Russell's kubelet manifest set, fix API server flags and probe ports, then verify control plane pods start."
+  - "Track hidden runtime tampering by auditing systemd services, processes, and kubelet config paths to catch unexpected eBPF probes."
+  - "For the community cluster, debug application outages by checking kubeconfig, pod selectors, CoreDNS resolution, and deployment labels."
 publishedAt: 2021-08-12T17:30:00.000Z
 type: live
 category: tutorial
@@ -113,4 +117,3 @@ resources:
     url: 'https://rawkode.live/teleport'
     category: other
 ---
-

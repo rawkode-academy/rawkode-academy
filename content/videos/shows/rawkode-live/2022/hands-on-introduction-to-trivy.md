@@ -7,6 +7,10 @@ description: >-
   filesystems, Git repos, Kubernetes manifests, and Terraform. Hands-on
   installation, image scanning, IaC checks, plus a GitHub Actions pipeline that
   signs builds with cosign.
+whatYouWillLearn:
+  - "Scan container images for missing patches and unfixed vulnerabilities before pushing."
+  - "Use Trivy on Terraform and Kubernetes manifests to catch misconfigurations early."
+  - "Integrate scans into GitHub Actions and sign container builds with cosign."
 publishedAt: 2022-02-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -117,4 +121,3 @@ resources:
     type: url
     category: other
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Natan Yellin and Eric return to walk through Robusta's playbooks and
   enrichers, demoing CrashLoopBackOff and OOMKill alerts, custom Stack Overflow
   enrichment, and the Robusta SaaS platform on top of Prometheus and Kubernetes.
+whatYouWillLearn:
+  - "Interpret Prometheus alerts with automatic context before deciding whether they are urgent."
+  - "Trigger CrashLoopBackOff and OOMKill alerts, then trace each one through Robusta enrichment."
+  - "Build custom playbooks that search Stack Overflow and inject action guidance."
 publishedAt: 2022-12-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -66,4 +70,3 @@ resources:
     type: url
     category: code
 ---
-

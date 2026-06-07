@@ -6,6 +6,10 @@ description: >-
   A tour of Spin 0.8: the Itty-style JavaScript router for multi-path
   components, TLS support for outbound Postgres and MySQL connections, and
   first-class OCI registry push, sign with cosign, and verify workflows.
+whatYouWillLearn:
+  - "Route multiple paths through one Spin component with the Itty-style JavaScript router"
+  - "Secure Postgres and MySQL outbound connections with TLS-enabled database access"
+  - "Push Spin workloads to OCI registries, then sign and verify with cosign"
 publishedAt: 2023-02-21T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -35,4 +39,3 @@ resources:
     type: url
     category: other
 ---
-

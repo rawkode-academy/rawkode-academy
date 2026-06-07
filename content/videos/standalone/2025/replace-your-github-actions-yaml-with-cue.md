@@ -9,6 +9,10 @@ description: >-
   Author GitHub Actions workflows in CUE instead of YAML. Walk through cue vet,
   import, and export, pull workflow definitions from the CUE Central Registry,
   pin actions to SHAs, and wire in a Dagger install step.
+whatYouWillLearn:
+  - "Author GitHub Actions workflows in CUE instead of handwritten YAML."
+  - "Import registry definitions to type-check workflows and reuse shared steps."
+  - "Pin actions to SHAs, add Dagger setup, and gate deploys on main."
 publishedAt: 2025-12-10T00:00:00.000Z
 type: recorded
 category: tutorial
@@ -30,4 +34,3 @@ resources:
     type: url
     category: code
 ---
-

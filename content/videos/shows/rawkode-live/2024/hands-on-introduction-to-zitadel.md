@@ -7,6 +7,10 @@ description: >-
   identity platform with Docker Compose, wiring up an OAuth proxy, and the
   event-sourced architecture behind audit trails, domain discovery, and
   passkeys.
+whatYouWillLearn:
+  - "Self-host Zitadel with Docker Compose and choose CockroachDB or Postgres."
+  - "Configure an OAuth proxy application and wire redirect URIs for login."
+  - "Use domain discovery, passkeys, and service users for B2B identity flows."
 publishedAt: 2024-01-31T17:00:00.000Z
 type: live
 category: tutorial
@@ -111,4 +115,3 @@ resources:
     url: 'https://zitadel.com/docs/guides/solution-scenarios/domain-discovery'
     category: documentation
 ---
-

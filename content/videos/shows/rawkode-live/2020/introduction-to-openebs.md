@@ -7,6 +7,10 @@ description: >-
   engine. They cover Container Attached Storage, DPDK/SPDK, huge pages, and
   NVMe-oF replication via the Nexus, then deploy Mayastor on a Kubernetes
   cluster and benchmark it with fio.
+whatYouWillLearn:
+  - "Understand how OpenEBS implements Container Attached Storage for Kubernetes by managing storage controllers in application pods."
+  - "Explore Mayastor's architecture using SPDK, DPDK, huge pages, and NVMe-oF replication through Nexus and replicas."
+  - "Deploy and validate an OpenEBS MayaStore cluster by configuring pools, creating PVCs, and running fio storage performance tests."
 publishedAt: 2020-10-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -100,4 +104,3 @@ resources:
     url: 'https://nixery.dev'
     category: demos
 ---
-

@@ -7,6 +7,10 @@ description: >-
   manager: projects, environments and folders, RBAC and approval policies,
   versioning and audit logs, the Kubernetes operator and agent sidecar, secret
   scanning, and self-hosting.
+whatYouWillLearn:
+  - "Organize secrets by project and environment, with inheritance across dev, staging, and production."
+  - "Use folders to group sensitive secrets, then apply RBAC and approvals per folder."
+  - "Scan code for hard-coded secrets and self-host Infisical with the Kubernetes operator."
 publishedAt: 2024-03-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -77,4 +81,3 @@ resources:
     url: 'https://infisical.com/docs/self-hosting/overview'
     category: documentation
 ---
-

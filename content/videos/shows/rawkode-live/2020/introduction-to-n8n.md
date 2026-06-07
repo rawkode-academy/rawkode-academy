@@ -6,6 +6,10 @@ description: >-
   Tanay Pant walks David through n8n, building workflows in the editor UI with
   HTTP Request, Cron, Set, Webhook and Function nodes, then wiring up Philips
   Hue, OpenWeatherMap and a Telegram bot via BotFather.
+whatYouWillLearn:
+  - "Build and run a local n8n workflow using HTTP Request, Cron, Set, Function, and Webhook nodes."
+  - "Use webhooks as lightweight API endpoints, switching between test and production modes safely in n8n."
+  - "Connect external services like Philips Hue, OpenWeatherMap, and Telegram with credentials and triggers for real automations."
 publishedAt: 2020-11-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://core.telegram.org/bots/tutorial'
     category: documentation
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Ilya Dmitrichenko joins David to install Cilium on a Cluster API cluster,
   debug IPAM and stale CiliumNode CRDs, and walk through eBPF-powered kube-proxy
   replacement, L7 policy, and Hubble visibility via the Star Wars demo.
+whatYouWillLearn:
+  - "Install Cilium on a Cluster API Kubernetes cluster, then validate deployment state and initial pod readiness."
+  - "Troubleshoot connectivity and IPAM errors, including range-full conditions, by reading Cilium logs and adjusting config."
+  - "Demonstrate Cilium features like eBPF replacement for kube-proxy, pod-level identity in Cilium Endpoints, and Hubble visibility."
 publishedAt: 2020-09-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -141,4 +145,3 @@ resources:
     url: 'https://docs.cilium.io/en/stable/overview/intro/'
     category: documentation
 ---
-

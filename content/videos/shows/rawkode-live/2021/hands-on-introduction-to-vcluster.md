@@ -6,6 +6,10 @@ description: >-
   Rich Burroughs and Lukas Gentele from Loft Labs walk through vCluster, a newly
   Kubernetes-certified distribution that runs a k3s control plane inside a
   namespace and syncs workloads to the host, plus a live install via Helm.
+whatYouWillLearn:
+  - "Maps every virtual namespace into one host namespace through the syncer."
+  - "Runs a Kubernetes-certified k3s control plane inside the vCluster namespace."
+  - "Supports testing different Kubernetes versions and upgrade paths without touching the host cluster."
 publishedAt: 2021-06-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -93,4 +97,3 @@ resources:
     type: url
     category: documentation
 ---
-

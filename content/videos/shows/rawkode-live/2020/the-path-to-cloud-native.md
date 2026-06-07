@@ -6,6 +6,10 @@ description: >-
   CNCF ambassador Ihor Dvoretskyi joins David to unpack cloud native adoption,
   the role of Kubernetes, when microservices make sense versus a monolith,
   stateful workloads, and the common pitfalls teams hit on the journey.
+whatYouWillLearn:
+  - "Identify how CNCF frames cloud native and why it extends beyond just containers and Kubernetes."
+  - "Evaluate when to choose Kubernetes, monoliths, or microservices based on team complexity and tradeoffs."
+  - "Avoid common adoption mistakes in cloud native transitions, especially around stateful databases and operations."
 publishedAt: 2020-10-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,4 +76,3 @@ guests:
   - idvoretskyi
 resources: []
 ---
-

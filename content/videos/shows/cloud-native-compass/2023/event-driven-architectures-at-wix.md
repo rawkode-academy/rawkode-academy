@@ -7,6 +7,10 @@ description: >-
   Kafka events per day. We cover when to choose event-driven over RPC, schema
   evolution with Confluent Schema Registry and protobuf, Kafka cost
   optimisation, polyglot services, and ZIO on the JVM.
+whatYouWillLearn:
+  - "When Wix favors events over RPC to decouple services and tolerate failures"
+  - "How protobuf definitions, linters, and schema registries keep event changes compatible"
+  - "How Kafka producer, consumer, and admin proxies reduce broker load and bills"
 publishedAt: 2023-06-19T17:00:00.000Z
 type: recorded
 category: interview
@@ -83,4 +87,3 @@ resources:
     category: code
     url: 'https://zio.dev/'
 ---
-

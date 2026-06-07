@@ -10,6 +10,10 @@ description: >-
   project. We author YAML dashboards against a Prometheus data source, validate
   them with percli, and wire up GitHub Actions to lint and apply them on every
   commit.
+whatYouWillLearn:
+  - "Author YAML dashboards against Prometheus data sources with Perses schemas."
+  - "Validate dashboard definitions locally with percli before applying changes."
+  - "Wire GitHub Actions to lint and apply dashboards on every commit."
 publishedAt: 2025-07-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -38,4 +42,3 @@ resources:
     type: url
     category: documentation
 ---
-

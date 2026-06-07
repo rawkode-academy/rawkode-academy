@@ -7,6 +7,10 @@ description: >-
   black-box AI. The conversation covers training data provenance, The Pile,
   Hugging Face, hallucinations, copyright, and the human problem of verifying AI
   outputs.
+whatYouWillLearn:
+  - "Why black-box AI makes proprietary data, training provenance, and enterprise trust inseparable."
+  - "How The Pile, Hugging Face models, and copyright questions shape dataset risk."
+  - "Why citations, clean source data, and human verification matter for hallucinated outputs."
 publishedAt: 2023-11-01T17:00:00.000Z
 type: recorded
 category: interview

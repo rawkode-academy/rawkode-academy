@@ -7,6 +7,10 @@ description: >-
   operator: scaffolding a project, defining a custom resource, writing the
   reconciler with controller-runtime, generating CRDs and RBAC, and deploying it
   to a Kubernetes cluster.
+whatYouWillLearn:
+  - "Scaffold a Go Operator SDK project, define a custom resource API, and implement controller reconciliation math logic."
+  - "Generate CRD and RBAC manifests, deploy the operator to a Kubernetes cluster, and observe reconciliation of sample resources."
+  - "Use controller-runtime patterns and struct tags to validate required custom resource fields and optional behavior during reconcile."
 publishedAt: 2020-12-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -71,4 +75,3 @@ resources:
     type: url
     category: code
 ---
-

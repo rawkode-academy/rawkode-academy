@@ -10,6 +10,10 @@ description: >-
   Kubernetes Report 2025, correlating its findings on adoption, operations, and
   pain points with their own hands-on experience running Kubernetes in
   production.
+whatYouWillLearn:
+  - "Hear Kat Cosgrove explain her Kubernetes release and SIG Docs work."
+  - "Compare State of Kubernetes Report 2025 findings with real production experience."
+  - "Discuss kubectl pronunciation, AI music, and everyday Kubernetes operator pain points."
 publishedAt: 2025-09-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -23,4 +27,3 @@ resources:
     url: 'https://www.spectrocloud.com/state-of-kubernetes-2025'
     category: other
 ---
-

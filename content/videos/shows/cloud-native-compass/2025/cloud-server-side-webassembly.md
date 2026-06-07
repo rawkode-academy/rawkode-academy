@@ -6,6 +6,10 @@ description: >-
   Mikkel Mørk Hegnhøj from Fermyon joins David and Laura to unpack Spin 3.0,
   WASI 0.3, and the WebAssembly component model. They cover running Wasm on
   Kubernetes via SpinKube, polyglot components, and built-in OpenTelemetry.
+whatYouWillLearn:
+  - "Why Spin shields developers from churn as WASI specifications move toward 0.3."
+  - "Run WebAssembly as first-class Kubernetes workloads with SpinKube, runwasi, and containerd."
+  - "Compose polyglot Spin components and trace their calls with OpenTelemetry spans."
 publishedAt: 2025-02-28T17:00:00.000Z
 type: recorded
 category: interview

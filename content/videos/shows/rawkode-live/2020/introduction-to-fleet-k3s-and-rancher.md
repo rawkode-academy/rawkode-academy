@@ -7,6 +7,10 @@ description: >-
   Kubernetes, Rancher for multi-cluster management, and the new Fleet GitOps
   engine in Rancher 2.5. Hands-on: provision clusters, install Rancher via Helm
   and cert-manager, then deploy with Fleet.
+whatYouWillLearn:
+  - "Understand how Rancher turns k3s clusters into a centrally managed fleet across cloud, on-prem, and edge locations."
+  - "Install Rancher with Helm, configure certificates with cert-manager, and join multiple k3s clusters to a single control plane."
+  - "Use Fleet GitOps to group clusters, auto-deploy workloads from Git repos, and fix image architecture sync failures."
 publishedAt: 2020-10-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -107,4 +111,3 @@ resources:
     url: 'https://fleet.rancher.io/'
     category: documentation
 ---
-

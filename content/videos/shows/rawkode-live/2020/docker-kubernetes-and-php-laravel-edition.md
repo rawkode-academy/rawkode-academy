@@ -6,6 +6,10 @@ description: >-
   Ciaran McNulty joins David to containerize the Ping CRM Laravel app from
   scratch: building a docker-compose stack with PHP-FPM, Nginx and MariaDB,
   layering a Dockerfile with PHP extensions, then deploying to Kubernetes.
+whatYouWillLearn:
+  - "Containerize a Laravel application with docker-compose using PHP-FPM, Nginx, and MariaDB."
+  - "Build a multi-layer Dockerfile workflow that handles PHP dependencies, extensions, and environment files."
+  - "Deploy the resulting app image to Kubernetes while considering migration strategies and rollout behavior."
 publishedAt: 2020-09-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -67,4 +71,3 @@ resources:
     url: 'https://12factor.net/'
     category: documentation
 ---
-

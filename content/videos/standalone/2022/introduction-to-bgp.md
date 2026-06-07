@@ -7,6 +7,10 @@ description: >-
   prefixes, anycast routing and CDN failover. They then deploy NGINX across two
   Equinix Metal metros, configure the BIRD daemon, and verify anycast routing
   with curl, traceroute and Locoping.
+whatYouWillLearn:
+  - "Explain how BGP routes traffic between autonomous systems using advertised prefixes."
+  - "Configure BIRD to announce a service prefix from servers in multiple metros."
+  - "Verify anycast failover with curl, traceroute, and locoping while stopping one node."
 publishedAt: 2022-07-14T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -100,4 +104,3 @@ resources:
     url: 'https://simple.wikipedia.org/wiki/Border_Gateway_Protocol'
     category: documentation
 ---
-

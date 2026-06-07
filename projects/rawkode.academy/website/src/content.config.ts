@@ -47,6 +47,7 @@ const videos = defineCollection({
 		tagline: z.string().trim().min(1).optional(),
 		subtitle: z.string().optional(),
 		description: z.string().trim().min(20),
+		whatYouWillLearn: z.array(z.string().trim().min(1)).default([]),
 		terms: z.array(z.string().trim().min(1)).optional(),
 		publishedAt: z.coerce.date(),
 		duration: z.number().positive(),

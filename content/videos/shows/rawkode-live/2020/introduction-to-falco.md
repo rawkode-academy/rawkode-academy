@@ -7,6 +7,10 @@ description: >-
   installing it on a host, the kernel module vs eBPF driver, writing rules in
   YAML, triggering syscall and Kubernetes audit alerts, and routing output via
   Falcosidekick.
+whatYouWillLearn:
+  - "Use Falco YAML rules to detect suspicious runtime actions like privileged containers, credential leaks, and unauthorized root access."
+  - "Install Falco on Linux hosts, wire Kubernetes audit webhooks, and validate logs from syscall and container triggers."
+  - "Inspect Falco default rules, custom rule files, macros, and lists, then reuse them with Falcosidekick or external outputs."
 publishedAt: 2020-10-30T17:00:00.000Z
 type: live
 category: tutorial
@@ -108,4 +112,3 @@ resources:
     url: 'https://github.com/falcosecurity/falcosidekick'
     category: code
 ---
-

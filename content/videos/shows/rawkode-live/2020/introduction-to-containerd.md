@@ -6,6 +6,10 @@ description: >-
   Phil Estes, containerd maintainer, walks through how containerd was extracted
   from Docker, its gRPC service architecture, snapshotters and CRI integration
   versus CRI-O, plus hands-on debugging with ctr and microk8s.
+whatYouWillLearn:
+  - "Trace containerd's origin from Docker into a standalone runtime layer used by Kubernetes and OCI ecosystems."
+  - "Explore containerd's gRPC API, pluggable services, namespaces, and CRI or build integrations with practical examples."
+  - "Practice CTR usage in microk8s by pulling images, creating namespaces, running containers, and debugging failures with deep logs."
 publishedAt: 2020-09-22T17:00:00.000Z
 type: live
 category: tutorial
@@ -60,4 +64,3 @@ resources:
     url: 'https://katacontainers.io/'
     category: code
 ---
-

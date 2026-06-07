@@ -7,6 +7,10 @@ description: >-
   autoscaling end to end: horizontal pod autoscaling on resource, custom
   (Prometheus adapter), and external (RabbitMQ) metrics, plus vertical pod
   autoscaling.
+whatYouWillLearn:
+  - "Compare when to use HPA with resource, custom, and external metrics for cost-aware pod scale behavior."
+  - "Set up Metrics Server, Prometheus Adapter, and RabbitMQ-backed external adapters to feed Kubernetes autoscaler inputs."
+  - "Walk through VPA installation and update modes to tune per-pod CPU and memory requests automatically over time."
 publishedAt: 2020-12-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -65,4 +69,3 @@ resources:
     url: 'https://github.com/kubernetes-sigs/prometheus-adapter'
     category: documentation
 ---
-

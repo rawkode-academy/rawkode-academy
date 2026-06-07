@@ -7,6 +7,10 @@ description: >-
   gotk, the source, kustomize, helm, and notification controllers, then adding
   Git and Helm repository sources, customizations with dependencies and health
   checks, and Helm releases on Kubernetes.
+whatYouWillLearn:
+  - "Bootstrapping FluxCD Toolkit with gotk and repository-backed source control for cluster state."
+  - "Defining multiple Git and Helm sources, then reconciling changes with dependencies and health checks."
+  - "Deploying and managing Helm releases with values overrides, test hooks, rollbacks, and observability tooling."
 publishedAt: 2020-10-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -131,4 +135,3 @@ resources:
     type: url
     category: code
 ---
-

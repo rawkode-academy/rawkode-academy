@@ -6,6 +6,10 @@ description: >-
   Add the Grafana Parca data source plugin, point it at your Parca server, and
   debug a misbehaving app with flame graphs and function filters without leaving
   Grafana.
+whatYouWillLearn:
+  - "Connect Grafana to a Parca server with the built-in data source plugin."
+  - "Filter CPU profiles by executable and isolate the million dollar application."
+  - "Use flame graphs and function filters to spot allocation hot paths."
 publishedAt: 2023-07-10T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -57,4 +61,3 @@ resources:
     url: 'https://grafana.com/docs/grafana/latest/datasources/parca/'
     category: documentation
 ---
-

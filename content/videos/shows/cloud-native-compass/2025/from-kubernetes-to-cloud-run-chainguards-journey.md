@@ -7,6 +7,10 @@ description: >-
   infrastructure from Kubernetes and Knative to Google Cloud Run, covering
   multi-region Terraform modules, least-privilege IAM, R2 for blob storage, and
   BigQuery-backed event logging.
+whatYouWillLearn:
+  - "Identify when mostly stateless, spiky-traffic workloads are better moved from Kubernetes or Knative to Cloud Run."
+  - "Use Knative-compatible container patterns to move services while removing node and cluster management."
+  - "Implement least-privilege IAM, R2 blob storage, and BigQuery event logging for secure image-serving operations."
 publishedAt: 2025-01-16T17:00:00.000Z
 type: recorded
 category: interview
@@ -60,4 +64,3 @@ resources:
     type: url
     category: code
 ---
-

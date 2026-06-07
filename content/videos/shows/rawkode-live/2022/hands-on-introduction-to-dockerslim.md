@@ -7,6 +7,10 @@ description: >-
   build, xray, and probing workflow, then live-slim a CentOS+curl image and a
   Node.js HTTP API before optimising a workload running on a kind Kubernetes
   cluster.
+whatYouWillLearn:
+  - "Use runtime analysis and optional integration tests to capture required files."
+  - "Choose HTTP probes for services or exec probes for CLI images."
+  - "Inspect the minimized scratch image with X-ray and report artifacts."
 publishedAt: 2022-09-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -92,4 +96,3 @@ resources:
     url: 'https://github.com/slimtoolkit/slim'
     category: code
 ---
-

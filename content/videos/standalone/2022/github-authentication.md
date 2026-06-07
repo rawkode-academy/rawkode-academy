@@ -7,6 +7,10 @@ description: >-
   organizations for an existing Teleport cluster: creating the OAuth app,
   writing the GitHub connector YAML, fixing the team requirement, then granting
   SSH access by editing a Teleport role.
+whatYouWillLearn:
+  - "Create a GitHub OAuth app with the Teleport callback URL."
+  - "Configure Teleport's GitHub connector with organization and team restrictions in YAML."
+  - "Grant SSH access by mapping the GitHub team to a Teleport role."
 publishedAt: 2022-05-04T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -52,4 +56,3 @@ resources:
     type: url
     category: other
 ---
-

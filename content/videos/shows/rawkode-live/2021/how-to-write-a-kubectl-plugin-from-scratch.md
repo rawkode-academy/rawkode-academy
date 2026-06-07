@@ -6,6 +6,10 @@ description: >-
   Matt Turner joins to write a kubectl plugin in Bash that swaps kubectl's
   verb-noun ordering to noun-verb, then packages it for distribution through the
   Krew plugin manager with a crew.yaml manifest and GitHub releases.
+whatYouWillLearn:
+  - "Swap kubectl's verb-noun interface into noun-verb commands using a simple Bash plugin."
+  - "Make the plugin executable, place it on PATH, and test it locally."
+  - "Package the plugin for Krew with a manifest and GitHub release workflow."
 publishedAt: 2021-01-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -78,4 +82,3 @@ resources:
     url: 'https://github.com/kubernetes-sigs/krew-index'
     category: code
 ---
-

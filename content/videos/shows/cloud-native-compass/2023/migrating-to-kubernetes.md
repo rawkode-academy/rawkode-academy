@@ -7,6 +7,10 @@ description: >-
   when not) to adopt it, taming developer experience with DevSpace, and the
   ecosystem of Argo CD, Flux, Helm, Kustomize, KEDA, and Crossplane that powers
   their platform.
+whatYouWillLearn:
+  - "When Kubernetes solves growing microservice complexity better than custom deployment scripts"
+  - "How DevSpace lets developers test selected service stacks inside remote namespaces"
+  - "Where Argo CD, Flux, Helm, Kustomize, KEDA, and Crossplane fit"
 publishedAt: 2023-05-22T17:00:00.000Z
 type: recorded
 category: interview

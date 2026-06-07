@@ -6,6 +6,10 @@ description: >-
   Senyo Simpson joins David to dig into Rust's async/await. They cover lazy
   futures, the Tokio executor, spawn and join, then build a custom Future,
   executor, and Waker from scratch to show what happens under the hood.
+whatYouWillLearn:
+  - "Explore how Rust futures stay lazy until an executor polls them"
+  - "Use Tokio spawn and join to run concurrent async tasks together"
+  - "Build a custom future, waker, and executor that reschedules delayed work"
 publishedAt: 2021-08-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -92,4 +96,3 @@ resources:
     url: 'https://rust-lang.github.io/async-book/'
     category: documentation
 ---
-

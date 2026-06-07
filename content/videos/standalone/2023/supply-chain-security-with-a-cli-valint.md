@@ -7,6 +7,10 @@ description: >-
   CycloneDX SBOMs for containers, Git repos, and Go projects, sign evidence with
   Sigstore, push to OCI registries, and enforce cosign policies locally, in CI,
   or as a Kubernetes admission controller.
+whatYouWillLearn:
+  - "Generate SLSA and CycloneDX SBOMs for container images, Git repositories, and Go projects."
+  - "Sign collected evidence with Sigstore and store it in OCI artifacts."
+  - "Enforce cosign policies locally, in CI, or through a Kubernetes admission controller."
 publishedAt: 2023-05-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -65,4 +69,3 @@ resources:
     url: 'https://www.sigstore.dev/'
     category: other
 ---
-

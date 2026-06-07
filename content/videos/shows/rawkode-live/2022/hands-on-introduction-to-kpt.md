@@ -7,6 +7,10 @@ description: >-
   installing the CLI and Porch, registering blueprint and deployment Git repos,
   authoring a namespace package with KRM functions, and driving it all from the
   Backstage-based Config as Data UI.
+whatYouWillLearn:
+  - "Install the kpt CLI, Porch, and UI components for a live demo."
+  - "Create a namespace package with kpt package init, tree, and function render."
+  - "Register blueprint and deployment repositories, then deploy the package through Backstage."
 publishedAt: 2022-07-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -183,4 +187,3 @@ resources:
     url: 'https://kubernetes.slack.com/messages/kpt'
     category: other
 ---
-

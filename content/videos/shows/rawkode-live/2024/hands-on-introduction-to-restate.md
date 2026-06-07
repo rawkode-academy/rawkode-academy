@@ -6,6 +6,10 @@ description: >-
   Jack Kleeman walks through Restate, a single-binary durable execution engine
   written in Rust. We cover context.run, keyed state, suspending and resuming
   workflows, context.promise, and live code a TypeScript write handler.
+whatYouWillLearn:
+  - "Model cross-service waits with durable promises and shared awakable IDs."
+  - "Make CRUD handlers idempotent by treating validation and duplicate writes as terminal errors."
+  - "Deploy Restate as a distributed runtime with high-availability failover across nodes."
 publishedAt: 2024-09-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -71,4 +75,3 @@ resources:
     url: 'https://github.com/restatedev/examples'
     category: code
 ---
-

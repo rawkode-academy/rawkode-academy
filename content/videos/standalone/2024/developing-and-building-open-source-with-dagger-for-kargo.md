@@ -6,6 +6,10 @@ description: >-
   Kat Cosgrove joins to Daggerize the Cargo project. We start with the Python
   SDK, explore container composition and caching, debug async issues, and end
   with a working Docker-in-Dagger setup running the Docker daemon as a service.
+whatYouWillLearn:
+  - "Use the Python SDK to define Dagger pipelines for an open source project."
+  - "Pass files and artifacts between containers to compose multi-step build workflows."
+  - "Run Docker daemon as a Dagger service to support nested container tooling."
 publishedAt: 2024-08-08T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -95,4 +99,3 @@ resources:
     url: 'https://docs.dagger.io/'
     category: documentation
 ---
-

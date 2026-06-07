@@ -7,6 +7,10 @@ description: >-
   contrasts it with Terraform and Pulumi, then live-demos provisioning a GKE
   cluster, building composite resources, and watching drift detection rebuild a
   deleted node group.
+whatYouWillLearn:
+  - "Understand how Crossplane works as an infrastructure control plane and differs from Terraform or Pulumi."
+  - "Apply Crossplane GKE cluster YAML as Kubernetes custom resources, then observe managed state with kubectl, logs, and metrics."
+  - "Build reusable composite resources to package platform patterns, then validate platform consistency with Crossplane drift correction."
 publishedAt: 2021-09-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -74,4 +78,3 @@ resources:
     url: 'https://github.com/crossplane-contrib/provider-sql'
     category: code
 ---
-

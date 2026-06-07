@@ -6,6 +6,10 @@ description: >-
   Laszlo Fogas walks through Gimlet, a GitOps developer platform that pairs Flux
   with the OneChart Helm chart and a UI. We install it on k3d, wire up GitHub,
   deploy an app with Buildpacks, and add NGINX from the marketplace.
+whatYouWillLearn:
+  - "Gimlet centers the UI on commits, branches, CI status, and manual deploys."
+  - "GitOps still needs workflows for promotions, smoke tests, and post-deploy health checks."
+  - "The platform reduces Kubernetes sprawl by hiding inventory tables and extra abstractions."
 publishedAt: 2023-08-26T17:00:00.000Z
 type: live
 category: tutorial
@@ -59,4 +63,3 @@ resources:
     type: url
     category: other
 ---
-

@@ -7,6 +7,10 @@ description: >-
   triggers, and the dashboard, building Tasks and TaskRuns with parameters and
   results, wiring up workspaces and the git-clone catalog task, and finishing
   with a GitHub webhook driving an end-to-end image build.
+whatYouWillLearn:
+  - "Build a Tekton pipeline by creating Tasks, TaskRuns, and Pipelines with parameters, results, and workspace-mounted shared storage."
+  - "Install Tekton components on Kubernetes and use the built-in tektoncd dashboard to observe task and pipeline execution."
+  - "Run end-to-end container image builds from GitHub webhooks with Tekton Triggers, event listeners, and git-clone tasks."
 publishedAt: 2020-12-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -88,4 +92,3 @@ resources:
     url: 'https://github.com/tektoncd/catalog'
     category: code
 ---
-

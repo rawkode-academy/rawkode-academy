@@ -7,6 +7,10 @@ description: >-
   ImagePolicyWebhook, Kyverno ClusterPolicy, deny NetworkPolicy and kubelet
   config typo on cluster 11; missing static manifests, immutable etcd DB,
   vm.min_free_kbytes starvation and kubelet memory limits on cluster 13.
+whatYouWillLearn:
+  - "Diagnose API-server failures from image policy webhook and disablement, then edit manifest settings to allow pod creation again."
+  - "Fix node readiness by correcting kubelet config typos and restarting kubelet so scheduling resumes on repaired workers."
+  - "Restore cluster 13 by re-adding missing control-plane manifests, removing immutable bits from etcd database files, and resetting vm.min_free_kbytes."
 publishedAt: 2021-03-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -172,4 +176,3 @@ resources:
     type: url
     category: other
 ---
-

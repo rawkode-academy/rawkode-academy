@@ -7,6 +7,10 @@ description: >-
   transfer, shared cache, collaborative debugging via Docker Desktop, native
   multi-architecture builds for AMD64 and ARM64, CI integration with GitHub
   Actions, and pricing tiers.
+whatYouWillLearn:
+  - "How managed Docker Build Cloud builders centralize builds, cache, and team debugging."
+  - "How BuildKit context transfer reduces network chatter and speeds repeated image builds."
+  - "How multi-architecture builds target AMD64 and ARM64, including GitHub Actions use."
 publishedAt: 2024-03-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     url: >-
       https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go
 ---
-

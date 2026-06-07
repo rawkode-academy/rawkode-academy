@@ -7,6 +7,10 @@ description: >-
   from the CLI, auto-enrich URLs with Microlink metadata and ChatGPT summaries,
   then expose a filtered todo API by adding a read field to the type and
   deploying with a git push.
+whatYouWillLearn:
+  - "Create and list Guidepad bookmarks from the CLI using a here doc."
+  - "Auto-enrich bookmark URLs with Microlink metadata and ChatGPT summaries."
+  - "Add a read field to filter unread bookmarks through a new endpoint."
 publishedAt: 2023-06-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -54,4 +58,3 @@ resources:
     type: url
     category: code
 ---
-
