@@ -6,6 +6,10 @@ description: >-
   Ben Abbott joins David to walk through Teleport 9, covering Machine ID for
   automated workloads with Ansible, new database access for Redis, MariaDB and
   SQL Server, moderated sessions, per-session MFA, and desktop access.
+whatYouWillLearn:
+  - "Issue short-lived machine identities for Ansible and other automation nodes."
+  - "Connect Redis, MariaDB, and SQL Server through Teleport database access."
+  - "Record and approve desktop sessions with per-session MFA and moderated access."
 publishedAt: 2022-04-07T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -103,4 +107,3 @@ resources:
     type: url
     category: documentation
 ---
-
