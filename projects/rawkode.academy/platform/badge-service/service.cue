@@ -15,7 +15,7 @@ _service: gen.#PlatformService & {
 		d1Databases: [{
 			binding:      "DB"
 			databaseName: "platform-badge"
-			databaseId:   "TODO_CREATE_PLATFORM_BADGE_D1"
+			databaseId:   "4711df5f-b59b-4eaf-8d88-afe600b75b90"
 		}]
 		routes: [{
 			pattern:      "badges.rawkode.academy"
