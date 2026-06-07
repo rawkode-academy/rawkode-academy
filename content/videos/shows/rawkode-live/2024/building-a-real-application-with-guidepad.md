@@ -7,6 +7,10 @@ description: >-
   build a real application on the platform: an AWS Lambda replacement that runs
   Node.js operations, walking through services, state plans, artifacts, and
   public interfaces.
+whatYouWillLearn:
+  - "Model a Node.js Lambda replacement with services, operations, artifacts, and exposures."
+  - "Use state plans to build, redeploy, and move services between environments."
+  - "Link public interfaces to service exposures so operations can execute correctly."
 publishedAt: 2024-07-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,4 +76,3 @@ resources:
     type: url
     category: code
 ---
-
