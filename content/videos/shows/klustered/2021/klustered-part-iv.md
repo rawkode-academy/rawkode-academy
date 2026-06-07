@@ -6,6 +6,10 @@ description: >-
   Lee Briggs joins to debug two broken Kubernetes clusters live: missing kubelet
   binaries, a renamed API server manifest, rogue validation and mutating
   webhooks, a stopped containerd, and a Cilium CNI image pull policy bug.
+whatYouWillLearn:
+  - "Debug broken Kubernetes control-plane health by inspecting kubelet status, static manifests, and API server errors."
+  - "Trace worker-node scheduling failures through node status checks, webhook diagnostics, and CNI init-container behavior."
+  - "Repair control-plane defects by fixing kubelet binaries, corrected API-server manifest settings, and Cilium image pull policies."
 publishedAt: 2021-03-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://goteleport.com/'
     category: other
 ---
-
