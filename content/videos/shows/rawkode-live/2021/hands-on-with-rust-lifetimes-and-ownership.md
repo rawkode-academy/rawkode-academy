@@ -6,6 +6,10 @@ description: >-
   Ana Hobden joins David to work through Rust's borrow checker and lifetime
   system using the Rustlings move-semantics exercises, covering ownership,
   mutable references, scope, and when to reach for Box, Rc, and Arc.
+whatYouWillLearn:
+  - "Explain how Rust's borrow checker enforces ownership, mutable borrows, and immutable references."
+  - "Walk through Rustlings exercises that move vectors through mutable references and dropped borrows."
+  - "Distinguish owned `String`s from `&str` slices and use explicit lifetimes to return references safely."
 publishedAt: 2021-06-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -80,4 +84,3 @@ resources:
     url: 'https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html'
     category: documentation
 ---
-
