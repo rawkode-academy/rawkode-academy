@@ -10,6 +10,10 @@ description: >-
   Oleg and Will from Microsoft show how Headlamp's plugin model surfaces Flux,
   Argo CD, Cilium Hubble, and Prometheus inside a Kubernetes UI, plus the new AI
   assistant, OIDC auth, Artifact Hub plugin catalogue, and Backstage embedding.
+whatYouWillLearn:
+  - "How Headlamp uses plugins to surface Flux, Argo CD, Cilium Hubble, and Prometheus."
+  - "How the plugin catalog lets users install official and third-party extensions from Artifact Hub."
+  - "How Headlamp combines OIDC login, customizable views, and an AI assistant for cluster tasks."
 publishedAt: 2025-10-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -45,4 +49,3 @@ resources:
     url: 'https://headlamp.dev/docs/latest/contributing/'
     category: documentation
 ---
-
