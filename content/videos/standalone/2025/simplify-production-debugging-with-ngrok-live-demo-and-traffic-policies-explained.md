@@ -10,6 +10,10 @@ description: >-
   your applications in production. We'll explore a practical use case where
   production traffic is routed to a local machine for debugging using ngrok
   traffic policies.
+whatYouWillLearn:
+  - "Route production requests to a local machine with ngrok for live debugging."
+  - "Use traffic policies to steer specific traffic without changing your deployed code."
+  - "Reproduce real production failures against your dev environment and inspect them directly."
 publishedAt: 2025-03-27T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -19,4 +23,3 @@ duration: 624
 guests: []
 resources: []
 ---
-
