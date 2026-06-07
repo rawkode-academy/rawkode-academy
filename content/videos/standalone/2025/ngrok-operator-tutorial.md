@@ -7,6 +7,10 @@ description: >-
   Install the ngrok Kubernetes Operator with Helm, then expose a workload using
   an AgentEndpoint and TrafficPolicy. Add OIDC auth via Zitadel, rate limiting,
   and a custom 429 page, all without load balancers or port forwarding.
+whatYouWillLearn:
+  - "Install the ngrok operator with Helm and configure its secrets via env vars."
+  - "Create an AgentEndpoint that maps a Kubernetes service to an ngrok domain."
+  - "Protect the endpoint with OIDC, one-request rate limits, and custom responses."
 publishedAt: 2025-07-23T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -32,4 +36,3 @@ resources:
     type: url
     category: demos
 ---
-
