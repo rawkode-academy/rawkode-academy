@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CredentialValidationError } from "./errors.js";
-import type { AchievementCredential } from "./types.js";
+import { OPENBADGE_CONTEXT, type AchievementCredential } from "./types.js";
 
 const ImageSchema = z.object({
 	id: z.string(),
@@ -42,39 +42,21 @@ const CredentialSubjectSchema = z.object({
 	achievement: AchievementSchema,
 });
 
-const ProofSchema = z.object({
-	type: z.literal("JwtProof2020"),
-	jwt: z.string().min(1),
-});
-
 const AchievementCredentialSchema = z.object({
-	"@context": z
-		.array(z.string())
-		.refine(
-			(values) =>
-				values.includes("https://www.w3.org/ns/credentials/v2") &&
-				values.includes(
-					"https://purl.imsglobal.org/spec/ob/v3p0/context-3.0.3.json",
-				),
-			{ message: "must include W3C VC v2 and OpenBadge v3 contexts" },
-		),
+	"@context": z.tuple([
+		z.literal(OPENBADGE_CONTEXT[0]),
+		z.literal(OPENBADGE_CONTEXT[1]),
+	]),
 	id: z.string(),
-	type: z
-		.array(z.string())
-		.refine(
-			(values) =>
-				values.includes("VerifiableCredential") &&
-				values.includes("AchievementCredential"),
-			{
-				message: "must include VerifiableCredential and AchievementCredential",
-			},
-		),
+	type: z.tuple([
+		z.literal("VerifiableCredential"),
+		z.literal("AchievementCredential"),
+	]),
 	name: z.string().min(1),
 	issuer: ProfileSchema,
 	credentialSubject: CredentialSubjectSchema,
 	validFrom: z.string().datetime(),
 	validUntil: z.string().datetime().optional(),
-	proof: ProofSchema.optional(),
 });
 
 export interface ValidationResult {

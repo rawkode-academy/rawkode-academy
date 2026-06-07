@@ -277,26 +277,9 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				});
 			}
 
-			const decoded = decodeJwt(badge.credentialJson) as AchievementCredential;
-
-			const credential = {
-				"@context": decoded["@context"],
-				id: decoded.id,
-				type: decoded.type,
-				name: decoded.name,
-				issuer: decoded.issuer,
-				credentialSubject: decoded.credentialSubject,
-				validFrom: decoded.validFrom,
-				...(decoded.validUntil && { validUntil: decoded.validUntil }),
-				proof: {
-					type: "JwtProof2020",
-					jwt: badge.credentialJson,
-				},
-			};
-
-			return new Response(JSON.stringify(credential), {
+			return new Response(badge.credentialJson, {
 				status: 200,
-				headers: { "Content-Type": "application/ld+json", ...CORS_HEADERS },
+				headers: { "Content-Type": "text/plain", ...CORS_HEADERS },
 			});
 		} catch (error) {
 			console.error("Failed to get badge JSON:", error);

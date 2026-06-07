@@ -36,7 +36,6 @@ export type {
 	CredentialSubject,
 	Image,
 	JWTClaims,
-	JWTProof,
 	Profile,
 	RSAKeys,
 } from "./types.js";

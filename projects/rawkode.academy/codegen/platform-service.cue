@@ -222,7 +222,7 @@ import (
 			hermetic: false
 			dir: from: "caller"
 			command: "sh"
-			args: ["-lc", strings.Join(_ciDeployCommands, "\n")]
+			args: ["-ec", strings.Join(_ciDeployCommands, "\n")]
 			inputs: list.Concat(_ciDeployInputSets)
 		}
 
@@ -231,7 +231,7 @@ import (
 				hermetic: false
 				dir: from: "caller"
 				command: "sh"
-				args: ["-lc", _wranglerWithNode24 + " d1 migrations apply DB --remote --config " + _migrationWranglerConfig]
+				args: ["-ec", _wranglerWithNode24 + " d1 migrations apply DB --remote --config " + _migrationWranglerConfig]
 				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", _migrationWranglerConfig]])
 			}
 		}

@@ -38,11 +38,6 @@ export interface CredentialSubject {
 	achievement: Achievement;
 }
 
-export interface JWTProof {
-	type: "JwtProof2020";
-	jwt: string;
-}
-
 export interface AchievementCredential {
 	"@context": typeof OPENBADGE_CONTEXT;
 	id: string;
@@ -52,7 +47,6 @@ export interface AchievementCredential {
 	credentialSubject: CredentialSubject;
 	validFrom: string;
 	validUntil?: string;
-	proof?: JWTProof;
 }
 
 export interface BuildAchievementParams {

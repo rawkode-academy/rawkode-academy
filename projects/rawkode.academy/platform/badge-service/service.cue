@@ -17,6 +17,10 @@ _service: gen.#PlatformService & {
 			databaseName: "platform-badge"
 			databaseId:   "TODO_CREATE_PLATFORM_BADGE_D1"
 		}]
+		routes: [{
+			pattern:      "badges.rawkode.academy"
+			customDomain: true
+		}]
 		secretStoreSecrets: [
 			{
 				binding:    "BADGE_ISSUER_RSA_PRIVATE_KEY"

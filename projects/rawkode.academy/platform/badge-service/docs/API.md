@@ -7,7 +7,7 @@
 | POST | `/issue` | Issue badge to user | Bearer token |
 | GET | `/issuer` | Get issuer profile with JWK | No |
 | GET | `/issuer/key-1` | Get issuer public JWK | No |
-| GET | `/badge/:id/json` | Get credential JSON-LD | No |
+| GET | `/badge/:id/json` | Get signed VC-JWT credential | No |
 | GET | `/badge/:id/image` | Get badge image | No |
 | GET | `/health` | Health check | No |
 
@@ -29,25 +29,14 @@ Issues are internal-only. Callers must provide `Authorization: Bearer <BADGE_ISS
 
 ### GET /badge/:id/json
 
-Returns OpenBadge 3.0 credential in JSON-LD format with JWT proof.
+Returns the OpenBadge 3.0 VC-JWT credential as a compact JWS string.
 
 **Response:**
-```json
-{
-  "@context": ["https://www.w3.org/ns/credentials/v2", "https://purl.imsglobal.org/spec/ob/v3p0/context.json"],
-  "id": "http://localhost:8787/badge/{id}",
-  "type": ["VerifiableCredential", "AchievementCredential"],
-  "issuer": { ... },
-  "credentialSubject": { ... },
-  "validFrom": "2025-01-01T00:00:00Z",
-  "proof": {
-    "type": "JwtProof2020",
-    "jwt": "<signed-jwt-token>"
-  }
-}
+```text
+eyJhbGciOiJSUzI1NiIsImtpZCI6Imh0dHBzOi8vYmFkZ2VzLnJhd2tvZGUuYWNhZGVteS9pc3N1ZXIva2V5LTEifQ...
 ```
 
-**Content-Type:** `application/ld+json`
+**Content-Type:** `text/plain`
 **Error:** `404` if badge not found
 
 ## Badge Verification
@@ -63,7 +52,7 @@ BADGE_ID="<your-badge-id>"
 CREDENTIAL=$(curl -s http://localhost:8787/badge/$BADGE_ID/json)
 
 # Decode JWT payload (inspection only, not verification):
-echo $CREDENTIAL | jq -r '.proof.jwt' | cut -d. -f2 | base64 -d | jq
+echo "$CREDENTIAL" | cut -d. -f2 | base64 -d | jq
 ```
 
 #### 2. Verify Against OpenBadge 3.0 Schema
