@@ -6,6 +6,10 @@ description: >-
   Bring GitOps to non-Kubernetes environments using Portainer Stacks backed by a
   Git repository and a docker-compose.yml, with continuous delivery triggered by
   either polling or GitHub webhooks.
+whatYouWillLearn:
+  - "Use Portainer stacks to deploy Docker Compose files from a Git repository."
+  - "Choose polling intervals or GitHub webhooks to trigger automatic redeployments."
+  - "Verify updates by watching Portainer add containers after each committed change."
 publishedAt: 2022-12-09T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -57,4 +61,3 @@ resources:
     url: 'https://docs.docker.com/compose/'
     category: documentation
 ---
-
