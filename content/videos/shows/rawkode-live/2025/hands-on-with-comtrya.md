@@ -7,6 +7,10 @@ description: >-
   Rust-based workstation configuration tool. They cover installation, writing
   YAML/TOML manifests, dependencies, conditional logic, action variants, and
   user, file, and git actions.
+whatYouWillLearn:
+  - "Install Comtrya from cargo, shell script, GitHub releases, or package managers."
+  - "Write YAML or TOML manifests with actions, dependencies, and selective applies."
+  - "Use where clauses and action variants to handle platform-specific behavior."
 publishedAt: 2025-01-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     url: 'https://github.com/comtrya/comtrya'
     category: code
 ---
-
