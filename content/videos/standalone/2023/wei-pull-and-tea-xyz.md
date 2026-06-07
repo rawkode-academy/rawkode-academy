@@ -6,6 +6,10 @@ description: >-
   Brian demos wei/pull, a GitHub app that auto-opens pull requests to keep forks
   in sync with upstream. David then walks through tea.xyz (now pkgx), running
   uninstalled commands, symlink shims, and resolving deps from README or t.yaml.
+whatYouWillLearn:
+  - "Run commands like bun or nim without installing them locally."
+  - "Create symlink shims so tea resolves tools from the command name."
+  - "Pull Go, npm, or other deps from README tables or t.yaml."
 publishedAt: 2023-08-24T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -58,4 +62,3 @@ resources:
     category: documentation
     url: 'https://pkgx.sh/'
 ---
-
