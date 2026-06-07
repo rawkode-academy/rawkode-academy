@@ -6,6 +6,10 @@ description: >-
   Eric Smalling and Carlos Santana race the clock to debug broken Kubernetes
   clusters. Expect rogue static pods, ZomboCom surprises, broken Cilium network
   policies, CoreDNS misfires, and a mutating admission webhook swapping images.
+whatYouWillLearn:
+  - "Track down rogue static pods and remove stale manifests that block cluster startup and service health."
+  - "Repair broken service networking by diagnosing Cilium, CoreDNS, kubelet state, and node IP table failures in sequence."
+  - "Debug image and policy issues caused by admission webhooks, scheduler misconfiguration, and shell aliases that rewrite kubectl."
 publishedAt: 2021-08-26T18:00:00.000Z
 type: live
 category: tutorial
@@ -109,4 +113,3 @@ resources:
     type: url
     category: other
 ---
-
