@@ -7,6 +7,10 @@ description: >-
   component to a TypeScript Spin backend, handle CORS, cache auth tokens in the
   key-value store, call createSession and getPostThread, and use the KV Explorer
   to seed credentials on deploy.
+whatYouWillLearn:
+  - "Handle CORS for browser requests against a Spin-powered Bluesky embed backend."
+  - "Cache Bluesky access tokens in Spin KV and refresh them when needed."
+  - "Use the KV Explorer and deploy-time credentials to seed and inspect data."
 publishedAt: 2023-06-23T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -58,4 +62,3 @@ resources:
     url: 'https://github.com/fermyon/spin-kv-explorer'
     category: code
 ---
-
