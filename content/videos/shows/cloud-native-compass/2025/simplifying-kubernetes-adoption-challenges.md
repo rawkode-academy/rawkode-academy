@@ -7,6 +7,10 @@ description: >-
   Kubernetes adoption still trips up teams: skipping container fundamentals,
   picking between managed services and self-hosted clusters, navigating tooling
   choices like Flux vs Argo CD, and structuring multi-cluster environments.
+whatYouWillLearn:
+  - "Identify why Kubernetes teams stumble when Linux, containers, and core platform fundamentals are skipped."
+  - "Compare managed Kubernetes services with self-hosted clusters based on team size, control, and compliance realities."
+  - "Evaluate practical tool selection for GitOps and policy stacks, including Flux, Argo CD, OPA, and Kyverno."
 publishedAt: 2025-03-13T17:00:00.000Z
 type: recorded
 category: interview
@@ -71,4 +75,3 @@ resources:
     url: 'https://slack.k8s.io/'
     category: other
 ---
-
