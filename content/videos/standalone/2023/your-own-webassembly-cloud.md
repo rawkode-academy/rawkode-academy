@@ -6,6 +6,10 @@ description: >-
   Deploy a Spin app to Fermyon Cloud, then stand up your own self-hosted
   WebAssembly platform on Civo with the fermyon/installer Terraform automation,
   walking through Nomad, Consul, Vault, Traefik, Hippo, HEPL, and Bundle.
+whatYouWillLearn:
+  - "Provision a Spin app on Fermyon Cloud and verify the hosted hello-fermion response."
+  - "Use the fermyon/installer Terraform setup to create a self-hosted platform on Civo."
+  - "Access Hippo, Bundle, and the Nomad stack through generated Terraform outputs and SSH."
 publishedAt: 2023-02-25T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -53,4 +57,3 @@ resources:
     url: 'https://rawkode.academy/watch/whats-new-with-spin-v0-8'
     category: other
 ---
-
