@@ -7,6 +7,10 @@ description: >-
   options like batch size, buffer limit, jitter and precision, fanning out to a
   second file output, and adding the Prometheus input plugin to scrape a local
   endpoint.
+whatYouWillLearn:
+  - "Configure Telegraf with a remote TOML file hosted on a public endpoint."
+  - "Tune batch size and buffer limits to improve metric collection resilience."
+  - "Use collection jitter and Prometheus inputs to spread load and scrape metrics."
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -50,4 +54,3 @@ resources:
     url: 'https://github.com/influxdata/telegraf/tree/master/plugins'
     category: documentation
 ---
-
