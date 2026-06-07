@@ -6,6 +6,10 @@ description: >-
   Jussi Nummelin walks through k0s, the single-binary Kubernetes distribution
   from Mirantis. We cover control plane isolation, single-node and HA install,
   then drive multi-node deploys and upgrades with k0sctl plus a Terraform demo.
+whatYouWillLearn:
+  - "Compare k0s control-plane isolation with node work scheduling and understand its security and networking implications."
+  - "Install a single-node k0s cluster from docs and validate that controllers and APIs are running correctly."
+  - "Run k0sctl through a Terraform-style workflow to orchestrate multi-host clusters from infrastructure code."
 publishedAt: 2021-08-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://github.com/k0sproject/k0sctl'
     category: code
 ---
-
