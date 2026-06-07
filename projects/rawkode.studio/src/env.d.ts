@@ -1,5 +1,7 @@
 /// <reference types="astro/client" />
 
+import type { SendSubjectInput } from "notifications/src/contracts.js";
+
 declare global {
 	interface Env extends StudioEnv {}
 
@@ -24,6 +26,7 @@ export interface StudioEnv {
 	RECORDINGS?: R2Bucket;
 	RECORDINGS_BUCKET_NAME?: string;
 	CLOUDFLARE_ACCOUNT_ID?: string;
+	CLOUDFLARE_STREAM_API_TOKEN?: string | SecretsStoreSecret;
 	REALTIMEKIT_API_TOKEN?: string;
 	REALTIMEKIT_APP_ID?: string;
 	REALTIMEKIT_GUEST_PRESET?: string;
@@ -31,6 +34,7 @@ export interface StudioEnv {
 	REALTIMEKIT_PRODUCER_PRESET?: string;
 	REALTIMEKIT_PROGRAM_PRESET?: string;
 	RAWKODE_GRAPHQL_URL?: string;
+	STREAM_NOTIFICATIONS?: Queue<SendSubjectInput>;
 	STUDIO_OPERATOR_GITHUB_HANDLES?: string;
 }
 

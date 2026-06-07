@@ -1,4 +1,13 @@
 import type { StudioEnv, StudioUser } from "../env";
+import type { SendSubjectInput } from "notifications/src/contracts.js";
+import {
+	cloudflareStreamLiveInputIsConnected,
+	createCloudflareStreamLiveInput,
+	getCloudflareStreamConfig,
+	getCloudflareStreamLiveInput,
+	type CloudflareStreamConfig,
+	type CloudflareStreamLiveInput,
+} from "./cloudflare-stream";
 import {
 	getStudioContentPersonByGithub,
 	getStudioContentVideo,
@@ -13,6 +22,8 @@ import {
 } from "./realtimekit";
 import {
 	buildStudioSession,
+	claimStudioStreamStart,
+	claimStudioStreamNotification,
 	createInviteToken,
 	createReadyMarker,
 	createRecordingId,
@@ -24,17 +35,23 @@ import {
 	hashInviteToken,
 	isStudioSessionActive,
 	redeemStudioInvite,
+	releaseStudioStreamNotificationClaim,
 	resolveStudioInvite,
 	saveRecordingReadyMarker,
 	saveStudioSessionRecordingStatus,
 	saveStudioSessionStatus,
 	saveStudioSession,
+	saveStudioStreamEnded,
+	saveStudioStreamLive,
+	saveStudioStreamStart,
 	upsertStudioParticipant,
 	userCanManageStudioSession,
 	userCanJoinStudioSessionAsGuest,
 	userIsConfiguredStudioOperator,
 	type StudioInvite,
+	type StudioSessionRecord,
 	type StudioRole,
+	type StreamEnvironment,
 } from "./studio";
 
 export class StudioOperationError extends Error {
@@ -42,10 +59,11 @@ export class StudioOperationError extends Error {
 		| "bad-request"
 		| "content-unavailable"
 		| "not-found"
-		| "provider-not-configured"
-		| "session-ended"
-		| "storage-not-configured"
-		| "unauthorized";
+			| "provider-not-configured"
+			| "session-ended"
+			| "storage-not-configured"
+			| "stream-active"
+			| "unauthorized";
 	readonly status: number;
 
 	constructor(
@@ -63,6 +81,7 @@ export interface CreateStudioSessionInput {
 	show?: string;
 	showId?: string;
 	startsAt?: string;
+	streamEnvironment?: StreamEnvironment;
 	title?: string;
 	videoId?: string;
 }
@@ -82,6 +101,11 @@ export interface CreateStudioInviteInput {
 
 export interface EndStudioSessionInput {
 	sessionId: string;
+}
+
+export interface StudioStreamInput {
+	sessionId: string;
+	streamToken?: string;
 }
 
 export interface MarkRecordingReadyInput {
@@ -166,6 +190,31 @@ function requireRecordingDatabase(env: StudioEnv): void {
 	}
 }
 
+async function requireConfiguredCloudflareStream(
+	env: StudioEnv,
+): Promise<CloudflareStreamConfig> {
+	const config = await getCloudflareStreamConfig(env);
+	if (!config) {
+		throw new StudioOperationError(
+			"provider-not-configured",
+			"Cloudflare Stream is not configured for this environment.",
+			503,
+		);
+	}
+	return config;
+}
+
+function requireNotificationsQueue(env: StudioEnv): Queue<SendSubjectInput> {
+	if (!env.STREAM_NOTIFICATIONS) {
+		throw new StudioOperationError(
+			"provider-not-configured",
+			"STREAM_NOTIFICATIONS queue binding is required for prod stream notifications.",
+			503,
+		);
+	}
+	return env.STREAM_NOTIFICATIONS;
+}
+
 function requirePersistentRecordingsBucket(env: StudioEnv): R2Bucket {
 	requireRecordingDatabase(env);
 	return requireRecordingsBucket(env);
@@ -233,6 +282,114 @@ function requireContentBackedRecordingVideoId(session: {
 		);
 	}
 	return session.contentVideoId;
+}
+
+function requireContentBackedStreamSession(session: {
+	contentVideoId?: string | null;
+	contentVideoSlug?: string | null;
+}): { contentVideoId: string; contentVideoSlug: string } {
+	if (!session.contentVideoId || !session.contentVideoSlug) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Prod streams must be attached to a Rawkode content video before going live.",
+			400,
+		);
+	}
+	return {
+		contentVideoId: session.contentVideoId,
+		contentVideoSlug: session.contentVideoSlug,
+	};
+}
+
+function requireStreamPublishUrls(liveInput: CloudflareStreamLiveInput): {
+	playbackUrl: string;
+	publishUrl: string;
+} {
+	const publishUrl = liveInput.webRTC?.url;
+	const playbackUrl = liveInput.webRTCPlayback?.url;
+	if (!liveInput.uid || !publishUrl || !playbackUrl) {
+		throw new StudioOperationError(
+			"provider-not-configured",
+			"Cloudflare Stream live input did not include WebRTC publish and playback URLs.",
+			503,
+		);
+	}
+	return { playbackUrl, publishUrl };
+}
+
+function nowSeconds(): number {
+	return Math.floor(Date.now() / 1000);
+}
+
+function buildStreamNotification(
+	session: {
+		cloudflareStreamLiveInputId?: string | null;
+		contentVideoId?: string | null;
+		contentVideoSlug?: string | null;
+		id: string;
+		title: string;
+	},
+): SendSubjectInput {
+	const { contentVideoId, contentVideoSlug } = requireContentBackedStreamSession(
+		session,
+	);
+	return {
+		subjectKey: `stream:${contentVideoSlug}`,
+		title: `${session.title} is live`,
+		body: "The stream has started on Rawkode Academy.",
+		url: `https://rawkode.academy/watch/${contentVideoSlug}`,
+		tag: `stream:${contentVideoSlug}`,
+		data: {
+			cloudflareStreamLiveInputId: session.cloudflareStreamLiveInputId,
+			studioSessionId: session.id,
+			videoId: contentVideoId,
+			videoSlug: contentVideoSlug,
+		},
+	};
+}
+
+async function notifyStudioStreamIfNeeded(
+	env: StudioEnv,
+	session: Pick<
+		StudioSessionRecord,
+		| "cloudflareStreamLiveInputId"
+		| "contentVideoId"
+		| "contentVideoSlug"
+		| "id"
+		| "streamEnvironment"
+		| "streamNotificationQueuedAt"
+		| "title"
+	>,
+): Promise<boolean> {
+	if (
+		session.streamEnvironment !== "prod" ||
+		session.streamNotificationQueuedAt !== null
+	) {
+		return false;
+	}
+
+	requireContentBackedStreamSession(session);
+	const notificationQueuedAt = nowSeconds();
+	const claimed = await claimStudioStreamNotification(
+		env,
+		session.id,
+		notificationQueuedAt,
+	);
+	if (!claimed) {
+		return false;
+	}
+
+	try {
+		await requireNotificationsQueue(env).send(buildStreamNotification(session));
+		return true;
+	} catch (error) {
+		await releaseStudioStreamNotificationClaim(
+			env,
+			session.id,
+			notificationQueuedAt,
+		).catch(() => undefined);
+		throw error;
+	}
 }
 
 async function getStudioParticipantProfile(
@@ -351,7 +508,8 @@ export async function createStudioSession(
 		show,
 		showId,
 		startsAt,
-		status: meeting ? "live" : "scheduled",
+		status: "scheduled",
+		streamEnvironment: input.streamEnvironment === "prod" ? "prod" : "test",
 		title,
 	});
 	await saveStudioSession(env, session);
@@ -366,6 +524,190 @@ export async function createStudioSession(
 		meeting,
 		provider: "realtimekit" as const,
 		status: meeting ? "ready" : "provider-not-configured",
+	};
+}
+
+export async function startStudioStream(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	if (session.status === "complete") {
+		throw new StudioOperationError(
+			"session-ended",
+			"Studio session has ended.",
+			409,
+		);
+	}
+	if (session.streamStatus === "live" || session.streamStatus === "starting") {
+		throw new StudioOperationError(
+			"stream-active",
+			"Studio stream is already active.",
+			409,
+		);
+	}
+	if (session.streamEnvironment === "prod") {
+		requireContentBackedStreamSession(session);
+	}
+	const streamToken = input.streamToken?.trim() || crypto.randomUUID();
+	const claimed = await claimStudioStreamStart(env, session.id, streamToken);
+	if (!claimed) {
+		throw new StudioOperationError(
+			"stream-active",
+			"Studio stream is already active.",
+			409,
+		);
+	}
+
+	try {
+		const config = await requireConfiguredCloudflareStream(env);
+		const liveInput = session.cloudflareStreamLiveInputId
+			? await getCloudflareStreamLiveInput(config, session.cloudflareStreamLiveInputId)
+			: await createCloudflareStreamLiveInput(config, {
+					contentVideoSlug: session.contentVideoSlug,
+					name: session.title,
+					sessionId: session.id,
+					streamEnvironment: session.streamEnvironment,
+				});
+		const { playbackUrl, publishUrl } = requireStreamPublishUrls(liveInput);
+		const saved = await saveStudioStreamStart(env, {
+			liveInputId: liveInput.uid,
+			playbackUrl,
+			sessionId: session.id,
+			startToken: streamToken,
+		});
+		if (!saved) {
+			throw new StudioOperationError(
+				"bad-request",
+				"Studio stream is no longer starting.",
+				409,
+			);
+		}
+
+		return {
+			sessionId: session.id,
+			streamStatus: "starting" as const,
+			liveInputId: liveInput.uid,
+			publishUrl,
+			playbackUrl,
+			streamToken,
+		};
+	} catch (error) {
+		await saveStudioStreamEnded(env, session.id, streamToken).catch(() => undefined);
+		throw error;
+	}
+}
+
+export async function confirmStudioStream(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	if (!session.cloudflareStreamLiveInputId) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Studio stream has not been started for this session.",
+			400,
+		);
+	}
+	if (session.status === "complete") {
+		throw new StudioOperationError(
+			"session-ended",
+			"Studio session has ended.",
+			409,
+		);
+	}
+	if (session.streamStatus === "live") {
+		return {
+			sessionId: session.id,
+			streamStatus: "live" as const,
+			notified: await notifyStudioStreamIfNeeded(env, session),
+		};
+	}
+	if (!input.streamToken) {
+		throw new StudioOperationError(
+			"bad-request",
+			"streamToken is required to confirm Studio stream publishing.",
+			400,
+		);
+	}
+	if (session.streamStatus !== "starting") {
+		throw new StudioOperationError(
+			"bad-request",
+			"Studio stream is not waiting for live confirmation.",
+			409,
+		);
+	}
+
+	const config = await requireConfiguredCloudflareStream(env);
+	const liveInput = await getCloudflareStreamLiveInput(
+		config,
+		session.cloudflareStreamLiveInputId,
+	);
+	if (!cloudflareStreamLiveInputIsConnected(liveInput)) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Cloudflare Stream live input is not connected yet.",
+			409,
+		);
+	}
+	const playbackUrl =
+		liveInput.webRTCPlayback?.url ?? session.cloudflareStreamPlaybackUrl;
+	if (!playbackUrl) {
+		throw new StudioOperationError(
+			"provider-not-configured",
+			"Cloudflare Stream live input did not include a WebRTC playback URL.",
+			503,
+		);
+	}
+
+	const savedLive = await saveStudioStreamLive(env, {
+		playbackUrl,
+		publicLive: session.streamEnvironment === "prod",
+		sessionId: session.id,
+		startToken: input.streamToken,
+	});
+	if (!savedLive) {
+		const latest = await getStudioSession(env, session.id);
+		if (latest?.streamStatus === "live") {
+			return {
+				sessionId: session.id,
+				streamStatus: "live" as const,
+				notified: await notifyStudioStreamIfNeeded(env, latest),
+			};
+		}
+		throw new StudioOperationError(
+			"bad-request",
+			"Studio stream is no longer waiting for live confirmation.",
+			409,
+		);
+	}
+
+	const notified = await notifyStudioStreamIfNeeded(env, session);
+
+	return {
+		sessionId: session.id,
+		streamStatus: "live" as const,
+		notified,
+	};
+}
+
+export async function stopStudioStream(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	await saveStudioStreamEnded(env, session.id, input.streamToken);
+
+	return {
+		sessionId: session.id,
+		streamStatus: "ended" as const,
 	};
 }
 
@@ -417,6 +759,7 @@ export async function endStudioSession(
 		const config = requireConfiguredRealtimeKit(env);
 		await endRealtimeKitSession(config, session.realtimeKitMeetingId);
 	}
+	await saveStudioStreamEnded(env, session.id);
 	await saveStudioSessionStatus(env, session.id, "complete");
 
 	return {
