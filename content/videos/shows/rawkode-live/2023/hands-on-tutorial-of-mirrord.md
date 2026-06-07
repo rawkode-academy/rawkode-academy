@@ -6,6 +6,10 @@ description: >-
   Aviram and Tal from MetalBear show how mirrord runs a local process inside a
   remote Kubernetes pod's context, mirroring traffic, env vars and files, then
   demo the VS Code extension, mirrord teams operator and L7 filtering.
+whatYouWillLearn:
+  - "Run a local service against remote Kubernetes env variables, files, and network context."
+  - "Use the VS Code extension or CLI to mirror a chosen target pod."
+  - "Filter mirrored traffic by header so only matching requests hit breakpoints."
 publishedAt: 2023-07-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -91,4 +95,3 @@ resources:
     url: 'https://discord.com/invite/pSKEdmNZcK'
     category: other
 ---
-
