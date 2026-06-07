@@ -7,6 +7,10 @@ description: >-
   Notebooks, and Pipelines, then trains an image classification model on the
   Kaggle chest X-ray pneumonia dataset and automates the workflow with Kale,
   Katib, and KFServing.
+whatYouWillLearn:
+  - "Sets up Kubeflow as a Kubernetes platform for running machine learning workflows."
+  - "Explains how notebooks, pipelines, and CRDs fit together for end-to-end model development."
+  - "Shows a chest X-ray pneumonia classifier trained with Kale, Katib, and KFServing."
 publishedAt: 2021-03-30T17:00:00.000Z
 type: live
 category: tutorial
@@ -67,4 +71,3 @@ resources:
     category: other
     url: 'https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia'
 ---
-
