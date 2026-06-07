@@ -6,6 +6,10 @@ description: >-
   Bret Fisher walks through Docker Compose v2 and the new Compose Spec: the
   rewritten Go CLI as a Docker plugin, profiles for grouping services,
   depends_on with healthchecks, convert, contexts, and deploying to ECS and ACI.
+whatYouWillLearn:
+  - "Use depends_on health checks to wait for dependent services before starting"
+  - "Group large Compose files with profiles to start only relevant services"
+  - "Convert Compose files and deploy them through ECS or ACI contexts"
 publishedAt: 2021-09-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -106,4 +110,3 @@ resources:
     url: 'https://spacevim.org/'
     category: code
 ---
-
