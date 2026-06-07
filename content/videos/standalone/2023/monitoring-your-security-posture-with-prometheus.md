@@ -6,6 +6,10 @@ description: >-
   Run Kubescape as an in-cluster operator, scrape its Prometheus metrics via a
   ServiceMonitor, and import the Grafana dashboard to track cluster risk score,
   framework failures, and control violations as your security posture changes.
+whatYouWillLearn:
+  - "Run Kubescape as an in-cluster operator that keeps scanning Kubernetes resources continuously."
+  - "Expose Kubescape findings through a ServiceMonitor so Prometheus ingests security metrics."
+  - "Use the imported Grafana dashboard to track risk score and framework failures."
 publishedAt: 2023-01-31T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -64,4 +68,3 @@ resources:
     url: 'https://github.com/kubescape/prometheus-exporter/tree/main/dashboards'
     category: other
 ---
-
