@@ -423,6 +423,18 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 			<section class="watch-detail__overview">
 				<MLabel tone="spruce">§ Overview</MLabel>
 				<h2 class="watch-detail__overview-title">About this video</h2>
+				{video.data.whatYouWillLearn.length > 0 && (
+					<section class="watch-detail__learn" aria-labelledby="watch-detail-learn-heading">
+						<h3 id="watch-detail-learn-heading" class="watch-detail__learn-title">
+							What You'll Learn
+						</h3>
+						<ol class="watch-detail__learn-list">
+							{video.data.whatYouWillLearn.map((item) => (
+								<li>{item}</li>
+							))}
+						</ol>
+					</section>
+				)}
 				<div class="prose" set:html={renderedDescriptionHtml} />
 			</section>
 
@@ -457,8 +469,6 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 			<VideoContentTabs
 				client:idle
 				videoId={video.data.id}
-				descriptionHtml={renderedDescriptionHtml}
-				whatYouWillLearn={video.data.whatYouWillLearn}
 				resources={video.data.resources ?? []}
 			/>
 
@@ -624,6 +634,59 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 	}
 
 	.watch-detail__overview .prose { max-width: 48rem; }
+
+	.watch-detail__learn {
+		max-width: 48rem;
+		margin: 0;
+	}
+
+	.watch-detail__learn-title {
+		margin: 0 0 0.75rem;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.watch-detail__learn-list {
+		counter-reset: watch-learn-item;
+		display: grid;
+		gap: 0.875rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.watch-detail__learn-list li {
+		counter-increment: watch-learn-item;
+		display: grid;
+		grid-template-columns: 2rem minmax(0, 1fr);
+		gap: 0.875rem;
+		align-items: start;
+		color: var(--editorial-ink);
+		line-height: 1.6;
+	}
+
+	.watch-detail__learn-list li::before {
+		content: counter(watch-learn-item);
+		display: inline-grid;
+		place-items: center;
+		width: 2rem;
+		height: 2rem;
+		margin-top: 0.125rem;
+		border-radius: 999px;
+		border: 1px solid color-mix(in oklch, var(--editorial-spruce) 35%, transparent);
+		background: var(--editorial-spruce-dim);
+		color: var(--editorial-spruce);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 700;
+		line-height: 1;
+		font-variant-numeric: tabular-nums;
+	}
 
 	.watch-detail__tech {
 		display: flex;

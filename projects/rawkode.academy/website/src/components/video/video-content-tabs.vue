@@ -47,28 +47,6 @@
 
  <!-- Tab Content -->
  <div class="p-4 sm:p-6 relative z-10">
- <!-- Description Panel -->
- <div
- v-show="activeTab === 'description'"
- id="video-panel-description"
- role="tabpanel"
- aria-labelledby="video-tab-description"
- >
- <div class="space-y-6">
- <section v-if="whatYouWillLearn.length > 0" aria-labelledby="video-learn-heading">
- <h3 id="video-learn-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
- What You'll Learn
- </h3>
- <ol class="video-learn-list">
- <li v-for="item in whatYouWillLearn" :key="item">
- {{ item }}
- </li>
- </ol>
- </section>
- <section v-if="descriptionHtml" class="prose prose-lg dark:prose-invert max-w-none" v-html="descriptionHtml" />
- </div>
- </div>
-
  <!-- Comments Panel -->
  <div
  v-show="activeTab === 'comments'"
@@ -209,20 +187,11 @@ export default {
 			type: Array,
 			default: () => [],
 		},
-		descriptionHtml: {
-			type: String,
-			default: "",
-		},
-		whatYouWillLearn: {
-			type: Array,
-			default: () => [],
-		},
 	},
 	data() {
 		return {
-			activeTab: "description",
+			activeTab: "resources",
 			tabs: [
-				{ id: "description", label: "Description" },
 				{ id: "comments", label: "Comments" },
 				{ id: "transcript", label: "Transcript" },
 				{ id: "resources", label: "Resources" },
@@ -278,46 +247,6 @@ nav {
 /* Additional spacing for prose paragraphs */
 .prose :deep(p) {
  margin-bottom: 1.5rem;
-}
-
-.video-learn-list {
- counter-reset: video-learn-item;
- display: grid;
- gap: 0.875rem;
- margin: 0;
- padding: 0;
- list-style: none;
-}
-
-.video-learn-list li {
- counter-increment: video-learn-item;
- display: grid;
- grid-template-columns: 2rem minmax(0, 1fr);
- gap: 0.875rem;
- align-items: start;
- color: var(--editorial-ink, rgb(17 24 39));
- line-height: 1.6;
-}
-
-.video-learn-list li::before {
- content: counter(video-learn-item);
- display: inline-grid;
- place-items: center;
- width: 2rem;
- height: 2rem;
- border-radius: 999px;
- border: 1px solid color-mix(in srgb, var(--editorial-spruce, rgb(13 148 136)) 35%, transparent);
- background: color-mix(in srgb, var(--editorial-spruce, rgb(13 148 136)) 10%, transparent);
- color: var(--editorial-spruce, rgb(13 148 136));
- font-size: 0.75rem;
- font-weight: 700;
- line-height: 1;
- margin-top: 0.125rem;
- font-variant-numeric: tabular-nums;
-}
-
-.dark .video-learn-list li {
- color: rgb(229 231 235);
 }
 
 /* Clean, professional link styles */
