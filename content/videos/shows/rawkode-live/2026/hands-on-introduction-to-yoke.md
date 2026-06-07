@@ -9,6 +9,10 @@ description: >-
   build and deploy Flights, compare Yoke with Helm and Timoni, explore drift
   detection, and dig into Air Traffic Controller, Airways, ArgoCD integration,
   and migration paths for platform teams.
+whatYouWillLearn:
+  - "Build Kubernetes packages as code instead of templated YAML with Yoke Flight."
+  - "Detect drift between desired package state and live cluster resources."
+  - "Use Air Traffic Controller, Airways, or ArgoCD to deploy packages."
 terms:
   - Yoke
   - YokeCD
