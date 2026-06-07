@@ -6,6 +6,10 @@ description: >-
   Ben Johnson walks through Litestream, his streaming replication tool for
   SQLite. We cover how it tails the WAL, ships segments to S3 or Azure, and
   restores point-in-time copies, then install it and replicate a live database.
+whatYouWillLearn:
+  - "Track how Litestream tails SQLite WAL changes and replicates them to durable cloud object storage."
+  - "Configure local MinIO targets, install Litestream, and run a full live database replication flow end-to-end."
+  - "Restore point-in-time copies and verify replication status, retention behavior, and useful Litestream subcommands."
 publishedAt: 2021-06-22T17:00:00.000Z
 type: live
 category: tutorial
@@ -104,4 +108,3 @@ resources:
     url: 'https://litestream.io/tips/'
     category: documentation
 ---
-
