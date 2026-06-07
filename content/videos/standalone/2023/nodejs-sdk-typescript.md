@@ -6,6 +6,10 @@ description: >-
   A walkthrough of Fermyon Spin's Node.js SDK in TypeScript: handling request
   headers, ArrayBuffer bodies, JSON parsing with Zod for runtime safety, query
   strings via qs, outbound fetch, and configuring allowed_outbound_hosts.
+whatYouWillLearn:
+  - "Handle request headers by reading x-name, uppercasing it, and echoing it back."
+  - "Parse JSON request bodies with Zod so runtime validation matches the TypeScript shape."
+  - "Use qs to split query strings from the path, then allow outbound hosts."
 publishedAt: 2023-02-02T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -58,4 +62,3 @@ resources:
     category: code
     url: 'https://github.com/ljharb/qs'
 ---
-
