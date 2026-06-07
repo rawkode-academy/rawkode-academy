@@ -6,6 +6,10 @@ description: >-
   Matti Ranta joins David to walk through Gitea Actions end-to-end: installing
   act-runner, registering it against Gitea Cloud, and writing a workflow for a
   Go project. Also covers GitHub Actions compatibility, packages, and triggers.
+whatYouWillLearn:
+  - "Install act-runner locally or in Docker, then register it against Gitea Cloud."
+  - "Use Gitea Actions workflow files to run checkout, setup-go, and build steps."
+  - "Configure push, pull request, cron, and tag triggers with branch protection checks."
 publishedAt: 2024-01-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -104,4 +108,3 @@ resources:
     url: 'https://tart.run/'
     category: other
 ---
-
