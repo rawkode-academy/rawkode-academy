@@ -6,6 +6,10 @@ description: >-
   A hands-on tour of Spin's Rust SDK: writing and routing an HTTP component,
   reading headers, decoding the request body, parsing query strings, and making
   outbound HTTP requests with allowed-domain configuration in spin.toml.
+whatYouWillLearn:
+  - "Read request headers with Spin's request object and access specific header values safely."
+  - "Decode request bodies by matching bytes and converting them into Rust strings."
+  - "Parse query strings, send outbound HTTP requests, and allowlist destinations in spin.toml."
 publishedAt: 2023-01-27T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -37,4 +41,3 @@ resources:
     url: 'https://www.fermyon.com/discord'
     category: other
 ---
-
