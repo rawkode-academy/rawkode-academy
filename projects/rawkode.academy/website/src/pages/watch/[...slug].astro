@@ -457,6 +457,8 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 			<VideoContentTabs
 				client:idle
 				videoId={video.data.id}
+				descriptionHtml={renderedDescriptionHtml}
+				whatYouWillLearn={video.data.whatYouWillLearn}
 				resources={video.data.resources ?? []}
 			/>
 

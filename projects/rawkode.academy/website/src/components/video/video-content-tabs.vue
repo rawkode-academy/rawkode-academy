@@ -47,6 +47,28 @@
 
  <!-- Tab Content -->
  <div class="p-4 sm:p-6 relative z-10">
+ <!-- Description Panel -->
+ <div
+ v-show="activeTab === 'description'"
+ id="video-panel-description"
+ role="tabpanel"
+ aria-labelledby="video-tab-description"
+ >
+ <div class="space-y-6">
+ <section v-if="whatYouWillLearn.length > 0">
+ <h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+ What You'll Learn
+ </h3>
+ <ul class="video-learn-list">
+ <li v-for="item in whatYouWillLearn" :key="item">
+ {{ item }}
+ </li>
+ </ul>
+ </section>
+ <section v-if="descriptionHtml" class="prose prose-lg dark:prose-invert max-w-none" v-html="descriptionHtml" />
+ </div>
+ </div>
+
  <!-- Comments Panel -->
  <div
  v-show="activeTab === 'comments'"
@@ -187,11 +209,20 @@ export default {
 			type: Array,
 			default: () => [],
 		},
+		descriptionHtml: {
+			type: String,
+			default: "",
+		},
+		whatYouWillLearn: {
+			type: Array,
+			default: () => [],
+		},
 	},
 	data() {
 		return {
-			activeTab: "resources",
+			activeTab: "description",
 			tabs: [
+				{ id: "description", label: "Description" },
 				{ id: "comments", label: "Comments" },
 				{ id: "transcript", label: "Transcript" },
 				{ id: "resources", label: "Resources" },
@@ -247,6 +278,32 @@ nav {
 /* Additional spacing for prose paragraphs */
 .prose :deep(p) {
  margin-bottom: 1.5rem;
+}
+
+.video-learn-list {
+ display: grid;
+ gap: 0.75rem;
+ margin: 0;
+ padding: 0;
+ list-style: none;
+}
+
+.video-learn-list li {
+ position: relative;
+ padding-left: 1.25rem;
+ color: var(--editorial-ink, rgb(17 24 39));
+ line-height: 1.6;
+}
+
+.video-learn-list li::before {
+ content: "";
+ position: absolute;
+ left: 0;
+ top: 0.72em;
+ width: 0.4rem;
+ height: 0.4rem;
+ border-radius: 999px;
+ background: var(--editorial-spruce, rgb(13 148 136));
 }
 
 /* Clean, professional link styles */
