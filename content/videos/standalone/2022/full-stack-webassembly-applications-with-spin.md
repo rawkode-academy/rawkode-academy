@@ -7,6 +7,10 @@ description: >-
   frontend plus two API components, a Rust addition service and a Grain
   subtraction service, all running locally with spin up and deployed to Fermyon
   Cloud.
+whatYouWillLearn:
+  - "Build a full stack Spin app with a Bartholomew CMS frontend."
+  - "Expose separate Rust and Grain API components for addition and subtraction."
+  - "Run the app locally with spin up, then deploy it to Fermyon Cloud."
 publishedAt: 2022-11-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -63,4 +67,3 @@ resources:
     category: code
     url: 'https://github.com/spinframework/spin'
 ---
-
