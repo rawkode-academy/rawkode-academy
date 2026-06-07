@@ -6,6 +6,10 @@ description: >-
   Install Portainer on Kubernetes two ways (helm upgrade --install and kubectl
   -k with Kustomize), then use Portainer's UI to enable pod security constraints
   backed by an auto-installed Gatekeeper.
+whatYouWillLearn:
+  - "Verify a default storage class before installing Portainer, because it needs persistent storage."
+  - "Use helm upgrade --install for an idempotent Portainer deployment that respects values.yaml changes."
+  - "Enable pod security constraints in Portainer, which automatically installs Gatekeeper for enforcement."
 publishedAt: 2023-03-14T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -71,4 +75,3 @@ resources:
     url: 'https://github.com/portainer/k8s/blob/master/charts/portainer/values.yaml'
     category: code
 ---
-
