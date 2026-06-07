@@ -55,15 +55,15 @@
  aria-labelledby="video-tab-description"
  >
  <div class="space-y-6">
- <section v-if="whatYouWillLearn.length > 0">
- <h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+ <section v-if="whatYouWillLearn.length > 0" aria-labelledby="video-learn-heading">
+ <h3 id="video-learn-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
  What You'll Learn
  </h3>
- <ul class="video-learn-list">
+ <ol class="video-learn-list">
  <li v-for="item in whatYouWillLearn" :key="item">
  {{ item }}
  </li>
- </ul>
+ </ol>
  </section>
  <section v-if="descriptionHtml" class="prose prose-lg dark:prose-invert max-w-none" v-html="descriptionHtml" />
  </div>
@@ -281,29 +281,43 @@ nav {
 }
 
 .video-learn-list {
+ counter-reset: video-learn-item;
  display: grid;
- gap: 0.75rem;
+ gap: 0.875rem;
  margin: 0;
  padding: 0;
  list-style: none;
 }
 
 .video-learn-list li {
- position: relative;
- padding-left: 1.25rem;
+ counter-increment: video-learn-item;
+ display: grid;
+ grid-template-columns: 2rem minmax(0, 1fr);
+ gap: 0.875rem;
+ align-items: start;
  color: var(--editorial-ink, rgb(17 24 39));
  line-height: 1.6;
 }
 
 .video-learn-list li::before {
- content: "";
- position: absolute;
- left: 0;
- top: 0.72em;
- width: 0.4rem;
- height: 0.4rem;
+ content: counter(video-learn-item);
+ display: inline-grid;
+ place-items: center;
+ width: 2rem;
+ height: 2rem;
  border-radius: 999px;
- background: var(--editorial-spruce, rgb(13 148 136));
+ border: 1px solid color-mix(in srgb, var(--editorial-spruce, rgb(13 148 136)) 35%, transparent);
+ background: color-mix(in srgb, var(--editorial-spruce, rgb(13 148 136)) 10%, transparent);
+ color: var(--editorial-spruce, rgb(13 148 136));
+ font-size: 0.75rem;
+ font-weight: 700;
+ line-height: 1;
+ margin-top: 0.125rem;
+ font-variant-numeric: tabular-nums;
+}
+
+.dark .video-learn-list li {
+ color: rgb(229 231 235);
 }
 
 /* Clean, professional link styles */
