@@ -7,6 +7,10 @@ description: >-
   ingesting logs and OpenTelemetry traces on Kubernetes, querying via the UI and
   CLI, and exploring the Grafana plugin plus Jaeger integration over 500M+
   spans.
+whatYouWillLearn:
+  - "Create Quickwit indexes and tailor mappings for logs and traces"
+  - "Ingest OpenTelemetry logs and traces through Kubernetes collectors and indexers"
+  - "Query data in the UI, CLI, Grafana plugin, and Jaeger integration"
 publishedAt: 2024-01-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -104,4 +108,3 @@ resources:
     url: 'https://github.com/quickwit-oss/quickwit-datasource'
     category: code
 ---
-
