@@ -7,6 +7,10 @@ description: >-
   that turns Kyverno PolicyReports into Prometheus metrics, a UI dashboard, and
   notifications. We install it via Helm alongside kube-prometheus and explore
   Grafana dashboards for policy violations.
+whatYouWillLearn:
+  - "Displays Kyverno PolicyReports as searchable violations, audit results, and cluster-wide compliance records."
+  - "Installs Policy Reporter with Helm, then optionally enables a standalone UI deployment."
+  - "Connects policy violations to Prometheus metrics, Grafana dashboards, and alerting targets."
 publishedAt: 2021-04-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -72,4 +76,3 @@ resources:
     url: 'https://kyverno.io/policies/pod-security/'
     category: documentation
 ---
-
