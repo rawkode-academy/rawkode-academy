@@ -7,6 +7,10 @@ description: >-
   repo, and a curl script for other distros. Then start the server, create the
   first user with tctl, set up 2FA, and try web SSH, the audit log, and session
   replay.
+whatYouWillLearn:
+  - "Install Teleport on Debian, Red Hat, or other Linux distributions from official repositories."
+  - "Create the first Teleport user with tctl, then finish password and 2FA setup."
+  - "Use Teleport web SSH, audit logs, and session recordings to inspect activity."
 publishedAt: 2021-10-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -69,4 +73,3 @@ resources:
     title: Teleport documentation
     url: 'https://goteleport.com/docs/'
 ---
-
