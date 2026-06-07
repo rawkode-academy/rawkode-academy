@@ -6,6 +6,10 @@ description: >-
   Use the Kubescape CLI to scan plain manifests, Kustomize overlays, and Helm
   charts against frameworks like NSA/CISA, then wire the GitHub Action into CI
   to publish pretty-printer, JUnit, and SARIF reports to Code Scanning.
+whatYouWillLearn:
+  - "Scan plain manifests recursively with Kubescape to surface failed controls."
+  - "Scope scans to NSA framework or specific controls to narrow violations."
+  - "Publish Kubescape results as JUnit or SARIF for GitHub Code Scanning."
 publishedAt: 2022-12-20T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -77,4 +81,3 @@ resources:
     url: 'https://github.com/rawkode-academy/klustered'
     category: code
 ---
-
