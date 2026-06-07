@@ -7,6 +7,10 @@ description: >-
   Helm plugin that puts a focused web UI over the Helm CLI. The demo covers
   release history, manifest and values diffs, rollbacks, reconfigure, and
   Trivy/Checkov scanner integration.
+whatYouWillLearn:
+  - "Inspect Helm release history to spot stable revisions and rollback candidates."
+  - "Compare manifests and user-defined values before applying upgrades or reconfigurations."
+  - "Run Checkov or Trivy scans on rendered Kubernetes resources inside Helm Dashboard."
 publishedAt: 2022-10-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -101,4 +105,3 @@ resources:
     title: Checkov
     url: 'https://www.checkov.io/'
 ---
-
