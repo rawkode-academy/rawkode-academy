@@ -6,6 +6,10 @@ description: >-
   Alessandro de Maria and Ricardo Amaro walk through Kapitan's inventory model,
   targets and classes, the Kubernetes manifest generator, secret references, and
   the kapitan-reference repository for getting started.
+whatYouWillLearn:
+  - "Describe Kapitan's inventory model for reusing values across targets."
+  - "Explain how targets combine classes into rendered Kubernetes manifests."
+  - "Trace the generator workflow from inventory edits to compiled output."
 publishedAt: 2021-02-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -98,4 +102,3 @@ resources:
     url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
 ---
-
