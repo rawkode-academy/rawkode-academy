@@ -25,11 +25,16 @@ import {
   parseRecordingHandoff,
   type RecordingHandoff,
 } from "../recording/handoff";
+import {
+  startWhipPublishing,
+  type WhipPublishSession,
+} from "../live/whipClient";
 import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
 import { getHitTestLayerStack } from "../studio/layerStack";
 import type { ActiveOverlay, ActiveSceneStinger, CanvasResolution, StudioLayer } from "../types";
 
 type MotionAnimationControls = ReturnType<typeof animate>;
+type LivePublishStatus = "confirming" | "ended" | "failed" | "idle" | "live" | "starting" | "stopping";
 type RecordingUploadStatus = "failed" | "idle" | "local" | "ready" | "uploading";
 
 interface RecordingUploadPart {
@@ -50,6 +55,15 @@ interface RecordingUpload {
   uploadId: string;
 }
 
+class StudioRequestError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
 const props = defineProps<{
   activeOverlays?: Record<string, ActiveOverlay>;
   activeStinger?: ActiveSceneStinger;
@@ -59,6 +73,9 @@ const props = defineProps<{
   isPlaying: boolean;
   isRecording: boolean;
   sessionId?: string;
+  canPublishLive?: boolean;
+  streamEnvironment?: "prod" | "test";
+  streamStatus?: string;
   title: string;
   subtitle?: string;
   interactive?: boolean;
@@ -77,7 +94,18 @@ const canvasDisplaySize = ref({ width: 0, height: 0 });
 const canRecordLocally = typeof MediaRecorder !== "undefined";
 const isDragging = ref(false);
 const isFinishingRecording = ref(false);
+const livePublishError = ref("");
+const livePublishStatus = ref<LivePublishStatus>(
+  props.streamStatus === "live"
+    ? "live"
+    : props.streamStatus === "starting"
+      ? "starting"
+      : props.streamStatus === "ended"
+        ? "ended"
+        : "idle",
+);
 const isLocalRecording = ref(false);
+const isStartingLivePublish = ref(false);
 const isStartingRecording = ref(false);
 const recordingUploadError = ref("");
 const recordingUploadStatus = ref<RecordingUploadStatus>("idle");
@@ -94,6 +122,13 @@ let recordingChunkIndex = 0;
 let recordingFinishPromise: Promise<void> | undefined;
 let recordingUpload: RecordingUpload | undefined;
 let recordingOwnedTracks: MediaStreamTrack[] = [];
+let livePublishSession: WhipPublishSession | undefined;
+let livePublishAbortController: AbortController | undefined;
+let liveOwnedTracks: MediaStreamTrack[] = [];
+let liveServerStreamStarted = false;
+let ownsLivePublish = false;
+let livePublishGeneration = 0;
+let liveStreamToken: string | undefined;
 let isComponentUnmounted = false;
 const mediaVideoElements = new Map<string, HTMLVideoElement>();
 let stingerAnimation: MotionAnimationControls | undefined;
@@ -135,6 +170,29 @@ const recordingStatusHref = computed(() =>
   completedRecording.value
     ? getRecordingHandoffStatusUrl(completedRecording.value)
     : "",
+);
+const liveStatusText = computed(() => {
+  if (livePublishStatus.value === "starting") return "Starting live stream";
+  if (livePublishStatus.value === "confirming") return "Confirming stream";
+  if (livePublishStatus.value === "live") {
+    return `${props.streamEnvironment === "prod" ? "Prod" : "Test"} stream live`;
+  }
+  if (livePublishStatus.value === "stopping") return "Stopping stream";
+  if (livePublishStatus.value === "ended") return "Stream ended";
+  if (livePublishStatus.value === "failed") return livePublishError.value;
+  return "";
+});
+const liveButtonLabel = computed(() => {
+  if (livePublishStatus.value === "starting" || livePublishStatus.value === "confirming") {
+    return "Cancel live start";
+  }
+  if (livePublishStatus.value === "stopping") return "Stopping";
+  if (livePublishStatus.value === "live") return "Stop live";
+  return "Go live";
+});
+const liveButtonDisabled = computed(() =>
+  !props.sessionId ||
+  livePublishStatus.value === "stopping",
 );
 
 async function paint(timestamp = performance.now()): Promise<void> {
@@ -569,7 +627,224 @@ async function abortRecordingUpload(upload: RecordingUpload | undefined): Promis
   }).catch(() => undefined);
 }
 
+async function toggleLivePublishing(): Promise<void> {
+  if (liveButtonDisabled.value) {
+    return;
+  }
+  if (
+    livePublishStatus.value === "live" ||
+    livePublishStatus.value === "starting" ||
+    livePublishStatus.value === "confirming"
+  ) {
+    await stopLivePublishing();
+    return;
+  }
+
+  await startLivePublishing();
+}
+
+async function startLivePublishing(): Promise<void> {
+  if (!props.sessionId || isStartingLivePublish.value) {
+    return;
+  }
+
+  isStartingLivePublish.value = true;
+  const publishGeneration = livePublishGeneration + 1;
+  livePublishGeneration = publishGeneration;
+  livePublishStatus.value = "starting";
+  livePublishError.value = "";
+  const streamToken = crypto.randomUUID();
+  liveStreamToken = streamToken;
+  try {
+    const start = await postStreamAction<{
+      liveInputId: string;
+      playbackUrl: string;
+      publishUrl: string;
+      streamStatus: "starting";
+      streamToken: string;
+    }>("start", { streamToken });
+    liveStreamToken = streamToken;
+    liveServerStreamStarted = true;
+    if (publishGeneration !== livePublishGeneration) {
+      await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
+      liveServerStreamStarted = false;
+      if (liveStreamToken === streamToken) {
+        liveStreamToken = undefined;
+      }
+      return;
+    }
+    const programmeStream = createProgrammeOutputStream((tracks) => {
+      liveOwnedTracks = tracks;
+    });
+    if (!programmeStream) {
+      throw new Error("Programme canvas stream is not available.");
+    }
+    const abortController = new AbortController();
+    livePublishAbortController = abortController;
+    livePublishSession = await startWhipPublishing({
+      publishUrl: start.publishUrl,
+      signal: abortController.signal,
+      stream: programmeStream,
+    });
+    ownsLivePublish = true;
+    livePublishStatus.value = "confirming";
+    await confirmLivePublishing(publishGeneration, streamToken);
+    if (publishGeneration !== livePublishGeneration) {
+      await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
+      liveServerStreamStarted = false;
+      if (liveStreamToken === streamToken) {
+        liveStreamToken = undefined;
+      }
+      await cleanupLivePublishing();
+      return;
+    }
+    livePublishStatus.value = "live";
+  } catch (error) {
+    if (publishGeneration !== livePublishGeneration) {
+      await cleanupLivePublishing();
+      return;
+    }
+    livePublishStatus.value = "failed";
+    livePublishError.value = toErrorMessage(error);
+    if (liveServerStreamStarted) {
+      await postStreamAction("stop", { streamToken: liveStreamToken }).catch(() => undefined);
+      liveServerStreamStarted = false;
+      liveStreamToken = undefined;
+    }
+    await cleanupLivePublishing();
+  } finally {
+    isStartingLivePublish.value = false;
+  }
+}
+
+async function stopLivePublishing(): Promise<void> {
+  if (!props.sessionId || livePublishStatus.value === "stopping") {
+    return;
+  }
+
+  livePublishStatus.value = "stopping";
+  livePublishError.value = "";
+  livePublishGeneration += 1;
+  const streamToken = liveStreamToken;
+  try {
+    const stopPromise = postStreamAction("stop", { streamToken });
+    await cleanupLivePublishing();
+    await stopPromise;
+    liveServerStreamStarted = false;
+    liveStreamToken = undefined;
+    livePublishStatus.value = "ended";
+  } catch (error) {
+    livePublishStatus.value = "failed";
+    livePublishError.value = toErrorMessage(error);
+  }
+}
+
+async function confirmLivePublishing(
+  publishGeneration: number,
+  streamToken: string,
+): Promise<void> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    if (publishGeneration !== livePublishGeneration) {
+      throw new Error("Live publishing stopped.");
+    }
+    try {
+      await postStreamAction<{ notified: boolean; streamStatus: "live" }>(
+        "confirm",
+        { streamToken },
+      );
+      return;
+    } catch (error) {
+      lastError = error;
+      if (!isStreamNotConnectedYet(error)) {
+        throw error;
+      }
+      await delay(1000);
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Cloudflare Stream live input did not connect.");
+}
+
+async function cleanupLivePublishing(): Promise<void> {
+  const abortController = livePublishAbortController;
+  livePublishAbortController = undefined;
+  abortController?.abort();
+  const publishSession = livePublishSession;
+  livePublishSession = undefined;
+  ownsLivePublish = false;
+  await publishSession?.close().catch(() => undefined);
+  for (const track of liveOwnedTracks) {
+    track.stop();
+  }
+  liveOwnedTracks = [];
+}
+
+async function delay(milliseconds: number): Promise<void> {
+  await new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+}
+
+async function postStreamAction<T = unknown>(
+  action: "confirm" | "start" | "stop",
+  options: { keepalive?: boolean; streamToken?: string } = {},
+): Promise<T> {
+  const response = await fetch("/api/studio/stream", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action,
+      sessionId: props.sessionId,
+      streamToken: options.streamToken,
+    }),
+    keepalive: options.keepalive,
+  });
+  if (!response.ok) {
+    throw new StudioRequestError(await readErrorResponse(response), response.status);
+  }
+  return await response.json() as T;
+}
+
+async function stopOwnedLivePublishingForTeardown(): Promise<void> {
+  if (
+    !props.sessionId ||
+    (!isStartingLivePublish.value && !liveServerStreamStarted && !ownsLivePublish)
+  ) {
+    return;
+  }
+
+  livePublishGeneration += 1;
+  const streamToken = liveStreamToken;
+  if (!liveServerStreamStarted && !ownsLivePublish && !streamToken) {
+    return;
+  }
+  const stopPromise = postStreamAction("stop", {
+    keepalive: true,
+    streamToken,
+  }).catch(() => undefined);
+  liveServerStreamStarted = false;
+  liveStreamToken = undefined;
+  await cleanupLivePublishing();
+  await stopPromise;
+}
+
+function isStreamNotConnectedYet(error: unknown): boolean {
+  return error instanceof StudioRequestError &&
+    error.status === 409 &&
+    error.message.includes("not connected yet");
+}
+
 function createRecordingStream(): MediaStream | undefined {
+  return createProgrammeOutputStream((tracks) => {
+    recordingOwnedTracks = tracks;
+  });
+}
+
+function createProgrammeOutputStream(
+  setOwnedTracks: (tracks: MediaStreamTrack[]) => void,
+): MediaStream | undefined {
   const canvasStream = captureCanvasStream();
   if (!canvasStream) {
     return undefined;
@@ -579,7 +854,7 @@ function createRecordingStream(): MediaStream | undefined {
     .flatMap((stream) => stream.getAudioTracks())
     .filter((track) => track.readyState === "live")
     .map((track) => track.clone());
-  recordingOwnedTracks = [...canvasStream.getTracks(), ...audioTracks];
+  setOwnedTracks([...canvasStream.getTracks(), ...audioTracks]);
 
   return new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
 }
@@ -753,6 +1028,7 @@ watch(
 );
 
 onMounted(() => {
+  window.addEventListener("pagehide", stopOwnedLivePublishingForTeardown);
   frameResizeObserver = new ResizeObserver((entries) => {
     const entry = entries[0];
     if (!entry) {
@@ -770,11 +1046,13 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isComponentUnmounted = true;
+  window.removeEventListener("pagehide", stopOwnedLivePublishingForTeardown);
   if (isLocalRecording.value) {
     stopLocalRecording();
   } else if (isStartingRecording.value) {
     void cleanupPendingRecordingStart();
   }
+  void stopOwnedLivePublishingForTeardown();
   clearMediaVideoElements();
   stopOverlayAnimations();
   stopStingerAnimation();
@@ -974,6 +1252,23 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         <button class="secondary-button compact" type="button" @click="exportPng">
           Export PNG
         </button>
+        <button
+          v-if="canPublishLive"
+          class="record-button compact"
+          :class="{ active: livePublishStatus === 'live' }"
+          type="button"
+          :disabled="liveButtonDisabled"
+          @click="toggleLivePublishing"
+        >
+          {{ liveButtonLabel }}
+        </button>
+        <span
+          v-if="liveStatusText"
+          class="recording-upload-state"
+          :class="{ error: livePublishStatus === 'failed' }"
+        >
+          {{ liveStatusText }}
+        </span>
         <button
           class="record-button compact"
           :class="{ active: isLocalRecording }"

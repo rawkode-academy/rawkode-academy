@@ -2,6 +2,7 @@
 import { getCollection, getEntry } from "astro:content";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
+import LiveStreamGate from "@/components/video/LiveStreamGate.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
 import VideoCast from "@/components/video/VideoCast.astro";
@@ -20,6 +21,11 @@ import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import {
+	getStudioLiveState,
+	shouldMountStudioLiveGate,
+	type StudioBindingEnv,
+} from "@/lib/studio-live";
 import { env } from "cloudflare:workers";
 
 export const prerender = false;
@@ -35,11 +41,16 @@ if (!video) {
 	return new Response(null, { status: 404 });
 }
 
-Astro.response.headers.set(
-	"Cache-Control",
-	"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
-);
-Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
+if (video.data.type === "live") {
+	Astro.response.headers.set("Cache-Control", "no-store");
+	Astro.response.headers.set("CDN-Cache-Control", "no-store");
+} else {
+	Astro.response.headers.set(
+		"Cache-Control",
+		"public, max-age=600, s-maxage=7200, stale-while-revalidate=172800",
+	);
+	Astro.response.headers.set("CDN-Cache-Control", "public, max-age=7200");
+}
 Astro.response.headers.set(
 	"Cache-Tag",
 	`video-${video.data.slug}, videos-page, video-detail`,
@@ -189,7 +200,24 @@ const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
 const now = new Date();
-const isUpcomingLive = video.data.type === "live" && video.data.publishedAt > now;
+const isLive = video.data.type === "live";
+const isUpcomingLive = isLive && video.data.publishedAt > now;
+const studioLiveState = isLive
+	? await getStudioLiveState(env as StudioBindingEnv, video.data.slug)
+	: {
+			live: false,
+			playbackUrl: null,
+			session: null,
+		};
+const shouldMountLiveGate = shouldMountStudioLiveGate({
+	isLive,
+	isUpcomingLive,
+	liveState: studioLiveState,
+	now,
+	publishedAt: video.data.publishedAt,
+});
+const shouldRenderVodFallback =
+	shouldMountLiveGate && !isUpcomingLive && !studioLiveState.live;
 
 const META_DESCRIPTION_LIMIT = 160;
 const metaDescription = (() => {
@@ -234,7 +262,7 @@ const user = Astro.locals.user;
 const isAuthenticated = !!user;
 
 let initialPosition = 0;
-if (!isUpcomingLive && isAuthenticated && user?.id) {
+if ((!shouldMountLiveGate || shouldRenderVodFallback) && isAuthenticated && user?.id) {
 	try {
 		const response = await fetch("https://api.rawkode.academy/graphql", {
 			method: "POST",
@@ -263,7 +291,6 @@ if (!isUpcomingLive && isAuthenticated && user?.id) {
 const categoryLabel =
 	formatLabel(video.data.category) ||
 	(video.data.type === "live" ? "Live session" : "Recorded session");
-const isLive = video.data.type === "live";
 const runtimeLabel = formatVideoRuntimeLabel(
 	{
 		duration: durationSec,
@@ -348,12 +375,16 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 		</header>
 
 		<div class="watch-detail__player-frame">
-			{isUpcomingLive ? (
-				<img
-					class="watch-detail__upcoming-thumbnail"
-					src={thumbnailUrl}
-					alt=""
-					loading="eager"
+			{shouldMountLiveGate ? (
+				<LiveStreamGate
+					client:only="vue"
+					videoSlug={video.data.slug}
+					initialState={studioLiveState}
+					thumbnailUrl={thumbnailUrl}
+					title={video.data.title}
+					fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
+					fallbackInitialPosition={initialPosition}
+					fallbackIsAuthenticated={isAuthenticated}
 				/>
 			) : (
 				<VideoPlayer
@@ -366,7 +397,7 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 			)}
 		</div>
 
-		{isUpcomingLive && (
+		{isUpcomingLive && !studioLiveState.live && (
 			<section class="watch-detail__upcoming-panel" aria-label="Upcoming stream details">
 				<div class="watch-detail__upcoming-panel-inner">
 					<MLabel tone="amber">Upcoming Stream</MLabel>

@@ -314,6 +314,25 @@ textarea:focus-visible {
   display: contents;
 }
 
+.stream-environment-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  color: #a7b6bf;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.stream-environment-field select {
+  min-height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(10, 13, 18, 0.94);
+  color: #e8f1f5;
+  font: inherit;
+}
+
 .session-empty {
   margin: 0;
   padding: 16px;

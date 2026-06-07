@@ -17,8 +17,6 @@ on:
     - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/**
     - projects/rawkode.academy/platform/email-preferences/**
     - projects/rawkode.academy/platform/notifications/**
-    - projects/rawkode.academy/platform/notifications/scripts/ensure-queues.ts
-    - projects/rawkode.academy/platform/notifications/scripts/ensure-queues.ts/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/astro.config.mts/**
     - projects/rawkode.academy/website/env.cue
@@ -26,8 +24,6 @@ on:
     - projects/rawkode.academy/website/package.json/**
     - projects/rawkode.academy/website/public/**
     - projects/rawkode.academy/website/schema/**
-    - projects/rawkode.academy/website/scripts/sync-realtimekit-webhook.ts
-    - projects/rawkode.academy/website/scripts/sync-realtimekit-webhook.ts/**
     - projects/rawkode.academy/website/src/**
     - projects/rawkode.academy/website/wrangler.jsonc
     - projects/rawkode.academy/website/wrangler.jsonc/**

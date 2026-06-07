@@ -168,7 +168,7 @@ export async function addRealtimeKitParticipant(
 		{
 			method: "POST",
 			body: JSON.stringify({
-				custom_participant_id: input.participantId,
+				custom_participant_id: `studio:${input.role}:${input.participantId}`,
 				preset_name: config.presets[input.role],
 				name: input.name,
 				picture: input.picture ?? undefined,

@@ -14,6 +14,8 @@ export type RecordingStatus =
 	| "uploaded"
 	| "transcoding"
 	| "vod-ready";
+export type StreamEnvironment = "prod" | "test";
+export type StudioStreamStatus = "ended" | "failed" | "idle" | "live" | "starting";
 export type StudioSessionStatus = "scheduled" | "live" | "recording" | "complete";
 
 export interface StudioPersonSummary {
@@ -36,6 +38,13 @@ export interface StudioSessionSummary {
 	recordingStatus: RecordingStatus;
 	realtimeKitMeetingId: string | null;
 	recordingPrefix: string;
+	streamEnvironment: StreamEnvironment;
+	streamStatus: StudioStreamStatus;
+	cloudflareStreamLiveInputId: string | null;
+	cloudflareStreamPlaybackUrl: string | null;
+	streamStartedAt: number | null;
+	streamEndedAt: number | null;
+	streamNotificationQueuedAt: number | null;
 }
 
 export interface StudioSessionRecord extends StudioSessionSummary {
@@ -133,11 +142,31 @@ type StudioSessionRow = {
 	recording_status: RecordingStatus;
 	realtimekit_meeting_id: string | null;
 	recording_prefix: string;
+	stream_environment: StreamEnvironment;
+	stream_status: StudioStreamStatus;
+	cloudflare_stream_live_input_id: string | null;
+	cloudflare_stream_playback_url: string | null;
+	stream_started_at: number | null;
+	stream_ended_at: number | null;
+	stream_notification_queued_at: number | null;
+	stream_start_token: string | null;
 	created_by_id: string;
 	created_by_github: string | null;
 	created_at: number;
 	updated_at: number;
 };
+
+export interface StudioPublicLiveState {
+	live: boolean;
+	playbackUrl: string | null;
+	session: {
+		id: string;
+		show: string;
+		startedAt: number | null;
+		startsAt: string;
+		title: string;
+	} | null;
+}
 
 type StudioInviteRow = {
 	token_hash: string;
@@ -234,6 +263,13 @@ function fallbackSession(): StudioSessionRecord {
 		recordingStatus: "idle",
 		realtimeKitMeetingId: null,
 		recordingPrefix: "studio/recordings/rawkode-live-next/",
+		streamEnvironment: "test",
+		streamStatus: "idle",
+		cloudflareStreamLiveInputId: null,
+		cloudflareStreamPlaybackUrl: null,
+		streamStartedAt: null,
+		streamEndedAt: null,
+		streamNotificationQueuedAt: null,
 		createdById: "seed",
 		createdByGithub: "rawkode",
 		createdAt,
@@ -264,6 +300,13 @@ function rowToSession(row: StudioSessionRow): StudioSessionRecord {
 		recordingStatus: row.recording_status,
 		realtimeKitMeetingId: row.realtimekit_meeting_id,
 		recordingPrefix: row.recording_prefix,
+		streamEnvironment: row.stream_environment ?? "test",
+		streamStatus: row.stream_status ?? "idle",
+		cloudflareStreamLiveInputId: row.cloudflare_stream_live_input_id ?? null,
+		cloudflareStreamPlaybackUrl: row.cloudflare_stream_playback_url ?? null,
+		streamStartedAt: row.stream_started_at ?? null,
+		streamEndedAt: row.stream_ended_at ?? null,
+		streamNotificationQueuedAt: row.stream_notification_queued_at ?? null,
 		createdById: row.created_by_id,
 		createdByGithub: row.created_by_github,
 		createdAt: row.created_at,
@@ -581,6 +624,13 @@ export async function listStudioSessions(
 				        recording_status,
 				        realtimekit_meeting_id,
 				        recording_prefix,
+				        stream_environment,
+				        stream_status,
+				        cloudflare_stream_live_input_id,
+				        cloudflare_stream_playback_url,
+				        stream_started_at,
+				        stream_ended_at,
+				        stream_notification_queued_at,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -678,6 +728,13 @@ export async function listStudioSessionsForUser(
 				        recording_status,
 				        realtimekit_meeting_id,
 				        recording_prefix,
+				        stream_environment,
+				        stream_status,
+				        cloudflare_stream_live_input_id,
+				        cloudflare_stream_playback_url,
+				        stream_started_at,
+				        stream_ended_at,
+				        stream_notification_queued_at,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -741,6 +798,13 @@ export async function getStudioSession(
 				        recording_status,
 				        realtimekit_meeting_id,
 				        recording_prefix,
+				        stream_environment,
+				        stream_status,
+				        cloudflare_stream_live_input_id,
+				        cloudflare_stream_playback_url,
+				        stream_started_at,
+				        stream_ended_at,
+				        stream_notification_queued_at,
 				        created_by_id,
 				        created_by_github,
 				        created_at,
@@ -758,6 +822,90 @@ export async function getStudioSession(
 	if (!row) return null;
 	const [session] = await withDerivedSessionRecordingStatuses(env, [rowToSession(row)]);
 	return session ?? null;
+}
+
+export async function getPublicStudioLiveState(
+	env: StudioEnv | undefined,
+	videoSlug: string,
+): Promise<StudioPublicLiveState> {
+	const db = getDb(env);
+	if (!db || !videoSlug.trim()) {
+		return {
+			live: false,
+			playbackUrl: null,
+			session: null,
+		};
+	}
+
+	let row: StudioSessionRow | null;
+	try {
+		row = await db
+			.prepare(
+				`SELECT id,
+				        content_video_id,
+				        content_video_slug,
+				        title,
+				        show_id,
+				        show_title,
+				        content_hosts_json,
+				        content_guests_json,
+				        starts_at,
+				        status,
+				        recording_status,
+				        realtimekit_meeting_id,
+				        recording_prefix,
+				        stream_environment,
+				        stream_status,
+				        cloudflare_stream_live_input_id,
+				        cloudflare_stream_playback_url,
+				        stream_started_at,
+				        stream_ended_at,
+				        stream_notification_queued_at,
+				        created_by_id,
+				        created_by_github,
+				        created_at,
+				        updated_at
+				   FROM studio_sessions
+				  WHERE content_video_slug = ?
+				    AND stream_environment = 'prod'
+				    AND stream_status = 'live'
+				    AND status = 'live'
+				    AND cloudflare_stream_playback_url IS NOT NULL
+				  ORDER BY COALESCE(stream_started_at, updated_at) DESC
+				  LIMIT 1`,
+			)
+			.bind(videoSlug.trim())
+			.first<StudioSessionRow>();
+	} catch (error) {
+		if (isMissingStudioSessionsTableError(error)) {
+				return {
+					live: false,
+					playbackUrl: null,
+					session: null,
+				};
+		}
+		throw error;
+	}
+
+	if (!row?.cloudflare_stream_playback_url) {
+		return {
+			live: false,
+			playbackUrl: null,
+			session: null,
+		};
+	}
+
+	return {
+		live: true,
+		playbackUrl: row.cloudflare_stream_playback_url,
+		session: {
+			id: row.id,
+			show: row.show_title,
+			startedAt: row.stream_started_at ?? null,
+			startsAt: row.starts_at,
+			title: row.title,
+		},
+	};
 }
 
 export async function listStudioRecordings(
@@ -863,12 +1011,19 @@ export async function saveStudioSession(
 				recording_status,
 				realtimekit_meeting_id,
 				recording_prefix,
+				stream_environment,
+				stream_status,
+				cloudflare_stream_live_input_id,
+				cloudflare_stream_playback_url,
+				stream_started_at,
+				stream_ended_at,
+				stream_notification_queued_at,
 				created_by_id,
 				created_by_github,
 				created_at,
 				updated_at
 			)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			ON CONFLICT(id) DO UPDATE SET
 				content_video_id = excluded.content_video_id,
 				content_video_slug = excluded.content_video_slug,
@@ -878,10 +1033,27 @@ export async function saveStudioSession(
 				content_hosts_json = excluded.content_hosts_json,
 				content_guests_json = excluded.content_guests_json,
 				starts_at = excluded.starts_at,
-				status = excluded.status,
-				recording_status = excluded.recording_status,
+				status = CASE
+					WHEN studio_sessions.status <> 'scheduled' THEN studio_sessions.status
+					ELSE excluded.status
+				END,
+				recording_status = CASE
+					WHEN studio_sessions.recording_status <> 'idle' THEN studio_sessions.recording_status
+					ELSE excluded.recording_status
+				END,
 				realtimekit_meeting_id = excluded.realtimekit_meeting_id,
 				recording_prefix = excluded.recording_prefix,
+				stream_environment = CASE
+					WHEN studio_sessions.stream_status IN ('idle', 'ended', 'failed')
+						THEN excluded.stream_environment
+					ELSE studio_sessions.stream_environment
+				END,
+				stream_status = studio_sessions.stream_status,
+				cloudflare_stream_live_input_id = studio_sessions.cloudflare_stream_live_input_id,
+				cloudflare_stream_playback_url = studio_sessions.cloudflare_stream_playback_url,
+				stream_started_at = studio_sessions.stream_started_at,
+				stream_ended_at = studio_sessions.stream_ended_at,
+				stream_notification_queued_at = studio_sessions.stream_notification_queued_at,
 				updated_at = excluded.updated_at`,
 		)
 		.bind(
@@ -898,12 +1070,19 @@ export async function saveStudioSession(
 			session.recordingStatus,
 			session.realtimeKitMeetingId,
 			session.recordingPrefix,
+			session.streamEnvironment,
+			session.streamStatus,
+			session.cloudflareStreamLiveInputId,
+			session.cloudflareStreamPlaybackUrl,
+			session.streamStartedAt,
+			session.streamEndedAt,
+			session.streamNotificationQueuedAt,
 			session.createdById,
 			session.createdByGithub,
 			session.createdAt,
 			session.updatedAt,
-			)
-			.run();
+		)
+		.run();
 }
 
 export async function saveStudioSessionRecordingStatus(
@@ -948,6 +1127,208 @@ export async function saveStudioSessionStatus(
 		.run();
 }
 
+export async function saveStudioStreamStart(
+	env: StudioEnv,
+	input: {
+		liveInputId: string;
+		playbackUrl: string;
+		sessionId: string;
+		startToken: string;
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to persist Studio stream status");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET stream_status = 'starting',
+			        cloudflare_stream_live_input_id = ?,
+			        cloudflare_stream_playback_url = ?,
+			        stream_started_at = NULL,
+			        stream_ended_at = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status = 'starting'
+			    AND stream_start_token = ?`,
+		)
+		.bind(input.liveInputId, input.playbackUrl, input.sessionId, input.startToken)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function claimStudioStreamStart(
+	env: StudioEnv,
+	sessionId: string,
+	startToken: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to claim Studio stream start");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET stream_status = 'starting',
+			        stream_start_token = ?,
+			        stream_started_at = NULL,
+			        stream_ended_at = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND status <> 'complete'
+			    AND stream_status NOT IN ('starting', 'live')
+			    AND (stream_start_token IS NULL OR stream_start_token <> ?)`,
+		)
+		.bind(startToken, sessionId, startToken)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function saveStudioStreamLive(
+	env: StudioEnv,
+	input: {
+		playbackUrl: string;
+		publicLive: boolean;
+		sessionId: string;
+		startToken: string;
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to persist Studio stream status");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN ? = 1 THEN 'live' ELSE status END,
+			        stream_status = 'live',
+			        cloudflare_stream_playback_url = ?,
+			        stream_started_at = CASE
+			          WHEN stream_status = 'live' THEN stream_started_at
+			          ELSE unixepoch()
+			        END,
+			        stream_ended_at = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status = 'starting'
+			    AND stream_start_token = ?`,
+		)
+		.bind(
+			input.publicLive ? 1 : 0,
+			input.playbackUrl,
+			input.sessionId,
+			input.startToken,
+		)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function claimStudioStreamNotification(
+	env: StudioEnv,
+	sessionId: string,
+	notificationQueuedAt: number,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to claim Studio stream notification");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET stream_notification_queued_at = ?,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_environment = 'prod'
+			    AND stream_status = 'live'
+			    AND status = 'live'
+			    AND stream_notification_queued_at IS NULL`,
+		)
+		.bind(notificationQueuedAt, sessionId)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function releaseStudioStreamNotificationClaim(
+	env: StudioEnv,
+	sessionId: string,
+	notificationQueuedAt: number,
+): Promise<void> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to release Studio stream notification claim");
+	}
+
+	await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET stream_notification_queued_at = NULL,
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_notification_queued_at = ?`,
+		)
+		.bind(sessionId, notificationQueuedAt)
+		.run();
+}
+
+function d1WriteChanged(result: D1Result<unknown>): boolean {
+	return (result.meta?.changes ?? result.meta?.rows_written ?? 0) > 0;
+}
+
+export async function saveStudioStreamEnded(
+	env: StudioEnv,
+	sessionId: string,
+	startToken?: string,
+): Promise<void> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to persist Studio stream status");
+	}
+
+	if (startToken) {
+		await db
+			.prepare(
+				`UPDATE studio_sessions
+				    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+				        stream_status = 'ended',
+				        stream_start_token = CASE
+				          WHEN stream_start_token = ? THEN NULL
+				          ELSE ?
+				        END,
+				        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+				        updated_at = unixepoch()
+				  WHERE id = ?
+				    AND (
+				      stream_start_token = ?
+				      OR (
+				        stream_start_token IS NULL
+				        AND stream_status NOT IN ('starting', 'live')
+				      )
+				    )`,
+			)
+			.bind(startToken, startToken, sessionId, startToken)
+			.run();
+		return;
+	}
+
+	await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'ended',
+			        stream_start_token = NULL,
+			        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+			        updated_at = unixepoch()
+			  WHERE id = ?`,
+		)
+		.bind(sessionId)
+		.run();
+}
+
 export function buildStudioSession(input: {
 	contentVideoId?: string | null;
 	contentVideoSlug?: string | null;
@@ -960,6 +1341,7 @@ export function buildStudioSession(input: {
 	showId?: string;
 	startsAt?: string;
 	status?: StudioSessionStatus;
+	streamEnvironment?: StreamEnvironment;
 	title: string;
 }): StudioSessionRecord {
 	const createdAt = nowSeconds();
@@ -984,6 +1366,13 @@ export function buildStudioSession(input: {
 		recordingStatus: "idle",
 		realtimeKitMeetingId: input.meeting?.id ?? null,
 		recordingPrefix: `studio/recordings/${sessionId}/`,
+		streamEnvironment: input.streamEnvironment ?? "test",
+		streamStatus: "idle",
+		cloudflareStreamLiveInputId: null,
+		cloudflareStreamPlaybackUrl: null,
+		streamStartedAt: null,
+		streamEndedAt: null,
+		streamNotificationQueuedAt: null,
 		createdById: getStudioUserId(input.createdBy),
 		createdByGithub,
 		createdAt,

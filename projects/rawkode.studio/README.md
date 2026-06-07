@@ -18,7 +18,9 @@ bun run verify:live
 - `STUDIO_DB`: D1 database with `data-model/0000_studio_sessions.sql`.
 - `RECORDINGS`: R2 bucket containing Studio recordings and ready markers. Production binds `rawkode-academy-content` so R2 Event Notifications can hand markers to the ingest Worker; the public content Worker denies `studio/recordings/*` while still serving final `videos/*` VOD output.
 - `RECORDINGS_BUCKET_NAME`: name of the bound R2 recordings bucket written into ready markers.
-- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account that owns the RealtimeKit app.
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account that owns the RealtimeKit app and Stream live inputs.
+- `CLOUDFLARE_STREAM_API_TOKEN`: Cloudflare Stream API token from Secrets Store. It is used only by Studio server operations that create or inspect Stream live inputs.
+- `STREAM_NOTIFICATIONS`: queue producer for `rawkode-academy-notifications`. Studio enqueues `SendSubjectInput` only after a prod stream is confirmed live.
 - `REALTIMEKIT_API_TOKEN`, `REALTIMEKIT_APP_ID`: Cloudflare RealtimeKit API secrets from Secrets Store. `CLOUDFLARE_API_TOKEN` is only the deploy credential resolved by `env.cue`.
 - `REALTIMEKIT_HOST_PRESET`, `REALTIMEKIT_PRODUCER_PRESET`, `REALTIMEKIT_GUEST_PRESET`, `REALTIMEKIT_PROGRAM_PRESET`: optional preset names for contributor tokens.
 - `RAWKODE_GRAPHQL_URL`: Rawkode GraphQL gateway used to resolve content videos, shows, hosts, and guests. Defaults to `https://api.rawkode.academy/`.
@@ -39,6 +41,8 @@ Guest joins use opaque invite tokens stored as SHA-256 hashes in D1. Invite URLs
 ## RealtimeKit Room UI
 
 Studio room pages include a Vue room bridge that requests a participant token from `/api/studio/participant-token` and loads the Cloudflare RealtimeKit client/UI from jsDelivr on demand. Local fallback sessions intentionally stop at the provider-not-configured response until a persisted session has a RealtimeKit meeting ID.
+
+Creating a RealtimeKit meeting only prepares the host/guest green room. Public streaming starts later from the programme canvas using Cloudflare Stream WebRTC/WHIP. A Studio session stores `streamEnvironment` as `test` or `prod`; test streams can publish to Stream for operator preview, while prod streams expose live state to the website and enqueue notifications only after Cloudflare reports the live input connected.
 
 The browser production canvas remains a Vue island inside Astro pages. Hosts, producers, and guests authenticate through `rawkode.academy` identity, where the GitHub handle is the user ID used to attach people metadata.
 

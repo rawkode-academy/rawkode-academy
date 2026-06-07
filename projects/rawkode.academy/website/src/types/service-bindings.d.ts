@@ -7,7 +7,6 @@
 
 import type { EmailPreferences } from "email-preferences/rpc/rpc-service.js";
 import type { Notifications } from "notifications/src/main.js";
-import type { SendSubjectInput } from "notifications/src/contracts.js";
 import type { SkiAchievements } from "ski-achievements/http/http-service.js";
 import type { SkiLeaderboard } from "ski-leaderboard/http/http-service.js";
 import type { SkiPlayerLearnedPhrases } from "ski-player-learned-phrases/http/http-service.js";
@@ -20,7 +19,7 @@ export interface TypedEnv {
 	WATCH_HISTORY: Fetcher;
 	IDENTITY: Fetcher;
 	ANALYTICS: Fetcher;
-	STREAM_NOTIFICATIONS: Queue<SendSubjectInput>;
+	STUDIO: Fetcher;
 	ASSETS: Fetcher;
 	EMAIL_PREFERENCES: Service<typeof EmailPreferences>;
 	NOTIFICATIONS: Service<typeof Notifications>;

@@ -20,7 +20,6 @@
 		"check:orphans": "bun scripts/orphan-check.ts --base https://rawkode.academy --maxDepth 3 --limit 1000",
 		"check:cwv": "bun scripts/check-cwv.ts --base https://rawkode.academy",
 		"sync:technologies": "bun scripts/sync-technologies.ts",
-		"sync:realtimekit-webhook": "bun scripts/sync-realtimekit-webhook.ts",
 		"subgraph:sdl": "bun scripts/publish-subgraph.ts",
 		"knip": "knip"
 	},

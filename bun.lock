@@ -594,6 +594,7 @@
         "@remotion/player": "^4.0.473",
         "astro": "^6.4.2",
         "motion": "^12.40.0",
+        "notifications": "workspace:*",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
         "remotion": "^4.0.473",

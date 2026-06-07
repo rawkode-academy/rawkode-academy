@@ -7,6 +7,7 @@ on:
     paths:
     - .github/workflows/rawkode-academy-studio-pullrequest.yml
     - cue.mod/**
+    - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.studio/astro.config.mts
     - projects/rawkode.studio/astro.config.mts/**
     - projects/rawkode.studio/data-model/**

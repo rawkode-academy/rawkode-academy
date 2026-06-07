@@ -42,6 +42,8 @@ const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Mee
 			roomRole="Host"
 			sessionId={session.id}
 			sessionTitle={session.title}
+			streamEnvironment={session.streamEnvironment}
+			streamStatus={session.streamStatus}
 		/>
 	</section>
 </StudioLayout>

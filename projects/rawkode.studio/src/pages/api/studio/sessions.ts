@@ -22,6 +22,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 		show?: string;
 		showId?: string;
 		startsAt?: string;
+		streamEnvironment?: string;
 		title?: string;
 		videoId?: string;
 	} | null;
@@ -34,6 +35,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 			show: body.show,
 			showId: body.showId,
 			startsAt: body.startsAt,
+			streamEnvironment: body.streamEnvironment === "prod" ? "prod" : "test",
 			title: body.title,
 			videoId: body.videoId,
 		});

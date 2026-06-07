@@ -61,11 +61,11 @@ function eventState(event: StudioEventSummary): string {
 						</h1>
 					</div>
 					<p>
-						{
-							dashboard.isOperator
-								? "Create and end RealtimeKit sessions for scheduled Rawkode events."
-								: "Join active Studio rooms for events where your GitHub handle is listed."
-						}
+							{
+								dashboard.isOperator
+									? "Create RealtimeKit green rooms and choose whether the later go-live is a test or prod stream."
+									: "Join active Studio rooms for events where your GitHub handle is listed."
+							}
 					</p>
 				</div>
 
@@ -130,7 +130,7 @@ function eventState(event: StudioEventSummary): string {
 									<p>{eventTiming(event)}</p>
 								</div>
 								<div class="session-status">
-									<span>{event.sessions.length} RTK sessions</span>
+									<span>{event.sessions.length} rooms</span>
 									<span>{activeSessions.length} active</span>
 								</div>
 								<div class="session-actions">
@@ -138,8 +138,15 @@ function eventState(event: StudioEventSummary): string {
 										dashboard.isOperator ? (
 											<form method="POST" action={actions.createSession}>
 												<input name="videoId" type="hidden" value={event.id} />
+												<label class="stream-environment-field">
+													<span>Stream mode</span>
+													<select name="streamEnvironment">
+														<option value="test" selected>Test</option>
+														<option value="prod">Prod</option>
+													</select>
+												</label>
 												<button class="button primary" type="submit">
-													Create RTK session
+													Create room
 												</button>
 											</form>
 										) : activeSessions.length === 0 ? (
@@ -155,6 +162,8 @@ function eventState(event: StudioEventSummary): string {
 													<div>
 														<strong>{session.id}</strong>
 														<span>{session.status}</span>
+														<span>{session.streamEnvironment}</span>
+														<span>{session.streamStatus}</span>
 													</div>
 													<div class="session-actions">
 														{
