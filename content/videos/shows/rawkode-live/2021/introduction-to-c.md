@@ -6,6 +6,10 @@ description: >-
   Sy Brand walks David through modern C++ via Exercism's Hello World and Isogram
   exercises, covering Catch2 tests, CMake builds, namespaces, std::string vs
   string_view, std::unordered_set, range-based for loops, auto, and references.
+whatYouWillLearn:
+  - "Builds a Hello World exercise with Catch2 tests and CMake."
+  - "Explains how isograms work by filtering repeated letters, spaces, and hyphens."
+  - "Covers std::string, string_view, auto, and references for modern C++ code."
 publishedAt: 2021-07-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -114,4 +118,3 @@ resources:
     url: 'https://www.includecpp.org/'
     category: other
 ---
-
