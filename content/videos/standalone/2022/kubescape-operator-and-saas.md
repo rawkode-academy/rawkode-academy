@@ -6,6 +6,10 @@ description: >-
   Deploy the Kubescape operator across AKS, EKS, and GKE with Pulumi, then use
   Kubescape Cloud to triage configuration risks, CVEs, and RBAC across workloads
   from Flux, Grafana, and Helm charts.
+whatYouWillLearn:
+  - "Deploy the Kubescape operator across managed Kubernetes clusters with Pulumi and Helm."
+  - "Use Kubescape Cloud to rank configuration risks, CVEs, and affected workloads."
+  - "Trace failing controls to remediation YAML, exceptions, and RBAC relationships."
 publishedAt: 2022-12-20T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -61,4 +65,3 @@ resources:
     url: 'https://kubescape.github.io/helm-charts'
     category: documentation
 ---
-
