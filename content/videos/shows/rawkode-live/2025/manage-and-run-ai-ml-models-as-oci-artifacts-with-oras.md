@@ -10,6 +10,10 @@ description: >-
   Josh Duffney and Feynman Zhou from Microsoft show how to package AI/ML models
   as OCI artifacts with ORAS, store them in any container registry, sign them
   with Notation, and mount them into Kubernetes pods via OCI image volumes.
+whatYouWillLearn:
+  - "Package AI and ML models as OCI artifacts with ORAS."
+  - "Push model artifacts to any registry and mount them in Kubernetes."
+  - "Sign and verify model artifacts with Notation and ORAS attach."
 publishedAt: 2025-03-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -41,4 +45,3 @@ resources:
     url: 'https://github.com/modelpack/model-spec'
     category: code
 ---
-
