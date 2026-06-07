@@ -7,6 +7,10 @@ description: >-
   Docker Compose: fixing the npm watcher, running Artisan migrations, chasing
   HMR port bindings, and refactoring the production Dockerfile for Composer
   caching.
+whatYouWillLearn:
+  - "Repair missing Laravel asset builds by wiring the Node watcher as a dependency in Docker Compose."
+  - "Connect database setup to the PHP environment with automated Artisan migrations and seeding to complete app startup."
+  - "Enable Laravel hot module reload by fixing HMR port collisions and container bind addresses during local development."
 publishedAt: 2020-10-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -158,4 +162,3 @@ resources:
     url: 'https://laravel.com/docs/dusk'
     category: documentation
 ---
-
