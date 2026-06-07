@@ -7,6 +7,10 @@ description: >-
   dynamic labels, user and role management, eBPF enhanced session recording, and
   accessing servers through the Web UI and tsh CLI with shared and recorded
   sessions.
+whatYouWillLearn:
+  - "Register agent nodes with static tokens and troubleshoot join failures."
+  - "Add static and dynamic node labels for filtering cluster access."
+  - "Create users, replay recorded sessions, and query nodes from tsh."
 publishedAt: 2021-11-05T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -95,4 +99,3 @@ resources:
       https://goteleport.com/docs/enroll-resources/server-access/guides/bpf-session-recording/
     category: documentation
 ---
-
