@@ -6,6 +6,10 @@ description: >-
   Build a custom Kubescape framework two ways: the easy path through ARMO
   Cloud's UI, then a local-only flow that authors controls in CUE, exports to
   JSON, and runs Rego rules against Kubernetes manifests.
+whatYouWillLearn:
+  - "Create custom Kubescape frameworks in ARMO Cloud by selecting controls and saving them."
+  - "Export the framework to JSON, then scan local manifests with kubescape scan use from."
+  - "Write custom controls in Cue, export them, and embed Rego rules inside JSON."
 publishedAt: 2023-01-30T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -37,4 +41,3 @@ resources:
     url: 'https://ghcr.io/rawkodeacademy'
     category: code
 ---
-
