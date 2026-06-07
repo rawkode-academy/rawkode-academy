@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const ValidUntilSchema = z
+	.union([z.string().datetime(), z.date()])
+	.optional()
+	.transform((value) => (value ? new Date(value) : undefined));
+
 export const IssueBadgeRequestSchema = z.object({
 	userId: z.string().min(1, "userId is required"),
 	recipientEmail: z.string().email("recipientEmail must be a valid email"),
@@ -8,7 +13,7 @@ export const IssueBadgeRequestSchema = z.object({
 	achievementDescription: z
 		.string()
 		.min(1, "achievementDescription is required"),
-	validUntil: z.coerce.date().optional(),
+	validUntil: ValidUntilSchema,
 });
 
 export const IssueBadgeResponseSchema = z.object({

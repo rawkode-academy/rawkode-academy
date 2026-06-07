@@ -458,6 +458,10 @@ import (
 			}]
 		}
 
+		if len(_bindings.vars) > 0 {
+			vars: _bindings.vars
+		}
+
 		if len(_bindings.services) > 0 {
 			services: [for svc in _bindings.services {
 				binding: svc.binding

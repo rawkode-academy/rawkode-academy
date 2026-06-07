@@ -198,6 +198,16 @@ export class BadgeService extends WorkerEntrypoint<Env> {
 				? toSecondPrecision(validUntil)
 				: undefined;
 
+			if (validUntilDate && validUntilDate <= validFromDate) {
+				return new Response(
+					JSON.stringify({ error: "validUntil must be after validFrom" }),
+					{
+						status: 400,
+						headers: { "Content-Type": "application/json", ...CORS_HEADERS },
+					},
+				);
+			}
+
 			const signedJWT = await createSignedCredential(
 				{
 					id: `${this.env.BADGE_ISSUER_URL}/badge/${badgeId}`,

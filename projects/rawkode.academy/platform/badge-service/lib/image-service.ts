@@ -8,7 +8,7 @@ export interface BadgeImageParams {
 }
 
 export interface BadgeImage {
-	body: ArrayBuffer | string;
+	body: ReadableStream<Uint8Array> | string;
 	contentType: string;
 }
 
@@ -47,9 +47,18 @@ export async function fetchBadgeImage(url: string): Promise<BadgeImage> {
 			throw new Error(`Image service returned status ${response.status}`);
 		}
 
+		const contentType = response.headers.get("Content-Type") ?? "image/png";
+		if (!contentType.toLowerCase().startsWith("image/")) {
+			throw new Error(`Image service returned unsupported ${contentType}`);
+		}
+
+		if (!response.body) {
+			throw new Error("Image service returned an empty response body");
+		}
+
 		return {
-			body: await response.arrayBuffer(),
-			contentType: response.headers.get("Content-Type") ?? "image/png",
+			body: response.body,
+			contentType,
 		};
 	} catch (error) {
 		const message =

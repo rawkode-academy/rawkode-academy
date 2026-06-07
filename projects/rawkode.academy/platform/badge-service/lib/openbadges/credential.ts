@@ -54,6 +54,7 @@ export function buildCredential(
 		credential.validUntil = toSecondPrecisionISOString(params.validUntil);
 	}
 
+	validateCredentialOrThrow(credential);
 	return credential;
 }
 
@@ -63,7 +64,6 @@ export async function createSignedCredential(
 	issuerUrl: string,
 ): Promise<string> {
 	const credential = buildCredential(params);
-	validateCredentialOrThrow(credential);
 	return signCredentialAsJWT(credential, privateKey, issuerUrl);
 }
 

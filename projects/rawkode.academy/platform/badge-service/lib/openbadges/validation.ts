@@ -42,22 +42,33 @@ const CredentialSubjectSchema = z.object({
 	achievement: AchievementSchema,
 });
 
-const AchievementCredentialSchema = z.object({
-	"@context": z.tuple([
-		z.literal(OPENBADGE_CONTEXT[0]),
-		z.literal(OPENBADGE_CONTEXT[1]),
-	]),
-	id: z.string(),
-	type: z.tuple([
-		z.literal("VerifiableCredential"),
-		z.literal("AchievementCredential"),
-	]),
-	name: z.string().min(1),
-	issuer: ProfileSchema,
-	credentialSubject: CredentialSubjectSchema,
-	validFrom: z.string().datetime(),
-	validUntil: z.string().datetime().optional(),
-});
+const AchievementCredentialSchema = z
+	.object({
+		"@context": z.tuple([
+			z.literal(OPENBADGE_CONTEXT[0]),
+			z.literal(OPENBADGE_CONTEXT[1]),
+		]),
+		id: z.string(),
+		type: z.tuple([
+			z.literal("VerifiableCredential"),
+			z.literal("AchievementCredential"),
+		]),
+		name: z.string().min(1),
+		issuer: ProfileSchema,
+		credentialSubject: CredentialSubjectSchema,
+		validFrom: z.string().datetime(),
+		validUntil: z.string().datetime().optional(),
+	})
+	.refine(
+		(credential) =>
+			!credential.validUntil ||
+			new Date(credential.validUntil).getTime() >
+				new Date(credential.validFrom).getTime(),
+		{
+			path: ["validUntil"],
+			message: "validUntil must be after validFrom",
+		},
+	);
 
 export interface ValidationResult {
 	valid: boolean;

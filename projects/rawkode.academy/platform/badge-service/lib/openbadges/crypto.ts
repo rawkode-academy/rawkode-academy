@@ -34,6 +34,30 @@ export function issuerKeyId(issuerUrl: string): string {
 	return `${issuerUrl}/issuer/key-1`;
 }
 
+async function assertKeyPairMatches(
+	privateKey: CryptoKey,
+	publicKey: CryptoKey,
+): Promise<void> {
+	const probe = new TextEncoder().encode("rawkode-academy-badge-key-check");
+	const signature = await crypto.subtle.sign(
+		"RSASSA-PKCS1-v1_5",
+		privateKey,
+		probe,
+	);
+	const verified = await crypto.subtle.verify(
+		"RSASSA-PKCS1-v1_5",
+		publicKey,
+		signature,
+		probe,
+	);
+
+	if (!verified) {
+		throw new KeyManagementError(
+			"BADGE_ISSUER_RSA_PRIVATE_KEY and BADGE_ISSUER_RSA_PUBLIC_KEY do not match",
+		);
+	}
+}
+
 export async function loadRSAKeys(env: BadgeKeyEnv): Promise<RSAKeys> {
 	try {
 		const privatePem = await readSecretString(
@@ -46,6 +70,7 @@ export async function loadRSAKeys(env: BadgeKeyEnv): Promise<RSAKeys> {
 		);
 		const privateKey = await importPKCS8(privatePem, "RS256");
 		const publicKey = await importSPKI(publicPem, "RS256");
+		await assertKeyPairMatches(privateKey, publicKey);
 
 		return { privateKey, publicKey };
 	} catch (error) {

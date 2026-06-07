@@ -218,6 +218,34 @@ describe("buildCredential", () => {
 		expect(credential.validFrom).toBe("2024-01-01T00:00:00.000Z");
 		expect(credential.validUntil).toBe("2025-01-01T00:00:00.000Z");
 	});
+
+	it("should reject credentials where validUntil is not after validFrom", () => {
+		const issuerProfile: Profile = {
+			id: `${TEST_ISSUER_URL}/issuer`,
+			type: ["Profile"],
+			name: "Rawkode Academy",
+		};
+
+		const achievement = buildAchievement({
+			id: `${TEST_ISSUER_URL}/achievements/test`,
+			name: "Test",
+			description: "Test achievement",
+			imageUrl: "https://example.com/image.svg",
+			creatorProfile: issuerProfile,
+		});
+
+		expect(() =>
+			buildCredential({
+				id: `${TEST_ISSUER_URL}/credentials/cred123`,
+				name: "Test",
+				issuerProfile,
+				recipientEmail: "user@example.com",
+				achievement,
+				validFrom: new Date("2025-01-01T00:00:00.000Z"),
+				validUntil: new Date("2025-01-01T00:00:00.000Z"),
+			}),
+		).toThrow(CredentialValidationError);
+	});
 });
 
 describe("validateCredential", () => {
@@ -329,6 +357,18 @@ describe("loadRSAKeys", () => {
 
 		expect(keys.privateKey.type).toBe("private");
 		expect(keys.publicKey.type).toBe("public");
+	});
+
+	it("should throw KeyManagementError when RSA public key does not match private key", async () => {
+		const { publicKey } = await generateTestRSAKeyPair();
+		const mismatchedPublicKey = await exportSPKI(publicKey);
+		const env = {
+			BADGE_ISSUER_RSA_PRIVATE_KEY: TEST_RSA_PRIVATE_KEY,
+			BADGE_ISSUER_RSA_PUBLIC_KEY: mismatchedPublicKey,
+		};
+
+		await expect(loadRSAKeys(env)).rejects.toThrow(KeyManagementError);
+		await expect(loadRSAKeys(env)).rejects.toThrow("do not match");
 	});
 });
 
