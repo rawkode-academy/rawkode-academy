@@ -6,6 +6,10 @@ description: >-
   Brian demos aquaproj for pinning CLI tool versions per-project and globally
   via its YAML registry, then David walks through a Go Dagger pipeline that
   builds a container, runs Hurl HTTP tests, and visualises cached steps.
+whatYouWillLearn:
+  - "Pin a CLI tool version in a project-specific aqua.yaml registry file"
+  - "Use a global aqua config to keep shared tools like gh and rust-analyzer"
+  - "Build a Go service and test it with Dagger, Hurl, and cached steps"
 publishedAt: 2023-08-17T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -66,4 +70,3 @@ resources:
     url: 'https://docs.dagger.io/'
     category: documentation
 ---
-
