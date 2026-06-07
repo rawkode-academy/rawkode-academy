@@ -7,6 +7,10 @@ description: >-
   Equinix Metal, wiring up Prometheus and InfluxDB data sources, building
   dashboards, configuring alert rules with webhook notifications, and importing
   community dashboards.
+whatYouWillLearn:
+  - "Set up Grafana on a fresh Equinix Metal host and complete initial admin account hardening."
+  - "Add Prometheus and InfluxDB as data sources and inspect collected Linux metrics in Explore and dashboards."
+  - "Build alerting rules with webhook notifications, then create panels and import a community dashboard."
 publishedAt: 2020-10-29T17:00:00.000Z
 type: live
 category: tutorial
@@ -105,4 +109,3 @@ resources:
     url: 'https://www.influxdata.com/'
     category: documentation
 ---
-
