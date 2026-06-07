@@ -7,6 +7,10 @@ description: >-
   sharding from ancient Rome, defines time series data (metrics versus events),
   shows collection with Telegraf, and previews downsampling and Kubernetes
   monitoring with InfluxDB.
+whatYouWillLearn:
+  - "Differentiate metrics from events using logs, cards, and football examples."
+  - "Use Telegraf to collect metrics from systems and services."
+  - "Apply downsampling and monitoring patterns for Kubernetes workloads."
 publishedAt: 2021-07-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -130,4 +134,3 @@ resources:
     url: 'https://spinroot.com/gerard/hist.html'
     category: other
 ---
-
