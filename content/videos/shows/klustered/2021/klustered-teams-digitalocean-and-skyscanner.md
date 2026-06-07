@@ -6,6 +6,10 @@ description: >-
   Skyscanner and DigitalOcean each take on a broken Kubernetes cluster. Fixes
   span expired certs, etcd probes and resource limits, a kube-vip VIP, a rogue
   validating webhook, kube-monkey, and Cilium with kube-proxy replacement.
+whatYouWillLearn:
+  - "Fix expired Kubernetes API server certificates, static pod manifests, and restart flows to recover initial cluster access."
+  - "Diagnose etcd readiness and resource limit problems by removing probes and tuning limits to stabilize control plane."
+  - "Debug application breakages caused by invalid webhooks, Postgres DNS, and Cilium kube-proxy replacement networking during app rollout."
 publishedAt: 2021-07-29T17:30:00.000Z
 type: live
 category: tutorial
@@ -181,4 +185,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-
