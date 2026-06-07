@@ -7,6 +7,10 @@ description: >-
   `daytona create` spins up a workspace from a Git repo and devcontainer,
   running in local Docker or remote DigitalOcean with the same flow, plus public
   port forwarding via a reverse proxy.
+whatYouWillLearn:
+  - "Use your own editor, including VS Code, JetBrains, or Cursor."
+  - "Daytona provisions local Docker or remote cloud workspaces from a Git repository."
+  - "Public port forwarding adds a reverse proxy and QR code preview link."
 publishedAt: 2024-09-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -76,4 +80,3 @@ resources:
     url: 'https://github.com/juanfont/headscale'
     category: code
 ---
-
