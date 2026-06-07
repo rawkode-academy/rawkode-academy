@@ -7,6 +7,10 @@ description: >-
   policy management via validate, mutate, and generate rules. Covers the
   admission controller, policy reports, comparisons with PodSecurityPolicies and
   OPA Gatekeeper, and hands-on policy demos.
+whatYouWillLearn:
+  - "How Kyverno enforces Kubernetes policies through admission controller requests."
+  - "How validate, mutate, and generate rules shape cluster behavior."
+  - "How policy reports and audit mode surface policy violations."
 publishedAt: 2021-02-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -120,4 +124,3 @@ resources:
     category: other
     url: 'https://github.com/itaysk/kubectl-neat'
 ---
-
