@@ -7,6 +7,10 @@ description: >-
   Kubernetes clusters, and web apps. We cover short-lived certificates, session
   recording, and audit, then install Teleport, add a node, and connect a
   Kubernetes cluster via the Helm chart.
+whatYouWillLearn:
+  - "Set up a Teleport auth/proxy/SSH service stack and run it safely as a Linux service with TLS."
+  - "Create users and roles in Web UI, then access SSH, web apps, and Kubernetes under enforced policies."
+  - "Generate and use short-lived certificates, then inspect audit logs and session recordings for each SSH or Kubernetes action."
 publishedAt: 2020-12-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -101,4 +105,3 @@ resources:
     url: 'https://goteleport.com/docs/enroll-resources/server-access/openssh/'
     category: documentation
 ---
-
