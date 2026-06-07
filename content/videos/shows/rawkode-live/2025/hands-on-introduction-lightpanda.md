@@ -7,6 +7,10 @@ description: >-
   JavaScript and exposes the final DOM without rendering. They benchmark it
   against headless Chrome, demo CDP automation, and walk through real-world
   limits like missing Web APIs.
+whatYouWillLearn:
+  - "Run JavaScript and return the final DOM without graphical rendering."
+  - "Automate browsers through CDP with Puppeteer, Playwright, or Selenium clients."
+  - "Cut memory use and startup time compared with headless Chrome."
 publishedAt: 2025-04-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -30,4 +34,3 @@ resources:
     category: code
     url: 'https://github.com/web-platform-tests/wpt'
 ---
-
