@@ -7,6 +7,10 @@ description: >-
   access control: developers declare which services they call in ClientIntents
   CRs, and the operator generates the policies. Demoed on Weaveworks Sock Shop,
   with Otterize Cloud's access graph.
+whatYouWillLearn:
+  - "Declare service-to-service access in ClientIntents instead of hand-writing Kubernetes NetworkPolicies."
+  - "Protect a service with default deny, then restore access by adding the missing intent."
+  - "Use Otterize Cloud's access graph and network mapper to discover real traffic."
 publishedAt: 2023-11-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -96,4 +100,3 @@ resources:
     url: 'https://github.com/microservices-demo/microservices-demo'
     category: demos
 ---
-
