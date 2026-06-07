@@ -6,6 +6,10 @@ description: >-
   Michael Irwin from Docker walks David through Docker Build Cloud, a hosted
   BuildKit service. They cover the shared remote cache, native AMD64/ARM64
   builders, and wire it up with Buildx and Docker Compose on a React demo app.
+whatYouWillLearn:
+  - "Set up a Buildx cloud builder from Docker Build Cloud's web UI or CLI."
+  - "Use the shared remote cache so teammates inherit fast builds from earlier runs."
+  - "Switch between cloud and local builders without changing your Docker Compose commands."
 publishedAt: 2024-03-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -43,4 +47,3 @@ guests:
   - mikesir87
 resources: []
 ---
-
