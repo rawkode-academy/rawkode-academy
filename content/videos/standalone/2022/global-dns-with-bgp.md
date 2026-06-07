@@ -6,6 +6,10 @@ description: >-
   Run CoreDNS in three metros on Equinix Metal and advertise a single anycast IP
   over BGP with BIRD, then reproduce the whole setup with Pulumi and CUE so the
   closest region answers every query.
+whatYouWillLearn:
+  - "Run CoreDNS as a DNS server across three metros worldwide."
+  - "Advertise one global IPv4 address over BGP for closest-region routing."
+  - "Recreate the deployment with Pulumi and CUE instead of manual setup."
 publishedAt: 2022-08-11T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -136,4 +140,3 @@ resources:
     url: 'https://bird.network.cz/'
     category: other
 ---
-
