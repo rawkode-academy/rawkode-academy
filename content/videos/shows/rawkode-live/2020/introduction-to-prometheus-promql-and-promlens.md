@@ -6,6 +6,10 @@ description: >-
   Julius Volz, Prometheus co-founder, walks through the data model and four
   metric types, scraping node_exporter, writing PromQL in PromLens, and building
   a predict_linear disk-fill alert.
+whatYouWillLearn:
+  - "Understand Prometheus as a pull-based time-series monitoring system with a dimensional metric model and labels."
+  - "Set up Prometheus and node_exporter scraping, configure scrape targets, and validate collected metrics in the UI."
+  - "Build and evaluate PromQL and PromLens queries like rate, ratios, and predict_linear for disk-alerting scenarios."
 publishedAt: 2020-10-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -104,4 +108,3 @@ resources:
     url: 'https://cortexmetrics.io/'
     category: other
 ---
-
