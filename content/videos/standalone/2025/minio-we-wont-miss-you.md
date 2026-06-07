@@ -10,6 +10,10 @@ description: >-
   they got here: silent AGPL relicensing in 2019 and 2021, the Weka
   license-revocation stunt, gutting the May 2025 community console, and pushing
   a $96K paywall for features that used to be free.
+whatYouWillLearn:
+  - "Trace the 2019 and 2021 license changes that quietly hardened MinIO's codebase."
+  - "See how the Weka dispute showed why public license enforcement can backfire."
+  - "Understand how MinIO removed community console features and priced them at $96,000."
 publishedAt: 2025-12-04T00:00:00.000Z
 type: recorded
 category: editorial
@@ -38,4 +42,3 @@ resources:
     url: 'https://github.com/minio/minio/discussions/21326'
     category: other
 ---
-
