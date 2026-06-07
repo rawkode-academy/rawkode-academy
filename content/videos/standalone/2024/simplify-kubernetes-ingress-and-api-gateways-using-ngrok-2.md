@@ -7,6 +7,10 @@ description: >-
   and HTTPRoute against a custom ngrok.dev domain, route to three sample
   services, then enforce a sliding-window rate limit with an ngrok
   TrafficPolicy.
+whatYouWillLearn:
+  - "Install the ngrok Kubernetes operator with Helm and connect it to a namespace."
+  - "Configure GatewayClass, Gateway, and HTTPRoute resources to route traffic by hostname and path."
+  - "Attach an ngrok TrafficPolicy to rate limit build requests over a sliding window."
 publishedAt: 2024-10-03T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -75,4 +79,3 @@ resources:
     url: 'https://charts.ngrok.com'
     category: code
 ---
-
