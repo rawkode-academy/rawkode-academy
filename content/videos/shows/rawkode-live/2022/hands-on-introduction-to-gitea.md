@@ -6,6 +6,10 @@ description: >-
   David is joined by Matti (project owner) to install Gitea from binary on an
   Equinix Metal Ubuntu box, walk the web installer with SQLite, then tour repos,
   SSH signing, migrations, CI options, and the API.
+whatYouWillLearn:
+  - "Install Gitea from a binary on Ubuntu and finish the web installer."
+  - "Configure SQLite, admin access, SSH keys, and commit signing in Gitea."
+  - "Use repository migration, push mirrors, CI options, and the API."
 publishedAt: 2022-09-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -156,4 +160,3 @@ resources:
     url: 'https://codeberg.org'
     category: other
 ---
-

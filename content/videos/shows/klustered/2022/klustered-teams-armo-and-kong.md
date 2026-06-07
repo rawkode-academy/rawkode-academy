@@ -6,6 +6,10 @@ description: >-
   Teams Kong and Armo trade broken clusters, debugging liveness probes, Postgres
   ConfigMap init scripts, a malicious mutating webhook, a rogue NodePort
   process, a fake kubectl alias, and a kubeconfig HTTP/HTTPS swap.
+whatYouWillLearn:
+  - "Diagnose Kubernetes pod restarts by checking resource limits, liveness probes, and logs to stabilize workloads."
+  - "Trace sabotage-caused outages by inspecting mutating webhooks, NodePort routes, and unexpected processes on worker nodes."
+  - "Recover API and database access by fixing kubectl execution, kubeconfig protocol, and PostgreSQL service port mappings."
 publishedAt: 2022-03-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -145,4 +149,3 @@ chapters:
 duration: 5269
 resources: []
 ---
-

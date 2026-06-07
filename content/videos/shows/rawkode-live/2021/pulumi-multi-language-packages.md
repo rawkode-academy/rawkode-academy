@@ -7,6 +7,10 @@ description: >-
   schema.json, implementing a Kubernetes deployment component in Go from the
   pulumi-component-provider-go-boilerplate, then generating and consuming SDKs
   from TypeScript.
+whatYouWillLearn:
+  - "Explain Pulumi multi-language components through a Go provider and schema.json."
+  - "Implement Kubernetes resources in Go, then regenerate language SDKs from the schema."
+  - "Debug schema mismatches until the TypeScript package builds and deploys successfully."
 publishedAt: 2021-05-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     url: 'https://github.com/pulumi/pulumi-component-provider-py-boilerplate'
     category: code
 ---
-

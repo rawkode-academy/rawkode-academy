@@ -7,6 +7,10 @@ description: >-
   service, then deploy it to Kubernetes with Helm. Add a TracingPolicy that
   hooks kernel probes to monitor module loading, and inspect events with the
   tetra CLI.
+whatYouWillLearn:
+  - "Install Tetragon on Linux from GitHub releases and run it as a systemd service"
+  - "Inspect live process events with tetra get events and relate output to running commands"
+  - "Add a tracing policy for kernel module activity and apply it in Kubernetes with Helm"
 publishedAt: 2024-02-21T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -61,4 +65,3 @@ resources:
     url: 'https://github.com/cilium/tetragon/tree/main/install/kubernetes/tetragon'
     category: code
 ---
-

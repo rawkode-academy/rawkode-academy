@@ -6,6 +6,10 @@ description: >-
   Leo joins Alex and David to wire Prometheus middleware into Laravel, scrape
   the metrics endpoint, deploy the Prometheus Adapter, and drive a Horizontal
   Pod Autoscaler with custom metrics under load from Siege.
+whatYouWillLearn:
+  - "Wire Prometheus middleware into Laravel so application requests become scrapeable metrics."
+  - "Annotate the Kubernetes deployment so Prometheus can discover and scrape the metrics endpoint."
+  - "Install the Prometheus Adapter, define custom metrics rules, and drive HPA scaling from response time."
 publishedAt: 2021-03-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -89,4 +93,3 @@ resources:
     category: code
     url: 'https://github.com/JoeDog/siege'
 ---
-

@@ -8,6 +8,10 @@ description: >-
   Built from upstream components (musl libc, systemd, vanilla kernels) with no
   base-OS package manager, designed as a lean foundation for immutable,
   image-based cloud and edge systems.
+whatYouWillLearn:
+  - "How Hadron builds a minimal Linux base from upstream components."
+  - "Why Hadron removes the base-OS package manager from the system."
+  - "How Hadron targets immutable image-based cloud and edge deployments."
 publishedAt: 2026-02-05T19:24:45.000Z
 type: recorded
 category: tutorial
@@ -17,4 +21,3 @@ technologies:
 duration: 592
 guests: []
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Ciaran McNulty joins David to apply BDD to the git-sync Rust library. They
   turn example-mapping outcomes into Gherkin scenarios, refine wording, group
   rules, and decide between library-level and CLI end-to-end acceptance tests.
+whatYouWillLearn:
+  - "Map BDD example-mapping outcomes into concrete Gherkin feature files for git-sync behavior."
+  - "Define repository bootstrap rules around missing directories, conflicting paths, and incorrect local Git states with precise scenarios."
+  - "Choose test boundaries between library-level acceptance coverage and two focused CLI happy-path checks."
 publishedAt: 2020-12-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -56,4 +60,3 @@ resources:
     url: 'https://github.com/rawkode/gitsync'
     category: code
 ---
-

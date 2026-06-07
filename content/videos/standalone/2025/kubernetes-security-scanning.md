@@ -10,6 +10,10 @@ description: >-
   kube-hunter for red-team probing, Sonobuoy for CNCF conformance, and Syft plus
   Grype for SBOMs and CVEs. Demo runs them by hand, then automates via Spectro
   Cloud Palette.
+whatYouWillLearn:
+  - "Explain how kube-bench checks clusters against CIS benchmarks for hardening hygiene."
+  - "Show how kube-hunter probes exposed ports, dashboards, and logic flaws from inside."
+  - "Build an SBOM with Syft, then use Grype to find CVEs."
 publishedAt: 2025-12-12T00:00:00.000Z
 type: recorded
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     url: 'https://github.com/anchore/grype'
     category: code
 ---
-

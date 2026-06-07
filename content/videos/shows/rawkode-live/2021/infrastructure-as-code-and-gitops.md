@@ -6,6 +6,10 @@ description: >-
   Bootstrap a Kubernetes cluster on Equinix Metal with Pulumi, then hand
   workloads over to FluxCD. Covers Pulumi project layout, stacks vs Terraform
   workspaces, Flux install, Helm releases, and a live GitOps namespace demo.
+whatYouWillLearn:
+  - "Bootstrap a Kubernetes cluster with Pulumi, then hand workload reconciliation to Flux."
+  - "Use Pulumi stacks for environments, instead of Terraform workspaces, to model deployments."
+  - "Keep the cluster ephemeral and rely on Git as the audit trail."
 publishedAt: 2021-02-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -114,4 +118,3 @@ resources:
     type: url
     category: code
 ---
-

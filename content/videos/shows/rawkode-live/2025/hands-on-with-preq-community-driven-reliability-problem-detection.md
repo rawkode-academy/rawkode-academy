@@ -11,6 +11,10 @@ description: >-
   problem detector. We dig into Common Reliability Enumerations (CREs), running
   community rules against logs and configs, and applying vulnerability-database
   thinking to recurring software failures.
+whatYouWillLearn:
+  - "Map recurring software failures into community-shared Common Reliability Enumerations."
+  - "Run Preak rules against logs and configs to surface reliability problems early."
+  - "Apply vulnerability-database thinking to detect known failure patterns and mitigations."
 publishedAt: 2025-06-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -33,4 +37,3 @@ resources:
     url: 'https://prequel.dev/'
     category: other
 ---
-

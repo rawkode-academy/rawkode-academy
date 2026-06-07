@@ -7,6 +7,10 @@ description: >-
   Packet bare metal: provisioning nodes with Pulumi and TypeScript,
   bootstrapping with kubeadm, installing Calico CNI, and announcing pod and
   service IPv6 addresses to the upstream router via BGP.
+whatYouWillLearn:
+  - "Use Pulumi and TypeScript to provision IPv6-enabled Packet servers and configure Kubernetes node networking prerequisites."
+  - "Understand how kubeadm initializes an IPv6-only cluster with service and pod subnets plus DNS settings."
+  - "Apply Calico CNI and BGP route announcements so pods and services receive reachable external IPv6 addresses."
 publishedAt: 2020-09-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -50,4 +54,3 @@ resources:
       https://docs.tigera.io/calico/latest/reference/architecture/design/l3-interconnect-fabric
     category: documentation
 ---
-

@@ -7,6 +7,10 @@ description: >-
   per-project dev environments. We cover devenv.nix structure, Rust language
   support, running Postgres and Temporal as services, custom scripts, and
   building containers.
+whatYouWillLearn:
+  - "Structure a devenv.nix file to define packages, env vars, scripts, and hooks."
+  - "Run Postgres and Temporal as local services inside reproducible project environments."
+  - "Configure Rust tooling, cargo watch, shell entry hooks, and test commands."
 publishedAt: 2024-06-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -77,4 +81,3 @@ resources:
     url: 'https://github.com/cachix/devenv/tree/main/examples/fly.io'
     category: demos
 ---
-

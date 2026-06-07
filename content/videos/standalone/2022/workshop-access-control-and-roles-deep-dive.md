@@ -6,6 +6,10 @@ description: >-
   Deep dive into Teleport RBAC: explore the editor, auditor, and access base
   roles, modify user traits and logins, restrict access with node labels, build
   elevated access approval workflows, and enforce session MFA.
+whatYouWillLearn:
+  - "Teleport includes editor, auditor, and access roles for cluster changes, logs, and secured resources."
+  - "User traits populate allowed logins, so changing traits controls which SSH usernames are available."
+  - "Label-based rules can limit nodes, and elevated access can require approval plus MFA."
 publishedAt: 2022-02-19T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://github.com/rawkode-academy/courses'
     category: code
 ---
-

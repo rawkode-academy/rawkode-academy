@@ -7,6 +7,10 @@ description: >-
   subgraphs with the TypeScript SDK, compose products and reviews into a
   federated graph, extend types across teams, and deploy via the Grafbase Cloud
   GitHub integration.
+whatYouWillLearn:
+  - "Create standalone GraphQL graphs in TypeScript with resolvers and deploy them to Grafbase Cloud."
+  - "Extend product types across subgraphs so federated queries can resolve reviews from another service."
+  - "Use connectors and edge deployment to unify APIs while keeping responses fast and typed."
 publishedAt: 2024-02-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -63,4 +67,3 @@ resources:
     url: 'https://grafbase.com/docs/resolvers'
     category: documentation
 ---
-

@@ -7,6 +7,10 @@ description: >-
   command palette, built-in Prometheus metrics, smart terminal context
   switching, Helm chart deployment, extensions (Starboard, Resource Map), and
   sharing clusters via Lens Spaces with ClusterConnect.
+whatYouWillLearn:
+  - "Organize Kubernetes clusters and workloads in Lens's unified catalog with quick labeling and filtering."
+  - "Use hotbar, command palette, and smart terminal to switch clusters while preserving correct kubectl and helm context."
+  - "Share clusters through Lens Spaces with ClusterConnect by installing the connector, inviting teammates, and controlling RBAC role access."
 publishedAt: 2021-08-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -116,4 +120,3 @@ resources:
     type: url
     category: code
 ---
-

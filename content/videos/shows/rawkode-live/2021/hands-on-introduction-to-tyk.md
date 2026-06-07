@@ -7,6 +7,10 @@ description: >-
   gateway: installing it on Kubernetes with Helm, configuring keyless and
   API-key auth, rate limits, the Tyk Operator, and stitching REST sources into a
   GraphQL universal data graph.
+whatYouWillLearn:
+  - "Install Tyk OSS Gateway on Kubernetes with Helm and Redis support"
+  - "Configure keyless and API-key protected APIs through the Tyk REST API"
+  - "Use security policies and rate limits to control API client access"
 publishedAt: 2021-09-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -147,4 +151,3 @@ resources:
     url: 'https://jsonplaceholder.typicode.com/users'
     category: demos
 ---
-

@@ -7,6 +7,10 @@ description: >-
   deploy a Go function, demo containerd pause for fast cold starts and async
   callbacks, then expose a cluster service publicly using inlets-operator and
   arkade.
+whatYouWillLearn:
+  - "Install faasd on Equinix Metal with cloud-init, then deploy and validate core components via faas-cli."
+  - "Create a Go-based function from templates, build it, redeploy after code changes, and test sync and async calls."
+  - "Expose your faasd function through inlets-operator using arkade by installing ingress, cert manager, and TLS-enabled public access."
 publishedAt: 2020-11-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -186,4 +190,3 @@ resources:
     url: 'https://simonsinek.com/books/start-with-why/'
     category: other
 ---
-

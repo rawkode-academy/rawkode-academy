@@ -7,6 +7,10 @@ description: >-
   fixing expired apiserver certs, a tab-corrupted scheduler manifest, a
   malicious validating webhook, node taints, scheduler port mismatches, resource
   quotas, and a containerd registry redirect.
+whatYouWillLearn:
+  - "Fix expired Kubernetes API server certificates and regenerate trust with practical kubeadm commands."
+  - "Trace scheduler and controller-manager issues by checking static manifests, port settings, and pod restart behavior."
+  - "Resolve resource quotas, taints, containerd images, and registry redirects to restore app and database pods."
 publishedAt: 2021-07-08T17:30:00.000Z
 type: live
 category: tutorial
@@ -133,4 +137,3 @@ resources:
     url: 'https://goteleport.com/'
     category: other
 ---
-

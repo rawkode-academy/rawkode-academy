@@ -6,6 +6,10 @@ description: >-
   Komodor's CTO and engineers debug a maliciously broken Kubernetes cluster
   live, using their timeline to track down Cilium CNI RBAC, Flux GitOps
   reconciliation, and a NetworkPolicy blocking Drupal from Postgres.
+whatYouWillLearn:
+  - "Trace service changes over time to spot broken deploys and config drift."
+  - "Use manifest diffs and RBAC checks to explain Cilium agent failures."
+  - "Follow DNS and NetworkPolicy evidence to restore Drupal to Postgres access."
 publishedAt: 2023-12-13T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -60,4 +64,3 @@ duration: 1815
 guests: []
 resources: []
 ---
-

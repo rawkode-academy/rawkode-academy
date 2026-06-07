@@ -7,6 +7,10 @@ description: >-
   Kubernetes clusters. Issues include a rogue iptables rule, an etcd read-only
   manifest, a missing PATH, a tampered kubectl, jsPolicy webhooks, and a stuck
   containerd task.
+whatYouWillLearn:
+  - "Trace kubectl access failures by checking PATH, binary trust, and kubelet and API server connectivity from logs."
+  - "Find and repair Kubernetes control-plane faults by auditing manifest state, etcd read-only flags, and controller-manager settings."
+  - "Detect rogue nodeside misconfigurations such as iptables rules and rogue containerd tasks that block workloads."
 publishedAt: 2021-09-16T17:30:00.000Z
 type: live
 category: tutorial
@@ -216,4 +220,3 @@ resources:
     url: 'https://github.com/containerd/nerdctl'
     category: code
 ---
-

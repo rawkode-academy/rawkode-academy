@@ -6,6 +6,10 @@ description: >-
   Anaïs Urlichs and Philipp Strube join David to break down Kubernetes Services:
   ClusterIP, NodePort, port versus targetPort, selectors and endpoints,
   DNS-based service discovery, and load balancing across pods.
+whatYouWillLearn:
+  - "Distinguish ClusterIP and NodePort services by how clients reach pods."
+  - "Trace service selectors to endpoints, then watch readiness probes change traffic."
+  - "Use port and targetPort, plus named ports, to map requests correctly."
 publishedAt: 2021-01-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -88,4 +92,3 @@ resources:
     type: url
     category: demos
 ---
-

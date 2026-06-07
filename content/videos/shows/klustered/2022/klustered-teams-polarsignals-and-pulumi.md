@@ -7,6 +7,10 @@ description: >-
   a controller manager pointed at the wrong API server address, Postgres DNS
   resolution failures, and a containerd freezer cgroup trap hiding on the worker
   nodes.
+whatYouWillLearn:
+  - "Diagnose broken control plane behavior by validating controller manager logs, kubeconfig API server endpoint, and static pod configuration."
+  - "Debug application readiness failures by inspecting health checks, deployment updates, and rollback conditions in Kubernetes pods."
+  - "Track down DNS and networking faults by testing Postgres service connectivity, in-cluster lookups, and node-level runtime health."
 publishedAt: 2022-03-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -101,4 +105,3 @@ chapters:
 duration: 6155
 resources: []
 ---
-

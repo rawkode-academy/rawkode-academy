@@ -7,6 +7,10 @@ description: >-
   Prometheus SLIs, deploy to Kubernetes via Helm, then trigger automatic
   remediation that scales pods on a response-time breach. Includes Litmus and
   k3s notes.
+whatYouWillLearn:
+  - "Define Prometheus-backed SLIs in YAML and commit them to your Git repository."
+  - "Use SLO quality gates to block promotion when response time breaches targets."
+  - "Trigger automatic remediation that scales Helm-managed pods when performance degrades."
 publishedAt: 2021-01-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -111,4 +115,3 @@ resources:
     url: 'https://slack.keptn.sh'
     category: other
 ---
-

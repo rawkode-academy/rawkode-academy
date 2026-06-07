@@ -7,6 +7,10 @@ description: >-
   clusters live. Cluster one hides a renamed etcd static pod manifest; cluster
   two has a rogue process scaling a deployment to zero via a malicious kubectl
   auth helper.
+whatYouWillLearn:
+  - "Diagnose a Kubernetes API server outage by auditing control plane components and kubelet/static pod manifests."
+  - "Upgrade the broken clustered application from v1 to v2 in namespace while recovering failing controllers and services."
+  - "Identify a hostile kubeauth helper by checking at jobs, process tables, and BCC tooling traces."
 publishedAt: 2022-06-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -183,4 +187,3 @@ resources:
     url: 'https://kubehuddle.com/'
     category: other
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Spin 1.0 ships Spin apps as OCI artifacts. Push to GHCR with spin registry
   push, run with spin up -f, then build a Dockerfile so docker run and docker
   compose work, and sign the image with cosign keyless.
+whatYouWillLearn:
+  - "Package Spin applications as OCI artifacts and push them to GHCR."
+  - "Run registry images locally with spin up -f from any directory."
+  - "Build a Dockerfile for Spin, then use Docker Compose and cosign."
 publishedAt: 2023-04-27T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -51,4 +55,3 @@ resources:
     category: documentation
     url: 'https://docs.sigstore.dev/cosign/signing/signing_with_blobs/'
 ---
-

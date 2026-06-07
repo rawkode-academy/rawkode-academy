@@ -7,6 +7,10 @@ description: >-
   Native Compass to debate cloud pricing beyond the big three, whether Docker is
   still trustworthy, WebAssembly's role alongside containers, and the rise of
   internal developer portals like Backstage.
+whatYouWillLearn:
+  - "Compare cloud costs across premium clouds, smaller providers, bare metal, and hidden egress"
+  - "Evaluate Docker Hub trust issues after free plan changes and weak communication"
+  - "Identify where WebAssembly fits: edge devices, serverless starts, sandboxing, and Envoy filters"
 publishedAt: 2023-05-21T17:00:00.000Z
 type: recorded
 category: interview
@@ -50,4 +54,3 @@ resources:
     type: url
     category: code
 ---
-

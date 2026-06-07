@@ -6,6 +6,10 @@ description: >-
   Kate Goldenring (Fermyon), Connor Hicks (Suborbital), and Kevin Hoffman
   (Cosmonic/wasmCloud) explore server-side WebAssembly: WASI, the component
   model, runtimes, and how Wasm sits alongside containers and Kubernetes.
+whatYouWillLearn:
+  - "How WASI and the component model expose host services to Wasm modules"
+  - "Why WebAssembly improves portability, startup speed, security, and language interoperability over containers"
+  - "Where serverless, edge, plugin systems, and hybrid container deployments fit today"
 publishedAt: 2023-05-08T17:00:00.000Z
 type: recorded
 category: interview

@@ -6,6 +6,10 @@ description: >-
   Vitess maintainers Deepthi Sigireddi and Alkin Tezuysal from PlanetScale walk
   through the architecture (VTGate, VTTablet, topology), then deploy a sharded
   MySQL cluster on Kubernetes with the operator and connect WordPress.
+whatYouWillLearn:
+  - "Explain how VTGate routes queries using shard metadata from topology services"
+  - "Deploy a sharded MySQL cluster on Kubernetes with the Vitess operator"
+  - "Connect WordPress to Vitess then scale and reshard the cluster live"
 publishedAt: 2021-02-26T17:00:00.000Z
 type: live
 category: tutorial
@@ -95,4 +99,3 @@ resources:
     type: url
     category: documentation
 ---
-

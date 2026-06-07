@@ -7,6 +7,10 @@ description: >-
   include a missing API server, etcd resource limits, a decoy DaemonSet, DNS
   policy, AppArmor blocking kubectl, etcd encryption misconfig, and a malicious
   Postgres startup command.
+whatYouWillLearn:
+  - "Perform Kubernetes control-plane triage by checking manifests, logs, and service health to diagnose startup failures."
+  - "Trace scheduler behavior when apps are stuck Pending by inspecting node resources, manifests, and kubelet logs."
+  - "Resolve etcd encryption and Postgres connectivity breakages by validating encryption providers, key types, DNS, and startup commands."
 publishedAt: 2021-09-09T17:30:00.000Z
 type: live
 category: tutorial
@@ -107,4 +111,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

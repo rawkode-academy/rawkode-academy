@@ -6,6 +6,10 @@ description: >-
   David explores Fermyon's Spin, comparing its Nomad-based runtime to Kubernetes
   via Krustlet, then builds a Rust HTTP microservice backed by Prisma and
   CockroachDB, running it locally before deploying to Fermyon Cloud.
+whatYouWillLearn:
+  - "Compare Spin's Nomad-backed runtime to Kubernetes and Krustlet for WebAssembly workloads"
+  - "Build a Rust HTTP microservice that uses Prisma with CockroachDB"
+  - "Run the compiled Wasm app locally, inspect routes, and deploy to Fermyon Cloud"
 publishedAt: 2022-11-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -51,4 +55,3 @@ resources:
     type: url
     category: code
 ---
-

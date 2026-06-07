@@ -6,6 +6,10 @@ description: >-
   Connor Hicks walks through Suborbital's ATMO runtime, writing Rust functions
   compiled to WebAssembly, composing them via the Directive YAML, and chaining
   workflows with HTTP and cache access through the subo CLI.
+whatYouWillLearn:
+  - "Compose web services from WebAssembly functions instead of coordinating many separate services"
+  - "Use the Suborbital directive to route HTTP requests into chained functions"
+  - "Combine request state, parallel function groups, HTTP calls, and cache access in workflows"
 publishedAt: 2021-01-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -110,4 +114,3 @@ resources:
     type: url
     category: other
 ---
-

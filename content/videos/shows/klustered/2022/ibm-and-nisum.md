@@ -6,6 +6,10 @@ description: >-
   Teams from IBM and Nisum take on broken Kubernetes clusters live, hunting down
   sabotaged Cilium operator labels, a tampered CoreDNS ConfigMap, and other
   breaks with kubectl while pair debugging over Teleport.
+whatYouWillLearn:
+  - "Diagnose pods or deployments that reset to zero replicas and recover running state with kubectl workflows."
+  - "Trace CoreDNS and Cilium operator issues by reading deployment YAML, pod logs, and rollout descriptors."
+  - "Unblock tainted worker nodes by adjusting tolerations, removing rogue process constraints, and validating services."
 publishedAt: 2022-05-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -28,4 +32,3 @@ resources:
     url: 'https://goteleport.com/'
     category: other
 ---
-

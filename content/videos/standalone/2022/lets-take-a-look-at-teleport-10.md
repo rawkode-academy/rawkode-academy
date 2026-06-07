@@ -7,6 +7,10 @@ description: >-
   passwordless access via WebAuthn, FIDO and YubiKeys, resource-level access
   requests, Machine ID for Kubernetes, new database integrations, and upgrade
   guidance.
+whatYouWillLearn:
+  - "Passwordless Teleport 10 logins use WebAuthn, FIDO, and hardware keys like YubiKey."
+  - "Resource access requests add just-in-time approval for specific databases, nodes, and Kubernetes targets."
+  - "Machine ID for Kubernetes issues certificates and helps automate external identity provisioning and upgrades."
 publishedAt: 2022-07-30T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -113,4 +117,3 @@ resources:
     url: 'https://goteleport.com/slack'
     category: other
 ---
-

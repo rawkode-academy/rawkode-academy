@@ -7,6 +7,10 @@ description: >-
   returning JSON, parsing headers, body, and query strings, and making outbound
   HTTP requests, with tips for navigating the Rust source while LSP support is
   pending.
+whatYouWillLearn:
+  - "Install the py2wasm plugin and Spin Python template before generating a project."
+  - "Return JSON, then read request headers, body, and query parameters from Spin."
+  - "Make outbound HTTP requests, then allow only approved hosts in Spin config."
 publishedAt: 2023-03-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -45,4 +49,3 @@ resources:
     url: 'https://github.com/spinframework/spin-python-sdk'
     category: code
 ---
-

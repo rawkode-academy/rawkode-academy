@@ -6,6 +6,10 @@ description: >-
   Leigh Capili and Marcus Noble debug broken Kubernetes clusters: kubelet
   systemd units, kubeconfig ports, admission webhooks from Kyverno, Pod Security
   Policies, quotas, and a kubeadm certificate renewal gone wrong.
+whatYouWillLearn:
+  - "Trace and fix kubeconfig port errors, broken kubelet units, and offline control plane symptoms in a damaged cluster."
+  - "Debug real-world Kubernetes admission failures, including Kyverno webhook rejections and Pod Security Policies."
+  - "Rebuild cluster state by resolving quota and restart issues, including vCluster recovery and kubeadm certificate fixes."
 publishedAt: 2022-04-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -109,4 +113,3 @@ resources:
     url: 'https://artifacthub.io/'
     category: other
 ---
-

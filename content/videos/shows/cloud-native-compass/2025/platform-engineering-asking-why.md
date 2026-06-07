@@ -9,6 +9,10 @@ description: >-
   Evelyn Osman joins David and Laura to defend AWK and Bash, argue platform
   engineering must start by asking "why", and pick apart whether every workload
   really belongs on Kubernetes. Also covers decoupling CI from CD.
+whatYouWillLearn:
+  - "How to question platform decisions by asking why each service needs Kubernetes, microservices, or heavier operational tooling."
+  - "When building platforms, Evelyn explains tradeoffs between full Kubernetes fleets, VM or bare-metal hosts, and container-only alternatives."
+  - "They also cover practical release strategy choices, including decoupling CI from CD to avoid tightly coupled deployment workflows."
 publishedAt: 2025-10-10T17:00:00.000Z
 type: recorded
 category: interview
@@ -41,4 +45,3 @@ resources:
     category: documentation
     url: 'https://argo-cd.readthedocs.io/'
 ---
-

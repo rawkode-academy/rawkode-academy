@@ -7,6 +7,10 @@ description: >-
   instrument their own code. We cover OpenTelemetry's auto vs manual
   instrumentation, sampling and cost trade-offs, single-pane-of-glass backends,
   and the environmental impact of telemetry.
+whatYouWillLearn:
+  - "Understand why developers own instrumentation and when observability teams should not own production code signals."
+  - "Compare OpenTelemetry auto and manual instrumentation, including when zero-touch coverage adds too much noise or technical debt."
+  - "Use sampling, feature flags, and collector routing to balance telemetry coverage with dollar cost, storage, and environmental impact."
 publishedAt: 2025-06-19T10:00:00.000Z
 type: recorded
 category: interview
@@ -44,4 +48,3 @@ resources:
     url: 'https://www.oreilly.com/library/view/learning-opentelemetry/9781098147174/'
     category: other
 ---
-

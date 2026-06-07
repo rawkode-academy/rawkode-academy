@@ -7,6 +7,10 @@ description: >-
   web UI and fixing dependency vulnerabilities via automated PRs, through Snyk
   Code data-flow analysis and VS Code, to container image scans, the CLI, and
   Kubernetes YAML IaC scanning.
+whatYouWillLearn:
+  - "Import a GitHub repository into Snyk and trigger automated fix pull requests."
+  - "Inspect application code with Snyk Code data flow analysis in VS Code."
+  - "Scan container images and Kubernetes YAML with the Snyk CLI."
 publishedAt: 2021-07-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -99,4 +103,3 @@ resources:
     url: 'https://github.com/cncf/tag-security/tree/main/security-whitepaper'
     category: documentation
 ---
-

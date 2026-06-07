@@ -7,6 +7,10 @@ description: >-
   Back up a stateful Postgres workload with Velero, simulate a namespace
   disaster, and restore from S3 (SeaweedFS). Then scale the same pattern across
   a fleet with scheduled, RBAC-controlled backups in Spectro Cloud Palette.
+whatYouWillLearn:
+  - "Back up a single namespace with Velero while preserving Postgres and PVC data."
+  - "Restore a deleted namespace from backup and recover pods, stateful sets, and volumes."
+  - "Centralize scheduled RBAC controlled backups in Palette across clusters with shared storage policies."
 publishedAt: 2025-11-25T14:00:00.000Z
 type: recorded
 category: tutorial
@@ -45,4 +49,3 @@ resources:
     url: 'https://github.com/seaweedfs/seaweedfs'
     category: documentation
 ---
-

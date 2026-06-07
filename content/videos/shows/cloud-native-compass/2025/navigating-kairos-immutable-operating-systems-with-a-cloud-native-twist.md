@@ -6,6 +6,10 @@ description: >-
   Mauro Morales and Dimitris Karakasilis explain how Kairos turns any Linux
   distribution into an immutable, A/B-upgradeable OS shipped as an OCI image,
   and where it fits alongside bootc and other immutable system efforts.
+whatYouWillLearn:
+  - "Build Kairos images from existing Linux distributions, enabling A/B upgrades and atomic rollback."
+  - "Configure immutable systems with OCI workflow using Dockerfiles, YAML, and the kairos-init tool."
+  - "Compare Kairos' distro-agnostic approach with bootc and other immutable OS strategies."
 publishedAt: 2025-12-18T10:00:00.000Z
 type: recorded
 category: interview
@@ -72,4 +76,3 @@ resources:
     url: 'https://github.com/bootc-dev/bootc'
     category: code
 ---
-

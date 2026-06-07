@@ -7,6 +7,10 @@ description: >-
   scratch, covering multi-stage builds, cache mounts, local binary outputs,
   multi-platform builds with QEMU, declarative bake files in HCL, and
   cross-compilation with native toolchains.
+whatYouWillLearn:
+  - "Use cache mounts for compiler state that survives repeated BuildKit runs."
+  - "Bake packages common build flags into reusable targets for binaries."
+  - "Cross-compilation works best with build and target platform arguments."
 publishedAt: 2021-08-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -115,4 +119,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

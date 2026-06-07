@@ -6,6 +6,10 @@ description: >-
   Live workshop covering Teleport application access: configure auth/proxy with
   ACME, join a worker node, then expose NGINX and Grafana as Teleport apps.
   Includes JWT inspection, path-based restrictions, and TSH CLI access.
+whatYouWillLearn:
+  - "Enable the app service debug mode to inspect Teleport JWT headers and payloads"
+  - "Expose NGINX as a Teleport app backed by localhost and wildcard DNS"
+  - "Block a private admin page with NGINX, then recover access using app start"
 publishedAt: 2021-11-18T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -97,4 +101,3 @@ resources:
     url: 'https://get.docker.io/'
     category: code
 ---
-

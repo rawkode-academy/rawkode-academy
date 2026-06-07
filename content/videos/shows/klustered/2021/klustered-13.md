@@ -7,6 +7,10 @@ description: >-
   tackling a LimitRange blocking scaling, a bad image pull secret, resource
   quota and taint issues, plus a Cilium outage caused by a containerd registry
   mirror rewriting images to honky.io.
+whatYouWillLearn:
+  - "Troubleshoot Kubernetes LimitRange restrictions by tracing controller-manager events and adjusting pod resource settings."
+  - "Diagnose ImagePullBackOff by validating image pull secrets, registry credentials, and image policy consistency."
+  - "Repair node scheduling and Cilium startup issues by auditing taints, resource quotas, and containerd mirror rewrites."
 publishedAt: 2021-06-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -113,4 +117,3 @@ resources:
     url: 'https://goteleport.com/docs/'
     category: documentation
 ---
-

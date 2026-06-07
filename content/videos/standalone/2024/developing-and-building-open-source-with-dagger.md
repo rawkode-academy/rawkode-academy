@@ -6,6 +6,10 @@ description: >-
   Mark Bernstein joins to Daggerize OpenUnison: writing a Dagger pipeline that
   spins up an ephemeral k3s cluster and deploys the OpenUnison Helm charts,
   swapping Podman for Docker along the way to make in-cluster testing work.
+whatYouWillLearn:
+  - "Provision an ephemeral Kubernetes cluster for in-pipeline OpenUnison testing."
+  - "Deploy OpenUnison Helm charts and adjust values to shape the deployment."
+  - "Switch Dagger from Podman to Docker when local cluster connectivity breaks."
 publishedAt: 2024-08-15T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -77,4 +81,3 @@ resources:
     url: 'https://daggerverse.dev/mod/github.com/marcosnils/daggerverse/k3s'
     category: code
 ---
-

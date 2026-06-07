@@ -7,6 +7,10 @@ description: >-
   with global query, HA deduplication, and long-term storage. Covers the
   Sidecar, Querier, Store Gateway, and Compactor, plus a live demo running three
   Prometheus servers against MinIO.
+whatYouWillLearn:
+  - "Set up a distributed Thanos architecture using multiple Prometheus instances with sidecars and a querier for global querying."
+  - "Upload Prometheus data blocks from sidecars to S3-compatible object storage and query long-term history."
+  - "Run live demos for Store Gateway and Compactor features, including downsampling, HA deduplication behavior, and troubleshooting connectivity issues."
 publishedAt: 2020-11-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -121,4 +125,3 @@ resources:
     url: 'https://github.com/cncf/tag-observability'
     category: other
 ---
-

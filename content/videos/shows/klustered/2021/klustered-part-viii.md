@@ -6,6 +6,10 @@ description: >-
   Noel Georgi joins David to debug two broken Kubernetes clusters: a TLS 1.3
   handshake mismatch blocking the API server, and rogue Cilium host network
   policies plus a misconfigured native-routing-cidr breaking node readiness.
+whatYouWillLearn:
+  - "Diagnose Kubernetes API server TLS handshake failures by checking static pod config, ports, and control-plane logs."
+  - "Remove broken Cilium host network policies and verify node connectivity when nodes stay NotReady."
+  - "Fix Cilium tunnel-mode and CIDR settings that can break cluster networking and kubelet connectivity."
 publishedAt: 2021-04-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -223,4 +227,3 @@ resources:
     url: 'https://github.com/itaysk/kubectl-neat'
     category: code
 ---
-

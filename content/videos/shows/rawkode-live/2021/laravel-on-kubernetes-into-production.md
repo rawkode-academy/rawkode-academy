@@ -7,6 +7,10 @@ description: >-
   production-grade Kubernetes setup, wiring up MariaDB via Helm, ConfigMaps and
   Secrets, init-container migrations, CronJob schedulers, queue worker
   Deployments, and update strategies.
+whatYouWillLearn:
+  - "Run Laravel database migrations with Kubernetes init containers before app startup."
+  - "Wire application configuration and secrets through ConfigMaps and Kubernetes Secrets."
+  - "Deploy CronJobs, queue workers, and safer rollout strategies for Laravel workloads."
 publishedAt: 2021-01-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -119,4 +123,3 @@ resources:
     url: 'https://kapitan.dev/'
     category: code
 ---
-

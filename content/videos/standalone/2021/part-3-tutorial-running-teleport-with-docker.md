@@ -7,6 +7,10 @@ description: >-
   the configure subcommand, mount it alongside a named volume for state, and
   expose ports 3023, 3025, and 3080. Then wire up a multi-node lab with Docker
   Compose and create the first user.
+whatYouWillLearn:
+  - "Inspect Teleport's container image and generate a runtime config with configure."
+  - "Mount Teleport state in a named Docker volume and keep it persistent."
+  - "Wire Teleport ports 3023, 3025, and 3080 through Docker Compose, then create the first user."
 publishedAt: 2021-11-03T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -86,4 +90,3 @@ resources:
     url: >-
       https://github.com/rawkode-academy/courses/tree/main/teleport-complete-guide/3-running-teleport-with-docker
 ---
-

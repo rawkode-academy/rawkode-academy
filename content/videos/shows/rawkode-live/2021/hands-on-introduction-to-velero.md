@@ -6,6 +6,10 @@ description: >-
   Velero maintainer Carlisia Thompson joins David to install Velero against a
   MinIO S3 backend, back up Kubernetes objects and persistent volumes, then
   simulate a disaster and restore the workload into a fresh namespace.
+whatYouWillLearn:
+  - "Install Velero with the CLI against a MinIO-backed S3 storage location"
+  - "Back up Kubernetes resources and persistent volumes, including selective namespace backups"
+  - "Restore a deleted workload into a fresh namespace after simulating disaster"
 publishedAt: 2021-04-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     type: url
     category: documentation
 ---
-

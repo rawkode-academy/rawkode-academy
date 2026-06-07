@@ -7,6 +7,10 @@ description: >-
   build, push, and deploy loop for Kubernetes. Hands-on demos cover Go
   microservices, TypeScript file sync, Buildpacks with Python, Helm,
   multi-config modules, and React hot module reload.
+whatYouWillLearn:
+  - "Automate the build, push, deploy loop for Kubernetes applications with Skaffold dev."
+  - "Use Dockerfile awareness to rebuild only changed Go, TypeScript, or buildpack sources."
+  - "Sync files, port-forward services, and hot-reload React or debug pods through Cloud Code."
 publishedAt: 2021-04-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -135,4 +139,3 @@ resources:
       https://github.com/GoogleContainerTools/skaffold/tree/main/examples/custom-tests
     category: demos
 ---
-

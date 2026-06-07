@@ -6,6 +6,10 @@ description: >-
   Lukas Gentele from Loft Labs demos DevPod, walking through the UI and CLI, the
   Docker provider, spinning up a workspace on Google Cloud, custom YAML
   providers, devcontainer.json compatibility, and the inactivity timeout.
+whatYouWillLearn:
+  - "Provision workspaces on local Docker or cloud providers without changing tools."
+  - "Launch Rust projects in remote environments with IDE and CLI parity."
+  - "Use custom provider YAML to add GCP, Scaleway, or other backends."
 publishedAt: 2023-05-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -88,4 +92,3 @@ resources:
     type: url
     category: code
 ---
-

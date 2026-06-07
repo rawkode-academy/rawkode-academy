@@ -7,6 +7,10 @@ description: >-
   sidecar pattern, state management with the JavaScript SDK and Redis, outbox
   pattern, then deploying the demo app to a Kind Kubernetes cluster with the
   Dapr control plane installed via Helm.
+whatYouWillLearn:
+  - "Explain Dapr's sidecar model for stable APIs across environments."
+  - "Use the JavaScript SDK to persist state in Redis."
+  - "Deploy the demo app to Kubernetes with Dapr and Helm."
 publishedAt: 2023-12-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -116,4 +120,3 @@ resources:
       https://docs.dapr.io/reference/components-reference/supported-state-stores/
     category: documentation
 ---
-

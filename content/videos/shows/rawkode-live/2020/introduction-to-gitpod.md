@@ -7,6 +7,10 @@ description: >-
   defined in code: .gitpod.yml, Dockerfile-based workspaces on Kubernetes, Go
   and Rust projects, Docker Compose, port forwarding, OpenVSX extensions, and
   pull request review workflows.
+whatYouWillLearn:
+  - "Build cloud dev environments in code by defining compilers, tools, and dependencies in .gitpod.yml or Dockerfile workflows."
+  - "Start reproducible workspaces from any branch in seconds, then code with preconfigured IDEs and extensions."
+  - "Review Go and Rust changes by opening branches, staging commits, running builds, and sharing workspaces for pair debugging."
 publishedAt: 2020-12-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -144,4 +148,3 @@ resources:
     type: url
     category: code
 ---
-

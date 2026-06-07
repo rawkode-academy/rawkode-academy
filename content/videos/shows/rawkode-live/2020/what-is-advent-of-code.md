@@ -7,6 +7,10 @@ description: >-
   Day 7, the bag rules puzzle, live in Go. They cover the philosophy of the
   puzzles, input parsing with fmt.Sscanf, and recursive logic for counting
   containing and contained bags.
+whatYouWillLearn:
+  - "Map bag-color containment rules for Advent of Code Day 7 and model parent-to-child relationships."
+  - "Implement input parsing by splitting each rule into container and contained bags with counts."
+  - "Build recursive functions that count outer containers for shiny gold and total nested bag quantities."
 publishedAt: 2020-12-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -49,4 +53,3 @@ resources:
     url: 'https://adventofcode.com/'
     category: other
 ---
-

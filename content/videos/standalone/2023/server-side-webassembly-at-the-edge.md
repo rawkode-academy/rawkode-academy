@@ -6,6 +6,10 @@ description: >-
   Deploying the Fermyon Platform to Equinix Metal with Terraform, using BGP
   anycast across Dallas and Amsterdam to route Spin WebAssembly applications to
   the nearest metro for low-latency edge serving.
+whatYouWillLearn:
+  - "Provision Fermyon Spin on Equinix Metal with Terraform and user API keys."
+  - "Enable BGP so traffic reaches the nearest metro instead of one region."
+  - "Deploy the same application to Dallas and Amsterdam to compare latency."
 publishedAt: 2023-03-07T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -121,4 +125,3 @@ resources:
     url: 'https://github.com/deislabs/bindle'
     category: code
 ---
-

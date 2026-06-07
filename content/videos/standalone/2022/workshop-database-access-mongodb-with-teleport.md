@@ -7,6 +7,10 @@ description: >-
   access to MongoDB. Covers configuring a self-hosted mongod with X.509 auth,
   issuing certs via tctl, audit logging, and extending the same flow to MongoDB
   Atlas and Compass.
+whatYouWillLearn:
+  - "Configure self-hosted mongod with Teleport-issued X.509 certificates and restart it safely."
+  - "Use tsh db ls, login, and connect to reach MongoDB through Teleport."
+  - "Trust Teleport CA in MongoDB Atlas, then connect through a DB proxy."
 publishedAt: 2022-01-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -117,4 +121,3 @@ resources:
     url: 'https://www.mongodb.com/products/tools/compass'
     category: other
 ---
-

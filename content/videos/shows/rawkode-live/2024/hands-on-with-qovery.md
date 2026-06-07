@@ -7,6 +7,10 @@ description: >-
   applications to a Kubernetes cluster on AWS. They explore the Rust-based
   engine, install the CLI, deploy services, run a Grafana Helm chart, and export
   the environment to Terraform.
+whatYouWillLearn:
+  - "Qovery runs a Rust control plane that talks to Kubernetes through reverse connections."
+  - "You can deploy GitHub apps, Helm charts, or container images from registries."
+  - "Terraform modules run inside the same pipeline, and outputs feed later services."
 publishedAt: 2024-10-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -77,4 +81,3 @@ resources:
     url: 'https://github.com/grafana/helm-charts'
     category: code
 ---
-

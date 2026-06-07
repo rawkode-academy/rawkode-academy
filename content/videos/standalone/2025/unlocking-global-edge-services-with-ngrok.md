@@ -6,6 +6,10 @@ description: >-
   BGP routes the internet like Google Maps, but running your own POPs is hard.
   ngrok's global load balancer spans 8 POPs with automatic failover, demoed here
   with two Deno apps tunnelled from EU and US.
+whatYouWillLearn:
+  - "How BGP routes traffic to the nearest available edge location."
+  - "How ngrok load balancers span multiple POPs without georeplicating apps."
+  - "How ngrok fails over requests from a down tunnel to another edge."
 publishedAt: 2025-01-23T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -50,4 +54,3 @@ resources:
     url: 'https://ngrok.com/'
     category: documentation
 ---
-

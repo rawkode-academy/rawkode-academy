@@ -7,6 +7,10 @@ description: >-
   tangled with Kyverno mutating webhooks and a sneaky Pod Security Policy, then
   a kubelet feature-gate error, an etcd request-size limit, and a CoreDNS
   ConfigMap typo (clouster.local).
+whatYouWillLearn:
+  - "Diagnose why a Kubernetes workload disappears by checking pod states across namespaces."
+  - "Track scheduler, CNI, and kubelet failures to restore a broken cluster to readiness."
+  - "Fix CoreDNS and admission configuration errors, including a clouster.local typo."
 publishedAt: 2021-04-01T18:00:00.000Z
 type: live
 category: tutorial
@@ -111,4 +115,3 @@ guests:
   - guineveresaenger
 resources: []
 ---
-

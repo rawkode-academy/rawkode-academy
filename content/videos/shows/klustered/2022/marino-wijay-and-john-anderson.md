@@ -7,6 +7,10 @@ description: >-
   webhooks, a Not Ready node with a bad kubelet eviction flag, controller
   manager RBAC, a corrupt API server cert, and Cilium CNI mismatched with
   containerd.
+whatYouWillLearn:
+  - "Trace webhook failures by reading pod events and validating Kyverno webhook service, pod status, and networking assumptions."
+  - "Recover NotReady worker nodes by diagnosing image disk pressure, cleaning storage, and restarting kubelet after fixing eviction flags."
+  - "Fix control plane start by isolating API server startup errors in kubelet logs, then regenerating corrupted PKI certs."
 publishedAt: 2022-05-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -197,4 +201,3 @@ resources:
     url: 'https://console.equinix.com'
     category: other
 ---
-

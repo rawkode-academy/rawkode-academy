@@ -7,6 +7,10 @@ description: >-
   Grunert (a rogue node debugger pod and a containerd 'honk' error pointing at
   BPF) and cluster 18 from Billie Cleek (CoreDNS NXDOMAIN rule and a malicious
   mutating webhook).
+whatYouWillLearn:
+  - "Trace an application update failure in cluster 17 by isolating a container runtime error during pod startup."
+  - "Find and stop a suspicious node-level debugger pod while validating other deployment and networking signals."
+  - "Resolve cluster 18 by detecting CoreDNS NXDOMAIN behavior and removing a broken mutating webhook."
 publishedAt: 2021-04-15T16:30:00.000Z
 type: live
 category: tutorial
@@ -112,4 +116,3 @@ resources:
     url: 'https://deploy.equinix.com/'
     category: other
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Diagnose a runaway CPU spike on Kubernetes with Parca, the open-source
   continuous profiler from Polar Signals. Deploy the server and eBPF agent,
   explore icicle graphs and pprof profiles, and pinpoint the offending code.
+whatYouWillLearn:
+  - "Deploy Parca server and eBPF agent inside a Kubernetes cluster."
+  - "Use icicle graphs to trace CPU time from parent functions to children."
+  - "Compare old and new deployments side by side to spot slower functions."
 publishedAt: 2023-06-05T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -84,4 +88,3 @@ resources:
     url: 'https://www.parca.dev/docs/quickstart/'
     category: documentation
 ---
-

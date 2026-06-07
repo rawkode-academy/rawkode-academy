@@ -7,6 +7,10 @@ description: >-
   compression, and continuous aggregates. We launch a Forge instance, load NYC
   taxi data with parallel copy, then run geospatial queries and visualize in
   Grafana.
+whatYouWillLearn:
+  - "Load NYC taxi rides into TimescaleDB with parallel copy, then verify counts."
+  - "Query ride counts by day and hour using date_trunc and grouping."
+  - "Analyze trip data geospatially, then visualize time series in Grafana dashboards."
 publishedAt: 2021-02-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -89,4 +93,3 @@ resources:
     url: 'https://tstb.co/getstartedcloud'
     category: other
 ---
-

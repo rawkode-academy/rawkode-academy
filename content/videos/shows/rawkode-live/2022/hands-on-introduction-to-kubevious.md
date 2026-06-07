@@ -6,6 +6,10 @@ description: >-
   Ruben Hakopian walks through Kubevious, installing it via Helm and exploring
   the application-centric UI, time machine, custom rules, and the Guard CLI for
   catching Kubernetes misconfigurations before they hit the cluster.
+whatYouWillLearn:
+  - "Install Kubevious with Helm and inspect parser-generated UI data in the cluster."
+  - "Use the browser to trace app hierarchy, images, packages, and Kubernetes resources."
+  - "Validate manifests with Guard, custom rules, and time machine debugging before rollout."
 publishedAt: 2022-08-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -102,4 +106,3 @@ resources:
     url: 'https://github.com/kubevious/kubevious'
     category: code
 ---
-

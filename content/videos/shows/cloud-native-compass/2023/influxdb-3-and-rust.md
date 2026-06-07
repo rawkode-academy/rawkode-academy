@@ -6,6 +6,10 @@ description: >-
   InfluxDB, a time series database, underwent a major rewrite to create InfluxDB
   3.0, also known as IOx. The decision to rewrite the database was driven by the
   need for strict control over memory management and high performance.
+whatYouWillLearn:
+  - "Why high-cardinality workloads made the original InfluxDB index increasingly expensive"
+  - "How Rust, Arrow, Parquet, object storage, and DataFusion shaped InfluxDB 3"
+  - "Why SQL and InfluxQL are native in InfluxDB 3 while Flux remains unresolved"
 publishedAt: 2023-11-08T17:00:00.000Z
 type: recorded
 category: interview
@@ -86,4 +90,3 @@ resources:
     url: 'https://www.hashicorp.com/blog/hashicorp-adopts-business-source-license'
     category: other
 ---
-

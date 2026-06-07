@@ -3,6 +3,10 @@ id: c46r2bn411wdonadyion4cxd
 slug: introduction-to-coredns
 title: Introduction to CoreDNS
 description: 'CoreDNS creator Miek Gieben walks through the plugin-driven Go DNS server: Corefile syntax, plugin ordering at compile time, DNS-over-HTTPS, multi-zone servers, debugging with dnstap, writing a plugin, and how coredns.io is hosted with automated DNSSEC signing.'
+whatYouWillLearn:
+  - "Discover how CoreDNS uses compile-time plugins to add DNS features such as caching, TLS, and logging."
+  - "Configure Corefile blocks for multiple zones, UDP plus DNS over HTTPS, and plugin ordering behavior."
+  - "Explore debugging and hardening in CoreDNS, including metrics, dnstap traces, and DNSSEC automation in production."
 publishedAt: 2020-11-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     type: url
     category: other
 ---
-

@@ -7,6 +7,10 @@ description: >-
   via Helm, browsing service and event timelines, best-practice checks,
   config-change diffs, deployment monitors to Slack, and log redaction with
   regex.
+whatYouWillLearn:
+  - "Install Komodor on a Kubernetes cluster using the Helm agent chart."
+  - "Inspect service timelines, cluster events, and related workload details."
+  - "Configure deployment alerts to Slack and test log redaction rules."
 publishedAt: 2023-02-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -63,4 +67,3 @@ resources:
     type: url
     category: demos
 ---
-

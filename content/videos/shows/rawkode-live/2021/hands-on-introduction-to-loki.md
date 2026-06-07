@@ -7,6 +7,10 @@ description: >-
   Loki stack on Kubernetes via Helm, shipping logs with Promtail, and querying
   the Sock Shop demo with LogQL filters, parsers, and metric aggregations in
   Grafana.
+whatYouWillLearn:
+  - "Compare Loki deployment architectures and storage patterns for production and local Kubernetes environments."
+  - "Install a Loki stack with Helm and configure Promtail log shipping into a live demo namespace."
+  - "Query Sock Shop logs in Grafana with LogQL, labels, parsing, and metrics dashboards."
 publishedAt: 2021-04-29T17:00:00.000Z
 type: live
 category: tutorial
@@ -83,4 +87,3 @@ resources:
     url: 'https://grafana.com/docs/loki/latest/logql/'
     category: documentation
 ---
-

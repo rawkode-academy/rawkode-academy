@@ -7,6 +7,10 @@ description: >-
   clusters with Cluster API, installing the Packet infrastructure provider,
   generating a workload cluster config with clusterctl, and bootstrapping nodes
   via kubeadm on Packet bare metal.
+whatYouWillLearn:
+  - "Use Cluster API to define Kubernetes cluster lifecycle declaratively with separate management and workload responsibilities."
+  - "Initialize a Cluster API management cluster with clusterctl and provider plugins, including version and dependency checks."
+  - "Generate Packet provider cluster manifests, apply them, then fetch kubeconfig and add-ons to bring CNI and scaling workflow online."
 publishedAt: 2020-08-26T15:30:00.000Z
 type: live
 category: tutorial
@@ -66,4 +70,3 @@ resources:
     url: 'https://github.com/kubernetes/autoscaler'
     category: code
 ---
-

@@ -13,6 +13,10 @@ description: >-
   container supply chain on Kubernetes: signing images with notation, storing
   signatures as OCI artifacts, and enforcing trust at admission via Ratify and
   OPA Gatekeeper.
+whatYouWillLearn:
+  - "Sign container images and artifacts with Notation using trusted certificates."
+  - "Store detached signatures in OCI registries alongside images with ORAS."
+  - "Enforce admission-time trust checks in Kubernetes with Ratify and Gatekeeper."
 publishedAt: 2025-03-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -48,4 +52,3 @@ resources:
     url: 'https://github.com/notaryproject/specifications'
     category: documentation
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Walk through five ways to install InfluxDB 2: brew on macOS, the apt
   repository on Debian/Ubuntu, the yum repo on Red Hat, the official Docker
   image with a persistent volume, and the influxdata Helm chart on Kubernetes.
+whatYouWillLearn:
+  - "Install InfluxDB 2 on macOS with Homebrew and run it locally."
+  - "Configure Debian or Ubuntu repositories with the signed key and apt."
+  - "Deploy InfluxDB 2 with Docker volumes or the Helm chart on Kubernetes."
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -54,4 +58,3 @@ resources:
     type: url
     category: documentation
 ---
-

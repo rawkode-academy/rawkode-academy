@@ -6,6 +6,10 @@ description: >-
   Adriano Pezzuto walks through Kamaji, running tenant Kubernetes control planes
   as pods inside a management cluster, then provisions a tenant and joins AWS
   worker nodes via kubeadm and Cluster API conventions.
+whatYouWillLearn:
+  - "Provision tenant control planes as pods inside a management cluster."
+  - "Expose each tenant cluster through a load balancer endpoint and kubeconfig."
+  - "Join AWS worker nodes with kubeadm, then bridge connectivity with an agent."
 publishedAt: 2022-08-13T17:00:00.000Z
 type: live
 category: tutorial
@@ -108,4 +112,3 @@ resources:
     category: code
     url: 'https://github.com/projectcapsule/capsule'
 ---
-

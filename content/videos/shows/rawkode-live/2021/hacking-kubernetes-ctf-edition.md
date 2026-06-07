@@ -7,6 +7,10 @@ description: >-
   from KubeCon: escaping via host mounts, killing crypto-miner deployments
   through RBAC gaps, executing commands blindly via log streams, and pivoting
   between containers via shared process namespaces.
+whatYouWillLearn:
+  - "Use host mounts to escalate from a compromised pod and locate persistent flag files in a CTF cluster."
+  - "Check Kubernetes RBAC and privileges to spot insecure workloads, then remove malicious miners safely."
+  - "Follow process-table and /proc hints to map shared namespaces and read another container's root filesystem."
 publishedAt: 2021-05-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -137,4 +141,3 @@ resources:
     url: 'https://github.com/genuinetools/bane'
     category: code
 ---
-

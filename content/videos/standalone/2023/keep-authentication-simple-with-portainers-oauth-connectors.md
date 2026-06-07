@@ -7,6 +7,10 @@ description: >-
   configuring OAuth with GitHub and Google, registering client IDs and secrets,
   pre-adding users, and keeping internal login as a fallback when settings go
   wrong.
+whatYouWillLearn:
+  - "Configure Portainer OAuth with GitHub client IDs and secrets."
+  - "Register Portainer users manually when automatic provisioning stays disabled."
+  - "Keep internal authentication available as a recovery path."
 publishedAt: 2023-03-06T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -65,4 +69,3 @@ resources:
     url: 'https://docs.portainer.io/admin/settings/authentication/oauth'
     category: documentation
 ---
-

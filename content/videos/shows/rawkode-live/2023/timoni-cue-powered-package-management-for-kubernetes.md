@@ -7,6 +7,10 @@ description: >-
   CUE and OCI artifacts. Modules and bundles replace Helm charts and YAML
   templating, distributed via container registries with Cosign signing and
   SOPS-encrypted values.
+whatYouWillLearn:
+  - "Package Kubernetes applications as CUE-based modules stored in OCI registries."
+  - "Bundle modules and configuration together, then apply them with Timoni."
+  - "Use server side apply so Timoni tracks live state declaratively."
 publishedAt: 2023-11-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -38,4 +42,3 @@ resources:
     url: 'https://timoni.sh/bundle-secrets/'
     category: documentation
 ---
-

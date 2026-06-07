@@ -7,6 +7,10 @@ description: >-
   ChaosCenter portal, public and private ChaosHubs, resilience scoring, GitOps
   sync, and probes. Demos chain chaos workflows against Bank of Anthos on
   Kubernetes and EC2 failure against Sock Shop.
+whatYouWillLearn:
+  - "Show how probes validate steady-state hypotheses before faults are injected."
+  - "Build chaos workflows from the public or private Chaos Hub."
+  - "Track resilience scores from GitOps synced runs across repeated experiments."
 publishedAt: 2021-07-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -133,4 +137,3 @@ resources:
     url: 'https://principlesofchaos.org/'
     category: documentation
 ---
-

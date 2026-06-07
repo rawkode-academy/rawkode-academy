@@ -6,6 +6,10 @@ description: >-
   Ganesh Vernekar joins to walk through Cortex: building from source, wiring
   Prometheus remote_write, scaling it with Docker Compose and MinIO, the
   single-binary vs microservices architecture, and how it compares to Thanos.
+whatYouWillLearn:
+  - "Build Cortex from source, run a single binary, and wire Prometheus remote_write for first ingest verification."
+  - "Scale a local Cortex deployment with Docker Compose and MinIO, then observe how distributors route metrics to storage."
+  - "Compare single-binary and microservices Cortex modes, including ring-based placement, component responsibilities, and scaling tradeoffs."
 publishedAt: 2020-11-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -86,4 +90,3 @@ resources:
     url: 'https://github.com/thanos-io/thanos'
     category: code
 ---
-

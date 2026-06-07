@@ -6,6 +6,10 @@ description: >-
   Adam Szücs-Mátyás and William Lightning debug two broken Kubernetes clusters.
   Fixes cover cordoned nodes, a CoreDNS ConfigMap, a Harbor image redirect via
   containerd, plus etcd permission and disk-full recovery from a loopback mount.
+whatYouWillLearn:
+  - "Remove node taints and unschedulable flags to restore pod scheduling on a disrupted cluster."
+  - "Audit and repair CoreDNS failures by fixing ConfigMap entries and restarting DNS pods."
+  - "Recover a Kubernetes control plane by correcting etcd permissions and resolving loopback mount disk exhaustion."
 publishedAt: 2021-08-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -104,4 +108,3 @@ resources:
     url: 'https://goteleport.com/'
     category: other
 ---
-

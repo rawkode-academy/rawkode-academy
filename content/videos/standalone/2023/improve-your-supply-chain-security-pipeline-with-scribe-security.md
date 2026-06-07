@@ -6,6 +6,10 @@ description: >-
   Walkthrough of Scribe Security's free tier, scanning a forked Directus project
   to review SLSA compliance, vulnerabilities, the SBOM and licenses, then wiring
   it up via GitHub Actions in under 55 lines of YAML.
+whatYouWillLearn:
+  - "Review SLSA and NIST compliance controls before publishing software security claims."
+  - "Inspect container vulnerabilities alongside SBOM data, package counts, and open source license coverage."
+  - "Wire GitHub Actions to generate Scribe artifacts, upload provenance, and scan builds."
 publishedAt: 2023-04-19T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -55,4 +59,3 @@ resources:
     url: 'https://github.com/scribe-security/action-bom'
     category: code
 ---
-

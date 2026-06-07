@@ -7,6 +7,10 @@ description: >-
   attacking five deliberately vulnerable clusters: insecure API server port,
   unauthenticated kubelet, unauthenticated etcd, privileged pod escape, and Helm
   2's Tiller.
+whatYouWillLearn:
+  - "Practice against isolated kind clusters with a disposable client container and built-in attack tools"
+  - "Exploit insecure API server, kubelet, and etcd access to extract secrets and CA keys"
+  - "Use privileged pods and Helm 2 Tiller misconfigurations to reach host files and cluster admin"
 publishedAt: 2021-04-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -178,4 +182,3 @@ resources:
     url: 'https://github.com/cyberark/kubeletctl'
     category: code
 ---
-

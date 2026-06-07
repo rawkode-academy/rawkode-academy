@@ -7,6 +7,10 @@ description: >-
   Markdown into runnable notebooks via the CLI and VS Code, mixing shell, Python
   and Deno cells, navigating cloud resources, and reproducible envs with dev
   containers and Dagger.
+whatYouWillLearn:
+  - "Turn Markdown files into runnable notebooks from both the CLI and VS Code."
+  - "Mix shell, Python, JavaScript, and Deno cells in one notebook workflow."
+  - "Use managed environments and dev containers to keep sessions reproducible across tools."
 publishedAt: 2024-10-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -70,4 +74,3 @@ resources:
     url: 'https://docs.runme.dev/guide/dagger'
     category: documentation
 ---
-

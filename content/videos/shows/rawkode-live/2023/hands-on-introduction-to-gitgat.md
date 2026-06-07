@@ -7,6 +7,10 @@ description: >-
   written in Rego on OPA that audits GitHub security posture: 2FA, branch
   protection, signed commits, deploy and SSH keys. Runs locally or on a schedule
   via GitHub Actions.
+whatYouWillLearn:
+  - "Use GitGat to audit GitHub security posture across repositories."
+  - "Run GitGat locally or on a schedule with GitHub Actions."
+  - "Customize GitGat checks with a state file and Rego policies."
 publishedAt: 2023-03-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -114,4 +118,3 @@ resources:
     type: url
     category: documentation
 ---
-

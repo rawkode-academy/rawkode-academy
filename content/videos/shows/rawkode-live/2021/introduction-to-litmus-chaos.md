@@ -7,6 +7,10 @@ description: >-
   Kubernetes-native chaos engineering project. They cover the ChaosCenter
   portal, workflows and probes, then demo Kafka chaos with Grafana and AWS EC2
   termination.
+whatYouWillLearn:
+  - "How Litmus uses workflows to run chaos experiments against Kubernetes targets"
+  - "How probes define experiment hypotheses and measure application resilience during chaos"
+  - "How the Kafka demo tracks failures with Grafana and workflow results"
 publishedAt: 2021-03-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -129,4 +133,3 @@ resources:
     type: url
     category: demos
 ---
-

@@ -7,6 +7,10 @@ description: >-
   Issues span admission webhooks, Cilium networking, image pull policies,
   resource quotas, etcd manifests, kubelet permissions, and a CoreDNS ConfigMap
   reverted by Cloud Custodian.
+whatYouWillLearn:
+  - "Remove a broken admission webhook and verify API calls return valid service-account tokens again."
+  - "Trace mutating imagePullPolicy changes, then delete stale resource quotas and restart pods to clear blocked scheduling."
+  - "Fix Cilium and DNS outages by validating service host and port settings and repairing CoreDNS ConfigMap typo rollbacks."
 publishedAt: 2022-04-29T17:00:00.000Z
 type: live
 category: tutorial
@@ -223,4 +227,3 @@ resources:
     url: 'https://rawkode.live/win'
     category: other
 ---
-

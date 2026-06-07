@@ -6,6 +6,10 @@ description: >-
   Ariadne Conill, primary author of apko and melange, walks through assembling
   distroless OCI images from APK packages: building an NGINX image with apko,
   packaging GNU hello with melange, signing keys, SBOMs, and GitHub Actions.
+whatYouWillLearn:
+  - "Assemble distroless OCI images from APK packages with apko."
+  - "Turn source code into signed APK packages with melange."
+  - "Publish reproducible package repositories and images through GitHub Actions."
 publishedAt: 2022-03-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -88,4 +92,3 @@ resources:
       https://github.com/chainguard-dev/melange/blob/main/examples/gnu-hello.yaml
     category: demos
 ---
-

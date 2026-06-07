@@ -6,6 +6,10 @@ description: >-
   Configure the Parca config map with a Prometheus-style scrape job that uses
   Kubernetes service discovery, keeps pods by parca.dev annotations, and adds
   the cluster role binding needed to scrape an InfluxDB 2 pprof endpoint.
+whatYouWillLearn:
+  - "Configure Parca to discover pods with Kubernetes service discovery."
+  - "Filter discovered pods by the parca.dev/profile annotation before scraping."
+  - "Expose a pprof endpoint with parca.dev/path and parca.dev/port annotations."
 publishedAt: 2023-07-11T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -58,4 +62,3 @@ resources:
     category: documentation
     url: 'https://docs.influxdata.com/influxdb/v2/'
 ---
-

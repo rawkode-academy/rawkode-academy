@@ -7,6 +7,10 @@ description: >-
   live, tackling admission webhooks, rogue pod re-creation, kubelet and
   scheduler misconfigurations, an API server manifest typo, and a Cilium network
   policy.
+whatYouWillLearn:
+  - "Walk through live debugging of failing Kubernetes clusters, from broken node status to service-level outages."
+  - "Diagnose admission webhook failures and broken pod recreation behavior to restore stable application state."
+  - "Fix kubelet, scheduler, API server, and Cilium policy misconfigurations blocking database and network connectivity."
 publishedAt: 2021-08-05T17:30:00.000Z
 type: live
 category: tutorial
@@ -100,4 +104,3 @@ resources:
     url: 'https://github.com/FairwindsOps/rbac-lookup'
     category: code
 ---
-

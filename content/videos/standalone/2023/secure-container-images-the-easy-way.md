@@ -7,6 +7,10 @@ description: >-
   which files the workload actually uses, then rebuilds a minimal image. Demos
   shrink NGINX from 33MB to 12MB, a Rust dog image from 97MB to under 10MB, and
   an unoptimised Astro build from 1.4GB to 100MB.
+whatYouWillLearn:
+  - "Use HTTP probes to discover runtime files inside a container image."
+  - "Drive Slim Toolkit with exec probes for command-line applications."
+  - "Shrink unoptimized Astro and NGINX images without breaking functionality."
 publishedAt: 2023-04-25T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -41,4 +45,3 @@ resources:
     url: 'https://rawkode.academy'
     category: demos
 ---
-

@@ -7,6 +7,10 @@ description: >-
   clusters: a malicious static pod manifest persisted via a systemd service and
   LD_PRELOAD hook, and an etcd flooding attack that exhausted the database
   quota.
+whatYouWillLearn:
+  - "Trace a compromised Kubernetes control plane by forensically locating a malicious static pod manifest hidden on disk."
+  - "Remove persistence from a cluster by stopping a rogue systemd service and neutralizing an LD_PRELOAD injection path."
+  - "Mitigate etcd database flooding by diagnosing quota pressure, identifying attacker IP traffic, and validating cluster recovery."
 publishedAt: 2021-05-06T17:35:00.000Z
 type: live
 category: tutorial
@@ -79,4 +83,3 @@ resources:
     url: 'https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/'
     category: documentation
 ---
-

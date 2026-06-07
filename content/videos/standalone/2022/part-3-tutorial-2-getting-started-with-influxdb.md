@@ -3,6 +3,10 @@ id: f8kozfxzp1vtykj2na0sye5w
 slug: part-3-tutorial-2-getting-started-with-influxdb
 title: 'Part 3 - Tutorial 2: Getting Started with InfluxDB'
 description: 'Walk through the InfluxDB 2 first-run setup (admin user, org, bucket), then tour the UI: Data (Telegraf plugins, scrapers, tokens), Explore, Boards, Tasks for Flux automation, Alerts, and Settings for variables, templates, and labels.'
+whatYouWillLearn:
+  - "Set up the first admin user, organization, and bucket in InfluxDB 2"
+  - "Create buckets with retention policies and see how automatic deletion works"
+  - "Use the Data, Explore, Boards, Tasks, Alerts, and Settings tabs"
 publishedAt: 2022-01-26T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -66,4 +70,3 @@ resources:
     type: url
     category: code
 ---
-

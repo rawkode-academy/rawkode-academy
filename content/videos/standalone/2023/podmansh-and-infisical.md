@@ -7,6 +7,10 @@ description: >-
   via Quadlet systemd units with three isolation levels. David demos Infisical
   for secrets management, with CLI injection, GitHub sync, folder scoping, and
   SDKs.
+whatYouWillLearn:
+  - "Configure podmansh as a Linux login shell inside a Podman container."
+  - "Use Quadlet systemd units to boot lightweight containers with persistent storage."
+  - "Inject secrets from Infisical with CLI runs, GitHub sync, folders, and SDKs."
 publishedAt: 2023-08-10T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -70,4 +74,3 @@ resources:
     url: 'https://infisical.com/docs'
     category: documentation
 ---
-

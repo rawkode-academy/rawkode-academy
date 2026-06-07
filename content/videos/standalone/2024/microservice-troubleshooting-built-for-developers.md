@@ -6,6 +6,10 @@ description: >-
   Deploy the Lumigo operator to Kubernetes with Helm, auto-instrument the
   OpenTelemetry demo app, then walk the system map, transactions, timeline
   traces, and issues view to debug a failing checkout.
+whatYouWillLearn:
+  - "Deploy Lumigo with Helm to auto-instrument Kubernetes services without changing application code."
+  - "Use the system map, transactions, and timeline traces to trace failing checkout requests."
+  - "Filter issues by service or endpoint, then assign, mute, or open Jira tickets."
 publishedAt: 2024-01-24T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -69,4 +73,3 @@ resources:
     url: 'https://docs.lumigo.io/'
     category: documentation
 ---
-

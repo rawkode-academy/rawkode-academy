@@ -7,6 +7,10 @@ description: >-
   installs containerd Wasm shims onto nodes via annotations. We deploy it to a
   kind cluster and a bare metal kubeadm cluster, then run WasmEdge and Spin
   workloads.
+whatYouWillLearn:
+  - "Explain how KWasm installs WebAssembly runtimes onto Kubernetes clusters."
+  - "Trigger node provisioning by annotating Kubernetes nodes for KWasm."
+  - "Run WasmEdge and Spin workloads on kind and bare metal clusters."
 publishedAt: 2023-03-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -75,4 +79,3 @@ resources:
     type: url
     category: demos
 ---
-

@@ -6,6 +6,10 @@ description: >-
   Noel Georgi returns to debug Kluster 015, where a corrupted Cilium CNI binary
   and a malicious systemd-collector-d binary hijacking the containerd shim leave
   pods stuck. crictl, shim comparisons, and Rawkode service fixes restore it.
+whatYouWillLearn:
+  - "Trace API server restart behavior and stuck Pods by reading cluster logs and runtime diagnostics step by step."
+  - "Reproduce Cilium networking failures, compare plugin and shim binaries across nodes, and verify containerd sandbox behavior with crictl."
+  - "Detect and remove a malicious systemd-collector-d binary, then fix remaining Rawkode service settings to restore API server access."
 publishedAt: 2021-04-09T13:00:00.000Z
 type: live
 category: tutorial
@@ -70,4 +74,3 @@ resources:
     url: 'https://deploy.equinix.com/'
     category: other
 ---
-

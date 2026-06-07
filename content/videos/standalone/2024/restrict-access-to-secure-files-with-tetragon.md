@@ -7,6 +7,10 @@ description: >-
   Kubernetes cluster, then filter on sys_write and paths under /etc using
   matchArgs, and enforce policy in-kernel with the SIGKILL and getURL match
   actions.
+whatYouWillLearn:
+  - "Write a kprobe tracing policy for sys_write with the correct syscall arguments."
+  - "Use selectors and matchArgs to filter file access by kernel path arguments."
+  - "Enforce secure-file rules in kernel with Sigkill or getURL actions."
 publishedAt: 2024-02-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -96,4 +100,3 @@ resources:
     url: 'https://sourcegraph.com/'
     category: other
 ---
-

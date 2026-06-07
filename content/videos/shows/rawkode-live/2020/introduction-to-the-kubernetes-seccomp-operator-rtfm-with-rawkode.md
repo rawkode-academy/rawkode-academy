@@ -6,6 +6,10 @@ description: >-
   Daniel Mangum and Sascha Grunert walk through the Kubernetes seccomp operator:
   what seccomp is, installing the operator, applying profiles to nginx pods,
   tracing blocked syscalls with strace, and generating profiles with podman.
+whatYouWillLearn:
+  - "Use Kubernetes securityContext fields to attach seccomp profiles to pods instead of manual node-level annotations."
+  - "Watch the operator sync seccomp profile ConfigMaps to nodes via daemonset updates and keep pods using valid annotations."
+  - "Trace blocked syscalls with strace and generate reproducible seccomp profiles from Podman workload logs."
 publishedAt: 2020-09-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -58,4 +62,3 @@ resources:
     url: 'https://docs.podman.io/en/latest/markdown/podman-generate.1.html'
     category: documentation
 ---
-

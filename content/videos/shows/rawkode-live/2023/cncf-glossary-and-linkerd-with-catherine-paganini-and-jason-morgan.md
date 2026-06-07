@@ -7,6 +7,10 @@ description: >-
   Native Glossary makes cloud native terms accessible (and localised) for
   non-technical audiences, then dig into Linkerd, service mesh trade-offs, and
   Gateway API adoption.
+whatYouWillLearn:
+  - "Explain cloud native terms in plain language for non-technical audiences."
+  - "Describe how glossary translations expand access across multiple languages."
+  - "Summarize Linkerd's Gateway API adoption and traffic management goals."
 publishedAt: 2023-03-07T17:00:00.000Z
 type: live
 category: tutorial
@@ -70,4 +74,3 @@ resources:
     url: 'https://buoyant.io/service-mesh-academy'
     category: other
 ---
-

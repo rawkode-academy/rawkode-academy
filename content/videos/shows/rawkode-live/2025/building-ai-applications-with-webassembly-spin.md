@@ -7,6 +7,10 @@ description: >-
   Thorsten Hans walks through Spin from scratch: a TypeScript hello-world, an
   HTTP API with itty-router, persistence via the key-value store and SQLite,
   then plugging in Ollama with DeepSeek r1 through Spin's LLM interface.
+whatYouWillLearn:
+  - "Initialize a Spin TypeScript app with spin new and HTTP routing."
+  - "Use spin build and spin up to compile WebAssembly and run locally."
+  - "Wire Spin KV and Ollama variables to generate personalized AI output."
 publishedAt: 2025-03-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -34,4 +38,3 @@ resources:
     type: url
     category: documentation
 ---
-

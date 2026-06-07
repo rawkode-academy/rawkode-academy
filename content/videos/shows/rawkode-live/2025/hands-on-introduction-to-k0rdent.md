@@ -7,6 +7,10 @@ description: >-
   Martin Sadler and Karthik Satchitanand from Mirantis introduce k0rdent, a
   template-driven platform built on k0s, Cluster API, and Sveltos that wraps
   cluster provisioning, state, and observability into single YAML definitions.
+whatYouWillLearn:
+  - "Wrap cluster provisioning in reusable templates built from Cluster API and k0s."
+  - "Manage workload clusters and services from one template-driven management cluster."
+  - "Use service templates and observability to keep child clusters consistent and visible."
 publishedAt: 2025-05-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -32,4 +36,3 @@ resources:
     category: code
     url: 'https://github.com/k0rdent/catalog'
 ---
-

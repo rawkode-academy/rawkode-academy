@@ -6,6 +6,10 @@ description: >-
   Using ngrok Traffic Policies and CEL expressions to lock down a Deno API:
   restrict the /metrics endpoint to specific IPs, then geo-restrict /uk to
   United Kingdom visitors with a custom CEL-interpolated 404 response.
+whatYouWillLearn:
+  - "Restrict Prometheus metrics with ngrok traffic policies by matching the /metrics path."
+  - "Use CEL geo variables to block or allow requests by country."
+  - "Return a custom 404 response with CEL-interpolated country text for /uk."
 publishedAt: 2025-01-20T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -98,4 +102,3 @@ resources:
     type: url
     category: documentation
 ---
-

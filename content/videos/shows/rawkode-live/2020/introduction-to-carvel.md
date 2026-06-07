@@ -7,6 +7,10 @@ description: >-
   formerly known as k14s: kapp for diff-aware deployments, ytt's structural YAML
   templating in Starlark, kapp-controller for GitOps, plus kbld and imgpkg for
   image and bundle workflows.
+whatYouWillLearn:
+  - "How Carvel's kapp manages Kubernetes diff-based deployments, annotations, ordering, and error-focused rollout control."
+  - "How ytt uses structural YAML and overlays to share reusable templates and customize environment-specific Kubernetes manifests."
+  - "How kbld and imgpkg convert image tags to digests and bundle config with images for reproducible, relocatable deployments."
 publishedAt: 2020-09-30T17:00:00.000Z
 type: live
 category: tutorial
@@ -91,4 +95,3 @@ resources:
     type: url
     category: other
 ---
-

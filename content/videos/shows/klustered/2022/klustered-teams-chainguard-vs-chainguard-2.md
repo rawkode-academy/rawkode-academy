@@ -6,6 +6,10 @@ description: >-
   Two Chainguard teams race to repair broken Kubernetes clusters, digging into
   containerd config, service selectors, Cilium CNI, Postgres StatefulSets,
   corrupted kubelet certificates, and a kubeadm reset to bring the apps back.
+whatYouWillLearn:
+  - "Trace Kubernetes service selector and endpoint issues to restore application connectivity between teams."
+  - "Audit containerd runtime settings and logs to identify cluster-level component startup and image failures."
+  - "Troubleshoot Cilium networking and kubelet certificate problems with a node reset and rejoin workflow."
 publishedAt: 2022-04-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -108,4 +112,3 @@ resources:
     url: 'https://www.sleuthkit.org/'
     category: other
 ---
-

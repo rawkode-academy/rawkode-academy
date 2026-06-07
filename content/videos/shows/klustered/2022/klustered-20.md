@@ -7,6 +7,10 @@ description: >-
   kubectl, a rogue process killing deployments, a CoreDNS ConfigMap edit, and a
   kubelet that swaps images. Marek drops the kubelet port with UFW and removes
   the scheduler manifest.
+whatYouWillLearn:
+  - "Diagnose kubectl permission failures by exporting kubeconfig, verifying privileges, and rejoining a broken cluster control plane."
+  - "Track a disappearing deployment to a rogue process, kill the offender, and confirm stable re-creation behavior."
+  - "Patch CoreDNS config, then restore kubelet and scheduler components to resolve image swaps, timeouts, and node readiness."
 publishedAt: 2022-02-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -137,4 +141,3 @@ resources:
     url: 'https://help.ubuntu.com/community/UFW'
     category: documentation
 ---
-

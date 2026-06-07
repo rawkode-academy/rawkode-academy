@@ -7,6 +7,10 @@ description: >-
   schedulers, a 1m CPU limit, and a mangled Service. Andy's stacks a fake
   kubectl, swapped API server image, Cilium IPv4 masquerade flip, hosts file DNS
   hijack, and read-only worker.
+whatYouWillLearn:
+  - "Diagnose pod startup failures from Cilium and scheduler corruption in Rachel's cluster, then restore pod scheduling."
+  - "Identify a 1m CPU limit and broken service definition, then fix and recreate it so apps recover."
+  - "Recover Andy's cluster by replacing fake kubectl and API server image, then repairing Cilium masquerade and DNS breakage."
 publishedAt: 2021-07-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -224,4 +228,3 @@ resources:
     category: other
     url: 'https://goteleport.com/'
 ---
-

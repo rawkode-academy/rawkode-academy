@@ -7,6 +7,10 @@ description: >-
   versus Hayden's Windows 11 with WSL2. They demo workflows, debate paper cuts
   like full-disk encryption, and ask whether the year of the Linux desktop will
   ever actually arrive.
+whatYouWillLearn:
+  - "Windows 11 with WSL lets Linux tooling live alongside native desktop conveniences."
+  - "Linux laptop full disk encryption and biometric login still feel inconsistent."
+  - "Winget, Chocolatey, and UniGetUI create an auto-updating Windows software stack."
 publishedAt: 2024-07-17T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -73,4 +77,3 @@ resources:
     url: 'https://github.com/microsoft/devhome'
     category: code
 ---
-

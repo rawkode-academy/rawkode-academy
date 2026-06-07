@@ -6,6 +6,10 @@ description: >-
   Hugo Santos walks through Namespace, an end-to-end application platform built
   on Kubernetes. We bootstrap a local K3s cluster, define services in CUE, build
   images with BuildKit, wire in MinIO, and explore module-based dependencies.
+whatYouWillLearn:
+  - "Bootstraps a local K3s cluster with NGINX ingress and a private registry."
+  - "Defines services in CUE and wires cross-package dependencies through service endpoints."
+  - "Sets up encrypted team secrets and whole-system tests around MinIO-backed services."
 publishedAt: 2022-12-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -87,4 +91,3 @@ resources:
     url: 'https://github.com/cashapp/hermit'
     category: code
 ---
-

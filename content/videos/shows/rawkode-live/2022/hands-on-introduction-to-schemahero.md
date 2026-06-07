@@ -7,6 +7,10 @@ description: >-
   that turns database schemas into declarative custom resources. We install it
   via Krew, run it against Postgres and MariaDB, review generated migrations,
   and wire it into a Flux GitOps workflow.
+whatYouWillLearn:
+  - "Model database schemas as declarative SchemaHero custom resources."
+  - "Plan migrations, inspect generated SQL, and approve changes manually."
+  - "Use operatorless mode, Flux, and seed data for GitOps deployments."
 publishedAt: 2022-01-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -188,4 +192,3 @@ resources:
     url: 'https://kubernetes.slack.com/messages/schemahero'
     category: other
 ---
-

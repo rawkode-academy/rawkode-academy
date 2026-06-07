@@ -7,6 +7,10 @@ description: >-
   on Packet bare metal using Pulumi with TypeScript, then drive it with Salt:
   bootstrap, grains, pillars, targeting, and state modules for cron, files and
   SSH keys.
+whatYouWillLearn:
+  - "Provision mixed Ubuntu, CentOS, and FreeBSD machines with Pulumi and TypeScript using Packet-hosted infrastructure."
+  - "Bootstrap and configure SaltStack grains and pillars to standardize SSH keys, files, and cron state across hosts."
+  - "Target minions with Salt commands and troubleshoot real-world issues like syntax errors, Python compatibility, and SSH key distribution."
 publishedAt: 2020-09-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://github.com/saltstack/salt-bootstrap'
     category: code
 ---
-

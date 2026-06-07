@@ -6,6 +6,10 @@ description: >-
   Mat and Vineeth from Timescale show how Promscale stores Prometheus metrics in
   TimescaleDB, then deploy it on Kubernetes with TOBS and query the data using
   both PromQL and SQL in Grafana.
+whatYouWillLearn:
+  - "Store Prometheus metrics in TimescaleDB for long term retention."
+  - "Query the same data with PromQL or SQL in Grafana."
+  - "Deploy Promscale on Kubernetes with TOBS and supporting observability tools."
 publishedAt: 2021-05-20T17:00:00.000Z
 type: live
 category: tutorial
@@ -101,4 +105,3 @@ resources:
     type: url
     category: other
 ---
-

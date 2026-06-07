@@ -6,6 +6,10 @@ description: >-
   KubeCon special part three. Jeffrey Sica and Chris Carty break clusters with a
   modified kubelet, OPA Gatekeeper policies, a broken Cilium CNI, and a hidden
   static pod manifest, then race to find and fix the sabotage live.
+whatYouWillLearn:
+  - "Diagnose pod crash loops by checking image tags, readiness probes, logs, and restart patterns under pressure."
+  - "Debug API server failures via static pod locations, kubelet behavior, and kubeconfig typo fixes."
+  - "Locate hidden admission webhook and CNI issues by tracing policy rejections, network policy blocks, and namespace scheduling faults."
 publishedAt: 2021-05-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -114,4 +118,3 @@ resources:
     url: 'https://www.kubernetes.dev/resources/office-hours/'
     category: other
 ---
-

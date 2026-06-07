@@ -6,6 +6,10 @@ description: >-
   In this episode, hosts David and Laura, sit down with Laslo Fogas; a self
   proclaimed WebAssembly sceptic. They discuss the future of Cloud Native and
   improving the broken developer experience.
+whatYouWillLearn:
+  - "Why container-based development strains local feedback loops on Mac and Windows"
+  - "How the component model trades POSIX access for explicit sandboxed capabilities"
+  - "Where WebAssembly can complement Kubernetes through lightweight runtimes and extension points"
 publishedAt: 2023-07-21T17:00:00.000Z
 type: recorded
 category: interview

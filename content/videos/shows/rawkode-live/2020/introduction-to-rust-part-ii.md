@@ -7,6 +7,10 @@ description: >-
   Goregaokar. We cover if/else, match, move semantics and borrowing, Option<T>
   with if let and while let, enum variants and pattern matching, Clippy lints,
   and writing unit tests.
+whatYouWillLearn:
+  - "Practice Rustlings control flow exercises covering if/else, match, and return-value style in practical snippets."
+  - "Understand Rust ownership behavior by walking through move semantics, mutability, shadowing, copying, and cloning examples."
+  - "Use Option and enums in real code, including Some/None handling, if let/while let, and match patterns."
 publishedAt: 2020-12-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -133,4 +137,3 @@ resources:
     url: 'https://github.com/rust-lang/rust-clippy'
     category: code
 ---
-

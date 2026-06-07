@@ -7,6 +7,10 @@ description: >-
   Rust with the Cucumber Rust crate, mapping Gherkin steps to step definitions,
   matching parameters with cucumber expressions and regex, then driving the
   Given/When/Then loop until the scenarios pass.
+whatYouWillLearn:
+  - "Build a Cucumber Rust acceptance test suite for a git sync bootstrap feature in Given/When/Then flow."
+  - "Map feature-file steps to reusable step definitions using cucumber expressions, regex captures, and quoted parameters."
+  - "Set up per-scenario Cucumber world state with temporary directories, then verify repository bootstrap and clone behavior."
 publishedAt: 2021-01-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -75,4 +79,3 @@ resources:
     url: 'https://cucumber.io/docs/gherkin/'
     category: documentation
 ---
-

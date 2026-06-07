@@ -6,6 +6,10 @@ description: >-
   Walk through the Spin Go SDK by writing an HTTP handler, reading request
   headers, body, and query parameters, then making outbound HTTP requests and
   allowlisting hosts in spin.toml.
+whatYouWillLearn:
+  - "Read request headers, default missing names to world, and title-case returned values."
+  - "Read the request body safely with IO read all and error handling."
+  - "Fetch query parameters, call outbound HTTP, and allowlist hosts in spin.toml."
 publishedAt: 2023-01-31T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -38,4 +42,3 @@ resources:
     url: 'https://github.com/spinframework/spin-go-sdk'
     category: code
 ---
-

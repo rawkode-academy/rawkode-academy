@@ -7,6 +7,10 @@ description: >-
   Rawkode Academy monorepo, why he calls it smart coding rather than vibe
   coding, and the trade-offs around productivity, skill atrophy, and the
   environmental cost of AI tools.
+whatYouWillLearn:
+  - "How Claude Code works as a CLI agent with terminal access and commits"
+  - "How prompts, personas, and architecture constraints guide AI toward usable code"
+  - "How to balance productivity gains with tests, code review, and environmental costs"
 publishedAt: 2025-06-26T10:00:00.000Z
 type: recorded
 category: interview
@@ -29,4 +33,3 @@ resources:
     type: url
     category: other
 ---
-

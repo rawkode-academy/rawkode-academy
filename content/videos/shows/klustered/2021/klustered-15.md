@@ -7,6 +7,10 @@ description: >-
   clusters, fixing containerd socket paths, kubelet misconfigurations, a rogue
   eBPF port blocker, a kubeconfig issue, and a Cilium NetworkPolicy blocking
   Postgres egress.
+whatYouWillLearn:
+  - "Repair cluster node readiness by fixing containerd socket path issues and validating kubelet and API-server connectivity."
+  - "Diagnose and remove a rogue eBPF port blocker, then confirm firewall, iptables, and network policy behavior."
+  - "Investigate unschedulable nodes, disk pressure, kubeconfig misconfigurations, and blocked Postgres egress with in-pod DNS checks."
 publishedAt: 2021-07-01T17:30:00.000Z
 type: live
 category: tutorial
@@ -111,4 +115,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

@@ -7,6 +7,10 @@ description: >-
   tool. We deploy Vizier with the etcd operator, explore PxL scripts, trace HTTP
   and gRPC traffic, view flame graphs, and wire up a Slack alert via the Go
   client.
+whatYouWillLearn:
+  - "Deploy Pixie Vizier on Kubernetes with the etcd operator."
+  - "Write PxL scripts to query namespaces, HTTP events, and schema."
+  - "Build Slack alerts from Pixie data using the Go client."
 publishedAt: 2021-07-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -120,4 +124,3 @@ resources:
     type: url
     category: demos
 ---
-

@@ -7,6 +7,10 @@ description: >-
   HR company based out of Germany. Frank has been in the industry for close to
   15 years and has worked with various programming languages such as PHP,
   TypeScript, Kotlin, Java, Go, and Rust.
+whatYouWillLearn:
+  - "Choose event sourcing when business history matters as much as final state"
+  - "Use recorded failure events to expose friction hidden by exception-only flows"
+  - "Plan versioning, projections, and recovery before exposing event streams between services"
 publishedAt: 2023-05-15T17:00:00.000Z
 type: recorded
 category: interview

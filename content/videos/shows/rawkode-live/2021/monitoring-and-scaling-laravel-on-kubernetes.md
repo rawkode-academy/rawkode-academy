@@ -7,6 +7,10 @@ description: >-
   and Ciaran McNulty to load-test with Siege, wire up a CPU-based HPA via
   metrics-server, then layer Linkerd sidecars, Grafana dashboards, and a
   Prometheus ServiceMonitor for custom application metrics.
+whatYouWillLearn:
+  - "Load-test a Laravel app with Siege to expose CPU and latency pressure."
+  - "Use Linkerd, Grafana, and Prometheus to inspect request-level service metrics."
+  - "Configure custom Prometheus metrics for HPA scaling beyond raw CPU."
 publishedAt: 2021-02-24T17:00:00.000Z
 type: live
 category: tutorial
@@ -113,4 +117,3 @@ resources:
     url: 'https://github.com/alexbowers/laravel-example-project'
     category: code
 ---
-

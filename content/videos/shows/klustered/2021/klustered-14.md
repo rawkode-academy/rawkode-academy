@@ -7,6 +7,10 @@ description: >-
   Cluster 31 hides a kubelet cgroup driver mismatch starving Postgres and
   Cilium, while Cluster 32 spawns replicating "not-a-virus" pods across rogue
   namespaces.
+whatYouWillLearn:
+  - "Troubleshoot Kubernetes node scheduling by tracking taints, memory pressure, and pod readiness when services are failing."
+  - "Pinpoint kubelet cgroup driver mismatch between systemd and cgroupfs and recover networking by restarting control-plane services."
+  - "Investigate rogue self-replicating workloads, isolate the triggering process, and remove spawned namespaces plus replicas safely."
 publishedAt: 2021-06-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -113,4 +117,3 @@ resources:
     url: 'https://www.youtube.com/c/DevOpsDirective'
     category: other
 ---
-

@@ -7,6 +7,10 @@ description: >-
   Kubernetes cluster, walk through the eBPF agent and server, and explore flame
   graphs, profile comparisons, and pprof scraping for continuous profiling at
   roughly one percent overhead.
+whatYouWillLearn:
+  - "How Parca scrapes pprof endpoints to ingest continuous profiles from applications."
+  - "How to compare two profiles and spot regressions across application versions."
+  - "How flame graphs and icicle graphs reveal hot paths in profiles."
 publishedAt: 2022-01-26T17:00:00.000Z
 type: live
 category: tutorial
@@ -137,4 +141,3 @@ resources:
     url: 'https://www.youtube.com/watch?v=MkSdvPdS1oA'
     category: other
 ---
-

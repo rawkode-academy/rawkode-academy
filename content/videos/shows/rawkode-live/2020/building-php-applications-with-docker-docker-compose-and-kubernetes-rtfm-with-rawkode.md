@@ -10,6 +10,10 @@ description: >-
   PHP-FPM as separate containers, Compose 2.x for health-check dependencies, a
   multi-stage Dockerfile, then Kubernetes with NGINX as a sidecar and
   independently scaled via a service.
+whatYouWillLearn:
+  - "Set up a Slim PHP app with separate NGINX and php-fpm containers driven from a shared codebase."
+  - "Build a Compose 2.x workflow with service health checks, dependency ordering, and cached composer installs."
+  - "Deploy the same Dockerized stack to Kubernetes using sidecar NGINX containers and independent service scaling."
 publishedAt: 2020-09-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -56,4 +60,3 @@ resources:
     url: 'https://kustomize.io/'
     category: documentation
 ---
-

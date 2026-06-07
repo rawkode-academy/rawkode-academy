@@ -6,6 +6,10 @@ description: >-
   Part 2 of the Komodor tutorial: wire Sentry, Prometheus Alertmanager, and
   Grafana alerting into Komodor so application exceptions and cluster alerts
   appear alongside Kubernetes events in the troubleshooting timeline.
+whatYouWillLearn:
+  - "Create a Sentry internal integration, copy Komodor's webhook URL, and assign issue and event permissions."
+  - "Configure Alertmanager by base64-encoding its secret, reloading pods, and routing alerts to Komodor."
+  - "Set Grafana contact points and notification policies so alerting also forwards to Komodor."
 publishedAt: 2023-02-14T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -65,4 +69,3 @@ resources:
     url: 'https://prometheus.io/docs/alerting/latest/alertmanager/'
     category: documentation
 ---
-

@@ -7,6 +7,10 @@ description: >-
   Kubernetes. We cover Plunder for provisioning, then demo a control plane VIP
   via Raft leader election and Service type LoadBalancer announced over BGP on
   Equinix Metal.
+whatYouWillLearn:
+  - "Build a bare-metal Kubernetes control plane demo using kube-vip VIPs to survive leader changes and avoid endpoint drift."
+  - "Use kube-vip generated static pod manifests so kubeadm init can start while control-plane VIPs come up."
+  - "Create BGP-advertised and DHCP-based load balancer services in Kubernetes so internal and external clients can reach cluster services directly."
 publishedAt: 2020-09-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -46,4 +50,3 @@ resources:
     url: 'https://github.com/kube-vip/kube-vip'
     category: code
 ---
-

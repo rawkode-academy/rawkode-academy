@@ -6,6 +6,10 @@ description: >-
   Kicking off the Fermyon Spin course with the why of WebAssembly. A Rust
   password validator becomes a shared domain crate consumed by a Spin HTTP
   backend and a JavaScript frontend, both compiled to Wasm.
+whatYouWillLearn:
+  - "Show a Rust password validator shared between backend and frontend."
+  - "Compile shared domain logic into WebAssembly for multiple runtimes."
+  - "Reuse the same validation rules from Spin and JavaScript clients."
 publishedAt: 2023-01-23T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -42,4 +46,3 @@ duration: 945
 guests: []
 resources: []
 ---
-

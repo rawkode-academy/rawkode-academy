@@ -6,6 +6,10 @@ description: >-
   Suhail Patel joins Rawkode to build a Kubernetes mutating admission webhook in
   Go that rewrites pod image tags expressed as semver constraints into concrete
   versions, with TLS certs generated via CFSSL and the Kubernetes CSR API.
+whatYouWillLearn:
+  - "Build a mutating admission webhook that parses Kubernetes AdmissionReview requests."
+  - "Generate webhook TLS certificates with CFSSL and approve a Kubernetes CSR."
+  - "Rewrite pod container images from semver tags to concrete versions."
 publishedAt: 2021-02-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -120,4 +124,3 @@ resources:
     url: 'https://github.com/cloudflare/cfssl'
     category: code
 ---
-

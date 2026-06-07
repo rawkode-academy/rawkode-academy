@@ -6,6 +6,10 @@ description: >-
   Two broken clusters from Adyen and William. Debug a Cilium CNI image typo,
   chase a rogue service rewriting resolv.conf, then unpick etcd client auth, a
   validating webhook blocking a new ReplicaSet, and a server-side apply fix.
+whatYouWillLearn:
+  - "Troubleshoot a Kubernetes CNI outage by fixing a mistyped Cilium daemonset image and validating pod readiness."
+  - "Track DNS and service issues by tracing resolv.conf rewrites, flushing host iptables, and restoring CoreDNS/App connectivity."
+  - "Resolve etcd blockers with role checks, client certificate generation, and validating webhook override to unblock a stuck deployment."
 publishedAt: 2022-03-05T17:00:00.000Z
 type: live
 category: tutorial
@@ -118,4 +122,3 @@ resources:
     url: 'https://coredns.io/'
     category: other
 ---
-

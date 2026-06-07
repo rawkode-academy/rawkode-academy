@@ -6,6 +6,10 @@ description: >-
   Connor Hicks and Francis Gulotta join David to add a GraphQL host capability
   to Suborbital's Reactor, writing the Go-side client and exposing it to a Rust
   Wasm module over the FFI boundary so sandboxed modules can call GraphQL APIs.
+whatYouWillLearn:
+  - "Build a Suborbital host-side GraphQL client in Go that can call external APIs from Wasm modules."
+  - "Implement the Go-Rust FFI memory contract for request serialization, response lengths, and error propagation."
+  - "Handle GraphQL errors and data parsing while running a Rust Wasm module against the host-invoked API response."
 publishedAt: 2021-07-06T17:00:00.000Z
 type: live
 category: tutorial
@@ -120,4 +124,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

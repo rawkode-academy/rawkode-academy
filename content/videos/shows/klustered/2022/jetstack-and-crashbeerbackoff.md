@@ -6,6 +6,10 @@ description: >-
   Team JetStack and Team CrashBeerBackOff tackle two broken Kubernetes clusters,
   debugging containerd log limits, a disabled deployment controller, kubelet
   service typos, and iptables NAT rules redirecting API server and DNS traffic.
+whatYouWillLearn:
+  - "Fix Teleport session access issues caused by ACL and join permission changes when joining Kubernetes nodes remotely."
+  - "Troubleshoot broken control plane and worker behavior by reading kubelet, API server, and deployment controller logs."
+  - "Detect and fix networking, manifest, and scheduling mistakes in IP tables, kubelet secure ports, and node selectors."
 publishedAt: 2022-08-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -128,4 +132,3 @@ resources:
     url: 'https://deploy.equinix.com/'
     category: other
 ---
-

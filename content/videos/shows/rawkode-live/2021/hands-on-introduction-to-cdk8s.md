@@ -6,6 +6,10 @@ description: >-
   Live walkthrough of cdk8s with creator Elad Ben Israel, covering the App and
   Chart model, snapshot testing, cdk8s+, importing CRDs, wrapping Helm charts,
   and JSON escape patches.
+whatYouWillLearn:
+  - "Build Kubernetes manifests with cdk8s by creating an App, defining Charts, and constructing low-level resources."
+  - "Write and run snapshot tests for cdk8s output, then synthesize manifests and validate resource naming."
+  - "Import CRDs, create reusable custom constructs, and patch Helm chart output with cdk8s plus and JSON escapes."
 publishedAt: 2021-04-01T17:00:00.000Z
 type: live
 category: tutorial
@@ -102,4 +106,3 @@ resources:
     url: 'https://constructs.dev/'
     category: other
 ---
-

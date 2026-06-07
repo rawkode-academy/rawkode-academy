@@ -7,6 +7,10 @@ description: >-
   covering SSO into the dashboard and kubectl, the ou-control deployer, the
   ou-login plugin, multi-cluster satellites, and Namespace and Virtual Cluster
   as a Service demos.
+whatYouWillLearn:
+  - "How OpenUnison provides SSO access to the Kubernetes dashboard and kubectl."
+  - "How the ou-control deployer automates control plane and satellite cluster setup."
+  - "How namespace as a service and virtual clusters reduce enterprise cluster sprawl."
 publishedAt: 2022-09-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -68,4 +72,3 @@ resources:
     type: url
     category: code
 ---
-

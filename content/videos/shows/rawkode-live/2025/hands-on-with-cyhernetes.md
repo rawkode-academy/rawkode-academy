@@ -10,6 +10,10 @@ description: >-
   Kubernetes. Use ASCII-art graph patterns to match resources, traverse
   relationships across kinds, and run CRUD operations from a shell, web client,
   or operator that reconciles one-line queries.
+whatYouWillLearn:
+  - "Match Kubernetes resources with Cypher graph patterns instead of long imperative shell commands."
+  - "Traverse relationships between deployments, services, pods, and custom kinds from a single query."
+  - "Run the same query in the shell, web client, or operator."
 publishedAt: 2025-01-10T17:00:00.000Z
 type: live
 category: tutorial
@@ -29,4 +33,3 @@ resources:
     url: 'https://github.com/AvitalTamir/cyphernetes/tree/main/operator'
     category: code
 ---
-

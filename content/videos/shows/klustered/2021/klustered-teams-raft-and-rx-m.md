@@ -7,6 +7,10 @@ description: >-
   cert path typo and an API server namespace typo, then a missing Postgres
   manifest. Raft fix an RBAC ClusterRole missing the create verb and work around
   a broken scheduler.
+whatYouWillLearn:
+  - "Diagnose broken Kubernetes control plane by verifying kubeconfigs, API server flags, and etcd certificate and namespace settings."
+  - "Debug application deployment failures by fixing RBAC create permissions, ReplicaSet rollout behavior, and image-related configuration mistakes."
+  - "Recover cluster stability after storage and scheduling failures by correcting Postgres manifests, resource quotas, and node taint handling."
 publishedAt: 2021-12-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -158,4 +162,3 @@ resources:
     url: 'https://www.postgresql.org/'
     category: documentation
 ---
-

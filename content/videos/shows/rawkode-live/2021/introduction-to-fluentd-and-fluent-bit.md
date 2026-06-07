@@ -5,6 +5,10 @@ title: Introduction to Fluentd & Fluent Bit
 description: >-
   In this episode, we take a look at using Fluentd for log collection within a
   Kubernetes cluster, as well as using Fluent Bit for stream processing.
+whatYouWillLearn:
+  - "Compare Fluentd and Fluent Bit for Kubernetes logging and pipeline roles."
+  - "Configure Kubernetes log collection, enrichment, and Elasticsearch output with Fluent Bit."
+  - "Build Fluent Bit stream processing tasks with filters, inputs, and outputs."
 publishedAt: 2021-01-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -120,4 +124,3 @@ resources:
     type: url
     category: demos
 ---
-

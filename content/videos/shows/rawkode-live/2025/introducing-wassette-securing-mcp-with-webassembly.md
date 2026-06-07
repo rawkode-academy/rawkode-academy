@@ -9,6 +9,10 @@ description: >-
   Microsoft's Jiaxiao Zhou, Josh Duffney and Yosh Wuyts demo Wassette, an MCP
   server that runs AI agent tools as sandboxed WebAssembly components with
   per-tool permission policies, then compile a JS tool with jco and load it in.
+whatYouWillLearn:
+  - "How Wassette runs MCP tools as sandboxed WebAssembly components."
+  - "How per-tool permission policies gate network and storage access."
+  - "How to compile JavaScript tools with Jco and load them dynamically."
 publishedAt: 2025-09-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -37,4 +41,3 @@ resources:
     type: url
     category: demos
 ---
-

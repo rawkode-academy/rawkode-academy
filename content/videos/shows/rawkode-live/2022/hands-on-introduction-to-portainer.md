@@ -7,6 +7,10 @@ description: >-
   for Kubernetes, Docker, Swarm, and Nomad. Covers namespace policies, OPA
   Gatekeeper integration, GitOps, edge compute, and lowering the barrier from
   VMs to containers.
+whatYouWillLearn:
+  - "Map Docker, Swarm, Nomad, and Kubernetes clusters from one universal management console."
+  - "Create namespaces with quotas, ingress rules, and access controls that prevent bad deployments."
+  - "Apply OPA Gatekeeper policies, registry access, and edge device management centrally."
 publishedAt: 2022-10-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -81,4 +85,3 @@ resources:
     url: 'https://sosiv.io'
     category: other
 ---
-

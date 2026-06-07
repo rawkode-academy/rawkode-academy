@@ -7,6 +7,10 @@ description: >-
   Prometheus data to recommend CPU and memory requests and limits for Kubernetes
   workloads. They compare it to the VPA, demo the simple strategy, and discuss
   future directions.
+whatYouWillLearn:
+  - "Use historical Prometheus data to recommend CPU requests, limits, and memory settings."
+  - "Simple strategy uses peak memory and the 99th percentile CPU usage."
+  - "KRR flags missing requests and suggests concrete values for each workload."
 publishedAt: 2023-05-25T17:00:00.000Z
 type: live
 category: tutorial
@@ -96,4 +100,3 @@ resources:
     category: documentation
     url: 'https://prometheus.io/'
 ---
-

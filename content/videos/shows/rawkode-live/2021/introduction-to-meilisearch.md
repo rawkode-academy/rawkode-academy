@@ -6,6 +6,10 @@ description: >-
   Frédéric Harper and Carolina Ferreira from the Meilisearch team walk through
   the Rust-based search engine: REST API, indexes, typo tolerance, ranking
   rules, synonyms, faceted search, and deployment.
+whatYouWillLearn:
+  - "Create indexes and import documents through Meilisearch's REST API endpoints."
+  - "Tune searchable attributes, ranking rules, and synonyms in the settings API."
+  - "Use faceted search plus dumps and snapshots for filtering and backups."
 publishedAt: 2021-02-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -101,4 +105,3 @@ resources:
     type: url
     category: demos
 ---
-

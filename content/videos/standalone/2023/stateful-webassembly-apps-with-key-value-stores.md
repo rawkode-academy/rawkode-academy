@@ -5,6 +5,10 @@ title: Stateful WebAssembly Apps with Key-Value Stores
 description: >-
   Let's take a look at storing state in our Spin applications, using the Spin
   SDK KV stores; powered by SQLite.
+whatYouWillLearn:
+  - "Configure Spin key-value stores in spin.toml with the default store."
+  - "Use Rust handlers to read, write, and delete short URL mappings."
+  - "Test redirects and conflict responses with Hurl request scenarios."
 publishedAt: 2023-04-03T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -41,4 +45,3 @@ resources:
     url: 'https://spinframework.dev/v2/url-shortener-tutorial'
     category: documentation
 ---
-

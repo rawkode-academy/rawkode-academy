@@ -7,6 +7,10 @@ description: >-
   debug a broken Kubernetes cluster with kubectl, fixing a port mismatch, a 1Mi
   memory limit, a scheduler startup delay, a scaled-down Postgres StatefulSet,
   and a service selector typo.
+whatYouWillLearn:
+  - "Use kubectl and kube-system checks to confirm API server readiness and identify pods failing to start."
+  - "Detect and fix WordPress app issues by spotting port mismatches between container specs, readiness probes, and Service endpoints."
+  - "Resolve startup and connectivity failures by adjusting Kubernetes resource limits, image pull policy, and selector labels."
 publishedAt: 2021-05-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -140,4 +144,3 @@ guests:
   - jeremytanner
 resources: []
 ---
-

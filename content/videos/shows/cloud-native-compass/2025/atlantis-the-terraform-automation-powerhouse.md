@@ -7,6 +7,10 @@ description: >-
   through the Terraform pull request automation server: how it runs plan and
   apply from PR comments, OpenTofu support, the path to 1.0, and the security
   model around credentials.
+whatYouWillLearn:
+  - "How Atlantis turns pull request comments into Terraform plan and apply workflows"
+  - "How custom Atlantis workflows can run CDKTF, Terragrunt, Atmos, or OpenTofu"
+  - "How role assumption, policy checks, and separate servers limit Atlantis blast radius"
 publishedAt: 2025-04-03T17:00:00.000Z
 type: recorded
 category: interview
@@ -33,4 +37,3 @@ resources:
     category: code
     url: 'https://github.com/runatlantis/helm-charts'
 ---
-

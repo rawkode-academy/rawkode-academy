@@ -7,6 +7,10 @@ description: >-
   contrast it with Terraform and Pulumi, install the Equinix Metal provider,
   walk through CompositeResourceDefinitions and Compositions, and provision a
   device that boots Tinkerbell.
+whatYouWillLearn:
+  - "Use Crossplane to provision and continuously reconcile infrastructure through Kubernetes APIs and CRDs."
+  - "Install Crossplane and the Equinix Metal provider using package-based providers, CRDs, and controller reconcilers."
+  - "Define and compose XRDs and Compositions to deploy an abstract infrastructure resource on bare-metal platforms."
 publishedAt: 2020-10-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -94,4 +98,3 @@ resources:
     type: url
     category: other
 ---
-

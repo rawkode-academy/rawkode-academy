@@ -6,6 +6,10 @@ description: >-
   Steven Martin walks through what landed in Teleport 8: Windows desktop access
   without RDP, single-port 443 connectivity, WebAuthn with Touch ID, EC2 node
   auto-join, dynamic app and database registration, and RDS auto-discovery.
+whatYouWillLearn:
+  - "Access Windows desktops through Teleport's browser-based RDP proxy with passwordless authentication."
+  - "Consolidate SSH, Kubernetes, database, and web access onto a single 443 port."
+  - "Use WebAuthn, Touch ID, and AWS discovery to gate privileged resources."
 publishedAt: 2021-12-21T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -77,4 +81,3 @@ resources:
     url: >-
       https://goteleport.com/docs/enroll-resources/application-access/cloud-apis/aws-console/
 ---
-

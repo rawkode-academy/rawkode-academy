@@ -7,6 +7,10 @@ description: >-
   cargo project setup, editions, lifetimes, generics with impl Into and where
   clauses, command-line parsing with structopt, and reading the system
   dictionary with BufReader and iterators.
+whatYouWillLearn:
+  - "Create a new Rust Cargo project and wire a first CLI app with main, tests, and return types."
+  - "Apply lifetimes, impl Into, and where clauses to define flexible generic anagram function signatures."
+  - "Build command-line parsing and file processing with std::env args plus BufReader iterators to find anagrams from a dictionary."
 publishedAt: 2020-12-11T17:00:00.000Z
 type: live
 category: tutorial
@@ -115,4 +119,3 @@ resources:
     url: 'https://cheats.rs/'
     category: documentation
 ---
-

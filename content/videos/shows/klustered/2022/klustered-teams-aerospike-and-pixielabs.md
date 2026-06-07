@@ -6,6 +6,10 @@ description: >-
   Teams Aerospike and Pixie Labs tackle broken Kubernetes clusters via Teleport.
   Aerospike untangles etcd auth, ImagePullPolicy and registry DNS; Pixie hits
   etcd ports, a rogue manifest, kubelet run-once and containerd socket paths.
+whatYouWillLearn:
+  - "debug Kubernetes control-plane failures by tracing etcd authentication, API server startup, and control-plane connectivity issues."
+  - "resolve node readiness and scheduling problems by checking taints, run-once settings, maxPods limits, and container runtime socket paths."
+  - "fix image pull and registry access faults by correcting ImagePullPolicy, DNS hosts, and kubelet manifest and certificate issues."
 publishedAt: 2022-04-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -148,4 +152,3 @@ resources:
     url: 'https://slackin.px.dev'
     category: other
 ---
-

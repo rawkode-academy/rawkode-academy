@@ -7,6 +7,10 @@ description: >-
   12-month support window, storage capacity tracking, CSI volume health, Ingress
   going GA, and live demos of structured logging with klog, immutable
   ConfigMaps, and seccomp profiles.
+whatYouWillLearn:
+  - "Understand why Kubernetes 1.19 extended support to 12 months and how release timing affected the process."
+  - "Track what changed in Kubernetes storage in 1.19, including capacity tracking, ephemeral volumes, and CSI volume health."
+  - "Explore hands-on demos of structured logging with klog, immutable ConfigMaps, and seccomp profiles in clusters."
 publishedAt: 2020-09-15T17:00:00.000Z
 type: live
 category: tutorial
@@ -56,4 +60,3 @@ resources:
     category: code
     url: 'https://github.com/kubernetes-sigs/security-profiles-operator'
 ---
-

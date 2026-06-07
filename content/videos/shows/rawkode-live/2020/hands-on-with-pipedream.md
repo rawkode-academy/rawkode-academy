@@ -6,6 +6,10 @@ description: >-
   Hands-on tour of Pipedream with cofounder Dylan Sather, building event-driven
   workflows in the UI that wire Twitter searches into Spotify playlists and pipe
   Discord messages out to Twitter using Node.js code steps.
+whatYouWillLearn:
+  - "Use Pipedream workflows to wire event-driven automations through triggers, steps, and actions."
+  - "Build and test a Twitter-to-Spotify playlist flow by handling event payloads and Spotify API calls."
+  - "Compare Pipedream control features like concurrency, timeouts, webhooks, and checkpoints to avoid brittle integrations."
 publishedAt: 2020-12-16T17:00:00.000Z
 type: live
 category: tutorial
@@ -112,4 +116,3 @@ resources:
     url: 'https://pipedream.com/blog/avoiding-parking-tickets-with-pipedream/'
     category: other
 ---
-

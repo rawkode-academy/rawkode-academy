@@ -7,6 +7,10 @@ description: >-
   Garrison's cluster with expired control-plane certificates and MetalLB
   trouble, and SIG Honk's cluster with a malicious sshd, a swapped API server
   image, and disabled controller-manager flags.
+whatYouWillLearn:
+  - "Inspect expired Kubernetes control-plane certificates over Teleport and identify why kubectl/API access fails."
+  - "Fix a malicious host-level SSHD issue then restore WordPress workloads by repairing deployment and controller flow."
+  - "Troubleshoot MetalLB load balancing and DNS problems after node access, then validate application reachability from within the cluster."
 publishedAt: 2021-03-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     type: url
     category: code
 ---
-

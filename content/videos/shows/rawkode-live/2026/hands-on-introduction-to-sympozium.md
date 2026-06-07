@@ -7,6 +7,10 @@ description: >-
   Alex Jones joins to introduce Sympozium, a Kubernetes-native coordination
   layer for multi-agent AI systems. We walk through modelling agents as pods and
   using CRDs and jobs to orchestrate structured handoffs and shared context.
+whatYouWillLearn:
+  - "Model multi-agent workloads as Kubernetes pods with Sympozium's coordination layer."
+  - "Use CRDs and jobs to orchestrate structured handoffs between agents."
+  - "Share context across agents while keeping orchestration native to Kubernetes."
 publishedAt: 2026-04-17T05:38:22.000Z
 type: live
 category: tutorial
@@ -30,4 +34,3 @@ resources:
     url: 'https://github.com/sympozium-ai/sympozium'
     category: code
 ---
-

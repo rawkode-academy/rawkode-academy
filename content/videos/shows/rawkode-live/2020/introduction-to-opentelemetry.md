@@ -6,6 +6,10 @@ description: >-
   Amy Tobey and Liz Fong-Jones join David to instrument a Go gRPC service
   (Tinkerbell) with OpenTelemetry from scratch, wiring up the SDK, a stdout
   exporter, a Honeycomb exporter, custom attributes, and database spans.
+whatYouWillLearn:
+  - "Set up OpenTelemetry in a Go gRPC service by configuring the SDK, tracer provider, and initialization order."
+  - "Trace gRPC requests with OpenTelemetry Go auto-instrumentation and add spans around application and database call flows."
+  - "Export traces to stdout for local debugging and to Honeycomb, then inspect and enrich spans with custom attributes."
 publishedAt: 2020-11-03T17:00:00.000Z
 type: live
 category: tutorial
@@ -81,4 +85,3 @@ resources:
     url: 'https://pkg.go.dev/go.opentelemetry.io/otel/trace'
     category: documentation
 ---
-

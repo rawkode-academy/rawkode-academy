@@ -7,6 +7,10 @@ description: >-
   Kubernetes, exploring the dashboard and CLI (tap, stat, top), running the
   EmojiVoto and Books demos, configuring service profiles for retries and
   timeouts, traffic split fault injection, mTLS, and multi-cluster.
+whatYouWillLearn:
+  - "Understand how Linkerd 2 installs on Kubernetes and verifies control-plane health with check, dashboard, and CLI validation commands."
+  - "Explore service traffic behavior in EmojiVoto and Books demos using linkerd stat, tap, and top to observe requests."
+  - "Configure Service Profiles, fault injection, and mTLS defaults in Linkerd while applying retries, timeouts, and traffic splits."
 publishedAt: 2020-11-04T17:00:00.000Z
 type: live
 category: tutorial
@@ -142,4 +146,3 @@ resources:
     url: 'https://sre.google/sre-book/table-of-contents/'
     category: documentation
 ---
-

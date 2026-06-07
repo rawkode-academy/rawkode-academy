@@ -7,6 +7,10 @@ description: >-
   Guidepad primitives (environments, control planes, state machines,
   requirements), we build an event-driven S3 provider in ~100 lines of Python
   that reconciles from CloudTrail events.
+whatYouWillLearn:
+  - "Use Guidepad environments to provide AWS credentials and run Python control planes."
+  - "Model reconciliation with state machines and CloudTrail requirements that react to bucket deletions."
+  - "Build S3 behavior in code, including create, ACL repair, rename, and undeploy handling."
 publishedAt: 2024-01-29T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -69,4 +73,3 @@ resources:
     type: url
     category: code
 ---
-

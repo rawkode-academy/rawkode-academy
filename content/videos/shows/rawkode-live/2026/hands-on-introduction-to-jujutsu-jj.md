@@ -8,6 +8,10 @@ description: >-
   that mean we've reached the end of history for VCS? Join us for a deep dive
   into Jujutsu (jj), a Git-compatible version control system that might change
   the way you think about source control.
+whatYouWillLearn:
+  - "Compare Jujutsu with Git as a version control alternative"
+  - "Explore jj's Git-compatible workflow and branching model with Steve Klabnik"
+  - "See how Jujutsu may change your source control habits"
 publishedAt: 2026-01-22T06:37:57.000Z
 type: live
 category: tutorial
@@ -18,4 +22,3 @@ duration: 3715
 guests:
   - steveklabnik
 ---
-

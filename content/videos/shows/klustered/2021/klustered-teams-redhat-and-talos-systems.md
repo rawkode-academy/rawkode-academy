@@ -6,6 +6,10 @@ description: >-
   Teams from Talos Systems and Red Hat break each other's Kubernetes clusters
   and race to fix them, debugging expired certificates, etcd quorum loss and
   snapshot restore, Cilium network policies, and a broken CNI loopback plugin.
+whatYouWillLearn:
+  - "Bypass broken cluster shell access with corrected kubectl binaries, shell setup, and session-specific teleport fixes."
+  - "Diagnose expired Kubernetes certificates and control-plane disruption by tracking teleport loss, API server downtime, and etcd quorum status."
+  - "Repair worker-node readiness and Cilium networking by fixing kubelet hostname mismatches and restoring the loopback CNI plugin."
 publishedAt: 2021-07-15T17:30:00.000Z
 type: live
 category: tutorial
@@ -117,4 +121,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

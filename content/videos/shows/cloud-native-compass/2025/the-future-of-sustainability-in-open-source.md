@@ -7,6 +7,10 @@ description: >-
   commons principles, covering reciprocity, governance, VC funding pitfalls,
   maintainer burnout, and why web browsers should be treated as international
   public utilities.
+whatYouWillLearn:
+  - "Apply Eleanor Ostrom's commons framework to open source by testing trust, reciprocity, and shared governance boundaries."
+  - "Evaluate why common open source funding models fail, then compare sustainable alternatives to avoid VC dependency traps."
+  - "Build safer maintainer workflows by sharing ownership, reducing burnout, and improving security for critical infrastructure packages."
 publishedAt: 2025-06-12T10:00:00.000Z
 type: recorded
 category: interview
@@ -29,4 +33,3 @@ resources:
     type: url
     category: other
 ---
-

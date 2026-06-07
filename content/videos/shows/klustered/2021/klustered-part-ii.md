@@ -7,6 +7,10 @@ description: >-
   an etcd version mismatch, a bad kubelet flag, an etcd "no space" alarm and
   quota, a block-all NetworkPolicy, and a PodSecurityPolicy affecting static
   pods.
+whatYouWillLearn:
+  - "Identify an etcd version mismatch and fix it by comparing manifests and binary compatibility."
+  - "Track kubelet startup failures caused by invalid flags, then repair node boot by updating config and binaries."
+  - "Resolve cluster networking and control-plane blockers by checking NetworkPolicy, PodSecurityPolicy, and missing CoreDNS/control-plane pods."
 publishedAt: 2021-02-25T12:00:00.000Z
 type: live
 category: tutorial
@@ -125,4 +129,3 @@ resources:
     url: 'https://docs.cilium.io/en/stable/observability/hubble/hubble-ui/'
     category: documentation
 ---
-

@@ -7,6 +7,10 @@ description: >-
   profiler, and reading the resulting Cachegrind files in QCachegrind to find
   hot paths, starting from hello-world and factorial scripts before profiling
   Composer install on a real project.
+whatYouWillLearn:
+  - "Install and enable Xdebug with PECL, confirm extension loading, then generate profiler output from the PHP CLI."
+  - "Capture traces hello-world and factorial scripts, then inspect Cachegrind call trees in QCachegrind to find hot spots."
+  - "Profile Composer install in xdebug versions 2 and 3, then compare output and isolate Composer-specific profiling settings."
 publishedAt: 2020-09-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -54,4 +58,3 @@ resources:
     type: url
     category: code
 ---
-

@@ -7,6 +7,10 @@ description: >-
   kernel, why the verifier makes it safer than kernel modules, and how projects
   like Cilium, Falco, and Pixie are using it for networking, security, and
   observability.
+whatYouWillLearn:
+  - "How eBPF hooks, maps, and bytecode moved beyond packet filtering in Linux"
+  - "Why the verifier checks memory access, helper calls, and termination before loading programs"
+  - "Where Cilium, Falco, Pixie, BCC, and LibBPF expose eBPF to practitioners"
 publishedAt: 2023-08-25T17:00:00.000Z
 type: recorded
 category: interview
@@ -101,4 +105,3 @@ resources:
     url: 'https://github.com/iovisor/bcc/blob/master/tools/opensnoop_example.txt'
     category: demos
 ---
-

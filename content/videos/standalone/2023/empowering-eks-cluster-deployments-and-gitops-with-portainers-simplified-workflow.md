@@ -9,6 +9,10 @@ description: >-
   Provision an AWS EKS cluster from the Portainer UI, deploy the Google Cloud
   Platform microservices demo via a Git manifest, then hit the cluster with
   Portainer's in-browser kubectl shell, all in under ten minutes.
+whatYouWillLearn:
+  - "Provision an AWS EKS cluster from Portainer with cloud credentials and a named environment"
+  - "Deploy the Google Cloud Platform microservices demo from a Git repository path"
+  - "Use Portainer's in-browser kubectl shell to inspect services and load balancer access"
 publishedAt: 2023-08-24T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -46,4 +50,3 @@ resources:
     url: 'https://github.com/GoogleCloudPlatform/microservices-demo'
     category: demos
 ---
-

@@ -10,6 +10,10 @@ description: >-
   deprecation window, blaming "product market fit" despite roughly half a
   million monthly downloads. The synth-to-HCL migration path misses why people
   picked CDKTF in the first place.
+whatYouWillLearn:
+  - "Explains how Terraform CDK was archived without any deprecation window."
+  - "Shows why download counts contradict HashiCorp's product-market-fit explanation."
+  - "Argues the real issue was enterprise revenue, not community adoption."
 publishedAt: 2025-12-11T00:00:00.000Z
 type: recorded
 category: editorial
@@ -31,4 +35,3 @@ resources:
     url: 'https://pypi.org/project/cdktf/'
     category: code
 ---
-

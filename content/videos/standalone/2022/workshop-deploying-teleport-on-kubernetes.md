@@ -7,6 +7,10 @@ description: >-
   charts. Covers the teleport-cluster chart with LoadBalancer and Ingress, the
   kube-agent for connecting additional clusters, and exposing host SSH access
   via a DaemonSet.
+whatYouWillLearn:
+  - "Find Teleport's official Helm charts and avoid unofficial Artifact Hub entries."
+  - "Deploy the main Teleport cluster chart with either LoadBalancer or Ingress."
+  - "Use the KubeAgent chart to connect another Kubernetes cluster back."
 publishedAt: 2022-01-19T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -63,4 +67,3 @@ resources:
     type: url
     category: other
 ---
-

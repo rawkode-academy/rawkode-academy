@@ -7,6 +7,10 @@ description: >-
   OPA Playground, Kubernetes admission policies for label and image-source
   validation using iteration, running OPA locally with bundles and the REPL, and
   writing unit tests for Rego policies.
+whatYouWillLearn:
+  - "Use OPA as a policy engine to offload decision logic for authorization and Kubernetes admission control."
+  - "Write Rego policies with rules, inputs, and iteration patterns for label, resource, and image validation."
+  - "Build reproducible policy CI loops using opa run, opa eval, and rego test workflows with local bundles."
 publishedAt: 2020-11-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://www.openpolicyagent.org/docs/policy-testing'
     category: documentation
 ---
-

@@ -7,6 +7,10 @@ description: >-
   delivery and operations. We install Istio and Keptn on Kubernetes, write a
   shipyard, onboard a Helm-packaged service, and let Prometheus-backed SLO
   quality gates gate the staging rollout.
+whatYouWillLearn:
+  - "Install Keptn and Istio on Kubernetes, configure the CLI, and bootstrap a GitOps-controlled Keptn project."
+  - "Define Keptn's shipyard and onboard services into the platform using service packaging and JMeter tests."
+  - "Set up Prometheus quality gates, trigger a deployment, and observe automated staging rollback on SLO failure."
 publishedAt: 2020-12-02T14:00:00.000Z
 type: live
 category: tutorial
@@ -147,4 +151,3 @@ resources:
     type: url
     category: demos
 ---
-

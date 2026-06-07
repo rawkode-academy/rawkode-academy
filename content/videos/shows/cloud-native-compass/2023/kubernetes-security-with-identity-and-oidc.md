@@ -7,6 +7,10 @@ description: >-
   certificates are an anti-pattern, how OIDC and impersonation deliver revocable
   cluster access, and how workflow identity via OIDC JWTs replaces static
   service account tokens in CI/CD pipelines.
+whatYouWillLearn:
+  - "Why long-lived kubeconfig certificates should be reserved for break-glass access"
+  - "How OIDC impersonation maps GitHub workflow identities to Kubernetes RBAC"
+  - "Why supply chain signing depends on trusted identities, not just cryptographic keys"
 publishedAt: 2023-05-29T17:00:00.000Z
 type: recorded
 category: interview

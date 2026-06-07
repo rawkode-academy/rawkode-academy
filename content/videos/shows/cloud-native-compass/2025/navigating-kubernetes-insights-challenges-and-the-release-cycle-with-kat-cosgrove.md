@@ -9,6 +9,10 @@ description: >-
   Kat Cosgrove joins David and Laura to unpack how SIG Release ships Kubernetes:
   team structure, CI signal, bug triage, press embargoes, maintainer burnout,
   and why a Kubernetes 2.0 is unlikely.
+whatYouWillLearn:
+  - "Understand SIG Release team roles, schedules, and handoffs from release lead to release shadows."
+  - "Track how CI signal, bug triage, and external dependencies determine Kubernetes release readiness."
+  - "Recognize maintainer pain points around drive-by PRs, burnouts, and PR etiquette in open source."
 publishedAt: 2025-01-30T17:00:00.000Z
 type: recorded
 category: interview
@@ -78,4 +82,3 @@ resources:
     url: 'https://cloudnativecompass.fm/'
     category: other
 ---
-

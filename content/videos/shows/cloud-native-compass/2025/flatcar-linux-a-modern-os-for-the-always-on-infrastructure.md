@@ -7,6 +7,10 @@ description: >-
   partition layout, Ignition provisioning, systemd-sysext for Kubernetes,
   LUKS/TPM disk encryption, and how Nebraska coordinates monthly fleet updates
   without SSH.
+whatYouWillLearn:
+  - "Why Flatcar's immutable A/B partitions make operating system updates atomic and reversible"
+  - "How Ignition and Butane provision encrypted disks without embedding long-lived secret material"
+  - "How Nebraska, kured, and Flatcar's update operator coordinate rolling Kubernetes node reboots"
 publishedAt: 2025-10-15T17:00:00.000Z
 type: recorded
 category: interview

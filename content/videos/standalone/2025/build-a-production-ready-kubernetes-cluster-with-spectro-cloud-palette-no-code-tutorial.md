@@ -13,6 +13,10 @@ description: >-
   Compose a reusable, production-ready Kubernetes cluster profile in the Spectro
   Cloud Palette UI, layering the OS, CNI, CSI, and add-ons like Prometheus and
   Grafana, then deploy it without writing YAML or Helm values by hand.
+whatYouWillLearn:
+  - "Compose a reusable Kubernetes cluster profile in Spectro Cloud Palette UI"
+  - "Layer OS, CNI, CSI, Prometheus, and Grafana add-ons into one production stack"
+  - "Deploy the finished cluster without writing YAML or Helm values by hand"
 publishedAt: 2025-07-07T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -30,4 +34,3 @@ resources:
     url: 'https://docs.spectrocloud.com/'
     category: documentation
 ---
-

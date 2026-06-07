@@ -11,6 +11,10 @@ description: >-
   meta-Linux distribution for immutable edge systems. Live demo builds a
   bootable image, installs the OS, and brings up a K3s cluster, then covers
   AuroraBoot, bundles, and trusted boot.
+whatYouWillLearn:
+  - "Build a bootable Kairos image from a container base and deploy it"
+  - "Install immutable edge Kubernetes systems with K3s using the interactive installer"
+  - "Extend Kairos with bundles for preinstalled services, cloud config, and addons"
 publishedAt: 2025-05-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -48,4 +52,3 @@ resources:
     url: 'https://0pointer.net/blog/fitting-everything-together.html'
     category: other
 ---
-

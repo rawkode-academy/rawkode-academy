@@ -7,6 +7,10 @@ description: >-
   Node.js project, deploy it to Kubernetes with a Helm chart, swap into dev
   mode, watch file sync and hot reloading via nodemon, and explore pipelines,
   dependencies, and the VS Code remote SSH integration.
+whatYouWillLearn:
+  - "Initialize DevSpace from a containerized app with Dockerfile, Helm, or Kubernetes manifests."
+  - "Use dev mode to sync source changes into a running container and hot reload."
+  - "Organize deployments, pipelines, dependencies, and remote SSH access from VS Code."
 publishedAt: 2022-09-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -101,4 +105,3 @@ resources:
     url: 'https://kubernetes.slack.com/messages/devspace'
     category: other
 ---
-

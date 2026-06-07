@@ -7,6 +7,10 @@ description: >-
   Anycast BGP, then use Portainer's Edge Compute to deploy an NGINX container to
   the US, Europe, and Asia and measure the latency improvements as each region
   comes online.
+whatYouWillLearn:
+  - "Provision four bare metal nodes with Terraform CDK and an Anycast BGP address."
+  - "Use Portainer edge stacks to place NGINX on region-specific agents automatically."
+  - "Measure latency before and after adding Singapore to improve Asia-Pacific response times."
 publishedAt: 2023-01-16T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     url: 'https://tools.keycdn.com/performance'
     category: other
 ---
-

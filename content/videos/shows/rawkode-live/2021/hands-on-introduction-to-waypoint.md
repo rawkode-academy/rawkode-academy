@@ -7,6 +7,10 @@ description: >-
   model, showing the HCL config, GitOps workflow, the server and runner
   architecture, and three demos deploying to AWS Lambda, Kubernetes, and a
   Minecraft server.
+whatYouWillLearn:
+  - "Explain how Waypoint splits build, deploy, and release into separate workflow stages"
+  - "Show GitOps-driven Lambda delivery with HCL, build packs, and Horizon routing"
+  - "Compare Kubernetes and Minecraft deployments while using Waypoint runners on Kubernetes"
 publishedAt: 2021-08-14T17:00:00.000Z
 type: live
 category: tutorial
@@ -134,4 +138,3 @@ resources:
     url: 'https://github.com/hashicorp/waypoint/milestone/17'
     category: other
 ---
-

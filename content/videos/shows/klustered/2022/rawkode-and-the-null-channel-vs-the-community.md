@@ -7,6 +7,10 @@ description: >-
   community-submitted broken clusters featuring a fake kubelet binary, a
   restricted-bash shell, a custom Wordle game, blocked PATH tricks, etcd cert
   trust failures, and a kernel namespace limit.
+whatYouWillLearn:
+  - "Trace Kubernetes control-plane failures from fake kubelet binaries to node readiness recovery."
+  - "Diagnose kubelet startup failures from bad systemd flags, then patch unit files and restart dependencies."
+  - "Recover restricted shell and PATH corruption on remote hosts to restore admin access and worker rejoin."
 publishedAt: 2022-04-21T17:00:00.000Z
 type: live
 category: tutorial
@@ -145,4 +149,3 @@ resources:
     url: 'https://rawkode.live/win'
     category: other
 ---
-

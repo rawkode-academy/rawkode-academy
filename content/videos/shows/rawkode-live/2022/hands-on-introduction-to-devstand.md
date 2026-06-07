@@ -6,6 +6,10 @@ description: >-
   Max shows how DevStand lowers the Kubernetes barrier for application
   developers, with a visual editor and VS Code extension that authors manifests,
   ingress, and dependencies like Minio storage.
+whatYouWillLearn:
+  - "Visual Studio Code extension lets developers compose Kubernetes applications from building blocks."
+  - "Add a web application, then wire a database dependency and shared environment."
+  - "The visual editor generates manifests for deployment, ingress, and worker variations."
 publishedAt: 2022-10-08T17:00:00.000Z
 type: live
 category: tutorial
@@ -98,4 +102,3 @@ resources:
     url: 'https://devstand.app'
     category: documentation
 ---
-

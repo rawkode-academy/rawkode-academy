@@ -7,6 +7,10 @@ description: >-
   detect languages plus a static frontend, then swaps the vanilla HTML for an
   Astro build to show how any SSG that produces a dist directory can be served
   by Spin's static file server.
+whatYouWillLearn:
+  - "Build a multi-component Spin app with a JavaScript backend and static frontend."
+  - "Serve any static site generator output from Spin's static file server."
+  - "Point Spin at an Astro dist directory and relaunch the app."
 publishedAt: 2023-06-07T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -58,4 +62,3 @@ resources:
     url: 'https://docs.astro.build/en/install-and-setup/'
     category: documentation
 ---
-

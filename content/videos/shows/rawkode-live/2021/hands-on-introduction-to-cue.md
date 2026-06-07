@@ -7,6 +7,10 @@ description: >-
   to the data constraint language. They cover unification, the type lattice,
   validation, and Kubernetes manifest generation, then work through the official
   tutorial together.
+whatYouWillLearn:
+  - "Use CUE to combine schemas, defaults, and constraints into flexible, reusable configuration systems."
+  - "Explore CUE validation workflows using templates, disjunctions, and concrete data with practical examples."
+  - "Walk through Kubernetes-focused CUE usage including import, schema checking, trimming, and OpenAPI generation."
 publishedAt: 2021-04-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -118,4 +122,3 @@ resources:
     url: 'https://deploy.equinix.com/'
     category: other
 ---
-

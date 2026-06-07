@@ -7,6 +7,10 @@ description: >-
   through node and pod affinity, topology spread constraints, priority classes
   and preemption, plus alpha features like scheduling gates and dynamic resource
   allocation.
+whatYouWillLearn:
+  - "Restrict pods to specific nodes with node selectors and matching labels."
+  - "Use node and pod affinity to co-locate workloads or keep them apart."
+  - "Manage placement with priority classes, topology spread constraints, scheduling gates, and dynamic resource allocation."
 publishedAt: 2022-12-22T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -61,4 +65,3 @@ resources:
       https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
     category: documentation
 ---
-

@@ -7,6 +7,10 @@ description: >-
   waSCC, walks through WebAssembly beyond the browser: the WAT text format,
   wasmtime, and waSCC's capability-secure actors, signed JWT entitlements, and
   Lattice clustering.
+whatYouWillLearn:
+  - "Explore how WebAssembly executes outside browsers through bytecode hosts and runtime constraints."
+  - "Build WebAssembly actors with waSCC templates and implement WAPC contracts for provider calls."
+  - "Configure capability bindings, signing, and lattice policies to secure and move workloads."
 publishedAt: 2020-10-22T17:00:00.000Z
 type: live
 category: tutorial

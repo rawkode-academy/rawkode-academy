@@ -7,6 +7,10 @@ description: >-
   Kubescape custom controls. We build a "no latest tag" rule, then a
   CAP_SYS_ADMIN deny, debug the generated policy in the Rego Playground, and run
   it with `kubescape scan control --use-from`.
+whatYouWillLearn:
+  - "Generate a no latest tag policy for Kubernetes workloads from plain English."
+  - "Debug AI-generated Rego in the playground when the deny rule does not fire."
+  - "Patch the downloaded control path so CAP_SYS_ADMIN checks reach container specs."
 publishedAt: 2023-03-30T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -50,4 +54,3 @@ resources:
     url: 'https://www.openpolicyagent.org/'
     category: documentation
 ---
-

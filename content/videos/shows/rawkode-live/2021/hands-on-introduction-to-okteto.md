@@ -6,6 +6,10 @@ description: >-
   Ramiro Berrelleza walks through Okteto Cloud and the okteto CLI, deploying the
   Movies sample with Helm and BuildKit, then using okteto up to sync code into a
   live Kubernetes pod. Plus Docker Compose support and preview environments.
+whatYouWillLearn:
+  - "Deploy a sample app to Okteto Cloud by adding a namespace, credentials, and pipeline in the quick-start flow."
+  - "Install and use the Okteto CLI and `okteto up` to sync local code into a running Kubernetes pod."
+  - "Run Docker Compose apps and enable preview environments with GitHub Actions from the same Okteto pipeline configuration."
 publishedAt: 2021-05-19T17:00:00.000Z
 type: live
 category: tutorial
@@ -90,4 +94,3 @@ resources:
     category: demos
     url: 'https://github.com/dockersamples/example-voting-app'
 ---
-

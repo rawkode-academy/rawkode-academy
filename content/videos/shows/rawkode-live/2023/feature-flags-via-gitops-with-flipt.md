@@ -7,6 +7,10 @@ description: >-
   syncing flag state from a Git repository (Gitea) and OCI registries. Demo
   covers variants, stickiness, gRPC and REST SDKs (Node, Python), and bundling
   flags with ttl.sh.
+whatYouWillLearn:
+  - "Manage a chat-enabled flag through a Git PR, then watch Flipt detect the merge."
+  - "Use percentage variants and stickiness so the same user keeps one chatbot persona."
+  - "Bundle feature flag state into an OCI artifact and run Flipt against it."
 publishedAt: 2023-11-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -75,4 +79,3 @@ resources:
     url: 'https://ttl.sh'
     category: other
 ---
-

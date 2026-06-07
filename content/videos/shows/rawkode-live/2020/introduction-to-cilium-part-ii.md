@@ -6,6 +6,10 @@ description: >-
   Ilya Dmitrichenko joins David to install Cilium on a bare-metal Kubernetes
   cluster, run the Star Wars demo, apply L3/L4 and L7 (HTTP) network policies,
   explore Hubble UI, lock down DNS egress, and replace kube-proxy.
+whatYouWillLearn:
+  - "Install Cilium on a bare-metal Kubernetes cluster and verify connectivity with Cilium's installation and status checks."
+  - "Apply and test L3/L4 and L7 HTTP policies to control pod-to-pod traffic in a Star Wars demo workload."
+  - "Use Cilium CLI and Hubble UI to inspect flows, remove kube-proxy, and enforce DNS egress with FQDN policies."
 publishedAt: 2020-11-12T17:00:00.000Z
 type: live
 category: tutorial
@@ -111,4 +115,3 @@ resources:
     category: documentation
     url: 'https://docs.cilium.io/en/stable/network/kubernetes/kubeproxy-free/'
 ---
-

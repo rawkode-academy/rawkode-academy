@@ -7,6 +7,10 @@ description: >-
   tuning Docker for Mac volume performance, splitting Node.js asset compilation
   (Webpack, Laravel Mix, Tailwind) out of the PHP container, and tidying the
   Compose and Kubernetes manifests.
+whatYouWillLearn:
+  - "Configure a local Laravel stack with separate PHP, NGINX, and MariaDB containers for repeatable local development."
+  - "Split Node.js asset compilation into its own container with shared volumes, so frontend changes recompile without PHP rebuilds."
+  - "Tune Docker for Mac volume options, such as delegated and cached consistency flags, to speed file syncing."
 publishedAt: 2020-09-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -45,4 +49,3 @@ resources:
     url: 'https://laravel-mix.com/docs/6.0/installation'
     category: documentation
 ---
-

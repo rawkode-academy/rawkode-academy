@@ -6,6 +6,10 @@ description: >-
   Steve Klabnik, co-author of The Rust Programming Language book, joins to teach
   Rust from scratch. Working through Rustlings exercises, they cover variables,
   mutability, shadowing, functions, strings (&str vs String), and structs.
+whatYouWillLearn:
+  - "Start a Rust project by running Rustlings exercises and working with variables, mutability, shadowing, and constants."
+  - "Write and read Rust functions with typed arguments, return types, and implicit return behavior in practice."
+  - "Compare `&str` and `String`, then convert between string types using ownership and deref ideas."
 publishedAt: 2020-12-02T17:00:00.000Z
 type: live
 category: tutorial
@@ -92,4 +96,3 @@ resources:
     url: 'https://users.rust-lang.org/'
     category: other
 ---
-

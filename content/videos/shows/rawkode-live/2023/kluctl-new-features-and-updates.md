@@ -3,6 +3,10 @@ id: nnnb1s0hvh5ypbwavjppy3ze
 slug: kluctl-new-features-and-updates
 title: Kluctl New Features & Updates
 description: 'Alexander Block returns to walk through what''s new in Kluctl: the GitOps controller for pull-based deploys alongside the CLI, the WebUI for visibility, and a live demo bootstrapping a kind cluster and handing off to GitOps.'
+whatYouWillLearn:
+  - "Deploy complex Kubernetes applications with Kluctl's deployment projects, targets, templating, and dependency ordering."
+  - "Use cluster-loaded variables and Jinja templates to keep manifests environment-specific without duplication."
+  - "Inspect GitOps and CLI deployments in the WebUI, including remote clusters and manual actions."
 publishedAt: 2023-09-27T17:00:00.000Z
 type: live
 category: tutorial
@@ -85,4 +89,3 @@ resources:
     url: 'https://github.com/kluctl/template-controller'
     category: code
 ---
-

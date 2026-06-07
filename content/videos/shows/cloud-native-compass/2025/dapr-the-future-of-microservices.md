@@ -7,6 +7,10 @@ description: >-
   state, workflows, virtual actors) tame microservice complexity, and how Dapr
   Agents extends that same actor and durable-workflow model to agentic LLM
   systems.
+whatYouWillLearn:
+  - "Why Dapr sits above service meshes with application identity, retries, security, and observability"
+  - "How component APIs decouple pub/sub, state stores, workflows, and LLM providers from code"
+  - "How actors make Dapr Agents durable, recoverable, and scalable across agent workflows"
 publishedAt: 2025-03-21T12:00:00.000Z
 type: recorded
 category: interview
@@ -39,4 +43,3 @@ resources:
     url: 'https://www.diagrid.io/catalyst'
     category: other
 ---
-

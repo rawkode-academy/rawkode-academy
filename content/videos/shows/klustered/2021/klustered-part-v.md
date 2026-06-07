@@ -6,6 +6,10 @@ description: >-
   Jason DeTiberus joins to debug two broken clusters from Thomas Stromberg and
   CloudNative Wales. Expect rogue processes, mangled resolv.conf, exhausted
   inodes in /tmp, a rickrolled manifest symlink, and recursive bind mounts.
+whatYouWillLearn:
+  - "Diagnose a non-responsive Kubernetes API server by checking control-plane pods, logs, and etcd connectivity."
+  - "Identify and kill rogue host-side processes and scripts, including rickroll symlink tasks, blocking cluster recovery."
+  - "Repair DNS and storage stability by fixing resolv.conf, CoreDNS config, node taints, and corrupted manifests."
 publishedAt: 2021-03-18T17:00:00.000Z
 type: live
 category: tutorial
@@ -236,4 +240,3 @@ resources:
       https://github.com/kubernetes/kubernetes/blob/master/cmd/kubeadm/app/phases/addons/dns/manifests.go
     category: code
 ---
-

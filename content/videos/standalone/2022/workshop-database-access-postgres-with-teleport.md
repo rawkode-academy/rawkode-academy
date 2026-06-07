@@ -3,6 +3,10 @@ id: ag2zatp44xhj015i1fe4ejs1
 slug: workshop-database-access-postgres-with-teleport
 title: Workshop - Database Access (Postgres) with Teleport
 description: 'Find out more at https://rawkode.live/teleport'
+whatYouWillLearn:
+  - "Set up Postgres on a VM and configure pg_hba.conf access rules."
+  - "Create Teleport database roles, assign users, and activate them correctly."
+  - "Use tsh db login, config, and GUI clients to reach Postgres."
 publishedAt: 2022-01-15T17:00:00.000Z
 type: recorded
 category: tutorial
@@ -93,4 +97,3 @@ resources:
     url: 'https://rawkode.chat'
     category: other
 ---
-

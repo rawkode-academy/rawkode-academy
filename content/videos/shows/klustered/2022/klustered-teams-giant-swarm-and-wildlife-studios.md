@@ -7,6 +7,10 @@ description: >-
   and debug live, working through Cilium CNI sabotage, tampered pause images,
   replaced kubectl binaries, broken DNS, etcd failures, and iptables policy
   traps.
+whatYouWillLearn:
+  - "Troubleshoot a Kubernetes CrashLoopBackOff by auditing pod image updates, probes, and restart patterns."
+  - "Verify API server startup failures by checking kubelet logs, static pod manifests, and network settings."
+  - "Detect tampered control plane components by inspecting pause images, replaced kubectl binaries, and API manifest edits."
 publishedAt: 2022-02-17T17:00:00.000Z
 type: live
 category: tutorial
@@ -123,4 +127,3 @@ chapters:
 duration: 6382
 resources: []
 ---
-

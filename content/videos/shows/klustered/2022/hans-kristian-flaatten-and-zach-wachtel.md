@@ -6,6 +6,10 @@ description: >-
   Hans Kristian Flaatten and Zach Wachtel tackle two broken Kubernetes clusters,
   debugging a bad kubeconfig IP, an encryption provider config, a disk IO
   throttle cron job, plus Kyverno webhooks and a Cilium egress policy.
+whatYouWillLearn:
+  - "Debug cluster access problems by checking kubeconfig endpoints, kubelet and API server logs, and transport socket errors."
+  - "Identify broken control-plane components by removing stale encryption provider config and validating etcd and control-plane health."
+  - "Locate performance kill-switches in cron jobs, disable harmful system services, and restore startup with Cilium and Kyverno fixes."
 publishedAt: 2022-10-28T17:00:00.000Z
 type: live
 category: tutorial
@@ -106,4 +110,3 @@ resources:
     url: 'https://changelog.com/shipit'
     category: other
 ---
-
