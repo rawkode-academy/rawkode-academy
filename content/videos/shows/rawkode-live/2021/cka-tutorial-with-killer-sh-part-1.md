@@ -7,6 +7,10 @@ description: >-
   contexts, scheduling pods onto control plane nodes, scaling StatefulSets,
   creating PVs and PVCs with hostPath, kubectl top, and manually scheduling pods
   by stopping the scheduler.
+whatYouWillLearn:
+  - "Practice listing and switching three Kubernetes contexts, extracting the current context directly from kubeconfig with shell commands."
+  - "Create and verify StatefulSet scaling and Pod scheduling tasks, including unscheduled and normal scheduler cases."
+  - "Build PV, PVC, and hostPath workload resources, use kubectl top, and check control-plane components via SSH."
 publishedAt: 2021-06-09T17:00:00.000Z
 type: live
 category: tutorial
@@ -68,4 +72,3 @@ resources:
     url: 'https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/'
     category: documentation
 ---
-
