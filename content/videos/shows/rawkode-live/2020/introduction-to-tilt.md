@@ -7,6 +7,10 @@ description: >-
   Kubernetes development. We write a Tiltfile in Starlark, build a Docker image,
   deploy via kubectl and Helm, and use live_update to sync changes without
   rebuilds.
+whatYouWillLearn:
+  - "Write a Tiltfile in Starlark that defines local services, Docker builds, and Kubernetes resources for each dev run."
+  - "Use Tilt live update to sync code edits directly into containers, with targeted rebuilds for edge cases."
+  - "Load Kubernetes dependencies with Helm through the kustomize/helm remote flow inside a single Tiltfile setup."
 publishedAt: 2020-09-23T17:00:00.000Z
 type: live
 category: tutorial
@@ -87,4 +91,3 @@ resources:
     category: code
     url: 'https://github.com/tilt-dev/tilt-extensions'
 ---
-
