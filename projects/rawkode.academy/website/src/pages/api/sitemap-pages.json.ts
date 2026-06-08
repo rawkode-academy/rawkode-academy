@@ -143,22 +143,11 @@ async function generateNavigationItems(
 			description: "Branding and logo usage guidelines",
 		},
 		{
-			href: "/organizations/consulting",
-			title: "Consulting",
-			category: "Organizations",
-			description: "Consulting services",
-		},
-		{
-			href: "/organizations/training",
-			title: "Training",
-			category: "Organizations",
-			description: "Training services",
-		},
-		{
 			href: "/organizations/partnerships",
-			title: "Partnerships",
+			title: "Developer Adoption Partnerships",
 			category: "Organizations",
-			description: "Partner with us",
+			description:
+				"Pressure-test developer adoption decisions before GTM spend",
 		},
 		{
 			href: "/maintainers/share-your-project",

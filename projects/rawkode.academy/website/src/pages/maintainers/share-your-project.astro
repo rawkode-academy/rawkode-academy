@@ -4,6 +4,24 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
+const contactEmail = "david@rawkode.academy";
+
+const projectEmailBody = [
+	"Project name:",
+	"Project URL:",
+	"Maintainer names:",
+	"Why this project is useful to developers:",
+	"What you would like to show live:",
+	"Preferred timezone:",
+	"Good weeks for a session:",
+	"Recording or disclosure constraints:",
+].join("\n");
+
+const projectEmailHref = `mailto:${contactEmail}?${new URLSearchParams({
+	subject: "Rawkode Live project submission",
+	body: projectEmailBody,
+}).toString()}`;
+
 const stats = [
 	{ value: "100+", label: "Projects featured" },
 	{ value: "60-90", label: "Minute session" },
@@ -90,7 +108,7 @@ const faqItems = [
 		lede="Bring your open-source project onto Rawkode Live for a practical walkthrough, maintainer conversation, and live technical Q&A."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#booking">Book a slot</a>
+			<a class="editorial-button" href="#contact">Email your project</a>
 			<a class="editorial-button editorial-button--secondary" href="#process">How it works</a>
 		</div>
 
@@ -169,41 +187,28 @@ const faqItems = [
 			</div>
 		</section>
 
-		<section id="booking" class="editorial-section editorial-section--split">
+		<section id="contact" class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Booking</p>
-				<h2 class="editorial-section__title">Pick a time</h2>
+				<p class="editorial-kicker">Contact</p>
+				<h2 class="editorial-section__title">Email your project</h2>
 				<p class="editorial-section__lede">
-					Choose an available slot and we will follow up with the details needed before the show.
+					Send enough context to check fit. If the project is a good match, David will reply with the next available path.
 				</p>
 			</div>
-			<div class="share-booking">
-				<div id="booking-page" class="share-booking__embed" aria-label="Booking calendar"></div>
+			<div class="share-contact">
+				<ul class="share-contact__fields">
+					<li>Project name and URL</li>
+					<li>Maintainers joining</li>
+					<li>What you want to show live</li>
+					<li>Preferred timezone and good weeks</li>
+				</ul>
+				<a class="editorial-button" href={projectEmailHref}>Email David</a>
+				<p>
+					Or email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+				</p>
 			</div>
 		</section>
 	</EditorialShell>
-
-	<script is:inline>
-		window.SavvyCal =
-			window.SavvyCal ||
-			function () {
-				(SavvyCal.q = SavvyCal.q || []).push(arguments);
-			};
-
-		const script = document.createElement("script");
-		script.async = true;
-		script.src = "https://embed.savvycal.com/v1/embed.js";
-		document.head.appendChild(script);
-
-		script.onload = () => {
-			SavvyCal("init", { origin: "https://meet.rawkode.academy" });
-			SavvyCal("inline", {
-				link: "share-your-project",
-				selector: "#booking-page",
-				theme: "os",
-			});
-		};
-	</script>
 </Page>
 
 <style>
@@ -219,27 +224,55 @@ const faqItems = [
 		text-underline-offset: 0.2em;
 	}
 
-	.share-booking {
+	.share-contact {
 		border: 1px solid var(--editorial-hairline);
 		border-radius: 6px;
 		background: var(--editorial-paper-deep);
-		padding: 0.75rem;
+		padding: 1.25rem;
 	}
 
-	.share-booking__embed {
-		min-height: 42rem;
-		border-radius: 4px;
-		overflow: hidden;
-		background: var(--editorial-paper);
+	.share-contact__fields {
+		display: grid;
+		gap: 0.75rem;
+		list-style: none;
+		padding: 0;
+		margin: 0 0 1.25rem;
+	}
+
+	.share-contact__fields li,
+	.share-contact p {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		color: var(--editorial-ink-soft);
+		line-height: 1.55;
+	}
+
+	.share-contact__fields li {
+		position: relative;
+		padding-left: 1rem;
+	}
+
+	.share-contact__fields li::before {
+		content: "";
+		position: absolute;
+		top: 0.65em;
+		left: 0;
+		width: 0.35rem;
+		height: 0.35rem;
+		background: var(--editorial-spruce);
+	}
+
+	.share-contact p {
+		margin: 1rem 0 0;
+	}
+
+	.share-contact a:not(.editorial-button) {
+		color: var(--editorial-spruce);
+		text-underline-offset: 0.2em;
 	}
 
 	@media (max-width: 700px) {
-		.share-booking {
-			padding: 0.4rem;
-		}
-
-		.share-booking__embed {
-			min-height: 36rem;
+		.share-contact {
+			padding: 1rem;
 		}
 	}
 </style>

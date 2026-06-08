@@ -24,6 +24,20 @@ describe("legacy route resolver", () => {
 				location: "https://rawkode.academy/technology/equinix-metal",
 			},
 		);
+		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/organizations/consulting")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/organizations/partnerships",
+		});
+		expect(
+			resolveLegacyRoute(new URL("https://rawkode.academy/organizations/training/")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/organizations/partnerships",
+		});
 	});
 
 	it("temporarily redirects legacy sign-in while preserving query params", () => {

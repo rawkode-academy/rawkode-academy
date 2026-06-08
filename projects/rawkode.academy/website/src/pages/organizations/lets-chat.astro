@@ -1,179 +1,322 @@
 ---
 import Page from "@/wrappers/page.astro";
+
+const contactEmail = "david@rawkode.academy";
+
+const fitIntakeFields = [
+	"Interested tier",
+	"Company and product category",
+	"Target practitioner or buyer",
+	"Current adoption constraint",
+	"Budget readiness",
+	"Internal marketing, product, or DevRel owner",
+	"Decision window",
+	"Optional artifact URL",
+];
+
+const fitEmailBody = [
+	"Interested tier: Not selected",
+	"Company:",
+	"Product category:",
+	"Target practitioner or buyer:",
+	"Current adoption constraint:",
+	"Budget readiness:",
+	"Internal marketing, product, or DevRel owner:",
+	"Decision window:",
+	"Optional artifact URL:",
+	"",
+	"What decision needs review this month?",
+].join("\n");
+
+const fitEmailHref = `mailto:${contactEmail}?${new URLSearchParams({
+	subject: "Developer Adoption Partnerships fit check",
+	body: fitEmailBody,
+}).toString()}`;
+
+const fitCheckBoundaries = [
+	"One short qualification email before any call is offered",
+	"No product audit, positioning review, asset review, or strategy session by email",
+	"Requests that are not a fit may be declined without a call",
+];
 ---
 
-<style>
-	@reference "../../styles/global.css";
-
-	h1,
-	h2,
-	h3 {
-		@apply mt-8 mb-4;
-	}
-
-	h1 {
-		@apply text-4xl tracking-tight font-bold text-primary-content;
-	}
-
-	.benefits-list {
-		@apply mt-6 space-y-4;
-	}
-
-	.benefits-list li {
-		@apply flex items-start;
-	}
-
-	.benefits-list .icon {
-		@apply shrink-0 w-5 h-5 text-primary mt-1 mr-3;
-	}
-
-	.benefits-list .text {
-		@apply text-secondary-content;
-	}
-
-	#booking-page {
-		@apply w-full min-h-[600px] overflow-hidden;
-	}
-</style>
-
 <Page
-	title="Schedule a Partnership Consultation"
-	description="Discuss how Rawkode Academy can help accelerate your developer marketing strategy and product adoption."
+	title="Developer Adoption Partnerships Fit Check"
+	description="Email your adoption decision for a Developer Adoption Partnerships fit check."
 	pageType="ContactPage"
 >
-	<div class="max-w-4xl mx-auto">
-		<h1 class="text-center mb-6">Schedule Your Partnership Consultation</h1>
-
-		<div class="bg-white dark:bg-gray-800 rounded-sm shadow-md p-6 mb-8">
-			<p class="text-lg text-secondary-content mb-4">
-				Ready to explore how a <a
-					href="/organizations/partnerships"
-					class="text-primary hover:underline">Rawkode Academy partnership</a
-				> can accelerate your developer marketing strategy and product adoption?
-				Schedule a consultation with our team to discuss your specific goals and
-				how we can help you achieve them.
-			</p>
-
-			<h2 class="text-2xl font-semibold text-gray-800 dark:text-white">
-				During our consultation, we'll discuss:
-			</h2>
-
-			<ul class="benefits-list">
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Your product's unique value proposition and how to effectively
-						communicate it to developers</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Your current developer marketing challenges and opportunities</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Which partnership tier would best align with your business
-						objectives</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>Potential content strategies and formats to showcase your
-						technology</span
-					>
-				</li>
-				<li>
-					<svg
-						class="icon"
-						fill="currentColor"
-						viewBox="0 0 20 20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							fill-rule="evenodd"
-							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-							clip-rule="evenodd"></path>
-					</svg>
-					<span class="text"
-						>How we measure success and provide ongoing value throughout our
-						partnership</span
-					>
-				</li>
-			</ul>
-		</div>
-
-		<div class="bg-gray-50 dark:bg-gray-700 rounded-sm p-6">
-			<h2
-				class="text-2xl font-semibold text-gray-800 dark:text-white text-center mb-6"
-			>
-				Select a Time That Works for You
-			</h2>
-
-			<div id="booking-page">
-				<!-- this is where we will inject the interface -->
+	<main class="fit-page">
+		<section class="fit-hero">
+			<div class="fit-hero__copy">
+				<p class="fit-kicker">Fit check</p>
+				<h1>Email your adoption decision for a fit check.</h1>
+				<p>
+					Send the context below. If the decision fits the partnership, David
+					will reply with the next step.
+				</p>
+				<div class="fit-tier" aria-live="polite">
+					<p class="fit-kicker">Selected tier</p>
+					<strong data-selected-tier>
+						Choose a tier from the partnerships page or state one in the email.
+					</strong>
+				</div>
 			</div>
 
-			<script is:inline>
-				window.SavvyCal =
-					window.SavvyCal ||
-					function () {
-						(SavvyCal.q = SavvyCal.q || []).push(arguments);
-					};
-			</script>
-			<script is:inline async src="https://embed.savvycal.com/v1/embed.js"
-			></script>
-			<script is:inline>
-				SavvyCal("init", { origin: "https://meet.rawkode.academy" });
-				SavvyCal("inline", {
-					link: "collaborate",
-					selector: "#booking-page",
-					theme: "os",
-				});
-			</script>
-		</div>
-	</div>
+			<aside class="fit-email-panel" aria-label="Email about partnerships">
+				<p class="fit-kicker">What to include</p>
+				<h2>Share enough context for a clear reply.</h2>
+				<a
+					class="fit-email-button"
+					href={fitEmailHref}
+					data-fit-email
+					data-email-address={contactEmail}
+					data-email-subject="Developer Adoption Partnerships fit check"
+					data-email-body-template={fitEmailBody}
+				>
+					Email your adoption decision
+				</a>
+				<ul class="fit-field-list">
+					{fitIntakeFields.map((item) => <li>{item}</li>)}
+				</ul>
+				<p class="fit-direct-email">
+					Or email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
+				</p>
+			</aside>
+		</section>
+
+		<section class="fit-details">
+			<article>
+				<p class="fit-kicker">Fit check summary</p>
+				<h2>A short check before any call.</h2>
+				<ul>
+					<li>£1k-£3k monthly range</li>
+					<li>Marketing, product, or DevRel remains the execution owner</li>
+					<li>Email first; calls only when the fit is clear</li>
+				</ul>
+			</article>
+			<article>
+				<p class="fit-kicker">Boundary</p>
+				<h2>This is qualification, not free consulting.</h2>
+				<ul>
+					{fitCheckBoundaries.map((item) => <li>{item}</li>)}
+				</ul>
+			</article>
+		</section>
+	</main>
+
+	<script is:inline>
+		const tierLabels = {
+			signal: "Signal (£1,000/month)",
+			review: "Review (£2,000/month)",
+			direction: "Direction (£3,000/month)",
+		};
+		const params = new URLSearchParams(window.location.search);
+		const selectedTier = tierLabels[params.get("tier") || ""];
+		const selectedTierNode = document.querySelector("[data-selected-tier]");
+		const emailLink = document.querySelector("[data-fit-email]");
+
+		if (selectedTier && selectedTierNode) {
+			selectedTierNode.textContent = selectedTier;
+		}
+
+		if (selectedTier && emailLink) {
+			const emailAddress = emailLink.dataset.emailAddress;
+			const subject = emailLink.dataset.emailSubject;
+			const template = emailLink.dataset.emailBodyTemplate || "";
+			const body = template.replace(
+				"Interested tier: Not selected",
+				`Interested tier: ${selectedTier}`,
+			);
+			emailLink.href = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+		}
+	</script>
 </Page>
+
+<style>
+	.fit-page {
+		background: var(--editorial-paper);
+		color: var(--editorial-ink);
+	}
+
+	.fit-hero {
+		display: grid;
+		grid-template-columns: minmax(0, 0.95fr) minmax(24rem, 1.05fr);
+		gap: 2rem;
+		align-items: start;
+		padding: 3rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.fit-hero__copy {
+		max-width: 58rem;
+	}
+
+	.fit-kicker {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		margin: 0 0 0.75rem;
+	}
+
+	.fit-hero h1,
+	.fit-email-panel h2,
+	.fit-details h2 {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.fit-hero h1 {
+		font-size: clamp(2.25rem, 5vw, 4.25rem);
+	}
+
+	.fit-email-panel h2,
+	.fit-details h2 {
+		font-size: clamp(1.5rem, 3vw, 2.25rem);
+	}
+
+	.fit-hero p:not(.fit-kicker),
+	.fit-tier strong,
+	.fit-field-list li,
+	.fit-details li,
+	.fit-direct-email {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+	}
+
+	.fit-hero p:not(.fit-kicker) {
+		max-width: 44rem;
+		margin: 1rem 0 0;
+	}
+
+	.fit-tier {
+		margin-top: 1.5rem;
+		padding: 1.25rem 0 0;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.fit-tier strong {
+		display: block;
+		color: var(--editorial-ink);
+	}
+
+	.fit-email-panel {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		padding: 1.25rem;
+	}
+
+	.fit-field-list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.75rem;
+		list-style: none;
+		padding: 0;
+		margin: 1.25rem 0 0;
+	}
+
+	.fit-field-list li,
+	.fit-details li {
+		position: relative;
+		padding-left: 1rem;
+	}
+
+	.fit-field-list li::before,
+	.fit-details li::before {
+		content: "";
+		position: absolute;
+		top: 0.65em;
+		left: 0;
+		width: 0.35rem;
+		height: 0.35rem;
+		background: var(--editorial-spruce);
+	}
+
+	.fit-email-button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		margin-top: 1.5rem;
+		padding: 0.625rem 1rem;
+		border: 1px solid var(--editorial-ink);
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-align: center;
+		text-decoration: none;
+		transition:
+			background-color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.fit-email-button:hover {
+		background: var(--editorial-spruce);
+		border-color: var(--editorial-spruce);
+	}
+
+	.fit-direct-email {
+		margin: 1rem 0 0;
+	}
+
+	.fit-direct-email a {
+		color: var(--editorial-spruce);
+		text-underline-offset: 0.2em;
+	}
+
+	.fit-details {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1rem;
+		padding: 3rem var(--space-section-pad-x);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.fit-details article {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+		padding: 1.25rem;
+	}
+
+	.fit-details ul {
+		list-style: none;
+		padding: 0;
+		margin: 1.25rem 0 0;
+	}
+
+	.fit-details li {
+		margin-top: 0.85rem;
+	}
+
+	@media (max-width: 980px) {
+		.fit-hero,
+		.fit-details {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 720px) {
+		.fit-hero,
+		.fit-details {
+			padding-left: 1rem;
+			padding-right: 1rem;
+		}
+
+		.fit-field-list {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
