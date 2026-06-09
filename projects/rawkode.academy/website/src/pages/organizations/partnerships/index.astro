@@ -5,7 +5,7 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const contactHref =
-	"mailto:david@rawkode.academy?subject=Proof%20to%20review&body=Adoption%20problem%3A%0D%0ACompany%2Fcategory%3A%0D%0APreferred%20review%20option%2C%20if%20known%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+	"mailto:david@rawkode.academy?subject=Partnership%20fit&body=Company%2Fcategory%3A%0D%0AProduct%20or%20platform%3A%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A";
 
 const faqs = [
 	{
@@ -16,173 +16,174 @@ const faqs = [
 	{
 		question: "Do you replace our marketing, product, or DevRel team?",
 		answer:
-			"No. We work with marketing, product, DevRel, sales engineering, and technical owners so they can make better decisions. Your team keeps execution ownership; the partnership exposes where technical evaluators are likely to stall, distrust the claim, or miss the value.",
+			"No. We work with marketing, product, DevRel, sales engineering, and technical owners so they can make better adoption decisions. Your team keeps execution ownership; the partnership brings practitioner signal, strategic critique, and sharper direction.",
 	},
 	{
 		question: "What should we bring first?",
 		answer:
-			"Send the company or product, the target technical evaluator, the decision you need to make, the team stakeholders, the review deadline, the surfaces or infrastructure artifacts available, and useful links. Rough context is enough.",
+			"Send the company or product, the target developer or platform team, the adoption challenge, the team stakeholders, the next budget or launch decision, and useful links. Rough context is enough.",
 	},
 	{
 		question: "Why pay for this before budget moves?",
 		answer:
-			"The point is to avoid a larger wasted bet: a launch story practitioners do not believe, a docs or demo rebuild that still misses evaluation risk, a DevRel hire without a clear remit, or sales-engineering confusion that slows technical buyers. The output tells your team what to keep, change, prove, or stop before more spend is committed.",
+			"The point is to avoid a larger wasted bet: a launch story practitioners ignore, a docs or demo rebuild that does not change adoption, a DevRel hire without a clear remit, or a sales push that cannot answer technical objections. The partnership helps your team decide what to keep, change, prove, or stop before more spend is committed.",
 	},
 	{
 		question: "How fast can this start?",
 		answer:
-			"The diagnostic is the fastest route when the problem is narrow. A monthly partnership is better when several pieces need to align before launch, repositioning, sales enablement, or DevRel spend. Three monthly cycles are often enough to move from risk map to corrected story to launch-ready proof.",
+			"Partnerships are month-to-month with no annual lock-in. Companies can join when they need outside signal, use the partnership while it is valuable, and stop before the next billing cycle.",
 	},
 	{
 		question: "Do you plan campaigns or run DevRel for us?",
 		answer:
-			"No. The partnership reviews named adoption decisions, technical proof, docs paths, demos, launch narratives, and enablement surfaces. It does not include full campaign planning, outsourced DevRel execution, custom content production, or open-ended access.",
+			"No. The partnership helps shape adoption strategy, technical narrative, developer education, launch direction, and internal alignment. It does not include full campaign planning, outsourced DevRel execution, custom content production, lead generation, or open-ended access.",
 	},
 	{
 		question: "Is confidential material safe to share?",
 		answer:
-			"Start with public or shareable material. If a fit check shows private context is needed, we can agree the right confidentiality boundary before reviewing it.",
+			"Start with public or shareable context. If a fit check shows private context is needed, we can agree the right confidentiality boundary before using it in the partnership.",
 	},
 ];
 
 const packages = [
 	{
-		name: "Adoption Risk Audit",
-		price: "From £1,000",
-		label: "One decision",
+		name: "Signal Partnership",
+		price: "£1,000 / month",
+		label: "Lightweight",
 		bestFor:
-			"A launch claim, docs journey, demo flow, sales narrative, or DevRel bet needs a hard technical read before budget moves.",
+			"Founders and small teams that need outside practitioner signal before they commit more budget to messaging, launches, docs, demos, DevRel, or sales enablement.",
 		outcome:
-			"Know what buyers will question, what is missing, and what your team should keep, change, or stop.",
+			"Know what developers are likely to understand, question, ignore, or need next before your team spends more.",
 		included: [
-			"One adoption decision",
-			"Ranked proof-gap memo",
-			"Risk, affected evaluator, blocked decision, and proof needed",
-			"60-minute readout with highest-priority actions and owner recommendations",
+			"Monthly partnership session",
+			"Question submission before the session",
+			"Practitioner signal on developer adoption, DevRel, docs, demos, positioning, or launch direction",
+			"Monthly memo with themes, recommendations, and next decisions",
 		],
-		boundaries: ["Fixed scope", "No implementation", "No rewrites"],
-		cta: "Send audit problem",
-		href: "mailto:david@rawkode.academy?subject=Adoption%20Risk%20Audit&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Adoption%20Risk%20Audit%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AThe%20one%20adoption%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A",
+		boundaries: ["No private delivery team", "No custom content production", "Your team owns execution"],
+		cta: "Email adoption problem",
+		href: "mailto:david@rawkode.academy?subject=Signal%20Partnership&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%20Partnership%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AUseful%20links%3A",
 	},
 	{
-		name: "Monthly Partnership",
-		price: "From £2,000 / month",
+		name: "Adoption Partnership",
+		price: "£2,000 / month",
 		label: "Default",
 		bestFor:
-			"Cross-functional teams need a monthly outside read across launch, docs, demo, enablement, or positioning work.",
+			"Marketing, product, DevRel, sales engineering, and engineering teams that need recurring outside judgement while shaping developer adoption.",
 		outcome:
-			"Spot buyer objections early, align the story across teams, and leave each month with practical decisions to ship.",
+			"Leave each month with clearer adoption priorities, stronger technical narrative, and practical next moves your team can own.",
 		included: [
-			"One named adoption decision or launch workstream per month",
-			"Evaluator, buying trigger, and risk map",
-			"Review across active launch, docs, demo, or enablement work",
-			"Monthly working session plus proof-gap memo",
+			"Monthly working session with your core team",
+			"Developer adoption map: audience, trigger, friction, proof, and next action",
+			"Async input on active adoption decisions during the month",
+			"Shared memo with recommendations, tradeoffs, and owner suggestions",
 		],
 		boundaries: [
-			"Scoped monthly workstream",
-			"No campaign execution",
+			"Scoped monthly rhythm",
+			"No outsourced GTM or DevRel",
 			"Your team owns delivery",
 		],
-		cta: "Send adoption problem",
+		cta: "Email adoption problem",
 		href: contactHref,
 		featured: true,
 	},
 	{
-		name: "Launch Review Sprint",
-		price: "From £3,000",
-		label: "High urgency",
+		name: "Launch Partnership",
+		price: "£3,000 / month",
+		label: "High focus",
 		bestFor:
-			"A launch, repositioning, sales push, or major product update is already in motion and needs tighter scrutiny before the story reaches the market.",
+			"A launch, repositioning, category push, DevRel program, or sales motion needs tighter cross-functional direction while the market window is live.",
 		outcome:
-			"Fast feedback while the launch, repositioning, or sales push is still movable.",
+			"Keep the adoption strategy, technical narrative, education path, and sales or DevRel handoff aligned while the work is still movable.",
 		included: [
-			"Two 60-minute working sessions",
-			"Risk triage across the critical material",
-			"Priority evidence-gap memo and leadership-ready summary",
+			"Monthly private strategy session",
+			"Priority async input on active adoption questions",
+			"Cross-functional alignment session for product, marketing, DevRel, sales engineering, or engineering",
+			"Leadership-ready adoption recommendations",
 		],
 		boundaries: [
-			"Bounded sprint",
-			"Your team executes",
-			"No standing retainer",
+			"Bounded monthly scope",
+			"No campaign ownership",
+			"No fractional team replacement",
 		],
-		cta: "Send sprint problem",
-		href: "mailto:david@rawkode.academy?subject=Launch%20Review%20Sprint&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Launch%20Review%20Sprint%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0AThe%20adoption%20risk%20to%20review%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0ALinks%2C%20if%20useful%3A",
+		cta: "Email launch problem",
+		href: "mailto:david@rawkode.academy?subject=Launch%20Partnership&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Launch%20Partnership%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0AUpcoming%20launch%2C%20repositioning%2C%20sales%20push%2C%20or%20DevRel%20motion%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A",
 	},
 ];
 
 const inspectAreas = [
 	{
-		title: "Quickstart truth",
-		body: "Does the first install expose the adoption blockers, or hide CRDs, IAM, egress, tenancy, state, and failure modes?",
+		title: "Adoption strategy",
+		body: "Who needs to care, what belief needs to change, what friction blocks adoption, and what your team should do next.",
 	},
 	{
-		title: "Trust boundary",
-		body: "Can evaluators see control plane, data plane, credentials, telemetry, data retention, SaaS/self-hosted boundaries, and on-call ownership?",
+		title: "Technical narrative",
+		body: "Turn architecture, tradeoffs, and product depth into a story that developers, platform teams, and technical buyers can follow.",
 	},
 	{
-		title: "Demo reproducibility",
-		body: "Can a real team reproduce, upgrade, roll back, observe, and operate the demo in its own environment without a guided happy path?",
+		title: "Developer education",
+		body: "Shape docs, demos, tutorials, learning paths, and examples around the real journey from curiosity to evaluation to internal recommendation.",
 	},
 	{
-		title: "Migration bet",
-		body: "What changes in the current stack, what breaks, how long migration takes, and which success metric proves the move worked?",
+		title: "Sales enablement",
+		body: "Help sales engineering and GTM teams explain technical value without flattening the product into claims practitioners will reject.",
 	},
 	{
-		title: "Operational proof",
-		body: "Are auth, RBAC, observability, scaling, upgrade, rollback, privacy, data movement, and failure recovery strong enough for evaluation?",
+		title: "DevRel direction",
+		body: "Decide what DevRel should own, which developer behaviors matter, and how community, education, and product feedback should connect.",
 	},
 	{
-		title: "Cross-team handoff",
-		body: "Can the teams shipping and selling the product answer the same objection with the same proof?",
+		title: "Cross-team alignment",
+		body: "Get product, marketing, DevRel, sales engineering, and engineering working from the same adoption story and the same technical reality.",
 	},
 ];
 
 const triggers = [
-	"A launch budget is about to move and the technical claim still feels thin.",
-	"Docs explain installation but not evaluation, migration, or operation.",
-	"The demo is impressive to insiders but does not change buyer confidence.",
-	"DevRel activity is growing but adoption behavior is not changing.",
-	"Sales needs a sharper technical story than the homepage gives them.",
-	"A category or repositioning claim needs to survive a skeptical evaluator.",
+	"You are launching and the story is not turning technical interest into adoption.",
+	"Your team knows the product is strong, but developers are not seeing why it matters.",
+	"Docs and demos explain features but do not help teams evaluate, recommend, or adopt.",
+	"DevRel or community activity is busy, but nobody agrees what it should change.",
+	"Sales conversations stall because technical buyers cannot see fit, migration path, or operational reality.",
+	"Product, marketing, DevRel, and sales engineering are telling different versions of the story.",
 ];
 
 const workExamples = [
 	{
-		title: "Launch claims",
-		body: "Claims that sound impressive but do not prove operational value, migration value, or a clear reason to change the current stack.",
+		title: "Positioning and category",
+		body: "Clarify who the product is for, what adoption moment matters, and which claim deserves to lead.",
 	},
 	{
-		title: "Docs paths",
-		body: "Docs that install the product but fail the evaluation, migration, security, tenancy, upgrade, and day-two ownership questions.",
+		title: "Developer journey",
+		body: "Map the path from first interest to hands-on evaluation, internal recommendation, and repeated use.",
 	},
 	{
-		title: "Demos and enablement",
-		body: "Demos and sales narratives that work on stage but collapse under platform, security, SRE, or AI infrastructure objections.",
+		title: "Team handoff",
+		body: "Make sure product, marketing, DevRel, sales engineering, and engineering can explain the same value without pretending to be the same function.",
 	},
 ];
 ---
 
 <Page
 	title="Partnerships"
-	description="Cloud-native and DevTool SaaS partnerships for teams improving positioning, launches, docs, demos, DevRel, and technical trust."
+	description="Cloud-native and DevTool partnerships for teams improving developer adoption across product, marketing, DevRel, sales engineering, and engineering."
 >
 	<FAQJsonLD questions={faqs} slot="extra-head" />
 
 	<main class="partnerships-page">
 		<section class="partnerships-hero" aria-labelledby="partnerships-title">
-			<p class="partnerships-kicker">Partnerships for DevTools and infrastructure companies</p>
+			<p class="partnerships-kicker">Partnerships for DevTools and infrastructure teams</p>
 			<div class="partnerships-hero__grid">
 				<div class="partnerships-hero__copy">
-					<h1 id="partnerships-title">Give developers and platform teams proof your product is worth adopting.</h1>
+					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
 					<p>
-						Bring the launch claim, docs, demo, or architecture proof. We review it like the people who must run, secure, and defend it, then work alongside your marketing, product, DevRel, sales engineering, and technical teams. They keep ownership; we expose what skeptical operators will question before spend moves.
+						Rawkode works alongside your marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
 					</p>
 					<p class="partnerships-hero__trigger">
-						Use this before the plan becomes expensive to unwind.
+						Your team keeps execution. We bring practitioner signal, strategic critique, and cloud-native judgement before the spend hardens.
 					</p>
 					<div class="partnerships-actions">
-						<a class="partnerships-button" href={contactHref}>Send proof to review</a>
-						<a class="partnerships-link" href="#packages">See review options</a>
+						<a class="partnerships-button" href={contactHref}>Email the adoption problem</a>
+						<a class="partnerships-link" href="#packages">See partnership options</a>
 					</div>
 				</div>
 			</div>
@@ -190,10 +191,10 @@ const workExamples = [
 
 		<section id="inspect" class="partnerships-section partnerships-section--inspect" aria-labelledby="inspect-title">
 			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">What we inspect</p>
-				<h2 id="inspect-title">Where technical evaluators lose confidence.</h2>
+				<p class="partnerships-kicker">Where we help</p>
+				<h2 id="inspect-title">Make adoption clearer across the teams already doing the work.</h2>
 				<p>
-					This is not generic brand feedback or infrastructure certification. Bring architecture notes, docs paths, demos, operational constraints, ownership proof, and the claims your team is already making.
+					The work is strategy, signal, and cross-team clarity: what developers need to understand, believe, try, and repeat before adoption moves.
 				</p>
 			</div>
 			<div class="partnerships-inspection-list">
@@ -212,9 +213,9 @@ const workExamples = [
 		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Partnership paths</p>
-				<h2 id="packages-title">Pick the review depth before the next expensive move.</h2>
+				<h2 id="packages-title">Choose the monthly rhythm that matches the adoption problem.</h2>
 				<p>
-					Start with an audit for one narrow decision. Use the monthly partnership when several teams need to align. Use a sprint when launch timing needs tighter pressure.
+					No annual lock-in. No fractional DevRel role. No content treadmill. Use the partnership while outside signal is valuable, then stop before the next billing cycle.
 				</p>
 			</div>
 			<div class="partnerships-package-grid">
@@ -248,7 +249,7 @@ const workExamples = [
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="triggers-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Good fit</p>
-				<h2 id="triggers-title">Bring the work when the next move is expensive.</h2>
+				<h2 id="triggers-title">Use this when adoption is the problem, not output volume.</h2>
 			</div>
 			<ul class="partnerships-trigger-list">
 				{triggers.map((trigger) => <li>{trigger}</li>)}
@@ -258,7 +259,7 @@ const workExamples = [
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="proof-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Why Rawkode</p>
-				<h2 id="proof-title">Public work where infrastructure has to prove itself.</h2>
+				<h2 id="proof-title">Built from years of public practitioner work.</h2>
 			</div>
 			<div class="partnerships-work-grid">
 				<article class="partnerships-work">
@@ -270,18 +271,18 @@ const workExamples = [
 					<p><a href="/shows/klustered">Public Kubernetes failure-mode triage under pressure</a>, with teams working through broken clusters, operational constraints, and real debugging paths.</p>
 				</article>
 				<article class="partnerships-work">
-					<h3>Courses and output</h3>
-					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> plus partnership outputs that name the risk, affected evaluator, blocked decision, proof needed, and owner recommendation.</p>
+					<h3>Courses and education</h3>
+					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> that shows how developers learn infrastructure, where they get stuck, and what they need before a tool becomes part of their workflow.</p>
 				</article>
 			</div>
 		</section>
 
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="examples-title">
 			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Failure points</p>
-				<h2 id="examples-title">What gets torn apart.</h2>
+				<p class="partnerships-kicker">Adoption work</p>
+				<h2 id="examples-title">What gets clearer.</h2>
 				<p>
-					The output is not a slide deck that sits in a folder. It is a set of decisions your team can use before launch, docs, demos, sales enablement, or DevRel spend.
+					The partnership should make the next move easier for the people already responsible for product, marketing, DevRel, sales engineering, and engineering.
 				</p>
 			</div>
 			<div class="partnerships-work-grid">
@@ -302,18 +303,18 @@ const workExamples = [
 			<div class="partnerships-process">
 				<article>
 					<span>01</span>
-					<h3>Email the brief</h3>
-					<p>Company, category, target technical evaluator, team stakeholders, deadline, docs, demos, architecture notes, enablement material, and links if they help.</p>
+					<h3>Email the problem</h3>
+					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, upcoming budget decision, and links if they help.</p>
 				</article>
 				<article>
 					<span>02</span>
 					<h3>Get a fit reply</h3>
-					<p>David will say whether this fits an audit, monthly partnership, sprint, or no fit.</p>
+					<p>David will say whether this fits a signal, adoption, or launch partnership, or whether it is not a good fit.</p>
 				</article>
 				<article>
 					<span>03</span>
-					<h3>Review the decision</h3>
-					<p>We work with your team on the proof, story, docs, demo, objections, and next actions.</p>
+					<h3>Work the adoption problem</h3>
+					<p>We work with your team on strategy, narrative, education, proof, objections, team alignment, and next actions.</p>
 				</article>
 			</div>
 		</section>
@@ -337,9 +338,9 @@ const workExamples = [
 			<p class="partnerships-kicker">Start here</p>
 			<h2 id="final-title">Email the adoption problem before the spend is committed.</h2>
 			<p>
-				Rough context is enough: product, target technical evaluator, decision to review, timing, docs, demos, architecture notes, enablement material, and links if useful.
+				Rough context is enough: product, target developers, team stakeholders, adoption challenge, upcoming launch or budget decision, and links if useful.
 			</p>
-			<a class="partnerships-button" href={contactHref}>Send proof to review</a>
+			<a class="partnerships-button" href={contactHref}>Email the adoption problem</a>
 		</section>
 	</main>
 </Page>
