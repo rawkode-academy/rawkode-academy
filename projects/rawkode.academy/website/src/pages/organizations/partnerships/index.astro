@@ -60,7 +60,6 @@ const packages = [
 			"Practitioner signal on developer adoption, DevRel, docs, demos, positioning, or launch direction",
 			"Monthly memo with themes, recommendations, and next decisions",
 		],
-		boundaries: ["No private delivery team", "No custom content production", "Your team owns execution"],
 		cta: "Email David",
 		href: "mailto:david@rawkode.academy?subject=Signal%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AUseful%20links%3A",
 	},
@@ -77,11 +76,6 @@ const packages = [
 			"Developer adoption map: audience, trigger, friction, proof, and next action",
 			"Async input on active adoption decisions during the month",
 			"Shared memo with recommendations, tradeoffs, and owner suggestions",
-		],
-		boundaries: [
-			"Scoped monthly rhythm",
-			"No outsourced GTM or DevRel",
-			"Your team owns delivery",
 		],
 		cta: "Email David",
 		href: contactHref,
@@ -100,11 +94,6 @@ const packages = [
 			"Priority async input on active adoption questions",
 			"Cross-functional alignment session for product, marketing, DevRel, sales engineering, or engineering",
 			"Leadership-ready adoption recommendations",
-		],
-		boundaries: [
-			"Bounded monthly scope",
-			"No campaign ownership",
-			"No fractional team replacement",
 		],
 		cta: "Email David",
 		href: "mailto:david@rawkode.academy?subject=Launch%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Launch%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0AUpcoming%20launch%2C%20repositioning%2C%20sales%20push%2C%20or%20DevRel%20motion%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A",
@@ -214,41 +203,36 @@ const workExamples = [
 			</div>
 		</section>
 
-		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Partnership paths</p>
-				<h2 id="packages-title">Pick the partnership your team needs now.</h2>
-				<p>
-					Month-to-month help for adoption strategy, technical narrative, developer education, DevRel direction, launch readiness, and sales handoff. No annual lock-in, no fractional DevRel role, no content treadmill.
-				</p>
-			</div>
-			<div class="partnerships-package-grid">
-				{packages.map((pkg) => (
-					<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
-						<div class="partnerships-package__top">
-							<p class="partnerships-package__label">{pkg.label}</p>
-							<h3>{pkg.name}</h3>
-							<p class="partnerships-package__price">{pkg.price}</p>
-							<a class="partnerships-button" href={pkg.href}>{pkg.cta}</a>
-						</div>
-						<div class="partnerships-package__summary">
-							<p>{pkg.bestFor}</p>
-							<p class="partnerships-package__outcome">{pkg.outcome}</p>
-						</div>
-						<div>
-							<ul class="partnerships-package__included">
-								{pkg.included.map((item) => <li>{item}</li>)}
-							</ul>
-						</div>
-						<div class="partnerships-package__boundary-group" aria-label={`${pkg.name} boundaries`}>
-							<ul class="partnerships-package__boundaries">
-								{pkg.boundaries.map((item) => <li>{item}</li>)}
-							</ul>
-						</div>
-					</article>
-				))}
-			</div>
-		</section>
+			<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
+				<div class="partnerships-section__header">
+					<p class="partnerships-kicker">Partnership paths</p>
+					<h2 id="packages-title">Pick the partnership your team needs now.</h2>
+					<p>
+						Month-to-month help for adoption strategy, technical narrative, developer education, DevRel direction, launch readiness, and sales handoff, matched to how much outside signal your team needs.
+					</p>
+				</div>
+					<div class="partnerships-package-grid">
+						{packages.map((pkg) => (
+							<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
+								<div class="partnerships-package__top">
+									<p class="partnerships-package__label">{pkg.label}</p>
+									<h3>{pkg.name}</h3>
+									<p class="partnerships-package__price">{pkg.price}</p>
+									<a class="partnerships-button" href={pkg.href}>{pkg.cta}</a>
+								</div>
+								<div class="partnerships-package__summary">
+									<p>{pkg.bestFor}</p>
+									<p class="partnerships-package__outcome">{pkg.outcome}</p>
+							</div>
+							<div>
+								<ul class="partnerships-package__included">
+									{pkg.included.map((item) => <li>{item}</li>)}
+								</ul>
+							</div>
+						</article>
+					))}
+				</div>
+			</section>
 
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="triggers-title">
 			<div class="partnerships-section__header">
@@ -620,28 +604,6 @@ const workExamples = [
 		background: var(--partnerships-accent);
 	}
 
-	.partnerships-package__boundaries {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.45rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.partnerships-package__boundaries li {
-		border: 1px solid var(--partnerships-line);
-		border-radius: 999px;
-		color: var(--partnerships-muted);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		line-height: 1;
-		padding: 0.42rem 0.55rem;
-		text-transform: uppercase;
-	}
-
 	.partnerships-work,
 	.partnerships-process article {
 		padding: 1rem;
@@ -811,10 +773,6 @@ const workExamples = [
 			gap: 1.25rem;
 			align-items: start;
 			padding: 1.15rem;
-		}
-
-		.partnerships-package__boundary-group {
-			grid-column: 1 / -1;
 		}
 
 		.partnerships-process {
