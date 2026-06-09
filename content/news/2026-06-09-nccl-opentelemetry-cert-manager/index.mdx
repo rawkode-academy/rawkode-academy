@@ -1,0 +1,48 @@
+---
+title: "NCCL EP, OpenTelemetry Collector, and cert-manager ship runtime changes"
+description: "NVIDIA published NCCL EP v0.1.0 for MoE expert-parallel communication, OpenTelemetry Collector v0.154.0 tightened builder behavior and queue config handling, and cert-manager v1.21.0-alpha.1 added Gateway API and issuer fixes."
+publishedAt: 2026-06-09
+authors:
+  - rawkode
+technologies:
+  - opentelemetry
+  - cert-manager
+---
+
+Three fresh releases landed in the last 24 hours across AI/HPC communication, telemetry collection, and certificate automation.
+
+## NCCL EP v0.1.0 targets MoE expert-parallel communication
+
+NVIDIA published NCCL EP v0.1.0 on June 8 as an NCCL API extension for Mixture-of-Experts communication. It adds dispatch and combine primitives for Expert Parallelism across distributed GPU systems on top of NCCL Device API LSA and GIN operations.
+
+The release changes EP tensor memory ownership to caller-managed allocations, separates handle initialization from routing updates for CUDA Graph-compatible data paths, lets users set NCCL EP SM usage, associates EP tensors with NCCL Windows for zero-copy paths, and adds active-rank masks so failed ranks can be excluded without aborting. It also moves HT mode to JIT compilation, adds Multi-node NVLINK support, removes rank-count limits in LSA teams, and removes CUDA IPC dependencies by migrating to NCCL infrastructure.
+
+For teams serving MoE models, the concrete change is a communication path built around dispatch and combine rather than treating expert routing as generic collectives.
+
+**Source:** [NVIDIA NCCL EP v0.1.0 release](https://github.com/NVIDIA/nccl/releases/tag/nccl-ep-v0.1.0) - June 8, 2026
+
+---
+
+## OpenTelemetry Collector v0.154.0 makes builder skip behavior real
+
+OpenTelemetry Collector released v1.60.0/v0.154.0 on June 8. The user-visible breaking change fixes `ocb --skip-get-modules` so it no longer regenerates `go.mod`, matching the builder flag contract.
+
+The release adds an `include_insecure_cipher_suites` config option in `configtls`, with insecure suites disabled by default, and adds `ExposedHeaders` to HTTP CORS config. It also fixes a collector startup panic when `sending_queue::sizer` is configured while batching is disabled.
+
+For collector distribution maintainers, the builder change matters because the flag now leaves existing module files untouched.
+
+**Source:** [OpenTelemetry Collector v1.60.0/v0.154.0 release](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.154.0) - June 8, 2026
+
+---
+
+## cert-manager v1.21.0-alpha.1 adds Gateway API and issuer plumbing
+
+cert-manager published v1.21.0-alpha.1 on June 8 as a testing-only pre-release. It adds Venafi OAuth token request observability plus an `AuthFailed` Issuer condition reason, a controller flag to propagate Helm `global.commonLabels` to ACME HTTP-01 solver Pods, Services, Ingresses, and Gateway API HTTPRoutes, and Gateway API options for ignored TLS listeners and additional listener protocols.
+
+Bug fixes include DNS issuer secret validation before readiness, missing issuer-finalizer RBAC for order controller owner references, namespace-scoped metrics collector startup behavior, a Venafi TPP signing regression, 30-second negative caching for CRD-missing discovery in the `certificateRequestApproval` webhook, and an infinite re-issuance loop when an issuer returns an already expired certificate.
+
+This is not an upgrade target, but it is a useful preview of where the 1.21 line is tightening issuer diagnostics and Gateway API automation.
+
+**Source:** [cert-manager v1.21.0-alpha.1 release](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.0-alpha.1) - June 8, 2026
+
+---
