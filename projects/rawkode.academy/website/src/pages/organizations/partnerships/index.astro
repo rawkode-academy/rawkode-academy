@@ -742,7 +742,7 @@ const workExamples = [
 		}
 	}
 
-	@media (min-width: 760px) {
+	@media (min-width: 1100px) {
 		.partnerships-section--inspect .partnerships-section__header {
 			display: grid;
 			gap: 1rem 2rem;
@@ -784,11 +784,6 @@ const workExamples = [
 			max-width: 48rem;
 		}
 
-		.partnerships-package-grid {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-			align-items: stretch;
-		}
-
 		.partnerships-package {
 			padding: 1.15rem;
 		}
@@ -796,6 +791,13 @@ const workExamples = [
 		.partnerships-work-grid,
 		.partnerships-process {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	@media (min-width: 1180px) {
+		.partnerships-package-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			align-items: stretch;
 		}
 	}
 </style>
