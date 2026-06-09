@@ -5,7 +5,7 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const contactHref =
-	"mailto:david@rawkode.academy?subject=Decision%20brief%20request&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+	"mailto:david@rawkode.academy?subject=Proof%20to%20review&body=Adoption%20problem%3A%0D%0ACompany%2Fcategory%3A%0D%0APreferred%20review%20option%2C%20if%20known%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
 
 const faqs = [
 	{
@@ -53,14 +53,15 @@ const packages = [
 		bestFor:
 			"A launch claim, docs journey, demo flow, sales narrative, or DevRel bet needs a hard technical read before budget moves.",
 		outcome:
-			"Know what buyers will question, what proof is missing, and what to keep, change, prove, or stop.",
+			"Know what buyers will question, what is missing, and what your team should keep, change, or stop.",
 		included: [
 			"One adoption decision",
-			"Technical objections and missing evidence",
-			"60-minute readout plus written P0/P1 actions",
+			"Ranked proof-gap memo",
+			"Risk, affected evaluator, blocked decision, and proof needed",
+			"60-minute readout with highest-priority actions and owner recommendations",
 		],
 		boundaries: ["Fixed scope", "No implementation", "No rewrites"],
-		cta: "Email audit brief",
+		cta: "Send audit problem",
 		href: "mailto:david@rawkode.academy?subject=Adoption%20Risk%20Audit&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Adoption%20Risk%20Audit%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AThe%20one%20adoption%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A",
 	},
 	{
@@ -68,20 +69,21 @@ const packages = [
 		price: "From £2,000 / month",
 		label: "Default",
 		bestFor:
-			"Marketing, product, DevRel, sales engineering, and technical owners need a monthly outside read across launch, docs, demo, enablement, or positioning work.",
+			"Cross-functional teams need a monthly outside read across launch, docs, demo, enablement, or positioning work.",
 		outcome:
-			"Find adoption risk early, align the story across teams, and leave each month with practical decisions to ship.",
+			"Spot buyer objections early, align the story across teams, and leave each month with practical decisions to ship.",
 		included: [
+			"One named adoption decision or launch workstream per month",
 			"Evaluator, buying trigger, and risk map",
 			"Review across active launch, docs, demo, or enablement work",
-			"Monthly working session plus decision memo",
+			"Monthly working session plus proof-gap memo",
 		],
 		boundaries: [
-			"Month-to-month",
+			"Scoped monthly workstream",
 			"No campaign execution",
 			"Your team owns delivery",
 		],
-		cta: "Email decision brief",
+		cta: "Send adoption problem",
 		href: contactHref,
 		featured: true,
 	},
@@ -96,14 +98,14 @@ const packages = [
 		included: [
 			"Two 60-minute working sessions",
 			"Risk triage across the critical material",
-			"Priority written feedback and leadership-ready summary",
+			"Priority evidence-gap memo and leadership-ready summary",
 		],
 		boundaries: [
 			"Bounded sprint",
 			"Your team executes",
 			"No standing retainer",
 		],
-		cta: "Email sprint brief",
+		cta: "Send sprint problem",
 		href: "mailto:david@rawkode.academy?subject=Launch%20Review%20Sprint&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Launch%20Review%20Sprint%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0AThe%20adoption%20risk%20to%20review%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0ALinks%2C%20if%20useful%3A",
 	},
 ];
@@ -131,7 +133,7 @@ const inspectAreas = [
 	},
 	{
 		title: "Cross-team handoff",
-		body: "Can marketing, product, DevRel, sales engineering, and technical owners answer the same objection with the same proof?",
+		body: "Can the teams shipping and selling the product answer the same objection with the same proof?",
 	},
 ];
 
@@ -158,21 +160,6 @@ const workExamples = [
 		body: "Demos and sales narratives that work on stage but collapse under platform, security, SRE, or AI infrastructure objections.",
 	},
 ];
-
-const heroDecisionBriefRows = [
-	{
-		label: "Budget at risk",
-		text: "Launch, docs, demo, DevRel, or sales enablement spend.",
-	},
-	{
-		label: "What stalls",
-		text: "Trust boundary, migration cost, rollback path, or failure ownership.",
-	},
-	{
-		label: "Leave with",
-		text: "Risk map, proof gaps, P0/P1 fixes, and bets to pause.",
-	},
-];
 ---
 
 <Page
@@ -183,30 +170,21 @@ const heroDecisionBriefRows = [
 
 	<main class="partnerships-page">
 		<section class="partnerships-hero" aria-labelledby="partnerships-title">
-			<p class="partnerships-kicker">Partnerships for cloud-native and DevTool SaaS teams</p>
+			<p class="partnerships-kicker">Partnerships for infrastructure products under operator scrutiny</p>
 			<div class="partnerships-hero__grid">
 				<div class="partnerships-hero__copy">
-					<h1 id="partnerships-title">Stop technical buyers stalling on claims you cannot prove yet.</h1>
+					<h1 id="partnerships-title">Pressure-test the proof operators need before they trust the product.</h1>
 					<p>
-						We work with your marketing, product, DevRel, sales engineering, and technical teams to pressure-test the claims, docs, demos, and proof buyers use to decide. Your team keeps execution; we make the adoption risks obvious before budget moves.
+						Bring the launch claim, docs, demo, or architecture proof. We review it like the people who must run, secure, and defend it, then work alongside your marketing, product, DevRel, sales engineering, and technical teams. They keep ownership; we expose what skeptical operators will question before spend moves.
+					</p>
+					<p class="partnerships-hero__trigger">
+						Use this before the plan becomes expensive to unwind.
 					</p>
 					<div class="partnerships-actions">
-						<a class="partnerships-button" href={contactHref}>Email decision brief</a>
-						<a class="partnerships-button partnerships-button--secondary" href="#packages">Compare packages</a>
+						<a class="partnerships-button" href={contactHref}>Send proof to review</a>
+						<a class="partnerships-link" href="#packages">See review options</a>
 					</div>
 				</div>
-				<aside class="partnerships-hero-panel" aria-label="Example partnership decision brief">
-					<p class="partnerships-trigger__label">Decision brief</p>
-					<h2 class="partnerships-hero-panel__title">Adoption risk before budget moves</h2>
-					<div class="partnerships-hero-panel__checks">
-						{heroDecisionBriefRows.map((point) => (
-							<div class="partnerships-hero-panel__check">
-								<span>{point.label}</span>
-								<p>{point.text}</p>
-							</div>
-						))}
-					</div>
-				</aside>
 			</div>
 		</section>
 
@@ -280,20 +258,20 @@ const heroDecisionBriefRows = [
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="proof-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Why Rawkode</p>
-				<h2 id="proof-title">Years of making infrastructure claims prove themselves in public.</h2>
+				<h2 id="proof-title">Public work where infrastructure has to prove itself.</h2>
 			</div>
 			<div class="partnerships-work-grid">
 				<article class="partnerships-work">
-					<h3>90+ technologies covered</h3>
-					<p>Kubernetes, observability, identity, platform engineering, WebAssembly, security, data, AI infrastructure, and developer tooling.</p>
+					<h3>Rawkode Live</h3>
+					<p><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> across Kubernetes, observability, identity, platform engineering, security, data, AI infrastructure, and developer tooling.</p>
 				</article>
 				<article class="partnerships-work">
-					<h3>Public technical judgement</h3>
-					<p>Live builds, maintainer sessions, articles, courses, and hands-on demos make technical trade-offs visible before they become sales objections.</p>
+					<h3>Klustered</h3>
+					<p><a href="/shows/klustered">Public Kubernetes failure-mode triage under pressure</a>, with teams working through broken clusters, operational constraints, and real debugging paths.</p>
 				</article>
 				<article class="partnerships-work">
-					<h3>Useful to operators</h3>
-					<p>The output helps the teams shipping the change and the technical owners who have to defend adoption: marketing, product, DevRel, sales engineering, platform, security, and leadership.</p>
+					<h3>Courses and output</h3>
+					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> plus partnership outputs that name the risk, affected evaluator, blocked decision, proof needed, and owner recommendation.</p>
 				</article>
 			</div>
 		</section>
@@ -361,7 +339,7 @@ const heroDecisionBriefRows = [
 			<p>
 				Rough context is enough: product, target technical evaluator, decision to review, timing, docs, demos, architecture notes, enablement material, and links if useful.
 			</p>
-			<a class="partnerships-button" href={contactHref}>Email decision brief</a>
+			<a class="partnerships-button" href={contactHref}>Send proof to review</a>
 		</section>
 	</main>
 </Page>
@@ -395,8 +373,7 @@ const heroDecisionBriefRows = [
 	}
 
 	.partnerships-kicker,
-	.partnerships-package__label,
-	.partnerships-trigger__label {
+	.partnerships-package__label {
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 		font-size: 0.7rem;
 		font-weight: 700;
@@ -422,11 +399,9 @@ const heroDecisionBriefRows = [
 		line-height: 0.96;
 		margin: 0;
 		max-width: 15ch;
-		overflow-wrap: anywhere;
 	}
 
 	.partnerships-hero__copy > p,
-	.partnerships-hero-panel p,
 	.partnerships-section__header p,
 	.partnerships-package p,
 	.partnerships-inspection-item p,
@@ -444,6 +419,12 @@ const heroDecisionBriefRows = [
 		font-size: clamp(1rem, 2.2vw, 1.18rem);
 		margin-top: 0.9rem;
 		max-width: 41rem;
+	}
+
+	.partnerships-hero__trigger {
+		color: var(--partnerships-ink) !important;
+		font-weight: 680;
+		margin-top: 0.75rem !important;
 	}
 
 	.partnerships-actions {
@@ -478,13 +459,24 @@ const heroDecisionBriefRows = [
 		border-color: var(--partnerships-accent);
 	}
 
-	.partnerships-button--secondary {
-		background: transparent;
+	.partnerships-link {
+		align-self: flex-start;
 		color: var(--partnerships-ink);
-		border-color: var(--partnerships-line);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 750;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.22em;
+		text-transform: uppercase;
 	}
 
-	.partnerships-hero-panel,
+	.partnerships-link:hover {
+		color: var(--partnerships-accent);
+	}
+
 	.partnerships-work,
 	.partnerships-process article,
 	.partnerships-package,
@@ -492,53 +484,6 @@ const heroDecisionBriefRows = [
 		border: 1px solid var(--partnerships-line);
 		border-radius: 6px;
 		background: var(--partnerships-paper-deep);
-	}
-
-	.partnerships-hero-panel {
-		align-self: start;
-		display: none;
-		gap: 0.6rem;
-		order: 2;
-		padding: clamp(0.85rem, 1.6vw, 1rem);
-	}
-
-	.partnerships-hero-panel__title {
-		color: var(--partnerships-ink) !important;
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: clamp(1.05rem, 3vw, 1.35rem);
-		font-weight: 760;
-		letter-spacing: 0;
-		line-height: 1.05;
-		margin: 0;
-		max-width: 18ch;
-	}
-
-	.partnerships-hero-panel__checks {
-		display: grid;
-		gap: 0.45rem;
-	}
-
-	.partnerships-hero-panel__check {
-		border-top: 1px solid var(--partnerships-line);
-		display: grid;
-		gap: 0.18rem;
-		padding-top: 0.45rem;
-	}
-
-	.partnerships-hero-panel__check span {
-		color: var(--partnerships-accent);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.68rem;
-		font-weight: 800;
-		letter-spacing: 0.1em;
-		line-height: 1.3;
-		text-transform: uppercase;
-	}
-
-	.partnerships-hero-panel__check p {
-		color: var(--partnerships-ink) !important;
-		font-size: 0.86rem !important;
-		line-height: 1.3 !important;
 	}
 
 	.partnerships-section {
@@ -679,13 +624,20 @@ const heroDecisionBriefRows = [
 		text-transform: uppercase;
 	}
 
-	.partnerships-work,
-	.partnerships-process article {
-		padding: 1rem;
-		display: flex;
+		.partnerships-work,
+		.partnerships-process article {
+			padding: 1rem;
+			display: flex;
 		flex-direction: column;
-		gap: 0.55rem;
-	}
+			gap: 0.55rem;
+		}
+
+		.partnerships-work a {
+			color: var(--partnerships-ink);
+			text-decoration: underline;
+			text-decoration-thickness: 1px;
+			text-underline-offset: 0.18em;
+		}
 
 	.partnerships-section--inspect .partnerships-section__header {
 		margin-bottom: 1.35rem;
@@ -790,10 +742,6 @@ const heroDecisionBriefRows = [
 	}
 
 	@media (min-width: 760px) {
-		.partnerships-hero-panel {
-			display: grid;
-		}
-
 		.partnerships-section--inspect .partnerships-section__header {
 			display: grid;
 			gap: 1rem 2rem;
@@ -820,7 +768,6 @@ const heroDecisionBriefRows = [
 	}
 
 	@media (min-width: 900px) {
-		.partnerships-hero__grid,
 		.partnerships-section--split {
 			display: grid;
 			grid-template-columns: minmax(0, 0.9fr) minmax(18rem, 0.55fr);
@@ -828,8 +775,12 @@ const heroDecisionBriefRows = [
 			align-items: start;
 		}
 
-		.partnerships-hero-panel {
-			margin-top: 0.2rem;
+	.partnerships-hero h1 {
+		max-width: 16ch;
+	}
+
+		.partnerships-hero__copy > p {
+			max-width: 48rem;
 		}
 
 		.partnerships-package-grid {
