@@ -141,7 +141,7 @@ async function generateNavigationItems(
 			title: "For Organizations",
 			category: "Organizations",
 			description:
-				"Developer adoption partnerships for cloud-native and DevTool teams reviewing practitioner proof, docs, demos, launches, and technical trust",
+				"Partnerships for cloud-native and DevTool teams reviewing technical buyer proof, docs, demos, launches, and sales enablement",
 			keywords: [
 				"partnerships",
 				"fit check",
@@ -161,7 +161,7 @@ async function generateNavigationItems(
 			title: "Partnership Fit Check",
 			category: "Organizations",
 			description:
-				"Send adoption context for a developer adoption partnership fit check",
+				"Email a partnership brief for a technical adoption fit check",
 			keywords: [
 				"fit check",
 				"adoption",
@@ -183,10 +183,10 @@ async function generateNavigationItems(
 		},
 		{
 			href: "/organizations/partnerships",
-			title: "Developer Adoption Partnerships",
+			title: "Partnerships",
 			category: "Organizations",
 			description:
-				"Developer adoption partnerships for cloud-native and DevTool teams with practitioner-risk in docs, demos, launches, technical proof, and sales enablement",
+				"Partnerships for cloud-native and DevTool teams with evaluation risk in docs, demos, launches, technical proof, and sales enablement",
 			keywords: [
 				"partnerships",
 				"practitioner proof",

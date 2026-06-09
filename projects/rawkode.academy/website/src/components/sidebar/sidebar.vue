@@ -40,7 +40,7 @@ const baseItems: RawNavItem[] = [
 		icon: Squares2X2Icon,
 	},
 	{
-		name: "Adoption Partnerships",
+		name: "Partnerships",
 		href: "/organizations/partnerships",
 		icon: RocketLaunchIcon,
 	},
