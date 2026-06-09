@@ -175,15 +175,19 @@ const workExamples = [
 			<div class="partnerships-hero__grid">
 				<div class="partnerships-hero__copy">
 					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
-					<p>
-						Rawkode works alongside your marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
-					</p>
-					<p class="partnerships-hero__trigger">
-						Your team keeps execution. We bring practitioner signal, strategic critique, and cloud-native judgement before the spend hardens.
-					</p>
-					<div class="partnerships-actions">
-						<a class="partnerships-button" href={contactHref}>Email David</a>
-						<a class="partnerships-link" href="#packages">View options</a>
+					<div class="partnerships-hero__body">
+						<p>
+							Rawkode works alongside your marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
+						</p>
+						<div class="partnerships-hero__next">
+							<p class="partnerships-hero__trigger">
+								Your team keeps execution. We bring practitioner signal, strategic critique, and cloud-native judgement before the spend hardens.
+							</p>
+							<div class="partnerships-actions">
+								<a class="partnerships-button" href={contactHref}>Email David</a>
+								<a class="partnerships-link" href="#packages">View options</a>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -213,9 +217,9 @@ const workExamples = [
 		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Partnership paths</p>
-				<h2 id="packages-title">Choose the monthly rhythm that matches the adoption problem.</h2>
+				<h2 id="packages-title">Pick the partnership your team needs now.</h2>
 				<p>
-					No annual lock-in. No fractional DevRel role. No content treadmill. Use the partnership while outside signal is valuable, then stop before the next billing cycle.
+					Month-to-month help for adoption strategy, technical narrative, developer education, DevRel direction, launch readiness, and sales handoff. No annual lock-in, no fractional DevRel role, no content treadmill.
 				</p>
 			</div>
 			<div class="partnerships-package-grid">
@@ -256,7 +260,7 @@ const workExamples = [
 			</ul>
 		</section>
 
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="proof-title">
+		<section class="partnerships-section partnerships-section--split partnerships-section--proof" aria-labelledby="proof-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Why Rawkode</p>
 				<h2 id="proof-title">Built from years of public practitioner work.</h2>
@@ -303,7 +307,7 @@ const workExamples = [
 			<div class="partnerships-process">
 				<article>
 					<span>01</span>
-					<h3>Email the problem</h3>
+					<h3>Email context</h3>
 					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, upcoming budget decision, and links if they help.</p>
 				</article>
 				<article>
@@ -313,7 +317,7 @@ const workExamples = [
 				</article>
 				<article>
 					<span>03</span>
-					<h3>Work the adoption problem</h3>
+					<h3>Work with your team</h3>
 					<p>We work with your team on strategy, narrative, education, proof, objections, team alignment, and next actions.</p>
 				</article>
 			</div>
@@ -361,10 +365,10 @@ const workExamples = [
 	.partnerships-hero,
 	.partnerships-section,
 	.partnerships-final {
-		max-width: 72rem;
+		max-width: 118rem;
 		margin: 0 auto;
-		padding-left: clamp(1rem, 4vw, 2rem);
-		padding-right: clamp(1rem, 4vw, 2rem);
+		padding-left: clamp(1rem, 3vw, 3rem);
+		padding-right: clamp(1rem, 3vw, 3rem);
 	}
 
 	.partnerships-hero {
@@ -393,16 +397,16 @@ const workExamples = [
 
 	.partnerships-hero h1 {
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: clamp(2.15rem, 6vw, 4.75rem);
+		font-size: clamp(2.15rem, 5.5vw, 6rem);
 		font-style: normal;
 		font-weight: 780;
 		letter-spacing: 0;
 		line-height: 0.96;
 		margin: 0;
-		max-width: 15ch;
+		max-width: 100%;
 	}
 
-	.partnerships-hero__copy > p,
+	.partnerships-hero__body p,
 	.partnerships-section__header p,
 	.partnerships-package p,
 	.partnerships-inspection-item p,
@@ -416,16 +420,20 @@ const workExamples = [
 		margin: 0;
 	}
 
-	.partnerships-hero__copy > p {
-		font-size: clamp(1rem, 2.2vw, 1.18rem);
+	.partnerships-hero__body {
+		display: grid;
+		gap: 0.85rem;
 		margin-top: 0.9rem;
-		max-width: 41rem;
+	}
+
+	.partnerships-hero__body > p {
+		font-size: clamp(1rem, 2.2vw, 1.18rem);
+		max-width: 66rem;
 	}
 
 	.partnerships-hero__trigger {
 		color: var(--partnerships-ink) !important;
 		font-weight: 680;
-		margin-top: 0.75rem !important;
 	}
 
 	.partnerships-actions {
@@ -433,6 +441,7 @@ const workExamples = [
 		flex-direction: column;
 		gap: 0.75rem;
 		margin-top: 1.3rem;
+		width: fit-content;
 	}
 
 	.partnerships-button {
@@ -462,12 +471,15 @@ const workExamples = [
 
 	.partnerships-link {
 		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
 		color: var(--partnerships-ink);
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		font-weight: 750;
 		letter-spacing: 0.08em;
 		line-height: 1.2;
+		min-height: 2.85rem;
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
 		text-underline-offset: 0.22em;
@@ -503,22 +515,23 @@ const workExamples = [
 		flex-direction: column;
 		gap: 0.65rem;
 		margin-bottom: 1.25rem;
+		max-width: none;
 	}
 
 	.partnerships-section h2,
 	.partnerships-final h2 {
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: clamp(1.65rem, 7vw, 3.1rem);
+		font-size: clamp(1.65rem, 6vw, 4rem);
 		font-style: normal;
 		font-weight: 760;
 		letter-spacing: 0;
 		line-height: 0.98;
 		margin: 0;
-		max-width: 14ch;
+		max-width: 20ch;
 	}
 
 	.partnerships-section__header p {
-		max-width: 40rem;
+		max-width: 58rem;
 	}
 
 	.partnerships-package-grid,
@@ -544,6 +557,10 @@ const workExamples = [
 		display: flex;
 		flex-direction: column;
 		gap: 0.3rem;
+	}
+
+	.partnerships-package__top .partnerships-button {
+		margin-top: 0.35rem;
 	}
 
 	.partnerships-package h3,
@@ -625,28 +642,42 @@ const workExamples = [
 		text-transform: uppercase;
 	}
 
-		.partnerships-work,
-		.partnerships-process article {
-			padding: 1rem;
-			display: flex;
+	.partnerships-work,
+	.partnerships-process article {
+		padding: 1rem;
+		display: flex;
 		flex-direction: column;
-			gap: 0.55rem;
-		}
+		gap: 0.55rem;
+	}
 
-		.partnerships-work a {
-			color: var(--partnerships-ink);
-			text-decoration: underline;
-			text-decoration-thickness: 1px;
-			text-underline-offset: 0.18em;
-		}
+	.partnerships-work a {
+		color: var(--partnerships-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.18em;
+	}
+
+	.partnerships-section--proof .partnerships-work-grid {
+		gap: 0;
+		grid-template-columns: 1fr;
+	}
+
+	.partnerships-section--proof .partnerships-work {
+		border-left: 0;
+		border-right: 0;
+		border-radius: 0;
+	}
+
+	.partnerships-section--proof .partnerships-work + .partnerships-work {
+		border-top: 0;
+	}
 
 	.partnerships-section--inspect .partnerships-section__header {
 		margin-bottom: 1.35rem;
-		max-width: none;
 	}
 
 	.partnerships-section--inspect .partnerships-section__header h2 {
-		max-width: 18ch;
+		max-width: 20ch;
 	}
 
 	.partnerships-inspection-list {
@@ -688,6 +719,10 @@ const workExamples = [
 		font-size: 0.72rem;
 		font-weight: 700;
 		color: var(--partnerships-accent);
+	}
+
+	.partnerships-process {
+		grid-template-columns: 1fr;
 	}
 
 	.partnerships-faq-list {
@@ -736,28 +771,12 @@ const workExamples = [
 			width: auto;
 		}
 
-		.partnerships-work-grid,
-		.partnerships-process {
+		.partnerships-work-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 
 	@media (min-width: 1100px) {
-		.partnerships-section--inspect .partnerships-section__header {
-			display: grid;
-			gap: 1rem 2rem;
-			grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
-		}
-
-		.partnerships-section--inspect .partnerships-section__header .partnerships-kicker {
-			grid-column: 1 / -1;
-		}
-
-		.partnerships-section--inspect .partnerships-section__header p {
-			align-self: end;
-			max-width: 36rem;
-		}
-
 		.partnerships-inspection-list {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			column-gap: 1.5rem;
@@ -768,36 +787,74 @@ const workExamples = [
 		}
 	}
 
-	@media (min-width: 900px) {
-		.partnerships-section--split {
+	@media (min-width: 1180px) {
+		.partnerships-section__header {
 			display: grid;
-			grid-template-columns: minmax(0, 0.9fr) minmax(18rem, 0.55fr);
-			gap: 2rem;
-			align-items: start;
+			gap: 1rem 3rem;
+			grid-template-columns: minmax(0, 0.85fr) minmax(22rem, 0.65fr);
+			margin-bottom: 1.75rem;
 		}
 
-	.partnerships-hero h1 {
-		max-width: 16ch;
-	}
+		.partnerships-section__header .partnerships-kicker {
+			grid-column: 1 / -1;
+		}
 
-		.partnerships-hero__copy > p {
-			max-width: 48rem;
+		.partnerships-section__header h2 {
+			max-width: none;
+		}
+
+		.partnerships-section__header p {
+			align-self: end;
+			max-width: 44rem;
+		}
+
+		.partnerships-hero__body {
+			grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.55fr);
+			gap: 2rem;
+			align-items: end;
+		}
+
+		.partnerships-hero h1 {
+			max-width: 100%;
+		}
+
+		.partnerships-hero__body > p {
+			max-width: 66rem;
 		}
 
 		.partnerships-package {
+			display: grid;
+			grid-template-columns: minmax(13rem, 0.45fr) minmax(0, 0.8fr) minmax(0, 1fr);
+			gap: 1.25rem;
+			align-items: start;
 			padding: 1.15rem;
 		}
 
-		.partnerships-work-grid,
-		.partnerships-process {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+		.partnerships-package__boundary-group {
+			grid-column: 1 / -1;
 		}
-	}
 
-	@media (min-width: 1180px) {
-		.partnerships-package-grid {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-			align-items: stretch;
+		.partnerships-process {
+			grid-template-columns: 1fr;
+		}
+
+		.partnerships-process article {
+			display: grid;
+			grid-template-columns: 3rem minmax(12rem, 0.35fr) minmax(0, 1fr);
+			gap: 1rem;
+			align-items: start;
+		}
+
+		.partnerships-section--proof .partnerships-work-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.partnerships-section--proof .partnerships-work {
+			display: grid;
+			grid-template-columns: minmax(12rem, 0.28fr) minmax(0, 1fr);
+			gap: 1.5rem;
+			align-items: start;
+			padding: 1.25rem 0;
 		}
 	}
 </style>
