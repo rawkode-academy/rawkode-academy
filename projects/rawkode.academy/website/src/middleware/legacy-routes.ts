@@ -1,4 +1,6 @@
+import { defineMiddleware } from "astro:middleware";
 import { resolveLegacyPersonRedirect } from "./legacy-person-redirects";
+
 type LegacyRouteResult =
 	| {
 			kind: "redirect";
@@ -10,12 +12,6 @@ type LegacyRouteResult =
 			status: 204;
 			headers: Record<string, string>;
 	  };
-
-type MiddlewareContext = {
-	url: URL;
-};
-
-type MiddlewareNext = () => Response | Promise<Response>;
 
 const PERMANENT_REDIRECTS = new Map<string, string>([
 	["/events", "/watch"],
@@ -75,10 +71,7 @@ export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {
 	return undefined;
 }
 
-export const legacyRoutesMiddleware = (
-	context: MiddlewareContext,
-	next: MiddlewareNext,
-) => {
+export const legacyRoutesMiddleware = defineMiddleware((context, next) => {
 	const result = resolveLegacyRoute(context.url);
 	if (!result) {
 		return next();
@@ -92,4 +85,4 @@ export const legacyRoutesMiddleware = (
 		status: result.status,
 		headers: result.headers,
 	});
-};
+});

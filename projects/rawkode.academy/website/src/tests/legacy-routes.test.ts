@@ -17,22 +17,26 @@ describe("legacy route resolver", () => {
 			status: 301,
 			location: "https://rawkode.academy/about",
 		});
-		expect(resolveLegacyRoute(new URL("https://rawkode.academy/metal"))).toEqual(
-			{
-				kind: "redirect",
-				status: 301,
-				location: "https://rawkode.academy/technology/equinix-metal",
-			},
-		);
 		expect(
-			resolveLegacyRoute(new URL("https://rawkode.academy/organizations/consulting")),
+			resolveLegacyRoute(new URL("https://rawkode.academy/metal")),
+		).toEqual({
+			kind: "redirect",
+			status: 301,
+			location: "https://rawkode.academy/technology/equinix-metal",
+		});
+		expect(
+			resolveLegacyRoute(
+				new URL("https://rawkode.academy/organizations/consulting"),
+			),
 		).toEqual({
 			kind: "redirect",
 			status: 301,
 			location: "https://rawkode.academy/organizations/partnerships",
 		});
 		expect(
-			resolveLegacyRoute(new URL("https://rawkode.academy/organizations/training/")),
+			resolveLegacyRoute(
+				new URL("https://rawkode.academy/organizations/training/"),
+			),
 		).toEqual({
 			kind: "redirect",
 			status: 301,
@@ -57,7 +61,9 @@ describe("legacy route resolver", () => {
 
 	it("permanently redirects legacy people slugs to GitHub-handle slugs", () => {
 		expect(
-			resolveLegacyRoute(new URL("https://rawkode.academy/people/adrian-mouat")),
+			resolveLegacyRoute(
+				new URL("https://rawkode.academy/people/adrian-mouat"),
+			),
 		).toEqual({
 			kind: "redirect",
 			status: 301,
@@ -75,7 +81,9 @@ describe("legacy route resolver", () => {
 			location: "https://rawkode.academy/people/askdba",
 		});
 		expect(
-			resolveLegacyRoute(new URL("https://rawkode.academy/people/marino-wijay")),
+			resolveLegacyRoute(
+				new URL("https://rawkode.academy/people/marino-wijay"),
+			),
 		).toEqual({
 			kind: "redirect",
 			status: 301,

@@ -4,24 +4,6 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactEmail = "david@rawkode.academy";
-
-const projectEmailBody = [
-	"Project name:",
-	"Project URL:",
-	"Maintainer names:",
-	"Why this project is useful to developers:",
-	"What you would like to show live:",
-	"Preferred timezone:",
-	"Good weeks for a session:",
-	"Recording or disclosure constraints:",
-].join("\n");
-
-const projectEmailHref = `mailto:${contactEmail}?${new URLSearchParams({
-	subject: "Rawkode Live project submission",
-	body: projectEmailBody,
-}).toString()}`;
-
 const stats = [
 	{ value: "100+", label: "Projects featured" },
 	{ value: "60-90", label: "Minute session" },
@@ -30,16 +12,16 @@ const stats = [
 
 const benefits = [
 	{
-		title: "Reach developers",
-		body: "Introduce your project to an audience already interested in developer tools, infrastructure, automation, and open source.",
+		title: "Show the real project",
+		body: "Show the project to developers who care about how infrastructure software is built, operated, and adopted.",
 	},
 	{
-		title: "Get useful feedback",
+		title: "Answer real questions",
 		body: "Talk through trade-offs, roadmap decisions, and adoption questions with people who understand the technical context.",
 	},
 	{
-		title: "Create a durable artifact",
-		body: "The recording gives your project a clear walkthrough you can share with contributors, users, and sponsors.",
+		title: "Leave a useful recording",
+		body: "The recording gives your project a clear walkthrough you can share with contributors, users, and community channels.",
 	},
 ];
 
@@ -67,6 +49,7 @@ const expectations = [
 	"You do not need to be the original creator, but you should be able to speak deeply about the project.",
 	"The session should be technical, practical, and honest about trade-offs.",
 	"Preparation matters. A focused demo beats a broad marketing walkthrough.",
+	"This is not paid placement, endorsement, lead generation, or company partnership access.",
 ];
 
 const faqItems = [
@@ -87,8 +70,7 @@ const faqItems = [
 	},
 	{
 		question: "Is there a cost to participate?",
-		answer:
-			"No. Featuring an open-source project on Rawkode Live is free.",
+		answer: "No. Featuring an open-source project on Rawkode Live is free.",
 	},
 	{
 		question: "What is the format of the session?",
@@ -108,7 +90,7 @@ const faqItems = [
 		lede="Bring your open-source project onto Rawkode Live for a practical walkthrough, maintainer conversation, and live technical Q&A."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#contact">Email your project</a>
+			<a class="editorial-button" href="mailto:david@rawkode.academy?subject=Share%20my%20open-source%20project&body=Project%20name%3A%0AProject%20URL%3A%0AMaintainers%3A%0AWhat%20you%20want%20to%20cover%3A%0AWhy%20this%20is%20useful%20for%20developers%3A">Email project details</a>
 			<a class="editorial-button editorial-button--secondary" href="#process">How it works</a>
 		</div>
 
@@ -189,23 +171,21 @@ const faqItems = [
 
 		<section id="contact" class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Contact</p>
-				<h2 class="editorial-section__title">Email your project</h2>
+				<p class="editorial-kicker">Email</p>
+				<h2 class="editorial-section__title">Email the project details</h2>
 				<p class="editorial-section__lede">
-					Send enough context to check fit. If the project is a good match, David will reply with the next available path.
+					Send the project, maintainers, topic, and why the session would help working developers. We will reply if it is a fit and coordinate timing by email. Commercial adoption review belongs on the company partnerships route.
 				</p>
 			</div>
-			<div class="share-contact">
-				<ul class="share-contact__fields">
-					<li>Project name and URL</li>
-					<li>Maintainers joining</li>
-					<li>What you want to show live</li>
-					<li>Preferred timezone and good weeks</li>
+			<div class="share-booking">
+				<h3>Include enough context to check fit</h3>
+				<ul class="editorial-list">
+					<li>Project name, URL, and maintainer contacts</li>
+					<li>The technical problem the project solves</li>
+					<li>The demo, architecture, or trade-offs you want to discuss</li>
+					<li>Any timing constraints around releases or community events</li>
 				</ul>
-				<a class="editorial-button" href={projectEmailHref}>Email David</a>
-				<p>
-					Or email <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
-				</p>
+				<a class="editorial-button" href="mailto:david@rawkode.academy?subject=Share%20my%20open-source%20project&body=Project%20name%3A%0AProject%20URL%3A%0AMaintainers%3A%0AWhat%20you%20want%20to%20cover%3A%0AWhy%20this%20is%20useful%20for%20developers%3A">Email project details</a>
 			</div>
 		</section>
 	</EditorialShell>
@@ -224,55 +204,21 @@ const faqItems = [
 		text-underline-offset: 0.2em;
 	}
 
-	.share-contact {
+	.share-booking {
+		display: grid;
+		gap: 1rem;
 		border: 1px solid var(--editorial-hairline);
 		border-radius: 6px;
 		background: var(--editorial-paper-deep);
-		padding: 1.25rem;
+		padding: 1rem;
 	}
 
-	.share-contact__fields {
-		display: grid;
-		gap: 0.75rem;
-		list-style: none;
-		padding: 0;
-		margin: 0 0 1.25rem;
-	}
-
-	.share-contact__fields li,
-	.share-contact p {
+	.share-booking h3 {
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		color: var(--editorial-ink-soft);
-		line-height: 1.55;
-	}
-
-	.share-contact__fields li {
-		position: relative;
-		padding-left: 1rem;
-	}
-
-	.share-contact__fields li::before {
-		content: "";
-		position: absolute;
-		top: 0.65em;
-		left: 0;
-		width: 0.35rem;
-		height: 0.35rem;
-		background: var(--editorial-spruce);
-	}
-
-	.share-contact p {
-		margin: 1rem 0 0;
-	}
-
-	.share-contact a:not(.editorial-button) {
-		color: var(--editorial-spruce);
-		text-underline-offset: 0.2em;
-	}
-
-	@media (max-width: 700px) {
-		.share-contact {
-			padding: 1rem;
-		}
+		font-size: 1.25rem;
+		font-weight: 700;
+		line-height: 1.15;
+		color: var(--editorial-ink);
+		margin: 0;
 	}
 </style>

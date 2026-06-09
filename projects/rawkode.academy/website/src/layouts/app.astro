@@ -73,7 +73,7 @@ import { ThemeToggle } from "@/components/ui";
 					type="button"
 					id="topbar-search-trigger"
 					aria-haspopup="dialog"
-					aria-label="Search videos, articles, and technologies"
+					aria-label="Search videos, articles, technologies, and partnerships"
 					class="ed-topbar__pill focus-ring"
 				>
 					<svg class="ed-topbar__pill-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -83,7 +83,7 @@ import { ThemeToggle } from "@/components/ui";
 					<span class="ed-topbar__pill-prompt">
 						Search academy
 					</span>
-					<span class="ed-topbar__pill-hint">Lessons, articles, people</span>
+					<span class="ed-topbar__pill-hint">Lessons, articles, partnerships</span>
 					<span class="ed-topbar__keycaps">
 						<kbd id="command-shortcut">⌘K</kbd>
 					</span>
@@ -96,7 +96,7 @@ import { ThemeToggle } from "@/components/ui";
 					type="button"
 					id="mobile-search-trigger"
 					class="ed-topbar__icon-btn ed-topbar__mobile-search focus-ring md:hidden"
-					aria-label="Search videos, articles, and technologies"
+					aria-label="Search videos, articles, technologies, and partnerships"
 					aria-haspopup="dialog"
 				>
 					<svg class="w-5 h-5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -123,9 +123,9 @@ import { ThemeToggle } from "@/components/ui";
 	<div class="flex flex-col min-h-screen">
 		<div class="flex overflow-hidden flex-1">
 			<main id="main-content" class="w-full h-auto pt-16 md:ml-72 overflow-x-hidden transition-card">
-                                <slot />
-                        </main>
-                </div>
+				<slot />
+			</main>
+		</div>
 		<div id="footer-container" class="md:ml-72 transition-card">
 			<Footer />
 		</div>

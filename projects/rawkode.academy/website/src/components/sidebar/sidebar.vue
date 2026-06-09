@@ -5,6 +5,7 @@ import {
 	MapIcon,
 	MegaphoneIcon,
 	NewspaperIcon,
+	RocketLaunchIcon,
 	Squares2X2Icon,
 	TvIcon,
 	VideoCameraIcon,
@@ -33,7 +34,16 @@ const baseItems: RawNavItem[] = [
 	{ name: "News", href: "/news", icon: MegaphoneIcon },
 	{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
 	{ name: "Articles", href: "/read", icon: NewspaperIcon },
-	{ name: "Technology Matrix", href: "/technology/matrix", icon: Squares2X2Icon },
+	{
+		name: "Technology Matrix",
+		href: "/technology/matrix",
+		icon: Squares2X2Icon,
+	},
+	{
+		name: "Adoption Partnerships",
+		href: "/organizations/partnerships",
+		icon: RocketLaunchIcon,
+	},
 	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
 	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
 	{ name: "Shows", href: "/shows", icon: TvIcon },
@@ -130,7 +140,10 @@ const expandSidebar = () => {
 };
 
 function maxWidthForViewport() {
-	return Math.min(maxExpandedWidth, Math.max(minExpandedWidth, Math.floor(window.innerWidth * 0.42)));
+	return Math.min(
+		maxExpandedWidth,
+		Math.max(minExpandedWidth, Math.floor(window.innerWidth * 0.42)),
+	);
 }
 
 function clampWidth(width: number) {
@@ -138,7 +151,10 @@ function clampWidth(width: number) {
 }
 
 function readStoredExpandedWidth() {
-	const stored = Number.parseInt(localStorage.getItem(widthStorageKey) || "", 10);
+	const stored = Number.parseInt(
+		localStorage.getItem(widthStorageKey) || "",
+		10,
+	);
 	if (!Number.isFinite(stored)) return defaultExpandedWidth;
 	return clampWidth(stored);
 }
@@ -174,7 +190,10 @@ function stopResize() {
 	if (!isResizing.value) return;
 	isResizing.value = false;
 	document.body.classList.remove("ed-sidebar-resizing");
-	localStorage.setItem(widthStorageKey, String(Math.round(expandedWidth.value)));
+	localStorage.setItem(
+		widthStorageKey,
+		String(Math.round(expandedWidth.value)),
+	);
 	window.removeEventListener("pointermove", handleResizeMove);
 	window.removeEventListener("pointerup", stopResize);
 	applySidebarWidth();
@@ -182,7 +201,10 @@ function stopResize() {
 
 function resizeBy(delta: number) {
 	expandedWidth.value = clampWidth(expandedWidth.value + delta);
-	localStorage.setItem(widthStorageKey, String(Math.round(expandedWidth.value)));
+	localStorage.setItem(
+		widthStorageKey,
+		String(Math.round(expandedWidth.value)),
+	);
 	applySidebarWidth();
 }
 

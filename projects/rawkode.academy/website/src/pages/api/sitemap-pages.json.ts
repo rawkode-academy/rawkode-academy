@@ -137,6 +137,45 @@ async function generateNavigationItems(
 			description: "Subscribe to RSS feeds",
 		},
 		{
+			href: "/organizations",
+			title: "For Organizations",
+			category: "Organizations",
+			description:
+				"Developer adoption partnerships for cloud-native and DevTool teams reviewing practitioner proof, docs, demos, launches, and technical trust",
+			keywords: [
+				"partnerships",
+				"fit check",
+				"practitioner proof",
+				"platform engineering",
+				"SRE",
+				"marketing",
+				"product",
+				"DevRel",
+				"docs",
+				"demo",
+				"launch",
+			],
+		},
+		{
+			href: "/organizations/lets-chat",
+			title: "Partnership Fit Check",
+			category: "Organizations",
+			description:
+				"Send adoption context for a developer adoption partnership fit check",
+			keywords: [
+				"fit check",
+				"adoption",
+				"technical evaluator",
+				"platform engineering",
+				"marketing",
+				"product",
+				"DevRel",
+				"docs",
+				"demo",
+				"launch",
+			],
+		},
+		{
 			href: "/organizations/branding",
 			title: "Branding",
 			category: "Organizations",
@@ -147,7 +186,22 @@ async function generateNavigationItems(
 			title: "Developer Adoption Partnerships",
 			category: "Organizations",
 			description:
-				"Pressure-test developer adoption decisions before GTM spend",
+				"Developer adoption partnerships for cloud-native and DevTool teams with practitioner-risk in docs, demos, launches, technical proof, and sales enablement",
+			keywords: [
+				"partnerships",
+				"practitioner proof",
+				"technical evaluator",
+				"platform engineering",
+				"SRE",
+				"Kubernetes",
+				"AI infrastructure",
+				"marketing",
+				"product",
+				"DevRel",
+				"docs",
+				"demo",
+				"launch",
+			],
 		},
 		{
 			href: "/maintainers/share-your-project",
@@ -164,7 +218,10 @@ async function generateNavigationItems(
 			description: page.description,
 			href: page.href,
 			category: page.category,
-			keywords: [page.title.toLowerCase(), page.category.toLowerCase()],
+			keywords: page.keywords ?? [
+				page.title.toLowerCase(),
+				page.category.toLowerCase(),
+			],
 		});
 	});
 

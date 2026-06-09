@@ -92,9 +92,7 @@ interface HeroVideo {
 	durationSeconds?: number | undefined;
 }
 
-const toHeroVideo = (
-	v: (typeof allVideosRaw)[number],
-): HeroVideo => ({
+const toHeroVideo = (v: (typeof allVideosRaw)[number]): HeroVideo => ({
 	id: v.data.id,
 	slug: v.data.slug,
 	title: v.data.title,
@@ -138,7 +136,9 @@ if (liveVideo) {
 	heroVideo = toHeroVideo(nextUpcoming);
 } else if (fallbackVideo) {
 	heroState = "fallback";
-	heroVideo = toHeroVideo(allVideosRaw.find((v) => v.data.id === fallbackVideo.data.id)!);
+	heroVideo = toHeroVideo(
+		allVideosRaw.find((v) => v.data.id === fallbackVideo.data.id)!,
+	);
 }
 
 // "Next up" schedule rows: prefer upcoming, fall back to recent past.
@@ -307,7 +307,10 @@ const secondaryArticleItems = secondaryArticles.map((article) => {
 		mediaAlt?: string;
 	} = {
 		href: `/read/${article.id}`,
-		meta: [articleLabel(article), formatPublishedDate(article.data.publishedAt)],
+		meta: [
+			articleLabel(article),
+			formatPublishedDate(article.data.publishedAt),
+		],
 		title: article.data.title,
 		body: summarizeArticle(article),
 	};
@@ -371,7 +374,7 @@ const heroStats = [
 
 const pageTitle = "Cloud Native & Kubernetes Education";
 const pageDescription =
-	"Hands-on cloud native education from Rawkode Academy. Courses, articles, deep-dive videos, and live builds for engineers shipping production systems.";
+	"Hands-on cloud native education and developer adoption partnerships from Rawkode Academy for engineers and teams shipping production systems.";
 ---
 
 <Page title={pageTitle} description={pageDescription}>
@@ -426,6 +429,16 @@ const pageDescription =
 				</div>
 			</div>
 		</div>
+	</section>
+
+	<section class="landing-section landing-section--company">
+		<SectionHeader
+			kicker="For Companies"
+			title="Developer Adoption Partnerships"
+			body="Work with Rawkode to help marketing, product, DevRel, sales engineering, and technical owners find the proof, docs, demo, and operational gaps blocking practitioner trust."
+			ctaLabel="Compare partnership paths →"
+			ctaHref="/organizations/partnerships"
+		/>
 	</section>
 
 	<NewsletterStrip />
@@ -541,16 +554,6 @@ const pageDescription =
 			/>
 			<TestimonialSlider type="viewer" blurb="" />
 		</section>
-
-		<section class="landing-section">
-			<SectionHeader
-				kicker="For Organizations"
-				title="Developer Adoption Partnerships"
-				body="Pressure-test launches, docs, demos, campaigns, and DevRel decisions with monthly practitioner signal and cohort review."
-				ctaLabel="View tiers →"
-				ctaHref="/organizations/partnerships"
-			/>
-		</section>
 	</div>
 </Page>
 
@@ -568,6 +571,12 @@ const pageDescription =
 
 	.landing-section--matrix {
 		padding: 0;
+	}
+
+	.landing-section--company {
+		padding-top: clamp(2rem, 6vw, 4rem);
+		padding-bottom: clamp(2rem, 6vw, 4rem);
+		border-bottom: 1px solid color-mix(in oklab, var(--color-primary-content) 14%, transparent);
 	}
 
 	.matrix-home {

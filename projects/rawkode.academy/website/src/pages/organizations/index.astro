@@ -4,62 +4,90 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const summaryStats = [
-	{ value: "£1k-£3k", label: "Monthly range" },
-	{ value: "90 min", label: "Monthly cohort session" },
-	{ value: "Bounded", label: "Review, not execution" },
+const contactHref =
+	"mailto:david@rawkode.academy?subject=Partnership%20fit%20check&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ASurfaces%20to%20review%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+
+const practitionerSignals = [
+	{
+		value: "Proof",
+		label: "Docs, demos, architecture, and operational claims",
+	},
+	{
+		value: "Risk",
+		label: "Trust boundaries, migration, RBAC/IAM, egress, and tenancy",
+	},
+	{
+		value: "Owners",
+		label: "Marketing, product, DevRel, sales engineering, and technical teams",
+	},
 ];
 
-const organizationPaths = [
+const adoptionSignals = [
 	{
-		title: "Developer Adoption Partnerships",
-		body: "Monthly outside review for infrastructure teams that want marketing, product, and DevRel to make sharper adoption decisions.",
-		href: "/organizations/partnerships",
+		value: "£1k",
+		label: "Adoption Diagnostic from",
+	},
+	{
+		value: "£2k/mo",
+		label: "Adoption Partnership from",
+	},
+	{
+		value: "£3k/mo",
+		label: "Review Sprint from",
+	},
+];
+
+const fitAreas = [
+	{
+		title: "Developer adoption partnerships",
+		body: "Work with marketing, product, DevRel, sales engineering, and technical owners to expose the proof, docs, demo, and operational gaps blocking adoption.",
 		items: [
-			"Cohort review",
-			"Question submission",
-			"Shared post-session notes",
-			"Bounded asset review by tier",
+			"Adoption Diagnostic",
+			"Adoption Partnership",
+			"Partnership Review Sprint",
+			"Adoption context",
 		],
-	},
-	{
-		title: "Branding",
-		body: "Official Rawkode Academy logos, marks, colors, and usage guidance for approved co-branding contexts.",
-		href: "/organizations/branding",
-		items: ["Logo assets", "Usage guidelines", "Color system"],
+		href: "/organizations/partnerships",
+		cta: "Compare partnership paths",
 	},
 ];
 
-const partnershipBoundaries = [
-	"Not a consulting retainer",
-	"Not outsourced DevRel",
-	"Does not replace marketing, product, or DevRel teams",
-	"Not a custom content package",
-	"Not sponsored editorial coverage",
-	"Not unlimited access",
+const utilityLinks = [
+	{
+		title: "Brand assets",
+		body: "Use the official Rawkode Academy marks, palette, and usage guidance when an approved collaboration needs co-branding.",
+		href: "/organizations/branding",
+		cta: "View brand kit",
+	},
+];
+
+const badFits = [
+	"You need outsourced DevRel execution or someone to run the function for you.",
+	"You want paid coverage, guaranteed mentions, media inventory, or leads.",
+	"You want a generic workshop disconnected from adoption strategy.",
 ];
 ---
 
 <Page
 	title="For Organizations"
-	description="Monthly partnerships help developer infrastructure companies sharpen adoption direction through practitioner-led review and cohort learning."
+	description="Developer adoption partnerships for cloud-native and DevTool companies that need sharper practitioner proof, launch, docs, demo, and DevRel strategy."
 >
 	<EditorialShell
-		eyebrow="Organizations"
-		title="Avoid expensive developer adoption mistakes before GTM budget moves"
-		lede="Monthly partnerships work with marketing, product, and DevRel teams to pressure-test developer adoption decisions before GTM budget moves."
+		eyebrow="For Organizations"
+		title="Developer Adoption Partnerships"
+		lede="Rawkode works with your marketing, product, DevRel, sales engineering, and technical owners to find the proof gaps practitioners hit before they trust a DevTool, cloud-native platform, or infrastructure product. Your team keeps execution ownership; Rawkode sharpens the path."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="/organizations/partnerships">View partnership tiers</a>
-			<a class="editorial-button editorial-button--secondary" href="/organizations/lets-chat">Email your adoption decision</a>
+			<a class="editorial-button" href="/organizations/partnerships">Compare partnership paths</a>
+			<a class="editorial-button editorial-button--secondary" href={contactHref}>Send adoption context</a>
 		</div>
 
 		<section class="editorial-section">
 			<div class="editorial-stat-grid">
-				{summaryStats.map((stat) => (
+				{practitionerSignals.map((signal) => (
 					<div class="editorial-stat">
-						<span class="editorial-stat__value">{stat.value}</span>
-						<span class="editorial-stat__label">{stat.label}</span>
+						<span class="editorial-stat__value">{signal.value}</span>
+						<span class="editorial-stat__label">{signal.label}</span>
 					</div>
 				))}
 			</div>
@@ -67,23 +95,48 @@ const partnershipBoundaries = [
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Developer adoption</p>
-				<h2 class="editorial-section__title">Pressure-test adoption before spend commits</h2>
+				<p class="editorial-kicker">What is active now</p>
+				<h2 class="editorial-section__title">The company route is Developer Adoption Partnerships</h2>
 				<p class="editorial-section__lede">
-					Choose partnerships when the cost of being wrong is higher than the
-					monthly fee. Use them before committing budget to launch messaging,
-					docs, demos, campaigns, events, community, or DevRel hiring decisions.
+					For companies, the active route is an Adoption Diagnostic from £1,000, an Adoption Partnership from £2,000/month, or a Partnership Review Sprint from £3,000/month focused on practitioner proof, launch clarity, and technical trust.
 				</p>
 			</div>
 			<div class="editorial-grid editorial-grid--2">
-				{organizationPaths.map((path) => (
-					<article class="editorial-card">
-						<h3 class="editorial-card__title">{path.title}</h3>
-						<p class="editorial-card__body">{path.body}</p>
+				{fitAreas.map((area) => (
+					<article class="editorial-card organizations-card">
+						<h3 class="editorial-card__title">{area.title}</h3>
+						<p class="editorial-card__body">{area.body}</p>
 						<ul class="editorial-list">
-							{path.items.map((item) => <li>{item}</li>)}
+							{area.items.map((item) => <li>{item}</li>)}
 						</ul>
-						<a class="editorial-card-link" href={path.href}>Open {path.title}</a>
+						<a class="organizations-card__link" href={area.href}>{area.cta}</a>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				{adoptionSignals.map((signal) => (
+					<div class="editorial-stat">
+						<span class="editorial-stat__value">{signal.value}</span>
+						<span class="editorial-stat__label">{signal.label}</span>
+					</div>
+				))}
+			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Utility</p>
+				<h2 class="editorial-section__title">Brand assets are not the commercial offer</h2>
+			</div>
+			<div class="editorial-grid editorial-grid--2">
+				{utilityLinks.map((link) => (
+					<article class="editorial-card organizations-card">
+						<h3 class="editorial-card__title">{link.title}</h3>
+						<p class="editorial-card__body">{link.body}</p>
+						<a class="organizations-card__link" href={link.href}>{link.cta}</a>
 					</article>
 				))}
 			</div>
@@ -91,53 +144,73 @@ const partnershipBoundaries = [
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Boundary</p>
-				<h2 class="editorial-section__title">Designed to stay lightweight</h2>
-				<p class="editorial-section__lede">
-					The value is clarity and direction for internal teams without turning
-					the relationship into an execution-heavy agency, replacement product
-					marketer, or fractional DevRel function.
-				</p>
+				<p class="editorial-kicker">Fit check</p>
+				<h2 class="editorial-section__title">This is useful when the adoption path is unclear</h2>
 			</div>
-			<div class="editorial-card">
-				<ul class="editorial-list">
-					{partnershipBoundaries.map((boundary) => <li>{boundary}</li>)}
-				</ul>
+			<div class="editorial-card editorial-card--paper">
+				<p class="editorial-card__body">
+					Bring the product, the evaluator, the current adoption risk, the surfaces to review, and any useful infrastructure artifacts: Helm charts, CRDs, RBAC/IAM notes, Terraform, architecture notes, telemetry, tenancy, runbooks, demo environment, or docs paths. We will tell you whether it fits an Adoption Diagnostic, Adoption Partnership, Partnership Review Sprint, or no fit.
+				</p>
 			</div>
 		</section>
 
-		<section class="editorial-section">
-			<div class="editorial-callout">
-				<div>
-					<h2 class="editorial-section__title">Need practitioner signal before committing budget?</h2>
-					<p class="editorial-card__body">
-						Email the current GTM decision. We will reply if a monthly
-						partnership can create useful practitioner signal before you spend.
-					</p>
-				</div>
-				<a class="editorial-button" href="/organizations/lets-chat">Email your adoption decision</a>
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Bad fit</p>
+				<h2 class="editorial-section__title">What this does not solve</h2>
 			</div>
+			<ul class="organizations-list">
+				{badFits.map((item) => <li>{item}</li>)}
+			</ul>
 		</section>
 	</EditorialShell>
 </Page>
 
 <style>
-	.editorial-card-link {
-		display: inline-flex;
-		align-items: center;
-		width: fit-content;
-		margin-top: 1rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-ink);
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
+	.organizations-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
-	.editorial-card-link:hover {
+	.organizations-card__link {
+		align-self: flex-start;
+		margin-top: auto;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
 		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+
+	.organizations-card__link:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.organizations-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.organizations-list li {
+		border-left: 3px solid var(--editorial-red, #b42318);
+		padding: 0.8rem 1rem;
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink-soft);
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	@media (max-width: 760px) {
+		.organizations-card__link {
+			width: 100%;
+		}
 	}
 </style>
