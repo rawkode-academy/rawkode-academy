@@ -793,9 +793,10 @@ const workExamples = [
 		.partnerships-section--proof .partnerships-work {
 			display: grid;
 			grid-template-columns: minmax(12rem, 0.28fr) minmax(0, 1fr);
-			gap: 1.5rem;
+			column-gap: clamp(1.75rem, 3vw, 2.75rem);
+			row-gap: 0.6rem;
 			align-items: start;
-			padding: 1.25rem 0;
+			padding: 1.25rem clamp(1.1rem, 2.2vw, 1.75rem);
 		}
 	}
 </style>
