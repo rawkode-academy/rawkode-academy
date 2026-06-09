@@ -4,8 +4,30 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactHref =
-	"mailto:david@rawkode.academy?subject=Partnership%20fit&body=Company%2Fcategory%3A%0D%0AProduct%20or%20platform%3A%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A";
+const decisionBriefFields = [
+	"Company/category:",
+	"Preferred partnership path:",
+	"Target technical evaluator:",
+	"Team stakeholders:",
+	"Deadline or launch window:",
+	"Docs, demos, architecture notes, or enablement material:",
+	"Infrastructure artifacts available:",
+	"Adoption risk or decision to review:",
+	"Links, if useful:",
+];
+
+const briefHref = (path?: string) => {
+	const fields = [...decisionBriefFields];
+	if (path) {
+		fields[1] = `Preferred partnership path: ${path}`;
+	}
+
+	return `mailto:david@rawkode.academy?subject=${encodeURIComponent(
+		path ? `${path} decision brief` : "Decision brief request",
+	)}&body=${encodeURIComponent(fields.join("\r\n"))}`;
+};
+
+const contactHref = briefHref();
 
 const faqs = [
 	{
@@ -16,66 +38,93 @@ const faqs = [
 	{
 		question: "Do you replace our marketing, product, or DevRel team?",
 		answer:
-			"No. We work with marketing, product, DevRel, sales engineering, and technical owners so they can make better adoption decisions. Your team keeps execution ownership; the partnership brings practitioner signal, strategic critique, and sharper direction.",
+			"No. Your team keeps execution ownership. Rawkode brings practitioner signal, technical critique, and a clearer decision path for the people already doing the work.",
 	},
 	{
 		question: "What should we bring first?",
 		answer:
-			"Send the company or product, the target developer or platform team, the adoption challenge, the team stakeholders, the next budget or launch decision, and useful links. Rough context is enough.",
+			"Send rough context: the product, the target technical evaluator, stakeholders, the current adoption risk, any deadline, and the docs, demos, architecture notes, or enablement material already in play.",
 	},
 	{
-		question: "Why pay for this before budget moves?",
+		question: "Why do this before budget moves?",
 		answer:
-			"The point is to avoid a larger wasted bet: a launch story practitioners ignore, a docs or demo rebuild that does not change adoption, a DevRel hire without a clear remit, or a sales push that cannot answer technical objections. The partnership helps your team decide what to keep, change, prove, or stop before more spend is committed.",
+			"The useful moment is before the bigger bet hardens: a launch story practitioners ignore, a docs rebuild that does not change evaluation, a DevRel hire without a clear remit, or a sales push that cannot answer technical objections.",
 	},
 	{
 		question: "How fast can this start?",
 		answer:
-			"Partnerships are month-to-month with no annual lock-in. Companies can join when they need outside signal, use the partnership while it is valuable, and stop before the next billing cycle.",
+			"Start by email. If the problem fits, David will reply with the right path and a call option. Monthly partnerships are month-to-month. Audit and sprint paths are bounded by the decision being reviewed.",
 	},
 	{
 		question: "Do you plan campaigns or run DevRel for us?",
 		answer:
-			"No. The partnership helps shape adoption strategy, technical narrative, developer education, launch direction, and internal alignment. It does not include full campaign planning, outsourced DevRel execution, custom content production, lead generation, or open-ended access.",
+			"No. The work shapes adoption strategy, technical narrative, developer education, launch proof, and internal alignment. It does not include campaign ownership, outsourced DevRel execution, custom content production, lead generation, or open-ended access.",
 	},
 	{
 		question: "Is confidential material safe to share?",
 		answer:
-			"Start with public or shareable context. If a fit check shows private context is needed, we can agree the right confidentiality boundary before using it in the partnership.",
+			"Start with public or shareable context. If private context is needed after the fit check, agree the confidentiality boundary before using it in the partnership.",
 	},
 ];
 
-const packages = [
+const decisionLedger = [
 	{
-		name: "Signal Partnership",
-		price: "£1,000 / month",
-		label: "Lightweight",
-		bestFor:
-			"Founders and small teams that need outside practitioner signal before they commit more budget to messaging, launches, docs, demos, DevRel, or sales enablement.",
-		outcome:
-			"Know what developers are likely to understand, question, ignore, or need next before your team spends more.",
-		included: [
-			"Monthly partnership session",
-			"Question submission before the session",
-			"Practitioner signal on developer adoption, DevRel, docs, demos, positioning, or launch direction",
-			"Monthly memo with themes, recommendations, and next decisions",
-		],
-		boundaries: ["No private delivery team", "No custom content production", "Your team owns execution"],
-		cta: "Email David",
-		href: "mailto:david@rawkode.academy?subject=Signal%20Partnership&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%20Partnership%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AUseful%20links%3A",
+		label: "Claim",
+		value: "What developers are being asked to believe",
 	},
 	{
-		name: "Adoption Partnership",
-		price: "£2,000 / month",
-		label: "Default",
-		bestFor:
-			"Marketing, product, DevRel, sales engineering, and engineering teams that need recurring outside judgement while shaping developer adoption.",
-		outcome:
-			"Leave each month with clearer adoption priorities, stronger technical narrative, and practical next moves your team can own.",
-		included: [
-			"Monthly working session with your core team",
+		label: "Proof",
+		value: "Docs, demos, architecture, runbooks, and operational evidence",
+	},
+	{
+		label: "Friction",
+		value: "The objection, missing step, or trust boundary blocking adoption",
+	},
+	{
+		label: "Owner",
+		value: "Product, marketing, DevRel, sales engineering, or technical lead",
+	},
+];
+
+const partnershipPaths = [
+	{
+		name: "Adoption Risk Audit",
+		role: "One decision",
+		price: "From £1,000",
+		summary:
+			"A focused review when a launch, demo, docs path, sales motion, or technical claim needs outside practitioner scrutiny before more money moves.",
+		useWhen: [
+			"A specific adoption decision is close",
+			"The team needs fast outside signal",
+			"You have artifacts to review",
+		],
+		deliverables: [
+			"Risk map across audience, proof, friction, and next action",
+			"Written notes on what to keep, change, prove, or stop",
+			"Clear recommendation on whether a larger partnership is useful",
+		],
+		boundaries: [
+			"No ongoing advisory",
+			"No custom content production",
+			"No paid coverage",
+		],
+		cta: "Email audit brief",
+		href: briefHref("Adoption Risk Audit"),
+	},
+	{
+		name: "Monthly Partnership",
+		role: "Recurring signal",
+		price: "From £2,000/month",
+		summary:
+			"A month-to-month rhythm for teams shaping developer adoption across product, marketing, DevRel, sales engineering, and technical owners.",
+		useWhen: [
+			"Adoption work spans several teams",
+			"The story, docs, demos, and sales handoff need to line up",
+			"You need critique while the work is still movable",
+		],
+		deliverables: [
+			"Monthly working session with the core team",
 			"Developer adoption map: audience, trigger, friction, proof, and next action",
-			"Async input on active adoption decisions during the month",
 			"Shared memo with recommendations, tradeoffs, and owner suggestions",
 		],
 		boundaries: [
@@ -83,250 +132,294 @@ const packages = [
 			"No outsourced GTM or DevRel",
 			"Your team owns delivery",
 		],
-		cta: "Email David",
-		href: contactHref,
 		featured: true,
+		cta: "Email partnership brief",
+		href: briefHref("Monthly Partnership"),
 	},
 	{
-		name: "Launch Partnership",
-		price: "£3,000 / month",
-		label: "High focus",
-		bestFor:
-			"A launch, repositioning, category push, DevRel program, or sales motion needs tighter cross-functional direction while the market window is live.",
-		outcome:
-			"Keep the adoption strategy, technical narrative, education path, and sales or DevRel handoff aligned while the work is still movable.",
-		included: [
-			"Monthly private strategy session",
-			"Priority async input on active adoption questions",
-			"Cross-functional alignment session for product, marketing, DevRel, sales engineering, or engineering",
-			"Leadership-ready adoption recommendations",
+		name: "Launch Review Sprint",
+		role: "Market window",
+		price: "From £3,000",
+		summary:
+			"A bounded sprint when a launch, repositioning, category push, DevRel program, or sales motion needs tighter adoption proof before it lands.",
+		useWhen: [
+			"A deadline or launch window exists",
+			"Multiple teams are telling different stories",
+			"Technical buyers need proof before they can recommend",
+		],
+		deliverables: [
+			"Priority review of launch story, demo path, technical objections, and education flow",
+			"Cross-functional alignment session for the people carrying adoption",
+			"Leadership-ready recommendations for the next market move",
 		],
 		boundaries: [
-			"Bounded monthly scope",
+			"Bounded sprint scope",
 			"No campaign ownership",
 			"No fractional team replacement",
 		],
-		cta: "Email David",
-		href: "mailto:david@rawkode.academy?subject=Launch%20Partnership&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Launch%20Partnership%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0AUpcoming%20launch%2C%20repositioning%2C%20sales%20push%2C%20or%20DevRel%20motion%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A",
+		cta: "Email sprint brief",
+		href: briefHref("Launch Review Sprint"),
 	},
 ];
 
-const inspectAreas = [
-	{
-		title: "Adoption strategy",
-		body: "Who needs to care, what belief needs to change, what friction blocks adoption, and what your team should do next.",
-	},
+const proofAreas = [
 	{
 		title: "Technical narrative",
-		body: "Turn architecture, tradeoffs, and product depth into a story that developers, platform teams, and technical buyers can follow.",
+		body: "Does the story explain the architecture, tradeoffs, and reason to change in a way a practitioner can repeat?",
 	},
 	{
-		title: "Developer education",
-		body: "Shape docs, demos, tutorials, learning paths, and examples around the real journey from curiosity to evaluation to internal recommendation.",
+		title: "Docs and demos",
+		body: "Do the learning materials help someone evaluate, recommend, and adopt, or do they only list features?",
 	},
 	{
-		title: "Sales enablement",
-		body: "Help sales engineering and GTM teams explain technical value without flattening the product into claims practitioners will reject.",
+		title: "Operational trust",
+		body: "Are migration, tenancy, RBAC/IAM, telemetry, egress, reliability, and failure modes addressed before objections appear?",
+	},
+	{
+		title: "Sales handoff",
+		body: "Can sales engineering answer the technical buyer without flattening the product into claims that practitioners reject?",
 	},
 	{
 		title: "DevRel direction",
-		body: "Decide what DevRel should own, which developer behaviors matter, and how community, education, and product feedback should connect.",
+		body: "Does DevRel know which developer behavior it is trying to change, and how that signal flows back to product?",
 	},
 	{
-		title: "Cross-team alignment",
-		body: "Get product, marketing, DevRel, sales engineering, and engineering working from the same adoption story and the same technical reality.",
+		title: "Team alignment",
+		body: "Are product, marketing, DevRel, sales engineering, and engineering working from the same adoption reality?",
 	},
 ];
 
-const triggers = [
-	"You are launching and the story is not turning technical interest into adoption.",
-	"Your team knows the product is strong, but developers are not seeing why it matters.",
-	"Docs and demos explain features but do not help teams evaluate, recommend, or adopt.",
-	"DevRel or community activity is busy, but nobody agrees what it should change.",
-	"Sales conversations stall because technical buyers cannot see fit, migration path, or operational reality.",
-	"Product, marketing, DevRel, and sales engineering are telling different versions of the story.",
+const publicWork = [
+	{
+		title: "Rawkode Live",
+		href: "/shows/rawkode-live",
+		body: "Maintainer-led live builds and product walkthroughs across Kubernetes, observability, identity, platform engineering, security, data, AI infrastructure, and developer tooling.",
+	},
+	{
+		title: "Klustered",
+		href: "/shows/klustered",
+		body: "Public Kubernetes failure-mode triage under pressure, with teams working through broken clusters, operational constraints, and real debugging paths.",
+	},
+	{
+		title: "Courses and education",
+		href: "/courses/teleport-for-kubernetes",
+		body: "Runnable technical education that shows how developers learn infrastructure, where they get stuck, and what proof they need before a tool becomes part of their workflow.",
+	},
 ];
 
-const workExamples = [
+const goodFits = [
+	"Your team needs to decide what claim deserves to lead.",
+	"Developers understand the feature but not why it matters now.",
+	"Docs or demos are busy but do not help evaluation.",
+	"Sales conversations stall on technical proof, migration path, or operational risk.",
+	"DevRel activity exists, but the team cannot say what it should change.",
+];
+
+const badFits = [
+	"You want paid coverage, guaranteed mentions, media inventory, or leads.",
+	"You need someone to run DevRel, campaigns, or content production for you.",
+	"You want a generic workshop disconnected from adoption strategy.",
+	"You need open-ended access without a decision or scope boundary.",
+];
+
+const processSteps = [
 	{
-		title: "Positioning and category",
-		body: "Clarify who the product is for, what adoption moment matters, and which claim deserves to lead.",
+		number: "01",
+		title: "Email the decision brief",
+		body: "Send the product, evaluator, stakeholders, decision, deadline, and existing artifacts. Rough context is enough.",
 	},
 	{
-		title: "Developer journey",
-		body: "Map the path from first interest to hands-on evaluation, internal recommendation, and repeated use.",
+		number: "02",
+		title: "Get a fit reply",
+		body: "David will say whether it fits an audit, monthly partnership, launch sprint, or no-fit reply.",
 	},
 	{
-		title: "Team handoff",
-		body: "Make sure product, marketing, DevRel, sales engineering, and engineering can explain the same value without pretending to be the same function.",
+		number: "03",
+		title: "Work on the adoption proof",
+		body: "The engagement focuses on strategy, narrative, education, technical proof, objections, alignment, and next actions your team can own.",
 	},
 ];
 ---
 
 <Page
-	title="Partnerships"
-	description="Cloud-native and DevTool partnerships for teams improving developer adoption across product, marketing, DevRel, sales engineering, and engineering."
+	title="Developer Adoption Partnerships"
+	description="Decision-focused partnerships for DevTool and cloud-native companies that need sharper technical proof, launch clarity, developer education, and adoption strategy."
 >
 	<FAQJsonLD questions={faqs} slot="extra-head" />
 
 	<main class="partnerships-page">
 		<section class="partnerships-hero" aria-labelledby="partnerships-title">
-			<p class="partnerships-kicker">Partnerships for DevTools and infrastructure teams</p>
-			<div class="partnerships-hero__grid">
-				<div class="partnerships-hero__copy">
-					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
-					<div class="partnerships-hero__body">
-						<p>
-							Rawkode works alongside your marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
-						</p>
-						<div class="partnerships-hero__next">
-							<p class="partnerships-hero__trigger">
-								Your team keeps execution. We bring practitioner signal, strategic critique, and cloud-native judgement before the spend hardens.
-							</p>
-							<div class="partnerships-actions">
-								<a class="partnerships-button" href={contactHref}>Email David</a>
-								<a class="partnerships-link" href="#packages">View options</a>
+			<div class="partnerships-hero__copy">
+				<p class="partnerships-label">Developer adoption partnerships</p>
+				<h1 id="partnerships-title">Find the technical proof your buyers need before the next spend hardens.</h1>
+				<p class="partnerships-hero__lede">
+					Rawkode works with DevTool and cloud-native teams when developer adoption is stuck between product depth and market understanding. Your team keeps execution. The partnership sharpens the claim, proof, education path, and handoff that make adoption easier to decide.
+				</p>
+				<div class="partnerships-actions" aria-label="Partnership actions">
+					<a class="partnerships-button partnerships-button--primary" href={contactHref}>Email decision brief</a>
+					<a class="partnerships-button partnerships-button--secondary" href="#paths">Compare paths</a>
+				</div>
+			</div>
+
+			<aside class="partnerships-ledger" aria-label="Decision brief fields">
+				<div class="partnerships-ledger__head">
+					<span>Decision brief</span>
+					<strong>What gets tested</strong>
+				</div>
+				<dl class="partnerships-ledger__list">
+					{decisionLedger.map((item) => (
+						<div>
+							<dt>{item.label}</dt>
+							<dd>{item.value}</dd>
+						</div>
+					))}
+				</dl>
+			</aside>
+		</section>
+
+		<section class="partnerships-signal" aria-label="Partnership operating model">
+			<div>
+				<strong>Bounded input</strong>
+				<span>No open-ended retainer. Each path has a decision boundary.</span>
+			</div>
+			<div>
+				<strong>Practitioner signal</strong>
+				<span>Advice comes from public technical work, maintainer sessions, and real evaluation paths.</span>
+			</div>
+			<div>
+				<strong>Your team ships</strong>
+				<span>Rawkode sharpens direction. Product, marketing, DevRel, sales engineering, and engineering own delivery.</span>
+			</div>
+		</section>
+
+		<section id="paths" class="partnerships-section partnerships-section--paths" aria-labelledby="paths-title">
+			<div class="partnerships-section__intro">
+				<h2 id="paths-title">Pick the shape of the decision.</h2>
+				<p>
+					Use the lightest path that answers the adoption question in front of the team. Each option is designed to reduce wasted spend before bigger execution begins.
+				</p>
+			</div>
+
+			<div class="partnerships-path-list">
+				{partnershipPaths.map((path) => (
+					<article class:list={["partnerships-path", { "partnerships-path--featured": path.featured }]}>
+						<header class="partnerships-path__head">
+							<div>
+								<p class="partnerships-path__role">{path.role}</p>
+								<h3>{path.name}</h3>
+							</div>
+							<div class="partnerships-path__price">
+								<strong>{path.price}</strong>
+								<a class="partnerships-button partnerships-button--compact" href={path.href}>{path.cta}</a>
+							</div>
+						</header>
+						<p class="partnerships-path__summary">{path.summary}</p>
+						<div class="partnerships-path__details">
+							<div>
+								<h4>Use when</h4>
+								<ul>
+									{path.useWhen.map((item) => <li>{item}</li>)}
+								</ul>
+							</div>
+							<div>
+								<h4>You get</h4>
+								<ul>
+									{path.deliverables.map((item) => <li>{item}</li>)}
+								</ul>
+							</div>
+							<div>
+								<h4>Not included</h4>
+								<ul>
+									{path.boundaries.map((item) => <li>{item}</li>)}
+								</ul>
 							</div>
 						</div>
-					</div>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section partnerships-section--proof" aria-labelledby="proof-title">
+			<div class="partnerships-section__intro">
+				<h2 id="proof-title">The work is technical proof, not output volume.</h2>
+				<p>
+					Most adoption problems are not solved by publishing more assets. They are solved by making the right claim easier to verify, repeat, and defend inside a technical team.
+				</p>
+			</div>
+
+			<div class="partnerships-proof-grid">
+				{proofAreas.map((area) => (
+					<article class="partnerships-proof-item">
+						<h3>{area.title}</h3>
+						<p>{area.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section partnerships-section--split" aria-labelledby="public-work-title">
+			<div class="partnerships-section__intro">
+				<h2 id="public-work-title">Built from public practitioner work.</h2>
+				<p>
+					The advice comes from years of watching tools meet real developer skepticism in public: live builds, broken systems, maintainer walkthroughs, and technical education.
+				</p>
+			</div>
+			<div class="partnerships-public-list">
+				{publicWork.map((item) => (
+					<a class="partnerships-public-item" href={item.href}>
+						<strong>{item.title}</strong>
+						<span>{item.body}</span>
+					</a>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-fit" aria-labelledby="fit-title">
+			<div class="partnerships-fit__intro">
+				<h2 id="fit-title">Useful when adoption is the unclear part.</h2>
+				<p>
+					This should be bought because the team needs sharper judgement, not because it needs another generic content lane.
+				</p>
+			</div>
+			<div class="partnerships-fit__lists">
+				<div>
+					<h3>Good fit</h3>
+					<ul>
+						{goodFits.map((item) => <li>{item}</li>)}
+					</ul>
+				</div>
+				<div>
+					<h3>Bad fit</h3>
+					<ul>
+						{badFits.map((item) => <li>{item}</li>)}
+					</ul>
 				</div>
 			</div>
 		</section>
 
-		<section id="inspect" class="partnerships-section partnerships-section--inspect" aria-labelledby="inspect-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Where we help</p>
-				<h2 id="inspect-title">Make adoption clearer across the teams already doing the work.</h2>
+		<section class="partnerships-section partnerships-section--process" aria-labelledby="process-title">
+			<div class="partnerships-section__intro">
+				<h2 id="process-title">Email first. Call only when there is a fit.</h2>
 				<p>
-					The work is strategy, signal, and cross-team clarity: what developers need to understand, believe, try, and repeat before adoption moves.
+					The first step is deliberately small. A useful email gives enough context to avoid wasting a call on the wrong problem.
 				</p>
 			</div>
-			<div class="partnerships-inspection-list">
-				{inspectAreas.map((area, index) => (
-					<article class="partnerships-inspection-item">
-						<span class="partnerships-inspection-item__number">{String(index + 1).padStart(2, "0")}</span>
+			<ol class="partnerships-process">
+				{processSteps.map((step) => (
+					<li>
+						<span>{step.number}</span>
 						<div>
-							<h3>{area.title}</h3>
-							<p>{area.body}</p>
+							<h3>{step.title}</h3>
+							<p>{step.body}</p>
 						</div>
-					</article>
+					</li>
 				))}
-			</div>
+			</ol>
 		</section>
 
-		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Partnership paths</p>
-				<h2 id="packages-title">Pick the partnership your team needs now.</h2>
-				<p>
-					Month-to-month help for adoption strategy, technical narrative, developer education, DevRel direction, launch readiness, and sales handoff. No annual lock-in, no fractional DevRel role, no content treadmill.
-				</p>
-			</div>
-			<div class="partnerships-package-grid">
-				{packages.map((pkg) => (
-					<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
-						<div class="partnerships-package__top">
-							<p class="partnerships-package__label">{pkg.label}</p>
-							<h3>{pkg.name}</h3>
-							<p class="partnerships-package__price">{pkg.price}</p>
-							<a class="partnerships-button" href={pkg.href}>{pkg.cta}</a>
-						</div>
-						<div class="partnerships-package__summary">
-							<p>{pkg.bestFor}</p>
-							<p class="partnerships-package__outcome">{pkg.outcome}</p>
-						</div>
-						<div>
-							<ul class="partnerships-package__included">
-								{pkg.included.map((item) => <li>{item}</li>)}
-							</ul>
-						</div>
-						<div class="partnerships-package__boundary-group" aria-label={`${pkg.name} boundaries`}>
-							<ul class="partnerships-package__boundaries">
-								{pkg.boundaries.map((item) => <li>{item}</li>)}
-							</ul>
-						</div>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="triggers-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Good fit</p>
-				<h2 id="triggers-title">Use this when adoption is the problem, not output volume.</h2>
-			</div>
-			<ul class="partnerships-trigger-list">
-				{triggers.map((trigger) => <li>{trigger}</li>)}
-			</ul>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split partnerships-section--proof" aria-labelledby="proof-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Why Rawkode</p>
-				<h2 id="proof-title">Built from years of public practitioner work.</h2>
-			</div>
-			<div class="partnerships-work-grid">
-				<article class="partnerships-work">
-					<h3>Rawkode Live</h3>
-					<p><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> across Kubernetes, observability, identity, platform engineering, security, data, AI infrastructure, and developer tooling.</p>
-				</article>
-				<article class="partnerships-work">
-					<h3>Klustered</h3>
-					<p><a href="/shows/klustered">Public Kubernetes failure-mode triage under pressure</a>, with teams working through broken clusters, operational constraints, and real debugging paths.</p>
-				</article>
-				<article class="partnerships-work">
-					<h3>Courses and education</h3>
-					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> that shows how developers learn infrastructure, where they get stuck, and what they need before a tool becomes part of their workflow.</p>
-				</article>
-			</div>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="examples-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Adoption work</p>
-				<h2 id="examples-title">What gets clearer.</h2>
-				<p>
-					The partnership should make the next move easier for the people already responsible for product, marketing, DevRel, sales engineering, and engineering.
-				</p>
-			</div>
-			<div class="partnerships-work-grid">
-				{workExamples.map((item) => (
-					<article class="partnerships-work">
-						<h3>{item.title}</h3>
-						<p>{item.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="process-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Process</p>
-				<h2 id="process-title">Email context first. Call only when there is a fit.</h2>
-			</div>
-			<div class="partnerships-process">
-				<article>
-					<span>01</span>
-					<h3>Email context</h3>
-					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, upcoming budget decision, and links if they help.</p>
-				</article>
-				<article>
-					<span>02</span>
-					<h3>Get a fit reply</h3>
-					<p>David will say whether this fits a signal, adoption, or launch partnership, or whether it is not a good fit.</p>
-				</article>
-				<article>
-					<span>03</span>
-					<h3>Work with your team</h3>
-					<p>We work with your team on strategy, narrative, education, proof, objections, team alignment, and next actions.</p>
-				</article>
-			</div>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="faq-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Questions</p>
-				<h2 id="faq-title">Clear boundaries before we start.</h2>
+		<section class="partnerships-section partnerships-section--faq" aria-labelledby="faq-title">
+			<div class="partnerships-section__intro">
+				<h2 id="faq-title">Boundaries before we start.</h2>
 			</div>
 			<div class="partnerships-faq-list">
 				{faqs.map((faq) => (
@@ -339,109 +432,112 @@ const workExamples = [
 		</section>
 
 		<section class="partnerships-final" aria-labelledby="final-title">
-			<p class="partnerships-kicker">Start here</p>
-			<h2 id="final-title">Start before the spend is committed.</h2>
-			<p>
-				Rough context is enough: product, target developers, team stakeholders, adoption challenge, upcoming launch or budget decision, and links if useful.
-			</p>
-			<a class="partnerships-button" href={contactHref}>Email David</a>
+			<div>
+				<h2 id="final-title">Send the decision before the spend is committed.</h2>
+				<p>
+					Rough context is enough: product, target technical evaluator, stakeholders, adoption risk, deadline, and useful links.
+				</p>
+			</div>
+			<a class="partnerships-button partnerships-button--primary" href={contactHref}>Email decision brief</a>
 		</section>
 	</main>
 </Page>
 
 <style>
 	.partnerships-page {
-		--partnerships-ink: var(--editorial-ink, oklch(0.18 0.02 260));
-		--partnerships-muted: var(--editorial-ink-soft, oklch(0.42 0.025 260));
-		--partnerships-paper: var(--editorial-paper, oklch(0.985 0.006 95));
-		--partnerships-paper-deep: var(--editorial-paper-deep, oklch(0.955 0.012 95));
-		--partnerships-line: var(--editorial-hairline, oklch(0.82 0.018 95));
-		--partnerships-accent: var(--editorial-spruce, oklch(0.36 0.08 170));
+		--partnerships-ink: var(--editorial-ink);
+		--partnerships-muted: var(--editorial-ink-soft);
+		--partnerships-subtle: var(--editorial-ink-mute);
+		--partnerships-paper: var(--editorial-paper);
+		--partnerships-paper-deep: var(--editorial-paper-deep);
+		--partnerships-line: var(--editorial-hairline);
+		--partnerships-line-strong: var(--editorial-hairline-strong);
+		--partnerships-spruce: var(--editorial-spruce);
+		--partnerships-amber: var(--editorial-amber);
+		--partnerships-rust: var(--editorial-rust);
 		background: var(--partnerships-paper);
 		color: var(--partnerships-ink);
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
 	}
 
+	.partnerships-page * {
+		box-sizing: border-box;
+	}
+
 	.partnerships-hero,
+	.partnerships-signal,
 	.partnerships-section,
+	.partnerships-fit,
 	.partnerships-final {
 		max-width: 118rem;
 		margin: 0 auto;
-		padding-left: clamp(1rem, 3vw, 3rem);
-		padding-right: clamp(1rem, 3vw, 3rem);
+		padding-inline: clamp(1rem, 3vw, 3rem);
 	}
 
 	.partnerships-hero {
-		padding-top: clamp(1.5rem, 4vw, 3.5rem);
-		padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+		display: grid;
+		gap: clamp(1.5rem, 4vw, 4rem);
+		grid-template-columns: minmax(0, 1fr);
+		padding-block: clamp(2rem, 6vw, 5rem);
 		border-bottom: 1px solid var(--partnerships-line);
 	}
 
-	.partnerships-kicker,
-	.partnerships-package__label {
+	.partnerships-hero__copy {
+		display: flex;
+		flex-direction: column;
+		gap: 1.3rem;
+		max-width: 76rem;
+	}
+
+	.partnerships-label,
+	.partnerships-path__role,
+	.partnerships-ledger__head span {
+		margin: 0;
+		color: var(--partnerships-spruce);
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 		font-size: 0.7rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
-		line-height: 1.35;
-		margin: 0;
+		line-height: 1.2;
 		text-transform: uppercase;
-		color: var(--partnerships-accent);
 	}
 
-	.partnerships-hero__grid {
-		display: grid;
-		gap: 1.25rem;
-		margin-top: 0.9rem;
-	}
-
-	.partnerships-hero h1 {
+	.partnerships-hero h1,
+	.partnerships-section h2,
+	.partnerships-fit h2,
+	.partnerships-final h2 {
+		margin: 0;
+		color: var(--partnerships-ink);
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: clamp(2.15rem, 5.5vw, 6rem);
 		font-style: normal;
 		font-weight: 780;
 		letter-spacing: 0;
-		line-height: 0.96;
-		margin: 0;
-		max-width: 100%;
+		text-wrap: balance;
 	}
 
-	.partnerships-hero__body p,
-	.partnerships-section__header p,
-	.partnerships-package p,
-	.partnerships-inspection-item p,
-	.partnerships-work p,
-	.partnerships-process p,
-	.partnerships-faq-list p,
+	.partnerships-hero h1 {
+		max-width: 16ch;
+		font-size: clamp(2.75rem, 7vw, 5.8rem);
+		line-height: 0.95;
+	}
+
+	.partnerships-hero__lede,
+	.partnerships-section__intro p,
+	.partnerships-fit__intro p,
 	.partnerships-final p {
-		color: var(--partnerships-muted);
-		font-size: 1rem;
-		line-height: 1.55;
+		max-width: 66ch;
 		margin: 0;
-	}
-
-	.partnerships-hero__body {
-		display: grid;
-		gap: 0.85rem;
-		margin-top: 0.9rem;
-	}
-
-	.partnerships-hero__body > p {
-		font-size: clamp(1rem, 2.2vw, 1.18rem);
-		max-width: 66rem;
-	}
-
-	.partnerships-hero__trigger {
-		color: var(--partnerships-ink) !important;
-		font-weight: 680;
+		color: var(--partnerships-muted);
+		font-size: clamp(1.02rem, 1.4vw, 1.2rem);
+		line-height: 1.55;
+		text-wrap: pretty;
 	}
 
 	.partnerships-actions {
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
 		gap: 0.75rem;
-		margin-top: 1.3rem;
-		width: fit-content;
+		align-items: center;
 	}
 
 	.partnerships-button {
@@ -452,8 +548,6 @@ const workExamples = [
 		border: 1px solid var(--partnerships-ink);
 		border-radius: 4px;
 		padding: 0.85rem 1rem;
-		background: var(--partnerships-ink);
-		color: var(--partnerships-paper);
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		font-weight: 750;
@@ -462,267 +556,388 @@ const workExamples = [
 		text-align: center;
 		text-decoration: none;
 		text-transform: uppercase;
+		transition:
+			background-color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard),
+			color var(--duration-base) var(--ease-standard),
+			transform var(--duration-base) var(--ease-standard);
 	}
 
 	.partnerships-button:hover {
-		background: var(--partnerships-accent);
-		border-color: var(--partnerships-accent);
+		transform: translateY(-1px);
 	}
 
-	.partnerships-link {
-		align-self: flex-start;
-		display: inline-flex;
-		align-items: center;
+	.partnerships-button:focus-visible,
+	.partnerships-public-item:focus-visible,
+	.partnerships-faq-list summary:focus-visible {
+		outline: 2px solid var(--partnerships-spruce);
+		outline-offset: 3px;
+	}
+
+	.partnerships-button--primary,
+	.partnerships-button--compact {
+		background: var(--partnerships-ink);
+		color: var(--partnerships-paper);
+	}
+
+	.partnerships-button--primary:hover,
+	.partnerships-button--compact:hover {
+		background: var(--partnerships-spruce);
+		border-color: var(--partnerships-spruce);
+	}
+
+	.partnerships-button--secondary {
+		background: transparent;
 		color: var(--partnerships-ink);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 750;
-		letter-spacing: 0.08em;
-		line-height: 1.2;
-		min-height: 2.85rem;
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.22em;
-		text-transform: uppercase;
+		border-color: var(--partnerships-line-strong);
 	}
 
-	.partnerships-link:hover {
-		color: var(--partnerships-accent);
+	.partnerships-button--secondary:hover {
+		background: var(--partnerships-paper-deep);
+		border-color: var(--partnerships-ink);
 	}
 
-	.partnerships-work,
-	.partnerships-process article,
-	.partnerships-package,
-	.partnerships-faq-list details {
-		border: 1px solid var(--partnerships-line);
+	.partnerships-button--compact {
+		width: 100%;
+		min-height: 2.5rem;
+		padding: 0.72rem 0.85rem;
+		font-size: 0.68rem;
+	}
+
+	.partnerships-ledger {
+		align-self: start;
+		border: 1px solid var(--partnerships-line-strong);
 		border-radius: 6px;
 		background: var(--partnerships-paper-deep);
 	}
 
-	.partnerships-section {
-		padding-top: 2.5rem;
-		padding-bottom: 2.5rem;
-		border-bottom: 1px solid var(--partnerships-line);
-		scroll-margin-top: 5rem;
-	}
-
-	.partnerships-section--tight {
-		padding-top: 2rem;
-	}
-
-	.partnerships-section__header {
+	.partnerships-ledger__head {
 		display: flex;
-		flex-direction: column;
-		gap: 0.65rem;
-		margin-bottom: 1.25rem;
-		max-width: none;
-	}
-
-	.partnerships-section h2,
-	.partnerships-final h2 {
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: clamp(1.65rem, 6vw, 4rem);
-		font-style: normal;
-		font-weight: 760;
-		letter-spacing: 0;
-		line-height: 0.98;
-		margin: 0;
-		max-width: 20ch;
-	}
-
-	.partnerships-section__header p {
-		max-width: 58rem;
-	}
-
-	.partnerships-package-grid,
-	.partnerships-work-grid,
-	.partnerships-process {
-		display: grid;
+		align-items: start;
+		justify-content: space-between;
 		gap: 1rem;
-	}
-
-	.partnerships-package {
-		padding: 0.9rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.partnerships-package--featured {
-		border-color: var(--partnerships-accent);
-		box-shadow: inset 0 0 0 1px var(--partnerships-accent);
-	}
-
-	.partnerships-package__top {
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-	}
-
-	.partnerships-package__top .partnerships-button {
-		margin-top: 0.35rem;
-	}
-
-	.partnerships-package h3,
-	.partnerships-inspection-item h3,
-	.partnerships-work h3,
-	.partnerships-process h3 {
-		font-size: 1.25rem;
-		font-weight: 730;
-		line-height: 1.1;
-		letter-spacing: 0;
-		margin: 0;
-	}
-
-	.partnerships-package__price {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: var(--partnerships-ink) !important;
-	}
-
-	.partnerships-package__summary {
-		display: grid;
-		gap: 0.5rem;
-	}
-
-	.partnerships-package__outcome {
-		color: var(--partnerships-ink) !important;
-	}
-
-	.partnerships-package__included,
-	.partnerships-trigger-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		gap: 0.45rem;
-	}
-
-	.partnerships-package__included li,
-	.partnerships-trigger-list li {
-		position: relative;
-		padding-left: 1rem;
-		color: var(--partnerships-muted);
-		font-size: 0.92rem;
-		line-height: 1.4;
-	}
-
-	.partnerships-package__included li::before,
-	.partnerships-trigger-list li::before {
-		content: "";
-		position: absolute;
-		left: 0;
-		top: 0.62em;
-		width: 0.35rem;
-		height: 0.35rem;
-		border-radius: 999px;
-		background: var(--partnerships-accent);
-	}
-
-	.partnerships-package__boundaries {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.45rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.partnerships-package__boundaries li {
-		border: 1px solid var(--partnerships-line);
-		border-radius: 999px;
-		color: var(--partnerships-muted);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		line-height: 1;
-		padding: 0.42rem 0.55rem;
-		text-transform: uppercase;
-	}
-
-	.partnerships-work,
-	.partnerships-process article {
 		padding: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.55rem;
-	}
-
-	.partnerships-work a {
-		color: var(--partnerships-ink);
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.18em;
-	}
-
-	.partnerships-section--proof .partnerships-work-grid {
-		gap: 0;
-		grid-template-columns: 1fr;
-	}
-
-	.partnerships-section--proof .partnerships-work {
-		border-left: 0;
-		border-right: 0;
-		border-radius: 0;
-	}
-
-	.partnerships-section--proof .partnerships-work + .partnerships-work {
-		border-top: 0;
-	}
-
-	.partnerships-section--inspect .partnerships-section__header {
-		margin-bottom: 1.35rem;
-	}
-
-	.partnerships-section--inspect .partnerships-section__header h2 {
-		max-width: 20ch;
-	}
-
-	.partnerships-inspection-list {
 		border-bottom: 1px solid var(--partnerships-line);
-		border-top: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-ledger__head strong {
+		max-width: 12rem;
+		color: var(--partnerships-ink);
+		font-size: 1.05rem;
+		line-height: 1.1;
+		text-align: right;
+		text-wrap: balance;
+	}
+
+	.partnerships-ledger__list {
+		margin: 0;
+	}
+
+	.partnerships-ledger__list div {
 		display: grid;
-		gap: 0;
+		gap: 0.25rem;
+		grid-template-columns: 6.5rem minmax(0, 1fr);
+		padding: 0.95rem 1rem;
+		border-bottom: 1px solid var(--partnerships-line);
 	}
 
-	.partnerships-inspection-item {
-		border-top: 1px solid var(--partnerships-line);
-		display: grid;
-		gap: 0.85rem;
-		grid-template-columns: 2.4rem minmax(0, 1fr);
-		padding: 0.95rem 0;
+	.partnerships-ledger__list div:last-child {
+		border-bottom: 0;
 	}
 
-	.partnerships-inspection-item:first-child {
-		border-top: 0;
-	}
-
-	.partnerships-inspection-item__number {
-		color: var(--partnerships-accent);
+	.partnerships-ledger dt {
+		color: var(--partnerships-rust);
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		font-weight: 800;
 		letter-spacing: 0.08em;
-		line-height: 1.2;
-		padding-top: 0.15rem;
+		text-transform: uppercase;
 	}
 
-	.partnerships-inspection-item div {
+	.partnerships-ledger dd {
+		margin: 0;
+		color: var(--partnerships-muted);
+		font-size: 0.95rem;
+		line-height: 1.45;
+	}
+
+	.partnerships-signal {
 		display: grid;
-		gap: 0.35rem;
+		gap: 0;
+		border-bottom: 1px solid var(--partnerships-line);
 	}
 
-	.partnerships-process span {
+	.partnerships-signal div {
+		display: grid;
+		gap: 0.3rem;
+		padding-block: 1rem;
+		border-bottom: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-signal div:last-child {
+		border-bottom: 0;
+	}
+
+	.partnerships-signal strong {
+		color: var(--partnerships-ink);
+		font-size: 1rem;
+		line-height: 1.2;
+	}
+
+	.partnerships-signal span {
+		color: var(--partnerships-muted);
+		font-size: 0.95rem;
+		line-height: 1.45;
+	}
+
+	.partnerships-section,
+	.partnerships-fit {
+		padding-block: clamp(2.75rem, 6vw, 5.5rem);
+		border-bottom: 1px solid var(--partnerships-line);
+		scroll-margin-top: 5rem;
+	}
+
+	.partnerships-section__intro,
+	.partnerships-fit__intro {
+		display: grid;
+		gap: 0.8rem;
+		margin-bottom: clamp(1.25rem, 3vw, 2.5rem);
+	}
+
+	.partnerships-section--split {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.partnerships-section h2,
+	.partnerships-fit h2,
+	.partnerships-final h2 {
+		max-width: 16ch;
+		font-size: clamp(2rem, 5vw, 4.25rem);
+		line-height: 0.98;
+	}
+
+	.partnerships-path-list {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.partnerships-path {
+		display: grid;
+		gap: 1rem;
+		border: 1px solid var(--partnerships-line);
+		border-radius: 6px;
+		background: var(--partnerships-paper-deep);
+		padding: clamp(1rem, 2vw, 1.4rem);
+	}
+
+	.partnerships-path--featured {
+		border-color: var(--partnerships-spruce);
+		background:
+			linear-gradient(
+				90deg,
+				color-mix(in oklch, var(--partnerships-spruce) 8%, transparent),
+				transparent 60%
+			),
+			var(--partnerships-paper-deep);
+	}
+
+	.partnerships-path__head {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.partnerships-path__head h3,
+	.partnerships-proof-item h3,
+	.partnerships-fit h3,
+	.partnerships-process h3 {
+		margin: 0;
+		color: var(--partnerships-ink);
+		font-size: clamp(1.25rem, 2vw, 1.65rem);
+		font-weight: 740;
+		letter-spacing: 0;
+		line-height: 1.08;
+		text-wrap: balance;
+	}
+
+	.partnerships-path__price {
+		display: grid;
+		gap: 0.65rem;
+		align-content: start;
+	}
+
+	.partnerships-path__price strong {
+		color: var(--partnerships-ink);
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 700;
-		color: var(--partnerships-accent);
+		font-size: 0.95rem;
+		line-height: 1.2;
+	}
+
+	.partnerships-path__summary {
+		max-width: 74ch;
+		margin: 0;
+		color: var(--partnerships-muted);
+		font-size: 1rem;
+		line-height: 1.55;
+		text-wrap: pretty;
+	}
+
+	.partnerships-path__details {
+		display: grid;
+		gap: 1rem;
+		border-top: 1px solid var(--partnerships-line);
+		padding-top: 1rem;
+	}
+
+	.partnerships-path__details div {
+		display: grid;
+		gap: 0.55rem;
+		align-content: start;
+	}
+
+	.partnerships-path__details h4 {
+		margin: 0;
+		color: var(--partnerships-rust);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		text-transform: uppercase;
+	}
+
+	.partnerships-path__details ul,
+	.partnerships-fit ul {
+		display: grid;
+		gap: 0.45rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.partnerships-path__details li,
+	.partnerships-fit li {
+		position: relative;
+		padding-left: 1rem;
+		color: var(--partnerships-muted);
+		font-size: 0.94rem;
+		line-height: 1.45;
+	}
+
+	.partnerships-path__details li::before,
+	.partnerships-fit li::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0.62em;
+		width: 0.36rem;
+		height: 0.36rem;
+		border-radius: 999px;
+		background: var(--partnerships-spruce);
+	}
+
+	.partnerships-proof-grid {
+		display: grid;
+		border-top: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-proof-item {
+		display: grid;
+		gap: 0.5rem;
+		padding-block: 1rem;
+		border-bottom: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-proof-item p,
+	.partnerships-public-item span,
+	.partnerships-process p,
+	.partnerships-faq-list p {
+		margin: 0;
+		color: var(--partnerships-muted);
+		font-size: 0.98rem;
+		line-height: 1.55;
+		text-wrap: pretty;
+	}
+
+	.partnerships-public-list {
+		display: grid;
+		gap: 0;
+		border-top: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-public-item {
+		display: grid;
+		gap: 0.45rem;
+		padding-block: 1rem;
+		border-bottom: 1px solid var(--partnerships-line);
+		color: inherit;
+		text-decoration: none;
+		transition:
+			color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard);
+	}
+
+	.partnerships-public-item:hover {
+		background: color-mix(in oklch, var(--partnerships-spruce) 6%, transparent);
+	}
+
+	.partnerships-public-item strong {
+		color: var(--partnerships-ink);
+		font-size: 1.15rem;
+		line-height: 1.2;
+	}
+
+	.partnerships-fit {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.partnerships-fit__lists {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.partnerships-fit__lists > div {
+		display: grid;
+		gap: 0.85rem;
+		border: 1px solid var(--partnerships-line);
+		border-radius: 6px;
+		background: var(--partnerships-paper-deep);
+		padding: 1rem;
+	}
+
+	.partnerships-fit__lists > div:last-child .partnerships-fit li::before {
+		background: var(--partnerships-rust);
 	}
 
 	.partnerships-process {
-		grid-template-columns: 1fr;
+		display: grid;
+		gap: 0;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-process li {
+		display: grid;
+		gap: 0.75rem;
+		padding-block: 1rem;
+		border-bottom: 1px solid var(--partnerships-line);
+	}
+
+	.partnerships-process span {
+		color: var(--partnerships-spruce);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.74rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+	}
+
+	.partnerships-process li > div {
+		display: grid;
+		gap: 0.45rem;
 	}
 
 	.partnerships-faq-list {
@@ -731,14 +946,19 @@ const workExamples = [
 	}
 
 	.partnerships-faq-list details {
+		border: 1px solid var(--partnerships-line);
+		border-radius: 6px;
+		background: var(--partnerships-paper-deep);
 		padding: 1rem;
 	}
 
 	.partnerships-faq-list summary {
 		cursor: pointer;
+		color: var(--partnerships-ink);
 		font-size: 1rem;
 		font-weight: 730;
 		line-height: 1.3;
+		text-wrap: balance;
 	}
 
 	.partnerships-faq-list p {
@@ -746,115 +966,106 @@ const workExamples = [
 	}
 
 	.partnerships-final {
-		padding-top: 2.5rem;
-		padding-bottom: 3rem;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
+		display: grid;
+		gap: 1.25rem;
+		align-items: end;
+		padding-block: clamp(2.75rem, 6vw, 5rem);
 	}
 
-	.partnerships-final h2 {
-		max-width: 16ch;
+	.partnerships-final > div {
+		display: grid;
+		gap: 0.85rem;
 	}
 
-	.partnerships-final p {
-		max-width: 38rem;
-	}
-
-	@media (min-width: 640px) {
-		.partnerships-actions {
-			flex-direction: row;
-			align-items: center;
+	@media (min-width: 720px) {
+		.partnerships-signal {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
-		.partnerships-button {
-			width: auto;
+		.partnerships-signal div {
+			padding: 1rem;
+			border-right: 1px solid var(--partnerships-line);
+			border-bottom: 0;
 		}
 
-		.partnerships-work-grid {
+		.partnerships-signal div:last-child {
+			border-right: 0;
+		}
+
+		.partnerships-path__details,
+		.partnerships-fit__lists {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.partnerships-path__details div:last-child {
+			grid-column: 1 / -1;
+		}
+
+		.partnerships-proof-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.partnerships-proof-item {
+			padding: 1rem;
+			border-right: 1px solid var(--partnerships-line);
+		}
+
+		.partnerships-proof-item:nth-child(2n) {
+			border-right: 0;
+		}
+
+		.partnerships-process li {
+			grid-template-columns: 3.5rem minmax(0, 1fr);
 		}
 	}
 
 	@media (min-width: 1100px) {
-		.partnerships-inspection-list {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			column-gap: 1.5rem;
-		}
-
-		.partnerships-inspection-item:nth-child(2) {
-			border-top: 0;
-		}
-	}
-
-	@media (min-width: 1180px) {
-		.partnerships-section__header {
-			display: grid;
-			gap: 1rem 3rem;
-			grid-template-columns: minmax(0, 0.85fr) minmax(22rem, 0.65fr);
-			margin-bottom: 1.75rem;
-		}
-
-		.partnerships-section__header .partnerships-kicker {
-			grid-column: 1 / -1;
-		}
-
-		.partnerships-section__header h2 {
-			max-width: none;
-		}
-
-		.partnerships-section__header p {
-			align-self: end;
-			max-width: 44rem;
-		}
-
-		.partnerships-hero__body {
-			grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.55fr);
-			gap: 2rem;
+		.partnerships-hero {
+			grid-template-columns: minmax(0, 1fr) minmax(24rem, 0.42fr);
 			align-items: end;
 		}
 
-		.partnerships-hero h1 {
-			max-width: 100%;
+		.partnerships-hero__lede {
+			max-width: 58rem;
 		}
 
-		.partnerships-hero__body > p {
-			max-width: 66rem;
-		}
-
-		.partnerships-package {
-			display: grid;
-			grid-template-columns: minmax(13rem, 0.45fr) minmax(0, 0.8fr) minmax(0, 1fr);
-			gap: 1.25rem;
-			align-items: start;
-			padding: 1.15rem;
-		}
-
-		.partnerships-package__boundary-group {
-			grid-column: 1 / -1;
-		}
-
-		.partnerships-process {
-			grid-template-columns: 1fr;
-		}
-
-		.partnerships-process article {
-			display: grid;
-			grid-template-columns: 3rem minmax(12rem, 0.35fr) minmax(0, 1fr);
-			gap: 1rem;
+		.partnerships-path__head {
+			grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.25fr);
 			align-items: start;
 		}
 
-		.partnerships-section--proof .partnerships-work-grid {
-			grid-template-columns: 1fr;
+		.partnerships-path__details {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
-		.partnerships-section--proof .partnerships-work {
-			display: grid;
-			grid-template-columns: minmax(12rem, 0.28fr) minmax(0, 1fr);
-			gap: 1.5rem;
+		.partnerships-path__details div:last-child {
+			grid-column: auto;
+		}
+
+		.partnerships-section--split,
+		.partnerships-fit,
+		.partnerships-final {
+			grid-template-columns: minmax(0, 0.62fr) minmax(28rem, 0.78fr);
 			align-items: start;
-			padding: 1.25rem 0;
+		}
+
+		.partnerships-final {
+			align-items: end;
+		}
+
+		.partnerships-final .partnerships-button {
+			justify-self: end;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.partnerships-button,
+		.partnerships-public-item {
+			transition-duration: 1ms;
+		}
+
+		.partnerships-button:hover {
+			transform: none;
 		}
 	}
 </style>
