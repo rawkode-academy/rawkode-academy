@@ -20,6 +20,8 @@ const briefHref = (path?: string) => {
 	const fields = [...decisionBriefFields];
 	if (path) {
 		fields[1] = `Preferred partnership path: ${path}`;
+	} else {
+		fields[1] = "Preferred partnership path: Not sure yet";
 	}
 
 	return `mailto:david@rawkode.academy?subject=${encodeURIComponent(
@@ -435,7 +437,7 @@ const processSteps = [
 			<div>
 				<h2 id="final-title">Send the decision before the spend is committed.</h2>
 				<p>
-					Rough context is enough: product, target technical evaluator, stakeholders, adoption risk, deadline, and useful links.
+					Rough context is enough: product, target technical evaluator, stakeholders, adoption risk, deadline, and useful links. If the path is unclear, say that.
 				</p>
 			</div>
 			<a class="partnerships-button partnerships-button--primary" href={contactHref}>Email decision brief</a>
