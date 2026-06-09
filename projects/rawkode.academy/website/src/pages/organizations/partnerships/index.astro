@@ -5,7 +5,7 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const contactHref =
-	"mailto:david@rawkode.academy?subject=Partnership%20fit%20check&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+	"mailto:david@rawkode.academy?subject=Decision%20brief%20request&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
 
 const faqs = [
 	{
@@ -81,7 +81,7 @@ const packages = [
 			"No campaign execution",
 			"Your team owns delivery",
 		],
-		cta: "Email partnership brief",
+		cta: "Email decision brief",
 		href: contactHref,
 		featured: true,
 	},
@@ -111,27 +111,27 @@ const packages = [
 const inspectAreas = [
 	{
 		title: "Quickstart truth",
-		body: "Does the first install prove something useful, or hide Helm charts, CRDs, RBAC/IAM, state, egress, tenancy, and failure modes?",
+		body: "Does the first install expose the adoption blockers, or hide CRDs, IAM, egress, tenancy, state, and failure modes?",
 	},
 	{
-		title: "Architecture and trust boundary",
-		body: "Can a platform engineer see control-plane/data-plane boundaries, credential ownership, telemetry, SaaS versus self-hosted trust boundaries, and data retention?",
+		title: "Trust boundary",
+		body: "Can evaluators see control plane, data plane, credentials, telemetry, data retention, SaaS/self-hosted boundaries, and on-call ownership?",
 	},
 	{
 		title: "Demo reproducibility",
-		body: "Does the demo show a believable operating path with Terraform, operators, rollback, upgrade, cost/resource profile, and runbook implications?",
+		body: "Can a real team reproduce, upgrade, roll back, observe, and operate the demo in its own environment without a guided happy path?",
 	},
 	{
-		title: "Migration story",
-		body: "What does a team replace, what breaks, how long migration takes, what data or model movement is required, and what success looks like after day one?",
+		title: "Migration bet",
+		body: "What changes in the current stack, what breaks, how long migration takes, and which success metric proves the move worked?",
 	},
 	{
 		title: "Operational proof",
-		body: "Are RBAC, auth, observability, upgrade, rollback, PII/log retention, GPU scheduling, scale, and failure handling explained well enough for evaluation?",
+		body: "Are auth, RBAC, observability, scaling, upgrade, rollback, privacy, data movement, and failure recovery strong enough for evaluation?",
 	},
 	{
-		title: "Sales engineer handoff",
-		body: "Can sales, DevRel, sales engineering, security, and product experts answer the same technical objections without inventing different stories?",
+		title: "Cross-team handoff",
+		body: "Can marketing, product, DevRel, sales engineering, and technical owners answer the same objection with the same proof?",
 	},
 ];
 
@@ -158,6 +158,21 @@ const workExamples = [
 		body: "Demos and sales narratives that work on stage but collapse under platform, security, SRE, or AI infrastructure objections.",
 	},
 ];
+
+const heroDecisionBriefRows = [
+	{
+		label: "Budget at risk",
+		text: "Launch, docs, demo, DevRel, or sales enablement spend.",
+	},
+	{
+		label: "What stalls",
+		text: "Trust boundary, migration cost, rollback path, or failure ownership.",
+	},
+	{
+		label: "Leave with",
+		text: "Risk map, proof gaps, P0/P1 fixes, and bets to pause.",
+	},
+];
 ---
 
 <Page
@@ -176,32 +191,41 @@ const workExamples = [
 						We work with your marketing, product, DevRel, sales engineering, and technical teams to pressure-test the claims, docs, demos, and proof buyers use to decide. Your team keeps execution; we make the adoption risks obvious before budget moves.
 					</p>
 					<div class="partnerships-actions">
-						<a class="partnerships-button" href={contactHref}>Email partnership brief</a>
+						<a class="partnerships-button" href={contactHref}>Email decision brief</a>
 						<a class="partnerships-button partnerships-button--secondary" href="#packages">Compare packages</a>
 					</div>
 				</div>
-				<aside class="partnerships-trigger" aria-label="Common buying trigger">
-					<p class="partnerships-trigger__label">Use this before you</p>
-					<p>
-						Fund a launch, rewrite docs, rebuild a demo, hire DevRel, or arm sales with a story practitioners may not believe yet.
-					</p>
+				<aside class="partnerships-hero-panel" aria-label="Example partnership decision brief">
+					<p class="partnerships-trigger__label">Decision brief</p>
+					<h2 class="partnerships-hero-panel__title">Adoption risk before budget moves</h2>
+					<div class="partnerships-hero-panel__checks">
+						{heroDecisionBriefRows.map((point) => (
+							<div class="partnerships-hero-panel__check">
+								<span>{point.label}</span>
+								<p>{point.text}</p>
+							</div>
+						))}
+					</div>
 				</aside>
 			</div>
 		</section>
 
-		<section id="inspect" class="partnerships-section partnerships-section--split" aria-labelledby="inspect-title">
+		<section id="inspect" class="partnerships-section partnerships-section--inspect" aria-labelledby="inspect-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">What we inspect</p>
 				<h2 id="inspect-title">Where technical evaluators lose confidence.</h2>
 				<p>
-					This is not generic brand feedback. Bring the same evidence your evaluator needs: architecture notes, docs, demo paths, operational constraints, and the claims your team is already making.
+					This is not generic brand feedback or infrastructure certification. Bring architecture notes, docs paths, demos, operational constraints, ownership proof, and the claims your team is already making.
 				</p>
 			</div>
-			<div class="partnerships-card-grid">
-				{inspectAreas.map((area) => (
-					<article class="partnerships-card">
-						<h3>{area.title}</h3>
-						<p>{area.body}</p>
+			<div class="partnerships-inspection-list">
+				{inspectAreas.map((area, index) => (
+					<article class="partnerships-inspection-item">
+						<span class="partnerships-inspection-item__number">{String(index + 1).padStart(2, "0")}</span>
+						<div>
+							<h3>{area.title}</h3>
+							<p>{area.body}</p>
+						</div>
 					</article>
 				))}
 			</div>
@@ -337,7 +361,7 @@ const workExamples = [
 			<p>
 				Rough context is enough: product, target technical evaluator, decision to review, timing, docs, demos, architecture notes, enablement material, and links if useful.
 			</p>
-			<a class="partnerships-button" href={contactHref}>Email partnership brief</a>
+			<a class="partnerships-button" href={contactHref}>Email decision brief</a>
 		</section>
 	</main>
 </Page>
@@ -402,10 +426,10 @@ const workExamples = [
 	}
 
 	.partnerships-hero__copy > p,
-	.partnerships-trigger p,
+	.partnerships-hero-panel p,
 	.partnerships-section__header p,
 	.partnerships-package p,
-	.partnerships-card p,
+	.partnerships-inspection-item p,
 	.partnerships-work p,
 	.partnerships-process p,
 	.partnerships-faq-list p,
@@ -460,8 +484,7 @@ const workExamples = [
 		border-color: var(--partnerships-line);
 	}
 
-	.partnerships-trigger,
-	.partnerships-card,
+	.partnerships-hero-panel,
 	.partnerships-work,
 	.partnerships-process article,
 	.partnerships-package,
@@ -471,11 +494,51 @@ const workExamples = [
 		background: var(--partnerships-paper-deep);
 	}
 
-	.partnerships-trigger {
-		padding: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.65rem;
+	.partnerships-hero-panel {
+		align-self: start;
+		display: none;
+		gap: 0.6rem;
+		order: 2;
+		padding: clamp(0.85rem, 1.6vw, 1rem);
+	}
+
+	.partnerships-hero-panel__title {
+		color: var(--partnerships-ink) !important;
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: clamp(1.05rem, 3vw, 1.35rem);
+		font-weight: 760;
+		letter-spacing: 0;
+		line-height: 1.05;
+		margin: 0;
+		max-width: 18ch;
+	}
+
+	.partnerships-hero-panel__checks {
+		display: grid;
+		gap: 0.45rem;
+	}
+
+	.partnerships-hero-panel__check {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.18rem;
+		padding-top: 0.45rem;
+	}
+
+	.partnerships-hero-panel__check span {
+		color: var(--partnerships-accent);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 800;
+		letter-spacing: 0.1em;
+		line-height: 1.3;
+		text-transform: uppercase;
+	}
+
+	.partnerships-hero-panel__check p {
+		color: var(--partnerships-ink) !important;
+		font-size: 0.86rem !important;
+		line-height: 1.3 !important;
 	}
 
 	.partnerships-section {
@@ -513,7 +576,6 @@ const workExamples = [
 	}
 
 	.partnerships-package-grid,
-	.partnerships-card-grid,
 	.partnerships-work-grid,
 	.partnerships-process {
 		display: grid;
@@ -539,7 +601,7 @@ const workExamples = [
 	}
 
 	.partnerships-package h3,
-	.partnerships-card h3,
+	.partnerships-inspection-item h3,
 	.partnerships-work h3,
 	.partnerships-process h3 {
 		font-size: 1.25rem;
@@ -617,13 +679,55 @@ const workExamples = [
 		text-transform: uppercase;
 	}
 
-	.partnerships-card,
 	.partnerships-work,
 	.partnerships-process article {
 		padding: 1rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.55rem;
+	}
+
+	.partnerships-section--inspect .partnerships-section__header {
+		margin-bottom: 1.35rem;
+		max-width: none;
+	}
+
+	.partnerships-section--inspect .partnerships-section__header h2 {
+		max-width: 18ch;
+	}
+
+	.partnerships-inspection-list {
+		border-bottom: 1px solid var(--partnerships-line);
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0;
+	}
+
+	.partnerships-inspection-item {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.85rem;
+		grid-template-columns: 2.4rem minmax(0, 1fr);
+		padding: 0.95rem 0;
+	}
+
+	.partnerships-inspection-item:first-child {
+		border-top: 0;
+	}
+
+	.partnerships-inspection-item__number {
+		color: var(--partnerships-accent);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		padding-top: 0.15rem;
+	}
+
+	.partnerships-inspection-item div {
+		display: grid;
+		gap: 0.35rem;
 	}
 
 	.partnerships-process span {
@@ -679,10 +783,39 @@ const workExamples = [
 			width: auto;
 		}
 
-		.partnerships-card-grid,
 		.partnerships-work-grid,
 		.partnerships-process {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (min-width: 760px) {
+		.partnerships-hero-panel {
+			display: grid;
+		}
+
+		.partnerships-section--inspect .partnerships-section__header {
+			display: grid;
+			gap: 1rem 2rem;
+			grid-template-columns: minmax(0, 0.72fr) minmax(0, 1fr);
+		}
+
+		.partnerships-section--inspect .partnerships-section__header .partnerships-kicker {
+			grid-column: 1 / -1;
+		}
+
+		.partnerships-section--inspect .partnerships-section__header p {
+			align-self: end;
+			max-width: 36rem;
+		}
+
+		.partnerships-inspection-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 1.5rem;
+		}
+
+		.partnerships-inspection-item:nth-child(2) {
+			border-top: 0;
 		}
 	}
 
@@ -695,7 +828,7 @@ const workExamples = [
 			align-items: start;
 		}
 
-		.partnerships-trigger {
+		.partnerships-hero-panel {
 			margin-top: 0.2rem;
 		}
 
@@ -708,18 +841,8 @@ const workExamples = [
 			padding: 1.15rem;
 		}
 
-		.partnerships-card-grid {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-
 		.partnerships-work-grid,
 		.partnerships-process {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-	}
-
-	@media (min-width: 1120px) {
-		.partnerships-card-grid {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}
