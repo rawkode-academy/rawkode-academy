@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-09T15:53:51Z",
+  "title": "Design System: Rawkode Academy Website",
+  "extensions": {
+    "colorMeta": {
+      "editorial-paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(0.97 0.008 85)",
+        "tonalRamp": ["oklch(0.97 0.008 85)", "oklch(0.93 0.012 85)", "oklch(0.88 0.014 85)"]
+      },
+      "editorial-ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.18 0.02 60)",
+        "tonalRamp": ["oklch(0.18 0.02 60)", "oklch(0.36 0.015 60)", "oklch(0.58 0.012 60)"]
+      },
+      "editorial-spruce": {
+        "role": "primary",
+        "displayName": "Spruce Signal",
+        "canonical": "oklch(0.52 0.09 165)",
+        "tonalRamp": ["oklch(0.38 0.08 165)", "oklch(0.52 0.09 165)", "oklch(0.70 0.08 165)"]
+      },
+      "editorial-amber": {
+        "role": "secondary",
+        "displayName": "Amber Live",
+        "canonical": "oklch(0.72 0.15 65)",
+        "tonalRamp": ["oklch(0.50 0.12 65)", "oklch(0.72 0.15 65)", "oklch(0.86 0.09 65)"]
+      },
+      "editorial-rust": {
+        "role": "secondary",
+        "displayName": "Rust Proof",
+        "canonical": "oklch(0.55 0.13 40)",
+        "tonalRamp": ["oklch(0.42 0.11 40)", "oklch(0.55 0.13 40)", "oklch(0.76 0.08 40)"]
+      },
+      "editorial-violet": {
+        "role": "tertiary",
+        "displayName": "Violet Edge",
+        "canonical": "oklch(0.50 0.13 290)",
+        "tonalRamp": ["oklch(0.38 0.11 290)", "oklch(0.50 0.13 290)", "oklch(0.72 0.08 290)"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Editorial Display",
+        "purpose": "Hero and masthead statements where publication voice matters."
+      },
+      "headline": {
+        "displayName": "Technical Headline",
+        "purpose": "Major claims and section statements in dense layouts."
+      },
+      "body": {
+        "displayName": "Readable Body",
+        "purpose": "Long-form prose, ledes, cards, and UI explanations."
+      },
+      "label": {
+        "displayName": "Mono Metadata",
+        "purpose": "Schedule, category, state, and compact system labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ring-low",
+        "value": "0 0 0 1px oklch(0.18 0.02 60 / 0.06)",
+        "purpose": "Light-mode surface separation."
+      },
+      {
+        "name": "ring-medium",
+        "value": "0 0 0 1px oklch(0.18 0.02 60 / 0.10)",
+        "purpose": "Light-mode card or panel separation."
+      },
+      {
+        "name": "dark-low",
+        "value": "0 2px 6px rgba(0, 0, 0, 0.4)",
+        "purpose": "Low dark-mode elevation."
+      },
+      {
+        "name": "dark-medium",
+        "value": "0 8px 24px rgba(0, 0, 0, 0.5)",
+        "purpose": "Dark-mode active or floating surfaces."
+      }
+    ],
+    "motion": [
+      {
+        "name": "duration-fast",
+        "value": "120ms",
+        "purpose": "Small state transitions."
+      },
+      {
+        "name": "duration-base",
+        "value": "200ms",
+        "purpose": "Default interaction transitions."
+      },
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default color and state easing."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "640px"
+      },
+      {
+        "name": "tablet",
+        "value": "960px"
+      },
+      {
+        "name": "desktop",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Editorial Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action for editorial and commercial surfaces.",
+      "html": "<button class=\"ds-button ds-button-primary\">Start watching free</button>",
+      "css": ".ds-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; border: 1px solid var(--editorial-ink); border-radius: 4px; padding: 0.8rem 1.1rem; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; line-height: 1; text-transform: uppercase; text-decoration: none; transition: background-color var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard), color var(--duration-base) var(--ease-standard); } .ds-button-primary { background: var(--editorial-ink); color: var(--editorial-paper); } .ds-button-primary:hover { background: var(--editorial-spruce); border-color: var(--editorial-spruce); } .ds-button:focus-visible { outline: 2px solid rgb(var(--brand-primary)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Editorial Card",
+      "kind": "card",
+      "refersTo": "card-editorial",
+      "description": "Compact content unit for sections, formats, offers, and related items.",
+      "html": "<article class=\"ds-card\"><h3>Hands-on and honest</h3><p>We show the work as it happens, including mistakes, dead ends, and fixes.</p></article>",
+      "css": ".ds-card { border: 1px solid var(--editorial-hairline); border-radius: 6px; background: var(--editorial-paper-deep); padding: 1.2rem; color: var(--editorial-ink); } .ds-card h3 { font-family: var(--font-inter-tight), system-ui, sans-serif; font-size: 1.05rem; font-weight: 700; line-height: 1.2; letter-spacing: 0; margin: 0 0 0.55rem; text-wrap: balance; } .ds-card p { font-family: var(--font-inter-tight), system-ui, sans-serif; font-size: 0.94rem; line-height: 1.55; color: var(--editorial-ink-soft); margin: 0; }"
+    },
+    {
+      "name": "Mono Label",
+      "kind": "chip",
+      "refersTo": "label-mono",
+      "description": "Small status, category, or schedule label.",
+      "html": "<span class=\"ds-label\">Upcoming streams</span>",
+      "css": ".ds-label { display: inline-flex; align-items: center; width: fit-content; font-family: var(--font-jetbrains-mono), ui-monospace, monospace; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.14em; line-height: 1; text-transform: uppercase; color: var(--editorial-spruce); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Engineering Field Journal",
+    "overview": "Rawkode Academy uses a restrained editorial system for practical technical learning: paper-like surfaces, ink-led typography, sharp corners, ruled divisions, and a small set of earthy accents. The system should feel like a published engineering notebook with production evidence attached, not a generic developer landing page.",
+    "keyCharacteristics": [
+      "Paper and ink surfaces with restrained accents.",
+      "Sharp editorial radii from 2px to 8px.",
+      "Hairline borders and tonal layering before shadows.",
+      "Dense but readable layouts with deliberate rhythm.",
+      "Copy that names real technical work, tradeoffs, and boundaries."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Accent Rule",
+        "body": "Accent color marks a real state, category, or decision. Do not use accent color as decorative filler.",
+        "section": "colors"
+      },
+      {
+        "name": "The Display Scarcity Rule",
+        "body": "Large italic serif type is a signal. Use it for decisive moments, not as a site-wide reflex.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Borders and tonal shifts come before drop shadows. Shadows should clarify state or dark-mode layering, not decorate.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use src/styles/global.css and uno.config.ts tokens before adding new one-off values.",
+      "Do keep body and lede text at strong contrast against Paper and Dark Base.",
+      "Do write commercial copy as bounded adoption help with clear exclusions."
+    ],
+    "donts": [
+      "Don't make the site feel like slideware, a generic SaaS landing page, a paid-media publication, or a content farm.",
+      "Don't frame partnerships as outsourced DevRel, open-ended consulting retainers, lead generation, guaranteed coverage, or editorial placement.",
+      "Don't use gradient text, glassmorphism, broad purple-blue gradients, oversized rounded cards, or decorative soft shadows."
+    ]
+  }
+}
