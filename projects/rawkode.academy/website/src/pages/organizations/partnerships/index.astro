@@ -160,10 +160,12 @@ const heroProofPoints = [
 
 	<main class="partnerships-page">
 		<section class="partnerships-hero" aria-labelledby="partnerships-title">
-			<p class="partnerships-kicker">Partnerships for DevTools and infrastructure teams</p>
+			<div class="partnerships-hero__header">
+				<p class="partnerships-kicker">Partnerships for DevTools and infrastructure teams</p>
+				<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
+			</div>
 			<div class="partnerships-hero__grid">
 				<div class="partnerships-hero__copy">
-					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
 					<p class="partnerships-hero__lead">
 						Rawkode works with the teams already shaping your product story: product, marketing, DevRel, sales engineering, and engineering. We help turn technical reality into the strategy, proof, education, and narrative developers need before they trust, try, and adopt your product.
 					</p>
@@ -358,6 +360,11 @@ const heroProofPoints = [
 		border-bottom: 1px solid var(--partnerships-line);
 	}
 
+	.partnerships-hero__header {
+		display: grid;
+		gap: clamp(0.85rem, 1.8vw, 1.25rem);
+	}
+
 	.partnerships-kicker,
 	.partnerships-package__label {
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
@@ -373,7 +380,7 @@ const heroProofPoints = [
 	.partnerships-hero__grid {
 		display: grid;
 		gap: clamp(1.75rem, 4vw, 4rem);
-		margin-top: 1rem;
+		margin-top: clamp(1.4rem, 3vw, 2.35rem);
 	}
 
 	.partnerships-hero h1 {
@@ -384,7 +391,8 @@ const heroProofPoints = [
 		letter-spacing: 0;
 		line-height: 1;
 		margin: 0;
-		max-width: 17ch;
+		max-width: 30ch;
+		text-wrap: balance;
 	}
 
 	.partnerships-hero__lead,
@@ -404,7 +412,6 @@ const heroProofPoints = [
 	.partnerships-hero__lead {
 		font-size: clamp(1rem, 2.2vw, 1.18rem);
 		line-height: 1.6;
-		margin-top: clamp(0.9rem, 1.8vw, 1.15rem);
 		max-width: 44rem;
 	}
 
