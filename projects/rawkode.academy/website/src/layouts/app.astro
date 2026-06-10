@@ -119,11 +119,11 @@ import { ThemeToggle } from "@/components/ui";
 
 	<div class="flex flex-col min-h-screen">
 		<div class="flex overflow-hidden flex-1">
-			<main id="main-content" class="w-full h-auto pt-16 md:ml-72 overflow-x-hidden transition-card">
+			<main id="main-content" class="w-full h-auto pt-16 md:ml-64 overflow-x-hidden transition-card">
 				<slot />
 			</main>
 		</div>
-		<div id="footer-container" class="md:ml-72 transition-card">
+		<div id="footer-container" class="md:ml-64 transition-card">
 			<Footer />
 		</div>
 	</div>
@@ -133,7 +133,7 @@ import { ThemeToggle } from "@/components/ui";
 	<style>
 		:global(:root) {
 			--ed-sidebar-collapsed-width: 3.5rem;
-			--ed-sidebar-expanded-width: 18rem;
+			--ed-sidebar-expanded-width: 16rem;
 			--ed-sidebar-current-width: var(--ed-sidebar-expanded-width);
 		}
 
@@ -383,7 +383,8 @@ import { ThemeToggle } from "@/components/ui";
 		}
 
 		const sidebarWidthStorageKey = "sidebar-expanded-width";
-		const defaultSidebarWidth = 288;
+		const defaultSidebarWidth = 256;
+		const legacyDefaultSidebarWidth = 288;
 		const minSidebarWidth = 224;
 		const maxSidebarWidth = 440;
 
@@ -406,6 +407,10 @@ import { ThemeToggle } from "@/components/ui";
 				localStorage.getItem(sidebarWidthStorageKey) || "",
 				10,
 			);
+			if (stored === legacyDefaultSidebarWidth) {
+				localStorage.removeItem(sidebarWidthStorageKey);
+				return defaultSidebarWidth;
+			}
 			const width = Number.isFinite(stored) ? stored : defaultSidebarWidth;
 			return clampSidebarWidth(width);
 		}
@@ -432,11 +437,11 @@ import { ThemeToggle } from "@/components/ui";
 			);
 
 			if (mainContent) {
-				mainContent.classList.remove("md:ml-72", "md:ml-14");
+				mainContent.classList.remove("md:ml-64", "md:ml-72", "md:ml-14");
 			}
 
 			if (footerContainer) {
-				footerContainer.classList.remove("md:ml-72", "md:ml-14");
+				footerContainer.classList.remove("md:ml-64", "md:ml-72", "md:ml-14");
 			}
 		}
 

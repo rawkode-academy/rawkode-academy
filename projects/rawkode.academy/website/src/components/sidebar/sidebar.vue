@@ -25,7 +25,8 @@ const isMobileViewport = ref(false);
 const isResizing = ref(false);
 const collapseStorageKey = "sidebar-collapsed";
 const widthStorageKey = "sidebar-expanded-width";
-const defaultExpandedWidth = 288;
+const defaultExpandedWidth = 256;
+const legacyDefaultExpandedWidth = 288;
 const minExpandedWidth = 224;
 const maxExpandedWidth = 440;
 const expandedWidth = ref(defaultExpandedWidth);
@@ -155,6 +156,10 @@ function readStoredExpandedWidth() {
 		localStorage.getItem(widthStorageKey) || "",
 		10,
 	);
+	if (stored === legacyDefaultExpandedWidth) {
+		localStorage.removeItem(widthStorageKey);
+		return defaultExpandedWidth;
+	}
 	if (!Number.isFinite(stored)) return defaultExpandedWidth;
 	return clampWidth(stored);
 }
@@ -295,11 +300,11 @@ function handleResizeKeydown(event: KeyboardEvent) {
 	overflow: hidden;
 }
 
-.ed-sidebar--expanded { width: var(--ed-sidebar-expanded-width, 18rem); }
+.ed-sidebar--expanded { width: var(--ed-sidebar-expanded-width, 16rem); }
 .ed-sidebar--collapsed { width: var(--ed-sidebar-collapsed-width, 3.5rem); }
 
 .ed-sidebar--expanded.ed-sidebar {
-	min-width: var(--ed-sidebar-expanded-width, 18rem);
+	min-width: var(--ed-sidebar-expanded-width, 16rem);
 }
 
 .ed-sidebar__resize-handle {
