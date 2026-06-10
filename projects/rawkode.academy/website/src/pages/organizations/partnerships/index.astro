@@ -51,15 +51,14 @@ const packages = [
 		price: "£1,000 / month",
 		label: "Entry",
 		bestFor:
-			"Founders and small GTM teams that want a recurring read on whether developers understand, trust, and act on the story they are putting into market.",
+			"Teams that need a recurring outside read on what developers understand, question, trust, or ignore.",
 		outcome:
-			"Each month surfaces the clearest adoption friction, the proof developers still need, and the next bet your team should make.",
+			"Each month gives your team a clearer read on adoption friction, proof gaps, and the next story or surface worth improving.",
 		included: [
-			"Evidence base from public developer discussion and feedback, product surface review, category monitoring, and Rawkode field notes",
-			"Monthly adoption signal brief covering objections, proof gaps, confusing language, and market narrative shifts",
-			"Living adoption signal register across positioning, docs, demos, onboarding, launch story, and team narrative alignment",
-			"Sponsor-disclosed public field note or open takeaway when the learning belongs in the community",
-			"Decision readout: what to keep, change, prove, pause, or escalate next month",
+			"Monthly signal brief drawn from public technical work, product surfaces, category movement, and field notes",
+			"Adoption friction tracked over time across positioning, docs, demos, onboarding, and narrative",
+			"One clear recommendation for what to keep, change, prove, pause, or escalate",
+			"Optional public field note when the learning belongs in the community",
 		],
 		cta: "Get in Touch",
 		href: "mailto:david@rawkode.academy?subject=Signal%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AUseful%20links%3A",
@@ -69,15 +68,15 @@ const packages = [
 		price: "£2,000 / month",
 		label: "Default",
 		bestFor:
-			"Product, marketing, DevRel, sales engineering, and founder teams ready to turn developer signal into a monthly adoption improvement loop.",
+			"Teams ready to turn recurring signal into a focused monthly adoption experiment.",
 		outcome:
-			"Run a focused adoption experiment each month, review what changed, and keep the adoption map moving with your team.",
+			"Each month moves one adoption blocker from vague concern to clearer experiment, evidence, and next step.",
 		included: [
 			"Everything in Signal",
-			"Monthly experiment design session tied to one adoption blocker",
-			"Evidence plan for what to observe, compare, or test in developer-facing work",
-			"Shared learning artifact: teardown notes, docs-friction pattern, demo-path findings, or onboarding rubric",
-			"Living adoption map showing blockers, proof gaps, learning, and next experiments",
+			"Monthly working session around one adoption blocker",
+			"Experiment shape: audience, friction, hypothesis, proof, and success signal",
+			"Shared learning artifact your team can use in docs, demos, onboarding, narrative, or sales handoff",
+			"Adoption map updated with what changed, what remains unclear, and what to test next",
 		],
 		cta: "Get in Touch",
 		href: contactHref,
@@ -88,84 +87,52 @@ const packages = [
 		price: "£3,000 / month",
 		label: "Cohort",
 		bestFor:
-			"Teams that want a curated peer room, expert perspective, and serious practitioner comparison while they shape developer adoption.",
+			"Teams that want peer comparison, expert perspective, and a shared room for serious developer adoption problems.",
 		outcome:
-			"Join the same recurring cohort as other Council members, learn from an industry expert, and compare the adoption blockers shaping your next bets.",
+			"Each month gives your team practitioner patterns from other members, expert perspective, and reusable language for the decisions ahead.",
 		included: [
 			"Everything in Adoption",
-			"Shared monthly cohort room where Council members compare adoption problems and collaborate",
+			"Shared monthly cohort room where Council members compare adoption problems",
 			"Member case reviews around live docs, demos, narratives, onboarding, or launch motions",
 			"Monthly industry expert presentation with working Q&A",
-			"Council pattern notes with risks, experiments, expert takeaways, and reusable decision language",
+			"Council pattern notes with risks, experiments, expert takeaways, and useful decision language",
 		],
 		cta: "Get in Touch",
 		href: "mailto:david@rawkode.academy?subject=Council%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Council%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACohort%20or%20expert%20themes%20that%20would%20help%3A%0D%0AUseful%20links%3A",
 	},
 ];
 
-const compoundPoints = [
-	{
-		title: "Signal explains what blocks trust.",
-		body: "The evidence base stays visible: public developer discussion and feedback, category monitoring, product surface review, Rawkode field notes, and disclosed community learning.",
-	},
-	{
-		title: "Adoption tests a focused change.",
-		body: "The record gets stronger over time: proof gaps, friction patterns, experiments, outcomes, and sharper next-month decisions.",
-	},
-	{
-		title: "Council adds peer and expert pattern recognition.",
-		body: "Members compare live adoption problems in a shared cohort and leave with reusable patterns from the room.",
-	},
-];
-
 const inspectAreas = [
 	{
-		title: "Adoption strategy",
-		body: "Who needs to care, what belief needs to change, what friction blocks adoption, and what your team should do next.",
+		title: "The story does not match the technical reality.",
+		body: "The product is strong, but the public narrative skips the tradeoffs, proof, or context developers need before they trust it.",
 	},
 	{
-		title: "Technical narrative",
-		body: "Turn architecture, tradeoffs, and product depth into a story that developers, platform teams, and technical buyers can follow.",
+		title: "The docs explain features, not confidence.",
+		body: "Developers can understand what the product does and still not know whether it fits their workflow, team, risk, or next step.",
 	},
 	{
-		title: "Developer education",
-		body: "Shape docs, demos, tutorials, learning paths, and examples around the real journey from curiosity to evaluation to internal recommendation.",
+		title: "DevRel activity is busy but hard to connect.",
+		body: "Content, community, education, and feedback all exist, but they do not clearly ladder into adoption.",
 	},
 	{
-		title: "Sales enablement",
-		body: "Help sales engineering and GTM teams explain technical value without flattening the product into claims practitioners will reject.",
-	},
-	{
-		title: "DevRel direction",
-		body: "Decide what DevRel should own, which developer behaviors matter, and how community, education, and product feedback should connect.",
-	},
-	{
-		title: "Cross-team alignment",
-		body: "Get product, marketing, DevRel, sales engineering, and engineering working from the same adoption story and the same technical reality.",
+		title: "Sales conversations expose unresolved proof gaps.",
+		body: "Technical buyers ask about operations, migration, security, cost, or fit, and the team has to assemble the answer late.",
 	},
 ];
 
-const triggers = [
-	"You are launching and the story is not turning technical interest into adoption.",
-	"Your team knows the product is strong, but developers are not seeing why it matters.",
-	"Docs and demos explain features but do not help teams evaluate, recommend, or adopt.",
-	"DevRel or community activity is busy, but nobody agrees what it should change.",
-	"Sales conversations stall because technical buyers cannot see fit, migration path, or operational reality.",
-	"Product, marketing, DevRel, and sales engineering are telling different versions of the story.",
-];
-
-const workExamples = [
+const loopSteps = [
 	{
-		title: "Positioning and category",
-		body: "Clarify who the product is for, what adoption moment matters, and which claim deserves to lead.",
+		title: "Read the signal.",
+		body: "Look at public developer discussion, product surfaces, docs, demos, field notes, and the questions your team is hearing.",
 	},
 	{
-		title: "Developer journey",
-		body: "Map the path from first interest to hands-on evaluation, internal recommendation, and repeated use.",
+		title: "Choose the friction.",
+		body: "Decide which adoption blocker matters now: unclear positioning, missing proof, weak evaluation path, disconnected education, or unresolved technical objection.",
 	},
 	{
-		title: "Team handoff",
-		body: "Make sure product, marketing, DevRel, sales engineering, and engineering can explain the same value without pretending to be the same function.",
+		title: "Turn it into motion.",
+		body: "Shape the next experiment, field note, adoption map, cohort discussion, or internal narrative your team can actually use.",
 	},
 ];
 
@@ -198,7 +165,7 @@ const heroProofPoints = [
 				<div class="partnerships-hero__copy">
 					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
 					<p class="partnerships-hero__lead">
-						Rawkode works alongside marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
+						Rawkode works with the teams already shaping your product story: product, marketing, DevRel, sales engineering, and engineering. We help turn technical reality into the strategy, proof, education, and narrative developers need before they trust, try, and adopt your product.
 					</p>
 					<div class="partnerships-actions">
 						<a class="partnerships-button" href={contactHref}>Get in Touch</a>
@@ -221,10 +188,10 @@ const heroProofPoints = [
 
 		<section id="inspect" class="partnerships-section partnerships-section--inspect" aria-labelledby="inspect-title">
 			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Where we help</p>
-				<h2 id="inspect-title">Make adoption clearer across the teams already doing the work.</h2>
+				<p class="partnerships-kicker">Adoption clarity</p>
+				<h2 id="inspect-title">Where adoption gets unclear.</h2>
 				<p>
-					The work is strategy, signal, and cross-team clarity: what developers need to understand, believe, try, and repeat before adoption moves.
+					The problem is rarely that the team is not doing enough. It is usually that product, marketing, DevRel, sales engineering, and engineering are each seeing a different part of the adoption story. Developers feel that gap before the dashboard does.
 				</p>
 			</div>
 			<div class="partnerships-inspection-list">
@@ -240,22 +207,56 @@ const heroProofPoints = [
 			</div>
 		</section>
 
+		<section class="partnerships-section partnerships-section--split partnerships-section--loop" aria-labelledby="loop-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Monthly loop</p>
+				<h2 id="loop-title">The work repeats monthly because adoption keeps moving.</h2>
+				<p>
+					Each month should leave your team with a clearer read on what developers believe, where confidence breaks down, and what proof or experiment should come next.
+				</p>
+			</div>
+			<div class="partnerships-work-grid partnerships-work-grid--three">
+				{loopSteps.map((step) => (
+					<article class="partnerships-work">
+						<h3>{step.title}</h3>
+						<p>{step.body}</p>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="partnerships-section partnerships-section--split partnerships-section--proof" aria-labelledby="proof-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Why Rawkode</p>
+				<h2 id="proof-title">The Work Behind the Signal</h2>
+				<p>
+					Rawkode's public work sits close to the people your product needs to earn trust from: maintainers, platform engineers, DevTool builders, infrastructure teams, and technical practitioners. It brings outside pattern recognition while respecting the independence of the people doing the work.
+				</p>
+			</div>
+			<div class="partnerships-work-grid">
+				<article class="partnerships-work">
+					<h3>Rawkode Live</h3>
+					<p><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> show how technical people explain tradeoffs, evaluate tools, ask questions, and decide whether something is worth trying.</p>
+				</article>
+				<article class="partnerships-work">
+					<h3>Klustered</h3>
+					<p><a href="/shows/klustered">Public Kubernetes failure-mode triage</a> shows what practitioners trust under pressure: operational clarity, debugging paths, honest constraints, and proof that survives contact with real systems.</p>
+				</article>
+				<article class="partnerships-work">
+					<h3>Courses and education</h3>
+					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> shows where developers get stuck, what they need before they feel confident, and how learning turns into evaluation and repeated use.</p>
+				</article>
+			</div>
+		</section>
+
 		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Partnership paths</p>
-				<h2 id="packages-title">Build a monthly adoption loop your team can keep using.</h2>
+				<h2 id="packages-title">Start where your adoption work needs support.</h2>
 				<p>
-					Start with recurring practitioner signal, move into monthly adoption experiments, then join the Council when shared cohort learning and expert perspective are worth bringing into the room.
+					Each path is month-to-month. Start with outside signal, move into focused experiments, or join Council when peer comparison and expert perspective matter.
 				</p>
 			</div>
-			<ul class="partnerships-compound-list" aria-label="What compounds each month">
-				{compoundPoints.map((point) => (
-					<li>
-						<h3>{point.title}</h3>
-						<p>{point.body}</p>
-					</li>
-				))}
-			</ul>
 			<div class="partnerships-package-grid">
 				{packages.map((pkg) => (
 					<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
@@ -279,64 +280,15 @@ const heroProofPoints = [
 			</div>
 		</section>
 
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="triggers-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Good fit</p>
-				<h2 id="triggers-title">Use this when adoption is the problem, not output volume.</h2>
-			</div>
-			<ul class="partnerships-trigger-list">
-				{triggers.map((trigger) => <li>{trigger}</li>)}
-			</ul>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split partnerships-section--proof" aria-labelledby="proof-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Why Rawkode</p>
-				<h2 id="proof-title">Built from years of public practitioner work.</h2>
-			</div>
-			<div class="partnerships-work-grid">
-				<article class="partnerships-work">
-					<h3>Rawkode Live</h3>
-					<p><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> across Kubernetes, observability, identity, platform engineering, security, data, AI infrastructure, and developer tooling.</p>
-				</article>
-				<article class="partnerships-work">
-					<h3>Klustered</h3>
-					<p><a href="/shows/klustered">Public Kubernetes failure-mode triage under pressure</a>, with teams working through broken clusters, operational constraints, and real debugging paths.</p>
-				</article>
-				<article class="partnerships-work">
-					<h3>Courses and education</h3>
-					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> that shows how developers learn infrastructure, where they get stuck, and what they need before a tool becomes part of their workflow.</p>
-				</article>
-			</div>
-		</section>
-
-		<section class="partnerships-section partnerships-section--split" aria-labelledby="examples-title">
-			<div class="partnerships-section__header">
-				<p class="partnerships-kicker">Adoption work</p>
-				<h2 id="examples-title">What gets clearer.</h2>
-				<p>
-					The partnership should make the next move easier for the people already responsible for product, marketing, DevRel, sales engineering, and engineering.
-				</p>
-			</div>
-			<div class="partnerships-work-grid">
-				{workExamples.map((item) => (
-					<article class="partnerships-work">
-						<h3>{item.title}</h3>
-						<p>{item.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="process-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Process</p>
-				<h2 id="process-title">Email context first. Call only when there is a fit.</h2>
+				<h2 id="process-title">Send context first. Call only when there is a fit.</h2>
 			</div>
 			<div class="partnerships-process">
 				<article>
 					<span>01</span>
-					<h3>Email context</h3>
+					<h3>Send context</h3>
 					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, current team rhythm, and links if they help.</p>
 				</article>
 				<article>
@@ -615,42 +567,6 @@ const heroProofPoints = [
 		gap: 1rem;
 	}
 
-	.partnerships-compound-list {
-		border-bottom: 1px solid var(--partnerships-line);
-		border-top: 1px solid var(--partnerships-line);
-		display: grid;
-		gap: 0;
-		list-style: none;
-		margin: 0 0 1rem;
-		padding: 0;
-	}
-
-	.partnerships-compound-list li {
-		border-top: 1px solid var(--partnerships-line);
-		display: grid;
-		gap: 0.35rem;
-		padding: 0.85rem 0;
-	}
-
-	.partnerships-compound-list li:first-child {
-		border-top: 0;
-	}
-
-	.partnerships-compound-list h3 {
-		font-size: 1rem;
-		font-weight: 730;
-		letter-spacing: 0;
-		line-height: 1.15;
-		margin: 0;
-	}
-
-	.partnerships-compound-list p {
-		color: var(--partnerships-muted);
-		font-size: 0.94rem;
-		line-height: 1.45;
-		margin: 0;
-	}
-
 	.partnerships-package {
 		padding: 0.9rem;
 		display: flex;
@@ -700,8 +616,7 @@ const heroProofPoints = [
 		color: var(--partnerships-ink) !important;
 	}
 
-	.partnerships-package__included,
-	.partnerships-trigger-list {
+	.partnerships-package__included {
 		list-style: none;
 		padding: 0;
 		margin: 0;
@@ -709,8 +624,7 @@ const heroProofPoints = [
 		gap: 0.45rem;
 	}
 
-	.partnerships-package__included li,
-	.partnerships-trigger-list li {
+	.partnerships-package__included li {
 		position: relative;
 		padding-left: 1rem;
 		color: var(--partnerships-muted);
@@ -718,8 +632,7 @@ const heroProofPoints = [
 		line-height: 1.4;
 	}
 
-	.partnerships-package__included li::before,
-	.partnerships-trigger-list li::before {
+	.partnerships-package__included li::before {
 		content: "";
 		position: absolute;
 		left: 0;
@@ -898,23 +811,8 @@ const heroProofPoints = [
 			max-width: 58rem;
 		}
 
-		.partnerships-compound-list {
+		.partnerships-work-grid--three {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-
-		.partnerships-compound-list li {
-			border-left: 1px solid var(--partnerships-line);
-			border-top: 0;
-			padding: 1rem clamp(1rem, 1.5vw, 1.25rem);
-		}
-
-		.partnerships-compound-list li:first-child {
-			border-left: 0;
-			padding-left: 0;
-		}
-
-		.partnerships-compound-list li:last-child {
-			padding-right: 0;
 		}
 
 		.partnerships-package {
