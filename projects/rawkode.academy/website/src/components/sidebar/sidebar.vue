@@ -5,6 +5,7 @@ import {
 	MapIcon,
 	MegaphoneIcon,
 	NewspaperIcon,
+	RocketLaunchIcon,
 	Squares2X2Icon,
 	TvIcon,
 	VideoCameraIcon,
@@ -24,7 +25,8 @@ const isMobileViewport = ref(false);
 const isResizing = ref(false);
 const collapseStorageKey = "sidebar-collapsed";
 const widthStorageKey = "sidebar-expanded-width";
-const defaultExpandedWidth = 288;
+const defaultExpandedWidth = 256;
+const legacyDefaultExpandedWidth = 288;
 const minExpandedWidth = 224;
 const maxExpandedWidth = 440;
 const expandedWidth = ref(defaultExpandedWidth);
@@ -33,7 +35,16 @@ const baseItems: RawNavItem[] = [
 	{ name: "News", href: "/news", icon: MegaphoneIcon },
 	{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
 	{ name: "Articles", href: "/read", icon: NewspaperIcon },
-	{ name: "Technology Matrix", href: "/technology/matrix", icon: Squares2X2Icon },
+	{
+		name: "Technology Matrix",
+		href: "/technology/matrix",
+		icon: Squares2X2Icon,
+	},
+	{
+		name: "Partnerships",
+		href: "/organizations/partnerships",
+		icon: RocketLaunchIcon,
+	},
 	{ name: "Courses", href: "/courses", icon: AcademicCapIcon },
 	{ name: "Learning Paths", href: "/learning-paths", icon: MapIcon },
 	{ name: "Shows", href: "/shows", icon: TvIcon },
@@ -130,7 +141,10 @@ const expandSidebar = () => {
 };
 
 function maxWidthForViewport() {
-	return Math.min(maxExpandedWidth, Math.max(minExpandedWidth, Math.floor(window.innerWidth * 0.42)));
+	return Math.min(
+		maxExpandedWidth,
+		Math.max(minExpandedWidth, Math.floor(window.innerWidth * 0.42)),
+	);
 }
 
 function clampWidth(width: number) {
@@ -138,7 +152,14 @@ function clampWidth(width: number) {
 }
 
 function readStoredExpandedWidth() {
-	const stored = Number.parseInt(localStorage.getItem(widthStorageKey) || "", 10);
+	const stored = Number.parseInt(
+		localStorage.getItem(widthStorageKey) || "",
+		10,
+	);
+	if (stored === legacyDefaultExpandedWidth) {
+		localStorage.removeItem(widthStorageKey);
+		return defaultExpandedWidth;
+	}
 	if (!Number.isFinite(stored)) return defaultExpandedWidth;
 	return clampWidth(stored);
 }
@@ -174,7 +195,10 @@ function stopResize() {
 	if (!isResizing.value) return;
 	isResizing.value = false;
 	document.body.classList.remove("ed-sidebar-resizing");
-	localStorage.setItem(widthStorageKey, String(Math.round(expandedWidth.value)));
+	localStorage.setItem(
+		widthStorageKey,
+		String(Math.round(expandedWidth.value)),
+	);
 	window.removeEventListener("pointermove", handleResizeMove);
 	window.removeEventListener("pointerup", stopResize);
 	applySidebarWidth();
@@ -182,7 +206,10 @@ function stopResize() {
 
 function resizeBy(delta: number) {
 	expandedWidth.value = clampWidth(expandedWidth.value + delta);
-	localStorage.setItem(widthStorageKey, String(Math.round(expandedWidth.value)));
+	localStorage.setItem(
+		widthStorageKey,
+		String(Math.round(expandedWidth.value)),
+	);
 	applySidebarWidth();
 }
 
@@ -223,12 +250,6 @@ function handleResizeKeydown(event: KeyboardEvent) {
 		]"
 		aria-label="Sidebar navigation"
 	>
-		<div class="ed-sidebar__index" aria-hidden="true">
-			<span class="ed-sidebar__index-label">
-				{{ isCollapsed ? "Nav" : "Navigation" }}
-			</span>
-		</div>
-
 		<nav class="ed-sidebar__nav">
 			<ul class="ed-sidebar__list">
 				<li v-for="item in navItems" :key="item.href" class="ed-sidebar__item">
@@ -279,11 +300,11 @@ function handleResizeKeydown(event: KeyboardEvent) {
 	overflow: hidden;
 }
 
-.ed-sidebar--expanded { width: var(--ed-sidebar-expanded-width, 18rem); }
+.ed-sidebar--expanded { width: var(--ed-sidebar-expanded-width, 16rem); }
 .ed-sidebar--collapsed { width: var(--ed-sidebar-collapsed-width, 3.5rem); }
 
 .ed-sidebar--expanded.ed-sidebar {
-	min-width: var(--ed-sidebar-expanded-width, 18rem);
+	min-width: var(--ed-sidebar-expanded-width, 16rem);
 }
 
 .ed-sidebar__resize-handle {
@@ -347,26 +368,6 @@ function handleResizeKeydown(event: KeyboardEvent) {
 	.ed-sidebar--collapsed {
 		display: none;
 	}
-}
-
-.ed-sidebar__index {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.875rem 1rem;
-	border-bottom: 1px solid var(--editorial-hairline);
-	font-family: var(--font-jetbrains-mono), monospace;
-	font-size: 0.6875rem;
-	font-weight: 500;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	color: var(--editorial-ink-mute);
-	min-height: 44px;
-}
-
-.ed-sidebar--collapsed .ed-sidebar__index {
-	justify-content: center;
-	padding: 0.875rem 0;
 }
 
 .ed-sidebar__nav {

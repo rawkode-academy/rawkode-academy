@@ -137,28 +137,71 @@ async function generateNavigationItems(
 			description: "Subscribe to RSS feeds",
 		},
 		{
+			href: "/organizations",
+			title: "For Organizations",
+			category: "Organizations",
+			description:
+				"Partnerships for cloud-native and DevTool teams reviewing technical buyer proof, docs, demos, launches, and sales enablement",
+			keywords: [
+				"partnerships",
+				"fit check",
+				"practitioner proof",
+				"platform engineering",
+				"SRE",
+				"marketing",
+				"product",
+				"DevRel",
+				"docs",
+				"demo",
+				"launch",
+			],
+		},
+		{
+			href: "/organizations/lets-chat",
+			title: "Partnership Fit Check",
+			category: "Organizations",
+			description:
+				"Email a partnership brief for a technical adoption fit check",
+			keywords: [
+				"fit check",
+				"adoption",
+				"technical evaluator",
+				"platform engineering",
+				"marketing",
+				"product",
+				"DevRel",
+				"docs",
+				"demo",
+				"launch",
+			],
+		},
+		{
 			href: "/organizations/branding",
 			title: "Branding",
 			category: "Organizations",
 			description: "Branding and logo usage guidelines",
 		},
 		{
-			href: "/organizations/consulting",
-			title: "Consulting",
-			category: "Organizations",
-			description: "Consulting services",
-		},
-		{
-			href: "/organizations/training",
-			title: "Training",
-			category: "Organizations",
-			description: "Training services",
-		},
-		{
 			href: "/organizations/partnerships",
 			title: "Partnerships",
 			category: "Organizations",
-			description: "Partner with us",
+			description:
+				"Partnerships for cloud-native and DevTool teams with evaluation risk in docs, demos, launches, technical proof, and sales enablement",
+			keywords: [
+				"partnerships",
+				"practitioner proof",
+				"technical evaluator",
+				"platform engineering",
+				"SRE",
+				"Kubernetes",
+				"AI infrastructure",
+				"marketing",
+				"product",
+				"DevRel",
+				"docs",
+				"demo",
+				"launch",
+			],
 		},
 		{
 			href: "/maintainers/share-your-project",
@@ -175,7 +218,10 @@ async function generateNavigationItems(
 			description: page.description,
 			href: page.href,
 			category: page.category,
-			keywords: [page.title.toLowerCase(), page.category.toLowerCase()],
+			keywords: page.keywords ?? [
+				page.title.toLowerCase(),
+				page.category.toLowerCase(),
+			],
 		});
 	});
 

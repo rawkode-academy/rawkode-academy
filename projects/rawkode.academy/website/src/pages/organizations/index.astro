@@ -1,314 +1,216 @@
 ---
-import Button from "@/components/common/Button.vue";
-import { Hero } from "@/components/ui";
-import PartnerLogos from "@/components/partner/logos.astro";
+import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const services = [
+const contactHref =
+	"mailto:david@rawkode.academy?subject=Decision%20brief%20request&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+
+const practitionerSignals = [
 	{
-		icon: "rocket",
-		title: "Strategic Partnerships",
-		description:
-			"Accelerate developer adoption through authentic technical content and strategic guidance.",
-		link: "/organizations/partnerships",
-		features: [
-			"Expert-led technical content",
-			"Developer community engagement",
-			"Flexible partnership tiers",
-			"Measurable outcomes",
-		],
+		value: "Proof",
+		label: "Docs, demos, architecture, and operational claims",
 	},
 	{
-		icon: "wrench",
-		title: "Expert Consulting",
-		description:
-			"Transform your developer experience and go-to-market strategy with battle-tested expertise.",
-		link: "/organizations/consulting",
-		features: [
-			"Developer experience audits",
-			"Technical strategy workshops",
-			"Developer tools optimization",
-			"Platform engineering guidance",
-		],
+		value: "Risk",
+		label: "Trust boundaries, migration, RBAC/IAM, egress, and tenancy",
 	},
 	{
-		icon: "academic",
-		title: "Team Training",
-		description:
-			"Empower your teams with hands-on cloud native training programs tailored to your needs.",
-		link: "/organizations/training",
-		features: [
-			"Custom curriculum design",
-			"Hands-on workshops",
-			"Real-world scenarios",
-			"Ongoing learning support",
-		],
+		value: "Owners",
+		label: "Marketing, product, DevRel, sales engineering, and technical teams",
+	},
+];
+
+const adoptionSignals = [
+	{
+		value: "£1k",
+		label: "Signal from",
 	},
 	{
-		icon: "information",
-		title: "Branding",
-		description:
-			"Access our official brand assets - logos, palette, and usage guidelines for co-branding and partnerships.",
-		link: "/organizations/branding",
-		features: [
-			"Logo and monogram assets",
-			"Color palettes and CSS variables",
-			"Downloadable brand kit",
-		],
+		value: "£2k/mo",
+		label: "Adoption from",
 	},
+	{
+		value: "£3k/mo",
+		label: "Launch from",
+	},
+];
+
+const fitAreas = [
+	{
+		title: "Partnerships",
+		body: "Work with marketing, product, DevRel, sales engineering, and technical owners to expose the claims, docs, demos, and operational gaps that stall technical buyers.",
+		items: [
+			"Signal",
+			"Adoption",
+			"Launch",
+			"Technical buyer proof",
+		],
+		href: "/organizations/partnerships",
+		cta: "Compare partnership paths",
+	},
+];
+
+const utilityLinks = [
+	{
+		title: "Brand assets",
+		body: "Use the official Rawkode Academy marks, palette, and usage guidance when an approved collaboration needs co-branding.",
+		href: "/organizations/branding",
+		cta: "View brand kit",
+	},
+];
+
+const badFits = [
+	"You need outsourced DevRel execution or someone to run the function for you.",
+	"You want paid coverage, guaranteed mentions, media inventory, or leads.",
+	"You want a generic workshop disconnected from adoption strategy.",
 ];
 ---
 
-<style>
-	@reference "../../styles/global.css";
-
-	.service-card {
-		@apply bg-white dark:bg-gray-800 rounded-sm border border-surface p-8 transition-card hover: hover:border-primary/50 dark:hover:border-primary/50;
-	}
-
-	.service-icon {
-		@apply w-12 h-12 mb-6 text-primary;
-	}
-
-	.feature-check {
-		@apply w-5 h-5 text-green-500 flex-shrink-0;
-	}
-
-	.stat-card {
-		@apply text-center p-6;
-	}
-
-	.stat-value {
-		@apply text-4xl md:text-5xl font-bold text-primary mb-2;
-	}
-
-	.stat-label {
-		@apply text-muted text-sm uppercase tracking-wide;
-	}
-</style>
-
 <Page
-	title="Enterprise Solutions"
-	description="Partner with Rawkode Academy for strategic partnerships, expert consulting, and team training to accelerate your cloud native journey."
+	title="For Organizations"
+	description="Cloud-native and DevTool partnerships for companies that need sharper technical proof, launch, docs, demo, and DevRel strategy."
 >
-	<!-- Hero Section -->
-	<Hero
-		title="Enterprise Solutions for Modern Teams"
-		subtitle="Accelerate your cloud native journey with strategic partnerships, expert consulting, and hands-on training programs designed to drive measurable results."
-		badge="For Organizations"
-		background="blobs"
-		pattern="grid"
-		wave={true}
-		stats={[
-			{ label: 'Global Reach' },
-			{ label: 'Proven Expertise' },
-			{ label: 'Measurable Impact' }
-		]}
-		client:load
+	<EditorialShell
+		eyebrow="For Organizations"
+		title="Partnerships"
+		lede="We work with your marketing, product, DevRel, sales engineering, and technical owners to find the claims practitioners cannot verify before they trust a DevTool, cloud-native platform, or infrastructure product. Your team keeps execution ownership; the partnership sharpens the path."
 	>
-		<Fragment slot="actions">
-			<Button href="#services" variant="primary" size="lg">Explore Services</Button>
-			<Button href="/organizations/lets-chat" variant="secondary" size="lg">Schedule a Call</Button>
-		</Fragment>
-	</Hero>
-
-	<!-- Stats Section -->
-	<section class="py-16 bg-gray-50 dark:bg-gray-900">
-		<div class="max-w-6xl mx-auto px-4">
-			<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-				<div class="stat-card">
-					<div class="stat-value">100K+</div>
-					<div class="stat-label">Developers Reached</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value">90+</div>
-					<div class="stat-label">Technologies Covered</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value">500+</div>
-					<div class="stat-label">Hours of Content</div>
-				</div>
-				<div class="stat-card">
-					<div class="stat-value">1M+</div>
-					<div class="stat-label">Developer Views</div>
-				</div>
-			</div>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href="/organizations/partnerships">Compare packages</a>
+			<a class="editorial-button editorial-button--secondary" href={contactHref}>Email decision brief</a>
 		</div>
-	</section>
 
-	<!-- Why Choose Us Section -->
-	<section class="py-16 bg-white dark:bg-gray-800">
-		<div class="max-w-6xl mx-auto px-4">
-			<div class="text-center mb-12">
-				<h2 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
-					Why Choose Rawkode Academy?
-				</h2>
-				<p class="text-xl text-muted max-w-3xl mx-auto">
-					We bridge the critical gap between technical innovation and developer understanding
-				</p>
-			</div>
-
- <div class="grid md:grid-cols-3 gap-8">
-				<div class="text-center">
-					<div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-						<svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-						</svg>
-					</div>
-					<h3 class="text-xl font-bold text-primary-content mb-3">Authentic Expertise</h3>
-					<p class="text-muted">
-						Deep technical knowledge combined with real-world experience building and deploying cloud native applications
-					</p>
-				</div>
-
-				<div class="text-center">
-					<div class="inline-flex items-center justify-center w-16 h-16 bg-secondary/10 rounded-full mb-4">
-						<svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-						</svg>
-					</div>
-					<h3 class="text-xl font-bold text-primary-content mb-3">Engaged Community</h3>
-					<p class="text-muted">
-						Access to a passionate, global community of developers actively seeking to learn and adopt new technologies
-					</p>
-				</div>
-
-				<div class="text-center">
-					<div class="inline-flex items-center justify-center w-16 h-16 bg-tertiary/10 rounded-full mb-4">
-						<svg class="w-8 h-8 text-tertiary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-						</svg>
-					</div>
-					<h3 class="text-xl font-bold text-primary-content mb-3">Measurable Results</h3>
-					<p class="text-muted">
-						Data-driven approach with comprehensive analytics and reporting to track engagement and adoption
-					</p>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<!-- Services Section -->
-	<section id="services" class="py-20 bg-gray-50 dark:bg-gray-900">
-		<div class="max-w-7xl mx-auto px-4">
-			<div class="text-center mb-16">
-				<h2 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
-					Our Services
-				</h2>
-				<p class="text-xl text-muted max-w-3xl mx-auto">
-					Tailored solutions to meet your organization's unique needs
-				</p>
-			</div>
-
-			<div class="grid md:grid-cols-3 gap-8">
-				{services.map((service) => (
-					<div class="service-card">
- <div class="mb-6">
- {service.icon === 'rocket' && (
- <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
- </svg>
- )}
- {service.icon === 'wrench' && (
- <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
- </svg>
- )}
-							{service.icon === 'information' && (
-								<svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z"></path>
-								</svg>
-							)}
- {service.icon === 'academic' && (
- <svg class="w-12 h-12 mb-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path d="M12 14l9-5-9-5-9 5 9 5z"></path>
- <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
- </svg>
- )}
- </div>
-
-						<h3 class="text-2xl font-bold text-primary-content mb-3">
-							{service.title}
-						</h3>
-
-						<p class="text-muted mb-6">
-							{service.description}
-						</p>
-
- <ul class="space-y-3 mb-8">
- {service.features.map((feature) => (
- <li class="flex items-center text-secondary-content">
- <svg class="w-5 h-5 text-green-500 flex-shrink-0 mr-2" fill="currentColor" viewBox="0 0 20 20">
- <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
- </svg>
- {feature}
- </li>
- ))}
- </ul>
-
-						<a
-							href={service.link}
-							class="inline-flex items-center text-primary hover:text-secondary font-semibold transition-colors"
-						>
-							Learn More
-							<svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-							</svg>
-						</a>
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				{practitionerSignals.map((signal) => (
+					<div class="editorial-stat">
+						<span class="editorial-stat__value">{signal.value}</span>
+						<span class="editorial-stat__label">{signal.label}</span>
 					</div>
 				))}
 			</div>
-		</div>
-	</section>
+		</section>
 
-	<!-- Trusted Partners Section -->
-	<section class="py-16 bg-white dark:bg-gray-800">
-		<div class="max-w-6xl mx-auto px-4">
-			<div class="text-center mb-12">
-				<h2 class="text-3xl md:text-4xl font-bold text-primary-content mb-4">
-					Trusted by Innovative Companies
-				</h2>
-				<p class="text-xl text-muted">
-					Join these organizations who have partnered with us to accelerate their cloud native journey
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">What is active now</p>
+				<h2 class="editorial-section__title">The company route is partnerships</h2>
+				<p class="editorial-section__lede">
+					For companies, the active paths are Signal from £1,000/month, Adoption from £2,000/month, or Launch from £3,000/month, focused on practitioner signal, launch clarity, and buyer confidence.
 				</p>
 			</div>
-
-			<div class="mt-10">
-				<PartnerLogos />
+			<div class="editorial-grid editorial-grid--2">
+				{fitAreas.map((area) => (
+					<article class="editorial-card organizations-card">
+						<h3 class="editorial-card__title">{area.title}</h3>
+						<p class="editorial-card__body">{area.body}</p>
+						<ul class="editorial-list">
+							{area.items.map((item) => <li>{item}</li>)}
+						</ul>
+						<a class="organizations-card__link" href={area.href}>{area.cta}</a>
+					</article>
+				))}
 			</div>
-		</div>
-	</section>
+		</section>
 
-	<!-- CTA Section -->
-	<section class="py-20 bg-[var(--editorial-ink)] text-white">
-		<div class="max-w-4xl mx-auto px-4 text-center">
-			<h2 class="text-3xl md:text-4xl font-bold mb-6">
-				Ready to Accelerate Your Cloud Native Journey?
-			</h2>
-			<p class="text-xl mb-8 opacity-90">
-				Schedule a consultation to explore how we can help you achieve your goals
-			</p>
-			<div class="flex flex-col sm:flex-row justify-center gap-4">
-				<a
-					href="/organizations/lets-chat"
-					class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-white text-primary rounded-sm hover:bg-gray-100 transition-smooth hover:"
-				>
-					Schedule a Call
-					<svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-					</svg>
-				</a>
-				<a
-					href="#services"
-					class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold bg-transparent border-2 border-white text-white rounded-sm hover:bg-white/10 transition-smooth"
-				>
-					View Services
-				</a>
+		<section class="editorial-section">
+			<div class="editorial-stat-grid">
+				{adoptionSignals.map((signal) => (
+					<div class="editorial-stat">
+						<span class="editorial-stat__value">{signal.value}</span>
+						<span class="editorial-stat__label">{signal.label}</span>
+					</div>
+				))}
 			</div>
-		</div>
-	</section>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Utility</p>
+				<h2 class="editorial-section__title">Brand assets are not the commercial offer</h2>
+			</div>
+			<div class="editorial-grid editorial-grid--2">
+				{utilityLinks.map((link) => (
+					<article class="editorial-card organizations-card">
+						<h3 class="editorial-card__title">{link.title}</h3>
+						<p class="editorial-card__body">{link.body}</p>
+						<a class="organizations-card__link" href={link.href}>{link.cta}</a>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Fit check</p>
+				<h2 class="editorial-section__title">This is useful when the adoption path is unclear</h2>
+			</div>
+			<div class="editorial-card editorial-card--paper">
+				<p class="editorial-card__body">
+					Bring the product, the evaluator, the current adoption risk, the docs, demos, architecture notes, enablement material, and any useful infrastructure artifacts: Helm charts, CRDs, RBAC/IAM notes, Terraform, telemetry, tenancy, runbooks, or demo environments. We will tell you whether it fits a signal partnership, adoption partnership, launch partnership, or no fit.
+				</p>
+			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Bad fit</p>
+				<h2 class="editorial-section__title">What this does not solve</h2>
+			</div>
+			<ul class="organizations-list">
+				{badFits.map((item) => <li>{item}</li>)}
+			</ul>
+		</section>
+	</EditorialShell>
 </Page>
+
+<style>
+	.organizations-card {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.organizations-card__link {
+		align-self: flex-start;
+		margin-top: auto;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+
+	.organizations-card__link:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.organizations-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.organizations-list li {
+		border-left: 3px solid var(--editorial-red, #b42318);
+		padding: 0.8rem 1rem;
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink-soft);
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	@media (max-width: 760px) {
+		.organizations-card__link {
+			width: 100%;
+		}
+	}
+</style>

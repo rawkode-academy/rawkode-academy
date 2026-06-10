@@ -143,8 +143,6 @@ const shows = defineCollection({
 		}),
 });
 
-// HINT: image() is described here -> https://docs.astro.build/en/guides/images/#images-in-content-collections
-
 const people = defineCollection({
 	loader: glob({
 		pattern: ["**/*.{md,mdx}"],
@@ -326,7 +324,7 @@ const testimonials = defineCollection({
 			image: z.string(),
 			link: z.string().optional(),
 		}),
-		type: z.enum(["maintainer", "partner", "consulting", "viewer"]),
+		type: z.enum(["maintainer", "partner", "viewer"]),
 	}),
 });
 

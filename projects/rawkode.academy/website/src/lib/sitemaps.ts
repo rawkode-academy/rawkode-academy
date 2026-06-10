@@ -64,8 +64,6 @@ const staticPages: StaticPageDefinition[] = [
 	{ path: "/feeds", changefreq: "monthly", priority: 0.5 },
 	// Organization / commercial pages.
 	{ path: "/organizations", changefreq: "monthly", priority: 0.7 },
-	{ path: "/organizations/consulting", changefreq: "monthly", priority: 0.7 },
-	{ path: "/organizations/training", changefreq: "monthly", priority: 0.7 },
 	{ path: "/organizations/partnerships", changefreq: "monthly", priority: 0.7 },
 	{ path: "/organizations/lets-chat", changefreq: "monthly", priority: 0.5 },
 	{ path: "/organizations/branding", changefreq: "yearly", priority: 0.4 },

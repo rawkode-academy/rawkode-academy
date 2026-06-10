@@ -1,452 +1,223 @@
 ---
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
-import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
 import Page from "@/wrappers/page.astro";
-import controlplaneLogo from "../../../components/partner/logos/controlplane.svg?raw";
-import fermyonLogo from "../../../components/partner/logos/fermyon.svg?raw";
-import guidepadLogo from "../../../components/partner/logos/guidepad.svg?raw";
-import herokuLogo from "../../../components/partner/logos/heroku.svg?raw";
-import microsoftLogo from "../../../components/partner/logos/microsoft.svg?raw";
-import ngrokLogo from "../../../components/partner/logos/ngrok.svg?raw";
-import spectrocloudLogo from "../../../components/partner/logos/spectrocloud.svg?raw";
-import teleportLogo from "../../../components/partner/logos/teleport.svg?raw";
-import wundergraphLogo from "../../../components/partner/logos/wundergraph.svg?raw";
-import zitadelLogo from "../../../components/partner/logos/zitadel.svg?raw";
 
 export const prerender = true;
 
-const partnershipFAQs = [
+const contactHref =
+	"mailto:david@rawkode.academy?subject=Partnership%20fit&body=Company%2Fcategory%3A%0D%0AProduct%20or%20platform%3A%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AWhat%20your%20team%20wants%20to%20learn%20or%20improve%20next%3A%0D%0AUseful%20links%3A";
+
+const faqs = [
 	{
-		question: "What is the minimum partnership duration?",
+		question: "When is this useful?",
 		answer:
-			"Partnerships are structured as annual engagements because developer trust compounds through repeated technical proof, not one campaign burst. We still plan the work in quarterly cycles so each quarter has clear deliverables and reporting.",
+			"When your product has real technical depth, but adoption is getting stuck between positioning, docs, demos, DevRel activity, sales conversations, and the proof developers need before they trust it.",
 	},
 	{
-		question: "What are the payment terms for partnerships?",
+		question: "What happens in the first month?",
 		answer:
-			"Nip and Dram are typically paid annually upfront. Blend and Malt can be paid annually, semi-annually, or quarterly depending on procurement needs. We confirm the commercial structure during the fit call.",
+			"We start with your current adoption challenge, the people your product needs to reach, and the surfaces developers already see. The first month should leave your team with a clearer signal read, sharper friction, and a practical next move.",
 	},
 	{
-		question: "Do you replace our internal DevRel team?",
+		question: "What changes month to month?",
 		answer:
-			"No. We assist and extend internal DevRel, marketing, product, and engineering teams. Partners use Rawkode Academy for external practitioner credibility, content production capacity, technical feedback, and distribution into a relevant developer audience.",
+			"The product, category, competitors, launch moments, buyer questions, and developer reactions keep moving. Each month updates the signal history, friction backlog, experiment record, and decisions your team can act on next.",
 	},
 	{
-		question: "How do you measure partnership success?",
+		question: "How do we choose between Signal, Adoption, and Council?",
 		answer:
-			"We align on success measures before work starts. Reporting can include views, watch time, retention, referral traffic with UTM links, developer questions, docs friction, product feedback, content reuse, and partner-defined adoption indicators.",
+			"Start with Signal if you need recurring outside perspective. Choose Adoption when you want to turn that signal into a focused monthly experiment. Choose Council when peer comparison, expert perspective, and a shared room would make the work stronger.",
 	},
 	{
-		question: "Can our team reuse the content?",
+		question: "What does Council add beyond Adoption?",
 		answer:
-			"Yes. Partnership planning includes the assets your sales, marketing, DevRel, and product teams can reuse, such as clips, tutorials, demo paths, workshop material, launch recaps, and technical feedback summaries.",
+			"Council adds a monthly cohort room with other member teams, member case reviews, an industry expert presentation, and pattern notes your team can use when the adoption problem benefits from more than one company's perspective.",
 	},
 	{
-		question: "How do you qualify potential partners?",
+		question: "What do you need from our team?",
 		answer:
-			"We look for developer tools and cloud native companies with useful technology, technical access for review, and a willingness to teach through real usage. We are not a fit for scripted praise, paid mentions with no technical review, or guaranteed pipeline claims from a single asset.",
+			"Rough context is enough to start: product, category, target developers, team stakeholders, current adoption challenge, current GTM, DevRel, or product rhythm, and links if they help.",
 	},
 	{
-		question: "I have additional questions about partnerships",
+		question: "What is intentionally out of scope?",
 		answer:
-			"Book a fit call and we can talk through your product, audience, timing, internal team shape, and the smallest useful partnership tier.",
+			"This is not outsourced DevRel, campaign planning, custom content production on demand, lead generation, audience rental, or open-ended access. Your team owns execution; Rawkode brings practitioner signal, strategic critique, and useful adoption patterns.",
 	},
 ];
 
-const proofStats = [
-	{ value: "90+", label: "Technologies covered" },
-	{ value: "400+", label: "Videos, articles, and lessons" },
-	{ value: "1M+", label: "Developer views" },
-];
-
-const partnerProofs = [
+const packages = [
 	{
-		company: "Fermyon",
-		label: "Developer education",
-		headline: "Hands-on challenges moved developers from awareness to use.",
-		body: "Rawkode Academy introduced developers to server-side WebAssembly, promoted Spin and Fermyon Cloud, and created Advent of Spin challenges that gave developers a practical way to try the technology.",
-		quote:
-			"We saw notable results in developers joining our community and using our services.",
-		source: "Head of DevRel at Fermyon",
-	},
-	{
-		company: "Guidepad",
-		label: "Product positioning",
-		headline: "Strategy, demo videos, and market guidance for an early-stage platform.",
-		body: "Guidepad used the partnership for cloud native positioning, product strategy, and demo assets while the company was still sharpening its market story.",
-		quote:
-			"The guidance and insights consistently elevate our product and strategy.",
-		source: "Reggie Wilkerson, Co-Founder and CEO at Guidepad",
-	},
-];
-
-const capabilities = [
-	{
-		title: "Technical proof",
-		body: "Tutorials, livestreams, workshops, and product walkthroughs built around real developer workflows instead of abstract positioning.",
-		items: ["Tutorials", "Live builds", "Workshops"],
-	},
-	{
-		title: "DevRel assistance",
-		body: "Extra content capacity, launch support, practitioner feedback, and campaign execution that supports your internal team without replacing it.",
-		items: ["Content support", "Launch coverage", "Team enablement"],
-	},
-	{
-		title: "Product signal",
-		body: "Developer experience feedback, docs friction, demo path review, and market context from people who build with cloud native tools in public.",
-		items: ["DX review", "Docs feedback", "Positioning"],
-	},
-];
-
-const first90Days = [
-	{
-		title: "Fit and focus",
-		timing: "Days 1-14",
-		body: "Confirm the developer audience, product moments, internal owners, technical access, and success measures.",
-	},
-	{
-		title: "Technical proof",
-		timing: "Days 15-45",
-		body: "Shape the demo path, plan the first tutorial or live build, and capture product or documentation feedback.",
-	},
-	{
-		title: "Distribution and signal",
-		timing: "Days 46-90",
-		body: "Publish, package reusable assets, report what developers responded to, and choose the next quarter's focus.",
-	},
-];
-
-const measurementSignals = [
-	{
-		title: "Content performance",
-		body: "Views, watch time, retention, engagement, and the topics developers keep returning to.",
-	},
-	{
-		title: "Qualified traffic",
-		body: "Referral traffic, UTM-tagged links, campaign landing pages, and partner-owned conversion points where available.",
-	},
-	{
-		title: "Developer signal",
-		body: "Questions, objections, docs gaps, product friction, and feedback that can help DevRel, product, and engineering teams.",
-	},
-	{
-		title: "Reusable assets",
-		body: "Clips, tutorials, demos, recaps, workshop material, and internal enablement notes your team can keep using.",
-	},
-];
-
-const partnershipTiers = [
-	{
-		label: "Visibility Partner",
-		name: "Nip",
-		price: "12,000",
-		cadence: "Quarterly rhythm",
-		summary:
-			"A focused visibility layer for teams that want steady awareness with a relevant developer audience.",
-		bestFor: "Best for staying present without a heavy program.",
-		featured: false,
-		features: [
-			"Partner placement across the academy",
-			"One technical livestream per quarter",
-			"Quarterly short-form clip pack",
-			"Social distribution for each release",
-			"Quarterly performance report",
+		name: "Signal",
+		price: "£1,000 / month",
+		label: "Entry",
+		bestFor:
+			"Teams that need a recurring outside read on what developers understand, question, trust, or ignore.",
+		outcome:
+			"Each month gives your team a clearer read on adoption friction, proof gaps, and the next story or surface worth improving.",
+		included: [
+			"Monthly signal brief drawn from public technical work, product surfaces, category movement, and field notes",
+			"Adoption friction tracked over time across positioning, docs, demos, onboarding, and narrative",
+			"One clear recommendation for what to keep, change, prove, pause, or escalate",
+			"Optional public field note when the learning belongs in the community",
 		],
+		cta: "Get in Touch",
+		href: "mailto:david@rawkode.academy?subject=Signal%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AUseful%20links%3A",
 	},
 	{
-		label: "Launch Partner",
-		name: "Dram",
-		price: "24,000",
-		cadence: "1 video per quarter",
-		summary:
-			"Launch and tutorial support for teams that need repeatable product stories developers can inspect.",
-		bestFor: "Best for feature launches and repeatable demo paths.",
+		name: "Adoption",
+		price: "£2,000 / month",
+		label: "Default",
+		bestFor:
+			"Teams ready to turn recurring signal into a focused monthly adoption experiment.",
+		outcome:
+			"Each month moves one adoption blocker from vague concern to clearer experiment, evidence, and next step.",
+		included: [
+			"Everything in Signal",
+			"Monthly working session around one adoption blocker",
+			"Experiment shape: audience, friction, hypothesis, proof, and success signal",
+			"Shared learning artifact your team can use in docs, demos, onboarding, narrative, or sales handoff",
+			"Adoption map updated with what changed, what remains unclear, and what to test next",
+		],
+		cta: "Get in Touch",
+		href: contactHref,
 		featured: true,
-		features: [
-			"Everything in Nip",
-			"One produced technical video per quarter",
-			"Launch or tutorial plan",
-			"One technical article or tutorial per quarter",
-			"Quarterly strategy session",
+	},
+	{
+		name: "Council",
+		price: "£3,000 / month",
+		label: "Cohort",
+		bestFor:
+			"Teams that want peer comparison, expert perspective, and a shared room for serious developer adoption problems.",
+		outcome:
+			"Each month gives your team practitioner patterns from other members, expert perspective, and reusable language for the decisions ahead.",
+		included: [
+			"Everything in Adoption",
+			"Shared monthly cohort room where Council members compare adoption problems",
+			"Member case reviews around live docs, demos, narratives, onboarding, or launch motions",
+			"Monthly industry expert presentation with working Q&A",
+			"Council pattern notes with risks, experiments, expert takeaways, and useful decision language",
 		],
-	},
-	{
-		label: "Adoption Partner",
-		name: "Blend",
-		price: "48,000",
-		cadence: "1 video every 2 months",
-		summary:
-			"Deeper collaboration for teams turning awareness into education, adoption, and internal learning.",
-		bestFor: "Best for multi-format adoption campaigns.",
-		featured: false,
-		features: [
-			"Everything in Dram",
-			"One produced technical video every two months",
-			"Workshop or live build program",
-			"Priority calendar placement",
-			"Monthly working session",
-		],
-	},
-	{
-		label: "Strategic Partner",
-		name: "Malt",
-		price: "96,000",
-		cadence: "1 video per month",
-		summary:
-			"Category-level partnership for teams that want annual planning, executive context, and deeper market signal.",
-		bestFor: "Best for teams shaping a category or major roadmap.",
-		featured: false,
-		features: [
-			"Everything in Blend",
-			"One produced technical video per month",
-			"Annual category narrative and content roadmap",
-			"Executive advisory sessions",
-			"Custom reporting and co-marketing plan",
-		],
+		cta: "Get in Touch",
+		href: "mailto:david@rawkode.academy?subject=Council%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Council%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACohort%20or%20expert%20themes%20that%20would%20help%3A%0D%0AUseful%20links%3A",
 	},
 ];
 
-const comparisonPoints = [
+const inspectAreas = [
 	{
-		title: "Conference sponsorship",
-		body: "Useful for presence, but the value fades quickly. A partnership creates technical assets and feedback loops that keep working after launch week.",
+		title: "The story does not match the technical reality.",
+		body: "The product is strong, but the public narrative skips the tradeoffs, proof, or context developers need before they trust it.",
 	},
 	{
-		title: "Podcast or newsletter buys",
-		body: "Good reach, limited proof. Rawkode Academy turns attention into demos, tutorials, workshops, and product questions your team can use.",
+		title: "The docs explain features, not confidence.",
+		body: "Developers can understand what the product does and still not know whether it fits their workflow, team, risk, or next step.",
 	},
 	{
-		title: "Paid ads",
-		body: "Fast distribution, low trust. Technical education gives developers a reason to inspect, try, and discuss the product.",
+		title: "DevRel activity is busy but hard to connect.",
+		body: "Content, community, education, and feedback all exist, but they do not clearly ladder into adoption.",
 	},
 	{
-		title: "Internal DevRel",
-		body: "We do not replace your team. We extend it with external practitioner credibility, production capacity, and market feedback.",
-	},
-];
-
-const goodFit = [
-	"Cloud native, infrastructure, platform, security, or developer tooling product",
-	"DevRel, marketing, product, or engineering owner who can collaborate",
-	"Access to technical review, demos, docs, or roadmap context",
-	"Interest in annual education, not a one-off paid mention",
-];
-
-const poorFit = [
-	"Scripted praise with no technical inspection",
-	"Guaranteed pipeline attribution from one asset",
-	"No access to product, docs, or a technical reviewer",
-	"Campaigns that only need broad consumer awareness",
-];
-
-const currentPartnerLogos = [
-	{
-		name: "Spectro Cloud",
-		url: "https://spectrocloud.com",
-		logo: spectrocloudLogo,
-	},
-	{
-		name: "Teleport",
-		url: "https://goteleport.com",
-		logo: teleportLogo,
+		title: "Sales conversations expose unresolved proof gaps.",
+		body: "Technical buyers ask about operations, migration, security, cost, or fit, and the team has to assemble the answer late.",
 	},
 ];
 
-const previousPartnerLogos = [
+const loopSteps = [
 	{
-		name: "ControlPlane",
-		url: "https://controlplane.io",
-		logo: controlplaneLogo,
+		title: "Read the signal.",
+		body: "Look at public developer discussion, product surfaces, docs, demos, field notes, and the questions your team is hearing.",
 	},
 	{
-		name: "Fermyon",
-		url: "https://www.fermyon.com",
-		logo: fermyonLogo,
+		title: "Choose the friction.",
+		body: "Decide which adoption blocker matters now: unclear positioning, missing proof, weak evaluation path, disconnected education, or unresolved technical objection.",
 	},
 	{
-		name: "Guidepad",
-		url: "https://guidepad.io",
-		logo: guidepadLogo,
-	},
-	{
-		name: "Heroku",
-		url: "https://heroku.com",
-		logo: herokuLogo,
-	},
-	{
-		name: "Microsoft Azure",
-		url: "https://azure.com",
-		logo: microsoftLogo,
-	},
-	{
-		name: "ngrok",
-		url: "https://ngrok.com",
-		logo: ngrokLogo,
-	},
-	{
-		name: "WunderGraph",
-		url: "https://wundergraph.com",
-		logo: wundergraphLogo,
-	},
-	{
-		name: "Zitadel",
-		url: "https://zitadel.com",
-		logo: zitadelLogo,
+		title: "Turn it into motion.",
+		body: "Shape the next experiment, field note, adoption map, cohort discussion, or internal narrative your team can actually use.",
 	},
 ];
 
-function withPartnerUtm(url: string): string {
-	const u = new URL(url);
-	u.searchParams.set("utm_source", "rawkode-academy");
-	u.searchParams.set("utm_medium", "partner-logo");
-	u.searchParams.set("utm_campaign", "partnerships-page");
-	return u.toString();
-}
+const heroProofPoints = [
+	{
+		label: "Keep",
+		body: "Your team owns execution.",
+	},
+	{
+		label: "Bring",
+		body: "Practitioner signal and strategic critique.",
+	},
+	{
+		label: "Decide",
+		body: "What to prove, change, or stop before the next investment.",
+	},
+];
 ---
 
 <Page
-	title="Strategic Technology Partnerships"
-	description="Partner with Rawkode Academy to accelerate developer adoption through technical content, DevRel assistance, and developer experience feedback."
+	title="Partnerships"
+	description="Cloud-native and DevTool partnerships for teams improving developer adoption across product, marketing, DevRel, sales engineering, and engineering."
 >
-	<FAQJsonLD questions={partnershipFAQs} slot="extra-head" />
+	<FAQJsonLD questions={faqs} slot="extra-head" />
 
-	<div class="partnerships-page">
-		<CollectionMasthead
-			title="Partnerships"
-			dek="DevRel support programs."
-		/>
-
-		<section class="partnerships-hero">
-			<div class="partnerships-hero__copy">
-				<p class="partnerships-kicker">
-					For DevRel, marketing, and developer tools teams
-				</p>
-				<h2>Turn developer attention into product adoption.</h2>
-				<p>
-					Rawkode Academy helps cloud native and developer tools teams create
-					hands-on tutorials, livestreams, workshops, and technical feedback
-					loops that make products easier to understand, trust, and adopt.
-				</p>
-				<p class="partnerships-fit-line">
-					We assist internal DevRel teams with external credibility, production
-					capacity, and audience access.
-				</p>
-				<div class="partnerships-actions">
-					<a class="partnerships-button partnerships-button--primary" href="/organizations/lets-chat">
-						Book a 30-minute fit call
-					</a>
-					<a class="partnerships-button partnerships-button--secondary" href="#tiers">
-						Compare tiers
-					</a>
-				</div>
-			</div>
-
-			<dl class="partnerships-proof" aria-label="Partnership proof">
-				{proofStats.map((stat) => (
-					<div>
-						<dt>{stat.value}</dt>
-						<dd>{stat.label}</dd>
+	<main class="partnerships-page">
+		<section class="partnerships-hero" aria-labelledby="partnerships-title">
+			<p class="partnerships-kicker">Partnerships for DevTools and infrastructure teams</p>
+			<div class="partnerships-hero__grid">
+				<div class="partnerships-hero__copy">
+					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
+					<p class="partnerships-hero__lead">
+						Rawkode works with the teams already shaping your product story: product, marketing, DevRel, sales engineering, and engineering. We help turn technical reality into the strategy, proof, education, and narrative developers need before they trust, try, and adopt your product.
+					</p>
+					<div class="partnerships-actions">
+						<a class="partnerships-button" href={contactHref}>Get in Touch</a>
+						<a class="partnerships-link" href="#packages">View Plans</a>
 					</div>
-				))}
-			</dl>
-		</section>
-
-		<section class="partnerships-section partnerships-section--proof">
-			<header class="partnerships-section__head partnerships-section__head--inline">
-				<div>
-					<p class="partnerships-kicker">Partner proof</p>
-					<h2>Proof that lives beyond launch week.</h2>
 				</div>
+				<aside class="partnerships-hero__rail" aria-label="How the partnership helps">
+					<p class="partnerships-hero__rail-label">Developer growth grounded in technical reality</p>
+					<ul>
+						{heroProofPoints.map((point) => (
+							<li>
+								<span>{point.label}</span>
+								<p>{point.body}</p>
+							</li>
+						))}
+					</ul>
+				</aside>
+			</div>
+		</section>
+
+		<section id="inspect" class="partnerships-section partnerships-section--inspect" aria-labelledby="inspect-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Adoption clarity</p>
+				<h2 id="inspect-title">Where adoption gets unclear.</h2>
 				<p>
-					The work is designed to become reusable education, product signal, and
-					market context, not a single sponsored impression.
+					The problem is rarely that the team is not doing enough. It is usually that product, marketing, DevRel, sales engineering, and engineering are each seeing a different part of the adoption story. Developers feel that gap before the dashboard does.
 				</p>
-			</header>
-
-			<div class="partnerships-case-grid">
-				{partnerProofs.map((proof) => (
-					<article class="partnerships-case">
-						<p class="partnerships-case__label">
-							{proof.company} / {proof.label}
-						</p>
-						<h3>{proof.headline}</h3>
-						<p>{proof.body}</p>
-						<blockquote>
-							<p>{proof.quote}</p>
-							<cite>{proof.source}</cite>
-						</blockquote>
+			</div>
+			<div class="partnerships-inspection-list">
+				{inspectAreas.map((area, index) => (
+					<article class="partnerships-inspection-item">
+						<span class="partnerships-inspection-item__number">{String(index + 1).padStart(2, "0")}</span>
+						<div>
+							<h3>{area.title}</h3>
+							<p>{area.body}</p>
+						</div>
 					</article>
 				))}
 			</div>
 		</section>
 
-		<section id="benefits" class="partnerships-section">
-			<header class="partnerships-section__head">
-				<p class="partnerships-kicker">What we do</p>
-				<h2>Ship technical proof developers believe.</h2>
-			</header>
-
-			<div class="partnerships-capabilities">
-				{capabilities.map((capability, index) => (
-					<article class="partnerships-capability">
-						<span class="partnerships-capability__number">
-							{String(index + 1).padStart(2, "0")}
-						</span>
-						<h3>{capability.title}</h3>
-						<p>{capability.body}</p>
-						<ul>
-							{capability.items.map((item) => (
-								<li>{item}</li>
-							))}
-						</ul>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section id="tiers" class="partnerships-section partnerships-section--deep">
-			<header class="partnerships-section__head partnerships-section__head--inline">
-				<div>
-					<p class="partnerships-kicker">Partnership tiers</p>
-					<h2>Choose the video cadence and support level.</h2>
-				</div>
+		<section class="partnerships-section partnerships-section--split partnerships-section--loop" aria-labelledby="loop-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Monthly loop</p>
+				<h2 id="loop-title">The work repeats monthly because adoption keeps moving.</h2>
 				<p>
-					All tiers are annual and can mix content creation, strategy,
-					developer education, and developer experience feedback.
+					Each month should leave your team with a clearer read on what developers believe, where confidence breaks down, and what proof or experiment should come next.
 				</p>
-			</header>
-
-			<div class="partnerships-tiers">
-				{partnershipTiers.map((tier) => (
-					<article class:list={["partnerships-tier", tier.featured && "partnerships-tier--featured"]}>
-						{tier.featured && <span class="partnerships-tier__flag">Recommended</span>}
-						<p class="partnerships-tier__label">{tier.label}</p>
-						<h3>{tier.name}</h3>
-						<p class="partnerships-tier__price">{tier.price}</p>
-						<p class="partnerships-tier__term">USD annually / {tier.cadence}</p>
-						<p class="partnerships-tier__summary">{tier.summary}</p>
-						<p class="partnerships-tier__best">{tier.bestFor}</p>
-						<ul>
-							{tier.features.map((feature) => (
-								<li>{feature}</li>
-							))}
-						</ul>
-						<a href="/organizations/lets-chat">Discuss {tier.label}</a>
-					</article>
-				))}
 			</div>
-		</section>
-
-		<section class="partnerships-section partnerships-section--deep">
-			<header class="partnerships-section__head">
-				<p class="partnerships-kicker">First 90 days</p>
-				<h2>Start with focus, then publish and learn.</h2>
-			</header>
-
-			<div class="partnerships-workflow">
-				{first90Days.map((step, index) => (
-					<article>
-						<span>{String(index + 1).padStart(2, "0")} / {step.timing}</span>
+			<div class="partnerships-work-grid partnerships-work-grid--three">
+				{loopSteps.map((step) => (
+					<article class="partnerships-work">
 						<h3>{step.title}</h3>
 						<p>{step.body}</p>
 					</article>
@@ -454,794 +225,626 @@ function withPartnerUtm(url: string): string {
 			</div>
 		</section>
 
-		<section class="partnerships-section">
-			<header class="partnerships-section__head partnerships-section__head--inline">
-				<div>
-					<p class="partnerships-kicker">Measurement</p>
-					<h2>Make success visible to every team involved.</h2>
-				</div>
+		<section class="partnerships-section partnerships-section--split partnerships-section--proof" aria-labelledby="proof-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Why Rawkode</p>
+				<h2 id="proof-title">The Work Behind the Signal</h2>
 				<p>
-					Reporting connects awareness, education, reusable assets, and product
-					feedback so DevRel, marketing, sales, and product can all use the
-					work.
+					Rawkode's public work sits close to the people your product needs to earn trust from: maintainers, platform engineers, DevTool builders, infrastructure teams, and technical practitioners. It brings outside pattern recognition while respecting the independence of the people doing the work.
 				</p>
-			</header>
+			</div>
+			<div class="partnerships-work-grid">
+				<article class="partnerships-work">
+					<h3>Rawkode Live</h3>
+					<p><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> show how technical people explain tradeoffs, evaluate tools, ask questions, and decide whether something is worth trying.</p>
+				</article>
+				<article class="partnerships-work">
+					<h3>Klustered</h3>
+					<p><a href="/shows/klustered">Public Kubernetes failure-mode triage</a> shows what practitioners trust under pressure: operational clarity, debugging paths, honest constraints, and proof that survives contact with real systems.</p>
+				</article>
+				<article class="partnerships-work">
+					<h3>Courses and education</h3>
+					<p><a href="/courses/teleport-for-kubernetes">Runnable technical education</a> shows where developers get stuck, what they need before they feel confident, and how learning turns into evaluation and repeated use.</p>
+				</article>
+			</div>
+		</section>
 
-			<div class="partnerships-measurement">
-				{measurementSignals.map((signal) => (
-					<article>
-						<h3>{signal.title}</h3>
-						<p>{signal.body}</p>
+		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Partnership paths</p>
+				<h2 id="packages-title">Start where your adoption work needs support.</h2>
+				<p>
+					Each path is month-to-month. Start with outside signal, move into focused experiments, or join Council when peer comparison and expert perspective matter.
+				</p>
+			</div>
+			<div class="partnerships-package-grid">
+				{packages.map((pkg) => (
+					<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
+						<div class="partnerships-package__top">
+							<p class="partnerships-package__label">{pkg.label}</p>
+							<h3>{pkg.name}</h3>
+							<p class="partnerships-package__price">{pkg.price}</p>
+							<a class="partnerships-button" href={pkg.href}>{pkg.cta}</a>
+						</div>
+						<div class="partnerships-package__summary">
+							<p>{pkg.bestFor}</p>
+							<p class="partnerships-package__outcome">{pkg.outcome}</p>
+						</div>
+						<div>
+							<ul class="partnerships-package__included">
+								{pkg.included.map((item) => <li>{item}</li>)}
+							</ul>
+						</div>
 					</article>
 				))}
 			</div>
 		</section>
 
-		<section class="partnerships-section partnerships-section--compare">
-			<div class="partnerships-compare__copy">
-				<p class="partnerships-kicker">Why this format</p>
-				<h2>More useful than one-off visibility.</h2>
-				<p>
-					Sponsorship can create a moment. Technical education creates proof,
-					reuse, and feedback your team can keep compounding.
-				</p>
+		<section class="partnerships-section partnerships-section--split" aria-labelledby="process-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Process</p>
+				<h2 id="process-title">Send context first. Call only when there is a fit.</h2>
 			</div>
-			<div class="partnerships-compare__points">
-				{comparisonPoints.map((point) => (
-					<article>
-						<h3>{point.title}</h3>
-						<p>{point.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="partnerships-section">
-			<header class="partnerships-section__head">
-				<p class="partnerships-kicker">Fit</p>
-				<h2>Designed for teams that want technical trust.</h2>
-			</header>
-
-			<div class="partnerships-fit-grid">
-				<article class="partnerships-fit-card">
-					<h3>Good fit</h3>
-					<ul>
-						{goodFit.map((item) => (
-							<li>{item}</li>
-						))}
-					</ul>
+			<div class="partnerships-process">
+				<article>
+					<span>01</span>
+					<h3>Send context</h3>
+					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, current team rhythm, and links if they help.</p>
 				</article>
-				<article class="partnerships-fit-card">
-					<h3>Not a fit</h3>
-					<ul>
-						{poorFit.map((item) => (
-							<li>{item}</li>
-						))}
-					</ul>
+				<article>
+					<span>02</span>
+					<h3>Get a fit reply</h3>
+					<p>David will say whether this fits Signal, Adoption, or Council, or whether it is not a good fit.</p>
+				</article>
+				<article>
+					<span>03</span>
+					<h3>Work with your team</h3>
+					<p>Each month produces signal, experiment decisions, or cohort synthesis your team can reuse in strategy, narrative, education, proof, objections, and alignment.</p>
 				</article>
 			</div>
 		</section>
 
-		<section class="partnerships-section partnerships-section--credibility">
-			<div class="partnerships-credibility__copy">
-				<p class="partnerships-kicker">Partner history</p>
-				<h2>Companies we have worked with.</h2>
-				<p>
-					Current and past partners span platform engineering, identity,
-					WebAssembly, cloud security, and developer experience.
-				</p>
+		<section class="partnerships-section partnerships-section--split" aria-labelledby="faq-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Questions</p>
+				<h2 id="faq-title">Questions before you start.</h2>
 			</div>
-
-			<div class="partnerships-logo-groups">
-				<article class="partnerships-logo-group">
-					<h3>Current partners</h3>
-					<div class="partnerships-logo-grid partnerships-logo-grid--current">
-						{currentPartnerLogos.map((partner) => (
-							<a
-								class="partnerships-logo-card partnerships-logo-card--current"
-								href={withPartnerUtm(partner.url)}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label={`Visit ${partner.name}`}
-							>
-								<span class="partnerships-logo-mark">
-									<Fragment set:html={partner.logo} />
-								</span>
-								<span class="partnerships-logo-name">{partner.name}</span>
-							</a>
-						))}
-					</div>
-				</article>
-
-				<article class="partnerships-logo-group">
-					<h3>Previously supported by</h3>
-					<div class="partnerships-logo-grid partnerships-logo-grid--previous">
-						{previousPartnerLogos.map((partner) => (
-							<a
-								class="partnerships-logo-card partnerships-logo-card--previous"
-								href={withPartnerUtm(partner.url)}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label={`Visit ${partner.name}`}
-							>
-								<span class="partnerships-logo-mark">
-									<Fragment set:html={partner.logo} />
-								</span>
-								<span class="partnerships-logo-name">{partner.name}</span>
-							</a>
-						))}
-					</div>
-				</article>
-			</div>
-		</section>
-
-		<section class="partnerships-cta">
-			<div>
-				<p class="partnerships-kicker">Next step</p>
-				<h2>Book a 30-minute fit call.</h2>
-				<p>
-					We will look at your product, audience, internal team shape, and goals,
-					then recommend the smallest useful partnership tier.
-				</p>
-			</div>
-			<a class="partnerships-button partnerships-button--primary" href="/organizations/lets-chat">
-				Book a 30-minute fit call
-			</a>
-		</section>
-
-		<section class="partnerships-section partnerships-section--faq">
-			<header class="partnerships-section__head">
-				<p class="partnerships-kicker">FAQ</p>
-				<h2>Partnership questions.</h2>
-			</header>
-
-			<div class="partnerships-faq">
-				{partnershipFAQs.map((item) => (
+			<div class="partnerships-faq-list">
+				{faqs.map((faq) => (
 					<details>
-						<summary>{item.question}</summary>
-						<p>{item.answer}</p>
+						<summary>{faq.question}</summary>
+						<p>{faq.answer}</p>
 					</details>
 				))}
 			</div>
 		</section>
-	</div>
+
+		<section class="partnerships-final" aria-labelledby="final-title">
+			<p class="partnerships-kicker">Start here</p>
+			<h2 id="final-title">Start with the next adoption problem.</h2>
+			<p>
+				Rough context is enough: product, target developers, team stakeholders, adoption challenge, current team rhythm, and links if useful.
+			</p>
+			<a class="partnerships-button" href={contactHref}>Get in Touch</a>
+		</section>
+	</main>
 </Page>
 
 <style>
 	.partnerships-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
+		--partnerships-ink: var(--editorial-ink, oklch(0.18 0.02 260));
+		--partnerships-muted: var(--editorial-ink-soft, oklch(0.42 0.025 260));
+		--partnerships-paper: var(--editorial-paper, oklch(0.985 0.006 95));
+		--partnerships-paper-deep: var(--editorial-paper-deep, oklch(0.955 0.012 95));
+		--partnerships-line: var(--editorial-hairline, oklch(0.82 0.018 95));
+		--partnerships-accent: var(--editorial-spruce, oklch(0.36 0.08 170));
+		background: var(--partnerships-paper);
+		color: var(--partnerships-ink);
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+	}
+
+	.partnerships-hero,
+	.partnerships-section,
+	.partnerships-final {
+		max-width: 118rem;
+		margin: 0 auto;
+		padding-left: clamp(1rem, 3vw, 3rem);
+		padding-right: clamp(1rem, 3vw, 3rem);
 	}
 
 	.partnerships-hero {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(18rem, 28rem);
-		gap: 2rem;
-		align-items: end;
-		padding: 3rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.partnerships-hero__copy {
-		max-width: 52rem;
+		padding-top: clamp(1.5rem, 3vw, 3rem);
+		padding-bottom: clamp(1.75rem, 3vw, 2.75rem);
+		border-bottom: 1px solid var(--partnerships-line);
 	}
 
 	.partnerships-kicker,
-	.partnerships-case__label,
-	.partnerships-tier__label {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
+	.partnerships-package__label {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		margin: 0 0 0.75rem;
-	}
-
-	.partnerships-hero h2,
-	.partnerships-section h2,
-	.partnerships-cta h2 {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(2rem, 4vw, 3.5rem);
-		font-weight: 700;
-		line-height: 1;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
+		line-height: 1.35;
 		margin: 0;
-		text-wrap: balance;
+		text-transform: uppercase;
+		color: var(--partnerships-accent);
 	}
 
-	.partnerships-hero p:not(.partnerships-kicker),
-	.partnerships-section__head > p:not(.partnerships-kicker),
-	.partnerships-compare__copy p:not(.partnerships-kicker),
-	.partnerships-cta p:not(.partnerships-kicker) {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.05rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
-		margin: 1rem 0 0;
+	.partnerships-hero__grid {
+		display: grid;
+		gap: clamp(1.75rem, 4vw, 4rem);
+		margin-top: 1rem;
+	}
+
+	.partnerships-hero h1 {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: clamp(2.2rem, 4.4vw, 4.55rem);
+		font-style: normal;
+		font-weight: 780;
+		letter-spacing: 0;
+		line-height: 1;
+		margin: 0;
+		max-width: 17ch;
+	}
+
+	.partnerships-hero__lead,
+	.partnerships-section__header p,
+	.partnerships-package p,
+	.partnerships-inspection-item p,
+	.partnerships-work p,
+	.partnerships-process p,
+	.partnerships-faq-list p,
+	.partnerships-final p {
+		color: var(--partnerships-muted);
+		font-size: 1rem;
+		line-height: 1.55;
+		margin: 0;
+	}
+
+	.partnerships-hero__lead {
+		font-size: clamp(1rem, 2.2vw, 1.18rem);
+		line-height: 1.6;
+		margin-top: clamp(0.9rem, 1.8vw, 1.15rem);
 		max-width: 44rem;
 	}
 
-	.partnerships-fit-line {
-		max-width: 38rem !important;
-		padding-left: 1rem;
-		border-left: 3px solid var(--editorial-spruce);
+	.partnerships-hero__rail {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.9rem;
+		padding-top: 1rem;
+	}
+
+	.partnerships-hero__rail-label {
+		color: var(--partnerships-ink);
+		font-size: 0.95rem;
+		font-weight: 760;
+		line-height: 1.25;
+		margin: 0;
+	}
+
+	.partnerships-hero__rail ul {
+		display: grid;
+		gap: 0;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.partnerships-hero__rail li {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.5rem;
+		grid-template-columns: 4.5rem minmax(0, 1fr);
+		padding: 0.85rem 0;
+	}
+
+	.partnerships-hero__rail li:first-child {
+		border-top: 0;
+		padding-top: 0;
+	}
+
+	.partnerships-hero__rail span {
+		color: var(--partnerships-accent);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		line-height: 1.25;
+		text-transform: uppercase;
+	}
+
+	.partnerships-hero__rail p {
+		color: var(--partnerships-ink);
+		font-size: 1rem;
+		font-weight: 680;
+		line-height: 1.35;
+		margin: 0;
 	}
 
 	.partnerships-actions {
 		display: flex;
-		flex-wrap: wrap;
+		flex-direction: column;
 		gap: 0.75rem;
 		margin-top: 1.5rem;
+		width: fit-content;
 	}
 
 	.partnerships-button {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 2.75rem;
-		padding: 0.625rem 1rem;
-		border: 1px solid var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 700;
+		min-height: 2.85rem;
+		border: 1px solid var(--partnerships-ink);
+		border-radius: 4px;
+		padding: 0.85rem 1rem;
+		background: var(--partnerships-ink);
+		color: var(--partnerships-paper);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 750;
 		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		line-height: 1.1;
 		text-align: center;
 		text-decoration: none;
-		transition: background-color var(--duration-base) var(--ease-standard),
-			color var(--duration-base) var(--ease-standard);
-	}
-
-	.partnerships-button--primary {
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-	}
-
-	.partnerships-button--primary:hover {
-		background: var(--editorial-spruce);
-		border-color: var(--editorial-spruce);
-	}
-
-	.partnerships-button--secondary {
-		background: transparent;
-		color: var(--editorial-ink);
-	}
-
-	.partnerships-button--secondary:hover {
-		background: var(--editorial-paper-deep);
-	}
-
-	.partnerships-proof {
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 0;
-		margin: 0;
-		border-top: 1px solid var(--editorial-hairline);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.partnerships-proof div {
-		display: grid;
-		grid-template-columns: auto minmax(0, 1fr);
-		align-items: baseline;
-		gap: 1rem;
-		padding: 1rem 0;
-	}
-
-	.partnerships-proof div + div {
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.partnerships-proof dt {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(1.75rem, 4vw, 2.625rem);
-		font-weight: 700;
-		line-height: 1;
-		color: var(--editorial-ink);
-	}
-
-	.partnerships-proof dd {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-		margin: 0;
+	}
+
+	.partnerships-button:hover {
+		background: var(--partnerships-accent);
+		border-color: var(--partnerships-accent);
+	}
+
+	.partnerships-link {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		color: var(--partnerships-ink);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 750;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		min-height: 2.85rem;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.22em;
+		text-transform: uppercase;
+	}
+
+	.partnerships-link:hover {
+		color: var(--partnerships-accent);
+	}
+
+	.partnerships-work,
+	.partnerships-process article,
+	.partnerships-package,
+	.partnerships-faq-list details {
+		border: 1px solid var(--partnerships-line);
+		border-radius: 6px;
+		background: var(--partnerships-paper-deep);
 	}
 
 	.partnerships-section {
-		padding: 3rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
+		padding-top: 2.5rem;
+		padding-bottom: 2.5rem;
+		border-bottom: 1px solid var(--partnerships-line);
+		scroll-margin-top: 5rem;
 	}
 
-	.partnerships-section--deep,
-	.partnerships-section--proof {
-		background: var(--editorial-paper-deep);
+	.partnerships-section--tight {
+		padding-top: 2rem;
 	}
 
-	.partnerships-section--split,
-	.partnerships-section--compare,
-	.partnerships-section--credibility,
-	.partnerships-cta {
-		display: grid;
-		grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-		gap: 2rem;
-		align-items: start;
-	}
-
-	.partnerships-section__head {
-		margin-bottom: 1.5rem;
-		max-width: 56rem;
-	}
-
-	.partnerships-section__head--inline {
+	.partnerships-section__header {
 		display: flex;
-		align-items: end;
-		justify-content: space-between;
-		gap: 2rem;
+		flex-direction: column;
+		gap: 0.65rem;
+		margin-bottom: 1.25rem;
 		max-width: none;
 	}
 
-	.partnerships-section__head--inline > p {
-		max-width: 28rem;
-	}
-
-	.partnerships-case-grid,
-	.partnerships-capabilities,
-	.partnerships-workflow,
-	.partnerships-measurement,
-	.partnerships-fit-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1rem;
-	}
-
-	.partnerships-capabilities,
-	.partnerships-workflow {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-	}
-
-	.partnerships-tiers {
-		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-		gap: 1rem;
-	}
-
-	.partnerships-case,
-	.partnerships-capability,
-	.partnerships-workflow article,
-	.partnerships-measurement article,
-	.partnerships-tier,
-	.partnerships-fit-card,
-	.partnerships-logo-group,
-	.partnerships-faq details {
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper);
-	}
-
-	.partnerships-case,
-	.partnerships-capability,
-	.partnerships-workflow article,
-	.partnerships-measurement article,
-	.partnerships-fit-card,
-	.partnerships-logo-group {
-		padding: 1.25rem;
-	}
-
-	.partnerships-case h3,
-	.partnerships-capability h3,
-	.partnerships-workflow h3,
-	.partnerships-measurement h3,
-	.partnerships-tier h3,
-	.partnerships-fit-card h3,
-	.partnerships-logo-group h3,
-	.partnerships-compare__points h3 {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1.25rem;
-		font-weight: 700;
-		line-height: 1.15;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
-		margin: 0;
-		text-wrap: balance;
-	}
-
-	.partnerships-capability h3,
-	.partnerships-workflow h3,
-	.partnerships-tier h3 {
-		margin-top: 0.875rem;
-	}
-
-	.partnerships-case p,
-	.partnerships-capability p,
-	.partnerships-workflow p,
-	.partnerships-measurement p,
-	.partnerships-tier__summary,
-	.partnerships-tier__best,
-	.partnerships-fit-card li,
-	.partnerships-credibility__copy p:not(.partnerships-kicker),
-	.partnerships-compare__points p,
-	.partnerships-faq p {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
-		margin: 0.75rem 0 0;
-	}
-
-	.partnerships-case blockquote {
-		margin: 1.25rem 0 0;
-		padding-top: 1rem;
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.partnerships-case blockquote p {
-		font-size: 1.05rem;
-		color: var(--editorial-ink);
-		margin: 0;
-	}
-
-	.partnerships-case cite {
-		display: block;
-		margin-top: 0.75rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.65rem;
+	.partnerships-section h2,
+	.partnerships-final h2 {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: clamp(1.65rem, 6vw, 4rem);
 		font-style: normal;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
+		font-weight: 760;
+		letter-spacing: 0;
+		line-height: 0.98;
+		margin: 0;
+		max-width: 20ch;
 	}
 
-	.partnerships-capability__number,
-	.partnerships-workflow span,
-	.partnerships-tier__flag {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
+	.partnerships-section__header p {
+		max-width: 58rem;
 	}
 
-	.partnerships-capability ul,
-	.partnerships-tier ul,
-	.partnerships-fit-card ul {
-		list-style: none;
-		padding: 0;
-		margin: 1rem 0 0;
+	.partnerships-package-grid,
+	.partnerships-work-grid,
+	.partnerships-process {
+		display: grid;
+		gap: 1rem;
 	}
 
-	.partnerships-capability ul,
-	.partnerships-tier ul {
+	.partnerships-package {
+		padding: 0.9rem;
 		display: flex;
-		flex-wrap: wrap;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.partnerships-package--featured {
+		border-color: var(--partnerships-accent);
+		box-shadow: inset 0 0 0 1px var(--partnerships-accent);
+	}
+
+	.partnerships-package__top {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+
+	.partnerships-package__top .partnerships-button {
+		margin-top: 0.35rem;
+	}
+
+	.partnerships-package h3,
+	.partnerships-inspection-item h3,
+	.partnerships-work h3,
+	.partnerships-process h3 {
+		font-size: 1.25rem;
+		font-weight: 730;
+		line-height: 1.1;
+		letter-spacing: 0;
+		margin: 0;
+	}
+
+	.partnerships-package__price {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: var(--partnerships-ink) !important;
+	}
+
+	.partnerships-package__summary {
+		display: grid;
 		gap: 0.5rem;
 	}
 
-	.partnerships-capability li,
-	.partnerships-tier li {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.65rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-ink);
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
-		padding: 0.25rem 0.45rem;
+	.partnerships-package__outcome {
+		color: var(--partnerships-ink) !important;
 	}
 
-	.partnerships-fit-card li {
+	.partnerships-package__included {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.45rem;
+	}
+
+	.partnerships-package__included li {
 		position: relative;
-		margin-top: 0.85rem;
 		padding-left: 1rem;
+		color: var(--partnerships-muted);
+		font-size: 0.92rem;
+		line-height: 1.4;
 	}
 
-	.partnerships-fit-card li::before {
+	.partnerships-package__included li::before {
 		content: "";
 		position: absolute;
-		top: 0.65em;
 		left: 0;
+		top: 0.62em;
 		width: 0.35rem;
 		height: 0.35rem;
-		background: var(--editorial-spruce);
+		border-radius: 999px;
+		background: var(--partnerships-accent);
 	}
 
-	.partnerships-section--credibility {
-		background: var(--editorial-paper-deep);
-	}
-
-	.partnerships-credibility__copy h2 {
-		font-size: clamp(1.75rem, 3vw, 2.5rem);
-		line-height: 1.05;
-	}
-
-	.partnerships-logo-groups {
-		display: grid;
-		grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-		gap: 1rem;
-		min-width: 0;
-	}
-
-	.partnerships-logo-grid {
-		display: grid;
-		gap: 0.75rem;
-		margin: 1rem 0 0;
-	}
-
-	.partnerships-logo-grid--current {
-		grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-	}
-
-	.partnerships-logo-grid--previous {
-		grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-	}
-
-	.partnerships-logo-card {
+	.partnerships-work,
+	.partnerships-process article {
+		padding: clamp(1.15rem, 2vw, 1.4rem);
 		display: flex;
 		flex-direction: column;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: 0.75rem;
-		min-width: 0;
-		min-height: 6rem;
-		padding: 0.9rem;
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
-		color: var(--editorial-ink);
-		text-decoration: none;
-		overflow: hidden;
-		transition:
-			border-color var(--duration-base) var(--ease-standard),
-			background-color var(--duration-base) var(--ease-standard);
+		gap: 0.7rem;
 	}
 
-	.partnerships-logo-card:hover {
-		border-color: var(--editorial-spruce);
-		background: var(--editorial-paper);
-	}
-
-	.partnerships-logo-card--previous {
-		min-height: 5.25rem;
-		padding: 0.75rem;
-	}
-
-	.partnerships-logo-mark {
-		display: flex;
-		align-items: center;
-		justify-content: flex-start;
-		width: 100%;
-		max-width: 12rem;
-		height: 2.75rem;
-		overflow: hidden;
-	}
-
-	.partnerships-logo-card--previous .partnerships-logo-mark {
-		max-width: 8.25rem;
-		height: 2rem;
-	}
-
-	.partnerships-logo-name {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.66rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	.partnerships-tier {
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		min-height: 100%;
-		padding: 1.25rem;
-	}
-
-	.partnerships-tier--featured {
-		border-color: var(--editorial-spruce);
-		box-shadow: inset 0 0 0 1px var(--editorial-spruce);
-	}
-
-	.partnerships-tier__flag {
-		width: fit-content;
-		color: var(--editorial-paper);
-		background: var(--editorial-spruce);
-		padding: 0.25rem 0.45rem;
-		margin-bottom: 0.75rem;
-	}
-
-	.partnerships-tier__label {
-		margin-bottom: 0;
-	}
-
-	.partnerships-tier__price {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 2rem;
-		font-weight: 700;
-		line-height: 1;
-		color: var(--editorial-ink);
-		margin: 0.875rem 0 0;
-	}
-
-	.partnerships-tier__term {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.65rem;
-		line-height: 1.35;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-		margin: 0.35rem 0 0;
-	}
-
-	.partnerships-tier__best {
-		color: var(--editorial-ink) !important;
-	}
-
-	.partnerships-tier a {
-		margin-top: auto;
-		padding-top: 1.25rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-ink);
+	.partnerships-work a {
+		color: var(--partnerships-ink);
+		text-decoration: underline;
 		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
+		text-underline-offset: 0.18em;
 	}
 
-	.partnerships-compare__points {
+	.partnerships-section--proof .partnerships-work-grid {
+		gap: 0;
+		grid-template-columns: 1fr;
+	}
+
+	.partnerships-section--proof .partnerships-work {
+		border-left: 0;
+		border-right: 0;
+		border-radius: 0;
+	}
+
+	.partnerships-section--proof .partnerships-work + .partnerships-work {
+		border-top: 0;
+	}
+
+	.partnerships-section--inspect .partnerships-section__header {
+		margin-bottom: 1.35rem;
+	}
+
+	.partnerships-section--inspect .partnerships-section__header h2 {
+		max-width: 20ch;
+	}
+
+	.partnerships-inspection-list {
+		border-bottom: 1px solid var(--partnerships-line);
+		border-top: 1px solid var(--partnerships-line);
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0;
+	}
+
+	.partnerships-inspection-item {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.85rem;
+		grid-template-columns: 2.4rem minmax(0, 1fr);
+		padding: 0.95rem 0;
+	}
+
+	.partnerships-inspection-item:first-child {
+		border-top: 0;
+	}
+
+	.partnerships-inspection-item__number {
+		color: var(--partnerships-accent);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		line-height: 1.2;
+		padding-top: 0.15rem;
+	}
+
+	.partnerships-inspection-item div {
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.partnerships-process span {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		color: var(--partnerships-accent);
+	}
+
+	.partnerships-process {
+		grid-template-columns: 1fr;
+	}
+
+	.partnerships-faq-list {
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.partnerships-faq-list details {
+		padding: 1rem;
+	}
+
+	.partnerships-faq-list summary {
+		cursor: pointer;
+		font-size: 1rem;
+		font-weight: 730;
+		line-height: 1.3;
+	}
+
+	.partnerships-faq-list p {
+		margin-top: 0.75rem;
+	}
+
+	.partnerships-final {
+		padding-top: 2.5rem;
+		padding-bottom: 3rem;
+		display: flex;
+		flex-direction: column;
 		gap: 1rem;
 	}
 
-	.partnerships-compare__points article {
-		padding: 1.25rem;
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper);
+	.partnerships-final h2 {
+		max-width: 16ch;
 	}
 
-	.partnerships-cta {
-		align-items: center;
-		padding: 2rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
+	.partnerships-final p {
+		max-width: 38rem;
 	}
 
-	.partnerships-cta h2,
-	.partnerships-cta .partnerships-kicker,
-	.partnerships-cta p {
-		color: inherit !important;
-	}
-
-	.partnerships-cta p {
-		opacity: 0.72;
-	}
-
-	.partnerships-cta .partnerships-button {
-		justify-self: end;
-		border-color: var(--editorial-paper);
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.partnerships-faq {
-		display: grid;
-		gap: 0.75rem;
-		max-width: 56rem;
-	}
-
-	.partnerships-faq details {
-		padding: 1rem 1.125rem;
-	}
-
-	.partnerships-faq summary {
-		cursor: pointer;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 1rem;
-		font-weight: 700;
-		line-height: 1.3;
-		color: var(--editorial-ink);
-	}
-
-	@media (max-width: 1180px) {
-		.partnerships-tiers {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-
-	@media (max-width: 980px) {
-		.partnerships-hero,
-		.partnerships-section--split,
-		.partnerships-section--compare,
-		.partnerships-section--credibility,
-		.partnerships-cta,
-		.partnerships-section__head--inline {
-			grid-template-columns: 1fr;
-			display: grid;
-		}
-
-		.partnerships-case-grid,
-		.partnerships-capabilities,
-		.partnerships-workflow,
-		.partnerships-measurement,
-		.partnerships-fit-grid,
-		.partnerships-compare__points,
-		.partnerships-logo-groups,
-		.partnerships-tiers {
-			grid-template-columns: 1fr;
-		}
-
-		.partnerships-cta .partnerships-button {
-			justify-self: start;
-		}
-	}
-
-	@media (max-width: 720px) {
-		.partnerships-hero,
-		.partnerships-section,
-		.partnerships-cta {
-			padding-left: 1rem;
-			padding-right: 1rem;
-		}
-
-		.partnerships-hero {
-			padding-top: 2rem;
-			padding-bottom: 2rem;
-		}
-
-		.partnerships-section {
-			padding-top: 2rem;
-			padding-bottom: 2rem;
-		}
-
+	@media (min-width: 640px) {
 		.partnerships-actions {
-			flex-direction: column;
-			align-items: stretch;
+			flex-direction: row;
+			align-items: center;
 		}
 
 		.partnerships-button {
-			width: 100%;
-			min-height: 3rem;
+			width: auto;
 		}
 
-		.partnerships-proof div {
-			grid-template-columns: 1fr;
-			gap: 0.35rem;
-		}
-
-		.partnerships-logo-grid--previous {
+		.partnerships-work-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 0.65rem;
-		}
-
-		.partnerships-logo-card--previous {
-			min-height: 4.75rem;
-			padding: 0.65rem;
-		}
-
-		.partnerships-logo-card--previous .partnerships-logo-mark {
-			max-width: 6.75rem;
-			height: 1.75rem;
 		}
 	}
-</style>
 
-<style is:global>
-	.partnerships-section--credibility .partnerships-logo-mark > svg {
-		display: block;
-		width: 100% !important;
-		height: 100% !important;
-		max-width: 100% !important;
-		max-height: 100% !important;
-		color: inherit;
-		flex: 0 0 100%;
+	@media (min-width: 1100px) {
+		.partnerships-inspection-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			column-gap: 1.5rem;
+		}
+
+		.partnerships-inspection-item:nth-child(2) {
+			border-top: 0;
+		}
+	}
+
+	@media (min-width: 1180px) {
+		.partnerships-hero__grid {
+			align-items: start;
+			grid-template-columns: minmax(0, 0.62fr) minmax(20rem, 0.38fr);
+		}
+
+		.partnerships-hero__rail {
+			border-left: 1px solid var(--partnerships-line);
+			border-top: 0;
+			margin-top: 0.25rem;
+			padding-left: clamp(1.25rem, 2vw, 2rem);
+			padding-top: 0;
+		}
+
+		.partnerships-section__header {
+			max-width: 72rem;
+			margin-bottom: 1.75rem;
+		}
+
+		.partnerships-section__header p {
+			max-width: 58rem;
+		}
+
+		.partnerships-work-grid--three {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.partnerships-package {
+			display: grid;
+			grid-template-columns: minmax(13rem, 0.45fr) minmax(0, 0.8fr) minmax(0, 1fr);
+			gap: 1.25rem;
+			align-items: start;
+			padding: 1.15rem;
+		}
+
+		.partnerships-process {
+			grid-template-columns: 1fr;
+		}
+
+		.partnerships-process article {
+			display: grid;
+			grid-template-columns: 3rem minmax(12rem, 0.35fr) minmax(0, 1fr);
+			gap: 1rem;
+			align-items: start;
+		}
+
+		.partnerships-section--proof .partnerships-work-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.partnerships-section--proof .partnerships-work {
+			display: grid;
+			grid-template-columns: minmax(12rem, 0.28fr) minmax(0, 1fr);
+			column-gap: clamp(1.75rem, 3vw, 2.75rem);
+			row-gap: 0.6rem;
+			align-items: start;
+			padding: clamp(1.25rem, 2vw, 1.6rem) clamp(1.4rem, 2.5vw, 2rem);
+		}
 	}
 </style>
