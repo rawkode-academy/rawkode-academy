@@ -9,39 +9,44 @@ const contactHref =
 
 const faqs = [
 	{
-		question: "Is this paid media?",
+		question: "When is this useful?",
 		answer:
-			"No. A partnership does not buy coverage, endorsement, paid mentions, guaranteed leads, audience access, or editorial placement. Public outputs are sponsor-disclosed and editorially independent. Partners get practitioner signal, collaboration, and learning they can use, not control over conclusions.",
+			"When your product has real technical depth, but adoption is getting stuck between positioning, docs, demos, DevRel activity, sales conversations, and the proof developers need before they trust it.",
 	},
 	{
-		question: "Do you replace our marketing, product, or DevRel team?",
+		question: "What happens in the first month?",
 		answer:
-			"No. We work with marketing, product, DevRel, sales engineering, and technical owners so they can make better adoption decisions. Your team keeps execution ownership; the partnership brings practitioner signal, strategic critique, and sharper direction.",
+			"We start with your current adoption challenge, the people your product needs to reach, and the surfaces developers already see. The first month should leave your team with a clearer signal read, sharper friction, and a practical next move.",
 	},
 	{
-		question: "What should we bring first?",
+		question: "What changes month to month?",
 		answer:
-			"Send the company or product, the target developer or platform team, the adoption challenge, the team stakeholders, the current GTM, DevRel, or product rhythm, and useful links. Rough context is enough.",
+			"The product, category, competitors, launch moments, buyer questions, and developer reactions keep moving. Each month updates the signal history, friction backlog, experiment record, and decisions your team can act on next.",
 	},
 	{
-		question: "Why pay for this month after month?",
+		question: "How do we choose between Signal, Adoption, and Council?",
 		answer:
-			"Developer adoption changes as the product, category, competitors, and buyer questions move. The partnership keeps a running signal history, friction backlog, experiment record, and outside pattern recognition your team can use every month.",
+			"Start with Signal if you need recurring outside perspective. Choose Adoption when you want to turn that signal into a focused monthly experiment. Choose Council when peer comparison, expert perspective, and a shared room would make the work stronger.",
 	},
 	{
-		question: "How fast can this start?",
+		question: "What does Council add beyond Adoption?",
 		answer:
-			"Partnerships are month-to-month with no annual lock-in. Companies can join when they need outside signal, use the partnership while it is valuable, and stop before the next billing cycle.",
+			"Council adds a monthly cohort room with other member teams, member case reviews, an industry expert presentation, and pattern notes your team can use when the adoption problem benefits from more than one company's perspective.",
 	},
 	{
-		question: "Do you plan campaigns or run DevRel for us?",
+		question: "What do you need from our team?",
 		answer:
-			"No. The partnership helps shape adoption strategy, technical narrative, developer education, community learning, and internal alignment. It can produce Rawkode-owned field notes or shared learning artifacts when the work belongs in public, but it does not include full campaign planning, outsourced DevRel execution, custom content production on demand, lead generation, audience access, or open-ended access.",
+			"Rough context is enough to start: product, category, target developers, team stakeholders, current adoption challenge, current GTM, DevRel, or product rhythm, and links if they help.",
 	},
 	{
-		question: "Is confidential material safe to share?",
+		question: "How does public work stay independent?",
 		answer:
-			"Start with public or shareable context. If a fit check shows private context is needed, we can agree the right confidentiality boundary before using it in the partnership.",
+			"A partnership does not buy coverage, endorsement, paid mentions, guaranteed leads, audience access, or editorial placement. Any public output is sponsor-disclosed and editorially independent.",
+	},
+	{
+		question: "What is intentionally out of scope?",
+		answer:
+			"This is not outsourced DevRel, campaign planning, custom content production on demand, lead generation, audience rental, or open-ended access. Your team owns execution; Rawkode brings practitioner signal, strategic critique, and useful adoption patterns.",
 	},
 ];
 
@@ -307,7 +312,7 @@ const heroProofPoints = [
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="faq-title">
 			<div class="partnerships-section__header">
 				<p class="partnerships-kicker">Questions</p>
-				<h2 id="faq-title">Clear boundaries before we start.</h2>
+				<h2 id="faq-title">Questions before you start.</h2>
 			</div>
 			<div class="partnerships-faq-list">
 				{faqs.map((faq) => (
