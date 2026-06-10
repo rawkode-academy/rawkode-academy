@@ -4,7 +4,7 @@ import SliderClient from "./slider.vue";
 import type { Testimonial } from "@/types/testimonial";
 
 interface Props {
-	type?: "maintainer" | "partner" | "consulting" | "viewer";
+	type?: "maintainer" | "partner" | "viewer";
 	blurb: string;
 	limit?: number;
 }
@@ -15,8 +15,6 @@ const getAudience = (type: string | undefined) => {
 			return "Maintainers";
 		case "partner":
 			return "Partners";
-		case "consulting":
-			return "Clients";
 		case "viewer":
 			return "Viewers";
 		default:
@@ -30,8 +28,6 @@ const getEyebrow = (type: string | undefined) => {
 			return "Builder Feedback";
 		case "partner":
 			return "Partner Perspective";
-		case "consulting":
-			return "Client Perspective";
 		case "viewer":
 			return "Community Signal";
 		default:

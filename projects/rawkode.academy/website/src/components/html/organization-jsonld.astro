@@ -23,7 +23,7 @@ const organizationSchema = {
 		height: 512,
 	},
 	description:
-		"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for developers to keep up with the Cloud Native landscape.",
+		"Rawkode Academy provides cloud-native education and partnerships for companies building technical products for practitioners.",
 	sameAs: [
 		"https://github.com/rawkode-academy",
 		"https://www.youtube.com/@RawkodeAcademy",
@@ -32,18 +32,15 @@ const organizationSchema = {
 	],
 	contactPoint: {
 		"@type": "ContactPoint",
-		contactType: "customer support",
-		email: "support@rawkode.academy",
+		contactType: "partnerships",
+		email: "david@rawkode.academy",
 		url: "https://rawkode.academy/organizations/lets-chat",
 	},
 	founder: {
 		"@type": "Person",
 		name: "David Flanagan",
 		url: "https://github.com/rawkode",
-		sameAs: [
-			"https://x.com/rawkode",
-			"https://www.linkedin.com/in/rawkode",
-		],
+		sameAs: ["https://x.com/rawkode", "https://www.linkedin.com/in/rawkode"],
 	},
 	foundingDate: "2021",
 	areaServed: {
@@ -63,20 +60,35 @@ const organizationSchema = {
 	offers: [
 		{
 			"@type": "Offer",
+			name: "Signal",
+			url: "https://rawkode.academy/organizations/partnerships",
 			itemOffered: {
 				"@type": "Service",
-				name: "Technical Training",
+				name: "Signal",
 				description:
-					"Hands-on technical training for cloud native technologies",
+					"Lightweight monthly partnership for outside practitioner signal before more budget moves",
 			},
 		},
 		{
 			"@type": "Offer",
+			name: "Adoption",
+			url: "https://rawkode.academy/organizations/partnerships",
 			itemOffered: {
 				"@type": "Service",
-				name: "Technical Consulting",
+				name: "Adoption",
 				description:
-					"Expert consulting for developer experience and cloud infrastructure",
+					"Monthly developer adoption partnership for positioning, launches, docs, demos, DevRel, technical proof, and sales enablement",
+			},
+		},
+		{
+			"@type": "Offer",
+			name: "Launch",
+			url: "https://rawkode.academy/organizations/partnerships",
+			itemOffered: {
+				"@type": "Service",
+				name: "Launch",
+				description:
+					"High-focus monthly partnership for launch, repositioning, category, DevRel, or sales motions",
 			},
 		},
 		{

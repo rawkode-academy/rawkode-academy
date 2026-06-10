@@ -17,6 +17,8 @@ const PERMANENT_REDIRECTS = new Map<string, string>([
 	["/events", "/watch"],
 	["/community-day", "/about"],
 	["/metal", "/technology/equinix-metal"],
+	["/organizations/consulting", "/organizations/partnerships"],
+	["/organizations/training", "/organizations/partnerships"],
 ]);
 
 export function resolveLegacyRoute(url: URL): LegacyRouteResult | undefined {
