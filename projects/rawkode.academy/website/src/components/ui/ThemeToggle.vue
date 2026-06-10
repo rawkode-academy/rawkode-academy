@@ -7,7 +7,7 @@
 		type="button"
 	>
 		<transition name="fade" mode="out-in">
-			<!-- System (auto) - monitor icon -->
+			<!-- System (auto) - sun/moon icon -->
 			<svg
 				v-if="preference === 'system'"
 				key="system"
@@ -21,9 +21,11 @@
 				xmlns="http://www.w3.org/2000/svg"
 				aria-hidden="true"
 			>
-				<rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-				<line x1="8" y1="21" x2="16" y2="21" />
-				<line x1="12" y1="17" x2="12" y2="21" />
+				<circle cx="7.75" cy="7.75" r="2.75" />
+				<path
+					d="M7.75 1.75v1.6M7.75 12.15v1.6M1.75 7.75h1.6M12.15 7.75h1.6M3.55 3.55l1.15 1.15M10.8 10.8l1.15 1.15M3.55 11.95 4.7 10.8M10.8 4.7l1.15-1.15"
+				/>
+				<path d="M21 15.6a5.9 5.9 0 0 1-8.2 5.43 6.7 6.7 0 0 0 0-10.86A5.9 5.9 0 0 1 21 15.6Z" />
 			</svg>
 
 			<!-- Dark - sun icon (clicking moves toward light) -->
@@ -111,7 +113,7 @@ const NEXT_DESCRIPTION: Record<ColorSchemePreference, string> = {
 const CURRENT_LABEL: Record<ColorSchemePreference, string> = {
 	light: "Light mode",
 	dark: "Dark mode",
-	system: "System theme",
+	system: "Auto theme",
 };
 
 const label = computed(() => NEXT_DESCRIPTION[preference.value]);
