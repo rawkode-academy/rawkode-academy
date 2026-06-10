@@ -5,13 +5,13 @@ import Page from "@/wrappers/page.astro";
 export const prerender = true;
 
 const contactHref =
-	"mailto:david@rawkode.academy?subject=Partnership%20fit&body=Company%2Fcategory%3A%0D%0AProduct%20or%20platform%3A%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A";
+	"mailto:david@rawkode.academy?subject=Partnership%20fit&body=Company%2Fcategory%3A%0D%0AProduct%20or%20platform%3A%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AWhat%20your%20team%20wants%20to%20learn%20or%20improve%20next%3A%0D%0AUseful%20links%3A";
 
 const faqs = [
 	{
 		question: "Is this paid media?",
 		answer:
-			"No. A partnership does not buy coverage, endorsement, paid mentions, guaranteed leads, or editorial placement. It is a focused commercial engagement around technical adoption.",
+			"No. A partnership does not buy coverage, endorsement, paid mentions, guaranteed leads, audience access, or editorial placement. Public outputs are sponsor-disclosed and editorially independent. Partners get practitioner signal, collaboration, and learning they can use, not control over conclusions.",
 	},
 	{
 		question: "Do you replace our marketing, product, or DevRel team?",
@@ -21,12 +21,12 @@ const faqs = [
 	{
 		question: "What should we bring first?",
 		answer:
-			"Send the company or product, the target developer or platform team, the adoption challenge, the team stakeholders, the next budget or launch decision, and useful links. Rough context is enough.",
+			"Send the company or product, the target developer or platform team, the adoption challenge, the team stakeholders, the current GTM, DevRel, or product rhythm, and useful links. Rough context is enough.",
 	},
 	{
-		question: "Why pay for this before budget moves?",
+		question: "Why pay for this month after month?",
 		answer:
-			"The point is to avoid a larger wasted bet: a launch story practitioners ignore, a docs or demo rebuild that does not change adoption, a DevRel hire without a clear remit, or a sales push that cannot answer technical objections. The partnership helps your team decide what to keep, change, prove, or stop before more spend is committed.",
+			"Developer adoption changes as the product, category, competitors, and buyer questions move. The partnership keeps a running signal history, friction backlog, experiment record, and outside pattern recognition your team can use every month.",
 	},
 	{
 		question: "How fast can this start?",
@@ -36,7 +36,7 @@ const faqs = [
 	{
 		question: "Do you plan campaigns or run DevRel for us?",
 		answer:
-			"No. The partnership helps shape adoption strategy, technical narrative, developer education, launch direction, and internal alignment. It does not include full campaign planning, outsourced DevRel execution, custom content production, lead generation, or open-ended access.",
+			"No. The partnership helps shape adoption strategy, technical narrative, developer education, community learning, and internal alignment. It can produce Rawkode-owned field notes or shared learning artifacts when the work belongs in public, but it does not include full campaign planning, outsourced DevRel execution, custom content production on demand, lead generation, audience access, or open-ended access.",
 	},
 	{
 		question: "Is confidential material safe to share?",
@@ -49,54 +49,72 @@ const packages = [
 	{
 		name: "Signal",
 		price: "£1,000 / month",
-		label: "Lightweight",
+		label: "Entry",
 		bestFor:
-			"Founders and small teams that need outside practitioner signal before they commit more budget to messaging, launches, docs, demos, DevRel, or sales enablement.",
+			"Founders and small GTM teams that want a recurring read on whether developers understand, trust, and act on the story they are putting into market.",
 		outcome:
-			"Know what developers are likely to understand, question, ignore, or need next before your team spends more.",
+			"Each month surfaces the clearest adoption friction, the proof developers still need, and the next bet your team should make.",
 		included: [
-			"Monthly partnership session",
-			"Question submission before the session",
-			"Practitioner signal on developer adoption, DevRel, docs, demos, positioning, or launch direction",
-			"Monthly memo with themes, recommendations, and next decisions",
+			"Evidence base from public developer discussion and feedback, product surface review, category monitoring, and Rawkode field notes",
+			"Monthly adoption signal brief covering objections, proof gaps, confusing language, and market narrative shifts",
+			"Living adoption signal register across positioning, docs, demos, onboarding, launch story, and team narrative alignment",
+			"Sponsor-disclosed public field note or open takeaway when the learning belongs in the community",
+			"Decision readout: what to keep, change, prove, pause, or escalate next month",
 		],
 		cta: "Email David",
-		href: "mailto:david@rawkode.academy?subject=Signal%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AUpcoming%20launch%2C%20sales%20push%2C%20DevRel%20motion%2C%20or%20budget%20decision%3A%0D%0AUseful%20links%3A",
+		href: "mailto:david@rawkode.academy?subject=Signal%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AUseful%20links%3A",
 	},
 	{
 		name: "Adoption",
 		price: "£2,000 / month",
 		label: "Default",
 		bestFor:
-			"Marketing, product, DevRel, sales engineering, and engineering teams that need recurring outside judgement while shaping developer adoption.",
+			"Product, marketing, DevRel, sales engineering, and founder teams ready to turn developer signal into a monthly adoption improvement loop.",
 		outcome:
-			"Leave each month with clearer adoption priorities, stronger technical narrative, and practical next moves your team can own.",
+			"Run a focused adoption experiment each month, review what changed, and keep the adoption map moving with your team.",
 		included: [
-			"Monthly working session with your core team",
-			"Developer adoption map: audience, trigger, friction, proof, and next action",
-			"Async input on active adoption decisions during the month",
-			"Shared memo with recommendations, tradeoffs, and owner suggestions",
+			"Everything in Signal",
+			"Monthly experiment design session tied to one adoption blocker",
+			"Evidence plan for what to observe, compare, or test in developer-facing work",
+			"Shared learning artifact: teardown notes, docs-friction pattern, demo-path findings, or onboarding rubric",
+			"Living adoption map showing blockers, proof gaps, learning, and next experiments",
 		],
 		cta: "Email David",
 		href: contactHref,
 		featured: true,
 	},
 	{
-		name: "Launch",
+		name: "Council",
 		price: "£3,000 / month",
-		label: "High focus",
+		label: "Cohort",
 		bestFor:
-			"A launch, repositioning, category push, DevRel program, or sales motion needs tighter cross-functional direction while the market window is live.",
+			"Teams that want a curated peer room, expert perspective, and serious practitioner comparison while they shape developer adoption.",
 		outcome:
-			"Keep the adoption strategy, technical narrative, education path, and sales or DevRel handoff aligned while the work is still movable.",
+			"Join the same recurring cohort as other Council members, learn from an industry expert, and compare the adoption blockers shaping your next bets.",
 		included: [
-			"Monthly private strategy session",
-			"Priority async input on active adoption questions",
-			"Cross-functional alignment session for product, marketing, DevRel, sales engineering, or engineering",
-			"Leadership-ready adoption recommendations",
+			"Everything in Adoption",
+			"Shared monthly cohort room where Council members compare adoption problems and collaborate",
+			"Member case reviews around live docs, demos, narratives, onboarding, or launch motions",
+			"Monthly industry expert presentation with working Q&A",
+			"Council pattern notes with risks, experiments, expert takeaways, and reusable decision language",
 		],
 		cta: "Email David",
-		href: "mailto:david@rawkode.academy?subject=Launch%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Launch%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0AUpcoming%20launch%2C%20repositioning%2C%20sales%20push%2C%20or%20DevRel%20motion%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0AWhat%20your%20team%20needs%20to%20decide%20next%3A%0D%0AUseful%20links%3A",
+		href: "mailto:david@rawkode.academy?subject=Council%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Council%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACohort%20or%20expert%20themes%20that%20would%20help%3A%0D%0AUseful%20links%3A",
+	},
+];
+
+const compoundPoints = [
+	{
+		title: "Signal explains what blocks trust.",
+		body: "The evidence base stays visible: public developer discussion and feedback, category monitoring, product surface review, Rawkode field notes, and disclosed community learning.",
+	},
+	{
+		title: "Adoption tests a focused change.",
+		body: "The record gets stronger over time: proof gaps, friction patterns, experiments, outcomes, and sharper next-month decisions.",
+	},
+	{
+		title: "Council adds peer and expert pattern recognition.",
+		body: "Members compare live adoption problems in a shared cohort and leave with reusable patterns from the room.",
 	},
 ];
 
@@ -150,6 +168,21 @@ const workExamples = [
 		body: "Make sure product, marketing, DevRel, sales engineering, and engineering can explain the same value without pretending to be the same function.",
 	},
 ];
+
+const heroProofPoints = [
+	{
+		label: "Keep",
+		body: "Your team owns execution.",
+	},
+	{
+		label: "Bring",
+		body: "Practitioner signal and strategic critique.",
+	},
+	{
+		label: "Decide",
+		body: "What to prove, change, or stop before the next investment.",
+	},
+];
 ---
 
 <Page
@@ -164,21 +197,25 @@ const workExamples = [
 			<div class="partnerships-hero__grid">
 				<div class="partnerships-hero__copy">
 					<h1 id="partnerships-title">We help your team turn technical depth into developer adoption.</h1>
-					<div class="partnerships-hero__body">
-						<p>
-							Rawkode works alongside your marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
-						</p>
-						<div class="partnerships-hero__next">
-							<p class="partnerships-hero__trigger">
-								Your team keeps execution. We bring practitioner signal, strategic critique, and cloud-native judgement before the spend hardens.
-							</p>
-							<div class="partnerships-actions">
-								<a class="partnerships-button" href={contactHref}>Email David</a>
-								<a class="partnerships-link" href="#packages">View options</a>
-							</div>
-						</div>
+					<p class="partnerships-hero__lead">
+						Rawkode works alongside marketing, product, DevRel, sales engineering, and engineering teams to shape the strategy, narrative, education, and proof that help developers understand why your product matters and how to adopt it.
+					</p>
+					<div class="partnerships-actions">
+						<a class="partnerships-button" href={contactHref}>Email David</a>
+						<a class="partnerships-link" href="#packages">View options</a>
 					</div>
 				</div>
+				<aside class="partnerships-hero__rail" aria-label="How the partnership helps">
+					<p class="partnerships-hero__rail-label">Developer growth grounded in technical reality</p>
+					<ul>
+						{heroProofPoints.map((point) => (
+							<li>
+								<span>{point.label}</span>
+								<p>{point.body}</p>
+							</li>
+						))}
+					</ul>
+				</aside>
 			</div>
 		</section>
 
@@ -203,36 +240,44 @@ const workExamples = [
 			</div>
 		</section>
 
-			<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
-				<div class="partnerships-section__header">
-					<p class="partnerships-kicker">Partnership paths</p>
-					<h2 id="packages-title">Pick the partnership your team needs now.</h2>
-					<p>
-						Month-to-month help for adoption strategy, technical narrative, developer education, DevRel direction, launch readiness, and sales handoff, matched to how much outside signal your team needs.
-					</p>
-				</div>
-					<div class="partnerships-package-grid">
-						{packages.map((pkg) => (
-							<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
-								<div class="partnerships-package__top">
-									<p class="partnerships-package__label">{pkg.label}</p>
-									<h3>{pkg.name}</h3>
-									<p class="partnerships-package__price">{pkg.price}</p>
-									<a class="partnerships-button" href={pkg.href}>{pkg.cta}</a>
-								</div>
-								<div class="partnerships-package__summary">
-									<p>{pkg.bestFor}</p>
-									<p class="partnerships-package__outcome">{pkg.outcome}</p>
-							</div>
-							<div>
-								<ul class="partnerships-package__included">
-									{pkg.included.map((item) => <li>{item}</li>)}
-								</ul>
-							</div>
-						</article>
-					))}
-				</div>
-			</section>
+		<section id="packages" class="partnerships-section partnerships-section--tight" aria-labelledby="packages-title">
+			<div class="partnerships-section__header">
+				<p class="partnerships-kicker">Partnership paths</p>
+				<h2 id="packages-title">Build a monthly adoption loop your team can keep using.</h2>
+				<p>
+					Start with recurring practitioner signal, move into monthly adoption experiments, then join the Council when shared cohort learning and expert perspective are worth bringing into the room.
+				</p>
+			</div>
+			<ul class="partnerships-compound-list" aria-label="What compounds each month">
+				{compoundPoints.map((point) => (
+					<li>
+						<h3>{point.title}</h3>
+						<p>{point.body}</p>
+					</li>
+				))}
+			</ul>
+			<div class="partnerships-package-grid">
+				{packages.map((pkg) => (
+					<article class:list={["partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
+						<div class="partnerships-package__top">
+							<p class="partnerships-package__label">{pkg.label}</p>
+							<h3>{pkg.name}</h3>
+							<p class="partnerships-package__price">{pkg.price}</p>
+							<a class="partnerships-button" href={pkg.href}>{pkg.cta}</a>
+						</div>
+						<div class="partnerships-package__summary">
+							<p>{pkg.bestFor}</p>
+							<p class="partnerships-package__outcome">{pkg.outcome}</p>
+						</div>
+						<div>
+							<ul class="partnerships-package__included">
+								{pkg.included.map((item) => <li>{item}</li>)}
+							</ul>
+						</div>
+					</article>
+				))}
+			</div>
+		</section>
 
 		<section class="partnerships-section partnerships-section--split" aria-labelledby="triggers-title">
 			<div class="partnerships-section__header">
@@ -292,17 +337,17 @@ const workExamples = [
 				<article>
 					<span>01</span>
 					<h3>Email context</h3>
-					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, upcoming budget decision, and links if they help.</p>
+					<p>Company, category, product, target developers, team stakeholders, current adoption challenge, current team rhythm, and links if they help.</p>
 				</article>
 				<article>
 					<span>02</span>
 					<h3>Get a fit reply</h3>
-					<p>David will say whether this fits a signal, adoption, or launch partnership, or whether it is not a good fit.</p>
+					<p>David will say whether this fits Signal, Adoption, or Council, or whether it is not a good fit.</p>
 				</article>
 				<article>
 					<span>03</span>
 					<h3>Work with your team</h3>
-					<p>We work with your team on strategy, narrative, education, proof, objections, team alignment, and next actions.</p>
+					<p>Each month produces signal, experiment decisions, or cohort synthesis your team can reuse in strategy, narrative, education, proof, objections, and alignment.</p>
 				</article>
 			</div>
 		</section>
@@ -324,9 +369,9 @@ const workExamples = [
 
 		<section class="partnerships-final" aria-labelledby="final-title">
 			<p class="partnerships-kicker">Start here</p>
-			<h2 id="final-title">Start before the spend is committed.</h2>
+			<h2 id="final-title">Start with the next adoption problem.</h2>
 			<p>
-				Rough context is enough: product, target developers, team stakeholders, adoption challenge, upcoming launch or budget decision, and links if useful.
+				Rough context is enough: product, target developers, team stakeholders, adoption challenge, current team rhythm, and links if useful.
 			</p>
 			<a class="partnerships-button" href={contactHref}>Email David</a>
 		</section>
@@ -356,8 +401,8 @@ const workExamples = [
 	}
 
 	.partnerships-hero {
-		padding-top: clamp(1.5rem, 4vw, 3.5rem);
-		padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+		padding-top: clamp(1.5rem, 3vw, 3rem);
+		padding-bottom: clamp(1.75rem, 3vw, 2.75rem);
 		border-bottom: 1px solid var(--partnerships-line);
 	}
 
@@ -375,22 +420,22 @@ const workExamples = [
 
 	.partnerships-hero__grid {
 		display: grid;
-		gap: 1.25rem;
-		margin-top: 0.9rem;
+		gap: clamp(1.75rem, 4vw, 4rem);
+		margin-top: 1rem;
 	}
 
 	.partnerships-hero h1 {
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: clamp(2.15rem, 5.5vw, 6rem);
+		font-size: clamp(2.2rem, 4.4vw, 4.55rem);
 		font-style: normal;
 		font-weight: 780;
 		letter-spacing: 0;
-		line-height: 0.96;
+		line-height: 1;
 		margin: 0;
-		max-width: 100%;
+		max-width: 17ch;
 	}
 
-	.partnerships-hero__body p,
+	.partnerships-hero__lead,
 	.partnerships-section__header p,
 	.partnerships-package p,
 	.partnerships-inspection-item p,
@@ -404,27 +449,72 @@ const workExamples = [
 		margin: 0;
 	}
 
-	.partnerships-hero__body {
-		display: grid;
-		gap: 0.85rem;
-		margin-top: 0.9rem;
-	}
-
-	.partnerships-hero__body > p {
+	.partnerships-hero__lead {
 		font-size: clamp(1rem, 2.2vw, 1.18rem);
-		max-width: 66rem;
+		line-height: 1.6;
+		margin-top: clamp(0.9rem, 1.8vw, 1.15rem);
+		max-width: 44rem;
 	}
 
-	.partnerships-hero__trigger {
-		color: var(--partnerships-ink) !important;
+	.partnerships-hero__rail {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.9rem;
+		padding-top: 1rem;
+	}
+
+	.partnerships-hero__rail-label {
+		color: var(--partnerships-ink);
+		font-size: 0.95rem;
+		font-weight: 760;
+		line-height: 1.25;
+		margin: 0;
+	}
+
+	.partnerships-hero__rail ul {
+		display: grid;
+		gap: 0;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.partnerships-hero__rail li {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.5rem;
+		grid-template-columns: 4.5rem minmax(0, 1fr);
+		padding: 0.85rem 0;
+	}
+
+	.partnerships-hero__rail li:first-child {
+		border-top: 0;
+		padding-top: 0;
+	}
+
+	.partnerships-hero__rail span {
+		color: var(--partnerships-accent);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		line-height: 1.25;
+		text-transform: uppercase;
+	}
+
+	.partnerships-hero__rail p {
+		color: var(--partnerships-ink);
+		font-size: 1rem;
 		font-weight: 680;
+		line-height: 1.35;
+		margin: 0;
 	}
 
 	.partnerships-actions {
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
-		margin-top: 1.3rem;
+		margin-top: 1.5rem;
 		width: fit-content;
 	}
 
@@ -523,6 +613,42 @@ const workExamples = [
 	.partnerships-process {
 		display: grid;
 		gap: 1rem;
+	}
+
+	.partnerships-compound-list {
+		border-bottom: 1px solid var(--partnerships-line);
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0;
+		list-style: none;
+		margin: 0 0 1rem;
+		padding: 0;
+	}
+
+	.partnerships-compound-list li {
+		border-top: 1px solid var(--partnerships-line);
+		display: grid;
+		gap: 0.35rem;
+		padding: 0.85rem 0;
+	}
+
+	.partnerships-compound-list li:first-child {
+		border-top: 0;
+	}
+
+	.partnerships-compound-list h3 {
+		font-size: 1rem;
+		font-weight: 730;
+		letter-spacing: 0;
+		line-height: 1.15;
+		margin: 0;
+	}
+
+	.partnerships-compound-list p {
+		color: var(--partnerships-muted);
+		font-size: 0.94rem;
+		line-height: 1.45;
+		margin: 0;
 	}
 
 	.partnerships-package {
@@ -750,6 +876,19 @@ const workExamples = [
 	}
 
 	@media (min-width: 1180px) {
+		.partnerships-hero__grid {
+			align-items: start;
+			grid-template-columns: minmax(0, 0.62fr) minmax(20rem, 0.38fr);
+		}
+
+		.partnerships-hero__rail {
+			border-left: 1px solid var(--partnerships-line);
+			border-top: 0;
+			margin-top: 0.25rem;
+			padding-left: clamp(1.25rem, 2vw, 2rem);
+			padding-top: 0;
+		}
+
 		.partnerships-section__header {
 			max-width: 72rem;
 			margin-bottom: 1.75rem;
@@ -759,12 +898,23 @@ const workExamples = [
 			max-width: 58rem;
 		}
 
-		.partnerships-hero h1 {
-			max-width: 100%;
+		.partnerships-compound-list {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
-		.partnerships-hero__body > p {
-			max-width: 66rem;
+		.partnerships-compound-list li {
+			border-left: 1px solid var(--partnerships-line);
+			border-top: 0;
+			padding: 1rem clamp(1rem, 1.5vw, 1.25rem);
+		}
+
+		.partnerships-compound-list li:first-child {
+			border-left: 0;
+			padding-left: 0;
+		}
+
+		.partnerships-compound-list li:last-child {
+			padding-right: 0;
 		}
 
 		.partnerships-package {
