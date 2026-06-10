@@ -245,12 +245,6 @@ function handleResizeKeydown(event: KeyboardEvent) {
 		]"
 		aria-label="Sidebar navigation"
 	>
-		<div class="ed-sidebar__index" aria-hidden="true">
-			<span class="ed-sidebar__index-label">
-				{{ isCollapsed ? "Nav" : "Navigation" }}
-			</span>
-		</div>
-
 		<nav class="ed-sidebar__nav">
 			<ul class="ed-sidebar__list">
 				<li v-for="item in navItems" :key="item.href" class="ed-sidebar__item">
@@ -369,26 +363,6 @@ function handleResizeKeydown(event: KeyboardEvent) {
 	.ed-sidebar--collapsed {
 		display: none;
 	}
-}
-
-.ed-sidebar__index {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.875rem 1rem;
-	border-bottom: 1px solid var(--editorial-hairline);
-	font-family: var(--font-jetbrains-mono), monospace;
-	font-size: 0.6875rem;
-	font-weight: 500;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	color: var(--editorial-ink-mute);
-	min-height: 44px;
-}
-
-.ed-sidebar--collapsed .ed-sidebar__index {
-	justify-content: center;
-	padding: 0.875rem 0;
 }
 
 .ed-sidebar__nav {
