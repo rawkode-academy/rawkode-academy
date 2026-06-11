@@ -167,7 +167,7 @@ import (
 	let _t = tasks
 	let _wranglerWithNode24 = "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c env CLOUDFLARE_API_TOKEN=\"$CLOUDFLARE_API_TOKEN\" CLOUDFLARE_ACCOUNT_ID=\"$CLOUDFLARE_ACCOUNT_ID\" bun x wrangler"
 	let _ciDeployCommands = [
-		if _hasMigrations {_wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"},
+		if _hasMigrations {_wranglerWithNode24 + " d1 migrations apply DB --remote --config " + _migrationWranglerConfig},
 		if includeReadModel {_wranglerWithNode24 + " deploy --config ./read-model/wrangler.jsonc"},
 		if includeWriteModel {_wranglerWithNode24 + " deploy --config ./write-model/wrangler.jsonc"},
 		if includeHttp {_wranglerWithNode24 + " deploy --config ./http/wrangler.jsonc"},
@@ -198,10 +198,16 @@ import (
 		}
 	}
 
-	// A service owns migrations when it has a data-model, a read-model, and a
-	// "DB" D1 binding (migrations_dir is auto-injected for DB on the read-model).
+	// A service owns migrations when it has a data-model, a deployable worker,
+	// and a "DB" D1 binding (migrations_dir is auto-injected for DB on generated
+	// read-model and HTTP Wrangler configs).
 	_dbBindings: [for db in _bindings.d1Databases if db.binding == "DB" {db}]
-	_hasMigrations: includeDataModel && includeReadModel && len(_dbBindings) > 0
+	_hasMigrations: includeDataModel && (includeReadModel || includeHttp) && len(_dbBindings) > 0
+	_migrationWranglerConfigs: [
+		if includeReadModel {"./read-model/wrangler.jsonc"},
+		if !includeReadModel && includeHttp {"./http/wrangler.jsonc"},
+	]
+	_migrationWranglerConfig: _migrationWranglerConfigs[0]
 
 	// Auto-generated deploy tasks based on enabled features. Services that own a
 	// D1 schema also get a `migrate` task, ordered before deploy in the pipeline.
@@ -216,7 +222,7 @@ import (
 			hermetic: false
 			dir: from: "caller"
 			command: "sh"
-			args: ["-lc", strings.Join(_ciDeployCommands, "\n")]
+			args: ["-ec", strings.Join(_ciDeployCommands, "\n")]
 			inputs: list.Concat(_ciDeployInputSets)
 		}
 
@@ -225,8 +231,8 @@ import (
 				hermetic: false
 				dir: from: "caller"
 				command: "sh"
-				args: ["-lc", _wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"]
-				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", "read-model/wrangler.jsonc"]])
+				args: ["-ec", _wranglerWithNode24 + " d1 migrations apply DB --remote --config " + _migrationWranglerConfig]
+				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", _migrationWranglerConfig]])
 			}
 		}
 
@@ -450,6 +456,10 @@ import (
 				binding:     bucket.binding
 				bucket_name: bucket.bucketName
 			}]
+		}
+
+		if len(_bindings.vars) > 0 {
+			vars: _bindings.vars
 		}
 
 		if len(_bindings.services) > 0 {
