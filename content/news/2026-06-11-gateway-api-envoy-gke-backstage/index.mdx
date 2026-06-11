@@ -1,0 +1,53 @@
+---
+title: "Gateway API, Envoy, GKE, and Backstage ship routing and platform fixes"
+description: "Gateway API v1.6.0-rc.1 moves TCPRoute and UDPRoute toward v1, Envoy patches HTTP/2 observability and cookie controls, Google details GKE Inference Gateway routing, and Backstage fixes Microsoft Graph user sync."
+publishedAt: 2026-06-11
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - envoy
+  - backstage
+---
+
+Four fresh infrastructure updates landed in the last 24 hours across Kubernetes networking APIs, Envoy HTTP/2 controls, AI inference routing, and Backstage catalog sync.
+
+## Gateway API v1.6.0-rc.1 moves TCPRoute and UDPRoute to GA
+
+Gateway API published v1.6.0-rc.1 on June 10. The release candidate graduates TCPRoute and UDPRoute to the v1 API version, deprecates v1alpha2 for those APIs, and adds UDPRoute conformance profile coverage plus TCPRoute feature support.
+
+Other changes are operator-visible: HTTPRoute retry validation now requires unique `retry.codes` values and `retry.attempts >= 1`, CORS moves into the standard channel, and a ValidatingAdmissionPolicy blocks mixed experimental and standard CRDs, monthly releases, and older releases in unsafe install paths. TLSRoute host and rule limits expand, but the release notes tell operators to validate kube-apiserver, etcd, and Gateway controller behavior before enabling larger manifests in production.
+
+**Source:** [Gateway API v1.6.0-rc.1 release](https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.6.0-rc.1) - June 10, 2026
+
+---
+
+## Envoy patches HTTP/2 observability across four supported branches
+
+Envoy released v1.35.12, v1.36.8, v1.37.4, and v1.38.2 on June 10. All four releases carry the same runtime and HTTP/2 changes, so operators can pick up the fix without jumping branches.
+
+Deleting an RTDS runtime guard override now restores the process-wide default runtime guard value. Envoy also adds opt-in HTTP/2 histograms for header-entry count, header-map byte size, reassembled `cookie` header length, and individual `cookie` header count, plus a new `envoy.reloadable_features.http2_max_cookies_size_in_kb` guard to cap reassembled `cookie` header size; the default leaves the limit off.
+
+**Source:** [Envoy v1.38.2 release](https://github.com/envoyproxy/envoy/releases/tag/v1.38.2) - June 10, 2026
+
+---
+
+## Google details prefix-cache-aware routing in GKE Inference Gateway
+
+Google published a June 10 post on GKE Inference Gateway prefix-cache routing for LLM serving. The linked [GKE Inference Gateway documentation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/about-gke-inference-gateway) describes it as a GKE Gateway extension powered by llm-d that uses model-server signals such as KV cache hits, GPU or TPU utilization, and request queue length to choose a serving pod.
+
+Instead of round-robin placement, the gateway can route requests with shared prompt context to replicas that already hold matching KV cache state. Google attributes benchmark results to Principled Technologies showing 7,169.21 output tokens per second versus 6,042.05, 188.36 ms mean time to first token versus 2624.73 ms, and 30.20 ms mean inter-token latency versus 81.03 ms against a third-party managed Kubernetes service; treat those as vendor-published benchmark claims unless you can reproduce the workload.
+
+**Source:** [Google Cloud Blog](https://cloud.google.com/blog/products/containers-kubernetes/gke-inference-gateway-prefix-caching-accelerates-ai-inference) - June 10, 2026
+
+---
+
+## Backstage v1.51.2 fixes Microsoft Graph user drops
+
+Backstage released v1.51.2 on June 10. The patch fixes an empty `userSelect` value causing all users to be dropped in the Microsoft Graph module.
+
+That is narrow but operationally important for portals whose catalog identity source is Microsoft Graph: the failure mode is missing users, not a cosmetic sync warning. Teams using the msgraph module should compare local config against the patch before assuming catalog data loss is an upstream directory issue.
+
+**Source:** [Backstage v1.51.2 release](https://github.com/backstage/backstage/releases/tag/v1.51.2) - June 10, 2026
+
+---
