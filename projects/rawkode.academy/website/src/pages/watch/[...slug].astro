@@ -1547,6 +1547,18 @@ const watchStatusLabel = isUpcomingLive
 				"player";
 		}
 
+		/* Single-column layout: the player is already as wide as it can get,
+		   so the expand/shrink toggle is meaningless — and its full-frame
+		   checkbox overlay would swallow the first tap meant for the player. */
+		.watch-detail__player-wrap {
+			max-width: 100%;
+		}
+
+		.watch-detail__player-state,
+		.watch-detail__player-toggle {
+			display: none;
+		}
+
 		.watch-detail__summary {
 			display: flex;
 			flex-direction: column;
