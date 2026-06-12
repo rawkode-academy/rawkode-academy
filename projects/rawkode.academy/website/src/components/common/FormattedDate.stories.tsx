@@ -80,27 +80,27 @@ export const AllVariants: Story = {
 				template: `
           <div class="space-y-4">
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Short Format</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Short Format</h3>
               <FormattedDate :date="date" format="short" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Long Format</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Long Format</h3>
               <FormattedDate :date="date" format="long" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Full Format</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Full Format</h3>
               <FormattedDate :date="date" format="full" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">With Icon</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">With Icon</h3>
               <FormattedDate :date="date" showIcon />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Long Format with Icon</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Long Format with Icon</h3>
               <FormattedDate :date="date" format="long" showIcon />
             </div>
           </div>
@@ -165,7 +165,7 @@ export const InContext: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <article class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <article class="p-6 bg-[var(--surface-card)] rounded-lg shadow">
             <h2 class="text-xl font-bold mb-2">Understanding Kubernetes Deployments</h2>
             <div class="flex items-center gap-4 text-sm text-muted">
               <span>By John Doe</span>

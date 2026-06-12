@@ -1,5 +1,5 @@
 <template>
- <div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
+ <div class="bg-[var(--surface-base)] py-24 sm:py-32">
 											 <div class="mx-auto px-6 lg:px-8">
 										 <div class="mx-auto lg:text-center">
 							 <h2>Deploy faster</h2>

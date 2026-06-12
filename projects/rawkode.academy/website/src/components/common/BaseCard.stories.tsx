@@ -140,7 +140,7 @@ export const WithFooter: Story = {
                 </p>
               </template>
               <template #footer>
-                <div class="flex items-center justify-between text-sm text-gray-500">
+                <div class="flex items-center justify-between text-sm text-muted">
                   <FormattedDate :date="publishDate" />
                   <span>5 min read</span>
                 </div>
@@ -188,7 +188,7 @@ export const CompleteExample: Story = {
                   Master advanced deployment patterns, custom operators, and production-ready
                   configurations for enterprise Kubernetes deployments.
                 </p>
-                <div class="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                <div class="flex items-center gap-4 mt-4 text-sm text-muted">
                   <span>24 lessons</span>
                   <span>•</span>
                   <span>6 hours</span>

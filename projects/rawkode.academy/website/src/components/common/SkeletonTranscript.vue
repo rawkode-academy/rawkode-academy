@@ -8,7 +8,7 @@
 		<!-- Search bar skeleton -->
 		<div class="mb-4">
 			<div
-				class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-sm"
+				class="animate-pulse bg-[var(--surface-skeleton)] rounded-sm"
 				style="height: 42px"
 			/>
 		</div>

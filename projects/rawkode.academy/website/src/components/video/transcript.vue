@@ -8,7 +8,7 @@
  type="text"
  placeholder="Search transcript..."
  aria-label="Search transcript"
- class="w-full px-4 py-2 pl-10 border border-surface rounded-sm bg-white dark:bg-gray-800 text-primary-content focus-ring"
+ class="w-full px-4 py-2 pl-10 border border-surface rounded-sm bg-[var(--surface-card)] text-primary-content focus-ring"
  />
  <svg
  class="absolute left-3 top-2.5 w-5 h-5 text-muted"

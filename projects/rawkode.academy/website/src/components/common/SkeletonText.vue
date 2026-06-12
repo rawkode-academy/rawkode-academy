@@ -5,7 +5,7 @@
 			v-for="(line, index) in lines"
 			:key="index"
 			:class="[
-				'animate-pulse bg-gray-200 dark:bg-gray-700',
+				'animate-pulse bg-[var(--surface-skeleton)]',
 				index < lines.length - 1 ? 'mb-2' : '',
 			]"
 			:style="{

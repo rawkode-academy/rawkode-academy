@@ -12,17 +12,17 @@
  @click.self="close"
  >
  <div
- class="relative w-full max-w-6xl bg-white/90 dark:bg-gray-900/90 rounded-sm dark: border border-white/50 dark:border-gray-700/50"
+ class="relative w-full max-w-6xl bg-[var(--surface-card)] rounded-sm border border-[var(--surface-border)]"
  @click.stop
  >
  <!-- Header -->
- <div class="flex items-center justify-between p-4 border-b border-white/30 dark:border-gray-700/50 ">
+ <div class="flex items-center justify-between p-4 border-b border-[var(--surface-border)] ">
  <h3 class="text-lg font-semibold text-primary-content">
  {{ resource.title }}
  </h3>
  <button
  @click="close"
- class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-smooth rounded-sm hover:bg-white/60 dark:hover:bg-gray-700/60 hover:"
+ class="p-2 text-muted hover:text-secondary-content transition-smooth rounded-sm hover:bg-[var(--surface-card-muted)] hover:"
  aria-label="Close"
  >
  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,10 +32,10 @@
  </div>
 
  <!-- Container -->
- <div class="relative bg-gray-50 dark:bg-gray-800" :style="{ height: containerHeight }">
+ <div class="relative bg-[var(--surface-card-muted)]" :style="{ height: containerHeight }">
  <div v-if="loading" class="absolute inset-0 flex items-center justify-center">
  <div class="text-center">
- <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-primary"></div>
+ <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--surface-border-strong)] border-t-primary"></div>
  <p class="mt-2 text-sm text-muted">Loading application...</p>
  </div>
  </div>
@@ -61,7 +61,7 @@
  </div>
 
  <!-- Footer -->
- <div class="flex items-center justify-between p-4 border-t border-white/30 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 ">
+ <div class="flex items-center justify-between p-4 border-t border-[var(--surface-border)] bg-[var(--surface-card-muted)] ">
  <p v-if="resource.description" class="text-sm text-muted">
  {{ resource.description }}
  </p>
@@ -71,7 +71,7 @@
  :href="getExternalUrl()"
  target="_blank"
  rel="noopener noreferrer"
- class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary-content bg-white/50 dark:bg-gray-700/50 border border-white/50 dark:border-gray-600/50 rounded-sm hover:bg-white/70 dark:hover:bg-gray-600/70 hover:scale-105 transition-smooth shadow-md hover:"
+ class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary-content bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-sm hover:bg-[var(--surface-card-muted)] hover:scale-105 transition-smooth shadow-md hover:"
  >
  Open in new tab
  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -145,32 +145,32 @@ export const AllVariations: Story = {
 				template: `
           <div class="space-y-8">
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Single Author</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Single Author</h3>
               <AuthorAvatarGroup :authors="authors.slice(0, 1)" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Two Authors</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Two Authors</h3>
               <AuthorAvatarGroup :authors="authors.slice(0, 2)" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Multiple Authors (Default)</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Multiple Authors (Default)</h3>
               <AuthorAvatarGroup :authors="authors" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Without Names</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Without Names</h3>
               <AuthorAvatarGroup :authors="authors" :showNames="false" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Max Display = 2</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Max Display = 2</h3>
               <AuthorAvatarGroup :authors="authors" :maxDisplay="2" />
             </div>
             
             <div>
-              <h3 class="text-sm font-medium text-gray-700 mb-2">Without Active Indicator</h3>
+              <h3 class="text-sm font-medium text-secondary-content mb-2">Without Active Indicator</h3>
               <AuthorAvatarGroup :authors="authors.slice(0, 2)" :showActiveIndicator="false" />
             </div>
           </div>
@@ -192,14 +192,14 @@ export const InContext: Story = {
 		<VueInReact
 			component={{
 				template: `
-          <article class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <article class="p-6 bg-[var(--surface-card)] rounded-lg shadow">
             <h2 class="text-xl font-bold mb-2">Understanding Kubernetes Deployments</h2>
             <div class="flex items-center gap-4 mb-4">
               <AuthorAvatarGroup :authors="authors.slice(0, 2)" />
-              <span class="text-sm text-gray-500">•</span>
-              <span class="text-sm text-gray-500">March 15, 2024</span>
-              <span class="text-sm text-gray-500">•</span>
-              <span class="text-sm text-gray-500">5 min read</span>
+              <span class="text-sm text-muted">•</span>
+              <span class="text-sm text-muted">March 15, 2024</span>
+              <span class="text-sm text-muted">•</span>
+              <span class="text-sm text-muted">5 min read</span>
             </div>
             <p class="text-secondary-content">
               Learn how to effectively manage and scale your applications using Kubernetes deployments...

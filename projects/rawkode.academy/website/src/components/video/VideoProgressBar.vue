@@ -40,7 +40,7 @@ const heightClass = computed(() => {
 const colorClass = computed(() => {
 	const colors: Record<string, string> = {
 		default: "bg-[rgb(var(--brand-primary))]",
-		subtle: "bg-gray-400 dark:bg-gray-500",
+		subtle: "bg-[var(--editorial-ink-mute)]",
 		accent: "bg-[rgb(var(--brand-secondary))]",
 	};
 	return colors[props.variant] || "bg-[rgb(var(--brand-primary))]";

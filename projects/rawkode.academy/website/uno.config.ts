@@ -32,6 +32,19 @@ export default defineConfig({
 		"client:visible",
 		"client:only",
 		"client:media",
+		// Raw Tailwind gray utilities are banned: they drift from the warm
+		// paper/ink editorial palette (worst in dark mode, where gray-900's
+		// cool hue clashes with the ink-dark ground). Use the semantic
+		// tokens instead — text-primary-content / text-secondary-content /
+		// text-muted, bg-[var(--surface-*)], border-[var(--surface-border)].
+		// src/tests/design-tokens.test.ts fails CI with the offending files.
+		[
+			/(?:^|:)(?:bg|text|border|divide|ring|outline|decoration|from|to|via|fill|stroke|placeholder|caret|accent|shadow)-gray-\d+(?:\/\d+)?$/,
+			{
+				message:
+					"gray-* utilities are banned — use the editorial tokens (text-*-content, var(--surface-*))",
+			},
+		],
 	],
 	theme: {
 		colors: {
