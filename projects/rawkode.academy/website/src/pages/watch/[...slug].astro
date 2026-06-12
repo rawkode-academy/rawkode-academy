@@ -571,8 +571,9 @@ const watchStatusLabel = isUpcomingLive
 			)}
 
 			{techEntries.length > 0 && (
-				<section class="watch-detail__tech">
-					<MLabel tone="spruce">Technologies featured</MLabel>
+				<section class="watch-detail__tech" aria-labelledby="watch-detail-tech-heading">
+					<h2 id="watch-detail-tech-heading" class="sr-only">Technologies featured</h2>
+					<MLabel tone="spruce" aria-hidden="true">Technologies featured</MLabel>
 					<div class="watch-detail__tech-grid">
 						{techEntries.map((tech) => (
 							<a

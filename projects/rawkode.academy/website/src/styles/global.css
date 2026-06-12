@@ -256,7 +256,9 @@ html.dark {
 @layer base {
 	/* Editorial heading ramp — h1/h2 in serif italic at display sizes,
 	   h3/h4 in Inter Tight semibold. Negative letter-spacing pulls the
-	   display sizes tight without going into "decorative" territory. */
+	   display sizes tight without going into "decorative" territory.
+	   `text-wrap: balance` evens out multi-line display headings so the
+	   serif italic never strands a one-word orphan line. */
 	h1 {
 		@apply text-4xl md:text-5xl text-primary-content;
 		font-family: var(--font-instrument-serif), serif;
@@ -264,6 +266,7 @@ html.dark {
 		font-weight: 400;
 		line-height: 1.02;
 		letter-spacing: -0.035em;
+		text-wrap: balance;
 	}
 
 	h2 {
@@ -273,6 +276,7 @@ html.dark {
 		font-weight: 400;
 		line-height: 1.05;
 		letter-spacing: -0.025em;
+		text-wrap: balance;
 	}
 
 	h3 {
@@ -281,6 +285,7 @@ html.dark {
 		font-weight: 500;
 		line-height: 1.2;
 		letter-spacing: -0.015em;
+		text-wrap: balance;
 	}
 
 	h4 {
