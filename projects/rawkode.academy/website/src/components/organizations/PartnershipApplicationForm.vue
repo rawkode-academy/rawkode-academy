@@ -93,11 +93,11 @@
 
 		<div class="application-form__trap" aria-hidden="true">
 			<label>
-				Website
+				Comments
 				<input
-					v-model="website"
+					v-model="honeypot"
 					type="text"
-					name="website"
+					name="comments"
 					tabindex="-1"
 					autocomplete="off"
 				/>
@@ -125,7 +125,8 @@ const path = ref<ApplicationPath>("Not sure yet");
 const targetDevelopers = ref("");
 const challenge = ref("");
 const links = ref("");
-const website = ref("");
+// Honeypot — named "comments" because autofill fills fields named "website".
+const honeypot = ref("");
 
 const loading = ref(false);
 const submitted = ref(false);
@@ -168,7 +169,7 @@ async function submit() {
 			targetDevelopers: targetDevelopers.value,
 			challenge: challenge.value,
 			...(links.value.trim() ? { links: links.value } : {}),
-			...(website.value ? { website: website.value } : {}),
+			...(honeypot.value ? { comments: honeypot.value } : {}),
 		});
 
 		if (result.error) {

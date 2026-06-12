@@ -4,7 +4,10 @@ import { EmailMessage } from "cloudflare:email";
 import { env } from "cloudflare:workers";
 import { applicationPaths } from "@/lib/partnerships";
 
-const FROM_ADDRESS = "partnerships@rawkode.academy";
+// Sender must be on a domain onboarded to Cloudflare Email Routing.
+// rawkode.academy's MX points at Google Workspace, so we send from
+// rawkode.email and deliver to the verified destination address below.
+const FROM_ADDRESS = "partnerships@rawkode.email";
 const TO_ADDRESS = "david@rawkode.academy";
 
 /** Strip CR/LF so user input can never inject extra MIME headers. */
@@ -47,11 +50,17 @@ export const partnership = {
 				.min(1, "Please describe your current adoption challenge")
 				.max(5000),
 			links: z.string().trim().max(2000).optional(),
-			// Honeypot: real users never fill this in.
-			website: z.string().optional(),
+			// Honeypot: real users never fill this in. Named so browser
+			// autofill heuristics (which match "website", "url", etc.)
+			// don't populate it for real applicants.
+			comments: z.string().optional(),
 		}),
 		handler: async (input) => {
-			if (input.website) {
+			if (input.comments) {
+				console.warn("Partnership application dropped by honeypot", {
+					email: input.email,
+					company: input.company,
+				});
 				return { success: true };
 			}
 
@@ -84,7 +93,7 @@ export const partnership = {
 				`To: <${TO_ADDRESS}>`,
 				`Reply-To: <${sanitizeHeader(input.email)}>`,
 				`Subject: ${subject}`,
-				`Message-ID: <${crypto.randomUUID()}@rawkode.academy>`,
+				`Message-ID: <${crypto.randomUUID()}@rawkode.email>`,
 				`Date: ${new Date().toUTCString()}`,
 				"MIME-Version: 1.0",
 				'Content-Type: text/plain; charset="utf-8"',
