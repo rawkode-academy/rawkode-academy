@@ -1,8 +1,13 @@
 <template>
  <Teleport to="body">
- <div class="popover-backdrop" @click="$emit('close')"></div>
- <div class="tech-card-popover" @click.stop>
- <button type="button" class="close-btn" @click="$emit('close')" aria-label="Close">
+ <dialog
+ ref="dialogEl"
+ class="tech-card-popover"
+ :aria-label="technology.name"
+ @click="onDialogClick"
+ @close="$emit('close')"
+ >
+ <button type="button" class="close-btn" @click="dialogEl?.close()" aria-label="Close">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
  </svg>
@@ -45,8 +50,9 @@
  <span class="stat-value">{{ technology.metrics.videoCount || 0 }}</span>
  <span class="stat-label">Videos</span>
  </div>
- <div class="stat">
- <span class="stat-value">{{ technology.metrics.articleCount || 0 }}</span>
+ <!-- Hidden until article links are wired up; a permanent zero reads as broken -->
+ <div v-if="technology.metrics.articleCount" class="stat">
+ <span class="stat-value">{{ technology.metrics.articleCount }}</span>
  <span class="stat-label">Articles</span>
  </div>
  <div class="stat">
@@ -76,12 +82,12 @@
  </a>
  </div>
  </div>
- </div>
+ </dialog>
  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { getDimensionLabel } from "@/lib/explorer/dimensions";
 
@@ -91,23 +97,24 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const emit = defineEmits<{
+defineEmits<{
 	close: [];
 }>();
 
-const handleKeydown = (event: KeyboardEvent) => {
-	if (event.key === "Escape") {
-		emit("close");
-	}
-};
+// Native <dialog>: focus trapping, Escape, and focus return come from the
+// platform. The close event bubbles up as the component's close emit.
+const dialogEl = ref<HTMLDialogElement | null>(null);
 
 onMounted(() => {
-	document.addEventListener("keydown", handleKeydown);
+	dialogEl.value?.showModal();
 });
 
-onUnmounted(() => {
-	document.removeEventListener("keydown", handleKeydown);
-});
+const onDialogClick = (event: MouseEvent) => {
+	// Clicks on ::backdrop target the dialog element itself
+	if (event.target === dialogEl.value) {
+		dialogEl.value?.close();
+	}
+};
 
 const statusLabel = computed(() => {
 	return getDimensionLabel(
@@ -159,41 +166,54 @@ const formatDate = (dateStr: string | null): string => {
 
 <style scoped>
 /* =================================
- Modal Overlay & Container
+ Modal Container (native <dialog>)
  ================================= */
-.popover-backdrop {
- position: fixed;
- inset: 0;
- z-index: 999;
- background: rgba(0, 0, 0, 0.6);
- backdrop-filter: blur(4px);
- animation: fadeIn 0.2s ease;
-}
+dialog.tech-card-popover {
+ /* Stage colors derive from the editorial palette, mirroring the matrix page */
+ --stage-skip: var(--editorial-rust);
+ --stage-watch: var(--editorial-amber-text);
+ --stage-explore: color-mix(
+ in oklab,
+ var(--editorial-amber-text) 45%,
+ var(--editorial-spruce) 55%
+ );
+ --stage-learn: var(--editorial-violet);
+ --stage-adopt: var(--editorial-spruce);
+ --stage-advocate: var(--editorial-ink);
+ --stage-graveyard: var(--editorial-ink-mute);
 
-.tech-card-popover {
- position: fixed;
- z-index: 1000;
  width: 480px;
  max-width: calc(100vw - 3rem);
- top: 50%;
- left: 50%;
- transform: translate(-50%, -50%);
- animation: scaleIn 0.2s ease;
+ max-height: calc(100vh - 4rem);
+ padding: 0;
+ border: none;
+ background: transparent;
+ margin: auto;
+ overflow: visible;
 }
 
-@keyframes fadeIn {
- from { opacity: 0; }
- to { opacity: 1; }
+:global(html.dark) dialog.tech-card-popover {
+ --stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
+}
+
+dialog.tech-card-popover::backdrop {
+ background: rgb(0 0 0 / 0.6);
+}
+
+dialog.tech-card-popover[open] {
+ animation: scaleIn 0.2s var(--ease-standard, ease);
 }
 
 @keyframes scaleIn {
  from {
  opacity: 0;
- transform: translate(-50%, -50%) scale(0.95);
+ transform: scale(0.97);
  }
- to {
- opacity: 1;
- transform: translate(-50%, -50%) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+ dialog.tech-card-popover[open] {
+ animation: none;
  }
 }
 
@@ -215,14 +235,12 @@ const formatDate = (dateStr: string | null): string => {
  border-radius: 50%;
  color: var(--text-muted);
  cursor: pointer;
- transition: all 0.15s ease;
- box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .close-btn:hover {
  background: var(--surface-card-muted);
  color: var(--text-primary-content);
- transform: scale(1.05);
 }
 
 /* =================================
@@ -230,12 +248,11 @@ const formatDate = (dateStr: string | null): string => {
  ================================= */
 .card-frame {
  background: var(--surface-card);
- border: 1px solid var(--surface-border);
- border-radius: 1.5rem;
+ border: 1px solid var(--editorial-hairline-strong);
+ border-radius: var(--radius-4xl);
  overflow: hidden;
- box-shadow:
- 0 25px 50px rgba(0, 0, 0, 0.25),
- 0 0 0 1px rgba(0, 0, 0, 0.05);
+ max-height: calc(100vh - 4rem);
+ overflow-y: auto;
 }
 
 /* =================================
@@ -250,12 +267,13 @@ const formatDate = (dateStr: string | null): string => {
  border-bottom: 4px solid var(--text-muted);
 }
 
-.card-header.status-skip { border-bottom-color: #ef4444; }
-.card-header.status-watch { border-bottom-color: #f97316; }
-.card-header.status-explore { border-bottom-color: #ca8a04; }
-.card-header.status-learn { border-bottom-color: #3b82f6; }
-.card-header.status-adopt { border-bottom-color: #22c55e; }
-.card-header.status-advocate { border-bottom-color: rgb(var(--brand-primary)); }
+.card-header.status-skip { border-bottom-color: var(--stage-skip); }
+.card-header.status-watch { border-bottom-color: var(--stage-watch); }
+.card-header.status-explore { border-bottom-color: var(--stage-explore); }
+.card-header.status-learn { border-bottom-color: var(--stage-learn); }
+.card-header.status-adopt { border-bottom-color: var(--stage-adopt); }
+.card-header.status-advocate { border-bottom-color: var(--stage-advocate); }
+.card-header.status-graveyard { border-bottom-color: var(--stage-graveyard); }
 
 .card-icon-wrapper {
  flex-shrink: 0;
@@ -265,7 +283,7 @@ const formatDate = (dateStr: string | null): string => {
  width: 80px;
  height: 80px;
  object-fit: contain;
- border-radius: 1rem;
+ border-radius: var(--radius-4xl);
  background: var(--surface-card);
  padding: 0.875rem;
  border: 1px solid var(--surface-border);
@@ -278,7 +296,7 @@ const formatDate = (dateStr: string | null): string => {
  align-items: center;
  justify-content: center;
  background: var(--surface-card);
- border-radius: 1rem;
+ border-radius: var(--radius-4xl);
  border: 1px solid var(--surface-border);
  font-size: 2rem;
  font-weight: 700;
@@ -311,17 +329,18 @@ const formatDate = (dateStr: string | null): string => {
  text-transform: uppercase;
  letter-spacing: 0.04em;
  padding: 0.375rem 0.75rem;
- border-radius: 0.375rem;
- color: white;
+ border-radius: var(--radius-md);
+ color: var(--surface-base);
  background: var(--text-muted);
 }
 
-.card-status-badge.status-skip { background: #ef4444; }
-.card-status-badge.status-watch { background: #f97316; }
-.card-status-badge.status-explore { background: #ca8a04; }
-.card-status-badge.status-learn { background: #3b82f6; }
-.card-status-badge.status-adopt { background: #22c55e; }
-.card-status-badge.status-advocate { background: rgb(var(--brand-primary)); }
+.card-status-badge.status-skip { background: var(--stage-skip); }
+.card-status-badge.status-watch { background: var(--stage-watch); }
+.card-status-badge.status-explore { background: var(--stage-explore); }
+.card-status-badge.status-learn { background: var(--stage-learn); }
+.card-status-badge.status-adopt { background: var(--stage-adopt); }
+.card-status-badge.status-advocate { background: var(--stage-advocate); }
+.card-status-badge.status-graveyard { background: var(--stage-graveyard); }
 
 .card-category {
  font-size: 0.875rem;
@@ -363,7 +382,7 @@ const formatDate = (dateStr: string | null): string => {
 /* Stats */
 .card-stats {
  display: grid;
- grid-template-columns: repeat(4, 1fr);
+ grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
  gap: 0.75rem;
 }
 
@@ -374,7 +393,7 @@ const formatDate = (dateStr: string | null): string => {
  gap: 0.25rem;
  padding: 0.875rem 0.5rem;
  background: var(--surface-card-muted);
- border-radius: 0.75rem;
+ border-radius: var(--radius-3xl);
 }
 
 .stat-value {
@@ -398,9 +417,9 @@ const formatDate = (dateStr: string | null): string => {
  align-items: flex-start;
  gap: 0.75rem;
  padding: 1rem;
- background: rgba(239, 68, 68, 0.08);
- border: 1px solid rgba(239, 68, 68, 0.15);
- border-radius: 0.75rem;
+ background: color-mix(in oklab, var(--editorial-rust) 8%, transparent);
+ border: 1px solid color-mix(in oklab, var(--editorial-rust) 18%, transparent);
+ border-radius: var(--radius-3xl);
 }
 
 .spicy-icon {
@@ -412,12 +431,8 @@ const formatDate = (dateStr: string | null): string => {
 .spicy-text {
  font-size: 0.875rem;
  font-style: italic;
- color: #be123c;
+ color: var(--editorial-rust);
  line-height: 1.5;
-}
-
-:global(html.dark) .spicy-text {
- color: #fda4af;
 }
 
 /* =================================
@@ -434,20 +449,21 @@ const formatDate = (dateStr: string | null): string => {
  gap: 0.625rem;
  width: 100%;
  padding: 1rem 1.5rem;
- background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%);
- color: white;
- border-radius: 0.75rem;
+ background: var(--editorial-ink);
+ color: var(--editorial-paper);
+ border: 1px solid var(--editorial-ink);
+ border-radius: var(--radius-md);
  font-size: 0.875rem;
  font-weight: 700;
  text-transform: uppercase;
  letter-spacing: 0.04em;
  text-decoration: none;
- transition: all 0.2s ease;
+ transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .card-cta:hover {
- transform: translateY(-2px);
- box-shadow: 0 8px 20px rgb(var(--brand-primary) / 0.35);
+ background: var(--editorial-spruce);
+ border-color: var(--editorial-spruce);
 }
 
 .card-cta svg {
@@ -462,8 +478,9 @@ const formatDate = (dateStr: string | null): string => {
  Mobile
  ================================= */
 @media (max-width: 540px) {
- .tech-card-popover {
+ dialog.tech-card-popover {
  width: calc(100vw - 2rem);
+ max-width: calc(100vw - 2rem);
  }
 
  .card-header {

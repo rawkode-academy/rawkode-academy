@@ -1,0 +1,18 @@
+---
+name: agentregistry
+website: 'https://agentregistry.dev/'
+source: 'https://github.com/agentregistry-dev/agentregistry'
+license: Apache-2.0
+status: alpha
+category: Provisioning
+subcategory: Container Registry
+matrix:
+  status: watch
+  trajectory: rising
+---
+
+agentregistry is a cloud native registry for the building blocks of agentic AI systems: MCP servers, agents, and skills. It gives organizations a curated, single source of truth for which agents and tools are approved for use, and handles discovery and deployment of those artifacts across local development environments and Kubernetes clusters.
+
+The project was created by Solo.io — its third agentic-infrastructure donation after kagent and agentgateway — and donated to the Linux Foundation, with a CNCF Sandbox application submitted in March 2026. It integrates with the projects you'd expect: Kubernetes for deployment, and Prometheus and OpenTelemetry for observability, with agentgateway as the natural enforcement point for what the registry curates.
+
+The problem it addresses is real and growing: as teams accumulate dozens of MCP servers and agents of varying provenance, "which of these are vetted, versioned, and safe to run?" needs an answer that isn't a wiki page. Whether the ecosystem standardizes on agentregistry or on registry features inside existing artifact stores (Artifact Hub, OCI registries) is the open question.
