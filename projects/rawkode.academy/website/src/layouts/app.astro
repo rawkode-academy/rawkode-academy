@@ -142,12 +142,17 @@ import { ThemeToggle } from "@/components/ui";
 			#footer-container {
 				margin-left: var(--ed-sidebar-current-width);
 			}
+
+			#footer-container {
+				width: calc(100% - var(--ed-sidebar-current-width));
+			}
 		}
 
 		@media (max-width: 767px) {
 			#main-content,
 			#footer-container {
 				margin-left: 0;
+				width: 100%;
 			}
 		}
 
