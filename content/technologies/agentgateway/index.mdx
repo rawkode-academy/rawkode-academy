@@ -1,0 +1,19 @@
+---
+name: agentgateway
+website: 'https://agentgateway.dev/'
+source: 'https://github.com/agentgateway/agentgateway'
+documentation: 'https://agentgateway.dev/docs/'
+license: Apache-2.0
+status: beta
+category: Orchestration & Management
+subcategory: API Gateway
+matrix:
+  status: watch
+  trajectory: rising
+---
+
+agentgateway is an AI-native proxy, written in Rust, for the traffic patterns that agentic systems create: agent-to-LLM, agent-to-tool, and agent-to-agent communication. It speaks the protocols of that world natively — Model Context Protocol (MCP) and Agent2Agent (A2A) — and layers security, observability, and governance on top, so platform teams can see and control what their agents are actually saying to models and tools.
+
+Created by Solo.io and donated to the Linux Foundation, it slots into the existing cloud native stack rather than beside it: kgateway can act as its control plane, and at KubeCon + CloudNativeCon Europe 2026 the Istio project announced experimental agentgateway support alongside its Gateway API Inference Extension work. Capabilities include MCP multiplexing (federating many MCP servers behind one endpoint), tool-level RBAC, prompt guardrails, and OpenTelemetry-based tracing of agent conversations.
+
+It occupies the emerging "agent gateway" niche alongside LiteLLM, Portkey, and the LLM-routing features appearing in traditional API gateways; its bet is that agent traffic deserves a purpose-built, vendor-neutral data plane rather than bolt-ons to HTTP gateways.
