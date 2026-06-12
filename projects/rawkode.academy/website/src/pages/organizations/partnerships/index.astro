@@ -1,13 +1,8 @@
 ---
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
-import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
-import {
-	partnershipFitSubject,
-	partnershipFitTemplate,
-	partnershipTiers,
-} from "@/lib/partnerships";
+import { partnershipTiers } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -302,38 +297,12 @@ const heroProofPoints = [
 			</div>
 			<div class="partnerships-apply__body">
 				<PartnershipApplicationForm client:visible />
-				<p class="partnerships-contact-note">
-					Prefer email? The same application works as an email to David.
-				</p>
-				<ContactFallback
-					subject={partnershipFitSubject}
-					template={partnershipFitTemplate}
-				/>
 			</div>
 		</section>
 	</EditorialShell>
 </Page>
 
 <style>
-	.partnerships-contact-note {
-		color: var(--editorial-ink-soft);
-		font-size: 0.88rem;
-		line-height: 1.5;
-		margin: 0;
-		max-width: 38rem;
-	}
-
-	.partnerships-contact-note a {
-		color: var(--editorial-ink);
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.18em;
-	}
-
-	.partnerships-contact-note a:hover {
-		color: var(--editorial-spruce);
-	}
-
 	.partnerships-rows {
 		display: grid;
 		gap: 0;
