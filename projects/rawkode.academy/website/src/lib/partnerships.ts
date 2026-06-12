@@ -57,7 +57,7 @@ export const partnershipTiers: PartnershipTier[] = [
 			"A monthly review of your high-level plans and objectives",
 		],
 		featured: false,
-		mailto: buildMailto("Signal partnership", tierBriefBody("Signal")),
+		mailto: buildMailto("Signal application", tierBriefBody("Signal")),
 	},
 	{
 		id: "adoption",
@@ -76,7 +76,7 @@ export const partnershipTiers: PartnershipTier[] = [
 			"Experiment plans when a blocker needs evidence: the audience, the hypothesis, and what success looks like",
 		],
 		featured: true,
-		mailto: buildMailto("Adoption partnership", tierBriefBody("Adoption")),
+		mailto: buildMailto("Adoption application", tierBriefBody("Adoption")),
 	},
 	{
 		id: "community",
@@ -96,7 +96,7 @@ export const partnershipTiers: PartnershipTier[] = [
 		],
 		featured: false,
 		note: "Limited to 10 teams. First cohort kicks off August 2026.",
-		mailto: buildMailto("Community partnership", tierBriefBody("Community")),
+		mailto: buildMailto("Community application", tierBriefBody("Community")),
 	},
 ];
 
@@ -112,8 +112,8 @@ export const partnershipBoundaries = [
 	"Audience rental or open-ended access.",
 ];
 
-/** General partnership-fit brief: subject, plain-text template, mailto. */
-export const partnershipFitSubject = "Partnership fit";
+/** General partnership application: subject, plain-text template, mailto. */
+export const partnershipFitSubject = "Partnership application";
 export const partnershipFitTemplate = [
 	"Company and product:",
 	"Target developers or platform teams:",

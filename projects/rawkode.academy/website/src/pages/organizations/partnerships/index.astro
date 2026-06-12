@@ -59,7 +59,7 @@ const faqs = [
 
 const packages = partnershipTiers.map((tier) => ({
 	...tier,
-	cta: tier.id === "community" ? "Apply for a seat" : `Ask about ${tier.name}`,
+	cta: `Apply for ${tier.name}`,
 	href: tier.mailto,
 }));
 
@@ -143,7 +143,7 @@ const heroProofPoints = [
 		lede="Get a practitioner advisor in your team's Slack: someone who watches developers evaluate tools every week, and tells you what to fix, prove, or test next. The kind of guidance agencies and analyst firms charge five figures for, from your actual target audience."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href={contactHref}>Email David</a>
+			<a class="editorial-button" href={contactHref}>Apply for a partnership</a>
 			<a class="editorial-button editorial-button--secondary" href="#packages">View plans and pricing</a>
 		</div>
 
@@ -221,7 +221,7 @@ const heroProofPoints = [
 				<p class="editorial-kicker">Partnership paths</p>
 				<h2 id="packages-title" class="editorial-section__title">Start where your adoption work needs support</h2>
 				<p class="editorial-section__lede">
-					Each path is month-to-month: start, pause, or cancel any month. Signal puts the advisor in your Slack. Adoption adds video sessions and reviews of the work itself, and is the recommended path. Community adds the room: ten seats, first cohort in August.
+					Every plan starts with an application, and not every application is a fit. All plans are month-to-month: start, pause, or cancel any month. Signal puts the advisor in your Slack. Adoption adds video sessions and reviews of the work itself, and is the recommended path. Community adds the room, capped at ten teams.
 				</p>
 			</div>
 			<dl class="partnerships-anchors">
@@ -256,22 +256,22 @@ const heroProofPoints = [
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="process-title">
 			<div class="editorial-section__header">
-				<h2 id="process-title" class="editorial-section__title">Send context first. Call only when there is a fit.</h2>
+				<h2 id="process-title" class="editorial-section__title">Every plan starts with an application</h2>
 			</div>
 			<div class="partnerships-rows">
 				<article class="partnerships-row partnerships-row--numbered">
 					<span class="partnerships-step">01</span>
-					<h3 class="editorial-card__title">Send context</h3>
-					<p class="editorial-card__body">Your company and product, the developers you need to reach, your current adoption challenge, and any links worth a look.</p>
+					<h3 class="editorial-card__title">Apply</h3>
+					<p class="editorial-card__body">Rough context is enough: your company and product, the developers you need to reach, your current adoption challenge, and any links worth a look.</p>
 				</article>
 				<article class="partnerships-row partnerships-row--numbered">
 					<span class="partnerships-step">02</span>
-					<h3 class="editorial-card__title">Get a fit reply</h3>
-					<p class="editorial-card__body">David Flanagan, Rawkode Academy's founder, will reply with whether this fits Signal, Adoption, or Community, or say plainly that it is not a good fit.</p>
+					<h3 class="editorial-card__title">Get an answer</h3>
+					<p class="editorial-card__body">David Flanagan, Rawkode Academy's founder, reviews every application and replies with a straight answer: which plan fits, or that it is not a good fit.</p>
 				</article>
 				<article class="partnerships-row partnerships-row--numbered">
 					<span class="partnerships-step">03</span>
-					<h3 class="editorial-card__title">Work with your team</h3>
+					<h3 class="editorial-card__title">Start</h3>
 					<p class="editorial-card__body">Slack Connect opens and the monthly rhythm starts: advice as questions come up, and a review of your plans and objectives each month.</p>
 				</article>
 			</div>
@@ -294,12 +294,12 @@ const heroProofPoints = [
 		<section class="editorial-section" aria-labelledby="final-title">
 			<div class="editorial-callout">
 				<div>
-					<h2 id="final-title" class="editorial-section__title">Start with the next adoption problem</h2>
+					<h2 id="final-title" class="editorial-section__title">Apply with your next adoption problem</h2>
 					<p class="editorial-card__body">
-						Rough context is enough: your product, the developers you need to reach, and the adoption problem in front of you.
+						Your product, the developers you need to reach, and the adoption problem in front of you. That is enough to apply.
 					</p>
 				</div>
-				<a class="editorial-button" href={contactHref}>Email David</a>
+				<a class="editorial-button" href={contactHref}>Apply for a partnership</a>
 			</div>
 			<p class="partnerships-contact-note partnerships-contact-note--footer">
 				Not sure what to send? <a href="/organizations/lets-chat">Here is what a useful first email includes</a>.
