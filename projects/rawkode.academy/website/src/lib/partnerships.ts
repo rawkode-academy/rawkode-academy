@@ -66,12 +66,13 @@ export const partnershipTiers: PartnershipTier[] = [
 		price: "£2,000 / month",
 		priceShort: "£2k/mo",
 		bestFor:
-			"Teams that want the advisor on video with the people doing the work, not just in threads.",
+			"Teams that want the advisor reviewing the work itself, not just the plan.",
 		outcome:
 			"Adoption blockers worked through together, with evidence instead of opinion.",
 		included: [
 			"Everything in Signal",
 			"A monthly video working session with your team on whatever matters most right now",
+			"Tactical reviews of the work itself: docs, demos, onboarding, launch posts, and pricing pages",
 			"Experiment plans when a blocker needs evidence: the audience, the hypothesis, and what success looks like",
 		],
 		featured: true,
