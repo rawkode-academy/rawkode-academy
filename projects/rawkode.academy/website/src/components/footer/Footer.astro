@@ -276,9 +276,11 @@ const aboutSection: FooterSection = {
  }
 
  .ed-footer__inner {
+ width: 100%;
  max-width: 90rem;
  margin: 0 auto;
  padding: 3rem 2.5rem 1.75rem;
+ box-sizing: border-box;
  }
 
  .ed-footer__cols {
@@ -290,6 +292,7 @@ const aboutSection: FooterSection = {
  }
 
  .ed-footer__cols > div {
+ min-width: 0;
  padding: 1.5rem 1.25rem;
  border-left: 1px solid var(--editorial-hairline);
  }
@@ -371,7 +374,7 @@ const aboutSection: FooterSection = {
  color: var(--editorial-ink);
  }
 
- @media (max-width: 960px) {
+ @media (max-width: 1180px) {
  .ed-footer__cols {
  grid-template-columns: repeat(2, 1fr);
  }

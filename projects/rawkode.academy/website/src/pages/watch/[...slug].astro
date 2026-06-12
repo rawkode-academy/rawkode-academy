@@ -310,6 +310,19 @@ const scheduledLabel = new Intl.DateTimeFormat("en-US", {
 	timeZoneName: "short",
 }).format(video.data.publishedAt);
 const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
+const publishedIso =
+	video.data.publishedAt instanceof Date
+		? video.data.publishedAt.toISOString()
+		: String(video.data.publishedAt);
+const heroDescription =
+	video.data.tagline ?? video.data.subtitle ?? metaDescription;
+const watchStatusLabel = isUpcomingLive
+	? "Upcoming"
+	: studioLiveState.live
+		? "Live now"
+		: isLive
+			? "Live"
+			: "On demand";
 ---
 
 <Page
@@ -324,7 +337,7 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 		title={video.data.title}
 		description={video.data.description}
 		thumbnailUrl={thumbnailUrl}
-		publishedAt={(video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt))}
+		publishedAt={publishedIso}
 		duration={durationSec ?? 0}
 		streamUrl={streamUrl}
 		captionUrl={captionUrl}
@@ -355,57 +368,57 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 				</>
 			)}
 			<span class="watch-detail__spacer"></span>
-			<span class="watch-detail__meta">{runtimeLabel}</span>
+			<span class="watch-detail__meta">{watchStatusLabel}</span>
 		</div>
 
-		<header class="watch-detail__header">
-			<MLabel tone={isLive ? "amber" : "spruce"}>
-				{isLive && <LiveDot color="amber" />}
-				{isLive ? "Live · " : ""}{categoryLabel}{showEntry ? ` · ${showEntry.data.name}` : ""}
-			</MLabel>
-			<h1 class="watch-detail__title">{video.data.title}</h1>
-			<div class="watch-detail__byline">
-				<time
-					datetime={video.data.publishedAt instanceof Date ? video.data.publishedAt.toISOString() : String(video.data.publishedAt)}
-				>
-					<MLabel>{publishedLabel}</MLabel>
-				</time>
-				<MLabel>{runtimeLabel}</MLabel>
-			</div>
-		</header>
+		<section
+			class="watch-detail__hero"
+			aria-labelledby="watch-detail-title"
+			data-watch-detail-hero
+		>
+			<aside class="watch-detail__summary" aria-label="Video summary">
+				<div class="watch-detail__summary-copy">
+					<MLabel tone={isLive ? "amber" : "spruce"}>
+						{isLive && <LiveDot color="amber" />}
+						{isLive ? "Live · " : ""}{categoryLabel}{showEntry ? ` · ${showEntry.data.name}` : ""}
+					</MLabel>
+					<h1 id="watch-detail-title" class="watch-detail__title">
+						{video.data.title}
+					</h1>
+					{heroDescription && (
+						<p class="watch-detail__dek">{heroDescription}</p>
+					)}
+				</div>
 
-		<div class="watch-detail__player-frame">
-			{shouldMountLiveGate ? (
-				<LiveStreamGate
-					client:only="vue"
-					videoSlug={video.data.slug}
-					initialState={studioLiveState}
-					thumbnailUrl={thumbnailUrl}
-					title={video.data.title}
-					fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
-					fallbackInitialPosition={initialPosition}
-					fallbackIsAuthenticated={isAuthenticated}
-				/>
-			) : (
-				<VideoPlayer
-					client:only="vue"
-					video={video.data.id}
-					thumbnailUrl={thumbnailUrl}
-					initialPosition={initialPosition}
-					isAuthenticated={isAuthenticated}
-				/>
-			)}
-		</div>
+				<dl class="watch-detail__facts">
+					<div>
+						<dt>Date</dt>
+						<dd><time datetime={publishedIso}>{publishedLabel}</time></dd>
+					</div>
+					<div>
+						<dt>Status</dt>
+						<dd>{watchStatusLabel}</dd>
+					</div>
+					<div>
+						<dt>Runtime</dt>
+						<dd>{runtimeLabel}</dd>
+					</div>
+					{showEntry && (
+						<div>
+							<dt>Show</dt>
+							<dd>
+								<a href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
+							</dd>
+						</div>
+					)}
+				</dl>
 
-		{isUpcomingLive && !studioLiveState.live && (
-			<section class="watch-detail__upcoming-panel" aria-label="Upcoming stream details">
-				<div class="watch-detail__upcoming-panel-inner">
-					<MLabel tone="amber">Upcoming Stream</MLabel>
-					<div class="watch-detail__upcoming-copy">
+				{isUpcomingLive && !studioLiveState.live && (
+					<div class="watch-detail__upcoming-callout" aria-label="Upcoming stream details">
 						<h2>This session has not started yet.</h2>
 						<p>
-							The video player will appear when the live stream is available.
-							Join us on <time datetime={video.data.publishedAt.toISOString()}>{scheduledLabel}</time>.
+							Join us on <time datetime={publishedIso}>{scheduledLabel}</time>.
+							The player will activate when the stream is available.
 						</p>
 						<StreamNotifyButton
 							client:visible
@@ -413,9 +426,53 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 							publicKey={notificationsPublicKey}
 						/>
 					</div>
+				)}
+			</aside>
+
+			<div class="watch-detail__player-wrap">
+				<input
+					id="watch-detail-player-state"
+					class="watch-detail__player-state"
+					type="checkbox"
+					aria-label="Expand or shrink video player"
+					data-watch-detail-state
+				/>
+				<div id="watch-detail-player" class="watch-detail__player-frame">
+					{shouldMountLiveGate ? (
+						<LiveStreamGate
+							client:only="vue"
+							videoSlug={video.data.slug}
+							initialState={studioLiveState}
+							thumbnailUrl={thumbnailUrl}
+							title={video.data.title}
+							fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
+							fallbackInitialPosition={initialPosition}
+							fallbackIsAuthenticated={isAuthenticated}
+						/>
+					) : (
+						<VideoPlayer
+							client:only="vue"
+							video={video.data.id}
+							thumbnailUrl={thumbnailUrl}
+							initialPosition={initialPosition}
+							isAuthenticated={isAuthenticated}
+						/>
+					)}
 				</div>
-			</section>
-		)}
+				<label
+					class="watch-detail__player-toggle"
+					for="watch-detail-player-state"
+					data-watch-detail-toggle
+				>
+					<span class="watch-detail__player-toggle-label watch-detail__player-toggle-label--expand" data-watch-detail-toggle-label>
+						Expand player
+					</span>
+					<span class="watch-detail__player-toggle-label watch-detail__player-toggle-label--shrink">
+						Shrink player
+					</span>
+				</label>
+			</div>
+		</section>
 
 		<div class="watch-detail__body">
 			<VideoReactions server:defer videoId={video.data.slug} />
@@ -488,6 +545,7 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 				/>
 			))}
 		</div>
+
 	</div>
 </Page>
 
@@ -520,45 +578,184 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 	.watch-detail__spacer { flex: 1; }
 	.watch-detail__meta { color: var(--editorial-ink-mute); }
 
-	.watch-detail__header {
-		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+	.watch-detail__hero {
 		max-width: 90rem;
 		margin: 0 auto;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-block-gap);
+		padding: clamp(1rem, 2vw, 1.5rem) var(--space-section-pad-x)
+			clamp(1.25rem, 2.5vw, 2rem);
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(18rem, 30rem);
+		grid-template-areas: "summary player";
+		gap: clamp(1rem, 2vw, 1.5rem);
+		align-items: start;
+		transition:
+			grid-template-columns 420ms var(--ease-standard),
+			gap 420ms var(--ease-standard);
+	}
+
+	.watch-detail__hero:has(.watch-detail__player-state:checked) {
+		grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
+		grid-template-areas: "summary player";
 	}
 
 	.watch-detail__title {
 		font-family: var(--font-instrument-serif), serif;
 		font-style: italic;
 		font-weight: 400;
-		font-size: clamp(2.25rem, 5vw, 3.75rem);
-		line-height: 1;
-		letter-spacing: -0.025em;
+		font-size: clamp(2.25rem, 3.3vw, 3.5rem);
+		line-height: 0.96;
+		letter-spacing: 0;
 		color: var(--editorial-ink);
 		margin: 0;
 		text-wrap: balance;
 	}
 
-	.watch-detail__byline {
+	.watch-detail__dek {
+		margin: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: clamp(1rem, 1.5vw, 1.125rem);
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+		text-wrap: pretty;
+	}
+
+	.watch-detail__summary {
+		grid-area: summary;
 		display: flex;
-		gap: 1.25rem;
-		align-items: center;
-		padding-top: 0.5rem;
+		flex-direction: column;
+		gap: 1rem;
+		min-width: 0;
+		padding-top: 0.125rem;
+	}
+
+	.watch-detail__summary-copy {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.watch-detail__facts {
+		display: grid;
+		grid-template-columns: 1fr;
+		margin: 0;
 		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-detail__facts div {
+		display: grid;
+		grid-template-columns: minmax(5rem, 0.45fr) minmax(0, 1fr);
+		gap: 0.75rem;
+		padding: 0.625rem 0;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-detail__facts dt,
+	.watch-detail__facts dd {
+		margin: 0;
+		min-width: 0;
+	}
+
+	.watch-detail__facts dt {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.625rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		line-height: 1.25;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.watch-detail__facts dd {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.25;
+		color: var(--editorial-ink);
+	}
+
+	.watch-detail__facts a {
+		color: inherit;
+		text-decoration-thickness: 1px;
+		text-decoration-color: var(--editorial-hairline-strong);
+		text-underline-offset: 0.2em;
+	}
+
+	.watch-detail__facts a:hover {
+		color: var(--editorial-spruce);
+		text-decoration-color: currentColor;
+	}
+
+	.watch-detail__upcoming-callout {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--editorial-hairline-strong);
+	}
+
+	.watch-detail__upcoming-callout h2 {
+		margin: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		font-weight: 700;
+		line-height: 1.15;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+	}
+
+	.watch-detail__upcoming-callout p {
+		margin: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.45;
+		color: var(--editorial-ink-soft);
+	}
+
+	.watch-detail__player-wrap {
+		grid-area: player;
+		isolation: isolate;
+		position: relative;
+		width: 100%;
+		max-width: 30rem;
+		transition:
+			max-width 420ms var(--ease-standard),
+			filter var(--duration-base) var(--ease-standard);
+	}
+
+	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-wrap {
+		max-width: 100%;
+	}
+
+	.watch-detail__player-state {
+		position: absolute;
+		inset: 0;
+		z-index: 2147483647;
+		width: auto;
+		height: auto;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: zoom-in;
+		opacity: 0.001;
+	}
+
+	.watch-detail__player-state:checked {
+		inset: 0.75rem 0.75rem auto auto;
+		width: 10.5rem;
+		height: 2rem;
+		cursor: zoom-out;
 	}
 
 	.watch-detail__player-frame {
 		position: relative;
 		aspect-ratio: 16 / 9;
 		background: oklch(0.1 0 0);
-		border-top: 1px solid var(--editorial-hairline-strong);
-		border-bottom: 1px solid var(--editorial-hairline-strong);
+		border: 1px solid var(--editorial-hairline-strong);
 		overflow: hidden;
-		max-width: 90rem;
-		margin: 0 auto;
 		width: 100%;
+		transition:
+			border-color var(--duration-base) var(--ease-standard),
+			box-shadow var(--duration-base) var(--ease-standard);
 	}
 
 	.watch-detail__player-frame :global(> *) {
@@ -566,7 +763,7 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 		inset: 0;
 	}
 
-	.watch-detail__upcoming-thumbnail {
+	:global(.watch-detail__upcoming-thumbnail) {
 		position: absolute;
 		inset: 0;
 		width: 100%;
@@ -574,37 +771,75 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 		object-fit: cover;
 	}
 
-	.watch-detail__upcoming-panel {
-		border-bottom: 1px solid var(--editorial-hairline);
+	.watch-detail__player-toggle {
+		position: absolute;
+		inset: 0;
+		z-index: 2147483646;
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
+		padding: 0.875rem;
+		border: 0;
+		background: linear-gradient(
+			180deg,
+			oklch(0 0 0 / 0) 0%,
+			oklch(0 0 0 / 0) 48%,
+			oklch(0 0 0 / 0.58) 100%
+		);
+		color: var(--editorial-paper);
+		cursor: zoom-in;
+		pointer-events: none;
+		text-align: left;
+		user-select: none;
 	}
 
-	.watch-detail__upcoming-panel-inner {
-		max-width: 90rem;
-		margin: 0 auto;
-		padding: clamp(1.25rem, 3vw, 2rem) var(--space-section-pad-x);
-		display: grid;
-		grid-template-columns: max-content minmax(0, 1fr);
-		align-items: start;
-		gap: clamp(1rem, 3vw, 2rem);
+	.watch-detail__player-state:focus-visible ~ .watch-detail__player-toggle {
+		outline: 2px solid var(--editorial-amber);
+		outline-offset: -4px;
 	}
 
-	.watch-detail__upcoming-copy h2 {
-		margin: 0;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(1.125rem, 2.2vw, 1.75rem);
+	.watch-detail__player-toggle-label {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2rem;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid oklch(1 0 0 / 0.45);
+		background: oklch(0 0 0 / 0.72);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
 		font-weight: 700;
-		line-height: 1.05;
-		letter-spacing: 0;
+		letter-spacing: 0.14em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	.watch-detail__player-toggle-label--shrink {
+		display: none;
+	}
+
+	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle {
+		inset: 0.75rem 0.75rem auto auto;
+		padding: 0;
+		background: transparent;
+		color: var(--editorial-ink);
+		cursor: zoom-out;
+	}
+
+	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle-label {
+		min-height: 0;
+		padding: 0.5rem 0.625rem;
+		border-color: var(--editorial-hairline-strong);
+		background: color-mix(in oklch, var(--editorial-paper) 92%, transparent);
 		color: var(--editorial-ink);
 	}
 
-	.watch-detail__upcoming-copy p {
-		margin: 0.625rem 0 0;
-		max-width: 48rem;
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(0.875rem, 1.5vw, 1rem);
-		line-height: 1.5;
-		color: var(--editorial-ink-soft);
+	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle-label--expand {
+		display: none;
+	}
+
+	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle-label--shrink {
+		display: inline-flex;
 	}
 
 	.watch-detail__body {
@@ -742,16 +977,135 @@ const notificationsPublicKey = env.NOTIFICATIONS_VAPID_PUBLIC_KEY ?? "";
 		font-size: 0.85rem;
 	}
 
+	@media (max-width: 1500px) {
+		.watch-detail__hero:has(.watch-detail__player-state:checked) {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				"summary"
+				"player";
+		}
+
+		.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__summary {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+			gap: 1rem 1.25rem;
+			padding-top: 0;
+		}
+
+		.watch-detail__upcoming-callout {
+			grid-column: 1 / -1;
+		}
+	}
+
+	@media (min-width: 900px) and (max-width: 1180px) {
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) {
+			grid-template-columns: minmax(18rem, 20rem) minmax(0, 1fr);
+			grid-template-areas:
+				"copy player"
+				"facts facts";
+			gap: 1rem 1.25rem;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__player-wrap {
+			max-width: 20rem;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__summary {
+			display: contents;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__summary-copy {
+			grid-area: copy;
+			gap: 0.625rem;
+			align-self: start;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__title {
+			font-size: clamp(2.125rem, 3.8vw, 2.75rem);
+			line-height: 0.95;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__dek {
+			font-size: 1rem;
+			line-height: 1.35;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__facts {
+			grid-area: facts;
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+			column-gap: 1rem;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__facts div {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
+			padding: 0.5rem 0;
+		}
+
+		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__upcoming-callout {
+			grid-column: 1 / -1;
+		}
+	}
+
+	@media (max-width: 899px) {
+		.watch-detail__hero {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				"summary"
+				"player";
+		}
+
+		.watch-detail__summary {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__summary {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		.watch-detail__facts {
+			grid-template-columns: 1fr 1fr;
+			column-gap: 1rem;
+		}
+
+		.watch-detail__facts div {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.watch-detail__hero,
+		.watch-detail__player-wrap,
+		.watch-detail__player-frame {
+			transition: none;
+		}
+	}
+
 	@media (max-width: 720px) {
 		.watch-detail__breadcrumb,
-		.watch-detail__header,
-		.watch-detail__body,
-		.watch-detail__upcoming-panel-inner {
+		.watch-detail__hero,
+		.watch-detail__body {
 			padding-left: 1.25rem;
 			padding-right: 1.25rem;
 		}
 		.watch-detail__breadcrumb { gap: 0.4rem; }
-		.watch-detail__upcoming-panel-inner {
+
+		.watch-detail__hero {
+			grid-template-columns: 1fr;
+		}
+
+		.watch-detail__summary {
+			display: flex;
+			flex-direction: column;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.watch-detail__facts {
 			grid-template-columns: 1fr;
 		}
 	}
