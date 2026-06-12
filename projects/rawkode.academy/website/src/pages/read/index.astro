@@ -73,7 +73,7 @@ const visibleArticles = allArticles.filter(
 	(article) => matchesType(article) && matchesTopic(article),
 );
 
-const page = Math.max(
+const requestedPage = Math.max(
 	1,
 	parseInt(Astro.url.searchParams.get("page") || "1", 10) || 1,
 );
@@ -162,16 +162,19 @@ const activeTopicIndex = selectedTopic
 
 const featuredCandidate =
 	visibleArticles.find((article) => article.data.cover) ?? visibleArticles[0];
-const featured = page === 1 ? featuredCandidate : undefined;
-const featuredIndex = featured
-	? allArticles.findIndex((article) => article.id === featured.id)
-	: -1;
 // The candidate stays out of the grid on every page so page boundaries
 // don't shift between page 1 (featured rendered) and later pages.
 const gridArticles = visibleArticles.filter(
 	(article) => !featuredCandidate || article.id !== featuredCandidate.id,
 );
 const totalPages = Math.max(1, Math.ceil(gridArticles.length / articlesPerPage));
+// Clamp out-of-range requests so ?page=999 renders the last real page
+// instead of an empty grid with prev/next links into a phantom crawl space.
+const page = Math.min(requestedPage, totalPages);
+const featured = page === 1 ? featuredCandidate : undefined;
+const featuredIndex = featured
+	? allArticles.findIndex((article) => article.id === featured.id)
+	: -1;
 const pagedArticles = gridArticles.slice(
 	(page - 1) * articlesPerPage,
 	page * articlesPerPage,
@@ -311,16 +314,6 @@ const pageDescription =
 				<EmptyState title="No articles match these filters.">
 					<Fragment slot="actions">
 						<a href="/read">Browse all articles →</a>
-					</Fragment>
-				</EmptyState>
-			</div>
-		)}
-
-		{visibleArticles.length > 0 && pagedArticles.length === 0 && (
-			<div class="read-empty">
-				<EmptyState title="No more articles on this page.">
-					<Fragment slot="actions">
-						<a href={readHref()}>Back to page one →</a>
 					</Fragment>
 				</EmptyState>
 			</div>

@@ -41,7 +41,7 @@ if (user) {
 
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-const page = Math.max(
+const requestedPage = Math.max(
 	1,
 	parseInt(Astro.url.searchParams.get("page") || "1", 10) || 1,
 );
@@ -130,6 +130,13 @@ const sortedVideos =
 			: visibleVideos;
 
 // Pagination. Page one promotes the first visible video, then starts the grid after it.
+// Out-of-range requests clamp to the last real page so ?page=999 never
+// renders an empty grid with prev/next links into a phantom crawl space.
+const totalPages = Math.max(
+	1,
+	Math.ceil((sortedVideos.length - 1) / videosPerPage),
+);
+const page = Math.min(requestedPage, totalPages);
 const featuredVideo = page === 1 ? (sortedVideos[0] ?? null) : null;
 const start = page === 1 ? 1 : 1 + (page - 1) * videosPerPage;
 const end = start + videosPerPage;
@@ -511,6 +518,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 			</MLabel>
 			<PagerStrip
 				page={page}
+				totalPages={totalPages}
 				prevHref={page > 1 ? watchPathFor(page - 1) : undefined}
 				nextHref={hasNextPage ? watchPathFor(page + 1) : undefined}
 				ariaLabel="Video pages"

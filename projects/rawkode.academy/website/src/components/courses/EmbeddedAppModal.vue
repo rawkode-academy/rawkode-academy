@@ -22,7 +22,7 @@
  </h3>
  <button
  @click="close"
- class="p-2 text-muted hover:text-secondary-content transition-smooth rounded-sm hover:bg-[var(--surface-card-muted)] hover:"
+ class="p-2 text-muted hover:text-secondary-content transition-smooth rounded-sm hover:bg-[var(--surface-card-muted)]"
  aria-label="Close"
  >
  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,7 +71,7 @@
  :href="getExternalUrl()"
  target="_blank"
  rel="noopener noreferrer"
- class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary-content bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-sm hover:bg-[var(--surface-card-muted)] hover:scale-105 transition-smooth shadow-md hover:"
+ class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-secondary-content bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-sm hover:bg-[var(--surface-card-muted)] hover:scale-105 transition-smooth shadow-md"
  >
  Open in new tab
  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

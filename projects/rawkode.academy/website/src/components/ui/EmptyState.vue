@@ -1,5 +1,5 @@
 <template>
-	<div class="empty-state" role="status">
+	<div class="empty-state">
 		<p class="empty-state__title">{{ title }}</p>
 		<p v-if="body || $slots.default" class="empty-state__body">
 			<slot>{{ body }}</slot>
