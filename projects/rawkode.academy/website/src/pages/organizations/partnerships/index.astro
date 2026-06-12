@@ -1,27 +1,20 @@
 ---
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
+import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	PARTNERSHIP_EMAIL,
+	partnershipFitMailto,
+	partnershipFitSubject,
+	partnershipFitTemplate,
+	partnershipTiers,
+} from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactEmail = "david@rawkode.academy";
-
-const mailtoBody = (path?: string) =>
-	encodeURIComponent(
-		[
-			"Company and product:",
-			...(path ? [`Preferred path: ${path}`] : []),
-			"Target developers or platform teams:",
-			"Current adoption challenge:",
-			"Links worth a look:",
-		].join("\r\n"),
-	);
-
-const mailto = (subject: string, path?: string) =>
-	`mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${mailtoBody(path)}`;
-
-const contactHref = mailto("Partnership fit");
+const contactEmail = PARTNERSHIP_EMAIL;
+const contactHref = partnershipFitMailto;
 
 const faqs = [
 	{
@@ -56,62 +49,11 @@ const faqs = [
 	},
 ];
 
-const packages = [
-	{
-		name: "Signal",
-		price: "£1,000 / month",
-		label: "Entry",
-		bestFor:
-			"Teams that want a recurring outside read on what developers understand, question, trust, or ignore.",
-		outcome:
-			"A clearer picture, every month, of where adoption is getting stuck and what is worth improving next.",
-		included: [
-			"A written monthly brief covering your docs, demos, positioning, and what developers are saying in public",
-			"A running log of adoption blockers, tracked month over month",
-			"One clear recommendation: what to keep, change, prove, pause, or escalate",
-			"An optional public field note when the learning belongs in the community",
-		],
-		cta: "Ask about Signal",
-		href: mailto("Signal partnership", "Signal"),
-	},
-	{
-		name: "Adoption",
-		price: "£2,000 / month",
-		label: "Default",
-		bestFor:
-			"Teams ready to turn that recurring read into one focused adoption experiment each month.",
-		outcome:
-			"One adoption blocker per month moved from vague concern to a tested answer your team can act on.",
-		included: [
-			"Everything in Signal",
-			"A monthly working session with your team on one adoption blocker",
-			"A written experiment plan: the audience, the blocker, the hypothesis, and what success looks like",
-			"A shared artifact your team can reuse in docs, demos, onboarding, or sales conversations",
-			"An adoption map updated each month: what changed, what is still unclear, what to test next",
-		],
-		cta: "Ask about Adoption",
-		href: mailto("Adoption partnership", "Adoption"),
-		featured: true,
-	},
-	{
-		name: "Council",
-		price: "£3,000 / month",
-		label: "Cohort",
-		bestFor:
-			"Teams that want peer comparison, expert perspective, and a shared room for serious developer adoption problems.",
-		outcome:
-			"Patterns from other member teams and outside experts, applied to your own adoption decisions.",
-		included: [
-			"Everything in Adoption",
-			"A monthly cohort session with the other Council member teams",
-			"Case reviews of live docs, demos, onboarding, and launches: yours and theirs",
-			"A monthly industry expert presentation with working Q&A",
-			"Written pattern notes: risks, experiments, and expert takeaways you can bring to your roadmap",
-		],
-		cta: "Ask about Council",
-		href: mailto("Council partnership", "Council"),
-	},
-];
+const packages = partnershipTiers.map((tier) => ({
+	...tier,
+	cta: `Ask about ${tier.name}`,
+	href: tier.mailto,
+}));
 
 const inspectAreas = [
 	{
@@ -330,8 +272,12 @@ const heroProofPoints = [
 				<a class="editorial-button" href={contactHref}>Email David</a>
 			</div>
 			<p class="partnerships-contact-note partnerships-contact-note--footer">
-				Or write your own email to <a href={`mailto:${contactEmail}`}>{contactEmail}</a>. <a href="/organizations/lets-chat">Here is what a useful first email includes</a>.
+				Not sure what to send? <a href="/organizations/lets-chat">Here is what a useful first email includes</a>.
 			</p>
+			<ContactFallback
+				subject={partnershipFitSubject}
+				template={partnershipFitTemplate}
+			/>
 		</section>
 	</EditorialShell>
 </Page>

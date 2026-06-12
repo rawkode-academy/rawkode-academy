@@ -30,15 +30,13 @@ export interface PartnershipTier {
 	mailto: string;
 }
 
-const tierBriefBody = (path: string, extra?: string): string =>
+const tierBriefBody = (path: string): string =>
 	[
-		"Company/category:",
-		`Preferred partnership path: ${path}`,
+		"Company and product:",
+		`Preferred path: ${path}`,
 		"Target developers or platform teams:",
-		"Team stakeholders:",
 		"Current adoption challenge:",
-		...(extra ? [extra] : ["Current GTM, DevRel, or product rhythm:"]),
-		"Useful links:",
+		"Links worth a look:",
 	].join("\n");
 
 export const partnershipTiers: PartnershipTier[] = [
@@ -49,17 +47,17 @@ export const partnershipTiers: PartnershipTier[] = [
 		price: "£1,000 / month",
 		priceShort: "£1k/mo",
 		bestFor:
-			"Teams that need a recurring outside read on what developers understand, question, trust, or ignore.",
+			"Teams that want a recurring outside read on what developers understand, question, trust, or ignore.",
 		outcome:
-			"Each month gives your team a clearer read on adoption friction, proof gaps, and the next story or surface worth improving.",
+			"A clearer picture, every month, of where adoption is getting stuck and what is worth improving next.",
 		included: [
-			"Monthly signal brief drawn from public technical work, product surfaces, category movement, and field notes",
-			"Adoption friction tracked over time across positioning, docs, demos, onboarding, and narrative",
-			"One clear recommendation for what to keep, change, prove, pause, or escalate",
-			"Optional public field note when the learning belongs in the community",
+			"A written monthly brief covering your docs, demos, positioning, and what developers are saying in public",
+			"A running log of adoption blockers, tracked month over month",
+			"One clear recommendation: what to keep, change, prove, pause, or escalate",
+			"An optional public field note when the learning belongs in the community",
 		],
 		featured: false,
-		mailto: buildMailto("Signal path", tierBriefBody("Signal")),
+		mailto: buildMailto("Signal partnership", tierBriefBody("Signal")),
 	},
 	{
 		id: "adoption",
@@ -68,18 +66,18 @@ export const partnershipTiers: PartnershipTier[] = [
 		price: "£2,000 / month",
 		priceShort: "£2k/mo",
 		bestFor:
-			"Teams ready to turn recurring signal into a focused monthly adoption experiment.",
+			"Teams ready to turn that recurring read into one focused adoption experiment each month.",
 		outcome:
-			"Each month moves one adoption blocker from vague concern to clearer experiment, evidence, and next step.",
+			"One adoption blocker per month moved from vague concern to a tested answer your team can act on.",
 		included: [
 			"Everything in Signal",
-			"Monthly working session around one adoption blocker",
-			"Experiment shape: audience, friction, hypothesis, proof, and success signal",
-			"Shared learning artifact your team can use in docs, demos, onboarding, narrative, or sales handoff",
-			"Adoption map updated with what changed, what remains unclear, and what to test next",
+			"A monthly working session with your team on one adoption blocker",
+			"A written experiment plan: the audience, the blocker, the hypothesis, and what success looks like",
+			"A shared artifact your team can reuse in docs, demos, onboarding, or sales conversations",
+			"An adoption map updated each month: what changed, what is still unclear, what to test next",
 		],
 		featured: true,
-		mailto: buildMailto("Adoption path", tierBriefBody("Adoption")),
+		mailto: buildMailto("Adoption partnership", tierBriefBody("Adoption")),
 	},
 	{
 		id: "council",
@@ -90,19 +88,16 @@ export const partnershipTiers: PartnershipTier[] = [
 		bestFor:
 			"Teams that want peer comparison, expert perspective, and a shared room for serious developer adoption problems.",
 		outcome:
-			"Each month gives your team practitioner patterns from other members, expert perspective, and reusable language for the decisions ahead.",
+			"Patterns from other member teams and outside experts, applied to your own adoption decisions.",
 		included: [
 			"Everything in Adoption",
-			"Shared monthly cohort room where Council members compare adoption problems",
-			"Member case reviews around live docs, demos, narratives, onboarding, or launch motions",
-			"Monthly industry expert presentation with working Q&A",
-			"Council pattern notes with risks, experiments, expert takeaways, and useful decision language",
+			"A monthly cohort session with the other Council member teams",
+			"Case reviews of live docs, demos, onboarding, and launches: yours and theirs",
+			"A monthly industry expert presentation with working Q&A",
+			"Written pattern notes: risks, experiments, and expert takeaways you can bring to your roadmap",
 		],
 		featured: false,
-		mailto: buildMailto(
-			"Council path",
-			tierBriefBody("Council", "Cohort or expert themes that would help:"),
-		),
+		mailto: buildMailto("Council partnership", tierBriefBody("Council")),
 	},
 ];
 
@@ -121,14 +116,10 @@ export const partnershipBoundaries = [
 /** General partnership-fit brief: subject, plain-text template, mailto. */
 export const partnershipFitSubject = "Partnership fit";
 export const partnershipFitTemplate = [
-	"Company/category:",
-	"Product or platform:",
+	"Company and product:",
 	"Target developers or platform teams:",
-	"Team stakeholders:",
 	"Current adoption challenge:",
-	"Current GTM, DevRel, or product rhythm:",
-	"What your team wants to learn or improve next:",
-	"Useful links:",
+	"Links worth a look:",
 ].join("\n");
 export const partnershipFitMailto = buildMailto(
 	partnershipFitSubject,
