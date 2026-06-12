@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { resolveOpenGraphImage } from "@/lib/open-graph";
+import { SITE_DESCRIPTION } from "@/lib/site";
 
 const {
 	title,
@@ -19,9 +20,7 @@ const {
 
 const openGraphUrl = new URL(Astro.url.pathname, Astro.site);
 
-const openGraphDescription =
-	description ??
-	"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape.";
+const openGraphDescription = description ?? SITE_DESCRIPTION;
 
 const openGraphImage = resolveOpenGraphImage({
 	title,

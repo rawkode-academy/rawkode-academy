@@ -76,19 +76,21 @@ const isAuthenticated = !!Astro.locals.user;
 				<button
 					class="reaction-btn paper-card-muted flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 focus:outline-none focus:ring-2 focus:ring-primary/50"
 					data-emoji={reaction.emoji}
-					aria-label={`${reaction.label} reaction`}
+					data-label={reaction.label}
+					aria-label={`${reaction.label}, ${reactionCounts[reaction.emoji] || 0} reactions`}
+					aria-pressed="false"
 				>
 					<span class="text-base sm:text-xl">{reaction.emoji}</span>
 					<span class="count text-xs sm:text-sm font-medium text-secondary-content">{reactionCounts[reaction.emoji] || 0}</span>
 				</button>
 			))
 		}
-		<button class="add-emoji reaction-btn paper-card-muted flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-gray-300/60 dark:!border-gray-600/60" aria-label="Add custom emoji"
+		<button class="add-emoji reaction-btn paper-card-muted flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-[var(--editorial-hairline-strong)]" aria-label="Add custom emoji" aria-expanded="false" aria-controls="emoji-picker"
 			>+</button
 		>
 	</div>
 
-	<div class="emoji-picker hidden mt-3 p-2 sm:p-3 paper-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10">
+	<div id="emoji-picker" class="emoji-picker mt-3 p-2 sm:p-3 paper-card grid grid-cols-5 sm:grid-cols-7 gap-1 relative z-10" hidden>
 		{
 			EXTRA_EMOJIS.map((emoji) => (
 				<button class="emoji-option paper-card-muted p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" data-emoji={emoji}>
@@ -104,6 +106,12 @@ const isAuthenticated = !!Astro.locals.user;
 
 	.reaction-btn.active {
 		@apply ring-2 ring-primary/70 bg-primary/30 dark:bg-primary/20;
+	}
+
+	/* The grid display utility would otherwise override the UA's
+	   [hidden] { display: none } rule. */
+	.emoji-picker[hidden] {
+		display: none !important;
 	}
 </style>
 
@@ -140,6 +148,7 @@ const isAuthenticated = !!Astro.locals.user;
 		// Optimistic update
 		countEl.textContent = String(currentCount + 1);
 		button.classList.add("active");
+		syncReactionState(button, currentCount + 1, true);
 
 		try {
 			const { error } = await actions.addReaction({
@@ -152,6 +161,7 @@ const isAuthenticated = !!Astro.locals.user;
 				// Revert on error
 				countEl.textContent = String(currentCount);
 				button.classList.remove("active");
+				syncReactionState(button, currentCount, false);
 
 				// Handle authentication errors
 				if (error.code === "UNAUTHORIZED") {
@@ -162,6 +172,19 @@ const isAuthenticated = !!Astro.locals.user;
 			// Revert on error
 			countEl.textContent = String(currentCount);
 			button.classList.remove("active");
+			syncReactionState(button, currentCount, false);
+		}
+	}
+
+	function syncReactionState(
+		button: HTMLButtonElement,
+		count: number,
+		pressed: boolean,
+	) {
+		button.setAttribute("aria-pressed", String(pressed));
+		const label = button.dataset.label;
+		if (label) {
+			button.setAttribute("aria-label", `${label}, ${count} reactions`);
 		}
 	}
 
@@ -176,6 +199,7 @@ const isAuthenticated = !!Astro.locals.user;
 	// Set up emoji picker
 	addEmojiBtn?.addEventListener("click", () => {
 		emojiPicker.hidden = !emojiPicker.hidden;
+		addEmojiBtn.setAttribute("aria-expanded", String(!emojiPicker.hidden));
 	});
 
 	emojiPicker?.querySelectorAll(".emoji-option").forEach((btn) => {
@@ -184,14 +208,16 @@ const isAuthenticated = !!Astro.locals.user;
 			if (emoji) {
 				handleReaction(emoji);
 				emojiPicker.hidden = true;
+				addEmojiBtn?.setAttribute("aria-expanded", "false");
 			}
 		});
 	});
 
 	// Close emoji picker on outside click
 	document.addEventListener("click", (e) => {
-		if (!container?.contains(e.target as Node)) {
+		if (!container?.contains(e.target as Node) && !emojiPicker.hidden) {
 			emojiPicker.hidden = true;
+			addEmojiBtn?.setAttribute("aria-expanded", "false");
 		}
 	});
 </script>

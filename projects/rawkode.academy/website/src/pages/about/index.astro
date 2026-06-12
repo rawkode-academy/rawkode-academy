@@ -1,21 +1,26 @@
 ---
 import EditorialShell from "@/components/ui/EditorialShell.astro";
+import { getSiteStats } from "@/lib/site-stats";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
+// Computed from the content collections (same data the homepage hero
+// uses), so the numbers stay truthful as content ships.
+const { videoCount, totalHours, courseCount } = await getSiteStats();
+
 const stats = [
 	{
-		value: "60K+",
-		label: "Developers reached",
+		value: `${videoCount}`,
+		label: "Lessons published",
 	},
 	{
-		value: "500+",
+		value: `${totalHours}+`,
 		label: "Hours of content",
 	},
 	{
-		value: "90+",
-		label: "Projects featured",
+		value: `${courseCount}`,
+		label: "Courses",
 	},
 ];
 

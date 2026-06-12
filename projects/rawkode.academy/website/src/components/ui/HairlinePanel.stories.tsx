@@ -6,7 +6,10 @@ const meta = {
 	component: HairlinePanel,
 	tags: ["autodocs"],
 	argTypes: {
-		variant: { control: "select", options: ["paper", "paper-deep", "muted", "ink"] },
+		variant: {
+			control: "select",
+			options: ["paper", "paper-deep", "muted", "ink"],
+		},
 		heavy: { control: "boolean" },
 	},
 };

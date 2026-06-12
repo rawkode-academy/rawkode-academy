@@ -84,8 +84,7 @@ const variantClasses = {
 	glass: "paper-card",
 	solid: "paper-card",
 	gradient: "paper-card-muted",
-	bordered:
-		"bg-transparent border border-[var(--editorial-hairline-strong)]",
+	bordered: "bg-transparent border border-[var(--editorial-hairline-strong)]",
 	flat: "bg-[var(--surface-card-muted)]",
 };
 

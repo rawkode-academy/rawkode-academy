@@ -238,29 +238,17 @@ export default {
 }
 
 .transcript-container::-webkit-scrollbar-track {
- background: rgb(229 231 235);
+ background: var(--surface-card-muted);
  border-radius: 4px;
 }
 
-.dark .transcript-container::-webkit-scrollbar-track {
- background: rgb(55 65 81);
-}
-
 .transcript-container::-webkit-scrollbar-thumb {
- background: rgb(156 163 175);
+ background: var(--editorial-hairline-strong);
  border-radius: 4px;
 }
 
 .transcript-container::-webkit-scrollbar-thumb:hover {
- background: rgb(107 114 128);
-}
-
-.dark .transcript-container::-webkit-scrollbar-thumb {
- background: rgb(75 85 99);
-}
-
-.dark .transcript-container::-webkit-scrollbar-thumb:hover {
- background: rgb(107 114 128);
+ background: var(--editorial-ink-mute);
 }
 
 /* Highlight for search results */

@@ -1,0 +1,252 @@
+---
+import { getCollection } from "astro:content";
+import MLabel from "@/components/ui/MLabel.vue";
+import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+
+/**
+ * Personalised "Continue watching" rail.
+ *
+ * Rendered as a server island (`server:defer`) so the surrounding page shell
+ * stays publicly cacheable — this component is fetched in a separate,
+ * uncacheable request that sees the signed-in user via Astro.locals.
+ * Renders nothing for signed-out users or when there is no watch history.
+ */
+
+export const prerender = false;
+
+interface WatchPosition {
+	videoId: string;
+	positionSeconds: number;
+	updatedAt: string;
+}
+
+interface RailItem {
+	slug: string;
+	title: string;
+	thumbnailUrl: string;
+	progressPercent: number;
+	remainingLabel: string;
+}
+
+const user = Astro.locals.user;
+let items: RailItem[] = [];
+
+if (user) {
+	let positions: WatchPosition[] = [];
+	try {
+		const response = await fetch("https://api.rawkode.academy/graphql", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				query: `
+					query ContinueWatching($userId: String!, $limit: Int) {
+						continueWatching(userId: $userId, limit: $limit) {
+							videoId
+							positionSeconds
+							updatedAt
+						}
+					}
+				`,
+				variables: { userId: user.id, limit: 8 },
+			}),
+		});
+		const result = (await response.json()) as {
+			data?: { continueWatching?: WatchPosition[] };
+		};
+		positions = result?.data?.continueWatching ?? [];
+	} catch {
+		// Silently degrade — the rail simply doesn't render.
+	}
+
+	if (positions.length > 0) {
+		const allVideos = await getCollection("videos");
+		const videoById = new Map(allVideos.map((v) => [v.data.id, v]));
+
+		items = positions
+			.map((position): RailItem | undefined => {
+				const video = videoById.get(position.videoId);
+				if (!video) return undefined;
+
+				const duration =
+					typeof video.data.duration === "number" ? video.data.duration : 0;
+				if (duration <= 0) return undefined;
+
+				const progressPercent = Math.max(
+					0,
+					Math.min(100, (position.positionSeconds / duration) * 100),
+				);
+				const remainingMinutes = Math.max(
+					1,
+					Math.round((duration - position.positionSeconds) / 60),
+				);
+
+				return {
+					slug: video.data.slug,
+					title: video.data.title,
+					thumbnailUrl: getVideoThumbnailUrl(video.data.id),
+					progressPercent,
+					remainingLabel: `${remainingMinutes} min left`,
+				};
+			})
+			.filter((item): item is RailItem => Boolean(item))
+			.slice(0, 4);
+	}
+}
+---
+
+{items.length > 0 && (
+	<section class="continue-rail" aria-labelledby="continue-rail-title">
+		<div class="continue-rail__header">
+			<MLabel tone="spruce">Continue Watching</MLabel>
+			<h2 id="continue-rail-title">Pick up where you left off</h2>
+		</div>
+		<div class="continue-rail__grid">
+			{items.map((item) => (
+				<a class="continue-rail__item" href={`/watch/${item.slug}`}>
+					<div class="continue-rail__frame">
+						<img
+							src={item.thumbnailUrl}
+							alt=""
+							loading="lazy"
+							decoding="async"
+							width="320"
+							height="180"
+						/>
+						<div
+							class="continue-rail__progress"
+							role="progressbar"
+							aria-valuenow={Math.round(item.progressPercent)}
+							aria-valuemin="0"
+							aria-valuemax="100"
+							aria-label={`Watched ${Math.round(item.progressPercent)}%`}
+						>
+							<div
+								class="continue-rail__progress-fill"
+								style={`width: ${item.progressPercent}%`}
+							/>
+						</div>
+					</div>
+					<h3>{item.title}</h3>
+					<MLabel>{item.remainingLabel}</MLabel>
+				</a>
+			))}
+		</div>
+	</section>
+)}
+
+<style>
+	.continue-rail {
+		border-bottom: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+		padding: 1.25rem 2.5rem 1.5rem;
+	}
+
+	.continue-rail__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.continue-rail__header h2 {
+		margin: 0;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: 1.5rem;
+		font-style: italic;
+		font-weight: 400;
+		line-height: 1;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+	}
+
+	.continue-rail__grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 1.25rem;
+	}
+
+	.continue-rail__item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-width: 0;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.continue-rail__item:hover h3 {
+		color: var(--editorial-spruce);
+	}
+
+	.continue-rail__frame {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-sm);
+		background: var(--editorial-paper-deep);
+	}
+
+	.continue-rail__frame img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.continue-rail__progress {
+		position: absolute;
+		inset-inline: 0;
+		bottom: 0;
+		height: 4px;
+		background: oklch(0.18 0.02 60 / 0.35);
+	}
+
+	.continue-rail__progress-fill {
+		height: 100%;
+		background: var(--editorial-spruce);
+	}
+
+	.continue-rail__item h3 {
+		margin: 0;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: 1.05rem;
+		font-style: italic;
+		font-weight: 400;
+		line-height: 1.15;
+		letter-spacing: 0;
+		color: var(--editorial-ink);
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	@media (max-width: 960px) {
+		.continue-rail {
+			padding-inline: 1.25rem;
+		}
+		.continue-rail__grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-width: 640px) {
+		.continue-rail__grid {
+			grid-template-columns: 1fr;
+		}
+		.continue-rail__item {
+			flex-direction: row;
+			align-items: center;
+			gap: 0.75rem;
+		}
+		.continue-rail__frame {
+			width: 7.5rem;
+			flex-shrink: 0;
+		}
+		.continue-rail__item h3 {
+			-webkit-line-clamp: 2;
+		}
+	}
+</style>

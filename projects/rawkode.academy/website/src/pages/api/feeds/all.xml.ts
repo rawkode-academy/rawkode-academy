@@ -1,7 +1,10 @@
 import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
-import { renderAndSanitizeArticles, withRssMimeType } from "../../../lib/feed-utils";
+import {
+	renderAndSanitizeArticles,
+	withRssMimeType,
+} from "../../../lib/feed-utils";
 import { createLogger } from "@/lib/logger";
 import { getVideoThumbnailJpegUrl } from "@/lib/video-thumbnail";
 

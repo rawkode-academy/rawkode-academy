@@ -1,11 +1,17 @@
 ---
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
+import ContactFallback from "@/components/organizations/ContactFallback.astro";
+import {
+	partnershipFitMailto,
+	partnershipFitSubject,
+	partnershipFitTemplate,
+	partnershipTiers,
+} from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactHref =
-	"mailto:david@rawkode.academy?subject=Partnership%20fit&body=Company%2Fcategory%3A%0D%0AProduct%20or%20platform%3A%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AWhat%20your%20team%20wants%20to%20learn%20or%20improve%20next%3A%0D%0AUseful%20links%3A";
+const contactHref = partnershipFitMailto;
 
 const faqs = [
 	{
@@ -45,62 +51,11 @@ const faqs = [
 	},
 ];
 
-const packages = [
-	{
-		name: "Signal",
-		price: "£1,000 / month",
-		label: "Entry",
-		bestFor:
-			"Teams that need a recurring outside read on what developers understand, question, trust, or ignore.",
-		outcome:
-			"Each month gives your team a clearer read on adoption friction, proof gaps, and the next story or surface worth improving.",
-		included: [
-			"Monthly signal brief drawn from public technical work, product surfaces, category movement, and field notes",
-			"Adoption friction tracked over time across positioning, docs, demos, onboarding, and narrative",
-			"One clear recommendation for what to keep, change, prove, pause, or escalate",
-			"Optional public field note when the learning belongs in the community",
-		],
-		cta: "Get in Touch",
-		href: "mailto:david@rawkode.academy?subject=Signal%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Signal%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACurrent%20GTM%2C%20DevRel%2C%20or%20product%20rhythm%3A%0D%0AUseful%20links%3A",
-	},
-	{
-		name: "Adoption",
-		price: "£2,000 / month",
-		label: "Default",
-		bestFor:
-			"Teams ready to turn recurring signal into a focused monthly adoption experiment.",
-		outcome:
-			"Each month moves one adoption blocker from vague concern to clearer experiment, evidence, and next step.",
-		included: [
-			"Everything in Signal",
-			"Monthly working session around one adoption blocker",
-			"Experiment shape: audience, friction, hypothesis, proof, and success signal",
-			"Shared learning artifact your team can use in docs, demos, onboarding, narrative, or sales handoff",
-			"Adoption map updated with what changed, what remains unclear, and what to test next",
-		],
-		cta: "Get in Touch",
-		href: contactHref,
-		featured: true,
-	},
-	{
-		name: "Council",
-		price: "£3,000 / month",
-		label: "Cohort",
-		bestFor:
-			"Teams that want peer comparison, expert perspective, and a shared room for serious developer adoption problems.",
-		outcome:
-			"Each month gives your team practitioner patterns from other members, expert perspective, and reusable language for the decisions ahead.",
-		included: [
-			"Everything in Adoption",
-			"Shared monthly cohort room where Council members compare adoption problems",
-			"Member case reviews around live docs, demos, narratives, onboarding, or launch motions",
-			"Monthly industry expert presentation with working Q&A",
-			"Council pattern notes with risks, experiments, expert takeaways, and useful decision language",
-		],
-		cta: "Get in Touch",
-		href: "mailto:david@rawkode.academy?subject=Council%20path&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%20Council%0D%0ATarget%20developers%20or%20platform%20teams%3A%0D%0ATeam%20stakeholders%3A%0D%0ACurrent%20adoption%20challenge%3A%0D%0ACohort%20or%20expert%20themes%20that%20would%20help%3A%0D%0AUseful%20links%3A",
-	},
-];
+const packages = partnershipTiers.map((tier) => ({
+	...tier,
+	cta: "Get in Touch",
+	href: tier.mailto,
+}));
 
 const inspectAreas = [
 	{
@@ -328,6 +283,10 @@ const heroProofPoints = [
 				Rough context is enough: product, target developers, team stakeholders, adoption challenge, current team rhythm, and links if useful.
 			</p>
 			<a class="partnerships-button" href={contactHref}>Get in Touch</a>
+			<ContactFallback
+				subject={partnershipFitSubject}
+				template={partnershipFitTemplate}
+			/>
 		</section>
 	</main>
 </Page>

@@ -53,8 +53,14 @@ const tag = computed(() => (props.href ? "a" : "button"));
 }
 
 .ed-btn--sm { padding: 0.6rem 0.95rem; font-size: 0.6875rem; }
-.ed-btn--md { padding: 0.85rem 1.25rem; font-size: 0.75rem; }
-.ed-btn--lg { padding: 1rem 1.5rem;     font-size: 0.8125rem; }
+.ed-btn--md { padding: 0.85rem 1.25rem; font-size: 0.75rem; min-height: 2.75rem; }
+.ed-btn--lg { padding: 1rem 1.5rem;     font-size: 0.8125rem; min-height: 2.75rem; }
+
+/* On coarse pointers the small button keeps its visual density but
+   grows to a 44px tap target. */
+@media (pointer: coarse) {
+	.ed-btn--sm { min-height: 2.75rem; }
+}
 
 .ed-btn--solid {
 	background: var(--editorial-ink);

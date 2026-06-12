@@ -21,12 +21,14 @@ export interface RealtimeKitLivestream {
 export interface RealtimeKitVideoCandidate {
 	slug: string;
 	title?: string;
-	realtimeKit?: {
-		streamId?: string | undefined;
-		meetingId?: string | undefined;
-		livestreamName?: string | undefined;
-		roomName?: string | undefined;
-	} | undefined;
+	realtimeKit?:
+		| {
+				streamId?: string | undefined;
+				meetingId?: string | undefined;
+				livestreamName?: string | undefined;
+				roomName?: string | undefined;
+		  }
+		| undefined;
 }
 
 export function isRealtimeKitLiveStartEvent(

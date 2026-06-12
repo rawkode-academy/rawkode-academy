@@ -18,8 +18,7 @@ export const Default: Story = {
 	args: {
 		left: "Dispatch №048 · Vol IV",
 		right: "Thursday, April 23 2026",
-		quote:
-			"The only cloud native content where I actually learn something.",
+		quote: "The only cloud native content where I actually learn something.",
 		quoteSource: "Principal Engineer, Stripe",
 	},
 };

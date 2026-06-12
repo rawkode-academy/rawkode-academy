@@ -2,7 +2,10 @@
 import type { CollectionEntry } from "astro:content";
 import MLabel from "@/components/ui/MLabel.vue";
 
-interface Tag { label: string; href: string }
+interface Tag {
+	label: string;
+	href: string;
+}
 
 interface Props {
 	authors: CollectionEntry<"people">[];
@@ -12,7 +15,13 @@ interface Props {
 	tags?: Tag[];
 }
 
-const { authors, date, updatedDate, readingTime, tags = [] } = Astro.props as Props;
+const {
+	authors,
+	date,
+	updatedDate,
+	readingTime,
+	tags = [],
+} = Astro.props as Props;
 const primary = authors[0];
 const primaryInitials = primary
 	? primary.data.name

@@ -66,7 +66,10 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { generateShareCard as apiGenerateShareCard, type ShareCardResult } from "@/lib/game-api";
+import {
+	generateShareCard as apiGenerateShareCard,
+	type ShareCardResult,
+} from "@/lib/game-api";
 
 const props = defineProps<{
 	enemyId: string;

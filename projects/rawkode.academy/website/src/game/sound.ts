@@ -14,7 +14,7 @@ function playTone(
 	duration: number,
 	type: OscillatorType = "square",
 	volume: number = 0.3,
-	frequencyEnd?: number
+	frequencyEnd?: number,
 ) {
 	const ctx = getContext();
 	const oscillator = ctx.createOscillator();
@@ -24,7 +24,10 @@ function playTone(
 	oscillator.frequency.setValueAtTime(frequency, ctx.currentTime);
 
 	if (frequencyEnd) {
-		oscillator.frequency.linearRampToValueAtTime(frequencyEnd, ctx.currentTime + duration);
+		oscillator.frequency.linearRampToValueAtTime(
+			frequencyEnd,
+			ctx.currentTime + duration,
+		);
 	}
 
 	gainNode.gain.setValueAtTime(volume, ctx.currentTime);

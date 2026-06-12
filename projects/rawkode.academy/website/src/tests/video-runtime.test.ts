@@ -26,15 +26,25 @@ describe("video runtime labels", () => {
 	});
 
 	it("keeps recorded and past live videos on duration labels", () => {
-		expect(formatVideoRuntimeLabel({
-			duration: 3600,
-			publishedAt: "2026-07-09T17:00:00.000Z",
-			type: "recorded",
-		}, now)).toBe("1:00:00");
-		expect(formatVideoRuntimeLabel({
-			duration: 3600,
-			publishedAt: "2026-06-01T17:00:00.000Z",
-			type: "live",
-		}, now)).toBe("1:00:00");
+		expect(
+			formatVideoRuntimeLabel(
+				{
+					duration: 3600,
+					publishedAt: "2026-07-09T17:00:00.000Z",
+					type: "recorded",
+				},
+				now,
+			),
+		).toBe("1:00:00");
+		expect(
+			formatVideoRuntimeLabel(
+				{
+					duration: 3600,
+					publishedAt: "2026-06-01T17:00:00.000Z",
+					type: "live",
+				},
+				now,
+			),
+		).toBe("1:00:00");
 	});
 });

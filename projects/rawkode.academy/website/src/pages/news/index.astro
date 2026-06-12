@@ -135,9 +135,7 @@ const trendingItems = allNews.slice(0, 5).map((s) => ({
 	href: `/news/${s.id}`,
 }));
 
-const newsRows = rest
-	.filter((s) => s.id !== cveStory?.id)
-	.slice(0, 10);
+const newsRows = rest.filter((s) => s.id !== cveStory?.id).slice(0, 10);
 ---
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">

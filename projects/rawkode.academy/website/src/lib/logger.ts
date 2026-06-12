@@ -93,8 +93,7 @@ function createLogFunction(
 		if (level === "error") {
 			if (
 				contextOrError instanceof Error ||
-				(contextOrError !== null &&
-					typeof contextOrError !== "object") ||
+				(contextOrError !== null && typeof contextOrError !== "object") ||
 				(typeof contextOrError === "object" &&
 					contextOrError !== null &&
 					"message" in contextOrError &&

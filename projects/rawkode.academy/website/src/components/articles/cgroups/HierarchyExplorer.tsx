@@ -18,7 +18,13 @@ const controllerColors: Record<string, { bg: string; text: string }> = {
 	cpuset: { bg: "bg-cyan-500/20", text: "text-cyan-400" },
 };
 
-const v1Trees: { root: string; color: string; borderColor: string; glowColor: string; nodes: TreeNode[] }[] = [
+const v1Trees: {
+	root: string;
+	color: string;
+	borderColor: string;
+	glowColor: string;
+	nodes: TreeNode[];
+}[] = [
 	{
 		root: "/sys/fs/cgroup/cpu/",
 		color: "text-red-400",
@@ -100,7 +106,10 @@ const v2Tree: TreeNode[] = [
 ];
 
 function ControllerBadge({ name }: { name: string }) {
-	const colors = controllerColors[name] ?? { bg: "bg-slate-500/20", text: "text-slate-400" };
+	const colors = controllerColors[name] ?? {
+		bg: "bg-slate-500/20",
+		text: "text-slate-400",
+	};
 	return (
 		<span
 			className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${colors.bg} ${colors.text}`}
@@ -143,7 +152,9 @@ function TreeNodeRow({
 						key={`line-${depth}-${idx}`}
 						className="inline-block w-5 h-7 flex-shrink-0"
 						style={{
-							borderLeft: showLine ? "1px solid rgba(148, 163, 184, 0.2)" : "none",
+							borderLeft: showLine
+								? "1px solid rgba(148, 163, 184, 0.2)"
+								: "none",
 						}}
 					/>
 				))}
@@ -176,7 +187,13 @@ function TreeNodeRow({
 							fill="none"
 							className={`transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`}
 						>
-							<path d="M3 1.5L7 5L3 8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+							<path
+								d="M3 1.5L7 5L3 8.5"
+								stroke="currentColor"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							/>
 						</svg>
 					</button>
 				) : (
@@ -197,7 +214,9 @@ function TreeNodeRow({
 				) : (
 					<span
 						className={`font-mono text-sm ${
-							node.isProcess ? "text-orange-400 font-semibold" : "text-slate-400"
+							node.isProcess
+								? "text-orange-400 font-semibold"
+								: "text-slate-400"
 						}`}
 					>
 						{node.name}
@@ -256,7 +275,9 @@ function V1Tree({
 		<div
 			className={`rounded-lg border ${tree.borderColor} bg-slate-900/80 p-3 shadow-lg ${tree.glowColor}`}
 		>
-			<div className={`font-mono text-xs font-bold ${tree.color} mb-2 pb-1.5 border-b border-slate-700/50`}>
+			<div
+				className={`font-mono text-xs font-bold ${tree.color} mb-2 pb-1.5 border-b border-slate-700/50`}
+			>
 				{tree.root}
 			</div>
 			<div>
@@ -278,7 +299,15 @@ function V1Tree({
 	);
 }
 
-function StatBox({ label, value, variant }: { label: string; value: string; variant: "red" | "green" }) {
+function StatBox({
+	label,
+	value,
+	variant,
+}: {
+	label: string;
+	value: string;
+	variant: "red" | "green";
+}) {
 	const colors =
 		variant === "red"
 			? "border-red-500/20 bg-red-500/5 text-red-400"
@@ -322,7 +351,9 @@ export default function HierarchyExplorer() {
 		return keys;
 	}, []);
 
-	const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => new Set(allExpandedKeys));
+	const [expandedKeys, setExpandedKeys] = useState<Set<string>>(
+		() => new Set(allExpandedKeys),
+	);
 
 	const toggleExpand = useCallback((key: string) => {
 		setExpandedKeys((prev) => {
@@ -405,9 +436,15 @@ export default function HierarchyExplorer() {
 					}`}
 				>
 					{displayTab === "v1" ? (
-						<V1Content expandedKeys={expandedKeys} toggleExpand={toggleExpand} />
+						<V1Content
+							expandedKeys={expandedKeys}
+							toggleExpand={toggleExpand}
+						/>
 					) : (
-						<V2Content expandedKeys={expandedKeys} toggleExpand={toggleExpand} />
+						<V2Content
+							expandedKeys={expandedKeys}
+							toggleExpand={toggleExpand}
+						/>
 					)}
 				</div>
 			</div>
@@ -460,16 +497,23 @@ function V1Content({
 							strokeWidth="1.5"
 							strokeLinejoin="round"
 						/>
-						<path d="M10 8V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+						<path
+							d="M10 8V11"
+							stroke="currentColor"
+							strokeWidth="1.5"
+							strokeLinecap="round"
+						/>
 						<circle cx="10" cy="14" r="0.75" fill="currentColor" />
 					</svg>
 					<div>
-						<div className="text-sm font-semibold text-red-400 mb-1">The Problem</div>
+						<div className="text-sm font-semibold text-red-400 mb-1">
+							The Problem
+						</div>
 						<div className="text-xs text-slate-400 leading-relaxed">
 							<span className="text-orange-400 font-semibold">nginx</span> and{" "}
-							<span className="text-orange-400 font-semibold">redis</span> appear in 3
-							separate trees. No unified view. No atomic moves. No combined resource
-							accounting.
+							<span className="text-orange-400 font-semibold">redis</span>{" "}
+							appear in 3 separate trees. No unified view. No atomic moves. No
+							combined resource accounting.
 						</div>
 					</div>
 				</div>
@@ -536,13 +580,28 @@ function V2Content({
 						fill="none"
 						className="text-emerald-400 flex-shrink-0 mt-0.5"
 					>
-						<circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
-						<path d="M6.5 10L9 12.5L13.5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+						<circle
+							cx="10"
+							cy="10"
+							r="8"
+							stroke="currentColor"
+							strokeWidth="1.5"
+						/>
+						<path
+							d="M6.5 10L9 12.5L13.5 7.5"
+							stroke="currentColor"
+							strokeWidth="1.5"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+						/>
 					</svg>
 					<div>
-						<div className="text-sm font-semibold text-emerald-400 mb-1">The Solution</div>
+						<div className="text-sm font-semibold text-emerald-400 mb-1">
+							The Solution
+						</div>
 						<div className="text-xs text-slate-400 leading-relaxed">
-							One tree. All controllers. Unified resource accounting per process.
+							One tree. All controllers. Unified resource accounting per
+							process.
 						</div>
 					</div>
 				</div>

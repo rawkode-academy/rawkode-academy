@@ -1,7 +1,11 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 
-type ScoreType = "fastest_breach" | "win_streak" | "total_wins" | "enemies_defeated";
+type ScoreType =
+	| "fastest_breach"
+	| "win_streak"
+	| "total_wins"
+	| "enemies_defeated";
 
 const validScoreTypes: ScoreType[] = [
 	"fastest_breach",
@@ -53,9 +57,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
 		return new Response(
 			JSON.stringify({
 				...playerRank,
-				achievedAt: playerRank.achievedAt instanceof Date
-					? playerRank.achievedAt.toISOString()
-					: playerRank.achievedAt,
+				achievedAt:
+					playerRank.achievedAt instanceof Date
+						? playerRank.achievedAt.toISOString()
+						: playerRank.achievedAt,
 			}),
 			{
 				status: 200,

@@ -26,7 +26,10 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 							src={person.data.avatarUrl || '/images/avatars/default.png'}
 							alt={person.data.name}
 							class="w-12 h-12 rounded-full object-cover border-2 border-primary"
+							width="48"
+							height="48"
 							loading="lazy"
+							decoding="async"
 						/>
 						<span class="absolute -bottom-1 -right-1 bg-primary text-primary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-primary-content/10 shadow-sm">
 							HOST
@@ -53,9 +56,12 @@ const hasSpeakers = hosts.length > 0 || guests.length > 0;
 							src={person.data.avatarUrl || '/images/avatars/default.png'}
 							alt={person.data.name}
 							class="w-12 h-12 rounded-full object-cover border-2 border-secondary/50"
+							width="48"
+							height="48"
 							loading="lazy"
+							decoding="async"
 						/>
-						<span class="absolute -bottom-1 -right-1 bg-secondary text-secondary-content text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-secondary-content/10 shadow-sm">
+						<span class="absolute -bottom-1 -right-1 bg-[var(--editorial-amber)] text-[oklch(0.22_0.04_65)] text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-secondary-content/10 shadow-sm">
 							GUEST
 						</span>
 					</div>

@@ -60,7 +60,10 @@ const hasMoreVideos =
 							src={video.thumbnailUrl}
 							alt={video.title}
 							class="w-full h-full object-cover group-hover:scale-105 "
+							width="1280"
+							height="720"
 							loading="lazy"
+							decoding="async"
 						/>
 						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
 							{formatVideoRuntimeLabel(video)}

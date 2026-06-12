@@ -1,0 +1,572 @@
+---
+/**
+ * Primary site navigation — server-rendered so the links exist in the
+ * HTML without client-side JavaScript (SEO + the project's no-JS
+ * principle). A small vanilla script layers on the interactive
+ * behaviours: desktop collapse, width resize, and the mobile drawer.
+ */
+interface NavLink {
+	name: string;
+	href: string;
+	iconPath: string;
+}
+
+const navItems: NavLink[] = [
+	{
+		name: "News",
+		href: "/news",
+		iconPath:
+			"M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46",
+	},
+	{
+		name: "Videos",
+		href: "/watch",
+		iconPath:
+			"m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z",
+	},
+	{
+		name: "Articles",
+		href: "/read",
+		iconPath:
+			"M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z",
+	},
+	{
+		name: "Technology Matrix",
+		href: "/technology/matrix",
+		iconPath:
+			"M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z",
+	},
+	{
+		name: "Courses",
+		href: "/courses",
+		iconPath:
+			"M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5",
+	},
+	{
+		name: "Learning Paths",
+		href: "/learning-paths",
+		iconPath:
+			"M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z",
+	},
+	{
+		name: "Shows",
+		href: "/shows",
+		iconPath:
+			"M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125Z",
+	},
+	{
+		name: "Technologies",
+		href: "/technology",
+		iconPath:
+			"m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9",
+	},
+	{
+		name: "People",
+		href: "/people",
+		iconPath:
+			"M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z",
+	},
+];
+
+const currentPath = Astro.url.pathname;
+
+function isCurrentPath(itemPath: string): boolean {
+	if (itemPath === "/" && currentPath === "/") return true;
+	if (itemPath === "/technology") {
+		return (
+			currentPath === "/technology" ||
+			(currentPath.startsWith("/technology/") &&
+				!currentPath.startsWith("/technology/matrix"))
+		);
+	}
+	return itemPath !== "/" && currentPath.startsWith(itemPath);
+}
+---
+
+<aside id="site-sidebar" class="ed-sidebar" aria-label="Sidebar navigation">
+	<nav class="ed-sidebar__nav">
+		<ul class="ed-sidebar__list">
+			{
+				navItems.map((item) => {
+					const active = isCurrentPath(item.href);
+					return (
+						<li class="ed-sidebar__item">
+							<a
+								href={item.href}
+								class:list={["ed-nav-item", active && "ed-nav-item--active"]}
+								aria-current={active ? "page" : undefined}
+								data-nav-name={item.name}
+							>
+								<svg
+									class="ed-nav-item__icon"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.6"
+									stroke="currentColor"
+									aria-hidden="true"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d={item.iconPath}
+									/>
+								</svg>
+								<span class="ed-nav-item__label">{item.name}</span>
+							</a>
+						</li>
+					);
+				})
+			}
+		</ul>
+	</nav>
+
+	<div
+		id="sidebar-resize-handle"
+		class="ed-sidebar__resize-handle"
+		role="separator"
+		tabindex="0"
+		aria-label="Resize sidebar"
+		aria-orientation="vertical"
+	>
+	</div>
+</aside>
+
+<button
+	type="button"
+	id="sidebar-scrim"
+	class="ed-sidebar__scrim md:hidden"
+	aria-label="Close navigation"
+	hidden></button>
+
+<script is:inline>
+	// Apply the persisted collapse state before paint so a collapsed
+	// sidebar doesn't flash expanded. Mirrors ThemeScript's approach.
+	(() => {
+		try {
+			if (window.innerWidth < 768) return;
+			if (localStorage.getItem("sidebar-collapsed") === "true") {
+				document
+					.getElementById("site-sidebar")
+					?.classList.add("ed-sidebar--collapsed");
+				document.documentElement.style.setProperty(
+					"--ed-sidebar-current-width",
+					"var(--ed-sidebar-collapsed-width, 3.5rem)",
+				);
+			}
+			const stored = Number.parseInt(
+				localStorage.getItem("sidebar-expanded-width") || "",
+				10,
+			);
+			if (Number.isFinite(stored) && stored !== 288) {
+				document.documentElement.style.setProperty(
+					"--ed-sidebar-expanded-width",
+					`${Math.min(Math.max(stored, 224), 440)}px`,
+				);
+			}
+		} catch {
+			/* storage unavailable — keep defaults */
+		}
+	})();
+</script>
+
+<script>
+	const collapseStorageKey = "sidebar-collapsed";
+	const widthStorageKey = "sidebar-expanded-width";
+	const defaultExpandedWidth = 256;
+	const legacyDefaultExpandedWidth = 288;
+	const minExpandedWidth = 224;
+	const maxExpandedWidth = 440;
+
+	const sidebar = document.getElementById("site-sidebar");
+	const scrim = document.getElementById("sidebar-scrim");
+	const resizeHandle = document.getElementById("sidebar-resize-handle");
+	const desktopToggle = document.getElementById("sidebar-toggle-btn");
+	const mobileToggle = document.getElementById("mobile-sidebar-btn");
+
+	let expandedWidth = defaultExpandedWidth;
+	let isResizing = false;
+
+	const isMobile = () => window.innerWidth < 768;
+	const isCollapsed = () =>
+		sidebar?.classList.contains("ed-sidebar--collapsed") ?? false;
+	const isDrawerOpen = () =>
+		sidebar?.classList.contains("ed-sidebar--open") ?? false;
+
+	function maxWidthForViewport() {
+		return Math.min(
+			maxExpandedWidth,
+			Math.max(minExpandedWidth, Math.floor(window.innerWidth * 0.42)),
+		);
+	}
+
+	function clampWidth(width: number) {
+		return Math.min(Math.max(width, minExpandedWidth), maxWidthForViewport());
+	}
+
+	function readStoredWidth() {
+		const stored = Number.parseInt(
+			localStorage.getItem(widthStorageKey) || "",
+			10,
+		);
+		if (stored === legacyDefaultExpandedWidth) {
+			localStorage.removeItem(widthStorageKey);
+			return defaultExpandedWidth;
+		}
+		if (!Number.isFinite(stored)) return defaultExpandedWidth;
+		return clampWidth(stored);
+	}
+
+	function applyLayout() {
+		const root = document.documentElement;
+		const width = `${Math.round(expandedWidth)}px`;
+		root.style.setProperty("--ed-sidebar-expanded-width", width);
+		root.style.setProperty(
+			"--ed-sidebar-current-width",
+			isMobile() || isCollapsed()
+				? "var(--ed-sidebar-collapsed-width, 3.5rem)"
+				: width,
+		);
+		syncAria();
+		if (resizeHandle) {
+			resizeHandle.setAttribute("aria-valuemin", String(minExpandedWidth));
+			resizeHandle.setAttribute(
+				"aria-valuemax",
+				String(maxWidthForViewport()),
+			);
+			resizeHandle.setAttribute(
+				"aria-valuenow",
+				String(Math.round(expandedWidth)),
+			);
+		}
+	}
+
+	function syncAria() {
+		desktopToggle?.setAttribute("aria-expanded", String(!isCollapsed()));
+		desktopToggle?.setAttribute("aria-controls", "site-sidebar");
+		mobileToggle?.setAttribute("aria-expanded", String(isDrawerOpen()));
+		mobileToggle?.setAttribute("aria-controls", "site-sidebar");
+	}
+
+	function setDrawer(open: boolean) {
+		if (!sidebar || !scrim) return;
+		sidebar.classList.toggle("ed-sidebar--open", open);
+		scrim.hidden = !open;
+		syncAria();
+		if (open) {
+			(sidebar.querySelector("a") as HTMLElement | null)?.focus();
+		} else {
+			mobileToggle?.focus();
+		}
+	}
+
+	function toggle() {
+		if (isMobile()) {
+			setDrawer(!isDrawerOpen());
+			return;
+		}
+		sidebar?.classList.toggle("ed-sidebar--collapsed");
+		localStorage.setItem(collapseStorageKey, String(isCollapsed()));
+		applyLayout();
+	}
+
+	desktopToggle?.addEventListener("click", toggle);
+	mobileToggle?.addEventListener("click", toggle);
+	scrim?.addEventListener("click", () => setDrawer(false));
+	window.addEventListener("toggle-sidebar", toggle);
+
+	window.addEventListener("keydown", (event) => {
+		if (event.key === "Escape" && isDrawerOpen()) setDrawer(false);
+	});
+
+	// Expand a collapsed desktop sidebar when a nav link is clicked while
+	// collapsed (preserves the previous icon-rail affordance).
+	sidebar?.addEventListener("click", (event) => {
+		if (isMobile() || !isCollapsed()) return;
+		const link = (event.target as HTMLElement).closest("a");
+		if (!link) return;
+		event.preventDefault();
+		sidebar.classList.remove("ed-sidebar--collapsed");
+		localStorage.setItem(collapseStorageKey, "false");
+		applyLayout();
+	});
+
+	// ── Resize handle ──
+	function persistWidth() {
+		localStorage.setItem(widthStorageKey, String(Math.round(expandedWidth)));
+	}
+
+	function handleResizeMove(event: PointerEvent) {
+		if (!isResizing) return;
+		expandedWidth = clampWidth(event.clientX);
+		applyLayout();
+	}
+
+	function stopResize() {
+		if (!isResizing) return;
+		isResizing = false;
+		document.body.classList.remove("ed-sidebar-resizing");
+		persistWidth();
+		window.removeEventListener("pointermove", handleResizeMove);
+		window.removeEventListener("pointerup", stopResize);
+		applyLayout();
+	}
+
+	resizeHandle?.addEventListener("pointerdown", (event) => {
+		if (isCollapsed() || isMobile()) return;
+		event.preventDefault();
+		isResizing = true;
+		document.body.classList.add("ed-sidebar-resizing");
+		window.addEventListener("pointermove", handleResizeMove);
+		window.addEventListener("pointerup", stopResize);
+	});
+
+	resizeHandle?.addEventListener("keydown", (event) => {
+		if (isCollapsed() || isMobile()) return;
+		const apply = () => {
+			persistWidth();
+			applyLayout();
+		};
+		if (event.key === "ArrowLeft") {
+			event.preventDefault();
+			expandedWidth = clampWidth(expandedWidth - 16);
+			apply();
+		} else if (event.key === "ArrowRight") {
+			event.preventDefault();
+			expandedWidth = clampWidth(expandedWidth + 16);
+			apply();
+		} else if (event.key === "Home") {
+			event.preventDefault();
+			expandedWidth = minExpandedWidth;
+			apply();
+		} else if (event.key === "End") {
+			event.preventDefault();
+			expandedWidth = maxWidthForViewport();
+			apply();
+		}
+	});
+
+	window.addEventListener(
+		"resize",
+		() => {
+			expandedWidth = clampWidth(expandedWidth);
+			if (!isMobile() && isDrawerOpen()) setDrawer(false);
+			applyLayout();
+		},
+		{ passive: true },
+	);
+
+	expandedWidth = readStoredWidth();
+	applyLayout();
+</script>
+
+<style>
+	.ed-sidebar {
+		position: fixed;
+		top: 64px; /* matches ed-topbar height */
+		left: 0;
+		bottom: 0;
+		z-index: 30;
+		background: var(--editorial-paper);
+		border-right: 1px solid var(--editorial-hairline);
+		display: flex;
+		flex-direction: column;
+		width: var(--ed-sidebar-expanded-width, 16rem);
+		transition: width var(--duration-slow) var(--ease-standard);
+		overflow: hidden;
+	}
+
+	.ed-sidebar--collapsed {
+		width: var(--ed-sidebar-collapsed-width, 3.5rem);
+	}
+
+	.ed-sidebar--collapsed .ed-nav-item__label {
+		display: none;
+	}
+
+	.ed-sidebar--collapsed .ed-nav-item {
+		justify-content: center;
+		padding: 0.75rem 0;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.ed-sidebar {
+			transition: none;
+		}
+	}
+
+	.ed-sidebar__resize-handle {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 2;
+		width: 0.75rem;
+		cursor: col-resize;
+		touch-action: none;
+	}
+
+	.ed-sidebar__resize-handle::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 1px;
+		background: var(--editorial-hairline);
+	}
+
+	.ed-sidebar__resize-handle::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		right: 0.25rem;
+		width: 2px;
+		height: 2.5rem;
+		background: color-mix(in oklab, var(--editorial-ink-mute) 60%, transparent);
+		transform: translateY(-50%);
+		opacity: 0;
+		transition: opacity var(--duration-base) var(--ease-standard);
+	}
+
+	.ed-sidebar__resize-handle:hover::after {
+		opacity: 1;
+	}
+
+	.ed-sidebar__resize-handle:focus-visible {
+		outline: 2px solid var(--editorial-ink);
+		outline-offset: -2px;
+	}
+
+	.ed-sidebar--collapsed .ed-sidebar__resize-handle {
+		display: none;
+	}
+
+	:global(body.ed-sidebar-resizing) {
+		cursor: col-resize;
+		user-select: none;
+	}
+
+	:global(body.ed-sidebar-resizing) .ed-sidebar {
+		transition: none;
+	}
+
+	/* Mobile: the sidebar is a drawer. Hidden until opened; the SSR nav
+	   markup still exists in the document for crawlers and no-JS users
+	   (who reach the same links through the footer). */
+	@media (max-width: 767px) {
+		.ed-sidebar {
+			display: none;
+			width: min(20rem, 88vw);
+			box-shadow: 0 0 0 1px var(--editorial-hairline);
+		}
+
+		.ed-sidebar--open {
+			display: flex;
+		}
+
+		.ed-sidebar--open .ed-nav-item__label {
+			display: inline;
+		}
+
+		.ed-sidebar--open .ed-nav-item {
+			justify-content: flex-start;
+			padding: 0.75rem 1rem;
+		}
+
+		.ed-sidebar__resize-handle {
+			display: none;
+		}
+	}
+
+	.ed-sidebar__nav {
+		flex: 1;
+		overflow-y: auto;
+		padding: 0.5rem 0;
+		scrollbar-width: thin;
+		scrollbar-color: var(--editorial-hairline-strong) transparent;
+	}
+
+	.ed-sidebar__nav::-webkit-scrollbar {
+		width: 4px;
+	}
+	.ed-sidebar__nav::-webkit-scrollbar-thumb {
+		background: var(--editorial-hairline-strong);
+	}
+
+	.ed-sidebar__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.ed-sidebar__item {
+		margin: 0;
+	}
+
+	.ed-nav-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+		min-height: 44px;
+		padding: 0.625rem 1rem;
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9rem;
+		font-weight: 500;
+		position: relative;
+		border-left: 2px solid transparent;
+		transition:
+			color var(--duration-base) var(--ease-standard),
+			background-color var(--duration-base) var(--ease-standard),
+			border-color var(--duration-base) var(--ease-standard);
+	}
+
+	.ed-nav-item:hover {
+		color: var(--editorial-ink);
+		background: var(--surface-card-muted);
+	}
+
+	.ed-nav-item--active {
+		color: var(--editorial-ink);
+		background: var(--surface-card-muted);
+		border-left-color: var(--editorial-ink);
+	}
+
+	.ed-nav-item__icon {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
+	}
+
+	.ed-nav-item__label {
+		min-width: 0;
+		flex: 1;
+		line-height: 1.3;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.ed-nav-item:focus-visible {
+		outline: 2px solid var(--editorial-ink);
+		outline-offset: -2px;
+	}
+
+	.ed-sidebar__scrim {
+		position: fixed;
+		inset: 0;
+		z-index: 20;
+		background: oklch(0.18 0.02 60 / 0.45);
+		border: none;
+		padding: 0;
+		cursor: pointer;
+	}
+
+	:global(html.dark) .ed-sidebar {
+		background: var(--surface-base);
+	}
+</style>

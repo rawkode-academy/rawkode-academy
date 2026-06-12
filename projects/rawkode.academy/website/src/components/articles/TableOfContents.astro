@@ -171,13 +171,14 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		padding: 1rem;
 	}
 
-	/* Minimized dots with progress track */
+	/* Minimized dots with progress track. The gap leaves room for each
+	   dot's enlarged hit area (see .toc-dot::after) without overlap. */
 	.toc-dots {
 		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 1.125rem;
 		padding: 0.5rem 0;
 		transition: opacity 0.2s ease;
 	}
@@ -239,6 +240,18 @@ const tocHeadings: TocHeading[] = filteredHeadings.reduce<TocHeading[]>(
 		border: 2px solid rgb(var(--brand-primary) / 0.3);
 		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		z-index: 2;
+	}
+
+	/* Invisible hit area — 44px wide, full pitch tall (14px dot +
+	   1.125rem gap) — keeps the 14px visual while making each dot a
+	   comfortable click/tap target. */
+	.toc-dot::after {
+		content: '';
+		position: absolute;
+		left: -15px;
+		right: -15px;
+		top: -9px;
+		bottom: -9px;
 	}
 
 	.toc-dot-inner {

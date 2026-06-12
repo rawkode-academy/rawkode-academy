@@ -126,7 +126,7 @@ export function getSessionCampaignAttribution(): CampaignAttribution {
 						utm_campaign: current.utm_campaign,
 						utm_term: current.utm_term,
 						utm_content: current.utm_content,
-				  }
+					}
 				: {
 						landing_page: stored.landing_page ?? current.landing_page,
 						initial_referrer:
@@ -136,7 +136,7 @@ export function getSessionCampaignAttribution(): CampaignAttribution {
 						utm_campaign: stored.utm_campaign,
 						utm_term: stored.utm_term,
 						utm_content: stored.utm_content,
-				  },
+					},
 		);
 		const serialized = serializeCampaignAttribution(merged);
 		if (serialized) {

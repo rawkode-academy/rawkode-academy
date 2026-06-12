@@ -140,9 +140,7 @@ function extractStepText(section: string): string | undefined {
 		if (/^<[A-Za-z]/.test(paragraph)) continue;
 		if (/^import\s/.test(paragraph)) continue;
 
-		const cleaned = stripMarkdownInline(paragraph)
-			.replace(/\s+/g, " ")
-			.trim();
+		const cleaned = stripMarkdownInline(paragraph).replace(/\s+/g, " ").trim();
 		if (cleaned.length === 0) continue;
 
 		// Cap at ~500 chars to keep the JSON-LD compact.

@@ -104,7 +104,7 @@ async function generateNavigationItems(
 			href: "/series",
 			title: "All Series",
 			category: "Series",
-			description: "Browse video series",
+			description: "Browse article series",
 		},
 		{
 			href: "/technology",
@@ -247,10 +247,10 @@ async function generateNavigationItems(
 			navigationItems.push({
 				id: `/series/${s.id}`,
 				title: s.data.title,
-				description: "Watch this series",
+				description: "Read this series",
 				href: `/series/${s.id}`,
 				category: "Series",
-				keywords: [s.data.title.toLowerCase(), "series", "watch"],
+				keywords: [s.data.title.toLowerCase(), "series", "read", "articles"],
 			});
 		});
 

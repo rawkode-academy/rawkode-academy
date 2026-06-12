@@ -57,15 +57,10 @@ const isSection = variant === "section";
 		<div
 			class:list={[
 				isSection
-					? "relative mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] px-6 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
-					: "section-shell-muted overflow-hidden rounded-[1.75rem] px-6 py-6 sm:px-8 sm:py-8",
+					? "paper-panel relative mx-auto max-w-7xl overflow-hidden rounded-4xl px-6 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
+					: "section-shell-muted overflow-hidden rounded-3xl px-6 py-6 sm:px-8 sm:py-8",
 			]}
 		>
-			{isSection ? (
-				<div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_50%,_rgba(var(--brand-primary),0.12),_transparent_34%),radial-gradient(circle_at_100%_18%,_rgba(var(--brand-secondary),0.1),_transparent_26%)] dark:bg-[radial-gradient(circle_at_0%_50%,_rgba(var(--brand-primary),0.16),_transparent_34%),radial-gradient(circle_at_100%_18%,_rgba(var(--brand-secondary),0.12),_transparent_26%)]"></div>
-			) : (
-				<div class="pointer-events-none absolute inset-y-0 left-0 w-24 bg-transparent"></div>
-			)}
 
 			<div class:list={[isSection ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-center lg:gap-10" : "grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-center lg:gap-8"]}>
 				<div class:list={[isSection ? "min-w-0 space-y-3" : "min-w-0 space-y-2"]}>

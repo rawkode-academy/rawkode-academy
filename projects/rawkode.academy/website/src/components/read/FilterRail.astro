@@ -1,7 +1,11 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
 
-interface Topic { label: string; href: string; count?: number }
+interface Topic {
+	label: string;
+	href: string;
+	count?: number;
+}
 
 interface Props {
 	topics: Topic[];
