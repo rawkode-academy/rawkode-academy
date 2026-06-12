@@ -16,7 +16,7 @@ const buildMailto = (subject: string, body: string): string =>
 export interface PartnershipTier {
 	id: string;
 	name: string;
-	/** Short mono label shown above the tier name (Entry / Default / Cohort). */
+	/** Short mono label shown above the tier name (Slack / Slack + video / Cohort). */
 	label: string;
 	/** Full price string, e.g. "£1,000 / month". */
 	price: string;
@@ -45,18 +45,18 @@ export const partnershipTiers: PartnershipTier[] = [
 	{
 		id: "signal",
 		name: "Signal",
-		label: "Entry",
+		label: "Slack",
 		price: "£1,000 / month",
 		priceShort: "£1k/mo",
 		bestFor:
-			"Teams that want a recurring outside read without another meeting. Fully async: the brief is the meeting.",
+			"Teams that want an advisor in their Slack and a recurring outside read, without another meeting on the calendar.",
 		outcome:
 			"Know what developers hit in their first fifteen minutes, every month, before your funnel data tells you.",
 		included: [
+			"David in your Slack: async advice on positioning, docs, demos, launches, and objections as they come up",
 			"Your getting-started path, run cold every month like a first-time evaluator, with time-to-first-success tracked",
 			"A written monthly brief: what developers see in your docs, demos, and positioning, and what they say in public",
 			"A running log of adoption blockers, opened and closed month over month",
-			"One clear recommendation: what to keep, change, prove, pause, or escalate",
 			"An optional public field note, only with your approval, when the learning belongs in the community",
 		],
 		featured: false,
@@ -65,17 +65,17 @@ export const partnershipTiers: PartnershipTier[] = [
 	{
 		id: "adoption",
 		name: "Adoption",
-		label: "Default",
+		label: "Slack + video",
 		price: "£2,000 / month",
 		priceShort: "£2k/mo",
 		bestFor:
-			"Teams ready to turn that recurring read into one focused experiment each month, working directly with David.",
+			"Teams that want the advisor on video with the people doing the work, not just in threads.",
 		outcome:
-			"One adoption blocker killed per month, with evidence your whole team can reuse.",
+			"Adoption blockers moved from opinion to evidence, with artifacts your whole team can reuse.",
 		included: [
 			"Everything in Signal",
-			"A monthly working session with your team on one adoption blocker",
-			"A written experiment plan: the audience, the blocker, the hypothesis, and what success looks like",
+			"A monthly video working session with your team on whatever is blocking adoption right now",
+			"Experiment plans when a blocker needs evidence: the audience, the hypothesis, and what success looks like",
 			"A growing experiment record: what was tested, what the evidence said, what changed",
 			"A one-page monthly summary written for the people you report to",
 		],
@@ -85,7 +85,7 @@ export const partnershipTiers: PartnershipTier[] = [
 	{
 		id: "community",
 		name: "Community",
-		label: "10 seats",
+		label: "Cohort",
 		price: "£3,000 / month",
 		priceShort: "£3k/mo",
 		bestFor:
