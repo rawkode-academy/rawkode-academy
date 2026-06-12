@@ -71,7 +71,9 @@ This design is elegant. What went wrong is what always goes wrong in systems tha
 
 ## Try It Yourself
 
-> **Tested on:** Ubuntu 25.10, kernel 7.0.5, systemd 257, runc 1.3.4. Anything cgroupsv2 with these or newer should behave identically.
+<Aside variant="info">
+	**Tested on:** Ubuntu 25.10, kernel 7.0.5, systemd 257, runc 1.3.4. Anything cgroupsv2 with these or newer should behave identically.
+</Aside>
 
 The cleanest way to *feel* how cgroups work is to create one, cap it, and watch the kernel enforce the cap. Do this on a disposable Linux VM or lab host, not a production node. Any cgroupsv2 system will do.
 
