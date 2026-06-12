@@ -27,6 +27,12 @@
 			"id": "f3a5e01c10b144f5964d060cefa1b70c"
 		}
 	],
+	"send_email": [
+		{
+			"name": "PARTNERSHIP_APPLICATIONS",
+			"destination_address": "david@rawkode.academy"
+		}
+	],
 	"routes": [
 		{
 			"pattern": "rawkode.academy",

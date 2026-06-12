@@ -1,6 +1,7 @@
 import { auth } from "./auth";
 import { signupForCourseUpdates } from "./courses";
 import { newsletter } from "./newsletter";
+import { partnership } from "./partnership";
 import { addReaction, removeReaction } from "./reaction";
 import { trackShareEvent } from "./share";
 import { streamNotifications } from "./stream-notifications";
@@ -12,6 +13,7 @@ export const server = {
 	trackVideoEvent,
 	signupForCourseUpdates,
 	newsletter,
+	partnership,
 	trackShareEvent,
 	streamNotifications,
 	addReaction,
