@@ -91,19 +91,6 @@
 			<small v-if="fieldErrors.links" class="application-form__field-error">{{ fieldErrors.links }}</small>
 		</label>
 
-		<div class="application-form__trap" aria-hidden="true">
-			<label>
-				Website
-				<input
-					v-model="website"
-					type="text"
-					name="website"
-					tabindex="-1"
-					autocomplete="off"
-				/>
-			</label>
-		</div>
-
 		<button type="submit" class="editorial-button" :disabled="loading">
 			{{ loading ? "Sending application..." : "Submit application" }}
 		</button>
@@ -125,7 +112,6 @@ const path = ref<ApplicationPath>("Not sure yet");
 const targetDevelopers = ref("");
 const challenge = ref("");
 const links = ref("");
-const website = ref("");
 
 const loading = ref(false);
 const submitted = ref(false);
@@ -168,7 +154,6 @@ async function submit() {
 			targetDevelopers: targetDevelopers.value,
 			challenge: challenge.value,
 			...(links.value.trim() ? { links: links.value } : {}),
-			...(website.value ? { website: website.value } : {}),
 		});
 
 		if (result.error) {
@@ -285,14 +270,6 @@ async function submit() {
 	font-size: 0.92rem;
 	line-height: 1.5;
 	padding: 0.75rem 1rem;
-}
-
-.application-form__trap {
-	position: absolute;
-	left: -9999px;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
 }
 
 .application-form button:disabled {
