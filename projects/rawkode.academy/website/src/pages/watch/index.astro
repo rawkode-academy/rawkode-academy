@@ -19,6 +19,7 @@ import SeriesFilter from "@/components/video/SeriesFilter.astro";
 import VideoGridItem from "@/components/video/VideoGridItem.astro";
 import ContinueWatchingRail from "@/components/video/ContinueWatchingRail.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import PagerStrip from "@/components/ui/PagerStrip.astro";
 
 const user = Astro.locals.user;
 
@@ -505,19 +506,12 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 				<a class="watch-footer__link" href="/api/feeds/videos.json">JSON Feed</a> ·
 				<a class="watch-footer__link" href="/watch">All videos</a>
 			</MLabel>
-			<div class="watch-footer__pager">
-				{page > 1 && (
-					<a class="watch-footer__pager-btn" href={watchPathFor(page - 1)}>
-						<MLabel tone="ink">← Previous</MLabel>
-					</a>
-				)}
-				<MLabel>Page {page}</MLabel>
-				{hasNextPage && (
-					<a class="watch-footer__pager-btn" href={watchPathFor(page + 1)}>
-						<MLabel tone="ink">Next →</MLabel>
-					</a>
-				)}
-			</div>
+			<PagerStrip
+				page={page}
+				prevHref={page > 1 ? watchPathFor(page - 1) : undefined}
+				nextHref={hasNextPage ? watchPathFor(page + 1) : undefined}
+				ariaLabel="Video pages"
+			/>
 		</footer>
 	</div>
 </Page>
@@ -731,20 +725,6 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 		text-decoration-color: var(--editorial-hairline-strong);
 	}
 	.watch-footer__link:hover { text-decoration-color: currentColor; }
-
-	.watch-footer__pager {
-		display: flex;
-		gap: 1rem;
-		align-items: center;
-	}
-
-	.watch-footer__pager-btn {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.75rem;
-		padding: 0 0.5rem;
-		text-decoration: none;
-	}
 
 	@media (max-width: 960px) {
 		.watch-grid {
