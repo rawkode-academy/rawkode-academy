@@ -50,20 +50,8 @@ export const partnership = {
 				.min(1, "Please describe your current adoption challenge")
 				.max(5000),
 			links: z.string().trim().max(2000).optional(),
-			// Honeypot: real users never fill this in. Named so browser
-			// autofill heuristics (which match "website", "url", etc.)
-			// don't populate it for real applicants.
-			comments: z.string().optional(),
 		}),
 		handler: async (input) => {
-			if (input.comments) {
-				console.warn("Partnership application dropped by honeypot", {
-					email: input.email,
-					company: input.company,
-				});
-				return { success: true };
-			}
-
 			const subject = encodeHeader(
 				`Partnership application: ${input.path} - ${input.company}`.slice(
 					0,
