@@ -18,89 +18,81 @@ const iconPaths: Record<Props["variant"], string> = {
 ---
 
 <div class={`aside aside--${variant}`}>
-	<div class="aside__rail" aria-hidden="true"></div>
-	<div class="aside__icon" aria-hidden="true">
-		<svg
-			class="h-4 w-4"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke-width="1.5"
-			stroke="currentColor"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d={iconPaths[variant]}></path>
-		</svg>
+	<div class="aside__header" aria-hidden="true">
+		<span class="aside__icon">
+			<svg
+				class="h-4 w-4"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke-width="1.5"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					d={iconPaths[variant]}></path>
+			</svg>
+		</span>
+		<span class="aside__label">{variant}</span>
 	</div>
 	<div class="aside__body">
-		<span class="aside__label">{variant}</span>
 		<slot />
 	</div>
 </div>
 
 <style>
+	/* Icon + mono label form a header row; the body spans the full
+	   width below it so narrow viewports don't lose ~50px of measure
+	   to an icon gutter. Variant colour rides on a background tint and
+	   the header, not a side-stripe rail. */
 	.aside {
-		display: grid;
-		grid-template-columns: 4px 28px 1fr;
-		gap: 0.875rem;
-		align-items: start;
-		padding: 0.875rem 1rem;
-		margin: 1.25rem 0;
+		padding: 1rem 1.125rem;
+		margin: 1.75rem 0;
 		background: var(--editorial-paper-deep);
 		border: 1px solid var(--editorial-hairline);
 		border-radius: var(--radius-sm);
 		color: var(--editorial-ink);
 	}
 
-	.aside__rail {
-		width: 2px;
-		align-self: stretch;
-		justify-self: start;
-		background: var(--editorial-ink-mute);
-		margin-left: -1rem;
-		margin-block: -0.875rem;
+	.aside--tip { background: color-mix(in oklab, var(--editorial-spruce) 6%, var(--editorial-paper-deep)); }
+	.aside--caution { background: color-mix(in oklab, var(--editorial-amber) 8%, var(--editorial-paper-deep)); }
+	.aside--danger { background: color-mix(in oklab, var(--editorial-rust) 8%, var(--editorial-paper-deep)); }
+
+	.aside__header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
+		color: var(--editorial-ink);
 	}
 
-	.aside--tip .aside__rail { background: var(--editorial-spruce); }
-	.aside--caution .aside__rail { background: var(--editorial-amber); }
-	.aside--danger .aside__rail { background: var(--editorial-rust); }
-	.aside--info .aside__rail { background: var(--editorial-ink); }
+	.aside--tip .aside__header { color: var(--editorial-spruce); }
+	.aside--caution .aside__header { color: var(--editorial-amber-text); }
+	.aside--danger .aside__header { color: var(--editorial-rust); }
 
 	.aside__icon {
-		width: 28px;
-		height: 28px;
+		width: 16px;
+		height: 16px;
 		display: grid;
 		place-items: center;
-		color: var(--editorial-ink);
-		margin-top: 0.1rem;
+		flex-shrink: 0;
 	}
-
-	.aside--tip .aside__icon { color: var(--editorial-spruce); }
-	.aside--caution .aside__icon { color: var(--editorial-amber-text); }
-	.aside--danger .aside__icon { color: var(--editorial-rust); }
 
 	.aside__body {
 		min-width: 0;
 		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.5;
+		font-size: 0.9375rem;
+		line-height: 1.6;
 	}
 
 	.aside__label {
-		display: block;
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 0.65rem;
 		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
-		color: var(--editorial-ink-mute);
-		margin-bottom: 0.35rem;
+		color: inherit;
 	}
-
-	.aside--tip .aside__label { color: var(--editorial-spruce); }
-	.aside--caution .aside__label { color: var(--editorial-amber-text); }
-	.aside--danger .aside__label { color: var(--editorial-rust); }
 
 	.aside :global(p) {
 		margin: 0;

@@ -141,16 +141,16 @@ export default defineConfig({
 		// that never ships in dist. Inlining avoids the broken file reference.
 		...(d2Available ? [d2({ inline: true })] : []),
 		expressiveCode({
-			// Editorial palette: Ayu Light for the paper scheme, Catppuccin
-			// Mocha for the dark scheme. First entry is the default.
-			themes: ["catppuccin-mocha", "ayu-light"],
-			themeCssRoot: ":root",
-			themeCssSelector: (theme) =>
-				theme.name === "ayu-light" ? ":root:not(.dark)" : "html.dark",
+			// Code blocks are "screen within the page" surfaces: like the
+			// --terminal-* tokens they stay dark in both colour schemes, so
+			// shell frames, output blocks, and editor frames all read as the
+			// same material instead of flipping between light and dark chrome.
+			themes: ["catppuccin-mocha"],
 			styleOverrides: {
 				borderRadius: "var(--radius-sm)",
-				borderColor: "var(--editorial-hairline-strong)",
+				borderColor: "var(--terminal-border)",
 				borderWidth: "1px",
+				codeBackground: "var(--terminal-bg)",
 				codeFontFamily:
 					"var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
 				codeFontSize: "13px",
@@ -160,12 +160,13 @@ export default defineConfig({
 					editorActiveTabBorderColor: "transparent",
 					editorActiveTabIndicatorBottomColor: "transparent",
 					editorActiveTabIndicatorTopColor: "var(--editorial-spruce)",
-					editorTabBarBackground: "oklch(0.18 0.012 280)",
-					editorTabBarBorderBottomColor: "oklch(1 0 0 / 0.08)",
+					editorBackground: "var(--terminal-bg)",
+					editorTabBarBackground: "var(--terminal-surface)",
+					editorTabBarBorderBottomColor: "var(--terminal-border)",
 					frameBoxShadowCssValue: "none",
-					terminalBackground: "oklch(0.14 0.012 280)",
-					terminalTitlebarBackground: "oklch(0.18 0.012 280)",
-					terminalTitlebarBorderBottomColor: "oklch(1 0 0 / 0.08)",
+					terminalBackground: "var(--terminal-bg)",
+					terminalTitlebarBackground: "var(--terminal-surface)",
+					terminalTitlebarBorderBottomColor: "var(--terminal-border)",
 					terminalTitlebarDotsForeground: "oklch(1 0 0 / 0.18)",
 				},
 			},

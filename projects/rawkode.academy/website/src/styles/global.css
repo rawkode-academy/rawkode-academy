@@ -517,64 +517,56 @@ html.dark {
 		outline-offset: 2px;
 	}
 
-	/* Editorial aside callout — used by React AsideWrapper in MDX. */
+	/* Editorial aside callout — used by React AsideWrapper in MDX.
+	   Icon + mono label form a header row; the body spans the full
+	   width below it so narrow viewports don't lose ~50px of measure
+	   to an icon gutter. Variant colour rides on a background tint and
+	   the header, not a side-stripe rail. */
 	.ed-aside {
-		display: grid;
-		grid-template-columns: 4px 28px 1fr;
-		gap: 0.875rem;
-		align-items: start;
-		padding: 0.875rem 1rem;
-		margin: 1.25rem 0;
+		padding: 1rem 1.125rem;
+		margin: 1.75rem 0;
 		background: var(--editorial-paper-deep);
 		border: 1px solid var(--editorial-hairline);
 		border-radius: var(--radius-sm);
 		color: var(--editorial-ink);
 	}
 
-	.ed-aside__rail {
-		width: 2px;
-		align-self: stretch;
-		background: var(--editorial-ink-mute);
-		margin-left: -1rem;
-		margin-block: -0.875rem;
-	}
+	.ed-aside--tip     { background: color-mix(in oklab, var(--editorial-spruce) 6%, var(--editorial-paper-deep)); }
+	.ed-aside--caution { background: color-mix(in oklab, var(--editorial-amber) 8%, var(--editorial-paper-deep)); }
+	.ed-aside--danger  { background: color-mix(in oklab, var(--editorial-rust) 8%, var(--editorial-paper-deep)); }
 
-	.ed-aside--tip .ed-aside__rail     { background: var(--editorial-spruce); }
-	.ed-aside--caution .ed-aside__rail { background: var(--editorial-amber); }
-	.ed-aside--danger .ed-aside__rail  { background: var(--editorial-rust); }
-	.ed-aside--info .ed-aside__rail    { background: var(--editorial-ink); }
-
-	.ed-aside__icon {
-		width: 28px; height: 28px;
-		display: grid; place-items: center;
-		margin-top: 0.1rem;
+	.ed-aside__header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
 		color: var(--editorial-ink);
 	}
-	.ed-aside--tip .ed-aside__icon     { color: var(--editorial-spruce); }
-	.ed-aside--caution .ed-aside__icon { color: var(--editorial-amber-text); }
-	.ed-aside--danger .ed-aside__icon  { color: var(--editorial-rust); }
+	.ed-aside--tip .ed-aside__header     { color: var(--editorial-spruce); }
+	.ed-aside--caution .ed-aside__header { color: var(--editorial-amber-text); }
+	.ed-aside--danger .ed-aside__header  { color: var(--editorial-rust); }
+
+	.ed-aside__icon {
+		width: 16px; height: 16px;
+		display: grid; place-items: center;
+		flex-shrink: 0;
+	}
 
 	.ed-aside__body {
 		min-width: 0;
 		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.5;
+		font-size: 0.9375rem;
+		line-height: 1.6;
 	}
 
 	.ed-aside__label {
-		display: block;
 		font-family: var(--font-jetbrains-mono), monospace;
 		font-size: 0.65rem;
 		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
-		color: var(--editorial-ink-mute);
-		margin-bottom: 0.35rem;
+		color: inherit;
 	}
-	.ed-aside--tip .ed-aside__label     { color: var(--editorial-spruce); }
-	.ed-aside--caution .ed-aside__label { color: var(--editorial-amber-text); }
-	.ed-aside--danger .ed-aside__label  { color: var(--editorial-rust); }
-	.ed-aside--info .ed-aside__label    { color: var(--editorial-ink); }
 
 	.ed-aside p { margin: 0; }
 	.ed-aside p + p { margin-top: 0.5rem; }
@@ -589,85 +581,27 @@ html.dark {
 	.ed-aside a:hover { text-decoration-color: currentColor; }
 
 	/* ════════════════════════════════════════════════════════════════
-	   Article body — Instrument Serif paragraphs on /read/[slug] pages.
-	   The general `.prose` rules below still use Inter Tight for body
-	   on changelog / ADRs / etc.; `.article-prose` opts long-form
-	   articles into the serif reading body per the read-pages design. */
-	.article-prose {
-		font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
-		font-size: 1.125rem;
-		line-height: 1.55;
-		color: var(--editorial-ink-soft);
-	}
-
+	   Article body — long-form articles on /read/[slug] read through the
+	   standard `.prose` ramp (Inter Tight body, serif italic display
+	   headings). Instrument Serif is a display face; per the Display
+	   Scarcity Rule it carries headings and ledes, not running text. */
 	.article-prose > p:first-of-type {
-		font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
-		font-size: 1.375rem;
-		line-height: 1.45;
-		color: var(--editorial-ink);
+		font-size: 1.3125rem;
+		line-height: 1.5;
 	}
 
-	.article-prose p,
-	.article-prose li {
-		font-family: var(--font-instrument-serif), "Iowan Old Style", Georgia, serif;
-	}
-
-	.article-prose strong,
-	.article-prose b,
-	.article-prose em,
-	.article-prose i {
-		font-family: inherit;
-	}
-
-	/* Section headings inside articles: the chat described them as
-	   "§NN ·" mono kicker beside a serif italic h2. Render h2/h3 with
-	   the section-mark prefix using a CSS counter so MDX stays clean. */
-	.article-prose {
-		counter-reset: article-section;
-	}
-
+	/* Articles breathe a little more between sections than the compact
+	   changelog / ADR prose. */
 	.article-prose h2 {
-		counter-increment: article-section;
-		display: grid;
-		grid-template-columns: auto 1fr;
-		column-gap: 0.875rem;
-		align-items: baseline;
 		margin-top: 3rem;
 		margin-bottom: 1.125rem;
 	}
 
-	.article-prose h2::before {
-		content: "§" counter(article-section, decimal-leading-zero);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-style: normal;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		line-height: 1.4;
-		grid-column: 1;
-	}
-
-	.article-prose h2 > * {
-		grid-column: 2;
-	}
-
-	/* When prose links wrap a heading (MDX autolink), keep the
-	   inner heading aligned with the section mark. */
-	.article-prose h2 :global(a) {
+	/* When prose links wrap a heading (MDX autolink), keep headings
+	   looking like headings. */
+	.article-prose :is(h2, h3, h4) a {
 		text-decoration: none;
 		color: inherit;
-	}
-
-	@media (max-width: 720px) {
-		.article-prose h2 {
-			grid-template-columns: 1fr;
-			row-gap: 0.25rem;
-		}
-		.article-prose h2::before {
-			grid-column: 1;
-		}
 	}
 
 	/* ════════════════════════════════════════════════════════════════
@@ -924,6 +858,22 @@ html.dark {
 		margin-bottom: 1.5rem;
 	}
 
+	/* On phones the article gutter is 1.25rem a side and code is the
+	   widest content on the page — let blocks bleed to the viewport
+	   edges to claw that measure back. */
+	@media (max-width: 720px) {
+		.article-prose .expressive-code {
+			margin-inline: -1.25rem;
+		}
+
+		.article-prose .expressive-code .frame,
+		.article-prose .expressive-code .frame pre,
+		.article-prose .expressive-code .frame .header {
+			border-radius: 0;
+			border-inline-width: 0;
+		}
+	}
+
 	/* Images — paperDeep frame, 2px hairline, no shadow. */
 	.prose img {
 		border: 1px solid var(--surface-border);
@@ -1162,4 +1112,120 @@ html.dark {
 	background: transparent;
 	border: 0;
 	overflow-wrap: normal;
+}
+
+/* Tables already scroll horizontally on narrow viewports; never break
+   a `cpu.cfs_quota_us`-style identifier mid-token inside one. (Unlayered
+   like the `.prose code` rule above, which it has to out-cascade.) */
+.prose table code {
+	overflow-wrap: normal;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Prose rhythm — unlayered restatements.
+
+   The UnoCSS preflight reset is injected unlayered, so it out-cascades
+   everything in @layer base/components regardless of specificity:
+   `h1..h6 { font-size: inherit }`, `h1..h6, p, blockquote, hr, pre
+   { margin: 0 }` and `ol, ul { padding: 0 }` were silently flattening
+   the entire prose ramp (body-sized headings, zero paragraph spacing,
+   bullets hanging outside the text column). Every size/spacing rule
+   the reset clobbers is restated here, unlayered, mirroring the
+   `.prose code` rules above.
+   ════════════════════════════════════════════════════════════════ */
+.prose h1 {
+	font-size: clamp(2.25rem, 5vw, 3.5rem);
+	font-weight: 400;
+	margin: 2.5rem 0 1.25rem;
+}
+
+.prose h2 {
+	font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+	font-weight: 400;
+	margin: 2.25rem 0 1rem;
+}
+
+.prose h3 {
+	font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+	font-weight: 500;
+	margin: 2rem 0 0.875rem;
+}
+
+.prose h4 {
+	font-size: clamp(1.125rem, 2vw, 1.25rem);
+	font-weight: 500;
+	margin: 1.75rem 0 0.75rem;
+}
+
+.article-prose h2 {
+	margin-top: 3rem;
+	margin-bottom: 1.125rem;
+}
+
+.prose p {
+	margin-bottom: 1.5rem;
+}
+
+.prose ul {
+	margin-bottom: 1.5rem;
+	padding-left: 2rem;
+}
+
+.prose ol {
+	margin-bottom: 1.5rem;
+	padding-left: 2.5rem;
+}
+
+.prose :is(ul, ol) > li {
+	padding-left: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.prose li > p {
+	margin: 0.5rem 0;
+}
+
+.prose li > p:first-child {
+	margin-top: 0;
+}
+
+.prose li > p:last-child {
+	margin-bottom: 0;
+}
+
+.prose li > :is(ul, ol) {
+	margin-block: 0.625rem;
+}
+
+.prose blockquote {
+	margin: 2rem 0;
+}
+
+.prose blockquote p {
+	margin-bottom: 0;
+}
+
+.prose blockquote p:not(:last-child) {
+	margin-bottom: 0.75rem;
+}
+
+.prose img {
+	margin: 2rem 0;
+}
+
+.prose pre {
+	margin-bottom: 1.5rem;
+}
+
+.prose hr {
+	border: none;
+	margin: 3rem auto;
+}
+
+.prose > *:first-child {
+	margin-top: 0;
+}
+
+.prose > *:last-child {
+	margin-bottom: 0;
 }

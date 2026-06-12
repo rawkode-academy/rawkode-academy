@@ -23,14 +23,13 @@ const AsideWrapper: React.FC<AsideProps> = ({ variant, children }) => {
 
 	return (
 		<div className={`ed-aside ed-aside--${variant}`}>
-			<div className="ed-aside__rail" aria-hidden="true" />
-			<div className="ed-aside__icon" aria-hidden="true">
-				<IconComponent className="h-4 w-4" />
-			</div>
-			<div className="ed-aside__body">
+			<div className="ed-aside__header">
+				<span className="ed-aside__icon" aria-hidden="true">
+					<IconComponent className="h-4 w-4" />
+				</span>
 				<span className="ed-aside__label">{variant}</span>
-				{children}
 			</div>
+			<div className="ed-aside__body">{children}</div>
 		</div>
 	);
 };
