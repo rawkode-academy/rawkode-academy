@@ -114,27 +114,27 @@ export const InContext: Story = {
             <SectionHeader title="Technologies" />
             
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+              <div class="p-4 bg-[var(--surface-card-muted)] rounded">
                 <h3 class="font-semibold">Kubernetes</h3>
                 <p class="text-sm text-muted">Container orchestration</p>
               </div>
-              <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+              <div class="p-4 bg-[var(--surface-card-muted)] rounded">
                 <h3 class="font-semibold">Docker</h3>
                 <p class="text-sm text-muted">Container runtime</p>
               </div>
-              <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+              <div class="p-4 bg-[var(--surface-card-muted)] rounded">
                 <h3 class="font-semibold">Terraform</h3>
                 <p class="text-sm text-muted">Infrastructure as code</p>
               </div>
-              <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+              <div class="p-4 bg-[var(--surface-card-muted)] rounded">
                 <h3 class="font-semibold">Prometheus</h3>
                 <p class="text-sm text-muted">Monitoring & alerting</p>
               </div>
-              <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+              <div class="p-4 bg-[var(--surface-card-muted)] rounded">
                 <h3 class="font-semibold">Istio</h3>
                 <p class="text-sm text-muted">Service mesh</p>
               </div>
-              <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded">
+              <div class="p-4 bg-[var(--surface-card-muted)] rounded">
                 <h3 class="font-semibold">ArgoCD</h3>
                 <p class="text-sm text-muted">GitOps deployment</p>
               </div>

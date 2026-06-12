@@ -15,27 +15,27 @@
  retry-text="Retry loading comments"
  />
 
- <div v-else-if="comments.length === 0" class="text-center py-8 text-muted">
- <p>No comments yet. Join the discussion on Discord!</p>
+ <EmptyState
+ v-else-if="comments.length === 0"
+ title="No comments yet."
+ body="Be the first to start the discussion."
+ >
+ <template v-if="discordInviteUrl" #actions>
  <a
- v-if="discordInviteUrl"
  :href="discordInviteUrl"
  target="_blank"
  rel="noopener noreferrer"
- class="inline-flex items-center mt-2 text-primary hover:text-primary/90"
  >
- Join the discussion on Discord
- <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
- </svg>
+ Join the discussion on Discord →
  </a>
- </div>
+ </template>
+ </EmptyState>
 
  <div v-else class="space-y-4">
  <div
  v-for="comment in comments"
  :key="comment.id"
- class="bg-white dark:bg-gray-800 border border-surface rounded-sm p-4"
+ class="bg-[var(--surface-card)] border border-surface rounded-sm p-4"
  >
  <div class="flex items-start space-x-3">
  <div class="flex-shrink-0">
@@ -93,6 +93,7 @@
 import { onMounted, ref } from "vue";
 import SkeletonComment from "@/components/common/SkeletonComment.vue";
 import ErrorState from "@/components/common/ErrorState.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import { handleApiResponse, getErrorMessage } from "@/utils/error-handler";
 
 interface Comment {

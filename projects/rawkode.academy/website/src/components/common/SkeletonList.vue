@@ -8,24 +8,24 @@
 		>
 			<div
 				v-if="showIcon"
-				class="shrink-0 animate-pulse bg-gray-200 dark:bg-gray-700"
+				class="shrink-0 animate-pulse bg-[var(--surface-skeleton)]"
 				:class="[iconRounded ? 'rounded-full' : 'rounded']"
 				:style="{ width: iconSize, height: iconSize }"
 			/>
 			<div class="flex-1">
 				<div
-					class="mb-1 h-4 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+					class="mb-1 h-4 animate-pulse rounded bg-[var(--surface-skeleton)]"
 					:style="{ width: getTitleWidth(index) }"
 				/>
 				<div
 					v-if="showSubtitle"
-					class="h-3 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+					class="h-3 animate-pulse rounded bg-[var(--surface-skeleton)]"
 					:style="{ width: getSubtitleWidth(index) }"
 				/>
 			</div>
 			<div
 				v-if="showAction"
-				class="h-6 w-6 shrink-0 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+				class="h-6 w-6 shrink-0 animate-pulse rounded bg-[var(--surface-skeleton)]"
 			/>
 		</div>
 	</div>

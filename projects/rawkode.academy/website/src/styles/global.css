@@ -44,6 +44,18 @@
 	--surface-card-muted: oklch(0.18 0.02 60 / 0.04);
 	--surface-border: var(--editorial-hairline);
 	--surface-border-strong: var(--editorial-hairline-strong);
+	/* Skeleton bone — needs to read against both paper and card surfaces,
+	   so it sits between hairline and card-muted in weight. */
+	--surface-skeleton: oklch(0.18 0.02 60 / 0.10);
+
+	/* Theme-invariant terminal chrome. Terminals, WebContainers, and other
+	   "screen within the page" surfaces stay dark in both colour schemes;
+	   they must not flip with --surface-*. */
+	--terminal-bg: oklch(0.16 0.01 280);
+	--terminal-surface: oklch(0.22 0.012 280);
+	--terminal-border: oklch(1 0 0 / 0.12);
+	--terminal-text: oklch(0.92 0.005 85);
+	--terminal-text-dim: oklch(0.68 0.008 85);
 
 	/* Layout Spacing Tokens */
 	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
@@ -101,6 +113,7 @@ html.dark {
 	--surface-overlay: oklch(0.14 0.01 280 / 0.92);
 	--surface-card: var(--editorial-paper-deep);
 	--surface-card-muted: oklch(1 0 0 / 0.04);
+	--surface-skeleton: oklch(1 0 0 / 0.10);
 	--surface-border: var(--editorial-hairline);
 	--surface-border-strong: var(--editorial-hairline-strong);
 
@@ -109,13 +122,42 @@ html.dark {
 	--text-muted: var(--editorial-ink-mute);
 }
 
+/* Cross-document view transitions — native MPA transitions, no client
+   router. Full page loads still happen (scripts, analytics, and auth all
+   behave exactly as before); supporting browsers crossfade between pages
+   and morph any element whose `view-transition-name` matches across the
+   two documents (video stills → the watch-page player frame). Browsers
+   without support simply navigate. */
+@view-transition {
+	navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: var(--duration-base);
+	animation-timing-function: var(--ease-standard);
+}
+
 /* Honour reduced-motion globally: components opt back in only where a
    motion alternative is genuinely needed. Covers the `scroll-smooth`
-   class on <html>, skeleton pulses, and Vue <transition> fades without
-   per-component guards. */
+   class on <html>, skeleton pulses, view transitions, and Vue
+   <transition> fades without per-component guards. */
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto !important;
+	}
+
+	@view-transition {
+		navigation: none;
+	}
+
+	/* Belt and braces for engines that ignore @view-transition inside a
+	   conditional group: the universal selector below can't reach the
+	   ::view-transition pseudo-tree, so kill its animations explicitly. */
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
 	}
 
 	*,
@@ -243,7 +285,9 @@ html.dark {
 @layer base {
 	/* Editorial heading ramp — h1/h2 in serif italic at display sizes,
 	   h3/h4 in Inter Tight semibold. Negative letter-spacing pulls the
-	   display sizes tight without going into "decorative" territory. */
+	   display sizes tight without going into "decorative" territory.
+	   `text-wrap: balance` evens out multi-line display headings so the
+	   serif italic never strands a one-word orphan line. */
 	h1 {
 		@apply text-4xl md:text-5xl text-primary-content;
 		font-family: var(--font-instrument-serif), serif;
@@ -251,6 +295,7 @@ html.dark {
 		font-weight: 400;
 		line-height: 1.02;
 		letter-spacing: -0.035em;
+		text-wrap: balance;
 	}
 
 	h2 {
@@ -260,6 +305,7 @@ html.dark {
 		font-weight: 400;
 		line-height: 1.05;
 		letter-spacing: -0.025em;
+		text-wrap: balance;
 	}
 
 	h3 {
@@ -268,6 +314,7 @@ html.dark {
 		font-weight: 500;
 		line-height: 1.2;
 		letter-spacing: -0.015em;
+		text-wrap: balance;
 	}
 
 	h4 {

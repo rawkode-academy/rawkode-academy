@@ -1,5 +1,6 @@
 <template>
  <div class="paper-card bleed-x-mobile">
+ <h2 class="sr-only">Comments, transcript, and resources</h2>
  <!-- Tab Navigation -->
  <div class="border-b border-subtle relative z-10">
  <!-- Dropdown for Mobile -->
@@ -77,9 +78,10 @@
  role="tabpanel"
  aria-labelledby="video-tab-resources"
  >
- <div v-if="!resources || resources.length === 0" class="prose prose-lg dark:prose-invert max-w-none">
- <p class="text-muted">No resources for this episode yet.</p>
- </div>
+ <EmptyState
+ v-if="!resources || resources.length === 0"
+ title="No resources for this episode yet."
+ />
  <div v-else class="space-y-6">
  <div v-for="group in groupedResources" :key="group.category">
  <h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
@@ -92,7 +94,7 @@
  :href="resource.url || resource.filePath || '#'"
  :target="resource.type === 'url' ? '_blank' : undefined"
  :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
- class="flex items-start gap-3 p-3 rounded-sm bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-smooth group"
+ class="flex items-start gap-3 p-3 rounded-sm bg-[var(--surface-card-muted)] hover:bg-[var(--surface-card)] transition-smooth group"
  >
  <svg
  class="w-5 h-5 mt-0.5 text-muted group-hover:text-primary flex-shrink-0"
@@ -139,6 +141,7 @@
 </template>
 
 <script>
+import EmptyState from "@/components/ui/EmptyState.vue";
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
 

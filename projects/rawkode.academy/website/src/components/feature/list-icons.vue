@@ -114,7 +114,7 @@ const offerings: Offering[] = [
 ];
 </script>
 <template>
-	<section class="bg-white dark:bg-gray-900">
+	<section class="bg-[var(--surface-base)]">
 		<div class="py-8 px-4 mx-auto max-w-(--breakpoint-xl) sm:py-16 lg:px-6">
 			<div class="max-w-(--breakpoint-md) mb-8 lg:mb-16">
 				<h2 class="mb-4 text-4xl tracking-tight font-extrabold text-primary-content">Partner With Industry
@@ -127,7 +127,7 @@ const offerings: Offering[] = [
 			</div>
 			<div class="space-y-12 md:grid md:grid-cols-1 lg:grid-cols-3 md:gap-8 xl:gap-12 md:space-y-0">
 				<div v-for="offer in offerings"
-					class="p-6 bg-gray-50 dark:bg-gray-800 rounded-sm border border-surface shadow-sm hover: transition-card">
+					class="p-6 bg-[var(--surface-card-muted)] rounded-sm border border-surface shadow-sm transition-card">
 					<div class="flex items-center mb-4">
 						<div
 							:class="`flex justify-center items-center mr-4 w-12 h-12 bg-${offer.color} rounded-full dark:bg-${offer.color} lg:h-14 lg:w-14`">

@@ -373,6 +373,9 @@ function isCurrentPath(itemPath: string): boolean {
 		width: var(--ed-sidebar-expanded-width, 16rem);
 		transition: width var(--duration-slow) var(--ease-standard);
 		overflow: hidden;
+		/* Static chrome during cross-document view transitions — same
+		   reasoning as .ed-topbar in app.astro. */
+		view-transition-name: ed-sidebar;
 	}
 
 	.ed-sidebar--collapsed {

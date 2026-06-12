@@ -3,7 +3,7 @@
 		<span class="sr-only">{{ ariaLabel }}</span>
 		<div
 			v-if="showImage"
-			class="mb-4 animate-pulse rounded bg-gray-200 dark:bg-gray-700"
+			class="mb-4 animate-pulse rounded bg-[var(--surface-skeleton)]"
 			:style="{ height: imageHeight }"
 		/>
 		<SkeletonText :lines="1" line-height="1.25rem" last-line-width="70%" />
@@ -16,7 +16,7 @@
 		/>
 		<div v-if="showFooter" class="mt-4 flex items-center gap-3">
 			<div
-				class="h-8 w-8 animate-pulse rounded-full bg-gray-200 dark:bg-gray-700"
+				class="h-8 w-8 animate-pulse rounded-full bg-[var(--surface-skeleton)]"
 			/>
 			<SkeletonText
 				class-name="flex-1"

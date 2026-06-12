@@ -32,7 +32,7 @@ export function SkeletonList({
 				>
 					{showIcon && (
 						<div
-							className={`animate-pulse bg-gray-200 dark:bg-gray-700 shrink-0 ${
+							className={`animate-pulse bg-[var(--surface-skeleton)] shrink-0 ${
 								iconRounded ? "rounded-full" : "rounded"
 							}`}
 							style={{
@@ -44,12 +44,12 @@ export function SkeletonList({
 
 					<div className="flex-1">
 						<div
-							className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-4 mb-1"
+							className="animate-pulse bg-[var(--surface-skeleton)] rounded h-4 mb-1"
 							style={{ width: getTitleWidth(index) }}
 						/>
 						{showSubtitle && (
 							<div
-								className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-3"
+								className="animate-pulse bg-[var(--surface-skeleton)] rounded h-3"
 								style={{ width: "50%" }}
 							/>
 						)}
@@ -57,7 +57,7 @@ export function SkeletonList({
 
 					{showAction && (
 						<div
-							className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded shrink-0"
+							className="animate-pulse bg-[var(--surface-skeleton)] rounded shrink-0"
 							style={{
 								width: "1.5rem",
 								height: "1.5rem",

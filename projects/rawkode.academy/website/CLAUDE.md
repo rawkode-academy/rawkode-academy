@@ -39,6 +39,11 @@ There is **no `tailwind.config.ts`**. There is **no `@tailwindcss/vite` plugin**
 - **Rust** `oklch(0.55 0.13 40)` — secondary accent (difficulty tags, kickers)
 - **Violet** `oklch(0.50 0.13 290)` — third accent (reserved for variant work)
 
+Supporting surface tokens:
+
+- `--surface-skeleton` — bone colour for the `Skeleton*` loading family; flips with the scheme.
+- `--terminal-bg` / `--terminal-surface` / `--terminal-border` / `--terminal-text` / `--terminal-text-dim` — theme-invariant chrome for terminals, WebContainers, and other "screen within the page" surfaces. These stay dark in light mode; never swap them for `--surface-*`.
+
 Dark mode replaces paper with `oklch(0.14 0.01 280)` (ink-dark), surface-card with `oklch(0.26 0.014 280)` (paper-dark), and the ink/hairline triplet flips to whites at varying opacity. The token *names* survive: `--surface-card`, `--editorial-ink`, etc. consume the active mode automatically.
 
 #### Token surfaces
@@ -146,6 +151,8 @@ Negative letter-spacing tightens display sizes (`-0.035em` on h1, `-0.025em` on 
 | `StatRow.vue` | N-column band with serif italic numerals and `MLabel` captions. Hairline column dividers. |
 | `SectionRail.vue` | Anchor rail (e.g. `§01..§06`). Hairline-bordered grid; each cell hovers to `--surface-card-muted`. |
 | `HairlinePanel.vue` | Paper / paper-deep / muted / ink surface with 1px hairline. Optional `heavy` variant uses 2px ink border. |
+| `EmptyState.vue` | "Loaded, but nothing here" counterpart to the `Skeleton*` family. Serif italic `title`, optional `body`, mono uppercase links via the `actions` slot, `align`: `center`/`start`. Use it for zero-result search, filtered-out lists, empty comments. |
+| `PagerStrip.astro` | Editorial pager: prev/next links around a mono `Page N [of M]` label. Server-rendered `?page=N` links; used by `/watch` and `/read`. |
 
 Every editorial primitive has a `*.stories.tsx` under the same folder. Run `bun run storybook` to explore.
 
@@ -203,8 +210,17 @@ The following class names from the Rawkode Blue era still work — they're alias
 - Don't add box-shadows for elevation. Use hairline borders.
 - Don't `rounded-2xl` and above for cards. Editorial is sharp.
 - Don't hardcode hex values. Reach for `--editorial-*` or the semantic `text-*` / `bg-*` classes.
+- Don't use raw `gray-*` colour utilities (`bg-gray-800`, `text-gray-500`, `dark:bg-gray-900`, …). They're blocked in `uno.config.ts` (no CSS is generated) and `src/tests/design-tokens.test.ts` fails CI with the offending file:line. Use `text-primary-content` / `text-secondary-content` / `text-muted`, `bg-[var(--surface-*)]`, `border-[var(--surface-border)]`, or the `--terminal-*` tokens.
 - Don't write `rgb(95 94 215 / 0.x)` (the old Rawkode Blue purple). The triplet is now spruce; you almost always want `var(--editorial-spruce)` instead.
 - Don't reach for `react-type-animation` or other type-on effects. The editorial system is static.
+
+#### View transitions
+
+The site uses **native cross-document view transitions** (`@view-transition { navigation: auto }` in `global.css`), not Astro's `ClientRouter`. Full page loads still happen, so per-page `<script>` blocks need no `astro:page-load` wiring. Conventions:
+
+- Persistent chrome (topbar, sidebar) carries a fixed `view-transition-name` so it reads as static during navigation.
+- Matching elements across two pages morph by sharing a name: use `videoTransitionName(slug)` from `src/utils/view-transition-name.ts` (video stills on `/watch` morph into the watch-page player frame). Names must be unique per page — never name elements that can render the same slug twice (e.g. the continue-watching rail).
+- `prefers-reduced-motion: reduce` disables navigation transitions globally; no per-component guards needed.
 
 ## Light / Dark / System mode
 

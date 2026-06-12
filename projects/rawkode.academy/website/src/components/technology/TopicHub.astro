@@ -109,7 +109,7 @@ function formatLearningPathDuration(minutes: number): string {
  {learningPaths.map((path) => (
  <a
  href={`/learning-paths/${path.id}`}
- class="group block rounded-sm border border-black/10 dark:border-white/10 bg-white dark:bg-gray-900 p-6 shadow-sm hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
+ class="group block rounded-sm border border-black/10 dark:border-white/10 bg-[var(--surface-card)] p-6 shadow-sm hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
  >
  <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted mb-2">
  <span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
@@ -188,7 +188,7 @@ function formatLearningPathDuration(minutes: number): string {
  {videos.map((video) => (
  <a
  href={`/watch/${video.slug}`}
- class="group relative block overflow-hidden rounded-sm bg-gray-100 dark:bg-gray-800 aspect-video"
+ class="group relative block overflow-hidden rounded-sm bg-[var(--surface-card)] aspect-video"
  >
  <img
  src={video.thumbnailUrl}

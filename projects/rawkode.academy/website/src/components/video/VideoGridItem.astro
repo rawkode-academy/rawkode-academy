@@ -12,6 +12,9 @@ interface Props {
 	author?: string | undefined;
 	date?: string | undefined;
 	viewerCount?: number | undefined;
+	/** Cross-document view-transition name. The same name on the watch
+	 * page's player frame morphs this still into the player on click. */
+	vtName?: string | undefined;
 }
 
 const {
@@ -24,17 +27,23 @@ const {
 	author,
 	date,
 	viewerCount,
+	vtName,
 } = Astro.props as Props;
 ---
 
 <a class="video-grid-item" href={href}>
-	<VideoStill
-		episodeNum={episodeNum}
-		title={title}
-		series={series}
-		duration={duration}
-		thumbnailUrl={thumbnailUrl}
-	/>
+	<div
+		class="video-grid-item__still"
+		style={vtName ? `view-transition-name: ${vtName}` : undefined}
+	>
+		<VideoStill
+			episodeNum={episodeNum}
+			title={title}
+			series={series}
+			duration={duration}
+			thumbnailUrl={thumbnailUrl}
+		/>
+	</div>
 
 	<div class="video-grid-item__body">
 		<MLabel tone="spruce">

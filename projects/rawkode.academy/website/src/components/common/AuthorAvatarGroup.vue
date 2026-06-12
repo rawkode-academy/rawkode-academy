@@ -8,14 +8,14 @@
  :style="`z-index: ${10 - index}`"
  >
  <img
- class="w-10 h-10 rounded-full object-cover border-2 border-secondary p-0.5 bg-white dark:bg-gray-800"
+ class="w-10 h-10 rounded-full object-cover border-2 border-secondary p-0.5 bg-[var(--surface-card)]"
  :src="author.data.avatarUrl ?? '/apple-touch-icon.png'"
  :alt="`Profile picture of ${author.data.name}`"
  loading="lazy"
  />
  <span
  v-if="showActiveIndicator && index === 0"
- class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-white dark:border-gray-800"
+ class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-[var(--surface-card)]"
  ></span>
  </div>
  <div
@@ -23,7 +23,7 @@
  class="relative"
  style="z-index: 0;"
  >
- <div class="w-10 h-10 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-white dark:bg-gray-800 flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
+ <div class="w-10 h-10 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-[var(--surface-card)] flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
  +{{ remainingCount }}
  </div>
  </div>

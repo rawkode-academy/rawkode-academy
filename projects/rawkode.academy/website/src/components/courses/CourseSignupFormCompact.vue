@@ -50,21 +50,21 @@
  id="email"
  placeholder="Enter your email"
  required
- class="w-full rounded-sm border border-white/60 bg-white/80 px-4 py-3 text-primary-content placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-gray-950/35"
+ class="w-full rounded-sm border border-white/60 bg-[var(--surface-card)] px-4 py-3 text-primary-content placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/10"
  :disabled="loading"
  />
  </div>
 
  <div
  v-if="signupConfig.sponsor && signupConfig.allowSponsorContact"
- class="rounded-sm border border-white/40 bg-white/55 px-4 py-3 dark:border-white/8 dark:bg-gray-950/25"
+ class="rounded-sm border border-white/40 bg-[var(--surface-card-muted)] px-4 py-3 dark:border-white/8"
  >
  <div class="flex items-start gap-3">
  <input
  v-model="sponsorConsent"
  type="checkbox"
  id="sponsor-consent"
- class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+ class="mt-1 h-4 w-4 rounded border-[var(--surface-border-strong)] text-primary focus:ring-primary"
  :disabled="loading"
  />
  <label for="sponsor-consent" class="text-sm leading-6 text-secondary-content">

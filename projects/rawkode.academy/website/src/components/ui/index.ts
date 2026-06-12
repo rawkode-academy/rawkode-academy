@@ -19,3 +19,4 @@ export { default as MastheadBar } from "./MastheadBar.vue";
 export { default as EditorialButton } from "./EditorialButton.vue";
 export { default as StatRow } from "./StatRow.vue";
 export { default as SectionRail } from "./SectionRail.vue";
+export { default as EmptyState } from "./EmptyState.vue";

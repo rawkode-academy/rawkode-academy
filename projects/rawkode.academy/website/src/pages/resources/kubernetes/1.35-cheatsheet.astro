@@ -71,7 +71,7 @@ const pageDescription =
 				</div>
 
 				<!-- Release Info Banner -->
-				<div class="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-sm sm:rounded-sm p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200 dark:border-blue-800/50">
+				<div class="bg-[var(--surface-card-muted)] rounded-sm sm:rounded-sm p-4 sm:p-6 mb-6 sm:mb-8 border border-blue-200 dark:border-blue-800/50">
 					<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
 						<div>
 							<h2 class="text-base sm:text-lg font-semibold text-primary-content">Release Date: December 17, 2025</h2>
@@ -104,12 +104,12 @@ const pageDescription =
 								<!-- cgroup v1 -->
 								<div>
 									<h4 class="font-semibold text-primary-content mb-2 text-sm sm:text-base">cgroup v1 Support Disabled by Default</h4>
-									<p class="text-muted text-xs sm:text-sm mb-3">The Kubelet config <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">failCgroupV1</code> now defaults to <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">true</code>. If a node boots with legacy cgroup v1 hierarchy, the Kubelet <strong>crashes immediately on startup</strong>.</p>
-									<div class="bg-gray-900 rounded-sm p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto space-y-1 sm:space-y-2">
+									<p class="text-muted text-xs sm:text-sm mb-3">The Kubelet config <code class="bg-[var(--surface-card-muted)] px-1 rounded text-xs">failCgroupV1</code> now defaults to <code class="bg-[var(--surface-card-muted)] px-1 rounded text-xs">true</code>. If a node boots with legacy cgroup v1 hierarchy, the Kubelet <strong>crashes immediately on startup</strong>.</p>
+									<div class="bg-[var(--terminal-bg)] rounded-sm p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto space-y-1 sm:space-y-2">
 										<div>
-											<p class="text-gray-400"># Check if your nodes use cgroups v2</p>
+											<p class="text-[var(--terminal-text-dim)]"># Check if your nodes use cgroups v2</p>
 											<p class="text-green-400 break-all">stat -fc %T /sys/fs/cgroup/</p>
-											<p class="text-gray-400"># Returns: cgroup2fs (v2) or tmpfs (v1 - WILL FAIL!)</p>
+											<p class="text-[var(--terminal-text-dim)]"># Returns: cgroup2fs (v2) or tmpfs (v1 - WILL FAIL!)</p>
 										</div>
 									</div>
 								</div>
@@ -118,8 +118,8 @@ const pageDescription =
 								<div>
 									<h4 class="font-semibold text-primary-content mb-2 text-sm sm:text-base">containerd 1.x End of Support</h4>
 									<p class="text-muted text-xs sm:text-sm mb-3">Kubernetes 1.35 is the <strong>last version</strong> to support containerd 1.7. You must upgrade to containerd 2.0+ before upgrading to Kubernetes 1.36.</p>
-									<div class="bg-gray-900 rounded-sm p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto">
-										<p class="text-gray-400"># Monitor affected nodes with this metric</p>
+									<div class="bg-[var(--terminal-bg)] rounded-sm p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto">
+										<p class="text-[var(--terminal-text-dim)]"># Monitor affected nodes with this metric</p>
 										<p class="text-green-400">kubelet_cri_losing_support</p>
 									</div>
 								</div>
@@ -127,7 +127,7 @@ const pageDescription =
 								<!-- Image Pull -->
 								<div>
 									<h4 class="font-semibold text-primary-content mb-2 text-sm sm:text-base">Image Pull Credential Verification (Enabled by Default)</h4>
-									<p class="text-muted text-xs sm:text-sm mb-3">The <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">KubeletEnsureSecretPulledImages</code> feature is now enabled. Pods must have valid credentials for cached images.</p>
+									<p class="text-muted text-xs sm:text-sm mb-3">The <code class="bg-[var(--surface-card-muted)] px-1 rounded text-xs">KubeletEnsureSecretPulledImages</code> feature is now enabled. Pods must have valid credentials for cached images.</p>
 								</div>
 							</div>
 						</div>
@@ -144,7 +144,7 @@ const pageDescription =
 										<div class="min-w-0">
 											<strong class="text-sm sm:text-base">In-place Pod Resource Updates</strong>
 											<p class="text-xs sm:text-sm text-muted mt-1">Adjust CPU and memory without restarting pods! No more recreating stateful workloads for vertical scaling.</p>
-											<div class="bg-gray-900 rounded-sm p-2 sm:p-3 mt-2 font-mono text-[10px] sm:text-xs overflow-x-auto">
+											<div class="bg-[var(--terminal-bg)] rounded-sm p-2 sm:p-3 mt-2 font-mono text-[10px] sm:text-xs overflow-x-auto">
 												<p class="text-green-400 whitespace-nowrap">kubectl patch pod my-pod --subresource='resize' -p '&#123;"spec":&#123;"containers":[&#123;"name":"app","resources":&#123;"requests":&#123;"memory":"512Mi"&#125;&#125;&#125;]&#125;&#125;'</p>
 											</div>
 										</div>
@@ -196,7 +196,7 @@ const pageDescription =
 										<span class="text-blue-500 mt-0.5 sm:mt-1 font-bold flex-shrink-0">β</span>
 										<div class="min-w-0">
 											<strong class="text-sm sm:text-base">User Namespaces Support</strong>
-											<p class="text-xs sm:text-sm text-muted mt-1">Run containers as UID 0 inside, but unprivileged on the host. Set <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">hostUsers: false</code> in your pod spec.</p>
+											<p class="text-xs sm:text-sm text-muted mt-1">Run containers as UID 0 inside, but unprivileged on the host. Set <code class="bg-[var(--surface-card-muted)] px-1 rounded text-xs">hostUsers: false</code> in your pod spec.</p>
 										</div>
 									</li>
 									<li class="flex items-start gap-2 sm:gap-3">
@@ -218,23 +218,23 @@ const pageDescription =
 							<div class="bg-purple-50 dark:bg-purple-900/20 rounded-sm sm:rounded-sm p-4 sm:p-6 border border-purple-200 dark:border-purple-800/50">
 								<ul class="space-y-3">
 									<li class="flex items-start gap-2 sm:gap-3">
-										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
-										<span class="text-primary-content text-xs sm:text-sm"><strong>Verify cgroups v2</strong> - Run <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs break-all">stat -fc %T /sys/fs/cgroup/</code> on all nodes</span>
+										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-[var(--surface-border)] text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
+										<span class="text-primary-content text-xs sm:text-sm"><strong>Verify cgroups v2</strong> - Run <code class="bg-[var(--surface-card-muted)] px-1 rounded text-xs break-all">stat -fc %T /sys/fs/cgroup/</code> on all nodes</span>
 									</li>
 									<li class="flex items-start gap-2 sm:gap-3">
-										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
+										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-[var(--surface-border)] text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
 										<span class="text-primary-content text-xs sm:text-sm"><strong>Check containerd version</strong> - Must be 1.7+ (2.0+ recommended)</span>
 									</li>
 									<li class="flex items-start gap-2 sm:gap-3">
-										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
+										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-[var(--surface-border)] text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
 										<span class="text-primary-content text-xs sm:text-sm"><strong>Verify image pull secrets</strong> - Pods need valid credentials for cached images</span>
 									</li>
 									<li class="flex items-start gap-2 sm:gap-3">
-										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
+										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-[var(--surface-border)] text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
 										<span class="text-primary-content text-xs sm:text-sm"><strong>Test in staging</strong> - Upgrade staging cluster first</span>
 									</li>
 									<li class="flex items-start gap-2 sm:gap-3">
-										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
+										<input type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 rounded border-[var(--surface-border)] text-purple-600 focus:ring-purple-500 mt-0.5 flex-shrink-0" />
 										<span class="text-primary-content text-xs sm:text-sm"><strong>Backup etcd</strong> - Always before any upgrade</span>
 									</li>
 								</ul>
@@ -244,32 +244,32 @@ const pageDescription =
 						<!-- Feature Gates -->
 						<div>
 							<h3 class="text-lg sm:text-xl font-semibold text-primary-content mb-3 sm:mb-4 flex items-center gap-2">
-								<span class="text-gray-500">⚙️</span> Key Feature Gates
+								<span class="text-muted">⚙️</span> Key Feature Gates
 							</h3>
 							<!-- Mobile: Card view -->
 							<div class="block sm:hidden space-y-3">
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
+								<div class="bg-[var(--surface-card-muted)] rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">GA</span>
 										<span class="text-xs text-muted">true (locked)</span>
 									</div>
 									<p class="font-mono text-xs text-primary-content break-all">InPlacePodVerticalScaling</p>
 								</div>
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
+								<div class="bg-[var(--surface-card-muted)] rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 font-medium">GA</span>
 										<span class="text-xs text-muted">true (locked)</span>
 									</div>
 									<p class="font-mono text-xs text-primary-content break-all">StructuredAuthenticationConfiguration</p>
 								</div>
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
+								<div class="bg-[var(--surface-card-muted)] rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">Beta</span>
 										<span class="text-xs text-muted">true</span>
 									</div>
 									<p class="font-mono text-xs text-primary-content break-all">UserNamespacesSupport</p>
 								</div>
-								<div class="bg-gray-50 dark:bg-gray-800/50 rounded-sm p-3 border border-surface">
+								<div class="bg-[var(--surface-card-muted)] rounded-sm p-3 border border-surface">
 									<div class="flex items-center justify-between mb-1">
 										<span class="px-2 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">Beta</span>
 										<span class="text-xs text-muted">true</span>
@@ -333,7 +333,7 @@ const pageDescription =
 							</a>
 							<a
 								href="/watch"
-								class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-sm sm:rounded-sm border-2 border-surface text-primary-content text-sm sm:text-base font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+								class="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 rounded-sm sm:rounded-sm border-2 border-surface text-primary-content text-sm sm:text-base font-semibold hover:bg-[var(--surface-card-muted)] transition-colors"
 							>
 								Watch Kubernetes Videos
 							</a>

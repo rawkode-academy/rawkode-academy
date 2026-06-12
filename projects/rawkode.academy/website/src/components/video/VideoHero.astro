@@ -16,6 +16,9 @@ interface Props {
 	viewerCount?: number | undefined;
 	primaryCtaLabel?: string | undefined;
 	secondaryCtaLabel?: string | undefined;
+	/** Cross-document view-transition name. The same name on the watch
+	 * page's player frame morphs this still into the player on click. */
+	vtName?: string | undefined;
 }
 
 const {
@@ -32,6 +35,7 @@ const {
 	viewerCount,
 	primaryCtaLabel,
 	secondaryCtaLabel,
+	vtName,
 } = Astro.props as Props;
 
 const primaryLabel =
@@ -49,7 +53,11 @@ const metaParts = [
 ---
 
 <section class="video-hero">
-	<a class="video-hero__still" href={href}>
+	<a
+		class="video-hero__still"
+		href={href}
+		style={vtName ? `view-transition-name: ${vtName}` : undefined}
+	>
 		<VideoStill
 			episodeNum={episodeNum}
 			title={title}

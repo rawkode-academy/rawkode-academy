@@ -2,7 +2,7 @@
 	<div :class="className" role="status" :aria-label="ariaLabel">
 		<span class="sr-only">{{ ariaLabel }}</span>
 		<div
-			class="animate-pulse bg-gray-200 dark:bg-gray-700"
+			class="animate-pulse bg-[var(--surface-skeleton)]"
 			:class="[rounded ? 'rounded-full' : 'rounded']"
 			:style="{ width, height }"
 		/>

@@ -12,7 +12,7 @@
  </p>
  </div>
 
- <div class="rounded-sm border border-white/40 bg-white/60 p-6 dark:border-white/8 dark:bg-gray-950/30">
+ <div class="rounded-sm border border-white/40 bg-[var(--surface-card)] p-6 dark:border-white/8">
  <!-- Checking Subscription -->
  <div v-if="checkingSubscription" class="text-center py-8">
  <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
@@ -72,17 +72,17 @@
  name="email"
  required
  placeholder="your@email.com"
- class="w-full rounded-sm border border-white/60 bg-white/80 px-4 py-3 text-primary-content placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/10 dark:bg-gray-950/35"
+ class="w-full rounded-sm border border-white/60 bg-[var(--surface-card)] px-4 py-3 text-primary-content placeholder:text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-white/10"
  />
  </div>
 
- <div v-if="disclaimer" class="rounded-sm bg-white/65 p-3 text-sm text-muted dark:bg-gray-950/30">
+ <div v-if="disclaimer" class="rounded-sm bg-[var(--surface-card-muted)] p-3 text-sm text-muted">
  <p>{{ disclaimer }}</p>
  </div>
 
  <div
  v-if="allowSponsorContact && sponsor"
- class="rounded-sm border border-white/40 bg-white/55 px-4 py-3 dark:border-white/8 dark:bg-gray-950/25"
+ class="rounded-sm border border-white/40 bg-[var(--surface-card-muted)] px-4 py-3 dark:border-white/8"
  >
  <div class="flex items-start">
  <input
@@ -91,7 +91,7 @@
  id="sponsor-contact"
  name="allowSponsorContact"
  value="true"
- class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+ class="mt-1 h-4 w-4 rounded border-[var(--surface-border-strong)] text-primary focus:ring-primary"
  />
  <label for="sponsor-contact" class="ml-2 text-sm text-secondary-content">
  I agree to allow {{ sponsor }} to contact me with relevant offers and product updates.
