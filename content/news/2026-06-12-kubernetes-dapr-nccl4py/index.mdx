@@ -1,0 +1,44 @@
+---
+title: "Kubernetes patches four release lines, Dapr fixes Sentry identity issuance, and NCCL4py adds expert-parallel APIs"
+description: "Kubernetes shipped a June 12 patch train, Dapr fixed a Sentry certificate-issuer crash in 1.16, and NCCL4py added Python access to NCCL EP dispatch and combine APIs."
+publishedAt: 2026-06-12
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - dapr
+---
+
+### Kubernetes ships June 12 patch releases for 1.36, 1.35, 1.34, and 1.33
+
+Kubernetes published patch releases for four release lines on June 12: v1.36.2, v1.35.6, v1.34.9, and v1.33.13.
+
+The GitHub release entries point operators to the branch-specific changelogs and kubernetes-announce thread rather than embedding full notes in each tag. Treat this as a routine but time-sensitive maintenance train: clusters pinned to any of these minor lines now have fresh patch builds and changelogs to evaluate before the next managed-service or self-managed upgrade window.
+
+**Source:** [Kubernetes releases](https://github.com/kubernetes/kubernetes/releases) - June 12, 2026
+
+---
+
+### Dapr 1.16.15 fixes Sentry startup failures with Ed25519 and RSA issuer keys
+
+Dapr Runtime v1.16.15 landed on June 11 with a focused Sentry fix for control planes that encounter Ed25519 or RSA issuer keys in the `dapr-trust-bundle` secret.
+
+The release notes describe a failure where `dapr-sentry` crashes before serving traffic, preventing sidecars from obtaining or rotating identity certificates. The fix updates `dapr/kit` private-key encoding so Ed25519 value-form keys and RSA private keys round-trip through PKCS#8, with tests covering ECDSA P-256, RSA-2048, and Ed25519.
+
+This matters if you downgraded from Dapr 1.18 to 1.16 against the same cluster, or rotated issuer material into a key type older Sentry code could not encode.
+
+**Source:** [Dapr Runtime v1.16.15 release](https://github.com/dapr/dapr/releases/tag/v1.16.15) - June 11, 2026
+
+---
+
+### NCCL4py 0.3.1 exposes NCCL EP from Python
+
+NVIDIA released NCCL4py v0.3.1 on June 11 with a new `nccl.ep` package for Python access to `libnccl_ep.so`.
+
+The API exposes expert-parallel dispatch and combine workflows through `Group`, `Handle`, `Tensor`, typed configuration objects, and PyTorch process-group interop for creating NCCL communicators. The release also adds `nccl.core.device.cute`, so CuTeDSL kernels can call NCCL device APIs, and adds `nccl.get_version()` / `nccl.show_versions()` diagnostics for loaded NCCL and NCCL EP libraries.
+
+The release notes call both `nccl.ep` and `nccl.core.device.cute` initial API support, so downstream integrations should expect interface movement as NCCL EP and CuTeDSL integration matures.
+
+**Source:** [NVIDIA NCCL4py v0.3.1 release](https://github.com/NVIDIA/nccl/releases/tag/nccl4py-v0.3.1) - June 11, 2026
+
+---
