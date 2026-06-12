@@ -60,6 +60,7 @@ const categoryDescriptions: Record<string, string> = {
 	Wasm: "WebAssembly technologies",
 	Serverless: "Function-as-a-service and event-driven",
 	CNAI: "Cloud Native AI and ML",
+	Uncategorized: "Not yet assigned a landscape category",
 };
 
 const stageLabels = Object.fromEntries(
@@ -89,11 +90,11 @@ const trajectoryEmoji: Record<Trajectory, string> = {
 // Get all technologies with matrix data
 const allTechnologies = await getCollection("technologies");
 const matrixTechnologies = allTechnologies
-	.filter((tech) => tech.data.matrix?.status && tech.data.category)
+	.filter((tech) => tech.data.matrix?.status)
 	.map((tech) => ({
 		id: tech.id,
 		name: tech.data.name,
-		category: tech.data.category as string,
+		category: (tech.data.category as string | undefined) ?? "Uncategorized",
 		status: tech.data.matrix!.status as PipelineStage,
 		icon: resolveTechnologyIconUrl(tech.id, tech.data.logos),
 		confidence: tech.data.matrix!.confidence as Confidence | undefined,
@@ -285,7 +286,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		<div class="matrix-content">
 
 			<!-- Pipeline Header -->
-			<div class="pipeline-header" role="img" aria-label="Pipeline stages from Skip to Advocate">
+			<div class="pipeline-header" role="group" aria-label="Pipeline stages from Watch to Advocate">
 				<div class="header-flow-line"></div>
 				{pipelineStages.map((stage, idx) => (
 					<div class={`header-stage header-${stage}`} style={`--stage-index: ${idx}`}>
@@ -336,10 +337,11 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 														data-icon={tech.icon || ""}
 													>
 														{tech.icon ? (
-															<img src={tech.icon} alt={tech.name} class="icon-img" loading="lazy" />
+															<img src={tech.icon} alt="" class="icon-img" loading="lazy" />
 														) : (
-															<span class="icon-initial">{tech.name[0]}</span>
+															<span class="icon-initial" aria-hidden="true">{tech.name[0]}</span>
 														)}
+														<span class="tech-name">{tech.name}</span>
 														{tech.trajectory && (
 															<span class={`icon-trajectory trajectory-${tech.trajectory}`}>
 																{trajectoryEmoji[tech.trajectory]}
@@ -403,10 +405,11 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 											data-icon={tech.icon || ""}
 										>
 											{tech.icon ? (
-												<img src={tech.icon} alt={tech.name} class="other-icon" loading="lazy" />
+												<img src={tech.icon} alt="" class="other-icon" loading="lazy" />
 											) : (
-												<span class="other-initial">{tech.name[0]}</span>
+												<span class="other-initial" aria-hidden="true">{tech.name[0]}</span>
 											)}
+											<span class="other-name">{tech.name}</span>
 										</button>
 									))}
 								</div>
@@ -440,10 +443,11 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 											data-icon={tech.icon || ""}
 										>
 											{tech.icon ? (
-												<img src={tech.icon} alt={tech.name} class="other-icon" loading="lazy" />
+												<img src={tech.icon} alt="" class="other-icon" loading="lazy" />
 											) : (
-												<span class="other-initial">{tech.name[0]}</span>
+												<span class="other-initial" aria-hidden="true">{tech.name[0]}</span>
 											)}
+											<span class="other-name">{tech.name}</span>
 										</button>
 									))}
 								</div>
@@ -457,8 +461,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	</Container>
 
 	<!-- Card Popup Modal -->
-	<div id="tech-card-modal" class="modal-backdrop" aria-hidden="true">
-		<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-tech-name">
+	<dialog id="tech-card-modal" class="tech-modal" aria-labelledby="modal-tech-name">
+		<div class="modal-content">
 			<button type="button" class="modal-close" aria-label="Close">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -493,7 +497,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 							<span id="modal-videos" class="stat-value">0</span>
 							<span class="stat-label">Videos</span>
 						</div>
-						<div class="modal-stat">
+						<div class="modal-stat" id="modal-articles-stat">
 							<span id="modal-articles" class="stat-value">0</span>
 							<span class="stat-label">Articles</span>
 						</div>
@@ -524,7 +528,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 				</div>
 			</div>
 		</div>
-	</div>
+	</dialog>
 </Page>
 
 <style>
@@ -534,7 +538,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.matrix-hero,
 	.matrix-legend,
 	.matrix-content,
-	.modal-backdrop {
+	.tech-modal {
 		--stage-skip: var(--editorial-rust);
 		--stage-watch: var(--editorial-amber-text);
 		--stage-explore: color-mix(
@@ -553,7 +557,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	:global(html.dark) .matrix-hero,
 	:global(html.dark) .matrix-legend,
 	:global(html.dark) .matrix-content,
-	:global(html.dark) .modal-backdrop {
+	:global(html.dark) .tech-modal {
 		--stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
 	}
 
@@ -890,18 +894,17 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	/* ===== PIPELINE HEADER ===== */
+	/* Sticky so the stage columns keep their identity while scrolling 14 lanes.
+	   Stages share the same 1fr tracks as the lane cells (no min-width), so the
+	   header and lanes can never drift out of alignment. */
 	.pipeline-header {
 		display: flex;
-		position: relative;
-		z-index: 1;
+		position: sticky;
+		top: 0;
+		z-index: 20;
 		gap: 0.25rem;
-		padding: 0 0 0.5rem;
-		overflow-x: auto;
-		scrollbar-width: none;
-	}
-
-	.pipeline-header::-webkit-scrollbar {
-		display: none;
+		padding: 0.5rem 0;
+		background: var(--surface-base);
 	}
 
 	.header-flow-line {
@@ -910,7 +913,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 	.header-stage {
 		flex: 1;
-		min-width: 130px;
+		min-width: 0;
 	}
 
 	.stage-arrow {
@@ -979,7 +982,9 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.lane-wrapper {
 		position: relative;
 		animation: fadeInUp 0.4s ease-out backwards;
-		animation-delay: calc(var(--lane-index) * 0.1s);
+		/* Capped: with 14 lanes an uncapped stagger leaves the last lane
+		   invisible for over a second. */
+		animation-delay: min(calc(var(--lane-index) * 0.05s), 0.3s);
 	}
 
 	.lane-wrapper:has(.tech-icon:hover) {
@@ -1170,10 +1175,26 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	.tech-icon:hover::after,
-	.tech-icon:hover::before {
+	.tech-icon:hover::before,
+	.tech-icon:focus-visible::after,
+	.tech-icon:focus-visible::before {
 		opacity: 1;
 		visibility: visible;
 		transform: translateX(-50%) translateY(0);
+	}
+
+	/* Visually hidden on desktop (tooltips carry the name there), but kept in
+	   the accessibility tree so buttons stay labelled with alt="" icons. */
+	.tech-name {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 
 
@@ -1222,8 +1243,16 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 	/* ===== RESPONSIVE ===== */
 	@media (max-width: 1024px) {
-		.pipeline-header {
-			padding-bottom: 1rem;
+		.stage-sublabel {
+			display: none;
+		}
+
+		.stage-content {
+			padding: 0.6rem 0.5rem;
+		}
+
+		.stage-label {
+			font-size: 0.7rem;
 		}
 
 		.lane-desc {
@@ -1236,12 +1265,23 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 			padding: 2rem 0 1.75rem;
 		}
 
+		/* Horizontal strip instead of a 4-row grid: keeps the hero compact and
+		   the stage order (skip → advocate → graveyard) readable. */
 		.hero-pipeline-preview {
+			display: flex;
 			gap: 0.375rem;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			overflow-x: auto;
+			padding-bottom: 0.25rem;
+			scrollbar-width: none;
+		}
+
+		.hero-pipeline-preview::-webkit-scrollbar {
+			display: none;
 		}
 
 		.preview-stage {
+			flex: 0 0 auto;
+			min-width: 5.25rem;
 			padding: 0.5rem 0.75rem;
 		}
 
@@ -1250,7 +1290,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		}
 
 		.preview-label {
-			font-size: 0.55rem;
+			font-size: 0.65rem;
 		}
 
 		.hero-actions {
@@ -1313,52 +1353,86 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		.cell-advocate::before { content: 'Advocate'; color: var(--stage-advocate); }
 
 		.cell-content {
-			gap: 0.75rem;
+			gap: 0.5rem;
 		}
 
+		/* Icon + name chips: bare icons are unidentifiable on touch screens
+		   where there is no hover tooltip. */
 		.tech-icon {
-			width: 40px;
-			height: 40px;
+			width: auto;
+			height: auto;
+			min-height: 44px;
+			padding: 0.5rem 0.75rem;
+			gap: 0.5rem;
+			border-radius: 6px;
+		}
+
+		.tech-icon::after,
+		.tech-icon::before {
+			display: none;
+		}
+
+		.tech-name {
+			position: static;
+			width: auto;
+			height: auto;
+			margin: 0;
+			overflow: visible;
+			clip-path: none;
+			white-space: normal;
+			overflow-wrap: anywhere;
+			text-align: left;
+			font-size: 0.8rem;
+			font-weight: 600;
+			color: var(--text-primary-content);
 		}
 
 		.icon-img {
-			width: 24px;
-			height: 24px;
+			width: 22px;
+			height: 22px;
+		}
+
+		.icon-initial {
+			width: 22px;
+			height: 22px;
 		}
 
 	}
 
-	/* ===== MODAL POPUP ===== */
-	.modal-backdrop {
-		position: fixed;
-		inset: 0;
-		z-index: 999;
-		background: rgba(0, 0, 0, 0.6);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		opacity: 0;
-		visibility: hidden;
-		transition: opacity 0.2s ease, visibility 0.2s ease;
+	/* ===== MODAL POPUP =====
+	   Native <dialog>: focus trapping, Escape, and focus return come from the
+	   platform; ::backdrop replaces the hand-rolled overlay. */
+	dialog.tech-modal {
+		padding: 0;
+		border: none;
+		background: transparent;
+		margin: auto;
+		max-width: calc(100vw - 3rem);
+		max-height: calc(100vh - 4rem);
+		overflow: visible;
 	}
 
-	.modal-backdrop.visible {
-		opacity: 1;
-		visibility: visible;
+	dialog.tech-modal::backdrop {
+		background: rgb(0 0 0 / 0.6);
+	}
+
+	dialog.tech-modal[open] {
+		animation: modal-in var(--duration-base) var(--ease-out);
+	}
+
+	@keyframes modal-in {
+		from {
+			opacity: 0;
+			transform: scale(0.97);
+		}
 	}
 
 	.modal-content {
 		position: relative;
 		width: 480px;
-		max-width: calc(100vw - 3rem);
+		max-width: 100%;
 		max-height: calc(100vh - 4rem);
 		overflow-y: auto;
-		transform: scale(0.95);
-		transition: transform 0.2s ease;
-	}
-
-	.modal-backdrop.visible .modal-content {
-		transform: scale(1);
 	}
 
 	.modal-close {
@@ -1510,7 +1584,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 	.modal-stats {
 		display: grid;
-		grid-template-columns: repeat(4, 1fr);
+		grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
 		gap: 0.75rem;
 	}
 
@@ -1603,6 +1677,10 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	@media (max-width: 540px) {
+		dialog.tech-modal {
+			max-width: calc(100vw - 2rem);
+		}
+
 		.modal-content {
 			width: calc(100vw - 2rem);
 		}
@@ -1751,8 +1829,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 28px;
-		height: 28px;
+		width: 32px;
+		height: 32px;
 		padding: 0;
 		background: var(--surface-card);
 		border: 1px solid var(--surface-border);
@@ -1795,10 +1873,25 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		z-index: 100;
 	}
 
-	.other-item:hover::after {
+	.other-item:hover::after,
+	.other-item:focus-visible::after {
 		opacity: 1;
 		visibility: visible;
 		transform: translateX(-50%) translateY(0);
+	}
+
+	/* Same treatment as .tech-name: screen-reader-only on desktop, visible
+	   chip label on mobile. */
+	.other-name {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.other-icon {
@@ -1841,6 +1934,55 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		.other-group {
 			min-width: 100%;
 		}
+
+		.other-item {
+			width: auto;
+			height: auto;
+			min-height: 40px;
+			padding: 0.375rem 0.625rem;
+			gap: 0.4rem;
+			opacity: 1;
+		}
+
+		.other-item::after {
+			display: none;
+		}
+
+		.other-name {
+			position: static;
+			width: auto;
+			height: auto;
+			margin: 0;
+			overflow: visible;
+			clip-path: none;
+			white-space: normal;
+			overflow-wrap: anywhere;
+			text-align: left;
+			font-size: 0.75rem;
+			font-weight: 600;
+			color: var(--text-secondary-content);
+		}
+	}
+
+	/* ===== REDUCED MOTION ===== */
+	@media (prefers-reduced-motion: reduce) {
+		.lane-wrapper {
+			animation: none;
+		}
+
+		.tech-icon:hover {
+			transform: none;
+		}
+
+		dialog.tech-modal[open] {
+			animation: none;
+		}
+
+		.advanced-mode-link:hover svg,
+		.modal-cta:hover svg,
+		.other-advanced-link:hover svg {
+			transform: none;
+		}
 	}
 
 </style>
@@ -1871,7 +2013,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	// Modal elements
-	const modal = document.getElementById('tech-card-modal');
+	const modal = document.getElementById('tech-card-modal') as HTMLDialogElement | null;
 	const modalIcon = document.getElementById('modal-icon') as HTMLImageElement;
 	const modalIconPlaceholder = document.getElementById('modal-icon-placeholder');
 	const modalName = document.getElementById('modal-tech-name');
@@ -1882,6 +2024,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	const modalWhy = document.getElementById('modal-why');
 	const modalVideos = document.getElementById('modal-videos');
 	const modalArticles = document.getElementById('modal-articles');
+	const modalArticlesStat = document.getElementById('modal-articles-stat');
 	const modalFirstUsed = document.getElementById('modal-first-used');
 	const modalTrajectory = document.getElementById('modal-trajectory');
 	const modalSpicySection = document.getElementById('modal-spicy-section');
@@ -1940,6 +2083,9 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 		if (modalVideos) modalVideos.textContent = videoCount;
 		if (modalArticles) modalArticles.textContent = articleCount;
+		// Hide the articles stat until article links are wired up — a permanent
+		// zero reads as broken rather than empty.
+		if (modalArticlesStat) modalArticlesStat.style.display = articleCount === '0' ? 'none' : 'flex';
 		if (modalFirstUsed) modalFirstUsed.textContent = formatDate(firstUsed);
 		if (modalTrajectory) modalTrajectory.textContent = trajectoryIcons[trajectory] || "–";
 
@@ -1956,34 +2102,32 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 			modalCtaLink.href = `/technology/${id}`;
 		}
 
-		// Show modal
-		modal?.classList.add('visible');
-		modal?.setAttribute('aria-hidden', 'false');
+		// Native <dialog> handles focus trapping, Escape, and focus return.
+		modal?.showModal();
 		document.body.style.overflow = 'hidden';
 	}
 
-	function hideModal() {
-		modal?.classList.remove('visible');
-		modal?.setAttribute('aria-hidden', 'true');
+	// Restore page scroll whenever the dialog closes (button, Escape, backdrop)
+	modal?.addEventListener('close', () => {
 		document.body.style.overflow = '';
-	}
+	});
 
-	// Close modal on backdrop click
+	// Close modal on backdrop click — clicks on ::backdrop target the dialog itself
 	modal?.addEventListener('click', (e) => {
 		if (e.target === modal) {
-			hideModal();
+			modal.close();
 		}
 	});
 
 	// Close modal on close button click
-	modalClose?.addEventListener('click', hideModal);
+	modalClose?.addEventListener('click', () => modal?.close());
 
-	// Close modal on escape key
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && modal?.classList.contains('visible')) {
-			hideModal();
-		}
-	});
+	// Stage definitions are the only explanation of what the stages mean on
+	// mobile (the pipeline header is hidden there), so open them by default.
+	const legend = document.querySelector('.legend-details');
+	if (legend && window.matchMedia('(max-width: 768px)').matches) {
+		legend.setAttribute('open', '');
+	}
 
 	// Add click handlers to all tech icons
 	document.querySelectorAll('.tech-icon').forEach(button => {
