@@ -109,9 +109,7 @@ export function getAttributionFromCookies(req: Request): {
 	const cookieHeader = req.headers.get("cookie");
 	if (!cookieHeader) return {};
 
-	const firstMatch = cookieHeader.match(
-		/(?:^|;\s*)rk_first_touch=([^;]+)/,
-	);
+	const firstMatch = cookieHeader.match(/(?:^|;\s*)rk_first_touch=([^;]+)/);
 	const lastMatch = cookieHeader.match(/(?:^|;\s*)rk_last_touch=([^;]+)/);
 
 	const first = parseAttributionCookie(firstMatch?.[1]);

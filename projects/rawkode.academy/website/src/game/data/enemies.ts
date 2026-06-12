@@ -7,7 +7,8 @@ export const enemies: EnemyData[] = [
 		id: "nginx-ingress",
 		name: "Ingress Controller",
 		layer: "External",
-		description: "The popular ingress controller, guarding the cluster entrance",
+		description:
+			"The popular ingress controller, guarding the cluster entrance",
 		difficulty: 1,
 		sprite: `${SPRITE_BASE}/ingress.webp`,
 	},

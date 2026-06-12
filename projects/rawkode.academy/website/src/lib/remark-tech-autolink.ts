@@ -45,15 +45,7 @@ const DEFAULT_SKIP_PATH_SUBSTRINGS = ["/content/technologies/"];
 // Ambiguity guards: single/two-letter names and common English words
 // that happen to be tracked tech names. These false-positive too often
 // to be auto-linked sitewide. Per-call exclusions go in skipNames.
-const DEFAULT_SKIP = [
-	"d",
-	"k",
-	"go",
-	"ko",
-	"score",
-	"distribution",
-	"salt",
-];
+const DEFAULT_SKIP = ["d", "k", "go", "ko", "score", "distribution", "salt"];
 
 const SKIP_COMMENT_PATTERN =
 	/(?:<!--\s*no-autolink\s*-->|{\s*\/\*\s*no-autolink\s*\*\/\s*})/i;

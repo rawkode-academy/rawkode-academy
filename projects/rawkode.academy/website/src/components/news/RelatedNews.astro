@@ -86,11 +86,7 @@ const related = selectRelatedNews(
 		margin: 1.5rem 0 4rem;
 		padding-top: 2rem;
 		padding-right: 4rem;
-		border-top: 1px solid rgb(0 0 0 / 0.1);
-	}
-
-	:root.dark .related-news {
-		border-top-color: rgb(255 255 255 / 0.1);
+		border-top: 1px solid var(--surface-border);
 	}
 
 	@media (max-width: 767px) {
@@ -103,12 +99,8 @@ const related = selectRelatedNews(
 		font-size: 1.5rem;
 		font-weight: 700;
 		letter-spacing: -0.02em;
-		color: rgb(17 24 39);
+		color: var(--text-primary-content);
 		margin: 0 0 1.25rem;
-	}
-
-	:root.dark .related-heading {
-		color: white;
 	}
 
 	.related-list {
@@ -127,17 +119,12 @@ const related = selectRelatedNews(
 	}
 
 	.related-item {
-		border-radius: 1rem;
+		border-radius: var(--radius-3xl);
 		padding: 1.25rem;
-		border: 1px solid rgb(0 0 0 / 0.08);
+		border: 1px solid var(--surface-border);
 		transition:
-			border-color 0.15s,
-			background-color 0.15s,
-			transform 0.15s;
-	}
-
-	:root.dark .related-item {
-		border-color: rgb(255 255 255 / 0.08);
+			border-color var(--duration-fast) var(--ease-standard),
+			background-color var(--duration-fast) var(--ease-standard);
 	}
 
 	.related-item:hover {
@@ -154,12 +141,8 @@ const related = selectRelatedNews(
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.18em;
-		color: rgb(107 114 128);
+		color: var(--text-muted);
 		margin-bottom: 0.5rem;
-	}
-
-	:root.dark .related-meta {
-		color: rgb(156 163 175);
 	}
 
 	.related-title {
@@ -168,17 +151,13 @@ const related = selectRelatedNews(
 		font-weight: 600;
 		letter-spacing: -0.01em;
 		margin: 0 0 0.5rem;
-		color: rgb(17 24 39);
-	}
-
-	:root.dark .related-title {
-		color: white;
+		color: var(--text-primary-content);
 	}
 
 	.related-title a {
 		color: inherit;
 		text-decoration: none;
-		transition: color 0.15s;
+		transition: color var(--duration-fast) var(--ease-standard);
 	}
 
 	.related-title a:hover {
@@ -188,15 +167,11 @@ const related = selectRelatedNews(
 	.related-dek {
 		font-size: 0.9rem;
 		line-height: 1.5;
-		color: rgb(75 85 99);
+		color: var(--text-secondary-content);
 		margin: 0;
 		display: -webkit-box;
 		-webkit-line-clamp: 3;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-	}
-
-	:root.dark .related-dek {
-		color: rgb(209 213 219);
 	}
 </style>

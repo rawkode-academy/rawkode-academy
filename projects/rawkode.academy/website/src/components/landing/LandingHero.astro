@@ -5,7 +5,10 @@ import MLabel from "@/components/ui/MLabel.vue";
 import StatRow from "@/components/ui/StatRow.vue";
 import OnAirPanel from "@/components/landing/OnAirPanel.astro";
 
-interface Stat { value: string; label: string }
+interface Stat {
+	value: string;
+	label: string;
+}
 
 interface HeroVideo {
 	id: string;
@@ -30,12 +33,7 @@ interface Props {
 	stats?: Stat[];
 }
 
-const {
-	state,
-	video,
-	schedule = [],
-	stats = [],
-} = Astro.props as Props;
+const { state, video, schedule = [], stats = [] } = Astro.props as Props;
 
 // Right-column kicker copy: only the "live now" state runs the amber
 // On-air ribbon. The upcoming + fallback states get a quieter mono kicker.

@@ -25,10 +25,7 @@ export interface StoredSession {
 
 // PKCE helpers
 function encodeBase64Url(str: string): string {
-	return btoa(str)
-		.replace(/\+/g, "-")
-		.replace(/\//g, "_")
-		.replace(/=+$/, "");
+	return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 function encodeBase64UrlFromBytes(bytes: Uint8Array): string {
@@ -121,16 +118,18 @@ export async function exchangeCodeForTokens(
 
 	if (!tokenResponse.ok) {
 		const errorBody = await tokenResponse.text();
-		console.error("[auth] Token exchange failed:", tokenResponse.status, errorBody);
+		console.error(
+			"[auth] Token exchange failed:",
+			tokenResponse.status,
+			errorBody,
+		);
 		return null;
 	}
 
 	return await tokenResponse.json();
 }
 
-export async function getUserInfo(
-	accessToken: string,
-): Promise<{
+export async function getUserInfo(accessToken: string): Promise<{
 	sub: string;
 	email?: string;
 	name?: string;

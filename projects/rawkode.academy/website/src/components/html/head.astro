@@ -1,5 +1,6 @@
 ---
 import { Font } from "astro:assets";
+import { SITE_DESCRIPTION } from "@/lib/site";
 import type { OpenGraphProps } from "@/types/opengraph";
 import PostHog from "../posthog/index.astro";
 import Grafana from "../grafana/index.astro";
@@ -76,8 +77,7 @@ const normalizedTitle =
 	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b23" />
 	<meta
 		name="description"
-		content={Astro.props.description ||
-			"The Rawkode Academy provides educational, entertaining, and cutting-edge learning paths for you, or your developers, to keep up with the fast-paced, ever-evolving, and extremely volatile Cloud Native landscape."}
+		content={Astro.props.description || SITE_DESCRIPTION}
 	/>
 
 	<title>{normalizedTitle}</title>

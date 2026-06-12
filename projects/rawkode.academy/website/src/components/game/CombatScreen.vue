@@ -93,13 +93,25 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import type { EnemyData, Insult, Comeback, InsultLayer } from "@/game/data/types";
+import type {
+	EnemyData,
+	Insult,
+	Comeback,
+	InsultLayer,
+} from "@/game/data/types";
 import { insults, comebacks, getEffectiveComebacks } from "@/game/data/insults";
 import { layerScenes } from "@/game/data/scenes";
 import { sfx } from "@/game/sound";
 
 // Layer hierarchy - enemies know their layer and all previous layers
-const layerOrder: InsultLayer[] = ["External", "App", "ServiceMesh", "KubeSystem", "ApiServer", "Host"];
+const layerOrder: InsultLayer[] = [
+	"External",
+	"App",
+	"ServiceMesh",
+	"KubeSystem",
+	"ApiServer",
+	"Host",
+];
 
 function getAccessibleLayers(enemyLayer: InsultLayer): InsultLayer[] {
 	const index = layerOrder.indexOf(enemyLayer);
@@ -122,13 +134,17 @@ const emit = defineEmits<{
 	learnComeback: [comeback: Comeback];
 }>();
 
-type Phase = 'player-pick-insult' | 'player-pick-comeback' | 'enemy-responding' | 'processing';
-type Attacker = 'player' | 'enemy';
+type Phase =
+	| "player-pick-insult"
+	| "player-pick-comeback"
+	| "enemy-responding"
+	| "processing";
+type Attacker = "player" | "enemy";
 
 const playerHealth = ref(3);
 const enemyHealth = ref(3);
-const attacker = ref<Attacker>('player');
-const phase = ref<Phase>('player-pick-insult');
+const attacker = ref<Attacker>("player");
+const phase = ref<Phase>("player-pick-insult");
 const currentPhrase = ref<string | null>(null);
 const responsePhrase = ref<string | null>(null);
 const currentInsultId = ref<string | null>(null);
@@ -172,26 +188,39 @@ function handleKeydown(event: KeyboardEvent) {
 	const target = event.target as HTMLElement | null;
 	if (
 		target &&
-		(target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
+		(target.tagName === "INPUT" ||
+			target.tagName === "TEXTAREA" ||
+			target.isContentEditable)
 	) {
 		return;
 	}
 
-	if (event.key >= MIN_CHOICE_KEY_STRING && event.key <= MAX_CHOICE_KEY_STRING) {
+	if (
+		event.key >= MIN_CHOICE_KEY_STRING &&
+		event.key <= MAX_CHOICE_KEY_STRING
+	) {
 		const index = Number(event.key) - 1;
 		let handled = false;
 
-		if (phase.value === 'player-pick-insult') {
+		if (phase.value === "player-pick-insult") {
 			handled = tryKeyboardSelect(availableInsults.value, index, playerInsult);
-		} else if (phase.value === 'player-pick-comeback') {
-			handled = tryKeyboardSelect(availableComebacks.value, index, playerComeback);
+		} else if (phase.value === "player-pick-comeback") {
+			handled = tryKeyboardSelect(
+				availableComebacks.value,
+				index,
+				playerComeback,
+			);
 		}
 
 		if (handled) event.preventDefault();
 	}
 }
 
-function tryKeyboardSelect<T>(options: T[], index: number, handler: (item: T) => void): boolean {
+function tryKeyboardSelect<T>(
+	options: T[],
+	index: number,
+	handler: (item: T) => void,
+): boolean {
 	if (index < 0 || index >= options.length) return false;
 	const option = options[index];
 
@@ -201,7 +230,7 @@ function tryKeyboardSelect<T>(options: T[], index: number, handler: (item: T) =>
 
 function startCombat() {
 	// Randomly decide who starts
-	attacker.value = Math.random() < 0.5 ? 'player' : 'enemy';
+	attacker.value = Math.random() < 0.5 ? "player" : "enemy";
 	startTurn();
 }
 
@@ -210,10 +239,10 @@ function startTurn() {
 	responsePhrase.value = null;
 	currentPhrase.value = null;
 
-	if (attacker.value === 'player') {
+	if (attacker.value === "player") {
 		// Player's turn to insult
 		availableInsults.value = getRandomInsults();
-		phase.value = 'player-pick-insult';
+		phase.value = "player-pick-insult";
 	} else {
 		// Enemy's turn to insult
 		enemyInsult();
@@ -224,17 +253,18 @@ function getRandomInsults(): Insult[] {
 	const learned = props.learnedInsults;
 
 	// Find insults effective against current enemy
-	const effectiveInsults = learned.filter((i) =>
-		i.enemies.includes(props.enemy.id) || i.layer === props.enemy.layer
+	const effectiveInsults = learned.filter(
+		(i) => i.enemies.includes(props.enemy.id) || i.layer === props.enemy.layer,
 	);
 
 	// Filter out already-used insults this combat
-	const unusedEffective = effectiveInsults.filter((i) =>
-		!usedPlayerInsults.value.has(i.id)
+	const unusedEffective = effectiveInsults.filter(
+		(i) => !usedPlayerInsults.value.has(i.id),
 	);
-	const unusedNonEffective = learned.filter((i) =>
-		!effectiveInsults.some((e) => e.id === i.id) &&
-		!usedPlayerInsults.value.has(i.id)
+	const unusedNonEffective = learned.filter(
+		(i) =>
+			!effectiveInsults.some((e) => e.id === i.id) &&
+			!usedPlayerInsults.value.has(i.id),
 	);
 
 	if (learned.length <= 4) {
@@ -245,11 +275,15 @@ function getRandomInsults(): Insult[] {
 
 	// Guarantee 1 effective if available and unused
 	if (unusedEffective.length > 0) {
-		const shuffledEffective = [...unusedEffective].sort(() => Math.random() - 0.5);
+		const shuffledEffective = [...unusedEffective].sort(
+			() => Math.random() - 0.5,
+		);
 		choices.push(shuffledEffective[0]!);
 
 		// Fill rest with random non-effective (prefer unused)
-		const shuffledNonEffective = [...unusedNonEffective].sort(() => Math.random() - 0.5);
+		const shuffledNonEffective = [...unusedNonEffective].sort(
+			() => Math.random() - 0.5,
+		);
 		for (const insult of shuffledNonEffective) {
 			if (choices.length >= 4) break;
 			choices.push(insult);
@@ -276,20 +310,24 @@ function getRandomComebacks(insultId: string): Comeback[] {
 	const effectiveComebacks = getEffectiveComebacks(insultId);
 
 	const learnedEffective = learned.filter((c) =>
-		effectiveComebacks.some((e) => e.id === c.id)
+		effectiveComebacks.some((e) => e.id === c.id),
 	);
-	const learnedNonEffective = learned.filter((c) =>
-		!effectiveComebacks.some((e) => e.id === c.id)
+	const learnedNonEffective = learned.filter(
+		(c) => !effectiveComebacks.some((e) => e.id === c.id),
 	);
 
 	const choices: Comeback[] = [];
 
 	if (learned.length > 4) {
 		if (learnedEffective.length > 0) {
-			const shuffledEffective = [...learnedEffective].sort(() => Math.random() - 0.5);
+			const shuffledEffective = [...learnedEffective].sort(
+				() => Math.random() - 0.5,
+			);
 			choices.push(shuffledEffective[0]!);
 
-			const shuffledNonEffective = [...learnedNonEffective].sort(() => Math.random() - 0.5);
+			const shuffledNonEffective = [...learnedNonEffective].sort(
+				() => Math.random() - 0.5,
+			);
 			for (const c of shuffledNonEffective) {
 				if (choices.length >= 4) break;
 				choices.push(c);
@@ -313,7 +351,7 @@ function playerInsult(insult: Insult) {
 	isProcessing.value = true;
 	currentPhrase.value = insult.text;
 	currentInsultId.value = insult.id;
-	phase.value = 'enemy-responding';
+	phase.value = "enemy-responding";
 
 	sfx.playerAttack();
 	playerAttacking.value = true;
@@ -328,11 +366,15 @@ function playerInsult(insult: Insult) {
 function enemyRespond(insultId: string) {
 	// Enemy knows comebacks from their layer and all previous layers
 	const accessibleLayers = getAccessibleLayers(props.enemy.layer);
-	const knownComebacks = comebacks.filter((c) => accessibleLayers.includes(c.layer));
+	const knownComebacks = comebacks.filter((c) =>
+		accessibleLayers.includes(c.layer),
+	);
 
 	const effectiveComebacks = getEffectiveComebacks(insultId);
 	// Only consider effective comebacks the enemy actually knows
-	const knownEffective = effectiveComebacks.filter((c) => knownComebacks.some((k) => k.id === c.id));
+	const knownEffective = effectiveComebacks.filter((c) =>
+		knownComebacks.some((k) => k.id === c.id),
+	);
 
 	// Enemy chance scales with progression - earlier layers are forgiving, later layers challenge
 	const layerChance: Record<string, number> = {
@@ -348,11 +390,17 @@ function enemyRespond(insultId: string) {
 
 	let chosenComeback: Comeback;
 	if (knowsEffective) {
-		chosenComeback = knownEffective[Math.floor(Math.random() * knownEffective.length)]!;
+		chosenComeback =
+			knownEffective[Math.floor(Math.random() * knownEffective.length)]!;
 	} else {
 		// Pick a random comeback from what the enemy knows
-		const randomComebacks = knownComebacks.filter((c) => !knownEffective.some((e) => e.id === c.id));
-		chosenComeback = randomComebacks[Math.floor(Math.random() * randomComebacks.length)] || knownComebacks[0] || comebacks[0]!;
+		const randomComebacks = knownComebacks.filter(
+			(c) => !knownEffective.some((e) => e.id === c.id),
+		);
+		chosenComeback =
+			randomComebacks[Math.floor(Math.random() * randomComebacks.length)] ||
+			knownComebacks[0] ||
+			comebacks[0]!;
 	}
 
 	// Player learns this comeback by seeing the enemy use it
@@ -360,17 +408,21 @@ function enemyRespond(insultId: string) {
 
 	responsePhrase.value = chosenComeback.text;
 
-	const isEffective = effectiveComebacks.some((e) => e.id === chosenComeback.id);
+	const isEffective = effectiveComebacks.some(
+		(e) => e.id === chosenComeback.id,
+	);
 
 	setTimeout(() => {
-		resolveExchange(isEffective, 'enemy');
+		resolveExchange(isEffective, "enemy");
 	}, 1000);
 }
 
 function enemyInsult() {
 	// Enemy knows insults from their layer and all previous layers
 	const accessibleLayers = getAccessibleLayers(props.enemy.layer);
-	const allAvailable = insults.filter((i) => accessibleLayers.includes(i.layer));
+	const allAvailable = insults.filter((i) =>
+		accessibleLayers.includes(i.layer),
+	);
 	// Filter out insults already used this combat
 	let available = allAvailable.filter((i) => !usedEnemyInsults.value.has(i.id));
 
@@ -380,7 +432,8 @@ function enemyInsult() {
 		available = allAvailable;
 	}
 
-	const insult = available[Math.floor(Math.random() * available.length)] || insults[0]!;
+	const insult =
+		available[Math.floor(Math.random() * available.length)] || insults[0]!;
 	usedEnemyInsults.value.add(insult.id);
 
 	// Player learns this insult by seeing the enemy use it
@@ -396,7 +449,7 @@ function enemyInsult() {
 		enemyAttacking.value = false;
 		// Player needs to respond
 		availableComebacks.value = getRandomComebacks(insult.id);
-		phase.value = 'player-pick-comeback';
+		phase.value = "player-pick-comeback";
 		isProcessing.value = false;
 	}, 500);
 }
@@ -412,16 +465,16 @@ function playerComeback(comeback: Comeback) {
 	const isEffective = effectiveComebacks.some((e) => e.id === comeback.id);
 
 	setTimeout(() => {
-		resolveExchange(isEffective, 'player');
+		resolveExchange(isEffective, "player");
 	}, 500);
 }
 
 function resolveExchange(responderWon: boolean, responder: Attacker) {
-	phase.value = 'processing';
+	phase.value = "processing";
 
 	if (responderWon) {
 		// Responder's comeback was effective - attacker takes damage
-		if (responder === 'player') {
+		if (responder === "player") {
 			sfx.effectiveHit();
 			enemyHit.value = true;
 			enemyHealth.value--;
@@ -436,7 +489,7 @@ function resolveExchange(responderWon: boolean, responder: Attacker) {
 		}
 	} else {
 		// Responder's comeback was ineffective - responder takes damage
-		if (responder === 'player') {
+		if (responder === "player") {
 			sfx.ineffectiveHit();
 			playerHit.value = true;
 			playerHealth.value--;

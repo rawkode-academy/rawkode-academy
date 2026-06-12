@@ -1,7 +1,10 @@
 ---
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import {
+	getVideoThumbnailResizedUrl,
+	getVideoThumbnailUrl,
+} from "@/lib/video-thumbnail";
 
 import Page from "@/wrappers/page.astro";
 
@@ -14,6 +17,18 @@ import SecondaryGrid from "@/components/landing/SecondaryGrid.astro";
 import ValuesGrid from "@/components/landing/ValuesGrid.astro";
 import TestimonialSlider from "@/components/testimonial/slider.astro";
 import { DIMENSIONS } from "@/lib/explorer/dimensions";
+
+// ─── Edge caching ───────────────────────────────────────────────
+// No personalization is rendered into this page (auth UI is server:defer),
+// so it is safe to cache at the edge. Short s-maxage because the hero
+// reflects live/upcoming stream state.
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
+);
+Astro.response.headers.set("CDN-Cache-Control", "public, max-age=300");
+Astro.response.headers.set("Cache-Tag", "homepage");
+Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
 // ─── Data fetching ──────────────────────────────────────────────
 
@@ -379,6 +394,15 @@ const pageDescription =
 
 <Page title={pageTitle} description={pageDescription}>
 	{heroVideo && (
+		<link
+			slot="extra-head"
+			rel="preload"
+			as="image"
+			href={getVideoThumbnailResizedUrl(heroVideo.id, 800)}
+			fetchpriority="high"
+		/>
+	)}
+	{heroVideo && (
 		<LandingHero
 			state={heroState!}
 			video={heroVideo}
@@ -447,7 +471,7 @@ const pageDescription =
 		{newsItems.length > 0 && (
 			<section class="landing-section">
 				<SectionHeader
-					kicker="News"
+					kicker="Updated daily"
 					title="Latest News"
 					body="Recent updates from across the cloud native ecosystem."
 					ctaLabel="All news →"
@@ -460,7 +484,7 @@ const pageDescription =
 		{learningPathItems.length > 0 && (
 			<section class="landing-section">
 				<SectionHeader
-					kicker="Learning Paths"
+					kicker={`${allLearningPaths.length} paths`}
 					title="Learning Paths"
 					body="Structured routes through related lessons, articles, and videos."
 					ctaLabel="All paths →"
@@ -473,7 +497,7 @@ const pageDescription =
 		{featuredVideo && (
 			<section class="landing-section">
 				<SectionHeader
-					kicker="Videos"
+					kicker={`${publishedVideos.length} in the archive`}
 					title="Latest Videos"
 					body="Recent sessions, walkthroughs, and practical demos."
 					ctaLabel="Browse videos →"
@@ -506,7 +530,7 @@ const pageDescription =
 		{featuredArticle && (
 			<section class="landing-section">
 				<SectionHeader
-					kicker="Articles"
+					kicker={`${allArticles.length} published`}
 					title="Latest Articles"
 					body="Technical guides, architecture notes, and written explanations."
 					ctaLabel="Browse articles →"

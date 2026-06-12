@@ -1,23 +1,31 @@
 ---
-import { getCollection } from "astro:content";
 import { env } from "cloudflare:workers";
-import VideoFeed from "@/components/video/video-feed.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 import EditorialButton from "@/components/ui/EditorialButton.vue";
 import Page from "@/wrappers/page.astro";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
+import {
+	getSearchIndex,
+	isSearchType,
+	searchEntries,
+	SEARCH_TYPE_LABELS,
+	SEARCH_TYPES,
+	type SearchResult,
+	type SearchType,
+} from "@/lib/search";
 
 const searchQuery = (Astro.url.searchParams.get("q") || "").trim();
-const normalizedQuery = searchQuery.toLowerCase();
+const typeParam = (Astro.url.searchParams.get("type") || "").trim();
+const activeType: SearchType | undefined = isSearchType(typeParam)
+	? typeParam
+	: undefined;
 
-const results = normalizedQuery
-	? await getCollection("videos", ({ data }) => {
-			const haystack = `${data.title} ${data.description ?? ""}`.toLowerCase();
-			return haystack.includes(normalizedQuery);
-		})
-	: [];
+const index = searchQuery ? await getSearchIndex() : [];
+const allRanked = searchQuery ? searchEntries(index, searchQuery) : [];
+const ranked = activeType
+	? allRanked.filter((result) => result.type === activeType)
+	: allRanked;
 
 if (shouldCaptureSearchAnalytics(searchQuery)) {
 	const analytics = env.ANALYTICS as Fetcher | undefined;
@@ -26,8 +34,8 @@ if (shouldCaptureSearchAnalytics(searchQuery)) {
 			event: "search_performed",
 			properties: {
 				query: searchQuery,
-				results_count: results.length,
-				search_type: "video",
+				results_count: ranked.length,
+				search_type: activeType ?? "all",
 			},
 			distinctId: getDistinctId(Astro),
 		},
@@ -35,27 +43,65 @@ if (shouldCaptureSearchAnalytics(searchQuery)) {
 	);
 }
 
-const feedVideos = results
-	.sort(
-		(a, b) =>
-			new Date(b.data.publishedAt).getTime() -
-			new Date(a.data.publishedAt).getTime(),
-	)
-	.slice(0, 24)
-	.map((video) => ({
-		id: video.data.id,
-		title: video.data.title,
-		description: video.data.description,
-		slug: video.data.slug,
-		thumbnailUrl: getVideoThumbnailUrl(video.data.id),
-		streamUrl: `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`,
-		duration: typeof video.data.duration === "number" ? video.data.duration : 0,
-		publishedAt:
-			video.data.publishedAt instanceof Date
-				? video.data.publishedAt.toISOString()
-				: String(video.data.publishedAt),
-		type: video.data.type,
-	}));
+// Group ranked results by content type, preserving rank order: groups are
+// ordered by their best-ranked result, items stay ranked within each group.
+const GROUP_LIMIT = activeType ? 48 : 12;
+
+const groups: { type: SearchType; results: SearchResult[]; total: number }[] =
+	[];
+const groupByType = new Map<SearchType, (typeof groups)[number]>();
+for (const result of ranked) {
+	let group = groupByType.get(result.type);
+	if (!group) {
+		group = { type: result.type, results: [], total: 0 };
+		groupByType.set(result.type, group);
+		groups.push(group);
+	}
+	group.total += 1;
+	if (group.results.length < GROUP_LIMIT) {
+		group.results.push(result);
+	}
+}
+
+const countsByType = new Map<SearchType, number>();
+for (const result of allRanked) {
+	countsByType.set(result.type, (countsByType.get(result.type) ?? 0) + 1);
+}
+
+const searchHref = (type?: SearchType): string => {
+	const params = new URLSearchParams({ q: searchQuery });
+	if (type) params.set("type", type);
+	return `/search?${params.toString()}`;
+};
+
+const typeFilters = [
+	{
+		label: "All",
+		href: searchHref(),
+		count: allRanked.length,
+		active: !activeType,
+	},
+	...SEARCH_TYPES.filter((type) => (countsByType.get(type) ?? 0) > 0).map(
+		(type) => ({
+			label: SEARCH_TYPE_LABELS[type],
+			href: searchHref(type),
+			count: countsByType.get(type) ?? 0,
+			active: activeType === type,
+		}),
+	),
+];
+
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+});
+
+const truncate = (text: string, maxLength: number): string => {
+	const normalized = text.replace(/\s+/g, " ").trim();
+	if (normalized.length <= maxLength) return normalized;
+	return `${normalized.slice(0, maxLength).trimEnd()}…`;
+};
 
 const suggestions = [
 	{ label: "Kubernetes", href: "/search?q=kubernetes" },
@@ -70,22 +116,22 @@ const suggestions = [
 <Page
 	title={searchQuery ? `Search results for "${searchQuery}"` : "Search"}
 	description={searchQuery
-		? `Video search results for "${searchQuery}" on Rawkode Academy.`
-		: "Search Rawkode Academy's cloud native and Kubernetes video library."}
+		? `Search results for "${searchQuery}" on Rawkode Academy.`
+		: "Search Rawkode Academy's videos, articles, news, courses, learning paths, shows, and technologies."}
 	pageType="SearchResultsPage"
 	noindex
 >
 	<div class="search-page">
 		<header class="search-page__header">
-			<MLabel tone="spruce">§ Search the archive</MLabel>
+			<MLabel tone="spruce">Search the archive</MLabel>
 			<h1 class="search-page__title">
-				{searchQuery ? `Results for ` : "Find a video"}
+				{searchQuery ? `Results for ` : "Search everything"}
 				{searchQuery && <em class="search-page__query">"{searchQuery}"</em>}
 			</h1>
 			<p class="search-page__lede">
 				{searchQuery
-					? `Matched ${feedVideos.length} video${feedVideos.length === 1 ? "" : "s"} across the archive.`
-					: "Search lessons, talks, and sessions by title or description. Or press ⌘K anywhere on the site to open the command palette."}
+					? `Matched ${ranked.length} ${ranked.length === 1 ? "entry" : "entries"}${activeType ? ` in ${SEARCH_TYPE_LABELS[activeType].toLowerCase()}` : " across the archive"}.`
+					: "Searches videos, articles, news, courses, learning paths, shows, and technologies. Or press ⌘K anywhere on the site to open the command palette."}
 			</p>
 			<form class="search-page__form" method="get" action="/search">
 				<input
@@ -97,6 +143,7 @@ const suggestions = [
 					autocomplete="off"
 					autofocus
 				/>
+				{activeType && <input type="hidden" name="type" value={activeType} />}
 				<EditorialButton variant="solid" size="md" arrow>Search</EditorialButton>
 			</form>
 
@@ -112,6 +159,28 @@ const suggestions = [
 					</ul>
 				</div>
 			)}
+
+			{searchQuery && allRanked.length > 0 && (
+				<nav class="search-page__filters" aria-label="Filter results by type">
+					<MLabel tone="muted">Filter</MLabel>
+					<ul class="search-page__chips">
+						{typeFilters.map((filter) => (
+							<li>
+								<a
+									class:list={[
+										"search-page__chip",
+										{ "search-page__chip--active": filter.active },
+									]}
+									href={filter.href}
+									aria-current={filter.active ? "page" : undefined}
+								>
+									{filter.label} · {filter.count}
+								</a>
+							</li>
+						))}
+					</ul>
+				</nav>
+			)}
 		</header>
 
 		<section class="search-page__results">
@@ -119,19 +188,68 @@ const suggestions = [
 				<div class="search-page__empty">
 					<MLabel>Type a query to begin.</MLabel>
 				</div>
-			) : feedVideos.length === 0 ? (
+			) : ranked.length === 0 ? (
 				<div class="search-page__empty">
 					<MLabel>Nothing matched "{searchQuery}".</MLabel>
 					<p class="search-page__empty-body">
-						Try a broader keyword, or browse <a href="/watch">the full video library</a>.
+						{activeType ? (
+							<>
+								No {SEARCH_TYPE_LABELS[activeType].toLowerCase()} matched. Try{" "}
+								<a href={searchHref()}>searching all content types</a>.
+							</>
+						) : (
+							<>
+								Try a broader keyword, or browse{" "}
+								<a href="/watch">the full video library</a>.
+							</>
+						)}
 					</p>
 				</div>
 			) : (
-				<VideoFeed
-					title={`Matches for "${searchQuery}"`}
-					description={`${feedVideos.length} video${feedVideos.length === 1 ? "" : "s"} sorted newest first.`}
-					videos={feedVideos}
-				/>
+				<div class="search-page__groups">
+					{groups.map((group) => (
+						<section class="search-group" aria-label={SEARCH_TYPE_LABELS[group.type]}>
+							<header class="search-group__header">
+								<MLabel tone="rust">{SEARCH_TYPE_LABELS[group.type]}</MLabel>
+								<MLabel tone="muted">
+									{group.total} {group.total === 1 ? "match" : "matches"}
+								</MLabel>
+							</header>
+							<ul class="search-group__list">
+								{group.results.map((result) => (
+									<li class="search-result">
+										<a class="search-result__link focus-ring" href={result.href}>
+											<span class="search-result__meta">
+												<span class="search-result__type">
+													{SEARCH_TYPE_LABELS[group.type]}
+												</span>
+												{result.date && (
+													<>
+														<span aria-hidden="true">·</span>
+														<time datetime={result.date}>
+															{dateFormatter.format(new Date(result.date))}
+														</time>
+													</>
+												)}
+											</span>
+											<span class="search-result__title">{result.title}</span>
+											{result.description && (
+												<span class="search-result__description">
+													{truncate(result.description, 180)}
+												</span>
+											)}
+										</a>
+									</li>
+								))}
+							</ul>
+							{group.total > group.results.length && !activeType && (
+								<a class="search-group__more" href={searchHref(group.type)}>
+									All {group.total} {SEARCH_TYPE_LABELS[group.type].toLowerCase()} →
+								</a>
+							)}
+						</section>
+					))}
+				</div>
 			)}
 		</section>
 	</div>
@@ -201,7 +319,8 @@ const suggestions = [
 		outline-offset: 2px;
 	}
 
-	.search-page__suggest {
+	.search-page__suggest,
+	.search-page__filters {
 		display: flex;
 		align-items: center;
 		gap: 0.875rem;
@@ -236,17 +355,112 @@ const suggestions = [
 		color: var(--editorial-ink);
 		border-color: var(--editorial-ink);
 	}
+	.search-page__chip--active {
+		color: var(--editorial-paper);
+		background: var(--editorial-ink);
+		border-color: var(--editorial-ink);
+	}
+	.search-page__chip--active:hover {
+		color: var(--editorial-paper);
+	}
 
 	.search-page__results {
-		max-width: 90rem;
+		max-width: 60rem;
 		margin: 0 auto;
-		padding: 0 0 4rem;
+		padding: 0 2.5rem 4rem;
+	}
+
+	.search-page__groups {
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
+		padding-top: 2rem;
+	}
+
+	.search-group__header {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: 0.625rem;
+		border-bottom: 2px solid var(--editorial-ink);
+	}
+
+	.search-group__list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.search-result {
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.search-result__link {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		padding: 1rem 0;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.search-result__meta {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+	}
+
+	.search-result__type {
+		color: var(--editorial-spruce);
+	}
+
+	.search-result__title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.5rem;
+		line-height: 1.15;
+		letter-spacing: -0.015em;
+		color: var(--editorial-ink);
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+	.search-result__link:hover .search-result__title {
+		color: var(--editorial-spruce);
+	}
+
+	.search-result__description {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9375rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-soft);
+		max-width: 44rem;
+	}
+
+	.search-group__more {
+		display: inline-block;
+		margin-top: 0.875rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+	.search-group__more:hover {
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 
 	.search-page__empty {
-		max-width: 60rem;
-		margin: 0 auto;
-		padding: var(--space-section-pad-y) var(--space-section-pad-x);
+		padding: var(--space-section-pad-y) 0;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
@@ -267,7 +481,9 @@ const suggestions = [
 
 	@media (max-width: 720px) {
 		.search-page__header { padding: 2rem 1.25rem 1.5rem; }
+		.search-page__results { padding: 0 1.25rem 3rem; }
 		.search-page__form { flex-direction: column; }
 		.search-page__input { width: 100%; }
+		.search-result__title { font-size: 1.25rem; }
 	}
 </style>

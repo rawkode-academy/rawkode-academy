@@ -1,7 +1,10 @@
 import { defineCollection, reference } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
-import { createTechnologySchema, type TechnologyData } from "@rawkodeacademy/content";
+import {
+	createTechnologySchema,
+	type TechnologyData,
+} from "@rawkodeacademy/content";
 import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 
 // Local, file-based content collections for videos, shows, and technologies.
@@ -148,53 +151,65 @@ const people = defineCollection({
 		pattern: ["**/*.{md,mdx}"],
 		base: resolveContentDirSync("people"),
 	}),
-	schema: z.object({
-		name: z.string(),
-		id: z.string(),
-		terms: z.array(z.string().trim().min(1)).optional(),
-		github: z.string().optional(),
-		twitter: z.string().optional(),
-		bluesky: z.string().optional(),
-		mastodon: z.url().optional(),
-		linkedin: z.string().optional(),
-		website: z.url().optional(),
-		youtube: z.url().optional(),
-		forename: z.string().optional(),
-		surname: z.string().optional(),
-		// biography: z.string().optional(), // Moved to MDX body
-		links: z
-			.array(
-				z.object({
-					url: z.url(),
-					name: z.string(),
-				}),
-			)
-			.default([]),
-	}).transform((person) => {
-		// Build full URLs from handles
-		// website, youtube, and mastodon are kept as full URLs (too variable to derive)
-		const githubUrl = person.github ? `https://github.com/${person.github}` : undefined;
-		const twitterUrl = person.twitter ? `https://x.com/${person.twitter}` : undefined;
-		const blueskyUrl = person.bluesky ? `https://bsky.app/profile/${person.bluesky}` : undefined;
-		const linkedinUrl = person.linkedin ? `https://www.linkedin.com/in/${person.linkedin}` : undefined;
-		const avatarUrl = person.github ? `https://avatars.githubusercontent.com/${person.github}` : undefined;
+	schema: z
+		.object({
+			name: z.string(),
+			id: z.string(),
+			terms: z.array(z.string().trim().min(1)).optional(),
+			github: z.string().optional(),
+			twitter: z.string().optional(),
+			bluesky: z.string().optional(),
+			mastodon: z.url().optional(),
+			linkedin: z.string().optional(),
+			website: z.url().optional(),
+			youtube: z.url().optional(),
+			forename: z.string().optional(),
+			surname: z.string().optional(),
+			// biography: z.string().optional(), // Moved to MDX body
+			links: z
+				.array(
+					z.object({
+						url: z.url(),
+						name: z.string(),
+					}),
+				)
+				.default([]),
+		})
+		.transform((person) => {
+			// Build full URLs from handles
+			// website, youtube, and mastodon are kept as full URLs (too variable to derive)
+			const githubUrl = person.github
+				? `https://github.com/${person.github}`
+				: undefined;
+			const twitterUrl = person.twitter
+				? `https://x.com/${person.twitter}`
+				: undefined;
+			const blueskyUrl = person.bluesky
+				? `https://bsky.app/profile/${person.bluesky}`
+				: undefined;
+			const linkedinUrl = person.linkedin
+				? `https://www.linkedin.com/in/${person.linkedin}`
+				: undefined;
+			const avatarUrl = person.github
+				? `https://avatars.githubusercontent.com/${person.github}`
+				: undefined;
 
-		return {
-			...person,
-			github: githubUrl,
-			twitter: twitterUrl,
-			bluesky: blueskyUrl,
-			linkedin: linkedinUrl,
-			avatarUrl,
-			// Keep original handles for display
-			handles: {
-				github: person.github,
-				twitter: person.twitter,
-				bluesky: person.bluesky,
-				linkedin: person.linkedin,
-			},
-		};
-	}),
+			return {
+				...person,
+				github: githubUrl,
+				twitter: twitterUrl,
+				bluesky: blueskyUrl,
+				linkedin: linkedinUrl,
+				avatarUrl,
+				// Keep original handles for display
+				handles: {
+					github: person.github,
+					twitter: person.twitter,
+					bluesky: person.bluesky,
+					linkedin: person.linkedin,
+				},
+			};
+		}),
 });
 
 const articles = defineCollection({
@@ -233,9 +248,7 @@ const articles = defineCollection({
 				series: reference("series").optional(),
 				technologies: z
 					.array(z.string().min(1))
-					.nonempty(
-						"At least one technology is required for each article",
-					),
+					.nonempty("At least one technology is required for each article"),
 				openGraph: z
 					.object({
 						title: z.string(),
@@ -278,7 +291,10 @@ const technologies = defineCollection({
 		base: resolveContentDirSync("technologies"),
 	}),
 	// createTechnologySchema uses zod@3.25 types; cast output for Astro's zod@4 inference
-	schema: () => createTechnologySchema(z as any) as unknown as import("astro/zod").ZodType<TechnologyData>,
+	schema: () =>
+		createTechnologySchema(
+			z as any,
+		) as unknown as import("astro/zod").ZodType<TechnologyData>,
 });
 
 const series = defineCollection({
@@ -421,9 +437,7 @@ const news = defineCollection({
 		description: z.string(),
 		publishedAt: z.coerce.date(),
 		authors: z.array(reference("people")).default(["rawkode"] as any),
-		technologies: z
-			.array(z.string().min(1))
-			.default([]),
+		technologies: z.array(z.string().min(1)).default([]),
 	}),
 });
 

@@ -48,7 +48,9 @@ const formatDate = (date: Date): string => {
 };
 
 const adrNumber = adr.id.match(/^(\d{4})-/)?.[1] || "0000";
-const adoptedLabel = adr.data.adoptedAt ? formatDate(adr.data.adoptedAt) : "Not adopted";
+const adoptedLabel = adr.data.adoptedAt
+	? formatDate(adr.data.adoptedAt)
+	: "Not adopted";
 const validAuthors = authors.filter((author) => author && author.data);
 ---
 

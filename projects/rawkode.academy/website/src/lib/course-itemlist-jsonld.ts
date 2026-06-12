@@ -46,9 +46,7 @@ export function buildCourseItemListJsonLd(
 	const { siteUrl, listUrl, listName, courses, limit = DEFAULT_LIMIT } = input;
 
 	const ordered = [...courses]
-		.sort(
-			(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-		)
+		.sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
 		.slice(0, Math.max(0, limit));
 
 	const provider = {

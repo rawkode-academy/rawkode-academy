@@ -19,7 +19,9 @@ const props = defineProps<{
 }>();
 
 const liveState = ref<StudioLiveState>(
-	props.initialState ? parseStudioLiveState(props.initialState) : emptyStudioLiveState(),
+	props.initialState
+		? parseStudioLiveState(props.initialState)
+		: emptyStudioLiveState(),
 );
 let pollTimer: number | undefined;
 
@@ -41,7 +43,9 @@ async function refreshLiveState(): Promise<void> {
 		`/api/studio/live-state?videoSlug=${encodeURIComponent(props.videoSlug)}`,
 	).catch(() => null);
 	if (!response?.ok) return;
-	liveState.value = parseStudioLiveState(await response.json().catch(() => null));
+	liveState.value = parseStudioLiveState(
+		await response.json().catch(() => null),
+	);
 }
 </script>
 

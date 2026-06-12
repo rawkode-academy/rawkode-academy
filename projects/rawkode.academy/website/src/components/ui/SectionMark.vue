@@ -31,7 +31,7 @@ const paddedNum = computed(() => {
 const dotColor = computed(
 	() =>
 		({
-			amber: "var(--editorial-amber)",
+			amber: "var(--editorial-amber-text)",
 			rust: "var(--editorial-rust)",
 			spruce: "var(--editorial-spruce)",
 			ink: "var(--editorial-ink)",

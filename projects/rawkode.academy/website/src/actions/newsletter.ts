@@ -141,16 +141,12 @@ export const newsletter = {
 			const prefixedUserId = createLearnerId(context.locals.user.id);
 			const source = input.source || `website:${input.channel}:unknown`;
 
-			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
-					{
-						audience: input.audience,
-						channel: input.channel,
-						status: "subscribed",
-						source,
-					},
-				);
+			const result = await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+				audience: input.audience,
+				channel: input.channel,
+				status: "subscribed",
+				source,
+			});
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_SUBSCRIBED,
@@ -193,16 +189,12 @@ export const newsletter = {
 			const prefixedUserId = createLearnerId(context.locals.user.id);
 			const source = input.source || "website:newsletter:unknown";
 
-			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
-					{
-						audience: input.audience,
-						channel: "newsletter",
-						status: "unsubscribed",
-						source,
-					},
-				);
+			const result = await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+				audience: input.audience,
+				channel: "newsletter",
+				status: "unsubscribed",
+				source,
+			});
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_UNSUBSCRIBED,
@@ -239,16 +231,12 @@ export const newsletter = {
 			const source = input.source || "website:settings";
 			const status = input.subscribed ? "subscribed" : "unsubscribed";
 
-			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
-					{
-						audience: input.audience,
-						channel: input.channel,
-						status,
-						source,
-					},
-				);
+			const result = await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+				audience: input.audience,
+				channel: input.channel,
+				status,
+				source,
+			});
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_PREFERENCE_UPDATED,
@@ -282,21 +270,16 @@ export const newsletter = {
 			const source = input.source || "website:settings:unsubscribe-all";
 
 			const allPrefs =
-				await env.EMAIL_PREFERENCES.getPreferences(
-					prefixedUserId,
-				);
+				await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId);
 
 			const unsubscribePromises = allPrefs.map(
 				(pref: { channel: string; audience: string }) =>
-					env.EMAIL_PREFERENCES.setPreference(
-						prefixedUserId,
-						{
-							audience: pref.audience,
-							channel: pref.channel,
-							status: "unsubscribed",
-							source,
-						},
-					),
+					env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+						audience: pref.audience,
+						channel: pref.channel,
+						status: "unsubscribed",
+						source,
+					}),
 			);
 
 			await Promise.all(unsubscribePromises);
@@ -332,16 +315,12 @@ export const newsletter = {
 			const source = input.source || `website:${input.channel}:unknown`;
 			const isAuthenticated = Boolean(context.locals.user);
 
-			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
-					{
-						audience: input.audience,
-						channel: input.channel,
-						status: "subscribed",
-						source,
-					},
-				);
+			const result = await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+				audience: input.audience,
+				channel: input.channel,
+				status: "subscribed",
+				source,
+			});
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_SUBSCRIBED,
@@ -392,16 +371,12 @@ export const newsletter = {
 			const source = input.source || "website:newsletter:unknown";
 			const isAuthenticated = Boolean(context.locals.user);
 
-			const result =
-				await env.EMAIL_PREFERENCES.setPreference(
-					prefixedUserId,
-					{
-						audience: input.audience,
-						channel: "newsletter",
-						status: "unsubscribed",
-						source,
-					},
-				);
+			const result = await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
+				audience: input.audience,
+				channel: "newsletter",
+				status: "unsubscribed",
+				source,
+			});
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_UNSUBSCRIBED,

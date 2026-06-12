@@ -247,7 +247,9 @@ const LEGACY_PERSON_REDIRECTS = new Map<string, string>([
 	["zach-wachtel", "zwachtel11"],
 ]);
 
-export function resolveLegacyPersonRedirect(pathname: string): string | undefined {
+export function resolveLegacyPersonRedirect(
+	pathname: string,
+): string | undefined {
 	const match = pathname.match(/^\/people\/([^/]+)$/);
 	if (!match) return undefined;
 	const slug = match[1];

@@ -67,9 +67,7 @@ describe("remarkTechAutolink", () => {
 	});
 
 	it("does not link inside fenced code blocks", async () => {
-		const out = await process(
-			"```sh\napko build config.yaml image.tar\n```\n",
-		);
+		const out = await process("```sh\napko build config.yaml image.tar\n```\n");
 		expect(out).not.toContain("[apko]");
 	});
 
@@ -88,9 +86,7 @@ describe("remarkTechAutolink", () => {
 	});
 
 	it("honors the default skip list (Go is not auto-linked)", async () => {
-		const out = await process(
-			"This service is written in Go. Go is fast.\n",
-		);
+		const out = await process("This service is written in Go. Go is fast.\n");
 		expect(out).not.toContain("/technology/go");
 	});
 
@@ -148,7 +144,7 @@ describe("remarkTechAutolink", () => {
 		// a plain Markdown paragraph outside the JSX should still get
 		// auto-linked normally.
 		const out = await process(
-			'<Note>This Kubernetes tip is inside an MDX component.</Note>\n\nKubernetes is also mentioned in plain prose.\n',
+			"<Note>This Kubernetes tip is inside an MDX component.</Note>\n\nKubernetes is also mentioned in plain prose.\n",
 		);
 		expect(out).toContain("[Kubernetes](/technology/kubernetes)");
 	});

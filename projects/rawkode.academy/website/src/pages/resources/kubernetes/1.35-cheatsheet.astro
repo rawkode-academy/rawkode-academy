@@ -31,7 +31,8 @@ if (user) {
 		const allPrefs = await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId);
 		hasNewsletterSubscription = allPrefs.some(
 			(pref: { channel: string; audience: string }) =>
-				pref.channel === "newsletter" && pref.audience === "kubernetes-release-updates"
+				pref.channel === "newsletter" &&
+				pref.audience === "kubernetes-release-updates",
 		);
 	} catch (e) {
 		console.error("Failed to fetch email preferences", e);
@@ -39,7 +40,10 @@ if (user) {
 }
 
 // User has access if they've subscribed (via preferences, cookie, or query param)
-const hasAccess = hasNewsletterSubscription || hasCheatsheetCookie || Astro.url.searchParams.has("subscribed");
+const hasAccess =
+	hasNewsletterSubscription ||
+	hasCheatsheetCookie ||
+	Astro.url.searchParams.has("subscribed");
 
 const pageTitle = "Kubernetes 1.35 Cheat Sheet";
 const pageDescription =

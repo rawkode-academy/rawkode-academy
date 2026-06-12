@@ -342,32 +342,20 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  left: 50%;
  transform: translateX(-50%) translateY(4px);
  padding: 0.625rem 1rem;
- background: rgba(17, 24, 39, 0.85);
- backdrop-filter: blur(16px);
- -webkit-backdrop-filter: blur(16px);
- border: 1px solid rgba(255, 255, 255, 0.1);
+ background: var(--surface-card);
+ border: 1px solid var(--editorial-hairline-strong);
  border-top: 2px solid rgb(var(--brand-primary));
- border-radius: 10px;
+ border-radius: var(--radius-3xl);
  font-size: 0.8rem;
  font-weight: 600;
  letter-spacing: 0.01em;
- color: #f9fafb;
+ color: var(--text-primary-content);
  white-space: nowrap;
- box-shadow:
- 0 8px 32px rgba(0, 0, 0, 0.3),
- 0 4px 12px rgba(0, 0, 0, 0.2),
- inset 0 0 0 1px rgba(255, 255, 255, 0.05);
  opacity: 0;
  visibility: hidden;
  transition: all var(--duration-base) var(--ease-standard);
  pointer-events: none;
  z-index: 100;
-}
-
-:global(html.dark) .tech-icon::after {
- background: rgba(0, 0, 0, 0.8);
- border-color: rgba(255, 255, 255, 0.15);
- border-top-color: rgb(var(--brand-primary));
 }
 
 /* Tooltip arrow */
@@ -381,17 +369,12 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  height: 0;
  border-left: 8px solid transparent;
  border-right: 8px solid transparent;
- border-top: 8px solid rgba(17, 24, 39, 0.85);
- filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+ border-top: 8px solid var(--editorial-hairline-strong);
  opacity: 0;
  visibility: hidden;
  transition: all var(--duration-base) var(--ease-standard);
  pointer-events: none;
  z-index: 100;
-}
-
-:global(html.dark) .tech-icon::before {
- border-top-color: rgba(0, 0, 0, 0.8);
 }
 
 .tech-icon:hover::after,

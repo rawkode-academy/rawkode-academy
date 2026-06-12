@@ -370,16 +370,28 @@ export const Surfaces: Story = {
 					Editorial Surfaces
 				</h2>
 				<p className="text-sm text-secondary-content mb-6 max-w-2xl">
-					Editorial design uses flat surfaces with 1px hairline borders —
-					no gradients, no backdrop blur, no depth shadows. The four
-					primary surface tokens cover ~95% of cases.
+					Editorial design uses flat surfaces with 1px hairline borders — no
+					gradients, no backdrop blur, no depth shadows. The four primary
+					surface tokens cover ~95% of cases.
 				</p>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{[
 						["Paper", "var(--editorial-paper)", "Default page background"],
-						["Paper deep", "var(--editorial-paper-deep)", "Secondary surface — card backgrounds, video frames"],
-						["Surface card muted", "var(--surface-card-muted)", "Hover state, subtle wells"],
-						["Ink", "var(--editorial-ink)", "Solid ink background (CTAs, panels)"],
+						[
+							"Paper deep",
+							"var(--editorial-paper-deep)",
+							"Secondary surface — card backgrounds, video frames",
+						],
+						[
+							"Surface card muted",
+							"var(--surface-card-muted)",
+							"Hover state, subtle wells",
+						],
+						[
+							"Ink",
+							"var(--editorial-ink)",
+							"Solid ink background (CTAs, panels)",
+						],
 					].map(([name, value, note]) => (
 						<div key={name}>
 							<p className="text-sm font-medium text-primary-content mb-2">
@@ -389,9 +401,7 @@ export const Surfaces: Story = {
 								className="w-full h-24 rounded-sm border border-[var(--editorial-hairline)]"
 								style={{ background: value }}
 							/>
-							<code className="text-xs text-muted block mt-2">
-								{value}
-							</code>
+							<code className="text-xs text-muted block mt-2">{value}</code>
 							<p className="text-xs text-muted mt-1">{note}</p>
 						</div>
 					))}

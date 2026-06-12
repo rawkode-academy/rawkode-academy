@@ -37,17 +37,11 @@ const {
 	siteUrl = "https://rawkode.academy",
 } = Astro.props;
 
-const sameAs = [website, source, documentation].filter(
-	(v): v is string => Boolean(v),
+const sameAs = [website, source, documentation].filter((v): v is string =>
+	Boolean(v),
 );
 
-const keywords = [
-	category,
-	subcategory,
-	cncfStatus,
-	...aliases,
-	...terms,
-]
+const keywords = [category, subcategory, cncfStatus, ...aliases, ...terms]
 	.filter((v): v is string => Boolean(v))
 	.filter((value, index, values) => values.indexOf(value) === index)
 	.join(", ");
@@ -58,21 +52,21 @@ const additionalProperty = [
 				"@type": "PropertyValue",
 				name: "Rawkode Academy matrix status",
 				value: matrixStatus,
-		 }
+			}
 		: undefined,
 	cncfStatus
 		? {
 				"@type": "PropertyValue",
 				name: "CNCF status",
 				value: cncfStatus,
-		 }
+			}
 		: undefined,
 	license
 		? {
 				"@type": "PropertyValue",
 				name: "License",
 				value: license,
-		 }
+			}
 		: undefined,
 ].filter(Boolean);
 

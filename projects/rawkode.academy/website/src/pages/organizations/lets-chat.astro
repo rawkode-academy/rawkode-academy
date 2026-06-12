@@ -1,11 +1,18 @@
 ---
+import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	decisionBriefMailto,
+	decisionBriefSubject,
+	decisionBriefTemplate,
+	partnershipTierNames,
+} from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactHref =
-	"mailto:david@rawkode.academy?subject=Decision%20brief%20request&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+const contactHref = decisionBriefMailto;
+const tierList = partnershipTierNames.join(", ");
 
 const requiredContext = [
 	"Company or product category",
@@ -69,9 +76,13 @@ const optionalContext = [
 			</div>
 			<div class="editorial-card editorial-card--paper">
 				<p class="editorial-card__body">
-					David will tell you whether the problem fits Signal, Adoption, Launch, or is not a fit. If a call is useful, it can be arranged from there.
+					David will tell you whether the problem fits {tierList}, or is not a fit. If a call is useful, it can be arranged from there.
 				</p>
 			</div>
+			<ContactFallback
+				subject={decisionBriefSubject}
+				template={decisionBriefTemplate}
+			/>
 		</section>
 	</EditorialShell>
 </Page>

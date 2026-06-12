@@ -67,7 +67,11 @@ async function connectPlayback(): Promise<void> {
 			},
 			abortController.signal,
 		);
-		if (connectVersion !== version || isUnmounted || abortController.signal.aborted) {
+		if (
+			connectVersion !== version ||
+			isUnmounted ||
+			abortController.signal.aborted
+		) {
 			await session.close();
 			return;
 		}
@@ -75,9 +79,8 @@ async function connectPlayback(): Promise<void> {
 	} catch (error) {
 		if (connectVersion !== version || isUnmounted) return;
 		status.value = "failed";
-		errorMessage.value = error instanceof Error
-			? error.message
-			: "Live playback failed.";
+		errorMessage.value =
+			error instanceof Error ? error.message : "Live playback failed.";
 		schedulePlaybackRetry();
 	}
 }
@@ -199,7 +202,10 @@ async function startWhepPlayback(
 	};
 }
 
-function getWhepResourceUrl(playbackUrl: string, response: Response): string | null {
+function getWhepResourceUrl(
+	playbackUrl: string,
+	response: Response,
+): string | null {
 	const location = response.headers.get("Location");
 	if (!location) return null;
 	return new URL(location, playbackUrl).href;

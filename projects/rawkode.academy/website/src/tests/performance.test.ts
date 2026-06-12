@@ -15,7 +15,7 @@ describe("Core Web Vitals Guardrails", () => {
 
 		expect(source).toContain("requestIdleCallback");
 		expect(source).toContain("respect_dnt: true");
-		expect(source).not.toContain("type=\"text/partytown\"");
+		expect(source).not.toContain('type="text/partytown"');
 	});
 
 	it("emits explicit canonical PostHog pageviews without consent hooks", () => {
@@ -52,8 +52,12 @@ describe("Core Web Vitals Guardrails", () => {
 		const preloadedFonts = source.match(/<Font[^>]*preload[^>]*>/g) ?? [];
 
 		expect(preloadedFonts).toHaveLength(2);
-		expect(source).toContain('<Font cssVariable="--font-instrument-serif" preload />');
-		expect(source).toContain('<Font cssVariable="--font-inter-tight" preload />');
+		expect(source).toContain(
+			'<Font cssVariable="--font-instrument-serif" preload />',
+		);
+		expect(source).toContain(
+			'<Font cssVariable="--font-inter-tight" preload />',
+		);
 		expect(source).not.toContain('--font-jetbrains-mono" preload');
 	});
 
@@ -77,7 +81,7 @@ describe("Core Web Vitals Guardrails", () => {
 		const source = readProjectFile("src/components/html/head.astro");
 
 		expect(source).not.toContain('@import "@/styles/global.css";');
-		expect(source).toContain('import.meta.env.DEV');
+		expect(source).toContain("import.meta.env.DEV");
 		expect(source).toContain('href="/src/styles/global.css"');
 	});
 
@@ -94,7 +98,9 @@ describe("Core Web Vitals Guardrails", () => {
 	});
 
 	it("keeps the watch tabs focused on supplemental content with resources selected by default", () => {
-		const source = readProjectFile("src/components/video/video-content-tabs.vue");
+		const source = readProjectFile(
+			"src/components/video/video-content-tabs.vue",
+		);
 
 		expect(source).not.toContain("descriptionHtml");
 		expect(source).not.toContain('label: "Description"');

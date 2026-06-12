@@ -37,7 +37,10 @@
 </template>
 
 <script setup lang="ts">
-interface NavLink { label: string; href: string }
+interface NavLink {
+	label: string;
+	href: string;
+}
 
 const props = withDefaults(
 	defineProps<{

@@ -35,11 +35,12 @@ function formatTechnologyKeyword(technology: string): string {
 	return technology
 		.split(/[-/]/g)
 		.filter(Boolean)
-		.map((segment) =>
-			TECHNOLOGY_KEYWORD_OVERRIDES.get(segment.toLowerCase()) ??
-			(segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`),
+		.map(
+			(segment) =>
+				TECHNOLOGY_KEYWORD_OVERRIDES.get(segment.toLowerCase()) ??
+				(segment.length <= 3
+					? segment.toUpperCase()
+					: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`),
 		)
 		.join(" ");
 }

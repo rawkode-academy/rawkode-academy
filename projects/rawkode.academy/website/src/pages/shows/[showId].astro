@@ -8,7 +8,7 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import PodcastSeriesJsonLd from "@/components/html/podcast-series-jsonld.astro";
 import VideoFeed from "@/components/video/video-feed.astro";
-import SubscribeLinks from "@/components/show/SubscribeLinks.vue";
+import SubscribeLinks from "@/components/show/SubscribeLinks.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { Image } from "astro:assets";
@@ -166,7 +166,7 @@ function formatDuration(seconds: number) {
  <!-- Hero -->
  <section class="relative overflow-hidden" style="border-bottom: 1px solid var(--surface-border)">
  <div class="absolute inset-0 bg-[var(--surface-card)]" aria-hidden="true"></div>
- <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(var(--color-primary-rgb,4,181,156),0.25),transparent)]" aria-hidden="true"></div>
+ <div class="absolute inset-0 bg-[rgba(var(--brand-primary),0.05)]" aria-hidden="true"></div>
 
  <div class="relative mx-auto max-w-7xl content-px pb-12 pt-8">
  <Breadcrumb elements={breadcrumbElements} />
@@ -219,7 +219,7 @@ function formatDuration(seconds: number) {
  </div>
  )}
 
- <SubscribeLinks links={showEntry.data.subscribeLinks} client:load />
+ <SubscribeLinks links={showEntry.data.subscribeLinks} />
  </div>
 
  <!-- Cover image or latest episode thumbnail -->

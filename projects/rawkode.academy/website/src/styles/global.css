@@ -13,23 +13,27 @@
 	   used by the legacy `rgb(var(--x))` and `rgba(var(--x), 0.x)` pattern
 	   throughout the codebase. New primitives should prefer the direct
 	   `--editorial-*` oklch tokens below for precision. */
-	--brand-primary: 47 135 114; /* spruce  — oklch(0.52 0.09 165) */
-	--brand-secondary: 218 142 58; /* amber   — oklch(0.72 0.15 65) */
-	--brand-accent: 176 102 76; /* rust    — oklch(0.55 0.13 40) */
+	--brand-primary: 35 115 86; /* spruce  — oklch(0.50 0.09 165) */
+	--brand-secondary: 154 85 0; /* amber-text — oklch(0.52 0.13 65) */
+	--brand-accent: 165 74 40; /* rust    — oklch(0.52 0.13 40) */
 
 	/* Editorial direct-color palette (preferred for new primitives) */
 	--editorial-paper: oklch(0.97 0.008 85);
 	--editorial-paper-deep: oklch(0.93 0.012 85);
 	--editorial-ink: oklch(0.18 0.02 60);
 	--editorial-ink-soft: oklch(0.36 0.015 60);
-	--editorial-ink-mute: oklch(0.58 0.012 60);
+	--editorial-ink-mute: oklch(0.51 0.012 60); /* ≥4.5:1 on paper + paper-deep */
 	--editorial-hairline: oklch(0.18 0.02 60 / 0.12);
 	--editorial-hairline-strong: oklch(0.18 0.02 60 / 0.22);
-	--editorial-spruce: oklch(0.52 0.09 165);
-	--editorial-spruce-dim: oklch(0.52 0.09 165 / 0.12);
+	--editorial-spruce: oklch(0.50 0.09 165); /* ≥4.5:1 on paper + paper-deep */
+	--editorial-spruce-dim: oklch(0.50 0.09 165 / 0.12);
 	--editorial-amber: oklch(0.72 0.15 65);
 	--editorial-amber-dim: oklch(0.72 0.15 65 / 0.14);
-	--editorial-rust: oklch(0.55 0.13 40);
+	/* Amber fails AA as light-mode text (2.35:1 on paper). Text/icon
+	   consumers use this darker companion; dots, borders and backgrounds
+	   keep --editorial-amber. Dark mode points both at the bright value. */
+	--editorial-amber-text: oklch(0.52 0.13 65);
+	--editorial-rust: oklch(0.52 0.13 40); /* ≥4.5:1 on paper + paper-deep */
 	--editorial-violet: oklch(0.50 0.13 290);
 
 	/* Light-mode surface tokens */
@@ -78,9 +82,20 @@ html.dark {
 	--editorial-paper-deep: oklch(0.26 0.014 280);
 	--editorial-ink: oklch(0.92 0.008 85); /* light text on dark */
 	--editorial-ink-soft: oklch(0.74 0.008 85);
-	--editorial-ink-mute: oklch(0.58 0.008 85);
+	--editorial-ink-mute: oklch(0.66 0.008 85); /* ≥4.5:1 on base + card */
 	--editorial-hairline: oklch(1 0 0 / 0.10);
 	--editorial-hairline-strong: oklch(1 0 0 / 0.18);
+
+	/* Accents brighten on dark ground — the light-mode values sit at
+	   ~3:1 against the dark card surface, below AA for text. The legacy
+	   triplets follow so every rgb(var(--brand-*)) consumer lifts too. */
+	--editorial-spruce: oklch(0.72 0.09 165);
+	--editorial-spruce-dim: oklch(0.72 0.09 165 / 0.14);
+	--editorial-rust: oklch(0.70 0.12 40);
+	--editorial-amber-text: oklch(0.72 0.15 65);
+	--brand-primary: 107 183 151; /* spruce dark — oklch(0.72 0.09 165) */
+	--brand-secondary: 218 142 58; /* amber — oklch(0.72 0.15 65) */
+	--brand-accent: 221 131 100; /* rust dark — oklch(0.70 0.12 40) */
 
 	--surface-base: oklch(0.14 0.01 280); /* ink-dark ground */
 	--surface-overlay: oklch(0.14 0.01 280 / 0.92);
@@ -94,12 +109,33 @@ html.dark {
 	--text-muted: var(--editorial-ink-mute);
 }
 
+/* Honour reduced-motion globally: components opt back in only where a
+   motion alternative is genuinely needed. Covers the `scroll-smooth`
+   class on <html>, skeleton pulses, and Vue <transition> fades without
+   per-component guards. */
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto !important;
+	}
+
+	*,
+	::before,
+	::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
 body {
 	position: relative;
 	min-height: 100vh;
 	background-color: var(--surface-base);
 	color: var(--text-primary-content);
-	overflow-x: hidden;
+	/* `clip` rather than `hidden`: clip does not create a scroll container,
+	   so position:sticky descendants keep working while horizontal
+	   scrolling is still prevented. */
+	overflow-x: clip;
 	font-family: var(--font-inter-tight), "Inter", -apple-system, system-ui, sans-serif;
 }
 
@@ -331,10 +367,6 @@ html.dark {
 		color: var(--editorial-spruce);
 	}
 
-	html.dark .eyebrow-label {
-		color: oklch(0.72 0.09 165);
-	}
-
 	.surface-divider {
 		border-color: var(--surface-border);
 	}
@@ -472,7 +504,7 @@ html.dark {
 		color: var(--editorial-ink);
 	}
 	.ed-aside--tip .ed-aside__icon     { color: var(--editorial-spruce); }
-	.ed-aside--caution .ed-aside__icon { color: var(--editorial-amber); }
+	.ed-aside--caution .ed-aside__icon { color: var(--editorial-amber-text); }
 	.ed-aside--danger .ed-aside__icon  { color: var(--editorial-rust); }
 
 	.ed-aside__body {
@@ -493,7 +525,7 @@ html.dark {
 		margin-bottom: 0.35rem;
 	}
 	.ed-aside--tip .ed-aside__label     { color: var(--editorial-spruce); }
-	.ed-aside--caution .ed-aside__label { color: var(--editorial-amber); }
+	.ed-aside--caution .ed-aside__label { color: var(--editorial-amber-text); }
 	.ed-aside--danger .ed-aside__label  { color: var(--editorial-rust); }
 	.ed-aside--info .ed-aside__label    { color: var(--editorial-ink); }
 
@@ -880,12 +912,17 @@ html.dark {
 		font-size: 1rem;
 	}
 
-	/* Tables — flat, hairline grid. */
+	/* Tables — flat, hairline grid. `display: block` + overflow-x lets
+	   wide markdown tables scroll horizontally on narrow viewports
+	   instead of being clipped. */
 	.prose table {
+		display: block;
 		width: 100%;
 		margin-bottom: 1.5rem;
 		font-size: 0.9375rem;
 		border-collapse: collapse;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.prose th {
@@ -1038,7 +1075,7 @@ html.dark {
 	}
 }
 
-/* Text-tone utilities, focus-ring, link-muted, transition-*, card-shadow-*,
+/* Text-tone utilities, focus-ring, transition-*, card-shadow-*,
    border-surface(-strong) all live in `uno.config.ts` now — registered as
    shortcuts / rules / preflights so `@apply` continues to work from scoped
    Astro/Vue <style> blocks through `@unocss/transformer-directives`. */

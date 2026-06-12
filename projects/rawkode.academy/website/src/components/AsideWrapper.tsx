@@ -28,7 +28,7 @@ const AsideWrapper: React.FC<AsideProps> = ({ variant, children }) => {
 				<IconComponent className="h-4 w-4" />
 			</div>
 			<div className="ed-aside__body">
-				<span className="ed-aside__label">§ {variant}</span>
+				<span className="ed-aside__label">{variant}</span>
 				{children}
 			</div>
 		</div>

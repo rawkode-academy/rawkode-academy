@@ -83,8 +83,9 @@ import {
 
 const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	try {
-		(window as { posthog?: { capture: (e: string, p?: unknown) => void } })
-			.posthog?.capture(event, properties);
+		(
+			window as { posthog?: { capture: (e: string, p?: unknown) => void } }
+		).posthog?.capture(event, properties);
 	} catch {
 		// Ignore tracking errors
 	}
@@ -119,7 +120,8 @@ const CURRENT_LABEL: Record<ColorSchemePreference, string> = {
 const label = computed(() => NEXT_DESCRIPTION[preference.value]);
 
 const ariaLabel = computed(
-	() => `${NEXT_DESCRIPTION[preference.value]} (current: ${CURRENT_LABEL[preference.value].toLowerCase()})`,
+	() =>
+		`${NEXT_DESCRIPTION[preference.value]} (current: ${CURRENT_LABEL[preference.value].toLowerCase()})`,
 );
 
 const handlePreferenceChange = (event: Event) => {
@@ -154,14 +156,15 @@ const buttonClasses = computed(() => {
 		"inline-flex items-center justify-center transition-smooth focus-ring";
 
 	const variantClasses = {
-		icon: "rounded-full hover:bg-gray-100 dark:hover:bg-gray-800",
+		icon: "rounded-full hover:bg-[var(--surface-card-muted)]",
 		button:
-			"rounded-lg border border-glass hover:bg-white/60 dark:hover:bg-gray-700/70",
+			"rounded-lg border border-[var(--surface-border)] hover:bg-[var(--surface-card-muted)]",
 	};
 
 	const sizeClasses = {
 		sm: props.variant === "button" ? "px-3 py-2" : "p-2",
-		md: props.variant === "button" ? "px-4 py-2.5" : "p-2.5",
+		// p-3 + 20px icon = 44px hit area for the default icon toggle.
+		md: props.variant === "button" ? "px-4 py-2.5 min-h-11" : "p-3",
 		lg: props.variant === "button" ? "px-5 py-3" : "p-3",
 	};
 
