@@ -136,6 +136,7 @@ function isCurrentPath(itemPath: string): boolean {
 													active && "ed-nav-item--active",
 												]}
 												aria-current={active ? "page" : undefined}
+												aria-label={item.name}
 												data-nav-name={item.name}
 											>
 												<svg
