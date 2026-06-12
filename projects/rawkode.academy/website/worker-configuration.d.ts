@@ -4,6 +4,7 @@
 interface __BaseEnv_Env {
 	SESSION: KVNamespace;
 	ASSETS: Fetcher;
+	PARTNERSHIP_APPLICATIONS: SendEmail;
 	CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce";
 	NOTIFICATIONS_VAPID_PUBLIC_KEY: "BDgtSVztEoFZDmO0Iz-MpBNaYv8ukGIQQYS8SwUBt7vMLXQT60-zjsyMTY8opukUBHoptdgm2u-uonWthz6e1SE";
 	EMOJI_REACTIONS: Fetcher /* platform-emoji-reactions-write-model */;

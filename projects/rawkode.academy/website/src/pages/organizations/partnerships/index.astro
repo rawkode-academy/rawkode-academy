@@ -1,9 +1,9 @@
 ---
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import ContactFallback from "@/components/organizations/ContactFallback.astro";
+import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
-	partnershipFitMailto,
 	partnershipFitSubject,
 	partnershipFitTemplate,
 	partnershipTiers,
@@ -11,8 +11,6 @@ import {
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
-
-const contactHref = partnershipFitMailto;
 
 const faqs = [
 	{
@@ -34,6 +32,11 @@ const faqs = [
 		question: "What changes month to month?",
 		answer:
 			"Your product, your competitors, and developer reactions keep moving, and the advice keeps pace. Each monthly review starts from what changed: what developers are saying, what your team shipped, and what you are deciding next.",
+	},
+	{
+		question: "Is there an annual option?",
+		answer:
+			"Yes. Pay for twelve months up front and get two free, on any plan. Otherwise every plan is month-to-month: start, pause, or cancel any month.",
 	},
 	{
 		question: "What does Community add beyond Adoption?",
@@ -60,7 +63,6 @@ const faqs = [
 const packages = partnershipTiers.map((tier) => ({
 	...tier,
 	cta: `Apply for ${tier.name}`,
-	href: tier.mailto,
 }));
 
 const anchors = [
@@ -143,7 +145,7 @@ const heroProofPoints = [
 		lede="Get a practitioner advisor in your team's Slack: someone who watches developers evaluate tools every week, and tells you what to fix, prove, or test next. The kind of guidance agencies and analyst firms charge five figures for, from your actual target audience."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href={contactHref}>Apply for a partnership</a>
+			<a class="editorial-button" href="#apply">Apply for a partnership</a>
 			<a class="editorial-button editorial-button--secondary" href="#packages">View plans and pricing</a>
 		</div>
 
@@ -221,7 +223,7 @@ const heroProofPoints = [
 				<p class="editorial-kicker">Partnership paths</p>
 				<h2 id="packages-title" class="editorial-section__title">Start where your adoption work needs support</h2>
 				<p class="editorial-section__lede">
-					Every plan starts with an application, and not every application is a fit. All plans are month-to-month: start, pause, or cancel any month. Signal puts the advisor in your Slack. Adoption adds video sessions and reviews of the work itself, and is the recommended path. Community adds the room, capped at ten teams.
+					Every plan starts with an application, and not every application is a fit. All plans are month-to-month: start, pause, or cancel any month, or pay for twelve months up front and get two free. Signal puts the advisor in your Slack. Adoption adds video sessions and reviews of the work itself, and is the recommended path. Community adds the room, capped at ten teams.
 				</p>
 			</div>
 			<dl class="partnerships-anchors">
@@ -240,7 +242,7 @@ const heroProofPoints = [
 							<h3 class="partnerships-package__name">{pkg.name}</h3>
 							<p class="partnerships-package__price">{pkg.price}</p>
 							{pkg.note && <p class="partnerships-package__note">{pkg.note}</p>}
-							<a class="editorial-button" href={pkg.href}>{pkg.cta}</a>
+							<a class="editorial-button" href="#apply" data-apply-path={pkg.name}>{pkg.cta}</a>
 						</div>
 						<div class="partnerships-package__summary">
 							<p class="editorial-card__body">{pkg.bestFor}</p>
@@ -291,23 +293,23 @@ const heroProofPoints = [
 			</div>
 		</section>
 
-		<section class="editorial-section" aria-labelledby="final-title">
-			<div class="editorial-callout">
-				<div>
-					<h2 id="final-title" class="editorial-section__title">Apply with your next adoption problem</h2>
-					<p class="editorial-card__body">
-						Your product, the developers you need to reach, and the adoption problem in front of you. That is enough to apply.
-					</p>
-				</div>
-				<a class="editorial-button" href={contactHref}>Apply for a partnership</a>
+		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
+			<div class="editorial-section__header">
+				<h2 id="apply-title" class="editorial-section__title">Apply with your next adoption problem</h2>
+				<p class="editorial-section__lede">
+					Your product, the developers you need to reach, and the adoption problem in front of you. That is enough to apply.
+				</p>
 			</div>
-			<p class="partnerships-contact-note partnerships-contact-note--footer">
-				Not sure what to send? <a href="/organizations/lets-chat">Here is what a useful first email includes</a>.
-			</p>
-			<ContactFallback
-				subject={partnershipFitSubject}
-				template={partnershipFitTemplate}
-			/>
+			<div class="partnerships-apply__body">
+				<PartnershipApplicationForm client:visible />
+				<p class="partnerships-contact-note">
+					Prefer email? The same application works as an email to David.
+				</p>
+				<ContactFallback
+					subject={partnershipFitSubject}
+					template={partnershipFitTemplate}
+				/>
+			</div>
 		</section>
 	</EditorialShell>
 </Page>
@@ -319,10 +321,6 @@ const heroProofPoints = [
 		line-height: 1.5;
 		margin: 0;
 		max-width: 38rem;
-	}
-
-	.partnerships-contact-note--footer {
-		margin-top: 1rem;
 	}
 
 	.partnerships-contact-note a {
@@ -388,6 +386,16 @@ const heroProofPoints = [
 
 	.partnerships-packages {
 		scroll-margin-top: 5rem;
+	}
+
+	.partnerships-apply {
+		scroll-margin-top: 5rem;
+	}
+
+	.partnerships-apply__body {
+		display: grid;
+		gap: 1.25rem;
+		justify-items: start;
 	}
 
 	.partnerships-anchors {

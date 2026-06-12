@@ -103,6 +103,15 @@ export const partnershipTiers: PartnershipTier[] = [
 /** "Signal, Adoption, or Community" for prose. */
 export const partnershipTierNames = partnershipTiers.map((tier) => tier.name);
 
+/** Options for the application form's preferred-path field. */
+export const applicationPaths = [
+	"Signal",
+	"Adoption",
+	"Community",
+	"Not sure yet",
+] as const;
+export type ApplicationPath = (typeof applicationPaths)[number];
+
 /** Boundaries: what the partnership intentionally does not include. */
 export const partnershipBoundaries = [
 	"Outsourced DevRel execution, or someone to run the function for you.",
