@@ -21,7 +21,22 @@ const faqs = [
 	{
 		question: "How does Slack access work?",
 		answer:
-			"Slack Connect links your workspace with Rawkode Academy's. It is advisory access, practitioner to practitioner: questions get considered answers, not instant ones, and anything bigger than a thread becomes the focus of the monthly review, or a video session on Adoption and Community. It is not on-call support.",
+			"Slack Connect links your workspace with Rawkode Academy's. It is advisory access, practitioner to practitioner: questions get considered answers within a couple of working days, and anything bigger than a thread becomes the focus of the monthly review, or a video session on Adoption and Community. It is not on-call support.",
+	},
+	{
+		question: "Why pay for Signal instead of just DMing David?",
+		answer:
+			"You can, and people do: when there is time, about whatever happens to be in front of him. Signal means your context is held month over month, your questions take priority over the inbox, and the review of your plans happens every month whether or not you remembered to ask.",
+	},
+	{
+		question: "Do you work with competing companies?",
+		answer:
+			"No. One company per problem space at a time, across every plan. If a direct competitor applies while we work together, they wait. Community cohorts are screened the same way: no two member teams compete directly.",
+	},
+	{
+		question: "Does a partnership affect Rawkode Live coverage?",
+		answer:
+			"No. Advisory clients get no coverage, and coverage decisions never consider who pays. The audience's trust is the product; it is not for sale.",
 	},
 	{
 		question: "What changes month to month?",
@@ -51,7 +66,7 @@ const faqs = [
 	{
 		question: "What is intentionally out of scope?",
 		answer:
-			"This is not outsourced DevRel, campaign planning, custom content production on demand, lead generation, audience rental, or open-ended access. Your team owns execution; Rawkode brings a practitioner's read, strategic critique, and adoption patterns that have worked elsewhere.",
+			"This is not outsourced DevRel, campaign planning, custom content production on demand, lead generation, audience rental, or open-ended access. Your team owns execution; Rawkode brings a practitioner's read, strategic critique, and adoption patterns that have worked elsewhere. And if you have your own DevRel team, the advice goes through them, not around them.",
 	},
 ];
 
@@ -72,9 +87,9 @@ const anchors = [
 			"A fraction of a retainer, no onboarding ramp, and no account manager between you and the practitioner.",
 	},
 	{
-		term: "Instead of an analyst report",
+		term: "Instead of a fractional hire",
 		detail:
-			"Advice from your target audience: the platform engineers and maintainers who evaluate, adopt, and veto tools.",
+			"A senior practitioner's judgement without a day rate, a ramp-up, or a seat on your payroll.",
 	},
 ];
 
@@ -137,7 +152,7 @@ const heroProofPoints = [
 	<EditorialShell
 		eyebrow="Partnerships for DevTools and infrastructure teams"
 		title="We help your team turn technical depth into developer adoption."
-		lede="Get a practitioner advisor in your team's Slack: someone who watches developers evaluate tools every week, and tells you what to fix, prove, or test next. The kind of guidance agencies and analyst firms charge five figures for, from your actual target audience."
+		lede="Get a practitioner advisor in your team's Slack: someone who watches developers evaluate tools every week, and tells you what to fix, prove, or test next. One advisor, direct access, no agency in between."
 	>
 		<div class="editorial-actions" slot="actions">
 			<a class="editorial-button" href="#apply">Apply for a partnership</a>
@@ -199,6 +214,10 @@ const heroProofPoints = [
 			</div>
 			<div class="partnerships-rows">
 				<article class="partnerships-row">
+					<h3 class="editorial-card__title">A new programme, an old practice</h3>
+					<p class="editorial-card__body">This programme is new, and the first teams in it are exactly that: first. The practice behind it is not. Hundreds of projects evaluated on air, dozens of teams worked with directly, and over two decades of trust in this field that does not get spent on bad advice.</p>
+				</article>
+				<article class="partnerships-row">
 					<h3 class="editorial-card__title">Courses built with partners</h3>
 					<p class="editorial-card__body">Teleport worked with Rawkode Academy on <a href="/courses/teleport-for-kubernetes">Teleport for Kubernetes</a>: a runnable course that meets developers where they evaluate, hands on, in a real cluster.</p>
 				</article>
@@ -209,6 +228,10 @@ const heroProofPoints = [
 				<article class="partnerships-row">
 					<h3 class="editorial-card__title">Rawkode Live</h3>
 					<p class="editorial-card__body"><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> show how technical people explain tradeoffs, evaluate tools, ask questions, and decide whether something is worth trying.</p>
+				</article>
+				<article class="partnerships-row">
+					<h3 class="editorial-card__title">No agency behind this page</h3>
+					<p class="editorial-card__body">The person who answers your Slack is the person on every episode: no account managers, no juniors, no handoffs.</p>
 				</article>
 			</div>
 		</section>
