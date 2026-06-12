@@ -2,6 +2,7 @@
 import { env } from "cloudflare:workers";
 import MLabel from "@/components/ui/MLabel.vue";
 import EditorialButton from "@/components/ui/EditorialButton.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import Page from "@/wrappers/page.astro";
 import { captureServerEvent, getDistinctId } from "@/server/analytics";
 import { shouldCaptureSearchAnalytics } from "@/lib/search-analytics";
@@ -190,8 +191,7 @@ const suggestions = [
 				</div>
 			) : ranked.length === 0 ? (
 				<div class="search-page__empty">
-					<MLabel>Nothing matched "{searchQuery}".</MLabel>
-					<p class="search-page__empty-body">
+					<EmptyState title={`Nothing matched "${searchQuery}".`}>
 						{activeType ? (
 							<>
 								No {SEARCH_TYPE_LABELS[activeType].toLowerCase()} matched. Try{" "}
@@ -203,7 +203,7 @@ const suggestions = [
 								<a href="/watch">the full video library</a>.
 							</>
 						)}
-					</p>
+					</EmptyState>
 				</div>
 			) : (
 				<div class="search-page__groups">
@@ -464,19 +464,6 @@ const suggestions = [
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-	}
-
-	.search-page__empty-body {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.9375rem;
-		color: var(--editorial-ink-soft);
-		margin: 0;
-	}
-
-	.search-page__empty a {
-		color: var(--editorial-spruce);
-		text-decoration: underline;
-		text-underline-offset: 2px;
 	}
 
 	@media (max-width: 720px) {
