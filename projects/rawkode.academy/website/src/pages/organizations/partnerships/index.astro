@@ -25,17 +25,22 @@ const faqs = [
 	{
 		question: "What happens in the first month?",
 		answer:
-			"We start with your current adoption challenge, the developers your product needs to reach, and the surfaces they already see. The first month ends with your first written brief: what developers see today, where they get stuck, and the next thing worth fixing.",
+			"The first month is a full baseline audit: your getting-started path run cold like a first-time evaluator, your docs and demos read the way developers read them, and a written brief on where adoption stands today and what to fix first.",
 	},
 	{
 		question: "What changes month to month?",
 		answer:
-			"Your product, your competitors, and developer reactions keep moving. Each brief builds on the last, so over time your team has a running record of what was tried, what the evidence said, and what to do next.",
+			"Your product, your competitors, and developer reactions keep moving. Each brief builds on the last, so over time your team owns a running record of what was tried, what the evidence said, and what to do next. Every third brief steps back into a quarterly review of how adoption is trending.",
 	},
 	{
-		question: "What does Council add beyond Adoption?",
+		question: "What does Community add beyond Adoption?",
 		answer:
-			"A monthly cohort session with the other Council member teams, case reviews of live docs, demos, and launches, an industry expert presentation with working Q&A, and written pattern notes your team can bring to its own roadmap.",
+			"A monthly cohort session with the other member teams, case reviews of live docs, demos, and launches, a monthly expert session with working Q&A, and written pattern notes your team can bring to its own roadmap.",
+	},
+	{
+		question: "Why is Community limited to ten teams?",
+		answer:
+			"The room only works if every team gets reviewed and every voice knows the others. Ten teams keeps the case reviews honest and the patterns specific. The first cohort kicks off in August 2026.",
 	},
 	{
 		question: "What do you need from our team?",
@@ -51,9 +56,27 @@ const faqs = [
 
 const packages = partnershipTiers.map((tier) => ({
 	...tier,
-	cta: `Ask about ${tier.name}`,
+	cta: tier.id === "community" ? "Apply for a seat" : `Ask about ${tier.name}`,
 	href: tier.mailto,
 }));
+
+const anchors = [
+	{
+		term: "Instead of a conference",
+		detail:
+			"A booth at one event costs more than a year of Signal, and the feedback ends when the hall closes.",
+	},
+	{
+		term: "Instead of an agency",
+		detail:
+			"A fraction of a retainer, no onboarding ramp, and no account manager between you and the practitioner.",
+	},
+	{
+		term: "Instead of an analyst report",
+		detail:
+			"Written by your target audience: the platform engineers and maintainers who evaluate, adopt, and veto tools.",
+	},
+];
 
 const inspectAreas = [
 	{
@@ -114,7 +137,7 @@ const heroProofPoints = [
 	<EditorialShell
 		eyebrow="Partnerships for DevTools and infrastructure teams"
 		title="We help your team turn technical depth into developer adoption."
-		lede="Rawkode works with the people shaping your product story: product, marketing, DevRel, sales engineering, and engineering. Every month, you get an outside practitioner's read on what developers see when they evaluate your product, and what to fix, prove, or test next."
+		lede="Every month, you get an outside practitioner's read on what developers see when they evaluate your product, and what to fix, prove, or test next. The kind of read agencies and analyst firms charge five figures for, from your actual target audience."
 	>
 		<div class="partnerships-cta" slot="actions">
 			<div class="editorial-actions">
@@ -200,9 +223,17 @@ const heroProofPoints = [
 				<p class="editorial-kicker">Partnership paths</p>
 				<h2 id="packages-title" class="editorial-section__title">Start where your adoption work needs support</h2>
 				<p class="editorial-section__lede">
-					Each path is month-to-month, no annual lock-in. Start with Signal if you want a recurring outside read. Choose Adoption to turn that read into one focused experiment each month. Choose Council when peer comparison and expert perspective would make the work stronger.
+					Each path is month-to-month: start, pause, or cancel any month. Start with Signal for the recurring outside read. Choose Adoption to kill one blocker per month with your team. Apply for Community when peer comparison would sharpen the work: ten seats, first cohort in August.
 				</p>
 			</div>
+			<dl class="partnerships-anchors">
+				{anchors.map((anchor) => (
+					<div class="partnerships-anchors__item">
+						<dt>{anchor.term}</dt>
+						<dd>{anchor.detail}</dd>
+					</div>
+				))}
+			</dl>
 			<div class="partnerships-package-grid">
 				{packages.map((pkg) => (
 					<article class:list={["editorial-card", "partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
@@ -210,6 +241,7 @@ const heroProofPoints = [
 							<p class="editorial-kicker">{pkg.label}</p>
 							<h3 class="partnerships-package__name">{pkg.name}</h3>
 							<p class="partnerships-package__price">{pkg.price}</p>
+							{pkg.note && <p class="partnerships-package__note">{pkg.note}</p>}
 							<a class="editorial-button" href={pkg.href}>{pkg.cta}</a>
 						</div>
 						<div class="partnerships-package__summary">
@@ -237,7 +269,7 @@ const heroProofPoints = [
 				<article class="partnerships-row partnerships-row--numbered">
 					<span class="partnerships-step">02</span>
 					<h3 class="editorial-card__title">Get a fit reply</h3>
-					<p class="editorial-card__body">David Flanagan, Rawkode Academy's founder, will reply with whether this fits Signal, Adoption, or Council, or say plainly that it is not a good fit.</p>
+					<p class="editorial-card__body">David Flanagan, Rawkode Academy's founder, will reply with whether this fits Signal, Adoption, or Community, or say plainly that it is not a good fit.</p>
 				</article>
 				<article class="partnerships-row partnerships-row--numbered">
 					<span class="partnerships-step">03</span>
@@ -364,6 +396,52 @@ const heroProofPoints = [
 
 	.partnerships-packages {
 		scroll-margin-top: 5rem;
+	}
+
+	.partnerships-anchors {
+		display: grid;
+		gap: 1rem;
+		margin: 0 0 1.5rem;
+	}
+
+	.partnerships-anchors__item {
+		border-top: 1px solid var(--editorial-hairline-strong);
+		padding-top: 0.85rem;
+		display: grid;
+		gap: 0.35rem;
+	}
+
+	.partnerships-anchors dt {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+
+	.partnerships-anchors dd {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.94rem;
+		line-height: 1.55;
+		color: var(--editorial-ink-soft);
+		margin: 0;
+	}
+
+	.partnerships-package__note {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-rust);
+		margin: 0;
+	}
+
+	@media (min-width: 720px) {
+		.partnerships-anchors {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
 	}
 
 	.partnerships-packages__header {

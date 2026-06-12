@@ -26,6 +26,8 @@ export interface PartnershipTier {
 	outcome: string;
 	included: string[];
 	featured: boolean;
+	/** Scarcity or availability note, e.g. seat limits and cohort dates. */
+	note?: string;
 	/** Prefilled mailto for this tier. */
 	mailto: string;
 }
@@ -47,14 +49,15 @@ export const partnershipTiers: PartnershipTier[] = [
 		price: "£1,000 / month",
 		priceShort: "£1k/mo",
 		bestFor:
-			"Teams that want a recurring outside read on what developers understand, question, trust, or ignore.",
+			"Teams that want a recurring outside read without another meeting. Fully async: the brief is the meeting.",
 		outcome:
-			"A clearer picture, every month, of where adoption is getting stuck and what is worth improving next.",
+			"Know what developers hit in their first fifteen minutes, every month, before your funnel data tells you.",
 		included: [
-			"A written monthly brief covering your docs, demos, positioning, and what developers are saying in public",
-			"A running log of adoption blockers, tracked month over month",
+			"Your getting-started path, run cold every month like a first-time evaluator, with time-to-first-success tracked",
+			"A written monthly brief: what developers see in your docs, demos, and positioning, and what they say in public",
+			"A running log of adoption blockers, opened and closed month over month",
 			"One clear recommendation: what to keep, change, prove, pause, or escalate",
-			"An optional public field note when the learning belongs in the community",
+			"An optional public field note, only with your approval, when the learning belongs in the community",
 		],
 		featured: false,
 		mailto: buildMailto("Signal partnership", tierBriefBody("Signal")),
@@ -66,42 +69,43 @@ export const partnershipTiers: PartnershipTier[] = [
 		price: "£2,000 / month",
 		priceShort: "£2k/mo",
 		bestFor:
-			"Teams ready to turn that recurring read into one focused adoption experiment each month.",
+			"Teams ready to turn that recurring read into one focused experiment each month, working directly with David.",
 		outcome:
-			"One adoption blocker per month moved from vague concern to a tested answer your team can act on.",
+			"One adoption blocker killed per month, with evidence your whole team can reuse.",
 		included: [
 			"Everything in Signal",
 			"A monthly working session with your team on one adoption blocker",
 			"A written experiment plan: the audience, the blocker, the hypothesis, and what success looks like",
-			"A shared artifact your team can reuse in docs, demos, onboarding, or sales conversations",
-			"An adoption map updated each month: what changed, what is still unclear, what to test next",
+			"A growing experiment record: what was tested, what the evidence said, what changed",
+			"A one-page monthly summary written for the people you report to",
 		],
 		featured: true,
 		mailto: buildMailto("Adoption partnership", tierBriefBody("Adoption")),
 	},
 	{
-		id: "council",
-		name: "Council",
-		label: "Cohort",
+		id: "community",
+		name: "Community",
+		label: "10 seats",
 		price: "£3,000 / month",
 		priceShort: "£3k/mo",
 		bestFor:
-			"Teams that want peer comparison, expert perspective, and a shared room for serious developer adoption problems.",
+			"Teams that want peer comparison and expert perspective on serious developer adoption problems, in a room that stays small.",
 		outcome:
-			"Patterns from other member teams and outside experts, applied to your own adoption decisions.",
+			"Patterns from the other member teams and invited experts, applied to your own adoption decisions.",
 		included: [
 			"Everything in Adoption",
-			"A monthly cohort session with the other Council member teams",
+			"A monthly cohort session with the other member teams, capped at ten companies",
 			"Case reviews of live docs, demos, onboarding, and launches: yours and theirs",
-			"A monthly industry expert presentation with working Q&A",
-			"Written pattern notes: risks, experiments, and expert takeaways you can bring to your roadmap",
+			"A monthly expert session drawn from the Rawkode network: maintainers, platform leads, and CNCF voices, with the calendar published a quarter ahead",
+			"Written pattern notes: risks, experiments, and takeaways you can bring to your roadmap",
 		],
 		featured: false,
-		mailto: buildMailto("Council partnership", tierBriefBody("Council")),
+		note: "Limited to 10 teams. First cohort kicks off August 2026.",
+		mailto: buildMailto("Community partnership", tierBriefBody("Community")),
 	},
 ];
 
-/** "Signal, Adoption, or Council" for prose. */
+/** "Signal, Adoption, or Community" for prose. */
 export const partnershipTierNames = partnershipTiers.map((tier) => tier.name);
 
 /** Boundaries: what the partnership intentionally does not include. */
