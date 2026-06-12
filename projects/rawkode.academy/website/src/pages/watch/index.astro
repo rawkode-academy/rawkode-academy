@@ -11,6 +11,7 @@ import { formatStreamingCountdown } from "@/lib/streaming-countdown";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { videoTransitionName } from "@/utils/view-transition-name";
 
 import VideoMasthead from "@/components/video/VideoMasthead.astro";
 import VideoHero from "@/components/video/VideoHero.astro";
@@ -432,6 +433,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 						: new Date(featuredVideo.publishedAt),
 				)}
 				primaryCtaLabel="Watch session →"
+				vtName={videoTransitionName(featuredVideo.slug)}
 			/>
 		)}
 
@@ -496,6 +498,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 							? v.publishedAt
 							: new Date(v.publishedAt),
 					)}
+					vtName={videoTransitionName(v.slug)}
 				/>
 			))}
 		</div>

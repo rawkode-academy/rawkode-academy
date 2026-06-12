@@ -122,13 +122,42 @@ html.dark {
 	--text-muted: var(--editorial-ink-mute);
 }
 
+/* Cross-document view transitions — native MPA transitions, no client
+   router. Full page loads still happen (scripts, analytics, and auth all
+   behave exactly as before); supporting browsers crossfade between pages
+   and morph any element whose `view-transition-name` matches across the
+   two documents (video stills → the watch-page player frame). Browsers
+   without support simply navigate. */
+@view-transition {
+	navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: var(--duration-base);
+	animation-timing-function: var(--ease-standard);
+}
+
 /* Honour reduced-motion globally: components opt back in only where a
    motion alternative is genuinely needed. Covers the `scroll-smooth`
-   class on <html>, skeleton pulses, and Vue <transition> fades without
-   per-component guards. */
+   class on <html>, skeleton pulses, view transitions, and Vue
+   <transition> fades without per-component guards. */
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto !important;
+	}
+
+	@view-transition {
+		navigation: none;
+	}
+
+	/* Belt and braces for engines that ignore @view-transition inside a
+	   conditional group: the universal selector below can't reach the
+	   ::view-transition pseudo-tree, so kill its animations explicitly. */
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
 	}
 
 	*,
