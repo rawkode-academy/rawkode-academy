@@ -9,6 +9,7 @@ import {
 import CourseModules from "@/components/courses/CourseModules.astro";
 import CourseSignupFormCompact from "@/components/courses/CourseSignupFormCompact.astro";
 import CourseDetailHero from "@/components/courses/CourseDetailHero.vue";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import CourseJsonLd from "@/components/html/course-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -118,6 +119,14 @@ function getResourceHref(
 			authors={authors}
 		/>
 	)}
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Courses", link: "/courses" },
+			{ title: course.data.title, link: `/courses/${course.id}` },
+		]}
+	/>
 	
 	<!-- Hero Section with Signup Form -->
 	<CourseDetailHero

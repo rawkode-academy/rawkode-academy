@@ -13,6 +13,7 @@ import EditorialButton from "@/components/ui/EditorialButton.vue";
 import MLabel from "@/components/ui/MLabel.vue";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 
 export const prerender = true;
 
@@ -103,6 +104,14 @@ const pageDescription = learningPath.data.description;
 		learningPath={learningPath}
 		authors={authors}
 		technologyLabels={technologyLabels}
+	/>
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Learning Paths", link: "/learning-paths" },
+			{ title: learningPath.data.title, link: `/learning-paths/${learningPath.id}` },
+		]}
 	/>
 
 	<div class="path-detail">

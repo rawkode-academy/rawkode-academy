@@ -3,6 +3,8 @@ import {
 	groupTranscriptParagraphs,
 	parseWebVTT,
 	transcriptParagraphToText,
+	transcriptParagraphsToText,
+	type TranscriptParagraphText,
 } from "@/utils/video-transcript";
 
 export type WatchVideoSeoTextSource = "transcript" | "summary" | "none";
@@ -13,6 +15,7 @@ export interface WatchVideoSeoTextState {
 	previewDescription: string;
 	previewParagraphs: string[];
 	transcriptExcerpt?: string;
+	transcriptParagraphs?: TranscriptParagraphText[];
 }
 
 type ChapterLike = {
@@ -135,6 +138,8 @@ export async function buildWatchVideoSeoText({
 					previewDescription: TRANSCRIPT_PREVIEW_DESCRIPTION,
 					previewParagraphs,
 					transcriptExcerpt: buildTranscriptExcerpt(transcriptParagraphs),
+					transcriptParagraphs:
+						transcriptParagraphsToText(transcriptParagraphs),
 				};
 			}
 		}
