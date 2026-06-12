@@ -3,7 +3,6 @@ import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
-	PARTNERSHIP_EMAIL,
 	partnershipFitMailto,
 	partnershipFitSubject,
 	partnershipFitTemplate,
@@ -13,7 +12,6 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactEmail = PARTNERSHIP_EMAIL;
 const contactHref = partnershipFitMailto;
 
 const faqs = [
@@ -25,22 +23,22 @@ const faqs = [
 	{
 		question: "What happens in the first month?",
 		answer:
-			"We open a shared Slack channel and run a full baseline audit: your getting-started path run cold like a first-time evaluator, your docs and demos read the way developers read them, and a written brief on where adoption stands today and what to fix first.",
+			"We open Slack Connect between our workspaces and start with your current plans and objectives: what is in motion, where adoption stands, and what to focus on first.",
 	},
 	{
 		question: "How does Slack access work?",
 		answer:
-			"David joins a shared channel with your team. It is advisory access, practitioner to practitioner: questions get considered answers, not instant ones, and anything bigger than a thread becomes part of the monthly brief, or a video session on Adoption and Community. It is not on-call support.",
+			"Slack Connect links your workspace with Rawkode Academy's. It is advisory access, practitioner to practitioner: questions get considered answers, not instant ones, and anything bigger than a thread becomes the focus of the monthly review, or a video session on Adoption and Community. It is not on-call support.",
 	},
 	{
 		question: "What changes month to month?",
 		answer:
-			"Your product, your competitors, and developer reactions keep moving. Each brief builds on the last, so over time your team owns a running record of what was tried, what the evidence said, and what to do next. Every third brief steps back into a quarterly review of how adoption is trending.",
+			"Your product, your competitors, and developer reactions keep moving, and the advice keeps pace. Each monthly review starts from what changed: what developers are saying, what your team shipped, and what you are deciding next.",
 	},
 	{
 		question: "What does Community add beyond Adoption?",
 		answer:
-			"A monthly cohort session with the other member teams, case reviews of live docs, demos, and launches, a monthly expert session with working Q&A, and written pattern notes your team can bring to its own roadmap.",
+			"A monthly cohort session with the other member teams, case reviews of live docs, demos, and launches, and a monthly expert session with working Q&A.",
 	},
 	{
 		question: "Why is Community limited to ten teams?",
@@ -79,7 +77,7 @@ const anchors = [
 	{
 		term: "Instead of an analyst report",
 		detail:
-			"Written by your target audience: the platform engineers and maintainers who evaluate, adopt, and veto tools.",
+			"Advice from your target audience: the platform engineers and maintainers who evaluate, adopt, and veto tools.",
 	},
 ];
 
@@ -108,12 +106,12 @@ const loopSteps = [
 		body: "Positioning questions, launch reviews, demo feedback, a tough technical objection: raise it in Slack and get a practitioner's answer.",
 	},
 	{
-		title: "Get the evaluator's view monthly.",
-		body: "Your getting-started path run cold, your docs and demos read like a first-time evaluator, and a written brief on what changed.",
+		title: "Review the plan monthly.",
+		body: "Once a month, we look at your high-level plans and objectives: what developers are telling you, what changed, and where to focus next.",
 	},
 	{
-		title: "Keep the record.",
-		body: "The blocker log and experiment record compound month over month into your team's institutional memory for adoption decisions.",
+		title: "Decide what's next.",
+		body: "Each review ends with clear calls: what to keep, change, prove, pause, or stop.",
 	},
 ];
 
@@ -144,14 +142,9 @@ const heroProofPoints = [
 		title="We help your team turn technical depth into developer adoption."
 		lede="Get a practitioner advisor in your team's Slack: someone who watches developers evaluate tools every week, and tells you what to fix, prove, or test next. The kind of guidance agencies and analyst firms charge five figures for, from your actual target audience."
 	>
-		<div class="partnerships-cta" slot="actions">
-			<div class="editorial-actions">
-				<a class="editorial-button" href={contactHref}>Email David</a>
-				<a class="editorial-button editorial-button--secondary" href="#packages">View plans and pricing</a>
-			</div>
-			<p class="partnerships-contact-note">
-				Prefer to write your own email? <a href={`mailto:${contactEmail}`}>{contactEmail}</a> works too. <a href="/organizations/lets-chat">See what a useful first email includes</a>.
-			</p>
+		<div class="editorial-actions" slot="actions">
+			<a class="editorial-button" href={contactHref}>Email David</a>
+			<a class="editorial-button editorial-button--secondary" href="#packages">View plans and pricing</a>
 		</div>
 
 		<section class="editorial-section" aria-label="How the partnership works">
@@ -186,7 +179,7 @@ const heroProofPoints = [
 			<div class="editorial-section__header">
 				<h2 id="loop-title" class="editorial-section__title">An advisor on tap, not a monthly report</h2>
 				<p class="editorial-section__lede">
-					Questions do not wait for a scheduled call. Ask in Slack as they come up; every month, the written brief captures what developers see, what changed, and what to do next.
+					Questions do not wait for a scheduled call. Ask in Slack as they come up; once a month, we step back and look at the bigger picture together.
 				</p>
 			</div>
 			<div class="partnerships-rows">
@@ -279,7 +272,7 @@ const heroProofPoints = [
 				<article class="partnerships-row partnerships-row--numbered">
 					<span class="partnerships-step">03</span>
 					<h3 class="editorial-card__title">Work with your team</h3>
-					<p class="editorial-card__body">A shared Slack channel opens and the monthly cadence starts. Every month ends with something your team can reuse: a written brief, an experiment plan, or cohort notes.</p>
+					<p class="editorial-card__body">Slack Connect opens and the monthly rhythm starts: advice as questions come up, and a review of your plans and objectives each month.</p>
 				</article>
 			</div>
 		</section>
@@ -320,12 +313,6 @@ const heroProofPoints = [
 </Page>
 
 <style>
-	.partnerships-cta {
-		display: flex;
-		flex-direction: column;
-		gap: 0.85rem;
-	}
-
 	.partnerships-contact-note {
 		color: var(--editorial-ink-soft);
 		font-size: 0.88rem;

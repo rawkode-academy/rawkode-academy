@@ -49,15 +49,12 @@ export const partnershipTiers: PartnershipTier[] = [
 		price: "£1,000 / month",
 		priceShort: "£1k/mo",
 		bestFor:
-			"Teams that want an advisor in their Slack and a recurring outside read, without another meeting on the calendar.",
+			"Teams that want an advisor in their Slack without adding another meeting to the calendar.",
 		outcome:
-			"Know what developers hit in their first fifteen minutes, every month, before your funnel data tells you.",
+			"Your plans and objectives, checked monthly against how developers actually evaluate tools.",
 		included: [
-			"David in your Slack: async advice on positioning, docs, demos, launches, and objections as they come up",
-			"Your getting-started path, run cold every month like a first-time evaluator, with time-to-first-success tracked",
-			"A written monthly brief: what developers see in your docs, demos, and positioning, and what they say in public",
-			"A running log of adoption blockers, opened and closed month over month",
-			"An optional public field note, only with your approval, when the learning belongs in the community",
+			"Slack Connect with Rawkode Academy: advice on positioning, docs, demos, launches, and objections as they come up",
+			"A monthly review of your high-level plans and objectives",
 		],
 		featured: false,
 		mailto: buildMailto("Signal partnership", tierBriefBody("Signal")),
@@ -71,13 +68,11 @@ export const partnershipTiers: PartnershipTier[] = [
 		bestFor:
 			"Teams that want the advisor on video with the people doing the work, not just in threads.",
 		outcome:
-			"Adoption blockers moved from opinion to evidence, with artifacts your whole team can reuse.",
+			"Adoption blockers worked through together, with evidence instead of opinion.",
 		included: [
 			"Everything in Signal",
-			"A monthly video working session with your team on whatever is blocking adoption right now",
+			"A monthly video working session with your team on whatever matters most right now",
 			"Experiment plans when a blocker needs evidence: the audience, the hypothesis, and what success looks like",
-			"A growing experiment record: what was tested, what the evidence said, what changed",
-			"A one-page monthly summary written for the people you report to",
 		],
 		featured: true,
 		mailto: buildMailto("Adoption partnership", tierBriefBody("Adoption")),
@@ -97,7 +92,6 @@ export const partnershipTiers: PartnershipTier[] = [
 			"A monthly cohort session with the other member teams, capped at ten companies",
 			"Case reviews of live docs, demos, onboarding, and launches: yours and theirs",
 			"A monthly expert session drawn from the Rawkode network: maintainers, platform leads, and CNCF voices, with the calendar published a quarter ahead",
-			"Written pattern notes: risks, experiments, and takeaways you can bring to your roadmap",
 		],
 		featured: false,
 		note: "Limited to 10 teams. First cohort kicks off August 2026.",
