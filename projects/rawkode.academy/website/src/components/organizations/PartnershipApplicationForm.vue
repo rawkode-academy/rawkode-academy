@@ -3,7 +3,7 @@
 		<h3>Application received</h3>
 		<p>David reads every application and replies either way.</p>
 	</div>
-	<form v-else class="application-form" novalidate @submit.prevent="submit">
+	<form v-else class="application-form" @submit.prevent="submit">
 		<p v-if="error" class="application-form__error" role="alert">{{ error }}</p>
 
 		<div class="application-form__row application-form__row--split">
@@ -15,8 +15,10 @@
 					name="name"
 					autocomplete="name"
 					required
+					:aria-invalid="Boolean(fieldErrors.name)"
 					:disabled="loading"
 				/>
+				<small v-if="fieldErrors.name" class="application-form__field-error">{{ fieldErrors.name }}</small>
 			</label>
 			<label class="application-form__field">
 				<span>Work email</span>
@@ -26,8 +28,10 @@
 					name="email"
 					autocomplete="email"
 					required
+					:aria-invalid="Boolean(fieldErrors.email)"
 					:disabled="loading"
 				/>
+				<small v-if="fieldErrors.email" class="application-form__field-error">{{ fieldErrors.email }}</small>
 			</label>
 		</div>
 
@@ -40,8 +44,10 @@
 					name="company"
 					autocomplete="organization"
 					required
+					:aria-invalid="Boolean(fieldErrors.company)"
 					:disabled="loading"
 				/>
+				<small v-if="fieldErrors.company" class="application-form__field-error">{{ fieldErrors.company }}</small>
 			</label>
 			<label class="application-form__field">
 				<span>Preferred plan</span>
@@ -60,8 +66,10 @@
 				type="text"
 				name="targetDevelopers"
 				required
+				:aria-invalid="Boolean(fieldErrors.targetDevelopers)"
 				:disabled="loading"
 			/>
+			<small v-if="fieldErrors.targetDevelopers" class="application-form__field-error">{{ fieldErrors.targetDevelopers }}</small>
 		</label>
 
 		<label class="application-form__field">
@@ -71,13 +79,16 @@
 				name="challenge"
 				rows="4"
 				required
+				:aria-invalid="Boolean(fieldErrors.challenge)"
 				:disabled="loading"
 			></textarea>
+			<small v-if="fieldErrors.challenge" class="application-form__field-error">{{ fieldErrors.challenge }}</small>
 		</label>
 
 		<label class="application-form__field">
 			<span>Links worth a look <em>(optional)</em></span>
-			<input v-model="links" type="text" name="links" :disabled="loading" />
+			<input v-model="links" type="text" name="links" :aria-invalid="Boolean(fieldErrors.links)" :disabled="loading" />
+			<small v-if="fieldErrors.links" class="application-form__field-error">{{ fieldErrors.links }}</small>
 		</label>
 
 		<div class="application-form__trap" aria-hidden="true">
@@ -101,8 +112,11 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from "vue";
-import { actions } from "astro:actions";
+import { actions, isInputError } from "astro:actions";
 import { applicationPaths, type ApplicationPath } from "@/lib/partnerships";
+
+const FALLBACK_ERROR =
+	"We could not send your application. Please email david@rawkode.academy directly.";
 
 const name = ref("");
 const email = ref("");
@@ -116,6 +130,7 @@ const website = ref("");
 const loading = ref(false);
 const submitted = ref(false);
 const error = ref("");
+const fieldErrors = ref<Record<string, string>>({});
 
 const isApplicationPath = (value: string): value is ApplicationPath =>
 	(applicationPaths as readonly string[]).includes(value);
@@ -141,6 +156,7 @@ onBeforeUnmount(() => {
 
 async function submit() {
 	error.value = "";
+	fieldErrors.value = {};
 	loading.value = true;
 
 	try {
@@ -156,15 +172,22 @@ async function submit() {
 		});
 
 		if (result.error) {
-			error.value =
-				result.error.message ||
-				"We could not send your application. Please email david@rawkode.academy directly.";
+			if (isInputError(result.error)) {
+				fieldErrors.value = Object.fromEntries(
+					Object.entries(result.error.fields).map(([field, messages]) => [
+						field,
+						messages?.[0] ?? "Please check this field",
+					]),
+				);
+				error.value = "Please check the highlighted fields.";
+			} else {
+				error.value = result.error.message || FALLBACK_ERROR;
+			}
 		} else {
 			submitted.value = true;
 		}
 	} catch {
-		error.value =
-			"We could not send your application. Please email david@rawkode.academy directly.";
+		error.value = FALLBACK_ERROR;
 	} finally {
 		loading.value = false;
 	}
@@ -237,6 +260,18 @@ async function submit() {
 .application-form__field select:disabled,
 .application-form__field textarea:disabled {
 	opacity: 0.6;
+}
+
+.application-form__field input[aria-invalid="true"],
+.application-form__field textarea[aria-invalid="true"] {
+	border-color: var(--editorial-rust);
+}
+
+.application-form__field-error {
+	color: var(--editorial-rust);
+	font-family: var(--font-inter-tight), system-ui, sans-serif;
+	font-size: 0.8rem;
+	line-height: 1.4;
 }
 
 .application-form__error {
