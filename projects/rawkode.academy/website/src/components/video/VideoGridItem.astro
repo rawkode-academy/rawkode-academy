@@ -11,7 +11,6 @@ interface Props {
 	thumbnailUrl?: string | undefined;
 	author?: string | undefined;
 	date?: string | undefined;
-	viewerCount?: number | undefined;
 	/** Cross-document view-transition name. The same name on the watch
 	 * page's player frame morphs this still into the player on click. */
 	vtName?: string | undefined;
@@ -26,7 +25,6 @@ const {
 	thumbnailUrl,
 	author,
 	date,
-	viewerCount,
 	vtName,
 } = Astro.props as Props;
 ---
@@ -54,11 +52,7 @@ const {
 		<h3 class="video-grid-item__title">{title}</h3>
 		<div class="video-grid-item__footer">
 			{author && <MLabel>{author}</MLabel>}
-			<MLabel>
-				{[date, viewerCount !== undefined ? `${viewerCount.toLocaleString()} views` : null]
-					.filter(Boolean)
-					.join(" · ")}
-			</MLabel>
+			{date && <MLabel>{date}</MLabel>}
 		</div>
 	</div>
 </a>

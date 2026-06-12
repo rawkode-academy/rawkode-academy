@@ -2,6 +2,7 @@
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import SeriesArticles from "@/components/articles/series/SeriesArticles.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
@@ -50,6 +51,14 @@ const imageUrl = await computeImageUrl(series);
 	description={`${series.data.title} - a multi-part article series from Rawkode Academy covering hands-on cloud native and Kubernetes engineering.`}
 	image={{ image: imageUrl }}
 >
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Series", link: "/series" },
+			{ title: series.data.title, link: `/series/${series.id}` },
+		]}
+	/>
 	<div class="mx-auto max-w-3xl content-px py-12">
 		<h1>
 			{series.data.title}

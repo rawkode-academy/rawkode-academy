@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntry } from "astro:content";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import VideoMetadata from "@/components/html/video-metadata.astro";
 import VideoPlayer from "@/components/video/player.vue";
 import LiveStreamGate from "@/components/video/LiveStreamGate.vue";
@@ -275,6 +276,52 @@ const watchVideoSeoText = await buildWatchVideoSeoText({
 	chapters: chapterSource,
 });
 
+// Full transcript, grouped under chapter headings, server-rendered so the
+// spoken content is crawlable in the initial HTML (the interactive
+// transcript tab hydrates separately and only ever existed client-side).
+type TranscriptSection = {
+	title: string | null;
+	startTime: number | null;
+	paragraphs: { startSeconds: number; text: string }[];
+};
+
+const transcriptSections: TranscriptSection[] = (() => {
+	const paragraphs = watchVideoSeoText.transcriptParagraphs ?? [];
+	if (paragraphs.length === 0) return [];
+	if (chapterSource.length === 0) {
+		return [{ title: null, startTime: null, paragraphs }];
+	}
+
+	const sortedChapters = [...chapterSource].sort(
+		(a, b) => a.startTime - b.startTime,
+	);
+	const leading: TranscriptSection = {
+		title: null,
+		startTime: null,
+		paragraphs: [],
+	};
+	const sections: TranscriptSection[] = sortedChapters.map((chapter) => ({
+		title: chapter.title,
+		startTime: chapter.startTime,
+		paragraphs: [],
+	}));
+
+	for (const paragraph of paragraphs) {
+		let sectionIndex = -1;
+		for (let i = 0; i < sortedChapters.length; i++) {
+			const chapter = sortedChapters[i];
+			if (chapter && paragraph.startSeconds >= chapter.startTime) {
+				sectionIndex = i;
+			}
+		}
+		(sections[sectionIndex] ?? leading).paragraphs.push(paragraph);
+	}
+
+	return [leading, ...sections].filter(
+		(section) => section.paragraphs.length > 0,
+	);
+})();
+
 const user = Astro.locals.user;
 const isAuthenticated = !!user;
 
@@ -370,6 +417,17 @@ const watchStatusLabel = isUpcomingLive
 		creators={creatorRefs}
 		guests={guestRefs}
 		partOfSeries={partOfSeriesRef}
+	/>
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Watch", link: "/watch" },
+			...(showEntry
+				? [{ title: showEntry.data.name, link: `/shows/${showEntry.id}` }]
+				: []),
+			{ title: video.data.title, link: `/watch/${video.data.slug}` },
+		]}
 	/>
 	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
@@ -571,6 +629,59 @@ const watchStatusLabel = isUpcomingLive
 							</li>
 						))}
 					</ol>
+				</section>
+			)}
+
+			{transcriptSections.length > 0 && (
+				<section
+					class="watch-detail__transcript"
+					aria-labelledby="watch-detail-transcript-heading"
+				>
+					<MLabel tone="spruce">Transcript</MLabel>
+					<h2
+						id="watch-detail-transcript-heading"
+						class="watch-detail__transcript-title"
+					>
+						Full transcript
+					</h2>
+					<p class="watch-detail__transcript-note">
+						Generated from the English captions. Timestamps jump the player to
+						that moment.
+					</p>
+					<details class="watch-detail__transcript-details">
+						<summary>Read the full transcript</summary>
+						<div class="watch-detail__transcript-body">
+							{transcriptSections.map((section) => (
+								<section class="watch-detail__transcript-section">
+									{section.title !== null && section.startTime !== null && (
+										<h3 class="watch-detail__transcript-chapter">
+											<a
+												href={`?t=${section.startTime}`}
+												data-chapter-link={String(section.startTime)}
+											>
+												<span class="watch-detail__transcript-time">
+													{formatTimestamp(section.startTime)}
+												</span>
+												{section.title}
+											</a>
+										</h3>
+									)}
+									{section.paragraphs.map((paragraph) => (
+										<p class="watch-detail__transcript-paragraph">
+											<a
+												class="watch-detail__transcript-time"
+												href={`?t=${paragraph.startSeconds}`}
+												data-chapter-link={String(paragraph.startSeconds)}
+											>
+												{formatTimestamp(paragraph.startSeconds)}
+											</a>{" "}
+											{paragraph.text}
+										</p>
+									))}
+								</section>
+							))}
+						</div>
+					</details>
 				</section>
 			)}
 
@@ -1209,6 +1320,101 @@ const watchStatusLabel = isUpcomingLive
 		transition: color var(--duration-base) var(--ease-standard);
 	}
 
+	.watch-detail__transcript {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-block-gap);
+		padding-top: var(--space-section-gap);
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-detail__transcript-title {
+		font-family: var(--font-instrument-serif), serif;
+		font-style: italic;
+		font-weight: 400;
+		font-size: 1.75rem;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--editorial-ink);
+		margin: 0;
+	}
+
+	.watch-detail__transcript-note {
+		max-width: 48rem;
+		margin: 0;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.875rem;
+		line-height: 1.5;
+		color: var(--editorial-ink-mute);
+	}
+
+	.watch-detail__transcript-details {
+		max-width: 48rem;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-detail__transcript-details summary {
+		cursor: pointer;
+		padding: 0.625rem 0;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+
+	.watch-detail__transcript-details summary:hover {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+	}
+
+	.watch-detail__transcript-body {
+		padding: 0.5rem 0 0.75rem;
+	}
+
+	.watch-detail__transcript-chapter {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--editorial-ink);
+		margin: 1.75rem 0 0.75rem;
+	}
+
+	.watch-detail__transcript-chapter a {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.875rem;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.watch-detail__transcript-chapter a:hover {
+		color: var(--editorial-spruce);
+	}
+
+	.watch-detail__transcript-paragraph {
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.6;
+		color: var(--editorial-ink-soft);
+		margin: 0 0 1rem;
+	}
+
+	.watch-detail__transcript-time {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--editorial-ink-mute);
+		font-variant-numeric: tabular-nums;
+		text-decoration: none;
+	}
+
+	a.watch-detail__transcript-time:hover {
+		color: var(--editorial-spruce);
+	}
+
 	.watch-detail__tech {
 		display: flex;
 		flex-direction: column;
@@ -1339,6 +1545,18 @@ const watchStatusLabel = isUpcomingLive
 			grid-template-areas:
 				"summary"
 				"player";
+		}
+
+		/* Single-column layout: the player is already as wide as it can get,
+		   so the expand/shrink toggle is meaningless — and its full-frame
+		   checkbox overlay would swallow the first tap meant for the player. */
+		.watch-detail__player-wrap {
+			max-width: 100%;
+		}
+
+		.watch-detail__player-state,
+		.watch-detail__player-toggle {
+			display: none;
 		}
 
 		.watch-detail__summary {
