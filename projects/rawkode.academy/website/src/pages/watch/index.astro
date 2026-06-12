@@ -11,6 +11,7 @@ import { formatStreamingCountdown } from "@/lib/streaming-countdown";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
+import { videoTransitionName } from "@/utils/view-transition-name";
 
 import VideoMasthead from "@/components/video/VideoMasthead.astro";
 import VideoHero from "@/components/video/VideoHero.astro";
@@ -19,6 +20,7 @@ import SeriesFilter from "@/components/video/SeriesFilter.astro";
 import VideoGridItem from "@/components/video/VideoGridItem.astro";
 import ContinueWatchingRail from "@/components/video/ContinueWatchingRail.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import PagerStrip from "@/components/ui/PagerStrip.astro";
 
 const user = Astro.locals.user;
 
@@ -39,7 +41,7 @@ if (user) {
 
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 
-const page = Math.max(
+const requestedPage = Math.max(
 	1,
 	parseInt(Astro.url.searchParams.get("page") || "1", 10) || 1,
 );
@@ -128,6 +130,13 @@ const sortedVideos =
 			: visibleVideos;
 
 // Pagination. Page one promotes the first visible video, then starts the grid after it.
+// Out-of-range requests clamp to the last real page so ?page=999 never
+// renders an empty grid with prev/next links into a phantom crawl space.
+const totalPages = Math.max(
+	1,
+	Math.ceil((sortedVideos.length - 1) / videosPerPage),
+);
+const page = Math.min(requestedPage, totalPages);
 const featuredVideo = page === 1 ? (sortedVideos[0] ?? null) : null;
 const start = page === 1 ? 1 : 1 + (page - 1) * videosPerPage;
 const end = start + videosPerPage;
@@ -431,6 +440,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 						: new Date(featuredVideo.publishedAt),
 				)}
 				primaryCtaLabel="Watch session →"
+				vtName={videoTransitionName(featuredVideo.slug)}
 			/>
 		)}
 
@@ -495,6 +505,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 							? v.publishedAt
 							: new Date(v.publishedAt),
 					)}
+					vtName={videoTransitionName(v.slug)}
 				/>
 			))}
 		</div>
@@ -505,19 +516,13 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 				<a class="watch-footer__link" href="/api/feeds/videos.json">JSON Feed</a> ·
 				<a class="watch-footer__link" href="/watch">All videos</a>
 			</MLabel>
-			<div class="watch-footer__pager">
-				{page > 1 && (
-					<a class="watch-footer__pager-btn" href={watchPathFor(page - 1)}>
-						<MLabel tone="ink">← Previous</MLabel>
-					</a>
-				)}
-				<MLabel>Page {page}</MLabel>
-				{hasNextPage && (
-					<a class="watch-footer__pager-btn" href={watchPathFor(page + 1)}>
-						<MLabel tone="ink">Next →</MLabel>
-					</a>
-				)}
-			</div>
+			<PagerStrip
+				page={page}
+				totalPages={totalPages}
+				prevHref={page > 1 ? watchPathFor(page - 1) : undefined}
+				nextHref={hasNextPage ? watchPathFor(page + 1) : undefined}
+				ariaLabel="Video pages"
+			/>
 		</footer>
 	</div>
 </Page>
@@ -731,20 +736,6 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 		text-decoration-color: var(--editorial-hairline-strong);
 	}
 	.watch-footer__link:hover { text-decoration-color: currentColor; }
-
-	.watch-footer__pager {
-		display: flex;
-		gap: 1rem;
-		align-items: center;
-	}
-
-	.watch-footer__pager-btn {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.75rem;
-		padding: 0 0.5rem;
-		text-decoration: none;
-	}
 
 	@media (max-width: 960px) {
 		.watch-grid {

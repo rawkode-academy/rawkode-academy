@@ -10,6 +10,8 @@ import FilterRail from "@/components/read/FilterRail.astro";
 import ArticleGridItem from "@/components/read/ArticleGridItem.astro";
 import ReadFooter from "@/components/read/ReadFooter.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import EmptyState from "@/components/ui/EmptyState.vue";
+import PagerStrip from "@/components/ui/PagerStrip.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
@@ -71,17 +73,32 @@ const visibleArticles = allArticles.filter(
 	(article) => matchesType(article) && matchesTopic(article),
 );
 
+const requestedPage = Math.max(
+	1,
+	parseInt(Astro.url.searchParams.get("page") || "1", 10) || 1,
+);
+const articlesPerPage = 12;
+
 const readHref = (
-	overrides: { type?: string | undefined; topic?: string | undefined } = {},
+	overrides: {
+		type?: string | undefined;
+		topic?: string | undefined;
+		page?: number;
+	} = {},
 ) => {
 	const type = "type" in overrides ? overrides.type : selectedType;
 	const topic = "topic" in overrides ? overrides.topic : selectedTopic;
+	// Changing a filter always resets to page 1; only the pager carries pages.
+	const targetPage = overrides.page ?? 1;
 	const params = new URLSearchParams();
 	if (type) params.set("type", type);
 	if (topic) params.set("topic", topic);
+	if (targetPage > 1) params.set("page", String(targetPage));
 	const query = params.toString();
 	return `/read${query ? `?${query}` : ""}`;
 };
+
+const readPathFor = (targetPage: number) => readHref({ page: targetPage });
 
 const formatTopicLabel = (id: string) =>
 	id.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
@@ -141,15 +158,28 @@ const activeTopicIndex = selectedTopic
 	: 0;
 
 // ─── Featured + grid ───────────────────────────────────────────
+// The featured article only fronts page 1; later pages are grid-only.
 
-const featured =
+const featuredCandidate =
 	visibleArticles.find((article) => article.data.cover) ?? visibleArticles[0];
+// The candidate stays out of the grid on every page so page boundaries
+// don't shift between page 1 (featured rendered) and later pages.
+const gridArticles = visibleArticles.filter(
+	(article) => !featuredCandidate || article.id !== featuredCandidate.id,
+);
+const totalPages = Math.max(1, Math.ceil(gridArticles.length / articlesPerPage));
+// Clamp out-of-range requests so ?page=999 renders the last real page
+// instead of an empty grid with prev/next links into a phantom crawl space.
+const page = Math.min(requestedPage, totalPages);
+const featured = page === 1 ? featuredCandidate : undefined;
 const featuredIndex = featured
 	? allArticles.findIndex((article) => article.id === featured.id)
 	: -1;
-const rest = featured
-	? visibleArticles.filter((article) => article.id !== featured.id)
-	: [];
+const pagedArticles = gridArticles.slice(
+	(page - 1) * articlesPerPage,
+	page * articlesPerPage,
+);
+const hasNextPage = page < totalPages;
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
 
 // ─── Helpers ───────────────────────────────────────────────────
@@ -185,8 +215,9 @@ const dispatchNumForArticle = (article: (typeof allArticles)[number]) =>
 	);
 
 // Pre-resolve authors for the grid (Astro can't await in JSX iteration cleanly).
+// Only the current page's slice — not the whole archive.
 const restWithMeta = await Promise.all(
-	rest.map(async (article) => ({
+	pagedArticles.map(async (article) => ({
 		article,
 		dispatchNum: dispatchNumForArticle(article),
 		author: await articleAuthorName(article),
@@ -208,8 +239,10 @@ const pageDescription =
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
 	<Fragment slot="extra-head">
-		{isFiltered && <meta name="robots" content="noindex,follow" />}
-		{!isFiltered && (
+		{(isFiltered || page > 1) && <meta name="robots" content="noindex,follow" />}
+		{page > 1 && <link rel="prev" href={readPathFor(page - 1)} />}
+		{hasNextPage && <link rel="next" href={readPathFor(page + 1)} />}
+		{!isFiltered && page === 1 && (
 			<ArticleItemListJsonLd
 				articles={allArticles}
 				listUrl={new URL("/read", Astro.site ?? Astro.url).href}
@@ -278,8 +311,11 @@ const pageDescription =
 
 		{visibleArticles.length === 0 && (
 			<div class="read-empty">
-				<p>No articles match these filters.</p>
-				<a href="/read">Browse all articles →</a>
+				<EmptyState title="No articles match these filters.">
+					<Fragment slot="actions">
+						<a href="/read">Browse all articles →</a>
+					</Fragment>
+				</EmptyState>
 			</div>
 		)}
 
@@ -303,6 +339,18 @@ const pageDescription =
 				/>
 			))}
 		</div>
+
+		{totalPages > 1 && (
+			<div class="read-pager">
+				<PagerStrip
+					page={page}
+					totalPages={totalPages}
+					prevHref={page > 1 ? readPathFor(page - 1) : undefined}
+					nextHref={hasNextPage ? readPathFor(page + 1) : undefined}
+					ariaLabel="Article pages"
+				/>
+			</div>
+		)}
 
 		<ReadFooter />
 	</div>
@@ -346,32 +394,7 @@ const pageDescription =
 	}
 
 	.read-empty {
-		padding: 3rem 2.5rem;
-		text-align: center;
-	}
-
-	.read-empty p {
-		margin: 0 0 0.75rem;
-		font-family: var(--font-instrument-serif), serif;
-		font-size: 1.5rem;
-		font-style: italic;
-		color: var(--editorial-ink-soft);
-	}
-
-	.read-empty a {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.75rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		text-decoration: none;
-	}
-
-	.read-empty a:hover {
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
+		padding: 1.5rem 2.5rem;
 	}
 
 	.read-grid {
@@ -379,6 +402,12 @@ const pageDescription =
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 0;
 		padding: 1.5rem 2.5rem 4rem;
+	}
+
+	.read-pager {
+		display: flex;
+		justify-content: center;
+		padding: 0 2.5rem 3rem;
 	}
 
 	@media (max-width: 960px) {

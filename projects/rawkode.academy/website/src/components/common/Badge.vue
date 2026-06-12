@@ -33,8 +33,8 @@ const baseClasses = "inline-flex items-center font-semibold transition-smooth";
 
 const variantClasses = {
 	default: props.outline
-		? "border border-gray-300/50 text-gray-700 dark:border-gray-500/60 dark:text-gray-100 bg-white/30 dark:bg-gray-700/40"
-		: "bg-gray-500/20 text-gray-800 dark:bg-gray-600/40 dark:text-gray-100 border border-gray-400/30 dark:border-gray-500/50",
+		? "border border-[var(--surface-border)] text-secondary-content bg-[var(--surface-card)]"
+		: "bg-[var(--surface-card-muted)] text-primary-content border border-[var(--surface-border)]",
 	primary: props.outline
 		? "border border-primary/50 text-primary dark:text-white bg-white/30 dark:bg-primary/40"
 		: "bg-primary/20 text-primary dark:bg-primary/40 dark:text-white border border-primary/30 dark:border-primary/50",

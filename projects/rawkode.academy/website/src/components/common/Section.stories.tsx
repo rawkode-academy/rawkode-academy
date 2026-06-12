@@ -171,19 +171,19 @@ export const RealWorldExample: Story = {
             <Section>
               <Heading as="h2" size="2xl" class="mb-6">Features</Heading>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="p-6 bg-[var(--surface-card)] rounded-lg shadow">
                   <Heading as="h3" size="lg">Feature One</Heading>
                   <p class="mt-2 text-secondary-content">
                     Description of the first feature goes here.
                   </p>
                 </div>
-                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="p-6 bg-[var(--surface-card)] rounded-lg shadow">
                   <Heading as="h3" size="lg">Feature Two</Heading>
                   <p class="mt-2 text-secondary-content">
                     Description of the second feature goes here.
                   </p>
                 </div>
-                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+                <div class="p-6 bg-[var(--surface-card)] rounded-lg shadow">
                   <Heading as="h3" size="lg">Feature Three</Heading>
                   <p class="mt-2 text-secondary-content">
                     Description of the third feature goes here.

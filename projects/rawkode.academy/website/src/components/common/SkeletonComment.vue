@@ -7,7 +7,7 @@
 		<span class="sr-only">{{ ariaLabel }}</span>
 		<!-- Avatar skeleton -->
 		<div
-			class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full shrink-0"
+			class="animate-pulse bg-[var(--surface-skeleton)] rounded-full shrink-0"
 			:style="{
 				width: '2.5rem',
 				height: '2.5rem',
@@ -19,11 +19,11 @@
 			<!-- Header with author and timestamp -->
 			<div class="flex items-center gap-2 mb-2">
 				<div
-					class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-4"
+					class="animate-pulse bg-[var(--surface-skeleton)] rounded h-4"
 					style="width: 120px"
 				/>
 				<div
-					class="animate-pulse bg-gray-200 dark:bg-gray-700 rounded h-3"
+					class="animate-pulse bg-[var(--surface-skeleton)] rounded h-3"
 					style="width: 80px"
 				/>
 			</div>

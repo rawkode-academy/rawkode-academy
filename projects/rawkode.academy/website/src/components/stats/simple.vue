@@ -13,7 +13,7 @@ defineProps<Props>();
 </script>
 
 <template>
-	<section class="bg-white dark:bg-gray-900">
+	<section class="bg-[var(--surface-base)]">
 		<div class="px-4 mx-auto max-w-(--breakpoint-xl) lg:px-6 xl:px-0">
 			<div class="mx-auto max-w-(--breakpoint-md) text-center">
 				<h2 class="text-3xl tracking-tight font-extrabold text-primary-content md:text-4xl">{{ title }}</h2>

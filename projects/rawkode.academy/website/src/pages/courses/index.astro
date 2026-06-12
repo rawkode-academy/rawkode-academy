@@ -4,6 +4,7 @@ import CourseCard from "@/components/courses/CourseCard.astro";
 import CoursesHero from "@/components/courses/CoursesHero.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
 import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import EmptyState from "@/components/ui/EmptyState.vue";
 import MLabel from "@/components/ui/MLabel.vue";
 import { getCourseModuleSlug } from "@/utils/course-path";
 import Page from "@/wrappers/page.astro";
@@ -89,8 +90,11 @@ const pageDescription =
 				/>
 			) : (
 				<div class="courses-page__empty">
-					<h2>Courses are on the way</h2>
-					<p>Practical, engineering-first courses are being built now.</p>
+					<EmptyState
+						title="Courses are on the way"
+						body="Practical, engineering-first courses are being built now."
+						align="start"
+					/>
 				</div>
 			)}
 		</section>
@@ -109,8 +113,11 @@ const pageDescription =
 				</div>
 			) : (
 				<div class="courses-page__empty">
-					<h2>More courses launching soon</h2>
-					<p>Kubernetes, platform engineering, and identity deep dives are next.</p>
+					<EmptyState
+						title="More courses launching soon"
+						body="Kubernetes, platform engineering, and identity deep dives are next."
+						align="start"
+					/>
 				</div>
 			)}
 		</section>
@@ -139,8 +146,7 @@ const pageDescription =
 		margin-bottom: 1.25rem;
 	}
 
-	.courses-page__section-head h2,
-	.courses-page__empty h2 {
+	.courses-page__section-head h2 {
 		font-family: var(--font-inter-tight), sans-serif;
 		font-size: clamp(1.375rem, 2vw, 1.875rem);
 		font-weight: 700;
@@ -157,12 +163,6 @@ const pageDescription =
 
 	.courses-page__empty {
 		padding: 2rem var(--space-section-pad-x);
-	}
-
-	.courses-page__empty p {
-		font-family: var(--font-inter-tight), sans-serif;
-		color: var(--editorial-ink-soft);
-		margin: 0.5rem 0 0;
 	}
 
 	@media (max-width: 720px) {

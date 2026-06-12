@@ -1,0 +1,63 @@
+---
+import MLabel from "@/components/ui/MLabel.vue";
+
+/**
+ * Editorial pager — prev/next links around a mono "Page N [of M]" label.
+ * Server-rendered links only; pages indexed from 1. Render it inside a
+ * collection footer (see /watch) or standalone (see /read).
+ */
+interface Props {
+	page: number;
+	totalPages?: number | undefined;
+	prevHref?: string | undefined;
+	nextHref?: string | undefined;
+	ariaLabel?: string;
+}
+
+const {
+	page,
+	totalPages,
+	prevHref,
+	nextHref,
+	ariaLabel = "Pagination",
+} = Astro.props;
+---
+
+<nav class="pager-strip" aria-label={ariaLabel}>
+	{prevHref && (
+		<a class="pager-strip__btn focus-ring" href={prevHref} rel="prev">
+			<MLabel tone="ink">← Previous</MLabel>
+		</a>
+	)}
+	<MLabel>
+		Page {page}{typeof totalPages === "number" ? ` of ${totalPages}` : ""}
+	</MLabel>
+	{nextHref && (
+		<a class="pager-strip__btn focus-ring" href={nextHref} rel="next">
+			<MLabel tone="ink">Next →</MLabel>
+		</a>
+	)}
+</nav>
+
+<style>
+	.pager-strip {
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+	}
+
+	.pager-strip__btn {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: 0 0.5rem;
+		text-decoration: none;
+	}
+
+	.pager-strip__btn:hover {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+		color: var(--editorial-ink);
+	}
+</style>

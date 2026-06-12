@@ -206,7 +206,7 @@ const getResourceIconClass = (type: string) => {
 		case "embed":
 			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
 		default:
-			return "bg-gray-100 dark:bg-gray-800 text-muted";
+			return "bg-[var(--surface-card-muted)] text-muted";
 	}
 };
 

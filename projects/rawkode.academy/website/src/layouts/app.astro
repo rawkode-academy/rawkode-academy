@@ -164,6 +164,10 @@ import { ThemeToggle } from "@/components/ui";
 			z-index: 50;
 			background: var(--editorial-paper);
 			border-bottom: 1px solid var(--editorial-hairline);
+			/* Identical on both sides of a cross-document view transition,
+			   so it gets its own group and reads as static chrome instead
+			   of crossfading with the page. */
+			view-transition-name: ed-topbar;
 		}
 
 		.ed-topbar__inner {

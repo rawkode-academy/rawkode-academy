@@ -18,6 +18,7 @@ import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
+import { videoTransitionName } from "@/utils/view-transition-name";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
@@ -462,7 +463,10 @@ const watchStatusLabel = isUpcomingLive
 				)}
 			</aside>
 
-			<div class="watch-detail__player-wrap">
+			<div
+				class="watch-detail__player-wrap"
+				style={`view-transition-name: ${videoTransitionName(video.data.slug)}`}
+			>
 				<input
 					id="watch-detail-player-state"
 					class="watch-detail__player-state"
@@ -571,8 +575,9 @@ const watchStatusLabel = isUpcomingLive
 			)}
 
 			{techEntries.length > 0 && (
-				<section class="watch-detail__tech">
-					<MLabel tone="spruce">Technologies featured</MLabel>
+				<section class="watch-detail__tech" aria-labelledby="watch-detail-tech-heading">
+					<h2 id="watch-detail-tech-heading" class="sr-only">Technologies featured</h2>
+					<MLabel tone="spruce" aria-hidden="true">Technologies featured</MLabel>
 					<div class="watch-detail__tech-grid">
 						{techEntries.map((tech) => (
 							<a

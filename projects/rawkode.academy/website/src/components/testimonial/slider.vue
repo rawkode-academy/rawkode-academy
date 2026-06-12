@@ -162,7 +162,7 @@ const formattedPosition = computed(() => {
 										<img
 											:src="activeTestimonial.author.image"
 											:alt="`${activeTestimonial.author.name} profile picture`"
-											class="h-16 w-16 rounded-full border-4 border-white object-cover shadow-md dark:border-gray-800 sm:h-[4.5rem] sm:w-[4.5rem]"
+											class="h-16 w-16 rounded-full border-4 border-[var(--surface-card)] object-cover shadow-md sm:h-[4.5rem] sm:w-[4.5rem]"
 											loading="lazy"
 										/>
 									</div>

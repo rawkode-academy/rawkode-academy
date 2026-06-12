@@ -1,11 +1,11 @@
 <template>
- <div class="h-full flex flex-col bg-gray-900 text-gray-100">
+ <div class="h-full flex flex-col bg-[var(--terminal-bg)] text-[var(--terminal-text)]">
  <!-- Header -->
- <div class="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
+ <div class="flex items-center justify-between p-4 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)]">
  <div class="flex items-center gap-4">
  <h3 class="text-lg font-semibold">{{ title }}</h3>
- <div v-if="status === 'booting'" class="flex items-center gap-2 text-sm text-gray-400">
- <div class="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+ <div v-if="status === 'booting'" class="flex items-center gap-2 text-sm text-[var(--terminal-text-dim)]">
+ <div class="animate-spin rounded-full h-4 w-4 border-2 border-[var(--terminal-text-dim)] border-t-transparent"></div>
  <span>Starting container...</span>
  </div>
  <div v-else-if="status === 'installing'" class="flex items-center gap-2 text-sm text-primary">
@@ -21,7 +21,7 @@
  <button
  @click="restart"
  :disabled="status !== 'ready'"
- class="p-2 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+ class="p-2 text-[var(--terminal-text-dim)] hover:text-[var(--terminal-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
  title="Restart"
  >
  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,11 +34,11 @@
  <!-- Split View -->
  <div class="flex-1 flex overflow-hidden">
  <!-- Editor -->
- <div class="w-1/2 flex flex-col border-r border-gray-700">
- <div class="p-2 bg-gray-800 border-b border-gray-700 relative z-10">
+ <div class="w-1/2 flex flex-col border-r border-[var(--terminal-border)]">
+ <div class="p-2 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)] relative z-10">
  <select
  v-model="selectedFile"
- class="w-full px-3 py-1 bg-gray-700 text-white rounded border border-gray-600 hover:bg-gray-600 focus:border-primary focus:outline-none cursor-pointer transition-colors"
+ class="w-full px-3 py-1 bg-[var(--terminal-bg)] text-[var(--terminal-text)] rounded border border-[var(--terminal-border)] hover:bg-[var(--terminal-surface)] focus:border-primary focus:outline-none cursor-pointer transition-colors"
  :disabled="fileList.length === 0"
  >
  <option v-if="fileList.length === 0" value="">No files loaded</option>
@@ -52,11 +52,11 @@
  v-if="selectedFile && fileContents[selectedFile] !== undefined"
  v-model="fileContents[selectedFile]"
  @input="onFileChange"
- class="absolute inset-0 w-full h-full p-4 bg-gray-900 text-gray-100 font-mono text-sm resize-none focus:outline-none"
+ class="absolute inset-0 w-full h-full p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text)] font-mono text-sm resize-none focus:outline-none"
  :placeholder="`Edit ${selectedFile}...`"
  spellcheck="false"
  ></textarea>
- <div v-else class="absolute inset-0 w-full h-full p-4 bg-gray-900 text-gray-500 font-mono text-sm">
+ <div v-else class="absolute inset-0 w-full h-full p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-dim)] font-mono text-sm">
  Select a file to edit
  </div>
  </div>
@@ -64,9 +64,9 @@
 
  <!-- Preview -->
  <div class="w-1/2 flex flex-col">
- <div class="p-2 bg-gray-800 border-b border-gray-700">
+ <div class="p-2 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)]">
  <div class="flex items-center gap-2">
- <span class="text-sm text-gray-400">Preview:</span>
+ <span class="text-sm text-[var(--terminal-text-dim)]">Preview:</span>
  <a 
  v-if="previewUrl"
  :href="previewUrl" 
@@ -80,19 +80,19 @@
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
  </svg>
  </a>
- <span v-else class="text-sm text-gray-500 italic">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
+ <span v-else class="text-sm text-[var(--terminal-text-dim)] italic">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
  </div>
  </div>
- <div class="flex-1 relative bg-white dark:bg-gray-900">
+ <div class="flex-1 relative bg-[var(--surface-card)]">
  <iframe
  v-if="previewUrl"
  :src="previewUrl"
  class="absolute inset-0 w-full h-full"
  frameborder="0"
  ></iframe>
- <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500">
+ <div v-else class="absolute inset-0 flex items-center justify-center text-muted">
  <div class="text-center">
- <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg class="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
  </svg>
  <p>Waiting for server...</p>
@@ -103,12 +103,12 @@
  </div>
 
  <!-- Terminal -->
- <div class="h-48 flex-shrink-0 bg-black border-t border-gray-700 overflow-hidden flex flex-col">
- <div class="p-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
- <span class="text-sm text-gray-400">Terminal</span>
+ <div class="h-48 flex-shrink-0 bg-black border-t border-[var(--terminal-border)] overflow-hidden flex flex-col">
+ <div class="p-2 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)] flex items-center justify-between">
+ <span class="text-sm text-[var(--terminal-text-dim)]">Terminal</span>
  <button
  @click="clearTerminal"
- class="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+ class="text-xs text-[var(--terminal-text-dim)] hover:text-[var(--terminal-text)] transition-colors"
  >
  Clear
  </button>
@@ -176,8 +176,8 @@ const clearTerminal = () => {
 const getTerminalLineClass = (line: string) => {
 	if (line.startsWith("[error]")) return "text-red-400";
 	if (line.startsWith("[success]")) return "text-green-400";
-	if (line.startsWith("[info]")) return "text-gray-300";
-	return "text-gray-400";
+	if (line.startsWith("[info]")) return "text-[var(--terminal-text)]";
+	return "text-[var(--terminal-text-dim)]";
 };
 
 const formatTerminalLine = (line: string) => {
