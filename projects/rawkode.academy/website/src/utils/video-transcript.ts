@@ -100,6 +100,33 @@ export function groupTranscriptParagraphs(
 	return paragraphs;
 }
 
+export function vttTimestampToSeconds(timestamp: string): number {
+	const match = timestamp.match(/^(\d{2}):(\d{2}):(\d{2})\.(\d{3})$/);
+	if (!match) {
+		return 0;
+	}
+	const [, hours, minutes, seconds] = match;
+	return Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+}
+
+export interface TranscriptParagraphText {
+	startSeconds: number;
+	text: string;
+}
+
+export function transcriptParagraphsToText(
+	paragraphs: TranscriptParagraph[],
+): TranscriptParagraphText[] {
+	return paragraphs
+		.map((paragraph) => ({
+			startSeconds: vttTimestampToSeconds(
+				paragraph[0]?.start ?? "00:00:00.000",
+			),
+			text: transcriptParagraphToText(paragraph),
+		}))
+		.filter((paragraph) => paragraph.text.length > 0);
+}
+
 export function transcriptParagraphToText(
 	paragraph: TranscriptParagraph,
 ): string {

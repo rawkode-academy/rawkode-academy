@@ -8,6 +8,8 @@ import {
 	buildTranscriptExcerpt,
 	groupTranscriptParagraphs,
 	parseWebVTT,
+	transcriptParagraphsToText,
+	vttTimestampToSeconds,
 } from "@/utils/video-transcript";
 import {
 	buildVideoSummaryParagraphs,
@@ -542,7 +544,45 @@ Search engines should see this text.`;
 		expect(state.transcriptExcerpt).toContain(
 			"Search engines should see this text.",
 		);
+		expect(state.transcriptParagraphs?.[0]?.startSeconds).toBe(0);
+		expect(
+			state.transcriptParagraphs?.map((paragraph) => paragraph.text).join(" "),
+		).toContain("Search engines should see this text.");
 		expect(fetchImpl).toHaveBeenCalledTimes(1);
+	});
+
+	it("converts VTT timestamps and full paragraphs for server rendering", () => {
+		expect(vttTimestampToSeconds("00:00:00.000")).toBe(0);
+		expect(vttTimestampToSeconds("00:01:30.500")).toBe(90);
+		expect(vttTimestampToSeconds("01:02:03.000")).toBe(3723);
+		expect(vttTimestampToSeconds("garbage")).toBe(0);
+
+		const paragraphs = transcriptParagraphsToText([
+			[
+				{
+					start: "00:00:05.000",
+					end: "00:00:08.000",
+					text: "First cue.",
+				},
+				{
+					start: "00:00:08.000",
+					end: "00:00:11.000",
+					text: "Second cue.",
+				},
+			],
+			[
+				{
+					start: "00:10:00.000",
+					end: "00:10:04.000",
+					text: "Later cue.",
+				},
+			],
+		]);
+
+		expect(paragraphs).toEqual([
+			{ startSeconds: 5, text: "First cue. Second cue." },
+			{ startSeconds: 600, text: "Later cue." },
+		]);
 	});
 
 	it("falls back to a server-rendered summary when captions are unavailable", async () => {

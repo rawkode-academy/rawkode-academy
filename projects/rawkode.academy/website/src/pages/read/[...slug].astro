@@ -12,6 +12,7 @@ import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
 
 import ArticleJsonLd from "@/components/html/article-jsonld.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import { buildHowToJsonLd } from "@/lib/howto-jsonld";
 
 import RelatedArticles from "@/components/articles/RelatedArticles.astro";
@@ -185,11 +186,25 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 	articleTags={tags.map((tag) => tag.label)}
 	{...(howToJsonLd ? { jsonLd: howToJsonLd } : {})}
 >
-	{imageUrl ? (
-		<ArticleJsonLd slot="extra-head" article={article} authors={authors} imageUrl={imageUrl} />
-	) : (
-		<ArticleJsonLd slot="extra-head" article={article} authors={authors} />
-	)}
+	{/*
+		A single slotted element with a conditional spread — a ternary holding
+		two `slot="extra-head"` branches makes Astro drop every slotted
+		sibling that follows it (the feed links below never reached the head).
+	*/}
+	<ArticleJsonLd
+		slot="extra-head"
+		article={article}
+		authors={authors}
+		{...(imageUrl ? { imageUrl } : {})}
+	/>
+	<BreadcrumbJsonLd
+		slot="extra-head"
+		elements={[
+			{ title: "Home", link: "/" },
+			{ title: "Read", link: "/read" },
+			{ title: article.data.title, link: `/read/${article.id}` },
+		]}
+	/>
 	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />

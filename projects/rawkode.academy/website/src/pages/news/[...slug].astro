@@ -7,6 +7,7 @@ import {
 } from "astro:content";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import ArticleByline from "@/components/read/ArticleByline.astro";
+import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import RelatedNews from "@/components/news/RelatedNews.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
@@ -109,6 +110,13 @@ const categoryTrail = tags[0]?.label;
 >
 	<Fragment slot="extra-head">
 		<NewsJsonLd article={article} authors={authors} />
+		<BreadcrumbJsonLd
+			elements={[
+				{ title: "Home", link: "/" },
+				{ title: "News", link: "/news" },
+				{ title: article.data.title, link: `/news/${article.id}` },
+			]}
+		/>
 		<link
 			rel="alternate"
 			type="application/rss+xml"

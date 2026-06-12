@@ -13,7 +13,6 @@ interface Props {
 	description: string;
 	author?: string | undefined;
 	date?: string | undefined;
-	viewerCount?: number | undefined;
 	primaryCtaLabel?: string | undefined;
 	secondaryCtaLabel?: string | undefined;
 	/** Cross-document view-transition name. The same name on the watch
@@ -32,7 +31,6 @@ const {
 	description,
 	author,
 	date,
-	viewerCount,
 	primaryCtaLabel,
 	secondaryCtaLabel,
 	vtName,
@@ -46,9 +44,6 @@ const metaParts = [
 	duration,
 	date,
 	author,
-	viewerCount !== undefined
-		? `${viewerCount.toLocaleString()} ${live ? "watching" : "views"}`
-		: null,
 ].filter(Boolean);
 ---
 

@@ -258,8 +258,15 @@
 		padding: 4.75rem 0.75rem 0;
 	}
 
+	/* Pin to both edges instead of the desktop centering math — keeping
+	   `left: 50%` + its negative margin while forcing `width: 100%` pushed
+	   the right edge 1rem past the viewport. */
 	.command-palette-container {
-		width: 100%;
+		top: 4.75rem;
+		left: 0.75rem;
+		right: 0.75rem;
+		margin-left: 0;
+		width: auto;
 	}
 
 	.command-palette-header {
@@ -272,7 +279,9 @@
 	}
 
 	.command-palette-list {
-		max-height: calc(100vh - 10rem);
+		/* dvh tracks the visible viewport on mobile Safari, where the URL
+		   bar makes 100vh taller than what's actually on screen. */
+		max-height: calc(100dvh - 10rem);
 	}
 
 	.command-palette-item-title {
