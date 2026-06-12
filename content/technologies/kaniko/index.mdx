@@ -5,16 +5,16 @@ logos:
 website: 'https://github.com/GoogleContainerTools/kaniko'
 documentation: 'https://github.com/GoogleContainerTools/kaniko/blob/main/README.md'
 license: Apache-2.0
-status: stable
+status: abandoned
 category: App Definition and Development
 subcategory: Application Definition & Image Build
 community:
   twitter: 'https://twitter.com/GCPcloud'
 matrix:
-  status: explore
+  status: skip
 ---
 Kaniko is a daemonless container image builder from Google that executes a Dockerfile entirely in userspace inside a container. It was created to solve one specific problem: building OCI images in a Kubernetes pod without Docker-in-Docker, `--privileged`, or a mounted Docker socket.
 
 The executor image (`gcr.io/kaniko-project/executor`) takes a build context (local tarball, Git URL, S3, GCS) and a Dockerfile, pulls the base image, then walks each instruction one at a time. For each `RUN` it executes the command in the container's root filesystem and then snapshots the filesystem changes by diffing against the previous state to produce a new layer. The resulting image is pushed directly to a registry. Because nothing calls `runc` or a daemon, Kaniko only needs its own container and does not require root on the host — though it does require elevated capabilities inside its own user namespace to chroot and manipulate the filesystem.
 
-It is the default builder inside Tekton, Jenkins X, Argo Workflows, and GitLab's Kubernetes executor for anyone allergic to DinD. The main trade-offs versus BuildKit (the modern default behind `docker build`): Kaniko is single-threaded per stage, layer caching is less sophisticated, and it is slower on large builds. Note the repo is in maintenance mode — the project still receives fixes but lags behind BuildKit on features and performance.
+It is the default builder inside Tekton, Jenkins X, Argo Workflows, and GitLab's Kubernetes executor for anyone allergic to DinD. The main trade-offs versus BuildKit (the modern default behind `docker build`): Kaniko is single-threaded per stage, layer caching is less sophisticated, and it is slower on large builds. Google archived the repository on June 3, 2025, and the remaining maintainers retired, ending upstream development. Community forks exist — Chainguard maintains one, and the osscontainertools fork keeps dependencies patched — but for new pipelines BuildKit, Buildah, or podman build are the recommended replacements; GitLab has removed its Kaniko documentation and now recommends Buildah.

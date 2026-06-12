@@ -57,11 +57,12 @@
  <img
  v-if="tech.icon"
  :src="tech.icon"
- :alt="tech.name"
+ alt=""
  class="icon-img"
  loading="lazy"
  />
- <span v-else class="icon-initial">{{ tech.name[0] }}</span>
+ <span v-else class="icon-initial" aria-hidden="true">{{ tech.name[0] }}</span>
+ <span class="tech-name">{{ tech.name }}</span>
  <span
  v-if="tech.dimensions['matrix.trajectory']"
  class="icon-trajectory"
@@ -78,15 +79,22 @@
 
  <!-- Empty state -->
  <div v-if="technologies.length === 0" class="empty-state">
- <div class="empty-icon">🔍</div>
- <h3>No technologies found</h3>
- <p>Try adjusting your filters or search query</p>
+ <h3>No technologies match</h3>
+ <p>Loosen a filter, clear the search, or switch an axis to a broader dimension.</p>
+ <button
+ v-if="explorer"
+ type="button"
+ class="empty-clear"
+ @click="explorer.clearFilters()"
+ >
+ Clear all filters
+ </button>
  </div>
  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, inject, onMounted, onUnmounted, ref } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import type { DimensionKey } from "@/lib/explorer/dimensions";
 import {
@@ -112,6 +120,24 @@ defineEmits<{
 	select: [id: string | null];
 }>();
 
+// Explorer state (provided by TechnologyExplorer) — used by the empty state
+// to offer a one-click way out of an over-filtered view.
+const explorer = inject<{ clearFilters: () => void } | null>("explorer", null);
+
+// Dimension colors have light/dark variants; track the active scheme so the
+// header and tab colors adapt instead of always using the light palette.
+const isDark = ref(false);
+const updateScheme = () => {
+	isDark.value = document.documentElement.classList.contains("dark");
+};
+onMounted(() => {
+	updateScheme();
+	window.addEventListener("color-scheme-change", updateScheme);
+});
+onUnmounted(() => {
+	window.removeEventListener("color-scheme-change", updateScheme);
+});
+
 // Grid columns CSS - row header fixed, columns fill available space equally
 const gridColumns = computed(() => {
 	const colCount = props.xAxisValues.length;
@@ -130,7 +156,7 @@ const getXAxisLabel = (value: string | null): string => {
 };
 
 const getXAxisColor = (value: string | null): string => {
-	return getDimensionColor(props.xAxis, value);
+	return getDimensionColor(props.xAxis, value, isDark.value);
 };
 
 const getColumnCount = (xValue: string | null): number => {
@@ -153,7 +179,7 @@ const getYAxisLabel = (value: string | null): string => {
 };
 
 const getYAxisColor = (value: string | null): string => {
-	return getDimensionColor(props.yAxis, value);
+	return getDimensionColor(props.yAxis, value, isDark.value);
 };
 
 const getRowCount = (yValue: string | null): number => {
@@ -192,7 +218,8 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  display: flex;
  flex-direction: column;
  gap: 0;
- overflow-x: auto;
+ /* No overflow-x: columns are 1fr and compress instead of scrolling, and an
+    auto-overflow container would clip the name tooltips. */
  min-width: 0;
 }
 
@@ -203,7 +230,7 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  position: sticky;
  top: 0;
  z-index: 10;
- background: var(--surface-background);
+ background: var(--surface-base);
  padding-bottom: 0.5rem;
 }
 
@@ -217,6 +244,11 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  border-radius: 6px 6px 0 0;
  color: white;
  text-align: center;
+}
+
+/* Dark-scheme dimension colors are light pastels; flip the label to ink. */
+:global(html.dark) .header-cell {
+ color: oklch(0.2 0.015 280);
 }
 
 .header-label {
@@ -284,13 +316,24 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  text-align: center;
 }
 
+:global(html.dark) .tab-count {
+ color: oklch(0.2 0.015 280);
+}
+
 .grid-row {
  display: grid;
  gap: 0;
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
  border-radius: 8px;
- overflow: hidden;
+ /* overflow must stay visible or the name tooltips are clipped */
+ overflow: visible;
+}
+
+.grid-row:has(.tech-icon:hover),
+.grid-row:has(.tech-icon:focus-visible) {
+ position: relative;
+ z-index: 10;
 }
 
 /* Grid cells */
@@ -299,7 +342,15 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  min-height: 50px;
  background: rgb(from var(--cell-color) r g b / 0.05);
  border-left: 1px solid var(--surface-border);
- overflow: hidden;
+}
+
+.grid-cell:first-child {
+ border-radius: 8px 0 0 8px;
+ border-left: none;
+}
+
+.grid-cell:last-child {
+ border-radius: 0 8px 8px 0;
 }
 
 .cell-content {
@@ -378,10 +429,26 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 }
 
 .tech-icon:hover::after,
-.tech-icon:hover::before {
+.tech-icon:hover::before,
+.tech-icon:focus-visible::after,
+.tech-icon:focus-visible::before {
  opacity: 1;
  visibility: visible;
  transform: translateX(-50%) translateY(0);
+}
+
+/* Screen-reader-only on desktop (tooltip carries the visible name); shown as
+   a chip label on mobile where there is no hover. */
+.tech-name {
+ position: absolute;
+ width: 1px;
+ height: 1px;
+ padding: 0;
+ margin: -1px;
+ overflow: hidden;
+ clip-path: inset(50%);
+ white-space: nowrap;
+ border: 0;
 }
 
 .icon-img {
@@ -422,15 +489,15 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
 }
 
 .trajectory-rising {
- color: rgb(34, 197, 94);
+ color: var(--editorial-spruce);
 }
 
 .trajectory-stable {
- color: rgb(156, 163, 175);
+ color: var(--editorial-ink-mute);
 }
 
 .trajectory-falling {
- color: rgb(239, 68, 68);
+ color: var(--editorial-rust);
 }
 
 /* Empty state */
@@ -439,13 +506,33 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  flex-direction: column;
  align-items: center;
  justify-content: center;
+ gap: 0.5rem;
  padding: 4rem 2rem;
  text-align: center;
+ background: var(--surface-card);
+ border: 1px dashed var(--surface-border);
+ border-radius: 8px;
 }
 
-.empty-icon {
- font-size: 3rem;
- margin-bottom: 1rem;
+.empty-clear {
+ margin-top: 0.75rem;
+ padding: 0.625rem 1rem;
+ background: var(--editorial-ink);
+ color: var(--editorial-paper);
+ border: 1px solid var(--editorial-ink);
+ border-radius: var(--radius-md);
+ font-family: var(--font-jetbrains-mono), monospace;
+ font-size: 0.72rem;
+ font-weight: 700;
+ letter-spacing: 0.1em;
+ text-transform: uppercase;
+ cursor: pointer;
+ transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.empty-clear:hover {
+ background: var(--editorial-spruce);
+ border-color: var(--editorial-spruce);
 }
 
 .empty-state h3 {
@@ -509,23 +596,55 @@ const getTrajectoryEmoji = (trajectory: string | null): string => {
  }
 
  .cell-content {
- gap: 0.75rem;
+ gap: 0.5rem;
  }
 
+ /* Icon + name chips: bare icons are unidentifiable without hover */
  .tech-icon {
- width: 40px;
- height: 40px;
+ width: auto;
+ height: auto;
+ min-height: 44px;
+ padding: 0.5rem 0.75rem;
+ gap: 0.5rem;
+ border-radius: 6px;
+ }
+
+ .tech-name {
+ position: static;
+ width: auto;
+ height: auto;
+ margin: 0;
+ overflow: visible;
+ clip-path: none;
+ white-space: normal;
+ overflow-wrap: anywhere;
+ text-align: left;
+ font-size: 0.8rem;
+ font-weight: 600;
+ color: var(--text-primary-content);
  }
 
  .icon-img {
- width: 24px;
- height: 24px;
+ width: 22px;
+ height: 22px;
+ }
+
+ .icon-initial {
+ width: 22px;
+ height: 22px;
  }
 
  /* Hide tooltips on mobile */
  .tech-icon::after,
  .tech-icon::before {
  display: none;
+ }
+}
+
+@media (prefers-reduced-motion: reduce) {
+ .tech-icon:hover,
+ .tech-icon.is-hovered {
+ transform: none;
  }
 }
 </style>

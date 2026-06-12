@@ -29,7 +29,13 @@
  :aria-hidden="!showControls"
  >
  <div class="controls-content">
- <div class="controls-drawer-header">
+ <div
+ class="controls-drawer-header"
+ @touchstart.passive="onSheetTouchStart"
+ @touchmove.passive="onSheetTouchMove"
+ @touchend="onSheetTouchEnd"
+ >
+ <span class="drawer-handle" aria-hidden="true"></span>
  <h2>Advanced filters</h2>
  <button
  type="button"
@@ -71,6 +77,20 @@
 
  <!-- Visualization canvas -->
  <main class="explorer-canvas">
+ <!-- Persistent search on mobile: the filter drawer is closed by default
+ there, and search is the most common entry point. -->
+ <div class="mobile-search">
+ <input
+ type="search"
+ class="mobile-search-input"
+ placeholder="Search technologies…"
+ aria-label="Search technologies"
+ :value="filters.search"
+ @input="setSearch(($event.target as HTMLInputElement).value)"
+ />
+ <span class="mobile-search-count" aria-live="polite">{{ filteredTechnologies.length }} shown</span>
+ </div>
+
  <!-- Grid View (Phase 1) -->
  <GridView
  v-if="viewMode === 'grid'"
@@ -115,6 +135,21 @@
  </main>
  </div>
 
+ <!-- Floating filter button (mobile): keeps filters reachable after
+ scrolling a long results list. -->
+ <button
+ v-if="!showControls"
+ type="button"
+ class="filters-fab"
+ @click="toggleControls"
+ >
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
+ </svg>
+ <span>Filters</span>
+ <span v-if="filterCount > 0" class="fab-badge">{{ filterCount }}</span>
+ </button>
+
  <!-- Technology card popover (click to show) -->
  <TechCardPopover
  v-if="selectedTech"
@@ -135,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, onMounted, provide } from "vue";
+import { ref, computed, onBeforeUnmount, onMounted, provide, watch } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { useExplorerState } from "@/composables/useExplorerState";
 import { useUrlState } from "@/composables/useUrlState";
@@ -191,6 +226,38 @@ const {
 const closeControls = () => {
 	showControls.value = false;
 };
+
+const isMobile = () =>
+	typeof window !== "undefined" &&
+	window.matchMedia("(max-width: 768px)").matches;
+
+// On mobile the controls render as a bottom sheet; lock the page behind it.
+watch(showControls, (open) => {
+	if (typeof document === "undefined") return;
+	document.body.style.overflow = open && isMobile() ? "hidden" : "";
+});
+
+// Swipe-down on the sheet header dismisses it.
+let sheetTouchY: number | null = null;
+let sheetTouchDelta = 0;
+
+function onSheetTouchStart(event: TouchEvent) {
+	sheetTouchY = event.touches[0]?.clientY ?? null;
+	sheetTouchDelta = 0;
+}
+
+function onSheetTouchMove(event: TouchEvent) {
+	if (sheetTouchY === null) return;
+	sheetTouchDelta = (event.touches[0]?.clientY ?? sheetTouchY) - sheetTouchY;
+}
+
+function onSheetTouchEnd() {
+	if (sheetTouchDelta > 60 && isMobile()) {
+		closeControls();
+	}
+	sheetTouchY = null;
+	sheetTouchDelta = 0;
+}
 
 // URL state sync
 const urlState = useUrlState(explorer);
@@ -253,6 +320,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
 	window.removeEventListener("keydown", handleKeydown);
+	document.body.style.overflow = "";
 });
 
 function handleKeydown(event: KeyboardEvent) {
@@ -323,6 +391,13 @@ function handleKeydown(event: KeyboardEvent) {
 .explorer-canvas {
  flex: 1;
  min-width: 0;
+}
+
+/* Mobile-only affordances, hidden on desktop */
+.mobile-search,
+.filters-fab,
+.drawer-handle {
+ display: none;
 }
 
 /* Coming soon placeholder */
@@ -474,7 +549,92 @@ function handleKeydown(event: KeyboardEvent) {
  }
 
  .explorer-canvas {
- padding-bottom: 80px; /* Space for controls toggle */
+ padding-bottom: 80px; /* Space for the floating filter button */
+ }
+
+ .mobile-search {
+ display: flex;
+ align-items: center;
+ gap: 0.625rem;
+ margin-bottom: 0.875rem;
+ }
+
+ .mobile-search-input {
+ flex: 1;
+ min-width: 0;
+ min-height: 44px;
+ padding: 0.5rem 0.875rem;
+ background: var(--surface-card);
+ border: 1px solid var(--surface-border);
+ border-radius: 6px;
+ font-size: 1rem;
+ color: var(--text-primary-content);
+ }
+
+ .mobile-search-input:focus-visible {
+ outline: 2px solid rgb(var(--brand-primary));
+ outline-offset: 1px;
+ }
+
+ .mobile-search-count {
+ font-family: var(--font-jetbrains-mono), monospace;
+ font-size: 0.72rem;
+ font-weight: 700;
+ color: var(--text-muted);
+ white-space: nowrap;
+ }
+
+ .filters-fab {
+ position: fixed;
+ bottom: 1.25rem;
+ right: 1.25rem;
+ z-index: 48; /* below the sheet (50) and its backdrop (49) */
+ display: inline-flex;
+ align-items: center;
+ gap: 0.5rem;
+ min-height: 48px;
+ padding: 0.75rem 1.125rem;
+ background: var(--editorial-ink);
+ color: var(--editorial-paper);
+ border: 1px solid var(--editorial-ink);
+ border-radius: 9999px;
+ font-family: var(--font-jetbrains-mono), monospace;
+ font-size: 0.72rem;
+ font-weight: 700;
+ letter-spacing: 0.1em;
+ text-transform: uppercase;
+ cursor: pointer;
+ box-shadow: 0 4px 16px rgb(0 0 0 / 0.2);
+ }
+
+ .filters-fab svg {
+ width: 1rem;
+ height: 1rem;
+ }
+
+ .fab-badge {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ min-width: 1.25rem;
+ height: 1.25rem;
+ padding: 0 0.3rem;
+ background: rgb(var(--brand-primary));
+ color: white;
+ border-radius: 9999px;
+ font-size: 0.65rem;
+ }
+
+ .drawer-handle {
+ display: block;
+ position: absolute;
+ top: 0.375rem;
+ left: 50%;
+ transform: translateX(-50%);
+ width: 2.5rem;
+ height: 0.25rem;
+ border-radius: 9999px;
+ background: var(--surface-border-strong, var(--surface-border));
  }
 }
 </style>

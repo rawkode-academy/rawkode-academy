@@ -1,0 +1,22 @@
+---
+name: llm-d
+website: 'https://llm-d.ai/'
+source: 'https://github.com/llm-d/llm-d'
+documentation: 'https://llm-d.ai/docs'
+license: Apache-2.0
+status: beta
+category: CNAI
+subcategory: ML Serving
+cncf:
+  status: sandbox
+  accepted: '2026-03-24'
+matrix:
+  status: explore
+  trajectory: rising
+---
+
+llm-d is a Kubernetes-native distributed inference serving stack for large language models, founded by Red Hat, Google Cloud, IBM Research, CoreWeave, and NVIDIA, with AMD, Cisco, Hugging Face, Intel, Lambda, and Mistral AI contributing. It was accepted as a CNCF Sandbox project at KubeCon + CloudNativeCon Europe 2026, with the stated goal of making distributed LLM inference a first-class cloud native workload.
+
+Rather than inventing a new model server, llm-d composes proven pieces: vLLM as the inference engine, the Gateway API Inference Extension as a model-aware request scheduler, and Kubernetes as the orchestration layer. On top of that it adds the techniques that matter at scale — disaggregated prefill and decode phases, KV-cache-aware routing that sends requests to replicas already holding relevant cache state, and support for heterogeneous accelerators including NVIDIA and AMD GPUs and Google TPUs. Deployment is via Helm charts with "well-lit paths" for common topologies.
+
+It competes with (and complements) KServe, Ray Serve, and NVIDIA's serving stack; the differentiation is being vendor-neutral, Kubernetes-native, and tuned specifically for the traffic patterns of LLM inference rather than generic model serving.

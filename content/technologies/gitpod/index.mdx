@@ -1,11 +1,13 @@
 ---
 name: Gitpod
+aliases:
+  - Ona
 logos:
   horizontal: true
 website: 'https://www.gitpod.io/'
 documentation: 'https://www.gitpod.io/docs/'
 license: AGPL-3.0
-status: stable
+status: superseded
 category: App Definition and Development
 subcategory: Application Definition & Image Build
 matrix:
@@ -17,3 +19,5 @@ Gitpod is a cloud development environment platform — you push a `.gitpod.yml` 
 The original Gitpod Classic was an open-source, Kubernetes-based multi-tenant platform: each workspace was a pod with a containerized VS Code Server, backed by a workspace content sync service and a websocket-based IDE bridge. In 2024 Gitpod introduced Gitpod Flex, a rearchitected product that runs workspaces on dedicated VMs (including inside the customer's own AWS account) rather than shared Kubernetes nodes, to address the isolation and compliance complaints from larger customers. Workspaces can be prebuilt — Gitpod runs your init commands ahead of time on every commit, so opening one is effectively instant.
 
 It sits in the same category as GitHub Codespaces, Coder, JetBrains Space/Remote Dev, and DevPod. The historical selling point versus Codespaces was being cloud-and-host agnostic; the current selling point versus Coder is the prebuild system and the managed experience. Gitpod Classic is open source (AGPL); Flex is the commercial SaaS/self-hosted product.
+
+In September 2025 the company rebranded as Ona, repositioning from cloud development environments to "mission control" for software engineering agents: the same sandboxed, prebuild-backed workspaces, but driven by autonomous coding agents with humans reviewing. Gitpod Classic was sunset as part of the transition. On June 11, 2026, OpenAI announced it was acquiring Ona so Codex agents can run long, multi-hour tasks inside a customer's own cloud — making the Gitpod brand a historical artifact, though the workspace technology lives on inside Codex.

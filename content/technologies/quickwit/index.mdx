@@ -10,7 +10,7 @@ status: stable
 category: Observability and Analysis
 subcategory: Logging
 matrix:
-  status: explore
+  status: watch
 ---
 Quickwit is a distributed search engine for logs, traces, and general event data, written in Rust and built around Tantivy, the inverted-index library that also powers Meilisearch. Its core design decision is decoupling storage from compute: indexes are stored as immutable splits on object storage (S3, GCS, Azure Blob, or local filesystem) and queried by stateless search nodes that can be scaled independently of ingestion.
 
