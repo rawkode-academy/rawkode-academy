@@ -98,11 +98,11 @@ describe("Theme Management", () => {
 	});
 
 	describe("getThemeColors", () => {
-		it("returns the rawkode-blue brand palette", () => {
+		it("returns the editorial brand palette", () => {
 			const colors = getThemeColors();
-			expect(colors.primary).toBe("#5F5ED7");
-			expect(colors.secondary).toBe("#00CEFF");
-			expect(colors.accent).toBe("#111827");
+			expect(colors.primary).toBe("#237356");
+			expect(colors.secondary).toBe("#9A5500");
+			expect(colors.accent).toBe("#A54A28");
 		});
 	});
 

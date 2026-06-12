@@ -13,7 +13,9 @@ describe("website content subgraph schema", () => {
 		expect(sdl).toContain("githubHandle: String");
 		expect(sdl).toContain("githubUrl: String");
 		expect(sdl).toContain("personByGithub(username: String!): Person");
-		expect(sdl).toContain("getUpcomingVideos(limit: Int = 15, offset: Int = 0): [Video!]");
+		expect(sdl).toContain(
+			"getUpcomingVideos(limit: Int = 15, offset: Int = 0): [Video!]",
+		);
 		expect(sdl).toContain("me: Person");
 	});
 });

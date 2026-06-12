@@ -35,11 +35,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		});
 	}
 
-	const { won, playTimeSeconds, enemyDefeated, noDamageWin, firstTryWin } = payload;
+	const { won, playTimeSeconds, enemyDefeated, noDamageWin, firstTryWin } =
+		payload;
 
 	if (typeof won !== "boolean" || typeof playTimeSeconds !== "number") {
 		return new Response(
-			JSON.stringify({ error: "Invalid payload: won and playTimeSeconds required" }),
+			JSON.stringify({
+				error: "Invalid payload: won and playTimeSeconds required",
+			}),
 			{
 				status: 400,
 				headers: { "Content-Type": "application/json" },
@@ -47,9 +50,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
-	if (playTimeSeconds <= 0 || playTimeSeconds > 3600 || !Number.isFinite(playTimeSeconds)) {
+	if (
+		playTimeSeconds <= 0 ||
+		playTimeSeconds > 3600 ||
+		!Number.isFinite(playTimeSeconds)
+	) {
 		return new Response(
-			JSON.stringify({ error: "Invalid playTimeSeconds: must be between 1 and 3600" }),
+			JSON.stringify({
+				error: "Invalid playTimeSeconds: must be between 1 and 3600",
+			}),
 			{
 				status: 400,
 				headers: { "Content-Type": "application/json" },
@@ -126,7 +135,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		}
 
 		// Get learned phrases count for achievement check
-		const phrases = await env.SKI_PLAYER_LEARNED_PHRASES.getPlayerPhrases(personId);
+		const phrases =
+			await env.SKI_PLAYER_LEARNED_PHRASES.getPlayerPhrases(personId);
 
 		// Check and unlock achievements
 		const achievementStats = {

@@ -44,8 +44,7 @@ const coverBgMap: Record<string, string> = {
 };
 const coverFrom = coverBgMap[levelKey] ?? "oklch(0.22 0.04 165)";
 
-const mark =
-	monogram ?? (title.match(/[A-Za-z]/)?.[0] ?? "§").toUpperCase();
+const mark = monogram ?? (title.match(/[A-Za-z]/)?.[0] ?? "§").toUpperCase();
 ---
 
 <a class={`path-card ${big ? "path-card--big" : ""}`} href={href}>
@@ -53,7 +52,7 @@ const mark =
 		<span class="path-card__mark" aria-hidden="true">{mark}</span>
 		<span class="path-card__level">{level}</span>
 		<div class="path-card__cover-meta">
-			<span>§ Path</span>
+			<span>Path</span>
 			{lessons !== undefined && <><span>·</span><span>{lessons} lessons</span></>}
 			{hours !== undefined && <><span>·</span><span>{hours}h total</span></>}
 		</div>

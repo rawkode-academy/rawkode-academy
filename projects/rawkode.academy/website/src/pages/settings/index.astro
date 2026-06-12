@@ -32,16 +32,17 @@ let technologySubscriptions: string[] = [];
 
 try {
 	const allPrefs: EmailPreference[] =
-		await env.EMAIL_PREFERENCES.getPreferences(
-			prefixedUserId,
-		);
+		await env.EMAIL_PREFERENCES.getPreferences(prefixedUserId);
 
 	for (const pref of allPrefs) {
 		if (pref.channel === "newsletter" && pref.audience === "academy") {
 			academyNewsletter = true;
 		} else if (pref.channel === "newsletter" && pref.audience === "matrix") {
 			matrixNewsletter = true;
-		} else if (pref.channel === "newsletter" && pref.audience === "kubernetes-release-updates") {
+		} else if (
+			pref.channel === "newsletter" &&
+			pref.audience === "kubernetes-release-updates"
+		) {
 			kubernetesReleaseUpdates = true;
 		} else if (pref.channel === "marketing" && pref.audience === "academy") {
 			marketingEmails = true;
@@ -61,15 +62,15 @@ try {
 
 <Page title="Settings - Rawkode Academy" description="Manage your account settings and email preferences.">
 	<div class="max-w-3xl mx-auto py-8 px-4">
-		<h1 class="text-3xl font-bold text-neutral-900 dark:text-white mb-8">
+		<h1 class="text-3xl font-bold text-primary-content mb-8">
 			Settings
 		</h1>
 
 		<div class="space-y-8">
 			<!-- Profile Section -->
-			<section class="rounded-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-				<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-					<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+			<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
+				<div class="px-6 py-4 border-b border-[var(--surface-border)]">
+					<h2 class="text-lg font-semibold text-primary-content">
 						Profile
 					</h2>
 				</div>
@@ -86,10 +87,10 @@ try {
 							<Avatar client:load name={user.name || ""} variant="pixel" class="w-16 h-16 rounded-full" />
 						)}
 						<div>
-							<p class="text-lg font-medium text-neutral-900 dark:text-white">
+							<p class="text-lg font-medium text-primary-content">
 								{user.name}
 							</p>
-							<p class="text-sm text-neutral-500 dark:text-neutral-400">
+							<p class="text-sm text-muted">
 								{user.email}
 							</p>
 						</div>
@@ -98,12 +99,12 @@ try {
 			</section>
 
 			<!-- Email Preferences Section -->
-				<section class="rounded-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-					<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+				<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
+					<div class="px-6 py-4 border-b border-[var(--surface-border)]">
+						<h2 class="text-lg font-semibold text-primary-content">
 							Email Preferences
 						</h2>
-					<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+					<p class="text-sm text-muted mt-1">
 						Manage what emails you receive from Rawkode Academy.
 					</p>
 				</div>
@@ -121,12 +122,12 @@ try {
 				</section>
 
 				<!-- Email Tools -->
-				<section class="rounded-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 overflow-hidden">
-					<div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
-						<h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
+				<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
+					<div class="px-6 py-4 border-b border-[var(--surface-border)]">
+						<h2 class="text-lg font-semibold text-primary-content">
 							Email Tools
 						</h2>
-						<p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+						<p class="text-sm text-muted mt-1">
 							Send yourself a quick test message to confirm email delivery works.
 						</p>
 					</div>

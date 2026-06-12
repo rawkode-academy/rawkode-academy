@@ -2,7 +2,7 @@
 	<nav
 		class="section-rail"
 		:aria-label="ariaLabel"
-		:style="{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }"
+		:style="{ '--section-rail-cols': items.length }"
 	>
 		<a
 			v-for="(item, i) in items"
@@ -21,7 +21,11 @@
 <script setup lang="ts">
 import MLabel from "./MLabel.vue";
 
-interface Item { num: number | string; label: string; href: string }
+interface Item {
+	num: number | string;
+	label: string;
+	href: string;
+}
 
 withDefaults(
 	defineProps<{
@@ -40,6 +44,7 @@ const pad = (v: number | string) => {
 <style scoped>
 .section-rail {
 	display: grid;
+	grid-template-columns: repeat(var(--section-rail-cols, 1), minmax(0, 1fr));
 	border-top: 1px solid var(--editorial-hairline);
 	border-bottom: 1px solid var(--editorial-hairline);
 }
@@ -56,6 +61,22 @@ const pad = (v: number | string) => {
 
 .section-rail__item--first {
 	border-left: none;
+}
+
+/* Small viewports: stack the rail vertically so it never overflows. */
+@media (max-width: 640px) {
+	.section-rail {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.section-rail__item {
+		border-left: none;
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.section-rail__item--first {
+		border-top: none;
+	}
 }
 
 .section-rail__item:hover {

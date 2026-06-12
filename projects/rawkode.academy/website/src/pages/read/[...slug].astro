@@ -133,8 +133,9 @@ const updateDate = wasUpdated
 	: undefined;
 
 // Dispatch number — articles ordered desc by date give this a meaningful index.
-const allArticles = (await getCollection("articles", ({ data }) => !data.draft))
-	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const allArticles = (
+	await getCollection("articles", ({ data }) => !data.draft)
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 const indexInCorpus = allArticles.findIndex((a) => a.id === article.id);
 const dispatchNum = String(allArticles.length - indexInCorpus).padStart(3, "0");
@@ -152,7 +153,11 @@ const breadcrumbs = [
 ];
 
 // Category trail under the kicker (e.g. "Containers · supply-chain")
-const categoryTrail = tags.slice(0, 2).map((t) => t.label).join(" · ") || undefined;
+const categoryTrail =
+	tags
+		.slice(0, 2)
+		.map((t) => t.label)
+		.join(" · ") || undefined;
 
 // Tools list for the sticky TOC sidebar.
 const tools = (article.data.technologies ?? [])

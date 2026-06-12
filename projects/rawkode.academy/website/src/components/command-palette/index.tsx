@@ -19,15 +19,37 @@ import "./styles.css";
 interface NavigationItem {
 	id: string;
 	title: string;
-	description?: string;
-	href?: string;
+	description?: string | undefined;
+	href?: string | undefined;
 	category: string;
-	keywords?: string[];
-	action?: () => boolean | void;
-	preference?: ColorSchemePreference;
+	keywords?: string[] | undefined;
+	action?: (() => boolean | void) | undefined;
+	preference?: ColorSchemePreference | undefined;
 }
 
 type CommandPage = "root" | "appearance";
+
+interface UnifiedSearchResult {
+	id: string;
+	title: string;
+	description?: string;
+	href: string;
+	type: string;
+	date?: string;
+	keywords?: string[];
+}
+
+// Map unified search result types to the palette's category strings
+// (see getCategoryIcon in icons.tsx for categories with dedicated icons).
+const SEARCH_TYPE_CATEGORIES: Record<string, string> = {
+	video: "Videos",
+	article: "Articles",
+	news: "News",
+	course: "Learning",
+	"learning-path": "Learning",
+	show: "Shows",
+	technology: "Technology",
+};
 
 interface CommandPaletteProps {
 	isOpen: boolean;
@@ -49,9 +71,9 @@ export default function CommandPalette({
 }: CommandPaletteProps): ReactElement | null {
 	const [search, setSearch] = useState("");
 	const [navigationItems, setNavigationItems] = useState<NavigationItem[]>([]);
-	const [articleItems, setArticleItems] = useState<NavigationItem[]>([]);
+	const [searchItems, setSearchItems] = useState<NavigationItem[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [isSearchingArticles, setIsSearchingArticles] = useState(false);
+	const [isSearchingContent, setIsSearchingContent] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const [currentPreference, setCurrentPreference] =
@@ -204,31 +226,41 @@ export default function CommandPalette({
 		};
 	}, [hasLoadedNavigation, isOpen]);
 
-	// Search for articles when user types
+	// Search all content types (videos, articles, news, courses, learning
+	// paths, shows, technologies) via the unified index when the user types.
 	useEffect(() => {
 		if (searchTimeoutRef.current) {
 			clearTimeout(searchTimeoutRef.current);
 		}
 
 		if (!isOpen || activePage !== "root") {
-			setArticleItems([]);
-			setIsSearchingArticles(false);
+			setSearchItems([]);
+			setIsSearchingContent(false);
 			return;
 		}
 
 		if (search.length >= 2) {
 			const abortController = new AbortController();
 
-			setIsSearchingArticles(true);
+			setIsSearchingContent(true);
 			searchTimeoutRef.current = setTimeout(async () => {
 				try {
 					const response = await fetch(
-						`/api/search-articles.json?q=${encodeURIComponent(search)}`,
+						`/api/search.json?q=${encodeURIComponent(search)}`,
 						{ signal: abortController.signal },
 					);
 					if (response.ok) {
-						const articles: NavigationItem[] = await response.json();
-						setArticleItems(articles);
+						const results: UnifiedSearchResult[] = await response.json();
+						setSearchItems(
+							results.map((result) => ({
+								id: result.id,
+								title: result.title,
+								description: result.description,
+								href: result.href,
+								category: SEARCH_TYPE_CATEGORIES[result.type] ?? "Pages",
+								keywords: result.keywords,
+							})),
+						);
 					}
 				} catch (error) {
 					if (error instanceof DOMException && error.name === "AbortError") {
@@ -236,7 +268,7 @@ export default function CommandPalette({
 					}
 				} finally {
 					if (!abortController.signal.aborted) {
-						setIsSearchingArticles(false);
+						setIsSearchingContent(false);
 					}
 				}
 			}, 300); // Debounce search
@@ -248,8 +280,8 @@ export default function CommandPalette({
 				}
 			};
 		} else {
-			setArticleItems([]);
-			setIsSearchingArticles(false);
+			setSearchItems([]);
+			setIsSearchingContent(false);
 		}
 
 		return () => {
@@ -258,28 +290,6 @@ export default function CommandPalette({
 			}
 		};
 	}, [activePage, isOpen, search]);
-
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
-				onClose();
-			}
-		};
-
-		if (isOpen) {
-			document.addEventListener("keydown", handleKeyDown);
-			document.body.style.overflow = "hidden";
-			// Focus the input after the component has rendered
-			setTimeout(() => {
-				inputRef.current?.focus();
-			}, 0);
-		}
-
-		return () => {
-			document.removeEventListener("keydown", handleKeyDown);
-			document.body.style.overflow = "unset";
-		};
-	}, [isOpen, onClose]);
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -345,9 +355,18 @@ export default function CommandPalette({
 		return getCategoryIcon(item.category);
 	};
 
-	if (!isOpen) return null;
-
-	const rootItems = [...commandItems, ...navigationItems, ...articleItems];
+	// Drop navigation items that the unified search already returned so the
+	// same page doesn't appear twice while searching.
+	const searchHrefs = new Set(
+		searchItems.map((item) => item.href).filter(Boolean),
+	);
+	const rootItems = [
+		...commandItems,
+		...navigationItems.filter(
+			(item) => !item.href || !searchHrefs.has(item.href),
+		),
+		...searchItems,
+	];
 	const appearancePageItems = [
 		{
 			id: "command-back-to-root",
@@ -378,168 +397,174 @@ export default function CommandPalette({
 	);
 
 	return (
-		<div className="command-palette-overlay" onClick={onClose}>
-			<div
-				className="command-palette-container"
-				onClick={(e) => e.stopPropagation()}
-			>
-				<Command className="command-palette" filter={customFilter}>
-					<div className="command-palette-header">
-						<div
-							style={{
-								position: "relative",
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-							}}
-						>
-							<svg
-								className="command-palette-search-icon"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								style={{
-									position: "absolute",
-									left: "16px",
-									top: "50%",
-									transform: "translateY(-50%)",
-									zIndex: 1,
-									pointerEvents: "none",
-								}}
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-								/>
-							</svg>
-							<Command.Input
-								ref={inputRef}
-								placeholder={
-									activePage === "appearance"
-										? "Search appearance..."
-										: "Search pages..."
-								}
-								value={search}
-								onValueChange={setSearch}
-								className="command-palette-input"
-								style={{
-									paddingLeft: "52px",
-									paddingRight: "70px",
-									width: "100%",
-								}}
-							/>
-							<kbd
-								className="command-palette-kbd"
-								style={{
-									position: "absolute",
-									right: "16px",
-									top: "50%",
-									transform: "translateY(-50%)",
-									zIndex: 1,
-								}}
-							>
-								ESC
-							</kbd>
-						</div>
-					</div>
-
-					<Command.List className="command-palette-list">
-						{isLoading && (
-							<div className="command-palette-loading">
-								<SkeletonList
-									items={5}
-									showIcon={true}
-									iconSize="1.5rem"
-									showSubtitle={false}
-									className="command-palette-skeleton"
-								/>
-							</div>
-						)}
-
-						{isRootPage &&
-							isSearchingArticles &&
-							!isLoading &&
-							search.length >= 2 && (
-								<div className="command-palette-searching">
-									<SkeletonList
-										items={3}
-										showIcon={true}
-										iconSize="1.5rem"
-										showSubtitle={true}
-										className="command-palette-skeleton"
-									/>
-								</div>
-							)}
-
-						<Command.Empty className="command-palette-empty">
-							{!isLoading &&
-								!isSearchingArticles &&
-								(activePage === "appearance"
-									? `No appearance options match "${search}"`
-									: `No results found for "${search}"`)}
-						</Command.Empty>
-
-						{Object.entries(groupedItems).map(([category, items]) => {
-							const CategoryIcon = getCategoryIcon(category);
-							return (
-								<Command.Group
-									key={category}
-									heading={
-										<div className="flex items-center gap-2">
-											<CategoryIcon className="command-palette-category-icon" />
-											{category}
-										</div>
-									}
-									className="command-palette-group"
-								>
-									{items.map((item) => {
-										const ItemIcon = getItemIcon(item);
-										const isActiveScheme =
-											item.preference === currentPreference;
-										return (
-											<Command.Item
-												key={item.id}
-												value={`${item.title} ${item.description || ""} ${item.keywords?.join(" ") || ""}`}
-												onSelect={() => handleSelect(item)}
-												className="command-palette-item"
-											>
-												<ItemIcon className="command-palette-item-icon" />
-												<div className="command-palette-item-content">
-													<div className="command-palette-item-title">
-														{item.title}
-														{isActiveScheme && (
-															<span className="ml-2 text-xs text-primary">
-																(active)
-															</span>
-														)}
-													</div>
-												</div>
-												{item.href && item.href.startsWith("http") && (
-													<svg
-														className="command-palette-external-icon"
-														fill="none"
-														stroke="currentColor"
-														viewBox="0 0 24 24"
-													>
-														<path
-															strokeLinecap="round"
-															strokeLinejoin="round"
-															strokeWidth={2}
-															d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-														/>
-													</svg>
-												)}
-											</Command.Item>
-										);
-									})}
-								</Command.Group>
-							);
-						})}
-					</Command.List>
-				</Command>
+		// Command.Dialog wraps Radix Dialog: focus trap, focus restoration
+		// to the trigger, Escape handling, scroll lock, and dialog ARIA all
+		// come from the library rather than hand-rolled listeners.
+		<Command.Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				if (!open) onClose();
+			}}
+			label="Search and commands"
+			overlayClassName="command-palette-overlay"
+			contentClassName="command-palette-container"
+			className="command-palette"
+			filter={customFilter}
+		>
+			<div className="command-palette-header">
+				<div
+					style={{
+						position: "relative",
+						width: "100%",
+						display: "flex",
+						alignItems: "center",
+					}}
+				>
+					<svg
+						className="command-palette-search-icon"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						style={{
+							position: "absolute",
+							left: "16px",
+							top: "50%",
+							transform: "translateY(-50%)",
+							zIndex: 1,
+							pointerEvents: "none",
+						}}
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth={2}
+							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+						/>
+					</svg>
+					<Command.Input
+						ref={inputRef}
+						aria-label="Search pages and commands"
+						placeholder={
+							activePage === "appearance"
+								? "Search appearance..."
+								: "Search pages..."
+						}
+						value={search}
+						onValueChange={setSearch}
+						className="command-palette-input"
+						style={{
+							paddingLeft: "52px",
+							paddingRight: "70px",
+							width: "100%",
+						}}
+					/>
+					<kbd
+						className="command-palette-kbd"
+						style={{
+							position: "absolute",
+							right: "16px",
+							top: "50%",
+							transform: "translateY(-50%)",
+							zIndex: 1,
+						}}
+					>
+						ESC
+					</kbd>
+				</div>
 			</div>
-		</div>
+
+			<Command.List className="command-palette-list">
+				{isLoading && (
+					<div className="command-palette-loading">
+						<SkeletonList
+							items={5}
+							showIcon={true}
+							iconSize="1.5rem"
+							showSubtitle={false}
+							className="command-palette-skeleton"
+						/>
+					</div>
+				)}
+
+				{isRootPage &&
+					isSearchingContent &&
+					!isLoading &&
+					search.length >= 2 && (
+						<div className="command-palette-searching">
+							<SkeletonList
+								items={3}
+								showIcon={true}
+								iconSize="1.5rem"
+								showSubtitle={true}
+								className="command-palette-skeleton"
+							/>
+						</div>
+					)}
+
+				<Command.Empty className="command-palette-empty">
+					{!isLoading &&
+						!isSearchingContent &&
+						(activePage === "appearance"
+							? `No appearance options match "${search}"`
+							: `No results found for "${search}"`)}
+				</Command.Empty>
+
+				{Object.entries(groupedItems).map(([category, items]) => {
+					const CategoryIcon = getCategoryIcon(category);
+					return (
+						<Command.Group
+							key={category}
+							heading={
+								<div className="flex items-center gap-2">
+									<CategoryIcon className="command-palette-category-icon" />
+									{category}
+								</div>
+							}
+							className="command-palette-group"
+						>
+							{items.map((item) => {
+								const ItemIcon = getItemIcon(item);
+								const isActiveScheme = item.preference === currentPreference;
+								return (
+									<Command.Item
+										key={item.id}
+										value={`${item.title} ${item.description || ""} ${item.keywords?.join(" ") || ""}`}
+										onSelect={() => handleSelect(item)}
+										className="command-palette-item"
+									>
+										<ItemIcon className="command-palette-item-icon" />
+										<div className="command-palette-item-content">
+											<div className="command-palette-item-title">
+												{item.title}
+												{isActiveScheme && (
+													<span className="ml-2 text-xs text-primary">
+														(active)
+													</span>
+												)}
+											</div>
+										</div>
+										{item.href && item.href.startsWith("http") && (
+											<svg
+												className="command-palette-external-icon"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+												/>
+											</svg>
+										)}
+									</Command.Item>
+								);
+							})}
+						</Command.Group>
+					);
+				})}
+			</Command.List>
+		</Command.Dialog>
 	);
 }

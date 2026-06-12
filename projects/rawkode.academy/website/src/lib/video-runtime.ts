@@ -9,9 +9,10 @@ export function isUpcomingLiveVideo(
 	now = new Date(),
 ): boolean {
 	if (video.type !== "live" || !video.publishedAt) return false;
-	const publishedAt = video.publishedAt instanceof Date
-		? video.publishedAt
-		: new Date(video.publishedAt);
+	const publishedAt =
+		video.publishedAt instanceof Date
+			? video.publishedAt
+			: new Date(video.publishedAt);
 
 	return Number.isFinite(publishedAt.getTime()) && publishedAt > now;
 }

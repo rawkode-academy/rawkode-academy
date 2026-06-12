@@ -209,12 +209,12 @@ const trackSignInClick = () => {
 					v-if="showSubscribedState"
 					role="status"
 					aria-live="polite"
-					class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-sm bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20"
+					class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-sm bg-[var(--editorial-spruce-dim)] border border-[var(--surface-border)]"
 				>
-					<svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<svg class="w-5 h-5 text-[var(--editorial-spruce)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
-					<span class="text-sm font-medium text-green-700 dark:text-green-300">
+					<span class="text-sm font-medium text-[var(--editorial-spruce)]">
 						{{ isSuccess ? "You're in!" : "Subscribed" }}
 					</span>
 				</div>

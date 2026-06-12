@@ -60,7 +60,15 @@ const {
 				/>
 			)}
 			{!mediaImage && mediaSrc && (
-				<img class="featured__img" src={mediaSrc} alt={mediaAlt} loading="lazy" />
+				<img
+					class="featured__img"
+					src={mediaSrc}
+					alt={mediaAlt}
+					width="1280"
+					height="720"
+					loading="lazy"
+					decoding="async"
+				/>
 			)}
 			{!mediaImage && !mediaSrc && mediaPlaceholder && (
 				<div class="featured__placeholder">

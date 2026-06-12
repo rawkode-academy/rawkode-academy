@@ -75,14 +75,17 @@ function parseArgs(): Args {
 				.filter(Boolean)
 		: DEFAULT_PAGES;
 
-	const strategies = (strategiesArg
-		? strategiesArg
-				.split(",")
-				.map((value) => value.trim().toLowerCase())
-				.filter((value): value is Strategy =>
-					value === "mobile" || value === "desktop",
-				)
-		: DEFAULT_STRATEGIES) as Strategy[];
+	const strategies = (
+		strategiesArg
+			? strategiesArg
+					.split(",")
+					.map((value) => value.trim().toLowerCase())
+					.filter(
+						(value): value is Strategy =>
+							value === "mobile" || value === "desktop",
+					)
+			: DEFAULT_STRATEGIES
+	) as Strategy[];
 
 	return { base, pages, strategies, apiKey };
 }
@@ -149,7 +152,9 @@ async function runPageSpeed(
 		const status = response.status;
 		const retryable = status === 429 || status >= 500;
 		if (!retryable || attempt === maxRetries) {
-			throw new Error(`PageSpeed API failed (${response.status} ${response.statusText})`);
+			throw new Error(
+				`PageSpeed API failed (${response.status} ${response.statusText})`,
+			);
 		}
 
 		const retryAfterMs = parseRetryAfterMs(response.headers.get("Retry-After"));
@@ -162,9 +167,12 @@ async function runPageSpeed(
 	}
 
 	const data = (await response.json()) as PageSpeedResponse;
-	const audits = (data?.lighthouseResult?.audits ??
-		{}) as Record<string, { numericValue?: number }>;
-	const performanceScoreRaw = data?.lighthouseResult?.categories?.performance?.score;
+	const audits = (data?.lighthouseResult?.audits ?? {}) as Record<
+		string,
+		{ numericValue?: number }
+	>;
+	const performanceScoreRaw =
+		data?.lighthouseResult?.categories?.performance?.score;
 	const performanceScore =
 		typeof performanceScoreRaw === "number" ? performanceScoreRaw * 100 : null;
 
@@ -177,8 +185,7 @@ async function runPageSpeed(
 	const inpOrTbtMs = inpMs ?? tbtMs;
 	const inpSource: "INP" | "TBT" = inpMs !== null ? "INP" : "TBT";
 	const lcpDisplay = lcpMs === null ? "missing" : `${lcpMs}ms`;
-	const inpOrTbtDisplay =
-		inpOrTbtMs === null ? "missing" : `${inpOrTbtMs}ms`;
+	const inpOrTbtDisplay = inpOrTbtMs === null ? "missing" : `${inpOrTbtMs}ms`;
 
 	const failures: string[] = [];
 	if (lcpMs === null || lcpMs > 2500) {

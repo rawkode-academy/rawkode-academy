@@ -1,0 +1,171 @@
+---
+import { PARTNERSHIP_EMAIL } from "@/lib/partnerships";
+
+/**
+ * Plain-text contact fallback for the partnership pages.
+ *
+ * The primary CTAs are prefilled mailto: links, which fail silently on
+ * machines without a configured mail handler. This panel keeps the
+ * funnel open: a visible email address and the brief template, each
+ * with a copy button.
+ */
+
+interface Props {
+	/** Plain-text brief template (the mailto body, unencoded). */
+	template: string;
+	/** Suggested subject line, shown above the template. */
+	subject: string;
+}
+
+const { template, subject } = Astro.props;
+---
+
+<aside class="contact-fallback" aria-label="Email details for copy and paste">
+	<p class="contact-fallback__label">No mail client? Copy instead</p>
+
+	<div class="contact-fallback__row">
+		<code class="contact-fallback__email">{PARTNERSHIP_EMAIL}</code>
+		<button
+			type="button"
+			class="contact-fallback__copy"
+			data-copy-text={PARTNERSHIP_EMAIL}
+		>
+			Copy email
+		</button>
+	</div>
+
+	<p class="contact-fallback__label">
+		Brief template <span class="contact-fallback__subject">subject: {subject}</span>
+	</p>
+
+	<pre class="contact-fallback__template">{template}</pre>
+	<button
+		type="button"
+		class="contact-fallback__copy"
+		data-copy-text={template}
+	>
+		Copy template
+	</button>
+</aside>
+
+<script>
+	const copyWithFallback = async (text: string): Promise<boolean> => {
+		try {
+			await navigator.clipboard.writeText(text);
+			return true;
+		} catch {
+			// Clipboard API unavailable (insecure context, permissions):
+			// select the text in an off-screen textarea and use execCommand.
+			const textarea = document.createElement("textarea");
+			textarea.value = text;
+			textarea.setAttribute("readonly", "");
+			textarea.style.position = "fixed";
+			textarea.style.left = "-9999px";
+			document.body.appendChild(textarea);
+			textarea.select();
+			let copied = false;
+			try {
+				copied = document.execCommand("copy");
+			} catch {
+				copied = false;
+			}
+			textarea.remove();
+			return copied;
+		}
+	};
+
+	for (const button of document.querySelectorAll<HTMLButtonElement>(
+		".contact-fallback__copy[data-copy-text]",
+	)) {
+		const original = button.textContent;
+		button.addEventListener("click", async () => {
+			const copied = await copyWithFallback(button.dataset.copyText ?? "");
+			button.textContent = copied ? "Copied" : "Copy failed";
+			window.setTimeout(() => {
+				button.textContent = original;
+			}, 2000);
+		});
+	}
+</script>
+
+<style>
+	.contact-fallback {
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper-deep);
+		padding: 1.25rem;
+		display: grid;
+		gap: 0.75rem;
+		justify-items: start;
+		width: 100%;
+		max-width: 46rem;
+	}
+
+	.contact-fallback__label {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-mute);
+		margin: 0;
+	}
+
+	.contact-fallback__label + .contact-fallback__label,
+	.contact-fallback__template + .contact-fallback__copy {
+		margin-top: 0.25rem;
+	}
+
+	.contact-fallback__subject {
+		text-transform: none;
+		letter-spacing: 0.04em;
+		font-weight: 500;
+	}
+
+	.contact-fallback__row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.contact-fallback__email {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: var(--editorial-ink);
+		user-select: all;
+	}
+
+	.contact-fallback__template {
+		width: 100%;
+		margin: 0;
+		padding: 0.85rem 1rem;
+		border: 1px solid var(--editorial-hairline);
+		background: var(--editorial-paper);
+		color: var(--editorial-ink-soft);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.8rem;
+		line-height: 1.6;
+		white-space: pre-wrap;
+		overflow-x: auto;
+	}
+
+	.contact-fallback__copy {
+		border: 1px solid var(--editorial-hairline-strong);
+		background: transparent;
+		color: var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.45rem 0.8rem;
+		border-radius: var(--radius-sm, 2px);
+		cursor: pointer;
+	}
+
+	.contact-fallback__copy:hover {
+		background: var(--editorial-paper);
+		border-color: var(--editorial-ink);
+	}
+</style>

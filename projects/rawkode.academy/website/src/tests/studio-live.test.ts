@@ -12,8 +12,12 @@ import {
 
 describe("Studio live state", () => {
 	it("parses only active live states with WHEP playback URLs", () => {
-		expect(parseStudioLiveState({ live: false })).toEqual(emptyStudioLiveState());
-		expect(parseStudioLiveState({ live: true })).toEqual(emptyStudioLiveState());
+		expect(parseStudioLiveState({ live: false })).toEqual(
+			emptyStudioLiveState(),
+		);
+		expect(parseStudioLiveState({ live: true })).toEqual(
+			emptyStudioLiveState(),
+		);
 
 		expect(
 			parseStudioLiveState({
@@ -161,7 +165,9 @@ describe("Studio live state", () => {
 		expect(watchPage).toContain("getStudioLiveState(env as StudioBindingEnv");
 		expect(watchPage).toContain("video.data.slug");
 		expect(watchPage).toContain("shouldMountStudioLiveGate");
-		expect(watchPage).toContain('Astro.response.headers.set("Cache-Control", "no-store")');
+		expect(watchPage).toContain(
+			'Astro.response.headers.set("Cache-Control", "no-store")',
+		);
 		expect(watchPage).toContain("<LiveStreamGate");
 		expect(watchPage).toContain("fallbackVideoId");
 		expect(watchPage).toContain("<VideoPlayer");

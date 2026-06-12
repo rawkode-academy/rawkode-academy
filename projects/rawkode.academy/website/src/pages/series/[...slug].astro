@@ -50,18 +50,19 @@ const imageUrl = await computeImageUrl(series);
 	description={`${series.data.title} - a multi-part article series from Rawkode Academy covering hands-on cloud native and Kubernetes engineering.`}
 	image={{ image: imageUrl }}
 >
-	<h1 class="text-5xl font-extrabold dark:text-white">
-		{series.data.title}
-	</h1>
+	<div class="mx-auto max-w-3xl content-px py-12">
+		<h1>
+			{series.data.title}
+		</h1>
 
-	<article class="max-w-(--breakpoint-xl) format prose lg:prose-xl dark:format-invert">
-		<Content />
+		<article class="prose article-prose mt-8">
+			<Content />
 
-		<h2 class="text-4xl font-bold dark:text-white">Articles</h2>
+			<h2>Articles</h2>
 
-		<div class="not-format">
-			<SeriesArticles series={series} />
-
-		</div>
-	</article>
+			<div class="not-prose">
+				<SeriesArticles series={series} />
+			</div>
+		</article>
+	</div>
 </Page>

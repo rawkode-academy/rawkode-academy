@@ -60,7 +60,9 @@ export const auth = {
 		handler: async (input) => {
 			const returnTo = input.returnTo || "/";
 			// Return the sign-in endpoint URL which handles the OIDC flow
-			return { url: `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}` };
+			return {
+				url: `/api/auth/sign-in?returnTo=${encodeURIComponent(returnTo)}`,
+			};
 		},
 	}),
 };

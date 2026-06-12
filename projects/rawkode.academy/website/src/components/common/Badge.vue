@@ -29,8 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
 	outline: false,
 });
 
-const baseClasses =
-	"inline-flex items-center font-semibold transition-smooth backdrop-blur-md shadow-sm";
+const baseClasses = "inline-flex items-center font-semibold transition-smooth";
 
 const variantClasses = {
 	default: props.outline

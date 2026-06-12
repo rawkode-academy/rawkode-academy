@@ -49,7 +49,9 @@ if (articleTechnologySet.size > 0) {
 		.map((video) => {
 			const technologyIds = (video.data.technologies ?? [])
 				.map(normalizeTechnologyId)
-				.filter((technologyId): technologyId is string => Boolean(technologyId));
+				.filter((technologyId): technologyId is string =>
+					Boolean(technologyId),
+				);
 			const sharedTechnologyCount = technologyIds.filter((technologyId) =>
 				articleTechnologySet.has(technologyId),
 			).length;
@@ -94,7 +96,10 @@ if (articleTechnologySet.size > 0) {
 							src={video.thumbnailUrl}
 							alt={video.title}
 							class="w-full h-full object-cover group-hover:scale-105 "
+							width="1280"
+							height="720"
 							loading="lazy"
+							decoding="async"
 						/>
 						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
 							{formatVideoRuntimeLabel(video)}

@@ -22,7 +22,13 @@ interface Props {
 	isAuthenticated?: boolean;
 }
 
-const { title, description, videos: passedVideos = [], watchPositions = {}, isAuthenticated = false } = Astro.props;
+const {
+	title,
+	description,
+	videos: passedVideos = [],
+	watchPositions = {},
+	isAuthenticated = false,
+} = Astro.props;
 
 const videos: Video[] = passedVideos.map((v) => ({
 	id: v.id,

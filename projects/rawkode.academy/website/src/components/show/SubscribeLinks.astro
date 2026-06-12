@@ -1,0 +1,93 @@
+---
+/**
+ * Static subscribe links. The FontAwesome packages are only imported in
+ * the frontmatter (server-side), so the icons render as inline SVG with
+ * zero client JavaScript — previously this was a hydrated Vue island
+ * shipping the FontAwesome runtime.
+ */
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+	faAmazon,
+	faApple,
+	faSpotify,
+	faYoutube,
+} from "@fortawesome/free-brands-svg-icons";
+import { faLink, faPodcast, faRss } from "@fortawesome/free-solid-svg-icons";
+
+interface SubscribeLink {
+	platform: string;
+	url: string;
+	icon: string;
+}
+
+interface Props {
+	links: SubscribeLink[];
+}
+
+const { links } = Astro.props;
+
+const icons: Record<string, IconDefinition> = {
+	spotify: faSpotify,
+	youtube: faYoutube,
+	"apple-podcasts": faApple,
+	"amazon-music": faAmazon,
+	"pocket-casts": faPodcast,
+	overcast: faPodcast,
+	rss: faRss,
+};
+
+const iconFor = (iconType: string): IconDefinition => icons[iconType] ?? faLink;
+---
+
+{
+	links.length > 0 && (
+		<div class="flex flex-col gap-3">
+			<p class="text-sm font-semibold uppercase tracking-wide text-muted">
+				Subscribe
+			</p>
+			<div class="flex flex-wrap gap-2">
+				{links.map((link) => {
+					const icon = iconFor(link.icon);
+					return (
+						<a
+							href={link.url}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="hairline-chip gap-2 rounded-sm px-4 py-2 text-sm font-medium text-secondary-content transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+							data-subscribe-platform={link.platform}
+							data-subscribe-icon={link.icon}
+						>
+							<svg
+								class="h-4 w-4"
+								viewBox={`0 0 ${icon.icon[0]} ${icon.icon[1]}`}
+								fill="currentColor"
+								aria-hidden="true"
+							>
+								<path d={String(icon.icon[4])} />
+							</svg>
+							{link.platform}
+						</a>
+					);
+				})}
+			</div>
+		</div>
+	)
+}
+
+<script>
+	document.addEventListener("click", (e) => {
+		const link = (e.target as HTMLElement).closest(
+			"a[data-subscribe-platform]",
+		);
+		if (!link) return;
+		try {
+			window.posthog?.capture("podcast_subscribe_clicked", {
+				platform: link.getAttribute("data-subscribe-platform"),
+				icon_type: link.getAttribute("data-subscribe-icon"),
+				destination_url: link.getAttribute("href"),
+			});
+		} catch {
+			// Ignore tracking errors
+		}
+	});
+</script>

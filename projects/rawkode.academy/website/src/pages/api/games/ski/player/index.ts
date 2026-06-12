@@ -18,16 +18,19 @@ export const GET: APIRoute = async ({ locals }) => {
 	const personId = user.id;
 
 	try {
-		const [statsData, phrasesData, allAchievements, playerAchievements] = await Promise.all([
-			env.SKI_PLAYER_STATS.getPlayerStats(personId),
-			env.SKI_PLAYER_LEARNED_PHRASES.getPlayerPhrases(personId),
-			env.SKI_ACHIEVEMENTS.getAllAchievements(),
-			env.SKI_ACHIEVEMENTS.getPlayerAchievements(personId),
-		]);
+		const [statsData, phrasesData, allAchievements, playerAchievements] =
+			await Promise.all([
+				env.SKI_PLAYER_STATS.getPlayerStats(personId),
+				env.SKI_PLAYER_LEARNED_PHRASES.getPlayerPhrases(personId),
+				env.SKI_ACHIEVEMENTS.getAllAchievements(),
+				env.SKI_ACHIEVEMENTS.getPlayerAchievements(personId),
+			]);
 
 		// Check if player has any learned phrases
-		const hasLearnedPhrases = phrasesData &&
-			(phrasesData.learnedInsults.length > 0 || phrasesData.learnedComebacks.length > 0);
+		const hasLearnedPhrases =
+			phrasesData &&
+			(phrasesData.learnedInsults.length > 0 ||
+				phrasesData.learnedComebacks.length > 0);
 
 		// Only return 404 if player has neither stats nor phrases
 		if (!statsData && !hasLearnedPhrases) {

@@ -145,7 +145,9 @@ async function main() {
 	console.log("🔍 Validating SEO requirements...\n");
 
 	const validationErrors: ValidationError[] = [];
-	const contentRoot = fileURLToPath(new URL("../../../../content", import.meta.url));
+	const contentRoot = fileURLToPath(
+		new URL("../../../../content", import.meta.url),
+	);
 
 	// Validate articles
 	const articleFiles = await glob(`${contentRoot}/articles/**/*.{md,mdx}`);

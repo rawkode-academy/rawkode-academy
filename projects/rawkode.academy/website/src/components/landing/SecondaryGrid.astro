@@ -36,7 +36,15 @@ const { items, withMedia = false } = Astro.props as Props;
 						/>
 					)}
 					{!item.mediaImage && item.mediaSrc && (
-						<img class="sec-grid__img" src={item.mediaSrc} alt={item.mediaAlt ?? item.title} loading="lazy" />
+						<img
+							class="sec-grid__img"
+							src={item.mediaSrc}
+							alt={item.mediaAlt ?? item.title}
+							width="1280"
+							height="720"
+							loading="lazy"
+							decoding="async"
+						/>
 					)}
 				</div>
 			)}

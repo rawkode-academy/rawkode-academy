@@ -30,11 +30,11 @@
 						<slot name="breadcrumb" />
 					</div>
 
-					<!-- Editorial kicker — mono uppercase label with optional
-					     leading §-mark. Replaces the legacy rounded Badge pill. -->
+					<!-- Editorial kicker: mono uppercase label.
+					     Replaces the legacy rounded Badge pill. -->
 					<div v-if="$slots.badge || badge" class="mb-4">
 						<slot name="badge">
-							<span v-if="badge" class="hero-kicker">§ {{ badge }}</span>
+							<span v-if="badge" class="hero-kicker">{{ badge }}</span>
 						</slot>
 					</div>
 
@@ -146,8 +146,7 @@ const sectionClasses = computed(() => {
 
 	const backgroundClasses: Record<string, string> = {
 		none: "",
-		gradient:
-			"bg-[var(--surface-card)]",
+		gradient: "bg-[var(--surface-card)]",
 		"gradient-hero": "bg-[var(--surface-base)]",
 		"gradient-hero-alt": "bg-[var(--surface-base)]",
 		blobs: "bg-[var(--surface-base)]",

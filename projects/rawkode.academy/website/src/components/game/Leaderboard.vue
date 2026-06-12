@@ -160,7 +160,9 @@ async function loadLeaderboard() {
 	try {
 		const [leaderboardData, rankData] = await Promise.all([
 			getLeaderboard(activeTab.value, 50),
-			props.currentPlayerId ? getPlayerRank(activeTab.value) : Promise.resolve(null),
+			props.currentPlayerId
+				? getPlayerRank(activeTab.value)
+				: Promise.resolve(null),
 		]);
 
 		entries.value = leaderboardData;

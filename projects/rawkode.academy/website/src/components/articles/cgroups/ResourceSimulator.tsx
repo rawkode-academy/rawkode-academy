@@ -146,11 +146,7 @@ function TerminalLine({
 	);
 }
 
-function TerminalBlock({
-	children,
-}: {
-	children: ReactNode;
-}) {
+function TerminalBlock({ children }: { children: ReactNode }) {
 	return <div className="mb-3 last:mb-0">{children}</div>;
 }
 
@@ -174,18 +170,12 @@ export default function ResourceSimulator() {
 				<>
 					<TerminalBlock>
 						<TerminalLine command="cat cpu.max" />
-						<TerminalLine
-							output={`${cpuQuota} 100000`}
-							outputColor="#ef4444"
-						/>
+						<TerminalLine output={`${cpuQuota} 100000`} outputColor="#ef4444" />
 					</TerminalBlock>
 
 					<TerminalBlock>
 						<TerminalLine command="cat memory.max" />
-						<TerminalLine
-							output={`${memoryBytes}`}
-							outputColor="#f59e0b"
-						/>
+						<TerminalLine output={`${memoryBytes}`} outputColor="#f59e0b" />
 					</TerminalBlock>
 
 					<TerminalBlock>
@@ -211,10 +201,7 @@ export default function ResourceSimulator() {
 			<>
 				<TerminalBlock>
 					<TerminalLine command="cat cpu.cfs_quota_us" />
-					<TerminalLine
-						output={`${cpuQuota}`}
-						outputColor="#ef4444"
-					/>
+					<TerminalLine output={`${cpuQuota}`} outputColor="#ef4444" />
 				</TerminalBlock>
 
 				<TerminalBlock>
@@ -224,10 +211,7 @@ export default function ResourceSimulator() {
 
 				<TerminalBlock>
 					<TerminalLine command="cat memory.limit_in_bytes" />
-					<TerminalLine
-						output={`${memoryBytes}`}
-						outputColor="#f59e0b"
-					/>
+					<TerminalLine output={`${memoryBytes}`} outputColor="#f59e0b" />
 				</TerminalBlock>
 
 				<TerminalBlock>
@@ -240,10 +224,7 @@ export default function ResourceSimulator() {
 
 				<TerminalBlock>
 					<TerminalLine command="cat blkio.throttle.read_iops_device" />
-					<TerminalLine
-						output={`8:0 ${io}`}
-						outputColor="#10b981"
-					/>
+					<TerminalLine output={`8:0 ${io}`} outputColor="#10b981" />
 				</TerminalBlock>
 			</>
 		);

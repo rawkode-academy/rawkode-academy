@@ -13,14 +13,14 @@ const milestones: Milestone[] = [
 		year: 2006,
 		label: "Process containers proposed",
 		detail:
-			"Paul Menage and Rohit Seth propose \"process containers\" for the Linux kernel, later renamed to avoid confusion with OS-level containers.",
+			'Paul Menage and Rohit Seth propose "process containers" for the Linux kernel, later renamed to avoid confusion with OS-level containers.',
 		color: "red",
 	},
 	{
 		year: 2007,
 		label: "Renamed to cgroups",
 		detail:
-			"Renamed to \"control groups\" (cgroups) before merge into the mainline kernel.",
+			'Renamed to "control groups" (cgroups) before merge into the mainline kernel.',
 		color: "red",
 	},
 	{
@@ -110,8 +110,7 @@ const milestones: Milestone[] = [
 	{
 		year: 2024,
 		label: "GKE defaults to v2",
-		detail:
-			"Google Kubernetes Engine defaults to cgroups v2 for new clusters.",
+		detail: "Google Kubernetes Engine defaults to cgroups v2 for new clusters.",
 		color: "blue",
 	},
 	{
@@ -167,23 +166,20 @@ function CgroupTimeline() {
 		setActiveIndex((prev) => (prev === index ? null : index));
 	}, []);
 
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent, index: number) => {
-			if (e.key === "Escape") {
-				setActiveIndex(null);
-				return;
-			}
-			if (e.key === "ArrowRight" && index < milestones.length - 1) {
-				e.preventDefault();
-				milestoneRefs.current[index + 1]?.focus();
-			}
-			if (e.key === "ArrowLeft" && index > 0) {
-				e.preventDefault();
-				milestoneRefs.current[index - 1]?.focus();
-			}
-		},
-		[],
-	);
+	const handleKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+		if (e.key === "Escape") {
+			setActiveIndex(null);
+			return;
+		}
+		if (e.key === "ArrowRight" && index < milestones.length - 1) {
+			e.preventDefault();
+			milestoneRefs.current[index + 1]?.focus();
+		}
+		if (e.key === "ArrowLeft" && index > 0) {
+			e.preventDefault();
+			milestoneRefs.current[index - 1]?.focus();
+		}
+	}, []);
 
 	const legendColors = ["red", "green", "blue", "gray"] as const;
 
@@ -320,9 +316,7 @@ function CgroupTimeline() {
 											<div
 												className="rounded-lg px-3 py-2.5"
 												style={{
-													background: isActive
-														? colors.bgActive
-														: colors.bg,
+													background: isActive ? colors.bgActive : colors.bg,
 													border: `1px solid ${isActive ? colors.border : "transparent"}`,
 													boxShadow: isActive
 														? `0 0 16px ${colors.glow}`

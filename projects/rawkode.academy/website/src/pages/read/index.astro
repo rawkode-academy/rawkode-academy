@@ -9,25 +9,38 @@ import FeaturedArticle from "@/components/read/FeaturedArticle.astro";
 import FilterRail from "@/components/read/FilterRail.astro";
 import ArticleGridItem from "@/components/read/ArticleGridItem.astro";
 import ReadFooter from "@/components/read/ReadFooter.astro";
+import MLabel from "@/components/ui/MLabel.vue";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 
-export const prerender = true;
+export const prerender = false;
+
+// Cache headers — content only changes at deploy time, and nothing here is
+// personalised, so filtered variants are publicly cacheable per-URL.
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+);
+Astro.response.headers.set("CDN-Cache-Control", "public, max-age=3600");
+Astro.response.headers.set("Cache-Tag", "articles-page, articles-list");
 
 // ─── Data ──────────────────────────────────────────────────────
 
-const allArticles = (await getCollection("articles", ({ data }) => !data.draft))
-	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const allArticles = (
+	await getCollection("articles", ({ data }) => !data.draft)
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
-const featured = allArticles.find((article) => article.data.cover) ?? allArticles[0];
-const featuredIndex = featured
-	? allArticles.findIndex((article) => article.id === featured.id)
-	: -1;
-const rest = featured
-	? allArticles.filter((article) => article.id !== featured.id)
-	: [];
-const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
+// ─── Filters (?type=…&topic=…) ─────────────────────────────────
+
+const typeKeyFor = (article: (typeof allArticles)[number]) =>
+	article.data.type || "tutorial";
+
+const typeCounts = new Map<string, number>();
+for (const article of allArticles) {
+	const key = typeKeyFor(article);
+	typeCounts.set(key, (typeCounts.get(key) ?? 0) + 1);
+}
 
 // Topics — derived from technologies referenced across the corpus.
 const topicCounts = new Map<string, number>();
@@ -37,17 +50,107 @@ for (const article of allArticles) {
 	}
 }
 
-const topTopics = Array.from(topicCounts.entries())
-	.sort((a, b) => b[1] - a[1])
-	.slice(0, 8)
-	.map(([id]) => ({
-		label: id
-			.replace(/[-_]/g, " ")
-			.replace(/\b\w/g, (char) => char.toUpperCase()),
-		href: `/technology/${id}`,
-	}));
+const requestedType = Astro.url.searchParams.get("type") || undefined;
+const selectedType =
+	requestedType && typeCounts.has(requestedType) ? requestedType : undefined;
 
-const topics = topTopics;
+const requestedTopic = Astro.url.searchParams.get("topic") || undefined;
+const selectedTopic =
+	requestedTopic && topicCounts.has(requestedTopic)
+		? requestedTopic
+		: undefined;
+
+const isFiltered = Boolean(selectedType || selectedTopic);
+
+const matchesType = (article: (typeof allArticles)[number]) =>
+	!selectedType || typeKeyFor(article) === selectedType;
+const matchesTopic = (article: (typeof allArticles)[number]) =>
+	!selectedTopic || (article.data.technologies ?? []).includes(selectedTopic);
+
+const visibleArticles = allArticles.filter(
+	(article) => matchesType(article) && matchesTopic(article),
+);
+
+const readHref = (
+	overrides: { type?: string | undefined; topic?: string | undefined } = {},
+) => {
+	const type = "type" in overrides ? overrides.type : selectedType;
+	const topic = "topic" in overrides ? overrides.topic : selectedTopic;
+	const params = new URLSearchParams();
+	if (type) params.set("type", type);
+	if (topic) params.set("topic", topic);
+	const query = params.toString();
+	return `/read${query ? `?${query}` : ""}`;
+};
+
+const formatTopicLabel = (id: string) =>
+	id.replace(/[-_]/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+
+// Type rail — every type the corpus actually uses, counted against the
+// active topic so the numbers describe what a click returns.
+const typeRailCounts = new Map<string, number>();
+for (const article of allArticles) {
+	if (!matchesTopic(article)) continue;
+	const key = typeKeyFor(article);
+	typeRailCounts.set(key, (typeRailCounts.get(key) ?? 0) + 1);
+}
+
+const navTypes = Array.from(typeRailCounts.entries()).sort(
+	(a, b) => b[1] - a[1],
+);
+if (selectedType && !navTypes.some(([key]) => key === selectedType)) {
+	navTypes.push([selectedType, 0]);
+}
+
+const typeItems = [
+	{ label: "All", href: readHref({ type: undefined }) },
+	...navTypes.map(([key]) => ({
+		label: getTypeBadgeConfig(key).label,
+		href: readHref({ type: key }),
+	})),
+];
+const activeTypeIndex = selectedType
+	? Math.max(0, 1 + navTypes.findIndex(([key]) => key === selectedType))
+	: 0;
+
+// Topic rail — top topics by article count within the active type.
+const topicRailCounts = new Map<string, number>();
+for (const article of allArticles) {
+	if (!matchesType(article)) continue;
+	for (const tech of article.data.technologies ?? []) {
+		topicRailCounts.set(tech, (topicRailCounts.get(tech) ?? 0) + 1);
+	}
+}
+
+const navTopics = Array.from(topicRailCounts.entries())
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 8);
+if (selectedTopic && !navTopics.some(([id]) => id === selectedTopic)) {
+	navTopics.push([selectedTopic, topicRailCounts.get(selectedTopic) ?? 0]);
+}
+
+const topicItems = [
+	{ label: "All", href: readHref({ topic: undefined }) },
+	...navTopics.map(([id]) => ({
+		label: formatTopicLabel(id),
+		href: readHref({ topic: id }),
+	})),
+];
+const activeTopicIndex = selectedTopic
+	? Math.max(0, 1 + navTopics.findIndex(([id]) => id === selectedTopic))
+	: 0;
+
+// ─── Featured + grid ───────────────────────────────────────────
+
+const featured =
+	visibleArticles.find((article) => article.data.cover) ?? visibleArticles[0];
+const featuredIndex = featured
+	? allArticles.findIndex((article) => article.id === featured.id)
+	: -1;
+const rest = featured
+	? visibleArticles.filter((article) => article.id !== featured.id)
+	: [];
+const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
 
 // ─── Helpers ───────────────────────────────────────────────────
 
@@ -77,7 +180,9 @@ const dispatchNumFor = (idx: number) =>
 	String(allArticles.length - idx).padStart(3, "0");
 
 const dispatchNumForArticle = (article: (typeof allArticles)[number]) =>
-	dispatchNumFor(allArticles.findIndex((candidate) => candidate.id === article.id));
+	dispatchNumFor(
+		allArticles.findIndex((candidate) => candidate.id === article.id),
+	);
 
 // Pre-resolve authors for the grid (Astro can't await in JSX iteration cleanly).
 const restWithMeta = await Promise.all(
@@ -89,6 +194,13 @@ const restWithMeta = await Promise.all(
 	})),
 );
 
+const activeFilterSummary = [
+	selectedType ? getTypeBadgeConfig(selectedType).label : undefined,
+	selectedTopic ? formatTopicLabel(selectedTopic) : undefined,
+]
+	.filter(Boolean)
+	.join(" · ");
+
 const pageTitle = "Field Notes — Articles from Rawkode Academy";
 const pageDescription =
 	"Long-form essays, tutorials, and field reports on cloud native engineering — Kubernetes, eBPF, containers, supply chain.";
@@ -96,11 +208,14 @@ const pageDescription =
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
 	<Fragment slot="extra-head">
-		<ArticleItemListJsonLd
-			articles={allArticles}
-			listUrl={new URL("/read", Astro.site ?? Astro.url).href}
-			listName={pageTitle}
-		/>
+		{isFiltered && <meta name="robots" content="noindex,follow" />}
+		{!isFiltered && (
+			<ArticleItemListJsonLd
+				articles={allArticles}
+				listUrl={new URL("/read", Astro.site ?? Astro.url).href}
+				listName={pageTitle}
+			/>
+		)}
 		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Articles (RSS)" href="/api/feeds/articles.xml" />
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - Articles (JSON Feed)" href="/api/feeds/articles.json" />
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
@@ -126,7 +241,47 @@ const pageDescription =
 			/>
 		)}
 
-		<FilterRail topics={topics} />
+		<FilterRail
+			label="Type"
+			ariaLabel="Article types"
+			topics={typeItems}
+			activeIndex={activeTypeIndex}
+		/>
+
+		<FilterRail
+			label="Topics"
+			ariaLabel="Article topics"
+			topics={topicItems}
+			activeIndex={activeTopicIndex}
+		/>
+
+		{isFiltered && (
+			<div class="read-filter-status">
+				<MLabel>
+					{visibleArticles.length}{" "}
+					{visibleArticles.length === 1 ? "article" : "articles"}
+					{activeFilterSummary ? ` · ${activeFilterSummary}` : ""}
+				</MLabel>
+				<div class="read-filter-status__links">
+					{selectedTopic && (
+						<a
+							class="read-filter-status__link"
+							href={`/technology/${selectedTopic}`}
+						>
+							View technology hub →
+						</a>
+					)}
+					<a class="read-filter-status__link" href="/read">Clear filters</a>
+				</div>
+			</div>
+		)}
+
+		{visibleArticles.length === 0 && (
+			<div class="read-empty">
+				<p>No articles match these filters.</p>
+				<a href="/read">Browse all articles →</a>
+			</div>
+		)}
 
 		<div class="read-grid">
 			{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => (
@@ -159,6 +314,66 @@ const pageDescription =
 		color: var(--editorial-ink);
 	}
 
+	.read-filter-status {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.5rem;
+		padding: 0.75rem 2.5rem 0;
+	}
+
+	.read-filter-status__links {
+		display: flex;
+		align-items: baseline;
+		gap: 1.25rem;
+	}
+
+	.read-filter-status__link {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+
+	.read-filter-status__link:hover {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+	}
+
+	.read-empty {
+		padding: 3rem 2.5rem;
+		text-align: center;
+	}
+
+	.read-empty p {
+		margin: 0 0 0.75rem;
+		font-family: var(--font-instrument-serif), serif;
+		font-size: 1.5rem;
+		font-style: italic;
+		color: var(--editorial-ink-soft);
+	}
+
+	.read-empty a {
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+
+	.read-empty a:hover {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+	}
+
 	.read-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -167,6 +382,14 @@ const pageDescription =
 	}
 
 	@media (max-width: 960px) {
+		.read-filter-status {
+			padding-inline: 1.5rem;
+		}
+
+		.read-empty {
+			padding-inline: 1.5rem;
+		}
+
 		.read-grid {
 			grid-template-columns: 1fr;
 			padding: 1rem 1.5rem 3rem;

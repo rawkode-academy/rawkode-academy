@@ -17,6 +17,7 @@ import VideoHero from "@/components/video/VideoHero.astro";
 import VideoStill from "@/components/video/VideoStill.astro";
 import SeriesFilter from "@/components/video/SeriesFilter.astro";
 import VideoGridItem from "@/components/video/VideoGridItem.astro";
+import ContinueWatchingRail from "@/components/video/ContinueWatchingRail.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 
 const user = Astro.locals.user;
@@ -57,66 +58,219 @@ const technologyById = new Map(
 );
 
 const totalVideoCount = allVideos.length;
-const seriesKeyFor = (video: (typeof allVideos)[number]) =>
+const categoryKeyFor = (video: (typeof allVideos)[number]) =>
 	(video.category || video.type || "Library").toString();
 
-// Series counts are derived from `category` when present, falling back to `type`.
-const seriesCounts = new Map<string, number>();
-for (const v of allVideos) {
-	const key = seriesKeyFor(v);
-	seriesCounts.set(key, (seriesCounts.get(key) ?? 0) + 1);
-}
+const technologyIdsFor = (video: (typeof allVideos)[number]) =>
+	normalizeTechnologyReferences(video.technologies);
 
-const requestedSeries = Astro.url.searchParams.get("series") || undefined;
-const selectedSeries =
-	requestedSeries && seriesCounts.has(requestedSeries) ? requestedSeries : undefined;
-const visibleVideos = selectedSeries
-	? allVideos.filter((video) => seriesKeyFor(video) === selectedSeries)
-	: allVideos;
+// Category counts are derived from `category` when present, falling back to `type`.
+const allCategoryKeys = new Set(allVideos.map(categoryKeyFor));
+const allTechnologyIds = new Set(allVideos.flatMap(technologyIdsFor));
+
+// "category" is the canonical param; "series" is read for backwards
+// compatibility with links minted before the facet was renamed.
+const requestedCategory =
+	Astro.url.searchParams.get("category") ||
+	Astro.url.searchParams.get("series") ||
+	undefined;
+const selectedCategory =
+	requestedCategory && allCategoryKeys.has(requestedCategory)
+		? requestedCategory
+		: undefined;
+
+const requestedTechnology =
+	Astro.url.searchParams.get("technology") || undefined;
+const selectedTechnology =
+	requestedTechnology && allTechnologyIds.has(requestedTechnology)
+		? requestedTechnology
+		: undefined;
+
+const SORT_OPTIONS = ["newest", "oldest", "longest"] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
+const requestedSort = Astro.url.searchParams.get("sort") || "newest";
+const selectedSort: SortOption = (SORT_OPTIONS as readonly string[]).includes(
+	requestedSort,
+)
+	? (requestedSort as SortOption)
+	: "newest";
+
+const matchesCategory = (video: (typeof allVideos)[number]) =>
+	!selectedCategory || categoryKeyFor(video) === selectedCategory;
+const matchesTechnology = (video: (typeof allVideos)[number]) =>
+	!selectedTechnology || technologyIdsFor(video).includes(selectedTechnology);
+
+// Facets compose: each rail's counts reflect the *other* active facet, so the
+// numbers always describe what a click will actually return.
+const visibleVideos = allVideos.filter(
+	(video) => matchesCategory(video) && matchesTechnology(video),
+);
 const visibleCount = visibleVideos.length;
 
-// Pagination. Page one promotes the newest visible video, then starts the grid after it.
-const featuredVideo = page === 1 ? (visibleVideos[0] ?? null) : null;
+// Dispatch numbers stay chronological (newest = highest) within the filtered
+// set, regardless of the active sort order.
+const dispatchNumByVideoId = new Map(
+	visibleVideos.map((video, idx) => [
+		video.id,
+		String(visibleCount - idx).padStart(3, "0"),
+	]),
+);
+
+const sortedVideos =
+	selectedSort === "oldest"
+		? [...visibleVideos].reverse()
+		: selectedSort === "longest"
+			? [...visibleVideos].sort(
+					(a, b) =>
+						(typeof b.duration === "number" ? b.duration : 0) -
+						(typeof a.duration === "number" ? a.duration : 0),
+				)
+			: visibleVideos;
+
+// Pagination. Page one promotes the first visible video, then starts the grid after it.
+const featuredVideo = page === 1 ? (sortedVideos[0] ?? null) : null;
 const start = page === 1 ? 1 : 1 + (page - 1) * videosPerPage;
 const end = start + videosPerPage;
-const feedVideos = visibleVideos.slice(start, end);
-const hasNextPage = end < visibleVideos.length;
+const feedVideos = sortedVideos.slice(start, end);
+const hasNextPage = end < sortedVideos.length;
 
-const topSeries = Array.from(seriesCounts.entries())
-	.sort((a, b) => b[1] - a[1])
-	.slice(0, 7);
+const isFiltered = Boolean(
+	selectedCategory || selectedTechnology || selectedSort !== "newest",
+);
 
-const navSeries =
-	selectedSeries && !topSeries.some(([label]) => label === selectedSeries)
-		? [
-				...topSeries,
-				[selectedSeries, seriesCounts.get(selectedSeries) ?? 0] as [
-					string,
-					number,
-				],
-			]
-		: topSeries;
+const watchHref = (
+	overrides: {
+		category?: string | undefined;
+		technology?: string | undefined;
+		sort?: SortOption;
+		page?: number;
+	} = {},
+) => {
+	const category =
+		"category" in overrides ? overrides.category : selectedCategory;
+	const technology =
+		"technology" in overrides ? overrides.technology : selectedTechnology;
+	const sort = overrides.sort ?? selectedSort;
+	const targetPage = overrides.page ?? 1;
 
-const watchPathFor = (targetPage = 1) => {
 	const params = new URLSearchParams();
-	if (selectedSeries) params.set("series", selectedSeries);
+	if (category) params.set("category", category);
+	if (technology) params.set("technology", technology);
+	if (sort !== "newest") params.set("sort", sort);
 	if (targetPage > 1) params.set("page", String(targetPage));
 	const query = params.toString();
 	return `/watch${query ? `?${query}` : ""}`;
 };
 
-const seriesItems = [
-	{ label: "All", count: totalVideoCount, href: "/watch" },
-	...navSeries.map(([label, count]) => ({
-		label: label.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+const watchPathFor = (targetPage: number) => watchHref({ page: targetPage });
+
+// ─── Category facet ────────────────────────────────────────────
+
+const categoryCounts = new Map<string, number>();
+for (const video of allVideos) {
+	if (!matchesTechnology(video)) continue;
+	const key = categoryKeyFor(video);
+	categoryCounts.set(key, (categoryCounts.get(key) ?? 0) + 1);
+}
+
+const topCategories = Array.from(categoryCounts.entries())
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 7);
+
+const navCategories =
+	selectedCategory && !topCategories.some(([key]) => key === selectedCategory)
+		? [
+				...topCategories,
+				[selectedCategory, categoryCounts.get(selectedCategory) ?? 0] as [
+					string,
+					number,
+				],
+			]
+		: topCategories;
+
+const categoryAllCount = selectedTechnology
+	? Array.from(categoryCounts.values()).reduce((sum, count) => sum + count, 0)
+	: totalVideoCount;
+
+const categoryItems = [
+	{
+		label: "All",
+		count: categoryAllCount,
+		href: watchHref({ category: undefined }),
+	},
+	...navCategories.map(([key, count]) => ({
+		label: key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 		count,
-		href: `/watch?series=${encodeURIComponent(label)}`,
+		href: watchHref({ category: key }),
 	})),
 ];
 
-const activeSeriesIndex = selectedSeries
-	? Math.max(0, 1 + navSeries.findIndex(([label]) => label === selectedSeries))
+const activeCategoryIndex = selectedCategory
+	? Math.max(
+			0,
+			1 + navCategories.findIndex(([key]) => key === selectedCategory),
+		)
 	: 0;
+
+// ─── Technology facet ──────────────────────────────────────────
+
+const technologyCounts = new Map<string, number>();
+for (const video of allVideos) {
+	if (!matchesCategory(video)) continue;
+	for (const technologyId of technologyIdsFor(video)) {
+		technologyCounts.set(
+			technologyId,
+			(technologyCounts.get(technologyId) ?? 0) + 1,
+		);
+	}
+}
+
+const topTechnologies = Array.from(technologyCounts.entries())
+	.sort((a, b) => b[1] - a[1])
+	.slice(0, 12);
+
+const navTechnologies =
+	selectedTechnology &&
+	!topTechnologies.some(([id]) => id === selectedTechnology)
+		? [
+				...topTechnologies,
+				[selectedTechnology, technologyCounts.get(selectedTechnology) ?? 0] as [
+					string,
+					number,
+				],
+			]
+		: topTechnologies;
+
+const technologyLabelFor = (technologyId: string) =>
+	technologyById.get(technologyId)?.data.name ??
+	technologyId.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+const technologyItems = [
+	{
+		label: "All",
+		href: watchHref({ technology: undefined }),
+	},
+	...navTechnologies.map(([id, count]) => ({
+		label: technologyLabelFor(id),
+		count,
+		href: watchHref({ technology: id }),
+	})),
+];
+
+const activeTechnologyIndex = selectedTechnology
+	? Math.max(
+			0,
+			1 + navTechnologies.findIndex(([id]) => id === selectedTechnology),
+		)
+	: 0;
+
+// ─── Sort ──────────────────────────────────────────────────────
+
+const sortItems = SORT_OPTIONS.map((sort) => ({
+	sort,
+	label: sort.replace(/\b\w/, (c) => c.toUpperCase()),
+	href: watchHref({ sort }),
+}));
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	month: "short",
@@ -131,9 +285,6 @@ const formatLabel = (value?: string | null) =>
 const formatDateTimeAttribute = (date: Date | string) =>
 	(date instanceof Date ? date : new Date(date)).toISOString();
 
-const dispatchNumFor = (idx: number) =>
-	String(visibleCount - idx).padStart(3, "0");
-
 const runtimeLabelFor = (video: (typeof allVideos)[number]) =>
 	formatVideoRuntimeLabel(
 		{
@@ -144,8 +295,10 @@ const runtimeLabelFor = (video: (typeof allVideos)[number]) =>
 		renderedAt,
 	);
 
-const featuredEpisodeNum = featuredVideo ? dispatchNumFor(0) : undefined;
-const featuredSeries = featuredVideo
+const featuredEpisodeNum = featuredVideo
+	? dispatchNumByVideoId.get(featuredVideo.id)
+	: undefined;
+const featuredCategory = featuredVideo
 	? formatLabel(featuredVideo.category || featuredVideo.type)
 	: undefined;
 
@@ -167,11 +320,8 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 					}
 				: undefined;
 		})
-		.filter(
-			(
-				logo,
-			): logo is { src: string; name: string; kind: "icon" } =>
-				Boolean(logo),
+		.filter((logo): logo is { src: string; name: string; kind: "icon" } =>
+			Boolean(logo),
 		)
 		.slice(0, 1);
 ---
@@ -181,7 +331,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 	description="Watch hands-on cloud native and Kubernetes tutorials, deep dives, and live builds for engineers shipping production systems."
 	pageType="CollectionPage"
 >
-	{page > 1 && (
+	{(page > 1 || isFiltered) && (
 		<Fragment slot="extra-head">
 			<meta name="robots" content="noindex,follow" />
 		</Fragment>
@@ -205,7 +355,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 	<link slot="extra-head" rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
-	{page === 1 && (
+	{page === 1 && !isFiltered && (
 		<VideoItemListJsonLd
 			slot="extra-head"
 			videos={allVideos.map((v) => ({
@@ -229,6 +379,8 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 			title="Latest Videos"
 			dek="Tutorials, talks, and live builds."
 		/>
+
+		<ContinueWatchingRail server:defer />
 
 		{visibleUpcomingVideos.length > 0 && (
 			<section class="watch-upcoming" aria-labelledby="watch-upcoming-title">
@@ -269,7 +421,7 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 				href={`/watch/${featuredVideo.slug}`}
 				episodeNum={featuredEpisodeNum}
 				title={featuredVideo.title}
-				series={featuredSeries}
+				series={featuredCategory}
 				duration={runtimeLabelFor(featuredVideo)}
 				thumbnailUrl={getVideoThumbnailUrl(featuredVideo.id)}
 				description={featuredVideo.description}
@@ -282,13 +434,58 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 			/>
 		)}
 
-		<SeriesFilter items={seriesItems} activeIndex={activeSeriesIndex} />
+		<SeriesFilter
+			label="Category"
+			ariaLabel="Video categories"
+			items={categoryItems}
+			activeIndex={activeCategoryIndex}
+		/>
+
+		<SeriesFilter
+			label="Technology"
+			ariaLabel="Video technologies"
+			items={technologyItems}
+			activeIndex={activeTechnologyIndex}
+		/>
+
+		<div class="watch-toolbar">
+			<nav class="watch-toolbar__sort" aria-label="Sort videos">
+				<MLabel>Sort</MLabel>
+				{sortItems.map((item) => (
+					<a
+						class={`watch-toolbar__sort-link ${item.sort === selectedSort ? "watch-toolbar__sort-link--active" : ""}`}
+						href={item.href}
+						aria-current={item.sort === selectedSort ? "page" : undefined}
+					>
+						{item.label}
+					</a>
+				))}
+			</nav>
+			<form
+				class="watch-toolbar__search"
+				method="get"
+				action="/search"
+				role="search"
+			>
+				<input type="hidden" name="type" value="video" />
+				<label class="sr-only" for="watch-search-input">Search videos</label>
+				<input
+					id="watch-search-input"
+					class="watch-toolbar__search-input"
+					type="search"
+					name="q"
+					placeholder="Search videos…"
+					required
+				/>
+				<button class="watch-toolbar__search-btn" type="submit">Search</button>
+			</form>
+		</div>
 
 		<div class="watch-grid">
-			{feedVideos.map((v, idx) => (
+			{feedVideos.map((v) => (
 				<VideoGridItem
 					href={`/watch/${v.slug}`}
-					episodeNum={dispatchNumFor(start + idx)}
+					episodeNum={dispatchNumByVideoId.get(v.id)}
 					title={v.title}
 					series={formatLabel(v.category || v.type) || undefined}
 					duration={runtimeLabelFor(v)}
@@ -411,6 +608,104 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 		overflow: hidden;
 	}
 
+	.watch-toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 0.75rem 1.5rem;
+		padding: 0.875rem 2.5rem 0.75rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.watch-toolbar__sort {
+		display: flex;
+		align-items: baseline;
+		gap: 1rem;
+	}
+
+	.watch-toolbar__sort-link {
+		display: inline-flex;
+		align-items: center;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--editorial-ink-soft);
+		text-decoration: none;
+		transition: color var(--duration-base) var(--ease-standard),
+			text-decoration-color var(--duration-base) var(--ease-standard);
+	}
+
+	.watch-toolbar__sort-link:hover {
+		color: var(--editorial-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.35em;
+	}
+
+	.watch-toolbar__sort-link--active {
+		color: var(--editorial-ink);
+		text-decoration: underline;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.35em;
+	}
+
+	.watch-toolbar__search {
+		display: flex;
+		align-items: stretch;
+		gap: 0;
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: var(--radius-sm);
+		background: var(--editorial-paper);
+	}
+
+	.watch-toolbar__search-input {
+		width: 14rem;
+		max-width: 100%;
+		min-height: 2.5rem;
+		padding: 0.4rem 0.625rem;
+		border: none;
+		background: transparent;
+		color: var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.75rem;
+	}
+
+	.watch-toolbar__search-input::placeholder {
+		color: var(--editorial-ink-mute);
+	}
+
+	.watch-toolbar__search-input:focus-visible {
+		outline: 2px solid var(--editorial-spruce);
+		outline-offset: -2px;
+	}
+
+	.watch-toolbar__search-btn {
+		padding: 0.4rem 0.75rem;
+		border: none;
+		border-left: 1px solid var(--editorial-hairline-strong);
+		background: var(--editorial-paper-deep);
+		color: var(--editorial-ink);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+		transition: color var(--duration-base) var(--ease-standard);
+	}
+
+	.watch-toolbar__search-btn:hover {
+		color: var(--editorial-spruce);
+	}
+
+	.watch-toolbar__search-btn:focus-visible {
+		outline: 2px solid var(--editorial-spruce);
+		outline-offset: -2px;
+	}
+
 	.watch-grid {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -444,6 +739,10 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 	}
 
 	.watch-footer__pager-btn {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: 0 0.5rem;
 		text-decoration: none;
 	}
 
@@ -466,6 +765,19 @@ const technologyLogosFor = (video: (typeof upcomingVideos)[number]) =>
 
 		.watch-upcoming {
 			padding-inline: 1.25rem;
+		}
+
+		.watch-toolbar {
+			padding-inline: 1.25rem;
+		}
+
+		.watch-toolbar__search {
+			flex: 1 1 100%;
+		}
+
+		.watch-toolbar__search-input {
+			flex: 1;
+			width: auto;
 		}
 	}
 	@media (max-width: 640px) {

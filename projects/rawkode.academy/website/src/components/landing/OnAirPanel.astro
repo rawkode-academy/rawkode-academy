@@ -1,7 +1,7 @@
 ---
 import LiveDot from "@/components/ui/LiveDot.vue";
 import MLabel from "@/components/ui/MLabel.vue";
-import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getVideoThumbnailResizedUrl } from "@/lib/video-thumbnail";
 
 interface Video {
 	id: string;
@@ -27,7 +27,10 @@ interface Props {
 
 const { state, video, schedule = [] } = Astro.props as Props;
 
-const thumbnailUrl = getVideoThumbnailUrl(video.id);
+// Hero thumbnail is the homepage LCP candidate: serve a right-sized,
+// auto-format variant via Cloudflare image resizing. Keep this width in
+// sync with the <link rel="preload"> emitted by src/pages/index.astro.
+const thumbnailUrl = getVideoThumbnailResizedUrl(video.id, 800);
 
 const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
 	weekday: "short",
@@ -80,7 +83,16 @@ const subLabel =
 	</div>
 
 	<a class="on-air__screen" href={`/watch/${video.slug}`} aria-label={`Open ${video.title}`}>
-		<img class="on-air__thumb" src={thumbnailUrl} alt={video.title} loading="eager" />
+		<img
+			class="on-air__thumb"
+			src={thumbnailUrl}
+			alt={video.title}
+			width="800"
+			height="450"
+			loading="eager"
+			fetchpriority="high"
+			decoding="async"
+		/>
 		{state === "live" && (
 			<div class="on-air__rec">
 				<span class="on-air__rec-dot" aria-hidden="true"></span>

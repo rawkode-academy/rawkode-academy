@@ -44,9 +44,8 @@ const paddingClass = computed(() => {
 const backgroundClass = computed(() => {
 	const backgroundClasses: Record<string, string> = {
 		none: "",
-		gray: "bg-gray-50 dark:bg-gray-900",
-		gradient:
-			"bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800",
+		gray: "bg-[var(--surface-card-muted)]",
+		gradient: "bg-[var(--surface-card-muted)]",
 		dots: "relative overflow-hidden",
 	};
 	return backgroundClasses[props.background];

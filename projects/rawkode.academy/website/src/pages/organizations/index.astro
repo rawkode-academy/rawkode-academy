@@ -1,52 +1,53 @@
 ---
+import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
+import {
+	decisionBriefMailto,
+	decisionBriefSubject,
+	decisionBriefTemplate,
+	partnershipBoundaries,
+	partnershipTierNames,
+	partnershipTiers,
+} from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactHref =
-	"mailto:david@rawkode.academy?subject=Decision%20brief%20request&body=Company%2Fcategory%3A%0D%0APreferred%20partnership%20path%3A%0D%0ATarget%20technical%20evaluator%3A%0D%0ATeam%20stakeholders%3A%0D%0ADeadline%20or%20launch%20window%3A%0D%0ADocs%2C%20demos%2C%20architecture%20notes%2C%20or%20enablement%20material%3A%0D%0AInfrastructure%20artifacts%20available%3A%0D%0AAdoption%20risk%20or%20decision%20to%20review%3A%0D%0ALinks%2C%20if%20useful%3A";
+const contactHref = decisionBriefMailto;
 
-const practitionerSignals = [
+const reviewScope = [
 	{
-		value: "Proof",
-		label: "Docs, demos, architecture, and operational claims",
+		term: "What we review",
+		detail: "Docs, demos, architecture, and operational claims.",
 	},
 	{
-		value: "Risk",
-		label: "Trust boundaries, migration, RBAC/IAM, egress, and tenancy",
+		term: "Risk we surface",
+		detail: "Trust boundaries, migration, RBAC/IAM, egress, and tenancy.",
 	},
 	{
-		value: "Owners",
-		label: "Marketing, product, DevRel, sales engineering, and technical teams",
+		term: "Who owns the work",
+		detail:
+			"Marketing, product, DevRel, sales engineering, and technical teams. Your team keeps execution.",
 	},
 ];
 
-const adoptionSignals = [
-	{
-		value: "£1k",
-		label: "Signal from",
-	},
-	{
-		value: "£2k/mo",
-		label: "Adoption from",
-	},
-	{
-		value: "£3k/mo",
-		label: "Launch from",
-	},
-];
+const pricingStats = partnershipTiers.map((tier) => ({
+	value: tier.priceShort,
+	label: `${tier.name} from`,
+}));
+
+const tierSummary = partnershipTiers
+	.map(
+		(tier, index) =>
+			`${index === partnershipTiers.length - 1 ? "or " : ""}${tier.name} from ${tier.price.replace(" / ", "/")}`,
+	)
+	.join(", ");
 
 const fitAreas = [
 	{
 		title: "Partnerships",
 		body: "Work with marketing, product, DevRel, sales engineering, and technical owners to expose the claims, docs, demos, and operational gaps that stall technical buyers.",
-		items: [
-			"Signal",
-			"Adoption",
-			"Launch",
-			"Technical buyer proof",
-		],
+		items: [...partnershipTierNames, "Technical buyer proof"],
 		href: "/organizations/partnerships",
 		cta: "Compare partnership paths",
 	},
@@ -61,11 +62,7 @@ const utilityLinks = [
 	},
 ];
 
-const badFits = [
-	"You need outsourced DevRel execution or someone to run the function for you.",
-	"You want paid coverage, guaranteed mentions, media inventory, or leads.",
-	"You want a generic workshop disconnected from adoption strategy.",
-];
+const badFits = partnershipBoundaries;
 ---
 
 <Page
@@ -83,14 +80,14 @@ const badFits = [
 		</div>
 
 		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				{practitionerSignals.map((signal) => (
-					<div class="editorial-stat">
-						<span class="editorial-stat__value">{signal.value}</span>
-						<span class="editorial-stat__label">{signal.label}</span>
+			<dl class="organizations-scope">
+				{reviewScope.map((row) => (
+					<div class="organizations-scope__row">
+						<dt>{row.term}</dt>
+						<dd>{row.detail}</dd>
 					</div>
 				))}
-			</div>
+			</dl>
 		</section>
 
 		<section class="editorial-section editorial-section--split">
@@ -98,7 +95,7 @@ const badFits = [
 				<p class="editorial-kicker">What is active now</p>
 				<h2 class="editorial-section__title">The company route is partnerships</h2>
 				<p class="editorial-section__lede">
-					For companies, the active paths are Signal from £1,000/month, Adoption from £2,000/month, or Launch from £3,000/month, focused on practitioner signal, launch clarity, and buyer confidence.
+					For companies, the active paths are {tierSummary}, focused on practitioner signal, focused experiments, and peer perspective.
 				</p>
 			</div>
 			<div class="editorial-grid editorial-grid--2">
@@ -117,7 +114,7 @@ const badFits = [
 
 		<section class="editorial-section">
 			<div class="editorial-stat-grid">
-				{adoptionSignals.map((signal) => (
+				{pricingStats.map((signal) => (
 					<div class="editorial-stat">
 						<span class="editorial-stat__value">{signal.value}</span>
 						<span class="editorial-stat__label">{signal.label}</span>
@@ -149,9 +146,13 @@ const badFits = [
 			</div>
 			<div class="editorial-card editorial-card--paper">
 				<p class="editorial-card__body">
-					Bring the product, the evaluator, the current adoption risk, the docs, demos, architecture notes, enablement material, and any useful infrastructure artifacts: Helm charts, CRDs, RBAC/IAM notes, Terraform, telemetry, tenancy, runbooks, or demo environments. We will tell you whether it fits a signal partnership, adoption partnership, launch partnership, or no fit.
+					Bring the product, the evaluator, the current adoption risk, the docs, demos, architecture notes, enablement material, and any useful infrastructure artifacts: Helm charts, CRDs, RBAC/IAM notes, Terraform, telemetry, tenancy, runbooks, or demo environments. We will tell you whether it fits Signal, Adoption, Council, or is not a fit.
 				</p>
 			</div>
+			<ContactFallback
+				subject={decisionBriefSubject}
+				template={decisionBriefTemplate}
+			/>
 		</section>
 
 		<section class="editorial-section editorial-section--split">
@@ -190,6 +191,47 @@ const badFits = [
 		text-underline-offset: 0.2em;
 	}
 
+	.organizations-scope {
+		margin: 0;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.organizations-scope__row {
+		display: grid;
+		gap: 0.35rem;
+		padding: 0.9rem 0;
+	}
+
+	.organizations-scope__row + .organizations-scope__row {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.organizations-scope dt {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+
+	.organizations-scope dd {
+		margin: 0;
+		color: var(--editorial-ink-soft);
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.98rem;
+		line-height: 1.55;
+	}
+
+	@media (min-width: 760px) {
+		.organizations-scope__row {
+			grid-template-columns: minmax(11rem, 0.28fr) minmax(0, 1fr);
+			gap: 1.5rem;
+			align-items: baseline;
+		}
+	}
+
 	.organizations-list {
 		list-style: none;
 		padding: 0;
@@ -199,7 +241,7 @@ const badFits = [
 	}
 
 	.organizations-list li {
-		border-left: 3px solid var(--editorial-red, #b42318);
+		border: 1px solid var(--editorial-hairline);
 		padding: 0.8rem 1rem;
 		background: var(--editorial-paper-deep);
 		color: var(--editorial-ink-soft);

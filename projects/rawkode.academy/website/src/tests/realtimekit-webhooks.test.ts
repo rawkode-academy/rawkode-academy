@@ -172,16 +172,19 @@ describe("RealtimeKit webhook helpers", () => {
 
 	it("keeps the legacy RealtimeKit live webhook side-effect free", async () => {
 		const response = await realtimeKitStreamStartedWebhook({
-			request: new Request("https://rawkode.academy/api/webhooks/realtimekit/stream-started", {
-				method: "POST",
-				body: JSON.stringify({
-					event: "livestreaming.statusUpdate",
-					streamId: "stream-123",
-					status: "LIVE",
-				}),
-			}),
+			request: new Request(
+				"https://rawkode.academy/api/webhooks/realtimekit/stream-started",
+				{
+					method: "POST",
+					body: JSON.stringify({
+						event: "livestreaming.statusUpdate",
+						streamId: "stream-123",
+						status: "LIVE",
+					}),
+				},
+			),
 		} as Parameters<typeof realtimeKitStreamStartedWebhook>[0]);
-		const body = await response.json() as {
+		const body = (await response.json()) as {
 			ignored?: boolean;
 			queued?: boolean;
 			reason?: string;

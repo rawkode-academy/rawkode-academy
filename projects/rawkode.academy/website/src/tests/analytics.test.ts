@@ -102,7 +102,8 @@ describe("server analytics helpers", () => {
 			sessionStorage: {
 				getItem: () =>
 					JSON.stringify({
-						landing_page: "/technology/matrix?utm_source=linkedin&utm_medium=social&utm_campaign=q1-launch",
+						landing_page:
+							"/technology/matrix?utm_source=linkedin&utm_medium=social&utm_campaign=q1-launch",
 						initial_referrer: "https://www.google.com/",
 						utm_source: "linkedin",
 						utm_medium: "social",
@@ -116,7 +117,8 @@ describe("server analytics helpers", () => {
 		});
 
 		expect(getSessionCampaignAttribution()).toEqual({
-			landing_page: "/technology/matrix?utm_source=linkedin&utm_medium=social&utm_campaign=q1-launch",
+			landing_page:
+				"/technology/matrix?utm_source=linkedin&utm_medium=social&utm_campaign=q1-launch",
 			initial_referrer: "https://www.google.com/",
 			utm_source: "youtube",
 		});

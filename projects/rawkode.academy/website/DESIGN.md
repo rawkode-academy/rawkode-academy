@@ -6,10 +6,11 @@ colors:
   editorial-paper-deep: "oklch(0.93 0.012 85)"
   editorial-ink: "oklch(0.18 0.02 60)"
   editorial-ink-soft: "oklch(0.36 0.015 60)"
-  editorial-ink-mute: "oklch(0.58 0.012 60)"
-  editorial-spruce: "oklch(0.52 0.09 165)"
+  editorial-ink-mute: "oklch(0.51 0.012 60)"
+  editorial-spruce: "oklch(0.50 0.09 165)"
   editorial-amber: "oklch(0.72 0.15 65)"
-  editorial-rust: "oklch(0.55 0.13 40)"
+  editorial-amber-text: "oklch(0.52 0.13 65)"
+  editorial-rust: "oklch(0.52 0.13 40)"
   editorial-violet: "oklch(0.50 0.13 290)"
   dark-base: "oklch(0.14 0.01 280)"
   dark-surface: "oklch(0.26 0.014 280)"
@@ -114,12 +115,12 @@ The palette is an editorial paper and ink system with restrained practitioner ac
 
 ### Primary
 
-- **Spruce Signal** (`oklch(0.52 0.09 165)`): Primary action accent for links, labels, active states, and selected system moments.
+- **Spruce Signal** (`oklch(0.50 0.09 165)`): Primary action accent for links, labels, active states, and selected system moments.
 
 ### Secondary
 
 - **Amber Live** (`oklch(0.72 0.15 65)`): Time-sensitive states such as live, upcoming, warning, and attention cues.
-- **Rust Proof** (`oklch(0.55 0.13 40)`): Editorial emphasis, strong inline accent, and grounded commercial details.
+- **Rust Proof** (`oklch(0.52 0.13 40)`): Editorial emphasis, strong inline accent, and grounded commercial details.
 
 ### Tertiary
 
@@ -131,7 +132,7 @@ The palette is an editorial paper and ink system with restrained practitioner ac
 - **Deep Paper** (`oklch(0.93 0.012 85)`): Cards, secondary panels, and slight separation.
 - **Ink** (`oklch(0.18 0.02 60)`): Primary text and strong borders.
 - **Soft Ink** (`oklch(0.36 0.015 60)`): Body ledes, secondary descriptions, and lower hierarchy text.
-- **Muted Ink** (`oklch(0.58 0.012 60)`): Metadata only, never long body copy if contrast weakens.
+- **Muted Ink** (`oklch(0.51 0.012 60)`): Metadata only, never long body copy if contrast weakens.
 - **Dark Base** (`oklch(0.14 0.01 280)`): Dark-mode page ground.
 - **Dark Surface** (`oklch(0.26 0.014 280)`): Dark-mode cards and panels.
 

@@ -29,7 +29,10 @@ const { technologies } = Astro.props;
 							src={tech.logoUrl || "/apple-touch-icon.png"}
 							alt={tech.name}
 							class="h-full w-full object-contain"
+							width="40"
+							height="40"
 							loading="lazy"
+							decoding="async"
 							onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
 						/>
 					</div>

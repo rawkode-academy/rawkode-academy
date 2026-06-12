@@ -56,7 +56,10 @@ const qosConfigs: Record<QoSClass, QoSConfig> = {
 			{ text: "# memory.max", type: "comment" },
 			{ text: "268435456             # 256Mi", type: "value" },
 			{ text: "", type: "blank" },
-			{ text: "# memory.min (only when MemoryQoS alpha gate is on)", type: "comment" },
+			{
+				text: "# memory.min (only when MemoryQoS alpha gate is on)",
+				type: "comment",
+			},
 			{
 				text: "268435456             # 256Mi (protected, requests == limits)",
 				type: "value",
@@ -103,7 +106,10 @@ const qosConfigs: Record<QoSClass, QoSConfig> = {
 			{ text: "# memory.max", type: "comment" },
 			{ text: "536870912             # 512Mi", type: "value" },
 			{ text: "", type: "blank" },
-			{ text: "# memory.low (only when MemoryQoS alpha gate is on, K8s 1.36+)", type: "comment" },
+			{
+				text: "# memory.low (only when MemoryQoS alpha gate is on, K8s 1.36+)",
+				type: "comment",
+			},
 			{
 				text: "134217728             # 128Mi (best-effort protection)",
 				type: "value",
@@ -211,7 +217,10 @@ function YamlPanel({ lines }: { lines: YamlLine[] }) {
 function TerminalPanel({
 	lines,
 	themeColor,
-}: { lines: TerminalLine[]; themeColor: string }) {
+}: {
+	lines: TerminalLine[];
+	themeColor: string;
+}) {
 	return (
 		<div
 			style={{
@@ -330,7 +339,9 @@ export default function PodCgroupMapper() {
 	const switchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
-		return () => { if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current); };
+		return () => {
+			if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+		};
 	}, []);
 
 	const handleSwitch = useCallback(
@@ -411,18 +422,13 @@ export default function PodCgroupMapper() {
 			</div>
 
 			{/* Two-panel layout */}
-			<div
-				style={{ padding: "1rem" }}
-				className="flex flex-col md:flex-row"
-			>
+			<div style={{ padding: "1rem" }} className="flex flex-col md:flex-row">
 				{/* Left panel: Pod Spec */}
 				<div
 					className="flex-1 min-w-0"
 					style={{
 						opacity: transitioning ? 0 : 1,
-						transform: transitioning
-							? "translateY(4px)"
-							: "translateY(0)",
+						transform: transitioning ? "translateY(4px)" : "translateY(0)",
 						transition: "opacity 150ms ease, transform 150ms ease",
 					}}
 				>
@@ -471,9 +477,7 @@ export default function PodCgroupMapper() {
 				</div>
 
 				{/* Arrow */}
-				<div
-					className="flex items-center justify-center py-2 px-0 md:py-0 md:px-2"
-				>
+				<div className="flex items-center justify-center py-2 px-0 md:py-0 md:px-2">
 					<ArrowSeparator color={config.color} />
 				</div>
 
@@ -482,9 +486,7 @@ export default function PodCgroupMapper() {
 					className="flex-1 min-w-0"
 					style={{
 						opacity: transitioning ? 0 : 1,
-						transform: transitioning
-							? "translateY(4px)"
-							: "translateY(0)",
+						transform: transitioning ? "translateY(4px)" : "translateY(0)",
 						transition: "opacity 150ms ease, transform 150ms ease",
 						transitionDelay: "50ms",
 					}}
@@ -530,10 +532,7 @@ export default function PodCgroupMapper() {
 							border: "1px solid rgba(148, 163, 184, 0.1)",
 						}}
 					>
-						<TerminalPanel
-							lines={config.terminal}
-							themeColor={config.color}
-						/>
+						<TerminalPanel lines={config.terminal} themeColor={config.color} />
 					</div>
 				</div>
 			</div>

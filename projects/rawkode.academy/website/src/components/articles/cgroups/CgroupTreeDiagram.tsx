@@ -82,10 +82,7 @@ function CgroupTreeDiagram() {
 					>
 						A typical cgroup tree
 					</h3>
-					<p
-						className="m-0 mt-1 text-sm"
-						style={{ color: "#94a3b8" }}
-					>
+					<p className="m-0 mt-1 text-sm" style={{ color: "#94a3b8" }}>
 						How systemd lays out cgroups on a modern Linux host. Limits set on
 						any node cascade to every descendant.
 					</p>
@@ -94,11 +91,7 @@ function CgroupTreeDiagram() {
 				{/* Legend */}
 				<div className="flex flex-col gap-1.5">
 					{(Object.keys(typeAccent) as NodeType[]).map((t) => (
-						<LegendItem
-							key={t}
-							color={typeAccent[t]}
-							label={typeLabels[t]}
-						/>
+						<LegendItem key={t} color={typeAccent[t]} label={typeLabels[t]} />
 					))}
 				</div>
 			</div>
@@ -114,8 +107,8 @@ function CgroupTreeDiagram() {
 					<title id="cgroup-tree-title">
 						cgroup hierarchy: /sys/fs/cgroup/ branches into system.slice and
 						user.slice. system.slice contains nginx.service and
-						postgres.service. user.slice contains user-1000.slice which
-						contains session-2.scope.
+						postgres.service. user.slice contains user-1000.slice which contains
+						session-2.scope.
 					</title>
 
 					{/* Connectors (drawn first so they sit behind the nodes) */}

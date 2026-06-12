@@ -182,11 +182,7 @@ const graveyardTechnologies = allTechnologies
 		videoCount: videoCountsByTech.get(tech.id) || 0,
 	}));
 
-const legendStages = [
-	"skip",
-	...pipelineStages,
-	"graveyard",
-].map((stage) => ({
+const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	stage,
 	label: stageLabels[stage] ?? stage,
 	copy: stageCopy[stage] ?? stageDescriptions[stage] ?? "",
@@ -532,6 +528,35 @@ const legendStages = [
 </Page>
 
 <style>
+	/* ===== ADOPTION-STAGE TOKENS =====
+	   Stage colors derive from the editorial palette so both color schemes
+	   resolve automatically. All values are AA-safe as text on paper. */
+	.matrix-hero,
+	.matrix-legend,
+	.matrix-content,
+	.modal-backdrop {
+		--stage-skip: var(--editorial-rust);
+		--stage-watch: var(--editorial-amber-text);
+		--stage-explore: color-mix(
+			in oklab,
+			var(--editorial-amber-text) 45%,
+			var(--editorial-spruce) 55%
+		);
+		--stage-learn: var(--editorial-violet);
+		--stage-adopt: var(--editorial-spruce);
+		--stage-advocate: var(--editorial-ink);
+		--stage-graveyard: var(--editorial-ink-mute);
+	}
+
+	/* Violet is not re-pointed by html.dark; lift it locally for contrast
+	   on dark surfaces. */
+	:global(html.dark) .matrix-hero,
+	:global(html.dark) .matrix-legend,
+	:global(html.dark) .matrix-content,
+	:global(html.dark) .modal-backdrop {
+		--stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
+	}
+
 	/* ===== LEGEND ===== */
 	.matrix-legend {
 		padding: 0;
@@ -619,13 +644,13 @@ const legendStages = [
 		margin-top: 0.375rem;
 	}
 
-	.legend-stage-skip .stage-indicator { background: rgb(239, 68, 68); }
-	.legend-stage-watch .stage-indicator { background: rgb(249, 115, 22); }
-	.legend-stage-explore .stage-indicator { background: rgb(202, 138, 4); }
-	.legend-stage-learn .stage-indicator { background: rgb(59, 130, 246); }
-	.legend-stage-adopt .stage-indicator { background: rgb(34, 197, 94); }
-	.legend-stage-advocate .stage-indicator { background: rgb(var(--brand-primary)); }
-	.legend-stage-graveyard .stage-indicator { background: rgb(107, 114, 128); }
+	.legend-stage-skip .stage-indicator { background: var(--stage-skip); }
+	.legend-stage-watch .stage-indicator { background: var(--stage-watch); }
+	.legend-stage-explore .stage-indicator { background: var(--stage-explore); }
+	.legend-stage-learn .stage-indicator { background: var(--stage-learn); }
+	.legend-stage-adopt .stage-indicator { background: var(--stage-adopt); }
+	.legend-stage-advocate .stage-indicator { background: var(--stage-advocate); }
+	.legend-stage-graveyard .stage-indicator { background: var(--stage-graveyard); }
 
 	.legend-stage .stage-info {
 		display: flex;
@@ -678,11 +703,7 @@ const legendStages = [
 	.hero-gradient {
 		position: absolute;
 		inset: 0;
-		background: linear-gradient(
-			135deg,
-			color-mix(in oklab, var(--editorial-paper-deep) 74%, transparent),
-			color-mix(in oklab, var(--editorial-paper) 92%, transparent)
-		);
+		background: color-mix(in oklab, var(--editorial-paper-deep) 60%, var(--editorial-paper) 40%);
 	}
 
 	.hero-grid {
@@ -727,14 +748,7 @@ const legendStages = [
 		color: var(--editorial-ink);
 	}
 
-	.title-accent {
-		background: linear-gradient(135deg, rgb(var(--brand-primary)), rgb(var(--brand-secondary)));
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-
-	.hero-subtitle {
+.hero-subtitle {
 		max-width: 42rem;
 		font-size: clamp(1rem, 1.8vw, 1.35rem);
 		margin: 0 0 1.75rem;
@@ -778,23 +792,15 @@ const legendStages = [
 		opacity: 0.8;
 	}
 
-	/* Pipeline stage colors - these are semantic to the matrix concept */
-	.preview-skip { background: rgba(239, 68, 68, 0.15); color: rgb(239, 68, 68); }
-	.preview-watch { background: rgba(249, 115, 22, 0.15); color: rgb(249, 115, 22); }
-	.preview-explore { background: rgba(234, 179, 8, 0.15); color: rgb(180, 130, 0); }
-	.preview-learn { background: rgba(59, 130, 246, 0.15); color: rgb(59, 130, 246); }
-	.preview-adopt { background: rgba(34, 197, 94, 0.15); color: rgb(34, 197, 94); }
-	.preview-advocate { background: rgb(var(--brand-primary) / 0.15); color: rgb(var(--brand-primary)); }
-
-	html.dark .preview-skip { background: rgba(239, 68, 68, 0.2); color: rgb(252, 165, 165); }
-	html.dark .preview-watch { background: rgba(249, 115, 22, 0.2); color: rgb(253, 186, 116); }
-	html.dark .preview-explore { background: rgba(234, 179, 8, 0.2); color: rgb(253, 224, 71); }
-	html.dark .preview-learn { background: rgba(59, 130, 246, 0.2); color: rgb(147, 197, 253); }
-	html.dark .preview-adopt { background: rgba(34, 197, 94, 0.2); color: rgb(134, 239, 172); }
-	html.dark .preview-advocate { background: rgb(var(--brand-primary) / 0.25); color: rgb(var(--brand-secondary)); }
-
-	.preview-graveyard { background: rgba(107, 114, 128, 0.15); color: rgb(107, 114, 128); }
-	html.dark .preview-graveyard { background: rgba(107, 114, 128, 0.25); color: rgb(156, 163, 175); }
+	/* Pipeline stage colors - these are semantic to the matrix concept.
+	   Stage tokens flip with the color scheme, so no html.dark overrides. */
+	.preview-skip { background: color-mix(in oklab, var(--stage-skip) 12%, transparent); color: var(--stage-skip); }
+	.preview-watch { background: color-mix(in oklab, var(--stage-watch) 12%, transparent); color: var(--stage-watch); }
+	.preview-explore { background: color-mix(in oklab, var(--stage-explore) 12%, transparent); color: var(--stage-explore); }
+	.preview-learn { background: color-mix(in oklab, var(--stage-learn) 12%, transparent); color: var(--stage-learn); }
+	.preview-adopt { background: color-mix(in oklab, var(--stage-adopt) 12%, transparent); color: var(--stage-adopt); }
+	.preview-advocate { background: color-mix(in oklab, var(--stage-advocate) 12%, transparent); color: var(--stage-advocate); }
+	.preview-graveyard { background: color-mix(in oklab, var(--stage-graveyard) 12%, transparent); color: var(--stage-graveyard); }
 
 	.preview-muted {
 		opacity: 0.6;
@@ -940,28 +946,25 @@ const legendStages = [
 	}
 
 	/* Stage colors */
-	.header-skip .stage-content { background: rgb(239, 68, 68); }
-	.header-watch .stage-content { background: rgb(249, 115, 22); }
-	.header-explore .stage-content { background: rgb(202, 138, 4); }
-	.header-learn .stage-content { background: rgb(59, 130, 246); }
-	.header-adopt .stage-content { background: rgb(22, 163, 74); }
-	
-	.header-advocate .stage-content {
-		background: rgb(var(--brand-primary));
-	}
+	.header-skip .stage-content { background: var(--stage-skip); }
+	.header-watch .stage-content { background: var(--stage-watch); }
+	.header-explore .stage-content { background: var(--stage-explore); }
+	.header-learn .stage-content { background: var(--stage-learn); }
+	.header-adopt .stage-content { background: var(--stage-adopt); }
+	.header-advocate .stage-content { background: var(--stage-advocate); }
 
 	.stage-label {
 		font-size: 0.85rem;
 		font-weight: 800;
-		color: white;
+		color: var(--surface-base);
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 	}
 
 	.stage-sublabel {
 		font-size: 0.65rem;
-		color: rgba(255, 255, 255, 0.9);
+		color: var(--surface-base);
+		opacity: 0.9;
 		margin-top: 0.125rem;
 		font-weight: 500;
 	}
@@ -1022,11 +1025,7 @@ const legendStages = [
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: rgb(17, 24, 39);
-	}
-
-	html.dark .lane-title {
-		color: rgb(255, 255, 255);
+		color: var(--text-primary-content);
 	}
 
 	.lane-desc {
@@ -1084,19 +1083,12 @@ const legendStages = [
 	}
 
 	/* Subtle stage tints */
-	.cell-skip { background: rgba(239, 68, 68, 0.03); }
-	.cell-watch { background: rgba(249, 115, 22, 0.03); }
-	.cell-explore { background: rgba(234, 179, 8, 0.03); }
-	.cell-learn { background: rgba(59, 130, 246, 0.03); }
-	.cell-adopt { background: rgba(34, 197, 94, 0.04); }
-	.cell-advocate { background: rgb(var(--brand-primary) / 0.04); }
-
-	html.dark .cell-skip { background: rgba(239, 68, 68, 0.06); }
-	html.dark .cell-watch { background: rgba(249, 115, 22, 0.06); }
-	html.dark .cell-explore { background: rgba(234, 179, 8, 0.06); }
-	html.dark .cell-learn { background: rgba(59, 130, 246, 0.06); }
-	html.dark .cell-adopt { background: rgba(34, 197, 94, 0.08); }
-	html.dark .cell-advocate { background: rgb(var(--brand-primary) / 0.08); }
+	.cell-skip { background: color-mix(in oklab, var(--stage-skip) 4%, transparent); }
+	.cell-watch { background: color-mix(in oklab, var(--stage-watch) 4%, transparent); }
+	.cell-explore { background: color-mix(in oklab, var(--stage-explore) 4%, transparent); }
+	.cell-learn { background: color-mix(in oklab, var(--stage-learn) 4%, transparent); }
+	.cell-adopt { background: color-mix(in oklab, var(--stage-adopt) 5%, transparent); }
+	.cell-advocate { background: color-mix(in oklab, var(--stage-advocate) 5%, transparent); }
 
 	.cell-content {
 		display: flex;
@@ -1142,32 +1134,20 @@ const legendStages = [
 		left: 50%;
 		transform: translateX(-50%) translateY(4px);
 		padding: 0.625rem 1rem;
-		background: rgba(17, 24, 39, 0.85);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: var(--surface-card);
+		border: 1px solid var(--editorial-hairline-strong);
 		border-top: 2px solid rgb(var(--brand-primary));
-		border-radius: 10px;
+		border-radius: var(--radius-3xl);
 		font-size: 0.8rem;
 		font-weight: 600;
 		letter-spacing: 0.01em;
-		color: #f9fafb;
+		color: var(--text-primary-content);
 		white-space: nowrap;
-		box-shadow:
-			0 8px 32px rgba(0, 0, 0, 0.3),
-			0 4px 12px rgba(0, 0, 0, 0.2),
-			inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 		opacity: 0;
 		visibility: hidden;
 		transition: all var(--duration-base) var(--ease-standard);
 		pointer-events: none;
 		z-index: 100;
-	}
-
-	html.dark .tech-icon::after {
-		background: rgba(0, 0, 0, 0.8);
-		border-color: rgba(255, 255, 255, 0.15);
-		border-top-color: rgb(var(--brand-primary));
 	}
 
 	/* Tooltip arrow */
@@ -1181,17 +1161,12 @@ const legendStages = [
 		height: 0;
 		border-left: 8px solid transparent;
 		border-right: 8px solid transparent;
-		border-top: 8px solid rgba(17, 24, 39, 0.85);
-		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+		border-top: 8px solid var(--editorial-hairline-strong);
 		opacity: 0;
 		visibility: hidden;
 		transition: all var(--duration-base) var(--ease-standard);
 		pointer-events: none;
 		z-index: 100;
-	}
-
-	html.dark .tech-icon::before {
-		border-top-color: rgba(0, 0, 0, 0.8);
 	}
 
 	.tech-icon:hover::after,
@@ -1219,11 +1194,7 @@ const legendStages = [
 		border-radius: 4px;
 		font-size: 0.7rem;
 		font-weight: 700;
-		color: rgb(17, 24, 39);
-	}
-
-	html.dark .icon-initial {
-		color: rgb(255, 255, 255);
+		color: var(--text-primary-content);
 	}
 
 	.icon-trajectory {
@@ -1243,13 +1214,9 @@ const legendStages = [
 		line-height: 1;
 	}
 
-	.trajectory-rising { color: rgb(34, 197, 94); }
-	.trajectory-stable { color: rgb(156, 163, 175); }
-	.trajectory-falling { color: rgb(239, 68, 68); }
-
-	html.dark .trajectory-rising { color: rgb(134, 239, 172); }
-	html.dark .trajectory-stable { color: rgb(156, 163, 175); }
-	html.dark .trajectory-falling { color: rgb(252, 165, 165); }
+	.trajectory-rising { color: var(--editorial-spruce); }
+	.trajectory-stable { color: var(--editorial-ink-mute); }
+	.trajectory-falling { color: var(--editorial-rust); }
 
 
 
@@ -1338,12 +1305,12 @@ const legendStages = [
 			opacity: 0.7;
 		}
 
-		.cell-skip::before { content: 'Skip'; color: rgb(239, 68, 68); }
-		.cell-watch::before { content: 'Watch'; color: rgb(249, 115, 22); }
-		.cell-explore::before { content: 'Explore'; color: rgb(202, 138, 4); }
-		.cell-learn::before { content: 'Learn'; color: rgb(59, 130, 246); }
-		.cell-adopt::before { content: 'Adopt'; color: rgb(34, 197, 94); }
-		.cell-advocate::before { content: 'Advocate'; color: rgb(var(--brand-primary)); }
+		.cell-skip::before { content: 'Skip'; color: var(--stage-skip); }
+		.cell-watch::before { content: 'Watch'; color: var(--stage-watch); }
+		.cell-explore::before { content: 'Explore'; color: var(--stage-explore); }
+		.cell-learn::before { content: 'Learn'; color: var(--stage-learn); }
+		.cell-adopt::before { content: 'Adopt'; color: var(--stage-adopt); }
+		.cell-advocate::before { content: 'Advocate'; color: var(--stage-advocate); }
 
 		.cell-content {
 			gap: 0.75rem;
@@ -1367,7 +1334,6 @@ const legendStages = [
 		inset: 0;
 		z-index: 999;
 		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(4px);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -1411,23 +1377,18 @@ const legendStages = [
 		color: var(--text-muted);
 		cursor: pointer;
 		transition: all 0.15s ease;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 
 	.modal-close:hover {
 		background: var(--surface-card-muted);
 		color: var(--text-primary-content);
-		transform: scale(1.05);
 	}
 
 	.modal-card-frame {
 		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
-		border-radius: 1.5rem;
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: var(--radius-4xl);
 		overflow: hidden;
-		box-shadow:
-			0 25px 50px rgba(0, 0, 0, 0.25),
-			0 0 0 1px rgba(0, 0, 0, 0.05);
 	}
 
 	.modal-header {
@@ -1439,13 +1400,13 @@ const legendStages = [
 		border-bottom: 4px solid var(--text-muted);
 	}
 
-	.modal-header.status-skip { border-bottom-color: #ef4444; }
-	.modal-header.status-watch { border-bottom-color: #f97316; }
-	.modal-header.status-explore { border-bottom-color: #ca8a04; }
-	.modal-header.status-learn { border-bottom-color: #3b82f6; }
-	.modal-header.status-adopt { border-bottom-color: #22c55e; }
-	.modal-header.status-advocate { border-bottom-color: rgb(var(--brand-primary)); }
-	.modal-header.status-graveyard { border-bottom-color: #6b7280; }
+	.modal-header.status-skip { border-bottom-color: var(--stage-skip); }
+	.modal-header.status-watch { border-bottom-color: var(--stage-watch); }
+	.modal-header.status-explore { border-bottom-color: var(--stage-explore); }
+	.modal-header.status-learn { border-bottom-color: var(--stage-learn); }
+	.modal-header.status-adopt { border-bottom-color: var(--stage-adopt); }
+	.modal-header.status-advocate { border-bottom-color: var(--stage-advocate); }
+	.modal-header.status-graveyard { border-bottom-color: var(--stage-graveyard); }
 
 	.modal-icon-wrapper {
 		flex-shrink: 0;
@@ -1455,7 +1416,7 @@ const legendStages = [
 		width: 80px;
 		height: 80px;
 		object-fit: contain;
-		border-radius: 1rem;
+		border-radius: var(--radius-4xl);
 		background: var(--surface-card);
 		padding: 0.875rem;
 		border: 1px solid var(--surface-border);
@@ -1468,7 +1429,7 @@ const legendStages = [
 		align-items: center;
 		justify-content: center;
 		background: var(--surface-card);
-		border-radius: 1rem;
+		border-radius: var(--radius-4xl);
 		border: 1px solid var(--surface-border);
 		font-size: 2rem;
 		font-weight: 700;
@@ -1501,18 +1462,18 @@ const legendStages = [
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		padding: 0.375rem 0.75rem;
-		border-radius: 0.375rem;
-		color: white;
+		border-radius: var(--radius-md);
+		color: var(--surface-base);
 		background: var(--text-muted);
 	}
 
-	.modal-status-badge.status-skip { background: #ef4444; }
-	.modal-status-badge.status-watch { background: #f97316; }
-	.modal-status-badge.status-explore { background: #ca8a04; }
-	.modal-status-badge.status-learn { background: #3b82f6; }
-	.modal-status-badge.status-adopt { background: #22c55e; }
-	.modal-status-badge.status-advocate { background: rgb(var(--brand-primary)); }
-	.modal-status-badge.status-graveyard { background: #6b7280; }
+	.modal-status-badge.status-skip { background: var(--stage-skip); }
+	.modal-status-badge.status-watch { background: var(--stage-watch); }
+	.modal-status-badge.status-explore { background: var(--stage-explore); }
+	.modal-status-badge.status-learn { background: var(--stage-learn); }
+	.modal-status-badge.status-adopt { background: var(--stage-adopt); }
+	.modal-status-badge.status-advocate { background: var(--stage-advocate); }
+	.modal-status-badge.status-graveyard { background: var(--stage-graveyard); }
 
 	.modal-category {
 		font-size: 0.875rem;
@@ -1560,7 +1521,7 @@ const legendStages = [
 		gap: 0.25rem;
 		padding: 0.875rem 0.5rem;
 		background: var(--surface-card-muted);
-		border-radius: 0.75rem;
+		border-radius: var(--radius-3xl);
 	}
 
 	.modal-stat .stat-value {
@@ -1583,9 +1544,9 @@ const legendStages = [
 		align-items: flex-start;
 		gap: 0.75rem;
 		padding: 1rem;
-		background: rgba(239, 68, 68, 0.08);
-		border: 1px solid rgba(239, 68, 68, 0.15);
-		border-radius: 0.75rem;
+		background: color-mix(in oklab, var(--editorial-rust) 8%, transparent);
+		border: 1px solid color-mix(in oklab, var(--editorial-rust) 18%, transparent);
+		border-radius: var(--radius-3xl);
 	}
 
 	.modal-spicy.visible {
@@ -1601,12 +1562,8 @@ const legendStages = [
 	.modal-spicy .spicy-text {
 		font-size: 0.875rem;
 		font-style: italic;
-		color: #be123c;
+		color: var(--editorial-rust);
 		line-height: 1.5;
-	}
-
-	html.dark .modal-spicy .spicy-text {
-		color: #fda4af;
 	}
 
 	.modal-footer {
@@ -1620,20 +1577,21 @@ const legendStages = [
 		gap: 0.625rem;
 		width: 100%;
 		padding: 1rem 1.5rem;
-		background: linear-gradient(135deg, rgb(var(--brand-primary)) 0%, rgb(var(--brand-secondary)) 100%);
-		color: white;
-		border-radius: 0.75rem;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		border: 1px solid var(--editorial-ink);
+		border-radius: var(--radius-md);
 		font-size: 0.875rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		text-decoration: none;
-		transition: all 0.2s ease;
+		transition: background-color 0.2s ease, border-color 0.2s ease;
 	}
 
 	.modal-cta:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 20px rgb(var(--brand-primary) / 0.35);
+		background: var(--editorial-spruce);
+		border-color: var(--editorial-spruce);
 	}
 
 	.modal-cta svg {
@@ -1765,15 +1723,15 @@ const legendStages = [
 		letter-spacing: 0.04em;
 		padding: 0.25rem 0.5rem;
 		border-radius: 4px;
-		color: white;
+		color: var(--surface-base);
 	}
 
 	.other-group-badge.skip {
-		background: rgb(239, 68, 68);
+		background: var(--stage-skip);
 	}
 
 	.other-group-badge.graveyard {
-		background: rgb(107, 114, 128);
+		background: var(--stage-graveyard);
 	}
 
 	.other-group-count {
@@ -1807,14 +1765,13 @@ const legendStages = [
 
 	.other-item:hover {
 		opacity: 1;
-		transform: scale(1.1);
-		border-color: rgb(239, 68, 68);
-		box-shadow: 0 0 0 2px rgb(239, 68, 68 / 0.15);
+		border-color: var(--stage-skip);
+		box-shadow: 0 0 0 2px color-mix(in oklab, var(--stage-skip) 15%, transparent);
 	}
 
 	.other-item.graveyard:hover {
-		border-color: rgb(107, 114, 128);
-		box-shadow: 0 0 0 2px rgb(107, 114, 128 / 0.15);
+		border-color: var(--stage-graveyard);
+		box-shadow: 0 0 0 2px color-mix(in oklab, var(--stage-graveyard) 15%, transparent);
 	}
 
 	.other-item::after {
@@ -1824,11 +1781,12 @@ const legendStages = [
 		left: 50%;
 		transform: translateX(-50%) translateY(4px);
 		padding: 0.375rem 0.625rem;
-		background: rgba(17, 24, 39, 0.9);
-		border-radius: 6px;
+		background: var(--surface-card);
+		border: 1px solid var(--editorial-hairline-strong);
+		border-radius: var(--radius-3xl);
 		font-size: 0.7rem;
 		font-weight: 600;
-		color: #f9fafb;
+		color: var(--text-primary-content);
 		white-space: nowrap;
 		opacity: 0;
 		visibility: hidden;

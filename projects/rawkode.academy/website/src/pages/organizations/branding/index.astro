@@ -9,35 +9,52 @@ export const prerender = true;
 
 const colors = [
 	{
-		label: "Purple",
-		hex: "#5F5ED7",
-		usage: "Primary brand color, action states, and partner lockups.",
-	},
-	{
-		label: "Cyan",
-		hex: "#00CEFF",
-		usage: "Secondary highlights, gradients, and accent surfaces.",
+		label: "Paper",
+		value: "oklch(0.97 0.008 85)",
+		usage: "Light surface. The default ground for the mark and all print.",
 	},
 	{
 		label: "Ink",
-		hex: "#111827",
-		usage: "Typography on light surfaces and deep brand backgrounds.",
+		value: "oklch(0.18 0.02 60)",
+		usage:
+			"Primary type and the default solid logo treatment on light surfaces.",
+	},
+	{
+		label: "Spruce",
+		value: "oklch(0.50 0.09 165)",
+		usage: "Primary accent: links, section marks, and action states.",
+	},
+	{
+		label: "Amber",
+		value: "oklch(0.72 0.15 65)",
+		usage:
+			"Live and on-air signals. Decorative use only; never body text on light surfaces.",
+	},
+	{
+		label: "Rust",
+		value: "oklch(0.52 0.13 40)",
+		usage: "Secondary accent: difficulty tags and kickers.",
 	},
 ];
 
-const brandGradients = [
+const typefaces = [
 	{
-		id: "rawkode-blue",
-		name: "Rawkode Blue",
-		angleLabel: "135 deg",
-		angleDeg: 135,
-		description:
-			"The canonical brand gradient: purple into cyan, top-left to bottom-right.",
-		stops: [
-			{ label: "Purple", hex: "#5F5ED7", offset: "0%" },
-			{ label: "Cyan", hex: "#00CEFF", offset: "100%" },
-		],
-		background: "linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)",
+		name: "Instrument Serif",
+		role: "Display",
+		sample: "Engineering journal meets terminal",
+		usage: "Italic display headings and headline-scale text.",
+	},
+	{
+		name: "Inter Tight",
+		role: "Body",
+		sample: "Tutorials, deep dives, and curated events.",
+		usage: "Body copy and interface text, weights 300–700.",
+	},
+	{
+		name: "JetBrains Mono",
+		role: "Mono",
+		sample: "§01 · PARTNER RESOURCES",
+		usage: "Labels, meta strips, code, and microcopy.",
 	},
 ];
 
@@ -74,47 +91,13 @@ const logoAssets = [
 	},
 ];
 
-const encodeSvgForCss = (svg: string) =>
-	svg
-		.replace(/[\n\r]+/g, " ")
-		.replace(/\s{2,}/g, " ")
-		.replace(/"/g, "'")
-		.replace(/%/g, "%25")
-		.replace(/#/g, "%23")
-		.replace(/{/g, "%7B")
-		.replace(/}/g, "%7D")
-		.replace(/</g, "%3C")
-		.replace(/>/g, "%3E");
-
-const logoPreviewAssets = logoAssets.map((logo) => ({
-	...logo,
-	maskUrl: `url("data:image/svg+xml,${encodeSvgForCss(logo.asset)}")`,
-}));
-
 const logoDownloadJson = JSON.stringify(
-	logoPreviewAssets.map((logo) => ({
+	logoAssets.map((logo) => ({
 		slug: logo.slug,
 		svg: logo.asset,
 		downloadName: logo.downloadName,
 	})),
 ).replace(/</g, "\\u003C");
-
-const gradientDownloadJson = JSON.stringify(
-	brandGradients.map((gradient) => ({
-		id: gradient.id,
-		name: gradient.name,
-		angle: gradient.angleDeg,
-		stops: gradient.stops.map((stop) => ({
-			offset: stop.offset,
-			color: stop.hex,
-		})),
-	})),
-).replace(/</g, "\\u003C");
-
-const defaultGradientId = brandGradients[0]?.id ?? null;
-const defaultLogoGradient =
-	brandGradients[0]?.background ??
-	"linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%)";
 ---
 
 <Page
@@ -136,39 +119,15 @@ const defaultLogoGradient =
 				<p class="editorial-kicker">Logo assets</p>
 				<h2 class="editorial-section__title">Use the right lockup for the space</h2>
 				<p class="editorial-section__lede">
-					Preview the source artwork as a solid mark or with the canonical Rawkode Blue gradient, then download the variant you need.
+					Preview the source artwork as a solid ink mark, then download the variant you need.
 				</p>
-				<div class="branding-preview-controls" data-logo-preview-controls>
-					<button type="button" class="logo-preview-toggle" data-preview-mode="solid" aria-pressed="true">
-						Solid
-					</button>
-					{brandGradients.map((gradient) => (
-						<button
-							type="button"
-							class="logo-preview-toggle"
-							data-preview-mode="gradient"
-							data-gradient-id={gradient.id}
-							data-gradient-style={gradient.background}
-							aria-pressed="false"
-						>
-							Gradient
-						</button>
-					))}
-				</div>
 			</div>
-			<div
-				class="branding-logo-grid"
-				data-logo-preview
-				data-preview-mode="solid"
-				data-active-gradient-id={defaultGradientId ?? ""}
-				style={`--logo-preview-gradient:${defaultLogoGradient};`}
-			>
-				{logoPreviewAssets.map((logo) => (
+			<div class="branding-logo-grid" data-logo-preview>
+				{logoAssets.map((logo) => (
 					<article class={`editorial-card brand-asset brand-asset--${logo.format}`}>
 						<div class="brand-asset__preview">
 							<div
 								class={`brand-logo ${logo.format === "square" ? "brand-logo--padded" : "brand-logo--wide"}`}
-								style={`--logo-mask:${logo.maskUrl};`}
 								set:html={logo.asset}
 							/>
 						</div>
@@ -197,28 +156,47 @@ const defaultLogoGradient =
 				<p class="editorial-kicker">Color</p>
 				<h2 class="editorial-section__title">One canonical palette</h2>
 				<p class="editorial-section__lede">
-					Rawkode Blue is the single brand treatment across the academy, streams, partner materials, and product surfaces.
+					The editorial palette - warm paper surfaces, deep ink type, and three
+					restrained accents - is the single brand treatment across the academy,
+					streams, partner materials, and product surfaces. Flat color only: no
+					gradients, no glows, no drop shadows.
 				</p>
 			</div>
 			<div class="editorial-grid">
-				{brandGradients.map((gradient) => (
-					<article class="brand-gradient">
-						<div class="brand-gradient__swatch" style={`background:${gradient.background}`}>
-							<span>{gradient.angleLabel}</span>
-							<strong>{gradient.name}</strong>
-						</div>
-						<p class="editorial-card__body">{gradient.description}</p>
-					</article>
-				))}
 				<div class="brand-color-grid">
 					{colors.map((color) => (
 						<article class="editorial-card brand-color">
-							<div class="brand-color__swatch" style={`background:${color.hex}`} />
+							<div class="brand-color__swatch" style={`background:${color.value}`} />
 							<div>
 								<h3 class="editorial-card__title">{color.label}</h3>
-								<p class="editorial-meta">{color.hex}</p>
+								<p class="editorial-meta">{color.value}</p>
 								<p class="editorial-card__body">{color.usage}</p>
 							</div>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Type</p>
+				<h2 class="editorial-section__title">Three typefaces, three jobs</h2>
+				<p class="editorial-section__lede">
+					Serif italic for display, a geometric sans for body, and a mono for
+					labels and meta. Do not substitute or mix roles.
+				</p>
+			</div>
+			<div class="editorial-grid">
+				<div class="brand-type-grid">
+					{typefaces.map((typeface) => (
+						<article class="editorial-card brand-typeface">
+							<p class={`brand-typeface__sample brand-typeface__sample--${typeface.role.toLowerCase()}`}>
+								{typeface.sample}
+							</p>
+							<h3 class="editorial-card__title">{typeface.name}</h3>
+							<p class="editorial-meta">{typeface.role}</p>
+							<p class="editorial-card__body">{typeface.usage}</p>
 						</article>
 					))}
 				</div>
@@ -239,6 +217,7 @@ const defaultLogoGradient =
 					<ul class="editorial-list">
 						<li>Keep clearspace around the mark on all sides.</li>
 						<li>Do not stretch, skew, outline, or add shadows to the logo.</li>
+						<li>Do not apply gradients to the logo; tint it as a single solid color.</li>
 						<li>Use the wordmark where the full name needs to be understood quickly.</li>
 						<li>Use the monogram or icon in constrained square placements.</li>
 						<li>Avoid busy backgrounds unless there is enough contrast.</li>
@@ -252,8 +231,8 @@ const defaultLogoGradient =
   stroke: currentColor !important;
 }
 
-.brand-logo--primary {
-  color: #5F5ED7;
+.brand-logo--spruce {
+  color: oklch(0.50 0.09 165);
 }`}</code></pre>
 					</div>
 				</article>
@@ -262,54 +241,16 @@ const defaultLogoGradient =
 	</EditorialShell>
 </Page>
 
-<script type="module" is:inline define:vars={{ logoDownloadJson, gradientDownloadJson, defaultGradientId }}>
+<script type="module" is:inline define:vars={{ logoDownloadJson }}>
 	const previewRoot = document.querySelector("[data-logo-preview]");
-	const previewControls = document.querySelector("[data-logo-preview-controls]");
 	const logoDownloadEntries = JSON.parse(logoDownloadJson);
-	const gradientDownloadEntries = JSON.parse(gradientDownloadJson);
 	const logoDownloadData = new Map(Array.isArray(logoDownloadEntries) ? logoDownloadEntries.map((entry) => [entry.slug, entry]) : []);
-	const gradientDownloadData = new Map(Array.isArray(gradientDownloadEntries) ? gradientDownloadEntries.map((entry) => [entry.id, entry]) : []);
-	const gradientIdFromAstro = defaultGradientId;
-
-	if (previewRoot && gradientIdFromAstro && !previewRoot.dataset.activeGradientId && gradientDownloadData.size) {
-		previewRoot.dataset.activeGradientId = gradientIdFromAstro;
-	}
-
-	const setPressedState = (activeButton) => {
-		document.querySelectorAll("[data-logo-preview-controls] .logo-preview-toggle").forEach((btn) => {
-			btn.setAttribute("aria-pressed", btn === activeButton ? "true" : "false");
-		});
-	};
-
-	const applyPreviewMode = (button) => {
-		if (!previewRoot) return;
-		const mode = button?.dataset.previewMode ?? "solid";
-		previewRoot.dataset.previewMode = mode;
-
-		if (mode === "gradient") {
-			const gradientId = button?.dataset.gradientId || previewRoot.dataset.activeGradientId || gradientIdFromAstro;
-			if (gradientId) previewRoot.dataset.activeGradientId = gradientId;
-			const style = button?.dataset.gradientStyle;
-			if (style) previewRoot.style.setProperty("--logo-preview-gradient", style);
-		}
-
-		if (button) setPressedState(button);
-	};
 
 	const resolveButtonFromEvent = (event, selector) => {
 		const target = event.target;
 		if (!(target instanceof Element)) return null;
 		return target.closest(selector);
 	};
-
-	if (previewControls) {
-		previewControls.addEventListener("click", (event) => {
-			const button = resolveButtonFromEvent(event, ".logo-preview-toggle");
-			if (!button) return;
-			event.preventDefault();
-			applyPreviewMode(button);
-		});
-	}
 
 	const insertBeforeClose = (svg, markup) => {
 		const closeIndex = svg.lastIndexOf("</svg>");
@@ -323,16 +264,6 @@ const defaultLogoGradient =
 	const applySolidFill = (svg, color) => {
 		const style = `${paintableSelector} { fill: ${color} !important; stroke: ${color} !important; }`;
 		return insertBeforeClose(svg, createStyleMarkup(style));
-	};
-
-	const applyGradientFill = (svg, gradient) => {
-		const gradientId = `grad-${Math.random().toString(36).slice(2, 9)}`;
-		const stopsMarkup = gradient.stops
-			.map((stop) => `<stop offset="${stop.offset || "0%"}" stop-color="${stop.color}" />`)
-			.join("");
-		const gradientMarkup = `<defs><linearGradient id="${gradientId}" gradientUnits="objectBoundingBox" gradientTransform="rotate(${gradient.angle}, 0.5, 0.5)">${stopsMarkup}</linearGradient></defs>`;
-		const style = `${paintableSelector} { fill: url(#${gradientId}) !important; stroke: url(#${gradientId}) !important; }`;
-		return insertBeforeClose(insertBeforeClose(svg, gradientMarkup), createStyleMarkup(style));
 	};
 
 	const normalizeColorValue = (value) => {
@@ -385,42 +316,14 @@ const defaultLogoGradient =
 		const logo = slug ? logoDownloadData.get(slug) : null;
 		if (!logo) return;
 
-		const mode = previewRoot.dataset.previewMode ?? "solid";
-		let svgContent = logo.svg;
-		let filenameSuffix = "";
+		const color = resolveSolidColor();
+		const svgContent = applySolidFill(logo.svg, color);
 
-		if (mode === "gradient") {
-			const gradientId = previewRoot.dataset.activeGradientId ?? gradientIdFromAstro;
-			const gradient = gradientId ? gradientDownloadData.get(gradientId) : null;
-			if (!gradient) return;
-			svgContent = applyGradientFill(logo.svg, gradient);
-			filenameSuffix = gradient.name;
-		} else {
-			const color = resolveSolidColor();
-			svgContent = applySolidFill(logo.svg, color);
-			filenameSuffix = color;
-		}
-
-		triggerDownload(svgContent, buildFilename(logo.downloadName, filenameSuffix));
+		triggerDownload(svgContent, buildFilename(logo.downloadName, color));
 	});
-
-	if (previewRoot) {
-		const activeButton =
-			document.querySelector('[data-logo-preview-controls] .logo-preview-toggle[aria-pressed="true"]') ??
-			document.querySelector("[data-logo-preview-controls] .logo-preview-toggle");
-		if (activeButton) applyPreviewMode(activeButton);
-	}
 </script>
 
 <style is:global>
-	.branding-preview-controls {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-top: 0.5rem;
-	}
-
-	.logo-preview-toggle,
 	.logo-download-link {
 		border: 1px solid var(--editorial-hairline-strong);
 		border-radius: 4px;
@@ -435,7 +338,6 @@ const defaultLogoGradient =
 		padding: 0.65rem 0.8rem;
 	}
 
-	.logo-preview-toggle[aria-pressed="true"],
 	.logo-download-link:hover {
 		background: var(--editorial-ink);
 		border-color: var(--editorial-ink);
@@ -496,21 +398,11 @@ const defaultLogoGradient =
 		justify-content: center;
 		box-sizing: border-box;
 		position: relative;
-		isolation: isolate;
 		padding: var(--logo-padding);
 	}
 
 	.brand-logo--padded {
 		--logo-padding: 1rem;
-	}
-
-	.brand-logo::after {
-		content: "";
-		position: absolute;
-		inset: var(--logo-padding);
-		opacity: 0;
-		pointer-events: none;
-		z-index: 1;
 	}
 
 	.brand-logo svg {
@@ -519,70 +411,11 @@ const defaultLogoGradient =
 		height: 100%;
 		max-width: 100%;
 		max-height: 100%;
-		position: relative;
-		z-index: 2;
-		transition: opacity 0.2s ease;
 	}
 
 	.brand-logo--wide svg {
 		width: 100%;
 		height: auto;
-	}
-
-	[data-preview-mode="gradient"] .brand-logo {
-		color: transparent;
-	}
-
-	[data-preview-mode="gradient"] .brand-logo svg {
-		opacity: 0;
-	}
-
-	[data-preview-mode="gradient"] .brand-logo::after {
-		opacity: 1;
-		background: var(--logo-preview-gradient, linear-gradient(135deg, #5F5ED7 0%, #00CEFF 100%));
-		mask-image: var(--logo-mask);
-		mask-repeat: no-repeat;
-		mask-position: center;
-		mask-size: contain;
-		-webkit-mask-image: var(--logo-mask);
-		-webkit-mask-repeat: no-repeat;
-		-webkit-mask-position: center;
-		-webkit-mask-size: contain;
-	}
-
-	.brand-gradient {
-		border: 1px solid var(--editorial-hairline);
-		border-radius: 6px;
-		overflow: hidden;
-		background: var(--editorial-paper-deep);
-	}
-
-	.brand-gradient__swatch {
-		min-height: 9rem;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-end;
-		gap: 0.35rem;
-		padding: 1rem;
-		color: white;
-	}
-
-	.brand-gradient__swatch span {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.7rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		opacity: 0.82;
-	}
-
-	.brand-gradient__swatch strong {
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 1.5rem;
-		line-height: 1;
-	}
-
-	.brand-gradient > .editorial-card__body {
-		padding: 1rem;
 	}
 
 	.brand-color-grid {
@@ -605,13 +438,47 @@ const defaultLogoGradient =
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
+	.brand-type-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1rem;
+	}
+
+	.brand-typeface__sample {
+		min-height: 4.5rem;
+		margin: 0 0 0.75rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid var(--editorial-hairline);
+		font-size: 1.35rem;
+		line-height: 1.25;
+		color: var(--editorial-ink);
+	}
+
+	.brand-typeface__sample--display {
+		font-family: var(--font-instrument-serif), Georgia, serif;
+		font-style: italic;
+		letter-spacing: -0.02em;
+	}
+
+	.brand-typeface__sample--body {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+	}
+
+	.brand-typeface__sample--mono {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.85rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
 	.branding-code pre {
 		margin: 0;
 	}
 
 	@media (max-width: 760px) {
 		.branding-logo-grid,
-		.brand-color-grid {
+		.brand-color-grid,
+		.brand-type-grid {
 			grid-template-columns: 1fr;
 		}
 

@@ -112,9 +112,10 @@ const comebackSlots = ref<SlotState<Comeback>[]>([
 
 const isSpinning = ref(false);
 
-const allRevealed = computed(() =>
-	insultSlots.value.every((s) => s.revealed) &&
-	comebackSlots.value.every((s) => s.revealed)
+const allRevealed = computed(
+	() =>
+		insultSlots.value.every((s) => s.revealed) &&
+		comebackSlots.value.every((s) => s.revealed),
 );
 
 function startSpin() {

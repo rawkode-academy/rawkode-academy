@@ -18,9 +18,10 @@ const jsonLd = {
 	description,
 	...(image && { image }),
 	...(jobTitle && { jobTitle }),
-	...(sameAs && sameAs.filter(Boolean).length > 0 && {
-		sameAs: sameAs.filter((s): s is string => Boolean(s)),
-	}),
+	...(sameAs &&
+		sameAs.filter(Boolean).length > 0 && {
+			sameAs: sameAs.filter((s): s is string => Boolean(s)),
+		}),
 };
 ---
 

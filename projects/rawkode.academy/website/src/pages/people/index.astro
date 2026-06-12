@@ -7,7 +7,9 @@ import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 
 const people = await getCollection("people");
-const sortedPeople = people.sort((a, b) => a.data.name.localeCompare(b.data.name));
+const sortedPeople = people.sort((a, b) =>
+	a.data.name.localeCompare(b.data.name),
+);
 
 const peopleJsonLd = sortedPeople.map((person) => ({
 	id: person.data.id,

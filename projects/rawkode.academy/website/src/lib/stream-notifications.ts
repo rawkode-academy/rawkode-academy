@@ -52,6 +52,9 @@ export function isUpcomingLiveVideo(
 	video: { type?: string | undefined; publishedAt?: Date | undefined },
 	now = new Date(),
 ): boolean {
-	return video.type === "live" && video.publishedAt instanceof Date &&
-		video.publishedAt.getTime() > now.getTime();
+	return (
+		video.type === "live" &&
+		video.publishedAt instanceof Date &&
+		video.publishedAt.getTime() > now.getTime()
+	);
 }

@@ -1,9 +1,10 @@
 /**
  * Theme utilities.
  *
- * The site has a single brand theme - Rawkode Blue (defined in `:root`
- * and `html.dark` in `src/styles/global.css`). The only user-controlled
- * knob is the colour-scheme preference: light, dark, or system.
+ * The site has a single brand theme - the editorial palette (defined in
+ * `:root` and `html.dark` in `src/styles/global.css`). The only
+ * user-controlled knob is the colour-scheme preference: light, dark, or
+ * system.
  *
  * Concepts:
  *   - `ColorScheme`             - the *applied* mode on the page (light | dark).
@@ -14,10 +15,17 @@
 
 const PREF_STORAGE_KEY = "rawkode-color-scheme";
 
+/**
+ * Light-mode brand palette as sRGB hex approximations of the editorial
+ * oklch tokens in `global.css`:
+ *   primary   = spruce     - oklch(0.50 0.09 165)
+ *   secondary = amber-text - oklch(0.52 0.13 65)
+ *   accent    = rust       - oklch(0.52 0.13 40)
+ */
 const BRAND_COLORS = {
-	primary: "#5F5ED7",
-	secondary: "#00CEFF",
-	accent: "#111827",
+	primary: "#237356",
+	secondary: "#9A5500",
+	accent: "#A54A28",
 } as const;
 
 export type ColorScheme = "light" | "dark";

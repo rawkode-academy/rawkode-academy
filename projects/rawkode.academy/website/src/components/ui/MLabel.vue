@@ -35,7 +35,7 @@ const toneClass = computed(() => `m-label--${props.tone}`);
 .m-label--soft    { color: var(--editorial-ink-soft); }
 .m-label--ink     { color: var(--editorial-ink); }
 .m-label--accent  { color: var(--editorial-spruce); }
-.m-label--amber   { color: var(--editorial-amber); }
+.m-label--amber   { color: var(--editorial-amber-text); }
 .m-label--rust    { color: var(--editorial-rust); }
 .m-label--spruce  { color: var(--editorial-spruce); }
 </style>

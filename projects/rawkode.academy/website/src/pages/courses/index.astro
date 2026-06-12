@@ -45,11 +45,14 @@ if (featuredCourse) {
 		name: author.data.name,
 		avatarUrl: author.data.avatarUrl,
 	}));
-	featuredPublishedLabel = featuredCourse.data.publishedAt.toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
+	featuredPublishedLabel = featuredCourse.data.publishedAt.toLocaleDateString(
+		"en-US",
+		{
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+		},
+	);
 }
 
 const pageTitle = "Cloud Native Courses";

@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-import "vidstack/bundle";
+import "vidstack/player/styles/default/theme.css";
+import "vidstack/player/styles/default/layouts/video.css";
+import "vidstack/player";
+import "vidstack/player/layouts/default";
+import "vidstack/player/ui";
 import { actions } from "astro:actions";
 import { onMounted, onUnmounted, ref } from "vue";
 
@@ -39,7 +43,8 @@ async function trackVideoEvent(event: VideoAnalyticsEvent) {
 async function saveWatchPosition(positionSeconds: number) {
 	// Only save if authenticated and position changed significantly
 	if (!props.isAuthenticated) return;
-	if (Math.abs(positionSeconds - lastSavedPosition) < MIN_POSITION_CHANGE) return;
+	if (Math.abs(positionSeconds - lastSavedPosition) < MIN_POSITION_CHANGE)
+		return;
 
 	try {
 		await actions.updateWatchPosition({
@@ -72,7 +77,7 @@ onMounted(() => {
 	const tParam = new URL(window.location.href).searchParams.get("t");
 	const startAt = tParam
 		? Number.parseInt(tParam, 10)
-		: props.initialPosition ?? 0;
+		: (props.initialPosition ?? 0);
 	if (!Number.isNaN(startAt) && startAt > 0) {
 		const mediaEl = playerEl.querySelector("video");
 		if (mediaEl) {

@@ -113,6 +113,12 @@ export default defineConfig({
 		sessionKVBindingName: "SESSION",
 	}),
 	trailingSlash: "never",
+	// Speculatively fetch internal links as they enter the viewport so
+	// MPA navigation feels instant on the homepage → watch/read paths.
+	prefetch: {
+		prefetchAll: true,
+		defaultStrategy: "viewport",
+	},
 	build: {
 		// PSI flagged ~620 ms of render-blocking CSS on the homepage. Inlining
 		// every stylesheet pulls them out of the critical request chain at the
@@ -183,7 +189,8 @@ export default defineConfig({
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
-			...(process.env.NODE_ENV === "production" && process.env.GRAFANA_SOURCEMAP_API_KEY
+			...(process.env.NODE_ENV === "production" &&
+			process.env.GRAFANA_SOURCEMAP_API_KEY
 				? [
 						faroUploader({
 							appName: "rawkode.academy",

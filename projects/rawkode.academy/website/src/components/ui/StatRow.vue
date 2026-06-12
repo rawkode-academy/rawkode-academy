@@ -17,7 +17,11 @@
 import { computed } from "vue";
 import MLabel from "./MLabel.vue";
 
-interface Stat { value: string; label: string; note?: string }
+interface Stat {
+	value: string;
+	label: string;
+	note?: string;
+}
 
 const props = withDefaults(
 	defineProps<{

@@ -28,7 +28,9 @@ describe("Skeleton Components", () => {
 		const skeletonCard = readComponent("SkeletonCard.vue");
 		const skeletonList = readComponent("SkeletonList.vue");
 
-		expect(skeletonCard).toContain('import SkeletonText from "./SkeletonText.vue";');
+		expect(skeletonCard).toContain(
+			'import SkeletonText from "./SkeletonText.vue";',
+		);
 		expect(skeletonCard).toContain("showDescription");
 		expect(skeletonCard).toContain("showFooter");
 

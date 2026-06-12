@@ -57,17 +57,22 @@ const levelTopics = [
 
 const requestedLevel = Astro.url.searchParams.get("level")?.toLowerCase();
 const selectedLevel =
-	requestedLevel && levelCounts.has(requestedLevel) ? requestedLevel : undefined;
+	requestedLevel && levelCounts.has(requestedLevel)
+		? requestedLevel
+		: undefined;
 const visiblePaths = selectedLevel
 	? learningPaths.filter(
-			(path) => (path.data.difficulty || "beginner").toLowerCase() === selectedLevel,
+			(path) =>
+				(path.data.difficulty || "beginner").toLowerCase() === selectedLevel,
 		)
 	: learningPaths;
 const activeLevelIndex = selectedLevel
 	? Math.max(
 			0,
 			levelTopics.findIndex(
-				(topic) => topic.href === `/learning-paths?level=${encodeURIComponent(selectedLevel)}`,
+				(topic) =>
+					topic.href ===
+					`/learning-paths?level=${encodeURIComponent(selectedLevel)}`,
 			),
 		)
 	: 0;

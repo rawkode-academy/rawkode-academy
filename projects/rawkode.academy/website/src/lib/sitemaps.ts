@@ -68,9 +68,21 @@ const staticPages: StaticPageDefinition[] = [
 	{ path: "/organizations/lets-chat", changefreq: "monthly", priority: 0.5 },
 	{ path: "/organizations/branding", changefreq: "yearly", priority: 0.4 },
 	// Long-tail / utility pages.
-	{ path: "/maintainers/share-your-project", changefreq: "monthly", priority: 0.5 },
-	{ path: "/games/secret-of-kubernetes-island", changefreq: "monthly", priority: 0.5 },
-	{ path: "/resources/kubernetes/1.35-cheatsheet", changefreq: "monthly", priority: 0.5 },
+	{
+		path: "/maintainers/share-your-project",
+		changefreq: "monthly",
+		priority: 0.5,
+	},
+	{
+		path: "/games/secret-of-kubernetes-island",
+		changefreq: "monthly",
+		priority: 0.5,
+	},
+	{
+		path: "/resources/kubernetes/1.35-cheatsheet",
+		changefreq: "monthly",
+		priority: 0.5,
+	},
 	{ path: "/privacy", changefreq: "yearly", priority: 0.3 },
 ];
 

@@ -1,10 +1,7 @@
 import { getCollection } from "astro:content";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-	getPersonByGithub,
-	listPeople,
-} from "../subgraph/loaders/people";
+import { getPersonByGithub, listPeople } from "../subgraph/loaders/people";
 
 const mockedGetCollection = vi.mocked(getCollection);
 

@@ -94,7 +94,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import type { EnemyData, Insult, Comeback } from "@/game/data/types";
-import { insults as allInsults, comebacks as allComebacks } from "@/game/data/insults";
+import {
+	insults as allInsults,
+	comebacks as allComebacks,
+} from "@/game/data/insults";
 import MenuScreen from "./MenuScreen.vue";
 import InitialAllocationScreen from "./InitialAllocationScreen.vue";
 import ClusterMap from "./ClusterMap.vue";
@@ -122,7 +125,16 @@ const trackEvent = (event: string, properties?: Record<string, unknown>) => {
 	}
 };
 
-type GameState = "menu" | "allocation" | "map" | "combat" | "victory" | "defeat" | "achievements" | "leaderboard" | "inventory";
+type GameState =
+	| "menu"
+	| "allocation"
+	| "map"
+	| "combat"
+	| "victory"
+	| "defeat"
+	| "achievements"
+	| "leaderboard"
+	| "inventory";
 
 const gameState = ref<GameState>("menu");
 const currentEnemy = ref<EnemyData | null>(null);
@@ -338,7 +350,8 @@ async function handleDefeat() {
 		enemy_id: currentEnemy.value?.id,
 		enemy_name: currentEnemy.value?.name ?? "Unknown",
 		play_time_seconds: playTimeSeconds,
-		phrases_learned: combatLearnedInsults.value.length + combatLearnedComebacks.value.length,
+		phrases_learned:
+			combatLearnedInsults.value.length + combatLearnedComebacks.value.length,
 	});
 
 	// Record game result

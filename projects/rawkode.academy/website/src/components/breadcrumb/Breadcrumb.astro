@@ -71,21 +71,16 @@ const visibleElements = elements.slice(0, -1);
 		justify-content: center;
 		width: 1.5rem;
 		height: 1.5rem;
-		color: rgb(107 114 128);
+		color: var(--text-muted);
 		background: rgb(var(--brand-primary) / 0.1);
 		border-radius: 50%;
-		transition: all 0.15s ease;
-	}
-
-	:root.dark .home-link {
-		color: rgb(156 163 175);
-		background: rgb(var(--brand-primary) / 0.15);
+		transition: color var(--duration-fast) var(--ease-standard),
+			background-color var(--duration-fast) var(--ease-standard);
 	}
 
 	.home-link:hover {
 		color: rgb(var(--brand-primary));
 		background: rgb(var(--brand-primary) / 0.2);
-		transform: scale(1.1);
 	}
 
 	.home-link svg {
@@ -96,25 +91,18 @@ const visibleElements = elements.slice(0, -1);
 	.chevron {
 		width: 1rem;
 		height: 1rem;
-		color: rgb(209 213 219);
+		color: var(--editorial-hairline-strong);
 		margin: 0 0.125rem;
 	}
 
-	:root.dark .chevron {
-		color: rgb(75 85 99);
-	}
-
 	a:not(.home-link) {
-		color: rgb(107 114 128);
+		color: var(--text-muted);
 		text-decoration: none;
 		font-weight: 500;
 		padding: 0.25rem 0.5rem;
-		border-radius: 0.375rem;
-		transition: all 0.15s ease;
-	}
-
-	:root.dark a:not(.home-link) {
-		color: rgb(156 163 175);
+		border-radius: var(--radius-md);
+		transition: color var(--duration-fast) var(--ease-standard),
+			background-color var(--duration-fast) var(--ease-standard);
 	}
 
 	a:not(.home-link):hover {

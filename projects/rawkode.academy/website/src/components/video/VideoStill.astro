@@ -7,7 +7,9 @@ interface Props {
 	live?: boolean;
 	big?: boolean;
 	thumbnailUrl?: string | undefined;
-	technologyLogos?: { src: string; name: string; kind: "horizontal" | "icon" }[] | undefined;
+	technologyLogos?:
+		| { src: string; name: string; kind: "horizontal" | "icon" }[]
+		| undefined;
 	accent?: "spruce" | "amber" | "rust" | "violet";
 }
 
@@ -22,7 +24,7 @@ const {
 
 const accentVar = {
 	spruce: "var(--editorial-spruce)",
-	amber: "var(--editorial-amber)",
+	amber: "var(--editorial-amber-text)",
 	rust: "var(--editorial-rust)",
 	violet: "var(--editorial-violet)",
 }[accent];

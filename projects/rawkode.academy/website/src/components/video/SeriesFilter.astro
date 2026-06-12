@@ -1,10 +1,15 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
 
-interface SeriesItem { label: string; href: string; count?: number }
+interface SeriesItem {
+	label: string;
+	href: string;
+	count?: number;
+}
 
 interface Props {
 	label?: string;
+	ariaLabel?: string;
 	items: SeriesItem[];
 	activeIndex?: number;
 	rightLabel?: string;
@@ -12,6 +17,7 @@ interface Props {
 
 const {
 	label = "Series",
+	ariaLabel,
 	items,
 	activeIndex = 0,
 } = Astro.props as Props;
@@ -21,7 +27,7 @@ const {
 	<div class="series-filter__label">
 		<MLabel>{label}</MLabel>
 	</div>
-	<nav class="series-filter__links" aria-label="Video series">
+	<nav class="series-filter__links" aria-label={ariaLabel ?? label}>
 		{items.map((t, i) => (
 			<a
 				class={`series-filter__link ${i === activeIndex ? "series-filter__link--active" : ""}`}

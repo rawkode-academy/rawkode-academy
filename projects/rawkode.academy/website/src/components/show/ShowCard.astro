@@ -48,7 +48,10 @@ const latestEpisodeDate = latestEpisodePublishedAt
 				src={thumbnailUrl}
 				alt={`Latest episode from ${show.name}`}
 				class="show-card__img"
+				width="1280"
+				height="720"
 				loading="lazy"
+				decoding="async"
 			/>
 		) : (
 			<div class="show-card__placeholder" aria-hidden="true">

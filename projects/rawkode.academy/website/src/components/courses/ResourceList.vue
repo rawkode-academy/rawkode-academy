@@ -118,9 +118,9 @@ interface Resource {
 				import?:
 					| {
 							localDir: string;
-					 }
+					  }
 					| undefined;
-		 }
+		  }
 		| undefined;
 	category: "slides" | "code" | "documentation" | "demos" | "other";
 }

@@ -23,7 +23,16 @@ export default defineConfig({
 	// Astro's `class:list` directive looks superficially like an attributify
 	// pattern and otherwise leaks broken CSS rules into the generated bundle.
 	// Block the literal attribute names so the content scanner skips them.
-	blocklist: ["class:list", "set:html", "set:text", "client:load", "client:idle", "client:visible", "client:only", "client:media"],
+	blocklist: [
+		"class:list",
+		"set:html",
+		"set:text",
+		"client:load",
+		"client:idle",
+		"client:visible",
+		"client:only",
+		"client:media",
+	],
 	theme: {
 		colors: {
 			primary: "rgb(var(--brand-primary) / <alpha-value>)",
@@ -39,8 +48,7 @@ export default defineConfig({
 				"var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif",
 			body: "var(--font-inter-tight), 'Inter', -apple-system, system-ui, sans-serif",
 			mono: "var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
-			serif:
-				"var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif",
+			serif: "var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif",
 			sans: "var(--font-inter-tight), 'Inter', -apple-system, system-ui, sans-serif",
 		},
 		borderRadius: {
@@ -145,30 +153,15 @@ export default defineConfig({
 	],
 	preflights: [
 		{
-			// `focus-ring` and `link-muted` both wrap pseudo-selectors that
-			// UnoCSS rules can't express in a single declaration. Emitting
-			// them as preflight CSS preserves the exact existing semantics
-			// (only render on `:focus-visible`, hover swap to brand colour).
+			// `focus-ring` wraps a pseudo-selector that UnoCSS rules can't
+			// express in a single declaration. Emitting it as preflight CSS
+			// preserves the exact existing semantics (only render on
+			// `:focus-visible`).
 			getCSS: () => `
 .focus-ring:focus-visible {
 	outline: 2px solid rgb(var(--brand-primary));
 	outline-offset: 2px;
 	border-radius: var(--radius-sm);
-}
-
-.link-muted {
-	color: rgb(75 85 99);
-	transition-property: color;
-	transition-timing-function: var(--ease-standard);
-	transition-duration: var(--duration-base);
-}
-
-:root.dark .link-muted {
-	color: rgb(156 163 175);
-}
-
-.link-muted:hover {
-	color: rgb(var(--brand-primary));
 }
 `,
 		},

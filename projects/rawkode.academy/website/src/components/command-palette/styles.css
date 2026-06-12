@@ -10,11 +10,24 @@
 	animation: commandPaletteFade 0.12s var(--ease-standard);
 }
 
+/* Radix Dialog renders the overlay and content as siblings, so the
+   container positions itself rather than relying on overlay flex. */
 .command-palette-container {
-	width: min(100%, 42rem);
-	margin: 0 auto;
+	position: fixed;
+	top: 12vh;
+	left: 50%;
+	margin-left: max(-21rem, calc((100vw - 2rem) / -2));
+	z-index: 10000;
+	width: min(calc(100vw - 2rem), 42rem);
 	box-sizing: border-box;
 	animation: commandPaletteEnter 0.16s var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.command-palette-overlay,
+	.command-palette-container {
+		animation: none;
+	}
 }
 
 .command-palette {
@@ -23,7 +36,8 @@
 	border-radius: 6px;
 	background: var(--editorial-paper);
 	color: var(--editorial-ink);
-	box-shadow: 0 1.25rem 3rem color-mix(in oklab, var(--editorial-ink) 20%, transparent);
+	box-shadow: 0 1.25rem 3rem
+		color-mix(in oklab, var(--editorial-ink) 20%, transparent);
 }
 
 .command-palette-header {
@@ -56,8 +70,10 @@
 	text-align: left;
 }
 
-.command-palette-input:focus {
+.command-palette-input:focus-visible {
 	border-color: var(--editorial-hairline-strong);
+	outline: 2px solid var(--editorial-spruce);
+	outline-offset: 1px;
 }
 
 .command-palette-input::placeholder {

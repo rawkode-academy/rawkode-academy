@@ -38,7 +38,7 @@ export function shouldMountStudioLiveGate(input: StudioLiveGateInput): boolean {
 	const livePollingWindowSeconds = 4 * 60 * 60;
 	return (
 		input.publishedAt.getTime() + livePollingWindowSeconds * 1000 >
-			input.now.getTime()
+		input.now.getTime()
 	);
 }
 
@@ -69,7 +69,10 @@ export function parseStudioLiveState(value: unknown): StudioLiveState {
 	if (!isRecord(value) || value.live !== true) {
 		return emptyStudioLiveState();
 	}
-	if (typeof value.playbackUrl !== "string" || value.playbackUrl.trim() === "") {
+	if (
+		typeof value.playbackUrl !== "string" ||
+		value.playbackUrl.trim() === ""
+	) {
 		return emptyStudioLiveState();
 	}
 
@@ -80,9 +83,7 @@ export function parseStudioLiveState(value: unknown): StudioLiveState {
 	};
 }
 
-function parseStudioLiveSession(
-	value: unknown,
-): StudioLiveState["session"] {
+function parseStudioLiveSession(value: unknown): StudioLiveState["session"] {
 	if (!isRecord(value)) return null;
 	if (typeof value.id !== "string" || typeof value.title !== "string") {
 		return null;

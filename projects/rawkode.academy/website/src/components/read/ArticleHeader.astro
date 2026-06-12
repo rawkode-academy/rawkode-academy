@@ -1,7 +1,11 @@
 ---
 import MLabel from "@/components/ui/MLabel.vue";
 
-interface BreadcrumbItem { label: string; href?: string; current?: boolean }
+interface BreadcrumbItem {
+	label: string;
+	href?: string;
+	current?: boolean;
+}
 
 interface Props {
 	breadcrumbs?: BreadcrumbItem[];

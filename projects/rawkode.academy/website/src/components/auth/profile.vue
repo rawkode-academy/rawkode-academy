@@ -19,6 +19,12 @@ const toggleDropdown = () => {
 	dropdownOpen.value = !dropdownOpen.value;
 };
 
+const closeDropdown = (restoreFocus = false) => {
+	if (!dropdownOpen.value) return;
+	dropdownOpen.value = false;
+	if (restoreFocus) buttonRef.value?.focus();
+};
+
 const handleClickOutside = (event: MouseEvent) => {
 	if (
 		dropdownRef.value &&
@@ -26,8 +32,12 @@ const handleClickOutside = (event: MouseEvent) => {
 		!dropdownRef.value.contains(event.target as Node) &&
 		!buttonRef.value.contains(event.target as Node)
 	) {
-		dropdownOpen.value = false;
+		closeDropdown();
 	}
+};
+
+const handleKeydown = (event: KeyboardEvent) => {
+	if (event.key === "Escape") closeDropdown(true);
 };
 
 const signOut = async () => {
@@ -46,19 +56,24 @@ const signOut = async () => {
 
 onMounted(() => {
 	document.addEventListener("click", handleClickOutside);
+	document.addEventListener("keydown", handleKeydown);
 });
 
 onUnmounted(() => {
 	document.removeEventListener("click", handleClickOutside);
+	document.removeEventListener("keydown", handleKeydown);
 });
 </script>
 
 <template>
 	<div class="w-full flex items-end justify-end relative">
-		<button 
+		<button
 			ref="buttonRef"
+			id="userProfileButton"
 			type="button"
-			class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+			class="focus-ring flex mx-3 text-sm rounded-full md:mr-0"
+			aria-haspopup="true"
+			aria-controls="userProfileMenu"
 			:aria-expanded="dropdownOpen"
 			@click="toggleDropdown">
 			<span class="sr-only">Open user menu</span>
@@ -67,22 +82,27 @@ onUnmounted(() => {
 		</button>
 		<div
 			ref="dropdownRef"
+			id="userProfileMenu"
 			:class="[
-				'absolute right-0 top-full z-50 mt-2 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-sm transition-smooth',
+				'absolute right-0 top-full z-50 mt-2 w-56 text-base list-none paper-card divide-y divide-[var(--surface-border)] transition-smooth',
 				dropdownOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
 			]">
 			<div class="py-3 px-4">
 				<span class="block text-sm font-semibold text-primary-content">{{ user.name }}</span>
-				<span class="block text-sm text-gray-900 truncate dark:text-white">{{ user.email }}</span>
+				<span class="block text-sm text-secondary-content truncate">{{ user.email }}</span>
 			</div>
 			<ul class="py-1 text-secondary-content" aria-labelledby="userProfileButton">
 				<li>
+					<a href="/home"
+						class="block py-2 px-4 text-sm hover:bg-[var(--surface-card-muted)] hover:text-primary-content">Continue watching</a>
+				</li>
+				<li>
 					<a href="/settings"
-						class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
+						class="block py-2 px-4 text-sm hover:bg-[var(--surface-card-muted)] hover:text-primary-content">Settings</a>
 				</li>
 				<li>
 					<button @click="signOut"
-						class="w-full text-left block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign
+						class="w-full text-left block py-2 px-4 text-sm hover:bg-[var(--surface-card-muted)] hover:text-primary-content">Sign
 						out</button>
 				</li>
 			</ul>

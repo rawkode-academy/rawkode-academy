@@ -63,7 +63,9 @@ export function buildVideoSummaryParagraphs(
 
 	const chapterTitles = chapters
 		.map((chapter) =>
-			typeof chapter.title === "string" ? normalizeWhitespace(chapter.title) : "",
+			typeof chapter.title === "string"
+				? normalizeWhitespace(chapter.title)
+				: "",
 		)
 		.filter((title) => title.length > 0)
 		.slice(0, 6);

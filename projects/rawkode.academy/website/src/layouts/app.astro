@@ -1,8 +1,7 @@
 ---
 import UserHeader from "@/components/auth/user-header.astro";
-import CommandPaletteWrapper from "@/components/command-palette/wrapper.tsx";
 import Footer from "@/components/footer/Footer.astro";
-import Sidebar from "@/components/sidebar/sidebar.vue";
+import Sidebar from "@/components/sidebar/Sidebar.astro";
 import SkipLink from "@/components/common/SkipLink.astro";
 import { ThemeToggle } from "@/components/ui";
 ---
@@ -67,12 +66,13 @@ import { ThemeToggle } from "@/components/ui";
 				</a>
 			</div>
 
-			<!-- Center section - search trigger -->
+			<!-- Center section - search trigger. A real link to /search so
+			     the path works without JavaScript; the palette script
+			     upgrades the click into the command palette. -->
 			<div class="ed-topbar__center">
-				<button
-					type="button"
+				<a
+					href="/search"
 					id="topbar-search-trigger"
-					aria-haspopup="dialog"
 					aria-label="Search the Academy"
 					class="ed-topbar__pill focus-ring"
 				>
@@ -84,23 +84,22 @@ import { ThemeToggle } from "@/components/ui";
 					<span class="ed-topbar__keycaps">
 						<kbd id="command-shortcut">⌘K</kbd>
 					</span>
-				</button>
+				</a>
 			</div>
 
 			<!-- Right section - Theme Toggle & Profile -->
 			<div class="ed-topbar__right">
-				<button
-					type="button"
+				<a
+					href="/search"
 					id="mobile-search-trigger"
 					class="ed-topbar__icon-btn ed-topbar__mobile-search focus-ring md:hidden"
 					aria-label="Search the Academy"
-					aria-haspopup="dialog"
 				>
 					<svg class="w-5 h-5" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
 						<circle cx="11" cy="11" r="7" />
 						<path d="m20 20-4.35-4.35" />
 					</svg>
-				</button>
+				</a>
 				<span class="ed-topbar__theme-toggle">
 					<ThemeToggle client:load variant="icon" size="md" />
 				</span>
@@ -115,11 +114,11 @@ import { ThemeToggle } from "@/components/ui";
 		</div>
 	</nav>
 
-	<Sidebar client:only="vue" />
+	<Sidebar />
 
 	<div class="flex flex-col min-h-screen">
-		<div class="flex overflow-hidden flex-1">
-			<main id="main-content" class="w-full h-auto pt-16 md:ml-64 overflow-x-hidden transition-card">
+		<div class="flex flex-1">
+			<main id="main-content" class="w-full h-auto pt-16 md:ml-64 transition-card">
 				<slot />
 			</main>
 		</div>
@@ -127,8 +126,6 @@ import { ThemeToggle } from "@/components/ui";
 			<Footer />
 		</div>
 	</div>
-
-	<CommandPaletteWrapper client:only="react" />
 
 	<style>
 		:global(:root) {
@@ -200,7 +197,10 @@ import { ThemeToggle } from "@/components/ui";
 		}
 
 		.ed-topbar__icon-btn {
-			padding: 0.5rem;
+			/* 0.75rem padding + 20px icon = 44px touch target. */
+			padding: 0.75rem;
+			min-width: 2.75rem;
+			min-height: 2.75rem;
 			color: var(--editorial-ink-soft);
 			background: transparent;
 			border: none;
@@ -218,8 +218,8 @@ import { ThemeToggle } from "@/components/ui";
 		.ed-topbar__mobile-search {
 			border: 1px solid var(--editorial-hairline);
 			background: var(--editorial-paper);
-			min-width: 2.25rem;
-			min-height: 2.25rem;
+			min-width: 2.75rem;
+			min-height: 2.75rem;
 		}
 
 		.ed-topbar__mark {
@@ -365,124 +365,50 @@ import { ThemeToggle } from "@/components/ui";
 			shortcutElement.textContent = isMac ? "⌘K" : "Ctrl+K";
 		}
 
-		// Function to open command palette
-		function openCommandPalette() {
-			document.dispatchEvent(new CustomEvent("open-command-palette"));
-		}
+		// ── Command palette lazy loader ──
+		// React and the palette only load on first use (⌘K, the search
+		// pill, or an `open-command-palette` event). Until then the search
+		// triggers are plain links to /search, which also serves no-JS
+		// visitors.
+		let paletteRequested = false;
 
-		// Add click handler to search trigger to open command palette
-		const searchTrigger = document.getElementById("topbar-search-trigger");
-		if (searchTrigger) {
-			searchTrigger.addEventListener("click", (e) => {
+		function preMountKeydown(e: KeyboardEvent) {
+			if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "/")) {
 				e.preventDefault();
-				openCommandPalette();
-			});
-		}
-
-		const mobileSearchTrigger = document.getElementById("mobile-search-trigger");
-		if (mobileSearchTrigger) {
-			mobileSearchTrigger.addEventListener("click", (e) => {
-				e.preventDefault();
-				openCommandPalette();
-			});
-		}
-
-		const sidebarWidthStorageKey = "sidebar-expanded-width";
-		const defaultSidebarWidth = 256;
-		const legacyDefaultSidebarWidth = 288;
-		const minSidebarWidth = 224;
-		const maxSidebarWidth = 440;
-
-		function maxSidebarWidthForViewport() {
-			return Math.min(
-				maxSidebarWidth,
-				Math.max(minSidebarWidth, Math.floor(window.innerWidth * 0.42)),
-			);
-		}
-
-		function clampSidebarWidth(width: number) {
-			return Math.min(
-				Math.max(width, minSidebarWidth),
-				maxSidebarWidthForViewport(),
-			);
-		}
-
-		function readSidebarExpandedWidth() {
-			const stored = Number.parseInt(
-				localStorage.getItem(sidebarWidthStorageKey) || "",
-				10,
-			);
-			if (stored === legacyDefaultSidebarWidth) {
-				localStorage.removeItem(sidebarWidthStorageKey);
-				return defaultSidebarWidth;
-			}
-			const width = Number.isFinite(stored) ? stored : defaultSidebarWidth;
-			return clampSidebarWidth(width);
-		}
-
-		// Function to update main content offset based on sidebar state
-		function updateMainContentMargin() {
-			const mainContent = document.getElementById("main-content");
-			const footerContainer = document.getElementById("footer-container");
-			const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
-			const isMobile = window.innerWidth < 768;
-			const expandedWidth = `${readSidebarExpandedWidth()}px`;
-			const currentWidth =
-				isMobile || isCollapsed
-					? "var(--ed-sidebar-collapsed-width, 3.5rem)"
-					: expandedWidth;
-
-			document.documentElement.style.setProperty(
-				"--ed-sidebar-expanded-width",
-				expandedWidth,
-			);
-			document.documentElement.style.setProperty(
-				"--ed-sidebar-current-width",
-				currentWidth,
-			);
-
-			if (mainContent) {
-				mainContent.classList.remove("md:ml-64", "md:ml-72", "md:ml-14");
-			}
-
-			if (footerContainer) {
-				footerContainer.classList.remove("md:ml-64", "md:ml-72", "md:ml-14");
+				loadPalette();
 			}
 		}
 
-		// Update on page load
-		updateMainContentMargin();
-
-		// Add sidebar toggle handlers
-		const sidebarToggleBtn = document.getElementById("sidebar-toggle-btn");
-		const mobileSidebarBtn = document.getElementById("mobile-sidebar-btn");
-
-		if (sidebarToggleBtn) {
-			sidebarToggleBtn.addEventListener("click", (e) => {
-				e.preventDefault();
-				window.dispatchEvent(new Event("toggle-sidebar"));
-				// Update margin after a short delay to sync with sidebar animation
-				setTimeout(updateMainContentMargin, 50);
-			});
-		}
-
-		if (mobileSidebarBtn) {
-			mobileSidebarBtn.addEventListener("click", (e) => {
-				e.preventDefault();
-				window.dispatchEvent(new Event("toggle-sidebar"));
-				setTimeout(updateMainContentMargin, 50);
-			});
-		}
-
-		// Listen for sidebar state changes from other sources
-		window.addEventListener("storage", (e) => {
-			if (
-				e.key === "sidebar-collapsed" ||
-				e.key === sidebarWidthStorageKey
-			) {
-				updateMainContentMargin();
+		function loadPalette() {
+			if (paletteRequested) {
+				// Module loaded (its own listeners take over) or in flight
+				// (it opens on mount anyway).
+				document.dispatchEvent(new CustomEvent("open-command-palette"));
+				return;
 			}
+			paletteRequested = true;
+			// Stand down before the palette's own shortcut handler attaches,
+			// so a later ⌘K isn't handled twice.
+			document.removeEventListener("keydown", preMountKeydown);
+			import("@/components/command-palette/mount")
+				.then((m) => m.mountCommandPalette())
+				.catch(() => {
+					window.location.assign("/search");
+				});
+		}
+
+		document.addEventListener("keydown", preMountKeydown);
+		document.addEventListener("open-command-palette", () => {
+			if (!paletteRequested) loadPalette();
 		});
-		window.addEventListener("resize", updateMainContentMargin, { passive: true });
+
+		for (const id of ["topbar-search-trigger", "mobile-search-trigger"]) {
+			const trigger = document.getElementById(id);
+			trigger?.setAttribute("aria-haspopup", "dialog");
+			trigger?.addEventListener("click", (e) => {
+				e.preventDefault();
+				loadPalette();
+			});
+		}
 	</script>
 </div>

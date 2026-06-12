@@ -5,7 +5,9 @@ import {
 	CubeIcon,
 	DocumentTextIcon,
 	InformationCircleIcon,
+	MagnifyingGlassIcon,
 	MapIcon,
+	MegaphoneIcon,
 	NewspaperIcon,
 	RocketLaunchIcon,
 	RssIcon,
@@ -35,6 +37,8 @@ const currentYear = new Date().getFullYear();
 const learningSections: FooterSection = {
 	title: "Learning",
 	links: [
+		{ name: "Search", href: "/search", icon: MagnifyingGlassIcon },
+		{ name: "News", href: "/news", icon: MegaphoneIcon },
 		{ name: "Articles", href: "/read", icon: NewspaperIcon },
 		{ name: "Videos", href: "/watch", icon: VideoCameraIcon },
 		{ name: "Shows", href: "/shows", icon: TvIcon },
@@ -62,9 +66,7 @@ const organizationSection: FooterSection = {
 
 const communitySection: FooterSection = {
 	title: "Community",
-	links: [
-		{ name: "People", href: "/people", icon: UsersIcon },
-	],
+	links: [{ name: "People", href: "/people", icon: UsersIcon }],
 };
 
 const contributorsSection: FooterSection = {
@@ -332,6 +334,19 @@ const aboutSection: FooterSection = {
 
  .ed-footer__link:hover {
  color: var(--editorial-ink);
+ }
+
+ /* 44px row-height tap targets on mobile; desktop keeps its density. */
+ @media (max-width: 767px) {
+ .ed-footer__list {
+ gap: 0;
+ }
+
+ .ed-footer__link {
+ display: inline-flex;
+ align-items: center;
+ min-height: 2.75rem;
+ }
  }
 
  .ed-footer__masthead {
