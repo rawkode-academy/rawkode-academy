@@ -81,10 +81,10 @@ async function subscribeNewsletter(): Promise<void> {
 onMounted(async () => {
 	if (!props.isSignedIn) return;
 	try {
-		const res = await fetch("/api/subscriptions/check?audienceId=cnicon");
+		const res = await fetch("/api/games/cnicon/newsletter-status");
 		if (!res.ok) return;
-		const data = (await res.json()) as { isSubscribed?: boolean };
-		if (data.isSubscribed) {
+		const data = (await res.json()) as { subscribed?: boolean };
+		if (data.subscribed) {
 			newsletterState.value = "done";
 		}
 	} catch {
