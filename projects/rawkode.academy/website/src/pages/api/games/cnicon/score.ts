@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { utcDateString } from "@/lib/games/guess-the-logo";
+import { weekKey } from "@/lib/games/guess-the-logo";
 import { queryReadModel } from "@/lib/games/read-model-graphql";
 
-const NAMESPACE = "guess-the-logo";
+const NAMESPACE = "cnicon";
 
 interface LeaderboardEntryData {
 	leaderboardEntry: {
@@ -13,9 +13,9 @@ interface LeaderboardEntryData {
 }
 
 /**
- * POST /api/games/guess-the-logo/score
- * Submit a score for today's puzzle. Only the first submission counts.
- * Body: { score: number } — integer 0..10
+ * POST /api/games/cnicon/score
+ * Submit a score for this week's puzzle. Only the first submission counts.
+ * Body: { score: number } — integer 0..10000 (points)
  */
 export const POST: APIRoute = async ({ request, locals }) => {
 	const user = locals.user;
@@ -43,10 +43,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		typeof score !== "number" ||
 		!Number.isInteger(score) ||
 		score < 0 ||
-		score > 10
+		score > 10000
 	) {
 		return new Response(
-			JSON.stringify({ error: "Invalid score: must be an integer 0..10" }),
+			JSON.stringify({ error: "Invalid score: must be an integer 0..10000" }),
 			{
 				status: 400,
 				headers: { "Content-Type": "application/json" },
@@ -54,8 +54,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		);
 	}
 
-	const date = utcDateString(new Date());
-	const scoreType = "daily-" + date;
+	const scoreType = "weekly-" + weekKey(new Date());
 
 	try {
 		// Check if the player has already played today
