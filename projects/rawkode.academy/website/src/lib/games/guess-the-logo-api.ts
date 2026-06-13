@@ -56,7 +56,7 @@ export async function getStatus(): Promise<{
 	rank: number | null;
 	score: number | null;
 }> {
-	return fetchJson("/api/games/guess-the-logo/status");
+	return fetchJson("/api/games/cnicon/status");
 }
 
 /**
@@ -68,7 +68,7 @@ export async function submitScore(score: number): Promise<{
 	rank: number;
 	score: number;
 }> {
-	return fetchJson("/api/games/guess-the-logo/score", {
+	return fetchJson("/api/games/cnicon/score", {
 		method: "POST",
 		body: JSON.stringify({ score }),
 	});
@@ -82,8 +82,8 @@ export async function getLeaderboard(
 ): Promise<LeaderboardEntry[]> {
 	const url =
 		limit !== undefined
-			? `/api/games/guess-the-logo/leaderboard?limit=${limit}`
-			: "/api/games/guess-the-logo/leaderboard";
+			? `/api/games/cnicon/leaderboard?limit=${limit}`
+			: "/api/games/cnicon/leaderboard";
 	return fetchJson<LeaderboardEntry[]>(url);
 }
 
@@ -94,7 +94,7 @@ export async function getLeaderboard(
 export async function unlockAchievements(
 	ids: string[],
 ): Promise<{ unlocked: string[] }> {
-	return fetchJson("/api/games/guess-the-logo/achievements", {
+	return fetchJson("/api/games/cnicon/achievements", {
 		method: "POST",
 		body: JSON.stringify({ achievementIds: ids }),
 	});
@@ -106,5 +106,5 @@ export async function unlockAchievements(
 export async function getAchievements(): Promise<
 	{ achievementId: string; unlockedAt: string }[]
 > {
-	return fetchJson("/api/games/guess-the-logo/achievements");
+	return fetchJson("/api/games/cnicon/achievements");
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import type { Round } from "@/lib/games/guess-the-logo";
-import { scoreGame } from "@/lib/games/guess-the-logo";
+import { scoreGame, computeScore } from "@/lib/games/guess-the-logo";
 import { ACHIEVEMENTS, evaluateAchievements } from "@/lib/games/guess-the-logo-achievements";
 import {
 	getStatus,
@@ -16,7 +16,7 @@ import ResultsView from "./ResultsView.vue";
 
 const props = defineProps<{
 	rounds: Round[];
-	date: string;
+	date: string; // YYYY-MM-DD Monday of the current week
 	playerName: string | null;
 	disableAuth: boolean;
 }>();
@@ -26,10 +26,13 @@ type GameState = "loading" | "intro" | "playing" | "results";
 const state = ref<GameState>("loading");
 const currentIndex = ref(0);
 const answers = ref<(string | null)[]>([]);
+const timeLeftMsArr = ref<number[]>([]);
 const revealed = ref(false);
 
 // Results data
 const finalScore = ref(0);
+const finalCorrect = ref(0);
+const finalPerRoundCorrect = ref<boolean[]>([]);
 const earnedIds = ref<string[]>([]);
 const newlyUnlocked = ref<string[]>([]);
 const leaderboard = ref<LeaderboardEntry[]>([]);
@@ -37,17 +40,16 @@ const playerRank = ref<number | null>(null);
 const alreadyPlayed = ref(false);
 const playerAchievements = ref<{ achievementId: string; unlockedAt: string }[]>([]);
 
-// Intro date formatting
-function formatDateDisplay(dateStr: string): string {
-	const [year, month, day] = dateStr.split("-").map(Number);
+// Derive "Week of Mon D" label from the date prop (Monday YYYY-MM-DD)
+const weekLabel = computed(() => {
+	const [year, month, day] = props.date.split("-").map(Number);
 	const d = new Date(Date.UTC(year, month - 1, day));
-	return d.toLocaleDateString("en-US", {
-		month: "long",
+	return "Week of " + d.toLocaleDateString("en-US", {
+		month: "short",
 		day: "numeric",
-		year: "numeric",
 		timeZone: "UTC",
 	});
-}
+});
 
 async function loadResultsData(existingScore: number | null = null, existingRank: number | null = null) {
 	const [lb, achs] = await Promise.all([
@@ -74,6 +76,7 @@ onMounted(async () => {
 				alreadyPlayed.value = true;
 				finalScore.value = status.score ?? 0;
 				playerRank.value = status.rank;
+				finalPerRoundCorrect.value = [];
 				await loadResultsData(status.score, status.rank);
 				state.value = "results";
 				return;
@@ -88,16 +91,21 @@ onMounted(async () => {
 function startGame() {
 	currentIndex.value = 0;
 	answers.value = [];
+	timeLeftMsArr.value = [];
 	revealed.value = false;
 	state.value = "playing";
 }
 
-async function handleAnswer(name: string | null) {
-	// Record answer for current round
+async function handleAnswer(name: string | null, timeLeftMs: number) {
+	// Record answer and timing for current round
 	const idx = currentIndex.value;
 	const newAnswers = [...answers.value];
 	newAnswers[idx] = name;
 	answers.value = newAnswers;
+
+	const newTimes = [...timeLeftMsArr.value];
+	newTimes[idx] = timeLeftMs;
+	timeLeftMsArr.value = newTimes;
 
 	// Reveal the logo
 	revealed.value = true;
@@ -110,22 +118,26 @@ async function handleAnswer(name: string | null) {
 		revealed.value = false;
 	} else {
 		// All rounds done — compute results
-		await finishGame(newAnswers);
+		await finishGame(newAnswers, newTimes);
 	}
 }
 
-async function finishGame(finalAnswers: (string | null)[]) {
-	const score = scoreGame(finalAnswers, props.rounds);
+async function finishGame(finalAnswers: (string | null)[], finalTimes: number[]) {
+	const points = computeScore(props.rounds, finalAnswers, finalTimes);
+	const correct = scoreGame(finalAnswers, props.rounds);
+	const perRoundCorrect = props.rounds.map((r, i) => finalAnswers[i] === r.answer);
 	const earned = evaluateAchievements(props.rounds, finalAnswers);
 
-	finalScore.value = score;
+	finalScore.value = points;
+	finalCorrect.value = correct;
+	finalPerRoundCorrect.value = perRoundCorrect;
 	earnedIds.value = earned;
 	alreadyPlayed.value = false;
 
 	if (!props.disableAuth) {
 		try {
-			// Submit score (onlyIfAbsent server-side)
-			const scoreResult = await submitScore(score);
+			// Submit points score (onlyIfAbsent server-side)
+			const scoreResult = await submitScore(points);
 			playerRank.value = scoreResult.rank;
 		} catch {
 			playerRank.value = null;
@@ -140,7 +152,7 @@ async function finishGame(finalAnswers: (string | null)[]) {
 		}
 
 		// Load fresh leaderboard + all achievements
-		await loadResultsData(score, playerRank.value);
+		await loadResultsData(points, playerRank.value);
 	} else {
 		// Dev/no-auth path: show score without server calls
 		newlyUnlocked.value = earned;
@@ -156,44 +168,45 @@ async function finishGame(finalAnswers: (string | null)[]) {
 		<!-- Loading -->
 		<div v-if="state === 'loading'" class="gtl-center" aria-live="polite" aria-label="Loading">
 			<div class="gtl-spinner" aria-hidden="true"></div>
-			<p class="gtl-loading-text">Loading today's puzzle...</p>
+			<p class="gtl-loading-text">Loading this week's puzzle...</p>
 		</div>
 
 		<!-- Intro -->
 		<div v-else-if="state === 'intro'" class="gtl-intro gtl-center">
-			<p class="gtl-intro-eyebrow">Daily Challenge</p>
-			<h1 class="gtl-intro-title">Guess the Logo</h1>
-			<p class="gtl-intro-date">{{ formatDateDisplay(date) }}</p>
+			<p class="gtl-intro-eyebrow">Weekly Challenge</p>
+			<h1 class="gtl-intro-title">CNIcon</h1>
+			<p class="gtl-intro-week">{{ weekLabel }}</p>
 			<p class="gtl-intro-desc">
-				10 CNCF technology logos. 4 options each. 15 seconds per logo.
-				<br />How many can you identify?
+				5 cloud native logos. 4 options each. 15 seconds per logo. One shot per week.
 			</p>
 			<button class="gtl-start-btn" @click="startGame">Start</button>
 		</div>
 
-		<!-- Playing -->
-		<Transition v-else-if="state === 'playing'" name="gtl-fade" mode="out-in">
-			<RoundView
-				:key="currentIndex"
-				:round="rounds[currentIndex]"
-				:index="currentIndex"
-				:total="rounds.length"
-				:revealed="revealed"
-				@answer="handleAnswer"
-			/>
-		</Transition>
+		<!-- Playing — keyed RoundView WITHOUT a Transition wrapper to avoid stale-highlight bug -->
+		<RoundView
+			v-else-if="state === 'playing'"
+			:key="currentIndex"
+			:round="rounds[currentIndex]"
+			:index="currentIndex"
+			:total="rounds.length"
+			:revealed="revealed"
+			@answer="handleAnswer"
+		/>
 
 		<!-- Results -->
 		<ResultsView
 			v-else-if="state === 'results'"
 			:score="finalScore"
+			:correct="finalCorrect"
 			:total="rounds.length"
+			:per-round-correct="finalPerRoundCorrect"
 			:earned-ids="earnedIds"
 			:newly-unlocked="newlyUnlocked"
 			:achievements="ACHIEVEMENTS"
 			:leaderboard="leaderboard"
 			:rank="playerRank"
 			:already-played="alreadyPlayed"
+			:week-label="weekLabel"
 			:date="date"
 		/>
 	</div>
@@ -274,7 +287,7 @@ async function finishGame(finalAnswers: (string | null)[]) {
 	-webkit-text-fill-color: transparent;
 }
 
-.gtl-intro-date {
+.gtl-intro-week {
 	font-family: var(--font-inter-tight, system-ui, sans-serif);
 	font-size: 0.9rem;
 	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
@@ -306,23 +319,5 @@ async function finishGame(finalAnswers: (string | null)[]) {
 .gtl-start-btn:hover {
 	opacity: 0.9;
 	transform: translateY(-1px);
-}
-
-/* Fade transition between rounds */
-.gtl-fade-enter-active,
-.gtl-fade-leave-active {
-	transition: opacity 200ms ease;
-}
-
-.gtl-fade-enter-from,
-.gtl-fade-leave-to {
-	opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.gtl-fade-enter-active,
-	.gtl-fade-leave-active {
-		transition: none;
-	}
 }
 </style>

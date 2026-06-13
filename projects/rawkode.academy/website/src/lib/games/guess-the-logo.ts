@@ -1,5 +1,5 @@
 // Constants
-export const ROUND_COUNT = 10;
+export const ROUND_COUNT = 5;
 export const OPTION_COUNT = 4;
 export const TIMER_SECONDS = 15;
 
@@ -125,6 +125,111 @@ export function buildDailyRounds(
 	});
 	const rng = createRng(seedFromDate(date));
 	return buildRounds(sorted, count, optionCount, rng);
+}
+
+// Fixed UTC epoch: Jan 1 2024 is a Monday
+const WEEK_EPOCH_MS = Date.UTC(2024, 0, 1);
+
+// Given a Date, return the Monday (UTC) of its ISO week as a YYYY-MM-DD string
+export function weekKey(d: Date): string {
+	const dayOfWeek = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+	// ISO week Monday: shift Sunday (0) to 7 so Monday is "day 1" from Monday
+	const isoDay = dayOfWeek === 0 ? 7 : dayOfWeek;
+	const monday = new Date(d.getTime() - (isoDay - 1) * 86400000);
+	return utcDateString(monday);
+}
+
+// Given a Date, return the integer number of whole weeks since the epoch (Jan 1 2024)
+export function weekIndex(d: Date): number {
+	const monday = new Date(weekKey(d) + "T00:00:00Z");
+	return Math.floor((monday.getTime() - WEEK_EPOCH_MS) / (7 * 86400000));
+}
+
+// Build the weekly puzzle deterministically from a date.
+// Non-repeating across weeks: shuffles pool once with a fixed constant seed,
+// then selects 5 logos at cycled indices for the given week.
+export function buildWeeklyRounds(
+	pool: Logo[],
+	d: Date,
+	count: number = ROUND_COUNT,
+	optionCount: number = OPTION_COUNT,
+): Round[] {
+	if (pool.length < count) {
+		throw new Error(`Pool too small: need ${count}, have ${pool.length}`);
+	}
+	if (pool.length < optionCount) {
+		throw new Error(`Pool too small for options: need ${optionCount}, have ${pool.length}`);
+	}
+
+	// Stable sort by name, then Fisher-Yates shuffle with a FIXED constant seed
+	// so the overall ordering never changes across builds/weeks
+	const sorted = [...pool].sort((a, b) => {
+		if (a.name < b.name) return -1;
+		if (a.name > b.name) return 1;
+		return 0;
+	});
+	const fixedRng = createRng(0x6e1c0de5);
+	for (let i = sorted.length - 1; i > 0; i--) {
+		const j = Math.floor(fixedRng() * (i + 1));
+		const tmp = sorted[i] as Logo;
+		sorted[i] = sorted[j] as Logo;
+		sorted[j] = tmp;
+	}
+
+	// Select logos for this week using cycled indices
+	const W = weekIndex(d);
+	const wk = weekKey(d);
+	const chosen: Logo[] = [];
+	for (let i = 0; i < count; i++) {
+		const idx = (W * count + i) % sorted.length;
+		chosen.push(sorted[idx] as Logo);
+	}
+
+	// Build rounds with per-(week, position) seeded options
+	return chosen.map((logo, i) => {
+		const rng = createRng(seedFromDate(wk) ^ (i + 1));
+		const distractors = pickDistractors(logo.name, pool, optionCount - 1, rng);
+		const options = [logo.name, ...distractors];
+		// Shuffle options with same rng
+		for (let oi = options.length - 1; oi > 0; oi--) {
+			const j = Math.floor(rng() * (oi + 1));
+			const tmp = options[oi] as string;
+			options[oi] = options[j] as string;
+			options[j] = tmp;
+		}
+		return {
+			logo,
+			options,
+			answer: logo.name,
+		};
+	});
+}
+
+// Compute the point-based score for a completed game
+// base=500 + speed bonus (up to 500) * streak multiplier (up to 1.5x)
+export function computeScore(
+	rounds: Round[],
+	answers: (string | null)[],
+	timeLeftMs: number[],
+): number {
+	let total = 0;
+	let streak = 0;
+	for (let i = 0; i < rounds.length; i++) {
+		const round = rounds[i];
+		const answer = answers[i];
+		const tLeft = timeLeftMs[i] ?? 0;
+		if (round && answer !== null && answer === round.answer) {
+			streak++;
+			const base = 500;
+			const clamped = Math.max(0, Math.min(1, tLeft / (TIMER_SECONDS * 1000)));
+			const speed = Math.round(500 * clamped);
+			const mult = Math.min(1.5, 1 + 0.1 * (streak - 1));
+			total += Math.round((base + speed) * mult);
+		} else {
+			streak = 0;
+		}
+	}
+	return total;
 }
 
 // Score a completed game

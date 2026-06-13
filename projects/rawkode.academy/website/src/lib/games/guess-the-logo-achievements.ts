@@ -13,7 +13,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
 	{
 		id: "perfect-run",
 		name: "Perfect Run",
-		description: "Identify all 10 logos correctly.",
+		description: "Identify all 5 logos correctly.",
 		icon: "💯",
 	},
 	{
@@ -72,8 +72,8 @@ export function evaluateAchievements(
 		}
 	}
 
-	// perfect-run: 10/10
-	if (correct === rounds.length && rounds.length === 10) {
+	// perfect-run: 5/5
+	if (correct === rounds.length && rounds.length === 5) {
 		earned.push("perfect-run");
 	}
 
