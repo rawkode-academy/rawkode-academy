@@ -51,11 +51,23 @@ async function subscribeNewsletter(): Promise<void> {
 }
 
 function buildShareText(): string {
-	const squares = Array.from({ length: props.total }, (_, i) =>
-		props.perRoundCorrect[i] ? "🟩" : "⬛",
-	).join("");
-	return `CNIcon · ${props.weekLabel} · ${props.score} pts\n${squares} — Can you guess the logos? https://rawkode.academy/games/cnicon`;
+	const tail =
+		"Can you guess the logos? https://rawkode.academy/games/cnicon";
+	// Per-round squares are only known for a freshly-played game. On a revisit
+	// the leaderboard only stores points, so omit the squares (no breakdown).
+	const hasBreakdown = props.perRoundCorrect.length === props.total;
+	if (hasBreakdown) {
+		const squares = Array.from({ length: props.total }, (_, i) =>
+			props.perRoundCorrect[i] ? "🟩" : "⬛",
+		).join("");
+		return `CNIcon · ${props.weekLabel} · ${props.score} pts\n${squares} — ${tail}`;
+	}
+	return `CNIcon · ${props.weekLabel} · ${props.score} pts — ${tail}`;
 }
+
+// The correct-count breakdown is only meaningful for a freshly-played game; the
+// stored leaderboard entry holds points only, so hide it on a revisit.
+const hasBreakdown = props.perRoundCorrect.length === props.total;
 
 async function handleShare() {
 	const text = buildShareText();
@@ -106,11 +118,12 @@ function rankSuffix(n: number): string {
 
 		<!-- Score: points large, correct/total secondary -->
 		<div class="gtl-score-block">
-			<div class="gtl-score-points">{{ score }} <span class="gtl-score-pts-label">pts</span></div>
-			<div class="gtl-score-fraction">
+			<div class="gtl-score-points">{{ score.toLocaleString() }} <span class="gtl-score-pts-label">pts</span></div>
+			<div v-if="hasBreakdown" class="gtl-score-fraction">
 				<span class="gtl-score-num">{{ correct }}</span>
 				<span class="gtl-score-sep">/</span>
 				<span class="gtl-score-denom">{{ total }}</span>
+				<span class="gtl-score-correct-label">correct</span>
 			</div>
 		</div>
 
@@ -283,6 +296,17 @@ function rankSuffix(n: number): string {
 	font-size: 2rem;
 	font-weight: 400;
 	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+}
+
+.gtl-score-correct-label {
+	margin-left: 0.4rem;
+	align-self: center;
+	font-family: var(--font-jetbrains-mono, monospace);
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
 }
 
 .gtl-rank-line {
