@@ -11,8 +11,13 @@ hooks: onEnter: devenv: schema.#Devenv
 
 let _t = tasks
 env: {
-	GRAPHQL_ENDPOINT:  "https://api.rawkode.academy/"
+	GRAPHQL_ENDPOINT: "https://api.rawkode.academy/"
+	// Bypass the game login gate in local dev only. Production MUST require
+	// login (games read Astro.locals.user); the production override forces it off.
 	DISABLE_GAME_AUTH: true
+	environment: production: {
+		DISABLE_GAME_AUTH: false
+	}
 }
 
 ci: pipelines: {
@@ -58,8 +63,11 @@ tasks: {
 		command:  "bun"
 		args: ["run", "build"]
 
+		// env.cue is included so build-time env changes (e.g. DISABLE_GAME_AUTH)
+		// mark the build/deploy affected; otherwise CI would skip the redeploy.
 		inputs: [
 			"astro.config.mts",
+			"env.cue",
 			"package.json",
 			"public/**",
 			"src/**",
