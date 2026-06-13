@@ -1,0 +1,59 @@
+---
+title: "vLLM 0.23, SGLang 0.5.13, and Gateway API 1.6-rc.1 ship serving and routing changes"
+description: "vLLM 0.23.0 makes Model Runner V2 the default for Llama and Mistral and deprecates Transformers v4, SGLang 0.5.13 promotes Spec V2 to the default speculative-decoding path, and Gateway API 1.6.0-rc.1 graduates TCPRoute and UDPRoute to GA."
+publishedAt: 2026-06-13
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Four releases landed in the last 24 hours across LLM serving, L4 routing, and batch scheduling.
+
+## vLLM 0.23.0 defaults Model Runner V2 for dense models and deprecates Transformers v4
+
+vLLM published v0.23.0 on June 12, with 408 commits from 200 contributors. The release makes Model Runner V2 the default path for Llama and Mistral dense models, adding FlashInfer sampling, breakable CUDA graphs, and pipeline-parallel bubble elimination on that path.
+
+The breaking-class change is the deprecation of Transformers v4 support, with the project moving model loading onto Transformers v5. The release also lands a multi-tier KV cache offloading framework with an object-store secondary tier and per-request policies, continues DeepSeek-V4 hardening with decoupled sparse MLA metadata and TRTLLM attention kernels, and extends the experimental Rust frontend with streaming generate, dynamic LoRA, and new tool parsers.
+
+For operators tracking vLLM images, the concrete action items are the Transformers v5 migration and Model Runner V2 becoming the default for two of the most common dense-model families.
+
+**Source:** [vLLM v0.23.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.23.0) - June 12, 2026
+
+---
+
+## SGLang 0.5.13 promotes Spec V2 to the default speculative-decoding path
+
+SGLang released v0.5.13 on June 13. Spec V2 is now the default speculative-decoding path and supports tree drafting (topk > 1); Spec V1 is deprecated, and EAGLE and MTP models are migrated onto a unified V2 worker.
+
+The release reduces per-step scheduler overhead through unified async value passing, extends Piecewise and Breakable CUDA Graph coverage to DSA models, Kimi-K2.5, and DeepSeek V4, and enables HiCache by default for hybrid SWA/Mamba models. DeepSeek V4 support gains context parallelism with MTP, fused MoE kernels, sparse attention kernels, and SM120 GPU support. The release bumps transformers to 5.8.1, flashinfer to 0.6.12, and sgl-kernel to 0.4.3.
+
+Teams running EAGLE or MTP speculative decoding should plan the move off the deprecated V1 worker before it is removed.
+
+**Source:** [SGLang v0.5.13 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.13) - June 13, 2026
+
+---
+
+## Gateway API 1.6.0-rc.1 graduates TCPRoute and UDPRoute to GA
+
+The Gateway API project cut v1.6.0-rc.1 on June 12. Both TCPRoute and UDPRoute graduate to GA on the v1 API version, with the v1alpha2 versions of each now deprecated.
+
+The release candidate also moves the CORS filter into the standard channel, raises the allowed Certificate Authority references from 8 to 16, lifts TLSRoute to 4096 hostnames and rules, and allows BackendTLSPolicy to apply alongside other route types. HTTPRoute retry validation now requires unique retry codes and at least one attempt.
+
+This is a release candidate rather than a final tag, but it sets the v1 contract that platform teams exposing raw L4 services through Gateway API will standardize on once 1.6.0 ships.
+
+**Source:** [Gateway API v1.6.0-rc.1 release](https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.6.0-rc.1) - June 12, 2026
+
+---
+
+## Kueue 0.18.1 fixes DRA extended-resource requeueing and topology quota handling
+
+Kueue published the v0.18.1 patch on June 12. It fixes a bug where pending Workloads using DRA extended resources were not requeued when their DeviceClass was deleted or its `extendedResourceName` changed, and adds validation that rejects `deviceClassMappings` when the `KueueDRAIntegrationPartitionableDevices` feature gate is disabled.
+
+On the scheduling side, Topology-Aware Scheduling no longer ignores excluded or transformed resources during node capacity tracking, and Workloads with failed topology assignments are now classified as NoFit rather than Fit, preventing them from holding quota reservations they cannot use. The release also raises the LocalQueue status flavor limit from 16 to 64 to match ClusterQueue.
+
+For GPU and accelerator queues built on DRA, the requeue and NoFit fixes change how stuck Workloads recover and how reserved quota is accounted.
+
+**Source:** [Kueue v0.18.1 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.1) - June 12, 2026
+
+---
