@@ -12,6 +12,41 @@ export interface LeaderboardEntry {
 	achievedAt: string;
 }
 
+export interface PerCategoryCorrect {
+	sandbox: number;
+	incubating: number;
+	graduated: number;
+	archived: number;
+	nonCncf: number;
+}
+
+export interface PlayerStats {
+	weeksPlayed: number;
+	lastWeekKey: string;
+	lastWeekIndex: number;
+	currentStreak: number;
+	longestStreak: number;
+	lifetimeCorrect: number;
+	perCategoryCorrect: PerCategoryCorrect;
+	bestScore: number;
+	perfectWeeks: number;
+	correctCount: number;
+	wins: number;
+	podiums: number;
+	bestRank: number;
+	lastCreditedWeek: string;
+}
+
+export interface SubmitScorePayload {
+	score: number;
+	correct: number;
+	perCategoryCorrect: PerCategoryCorrect;
+	perfect: boolean;
+	fastWeek: boolean;
+	correctLogoNames: string[];
+	poolSize: number;
+}
+
 class GameApiError extends Error {
 	constructor(
 		message: string,
@@ -60,18 +95,28 @@ export async function getStatus(): Promise<{
 }
 
 /**
- * Submit the player's score for today's puzzle.
+ * Submit the player's score and full game detail for this week's puzzle.
  * First submission counts; subsequent calls return the existing entry.
+ * Returns newly unlocked achievement ids from server-side evaluation.
  */
-export async function submitScore(score: number): Promise<{
+export async function submitScore(payload: SubmitScorePayload): Promise<{
 	alreadyPlayed: boolean;
 	rank: number;
 	score: number;
+	newlyUnlocked: string[];
 }> {
 	return fetchJson("/api/games/cnicon/score", {
 		method: "POST",
-		body: JSON.stringify({ score }),
+		body: JSON.stringify(payload),
 	});
+}
+
+/**
+ * Get cumulative player stats for progress display.
+ * Returns null if the player has not played yet.
+ */
+export async function getPlayerStats(): Promise<PlayerStats | null> {
+	return fetchJson<PlayerStats | null>("/api/games/cnicon/stats");
 }
 
 /**
@@ -90,6 +135,7 @@ export async function getLeaderboard(
 /**
  * Unlock achievements by id (idempotent).
  * Returns the ids that were newly unlocked in this call.
+ * @deprecated Achievement unlocking is now handled server-side in the score route.
  */
 export async function unlockAchievements(
 	ids: string[],
@@ -101,7 +147,7 @@ export async function unlockAchievements(
 }
 
 /**
- * Get all achievements unlocked by the current user (across all days).
+ * Get all achievements unlocked by the current user (across all weeks).
  */
 export async function getAchievements(): Promise<
 	{ achievementId: string; unlockedAt: string }[]

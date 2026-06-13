@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import type { Round } from "@/lib/games/guess-the-logo";
-import { scoreGame, computeScore } from "@/lib/games/guess-the-logo";
-import { ACHIEVEMENTS, evaluateAchievements } from "@/lib/games/guess-the-logo-achievements";
+import { scoreGame, computeScore, TIMER_SECONDS } from "@/lib/games/guess-the-logo";
+import { ACHIEVEMENTS } from "@/lib/games/guess-the-logo-achievements";
 import {
 	getStatus,
 	submitScore,
-	unlockAchievements,
 	getLeaderboard,
 	getAchievements,
+	getPlayerStats,
 	type LeaderboardEntry,
+	type PerCategoryCorrect,
+	type PlayerStats,
 } from "@/lib/games/guess-the-logo-api";
 import RoundView from "./RoundView.vue";
 import ResultsView from "./ResultsView.vue";
@@ -19,6 +21,7 @@ const props = defineProps<{
 	date: string; // YYYY-MM-DD Monday of the current week
 	playerName: string | null;
 	disableAuth: boolean;
+	poolSize: number;
 }>();
 
 type GameState = "loading" | "intro" | "playing" | "results";
@@ -39,6 +42,7 @@ const leaderboard = ref<LeaderboardEntry[]>([]);
 const playerRank = ref<number | null>(null);
 const alreadyPlayed = ref(false);
 const playerAchievements = ref<{ achievementId: string; unlockedAt: string }[]>([]);
+const playerStats = ref<PlayerStats | null>(null);
 
 // Derive "Week of Mon D" label from the date prop (Monday YYYY-MM-DD)
 const weekLabel = computed(() => {
@@ -52,12 +56,14 @@ const weekLabel = computed(() => {
 });
 
 async function loadResultsData(existingScore: number | null = null, existingRank: number | null = null) {
-	const [lb, achs] = await Promise.all([
+	const [lb, achs, stats] = await Promise.all([
 		getLeaderboard(10).catch(() => [] as LeaderboardEntry[]),
 		getAchievements().catch(() => [] as { achievementId: string; unlockedAt: string }[]),
+		getPlayerStats().catch(() => null),
 	]);
 	leaderboard.value = lb;
 	playerAchievements.value = achs;
+	playerStats.value = stats;
 
 	// Build earnedIds from stored achievements
 	earnedIds.value = achs.map((a) => a.achievementId);
@@ -126,36 +132,82 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 	const points = computeScore(props.rounds, finalAnswers, finalTimes);
 	const correct = scoreGame(finalAnswers, props.rounds);
 	const perRoundCorrect = props.rounds.map((r, i) => finalAnswers[i] === r.answer);
-	const earned = evaluateAchievements(props.rounds, finalAnswers);
+
+	// Derive per-category correct counts
+	const perCategoryCorrect: PerCategoryCorrect = {
+		sandbox: 0,
+		incubating: 0,
+		graduated: 0,
+		archived: 0,
+		nonCncf: 0,
+	};
+	const correctLogoNames: string[] = [];
+
+	for (let i = 0; i < props.rounds.length; i++) {
+		const round = props.rounds[i];
+		if (round && finalAnswers[i] === round.answer) {
+			correctLogoNames.push(round.logo.name);
+			const status = round.logo.cncfStatus;
+			if (status === "sandbox") perCategoryCorrect.sandbox++;
+			else if (status === "incubating") perCategoryCorrect.incubating++;
+			else if (status === "graduated") perCategoryCorrect.graduated++;
+			else if (status === "archived") perCategoryCorrect.archived++;
+			else perCategoryCorrect.nonCncf++;
+		}
+	}
+
+	const perfect = correct === props.rounds.length && props.rounds.length === 5;
+
+	// fastWeek: every correct answer had > 50% time remaining
+	const timerTotalMs = TIMER_SECONDS * 1000;
+	let fastWeek = correct > 0;
+	for (let i = 0; i < props.rounds.length; i++) {
+		const round = props.rounds[i];
+		if (round && finalAnswers[i] === round.answer) {
+			const tLeft = finalTimes[i] ?? 0;
+			if (tLeft <= timerTotalMs * 0.5) {
+				fastWeek = false;
+				break;
+			}
+		}
+	}
 
 	finalScore.value = points;
 	finalCorrect.value = correct;
 	finalPerRoundCorrect.value = perRoundCorrect;
-	earnedIds.value = earned;
 	alreadyPlayed.value = false;
 
 	if (!props.disableAuth) {
 		try {
-			// Submit points score (onlyIfAbsent server-side)
-			const scoreResult = await submitScore(points);
+			// Submit richer payload — server records stats + unlocks achievements
+			const scoreResult = await submitScore({
+				score: points,
+				correct,
+				perCategoryCorrect,
+				perfect,
+				fastWeek,
+				correctLogoNames,
+				poolSize: props.poolSize,
+			});
 			playerRank.value = scoreResult.rank;
+			newlyUnlocked.value = scoreResult.newlyUnlocked ?? [];
 		} catch {
 			playerRank.value = null;
-		}
-
-		try {
-			// Unlock earned achievements
-			const unlockResult = await unlockAchievements(earned);
-			newlyUnlocked.value = unlockResult.unlocked;
-		} catch {
 			newlyUnlocked.value = [];
 		}
 
-		// Load fresh leaderboard + all achievements
+		// Load fresh leaderboard + all achievements + player stats
 		await loadResultsData(points, playerRank.value);
+
+		// Overlay earnedIds with newlyUnlocked so the UI shows them immediately
+		// even before the server round-trips all achievements
+		if (newlyUnlocked.value.length > 0) {
+			const merged = new Set([...earnedIds.value, ...newlyUnlocked.value]);
+			earnedIds.value = Array.from(merged);
+		}
 	} else {
 		// Dev/no-auth path: show score without server calls
-		newlyUnlocked.value = earned;
+		newlyUnlocked.value = perfect ? ["flawless"] : [];
 		leaderboard.value = [];
 	}
 
@@ -209,6 +261,8 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 			:week-label="weekLabel"
 			:date="date"
 			:is-signed-in="!disableAuth"
+			:stats="playerStats"
+			:pool-size="poolSize"
 		/>
 	</div>
 </template>
