@@ -27,7 +27,7 @@ interface PlayerStats {
 	};
 	bestScore: number;
 	perfectWeeks: number;
-	correctLogos: string[];
+	correctCount: number;
 	wins: number;
 	podiums: number;
 	bestRank: number;
@@ -201,19 +201,19 @@ function progressHint(id: string): string | null {
 		// Completion (pool-relative)
 		case "surveyor": {
 			const pct = props.poolSize > 0
-				? Math.round((s.correctLogos.length / props.poolSize) * 100)
+				? Math.round((s.correctCount / props.poolSize) * 100)
 				: 0;
 			return `${pct}% of pool (need 25%)`;
 		}
 		case "cartographer": {
 			const pct = props.poolSize > 0
-				? Math.round((s.correctLogos.length / props.poolSize) * 100)
+				? Math.round((s.correctCount / props.poolSize) * 100)
 				: 0;
 			return `${pct}% of pool (need 50%)`;
 		}
 		case "completionist": {
 			const pct = props.poolSize > 0
-				? Math.round((s.correctLogos.length / props.poolSize) * 100)
+				? Math.round((s.correctCount / props.poolSize) * 100)
 				: 0;
 			return `${pct}% of pool`;
 		}
