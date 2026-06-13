@@ -39,6 +39,35 @@ await this.env.ANALYTICS.fetch("https://analytics.internal/track", {
 });
 ```
 
+## Generic Reusable Services
+
+These services are namespace-keyed and shared across any game or feature. Achievement definitions, scoring criteria, and business rules live in the **consuming app**, not the service.
+
+### leaderboard
+
+- Location: `platform/leaderboard/`
+- Worker: `platform-leaderboard-rpc`
+- Website binding: `LEADERBOARD`
+- D1 database id: `20f8fa9e-58b7-45e6-b8d6-d961f1ba84b0`
+
+RPC methods (all accept an object param):
+
+- `recordScore({ namespace, personId, scoreType, score, personName?, higherIsBetter?, onlyIfAbsent? })` — upserts keeping the best score; when `onlyIfAbsent` is true the existing entry is returned untouched (enforces "first attempt counts" daily boards).
+- `getLeaderboard({ namespace, scoreType, limit?, higherIsBetter? })` — returns ranked entries for the given board.
+- `getPlayerRank({ namespace, personId, scoreType, higherIsBetter? })` — returns the player's entry and rank, or null.
+
+### achievements
+
+- Location: `platform/achievements/`
+- Worker: `platform-achievements-rpc`
+- Website binding: `ACHIEVEMENTS`
+- D1 database id: `83625427-47af-40ea-907e-d6682a93036a`
+
+RPC methods:
+
+- `unlockAchievements({ namespace, personId, achievementIds })` — idempotent bulk unlock; returns the ids that were newly unlocked this call.
+- `getPlayerAchievements({ namespace, personId })` — returns all unlocked achievement ids and their unlock timestamps.
+
 ## Service Structure
 
 Each GraphQL microservice follows this directory structure:

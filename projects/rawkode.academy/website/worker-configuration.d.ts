@@ -21,6 +21,8 @@ interface __BaseEnv_Env {
 	SKI_ACHIEVEMENTS: Service<typeof import("../games/secrets-of-kubernetes/achievements/http/http-service").SkiAchievements>;
 	SKI_LEADERBOARD: Service<typeof import("../games/secrets-of-kubernetes/leaderboard/http/http-service").SkiLeaderboard>;
 	SKI_SHARE_CARDS: Service<typeof import("../games/secrets-of-kubernetes/share-cards/http/http-service").SkiShareCards>;
+	LEADERBOARD: Service<typeof import("../platform/leaderboard/http/http-service").Leaderboard>;
+	ACHIEVEMENTS: Service<typeof import("../platform/achievements/http/http-service").Achievements>;
 }
 declare namespace Cloudflare {
 	interface Env extends __BaseEnv_Env {}

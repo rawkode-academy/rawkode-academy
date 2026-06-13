@@ -24,6 +24,8 @@ cuenv task build     # Run build task
 
 If no `env.cue` exists, use `bun run <script>` directly.
 
+**After adding or changing a cuenv-managed service** (any directory with an `env.cue`/`service.cue`), run `cuenv sync -A` at the repo root to materialize generated files (`wrangler.jsonc`, `package.json`, `http/main.ts`, `drizzle.config.ts`) so the Bun workspace and typechecks resolve.
+
 ## Common Commands
 
 ```bash
