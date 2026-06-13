@@ -87,8 +87,11 @@ tasks: {
 				"-lc",
 				"bun run build && bun x wrangler deploy --config ./dist/server/wrangler.json",
 			]
+			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
+			// an env-only change marks this deploy affected (else CI skips it).
 			inputs: [
 				"astro.config.mts",
+				"env.cue",
 				"package.json",
 				"public/**",
 				"src/**",
