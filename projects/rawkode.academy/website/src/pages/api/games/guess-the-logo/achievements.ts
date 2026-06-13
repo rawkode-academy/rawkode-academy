@@ -1,7 +1,15 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { queryReadModel } from "@/lib/games/read-model-graphql";
 
 const NAMESPACE = "guess-the-logo";
+
+interface PlayerAchievementsData {
+	playerAchievements: Array<{
+		achievementId: string;
+		unlockedAt: string;
+	}>;
+}
 
 /**
  * POST /api/games/guess-the-logo/achievements
@@ -50,7 +58,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	}
 
 	try {
-		const result = await env.ACHIEVEMENTS.unlockAchievements({
+		const result = await env.ACHIEVEMENTS_WRITE.unlockAchievements({
 			namespace: NAMESPACE,
 			personId: user.id,
 			achievementIds,
@@ -83,12 +91,18 @@ export const GET: APIRoute = async ({ locals }) => {
 	}
 
 	try {
-		const achievements = await env.ACHIEVEMENTS.getPlayerAchievements({
-			namespace: NAMESPACE,
-			personId: user.id,
-		});
+		const result = await queryReadModel<PlayerAchievementsData>(
+			env.ACHIEVEMENTS_READ,
+			`query($namespace: String!, $personId: String!) {
+				playerAchievements(namespace: $namespace, personId: $personId) {
+					achievementId
+					unlockedAt
+				}
+			}`,
+			{ namespace: NAMESPACE, personId: user.id },
+		);
 
-		return new Response(JSON.stringify(achievements), {
+		return new Response(JSON.stringify(result.playerAchievements), {
 			status: 200,
 			headers: { "Content-Type": "application/json" },
 		});

@@ -1,8 +1,19 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { utcDateString } from "@/lib/games/guess-the-logo";
+import { queryReadModel } from "@/lib/games/read-model-graphql";
 
 const NAMESPACE = "guess-the-logo";
+
+interface LeaderboardData {
+	leaderboard: Array<{
+		personId: string;
+		personName: string | null;
+		rank: number;
+		score: number;
+		achievedAt: string;
+	}>;
+}
 
 /**
  * GET /api/games/guess-the-logo/leaderboard
@@ -29,21 +40,21 @@ export const GET: APIRoute = async ({ url, locals }) => {
 	const scoreType = "daily-" + date;
 
 	try {
-		const entries = await env.LEADERBOARD.getLeaderboard({
-			namespace: NAMESPACE,
-			scoreType,
-			limit,
-		});
+		const result = await queryReadModel<LeaderboardData>(
+			env.LEADERBOARD_READ,
+			`query($namespace: String!, $scoreType: String!, $limit: Int) {
+				leaderboard(namespace: $namespace, scoreType: $scoreType, limit: $limit) {
+					personId
+					personName
+					rank
+					score
+					achievedAt
+				}
+			}`,
+			{ namespace: NAMESPACE, scoreType, limit },
+		);
 
-		const serialized = entries.map((entry) => ({
-			...entry,
-			achievedAt:
-				entry.achievedAt instanceof Date
-					? entry.achievedAt.toISOString()
-					: entry.achievedAt,
-		}));
-
-		return new Response(JSON.stringify(serialized), {
+		return new Response(JSON.stringify(result.leaderboard), {
 			status: 200,
 			headers: { "Content-Type": "application/json" },
 		});

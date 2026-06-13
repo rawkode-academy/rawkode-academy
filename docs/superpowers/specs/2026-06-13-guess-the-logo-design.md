@@ -3,6 +3,16 @@
 Date: 2026-06-13
 Status: Approved (building)
 
+## Architecture update (supersedes original service description)
+
+The `leaderboard` and `achievements` platform services have been rearchitected from a single http-only RPC worker into the standard platform CQRS shape:
+
+- **data-model** — Drizzle/D1 schema and migrations (shared layer).
+- **read-model** — federated GraphQL subgraph (Pothos + Yoga, `builder.toSubGraphSchema`). The gateway federates these under subgraph names `"leaderboard"` and `"achievements"`. The website binds them as `LEADERBOARD_READ` and `ACHIEVEMENTS_READ` (Fetcher — GraphQL POST).
+- **write-model** — binding-only Cloudflare Worker exporting a default RPC class (`LeaderboardWriteModel` / `AchievementsWriteModel`). The website binds them as `LEADERBOARD_WRITE` and `ACHIEVEMENTS_WRITE` (Service — RPC).
+
+The old single `LEADERBOARD` / `ACHIEVEMENTS` http bindings and `platform-leaderboard-rpc` / `platform-achievements-rpc` worker names are replaced by the four workers above. All business logic described in the sections below remains the same; only the transport layer and binding names have changed.
+
 ## Summary
 
 A logged-in, **daily** Wordle-style mini-game on the Rawkode Academy website.

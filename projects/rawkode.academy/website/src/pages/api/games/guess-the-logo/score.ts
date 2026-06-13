@@ -1,8 +1,16 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { utcDateString } from "@/lib/games/guess-the-logo";
+import { queryReadModel } from "@/lib/games/read-model-graphql";
 
 const NAMESPACE = "guess-the-logo";
+
+interface LeaderboardEntryData {
+	leaderboardEntry: {
+		rank: number;
+		score: number;
+	} | null;
+}
 
 /**
  * POST /api/games/guess-the-logo/score
@@ -51,18 +59,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 	try {
 		// Check if the player has already played today
-		const existing = await env.LEADERBOARD.getPlayerRank({
-			namespace: NAMESPACE,
-			personId: user.id,
-			scoreType,
-		});
+		const existing = await queryReadModel<LeaderboardEntryData>(
+			env.LEADERBOARD_READ,
+			`query($namespace: String!, $scoreType: String!, $personId: String!) {
+				leaderboardEntry(namespace: $namespace, scoreType: $scoreType, personId: $personId) {
+					rank
+					score
+				}
+			}`,
+			{ namespace: NAMESPACE, scoreType, personId: user.id },
+		);
 
-		if (existing) {
+		if (existing.leaderboardEntry) {
+			const entry = existing.leaderboardEntry;
 			return new Response(
 				JSON.stringify({
 					alreadyPlayed: true,
-					rank: existing.rank,
-					score: existing.score,
+					rank: entry.rank,
+					score: entry.score,
 				}),
 				{
 					status: 200,
@@ -72,7 +86,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		}
 
 		// Record the score — onlyIfAbsent ensures first attempt counts
-		const entry = await env.LEADERBOARD.recordScore({
+		const entry = await env.LEADERBOARD_WRITE.recordScore({
 			namespace: NAMESPACE,
 			personId: user.id,
 			scoreType,

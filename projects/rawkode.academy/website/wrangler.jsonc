@@ -108,12 +108,20 @@
 			"entrypoint": "SkiShareCards"
 		},
 		{
-			"binding": "LEADERBOARD",
-			"service": "platform-leaderboard-rpc"
+			"binding": "LEADERBOARD_READ",
+			"service": "platform-leaderboard-read-model"
 		},
 		{
-			"binding": "ACHIEVEMENTS",
-			"service": "platform-achievements-rpc"
+			"binding": "LEADERBOARD_WRITE",
+			"service": "platform-leaderboard-write-model"
+		},
+		{
+			"binding": "ACHIEVEMENTS_READ",
+			"service": "platform-achievements-read-model"
+		},
+		{
+			"binding": "ACHIEVEMENTS_WRITE",
+			"service": "platform-achievements-write-model"
 		}
 	]
 }

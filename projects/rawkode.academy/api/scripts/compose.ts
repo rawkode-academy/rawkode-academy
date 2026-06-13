@@ -21,6 +21,9 @@ const SUBGRAPHS = [
 	"watch-history",
 	// Show domain services
 	"brackets",
+	// Generic platform services
+	"leaderboard",
+	"achievements",
 	// Secret of Kubernetes Island game services
 	"ski-achievements",
 	"ski-leaderboard",

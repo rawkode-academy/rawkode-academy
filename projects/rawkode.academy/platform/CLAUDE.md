@@ -46,27 +46,56 @@ These services are namespace-keyed and shared across any game or feature. Achiev
 ### leaderboard
 
 - Location: `platform/leaderboard/`
-- Worker: `platform-leaderboard-rpc`
-- Website binding: `LEADERBOARD`
+- Shape: CQRS — `data-model/` + federated GraphQL `read-model/` + binding-only `write-model/`
+- Workers: `platform-leaderboard-read-model` (Fetcher, GraphQL subgraph) + `platform-leaderboard-write-model` (Service, RPC)
+- Website bindings: `LEADERBOARD_READ` (Fetcher — GraphQL POST) + `LEADERBOARD_WRITE` (Service — RPC)
+- Gateway subgraph: name `"leaderboard"`, binding `LEADERBOARD` (points to the read-model worker)
 - D1 database id: `20f8fa9e-58b7-45e6-b8d6-d961f1ba84b0`
 
-RPC methods (all accept an object param):
+Read-model GraphQL queries (subgraph `leaderboard`):
 
-- `recordScore({ namespace, personId, scoreType, score, personName?, higherIsBetter?, onlyIfAbsent? })` — upserts keeping the best score; when `onlyIfAbsent` is true the existing entry is returned untouched (enforces "first attempt counts" daily boards).
-- `getLeaderboard({ namespace, scoreType, limit?, higherIsBetter? })` — returns ranked entries for the given board.
-- `getPlayerRank({ namespace, personId, scoreType, higherIsBetter? })` — returns the player's entry and rank, or null.
+```graphql
+type LeaderboardEntry {
+  personId: String!
+  personName: String
+  rank: Int!
+  score: Int!
+  achievedAt: DateTime!
+}
+
+Query.leaderboard(namespace: String!, scoreType: String!, limit: Int): [LeaderboardEntry!]!
+Query.leaderboardEntry(namespace: String!, scoreType: String!, personId: String!): LeaderboardEntry
+```
+
+Tied scores share the same rank; higher score = better rank (rank 1 is best).
+
+Write-model RPC method (class `LeaderboardWriteModel`, default export; env `{ DB: D1Database; ANALYTICS: Service }`):
+
+- `recordScore({ namespace, personId, scoreType, score, personName?, higherIsBetter?, onlyIfAbsent? }): Promise<{ personId; personName: string|null; rank: number; score: number; achievedAt: Date }>` — upserts keeping the best score; when `onlyIfAbsent` is true the existing entry is returned untouched (enforces "first attempt counts" daily boards).
 
 ### achievements
 
 - Location: `platform/achievements/`
-- Worker: `platform-achievements-rpc`
-- Website binding: `ACHIEVEMENTS`
+- Shape: CQRS — `data-model/` + federated GraphQL `read-model/` + binding-only `write-model/`
+- Workers: `platform-achievements-read-model` (Fetcher, GraphQL subgraph) + `platform-achievements-write-model` (Service, RPC)
+- Website bindings: `ACHIEVEMENTS_READ` (Fetcher — GraphQL POST) + `ACHIEVEMENTS_WRITE` (Service — RPC)
+- Gateway subgraph: name `"achievements"`, binding `ACHIEVEMENTS` (points to the read-model worker)
 - D1 database id: `83625427-47af-40ea-907e-d6682a93036a`
 
-RPC methods:
+Read-model GraphQL queries (subgraph `achievements`):
 
-- `unlockAchievements({ namespace, personId, achievementIds })` — idempotent bulk unlock; returns the ids that were newly unlocked this call.
-- `getPlayerAchievements({ namespace, personId })` — returns all unlocked achievement ids and their unlock timestamps.
+```graphql
+type PlayerAchievement {
+  achievementId: String!
+  unlockedAt: DateTime!
+}
+
+Query.playerAchievements(namespace: String!, personId: String!): [PlayerAchievement!]!
+```
+
+Write-model RPC method (class `AchievementsWriteModel`, default export; env `{ DB: D1Database; ANALYTICS: Service }`):
+
+- `unlockAchievements({ namespace, personId, achievementIds }): Promise<{ unlocked: string[] }>` — idempotent bulk unlock; returns the ids that were newly unlocked this call.
 
 ## Service Structure
 

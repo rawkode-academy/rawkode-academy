@@ -3,10 +3,9 @@ package cuenv
 import gen "github.com/rawkode-academy/rawkode-academy/projects/rawkode.academy/codegen"
 
 _service: gen.#PlatformService & {
-	serviceName:      "leaderboard"
-	servicePrefix:    "platform"
-	includeReadModel: false
-	includeHttp:      true
+	serviceName:       "leaderboard"
+	servicePrefix:     "platform"
+	includeWriteModel: true
 	bindings: {
 		d1Databases: [{
 			binding:      "DB"
