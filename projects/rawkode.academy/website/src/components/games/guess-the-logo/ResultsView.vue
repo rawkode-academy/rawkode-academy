@@ -73,7 +73,8 @@ function formatAchievedAt(dateStr: string): string {
 }
 
 function rankSuffix(n: number): string {
-	if (n === 11 || n === 12 || n === 13) return "th";
+	const mod100 = n % 100;
+	if (mod100 >= 11 && mod100 <= 13) return "th";
 	const last = n % 10;
 	if (last === 1) return "st";
 	if (last === 2) return "nd";

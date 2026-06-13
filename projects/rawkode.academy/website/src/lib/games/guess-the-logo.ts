@@ -115,10 +115,10 @@ export function buildDailyRounds(
 	count: number = ROUND_COUNT,
 	optionCount: number = OPTION_COUNT,
 ): Round[] {
-	// Sort pool by iconUrl then name for a stable ordering across deploys
+	// Sort the pool by name for a stable ordering across deploys. `iconUrl` is a
+	// build-hashed asset path that changes between builds, so sorting on it would
+	// break the "same UTC day => identical puzzle" guarantee; the name is stable.
 	const sorted = [...pool].sort((a, b) => {
-		if (a.iconUrl < b.iconUrl) return -1;
-		if (a.iconUrl > b.iconUrl) return 1;
 		if (a.name < b.name) return -1;
 		if (a.name > b.name) return 1;
 		return 0;

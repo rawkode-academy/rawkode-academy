@@ -156,13 +156,24 @@ export class Leaderboard extends WorkerEntrypoint<Env> {
 			limit,
 		});
 
-		return entries.map((entry, index) => ({
-			personId: entry.personId,
-			personName: entry.personName,
-			rank: index + 1,
-			score: entry.scoreValue,
-			achievedAt: entry.achievedAt,
-		}));
+		// Competition ranking (1, 1, 3 …): tied scores share a rank, matching the
+		// `count(strictly better) + 1` used by getPlayerRank/recordScore. Entries
+		// are already ordered by scoreValue, so we only track the previous score.
+		let lastScore: number | null = null;
+		let lastRank = 0;
+		return entries.map((entry, index) => {
+			if (lastScore === null || entry.scoreValue !== lastScore) {
+				lastRank = index + 1;
+				lastScore = entry.scoreValue;
+			}
+			return {
+				personId: entry.personId,
+				personName: entry.personName,
+				rank: lastRank,
+				score: entry.scoreValue,
+				achievedAt: entry.achievedAt,
+			};
+		});
 	}
 
 	async getPlayerRank(input: {

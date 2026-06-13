@@ -19,7 +19,11 @@ export const GET: APIRoute = async ({ url, locals }) => {
 	}
 
 	const limitParam = url.searchParams.get("limit");
-	const limit = limitParam ? Number.parseInt(limitParam, 10) : 20;
+	const parsedLimit = limitParam ? Number.parseInt(limitParam, 10) : 20;
+	const limit =
+		Number.isFinite(parsedLimit) && parsedLimit > 0
+			? Math.min(parsedLimit, 100)
+			: 20;
 
 	const date = utcDateString(new Date());
 	const scoreType = "daily-" + date;
