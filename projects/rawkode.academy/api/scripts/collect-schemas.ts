@@ -14,6 +14,8 @@ const PLATFORM_SERVICES = [
 	"email-preferences",
 	"watch-history",
 	"brackets",
+	"leaderboard",
+	"achievements",
 ];
 
 // Helper function to collect schema from a service directory

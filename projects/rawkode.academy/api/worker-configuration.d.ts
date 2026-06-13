@@ -7,6 +7,8 @@ interface __BaseEnv_Env {
 	EMAIL_PREFERENCES: Fetcher /* platform-email-preferences-read-model */;
 	WATCH_HISTORY: Fetcher /* platform-watch-history-read-model */;
 	BRACKETS: Fetcher /* platform-brackets-read-model */;
+	LEADERBOARD: Fetcher /* platform-leaderboard-read-model */;
+	ACHIEVEMENTS: Fetcher /* platform-achievements-read-model */;
 	IDENTITY: Fetcher /* rawkode-academy-identity */;
 }
 declare namespace Cloudflare {

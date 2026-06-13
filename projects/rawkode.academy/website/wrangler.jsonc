@@ -106,6 +106,22 @@
 			"binding": "SKI_SHARE_CARDS",
 			"service": "games-ski-share-cards-rpc",
 			"entrypoint": "SkiShareCards"
+		},
+		{
+			"binding": "LEADERBOARD_READ",
+			"service": "platform-leaderboard-read-model"
+		},
+		{
+			"binding": "LEADERBOARD_WRITE",
+			"service": "platform-leaderboard-write-model"
+		},
+		{
+			"binding": "ACHIEVEMENTS_READ",
+			"service": "platform-achievements-read-model"
+		},
+		{
+			"binding": "ACHIEVEMENTS_WRITE",
+			"service": "platform-achievements-write-model"
 		}
 	]
 }

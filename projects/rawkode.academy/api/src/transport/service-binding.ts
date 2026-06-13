@@ -17,6 +17,9 @@ export const SUBGRAPH_BINDING_MAP: Record<string, keyof Env> = {
 	"watch-history": "WATCH_HISTORY",
 	// Show domain services
 	brackets: "BRACKETS",
+	// Generic platform services
+	leaderboard: "LEADERBOARD",
+	achievements: "ACHIEVEMENTS",
 };
 
 export interface ServiceBindingTransportContext {
