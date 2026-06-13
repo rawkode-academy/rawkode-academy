@@ -208,6 +208,7 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 			:already-played="alreadyPlayed"
 			:week-label="weekLabel"
 			:date="date"
+			:is-signed-in="!disableAuth"
 		/>
 	</div>
 </template>

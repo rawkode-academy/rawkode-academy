@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { actions } from "astro:actions";
 import type { LeaderboardEntry } from "@/lib/games/guess-the-logo-api";
 
 interface AchievementDef {
@@ -22,9 +23,32 @@ const props = defineProps<{
 	alreadyPlayed: boolean;
 	weekLabel: string;    // e.g. "Week of Jun 9"
 	date: string;         // YYYY-MM-DD (kept for leaderboard date display)
+	isSignedIn: boolean;  // newsletter opt-in needs an authenticated learner
 }>();
 
 const copied = ref(false);
+
+// Newsletter: notify the player when the weekly logos change. Uses the existing
+// newsletter service (EMAIL_PREFERENCES) via the shared astro:action; one-click
+// since the player is already signed in.
+const newsletterState = ref<"idle" | "loading" | "done" | "error">("idle");
+
+async function subscribeNewsletter(): Promise<void> {
+	if (newsletterState.value === "loading" || newsletterState.value === "done") {
+		return;
+	}
+	newsletterState.value = "loading";
+	try {
+		const { data, error } = await actions.newsletter.subscribe({
+			audience: "cnicon",
+			source: "website:cnicon:results",
+		});
+		if (error) throw new Error(error.message);
+		newsletterState.value = data?.success ? "done" : "error";
+	} catch {
+		newsletterState.value = "error";
+	}
+}
 
 function buildShareText(): string {
 	const squares = Array.from({ length: props.total }, (_, i) =>
@@ -103,6 +127,32 @@ function rankSuffix(n: number): string {
 		<div class="gtl-comeback">
 			<span class="gtl-comeback-icon">📅</span>
 			<span>Come back next Monday for a new weekly challenge.</span>
+		</div>
+
+		<!-- Newsletter: notify when the weekly logos change -->
+		<div v-if="isSignedIn" class="gtl-newsletter">
+			<template v-if="newsletterState === 'done'">
+				<span class="gtl-newsletter-icon">✅</span>
+				<p class="gtl-newsletter-text">You're on the list — we'll email you each Monday when the logos change.</p>
+			</template>
+			<template v-else>
+				<div class="gtl-newsletter-copy">
+					<span class="gtl-newsletter-title">Never miss a week</span>
+					<span class="gtl-newsletter-sub">Get an email each Monday when CNIcon's logos change.</span>
+				</div>
+				<div class="gtl-newsletter-action">
+					<button
+						class="gtl-newsletter-btn"
+						:disabled="newsletterState === 'loading'"
+						@click="subscribeNewsletter"
+					>
+						{{ newsletterState === "loading" ? "Subscribing…" : "Notify me" }}
+					</button>
+					<span v-if="newsletterState === 'error'" class="gtl-newsletter-error" role="alert">
+						Couldn't subscribe right now. Try again in a moment.
+					</span>
+				</div>
+			</template>
 		</div>
 
 		<!-- Achievements -->
@@ -277,6 +327,81 @@ function rankSuffix(n: number): string {
 
 .gtl-comeback-icon {
 	font-size: 1.1rem;
+}
+
+.gtl-newsletter {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem 1.25rem;
+	padding: 1rem 1.25rem;
+	border-radius: 0.5rem;
+	border: 1px solid color-mix(in srgb, #5f5ed7 35%, transparent);
+	background: color-mix(in srgb, #5f5ed7 6%, var(--surface-card, oklch(0.97 0.008 85)));
+}
+
+.gtl-newsletter-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	min-width: 12rem;
+	flex: 1;
+}
+
+.gtl-newsletter-title {
+	font-size: 0.95rem;
+	font-weight: 600;
+	color: var(--editorial-ink, oklch(0.18 0.02 60));
+}
+
+.gtl-newsletter-sub {
+	font-size: 0.825rem;
+	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+}
+
+.gtl-newsletter-action {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.35rem;
+}
+
+.gtl-newsletter-btn {
+	padding: 0.5rem 1.25rem;
+	border-radius: 0.5rem;
+	border: none;
+	background: linear-gradient(135deg, #5f5ed7, #00ceff);
+	color: #fff;
+	font-family: var(--font-inter-tight, system-ui, sans-serif);
+	font-size: 0.875rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: opacity 150ms ease;
+}
+
+.gtl-newsletter-btn:hover:not(:disabled) {
+	opacity: 0.9;
+}
+
+.gtl-newsletter-btn:disabled {
+	opacity: 0.6;
+	cursor: default;
+}
+
+.gtl-newsletter-error {
+	font-size: 0.75rem;
+	color: #dc2626;
+}
+
+.gtl-newsletter-icon {
+	font-size: 1.1rem;
+}
+
+.gtl-newsletter-text {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
 }
 
 .gtl-section {
