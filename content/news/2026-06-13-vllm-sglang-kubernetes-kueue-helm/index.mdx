@@ -1,0 +1,72 @@
+---
+title: "vLLM, SGLang, Kubernetes, Kueue, and Helm ship runtime fixes"
+description: "vLLM and SGLang released AI serving updates, while Kubernetes, Kueue, and Helm shipped scheduler, queueing, and release-management fixes."
+publishedAt: 2026-06-13
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - ai-infrastructure
+---
+
+Five fresh releases landed in the last 24 hours across AI serving, Kubernetes scheduling, workload queueing, and Helm release management.
+
+## vLLM v0.23.0 expands Model Runner V2 and KV-cache offload
+
+vLLM published v0.23.0 on June 12 with 408 commits across model support, serving internals, distributed execution, and hardware backends. Model Runner V2 is now selected by default for Llama and Mistral dense models, after previously landing for Qwen3.
+
+The release adds an object-store secondary tier to the KV-cache offloading framework, enables HMA by default for capable connectors, and adds per-request offloading policy through the `on_new_request` lifecycle hook. It also moves vLLM toward Transformers v5, deprecates v4 support, expands the experimental Rust frontend with streaming `generate`, dynamic LoRA, `/version`, and `/server_info` endpoints, and continues DeepSeek-V4 work across attention, RoPE, sparse MLA metadata, EPLB, and XPU decode paths.
+
+For operators running mixed model fleets, the practical change is broader default coverage for the newer execution path plus more explicit cache-tiering controls for disaggregated serving.
+
+**Source:** [vLLM v0.23.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.23.0) - June 12, 2026
+
+---
+
+## SGLang v0.5.13 makes Spec V2 the default speculative path
+
+SGLang released v0.5.13 on June 13 with runtime changes across speculative decoding, scheduler overhead, CUDA graph capture, hybrid-model cache offload, and DeepSeek V4 serving. The main serving change is that Spec V2 is now the default speculative-decoding path, with tree drafting across Triton, FA3, MLA, and AITER backends, including `page_size > 1` and Mamba or hybrid-linear models.
+
+The release deprecates Spec V1, moves EAGLE and MTP onto the unified V2 worker, and adds faster top-k equals 1 drafting. It also extends Piecewise and Breakable CUDA Graph coverage to DSA models, Kimi-K2.5, and DeepSeek V4; enables HiCache by default for hybrid SWA and Mamba models through UnifiedTree; and adds DeepSeek V4 context-parallel serving, sparse FlashMLA, FP4 indexer support, SM120 support, and DeepEP waterfill load balancing.
+
+This matters for inference teams because speculative decode, CUDA graph capture, and hierarchical KV-cache offload are becoming default-path behavior rather than optional tuning around the core server.
+
+**Source:** [SGLang v0.5.13 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.13) - June 13, 2026
+
+---
+
+## Kubernetes ships June patch releases with DRA and storage fixes
+
+Kubernetes published [v1.36.2](https://github.com/kubernetes/kubernetes/releases/tag/v1.36.2), [v1.35.6](https://github.com/kubernetes/kubernetes/releases/tag/v1.35.6), [v1.34.9](https://github.com/kubernetes/kubernetes/releases/tag/v1.34.9), and [v1.33.13](https://github.com/kubernetes/kubernetes/releases/tag/v1.33.13) on June 12. The v1.36.2 changelog includes DRA scheduler fixes for mutually exclusive device partitions, Pods stuck Pending when multi-node and per-node claims are mixed, and a kube-scheduler panic when `allocationMode: All` selects a device using shared counters.
+
+The backports also include endpoint-controller panic fixes for Services with empty `IPFamilies`, CSI republish handling so kubelet does not delete the mount directory after a failed `NodePublishVolume` call, and a 1.34+ regression fix for Secret API objects containing binary non-UTF-8 data in container environment values. Kubernetes v1.36.2 is also built with Go 1.26.4.
+
+For clusters testing DRA or CSI republish behavior, this patch set is more than routine version churn: it fixes scheduler and kubelet failure modes that can directly affect workload placement and volume contents.
+
+**Source:** [Kubernetes releases](https://github.com/kubernetes/kubernetes/releases) - June 12, 2026
+
+---
+
+## Kueue v0.18.1 and v0.17.5 repair DRA, TAS, and queue status behavior
+
+Kueue published [v0.18.1](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.1) and [v0.17.5](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.17.5) on June 12. The v0.18.1 release fixes pending DRA Workloads not being requeued when a `DeviceClass` is deleted or its `extendedResourceName` changes, rejects partitionable-device `sources` config when the related feature gate is disabled, and avoids hot reconcile loops for deterministic DRA resolution failures.
+
+Both supported lines include fixes for regular Workloads being rejected when `ElasticJobsViaWorkloadSlicesWithTAS` is enabled, LocalQueue status updates failing when a referenced ClusterQueue has more than 16 flavors, and TAS topology assignment errors being treated as `Fit` instead of `NoFit`. The releases also correct unset borrowing and lending limits in metrics to report `+Inf`, matching unconstrained behavior instead of reporting zero.
+
+Batch platform teams using Kueue for accelerator queues should treat this as a scheduler correctness release, especially if DRA or topology-aware scheduling is enabled.
+
+**Source:** [Kueue v0.18.1 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.1) - June 12, 2026
+
+---
+
+## Helm v4.2.1 and v3.21.1 patch CLI and SDK edge cases
+
+Helm released [v4.2.1](https://github.com/helm/helm/releases/tag/v4.2.1) and [v3.21.1](https://github.com/helm/helm/releases/tag/v3.21.1) on June 12. Helm 4.2.1 fixes a data race in `FailingKubeClient.RecordedWaitOptions`, success messages that were written to stderr instead of stdout, false warnings when resolving version range constraints, and a `WaitForDelete` race where the status observer could cancel the watch too early.
+
+Helm 3.21.1 fixes a nil REST client getter panic in ClientOnly CRD install flows, keeps registry credentials during plain-HTTP fallback with `oras-go` v2.6.1, and moves the v3 line to Go 1.26. Both v4.2.1 and v3.21.1 bump `golang.org/x/net` to v0.55.0 to address GO-2026-5026.
+
+The release is most relevant to teams embedding Helm as an SDK or depending on deterministic CLI output in automation.
+
+**Source:** [Helm v4.2.1 release](https://github.com/helm/helm/releases/tag/v4.2.1) - June 12, 2026
+
+---
