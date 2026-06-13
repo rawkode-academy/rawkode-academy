@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
-import { utcDateString } from "@/lib/games/guess-the-logo";
+import { weekKey } from "@/lib/games/guess-the-logo";
 import { queryReadModel } from "@/lib/games/read-model-graphql";
 
-const NAMESPACE = "guess-the-logo";
+const NAMESPACE = "cnicon";
 
 interface LeaderboardEntryData {
 	leaderboardEntry: {
@@ -13,8 +13,8 @@ interface LeaderboardEntryData {
 }
 
 /**
- * GET /api/games/guess-the-logo/status
- * Returns whether the current user has already played today's puzzle,
+ * GET /api/games/cnicon/status
+ * Returns whether the current user has already played this week's puzzle,
  * and their rank/score if so.
  */
 export const GET: APIRoute = async ({ locals }) => {
@@ -27,8 +27,7 @@ export const GET: APIRoute = async ({ locals }) => {
 		});
 	}
 
-	const date = utcDateString(new Date());
-	const scoreType = "daily-" + date;
+	const scoreType = "weekly-" + weekKey(new Date());
 
 	try {
 		const result = await queryReadModel<LeaderboardEntryData>(

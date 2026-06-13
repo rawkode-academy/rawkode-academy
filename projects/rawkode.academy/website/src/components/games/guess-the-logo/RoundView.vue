@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import type { Round } from "@/lib/games/guess-the-logo";
 import { TIMER_SECONDS } from "@/lib/games/guess-the-logo";
 import LogoScanline from "./LogoScanline.vue";
@@ -12,12 +12,14 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	answer: [name: string | null];
+	answer: [name: string | null, timeLeftMs: number];
 }>();
 
 const timeLeft = ref(TIMER_SECONDS);
 const playerAnswer = ref<string | null | undefined>(undefined); // undefined = not yet answered
+
 let timerId: ReturnType<typeof setInterval> | null = null;
+let startTime = 0; // performance.now() at mount
 
 function clearTimer() {
 	if (timerId !== null) {
@@ -29,23 +31,27 @@ function clearTimer() {
 function startTimer() {
 	clearTimer();
 	timeLeft.value = TIMER_SECONDS;
+	startTime = performance.now();
 	timerId = setInterval(() => {
-		timeLeft.value -= 1;
+		// Visible countdown stays whole-seconds
+		const elapsed = performance.now() - startTime;
+		timeLeft.value = Math.max(0, TIMER_SECONDS - Math.floor(elapsed / 1000));
 		if (timeLeft.value <= 0) {
 			clearTimer();
 			if (playerAnswer.value === undefined) {
 				playerAnswer.value = null;
-				emit("answer", null);
+				emit("answer", null, 0);
 			}
 		}
-	}, 1000);
+	}, 200); // poll at 200ms so the display stays tight
 }
 
 function handleOptionClick(option: string) {
 	if (playerAnswer.value !== undefined) return; // already answered
 	clearTimer();
+	const timeLeftMs = Math.max(0, TIMER_SECONDS * 1000 - (performance.now() - startTime));
 	playerAnswer.value = option;
-	emit("answer", option);
+	emit("answer", option, timeLeftMs);
 }
 
 function optionClass(option: string): string {
@@ -69,26 +75,8 @@ const timerColor = computed(() => {
 	return "#ef4444";
 });
 
-// Reset and restart timer when the round changes (index changes)
-watch(
-	() => props.index,
-	() => {
-		playerAnswer.value = undefined;
-		startTimer();
-	},
-);
-
-// Stop timer when revealed (answer already locked in)
-watch(
-	() => props.revealed,
-	(isRevealed) => {
-		if (isRevealed) {
-			clearTimer();
-		}
-	},
-);
-
 onMounted(() => {
+	playerAnswer.value = undefined;
 	startTimer();
 });
 
@@ -191,7 +179,7 @@ onUnmounted(() => {
 .gtl-timer-bar {
 	height: 100%;
 	border-radius: 2px;
-	transition: width 1s linear, background 300ms ease;
+	transition: width 0.2s linear, background 300ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { queryReadModel } from "@/lib/games/read-model-graphql";
 
-const NAMESPACE = "guess-the-logo";
+const NAMESPACE = "cnicon";
 
 interface PlayerAchievementsData {
 	playerAchievements: Array<{
@@ -12,12 +12,12 @@ interface PlayerAchievementsData {
 }
 
 /**
- * POST /api/games/guess-the-logo/achievements
+ * POST /api/games/cnicon/achievements
  * Unlock achievements for the current user.
  * Body: { achievementIds: string[] }
  *
- * GET /api/games/guess-the-logo/achievements
- * Returns all achievements unlocked by the current user (across all days).
+ * GET /api/games/cnicon/achievements
+ * Returns all achievements unlocked by the current user (across all weeks).
  */
 
 export const POST: APIRoute = async ({ request, locals }) => {

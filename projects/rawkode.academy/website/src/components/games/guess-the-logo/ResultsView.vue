@@ -10,39 +10,27 @@ interface AchievementDef {
 }
 
 const props = defineProps<{
-	score: number;
+	score: number;        // computeScore points integer
+	correct: number;      // scoreGame count 0..5
 	total: number;
+	perRoundCorrect: boolean[];
 	earnedIds: string[];
 	newlyUnlocked: string[];
 	achievements: AchievementDef[];
 	leaderboard: LeaderboardEntry[];
 	rank: number | null;
 	alreadyPlayed: boolean;
-	date: string;
+	weekLabel: string;    // e.g. "Week of Jun 9"
+	date: string;         // YYYY-MM-DD (kept for leaderboard date display)
 }>();
 
 const copied = ref(false);
 
-function formatDate(dateStr: string): string {
-	// dateStr is YYYY-MM-DD
-	const [year, month, day] = dateStr.split("-").map(Number);
-	const d = new Date(Date.UTC(year, month - 1, day));
-	return d.toLocaleDateString("en-US", {
-		month: "long",
-		day: "numeric",
-		year: "numeric",
-		timeZone: "UTC",
-	});
-}
-
 function buildShareText(): string {
-	const dots = Array.from({ length: props.total }, (_, i) => {
-		// We don't have per-round correctness here, just total score.
-		// Use green squares for correct, grey for wrong (approximated by score).
-		// Since we only have total, use a simple pattern.
-		return i < props.score ? "🟩" : "⬜";
-	}).join("");
-	return `Guess the Logo ${formatDate(props.date)} ${props.score}/${props.total}\n${dots}`;
+	const squares = Array.from({ length: props.total }, (_, i) =>
+		props.perRoundCorrect[i] ? "🟩" : "⬛",
+	).join("");
+	return `CNIcon · ${props.weekLabel} · ${props.score} pts\n${squares} — Can you guess the logos? https://rawkode.academy/games/cnicon`;
 }
 
 async function handleShare() {
@@ -87,20 +75,23 @@ function rankSuffix(n: number): string {
 	<div class="gtl-results">
 		<!-- Header -->
 		<div class="gtl-results-header">
-			<p class="gtl-results-date">{{ formatDate(date) }}</p>
-			<h2 class="gtl-results-title">Daily Challenge Complete</h2>
-			<p v-if="alreadyPlayed" class="gtl-already-played-note">You already played today.</p>
+			<p class="gtl-results-week">{{ weekLabel }}</p>
+			<h2 class="gtl-results-title">Weekly Challenge Complete</h2>
+			<p v-if="alreadyPlayed" class="gtl-already-played-note">You already played this week.</p>
 		</div>
 
-		<!-- Score -->
+		<!-- Score: points large, correct/total secondary -->
 		<div class="gtl-score-block">
-			<span class="gtl-score-num">{{ score }}</span>
-			<span class="gtl-score-sep">/</span>
-			<span class="gtl-score-denom">{{ total }}</span>
+			<div class="gtl-score-points">{{ score }} <span class="gtl-score-pts-label">pts</span></div>
+			<div class="gtl-score-fraction">
+				<span class="gtl-score-num">{{ correct }}</span>
+				<span class="gtl-score-sep">/</span>
+				<span class="gtl-score-denom">{{ total }}</span>
+			</div>
 		</div>
 
 		<p v-if="rank !== null" class="gtl-rank-line">
-			You ranked <strong>{{ rank }}{{ rankSuffix(rank) }}</strong> today.
+			You ranked <strong>{{ rank }}{{ rankSuffix(rank) }}</strong> this week.
 		</p>
 
 		<!-- Share button -->
@@ -108,10 +99,10 @@ function rankSuffix(n: number): string {
 			{{ copied ? "Copied!" : "Share Result" }}
 		</button>
 
-		<!-- Come back tomorrow -->
+		<!-- Come back next week -->
 		<div class="gtl-comeback">
 			<span class="gtl-comeback-icon">📅</span>
-			<span>Come back tomorrow for a new daily challenge.</span>
+			<span>Come back next Monday for a new weekly challenge.</span>
 		</div>
 
 		<!-- Achievements -->
@@ -135,8 +126,8 @@ function rankSuffix(n: number): string {
 		</section>
 
 		<!-- Leaderboard -->
-		<section v-if="leaderboard.length > 0" class="gtl-section" aria-label="Today's leaderboard">
-			<h3 class="gtl-section-title">Today's Leaderboard</h3>
+		<section v-if="leaderboard.length > 0" class="gtl-section" aria-label="This week's leaderboard">
+			<h3 class="gtl-section-title">This Week's Leaderboard</h3>
 			<ol class="gtl-leaderboard">
 				<li
 					v-for="entry in leaderboard"
@@ -146,7 +137,7 @@ function rankSuffix(n: number): string {
 				>
 					<span class="gtl-lb-rank">{{ entry.rank }}</span>
 					<span class="gtl-lb-name">{{ entry.personName ?? "Anonymous" }}</span>
-					<span class="gtl-lb-score">{{ entry.score }}/{{ total }}</span>
+					<span class="gtl-lb-score">{{ entry.score }} pts</span>
 					<span class="gtl-lb-time">{{ formatAchievedAt(entry.achievedAt) }}</span>
 				</li>
 			</ol>
@@ -169,7 +160,7 @@ function rankSuffix(n: number): string {
 	text-align: center;
 }
 
-.gtl-results-date {
+.gtl-results-week {
 	font-family: var(--font-jetbrains-mono, monospace);
 	font-size: 0.75rem;
 	font-weight: 600;
@@ -194,14 +185,15 @@ function rankSuffix(n: number): string {
 	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
 }
 
+/* Score block */
 .gtl-score-block {
 	display: flex;
-	align-items: baseline;
-	justify-content: center;
+	flex-direction: column;
+	align-items: center;
 	gap: 0.25rem;
 }
 
-.gtl-score-num {
+.gtl-score-points {
 	font-family: var(--font-instrument-serif, serif);
 	font-size: 4rem;
 	font-weight: 400;
@@ -209,14 +201,36 @@ function rankSuffix(n: number): string {
 	line-height: 1;
 }
 
-.gtl-score-sep {
+.gtl-score-pts-label {
+	font-family: var(--font-jetbrains-mono, monospace);
+	font-size: 1.25rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	color: color-mix(in srgb, #00ceff 60%, transparent);
+	vertical-align: baseline;
+}
+
+.gtl-score-fraction {
+	display: flex;
+	align-items: baseline;
+	gap: 0.2rem;
+}
+
+.gtl-score-num {
+	font-family: var(--font-instrument-serif, serif);
 	font-size: 2rem;
+	font-weight: 400;
+	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
+}
+
+.gtl-score-sep {
+	font-size: 1.5rem;
 	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
 }
 
 .gtl-score-denom {
 	font-family: var(--font-instrument-serif, serif);
-	font-size: 2.5rem;
+	font-size: 2rem;
 	font-weight: 400;
 	color: var(--editorial-ink-soft, oklch(0.36 0.015 60));
 }

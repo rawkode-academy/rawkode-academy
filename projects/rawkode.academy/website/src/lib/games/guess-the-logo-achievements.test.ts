@@ -12,19 +12,14 @@ function makeRound(name: string, cncfStatus: Logo["cncfStatus"]): Round {
 	};
 }
 
-/** Build a 10-round set using a mix of statuses */
+/** Build a 5-round set using a mix of statuses */
 function makeMixedRounds(): Round[] {
 	return [
 		makeRound("Sandbox-1", "sandbox"),
-		makeRound("Sandbox-2", "sandbox"),
 		makeRound("Incubating-1", "incubating"),
-		makeRound("Incubating-2", "incubating"),
 		makeRound("Graduated-1", "graduated"),
-		makeRound("Graduated-2", "graduated"),
 		makeRound("NonCncf-1", null),
-		makeRound("NonCncf-2", null),
 		makeRound("Archived-1", "archived"),
-		makeRound("Other-1", "sandbox"),
 	];
 }
 
@@ -66,7 +61,7 @@ describe("ACHIEVEMENTS", () => {
 // --- perfect-run ---
 
 describe("perfect-run", () => {
-	it("earned when all 10 correct", () => {
+	it("earned when all 5 correct", () => {
 		const rounds = makeMixedRounds();
 		const answers = rounds.map((r) => r.answer);
 		expect(evaluateAchievements(rounds, answers)).toContain("perfect-run");
@@ -86,9 +81,9 @@ describe("perfect-run", () => {
 		expect(evaluateAchievements(rounds, answers)).not.toContain("perfect-run");
 	});
 
-	it("not earned when fewer than 10 rounds even if all correct", () => {
-		// perfect-run requires exactly 10/10
-		const rounds = makeMixedRounds().slice(0, 5);
+	it("not earned when fewer than 5 rounds even if all correct", () => {
+		// perfect-run requires exactly 5/5
+		const rounds = makeMixedRounds().slice(0, 3);
 		const answers = rounds.map((r) => r.answer);
 		expect(evaluateAchievements(rounds, answers)).not.toContain("perfect-run");
 	});
@@ -97,15 +92,13 @@ describe("perfect-run", () => {
 // --- halfway-there ---
 
 describe("halfway-there", () => {
-	it("earned with exactly 5 correct", () => {
+	it("earned with exactly 5/5 correct", () => {
 		const rounds = makeMixedRounds();
-		const answers: (string | null)[] = rounds.map((r, i) =>
-			i < 5 ? r.answer : null,
-		);
+		const answers = rounds.map((r) => r.answer);
 		expect(evaluateAchievements(rounds, answers)).toContain("halfway-there");
 	});
 
-	it("earned with 10/10 correct", () => {
+	it("earned with 5/5 correct (all rounds)", () => {
 		const rounds = makeMixedRounds();
 		const answers = rounds.map((r) => r.answer);
 		expect(evaluateAchievements(rounds, answers)).toContain("halfway-there");
@@ -147,15 +140,10 @@ describe("sandbox-surfer", () => {
 	it("not earned when no sandbox logos in run", () => {
 		const rounds: Round[] = [
 			makeRound("Grad-1", "graduated"),
-			makeRound("Grad-2", "graduated"),
 			makeRound("Inc-1", "incubating"),
-			makeRound("Inc-2", "incubating"),
 			makeRound("NonCncf-1", null),
 			makeRound("NonCncf-2", null),
 			makeRound("NonCncf-3", null),
-			makeRound("NonCncf-4", null),
-			makeRound("NonCncf-5", null),
-			makeRound("NonCncf-6", null),
 		];
 		const answers = rounds.map((r) => r.answer);
 		expect(evaluateAchievements(rounds, answers)).not.toContain("sandbox-surfer");
@@ -174,13 +162,13 @@ describe("incubating-insider", () => {
 	it("not earned when one incubating logo is answered wrong", () => {
 		const rounds = makeMixedRounds();
 		const answers: (string | null)[] = rounds.map((r) => r.answer);
-		// index 2 is Incubating-1
-		answers[2] = "wrong";
+		// index 1 is Incubating-1
+		answers[1] = "wrong";
 		expect(evaluateAchievements(rounds, answers)).not.toContain("incubating-insider");
 	});
 
 	it("not earned when no incubating logos in run", () => {
-		const rounds: Round[] = Array.from({ length: 10 }, (_, i) =>
+		const rounds: Round[] = Array.from({ length: 5 }, (_, i) =>
 			makeRound(`Sandbox-${i}`, "sandbox"),
 		);
 		const answers = rounds.map((r) => r.answer);
@@ -200,13 +188,13 @@ describe("graduated-genius", () => {
 	it("not earned when one graduated logo is a timeout", () => {
 		const rounds = makeMixedRounds();
 		const answers: (string | null)[] = rounds.map((r) => r.answer);
-		// index 4 is Graduated-1
-		answers[4] = null;
+		// index 2 is Graduated-1
+		answers[2] = null;
 		expect(evaluateAchievements(rounds, answers)).not.toContain("graduated-genius");
 	});
 
 	it("not earned when no graduated logos in run", () => {
-		const rounds: Round[] = Array.from({ length: 10 }, (_, i) =>
+		const rounds: Round[] = Array.from({ length: 5 }, (_, i) =>
 			makeRound(`Inc-${i}`, "incubating"),
 		);
 		const answers = rounds.map((r) => r.answer);
@@ -226,13 +214,13 @@ describe("non-cncf-hero", () => {
 	it("not earned when one non-CNCF logo is wrong", () => {
 		const rounds = makeMixedRounds();
 		const answers: (string | null)[] = rounds.map((r) => r.answer);
-		// index 6 is NonCncf-1
-		answers[6] = "wrong";
+		// index 3 is NonCncf-1
+		answers[3] = "wrong";
 		expect(evaluateAchievements(rounds, answers)).not.toContain("non-cncf-hero");
 	});
 
 	it("not earned when no non-CNCF logos in run", () => {
-		const rounds: Round[] = Array.from({ length: 10 }, (_, i) =>
+		const rounds: Round[] = Array.from({ length: 5 }, (_, i) =>
 			makeRound(`Sandbox-${i}`, "sandbox"),
 		);
 		const answers = rounds.map((r) => r.answer);
@@ -242,8 +230,8 @@ describe("non-cncf-hero", () => {
 	it("not earned when one non-CNCF logo is a timeout", () => {
 		const rounds = makeMixedRounds();
 		const answers: (string | null)[] = rounds.map((r) => r.answer);
-		// index 7 is NonCncf-2
-		answers[7] = null;
+		// index 3 is NonCncf-1
+		answers[3] = null;
 		expect(evaluateAchievements(rounds, answers)).not.toContain("non-cncf-hero");
 	});
 });
@@ -261,14 +249,9 @@ describe("evaluateAchievements edge cases", () => {
 		const rounds: Round[] = [
 			makeRound("Sandbox-1", "sandbox"),
 			makeRound("NonCncf-1", null),
-			makeRound("NonCncf-2", null),
 			makeRound("Incubating-1", "incubating"),
 			makeRound("Incubating-2", "incubating"),
 			makeRound("Incubating-3", "incubating"),
-			makeRound("Incubating-4", "incubating"),
-			makeRound("Incubating-5", "incubating"),
-			makeRound("Incubating-6", "incubating"),
-			makeRound("Incubating-7", "incubating"),
 		];
 		const answers = rounds.map((r) => r.answer);
 		const earned = evaluateAchievements(rounds, answers);
