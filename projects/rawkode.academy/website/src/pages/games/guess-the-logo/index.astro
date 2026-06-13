@@ -1,0 +1,141 @@
+---
+import PageWrapper from "@/wrappers/page.astro";
+import { DISABLE_GAME_AUTH } from "astro:env/server";
+import { getCollection } from "astro:content";
+import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { utcDateString, buildDailyRounds, type CncfStatus } from "@/lib/games/guess-the-logo";
+
+const disableAuth = DISABLE_GAME_AUTH === "true";
+const user = Astro.locals.user;
+const canPlay = Boolean(user) || disableAuth;
+
+// Only build the puzzle for requests that can actually play — a signed-out
+// visitor just gets the sign-in CTA, so skip the content load + round generation.
+let date = "";
+let roundsJson = "[]";
+if (canPlay) {
+	const entries = await getCollection("technologies");
+	const logos = entries
+		.map((entry) => {
+			const iconUrl = resolveTechnologyIconUrl(entry.id, entry.data.logos);
+			if (!iconUrl) return null;
+			return {
+				name: entry.data.name,
+				iconUrl,
+				cncfStatus: (entry.data.cncf?.status ?? null) as CncfStatus,
+			};
+		})
+		.filter((logo): logo is NonNullable<typeof logo> => logo !== null);
+
+	date = utcDateString(new Date());
+	// Escape `<` so a technology name containing `</script>` can't break out of
+	// the JSON <script> tag below (JSON-in-HTML embedding mitigation).
+	roundsJson = JSON.stringify(buildDailyRounds(logos, date)).replace(
+		/</g,
+		"\\u003c",
+	);
+}
+---
+
+<PageWrapper
+	title="Guess the Logo"
+	description="A daily challenge — identify 10 technology logos through a retro CRT scan-line effect. One attempt per day, shared with every player worldwide."
+>
+	{!canPlay ? (
+		<div class="sign-in-cta">
+			<div class="sign-in-card">
+				<h1>Guess the Logo</h1>
+				<p>Sign in to play today's daily challenge and compete on the leaderboard.</p>
+				<a href="/api/auth/sign-in?returnTo=/games/guess-the-logo" class="sign-in-btn">
+					Sign in to play
+				</a>
+			</div>
+		</div>
+	) : (
+		<div class="game-wrapper bg-[var(--surface-base)]">
+			<div
+				id="gtl-root"
+				data-disable-auth={disableAuth ? "true" : "false"}
+				data-player-name={user?.name ?? ""}
+				data-date={date}
+			></div>
+			<script type="application/json" id="gtl-rounds" set:html={roundsJson} />
+		</div>
+	)}
+</PageWrapper>
+
+<script>
+	import { createApp } from "vue";
+	import GuessTheLogo from "@/components/games/guess-the-logo/GuessTheLogo.vue";
+
+	const root = document.getElementById("gtl-root");
+	if (root) {
+		const roundsEl = document.getElementById("gtl-rounds");
+		const rounds = roundsEl ? JSON.parse(roundsEl.textContent ?? "[]") : [];
+		const date = root.dataset.date ?? "";
+		const playerName = root.dataset.playerName || null;
+		const disableAuth = root.dataset.disableAuth === "true";
+
+		const app = createApp(GuessTheLogo, { rounds, date, playerName, disableAuth });
+		app.mount("#gtl-root");
+	}
+</script>
+
+<style>
+	.sign-in-cta {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: calc(100vh - 200px);
+		padding: 2rem;
+	}
+
+	.sign-in-card {
+		text-align: center;
+		max-width: 480px;
+		padding: 3rem 2rem;
+		border: 1px solid var(--editorial-hairline);
+		border-radius: var(--radius-md);
+		background: var(--surface-card);
+	}
+
+	.sign-in-card h1 {
+		margin-bottom: 1rem;
+	}
+
+	.sign-in-card p {
+		color: var(--editorial-ink-soft);
+		margin-bottom: 2rem;
+	}
+
+	.sign-in-btn {
+		display: inline-block;
+		padding: 0.625rem 1.5rem;
+		background: var(--editorial-ink);
+		color: var(--editorial-paper);
+		font-family: var(--font-jetbrains-mono);
+		font-size: 0.875rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		text-decoration: none;
+		border-radius: var(--radius-sm);
+		transition: opacity var(--duration-fast) var(--ease-standard);
+	}
+
+	.sign-in-btn:hover {
+		opacity: 0.85;
+	}
+
+	.game-wrapper {
+		width: 100%;
+		min-height: calc(100vh - 200px);
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	#gtl-root {
+		width: 100%;
+		height: 100%;
+		min-height: calc(100vh - 200px);
+	}
+</style>

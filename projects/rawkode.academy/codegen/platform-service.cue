@@ -167,7 +167,7 @@ import (
 	let _t = tasks
 	let _wranglerWithNode24 = "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c env CLOUDFLARE_API_TOKEN=\"$CLOUDFLARE_API_TOKEN\" CLOUDFLARE_ACCOUNT_ID=\"$CLOUDFLARE_ACCOUNT_ID\" bun x wrangler"
 	let _ciDeployCommands = [
-		if _hasMigrations {_wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"},
+		if _hasMigrations {_wranglerWithNode24 + " d1 migrations apply DB --remote --config " + _migrationsConfig},
 		if includeReadModel {_wranglerWithNode24 + " deploy --config ./read-model/wrangler.jsonc"},
 		if includeWriteModel {_wranglerWithNode24 + " deploy --config ./write-model/wrangler.jsonc"},
 		if includeHttp {_wranglerWithNode24 + " deploy --config ./http/wrangler.jsonc"},
@@ -198,10 +198,21 @@ import (
 		}
 	}
 
-	// A service owns migrations when it has a data-model, a read-model, and a
-	// "DB" D1 binding (migrations_dir is auto-injected for DB on the read-model).
+	// A service owns migrations when it has a data-model, a "DB" D1 binding, and
+	// at least one deployable worker (read-model or http) to apply them through.
+	// migrations_dir is auto-injected for the DB binding on whichever worker owns
+	// it, so http-only services (no read-model) apply migrations via the http
+	// worker — CI deploys then never need a manual `wrangler d1 migrations apply`.
 	_dbBindings: [for db in _bindings.d1Databases if db.binding == "DB" {db}]
-	_hasMigrations: includeDataModel && includeReadModel && len(_dbBindings) > 0
+	_hasMigrations: includeDataModel && len(_dbBindings) > 0 && (includeReadModel || includeHttp)
+
+	// The worker config that owns the DB binding (and thus runs migrations): the
+	// http worker when there is no read-model, otherwise the read-model.
+	_migrationsConfig: string | *"./read-model/wrangler.jsonc"
+	if !includeReadModel && includeHttp {
+		_migrationsConfig: "./http/wrangler.jsonc"
+	}
+	_migrationsConfigInput: strings.TrimPrefix(_migrationsConfig, "./")
 
 	// Auto-generated deploy tasks based on enabled features. Services that own a
 	// D1 schema also get a `migrate` task, ordered before deploy in the pipeline.
@@ -225,8 +236,8 @@ import (
 				hermetic: false
 				dir: from: "caller"
 				command: "sh"
-				args: ["-lc", _wranglerWithNode24 + " d1 migrations apply DB --remote --config ./read-model/wrangler.jsonc"]
-				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", "read-model/wrangler.jsonc"]])
+				args: ["-lc", _wranglerWithNode24 + " d1 migrations apply DB --remote --config " + _migrationsConfig]
+				inputs: list.Concat([_serviceDefinitionInputs, ["data-model/**", _migrationsConfigInput]])
 			}
 		}
 
