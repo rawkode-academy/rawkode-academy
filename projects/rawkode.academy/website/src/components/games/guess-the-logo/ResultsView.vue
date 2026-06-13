@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { actions } from "astro:actions";
 import type { LeaderboardEntry } from "@/lib/games/guess-the-logo-api";
 
@@ -49,6 +49,22 @@ async function subscribeNewsletter(): Promise<void> {
 		newsletterState.value = "error";
 	}
 }
+
+// Reflect an existing subscription so we don't show "Notify me" to someone who
+// already opted in. Best-effort; on failure the CTA stays available.
+onMounted(async () => {
+	if (!props.isSignedIn) return;
+	try {
+		const res = await fetch("/api/subscriptions/check?audienceId=cnicon");
+		if (!res.ok) return;
+		const data = (await res.json()) as { isSubscribed?: boolean };
+		if (data.isSubscribed) {
+			newsletterState.value = "done";
+		}
+	} catch {
+		// non-fatal
+	}
+});
 
 function buildShareText(): string {
 	const tail =
