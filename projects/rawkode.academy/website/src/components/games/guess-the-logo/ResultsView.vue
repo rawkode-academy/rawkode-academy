@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { actions } from "astro:actions";
 import type { LeaderboardEntry } from "@/lib/games/guess-the-logo-api";
 
@@ -8,6 +8,30 @@ interface AchievementDef {
 	name: string;
 	description: string;
 	icon: string;
+}
+
+// Mirrors the PlayerStats contract from the achievements service.
+interface PlayerStats {
+	weeksPlayed: number;
+	lastWeekKey: string;
+	lastWeekIndex: number;
+	currentStreak: number;
+	longestStreak: number;
+	lifetimeCorrect: number;
+	perCategoryCorrect: {
+		sandbox: number;
+		incubating: number;
+		graduated: number;
+		archived: number;
+		nonCncf: number;
+	};
+	bestScore: number;
+	perfectWeeks: number;
+	correctLogos: string[];
+	wins: number;
+	podiums: number;
+	bestRank: number;
+	lastCreditedWeek: string;
 }
 
 const props = defineProps<{
@@ -24,6 +48,8 @@ const props = defineProps<{
 	weekLabel: string;    // e.g. "Week of Jun 9"
 	date: string;         // YYYY-MM-DD (kept for leaderboard date display)
 	isSignedIn: boolean;  // newsletter opt-in needs an authenticated learner
+	stats: PlayerStats | null;
+	poolSize: number;
 }>();
 
 const copied = ref(false);
@@ -121,6 +147,121 @@ function rankSuffix(n: number): string {
 	if (last === 3) return "rd";
 	return "th";
 }
+
+// ---------------------------------------------------------------------------
+// Achievement progress hints
+// Returns a short string like "47 / 100" or "3 / 4 weeks" for locked
+// achievements where progress is derivable from stats. Returns null when
+// there is nothing meaningful to show (e.g. stats not available, or the
+// achievement has no numeric threshold).
+// ---------------------------------------------------------------------------
+function progressHint(id: string): string | null {
+	const s = props.stats;
+	if (!s) return null;
+
+	switch (id) {
+		// Streak / habit
+		case "first-timer":
+			return s.weeksPlayed >= 1 ? null : "play your first week";
+		case "committed":
+			return `${s.weeksPlayed} / 10 weeks`;
+		case "veteran":
+			return `${s.weeksPlayed} / 50 weeks`;
+		case "regular":
+			return `${Math.max(s.currentStreak, s.longestStreak)} / 4 week streak`;
+		case "devotee":
+			return `${s.longestStreak} / 12 week streak`;
+		case "year-round":
+			return `${s.longestStreak} / 52 week streak`;
+
+		// Lifetime mastery
+		case "century":
+			return `${s.lifetimeCorrect} / 100 correct`;
+		case "polyglot":
+			return `${s.lifetimeCorrect} / 500 correct`;
+		case "sandbox-sensei":
+			return `${s.perCategoryCorrect.sandbox} / 25 sandbox`;
+		case "incubator":
+			return `${s.perCategoryCorrect.incubating} / 25 incubating`;
+		case "honor-roll":
+			return `${s.perCategoryCorrect.graduated} / 25 graduated`;
+		case "off-the-map":
+			return `${s.perCategoryCorrect.nonCncf} / 25 non-CNCF`;
+
+		// Competition
+		case "podium":
+			return s.podiums >= 1 ? null : "finish top 3 in a week";
+		case "champion":
+			return s.wins >= 1 ? null : "finish #1 in a week";
+		case "hat-trick":
+			return `${s.wins} / 3 wins`;
+		case "high-roller":
+			return `${s.bestScore.toLocaleString()} / 5,000 pts best`;
+
+		// Completion (pool-relative)
+		case "surveyor": {
+			const pct = props.poolSize > 0
+				? Math.round((s.correctLogos.length / props.poolSize) * 100)
+				: 0;
+			return `${pct}% of pool (need 25%)`;
+		}
+		case "cartographer": {
+			const pct = props.poolSize > 0
+				? Math.round((s.correctLogos.length / props.poolSize) * 100)
+				: 0;
+			return `${pct}% of pool (need 50%)`;
+		}
+		case "completionist": {
+			const pct = props.poolSize > 0
+				? Math.round((s.correctLogos.length / props.poolSize) * 100)
+				: 0;
+			return `${pct}% of pool`;
+		}
+
+		// Per-week feats — no persistent progress to show; they're earned or not
+		case "flawless":
+		case "speed-run":
+			return null;
+
+		default:
+			return null;
+	}
+}
+
+// Group achievements into named sections for a more readable layout.
+const achievementGroups = computed(() => [
+	{
+		label: "Habit",
+		ids: new Set(["first-timer", "committed", "veteran", "regular", "devotee", "year-round"]),
+	},
+	{
+		label: "Mastery",
+		ids: new Set(["century", "polyglot", "sandbox-sensei", "incubator", "honor-roll", "off-the-map"]),
+	},
+	{
+		label: "Competition",
+		ids: new Set(["podium", "champion", "hat-trick", "high-roller"]),
+	},
+	{
+		label: "Completion",
+		ids: new Set(["surveyor", "cartographer", "completionist"]),
+	},
+	{
+		label: "Weekly Feats",
+		ids: new Set(["flawless", "speed-run"]),
+	},
+]);
+
+// Achievements that don't belong to any named group (catches legacy or new ids).
+const ungrouped = computed(() =>
+	props.achievements.filter(
+		(a) => !achievementGroups.value.some((g) => g.ids.has(a.id)),
+	),
+);
+
+function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
+	return props.achievements.filter((a) => groupIds.has(a.id));
+}
 </script>
 
 <template>
@@ -187,21 +328,76 @@ function rankSuffix(n: number): string {
 		<!-- Achievements -->
 		<section class="gtl-section" aria-label="Achievements">
 			<h3 class="gtl-section-title">Achievements</h3>
-			<div class="gtl-achievements-grid">
-				<div
-					v-for="a in achievements"
-					:key="a.id"
-					class="gtl-achievement-card"
-					:class="{ 'gtl-achievement-card--earned': isEarned(a.id), 'gtl-achievement-card--locked': !isEarned(a.id) }"
-				>
-					<span class="gtl-achievement-icon">{{ isEarned(a.id) ? a.icon : '🔒' }}</span>
-					<div class="gtl-achievement-info">
-						<span class="gtl-achievement-name">{{ a.name }}</span>
-						<span v-if="isNew(a.id)" class="gtl-achievement-new-badge">NEW</span>
-						<p class="gtl-achievement-desc">{{ a.description }}</p>
+
+			<!-- Newly unlocked callout (shown only when the player just earned something) -->
+			<div v-if="newlyUnlocked.length > 0" class="gtl-achievements-unlocked-banner" role="status">
+				<span class="gtl-achievements-unlocked-icon">🎉</span>
+				<span class="gtl-achievements-unlocked-text">
+					You unlocked {{ newlyUnlocked.length === 1 ? "a new achievement" : `${newlyUnlocked.length} new achievements` }} this week.
+				</span>
+			</div>
+
+			<!-- Named groups -->
+			<template v-for="group in achievementGroups" :key="group.label">
+				<template v-if="achievementsForGroup(group.ids).length > 0">
+					<p class="gtl-achievement-group-label">{{ group.label }}</p>
+					<div class="gtl-achievements-grid">
+						<div
+							v-for="a in achievementsForGroup(group.ids)"
+							:key="a.id"
+							class="gtl-achievement-card"
+							:class="{
+								'gtl-achievement-card--earned': isEarned(a.id),
+								'gtl-achievement-card--new': isNew(a.id),
+								'gtl-achievement-card--locked': !isEarned(a.id),
+							}"
+						>
+							<span class="gtl-achievement-icon">{{ isEarned(a.id) ? a.icon : '🔒' }}</span>
+							<div class="gtl-achievement-info">
+								<div class="gtl-achievement-name-row">
+									<span class="gtl-achievement-name">{{ a.name }}</span>
+									<span v-if="isNew(a.id)" class="gtl-achievement-new-badge">NEW</span>
+								</div>
+								<p class="gtl-achievement-desc">{{ a.description }}</p>
+								<span
+									v-if="!isEarned(a.id) && progressHint(a.id)"
+									class="gtl-achievement-progress"
+								>{{ progressHint(a.id) }}</span>
+							</div>
+						</div>
+					</div>
+				</template>
+			</template>
+
+			<!-- Any achievement not assigned to a group (e.g. legacy or new ids) -->
+			<template v-if="ungrouped.length > 0">
+				<p class="gtl-achievement-group-label">Other</p>
+				<div class="gtl-achievements-grid">
+					<div
+						v-for="a in ungrouped"
+						:key="a.id"
+						class="gtl-achievement-card"
+						:class="{
+							'gtl-achievement-card--earned': isEarned(a.id),
+							'gtl-achievement-card--new': isNew(a.id),
+							'gtl-achievement-card--locked': !isEarned(a.id),
+						}"
+					>
+						<span class="gtl-achievement-icon">{{ isEarned(a.id) ? a.icon : '🔒' }}</span>
+						<div class="gtl-achievement-info">
+							<div class="gtl-achievement-name-row">
+								<span class="gtl-achievement-name">{{ a.name }}</span>
+								<span v-if="isNew(a.id)" class="gtl-achievement-new-badge">NEW</span>
+							</div>
+							<p class="gtl-achievement-desc">{{ a.description }}</p>
+							<span
+								v-if="!isEarned(a.id) && progressHint(a.id)"
+								class="gtl-achievement-progress"
+							>{{ progressHint(a.id) }}</span>
+						</div>
 					</div>
 				</div>
-			</div>
+			</template>
 		</section>
 
 		<!-- Leaderboard -->
@@ -460,6 +656,39 @@ function rankSuffix(n: number): string {
 	margin: 0;
 }
 
+/* Newly-unlocked banner */
+.gtl-achievements-unlocked-banner {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.75rem 1rem;
+	border-radius: 0.5rem;
+	border: 1px solid color-mix(in srgb, #5f5ed7 40%, transparent);
+	background: color-mix(in srgb, #5f5ed7 8%, var(--surface-card, oklch(0.97 0.008 85)));
+}
+
+.gtl-achievements-unlocked-icon {
+	font-size: 1.1rem;
+	flex-shrink: 0;
+}
+
+.gtl-achievements-unlocked-text {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--editorial-ink, oklch(0.18 0.02 60));
+}
+
+/* Group label */
+.gtl-achievement-group-label {
+	font-family: var(--font-jetbrains-mono, monospace);
+	font-size: 0.68rem;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	margin: 0.5rem 0 0;
+}
+
 .gtl-achievements-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
@@ -481,6 +710,12 @@ function rankSuffix(n: number): string {
 	background: color-mix(in srgb, #5f5ed7 6%, var(--surface-card, oklch(0.97 0.008 85)));
 }
 
+/* Newly-unlocked card gets a cyan accent to distinguish from previously earned */
+.gtl-achievement-card--new {
+	border-color: color-mix(in srgb, #00ceff 55%, transparent);
+	background: color-mix(in srgb, #00ceff 8%, var(--surface-card, oklch(0.97 0.008 85)));
+}
+
 .gtl-achievement-card--locked {
 	opacity: 0.55;
 }
@@ -496,6 +731,13 @@ function rankSuffix(n: number): string {
 	flex-direction: column;
 	gap: 0.25rem;
 	min-width: 0;
+}
+
+.gtl-achievement-name-row {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.35rem;
 }
 
 .gtl-achievement-name {
@@ -523,6 +765,15 @@ function rankSuffix(n: number): string {
 	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
 	line-height: 1.4;
 	margin: 0;
+}
+
+/* Progress hint shown under the description on locked cards */
+.gtl-achievement-progress {
+	font-family: var(--font-jetbrains-mono, monospace);
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	color: color-mix(in srgb, #5f5ed7 70%, var(--editorial-ink-mute, oklch(0.58 0.012 60)));
 }
 
 .gtl-leaderboard {

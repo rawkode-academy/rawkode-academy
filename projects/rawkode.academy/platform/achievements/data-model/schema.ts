@@ -14,3 +14,18 @@ export const playerAchievementsTable = sqliteTable(
 		}),
 	}),
 );
+
+export const playerStatsTable = sqliteTable(
+	"player_stats",
+	{
+		namespace: text("namespace").notNull(),
+		personId: text("person_id").notNull(),
+		stats: text("stats").notNull(),
+		updatedAt: integer("updated_at").notNull(),
+	},
+	(table) => ({
+		pk: primaryKey({
+			columns: [table.namespace, table.personId],
+		}),
+	}),
+);

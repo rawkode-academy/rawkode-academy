@@ -13,6 +13,7 @@ const canPlay = Boolean(user) || disableAuth;
 // visitor just gets the sign-in CTA, so skip the content load + round generation.
 let weekStart = "";
 let roundsJson = "[]";
+let poolSize = 0;
 if (canPlay) {
 	const entries = await getCollection("technologies");
 	const logos = entries
@@ -27,6 +28,7 @@ if (canPlay) {
 		})
 		.filter((logo): logo is NonNullable<typeof logo> => logo !== null);
 
+	poolSize = logos.length;
 	const now = new Date();
 	weekStart = weekKey(now);
 	const rounds = buildWeeklyRounds(logos, now);
@@ -59,6 +61,7 @@ if (canPlay) {
 				data-disable-auth={disableAuth ? "true" : "false"}
 				data-player-name={user?.name ?? ""}
 				data-date={weekStart}
+				data-pool-size={String(poolSize)}
 			></div>
 			<script type="application/json" id="gtl-rounds" set:html={roundsJson} />
 		</div>
@@ -76,8 +79,9 @@ if (canPlay) {
 		const date = root.dataset.date ?? "";
 		const playerName = root.dataset.playerName || null;
 		const disableAuth = root.dataset.disableAuth === "true";
+		const poolSize = Number.parseInt(root.dataset.poolSize ?? "0", 10) || 0;
 
-		const app = createApp(GuessTheLogo, { rounds, date, playerName, disableAuth });
+		const app = createApp(GuessTheLogo, { rounds, date, playerName, disableAuth, poolSize });
 		app.mount("#gtl-root");
 	}
 </script>

@@ -8,6 +8,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { DateTimeResolver } from "graphql-scalars";
 import type { GraphQLSchema } from "graphql";
 import * as s from "../data-model/schema";
+import type { PlayerStats } from "../write-model/main";
 
 export interface PothosTypes {
 	DrizzleSchema: typeof s;
@@ -20,6 +21,16 @@ type PlayerAchievementRow = {
 	achievementId: string;
 	unlockedAt: Date;
 };
+
+type PerCategoryCorrect = {
+	sandbox: number;
+	incubating: number;
+	graduated: number;
+	archived: number;
+	nonCncf: number;
+};
+
+type PlayerStatsRow = PlayerStats & { correctCount: number };
 
 const createBuilder = (env: { DB: D1Database }) => {
 	const db = drizzle(env.DB);
@@ -40,6 +51,42 @@ const createBuilder = (env: { DB: D1Database }) => {
 					type: "DateTime",
 					resolve: (row) => row.unlockedAt,
 				}),
+			}),
+		});
+
+	const perCategoryCorrectRef = builder
+		.objectRef<PerCategoryCorrect>("PerCategoryCorrect")
+		.implement({
+			fields: (t) => ({
+				sandbox: t.exposeInt("sandbox"),
+				incubating: t.exposeInt("incubating"),
+				graduated: t.exposeInt("graduated"),
+				archived: t.exposeInt("archived"),
+				nonCncf: t.exposeInt("nonCncf"),
+			}),
+		});
+
+	const playerStatsRef = builder
+		.objectRef<PlayerStatsRow>("PlayerStats")
+		.implement({
+			fields: (t) => ({
+				weeksPlayed: t.exposeInt("weeksPlayed"),
+				lastWeekKey: t.exposeString("lastWeekKey"),
+				lastWeekIndex: t.exposeInt("lastWeekIndex"),
+				currentStreak: t.exposeInt("currentStreak"),
+				longestStreak: t.exposeInt("longestStreak"),
+				lifetimeCorrect: t.exposeInt("lifetimeCorrect"),
+				perCategoryCorrect: t.field({
+					type: perCategoryCorrectRef,
+					resolve: (row) => row.perCategoryCorrect,
+				}),
+				bestScore: t.exposeInt("bestScore"),
+				perfectWeeks: t.exposeInt("perfectWeeks"),
+				correctCount: t.exposeInt("correctCount"),
+				wins: t.exposeInt("wins"),
+				podiums: t.exposeInt("podiums"),
+				bestRank: t.exposeInt("bestRank"),
+				lastCreditedWeek: t.exposeString("lastCreditedWeek"),
 			}),
 		});
 
@@ -67,6 +114,37 @@ const createBuilder = (env: { DB: D1Database }) => {
 						achievementId: row.achievementId,
 						unlockedAt: row.unlockedAt,
 					}));
+				},
+			}),
+
+			playerStats: t.field({
+				type: playerStatsRef,
+				nullable: true,
+				args: {
+					namespace: t.arg({ type: "String", required: true }),
+					personId: t.arg({ type: "String", required: true }),
+				},
+				resolve: async (_root, args) => {
+					const row = await db
+						.select()
+						.from(s.playerStatsTable)
+						.where(
+							and(
+								eq(s.playerStatsTable.namespace, args.namespace),
+								eq(s.playerStatsTable.personId, args.personId),
+							),
+						)
+						.get();
+
+					if (!row) {
+						return null;
+					}
+
+					const parsed = JSON.parse(row.stats) as PlayerStats;
+					return {
+						...parsed,
+						correctCount: parsed.correctLogos.length,
+					};
 				},
 			}),
 		}),
