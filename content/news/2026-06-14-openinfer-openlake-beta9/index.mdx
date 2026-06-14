@@ -1,0 +1,49 @@
+---
+title: "OpenInfer, OpenLake, and Beta9 ship AI infrastructure releases"
+description: "OpenInfer published its first Rust and CUDA serving release, while OpenLake and Beta9 added storage and managed-pool infrastructure changes."
+publishedAt: 2026-06-14
+authors:
+  - rawkode
+technologies:
+  - ai-infrastructure
+  - platform-engineering
+  - storage
+---
+
+Three fresh releases landed in the last 24 hours across LLM serving, GPU-oriented storage, and managed compute pools.
+
+## OpenInfer 0.1.0 publishes a Rust and CUDA LLM serving engine
+
+OpenInfer published v0.1.0 on June 13 as the first source release of its Rust and CUDA LLM inference engine. The release exposes an OpenAI-compatible `/v1/completions` API and focuses the most mature path on Qwen3-4B and Qwen3-8B serving.
+
+For that Qwen3 path, the release lists BF16 weight loading, full-attention prefill and decode, paged KV cache, prefix cache, continuous batching, CUDA Graph decode, sampling, LoRA routing, and golden-logit accuracy gates. Other model families, including Qwen3.5-4B, DeepSeek-V4, DeepSeek-V2-Lite, and Kimi-K2, are present behind feature gates, with the release warning that the larger MoE lines still need more production polish.
+
+The architecture is explicitly componentized: vLLM's Rust frontend handles protocol and streaming, Dynamo logic handles KV block management, Pegaflow handles KV offload, and model-specific engines own scheduling, state layout, and kernel DAGs. For inference teams, the useful part is not another universal server claim; it is a source-level checkpoint for a Rust-native serving path where cache, scheduler, offload, and kernel boundaries are visible.
+
+**Source:** [OpenInfer v0.1.0 release](https://github.com/openinfer-project/openinfer/releases/tag/v0.1.0) - June 13, 2026
+
+---
+
+## OpenLake 0.3.0 adds RDMA transport and cluster liveness probes
+
+OpenLake released v0.3.0 on June 14 with changes aimed at the data path and operator visibility for its LLM inference and GPU training storage engine. The release includes RoCEv2 RC QP transport, one-sided RDMA verbs, and a libibverbs HCA probe, with the [underlying PR](https://github.com/openlake-project/openlake/pull/111) moving bulk erasure-coded shard egress onto an RC QP fabric.
+
+The release also adds a [liveness mode](https://github.com/openlake-project/openlake/pull/101) for `openlake cluster topology`: the new `--probe` path sends SigV4-signed requests to an authenticated S3-plane `/openlake/admin/v1/ping` endpoint, applies a probe timeout, bounds concurrency, and adds state plus alive-count output. Other v0.3.0 changes include Helm compatibility for host-networked pods and a version subcommand in the CLI.
+
+This matters because the release shifts some OpenLake work from local control-plane scaffolding toward the network and storage paths that decide whether multi-node GPU-serving storage fails visibly or silently.
+
+**Source:** [OpenLake v0.3.0 release](https://github.com/openlake-project/openlake/releases/tag/v0.3.0) - June 14, 2026
+
+---
+
+## Beta9 adds Hetzner private-pool capacity plumbing
+
+Beta9 published [gateway 0.1.651](https://github.com/beam-cloud/beta9/releases/tag/gateway-0.1.651) and [worker 0.1.634](https://github.com/beam-cloud/beta9/releases/tag/worker-0.1.634) on June 14 for its open-source serverless inference, sandbox, and background-job platform. Both releases point to the same [infrastructure PR](https://github.com/beam-cloud/beta9/pull/1687) adding a Hetzner provider for CPU-only managed private pools.
+
+The change introduces node-based capacity across pool configs, requests, offers, reservations, events, billing, OpenAPI, protobuf, SDK, and CLI surfaces, while keeping existing GPU-based pools on the previous path. It also adds provider and region filters to the solver, private-pool fallback to regular workers when pool settings allow it, a `pool offers` CLI command, agent systemd restart backoff, and telemetry redaction for bearer tokens and common API-key phrases.
+
+For platform teams running mixed private pools, the main change is that CPU-only capacity no longer has to masquerade as GPU capacity in the API and scheduling path.
+
+**Source:** [Beta9 gateway 0.1.651 release](https://github.com/beam-cloud/beta9/releases/tag/gateway-0.1.651) - June 14, 2026
+
+---
