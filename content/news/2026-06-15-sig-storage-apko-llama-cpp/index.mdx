@@ -1,0 +1,48 @@
+---
+title: "Kubernetes SIG Storage, apko, and llama.cpp ship storage and runtime updates"
+description: "Kubernetes published SIG Storage roadmap details, while apko and llama.cpp shipped concrete packaging and inference fixes."
+publishedAt: 2026-06-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - storage
+  - security
+  - ai-infrastructure
+---
+
+Today's digest covers Kubernetes storage roadmap detail, apko image-build correctness fixes, and a narrow llama.cpp update for Cohere2MoE model support.
+
+## Kubernetes SIG Storage points at COSI, CBT, and volume-health work
+
+Kubernetes published a SIG Storage spotlight on June 15 with roadmap detail from Xing Yang, a SIG Storage co-chair. The post is not a feature release, but it gives platform teams a concrete update on where Kubernetes storage APIs are moving after the v1.36 cycle.
+
+The Data Protection WG work highlighted in the post includes VolumeGroupSnapshot moving to GA in Kubernetes v1.36 and CSI Changed Block Tracking moving to beta. It also says the Container Object Storage Interface is moving to `v1alpha2`, with a future beta promotion planned, and calls out Volume Health work aimed at moving beyond non-persistent events toward remediation-oriented status. The same post asks for feedback on Mutable PV Affinity, introduced as alpha in Kubernetes v1.35, for cases such as shifting volumes between zones or storage classes.
+
+For operators running stateful and AI workloads on Kubernetes, the signal is that storage standardization is moving beyond volume provisioning into backup efficiency, object bucket claims, locality, and health-aware recovery.
+
+**Source:** [Kubernetes](https://kubernetes.io/blog/2026/06/15/sig-storage-spotlight-2026/) - June 15, 2026
+
+---
+
+## apko v1.2.17 fixes solver ordering and image permission bits
+
+Chainguard released apko v1.2.17 on June 15 with fixes that affect image reproducibility and filesystem semantics. The release includes a [solver change](https://github.com/chainguard-dev/apko/pull/2271) so apko follows apk-tools provider comparison ordering, avoiding a case where an older package build with a higher provider priority could outrank a newer build.
+
+The same release [preserves setuid, setgid, and sticky bits](https://github.com/chainguard-dev/apko/pull/2274) declared through `paths` mutations, fixing published layers that silently dropped special permission bits. It also changes [`expandapk` to materialize uncompressed `.dat.tar` cache files atomically](https://github.com/chainguard-dev/apko/pull/2269), so concurrent builds sharing a cache directory do not read a partial package payload.
+
+This is a small release, but the failure modes are operationally concrete: wrong package selection, incorrect layer permissions, and cache races during parallel image builds.
+
+**Source:** [apko](https://github.com/chainguard-dev/apko/releases/tag/v1.2.17) - June 15, 2026
+
+---
+
+## llama.cpp adds Cohere2MoE parsing across June 14 builds
+
+llama.cpp published four builds on June 14, ending with b9637. The sequence added [Cohere2MoE vocabulary handling for TINY_AYA](https://github.com/ggml-org/llama.cpp/releases/tag/b9630), a [dedicated Cohere2MoE chat parser](https://github.com/ggml-org/llama.cpp/releases/tag/b9637), [Jinja `count`, `d`, and `e` filter aliases](https://github.com/ggml-org/llama.cpp/releases/tag/b9632), and a [CLI fix for copying preserved tokens](https://github.com/ggml-org/llama.cpp/releases/tag/b9631).
+
+The most operator-facing change is the dedicated Cohere2MoE parser: the linked PR says the generic autoparser path was not sufficient for that template and points users at `models/templates/Cohere2-MoE.jinja`. Teams packaging llama.cpp-based inference images or local serving binaries for Cohere/North Code-style templates should pick up the newer build before debugging prompt-template behavior downstream.
+
+**Source:** [llama.cpp](https://github.com/ggml-org/llama.cpp/releases/tag/b9637) - June 14, 2026
+
+---
