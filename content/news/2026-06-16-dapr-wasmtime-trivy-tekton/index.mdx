@@ -1,0 +1,62 @@
+---
+title: "Dapr, Wasmtime, Trivy, and Tekton ship runtime and security fixes"
+description: "Dapr repaired workflow reload and timer failure modes while Wasmtime and Trivy shipped security fixes for WASIp1 hosts and OCI artifact downloads."
+publishedAt: 2026-06-16
+authors:
+  - rawkode
+technologies:
+  - dapr
+  - webassembly
+  - security
+  - tekton
+---
+
+Four fresh releases landed in the last 24 hours across workflow runtimes, WebAssembly hosts, supply-chain scanning, and CI/CD controllers.
+
+## Dapr 1.18.1 fixes workflow reload, timer, and concurrency failures
+
+Dapr published [v1.18.1](https://github.com/dapr/dapr/releases/tag/v1.18.1) on June 16 and [v1.16.16](https://github.com/dapr/dapr/releases/tag/v1.16.16) on June 15. The 1.18.1 release fixes leaked workflow event-timer reminders, workflow sidecars that stayed unavailable after a configuration reload, no-op Kubernetes operator resyncs that restarted sidecars, and `ContinueAsNew` child-workflow completions that could leave parents stuck in `RUNNING`.
+
+The same release regenerates the Helm chart `Configuration` CRD so workflow and activity concurrency-limit fields are preserved when Dapr is installed from the chart. The 1.16.16 backport fixes Sentry certificate signing when an issuer key type does not match the CSR signature algorithm, and avoids immutable scheduler StatefulSet storage changes during Helm downgrades from 1.17 or 1.18.
+
+For operators, the practical change is fewer workflow failure modes that required pod restarts, manual Helm overrides, or waiting for leaked reminders to be swept at workflow completion.
+
+**Source:** [Dapr v1.18.1 release](https://github.com/dapr/dapr/releases/tag/v1.18.1) and [Dapr v1.16.16 release](https://github.com/dapr/dapr/releases/tag/v1.16.16) - June 16 and June 15, 2026
+
+---
+
+## Wasmtime patches a WASIp1 fd_renumber host-resource leak
+
+Wasmtime published [v45.0.2](https://github.com/bytecodealliance/wasmtime/releases/tag/v45.0.2), [v44.0.3](https://github.com/bytecodealliance/wasmtime/releases/tag/v44.0.3), [v36.0.11](https://github.com/bytecodealliance/wasmtime/releases/tag/v36.0.11), and [v24.0.10](https://github.com/bytecodealliance/wasmtime/releases/tag/v24.0.10) on June 15. Each patch fixes [GHSA-3p27-qvp9-27qf](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-3p27-qvp9-27qf), a low-severity leak in the native WASIp1 `fd_renumber` implementation.
+
+The advisory says the bug updates Wasmtime's WASIp1 descriptor table without updating the underlying host descriptor table, so a guest can repeatedly call `fd_renumber` and exhaust host resources or file descriptors until the corresponding `Store` is destroyed. Hosts are affected when they load core Wasm modules, expose `fd_renumber`, and allow the guest to acquire a file descriptor such as by opening a file.
+
+There is no workaround listed; runtimes exposing WASIp1 file access should update to a patched line.
+
+**Source:** [Wasmtime security advisory](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-3p27-qvp9-27qf) - June 15, 2026
+
+---
+
+## Trivy 0.71.1 closes path traversal in downloaded OCI artifacts
+
+Aqua released [Trivy v0.71.1](https://github.com/aquasecurity/trivy/releases/tag/v0.71.1) on June 15 with a fix for [GHSA-mcj4-mphf-j9ff](https://github.com/aquasecurity/trivy/security/advisories/GHSA-mcj4-mphf-j9ff), a high-severity path traversal in downloaded OCI artifacts. The advisory says Trivy used the `org.opencontainers.image.title` annotation from an artifact manifest as a destination filename without validation.
+
+The affected paths are overridden OCI artifact sources such as `--db-repository`, `TRIVY_DB_REPOSITORY`, Java DB repositories, checks bundle repositories, and repositories passed to `trivy module install`. Trivy's default Aqua-operated repositories are not affected, but a hostile mirror or copied command pointing at an attacker-controlled artifact could write outside the intended destination as the user running Trivy.
+
+The release validates artifact filenames as local relative paths and also constrains VEX document loading to the repository cache directory. If you cannot upgrade immediately, the advisory says not to fetch Trivy databases, bundles, or modules from untrusted OCI repositories.
+
+**Source:** [Trivy v0.71.1 release](https://github.com/aquasecurity/trivy/releases/tag/v0.71.1) and [Trivy security advisory](https://github.com/aquasecurity/trivy/security/advisories/GHSA-mcj4-mphf-j9ff) - June 15, 2026
+
+---
+
+## Tekton Pipeline backports resolver validation and cross-architecture fixes
+
+Tekton Pipeline published [v1.9.4](https://github.com/tektoncd/pipeline/releases/tag/v1.9.4), [v1.6.3](https://github.com/tektoncd/pipeline/releases/tag/v1.6.3), and [v1.3.5](https://github.com/tektoncd/pipeline/releases/tag/v1.3.5) on June 15. The patch train includes resolver-framework validation so non-Tekton objects and arbitrary data fail resolution instead of being accepted.
+
+The v1.9.4 and v1.6.3 releases also fix entrypoint command lookup when controller and worker nodes run different CPU architectures, where the controller platform could leak into `TEKTON_PLATFORM_COMMANDS` and produce missing-command errors on workers. Both releases bump `google.golang.org/grpc` for CVE-2026-33186, while v1.9.4 adds clearer status and warning events when completed tasks are missing referenced results.
+
+Custom resolver users should read the upgrade notes before rolling forward, because the release notes call out an action-required change for Resolver API use outside the supported Tekton object set.
+
+**Source:** [Tekton Pipeline v1.9.4 release](https://github.com/tektoncd/pipeline/releases/tag/v1.9.4), [v1.6.3 release](https://github.com/tektoncd/pipeline/releases/tag/v1.6.3), and [v1.3.5 release](https://github.com/tektoncd/pipeline/releases/tag/v1.3.5) - June 15, 2026
+
+---
