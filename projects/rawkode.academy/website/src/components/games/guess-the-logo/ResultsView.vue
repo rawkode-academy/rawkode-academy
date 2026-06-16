@@ -50,9 +50,14 @@ const props = defineProps<{
 	isSignedIn: boolean;  // newsletter opt-in needs an authenticated learner
 	stats: PlayerStats | null;
 	poolSize: number;
+	playerName: string | null;
 }>();
 
 const copied = ref(false);
+
+const isPlayerInLeaderboard = computed(() =>
+	props.rank !== null && props.leaderboard.some((e) => e.rank === props.rank),
+);
 
 // Newsletter: notify the player when the weekly logos change. Uses the existing
 // newsletter service (EMAIL_PREFERENCES) via the shared astro:action; one-click
@@ -415,6 +420,15 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 					<span class="gtl-lb-score">{{ entry.score }} pts</span>
 					<span class="gtl-lb-time">{{ formatAchievedAt(entry.achievedAt) }}</span>
 				</li>
+				<template v-if="rank !== null && !isPlayerInLeaderboard">
+					<li class="gtl-leaderboard-gap" aria-hidden="true">···</li>
+					<li class="gtl-leaderboard-entry gtl-leaderboard-entry--self">
+						<span class="gtl-lb-rank">{{ rank }}</span>
+						<span class="gtl-lb-name">{{ playerName ?? "You" }}</span>
+						<span class="gtl-lb-score">{{ score }} pts</span>
+						<span class="gtl-lb-time"></span>
+					</li>
+				</template>
 			</ol>
 		</section>
 	</div>
@@ -793,6 +807,15 @@ function achievementsForGroup(groupIds: Set<string>): AchievementDef[] {
 	border-radius: 0.375rem;
 	border: 1px solid var(--editorial-hairline, oklch(0.18 0.02 60 / 0.12));
 	background: var(--surface-card, oklch(0.97 0.008 85));
+}
+
+.gtl-leaderboard-gap {
+	list-style: none;
+	text-align: center;
+	font-family: var(--font-jetbrains-mono, monospace);
+	font-size: 0.85rem;
+	color: var(--editorial-ink-mute, oklch(0.58 0.012 60));
+	padding: 0.25rem 0;
 }
 
 .gtl-leaderboard-entry--self {

@@ -263,6 +263,7 @@ async function finishGame(finalAnswers: (string | null)[], finalTimes: number[])
 			:is-signed-in="!disableAuth"
 			:stats="playerStats"
 			:pool-size="poolSize"
+			:player-name="playerName"
 		/>
 	</div>
 </template>
