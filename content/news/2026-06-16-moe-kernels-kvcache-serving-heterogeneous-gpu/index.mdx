@@ -1,0 +1,60 @@
+---
+title: "MoE training kernels ship while fresh research targets KV-cache, disaggregated serving, and heterogeneous GPUs"
+description: "NVIDIA shipped fused mixture-of-experts training kernels in Transformer Engine and Megatron Core, alongside new systems research on KV-cache management for coding agents, SLO-aware disaggregated serving, and heterogeneous-GPU training planning."
+publishedAt: 2026-06-16
+authors:
+  - rawkode
+technologies:
+  - ai-infrastructure
+  - hpc
+---
+
+Four fresh items from the last 24 hours, all in AI and HPC infrastructure: new mixture-of-experts training kernels shipping in NVIDIA's stack, plus three systems papers on KV-cache management, disaggregated serving, and heterogeneous-GPU training.
+
+## NVIDIA ships fused MoE training kernels in Transformer Engine and Megatron Core
+
+NVIDIA published an engineering writeup on June 15 describing three CuTe DSL kernels that fuse grouped GEMM, activation, and quantization for mixture-of-experts training.
+
+The kernels fold GLU activations (SwiGLU, GeGLU, sReLU) into GEMM epilogues by repacking weights so input and gate tensors are read together, removing intermediate tensor traffic. They track tokens-per-group in GPU memory to enable sync-free MoE execution under full-iteration CUDA Graphs, and fuse MXFP8 and NVFP4 quantization directly into the GEMM. NVIDIA reports a 1.3x forward-pass and up to 2.1x backward-pass speedup, an 8% end-to-end gain on DeepSeek-V3, and a 93% end-to-end gain on GPT-OSS pre-training. The kernels are exposed through cuDNN Frontend v1.23.0+, Transformer Engine v2.15+, and Megatron Core 26.04-alpha.rc2+.
+
+For teams pre-training MoE models, this is shipping today through named library versions rather than a research preview, though the end-to-end figures are vendor-reported.
+
+**Source:** [NVIDIA Developer Blog](https://developer.nvidia.com/blog/boosting-moe-training-throughput-with-advanced-fusion-kernels/) - June 15, 2026
+
+---
+
+## CacheWise tunes KV-cache management for LLM coding agents
+
+A paper submitted to arXiv on June 15 introduces CacheWise, a set of KV-cache policies built from real coding-agent traces rather than chat workloads and implemented in vLLM.
+
+The authors collected coding-assistant traces and found that sessions repeatedly reuse large prefixes and sustain KV-cache pressure that general-purpose serving handles inefficiently. CacheWise adds prefix-aware scheduling that recognizes repeated context, plus reuse-aware eviction informed by metadata predicted from tool calls. Built into vLLM and evaluated on the collected traces, the authors report 2x to 2.6x fewer KV-cache evictions and up to 3.5x faster agent-session completion.
+
+Agentic coding traffic has different cache locality than chat, and the paper argues scheduling and eviction tuned to that pattern materially change serving cost.
+
+**Source:** [arXiv: CacheWise](https://arxiv.org/abs/2606.16824) - June 15, 2026
+
+---
+
+## Tropical proposes SLO-aware multiplexing for disaggregated LLM serving
+
+Also submitted on June 15, Tropical treats the choice between disaggregated and colocated LLM serving as a multiplexing problem rather than a fixed deployment topology.
+
+Disaggregated serving isolates prefill and decode on separate workers to avoid interference but pays queuing delay; colocated serving cuts queuing but suffers prefill-decode interference. Tropical schedules work to balance queuing time against interference per request. The authors report serving up to 2.09x more requests within a 90% SLO, a 9x P90 time-to-first-token improvement over disaggregated serving for a 15% time-per-output-token reduction, and a 2.8x P90 time-per-output-token improvement over colocated serving at equivalent TTFT.
+
+For teams tuning prefill/decode splits, the result argues the disaggregation decision should be dynamic and SLO-driven.
+
+**Source:** [arXiv: Tropical](https://arxiv.org/abs/2606.16264) - June 15, 2026
+
+---
+
+## Tangram adapts homogeneous LLM parallelizers to mixed-GPU clusters
+
+A June 15 arXiv paper presents Tangram, which lets parallelizers designed for uniform hardware plan training across heterogeneous GPU fleets.
+
+Tangram exploits "homogeneous GPU islands" — groups of identical GPUs acquired together — and the common pattern of partitioning a model before parallelizing, composing model slices and islands into work-balanced pipelines through a narrow enumeration API plus pruning for scalability. Rather than redesign parallelizers, it decouples parallelization planning from hardware heterogeneity. Against the heterogeneous parallelizers Metis and Sailor, the authors report up to 2.3x higher training throughput.
+
+Operators rarely run a single GPU SKU, and Tangram targets the planning gap that forms when a training job spans mixed accelerator generations.
+
+**Source:** [arXiv: Tangram](https://arxiv.org/abs/2606.16907) - June 15, 2026
+
+---
