@@ -1,0 +1,62 @@
+---
+title: "Cilium, Argo CD, Backstage, and KubeVirt ship fixes and a 3.5 candidate"
+description: "Cilium patched three branches, Argo CD cut a 3.5 release candidate with Helm 4 and repo-server mTLS, Backstage 1.52 changed defaults, and KubeVirt fixed a virt-handler connection leak."
+publishedAt: 2026-06-17
+authors:
+  - rawkode
+technologies:
+  - cilium
+  - argo
+  - backstage
+  - kubevirt
+---
+
+Four projects shipped within the last 24 hours: a Cilium patch wave across three supported branches, an Argo CD 3.5 release candidate, a Backstage minor with breaking defaults, and a KubeVirt patch that fixes a virt-handler resource leak.
+
+## Cilium patches three branches with policy and Gateway API fixes
+
+Cilium published [v1.19.5](https://github.com/cilium/cilium/releases/tag/v1.19.5), [v1.18.11](https://github.com/cilium/cilium/releases/tag/v1.18.11), and [v1.17.17](https://github.com/cilium/cilium/releases/tag/v1.17.17) on June 16. The network-policy fixes are the ones to read first: a corruption bug in the `NamespaceSelector` field of `CiliumEgressGatewayPolicy`, and a wildcard-namespace bypass affecting rules defined without selectors.
+
+The releases also fix Gateway API controller panics triggered by a malformed `parametersRef`, TLS passthrough failures with mixed listener types, BGP soft peer resets during service reconciliation, and BPF datapath issues including host-proxy packet routing to pods and MTU calculation under padding. v1.19.5 additionally removes the deprecated `loadBalancer.standalone` Helm option and reworks the load-balancing backend representation to scale to thousands of shared services.
+
+Clusters relying on egress gateway policies or Gateway API listeners should treat the policy and panic fixes as correctness and security backports, not routine churn.
+
+**Source:** [Cilium v1.19.5 release](https://github.com/cilium/cilium/releases/tag/v1.19.5) - June 16, 2026
+
+---
+
+## Argo CD 3.5 release candidate bundles Helm 4 and adds repo-server mTLS
+
+Argo CD published [v3.5.0-rc1](https://github.com/argoproj/argo-cd/releases/tag/v3.5.0-rc1) on June 16. The release migrates the bundled Helm binary from Helm 3 to Helm 4 and adds mTLS support for repo-server communication, alongside a parallelism limit and glob-pattern RBAC caching aimed at repo-server and policy-evaluation performance.
+
+The Source Hydrator gains opt-in source integrity verification for dry sources as it moves toward beta. ApplicationSet adds a Preview Apps tab in the UI and concurrency when managing applications, and authentication picks up Azure Service Principal support for Azure DevOps repositories plus Microsoft Graph handling for Azure AD group-claims overflow. Webhook-triggered refreshes can now be configured with jitter to spread load.
+
+This is a release candidate, not GA, so the Helm 4 swap in particular is worth validating against existing charts before adopting.
+
+**Source:** [Argo CD v3.5.0-rc1 release](https://github.com/argoproj/argo-cd/releases/tag/v3.5.0-rc1) - June 16, 2026
+
+---
+
+## Backstage 1.52 changes the discovery default and removes immediate catalog stitching
+
+Backstage released [v1.52.0](https://github.com/backstage/backstage/releases/tag/v1.52.0) on June 16 with breaking changes that affect upgrades. `FrontendHostDiscovery` is now the default discovery implementation, supporting per-plugin endpoint overrides; deployments routing internal-only traffic must move those targets to the `target.internal` form. The deprecated `catalog.stitchingStrategy.mode: 'immediate'` setting is removed, so all catalog stitching now runs through the deferred asynchronous path.
+
+The release also adds semantic color tokens, a `NumberField` component, async-loading `Combobox` and `Select` components, an experimental `@backstage/connections` package positioned as an eventual replacement for integrations, and catalog database optimizations including split count queries. `ComboboxProps` and `SelectProps` are now union types, which requires migrating from interface extension to type intersection.
+
+Platform teams running Backstage at scale should plan the discovery and stitching changes into the upgrade rather than treating 1.52 as a drop-in minor.
+
+**Source:** [Backstage v1.52.0 release](https://github.com/backstage/backstage/releases/tag/v1.52.0) - June 16, 2026
+
+---
+
+## KubeVirt 1.8.4 fixes a virt-handler connection leak
+
+KubeVirt published [v1.8.4](https://github.com/kubevirt/kubevirt/releases/tag/v1.8.4) on June 16, with 31 changes from 12 contributors. The headline fix resolves a gRPC connection leak in virt-handler's `GetLauncherClient` that caused unbounded memory growth, socket accumulation, and goroutine leaks when multiple controllers raced to create connections for the same VMI.
+
+The release also bumps `moby/spdystream` to address CVE-2026-35469, expands node-labeller CPU feature support, and adds missing metrics, recording rules, and alerts for virt components.
+
+For nodes running many VMIs over long uptimes, the connection-leak fix directly addresses a virt-handler memory and file-descriptor growth path.
+
+**Source:** [KubeVirt v1.8.4 release](https://github.com/kubevirt/kubevirt/releases/tag/v1.8.4) - June 16, 2026
+
+---
