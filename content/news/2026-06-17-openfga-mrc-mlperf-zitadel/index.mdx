@@ -1,0 +1,55 @@
+---
+title: "OpenFGA, MRC, MLPerf, and Zitadel tighten AI and identity infrastructure"
+description: "OpenFGA ships security fixes, MRC targets Ethernet AI training transport, MLPerf Training adds MoE workloads, and Zitadel patches identity validation."
+publishedAt: 2026-06-17
+authors:
+  - rawkode
+technologies:
+  - security
+  - ai-infrastructure
+  - platform-engineering
+---
+
+Four fresh items cleared the 24-hour gate across authorization, AI training networks, benchmark coverage, and identity-provider validation.
+
+## OpenFGA v1.18.0 tightens OIDC and MySQL authorization behavior
+
+OpenFGA released v1.18.0 on June 17 with authentication fixes and a MySQL migration warning. The release says MySQL migrations can acquire a shared lock on the tuple and changelog tables, blocking `Write` operations, so large production deployments should avoid startup auto-migrations and follow the migration runbook.
+
+The release changes preshared-key authentication to use `crypto/subtle.ConstantTimeCompare`, refuses to start OIDC authentication unless both issuer and audience are configured, and fixes MySQL identifier comparison to be case-sensitive like Postgres and SQLite. The OIDC fix closes a configuration path where omitting `--authn-oidc-audience` skipped JWT `aud` validation for otherwise valid tokens from the configured issuer.
+
+For platform teams using OpenFGA as shared authorization infrastructure, this is both a security patch and an upgrade-planning item because schema migration 008 needs a maintenance window.
+
+**Source:** [OpenFGA v1.18.0 release](https://github.com/openfga/openfga/releases/tag/v1.18.0) - June 17, 2026
+
+---
+
+## MRC proposes a RoCEv2 transport for AI training over Ethernet
+
+Rip Sohan and co-authors posted [The Multipath Reliable Connection Transport](https://arxiv.org/abs/2606.18170) to arXiv on June 16. The paper describes MRC as a transport for large-scale AI and ML training over best-effort Ethernet.
+
+MRC extends RoCEv2 with per-packet multipath, sender-side congestion control, accelerated packet-loss recovery, and resilience for port and path failures. The useful boundary for AI infrastructure teams is that MRC targets training-network behavior below the scheduler and collective-library layer, changing how traffic is spread and recovered before tail latency reaches the job.
+
+**Source:** [arXiv](https://arxiv.org/abs/2606.18170) - June 16, 2026
+
+---
+
+## MLPerf Training v6.0 publishes new MoE benchmark results
+
+MLCommons updated the MLPerf Training results page on June 16 for v6.0, linking the official results sheet and supplemental document. NVIDIA published same-day commentary saying the round added pretraining workloads for DeepSeek-V3 671B and GPT-OSS 20B, and reported GB200 and GB300 entries up to 8,192 GPUs.
+
+Treat the vendor timing numbers as benchmark entries rather than portable sizing guidance. The practical signal is that the training benchmark suite is now exposing more mixture-of-experts and scale-out network behavior; NVIDIA attributes its submitted results to full-iteration CUDA graphs, MXFP8 attention, all-to-all overlap, adaptive routing, and congestion-control work across the training stack.
+
+**Source:** [MLCommons](https://mlcommons.org/benchmarks/training/) - June 16, 2026
+
+---
+
+## Zitadel v4.15.2 fixes JWT, OIDC, and PKCE validation paths
+
+Zitadel released v4.15.2 on June 17 with fixes across JWT identity providers, OAuth and OIDC provider setup, and token exchange flows. The release notes include always validating `exp` and `iat` claims for JWT IdPs, managing and validating JWT IdP audience, verifying `client_id` during code exchange and refresh-token flows, and applying PKCE when building OAuth and OIDC providers.
+
+The same release also switches outgoing connections to a protected HTTP client and fixes setup connection handling after specific migration steps. For shared identity deployments, the change set sits on token validation and IdP construction paths rather than cosmetic behavior.
+
+**Source:** [Zitadel v4.15.2 release](https://github.com/zitadel/zitadel/releases/tag/v4.15.2) - June 17, 2026
+
+---
