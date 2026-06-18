@@ -1,0 +1,74 @@
+---
+title: "Prometheus, PyTorch, Capsule, LangChain4j, ReMP, and PULSE land security and AI-infra updates"
+description: "Prometheus and PyTorch shipped security and correctness fixes, while fresh advisories and systems papers targeted Kubernetes multi-tenancy, vector-store filters, and GPU scheduling."
+publishedAt: 2026-06-18
+authors:
+  - rawkode
+technologies:
+  - prometheus
+  - kubernetes
+  - ai-infrastructure
+  - security
+---
+
+Six fresh items landed in the last 24 hours across observability, Kubernetes multi-tenancy, AI framework security, GPU correctness, LLM serving, and distributed training.
+
+## Prometheus v3.5.4 fixes STACKIT SD secret exposure
+
+Prometheus published v3.5.4 on June 17 with multiple security fixes. The release fixes a STACKIT service-discovery issue where secrets could be exposed in plaintext through the `/-/config` endpoint, bumps `golang.org/x/net` and OpenTelemetry dependencies for reported CVEs, and updates UI dependencies with security advisories.
+
+The release also starts publishing Prometheus container images to GitHub Container Registry, giving operators another official image source. For teams using STACKIT SD, this is an upgrade target rather than routine dependency churn.
+
+**Source:** [Prometheus v3.5.4 release](https://github.com/prometheus/prometheus/releases/tag/v3.5.4) - June 17, 2026
+
+---
+
+## PyTorch 2.12.1 fixes B100 and B200 correctness regressions
+
+PyTorch released 2.12.1 on June 18 as a bug-fix release for regressions and silent correctness issues. The release updates Triton to 3.7.1 to fix nondeterministic `FLASH_ATTN` output on NVIDIA B200 GPUs and an illegal-memory-access issue in the Triton `convolution2d_bwd_weight` kernel on B100 and B200 GPUs.
+
+It also fixes `fill_` on byte-dtype views with misaligned storage offsets and removes CPython 3.13t from the binary build matrix. The practical signal is clear: teams validating PyTorch 2.12 on Blackwell-class GPUs should treat 2.12.1 as the safer baseline.
+
+**Source:** [PyTorch 2.12.1 release](https://github.com/pytorch/pytorch/releases/tag/v2.12.1) - June 18, 2026
+
+---
+
+## Capsule discloses a namespaces/finalize admission bypass
+
+The Capsule project published GHSA-gwxr-7h77-7777 on June 17 for an incomplete fix to CVE-2026-30963. Capsule v0.13.2 used `namespace/finalize` instead of Kubernetes' plural `namespaces/finalize` in webhook rules, so the intended finalize-subresource defense did not match real API requests.
+
+The advisory says a user with `namespaces/finalize` RBAC could bypass the webhook through a raw finalize request and change a tenant label, carrying the same threat model as the earlier CVE. The affected range is `>= 0.13.0, < 0.13.6`, with Capsule 0.13.6 listed as the first patched version.
+
+**Source:** [Capsule GHSA-gwxr-7h77-7777 advisory](https://github.com/projectcapsule/capsule/security/advisories/GHSA-gwxr-7h77-7777) - June 17, 2026
+
+---
+
+## LangChain4j patches SQL injection in pgvector and MariaDB filters
+
+LangChain4j published GHSA-2mfg-cc43-9pcj on June 17 for SQL injection in the `langchain4j-pgvector` and `langchain4j-mariadb` embedding stores. The issue is in metadata filters: crafted filter keys, and in MariaDB some string values, could be concatenated into SQL for search and `removeAll(Filter)` paths without adequate escaping.
+
+The advisory calls out the risk for applications that allow attacker-influenced metadata filter keys, including LLM-generated filters, to reach those stores. Fixed package lines include `1.16.3-beta26`, `1.11.8-beta19`, `1.5.1-beta11`, and `1.2.1-beta8`; hard-coded allow-listed filter keys are the stated workaround.
+
+**Source:** [LangChain4j GHSA-2mfg-cc43-9pcj advisory](https://github.com/langchain4j/langchain4j/security/advisories/GHSA-2mfg-cc43-9pcj) - June 17, 2026
+
+---
+
+## ReMP targets runtime model-parallelism changes for LLM serving
+
+An arXiv paper published on June 17 describes ReMP, a framework for changing tensor-parallel and pipeline-parallel topology in running LLM serving systems. The paper argues that current serving stacks usually treat TP and PP layout as static, so topology changes require restarting service instances, dropping KV cache state, and recomputing work.
+
+ReMP decouples the parallelism topology from runtime state, migrates KV cache across TP and PP changes, and implements online reconfiguration. The authors report most topology switches finishing in 1-7 seconds across 7B to 70B models, with improvements in TTFT, TPOT, and output throughput under dynamic workloads.
+
+**Source:** [arXiv 2606.18741](https://arxiv.org/abs/2606.18741) - June 17, 2026
+
+---
+
+## PULSE makes skip locality a pipeline-parallel training constraint
+
+An arXiv paper published on June 17 describes PULSE, an automatic pipeline-parallel training strategy for large diffusion models. The core problem is that UNet-style encoder-decoder structures and skip connections can force skip activations and gradients across pipeline boundaries, making peer-to-peer communication a bottleneck.
+
+PULSE colocates skip-connected encoder-decoder layers, caches skip activations locally for backpropagation, and combines a dynamic-programming partitioner, ILP schedule synthesis, and hybrid-parallelism tuning. The authors report up to 89% less communication volume and up to 2.3x higher training throughput on communication-bound hardware.
+
+**Source:** [arXiv 2606.19163](https://arxiv.org/abs/2606.19163) - June 17, 2026
+
+---
