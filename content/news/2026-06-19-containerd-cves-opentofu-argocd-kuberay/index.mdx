@@ -1,0 +1,63 @@
+---
+title: "containerd, OpenTofu, Argo CD, and KubeRay ship security and correctness fixes"
+description: "containerd patched five CRI CVEs across every supported branch, while OpenTofu, Argo CD, and KubeRay fixed a git file-read flaw, RBAC and diff regressions, and a RayService cleanup deadlock."
+publishedAt: 2026-06-19
+authors:
+  - rawkode
+technologies:
+  - containerd
+  - opentofu
+  - kubernetes
+  - security
+  - ai-infrastructure
+---
+
+Four security and correctness patches landed across the cloud native stack on June 18: a coordinated containerd CVE wave, an OpenTofu file-read fix, Argo CD RBAC and diff regressions, and a KubeRay cleanup deadlock under Kueue.
+
+## containerd patches five CRI vulnerabilities across all supported branches
+
+containerd shipped [v2.3.2](https://github.com/containerd/containerd/releases/tag/v2.3.2), v2.2.5, v2.1.9, v2.0.10, and v1.7.33 on June 18, fixing five CVEs in the CRI plugin, three of them rated critical.
+
+The most severe, CVE-2026-53488 ([GHSA-xhf5-7wjv-pqxp](https://github.com/containerd/containerd/security/advisories/GHSA-xhf5-7wjv-pqxp)), lets `LABEL` metadata from a pulled image config reach host-level command execution when a plugin consumes container labels, so an untrusted image pull alone can trigger it. The other critical advisories cover CDI annotation smuggling during CRI checkpoint restore (GHSA-33vj-92qq-66hc) and local image tag poisoning via CRI checkpoint import (GHSA-cvxm-645q-p574); a high-severity symlink-following bug allows arbitrary host file reads during checkpoint restore (GHSA-rgh6-rfwx-v388), and a moderate parsing flaw enables an image-triggered DoS (GHSA-jpcc-p29g-p8mq). The patched releases also bump runc to v1.4.3 and `golang.org/x/crypto` to v0.53.0.
+
+Several of these are reachable from the image-pull or CRI checkpoint/restore paths rather than requiring an already-compromised workload, so clusters pulling third-party images should patch rather than wait for the next routine bump.
+
+**Source:** [containerd security advisories](https://github.com/containerd/containerd/security/advisories) - June 18, 2026
+
+---
+
+## OpenTofu fixes arbitrary file read via malicious git URLs
+
+OpenTofu released [v1.12.3](https://github.com/opentofu/opentofu/releases/tag/v1.12.3) and a companion v1.11.10 on June 18. v1.12.3 fixes GHSA-q7j3-v8qv-22vq, where previous releases in the v1.12 series could read an arbitrary file on the host during certain git operations via a maliciously crafted URL.
+
+The same release fixes handling of `TF_ENCRYPTION` values containing only whitespace, corrects deprecation-mark processing for values from `lifecycle.enabled`, and repairs `tofu console -lock=false`.
+
+This matters for CI systems that run `tofu init` or module fetches against modules sourced from untrusted or user-supplied git URLs, where the file-read path is reachable without operator interaction.
+
+**Source:** [OpenTofu v1.12.3 release](https://github.com/opentofu/opentofu/releases/tag/v1.12.3) - June 18, 2026
+
+---
+
+## Argo CD patches RBAC and diff regressions in 3.4.4 and 3.3.12
+
+Argo CD shipped [v3.4.4](https://github.com/argoproj/argo-cd/releases/tag/v3.4.4) and v3.3.12 on June 18, both bug-fix releases.
+
+v3.4.4 fixes an RBAC regression affecting project-scoped resources in multi-namespace (apps-in-any-namespace) configurations, and a separate regression that caused diffs to error on newly created objects. It also adds locking to the cluster informer for thread safety, excludes live status from normalization, and repairs dex passwords containing dollar signs and cross-generator Values templates in ApplicationSet.
+
+The RBAC and diff regressions affect access control and sync correctness in multi-tenant GitOps setups, so operators on the 3.4 or 3.3 lines should pick up the patch.
+
+**Source:** [Argo CD v3.4.4 release](https://github.com/argoproj/argo-cd/releases/tag/v3.4.4) - June 18, 2026
+
+---
+
+## KubeRay v1.6.2 fixes RayService cleanup deadlock under Kueue
+
+KubeRay released [v1.6.2](https://github.com/ray-project/kuberay/releases/tag/v1.6.2) on June 18 with two fixes for Ray clusters managed alongside Kueue.
+
+The release fixes a bug (#4807) where the Redis cleanup job would never execute when using RayService with Kueue, and adds a timeout (#4836) that enforces removal of Ray cluster finalizers so deletion is not blocked indefinitely when that cleanup job fails to run.
+
+Teams running Ray Serve on Kubernetes with Kueue could previously see RayService deletions hang on stuck finalizers; this release unblocks cluster teardown.
+
+**Source:** [KubeRay v1.6.2 release](https://github.com/ray-project/kuberay/releases/tag/v1.6.2) - June 18, 2026
+
+---
