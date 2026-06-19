@@ -1,0 +1,71 @@
+---
+title: "Prometheus Operator, Argo CD, Triton, Kubeflow Trainer, and OpenEBS ship platform fixes"
+description: "Prometheus Operator promoted sharding controls while Argo CD, Triton, Kubeflow Trainer, and OpenEBS shipped operator-facing fixes."
+publishedAt: 2026-06-19
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - observability
+  - gitops
+  - ai-infrastructure
+  - storage
+---
+
+Five fresh releases landed in the last 24 hours across observability, GitOps, AI compiler tooling, ML-on-Kubernetes training, and Kubernetes storage.
+
+## Prometheus Operator v0.92.0 promotes topology sharding and shard retention to beta
+
+Prometheus Operator released v0.92.0 on June 18 and promoted the `PrometheusTopologySharding` and `PrometheusShardRetentionPolicy` feature gates to beta, enabled by default. Topology-aware sharding can keep shards scraping zone-local targets by generating relabeling rules, adding shard pod `nodeSelector`s, and setting zone external labels; shard retention can keep scaled-down shards queryable through Thanos until their retention window expires.
+
+The release also moves `Prometheus` retention options into the config file for Prometheus 3 and newer, adds `staleSeriesCompactionThreshold` to `TSDBSpec`, adds OTLP label-underscore controls, and adds a `payload` field to AlertmanagerConfig webhook receivers. Validation tightened across OAuth2 `tokenUrl`, `RemoteReadSpec.url`, Probe static target labels, OAuth2 proxy configuration, Slack `update_message`, and malformed key/value flags.
+
+For operators running large Prometheus estates, this turns two sharding behaviors from opt-in experiments into default beta controls and reduces the chance of generating invalid scrape or Alertmanager configuration.
+
+**Source:** [Prometheus Operator v0.92.0 release](https://github.com/prometheus-operator/prometheus-operator/releases/tag/v0.92.0) - June 18, 2026
+
+---
+
+## Argo CD v3.4.4 and v3.3.12 fix RBAC, diff, and health regressions
+
+Argo CD published v3.4.4 and v3.3.12 on June 18 with patch fixes for supported 3.x lines. The v3.4.4 release fixes an RBAC regression for project-scoped resources in multi-namespace architecture, a server-side diff regression that errored on new objects, and `PromotionStrategy` health getting stuck in `Progressing` after no-op rehydration.
+
+Both releases add locking around `clusterinformer`, exclude live status from normalization, and fix Dex password parsing when the password contains a dollar sign. The v3.3.12 line also backports a fix to honor repo depth settings in `gitSourceHasChanges` and fetch code paths.
+
+GitOps platform teams using multi-namespace Argo CD or promotion strategies should treat this as a correctness patch rather than routine dependency churn.
+
+**Source:** [Argo CD v3.4.4 release](https://github.com/argoproj/argo-cd/releases/tag/v3.4.4) - June 18, 2026
+
+---
+
+## Triton 3.7.1 patches async-copy and LLVM InstCombine correctness regressions
+
+Triton released v3.7.1 on June 18 as a patch release on top of 3.7.0, with no new features or API changes. The first fix adds async read dependencies to `FenceAsync`, correcting a missing fence between `st.shared` and `copy_local_to_global` where an async copy could read shared memory before the store completed.
+
+The second fix pulls in an LLVM InstCombine correction for add simplification when known-zero bits are on the left-hand side rather than the right-hand side. For kernel authors and inference teams compiling custom Triton kernels, this is a compiler correctness release: the important change is avoiding wrong code, not adopting a new API.
+
+**Source:** [Triton 3.7.1 release](https://github.com/triton-lang/triton/releases/tag/v3.7.1) - June 18, 2026
+
+---
+
+## Kubeflow Trainer v2.2.1 backports TrainJob unsuspend and manifest fixes
+
+Kubeflow Trainer released v2.2.1 on June 18 for the 2.2 line. The release updates the branch to k8s 0.36, fixes generated Python API model versioning in the release process, and allows a `TrainJob` to update `spec.runtimePatches` while moving from `suspend: true` to `suspend: false` in a single API request.
+
+The release also fixes manifests to use released JobSet and LWS image versions and updates examples to use a namespaced SQuAD dataset. That matters for teams automating queued or suspended training workloads, because runtime overrides can now be changed at unsuspend time without a separate preflight API write.
+
+**Source:** [Kubeflow Trainer v2.2.1 release](https://github.com/kubeflow/trainer/releases/tag/v2.2.1) - June 18, 2026
+
+---
+
+## OpenEBS 4.5.1 packages Mayastor and LocalPV fixes
+
+OpenEBS released v4.5.1 on June 18 as a patch release over 4.5.0 and recommends upgrading because it includes a critical Replicated PV Mayastor fix. The Mayastor changes cover nexus destruction getting stuck while waiting for child closure, interrupt-mode shutdown cleanup, and snapshot clone accounting.
+
+The LocalPV side fixes quoted image values across ZFS, LVM, Hostpath, and Rawfile manifests. Rawfile LocalPV also adds backing-filesystem capacity and usage metrics under the `rawfile_pool_backing_fs_*` names, removes the older inconsistent `rawfile_pool_available_bytes` and `rawfile_pool_usage_bytes` metrics, fixes a Task Manager `KeyError` for tasks without `retry_count`, and adds a `capacityPollInterval` provisioner parameter.
+
+Storage operators should check dashboards and alerts for the Rawfile metric rename before rolling the patch into environments that scrape those metrics.
+
+**Source:** [OpenEBS v4.5.1 release](https://github.com/openebs/openebs/releases/tag/v4.5.1) - June 18, 2026
+
+---
