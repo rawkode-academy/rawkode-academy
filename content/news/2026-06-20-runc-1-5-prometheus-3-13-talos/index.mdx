@@ -1,0 +1,46 @@
+---
+title: "runc 1.5.0 ships stable, Prometheus 3.13 enters RC, Talos patches etcd leak"
+description: "runc cut its first stable 1.5 release with libpathrs hardening and a new support policy, Prometheus opened a 3.13.0 release candidate with new PromQL functions, and Talos v1.12.9 fixed an etcd client resource leak."
+publishedAt: 2026-06-20
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - prometheus
+---
+
+Three primary-source releases landed in the last 24 hours across container runtimes, metrics, and the node OS. It was a quiet window, so this is a short digest rather than a padded one.
+
+## runc 1.5.0 cuts the first stable release of the 1.5 branch
+
+The OCI reference runtime published [runc 1.5.0](https://github.com/opencontainers/runc/releases/tag/v1.5.0) on June 19, described by maintainers as the somewhat-delayed first stable release of the 1.5.z line. It rolls up the 1.5.0-rc series, including the fix for CVE-2026-41579, a low-severity issue where a malicious image with a `/dev` symlink could gain limited write access to the host filesystem.
+
+The 1.5 line continues runc's move onto `libpathrs` for safer path resolution: builds using the libpathrs tag now require v0.2.5 or later, and both `runc version` and `runc features` report libpathrs build details. The release upgrades go-criu to v8.3.0, drops binary size from roughly 16MB to 14MB, and fixes a long-standing bug where the `org.opencontainers.runc.version` annotation carried a stray newline that broke parsing in downstream tools.
+
+1.5.0 is also the first stable release under runc's revised support policy: the 1.2.z and earlier branches are end-of-life, 1.3.z receives only high-severity CVE fixes through October 2026, and 1.4.z moves to security and significant bugfixes only.
+
+**Source:** [runc 1.5.0 release](https://github.com/opencontainers/runc/releases/tag/v1.5.0) - June 19, 2026
+
+---
+
+## Prometheus 3.13.0-rc.0 adds scalar min_of/max_of and metadata search endpoints
+
+Prometheus published [v3.13.0-rc.0](https://github.com/prometheus/prometheus/releases/tag/v3.13.0-rc.0) on June 19 as a testing-only release candidate for the 3.13 line. PromQL gains experimental scalar `min_of(a, b)` and `max_of(a, b)` functions and support for smoothed/anchored rate over native histograms.
+
+The candidate adds experimental API search endpoints for metric names, label names, and label values, a `storage.tsdb.chunk_encoding.floats` flag to select float chunk encoding at runtime, and new scrape-time internal labels for per-target control over classic and native histogram conversion. Container images for the 3.13 line are now also published to the GitHub Container Registry, alongside a batch of TSDB and PromQL bugfixes, including range-query alignment and histogram handling in `resets()` and `changes()`.
+
+This is a preview rather than an upgrade target, but the new scalar functions and metadata search endpoints are worth testing for teams building query tooling on top of the Prometheus API.
+
+**Source:** [Prometheus v3.13.0-rc.0 release](https://github.com/prometheus/prometheus/releases/tag/v3.13.0-rc.0) - June 19, 2026
+
+---
+
+## Talos v1.12.9 fixes an etcd client leak and tightens OOM victim selection
+
+Sidero Labs released [Talos v1.12.9](https://github.com/siderolabs/talos/releases/tag/v1.12.9) on June 19 with 18 commits from 5 contributors. The release fixes an etcd client resource leak in the legacy Upgrade API and raises the file-descriptor limit for etcd, both of which matter for long-running control-plane nodes.
+
+It also recreates the DNS server when the host DNS runner restarts, makes OOM victim selection follow stricter QoS ordering, relaxes LUKS header and hostname validation, and reverts CoreDNS to 1.14.2 for stability. The node image ships Linux 6.18.35, containerd 2.2.5, runc 1.3.6, CoreDNS 1.14.2, and Go 1.25.11, with security updates pulled in via containerd 2.2.5 and OpenSSL 3.6.3.
+
+**Source:** [Talos v1.12.9 release](https://github.com/siderolabs/talos/releases/tag/v1.12.9) - June 19, 2026
+
+---
