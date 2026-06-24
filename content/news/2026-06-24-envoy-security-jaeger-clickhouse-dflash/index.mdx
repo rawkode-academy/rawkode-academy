@@ -1,0 +1,67 @@
+---
+title: "Envoy patches a CVE wave across four branches, Jaeger lands ClickHouse storage, DFlash claims 15x decode"
+description: "Envoy shipped a coordinated security release fixing roughly 15 CVEs across every supported branch, Jaeger 2.18.0 added an alpha ClickHouse backend with 8.6x span compression, and a batch of observability and AI-serving work landed alongside."
+publishedAt: 2026-06-24
+authors:
+  - rawkode
+technologies:
+  - envoy
+  - jaeger
+  - opentelemetry
+---
+
+A busier 24 hours than most: Envoy cut a fleet-wide security release, Jaeger added a columnar storage backend, the OpenTelemetry Collector reshuffled its tooling, and both vendor and academic work pushed on inference and MoE serving. Five segments below, all sourced to primary artifacts published in the window.
+
+## Envoy ships a coordinated security release across four supported branches
+
+The Envoy maintainers published [v1.38.3](https://github.com/envoyproxy/envoy/releases/tag/v1.38.3) on June 23, alongside parallel backports to v1.37.5, v1.36.9, and v1.35.13. The release closes roughly 15 CVEs in a single coordinated wave, so operators on any maintained branch have an upgrade to apply.
+
+The most operationally urgent fixes are an HTTP/3-to-HTTP/1 request smuggling issue (CVE-2026-48743), an embedded-NUL truncation in TLS SAN handling that can lead to an authentication bypass (CVE-2026-47778), and an OAuth2 code-verifier padding oracle (CVE-2026-47775). The batch also fixes several remotely triggerable crashes, including a per-route authorization crash (CVE-2026-47205), a `grpc_stats` segfault on Connect-protocol requests (CVE-2026-47204), and a `TcpStatsdSink` heap overflow (CVE-2026-48706), plus a QPACK-based HTTP/3 denial of service. Two behavioural changes ride along: TLS certificate compression is now off by default, and the Intel DLB connection balancer extension is disabled at the build layer.
+
+Because the same fixes span Envoy's gateway and service-mesh deployments, this also reaches Istio and other Envoy-based data planes downstream.
+
+**Source:** [Envoy v1.38.3 release](https://github.com/envoyproxy/envoy/releases/tag/v1.38.3) - June 23, 2026
+
+---
+
+## Jaeger 2.18.0 adds an alpha ClickHouse storage backend
+
+Jaeger maintainer Mahad Zaryab (Meta) [described](https://www.cncf.io/blog/2026/06/23/building-jaegers-clickhouse-backend-8-6x-compression-on-10-million-spans/) the project's new ClickHouse storage backend, shipped as an alpha in Jaeger 2.18.0, in a post published June 23. The backend stores spans in a columnar layout that exploits the repetition in trace data: the project reports an 8.6x compression ratio on a 10-million-span dataset, taking roughly 6 GiB of spans down to about 722 MiB on disk.
+
+Rather than scanning the spans table for common lookups, the backend precomputes service names, operation names, and trace-ID time ranges through materialized views, and computes Service Performance Monitoring metrics (latency, call rate, error rate) directly from stored spans rather than a separate metrics store. The post reports ingestion above 50,000 spans per second and trace-retrieval latency around 100 ms on its test setup.
+
+This gives Jaeger operators an OLAP-backed storage option alongside the existing Cassandra and Elasticsearch backends, with SPM served from the same store. It is alpha, so treat the numbers as project-reported and the API as unstable.
+
+**Source:** [CNCF blog - Jaeger ClickHouse backend](https://www.cncf.io/blog/2026/06/23/building-jaegers-clickhouse-backend-8-6x-compression-on-10-million-spans/) - June 23, 2026
+
+---
+
+## OpenTelemetry Collector v0.155.0 moves schemagen into core and removes seven stabilized feature gates
+
+The OpenTelemetry Collector cut [v0.155.0 / core v1.61.0](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.155.0) on June 23, removing seven feature gates that had reached stable, including `confighttp.framedSnappy`, `exporter.PersistRequestContext`, and `pdata.enableRefCounting`. Operators still passing those gates on the command line will need to drop them, since removed gates error rather than warn.
+
+The release moves the `schemagen` CLI from the contrib repository into core, adding overlay-file support for merging hand-curated schema fragments and a flag for custom Go package patterns. `mdatagen` gains versioned-metrics support to ease migration to new semantic conventions, and pdata adds a `DisallowUnknownFields` option across logs, traces, metrics, and profiles to reject JSON fields outside the OTLP schema, though the default still ignores them silently.
+
+**Source:** [OpenTelemetry Collector v0.155.0 release](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.155.0) - June 23, 2026
+
+---
+
+## NVIDIA reports up to 15x decode throughput from the open-source DFlash speculative decoder
+
+NVIDIA [published benchmarks](https://developer.nvidia.com/blog/boost-inference-performance-up-to-15x-on-nvidia-blackwell-using-dflash-speculative-decoding/) on June 23 for DFlash, an open-source block-diffusion model for speculative decoding developed at UC San Diego and released on [GitHub](https://github.com/z-lab/dflash) with checkpoints on Hugging Face. Unlike a draft model that proposes tokens one at a time, DFlash generates a block of candidate tokens in parallel for the target model to verify.
+
+On eight DGX B300 (Blackwell) GPUs running TensorRT-LLM against a coding benchmark, NVIDIA reports up to a 15x throughput improvement for gpt-oss-120b at high per-user interactivity, with smaller gains on smaller models. The method has integrations for SGLang, vLLM, and TensorRT-LLM, with the vLLM path described as configuration-only. The 15x figure is NVIDIA's own benchmark on its hardware and target workload, so treat it as a vendor-reported upper bound rather than a portable number.
+
+**Source:** [NVIDIA Developer blog - DFlash speculative decoding](https://developer.nvidia.com/blog/boost-inference-performance-up-to-15x-on-nvidia-blackwell-using-dflash-speculative-decoding/) - June 23, 2026
+
+---
+
+## CrossPool proposes KV-cache and weight disaggregation for serving cold MoE models
+
+A preprint titled [CrossPool: Efficient Multi-LLM Serving for Cold MoE Models through KV-Cache and Weight Disaggregation](https://arxiv.org/abs/2606.24506) was submitted to arXiv on June 23. It targets the case where a provider hosts many sparse Mixture-of-Experts models that each receive infrequent, bursty traffic, so keeping every model's full weights resident wastes GPU memory.
+
+CrossPool splits FFN weights and KV-cache into two separate GPU memory pools and allocates each independently, which the authors argue frees capacity for long-context requests and reduces the memory stranded by idle models. The paper reports an improvement in P99 time-between-tokens of up to 10.4x over existing systems under its evaluation. As a preprint, the result is unreviewed and the numbers are author-reported, but the weight/KV-cache disaggregation framing is a concrete direction for anyone serving a large catalogue of cold models.
+
+**Source:** [arXiv:2606.24506](https://arxiv.org/abs/2606.24506) - June 23, 2026
+
+---
