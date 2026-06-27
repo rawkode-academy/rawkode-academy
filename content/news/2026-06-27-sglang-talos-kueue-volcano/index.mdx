@@ -1,0 +1,58 @@
+---
+title: "SGLang 0.5.14 lands DeepSeek-V4 kernels, Talos 1.14 alpha mounts /var noexec, Kueue and Volcano patch their schedulers"
+description: "SGLang cut v0.5.14 with DeepSeek-V4 serving optimizations and Blackwell load-balancing, Talos v1.14.0-alpha.2 hardened the node filesystem and added encrypted DNS, and Kueue and Volcano shipped scheduler bug-fix patches."
+publishedAt: 2026-06-27
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - volcano
+---
+
+Four primary-source releases landed in the last 24 hours across inference serving, the node OS, and batch scheduling. It was a release-heavy but otherwise quiet window, so this is a tight digest rather than a padded one.
+
+## SGLang 0.5.14 adds DeepSeek-V4 kernels and Blackwell load-balancing for expert parallelism
+
+The SGLang project published [v0.5.14](https://github.com/sgl-project/sglang/releases/tag/v0.5.14) on June 26, its first tagged release since v0.5.13 on June 13, focused on DeepSeek-V4 serving and new model support.
+
+The release adds two dispatch-time load-balancing methods, Waterfill and LPLB, for DeepEP expert parallelism on DeepSeek-V3/R1 and DeepSeek-V4, and a new KDA CuteDSL prefill kernel for Kimi-Linear that the project reports as 1.08–1.52x faster than the Triton path on Blackwell (SM100). For DeepSeek-V4 on NVIDIA GB300, SGLang reports 5x higher throughput at the same interactivity. On the memory side, an int8 checkpoint pool for the Mamba radix cache grows prefix-cache capacity, and deduplicating the speculative-decoding intermediate conv-window cache halves its footprint. Breakable CUDA graph execution now also runs on AMD via ROCm/HIP, and day-0 support arrives for GLM-5.2, LiquidAI LFM2.5, Kimi-K2.7-Code, and others. The bundled sgl-kernel moves to 0.4.4 and the minimum Ray version rises to 2.55.1.
+
+The GB300 and Blackwell numbers are project-reported on its own configurations, not independently benchmarked.
+
+**Source:** [SGLang v0.5.14 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.14) - June 26, 2026
+
+---
+
+## Talos 1.14.0-alpha.2 mounts /var noexec and adds encrypted DNS resolution
+
+Sidero Labs published [Talos v1.14.0-alpha.2](https://github.com/siderolabs/talos/releases/tag/v1.14.0-alpha.2) on June 26, an alpha preview of the 1.14 line carrying node-hardening changes and an etcd version bump.
+
+The EPHEMERAL `/var` partition now mounts `noexec` alongside the existing `nosuid` and `nodev`, blocking binary execution from `/var`; workloads that execute binaries from there, such as Longhorn, break unless operators apply a `VolumeConfig` patch first. A new `ResolverConfig` document adds DNS over TLS and DNS over HTTPS with per-nameserver protocol selection, and NRI for the CRI containerd instance is now enabled by default without a machine-config patch. The release raises the default etcd to a 3.7.0 release candidate and moves etcd's HTTP endpoints to port 2383, and `talosctl apply-config` drops `--mode=reboot`, applying configuration without a reboot by default. The node image ships Linux 6.18.36, Kubernetes 1.36.2, containerd 2.3.2, runc 1.5.0-rc.3, CoreDNS 1.14.2, and Go 1.26.4.
+
+This is an alpha rather than an upgrade target, but the `noexec` change and its Longhorn caveat are worth testing before 1.14 reaches stable.
+
+**Source:** [Talos v1.14.0-alpha.2 release](https://github.com/siderolabs/talos/releases/tag/v1.14.0-alpha.2) - June 26, 2026
+
+---
+
+## Kueue 0.18.2 fixes DRA quota admission and a LocalQueue namespace leak
+
+Kueue released [v0.18.2](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.2), with a v0.17.6 backport, on June 26, a patch spanning Dynamic Resource Allocation, MultiKueue, and namespace isolation.
+
+The release fixes a bug where workloads carrying DRA device constraints or configurations were rejected as unsupported instead of being admitted for quota processing, and closes a LocalQueue information leak where queues sharing a name across namespaces were not properly isolated. Three MultiKueue fixes land alongside: creating a Job on a manager cluster no longer deletes a pre-existing worker-cluster Job with the same NamespacedName, stale Job status is no longer retained when worker Jobs settle quickly, and scheduling-gated `PodScheduled` conditions are preserved on manager Pods to avoid spurious Cluster Autoscaler scale-ups. Operators upgrading should note that the KueuePopulator Helm chart now removes its resources on uninstall, so previously leaked ConfigMap and RBAC objects must be deleted manually first.
+
+**Source:** [Kueue v0.18.2 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.2) - June 26, 2026
+
+---
+
+## Volcano 1.14.3 patches GPU sharing and topology-aware scheduling
+
+Volcano shipped [v1.14.3](https://github.com/volcano-sh/volcano/releases/tag/v1.14.3) on June 27, a patch release of the batch scheduler with ten bug fixes.
+
+The release fixes HAMi vGPU scheduling failures in medium and large clusters, corrects network-topology-aware scheduling in soft mode for jobs and subjobs, and switches scalar in-queue resource accounting to milli-units. It also checks Ascend vNPU health using allocatable resources, clears device-related annotations when releasing pods, caps unbounded growth of `job.Status.Conditions`, and reprieves higher-priority pods first during preemption.
+
+For teams running shared-GPU batch workloads on Volcano, the HAMi vGPU and topology-aware fixes are the reason to take the patch.
+
+**Source:** [Volcano v1.14.3 release](https://github.com/volcano-sh/volcano/releases/tag/v1.14.3) - June 27, 2026
+
+---
