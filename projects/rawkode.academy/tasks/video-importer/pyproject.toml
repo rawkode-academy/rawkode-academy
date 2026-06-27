@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Download YouTube videos and upload to Cloudflare R2"
 requires-python = ">=3.10"
 dependencies = [
-    "yt-dlp>=2024.1.0",
+    "yt-dlp>=2026.6.9",
     "boto3>=1.42.97",
     "requests>=2.32.5",
     "cuid2>=2.0.0",
