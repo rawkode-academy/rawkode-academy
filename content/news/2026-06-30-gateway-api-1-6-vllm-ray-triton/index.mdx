@@ -1,0 +1,66 @@
+---
+title: "Gateway API 1.6 sends TCPRoute and UDPRoute to GA, vLLM 0.24, Ray 2.56, Triton 2.70"
+description: "Gateway API v1.6.0 graduates TCPRoute and UDPRoute to GA, etcd-operator joins Cozystack with a rewritten v1alpha2 API, and vLLM, Ray, and Triton all cut releases in the same 24-hour window."
+publishedAt: 2026-06-30
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - etcd
+---
+
+A busy 24 hours across networking, control-plane tooling, and AI inference. Five primary-source releases landed, all verified against their changelogs and release notes.
+
+## Gateway API 1.6.0 graduates TCPRoute and UDPRoute to GA
+
+The Gateway API project published [v1.6.0](https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.6.0) on June 29, graduating both TCPRoute and UDPRoute to GA. The release notes recommend the `v1` API version for both and deprecate `v1alpha2`, which is slated for removal in a future release.
+
+The release adds a `GATEWAY-UDP` conformance profile with UDP and TCP echo-server test support, so L4 routing for non-HTTP traffic now has a conformance-tested API surface rather than an experimental one. It also tightens HTTPRoute retry validation — `retry.codes` must be unique and `retry.attempts` must be at least 1 — raises the Certificate Authority reference limit from 8 to 16, and fixes IPv6 cluster support and a ValidatingAdmissionPolicy issue that blocked installing the experimental CRDs.
+
+For platform teams exposing TCP and UDP workloads through Gateway API, the stable `v1` types remove the "still alpha" caveat that has kept L4 routing out of production manifests.
+
+**Source:** [Gateway API v1.6.0 release](https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.6.0) - June 29, 2026
+
+---
+
+## etcd-operator joins Cozystack with a rewritten v1alpha2 API
+
+The [etcd-operator project moved under Cozystack](https://www.cncf.io/blog/2026/06/29/etcd-operator-joins-cozystack-with-a-new-v1alpha2-api/) and published a rewritten `v1alpha2` API on June 29. The API group changes from `etcd.aenix.io/v1alpha1` to `etcd-operator.cozystack.io/v1alpha2`, and the operator no longer manages clusters through a StatefulSet.
+
+Instead, each member is a discrete `EtcdMember` resource, and the operator drives etcd's native membership operations — `MemberAdd`, `MemberPromote`, and `MemberRemove` — directly. That enables learner-mode joins, graceful removal that preserves quorum, and pause/resume that keeps member identity intact. The rewrite also adds tmpfs-backed storage with operator-driven recreation and moves validation to API-server-side CEL, dropping the admission webhook and its certificate dependency. An in-place migration path from the legacy operator is included. Ænix maintainer Timofei Larkin implemented the rewrite; the project stays Apache 2.0.
+
+Managing membership through etcd's own API rather than StatefulSet ordinals gives the operator first-class control over the operations that actually break etcd clusters: adding, promoting, and removing voting members without losing quorum.
+
+**Source:** [CNCF blog](https://www.cncf.io/blog/2026/06/29/etcd-operator-joins-cozystack-with-a-new-v1alpha2-api/) - June 29, 2026
+
+---
+
+## vLLM 0.24.0 makes Model Runner V2 default to quantized models
+
+vLLM cut [v0.24.0](https://github.com/vllm-project/vllm/releases/tag/v0.24.0) on June 30, a release of 571 commits from 256 contributors. Model Runner V2 now supports quantized models by default and enables GraniteMoE by default, continuing the migration of MoE models onto the newer runner path.
+
+The release adds new model families including MiniMax-M3 and a diffusion-LLM path via DiffusionGemma, a streaming parser that unifies tool-call and reasoning output across models, and broader hardware coverage spanning NVIDIA SM90/SM100 paths, AMD ROCm on Torch 2.11, Intel XPU, and TPU. A new `device_ids` argument replaces vLLM's internal manipulation of `CUDA_VISIBLE_DEVICES`. Security fixes cover an audio decompression-bomb mitigation, regex-compilation timeout guards, and a remote DoS in speculative decoding, with Starlette bumped to 1.0.1 or later. ERNIE, Xverse, Dots1, Bamba, and Mono-InternVL are removed, and Transformers v4 and first-generation Qwen/QwenVL are deprecated.
+
+**Source:** [vLLM v0.24.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.24.0) - June 30, 2026
+
+---
+
+## Ray 2.56.0 is the last release before 2.57 enforces new dependency floors
+
+[Ray 2.56.0](https://github.com/ray-project/ray/releases/tag/ray-2.56.0) shipped on June 29 and is the final release to support its older core dependencies. Version 2.57.0 will enforce minimum versions including numpy 2.1, pandas 2.2.3, pyarrow 18.0.0, pydantic 2.9, protobuf 5.26, grpcio 1.66, and scipy 1.14.1, so teams pinning older versions should plan upgrades before moving to 2.57.
+
+On features, the release re-architects Ray Serve LLM by decoupling request handling from the token-streaming response path, and adds a `ConsistentHashRouter` for session-sticky routing and a `CapacityQueueRouter` for supply-constrained workloads. Ray Core gains GPU-domain-aware placement groups that pack bundles onto nodes sharing a `ray.io/gpu-domain` label, plus support for Kubernetes in-place pod resizing. Ray Data adds `batch_size='auto'` for `map_batches` and support for multiple datasets per cluster.
+
+**Source:** [Ray 2.56.0 release](https://github.com/ray-project/ray/releases/tag/ray-2.56.0) - June 29, 2026
+
+---
+
+## Triton Inference Server 2.70.0 drops the Windows build and adds multi-GPU TensorRT
+
+NVIDIA released [Triton Inference Server 2.70.0](https://github.com/triton-inference-server/server/releases/tag/v2.70.0) (NGC container 26.06) on June 29, removing the Windows server build from the core build and documentation. The Python client now requires `ml_dtypes.bfloat16` arrays instead of casting from `np.float32`, a breaking change for clients sending BF16 tensors.
+
+The TensorRT backend gains multi-GPU (multi-device) inference, and the PyTorch backend enables dynamic batching for PyTorch 2. Other changes include a request body size limit on the OpenAI-compatible frontend, path-traversal hardening in model-environment unpacking, and a fix for server crashes when loading models from S3 after idle-connection timeouts. The bundled TensorRT-LLM backend is 1.2.1. Note that vLLM tensor parallelism greater than 1 still requires the Ray distributed executor backend in explicit model-control mode.
+
+**Source:** [Triton Inference Server 2.70.0 release](https://github.com/triton-inference-server/server/releases/tag/v2.70.0) - June 29, 2026
+
+---
