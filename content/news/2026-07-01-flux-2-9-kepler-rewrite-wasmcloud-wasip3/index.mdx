@@ -1,0 +1,49 @@
+---
+title: "Flux 2.9 ships a CLI plugin system, Kepler drops eBPF for /proc, wasmCloud turns on WASI Preview 3"
+description: "Flux v2.9.0 adds a CLI plugin system, post-quantum SOPS decryption, and Workload Identity auth; Kepler rewrites its power-monitoring data path off eBPF onto read-only /proc and /sys; and wasmCloud v2.5.0 enables WASI Preview 3 by default on Wasmtime 46."
+publishedAt: 2026-07-01
+authors:
+  - rawkode
+technologies:
+  - fluxcd
+  - kepler
+  - wasmcloud
+---
+
+Three primary-source releases and rewrites landed inside the last 24 hours across GitOps, power monitoring, and WebAssembly runtimes. It was a thin window otherwise, so this is a short, verified digest rather than a padded one.
+
+## Flux 2.9.0 adds a CLI plugin system and post-quantum SOPS decryption
+
+The Flux project published [v2.9.0](https://github.com/fluxcd/flux2/releases/tag/v2.9.0) on June 30 as a feature release, moving the core controllers onto the v1.9 line (source-controller v1.9.1, kustomize-controller v1.9.1, notification-controller v1.9.1, helm-controller v1.6.1, source-watcher v2.2.1).
+
+The headline addition is a CLI plugin system: `flux plugin install` pulls community extensions with digest pinning, and the release ships two built-in plugins, Mirror and Schema. SOPS decryption in Kustomization now supports the Age post-quantum cipher. Workload Identity support expands to OpenBao and Vault auth in Kustomization and to AWS CodeCommit in GitRepository, shifting those paths off static credentials. HelmRelease gains post-render strategies with chart-hook support and a `--set-literal`-style literal mode, and OCIRepository can pin custom Sigstore trusted roots for keyless verification in air-gapped clusters.
+
+This release removes the `image.toolkit.fluxcd.io/v1beta2` and `notification.toolkit.fluxcd.io/v1beta2` API versions from the CRDs, so operators must follow the documented upgrade procedure before bumping.
+
+**Source:** [Flux v2.9.0 release](https://github.com/fluxcd/flux2/releases/tag/v2.9.0) - June 30, 2026
+
+---
+
+## Kepler replaces eBPF with read-only /proc and /sys for power monitoring
+
+In a [June 30 CNCF post](https://www.cncf.io/blog/2026/06/30/kepler-re-architected-improved-power-accuracy-and-a-community-call-to-action/), Niki Manoledaki (Grafana Labs) and Sunyanan Choochotkaew (IBM) describe a re-architecture of Kepler's power-monitoring data path and a call for community validation.
+
+The previous design used eBPF to capture utilization signals, which required `CAP_BPF` and `CAP_SYSADMIN` and missed short-lived processes. The rewrite reads from `/proc` and `/sys` instead, dropping those privilege requirements, and discovers the host's power-meter structure at runtime rather than assuming a fixed hardware topology. The authors report that the new `kepler_node_cpu_watts` metric tracks IPMI readings and no longer produces the multi-kilowatt spikes seen on the old path, with per-process attribution drift reduced to a few milliwatts and test coverage at 90 percent.
+
+Dropping the privileged DaemonSet removes a standing objection to running Kepler in security-sensitive clusters, and the post explicitly asks for help validating GPU power, VM power modeling, and accuracy across more hardware.
+
+**Source:** [CNCF blog](https://www.cncf.io/blog/2026/06/30/kepler-re-architected-improved-power-accuracy-and-a-community-call-to-action/) - June 30, 2026
+
+---
+
+## wasmCloud 2.5.0 enables WASI Preview 3 by default
+
+wasmCloud published [v2.5.0](https://github.com/wasmCloud/wasmCloud/releases/tag/v2.5.0) on June 30, updating the runtime to Wasmtime 46 and enabling WASI Preview 3 (wasip3) by default.
+
+WASI Preview 3 brings the component model's native async support. The release adds async variants of the `wasmcloud:keyvalue` and `wasmcloud:blobstore` interfaces and supports wasip3 cross-component streams through the dynamic linker. Components can now multiplex several implementations of a capability — `wasi:keyvalue`, `wasmcloud:postgres`, and `wasmcloud:messaging/consumer` — via `implements` directives in their imports. The keyvalue interface is restructured to share a bucket through a types interface, a breaking change that requires interface updates, and the build adds s390x binaries.
+
+Turning wasip3 on by default is the signal that async in the component model is the runtime's default execution path, not an opt-in preview.
+
+**Source:** [wasmCloud v2.5.0 release](https://github.com/wasmCloud/wasmCloud/releases/tag/v2.5.0) - June 30, 2026
+
+---
