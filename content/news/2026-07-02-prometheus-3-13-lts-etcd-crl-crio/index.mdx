@@ -1,0 +1,67 @@
+---
+title: "Prometheus 3.13 ships as LTS, etcd patches a CRL bypass, CRI-O fixes Go scheduler throttling"
+description: "Prometheus cut 3.13.0 as its next LTS with three CVE fixes and TSDB speedups, etcd shipped 3.6.13 and 3.5.32 to close a gRPC CRL enforcement bypass, and CRI-O reworked its gomaxprocs hook to stop starving Go runtimes on partitioned nodes."
+publishedAt: 2026-07-02
+authors:
+  - rawkode
+technologies:
+  - prometheus
+  - etcd
+  - crio
+  - istio
+  - cert-manager
+---
+
+A quiet mid-summer window, but the releases that landed in the last 24 hours skew toward control-plane security and node-level correctness: a new Prometheus LTS, an etcd advisory affecting split HTTP/gRPC listeners, and a CRI-O change that matters if you pin CPUs.
+
+## Prometheus 3.13.0 ships as the next LTS with three CVE fixes
+
+Prometheus [published v3.13.0](https://github.com/prometheus/prometheus/releases/tag/v3.13.0) on July 1 and designated it a Long Term Support release. It closes CVE-2026-44990, an XSS in the UI via the `sanitize-html` dependency, and hardens credential handling so bearer tokens are no longer forwarded across hosts on HTTP redirects (CVE-2025-4673 and CVE-2023-45289).
+
+Beyond the security work, PromQL renames the experimental `min()`/`max()` duration helpers to `min_of()`/`max_of()` and adds them as scalar functions, plus smoothed and anchored rate over native histograms. On the storage side, the release reports roughly a 12–15% query speedup from lower per-sample overhead and up to 50% fewer heap allocations in the V2 histogram WAL decoder, and it fixes a snapshot-encoding corruption in the EncXOR2 chunk format. A new `storage.tsdb.chunk_encoding.floats` flag selects the float chunk encoding at runtime, and AWS RDS service discovery gains instance filtering.
+
+This is the promotion of the 3.13 line from the earlier release candidate to a supported LTS, so it is the version to standardise on rather than test.
+
+**Source:** [Prometheus v3.13.0 release](https://github.com/prometheus/prometheus/releases/tag/v3.13.0) - July 1, 2026
+
+---
+
+## etcd 3.6.13 and 3.5.32 close a CRL enforcement bypass on the gRPC listener
+
+etcd's maintainers released [v3.6.13](https://github.com/etcd-io/etcd/releases/tag/v3.6.13) and [v3.5.32](https://github.com/etcd-io/etcd/releases/tag/v3.5.32) on July 1 to fix a certificate revocation gap tracked as [GHSA-3wh4-j44w-pg92](https://github.com/etcd-io/etcd/security/advisories/GHSA-3wh4-j44w-pg92) (moderate, CVSS 6.5). When `--listen-client-http-urls` splits HTTP and gRPC onto separate listeners, the CRL supplied via `--client-crl-file` was applied only to the HTTP endpoint. A client presenting a revoked certificate is rejected over HTTP but still authenticates over gRPC. The 3.6 line is affected up to and including 3.6.12, and the 3.5 line up to and including 3.5.31.
+
+Both releases also fix WebSocket authentication for bearer-prefixed tokens, add a `write-only-skip-check` option for `--v2-deprecation`, and pull in Go 1.25.11 plus OpenTelemetry updates that address CVE-2026-29181 and CVE-2026-39883. Operators who run split client listeners and rely on CRLs should treat this as a priority upgrade; the advisory's interim mitigation is network-level restriction of the client ports.
+
+**Source:** [etcd security advisory GHSA-3wh4-j44w-pg92](https://github.com/etcd-io/etcd/security/advisories/GHSA-3wh4-j44w-pg92) - July 1, 2026
+
+---
+
+## CRI-O reworks its gomaxprocs hook to avoid Go scheduler throttling
+
+CRI-O released [v1.36.2](https://github.com/cri-o/cri-o/releases/tag/v1.36.2) and v1.34.10 on July 2 with a change to the gomaxprocs hook, which sets `GOMAXPROCS` for containerised Go workloads based on their CPU request. The hook now gives containers at least double their requested CPU count when computing the value, to reduce Go scheduler throttling, and ignores workload partitioning when deciding whether to inject at all.
+
+The 1.34.10 patch additionally fixes a bug where a container's `ImageRef` changed from a `repo@digest` reference to a raw image ID hash after a CRI-O restart, which can confuse tooling that keys on image references. The gomaxprocs change is the one to watch on CPU-pinned or performance-sensitive nodes, where an undersized `GOMAXPROCS` has been a recurring source of latency in Go control-plane components.
+
+**Source:** [CRI-O v1.36.2 release](https://github.com/cri-o/cri-o/releases/tag/v1.36.2) - July 2, 2026
+
+---
+
+## Istio 1.28.10 fixes a krt controller memory leak affecting waypoint relabels
+
+Istio published [1.28.10](https://istio.io/latest/news/releases/1.28.x/announcing-1.28.10/) on July 1 as a patch release. It fixes a memory leak in the `krt` controller framework where changing the key used in a `Fetch` filter—for example, relabeling a pod to point at a different waypoint—left stale reverse-index entries that were never cleaned up.
+
+The leak accumulated over time, raising memory use and triggering unnecessary recomputations, so it primarily affects ambient-mode meshes where waypoint assignments change during normal operation. There are no CVEs in this release.
+
+**Source:** [Istio 1.28.10 release notes](https://istio.io/latest/news/releases/1.28.x/announcing-1.28.10/) - July 1, 2026
+
+---
+
+## cert-manager 1.21 beta previews ACME renewal info and IAM auth for Vault
+
+cert-manager tagged [v1.21.0-beta.0](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.0-beta.0) on July 1, a testing-only prerelease. The headline additions are ACME Renewal Information (ARI) support behind an `ACMEUseARI` feature gate, which lets issuers honour a CA's suggested renewal windows, and AWS IAM authentication for the Vault issuer, including IRSA and ambient credentials.
+
+The beta also adds a `certificateRequestMaximumBackoffDuration` setting to cap retry backoff on failing CertificateRequests, a `waitInsteadOfSelfCheck` field for ACME HTTP01 and DNS01 solvers, `runtimeClassName` support for cert-manager components and solver pods, and a Modern2026 PKCS#12 profile with FIPS 140-3 support. This is a preview for testing, not an upgrade target, but the ARI and Vault IAM work are worth exercising ahead of the stable 1.21 release.
+
+**Source:** [cert-manager v1.21.0-beta.0 release](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.0-beta.0) - July 1, 2026
+
+---
