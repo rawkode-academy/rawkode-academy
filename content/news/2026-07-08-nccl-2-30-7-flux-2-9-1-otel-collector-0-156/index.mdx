@@ -1,0 +1,43 @@
+---
+title: "NCCL 2.30.7 adds zero-SM collectives, Flux 2.9.1 stops CRD schema corruption, OpenTelemetry Collector 0.156 fixes a pipeline startup race"
+description: "NVIDIA's NCCL 2.30.7 introduces experimental zero-SM collectives for compute-communication overlap, while Flux 2.9.1 stops post-build substitution from corrupting CRD schemas and OpenTelemetry Collector 0.156.0 fixes a pipeline startup race and duplicate OTLP/HTTP exports."
+publishedAt: 2026-07-08
+authors:
+  - rawkode
+technologies:
+  - opentelemetry
+  - fluxcd
+  - kubernetes
+---
+
+Three primary-source releases landed in the last 24 hours across GPU collective communication, GitOps, and observability. It was a quiet window, so this is a short digest rather than a padded one.
+
+## NCCL 2.30.7 adds experimental zero-SM collectives for compute-communication overlap
+
+NVIDIA published [NCCL v2.30.7-1](https://github.com/NVIDIA/nccl/releases/tag/v2.30.7-1) on July 8, the latest patch on the collective communication library's 2.30 branch. The headline addition is hierarchical zero-SM AllGather and All2all collectives that route inter-node traffic through an RMA CPU proxy, enabled with `NCCL_CTA_POLICY_ZERO`.
+
+Moving those collectives off streaming multiprocessors frees SM cycles for compute, which is what teams want when overlapping communication with kernels in large-scale training and inference. The release also adds an experimental GPU Push Interface (GPI) backend for GIN with explicit strong and weak signal semantics, window registration during CUDA graph capture, support for asymmetric buffer sizes during window registration, and MPS support for up to two ranks per physical GPU via CUDA's Memory Locality Optimized Partition (MLOPart). It optimizes the ReduceScatter symmetric kernel, adds batched copy-engine operations on the RMA put/wait path, and fixes a deadlock under PXN during runtime buffer memsetting. Support for GIN plugin API versions 11 and 12 is dropped.
+
+**Source:** [NVIDIA NCCL v2.30.7-1](https://github.com/NVIDIA/nccl/releases/tag/v2.30.7-1) - July 8, 2026
+
+---
+
+## Flux 2.9.1 disables variable substitution on its own CRDs to stop schema corruption
+
+The Flux team shipped [v2.9.1](https://github.com/fluxcd/flux2/releases/tag/v2.9.1) on July 7, a patch release for the GitOps toolkit. The primary fix annotates all Flux CRDs to disable Flux's post-build variable substitution on them, so substitution can no longer rewrite `${...}` sequences inside CRD OpenAPI schemas and corrupt them when Flux manages its own CRDs through a Kustomization.
+
+The release also updates SOPS to fix decryption of `.ini` files in kustomize-controller, resolves a dry-run failure when applying resources with strategic merge patches, and caches registry authorization tokens in source-controller to speed up Notation signature verification. Anyone running Flux to reconcile its own CRDs with post-build substitution enabled should take this patch.
+
+**Source:** [Flux v2.9.1](https://github.com/fluxcd/flux2/releases/tag/v2.9.1) - July 7, 2026
+
+---
+
+## OpenTelemetry Collector 0.156.0 fixes a pipeline startup race and duplicate OTLP/HTTP exports
+
+The OpenTelemetry Collector released [v0.156.0](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.156.0) on July 7. The core release fixes a race in the service where receivers could begin emitting telemetry before all pipeline components had finished initializing, which could drop or misroute early data.
+
+It also changes the OTLP/HTTP exporter to treat parsing errors on successful (2xx) responses as permanent rather than retryable, avoiding duplicate exports when a response body exceeds the 64kB read limit. The `memory_limiter` processor gains exponential backoff when garbage collection is ineffective, so it stops burning CPU while a downstream exporter is failing, and now reports health via component status. One breaking change ships alongside the fixes: `pkg/pprofile` adds bounds checks to `FromAttributeIndices`, altering behavior for profile attribute handling.
+
+**Source:** [OpenTelemetry Collector v0.156.0](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.156.0) - July 7, 2026
+
+---
