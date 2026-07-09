@@ -70,6 +70,18 @@
 	--space-card-pad: clamp(1.25rem, 3vw, 2.25rem);
 	--space-card-pad-lg: clamp(1.75rem, 4vw, 2.75rem);
 
+	/* Technical-publication layout contracts. Page compositions choose a
+	   measure instead of introducing another route-specific max-width. */
+	--layout-prose: 46rem;
+	--layout-content: 76rem;
+	--layout-wide: 96rem;
+	--space-page-pad-inline: clamp(1rem, 4vw, 3.5rem);
+	--space-page-pad-block: clamp(2rem, 5vw, 4.5rem);
+	--type-display: clamp(3.25rem, 8vw, 7.5rem);
+	--type-feature: clamp(2.5rem, 5vw, 5rem);
+	--type-page-title: clamp(2rem, 3.5vw, 3.5rem);
+	--type-section: clamp(1.5rem, 2.2vw, 2.25rem);
+
 	/* Semantic text-tone tokens — mirrored into UnoCSS theme so
 	   `text-primary-content` works as both a class and a CSS variable. */
 	--text-primary-content: var(--editorial-ink);
@@ -283,28 +295,25 @@ html.dark {
 }
 
 @layer base {
-	/* Editorial heading ramp — h1/h2 in serif italic at display sizes,
-	   h3/h4 in Inter Tight semibold. Negative letter-spacing pulls the
-	   display sizes tight without going into "decorative" territory.
-	   `text-wrap: balance` evens out multi-line display headings so the
-	   serif italic never strands a one-word orphan line. */
+	/* Technical-publication heading ramp. The serif is a scarce display
+	   signal; section and interface hierarchy stays compact and sans. */
 	h1 {
 		@apply text-4xl md:text-5xl text-primary-content;
 		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
+		font-style: normal;
 		font-weight: 400;
-		line-height: 1.02;
+		line-height: 0.98;
 		letter-spacing: -0.035em;
 		text-wrap: balance;
 	}
 
 	h2 {
 		@apply text-3xl md:text-4xl text-primary-content;
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		line-height: 1.05;
-		letter-spacing: -0.025em;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-style: normal;
+		font-weight: 650;
+		line-height: 1.02;
+		letter-spacing: -0.03em;
 		text-wrap: balance;
 	}
 
@@ -605,8 +614,8 @@ html.dark {
 	}
 
 	/* ════════════════════════════════════════════════════════════════
-	   Editorial .prose ramp — Inter Tight body over Instrument Serif
-	   italic display headings, sentence-sized JetBrains Mono code. Hairline
+	   Publication .prose ramp — Inter Tight body and hierarchy with
+	   sentence-sized JetBrains Mono code. Hairline
 	   blockquote (single 2px ink border-left, no gradient fill).
 	   ════════════════════════════════════════════════════════════════ */
 	.prose {
@@ -622,12 +631,12 @@ html.dark {
 		-moz-osx-font-smoothing: grayscale;
 	}
 
-	/* Display headings — serif italic h1/h2, sans medium h3/h4 */
+	/* Reading headings stay sans so long technical documents scan quickly. */
 	.prose h1 {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-style: normal;
 		font-size: clamp(2.25rem, 5vw, 3.5rem);
-		font-weight: 400;
+		font-weight: 650;
 		letter-spacing: -0.035em;
 		line-height: 1.02;
 		color: var(--text-primary-content);
@@ -636,10 +645,10 @@ html.dark {
 	}
 
 	.prose h2 {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-style: normal;
 		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-		font-weight: 400;
+		font-weight: 650;
 		letter-spacing: -0.025em;
 		line-height: 1.08;
 		color: var(--text-primary-content);

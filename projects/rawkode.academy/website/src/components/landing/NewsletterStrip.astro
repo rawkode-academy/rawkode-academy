@@ -34,6 +34,9 @@ import MLabel from "@/components/ui/MLabel.vue";
 	.newsletter-strip {
 		display: grid;
 		grid-template-columns: 1fr auto;
+		box-sizing: border-box;
+		width: 100%;
+		min-width: 0;
 		align-items: center;
 		gap: 2rem;
 		padding: 1.25rem 2.5rem;
@@ -47,6 +50,7 @@ import MLabel from "@/components/ui/MLabel.vue";
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;
+		min-width: 0;
 	}
 
 	.newsletter-strip__copy {
@@ -62,9 +66,12 @@ import MLabel from "@/components/ui/MLabel.vue";
 	}
 
 	.newsletter-strip__form {
-		display: flex;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
 		gap: 0.5rem;
 		align-items: center;
+		width: 100%;
+		min-width: 0;
 	}
 
 	.newsletter-strip__input {
@@ -88,6 +95,11 @@ import MLabel from "@/components/ui/MLabel.vue";
 			grid-template-columns: 1fr;
 			padding: 1.25rem 1.5rem;
 		}
-		.newsletter-strip__input { min-width: 0; flex: 1; }
+		.newsletter-strip__input { width: 100%; min-width: 0; }
+	}
+
+	@media (max-width: 440px) {
+		.newsletter-strip__form { grid-template-columns: 1fr; }
+		.newsletter-strip__form :global(button) { width: 100%; }
 	}
 </style>

@@ -35,6 +35,24 @@ function* walk(dir: string): Generator<string> {
 }
 
 describe("design tokens", () => {
+	it("defines the technical-publication layout contracts", () => {
+		const globalCss = readFileSync(join(projectRoot, "src/styles/global.css"), "utf-8");
+		const appLayout = readFileSync(join(projectRoot, "src/layouts/app.astro"), "utf-8");
+
+		for (const token of [
+			"--layout-prose",
+			"--layout-content",
+			"--layout-wide",
+			"--space-page-pad-inline",
+			"--type-page-title",
+		]) {
+			expect(globalCss, `Missing publication token ${token}`).toContain(token);
+		}
+
+		expect(appLayout).toContain("PublicationNav");
+		expect(appLayout).not.toContain('components/sidebar/Sidebar.astro');
+	});
+
 	it("uses editorial tokens instead of raw gray-* utilities", () => {
 		const violations: string[] = [];
 

@@ -1,0 +1,46 @@
+---
+interface Props {
+	label?: string;
+	resultCount?: number;
+	resultLabel?: string;
+	sticky?: boolean;
+}
+
+const {
+	label = "Refine",
+	resultCount,
+	resultLabel = "results",
+	sticky = false,
+} = Astro.props as Props;
+---
+
+<section class:list={["collection-toolbar", { "collection-toolbar--sticky": sticky }]} aria-label={label}>
+	<div class="collection-toolbar__summary">
+		<span>{label}</span>
+		{typeof resultCount === "number" && <strong>{resultCount} {resultLabel}</strong>}
+	</div>
+	<div class="collection-toolbar__controls"><slot /></div>
+	{Astro.slots.has("actions") && <div class="collection-toolbar__actions"><slot name="actions" /></div>}
+</section>
+
+<style>
+	.collection-toolbar {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 1rem;
+		align-items: center;
+		padding: 0.8rem var(--space-page-pad-inline);
+		border-block: 1px solid var(--surface-border);
+		background: var(--surface-overlay);
+	}
+	.collection-toolbar--sticky { position: sticky; top: 64px; z-index: 20; }
+	.collection-toolbar__summary { display: flex; flex-direction: column; gap: 0.2rem; font-family: var(--font-jetbrains-mono), monospace; font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+	.collection-toolbar__summary strong { color: var(--text-primary-content); font-weight: 600; }
+	.collection-toolbar__controls { display: flex; flex-wrap: wrap; gap: 0.5rem; min-width: 0; }
+	.collection-toolbar__actions { display: flex; gap: 0.5rem; }
+	@media (max-width: 720px) {
+		.collection-toolbar { grid-template-columns: 1fr; align-items: stretch; }
+		.collection-toolbar__summary { flex-direction: row; justify-content: space-between; }
+		.collection-toolbar__actions > :global(*) { flex: 1; }
+	}
+</style>
