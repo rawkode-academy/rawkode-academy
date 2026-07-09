@@ -1,0 +1,79 @@
+---
+interface MetaItem {
+	label: string;
+	value: string;
+}
+
+interface Props {
+	kind: string;
+	title: string;
+	href: string;
+	description?: string;
+	image?: string;
+	imageAlt?: string;
+	meta?: MetaItem[];
+	accent?: "spruce" | "amber" | "rust" | "violet";
+	featured?: boolean;
+}
+
+const {
+	kind,
+	title,
+	href,
+	description,
+	image,
+	imageAlt = "",
+	meta = [],
+	accent = "spruce",
+	featured = false,
+} = Astro.props as Props;
+---
+
+<article class:list={["content-card", `content-card--${accent}`, { "content-card--featured": featured }]}>
+	<a href={href} class="content-card__link">
+		{image ? (
+			<div class="content-card__media"><img src={image} alt={imageAlt} loading="lazy" /></div>
+		) : (
+			<div class="content-card__monogram" aria-hidden="true">{title.charAt(0)}</div>
+		)}
+		<div class="content-card__body">
+			<p class="content-card__kind">{kind}</p>
+			<h3>{title}</h3>
+			{description && <p class="content-card__description">{description}</p>}
+			{meta.length > 0 && (
+				<dl class="content-card__meta">
+					{meta.map((item) => <div><dt>{item.label}</dt><dd>{item.value}</dd></div>)}
+				</dl>
+			)}
+		</div>
+	</a>
+</article>
+
+<style>
+	.content-card { --card-accent: var(--editorial-spruce); border-top: 2px solid var(--card-accent); border-bottom: 1px solid var(--surface-border); }
+	.content-card--amber { --card-accent: var(--editorial-amber-text); }
+	.content-card--rust { --card-accent: var(--editorial-rust); }
+	.content-card--violet { --card-accent: var(--editorial-violet); }
+	.content-card__link { display: grid; grid-template-columns: minmax(9rem, 0.42fr) minmax(0, 1fr); color: inherit; text-decoration: none; }
+	.content-card__media,
+	.content-card__monogram { aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface-card); border-right: 1px solid var(--surface-border); }
+	.content-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--duration-slow) var(--ease-out); }
+	.content-card__monogram { display: grid; place-items: center; color: var(--card-accent); font-family: var(--font-instrument-serif), serif; font-size: clamp(4rem, 9vw, 8rem); }
+	.content-card__body { display: flex; flex-direction: column; gap: 0.65rem; padding: clamp(1rem, 3vw, 1.75rem); min-width: 0; }
+	.content-card__kind { margin: 0; color: var(--card-accent); font-family: var(--font-jetbrains-mono), monospace; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; }
+	.content-card h3 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.8rem); font-weight: 650; line-height: 1.05; letter-spacing: -0.025em; }
+	.content-card__description { max-width: 60ch; margin: 0; color: var(--text-secondary-content); line-height: 1.5; }
+	.content-card__meta { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin: auto 0 0; padding-top: 0.75rem; }
+	.content-card__meta div { display: flex; gap: 0.35rem; font-family: var(--font-jetbrains-mono), monospace; font-size: 0.64rem; text-transform: uppercase; }
+	.content-card__meta dt { color: var(--text-muted); }
+	.content-card__meta dd { margin: 0; }
+	.content-card__link:hover h3 { color: var(--card-accent); }
+	.content-card__link:hover img { transform: scale(1.025); }
+	.content-card--featured .content-card__link { grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr); }
+	@media (max-width: 640px) {
+		.content-card__link,
+		.content-card--featured .content-card__link { grid-template-columns: 1fr; }
+		.content-card__media,
+		.content-card__monogram { border-right: 0; border-bottom: 1px solid var(--surface-border); }
+	}
+</style>

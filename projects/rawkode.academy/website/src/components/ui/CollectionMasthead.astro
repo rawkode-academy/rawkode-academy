@@ -1,4 +1,6 @@
 ---
+import PageMasthead from "@/components/ui/PageMasthead.astro";
+
 interface Props {
 	title: string;
 	dek?: string | undefined;
@@ -7,54 +9,4 @@ interface Props {
 const { title, dek } = Astro.props as Props;
 ---
 
-<header class="collection-masthead">
-	<h1 class="collection-masthead__title">{title}</h1>
-	{dek && <p class="collection-masthead__dek">{dek}</p>}
-</header>
-
-<style>
-	.collection-masthead {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 1.125rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.collection-masthead__title {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: clamp(1.75rem, 3vw, 2.5rem);
-		font-weight: 700;
-		line-height: 1;
-		letter-spacing: 0;
-		margin: 0;
-	}
-
-	.collection-masthead__dek {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.4;
-		color: var(--editorial-ink-soft);
-		text-align: right;
-		margin: 0;
-	}
-
-	@media (max-width: 880px) {
-		.collection-masthead {
-			align-items: flex-start;
-			flex-direction: column;
-			gap: 0.25rem;
-			padding: 0.875rem 1rem;
-		}
-		.collection-masthead__title {
-			font-size: 1.875rem;
-		}
-		.collection-masthead__dek {
-			font-size: 0.875rem;
-			text-align: left;
-		}
-	}
-</style>
+<PageMasthead title={title} dek={dek} variant="collection" />

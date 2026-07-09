@@ -1,0 +1,122 @@
+---
+interface Props {
+	section?: string | undefined;
+	title: string;
+	dek?: string | undefined;
+	meta?: string[] | undefined;
+	variant?: "collection" | "detail" | "feature";
+	align?: "split" | "stack";
+}
+
+const {
+	section,
+	title,
+	dek,
+	meta = [],
+	variant = "collection",
+	align = "split",
+} = Astro.props as Props;
+---
+
+<header class:list={["page-masthead", `page-masthead--${variant}`, `page-masthead--${align}`]}>
+	<div class="page-masthead__inner">
+		<div class="page-masthead__heading">
+			{section && <p class="page-masthead__section">{section}</p>}
+			<h1>{title}</h1>
+		</div>
+		{(dek || meta.length > 0 || Astro.slots.has("actions")) && (
+			<div class="page-masthead__support">
+				{dek && <p class="page-masthead__dek">{dek}</p>}
+				{meta.length > 0 && (
+					<ul class="page-masthead__meta" aria-label="Page information">
+						{meta.map((item) => <li>{item}</li>)}
+					</ul>
+				)}
+				{Astro.slots.has("actions") && <div class="page-masthead__actions"><slot name="actions" /></div>}
+			</div>
+		)}
+	</div>
+</header>
+
+<style>
+	.page-masthead {
+		border-bottom: 1px solid var(--surface-border);
+		background: var(--surface-base);
+		color: var(--text-primary-content);
+	}
+
+	.page-masthead__inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+		gap: clamp(2rem, 6vw, 7rem);
+		align-items: end;
+		max-width: var(--layout-wide);
+		margin: 0 auto;
+		padding: clamp(1.5rem, 4vw, 3.75rem) var(--space-page-pad-inline);
+	}
+
+	.page-masthead--collection .page-masthead__inner { padding-block: clamp(1.25rem, 2.5vw, 2.25rem); }
+	.page-masthead--feature .page-masthead__inner { padding-block: clamp(3rem, 8vw, 8rem); }
+	.page-masthead--stack .page-masthead__inner { grid-template-columns: 1fr; gap: 1.25rem; }
+
+	.page-masthead__heading { min-width: 0; }
+
+	.page-masthead__section {
+		margin: 0 0 0.85rem;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		line-height: 1;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+	}
+
+	.page-masthead h1 {
+		margin: 0;
+		font-family: var(--font-instrument-serif), Georgia, serif;
+		font-size: var(--type-page-title);
+		font-style: normal;
+		font-weight: 400;
+		line-height: 0.98;
+		letter-spacing: -0.035em;
+		text-wrap: balance;
+		overflow-wrap: anywhere;
+	}
+
+	.page-masthead--detail h1 { font-size: var(--type-feature); }
+	.page-masthead--feature h1 { font-size: var(--type-display); max-width: 15ch; }
+
+	.page-masthead__support { display: flex; flex-direction: column; gap: 1rem; }
+
+	.page-masthead__dek {
+		max-width: 42rem;
+		margin: 0;
+		color: var(--text-secondary-content);
+		font-size: clamp(1rem, 1.4vw, 1.25rem);
+		line-height: 1.5;
+	}
+
+	.page-masthead__meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem 1rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--text-muted);
+	}
+
+	.page-masthead__meta li + li::before { content: "·"; margin-right: 1rem; }
+	.page-masthead__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+	@media (max-width: 760px) {
+		.page-masthead__inner { grid-template-columns: 1fr; gap: 1rem; }
+		.page-masthead--feature .page-masthead__inner { padding-block: 3rem; }
+		.page-masthead--feature h1 { font-size: clamp(3.2rem, 17vw, 5rem); }
+	}
+</style>

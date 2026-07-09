@@ -1,6 +1,6 @@
 ---
 name: Rawkode Academy Website
-description: Practitioner-led cloud-native education with an engineering journal visual system.
+description: Practitioner-led cloud-native education with a modern technical-publication visual system.
 colors:
   editorial-paper: "oklch(0.97 0.008 85)"
   editorial-paper-deep: "oklch(0.93 0.012 85)"
@@ -93,11 +93,11 @@ components:
 
 ## 1. Overview
 
-**Creative North Star: "The Engineering Field Journal"**
+**Creative North Star: "The Technical Publication for Practitioners"**
 
-Rawkode Academy uses a restrained editorial system for practical technical learning: paper-like surfaces, ink-led typography, sharp corners, ruled divisions, and a small set of earthy accents. The system should feel like a published engineering notebook with production evidence attached, not a generic developer landing page.
+Rawkode Academy uses a modern publication system for practical technical learning: wide media and reading canvases, decisive hierarchy, paper-like surfaces, sharp rules, and a small set of evidence-led accents. The system should feel like the technical publication developers keep open while they work, not a generic developer landing page or a themed documentation portal.
 
-The active codebase describes the visual identity as "engineering journal meets terminal". Preserve that by pairing Instrument Serif for selective display moments, Inter Tight for dense readable UI and prose, and JetBrains Mono for metadata, labels, and schedule-like information. The site can be content-heavy, but each page should keep hierarchy clear and avoid burying decisions in decorative cards.
+Instrument Serif is reserved for one defining display moment per page. Inter Tight carries navigation, section hierarchy, dense readable UI, and prose. JetBrains Mono is limited to metadata, labels, schedules, and technical identifiers. The site can be content-heavy, but every page must make the next useful artifact obvious without burying decisions in decorative cards.
 
 The system rejects slideware polish, broad SaaS gradients, paid-media gloss, fake simplicity, and open-ended consulting posture. Commercial pages should feel as specific and bounded as technical pages.
 
@@ -106,8 +106,9 @@ The system rejects slideware polish, broad SaaS gradients, paid-media gloss, fak
 - Paper and ink surfaces with spruce, amber, rust, and violet accents.
 - Sharp editorial radii from 2px to 8px, not soft rounded cards.
 - Hairline borders and tonal layering before shadows.
-- Dense but readable layouts with deliberate section rhythm.
+- Wide, scan-friendly layouts with deliberate section rhythm.
 - Copy that names real technical work, tradeoffs, and boundaries.
+- A compact publication masthead and full navigation drawer instead of a persistent application sidebar.
 
 ## 2. Colors
 
@@ -160,7 +161,7 @@ The palette is an editorial paper and ink system with restrained practitioner ac
 
 ### Named Rules
 
-**The Display Scarcity Rule.** Large italic serif type is a signal. Use it for decisive moments, not as a site-wide reflex.
+**The Display Scarcity Rule.** Large serif type is a signal. Use it once for the defining page statement; use sans-serif hierarchy for sections and long-form reading.
 
 **The Metadata Rule.** Mono labels must describe concrete metadata or state. Avoid using mono as generic developer costume.
 
@@ -209,7 +210,14 @@ The default elevation model is flat and structural. Light-mode surfaces rely on 
 
 ### Navigation
 
-Navigation should be predictable and compact. Use clear text labels, visible hover/focus states, and avoid oversized marketing nav treatments. Mobile navigation must preserve access to content collections, search, and organization contact paths.
+Navigation uses a compact sticky publication masthead with direct links to the primary learning formats, a search trigger, and an accessible full navigation drawer. Do not reintroduce a persistent desktop sidebar. Mobile navigation must preserve access to every collection while keeping the masthead controls within a 320px viewport.
+
+### Layout Contracts
+
+- **Prose** (`--layout-prose`): articles, policies, ADR bodies, and focused utility copy.
+- **Content** (`--layout-content`): detail pages, curricula, search, and collection results.
+- **Wide** (`--layout-wide`): video, technology matrix, landing features, and dense comparison surfaces.
+- Page families assemble `PageMasthead`, `CollectionToolbar`, `ContentCard`, and `DetailFrame` before introducing route-local layout CSS.
 
 ### Editorial Shell
 
@@ -232,5 +240,6 @@ The editorial shell is the signature layout for about and commercial surfaces: m
 - **Don't** frame partnerships as outsourced DevRel, open-ended consulting retainers, lead generation, guaranteed coverage, or editorial placement.
 - **Don't** use gradient text, glassmorphism, broad purple-blue gradients, oversized rounded cards, or decorative soft shadows.
 - **Don't** repeat tiny uppercase eyebrows above every section unless the section genuinely needs metadata.
+- **Don't** introduce a new route-local masthead, filter bar, card anatomy, or content-width value when a publication contract covers it.
 - **Don't** use mono labels when the text is not metadata, state, or a technical identifier.
 - **Don't** let muted text carry long body copy on tinted surfaces if contrast falls below WCAG AA.

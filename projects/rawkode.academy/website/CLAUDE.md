@@ -15,9 +15,9 @@ bun run sync:content  # Sync GraphQL content
 
 ## Component Library & Design System
 
-### Theme: Editorial — "Engineering journal meets terminal"
+### Theme: Modern technical publication
 
-The website ships a single design system: warm paper surfaces with deep ink type, italic serif display headings, geometric sans body, and mono microcopy. Light and dark colour schemes share the same vocabulary — values invert, names do not.
+The website ships a single design system: warm paper surfaces, deep ink type, a scarce serif display voice, compact sans hierarchy, and mono metadata. Light and dark colour schemes share the same vocabulary — values invert, names do not. A compact publication masthead replaces the former persistent sidebar so reading, video, and comparison pages retain the full canvas.
 
 #### Atomic CSS engine
 

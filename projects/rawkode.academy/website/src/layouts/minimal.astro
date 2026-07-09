@@ -21,11 +21,15 @@ const { title, description, noindex } = Astro.props;
     {noindex && <meta name="robots" content="noindex,follow" />}
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0f" />
+    <meta
+      name="theme-color"
+      content="#f8f5ef"
+      data-light-color="#f8f5ef"
+      data-dark-color="#1b1b23"
+    />
     <ThemeScript />
   </head>
-  <body class="h-full w-full bg-white dark:bg-black text-primary-content">
+  <body class="h-full w-full text-primary-content">
     <slot />
   </body>
 </html>
