@@ -53,6 +53,21 @@ describe("design tokens", () => {
 		expect(appLayout).not.toContain('components/sidebar/Sidebar.astro');
 	});
 
+	it("keeps the applied color scheme authoritative", () => {
+		const globalCss = readFileSync(join(projectRoot, "src/styles/global.css"), "utf-8");
+		const pageWrapper = readFileSync(join(projectRoot, "src/wrappers/page.astro"), "utf-8");
+		const publicationNav = readFileSync(
+			join(projectRoot, "src/components/navigation/PublicationNav.astro"),
+			"utf-8",
+		);
+
+		expect(globalCss).toMatch(/:root\s*\{[\s\S]*?color-scheme:\s*light;/);
+		expect(globalCss).toMatch(/html\.dark\s*\{[\s\S]*?color-scheme:\s*dark;/);
+		expect(pageWrapper).not.toContain("color-scheme: light dark");
+		expect(publicationNav).toContain("background: var(--terminal-bg)");
+		expect(publicationNav).toContain("color: var(--terminal-text)");
+	});
+
 	it("uses editorial tokens instead of raw gray-* utilities", () => {
 		const violations: string[] = [];
 

@@ -185,7 +185,7 @@ const isCurrent = (href: string) =>
 		position: absolute;
 		inset: 0;
 		border: 0;
-		background: color-mix(in oklab, var(--editorial-ink) 46%, transparent);
+		background: color-mix(in oklab, var(--terminal-bg) 72%, transparent);
 		cursor: pointer;
 	}
 
@@ -198,7 +198,7 @@ const isCurrent = (href: string) =>
 		overflow-y: auto;
 		background: var(--surface-base);
 		border-bottom: 1px solid var(--surface-border-strong);
-		box-shadow: 0 1rem 3rem color-mix(in oklab, var(--editorial-ink) 16%, transparent);
+		box-shadow: 0 1rem 3rem color-mix(in oklab, var(--terminal-bg) 52%, transparent);
 	}
 
 	.publication-nav__intro {
@@ -206,8 +206,8 @@ const isCurrent = (href: string) =>
 		flex-direction: column;
 		gap: 1rem;
 		padding: var(--space-page-pad-block) var(--space-page-pad-inline);
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
+		background: var(--terminal-bg);
+		color: var(--terminal-text);
 	}
 
 	.publication-nav__kicker,
@@ -239,7 +239,7 @@ const isCurrent = (href: string) =>
 		gap: 1rem;
 		margin-top: auto;
 		padding-top: 1rem;
-		border-top: 1px solid color-mix(in oklab, var(--editorial-paper) 28%, transparent);
+		border-top: 1px solid var(--terminal-border);
 		color: inherit;
 		font-weight: 600;
 		text-decoration: none;

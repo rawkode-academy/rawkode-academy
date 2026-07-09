@@ -37,7 +37,7 @@
 	--editorial-violet: oklch(0.50 0.13 290);
 
 	/* Light-mode surface tokens */
-	color-scheme: light dark;
+	color-scheme: light;
 	--surface-base: var(--editorial-paper);
 	--surface-overlay: oklch(0.97 0.008 85 / 0.94);
 	--surface-card: var(--editorial-paper-deep);
@@ -99,6 +99,8 @@
 }
 
 html.dark {
+	color-scheme: dark;
+
 	/* Dark-mode editorial palette — ink-dark ground with paper-dark surfaces.
 	   The triplet legacy tokens stay; only the value brightens slightly for
 	   contrast on dark. */
