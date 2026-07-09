@@ -6,6 +6,8 @@ on:
   pull_request:
     paths:
     - .github/workflows/rawkode-academy-studio-pullrequest.yml
+    - bun.lock
+    - bun.lock/**
     - cue.mod/**
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.studio/astro.config.mts
@@ -15,6 +17,7 @@ on:
     - projects/rawkode.studio/package.json
     - projects/rawkode.studio/package.json/**
     - projects/rawkode.studio/schema/**
+    - projects/rawkode.studio/scripts/**
     - projects/rawkode.studio/src/**
     - projects/rawkode.studio/tsconfig.json
     - projects/rawkode.studio/tsconfig.json/**
@@ -32,7 +35,6 @@ jobs:
   rawkode-academy-studio-pullRequest:
     name: rawkode-academy-studio-pullRequest
     runs-on: namespace-profile-linux-x86
-    environment: production
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -79,10 +81,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
-    - name: Setup 1Password
-      run: cuenv exec -- cuenv secrets setup onepassword
-      env:
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: 'Run pipeline: pullRequest'
       run: cuenv ci --pipeline pullRequest --path projects/rawkode.studio
       env:
@@ -90,5 +88,3 @@ jobs:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_REF_TYPE: ${{ github.ref_type }}
         GITHUB_REF_NAME: ${{ github.ref_name }}
-        CUENV_ENVIRONMENT: production
-        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}

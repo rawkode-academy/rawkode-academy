@@ -8,6 +8,8 @@ on:
     - main
     paths:
     - .github/workflows/rawkode-academy-studio-default.yml
+    - bun.lock
+    - bun.lock/**
     - cue.mod/**
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.studio/astro.config.mts
@@ -17,6 +19,7 @@ on:
     - projects/rawkode.studio/package.json
     - projects/rawkode.studio/package.json/**
     - projects/rawkode.studio/schema/**
+    - projects/rawkode.studio/scripts/**
     - projects/rawkode.studio/src/**
     - projects/rawkode.studio/tsconfig.json
     - projects/rawkode.studio/tsconfig.json/**

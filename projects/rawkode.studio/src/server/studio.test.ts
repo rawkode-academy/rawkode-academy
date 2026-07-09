@@ -9,25 +9,38 @@ import {
 	createStudioRecordingUpload,
 	createStudioSession,
 	endStudioSession,
+	heartbeatStudioStream,
+	heartbeatStudioRecording,
 	issueStudioParticipantToken,
 	markStudioRecordingReady,
+	StudioOperationError,
 	startStudioStream,
 	stopStudioStream,
+	takeOverStudioStream,
 	uploadStudioRecordingPart,
 } from "./operations";
+import { operationErrorResponse } from "./http";
 import {
 	buildStudioSession,
+	claimStudioStreamStart,
+	createRecordingId,
 	createReadyMarker,
 	createReadyMarkerKey,
+	expireStaleStudioStreams,
 	getPublicStudioLiveState,
 	getStudioSession,
 	getStudioSessionWatchUrl,
+	hasFreshStudioContentStreamConflict,
 	hashInviteToken,
 	listStudioRecordings,
+	listStudioSessions,
+	listStudioSessionsForUser,
 	loadStudioDashboard,
+	redeemStudioInvite,
 	resolveStudioInvite,
 	userCanManageStudioSession,
 } from "./studio";
+import { createRealtimeKitCustomParticipantId } from "./realtimekit";
 
 const user = {
 	id: "rawkode",
@@ -72,6 +85,16 @@ type StudioInviteDbRow = {
 	revoked_at: number | null;
 };
 
+type StudioParticipantDbRow = {
+	github_handle: string | null;
+	image_url: string | null;
+	name: string;
+	realtimekit_participant_id: string | null;
+	role: "guest" | "host" | "producer" | "program";
+	session_id: string;
+	user_id: string;
+};
+
 type StudioDbMockOptions = Partial<{
 	content_guests_json: string;
 	content_hosts_json: string;
@@ -80,12 +103,16 @@ type StudioDbMockOptions = Partial<{
 	cloudflare_stream_live_input_id: string | null;
 	cloudflare_stream_playback_url: string | null;
 	realtimekit_meeting_id: string | null;
+	recording_heartbeat_at: number | null;
+	recording_lease_grace_until: number | null;
+	recording_lease_id: string | null;
 	recording_status: "failed" | "idle" | "recording" | "transcoding" | "uploaded" | "vod-ready";
 	show_id: string;
 	show_title: string;
 	status: "complete" | "live" | "recording" | "scheduled";
 	stream_ended_at: number | null;
 	stream_environment: "prod" | "test";
+	stream_heartbeat_at: number | null;
 	stream_notification_queued_at: number | null;
 	stream_start_token: string | null;
 	stream_started_at: number | null;
@@ -93,18 +120,33 @@ type StudioDbMockOptions = Partial<{
 	title: string;
 }> & {
 	inviteRows?: StudioInviteDbRow[];
+	liveReplacementToken?: string;
+	participantRows?: StudioParticipantDbRow[];
+	participantWriteFailures?: number;
+	recordingInsertFailures?: number;
 	recordingRows?: StudioRecordingDbRow[];
 	redemptionRows?: Array<{ token_hash: string; user_id: string }>;
+	takeoverReplacementToken?: string;
 };
 
 function createStudioDbMock(options: StudioDbMockOptions = {}) {
 	const {
 		inviteRows = [],
+		liveReplacementToken,
+		participantRows = [],
+		participantWriteFailures = 0,
+		recordingInsertFailures = 0,
 		recordingRows = [],
 		redemptionRows = [],
+		takeoverReplacementToken,
 		...overrides
 	} = options;
+	let pendingTakeoverReplacementToken = takeoverReplacementToken;
+	let pendingLiveReplacementToken = liveReplacementToken;
+	let pendingParticipantWriteFailures = participantWriteFailures;
+	let pendingRecordingInsertFailures = recordingInsertFailures;
 	const writes: Array<{ params: unknown[]; sql: string }> = [];
+	const reads: Array<{ params: unknown[]; sql: string }> = [];
 	const sessionRow = {
 		id: "rawkode-live-next",
 		content_video_id: null,
@@ -117,6 +159,9 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		starts_at: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
 		status: "scheduled",
 		recording_status: "idle",
+		recording_lease_id: null,
+		recording_heartbeat_at: null,
+		recording_lease_grace_until: null,
 		realtimekit_meeting_id: null,
 		recording_prefix: "studio/recordings/rawkode-live-next/",
 		stream_environment: "test",
@@ -125,6 +170,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		cloudflare_stream_playback_url: null,
 		stream_started_at: null,
 		stream_ended_at: null,
+		stream_heartbeat_at: Math.floor(Date.now() / 1000),
 		stream_notification_queued_at: null,
 		stream_start_token: null,
 		created_by_id: "rawkode",
@@ -135,18 +181,60 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 	};
 	const db = {
 		prepare: (sql: string) => {
-			const all = async (...params: unknown[]) => ({
+			const all = async (...params: unknown[]) => {
+				reads.push({ sql, params });
+				return {
 				results: sql.includes("FROM studio_recordings")
-					? recordingRows.filter((row) => row.session_id === params[0])
+					? recordingRows
+						.filter((row) => row.session_id === params[0])
+						.sort((left, right) =>
+							right.created_at - left.created_at || right.updated_at - left.updated_at
+						)
+						.slice(0, sql.includes("LIMIT 50") ? 50 : undefined)
 					: sql.includes("FROM studio_sessions")
 						? [sessionRow]
 						: [],
-			});
+			};
+			};
 			return {
 				all: async () => all(),
 				bind: (...params: unknown[]) => ({
 					all: async () => all(...params),
 					first: async () => {
+						reads.push({ sql, params });
+						if (sql.includes("JOIN studio_recordings AS recording")) {
+							return sessionRow.id === String(params[0]) &&
+								recordingRows.some((row) =>
+									row.video_id === sessionRow.content_video_id
+								)
+								? { claimed: 1 }
+								: null;
+						}
+						if (sql.includes("FROM studio_recordings")) {
+							const matchingRows = sql.includes("WHERE video_id = ?")
+								? recordingRows.filter((row) => row.video_id === String(params[0]))
+								: sql.includes("WHERE recording_id = ?")
+									? recordingRows.filter((row) => row.recording_id === String(params[0]))
+									: recordingRows.filter((row) => row.session_id === String(params[0]));
+							return matchingRows
+								.sort((left, right) =>
+									right.created_at - left.created_at || right.updated_at - left.updated_at
+								)[0] ?? null;
+						}
+						if (sql.includes("SELECT realtimekit_participant_id")) {
+							return participantRows.find((row) =>
+								row.session_id === String(params[0]) &&
+								row.user_id === String(params[1]) &&
+								row.role === String(params[2])
+							) ?? null;
+						}
+						if (sql.includes("SELECT role") && sql.includes("FROM studio_participants")) {
+							return participantRows.find((row) =>
+								row.session_id === String(params[0]) &&
+								(row.user_id === String(params[1]) || row.github_handle === params[2]) &&
+								["host", "producer", "program"].includes(row.role)
+							) ?? null;
+						}
 						if (sql.includes("FROM studio_invites")) {
 							const tokenHash = String(params[0] ?? "");
 							const userId = String(params[1] ?? "");
@@ -174,10 +262,15 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 						}
 						if (sql.includes("content_video_slug = ?")) {
 							const videoSlug = String(params[0] ?? "");
+							const heartbeatIsFresh =
+								!sql.includes("stream_heartbeat_at >= unixepoch() - 20") ||
+								(sessionRow.stream_heartbeat_at !== null &&
+									sessionRow.stream_heartbeat_at >= Math.floor(Date.now() / 1000) - 20);
 							return sessionRow.content_video_slug === videoSlug &&
 								sessionRow.stream_environment === "prod" &&
 								sessionRow.stream_status === "live" &&
 								sessionRow.status === "live" &&
+								heartbeatIsFresh &&
 								sessionRow.cloudflare_stream_playback_url
 								? sessionRow
 								: null;
@@ -187,7 +280,76 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 					run: async () => {
 						let changes = 1;
 						writes.push({ sql, params });
+						if (sql.includes("INSERT INTO studio_invite_redemptions")) {
+							const tokenHash = String(params[0]);
+							const userId = String(params[1]);
+							const invite = inviteRows.find((row) => row.token_hash === tokenHash);
+							const alreadyRedeemed = redemptionRows.some((row) =>
+								row.token_hash === tokenHash && row.user_id === userId
+							);
+							const redemptionCount = redemptionRows.filter((row) =>
+								row.token_hash === tokenHash
+							).length;
+							if (
+								invite &&
+								!invite.revoked_at &&
+								invite.expires_at > Math.floor(Date.now() / 1000) &&
+								!alreadyRedeemed &&
+								(invite.max_uses === 0 || redemptionCount < invite.max_uses)
+							) {
+								redemptionRows.push({ token_hash: tokenHash, user_id: userId });
+							} else {
+								changes = 0;
+							}
+						}
+						if (
+							sql.includes("UPDATE studio_invites") &&
+							sql.includes("SELECT COUNT(*)")
+						) {
+							const tokenHash = String(params[1]);
+							const invite = inviteRows.find((row) => row.token_hash === tokenHash);
+							if (invite) {
+								invite.used_count = redemptionRows.filter((row) =>
+									row.token_hash === tokenHash
+								).length;
+							} else {
+								changes = 0;
+							}
+						}
+						if (sql.includes("INSERT INTO studio_participants")) {
+							if (pendingParticipantWriteFailures > 0) {
+								pendingParticipantWriteFailures -= 1;
+								throw new Error("simulated participant persistence failure");
+							}
+							const nextRow: StudioParticipantDbRow = {
+								github_handle: params[2] === null ? null : String(params[2]),
+								image_url: params[5] === null ? null : String(params[5]),
+								name: String(params[4]),
+								realtimekit_participant_id:
+									params[6] === null ? null : String(params[6]),
+								role: params[3] as StudioParticipantDbRow["role"],
+								session_id: String(params[0]),
+								user_id: String(params[1]),
+							};
+							const existing = participantRows.find((row) =>
+								row.session_id === nextRow.session_id &&
+								row.user_id === nextRow.user_id &&
+								row.role === nextRow.role
+							);
+							if (existing) {
+								Object.assign(existing, nextRow, {
+									realtimekit_participant_id:
+										nextRow.realtimekit_participant_id ?? existing.realtimekit_participant_id,
+								});
+							} else {
+								participantRows.push(nextRow);
+							}
+						}
 						if (sql.includes("INSERT INTO studio_recordings")) {
+							if (pendingRecordingInsertFailures > 0) {
+								pendingRecordingInsertFailures -= 1;
+								throw new Error("simulated recording persistence failure");
+							}
 							const now = Math.floor(Date.now() / 1000);
 							const recordingId = String(params[0]);
 							const nextRow: StudioRecordingDbRow = {
@@ -204,17 +366,13 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								created_at: now,
 								updated_at: now,
 							};
-							const existingIndex = recordingRows.findIndex((row) =>
-								row.recording_id === recordingId
+							const identityClaimed = recordingRows.some((row) =>
+								row.recording_id === recordingId || row.video_id === nextRow.video_id
 							);
-							if (existingIndex >= 0) {
-								recordingRows[existingIndex] = {
-									...recordingRows[existingIndex],
-									...nextRow,
-									created_at: recordingRows[existingIndex].created_at,
-								};
-							} else {
+							if (!identityClaimed) {
 								recordingRows.unshift(nextRow);
+							} else {
+								changes = 0;
 							}
 						}
 						if (sql.includes("UPDATE studio_recordings")) {
@@ -229,13 +387,161 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 						}
 						if (sql.includes("UPDATE studio_sessions")) {
 							const now = Math.floor(Date.now() / 1000);
-							if (sql.includes("recording_status = ?")) {
+								if (
+									sql.includes("stream_heartbeat_at = NULL") &&
+									sql.includes("unixepoch() - 120") &&
+									sql.includes("unixepoch() - 20")
+								) {
+									const matchesSession = params.length === 0 || String(params[0]) === sessionRow.id;
+									const timeoutSeconds = sessionRow.stream_status === "starting" ? 120 : 20;
+									const leaseExpired = sessionRow.stream_heartbeat_at === null ||
+										sessionRow.stream_heartbeat_at < now - timeoutSeconds;
+								if (
+									matchesSession &&
+									(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live") &&
+									leaseExpired
+								) {
+									if (sessionRow.status === "live") {
+										sessionRow.status = "scheduled";
+									}
+									sessionRow.stream_status = "ended";
+									sessionRow.stream_start_token = null;
+									sessionRow.stream_heartbeat_at = null;
+									sessionRow.stream_ended_at ??= now;
+								} else {
+									changes = 0;
+								}
+							}
+							if (
+								sql.includes("SET recording_status = 'recording'") &&
+								sql.includes("recording_lease_id = ?")
+							) {
+								const canonical = recordingRows.find((row) =>
+									row.video_id === sessionRow.content_video_id
+								);
+								const exactRetry = canonical?.session_id === sessionRow.id &&
+									canonical.recording_id === String(params[2]);
+								if (
+									sessionRow.id === String(params[1]) &&
+									sessionRow.stream_environment === "prod" &&
+									sessionRow.content_video_id !== null &&
+									(sessionRow.status !== "complete" || exactRetry) &&
+									sessionRow.recording_status !== "recording" &&
+									sessionRow.recording_lease_id === null &&
+									(!canonical || exactRetry)
+								) {
+									sessionRow.recording_status = "recording";
+									sessionRow.recording_lease_id = String(params[0]);
+									sessionRow.recording_heartbeat_at = now;
+									sessionRow.recording_lease_grace_until = null;
+								} else {
+									changes = 0;
+								}
+							} else if (sql.includes("recording_lease_id = COALESCE")) {
+								const recordingId = String(params[0]);
+								const ownsActiveLease =
+									sessionRow.recording_lease_id === String(params[2]) &&
+									sessionRow.recording_heartbeat_at !== null &&
+									sessionRow.recording_heartbeat_at >= now - 120;
+								const canAdoptLegacyLease =
+									sessionRow.recording_lease_id === null &&
+									sessionRow.recording_lease_grace_until !== null &&
+									sessionRow.recording_lease_grace_until > now;
+								if (
+									sessionRow.id === String(params[1]) &&
+									sessionRow.status !== "complete" &&
+									sessionRow.recording_status === "recording" &&
+									(ownsActiveLease || canAdoptLegacyLease)
+								) {
+									sessionRow.recording_lease_id = recordingId;
+									sessionRow.recording_heartbeat_at = now;
+									sessionRow.recording_lease_grace_until = null;
+								} else {
+									changes = 0;
+								}
+							} else if (
+								sql.includes("recording_heartbeat_at < unixepoch() - 120") &&
+								sql.includes("recording_lease_grace_until <= unixepoch()")
+							) {
+								const matchesSession = params.length === 0 || String(params[0]) === sessionRow.id;
+								const activeLeaseExpired =
+									sessionRow.recording_lease_id !== null &&
+									(sessionRow.recording_heartbeat_at === null ||
+										sessionRow.recording_heartbeat_at < now - 120);
+								const legacyLeaseExpired =
+									sessionRow.recording_lease_id === null &&
+									sessionRow.recording_status === "recording" &&
+									(sessionRow.recording_lease_grace_until === null ||
+										sessionRow.recording_lease_grace_until <= now);
+								if (matchesSession && (activeLeaseExpired || legacyLeaseExpired)) {
+									if (sessionRow.recording_status === "recording") {
+										sessionRow.recording_status = "idle";
+									}
+									sessionRow.recording_lease_id = null;
+									sessionRow.recording_heartbeat_at = null;
+									sessionRow.recording_lease_grace_until = null;
+								} else {
+									changes = 0;
+								}
+							} else if (
+								sql.includes("SET recording_status = ?") &&
+								sql.includes("recording_lease_id = NULL")
+							) {
+								if (
+									sessionRow.id === String(params[1]) &&
+									sessionRow.recording_lease_id === String(params[2])
+								) {
+									sessionRow.recording_status =
+										params[0] as NonNullable<StudioDbMockOptions["recording_status"]>;
+									sessionRow.recording_lease_id = null;
+									sessionRow.recording_heartbeat_at = null;
+									sessionRow.recording_lease_grace_until = null;
+								} else {
+									changes = 0;
+								}
+							} else if (
+								sql.includes("SET recording_status = 'uploaded'") &&
+								sql.includes("recording_lease_id IS NULL")
+							) {
+								const activeLegacyGrace =
+									sessionRow.recording_status === "recording" &&
+									sessionRow.recording_lease_grace_until !== null &&
+									sessionRow.recording_lease_grace_until > now;
+								if (
+									sessionRow.id === String(params[0]) &&
+									sessionRow.recording_lease_id === null &&
+									!activeLegacyGrace
+								) {
+									sessionRow.recording_status = "uploaded";
+								} else {
+									changes = 0;
+								}
+							} else if (sql.includes("recording_status = ?")) {
 								sessionRow.recording_status =
 									params[0] as NonNullable<StudioDbMockOptions["recording_status"]>;
 							}
 							if (sql.includes("SET status = ?")) {
-								sessionRow.status =
-									params[0] as NonNullable<StudioDbMockOptions["status"]>;
+								const hasFreshRecording = sessionRow.recording_status === "recording" && (
+									(
+										sessionRow.recording_lease_id !== null &&
+										sessionRow.recording_heartbeat_at !== null &&
+										sessionRow.recording_heartbeat_at >= now - 120
+									) || (
+										sessionRow.recording_lease_id === null &&
+										sessionRow.recording_lease_grace_until !== null &&
+										sessionRow.recording_lease_grace_until > now
+									)
+								);
+								if (
+									params[0] === "complete" &&
+									sql.includes("recording_heartbeat_at >= unixepoch() - 120") &&
+									hasFreshRecording
+								) {
+									changes = 0;
+								} else {
+									sessionRow.status =
+										params[0] as NonNullable<StudioDbMockOptions["status"]>;
+								}
 							}
 							if (
 								sql.includes("SET stream_status = 'starting'") &&
@@ -248,6 +554,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									sessionRow.stream_status = "starting";
 									sessionRow.cloudflare_stream_live_input_id = String(params[0]);
 									sessionRow.cloudflare_stream_playback_url = String(params[1]);
+									sessionRow.stream_heartbeat_at = now;
 									sessionRow.stream_started_at = null;
 									sessionRow.stream_ended_at = null;
 								} else {
@@ -265,20 +572,27 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								) {
 									sessionRow.stream_status = "starting";
 									sessionRow.stream_start_token = String(params[0]);
+									sessionRow.stream_heartbeat_at = now;
 									sessionRow.stream_started_at = null;
 									sessionRow.stream_ended_at = null;
 								} else {
 									changes = 0;
 								}
 							}
-							if (sql.includes("SET status = CASE WHEN ? = 1")) {
-								if (
+								if (sql.includes("SET status = CASE WHEN ? = 1")) {
+									if (pendingLiveReplacementToken) {
+										sessionRow.stream_status = "live";
+										sessionRow.stream_start_token = pendingLiveReplacementToken;
+										pendingLiveReplacementToken = undefined;
+									}
+									if (
 									sessionRow.stream_status === "starting" &&
 									sessionRow.stream_start_token === String(params[3])
 								) {
 									sessionRow.status = params[0] === 1 ? "live" : sessionRow.status;
 									sessionRow.stream_status = "live";
 									sessionRow.cloudflare_stream_playback_url = String(params[1]);
+									sessionRow.stream_heartbeat_at = now;
 									sessionRow.stream_started_at = now;
 									sessionRow.stream_ended_at = null;
 								} else {
@@ -304,10 +618,44 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									changes = 0;
 								}
 							}
-							if (sql.includes("stream_status = 'ended'")) {
-								if (params.length === 4) {
+							if (sql.includes("SET stream_heartbeat_at = unixepoch()")) {
+								if (
+									(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live") &&
+									sessionRow.stream_start_token === String(params[1])
+								) {
+									sessionRow.stream_heartbeat_at = now;
+								} else {
+									changes = 0;
+								}
+							}
+							if (
+								sql.includes("stream_status = 'ended'") &&
+								!sql.includes("unixepoch() - 20")
+							) {
+								if (sql.includes("stream_start_token IS ?")) {
+									if (pendingTakeoverReplacementToken) {
+										sessionRow.stream_status = "live";
+										sessionRow.stream_start_token = pendingTakeoverReplacementToken;
+										pendingTakeoverReplacementToken = undefined;
+									}
+									const matchesLease = sessionRow.stream_status === String(params[1]) &&
+										sessionRow.stream_start_token === (params[2] ?? null);
+									if (matchesLease) {
+										if (sessionRow.status === "live") {
+											sessionRow.status = "scheduled";
+										}
+										sessionRow.stream_status = "ended";
+										sessionRow.stream_start_token = null;
+										sessionRow.stream_heartbeat_at = null;
+										sessionRow.stream_ended_at ??= now;
+									} else {
+										changes = 0;
+									}
+								} else if (params.length === 4) {
 									const token = String(params[3]);
 									const matchesToken = sessionRow.stream_start_token === token;
+									const matchesActiveToken = matchesToken &&
+										(sessionRow.stream_status === "starting" || sessionRow.stream_status === "live");
 									const canPreCancel = sessionRow.stream_start_token === null &&
 										sessionRow.stream_status !== "starting" &&
 										sessionRow.stream_status !== "live";
@@ -316,7 +664,12 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 											sessionRow.status = "scheduled";
 										}
 										sessionRow.stream_status = "ended";
-										sessionRow.stream_start_token = matchesToken ? null : token;
+										sessionRow.stream_start_token = matchesActiveToken
+											? null
+											: canPreCancel
+												? token
+												: sessionRow.stream_start_token;
+										sessionRow.stream_heartbeat_at = null;
 										sessionRow.stream_ended_at ??= now;
 									} else {
 										changes = 0;
@@ -327,6 +680,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									}
 									sessionRow.stream_status = "ended";
 									sessionRow.stream_start_token = null;
+									sessionRow.stream_heartbeat_at = null;
 									sessionRow.stream_ended_at ??= now;
 								}
 							}
@@ -339,10 +693,81 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		},
 	} as unknown as D1Database;
 
-	return { db, writes };
+	return {
+		db,
+		inviteRows,
+		participantRows,
+		reads,
+		recordingRows,
+		redemptionRows,
+		sessionRow,
+		writes,
+	};
 }
 
-function createRecordingBucketMock() {
+type StudioSessionDbMockRow = ReturnType<typeof createStudioDbMock>["sessionRow"];
+
+function createMultiSessionStreamDbMock(rows: StudioSessionDbMockRow[]) {
+	const queries: string[] = [];
+	const isFreshPublisher = (row: StudioSessionDbMockRow) => {
+		const now = Math.floor(Date.now() / 1000);
+		return (
+			(row.stream_status === "starting" &&
+				row.stream_heartbeat_at !== null && row.stream_heartbeat_at >= now - 120) ||
+			(row.stream_status === "live" &&
+				row.stream_heartbeat_at !== null && row.stream_heartbeat_at >= now - 20)
+		);
+	};
+	const hasConflict = (target: StudioSessionDbMockRow) =>
+		target.stream_environment === "prod" && rows.some((other) =>
+			other.id !== target.id &&
+			other.stream_environment === "prod" &&
+			(other.content_video_id === target.content_video_id ||
+				other.content_video_slug === target.content_video_slug) &&
+			isFreshPublisher(other)
+		);
+	const db = {
+		prepare: (sql: string) => {
+			queries.push(sql);
+			return {
+				bind: (...params: unknown[]) => ({
+					first: async () => {
+						if (sql.includes("SELECT 1 AS conflicting")) {
+							const target = rows.find((row) => row.id === String(params[0]));
+							return target && hasConflict(target) ? { conflicting: 1 } : null;
+						}
+						if (sql.includes("FROM studio_sessions") && sql.includes("WHERE id = ?")) {
+							return rows.find((row) => row.id === String(params[0])) ?? null;
+						}
+						return null;
+					},
+					run: async () => {
+						if (sql.includes("SET stream_status = 'starting'")) {
+							const target = rows.find((row) => row.id === String(params[1]));
+							if (
+								target && target.status !== "complete" &&
+								target.stream_status !== "starting" && target.stream_status !== "live" &&
+								target.stream_start_token !== String(params[0]) && !hasConflict(target)
+							) {
+								target.stream_status = "starting";
+								target.stream_start_token = String(params[0]);
+								target.stream_heartbeat_at = Math.floor(Date.now() / 1000);
+								return { meta: { changes: 1, rows_written: 1 } };
+							}
+						}
+						return { meta: { changes: 0, rows_written: 0 } };
+					},
+				}),
+			};
+		},
+	} as unknown as D1Database;
+	return { db, queries, rows };
+}
+
+function createRecordingBucketMock(options: {
+	completeResponseFailures?: number;
+	markerPutFailures?: number;
+} = {}) {
 	const objects = new Map<string, { etag: string; value: string }>();
 	const uploads = new Map<
 		string,
@@ -352,6 +777,10 @@ function createRecordingBucketMock() {
 		}
 	>();
 	let uploadSequence = 0;
+	let abortCalls = 0;
+	let completeCalls = 0;
+	let pendingCompleteResponseFailures = options.completeResponseFailures ?? 0;
+	let pendingMarkerPutFailures = options.markerPutFailures ?? 0;
 
 	const objectFor = (key: string) => {
 		const object = objects.get(key);
@@ -386,6 +815,10 @@ function createRecordingBucketMock() {
 		get: async (key: string) => bodyFor(key),
 		head: async (key: string) => objectFor(key),
 		put: async (key: string, value: BodyInit) => {
+			if (pendingMarkerPutFailures > 0) {
+				pendingMarkerPutFailures -= 1;
+				throw new Error("simulated ready marker R2 failure");
+			}
 			const text = typeof value === "string"
 				? value
 				: await new Response(value).text();
@@ -402,9 +835,11 @@ function createRecordingBucketMock() {
 			}
 			return {
 				abort: async () => {
+					abortCalls += 1;
 					uploads.delete(uploadId);
 				},
 				complete: async (parts: R2UploadedPart[]) => {
+					completeCalls += 1;
 					const buffers = parts.map((part) => {
 						const uploaded = upload.parts.get(part.partNumber);
 						if (!uploaded || uploaded.etag !== part.etag) {
@@ -418,6 +853,10 @@ function createRecordingBucketMock() {
 						value: `multipart:${size}`,
 					});
 					uploads.delete(uploadId);
+					if (pendingCompleteResponseFailures > 0) {
+						pendingCompleteResponseFailures -= 1;
+						throw new Error("simulated multipart completion response loss");
+					}
 					return objectFor(key);
 				},
 				uploadPart: async (partNumber: number, body: ReadableStream) => {
@@ -438,7 +877,12 @@ function createRecordingBucketMock() {
 	} as unknown as R2Bucket;
 
 	return {
+		abortCalls: () => abortCalls,
 		bucket,
+		completeCalls: () => completeCalls,
+		putObject: (key: string, value: string, etag = `object-${objects.size + 1}`) => {
+			objects.set(key, { etag, value });
+		},
 		putJson: (key: string, value: unknown) => {
 			objects.set(key, {
 				etag: `json-${objects.size + 1}`,
@@ -449,8 +893,113 @@ function createRecordingBucketMock() {
 	};
 }
 
+function createRecordingConcurrencyDbMock(
+	videosBySession: Record<string, string>,
+): D1Database {
+	const now = Math.floor(Date.now() / 1000);
+	const sessions = new Map(
+		Object.entries(videosBySession).map(([id, videoId]) => [
+			id,
+			{
+				id,
+				content_video_id: videoId,
+				content_video_slug: `${videoId}-slug`,
+				title: `${id} production room`,
+				show_id: "rawkode-live",
+				show_title: "Rawkode Live",
+				content_hosts_json: "[]",
+				content_guests_json: "[]",
+				starts_at: new Date(Date.now() + 86_400_000).toISOString(),
+				status: "scheduled",
+				recording_status: "idle",
+				recording_lease_id: null as string | null,
+				recording_heartbeat_at: null as number | null,
+				recording_lease_grace_until: null as number | null,
+				realtimekit_meeting_id: null,
+				recording_prefix: `studio/recordings/${id}/`,
+				stream_environment: "prod",
+				stream_status: "idle",
+				cloudflare_stream_live_input_id: null,
+				cloudflare_stream_playback_url: null,
+				stream_started_at: null,
+				stream_ended_at: null,
+				stream_heartbeat_at: null,
+				stream_notification_queued_at: null,
+				stream_start_token: null,
+				created_by_id: "rawkode",
+				created_by_github: "rawkode",
+				created_at: 1,
+				updated_at: 1,
+			},
+		]),
+	);
+
+	return {
+		prepare: (sql: string) => ({
+			bind: (...params: unknown[]) => ({
+				all: async () => ({ results: [] }),
+				first: async () => {
+					if (sql.includes("JOIN studio_recordings AS recording")) return null;
+					if (sql.includes("FROM studio_sessions")) {
+						return sessions.get(String(params[0])) ?? null;
+					}
+					return null;
+				},
+				run: async () => {
+					if (
+						sql.includes("SET recording_status = 'recording'") &&
+						sql.includes("recording_lease_id = ?")
+					) {
+						const target = sessions.get(String(params[1]));
+						const activeOther = target
+							? [...sessions.values()].some((other) =>
+								other.id !== target.id &&
+								other.content_video_id === target.content_video_id &&
+								other.recording_status === "recording" &&
+								other.recording_lease_id !== null &&
+								(other.recording_heartbeat_at ?? 0) >= now - 120
+							)
+							: false;
+						if (
+							target &&
+							target.recording_status !== "recording" &&
+							target.recording_lease_id === null &&
+							!activeOther
+						) {
+							target.recording_status = "recording";
+							target.recording_lease_id = String(params[0]);
+							target.recording_heartbeat_at = now;
+							return { meta: { changes: 1 } };
+						}
+						return { meta: { changes: 0 } };
+					}
+					return { meta: { changes: 0 } };
+				},
+			}),
+		}),
+	} as unknown as D1Database;
+}
+
 afterEach(() => {
 	vi.restoreAllMocks();
+});
+
+describe("Studio API errors", () => {
+	it("returns the canonical recording claim code and 409 status", async () => {
+		const response = operationErrorResponse(
+			new StudioOperationError(
+				"recording-output-claimed",
+				"A canonical Studio recording already exists for this content video.",
+				409,
+			),
+		);
+
+		expect(response?.status).toBe(409);
+		await expect(response?.json()).resolves.toEqual({
+			code: "recording-output-claimed",
+			error: "A canonical Studio recording already exists for this content video.",
+		});
+	});
 });
 
 describe("Studio session records", () => {
@@ -546,7 +1095,7 @@ describe("Studio session records", () => {
 						"studio/recordings/rawkode-live-next/recording-1/source.webm",
 					source_etag: "complete-etag",
 					source_format: "webm",
-					output_prefix: "videos/video-123",
+					output_prefix: "videos/video-123/",
 					ready_marker_key:
 						"studio/recordings/rawkode-live-next/recording-1/ready.json",
 					status: "ready-marker-written",
@@ -561,7 +1110,16 @@ describe("Studio session records", () => {
 				return {
 					json: async () => ({
 						completedAt: "2026-08-01T11:00:00.000Z",
+						outputPrefix: "videos/video-123/",
+						recordingId: "recording-1",
+						sourceBucket: "verified-recordings",
+						sourceEtag: "complete-etag",
+						sourceFormat: "webm",
+						sourceKey:
+							"studio/recordings/rawkode-live-next/recording-1/source.webm",
 						status: "complete",
+						studioSessionId: "rawkode-live-next",
+						videoId: "video-123",
 					}),
 				};
 			},
@@ -579,7 +1137,7 @@ describe("Studio session records", () => {
 		expect(result).toHaveLength(1);
 		expect(result[0]).toMatchObject({
 			handoffStatus: "ready-marker-written",
-			outputPrefix: "videos/video-123",
+			outputPrefix: "videos/video-123/",
 			recordingId: "recording-1",
 			sourceFormat: "webm",
 			status: "vod-ready",
@@ -636,6 +1194,58 @@ describe("Studio session records", () => {
 		]);
 	});
 
+	it("ignores transcode status owned by a different recording", async () => {
+		const studioDb = createStudioDbMock({
+			recordingRows: [
+				{
+					recording_id: "recording-1",
+					session_id: "rawkode-live-next",
+					video_id: "video-123",
+					source_bucket: "verified-recordings",
+					source_key:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
+					source_etag: "complete-etag",
+					source_format: "webm",
+					output_prefix: "videos/video-123/",
+					ready_marker_key:
+						"studio/recordings/rawkode-live-next/recording-1/ready.json",
+					status: "ready",
+					created_at: 100,
+					updated_at: 120,
+				},
+			],
+		});
+		const recordings = {
+			get: async () => ({
+				json: async () => ({
+					outputPrefix: "videos/video-123/",
+					recordingId: "recording-other",
+					sourceBucket: "verified-recordings",
+					sourceEtag: "complete-etag",
+					sourceFormat: "webm",
+					sourceKey:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
+					status: "complete",
+					studioSessionId: "rawkode-live-next",
+					videoId: "video-123",
+				}),
+			}),
+		} as unknown as R2Bucket;
+
+		await expect(
+			listStudioRecordings(
+				{
+					RECORDINGS: recordings,
+					RECORDINGS_BUCKET_NAME: "verified-recordings",
+					STUDIO_DB: studioDb.db,
+				} as StudioEnv,
+				"rawkode-live-next",
+			),
+		).resolves.toMatchObject([
+			{ recordingId: "recording-1", status: "uploaded", transcode: null },
+		]);
+	});
+
 	it("shows recordings as transcoding while Cloud Run has not completed", async () => {
 		const studioDb = createStudioDbMock({
 			recordingRows: [
@@ -660,7 +1270,16 @@ describe("Studio session records", () => {
 		const recordings = {
 			get: async () => ({
 				json: async () => ({
+					outputPrefix: "videos/video-123/",
+					recordingId: "recording-1",
+					sourceBucket: "verified-recordings",
+					sourceEtag: "complete-etag",
+					sourceFormat: "webm",
+					sourceKey:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
 					status: "running",
+					studioSessionId: "rawkode-live-next",
+					videoId: "video-123",
 				}),
 			}),
 		} as unknown as R2Bucket;
@@ -710,7 +1329,16 @@ describe("Studio session records", () => {
 		const recordings = {
 			get: async () => ({
 				json: async () => ({
+					outputPrefix: "videos/video-123/",
+					recordingId: "recording-1",
+					sourceBucket: "verified-recordings",
+					sourceEtag: "complete-etag",
+					sourceFormat: "webm",
+					sourceKey:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
 					status: "failed",
+					studioSessionId: "rawkode-live-next",
+					videoId: "video-123",
 				}),
 			}),
 		} as unknown as R2Bucket;
@@ -807,6 +1435,185 @@ describe("Studio session records", () => {
 			},
 		]);
 	});
+
+	it("uses only the latest recording for session-list status derivation", async () => {
+		const recordingRows: StudioRecordingDbRow[] = Array.from(
+			{ length: 60 },
+			(_, index) => ({
+				recording_id: `recording-${index}`,
+				session_id: "rawkode-live-next",
+				video_id: `video-${index}`,
+				source_bucket: "verified-recordings",
+				source_key: `studio/recordings/rawkode-live-next/recording-${index}/source.webm`,
+				source_etag: `etag-${index}`,
+				source_format: "webm",
+				output_prefix: `videos/video-${index}/`,
+				ready_marker_key:
+					`studio/recordings/rawkode-live-next/recording-${index}/ready.json`,
+				status: "ready",
+				created_at: index,
+				updated_at: index,
+			}),
+		);
+		const studioDb = createStudioDbMock({ recordingRows });
+		const get = vi.fn(async () => null);
+		const env = {
+			RECORDINGS: { get } as unknown as R2Bucket,
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(listStudioSessions(env)).resolves.toMatchObject([
+			{ id: "rawkode-live-next", recordingStatus: "uploaded" },
+		]);
+		const latestReads = studioDb.reads.filter((read) =>
+			read.sql.includes("FROM studio_recordings")
+		);
+		expect(latestReads).toHaveLength(1);
+		expect(latestReads[0]?.sql).toContain("LIMIT 1");
+		expect(get).toHaveBeenCalledTimes(1);
+
+		await expect(listStudioRecordings(env, "rawkode-live-next")).resolves.toHaveLength(50);
+		const historyRead = [...studioDb.reads].reverse().find((read) =>
+			read.sql.includes("FROM studio_recordings")
+		);
+		expect(historyRead?.sql).toContain("LIMIT 50");
+		expect(get).toHaveBeenCalledTimes(51);
+	});
+
+	it("does not derive recording history during heartbeat control lookups", async () => {
+		const studioDb = createStudioDbMock({
+			recordingRows: [{
+				recording_id: "recording-1",
+				session_id: "rawkode-live-next",
+				video_id: "video-1",
+				source_bucket: "verified-recordings",
+				source_key: "studio/recordings/rawkode-live-next/recording-1/source.webm",
+				source_etag: "etag-1",
+				source_format: "webm",
+				output_prefix: "videos/video-1/",
+				ready_marker_key:
+					"studio/recordings/rawkode-live-next/recording-1/ready.json",
+				status: "ready",
+				created_at: 1,
+				updated_at: 1,
+			}],
+			stream_heartbeat_at: Math.floor(Date.now() / 1000),
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		const get = vi.fn(async () => null);
+
+		await expect(heartbeatStudioStream({
+			RECORDINGS: { get } as unknown as R2Bucket,
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
+		})).resolves.toMatchObject({ leaseStatus: "active" });
+
+		expect(studioDb.reads.some((read) =>
+			read.sql.includes("FROM studio_recordings")
+		)).toBe(false);
+		expect(get).not.toHaveBeenCalled();
+	});
+
+	it("orders active and upcoming sessions before recent completed history", async () => {
+		const template = createStudioDbMock().sessionRow;
+		const completed = Array.from({ length: 60 }, (_, index) => ({
+			...template,
+			id: `history-${index}`,
+			status: "complete" as const,
+			stream_status: "ended" as const,
+			starts_at: "2025-01-01T00:00:00.000Z",
+			created_at: index,
+			updated_at: index,
+		}));
+		const live = {
+			...template,
+			id: "live-session",
+			status: "live" as const,
+			stream_status: "live" as const,
+			starts_at: "2030-06-01T00:00:00.000Z",
+		};
+		const upcoming = {
+			...template,
+			id: "upcoming-session",
+			status: "scheduled" as const,
+			stream_status: "idle" as const,
+			starts_at: "2030-01-01T00:00:00.000Z",
+		};
+		const orderedRows = [
+			live,
+			upcoming,
+			...[...completed].sort((left, right) => right.updated_at - left.updated_at),
+		].slice(0, 50);
+		const sessionQueries: string[] = [];
+		const db = {
+			prepare: (sql: string) => {
+				if (sql.includes("FROM studio_recordings")) {
+					return {
+						bind: () => ({ first: async () => null }),
+					};
+				}
+				sessionQueries.push(sql);
+				const result = { results: orderedRows };
+				return {
+					all: async () => result,
+					bind: () => ({ all: async () => result }),
+				};
+			},
+		} as unknown as D1Database;
+		const env = { STUDIO_DB: db } as StudioEnv;
+
+		const all = await listStudioSessions(env);
+		const assigned = await listStudioSessionsForUser(env, user);
+		for (const sessions of [all, assigned]) {
+			expect(sessions).toHaveLength(50);
+			expect(sessions.slice(0, 2).map((session) => session.id)).toEqual([
+				"live-session",
+				"upcoming-session",
+			]);
+			expect(sessions.map((session) => session.id)).toContain("history-59");
+			expect(sessions.map((session) => session.id)).not.toContain("history-0");
+		}
+		expect(sessionQueries).toHaveLength(2);
+		for (const sql of sessionQueries) {
+			expect(sql).toContain("WHEN status IN ('live', 'recording')");
+			expect(sql).toContain("COALESCE(stream_ended_at, updated_at, created_at)");
+			expect(sql).toContain("LIMIT 50");
+		}
+	});
+
+	it("fails closed for demo sessions and invites outside development", async () => {
+		const productionEnv = {
+			STUDIO_RUNTIME_MODE: "production",
+		} as unknown as StudioEnv;
+		await expect(listStudioSessions(productionEnv)).resolves.toEqual([]);
+		await expect(listStudioSessionsForUser(productionEnv, user)).resolves.toEqual([]);
+		await expect(getStudioSession(productionEnv, "rawkode-live-next")).resolves.toBeNull();
+		await expect(resolveStudioInvite(productionEnv, "demo", guestUser)).resolves.toBeNull();
+
+		const studioDb = createStudioDbMock();
+		await expect(resolveStudioInvite({
+			STUDIO_DB: studioDb.db,
+			STUDIO_RUNTIME_MODE: "production",
+		} as unknown as StudioEnv, "demo", guestUser)).resolves.toBeNull();
+	});
+
+	it("keeps recording IDs unique when recordings start in the same millisecond", () => {
+		vi.useFakeTimers();
+		try {
+			vi.setSystemTime(new Date("2026-08-01T10:00:00.123Z"));
+			const first = createRecordingId();
+			const second = createRecordingId();
+			expect(first).not.toBe(second);
+			expect(first).toMatch(
+				/^recording-2026-08-01T10-00-00-123Z-[0-9a-f]{8}-[0-9a-f-]{27}$/,
+			);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });
 
 describe("Studio operations", () => {
@@ -897,30 +1704,41 @@ describe("Studio operations", () => {
 		});
 		expect(envCue).toContain("CLOUDFLARE_API_TOKEN: schema.#OnePasswordRef");
 		expect(envCue).toContain("op://sa.rawkode.academy/cloudflare/api-tokens/workers");
-		expect(envCue).toContain("tasks: [_t.migrations.remote, _t.check, _t.test, _t.deploy.main]");
+		expect(envCue).toContain(
+			'tasks: [_t.check, _t.test, _t.deploy."dry-run", _t.migrations.remote, _t.deploy.main]',
+		);
 		expect(envCue).toContain('tasks: [_t.check, _t.test, _t.deploy."dry-run"]');
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run migrate"]');
 		expect(envCue).toContain('args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]');
 		expect(envCue).toContain("env: PATH: _taskPath");
 	});
 
-	it("initializes the RealtimeKit room bridge with media defaults and compatible join APIs", () => {
+	it("lets RealtimeKit UI Kit own device setup and joining", () => {
 		const roomBridge = readFileSync(
 			new URL("../components/RealtimeKitRoom.vue", import.meta.url),
+			"utf8",
+		);
+		const participantSources = readFileSync(
+			new URL("../realtimekit/participantSources.ts", import.meta.url),
 			"utf8",
 		);
 		const studioApp = readFileSync(new URL("../App.vue", import.meta.url), "utf8");
 
 		expect(roomBridge).toContain("defaults: { audio: true, video: true }");
-		expect(roomBridge).toContain("const join = nextMeeting.joinRoom ?? nextMeeting.join");
-		expect(roomBridge).toContain("await join.call(nextMeeting)");
+		expect(roomBridge).not.toContain("nextMeeting.joinRoom");
+		expect(roomBridge).not.toContain("nextMeeting.join(");
+		expect(roomBridge).toContain('show-setup-screen="true"');
+		expect(roomBridge).toContain('return "Open room"');
+		expect(roomBridge).toContain('return "Close room"');
+		expect(roomBridge).toContain('return "Device setup open"');
+		expect(roomBridge).toContain(':aria-expanded="state === \'open\'"');
+		expect(roomBridge).toContain('aria-label="RealtimeKit device setup"');
 		expect(roomBridge).toContain('"media-streams-change": [payload: {');
-		expect(roomBridge).toContain("participant.audioTrack");
-		expect(roomBridge).toContain("participant.videoTrack");
-		expect(roomBridge).toContain("source-guest-camera");
-		expect(roomBridge).toContain("source-producer-camera");
-		expect(roomBridge).toContain("screenShareTracks");
-		expect(roomBridge).toContain("customParticipantId?.match(/^studio:(guest|host|producer|program):/");
+		expect(participantSources).toContain("participant.audioTrack");
+		expect(participantSources).toContain("participant.videoTrack");
+		expect(participantSources).toContain("source-realtimekit-camera-");
+		expect(participantSources).toContain("screenShareTracks");
+		expect(participantSources).toContain("studio:(guest|host|producer|program):");
 		expect(studioApp).toContain("const roomMediaStreams = shallowRef(new Map<string, MediaStream>())");
 		expect(studioApp).toContain("const roomMediaSources = shallowRef(new Map<string, StudioSource>())");
 		expect(studioApp).toContain("const streams = new Map<string, MediaStream>(roomMediaStreams.value)");
@@ -940,6 +1758,21 @@ describe("Studio operations", () => {
 			new URL("../../data-model/0003_stream_state.sql", import.meta.url),
 			"utf8",
 		);
+		const leaseMigration = readFileSync(
+			new URL("../../data-model/0005_stream_publisher_lease.sql", import.meta.url),
+			"utf8",
+		);
+		const participantIdentityMigration = readFileSync(
+			new URL(
+				"../../data-model/0006_realtimekit_participant_identity.sql",
+				import.meta.url,
+			),
+			"utf8",
+		);
+		const recordingLeaseMigration = readFileSync(
+			new URL("../../data-model/0007_recording_lease.sql", import.meta.url),
+			"utf8",
+		);
 
 		expect(migration).toContain("ADD COLUMN content_video_id TEXT");
 		expect(migration).toContain(
@@ -955,6 +1788,47 @@ describe("Studio operations", () => {
 		expect(streamMigration).toContain("ADD COLUMN cloudflare_stream_playback_url TEXT");
 		expect(streamMigration).toContain("ADD COLUMN stream_notification_queued_at INTEGER");
 		expect(streamMigration).toContain("ADD COLUMN stream_start_token TEXT");
+		expect(leaseMigration).toContain("ADD COLUMN stream_heartbeat_at INTEGER");
+		expect(leaseMigration).toContain("SET stream_heartbeat_at = unixepoch() + 120");
+		expect(leaseMigration).toContain("WHERE stream_status IN ('starting', 'live')");
+		expect(participantIdentityMigration).toContain(
+			"ADD COLUMN realtimekit_participant_id TEXT",
+		);
+		expect(participantIdentityMigration).toContain(
+			"studio_participants_realtimekit_participant_id_idx",
+		);
+		expect(participantIdentityMigration).toContain(
+			"ON studio_participants (session_id, realtimekit_participant_id)",
+		);
+		expect(participantIdentityMigration).toContain(
+			"WHERE realtimekit_participant_id IS NOT NULL",
+		);
+		expect(recordingLeaseMigration).toContain("ADD COLUMN recording_lease_id TEXT");
+		expect(recordingLeaseMigration).toContain(
+			"ADD COLUMN recording_heartbeat_at INTEGER",
+		);
+		expect(recordingLeaseMigration).toContain(
+			"ADD COLUMN recording_lease_grace_until INTEGER",
+		);
+		expect(recordingLeaseMigration).toContain("unixepoch() + 600");
+		expect(recordingLeaseMigration).toContain(
+			"studio_sessions_recording_lease_idx",
+		);
+	});
+
+	it("exposes the recording heartbeat action without requiring upload fields", () => {
+		const route = readFileSync(
+			new URL("../pages/api/studio/recording-upload.ts", import.meta.url),
+			"utf8",
+		);
+
+		expect(route).toContain('action?: "complete" | "create" | "heartbeat"');
+		expect(route).toMatch(
+			/if \(action === "heartbeat"\)[\s\S]+heartbeatStudioRecording[\s\S]+recordingId: body\.recordingId[\s\S]+sessionId: body\.sessionId/,
+		);
+		expect(route.indexOf('if (action === "heartbeat")')).toBeLessThan(
+			route.indexOf("parseSourceFormat(body.sourceFormat)"),
+		);
 	});
 
 	it("keeps active stream state stable across session upserts and notification claims", () => {
@@ -1211,7 +2085,16 @@ describe("Studio operations", () => {
 			get: async () => ({
 				json: async () => ({
 					completedAt: "2026-08-01T11:00:00.000Z",
+					outputPrefix: "videos/video-123/",
+					recordingId: "recording-1",
+					sourceBucket: "verified-recordings",
+					sourceEtag: "complete-etag",
+					sourceFormat: "webm",
+					sourceKey:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
 					status: "complete",
+					studioSessionId: "rawkode-live-next",
+					videoId: "video-123",
 				}),
 			}),
 		} as unknown as R2Bucket;
@@ -1257,7 +2140,16 @@ describe("Studio operations", () => {
 			get: async () => ({
 				json: async () => ({
 					completedAt: "2026-08-01T11:00:00.000Z",
+					outputPrefix: "videos/video-123/",
+					recordingId: "recording-1",
+					sourceBucket: "verified-recordings",
+					sourceEtag: "complete-etag",
+					sourceFormat: "webm",
+					sourceKey:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
 					status: "complete",
+					studioSessionId: "rawkode-live-next",
+					videoId: "video-123",
 				}),
 			}),
 		} as unknown as R2Bucket;
@@ -1409,6 +2301,51 @@ describe("Studio operations", () => {
 		expect(result.session.streamStatus).toBe("idle");
 	});
 
+	it("surfaces meeting creation provider failures as safe 502 errors", async () => {
+		const studioDb = createStudioDbMock();
+		vi.stubGlobal("fetch", vi.fn(async () =>
+			new Response(JSON.stringify({
+				errors: [{ code: 7000, message: "provider-secret-detail" }],
+				success: false,
+			}), { status: 500 }),
+		));
+
+		const error = await createStudioSession({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			show: "Rawkode Live",
+			title: "Provider failure rehearsal",
+		}).catch((reason: unknown) => reason);
+
+		expect(error).toMatchObject({ code: "provider-failed", status: 502 });
+		expect((error as Error).message).not.toContain("provider-secret-detail");
+		expect(studioDb.writes).toHaveLength(0);
+	});
+
+	it("does not leak Secrets Store failures while loading provider configuration", async () => {
+		const studioDb = createStudioDbMock();
+		const error = await createStudioSession({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			REALTIMEKIT_API_TOKEN: {
+				get: async () => Promise.reject(new Error("provider-secret-detail")),
+			},
+			REALTIMEKIT_APP_ID: { get: async () => "app-1" },
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			show: "Rawkode Live",
+			title: "Secrets Store failure rehearsal",
+		}).catch((reason: unknown) => reason);
+
+		expect(error).toMatchObject({ code: "provider-failed", status: 502 });
+		expect((error as Error).message).toBe(
+			"RealtimeKit configuration could not be loaded.",
+		);
+		expect(studioDb.writes).toHaveLength(0);
+	});
+
 	it("starts and confirms test Stream publishing without queueing notifications", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
@@ -1529,6 +2466,199 @@ describe("Studio operations", () => {
 		}
 	});
 
+	it("renews only the active Stream publisher lease", async () => {
+		const studioDb = createStudioDbMock({
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+
+		await expect(
+			heartbeatStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "publisher-token",
+			}),
+		).resolves.toEqual({
+			leaseStatus: "active",
+			sessionId: "rawkode-live-next",
+		});
+		await expect(
+			heartbeatStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "stale-token",
+			}),
+		).rejects.toMatchObject({
+			code: "stream-active",
+			status: 409,
+		});
+	});
+
+	it("requires the owning lease token to confirm or stop a live publisher", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-1",
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+
+		await expect(
+			confirmStudioStream(env, user, { sessionId: "rawkode-live-next" }),
+		).rejects.toMatchObject({ code: "bad-request", status: 400 });
+		await expect(
+			confirmStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "stale-token",
+			}),
+		).rejects.toMatchObject({ code: "stream-active", status: 409 });
+		await expect(
+			confirmStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "publisher-token",
+			}),
+		).resolves.toMatchObject({ streamStatus: "live" });
+
+		await expect(
+			stopStudioStream(env, user, { sessionId: "rawkode-live-next" }),
+		).rejects.toMatchObject({ code: "bad-request", status: 400 });
+		await expect(
+			stopStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "stale-token",
+			}),
+		).rejects.toMatchObject({ code: "stream-active", status: 409 });
+		await expect(
+			stopStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "publisher-token",
+			}),
+		).resolves.toMatchObject({ streamStatus: "ended" });
+	});
+
+	it("rejects a stale confirm when another publisher wins during live promotion", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-1",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			liveReplacementToken: "replacement-publisher",
+			stream_start_token: "stale-publisher",
+			stream_status: "starting",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () =>
+				new Response(JSON.stringify({
+					success: true,
+					result: {
+						uid: "live-input-1",
+						status: "connected",
+						webRTCPlayback: { url: "https://stream.example/webRTC/play" },
+					},
+				})),
+			),
+		);
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(
+			confirmStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "stale-publisher",
+			}),
+		).rejects.toMatchObject({ status: 409 });
+		await expect(
+			heartbeatStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "replacement-publisher",
+			}),
+		).resolves.toMatchObject({ leaseStatus: "active" });
+	});
+
+	it("hides stale publisher leases without writing during public live-state reads", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_slug: "future-event",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			status: "live",
+			stream_environment: "prod",
+			stream_heartbeat_at: Math.floor(Date.now() / 1000) - 21,
+			stream_start_token: "stale-publisher",
+			stream_status: "live",
+		});
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+		const writeCount = studioDb.writes.length;
+
+		await expect(getPublicStudioLiveState(env, "future-event")).resolves.toEqual({
+			live: false,
+			playbackUrl: null,
+			session: null,
+		});
+		expect(studioDb.writes).toHaveLength(writeCount);
+		expect(studioDb.sessionRow.stream_status).toBe("live");
+	});
+
+	it("allows a longer provisioning lease before expiring a starting publisher", async () => {
+		const recentStart = createStudioDbMock({
+			stream_heartbeat_at: Math.floor(Date.now() / 1000) - 21,
+			stream_start_token: "starting-publisher",
+			stream_status: "starting",
+		});
+		const staleStart = createStudioDbMock({
+			stream_heartbeat_at: Math.floor(Date.now() / 1000) - 121,
+			stream_start_token: "starting-publisher",
+			stream_status: "starting",
+		});
+
+		await expect(
+			expireStaleStudioStreams({ STUDIO_DB: recentStart.db } as StudioEnv, "rawkode-live-next"),
+		).resolves.toBe(0);
+		await expect(
+			expireStaleStudioStreams({ STUDIO_DB: staleStart.db } as StudioEnv, "rawkode-live-next"),
+		).resolves.toBe(1);
+	});
+
+	it("lets a manager invalidate the current publisher before takeover", async () => {
+		const studioDb = createStudioDbMock({
+			status: "live",
+			stream_start_token: "previous-publisher",
+			stream_status: "live",
+		});
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+
+		await expect(
+			takeOverStudioStream(env, user, { sessionId: "rawkode-live-next" }),
+		).resolves.toEqual({
+			sessionId: "rawkode-live-next",
+			streamStatus: "ended",
+		});
+		await expect(
+			heartbeatStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "previous-publisher",
+			}),
+		).rejects.toMatchObject({ status: 409 });
+	});
+
+	it("does not invalidate a publisher acquired after takeover observed the lease", async () => {
+		const studioDb = createStudioDbMock({
+			status: "live",
+			stream_start_token: "previous-publisher",
+			stream_status: "live",
+			takeoverReplacementToken: "replacement-publisher",
+		});
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+
+		await expect(
+			takeOverStudioStream(env, user, { sessionId: "rawkode-live-next" }),
+		).rejects.toMatchObject({ code: "stream-active", status: 409 });
+		await expect(
+			heartbeatStudioStream(env, user, {
+				sessionId: "rawkode-live-next",
+				streamToken: "replacement-publisher",
+			}),
+		).resolves.toMatchObject({ leaseStatus: "active" });
+	});
+
 	it("atomically rejects concurrent Stream start requests", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
@@ -1570,6 +2700,113 @@ describe("Studio operations", () => {
 				status: 409,
 			}),
 		});
+	});
+
+	it("atomically permits only one prod session per content video", async () => {
+		const template = createStudioDbMock().sessionRow;
+		const first = {
+			...template,
+			id: "session-a",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			stream_environment: "prod" as const,
+			stream_status: "idle" as const,
+			stream_start_token: null,
+		};
+		const second = { ...first, id: "session-b" };
+		const studioDb = createMultiSessionStreamDbMock([first, second]);
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+		const [firstClaim, secondClaim] = await Promise.all([
+			claimStudioStreamStart(env, "session-a", "token-a"),
+			claimStudioStreamStart(env, "session-b", "token-b"),
+		]);
+
+		expect([firstClaim, secondClaim].filter(Boolean)).toHaveLength(1);
+		const loser = firstClaim ? "session-b" : "session-a";
+		await expect(hasFreshStudioContentStreamConflict(env, loser)).resolves.toBe(true);
+		expect(studioDb.queries.find((sql) =>
+			sql.includes("SET stream_status = 'starting'")
+		)).toContain("OR NOT EXISTS");
+	});
+
+	it("returns a controlled content conflict for a duplicate prod session", async () => {
+		const template = createStudioDbMock().sessionRow;
+		const active = {
+			...template,
+			id: "session-a",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			stream_environment: "prod" as const,
+			stream_status: "live" as const,
+			stream_start_token: "token-a",
+			stream_heartbeat_at: Math.floor(Date.now() / 1000),
+		};
+		const duplicate = {
+			...template,
+			id: "session-b",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			stream_environment: "prod" as const,
+			stream_status: "idle" as const,
+			stream_start_token: null,
+		};
+		const studioDb = createMultiSessionStreamDbMock([active, duplicate]);
+
+		await expect(startStudioStream({
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			sessionId: "session-b",
+		})).rejects.toMatchObject({
+			code: "content-stream-active",
+			message: "Another prod Studio session is already publishing this content.",
+			status: 409,
+		});
+		expect(duplicate.stream_status).toBe("idle");
+	});
+
+	it("allows parallel test sessions and ignores stale prod content publishers", async () => {
+		const template = createStudioDbMock().sessionRow;
+		const testA = {
+			...template,
+			id: "test-a",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			stream_environment: "test" as const,
+			stream_status: "idle" as const,
+			stream_start_token: null,
+		};
+		const testB = { ...testA, id: "test-b" };
+		const testDb = createMultiSessionStreamDbMock([testA, testB]);
+		const testEnv = { STUDIO_DB: testDb.db } as StudioEnv;
+		await expect(Promise.all([
+			claimStudioStreamStart(testEnv, "test-a", "token-a"),
+			claimStudioStreamStart(testEnv, "test-b", "token-b"),
+		])).resolves.toEqual([true, true]);
+
+		const staleProd = {
+			...template,
+			id: "stale-prod",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			stream_environment: "prod" as const,
+			stream_status: "live" as const,
+			stream_start_token: "stale",
+			stream_heartbeat_at: Math.floor(Date.now() / 1000) - 21,
+		};
+		const replacement = {
+			...staleProd,
+			id: "replacement-prod",
+			stream_status: "idle" as const,
+			stream_start_token: null,
+		};
+		const prodDb = createMultiSessionStreamDbMock([staleProd, replacement]);
+		await expect(
+			claimStudioStreamStart(
+				{ STUDIO_DB: prodDb.db } as StudioEnv,
+				"replacement-prod",
+				"replacement",
+			),
+		).resolves.toBe(true);
 	});
 
 	it("rejects a start whose client token was already cancelled", async () => {
@@ -1660,12 +2897,16 @@ describe("Studio operations", () => {
 
 		const staleStart = startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "stale-start-token",
 		});
 		for (let attempt = 0; attempt < 20 && fetchMock.mock.calls.length === 0; attempt += 1) {
 			await new Promise((resolve) => setTimeout(resolve, 0));
 		}
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		await stopStudioStream(env, user, { sessionId: "rawkode-live-next" });
+		await stopStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "stale-start-token",
+		});
 		const currentStart = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
 		});
@@ -1741,7 +2982,10 @@ describe("Studio operations", () => {
 			notified: true,
 			streamStatus: "live",
 		});
-		await expect(confirmStudioStream(env, user, { sessionId: "rawkode-live-next" }))
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: start.streamToken,
+		}))
 			.resolves.toMatchObject({
 				notified: false,
 				streamStatus: "live",
@@ -1831,7 +3075,10 @@ describe("Studio operations", () => {
 			streamNotificationQueuedAt: null,
 			streamStatus: "live",
 		});
-		await expect(confirmStudioStream(env, user, { sessionId: "rawkode-live-next" }))
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: start.streamToken,
+		}))
 			.resolves.toMatchObject({
 				notified: true,
 				streamStatus: "live",
@@ -1990,7 +3237,7 @@ describe("Studio operations", () => {
 		expect(liveState.session?.startedAt).not.toBe(123);
 	});
 
-	it("rejects guest users for Stream start, confirm, and stop operations", async () => {
+	it("rejects guest users for Stream lifecycle operations", async () => {
 		const studioDb = createStudioDbMock({
 			cloudflare_stream_live_input_id: "live-input-1",
 			content_video_id: "video-123",
@@ -2008,13 +3255,19 @@ describe("Studio operations", () => {
 			.rejects.toMatchObject({ code: "unauthorized", status: 403 });
 		await expect(stopStudioStream(env, guestUser, { sessionId: "rawkode-live-next" }))
 			.rejects.toMatchObject({ code: "unauthorized", status: 403 });
+		await expect(
+			heartbeatStudioStream(env, guestUser, {
+				sessionId: "rawkode-live-next",
+				streamToken: "publisher-token",
+			}),
+		).rejects.toMatchObject({ code: "unauthorized", status: 403 });
+		await expect(takeOverStudioStream(env, guestUser, { sessionId: "rawkode-live-next" }))
+			.rejects.toMatchObject({ code: "unauthorized", status: 403 });
 	});
 
-	it("marks fallback recordings ready without storage bindings in local mode", async () => {
-		const result = await markStudioRecordingReady(
-			{} as StudioEnv,
-			user,
-			{
+	it("keeps test-mode recording handoff local", async () => {
+		await expect(
+			markStudioRecordingReady({} as StudioEnv, user, {
 				recordingId: "recording-1",
 				sessionId: "rawkode-live-next",
 				sourceBucket: "rawkode-recordings",
@@ -2022,24 +3275,94 @@ describe("Studio operations", () => {
 				sourceFormat: "mkv",
 				sourceKey: "studio/recordings/rawkode-live-next/recording-1/source.mkv",
 				videoId: "rawkode-live/example",
-			},
-		);
+			}),
+		).rejects.toMatchObject({
+			code: "bad-request",
+			message:
+				"Test-mode Studio recordings stay local and cannot use persistent recording handoff.",
+			status: 400,
+		});
+	});
 
-		expect(result.readyMarkerKey).toBe(
-			"studio/recordings/rawkode-live-next/recording-1/ready.json",
-		);
-		expect(result.videoId).toBe("rawkode-live/rawkode-live-next");
-		expect(result.outputPrefix).toBe("videos/rawkode-live/rawkode-live-next/");
-		expect(result.sourceVerified).toBe(false);
+	it("rejects test-mode upload creation before reading or mutating R2", async () => {
+		const studioDb = createStudioDbMock({ content_video_id: "video-123" });
+		let r2Touched = false;
+		const recordings = {
+			createMultipartUpload: async () => {
+				r2Touched = true;
+				throw new Error("test recording must stay local");
+			},
+			head: async () => {
+				r2Touched = true;
+				return null;
+			},
+		} as unknown as R2Bucket;
+
+		await expect(
+			createStudioRecordingUpload(
+				{
+					RECORDINGS: recordings,
+					RECORDINGS_BUCKET_NAME: "verified-recordings",
+					STUDIO_DB: studioDb.db,
+				} as StudioEnv,
+				user,
+				{ sessionId: "rawkode-live-next", sourceFormat: "webm" },
+			),
+		).rejects.toMatchObject({ code: "bad-request", status: 400 });
+		expect(r2Touched).toBe(false);
+	});
+
+	it("rejects test-mode ready markers before reading or mutating R2", async () => {
+		const studioDb = createStudioDbMock({ content_video_id: "video-123" });
+		let r2Touched = false;
+		const recordings = {
+			get: async () => {
+				r2Touched = true;
+				return null;
+			},
+			head: async () => {
+				r2Touched = true;
+				return null;
+			},
+			put: async () => {
+				r2Touched = true;
+				return null;
+			},
+		} as unknown as R2Bucket;
+
+		await expect(
+			markStudioRecordingReady(
+				{
+					RECORDINGS: recordings,
+					RECORDINGS_BUCKET_NAME: "verified-recordings",
+					STUDIO_DB: studioDb.db,
+				} as StudioEnv,
+				user,
+				{
+					recordingId: "recording-1",
+					sessionId: "rawkode-live-next",
+					sourceEtag: "source-etag",
+					sourceFormat: "webm",
+					sourceKey:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
+				},
+			),
+		).rejects.toMatchObject({ code: "bad-request", status: 400 });
+		expect(r2Touched).toBe(false);
 	});
 
 	it("targets content video IDs when publishing recording markers", async () => {
 		const writes: Array<{ key: string; value: string }> = [];
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		const recordings = {
-			head: async () => ({ etag: '"abc123"' }),
+			get: async () => null,
+			head: async (key: string) =>
+				key === "studio/recordings/rawkode-live-next/recording-1/source.webm"
+					? ({ etag: '"abc123"' } as R2Object)
+					: null,
 			put: async (key: string, value: string) => {
 				writes.push({ key, value });
 				return null;
@@ -2184,9 +3507,14 @@ describe("Studio operations", () => {
 		const writes: Array<{ key: string; value: string }> = [];
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		const recordings = {
-			head: async () => ({ etag: '"abc123"' }),
+			get: async () => null,
+			head: async (key: string) =>
+				key === "studio/recordings/rawkode-live-next/recording-1/source.mkv"
+					? ({ etag: '"abc123"' } as R2Object)
+					: null,
 			put: async (key: string, value: string) => {
 				writes.push({ key, value });
 				return null;
@@ -2222,6 +3550,430 @@ describe("Studio operations", () => {
 		);
 	});
 
+	it("allows only exact immutable ready-marker retries", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock();
+		const sourceKey =
+			"studio/recordings/rawkode-live-next/recording-1/source.webm";
+		recordings.putObject(sourceKey, "source", "source-etag");
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+		const input = {
+			recordingId: "recording-1",
+			sessionId: "rawkode-live-next",
+			sourceEtag: "source-etag",
+			sourceFormat: "webm" as const,
+			sourceKey,
+		};
+
+		await expect(markStudioRecordingReady(env, user, input)).resolves.toMatchObject({
+			recordingId: "recording-1",
+			videoId: "video-123",
+		});
+		recordings.putJson("videos/video-123/transcode-status.json", {
+			outputPrefix: "videos/video-123/",
+			recordingId: "recording-1",
+			sourceBucket: "verified-recordings",
+			sourceEtag: "source-etag",
+			sourceFormat: "webm",
+			sourceKey,
+			status: "complete",
+			studioSessionId: "rawkode-live-next",
+			videoId: "video-123",
+		});
+		await expect(markStudioRecordingReady(env, user, input)).resolves.toMatchObject({
+			recordingId: "recording-1",
+			videoId: "video-123",
+		});
+		expect(studioDb.recordingRows).toHaveLength(1);
+		expect(studioDb.recordingRows[0]).toMatchObject({
+			recording_id: "recording-1",
+			source_key: sourceKey,
+			status: "ready",
+			video_id: "video-123",
+		});
+	});
+
+	it("rejects a different recording or source for a claimed VOD output", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock();
+		const sourceKey =
+			"studio/recordings/rawkode-live-next/recording-1/source.webm";
+		const otherSourceKey =
+			"studio/recordings/rawkode-live-next/recording-2/source.webm";
+		recordings.putObject(sourceKey, "source", "source-etag");
+		recordings.putObject(otherSourceKey, "other", "other-etag");
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+		await markStudioRecordingReady(env, user, {
+			recordingId: "recording-1",
+			sessionId: "rawkode-live-next",
+			sourceEtag: "source-etag",
+			sourceFormat: "webm",
+			sourceKey,
+		});
+
+		await expect(
+			markStudioRecordingReady(env, user, {
+				recordingId: "recording-2",
+				sessionId: "rawkode-live-next",
+				sourceEtag: "other-etag",
+				sourceFormat: "webm",
+				sourceKey: otherSourceKey,
+			}),
+		).rejects.toMatchObject({ code: "recording-output-claimed", status: 409 });
+		await expect(
+			markStudioRecordingReady(env, user, {
+				recordingId: "recording-1",
+				sessionId: "rawkode-live-next",
+				sourceEtag: "other-etag",
+				sourceFormat: "webm",
+				sourceKey: otherSourceKey,
+			}),
+		).rejects.toMatchObject({ code: "recording-output-claimed", status: 409 });
+		expect(studioDb.recordingRows).toHaveLength(1);
+		expect(studioDb.recordingRows[0]).toMatchObject({
+			recording_id: "recording-1",
+			source_etag: "source-etag",
+			source_key: sourceKey,
+			status: "ready",
+		});
+		expect(recordings.text(
+			"studio/recordings/rawkode-live-next/recording-2/ready.json",
+		)).toBeNull();
+	});
+
+	it("rejects marker publication over legacy canonical output", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock();
+		const sourceKey =
+			"studio/recordings/rawkode-live-next/recording-1/source.webm";
+		recordings.putObject(sourceKey, "source", "source-etag");
+		recordings.putObject("videos/video-123/stream.m3u8", "legacy stream");
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(
+			markStudioRecordingReady(env, user, {
+				recordingId: "recording-1",
+				sessionId: "rawkode-live-next",
+				sourceEtag: "source-etag",
+				sourceFormat: "webm",
+				sourceKey,
+			}),
+		).rejects.toMatchObject({ code: "recording-output-claimed", status: 409 });
+		expect(studioDb.recordingRows).toHaveLength(0);
+		expect(recordings.text(
+			"studio/recordings/rawkode-live-next/recording-1/ready.json",
+		)).toBeNull();
+	});
+
+	it("rejects marker publication when canonical status belongs to another source", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock();
+		const sourceKey =
+			"studio/recordings/rawkode-live-next/recording-1/source.webm";
+		recordings.putObject(sourceKey, "source", "source-etag");
+		recordings.putJson("videos/video-123/transcode-status.json", {
+			outputPrefix: "videos/video-123/",
+			recordingId: "legacy-recording",
+			sourceBucket: "verified-recordings",
+			sourceEtag: "legacy-etag",
+			sourceFormat: "webm",
+			sourceKey: "legacy/source.webm",
+			status: "complete",
+			studioSessionId: "legacy-session",
+			videoId: "video-123",
+		});
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(
+			markStudioRecordingReady(env, user, {
+				recordingId: "recording-1",
+				sessionId: "rawkode-live-next",
+				sourceEtag: "source-etag",
+				sourceFormat: "webm",
+				sourceKey,
+			}),
+		).rejects.toMatchObject({ code: "recording-output-claimed", status: 409 });
+		expect(studioDb.recordingRows).toHaveLength(0);
+	});
+
+	it("recovers multipart completion response loss and repeat completion without re-completing", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock({ completeResponseFailures: 1 });
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+		const upload = await createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+		const part = await uploadStudioRecordingPart(env, user, {
+			body: new Blob(["response-loss"]).stream(),
+			partNumber: 1,
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		});
+		const completionInput = {
+			parts: [part],
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		};
+
+		await expect(completeStudioRecordingUpload(env, user, completionInput))
+			.resolves.toMatchObject({
+				completionRecovered: true,
+				leaseReleased: true,
+				sourceVerified: true,
+			});
+		await expect(completeStudioRecordingUpload(env, user, completionInput))
+			.resolves.toMatchObject({
+				completionRecovered: true,
+				leaseReleased: true,
+				sourceVerified: true,
+			});
+		expect(recordings.completeCalls()).toBe(1);
+		expect(studioDb.sessionRow.recording_lease_id).toBeNull();
+		expect(studioDb.sessionRow.recording_status).toBe("uploaded");
+	});
+
+	it("retries recording handoff after a transient D1 marker failure", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recordingInsertFailures: 1,
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock();
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+		const upload = await createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+		const part = await uploadStudioRecordingPart(env, user, {
+			body: new Blob(["d1-retry"]).stream(),
+			partNumber: 1,
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		});
+		const input = {
+			parts: [part],
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		};
+
+		await expect(completeStudioRecordingUpload(env, user, input)).rejects.toThrow(
+			"simulated recording persistence failure",
+		);
+		expect(studioDb.sessionRow.recording_lease_id).toBe(upload.recordingId);
+		await expect(completeStudioRecordingUpload(env, user, input)).resolves.toMatchObject({
+			completionRecovered: true,
+			leaseReleased: true,
+		});
+		expect(recordings.completeCalls()).toBe(1);
+	});
+
+	it("retries recording handoff after a transient R2 marker failure", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock({ markerPutFailures: 1 });
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+		const upload = await createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+		const part = await uploadStudioRecordingPart(env, user, {
+			body: new Blob(["r2-retry"]).stream(),
+			partNumber: 1,
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		});
+		const input = {
+			parts: [part],
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		};
+
+		await expect(completeStudioRecordingUpload(env, user, input)).rejects.toThrow(
+			"simulated ready marker R2 failure",
+		);
+		expect(studioDb.sessionRow.recording_lease_id).toBe(upload.recordingId);
+		await expect(completeStudioRecordingUpload(env, user, input)).resolves.toMatchObject({
+			completionRecovered: true,
+			leaseReleased: true,
+		});
+		expect(recordings.completeCalls()).toBe(1);
+	});
+
+	it("recovers an already-completed multipart upload instead of aborting it", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		const recordings = createRecordingBucketMock();
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+		const upload = await createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+		recordings.putObject(upload.sourceKey, "completed-source", "completed-etag");
+
+		const result = await abortStudioRecordingUpload(env, user, {
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		});
+
+		expect(result).toMatchObject({
+			aborted: false,
+			handoff: {
+				readyMarkerKey: `studio/recordings/rawkode-live-next/${upload.recordingId}/ready.json`,
+				sourceEtag: "completed-etag",
+			},
+			leaseReleased: true,
+			outcome: "recovered",
+			recovered: true,
+		});
+		expect(recordings.abortCalls()).toBe(0);
+		expect(studioDb.sessionRow.recording_status).toBe("uploaded");
+	});
+
+	it("rejects a stale abort without clearing a newer recording lease", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recording_heartbeat_at: Math.floor(Date.now() / 1000),
+			recording_lease_id: "new-recording",
+			recording_status: "recording",
+			stream_environment: "prod",
+		});
+		let resumed = false;
+		const recordings = {
+			head: async () => null,
+			resumeMultipartUpload: () => {
+				resumed = true;
+				throw new Error("stale abort must not touch R2");
+			},
+		} as unknown as R2Bucket;
+
+		await expect(abortStudioRecordingUpload({
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			recordingId: "old-recording",
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+			uploadId: "old-upload",
+		})).rejects.toMatchObject({ code: "recording-active", status: 409 });
+		expect(resumed).toBe(false);
+		expect(studioDb.sessionRow.recording_lease_id).toBe("new-recording");
+		expect(studioDb.sessionRow.recording_status).toBe("recording");
+	});
+
+	it("does not let an old marker overwrite a newly claimed recording lease", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recording_heartbeat_at: Math.floor(Date.now() / 1000),
+			recording_lease_id: "old-recording",
+			recording_status: "recording",
+			stream_environment: "prod",
+		});
+		const sourceKey =
+			"studio/recordings/rawkode-live-next/old-recording/source.webm";
+		let sourceExists = false;
+		const recordings = {
+			head: async (key: string) =>
+				sourceExists && key === sourceKey
+					? ({ etag: "old-etag", key } as R2Object)
+					: null,
+			put: async () => {
+				studioDb.sessionRow.recording_lease_id = "new-recording";
+				studioDb.sessionRow.recording_heartbeat_at = Math.floor(Date.now() / 1000);
+				studioDb.sessionRow.recording_status = "recording";
+				return null;
+			},
+			resumeMultipartUpload: () => ({
+				complete: async () => {
+					sourceExists = true;
+					return { etag: "old-etag", key: sourceKey } as R2Object;
+				},
+			}),
+		} as unknown as R2Bucket;
+
+		const result = await completeStudioRecordingUpload({
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			parts: [{ etag: "part-1", partNumber: 1 }],
+			recordingId: "old-recording",
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+			uploadId: "old-upload",
+		});
+
+		expect(result.leaseReleased).toBe(false);
+		expect(studioDb.sessionRow.recording_lease_id).toBe("new-recording");
+		expect(studioDb.sessionRow.recording_status).toBe("recording");
+	});
+
 	it("requires D1 before writing R2 recording ready markers", async () => {
 		const recordings = {
 			head: async () => ({ etag: '"abc123"' }),
@@ -2254,11 +4006,13 @@ describe("Studio operations", () => {
 	it("creates manager-owned multipart recording uploads under the session prefix", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		let createdKey = "";
 		let contentType = "";
 		let customMetadata: R2MultipartOptions["customMetadata"] = {};
 		const recordings = {
+			head: async () => null,
 			createMultipartUpload: async (
 				key: string,
 			options?: R2MultipartOptions,
@@ -2287,6 +4041,8 @@ describe("Studio operations", () => {
 		);
 
 		expect(result.recordingId).toMatch(/^recording-/);
+		expect(result.heartbeatIntervalMs).toBe(30_000);
+		expect(result.leaseTimeoutSeconds).toBe(120);
 		expect(result.partSizeBytes).toBe(8 * 1024 * 1024);
 		expect(result.sourceKey).toBe(createdKey);
 		expect(result.sourceKey).toMatch(
@@ -2299,9 +4055,16 @@ describe("Studio operations", () => {
 			videoId: "video-123",
 		});
 		expect(
-			studioDb.writes.find((write) => write.sql.includes("UPDATE studio_sessions"))
+			studioDb.writes.find((write) =>
+				write.sql.includes("SET recording_status = 'recording'")
+			)
 				?.params,
-		).toEqual(["recording", "rawkode-live-next"]);
+		).toEqual([
+			result.recordingId,
+			"rawkode-live-next",
+			result.recordingId,
+			result.recordingId,
+		]);
 		await expect(
 			loadStudioDashboard(user, {
 				STUDIO_DB: studioDb.db,
@@ -2314,6 +4077,260 @@ describe("Studio operations", () => {
 				},
 			],
 		});
+	});
+
+	it.each([
+		"videos/video-123/transcode-status.json",
+		"videos/video-123/stream.m3u8",
+	])("rejects legacy canonical output before multipart creation: %s", async (key) => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		let multipartCreates = 0;
+		const recordings = {
+			createMultipartUpload: async () => {
+				multipartCreates += 1;
+				throw new Error("canonical output must block multipart creation");
+			},
+			head: async (candidate: string) =>
+				candidate === key ? ({ etag: "legacy" } as R2Object) : null,
+		} as unknown as R2Bucket;
+
+		await expect(
+			createStudioRecordingUpload(
+				{
+					RECORDINGS: recordings,
+					RECORDINGS_BUCKET_NAME: "verified-recordings",
+					STUDIO_DB: studioDb.db,
+				} as StudioEnv,
+				user,
+				{ sessionId: "rawkode-live-next", sourceFormat: "webm" },
+			),
+		).rejects.toMatchObject({ code: "recording-output-claimed", status: 409 });
+		expect(multipartCreates).toBe(0);
+		expect(studioDb.sessionRow.recording_lease_id).toBeNull();
+	});
+
+	it("permanently rejects a second upload after the content video is claimed", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recordingRows: [
+				{
+					recording_id: "recording-1",
+					session_id: "rawkode-live-next",
+					video_id: "video-123",
+					source_bucket: "verified-recordings",
+					source_key:
+						"studio/recordings/rawkode-live-next/recording-1/source.webm",
+					source_etag: "source-etag",
+					source_format: "webm",
+					output_prefix: "videos/video-123/",
+					ready_marker_key:
+						"studio/recordings/rawkode-live-next/recording-1/ready.json",
+					status: "ready",
+					created_at: 1,
+					updated_at: 1,
+				},
+			],
+			stream_environment: "prod",
+		});
+		let multipartCreates = 0;
+		const recordings = {
+			createMultipartUpload: async () => {
+				multipartCreates += 1;
+				throw new Error("claimed video must not create multipart upload");
+			},
+			head: async () => null,
+		} as unknown as R2Bucket;
+
+		await expect(
+			createStudioRecordingUpload(
+				{
+					RECORDINGS: recordings,
+					RECORDINGS_BUCKET_NAME: "verified-recordings",
+					STUDIO_DB: studioDb.db,
+				} as StudioEnv,
+				user,
+				{ sessionId: "rawkode-live-next", sourceFormat: "webm" },
+			),
+		).rejects.toMatchObject({ code: "recording-output-claimed", status: 409 });
+		expect(multipartCreates).toBe(0);
+	});
+
+	it("serializes recording leases per video while allowing different videos", async () => {
+		const run = async (videosBySession: Record<string, string>) => {
+			const db = createRecordingConcurrencyDbMock(videosBySession);
+			let multipartCreates = 0;
+			const recordings = {
+				createMultipartUpload: async (key: string) => ({
+					key,
+					uploadId: `upload-${++multipartCreates}`,
+				}),
+				head: async () => null,
+			} as unknown as R2Bucket;
+			const env = {
+				RECORDINGS: recordings,
+				RECORDINGS_BUCKET_NAME: "verified-recordings",
+				STUDIO_DB: db,
+			} as StudioEnv;
+			const results = await Promise.allSettled(
+				Object.keys(videosBySession).map((sessionId) =>
+					createStudioRecordingUpload(env, user, {
+						sessionId,
+						sourceFormat: "webm",
+					})
+				),
+			);
+			return { multipartCreates, results };
+		};
+
+		const sameVideo = await run({ session1: "video-123", session2: "video-123" });
+		expect(sameVideo.results.filter((result) => result.status === "fulfilled"))
+			.toHaveLength(1);
+		expect(sameVideo.results.filter((result) => result.status === "rejected"))
+			.toHaveLength(1);
+		expect(sameVideo.multipartCreates).toBe(1);
+
+		const differentVideos = await run({ session1: "video-123", session2: "video-456" });
+		expect(differentVideos.results.every((result) => result.status === "fulfilled"))
+			.toBe(true);
+		expect(differentVideos.multipartCreates).toBe(2);
+	});
+
+	it("atomically rejects a second producer recording lease", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			stream_environment: "prod",
+		});
+		let multipartCreates = 0;
+		const recordings = {
+			head: async () => null,
+			createMultipartUpload: async (key: string) => {
+				multipartCreates += 1;
+				return { key, uploadId: `upload-${multipartCreates}` };
+			},
+		} as unknown as R2Bucket;
+		const env = {
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		const first = await createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+		await expect(createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		})).rejects.toMatchObject({
+			code: "recording-active",
+			message: "Another Studio recording is already active for this content video.",
+			status: 409,
+		});
+
+		expect(multipartCreates).toBe(1);
+		expect(studioDb.sessionRow.recording_lease_id).toBe(first.recordingId);
+		expect(studioDb.sessionRow.recording_status).toBe("recording");
+	});
+
+	it("renews only the owning recording heartbeat", async () => {
+		const now = Math.floor(Date.now() / 1000);
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recording_heartbeat_at: now - 30,
+			recording_lease_id: "recording-1",
+			recording_status: "recording",
+			stream_environment: "prod",
+		});
+		const env = { STUDIO_DB: studioDb.db } as StudioEnv;
+
+		await expect(heartbeatStudioRecording(env, user, {
+			recordingId: "recording-1",
+			sessionId: "rawkode-live-next",
+		})).resolves.toEqual({
+			leaseStatus: "active",
+			recordingId: "recording-1",
+			sessionId: "rawkode-live-next",
+		});
+		expect(studioDb.sessionRow.recording_heartbeat_at).toBeGreaterThan(now - 5);
+		await expect(heartbeatStudioRecording(env, user, {
+			recordingId: "recording-2",
+			sessionId: "rawkode-live-next",
+		})).rejects.toMatchObject({
+			code: "recording-active",
+			status: 409,
+		});
+		expect(studioDb.sessionRow.recording_lease_id).toBe("recording-1");
+	});
+
+	it("keeps a pre-deploy recording blocked during grace and adopts its first request", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recording_heartbeat_at: null,
+			recording_lease_grace_until: Math.floor(Date.now() / 1000) + 600,
+			recording_lease_id: null,
+			recording_status: "recording",
+			stream_environment: "prod",
+		});
+		let multipartCreates = 0;
+		const recordings = {
+			head: async () => null,
+			createMultipartUpload: async () => {
+				multipartCreates += 1;
+				throw new Error("grace recording must block create");
+			},
+			resumeMultipartUpload: () => ({
+				uploadPart: async (partNumber: number) => ({ etag: "legacy-part", partNumber }),
+			}),
+		} as unknown as R2Bucket;
+		const env = {
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		})).rejects.toMatchObject({ code: "recording-active", status: 409 });
+		expect(multipartCreates).toBe(0);
+		await expect(uploadStudioRecordingPart(env, user, {
+			body: new Blob(["legacy-part"]).stream(),
+			partNumber: 1,
+			recordingId: "legacy-recording",
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+			uploadId: "legacy-upload",
+		})).resolves.toEqual({ etag: "legacy-part", partNumber: 1 });
+		expect(studioDb.sessionRow.recording_lease_id).toBe("legacy-recording");
+		expect(studioDb.sessionRow.recording_lease_grace_until).toBeNull();
+	});
+
+	it("expires the ten-minute rollout grace before allowing a new recording", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recording_lease_grace_until: Math.floor(Date.now() / 1000) - 1,
+			recording_status: "recording",
+			stream_environment: "prod",
+		});
+		const recordings = {
+			head: async () => null,
+			createMultipartUpload: async (key: string) => ({ key, uploadId: "new-upload" }),
+		} as unknown as R2Bucket;
+
+		const result = await createStudioRecordingUpload({
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+
+		expect(studioDb.sessionRow.recording_lease_id).toBe(result.recordingId);
+		expect(studioDb.sessionRow.recording_status).toBe("recording");
 	});
 
 	it("rejects persistent recording uploads without a content video ID", async () => {
@@ -2373,6 +4390,10 @@ describe("Studio operations", () => {
 	it("uploads recording parts through server-owned multipart source keys", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			recording_heartbeat_at: Math.floor(Date.now() / 1000),
+			recording_lease_id: "recording-1",
+			recording_status: "recording",
+			stream_environment: "prod",
 		});
 		let resumedKey = "";
 		let resumedUploadId = "";
@@ -2417,11 +4438,16 @@ describe("Studio operations", () => {
 
 	it("returns sessions to idle when multipart recording uploads are aborted", async () => {
 		const studioDb = createStudioDbMock({
+			content_video_id: "video-123",
+			recording_heartbeat_at: Math.floor(Date.now() / 1000),
+			recording_lease_id: "recording-1",
 			recording_status: "recording",
+			stream_environment: "prod",
 		});
 		let abortedKey = "";
 		let abortedUploadId = "";
 		const recordings = {
+			head: async () => null,
 			resumeMultipartUpload: (key: string, uploadId: string) => {
 				abortedKey = key;
 				abortedUploadId = uploadId;
@@ -2452,14 +4478,21 @@ describe("Studio operations", () => {
 		expect(abortedUploadId).toBe("upload-1");
 		expect(result).toEqual({
 			aborted: true,
+			handoff: null,
+			leaseReleased: true,
+			outcome: "aborted",
 			recordingId: "recording-1",
+			recovered: false,
 			sessionId: "rawkode-live-next",
 			sourceKey: "studio/recordings/rawkode-live-next/recording-1/source.webm",
 		});
 		expect(
-			studioDb.writes.find((write) => write.sql.includes("UPDATE studio_sessions"))
+			studioDb.writes.find((write) =>
+				write.sql.includes("SET recording_status = ?") &&
+				write.sql.includes("recording_lease_id = NULL")
+			)
 				?.params,
-		).toEqual(["idle", "rawkode-live-next"]);
+		).toEqual(["idle", "rawkode-live-next", "recording-1"]);
 		await expect(loadStudioDashboard(user, { STUDIO_DB: studioDb.db } as StudioEnv))
 			.resolves.toMatchObject({
 				sessions: [
@@ -2475,11 +4508,16 @@ describe("Studio operations", () => {
 		const writes: Array<{ key: string; value: string }> = [];
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			recording_heartbeat_at: Math.floor(Date.now() / 1000),
+			recording_lease_id: "recording-1",
+			recording_status: "recording",
+			stream_environment: "prod",
 		});
 		let completedParts: R2UploadedPart[] = [];
+		let completed = false;
 		const recordings = {
 			head: async (key: string) =>
-				key === "studio/recordings/rawkode-live-next/recording-1/source.webm"
+				completed && key === "studio/recordings/rawkode-live-next/recording-1/source.webm"
 					? ({ etag: "complete-etag" } as R2Object)
 					: null,
 			put: async (key: string, value: string) => {
@@ -2489,6 +4527,7 @@ describe("Studio operations", () => {
 			resumeMultipartUpload: (key: string, uploadId: string) => ({
 				complete: async (parts: R2UploadedPart[]) => {
 					completedParts = parts;
+					completed = true;
 					expect(key).toBe(
 						"studio/recordings/rawkode-live-next/recording-1/source.webm",
 					);
@@ -2525,6 +4564,8 @@ describe("Studio operations", () => {
 			{ etag: "part-2", partNumber: 2 },
 		]);
 		expect(result.sourceEtag).toBe("complete-etag");
+		expect(result.completionRecovered).toBe(false);
+		expect(result.leaseReleased).toBe(true);
 		expect(result.sourceKey).toBe(
 			"studio/recordings/rawkode-live-next/recording-1/source.webm",
 		);
@@ -2543,6 +4584,7 @@ describe("Studio operations", () => {
 	it("round-trips uploaded browser recordings into VOD-ready dashboard state", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		const recordings = createRecordingBucketMock();
 		const env = {
@@ -2615,7 +4657,15 @@ describe("Studio operations", () => {
 			"videos/video-123/transcode-status.json",
 			{
 				completedAt: "2026-08-01T11:00:00.000Z",
+				outputPrefix: "videos/video-123/",
+				recordingId: upload.recordingId,
+				sourceBucket: "verified-recordings",
+				sourceEtag: "complete-17",
+				sourceFormat: "webm",
+				sourceKey: upload.sourceKey,
 				status: "complete",
+				studioSessionId: "rawkode-live-next",
+				videoId: "video-123",
 			},
 		);
 
@@ -2726,6 +4776,10 @@ describe("Studio operations", () => {
 					}),
 				);
 			}
+			if (init?.method === "GET") {
+				expect(url).toContain("/meetings/meeting-1/participants?page_no=");
+				return new Response(JSON.stringify({ success: true, result: [] }));
+			}
 
 			expect(url).toBe(
 				"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/participants",
@@ -2767,6 +4821,314 @@ describe("Studio operations", () => {
 			meetingId: "meeting-1",
 			token: "guest-token",
 		});
+	});
+
+	it("creates a participant once and refreshes its token on repeat joins", async () => {
+		const studioDb = createStudioDbMock({ realtimekit_meeting_id: "meeting-1" });
+		const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = String(input);
+			if (url === "https://content.example/graphql") {
+				return new Response(JSON.stringify({ data: { personByGithub: null } }));
+			}
+			if (init?.method === "GET") {
+				return new Response(JSON.stringify({ success: true, result: [] }));
+			}
+			if (url.endsWith("/participants")) {
+				return new Response(JSON.stringify({
+					success: true,
+					result: { id: "participant-1", token: "first-token" },
+				}));
+			}
+			expect(url).toContain("/participants/participant-1/token");
+			return new Response(JSON.stringify({
+				success: true,
+				result: { token: "refreshed-token" },
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(issueStudioParticipantToken(env, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			participantId: "participant-1",
+			token: "first-token",
+		});
+		await expect(issueStudioParticipantToken(env, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			participantId: "participant-1",
+			token: "refreshed-token",
+		});
+
+		expect(studioDb.participantRows).toMatchObject([
+			{ realtimekit_participant_id: "participant-1" },
+		]);
+		expect(fetchMock.mock.calls.filter(([url]) =>
+			String(url).endsWith("/participants")
+		)).toHaveLength(1);
+	});
+
+	it("reconciles a legacy participant identity and refreshes instead of creating", async () => {
+		const studioDb = createStudioDbMock({ realtimekit_meeting_id: "meeting-1" });
+		const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = String(input);
+			if (url === "https://content.example/graphql") {
+				return new Response(JSON.stringify({ data: { personByGithub: null } }));
+			}
+			if (init?.method === "GET") {
+				return new Response(JSON.stringify({
+					success: true,
+					result: [{
+						custom_participant_id: "studio:host:rawkode",
+						id: "legacy-participant",
+					}],
+				}));
+			}
+			expect(url).toContain("/participants/legacy-participant/token");
+			return new Response(JSON.stringify({
+				success: true,
+				result: { token: "legacy-refreshed-token" },
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(issueStudioParticipantToken({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			participantId: "legacy-participant",
+			token: "legacy-refreshed-token",
+		});
+		expect(studioDb.participantRows[0]?.realtimekit_participant_id).toBe(
+			"legacy-participant",
+		);
+		expect(fetchMock.mock.calls.some(([url]) =>
+			String(url).endsWith("/participants")
+		)).toBe(false);
+	});
+
+	it("recovers a concurrent duplicate add by reconciling the provider participant", async () => {
+		const studioDb = createStudioDbMock({ realtimekit_meeting_id: "meeting-1" });
+		const customParticipantId = await createRealtimeKitCustomParticipantId({
+			meetingId: "meeting-1",
+			participantId: "rawkode",
+			role: "host",
+		});
+		let listCount = 0;
+		const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = String(input);
+			if (url === "https://content.example/graphql") {
+				return new Response(JSON.stringify({ data: { personByGithub: null } }));
+			}
+			if (init?.method === "GET") {
+				listCount += 1;
+				return new Response(JSON.stringify({
+					success: true,
+					result: listCount > 2
+						? [{ custom_participant_id: customParticipantId, id: "winner" }]
+						: [],
+				}));
+			}
+			if (url.endsWith("/participants")) {
+				return new Response(JSON.stringify({
+					errors: [{ code: 40901, message: "duplicate" }],
+					success: false,
+				}), { status: 409 });
+			}
+			expect(url).toContain("/participants/winner/token");
+			return new Response(JSON.stringify({
+				success: true,
+				result: { token: "winner-token" },
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(issueStudioParticipantToken({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({ participantId: "winner", token: "winner-token" });
+		expect(studioDb.participantRows[0]?.realtimekit_participant_id).toBe("winner");
+	});
+
+	it("recovers on retry when provider creation succeeded before D1 persistence failed", async () => {
+		const studioDb = createStudioDbMock({
+			participantWriteFailures: 1,
+			realtimekit_meeting_id: "meeting-1",
+		});
+		const customParticipantId = await createRealtimeKitCustomParticipantId({
+			meetingId: "meeting-1",
+			participantId: "rawkode",
+			role: "host",
+		});
+		let providerParticipantExists = false;
+		let addCount = 0;
+		const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = String(input);
+			if (url === "https://content.example/graphql") {
+				return new Response(JSON.stringify({ data: { personByGithub: null } }));
+			}
+			if (init?.method === "GET") {
+				return new Response(JSON.stringify({
+					success: true,
+					result: providerParticipantExists
+						? [{ custom_participant_id: customParticipantId, id: "participant-1" }]
+						: [],
+				}));
+			}
+			if (url.endsWith("/participants")) {
+				addCount += 1;
+				providerParticipantExists = true;
+				return new Response(JSON.stringify({
+					success: true,
+					result: { id: "participant-1", token: "first-token" },
+				}));
+			}
+			return new Response(JSON.stringify({
+				success: true,
+				result: { token: "retry-token" },
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv;
+
+		await expect(issueStudioParticipantToken(env, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).rejects.toThrow("simulated participant persistence failure");
+		await expect(issueStudioParticipantToken(env, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			participantId: "participant-1",
+			token: "retry-token",
+		});
+		expect(addCount).toBe(1);
+		expect(studioDb.participantRows[0]?.realtimekit_participant_id).toBe(
+			"participant-1",
+		);
+	});
+
+	it("reconciles after a stored participant ID returns 404", async () => {
+		const participantRows: StudioParticipantDbRow[] = [{
+			github_handle: "rawkode",
+			image_url: null,
+			name: "Rawkode",
+			realtimekit_participant_id: "stale-participant",
+			role: "host",
+			session_id: "rawkode-live-next",
+			user_id: "rawkode",
+		}];
+		const studioDb = createStudioDbMock({
+			participantRows,
+			realtimekit_meeting_id: "meeting-1",
+		});
+		const customParticipantId = await createRealtimeKitCustomParticipantId({
+			meetingId: "meeting-1",
+			participantId: "rawkode",
+			role: "host",
+		});
+		const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+			const url = String(input);
+			if (url === "https://content.example/graphql") {
+				return new Response(JSON.stringify({ data: { personByGithub: null } }));
+			}
+			if (url.includes("/participants/stale-participant/token")) {
+				return new Response(JSON.stringify({ success: false }), { status: 404 });
+			}
+			if (init?.method === "GET") {
+				return new Response(JSON.stringify({
+					success: true,
+					result: [{ custom_participant_id: customParticipantId, id: "current-participant" }],
+				}));
+			}
+			expect(url).toContain("/participants/current-participant/token");
+			return new Response(JSON.stringify({
+				success: true,
+				result: { token: "current-token" },
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(issueStudioParticipantToken({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			participantId: "current-participant",
+			token: "current-token",
+		});
+		expect(participantRows[0]?.realtimekit_participant_id).toBe("current-participant");
+	});
+
+	it("surfaces non-recoverable participant provider failures as safe 502 errors", async () => {
+		const studioDb = createStudioDbMock({
+			participantRows: [{
+				github_handle: "rawkode",
+				image_url: null,
+				name: "Rawkode",
+				realtimekit_participant_id: "participant-1",
+				role: "host",
+				session_id: "rawkode-live-next",
+				user_id: "rawkode",
+			}],
+			realtimekit_meeting_id: "meeting-1",
+		});
+		vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) =>
+			String(input) === "https://content.example/graphql"
+				? new Response(JSON.stringify({ data: { personByGithub: null } }))
+				: new Response(JSON.stringify({
+					errors: [{ code: 7000, message: "provider-secret-detail" }],
+					success: false,
+				}), { status: 500 }),
+		));
+
+		const promise = issueStudioParticipantToken({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, user, {
+			role: "host",
+			sessionId: "rawkode-live-next",
+		});
+		await expect(promise).rejects.toMatchObject({
+			code: "provider-failed",
+			status: 502,
+		});
+		await expect(promise).rejects.not.toThrow("provider-secret-detail");
 	});
 
 	it("rejects participant tokens for ended sessions", async () => {
@@ -2860,6 +5222,89 @@ describe("Studio operations", () => {
 		).resolves.toBeNull();
 	});
 
+	it("redeems the same invite for the same user idempotently under concurrency", async () => {
+		const inviteRow: StudioInviteDbRow = {
+			token_hash: "invite-hash",
+			session_id: "rawkode-live-next",
+			role: "guest",
+			expires_at: Math.floor(Date.now() / 1000) + 60 * 60,
+			max_uses: 5,
+			used_count: 0,
+			created_by_id: "rawkode",
+			created_by_github: "rawkode",
+			created_at: 1,
+			revoked_at: null,
+		};
+		const redemptionRows: Array<{ token_hash: string; user_id: string }> = [];
+		const studioDb = createStudioDbMock({
+			inviteRows: [inviteRow],
+			redemptionRows,
+		});
+		const invite = {
+			tokenHash: inviteRow.token_hash,
+			sessionId: inviteRow.session_id,
+			role: inviteRow.role,
+			expiresAt: inviteRow.expires_at,
+			maxUses: inviteRow.max_uses,
+			usedCount: inviteRow.used_count,
+			createdById: inviteRow.created_by_id,
+			createdByGithub: inviteRow.created_by_github,
+			createdAt: inviteRow.created_at,
+			revokedAt: inviteRow.revoked_at,
+		};
+
+		await expect(Promise.all([
+			redeemStudioInvite({ STUDIO_DB: studioDb.db } as StudioEnv, invite, guestUser),
+			redeemStudioInvite({ STUDIO_DB: studioDb.db } as StudioEnv, invite, guestUser),
+		])).resolves.toEqual([true, true]);
+		expect(redemptionRows).toEqual([
+			{ token_hash: "invite-hash", user_id: "guest" },
+		]);
+		expect(inviteRow.used_count).toBe(1);
+	});
+
+	it("does not overbook a single-use invite under concurrent redemptions", async () => {
+		const inviteRow: StudioInviteDbRow = {
+			token_hash: "single-use-invite",
+			session_id: "rawkode-live-next",
+			role: "guest",
+			expires_at: Math.floor(Date.now() / 1000) + 60 * 60,
+			max_uses: 1,
+			used_count: 0,
+			created_by_id: "rawkode",
+			created_by_github: "rawkode",
+			created_at: 1,
+			revoked_at: null,
+		};
+		const redemptionRows: Array<{ token_hash: string; user_id: string }> = [];
+		const studioDb = createStudioDbMock({
+			inviteRows: [inviteRow],
+			redemptionRows,
+		});
+		const invite = {
+			tokenHash: inviteRow.token_hash,
+			sessionId: inviteRow.session_id,
+			role: inviteRow.role,
+			expiresAt: inviteRow.expires_at,
+			maxUses: inviteRow.max_uses,
+			usedCount: inviteRow.used_count,
+			createdById: inviteRow.created_by_id,
+			createdByGithub: inviteRow.created_by_github,
+			createdAt: inviteRow.created_at,
+			revokedAt: inviteRow.revoked_at,
+		};
+		const otherGuest = { ...guestUser, id: "other-guest", username: "other-guest" };
+
+		const results = await Promise.all([
+			redeemStudioInvite({ STUDIO_DB: studioDb.db } as StudioEnv, invite, guestUser),
+			redeemStudioInvite({ STUDIO_DB: studioDb.db } as StudioEnv, invite, otherGuest),
+		]);
+
+		expect(results.filter(Boolean)).toHaveLength(1);
+		expect(redemptionRows).toHaveLength(1);
+		expect(inviteRow.used_count).toBe(1);
+	});
+
 	it("creates single-use guest invites without persisting raw tokens", async () => {
 		const studioDb = createStudioDbMock();
 
@@ -2927,6 +5372,10 @@ describe("Studio operations", () => {
 					}),
 				);
 			}
+			if (init?.method === "GET") {
+				expect(url).toContain("/meetings/meeting-1/participants?page_no=");
+				return new Response(JSON.stringify({ success: true, result: [] }));
+			}
 
 			expect(url).toBe(
 				"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/participants",
@@ -2938,7 +5387,9 @@ describe("Studio operations", () => {
 				preset_name?: string;
 				};
 				expect(body).toMatchObject({
-					custom_participant_id: "studio:host:rawkode",
+					custom_participant_id: expect.stringMatching(
+						/^studio:host:v1:[a-f0-9]{64}$/,
+					),
 					name: "Rawkode Academy",
 					picture: "https://example.com/rawkode.png",
 					preset_name: "host-preset",
@@ -2993,7 +5444,46 @@ describe("Studio operations", () => {
 			"host",
 			"Rawkode Academy",
 			"https://example.com/rawkode.png",
+			"participant-1",
 		]);
+	});
+
+	it("rejects ending a Studio session while its recording lease is fresh", async () => {
+		const studioDb = createStudioDbMock({
+			recording_heartbeat_at: Math.floor(Date.now() / 1000),
+			recording_lease_id: "recording-1",
+			recording_status: "recording",
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+		});
+		const fetchMock = vi.fn(async () =>
+			new Response(JSON.stringify({ success: true, result: {} })),
+		);
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(
+			endStudioSession(
+				{
+					CLOUDFLARE_ACCOUNT_ID: "account-1",
+					REALTIMEKIT_API_TOKEN: "token-1",
+					REALTIMEKIT_APP_ID: "app-1",
+					STUDIO_DB: studioDb.db,
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+				} as StudioEnv,
+				user,
+				{
+					sessionId: "rawkode-live-next",
+				},
+			),
+		).rejects.toMatchObject({
+			code: "recording-active",
+			status: 409,
+		});
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(studioDb.sessionRow.status).toBe("live");
+		expect(studioDb.sessionRow.stream_status).toBe("idle");
+		expect(studioDb.sessionRow.recording_lease_id).toBe("recording-1");
+		expect(studioDb.sessionRow.recording_status).toBe("recording");
 	});
 
 	it("ends RealtimeKit sessions and marks Studio sessions complete", async () => {
@@ -3041,7 +5531,47 @@ describe("Studio operations", () => {
 			studioDb.writes.find((write) =>
 				write.sql.includes("SET status = ?")
 			)?.params,
-		).toEqual(["complete", "rawkode-live-next"]);
+		).toEqual(["complete", "rawkode-live-next", "complete"]);
+		expect(studioDb.sessionRow.recording_lease_id).toBeNull();
+		expect(studioDb.sessionRow.recording_heartbeat_at).toBeNull();
+		expect(studioDb.sessionRow.recording_status).toBe("idle");
+	});
+
+	it("ends the local session even when provider shutdown fails", async () => {
+		const studioDb = createStudioDbMock({
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+		});
+		let requestCount = 0;
+		vi.stubGlobal("fetch", vi.fn(async () => {
+			requestCount += 1;
+			return requestCount === 1
+				? new Response(JSON.stringify({ success: true, result: {} }))
+				: new Response(JSON.stringify({
+					errors: [{ code: 7000, message: "provider-secret-detail" }],
+					success: false,
+				}), { status: 500 });
+		}));
+
+		const error = await endStudioSession({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+		}).catch((reason: unknown) => reason);
+
+		expect(error).toMatchObject({ code: "provider-failed", status: 502 });
+		expect((error as Error).message).not.toContain("provider-secret-detail");
+		expect(studioDb.writes.some((write) =>
+			write.sql.includes("SET status = ?") && write.params[0] === "complete"
+		)).toBe(true);
+		expect(studioDb.sessionRow.status).toBe("complete");
+		expect(studioDb.sessionRow.recording_lease_id).toBeNull();
+		expect(studioDb.sessionRow.recording_heartbeat_at).toBeNull();
+		expect(studioDb.sessionRow.recording_status).toBe("idle");
 	});
 
 	it("hashes invite tokens instead of storing raw bearer tokens", async () => {
