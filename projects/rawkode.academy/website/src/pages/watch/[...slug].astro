@@ -860,7 +860,7 @@ const watchStatusLabel = isUpcomingLive
 		padding: clamp(1rem, 2vw, 1.5rem) var(--space-section-pad-x)
 			clamp(1.25rem, 2.5vw, 2rem);
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(18rem, 30rem);
+		grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
 		grid-template-areas: "summary player";
 		gap: clamp(1rem, 2vw, 1.5rem);
 		align-items: start;
@@ -876,7 +876,7 @@ const watchStatusLabel = isUpcomingLive
 
 	.watch-detail__title {
 		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
+		font-style: normal;
 		font-weight: 400;
 		font-size: clamp(2.25rem, 3.3vw, 3.5rem);
 		line-height: 0.96;
@@ -1018,7 +1018,7 @@ const watchStatusLabel = isUpcomingLive
 		isolation: isolate;
 		position: relative;
 		width: 100%;
-		max-width: 30rem;
+		max-width: 100%;
 		transition:
 			max-width 420ms var(--ease-standard),
 			filter var(--duration-base) var(--ease-standard);
@@ -1544,8 +1544,8 @@ const watchStatusLabel = isUpcomingLive
 		.watch-detail__hero {
 			grid-template-columns: 1fr;
 			grid-template-areas:
-				"summary"
-				"player";
+				"player"
+				"summary";
 		}
 
 		/* Single-column layout: the player is already as wide as it can get,

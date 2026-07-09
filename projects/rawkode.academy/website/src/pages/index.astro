@@ -14,8 +14,6 @@ import SectionHeader from "@/components/landing/SectionHeader.astro";
 import EditorialCardRail from "@/components/landing/EditorialCardRail.astro";
 import FeaturedFeature from "@/components/landing/FeaturedFeature.astro";
 import SecondaryGrid from "@/components/landing/SecondaryGrid.astro";
-import ValuesGrid from "@/components/landing/ValuesGrid.astro";
-import TestimonialSlider from "@/components/testimonial/slider.astro";
 import { DIMENSIONS } from "@/lib/explorer/dimensions";
 
 // ─── Edge caching ───────────────────────────────────────────────
@@ -336,39 +334,6 @@ const secondaryArticleItems = secondaryArticles.map((article) => {
 	return item;
 });
 
-const academyValues = [
-	{
-		title: "Authenticity",
-		description:
-			"We show the trade-offs, the rough edges, and the decisions we'd still make again.",
-	},
-	{
-		title: "Real Projects",
-		description:
-			"Much of the curriculum comes from problems we're solving in public, not invented demos.",
-	},
-	{
-		title: "Honest Mistakes",
-		description:
-			"Mistakes stay in the session because the recovery is usually more useful than the perfect path.",
-	},
-	{
-		title: "Hands-On",
-		description:
-			"Less talking about code, more terminal time, real code, and live builds you can follow end to end.",
-	},
-	{
-		title: "Early Evaluation",
-		description:
-			"We test new tools early, evaluate them honestly, and show where they fit.",
-	},
-	{
-		title: "Open & Closed Source",
-		description:
-			"We cover open source and vendors with the same standard: what works, what costs, and what saves time.",
-	},
-];
-
 // Stat row — all wired to real content collections.
 const totalSeconds = publishedVideos.reduce(
 	(acc, v) =>
@@ -561,23 +526,6 @@ const pageDescription =
 			</section>
 		)}
 
-		<section class="landing-section">
-			<SectionHeader
-				kicker="Teaching Approach"
-				title="How we teach"
-				body="Practical lessons based on real systems, trade-offs, and mistakes."
-			/>
-			<ValuesGrid values={academyValues} />
-		</section>
-
-		<section class="landing-section">
-			<SectionHeader
-				kicker="Testimonials"
-				title="What engineers say"
-				body="Feedback from people learning with Rawkode Academy."
-			/>
-			<TestimonialSlider type="viewer" blurb="" />
-		</section>
 	</div>
 </Page>
 
