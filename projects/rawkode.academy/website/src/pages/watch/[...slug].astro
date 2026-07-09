@@ -552,6 +552,7 @@ const watchStatusLabel = isUpcomingLive
 							fallbackVideoId={shouldRenderVodFallback ? video.data.id : undefined}
 							fallbackInitialPosition={initialPosition}
 							fallbackIsAuthenticated={isAuthenticated}
+							youtubeId={video.data.youtubeId}
 						/>
 					) : (
 						<VideoPlayer

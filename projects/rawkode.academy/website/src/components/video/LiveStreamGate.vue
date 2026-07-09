@@ -16,6 +16,7 @@ const props = defineProps<{
 	thumbnailUrl: string;
 	title: string;
 	videoSlug: string;
+	youtubeId?: string | undefined;
 }>();
 
 const liveState = ref<StudioLiveState>(
@@ -26,6 +27,7 @@ const liveState = ref<StudioLiveState>(
 let pollTimer: number | undefined;
 
 onMounted(() => {
+	if (props.youtubeId) return;
 	void refreshLiveState();
 	pollTimer = window.setInterval(() => {
 		void refreshLiveState();
@@ -50,8 +52,16 @@ async function refreshLiveState(): Promise<void> {
 </script>
 
 <template>
+	<iframe
+		v-if="youtubeId"
+		:src="`https://www.youtube-nocookie.com/embed/${youtubeId}`"
+		:title="title"
+		style="width: 100%; height: 100%; border: 0"
+		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+		allowfullscreen
+	></iframe>
 	<CloudflareWhepPlayer
-		v-if="liveState.live && liveState.playbackUrl"
+		v-else-if="liveState.live && liveState.playbackUrl"
 		:playback-url="liveState.playbackUrl"
 		:title="title"
 	/>

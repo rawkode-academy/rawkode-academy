@@ -64,6 +64,7 @@ const videos = defineCollection({
 				roomName: z.string().trim().min(1).optional(),
 			})
 			.optional(),
+		youtubeId: z.string().trim().min(1).optional(),
 		category: z
 			.enum(["editorial", "tutorial", "review", "interview", "announcement"])
 			.optional(),
