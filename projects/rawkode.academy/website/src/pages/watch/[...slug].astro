@@ -1619,10 +1619,12 @@ const watchStatusLabel = isUpcomingLive
 <style is:global>
 	/* Hide the server-rendered poster once the hydrated island has mounted
 	   a real player surface (vidstack <media-player>, the WHEP <video>
-	   element, or the upcoming-stream thumbnail). */
+	   element, an embedded YouTube <iframe>, or the upcoming-stream
+	   thumbnail). */
 	.watch-detail__player-frame:has(
 			media-player,
 			video,
+			iframe,
 			.watch-detail__upcoming-thumbnail
 		)
 		.watch-detail__ssr-poster {
