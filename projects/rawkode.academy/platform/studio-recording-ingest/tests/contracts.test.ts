@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { readFileSync } from "node:fs";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
 	assertReadyMarker,
 	assertReadyMarkerPathContract,
@@ -22,6 +22,27 @@ import {
 	requireCloudRunOperationName,
 	type CloudRunConfig,
 } from "../src/google.js";
+
+function createSecretsStoreRpcBinding(secret: string): {
+	binding: SecretsStoreSecret;
+	get: ReturnType<typeof vi.fn>;
+} {
+	const get = vi.fn(async () => secret);
+	const rpcGet = new Proxy(get, {
+		get(target, property, receiver) {
+			if (property === "call") {
+				return () => {
+					throw new Error('The RPC receiver does not implement the method "call".');
+				};
+			}
+			return Reflect.get(target, property, receiver);
+		},
+	});
+	return {
+		binding: { get: rpcGet } as SecretsStoreSecret,
+		get,
+	};
+}
 
 describe("studio recording ingest contracts", () => {
 	it("accepts only studio ready marker keys", () => {
@@ -278,10 +299,8 @@ describe("studio recording ingest worker", () => {
 		const recordings = createRecordingsMock(marker);
 		const env = createEnv(db.db, recordings.bucket);
 		const serviceAccountJson = env.GCP_SERVICE_ACCOUNT_JSON as string;
-		const serviceAccountSecret = {
-			get: async () => serviceAccountJson,
-		};
-		env.GCP_SERVICE_ACCOUNT_JSON = serviceAccountSecret as SecretsStoreSecret;
+		const serviceAccountSecret = createSecretsStoreRpcBinding(serviceAccountJson);
+		env.GCP_SERVICE_ACCOUNT_JSON = serviceAccountSecret.binding;
 		const calls: Array<{
 			config: CloudRunConfig;
 			marker: StudioRecordingReadyMarker;
@@ -305,6 +324,7 @@ describe("studio recording ingest worker", () => {
 		expect(calls[0]?.config.serviceAccount).toMatchObject({
 			client_email: "studio-recording-ingest@example.iam.gserviceaccount.com",
 		});
+		expect(serviceAccountSecret.get).toHaveBeenCalledOnce();
 		expect(calls).toEqual([
 			{
 				config: expect.objectContaining({

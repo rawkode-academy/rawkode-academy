@@ -44,7 +44,9 @@ async function readEnvSecret(
 
 	const get = (value as { get?: unknown }).get;
 	if (typeof get !== "function") return undefined;
-	const secret = await get.call(value);
+	// Secrets Store methods are Workers RPC method proxies. Invoking `.call` on
+	// the extracted proxy asks the remote receiver for a method named `call`.
+	const secret = await (value as SecretsStoreSecret).get();
 	return typeof secret === "string" && secret.trim()
 		? secret.trim()
 		: undefined;

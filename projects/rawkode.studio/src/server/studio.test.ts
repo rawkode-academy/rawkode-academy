@@ -49,6 +49,27 @@ const guestUser = {
 	username: "guest",
 };
 
+function createSecretsStoreRpcBinding(secret: string): {
+	binding: SecretsStoreSecret;
+	get: ReturnType<typeof vi.fn>;
+} {
+	const get = vi.fn(async () => secret);
+	const rpcGet = new Proxy(get, {
+		get(target, property, receiver) {
+			if (property === "call") {
+				return () => {
+					throw new Error('The RPC receiver does not implement the method "call".');
+				};
+			}
+			return Reflect.get(target, property, receiver);
+		},
+	});
+	return {
+		binding: { get: rpcGet } as SecretsStoreSecret,
+		get,
+	};
+}
+
 type StudioRecordingDbRow = {
 	recording_id: string;
 	session_id: string;
@@ -1577,8 +1598,8 @@ describe("Studio operations", () => {
 
 	it("keeps RealtimeKit room creation scheduled until the stream is confirmed live", async () => {
 		const studioDb = createStudioDbMock();
-		const apiTokenSecret = { get: vi.fn(async () => " rtk-token ") };
-		const appIdSecret = { get: vi.fn(async () => " app-1 ") };
+		const apiTokenSecret = createSecretsStoreRpcBinding(" rtk-token ");
+		const appIdSecret = createSecretsStoreRpcBinding(" app-1 ");
 		vi.stubGlobal(
 			"fetch",
 			vi.fn(async () =>
@@ -1597,8 +1618,8 @@ describe("Studio operations", () => {
 		const result = await createStudioSession(
 			{
 				CLOUDFLARE_ACCOUNT_ID: "account-1",
-				REALTIMEKIT_API_TOKEN: apiTokenSecret,
-				REALTIMEKIT_APP_ID: appIdSecret,
+				REALTIMEKIT_API_TOKEN: apiTokenSecret.binding,
+				REALTIMEKIT_APP_ID: appIdSecret.binding,
 				STUDIO_DB: studioDb.db,
 			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
