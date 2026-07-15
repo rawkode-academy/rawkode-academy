@@ -7,8 +7,8 @@ import {
 
 describe("thumbnail contracts", () => {
 	it("builds canonical R2 thumbnail keys", () => {
-		expect(thumbnailKey("7f1dfedcbf38a19375306862")).toBe(
-			"videos/7f1dfedcbf38a19375306862/thumbnail.webp",
+		expect(thumbnailKey("abc123")).toBe(
+			"videos/abc123/thumbnail.webp",
 		);
 	});
 
