@@ -276,13 +276,19 @@ describe("studio recording ingest worker", () => {
 		const event = createReadyEvent();
 		const db = createDbMock();
 		const recordings = createRecordingsMock(marker);
+		const env = createEnv(db.db, recordings.bucket);
+		const serviceAccountJson = env.GCP_SERVICE_ACCOUNT_JSON as string;
+		const serviceAccountSecret = {
+			get: async () => serviceAccountJson,
+		};
+		env.GCP_SERVICE_ACCOUNT_JSON = serviceAccountSecret as SecretsStoreSecret;
 		const calls: Array<{
 			config: CloudRunConfig;
 			marker: StudioRecordingReadyMarker;
 		}> = [];
 
 		const result = await handleR2Event(
-			createEnv(db.db, recordings.bucket),
+			env,
 			event,
 			{
 				runTranscodingJob: async (config, receivedMarker) => {
@@ -295,6 +301,9 @@ describe("studio recording ingest worker", () => {
 		expect(result).toEqual({
 			eventId: "content:studio/recordings/session-1/recording-1/ready.json:abc123",
 			cloudRunExecution: "operations/transcode-1",
+		});
+		expect(calls[0]?.config.serviceAccount).toMatchObject({
+			client_email: "studio-recording-ingest@example.iam.gserviceaccount.com",
 		});
 		expect(calls).toEqual([
 			{

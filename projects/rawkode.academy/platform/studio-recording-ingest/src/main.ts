@@ -17,7 +17,7 @@ export interface Env {
 	GCP_PROJECT_ID: string;
 	GCP_REGION: string;
 	GCP_TRANSCODING_JOB: string;
-	GCP_SERVICE_ACCOUNT_JSON: string;
+	GCP_SERVICE_ACCOUNT_JSON: string | SecretsStoreSecret;
 }
 
 interface HandleR2EventOptions {
@@ -100,12 +100,21 @@ async function markEvent(
 		.run();
 }
 
-function getCloudRunConfig(env: Env): CloudRunConfig {
+async function readServiceAccountJson(env: Env): Promise<string> {
+	const binding = env.GCP_SERVICE_ACCOUNT_JSON;
+	const value = typeof binding === "string" ? binding : await binding.get();
+	if (typeof value !== "string" || !value.trim()) {
+		throw new Error("GCP_SERVICE_ACCOUNT_JSON secret is empty");
+	}
+	return value;
+}
+
+async function getCloudRunConfig(env: Env): Promise<CloudRunConfig> {
 	return {
 		projectId: env.GCP_PROJECT_ID,
 		location: env.GCP_REGION,
 		jobName: env.GCP_TRANSCODING_JOB,
-		serviceAccount: JSON.parse(env.GCP_SERVICE_ACCOUNT_JSON),
+		serviceAccount: JSON.parse(await readServiceAccountJson(env)),
 	};
 }
 
@@ -156,7 +165,7 @@ export async function handleR2Event(
 			queuedAt: new Date().toISOString(),
 		});
 		const cloudRunExecution = await (options.runTranscodingJob ?? runTranscodingJob)(
-			getCloudRunConfig(env),
+			await getCloudRunConfig(env),
 			marker,
 		);
 		await markEvent(env, eventId, "triggered", { cloudRunExecution });
