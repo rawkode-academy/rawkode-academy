@@ -43,6 +43,19 @@ describe("browser media runtime dependencies", () => {
 		const styles = readFileSync(new URL("../styles.css", import.meta.url), "utf8");
 
 		expect(roomSource).toContain("const operatorDockOpen = ref(true)");
+		expect(roomSource).toContain(
+			"const meeting = shallowRef<RealtimeKitMeeting | null>(null)",
+		);
+		expect(roomSource).toContain(
+			'addEventListener("rtkStatesUpdate", handleRoomUiStatesUpdate)',
+		);
+		expect(roomSource).toContain(
+			'removeEventListener("rtkStatesUpdate", handleRoomUiStatesUpdate)',
+		);
+		expect(roomSource).not.toContain("rtk-states-update");
+		expect(roomSource).toContain(
+			'meeting.value !== nextMeeting || state.value === "connected"',
+		);
 		expect(roomSource).toContain("minimizeOperatorDock(true)");
 		expect(roomSource).toContain('v-show="roomUiIsVisible"');
 		expect(roomSource).toContain(':aria-controls="roomControlsId"');

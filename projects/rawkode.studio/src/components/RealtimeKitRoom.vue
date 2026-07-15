@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, watch } from "vue";
 import {
   getRealtimeKitRoomSetupState,
+  isRealtimeKitUiJoinedState,
   observeRealtimeKitRoomLifecycle,
   type RealtimeKitRoomLifecycleMeeting,
+  type RealtimeKitUiStatesUpdateEvent,
 } from "../live/realtimeKitRoomLifecycle";
 import type { StudioSource } from "../types";
 
@@ -81,7 +83,9 @@ const meetingElement = ref<HTMLElement | null>(null);
 const roomControlsToggle = ref<HTMLButtonElement | null>(null);
 const state = ref<RoomState>("idle");
 const errorMessage = ref("");
-const meeting = ref<RealtimeKitMeeting | null>(null);
+// SDK instances must retain their raw identity. A deep Vue ref proxies the
+// meeting, which makes lifecycle guards reject events emitted by the raw SDK.
+const meeting = shallowRef<RealtimeKitMeeting | null>(null);
 const operatorDockOpen = ref(true);
 const roomControlsId = `realtimekit-room-controls-${useId()}`;
 const roomControlsHeadingId = `${roomControlsId}-heading`;
@@ -112,6 +116,16 @@ const roomUiIsActive = computed(() => state.value === "setup" || state.value ===
 const roomUiIsVisible = computed(
   () => roomUiIsActive.value && (!isOperatorDock.value || operatorDockOpen.value),
 );
+
+watch(meetingElement, (element, _previousElement, onCleanup) => {
+  if (!element) {
+    return;
+  }
+  element.addEventListener("rtkStatesUpdate", handleRoomUiStatesUpdate);
+  onCleanup(() => {
+    element.removeEventListener("rtkStatesUpdate", handleRoomUiStatesUpdate);
+  });
+}, { flush: "post" });
 
 watch(state, (nextState) => {
   emit("connection-state-change", nextState);
@@ -255,15 +269,7 @@ function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
 function watchRoomLifecycle(nextMeeting: RealtimeKitMeeting): void {
   stopWatchingRoomLifecycle();
   removeRoomLifecycleListener = observeRealtimeKitRoomLifecycle(nextMeeting, {
-    onJoined: () => {
-      if (meeting.value !== nextMeeting) {
-        return;
-      }
-      state.value = "connected";
-      errorMessage.value = "";
-      minimizeOperatorDock(true);
-      emitRoomMediaStreams(nextMeeting);
-    },
+    onJoined: () => markRoomConnected(nextMeeting),
     onLeft: () => {
       if (meeting.value !== nextMeeting) {
         return;
@@ -282,6 +288,26 @@ function watchRoomLifecycle(nextMeeting: RealtimeKitMeeting): void {
       emitEmptyRoomMedia();
     },
   });
+}
+
+function handleRoomUiStatesUpdate(event: Event): void {
+  if (!isRealtimeKitUiJoinedState(event as RealtimeKitUiStatesUpdateEvent)) {
+    return;
+  }
+  const currentMeeting = meeting.value;
+  if (currentMeeting) {
+    markRoomConnected(currentMeeting);
+  }
+}
+
+function markRoomConnected(nextMeeting: RealtimeKitMeeting): void {
+  if (meeting.value !== nextMeeting || state.value === "connected") {
+    return;
+  }
+  state.value = "connected";
+  errorMessage.value = "";
+  minimizeOperatorDock(true);
+  emitRoomMediaStreams(nextMeeting);
 }
 
 function toggleOperatorDock(): void {
@@ -592,7 +618,11 @@ onBeforeUnmount(() => {
         </button>
       </header>
       <div class="realtimekit-room-stage">
-        <rtk-meeting ref="meetingElement" mode="fill" show-setup-screen="true" />
+        <rtk-meeting
+          ref="meetingElement"
+          mode="fill"
+          show-setup-screen="true"
+        />
       </div>
     </section>
   </div>

@@ -1,20 +1,68 @@
+export interface RealtimeKitRoomJoinedEvent {
+  reconnected: boolean;
+}
+
+export type RealtimeKitRoomLeftState =
+  | "connected-meeting"
+  | "disconnected"
+  | "ended"
+  | "failed"
+  | "kicked"
+  | "left"
+  | "rejected"
+  | "stageLeft";
+
+export interface RealtimeKitRoomLeftEvent {
+  state: RealtimeKitRoomLeftState;
+}
+
+export interface RealtimeKitRoomLifecycleEventMap {
+  roomJoined: RealtimeKitRoomJoinedEvent;
+  roomLeft: RealtimeKitRoomLeftEvent;
+}
+
+export type RealtimeKitRoomLifecycleListener<
+  EventName extends keyof RealtimeKitRoomLifecycleEventMap,
+> = (payload: RealtimeKitRoomLifecycleEventMap[EventName]) => void;
+
 export interface RealtimeKitRoomLifecycleMeeting {
   self?: {
-    addListener?(event: "roomJoined" | "roomLeft", listener: () => void): void;
-    removeListener?(event: "roomJoined" | "roomLeft", listener: () => void): void;
+    addListener?<EventName extends keyof RealtimeKitRoomLifecycleEventMap>(
+      event: EventName,
+      listener: RealtimeKitRoomLifecycleListener<EventName>,
+    ): void;
+    removeListener?<EventName extends keyof RealtimeKitRoomLifecycleEventMap>(
+      event: EventName,
+      listener: RealtimeKitRoomLifecycleListener<EventName>,
+    ): void;
     roomJoined?: boolean;
+    roomState?: "init" | "joined" | "waitlisted" | RealtimeKitRoomLeftState;
   };
 }
 
 interface RealtimeKitRoomLifecycleHandlers {
-  onJoined(): void;
-  onLeft(): void;
+  onJoined(payload: RealtimeKitRoomJoinedEvent): void;
+  onLeft(payload: RealtimeKitRoomLeftEvent): void;
+}
+
+export interface RealtimeKitUiStatesUpdateEvent {
+  detail?: {
+    meeting?: "ended" | "idle" | "joined" | "setup" | "waiting";
+  };
 }
 
 export function getRealtimeKitRoomSetupState(
   meeting: RealtimeKitRoomLifecycleMeeting,
 ): "connected" | "setup" {
-  return meeting.self?.roomJoined === true ? "connected" : "setup";
+  return meeting.self?.roomJoined === true || meeting.self?.roomState === "joined"
+    ? "connected"
+    : "setup";
+}
+
+export function isRealtimeKitUiJoinedState(
+  event: RealtimeKitUiStatesUpdateEvent,
+): boolean {
+  return event.detail?.meeting === "joined";
 }
 
 export function observeRealtimeKitRoomLifecycle(
