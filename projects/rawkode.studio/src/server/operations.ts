@@ -577,7 +577,6 @@ export async function createStudioSession(
 	const config = await getRealtimeKitConfig(env);
 	const meeting = config
 		? await createRealtimeKitMeeting(config, {
-				sessionId,
 				title,
 			})
 		: null;

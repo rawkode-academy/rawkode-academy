@@ -20,9 +20,32 @@ interface RealtimeKitConfig {
 
 interface CloudflareEnvelope<T> {
 	success: boolean;
-	errors?: Array<{ code?: number; message: string }>;
+	errors?: Array<{ code?: number | string; message?: string }>;
+	messages?: Array<{ code?: number | string; message?: string }>;
 	data?: T;
 	result?: T;
+}
+
+const MAX_REALTIMEKIT_ERROR_DETAILS = 3;
+const MAX_REALTIMEKIT_ERROR_CODE = 9_999_999_999;
+
+function realtimeKitApiError(
+	status: number,
+	body: CloudflareEnvelope<unknown> | null,
+): Error {
+	const codes = [...(body?.errors ?? []), ...(body?.messages ?? [])]
+		.map((detail) => detail.code)
+		.filter((code): code is number =>
+			typeof code === "number" &&
+			Number.isInteger(code) &&
+			code >= 0 &&
+			code <= MAX_REALTIMEKIT_ERROR_CODE
+		)
+		.slice(0, MAX_REALTIMEKIT_ERROR_DETAILS);
+	const suffix = codes.length > 0
+		? `: ${codes.map((code) => `[${String(code)}]`).join("; ")}`
+		: "";
+	return new Error(`RealtimeKit API returned ${status}${suffix}`);
 }
 
 function readEnvString(env: unknown, key: string): string | undefined {
@@ -91,12 +114,9 @@ async function realtimeKitFetch<T>(
 			},
 		},
 	);
-	const body = (await response.json()) as CloudflareEnvelope<T>;
-	if (!response.ok || !body.success) {
-		const message =
-			body.errors?.map((error) => error.message).join("; ") ||
-			`RealtimeKit API returned ${response.status}`;
-		throw new Error(message);
+	const body = await response.json().catch(() => null) as CloudflareEnvelope<T> | null;
+	if (!response.ok || !body?.success) {
+		throw realtimeKitApiError(response.status, body);
 	}
 
 	const data = body.data ?? body.result;
@@ -122,20 +142,17 @@ async function realtimeKitFetchOptional<T>(
 			},
 		},
 	);
-	const body = (await response.json().catch(() => ({}))) as CloudflareEnvelope<T>;
-	if (!response.ok || body.success === false) {
-		const message =
-			body.errors?.map((error) => error.message).join("; ") ||
-			`RealtimeKit API returned ${response.status}`;
-		throw new Error(message);
+	const body = await response.json().catch(() => null) as CloudflareEnvelope<T> | null;
+	if (!response.ok || body?.success === false) {
+		throw realtimeKitApiError(response.status, body);
 	}
 
-	return body.data ?? body.result ?? null;
+	return body?.data ?? body?.result ?? null;
 }
 
 export async function createRealtimeKitMeeting(
 	config: RealtimeKitConfig,
-	input: { sessionId: string; title: string },
+	input: { title: string },
 ): Promise<RealtimeKitMeeting> {
 	const data = await realtimeKitFetch<{ id: string; title?: string; record_on_start?: boolean }>(
 		config,
@@ -144,10 +161,6 @@ export async function createRealtimeKitMeeting(
 			method: "POST",
 			body: JSON.stringify({
 				title: input.title,
-				record_on_start: false,
-				recording_config: {
-					file_name_prefix: `studio/${input.sessionId}`,
-				},
 			}),
 		},
 	);
