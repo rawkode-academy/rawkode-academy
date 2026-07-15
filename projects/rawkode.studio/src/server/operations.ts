@@ -272,21 +272,34 @@ function getRecordingSourceKey(
 	return `${session.recordingPrefix}${recordingId}/source.${sourceFormat}`;
 }
 
-function getSessionRecordingVideoId(session: {
+const recordingAssetSegmentPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+export function resolveStudioRecordingVideoId(session: {
 	contentVideoId?: string | null;
 	id: string;
-	showId: string;
+	streamEnvironment: StreamEnvironment;
 }): string {
-	return session.contentVideoId ?? `${session.showId}/${session.id}`;
-}
-
-function requireContentBackedRecordingVideoId(session: {
-	contentVideoId?: string | null;
-}): string {
+	if (!recordingAssetSegmentPattern.test(session.id)) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Studio session ID must be a safe single path segment before recording.",
+			400,
+		);
+	}
+	if (session.streamEnvironment === "test") {
+		return `studio-rehearsal-${session.id}`;
+	}
 	if (!session.contentVideoId) {
 		throw new StudioOperationError(
 			"bad-request",
-			"Studio recordings must be attached to a Rawkode content video before VOD handoff.",
+			"Prod Studio recordings must be attached to a Rawkode content video before VOD handoff.",
+			400,
+		);
+	}
+	if (!recordingAssetSegmentPattern.test(session.contentVideoId)) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Studio recording video ID must be a safe single path segment.",
 			400,
 		);
 	}
@@ -1101,7 +1114,7 @@ export async function createStudioRecordingUpload(
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
 	const bucket = requirePersistentRecordingsBucket(env);
-	const videoId = requireContentBackedRecordingVideoId(session);
+	const videoId = resolveStudioRecordingVideoId(session);
 	const recordingId = createRecordingId();
 	const sourceKey = getRecordingSourceKey(
 		session,
@@ -1124,12 +1137,15 @@ export async function createStudioRecordingUpload(
 	}
 
 	return {
+		isRehearsal: session.streamEnvironment === "test",
+		outputPrefix: `videos/${videoId}/`,
 		partSizeBytes: recordingUploadPartSizeBytes,
 		recordingId,
 		sessionId: session.id,
 		sourceFormat: input.sourceFormat,
 		sourceKey,
 		uploadId: upload.uploadId,
+		videoId,
 	};
 }
 
@@ -1146,7 +1162,7 @@ export async function uploadStudioRecordingPart(
 		input.recordingId,
 		input.sourceFormat,
 	);
-	requireContentBackedRecordingVideoId(session);
+	resolveStudioRecordingVideoId(session);
 	const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
 	const part = await upload.uploadPart(input.partNumber, input.body);
 
@@ -1187,7 +1203,7 @@ export async function completeStudioRecordingUpload(
 		}
 	}
 
-	const videoId = requireContentBackedRecordingVideoId(session);
+	const videoId = resolveStudioRecordingVideoId(session);
 	const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
 	const source = await upload.complete(parts);
 
@@ -1263,9 +1279,7 @@ export async function markStudioRecordingReady(
 			503,
 		);
 	}
-	const videoId = persistentHandoff
-		? requireContentBackedRecordingVideoId(session)
-		: getSessionRecordingVideoId(session);
+	const videoId = resolveStudioRecordingVideoId(session);
 	const sourceBucket = env.RECORDINGS_BUCKET_NAME ?? input.sourceBucket;
 	if (!sourceBucket) {
 		throw new StudioOperationError(

@@ -6,6 +6,7 @@ import {
 	getStudioSessionWatchUrl,
 	userIsConfiguredStudioOperator,
 } from "../../../server/studio";
+import { resolveStudioRecordingVideoId } from "../../../server/operations";
 import { env } from "cloudflare:workers";
 
 if (!Astro.locals.user) {
@@ -25,6 +26,7 @@ if (!userIsConfiguredStudioOperator(env, Astro.locals.user)) {
 const readyMarkerKey = `studio/recordings/${sessionId}/<recording-id>/ready.json`;
 const recordings = await listStudioRecordings(env, session.id);
 const publicVodUrl = getStudioSessionWatchUrl(session);
+const recordingVideoId = resolveStudioRecordingVideoId(session);
 ---
 
 <StudioLayout title={`Recordings ${session.title} | Rawkode Studio`} active="recordings">
@@ -47,7 +49,7 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 				</div>
 				<div>
 					<dt>VIDEO_ID</dt>
-					<dd>{session.contentVideoId ?? `${session.showId}/${session.id}`}</dd>
+					<dd>{recordingVideoId}</dd>
 				</div>
 				{
 					publicVodUrl ? (
@@ -77,7 +79,9 @@ const publicVodUrl = getStudioSessionWatchUrl(session);
 				recordings.map((recording) => (
 					<article class="recording-row">
 						<div>
-							<p class="eyebrow">{recording.status}</p>
+							<p class="eyebrow">
+								{recording.isRehearsal ? `rehearsal · ${recording.status}` : recording.status}
+							</p>
 							<h2>{recording.recordingId}</h2>
 							<p>
 								<code>{recording.readyMarkerKey}</code>

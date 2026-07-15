@@ -82,9 +82,11 @@ type StudioDbMockOptions = Partial<{
 	content_hosts_json: string;
 	content_video_id: string | null;
 	content_video_slug: string | null;
+	id: string;
 	cloudflare_stream_live_input_id: string | null;
 	cloudflare_stream_playback_url: string | null;
 	realtimekit_meeting_id: string | null;
+	recording_prefix: string;
 	recording_status: "failed" | "idle" | "recording" | "transcoding" | "uploaded" | "vod-ready";
 	show_id: string;
 	show_title: string;
@@ -568,7 +570,7 @@ describe("Studio session records", () => {
 		expect(session.streamStatus).toBe("idle");
 	});
 
-	it("builds Rawkode watch URLs for content-backed sessions", () => {
+	it("builds Rawkode watch URLs only for Prod content-backed sessions", () => {
 		const session = buildStudioSession({
 			contentVideoId: "video-123",
 			contentVideoSlug: "future-episode",
@@ -576,6 +578,7 @@ describe("Studio session records", () => {
 			meeting: null,
 			sessionId: "video-123-next",
 			show: "Rawkode Live",
+			streamEnvironment: "prod",
 			title: "Future Rawkode Live episode",
 		});
 
@@ -1177,6 +1180,7 @@ describe("Studio operations", () => {
 		expect(route).toContain("getStudioSessionWatchUrl(session)");
 		expect(route).toContain("<dt>WATCH_URL</dt>");
 		expect(route).toContain('recording.status === "vod-ready"');
+		expect(route).toContain("recording.isRehearsal");
 	});
 
 	it("does not expose Studio sessions on anonymous dashboards", async () => {
@@ -1567,9 +1571,8 @@ describe("Studio operations", () => {
 				write.params.includes("Future Rawkode Live episode"),
 			),
 		).toBe(true);
-		expect(getStudioSessionWatchUrl(result.session)).toBe(
-			"https://rawkode.academy/watch/future-episode",
-		);
+		expect(result.session.streamEnvironment).toBe("test");
+		expect(getStudioSessionWatchUrl(result.session)).toBeNull();
 	});
 
 	it("keeps RealtimeKit room creation scheduled until the stream is confirmed live", async () => {
@@ -2604,8 +2607,10 @@ describe("Studio operations", () => {
 		expect(result.readyMarkerKey).toBe(
 			"studio/recordings/rawkode-live-next/recording-1/ready.json",
 		);
-		expect(result.videoId).toBe("rawkode-live/rawkode-live-next");
-		expect(result.outputPrefix).toBe("videos/rawkode-live/rawkode-live-next/");
+		expect(result.videoId).toBe("studio-rehearsal-rawkode-live-next");
+		expect(result.outputPrefix).toBe(
+			"videos/studio-rehearsal-rawkode-live-next/",
+		);
 		expect(result.sourceVerified).toBe(false);
 	});
 
@@ -2613,6 +2618,7 @@ describe("Studio operations", () => {
 		const writes: Array<{ key: string; value: string }> = [];
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		const recordings = {
 			head: async () => ({ etag: '"abc123"' }),
@@ -2648,7 +2654,7 @@ describe("Studio operations", () => {
 	});
 
 	it("rejects persistent recording handoff without a content video ID", async () => {
-		const studioDb = createStudioDbMock();
+		const studioDb = createStudioDbMock({ stream_environment: "prod" });
 		let touchedRecordings = false;
 		const recordings = {
 			head: async () => {
@@ -2769,6 +2775,7 @@ describe("Studio operations", () => {
 		const writes: Array<{ key: string; value: string }> = [];
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		const recordings = {
 			head: async () => ({ etag: '"abc123"' }),
@@ -2838,7 +2845,7 @@ describe("Studio operations", () => {
 		});
 	});
 
-	it("creates manager-owned multipart recording uploads under the session prefix", async () => {
+	it("namespaces content-backed Test multipart uploads as rehearsals", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
 		});
@@ -2884,7 +2891,12 @@ describe("Studio operations", () => {
 		expect(customMetadata).toMatchObject({
 			recordingId: result.recordingId,
 			sessionId: "rawkode-live-next",
-			videoId: "video-123",
+			videoId: "studio-rehearsal-rawkode-live-next",
+		});
+		expect(result).toMatchObject({
+			isRehearsal: true,
+			outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
+			videoId: "studio-rehearsal-rawkode-live-next",
 		});
 		expect(
 			studioDb.writes.find((write) => write.sql.includes("UPDATE studio_sessions"))
@@ -2906,7 +2918,7 @@ describe("Studio operations", () => {
 	});
 
 	it("rejects persistent recording uploads without a content video ID", async () => {
-		const studioDb = createStudioDbMock();
+		const studioDb = createStudioDbMock({ stream_environment: "prod" });
 		const recordings = {
 			createMultipartUpload: async () => {
 				throw new Error("should not create upload");
@@ -2964,6 +2976,7 @@ describe("Studio operations", () => {
 	it("uploads recording parts through server-owned multipart source keys", async () => {
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		let resumedKey = "";
 		let resumedUploadId = "";
@@ -3071,6 +3084,7 @@ describe("Studio operations", () => {
 		const writes: Array<{ key: string; value: string }> = [];
 		const studioDb = createStudioDbMock({
 			content_video_id: "video-123",
+			stream_environment: "prod",
 		});
 		let completedParts: R2UploadedPart[] = [];
 		const recordings = {
@@ -3171,7 +3185,7 @@ describe("Studio operations", () => {
 
 		const readyMarker = JSON.parse(recordings.text(handoff.readyMarkerKey) ?? "{}");
 		expect(handoff).toMatchObject({
-			outputPrefix: "videos/video-123/",
+			outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
 			readyMarkerKey:
 				`studio/recordings/rawkode-live-next/${upload.recordingId}/ready.json`,
 			sourceBucket: "verified-recordings",
@@ -3179,25 +3193,26 @@ describe("Studio operations", () => {
 			sourceFormat: "webm",
 			sourceKey: upload.sourceKey,
 			sourceVerified: true,
-			videoId: "video-123",
+			videoId: "studio-rehearsal-rawkode-live-next",
 		});
 		expect(readyMarker).toMatchObject({
 			contractVersion: 1,
-			outputPrefix: "videos/video-123/",
+			outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
 			recordingId: upload.recordingId,
 			sourceBucket: "verified-recordings",
 			sourceKey: upload.sourceKey,
 			studioSessionId: "rawkode-live-next",
-			videoId: "video-123",
+			videoId: "studio-rehearsal-rawkode-live-next",
 		});
 		await expect(listStudioRecordings(env, "rawkode-live-next")).resolves.toMatchObject([
 			{
 				handoffStatus: "ready",
-				outputPrefix: "videos/video-123/",
+				isRehearsal: true,
+				outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
 				recordingId: upload.recordingId,
 				status: "uploaded",
 				transcode: null,
-				videoId: "video-123",
+				videoId: "studio-rehearsal-rawkode-live-next",
 			},
 		]);
 		await expect(loadStudioDashboard(user, env)).resolves.toMatchObject({
@@ -3210,7 +3225,7 @@ describe("Studio operations", () => {
 		});
 
 		recordings.putJson(
-			"videos/video-123/transcode-status.json",
+			"videos/studio-rehearsal-rawkode-live-next/transcode-status.json",
 			{
 				completedAt: "2026-08-01T11:00:00.000Z",
 				status: "complete",
@@ -3224,9 +3239,10 @@ describe("Studio operations", () => {
 				transcode: {
 					completedAt: "2026-08-01T11:00:00.000Z",
 					status: "complete",
-					statusKey: "videos/video-123/transcode-status.json",
+					statusKey:
+						"videos/studio-rehearsal-rawkode-live-next/transcode-status.json",
 					streamUrl:
-						"https://content.rawkode.academy/videos/video-123/stream.m3u8",
+						"https://content.rawkode.academy/videos/studio-rehearsal-rawkode-live-next/stream.m3u8",
 				},
 			},
 		]);
@@ -3238,6 +3254,148 @@ describe("Studio operations", () => {
 				},
 			],
 		});
+	});
+
+	it("round-trips ad-hoc Test recordings through isolated multipart handoff", async () => {
+		const studioDb = createStudioDbMock();
+		const recordings = createRecordingBucketMock();
+		const env = {
+			RECORDINGS: recordings.bucket,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv;
+
+		const upload = await createStudioRecordingUpload(env, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		});
+		expect(upload).toMatchObject({
+			isRehearsal: true,
+			outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
+			videoId: "studio-rehearsal-rawkode-live-next",
+		});
+		expect(upload.sourceKey).toBe(
+			`studio/recordings/rawkode-live-next/${upload.recordingId}/source.webm`,
+		);
+
+		const part = await uploadStudioRecordingPart(env, user, {
+			body: new Blob(["ad-hoc-rehearsal"]).stream(),
+			partNumber: 1,
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		});
+		const handoff = await completeStudioRecordingUpload(env, user, {
+			parts: [part],
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceFormat: upload.sourceFormat,
+			uploadId: upload.uploadId,
+		});
+		expect(handoff).toMatchObject({
+			outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
+			readyMarkerKey:
+				`studio/recordings/rawkode-live-next/${upload.recordingId}/ready.json`,
+			sourceKey: upload.sourceKey,
+			videoId: "studio-rehearsal-rawkode-live-next",
+		});
+		expect(JSON.parse(recordings.text(handoff.readyMarkerKey) ?? "{}")).toMatchObject({
+			outputPrefix: "videos/studio-rehearsal-rawkode-live-next/",
+			recordingId: upload.recordingId,
+			studioSessionId: "rawkode-live-next",
+			videoId: "studio-rehearsal-rawkode-live-next",
+		});
+
+		const retriedHandoff = await markStudioRecordingReady(env, user, {
+			recordingId: upload.recordingId,
+			sessionId: upload.sessionId,
+			sourceEtag: handoff.sourceEtag,
+			sourceFormat: upload.sourceFormat,
+			sourceKey: upload.sourceKey,
+		});
+		expect(retriedHandoff).toMatchObject({
+			outputPrefix: handoff.outputPrefix,
+			readyMarkerKey: handoff.readyMarkerKey,
+			videoId: handoff.videoId,
+		});
+		await expect(listStudioRecordings(env, upload.sessionId)).resolves.toHaveLength(1);
+	});
+
+	it("rejects every Prod recording handoff path without a content video ID", async () => {
+		const studioDb = createStudioDbMock({ stream_environment: "prod" });
+		const recordings = {
+			resumeMultipartUpload: () => {
+				throw new Error("Prod recording must be rejected before resuming R2");
+			},
+		} as unknown as R2Bucket;
+		const env = {
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv;
+
+		await expect(uploadStudioRecordingPart(env, user, {
+			body: new Blob(["part"]).stream(),
+			partNumber: 1,
+			recordingId: "recording-1",
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+			uploadId: "upload-1",
+		})).rejects.toMatchObject({ code: "bad-request", status: 400 });
+		await expect(completeStudioRecordingUpload(env, user, {
+			parts: [{ etag: "part-etag", partNumber: 1 }],
+			recordingId: "recording-1",
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+			uploadId: "upload-1",
+		})).rejects.toMatchObject({ code: "bad-request", status: 400 });
+	});
+
+	it("rejects unsafe session IDs before deriving rehearsal asset paths", async () => {
+		const studioDb = createStudioDbMock({
+			id: "../escape",
+			recording_prefix: "studio/recordings/../escape/",
+		});
+		const recordings = {
+			createMultipartUpload: () => {
+				throw new Error("unsafe session must be rejected before writing R2");
+			},
+		} as unknown as R2Bucket;
+
+		await expect(createStudioRecordingUpload({
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, user, {
+			sessionId: "../escape",
+			sourceFormat: "webm",
+		})).rejects.toMatchObject({ code: "bad-request", status: 400 });
+	});
+
+	it("rejects unsafe Prod content IDs before deriving output paths", async () => {
+		const studioDb = createStudioDbMock({
+			content_video_id: "../escape",
+			stream_environment: "prod",
+		});
+		const recordings = {
+			createMultipartUpload: () => {
+				throw new Error("unsafe content ID must be rejected before writing R2");
+			},
+		} as unknown as R2Bucket;
+
+		await expect(createStudioRecordingUpload({
+			RECORDINGS: recordings,
+			RECORDINGS_BUCKET_NAME: "verified-recordings",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+			sourceFormat: "webm",
+		})).rejects.toMatchObject({ code: "bad-request", status: 400 });
 	});
 
 	it("rejects unsafe recording IDs before resuming multipart uploads", async () => {

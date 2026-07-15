@@ -93,6 +93,7 @@ export interface StudioTranscodeStatus {
 export interface StudioRecordingSummary {
 	recordingId: string;
 	videoId: string;
+	isRehearsal: boolean;
 	sourceBucket: string;
 	sourceKey: string;
 	sourceEtag: string;
@@ -394,9 +395,9 @@ export function isStudioSessionActive(session: StudioSessionSummary): boolean {
 }
 
 export function getStudioSessionWatchUrl(
-	session: Pick<StudioSessionRecord, "contentVideoSlug">,
+	session: Pick<StudioSessionRecord, "contentVideoSlug" | "streamEnvironment">,
 ): string | null {
-	return session.contentVideoSlug
+	return session.streamEnvironment === "prod" && session.contentVideoSlug
 		? `https://rawkode.academy/watch/${session.contentVideoSlug}`
 		: null;
 }
@@ -492,6 +493,7 @@ function rowToRecording(row: StudioRecordingRow): StudioRecordingSummary {
 	return {
 		recordingId: row.recording_id,
 		videoId: row.video_id,
+		isRehearsal: row.video_id.startsWith("studio-rehearsal-"),
 		sourceBucket: row.source_bucket,
 		sourceKey: row.source_key,
 		sourceEtag: row.source_etag,
