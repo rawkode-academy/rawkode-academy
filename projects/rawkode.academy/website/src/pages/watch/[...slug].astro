@@ -525,13 +525,6 @@ const watchStatusLabel = isUpcomingLive
 				class="watch-detail__player-wrap"
 				style={`view-transition-name: ${videoTransitionName(video.data.slug)}`}
 			>
-				<input
-					id="watch-detail-player-state"
-					class="watch-detail__player-state"
-					type="checkbox"
-					aria-label="Expand or shrink video player"
-					data-watch-detail-state
-				/>
 				<div id="watch-detail-player" class="watch-detail__player-frame">
 					<img
 						class="watch-detail__ssr-poster"
@@ -573,18 +566,6 @@ const watchStatusLabel = isUpcomingLive
 						</div>
 					</noscript>
 				</div>
-				<label
-					class="watch-detail__player-toggle"
-					for="watch-detail-player-state"
-					data-watch-detail-toggle
-				>
-					<span class="watch-detail__player-toggle-label watch-detail__player-toggle-label--expand" data-watch-detail-toggle-label>
-						Expand player
-					</span>
-					<span class="watch-detail__player-toggle-label watch-detail__player-toggle-label--shrink">
-						Shrink player
-					</span>
-				</label>
 			</div>
 		</section>
 
@@ -864,14 +845,6 @@ const watchStatusLabel = isUpcomingLive
 		grid-template-areas: "summary player";
 		gap: clamp(1rem, 2vw, 1.5rem);
 		align-items: start;
-		transition:
-			grid-template-columns 420ms var(--ease-standard),
-			gap 420ms var(--ease-standard);
-	}
-
-	.watch-detail__hero:has(.watch-detail__player-state:checked) {
-		grid-template-columns: minmax(18rem, 22rem) minmax(0, 1fr);
-		grid-template-areas: "summary player";
 	}
 
 	.watch-detail__title {
@@ -1019,34 +992,6 @@ const watchStatusLabel = isUpcomingLive
 		position: relative;
 		width: 100%;
 		max-width: 100%;
-		transition:
-			max-width 420ms var(--ease-standard),
-			filter var(--duration-base) var(--ease-standard);
-	}
-
-	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-wrap {
-		max-width: 100%;
-	}
-
-	.watch-detail__player-state {
-		position: absolute;
-		inset: 0;
-		z-index: 2147483647;
-		width: auto;
-		height: auto;
-		margin: 0;
-		padding: 0;
-		border: 0;
-		background: transparent;
-		cursor: zoom-in;
-		opacity: 0.001;
-	}
-
-	.watch-detail__player-state:checked {
-		inset: 0.75rem 0.75rem auto auto;
-		width: 10.5rem;
-		height: 2rem;
-		cursor: zoom-out;
 	}
 
 	.watch-detail__player-frame {
@@ -1109,77 +1054,6 @@ const watchStatusLabel = isUpcomingLive
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-	}
-
-	.watch-detail__player-toggle {
-		position: absolute;
-		inset: 0;
-		z-index: 2147483646;
-		display: flex;
-		align-items: flex-end;
-		justify-content: flex-start;
-		padding: 0.875rem;
-		border: 0;
-		background: linear-gradient(
-			180deg,
-			oklch(0 0 0 / 0) 0%,
-			oklch(0 0 0 / 0) 48%,
-			oklch(0 0 0 / 0.58) 100%
-		);
-		color: var(--editorial-paper);
-		cursor: zoom-in;
-		pointer-events: none;
-		text-align: left;
-		user-select: none;
-	}
-
-	.watch-detail__player-state:focus-visible ~ .watch-detail__player-toggle {
-		outline: 2px solid var(--editorial-amber);
-		outline-offset: -4px;
-	}
-
-	.watch-detail__player-toggle-label {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 2rem;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid oklch(1 0 0 / 0.45);
-		background: oklch(0 0 0 / 0.72);
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		line-height: 1;
-		text-transform: uppercase;
-	}
-
-	.watch-detail__player-toggle-label--shrink {
-		display: none;
-	}
-
-	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle {
-		inset: 0.75rem 0.75rem auto auto;
-		padding: 0;
-		background: transparent;
-		color: var(--editorial-ink);
-		cursor: zoom-out;
-	}
-
-	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle-label {
-		min-height: 0;
-		padding: 0.5rem 0.625rem;
-		border-color: var(--editorial-hairline-strong);
-		background: color-mix(in oklch, var(--editorial-paper) 92%, transparent);
-		color: var(--editorial-ink);
-	}
-
-	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle-label--expand {
-		display: none;
-	}
-
-	.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__player-toggle-label--shrink {
-		display: inline-flex;
 	}
 
 	.watch-detail__body {
@@ -1471,27 +1345,13 @@ const watchStatusLabel = isUpcomingLive
 	}
 
 	@media (max-width: 1500px) {
-		.watch-detail__hero:has(.watch-detail__player-state:checked) {
-			grid-template-columns: 1fr;
-			grid-template-areas:
-				"summary"
-				"player";
-		}
-
-		.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__summary {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
-			gap: 1rem 1.25rem;
-			padding-top: 0;
-		}
-
 		.watch-detail__upcoming-callout {
 			grid-column: 1 / -1;
 		}
 	}
 
 	@media (min-width: 900px) and (max-width: 1180px) {
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) {
+		.watch-detail__hero {
 			grid-template-columns: minmax(18rem, 20rem) minmax(0, 1fr);
 			grid-template-areas:
 				"copy player"
@@ -1499,43 +1359,43 @@ const watchStatusLabel = isUpcomingLive
 			gap: 1rem 1.25rem;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__player-wrap {
+		.watch-detail__player-wrap {
 			max-width: 20rem;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__summary {
+		.watch-detail__summary {
 			display: contents;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__summary-copy {
+		.watch-detail__summary-copy {
 			grid-area: copy;
 			gap: 0.625rem;
 			align-self: start;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__title {
+		.watch-detail__title {
 			font-size: clamp(2.125rem, 3.8vw, 2.75rem);
 			line-height: 0.95;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__dek {
+		.watch-detail__dek {
 			font-size: 1rem;
 			line-height: 1.35;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__facts {
+		.watch-detail__facts {
 			grid-area: facts;
 			grid-template-columns: repeat(4, minmax(0, 1fr));
 			column-gap: 1rem;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__facts div {
+		.watch-detail__facts div {
 			grid-template-columns: 1fr;
 			gap: 0.25rem;
 			padding: 0.5rem 0;
 		}
 
-		.watch-detail__hero:not(:has(.watch-detail__player-state:checked)) .watch-detail__upcoming-callout {
+		.watch-detail__upcoming-callout {
 			grid-column: 1 / -1;
 		}
 	}
@@ -1548,27 +1408,13 @@ const watchStatusLabel = isUpcomingLive
 				"summary";
 		}
 
-		/* Single-column layout: the player is already as wide as it can get,
-		   so the expand/shrink toggle is meaningless — and its full-frame
-		   checkbox overlay would swallow the first tap meant for the player. */
 		.watch-detail__player-wrap {
 			max-width: 100%;
-		}
-
-		.watch-detail__player-state,
-		.watch-detail__player-toggle {
-			display: none;
 		}
 
 		.watch-detail__summary {
 			display: flex;
 			flex-direction: column;
-		}
-
-		.watch-detail__hero:has(.watch-detail__player-state:checked) .watch-detail__summary {
-			display: flex;
-			flex-direction: column;
-			gap: 1rem;
 		}
 
 		.watch-detail__facts {
@@ -1583,8 +1429,6 @@ const watchStatusLabel = isUpcomingLive
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.watch-detail__hero,
-		.watch-detail__player-wrap,
 		.watch-detail__player-frame {
 			transition: none;
 		}
