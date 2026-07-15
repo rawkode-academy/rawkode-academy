@@ -604,12 +604,15 @@ textarea:focus-visible {
 }
 
 .realtimekit-room-drawer {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   z-index: 20;
   right: 16px;
   bottom: 16px;
-  width: min(520px, calc(100vw - 32px));
-  height: min(580px, calc(100vh - 90px));
+  width: min(420px, calc(100vw - 32px));
+  height: min(360px, calc(100dvh - 88px));
+  max-height: calc(100dvh - 32px);
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
@@ -617,7 +620,52 @@ textarea:focus-visible {
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.54);
 }
 
-.realtimekit-room-drawer rtk-meeting {
+.realtimekit-room[data-layout="dock"][data-state="setup"] .realtimekit-room-drawer {
+  width: min(520px, calc(100vw - 32px));
+  height: min(580px, calc(100dvh - 90px));
+}
+
+.realtimekit-room-drawer-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 8px 6px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.realtimekit-room-drawer-header div {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.realtimekit-room-drawer-header strong {
+  overflow: hidden;
+  color: #edf4f8;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.realtimekit-room-drawer-header span {
+  color: #8ff3e9;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.realtimekit-room-stage {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.realtimekit-room-stage rtk-meeting {
   display: block;
   width: 100%;
   height: 100%;
@@ -1369,6 +1417,10 @@ input[type="range"] {
   box-shadow: none;
 }
 
+.guest-room-shell .realtimekit-room-stage {
+  height: 100%;
+}
+
 .guest-card {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
@@ -1889,7 +1941,13 @@ button:hover {
     right: 10px;
     bottom: 10px;
     width: calc(100vw - 20px);
-    height: min(620px, calc(100vh - 20px));
+    height: min(520px, 68dvh);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .realtimekit-room[data-layout="dock"][data-state="setup"] .realtimekit-room-drawer {
+    width: calc(100vw - 20px);
+    height: min(620px, calc(100dvh - 20px));
   }
 
   .studio-app {

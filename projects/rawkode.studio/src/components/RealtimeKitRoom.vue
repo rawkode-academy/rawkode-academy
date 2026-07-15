@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from "vue";
 import {
   getRealtimeKitRoomSetupState,
   observeRealtimeKitRoomLifecycle,
@@ -78,9 +78,13 @@ const emit = defineEmits<{
 }>();
 
 const meetingElement = ref<HTMLElement | null>(null);
+const roomControlsToggle = ref<HTMLButtonElement | null>(null);
 const state = ref<RoomState>("idle");
 const errorMessage = ref("");
 const meeting = ref<RealtimeKitMeeting | null>(null);
+const operatorDockOpen = ref(true);
+const roomControlsId = `realtimekit-room-controls-${useId()}`;
+const roomControlsHeadingId = `${roomControlsId}-heading`;
 let uiKitLoaded: Promise<void> | undefined;
 let clientLoaded: Promise<RealtimeKitClient> | undefined;
 type RealtimeKitParticipantListener = (...args: unknown[]) => void;
@@ -103,6 +107,11 @@ const buttonLabel = computed(() => {
   return "Set up room";
 });
 const canJoin = computed(() => Boolean(props.sessionId) && state.value !== "connecting");
+const isOperatorDock = computed(() => props.role === "program");
+const roomUiIsActive = computed(() => state.value === "setup" || state.value === "connected");
+const roomUiIsVisible = computed(
+  () => roomUiIsActive.value && (!isOperatorDock.value || operatorDockOpen.value),
+);
 
 watch(state, (nextState) => {
   emit("connection-state-change", nextState);
@@ -120,6 +129,7 @@ async function toggleRoom(): Promise<void> {
 async function joinRoom(): Promise<void> {
   if (!canJoin.value) return;
 
+  operatorDockOpen.value = true;
   state.value = "connecting";
   errorMessage.value = "";
 
@@ -143,6 +153,7 @@ async function joinRoom(): Promise<void> {
       element.meeting = nextMeeting;
     }
     if (state.value === "connected") {
+      minimizeOperatorDock(true);
       emitRoomMediaStreams(nextMeeting);
     } else {
       emitEmptyRoomMedia();
@@ -181,6 +192,7 @@ async function leaveRoom(resetState = true): Promise<void> {
     state.value = "idle";
     errorMessage.value = "";
   }
+  operatorDockOpen.value = true;
   emitEmptyRoomMedia();
 }
 
@@ -249,6 +261,7 @@ function watchRoomLifecycle(nextMeeting: RealtimeKitMeeting): void {
       }
       state.value = "connected";
       errorMessage.value = "";
+      minimizeOperatorDock(true);
       emitRoomMediaStreams(nextMeeting);
     },
     onLeft: () => {
@@ -265,9 +278,36 @@ function watchRoomLifecycle(nextMeeting: RealtimeKitMeeting): void {
         element.meeting = undefined;
       }
       state.value = "idle";
+      operatorDockOpen.value = true;
       emitEmptyRoomMedia();
     },
   });
+}
+
+function toggleOperatorDock(): void {
+  if (!isOperatorDock.value || state.value !== "connected") {
+    return;
+  }
+  operatorDockOpen.value = !operatorDockOpen.value;
+}
+
+function minimizeOperatorDock(restoreFocus = false): void {
+  if (!isOperatorDock.value) {
+    return;
+  }
+  operatorDockOpen.value = false;
+  if (restoreFocus) {
+    void nextTick(() => roomControlsToggle.value?.focus());
+  }
+}
+
+function handleOperatorDockEscape(event: KeyboardEvent): void {
+  if (!isOperatorDock.value || state.value !== "connected" || !operatorDockOpen.value) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  minimizeOperatorDock(true);
 }
 
 function stopWatchingRoomLifecycle(): void {
@@ -502,7 +542,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="realtimekit-room" :data-state="state">
+  <div
+    class="realtimekit-room"
+    :data-layout="isOperatorDock ? 'dock' : 'embedded'"
+    :data-state="state"
+  >
     <button
       class="secondary-button compact"
       type="button"
@@ -511,10 +555,45 @@ onBeforeUnmount(() => {
     >
       {{ buttonLabel }}
     </button>
-    <span class="room-state">{{ state }}</span>
-    <span v-if="errorMessage" class="room-error">{{ errorMessage }}</span>
-    <div v-show="state === 'setup' || state === 'connected'" class="realtimekit-room-drawer">
-      <rtk-meeting ref="meetingElement" mode="fill" show-setup-screen="true" />
-    </div>
+    <span class="room-state" aria-live="polite">{{ state }}</span>
+    <button
+      v-if="isOperatorDock && state === 'connected'"
+      ref="roomControlsToggle"
+      class="secondary-button compact room-controls-toggle"
+      type="button"
+      :aria-controls="roomControlsId"
+      :aria-expanded="operatorDockOpen"
+      :aria-label="operatorDockOpen ? 'Hide RealtimeKit room controls' : 'Show RealtimeKit room controls'"
+      @click="toggleOperatorDock"
+    >
+      {{ operatorDockOpen ? "Hide room" : "Room controls" }}
+    </button>
+    <span v-if="errorMessage" class="room-error" role="alert">{{ errorMessage }}</span>
+    <section
+      v-show="roomUiIsVisible"
+      :id="roomControlsId"
+      class="realtimekit-room-drawer"
+      :aria-labelledby="isOperatorDock && state === 'connected' ? roomControlsHeadingId : undefined"
+      :aria-label="isOperatorDock && state === 'connected' ? undefined : 'RealtimeKit room'"
+      @keydown.esc="handleOperatorDockEscape"
+    >
+      <header v-if="isOperatorDock && state === 'connected'" class="realtimekit-room-drawer-header">
+        <div>
+          <strong :id="roomControlsHeadingId">RealtimeKit room</strong>
+          <span>Connected</span>
+        </div>
+        <button
+          class="ghost-button mini"
+          type="button"
+          aria-label="Minimize RealtimeKit room controls"
+          @click="minimizeOperatorDock(true)"
+        >
+          Minimize
+        </button>
+      </header>
+      <div class="realtimekit-room-stage">
+        <rtk-meeting ref="meetingElement" mode="fill" show-setup-screen="true" />
+      </div>
+    </section>
   </div>
 </template>
