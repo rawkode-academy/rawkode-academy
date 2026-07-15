@@ -31,6 +31,7 @@ const props = defineProps<{
 const {
   state,
   send,
+  programScene,
   programLayers,
 } = useStudioMachine();
 
@@ -100,8 +101,7 @@ const runtimeProgramLayers = computed(() => deriveProgrammeLayers({
 }));
 const programmeMediaReadiness = computed(() => getProgrammeMediaReadiness({
   layers: runtimeProgramLayers.value,
-  mediaStreams: mediaStreams.value,
-  roomConnected: roomState.value === "connected",
+  selectedSceneExists: Boolean(programScene.value),
 }));
 const sourcesForUi = computed(() =>
   [

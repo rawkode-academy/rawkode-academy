@@ -70,4 +70,33 @@ describe("browser media runtime dependencies", () => {
 		expect(styles).toContain('.realtimekit-room[data-layout="dock"][data-state="setup"]');
 		expect(styles).toContain("height: min(520px, 68dvh)");
 	});
+
+	it("keeps live and recording transports running while scene audio changes", () => {
+		const canvasSource = readFileSync(
+			new URL("../components/StudioCanvas.vue", import.meta.url),
+			"utf8",
+		);
+		const readinessSource = readFileSync(
+			new URL("../studio/programmeMedia.ts", import.meta.url),
+			"utf8",
+		);
+
+		expect(readinessSource).not.toContain(
+			"Select a scene with an available camera or screen share.",
+		);
+		expect(readinessSource).not.toContain(
+			"Enable an audible microphone for a programme source.",
+		);
+		expect(readinessSource).not.toContain(
+			"Join the RealtimeKit room before publishing.",
+		);
+		expect(canvasSource).toContain(
+			"createProgrammeOutput(canvasStream, getProgrammeAudioStreams)",
+		);
+		expect(canvasSource).toContain("recordingProgrammeOutput = await createProgrammeOutputStream()");
+		expect(canvasSource).toContain("liveProgrammeOutput = programmeOutput");
+		expect(canvasSource).toContain("syncProgrammeOutputAudioStreams()");
+		expect(canvasSource).toContain("output.setAudioStreams(audioStreams)");
+		expect(canvasSource).not.toContain("stopLivePublishingForMediaLoss");
+	});
 });

@@ -148,6 +148,7 @@ const isStartingRecording = ref(false);
 const activeRecordingBackupId = ref("");
 const recordingRecoveryVersion = ref(0);
 const recordingRecoveryWarning = ref("");
+const programmeAudioWarning = ref("");
 const recordingUploadError = ref("");
 const recordingUploadStatus = ref<RecordingUploadStatus>("idle");
 const completedRecording = ref<RecordingHandoff | null>(null);
@@ -381,6 +382,7 @@ async function startLocalRecording(): Promise<void> {
     }
 
     recordingProgrammeOutput = await createProgrammeOutputStream();
+    syncProgrammeOutputAudioStreams();
     const recordingStream = recordingProgrammeOutput.stream;
 
     const mimeType = getSupportedRecordingMimeType();
@@ -776,6 +778,7 @@ async function startLivePublishing(): Promise<void> {
   try {
     const programmeOutput = await createProgrammeOutputStream();
     liveProgrammeOutput = programmeOutput;
+    syncProgrammeOutputAudioStreams();
     const start = await postStreamAction<{
       liveInputId: string;
       playbackUrl: string;
@@ -878,7 +881,7 @@ async function stopLivePublishing(): Promise<void> {
   }
 }
 
-async function stopLivePublishingForMediaLoss(reason: string): Promise<void> {
+async function stopLivePublishingForOutputLoss(reason: string): Promise<void> {
   if (!hasActiveLivePublish.value) {
     return;
   }
@@ -1217,12 +1220,35 @@ async function createProgrammeOutputStream(): Promise<ProgrammeOutput> {
     throw new Error("Programme canvas stream is not available.");
   }
 
+  return await createProgrammeOutput(canvasStream, getProgrammeAudioStreams);
+}
+
+function getProgrammeAudioStreams(): MediaStream[] {
   const sourceIds = props.programmeSourceIds ?? getProgrammeMediaSourceIds(props.layers);
-  const audioStreams = sourceIds
+  return [...new Set(sourceIds)]
     .map((sourceId) => props.mediaStreams?.get(sourceId))
     .filter((stream): stream is MediaStream => Boolean(stream));
+}
 
-  return await createProgrammeOutput(canvasStream, audioStreams);
+function syncProgrammeOutputAudioStreams(): void {
+  const audioStreams = getProgrammeAudioStreams();
+  const failures: string[] = [];
+  for (const [label, output] of [
+    ["live", liveProgrammeOutput],
+    ["recording", recordingProgrammeOutput],
+  ] as const) {
+    if (!output) {
+      continue;
+    }
+    try {
+      output.setAudioStreams(audioStreams);
+    } catch (error) {
+      failures.push(`${label}: ${toErrorMessage(error)}`);
+    }
+  }
+  programmeAudioWarning.value = failures.length > 0
+    ? `Programme audio update failed (${failures.join("; ")}). Output continues with the existing mix.`
+    : "";
 }
 
 function getRecordingSourceFormat(_mimeType: string): "webm" {
@@ -1384,6 +1410,15 @@ watch(
 );
 
 watch(
+  [
+    () => props.layers,
+    () => props.mediaStreams,
+    () => props.programmeSourceIds,
+  ],
+  syncProgrammeOutputAudioStreams,
+);
+
+watch(
   () => props.publishBlockedReason,
   (reason) => {
     const blockedReason = reason?.trim();
@@ -1394,7 +1429,7 @@ watch(
       stopLocalRecording();
     }
     if (hasActiveLivePublish.value) {
-      void stopLivePublishingForMediaLoss(blockedReason);
+      void stopLivePublishingForOutputLoss(blockedReason);
     }
   },
 );
@@ -1700,6 +1735,13 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
           aria-live="polite"
         >
           {{ recordingRecoveryWarning }}
+        </span>
+        <span
+          v-if="programmeAudioWarning"
+          class="recording-upload-state warning"
+          aria-live="polite"
+        >
+          {{ programmeAudioWarning }}
         </span>
         <a
           v-if="recordingStatusHref"

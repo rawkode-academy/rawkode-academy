@@ -19,8 +19,7 @@ interface DeriveProgrammeLayersOptions {
 
 interface GetProgrammeMediaReadinessOptions {
   layers: StudioLayer[];
-  mediaStreams: Map<string, MediaStream>;
-  roomConnected: boolean;
+  selectedSceneExists: boolean;
 }
 
 export function deriveProgrammeLayers({
@@ -91,36 +90,13 @@ export function deriveProgrammeLayers({
 
 export function getProgrammeMediaReadiness({
   layers,
-  mediaStreams,
-  roomConnected,
+  selectedSceneExists,
 }: GetProgrammeMediaReadinessOptions): ProgrammeMediaReadiness {
   const sourceIds = getProgrammeMediaSourceIds(layers);
-  if (!roomConnected) {
+  if (!selectedSceneExists) {
     return {
       ready: false,
-      reason: "Join the RealtimeKit room before publishing.",
-      sourceIds,
-    };
-  }
-
-  const hasLiveVideo = sourceIds.some((sourceId) =>
-    mediaStreams.get(sourceId)?.getVideoTracks().some(isLiveEnabledTrack),
-  );
-  if (!hasLiveVideo) {
-    return {
-      ready: false,
-      reason: "Select a scene with an available camera or screen share.",
-      sourceIds,
-    };
-  }
-
-  const hasAudibleAudio = sourceIds.some((sourceId) =>
-    mediaStreams.get(sourceId)?.getAudioTracks().some(isAudibleTrack),
-  );
-  if (!hasAudibleAudio) {
-    return {
-      ready: false,
-      reason: "Enable an audible microphone for a programme source.",
+      reason: "Select a scene before publishing.",
       sourceIds,
     };
   }

@@ -5,6 +5,8 @@ import {
   getProgrammeMediaReadiness,
   OPERATOR_SOURCE_ID,
 } from "./programmeMedia";
+import { createInitialStudioState } from "./seed";
+import { getScene, getSceneLayers } from "./studioMachine";
 
 const resolution: CanvasResolution = { width: 1920, height: 1080, fps: 30 };
 const cameraBounds = { x: 0, y: 0, width: 640, height: 360 };
@@ -81,58 +83,70 @@ describe("deriveProgrammeLayers", () => {
 });
 
 describe("getProgrammeMediaReadiness", () => {
-  const programmeLayers = [cameraLayer("operator", OPERATOR_SOURCE_ID)];
+  it.each(["intro", "outro"])(
+    "allows the renderable %s scene without media sources",
+    (sceneId) => {
+      const state = createInitialStudioState();
+      const readiness = getProgrammeMediaReadiness({
+        layers: getSceneLayers(state, sceneId),
+        selectedSceneExists: Boolean(getScene(state, sceneId)),
+      });
 
-  it("requires the RealtimeKit room to be joined", () => {
-    const readiness = getProgrammeMediaReadiness({
-      layers: programmeLayers,
+      expect(readiness).toEqual({ ready: true, reason: "", sourceIds: [] });
+    },
+  );
+
+  it("allows a camera scene after its unavailable camera is removed", () => {
+    const state = createInitialStudioState();
+    const layers = deriveProgrammeLayers({
+      layers: getSceneLayers(state, "monologue"),
       mediaStreams: new Map(),
-      roomConnected: false,
+      resolution,
+      runtimeSources: [],
     });
 
-    expect(readiness).toMatchObject({
-      ready: false,
-      reason: "Join the RealtimeKit room before publishing.",
-    });
+    expect(layers.some((layer) => layer.type === "camera")).toBe(false);
+    expect(getProgrammeMediaReadiness({
+      layers,
+      selectedSceneExists: true,
+    })).toEqual({ ready: true, reason: "", sourceIds: [] });
   });
 
-  it("requires both intended live video and audible programme audio", () => {
-    const videoOnly = mediaStream({ video: [track("video", "video")] });
-    expect(getProgrammeMediaReadiness({
-      layers: programmeLayers,
-      mediaStreams: new Map([[OPERATOR_SOURCE_ID, videoOnly]]),
-      roomConnected: true,
-    }).reason).toBe("Enable an audible microphone for a programme source.");
-
-    const mutedAudio = track("muted", "audio");
-    Object.defineProperty(mutedAudio, "muted", { value: true });
-    expect(getProgrammeMediaReadiness({
-      layers: programmeLayers,
-      mediaStreams: new Map([[
-        OPERATOR_SOURCE_ID,
-        mediaStream({ audio: [mutedAudio], video: [track("video-2", "video")] }),
-      ]]),
-      roomConnected: true,
-    }).ready).toBe(false);
-  });
-
-  it("becomes ready with a joined room, live video, and audible audio", () => {
-    const readiness = getProgrammeMediaReadiness({
-      layers: programmeLayers,
-      mediaStreams: new Map([[
-        OPERATOR_SOURCE_ID,
-        mediaStream({
-          audio: [track("audio", "audio")],
-          video: [track("video", "video")],
-        }),
-      ]]),
-      roomConnected: true,
+  it("allows the screenshare scene without an active screen share", () => {
+    const state = createInitialStudioState();
+    const layers = deriveProgrammeLayers({
+      layers: getSceneLayers(state, "screenshare"),
+      mediaStreams: new Map(),
+      resolution,
+      runtimeSources: [],
     });
 
-    expect(readiness).toEqual({
+    expect(layers.some((layer) => layer.type === "screen")).toBe(false);
+    expect(getProgrammeMediaReadiness({
+      layers,
+      selectedSceneExists: true,
+    })).toEqual({ ready: true, reason: "", sourceIds: [] });
+  });
+
+  it("keeps selected media source IDs without requiring their tracks", () => {
+    expect(getProgrammeMediaReadiness({
+      layers: [cameraLayer("operator", OPERATOR_SOURCE_ID)],
+      selectedSceneExists: true,
+    })).toEqual({
       ready: true,
       reason: "",
       sourceIds: [OPERATOR_SOURCE_ID],
+    });
+  });
+
+  it("blocks when the selected scene does not exist", () => {
+    expect(getProgrammeMediaReadiness({
+      layers: [],
+      selectedSceneExists: false,
+    })).toEqual({
+      ready: false,
+      reason: "Select a scene before publishing.",
+      sourceIds: [],
     });
   });
 });

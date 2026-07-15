@@ -24,20 +24,22 @@ export interface ProgrammeOutputDependencies {
 }
 
 export interface ProgrammeOutput {
-  audioSourceCount: number;
+  readonly audioSourceCount: number;
   close(): Promise<void>;
+  setAudioStreams(streams: Iterable<MediaStream>): void;
   stream: MediaStream;
 }
 
 interface ProgrammeAudioMix {
   close(): Promise<void>;
-  sourceTrackCount: number;
+  readonly sourceTrackCount: number;
+  setStreams(streams: Iterable<MediaStream>): void;
   track: MediaStreamTrack;
 }
 
 export async function createProgrammeOutput(
   canvasStream: MediaStream,
-  audioStreams: Iterable<MediaStream>,
+  audioStreams: Iterable<MediaStream> | (() => Iterable<MediaStream>),
   dependencies: ProgrammeOutputDependencies = {},
 ): Promise<ProgrammeOutput> {
   const createMediaStream = dependencies.createMediaStream ?? ((tracks) => new MediaStream(tracks));
@@ -47,19 +49,34 @@ export async function createProgrammeOutput(
     throw new Error("Programme canvas has no live video track.");
   }
 
-  const audioMix = await createProgrammeAudioMix(audioStreams, {
+  const getAudioStreams = typeof audioStreams === "function"
+    ? audioStreams
+    : () => audioStreams;
+  const audioMix = await createProgrammeAudioMix(getAudioStreams(), {
     ...dependencies,
     createMediaStream,
   }).catch((error: unknown) => {
     stopTracks(canvasStream.getTracks());
     throw error;
   });
+  try {
+    audioMix.setStreams(getAudioStreams());
+  } catch (error) {
+    stopTracks(canvasStream.getTracks());
+    await audioMix.close().catch(() => undefined);
+    throw error;
+  }
   const stream = createMediaStream([...videoTracks, audioMix.track]);
   let closed = false;
 
   return {
-    audioSourceCount: audioMix.sourceTrackCount,
+    get audioSourceCount() {
+      return audioMix.sourceTrackCount;
+    },
     stream,
+    setAudioStreams(streams: Iterable<MediaStream>): void {
+      audioMix.setStreams(streams);
+    },
     async close(): Promise<void> {
       if (closed) {
         return;
@@ -104,11 +121,6 @@ async function createProgrammeAudioMix(
   streams: Iterable<MediaStream>,
   dependencies: ProgrammeOutputDependencies,
 ): Promise<ProgrammeAudioMix> {
-  const sourceTracks = collectUniqueAudibleAudioTracks(streams);
-  if (sourceTracks.length === 0) {
-    throw new Error("Programme has no audible audio source.");
-  }
-
   const createMediaStream = dependencies.createMediaStream ?? ((tracks) => new MediaStream(tracks));
   const createAudioContext = dependencies.createAudioContext ?? (() => {
     if (typeof AudioContext === "undefined") {
@@ -118,36 +130,85 @@ async function createProgrammeAudioMix(
   });
   const context = createAudioContext();
   const destination = context.createMediaStreamDestination();
-  const sourceNodes: ProgrammeAudioSourceNode[] = [];
+  const sourceNodes = new Map<
+    MediaStreamTrack | string,
+    { node: ProgrammeAudioSourceNode; track: MediaStreamTrack }
+  >();
+  let closed = false;
+
+  const setStreams = (nextStreams: Iterable<MediaStream>): void => {
+    if (closed) {
+      return;
+    }
+
+    const nextTracks = new Map<MediaStreamTrack | string, MediaStreamTrack>();
+    for (const track of collectUniqueAudibleAudioTracks(nextStreams)) {
+      nextTracks.set(getAudioTrackKey(track), track);
+    }
+
+    const additions = new Map<
+      MediaStreamTrack | string,
+      { node: ProgrammeAudioSourceNode; track: MediaStreamTrack }
+    >();
+    try {
+      for (const [key, track] of nextTracks) {
+        if (sourceNodes.get(key)?.track === track) {
+          continue;
+        }
+        const node = context.createMediaStreamSource(createMediaStream([track]));
+        try {
+          node.connect(destination);
+        } catch (error) {
+          node.disconnect();
+          throw error;
+        }
+        additions.set(key, { node, track });
+      }
+    } catch (error) {
+      for (const { node } of additions.values()) {
+        node.disconnect();
+      }
+      throw error;
+    }
+
+    for (const [key, source] of sourceNodes) {
+      if (nextTracks.get(key) === source.track) {
+        continue;
+      }
+      source.node.disconnect();
+      sourceNodes.delete(key);
+    }
+    for (const [key, source] of additions) {
+      sourceNodes.set(key, source);
+    }
+  };
 
   try {
-    for (const track of sourceTracks) {
-      const sourceNode = context.createMediaStreamSource(createMediaStream([track]));
-      sourceNode.connect(destination);
-      sourceNodes.push(sourceNode);
-    }
-    if (context.state === "suspended") {
-      await context.resume?.();
-    }
-
     const mixedTracks = destination.stream.getAudioTracks();
     if (mixedTracks.length !== 1 || !mixedTracks[0]) {
       throw new Error("Programme audio mixer did not produce exactly one audio track.");
     }
     const mixedTrack = mixedTracks[0];
-    let closed = false;
+    setStreams(streams);
+    if (context.state === "suspended") {
+      await context.resume?.();
+    }
 
     return {
-      sourceTrackCount: sourceTracks.length,
+      get sourceTrackCount() {
+        return sourceNodes.size;
+      },
+      setStreams,
       track: mixedTrack,
       async close(): Promise<void> {
         if (closed) {
           return;
         }
         closed = true;
-        for (const sourceNode of sourceNodes) {
-          sourceNode.disconnect();
+        for (const { node } of sourceNodes.values()) {
+          node.disconnect();
         }
+        sourceNodes.clear();
         destination.disconnect?.();
         mixedTrack.stop();
         if (context.state !== "closed") {
@@ -156,13 +217,19 @@ async function createProgrammeAudioMix(
       },
     };
   } catch (error) {
-    for (const sourceNode of sourceNodes) {
-      sourceNode.disconnect();
+    closed = true;
+    for (const { node } of sourceNodes.values()) {
+      node.disconnect();
     }
+    sourceNodes.clear();
     stopTracks(destination.stream.getTracks());
     await context.close().catch(() => undefined);
     throw error;
   }
+}
+
+function getAudioTrackKey(track: MediaStreamTrack): MediaStreamTrack | string {
+  return track.id ? `track:${track.id}` : track;
 }
 
 function stopTracks(tracks: MediaStreamTrack[]): void {
