@@ -2,6 +2,10 @@ import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { StudioEnv } from "../env";
 import {
+	clearCloudflareStreamLiveInputCache,
+	createCloudflareStreamLiveInput,
+} from "./cloudflare-stream";
+import {
 	abortStudioRecordingUpload,
 	completeStudioRecordingUpload,
 	confirmStudioStream,
@@ -11,6 +15,7 @@ import {
 	endStudioSession,
 	issueStudioParticipantToken,
 	markStudioRecordingReady,
+	resetStudioStream,
 	startStudioStream,
 	stopStudioStream,
 	uploadStudioRecordingPart,
@@ -91,9 +96,11 @@ type StudioDbMockOptions = Partial<{
 	stream_started_at: number | null;
 	stream_status: "ended" | "failed" | "idle" | "live" | "starting";
 	title: string;
+	updated_at: number;
 }> & {
 	inviteRows?: StudioInviteDbRow[];
 	recordingRows?: StudioRecordingDbRow[];
+	replaceLeaseBeforeEnd?: { liveInputId: string; startToken: string };
 	redemptionRows?: Array<{ token_hash: string; user_id: string }>;
 };
 
@@ -101,9 +108,11 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 	const {
 		inviteRows = [],
 		recordingRows = [],
+		replaceLeaseBeforeEnd,
 		redemptionRows = [],
 		...overrides
 	} = options;
+	let leaseReplacementApplied = false;
 	const writes: Array<{ params: unknown[]; sql: string }> = [];
 	const sessionRow = {
 		id: "rawkode-live-next",
@@ -130,7 +139,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		created_by_id: "rawkode",
 		created_by_github: "rawkode",
 		created_at: 1,
-		updated_at: 1,
+		updated_at: Math.floor(Date.now() / 1000),
 		...overrides,
 	};
 	const db = {
@@ -147,6 +156,34 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 				bind: (...params: unknown[]) => ({
 					all: async () => all(...params),
 					first: async () => {
+						if (
+							sql.includes("SELECT cloudflare_stream_live_input_id") &&
+							sql.includes("stream_status IN ('starting', 'live')")
+						) {
+							return sessionRow.id === String(params[0]) &&
+								(sessionRow.stream_status === "starting" ||
+									sessionRow.stream_status === "live") &&
+								sessionRow.cloudflare_stream_live_input_id &&
+								sessionRow.stream_start_token
+								? {
+									cloudflare_stream_live_input_id:
+										sessionRow.cloudflare_stream_live_input_id,
+									stream_start_token: sessionRow.stream_start_token,
+								}
+								: null;
+						}
+						if (
+							sql.includes("SELECT id") &&
+							sql.includes("AND stream_start_token = ?") &&
+							sql.includes("AND cloudflare_stream_live_input_id = ?")
+						) {
+							return sessionRow.id === String(params[0]) &&
+								sessionRow.stream_status === "live" &&
+								sessionRow.stream_start_token === String(params[1]) &&
+								sessionRow.cloudflare_stream_live_input_id === String(params[2])
+								? { id: sessionRow.id }
+								: null;
+						}
 						if (sql.includes("FROM studio_invites")) {
 							const tokenHash = String(params[0] ?? "");
 							const userId = String(params[1] ?? "");
@@ -179,10 +216,12 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								sessionRow.stream_status === "live" &&
 								sessionRow.status === "live" &&
 								sessionRow.cloudflare_stream_playback_url
-								? sessionRow
+								? { ...sessionRow }
 								: null;
 						}
-						return sql.includes("FROM studio_sessions") ? sessionRow : null;
+						return sql.includes("FROM studio_sessions")
+							? { ...sessionRow }
+							: null;
 						},
 					run: async () => {
 						let changes = 1;
@@ -242,6 +281,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								sql.includes("cloudflare_stream_live_input_id")
 							) {
 								if (
+									sessionRow.status !== "complete" &&
 									sessionRow.stream_status === "starting" &&
 									sessionRow.stream_start_token === String(params[3])
 								) {
@@ -273,8 +313,10 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 							}
 							if (sql.includes("SET status = CASE WHEN ? = 1")) {
 								if (
+									sessionRow.status !== "complete" &&
 									sessionRow.stream_status === "starting" &&
-									sessionRow.stream_start_token === String(params[3])
+									sessionRow.stream_start_token === String(params[3]) &&
+									sessionRow.cloudflare_stream_live_input_id === String(params[4])
 								) {
 									sessionRow.status = params[0] === 1 ? "live" : sessionRow.status;
 									sessionRow.stream_status = "live";
@@ -290,7 +332,9 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									sessionRow.stream_environment === "prod" &&
 									sessionRow.stream_status === "live" &&
 									sessionRow.status === "live" &&
-									sessionRow.stream_notification_queued_at === null
+									sessionRow.stream_notification_queued_at === null &&
+									sessionRow.stream_start_token === String(params[2]) &&
+									sessionRow.cloudflare_stream_live_input_id === String(params[3])
 								) {
 									sessionRow.stream_notification_queued_at = Number(params[0]);
 								} else {
@@ -298,14 +342,60 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 								}
 							}
 							if (sql.includes("stream_notification_queued_at = NULL")) {
-								if (sessionRow.stream_notification_queued_at === Number(params[1])) {
+								if (
+									sessionRow.stream_notification_queued_at === Number(params[1]) &&
+									sessionRow.stream_start_token === String(params[2]) &&
+									sessionRow.cloudflare_stream_live_input_id === String(params[3])
+								) {
 									sessionRow.stream_notification_queued_at = null;
 								} else {
 									changes = 0;
 								}
 							}
+							if (sql.includes("stream_status = 'failed'")) {
+								const isActive = sessionRow.stream_status === "starting" ||
+									sessionRow.stream_status === "live";
+								const matches = sql.includes("AND updated_at <= ?")
+									? sessionRow.stream_status === String(params[1]) &&
+										sessionRow.updated_at <= Number(params[2])
+									: sql.includes("AND stream_start_token = ?")
+										? sessionRow.stream_start_token === String(params[1])
+										: true;
+								if (isActive && matches) {
+									if (sessionRow.status === "live") sessionRow.status = "scheduled";
+									sessionRow.stream_status = "failed";
+									sessionRow.stream_start_token = null;
+									sessionRow.stream_ended_at = now;
+								} else {
+									changes = 0;
+								}
+							}
 							if (sql.includes("stream_status = 'ended'")) {
-								if (params.length === 4) {
+								if (
+									params.length === 3 &&
+									sql.includes("cloudflare_stream_live_input_id = ?")
+								) {
+									if (replaceLeaseBeforeEnd && !leaseReplacementApplied) {
+										leaseReplacementApplied = true;
+										sessionRow.cloudflare_stream_live_input_id =
+											replaceLeaseBeforeEnd.liveInputId;
+										sessionRow.stream_start_token = replaceLeaseBeforeEnd.startToken;
+									}
+									const matchesLease = (
+										sessionRow.stream_status === "starting" ||
+										sessionRow.stream_status === "live"
+									) &&
+										sessionRow.stream_start_token === String(params[1]) &&
+										sessionRow.cloudflare_stream_live_input_id === String(params[2]);
+									if (matchesLease) {
+										if (sessionRow.status === "live") sessionRow.status = "scheduled";
+										sessionRow.stream_status = "ended";
+										sessionRow.stream_start_token = null;
+										sessionRow.stream_ended_at ??= now;
+									} else {
+										changes = 0;
+									}
+								} else if (params.length === 4) {
 									const token = String(params[3]);
 									const matchesToken = sessionRow.stream_start_token === token;
 									const canPreCancel = sessionRow.stream_start_token === null &&
@@ -330,7 +420,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 									sessionRow.stream_ended_at ??= now;
 								}
 							}
-							sessionRow.updated_at = Math.floor(Date.now() / 1000);
+							if (changes > 0) sessionRow.updated_at = now;
 						}
 						return { meta: { changes, rows_written: changes } };
 					},
@@ -339,7 +429,7 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		},
 	} as unknown as D1Database;
 
-	return { db, writes };
+	return { db, sessionRow, writes };
 }
 
 function createRecordingBucketMock() {
@@ -450,6 +540,7 @@ function createRecordingBucketMock() {
 }
 
 afterEach(() => {
+	clearCloudflareStreamLiveInputCache();
 	vi.restoreAllMocks();
 });
 
@@ -571,6 +662,7 @@ describe("Studio session records", () => {
 			{
 				RECORDINGS: recordings,
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			"rawkode-live-next",
 		);
@@ -623,6 +715,7 @@ describe("Studio session records", () => {
 				{
 					RECORDINGS: recordings,
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"rawkode-live-next",
 			),
@@ -670,6 +763,7 @@ describe("Studio session records", () => {
 				{
 					RECORDINGS: recordings,
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"rawkode-live-next",
 			),
@@ -720,6 +814,7 @@ describe("Studio session records", () => {
 				{
 					RECORDINGS: recordings,
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"rawkode-live-next",
 			),
@@ -791,6 +886,7 @@ describe("Studio session records", () => {
 				{
 					RECORDINGS: recordings,
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"rawkode-live-next",
 			),
@@ -862,6 +958,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce",
 			RAWKODE_GRAPHQL_URL: "https://api.rawkode.academy/",
 			RECORDINGS_BUCKET_NAME: "rawkode-academy-content",
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		});
 		expect(wrangler.secrets_store_secrets).not.toContainEqual(
 			expect.objectContaining({ binding: "CLOUDFLARE_ACCOUNT_ID" }),
@@ -904,7 +1001,34 @@ describe("Studio operations", () => {
 		expect(envCue).toContain("env: PATH: _taskPath");
 	});
 
-	it("initializes the RealtimeKit room bridge with media defaults and compatible join APIs", () => {
+	it("restricts production WebRTC playback to Rawkode-owned origins", async () => {
+		const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+			expect(JSON.parse(String(init?.body))).toMatchObject({
+				recording: {
+					allowedOrigins: ["rawkode.academy", "rawkode.studio"],
+					requireSignedURLs: false,
+				},
+			});
+			return new Response(JSON.stringify({
+				success: true,
+				result: { uid: "live-input-1" },
+			}));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		await createCloudflareStreamLiveInput({
+			accountId: "account-1",
+			apiToken: "stream-token",
+		}, {
+			contentVideoSlug: "future-event",
+			name: "Future event",
+			sessionId: "rawkode-live-next",
+			streamEnvironment: "prod",
+		});
+		expect(fetchMock).toHaveBeenCalledOnce();
+	});
+
+	it("initializes the RealtimeKit room bridge with setup-owned join lifecycle", () => {
 		const roomBridge = readFileSync(
 			new URL("../components/RealtimeKitRoom.vue", import.meta.url),
 			"utf8",
@@ -912,8 +1036,10 @@ describe("Studio operations", () => {
 		const studioApp = readFileSync(new URL("../App.vue", import.meta.url), "utf8");
 
 		expect(roomBridge).toContain("defaults: { audio: true, video: true }");
-		expect(roomBridge).toContain("const join = nextMeeting.joinRoom ?? nextMeeting.join");
-		expect(roomBridge).toContain("await join.call(nextMeeting)");
+		expect(roomBridge).toContain('show-setup-screen="true"');
+		expect(roomBridge).toContain("observeRealtimeKitRoomLifecycle");
+		expect(roomBridge).toContain("getRealtimeKitRoomSetupState(nextMeeting)");
+		expect(roomBridge).not.toContain("join.call(nextMeeting)");
 		expect(roomBridge).toContain('"media-streams-change": [payload: {');
 		expect(roomBridge).toContain("participant.audioTrack");
 		expect(roomBridge).toContain("participant.videoTrack");
@@ -991,12 +1117,13 @@ describe("Studio operations", () => {
 		);
 	});
 
-	it("keeps the demo guest invite available when local D1 is bound", async () => {
+	it("keeps the demo guest invite behind an explicit development flag", async () => {
 		const prepare = vi.fn();
 
 		const resolved = await resolveStudioInvite(
 			{
 				STUDIO_DB: { prepare } as unknown as D1Database,
+				STUDIO_ENABLE_DEMO_INVITE: "true",
 			} as StudioEnv,
 			"demo",
 			guestUser,
@@ -1005,6 +1132,16 @@ describe("Studio operations", () => {
 		expect(resolved?.invite.tokenHash).toBe("demo");
 		expect(resolved?.session.id).toBe("rawkode-live-next");
 		expect(prepare).not.toHaveBeenCalled();
+	});
+
+	it("does not enable the demo guest invite by default", async () => {
+		const studioDb = createStudioDbMock();
+
+		await expect(resolveStudioInvite(
+			{ STUDIO_DB: studioDb.db } as StudioEnv,
+			"demo",
+			guestUser,
+		)).resolves.toBeNull();
 	});
 
 	it("treats a missing local invite table as an unavailable invite", async () => {
@@ -1112,7 +1249,57 @@ describe("Studio operations", () => {
 		expect(request.query).not.toContain("getAllVideos");
 	});
 
-	it("shows non-operators only assigned events and active sessions for those events", async () => {
+	it("reconciles disconnected Cloudflare inputs on operator dashboard reads", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "dashboard-live-input",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "dashboard-publisher-token",
+			stream_status: "live",
+		});
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (input: RequestInfo | URL) => {
+				if (String(input) === "https://content.example/graphql") {
+					return new Response(
+						JSON.stringify({ data: { getUpcomingVideos: [] } }),
+					);
+				}
+
+				return new Response(
+					JSON.stringify({
+						success: true,
+						result: {
+							status: "client_disconnect",
+							uid: "dashboard-live-input",
+						},
+					}),
+				);
+			}),
+		);
+
+		await expect(
+			loadStudioDashboard(user, {
+				CLOUDFLARE_ACCOUNT_ID: "account-1",
+				CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
+				STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+			} as StudioEnv),
+		).resolves.toMatchObject({
+			sessions: [
+				{
+					status: "scheduled",
+					streamStatus: "ended",
+				},
+			],
+		});
+		expect(studioDb.sessionRow.status).toBe("scheduled");
+		expect(studioDb.sessionRow.stream_status).toBe("ended");
+	});
+
+	it("does not expose the Studio control plane to non-operators", async () => {
 		const studioDb = createStudioDbMock({
 			content_guests_json: JSON.stringify([
 				{
@@ -1170,19 +1357,11 @@ describe("Studio operations", () => {
 				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv),
 		).resolves.toMatchObject({
-			events: [
-				{
-					id: "assigned-video",
-					sessions: [
-						{
-							id: "rawkode-live-next",
-							status: "live",
-						},
-					],
-				},
-			],
+			events: [],
 			isOperator: false,
+			sessions: [],
 		});
+		expect(fetch).not.toHaveBeenCalled();
 	});
 
 	it("derives dashboard session recording status from the latest VOD status", async () => {
@@ -1220,6 +1399,7 @@ describe("Studio operations", () => {
 			loadStudioDashboard(user, {
 				RECORDINGS: recordings,
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv),
 		).resolves.toMatchObject({
 			sessions: [
@@ -1266,6 +1446,7 @@ describe("Studio operations", () => {
 			loadStudioDashboard(user, {
 				RECORDINGS: recordings,
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv),
 		).resolves.toMatchObject({
 			sessions: [
@@ -1287,6 +1468,25 @@ describe("Studio operations", () => {
 			code: "storage-not-configured",
 			status: 503,
 		});
+	});
+
+	it("requires exact production arming confirmation", async () => {
+		for (const prodConfirmation of [undefined, "prod", "PRODUCTION"]) {
+			const studioDb = createStudioDbMock();
+			await expect(createStudioSession(
+				{
+					STUDIO_DB: studioDb.db,
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+				} as StudioEnv,
+				user,
+				{
+					prodConfirmation,
+					show: "Rawkode Live",
+					streamEnvironment: "prod",
+					title: "Rawkode Live production room",
+				},
+			)).rejects.toMatchObject({ code: "bad-request", status: 400 });
+		}
 	});
 
 	it("creates Studio sessions from content graph video metadata", async () => {
@@ -1334,6 +1534,7 @@ describe("Studio operations", () => {
 			{
 				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -1373,6 +1574,8 @@ describe("Studio operations", () => {
 
 	it("keeps RealtimeKit room creation scheduled until the stream is confirmed live", async () => {
 		const studioDb = createStudioDbMock();
+		const apiTokenSecret = { get: vi.fn(async () => " rtk-token ") };
+		const appIdSecret = { get: vi.fn(async () => " app-1 ") };
 		vi.stubGlobal(
 			"fetch",
 			vi.fn(async () =>
@@ -1391,12 +1594,14 @@ describe("Studio operations", () => {
 		const result = await createStudioSession(
 			{
 				CLOUDFLARE_ACCOUNT_ID: "account-1",
-				REALTIMEKIT_API_TOKEN: "rtk-token",
-				REALTIMEKIT_APP_ID: "app-1",
+				REALTIMEKIT_API_TOKEN: apiTokenSecret,
+				REALTIMEKIT_APP_ID: appIdSecret,
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
+				prodConfirmation: "PROD",
 				show: "Rawkode Live",
 				streamEnvironment: "prod",
 				title: "Rawkode Live production room",
@@ -1407,6 +1612,8 @@ describe("Studio operations", () => {
 		expect(result.session.status).toBe("scheduled");
 		expect(result.session.streamEnvironment).toBe("prod");
 		expect(result.session.streamStatus).toBe("idle");
+		expect(apiTokenSecret.get).toHaveBeenCalledOnce();
+		expect(appIdSecret.get).toHaveBeenCalledOnce();
 	});
 
 	it("starts and confirms test Stream publishing without queueing notifications", async () => {
@@ -1420,6 +1627,12 @@ describe("Studio operations", () => {
 			const url = String(input);
 			expect(url).toContain("/stream/live_inputs");
 			if (init?.method === "POST") {
+				expect(JSON.parse(String(init.body))).toMatchObject({
+					recording: {
+						allowedOrigins: ["rawkode.studio"],
+						requireSignedURLs: false,
+					},
+				});
 				return new Response(
 					JSON.stringify({
 						success: true,
@@ -1449,6 +1662,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STREAM_NOTIFICATIONS: queue,
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as unknown as StudioEnv;
 
 		const start = await startStudioStream(env, user, {
@@ -1482,6 +1696,126 @@ describe("Studio operations", () => {
 		});
 	});
 
+	it("keeps public playback live while Cloudflare reports an active input", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-connected",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+			success: true,
+			result: { uid: "live-input-connected", status: "connected" },
+		}))));
+
+		await expect(getPublicStudioLiveState({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, "future-event")).resolves.toMatchObject({
+			live: true,
+			playbackUrl: "https://stream.example/webRTC/play",
+		});
+		expect(studioDb.sessionRow.stream_status).toBe("live");
+	});
+
+	it("atomically removes public playback after Cloudflare disconnects", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-disconnected",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+			success: true,
+			result: { uid: "live-input-disconnected", status: "client_disconnect" },
+		}))));
+
+		await expect(getPublicStudioLiveState({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, "future-event")).resolves.toEqual({
+			live: false,
+			playbackUrl: null,
+			session: null,
+		});
+		expect(studioDb.sessionRow.stream_status).toBe("ended");
+		expect(studioDb.sessionRow.status).toBe("scheduled");
+		expect(studioDb.writes.some((write) =>
+			write.sql.includes("cloudflare_stream_live_input_id = ?")
+		)).toBe(true);
+	});
+
+	it("does not end public playback on a transient Cloudflare API error", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-provider-error",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		vi.spyOn(console, "error").mockImplementation(() => undefined);
+		vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+			errors: [{ message: "temporarily unavailable" }],
+			success: false,
+		}), { status: 503 })));
+
+		await expect(getPublicStudioLiveState({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, "future-event")).resolves.toMatchObject({ live: true });
+		expect(studioDb.sessionRow.stream_status).toBe("live");
+		expect(studioDb.writes.some((write) =>
+			write.sql.includes("cloudflare_stream_live_input_id = ?")
+		)).toBe(false);
+	});
+
+	it("does not apply a stale disconnect result to a replacement publisher token", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-race",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play-old",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "old-token",
+			stream_status: "live",
+		});
+		vi.stubGlobal("fetch", vi.fn(async () => {
+			studioDb.sessionRow.stream_start_token = "replacement-token";
+			studioDb.sessionRow.cloudflare_stream_playback_url =
+				"https://stream.example/webRTC/play-new";
+			return new Response(JSON.stringify({
+				success: true,
+				result: { uid: "live-input-race", status: "client_disconnect" },
+			}));
+		}));
+
+		await expect(getPublicStudioLiveState({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		} as StudioEnv, "future-event")).resolves.toMatchObject({
+			live: true,
+			playbackUrl: "https://stream.example/webRTC/play-new",
+		});
+		expect(studioDb.sessionRow.stream_start_token).toBe("replacement-token");
+		expect(studioDb.sessionRow.stream_status).toBe("live");
+	});
+
 	it("requires content metadata before starting prod Stream publishing", async () => {
 		const studioDb = createStudioDbMock({
 			stream_environment: "prod",
@@ -1493,6 +1827,7 @@ describe("Studio operations", () => {
 					CLOUDFLARE_ACCOUNT_ID: "account-1",
 					CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				user,
 				{ sessionId: "rawkode-live-next" },
@@ -1518,6 +1853,7 @@ describe("Studio operations", () => {
 						CLOUDFLARE_ACCOUNT_ID: "account-1",
 						CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 						STUDIO_DB: studioDb.db,
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 					} as StudioEnv,
 					user,
 					{ sessionId: "rawkode-live-next" },
@@ -1527,6 +1863,103 @@ describe("Studio operations", () => {
 				status: 409,
 			});
 		}
+	});
+
+	it("requires the active publisher token for stop and supports explicit reset", async () => {
+		const studioDb = createStudioDbMock({
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		const env = {
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv;
+
+		await expect(stopStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+		})).rejects.toMatchObject({ code: "stream-active", status: 409 });
+		await expect(stopStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "wrong-token",
+		})).rejects.toMatchObject({ code: "stream-active", status: 409 });
+
+		await expect(resetStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "publisher-token",
+		})).resolves.toEqual({
+			reset: true,
+			sessionId: "rawkode-live-next",
+			streamStatus: "failed",
+		});
+		await expect(resetStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+		})).resolves.toEqual({
+			reset: false,
+			sessionId: "rawkode-live-next",
+			streamStatus: "failed",
+		});
+	});
+
+	it("reclaims an abandoned starting lease", async () => {
+		const studioDb = createStudioDbMock({
+			stream_start_token: "abandoned-token",
+			stream_status: "starting",
+			updated_at: Math.floor(Date.now() / 1000) - 121,
+		});
+		vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+			success: true,
+			result: {
+				uid: "live-input-1",
+				status: "new_configuration_accepted",
+				webRTC: { url: "https://stream.example/webRTC/publish" },
+				webRTCPlayback: { url: "https://stream.example/webRTC/play" },
+			},
+		}))));
+
+		await expect(startStudioStream({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			recovered: true,
+			streamStatus: "starting",
+		});
+	});
+
+	it("reclaims a stale live claim only after the provider disconnects", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-1",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			stream_start_token: "abandoned-token",
+			stream_status: "live",
+			updated_at: Math.floor(Date.now() / 1000) - 31,
+		});
+		const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+			success: true,
+			result: {
+				uid: "live-input-1",
+				status: "disconnected",
+				webRTC: { url: "https://stream.example/webRTC/publish" },
+				webRTCPlayback: { url: "https://stream.example/webRTC/play" },
+			},
+		})));
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(startStudioStream({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+		})).resolves.toMatchObject({
+			recovered: true,
+			streamStatus: "starting",
+		});
+		expect(fetchMock).toHaveBeenCalledTimes(2);
 	});
 
 	it("atomically rejects concurrent Stream start requests", async () => {
@@ -1555,6 +1988,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_ACCOUNT_ID: "account-1",
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as StudioEnv;
 
 		const results = await Promise.allSettled([
@@ -1598,6 +2032,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_ACCOUNT_ID: "account-1",
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as StudioEnv;
 
 		await stopStudioStream(env, user, {
@@ -1656,16 +2091,21 @@ describe("Studio operations", () => {
 			CLOUDFLARE_ACCOUNT_ID: "account-1",
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as StudioEnv;
 
 		const staleStart = startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
+			streamToken: "stale-token",
 		});
 		for (let attempt = 0; attempt < 20 && fetchMock.mock.calls.length === 0; attempt += 1) {
 			await new Promise((resolve) => setTimeout(resolve, 0));
 		}
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		await stopStudioStream(env, user, { sessionId: "rawkode-live-next" });
+		await stopStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "stale-token",
+		});
 		const currentStart = await startStudioStream(env, user, {
 			sessionId: "rawkode-live-next",
 		});
@@ -1727,6 +2167,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STREAM_NOTIFICATIONS: queue,
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as unknown as StudioEnv;
 
 		const start = await startStudioStream(env, user, {
@@ -1741,7 +2182,10 @@ describe("Studio operations", () => {
 			notified: true,
 			streamStatus: "live",
 		});
-		await expect(confirmStudioStream(env, user, { sessionId: "rawkode-live-next" }))
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: start.streamToken,
+		}))
 			.resolves.toMatchObject({
 				notified: false,
 				streamStatus: "live",
@@ -1775,12 +2219,131 @@ describe("Studio operations", () => {
 				streamToken: start.streamToken,
 			}),
 		).resolves.toEqual({
+			changed: true,
 			sessionId: "rawkode-live-next",
 			streamStatus: "ended",
 		});
 		await expect(getPublicStudioLiveState(env, "future-event")).resolves.toMatchObject({
 			live: false,
 		});
+	});
+
+	it("rejects an already-live confirm from the wrong publisher token without notifying", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-current",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "current-publisher-token",
+			stream_status: "live",
+			title: "Future Rawkode Live episode",
+		});
+		const queue = { send: vi.fn(async () => undefined) };
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STREAM_NOTIFICATIONS: queue,
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as unknown as StudioEnv;
+
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "stale-publisher-token",
+		})).rejects.toMatchObject({
+			code: "stream-active",
+			status: 409,
+		});
+		expect(queue.send).not.toHaveBeenCalled();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(studioDb.sessionRow.stream_notification_queued_at).toBeNull();
+	});
+
+	it("rejects a confirm whose CAS loses to a replacement publisher lease", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-old",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play-old",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			stream_environment: "prod",
+			stream_start_token: "old-publisher-token",
+			stream_status: "starting",
+			title: "Future Rawkode Live episode",
+		});
+		const queue = { send: vi.fn(async () => undefined) };
+		vi.stubGlobal("fetch", vi.fn(async () => {
+			studioDb.sessionRow.cloudflare_stream_live_input_id = "live-input-replacement";
+			studioDb.sessionRow.cloudflare_stream_playback_url =
+				"https://stream.example/webRTC/play-replacement";
+			studioDb.sessionRow.status = "live";
+			studioDb.sessionRow.stream_start_token = "replacement-publisher-token";
+			studioDb.sessionRow.stream_status = "live";
+			return new Response(JSON.stringify({
+				success: true,
+				result: {
+					status: "connected",
+					uid: "live-input-old",
+					webRTCPlayback: { url: "https://stream.example/webRTC/play-old" },
+				},
+			}));
+		}));
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STREAM_NOTIFICATIONS: queue,
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as unknown as StudioEnv;
+
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "old-publisher-token",
+		})).rejects.toMatchObject({
+			code: "stream-active",
+			status: 409,
+		});
+		expect(queue.send).not.toHaveBeenCalled();
+		expect(studioDb.sessionRow.cloudflare_stream_live_input_id).toBe(
+			"live-input-replacement",
+		);
+		expect(studioDb.sessionRow.stream_start_token).toBe(
+			"replacement-publisher-token",
+		);
+	});
+
+	it("accepts an idempotent confirm only for the matching publisher lease", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-current",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			content_video_id: "video-123",
+			content_video_slug: "future-event",
+			status: "live",
+			stream_environment: "prod",
+			stream_notification_queued_at: 123,
+			stream_start_token: "current-publisher-token",
+			stream_status: "live",
+			title: "Future Rawkode Live episode",
+		});
+		const queue = { send: vi.fn(async () => undefined) };
+		const env = {
+			STREAM_NOTIFICATIONS: queue,
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as unknown as StudioEnv;
+
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "current-publisher-token",
+		})).resolves.toEqual({
+			notified: false,
+			sessionId: "rawkode-live-next",
+			streamStatus: "live",
+		});
+		expect(queue.send).not.toHaveBeenCalled();
 	});
 
 	it("retries prod stream notifications after a queue send failure", async () => {
@@ -1816,6 +2379,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STREAM_NOTIFICATIONS: queue,
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as unknown as StudioEnv;
 
 		const start = await startStudioStream(env, user, {
@@ -1826,12 +2390,20 @@ describe("Studio operations", () => {
 				sessionId: "rawkode-live-next",
 				streamToken: start.streamToken,
 			}),
-		).rejects.toThrow("queue down");
+		).resolves.toMatchObject({ notified: false, streamStatus: "live" });
 		await expect(getStudioSession(env, "rawkode-live-next")).resolves.toMatchObject({
 			streamNotificationQueuedAt: null,
 			streamStatus: "live",
 		});
-		await expect(confirmStudioStream(env, user, { sessionId: "rawkode-live-next" }))
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: "stale-publisher-token",
+		})).rejects.toMatchObject({ code: "stream-active", status: 409 });
+		expect(queue.send).toHaveBeenCalledTimes(1);
+		await expect(confirmStudioStream(env, user, {
+			sessionId: "rawkode-live-next",
+			streamToken: start.streamToken,
+		}))
 			.resolves.toMatchObject({
 				notified: true,
 				streamStatus: "live",
@@ -1869,6 +2441,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STREAM_NOTIFICATIONS: queue,
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as unknown as StudioEnv;
 
 		const start = await startStudioStream(env, user, {
@@ -1923,6 +2496,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STREAM_NOTIFICATIONS: queue,
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as unknown as StudioEnv;
 
 		const start = await startStudioStream(env, user, {
@@ -1974,6 +2548,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STREAM_NOTIFICATIONS: queue,
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as unknown as StudioEnv;
 
 		const start = await startStudioStream(env, user, {
@@ -2000,6 +2575,7 @@ describe("Studio operations", () => {
 			CLOUDFLARE_ACCOUNT_ID: "account-1",
 			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as StudioEnv;
 
 		await expect(startStudioStream(env, guestUser, { sessionId: "rawkode-live-next" }))
@@ -2012,7 +2588,7 @@ describe("Studio operations", () => {
 
 	it("marks fallback recordings ready without storage bindings in local mode", async () => {
 		const result = await markStudioRecordingReady(
-			{} as StudioEnv,
+			{ STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode" } as StudioEnv,
 			user,
 			{
 				recordingId: "recording-1",
@@ -2051,6 +2627,7 @@ describe("Studio operations", () => {
 				RECORDINGS: recordings,
 				RECORDINGS_BUCKET_NAME: "verified-recordings",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2090,6 +2667,7 @@ describe("Studio operations", () => {
 					RECORDINGS: recordings,
 					RECORDINGS_BUCKET_NAME: "verified-recordings",
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				user,
 				{
@@ -2112,7 +2690,10 @@ describe("Studio operations", () => {
 
 		await expect(
 			markStudioRecordingReady(
-				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				{
+					STUDIO_DB: studioDb.db,
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+				} as StudioEnv,
 				user,
 				{
 					recordingId: "recording-1",
@@ -2149,7 +2730,9 @@ describe("Studio operations", () => {
 
 	it("rejects recording sources outside the session prefix", async () => {
 		await expect(
-			markStudioRecordingReady({} as StudioEnv, user, {
+			markStudioRecordingReady({
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+			} as StudioEnv, user, {
 				recordingId: "recording-1",
 				sessionId: "rawkode-live-next",
 				sourceBucket: "rawkode-recordings",
@@ -2166,7 +2749,9 @@ describe("Studio operations", () => {
 
 	it("rejects unsafe recording IDs before creating ready marker keys", async () => {
 		await expect(
-			markStudioRecordingReady({} as StudioEnv, user, {
+			markStudioRecordingReady({
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+			} as StudioEnv, user, {
 				recordingId: "../recording-1",
 				sessionId: "rawkode-live-next",
 				sourceBucket: "rawkode-recordings",
@@ -2198,6 +2783,7 @@ describe("Studio operations", () => {
 				RECORDINGS: recordings,
 				RECORDINGS_BUCKET_NAME: "verified-recordings",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2235,6 +2821,7 @@ describe("Studio operations", () => {
 				{
 					RECORDINGS: recordings,
 					RECORDINGS_BUCKET_NAME: "verified-recordings",
+					STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				user,
 				{
@@ -2278,6 +2865,7 @@ describe("Studio operations", () => {
 				RECORDINGS: recordings,
 				RECORDINGS_BUCKET_NAME: "verified-recordings",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2305,6 +2893,7 @@ describe("Studio operations", () => {
 		await expect(
 			loadStudioDashboard(user, {
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv),
 		).resolves.toMatchObject({
 			sessions: [
@@ -2330,6 +2919,7 @@ describe("Studio operations", () => {
 					RECORDINGS: recordings,
 					RECORDINGS_BUCKET_NAME: "verified-recordings",
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				user,
 				{
@@ -2357,6 +2947,7 @@ describe("Studio operations", () => {
 					RECORDINGS: recordings,
 					RECORDINGS_BUCKET_NAME: "verified-recordings",
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				guestUser,
 				{
@@ -2395,6 +2986,7 @@ describe("Studio operations", () => {
 				RECORDINGS: recordings,
 				RECORDINGS_BUCKET_NAME: "verified-recordings",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2436,6 +3028,7 @@ describe("Studio operations", () => {
 				RECORDINGS: recordings,
 				RECORDINGS_BUCKET_NAME: "verified-recordings",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2460,7 +3053,10 @@ describe("Studio operations", () => {
 			studioDb.writes.find((write) => write.sql.includes("UPDATE studio_sessions"))
 				?.params,
 		).toEqual(["idle", "rawkode-live-next"]);
-		await expect(loadStudioDashboard(user, { STUDIO_DB: studioDb.db } as StudioEnv))
+		await expect(loadStudioDashboard(user, {
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv))
 			.resolves.toMatchObject({
 				sessions: [
 					{
@@ -2506,6 +3102,7 @@ describe("Studio operations", () => {
 				RECORDINGS: recordings,
 				RECORDINGS_BUCKET_NAME: "verified-recordings",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2549,6 +3146,7 @@ describe("Studio operations", () => {
 			RECORDINGS: recordings.bucket,
 			RECORDINGS_BUCKET_NAME: "verified-recordings",
 			STUDIO_DB: studioDb.db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		} as StudioEnv;
 
 		const upload = await createStudioRecordingUpload(env, user, {
@@ -2656,6 +3254,7 @@ describe("Studio operations", () => {
 					RECORDINGS: recordings,
 					RECORDINGS_BUCKET_NAME: "verified-recordings",
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				user,
 				{
@@ -2675,7 +3274,9 @@ describe("Studio operations", () => {
 
 	it("requires a provider meeting before issuing contributor tokens", async () => {
 		await expect(
-			issueStudioParticipantToken({} as StudioEnv, user, {
+			issueStudioParticipantToken({
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+			} as StudioEnv, user, {
 				role: "guest",
 				sessionId: "rawkode-live-next",
 			}),
@@ -2697,7 +3298,7 @@ describe("Studio operations", () => {
 		});
 	});
 
-	it("lets content-listed guests join an active session without an invite token", async () => {
+	it("requires content-listed guests to use an invite token", async () => {
 		const studioDb = createStudioDbMock({
 			content_guests_json: JSON.stringify([
 				{
@@ -2763,10 +3364,7 @@ describe("Studio operations", () => {
 					sessionId: "rawkode-live-next",
 				},
 			),
-		).resolves.toMatchObject({
-			meetingId: "meeting-1",
-			token: "guest-token",
-		});
+		).rejects.toMatchObject({ code: "unauthorized", status: 403 });
 	});
 
 	it("rejects participant tokens for ended sessions", async () => {
@@ -2782,6 +3380,7 @@ describe("Studio operations", () => {
 					REALTIMEKIT_API_TOKEN: "token-1",
 					REALTIMEKIT_APP_ID: "app-1",
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				user,
 				{
@@ -2798,6 +3397,8 @@ describe("Studio operations", () => {
 	it("lets a previously redeemed guest resolve a full single-use invite again", async () => {
 		const tokenHash = await hashInviteToken("guest-invite");
 		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "test-live-input",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play-secret",
 			inviteRows: [
 				{
 					token_hash: tokenHash,
@@ -2824,6 +3425,7 @@ describe("Studio operations", () => {
 			resolveStudioInvite(
 				{
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"guest-invite",
 			),
@@ -2832,6 +3434,7 @@ describe("Studio operations", () => {
 			resolveStudioInvite(
 				{
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"guest-invite",
 				guestUser,
@@ -2842,6 +3445,8 @@ describe("Studio operations", () => {
 				usedCount: 1,
 			},
 			session: {
+				cloudflareStreamLiveInputId: null,
+				cloudflareStreamPlaybackUrl: null,
 				id: "rawkode-live-next",
 			},
 		});
@@ -2849,6 +3454,7 @@ describe("Studio operations", () => {
 			resolveStudioInvite(
 				{
 					STUDIO_DB: studioDb.db,
+				STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 				} as StudioEnv,
 				"guest-invite",
 				{
@@ -2866,6 +3472,7 @@ describe("Studio operations", () => {
 		const result = await createStudioInvite(
 			{
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			user,
 			{
@@ -2963,6 +3570,7 @@ describe("Studio operations", () => {
 				REALTIMEKIT_HOST_PRESET: "host-preset",
 				RAWKODE_GRAPHQL_URL: "https://content.example/graphql",
 				STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 			} as StudioEnv,
 			{
 				...user,
@@ -2996,13 +3604,130 @@ describe("Studio operations", () => {
 		]);
 	});
 
-	it("ends RealtimeKit sessions and marks Studio sessions complete", async () => {
+	it("ends publicly and remains retryable when Cloudflare Stream cleanup fails", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-1",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			content_video_slug: "future-event",
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		let streamAvailable = false;
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+			if (String(input).includes("/stream/live_inputs/")) {
+				return streamAvailable
+					? new Response(JSON.stringify({
+						result: { enabled: false, uid: "live-input-1" },
+						success: true,
+					}))
+					: new Response(JSON.stringify({
+						errors: [{ message: "Cloudflare Stream unavailable" }],
+						success: false,
+					}), { status: 503 });
+			}
+			return new Response(JSON.stringify({ success: true, result: {} }));
+		});
+		vi.stubGlobal("fetch", fetchMock);
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv;
+
+		await expect(endStudioSession(env, user, {
+			sessionId: "rawkode-live-next",
+		})).rejects.toMatchObject({
+			code: "provider-cleanup-failed",
+			status: 502,
+		});
+		expect(studioDb.sessionRow.status).toBe("complete");
+		expect(studioDb.sessionRow.stream_status).toBe("ended");
+		await expect(getPublicStudioLiveState(env, "future-event")).resolves.toEqual({
+			live: false,
+			playbackUrl: null,
+			session: null,
+		});
+
+		streamAvailable = true;
+		await expect(endStudioSession(env, user, {
+			sessionId: "rawkode-live-next",
+		})).resolves.toEqual({
+			sessionId: "rawkode-live-next",
+			status: "complete",
+		});
+		expect(fetchMock).toHaveBeenCalledTimes(4);
+		expect(fetchMock).toHaveBeenNthCalledWith(
+			2,
+			"https://api.cloudflare.com/client/v4/accounts/account-1/stream/live_inputs/live-input-1",
+			expect.objectContaining({
+				body: JSON.stringify({ enabled: false }),
+				method: "PUT",
+			}),
+		);
+	});
+
+	it("keeps local terminal state retryable when RealtimeKit cleanup fails", async () => {
 		const studioDb = createStudioDbMock({
 			realtimekit_meeting_id: "meeting-1",
 			status: "live",
+			stream_status: "live",
 		});
-		const fetchMock = vi.fn(async () =>
-			new Response(JSON.stringify({ success: true, result: {} })),
+		let providerAvailable = false;
+		vi.stubGlobal("fetch", vi.fn(async () => providerAvailable
+			? new Response(JSON.stringify({ success: true, result: {} }))
+			: new Response(JSON.stringify({
+				errors: [{ message: "RealtimeKit unavailable" }],
+				success: false,
+			}), { status: 503 })));
+		const env = {
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			REALTIMEKIT_API_TOKEN: "token-1",
+			REALTIMEKIT_APP_ID: "app-1",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv;
+
+		await expect(endStudioSession(env, user, {
+			sessionId: "rawkode-live-next",
+		})).rejects.toMatchObject({
+			code: "provider-cleanup-failed",
+			status: 502,
+		});
+		expect(studioDb.sessionRow.status).toBe("complete");
+		expect(studioDb.sessionRow.stream_status).toBe("ended");
+
+		providerAvailable = true;
+		await expect(endStudioSession(env, user, {
+			sessionId: "rawkode-live-next",
+		})).resolves.toEqual({
+			sessionId: "rawkode-live-next",
+			status: "complete",
+		});
+	});
+
+	it("disables the active Cloudflare input, ends RealtimeKit, and marks D1 complete", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-1",
+			cloudflare_stream_playback_url: "https://stream.example/webRTC/play",
+			realtimekit_meeting_id: "meeting-1",
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "publisher-token",
+			stream_status: "live",
+		});
+		const fetchMock = vi.fn(async (input: RequestInfo | URL) =>
+			new Response(JSON.stringify({
+				success: true,
+				result: String(input).includes("/stream/live_inputs/")
+					? { enabled: false, uid: "live-input-1" }
+					: {},
+			})),
 		);
 		vi.stubGlobal("fetch", fetchMock);
 
@@ -3010,6 +3735,7 @@ describe("Studio operations", () => {
 			endStudioSession(
 				{
 					CLOUDFLARE_ACCOUNT_ID: "account-1",
+					CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
 					REALTIMEKIT_API_TOKEN: "token-1",
 					REALTIMEKIT_APP_ID: "app-1",
 					STUDIO_DB: studioDb.db,
@@ -3026,11 +3752,19 @@ describe("Studio operations", () => {
 		});
 		expect(fetchMock).toHaveBeenNthCalledWith(
 			1,
+			"https://api.cloudflare.com/client/v4/accounts/account-1/stream/live_inputs/live-input-1",
+			expect.objectContaining({
+				body: JSON.stringify({ enabled: false }),
+				method: "PUT",
+			}),
+		);
+		expect(fetchMock).toHaveBeenNthCalledWith(
+			2,
 			"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/active-session/kick-all",
 			expect.objectContaining({ method: "POST" }),
 		);
 		expect(fetchMock).toHaveBeenNthCalledWith(
-			2,
+			3,
 			"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1",
 			expect.objectContaining({
 				body: JSON.stringify({ status: "INACTIVE" }),
@@ -3042,13 +3776,51 @@ describe("Studio operations", () => {
 				write.sql.includes("SET status = ?")
 			)?.params,
 		).toEqual(["complete", "rawkode-live-next"]);
+		expect(studioDb.sessionRow.stream_status).toBe("ended");
+		expect(studioDb.sessionRow.stream_start_token).toBeNull();
+	});
+
+	it("never disables a replacement Cloudflare input after losing the publisher lease", async () => {
+		const studioDb = createStudioDbMock({
+			cloudflare_stream_live_input_id: "live-input-old",
+			replaceLeaseBeforeEnd: {
+				liveInputId: "live-input-replacement",
+				startToken: "replacement-publisher-token",
+			},
+			status: "live",
+			stream_environment: "prod",
+			stream_start_token: "old-publisher-token",
+			stream_status: "live",
+		});
+		const fetchMock = vi.fn();
+		vi.stubGlobal("fetch", fetchMock);
+
+		await expect(endStudioSession({
+			CLOUDFLARE_ACCOUNT_ID: "account-1",
+			CLOUDFLARE_STREAM_API_TOKEN: "stream-token",
+			STUDIO_DB: studioDb.db,
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, user, {
+			sessionId: "rawkode-live-next",
+		})).rejects.toMatchObject({
+			code: "provider-cleanup-failed",
+			status: 502,
+		});
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(studioDb.sessionRow.status).toBe("complete");
+		expect(studioDb.sessionRow.cloudflare_stream_live_input_id).toBe(
+			"live-input-replacement",
+		);
+		expect(studioDb.sessionRow.stream_start_token).toBe(
+			"replacement-publisher-token",
+		);
 	});
 
 	it("hashes invite tokens instead of storing raw bearer tokens", async () => {
 		await expect(hashInviteToken("invite-token")).resolves.toHaveLength(64);
 	});
 
-	it("treats fallback sessions as manageable only by the owner handle", async () => {
+	it("treats Studio sessions as manageable only by configured operators", async () => {
 		const session = buildStudioSession({
 			createdBy: user,
 			meeting: null,
@@ -3057,9 +3829,10 @@ describe("Studio operations", () => {
 			title: "Rawkode Live production room",
 		});
 
-		await expect(userCanManageStudioSession({} as StudioEnv, session, user)).resolves.toBe(
-			true,
-		);
+		await expect(userCanManageStudioSession({} as StudioEnv, session, user)).resolves.toBe(false);
+		await expect(userCanManageStudioSession({
+			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+		} as StudioEnv, session, user)).resolves.toBe(true);
 		await expect(
 			userCanManageStudioSession({} as StudioEnv, session, guestUser),
 		).resolves.toBe(false);

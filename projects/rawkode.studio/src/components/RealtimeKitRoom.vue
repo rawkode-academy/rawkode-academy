@@ -1,35 +1,34 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
+import {
+  getRealtimeKitRoomSetupState,
+  observeRealtimeKitRoomLifecycle,
+  type RealtimeKitRoomLifecycleMeeting,
+} from "../live/realtimeKitRoomLifecycle";
 import type { StudioSource } from "../types";
 
 type StudioRole = "guest" | "host" | "producer" | "program";
-type RoomState = "connected" | "connecting" | "idle" | "unavailable";
+type RoomState = "connected" | "connecting" | "idle" | "setup" | "unavailable";
 type SourceSlotRole = "guest" | "host" | "producer";
 
-declare global {
-  interface Window {
-    RealtimeKitClient?: {
-      init(input: {
-        authToken: string;
-        defaults: {
-          audio: boolean;
-          video: boolean;
-        };
-      }): Promise<RealtimeKitMeeting>;
-    };
-  }
-}
-
-interface RealtimeKitMeeting {
+interface RealtimeKitMeeting extends RealtimeKitRoomLifecycleMeeting {
   disconnect?: () => Promise<void> | void;
-  join?: () => Promise<void> | void;
-  joinRoom?: () => Promise<void> | void;
   leave?: () => Promise<void> | void;
   leaveRoom?: () => Promise<void> | void;
   participants?: {
     active?: RealtimeKitParticipantMap;
     joined?: RealtimeKitParticipantMap;
   };
+}
+
+interface RealtimeKitClient {
+  init(input: {
+    authToken: string;
+    defaults: {
+      audio: boolean;
+      video: boolean;
+    };
+  }): Promise<RealtimeKitMeeting>;
 }
 
 interface RealtimeKitParticipant {
@@ -71,6 +70,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  "connection-state-change": [state: RoomState];
   "media-streams-change": [payload: {
     sources: StudioSource[];
     streams: Map<string, MediaStream>;
@@ -82,7 +82,7 @@ const state = ref<RoomState>("idle");
 const errorMessage = ref("");
 const meeting = ref<RealtimeKitMeeting | null>(null);
 let uiKitLoaded: Promise<void> | undefined;
-let clientLoaded: Promise<void> | undefined;
+let clientLoaded: Promise<RealtimeKitClient> | undefined;
 type RealtimeKitParticipantListener = (...args: unknown[]) => void;
 const roomMediaEvents = [
   "participantJoined",
@@ -93,16 +93,23 @@ const roomMediaEvents = [
   "screenShareUpdate",
 ] as const;
 let removeRoomMediaListeners: Array<() => void> = [];
+let removeRoomLifecycleListener: (() => void) | undefined;
 
 const buttonLabel = computed(() => {
-  if (state.value === "connecting") return "Joining";
+  if (state.value === "connecting") return "Preparing";
   if (state.value === "connected") return "Leave room";
-  return "Join room";
+  if (state.value === "setup") return "Close setup";
+  if (state.value === "unavailable") return "Retry setup";
+  return "Set up room";
 });
 const canJoin = computed(() => Boolean(props.sessionId) && state.value !== "connecting");
 
+watch(state, (nextState) => {
+  emit("connection-state-change", nextState);
+}, { immediate: true });
+
 async function toggleRoom(): Promise<void> {
-  if (state.value === "connected") {
+  if (state.value === "connected" || state.value === "setup") {
     await leaveRoom();
     return;
   }
@@ -117,31 +124,29 @@ async function joinRoom(): Promise<void> {
   errorMessage.value = "";
 
   try {
-    await loadRealtimeKit();
-    const token = await issueParticipantToken();
-    const client = window.RealtimeKitClient;
-    if (!client) {
-      throw new Error("RealtimeKit client did not load");
-    }
-
+    const [client, token] = await Promise.all([
+      loadRealtimeKit(),
+      issueParticipantToken(),
+    ]);
     const nextMeeting = await client.init({
       authToken: token,
       defaults: { audio: true, video: true },
     });
     meeting.value = nextMeeting;
+    watchRoomLifecycle(nextMeeting);
+    watchRoomMedia(nextMeeting);
+    state.value = getRealtimeKitRoomSetupState(nextMeeting);
     const element = meetingElement.value as
       | (HTMLElement & { meeting?: RealtimeKitMeeting })
       | null;
     if (element) {
       element.meeting = nextMeeting;
     }
-    const join = nextMeeting.joinRoom ?? nextMeeting.join;
-    if (join) {
-      await join.call(nextMeeting);
+    if (state.value === "connected") {
+      emitRoomMediaStreams(nextMeeting);
+    } else {
+      emitEmptyRoomMedia();
     }
-    watchRoomMedia(nextMeeting);
-    emitRoomMediaStreams(nextMeeting);
-    state.value = "connected";
   } catch (error) {
     state.value = "unavailable";
     errorMessage.value = error instanceof Error ? error.message : "Unable to join room";
@@ -152,6 +157,7 @@ async function joinRoom(): Promise<void> {
 async function leaveRoom(resetState = true): Promise<void> {
   const currentMeeting = meeting.value;
   meeting.value = null;
+  stopWatchingRoomLifecycle();
   stopWatchingRoomMedia();
 
   const element = meetingElement.value as
@@ -175,10 +181,7 @@ async function leaveRoom(resetState = true): Promise<void> {
     state.value = "idle";
     errorMessage.value = "";
   }
-  emit("media-streams-change", {
-    sources: [],
-    streams: new Map(),
-  });
+  emitEmptyRoomMedia();
 }
 
 async function issueParticipantToken(): Promise<string> {
@@ -203,36 +206,15 @@ async function issueParticipantToken(): Promise<string> {
   return body.token;
 }
 
-async function loadRealtimeKit(): Promise<void> {
-  uiKitLoaded ??= import(
-    /* @vite-ignore */ "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit-ui@latest/loader/index.es2017.js"
-  ).then((module) => module.defineCustomElements());
-  clientLoaded ??= loadScript(
-    "https://cdn.jsdelivr.net/npm/@cloudflare/realtimekit@latest/dist/browser.js",
-  );
-
-  await Promise.all([uiKitLoaded, clientLoaded]);
-}
-
-function loadScript(src: string): Promise<void> {
-  const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
-  if (existing?.dataset.ready === "true") return Promise.resolve();
-
-  return new Promise((resolve, reject) => {
-    const script = existing ?? document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.addEventListener("load", () => {
-      script.dataset.ready = "true";
-      resolve();
-    }, { once: true });
-    script.addEventListener("error", () => reject(new Error("RealtimeKit client failed to load")), {
-      once: true,
-    });
-    if (!existing) {
-      document.head.appendChild(script);
-    }
+async function loadRealtimeKit(): Promise<RealtimeKitClient> {
+  uiKitLoaded ??= import("@cloudflare/realtimekit-ui/loader").then((module) => {
+    module.defineCustomElements(window);
   });
+  clientLoaded ??= import("@cloudflare/realtimekit").then(
+    (module) => module.default as unknown as RealtimeKitClient,
+  );
+  const [, client] = await Promise.all([uiKitLoaded, clientLoaded]);
+  return client;
 }
 
 function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
@@ -258,11 +240,53 @@ function watchRoomMedia(nextMeeting: RealtimeKitMeeting): void {
   }
 }
 
+function watchRoomLifecycle(nextMeeting: RealtimeKitMeeting): void {
+  stopWatchingRoomLifecycle();
+  removeRoomLifecycleListener = observeRealtimeKitRoomLifecycle(nextMeeting, {
+    onJoined: () => {
+      if (meeting.value !== nextMeeting) {
+        return;
+      }
+      state.value = "connected";
+      errorMessage.value = "";
+      emitRoomMediaStreams(nextMeeting);
+    },
+    onLeft: () => {
+      if (meeting.value !== nextMeeting) {
+        return;
+      }
+      meeting.value = null;
+      stopWatchingRoomLifecycle();
+      stopWatchingRoomMedia();
+      const element = meetingElement.value as
+        | (HTMLElement & { meeting?: RealtimeKitMeeting })
+        | null;
+      if (element?.meeting === nextMeeting) {
+        element.meeting = undefined;
+      }
+      state.value = "idle";
+      emitEmptyRoomMedia();
+    },
+  });
+}
+
+function stopWatchingRoomLifecycle(): void {
+  removeRoomLifecycleListener?.();
+  removeRoomLifecycleListener = undefined;
+}
+
 function stopWatchingRoomMedia(): void {
   for (const removeListener of removeRoomMediaListeners) {
     removeListener();
   }
   removeRoomMediaListeners = [];
+}
+
+function emitEmptyRoomMedia(): void {
+  emit("media-streams-change", {
+    sources: [],
+    streams: new Map(),
+  });
 }
 
 function emitRoomMediaStreams(nextMeeting: RealtimeKitMeeting): void {
@@ -466,7 +490,7 @@ function getFallbackSourceName(role: StudioRole, slotNumber: number): string {
 watch(
   () => [props.sessionId, props.role, props.inviteToken],
   () => {
-    if (state.value === "connected") {
+    if (meeting.value) {
       void leaveRoom();
     }
   },
@@ -489,7 +513,7 @@ onBeforeUnmount(() => {
     </button>
     <span class="room-state">{{ state }}</span>
     <span v-if="errorMessage" class="room-error">{{ errorMessage }}</span>
-    <div v-show="state === 'connected'" class="realtimekit-room-drawer">
+    <div v-show="state === 'setup' || state === 'connected'" class="realtimekit-room-drawer">
       <rtk-meeting ref="meetingElement" mode="fill" show-setup-screen="true" />
     </div>
   </div>

@@ -21,7 +21,6 @@ export interface ProgramRenderOptions {
   stingerStartedAt?: number;
   layers: StudioLayer[];
   resolution: CanvasResolution;
-  isRecording: boolean;
   timestamp: number;
 }
 
@@ -38,11 +37,17 @@ export async function renderProgramCanvas(
     }
 
     if (layer.type === "camera") {
-      drawCameraTile(context, layer, options.timestamp, getMediaVideoElement(layer, options));
+      const videoElement = getMediaVideoElement(layer, options);
+      if (hasDrawableVideo(videoElement)) {
+        drawCameraTile(context, layer, videoElement);
+      }
     }
 
     if (layer.type === "screen") {
-      drawScreenLayer(context, layer, options.timestamp, getMediaVideoElement(layer, options));
+      const videoElement = getMediaVideoElement(layer, options);
+      if (hasDrawableVideo(videoElement)) {
+        drawScreenLayer(context, layer, videoElement);
+      }
     }
 
     if (layer.type === "video") {
@@ -64,7 +69,6 @@ export async function renderProgramCanvas(
   }
 
   drawActiveStinger(context, options);
-  drawProgramChrome(context, options);
 }
 
 function getMediaVideoElement(layer: StudioLayer, options: ProgramRenderOptions): HTMLVideoElement | undefined {
@@ -596,60 +600,21 @@ function drawSceneBackground(context: CanvasRenderingContext2D, layer: StudioLay
 function drawCameraTile(
   context: CanvasRenderingContext2D,
   layer: StudioLayer,
-  timestamp: number,
-  videoElement?: HTMLVideoElement,
+  videoElement: HTMLVideoElement,
 ): void {
   const { x, y, width, height } = layer.bounds;
   const accent = layer.color ?? "#39d5c5";
-  const pulse = 0.45 + Math.sin(timestamp / 260 + layer.id.length) * 0.28;
-  const hasLiveVideo = hasDrawableVideo(videoElement);
 
   context.save();
   context.globalAlpha = layer.opacity;
   roundedRect(context, x, y, width, height, 28);
   context.fillStyle = "#131821";
   context.fill();
-
-  if (hasLiveVideo && videoElement) {
-    drawCameraVideo(context, layer, videoElement);
-  } else {
-    const tileGradient = context.createLinearGradient(x, y, x + width, y + height);
-    tileGradient.addColorStop(0, `${accent}33`);
-    tileGradient.addColorStop(0.42, "rgba(255, 255, 255, 0.04)");
-    tileGradient.addColorStop(1, "rgba(0, 0, 0, 0.18)");
-    context.fillStyle = tileGradient;
-    context.fill();
-
-    context.fillStyle = "rgba(255, 255, 255, 0.05)";
-    for (let i = 0; i < 7; i += 1) {
-      const barWidth = 9 + i * 3;
-      const barHeight = 50 + Math.sin(timestamp / (190 + i * 16)) * 24;
-      context.fillRect(x + 42 + i * 24, y + height - 94 - barHeight * pulse, barWidth, barHeight);
-    }
-
-    const avatarRadius = Math.min(width, height) * 0.16;
-    const avatarX = x + width / 2;
-    const avatarY = y + height / 2 - 14;
-    const avatarGradient = context.createRadialGradient(
-      avatarX - 22,
-      avatarY - 26,
-      8,
-      avatarX,
-      avatarY,
-      avatarRadius,
-    );
-    avatarGradient.addColorStop(0, "#ffffff");
-    avatarGradient.addColorStop(0.3, accent);
-    avatarGradient.addColorStop(1, "#0c0f15");
-    context.beginPath();
-    context.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
-    context.fillStyle = avatarGradient;
-    context.fill();
-  }
+  drawCameraVideo(context, layer, videoElement);
 
   roundedRect(context, x, y, width, height, 28);
-  context.strokeStyle = hasLiveVideo ? `${accent}88` : "rgba(255, 255, 255, 0.13)";
-  context.lineWidth = hasLiveVideo ? 4 : 3;
+  context.strokeStyle = `${accent}88`;
+  context.lineWidth = 4;
   context.stroke();
 
   context.fillStyle = "rgba(0, 0, 0, 0.46)";
@@ -673,7 +638,7 @@ function drawCameraTile(
   context.restore();
 }
 
-function hasDrawableVideo(videoElement: HTMLVideoElement | undefined): boolean {
+function hasDrawableVideo(videoElement: HTMLVideoElement | undefined): videoElement is HTMLVideoElement {
   return Boolean(
     videoElement &&
       videoElement.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
@@ -819,51 +784,20 @@ function getVideoContainDestination(
 function drawScreenLayer(
   context: CanvasRenderingContext2D,
   layer: StudioLayer,
-  timestamp: number,
-  videoElement?: HTMLVideoElement,
+  videoElement: HTMLVideoElement,
 ): void {
   const { x, y, width, height } = layer.bounds;
-  const hasLiveVideo = hasDrawableVideo(videoElement);
 
   context.save();
   context.globalAlpha = layer.opacity;
   roundedRect(context, x, y, width, height, 24);
   context.fillStyle = "#0b1018";
   context.fill();
-
-  if (hasLiveVideo && videoElement) {
-    drawScreenVideo(context, layer, videoElement);
-  } else {
-    const gradient = context.createLinearGradient(x, y, x + width, y + height);
-    gradient.addColorStop(0, "rgba(57, 213, 197, 0.2)");
-    gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.05)");
-    gradient.addColorStop(1, "rgba(255, 145, 103, 0.16)");
-    context.fillStyle = gradient;
-    context.fill();
-
-    context.fillStyle = "rgba(255, 255, 255, 0.08)";
-    for (let line = 0; line < 12; line += 1) {
-      const lineY = y + 84 + line * 44;
-      const lineWidth = width * (0.32 + ((line + 2) % 5) * 0.11);
-      roundedRect(context, x + 78, lineY, lineWidth, 12, 6);
-      context.fill();
-    }
-
-    const cursorX = x + width * 0.62 + Math.sin(timestamp / 900) * 18;
-    const cursorY = y + height * 0.42 + Math.cos(timestamp / 760) * 14;
-    context.fillStyle = "#f7fbff";
-    context.beginPath();
-    context.moveTo(cursorX, cursorY);
-    context.lineTo(cursorX + 34, cursorY + 76);
-    context.lineTo(cursorX + 52, cursorY + 48);
-    context.lineTo(cursorX + 88, cursorY + 46);
-    context.closePath();
-    context.fill();
-  }
+  drawScreenVideo(context, layer, videoElement);
 
   roundedRect(context, x, y, width, height, 24);
-  context.strokeStyle = hasLiveVideo ? "rgba(57, 213, 197, 0.42)" : "rgba(255, 255, 255, 0.16)";
-  context.lineWidth = hasLiveVideo ? 4 : 3;
+  context.strokeStyle = "rgba(57, 213, 197, 0.42)";
+  context.lineWidth = 4;
   context.stroke();
 
   context.fillStyle = "rgba(5, 10, 16, 0.78)";
@@ -925,28 +859,6 @@ function drawVideoLayer(
   context.font = "900 46px Inter, system-ui, sans-serif";
   context.textBaseline = "middle";
   context.fillText(layer.label ?? layer.name, x + 100, y + height - 82);
-
-  context.restore();
-}
-
-function drawProgramChrome(
-  context: CanvasRenderingContext2D,
-  options: ProgramRenderOptions,
-): void {
-  context.save();
-
-  context.fillStyle = options.isRecording ? "#ff6f61" : "#39d5c5";
-  roundedRect(context, 1504, 34, 140, 40, 20);
-  context.fill();
-  context.fillStyle = "#071014";
-  context.font = "800 18px Inter, system-ui, sans-serif";
-  context.textBaseline = "middle";
-  context.fillText(options.isRecording ? "REC" : "PROGRAM", 1534, 54);
-
-  context.strokeStyle = "rgba(255, 255, 255, 0.18)";
-  context.lineWidth = 2;
-  roundedRect(context, 96, 72, options.resolution.width - 192, options.resolution.height - 144, 34);
-  context.stroke();
 
   context.restore();
 }

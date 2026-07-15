@@ -3,8 +3,10 @@ import type { SendSubjectInput } from "notifications/src/contracts.js";
 import {
 	cloudflareStreamLiveInputIsConnected,
 	createCloudflareStreamLiveInput,
+	disableCloudflareStreamLiveInput,
 	getCloudflareStreamConfig,
 	getCloudflareStreamLiveInput,
+	updateCloudflareStreamLiveInputPlaybackPolicy,
 	type CloudflareStreamConfig,
 	type CloudflareStreamLiveInput,
 } from "./cloudflare-stream";
@@ -30,11 +32,13 @@ import {
 	createStudioSessionId,
 	createStudioInviteRecord,
 	getStudioSession,
+	getStudioStreamPublisherLease,
 	getStudioUserGithubHandle,
 	getStudioUserId,
 	hashInviteToken,
 	isStudioSessionActive,
 	redeemStudioInvite,
+	reclaimStaleStudioStream,
 	releaseStudioStreamNotificationClaim,
 	resolveStudioInvite,
 	saveRecordingReadyMarker,
@@ -42,11 +46,12 @@ import {
 	saveStudioSessionStatus,
 	saveStudioSession,
 	saveStudioStreamEnded,
+	saveStudioStreamEndedForLease,
+	saveStudioStreamFailed,
 	saveStudioStreamLive,
 	saveStudioStreamStart,
+	studioStreamPublisherLeaseMatches,
 	upsertStudioParticipant,
-	userCanManageStudioSession,
-	userCanJoinStudioSessionAsGuest,
 	userIsConfiguredStudioOperator,
 	type StudioInvite,
 	type StudioSessionRecord,
@@ -59,6 +64,7 @@ export class StudioOperationError extends Error {
 		| "bad-request"
 		| "content-unavailable"
 		| "not-found"
+			| "provider-cleanup-failed"
 			| "provider-not-configured"
 			| "session-ended"
 			| "storage-not-configured"
@@ -78,6 +84,7 @@ export class StudioOperationError extends Error {
 }
 
 export interface CreateStudioSessionInput {
+	prodConfirmation?: string;
 	show?: string;
 	showId?: string;
 	startsAt?: string;
@@ -149,9 +156,11 @@ export interface AbortRecordingUploadInput {
 
 const recordingUploadPartSizeBytes = 8 * 1024 * 1024;
 const recordingIdPattern = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/;
+const staleStreamStartingSeconds = 120;
+const staleStreamLiveSeconds = 30;
 
-function requireConfiguredRealtimeKit(env: StudioEnv) {
-	const config = getRealtimeKitConfig(env);
+async function requireConfiguredRealtimeKit(env: StudioEnv) {
+	const config = await getRealtimeKitConfig(env);
 	if (!config) {
 		throw new StudioOperationError(
 			"provider-not-configured",
@@ -360,35 +369,43 @@ async function notifyStudioStreamIfNeeded(
 		| "streamNotificationQueuedAt"
 		| "title"
 	>,
+	lease: {
+		liveInputId: string;
+		startToken: string;
+	},
 ): Promise<boolean> {
 	if (
 		session.streamEnvironment !== "prod" ||
-		session.streamNotificationQueuedAt !== null
+		session.streamNotificationQueuedAt !== null ||
+		session.cloudflareStreamLiveInputId !== lease.liveInputId
 	) {
 		return false;
 	}
 
-	requireContentBackedStreamSession(session);
 	const notificationQueuedAt = nowSeconds();
-	const claimed = await claimStudioStreamNotification(
-		env,
-		session.id,
-		notificationQueuedAt,
-	);
-	if (!claimed) {
-		return false;
-	}
-
+	let claimed = false;
 	try {
+		requireContentBackedStreamSession(session);
+		claimed = await claimStudioStreamNotification(env, {
+			liveInputId: lease.liveInputId,
+			notificationQueuedAt,
+			sessionId: session.id,
+			startToken: lease.startToken,
+		});
+		if (!claimed) return false;
 		await requireNotificationsQueue(env).send(buildStreamNotification(session));
 		return true;
 	} catch (error) {
-		await releaseStudioStreamNotificationClaim(
-			env,
-			session.id,
-			notificationQueuedAt,
-		).catch(() => undefined);
-		throw error;
+		if (claimed) {
+			await releaseStudioStreamNotificationClaim(env, {
+				liveInputId: lease.liveInputId,
+				notificationQueuedAt,
+				sessionId: session.id,
+				startToken: lease.startToken,
+			}).catch(() => undefined);
+		}
+		console.error("Studio stream notification failed", error);
+		return false;
 	}
 }
 
@@ -434,14 +451,58 @@ async function requireSessionManager(
 			404,
 		);
 	}
-	if (!(await userCanManageStudioSession(env, session, user))) {
+	if (!userIsConfiguredStudioOperator(env, user)) {
 		throw new StudioOperationError(
 			"unauthorized",
-			"Studio session management access is required.",
+			"Studio operator access is required.",
 			403,
 		);
 	}
 	return session;
+}
+
+async function recoverStaleStudioStreamIfNeeded(
+	env: StudioEnv,
+	session: StudioSessionRecord,
+): Promise<boolean> {
+	const currentTime = nowSeconds();
+	if (
+		session.streamStatus === "starting" &&
+		session.updatedAt <= currentTime - staleStreamStartingSeconds
+	) {
+		return await reclaimStaleStudioStream(env, {
+			sessionId: session.id,
+			staleBefore: currentTime - staleStreamStartingSeconds,
+			streamStatus: "starting",
+		});
+	}
+
+	if (
+		session.streamStatus !== "live" ||
+		session.updatedAt > currentTime - staleStreamLiveSeconds
+	) {
+		return false;
+	}
+
+	if (session.cloudflareStreamLiveInputId) {
+		try {
+			const config = await requireConfiguredCloudflareStream(env);
+			const liveInput = await getCloudflareStreamLiveInput(
+				config,
+				session.cloudflareStreamLiveInputId,
+			);
+			if (cloudflareStreamLiveInputIsConnected(liveInput)) return false;
+		} catch (error) {
+			console.error("Could not reconcile stale Studio stream", error);
+			return false;
+		}
+	}
+
+	return await reclaimStaleStudioStream(env, {
+		sessionId: session.id,
+		staleBefore: currentTime - staleStreamLiveSeconds,
+		streamStatus: "live",
+	});
 }
 
 export async function createStudioSession(
@@ -455,6 +516,16 @@ export async function createStudioSession(
 			"unauthorized",
 			"Studio operator access is required to create sessions.",
 			403,
+		);
+	}
+	if (
+		input.streamEnvironment === "prod" &&
+		input.prodConfirmation !== "PROD"
+	) {
+		throw new StudioOperationError(
+			"bad-request",
+			"Type PROD to arm a production stream.",
+			400,
 		);
 	}
 	const contentVideo = input.videoId
@@ -490,7 +561,7 @@ export async function createStudioSession(
 	const sessionId = contentVideo
 		? createStudioSessionId(contentVideo.id)
 		: createStudioSessionId(show);
-	const config = getRealtimeKitConfig(env);
+	const config = await getRealtimeKitConfig(env);
 	const meeting = config
 		? await createRealtimeKitMeeting(config, {
 				sessionId,
@@ -533,13 +604,17 @@ export async function startStudioStream(
 	input: StudioStreamInput,
 ) {
 	requireStudioDb(env);
-	const session = await requireSessionManager(env, user, input.sessionId);
+	let session = await requireSessionManager(env, user, input.sessionId);
 	if (session.status === "complete") {
 		throw new StudioOperationError(
 			"session-ended",
 			"Studio session has ended.",
 			409,
 		);
+	}
+	const recovered = await recoverStaleStudioStreamIfNeeded(env, session);
+	if (recovered) {
+		session = await requireSessionManager(env, user, input.sessionId);
 	}
 	if (session.streamStatus === "live" || session.streamStatus === "starting") {
 		throw new StudioOperationError(
@@ -564,7 +639,11 @@ export async function startStudioStream(
 	try {
 		const config = await requireConfiguredCloudflareStream(env);
 		const liveInput = session.cloudflareStreamLiveInputId
-			? await getCloudflareStreamLiveInput(config, session.cloudflareStreamLiveInputId)
+			? await updateCloudflareStreamLiveInputPlaybackPolicy(
+					config,
+					session.cloudflareStreamLiveInputId,
+					session.streamEnvironment,
+				)
 			: await createCloudflareStreamLiveInput(config, {
 					contentVideoSlug: session.contentVideoSlug,
 					name: session.title,
@@ -592,6 +671,7 @@ export async function startStudioStream(
 			liveInputId: liveInput.uid,
 			publishUrl,
 			playbackUrl,
+			recovered,
 			streamToken,
 		};
 	} catch (error) {
@@ -607,7 +687,8 @@ export async function confirmStudioStream(
 ) {
 	requireStudioDb(env);
 	const session = await requireSessionManager(env, user, input.sessionId);
-	if (!session.cloudflareStreamLiveInputId) {
+	const liveInputId = session.cloudflareStreamLiveInputId;
+	if (!liveInputId) {
 		throw new StudioOperationError(
 			"bad-request",
 			"Studio stream has not been started for this session.",
@@ -621,19 +702,35 @@ export async function confirmStudioStream(
 			409,
 		);
 	}
-	if (session.streamStatus === "live") {
-		return {
-			sessionId: session.id,
-			streamStatus: "live" as const,
-			notified: await notifyStudioStreamIfNeeded(env, session),
-		};
-	}
-	if (!input.streamToken) {
+	const streamToken = input.streamToken?.trim();
+	if (!streamToken) {
 		throw new StudioOperationError(
 			"bad-request",
 			"streamToken is required to confirm Studio stream publishing.",
 			400,
 		);
+	}
+	const publisherLease = {
+		liveInputId,
+		startToken: streamToken,
+	};
+	if (session.streamStatus === "live") {
+		const ownsLiveLease = await studioStreamPublisherLeaseMatches(env, {
+			...publisherLease,
+			sessionId: session.id,
+		});
+		if (!ownsLiveLease) {
+			throw new StudioOperationError(
+				"stream-active",
+				"The live Studio stream belongs to a different publisher.",
+				409,
+			);
+		}
+		return {
+			sessionId: session.id,
+			streamStatus: "live" as const,
+			notified: await notifyStudioStreamIfNeeded(env, session, publisherLease),
+		};
 	}
 	if (session.streamStatus !== "starting") {
 		throw new StudioOperationError(
@@ -646,7 +743,7 @@ export async function confirmStudioStream(
 	const config = await requireConfiguredCloudflareStream(env);
 	const liveInput = await getCloudflareStreamLiveInput(
 		config,
-		session.cloudflareStreamLiveInputId,
+		liveInputId,
 	);
 	if (!cloudflareStreamLiveInputIsConnected(liveInput)) {
 		throw new StudioOperationError(
@@ -666,28 +763,41 @@ export async function confirmStudioStream(
 	}
 
 	const savedLive = await saveStudioStreamLive(env, {
+		liveInputId,
 		playbackUrl,
 		publicLive: session.streamEnvironment === "prod",
 		sessionId: session.id,
-		startToken: input.streamToken,
+		startToken: streamToken,
 	});
 	if (!savedLive) {
 		const latest = await getStudioSession(env, session.id);
-		if (latest?.streamStatus === "live") {
+		const ownsLiveLease = latest?.streamStatus === "live" &&
+			latest.cloudflareStreamLiveInputId === liveInputId &&
+			await studioStreamPublisherLeaseMatches(env, {
+				...publisherLease,
+				sessionId: session.id,
+			});
+		if (ownsLiveLease) {
 			return {
 				sessionId: session.id,
 				streamStatus: "live" as const,
-				notified: await notifyStudioStreamIfNeeded(env, latest),
+				notified: await notifyStudioStreamIfNeeded(
+					env,
+					latest,
+					publisherLease,
+				),
 			};
 		}
 		throw new StudioOperationError(
-			"bad-request",
-			"Studio stream is no longer waiting for live confirmation.",
+			latest?.streamStatus === "live" ? "stream-active" : "bad-request",
+			latest?.streamStatus === "live"
+				? "The live Studio stream belongs to a different publisher."
+				: "Studio stream is no longer waiting for live confirmation.",
 			409,
 		);
 	}
 
-	const notified = await notifyStudioStreamIfNeeded(env, session);
+	const notified = await notifyStudioStreamIfNeeded(env, session, publisherLease);
 
 	return {
 		sessionId: session.id,
@@ -703,11 +813,80 @@ export async function stopStudioStream(
 ) {
 	requireStudioDb(env);
 	const session = await requireSessionManager(env, user, input.sessionId);
-	await saveStudioStreamEnded(env, session.id, input.streamToken);
+	const isActive = session.streamStatus === "starting" || session.streamStatus === "live";
+	if (!isActive) {
+		const changed = input.streamToken
+			? await saveStudioStreamEnded(env, session.id, input.streamToken)
+			: false;
+		return {
+			changed,
+			sessionId: session.id,
+			streamStatus: "ended" as const,
+		};
+	}
+	if (!input.streamToken) {
+		throw new StudioOperationError(
+			"stream-active",
+			"streamToken is required to stop the active Studio stream. Reset it explicitly if the publisher token was lost.",
+			409,
+		);
+	}
+
+	const changed = await saveStudioStreamEnded(env, session.id, input.streamToken);
+	if (!changed) {
+		const latest = await getStudioSession(env, session.id);
+		if (latest?.streamStatus === "starting" || latest?.streamStatus === "live") {
+			throw new StudioOperationError(
+				"stream-active",
+				"The active Studio stream belongs to a different publisher.",
+				409,
+			);
+		}
+	}
 
 	return {
+		changed,
 		sessionId: session.id,
 		streamStatus: "ended" as const,
+	};
+}
+
+export async function resetStudioStream(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	if (session.streamStatus !== "starting" && session.streamStatus !== "live") {
+		return {
+			reset: false,
+			sessionId: session.id,
+			streamStatus: session.streamStatus,
+		};
+	}
+
+	const reset = await saveStudioStreamFailed(env, session.id, input.streamToken);
+	if (!reset) {
+		const latest = await getStudioSession(env, session.id);
+		if (latest?.streamStatus === "starting" || latest?.streamStatus === "live") {
+			throw new StudioOperationError(
+				"stream-active",
+				"The active Studio stream belongs to a different publisher.",
+				409,
+			);
+		}
+		return {
+			reset: false,
+			sessionId: session.id,
+			streamStatus: latest?.streamStatus ?? "failed" as const,
+		};
+	}
+
+	return {
+		reset: true,
+		sessionId: session.id,
+		streamStatus: "failed" as const,
 	};
 }
 
@@ -755,12 +934,59 @@ export async function endStudioSession(
 	input: EndStudioSessionInput,
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
-	if (session.realtimeKitMeetingId) {
-		const config = requireConfiguredRealtimeKit(env);
-		await endRealtimeKitSession(config, session.realtimeKitMeetingId);
-	}
-	await saveStudioStreamEnded(env, session.id);
+	const publisherLease = await getStudioStreamPublisherLease(env, session.id);
 	await saveStudioSessionStatus(env, session.id, "complete");
+
+	let liveInputId = session.cloudflareStreamLiveInputId;
+	if (publisherLease) {
+		const endedMatchingLease = await saveStudioStreamEndedForLease(env, {
+			liveInputId: publisherLease.liveInputId,
+			sessionId: session.id,
+			startToken: publisherLease.startToken,
+		});
+		if (!endedMatchingLease) {
+			throw new StudioOperationError(
+				"provider-cleanup-failed",
+				"Studio ended publicly, but its publisher lease changed during cleanup. Retry ending the session.",
+				502,
+			);
+		}
+		liveInputId = publisherLease.liveInputId;
+	} else {
+		await saveStudioStreamEnded(env, session.id);
+	}
+
+	if (liveInputId) {
+		try {
+			const config = await requireConfiguredCloudflareStream(env);
+			await disableCloudflareStreamLiveInput(config, liveInputId);
+		} catch (error) {
+			const message = error instanceof Error
+				? error.message
+				: "Cloudflare Stream cleanup failed";
+			throw new StudioOperationError(
+				"provider-cleanup-failed",
+				`Studio ended publicly, but Cloudflare Stream cleanup failed. Retry ending the session: ${message}`,
+				502,
+			);
+		}
+	}
+
+	if (session.realtimeKitMeetingId) {
+		try {
+			const config = await requireConfiguredRealtimeKit(env);
+			await endRealtimeKitSession(config, session.realtimeKitMeetingId);
+		} catch (error) {
+			const message = error instanceof Error
+				? error.message
+				: "RealtimeKit cleanup failed";
+			throw new StudioOperationError(
+				"provider-cleanup-failed",
+				`Studio ended locally, but RealtimeKit cleanup failed. Retry ending the session: ${message}`,
+				502,
+			);
+		}
+	}
 
 	return {
 		sessionId: session.id,
@@ -782,17 +1008,15 @@ export async function issueStudioParticipantToken(
 		);
 	}
 	let inviteToRedeem: StudioInvite | null = null;
-	const canManage = await userCanManageStudioSession(env, session, user);
+	const canManage = userIsConfiguredStudioOperator(env, user);
 	if (input.role === "guest") {
 		if (!canManage) {
 			if (!input.inviteToken) {
-				if (!userCanJoinStudioSessionAsGuest(session, user)) {
-					throw new StudioOperationError(
-						"unauthorized",
-						"Guest invite token is required to join this Studio session.",
-						403,
-					);
-				}
+				throw new StudioOperationError(
+					"unauthorized",
+					"Guest invite token is required to join this Studio session.",
+					403,
+				);
 			} else {
 				const resolvedInvite = await resolveStudioInvite(env, input.inviteToken, user);
 				if (
@@ -831,7 +1055,7 @@ export async function issueStudioParticipantToken(
 		);
 	}
 
-	const config = requireConfiguredRealtimeKit(env);
+	const config = await requireConfiguredRealtimeKit(env);
 	if (inviteToRedeem) {
 		const redeemed = await redeemStudioInvite(env, inviteToRedeem, user);
 		if (!redeemed) {

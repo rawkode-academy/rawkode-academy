@@ -6,8 +6,12 @@ schema.#Project
 
 name: "rawkode-academy-studio"
 
-runtime: schema.#DevenvRuntime
-hooks: onEnter: devenv: schema.#Devenv
+runtime: schema.#DevenvRuntime & {
+	path: "../.."
+}
+hooks: onEnter: devenv: schema.#Devenv & {
+	dir: "../.."
+}
 
 let _t = tasks
 let _taskPath = "/home/runner/.bun/bin:/Users/rawkode/.bun/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
@@ -75,6 +79,7 @@ tasks: {
 		inputs: [
 			"astro.config.mts",
 			"package.json",
+			"scripts/**",
 			"src/**",
 			"tsconfig.json",
 			"wrangler.jsonc",
@@ -89,6 +94,7 @@ tasks: {
 		inputs: [
 			"data-model/**",
 			"package.json",
+			"scripts/**",
 			"src/**",
 			"wrangler.jsonc",
 		]
@@ -120,6 +126,7 @@ tasks: {
 				"astro.config.mts",
 				"data-model/**",
 				"package.json",
+				"scripts/**",
 				"src/**",
 				"wrangler.jsonc",
 			]
@@ -144,6 +151,7 @@ tasks: {
 				"astro.config.mts",
 				"data-model/**",
 				"package.json",
+				"scripts/**",
 				"src/**",
 				"wrangler.jsonc",
 			]

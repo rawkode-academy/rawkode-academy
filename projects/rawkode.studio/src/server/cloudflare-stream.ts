@@ -27,6 +27,12 @@ interface CloudflareApiEnvelope<T> {
 	success?: boolean;
 }
 
+const connectedLiveInputCache = new Map<
+	string,
+	{ expiresAt: number }
+>();
+const connectedLiveInputCacheTtlMs = 3_000;
+
 async function readSecretString(
 	value: string | SecretsStoreSecret | undefined,
 ): Promise<string | null> {
@@ -57,6 +63,57 @@ export function cloudflareStreamLiveInputIsConnected(
 	return liveInput.status === "connected" || liveInput.status === "reconnected";
 }
 
+export function cloudflareStreamLiveInputMayBeActive(
+	liveInput: Pick<CloudflareStreamLiveInput, "status">,
+): boolean {
+	return cloudflareStreamLiveInputIsConnected(liveInput) ||
+		liveInput.status === "reconnecting";
+}
+
+export async function cloudflareStreamLiveInputIsActive(
+	config: CloudflareStreamConfig,
+	liveInputId: string,
+): Promise<boolean> {
+	const cacheKey = `${config.accountId}:${liveInputId}`;
+	const cached = connectedLiveInputCache.get(cacheKey);
+	if (cached && cached.expiresAt > Date.now()) return true;
+
+	const liveInput = await getCloudflareStreamLiveInput(config, liveInputId);
+	const active = cloudflareStreamLiveInputMayBeActive(liveInput);
+	if (active) {
+		connectedLiveInputCache.set(cacheKey, {
+			expiresAt: Date.now() + connectedLiveInputCacheTtlMs,
+		});
+	} else {
+		connectedLiveInputCache.delete(cacheKey);
+	}
+	return active;
+}
+
+export function clearCloudflareStreamLiveInputCache(): void {
+	connectedLiveInputCache.clear();
+}
+
+function getLiveInputAllowedOrigins(
+	streamEnvironment: StreamEnvironment,
+): string[] {
+	return streamEnvironment === "prod"
+		? ["rawkode.academy", "rawkode.studio"]
+		: ["rawkode.studio"];
+}
+
+function getLiveInputRecordingPolicy(
+	streamEnvironment: StreamEnvironment,
+) {
+	return {
+		allowedOrigins: getLiveInputAllowedOrigins(streamEnvironment),
+		hideLiveViewerCount: false,
+		mode: "off",
+		requireSignedURLs: false,
+		timeoutSeconds: 0,
+	};
+}
+
 export async function createCloudflareStreamLiveInput(
 	config: CloudflareStreamConfig,
 	input: {
@@ -79,13 +136,40 @@ export async function createCloudflareStreamLiveInput(
 					studioSessionId: input.sessionId,
 					streamEnvironment: input.streamEnvironment,
 				},
-				recording: {
-					hideLiveViewerCount: false,
-					mode: "off",
-					requireSignedURLs: false,
-					timeoutSeconds: 0,
-				},
+				recording: getLiveInputRecordingPolicy(input.streamEnvironment),
 			}),
+		},
+	);
+}
+
+export async function updateCloudflareStreamLiveInputPlaybackPolicy(
+	config: CloudflareStreamConfig,
+	liveInputId: string,
+	streamEnvironment: StreamEnvironment,
+): Promise<CloudflareStreamLiveInput> {
+	return await cloudflareStreamRequest<CloudflareStreamLiveInput>(
+		config,
+		`/stream/live_inputs/${encodeURIComponent(liveInputId)}`,
+		{
+			method: "PUT",
+			body: JSON.stringify({
+				recording: getLiveInputRecordingPolicy(streamEnvironment),
+			}),
+		},
+	);
+}
+
+export async function disableCloudflareStreamLiveInput(
+	config: CloudflareStreamConfig,
+	liveInputId: string,
+): Promise<CloudflareStreamLiveInput> {
+	connectedLiveInputCache.delete(`${config.accountId}:${liveInputId}`);
+	return await cloudflareStreamRequest<CloudflareStreamLiveInput>(
+		config,
+		`/stream/live_inputs/${encodeURIComponent(liveInputId)}`,
+		{
+			method: "PUT",
+			body: JSON.stringify({ enabled: false }),
 		},
 	);
 }

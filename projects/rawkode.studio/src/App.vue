@@ -5,20 +5,24 @@ import RealtimeKitRoom from "./components/RealtimeKitRoom.vue";
 import SceneSwitcher from "./components/SceneSwitcher.vue";
 import StudioCanvas from "./components/StudioCanvas.vue";
 import StudioWidgets from "./components/StudioWidgets.vue";
+import {
+  deriveProgrammeLayers,
+  getProgrammeMediaReadiness,
+  OPERATOR_SOURCE_ID,
+} from "./studio/programmeMedia";
 import { useStudioMachine } from "./studio/useStudioMachine";
 import type { ActiveOverlay, StudioSource } from "./types";
 
 type CaptureStatus = "blocked" | "missing" | "ready" | "requesting" | "unavailable";
+type RoomState = "connected" | "connecting" | "idle" | "setup" | "unavailable";
 type RoomMediaPayload = {
   sources: StudioSource[];
   streams: Map<string, MediaStream>;
 };
 
 const props = defineProps<{
-  inviteToken?: string;
   providerStatus?: string;
   recordingStatus?: string;
-  roomRole?: string;
   sessionId?: string;
   sessionTitle?: string;
   streamEnvironment?: "prod" | "test";
@@ -35,11 +39,15 @@ const overlayTimerPhases = new Map<string, ActiveOverlay["phase"]>();
 const hostMediaStream = shallowRef<MediaStream | undefined>();
 const roomMediaStreams = shallowRef(new Map<string, MediaStream>());
 const roomMediaSources = shallowRef(new Map<string, StudioSource>());
+const roomState = ref<RoomState>("idle");
+const mediaTrackRevision = ref(0);
 const screenShareSources = ref<StudioSource[]>([]);
 const screenShareStreams = shallowRef(new Map<string, MediaStream>());
 const screenShareCaptureStates = ref<Record<string, { error: string; status: CaptureStatus }>>({});
 const hostCaptureStatus = ref<CaptureStatus>("requesting");
 const hostCaptureError = ref("");
+const prodConfirmation = ref("");
+const prodConfirmed = ref(false);
 const widgetHeight = ref(220);
 const isResizingWidgets = ref(false);
 let stingerTimer: number | undefined;
@@ -51,32 +59,18 @@ const activeStingerKey = computed(() => {
   const stinger = state.value.activeStinger;
   return stinger ? `${stinger.fromSceneId}:${stinger.toSceneId}:${getEffectKey(stinger.effect)}` : "";
 });
-const roomSubtitle = computed(() =>
-  [props.roomRole, "Browser production console"].filter(Boolean).join(" / "),
-);
-const roomRole = computed(() => {
-  const role = props.roomRole?.toLowerCase();
-  return role === "host" || role === "producer" || role === "program" || role === "guest"
-    ? role
-    : "guest";
-});
-const canPublishLive = computed(() =>
-  roomRole.value === "host" || roomRole.value === "producer" || roomRole.value === "program",
-);
-const localCameraSourceId = computed(() =>
-  roomRole.value === "producer" || roomRole.value === "program"
-    ? "source-producer-camera"
-    : roomRole.value === "guest"
-      ? "source-guest-camera"
-      : "source-host-camera",
-);
+const roomSubtitle = computed(() => props.streamEnvironment === "test"
+  ? "Operator control room / unlisted Test output with no public page or alerts"
+  : "Public production control room");
+const localCameraSourceId = OPERATOR_SOURCE_ID;
 const studioLayoutStyle = computed(() => ({
   "--widgets-height": `${widgetHeight.value}px`,
 }));
 const mediaStreams = computed(() => {
+  void mediaTrackRevision.value;
   const streams = new Map<string, MediaStream>(roomMediaStreams.value);
   if (hostMediaStream.value) {
-    streams.set(localCameraSourceId.value, hostMediaStream.value);
+    streams.set(localCameraSourceId, hostMediaStream.value);
   }
   for (const [sourceId, stream] of screenShareStreams.value) {
     streams.set(sourceId, stream);
@@ -84,6 +78,31 @@ const mediaStreams = computed(() => {
 
   return streams;
 });
+const runtimeMediaSources = computed(() => {
+  const sources = new Map(roomMediaSources.value);
+  const localSource = state.value.sources.find((source) => source.id === localCameraSourceId);
+  if (hostMediaStream.value && localSource) {
+    sources.set(localCameraSourceId, withLocalCaptureState(localSource));
+  } else if (!sources.has(localCameraSourceId) && localSource) {
+    sources.set(localCameraSourceId, withLocalCaptureState(localSource));
+  }
+  for (const source of screenShareSources.value) {
+    sources.set(source.id, withScreenShareCaptureState(source));
+  }
+  return [...sources.values()];
+});
+const runtimeProgramLayers = computed(() => deriveProgrammeLayers({
+  activeScreenShareSourceId: state.value.activeScreenShareSourceId,
+  layers: programLayers.value,
+  mediaStreams: mediaStreams.value,
+  resolution: state.value.resolution,
+  runtimeSources: runtimeMediaSources.value,
+}));
+const programmeMediaReadiness = computed(() => getProgrammeMediaReadiness({
+  layers: runtimeProgramLayers.value,
+  mediaStreams: mediaStreams.value,
+  roomConnected: roomState.value === "connected",
+}));
 const sourcesForUi = computed(() =>
   [
     ...state.value.sources
@@ -94,17 +113,13 @@ const sourcesForUi = computed(() =>
 );
 
 onMounted(() => {
-  startHostCapture();
+  if (props.streamEnvironment !== "prod") {
+    void startHostCapture();
+  }
 });
 
 function selectScene(id: string): void {
   send({ type: "scene.select", sceneId: id });
-}
-
-function showLowerThird(speaker: string, comment: string): void {
-  send({ type: "lowerThird.speaker.update", value: speaker });
-  send({ type: "lowerThird.comment.update", value: comment });
-  send({ type: "lowerThird.show" });
 }
 
 function setRecording(recording: boolean): void {
@@ -115,6 +130,27 @@ function setRecording(recording: boolean): void {
 
 function markProgramExported(): void {
   send({ type: "program.exported" });
+}
+
+function confirmProdControl(): void {
+  if (prodConfirmation.value !== "PROD") {
+    return;
+  }
+
+  prodConfirmed.value = true;
+  prodConfirmation.value = "";
+  void startHostCapture();
+}
+
+function resetProdConfirmation(): void {
+  if (props.streamEnvironment !== "prod") {
+    return;
+  }
+
+  prodConfirmed.value = false;
+  prodConfirmation.value = "";
+  stopHostCapture();
+  stopAllScreenShares();
 }
 
 async function addScreenShare(): Promise<void> {
@@ -150,6 +186,8 @@ async function startScreenShare(source: StudioSource): Promise<void> {
     });
     for (const track of stream.getTracks()) {
       track.addEventListener("ended", () => handleScreenShareEnded(source.id));
+      track.addEventListener("mute", handleMediaTrackStateChange);
+      track.addEventListener("unmute", handleMediaTrackStateChange);
     }
     const namedSource = {
       ...source,
@@ -188,6 +226,8 @@ function stopScreenShare(sourceId: string): void {
   const stream = screenShareStreams.value.get(sourceId);
   if (stream) {
     for (const track of stream.getTracks()) {
+      track.removeEventListener("mute", handleMediaTrackStateChange);
+      track.removeEventListener("unmute", handleMediaTrackStateChange);
       track.stop();
     }
   }
@@ -229,6 +269,8 @@ async function startHostCapture(): Promise<void> {
     hostCaptureStatus.value = "ready";
     for (const track of stream.getTracks()) {
       track.addEventListener("ended", handleHostTrackEnded);
+      track.addEventListener("mute", handleMediaTrackStateChange);
+      track.addEventListener("unmute", handleMediaTrackStateChange);
     }
   } catch (error) {
     hostMediaStream.value = undefined;
@@ -245,6 +287,8 @@ function stopHostCapture(): void {
 
   for (const track of stream.getTracks()) {
     track.removeEventListener("ended", handleHostTrackEnded);
+    track.removeEventListener("mute", handleMediaTrackStateChange);
+    track.removeEventListener("unmute", handleMediaTrackStateChange);
     track.stop();
   }
   hostMediaStream.value = undefined;
@@ -257,9 +301,14 @@ function stopAllScreenShares(): void {
 }
 
 function handleHostTrackEnded(): void {
+  handleMediaTrackStateChange();
   hostMediaStream.value = undefined;
   hostCaptureStatus.value = "blocked";
   hostCaptureError.value = "Camera or microphone stream ended";
+}
+
+function handleMediaTrackStateChange(): void {
+  mediaTrackRevision.value += 1;
 }
 
 function syncRoomMediaStreams(payload: RoomMediaPayload): void {
@@ -267,8 +316,12 @@ function syncRoomMediaStreams(payload: RoomMediaPayload): void {
   roomMediaSources.value = new Map(payload.sources.map((source) => [source.id, source]));
 }
 
+function syncRoomState(nextState: RoomState): void {
+  roomState.value = nextState;
+}
+
 function withRuntimeMediaState(source: StudioSource): StudioSource {
-  if (source.id === localCameraSourceId.value) {
+  if (source.id === localCameraSourceId) {
     return withLocalCaptureState(source);
   }
 
@@ -276,8 +329,14 @@ function withRuntimeMediaState(source: StudioSource): StudioSource {
 }
 
 function withLocalCaptureState(source: StudioSource): StudioSource {
+  const hasLiveVideo = hostMediaStream.value?.getVideoTracks().some((track) =>
+    track.readyState === "live" && track.enabled !== false
+  ) === true;
   return {
     ...source,
+    label: "Operator",
+    name: "Operator Camera",
+    status: hasLiveVideo ? "ready" : hostCaptureStatus.value === "requesting" ? "loading" : "missing",
     settings: {
       ...source.settings,
       captureError: hostCaptureError.value,
@@ -379,6 +438,7 @@ function setScreenShareCaptureState(sourceId: string, status: CaptureStatus, err
 }
 
 function handleScreenShareEnded(sourceId: string): void {
+  handleMediaTrackStateChange();
   const nextStreams = new Map(screenShareStreams.value);
   nextStreams.delete(sourceId);
   screenShareStreams.value = nextStreams;
@@ -561,7 +621,40 @@ function clampWidgetHeight(height: number): number {
 </script>
 
 <template>
-  <div class="studio-app" :style="studioLayoutStyle">
+  <section v-if="props.streamEnvironment === 'prod' && !prodConfirmed" class="prod-arming-shell">
+    <div class="prod-arming-card">
+      <p class="eyebrow">Public production safety gate</p>
+      <h1>Arm the production control room</h1>
+      <p>
+        Production can publish to the public watch page and send live alerts. Confirm only after
+        the unlisted Test rehearsal has passed.
+      </p>
+      <label for="prod-control-confirmation">
+        Type <strong>PROD</strong> to continue
+        <input
+          id="prod-control-confirmation"
+          v-model="prodConfirmation"
+          autocomplete="off"
+          inputmode="text"
+          spellcheck="false"
+          @keydown.enter.prevent="confirmProdControl"
+        />
+      </label>
+      <div class="prod-arming-actions">
+        <a class="button" href="/">Return to private dashboard</a>
+        <button
+          class="prod-arm-button"
+          type="button"
+          :disabled="prodConfirmation !== 'PROD'"
+          @click="confirmProdControl"
+        >
+          Arm public production
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div v-else class="studio-app" :style="studioLayoutStyle">
     <header class="top-bar">
       <div class="brand-block">
         <span class="brand-mark" aria-hidden="true">RS</span>
@@ -571,16 +664,18 @@ function clampWidgetHeight(height: number): number {
         </div>
       </div>
       <div class="top-bar-status">
+        <span :class="{ 'prod-status': props.streamEnvironment === 'prod' }">
+          {{ props.streamEnvironment === "prod" ? "Public production armed" : "Unlisted Test" }}
+        </span>
         <span v-if="props.providerStatus">{{ props.providerStatus }}</span>
         <span v-if="props.recordingStatus">{{ props.recordingStatus }}</span>
-        <span v-if="props.streamEnvironment">{{ props.streamEnvironment }} stream</span>
         <span v-if="props.streamStatus">{{ props.streamStatus }}</span>
       </div>
       <RealtimeKitRoom
         v-if="props.sessionId"
-        :invite-token="props.inviteToken"
-        :role="roomRole"
+        role="program"
         :session-id="props.sessionId"
+        @connection-state-change="syncRoomState"
         @media-streams-change="syncRoomMediaStreams"
       />
     </header>
@@ -597,19 +692,23 @@ function clampWidgetHeight(height: number): number {
       <StudioCanvas
         title="Programme"
         subtitle="Current output"
-        :layers="programLayers"
+        :layers="runtimeProgramLayers"
         :active-overlays="state.activeOverlays"
         :active-stinger="state.activeStinger"
         :media-streams="mediaStreams"
+        :programme-source-ids="programmeMediaReadiness.sourceIds"
+        :publish-blocked-reason="programmeMediaReadiness.reason"
         :resolution="state.resolution"
         :is-playing="state.isPlaying"
         :is-recording="state.isRecording"
         :session-id="props.sessionId"
-        :can-publish-live="canPublishLive"
+        :can-publish-live="true"
+        :prod-confirmed="prodConfirmed"
         :stream-environment="props.streamEnvironment"
         :stream-status="props.streamStatus"
         @recording-change="setRecording"
         @exported="markProgramExported"
+        @prod-confirmation-reset="resetProdConfirmation"
       />
     </main>
 
@@ -634,8 +733,6 @@ function clampWidgetHeight(height: number): number {
       @select-screen-share="selectScreenShare"
       @add-screen-share="addScreenShare"
       @stop-screen-share="stopScreenShare"
-      @show-comment="showLowerThird"
-      @show-banner="showLowerThird"
     />
   </div>
 </template>

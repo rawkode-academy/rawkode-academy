@@ -4,7 +4,7 @@ import {
 	listStudioRecordings,
 	getStudioSession,
 	getStudioSessionWatchUrl,
-	userCanManageStudioSession,
+	userIsConfiguredStudioOperator,
 } from "../../../server/studio";
 import { env } from "cloudflare:workers";
 
@@ -17,8 +17,8 @@ const session = await getStudioSession(env, sessionId);
 if (!session) {
 	return new Response("Studio session not found", { status: 404 });
 }
-if (!(await userCanManageStudioSession(env, session, Astro.locals.user))) {
-	return new Response("Studio session management access is required", {
+if (!userIsConfiguredStudioOperator(env, Astro.locals.user)) {
+	return new Response("Studio operator access is required", {
 		status: 403,
 	});
 }

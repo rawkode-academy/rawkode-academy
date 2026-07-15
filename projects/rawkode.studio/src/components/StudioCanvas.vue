@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { animate } from "motion";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { renderProgramCanvas } from "../canvas/programRenderer";
+import {
+  captureProgrammeCanvasStream,
+  configureProgrammeCanvasBackingStore,
+} from "../canvas/programmeCanvas";
+import RecordingRecovery from "./RecordingRecovery.vue";
 import {
   createRecordingFallbackBlob,
   type RecordingFallbackChunk,
@@ -14,11 +19,14 @@ import {
 } from "../recording/multipartBuffer";
 import {
   appendRecordingBackupChunk,
+  closeRecordingBackup,
   createRecordingBackup,
   deleteRecordingBackup,
   readRecordingBackupChunks,
   type RecordingBackup,
 } from "../recording/recordingBackup";
+import { initialiseRecordingDestinations } from "../recording/recordingDestinations";
+import { fetchWithTransientRetry } from "../recording/transientRetry";
 import {
   getRecordingHandoffStatusLabel,
   getRecordingHandoffStatusUrl,
@@ -29,13 +37,32 @@ import {
   startWhipPublishing,
   type WhipPublishSession,
 } from "../live/whipClient";
+import { getWebRtcConnectionHealth } from "../live/connectionHealth";
+import {
+  createProgrammeOutput,
+  type ProgrammeOutput,
+} from "../live/programmeOutput";
+import {
+  startWhepPlayback,
+  type WhepPlaybackSession,
+} from "../live/whepClient";
 import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
 import { getHitTestLayerStack } from "../studio/layerStack";
+import { getProgrammeMediaSourceIds } from "../studio/programmeMedia";
 import type { ActiveOverlay, ActiveSceneStinger, CanvasResolution, StudioLayer } from "../types";
 
 type MotionAnimationControls = ReturnType<typeof animate>;
-type LivePublishStatus = "confirming" | "ended" | "failed" | "idle" | "live" | "starting" | "stopping";
+type LivePublishStatus =
+  | "confirming"
+  | "degraded"
+  | "ended"
+  | "failed"
+  | "idle"
+  | "live"
+  | "starting"
+  | "stopping";
 type RecordingUploadStatus = "failed" | "idle" | "local" | "ready" | "uploading";
+type TestPreviewStatus = "degraded" | "failed" | "idle" | "playing" | "starting";
 
 interface RecordingUploadPart {
   etag: string;
@@ -69,11 +96,14 @@ const props = defineProps<{
   activeStinger?: ActiveSceneStinger;
   layers: StudioLayer[];
   mediaStreams?: Map<string, MediaStream>;
+  programmeSourceIds?: string[];
+  publishBlockedReason?: string;
   resolution: CanvasResolution;
   isPlaying: boolean;
   isRecording: boolean;
   sessionId?: string;
   canPublishLive?: boolean;
+  prodConfirmed?: boolean;
   streamEnvironment?: "prod" | "test";
   streamStatus?: string;
   title: string;
@@ -83,6 +113,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   exported: [];
+  "prod-confirmation-reset": [];
   "recording-change": [recording: boolean];
   "select-layer": [id: string];
   "update-layer-bounds": [id: string, bounds: StudioLayer["bounds"]];
@@ -94,22 +125,36 @@ const canvasDisplaySize = ref({ width: 0, height: 0 });
 const canRecordLocally = typeof MediaRecorder !== "undefined";
 const isDragging = ref(false);
 const isFinishingRecording = ref(false);
-const livePublishError = ref("");
-const livePublishStatus = ref<LivePublishStatus>(
-  props.streamStatus === "live"
-    ? "live"
-    : props.streamStatus === "starting"
-      ? "starting"
-      : props.streamStatus === "ended"
-        ? "ended"
-        : "idle",
+const hasUnownedServerStream =
+  props.streamStatus === "live" || props.streamStatus === "starting";
+const livePublishError = ref(
+  hasUnownedServerStream
+    ? "This browser is not publishing the active stream. Reset it before restarting."
+    : "",
 );
+const livePublishWarning = ref("");
+const livePublishStatus = ref<LivePublishStatus>(
+  hasUnownedServerStream
+    ? "failed"
+    : props.streamStatus === "ended"
+      ? "ended"
+      : "idle",
+);
+const requiresServerReset = ref(hasUnownedServerStream);
 const isLocalRecording = ref(false);
 const isStartingLivePublish = ref(false);
+const isRetryingLiveNotification = ref(false);
 const isStartingRecording = ref(false);
+const activeRecordingBackupId = ref("");
+const recordingRecoveryVersion = ref(0);
+const recordingRecoveryWarning = ref("");
 const recordingUploadError = ref("");
 const recordingUploadStatus = ref<RecordingUploadStatus>("idle");
 const completedRecording = ref<RecordingHandoff | null>(null);
+const testPlaybackUrl = ref("");
+const testPreviewElement = ref<HTMLVideoElement | null>(null);
+const testPreviewError = ref("");
+const testPreviewStatus = ref<TestPreviewStatus>("idle");
 const overlayPhaseStarts = new Map<string, { phase: ActiveOverlay["phase"]; startedAt: number }>();
 const overlayTransitionProgresses = new Map<string, number>();
 const overlayAnimations = new Map<string, MotionAnimationControls>();
@@ -121,14 +166,21 @@ let recordingBackup: RecordingBackup | undefined;
 let recordingChunkIndex = 0;
 let recordingFinishPromise: Promise<void> | undefined;
 let recordingUpload: RecordingUpload | undefined;
-let recordingOwnedTracks: MediaStreamTrack[] = [];
+let recordingProgrammeOutput: ProgrammeOutput | undefined;
 let livePublishSession: WhipPublishSession | undefined;
 let livePublishAbortController: AbortController | undefined;
-let liveOwnedTracks: MediaStreamTrack[] = [];
+let removeWhipConnectionStateListener: (() => void) | undefined;
+let whipDisconnectedTimer: number | undefined;
+let whipHealthFailureGeneration: number | undefined;
+let liveProgrammeOutput: ProgrammeOutput | undefined;
 let liveServerStreamStarted = false;
 let ownsLivePublish = false;
+let livePublishConfirmed = false;
 let livePublishGeneration = 0;
 let liveStreamToken: string | undefined;
+let testPreviewSession: WhepPlaybackSession | undefined;
+let testPreviewAbortController: AbortController | undefined;
+let removeTestPreviewConnectionStateListener: (() => void) | undefined;
 let isComponentUnmounted = false;
 const mediaVideoElements = new Map<string, HTMLVideoElement>();
 let stingerAnimation: MotionAnimationControls | undefined;
@@ -171,29 +223,60 @@ const recordingStatusHref = computed(() =>
     ? getRecordingHandoffStatusUrl(completedRecording.value)
     : "",
 );
+const mediaBlockedReason = computed(() => props.publishBlockedReason?.trim() ?? "");
+const hasActiveLivePublish = computed(() =>
+  livePublishStatus.value === "starting" ||
+  livePublishStatus.value === "confirming" ||
+  livePublishStatus.value === "live" ||
+  livePublishStatus.value === "degraded"
+);
 const liveStatusText = computed(() => {
   if (livePublishStatus.value === "starting") return "Starting live stream";
   if (livePublishStatus.value === "confirming") return "Confirming stream";
+  if (livePublishStatus.value === "degraded") {
+    return "Publisher connection interrupted — reconnecting";
+  }
   if (livePublishStatus.value === "live") {
     return `${props.streamEnvironment === "prod" ? "Prod" : "Test"} stream live`;
   }
   if (livePublishStatus.value === "stopping") return "Stopping stream";
-  if (livePublishStatus.value === "ended") return "Stream ended";
   if (livePublishStatus.value === "failed") return livePublishError.value;
+  if (mediaBlockedReason.value) return `Not ready: ${mediaBlockedReason.value}`;
+  if (livePublishStatus.value === "ended") return "Stream ended";
   return "";
 });
 const liveButtonLabel = computed(() => {
+  if (requiresServerReset.value) return "Reset stream";
   if (livePublishStatus.value === "starting" || livePublishStatus.value === "confirming") {
     return "Cancel live start";
   }
   if (livePublishStatus.value === "stopping") return "Stopping";
-  if (livePublishStatus.value === "live") return "Stop live";
+  if (livePublishStatus.value === "live" || livePublishStatus.value === "degraded") {
+    return "Stop live";
+  }
+  if (livePublishStatus.value === "failed") {
+    return `Retry ${props.streamEnvironment === "prod" ? "Prod" : "Test"}`;
+  }
   return "Go live";
 });
 const liveButtonDisabled = computed(() =>
   !props.sessionId ||
-  livePublishStatus.value === "stopping",
+  livePublishStatus.value === "stopping" ||
+  (!requiresServerReset.value && !hasActiveLivePublish.value && Boolean(mediaBlockedReason.value)),
 );
+const recordButtonDisabled = computed(() =>
+  !canRecordLocally ||
+  isFinishingRecording.value ||
+  isStartingRecording.value ||
+  (!isLocalRecording.value && Boolean(mediaBlockedReason.value)),
+);
+const testPreviewStatusText = computed(() => {
+  if (testPreviewStatus.value === "starting") return "Connecting";
+  if (testPreviewStatus.value === "playing") return "Playing";
+  if (testPreviewStatus.value === "degraded") return "Reconnecting";
+  if (testPreviewStatus.value === "failed") return testPreviewError.value;
+  return "";
+});
 
 async function paint(timestamp = performance.now()): Promise<void> {
   const canvas = canvasElement.value;
@@ -201,14 +284,9 @@ async function paint(timestamp = performance.now()): Promise<void> {
     return;
   }
 
-  const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  const backingWidth = props.resolution.width * ratio;
-  const backingHeight = props.resolution.height * ratio;
-
-  if (canvas.width !== backingWidth || canvas.height !== backingHeight) {
-    canvas.width = backingWidth;
-    canvas.height = backingHeight;
-  }
+  configureProgrammeCanvasBackingStore(canvas, props.resolution);
+  const backingWidth = canvas.width;
+  const backingHeight = canvas.height;
 
   const context = canvas.getContext("2d");
   if (!context) {
@@ -221,7 +299,7 @@ async function paint(timestamp = performance.now()): Promise<void> {
     return;
   }
 
-  bufferContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+  bufferContext.setTransform(1, 0, 0, 1, 0, 0);
   await renderProgramCanvas(bufferContext, {
     activeOverlays: props.activeOverlays,
     activeStinger: props.activeStinger,
@@ -230,7 +308,6 @@ async function paint(timestamp = performance.now()): Promise<void> {
     overlayTransitionProgresses: getOverlayTransitionProgresses(),
     overlayTransitionStarts: getOverlayTransitionStarts(),
     resolution: props.resolution,
-    isRecording: props.isRecording,
     stingerProgress,
     stingerStartedAt,
     timestamp,
@@ -269,7 +346,10 @@ function exportPng(): void {
 }
 
 function captureCanvasStream(): MediaStream | undefined {
-  return canvasElement.value?.captureStream(props.resolution.fps);
+  const canvas = canvasElement.value;
+  return canvas
+    ? captureProgrammeCanvasStream(canvas, props.resolution)
+    : undefined;
 }
 
 async function toggleLocalRecording(): Promise<void> {
@@ -288,40 +368,44 @@ async function startLocalRecording(): Promise<void> {
   if (isStartingRecording.value || isLocalRecording.value) {
     return;
   }
+  recordingRecoveryWarning.value = "";
+  if (mediaBlockedReason.value) {
+    recordingUploadStatus.value = "failed";
+    recordingUploadError.value = mediaBlockedReason.value;
+    return;
+  }
   isStartingRecording.value = true;
   try {
     if (typeof MediaRecorder === "undefined") {
       return;
     }
 
-    const recordingStream = createRecordingStream();
-    if (!recordingStream) {
-      return;
-    }
+    recordingProgrammeOutput = await createProgrammeOutputStream();
+    const recordingStream = recordingProgrammeOutput.stream;
 
     const mimeType = getSupportedRecordingMimeType();
     recordedChunks = [];
     recordingChunkIndex = 0;
-    recordingBackup = await createRecordingBackup(mimeType || "video/webm").catch(
-      (error: unknown) => {
-        recordingUploadError.value = toErrorMessage(error);
-        return undefined;
-      },
-    );
-    if (await cleanupPendingRecordingStartAfterUnmount()) {
-      return;
-    }
-
     recordingUploadStatus.value = "idle";
     recordingUploadError.value = "";
     completedRecording.value = null;
-    recordingUpload = recordingBackup
-      ? await createRecordingUpload(mimeType).catch((error: unknown) => {
-          recordingUploadStatus.value = "local";
-          recordingUploadError.value = toErrorMessage(error);
-          return undefined;
-        })
-      : undefined;
+    const destinations = await initialiseRecordingDestinations({
+      createBackup: () => createRecordingBackup(mimeType || "video/webm"),
+      createUpload: () => createRecordingUpload(mimeType),
+      shouldContinue: () => !isComponentUnmounted,
+    });
+    recordingBackup = destinations.backup;
+    recordingUpload = destinations.upload;
+    activeRecordingBackupId.value = recordingBackup?.id ?? "";
+    recordingRecoveryWarning.value = destinations.recoveryWarning;
+    if (destinations.uploadWarning) {
+      recordingUploadStatus.value = "local";
+      recordingUploadError.value = destinations.uploadWarning;
+    }
+    if (destinations.cancelled) {
+      await cleanupPendingRecordingStart();
+      return;
+    }
     if (await cleanupPendingRecordingStartAfterUnmount()) {
       return;
     }
@@ -358,6 +442,7 @@ async function startLocalRecording(): Promise<void> {
     await deleteRecordingBackup(recordingBackup).catch((backupError: unknown) => {
       console.warn("Unable to delete recording backup", backupError);
     });
+    recordingRecoveryVersion.value += 1;
     finishLocalRecording();
   } finally {
     isStartingRecording.value = false;
@@ -378,6 +463,7 @@ async function cleanupPendingRecordingStart(): Promise<void> {
   await deleteRecordingBackup(recordingBackup).catch((error: unknown) => {
     console.warn("Unable to delete recording backup", error);
   });
+  recordingRecoveryVersion.value += 1;
   finishLocalRecording();
 }
 
@@ -411,10 +497,12 @@ function queueFinishRecordingArtifact(): void {
 async function finishRecordingArtifact(): Promise<void> {
   const mimeType = mediaRecorder?.mimeType || "video/webm";
   isFinishingRecording.value = true;
+  let handoffSucceeded = false;
   try {
     if (recordingUpload) {
       completedRecording.value = await completeRecordingUpload(recordingUpload);
       recordingUploadStatus.value = "ready";
+      handoffSucceeded = true;
     } else {
       const localBlob = await readRecordingFallbackBlob(mimeType);
       if (localBlob) {
@@ -430,9 +518,15 @@ async function finishRecordingArtifact(): Promise<void> {
       downloadRecording(localBlob);
     }
   } finally {
-    await deleteRecordingBackup(recordingBackup).catch((error: unknown) => {
-      console.warn("Unable to delete recording backup", error);
-    });
+    if (handoffSucceeded) {
+      await deleteRecordingBackup(recordingBackup).catch(async (error: unknown) => {
+        console.warn("Unable to delete recording backup after successful handoff", error);
+        await closeRecordingBackup(recordingBackup);
+      });
+    } else {
+      await closeRecordingBackup(recordingBackup);
+    }
+    recordingRecoveryVersion.value += 1;
     finishLocalRecording();
   }
 }
@@ -443,7 +537,7 @@ function downloadRecording(blob: Blob): void {
   link.download = `rawkode-studio-program-${new Date().toISOString().replace(/[:.]/g, "-")}.webm`;
   link.href = url;
   link.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
   if (recordingUploadStatus.value !== "failed") {
     recordingUploadStatus.value = "local";
   }
@@ -466,13 +560,13 @@ async function readRecordingFallbackBlob(mimeType: string): Promise<Blob | null>
 }
 
 function finishLocalRecording(): void {
-  for (const track of recordingOwnedTracks) {
-    track.stop();
-  }
-  recordingOwnedTracks = [];
+  const programmeOutput = recordingProgrammeOutput;
+  recordingProgrammeOutput = undefined;
+  void programmeOutput?.close();
   mediaRecorder = undefined;
   recordedChunks = [];
   recordingBackup = undefined;
+  activeRecordingBackupId.value = "";
   recordingFinishPromise = undefined;
   recordingUpload = undefined;
   isFinishingRecording.value = false;
@@ -570,10 +664,13 @@ async function uploadRecordingPart(
     sourceFormat: upload.sourceFormat,
     uploadId: upload.uploadId,
   });
-  const response = await fetch(`/api/studio/recording-upload?${params.toString()}`, {
-    method: "PUT",
-    body: part,
-  });
+  const response = await fetchWithTransientRetry(
+    `/api/studio/recording-upload?${params.toString()}`,
+    {
+      method: "PUT",
+      body: part,
+    },
+  );
   if (!response.ok) {
     throw new Error(await readErrorResponse(response));
   }
@@ -591,6 +688,9 @@ async function completeRecordingUpload(upload: RecordingUpload): Promise<Recordi
     throw new Error(upload.failedMessage);
   }
 
+  // Multipart completion is not idempotent: a retry could run after R2 completed
+  // but before the D1/ready-marker handoff returned. Keep the browser backup
+  // instead of retrying a completion whose server-side outcome is ambiguous.
   const response = await fetch("/api/studio/recording-upload", {
     method: "POST",
     headers: {
@@ -631,8 +731,13 @@ async function toggleLivePublishing(): Promise<void> {
   if (liveButtonDisabled.value) {
     return;
   }
+  if (requiresServerReset.value) {
+    await resetLivePublishing();
+    return;
+  }
   if (
     livePublishStatus.value === "live" ||
+    livePublishStatus.value === "degraded" ||
     livePublishStatus.value === "starting" ||
     livePublishStatus.value === "confirming"
   ) {
@@ -647,48 +752,44 @@ async function startLivePublishing(): Promise<void> {
   if (!props.sessionId || isStartingLivePublish.value) {
     return;
   }
+  if (mediaBlockedReason.value) {
+    livePublishStatus.value = "failed";
+    livePublishError.value = mediaBlockedReason.value;
+    return;
+  }
+  if (props.streamEnvironment === "prod" && !props.prodConfirmed) {
+    livePublishStatus.value = "failed";
+    livePublishError.value = "Type PROD in the control room to arm production streaming.";
+    return;
+  }
 
   isStartingLivePublish.value = true;
   const publishGeneration = livePublishGeneration + 1;
   livePublishGeneration = publishGeneration;
   livePublishStatus.value = "starting";
   livePublishError.value = "";
+  livePublishWarning.value = "";
+  requiresServerReset.value = false;
+  whipHealthFailureGeneration = undefined;
   const streamToken = crypto.randomUUID();
   liveStreamToken = streamToken;
   try {
+    const programmeOutput = await createProgrammeOutputStream();
+    liveProgrammeOutput = programmeOutput;
     const start = await postStreamAction<{
       liveInputId: string;
       playbackUrl: string;
       publishUrl: string;
+      recovered: boolean;
       streamStatus: "starting";
       streamToken: string;
     }>("start", { streamToken });
     liveStreamToken = streamToken;
     liveServerStreamStarted = true;
-    if (publishGeneration !== livePublishGeneration) {
-      await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
-      liveServerStreamStarted = false;
-      if (liveStreamToken === streamToken) {
-        liveStreamToken = undefined;
-      }
-      return;
+    if (props.streamEnvironment !== "prod") {
+      testPlaybackUrl.value = start.playbackUrl;
+      testPreviewStatus.value = "starting";
     }
-    const programmeStream = createProgrammeOutputStream((tracks) => {
-      liveOwnedTracks = tracks;
-    });
-    if (!programmeStream) {
-      throw new Error("Programme canvas stream is not available.");
-    }
-    const abortController = new AbortController();
-    livePublishAbortController = abortController;
-    livePublishSession = await startWhipPublishing({
-      publishUrl: start.publishUrl,
-      signal: abortController.signal,
-      stream: programmeStream,
-    });
-    ownsLivePublish = true;
-    livePublishStatus.value = "confirming";
-    await confirmLivePublishing(publishGeneration, streamToken);
     if (publishGeneration !== livePublishGeneration) {
       await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
       liveServerStreamStarted = false;
@@ -698,7 +799,34 @@ async function startLivePublishing(): Promise<void> {
       await cleanupLivePublishing();
       return;
     }
+    const abortController = new AbortController();
+    livePublishAbortController = abortController;
+    livePublishSession = await startWhipPublishing({
+      publishUrl: start.publishUrl,
+      signal: abortController.signal,
+      stream: programmeOutput.stream,
+    });
+    ownsLivePublish = true;
+    watchWhipConnectionState(livePublishSession, publishGeneration);
+    livePublishStatus.value = "confirming";
+    const confirmation = await confirmLivePublishing(publishGeneration, streamToken);
+    if (publishGeneration !== livePublishGeneration) {
+      await postStreamAction("stop", { keepalive: true, streamToken }).catch(() => undefined);
+      liveServerStreamStarted = false;
+      if (liveStreamToken === streamToken) {
+        liveStreamToken = undefined;
+      }
+      await cleanupLivePublishing();
+      return;
+    }
+    livePublishConfirmed = true;
     livePublishStatus.value = "live";
+    if (props.streamEnvironment === "prod" && !confirmation.notified) {
+      livePublishWarning.value = "Prod is live, but the public alert was not sent.";
+    }
+    if (props.streamEnvironment !== "prod") {
+      await startUnlistedTestPreview(start.playbackUrl, publishGeneration);
+    }
   } catch (error) {
     if (publishGeneration !== livePublishGeneration) {
       await cleanupLivePublishing();
@@ -707,11 +835,18 @@ async function startLivePublishing(): Promise<void> {
     livePublishStatus.value = "failed";
     livePublishError.value = toErrorMessage(error);
     if (liveServerStreamStarted) {
-      await postStreamAction("stop", { streamToken: liveStreamToken }).catch(() => undefined);
-      liveServerStreamStarted = false;
+      try {
+        await postStreamAction("stop", { streamToken: liveStreamToken });
+        liveServerStreamStarted = false;
+        liveStreamToken = undefined;
+      } catch {
+        requiresServerReset.value = true;
+      }
+    } else {
       liveStreamToken = undefined;
     }
     await cleanupLivePublishing();
+    resetProdConfirmation();
   } finally {
     isStartingLivePublish.value = false;
   }
@@ -732,28 +867,67 @@ async function stopLivePublishing(): Promise<void> {
     await stopPromise;
     liveServerStreamStarted = false;
     liveStreamToken = undefined;
+    requiresServerReset.value = false;
+    livePublishStatus.value = "ended";
+    resetProdConfirmation();
+  } catch (error) {
+    livePublishStatus.value = "failed";
+    livePublishError.value = toErrorMessage(error);
+    requiresServerReset.value = true;
+    resetProdConfirmation();
+  }
+}
+
+async function stopLivePublishingForMediaLoss(reason: string): Promise<void> {
+  if (!hasActiveLivePublish.value) {
+    return;
+  }
+  await stopLivePublishing();
+  if (livePublishStatus.value === "ended" && mediaBlockedReason.value) {
+    livePublishStatus.value = "failed";
+    livePublishError.value = `Publishing stopped: ${reason}`;
+  }
+}
+
+async function resetLivePublishing(): Promise<void> {
+  if (!props.sessionId || livePublishStatus.value === "stopping") {
+    return;
+  }
+
+  livePublishStatus.value = "stopping";
+  livePublishError.value = "";
+  livePublishGeneration += 1;
+  const streamToken = liveStreamToken;
+  await cleanupLivePublishing();
+  try {
+    await postStreamAction("reset", { streamToken });
+    liveServerStreamStarted = false;
+    liveStreamToken = undefined;
+    requiresServerReset.value = false;
     livePublishStatus.value = "ended";
   } catch (error) {
     livePublishStatus.value = "failed";
     livePublishError.value = toErrorMessage(error);
+    requiresServerReset.value = true;
+  } finally {
+    resetProdConfirmation();
   }
 }
 
 async function confirmLivePublishing(
   publishGeneration: number,
   streamToken: string,
-): Promise<void> {
+): Promise<{ notified: boolean; streamStatus: "live" }> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 10; attempt += 1) {
     if (publishGeneration !== livePublishGeneration) {
       throw new Error("Live publishing stopped.");
     }
     try {
-      await postStreamAction<{ notified: boolean; streamStatus: "live" }>(
+      return await postStreamAction<{ notified: boolean; streamStatus: "live" }>(
         "confirm",
         { streamToken },
       );
-      return;
     } catch (error) {
       lastError = error;
       if (!isStreamNotConnectedYet(error)) {
@@ -767,18 +941,219 @@ async function confirmLivePublishing(
     : new Error("Cloudflare Stream live input did not connect.");
 }
 
+async function retryLiveNotification(): Promise<void> {
+  if (
+    props.streamEnvironment !== "prod" ||
+    livePublishStatus.value !== "live" ||
+    isRetryingLiveNotification.value
+  ) {
+    return;
+  }
+
+  isRetryingLiveNotification.value = true;
+  try {
+    const confirmation = await postStreamAction<{
+      notified: boolean;
+      streamStatus: "live";
+    }>("confirm", { streamToken: liveStreamToken });
+    livePublishWarning.value = confirmation.notified
+      ? ""
+      : "The public alert was not sent. Retry when notification delivery is available.";
+  } catch (error) {
+    livePublishWarning.value = `The public alert retry failed: ${toErrorMessage(error)}`;
+  } finally {
+    isRetryingLiveNotification.value = false;
+  }
+}
+
+async function startUnlistedTestPreview(
+  playbackUrl: string,
+  publishGeneration: number,
+): Promise<void> {
+  if (
+    props.streamEnvironment === "prod" ||
+    publishGeneration !== livePublishGeneration
+  ) {
+    return;
+  }
+
+  await cleanupTestPreview(false);
+  testPlaybackUrl.value = playbackUrl;
+  testPreviewStatus.value = "starting";
+  testPreviewError.value = "";
+  const abortController = new AbortController();
+  testPreviewAbortController = abortController;
+
+  try {
+    const previewSession = await startWhepPlayback({
+      playbackUrl,
+      signal: abortController.signal,
+    });
+    if (publishGeneration !== livePublishGeneration) {
+      await previewSession.close();
+      return;
+    }
+
+    testPreviewSession = previewSession;
+    removeTestPreviewConnectionStateListener =
+      previewSession.onConnectionStateChange((state) => {
+        const health = getWebRtcConnectionHealth(state);
+        if (health === "healthy") {
+          testPreviewStatus.value = "playing";
+          testPreviewError.value = "";
+        } else if (health === "degraded") {
+          testPreviewStatus.value = "degraded";
+        } else if (health === "failed") {
+          testPreviewStatus.value = "failed";
+          testPreviewError.value = "Test playback connection failed.";
+        } else {
+          testPreviewStatus.value = "starting";
+        }
+      });
+
+    await nextTick();
+    const previewElement = testPreviewElement.value;
+    if (previewElement) {
+      previewElement.srcObject = previewSession.stream;
+      await previewElement.play().catch(() => undefined);
+    }
+  } catch (error) {
+    if (
+      publishGeneration === livePublishGeneration &&
+      !abortController.signal.aborted
+    ) {
+      testPreviewStatus.value = "failed";
+      testPreviewError.value = toErrorMessage(error);
+    }
+  }
+}
+
+async function cleanupTestPreview(clearPlaybackUrl = true): Promise<void> {
+  removeTestPreviewConnectionStateListener?.();
+  removeTestPreviewConnectionStateListener = undefined;
+  const abortController = testPreviewAbortController;
+  testPreviewAbortController = undefined;
+  abortController?.abort();
+  const previewSession = testPreviewSession;
+  testPreviewSession = undefined;
+  await previewSession?.close().catch(() => undefined);
+  if (testPreviewElement.value) {
+    testPreviewElement.value.pause();
+    testPreviewElement.value.srcObject = null;
+  }
+  if (clearPlaybackUrl) {
+    testPlaybackUrl.value = "";
+    testPreviewStatus.value = "idle";
+    testPreviewError.value = "";
+  }
+}
+
 async function cleanupLivePublishing(): Promise<void> {
+  clearWhipDisconnectedTimer();
+  removeWhipConnectionStateListener?.();
+  removeWhipConnectionStateListener = undefined;
   const abortController = livePublishAbortController;
   livePublishAbortController = undefined;
   abortController?.abort();
   const publishSession = livePublishSession;
   livePublishSession = undefined;
   ownsLivePublish = false;
+  livePublishConfirmed = false;
+  livePublishWarning.value = "";
+  isRetryingLiveNotification.value = false;
   await publishSession?.close().catch(() => undefined);
-  for (const track of liveOwnedTracks) {
-    track.stop();
+  const programmeOutput = liveProgrammeOutput;
+  liveProgrammeOutput = undefined;
+  await programmeOutput?.close().catch(() => undefined);
+  await cleanupTestPreview();
+}
+
+function watchWhipConnectionState(
+  publishSession: WhipPublishSession,
+  publishGeneration: number,
+): void {
+  removeWhipConnectionStateListener?.();
+  removeWhipConnectionStateListener = publishSession.onConnectionStateChange((state) => {
+    if (
+      publishGeneration !== livePublishGeneration ||
+      publishSession !== livePublishSession
+    ) {
+      return;
+    }
+
+    const health = getWebRtcConnectionHealth(state);
+    if (health === "healthy") {
+      clearWhipDisconnectedTimer();
+      if (livePublishStatus.value === "degraded") {
+        livePublishStatus.value = livePublishConfirmed ? "live" : "confirming";
+        livePublishError.value = "";
+      }
+      return;
+    }
+    if (health === "degraded") {
+      livePublishStatus.value = "degraded";
+      if (whipDisconnectedTimer === undefined) {
+        whipDisconnectedTimer = window.setTimeout(() => {
+          whipDisconnectedTimer = undefined;
+          void failWhipPublishing(
+            publishGeneration,
+            "Publisher connection did not recover. Reset complete; retry when ready.",
+          );
+        }, 6000);
+      }
+      return;
+    }
+    if (health === "failed") {
+      clearWhipDisconnectedTimer();
+      void failWhipPublishing(
+        publishGeneration,
+        "Publisher connection failed. Reset complete; retry when ready.",
+      );
+    }
+  });
+}
+
+function clearWhipDisconnectedTimer(): void {
+  if (whipDisconnectedTimer !== undefined) {
+    window.clearTimeout(whipDisconnectedTimer);
+    whipDisconnectedTimer = undefined;
   }
-  liveOwnedTracks = [];
+}
+
+async function failWhipPublishing(
+  publishGeneration: number,
+  message: string,
+): Promise<void> {
+  if (
+    publishGeneration !== livePublishGeneration ||
+    whipHealthFailureGeneration === publishGeneration
+  ) {
+    return;
+  }
+
+  whipHealthFailureGeneration = publishGeneration;
+  livePublishGeneration += 1;
+  const streamToken = liveStreamToken;
+  livePublishStatus.value = "failed";
+  livePublishError.value = message;
+  requiresServerReset.value = true;
+  await cleanupLivePublishing();
+  try {
+    await postStreamAction("reset", { streamToken });
+    liveServerStreamStarted = false;
+    liveStreamToken = undefined;
+    requiresServerReset.value = false;
+  } catch (error) {
+    livePublishError.value = `${message} Server reset failed: ${toErrorMessage(error)}`;
+  } finally {
+    resetProdConfirmation();
+  }
+}
+
+function resetProdConfirmation(): void {
+  if (props.streamEnvironment === "prod") {
+    emit("prod-confirmation-reset");
+  }
 }
 
 async function delay(milliseconds: number): Promise<void> {
@@ -786,7 +1161,7 @@ async function delay(milliseconds: number): Promise<void> {
 }
 
 async function postStreamAction<T = unknown>(
-  action: "confirm" | "start" | "stop",
+  action: "confirm" | "reset" | "start" | "stop",
   options: { keepalive?: boolean; streamToken?: string } = {},
 ): Promise<T> {
   const response = await fetch("/api/studio/stream", {
@@ -836,27 +1211,18 @@ function isStreamNotConnectedYet(error: unknown): boolean {
     error.message.includes("not connected yet");
 }
 
-function createRecordingStream(): MediaStream | undefined {
-  return createProgrammeOutputStream((tracks) => {
-    recordingOwnedTracks = tracks;
-  });
-}
-
-function createProgrammeOutputStream(
-  setOwnedTracks: (tracks: MediaStreamTrack[]) => void,
-): MediaStream | undefined {
+async function createProgrammeOutputStream(): Promise<ProgrammeOutput> {
   const canvasStream = captureCanvasStream();
   if (!canvasStream) {
-    return undefined;
+    throw new Error("Programme canvas stream is not available.");
   }
 
-  const audioTracks = [...(props.mediaStreams?.values() ?? [])]
-    .flatMap((stream) => stream.getAudioTracks())
-    .filter((track) => track.readyState === "live")
-    .map((track) => track.clone());
-  setOwnedTracks([...canvasStream.getTracks(), ...audioTracks]);
+  const sourceIds = props.programmeSourceIds ?? getProgrammeMediaSourceIds(props.layers);
+  const audioStreams = sourceIds
+    .map((sourceId) => props.mediaStreams?.get(sourceId))
+    .filter((stream): stream is MediaStream => Boolean(stream));
 
-  return new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
+  return await createProgrammeOutput(canvasStream, audioStreams);
 }
 
 function getRecordingSourceFormat(_mimeType: string): "webm" {
@@ -875,11 +1241,11 @@ function getSupportedRecordingMimeType(): string {
 
 async function readErrorResponse(response: Response): Promise<string> {
   const body = await response.json().catch(() => null) as { error?: string } | null;
-  return body?.error ?? `Studio recording request failed with ${response.status}`;
+  return body?.error ?? `Studio request failed with ${response.status}`;
 }
 
 function toErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Studio recording request failed.";
+  return error instanceof Error ? error.message : "Studio request failed.";
 }
 
 function onPointerDown(event: PointerEvent): void {
@@ -1015,6 +1381,22 @@ watch(
     renderLoop.queuePaint();
   },
   { immediate: true },
+);
+
+watch(
+  () => props.publishBlockedReason,
+  (reason) => {
+    const blockedReason = reason?.trim();
+    if (!blockedReason) {
+      return;
+    }
+    if (isLocalRecording.value) {
+      stopLocalRecording();
+    }
+    if (hasActiveLivePublish.value) {
+      void stopLivePublishingForMediaLoss(blockedReason);
+    }
+  },
 );
 
 watch(
@@ -1258,6 +1640,7 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
           :class="{ active: livePublishStatus === 'live' }"
           type="button"
           :disabled="liveButtonDisabled"
+          :title="liveButtonDisabled ? mediaBlockedReason : undefined"
           @click="toggleLivePublishing"
         >
           {{ liveButtonLabel }}
@@ -1265,15 +1648,32 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         <span
           v-if="liveStatusText"
           class="recording-upload-state"
-          :class="{ error: livePublishStatus === 'failed' }"
+          :class="{ error: livePublishStatus === 'failed' || Boolean(mediaBlockedReason) }"
         >
           {{ liveStatusText }}
         </span>
+        <span
+          v-if="livePublishWarning"
+          class="recording-upload-state error"
+          aria-live="polite"
+        >
+          {{ livePublishWarning }}
+        </span>
+        <button
+          v-if="livePublishWarning && streamEnvironment === 'prod'"
+          class="secondary-button compact"
+          type="button"
+          :disabled="isRetryingLiveNotification"
+          @click="retryLiveNotification"
+        >
+          {{ isRetryingLiveNotification ? "Retrying alert" : "Retry alert" }}
+        </button>
         <button
           class="record-button compact"
           :class="{ active: isLocalRecording }"
           type="button"
-          :disabled="!canRecordLocally || isFinishingRecording || isStartingRecording"
+          :disabled="recordButtonDisabled"
+          :title="recordButtonDisabled ? mediaBlockedReason : undefined"
           @click="toggleLocalRecording"
         >
           {{
@@ -1293,6 +1693,14 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         >
           {{ recordingStatusText }}
         </span>
+        <span
+          v-if="recordingRecoveryWarning"
+          class="recording-upload-state warning"
+          :title="recordingRecoveryWarning"
+          aria-live="polite"
+        >
+          {{ recordingRecoveryWarning }}
+        </span>
         <a
           v-if="recordingStatusHref"
           class="secondary-button compact recording-status-link"
@@ -1308,6 +1716,11 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         </div>
       </div>
     </div>
+    <RecordingRecovery
+      v-if="canPublishLive"
+      :active-recording-id="activeRecordingBackupId"
+      :refresh-version="recordingRecoveryVersion"
+    />
     <div ref="frameElement" class="canvas-frame">
       <canvas
         ref="canvasElement"
@@ -1318,6 +1731,79 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         @pointerup="onPointerUp"
         @pointercancel="onPointerUp"
       />
+      <aside
+        v-if="testPlaybackUrl && streamEnvironment !== 'prod'"
+        class="test-playback-preview"
+        aria-label="Unlisted Test playback"
+      >
+        <div class="test-playback-preview-header">
+          <strong>Unlisted Test playback</strong>
+          <span
+            :class="{ error: testPreviewStatus === 'failed' }"
+            aria-live="polite"
+          >
+            {{ testPreviewStatusText }}
+          </span>
+        </div>
+        <video
+          ref="testPreviewElement"
+          autoplay
+          muted
+          playsinline
+        />
+      </aside>
     </div>
   </section>
 </template>
+
+<style scoped>
+.canvas-frame {
+  position: relative;
+}
+
+.test-playback-preview {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: min(320px, 36%);
+  overflow: hidden;
+  border: 1px solid rgba(143, 243, 233, 0.55);
+  border-radius: 8px;
+  background: #080b10;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.48);
+}
+
+.test-playback-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 9px;
+  color: #d8f8f4;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.test-playback-preview-header span {
+  color: #8ff3e9;
+}
+
+.test-playback-preview-header span.error {
+  color: #ffb0a4;
+}
+
+.test-playback-preview video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  object-fit: contain;
+}
+
+@media (max-width: 900px) {
+  .test-playback-preview {
+    width: min(240px, 48%);
+  }
+}
+</style>

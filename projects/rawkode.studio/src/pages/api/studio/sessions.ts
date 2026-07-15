@@ -19,6 +19,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 	}
 
 	const body = (await request.json().catch(() => null)) as {
+		prodConfirmation?: string;
 		show?: string;
 		showId?: string;
 		startsAt?: string;
@@ -32,6 +33,7 @@ export const POST: APIRoute = async ({ locals, request }) => {
 
 	try {
 		const result = await createStudioSession(env as StudioEnv, locals.user, {
+			prodConfirmation: body.prodConfirmation,
 			show: body.show,
 			showId: body.showId,
 			startsAt: body.startsAt,

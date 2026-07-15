@@ -1,25 +1,17 @@
 ---
 import "../styles.css";
-import { env } from "cloudflare:workers";
-import { userIsConfiguredStudioOperator } from "../server/studio";
 
 interface Props {
-	active?: "dashboard" | "guest" | "host" | "producer" | "recordings";
+	active?: "control" | "dashboard" | "guest" | "recordings";
 	bodyClass?: string;
+	showChrome?: boolean;
 	title: string;
 }
 
-const { active = "dashboard", bodyClass = "", title } = Astro.props;
+const { active = "dashboard", bodyClass = "", showChrome = true, title } = Astro.props;
 const user = Astro.locals.user;
-const isOperator = user ? userIsConfiguredStudioOperator(env, user) : false;
 const navItems = [
 	{ id: "dashboard", href: "/", label: "Dashboard" },
-	...(isOperator
-		? [
-				{ id: "host", href: "/host", label: "Host" },
-				{ id: "producer", href: "/producer", label: "Producer" },
-			]
-		: []),
 ];
 ---
 
@@ -32,7 +24,7 @@ const navItems = [
 	</head>
 	<body class={bodyClass}>
 		{
-			user ? (
+			showChrome && user ? (
 				<header class="studio-site-header">
 					<a class="studio-site-brand" href="/">
 						<span class="brand-mark">RK</span>

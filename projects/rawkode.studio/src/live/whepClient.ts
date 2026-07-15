@@ -3,20 +3,21 @@ import {
 	waitForIceGathering,
 } from "./webrtcSession";
 
-export interface WhipPublishSession {
+export interface WhepPlaybackSession {
 	close: () => Promise<void>;
 	connectionState: () => RTCPeerConnectionState;
 	onConnectionStateChange: (
 		listener: (state: RTCPeerConnectionState) => void,
 	) => () => void;
+	stream: MediaStream;
 }
 
-export async function startWhipPublishing(input: {
-	publishUrl: string;
+export async function startWhepPlayback(input: {
+	playbackUrl: string;
 	signal?: AbortSignal;
-	stream: MediaStream;
-}): Promise<WhipPublishSession> {
+}): Promise<WhepPlaybackSession> {
 	const peerConnection = new RTCPeerConnection();
+	const stream = new MediaStream();
 	let resourceUrl: string | null = null;
 	let deletedResourceUrl: string | null = null;
 	let closed = false;
@@ -28,7 +29,14 @@ export async function startWhipPublishing(input: {
 			listener(peerConnection.connectionState);
 		}
 	};
+	const handleTrack = (event: RTCTrackEvent) => {
+		if (!stream.getTracks().some((track) => track.id === event.track.id)) {
+			stream.addTrack(event.track);
+		}
+	};
 	peerConnection.addEventListener("connectionstatechange", emitConnectionState);
+	peerConnection.addEventListener("track", handleTrack);
+
 	const close = async () => {
 		input.signal?.removeEventListener("abort", handleAbort);
 		if (!closed) {
@@ -37,8 +45,12 @@ export async function startWhipPublishing(input: {
 				"connectionstatechange",
 				emitConnectionState,
 			);
+			peerConnection.removeEventListener("track", handleTrack);
 			connectionStateListeners.clear();
 			peerConnection.close();
+			for (const track of stream.getTracks()) {
+				track.stop();
+			}
 		}
 		if (resourceUrl && deletedResourceUrl !== resourceUrl) {
 			deletedResourceUrl = resourceUrl;
@@ -49,24 +61,23 @@ export async function startWhipPublishing(input: {
 		void close();
 	}
 	input.signal?.addEventListener("abort", handleAbort, { once: true });
-	for (const track of input.stream.getTracks()) {
-		peerConnection.addTrack(track, input.stream);
-	}
 
 	try {
 		if (input.signal?.aborted) {
-			throw new Error("WHIP publish stopped.");
+			throw new Error("WHEP playback stopped.");
 		}
+		peerConnection.addTransceiver("audio", { direction: "recvonly" });
+		peerConnection.addTransceiver("video", { direction: "recvonly" });
 		const offer = await peerConnection.createOffer();
 		await peerConnection.setLocalDescription(offer);
 		await waitForIceGathering(peerConnection, input.signal);
 
 		const localDescription = peerConnection.localDescription;
 		if (!localDescription?.sdp) {
-			throw new Error("Unable to create WHIP offer.");
+			throw new Error("Unable to create WHEP offer.");
 		}
 
-		const response = await fetch(input.publishUrl, {
+		const response = await fetch(input.playbackUrl, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/sdp",
@@ -75,9 +86,9 @@ export async function startWhipPublishing(input: {
 			signal: input.signal,
 		});
 		if (!response.ok) {
-			throw new Error(`WHIP publish failed with ${response.status}.`);
+			throw new Error(`WHEP playback failed with ${response.status}.`);
 		}
-		resourceUrl = resolveWebRtcSessionResourceUrl(input.publishUrl, response);
+		resourceUrl = resolveWebRtcSessionResourceUrl(input.playbackUrl, response);
 
 		const answer = await response.text();
 		await peerConnection.setRemoteDescription({
@@ -85,7 +96,7 @@ export async function startWhipPublishing(input: {
 			sdp: answer,
 		});
 		if (input.signal?.aborted) {
-			throw new Error("WHIP publish stopped.");
+			throw new Error("WHEP playback stopped.");
 		}
 	} catch (error) {
 		await close();
@@ -99,8 +110,7 @@ export async function startWhipPublishing(input: {
 			listener(peerConnection.connectionState);
 			return () => connectionStateListeners.delete(listener);
 		},
-		close: async () => {
-			await close();
-		},
+		close,
+		stream,
 	};
 }

@@ -1,11 +1,10 @@
 ---
-import App from "../../../App.vue";
+import GuestRoom from "../../../components/GuestRoom.vue";
 import StudioLayout from "../../../layouts/StudioLayout.astro";
 import {
 	getStudioSession,
 	resolveStudioInvite,
 	userCanManageStudioSession,
-	userCanJoinStudioSessionAsGuest,
 } from "../../../server/studio";
 import { env } from "cloudflare:workers";
 
@@ -23,34 +22,38 @@ const resolvedInvite = inviteToken
 	? await resolveStudioInvite(env, inviteToken, Astro.locals.user)
 	: null;
 const canManage = await userCanManageStudioSession(env, session, Astro.locals.user);
-const canJoinAsEventParticipant = userCanJoinStudioSessionAsGuest(session, Astro.locals.user);
-if (!canManage && !canJoinAsEventParticipant && resolvedInvite?.session.id !== session.id) {
+if (!canManage && resolvedInvite?.session.id !== session.id) {
 	return new Response("Guest invite token is required", { status: 403 });
 }
 const providerStatus = session.realtimeKitMeetingId ? "RealtimeKit ready" : "Meeting pending";
 ---
 
 <StudioLayout
-	title={`Guest ${session.title} | Rawkode Studio`}
+	title={`${session.title} | Guest room`}
 	active="guest"
-	bodyClass="studio-canvas-page"
+	bodyClass="guest-room-page"
+	showChrome={false}
 >
 	<section
-		class="studio-canvas-shell"
-		aria-label="Guest studio room"
+		class="guest-room-shell"
+		aria-label="RealtimeKit guest room"
+		data-guest-room
 		data-meeting-id={session.realtimeKitMeetingId ?? ""}
 		data-session-id={session.id}
 	>
-		<App
+		<header class="guest-room-header">
+			<div>
+				<p class="eyebrow">Rawkode Studio guest room</p>
+				<h1>{session.title}</h1>
+				<p>Join the call, check your camera and microphone, then leave from this page when the show ends.</p>
+			</div>
+			<div class="guest-room-status" aria-label="Room status">
+				<span>{providerStatus}</span>
+				<span>{session.status}</span>
+			</div>
+		</header>
+		<GuestRoom
 			client:only="vue"
-			inviteToken={inviteToken ?? undefined}
-			providerStatus={providerStatus}
-			recordingStatus={session.recordingStatus}
-			roomRole="Guest"
-			sessionId={session.id}
-			sessionTitle={session.title}
-			streamEnvironment={session.streamEnvironment}
-			streamStatus={session.streamStatus}
 		/>
 	</section>
 </StudioLayout>

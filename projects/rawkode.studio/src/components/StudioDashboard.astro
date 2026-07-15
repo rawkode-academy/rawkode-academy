@@ -50,21 +50,21 @@ function eventState(event: StudioEventSummary): string {
 				<div class="dashboard-panel dashboard-primary">
 					<div>
 						<p class="eyebrow">
-							{dashboard.isOperator ? "Host / Producer" : "Participant"}
+							{dashboard.isOperator ? "Private operator appliance" : "Guest access"}
 						</p>
 						<h1>
 							{
 								dashboard.isOperator
-									? "Upcoming events"
-									: "Your events"
+									? "Studio control rooms"
+									: "Your rooms"
 							}
 						</h1>
 					</div>
 					<p>
 							{
 								dashboard.isOperator
-									? "Create RealtimeKit green rooms and choose whether the later go-live is a test or prod stream."
-									: "Join active Studio rooms for events where your GitHub handle is listed."
+									? "Rehearse with an unlisted operator-only Test URL, then create a separate explicitly armed Prod room when the show is ready."
+									: "Join an active RealtimeKit room from your invite. Production controls remain private to the operator."
 							}
 					</p>
 				</div>
@@ -136,22 +136,40 @@ function eventState(event: StudioEventSummary): string {
 								<div class="session-actions">
 									{
 										dashboard.isOperator ? (
-											<form method="POST" action={actions.createSession}>
+											<form
+												class="create-room-form"
+												method="POST"
+												action={actions.createSession}
+												data-create-room-form
+											>
 												<input name="videoId" type="hidden" value={event.id} />
 												<label class="stream-environment-field">
-													<span>Stream mode</span>
-													<select name="streamEnvironment">
+													<span>Room mode</span>
+													<select name="streamEnvironment" data-stream-environment>
 														<option value="test" selected>Test</option>
-														<option value="prod">Prod</option>
+														<option value="prod">Prod (public)</option>
 													</select>
 												</label>
-												<button class="button primary" type="submit">
-													Create room
+												<p class="test-mode-note" data-test-mode-note>
+											Unlisted rehearsal. The URL is returned only to the signed-in operator and is not publicly advertised; it is not cryptographically signed.
+												</p>
+												<label class="prod-confirmation-field" data-prod-confirmation-field hidden>
+													<span>Type <strong>PROD</strong> to arm public production</span>
+													<input
+														autocomplete="off"
+														disabled
+														name="prodConfirmation"
+														spellcheck="false"
+														data-prod-confirmation
+													/>
+												</label>
+												<button class="button primary" type="submit" data-create-room-button>
+											Create Unlisted Test room
 												</button>
 											</form>
-										) : activeSessions.length === 0 ? (
-											<span class="session-muted">No active room</span>
-										) : null
+										) : (
+											<span class="session-muted">Join from your guest invite</span>
+										)
 									}
 								</div>
 								{
@@ -164,15 +182,14 @@ function eventState(event: StudioEventSummary): string {
 														<span>{session.status}</span>
 														<span>{session.streamEnvironment}</span>
 														<span>{session.streamStatus}</span>
-													</div>
-													<div class="session-actions">
-														{
-															dashboard.isOperator ? (
-																<>
-																	<a class="button" href={`/studio/${session.id}/host`}>Host</a>
-																	<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
-																	<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
-																	<form method="POST" action={actions.createInvite}>
+											</div>
+											<div class="session-actions">
+												{
+													dashboard.isOperator ? (
+														<>
+															<a class="button primary" href={`/studio/${session.id}/control`}>Control room</a>
+															<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+															<form method="POST" action={actions.createInvite}>
 																		<input name="sessionId" type="hidden" value={session.id} />
 																		<button class="button" type="submit">Guest invite</button>
 																	</form>
@@ -186,9 +203,7 @@ function eventState(event: StudioEventSummary): string {
 																	}
 																</>
 															) : isStudioSessionActive(session) ? (
-																<a class="button primary" href={`/studio/${session.id}/guest`}>
-																	Join room
-																</a>
+																<span class="session-muted">Guest invite required</span>
 															) : null
 														}
 													</div>
@@ -205,3 +220,38 @@ function eventState(event: StudioEventSummary): string {
 		</>
 	)
 }
+
+<script is:inline>
+	for (const form of document.querySelectorAll("[data-create-room-form]")) {
+		const environment = form.querySelector("[data-stream-environment]");
+		const testNote = form.querySelector("[data-test-mode-note]");
+		const confirmationField = form.querySelector("[data-prod-confirmation-field]");
+		const confirmation = form.querySelector("[data-prod-confirmation]");
+		const button = form.querySelector("[data-create-room-button]");
+
+		if (!environment || !confirmationField || !confirmation || !button) continue;
+
+		const syncMode = () => {
+			const isProd = environment.value === "prod";
+			confirmationField.hidden = !isProd;
+			confirmation.disabled = !isProd;
+			confirmation.required = isProd;
+			if (!isProd) {
+				confirmation.value = "";
+				confirmation.setCustomValidity("");
+			}
+			if (testNote) testNote.hidden = isProd;
+			button.textContent = isProd ? "Create public Prod room" : "Create Unlisted Test room";
+		};
+
+		environment.addEventListener("change", syncMode);
+		confirmation.addEventListener("input", () => confirmation.setCustomValidity(""));
+		form.addEventListener("submit", (event) => {
+			if (environment.value !== "prod" || confirmation.value === "PROD") return;
+			event.preventDefault();
+			confirmation.setCustomValidity("Type PROD exactly to create a public production room.");
+			confirmation.reportValidity();
+		});
+		syncMode();
+	}
+</script>

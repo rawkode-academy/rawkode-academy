@@ -8,7 +8,7 @@ import { env } from "cloudflare:workers";
 const createSessionResult = Astro.getActionResult(actions.createSession);
 if (createSessionResult?.data?.sessionId) {
 	return Astro.redirect(
-		`/studio/${encodeURIComponent(createSessionResult.data.sessionId)}/host`,
+		`/studio/${encodeURIComponent(createSessionResult.data.sessionId)}/control`,
 		303,
 	);
 }

@@ -4,6 +4,10 @@ import {
 	getStudioUpcomingContentEvents,
 	type StudioContentVideo,
 } from "./content";
+import {
+	cloudflareStreamLiveInputIsActive,
+	getCloudflareStreamConfig,
+} from "./cloudflare-stream";
 import type { RealtimeKitMeeting } from "./realtimekit";
 
 export type StudioRole = "guest" | "host" | "producer" | "program";
@@ -593,7 +597,7 @@ export function userIsConfiguredStudioOperator(
 	env: StudioEnv,
 	user: StudioUser,
 ): boolean {
-	const allowed = (env.STUDIO_OPERATOR_GITHUB_HANDLES ?? "rawkode")
+	const allowed = (env.STUDIO_OPERATOR_GITHUB_HANDLES ?? "")
 		.split(",")
 		.map((handle) => handle.trim().toLowerCase())
 		.filter(Boolean);
@@ -673,13 +677,6 @@ function sortSessionsForEvent(
 	);
 }
 
-function contentEventIncludesUser(event: StudioContentVideo, user: StudioUser): boolean {
-	return [
-		...(event.show?.hosts ?? []),
-		...event.guests,
-	].some((person) => personMatchesUser(person, user));
-}
-
 async function loadContentEvents(
 	env: StudioEnv | undefined,
 	options: { upcomingOnly?: boolean } = {},
@@ -705,10 +702,10 @@ export async function listStudioSessionsForUser(
 	env: StudioEnv | undefined,
 	user: StudioUser,
 ): Promise<StudioSessionRecord[]> {
+	if (!env || !userIsConfiguredStudioOperator(env, user)) return [];
 	const db = getDb(env);
 	if (!db) {
-		const session = fallbackSession();
-		return userOwnsStudioSession(session, user) ? [session] : [];
+		return [fallbackSession()];
 	}
 
 	let results: StudioSessionRow[] | undefined;
@@ -830,71 +827,65 @@ export async function getPublicStudioLiveState(
 ): Promise<StudioPublicLiveState> {
 	const db = getDb(env);
 	if (!db || !videoSlug.trim()) {
-		return {
-			live: false,
-			playbackUrl: null,
-			session: null,
-		};
+		return offlineStudioLiveState();
 	}
 
-	let row: StudioSessionRow | null;
+	let row: StudioSessionRow | null = null;
 	try {
-		row = await db
-			.prepare(
-				`SELECT id,
-				        content_video_id,
-				        content_video_slug,
-				        title,
-				        show_id,
-				        show_title,
-				        content_hosts_json,
-				        content_guests_json,
-				        starts_at,
-				        status,
-				        recording_status,
-				        realtimekit_meeting_id,
-				        recording_prefix,
-				        stream_environment,
-				        stream_status,
-				        cloudflare_stream_live_input_id,
-				        cloudflare_stream_playback_url,
-				        stream_started_at,
-				        stream_ended_at,
-				        stream_notification_queued_at,
-				        created_by_id,
-				        created_by_github,
-				        created_at,
-				        updated_at
-				   FROM studio_sessions
-				  WHERE content_video_slug = ?
-				    AND stream_environment = 'prod'
-				    AND stream_status = 'live'
-				    AND status = 'live'
-				    AND cloudflare_stream_playback_url IS NOT NULL
-				  ORDER BY COALESCE(stream_started_at, updated_at) DESC
-				  LIMIT 1`,
-			)
-			.bind(videoSlug.trim())
-			.first<StudioSessionRow>();
+		row = await getPublicStudioLiveRow(db, videoSlug.trim());
 	} catch (error) {
 		if (isMissingStudioSessionsTableError(error)) {
-				return {
-					live: false,
-					playbackUrl: null,
-					session: null,
-				};
+			return offlineStudioLiveState();
 		}
 		throw error;
 	}
 
 	if (!row?.cloudflare_stream_playback_url) {
-		return {
-			live: false,
-			playbackUrl: null,
-			session: null,
-		};
+		return offlineStudioLiveState();
 	}
 
+	if (!row.cloudflare_stream_live_input_id || !row.stream_start_token) {
+		return offlineStudioLiveState();
+	}
+
+	try {
+		const config = env ? await getCloudflareStreamConfig(env) : null;
+		if (!config) return publicStudioLiveStateFromRow(row);
+		if (await cloudflareStreamLiveInputIsActive(
+			config,
+			row.cloudflare_stream_live_input_id,
+		)) {
+			return publicStudioLiveStateFromRow(row);
+		}
+	} catch (error) {
+		console.error("Could not reconcile public Studio stream state", error);
+		return publicStudioLiveStateFromRow(row);
+	}
+
+	const ended = await saveStudioStreamEndedForLease(env as StudioEnv, {
+		liveInputId: row.cloudflare_stream_live_input_id,
+		sessionId: row.id,
+		startToken: row.stream_start_token,
+	});
+	if (ended) return offlineStudioLiveState();
+
+	// A new publisher may have replaced the lease while the provider check was in flight.
+	// Return that newer D1 state without applying the stale provider result to it.
+	const latest = await getPublicStudioLiveRow(db, videoSlug.trim());
+	return latest?.cloudflare_stream_playback_url &&
+		latest.cloudflare_stream_live_input_id &&
+		latest.stream_start_token
+		? publicStudioLiveStateFromRow(latest)
+		: offlineStudioLiveState();
+}
+
+function offlineStudioLiveState(): StudioPublicLiveState {
+	return { live: false, playbackUrl: null, session: null };
+}
+
+function publicStudioLiveStateFromRow(
+	row: StudioSessionRow,
+): StudioPublicLiveState {
 	return {
 		live: true,
 		playbackUrl: row.cloudflare_stream_playback_url,
@@ -906,6 +897,50 @@ export async function getPublicStudioLiveState(
 			title: row.title,
 		},
 	};
+}
+
+async function getPublicStudioLiveRow(
+	db: D1Database,
+	videoSlug: string,
+): Promise<StudioSessionRow | null> {
+	return await db
+		.prepare(
+			`SELECT id,
+			        content_video_id,
+			        content_video_slug,
+			        title,
+			        show_id,
+			        show_title,
+			        content_hosts_json,
+			        content_guests_json,
+			        starts_at,
+			        status,
+			        recording_status,
+			        realtimekit_meeting_id,
+			        recording_prefix,
+			        stream_environment,
+			        stream_status,
+			        cloudflare_stream_live_input_id,
+			        cloudflare_stream_playback_url,
+			        stream_started_at,
+			        stream_ended_at,
+			        stream_notification_queued_at,
+			        stream_start_token,
+			        created_by_id,
+			        created_by_github,
+			        created_at,
+			        updated_at
+			   FROM studio_sessions
+			  WHERE content_video_slug = ?
+			    AND stream_environment = 'prod'
+			    AND stream_status = 'live'
+			    AND status = 'live'
+			    AND cloudflare_stream_playback_url IS NOT NULL
+			  ORDER BY COALESCE(stream_started_at, updated_at) DESC
+			  LIMIT 1`,
+		)
+		.bind(videoSlug)
+		.first<StudioSessionRow>();
 }
 
 export async function listStudioRecordings(
@@ -955,35 +990,10 @@ export async function listStudioRecordings(
 
 export async function userCanManageStudioSession(
 	env: StudioEnv | undefined,
-	session: StudioSessionRecord,
+	_session: StudioSessionRecord,
 	user: StudioUser,
 ): Promise<boolean> {
-	if (env && userIsConfiguredStudioOperator(env, user)) return true;
-	if (userOwnsStudioSession(session, user)) return true;
-
-	const db = getDb(env);
-	if (!db) return false;
-
-	const row = await db
-		.prepare(
-			`SELECT role
-			   FROM studio_participants
-			  WHERE session_id = ?
-			    AND (user_id = ? OR github_handle = ?)
-			    AND role IN ('host', 'producer', 'program')
-			  LIMIT 1`,
-		)
-		.bind(session.id, getStudioUserId(user), getStudioUserGithubHandle(user))
-		.first<{ role: StudioRole }>();
-
-	return Boolean(row);
-}
-
-export function userCanJoinStudioSessionAsGuest(
-	session: StudioSessionRecord,
-	user: StudioUser,
-): boolean {
-	return userIsListedOnStudioSession(session, user);
+	return Boolean(env && userIsConfiguredStudioOperator(env, user));
 }
 
 export async function saveStudioSession(
@@ -1151,6 +1161,7 @@ export async function saveStudioStreamStart(
 			        stream_ended_at = NULL,
 			        updated_at = unixepoch()
 			  WHERE id = ?
+			    AND status <> 'complete'
 			    AND stream_status = 'starting'
 			    AND stream_start_token = ?`,
 		)
@@ -1190,6 +1201,7 @@ export async function claimStudioStreamStart(
 export async function saveStudioStreamLive(
 	env: StudioEnv,
 	input: {
+		liveInputId: string;
 		playbackUrl: string;
 		publicLive: boolean;
 		sessionId: string;
@@ -1214,23 +1226,94 @@ export async function saveStudioStreamLive(
 			        stream_ended_at = NULL,
 			        updated_at = unixepoch()
 			  WHERE id = ?
+			    AND status <> 'complete'
 			    AND stream_status = 'starting'
-			    AND stream_start_token = ?`,
+			    AND stream_start_token = ?
+			    AND cloudflare_stream_live_input_id = ?`,
 		)
 		.bind(
 			input.publicLive ? 1 : 0,
 			input.playbackUrl,
 			input.sessionId,
 			input.startToken,
+			input.liveInputId,
 		)
 		.run();
 	return d1WriteChanged(result);
 }
 
-export async function claimStudioStreamNotification(
+export async function studioStreamPublisherLeaseMatches(
+	env: StudioEnv,
+	input: {
+		liveInputId: string;
+		sessionId: string;
+		startToken: string;
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to verify Studio stream ownership");
+	}
+
+	const row = await db
+		.prepare(
+			`SELECT id
+			   FROM studio_sessions
+			  WHERE id = ?
+			    AND stream_status = 'live'
+			    AND stream_start_token = ?
+			    AND cloudflare_stream_live_input_id = ?
+			  LIMIT 1`,
+		)
+		.bind(input.sessionId, input.startToken, input.liveInputId)
+		.first<{ id: string }>();
+	return row?.id === input.sessionId;
+}
+
+export async function getStudioStreamPublisherLease(
 	env: StudioEnv,
 	sessionId: string,
-	notificationQueuedAt: number,
+): Promise<{
+	liveInputId: string;
+	startToken: string;
+} | null> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to load Studio stream ownership");
+	}
+
+	const row = await db
+		.prepare(
+			`SELECT cloudflare_stream_live_input_id,
+			        stream_start_token
+			   FROM studio_sessions
+			  WHERE id = ?
+			    AND stream_status IN ('starting', 'live')
+			    AND cloudflare_stream_live_input_id IS NOT NULL
+			    AND stream_start_token IS NOT NULL
+			  LIMIT 1`,
+		)
+		.bind(sessionId)
+		.first<{
+			cloudflare_stream_live_input_id: string;
+			stream_start_token: string;
+		}>();
+	return row
+		? {
+				liveInputId: row.cloudflare_stream_live_input_id,
+				startToken: row.stream_start_token,
+			}
+		: null;
+}
+
+export async function claimStudioStreamNotification(
+	env: StudioEnv,
+	input: {
+		liveInputId: string;
+		notificationQueuedAt: number;
+		sessionId: string;
+		startToken: string;
+	},
 ): Promise<boolean> {
 	const db = getDb(env);
 	if (!db) {
@@ -1246,17 +1329,28 @@ export async function claimStudioStreamNotification(
 			    AND stream_environment = 'prod'
 			    AND stream_status = 'live'
 			    AND status = 'live'
-			    AND stream_notification_queued_at IS NULL`,
+			    AND stream_notification_queued_at IS NULL
+			    AND stream_start_token = ?
+			    AND cloudflare_stream_live_input_id = ?`,
 		)
-		.bind(notificationQueuedAt, sessionId)
+		.bind(
+			input.notificationQueuedAt,
+			input.sessionId,
+			input.startToken,
+			input.liveInputId,
+		)
 		.run();
 	return d1WriteChanged(result);
 }
 
 export async function releaseStudioStreamNotificationClaim(
 	env: StudioEnv,
-	sessionId: string,
-	notificationQueuedAt: number,
+	input: {
+		liveInputId: string;
+		notificationQueuedAt: number;
+		sessionId: string;
+		startToken: string;
+	},
 ): Promise<void> {
 	const db = getDb(env);
 	if (!db) {
@@ -1269,9 +1363,16 @@ export async function releaseStudioStreamNotificationClaim(
 			    SET stream_notification_queued_at = NULL,
 			        updated_at = unixepoch()
 			  WHERE id = ?
-			    AND stream_notification_queued_at = ?`,
+			    AND stream_notification_queued_at = ?
+			    AND stream_start_token = ?
+			    AND cloudflare_stream_live_input_id = ?`,
 		)
-		.bind(sessionId, notificationQueuedAt)
+		.bind(
+			input.sessionId,
+			input.notificationQueuedAt,
+			input.startToken,
+			input.liveInputId,
+		)
 		.run();
 }
 
@@ -1283,14 +1384,14 @@ export async function saveStudioStreamEnded(
 	env: StudioEnv,
 	sessionId: string,
 	startToken?: string,
-): Promise<void> {
+): Promise<boolean> {
 	const db = getDb(env);
 	if (!db) {
 		throw new Error("STUDIO_DB binding is required to persist Studio stream status");
 	}
 
 	if (startToken) {
-		await db
+		const result = await db
 			.prepare(
 				`UPDATE studio_sessions
 				    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
@@ -1312,10 +1413,10 @@ export async function saveStudioStreamEnded(
 			)
 			.bind(startToken, startToken, sessionId, startToken)
 			.run();
-		return;
+		return d1WriteChanged(result);
 	}
 
-	await db
+	const result = await db
 		.prepare(
 			`UPDATE studio_sessions
 			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
@@ -1327,6 +1428,96 @@ export async function saveStudioStreamEnded(
 		)
 		.bind(sessionId)
 		.run();
+	return d1WriteChanged(result);
+}
+
+export async function saveStudioStreamEndedForLease(
+	env: StudioEnv,
+	input: {
+		liveInputId: string;
+		sessionId: string;
+		startToken: string;
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to reconcile Studio stream status");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'ended',
+			        stream_start_token = NULL,
+			        stream_ended_at = COALESCE(stream_ended_at, unixepoch()),
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status IN ('starting', 'live')
+			    AND stream_start_token = ?
+			    AND cloudflare_stream_live_input_id = ?`,
+		)
+		.bind(input.sessionId, input.startToken, input.liveInputId)
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function saveStudioStreamFailed(
+	env: StudioEnv,
+	sessionId: string,
+	startToken?: string,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to reset Studio stream status");
+	}
+
+	const tokenPredicate = startToken ? "AND stream_start_token = ?" : "";
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'failed',
+			        stream_start_token = NULL,
+			        stream_ended_at = unixepoch(),
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status IN ('starting', 'live')
+			    ${tokenPredicate}`,
+		)
+		.bind(...(startToken ? [sessionId, startToken] : [sessionId]))
+		.run();
+	return d1WriteChanged(result);
+}
+
+export async function reclaimStaleStudioStream(
+	env: StudioEnv,
+	input: {
+		sessionId: string;
+		staleBefore: number;
+		streamStatus: "live" | "starting";
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db) {
+		throw new Error("STUDIO_DB binding is required to reclaim Studio stream status");
+	}
+
+	const result = await db
+		.prepare(
+			`UPDATE studio_sessions
+			    SET status = CASE WHEN status = 'live' THEN 'scheduled' ELSE status END,
+			        stream_status = 'failed',
+			        stream_start_token = NULL,
+			        stream_ended_at = unixepoch(),
+			        updated_at = unixepoch()
+			  WHERE id = ?
+			    AND stream_status = ?
+			    AND updated_at <= ?`,
+		)
+		.bind(input.sessionId, input.streamStatus, input.staleBefore)
+		.run();
+	return d1WriteChanged(result);
 }
 
 export function buildStudioSession(input: {
@@ -1489,8 +1680,11 @@ export async function resolveStudioInvite(
 	user?: StudioUser,
 ): Promise<ResolvedStudioInvite | null> {
 	const db = getDb(env);
-	if (!db || token === "demo") {
-		if (token !== "demo") return null;
+	const demoInviteEnabled = Boolean(
+		import.meta.env.DEV && env?.STUDIO_ENABLE_DEMO_INVITE === "true",
+	);
+	if (!db || (token === "demo" && demoInviteEnabled)) {
+		if (token !== "demo" || !demoInviteEnabled) return null;
 		const session = fallbackSession();
 		return {
 			invite: {
@@ -1505,7 +1699,7 @@ export async function resolveStudioInvite(
 				createdAt: session.createdAt,
 				revokedAt: null,
 			},
-			session,
+			session: redactStudioSessionProviderUrls(session),
 		};
 	}
 
@@ -1556,7 +1750,17 @@ export async function resolveStudioInvite(
 
 	return {
 		invite: rowToInvite(row),
-		session,
+		session: redactStudioSessionProviderUrls(session),
+	};
+}
+
+function redactStudioSessionProviderUrls(
+	session: StudioSessionRecord,
+): StudioSessionRecord {
+	return {
+		...session,
+		cloudflareStreamLiveInputId: null,
+		cloudflareStreamPlaybackUrl: null,
 	};
 }
 
@@ -1704,6 +1908,56 @@ export async function saveRecordingReadyMarker(
 	return { readyMarkerKey, sourceVerified: Boolean(source) };
 }
 
+type StudioStreamLeaseRow = {
+	cloudflare_stream_live_input_id: string | null;
+	stream_start_token: string | null;
+};
+
+async function reconcileStudioSessionLiveState(
+	env: StudioEnv | undefined,
+	session: StudioSessionRecord,
+): Promise<StudioSessionRecord> {
+	if (!env || session.streamStatus !== "live") return session;
+	const db = getDb(env);
+	if (!db) return session;
+
+	const lease = await db
+		.prepare(
+			`SELECT cloudflare_stream_live_input_id,
+			        stream_start_token
+			   FROM studio_sessions
+			  WHERE id = ?
+			    AND stream_status = 'live'
+			  LIMIT 1`,
+		)
+		.bind(session.id)
+		.first<StudioStreamLeaseRow>();
+	if (!lease?.cloudflare_stream_live_input_id || !lease.stream_start_token) {
+		return session;
+	}
+
+	try {
+		const config = await getCloudflareStreamConfig(env);
+		if (!config) return session;
+		if (await cloudflareStreamLiveInputIsActive(
+			config,
+			lease.cloudflare_stream_live_input_id,
+		)) {
+			return session;
+		}
+	} catch (error) {
+		console.error("Could not reconcile Studio control state", error);
+		return session;
+	}
+
+	await saveStudioStreamEndedForLease(env, {
+		liveInputId: lease.cloudflare_stream_live_input_id,
+		sessionId: session.id,
+		startToken: lease.stream_start_token,
+	});
+	return await getStudioSession(env, session.id) ?? session;
+}
+
 export async function loadStudioDashboard(
 	user: StudioUser | undefined,
 	env?: StudioEnv,
@@ -1719,15 +1973,25 @@ export async function loadStudioDashboard(
 	}
 
 	const isOperator = env ? userIsConfiguredStudioOperator(env, user) : false;
-	const [{ error: contentError, events: contentEvents }, allSessions] =
+	if (!isOperator) {
+		return {
+			contentError: null,
+			events: [],
+			isOperator: false,
+			user,
+			sessions: [],
+		};
+	}
+	const [{ error: contentError, events: contentEvents }, storedSessions] =
 		await Promise.all([
 			loadContentEvents(env, { upcomingOnly: isOperator }),
 			listStudioSessions(env),
 		]);
+	const allSessions = await Promise.all(
+		storedSessions.map((session) => reconcileStudioSessionLiveState(env, session)),
+	);
 	const sessionsByContentVideoId = groupSessionsByContentVideoId(allSessions);
-	const visibleEvents = isOperator
-		? contentEvents.filter((event) => isUpcomingEvent(event))
-		: contentEvents.filter((event) => contentEventIncludesUser(event, user));
+	const visibleEvents = contentEvents.filter((event) => isUpcomingEvent(event));
 	const events = visibleEvents.map((event) =>
 		contentVideoToEvent(
 			event,
@@ -1740,8 +2004,6 @@ export async function loadStudioDashboard(
 		events,
 		isOperator,
 		user,
-		sessions: isOperator
-			? allSessions
-			: allSessions.filter((session) => userIsListedOnStudioSession(session, user)),
+		sessions: allSessions,
 	};
 }

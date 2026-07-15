@@ -2,6 +2,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { env } from "cloudflare:workers";
 import type { StudioEnv } from "../env";
+import { createSessionInputSchema } from "./createSessionInput";
 import {
 	confirmStudioStream,
 	createStudioInvite,
@@ -14,27 +15,6 @@ import {
 	stopStudioStream,
 } from "../server/operations";
 
-const isoDateTime = z.string().refine((value) => !Number.isNaN(Date.parse(value)), {
-	message: "Expected an ISO datetime string.",
-});
-const optionalText = z.preprocess(
-	(value) => {
-		if (value == null) return undefined;
-		if (typeof value !== "string") return value;
-		const trimmed = value.trim();
-		return trimmed.length > 0 ? trimmed : undefined;
-	},
-	z.string().min(1).optional(),
-);
-const optionalIsoDateTime = z.preprocess(
-	(value) => {
-		if (value == null) return undefined;
-		if (typeof value !== "string") return value;
-		const trimmed = value.trim();
-		return trimmed.length > 0 ? trimmed : undefined;
-	},
-	isoDateTime.optional(),
-);
 const optionalPositiveInt = (max: number) =>
 	z.preprocess(
 		(value) => {
@@ -72,18 +52,7 @@ function toActionError(error: unknown): never {
 export const server = {
 	createSession: defineAction({
 		accept: "form",
-		input: z
-			.object({
-				showId: optionalText,
-				show: optionalText,
-				startsAt: optionalIsoDateTime,
-				streamEnvironment: z.enum(["test", "prod"]).default("test"),
-				title: optionalText,
-				videoId: optionalText,
-			})
-			.refine((input) => input.videoId || (input.show && input.title), {
-				message: "Expected videoId or show and title.",
-			}),
+		input: createSessionInputSchema,
 		handler: async (input, context) => {
 			const user = requireUser(context);
 			const studioEnv = env as StudioEnv;

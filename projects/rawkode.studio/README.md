@@ -24,7 +24,7 @@ bun run verify:live
 - `REALTIMEKIT_API_TOKEN`, `REALTIMEKIT_APP_ID`: Cloudflare RealtimeKit API secrets from Secrets Store. `CLOUDFLARE_API_TOKEN` is only the deploy credential resolved by `env.cue`.
 - `REALTIMEKIT_HOST_PRESET`, `REALTIMEKIT_PRODUCER_PRESET`, `REALTIMEKIT_GUEST_PRESET`, `REALTIMEKIT_PROGRAM_PRESET`: optional preset names for contributor tokens.
 - `RAWKODE_GRAPHQL_URL`: Rawkode GraphQL gateway used to resolve content videos, shows, hosts, and guests. Defaults to `https://api.rawkode.academy/`.
-- `STUDIO_OPERATOR_GITHUB_HANDLES`: comma-separated GitHub handles allowed to create sessions. Defaults to `rawkode`.
+- `STUDIO_OPERATOR_GITHUB_HANDLES`: required comma-separated GitHub handles allowed to access the private control plane. Production explicitly sets this to `rawkode`; a missing or blank value authorizes nobody.
 
 ## Recording Handoff
 
@@ -32,7 +32,11 @@ Studio writes ready markers to `studio/recordings/{sessionId}/{recordingId}/read
 
 Only session managers can publish ready markers, and recording source keys must stay under the session recording prefix. D1 records the pending marker before the R2 ready marker is written so R2 Event Notifications cannot enqueue work before the session has a recording row.
 
-Host and producer rooms upload browser programme recordings through `/api/studio/recording-upload` using R2 multipart uploads. The server creates the source key as `studio/recordings/{sessionId}/{recordingId}/source.webm`, the browser uploads 8 MiB parts, and completion publishes the ready marker with the completed R2 object ETag and the server-derived VOD target. Local development without a `RECORDINGS` binding keeps recording available by downloading the WebM locally instead.
+The operator control room uploads browser programme recordings through `/api/studio/recording-upload` using R2 multipart uploads. The server creates the source key as `studio/recordings/{sessionId}/{recordingId}/source.webm`, the browser uploads 8 MiB parts, and completion publishes the ready marker with the completed R2 object ETag and the server-derived VOD target. Transient part-upload failures receive three bounded attempts. Multipart completion is intentionally not retried because completion plus the D1/ready-marker handoff is not yet idempotent; an ambiguous failure can leave an R2 source object without a completed handoff.
+
+Every browser recording chunk is also persisted to IndexedDB with content type, timestamps, chunk count, and size metadata. A successful server handoff clears that backup. Failed and local-only handoffs retain it across reloads; open **Local recording recovery** in the operator canvas to reconstruct/download the WebM, then delete the browser copy only after verifying the file. Clearing site data or using another browser profile removes these backups.
+
+For every Prod broadcast, start an independent local OBS programme recording (or an operating-system screen recording if OBS is unavailable) before arming Prod. Cloudflare Stream WHIP/WHEP does not provide a provider-side recording fallback. Keep the independent recording until the VOD handoff and playback are verified. If the browser handoff fails, preserve the independent recording, download the IndexedDB recovery copy, and reconcile any orphaned `source.webm` in R2 before retrying ingestion.
 
 ## Guest Access
 
@@ -48,4 +52,4 @@ The browser production canvas remains a Vue island inside Astro pages. Hosts, pr
 
 ## Live Verification
 
-Run `bun run verify:live` through the production `cuenv` environment to verify Cloudflare auth, the deployed Worker, session KV, Studio D1 schema, content R2 bucket, and RealtimeKit Secrets Store entries without printing secret values.
+Run `bun run verify:live` through the production `cuenv` environment after deployment. It verifies the checked-in production binding shapes, Cloudflare auth and deployed Worker, session KV, Studio D1 stream columns/index, content R2 bucket, notifications queue, Secrets Store and all three runtime secret names (including `CLOUDFLARE_STREAM_API_TOKEN`), and the public live-state HTTP contract without reading or printing secret values.

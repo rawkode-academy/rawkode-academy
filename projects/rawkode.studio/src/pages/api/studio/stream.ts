@@ -8,6 +8,7 @@ import {
 } from "../../../server/http";
 import {
 	confirmStudioStream,
+	resetStudioStream,
 	startStudioStream,
 	stopStudioStream,
 } from "../../../server/operations";
@@ -48,7 +49,13 @@ export const POST: APIRoute = async ({ locals, request }) => {
 				streamToken: body.streamToken,
 			}));
 		}
-		return json({ error: "action must be start, confirm, or stop." }, 400);
+		if (body.action === "reset") {
+			return json(await resetStudioStream(env as StudioEnv, locals.user, {
+				sessionId: body.sessionId,
+				streamToken: body.streamToken,
+			}));
+		}
+		return json({ error: "action must be start, confirm, stop, or reset." }, 400);
 	} catch (error) {
 		const response = operationErrorResponse(error);
 		if (response) return response;

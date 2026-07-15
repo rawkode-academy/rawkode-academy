@@ -314,6 +314,36 @@ textarea:focus-visible {
   display: contents;
 }
 
+.session-actions .create-room-form {
+  display: grid;
+  grid-template-columns: auto minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  width: min(720px, 100%);
+}
+
+.test-mode-note {
+  align-self: center;
+  margin: 0;
+  color: #8ff3e9;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.prod-confirmation-field {
+  min-width: 260px;
+  padding: 10px;
+  border: 1px solid rgba(255, 145, 103, 0.45);
+  border-radius: 6px;
+  background: rgba(255, 111, 97, 0.08);
+  color: #ffd4cc;
+}
+
+.prod-confirmation-field[hidden],
+.test-mode-note[hidden] {
+  display: none;
+}
+
 .stream-environment-field {
   display: inline-flex;
   align-items: center;
@@ -613,6 +643,67 @@ textarea:focus-visible {
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.top-bar-status span.prod-status {
+  background: rgba(255, 111, 97, 0.16);
+  color: #ffd4cc;
+}
+
+.prod-arming-shell {
+  display: grid;
+  min-height: 100%;
+  padding: 24px;
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 111, 97, 0.16), transparent 44%),
+    #090b10;
+}
+
+.prod-arming-card {
+  display: grid;
+  gap: 18px;
+  width: min(620px, 100%);
+  padding: clamp(24px, 5vw, 44px);
+  border: 1px solid rgba(255, 145, 103, 0.42);
+  border-radius: 10px;
+  background: rgba(13, 10, 12, 0.96);
+  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.48);
+}
+
+.prod-arming-card h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.05;
+}
+
+.prod-arming-card p {
+  margin: 0;
+  color: #c8b7b7;
+  line-height: 1.6;
+}
+
+.prod-arming-card label {
+  color: #ffd4cc;
+}
+
+.prod-arming-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.prod-arm-button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #ff6f61;
+  color: #140403;
+  font-weight: 850;
 }
 
 .brand-block {
@@ -1060,6 +1151,10 @@ textarea:focus-visible {
   color: #ffb0a4;
 }
 
+.canvas-actions .recording-upload-state.warning {
+  color: #ffd18a;
+}
+
 .canvas-actions .recording-status-link {
   min-width: 0;
   white-space: nowrap;
@@ -1182,13 +1277,101 @@ input[type="range"] {
 }
 
 .guests-panel {
-  grid-template-columns: repeat(2, minmax(240px, 1fr)) auto;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
   align-items: stretch;
+}
+
+.widget-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  color: #91a3ad;
+  font-size: 13px;
+}
+
+.guest-room-page,
+.guest-room-page .studio-site-main {
+  min-height: 100vh;
+}
+
+.guest-room-shell {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+  width: min(1040px, calc(100vw - 32px));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(24px, 6vw, 72px) 0;
+}
+
+.guest-room-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.guest-room-header h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(28px, 5vw, 48px);
+  line-height: 1.05;
+}
+
+.guest-room-header p:not(.eyebrow) {
+  max-width: 680px;
+  margin: 12px 0 0;
+  color: #a7b6bf;
+  line-height: 1.5;
+}
+
+.guest-room-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.guest-room-status span {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(57, 213, 197, 0.12);
+  color: #8ff3e9;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.guest-room-shell > astro-island {
+  display: block;
+}
+
+.guest-room-shell .realtimekit-room {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  justify-content: start;
+  min-height: 72px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(10, 13, 18, 0.94);
+}
+
+.guest-room-shell .realtimekit-room-drawer {
+  position: static;
+  grid-column: 1 / -1;
+  width: min(920px, calc(100vw - 64px));
+  height: min(680px, calc(100vh - 260px));
+  min-height: 440px;
+  margin-top: 16px;
+  box-shadow: none;
 }
 
 .guest-card {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto auto;
+  grid-template-columns: 38px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   min-width: 0;
@@ -1606,6 +1789,11 @@ button:hover {
 }
 
 @media (max-width: 1080px) {
+	.session-actions .create-room-form {
+		grid-template-columns: 1fr;
+		align-items: stretch;
+	}
+
   .studio-app {
     grid-template-columns: 190px minmax(0, 1fr);
     grid-template-rows: 56px minmax(0, 1fr) 8px var(--widgets-height, 220px);
@@ -1677,6 +1865,21 @@ button:hover {
     align-items: flex-start;
     flex-direction: column;
   }
+
+	.guest-room-header {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.guest-room-status {
+		justify-content: flex-start;
+	}
+
+	.guest-room-shell .realtimekit-room-drawer {
+		width: calc(100vw - 64px);
+		height: min(620px, calc(100vh - 220px));
+		min-height: 400px;
+	}
 
   .realtimekit-room {
     width: 100%;

@@ -30,10 +30,34 @@ function readEnvString(env: unknown, key: string): string | undefined {
 	return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-export function getRealtimeKitConfig(env: unknown): RealtimeKitConfig | null {
+async function readEnvSecret(
+	env: unknown,
+	key: string,
+): Promise<string | undefined> {
+	const value = (env as Record<string, unknown>)[key];
+	if (typeof value === "string") {
+		return value.trim() || undefined;
+	}
+	if (!value || typeof value !== "object" || !("get" in value)) {
+		return undefined;
+	}
+
+	const get = (value as { get?: unknown }).get;
+	if (typeof get !== "function") return undefined;
+	const secret = await get.call(value);
+	return typeof secret === "string" && secret.trim()
+		? secret.trim()
+		: undefined;
+}
+
+export async function getRealtimeKitConfig(
+	env: unknown,
+): Promise<RealtimeKitConfig | null> {
 	const accountId = readEnvString(env, "CLOUDFLARE_ACCOUNT_ID");
-	const apiToken = readEnvString(env, "REALTIMEKIT_API_TOKEN");
-	const appId = readEnvString(env, "REALTIMEKIT_APP_ID");
+	const [apiToken, appId] = await Promise.all([
+		readEnvSecret(env, "REALTIMEKIT_API_TOKEN"),
+		readEnvSecret(env, "REALTIMEKIT_APP_ID"),
+	]);
 	if (!accountId || !apiToken || !appId) return null;
 
 	return {

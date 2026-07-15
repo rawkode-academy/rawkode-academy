@@ -12,14 +12,14 @@ const resolvedInvite = await resolveStudioInvite(
 const session = resolvedInvite?.session ?? null;
 ---
 
-<StudioLayout title="Guest | Rawkode Studio" active="guest">
+<StudioLayout title="Guest invite | Rawkode Studio" active="guest" showChrome={false}>
 	<section class="role-panel">
 		<p class="eyebrow">Guest invite</p>
 		<h1>{session ? session.title : "Invite unavailable"}</h1>
 		<p>
 			{
 				session
-					? `Invite ${inviteToken} is ready for GitHub-backed identity verification.`
+					? "Sign in with GitHub, then join the RealtimeKit call. This invite never exposes production controls."
 					: `Invite ${inviteToken} does not match a Studio session.`
 			}
 		</p>
