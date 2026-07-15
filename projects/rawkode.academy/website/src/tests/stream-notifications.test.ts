@@ -11,7 +11,7 @@ describe("stream notifications", () => {
 	it("builds a generic notification intent for an upcoming stream", () => {
 		const notification = buildStreamNotification({
 			slug: "hands-on-introduction-to-iroh",
-			id: "7f1dfedcbf38a19375306862",
+			id: "ki0qbn121pdjly5f5vtvii1m",
 			title: "Hands-on Introduction to Iroh",
 			origin: "https://rawkode.academy",
 		});
@@ -26,7 +26,7 @@ describe("stream notifications", () => {
 			tag: "stream:hands-on-introduction-to-iroh",
 			data: {
 				videoSlug: "hands-on-introduction-to-iroh",
-				videoId: "7f1dfedcbf38a19375306862",
+				videoId: "ki0qbn121pdjly5f5vtvii1m",
 			},
 		});
 	});

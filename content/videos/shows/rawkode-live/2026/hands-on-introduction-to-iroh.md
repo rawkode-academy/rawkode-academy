@@ -1,5 +1,5 @@
 ---
-id: 7f1dfedcbf38a19375306862
+id: ki0qbn121pdjly5f5vtvii1m
 slug: hands-on-introduction-to-iroh
 title: Hands-on Introduction to Iroh
 tagline: Peer-to-peer apps, built from first principles
@@ -16,12 +16,11 @@ terms:
   - Iroh
 publishedAt: 2026-07-09T17:00:00.000Z
 type: live
-youtubeId: 5_us1xfYpOE
 category: tutorial
 technologies:
   - iroh
 show: rawkode-live
-duration: 3600
+duration: 5401
 guests:
   - b5
 ---

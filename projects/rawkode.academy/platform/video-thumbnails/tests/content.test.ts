@@ -42,11 +42,11 @@ Body`);
 			commitSha: "test-sha",
 		});
 		const job = jobs.find(
-			(candidate) => candidate.videoId === "7f1dfedcbf38a19375306862",
+			(candidate) => candidate.videoId === "ki0qbn121pdjly5f5vtvii1m",
 		);
 
 		expect(job).toMatchObject({
-			videoId: "7f1dfedcbf38a19375306862",
+			videoId: "ki0qbn121pdjly5f5vtvii1m",
 			tagline: "Peer-to-peer apps, built from first principles",
 			source: {
 				commitSha: "test-sha",
