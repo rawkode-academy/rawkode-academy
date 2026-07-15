@@ -24,6 +24,7 @@ interface WranglerConfig {
 }
 
 const studioWorkerName = "rawkode-academy-studio";
+const cloudflareAccountId = "0aeb879de8e3cdde5fb3d413025222ce";
 const studioDatabaseName = "rawkode-academy-studio";
 const studioDatabaseId = "1fe3facd-0c47-43e2-b89d-f402e457db32";
 const recordingsBucketName = "rawkode-academy-content";
@@ -33,6 +34,14 @@ const requiredSecretBindings = [
 	"REALTIMEKIT_API_TOKEN",
 	"REALTIMEKIT_APP_ID",
 ] as const;
+const realtimeKitAppName = "Rawkode Studio";
+const requiredRealtimeKitPresets = ["group_call_guest", "group_call_host"] as const;
+const realtimeKitPresetVariables = {
+	REALTIMEKIT_GUEST_PRESET: "group_call_guest",
+	REALTIMEKIT_HOST_PRESET: "group_call_host",
+	REALTIMEKIT_PRODUCER_PRESET: "group_call_host",
+	REALTIMEKIT_PROGRAM_PRESET: "group_call_host",
+} as const;
 const requiredStreamColumns = [
 	"stream_environment",
 	"stream_status",
@@ -43,6 +52,14 @@ const requiredStreamColumns = [
 	"stream_notification_queued_at",
 	"stream_start_token",
 ];
+const requiredParticipantProvisioningColumns = [
+	"realtimekit_custom_participant_id",
+	"realtimekit_participant_id",
+	"provisioning_state",
+	"invite_token_hash",
+	"invite_claim_id",
+];
+const requiredInviteClaimColumns = ["state", "claim_id", "finalized_at"];
 
 const steps: VerificationStep[] = [
 	{
@@ -116,6 +133,51 @@ const steps: VerificationStep[] = [
 			"PRAGMA index_list(studio_sessions);",
 		],
 		expect: ["studio_sessions_public_live_idx"],
+	},
+	{
+		name: "Studio D1 participant provisioning migration",
+		command: [
+			"bun",
+			"x",
+			"wrangler",
+			"d1",
+			"execute",
+			studioDatabaseName,
+			"--remote",
+			"--command",
+			"PRAGMA table_info(studio_participants);",
+		],
+		expect: requiredParticipantProvisioningColumns,
+	},
+	{
+		name: "Studio D1 invite claim migration",
+		command: [
+			"bun",
+			"x",
+			"wrangler",
+			"d1",
+			"execute",
+			studioDatabaseName,
+			"--remote",
+			"--command",
+			"PRAGMA table_info(studio_invite_redemptions);",
+		],
+		expect: requiredInviteClaimColumns,
+	},
+	{
+		name: "Studio D1 participant provider identity index",
+		command: [
+			"bun",
+			"x",
+			"wrangler",
+			"d1",
+			"execute",
+			studioDatabaseName,
+			"--remote",
+			"--command",
+			"PRAGMA index_list(studio_participants);",
+		],
+		expect: ["studio_participants_realtimekit_identity_idx"],
 	},
 	{
 		name: "Content R2 bucket",
@@ -217,6 +279,9 @@ async function verifyWranglerConfig(): Promise<boolean> {
 		config.vars?.STUDIO_OPERATOR_GITHUB_HANDLES,
 		"rawkode",
 	);
+	for (const [variable, preset] of Object.entries(realtimeKitPresetVariables)) {
+		expectMatch(errors, `${variable} variable`, config.vars?.[variable], preset);
+	}
 	if (typeof config.vars?.CLOUDFLARE_ACCOUNT_ID !== "string" || !config.vars.CLOUDFLARE_ACCOUNT_ID) {
 		errors.push("Cloudflare account id variable is missing.");
 	}
@@ -229,6 +294,79 @@ async function verifyWranglerConfig(): Promise<boolean> {
 
 	console.log("PASS Production binding configuration");
 	return true;
+}
+
+async function verifyRealtimeKitPresets(): Promise<boolean> {
+	const apiToken = process.env.CLOUDFLARE_API_TOKEN;
+	if (!apiToken) {
+		console.error("FAIL RealtimeKit live presets");
+		console.error("CLOUDFLARE_API_TOKEN is required for live preset verification.");
+		return false;
+	}
+
+	try {
+		let appId = process.env.REALTIMEKIT_APP_ID;
+		if (!appId) {
+			const appsResponse = await fetch(
+				`https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId}/realtime/kit/apps?per_page=100`,
+				{
+					headers: { Authorization: `Bearer ${apiToken}` },
+					signal: AbortSignal.timeout(15_000),
+				},
+			);
+			const appsBody = await appsResponse.json().catch(() => null) as {
+				data?: Array<{ id?: unknown; name?: unknown }>;
+				success?: boolean;
+			} | null;
+			if (!appsResponse.ok || appsBody?.success !== true) {
+				throw new Error(`App list returned HTTP ${appsResponse.status}.`);
+			}
+			const matchingApps = (appsBody.data ?? []).filter(
+				(candidate): candidate is { id: string; name: string } =>
+					candidate.name === realtimeKitAppName && typeof candidate.id === "string",
+			);
+			if (matchingApps.length === 0) {
+				throw new Error(`RealtimeKit app ${realtimeKitAppName} was not found.`);
+			}
+			if (matchingApps.length > 1) {
+				throw new Error(
+					`RealtimeKit app ${realtimeKitAppName} is ambiguous; set REALTIMEKIT_APP_ID.`,
+				);
+			}
+			appId = matchingApps[0].id;
+		}
+
+		const presetsResponse = await fetch(
+			`https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId}/realtime/kit/${encodeURIComponent(appId)}/presets?per_page=100`,
+			{
+				headers: { Authorization: `Bearer ${apiToken}` },
+				signal: AbortSignal.timeout(15_000),
+			},
+		);
+		const presetsBody = await presetsResponse.json().catch(() => null) as {
+			data?: Array<{ name?: unknown }>;
+			success?: boolean;
+		} | null;
+		if (!presetsResponse.ok || presetsBody?.success !== true) {
+			throw new Error(`Preset list returned HTTP ${presetsResponse.status}.`);
+		}
+		const names = new Set(
+			(presetsBody.data ?? [])
+				.map((preset) => preset.name)
+				.filter((name): name is string => typeof name === "string"),
+		);
+		const missing = requiredRealtimeKitPresets.filter((preset) => !names.has(preset));
+		if (missing.length > 0) {
+			throw new Error(`Missing configured presets: ${missing.join(", ")}.`);
+		}
+
+		console.log("PASS RealtimeKit live presets");
+		return true;
+	} catch (error) {
+		console.error("FAIL RealtimeKit live presets");
+		console.error(error instanceof Error ? error.message : "RealtimeKit preset verification failed.");
+		return false;
+	}
 }
 
 async function verifyLiveStateContract(): Promise<boolean> {
@@ -323,12 +461,15 @@ async function runStep(step: VerificationStep): Promise<boolean> {
 	return true;
 }
 
-const totalChecks = steps.length + 2;
+const totalChecks = steps.length + 3;
 let passed = await verifyWranglerConfig() ? 1 : 0;
 for (const step of steps) {
 	if (await runStep(step)) {
 		passed += 1;
 	}
+}
+if (await verifyRealtimeKitPresets()) {
+	passed += 1;
 }
 if (await verifyLiveStateContract()) {
 	passed += 1;

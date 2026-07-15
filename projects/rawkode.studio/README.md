@@ -15,14 +15,14 @@ bun run verify:live
 ## Runtime Bindings
 
 - `SESSION`: KV namespace for rawkode.academy identity sessions.
-- `STUDIO_DB`: D1 database with `data-model/0000_studio_sessions.sql`.
+- `STUDIO_DB`: D1 database managed by the additive migrations in `data-model/`.
 - `RECORDINGS`: R2 bucket containing Studio recordings and ready markers. Production binds `rawkode-academy-content` so R2 Event Notifications can hand markers to the ingest Worker; the public content Worker denies `studio/recordings/*` while still serving final `videos/*` VOD output.
 - `RECORDINGS_BUCKET_NAME`: name of the bound R2 recordings bucket written into ready markers.
 - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account that owns the RealtimeKit app and Stream live inputs.
 - `CLOUDFLARE_STREAM_API_TOKEN`: Cloudflare Stream API token from Secrets Store. It is used only by Studio server operations that create or inspect Stream live inputs.
 - `STREAM_NOTIFICATIONS`: queue producer for `rawkode-academy-notifications`. Studio enqueues `SendSubjectInput` only after a prod stream is confirmed live.
 - `REALTIMEKIT_API_TOKEN`, `REALTIMEKIT_APP_ID`: Cloudflare RealtimeKit API secrets from Secrets Store. `CLOUDFLARE_API_TOKEN` is only the deploy credential resolved by `env.cue`.
-- `REALTIMEKIT_HOST_PRESET`, `REALTIMEKIT_PRODUCER_PRESET`, `REALTIMEKIT_GUEST_PRESET`, `REALTIMEKIT_PROGRAM_PRESET`: optional preset names for contributor tokens.
+- `REALTIMEKIT_HOST_PRESET`, `REALTIMEKIT_PRODUCER_PRESET`, `REALTIMEKIT_GUEST_PRESET`, `REALTIMEKIT_PROGRAM_PRESET`: contributor-token preset names. Production maps host, producer, and program to `group_call_host`, and guests to the narrower `group_call_guest` preset.
 - `RAWKODE_GRAPHQL_URL`: Rawkode GraphQL gateway used to resolve content videos, shows, hosts, and guests. Defaults to `https://api.rawkode.academy/`.
 - `STUDIO_OPERATOR_GITHUB_HANDLES`: required comma-separated GitHub handles allowed to access the private control plane. Production explicitly sets this to `rawkode`; a missing or blank value authorizes nobody.
 
@@ -40,7 +40,7 @@ For every Prod broadcast, start an independent local OBS programme recording (or
 
 ## Guest Access
 
-Guest joins use opaque invite tokens stored as SHA-256 hashes in D1. Invite URLs resolve through `/guest/{token}`, then carry the token to the guest room and participant-token endpoint. Host, producer, and program roles require session management access.
+Guest joins use opaque invite tokens stored as SHA-256 hashes in D1. Invite URLs resolve through `/guest/{token}`, then carry the token to the guest room and participant-token endpoint. A transactional pending claim reserves invite capacity before RealtimeKit provisioning; the redemption count is finalized only after the exact provider participant is stored, so retries cannot double-consume an invite. Host, producer, and program roles require session management access.
 
 ## RealtimeKit Room UI
 
@@ -48,8 +48,8 @@ Studio room pages include a Vue room bridge that requests a participant token fr
 
 Creating a RealtimeKit meeting only prepares the host/guest green room. Public streaming starts later from the programme canvas using Cloudflare Stream WebRTC/WHIP. A Studio session stores `streamEnvironment` as `test` or `prod`; test streams can publish to Stream for operator preview, while prod streams expose live state to the website and enqueue notifications only after Cloudflare reports the live input connected.
 
-The browser production canvas remains a Vue island inside Astro pages. Hosts, producers, and guests authenticate through `rawkode.academy` identity, where the GitHub handle is the user ID used to attach people metadata.
+The browser production canvas remains a Vue island inside Astro pages. Hosts, producers, and guests authenticate through `rawkode.academy` identity. RealtimeKit uses the stable opaque identity `user.id`; GitHub handles are used only to enrich people metadata and to reconcile participants created before the opaque-ID contract.
 
 ## Live Verification
 
-Run `bun run verify:live` through the production `cuenv` environment after deployment. It verifies the checked-in production binding shapes, Cloudflare auth and deployed Worker, session KV, Studio D1 stream columns/index, content R2 bucket, notifications queue, Secrets Store and all three runtime secret names (including `CLOUDFLARE_STREAM_API_TOKEN`), and the public live-state HTTP contract without reading or printing secret values.
+Run `bun run verify:live` through the production `cuenv` environment after deployment. It verifies the checked-in production binding shapes, Cloudflare auth and deployed Worker, session KV, Studio D1 stream and participant-provisioning schema, content R2 bucket, notifications queue, Secrets Store and all three runtime secret names (including `CLOUDFLARE_STREAM_API_TOKEN`), the configured RealtimeKit presets against the live app, and the public live-state HTTP contract without printing secret values.

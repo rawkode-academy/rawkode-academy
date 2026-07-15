@@ -17,9 +17,12 @@ import {
 } from "./content";
 import {
 	addRealtimeKitParticipant,
+	createRealtimeKitCustomParticipantId,
 	createRealtimeKitMeeting,
 	endRealtimeKitSession,
 	getRealtimeKitConfig,
+	getRealtimeKitParticipantIdentity,
+	RealtimeKitApiError,
 	type RealtimeKitRole,
 } from "./realtimekit";
 import {
@@ -31,15 +34,17 @@ import {
 	createRecordingId,
 	createStudioSessionId,
 	createStudioInviteRecord,
+	finalizeStudioInviteParticipant,
+	getStudioParticipantProvisioning,
 	getStudioSession,
 	getStudioStreamPublisherLease,
 	getStudioUserGithubHandle,
-	getStudioUserId,
 	hashInviteToken,
 	isStudioSessionActive,
-	redeemStudioInvite,
 	reclaimStaleStudioStream,
+	releaseStudioInviteParticipantClaim,
 	releaseStudioStreamNotificationClaim,
+	reserveStudioInviteParticipant,
 	resolveStudioInvite,
 	saveRecordingReadyMarker,
 	saveStudioSessionRecordingStatus,
@@ -54,6 +59,8 @@ import {
 	upsertStudioParticipant,
 	userIsConfiguredStudioOperator,
 	type StudioInvite,
+	type StudioInviteClaim,
+	type StudioParticipantProvisioning,
 	type StudioSessionRecord,
 	type StudioRole,
 	type StreamEnvironment,
@@ -64,12 +71,14 @@ export class StudioOperationError extends Error {
 		| "bad-request"
 		| "content-unavailable"
 		| "not-found"
-			| "provider-cleanup-failed"
-			| "provider-not-configured"
-			| "session-ended"
-			| "storage-not-configured"
-			| "stream-active"
-			| "unauthorized";
+		| "provider-cleanup-failed"
+		| "provider-not-configured"
+		| "provider-unavailable"
+		| "session-ended"
+		| "state-unavailable"
+		| "storage-not-configured"
+		| "stream-active"
+		| "unauthorized";
 	readonly status: number;
 
 	constructor(
@@ -169,6 +178,21 @@ async function requireConfiguredRealtimeKit(env: StudioEnv) {
 		);
 	}
 	return config;
+}
+
+function participantStateUnavailable(): StudioOperationError {
+	return new StudioOperationError(
+		"state-unavailable",
+		"Studio participant state could not be finalized. Retry joining.",
+		503,
+	);
+}
+
+function isDefinitiveRealtimeKitRejection(error: unknown): boolean {
+	return error instanceof RealtimeKitApiError &&
+		error.status >= 400 &&
+		error.status < 500 &&
+		![408, 409, 425, 429].includes(error.status);
 }
 
 function requireRecordingsBucket(env: StudioEnv): R2Bucket {
@@ -445,7 +469,7 @@ async function getStudioParticipantProfile(
 			user.name ||
 			resolvedHandle ||
 			"Studio participant",
-		participantId: resolvedHandle ?? getStudioUserId(user),
+		participantId: user.id,
 		person,
 		picture: person?.avatarUrl ?? user.image,
 	};
@@ -1067,10 +1091,56 @@ export async function issueStudioParticipantToken(
 		);
 	}
 
+	const profile = await getStudioParticipantProfile(env, user);
 	const config = await requireConfiguredRealtimeKit(env);
+	const preferredCustomParticipantId = createRealtimeKitCustomParticipantId(
+		input.role as RealtimeKitRole,
+		profile.participantId,
+	);
+	let provisioning: StudioParticipantProvisioning | null;
+	try {
+		provisioning = await getStudioParticipantProvisioning(env, {
+			customParticipantId: preferredCustomParticipantId,
+			role: input.role,
+			sessionId: session.id,
+			user,
+		});
+	} catch {
+		throw participantStateUnavailable();
+	}
+	const shouldTryLegacyIdentity = !provisioning || provisioning.state !== "ready";
+	const legacyGithubHandle = provisioning?.githubHandle ?? profile.githubHandle;
+	const legacyParticipantId = shouldTryLegacyIdentity && legacyGithubHandle
+		? legacyGithubHandle
+		: null;
+	const customParticipantIds = [...new Set([
+		provisioning?.customParticipantId,
+		legacyParticipantId
+			? createRealtimeKitCustomParticipantId(
+				input.role as RealtimeKitRole,
+				legacyParticipantId,
+			)
+			: null,
+		preferredCustomParticipantId,
+	].filter((candidate): candidate is string => Boolean(candidate)))];
+	let inviteClaim: StudioInviteClaim | null = null;
 	if (inviteToRedeem) {
-		const redeemed = await redeemStudioInvite(env, inviteToRedeem, user);
-		if (!redeemed) {
+		try {
+			inviteClaim = await reserveStudioInviteParticipant(
+				env,
+				inviteToRedeem,
+				user,
+				{
+					customParticipantId:
+						provisioning?.customParticipantId ?? preferredCustomParticipantId,
+					imageUrl: profile.picture,
+					name: profile.name,
+				},
+			);
+		} catch {
+			throw participantStateUnavailable();
+		}
+		if (!inviteClaim) {
 			throw new StudioOperationError(
 				"unauthorized",
 				"Guest invite token is no longer available.",
@@ -1078,31 +1148,74 @@ export async function issueStudioParticipantToken(
 			);
 		}
 	}
-	const profile = await getStudioParticipantProfile(env, user);
-	const participant = await addRealtimeKitParticipant(config, {
-		meetingId: session.realtimeKitMeetingId,
-		participantId: profile.participantId,
-		role: input.role as RealtimeKitRole,
-		name: profile.name,
-		picture: profile.picture,
-	});
-	await upsertStudioParticipant(env, {
-		person: profile.person
-			? {
-					avatarUrl: profile.person.avatarUrl,
-					githubHandle: profile.githubHandle,
-					id: profile.participantId,
-					name: profile.name,
-				}
-			: null,
-		sessionId: session.id,
-		user,
-		role: input.role,
-	});
+	let participant;
+	try {
+		participant = await addRealtimeKitParticipant(config, {
+			customParticipantId: provisioning?.customParticipantId,
+			legacyParticipantId,
+			meetingId: session.realtimeKitMeetingId,
+			participantId: profile.participantId,
+			role: input.role as RealtimeKitRole,
+			name: profile.name,
+			picture: profile.picture,
+		});
+	} catch (error) {
+		if (inviteClaim && isDefinitiveRealtimeKitRejection(error)) {
+			const providerIdentity = await getRealtimeKitParticipantIdentity(config, {
+				customParticipantIds,
+				meetingId: session.realtimeKitMeetingId,
+			}).catch(() => undefined);
+			if (providerIdentity === null) {
+				await releaseStudioInviteParticipantClaim(env, inviteClaim).catch(
+					() => undefined,
+				);
+			}
+		}
+		const diagnostic = error instanceof RealtimeKitApiError
+			? ` ${error.message}.`
+			: "";
+		throw new StudioOperationError(
+			"provider-unavailable",
+			`RealtimeKit participant setup failed.${diagnostic}`,
+			502,
+		);
+	}
+	try {
+		if (inviteClaim) {
+			const finalized = await finalizeStudioInviteParticipant(
+				env,
+				inviteClaim,
+				participant,
+			);
+			if (!finalized) throw participantStateUnavailable();
+		} else {
+			await upsertStudioParticipant(env, {
+				person: profile.person
+					? {
+							avatarUrl: profile.person.avatarUrl,
+							githubHandle: profile.githubHandle,
+							id: profile.participantId,
+							name: profile.name,
+						}
+					: null,
+				realtimeKit: {
+					customParticipantId: participant.customParticipantId,
+					participantId: participant.participantId,
+				},
+				sessionId: session.id,
+				user,
+				role: input.role,
+			});
+		}
+	} catch (error) {
+		if (error instanceof StudioOperationError) throw error;
+		throw participantStateUnavailable();
+	}
 	return {
-		...participant,
 		meetingId: session.realtimeKitMeetingId,
+		participantId: participant.participantId,
 		sessionId: session.id,
+		token: participant.token,
 	};
 }
 

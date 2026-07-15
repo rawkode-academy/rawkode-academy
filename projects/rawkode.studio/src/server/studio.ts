@@ -133,6 +133,22 @@ export interface ResolvedStudioInvite {
 	session: StudioSessionRecord;
 }
 
+export interface StudioInviteClaim {
+	claimId: string;
+	customParticipantId: string;
+	role: StudioRole;
+	sessionId: string;
+	tokenHash: string;
+	userId: string;
+}
+
+export interface StudioParticipantProvisioning {
+	customParticipantId: string | null;
+	githubHandle: string | null;
+	participantId: string | null;
+	state: "pending" | "ready" | "unknown";
+}
+
 type StudioSessionRow = {
 	id: string;
 	content_video_id: string | null;
@@ -1577,6 +1593,10 @@ export async function upsertStudioParticipant(
 	env: StudioEnv,
 	input: {
 		person?: StudioPersonSummary | null;
+		realtimeKit?: {
+			customParticipantId: string;
+			participantId: string;
+		};
 		sessionId: string;
 		user: StudioUser;
 		role: StudioRole;
@@ -1594,14 +1614,31 @@ export async function upsertStudioParticipant(
 				role,
 				name,
 				image_url,
-				joined_at
+				joined_at,
+				realtimekit_custom_participant_id,
+				realtimekit_participant_id,
+				provisioning_state
 			)
-			VALUES (?, ?, ?, ?, ?, ?, unixepoch())
+			VALUES (?, ?, ?, ?, ?, ?, unixepoch(), ?, ?, ?)
 			ON CONFLICT(session_id, user_id, role) DO UPDATE SET
 				github_handle = excluded.github_handle,
 				name = excluded.name,
 				image_url = excluded.image_url,
-				joined_at = excluded.joined_at`,
+				joined_at = excluded.joined_at,
+				realtimekit_custom_participant_id = COALESCE(
+					excluded.realtimekit_custom_participant_id,
+					studio_participants.realtimekit_custom_participant_id
+				),
+				realtimekit_participant_id = CASE
+					WHEN excluded.realtimekit_custom_participant_id IS NOT NULL
+					THEN excluded.realtimekit_participant_id
+					ELSE studio_participants.realtimekit_participant_id
+				END,
+				provisioning_state = CASE
+					WHEN excluded.realtimekit_custom_participant_id IS NOT NULL
+					THEN excluded.provisioning_state
+					ELSE studio_participants.provisioning_state
+				END`,
 		)
 		.bind(
 			input.sessionId,
@@ -1613,8 +1650,63 @@ export async function upsertStudioParticipant(
 				getStudioUserGithubHandle(input.user) ||
 				"Studio participant",
 			input.person?.avatarUrl ?? input.user.image,
+			input.realtimeKit?.customParticipantId ?? null,
+			input.realtimeKit?.participantId ?? null,
+			input.realtimeKit ? "ready" : "unknown",
 		)
 		.run();
+}
+
+export async function getStudioParticipantProvisioning(
+	env: StudioEnv,
+	input: {
+		customParticipantId: string;
+		role: StudioRole;
+		sessionId: string;
+		user: StudioUser;
+	},
+): Promise<StudioParticipantProvisioning | null> {
+	const db = getDb(env);
+	if (!db) return null;
+	return await db
+		.prepare(
+			`SELECT github_handle,
+			        realtimekit_custom_participant_id,
+			        realtimekit_participant_id,
+			        provisioning_state
+			   FROM studio_participants
+			  WHERE session_id = ?
+			    AND role = ?
+			    AND (
+			      user_id = ?
+			      OR github_handle = ?
+			      OR realtimekit_custom_participant_id = ?
+			    )
+			  ORDER BY CASE WHEN user_id = ? THEN 0 ELSE 1 END
+			  LIMIT 1`,
+		)
+		.bind(
+			input.sessionId,
+			input.role,
+			getStudioUserId(input.user),
+			getStudioUserGithubHandle(input.user),
+			input.customParticipantId,
+			getStudioUserId(input.user),
+		)
+		.first<{
+			github_handle: string | null;
+			provisioning_state: StudioParticipantProvisioning["state"];
+			realtimekit_custom_participant_id: string | null;
+			realtimekit_participant_id: string | null;
+		}>()
+		.then((row) => row
+			? {
+					customParticipantId: row.realtimekit_custom_participant_id,
+					githubHandle: row.github_handle,
+					participantId: row.realtimekit_participant_id,
+					state: row.provisioning_state,
+				}
+			: null);
 }
 
 export async function createStudioInviteRecord(
@@ -1766,60 +1858,302 @@ function redactStudioSessionProviderUrls(
 	};
 }
 
-export async function redeemStudioInvite(
+export async function reserveStudioInviteParticipant(
 	env: StudioEnv,
 	invite: StudioInvite,
 	user: StudioUser,
-): Promise<boolean> {
+	input: {
+		customParticipantId: string;
+		imageUrl: string | null;
+		name: string;
+	},
+): Promise<StudioInviteClaim | null> {
+	const userId = getStudioUserId(user);
+	const claimId = await hashInviteToken(`${invite.tokenHash}:${userId}`);
+	const claim = {
+		claimId,
+		customParticipantId: input.customParticipantId,
+		role: invite.role,
+		sessionId: invite.sessionId,
+		tokenHash: invite.tokenHash,
+		userId,
+	} satisfies StudioInviteClaim;
 	const db = getDb(env);
-	if (!db || invite.tokenHash === "demo") return true;
+	if (!db || invite.tokenHash === "demo") return claim;
 
-	const existing = await db
-		.prepare(
-			`SELECT user_id
-			   FROM studio_invite_redemptions
-			  WHERE token_hash = ?
-			    AND user_id = ?
-			  LIMIT 1`,
-		)
-		.bind(invite.tokenHash, getStudioUserId(user))
-		.first<{ user_id: string }>();
-	if (existing) return true;
-
-	const update = await db
-		.prepare(
-			`UPDATE studio_invites
-			    SET used_count = used_count + 1
-			  WHERE token_hash = ?
-			    AND revoked_at IS NULL
-			    AND expires_at > unixepoch()
-			    AND (max_uses = 0 OR used_count < max_uses)`,
-		)
-		.bind(invite.tokenHash)
-		.run();
-	const updateMeta = update.meta as {
-		changes?: number;
-		rows_written?: number;
-	};
-	if ((updateMeta.changes ?? updateMeta.rows_written ?? 0) < 1) {
-		return false;
-	}
-
-	await db
-		.prepare(
+	const [claimResult, participantResult] = await db.batch([
+		db.prepare(
 			`INSERT INTO studio_invite_redemptions (
 				token_hash,
 				user_id,
 				github_handle,
-				redeemed_at
+				redeemed_at,
+				state,
+				claim_id,
+				finalized_at
 			)
-			VALUES (?, ?, ?, unixepoch())
-			ON CONFLICT(token_hash, user_id) DO NOTHING`,
-		)
-		.bind(invite.tokenHash, getStudioUserId(user), getStudioUserGithubHandle(user))
-		.run();
+			SELECT studio_invites.token_hash,
+			       ?,
+			       ?,
+			       unixepoch(),
+			       'pending',
+			       ?,
+			       NULL
+			  FROM studio_invites
+			 WHERE studio_invites.token_hash = ?
+			   AND studio_invites.session_id = ?
+			   AND studio_invites.role = ?
+			   AND studio_invites.revoked_at IS NULL
+			   AND studio_invites.expires_at > unixepoch()
+			   AND (
+			     studio_invites.max_uses = 0
+			     OR EXISTS (
+			       SELECT 1
+			         FROM studio_invite_redemptions AS existing_claim
+			        WHERE existing_claim.token_hash = studio_invites.token_hash
+			          AND existing_claim.user_id = ?
+			          AND existing_claim.state IN ('pending', 'redeemed')
+			     )
+			     OR (
+			       SELECT COUNT(*)
+			         FROM studio_invite_redemptions AS active_claim
+			        WHERE active_claim.token_hash = studio_invites.token_hash
+			          AND active_claim.state IN ('pending', 'redeemed')
+			     ) < studio_invites.max_uses
+			   )
+			ON CONFLICT(token_hash, user_id) DO UPDATE SET
+				github_handle = excluded.github_handle,
+				claim_id = excluded.claim_id
+			WHERE studio_invite_redemptions.state IN ('pending', 'redeemed')`,
+		).bind(
+			userId,
+			getStudioUserGithubHandle(user),
+			claimId,
+			invite.tokenHash,
+			invite.sessionId,
+			invite.role,
+			userId,
+		),
+		db.prepare(
+			`INSERT INTO studio_participants (
+				session_id,
+				user_id,
+				github_handle,
+				role,
+				name,
+				image_url,
+				joined_at,
+				realtimekit_custom_participant_id,
+				realtimekit_participant_id,
+				provisioning_state,
+				invite_token_hash,
+				invite_claim_id
+			)
+			SELECT ?, ?, ?, ?, ?, ?, unixepoch(), ?, NULL, 'pending', ?, ?
+			 WHERE EXISTS (
+			   SELECT 1
+			     FROM studio_invite_redemptions
+			    WHERE token_hash = ?
+			      AND user_id = ?
+			      AND claim_id = ?
+			      AND state IN ('pending', 'redeemed')
+			 )
+			ON CONFLICT(session_id, user_id, role) DO UPDATE SET
+				github_handle = excluded.github_handle,
+				name = excluded.name,
+				image_url = excluded.image_url,
+				joined_at = excluded.joined_at,
+				realtimekit_custom_participant_id = excluded.realtimekit_custom_participant_id,
+				realtimekit_participant_id = CASE
+					WHEN studio_participants.realtimekit_custom_participant_id = excluded.realtimekit_custom_participant_id
+					THEN studio_participants.realtimekit_participant_id
+					ELSE NULL
+				END,
+				provisioning_state = CASE
+					WHEN studio_participants.realtimekit_custom_participant_id = excluded.realtimekit_custom_participant_id
+					 AND studio_participants.realtimekit_participant_id IS NOT NULL
+					 AND studio_participants.provisioning_state = 'ready'
+					THEN 'ready'
+					ELSE 'pending'
+				END,
+				invite_token_hash = excluded.invite_token_hash,
+				invite_claim_id = excluded.invite_claim_id`,
+		).bind(
+			invite.sessionId,
+			userId,
+			getStudioUserGithubHandle(user),
+			invite.role,
+			input.name,
+			input.imageUrl,
+			input.customParticipantId,
+			invite.tokenHash,
+			claimId,
+			invite.tokenHash,
+			userId,
+			claimId,
+		),
+	]);
 
-	return true;
+	return claimResult &&
+		participantResult &&
+		d1WriteChanged(claimResult) &&
+		d1WriteChanged(participantResult)
+		? claim
+		: null;
+}
+
+export async function finalizeStudioInviteParticipant(
+	env: StudioEnv,
+	claim: StudioInviteClaim,
+	provider: {
+		customParticipantId: string;
+		participantId: string;
+	},
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db || claim.tokenHash === "demo") return true;
+
+	const [participantResult, redemptionResult] = await db.batch([
+		db.prepare(
+			`UPDATE studio_participants
+			    SET realtimekit_custom_participant_id = ?,
+			        realtimekit_participant_id = ?,
+			        provisioning_state = 'ready',
+			        joined_at = unixepoch()
+			  WHERE session_id = ?
+			    AND user_id = ?
+			    AND role = ?
+			    AND invite_token_hash = ?
+			    AND invite_claim_id = ?
+			    AND realtimekit_custom_participant_id IN (?, ?)
+			    AND (realtimekit_participant_id IS NULL OR realtimekit_participant_id = ?)`,
+		).bind(
+			provider.customParticipantId,
+			provider.participantId,
+			claim.sessionId,
+			claim.userId,
+			claim.role,
+			claim.tokenHash,
+			claim.claimId,
+			claim.customParticipantId,
+			provider.customParticipantId,
+			provider.participantId,
+		),
+		db.prepare(
+			`UPDATE studio_invite_redemptions
+			    SET state = 'redeemed',
+			        finalized_at = COALESCE(finalized_at, unixepoch())
+			  WHERE token_hash = ?
+			    AND user_id = ?
+			    AND claim_id = ?
+			    AND state IN ('pending', 'redeemed')
+			    AND EXISTS (
+			      SELECT 1
+			        FROM studio_participants
+			       WHERE session_id = ?
+			         AND user_id = ?
+			         AND role = ?
+			         AND realtimekit_custom_participant_id = ?
+			         AND realtimekit_participant_id = ?
+			         AND provisioning_state = 'ready'
+			         AND invite_token_hash = ?
+			         AND invite_claim_id = ?
+			    )`,
+		).bind(
+			claim.tokenHash,
+			claim.userId,
+			claim.claimId,
+			claim.sessionId,
+			claim.userId,
+			claim.role,
+			provider.customParticipantId,
+			provider.participantId,
+			claim.tokenHash,
+			claim.claimId,
+		),
+		db.prepare(
+			`UPDATE studio_invites
+			    SET used_count = (
+			      SELECT COUNT(*)
+			        FROM studio_invite_redemptions
+			       WHERE studio_invite_redemptions.token_hash = studio_invites.token_hash
+			         AND studio_invite_redemptions.state = 'redeemed'
+			    )
+			  WHERE token_hash = ?`,
+		).bind(claim.tokenHash),
+	]);
+
+	return Boolean(
+		participantResult &&
+		redemptionResult &&
+		d1WriteChanged(participantResult) &&
+		d1WriteChanged(redemptionResult),
+	);
+}
+
+export async function releaseStudioInviteParticipantClaim(
+	env: StudioEnv,
+	claim: StudioInviteClaim,
+): Promise<boolean> {
+	const db = getDb(env);
+	if (!db || claim.tokenHash === "demo") return true;
+
+	const [, redemptionResult] = await db.batch([
+		db.prepare(
+			`DELETE FROM studio_participants
+			  WHERE session_id = ?
+			    AND user_id = ?
+			    AND role = ?
+			    AND realtimekit_custom_participant_id = ?
+			    AND realtimekit_participant_id IS NULL
+			    AND provisioning_state = 'pending'
+			    AND invite_token_hash = ?
+			    AND invite_claim_id = ?`,
+		).bind(
+			claim.sessionId,
+			claim.userId,
+			claim.role,
+			claim.customParticipantId,
+			claim.tokenHash,
+			claim.claimId,
+		),
+		db.prepare(
+			`DELETE FROM studio_invite_redemptions
+			  WHERE token_hash = ?
+			    AND user_id = ?
+			    AND claim_id = ?
+			    AND state = 'pending'
+			    AND NOT EXISTS (
+			      SELECT 1
+			        FROM studio_participants
+			       WHERE session_id = ?
+			         AND user_id = ?
+			         AND role = ?
+			         AND realtimekit_custom_participant_id = ?
+			         AND (realtimekit_participant_id IS NOT NULL OR provisioning_state = 'ready')
+			    )`,
+		).bind(
+			claim.tokenHash,
+			claim.userId,
+			claim.claimId,
+			claim.sessionId,
+			claim.userId,
+			claim.role,
+			claim.customParticipantId,
+		),
+		db.prepare(
+			`UPDATE studio_invites
+			    SET used_count = (
+			      SELECT COUNT(*)
+			        FROM studio_invite_redemptions
+			       WHERE studio_invite_redemptions.token_hash = studio_invites.token_hash
+			         AND studio_invite_redemptions.state = 'redeemed'
+			    )
+			  WHERE token_hash = ?`,
+		).bind(claim.tokenHash),
+	]);
+
+	return Boolean(redemptionResult && d1WriteChanged(redemptionResult));
 }
 
 export async function saveRecordingReadyMarker(

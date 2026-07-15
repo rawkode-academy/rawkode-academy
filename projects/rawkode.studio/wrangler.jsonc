@@ -60,10 +60,10 @@
 		"RAWKODE_GRAPHQL_URL": "https://api.rawkode.academy/",
 		"RECORDINGS_BUCKET_NAME": "rawkode-academy-content",
 		"STUDIO_OPERATOR_GITHUB_HANDLES": "rawkode",
-		"REALTIMEKIT_HOST_PRESET": "rawkode-studio-host",
-		"REALTIMEKIT_PRODUCER_PRESET": "rawkode-studio-producer",
-		"REALTIMEKIT_GUEST_PRESET": "rawkode-studio-guest",
-		"REALTIMEKIT_PROGRAM_PRESET": "rawkode-studio-program"
+		"REALTIMEKIT_HOST_PRESET": "group_call_host",
+		"REALTIMEKIT_PRODUCER_PRESET": "group_call_host",
+		"REALTIMEKIT_GUEST_PRESET": "group_call_guest",
+		"REALTIMEKIT_PROGRAM_PRESET": "group_call_host"
 	},
 	"secrets_store_secrets": [
 		{

@@ -24,13 +24,18 @@ import {
 	buildStudioSession,
 	createReadyMarker,
 	createReadyMarkerKey,
+	finalizeStudioInviteParticipant,
 	getPublicStudioLiveState,
 	getStudioSession,
 	getStudioSessionWatchUrl,
 	hashInviteToken,
 	listStudioRecordings,
 	loadStudioDashboard,
+	releaseStudioInviteParticipantClaim,
+	reserveStudioInviteParticipant,
 	resolveStudioInvite,
+	type StudioInvite,
+	type StudioInviteClaim,
 	userCanManageStudioSession,
 } from "./studio";
 
@@ -98,6 +103,31 @@ type StudioInviteDbRow = {
 	revoked_at: number | null;
 };
 
+type StudioInviteRedemptionDbRow = {
+	claim_id: string | null;
+	finalized_at: number | null;
+	github_handle: string | null;
+	redeemed_at: number;
+	state: "pending" | "redeemed";
+	token_hash: string;
+	user_id: string;
+};
+
+type StudioParticipantDbRow = {
+	github_handle: string | null;
+	image_url: string | null;
+	invite_claim_id: string | null;
+	invite_token_hash: string | null;
+	joined_at: number;
+	name: string;
+	provisioning_state: "pending" | "ready" | "unknown";
+	realtimekit_custom_participant_id: string | null;
+	realtimekit_participant_id: string | null;
+	role: "guest" | "host" | "producer" | "program";
+	session_id: string;
+	user_id: string;
+};
+
 type StudioDbMockOptions = Partial<{
 	content_guests_json: string;
 	content_hosts_json: string;
@@ -122,20 +152,40 @@ type StudioDbMockOptions = Partial<{
 	updated_at: number;
 }> & {
 	inviteRows?: StudioInviteDbRow[];
+	failFinalizeBatches?: number;
+	participantRows?: StudioParticipantDbRow[];
 	recordingRows?: StudioRecordingDbRow[];
 	replaceLeaseBeforeEnd?: { liveInputId: string; startToken: string };
-	redemptionRows?: Array<{ token_hash: string; user_id: string }>;
+	redemptionRows?: Array<Partial<StudioInviteRedemptionDbRow> & {
+		token_hash: string;
+		user_id: string;
+	}>;
 };
 
 function createStudioDbMock(options: StudioDbMockOptions = {}) {
 	const {
+		failFinalizeBatches = 0,
 		inviteRows = [],
+		participantRows = [],
 		recordingRows = [],
 		replaceLeaseBeforeEnd,
-		redemptionRows = [],
+		redemptionRows: initialRedemptionRows = [],
 		...overrides
 	} = options;
+	let remainingFinalizeBatchFailures = failFinalizeBatches;
+	const redemptionRows: StudioInviteRedemptionDbRow[] = initialRedemptionRows.map(
+		(row) => ({
+			claim_id: row.claim_id ?? null,
+			finalized_at: row.finalized_at ?? row.redeemed_at ?? 1,
+			github_handle: row.github_handle ?? row.user_id,
+			redeemed_at: row.redeemed_at ?? 1,
+			state: row.state ?? "redeemed",
+			token_hash: row.token_hash,
+			user_id: row.user_id,
+		}),
+	);
 	let leaseReplacementApplied = false;
+	let batchQueue = Promise.resolve();
 	const writes: Array<{ params: unknown[]; sql: string }> = [];
 	const sessionRow = {
 		id: "rawkode-live-next",
@@ -166,6 +216,37 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		...overrides,
 	};
 	const db = {
+		batch: (statements: D1PreparedStatement[]) => {
+			const execute = async () => {
+				const inviteSnapshot = inviteRows.map((row) => ({ ...row }));
+				const participantSnapshot = participantRows.map((row) => ({ ...row }));
+				const redemptionSnapshot = redemptionRows.map((row) => ({ ...row }));
+				const firstSql = String((statements[0] as unknown as { __sql?: string }).__sql ?? "");
+				if (
+					remainingFinalizeBatchFailures > 0 &&
+					firstSql.includes("UPDATE studio_participants") &&
+					firstSql.includes("provisioning_state = 'ready'")
+				) {
+					remainingFinalizeBatchFailures -= 1;
+					throw new Error("injected participant finalization failure");
+				}
+				try {
+					const results: D1Result<unknown>[] = [];
+					for (const statement of statements) {
+						results.push(await statement.run());
+					}
+					return results;
+				} catch (error) {
+					inviteRows.splice(0, inviteRows.length, ...inviteSnapshot);
+					participantRows.splice(0, participantRows.length, ...participantSnapshot);
+					redemptionRows.splice(0, redemptionRows.length, ...redemptionSnapshot);
+					throw error;
+				}
+			};
+			const pending = batchQueue.then(execute, execute);
+			batchQueue = pending.then(() => undefined, () => undefined);
+			return pending;
+		},
 		prepare: (sql: string) => {
 			const all = async (...params: unknown[]) => ({
 				results: sql.includes("FROM studio_recordings")
@@ -177,8 +258,41 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 			return {
 				all: async () => all(),
 				bind: (...params: unknown[]) => ({
+					__params: params,
+					__sql: sql,
 					all: async () => all(...params),
 					first: async () => {
+						if (
+							sql.includes("realtimekit_custom_participant_id") &&
+							sql.includes("FROM studio_participants")
+						) {
+							const [
+								sessionId,
+								role,
+								userId,
+								githubHandle,
+								customParticipantId,
+							] = params.map(String);
+							const rows = participantRows.filter((row) =>
+								row.session_id === sessionId &&
+								row.role === role &&
+								(
+									row.user_id === userId ||
+									row.github_handle === githubHandle ||
+									row.realtimekit_custom_participant_id === customParticipantId
+								)
+							);
+							const row = rows.find((candidate) => candidate.user_id === userId) ?? rows[0];
+							return row
+								? {
+									github_handle: row.github_handle,
+									provisioning_state: row.provisioning_state,
+									realtimekit_custom_participant_id:
+										row.realtimekit_custom_participant_id,
+									realtimekit_participant_id: row.realtimekit_participant_id,
+								}
+								: null;
+						}
 						if (
 							sql.includes("SELECT cloudflare_stream_live_input_id") &&
 							sql.includes("stream_status IN ('starting', 'live')")
@@ -249,6 +363,334 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 					run: async () => {
 						let changes = 1;
 						writes.push({ sql, params });
+						if (
+							sql.includes("INSERT INTO studio_invite_redemptions") &&
+							sql.includes("'pending'")
+						) {
+							const [
+								userId,
+								githubHandle,
+								claimId,
+								tokenHash,
+								sessionId,
+								role,
+							] = params.map((param) => String(param ?? ""));
+							const invite = inviteRows.find((row) =>
+								row.token_hash === tokenHash &&
+								row.session_id === sessionId &&
+								row.role === role &&
+								row.revoked_at === null &&
+								row.expires_at > Math.floor(Date.now() / 1000)
+							);
+							const existing = redemptionRows.find((row) =>
+								row.token_hash === tokenHash && row.user_id === userId
+							);
+							const activeClaimCount = redemptionRows.filter((row) =>
+								row.token_hash === tokenHash &&
+								(row.state === "pending" || row.state === "redeemed")
+							).length;
+							const canReserve = Boolean(
+								invite &&
+								(
+									invite.max_uses === 0 ||
+									Boolean(existing && (
+										existing.state === "pending" || existing.state === "redeemed"
+									)) ||
+									activeClaimCount < invite.max_uses
+								)
+							);
+							if (!canReserve) {
+								changes = 0;
+							} else if (existing) {
+								existing.github_handle = githubHandle || null;
+								existing.claim_id = claimId;
+							} else {
+								redemptionRows.push({
+									claim_id: claimId,
+									finalized_at: null,
+									github_handle: githubHandle || null,
+									redeemed_at: Math.floor(Date.now() / 1000),
+									state: "pending",
+									token_hash: tokenHash,
+									user_id: userId,
+								});
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (
+							sql.includes("INSERT INTO studio_participants") &&
+							sql.includes("'pending'")
+						) {
+							const [
+								sessionId,
+								userId,
+								githubHandle,
+								role,
+								name,
+								imageUrl,
+								customParticipantId,
+								inviteTokenHash,
+								inviteClaimId,
+								tokenHash,
+								claimedUserId,
+								claimId,
+							] = params.map((param) => param === null ? null : String(param));
+							const hasClaim = redemptionRows.some((row) =>
+								row.token_hash === tokenHash &&
+								row.user_id === claimedUserId &&
+								row.claim_id === claimId &&
+								(row.state === "pending" || row.state === "redeemed")
+							);
+							if (!hasClaim) {
+								changes = 0;
+							} else {
+								const existing = participantRows.find((row) =>
+									row.session_id === sessionId &&
+									row.user_id === userId &&
+									row.role === role
+								);
+								const next = {
+									github_handle: githubHandle,
+									image_url: imageUrl,
+									invite_claim_id: inviteClaimId,
+									invite_token_hash: inviteTokenHash,
+									joined_at: Math.floor(Date.now() / 1000),
+									name: name ?? "Studio participant",
+									provisioning_state: "pending" as const,
+									realtimekit_custom_participant_id: customParticipantId,
+									realtimekit_participant_id: null,
+									role: role as StudioParticipantDbRow["role"],
+									session_id: sessionId ?? "",
+									user_id: userId ?? "",
+								};
+								if (existing) {
+									const preserveReady =
+										existing.realtimekit_custom_participant_id === customParticipantId &&
+										existing.realtimekit_participant_id !== null &&
+										existing.provisioning_state === "ready";
+									Object.assign(existing, next, preserveReady
+										? {
+											provisioning_state: "ready",
+											realtimekit_participant_id:
+												existing.realtimekit_participant_id,
+										}
+										: {});
+								} else {
+									participantRows.push(next);
+								}
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (
+							sql.includes("UPDATE studio_participants") &&
+							sql.includes("provisioning_state = 'ready'")
+						) {
+							const [
+								providerCustomId,
+								providerParticipantId,
+								sessionId,
+								userId,
+								role,
+								tokenHash,
+								claimId,
+								claimCustomId,
+								allowedProviderCustomId,
+								allowedProviderParticipantId,
+							] = params.map(String);
+							const row = participantRows.find((candidate) =>
+								candidate.session_id === sessionId &&
+								candidate.user_id === userId &&
+								candidate.role === role &&
+								candidate.invite_token_hash === tokenHash &&
+								candidate.invite_claim_id === claimId &&
+								(
+									candidate.realtimekit_custom_participant_id === claimCustomId ||
+									candidate.realtimekit_custom_participant_id === allowedProviderCustomId
+								) &&
+								(
+									candidate.realtimekit_participant_id === null ||
+									candidate.realtimekit_participant_id === allowedProviderParticipantId
+								)
+							);
+							if (!row) {
+								changes = 0;
+							} else {
+								row.realtimekit_custom_participant_id = providerCustomId;
+								row.realtimekit_participant_id = providerParticipantId;
+								row.provisioning_state = "ready";
+								row.joined_at = Math.floor(Date.now() / 1000);
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (
+							sql.includes("UPDATE studio_invite_redemptions") &&
+							sql.includes("SET state = 'redeemed'")
+						) {
+							const [
+								tokenHash,
+								userId,
+								claimId,
+								sessionId,
+								participantUserId,
+								role,
+								customParticipantId,
+								participantId,
+								participantTokenHash,
+								participantClaimId,
+							] = params.map(String);
+							const redemption = redemptionRows.find((row) =>
+								row.token_hash === tokenHash &&
+								row.user_id === userId &&
+								row.claim_id === claimId &&
+								(row.state === "pending" || row.state === "redeemed")
+							);
+							const participant = participantRows.find((row) =>
+								row.session_id === sessionId &&
+								row.user_id === participantUserId &&
+								row.role === role &&
+								row.realtimekit_custom_participant_id === customParticipantId &&
+								row.realtimekit_participant_id === participantId &&
+								row.provisioning_state === "ready" &&
+								row.invite_token_hash === participantTokenHash &&
+								row.invite_claim_id === participantClaimId
+							);
+							if (!redemption || !participant) {
+								changes = 0;
+							} else {
+								redemption.state = "redeemed";
+								redemption.finalized_at ??= Math.floor(Date.now() / 1000);
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (
+							sql.includes("UPDATE studio_invites") &&
+							sql.includes("SELECT COUNT(*)")
+						) {
+							const tokenHash = String(params[0]);
+							const invite = inviteRows.find((row) => row.token_hash === tokenHash);
+							if (!invite) {
+								changes = 0;
+							} else {
+								invite.used_count = redemptionRows.filter((row) =>
+									row.token_hash === tokenHash && row.state === "redeemed"
+								).length;
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (
+							sql.includes("DELETE FROM studio_participants") &&
+							sql.includes("provisioning_state = 'pending'")
+						) {
+							const [
+								sessionId,
+								userId,
+								role,
+								customParticipantId,
+								tokenHash,
+								claimId,
+							] = params.map(String);
+							const index = participantRows.findIndex((row) =>
+								row.session_id === sessionId &&
+								row.user_id === userId &&
+								row.role === role &&
+								row.realtimekit_custom_participant_id === customParticipantId &&
+								row.realtimekit_participant_id === null &&
+								row.provisioning_state === "pending" &&
+								row.invite_token_hash === tokenHash &&
+								row.invite_claim_id === claimId
+							);
+							if (index < 0) {
+								changes = 0;
+							} else {
+								participantRows.splice(index, 1);
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (
+							sql.includes("DELETE FROM studio_invite_redemptions") &&
+							sql.includes("state = 'pending'")
+						) {
+							const [
+								tokenHash,
+								userId,
+								claimId,
+								sessionId,
+								participantUserId,
+								role,
+								customParticipantId,
+							] = params.map(String);
+							const protectedParticipant = participantRows.some((row) =>
+								row.session_id === sessionId &&
+								row.user_id === participantUserId &&
+								row.role === role &&
+								row.realtimekit_custom_participant_id === customParticipantId &&
+								(
+									row.realtimekit_participant_id !== null ||
+									row.provisioning_state === "ready"
+								)
+							);
+							const index = protectedParticipant
+								? -1
+								: redemptionRows.findIndex((row) =>
+									row.token_hash === tokenHash &&
+									row.user_id === userId &&
+									row.claim_id === claimId &&
+									row.state === "pending"
+								);
+							if (index < 0) {
+								changes = 0;
+							} else {
+								redemptionRows.splice(index, 1);
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
+						if (sql.includes("INSERT INTO studio_participants")) {
+							const [
+								sessionId,
+								userId,
+								githubHandle,
+								role,
+								name,
+								imageUrl,
+								customParticipantId,
+								providerParticipantId,
+								provisioningState,
+							] = params.map((param) => param === null ? null : String(param));
+							const row = participantRows.find((candidate) =>
+								candidate.session_id === sessionId &&
+								candidate.user_id === userId &&
+								candidate.role === role
+							);
+							const base = {
+								github_handle: githubHandle,
+								image_url: imageUrl,
+								joined_at: Math.floor(Date.now() / 1000),
+								name: name ?? "Studio participant",
+								role: role as StudioParticipantDbRow["role"],
+								session_id: sessionId ?? "",
+								user_id: userId ?? "",
+							};
+							if (row) {
+								Object.assign(row, base);
+								if (customParticipantId !== null) {
+									row.realtimekit_custom_participant_id = customParticipantId;
+									row.realtimekit_participant_id = providerParticipantId;
+									row.provisioning_state =
+										provisioningState as StudioParticipantDbRow["provisioning_state"];
+								}
+							} else {
+								participantRows.push({
+									...base,
+									invite_claim_id: null,
+									invite_token_hash: null,
+									provisioning_state: (provisioningState ?? "unknown") as
+										StudioParticipantDbRow["provisioning_state"],
+									realtimekit_custom_participant_id: customParticipantId,
+									realtimekit_participant_id: providerParticipantId,
+								});
+							}
+							return { meta: { changes, rows_written: changes } };
+						}
 						if (sql.includes("INSERT INTO studio_recordings")) {
 							const now = Math.floor(Date.now() / 1000);
 							const recordingId = String(params[0]);
@@ -452,7 +894,63 @@ function createStudioDbMock(options: StudioDbMockOptions = {}) {
 		},
 	} as unknown as D1Database;
 
-	return { db, sessionRow, writes };
+	return {
+		db,
+		inviteRows,
+		participantRows,
+		redemptionRows,
+		sessionRow,
+		writes,
+	};
+}
+
+async function createGuestInviteFixture(maxUses = 1): Promise<{
+	invite: StudioInvite;
+	row: StudioInviteDbRow;
+	token: string;
+}> {
+	const token = "guest-invite";
+	const tokenHash = await hashInviteToken(token);
+	const now = Math.floor(Date.now() / 1000);
+	const row: StudioInviteDbRow = {
+		token_hash: tokenHash,
+		session_id: "rawkode-live-next",
+		role: "guest",
+		expires_at: now + 60 * 60,
+		max_uses: maxUses,
+		used_count: 0,
+		created_by_id: "rawkode",
+		created_by_github: "rawkode",
+		created_at: now,
+		revoked_at: null,
+	};
+	return {
+		invite: {
+			tokenHash,
+			sessionId: row.session_id,
+			role: row.role,
+			expiresAt: row.expires_at,
+			maxUses: row.max_uses,
+			usedCount: row.used_count,
+			createdById: row.created_by_id,
+			createdByGithub: row.created_by_github,
+			createdAt: row.created_at,
+			revokedAt: row.revoked_at,
+		},
+		row,
+		token,
+	};
+}
+
+function createRealtimeKitStudioEnv(db: D1Database): StudioEnv {
+	return {
+		CLOUDFLARE_ACCOUNT_ID: "account-1",
+		REALTIMEKIT_API_TOKEN: "token-1",
+		REALTIMEKIT_APP_ID: "app-1",
+		REALTIMEKIT_GUEST_PRESET: "group_call_guest",
+		STUDIO_DB: db,
+		STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
+	} as StudioEnv;
 }
 
 function createRecordingBucketMock() {
@@ -981,6 +1479,10 @@ describe("Studio operations", () => {
 		expect(wrangler.vars).toMatchObject({
 			CLOUDFLARE_ACCOUNT_ID: "0aeb879de8e3cdde5fb3d413025222ce",
 			RAWKODE_GRAPHQL_URL: "https://api.rawkode.academy/",
+			REALTIMEKIT_GUEST_PRESET: "group_call_guest",
+			REALTIMEKIT_HOST_PRESET: "group_call_host",
+			REALTIMEKIT_PRODUCER_PRESET: "group_call_host",
+			REALTIMEKIT_PROGRAM_PRESET: "group_call_host",
 			RECORDINGS_BUCKET_NAME: "rawkode-academy-content",
 			STUDIO_OPERATOR_GITHUB_HANDLES: "rawkode",
 		});
@@ -1090,6 +1592,10 @@ describe("Studio operations", () => {
 			new URL("../../data-model/0003_stream_state.sql", import.meta.url),
 			"utf8",
 		);
+		const participantProvisioningMigration = readFileSync(
+			new URL("../../data-model/0004_participant_provisioning.sql", import.meta.url),
+			"utf8",
+		);
 
 		expect(migration).toContain("ADD COLUMN content_video_id TEXT");
 		expect(migration).toContain(
@@ -1105,6 +1611,29 @@ describe("Studio operations", () => {
 		expect(streamMigration).toContain("ADD COLUMN cloudflare_stream_playback_url TEXT");
 		expect(streamMigration).toContain("ADD COLUMN stream_notification_queued_at INTEGER");
 		expect(streamMigration).toContain("ADD COLUMN stream_start_token TEXT");
+		expect(participantProvisioningMigration).toContain(
+			"ADD COLUMN state TEXT NOT NULL DEFAULT 'redeemed'",
+		);
+		expect(participantProvisioningMigration).toContain("ADD COLUMN claim_id TEXT");
+		expect(participantProvisioningMigration).toContain("ADD COLUMN finalized_at INTEGER");
+		expect(participantProvisioningMigration).toContain(
+			"ADD COLUMN realtimekit_custom_participant_id TEXT",
+		);
+		expect(participantProvisioningMigration).toContain(
+			"ADD COLUMN realtimekit_participant_id TEXT",
+		);
+		expect(participantProvisioningMigration).toContain(
+			"ADD COLUMN provisioning_state TEXT NOT NULL DEFAULT 'unknown'",
+		);
+		expect(participantProvisioningMigration).toContain(
+			"studio_participants_realtimekit_identity_idx",
+		);
+		expect(participantProvisioningMigration).toContain(
+			"SET finalized_at = redeemed_at",
+		);
+		expect(participantProvisioningMigration).toContain(
+			"studio_invite_redemptions.state = 'redeemed'",
+		);
 	});
 
 	it("keeps active stream state stable across session upserts and notification claims", () => {
@@ -3451,6 +3980,306 @@ describe("Studio operations", () => {
 		});
 	});
 
+	describe("participant invite provisioning saga", () => {
+		it("serializes max-use reservations and keeps same-user retries idempotent", async () => {
+			const fixture = await createGuestInviteFixture(1);
+			const studioDb = createStudioDbMock({ inviteRows: [fixture.row] });
+			const otherGuest = {
+				...guestUser,
+				id: "other-guest-subject",
+				name: "Other guest",
+				username: "other-guest",
+			};
+
+			const reservations = await Promise.all([
+				reserveStudioInviteParticipant(
+					{ STUDIO_DB: studioDb.db } as StudioEnv,
+					fixture.invite,
+					guestUser,
+					{
+						customParticipantId: "studio:guest:guest",
+						imageUrl: null,
+						name: "Guest",
+					},
+				),
+				reserveStudioInviteParticipant(
+					{ STUDIO_DB: studioDb.db } as StudioEnv,
+					fixture.invite,
+					otherGuest,
+					{
+						customParticipantId: "studio:guest:other-guest-subject",
+						imageUrl: null,
+						name: "Other guest",
+					},
+				),
+			]);
+
+			const winningClaim = reservations.find(
+				(claim): claim is StudioInviteClaim => claim !== null,
+			);
+			expect(reservations.filter(Boolean)).toHaveLength(1);
+			expect(winningClaim).toBeDefined();
+			expect(studioDb.redemptionRows).toHaveLength(1);
+			expect(studioDb.redemptionRows[0]?.state).toBe("pending");
+			expect(studioDb.participantRows).toHaveLength(1);
+			expect(studioDb.participantRows[0]?.provisioning_state).toBe("pending");
+			expect(studioDb.inviteRows[0]?.used_count).toBe(0);
+
+			const winningUser = winningClaim?.userId === "guest" ? guestUser : otherGuest;
+			const replay = await reserveStudioInviteParticipant(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				fixture.invite,
+				winningUser,
+				{
+					customParticipantId: winningClaim?.customParticipantId ?? "missing",
+					imageUrl: null,
+					name: winningUser.name ?? "Guest",
+				},
+			);
+
+			expect(replay).toEqual(winningClaim);
+			expect(studioDb.redemptionRows).toHaveLength(1);
+			expect(studioDb.participantRows).toHaveLength(1);
+			expect(studioDb.inviteRows[0]?.used_count).toBe(0);
+		});
+
+		it("finalizes from exact participant state and derives use counts without increments", async () => {
+			const fixture = await createGuestInviteFixture(2);
+			fixture.row.used_count = 99;
+			const studioDb = createStudioDbMock({ inviteRows: [fixture.row] });
+			const claim = await reserveStudioInviteParticipant(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				fixture.invite,
+				guestUser,
+				{
+					customParticipantId: "studio:guest:opaque-guest",
+					imageUrl: null,
+					name: "Guest",
+				},
+			);
+			expect(claim).not.toBeNull();
+
+			await expect(finalizeStudioInviteParticipant(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				claim as StudioInviteClaim,
+				{
+					customParticipantId: "studio:guest:opaque-guest",
+					participantId: "provider-participant-1",
+				},
+			)).resolves.toBe(true);
+			await expect(finalizeStudioInviteParticipant(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				claim as StudioInviteClaim,
+				{
+					customParticipantId: "studio:guest:opaque-guest",
+					participantId: "provider-participant-1",
+				},
+			)).resolves.toBe(true);
+
+			expect(studioDb.redemptionRows).toMatchObject([{ state: "redeemed" }]);
+			expect(studioDb.participantRows).toMatchObject([{
+				provisioning_state: "ready",
+				realtimekit_participant_id: "provider-participant-1",
+			}]);
+			expect(studioDb.inviteRows[0]?.used_count).toBe(1);
+
+			const secondGuest = {
+				...guestUser,
+				id: "missing-row-subject",
+				username: "missing-row",
+			};
+			const missingParticipantClaim = await reserveStudioInviteParticipant(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				fixture.invite,
+				secondGuest,
+				{
+					customParticipantId: "studio:guest:missing-row-subject",
+					imageUrl: null,
+					name: "Missing row",
+				},
+			);
+			expect(missingParticipantClaim).not.toBeNull();
+			const missingParticipantIndex = studioDb.participantRows.findIndex(
+				(row) => row.user_id === "missing-row",
+			);
+			expect(missingParticipantIndex).toBeGreaterThanOrEqual(0);
+			studioDb.participantRows.splice(missingParticipantIndex, 1);
+
+			await expect(finalizeStudioInviteParticipant(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				missingParticipantClaim as StudioInviteClaim,
+				{
+					customParticipantId: "studio:guest:missing-row-subject",
+					participantId: "provider-participant-2",
+				},
+			)).resolves.toBe(false);
+			expect(studioDb.redemptionRows.find((row) => row.user_id === "missing-row"))
+				.toMatchObject({ state: "pending" });
+			expect(studioDb.inviteRows[0]?.used_count).toBe(1);
+
+			await expect(releaseStudioInviteParticipantClaim(
+				{ STUDIO_DB: studioDb.db } as StudioEnv,
+				claim as StudioInviteClaim,
+			)).resolves.toBe(false);
+			expect(studioDb.inviteRows[0]?.used_count).toBe(1);
+		});
+
+		it("releases a pending claim only after a definitive provider rejection and confirmed absence", async () => {
+			const fixture = await createGuestInviteFixture();
+			const studioDb = createStudioDbMock({
+				inviteRows: [fixture.row],
+				realtimekit_meeting_id: "meeting-1",
+			});
+			const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+				if (init?.method === "GET") {
+					return new Response(JSON.stringify({ data: [], success: true }));
+				}
+				return new Response(JSON.stringify({
+					errors: [{ code: 1001, message: "provider detail must stay private" }],
+					success: false,
+				}), { status: 404 });
+			});
+			vi.stubGlobal("fetch", fetchMock);
+
+			const error = await issueStudioParticipantToken(
+				createRealtimeKitStudioEnv(studioDb.db),
+				guestUser,
+				{
+					inviteToken: fixture.token,
+					role: "guest",
+					sessionId: "rawkode-live-next",
+				},
+			).then(
+				() => null,
+				(cause: unknown) => cause,
+			);
+			expect(error).toMatchObject({
+				code: "provider-unavailable",
+				message:
+					"RealtimeKit participant setup failed. RealtimeKit API returned 404: [1001].",
+				status: 502,
+			});
+			expect((error as Error).message).not.toContain("provider detail must stay private");
+
+			expect(studioDb.redemptionRows).toHaveLength(0);
+			expect(studioDb.participantRows).toHaveLength(0);
+			expect(studioDb.inviteRows[0]?.used_count).toBe(0);
+			expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "GET"))
+				.toHaveLength(3);
+		});
+
+		it("retains the pending claim when provider outcome is ambiguous", async () => {
+			const fixture = await createGuestInviteFixture();
+			const studioDb = createStudioDbMock({
+				inviteRows: [fixture.row],
+				realtimekit_meeting_id: "meeting-1",
+			});
+			const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) =>
+				init?.method === "GET"
+					? new Response(JSON.stringify({ data: [], success: true }))
+					: new Response(JSON.stringify({
+						errors: [{ code: 2001, message: "ambiguous upstream failure" }],
+						success: false,
+					}), { status: 500 })
+			);
+			vi.stubGlobal("fetch", fetchMock);
+
+			await expect(issueStudioParticipantToken(
+				createRealtimeKitStudioEnv(studioDb.db),
+				guestUser,
+				{
+					inviteToken: fixture.token,
+					role: "guest",
+					sessionId: "rawkode-live-next",
+				},
+			)).rejects.toMatchObject({ code: "provider-unavailable", status: 502 });
+
+			expect(studioDb.redemptionRows).toMatchObject([{ state: "pending" }]);
+			expect(studioDb.participantRows).toMatchObject([{
+				provisioning_state: "pending",
+				realtimekit_participant_id: null,
+			}]);
+			expect(studioDb.inviteRows[0]?.used_count).toBe(0);
+			expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "GET"))
+				.toHaveLength(2);
+		});
+
+		it("recovers provider success after a D1 finalize rollback using the legacy participant", async () => {
+			const fixture = await createGuestInviteFixture();
+			const studioDb = createStudioDbMock({
+				failFinalizeBatches: 1,
+				inviteRows: [fixture.row],
+				realtimekit_meeting_id: "meeting-1",
+			});
+			const opaqueGuest = {
+				...guestUser,
+				id: "github:opaque-guest",
+				username: "guest",
+			};
+			let refreshCount = 0;
+			const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+				const url = String(input);
+				if (init?.method === "GET") {
+					return new Response(JSON.stringify({
+						data: [{
+							custom_participant_id: "studio:guest:guest",
+							id: "legacy-participant",
+						}],
+						success: true,
+					}));
+				}
+				expect(url).toContain("/participants/legacy-participant/token");
+				refreshCount += 1;
+				return new Response(JSON.stringify({
+					data: { token: `refreshed-token-${refreshCount}` },
+					success: true,
+				}));
+			});
+			vi.stubGlobal("fetch", fetchMock);
+
+			await expect(issueStudioParticipantToken(
+				createRealtimeKitStudioEnv(studioDb.db),
+				opaqueGuest,
+				{
+					inviteToken: fixture.token,
+					role: "guest",
+					sessionId: "rawkode-live-next",
+				},
+			)).rejects.toMatchObject({ code: "state-unavailable", status: 503 });
+			expect(studioDb.redemptionRows).toMatchObject([{ state: "pending" }]);
+			expect(studioDb.participantRows).toMatchObject([{
+				provisioning_state: "pending",
+				realtimekit_custom_participant_id: "studio:guest:github:opaque-guest",
+				realtimekit_participant_id: null,
+			}]);
+
+			await expect(issueStudioParticipantToken(
+				createRealtimeKitStudioEnv(studioDb.db),
+				opaqueGuest,
+				{
+					inviteToken: fixture.token,
+					role: "guest",
+					sessionId: "rawkode-live-next",
+				},
+			)).resolves.toMatchObject({
+				participantId: "legacy-participant",
+				token: "refreshed-token-2",
+			});
+
+			expect(refreshCount).toBe(2);
+			expect(studioDb.redemptionRows).toMatchObject([{ state: "redeemed" }]);
+			expect(studioDb.participantRows).toMatchObject([{
+				provisioning_state: "ready",
+				realtimekit_custom_participant_id: "studio:guest:guest",
+				realtimekit_participant_id: "legacy-participant",
+			}]);
+			expect(studioDb.inviteRows[0]?.used_count).toBe(1);
+			expect(fetchMock.mock.calls.filter(([url, init]) =>
+				String(url).endsWith("/participants") && init?.method === "POST"
+			)).toHaveLength(0);
+		});
+	});
+
 	it("requires a provider meeting before issuing contributor tokens", async () => {
 		await expect(
 			issueStudioParticipantToken({
@@ -3713,6 +4542,16 @@ describe("Studio operations", () => {
 					}),
 				);
 			}
+			if (init?.method === "GET") {
+				expect(url).toBe(
+					"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/participants?page_no=1&per_page=100",
+				);
+				return new Response(JSON.stringify({
+					data: [],
+					paging: { end_offset: 0, start_offset: 0, total_count: 0 },
+					success: true,
+				}));
+			}
 
 			expect(url).toBe(
 				"https://api.cloudflare.com/client/v4/accounts/account-1/realtime/kit/app-1/meetings/meeting-1/participants",
@@ -3724,7 +4563,7 @@ describe("Studio operations", () => {
 				preset_name?: string;
 				};
 				expect(body).toMatchObject({
-					custom_participant_id: "studio:host:rawkode",
+					custom_participant_id: "studio:host:github:rawkode",
 					name: "Rawkode Academy",
 					picture: "https://example.com/rawkode.png",
 					preset_name: "host-preset",
@@ -3780,6 +4619,9 @@ describe("Studio operations", () => {
 			"host",
 			"Rawkode Academy",
 			"https://example.com/rawkode.png",
+			"studio:host:github:rawkode",
+			"participant-1",
+			"ready",
 		]);
 	});
 
