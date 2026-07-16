@@ -1,0 +1,20 @@
+---
+name: Kueue
+logos:
+  icon: true
+website: 'https://kueue.sigs.k8s.io/'
+documentation: 'https://kueue.sigs.k8s.io/docs/'
+source: 'https://github.com/kubernetes-sigs/kueue'
+license: Apache-2.0
+status: beta
+category: Orchestration & Management
+subcategory: Scheduling & Orchestration
+terms:
+  - Kubernetes job queueing
+  - ClusterQueue
+  - LocalQueue
+  - ResourceFlavor
+---
+Kueue is Kubernetes-native job queueing and resource admission for batch, HPC, and AI/ML workloads. It decides when workloads may start based on quotas, priority, and available capacity, then leaves pod placement to the Kubernetes scheduler.
+
+The project supports shared ClusterQueues, namespace-scoped LocalQueues, ResourceFlavors, fair sharing, preemption, topology-aware scheduling, and multi-cluster dispatch. It integrates with Kubernetes Job, JobSet, KubeRay, Kubeflow Trainer, and other workload APIs.
