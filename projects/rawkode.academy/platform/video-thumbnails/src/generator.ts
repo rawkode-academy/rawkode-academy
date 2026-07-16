@@ -166,7 +166,9 @@ export function buildBackgroundPrompt(params: ThumbnailRenderParams): string {
 			? "distributed peer network, encrypted connection arcs, packet trails, mesh topology, flowing data paths"
 			: technologyId.includes("odin") || technologyName.includes("odin")
 				? "systems programming, memory layout grids, compiler pipeline silhouettes, low-level runtime architecture, geometric data blocks"
-				: "abstract software architecture, network topology, execution traces, data flow paths, geometric systems patterns";
+				: technologyId.includes("kueue") || technologyName.includes("kueue")
+					? "queued workload lanes, resource quota pools, admission gates, GPU cluster topology, fair-sharing flows"
+					: "abstract software architecture, network topology, execution traces, data flow paths, geometric systems patterns";
 
 	return [
 		"Create a 16:9 abstract background-only image for a developer livestream thumbnail.",

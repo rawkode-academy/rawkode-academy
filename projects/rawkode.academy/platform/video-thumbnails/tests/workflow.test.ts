@@ -188,6 +188,30 @@ describe("thumbnail workflow helpers", () => {
 		expect(prompt).not.toContain("Data-oriented systems programming, hands-on");
 	});
 
+	it("builds a Kueue workload admission background without product text", () => {
+		const prompt = buildBackgroundPrompt({
+			...renderParams,
+			video: {
+				...renderParams.video,
+				title: "Hands-on Introduction to Kueue",
+				tagline: "Kubernetes-native job queueing, hands-on",
+			},
+			technology: {
+				...renderParams.technology,
+				id: "kueue",
+				name: "Kueue",
+				terms: ["ClusterQueue", "LocalQueue", "ResourceFlavor"],
+			},
+		});
+
+		expect(prompt).toContain("queued workload lanes");
+		expect(prompt).toContain("resource quota pools");
+		expect(prompt).toContain("admission gates");
+		expect(prompt).not.toContain("Kueue");
+		expect(prompt).not.toContain("Hands-on Introduction to Kueue");
+		expect(prompt).not.toContain("Kubernetes-native job queueing, hands-on");
+	});
+
 	it("skips existing thumbnails unless forced", async () => {
 		const bucket = new FakeR2Bucket();
 		bucket.heads.set("videos/video123/thumbnail.webp", {});
