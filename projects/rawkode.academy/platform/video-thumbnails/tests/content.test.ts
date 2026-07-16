@@ -63,6 +63,32 @@ Body`);
 		expect(job?.technology.terms).toContain("peer-to-peer");
 	});
 
+	it("discovers the scheduled Kueue session with its canonical icon", async () => {
+		const { jobs } = await discoverThumbnailJobs(repoRoot, {
+			commitSha: "test-sha",
+		});
+		const job = jobs.find(
+			(candidate) => candidate.videoId === "02b0aa5bbec82f52066ff235",
+		);
+
+		expect(job).toMatchObject({
+			videoId: "02b0aa5bbec82f52066ff235",
+			tagline: "Kubernetes-native job queueing, hands-on",
+			source: {
+				commitSha: "test-sha",
+				trigger: "github-actions",
+				contentPath:
+					"content/videos/shows/rawkode-live/2026/hands-on-introduction-to-kueue.md",
+			},
+			technology: {
+				id: "kueue",
+				name: "Kueue",
+			},
+		});
+		expect(job?.technology.iconSvg).toContain("<svg");
+		expect(job?.technology.terms).toContain("ClusterQueue");
+	});
+
 	it("builds canonical public thumbnail URLs", () => {
 		expect(thumbnailUrl("abc123")).toBe(
 			"https://content.rawkode.academy/videos/abc123/thumbnail.webp",
