@@ -1,6 +1,96 @@
 import { buildLowerThirdHtml } from "../lowerThird";
 import type { CanvasResolution, StudioSource, StudioState } from "../types";
-import { compileScenes, defineScene, layouts, overlays, people, transitions } from "./scenes/sceneDsl";
+import {
+  compileScenes,
+  defineScene,
+  layouts,
+  overlays,
+  people,
+  transitions,
+  type SceneDefinition,
+} from "./scenes/sceneDsl";
+
+export const STUDIO_SCENE_DEFINITIONS: SceneDefinition[] = [
+  defineScene({
+    id: "intro",
+    name: "Intro",
+    stinger: transitions.slide("left", 2),
+    transition: "fade",
+    layout: layouts.remotion("rawkode-intro", {
+      title: "Rawkode Live",
+      subtitle: "Composable cloud native systems",
+      lowerThird: overlays.lowerThird({
+        enabled: false,
+        enter: transitions.slide("up", 0.22),
+        visibleSeconds: 8,
+        exit: transitions.fade(0.16),
+      }),
+    }),
+  }),
+  defineScene({
+    id: "monologue",
+    name: "Monologue",
+    stinger: transitions.fade(2),
+    transition: "cut",
+    layout: layouts.solo(people.selector("hosts"), {
+      lowerThird: overlays.lowerThird({
+        enter: transitions.slide("up", 0.22),
+        visibleSeconds: 8,
+        exit: transitions.fade(0.16),
+      }),
+    }),
+  }),
+  defineScene({
+    id: "guests",
+    name: "Guests",
+    stinger: transitions.flip("y", 2),
+    transition: "cut",
+    layout: layouts.dynamicGrid(
+      [people.selector("hosts"), people.selector("guests"), people.selector("producer")],
+      {
+        lowerThird: overlays.lowerThird({
+          enter: transitions.slide("up", 0.22),
+          visibleSeconds: 10,
+          exit: transitions.fade(0.16),
+        }),
+      },
+    ),
+  }),
+  defineScene({
+    id: "screenshare",
+    name: "Screenshare",
+    stinger: transitions.typewriter(2),
+    transition: "cut",
+    layout: layouts.screenshare(
+      "source-host-screen-share",
+      [people.selector("hosts"), people.selector("guests"), people.selector("producer")],
+      {
+        lowerThird: overlays.lowerThird({
+          enabled: false,
+          enter: transitions.slide("up", 0.22),
+          visibleSeconds: 8,
+          exit: transitions.fade(0.16),
+        }),
+      },
+    ),
+  }),
+  defineScene({
+    id: "outro",
+    name: "Outro",
+    stinger: transitions.cubeSpin("right", 2),
+    transition: "fade",
+    layout: layouts.remotion("rawkode-outro", {
+      title: "Thanks for watching",
+      subtitle: "Rawkode Live",
+      lowerThird: overlays.lowerThird({
+        enabled: false,
+        enter: transitions.slide("up", 0.22),
+        visibleSeconds: 8,
+        exit: transitions.fade(0.16),
+      }),
+    }),
+  }),
+];
 
 export function createInitialStudioState(): StudioState {
   const resolution: CanvasResolution = {
@@ -11,87 +101,7 @@ export function createInitialStudioState(): StudioState {
   const lowerThirdHtml = buildLowerThirdHtml("Rawkode Live", "Composable cloud native systems");
   const sources = createInitialSources();
   const document = compileScenes({
-    definitions: [
-      defineScene({
-        id: "intro",
-        name: "Intro",
-        stinger: transitions.slide("left", 2),
-        transition: "fade",
-        layout: layouts.remotion("rawkode-intro", {
-          title: "Rawkode Live",
-          subtitle: "Composable cloud native systems",
-          lowerThird: overlays.lowerThird({
-            enabled: false,
-            enter: transitions.slide("up", 0.22),
-            visibleSeconds: 8,
-            exit: transitions.fade(0.16),
-          }),
-        }),
-      }),
-      defineScene({
-        id: "monologue",
-        name: "Monologue",
-        stinger: transitions.fade(2),
-        transition: "cut",
-        layout: layouts.solo(people.selector("hosts"), {
-          lowerThird: overlays.lowerThird({
-            enter: transitions.slide("up", 0.22),
-            visibleSeconds: 8,
-            exit: transitions.fade(0.16),
-          }),
-        }),
-      }),
-      defineScene({
-        id: "guests",
-        name: "Guests",
-        stinger: transitions.flip("y", 2),
-        transition: "cut",
-        layout: layouts.dynamicGrid(
-          [people.selector("hosts"), people.selector("guests"), people.selector("producer")],
-          {
-            lowerThird: overlays.lowerThird({
-              enter: transitions.slide("up", 0.22),
-              visibleSeconds: 10,
-              exit: transitions.fade(0.16),
-            }),
-          },
-        ),
-      }),
-      defineScene({
-        id: "screenshare",
-        name: "Screenshare",
-        stinger: transitions.typewriter(2),
-        transition: "cut",
-        layout: layouts.screenshare(
-          "source-host-screen-share",
-          [people.selector("hosts"), people.selector("guests"), people.selector("producer")],
-          {
-            lowerThird: overlays.lowerThird({
-              enabled: false,
-              enter: transitions.slide("up", 0.22),
-              visibleSeconds: 8,
-              exit: transitions.fade(0.16),
-            }),
-          },
-        ),
-      }),
-      defineScene({
-        id: "outro",
-        name: "Outro",
-        stinger: transitions.cubeSpin("right", 2),
-        transition: "fade",
-        layout: layouts.remotion("rawkode-outro", {
-          title: "Thanks for watching",
-          subtitle: "Rawkode Live",
-          lowerThird: overlays.lowerThird({
-            enabled: false,
-            enter: transitions.slide("up", 0.22),
-            visibleSeconds: 8,
-            exit: transitions.fade(0.16),
-          }),
-        }),
-      }),
-    ],
+    definitions: STUDIO_SCENE_DEFINITIONS,
     lowerThirdHtml,
     resolution,
     sources,
@@ -100,6 +110,7 @@ export function createInitialStudioState(): StudioState {
   return {
     resolution,
     activeScreenShareSourceId: "source-host-screen-share",
+    audioMix: {},
     phase: "designing",
     sources,
     scenes: document.scenes,
