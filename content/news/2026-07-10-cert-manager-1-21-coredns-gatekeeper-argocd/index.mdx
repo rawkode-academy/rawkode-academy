@@ -1,0 +1,65 @@
+---
+title: "cert-manager 1.21 lands ACME renewal hints and Vault IAM auth, CoreDNS hardens DoH, Gatekeeper adds mutation scoping"
+description: "cert-manager 1.21.0 adds ACME Renewal Information and AWS IAM authentication for the Vault issuer while tightening default RBAC, alongside fresh releases from CoreDNS, OPA Gatekeeper, Argo CD, and containerd."
+publishedAt: 2026-07-10
+authors:
+  - rawkode
+technologies:
+  - cert-manager
+  - coredns
+  - opa
+  - argo
+  - containerd
+---
+
+An active patch-and-release window across the cloud native control plane in the last 24 hours: one feature release each from cert-manager, CoreDNS, and OPA Gatekeeper, a correctness fix for Argo CD's auto-sync, and a coordinated containerd patch wave. All five are primary-source releases.
+
+## cert-manager 1.21.0 adds ACME renewal hints and Vault IAM auth, and tightens default RBAC
+
+cert-manager published [v1.21.0](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.0) on July 9. Behind the `ACMEUseARI` feature gate, it adds experimental support for ACME Renewal Information (RFC 9773), letting cert-manager query the ACME server for renewal recommendations rather than relying solely on `renewBefore` timing — useful during mass revocations or CA key rollovers. The Vault issuer now authenticates with AWS IAM via IRSA, EKS Pod Identity, or ambient EC2/ECS credentials, removing the need for long-lived AWS secrets, and a new `renewalPolicies` field on the Certificate API gives finer control over renewal scheduling.
+
+Three Helm-chart breaking changes need attention before upgrading. The chart no longer ships a default Role and RoleBinding letting the controller create tokens for its own ServiceAccount; deployments relying on that must add their own RBAC or move to a dedicated ServiceAccount. The `cert-manager-edit` ClusterRole no longer grants `create` on Challenges and Orders, since those are internal ACME resources — hardening that follows the earlier DNS01 solver-bypass advisory ([GHSA-8rvj-mm4h-c258](https://github.com/cert-manager/cert-manager/security/advisories/GHSA-8rvj-mm4h-c258), fixed in 1.19.6 and 1.20.3). Finally, three ServiceMonitor/PodMonitor Helm values were removed and the metrics port was renamed from `tcp-prometheus-servicemonitor` to `http-metrics`, which will break scrape configs that reference the old name.
+
+**Source:** [cert-manager v1.21.0](https://github.com/cert-manager/cert-manager/releases/tag/v1.21.0) - July 9, 2026
+
+---
+
+## CoreDNS 1.14.5 hardens DoH/DoH3 handling and adds DoH upstreams to the forward plugin
+
+CoreDNS released [v1.14.5](https://github.com/coredns/coredns/releases/tag/v1.14.5) on July 10 with a batch of DNS transport-security fixes. The server now sanitizes DoH and DoH3 request parse errors to avoid leaking information from malformed requests, switches to Go's default TLS settings, and bounds DoQ stream reads by the server read timeout to limit resource exhaustion on QUIC connections.
+
+The forward plugin gains DNS-over-HTTPS for upstream queries and a configurable per-upstream read timeout, and restores the older behavior of continuing on an empty configuration file. The dnstap plugin picks up reliability fixes: closing the previous connection before reconnecting, resolving a self-deadlock during client flush errors, and storing IPv4-mapped IPv6 addresses as four octets with the correct socket family. For operators running CoreDNS as cluster DNS, the transport-security changes are the ones to read closely.
+
+**Source:** [CoreDNS v1.14.5](https://github.com/coredns/coredns/releases/tag/v1.14.5) - July 10, 2026
+
+---
+
+## OPA Gatekeeper 3.23.0 adds mutation operation scoping and remote-cluster status routing
+
+OPA Gatekeeper cut [v3.23.0](https://github.com/open-policy-agent/gatekeeper/releases/tag/v3.23.0) on July 9. The mutation `ApplyTo` specification gains an `operations` field, letting policy authors scope mutations to specific admission operations rather than applying them broadly. The release also adds a remote-cluster mode that routes status resources for deployments watching an external cluster, and moves internal logging to structured, semantic log lines.
+
+Under the hood, OCI artifact pulls migrate to oras-go v2, and audit and validation paths get hardening — including transient-failure handling in Validating Admission Policy API discovery and TLS readiness gating for the webhook servers — across roughly twenty bug fixes. The release bumps its Kubernetes libraries to 1.36.2 and pulls in a `golang.org/x/net` security fix.
+
+**Source:** [Gatekeeper v3.23.0](https://github.com/open-policy-agent/gatekeeper/releases/tag/v3.23.0) - July 9, 2026
+
+---
+
+## Argo CD 3.4.5 fixes an auto-sync regression that skipped commits during manifest generation
+
+Argo CD published [v3.4.5](https://github.com/argoproj/argo-cd/releases/tag/v3.4.5) on July 9, a cherry-pick patch for the 3.4 line. The headline fix addresses auto-sync being skipped when a newer commit arrives mid-sync while `manifest-generate-paths` is in use — a case that could silently leave an application out of sync with its Git source.
+
+The release also stops the repo-server from honoring the primary source's depth instead of a referenced source's, avoids running an auth reconcile during server-side apply, corrects deleted resources being shown in the UI, prevents `replace` operations from clobbering non-ignored fields, and fixes a regression in Dex config environment-variable substitution. It bumps `golang.org/x/crypto` to 0.53.0 and the Ubuntu base image to 26.04.
+
+**Source:** [Argo CD v3.4.5](https://github.com/argoproj/argo-cd/releases/tag/v3.4.5) - July 9, 2026
+
+---
+
+## containerd ships coordinated bugfix patches across all four supported release branches
+
+containerd released [1.7.34](https://github.com/containerd/containerd/releases/tag/v1.7.34), [2.0.11](https://github.com/containerd/containerd/releases/tag/v2.0.11), [2.2.6](https://github.com/containerd/containerd/releases/tag/v2.2.6), and [2.3.3](https://github.com/containerd/containerd/releases/tag/v2.3.3) together across July 9 and 10, covering every currently supported release branch. These are maintenance releases, not security fixes.
+
+The changes concentrate on CRI and sandbox lifecycle stability: fixes for lost container exit events that arrive before container info is cached, a nil-pointer path during NRI IP lookup, rejecting container creation when the sandbox is not running, and cleaning up sandboxes correctly when a hook fails. Because the runtime underpins most Kubernetes nodes, clusters hitting stuck-container or sandbox-cleanup edge cases are the ones that should schedule the patch.
+
+**Source:** [containerd 2.3.3](https://github.com/containerd/containerd/releases/tag/v2.3.3) - July 10, 2026
+
+---
