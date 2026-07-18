@@ -1,0 +1,49 @@
+---
+title: "OpenTelemetry semconv 1.43.0 promotes CI/CD conventions, Cilium 1.20 drops libnetwork, Argo Rollouts cuts first 1.10 RC"
+description: "OpenTelemetry semantic conventions v1.43.0 moves the CI/CD, VCS, and process convention groups to release-candidate status, Cilium's 1.20 pre-release removes the Docker libnetwork plugin and adds Gateway API L4 routing, and Argo Rollouts tagged its first 1.10 release candidate."
+publishedAt: 2026-07-04
+authors:
+  - rawkode
+technologies:
+  - opentelemetry
+  - cilium
+  - argo
+---
+
+The July 3 window was quiet: no GA milestone releases, merged KEPs, CVEs, or governance moves crossed the wire over the US holiday weekend. Three fresh primary-source releases still stood out — a substantive OpenTelemetry spec release, a Cilium 1.20 pre-release, and the first Argo Rollouts 1.10 release candidate. This is a short digest rather than a padded one.
+
+## OpenTelemetry semantic conventions 1.43.0 promotes CI/CD, VCS, and process conventions to release candidate
+
+OpenTelemetry published [semantic-conventions v1.43.0](https://github.com/open-telemetry/semantic-conventions/releases/tag/v1.43.0) on July 3, an incremental release over v1.42.0 that advances several convention groups toward stability.
+
+The release promotes the CI/CD conventions (spans, metrics, logs, attributes, and entity), the VCS attribute, entity, and metric conventions, and the process metrics and entity to release-candidate status, along with the disk, network, and system direction attributes. It adds an `azure.resource_group.name` resource attribute and `kotlin` as a `telemetry.sdk.language` value. On the breaking side, the Oracle guidance for `db.query.text` now recommends parameterized queries by default, and the signal requirement-level documentation deprecates its metric-specific version.
+
+Because these conventions flow downstream into every OTel SDK and instrumentation library, RC promotion means teams building CI/CD or VCS telemetry can adopt those attribute names with lower churn risk before they reach stable.
+
+**Source:** [OpenTelemetry Semantic Conventions v1.43.0](https://github.com/open-telemetry/semantic-conventions/releases/tag/v1.43.0) - July 3, 2026
+
+---
+
+## Cilium 1.20 pre-release removes the Docker libnetwork plugin and adds Gateway API L4 routing
+
+Cilium published [v1.20.0-pre.4](https://github.com/cilium/cilium/releases/tag/v1.20.0-pre.4) on July 3, a pre-release on the road to 1.20 that lands several networking changes.
+
+The pre-release adds beta IPv6 support to ENI IPAM mode, allowing IPv6 prefix allocation on that path, and introduces TCPRoute and UDPRoute support for the Gateway API, extending Cilium's Gateway API implementation to L4 traffic. It also sunsets the Docker libnetwork plugin, which is no longer available — operators still depending on it will need to migrate before upgrading to 1.20.
+
+As a pre-release, these features are preview-stage and can still change before 1.20 GA, but the libnetwork removal is a concrete signal for anyone tracking the 1.20 upgrade path.
+
+**Source:** [Cilium v1.20.0-pre.4](https://github.com/cilium/cilium/releases/tag/v1.20.0-pre.4) - July 3, 2026
+
+---
+
+## Argo Rollouts cuts its first 1.10 release candidate
+
+The Argo Rollouts team tagged [v1.10.0-rc1](https://github.com/argoproj/argo-rollouts/releases/tag/v1.10.0-rc1) on July 3, the first release candidate of the 1.10 line for the progressive-delivery controller.
+
+The candidate makes Traefik API group v3 the default for the Traefik traffic router, moves the build to Go 1.26 and a Debian 12 base image, and makes the Datadog metric provider's request timeout configurable. It also fixes a correctness bug where analysis runs could report success prematurely when a ReplicaSet became unsaturated, and reduces controller memory by filtering the ReplicaSet informer and converting unstructured objects to typed structures.
+
+The changelog spans the full cycle since v1.9.0; the RC itself is the fresh signal that 1.10 is nearing GA and is ready for pre-production testing.
+
+**Source:** [Argo Rollouts v1.10.0-rc1](https://github.com/argoproj/argo-rollouts/releases/tag/v1.10.0-rc1) - July 3, 2026
+
+---
