@@ -18,7 +18,7 @@
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"hono": "4.12.18",
+		"hono": "4.12.21",
 		"zod": "^3.25.28"
 	}
 }
