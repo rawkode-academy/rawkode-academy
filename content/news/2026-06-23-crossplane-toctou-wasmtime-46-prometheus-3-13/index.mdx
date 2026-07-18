@@ -1,0 +1,49 @@
+---
+title: "Crossplane fixes a critical signing bypass, Wasmtime 46 ships, Prometheus 3.13 nears"
+description: "Crossplane backported a fix for a CVSS 9.0 signature-verification TOCTOU across four release branches, Wasmtime 46.0.0 made WASI 0.3.0 and a copying garbage collector the defaults, and Prometheus 3.13.0-rc.1 added the min_of and max_of PromQL functions."
+publishedAt: 2026-06-23
+authors:
+  - rawkode
+technologies:
+  - crossplane
+  - webassembly
+  - prometheus
+---
+
+Three releases landed on June 22 across supply-chain security, WebAssembly runtimes, and metrics.
+
+## Crossplane patches a critical signature-verification bypass across four branches
+
+The Crossplane maintainers shipped v2.3.3, v2.2.3, v2.1.7, and v1.20.10 on June 22 to fix a time-of-check-to-time-of-use flaw in package signature verification, rated critical at CVSS 9.0 ([GHSA-wfqx-gjrf-g28r](https://github.com/crossplane/crossplane/security/advisories/GHSA-wfqx-gjrf-g28r)).
+
+When signature verification is enabled and a package is installed by tag, a malicious OCI registry could serve a correctly signed image for the verification step and then serve unsigned content for installation, because Crossplane resolved the tag separately for each step. The fix resolves the tag once and pins the resulting digest for both verification and install. The flaw affects only operators who combine three conditions: signature verification enabled, tag-based rather than digest-based package installs, and registries they do not control. Versions up to and including v2.3.2 are affected; installing packages by digest mitigates it.
+
+The same release also corrects `crossplane render` namespace assignment on injected resource references and bumps the Go toolchain and `golang.org/x/net`.
+
+**Source:** [Crossplane v2.3.3](https://github.com/crossplane/crossplane/releases/tag/v2.3.3) - June 22, 2026
+
+---
+
+## Wasmtime 46.0.0 makes WASI 0.3.0 and the copying GC the defaults
+
+The Bytecode Alliance released Wasmtime 46.0.0 on June 22, enabling WASI 0.3.0 and the component model's async support by default.
+
+The release turns on the `component-model-async` Wasm feature by default alongside WASI 0.3.0, and switches the default garbage collector from deferred reference counting to a copying collector that can reclaim cycles. It adds opt-in support for the WebAssembly branch-hinting proposal via `Config::wasm_branch_hinting`, exposes component async call stacks for root-task identification, and adds a `--header` option to `wasmtime serve`. The build now requires Rust 1.94.0.
+
+For embedders, the GC default change and async-by-default component model alter runtime behavior on upgrade, not just the set of available features.
+
+**Source:** [Wasmtime v46.0.0](https://github.com/bytecodealliance/wasmtime/releases/tag/v46.0.0) - June 22, 2026
+
+---
+
+## Prometheus 3.13 release candidate adds min_of and max_of to PromQL
+
+Prometheus published 3.13.0-rc.1 on June 22, the second candidate for the 3.13 line.
+
+The candidate adds experimental `min_of(a, b)` and `max_of(a, b)` scalar functions; these are also the new names for the experimental duration-expression `min()`/`max()` functions, renamed to avoid collision with the `min` and `max` aggregation operators. It adds smoothed/anchored rate support for native histograms and a `storage.tsdb.chunk_encoding.floats` option to select float chunk encoding at runtime. On performance, the release notes report roughly 12–15% faster queries from reduced per-sample overhead during chunk population and up to 2x faster case-insensitive regex matching.
+
+As a release candidate, this is a preview rather than an upgrade target, but it shows where the 3.13 line is taking PromQL and native-histogram rate handling.
+
+**Source:** [Prometheus v3.13.0-rc.1](https://github.com/prometheus/prometheus/releases/tag/v3.13.0-rc.1) - June 22, 2026
+
+---
