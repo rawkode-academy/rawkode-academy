@@ -1,0 +1,48 @@
+---
+title: "KubeVirt 1.9 preview adds Grace GPU passthrough; two papers target disaggregated LLM serving"
+description: "KubeVirt cut its first 1.9 release candidate with NVIDIA Grace GPU passthrough behind a feature gate, and two arXiv systems papers propose deflecting prefill onto decode nodes and an uncertainty-aware advisor for GPU serving configuration."
+publishedAt: 2026-07-03
+authors:
+  - rawkode
+technologies:
+  - kubevirt
+  - kubernetes
+---
+
+It was a quiet 24 hours for stable releases — the week's larger releases (Prometheus 3.13 LTS, Istio 1.28.10, etcd, cert-manager) all shipped on July 1, just outside the window. So this digest leans on GPU infrastructure: a KubeVirt release candidate that wires up Grace GPU passthrough, and two fresh arXiv systems papers on making LLM inference cheaper and more predictable.
+
+## KubeVirt 1.9.0-rc.0 adds NVIDIA Grace GPU passthrough behind a feature gate
+
+KubeVirt published [v1.9.0-rc.0](https://github.com/kubevirt/kubevirt/releases/tag/v1.9.0-rc.0) on July 2, the first release candidate for the 1.9 line, rolling up 1,564 changes from 107 contributors on top of v1.8.4. It builds on Go 1.26.4 and libvirt 11.10.
+
+The headline addition is a `GraceIOVirtualization` feature gate that configures NVIDIA Grace GPU passthrough using SMMUv3 and IOMMUFD, with ACPI Generic Initiator NUMA topology, NUMA distance mapping, and automatic PCI 64-bit hole sizing — the plumbing needed to pass Grace-class GPUs through to virtual machines on ARM64 hosts. A new Plugin CRD (`plugin.kubevirt.io/v1alpha1`) lets sidecars mutate libvirt domain XML over gRPC through declarative domain and node hooks with CEL-based evaluation, behind a `Plugins` feature gate. The RC also promotes `MigrationPriorityQueue`, `VMExport`, `PanicDevices`, persistent reservation, `ExpandDisk`, IBM Secure Execution, and `VideoConfig` to GA, and moves `WorkloadEncryptionSEV`, `RebootPolicy`, and hotplug volumes to beta.
+
+This is a release candidate, not an upgrade target, but the Grace passthrough path is the piece to watch: it points KubeVirt at ARM GPU hosts ahead of the 1.9 GA.
+
+**Source:** [KubeVirt v1.9.0-rc.0 release](https://github.com/kubevirt/kubevirt/releases/tag/v1.9.0-rc.0) - July 2, 2026
+
+---
+
+## Paper proposes deflecting prefill onto decode nodes in disaggregated serving
+
+A paper submitted to arXiv on July 2, [Towards Load-Aware Prefill Deflection for Disaggregated LLM Serving](https://arxiv.org/abs/2607.02043), targets a known imbalance in prefill/decode disaggregation: under load, the prefill GPU pool saturates while decode GPUs sit underused.
+
+The authors propose a scheduler that estimates time-to-first-token for each queued request on both prefill and decode nodes, then redirects — "deflects" — prefill work onto decode nodes as chunked-prefill steps interleaved with ongoing decode, but only when that improves tail latency without breaking time-between-tokens SLOs. Because a deflected request runs its prefill locally on the decode node, the design skips the inter-node KV-cache transfer that disaggregation normally forces. On production traces with DeepSeek-V2-Lite, the paper reports up to an 81% reduction in P95 TTFT and up to 79% higher SLO attainment over existing disaggregated schedulers, with sub-millisecond routing overhead.
+
+The numbers are the authors' own and are not independently corroborated, but the technique addresses a failure mode anyone running prefill/decode disaggregation will recognise.
+
+**Source:** [arXiv:2607.02043](https://arxiv.org/abs/2607.02043) - July 2, 2026
+
+---
+
+## OmniPilot pairs a calibrated cost model with abstention for GPU serving configuration
+
+Also submitted July 2, [OmniPilot: An Uncertainty-Aware LLM Inference Advisor for Heterogeneous GPU Clusters](https://arxiv.org/abs/2607.01579) recommends serving configurations — GPU type, tensor-parallel degree, and precision — while quantifying how confident it is in each recommendation.
+
+The system uses conformally calibrated quantile regression across eight serving targets and ranks candidate configurations by an economic-utility metric tied to operator preferences. An out-of-distribution detection layer abstains rather than guess on inputs outside its training envelope. Evaluated across A100, H100, and H200 GPUs at four precision levels (460 benchmark runs), the paper reports 6.2% mean absolute percentage error on throughput prediction, 95% top-1 accuracy on configuration ranking, and an abstention layer that flagged all five out-of-distribution test cases, where prediction error otherwise ran 24-46%.
+
+The abstention behaviour is the load-bearing idea: a cost model that declines to answer on unfamiliar hardware and precision combinations, rather than emitting a confident wrong recommendation an operator would act on. As above, the reported numbers are the authors' own.
+
+**Source:** [arXiv:2607.01579](https://arxiv.org/abs/2607.01579) - July 2, 2026
+
+---
