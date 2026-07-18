@@ -1,0 +1,44 @@
+---
+title: "SGLang 0.5.15 tunes GLM-5.2 for Blackwell, Prometheus patches an LTS range-query bug, Kyverno fixes admission validation"
+description: "SGLang 0.5.15 ships production GLM-5.2 serving on B300 with a faster speculative-decoding path, Prometheus 3.13.1 fixes a TSDB cache bug that corrupted range queries on the LTS line, and Kyverno 1.18.2 stops policies from skipping required image validation."
+publishedAt: 2026-07-11
+authors:
+  - rawkode
+technologies:
+  - prometheus
+  - kyverno
+---
+
+Three primary-source releases landed in the last day across AI serving, metrics, and policy. It was a fairly quiet window, so this is a tight three-item digest rather than a padded one.
+
+## SGLang 0.5.15 ships production GLM-5.2 serving and a faster speculative-decoding path
+
+SGLang published [v0.5.15](https://github.com/sgl-project/sglang/releases/tag/v0.5.15) on July 10, focused on serving GLM-5.2 in NVFP4 on Blackwell hardware and cutting speculative-decoding overhead. The project reports GLM-5.2 NVFP4 running at 500+ tokens/sec per user on 8x B300, and 450 on 4x GB300 at batch size 1.
+
+The release makes Spec V2 the tuned path: zero-overhead scheduling via a CUDA-graphable DSA draft-extend that drops device-host syncs and fuses metadata ops, which SGLang measures at +11% end-to-end throughput. Two supporting kernels land alongside it — IndexShare MTP reuses the indexer top-k across draft steps for up to 1.9x lower draft-step cost at long context, and TopK V2 fuses top-k selection with the page-table transform and supports runtime k up to 2048. Day-0 model support arrives for Hunyuan 3, HRM-Text, NVIDIA LocateAnything-3B, Baidu Unlimited-OCR, and Qwen3.6 in mixed NVFP4, plus a FlashKDA prefill backend for KDA linear attention and a built-in `web_search` tool backed by Exa.
+
+Every throughput figure here is SGLang's own benchmark; treat them as project-reported until independently reproduced.
+
+**Source:** [SGLang v0.5.15 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.15) - July 10, 2026
+
+---
+
+## Prometheus 3.13.1 fixes a TSDB cache bug that returned wrong samples to range queries
+
+Prometheus released [v3.13.1](https://github.com/prometheus/prometheus/releases/tag/v3.13.1) on July 10, a single-bugfix patch for the 3.13 LTS line. The fix targets a TSDB head-chunk cache that could return samples from the wrong chunk, or spurious not-found errors, for range queries issued after a head-chunk truncation (#19134).
+
+Head-chunk truncation runs continuously as the head block advances, so any range query spanning a truncation boundary could read incorrect data or fail rather than error loudly. Teams running 3.13.0 LTS in production should treat this as a data-correctness patch rather than an optional update, particularly where range queries back alerting or dashboards.
+
+**Source:** [Prometheus v3.13.1 release](https://github.com/prometheus/prometheus/releases/tag/v3.13.1) - July 10, 2026
+
+---
+
+## Kyverno 1.18.2 stops policies from skipping required image validation
+
+Kyverno cut [v1.18.2](https://github.com/kyverno/kyverno/releases/tag/v1.18.2) on July 10, led by a fix that stops the engine from aborting a required validation rule when an image reference does not match. Before the patch, a non-matching image in an image-scoped rule could short-circuit validation that operators intended to enforce, letting a workload through unchecked.
+
+The release also restarts dynamic watchers in background reporting when the API server returns HTTP 410 Gone, so policy reports recover after resource-version expiry instead of going stale, and backports a namespace-boundary enforcement fix in the generate controller. On the tooling side, the CLI now accepts multiple CRDs in a single `--crd-path` file, and the Pod Security Standards Helm chart tightens its allowed volume-type set.
+
+**Source:** [Kyverno v1.18.2 release](https://github.com/kyverno/kyverno/releases/tag/v1.18.2) - July 10, 2026
+
+---
