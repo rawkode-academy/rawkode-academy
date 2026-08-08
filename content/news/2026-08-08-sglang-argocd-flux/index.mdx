@@ -1,0 +1,45 @@
+---
+title: "SGLang 0.5.17 ships Kimi K3 support, Argo CD 3.5 promotes impersonation, Flux 2.9.4 hardens supply-chain paths"
+description: "SGLang 0.5.17 adds day-zero Kimi K3 support and a Rust ingress frontend, Argo CD 3.5.0 moves Source Hydrator and impersonation to beta on Helm 4, and Flux 2.9.4 tightens Git and OCI verification across its controllers."
+publishedAt: 2026-08-08
+authors:
+  - rawkode
+technologies:
+  - argo
+  - fluxcd
+  - kubernetes
+---
+
+Three primary-source releases landed in the last 24 hours across inference serving and GitOps. Two are feature minors, one is a hardening patch, so this is a short, focused digest rather than a padded one.
+
+## SGLang 0.5.17 adds day-zero Kimi K3 support and a Rust ingress frontend
+
+The inference-serving project released [SGLang v0.5.17](https://github.com/sgl-project/sglang/releases/tag/v0.5.17) on August 8, rolling up 582 pull requests from 194 contributors. The headline is day-zero support for Kimi K3, a 2.8T-parameter mixture-of-experts model that routes the top 16 of 896 experts through a 3584-dimension latent space with native MXFP4 quantization. The release also adds MiniMax-H3 and the EmbeddingGemma and LFM2.5 embedding models.
+
+Two infrastructure changes matter for operators. An initial Rust frontend moves network ingress and tokenization off the Python path onto a multi-threaded implementation, addressing a common CPU bottleneck ahead of the GPU. Distributed Weight Data Parallelism (DWDP) for MoE prefill is new: SGLang reports a 1.92x gain over DEP4 on 4x B200 serving gpt-oss-120b, and 506K versus 329K tok/s (1.54x) at saturation on its own benchmark.
+
+Plan for breaking changes before upgrading: the `sglang.jit_kernel` module is deprecated in favour of `sglang.kernels`, breakable prefill CUDA graphs are now on by default for DP attention, multimodal request errors return HTTP 400 instead of 500, and the helion dependency jumps from 0.2.6 to 1.4.
+
+**Source:** [SGLang v0.5.17 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.17) - August 8, 2026
+
+---
+
+## Argo CD 3.5.0 promotes Source Hydrator and impersonation to beta, moves to Helm 4
+
+Argo CD published [v3.5.0](https://github.com/argoproj/argo-cd/releases/tag/v3.5.0) on August 7, a stable minor with roughly 335 commits since the previous release. Source Hydrator and application-level impersonation both graduate from alpha to beta. Impersonation lets sync operations run under user-scoped credentials rather than the application controller's service account, which is the change multi-tenant platform teams have been waiting on for tighter per-team blast-radius control.
+
+The release also carries structural upgrades: the build migrates from Helm 3 to Helm 4, the UI moves to React 19 (existing UI extensions will need updates), repo-server gains mTLS, ApplicationSet picks up concurrency controls when reconciling managed applications, and the network view adds Gateway API resources. Azure DevOps repositories can now authenticate with an Azure Service Principal.
+
+**Source:** [Argo CD v3.5.0 release](https://github.com/argoproj/argo-cd/releases/tag/v3.5.0) - August 7, 2026
+
+---
+
+## Flux 2.9.4 hardens Git and OCI supply-chain paths across its controllers
+
+Sidecar-free GitOps toolkit Flux shipped [v2.9.4](https://github.com/fluxcd/flux2/releases/tag/v2.9.4) on August 7, a patch that bundles several security-boundary fixes rather than emergency CVE remediation. The image-automation-controller now validates refspecs to block force-updates and deletions, source-controller pins OCI chart digests during verification and restricts GCS authentication to service-account keys, and source-watcher enforces tarball extraction and glob-expansion limits.
+
+Component versions bump to source-controller v1.9.4, source-watcher v2.2.3, notification-controller v1.9.3, and image-reflector- and image-automation-controller v1.2.4. The release requires CRD schema updates for `ArtifactGenerator` and `ImageUpdateAutomation`, and `flux migrate -f` now targets version 2.9, so apply the updated CRDs before upgrading the controllers.
+
+**Source:** [Flux v2.9.4 release](https://github.com/fluxcd/flux2/releases/tag/v2.9.4) - August 7, 2026
+
+---
