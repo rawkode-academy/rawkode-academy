@@ -1,0 +1,46 @@
+---
+title: "vLLM 0.27.0 lands, containerd opens the 2.4 line, NCCL adds Compute Fabric Transport"
+description: "vLLM cut 0.27.0 with a PyTorch 2.13 base and expanded model support, containerd published the first 2.4.0 beta with an EROFS warm image cache, and NCCL 2.31.2 introduced Compute Fabric Transport APIs for Blackwell."
+publishedAt: 2026-08-11
+authors:
+  - rawkode
+technologies:
+  - ai-infrastructure
+  - containerd
+---
+
+Three primary-source releases landed in the last 24 hours across inference serving, container runtimes, and GPU collective communication. It was an otherwise quiet window, so this is a focused digest rather than a padded one.
+
+## vLLM 0.27.0 moves to a PyTorch 2.13 base and widens model and hardware support
+
+vLLM published [v0.27.0](https://github.com/vllm-project/vllm/releases/tag/v0.27.0) on August 10, rolling up 561 commits from 242 contributors. The release rebases the runtime onto PyTorch 2.13.0 with torchvision 0.28.0 and Triton 3.7.1, and adds model support for Kimi K3, Qwen3.5 dense and MoE variants, and DeepSeek-V4.
+
+On the engine side, Model Runner V2 extends beyond generative decoding to non-generative workloads including encoder-only attention, and the release adds a simplified fault-tolerance framework for combined data- and expert-parallel (DP+EP) serving plus NIXL-based prefill/decode disaggregation for hybrid MLA+SSM models. FlashAttention 4 integration deepens on SM100 with FP8 KV cache, and the notes list early enablement for NVIDIA Rubin (`sm_107`) alongside AMD `gfx1250`.
+
+The DP+EP fault-tolerance work and the encoder path in Model Runner V2 are the parts worth testing for teams running large-scale or mixed-workload inference rather than single-model decode.
+
+**Source:** [vLLM v0.27.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.27.0) - August 10, 2026
+
+---
+
+## containerd cuts the first 2.4.0 beta with an EROFS warm image cache
+
+The containerd project published [v2.4.0-beta.0](https://github.com/containerd/containerd/releases/tag/v2.4.0-beta.0) on August 10, opening the 2.4 release line ahead of a tentative GA on August 26 per the project's [release schedule](https://github.com/containerd/containerd/blob/main/RELEASES.md). Unlike 2.3, which is the current LTS branch supported through April 2028, 2.4 is a standard release and may carry breaking changes.
+
+The beta adds a warm image cache for the EROFS snapshotter and extends CRI runtime introspection so OCI runtime features can be surfaced for non-runc implementations. Other changes include a media type in the content create event and maximum-size labeling for snapshots. As a pre-release with functionality still under development, it is a testing target, not a production upgrade.
+
+**Source:** [containerd v2.4.0-beta.0 release](https://github.com/containerd/containerd/releases/tag/v2.4.0-beta.0) - August 10, 2026
+
+---
+
+## NCCL 2.31.2 adds Compute Fabric Transport and per-collective tuning
+
+NVIDIA released [NCCL v2.31.2-1](https://github.com/NVIDIA/nccl/releases/tag/v2.31.2-1) on August 11. The headline addition is Compute Fabric Transport (CFT): host and device APIs for registering window memory with CUDA logical endpoints and issuing device-side Put, Get, and NVLS operations. The release notes state CFT is supported on Blackwell GPUs with CUDA Toolkit 13.3 or later.
+
+The release also introduces per-collective configuration and tuning through a new `ncclCollConfig_t` type, with algorithm selection and CTA overrides at the call site rather than only through global environment variables. It extends GPU-Initiated Networking (GIN) with an EFA GDA backend and device-side timeouts, improves the Parallel Aggregated Tree algorithm for ReduceScatter and AllGather, and ships a Profiler v7 that exposes per-kernel phase events, plus fixes for hangs, data corruption, and resource leaks.
+
+Per-collective tuning matters for workloads that mix communication patterns in one job, where a single global algorithm choice previously forced a compromise.
+
+**Source:** [NVIDIA NCCL v2.31.2-1 release](https://github.com/NVIDIA/nccl/releases/tag/v2.31.2-1) - August 11, 2026
+
+---
