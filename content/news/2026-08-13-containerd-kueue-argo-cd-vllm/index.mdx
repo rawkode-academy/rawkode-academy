@@ -1,0 +1,62 @@
+---
+title: "containerd disables CRI checkpoint restore by default, Kueue locks LWS group size, Argo CD hardens Secret masking"
+description: "containerd 2.3.4 and 2.2.7 flip CRI checkpoint restore in CreateContainer off by default, Kueue 0.19.1 makes LeaderWorkerSet group size immutable to close a quota bypass, Argo CD backports Secret-masking fixes across three minors, and vLLM adds day-0 serving for the 2.4T-parameter Qwen3.8 MoE."
+publishedAt: 2026-08-13
+authors:
+  - rawkode
+technologies:
+  - containerd
+  - kueue
+  - argo
+  - ai-infrastructure
+---
+
+Four primary-source releases landed in the last 24 hours across container runtimes, batch scheduling, GitOps, and AI serving.
+
+## containerd 2.3.4 and 2.2.7 disable CRI checkpoint restore in CreateContainer by default
+
+The containerd project published [v2.3.4](https://github.com/containerd/containerd/releases/tag/v2.3.4) and a sibling [v2.2.7](https://github.com/containerd/containerd/releases/tag/v2.2.7) backport on August 12, both flipping a CRI default and deprecating checkpoint restore through the `CreateContainer` path.
+
+Restore in `CreateContainer` is now disabled by default and requires the `enable_experimental_restore_via_create` option to turn back on; the codepaths are also disabled outright when CRIU is not installed, gated behind a new `enable_criu` option. Both releases set `runtimeFeatures.UserNamespacesHostNetwork` to true by default in CRI and enable OCI runtime feature introspection for non-runc runtimes. Bug fixes include a memory leak in the OOM watcher map when stopping container monitoring, shims orphaned on transient errors while loading process IDs, corruption of binary protobuf shim start responses caused by premature whitespace trimming, and the EROFS snapshotter dropping lower layers stacked above merged filesystem metadata.
+
+Teams that restore containers through the CRI `CreateContainer` path need to opt back in explicitly before upgrading either line.
+
+**Source:** [containerd v2.3.4 release](https://github.com/containerd/containerd/releases/tag/v2.3.4) - August 12, 2026
+
+---
+
+## Kueue 0.19.1 makes LeaderWorkerSet group size immutable to close a quota bypass
+
+Kueue shipped [v0.19.1](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.1), with a [v0.18.5](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.5) backport, on August 12. The release makes `spec.leaderWorkerTemplate.size` immutable while a LeaderWorkerSet is managed by Kueue, behind a new `LWSImmutableGroupSize` feature gate that is Beta and enabled by default.
+
+The immutability closes a quota bypass where raising the group size on an already-admitted, Kueue-managed LeaderWorkerSet ran more pods per group than the reserved quota covered. The release also tightens Topology Aware Scheduling validation: when `podSetSliceRequiredTopology` is set, `podSetSliceSize` must also be set and greater than zero, non-positive slice sizes are rejected, and `TASRecomputeAssignmentWithinSchedulingCycle` can no longer be enabled without `TopologyAwareScheduling`.
+
+Platform teams running gang-scheduled GPU jobs through LeaderWorkerSet should expect size edits to be rejected after upgrading and plan resize as recreate rather than in-place edit.
+
+**Source:** [Kueue v0.19.1 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.1) - August 12, 2026
+
+---
+
+## Argo CD backports Secret-masking hardening across 3.5, 3.4, and 3.3
+
+The Argo project released [v3.5.1](https://github.com/argoproj/argo-cd/releases/tag/v3.5.1), [v3.4.7](https://github.com/argoproj/argo-cd/releases/tag/v3.4.7), and [v3.3.14](https://github.com/argoproj/argo-cd/releases/tag/v3.3.14) on August 12, a coordinated patch train weighted toward Secret handling.
+
+The releases prevent server-side-diff CLI secret mask spoofing, reuse the server-side diff result when masking Secret data, and hide secrets in the `last-applied-configuration` annotation. They are labelled as bug fixes rather than a security advisory, and follow the earlier server-side-diff secret-extraction class of issue. The train also stops ApplicationSet progressive sync from reconciling in a tight loop, verifies terminating Applications against the API server, and treats `timeout.reconciliation=0` as disabled soft expiry.
+
+Operators running server-side diff should patch to keep Secret data from leaking through diff output or the applied-configuration annotation.
+
+**Source:** [Argo CD v3.5.1 release](https://github.com/argoproj/argo-cd/releases/tag/v3.5.1) - August 12, 2026
+
+---
+
+## vLLM adds day-0 serving for the 2.4T-parameter Qwen3.8 MoE
+
+vLLM published [day-0 support](https://vllm.ai/blog/2026-08-12-qwen3.8) for `Qwen/Qwen3.8-2.4T-A95B` on August 12, a 2.4-trillion-parameter sparse MoE that the project says runs out of the box with no architecture changes required.
+
+The model uses 512 experts across 92 layers with hybrid attention — full attention every fourth layer, linear attention elsewhere — and ships checkpoints in FP8, BF16, NVFP4, and MXFP4. vLLM reports it needs at least two NVIDIA B300 or AMD MI355X nodes, or a single node for the FP4-quantized version, and that the release adds kernels for the model's linear-attention, routing, and expert-parallel paths on both NVIDIA and AMD hardware.
+
+The serving path, not the weights, is the news here: same-day multi-vendor kernel support gives operators a concrete deployment target instead of waiting on downstream engine work.
+
+**Source:** [vLLM blog](https://vllm.ai/blog/2026-08-12-qwen3.8) - August 12, 2026
+
+---
