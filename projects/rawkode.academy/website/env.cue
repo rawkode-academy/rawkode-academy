@@ -66,6 +66,9 @@ tasks: {
 		// env.cue is included so build-time env changes (e.g. DISABLE_GAME_AUTH)
 		// mark the build/deploy affected; otherwise CI would skip the redeploy.
 		inputs: [
+			// CI change detection compares repo-relative paths; retain the
+			// definition-relative glob below for local/task input resolution.
+			"content/**",
 			"../../../content/**",
 			"astro.config.mts",
 			"env.cue",
@@ -91,6 +94,9 @@ tasks: {
 			// env.cue drives build-time vars (e.g. DISABLE_GAME_AUTH); include it so
 			// an env-only change marks this deploy affected (else CI skips it).
 			inputs: [
+				// CI change detection compares repo-relative paths; retain the
+				// definition-relative glob below for local/task input resolution.
+				"content/**",
 				"../../../content/**",
 				"astro.config.mts",
 				"env.cue",
@@ -106,6 +112,9 @@ tasks: {
 			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]
 			inputs: [
+				// CI change detection compares repo-relative paths; retain the
+				// definition-relative glob below for local/task input resolution.
+				"content/**",
 				"../../../content/**",
 				"astro.config.mts",
 				"package.json",

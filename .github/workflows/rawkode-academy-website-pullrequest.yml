@@ -17,6 +17,7 @@ on:
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/astro.config.mts/**
+    - projects/rawkode.academy/website/content/**
     - projects/rawkode.academy/website/env.cue
     - projects/rawkode.academy/website/env.cue/**
     - projects/rawkode.academy/website/package.json
