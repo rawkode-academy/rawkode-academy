@@ -45,7 +45,7 @@ content/scripts/output/youtube-descriptions/
 **/.claude/scheduled_tasks.lock
 
 # BEGIN cuenv vcs
-.agents/skills/
+.agents/skills/cuenv/
 .cuenv/vcs/cache/
 .cuenv/vcs/tmp/
 # END cuenv vcs
