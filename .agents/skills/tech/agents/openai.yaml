@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rawkode Academy Technology Profiles"
+  short_description: "Maintain Academy technology profiles"
+  default_prompt: "Use $tech to research and maintain this Rawkode Academy technology profile."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rawkode Academy Video Importer"
+  short_description: "Import and verify Academy video content"
+  default_prompt: "Use $rawkode-academy-video-importer to import and verify this video for Rawkode Academy."
