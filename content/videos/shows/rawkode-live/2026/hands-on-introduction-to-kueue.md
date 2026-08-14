@@ -1,5 +1,5 @@
 ---
-id: 02b0aa5bbec82f52066ff235
+id: elpqrlouhe220jyf5tqr65vm
 slug: hands-on-introduction-to-kueue
 title: Hands-on Introduction to Kueue
 tagline: Kubernetes-native job queueing, hands-on
@@ -55,7 +55,7 @@ technologies:
   - kueue
   - kubernetes
 show: rawkode-live
-duration: 3600
+duration: 4727
 guests:
   - amy
 ---

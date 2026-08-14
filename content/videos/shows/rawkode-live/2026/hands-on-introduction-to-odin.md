@@ -1,5 +1,5 @@
 ---
-id: 7564ecf9c5c00c7ceea52daf
+id: nlnsodk2e7tnmwfychc7400m
 slug: hands-on-introduction-to-odin
 title: Hands-on Introduction to Odin
 tagline: Data-oriented systems programming, hands-on
@@ -42,7 +42,7 @@ category: tutorial
 technologies:
   - odin
 show: rawkode-live
-duration: 3600
+duration: 4614
 guests:
   - pmbanugo
 ---
