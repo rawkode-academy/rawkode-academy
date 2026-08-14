@@ -68,11 +68,11 @@ Body`);
 			commitSha: "test-sha",
 		});
 		const job = jobs.find(
-			(candidate) => candidate.videoId === "02b0aa5bbec82f52066ff235",
+			(candidate) => candidate.videoId === "elpqrlouhe220jyf5tqr65vm",
 		);
 
 		expect(job).toMatchObject({
-			videoId: "02b0aa5bbec82f52066ff235",
+			videoId: "elpqrlouhe220jyf5tqr65vm",
 			tagline: "Kubernetes-native job queueing, hands-on",
 			source: {
 				commitSha: "test-sha",
