@@ -1,0 +1,45 @@
+---
+title: "Talos 1.14 opens RC with sandboxd isolation, Dapr and Helm ship patch waves"
+description: "Talos Linux v1.14.0-rc.1 introduced sandboxd workload isolation and native BGP, Dapr patched placement, scheduler, and workflow recovery across three lines, and Helm fixed server-side apply conflict retries and OCI registry push auth."
+publishedAt: 2026-08-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - dapr
+  - helm
+---
+
+A quiet Friday across the ecosystem, so this is a short digest of three primary-source releases from the last 24 hours: a node OS release candidate and two maintenance patch waves.
+
+## Talos 1.14 opens its release candidate with sandboxd workload isolation
+
+Sidero Labs published [Talos Linux v1.14.0-rc.1](https://github.com/siderolabs/talos/releases/tag/v1.14.0-rc.1) on August 14, the first release candidate for the 1.14 line of the immutable Kubernetes node OS.
+
+The headline change is `sandboxd`, which runs the container runtime, kubelet, and pods in dedicated PID and mount namespaces to isolate workloads from the host. The candidate also adds native BGP through embedded GoBGP instances, with ECMP, BFD, and route imports, rather than relying on an external routing layer; DNS over TLS and DNS over HTTPS for encrypted resolution; and declarative management of LVM logical volumes, volume groups, and RAID arrays. It ships Linux 6.18 and Kubernetes 1.37.0-rc.0, and reworks machine configuration into multiple documents.
+
+This is a testing release rather than an upgrade target, but sandboxd is worth evaluating for teams that want workload isolation enforced at the OS layer instead of through runtime configuration.
+
+**Source:** [Talos v1.14.0-rc.1 release](https://github.com/siderolabs/talos/releases/tag/v1.14.0-rc.1) - August 14, 2026
+
+---
+
+## Dapr patches placement, scheduler, and workflow recovery across three release lines
+
+The Dapr project cut [v1.18.3](https://github.com/dapr/dapr/releases/tag/v1.18.3) on August 14, with patch releases v1.17.13 and v1.16.19 across the supported 1.16 and 1.17 lines following the same day.
+
+The releases fix a placement bug where a single sidecar disconnecting reported every sidecar in the namespace as disconnected from the Placement service. On the scheduler side, they bound graceful drain to five seconds so shutdowns stop hanging and failing to redeliver jobs, add timezone validation to prevent a crash on malformed job schedules, and restore embedded etcd metrics on the metrics endpoint. Workflow fixes cover stalled workflows that stayed stuck after the last worker disconnected, intermittent `GetInstance` failures while a workflow was running, and terminate calls silently dropped when batched with other operations. Actor state store components can now be hot-reloaded without a restart.
+
+**Source:** [Dapr v1.18.3 release](https://github.com/dapr/dapr/releases/tag/v1.18.3) - August 14, 2026
+
+---
+
+## Helm 4.2.4 fixes server-side apply conflict retries and registry push auth
+
+Helm published [v4.2.4](https://github.com/helm/helm/releases/tag/v4.2.4) and v3.21.4 on August 14, patch releases across the v4 and v3 lines.
+
+The releases restore a missing conflict-retry path for server-side apply and set the correct scope for token-based authentication when pushing charts to OCI registries. They also fix a panic on repeated `IsReachable` calls and improve error reporting for `helm template --debug` with `--show-only`. Two dependency bumps pull in fixes for advisories in `google.golang.org/grpc` (GO-2026-6061) and `go.opentelemetry.io/otel` (GO-2026-5158).
+
+**Source:** [Helm v4.2.4 release](https://github.com/helm/helm/releases/tag/v4.2.4) - August 14, 2026
+
+---
