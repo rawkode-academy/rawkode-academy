@@ -26,9 +26,9 @@ This is a testing release rather than an upgrade target, but sandboxd is worth e
 
 ## Dapr patches placement, scheduler, and workflow recovery across three release lines
 
-The Dapr project cut [v1.18.3](https://github.com/dapr/dapr/releases/tag/v1.18.3) on August 14, with patch releases v1.17.13 and v1.16.19 across the supported 1.16 and 1.17 lines following the same day.
+The Dapr project cut [v1.18.3](https://github.com/dapr/dapr/releases/tag/v1.18.3) on August 14, backporting the same fixes across the supported 1.16 and 1.17 lines as [v1.17.13](https://github.com/dapr/dapr/releases/tag/v1.17.13) and [v1.16.19](https://github.com/dapr/dapr/releases/tag/v1.16.19) the same day.
 
-The releases fix a placement bug where a single sidecar disconnecting reported every sidecar in the namespace as disconnected from the Placement service. On the scheduler side, they bound graceful drain to five seconds so shutdowns stop hanging and failing to redeliver jobs, add timezone validation to prevent a crash on malformed job schedules, and restore embedded etcd metrics on the metrics endpoint. Workflow fixes cover stalled workflows that stayed stuck after the last worker disconnected, intermittent `GetInstance` failures while a workflow was running, and terminate calls silently dropped when batched with other operations. Actor state store components can now be hot-reloaded without a restart.
+The releases fix a placement bug where a single sidecar disconnecting reported every sidecar in the namespace as disconnected from the Placement service. On the scheduler side, they cap graceful drain at five seconds so shutdowns stop hanging and failing to redeliver jobs, add timezone validation to prevent a crash on malformed job schedules, and restore embedded etcd metrics on the metrics endpoint. Workflow fixes cover stalled workflows that stayed stuck after the last worker disconnected, intermittent `GetInstance` failures while a workflow was running, and terminate calls silently dropped when batched with other operations. Actor state store components can now be hot-reloaded without a restart.
 
 **Source:** [Dapr v1.18.3 release](https://github.com/dapr/dapr/releases/tag/v1.18.3) - August 14, 2026
 
@@ -36,7 +36,7 @@ The releases fix a placement bug where a single sidecar disconnecting reported e
 
 ## Helm 4.2.4 fixes server-side apply conflict retries and registry push auth
 
-Helm published [v4.2.4](https://github.com/helm/helm/releases/tag/v4.2.4) and v3.21.4 on August 14, patch releases across the v4 and v3 lines.
+Helm published [v4.2.4](https://github.com/helm/helm/releases/tag/v4.2.4) and [v3.21.4](https://github.com/helm/helm/releases/tag/v3.21.4) on August 14, patch releases across the v4 and v3 lines.
 
 The releases restore a missing conflict-retry path for server-side apply and set the correct scope for token-based authentication when pushing charts to OCI registries. They also fix a panic on repeated `IsReachable` calls and improve error reporting for `helm template --debug` with `--show-only`. Two dependency bumps pull in fixes for advisories in `google.golang.org/grpc` (GO-2026-6061) and `go.opentelemetry.io/otel` (GO-2026-5158).
 
