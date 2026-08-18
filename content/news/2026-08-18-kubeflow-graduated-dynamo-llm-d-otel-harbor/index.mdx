@@ -1,0 +1,71 @@
+---
+title: "Kubeflow graduates from the CNCF, Dynamo 1.4 adds multi-datacenter KV routing, OpenTelemetry Collector gates queue batching"
+description: "The CNCF graduated Kubeflow on August 17, while NVIDIA Dynamo 1.4, llm-d 0.9, the OpenTelemetry Collector, and Harbor all shipped same-day releases across inference, observability, and registry infrastructure."
+publishedAt: 2026-08-18
+authors:
+  - rawkode
+technologies:
+  - kubeflow
+  - llm-d
+  - opentelemetry
+  - harbor
+  - kubernetes
+---
+
+August 17 was a busy day across the cloud native and AI-infrastructure stack. Five primary-source items landed inside the last 24 hours: a CNCF graduation, two distributed-inference releases, an OpenTelemetry Collector release with breaking config edits, and a Harbor patch that quietly re-bases its bundled database.
+
+## Kubeflow graduates from the CNCF
+
+The CNCF [announced on August 17](https://www.cncf.io/announcements/2026/08/17/cncf-announces-kubeflows-graduation-solidifying-the-standard-for-cloud-native-ai-operations/) that Kubeflow has reached graduated status, the foundation's top maturity tier and among the first AI/ML-focused projects to get there.
+
+Kubeflow now spans the full lifecycle — data processing, notebooks, distributed training and fine-tuning, and model serving through KServe — with recent additions aimed at post-training and agentic workloads. The CNCF cites more than 6,600 contributors across over 1,000 organizations, roughly 260 million cumulative PyPI downloads, and production adopters including Bloomberg, NVIDIA, Red Hat, LinkedIn, and Spotify. Graduation required a third-party security audit, a formal steering committee, and adoption of the CNCF Code of Conduct. The project integrates with Kueue for job queuing, Istio for service traffic, and Prometheus for monitoring.
+
+The signal for platform teams is that the vendor-neutral, Kubernetes-native MLOps stack now carries the CNCF's strongest maturity guarantee, which matters when standardizing training and serving paths for internal AI platforms.
+
+**Source:** [CNCF](https://www.cncf.io/announcements/2026/08/17/cncf-announces-kubeflows-graduation-solidifying-the-standard-for-cloud-native-ai-operations/) - August 17, 2026
+
+---
+
+## NVIDIA Dynamo 1.4 adds multi-datacenter KV routing and multimodal disaggregation
+
+NVIDIA released [Dynamo 1.4.0](https://github.com/ai-dynamo/dynamo/releases/tag/v1.4.0) on August 17, the 17th feature release of its open distributed-inference platform, with 640 merged PRs from 127 contributors.
+
+The release adds a sequenced, datacenter-scoped KV relay that extends prefix-cache-aware routing across datacenters, backed by a reservation replay cache that records routing decisions instead of resending long prompts. It introduces an experimental vLLM-compatible `/inference/v1/generate` token-in/token-out endpoint on the Dynamo frontend, and uses NIXL RDMA tensor transport to disaggregate multimodal, autoregressive-to-diffusion pipelines such as GLM-Image across nodes. The bundled Spica discrete-event simulator moved into the main repository for GPU-free capacity planning, and the process-local tokenizer prefix cache is now enabled by default with a 64 MiB budget. Dynamo 1.4 tracks vLLM 0.26.0 with FlashInfer 0.6.14.
+
+**Source:** [NVIDIA Dynamo v1.4.0](https://github.com/ai-dynamo/dynamo/releases/tag/v1.4.0) - August 17, 2026
+
+---
+
+## llm-d 0.9 bumps vLLM to 0.26 and adds Intel XPU support
+
+The llm-d project — the Kubernetes-native distributed inference stack built on vLLM — published [v0.9.0](https://github.com/llm-d/llm-d/releases/tag/v0.9.0) on August 17.
+
+The release upgrades the bundled vLLM from 0.23.0 to 0.26.0 across its CUDA, ROCm, CPU, TPU, and XPU variants, and adds Intel XPU support, including a tiered prefix cache backed by the LMCache connector for KV offload. Routing guidance moves from request-based to token-aware load balancing, and the endpoint-picker autoscaling path shifts from the Prometheus Adapter to KEDA queue-based scaling.
+
+Both changes point the same way: llm-d is standardizing on queue- and token-aware signals rather than raw request counts as the basis for scaling inference under load.
+
+**Source:** [llm-d v0.9.0](https://github.com/llm-d/llm-d/releases/tag/v0.9.0) - August 17, 2026
+
+---
+
+## OpenTelemetry Collector gates queue batching and renames exporter config fields
+
+The OpenTelemetry Collector released [v1.65.0/v0.159.0](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.159.0) on August 17.
+
+A new `pkg.exporterhelper.queueBatchEnabled` feature gate turns on batching inside `NewDefaultQueueConfig`, advancing Phase 1 of the exporter batching migration RFC by moving batching into the exporter queue rather than a standalone batch processor. The release also lands two breaking changes that convert embedded structs to named fields: the zpages extension's `confighttp.ServerConfig`, and `configauth.Config` inside confighttp's `AuthConfig`. It adds `otelcol_exporter_enqueue_size` and `otelcol_exporter_enqueue_size_bytes` metrics, and now records batch send-size histograms after batching rather than on the incoming request.
+
+Teams maintaining custom collector builds or config structs need to update for the renamed fields, and anyone testing the batching migration should watch the new enqueue-size metrics.
+
+**Source:** [OpenTelemetry Collector v0.159.0](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.159.0) - August 17, 2026
+
+---
+
+## Harbor 2.15.2 auto-upgrades its bundled Postgres from 15 to 18
+
+Harbor released [v2.15.2](https://github.com/goharbor/harbor/releases/tag/v2.15.2) on August 17, a patch that carries a significant operational change for its packaged database.
+
+On container startup the release runs `pg_upgrade` to move the bundled PostgreSQL from 15 to 18, so operators using the packaged database should back up first and expect a possible reindex for non-ASCII data. The release also swaps the bundled Redis cache for Valkey, upgrades the UI to Angular 21 and Node.js 22, and tightens security by validating the source project on blob mounts and rejecting tokens that omit an `iat` claim.
+
+**Source:** [Harbor v2.15.2](https://github.com/goharbor/harbor/releases/tag/v2.15.2) - August 17, 2026
+
+---
