@@ -1,0 +1,56 @@
+---
+title: "Cloud native digest for 19 August 2026: Prometheus 3.14, a Cilium NodePort outage fix, CoreDNS security rebuild, and Backstage auth hardening"
+description: "Prometheus 3.14.0 turns duration expressions on by default and promotes first_over_time to stable, while Cilium ships a coordinated patch for a BPF map collision that could drop NodePort traffic for ~30 minutes."
+publishedAt: 2026-08-19
+authors:
+  - rawkode
+technologies: []
+---
+
+### Prometheus 3.14.0 enables duration expressions by default and promotes first_over_time to stable
+
+Prometheus published 3.14.0 on 18 August 2026, with two changes that alter default query behaviour and one that removes a feature flag.
+
+The release enables PromQL duration expressions by default, making the `--enable-feature=promql-duration-expr` flag a no-op ([#19033](https://github.com/prometheus/prometheus/pull/19033)), and promotes `first_over_time` from experimental to a stable function ([#19093](https://github.com/prometheus/prometheus/pull/19093)). New in this cycle: Oracle Cloud Infrastructure compute service discovery ([#18919](https://github.com/prometheus/prometheus/pull/18919)) and an experimental `start_timestamp()` function for instant vectors ([#19089](https://github.com/prometheus/prometheus/pull/19089)). On the storage side, the notes call out fixes for a data-loss risk in the TSDB under out-of-order ingestion ([#19016](https://github.com/prometheus/prometheus/pull/19016)) and native histogram corruption after a restart ([#19202](https://github.com/prometheus/prometheus/pull/19202)).
+
+If you gate recording or alerting rules on duration-expression syntax, the flag change means expressions parse everywhere on 3.14.0 whether or not the flag is set, so audit rule files before rolling out.
+
+**Source:** [Prometheus v3.14.0 release notes](https://github.com/prometheus/prometheus/releases/tag/v3.14.0) — 18 August 2026
+
+---
+
+### Cilium patches a BPF map collision that could drop NodePort traffic for 30 minutes
+
+Cilium shipped a coordinated patch across three maintained branches on 18 August 2026 — 1.20.1, 1.19.7, and 1.18.13 — led by a load-balancing datapath fix rather than a security advisory.
+
+The headline bug is a BPF load-balancer map key collision in which HostPort or NodePort expansion could overwrite a LoadBalancer frontend, and the release notes describe a roughly 30-minute NodePort outage after a LoadBalancer service is deleted. The same set of releases corrects a case where, with kube-proxy replacement disabled, Cilium intercepted traffic destined for LoadBalancer VIPs that should have been delegated to kube-proxy, and fixes a BPF verifier rejection on pre-5.12 kernels when IPv6 is enabled.
+
+Operators running any of the three supported branches with NodePort or LoadBalancer services should treat the datapath fix as upgrade-worthy, since the failure mode is a silent traffic outage rather than a crash.
+
+**Source:** [Cilium v1.19.7 release notes](https://github.com/cilium/cilium/releases/tag/v1.19.7) — 18 August 2026
+
+---
+
+### CoreDNS 1.14.7 rebuilds on Go 1.26.6 to pick up three CVE fixes
+
+CoreDNS released 1.14.7 on 19 August 2026, a maintenance and hardening release built on a patched Go toolchain.
+
+Per the release notes, the build uses Go 1.26.6 to include fixes for CVE-2026-56865, CVE-2026-56864, and CVE-2026-33818, and the changelog groups roughly 49 noteworthy changes across caching, forwarding, and transport. The stated focus is reliability: improved stale-cache behaviour, safer upstream handling, and tighter connection and overload controls.
+
+Because CoreDNS sits on the resolution path for effectively every workload in a cluster, a toolchain-level CVE rebuild plus resolver-reliability fixes is worth folding into the next patch window rather than deferring.
+
+**Source:** [CoreDNS v1.14.7 release notes](https://github.com/coredns/coredns/releases/tag/v1.14.7) — 19 August 2026
+
+---
+
+### Backstage 1.54.0 tightens OAuth redirect-URI allowlist matching as a breaking change
+
+Backstage cut 1.54.0 on 18 August 2026, and the auth backend carries a breaking change that can lock out logins if operator config is not reviewed.
+
+The OAuth redirect URI and client-ID metadata allowlists in `@backstage/plugin-auth-backend` now match patterns per URL component instead of against the full URL string. Wildcards no longer cross host or path boundaries, patterns must include an explicit protocol, redirect URIs with embedded credentials are always rejected, and a wildcard port such as `http://localhost:*` now matches only the root path. The release also removes the previously deprecated extension `config.schema` and restructures the Connections API, both flagged as breaking.
+
+Portal operators upgrading from 1.53.x should re-derive their allowlist entries against the per-component rules before deploying, since an over-broad wildcard that previously worked may now fail to match a valid callback.
+
+**Source:** [Backstage v1.54.0 release notes](https://github.com/backstage/backstage/releases/tag/v1.54.0) — 18 August 2026
+
+---
