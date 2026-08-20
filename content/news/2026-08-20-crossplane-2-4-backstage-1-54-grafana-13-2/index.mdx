@@ -1,0 +1,45 @@
+---
+title: "Crossplane 2.4 restarts package pods on upgrade, Backstage 1.54 tightens OAuth, Grafana 13.2 moves alerting to v1beta1"
+description: "Crossplane 2.4.0 reworks package revisions and lets functions watch required resources, Backstage 1.54.0 hardens OAuth redirect matching and diffs catalog relations, and Grafana 13.2.0 migrates its notifications API to v1beta1."
+publishedAt: 2026-08-20
+authors:
+  - rawkode
+technologies:
+  - crossplane
+  - backstage
+  - grafana
+---
+
+Three primary-source releases landed across control planes, developer portals, and observability in the last 24 hours. All three carry operational consequences worth reading before you upgrade.
+
+## Crossplane 2.4 restarts every package pod on upgrade and lets functions watch required resources
+
+Crossplane published [v2.4.0](https://github.com/crossplane/crossplane/releases/tag/v2.4.0) on August 20, the latest stable release on the v2 control-plane line.
+
+Package revision names now incorporate both the package digest and `metadata.generation`, so any spec change mints a new `PackageRevision`. As a result, upgrading to 2.4 issues a new revision for every installed package and restarts the pods for all Providers and Functions. Package runtime objects move to server-side apply under the `pkg.crossplane.io/runtime` field manager, so fields removed from a `DeploymentRuntimeConfig` are now deleted from live objects instead of lingering. Composition functions can trigger reconciliation when a required, non-composed resource changes rather than waiting for the next poll, and providers with safe-start scale to zero replicas until their first `ManagedResourceDefinition` becomes active. The composed-resource garbage collector now validates controller references before acting on `spec.resourceRefs`, closing a path where it could delete resources it did not own.
+
+Operators should plan for the package-pod restart during the upgrade; the CLI has also moved to `cli.crossplane.io` and the binary is now named `crossplane` rather than `crank`.
+
+**Source:** [Crossplane v2.4.0 release](https://github.com/crossplane/crossplane/releases/tag/v2.4.0) - August 20, 2026
+
+---
+
+## Backstage 1.54 tightens OAuth redirect matching and syncs catalog relations by diff
+
+The Backstage maintainers released [v1.54.0](https://github.com/backstage/backstage/releases/tag/v1.54.0) on August 19.
+
+OAuth redirect URI allowlist matching now validates each URL component separately, so configured wildcards no longer cross host or path boundaries and URIs carrying embedded credentials are rejected. This is a breaking change for deployments that relied on looser matching. The catalog now applies only relation diffs instead of deleting and reinserting the full relation set, and entity-provider mutations retry on PostgreSQL deadlocks, cutting write churn on large catalogs. A new `refresh-catalog-entity` scaffolder action re-queues an entity immediately so automation can read back data right after a template run, and Kubernetes and MCP actions now emit auditor events. The deprecated `config.schema` extension option is removed in favour of a top-level `configSchema` that takes Standard Schema-compatible values such as Zod v4.
+
+**Source:** [Backstage v1.54.0 release](https://github.com/backstage/backstage/releases/tag/v1.54.0) - August 19, 2026
+
+---
+
+## Grafana 13.2 moves the notifications API to v1beta1 and adds GitLab and Bitbucket webhooks to Git Sync
+
+Grafana released [v13.2.0](https://github.com/grafana/grafana/releases/tag/v13.2.0) on August 19, addressing CVE-2026-17183.
+
+Alerting migrates its notifications API to `v1beta1` and gains an import path into Grafana-managed alerting: an Import tab plus a wizard that stages configuration, previews it, and can promote and auto-sync it, with contact-point provenance mismatches now returning 403 instead of 500. Git Sync provisioning adds GitLab and Bitbucket webhook support alongside GitHub Enterprise, which is now enabled by default, plus pull-request preview diffs against the merge base and per-repository webhook disabling. Dashboards can nest tabs up to four levels, interpolate thresholds, and surface panel query errors and notices in a single view; scripted dashboards are deprecated and disabled by default.
+
+**Source:** [Grafana v13.2.0 release](https://github.com/grafana/grafana/releases/tag/v13.2.0) - August 19, 2026
+
+---
