@@ -1,6 +1,6 @@
 ---
 title: "Wasmtime patches a filesystem sandbox escape, Crossplane 2.4 adds dependency watches, Kueue fixes DRA quota accounting"
-description: "Wasmtime shipped a coordinated patch wave for a high-severity filesystem sandbox escape (CVSS 8.8), Crossplane 2.4.0 lets composition functions watch resources they don't own, and Kueue 0.19.2/0.18.6 corrected DRA quota undercounting for GPU workloads."
+description: "Wasmtime shipped a coordinated patch wave for a high-severity filesystem sandbox escape (CVSS 8.8), Crossplane 2.4.0 lets composition functions watch resources they don't own, Kueue 0.19.2/0.18.6 corrected DRA quota undercounting for GPU workloads, and Kubernetes cut an August patch wave across three supported minors."
 publishedAt: 2026-08-21
 authors:
   - rawkode
@@ -17,7 +17,7 @@ Four primary-source releases in the last 24 hours span WebAssembly sandboxing, p
 
 The Bytecode Alliance published [advisory GHSA-vqjp-4c8c-hfgg](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-vqjp-4c8c-hfgg) on August 20, describing a filesystem sandbox escape rated CVSS 8.8. A guest granted read or write access to a preopened directory through `wasmtime-wasi` could use a trailing slash on a path or symlink to escape the sandbox and reach the host filesystem. The root cause is in the `cap-std` dependency (GHSA-hp8f-xmx4-4qrg), not Wasmtime's own path logic.
 
-The exposure is platform-dependent: hosts on Linux kernels older than 5.6, which lack the `openat2` syscall, and macOS are affected, while newer Linux kernels using the `RESOLVE_BENEATH` resolution flag are not. Fixes shipped the same day as patches to every supported line — [24.0.13](https://github.com/bytecodealliance/wasmtime/releases/tag/v24.0.13), [36.0.14](https://github.com/bytecodealliance/wasmtime/releases/tag/v36.0.14), 46.0.3, and 47.0.4 — alongside the feature release 48.0.0.
+The exposure is platform-dependent: hosts on Linux kernels older than 5.6, which lack the `openat2` syscall, and macOS are affected, while newer Linux kernels using the `RESOLVE_BENEATH` resolution flag are not. Fixes shipped the same day as patches to every supported line — [24.0.13](https://github.com/bytecodealliance/wasmtime/releases/tag/v24.0.13), [36.0.14](https://github.com/bytecodealliance/wasmtime/releases/tag/v36.0.14), [46.0.3](https://github.com/bytecodealliance/wasmtime/releases/tag/v46.0.3), and [47.0.4](https://github.com/bytecodealliance/wasmtime/releases/tag/v47.0.4) — alongside the feature release [48.0.0](https://github.com/bytecodealliance/wasmtime/releases/tag/v48.0.0).
 
 Anyone running untrusted modules with WASI filesystem access on macOS or pre-5.6 kernels should patch rather than rely on the kernel-level mitigation.
 
@@ -47,7 +47,7 @@ The releases also add an alpha `TASCacheTopologyTree` feature gate, off by defau
 
 ## Kubernetes ships an August patch wave across three supported minors
 
-The release team cut [v1.36.4](https://github.com/kubernetes/kubernetes/releases/tag/v1.36.4), v1.35.8, and v1.34.11 on August 20. The v1.36.4 changelog lists a DRA scheduling fix for shared-counter caches, a preemption race condition, a kubelet fix for duplicate CDI device IDs surfaced by DRA drivers, and a bump of `golang.org/x/net` and `golang.org/x/text` to pull in upstream Go security updates.
+The release team cut [v1.36.4](https://github.com/kubernetes/kubernetes/releases/tag/v1.36.4), [v1.35.8](https://github.com/kubernetes/kubernetes/releases/tag/v1.35.8), and [v1.34.11](https://github.com/kubernetes/kubernetes/releases/tag/v1.34.11) on August 20. The v1.36.4 changelog lists a DRA scheduling fix for shared-counter caches, a preemption race condition, a kubelet fix for duplicate CDI device IDs surfaced by DRA drivers, and a bump of `golang.org/x/net` and `golang.org/x/text` to pull in upstream Go security updates.
 
 There is no dedicated Kubernetes CVE in this wave; the security content is the transitive dependency refresh. The DRA-related fixes are the notable ones for operators running dynamic resource allocation drivers for GPUs and other accelerators.
 
