@@ -1,7 +1,7 @@
 ---
 id: pgrokuuhvovem0ajyew4tncu
 slug: part-2-tutorial-installing-teleport
-title: How to Install Teleport on Kubernetes (Step-by-Step)
+title: How to Install Teleport on Linux (APT, YUM and Curl)
 description: >-
   Three ways to install Teleport on Linux: the Debian APT repo, the Red Hat YUM
   repo, and a curl script for other distros. Then start the server, create the
