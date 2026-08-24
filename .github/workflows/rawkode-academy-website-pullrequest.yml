@@ -7,6 +7,7 @@ on:
     paths:
     - .github/workflows/rawkode-academy-website-pullrequest.yml
     - content/**
+    - bun.lock
     - cue.mod/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
     - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
