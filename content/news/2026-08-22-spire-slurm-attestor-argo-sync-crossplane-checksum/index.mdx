@@ -1,0 +1,47 @@
+---
+title: "SPIRE ships a Slurm workload attestor, Argo Workflows fixes sync-lock semantics, Crossplane patches an install checksum regression"
+description: "SPIRE v1.15.3 extends SPIFFE identity to Slurm-scheduled jobs, Argo Workflows v4.1.2 corrects how synchronized workflows report status on termination, and Crossplane backports a fix for binary checksums that had mismatched since v2.2.0."
+publishedAt: 2026-08-22
+authors:
+  - rawkode
+technologies:
+  - spire
+  - argo
+  - crossplane
+---
+
+Three primary-source releases landed on August 21 across workload identity, workflow orchestration, and control-plane packaging. It was a quiet 24 hours, so this is a short, focused digest.
+
+## SPIRE adds a Slurm workload attestor for HPC batch jobs
+
+SPIRE [v1.15.3](https://github.com/spiffe/spire/releases/tag/v1.15.3) shipped on August 21 with a new Slurm workload attestor ([#7160](https://github.com/spiffe/spire/pull/7160)), extending SPIFFE SVID issuance to jobs scheduled by Slurm rather than only container or process workloads.
+
+The attestor is Unix-only and works on cgroup v2 hosts. It resolves a workload's Slurm job by parsing `/proc/<pid>/cgroup` to find the job's cgroup under `/system.slice`, and emits `slurm:job_id` on older Slurm or `slurm:sluid` on Slurm 26.05 and later, plus a `slurm:step` selector that is either numeric or one of `batch`, `extern`, or `interactive`. Because it reads host-rooted cgroup paths, the SPIRE Agent must share the host's PID and cgroup namespaces. The same release adds an `azure_blob` BundlePublisher plugin for pushing the trust bundle to Azure Blob Storage, a `trust_bundle_spiffe_workload_api` option so nested agents can bootstrap their initial bundle from a Workload API endpoint, and flags to disable the Workload API and SDS APIs on public endpoints. Go moves to 1.26.6.
+
+This gives Slurm-scheduled HPC workloads first-class SPIFFE identities keyed on job and step, without wrapping them in a sidecar or a container-runtime attestor.
+
+**Source:** [SPIRE v1.15.3 release](https://github.com/spiffe/spire/releases/tag/v1.15.3) - August 21, 2026
+
+---
+
+## Argo Workflows v4.1.2 corrects how synchronized workflows report status on termination
+
+Argo Workflows published [v4.1.2](https://github.com/argoproj/argo-workflows/releases/tag/v4.1.2), with a parallel v4.0.10 backport, on August 21. The release concentrates on synchronization: workflows terminated while still pending on a sync lock now fail rather than report success, nodes waiting on a sync lock at shutdown are failed correctly, and transient sync-lock errors requeue the workflow instead of failing it.
+
+It also moves SSO session tokens to symmetric encryption ([#16744](https://github.com/argoproj/argo-workflows/issues/16744)), refuses a `reapplyUpdate` when a workflow's UID has changed to avoid writing over a recreated workflow of the same name, and applies MySQL driver-level options from the persistence config. Security dependency bumps cover `moby/go-archive`, `google/cel-go`, and `valyala/fasthttp`.
+
+Anyone using mutexes or semaphores to gate concurrency should read the sync-lock changes closely: the previous behaviour could mark a terminated workflow as succeeded, which skews retry and alerting logic built on final status.
+
+**Source:** [Argo Workflows v4.1.2 release](https://github.com/argoproj/argo-workflows/releases/tag/v4.1.2) - August 21, 2026
+
+---
+
+## Crossplane backports a binary checksum regression across three release lines
+
+Crossplane cut coordinated patches on August 21 across its supported lines: [v2.3.5](https://github.com/crossplane/crossplane/releases/tag/v2.3.5), v2.2.5, and v1.20.12, following the v2.4.0 minor a day earlier.
+
+The headline fix is a checksum regression: the published SHA256 checksums for `linux_amd64` binaries had mismatched the actual binaries since v2.2.0, which broke install scripts that verify downloads before running them. The release recomputes and verifies checksums after binary processing. The patches also fix an index-key collision in the deletion-protection (`Usage`) webhook, where resource identifiers were joined with periods; because API groups and names can themselves contain periods, distinct resources could collapse into the same key. The separator changes to a forward slash, which cannot appear in those fields. Dependency bumps pull in `cel-go` v0.30.0, `golang.org/x/mod` v0.40.0, `sigstore-go` v1.2.1, and `crossplane-runtime` v2.3.4 for upstream CVE fixes.
+
+**Source:** [Crossplane v2.3.5 release](https://github.com/crossplane/crossplane/releases/tag/v2.3.5) - August 21, 2026
+
+---
