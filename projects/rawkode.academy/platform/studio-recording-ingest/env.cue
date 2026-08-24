@@ -29,11 +29,10 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.check, _t.test, _t.deploy]
+		tasks: [_t.check, _t.test, _t."deploy.dry-run", _t.migrate, _t.deploy]
 	}
 
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}
@@ -47,7 +46,10 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
 		env: PATH: _taskPath
 		inputs: [
+			"../../../../bun.lock",
+			"data-model/**",
 			"package.json",
+			"scripts/**",
 			"src/**",
 			"tests/**",
 			"tsconfig.json",
@@ -59,8 +61,12 @@ tasks: {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
 		env: PATH: _taskPath
+		dependsOn: [_t.check]
 		inputs: [
+			"../../../../bun.lock",
+			"data-model/**",
 			"package.json",
+			"scripts/**",
 			"src/**",
 			"tests/**",
 			"tsconfig.json",
@@ -71,7 +77,9 @@ tasks: {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler deploy --config ./wrangler.jsonc"]
 		env: PATH: _taskPath
+		dependsOn: [_t.migrate]
 		inputs: [
+			"../../../../bun.lock",
 			"data-model/**",
 			"package.json",
 			"src/**",
@@ -83,7 +91,9 @@ tasks: {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run deploy:dry-run"]
 		env: PATH: _taskPath
+		dependsOn: [_t.test]
 		inputs: [
+			"../../../../bun.lock",
 			"data-model/**",
 			"package.json",
 			"src/**",
@@ -95,8 +105,11 @@ tasks: {
 		command: "sh"
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun x wrangler d1 migrations apply \(_queueName) --remote"]
 		env: PATH: _taskPath
+		dependsOn: [_t."deploy.dry-run"]
 		inputs: [
+			"../../../../bun.lock",
 			"data-model/**",
+			"package.json",
 			"wrangler.jsonc",
 		]
 	}

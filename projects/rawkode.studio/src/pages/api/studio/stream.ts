@@ -8,8 +8,10 @@ import {
 } from "../../../server/http";
 import {
 	confirmStudioStream,
+	heartbeatStudioStream,
 	startStudioStream,
 	stopStudioStream,
+	takeOverStudioStream,
 } from "../../../server/operations";
 
 export const POST: APIRoute = async ({ locals, request }) => {
@@ -42,13 +44,24 @@ export const POST: APIRoute = async ({ locals, request }) => {
 				streamToken: body.streamToken,
 			}));
 		}
+		if (body.action === "heartbeat") {
+			return json(await heartbeatStudioStream(env as StudioEnv, locals.user, {
+				sessionId: body.sessionId,
+				streamToken: body.streamToken,
+			}));
+		}
 		if (body.action === "stop") {
 			return json(await stopStudioStream(env as StudioEnv, locals.user, {
 				sessionId: body.sessionId,
 				streamToken: body.streamToken,
 			}));
 		}
-		return json({ error: "action must be start, confirm, or stop." }, 400);
+		if (body.action === "takeover") {
+			return json(await takeOverStudioStream(env as StudioEnv, locals.user, {
+				sessionId: body.sessionId,
+			}));
+		}
+		return json({ error: "action must be start, confirm, heartbeat, stop, or takeover." }, 400);
 	} catch (error) {
 		const response = operationErrorResponse(error);
 		if (response) return response;

@@ -14,7 +14,10 @@ const steps: VerificationStep[] = [
 	{
 		name: "D1 database",
 		command: ["bun", "x", "wrangler", "d1", "list"],
-		expect: ["platform-studio-recording-ingest", "53159084-61e6-425d-9660-8f350a08f036"],
+		expect: [
+			"platform-studio-recording-ingest",
+			"53159084-61e6-425d-9660-8f350a08f036",
+		],
 	},
 	{
 		name: "D1 schema",
@@ -27,13 +30,46 @@ const steps: VerificationStep[] = [
 			"platform-studio-recording-ingest",
 			"--remote",
 			"--command",
-			"SELECT name FROM sqlite_master WHERE type = 'table';",
+			`SELECT name FROM sqlite_master WHERE type = 'table';
+	SELECT name FROM pragma_table_info('studio_recording_vod_claims');
+	SELECT name FROM pragma_table_info('studio_recording_ingest_events');
+	SELECT name FROM d1_migrations;
+	SELECT 'vod_claim_uniqueness' AS invariant
+	 WHERE (SELECT COUNT(*) FROM pragma_index_list('studio_recording_vod_claims') WHERE "unique" = 1) >= 3;
+	SELECT 'event_processing_lease_index' AS invariant
+	 WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_recording_ingest_events_processing_lease_idx');
+	SELECT 'vod_dispatch_token_index' AS invariant
+	 WHERE EXISTS (SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_recording_vod_claims_dispatch_token_idx');`,
 		],
-		expect: ["studio_recording_ingest_events"],
+		expect: [
+			"studio_recording_ingest_events",
+			"studio_recording_vod_claims",
+			"video_id",
+			"recording_id",
+			"ready_marker_key",
+			"processing_owner",
+			"processing_lease_until",
+			"dispatch_token",
+			"dispatch_attempted_at",
+			"cloud_run_execution",
+			"0001_video_output_claims.sql",
+			"0002_event_processing_lease.sql",
+			"vod_claim_uniqueness",
+			"event_processing_lease_index",
+			"vod_dispatch_token_index",
+		],
 	},
 	{
 		name: "Worker deployment",
-		command: ["bun", "x", "wrangler", "deployments", "status", "--config", "./wrangler.jsonc"],
+		command: [
+			"bun",
+			"x",
+			"wrangler",
+			"deployments",
+			"status",
+			"--config",
+			"./wrangler.jsonc",
+		],
 	},
 	{
 		name: "GCP service-account Secrets Store entry",
@@ -93,6 +129,26 @@ const steps: VerificationStep[] = [
 			"value(metadata.name)",
 		],
 		expect: ["transcoding-job"],
+	},
+	{
+		name: "Cloud Run execution visibility",
+		command: [
+			"gcloud",
+			"run",
+			"jobs",
+			"executions",
+			"list",
+			"--job",
+			"transcoding-job",
+			"--project",
+			"rawkode-academy-production",
+			"--region",
+			"europe-west2",
+			"--limit",
+			"1",
+			"--format",
+			"value(metadata.name)",
+		],
 	},
 ];
 

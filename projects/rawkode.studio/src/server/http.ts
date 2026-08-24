@@ -16,7 +16,7 @@ export function requestHasAllowedOrigin(request: Request): boolean {
 
 export function operationErrorResponse(error: unknown): Response | null {
 	if (error instanceof StudioOperationError) {
-		return json({ error: error.message }, error.status);
+		return json({ code: error.code, error: error.message }, error.status);
 	}
 	return null;
 }

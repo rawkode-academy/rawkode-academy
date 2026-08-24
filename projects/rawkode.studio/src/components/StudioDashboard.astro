@@ -7,6 +7,7 @@ import {
 } from "../server/studio";
 
 interface Props {
+	authError?: string | null;
 	createSessionError?: string | null;
 	dashboard: StudioDashboard;
 	endSessionError?: string | null;
@@ -20,12 +21,30 @@ interface Props {
 }
 
 const {
+	authError = null,
 	createSessionError = null,
 	dashboard,
 	endSessionError = null,
 	invite = null,
 	inviteError = null,
 } = Astro.props;
+
+const authErrorMessages: Record<string, string> = {
+	access_denied: "GitHub sign-in was cancelled or denied.",
+	missing_auth_state: "The sign-in request expired or was incomplete. Please try again.",
+	session_store_unavailable: "Studio cannot create a session right now. Please try again shortly.",
+	token_exchange_failed: "GitHub sign-in could not be completed. Please try again.",
+	userinfo_failed: "Studio could not load your Rawkode identity. Please try again.",
+};
+const authErrorMessage = authError
+	? authErrorMessages[authError] ?? "Studio sign-in failed. Please try again."
+	: null;
+const eventSessionIds = new Set(
+	dashboard.events.flatMap((event) => event.sessions.map((session) => session.id)),
+);
+const historySessions = dashboard.sessions
+	.filter((session) => !isStudioSessionActive(session) || !eventSessionIds.has(session.id))
+	.sort((left, right) => right.startsAt.localeCompare(left.startsAt));
 
 function eventTiming(event: StudioEventSummary): string {
 	if (!event.startsAt) return "Unscheduled";
@@ -42,6 +61,7 @@ function eventState(event: StudioEventSummary): string {
 	!dashboard.user ? (
 		<section class="signed-out-panel" aria-label="Rawkode Studio sign in">
 			<h1>Welcome to Rawkode Studio</h1>
+			{authErrorMessage ? <p class="form-error" role="alert">{authErrorMessage}</p> : null}
 			<a class="button primary" href="/login">Log in</a>
 		</section>
 	) : (
@@ -76,6 +96,11 @@ function eventState(event: StudioEventSummary): string {
 			</section>
 
 			{
+				authErrorMessage ? (
+					<p class="form-error" role="alert">{authErrorMessage}</p>
+				) : null
+			}
+			{
 				dashboard.contentError ? (
 					<p class="form-error" role="alert">{dashboard.contentError}</p>
 				) : null
@@ -102,10 +127,13 @@ function eventState(event: StudioEventSummary): string {
 						<h2>{invite.sessionTitle}</h2>
 						<label>
 							Invite URL
-							<input readonly value={invite.inviteUrl} />
+							<input data-invite-url readonly value={invite.inviteUrl} />
 						</label>
 						<p>Expires {new Date(invite.expiresAt * 1000).toLocaleString()}</p>
-						<a class="button" href={invite.inviteUrl}>Open invite</a>
+						<div class="session-actions">
+							<button class="button" type="button" data-copy-invite>Copy invite</button>
+							<a class="button" href={invite.inviteUrl}>Open invite</a>
+						</div>
 					</section>
 				) : null
 			}
@@ -168,23 +196,23 @@ function eventState(event: StudioEventSummary): string {
 													<div class="session-actions">
 														{
 															dashboard.isOperator ? (
-																<>
-																	<a class="button" href={`/studio/${session.id}/host`}>Host</a>
-																	<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
+																isStudioSessionActive(session) ? (
+																	<>
+																		<a class="button" href={`/studio/${session.id}/host`}>Host</a>
+																		<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
+																		<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+																		<form method="POST" action={actions.createInvite}>
+																			<input name="sessionId" type="hidden" value={session.id} />
+																			<button class="button" type="submit">Guest invite</button>
+																		</form>
+																		<form method="POST" action={actions.endSession} data-end-session>
+																			<input name="sessionId" type="hidden" value={session.id} />
+																			<button class="button" type="submit">End session</button>
+																		</form>
+																	</>
+																) : (
 																	<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
-																	<form method="POST" action={actions.createInvite}>
-																		<input name="sessionId" type="hidden" value={session.id} />
-																		<button class="button" type="submit">Guest invite</button>
-																	</form>
-																	{
-																		isStudioSessionActive(session) ? (
-																			<form method="POST" action={actions.endSession}>
-																				<input name="sessionId" type="hidden" value={session.id} />
-																				<button class="button" type="submit">End session</button>
-																			</form>
-																		) : null
-																	}
-																</>
+																)
 															) : isStudioSessionActive(session) ? (
 																<a class="button primary" href={`/studio/${session.id}/guest`}>
 																	Join room
@@ -202,6 +230,69 @@ function eventState(event: StudioEventSummary): string {
 					})
 				}
 			</section>
+
+			{
+				historySessions.length > 0 ? (
+					<section class="session-history" aria-labelledby="session-history-heading">
+						<div class="session-section-heading">
+							<p class="eyebrow">Operations</p>
+							<h2 id="session-history-heading">Room history</h2>
+							<p>Completed and ad-hoc rooms remain available for recording recovery.</p>
+						</div>
+						<div class="session-list">
+							{historySessions.map((session) => (
+								<article class="session-row">
+									<div>
+										<p class="eyebrow">{session.show}</p>
+										<h2>{session.title}</h2>
+										<p>{new Date(session.startsAt).toLocaleString()}</p>
+									</div>
+									<div class="session-status">
+										<span>{session.status}</span>
+										<span>{session.recordingStatus}</span>
+										<span>{session.streamStatus}</span>
+									</div>
+									<div class="session-actions">
+										{dashboard.isOperator && isStudioSessionActive(session) ? (
+											<>
+												<a class="button" href={`/studio/${session.id}/host`}>Host</a>
+												<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
+											</>
+										) : null}
+										{dashboard.isOperator ? (
+											<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+										) : null}
+									</div>
+								</article>
+							))}
+						</div>
+					</section>
+				) : null
+			}
 		</>
 	)
 }
+
+<script>
+	for (const form of document.querySelectorAll<HTMLFormElement>("form[data-end-session]")) {
+		form.addEventListener("submit", (event) => {
+			if (!window.confirm("End this Studio session? Live publishing and contributor access will stop.")) {
+				event.preventDefault();
+			}
+		});
+	}
+
+	for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-copy-invite]")) {
+		button.addEventListener("click", async () => {
+			const input = button.closest("section")?.querySelector<HTMLInputElement>("input[data-invite-url]");
+			if (!input) return;
+			try {
+				await navigator.clipboard.writeText(input.value);
+				button.textContent = "Copied";
+			} catch {
+				input.select();
+				button.textContent = "Select and copy";
+			}
+		});
+	}
+</script>

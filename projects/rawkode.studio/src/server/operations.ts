@@ -15,13 +15,21 @@ import {
 } from "./content";
 import {
 	addRealtimeKitParticipant,
+	createLegacyRealtimeKitCustomParticipantId,
+	createRealtimeKitCustomParticipantId,
 	createRealtimeKitMeeting,
 	endRealtimeKitSession,
+	findRealtimeKitParticipantByCustomId,
 	getRealtimeKitConfig,
+	RealtimeKitProviderError,
+	refreshRealtimeKitParticipantToken,
+	type RealtimeKitConfig,
+	type RealtimeKitParticipantToken,
 	type RealtimeKitRole,
 } from "./realtimekit";
 import {
 	buildStudioSession,
+	claimStudioRecordingLease,
 	claimStudioStreamStart,
 	claimStudioStreamNotification,
 	createInviteToken,
@@ -29,41 +37,59 @@ import {
 	createRecordingId,
 	createStudioSessionId,
 	createStudioInviteRecord,
+	expireStaleStudioRecordingLeases,
+	expireStaleStudioStreams,
+	getStudioParticipantProviderIdentity,
 	getStudioSession,
+	getStudioStreamLease,
 	getStudioUserGithubHandle,
 	getStudioUserId,
+	hasCanonicalStudioVodOutput,
+	hasFreshStudioContentStreamConflict,
+	hasCanonicalStudioRecording,
 	hashInviteToken,
 	isStudioSessionActive,
 	redeemStudioInvite,
+	releaseStudioRecordingLease,
 	releaseStudioStreamNotificationClaim,
+	renewStudioRecordingLease,
 	resolveStudioInvite,
 	saveRecordingReadyMarker,
-	saveStudioSessionRecordingStatus,
 	saveStudioSessionStatus,
 	saveStudioSession,
 	saveStudioStreamEnded,
+	saveStudioStreamHeartbeat,
 	saveStudioStreamLive,
 	saveStudioStreamStart,
+	takeOverStudioStreamLease,
 	upsertStudioParticipant,
 	userCanManageStudioSession,
 	userCanJoinStudioSessionAsGuest,
 	userIsConfiguredStudioOperator,
 	type StudioInvite,
+	type StudioRecordingReadyMarker,
+	StudioRecordingOutputClaimedError,
 	type StudioSessionRecord,
 	type StudioRole,
 	type StreamEnvironment,
+	studioRecordingHeartbeatIntervalMs,
+	studioRecordingLeaseTimeoutSeconds,
 } from "./studio";
 
 export class StudioOperationError extends Error {
 	readonly code:
 		| "bad-request"
 		| "content-unavailable"
+		| "content-stream-active"
 		| "not-found"
-			| "provider-not-configured"
-			| "session-ended"
-			| "storage-not-configured"
-			| "stream-active"
-			| "unauthorized";
+		| "provider-failed"
+		| "provider-not-configured"
+		| "recording-active"
+		| "recording-output-claimed"
+		| "session-ended"
+		| "storage-not-configured"
+		| "stream-active"
+		| "unauthorized";
 	readonly status: number;
 
 	constructor(
@@ -147,11 +173,57 @@ export interface AbortRecordingUploadInput {
 	uploadId: string;
 }
 
+export interface StudioRecordingHeartbeatInput {
+	recordingId: string;
+	sessionId: string;
+}
+
+export type StudioRecordingHandoff = StudioRecordingReadyMarker & {
+	readyMarkerKey: string;
+	sourceVerified: boolean;
+};
+
+export type AbortStudioRecordingUploadResult =
+	| {
+			aborted: true;
+			handoff: null;
+			leaseReleased: boolean;
+			outcome: "aborted";
+			recordingId: string;
+			recovered: false;
+			sessionId: string;
+			sourceKey: string;
+	  }
+	| {
+			aborted: false;
+			handoff: StudioRecordingHandoff;
+			leaseReleased: boolean;
+			outcome: "recovered";
+			recordingId: string;
+			recovered: true;
+			sessionId: string;
+			sourceKey: string;
+	  };
+
 const recordingUploadPartSizeBytes = 8 * 1024 * 1024;
 const recordingIdPattern = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/;
 
-function requireConfiguredRealtimeKit(env: StudioEnv) {
-	const config = getRealtimeKitConfig(env);
+async function loadRealtimeKitConfig(
+	env: StudioEnv,
+): Promise<RealtimeKitConfig | null> {
+	try {
+		return await getRealtimeKitConfig(env);
+	} catch {
+		throw new StudioOperationError(
+			"provider-failed",
+			"RealtimeKit configuration could not be loaded.",
+			502,
+		);
+	}
+}
+
+async function requireConfiguredRealtimeKit(env: StudioEnv) {
+	const config = await loadRealtimeKitConfig(env);
 	if (!config) {
 		throw new StudioOperationError(
 			"provider-not-configured",
@@ -160,6 +232,20 @@ function requireConfiguredRealtimeKit(env: StudioEnv) {
 		);
 	}
 	return config;
+}
+
+function toStudioRealtimeKitError(error: unknown): unknown {
+	return error instanceof RealtimeKitProviderError
+		? new StudioOperationError("provider-failed", error.message, 502)
+		: error;
+}
+
+async function runRealtimeKitOperation<T>(operation: () => Promise<T>): Promise<T> {
+	try {
+		return await operation();
+	} catch (error) {
+		throw toStudioRealtimeKitError(error);
+	}
 }
 
 function requireRecordingsBucket(env: StudioEnv): R2Bucket {
@@ -263,6 +349,47 @@ function getRecordingSourceKey(
 	return `${session.recordingPrefix}${recordingId}/source.${sourceFormat}`;
 }
 
+async function requireStudioRecordingLease(
+	env: StudioEnv,
+	sessionId: string,
+	recordingId: string,
+): Promise<void> {
+	const renewed = await renewStudioRecordingLease(env, sessionId, recordingId);
+	if (!renewed) {
+		throw new StudioOperationError(
+			"recording-active",
+			"Another Studio recording is already active for this session.",
+			409,
+		);
+	}
+}
+
+async function requireStudioRecordingLeaseOrCompletedRecovery(
+	env: StudioEnv,
+	sessionId: string,
+	recordingId: string,
+): Promise<void> {
+	if (await renewStudioRecordingLease(env, sessionId, recordingId)) return;
+	await expireStaleStudioRecordingLeases(env, sessionId);
+	if (await claimStudioRecordingLease(env, sessionId, recordingId)) return;
+	throw new StudioOperationError(
+		"recording-active",
+		"Another Studio recording is already active for this session.",
+		409,
+	);
+}
+
+function requireRecordingSourceEtag(source: R2Object): string {
+	if (!source.etag) {
+		throw new StudioOperationError(
+			"storage-not-configured",
+			"Completed Studio recording source is missing its R2 ETag.",
+			503,
+		);
+	}
+	return source.etag;
+}
+
 function getSessionRecordingVideoId(session: {
 	contentVideoId?: string | null;
 	id: string;
@@ -282,6 +409,18 @@ function requireContentBackedRecordingVideoId(session: {
 		);
 	}
 	return session.contentVideoId;
+}
+
+function requireProdRecordingSession(session: {
+	streamEnvironment: StreamEnvironment;
+}): void {
+	if (session.streamEnvironment !== "prod") {
+		throw new StudioOperationError(
+			"bad-request",
+			"Test-mode Studio recordings stay local and cannot use persistent recording handoff.",
+			400,
+		);
+	}
 }
 
 function requireContentBackedStreamSession(session: {
@@ -421,6 +560,117 @@ async function getStudioParticipantProfile(
 	};
 }
 
+async function issueRealtimeKitParticipantToken(
+	env: StudioEnv,
+	config: RealtimeKitConfig,
+	input: {
+		meetingId: string;
+		profile: Awaited<ReturnType<typeof getStudioParticipantProfile>>;
+		role: RealtimeKitRole;
+		sessionId: string;
+		user: StudioUser;
+	},
+): Promise<RealtimeKitParticipantToken> {
+	const stableParticipantId = getStudioUserId(input.user);
+	const customParticipantIds = [
+		await createRealtimeKitCustomParticipantId({
+			meetingId: input.meetingId,
+			participantId: stableParticipantId,
+			role: input.role,
+		}),
+		createLegacyRealtimeKitCustomParticipantId({
+			participantId: input.profile.participantId,
+			role: input.role,
+		}),
+	];
+
+	const persistParticipant = async (realtimeKitParticipantId: string) => {
+		await upsertStudioParticipant(env, {
+			person: input.profile.person
+				? {
+						avatarUrl: input.profile.person.avatarUrl,
+						githubHandle: input.profile.githubHandle,
+						id: input.profile.participantId,
+						name: input.profile.name,
+					}
+				: null,
+			realtimeKitParticipantId,
+			role: input.role,
+			sessionId: input.sessionId,
+			user: input.user,
+		});
+	};
+	const refreshParticipant = (realtimeKitParticipantId: string) =>
+		runRealtimeKitOperation(() =>
+			refreshRealtimeKitParticipantToken(config, {
+				meetingId: input.meetingId,
+				realtimeKitParticipantId,
+			}),
+		);
+	const findExistingParticipant = async () => {
+		for (const customParticipantId of customParticipantIds) {
+			const participant = await findRealtimeKitParticipantByCustomId(config, {
+				customParticipantId,
+				meetingId: input.meetingId,
+			});
+			if (participant) return participant;
+		}
+		return null;
+	};
+
+	const storedIdentity = await getStudioParticipantProviderIdentity(env, {
+		role: input.role,
+		sessionId: input.sessionId,
+		user: input.user,
+	});
+	if (storedIdentity?.realtimeKitParticipantId) {
+		try {
+			const participant = await refreshRealtimeKitParticipantToken(config, {
+				meetingId: input.meetingId,
+				realtimeKitParticipantId: storedIdentity.realtimeKitParticipantId,
+			});
+			await persistParticipant(participant.participantId);
+			return participant;
+		} catch (error) {
+			if (!(error instanceof RealtimeKitProviderError && error.httpStatus === 404)) {
+				throw toStudioRealtimeKitError(error);
+			}
+		}
+	}
+
+	const existingParticipant = await runRealtimeKitOperation(findExistingParticipant);
+	if (existingParticipant) {
+		await persistParticipant(existingParticipant.participantId);
+		return refreshParticipant(existingParticipant.participantId);
+	}
+
+	let participant: RealtimeKitParticipantToken;
+	try {
+		participant = await addRealtimeKitParticipant(config, {
+			meetingId: input.meetingId,
+			name: input.profile.name,
+			participantId: stableParticipantId,
+			picture: input.profile.picture,
+			role: input.role,
+		});
+	} catch (addError) {
+		let recoveredParticipant;
+		try {
+			recoveredParticipant = await findExistingParticipant();
+		} catch (lookupError) {
+			throw toStudioRealtimeKitError(lookupError);
+		}
+		if (!recoveredParticipant) {
+			throw toStudioRealtimeKitError(addError);
+		}
+		await persistParticipant(recoveredParticipant.participantId);
+		return refreshParticipant(recoveredParticipant.participantId);
+	}
+
+	await persistParticipant(participant.participantId);
+	return participant;
+}
+
 async function requireSessionManager(
 	env: StudioEnv,
 	user: StudioUser,
@@ -490,12 +740,14 @@ export async function createStudioSession(
 	const sessionId = contentVideo
 		? createStudioSessionId(contentVideo.id)
 		: createStudioSessionId(show);
-	const config = getRealtimeKitConfig(env);
+	const config = await loadRealtimeKitConfig(env);
 	const meeting = config
-		? await createRealtimeKitMeeting(config, {
-				sessionId,
-				title,
-			})
+		? await runRealtimeKitOperation(() =>
+				createRealtimeKitMeeting(config, {
+					sessionId,
+					title,
+				}),
+			)
 		: null;
 	const session = buildStudioSession({
 		contentVideoId: contentVideo?.id ?? null,
@@ -533,6 +785,7 @@ export async function startStudioStream(
 	input: StudioStreamInput,
 ) {
 	requireStudioDb(env);
+	await expireStaleStudioStreams(env, input.sessionId);
 	const session = await requireSessionManager(env, user, input.sessionId);
 	if (session.status === "complete") {
 		throw new StudioOperationError(
@@ -551,9 +804,21 @@ export async function startStudioStream(
 	if (session.streamEnvironment === "prod") {
 		requireContentBackedStreamSession(session);
 	}
-	const streamToken = input.streamToken?.trim() || crypto.randomUUID();
+	const streamToken = input.streamToken === undefined
+		? crypto.randomUUID()
+		: normalizeStudioStreamToken(input.streamToken, "start Studio stream publishing");
 	const claimed = await claimStudioStreamStart(env, session.id, streamToken);
 	if (!claimed) {
+		if (
+			session.streamEnvironment === "prod" &&
+			await hasFreshStudioContentStreamConflict(env, session.id)
+		) {
+			throw new StudioOperationError(
+				"content-stream-active",
+				"Another prod Studio session is already publishing this content.",
+				409,
+			);
+		}
 		throw new StudioOperationError(
 			"stream-active",
 			"Studio stream is already active.",
@@ -600,6 +865,69 @@ export async function startStudioStream(
 	}
 }
 
+export async function heartbeatStudioStream(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	requireStudioDb(env);
+	await requireSessionManager(env, user, input.sessionId);
+	const streamToken = requireStudioStreamToken(
+		input.streamToken,
+		"renew Studio stream publishing",
+	);
+
+	const renewed = await saveStudioStreamHeartbeat(
+		env,
+		input.sessionId,
+		streamToken,
+	);
+	if (!renewed) {
+		throw new StudioOperationError(
+			"stream-active",
+			"Studio stream publisher lease is no longer active.",
+			409,
+		);
+	}
+
+	return {
+		sessionId: input.sessionId,
+		leaseStatus: "active" as const,
+	};
+}
+
+export async function takeOverStudioStream(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioStreamInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	if (session.status === "complete") {
+		throw new StudioOperationError(
+			"session-ended",
+			"Studio session has ended.",
+			409,
+		);
+	}
+
+	const lease = await getStudioStreamLease(env, session.id);
+	if (lease && (lease.status === "starting" || lease.status === "live")) {
+		const takenOver = await takeOverStudioStreamLease(env, session.id, lease);
+		if (!takenOver) {
+			throw new StudioOperationError(
+				"stream-active",
+				"Studio stream publisher changed while takeover was in progress. Try again.",
+				409,
+			);
+		}
+	}
+	return {
+		sessionId: session.id,
+		streamStatus: "ended" as const,
+	};
+}
+
 export async function confirmStudioStream(
 	env: StudioEnv,
 	user: StudioUser,
@@ -607,6 +935,10 @@ export async function confirmStudioStream(
 ) {
 	requireStudioDb(env);
 	const session = await requireSessionManager(env, user, input.sessionId);
+	const streamToken = requireStudioStreamToken(
+		input.streamToken,
+		"confirm Studio stream publishing",
+	);
 	if (!session.cloudflareStreamLiveInputId) {
 		throw new StudioOperationError(
 			"bad-request",
@@ -622,18 +954,19 @@ export async function confirmStudioStream(
 		);
 	}
 	if (session.streamStatus === "live") {
+		const ownsLease = await saveStudioStreamHeartbeat(env, session.id, streamToken);
+		if (!ownsLease) {
+			throw new StudioOperationError(
+				"stream-active",
+				"Studio stream publisher lease is no longer active.",
+				409,
+			);
+		}
 		return {
 			sessionId: session.id,
 			streamStatus: "live" as const,
 			notified: await notifyStudioStreamIfNeeded(env, session),
 		};
-	}
-	if (!input.streamToken) {
-		throw new StudioOperationError(
-			"bad-request",
-			"streamToken is required to confirm Studio stream publishing.",
-			400,
-		);
 	}
 	if (session.streamStatus !== "starting") {
 		throw new StudioOperationError(
@@ -669,11 +1002,13 @@ export async function confirmStudioStream(
 		playbackUrl,
 		publicLive: session.streamEnvironment === "prod",
 		sessionId: session.id,
-		startToken: input.streamToken,
+		startToken: streamToken,
 	});
 	if (!savedLive) {
 		const latest = await getStudioSession(env, session.id);
-		if (latest?.streamStatus === "live") {
+		const ownsLiveLease = latest?.streamStatus === "live" &&
+			await saveStudioStreamHeartbeat(env, session.id, streamToken);
+		if (latest?.streamStatus === "live" && ownsLiveLease) {
 			return {
 				sessionId: session.id,
 				streamStatus: "live" as const,
@@ -703,12 +1038,53 @@ export async function stopStudioStream(
 ) {
 	requireStudioDb(env);
 	const session = await requireSessionManager(env, user, input.sessionId);
-	await saveStudioStreamEnded(env, session.id, input.streamToken);
+	const streamToken = requireStudioStreamToken(
+		input.streamToken,
+		"stop Studio stream publishing",
+	);
+	const stopped = await saveStudioStreamEnded(env, session.id, streamToken);
+	if (!stopped) {
+		throw new StudioOperationError(
+			"stream-active",
+			"Studio stream publisher lease is no longer active.",
+			409,
+		);
+	}
 
 	return {
 		sessionId: session.id,
 		streamStatus: "ended" as const,
 	};
+}
+
+function requireStudioStreamToken(value: unknown, action: string): string {
+	if (typeof value !== "string" || value.trim().length === 0) {
+		throw new StudioOperationError(
+			"bad-request",
+			`streamToken is required to ${action}.`,
+			400,
+		);
+	}
+	return normalizeStudioStreamToken(value, action);
+}
+
+function normalizeStudioStreamToken(value: unknown, action: string): string {
+	if (typeof value !== "string") {
+		throw new StudioOperationError(
+			"bad-request",
+			`streamToken must be a string to ${action}.`,
+			400,
+		);
+	}
+	const token = value.trim();
+	if (token.length === 0 || token.length > 256) {
+		throw new StudioOperationError(
+			"bad-request",
+			`streamToken is invalid for ${action}.`,
+			400,
+		);
+	}
+	return token;
 }
 
 export async function createStudioInvite(
@@ -755,12 +1131,22 @@ export async function endStudioSession(
 	input: EndStudioSessionInput,
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
-	if (session.realtimeKitMeetingId) {
-		const config = requireConfiguredRealtimeKit(env);
-		await endRealtimeKitSession(config, session.realtimeKitMeetingId);
+	const meetingId = session.realtimeKitMeetingId;
+	await expireStaleStudioRecordingLeases(env, session.id);
+	if (!(await saveStudioSessionStatus(env, session.id, "complete"))) {
+		throw new StudioOperationError(
+			"recording-active",
+			"Stop the active Studio recording before ending this session.",
+			409,
+		);
 	}
 	await saveStudioStreamEnded(env, session.id);
-	await saveStudioSessionStatus(env, session.id, "complete");
+	if (meetingId) {
+		const config = await requireConfiguredRealtimeKit(env);
+		await runRealtimeKitOperation(() =>
+			endRealtimeKitSession(config, meetingId),
+		);
+	}
 
 	return {
 		sessionId: session.id,
@@ -831,7 +1217,7 @@ export async function issueStudioParticipantToken(
 		);
 	}
 
-	const config = requireConfiguredRealtimeKit(env);
+	const config = await requireConfiguredRealtimeKit(env);
 	if (inviteToRedeem) {
 		const redeemed = await redeemStudioInvite(env, inviteToRedeem, user);
 		if (!redeemed) {
@@ -843,25 +1229,12 @@ export async function issueStudioParticipantToken(
 		}
 	}
 	const profile = await getStudioParticipantProfile(env, user);
-	const participant = await addRealtimeKitParticipant(config, {
+	const participant = await issueRealtimeKitParticipantToken(env, config, {
 		meetingId: session.realtimeKitMeetingId,
-		participantId: profile.participantId,
-		role: input.role as RealtimeKitRole,
-		name: profile.name,
-		picture: profile.picture,
-	});
-	await upsertStudioParticipant(env, {
-		person: profile.person
-			? {
-					avatarUrl: profile.person.avatarUrl,
-					githubHandle: profile.githubHandle,
-					id: profile.participantId,
-					name: profile.name,
-				}
-			: null,
+		role: input.role,
+		profile,
 		sessionId: session.id,
 		user,
-		role: input.role,
 	});
 	return {
 		...participant,
@@ -876,30 +1249,61 @@ export async function createStudioRecordingUpload(
 	input: CreateRecordingUploadInput,
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
+	requireProdRecordingSession(session);
 	const bucket = requirePersistentRecordingsBucket(env);
 	const videoId = requireContentBackedRecordingVideoId(session);
+	if (await hasCanonicalStudioVodOutput(env, videoId)) {
+		throw new StudioOperationError(
+			"recording-output-claimed",
+			"A canonical VOD output already exists for this content video.",
+			409,
+		);
+	}
+	await expireStaleStudioRecordingLeases(env, session.id);
 	const recordingId = createRecordingId();
 	const sourceKey = getRecordingSourceKey(
 		session,
 		recordingId,
 		input.sourceFormat,
 	);
-	const upload = await bucket.createMultipartUpload(sourceKey, {
-		httpMetadata: { contentType: getRecordingContentType(input.sourceFormat) },
-		customMetadata: {
+	const claimed = await claimStudioRecordingLease(env, session.id, recordingId);
+	if (!claimed) {
+		if (await hasCanonicalStudioRecording(env, session.id)) {
+			throw new StudioOperationError(
+				"recording-output-claimed",
+				"A canonical Studio recording already exists for this content video.",
+				409,
+			);
+		}
+		throw new StudioOperationError(
+			"recording-active",
+			"Another Studio recording is already active for this content video.",
+			409,
+		);
+	}
+
+	let upload: R2MultipartUpload;
+	try {
+		upload = await bucket.createMultipartUpload(sourceKey, {
+			httpMetadata: { contentType: getRecordingContentType(input.sourceFormat) },
+			customMetadata: {
+				recordingId,
+				sessionId: session.id,
+				videoId,
+			},
+		});
+	} catch (error) {
+		await releaseStudioRecordingLease(env, {
+			nextStatus: "idle",
 			recordingId,
 			sessionId: session.id,
-			videoId,
-		},
-	});
-	try {
-		await saveStudioSessionRecordingStatus(env, session.id, "recording");
-	} catch (error) {
-		await upload.abort().catch(() => undefined);
+		}).catch(() => false);
 		throw error;
 	}
 
 	return {
+		heartbeatIntervalMs: studioRecordingHeartbeatIntervalMs,
+		leaseTimeoutSeconds: studioRecordingLeaseTimeoutSeconds,
 		partSizeBytes: recordingUploadPartSizeBytes,
 		recordingId,
 		sessionId: session.id,
@@ -915,6 +1319,7 @@ export async function uploadStudioRecordingPart(
 	input: UploadRecordingPartInput,
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
+	requireProdRecordingSession(session);
 	const bucket = requirePersistentRecordingsBucket(env);
 	assertRecordingPartNumber(input.partNumber);
 	const sourceKey = getRecordingSourceKey(
@@ -923,6 +1328,7 @@ export async function uploadStudioRecordingPart(
 		input.sourceFormat,
 	);
 	requireContentBackedRecordingVideoId(session);
+	await requireStudioRecordingLease(env, session.id, input.recordingId);
 	const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
 	const part = await upload.uploadPart(input.partNumber, input.body);
 
@@ -938,6 +1344,7 @@ export async function completeStudioRecordingUpload(
 	input: CompleteRecordingUploadInput,
 ) {
 	const session = await requireSessionManager(env, user, input.sessionId);
+	requireProdRecordingSession(session);
 	const bucket = requirePersistentRecordingsBucket(env);
 	const sourceKey = getRecordingSourceKey(
 		session,
@@ -964,40 +1371,142 @@ export async function completeStudioRecordingUpload(
 	}
 
 	const videoId = requireContentBackedRecordingVideoId(session);
-	const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
-	const source = await upload.complete(parts);
+	let completionRecovered = false;
+	let source = await bucket.head(sourceKey);
+	if (source) {
+		await requireStudioRecordingLeaseOrCompletedRecovery(
+			env,
+			session.id,
+			input.recordingId,
+		);
+		completionRecovered = true;
+	} else {
+		await requireStudioRecordingLease(env, session.id, input.recordingId);
+		try {
+			const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
+			source = await upload.complete(parts);
+		} catch (completionError) {
+			const completedSource = await bucket.head(sourceKey).catch(() => null);
+			if (!completedSource) throw completionError;
+			source = completedSource;
+			completionRecovered = true;
+		}
+	}
 
-	return await markStudioRecordingReady(env, user, {
+	const handoff = await markStudioRecordingReady(env, user, {
 		recordingId: input.recordingId,
 		sessionId: session.id,
-		sourceEtag: source.etag,
+		sourceEtag: requireRecordingSourceEtag(source),
 		sourceFormat: input.sourceFormat,
 		sourceKey,
 		videoId,
 	});
+	const leaseReleased = await releaseStudioRecordingLease(env, {
+		nextStatus: "uploaded",
+		recordingId: input.recordingId,
+		sessionId: session.id,
+	});
+
+	return { ...handoff, completionRecovered, leaseReleased };
 }
 
 export async function abortStudioRecordingUpload(
 	env: StudioEnv,
 	user: StudioUser,
 	input: AbortRecordingUploadInput,
-) {
+): Promise<AbortStudioRecordingUploadResult> {
 	const session = await requireSessionManager(env, user, input.sessionId);
+	requireProdRecordingSession(session);
 	const bucket = requirePersistentRecordingsBucket(env);
 	const sourceKey = getRecordingSourceKey(
 		session,
 		input.recordingId,
 		input.sourceFormat,
 	);
-	const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
-	await upload.abort();
-	await saveStudioSessionRecordingStatus(env, session.id, "idle");
+	const videoId = requireContentBackedRecordingVideoId(session);
 
-	return {
+	const recoverCompletedSource = async (
+		source: R2Object,
+	): Promise<AbortStudioRecordingUploadResult> => {
+		const handoff = await markStudioRecordingReady(env, user, {
+			recordingId: input.recordingId,
+			sessionId: session.id,
+			sourceEtag: requireRecordingSourceEtag(source),
+			sourceFormat: input.sourceFormat,
+			sourceKey,
+			videoId,
+		});
+		const leaseReleased = await releaseStudioRecordingLease(env, {
+			nextStatus: "uploaded",
+			recordingId: input.recordingId,
+			sessionId: session.id,
+		});
+		return {
+			aborted: false,
+			handoff,
+			leaseReleased,
+			outcome: "recovered",
+			recordingId: input.recordingId,
+			recovered: true,
+			sessionId: session.id,
+			sourceKey,
+		};
+	};
+
+	const completedSource = await bucket.head(sourceKey);
+	if (completedSource) {
+		await requireStudioRecordingLeaseOrCompletedRecovery(
+			env,
+			session.id,
+			input.recordingId,
+		);
+		return recoverCompletedSource(completedSource);
+	}
+	await requireStudioRecordingLease(env, session.id, input.recordingId);
+
+	try {
+		const upload = bucket.resumeMultipartUpload(sourceKey, input.uploadId);
+		await upload.abort();
+	} catch (abortError) {
+		const recoveredSource = await bucket.head(sourceKey).catch(() => null);
+		if (recoveredSource) return recoverCompletedSource(recoveredSource);
+		throw abortError;
+	}
+	const recoveredSource = await bucket.head(sourceKey);
+	if (recoveredSource) return recoverCompletedSource(recoveredSource);
+
+	const leaseReleased = await releaseStudioRecordingLease(env, {
+		nextStatus: "idle",
 		recordingId: input.recordingId,
 		sessionId: session.id,
-		sourceKey,
+	});
+	return {
 		aborted: true,
+		handoff: null,
+		leaseReleased,
+		outcome: "aborted",
+		recordingId: input.recordingId,
+		recovered: false,
+		sessionId: session.id,
+		sourceKey,
+	};
+}
+
+export async function heartbeatStudioRecording(
+	env: StudioEnv,
+	user: StudioUser,
+	input: StudioRecordingHeartbeatInput,
+) {
+	requireStudioDb(env);
+	const session = await requireSessionManager(env, user, input.sessionId);
+	requireProdRecordingSession(session);
+	assertRecordingId(input.recordingId);
+	await requireStudioRecordingLease(env, input.sessionId, input.recordingId);
+
+	return {
+		leaseStatus: "active" as const,
+		recordingId: input.recordingId,
+		sessionId: input.sessionId,
 	};
 }
 
@@ -1021,6 +1530,7 @@ export async function markStudioRecordingReady(
 			503,
 		);
 	}
+	requireProdRecordingSession(session);
 	const persistentHandoff = Boolean(env.RECORDINGS && env.STUDIO_DB);
 	const recordingId = input.recordingId ?? createRecordingId();
 	assertRecordingId(recordingId);
@@ -1060,7 +1570,19 @@ export async function markStudioRecordingReady(
 		sourceEtag: input.sourceEtag,
 		sourceFormat: input.sourceFormat,
 	});
-	const handoff = await saveRecordingReadyMarker(env, marker);
+	let handoff: Awaited<ReturnType<typeof saveRecordingReadyMarker>>;
+	try {
+		handoff = await saveRecordingReadyMarker(env, marker);
+	} catch (error) {
+		if (error instanceof StudioRecordingOutputClaimedError) {
+			throw new StudioOperationError(
+				"recording-output-claimed",
+				error.message,
+				409,
+			);
+		}
+		throw error;
+	}
 
 	return { ...marker, ...handoff };
 }

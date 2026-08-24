@@ -1,6 +1,93 @@
 export interface WhipPublishSession {
 	close: () => Promise<void>;
 	connectionState: () => RTCPeerConnectionState;
+	onConnectionStateChange: (
+		listener: (state: RTCPeerConnectionState) => void,
+	) => () => void;
+}
+
+export interface WhipTerminalConnectionMonitor {
+	activate: () => void;
+	dispose: () => void;
+}
+
+const TERMINAL_WHIP_CONNECTION_STATES = new Set<RTCPeerConnectionState>([
+	"closed",
+	"disconnected",
+	"failed",
+]);
+
+export function isTerminalWhipConnectionState(
+	state: RTCPeerConnectionState,
+): boolean {
+	return TERMINAL_WHIP_CONNECTION_STATES.has(state);
+}
+
+export function createWhipTerminalConnectionMonitor(
+	session: WhipPublishSession,
+	onTerminal: (state: RTCPeerConnectionState) => void | Promise<void>,
+	options: { disconnectedGraceMs?: number } = {},
+): WhipTerminalConnectionMonitor {
+	let active = false;
+	let disposed = false;
+	let terminalHandled = false;
+	let disconnectedTimer: ReturnType<typeof setTimeout> | undefined;
+	const disconnectedGraceMs = Math.max(0, options.disconnectedGraceMs ?? 5_000);
+	const clearDisconnectedTimer = () => {
+		if (disconnectedTimer !== undefined) {
+			clearTimeout(disconnectedTimer);
+			disconnectedTimer = undefined;
+		}
+	};
+	const handleTerminal = (state: RTCPeerConnectionState) => {
+		clearDisconnectedTimer();
+		terminalHandled = true;
+		void onTerminal(state);
+	};
+	const handleState = (state: RTCPeerConnectionState) => {
+		if (!active || disposed || terminalHandled) {
+			return;
+		}
+		if (state === "disconnected") {
+			if (disconnectedTimer === undefined) {
+				disconnectedTimer = setTimeout(() => {
+					disconnectedTimer = undefined;
+					if (
+						active &&
+						!disposed &&
+						!terminalHandled &&
+						session.connectionState() === "disconnected"
+					) {
+						handleTerminal("disconnected");
+					}
+				}, disconnectedGraceMs);
+			}
+			return;
+		}
+		clearDisconnectedTimer();
+		if (state === "closed" || state === "failed") {
+			handleTerminal(state);
+		}
+	};
+	const unsubscribe = session.onConnectionStateChange(handleState);
+
+	return {
+		activate: () => {
+			if (disposed || active) {
+				return;
+			}
+			active = true;
+			handleState(session.connectionState());
+		},
+		dispose: () => {
+			if (disposed) {
+				return;
+			}
+			disposed = true;
+			clearDisconnectedTimer();
+			unsubscribe();
+		},
+	};
 }
 
 export async function startWhipPublishing(input: {
@@ -12,9 +99,29 @@ export async function startWhipPublishing(input: {
 	let resourceUrl: string | null = null;
 	let deletedResourceUrl: string | null = null;
 	let closed = false;
+	const connectionStateListeners = new Set<
+		(state: RTCPeerConnectionState) => void
+	>();
+	const handleConnectionStateChange = () => {
+		if (closed) {
+			return;
+		}
+		for (const listener of connectionStateListeners) {
+			listener(peerConnection.connectionState);
+		}
+	};
+	peerConnection.addEventListener(
+		"connectionstatechange",
+		handleConnectionStateChange,
+	);
 	const close = async () => {
 		if (!closed) {
 			closed = true;
+			peerConnection.removeEventListener(
+				"connectionstatechange",
+				handleConnectionStateChange,
+			);
+			connectionStateListeners.clear();
 			peerConnection.close();
 		}
 		if (resourceUrl && deletedResourceUrl !== resourceUrl) {
@@ -75,6 +182,13 @@ export async function startWhipPublishing(input: {
 		connectionState: () => peerConnection.connectionState,
 		close: async () => {
 			await close();
+		},
+		onConnectionStateChange: (listener) => {
+			if (closed) {
+				return () => undefined;
+			}
+			connectionStateListeners.add(listener);
+			return () => connectionStateListeners.delete(listener);
 		},
 	};
 }

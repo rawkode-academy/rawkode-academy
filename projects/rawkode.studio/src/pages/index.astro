@@ -16,6 +16,7 @@ if (createSessionResult?.data?.sessionId) {
 const inviteResult = Astro.getActionResult(actions.createInvite);
 const endSessionResult = Astro.getActionResult(actions.endSession);
 const dashboard = await loadStudioDashboard(Astro.locals.user, env);
+const authError = Astro.url.searchParams.get("error");
 const invite = inviteResult?.data
 	? {
 			expiresAt: inviteResult.data.invite.expiresAt,
@@ -28,6 +29,7 @@ const invite = inviteResult?.data
 
 <StudioLayout title="Rawkode Studio" active="dashboard">
 	<StudioDashboard
+		authError={authError}
 		createSessionError={createSessionResult?.error?.message}
 		dashboard={dashboard}
 		endSessionError={endSessionResult?.error?.message}

@@ -28,11 +28,10 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.migrations.remote, _t.check, _t.test, _t.deploy.main]
+		tasks: [_t.check, _t.test, _t.deploy."dry-run", _t.migrations.remote, _t.deploy.main]
 	}
 
 	pullRequest: {
-		environment: "production"
 		when: {
 			pullRequest: true
 		}
@@ -46,8 +45,10 @@ tasks: {
 		command:  "bun"
 		args: ["run", "dev"]
 		inputs: [
+			"../../bun.lock",
 			"astro.config.mts",
 			"package.json",
+			"scripts/**",
 			"src/**",
 			"wrangler.jsonc",
 		]
@@ -59,6 +60,7 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run build"]
 		env: PATH: _taskPath
 		inputs: [
+			"../../bun.lock",
 			"astro.config.mts",
 			"package.json",
 			"src/**",
@@ -73,6 +75,7 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run check"]
 		env: PATH: _taskPath
 		inputs: [
+			"../../bun.lock",
 			"astro.config.mts",
 			"package.json",
 			"src/**",
@@ -87,8 +90,10 @@ tasks: {
 		args: ["-lc", "nix shell nixpkgs#bun nixpkgs#nodejs_24 -c bun run test"]
 		env: PATH: _taskPath
 		inputs: [
+			"../../bun.lock",
 			"data-model/**",
 			"package.json",
+			"scripts/**",
 			"src/**",
 			"wrangler.jsonc",
 		]
@@ -117,6 +122,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			inputs: [
+				"../../bun.lock",
 				"astro.config.mts",
 				"data-model/**",
 				"package.json",
@@ -141,6 +147,7 @@ tasks: {
 			env: PATH: _taskPath
 			dependsOn: [_t.build]
 			inputs: [
+				"../../bun.lock",
 				"astro.config.mts",
 				"data-model/**",
 				"package.json",

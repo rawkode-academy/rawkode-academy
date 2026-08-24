@@ -5,11 +5,14 @@ import RealtimeKitRoom from "./components/RealtimeKitRoom.vue";
 import SceneSwitcher from "./components/SceneSwitcher.vue";
 import StudioCanvas from "./components/StudioCanvas.vue";
 import StudioWidgets from "./components/StudioWidgets.vue";
+import { selectProgrammeAudioStreams } from "./audio/programmeAudioSources";
 import { useStudioMachine } from "./studio/useStudioMachine";
-import type { ActiveOverlay, StudioSource } from "./types";
+import { shouldPersistOwnedScreenCleanup } from "./studio/localSourceOwnership";
+import type { ActiveOverlay, StudioAudioMixControl, StudioSource } from "./types";
 
-type CaptureStatus = "blocked" | "missing" | "ready" | "requesting" | "unavailable";
+type CaptureStatus = "blocked" | "ended" | "missing" | "ready" | "requesting" | "unavailable";
 type RoomMediaPayload = {
+  authoritative: boolean;
   sources: StudioSource[];
   streams: Map<string, MediaStream>;
 };
@@ -27,42 +30,66 @@ const props = defineProps<{
 const {
   state,
   send,
+  acknowledgeConflict,
   programLayers,
-} = useStudioMachine();
+  isSynchronized,
+  remoteStateEpoch,
+  syncConflictNotice,
+  syncError,
+  syncStatus,
+} = useStudioMachine(undefined, {
+  sessionId: props.sessionId,
+  synchronize: props.roomRole?.toLowerCase() === "producer" || props.roomRole?.toLowerCase() === "program",
+});
 
 const overlayTimers = new Map<string, number>();
-const overlayTimerPhases = new Map<string, ActiveOverlay["phase"]>();
+const overlayTimerKeys = new Map<string, string>();
 const hostMediaStream = shallowRef<MediaStream | undefined>();
 const roomMediaStreams = shallowRef(new Map<string, MediaStream>());
 const roomMediaSources = shallowRef(new Map<string, StudioSource>());
+const roomMediaSnapshotAuthoritative = ref(false);
 const screenShareSources = ref<StudioSource[]>([]);
 const screenShareStreams = shallowRef(new Map<string, MediaStream>());
 const screenShareCaptureStates = ref<Record<string, { error: string; status: CaptureStatus }>>({});
 const hostCaptureStatus = ref<CaptureStatus>("requesting");
 const hostCaptureError = ref("");
 const widgetHeight = ref(220);
+const widgetMaxHeight = ref(220);
 const isResizingWidgets = ref(false);
 let stingerTimer: number | undefined;
 let stingerMidpointTimer: number | undefined;
 let stingerTimerKey = "";
 let resizeStartY = 0;
 let resizeStartHeight = 0;
+let hostCaptureGeneration = 0;
+let isComponentUnmounted = false;
+const screenShareCaptureGenerations = new Map<string, number>();
+const runtimeOwnerId = crypto.randomUUID();
+let ownedScreenCleanupSent = false;
 const activeStingerKey = computed(() => {
   const stinger = state.value.activeStinger;
-  return stinger ? `${stinger.fromSceneId}:${stinger.toSceneId}:${getEffectKey(stinger.effect)}` : "";
+  return stinger
+    ? `${stinger.generation ?? 0}:${stinger.fromSceneId}:${stinger.toSceneId}:${getEffectKey(stinger.effect)}`
+    : "";
 });
-const roomSubtitle = computed(() =>
-  [props.roomRole, "Browser production console"].filter(Boolean).join(" / "),
-);
 const roomRole = computed(() => {
   const role = props.roomRole?.toLowerCase();
   return role === "host" || role === "producer" || role === "program" || role === "guest"
     ? role
     : "guest";
 });
-const canPublishLive = computed(() =>
-  roomRole.value === "host" || roomRole.value === "producer" || roomRole.value === "program",
+const hasProductionControls = computed(() =>
+  roomRole.value === "producer" || roomRole.value === "program",
 );
+const roomSubtitle = computed(() =>
+  [
+    props.roomRole,
+    hasProductionControls.value ? "Browser production console" : "RealtimeKit green room",
+  ].filter(Boolean).join(" / "),
+);
+const canPublishLive = computed(() => hasProductionControls.value);
+const currentRecordingStatus = ref(props.recordingStatus ?? "");
+const currentStreamStatus = ref(props.streamStatus ?? "");
 const localCameraSourceId = computed(() =>
   roomRole.value === "producer" || roomRole.value === "program"
     ? "source-producer-camera"
@@ -85,40 +112,89 @@ const mediaStreams = computed(() => {
   return streams;
 });
 const sourcesForUi = computed(() =>
-  [
-    ...state.value.sources
-      .filter((source) => source.type !== "screen")
-      .map(withRuntimeMediaState),
-    ...screenShareSources.value.map(withScreenShareCaptureState),
-  ],
+  state.value.sources
+    .map(withRuntimeMediaState)
+    .filter(isVisibleRuntimeSource),
 );
+const programmeMediaStreams = computed(() =>
+  selectProgrammeAudioStreams(
+    mediaStreams.value,
+    sourcesForUi.value,
+    state.value.activeScreenShareSourceId,
+  )
+);
+const programmeAudioControls = computed(() => {
+  const controls: Record<string, StudioAudioMixControl> = {};
+  for (const source of sourcesForUi.value) {
+    const stream = mediaStreams.value.get(source.id);
+    if ((source.type !== "camera" && source.type !== "screen") || !hasLiveAudioTrack(stream)) {
+      continue;
+    }
+
+    const audioState = state.value.audioMix[source.id] ?? { gain: 1, muted: false };
+    controls[source.id] = {
+      gain: audioState.gain,
+      muted: audioState.muted,
+    };
+  }
+  return controls;
+});
 
 onMounted(() => {
-  startHostCapture();
+  updateWidgetMaxHeight();
+  window.addEventListener("resize", updateWidgetMaxHeight);
+  window.addEventListener("pagehide", persistOwnedScreenCleanup);
+  if (hasProductionControls.value) {
+    void startHostCapture();
+  }
 });
 
 function selectScene(id: string): void {
   send({ type: "scene.select", sceneId: id });
 }
 
-function showLowerThird(speaker: string, comment: string): void {
-  send({ type: "lowerThird.speaker.update", value: speaker });
-  send({ type: "lowerThird.comment.update", value: comment });
-  send({ type: "lowerThird.show" });
-}
-
 function setRecording(recording: boolean): void {
+  currentRecordingStatus.value = recording ? "recording" : "idle";
   if (state.value.isRecording !== recording) {
     send({ type: "recording.toggle" });
   }
+}
+
+function setRecordingStatus(status: string): void {
+  currentRecordingStatus.value = status;
+}
+
+function setStreamStatus(status: string): void {
+  currentStreamStatus.value = status;
 }
 
 function markProgramExported(): void {
   send({ type: "program.exported" });
 }
 
+function setProgrammeAudioSourceGain(sourceId: string, gain: number): void {
+  send({ type: "audioMix.source.gain", sourceId, gain: normalizeProgrammeAudioGain(gain) });
+}
+
+function setProgrammeAudioSourceMuted(sourceId: string, muted: boolean): void {
+  send({ type: "audioMix.source.mute", sourceId, muted });
+}
+
+function normalizeProgrammeAudioGain(gain: number): number {
+  if (!Number.isFinite(gain)) return 1;
+  return Math.min(Math.max(gain, 0), 2);
+}
+
+function hasLiveAudioTrack(stream: MediaStream | undefined): boolean {
+  try {
+    return stream?.getAudioTracks().some((track) => track.readyState === "live") === true;
+  } catch {
+    return false;
+  }
+}
+
 async function addScreenShare(): Promise<void> {
-  const sourceId = `source-screen-share-${Date.now().toString(36)}`;
+  const sourceId = `source-screen-share-${crypto.randomUUID()}`;
   const sourceNumber = screenShareSources.value.length + 1;
   await startScreenShare({
     id: sourceId,
@@ -130,13 +206,22 @@ async function addScreenShare(): Promise<void> {
 }
 
 async function startScreenShare(source: StudioSource): Promise<void> {
+  stopScreenShare(source.id);
+  const captureGeneration = screenShareCaptureGenerations.get(source.id) ?? 0;
+  const localSource: StudioSource = {
+    ...source,
+    settings: {
+      ...source.settings,
+      runtimeOwnerId,
+      runtimeSource: "local",
+    },
+  };
+  upsertScreenShareSource(localSource);
   if (!navigator.mediaDevices?.getDisplayMedia) {
+    upsertScreenShareSource({ ...localSource, status: "missing" });
     setScreenShareCaptureState(source.id, "unavailable", "Browser screen capture unavailable");
     return;
   }
-
-  stopScreenShare(source.id);
-  upsertScreenShareSource(source);
   setScreenShareCaptureState(source.id, "requesting", "");
 
   try {
@@ -148,11 +233,20 @@ async function startScreenShare(source: StudioSource): Promise<void> {
         width: { ideal: state.value.resolution.width },
       },
     });
+    if (
+      isComponentUnmounted ||
+      screenShareCaptureGenerations.get(source.id) !== captureGeneration
+    ) {
+      stopMediaStream(stream);
+      return;
+    }
     for (const track of stream.getTracks()) {
-      track.addEventListener("ended", () => handleScreenShareEnded(source.id));
+      track.addEventListener("ended", () =>
+        handleScreenShareEnded(source.id, stream, captureGeneration)
+      );
     }
     const namedSource = {
-      ...source,
+      ...localSource,
       name: getScreenShareName(source.name, stream, screenShareSources.value.length),
       status: "ready" as const,
     };
@@ -161,12 +255,25 @@ async function startScreenShare(source: StudioSource): Promise<void> {
     setScreenShareCaptureState(source.id, "ready", "");
     selectScreenShare(namedSource.id);
   } catch (error) {
+    if (
+      isComponentUnmounted ||
+      screenShareCaptureGenerations.get(source.id) !== captureGeneration
+    ) {
+      return;
+    }
     setScreenShareCaptureState(
       source.id,
       "blocked",
       error instanceof Error ? error.message : "Unable to capture screen",
     );
-    removeScreenShareSource(source.id);
+    upsertScreenShareSource({ ...localSource, status: "missing" });
+  }
+}
+
+function retryScreenShare(sourceId: string): void {
+  const source = getScreenShareSource(sourceId);
+  if (source) {
+    void startScreenShare(source);
   }
 }
 
@@ -176,7 +283,9 @@ function selectScreenShare(sourceId: string): void {
 }
 
 function selectNextScreenShare(): void {
-  const [nextSource] = screenShareSources.value;
+  const nextSource = screenShareSources.value.find((source) =>
+    getScreenShareCaptureState(source.id).status === "ready"
+  );
   send({
     type: "screenShare.source.select",
     sourceId: nextSource?.id ?? "source-host-screen-share",
@@ -185,16 +294,21 @@ function selectNextScreenShare(): void {
 }
 
 function stopScreenShare(sourceId: string): void {
+  screenShareCaptureGenerations.set(
+    sourceId,
+    (screenShareCaptureGenerations.get(sourceId) ?? 0) + 1,
+  );
   const stream = screenShareStreams.value.get(sourceId);
   if (stream) {
-    for (const track of stream.getTracks()) {
-      track.stop();
-    }
+    stopMediaStream(stream);
   }
   const nextStreams = new Map(screenShareStreams.value);
   nextStreams.delete(sourceId);
   screenShareStreams.value = nextStreams;
   removeScreenShareSource(sourceId);
+  if (state.value.sources.some((source) => source.id === sourceId)) {
+    send({ type: "source.remove", sourceId });
+  }
   setScreenShareCaptureState(sourceId, "missing", "");
   if (state.value.activeScreenShareSourceId === sourceId) {
     selectNextScreenShare();
@@ -209,6 +323,7 @@ async function startHostCapture(): Promise<void> {
   }
 
   stopHostCapture();
+  const captureGeneration = hostCaptureGeneration;
   hostCaptureStatus.value = "requesting";
   hostCaptureError.value = "";
 
@@ -225,12 +340,21 @@ async function startHostCapture(): Promise<void> {
         facingMode: "user",
       },
     });
+    if (isComponentUnmounted || captureGeneration !== hostCaptureGeneration) {
+      stopMediaStream(stream);
+      return;
+    }
     hostMediaStream.value = stream;
     hostCaptureStatus.value = "ready";
     for (const track of stream.getTracks()) {
-      track.addEventListener("ended", handleHostTrackEnded);
+      track.addEventListener("ended", () =>
+        handleHostTrackEnded(stream, captureGeneration)
+      );
     }
   } catch (error) {
+    if (isComponentUnmounted || captureGeneration !== hostCaptureGeneration) {
+      return;
+    }
     hostMediaStream.value = undefined;
     hostCaptureStatus.value = "blocked";
     hostCaptureError.value = error instanceof Error ? error.message : "Unable to capture camera and microphone";
@@ -238,36 +362,65 @@ async function startHostCapture(): Promise<void> {
 }
 
 function stopHostCapture(): void {
+  hostCaptureGeneration += 1;
   const stream = hostMediaStream.value;
   if (!stream) {
     return;
   }
 
-  for (const track of stream.getTracks()) {
-    track.removeEventListener("ended", handleHostTrackEnded);
-    track.stop();
-  }
   hostMediaStream.value = undefined;
+  stopMediaStream(stream);
 }
 
 function stopAllScreenShares(): void {
-  for (const sourceId of [...screenShareStreams.value.keys()]) {
+  const sourceIds = new Set([
+    ...screenShareStreams.value.keys(),
+    ...screenShareSources.value.map((source) => source.id),
+    ...screenShareCaptureGenerations.keys(),
+  ]);
+  for (const sourceId of sourceIds) {
     stopScreenShare(sourceId);
   }
 }
 
-function handleHostTrackEnded(): void {
+function handleHostTrackEnded(stream: MediaStream, captureGeneration: number): void {
+  if (
+    captureGeneration !== hostCaptureGeneration ||
+    hostMediaStream.value !== stream
+  ) {
+    return;
+  }
+  hostCaptureGeneration += 1;
   hostMediaStream.value = undefined;
+  stopMediaStream(stream);
   hostCaptureStatus.value = "blocked";
   hostCaptureError.value = "Camera or microphone stream ended";
+}
+
+function retryLocalCapture(sourceId: string): void {
+  if (sourceId === localCameraSourceId.value) {
+    void startHostCapture();
+  }
+}
+
+function stopMediaStream(stream: MediaStream): void {
+  for (const track of stream.getTracks()) {
+    track.stop();
+  }
 }
 
 function syncRoomMediaStreams(payload: RoomMediaPayload): void {
   roomMediaStreams.value = new Map(payload.streams);
   roomMediaSources.value = new Map(payload.sources.map((source) => [source.id, source]));
+  roomMediaSnapshotAuthoritative.value = payload.authoritative;
 }
 
 function withRuntimeMediaState(source: StudioSource): StudioSource {
+  if (source.type === "screen") {
+    return screenShareSources.value.some((candidate) => candidate.id === source.id)
+      ? withScreenShareCaptureState(source)
+      : withRoomMediaState(source);
+  }
   if (source.id === localCameraSourceId.value) {
     return withLocalCaptureState(source);
   }
@@ -275,9 +428,26 @@ function withRuntimeMediaState(source: StudioSource): StudioSource {
   return withRoomMediaState(source);
 }
 
+function isVisibleRuntimeSource(source: StudioSource): boolean {
+  if (source.type !== "camera") {
+    return true;
+  }
+
+  if (source.id === localCameraSourceId.value) {
+    return hasProductionControls.value;
+  }
+
+  return roomMediaSources.value.has(source.id);
+}
+
 function withLocalCaptureState(source: StudioSource): StudioSource {
   return {
     ...source,
+    status: hostCaptureStatus.value === "ready"
+      ? "ready"
+      : hostCaptureStatus.value === "requesting"
+        ? "loading"
+        : "missing",
     settings: {
       ...source.settings,
       captureError: hostCaptureError.value,
@@ -287,7 +457,7 @@ function withLocalCaptureState(source: StudioSource): StudioSource {
 }
 
 function withRoomMediaState(source: StudioSource): StudioSource {
-  if (!isRoomMediaSource(source)) {
+  if (!isRoomMediaSource(source) && source.type !== "screen") {
     return source;
   }
 
@@ -311,10 +481,63 @@ function withRoomMediaState(source: StudioSource): StudioSource {
       ...source.settings,
       ...roomSource?.settings,
       captureStatus: stream ? "ready" : "missing",
+      runtimeSource: "realtimekit",
     },
     status: stream ? "ready" : "missing",
   };
 }
+
+function reconcileRuntimeSources(): void {
+  if (!hasProductionControls.value || !isSynchronized.value) {
+    return;
+  }
+
+  const runtimeSources = new Map(roomMediaSources.value);
+  const existing = state.value.sources.find((source) => source.id === localCameraSourceId.value);
+  runtimeSources.set(localCameraSourceId.value, {
+    ...existing,
+    id: localCameraSourceId.value,
+    name: existing?.name ?? "Producer Camera",
+    type: "camera",
+    status: hostCaptureStatus.value === "ready"
+      ? "ready"
+      : hostCaptureStatus.value === "requesting"
+        ? "loading"
+        : "missing",
+    color: existing?.color ?? "#ffb26f",
+    label: existing?.label ?? "Producer",
+    roles: ["producer"],
+    settings: {
+      ...existing?.settings,
+      captureError: hostCaptureError.value,
+      captureStatus: hostCaptureStatus.value,
+      runtimeSource: "local",
+    },
+  });
+  for (const source of screenShareSources.value) {
+    runtimeSources.set(source.id, source);
+  }
+
+  send({
+    type: "sources.reconcile",
+    authoritativeRuntimeSource: roomMediaSnapshotAuthoritative.value ? "realtimekit" : undefined,
+    sources: [...runtimeSources.values()],
+  });
+}
+
+watch(
+  () => [
+    isSynchronized.value,
+    hostCaptureStatus.value,
+    hostMediaStream.value,
+    roomMediaSnapshotAuthoritative.value,
+    roomMediaSources.value,
+    remoteStateEpoch.value,
+    screenShareSources.value,
+  ] as const,
+  () => reconcileRuntimeSources(),
+  { immediate: true },
+);
 
 function isRoomMediaSource(source: StudioSource): boolean {
   return source.type === "camera" &&
@@ -330,6 +553,7 @@ function withScreenShareCaptureState(source: StudioSource): StudioSource {
       ...source.settings,
       captureError: captureState.error,
       captureStatus: captureState.status,
+      runtimeSource: "local",
       selected: source.id === state.value.activeScreenShareSourceId,
     },
   };
@@ -378,15 +602,60 @@ function setScreenShareCaptureState(sourceId: string, status: CaptureStatus, err
   };
 }
 
-function handleScreenShareEnded(sourceId: string): void {
+function handleScreenShareEnded(
+  sourceId: string,
+  stream: MediaStream,
+  captureGeneration: number,
+): void {
+  if (
+    screenShareCaptureGenerations.get(sourceId) !== captureGeneration ||
+    screenShareStreams.value.get(sourceId) !== stream
+  ) {
+    return;
+  }
+  screenShareCaptureGenerations.set(sourceId, captureGeneration + 1);
+  stopMediaStream(stream);
   const nextStreams = new Map(screenShareStreams.value);
   nextStreams.delete(sourceId);
   screenShareStreams.value = nextStreams;
-  removeScreenShareSource(sourceId);
-  setScreenShareCaptureState(sourceId, "missing", "");
+  const source = getScreenShareSource(sourceId);
+  if (source) {
+    upsertScreenShareSource({ ...source, status: "missing" });
+  }
+  setScreenShareCaptureState(sourceId, "ended", "Screen capture ended");
   if (state.value.activeScreenShareSourceId === sourceId) {
     selectNextScreenShare();
   }
+}
+
+function persistOwnedScreenCleanup(event?: PageTransitionEvent): void {
+  if (
+    !shouldPersistOwnedScreenCleanup(event) ||
+    !props.sessionId ||
+    ownedScreenCleanupSent
+  ) {
+    return;
+  }
+
+  const sourceIds = screenShareSources.value
+    .filter((source) => source.settings?.runtimeOwnerId === runtimeOwnerId)
+    .map((source) => source.id);
+  if (sourceIds.length === 0) {
+    return;
+  }
+
+  ownedScreenCleanupSent = true;
+  void fetch("/api/studio/state", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "remove-owned-sources",
+      ownerId: runtimeOwnerId,
+      sessionId: props.sessionId,
+      sourceIds,
+    }),
+    keepalive: true,
+  }).catch(() => undefined);
 }
 
 function startWidgetResize(event: PointerEvent): void {
@@ -439,6 +708,10 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  persistOwnedScreenCleanup();
+  isComponentUnmounted = true;
+  window.removeEventListener("resize", updateWidgetMaxHeight);
+  window.removeEventListener("pagehide", persistOwnedScreenCleanup);
   clearOverlayTimers();
   clearStingerTimer();
   finishWidgetResize();
@@ -448,12 +721,13 @@ onBeforeUnmount(() => {
 
 function scheduleOverlayTimers(activeOverlays: Record<string, ActiveOverlay>): void {
   for (const [layerId, overlay] of Object.entries(activeOverlays)) {
-    if (overlayTimerPhases.get(layerId) === overlay.phase) {
+    const timerKey = `${overlay.generation ?? 0}:${overlay.phase}`;
+    if (overlayTimerKeys.get(layerId) === timerKey) {
       continue;
     }
 
     clearOverlayTimer(layerId);
-    overlayTimerPhases.set(layerId, overlay.phase);
+    overlayTimerKeys.set(layerId, timerKey);
 
     const delaySeconds = getOverlayPhaseDelaySeconds(overlay);
     const eventType = getOverlayPhaseEvent(overlay.phase);
@@ -461,13 +735,13 @@ function scheduleOverlayTimers(activeOverlays: Record<string, ActiveOverlay>): v
       layerId,
       window.setTimeout(() => {
         overlayTimers.delete(layerId);
-        overlayTimerPhases.delete(layerId);
-        send({ type: eventType, layerId });
+        overlayTimerKeys.delete(layerId);
+        send({ type: eventType, layerId, generation: overlay.generation });
       }, secondsToMilliseconds(delaySeconds)),
     );
   }
 
-  for (const layerId of [...overlayTimerPhases.keys()]) {
+  for (const layerId of [...overlayTimerKeys.keys()]) {
     if (!activeOverlays[layerId]) {
       clearOverlayTimer(layerId);
     }
@@ -509,13 +783,13 @@ function scheduleStingerTimer(): void {
   stingerTimerKey = activeStingerKey.value;
   const durationSeconds = stinger.effect.durationSeconds ?? 2;
   stingerMidpointTimer = window.setTimeout(() => {
-    send({ type: "stinger.midpoint" });
+    send({ type: "stinger.midpoint", generation: stinger.generation });
   }, secondsToMilliseconds(durationSeconds / 2));
   stingerTimer = window.setTimeout(() => {
     stingerTimer = undefined;
     stingerMidpointTimer = undefined;
     stingerTimerKey = "";
-    send({ type: "stinger.finished" });
+    send({ type: "stinger.finished", generation: stinger.generation });
   }, secondsToMilliseconds(durationSeconds));
 }
 
@@ -531,7 +805,7 @@ function clearOverlayTimer(layerId: string): void {
     window.clearTimeout(timer);
   }
   overlayTimers.delete(layerId);
-  overlayTimerPhases.delete(layerId);
+  overlayTimerKeys.delete(layerId);
 }
 
 function clearStingerTimer(): void {
@@ -555,13 +829,21 @@ function getEffectKey(effect: { kind: string; transition?: string; sourceId?: st
 }
 
 function clampWidgetHeight(height: number): number {
-  const maxHeight = Math.max(220, Math.round(window.innerHeight * 0.56));
-  return Math.min(Math.max(Math.round(height), 150), maxHeight);
+  return Math.min(Math.max(Math.round(height), 150), widgetMaxHeight.value);
+}
+
+function updateWidgetMaxHeight(): void {
+  widgetMaxHeight.value = Math.max(220, Math.round(window.innerHeight * 0.56));
+  widgetHeight.value = clampWidgetHeight(widgetHeight.value);
 }
 </script>
 
 <template>
-  <div class="studio-app" :style="studioLayoutStyle">
+  <div
+    class="studio-app"
+    :class="{ 'green-room-app': !hasProductionControls }"
+    :style="studioLayoutStyle"
+  >
     <header class="top-bar">
       <div class="brand-block">
         <span class="brand-mark" aria-hidden="true">RS</span>
@@ -570,24 +852,52 @@ function clampWidgetHeight(height: number): number {
           <span>{{ roomSubtitle }}</span>
         </div>
       </div>
-      <div class="top-bar-status">
+      <div class="top-bar-status" role="status" aria-live="polite">
         <span v-if="props.providerStatus">{{ props.providerStatus }}</span>
-        <span v-if="props.recordingStatus">{{ props.recordingStatus }}</span>
+        <span v-if="currentRecordingStatus">{{ currentRecordingStatus }}</span>
         <span v-if="props.streamEnvironment">{{ props.streamEnvironment }} stream</span>
-        <span v-if="props.streamStatus">{{ props.streamStatus }}</span>
+        <span v-if="currentStreamStatus">{{ currentStreamStatus }}</span>
+        <span v-if="hasProductionControls">programme {{ syncStatus }}</span>
+        <span v-if="syncConflictNotice" class="room-error">{{ syncConflictNotice }}</span>
+        <span
+          v-if="syncError && syncError !== syncConflictNotice"
+          class="room-error"
+        >
+          {{ syncError }}
+        </span>
+        <button
+          v-if="syncConflictNotice"
+          class="status-dismiss"
+          type="button"
+          @click="acknowledgeConflict"
+        >
+          Dismiss conflict
+        </button>
       </div>
       <RealtimeKitRoom
-        v-if="props.sessionId"
+        v-if="props.sessionId && hasProductionControls"
         :invite-token="props.inviteToken"
+        :provider-ready="props.providerStatus !== 'Meeting pending'"
         :role="roomRole"
         :session-id="props.sessionId"
         @media-streams-change="syncRoomMediaStreams"
       />
     </header>
 
-    <PeopleRail :sources="sourcesForUi" @connect-source="startHostCapture" />
+    <PeopleRail
+      v-if="hasProductionControls && isSynchronized"
+      :audio-controls="programmeAudioControls"
+      :sources="sourcesForUi"
+      @audio-gain-change="setProgrammeAudioSourceGain"
+      @audio-mute-change="setProgrammeAudioSourceMuted"
+      @connect-source="retryLocalCapture"
+    />
 
-    <main class="stage-column">
+    <section
+      v-if="hasProductionControls && isSynchronized"
+      class="stage-column"
+      aria-label="Programme production controls"
+    >
       <SceneSwitcher
         :scenes="state.scenes"
         :layers="state.layers"
@@ -601,6 +911,8 @@ function clampWidgetHeight(height: number): number {
         :active-overlays="state.activeOverlays"
         :active-stinger="state.activeStinger"
         :media-streams="mediaStreams"
+        :programme-audio-streams="programmeMediaStreams"
+        :audio-mix="state.audioMix"
         :resolution="state.resolution"
         :is-playing="state.isPlaying"
         :is-recording="state.isRecording"
@@ -609,18 +921,61 @@ function clampWidgetHeight(height: number): number {
         :stream-environment="props.streamEnvironment"
         :stream-status="props.streamStatus"
         @recording-change="setRecording"
+        @recording-status-change="setRecordingStatus"
+        @stream-status-change="setStreamStatus"
         @exported="markProgramExported"
       />
-    </main>
+    </section>
+
+    <section
+      v-else-if="hasProductionControls"
+      class="green-room-stage"
+      aria-label="Programme state synchronization"
+      aria-live="polite"
+    >
+      <div class="green-room-panel">
+        <p class="eyebrow">Programme state</p>
+        <h2>{{ syncStatus === "error" ? "Programme unavailable" : "Loading programme" }}</h2>
+        <p v-if="syncError">{{ syncError }}</p>
+        <p v-else-if="syncConflictNotice">{{ syncConflictNotice }}</p>
+        <p v-else>Restoring the latest scene and overlay state for this session.</p>
+      </div>
+    </section>
+
+    <section
+      v-else
+      class="green-room-stage"
+      aria-labelledby="green-room-heading"
+    >
+      <div class="green-room-panel">
+        <p class="eyebrow">RealtimeKit green room</p>
+        <h2 id="green-room-heading">Join the contributor room</h2>
+        <p>
+          Use RealtimeKit to check your camera and microphone, then join the other contributors.
+          Programme switching, streaming, and recording are managed by the producer.
+        </p>
+        <RealtimeKitRoom
+          v-if="props.sessionId"
+          :invite-token="props.inviteToken"
+          :provider-ready="props.providerStatus !== 'Meeting pending'"
+          :role="roomRole"
+          :session-id="props.sessionId"
+          @media-streams-change="syncRoomMediaStreams"
+        />
+      </div>
+    </section>
 
     <div
+      v-if="hasProductionControls"
       class="widget-resizer"
       :class="{ active: isResizingWidgets }"
       role="separator"
-      aria-label="Resize production tabs"
+      aria-label="Resize screen sources panel"
       aria-orientation="horizontal"
       :aria-valuenow="widgetHeight"
       aria-valuemin="150"
+      :aria-valuemax="widgetMaxHeight"
+      :aria-valuetext="`${widgetHeight} pixels`"
       tabindex="0"
       @pointerdown="startWidgetResize"
       @keydown.up.prevent="adjustWidgetHeight(24)"
@@ -628,14 +983,17 @@ function clampWidgetHeight(height: number): number {
     />
 
     <StudioWidgets
+      v-if="hasProductionControls"
       :sources="sourcesForUi"
       :media-streams="mediaStreams"
       :active-screen-share-source-id="state.activeScreenShareSourceId"
+      :audio-controls="programmeAudioControls"
+      @audio-gain-change="setProgrammeAudioSourceGain"
+      @audio-mute-change="setProgrammeAudioSourceMuted"
       @select-screen-share="selectScreenShare"
       @add-screen-share="addScreenShare"
       @stop-screen-share="stopScreenShare"
-      @show-comment="showLowerThird"
-      @show-banner="showLowerThird"
+      @retry-screen-share="retryScreenShare"
     />
   </div>
 </template>

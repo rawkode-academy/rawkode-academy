@@ -63,6 +63,32 @@ describe("studioMachine", () => {
     ]);
   });
 
+  it("stores authoritative programme audio controls with bounded gain", () => {
+    const sourceId = "source-realtimekit-camera-studio-guest-alice";
+    const gained = reduceStudioState(createInitialStudioState(), {
+      type: "audioMix.source.gain",
+      sourceId,
+      gain: 3,
+    });
+    const muted = reduceStudioState(gained, {
+      type: "audioMix.source.mute",
+      sourceId,
+      muted: true,
+    });
+
+    expect(muted.audioMix[sourceId]).toEqual({ gain: 2, muted: true });
+    expect(reduceStudioState(muted, {
+      type: "audioMix.source.gain",
+      sourceId,
+      gain: Number.NaN,
+    })).toBe(muted);
+    expect(reduceStudioState(muted, {
+      type: "audioMix.source.mute",
+      sourceId: "",
+      muted: false,
+    })).toBe(muted);
+  });
+
   it("switches selected scenes to program at stinger midpoint while designing", () => {
     const transitioning = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
@@ -184,6 +210,7 @@ describe("studioMachine", () => {
     expect(switched.activeStinger).toEqual({
       fromSceneId: "intro",
       toSceneId: "monologue",
+      generation: expect.any(Number),
       effect: {
         kind: "motion-transition",
         transition: "wipe",
@@ -440,10 +467,11 @@ describe("studioMachine", () => {
   });
 
   it("tracks lower-third overlay phases until the exit transition completes", () => {
-    const monologue = reduceStudioState(createInitialStudioState(), {
+    const transitioning = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const monologue = reduceStudioState(transitioning, { type: "stinger.midpoint" });
     const shown = reduceStudioState(
       reduceStudioState(monologue, {
         type: "lowerThird.comment.update",
@@ -688,10 +716,11 @@ describe("studioMachine", () => {
   });
 
   it("renders comment input into the active scene lower third layer through an event", () => {
-    const monologue = reduceStudioState(createInitialStudioState(), {
+    const transitioning = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const monologue = reduceStudioState(transitioning, { type: "stinger.midpoint" });
     const withComment = reduceStudioState(
       reduceStudioState(monologue, {
         type: "lowerThird.comment.update",
@@ -715,10 +744,11 @@ describe("studioMachine", () => {
       }),
       { type: "lowerThird.show" },
     );
-    const outro = reduceStudioState(createInitialStudioState(), {
+    const outroTransition = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "outro",
     });
+    const outro = reduceStudioState(outroTransition, { type: "stinger.midpoint" });
     const outroComment = reduceStudioState(
       reduceStudioState(outro, {
         type: "lowerThird.comment.update",
