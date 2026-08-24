@@ -1,0 +1,56 @@
+---
+title: "Wasmtime patches a filesystem sandbox escape, Crossplane 2.4 adds dependency watches, Kueue fixes DRA quota accounting"
+description: "Wasmtime shipped a coordinated patch wave for a high-severity filesystem sandbox escape (CVSS 8.8), Crossplane 2.4.0 lets composition functions watch resources they don't own, Kueue 0.19.2/0.18.6 corrected DRA quota undercounting for GPU workloads, and Kubernetes cut an August patch wave across three supported minors."
+publishedAt: 2026-08-21
+authors:
+  - rawkode
+technologies:
+  - webassembly
+  - crossplane
+  - kueue
+  - kubernetes
+---
+
+Four primary-source releases in the last 24 hours span WebAssembly sandboxing, platform engineering, and GPU-aware batch scheduling. The Wasmtime advisory is the one to action today.
+
+## Wasmtime patches a filesystem sandbox escape across four release branches
+
+The Bytecode Alliance published [advisory GHSA-vqjp-4c8c-hfgg](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-vqjp-4c8c-hfgg) on August 20, describing a filesystem sandbox escape rated CVSS 8.8. A guest granted read or write access to a preopened directory through `wasmtime-wasi` could use a trailing slash on a path or symlink to escape the sandbox and reach the host filesystem. The root cause is in the `cap-std` dependency (GHSA-hp8f-xmx4-4qrg), not Wasmtime's own path logic.
+
+The exposure is platform-dependent: hosts on Linux kernels older than 5.6, which lack the `openat2` syscall, and macOS are affected, while newer Linux kernels using the `RESOLVE_BENEATH` resolution flag are not. Fixes shipped the same day as patches to every supported line — [24.0.13](https://github.com/bytecodealliance/wasmtime/releases/tag/v24.0.13), [36.0.14](https://github.com/bytecodealliance/wasmtime/releases/tag/v36.0.14), [46.0.3](https://github.com/bytecodealliance/wasmtime/releases/tag/v46.0.3), and [47.0.4](https://github.com/bytecodealliance/wasmtime/releases/tag/v47.0.4) — alongside the feature release [48.0.0](https://github.com/bytecodealliance/wasmtime/releases/tag/v48.0.0).
+
+Anyone running untrusted modules with WASI filesystem access on macOS or pre-5.6 kernels should patch rather than rely on the kernel-level mitigation.
+
+**Source:** [Wasmtime security advisory GHSA-vqjp-4c8c-hfgg](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-vqjp-4c8c-hfgg) - August 20, 2026
+
+---
+
+## Crossplane 2.4.0 lets composition functions watch required resources
+
+Crossplane released [v2.4.0](https://github.com/crossplane/crossplane/releases/tag/v2.4.0) on August 20. Composition functions can now watch resources they depend on but do not create: a change to a required resource triggers immediate reconciliation of the dependent composite resource instead of waiting for the next poll interval. The release also adds safe-start provider scaling, letting providers scale their runtime deployment to zero replicas until their first `ManagedResourceDefinition` becomes active, and switches container image builds to nixpkgs' `buildGoModule` so scanners like Trivy and Grype can see third-party dependencies.
+
+Several breaking changes land in the same release: the CLI now distributes only from `cli.crossplane.io`, package revision names incorporate package-metadata generation so every installed package gets a new revision on upgrade, and the `type` label on watch metrics changes from `ComposedResource` to `Dependency`. The v1.20 line reaches end-of-life when v2.5 ships in November 2026.
+
+**Source:** [Crossplane v2.4.0 release](https://github.com/crossplane/crossplane/releases/tag/v2.4.0) - August 20, 2026
+
+---
+
+## Kueue 0.19.2 and 0.18.6 fix DRA quota undercounting and a TAS double-assignment bug
+
+Kueue published [v0.19.2](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.2) and the backport [v0.18.6](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.6) on August 20, both carrying scheduling-correctness fixes that matter for GPU fleets. One fixes DRA quota undercounting that occurred when multiple resource names shared the same `deviceClassMappings`, along with mishandled negative extended-resource requests. Another corrects Topology-Aware Scheduling node-replacement logic that could assign two workloads to the same node, plus a domain-matching bug triggered by shared string prefixes.
+
+The releases also add an alpha `TASCacheTopologyTree` feature gate, off by default, that reuses cached topology trees during snapshot creation when scheduling-relevant node data is unchanged, cutting CPU time and allocations. Fair-sharing accounting was fixed to stop entry-penalty leaks that inflated LocalQueue usage.
+
+**Source:** [Kueue v0.19.2 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.2) - August 20, 2026
+
+---
+
+## Kubernetes ships an August patch wave across three supported minors
+
+The release team cut [v1.36.4](https://github.com/kubernetes/kubernetes/releases/tag/v1.36.4), [v1.35.8](https://github.com/kubernetes/kubernetes/releases/tag/v1.35.8), and [v1.34.11](https://github.com/kubernetes/kubernetes/releases/tag/v1.34.11) on August 20. The v1.36.4 changelog lists a DRA scheduling fix for shared-counter caches, a preemption race condition, a kubelet fix for duplicate CDI device IDs surfaced by DRA drivers, and a bump of `golang.org/x/net` and `golang.org/x/text` to pull in upstream Go security updates.
+
+There is no dedicated Kubernetes CVE in this wave; the security content is the transitive dependency refresh. The DRA-related fixes are the notable ones for operators running dynamic resource allocation drivers for GPUs and other accelerators.
+
+**Source:** [Kubernetes CHANGELOG-1.36 (v1.36.4)](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.36.md) - August 20, 2026
+
+---
