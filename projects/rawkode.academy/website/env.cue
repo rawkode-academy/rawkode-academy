@@ -70,6 +70,7 @@ tasks: {
 			// definition-relative glob below for local/task input resolution.
 			"content/**",
 			"../../../content/**",
+			"../../../bun.lock",
 			"astro.config.mts",
 			"env.cue",
 			"package.json",
@@ -98,6 +99,7 @@ tasks: {
 				// definition-relative glob below for local/task input resolution.
 				"content/**",
 				"../../../content/**",
+				"../../../bun.lock",
 				"astro.config.mts",
 				"env.cue",
 				"package.json",
@@ -116,6 +118,7 @@ tasks: {
 				// definition-relative glob below for local/task input resolution.
 				"content/**",
 				"../../../content/**",
+				"../../../bun.lock",
 				"astro.config.mts",
 				"package.json",
 				"public/**",
