@@ -53,104 +53,6 @@
         "wrangler": "^4.13.2",
       },
     },
-    "projects/rawkode.academy/content": {
-      "name": "content",
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/games/secrets-of-kubernetes/achievements": {
-      "name": "ski-achievements",
-      "dependencies": {
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard": {
-      "name": "ski-leaderboard",
-      "dependencies": {
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases": {
-      "name": "ski-player-learned-phrases",
-      "dependencies": {
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/games/secrets-of-kubernetes/player-stats": {
-      "name": "ski-player-stats",
-      "dependencies": {
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/games/secrets-of-kubernetes/share-cards": {
-      "name": "ski-share-cards",
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
     "projects/rawkode.academy/identity": {
       "name": "id.rawkode.academy",
       "version": "0.0.1",
@@ -179,126 +81,8 @@
         "wrangler": "^4.96.0",
       },
     },
-    "projects/rawkode.academy/platform/achievements": {
-      "name": "achievements",
-      "dependencies": {
-        "@apollo/subgraph": "^2.10.2",
-        "@graphql-tools/utils": "^10.8.6",
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@pothos/core": "^4.6.0",
-        "@pothos/plugin-directives": "^4.2.0",
-        "@pothos/plugin-drizzle": "^0.8.1",
-        "@pothos/plugin-federation": "^4.3.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "graphql": "^16.10.0",
-        "graphql-scalars": "^1.24.2",
-        "graphql-yoga": "^5.13.4",
-        "hono": "^4.8.3",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/platform/brackets": {
-      "name": "brackets",
-      "dependencies": {
-        "@apollo/subgraph": "^2.10.2",
-        "@graphql-tools/utils": "^10.8.6",
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@pothos/core": "^4.6.0",
-        "@pothos/plugin-directives": "^4.2.0",
-        "@pothos/plugin-drizzle": "^0.8.1",
-        "@pothos/plugin-federation": "^4.3.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "graphql": "^16.10.0",
-        "graphql-scalars": "^1.24.2",
-        "graphql-yoga": "^5.13.4",
-        "hono": "^4.8.3",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/platform/email-preferences": {
-      "name": "email-preferences",
-      "dependencies": {
-        "@apollo/subgraph": "^2.10.2",
-        "@graphql-tools/utils": "^10.8.6",
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@pothos/core": "^4.6.0",
-        "@pothos/plugin-directives": "^4.2.0",
-        "@pothos/plugin-drizzle": "^0.8.1",
-        "@pothos/plugin-federation": "^4.3.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "cloudevents": "^8.0.2",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "graphql": "^16.10.0",
-        "graphql-scalars": "^1.24.2",
-        "graphql-yoga": "^5.13.4",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
     "projects/rawkode.academy/platform/email-service": {
       "name": "email-service",
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
-      },
-    },
-    "projects/rawkode.academy/platform/emoji-reactions": {
-      "name": "emoji-reactions",
-      "dependencies": {
-        "@apollo/subgraph": "^2.10.2",
-        "@graphql-tools/utils": "^10.8.6",
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@pothos/core": "^4.6.0",
-        "@pothos/plugin-directives": "^4.2.0",
-        "@pothos/plugin-drizzle": "^0.8.1",
-        "@pothos/plugin-federation": "^4.3.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "better-auth": "^1.4.1",
-        "cloudevents": "^8.0.2",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "graphql": "^16.10.0",
-        "graphql-scalars": "^1.24.2",
-        "graphql-yoga": "^5.13.4",
-        "hono": "^4.8.3",
-        "zod": "^3.24.3",
-      },
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@cloudflare/workers-types": "^4.20250426.0",
@@ -324,35 +108,6 @@
         "@cloudflare/workers-types": "^4.20260524.1",
         "deno": "2.7.14",
         "vitest": "4.1.7",
-      },
-    },
-    "projects/rawkode.academy/platform/leaderboard": {
-      "name": "leaderboard",
-      "dependencies": {
-        "@apollo/subgraph": "^2.10.2",
-        "@graphql-tools/utils": "^10.8.6",
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@pothos/core": "^4.6.0",
-        "@pothos/plugin-directives": "^4.2.0",
-        "@pothos/plugin-drizzle": "^0.8.1",
-        "@pothos/plugin-federation": "^4.3.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "graphql": "^16.10.0",
-        "graphql-scalars": "^1.24.2",
-        "graphql-yoga": "^5.13.4",
-        "hono": "^4.8.3",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
       },
     },
     "projects/rawkode.academy/platform/notifications": {
@@ -400,37 +155,6 @@
         "typescript": "^5.9.3",
         "vitest": "^4.1.8",
         "wrangler": "^4.96.0",
-      },
-    },
-    "projects/rawkode.academy/platform/watch-history": {
-      "name": "watch-history",
-      "dependencies": {
-        "@apollo/subgraph": "^2.10.2",
-        "@graphql-tools/utils": "^10.8.6",
-        "@paralleldrive/cuid2": "^2.2.2",
-        "@pothos/core": "^4.6.0",
-        "@pothos/plugin-directives": "^4.2.0",
-        "@pothos/plugin-drizzle": "^0.8.1",
-        "@pothos/plugin-federation": "^4.3.2",
-        "@sindresorhus/slugify": "^2.2.1",
-        "better-auth": "^1.4.1",
-        "cloudevents": "^8.0.2",
-        "drizzle-kit": "^0.30.6",
-        "drizzle-orm": "^0.38.4",
-        "drizzle-zod": "^0.6.1",
-        "graphql": "^16.10.0",
-        "graphql-scalars": "^1.24.2",
-        "graphql-yoga": "^5.13.4",
-        "hono": "^4.8.3",
-        "zod": "^3.24.3",
-      },
-      "devDependencies": {
-        "@biomejs/biome": "^1.9.4",
-        "@cloudflare/workers-types": "^4.20250426.0",
-        "@types/bun": "latest",
-        "@types/node": "^22.15.2",
-        "vitest": "^4.1.8",
-        "wrangler": "^4.13.2",
       },
     },
     "projects/rawkode.academy/platform/youtube-scraper": {
@@ -2179,7 +1903,6 @@
 
     "abort-controller": ["abort-controller@3.0.0", "", { "dependencies": { "event-target-shim": "^5.0.0" } }, "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg=="],
 
-    "achievements": ["achievements@workspace:projects/rawkode.academy/platform/achievements"],
 
     "acorn": ["acorn@8.16.0", "", { "bin": { "acorn": "bin/acorn" } }, "sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw=="],
 
@@ -2293,7 +2016,6 @@
 
     "braces": ["braces@3.0.3", "", { "dependencies": { "fill-range": "^7.1.1" } }, "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA=="],
 
-    "brackets": ["brackets@workspace:projects/rawkode.academy/platform/brackets"],
 
     "browserslist": ["browserslist@4.28.2", "", { "dependencies": { "baseline-browser-mapping": "^2.10.12", "caniuse-lite": "^1.0.30001782", "electron-to-chromium": "^1.5.328", "node-releases": "^2.0.36", "update-browserslist-db": "^1.2.3" }, "bin": { "browserslist": "cli.js" } }, "sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg=="],
 
@@ -2405,7 +2127,6 @@
 
     "constantinople": ["constantinople@4.0.1", "", { "dependencies": { "@babel/parser": "^7.6.0", "@babel/types": "^7.6.1" } }, "sha512-vCrqcSIq4//Gx74TXXCGnHpulY1dskqLTFGDmhrGxzeXL8lF8kvXv6mpNWlJj1uD4DW23D4ljAqbY4RRaaUZIw=="],
 
-    "content": ["content@workspace:projects/rawkode.academy/content"],
 
     "convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
 
@@ -2543,13 +2264,11 @@
 
     "electron-to-chromium": ["electron-to-chromium@1.5.365", "", {}, "sha512-xfip4u1QF1s+URFqpA6N+OeFpDGpN7VJz1f3MO3bVL0QYBjpGiZ5/Of7kugvM+o8TTqmanUlviHN3c8M9vYWCw=="],
 
-    "email-preferences": ["email-preferences@workspace:projects/rawkode.academy/platform/email-preferences"],
 
     "email-service": ["email-service@workspace:projects/rawkode.academy/platform/email-service"],
 
     "emmet": ["emmet@2.4.11", "", { "dependencies": { "@emmetio/abbreviation": "^2.3.3", "@emmetio/css-abbreviation": "^2.1.8" } }, "sha512-23QPJB3moh/U9sT4rQzGgeyyGIrcM+GH5uVYg2C6wZIxAIJq7Ng3QLT79tl8FUwDXhyq9SusfknOrofAKqvgyQ=="],
 
-    "emoji-reactions": ["emoji-reactions@workspace:projects/rawkode.academy/platform/emoji-reactions"],
 
     "emoji-regex": ["emoji-regex@8.0.0", "", {}, "sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A=="],
 
@@ -3055,7 +2774,6 @@
 
     "launder": ["launder@1.7.1", "", { "dependencies": { "dayjs": "^1.11.7" } }, "sha512-mU6WRz5EusL9ZZuiZ5SO4Y6C0P9PAUR9iwdb6bzj4KDihm28DiHFw+/yk9DBH4f+Pv1wuzQ4e2jV3oQ7mkIqvw=="],
 
-    "leaderboard": ["leaderboard@workspace:projects/rawkode.academy/platform/leaderboard"],
 
     "lightningcss": ["lightningcss@1.32.0", "", { "dependencies": { "detect-libc": "^2.0.3" }, "optionalDependencies": { "lightningcss-android-arm64": "1.32.0", "lightningcss-darwin-arm64": "1.32.0", "lightningcss-darwin-x64": "1.32.0", "lightningcss-freebsd-x64": "1.32.0", "lightningcss-linux-arm-gnueabihf": "1.32.0", "lightningcss-linux-arm64-gnu": "1.32.0", "lightningcss-linux-arm64-musl": "1.32.0", "lightningcss-linux-x64-gnu": "1.32.0", "lightningcss-linux-x64-musl": "1.32.0", "lightningcss-win32-arm64-msvc": "1.32.0", "lightningcss-win32-x64-msvc": "1.32.0" } }, "sha512-NXYBzinNrblfraPGyrbPoD19C1h9lfI/1mzgWYvXUTe414Gz/X1FD2XBZSZM7rRTrMA8JL3OtAaGifrIKhQ5yQ=="],
 
@@ -3767,15 +3485,10 @@
 
     "sitemap": ["sitemap@9.0.1", "", { "dependencies": { "@types/node": "^24.9.2", "@types/sax": "^1.2.1", "arg": "^5.0.0", "sax": "^1.4.1" }, "bin": { "sitemap": "dist/esm/cli.js" } }, "sha512-S6hzjGJSG3d6if0YoF5kTyeRJvia6FSTBroE5fQ0bu1QNxyJqhhinfUsXi9fH3MgtXODWvwo2BDyQSnhPQ88uQ=="],
 
-    "ski-achievements": ["ski-achievements@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/achievements"],
 
-    "ski-leaderboard": ["ski-leaderboard@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard"],
 
-    "ski-player-learned-phrases": ["ski-player-learned-phrases@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases"],
 
-    "ski-player-stats": ["ski-player-stats@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/player-stats"],
 
-    "ski-share-cards": ["ski-share-cards@workspace:projects/rawkode.academy/games/secrets-of-kubernetes/share-cards"],
 
     "slash": ["slash@3.0.0", "", {}, "sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q=="],
 
@@ -4135,7 +3848,6 @@
 
     "warn-once": ["warn-once@0.1.1", "", {}, "sha512-VkQZJbO8zVImzYFteBXvBOZEl1qL175WH8VmZcxF2fZAoudNhNDvHi+doCaAEdU2l2vtcIwa2zn0QK5+I1HQ3Q=="],
 
-    "watch-history": ["watch-history@workspace:projects/rawkode.academy/platform/watch-history"],
 
     "web-namespaces": ["web-namespaces@2.0.1", "", {}, "sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ=="],
 
