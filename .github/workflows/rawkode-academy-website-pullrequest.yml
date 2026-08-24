@@ -96,6 +96,17 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
       run: cuenv exec -- bun install --frozen-lockfile
+    - name: Regenerate Bun lockfile for diagnosis
+      if: failure()
+      run: cuenv exec -- bun install
+    - name: Upload regenerated Bun lockfile
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: regenerated-bun-lock
+        path: bun.lock
+        if-no-files-found: error
+        retention-days: 1
     - name: Setup 1Password
       run: cuenv exec -- cuenv secrets setup onepassword
       env:
