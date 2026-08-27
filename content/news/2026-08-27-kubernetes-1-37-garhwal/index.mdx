@@ -1,0 +1,47 @@
+---
+title: "Kubernetes v1.37 Garhwal ships gang scheduling to beta and dates the ipvs removal"
+description: "Kubernetes v1.37 lands 67 enhancements, promotes native gang scheduling and DRA device taints to production tiers, and puts the ipvs kube-proxy backend on a fixed removal timeline."
+publishedAt: 2026-08-27
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+Kubernetes cut its third release of 2026 in the last 24 hours, and it dominated the window. Rather than a single "new version" note, here are the three changes in v1.37 that actually alter how platform, batch, and networking teams operate.
+
+## Kubernetes v1.37 Garhwal graduates KYAML, Pod Certificates, and node-declared features to stable
+
+The Kubernetes project released [v1.37, codenamed Garhwal](https://kubernetes.io/blog/2026/08/26/kubernetes-v1-37-release/), on August 26 with 67 enhancements: 16 graduating to stable, 23 to beta, and 27 new in alpha.
+
+Among the stable graduations, KYAML (KEP-5295) becomes a supported `kubectl` output format, a flow-style YAML subset that removes the indentation and type-coercion ambiguities that break generated manifests. Pod Certificates ([KEP-4317](https://github.com/kubernetes/enhancements/issues/4317)) reach GA, delivering short-lived X.509 identities to workloads through a `podCertificate` projected volume with no sidecar. Node-declared features ([KEP-5328](https://github.com/kubernetes/enhancements/issues/5328)) also go stable, letting a node advertise its feature-gated capabilities to the control plane so the scheduler and kubelet avoid placing workloads on nodes that cannot honour them during a skewed upgrade.
+
+The 1.37 branch enters maintenance mode in August 2027 and reaches end of life in October 2027.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/08/26/kubernetes-v1-37-release/) - August 26, 2026
+
+---
+
+## Native gang scheduling reaches beta with a Workload API and PodGroup
+
+[KEP-4671, Gang Scheduling Support](https://github.com/kubernetes/enhancements/issues/4671), moves to beta in v1.37 after shipping as alpha in 1.35 and 1.36. Owned by SIG Scheduling with the workload-aware-scheduling working group, it adds a Workload API and a decoupled `PodGroup` object that the scheduler treats as an all-or-nothing unit: if the whole group cannot be placed, the scheduler defers instead of partially scheduling it. The beta promotion adds workload scheduling cycles and delayed preemption.
+
+The release also advances Dynamic Resource Allocation for GPU fleets. Device-level taints and tolerations ([KEP-5055](https://github.com/kubernetes/enhancements/issues/5055)) graduate to GA, so a driver can taint a failing accelerator and have the scheduler drain claims off it. A new alpha standard `numaNode` device attribute ([KEP-6072](https://github.com/kubernetes/enhancements/issues/6072)) lets drivers report NUMA locality in a common form, so the scheduler can co-allocate a GPU and a NIC on the same NUMA node.
+
+For teams running training and batch on Kubernetes, in-tree gang scheduling removes the need for an external queueing layer to get all-or-nothing placement, the primitive distributed training jobs can deadlock without.
+
+**Source:** [KEP-4671 gang scheduling](https://github.com/kubernetes/enhancements/issues/4671) - August 26, 2026
+
+---
+
+## kube-proxy warns iptables users and sets a firm ipvs removal date
+
+v1.37 continues the migration off both legacy kube-proxy backends. Under [KEP-5343](https://github.com/kubernetes/enhancements/issues/5343), an unset proxy `mode` still defaults to iptables but now logs a warning, staging the eventual switch to nftables, a backend that has been GA since 1.33.
+
+The ipvs backend gets a concrete end date. [KEP-5495](https://github.com/kubernetes/enhancements/issues/5495) adds a `KubeProxyIPVS` feature gate, enabled by default in 1.37, that is scheduled to flip off in v1.40 and lock in v1.43, at which point ipvs mode is removed. kubeadm now emits a delayed deprecation warning that points ipvs users to nftables on modern kernels or iptables on older ones. Kube-proxy also drops the `nft` command-line tool for list operations in favour of the kernel netlink interface, cutting per-sync overhead.
+
+Operators still running ipvs now have a fixed migration window: the gate defaults off in v1.40 and the backend is removed in v1.43.
+
+**Source:** [KEP-5495 deprecate ipvs mode in kube-proxy](https://github.com/kubernetes/enhancements/issues/5495) - August 26, 2026
+
+---
