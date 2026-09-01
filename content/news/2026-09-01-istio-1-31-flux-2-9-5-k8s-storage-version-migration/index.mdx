@@ -1,0 +1,45 @@
+---
+title: "Istio 1.31 ships ambient scalability and FIPS 140-3, Flux returns to upstream Helm, Kubernetes graduates Storage Version Migration"
+description: "Istio cut a stable 1.31.0 with ambient XDS scoping, FIPS 140-3 and zone-aware load balancing, Flux 2.9.5 moved its controllers back to upstream Helm and hardened kubeconfig handling, and Kubernetes v1.37 marked Storage Version Migration GA and on by default."
+publishedAt: 2026-09-01
+authors:
+  - rawkode
+technologies:
+  - istio
+  - fluxcd
+  - kubernetes
+---
+
+Three primary-source items landed inside the last 24 hours: a stable Istio minor, a Flux patch that unwinds a Helm fork, and a Kubernetes v1.37 feature reaching GA. It was an otherwise quiet window, so this is a tight three-item digest rather than a padded one.
+
+## Istio 1.31.0 scopes ambient XDS pushes and adds a FIPS 140-3 compliance policy
+
+Istio published [1.31.0](https://istio.io/latest/news/releases/1.31.x/announcing-1.31/) on August 31, the first stable release of the 1.31 line, concentrating on ambient-mode scalability alongside new security and traffic-management controls.
+
+In ambient mode, istiod now scopes XDS pushes triggered by workload and service address changes to only the affected waypoints rather than pushing broadly, and services can reference primary and canary waypoints with weighted traffic distribution for gradual waypoint rollouts. Security adds a `fips-140-3` value for the `COMPLIANCE_POLICY` environment variable, enforcing TLS 1.2+ with FIPS-compliant cipher suites, plus `trustDomains` and `notTrustDomains` fields on an AuthorizationPolicy `Source` to match requests on the peer certificate's trust domain. Traffic management gains a `zoneAwareLbSetting` field for zone-aware routing with cross-region failover, an `istio-agentgateway-waypoint` `GatewayClass` for running agentgateway as a waypoint, and an `ALLOW_ANY_DYNAMIC_DNS` outbound mode built on Envoy's dynamic forward proxy. The release also fixes multi-cluster memory leaks and a concurrent map write in the CNI agent.
+
+**Source:** [Istio 1.31 release announcement](https://istio.io/latest/news/releases/1.31.x/announcing-1.31/) - August 31, 2026
+
+---
+
+## Flux 2.9.5 moves controllers back to upstream Helm v4.2.4 and rejects file-referencing kubeconfigs
+
+The Flux project released [v2.9.5](https://github.com/fluxcd/flux2/releases/tag/v2.9.5) on August 31, returning helm-controller and source-controller from a temporary Flux-maintained Helm fork to the upstream Helm v4.2.4 dependency.
+
+The release also tightens kubeconfig handling: helm-controller and kustomize-controller now reject kubeconfig Secrets that reference local filesystem paths in the `certificate-authority`, `tokenFile`, `client-certificate`, or `client-key` fields, requiring those credentials to be embedded inline instead. Controller versions in this release are source-controller v1.9.5, helm-controller v1.6.4, kustomize-controller v1.9.5, notification-controller v1.9.4, and the image-reflector and image-automation controllers at v1.2.5. It additionally fixes a panic in post-build variable substitution with negative-length substring expressions.
+
+The kubeconfig change closes a path where a Secret could point a controller at local files on the controller host, so teams driving remote clusters via kubeconfig Secrets should confirm their credentials are inlined before upgrading.
+
+**Source:** [Flux v2.9.5 release](https://github.com/fluxcd/flux2/releases/tag/v2.9.5) - August 31, 2026
+
+---
+
+## Kubernetes v1.37 marks Storage Version Migration GA and enabled by default
+
+Kubernetes published a [v1.37 feature blog](https://kubernetes.io/blog/2026/08/31/kubernetes-v1-37-storage-version-migration-ga/) on August 31 marking Storage Version Migration as generally available and enabled by default. The built-in `StorageVersionMigration` API (`storagemigration.k8s.io/v1`) and its control-plane controller are now stable.
+
+A declarative `StorageVersionMigration` object names a target group and resource, and the built-in StorageVersionMigrator controller rewrites existing objects back through the API server into the current default storage version. That covers two operational cases: safely removing an old API version from a CustomResourceDefinition's `.status.storedVersions` after a version promotion, and re-encrypting data at rest after configuring encryption or rotating keys, since existing objects otherwise keep their old on-disk representation until rewritten. The in-tree path replaces manual `kubectl get`/`kubectl replace` scripts and the out-of-tree kube-storage-version-migrator component.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/08/31/kubernetes-v1-37-storage-version-migration-ga/) - August 31, 2026
+
+---
