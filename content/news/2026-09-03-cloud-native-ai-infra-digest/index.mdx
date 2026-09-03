@@ -1,0 +1,55 @@
+---
+title: "Cloud Native and AI Infrastructure Digest: September 3, 2026"
+description: "PyTorch 2.14 lands an nccl2 distributed backend and c10d fault tolerance, the OpenTelemetry Collector consolidates keepalive config, Kubernetes 1.37 promotes HPA scale-to-zero to beta, and SeaweedFS discloses an unpatched weed iam privilege escalation."
+publishedAt: 2026-09-03
+authors:
+  - rawkode
+---
+
+### PyTorch 2.14 ships an nccl2 distributed backend and moves fault tolerance into c10d
+
+PyTorch 2.14 shipped on September 2 with changes aimed squarely at large-scale distributed training.
+
+The release adds `nccl2`, a backend ported from torchcomms that implements the full collective contract with nonblocking communicators and eager communicator splitting, opt-in via `TORCH_DIST_USE_NCCL2=1`. Fault tolerance becomes a first-class `c10d` concept, with in-place process-group reconfiguration, one-sided RMA windows, and a Flight Recorder that works across any backend rather than only NCCL. On the compiler side, NVGEMM brings CuTeDSL-generated CUTLASS kernels — including scaled and NVFP4 GEMM — into Inductor, which now also targets NVIDIA Rubin (`sm_107`), and ROCm 7.14 wheels are produced from the TheRock SDK.
+
+Moving reconfiguration and a backend-agnostic Flight Recorder into `c10d` turns fleet recovery from a framework-level workaround into a supported primitive.
+
+**Source:** [PyTorch](https://github.com/pytorch/pytorch/releases/tag/v2.14.0) - September 2, 2026
+
+---
+
+### OpenTelemetry Collector 1.66 consolidates HTTP keepalive config and drops Go 1.25
+
+The OpenTelemetry Collector released v1.66.0/v0.160.0 on September 2, with a config deprecation and a toolchain bump to schedule around.
+
+`confighttp` deprecates the flat keepalive fields — `idle_conn_timeout`, `max_idle_conns`, `max_idle_conns_per_host`, `idle_timeout`, and the `disable_keep_alives`/`keep_alives_enabled` toggles — in favour of a consolidated `keepalive` section; existing configurations still load but emit deprecation warnings. The minimum Go version moves to 1.26.0, dropping 1.25.0. A batching change in `exporterhelper` now caches request size per sizer type, removing the O(n²) recomputation that appeared under `sizer: bytes` accumulation. The paired contrib distribution shipped the same day.
+
+Operators using byte-sized batching get the performance fix without touching config, but the keepalive rename needs a migration before the flat fields are eventually removed.
+
+**Source:** [OpenTelemetry](https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.160.0) - September 2, 2026
+
+---
+
+### Kubernetes 1.37 promotes HPA scale-to-zero to beta and enables it by default
+
+A September 2 Kubernetes blog post details HorizontalPodAutoscaler scale-to-zero graduating to beta in v1.37, on by default after shipping as alpha.
+
+An HPA can now scale a target workload down to zero replicas when it is driven by object or external metrics — a signal such as queue length that exists independently of running Pods, unlike CPU or memory metrics that need a live Pod to measure. It requires a metrics adapter such as the Prometheus Adapter, and workloads must tolerate cold start: the HPA has to observe the metric, schedule a Pod, and let the application start before it can serve traffic. Kubernetes Services do not buffer requests while no Pods are ready, so request-driven workloads still need a buffering layer in front.
+
+Event- and queue-driven workloads that previously reached zero only through KEDA or a custom controller can now do so with core HPA, provided they scale on object or external metrics.
+
+**Source:** [Kubernetes](https://kubernetes.io/blog/2026/09/02/kubernetes-v1-37-hpa-scale-to-zero-beta/) - September 2, 2026
+
+---
+
+### SeaweedFS discloses an unpatched privilege escalation in the standalone weed iam server
+
+SeaweedFS published a critical security advisory on September 2 for its standalone `weed iam` server, with no fixed release available yet.
+
+In the deprecated-but-still-distributed `weed iam` server, every IAM action routes through a single `POST /` endpoint that calls `VerifyActionPermission` with empty bucket and object parameters. The evaluator resolves those to the ARN `arn:aws:s3:::` and action `s3:*`, so any identity holding a standard broad S3 data policy (`s3:*` on `*`) is wrongly granted full IAM administration — enough to mint access keys for other accounts, attach admin policies to itself, or delete other users' credentials. Versions up to and including 4.40 are affected and the advisory lists no patched version. The embedded IAM path (`weed s3 -iam=true`) is unaffected because it namespaces actions under an `iam:` prefix that `s3:*` policies cannot match.
+
+Operators running the standalone IAM server cannot patch their way out yet, so mitigation means retiring that server or tightly constraining who holds broad S3 policies until a fix ships.
+
+**Source:** [SeaweedFS](https://github.com/seaweedfs/seaweedfs/security/advisories/GHSA-jw56-gm6j-34mp) - September 2, 2026
+
+---
