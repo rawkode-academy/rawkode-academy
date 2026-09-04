@@ -1,0 +1,56 @@
+---
+title: "Kubernetes 1.37 DRA graduations, Talos 1.14.0, and Gateway API and Kueue fixes"
+description: "Kubernetes 1.37 promotes three Dynamic Resource Allocation features to GA, Talos Linux 1.14.0 adds workload isolation and native BGP, and Gateway API and Kueue ship conformance and scheduling fixes."
+publishedAt: 2026-09-04
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - kueue
+---
+
+Four primary-source items landed in the last 24 hours, weighted toward accelerator scheduling: the Kubernetes v1.37 DRA update, a Talos minor release, and patch releases from Gateway API and Kueue.
+
+## Kubernetes 1.37 graduates three Dynamic Resource Allocation features to GA
+
+The Kubernetes project published its [v1.37 DRA update](https://kubernetes.io/blog/2026/09/03/kubernetes-v1-37-dra-updates/) on September 3, detailing which Dynamic Resource Allocation features reached stable.
+
+DRA extended resource support (KEP-5004) is now GA, letting a DRA driver satisfy classic extended-resource requests such as `example.com/gpu` without running a separate device plugin, so existing workloads can adopt DRA without rewriting their resource requests. Also GA: ResourceClaim device status (KEP-4817), which adds a `devices` field to a claim's `.status` carrying per-device network data including interface name, MAC address, and IP addresses; and device taints and tolerations (KEP-5055), which let drivers or cluster-wide `DeviceTaintRules` mark devices unschedulable and evict Pods whose claims do not tolerate the taint. A standardized `resource.kubernetes.io/numaNode` attribute lands stable so devices from different drivers can be compared on the same NUMA node, and structured parameters (KEP-5398) advance to beta.
+
+For GPU platform teams, the extended-resource path removes the device-plugin-or-DRA choice that has slowed migration.
+
+**Source:** [Kubernetes blog: v1.37 DRA updates](https://kubernetes.io/blog/2026/09/03/kubernetes-v1-37-dra-updates/) - September 3, 2026
+
+---
+
+## Talos Linux 1.14.0 adds sandboxd workload isolation and native BGP
+
+Sidero Labs released [Talos Linux v1.14.0](https://github.com/siderolabs/talos/releases/tag/v1.14.0) on September 3, with 623 commits from more than 60 contributors.
+
+The headline change is `sandboxd` workload isolation, which runs the container runtime, kubelet, and pods in a dedicated PID and mount namespace separated from the Talos host. The release embeds GoBGP for native BGP routing, including ECMP, BFD, and multipath, removing the FRR extension previously needed for that path, and adds DNS over TLS and DNS over HTTPS for host resolution. Storage gains declarative LVM provisioning, MD RAID creation with boot support, and Btrfs. The node image ships Linux 6.18.48, Kubernetes 1.37.0, containerd 2.3.4, runc 1.5.1, etcd 3.7.1, and CoreDNS 1.14.7.
+
+Operators should plan for the breaking changes: in-tree Kubernetes volume plugins are deprecated in favor of CSI, `talosctl apply-config --mode=reboot` is removed, and etcd metrics move from port 2379 to a dedicated port 2383.
+
+**Source:** [Talos Linux v1.14.0 release](https://github.com/siderolabs/talos/releases/tag/v1.14.0) - September 3, 2026
+
+---
+
+## Gateway API 1.6.2 reclassifies 303, 307, and 308 redirects as Extended conformance
+
+The Kubernetes Gateway API project released [v1.6.2](https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.6.2) on September 3, a patch that changes the conformance level of several HTTP redirect status codes.
+
+`HTTPRequestRedirectFilter` support for status codes 303, 307, and 308 moves from Core to Extended conformance, so a conformant implementation is no longer required to support them for baseline compliance. Route authors who rely on those codes for portable behavior can no longer assume every Gateway implementation honors them and should confirm Extended support per implementation. The release also stabilizes flaky `TCPRouteWeightedRouting` and `UDPRouteWeightedRouting` conformance tests by waiting for data-plane readiness before asserting, and fixes the test suite's `FailFast` handling.
+
+**Source:** [Gateway API v1.6.2 release](https://github.com/kubernetes-sigs/gateway-api/releases/tag/v1.6.2) - September 3, 2026
+
+---
+
+## Kueue 0.19.3 fixes FairSharing preemption and DRA capacity validation
+
+Kueue shipped [v0.19.3](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.3) with a v0.18.7 backport on September 3, both bugfix releases for the Kubernetes batch queueing controller.
+
+The FairSharing fix corrects preemption target selection, where valid candidates could be skipped after Kueue selected workloads from the preemptor's own ClusterQueue; it sits behind the alpha `FairSharingReevaluatePreemptionCandidates` gate. For DRA, capacity-name validation now rejects names containing multiple slashes that previously produced non-matching device mappings. An AdmissionChecks fix stops a Workload from reporting `Admitted=True` after an AdmissionCheck rejection, and MultiKueue now treats remote workloads that finish with an `OwnerNotFound` reason as sync failures.
+
+**Source:** [Kueue v0.19.3 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.3) - September 3, 2026
+
+---
