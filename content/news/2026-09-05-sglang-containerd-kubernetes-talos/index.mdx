@@ -1,0 +1,56 @@
+---
+title: "SGLang 0.5.19 ships beam search, containerd patches an unpack DoS, Kubernetes 1.37 rootless goes beta"
+description: "SGLang cut a large 0.5.19 release with beam search and DeepEP v2, containerd shipped coordinated security patches across every supported branch, and Kubernetes promoted rootless node components to beta."
+publishedAt: 2026-09-05
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - containerd
+---
+
+Four primary-source items landed in the last 24 hours across AI inference serving, container-runtime security, and Kubernetes node hardening. The window skewed toward security, so most of this digest is upgrade-driven.
+
+## SGLang 0.5.19 adds beam search and DeepEP v2 for MoE serving
+
+The SGLang project published [v0.5.19](https://github.com/sgl-project/sglang/releases/tag/v0.5.19) on September 5, rolling up 786 pull requests from 214 contributors, more than 50 of them new.
+
+The release adds beam search: callers pass `beam_width` in a request and get back the n best sequences. Mixture-of-experts serving moves to DeepEP v2 with an ElasticBuffer engine, and LayerNorm sequence parallelism cuts reported prefill time by 3.5 to 5.6 percent. There is W4A8 MoE quantization on Hopper GPUs and a lean attention kernel for AMD MI355X that the project reports at up to 1.52x throughput. Several changes are breaking: the unified radix tree is now the default across configurations, `ServerArgs` no longer auto-resolves values, FlashInfer 0.6.18 is required, and requests are capped at 32 stop strings or regex patterns of 256 bytes each.
+
+Teams pinning SGLang images should read the breaking-change list before the next bump; the default radix-tree switch and `ServerArgs` change alter runtime behaviour without an opt-in.
+
+**Source:** [SGLang v0.5.19 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.19) - September 5, 2026
+
+---
+
+## containerd patches an unpack DoS and tightens descriptor-URL credential handling
+
+containerd shipped coordinated patch releases on September 4 across every supported branch: [2.3.5](https://github.com/containerd/containerd/releases/tag/v2.3.5), 2.2.8, 2.0.12, and 1.7.35.
+
+The headline fix is [GHSA-rp3h-jf77-q9p4](https://github.com/containerd/containerd/security/advisories/GHSA-rp3h-jf77-q9p4), a moderate-severity unpack denial of service with no assigned CVE. A crafted image using repeated opaque whiteouts forces superlinear-time directory traversals during layer unpacking, inflating CPU and unpack time; on shared nodes that delays container start and can cut image-pull concurrency for unrelated workloads. Affected versions are below 1.7.35, below 2.0.12, 2.2.0 through 2.2.7, and 2.3.0 through 2.3.4. Separately, the docker fetcher now normalizes descriptor-URL origins and strips sensitive authentication headers when fetching descriptor URLs, so registry credentials no longer leak to third-party hosts referenced in an image manifest; the release notes track this as CVE-2026-53495.
+
+Because the DoS affects any node that pulls untrusted images, this is a fleet-wide upgrade rather than a single-branch backport.
+
+**Source:** [containerd v2.3.5 release](https://github.com/containerd/containerd/releases/tag/v2.3.5) - September 4, 2026
+
+---
+
+## Kubernetes 1.37 promotes rootless node components to beta
+
+The Kubernetes blog announced on September 4 that the [`KubeletInUserNamespace` feature gate](https://kubernetes.io/blog/2026/09/04/kubernetes-v1-37-rootless-beta/) graduates to beta in v1.37.
+
+With the gate enabled, all node components — the kubelet, the CRI and OCI runtimes, CNI plugins, and kube-proxy — run as a non-root user on the host inside a Linux user namespace, so a container breakout is confined to an unprivileged account rather than host root. The capability first merged as alpha in v1.22 in 2021. It is distinct from pod-level user namespaces (`hostUsers: false`), which isolate pods while node components still run as root; the two compose for running Kubernetes nested inside a pod.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/04/kubernetes-v1-37-rootless-beta/) - September 4, 2026
+
+---
+
+## Talos 1.12.12 hardens kubelet certificate handling
+
+Sidero Labs released [Talos v1.12.12](https://github.com/siderolabs/talos/releases/tag/v1.12.12) on September 4 with 13 commits.
+
+The patch hardens the code around the kubelet's client-certificate handling, filters passed metadata during API proxying, and adds validation for meta keys in API paths. It also fixes tar-archive extraction to create parent directories and preserve special file modes, and escapes dashboard output. The node image ships Linux 6.18.49, containerd 2.2.7, Kubernetes 1.35.8, etcd 3.6.14, and Go 1.25.14.
+
+**Source:** [Talos v1.12.12 release](https://github.com/siderolabs/talos/releases/tag/v1.12.12) - September 4, 2026
+
+---
