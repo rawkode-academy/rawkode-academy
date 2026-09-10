@@ -1,0 +1,42 @@
+---
+title: "Kubernetes v1.37 formalizes node lifecycle conditions, vLLM 0.29 flips defaults, Helm 4.3 guards uninstall"
+description: "Kubernetes v1.37 reserves five well-known Node conditions for drain, maintenance, and shutdown states, vLLM 0.29.0 makes Model Runner V2 the default and removes ten model architectures, and Helm 4.3.0 verifies ownership before deleting resources on uninstall."
+publishedAt: 2026-09-10
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - helm
+---
+
+Three primary-source releases landed inside the last 24 hours across the Kubernetes node API, LLM inference, and packaging. It was a quiet window, so this is a short, three-item digest rather than a padded one.
+
+## Kubernetes v1.37 introduces five well-known node lifecycle conditions
+
+Kubernetes v1.37 adds five standardized Node conditions — `DrainInProgress`, `Drained`, `MaintenancePlanned`, `MaintenanceInProgress`, and `GracefulNodeShutdownInProgress` — giving the project a shared vocabulary for node operational states, as described in a [Kubernetes blog post](https://kubernetes.io/blog/2026/09/09/kubernetes-v1-37-node-lifecycle-conditions/) by Ryan Hallisey of NVIDIA on September 9. Until now those states were inferred from a mix of readiness, taints, Pod state, labels, and annotations, with no Kubernetes-owned way to describe them.
+
+Each condition lives in the Node object's `.status.conditions` array with the usual `type`, `status` (`True`, `False`, or `Unknown`), `reason`, `message`, and `lastTransitionTime` fields. By reserving these as well-known condition types, Kubernetes lets schedulers, autoscalers, and drain or maintenance controllers read one canonical signal instead of interpreting operator-specific labels and annotations.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/09/kubernetes-v1-37-node-lifecycle-conditions/) - September 9, 2026
+
+---
+
+## vLLM 0.29.0 makes Model Runner V2 the default and removes ten model architectures
+
+vLLM cut [v0.29.0](https://github.com/vllm-project/vllm/releases/tag/v0.29.0) on September 9, a release built around breaking changes that upgraders need to plan for. Model Runner V2 is now the default runner for all models, and FlashInfer all-reduce is enabled by default for tensor-parallel CUDA groups, with an opt-out via `VLLM_ALLREDUCE_USE_FLASHINFER=0`.
+
+The release also deprecates the `python -m vllm.entrypoints.openai.api_server` entrypoint in favor of `vllm serve`, and removes ten deprecated model architectures, including Arctic, Chameleon, and MPT. Teams pinning the old launch command or serving one of the dropped architectures will need to adjust before taking the new image.
+
+**Source:** [vLLM v0.29.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.29.0) - September 9, 2026
+
+---
+
+## Helm 4.3.0 verifies ownership before deleting resources on uninstall
+
+Helm released [v4.3.0](https://github.com/helm/helm/releases/tag/v4.3.0) on September 10, a feature release for the 4.x line. The headline change adds ownership verification before deleting resources during uninstall, so a release no longer removes cluster objects it does not own.
+
+The release lowers the informer resync period from one hour to three minutes for faster status convergence, adds a `--description` flag to `helm rollback` for recording rollback reasons, and honors `SOURCE_DATE_EPOCH` when building chart archives for reproducible packaging. The notes also reiterate that there will be no further Helm 3 minor releases, per the Helm 3 end-of-life plan.
+
+**Source:** [Helm v4.3.0 release](https://github.com/helm/helm/releases/tag/v4.3.0) - September 10, 2026
+
+---
