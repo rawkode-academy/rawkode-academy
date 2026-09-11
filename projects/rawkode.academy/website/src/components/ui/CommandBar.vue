@@ -27,7 +27,7 @@
 			<div class="cmd-bar__right">
 				<button
 					type="button"
-					class="cmd-bar__search focus-ring"
+					class="cmd-bar__search"
 					:aria-label="searchAriaLabel"
 					@click="handleSearchClick"
 				>
@@ -233,13 +233,14 @@ const handleSearchClick = () => {
 }
 
 .cmd-bar__nav a:hover {
-	color: var(--ctp-mocha-lavender);
+	/* Link semantics: blue → sapphire (lavender reserved for active/focus) */
+	color: var(--ctp-mocha-sapphire);
 	background: transparent;
 }
 
 .cmd-bar__nav a.cmd-bar__nav-link--active {
 	background: var(--ctp-mocha-surface1);
-	color: var(--ctp-mocha-text);
+	color: var(--ctp-mocha-lavender);
 }
 
 .cmd-bar__right {
@@ -258,7 +259,7 @@ const handleSearchClick = () => {
 	max-width: 16rem;
 	padding: 0 0.55rem 0 0.7rem;
 	background: var(--ctp-mocha-surface0);
-	border: 1px solid var(--ctp-mocha-lavender);
+	border: 1px solid var(--ctp-mocha-surface1);
 	border-radius: 2px;
 	cursor: pointer;
 	font: inherit;
@@ -270,7 +271,13 @@ const handleSearchClick = () => {
 
 .cmd-bar__search:hover {
 	color: var(--ctp-mocha-text);
-	border-color: var(--ctp-mocha-blue);
+	border-color: var(--ctp-mocha-surface2);
+}
+
+.cmd-bar__search:focus-visible {
+	border-color: var(--ctp-mocha-lavender);
+	outline: 2px solid var(--ctp-mocha-lavender);
+	outline-offset: 2px;
 }
 
 .cmd-bar__search-hint {
