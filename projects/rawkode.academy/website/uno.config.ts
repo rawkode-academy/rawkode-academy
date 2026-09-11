@@ -6,16 +6,11 @@ import {
 } from "unocss";
 
 /**
- * UnoCSS config — Phase 0 (visually-neutral migration from Tailwind v4).
+ * UnoCSS config — Ops Console × Catppuccin Mocha foundation.
  *
- * This file is the new home of every `@theme` block and `@utility` directive
- * that previously lived in `src/styles/global.css`. The legacy file keeps the
- * `:root` / `html.dark` CSS-variable declarations and the `@layer base/components`
- * styles, since those are framework-agnostic plain CSS that UnoCSS happily
- * leaves alone.
- *
- * Token *values* are preserved exactly — this is a mechanical engine swap, not
- * a rebrand. The rebrand happens in Phase 1.
+ * Token *values* for dark/preview live as `--ctp-mocha-*` in global.css.
+ * Semantic shortcuts still bind to `--editorial-*` / `--surface-*`, which
+ * remap to Mocha under `html.dark`.
  */
 export default defineConfig({
 	presets: [presetWind3()],
@@ -32,17 +27,16 @@ export default defineConfig({
 		"client:visible",
 		"client:only",
 		"client:media",
-		// Raw Tailwind gray utilities are banned: they drift from the warm
-		// paper/ink editorial palette (worst in dark mode, where gray-900's
-		// cool hue clashes with the ink-dark ground). Use the semantic
-		// tokens instead — text-primary-content / text-secondary-content /
-		// text-muted, bg-[var(--surface-*)], border-[var(--surface-border)].
+		// Raw Tailwind gray utilities are banned: they drift from the Mocha
+		// console palette. Use semantic tokens instead — text-primary-content /
+		// text-secondary-content / text-muted, bg-[var(--surface-*)],
+		// bg-[var(--ctp-mocha-*)], border-[var(--surface-border)].
 		// src/tests/design-tokens.test.ts fails CI with the offending files.
 		[
 			/(?:^|:)(?:bg|text|border|divide|ring|outline|decoration|from|to|via|fill|stroke|placeholder|caret|accent|shadow)-gray-\d+(?:\/\d+)?$/,
 			{
 				message:
-					"gray-* utilities are banned — use the editorial tokens (text-*-content, var(--surface-*))",
+					"gray-* utilities are banned — use Mocha / semantic tokens (text-*-content, var(--ctp-mocha-*), var(--surface-*))",
 			},
 		],
 	],
@@ -53,10 +47,32 @@ export default defineConfig({
 			accent: "rgb(var(--brand-accent) / <alpha-value>)",
 			"brand-primary": "rgb(var(--brand-primary) / <alpha-value>)",
 			"brand-secondary": "rgb(var(--brand-secondary) / <alpha-value>)",
+			// Catppuccin Mocha — prefer these for new chrome utilities.
+			"mocha-crust": "var(--ctp-mocha-crust)",
+			"mocha-mantle": "var(--ctp-mocha-mantle)",
+			"mocha-base": "var(--ctp-mocha-base)",
+			"mocha-surface0": "var(--ctp-mocha-surface0)",
+			"mocha-surface1": "var(--ctp-mocha-surface1)",
+			"mocha-surface2": "var(--ctp-mocha-surface2)",
+			"mocha-overlay0": "var(--ctp-mocha-overlay0)",
+			"mocha-overlay1": "var(--ctp-mocha-overlay1)",
+			"mocha-overlay2": "var(--ctp-mocha-overlay2)",
+			"mocha-subtext0": "var(--ctp-mocha-subtext0)",
+			"mocha-subtext1": "var(--ctp-mocha-subtext1)",
+			"mocha-text": "var(--ctp-mocha-text)",
+			"mocha-lavender": "var(--ctp-mocha-lavender)",
+			"mocha-blue": "var(--ctp-mocha-blue)",
+			"mocha-sapphire": "var(--ctp-mocha-sapphire)",
+			"mocha-teal": "var(--ctp-mocha-teal)",
+			"mocha-green": "var(--ctp-mocha-green)",
+			"mocha-yellow": "var(--ctp-mocha-yellow)",
+			"mocha-peach": "var(--ctp-mocha-peach)",
+			"mocha-red": "var(--ctp-mocha-red)",
+			"mocha-mauve": "var(--ctp-mocha-mauve)",
 		},
 		fontFamily: {
-			// Editorial trio. Display = serif (italic-by-default headings).
-			// Body = neo-grotesque. Mono = code/metadata.
+			// Ops Console: grotesque + mono only on chrome. Display/serif
+			// remain for content surfaces outside this PR's chrome scope.
 			display:
 				"var(--font-instrument-serif), 'Iowan Old Style', Georgia, serif",
 			body: "var(--font-inter-tight), 'Inter', -apple-system, system-ui, sans-serif",
@@ -65,15 +81,15 @@ export default defineConfig({
 			sans: "var(--font-inter-tight), 'Inter', -apple-system, system-ui, sans-serif",
 		},
 		borderRadius: {
-			// Editorial radii — sharp 2px corners. Names preserved for back-compat.
-			xs: "2px",
+			// Ops Console — 0–2px. Names preserved for back-compat.
+			xs: "0",
 			sm: "2px",
-			md: "3px",
-			lg: "3px",
-			xl: "4px",
-			"2xl": "4px",
-			"3xl": "6px",
-			"4xl": "8px",
+			md: "2px",
+			lg: "2px",
+			xl: "2px",
+			"2xl": "2px",
+			"3xl": "2px",
+			"4xl": "2px",
 		},
 		duration: {
 			fast: "120ms",
@@ -108,11 +124,10 @@ export default defineConfig({
 		},
 	},
 	shortcuts: {
-		// Text-tone utilities — back the `text-*-content` classes with the
-		// editorial CSS variables so light/dark swap follows --editorial-ink/-soft/-mute.
-		"text-primary-content": "text-[var(--editorial-ink)]",
-		"text-secondary-content": "text-[var(--editorial-ink-soft)]",
-		"text-muted": "text-[var(--editorial-ink-mute)]",
+		// Text-tone utilities — bind to semantic vars (Mocha under html.dark).
+		"text-primary-content": "text-[var(--text-primary-content)]",
+		"text-secondary-content": "text-[var(--text-secondary-content)]",
+		"text-muted": "text-[var(--text-muted)]",
 	},
 	rules: [
 		// Motion utilities — `@apply transition-*` from scoped style blocks.
@@ -150,7 +165,7 @@ export default defineConfig({
 				"transition-timing-function": "var(--ease-standard)",
 			},
 		],
-		// Shadow utilities — bound to the `--shadow-*` ramp.
+		// Shadow utilities — bound to the `--shadow-*` hairline ramp.
 		["card-shadow-sm", { "box-shadow": "var(--shadow-sm)" }],
 		["card-shadow", { "box-shadow": "var(--shadow-md)" }],
 		["card-shadow-md", { "box-shadow": "var(--shadow-md)" }],
@@ -166,13 +181,10 @@ export default defineConfig({
 	],
 	preflights: [
 		{
-			// `focus-ring` wraps a pseudo-selector that UnoCSS rules can't
-			// express in a single declaration. Emitting it as preflight CSS
-			// preserves the exact existing semantics (only render on
-			// `:focus-visible`).
+			// Focus ring — lavender 2px (Ops Console).
 			getCSS: () => `
 .focus-ring:focus-visible {
-	outline: 2px solid rgb(var(--brand-primary));
+	outline: 2px solid var(--ctp-mocha-lavender);
 	outline-offset: 2px;
 	border-radius: var(--radius-sm);
 }

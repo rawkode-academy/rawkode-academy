@@ -5,19 +5,46 @@
    live in `uno.config.ts`. */
 
 :root {
-	/* Editorial palette — "engineering journal meets terminal".
-	   Token *names* are preserved from the previous Rawkode Blue system
-	   so ~300 call sites keep working; only the values change.
+	/* ── Catppuccin Mocha (official palette)
+	   https://github.com/catppuccin/catppuccin
+	   Ops Console chrome prefers these names directly. Semantic
+	   --surface-* / --editorial-* aliases remap in html.dark so
+	   existing call sites inherit Mocha without a full rewrite. */
+	--ctp-mocha-crust: #11111b;
+	--ctp-mocha-mantle: #181825;
+	--ctp-mocha-base: #1e1e2e;
+	--ctp-mocha-surface0: #313244;
+	--ctp-mocha-surface1: #45475a;
+	--ctp-mocha-surface2: #585b70;
+	--ctp-mocha-overlay0: #6c7086;
+	--ctp-mocha-overlay1: #7f849c;
+	--ctp-mocha-overlay2: #9399b2;
+	--ctp-mocha-subtext0: #a6adc8;
+	--ctp-mocha-subtext1: #bac2de;
+	--ctp-mocha-text: #cdd6f4;
+	--ctp-mocha-lavender: #b4befe;
+	--ctp-mocha-blue: #89b4fa;
+	--ctp-mocha-sapphire: #74c7ec;
+	--ctp-mocha-sky: #89dceb;
+	--ctp-mocha-teal: #94e2d5;
+	--ctp-mocha-green: #a6e3a1;
+	--ctp-mocha-yellow: #f9e2af;
+	--ctp-mocha-peach: #fab387;
+	--ctp-mocha-maroon: #eba0ac;
+	--ctp-mocha-red: #f38ba8;
+	--ctp-mocha-mauve: #cba6f7;
+	--ctp-mocha-pink: #f5c2e7;
+	--ctp-mocha-flamingo: #f2cdcd;
+	--ctp-mocha-rosewater: #f5e0dc;
 
-	   The triplets below are sRGB approximations of oklch design values,
-	   used by the legacy `rgb(var(--x))` and `rgba(var(--x), 0.x)` pattern
-	   throughout the codebase. New primitives should prefer the direct
-	   `--editorial-*` oklch tokens below for precision. */
+	/* Legacy RGB triplets — light stub (preview is Mocha/dark-first).
+	   Values are sRGB approximations used by rgb(var(--x) / α) call sites. */
 	--brand-primary: 35 115 86; /* spruce  — oklch(0.50 0.09 165) */
 	--brand-secondary: 154 85 0; /* amber-text — oklch(0.52 0.13 65) */
 	--brand-accent: 165 74 40; /* rust    — oklch(0.52 0.13 40) */
 
-	/* Editorial direct-color palette (preferred for new primitives) */
+	/* Editorial direct-color palette — light stub only.
+	   Prefer --ctp-mocha-* for new chrome. */
 	--editorial-paper: oklch(0.97 0.008 85);
 	--editorial-paper-deep: oklch(0.93 0.012 85);
 	--editorial-ink: oklch(0.18 0.02 60);
@@ -36,7 +63,7 @@
 	--editorial-rust: oklch(0.52 0.13 40); /* ≥4.5:1 on paper + paper-deep */
 	--editorial-violet: oklch(0.50 0.13 290);
 
-	/* Light-mode surface tokens */
+	/* Light-mode surface tokens (stub — Mocha preview uses html.dark) */
 	color-scheme: light;
 	--surface-base: var(--editorial-paper);
 	--surface-overlay: oklch(0.97 0.008 85 / 0.94);
@@ -48,14 +75,13 @@
 	   so it sits between hairline and card-muted in weight. */
 	--surface-skeleton: oklch(0.18 0.02 60 / 0.10);
 
-	/* Theme-invariant terminal chrome. Terminals, WebContainers, and other
-	   "screen within the page" surfaces stay dark in both colour schemes;
-	   they must not flip with --surface-*. */
-	--terminal-bg: oklch(0.16 0.01 280);
-	--terminal-surface: oklch(0.22 0.012 280);
-	--terminal-border: oklch(1 0 0 / 0.12);
-	--terminal-text: oklch(0.92 0.005 85);
-	--terminal-text-dim: oklch(0.68 0.008 85);
+	/* Theme-invariant terminal chrome — aligned to Mocha crust/mantle so
+	   nested screens match Ops Console even in the light stub. */
+	--terminal-bg: var(--ctp-mocha-crust);
+	--terminal-surface: var(--ctp-mocha-mantle);
+	--terminal-border: var(--ctp-mocha-surface1);
+	--terminal-text: var(--ctp-mocha-text);
+	--terminal-text-dim: var(--ctp-mocha-subtext0);
 
 	/* Layout Spacing Tokens */
 	--space-page-sm: clamp(1rem, 3vw, 1.75rem);
@@ -101,39 +127,43 @@
 html.dark {
 	color-scheme: dark;
 
-	/* Dark-mode editorial palette — ink-dark ground with paper-dark surfaces.
-	   The triplet legacy tokens stay; only the value brightens slightly for
-	   contrast on dark. */
-	--editorial-paper: oklch(0.22 0.012 280); /* paper-dark */
-	--editorial-paper-deep: oklch(0.26 0.014 280);
-	--editorial-ink: oklch(0.92 0.008 85); /* light text on dark */
-	--editorial-ink-soft: oklch(0.74 0.008 85);
-	--editorial-ink-mute: oklch(0.66 0.008 85); /* ≥4.5:1 on base + card */
-	--editorial-hairline: oklch(1 0 0 / 0.10);
-	--editorial-hairline-strong: oklch(1 0 0 / 0.18);
+	/* Ops Console × Catppuccin Mocha — map legacy editorial aliases so
+	   untouched page content inherits the console ground without a
+	   full content rewrite. New chrome should use --ctp-mocha-* directly. */
+	--editorial-paper: var(--ctp-mocha-mantle);
+	--editorial-paper-deep: var(--ctp-mocha-surface0);
+	--editorial-ink: var(--ctp-mocha-text);
+	--editorial-ink-soft: var(--ctp-mocha-subtext1);
+	--editorial-ink-mute: var(--ctp-mocha-subtext0);
+	--editorial-hairline: var(--ctp-mocha-surface1);
+	--editorial-hairline-strong: var(--ctp-mocha-surface2);
 
-	/* Accents brighten on dark ground — the light-mode values sit at
-	   ~3:1 against the dark card surface, below AA for text. The legacy
-	   triplets follow so every rgb(var(--brand-*)) consumer lifts too. */
-	--editorial-spruce: oklch(0.72 0.09 165);
-	--editorial-spruce-dim: oklch(0.72 0.09 165 / 0.14);
-	--editorial-rust: oklch(0.70 0.12 40);
-	--editorial-amber-text: oklch(0.72 0.15 65);
-	--brand-primary: 107 183 151; /* spruce dark — oklch(0.72 0.09 165) */
-	--brand-secondary: 218 142 58; /* amber — oklch(0.72 0.15 65) */
-	--brand-accent: 221 131 100; /* rust dark — oklch(0.70 0.12 40) */
+	--editorial-spruce: var(--ctp-mocha-teal);
+	--editorial-spruce-dim: color-mix(in oklab, var(--ctp-mocha-teal) 14%, transparent);
+	--editorial-amber: var(--ctp-mocha-peach);
+	--editorial-amber-dim: color-mix(in oklab, var(--ctp-mocha-peach) 14%, transparent);
+	--editorial-amber-text: var(--ctp-mocha-peach);
+	--editorial-rust: var(--ctp-mocha-maroon);
+	--editorial-violet: var(--ctp-mocha-mauve);
 
-	--surface-base: oklch(0.14 0.01 280); /* ink-dark ground */
-	--surface-overlay: oklch(0.14 0.01 280 / 0.92);
-	--surface-card: var(--editorial-paper-deep);
-	--surface-card-muted: oklch(1 0 0 / 0.04);
-	--surface-skeleton: oklch(1 0 0 / 0.10);
-	--surface-border: var(--editorial-hairline);
-	--surface-border-strong: var(--editorial-hairline-strong);
+	/* Legacy RGB triplets → Mocha accents (teal / blue / peach) */
+	--brand-primary: 148 226 213; /* teal #94e2d5 */
+	--brand-secondary: 137 180 250; /* blue #89b4fa */
+	--brand-accent: 250 179 135; /* peach #fab387 */
 
-	--text-primary-content: var(--editorial-ink);
-	--text-secondary-content: var(--editorial-ink-soft);
-	--text-muted: var(--editorial-ink-mute);
+	--surface-base: var(--ctp-mocha-base);
+	--surface-overlay: color-mix(in oklab, var(--ctp-mocha-base) 92%, transparent);
+	--surface-card: var(--ctp-mocha-mantle);
+	--surface-card-muted: color-mix(in oklab, var(--ctp-mocha-text) 4%, transparent);
+	--surface-skeleton: color-mix(in oklab, var(--ctp-mocha-text) 10%, transparent);
+	--surface-border: var(--ctp-mocha-surface1);
+	--surface-border-strong: var(--ctp-mocha-surface2);
+
+	--text-primary-content: var(--ctp-mocha-text);
+	--text-secondary-content: var(--ctp-mocha-subtext1);
+	--text-muted: var(--ctp-mocha-subtext0);
+
+	--un-default-border-color: var(--ctp-mocha-surface1);
 }
 
 /* Cross-document view transitions — native MPA transitions, no client
@@ -200,16 +230,15 @@ body {
    UnoCSS theme keys live in uno.config.ts (colors, fontFamily, spacing,
    borderRadius, transitionDuration, transitionTimingFunction, boxShadow). */
 :root {
-	/* Radius scale — collapsed to editorial sharpness (2px–8px). The names
-	   are preserved so consumers don't break; only the magnitudes drop. */
-	--radius-xs: 2px;
+	/* Radius scale — Ops Console sharpness (0–2px). Names preserved. */
+	--radius-xs: 0;
 	--radius-sm: 2px;
-	--radius-md: 3px;
-	--radius-lg: 3px;
-	--radius-xl: 4px;
-	--radius-2xl: 4px;
-	--radius-3xl: 6px;
-	--radius-4xl: 8px;
+	--radius-md: 2px;
+	--radius-lg: 2px;
+	--radius-xl: 2px;
+	--radius-2xl: 2px;
+	--radius-3xl: 2px;
+	--radius-4xl: 2px;
 
 	/* Motion tokens — durations + easings. */
 	--duration-fast: 120ms;
@@ -222,14 +251,11 @@ body {
 	--ease-in: cubic-bezier(0.4, 0, 1, 1);
 	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-	/* "Shadow" ramp — editorial design uses hairline borders, not depth.
-	   The token names survive so `card-shadow-*` shortcuts in uno.config.ts
-	   keep working, but each step now resolves to a 1px ink ring at varying
-	   opacity. Add depth only where the design explicitly calls for it. */
-	--shadow-sm: 0 0 0 1px oklch(0.18 0.02 60 / 0.06);
-	--shadow-md: 0 0 0 1px oklch(0.18 0.02 60 / 0.10);
-	--shadow-lg: 0 0 0 1px oklch(0.18 0.02 60 / 0.16);
-	--shadow-xl: 0 0 0 1px oklch(0.18 0.02 60 / 0.20);
+	/* "Shadow" ramp — hairline rings only (no soft elevation). */
+	--shadow-sm: 0 0 0 1px var(--ctp-mocha-surface1);
+	--shadow-md: 0 0 0 1px var(--ctp-mocha-surface1);
+	--shadow-lg: 0 0 0 1px var(--ctp-mocha-surface2);
+	--shadow-xl: 0 0 0 1px var(--ctp-mocha-overlay0);
 
 	/* ────────────────────────────────────────────────────────────────
 	   Density tokens — control the editorial whitespace rhythm.
@@ -281,19 +307,11 @@ body {
 }
 
 html.dark {
-	/* Dark-mode hairline ramp — white at low opacity on ink-dark ground. */
-	--shadow-sm: 0 0 0 1px oklch(1 0 0 / 0.06);
-	--shadow-md: 0 0 0 1px oklch(1 0 0 / 0.10);
-	--shadow-lg: 0 0 0 1px oklch(1 0 0 / 0.16);
-	--shadow-xl: 0 0 0 1px oklch(1 0 0 / 0.20);
-}
-
-/* Dark-mode shadow ramp — deeper, no light bleed. */
-html.dark {
-	--shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
-	--shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-	--shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
-	--shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.7);
+	/* Mocha hairline ramp — surface1/surface2/overlay0, no soft elevation. */
+	--shadow-sm: 0 0 0 1px var(--ctp-mocha-surface1);
+	--shadow-md: 0 0 0 1px var(--ctp-mocha-surface1);
+	--shadow-lg: 0 0 0 1px var(--ctp-mocha-surface2);
+	--shadow-xl: 0 0 0 1px var(--ctp-mocha-overlay0);
 }
 
 @layer base {
@@ -524,7 +542,7 @@ html.dark {
 	.ed-btn--ghost:hover { background: var(--surface-card-muted); }
 
 	.ed-btn:focus-visible {
-		outline: 2px solid var(--editorial-ink);
+		outline: 2px solid var(--ctp-mocha-lavender);
 		outline-offset: 2px;
 	}
 
