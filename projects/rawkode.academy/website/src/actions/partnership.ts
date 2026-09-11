@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { EmailMessage } from "cloudflare:email";
 import { env } from "cloudflare:workers";
-import { applicationPaths } from "@/lib/partnerships";
+import { SPRINT_APPLICATION_PATH } from "@/lib/partnerships";
 
 // Sender must be on a domain onboarded to Cloudflare Email Routing.
 // rawkode.academy's MX points at Google Workspace, so we send from
@@ -31,48 +31,42 @@ const encodeHeader = (value: string): string => {
 export const partnership = {
 	apply: defineAction({
 		input: z.object({
-			name: z.string().trim().min(1, "Please tell us your name").max(200),
 			email: z.email("Please enter a valid work email"),
 			company: z
 				.string()
 				.trim()
 				.min(1, "Please tell us about your company and product")
 				.max(1000),
-			path: z.enum(applicationPaths),
-			targetDevelopers: z
+			technicalBuyer: z
 				.string()
 				.trim()
-				.min(1, "Please tell us which developers you need to reach")
+				.min(1, "Please tell us who the technical buyer is")
 				.max(2000),
 			challenge: z
 				.string()
 				.trim()
-				.min(1, "Please describe your current adoption challenge")
+				.min(1, "Please describe the adoption problem")
 				.max(5000),
 			links: z.string().trim().max(2000).optional(),
 		}),
 		handler: async (input) => {
 			const subject = encodeHeader(
-				`Partnership application: ${input.path} - ${input.company}`.slice(
-					0,
-					180,
-				),
+				`${SPRINT_APPLICATION_PATH}: ${input.company}`.slice(0, 180),
 			);
 
 			const body = [
-				`Name: ${input.name}`,
 				`Email: ${input.email}`,
-				`Preferred path: ${input.path}`,
+				`Path: ${SPRINT_APPLICATION_PATH}`,
 				"",
-				"Company and product:",
+				"Company/product:",
 				input.company,
 				"",
-				"Target developers or platform teams:",
-				input.targetDevelopers,
+				"Technical buyer:",
+				input.technicalBuyer,
 				"",
-				"Current adoption challenge:",
+				"Adoption problem:",
 				input.challenge,
-				...(input.links ? ["", "Links worth a look:", input.links] : []),
+				...(input.links ? ["", "Links:", input.links] : []),
 				"",
 			].join("\r\n");
 

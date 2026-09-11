@@ -26,7 +26,7 @@ The voice should feel like a strong engineering field journal: specific, earned,
 
 Do not make the site feel like slideware, a generic SaaS landing page, a paid-media publication, or a content farm. Avoid vague developer-marketing language, fake simplicity, template card grids, invented proof, broad consulting-retainer framing, and claims that Rawkode replaces a customer's marketing, product, DevRel, or sales engineering team.
 
-For the organization surface, avoid fractional DevRel positioning. Partnerships are bounded advisory and signal products around developer adoption, not outsourced execution, lead generation, guaranteed coverage, or editorial placement.
+For the organization surface, avoid fractional DevRel positioning. Public SKUs are Fit & Proof Sprint and Adoption Advisory only — bounded practitioner advisory around developer adoption, not outsourced execution, lead generation, guaranteed coverage, or editorial placement.
 
 ## Design Principles
 

@@ -139,6 +139,19 @@ const { eyebrow, title, lede, compact = false } = Astro.props as Props;
 		color: var(--editorial-ink);
 	}
 
+	.editorial-button--peach {
+		background: var(--ctp-mocha-peach);
+		border-color: var(--ctp-mocha-peach);
+		color: var(--ctp-mocha-base);
+		border-radius: 2px;
+	}
+
+	.editorial-button--peach:hover {
+		background: color-mix(in oklab, var(--ctp-mocha-peach) 88%, white);
+		border-color: color-mix(in oklab, var(--ctp-mocha-peach) 88%, white);
+		color: var(--ctp-mocha-base);
+	}
+
 	.editorial-section {
 		padding-top: 3rem;
 		padding-bottom: 3rem;
