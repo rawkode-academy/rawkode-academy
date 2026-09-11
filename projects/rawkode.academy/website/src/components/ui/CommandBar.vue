@@ -339,7 +339,7 @@ const handleSearchClick = () => {
 	}
 }
 
-@media (min-width: 1080px) {
+@media (min-width: 900px) {
 	.cmd-bar__nav {
 		display: flex;
 	}
