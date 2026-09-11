@@ -1,101 +1,206 @@
 ---
 import ContactFallback from "@/components/organizations/ContactFallback.astro";
+import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
-	decisionBriefMailto,
-	decisionBriefSubject,
-	decisionBriefTemplate,
-	partnershipTierNames,
+	fitProofSprint,
+	sprintApplyMailto,
+	sprintApplySubject,
+	sprintApplyTemplate,
 } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
-
-const contactHref = decisionBriefMailto;
-const tierList = partnershipTierNames.join(", ");
-
-const requiredContext = [
-	"Company or product category",
-	"Preferred partnership path",
-	"Target technical evaluator",
-	"Team stakeholders",
-	"The adoption risk or decision to review",
-	"Deadline or launch window",
-	"Docs, demos, architecture notes, or enablement material",
-];
-
-const optionalContext = [
-	"Helm charts, CRDs, RBAC/IAM notes, Terraform, architecture notes, telemetry, tenancy, runbooks, demo environment, or docs paths",
-	"Current blockers from sales, product, marketing, DevRel, sales engineering, platform, or security",
-	"What happens next if the review is useful",
-];
 ---
 
 <Page
-	title="Partnership Fit Check"
-	description="Email a decision brief for a Rawkode technical adoption fit check."
+	title="Fit & Proof Sprint"
+	description="Fit & Proof Sprint · £2,500 · about two weeks. Prove whether Rawkode is the right advisor for your adoption problem before ongoing advisory."
 >
-	<EditorialShell
-		eyebrow="Partnerships"
-		title="Email a decision brief"
-		lede="Send rough context on the technical product, the evaluator you need to help, and the decision in front of your marketing, product, DevRel, sales engineering, and technical owners. If there is a fit, David will reply with the right next step and a call option."
-	>
-		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href={contactHref}>Email decision brief</a>
-			<a class="editorial-button editorial-button--secondary" href="/organizations/partnerships">Compare packages</a>
-		</div>
+	<div class="ops-org">
+		<EditorialShell
+			eyebrow="Fit & Proof Sprint"
+			title={`${fitProofSprint.name} · ${fitProofSprint.price} · about two weeks`}
+			lede={fitProofSprint.summary}
+		>
+			<div class="editorial-actions" slot="actions">
+				<a class="editorial-button editorial-button--peach" href="#apply">
+					Start with a Fit & Proof Sprint
+				</a>
+				<a class="editorial-button editorial-button--secondary" href="/organizations/partnerships">
+					What’s in Adoption Advisory
+				</a>
+			</div>
 
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">What to send</p>
-				<h2 class="editorial-section__title">Rough context is enough.</h2>
-				<p class="editorial-section__lede">
-					This is not a procurement form. The first email should make the adoption problem clear enough to judge fit.
-				</p>
-			</div>
-			<div class="fit-check-grid">
-				<article class="editorial-card">
-					<h3 class="editorial-card__title">Useful first email</h3>
-					<ul class="editorial-list">
-						{requiredContext.map((item) => <li>{item}</li>)}
-					</ul>
-				</article>
-				<article class="editorial-card editorial-card--paper">
-					<h3 class="editorial-card__title">Optional links</h3>
-					<ul class="editorial-list">
-						{optionalContext.map((item) => <li>{item}</li>)}
-					</ul>
-				</article>
-			</div>
-		</section>
+			<section class="editorial-section editorial-section--split" aria-labelledby="inout-title">
+				<div class="editorial-section__header">
+					<p class="editorial-kicker">Scope</p>
+					<h2 id="inout-title" class="editorial-section__title">In and out</h2>
+					<p class="editorial-section__lede">
+						A bounded sprint. No coverage, no lead gen, no open-ended retainer.
+					</p>
+				</div>
+				<div class="ops-inout-grid">
+					<article class="ops-inout">
+						<p class="editorial-kicker">Included</p>
+						<ul class="editorial-list">
+							{fitProofSprint.included.map((item) => <li>{item}</li>)}
+						</ul>
+					</article>
+					<article class="ops-inout ops-inout--out">
+						<p class="editorial-kicker">Not included</p>
+						<ul class="editorial-list">
+							{fitProofSprint.excluded.map((item) => <li>{item}</li>)}
+						</ul>
+					</article>
+				</div>
+			</section>
 
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">What happens next</p>
-				<h2 class="editorial-section__title">The reply should make the next move obvious.</h2>
-			</div>
-			<div class="editorial-card editorial-card--paper">
-				<p class="editorial-card__body">
-					David will tell you whether the problem fits {tierList}, or is not a fit. If a call is useful, it can be arranged from there.
-				</p>
-			</div>
-			<ContactFallback
-				subject={decisionBriefSubject}
-				template={decisionBriefTemplate}
-			/>
-		</section>
-	</EditorialShell>
+			<section class="editorial-section editorial-section--split" aria-labelledby="credit-title">
+				<div class="editorial-section__header">
+					<p class="editorial-kicker">If you continue</p>
+					<h2 id="credit-title" class="editorial-section__title">Credit toward Adoption Advisory</h2>
+				</div>
+				<div class="ops-credit-panel">
+					<p class="editorial-card__body">
+						If you start Adoption Advisory within 30 days of the Sprint, the £2,500 fee is credited in full. No self-serve checkout — David replies to every application.
+					</p>
+					<ul class="ops-meta-list">
+						{fitProofSprint.notes.map((note) => <li>{note}</li>)}
+					</ul>
+				</div>
+			</section>
+
+			<section
+				id="apply"
+				class="editorial-section editorial-section--split ops-apply"
+				aria-labelledby="apply-title"
+			>
+				<div class="editorial-section__header">
+					<p class="editorial-kicker">Apply</p>
+					<h2 id="apply-title" class="editorial-section__title">Four fields. Rough context is enough.</h2>
+					<p class="editorial-section__lede">
+						Company/product, technical buyer, adoption problem, and links. We reply either way.
+					</p>
+				</div>
+				<div class="ops-apply__body">
+					<PartnershipApplicationForm client:visible />
+					<ContactFallback
+						subject={sprintApplySubject}
+						template={sprintApplyTemplate}
+					/>
+					<p class="ops-apply__mailto">
+						Prefer email?
+						<a href={sprintApplyMailto}>Open a prefilled Sprint application</a>
+					</p>
+				</div>
+			</section>
+		</EditorialShell>
+	</div>
 </Page>
 
 <style>
-	.fit-check-grid {
+	.ops-org :global(.page-masthead h1) {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-style: normal;
+		font-weight: 750;
+		letter-spacing: -0.02em;
+	}
+
+	.ops-org :global(.page-masthead__section),
+	.ops-org :global(.editorial-kicker) {
+		color: var(--ctp-mocha-teal);
+	}
+
+	.ops-org :global(.editorial-card),
+	.ops-org :global(.editorial-button),
+	.ops-org :global(.editorial-faq details) {
+		border-radius: 2px;
+	}
+
+	.ops-org :global(.editorial-button--peach) {
+		background: var(--ctp-mocha-peach);
+		border-color: var(--ctp-mocha-peach);
+		color: var(--ctp-mocha-base);
+	}
+
+	.ops-org :global(.editorial-button--peach:hover) {
+		background: color-mix(in oklab, var(--ctp-mocha-peach) 88%, white);
+		border-color: color-mix(in oklab, var(--ctp-mocha-peach) 88%, white);
+		color: var(--ctp-mocha-base);
+	}
+
+	.ops-org :global(a:not(.editorial-button)) {
+		color: var(--ctp-mocha-blue);
+	}
+
+	.ops-inout-grid {
 		display: grid;
 		gap: 1rem;
 	}
 
 	@media (min-width: 760px) {
-		.fit-check-grid {
+		.ops-inout-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
+	}
+
+	.ops-inout {
+		border: 1px solid var(--ctp-mocha-surface1);
+		border-radius: 2px;
+		background: var(--ctp-mocha-mantle);
+		padding: 1.2rem;
+		display: grid;
+		gap: 0.85rem;
+	}
+
+	.ops-inout--out {
+		border-color: var(--ctp-mocha-surface2);
+	}
+
+	.ops-credit-panel {
+		display: grid;
+		gap: 0.85rem;
+		border: 1px solid var(--ctp-mocha-surface1);
+		border-radius: 2px;
+		background: var(--ctp-mocha-mantle);
+		padding: 1.2rem;
+	}
+
+	.ops-meta-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: 0.45rem;
+	}
+
+	.ops-meta-list li {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		line-height: 1.5;
+		color: var(--ctp-mocha-subtext0);
+	}
+
+	.ops-apply {
+		scroll-margin-top: 5rem;
+	}
+
+	.ops-apply__body {
+		display: grid;
+		gap: 1.5rem;
+		justify-items: start;
+		width: 100%;
+		max-width: 40rem;
+	}
+
+	.ops-apply__mailto {
+		margin: 0;
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.92rem;
+		line-height: 1.5;
+		color: var(--ctp-mocha-subtext1);
 	}
 </style>

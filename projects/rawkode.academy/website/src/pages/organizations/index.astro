@@ -1,257 +1,152 @@
 ---
-import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
-import {
-	decisionBriefMailto,
-	decisionBriefSubject,
-	decisionBriefTemplate,
-	partnershipBoundaries,
-	partnershipTierNames,
-	partnershipTiers,
-} from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactHref = decisionBriefMailto;
-
-const reviewScope = [
-	{
-		term: "What we review",
-		detail: "Docs, demos, architecture, and operational claims.",
-	},
-	{
-		term: "Risk we surface",
-		detail: "Trust boundaries, migration, RBAC/IAM, egress, and tenancy.",
-	},
-	{
-		term: "Who owns the work",
-		detail:
-			"Marketing, product, DevRel, sales engineering, and technical teams. Your team keeps execution.",
-	},
-];
-
-const pricingStats = partnershipTiers.map((tier) => ({
-	value: tier.priceShort,
-	label: `${tier.name} from`,
-}));
-
-const tierSummary = partnershipTiers
-	.map(
-		(tier, index) =>
-			`${index === partnershipTiers.length - 1 ? "or " : ""}${tier.name} from ${tier.price.replace(" / ", "/")}`,
-	)
-	.join(", ");
-
-const fitAreas = [
+const routes = [
 	{
 		title: "Partnerships",
-		body: "Work with marketing, product, DevRel, sales engineering, and technical owners to expose the claims, docs, demos, and operational gaps that stall technical buyers.",
-		items: [...partnershipTierNames, "Technical buyer proof"],
+		body: "A practitioner advisor on your adoption problems. You own execution. Coverage is not for sale.",
 		href: "/organizations/partnerships",
-		cta: "Compare partnership paths",
+		cta: "The partnership",
+		primary: true,
 	},
-];
-
-const utilityLinks = [
 	{
 		title: "Brand assets",
-		body: "Use the official Rawkode Academy marks, palette, and usage guidance when an approved collaboration needs co-branding.",
+		body: "Marks, palette, and usage guidance. Not the commercial offer.",
 		href: "/organizations/branding",
 		cta: "View brand kit",
+		primary: false,
 	},
 ];
-
-const badFits = partnershipBoundaries;
 ---
 
 <Page
-	title="For Organizations"
-	description="Cloud-native and DevTool partnerships for companies that need sharper technical proof, launch, docs, demo, and DevRel strategy."
+	title="For organizations"
+	description="Partnerships for DevTools and cloud-native teams who need practitioner proof, not another agency. Brand assets if you already work together."
 >
-	<EditorialShell
-		eyebrow="For Organizations"
-		title="Partnerships"
-		lede="We work with your marketing, product, DevRel, sales engineering, and technical owners to find the claims practitioners cannot verify before they trust a DevTool, cloud-native platform, or infrastructure product. Your team keeps execution ownership; the partnership sharpens the path."
-	>
-		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="/organizations/partnerships">Compare packages</a>
-			<a class="editorial-button editorial-button--secondary" href={contactHref}>Email decision brief</a>
-		</div>
-
-		<section class="editorial-section">
-			<dl class="organizations-scope">
-				{reviewScope.map((row) => (
-					<div class="organizations-scope__row">
-						<dt>{row.term}</dt>
-						<dd>{row.detail}</dd>
-					</div>
-				))}
-			</dl>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">What is active now</p>
-				<h2 class="editorial-section__title">The company route is partnerships</h2>
-				<p class="editorial-section__lede">
-					For companies, the active paths are {tierSummary}, focused on practitioner signal, focused experiments, and peer perspective.
-				</p>
-			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{fitAreas.map((area) => (
-					<article class="editorial-card organizations-card">
-						<h3 class="editorial-card__title">{area.title}</h3>
-						<p class="editorial-card__body">{area.body}</p>
-						<ul class="editorial-list">
-							{area.items.map((item) => <li>{item}</li>)}
-						</ul>
-						<a class="organizations-card__link" href={area.href}>{area.cta}</a>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				{pricingStats.map((signal) => (
-					<div class="editorial-stat">
-						<span class="editorial-stat__value">{signal.value}</span>
-						<span class="editorial-stat__label">{signal.label}</span>
-					</div>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Utility</p>
-				<h2 class="editorial-section__title">Brand assets are not the commercial offer</h2>
-			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{utilityLinks.map((link) => (
-					<article class="editorial-card organizations-card">
-						<h3 class="editorial-card__title">{link.title}</h3>
-						<p class="editorial-card__body">{link.body}</p>
-						<a class="organizations-card__link" href={link.href}>{link.cta}</a>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Fit check</p>
-				<h2 class="editorial-section__title">This is useful when the adoption path is unclear</h2>
-			</div>
-			<div class="editorial-card editorial-card--paper">
-				<p class="editorial-card__body">
-					Bring the product, the evaluator, the current adoption risk, the docs, demos, architecture notes, enablement material, and any useful infrastructure artifacts: Helm charts, CRDs, RBAC/IAM notes, Terraform, telemetry, tenancy, runbooks, or demo environments. We will tell you whether it fits Signal, Adoption, Community, or is not a fit.
-				</p>
-			</div>
-			<ContactFallback
-				subject={decisionBriefSubject}
-				template={decisionBriefTemplate}
-			/>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Bad fit</p>
-				<h2 class="editorial-section__title">What this does not solve</h2>
-			</div>
-			<ul class="organizations-list">
-				{badFits.map((item) => <li>{item}</li>)}
-			</ul>
-		</section>
-	</EditorialShell>
+	<div class="ops-org">
+		<EditorialShell
+			eyebrow="For organizations"
+			title="For organizations"
+			lede="Partnerships for DevTools and cloud-native teams who need practitioner proof, not another agency. Brand assets if you already work together."
+		>
+			<section class="editorial-section" aria-label="Organization routes">
+				<div class="ops-hub-grid">
+					{routes.map((route) => (
+						<article class:list={["ops-hub-card", { "ops-hub-card--primary": route.primary }]}>
+							<p class="editorial-kicker">{route.primary ? "Primary" : "Utility"}</p>
+							<h2 class="ops-hub-card__title">{route.title}</h2>
+							<p class="ops-hub-card__body">{route.body}</p>
+							<a
+								class:list={[
+									"editorial-button",
+									route.primary ? "editorial-button--peach" : "editorial-button--secondary",
+								]}
+								href={route.href}
+							>
+								{route.cta}
+							</a>
+						</article>
+					))}
+				</div>
+			</section>
+		</EditorialShell>
+	</div>
 </Page>
 
 <style>
-	.organizations-card {
-		display: flex;
-		flex-direction: column;
+	.ops-org :global(.page-masthead h1) {
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-style: normal;
+		font-weight: 750;
+		letter-spacing: -0.02em;
+	}
+
+	.ops-org :global(.page-masthead__section) {
+		color: var(--ctp-mocha-teal);
+	}
+
+	.ops-org :global(.editorial-kicker) {
+		color: var(--ctp-mocha-teal);
+	}
+
+	.ops-org :global(.editorial-card),
+	.ops-org :global(.editorial-button),
+	.ops-org :global(.editorial-faq details) {
+		border-radius: 2px;
+	}
+
+	.ops-org :global(.editorial-button--peach) {
+		background: var(--ctp-mocha-peach);
+		border-color: var(--ctp-mocha-peach);
+		color: var(--ctp-mocha-base);
+	}
+
+	.ops-org :global(.editorial-button--peach:hover) {
+		background: color-mix(in oklab, var(--ctp-mocha-peach) 88%, white);
+		border-color: color-mix(in oklab, var(--ctp-mocha-peach) 88%, white);
+		color: var(--ctp-mocha-base);
+	}
+
+	.ops-org :global(a:not(.editorial-button)) {
+		color: var(--ctp-mocha-blue);
+	}
+
+	.ops-hub-grid {
+		display: grid;
 		gap: 1rem;
 	}
 
-	.organizations-card__link {
-		align-self: flex-start;
-		margin-top: auto;
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		text-decoration: none;
-	}
-
-	.organizations-card__link:hover {
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
-	}
-
-	.organizations-scope {
-		margin: 0;
-		border-top: 1px solid var(--editorial-hairline);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.organizations-scope__row {
-		display: grid;
-		gap: 0.35rem;
-		padding: 0.9rem 0;
-	}
-
-	.organizations-scope__row + .organizations-scope__row {
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.organizations-scope dt {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-	}
-
-	.organizations-scope dd {
-		margin: 0;
-		color: var(--editorial-ink-soft);
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 0.98rem;
-		line-height: 1.55;
-	}
-
 	@media (min-width: 760px) {
-		.organizations-scope__row {
-			grid-template-columns: minmax(11rem, 0.28fr) minmax(0, 1fr);
-			gap: 1.5rem;
-			align-items: baseline;
+		.ops-hub-grid {
+			grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+			align-items: stretch;
 		}
 	}
 
-	.organizations-list {
-		list-style: none;
-		padding: 0;
+	.ops-hub-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+		align-items: flex-start;
+		border: 1px solid var(--ctp-mocha-surface1);
+		border-radius: 2px;
+		background: var(--ctp-mocha-mantle);
+		padding: 1.35rem;
+		min-width: 0;
+	}
+
+	.ops-hub-card--primary {
+		border-color: var(--ctp-mocha-surface2);
+		box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ctp-mocha-teal) 28%, transparent);
+	}
+
+	.ops-hub-card__title {
 		margin: 0;
-		display: grid;
-		gap: 0.75rem;
-	}
-
-	.organizations-list li {
-		border: 1px solid var(--editorial-hairline);
-		padding: 0.8rem 1rem;
-		background: var(--editorial-paper-deep);
-		color: var(--editorial-ink-soft);
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.5;
+		font-size: 1.55rem;
+		font-weight: 750;
+		line-height: 1.05;
+		color: var(--ctp-mocha-text);
 	}
 
-	@media (max-width: 760px) {
-		.organizations-card__link {
+	.ops-hub-card__body {
+		margin: 0;
+		flex: 1;
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.98rem;
+		line-height: 1.55;
+		color: var(--ctp-mocha-subtext1);
+	}
+
+	.ops-hub-card :global(.editorial-button) {
+		margin-top: 0.35rem;
+	}
+
+	@media (max-width: 700px) {
+		.ops-hub-card :global(.editorial-button) {
 			width: 100%;
 		}
 	}
