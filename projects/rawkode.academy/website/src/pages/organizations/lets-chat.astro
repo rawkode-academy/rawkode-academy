@@ -143,6 +143,18 @@ export const prerender = true;
 		border-radius: 2px;
 	}
 
+	.ops-org :global(.editorial-button--secondary) {
+		background: transparent;
+		color: var(--ctp-mocha-text);
+		border-color: var(--ctp-mocha-surface2);
+	}
+
+	.ops-org :global(.editorial-button--secondary:hover) {
+		background: var(--ctp-mocha-surface0);
+		border-color: var(--ctp-mocha-subtext0);
+		color: var(--ctp-mocha-text);
+	}
+
 	.ops-org :global(.editorial-button--peach) {
 		background: var(--ctp-mocha-peach);
 		border-color: var(--ctp-mocha-peach);
@@ -226,6 +238,23 @@ export const prerender = true;
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
 		font-size: 0.92rem;
 		line-height: 1.5;
+		color: var(--ctp-mocha-subtext1);
+	}
+
+	.ops-org :global(.contact-fallback) {
+		background: var(--ctp-mocha-mantle);
+		border-color: var(--ctp-mocha-surface1);
+		border-radius: 2px;
+	}
+
+	.ops-org :global(.contact-fallback__email),
+	.ops-org :global(.contact-fallback__copy) {
+		color: var(--ctp-mocha-text);
+	}
+
+	.ops-org :global(.contact-fallback__template) {
+		background: var(--ctp-mocha-base);
+		border-color: var(--ctp-mocha-surface1);
 		color: var(--ctp-mocha-subtext1);
 	}
 </style>
