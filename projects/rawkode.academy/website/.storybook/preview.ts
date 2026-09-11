@@ -11,11 +11,12 @@ const preview: Preview = {
 		},
 		layout: "centered",
 		backgrounds: {
-			default: "light",
+			default: "mocha",
 			options: {
-				light: { name: "light", value: "#ffffff" },
-				dark: { name: "dark", value: "#0a0a0a" },
-				"rawkode-dark": { name: "rawkode-dark", value: "#1a1a2e" },
+				mocha: { name: "mocha", value: "#1e1e2e" },
+				mantle: { name: "mantle", value: "#181825" },
+				crust: { name: "crust", value: "#11111b" },
+				light: { name: "light (stub)", value: "#ffffff" },
 			},
 		},
 	},

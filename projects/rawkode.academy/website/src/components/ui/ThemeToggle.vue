@@ -156,9 +156,9 @@ const buttonClasses = computed(() => {
 		"inline-flex items-center justify-center transition-smooth focus-ring";
 
 	const variantClasses = {
-		icon: "rounded-full hover:bg-[var(--surface-card-muted)]",
+		icon: "rounded-[2px] text-[var(--ctp-mocha-subtext1)] hover:text-[var(--ctp-mocha-lavender)] hover:bg-transparent",
 		button:
-			"rounded-lg border border-[var(--surface-border)] hover:bg-[var(--surface-card-muted)]",
+			"rounded-[2px] border border-[var(--ctp-mocha-surface1)] text-[var(--ctp-mocha-subtext1)] hover:text-[var(--ctp-mocha-lavender)] hover:bg-transparent",
 	};
 
 	const sizeClasses = {

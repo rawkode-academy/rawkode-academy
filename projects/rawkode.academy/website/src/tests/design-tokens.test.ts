@@ -13,7 +13,15 @@ import { describe, expect, it } from "vitest";
  */
 
 const SCAN_ROOTS = ["src", ".storybook"];
-const SCAN_EXTENSIONS = [".astro", ".vue", ".tsx", ".jsx", ".ts", ".js", ".mdx"];
+const SCAN_EXTENSIONS = [
+	".astro",
+	".vue",
+	".tsx",
+	".jsx",
+	".ts",
+	".js",
+	".mdx",
+];
 const SKIP_DIRS = new Set(["node_modules", "dist", ".astro", "generated"]);
 const SKIP_FILES = new Set(["src/tests/design-tokens.test.ts"]);
 
@@ -36,8 +44,14 @@ function* walk(dir: string): Generator<string> {
 
 describe("design tokens", () => {
 	it("defines the technical-publication layout contracts", () => {
-		const globalCss = readFileSync(join(projectRoot, "src/styles/global.css"), "utf-8");
-		const appLayout = readFileSync(join(projectRoot, "src/layouts/app.astro"), "utf-8");
+		const globalCss = readFileSync(
+			join(projectRoot, "src/styles/global.css"),
+			"utf-8",
+		);
+		const appLayout = readFileSync(
+			join(projectRoot, "src/layouts/app.astro"),
+			"utf-8",
+		);
 
 		for (const token of [
 			"--layout-prose",
@@ -50,12 +64,18 @@ describe("design tokens", () => {
 		}
 
 		expect(appLayout).toContain("PublicationNav");
-		expect(appLayout).not.toContain('components/sidebar/Sidebar.astro');
+		expect(appLayout).not.toContain("components/sidebar/Sidebar.astro");
 	});
 
 	it("keeps the applied color scheme authoritative", () => {
-		const globalCss = readFileSync(join(projectRoot, "src/styles/global.css"), "utf-8");
-		const pageWrapper = readFileSync(join(projectRoot, "src/wrappers/page.astro"), "utf-8");
+		const globalCss = readFileSync(
+			join(projectRoot, "src/styles/global.css"),
+			"utf-8",
+		);
+		const pageWrapper = readFileSync(
+			join(projectRoot, "src/wrappers/page.astro"),
+			"utf-8",
+		);
 		const publicationNav = readFileSync(
 			join(projectRoot, "src/components/navigation/PublicationNav.astro"),
 			"utf-8",
@@ -63,9 +83,23 @@ describe("design tokens", () => {
 
 		expect(globalCss).toMatch(/:root\s*\{[\s\S]*?color-scheme:\s*light;/);
 		expect(globalCss).toMatch(/html\.dark\s*\{[\s\S]*?color-scheme:\s*dark;/);
+		expect(globalCss).toContain("--ctp-mocha-base");
+		expect(globalCss).toContain("--ctp-mocha-mantle");
 		expect(pageWrapper).not.toContain("color-scheme: light dark");
-		expect(publicationNav).toContain("background: var(--terminal-bg)");
-		expect(publicationNav).toContain("color: var(--terminal-text)");
+		expect(publicationNav).toContain("background: var(--ctp-mocha-crust)");
+		expect(publicationNav).toContain("color: var(--ctp-mocha-text)");
+	});
+
+	it("wires CommandBar chrome on the default shell", () => {
+		const appLayout = readFileSync(
+			join(projectRoot, "src/layouts/app.astro"),
+			"utf-8",
+		);
+		expect(appLayout).toContain('class="cmd-bar"');
+		expect(appLayout).toContain("/learning-paths");
+		expect(appLayout).toContain("/organizations/partnerships");
+		expect(appLayout).toContain("--ctp-mocha-mantle");
+		expect(appLayout).not.toContain("ed-topbar");
 	});
 
 	it("uses editorial tokens instead of raw gray-* utilities", () => {
