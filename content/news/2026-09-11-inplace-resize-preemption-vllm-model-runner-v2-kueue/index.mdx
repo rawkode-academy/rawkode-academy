@@ -1,0 +1,49 @@
+---
+title: "Kubernetes adds preemption for stuck in-place resizes, vLLM defaults to Model Runner V2, Kueue closes an LWS quota bypass"
+description: "Kubernetes v1.37 lets the scheduler preempt lower-priority pods to unblock deferred in-place resizes, vLLM 0.29.0 makes Model Runner V2 the default execution path, and Kueue's v0.20 candidate fixes a LeaderWorkerSet quota bypass and a DRA device-class mapping bug."
+publishedAt: 2026-09-11
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - kueue
+  - ai-infrastructure
+---
+
+Three primary-source releases landed in the last 24 hours across Kubernetes scheduling, AI inference serving, and workload queueing.
+
+## Kubernetes v1.37 lets the scheduler preempt to unblock deferred in-place resizes
+
+The Kubernetes project detailed a new alpha feature for v1.37 that allows the scheduler to preempt lower-priority workloads so a pending [in-place Pod resize can succeed](https://kubernetes.io/blog/2026/09/10/kubernetes-v1-37-scheduler-preemption-for-in-place-pod-resize-alpha/). Today, when a running Pod requests a resource scale-up that exceeds a node's allocatable headroom, the kubelet marks the resize `Deferred` and the Pod waits indefinitely for capacity to free up on its own.
+
+The feature, gated behind `InPlacePodVerticalScalingSchedulerPreemption`, lets the scheduler actively evict lower-priority Pods on the node to make room for a higher-priority Pod's deferred resize. It builds on in-place Pod resize, which graduated to GA in v1.35, and targets the case where a critical workload needs to grow on an already-saturated node rather than being rescheduled elsewhere.
+
+As an alpha feature the gate is off by default, but it closes a real gap for anyone relying on vertical resizing for latency-sensitive workloads on packed nodes.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/10/kubernetes-v1-37-scheduler-preemption-for-in-place-pod-resize-alpha/) - September 10, 2026
+
+---
+
+## vLLM 0.29.0 makes Model Runner V2 the default for all models
+
+vLLM published [v0.29.0](https://github.com/vllm-project/vllm/releases/tag/v0.29.0) with 594 commits from 277 contributors, and the headline change is that Model Runner V2 is now the default execution path for all models. This completes a migration that began with pooling models and consolidates vLLM onto a single runner implementation.
+
+Model Runner V1 is now deprecated, with removal targeted for v0.32; a small set of ROCm models without V2 support still fall back to V1 for now. The release also deprecates the `python -m vllm.entrypoints.openai.api_server` module entrypoint in favor of the `vllm serve` command.
+
+Teams that pin vLLM should plan for the V1 removal and the entrypoint change rather than being surprised by them two releases from now.
+
+**Source:** [vLLM v0.29.0 release](https://github.com/vllm-project/vllm/releases/tag/v0.29.0) - September 10, 2026
+
+---
+
+## Kueue's v0.20 candidate closes a LeaderWorkerSet quota bypass and fixes DRA device-class mapping
+
+Kueue cut [v0.20.0-rc.0](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.20.0-rc.0), a release candidate that fixes a quota bypass for LeaderWorkerSet workloads. Group size is now immutable for Kueue-managed LeaderWorkerSets, closing a gap where growing a pod group allowed more pods to run than the reserved quota covered; existing sets must be recreated at the new size rather than resized in place.
+
+The candidate also fixes a bug where a DRA device-class mapping, or a resource transformation under the reserved resource name `pods`, was silently discarded or left workloads permanently pending. Operators must rename or remove any such entries and update the matching ClusterQueue configuration before upgrading. TopologyAwareScheduling additionally gains stricter slice-size validation, requiring the slice size to be greater than zero when a required slice topology is set.
+
+This is a pre-release, so it is a testing target rather than an upgrade target, but the quota-bypass and DRA fixes are worth validating now for anyone running batch or gang-scheduled GPU workloads through Kueue.
+
+**Source:** [Kueue v0.20.0-rc.0 release](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.20.0-rc.0) - September 10, 2026
+
+---
