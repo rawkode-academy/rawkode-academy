@@ -190,16 +190,51 @@ const faqs = [
 </Page>
 
 <style>
-	.ops-org :global(.page-masthead h1) {
+	.ops-org :global(.editorial-shell),
+	.ops-org :global(.page-masthead) {
+		background: var(--ctp-mocha-base);
+		color: var(--ctp-mocha-text);
+		border-color: var(--ctp-mocha-surface1);
+	}
+
+	.ops-org :global(.page-masthead h1),
+	.ops-org :global(.editorial-section__title),
+	.ops-org :global(.editorial-card__title),
+	.ops-org :global(.editorial-stat__value),
+	.ops-org :global(.editorial-faq summary) {
+		color: var(--ctp-mocha-text);
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
 		font-style: normal;
+	}
+
+	.ops-org :global(.page-masthead h1) {
 		font-weight: 750;
 		letter-spacing: -0.02em;
+	}
+
+	.ops-org :global(.page-masthead__dek),
+	.ops-org :global(.editorial-section__lede),
+	.ops-org :global(.editorial-card__body),
+	.ops-org :global(.editorial-list),
+	.ops-org :global(.editorial-stat__label),
+	.ops-org :global(.editorial-faq p) {
+		color: var(--ctp-mocha-subtext1);
 	}
 
 	.ops-org :global(.page-masthead__section),
 	.ops-org :global(.editorial-kicker) {
 		color: var(--ctp-mocha-teal);
+	}
+
+	.ops-org :global(.editorial-section),
+	.ops-org :global(.page-masthead),
+	.ops-org :global(.editorial-stat) {
+		border-color: var(--ctp-mocha-surface1);
+	}
+
+	.ops-org :global(.editorial-faq details) {
+		background: var(--ctp-mocha-mantle);
+		border-color: var(--ctp-mocha-surface1);
 	}
 
 	.ops-org :global(.editorial-card),

@@ -57,19 +57,44 @@ const routes = [
 </Page>
 
 <style>
-	.ops-org :global(.page-masthead h1) {
+	/* Org funnel is Mocha-first (matches Ops Console preview), not light paper. */
+	.ops-org :global(.editorial-shell),
+	.ops-org :global(.page-masthead) {
+		background: var(--ctp-mocha-base);
+		color: var(--ctp-mocha-text);
+		border-color: var(--ctp-mocha-surface1);
+	}
+
+	.ops-org :global(.page-masthead h1),
+	.ops-org :global(.editorial-section__title),
+	.ops-org :global(.editorial-card__title),
+	.ops-org :global(.editorial-stat__value) {
+		color: var(--ctp-mocha-text);
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
 		font-style: normal;
+	}
+
+	.ops-org :global(.page-masthead h1) {
 		font-weight: 750;
 		letter-spacing: -0.02em;
 	}
 
-	.ops-org :global(.page-masthead__section) {
+	.ops-org :global(.page-masthead__dek),
+	.ops-org :global(.editorial-section__lede),
+	.ops-org :global(.editorial-card__body),
+	.ops-org :global(.editorial-list),
+	.ops-org :global(.editorial-stat__label) {
+		color: var(--ctp-mocha-subtext1);
+	}
+
+	.ops-org :global(.page-masthead__section),
+	.ops-org :global(.editorial-kicker) {
 		color: var(--ctp-mocha-teal);
 	}
 
-	.ops-org :global(.editorial-kicker) {
-		color: var(--ctp-mocha-teal);
+	.ops-org :global(.editorial-section),
+	.ops-org :global(.page-masthead) {
+		border-bottom-color: var(--ctp-mocha-surface1);
 	}
 
 	.ops-org :global(.editorial-card),
