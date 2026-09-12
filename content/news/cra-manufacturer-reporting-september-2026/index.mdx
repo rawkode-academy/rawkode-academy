@@ -1,0 +1,29 @@
+---
+title: CRA Manufacturer Reporting Begins With 24-Hour Early Warnings
+description: CRA manufacturer reporting obligations began on 11 September 2026. Initial
+  deadlines run from awareness, with separate rules for open-source stewards.
+publishedAt: '2026-09-12'
+authors:
+- rawkode
+technologies: []
+---
+
+ENISA launched the initial operating capability of its Cyber Resilience Act Single Reporting Platform on 11 September 2026. Reporting obligations began that day for manufacturers in scope. Qualifying actively exploited vulnerabilities and severe product security incidents now require an early warning without undue delay and within 24 hours of awareness, then a fuller notification within 72 hours of awareness, also without undue delay, unless the relevant information has already been supplied. [ENISA Announcement](https://www.enisa.europa.eu/news/the-cra-single-reporting-platform-is-launched) · [Reporting Deadlines](https://www.enisa.europa.eu/topics/product-security/single-reporting-platform-srp/frequently-asked-questions)
+
+These are initial deadlines; further reporting requirements also apply. [Article 14](https://eur-lex.europa.eu/eli/reg/2024/2847/oj/eng)
+
+## Why Platform Engineers Should Care
+
+For affected manufacturers, incident response needs an explicit handoff from incoming evidence to whoever assesses reportability and prepares the notification. Both deadlines run from awareness; submitting the first report does not restart the second clock.
+
+Running Kubernetes or contributing code does not itself establish manufacturer obligations. The Commission distinguishes commercially supplied open-source products, contributions outside a developer's responsibility, and open-source software stewards. The stewards' Article 24(3) reporting obligations begin on 11 December 2027. [Open-Source Scope](https://digital-strategy.ec.europa.eu/en/policies/cra-open-source) · [Commencement Dates](https://digital-strategy.ec.europa.eu/en/policies/cra-reporting)
+
+## What To Check
+
+The launch establishes an operational reporting mechanism. It does not establish that an organisation's incident process is ready, or settle its legal classification.
+
+Our engineering recommendation: trace a fictional qualifying event through the existing response process. Identify who establishes product exposure, who assesses reportability, who submits, and their deputies. Test the handoff outside normal working hours before building more tooling.
+
+Prepare representatives' personal EU Login accounts with MFA, but follow ENISA's current advice to register and initiate platform validation only when a notification is needed. [Account Guidance](https://www.enisa.europa.eu/topics/product-security/single-reporting-platform-srp/frequently-asked-questions)
+
+*Sources reviewed 12 September 2026. Workflow recommendations are editorial analysis; organisation-specific applicability requires separate assessment.*
