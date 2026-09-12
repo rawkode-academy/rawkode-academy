@@ -1,0 +1,26 @@
+---
+title: Portainer Plans A Kubernetes-First 3.x Without A Separate Community Edition
+description: Portainer plans Kubernetes-first 3.x without a separate CE build. Native
+  Docker environments remain, while users must assess maintenance and edition terms.
+publishedAt: '2026-09-12'
+authors:
+- rawkode
+technologies:
+- portainer
+- docker
+- kubernetes
+---
+
+Portainer Community Edition will remain on the 2.x codebase and will not receive the 3.x changes, CEO Neil Cresswell [announced on 11 September 2026](https://www.portainer.io/blog/portainer-3-0-is-coming). Portainer plans 3.0.0 STS for the end of September and 3.3.0 LTS for December.
+
+Native Docker, Swarm and Podman environments will remain operable in 3.x. However, Portainer says they will not receive the new capabilities being developed for its policy, GitOps and observability layers. Teams depending on those environments need to distinguish continued operation from continued feature investment.
+
+For users staying on 2.x, Portainer promises security updates, bug fixes and selected feature backports. The announcement gives no maintenance end date. These are vendor commitments, with delivery and duration still to be established.
+
+Community access to 3.x will use Portainer's [three-nodes-free Business Edition programme](https://www.portainer.io/take-3), which allows one licence per organisation. Its [linked agreement](https://www.portainer.io/legal/3nf-license-agreement), last modified on 6 July 2023, limits use to one server instance and three total nodes, including the server instance. Existing CE users should check their estate against those terms before assuming their upgrade path remains equivalent.
+
+Portainer's stated rationale is the engineering cost of supporting several substrates. Concentrating development on Kubernetes may produce a more coherent platform, but that does not establish a migration benefit for every Docker workload.
+
+**Operator Action:** Inventory the environments and features you depend on, request a concrete 2.x maintenance horizon, and evaluate edition terms separately from any runtime migration. No emergency migration is announced.
+
+*Sources checked on 12 September 2026. The release dates remain plans; this report makes no hands-on compatibility claim.*
