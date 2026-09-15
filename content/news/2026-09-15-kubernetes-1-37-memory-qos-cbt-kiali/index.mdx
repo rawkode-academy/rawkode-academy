@@ -1,0 +1,48 @@
+---
+title: "Kubernetes v1.37 moves Memory QoS and CSI changed block tracking to beta, Kiali 2.32 tracks canary control planes"
+description: "Kubernetes published two v1.37 feature deep-dives on September 14: Memory QoS graduates to beta enabled by default, and the CSI Changed Block Tracking API reaches beta with a breaking v1beta1 promotion. Kiali 2.32 adds multi-control-plane visibility for Istio canary upgrades."
+publishedAt: 2026-09-15
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - istio
+---
+
+A quiet 24-hour window, dominated by two Kubernetes v1.37 feature deep-dives published on September 14 and one service-mesh console release. This is a short digest rather than a padded one.
+
+## Kubernetes v1.37 graduates Memory QoS to beta, on by default but inert until configured
+
+The Kubernetes project published its [v1.37 Memory QoS feature blog](https://kubernetes.io/blog/2026/09/14/kubernetes-v1-37-memory-qos-graduates-to-beta/) on September 14. The `MemoryQoS` feature gate graduates to beta and is now enabled by default on every 1.37 kubelet.
+
+On cgroup v2 Linux nodes, the kubelet can translate pod QoS into the kernel's `memory.min`, `memory.low`, and `memory.high` controls, giving the memory-pressure path better guidance than a hard limit alone. The default-on gate is inert: the kubelet writes none of those values unless an operator sets `memoryThrottlingFactor`, which drives `memory.high` throttling on Burstable and BestEffort containers, or a `memoryReservationPolicy` such as `Tiered`, the reservation work added in v1.36. Existing clusters therefore see no behavior change on upgrade, and the feature has to be opted into per node. Memory QoS first shipped as alpha in v1.22 and stayed there until the v1.36 tiered-reservation work set up this beta.
+
+For nodes packed with Burstable workloads, `memoryThrottlingFactor` is now a supported lever to apply kernel throttling under memory pressure before the OOM killer picks a victim.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/14/kubernetes-v1-37-memory-qos-graduates-to-beta/) - September 14, 2026
+
+---
+
+## CSI changed block tracking reaches beta with a breaking v1beta1 API and no v1alpha1 fallback
+
+The second v1.37 feature post on September 14 covers the [CSI Changed Block Tracking API moving to beta](https://kubernetes.io/blog/2026/09/14/csi-changed-block-tracking-beta/), and it leads with a breaking change for anyone who ran the alpha.
+
+The `SnapshotMetadataService` CRD is promoted to `cbt.storage.k8s.io/v1beta1`, and the old `v1alpha1` is removed outright rather than served alongside it, so alpha users must migrate before upgrading. The schema itself is unchanged. The design otherwise matches the alpha that shipped in September 2025 and the `external-snapshot-metadata` sidecar that reached v1.0.0 in March 2026: a CSI driver advertises the `SNAPSHOT_METADATA_SERVICE` capability and implements a gRPC service exposing `GetMetadataAllocated` and `GetMetadataDelta`, which backup applications call to fetch allocated blocks or the delta between two snapshots instead of scanning whole volumes. Coverage is still block volumes only; file and network-share change lists remain out of scope.
+
+This is the API that incremental-backup vendors have wanted standardized, but the removed `v1alpha1` means clusters carrying the alpha CRD need a migration step before moving to 1.37.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/14/csi-changed-block-tracking-beta/) - September 14, 2026
+
+---
+
+## Kiali 2.32 adds multi-control-plane views for Istio canary upgrades
+
+The Istio console Kiali [released 2.32.0](https://kiali.io/news/release-notes/) on September 14, with a focus on operators running more than one control plane at once.
+
+The Namespaces view now shows multiple control planes during a canary upgrade, and the mesh graph no longer draws duplicate istiod→ztunnel edges when several control planes are deployed in ambient mode. The release also switches mesh traffic-graph health to a cached health status to cut load on large meshes, adds loading Istio configuration from a file, and documents guidance for pre-aggregated, federated metrics.
+
+Canary control-plane upgrades are where mesh observability tends to break down, and 2.32 makes the in-flight state legible instead of a tangle of duplicate edges.
+
+**Source:** [Kiali](https://kiali.io/news/release-notes/) - September 14, 2026
+
+---
