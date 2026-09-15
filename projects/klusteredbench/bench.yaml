@@ -1,0 +1,47 @@
+# KlusteredBench matrix. Every (scenario x agent x trial) is a fresh cluster.
+provider:
+  type: kind
+  # Pin this for a publishable run; the resolved server version is recorded in
+  # every result.json either way.
+  # nodeImage: kindest/node:v1.34.0
+  keep: false
+
+agents:
+  # `builtin` agents share one frozen harness (system prompt + a single shell
+  # tool), so differences between them are model differences only.
+  - name: opus-5
+    type: builtin
+    model: claude-opus-5
+    effort: high
+  - name: sonnet-5
+    type: builtin
+    model: claude-sonnet-5
+    effort: high
+  - name: haiku-4-5
+    type: builtin
+    model: claude-haiku-4-5
+  # Product benchmark: Claude Code's own harness, installed on the node.
+  - name: claude-code-opus-5
+    type: claude-code
+    model: claude-opus-5
+    maxTurns: 80
+  # Any other CLI agent. Example shape; the command must write $KB_USAGE_FILE.
+  # - name: my-agent
+  #   type: command
+  #   model: some-model
+  #   prepare: "pip install my-agent"
+  #   forwardEnv: [MY_API_KEY]
+  #   command: 'my-agent --model "$KB_MODEL" --system "$(cat $KB_SYSTEM_FILE)" "$(cat $KB_PROMPT_FILE)" --usage-out "$KB_USAGE_FILE"'
+
+scenarios: all
+trials: 3
+timeout: 15m          # default agent budget; scenario.yaml may override
+pollInterval: 5s      # harness verify cadence while the agent works
+commandTimeout: 5m    # cap on any single command the agent runs
+stopOnGreen: false    # true = cheaper runs, but hides fix-then-break behaviour
+parallel: 1           # clusters at once; each kind cluster wants ~2 CPU / 4 GiB
+outDir: results
+
+# Override list prices when they drift (USD per million tokens).
+# pricing:
+#   claude-opus-5: { input: 5, output: 25, cacheWrite: 6.25, cacheRead: 0.5 }

@@ -1,0 +1,11 @@
+id: replicaset-controller-disabled
+title: ReplicaSet controller switched off
+difficulty: hard
+tags: [control-plane, controller-manager, static-pods]
+source: labs.iximiuz.com/klustered-l2 (bug 2)
+timeout: 20m
+nodeLevel: true
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. Its pod was deleted and the Deployment is not replacing it. Restore service and make sure Deployments self-heal again.
+solution: |
+  kube-controller-manager runs with `--controllers=*,-replicaset-controller`, so no ReplicaSet ever reconciles. Remove that flag from /etc/kubernetes/manifests/kube-controller-manager.yaml and let the static pod restart.

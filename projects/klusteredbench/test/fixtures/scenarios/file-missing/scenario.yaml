@@ -1,0 +1,7 @@
+id: file-missing
+title: A file went missing
+difficulty: easy
+tags: [fixture]
+timeout: 2s
+prompt: |
+  The file "app" in the state directory must exist. It does not. Restore it.

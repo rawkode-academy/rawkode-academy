@@ -1,0 +1,10 @@
+id: level-one
+title: "Klustered: Level One"
+difficulty: medium
+tags: [composite, workload, networking, dns, scheduling, upgrade]
+source: labs.iximiuz.com/klustered-l1
+timeout: 20m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. Nothing is reachable right now. Repair the cluster, then roll the klustered Deployment forward to the image ghcr.io/rawkode-academy/klustered:v2. You are done when v2 is serving quotes.
+solution: |
+  Three planted bugs (database schedulingGate, Service selector typo `klustred`, app `dnsPolicy: Default`) plus the v1 -> v2 upgrade.

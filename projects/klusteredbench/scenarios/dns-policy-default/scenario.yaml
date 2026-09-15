@@ -1,0 +1,10 @@
+id: dns-policy-default
+title: App pod cannot resolve cluster services
+difficulty: easy
+tags: [workload, dns, networking]
+source: labs.iximiuz.com/klustered-l1 (bug 3)
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. It responds, but with a database error. Fix it.
+solution: |
+  The klustered Deployment sets `dnsPolicy: Default`, so the pod inherits the node's resolv.conf and cannot resolve the `postgres` Service. Remove the field or set `ClusterFirst`.

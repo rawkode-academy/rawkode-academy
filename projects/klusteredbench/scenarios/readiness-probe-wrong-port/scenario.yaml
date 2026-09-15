@@ -1,0 +1,10 @@
+id: readiness-probe-wrong-port
+title: Readiness probe checks the wrong port
+difficulty: easy
+tags: [workload, probes]
+source: labs.iximiuz.com/klustered-l4 (break 4)
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. The pod is Running but the app is unreachable. Fix it.
+solution: |
+  The readiness probe is a TCP check on 8080 while the container listens on 666, so the pod never becomes Ready and the Service has no endpoints. Point the probe at 666 (or remove it).

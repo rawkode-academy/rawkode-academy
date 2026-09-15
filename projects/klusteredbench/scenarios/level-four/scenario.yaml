@@ -1,0 +1,10 @@
+id: level-four
+title: "Klustered: Level Four"
+difficulty: medium
+tags: [composite, workload, scheduling, init-containers, probes, upgrade]
+source: labs.iximiuz.com/klustered-l4
+timeout: 20m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. Nothing is reachable right now. Repair the workloads, then roll the klustered Deployment forward to the image ghcr.io/rawkode-academy/klustered:v2. You are done when v2 is serving quotes.
+solution: |
+  Three breaks in one pod template that surface in lifecycle order: a 64-CPU request (Pending), an init container polling `postgresql` instead of `postgres` (Init), a readiness probe on 8080 instead of 666 (no endpoints). Then upgrade to v2.

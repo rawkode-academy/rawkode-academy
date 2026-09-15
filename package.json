@@ -6,7 +6,8 @@
     "content",
     "packages/**",
     "projects/**",
-    "!projects/**/generators/**"
+    "!projects/**/generators/**",
+    "!projects/klusteredbench"
   ],
   "devDependencies": {
     "@types/node": "^24.10.1",

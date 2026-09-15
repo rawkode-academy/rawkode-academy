@@ -1,0 +1,26 @@
+{
+	"name": "klusteredbench",
+	"version": "0.1.0",
+	"type": "module",
+	"private": true,
+	"description": "Repeatable evaluation of LLM agents against broken Kubernetes clusters",
+	"bin": {
+		"klusteredbench": "./src/cli.ts"
+	},
+	"scripts": {
+		"bench": "bun run src/cli.ts",
+		"check": "tsc --noEmit",
+		"lint": "biome check .",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@anthropic-ai/sdk": "^0.125.0",
+		"yaml": "^2.9.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.9",
+		"@types/node": "^24.10.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.2"
+	}
+}

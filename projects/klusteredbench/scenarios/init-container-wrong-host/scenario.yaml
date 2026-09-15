@@ -1,0 +1,10 @@
+id: init-container-wrong-host
+title: Init container waits on a hostname that does not exist
+difficulty: easy
+tags: [workload, init-containers, dns]
+source: labs.iximiuz.com/klustered-l4 (break 3)
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. The pod is stuck initialising. Fix it.
+solution: |
+  The `wait-for-db` init container polls `postgresql:5432` but the Service is named `postgres`. Fix the hostname.

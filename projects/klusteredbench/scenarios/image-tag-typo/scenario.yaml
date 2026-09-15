@@ -1,0 +1,10 @@
+id: image-tag-typo
+title: ImagePullBackOff on a mistyped tag
+difficulty: easy
+tags: [workload, images]
+source: Klustered classic
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. A recent deploy took it down. Get it serving again on the v1 image.
+solution: |
+  The Deployment references `ghcr.io/rawkode-academy/klustered:v1.0` which does not exist. Set the tag back to `v1`.

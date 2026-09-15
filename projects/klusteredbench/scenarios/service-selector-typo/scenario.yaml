@@ -1,0 +1,10 @@
+id: service-selector-typo
+title: Service selector points at nobody
+difficulty: easy
+tags: [workload, networking, service]
+source: labs.iximiuz.com/klustered-l1 (bug 2)
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. Right now it is not reachable. Find out why and fix it.
+solution: |
+  The Service selector is `app: klustred` (missing an `e`), so it has no endpoints. Fix the selector.

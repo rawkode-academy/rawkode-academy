@@ -1,0 +1,10 @@
+id: validating-admission-policy-lockout
+title: Admission policy denies every new pod
+difficulty: medium
+tags: [admission, policy, control-plane]
+source: labs.iximiuz.com/klustered-l2 (bug 3)
+timeout: 15m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. Its pod was deleted and has not come back. Restore service.
+solution: |
+  A ValidatingAdmissionPolicy (`namespace-guard`) bound to the default namespace denies creation of any pod whose name does not start with `kube-`. Delete the binding (or the policy).

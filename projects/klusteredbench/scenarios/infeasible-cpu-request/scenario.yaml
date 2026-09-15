@@ -1,0 +1,10 @@
+id: infeasible-cpu-request
+title: CPU request larger than any node
+difficulty: easy
+tags: [workload, scheduling, resources]
+source: labs.iximiuz.com/klustered-l4 (break 2)
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. Its pod will not schedule. Fix it.
+solution: |
+  The container requests 64 CPUs. No node can satisfy that. Lower or remove the request.

@@ -1,0 +1,10 @@
+id: scheduling-gate
+title: Database pod gated from scheduling
+difficulty: easy
+tags: [workload, scheduling]
+source: labs.iximiuz.com/klustered-l1 (bug 1)
+timeout: 10m
+prompt: |
+  The "klustered" web application in the default namespace should be reachable on NodePort 30000 and show a quote from its Postgres database. The database is down. Get the application serving quotes again.
+solution: |
+  The database Deployment's pod template carries `schedulingGates: [example.com/quota-check]` and no controller ever removes it, so the pod stays Pending forever. Remove the gate from the template.
