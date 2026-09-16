@@ -1,0 +1,67 @@
+---
+title: "Kubernetes 1.37 pod-level resource managers reach beta; OpenTelemetry's Kubernetes processor goes 1.0"
+description: "Kubernetes graduated Pod-Level Resource Managers to beta in v1.37, OpenTelemetry marked its k8sattributes processor stable at v1.0.0, and containerd, Crossplane, and Backstage shipped runtime, control-plane, and developer-portal updates."
+publishedAt: 2026-09-16
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - opentelemetry
+  - containerd
+  - crossplane
+  - backstage
+---
+
+Five primary-source releases landed in the last 24 hours across Kubernetes resource management, OpenTelemetry, container runtimes, and platform tooling.
+
+## Kubernetes 1.37 graduates Pod-Level Resource Managers to beta
+
+The Kubernetes project [documented](https://kubernetes.io/blog/2026/09/15/kubernetes-v1-37-pod-level-resource-managers-beta/) on September 15 that Pod-Level Resource Managers reached beta in v1.37. The feature lets the kubelet's Topology Manager, CPU Manager, and Memory Manager read a pod's aggregate `.spec.resources` when making hardware placement decisions, rather than requiring integer requests on every container in the pod.
+
+Operators can now give a pod's primary container exclusive, NUMA-aligned CPU cores and memory while leaving sidecars such as logging and telemetry agents in the shared pool. Before this, latency-critical pods faced an all-or-nothing choice: assign integer requests to every container including sidecars, or forfeit exclusive NUMA alignment. The feature is beta but off by default, so it needs an explicit feature-gate opt-in.
+
+This matters for training, inference, and other latency-sensitive workloads that pair a pinned primary container with best-effort sidecars on the same node.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/15/kubernetes-v1-37-pod-level-resource-managers-beta/) - September 15, 2026
+
+---
+
+## OpenTelemetry marks the Kubernetes attributes processor stable at v1.0.0
+
+The OpenTelemetry project [announced](https://opentelemetry.io/blog/2026/k8s-attributes-processor-v1/) on September 16 that the k8sattributes processor reached v1.0.0, shipping in the latest opentelemetry-collector-contrib and opentelemetry-collector-k8s distributions (v0.161.0). The processor enriches spans, metrics, and logs with pod, namespace, and workload metadata, and is one of the most widely deployed Collector components.
+
+The v1.0.0 designation is a stability contract: no breaking changes to the component's API when used as a Go library or in binaries, and stable output for the Kubernetes metadata attributes it emits. Reaching stable required adopting the v1.42.0 Kubernetes semantic conventions, which renames some attribute keys, so operators upgrading should review the migration guide before rolling it out to avoid breaking downstream dashboards and queries.
+
+**Source:** [OpenTelemetry blog](https://opentelemetry.io/blog/2026/k8s-attributes-processor-v1/) - September 16, 2026
+
+---
+
+## containerd 2.4.0-rc.0 opens a non-LTS line with CRI mount and runtime-introspection work
+
+containerd cut [v2.4.0-rc.0](https://github.com/containerd/containerd/releases/tag/v2.4.0-rc.0) on September 15, the first candidate for the 2.4 line, which maintainers flag as a non-LTS release with a shorter support window. The candidate enables the mount manager for image mounts in CRI and adds OCI runtime feature introspection for non-runc runtimes, letting the CRI plugin discover a runtime's supported features instead of assuming runc semantics.
+
+It also strips sensitive authentication headers when following descriptor URLs during image pulls, adds Prometheus metrics for the EROFS snapshotter's layer content cache, and ships Windows named-pipe server and log-streaming support. One breaking change removes restore support from CreateContainer. This is a candidate for testing rather than a production upgrade target.
+
+**Source:** [containerd v2.4.0-rc.0](https://github.com/containerd/containerd/releases/tag/v2.4.0-rc.0) - September 15, 2026
+
+---
+
+## Crossplane v2.4.1 fixes a provider-blocking CRD handoff and pulls in upstream security patches
+
+Crossplane published [v2.4.1](https://github.com/crossplane/crossplane/releases/tag/v2.4.1) on September 15, alongside patch releases v2.3.6, v2.2.6, and v1.20.13 for its other supported branches. The headline fix addresses a package-revision handoff bug where an outgoing revision failed to relinquish control of a CRD, leaving the incoming revision stuck with "cannot establish control of object" and blocking provider pods from starting without manual intervention.
+
+The release also bumps `google.golang.org/grpc` and `golang.org/x/crypto` and moves to Go 1.26.7 to pull in upstream security fixes, making this a recommended patch for anyone running affected 2.4 clusters.
+
+**Source:** [Crossplane v2.4.1](https://github.com/crossplane/crossplane/releases/tag/v2.4.1) - September 15, 2026
+
+---
+
+## Backstage 1.55.0 ships scaffolder task recovery and a batch of breaking changes
+
+The Backstage project released [v1.55.0](https://github.com/backstage/backstage/releases/tag/v1.55.0) on September 15. Scaffolder task recovery lets a software template resume from its last completed step after a crash or timeout, using persisted step outputs instead of restarting the run. The release also lazy-loads core plugin pages to cut initial bundle size, trims redundant GitLab API calls for merge-request and push actions, and adds a streaming Kubernetes watcher interface backed by an async iterator.
+
+It carries several breaking changes that need planning: Elasticsearch search now requires 8.19 or later, some deprecated catalog APIs and configuration options are removed, and seven packages ship security fixes the maintainers flag for immediate upgrade.
+
+**Source:** [Backstage v1.55.0](https://github.com/backstage/backstage/releases/tag/v1.55.0) - September 15, 2026
+
+---
