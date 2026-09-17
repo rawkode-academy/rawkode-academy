@@ -1,0 +1,45 @@
+---
+title: "containerd 2.4 drops deprecated CRI options, Kubernetes hardens container storage, cert-manager patches dependencies"
+description: "containerd v2.4.0 removes long-deprecated CRI configuration in its first non-LTS release, Kubernetes v1.37 details alpha bind mount options and emptyDir permission modes, and cert-manager v1.20.4 absorbs upstream dependency CVE fixes."
+publishedAt: 2026-09-17
+authors:
+  - rawkode
+technologies:
+  - containerd
+  - kubernetes
+  - cert-manager
+---
+
+Three primary-source items landed in the last 24 hours, across the container runtime, the Kubernetes storage layer, and certificate management. It was a quiet window, so this is a short digest rather than a padded one.
+
+## containerd 2.4.0 removes deprecated CRI options in a non-LTS release
+
+The container runtime published [containerd 2.4.0](https://github.com/containerd/containerd/releases/tag/v2.4.0) on September 16. It is a non-LTS release that trades a shorter support window for earlier access to new features; maintainers still point stability-focused users at the 2.3 LTS line.
+
+The upgrade carries several breaking changes in the CRI plugin. The `enable_cdi` option is gone and Container Device Interface injection is now always on; `bin_dir` for CNI plugin paths is removed in favour of `bin_dirs`; and the deprecated OTLP tracing processor configuration is dropped in favour of standard OpenTelemetry environment variables. `restore` in `CreateContainer` and the `shim.Command` helper are also removed. On the feature side, the EROFS snapshotter gains a warm image cache and Prometheus metrics, the CRI mount manager now handles image mounts, and NRI plugins can read a container's image name and digest.
+
+Audit any custom CRI configuration for the removed `enable_cdi` and `bin_dir` keys before rolling 2.4 onto nodes, and weigh the shorter support window against staying on 2.3 LTS.
+
+**Source:** [containerd v2.4.0 release](https://github.com/containerd/containerd/releases/tag/v2.4.0) - September 16, 2026
+
+---
+
+## Kubernetes v1.37 adds alpha bind mount options and emptyDir permission modes
+
+A September 16 post on the Kubernetes blog details two alpha storage-security features that debut in [v1.37](https://kubernetes.io/blog/2026/09/16/kubernetes-v1-37-hardening-container-storage/): per-mount bind flags on `volumeMounts` and configurable permission bits on `emptyDir` volumes.
+
+Bind mount options (KEP-5855, feature gate `VolumeBindMountOptions`) add a `bindMountOptions` list to a container's `volumeMounts` that accepts `noexec`, `nodev`, and `nosuid`, applied per container by the runtime — so a workload can mount a writable volume `noexec` to block binary execution without a separate security layer. emptyDir permission modes (KEP-5502, feature gate `EmptyDirVolumeMode`) add an `emptyDir.mode` field taking octal bits from `0000` to `01777`, replacing the fixed `0777` behaviour and allowing, for example, the sticky bit on a shared scratch directory. Both gates are disabled by default and apply only on Linux nodes; bind mount options additionally require the runtime to support the CRI `mount_options` field, and the scheduler avoids nodes whose runtime does not.
+
+**Source:** [Kubernetes blog](https://kubernetes.io/blog/2026/09/16/kubernetes-v1-37-hardening-container-storage/) - September 16, 2026
+
+---
+
+## cert-manager 1.20.4 rebuilds on updated dependencies and fixes an ingress-shim label bug
+
+cert-manager released [v1.20.4](https://github.com/cert-manager/cert-manager/releases/tag/v1.20.4) on September 16, a patch on the 1.20 branch that pulls in upstream security fixes and corrects a caching regression in ingress-shim.
+
+The release rebuilds on a newer Go toolchain and updates `golang.org/x/net`, `golang.org/x/crypto`, and `google.golang.org/grpc` to absorb upstream CVE fixes; the maintainers note the remaining `x/crypto` advisories do not affect cert-manager. The functional change stops ingress-shim from stripping the applyset label off cached Ingress and Gateway objects, which matters for clusters that rely on applyset-based pruning of managed Certificate resources.
+
+**Source:** [cert-manager v1.20.4 release](https://github.com/cert-manager/cert-manager/releases/tag/v1.20.4) - September 16, 2026
+
+---
