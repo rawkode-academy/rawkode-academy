@@ -1,0 +1,48 @@
+---
+title: "RL memory scaling on Kubernetes, token-level DiT serving, and post-hoc GPU fault recovery"
+description: "A quiet release window surfaced three arXiv systems preprints dated September 17: VERA reclaims 31.6% of HPC memory headroom where Kubernetes VPA over-provisions, PixelFlow lifts DiT serving goodput up to 2.8x with token-level scheduling, and FP-Sketch localizes silent data corruption after FP16 GEMMs."
+publishedAt: 2026-09-18
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - prometheus
+---
+
+The last 24 hours produced no major project releases across cloud native, platform engineering, or AI/HPC infrastructure. What did land were three systems-research preprints on arXiv, each submitted September 17, that speak directly to how these platforms behave under load. All three are unreviewed v1 preprints, so the reported numbers below are the authors' own.
+
+## RL recommender reclaims HPC memory where Kubernetes VPA over-provisions
+
+A preprint from Ade Pramono, Jie Ren, and Ivy Peng, [VERA](https://arxiv.org/abs/2609.19936), formulates vertical memory scaling for HPC workloads on Kubernetes as a Markov Decision Process and trains a reinforcement learning agent on 3,353 real Prometheus traces. The premise: the default Vertical Pod Autoscaler cannot anticipate the phase-driven memory spikes of first-run jobs, so it either over-provisions or under-sizes.
+
+On a live Google Kubernetes Engine cluster running LAMMPS, graph analytics, in-memory analytics, and MLPerf 3D-UNet, the authors report the RL agent reclaimed 31.6% of available memory headroom with at most one OOM event. Over the same runs, VPA reclaimed -7.9% — it raised provisioning rather than tightening it — and its recommendation would still have driven 30 runs into OOM.
+
+For platform teams bin-packing batch and HPC jobs onto shared nodes, the paper quantifies how far VPA's retrospective heuristic sits from what an observation-driven policy can recover.
+
+**Source:** [VERA on arXiv](https://arxiv.org/abs/2609.19936) - September 17, 2026
+
+---
+
+## PixelFlow schedules diffusion-transformer serving at token granularity
+
+[PixelFlow](https://arxiv.org/abs/2609.20723), a distributed serving system described by Zhexiang Zhang and co-authors, manages Diffusion Transformer (DiT) image-generation workloads at the level of individual image tokens rather than whole requests. Request-level batching gives coarse control — batches too small to saturate GPU compute, or large enough to violate latency SLOs — while globally coordinated scheduling stalls GPUs that must synchronize before admitting new work.
+
+PixelFlow splits requests into variable-sized token partitions, places tokens to limit cross-GPU exchange, and overlaps the remaining transfers with computation by exploiting similarity across denoising steps. An SLO-aware scheduler groups GPUs with compatible latency targets so each group advances independently, synchronizing only when their combined resources are needed to admit a request. Evaluated on Stable Diffusion 3 and FLUX.1-dev on H100 GPUs, the authors report up to 43% higher SLO attainment and up to 2.8x the goodput of existing DiT serving systems.
+
+The argument for serving teams is that the batching unit itself, not just the batch size, is the lever for GPU efficiency under latency constraints.
+
+**Source:** [PixelFlow on arXiv](https://arxiv.org/abs/2609.20723) - September 17, 2026
+
+---
+
+## FP-Sketch localizes silent data corruption after FP16 GEMMs without touching the kernel
+
+[FP-Sketch](https://arxiv.org/abs/2609.19758), from Pranav Napolean, Vikas Srivastava, and Napolean Periathambi, is a verifier that runs after an unmodified tensor-core GEMM — half-precision operands, FP32 accumulation — to detect and localize silent data corruption (SDC) from faulty accelerators. Deployed mitigations act on whole nodes, and algorithm-based fault tolerance fused into a GEMM localizes at most one error per checksum.
+
+FP-Sketch uses a sum sketch to detect corruption on every call, then hashed first-moment sketches, confirmed by independent recomputation, to localize multiple corrupted entries with no false positives, emitting a coordinate and magnitude per fault for fleet diagnosis. Using NVBit instruction-level injection, the authors report that accumulator upsets are often only 2-9% of a typical entry — a regime output-side injection cannot reproduce — and that guarding the MLP down-projections of Llama-2-7B removed 99.4% (BF16) and 99.9% (FP16) of the perplexity damage from 2,048 bit flips. The clean-path probe cost 0.78-3.06 ms against GEMMs of 0.35-12.47 ms.
+
+It reframes SDC handling for large-scale training away from coarse node-level reaction and toward cheap, targeted verification of the specific matmuls that matter.
+
+**Source:** [FP-Sketch on arXiv](https://arxiv.org/abs/2609.19758) - September 17, 2026
+
+---
