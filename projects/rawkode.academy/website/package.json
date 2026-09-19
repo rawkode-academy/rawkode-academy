@@ -3,7 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"build-storybook": "storybook build",
-		"build": "astro check && astro build",
+		"build": "cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && astro check && astro build",
 		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev": "astro dev",
@@ -48,6 +48,7 @@
 		"@pothos/plugin-directives": "^4.3.0",
 		"@pothos/plugin-drizzle": "^0.17.0",
 		"@pothos/plugin-federation": "^4.4.2",
+		"@rawkodeacademy/design-system": "workspace:*",
 		"@rawkodeacademy/content": "workspace:*",
 		"@types/better-sqlite3": "^7.6.13",
 		"@unocss/astro": "^66.0.0",

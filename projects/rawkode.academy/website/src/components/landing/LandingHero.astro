@@ -4,6 +4,8 @@ import LiveDot from "@/components/ui/LiveDot.vue";
 import MLabel from "@/components/ui/MLabel.vue";
 import StatRow from "@/components/ui/StatRow.vue";
 import OnAirPanel from "@/components/landing/OnAirPanel.astro";
+import { Dialog as DesignSystemDialog } from "@rawkodeacademy/design-system/vue";
+import "@rawkodeacademy/design-system/styles.css";
 
 interface Stat {
 	value: string;
@@ -93,6 +95,29 @@ const upcomingLabel =
 				<EditorialButton variant="outline" size="lg" href="/technology/matrix" arrow>
 					Technology Matrix
 				</EditorialButton>
+				<DesignSystemDialog
+					client:load
+					title="Signal instead of slideware"
+					description="The Rawkode Academy learning loop is practical, opinionated, and built around the work."
+					size="sm"
+				>
+					<span slot="trigger">How we teach <span aria-hidden="true">↗</span></span>
+					<div class="landing-hero__dialog-copy">
+						<p>
+							Cloud native is too important to learn from disconnected demos.
+							We turn real systems work into a clear path from first principles
+							to confident decisions.
+						</p>
+						<ol>
+							<li><strong>See the trade-offs.</strong> No polished happy paths.</li>
+							<li><strong>Build the thing.</strong> Follow along with working systems.</li>
+							<li><strong>Make the call.</strong> Leave with judgment you can use.</li>
+						</ol>
+					</div>
+					<a slot="footer" class="landing-hero__dialog-link" href="/courses">
+						Explore courses <span aria-hidden="true">→</span>
+					</a>
+				</DesignSystemDialog>
 			</div>
 
 			<StatRow stats={stats} />
@@ -213,6 +238,44 @@ const upcomingLabel =
 		gap: 0.75rem;
 		flex-wrap: wrap;
 		margin-bottom: 3rem;
+	}
+
+	.landing-hero__dialog-copy {
+		display: grid;
+		gap: 1.25rem;
+		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 0.9375rem;
+		line-height: 1.55;
+	}
+
+	.landing-hero__dialog-copy p {
+		margin: 0;
+	}
+
+	.landing-hero__dialog-copy ol {
+		display: grid;
+		gap: 0.75rem;
+		margin: 0;
+		padding-left: 1.25rem;
+	}
+
+	.landing-hero__dialog-copy strong {
+		font-weight: 650;
+	}
+
+	.landing-hero__dialog-link {
+		color: var(--editorial-spruce);
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: none;
+	}
+
+	.landing-hero__dialog-link:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.25rem;
 	}
 
 	@media (max-width: 960px) {
