@@ -62,11 +62,12 @@ describe("Academy latest content", () => {
 
 		mockedGetCollection.mockImplementation(async (name, predicate) => {
 			const values = collections[name as keyof typeof collections] ?? [];
-			return (
-				typeof predicate === "function"
-					? values.filter((value) => predicate(value as never))
-					: values
-			) as never;
+			const collectionPredicate = predicate as
+				| ((value: ReturnType<typeof entry>) => boolean)
+				| undefined;
+			return (collectionPredicate
+				? values.filter(collectionPredicate)
+				: values) as never;
 		});
 
 		const latest = await getLatestContent(
