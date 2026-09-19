@@ -1,0 +1,44 @@
+import { sva } from "../../styled-system/css";
+
+/** Content primitives. The document wrapper owns header/main/footer landmarks. */
+export const academyLayout = sva({
+	slots: ["root", "hero", "container", "kicker", "title", "description", "section", "sectionHeader", "sectionTitle", "grid", "card", "cardMedia", "cardBody", "cardTitle", "meta", "prose", "sidebar", "split", "toolbar", "input", "button", "buttonSecondary", "tag", "empty", "notice", "breadcrumbs", "list", "table", "tableWrap"],
+	base: {
+		root: { color: "academy.text", backgroundColor: "academy.canvas", fontFamily: "academy-text", lineHeight: "body", paddingBottom: "16", minWidth: "0" },
+		hero: { paddingBlock: "12", paddingInline: "6", backgroundColor: "academy.ground", borderBottom: "hairline", borderColor: "academy.border", _lg: { paddingBlock: "20" } },
+		container: { maxWidth: "academy-shell", marginInline: "auto", width: "full", minWidth: "0" },
+		kicker: { color: "academy.accent", fontFamily: "academy-mono", fontSize: "xs", letterSpacing: "wide", textTransform: "uppercase", marginBottom: "4" },
+		title: { margin: "0", fontFamily: "academy-display", fontSize: "4xl", fontWeight: "bold", lineHeight: "tight", letterSpacing: "tight", overflowWrap: "anywhere", _lg: { fontSize: "6xl" } },
+		description: { maxWidth: "academy-copy", marginTop: "6", color: "academy.textSoft", fontSize: "lg", lineHeight: "relaxed" },
+		section: { maxWidth: "academy-shell", marginInline: "auto", paddingInline: "6", paddingTop: "12", minWidth: "0" },
+		sectionHeader: { display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "4", marginBottom: "6" },
+		sectionTitle: { margin: "0", fontFamily: "academy-display", fontSize: "2xl", fontWeight: "bold", lineHeight: "tight" },
+		grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 18rem), 1fr))", gap: "6" },
+		card: { display: "flex", flexDirection: "column", minWidth: "0", overflow: "hidden", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel", color: "academy.text", textDecoration: "none", transitionProperty: "border-color", transitionDuration: "fast", _hover: { borderColor: "academy.accent" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" }, _motionReduce: { transitionDuration: "none" } },
+		cardMedia: { width: "full", aspectRatio: "academy-video", objectFit: "cover", backgroundColor: "academy.ground" },
+		cardBody: { padding: "6", display: "flex", flexDirection: "column", gap: "3" },
+		cardTitle: { margin: "0", fontFamily: "academy-display", fontSize: "xl", fontWeight: "bold", lineHeight: "tight" },
+		meta: { display: "flex", flexWrap: "wrap", gap: "3", color: "academy.textMuted", fontSize: "sm", margin: "0" },
+		prose: { color: "academy.textSoft", fontSize: "lg", lineHeight: "relaxed", overflowWrap: "anywhere", "& > * + *": { marginTop: "6" }, "& h2, & h3, & h4": { color: "academy.text", fontFamily: "academy-display", fontWeight: "bold", lineHeight: "tight" }, "& h2": { fontSize: "3xl" }, "& h3": { fontSize: "2xl" }, "& a": { color: "academy.accent", textDecoration: "underline", textUnderlineOffset: "0.2em" }, "& img": { maxWidth: "full", height: "auto" }, "& pre": { maxWidth: "full", overflowX: "auto", padding: "6", borderRadius: "academy-m", backgroundColor: "academy.ground" } },
+		sidebar: { minWidth: "0", alignSelf: "start", padding: "6", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel" },
+		split: { display: "grid", gap: "8", minWidth: "0", _lg: { gridTemplateColumns: "minmax(0, 2fr) minmax(16rem, 1fr)" } },
+		toolbar: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3", marginBottom: "8" },
+		input: { minWidth: "0", minHeight: "11", paddingInline: "4", paddingBlock: "2", border: "hairline", borderColor: "academy.inputBorder", borderRadius: "academy-s", backgroundColor: "academy.input", color: "academy.text", font: "inherit", _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+		button: { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "2", minHeight: "11", paddingInline: "5", paddingBlock: "3", backgroundColor: "academy.accent", color: "academy.accentForeground", border: "academy-button", borderRadius: "academy-s", fontSize: "sm", fontWeight: "bold", textDecoration: "none", cursor: "pointer", _focusVisible: { outline: "focus", outlineColor: "academy.text", outlineOffset: "focus" }, _disabled: { opacity: "0.5", cursor: "not-allowed" } },
+		buttonSecondary: { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "2", minHeight: "11", paddingInline: "5", paddingBlock: "3", backgroundColor: "transparent", color: "academy.text", border: "hairline", borderColor: "academy.border", borderRadius: "academy-s", fontSize: "sm", fontWeight: "semibold", textDecoration: "none", cursor: "pointer", _hover: { backgroundColor: "academy.panel" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+		tag: { display: "inline-flex", alignItems: "center", paddingInline: "3", paddingBlock: "1", border: "hairline", borderColor: "academy.border", borderRadius: "academy-pill", fontSize: "xs", color: "academy.textSoft", backgroundColor: "academy.panel", textDecoration: "none" },
+		empty: { padding: "10", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", textAlign: "center", color: "academy.textSoft" },
+		notice: { padding: "6", borderInlineStart: "focus", borderColor: "academy.accent", backgroundColor: "academy.panel", color: "academy.textSoft" },
+		breadcrumbs: { display: "flex", flexWrap: "wrap", gap: "2", color: "academy.textMuted", fontSize: "sm", marginBottom: "6" },
+		list: { display: "grid", gap: "4", margin: "0", padding: "0", listStyle: "none" },
+		tableWrap: { width: "full", overflowX: "auto", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m" },
+		table: { width: "full", borderCollapse: "collapse", fontSize: "sm", "& th, & td": { padding: "4", textAlign: "start", borderBottom: "hairline", borderColor: "academy.border" }, "& th": { backgroundColor: "academy.ground", color: "academy.text", fontWeight: "semibold" }, "& td": { color: "academy.textSoft" } },
+	},
+	variants: {
+		width: {
+			wide: {},
+			reading: { container: { maxWidth: "academy-copy" }, section: { maxWidth: "academy-copy" } },
+		},
+	},
+	defaultVariants: { width: "wide" },
+});

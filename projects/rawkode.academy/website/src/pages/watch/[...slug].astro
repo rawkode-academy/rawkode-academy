@@ -23,6 +23,8 @@ import { videoTransitionName } from "@/utils/view-transition-name";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 import {
 	getStudioLiveState,
 	shouldMountStudioLiveGate,
@@ -31,6 +33,8 @@ import {
 import { env } from "cloudflare:workers";
 
 export const prerender = false;
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
 
 const { slug } = Astro.params;
 
@@ -433,8 +437,8 @@ const watchStatusLabel = isUpcomingLive
 	<link slot="extra-head" rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
-	<div class="watch-detail">
-		<div class="watch-detail__breadcrumb">
+	<div class:list={[layout.root, media.root, "watch-detail"]}>
+		<div class:list={[layout.container, layout.breadcrumbs, "watch-detail__breadcrumb"]}>
 			<a class="watch-detail__crumb" href="/watch">Watch</a>
 			<span class="watch-detail__sep">/</span>
 			{showEntry ? (
@@ -451,11 +455,11 @@ const watchStatusLabel = isUpcomingLive
 		</div>
 
 		<section
-			class="watch-detail__hero"
+			class:list={[layout.hero, media.hero, "watch-detail__hero"]}
 			aria-labelledby="watch-detail-title"
 			data-watch-detail-hero
 		>
-			<aside class="watch-detail__summary" aria-label="Video summary">
+			<aside class:list={[layout.sidebar, media.aside, "watch-detail__summary"]} aria-label="Video summary">
 				<div class="watch-detail__summary-copy">
 					<MLabel tone={isLive ? "amber" : "spruce"}>
 						{isLive && <LiveDot color="amber" />}
@@ -522,7 +526,7 @@ const watchStatusLabel = isUpcomingLive
 			</aside>
 
 			<div
-				class="watch-detail__player-wrap"
+				class:list={[media.frame, "watch-detail__player-wrap"]}
 				style={`view-transition-name: ${videoTransitionName(video.data.slug)}`}
 			>
 				<div id="watch-detail-player" class="watch-detail__player-frame">
@@ -569,7 +573,7 @@ const watchStatusLabel = isUpcomingLive
 			</div>
 		</section>
 
-		<div class="watch-detail__body">
+		<div class:list={[layout.container, layout.section, media.body, "watch-detail__body"]}>
 			<VideoReactions server:defer videoId={video.data.slug} />
 
 			<section class="watch-detail__overview">

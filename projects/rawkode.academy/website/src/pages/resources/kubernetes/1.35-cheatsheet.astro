@@ -3,6 +3,8 @@ import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import K8sCheatsheetCTA from "@/components/lead-magnet/K8sCheatsheetCTA.vue";
 import { createLearnerId } from "@/actions/newsletter";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
 
@@ -48,24 +50,26 @@ const hasAccess =
 const pageTitle = "Kubernetes 1.35 Cheat Sheet";
 const pageDescription =
 	"A guide to Kubernetes 1.35 - breaking changes, new GA features, AI/ML scheduler primitives, and a migration checklist for cloud native engineers.";
+const layout = academyLayout({ width: "reading" });
 ---
 
 <Page title={pageTitle} description={pageDescription}>
+	<div class={layout.root}>
 	{hasAccess ? (
 		<!-- Cheatsheet Content for Subscribed Users -->
-		<section class="py-12 px-4 sm:py-16 lg:py-20">
-			<div class="mx-auto max-w-4xl w-full">
+		<section class:list={[layout.section, "py-12 px-4 sm:py-16 lg:py-20"]}>
+			<div class:list={[layout.container, "mx-auto max-w-4xl w-full"]}>
 				<!-- Success Header -->
-				<div class="text-center mb-8 sm:mb-12">
+				<div class:list={[layout.hero, "text-center mb-8 sm:mb-12"]}>
 					<div class="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 dark:bg-green-900/30 mb-4 sm:mb-6">
 						<svg class="w-8 h-8 sm:w-10 sm:h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
 						</svg>
 					</div>
-					<h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-content mb-3 sm:mb-4">
+					<h1 class:list={[layout.title, "text-2xl sm:text-3xl md:text-4xl font-bold text-primary-content mb-3 sm:mb-4"]}>
 						Your Kubernetes 1.35 Cheat Sheet
 					</h1>
-					<p class="text-base sm:text-lg text-muted max-w-2xl mx-auto px-2">
+					<p class:list={[layout.description, "text-base sm:text-lg text-muted max-w-2xl mx-auto px-2"]}>
 						Thank you for joining the Rawkode Academy community. Here's everything you need to know about Kubernetes 1.35.
 					</p>
 				</div>
@@ -88,7 +92,7 @@ const pageDescription =
 				</div>
 
 				<!-- Cheatsheet Content Card -->
-				<div class="paper-panel rounded-sm sm:rounded-sm p-4 sm:p-6 md:p-8 lg:p-12 mb-8 sm:mb-12">
+				<div class:list={[layout.card, "paper-panel rounded-sm sm:rounded-sm p-4 sm:p-6 md:p-8 lg:p-12 mb-8 sm:mb-12"]}>
 					<h2 class="text-xl sm:text-2xl font-bold text-primary-content mb-6 sm:mb-8">
 						What's New in Kubernetes 1.35
 					</h2>
@@ -278,8 +282,8 @@ const pageDescription =
 								</div>
 							</div>
 							<!-- Desktop: Table view -->
-							<div class="hidden sm:block overflow-x-auto -mx-4 sm:mx-0">
-								<table class="w-full text-sm min-w-[500px]">
+							<div class:list={[layout.tableWrap, "hidden sm:block overflow-x-auto -mx-4 sm:mx-0"]}>
+								<table class:list={[layout.table, "w-full text-sm min-w-[500px]"]}>
 									<thead>
 										<tr class="border-b border-surface">
 											<th class="text-left py-3 px-4 text-primary-content">Feature Gate</th>
@@ -344,17 +348,17 @@ const pageDescription =
 		</section>
 	) : (
 		<!-- Lead Magnet CTA for Non-Subscribers -->
-		<section class="py-10 px-4 sm:py-12 md:py-16 lg:py-20">
-			<div class="mx-auto max-w-4xl text-center mb-8 sm:mb-12">
-				<h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-content mb-4 sm:mb-6 font-display px-2">
+		<section class:list={[layout.section, "py-10 px-4 sm:py-12 md:py-16 lg:py-20"]}>
+			<div class:list={[layout.container, "mx-auto max-w-4xl text-center mb-8 sm:mb-12"]}>
+				<h1 class:list={[layout.title, "text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-primary-content mb-4 sm:mb-6 font-display px-2"]}>
 					Be Ready for <span class="text-primary">Kubernetes 1.35</span>
 				</h1>
-				<p class="text-base sm:text-lg md:text-xl text-secondary-content max-w-2xl mx-auto px-2">
+				<p class:list={[layout.description, "text-base sm:text-lg md:text-xl text-secondary-content max-w-2xl mx-auto px-2"]}>
 					The biggest Kubernetes release of 2025 is coming. Don't get caught off guard by breaking changes.
 				</p>
 			</div>
 
-			<div class="mx-auto max-w-7xl">
+			<div class:list={[layout.container, "mx-auto max-w-7xl"]}>
 				<K8sCheatsheetCTA
 					client:visible
 					isSignedIn={!!user}
@@ -365,8 +369,8 @@ const pageDescription =
 			</div>
 
 			<!-- Additional context -->
-			<div class="mx-auto max-w-4xl mt-10 sm:mt-12 md:mt-16">
-				<div class="paper-panel rounded-sm sm:rounded-sm p-5 sm:p-6 md:p-8">
+			<div class:list={[layout.container, "mx-auto max-w-4xl mt-10 sm:mt-12 md:mt-16"]}>
+				<div class:list={[layout.card, "paper-panel rounded-sm sm:rounded-sm p-5 sm:p-6 md:p-8"]}>
 					<h2 class="text-lg sm:text-xl font-semibold text-primary-content mb-4">
 						Why You Need This Cheat Sheet
 					</h2>
@@ -400,4 +404,5 @@ const pageDescription =
 			</div>
 		</section>
 	)}
+	</div>
 </Page>

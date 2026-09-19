@@ -5,6 +5,8 @@ import EmailPreferences from "@/components/settings/EmailPreferences.vue";
 import TestEmailButton from "@/components/settings/TestEmailButton.vue";
 import Avatar from "vue-boring-avatars";
 import { createLearnerId } from "@/actions/newsletter";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
 
@@ -58,14 +60,21 @@ try {
 } catch (e) {
 	console.error("Failed to fetch email preferences", e);
 }
+const layout = academyLayout({ width: "reading" });
 ---
 
 <Page title="Settings - Rawkode Academy" description="Manage your account settings and email preferences.">
-	<div class="max-w-3xl mx-auto py-8 px-4">
-		<h1 class="text-3xl font-bold text-primary-content mb-8">
+	<div class:list={[layout.root, "academy-settings"]}>
+		<section class={layout.hero}>
+			<div class={layout.container}>
+				<h1 class={layout.title}>
 			Settings
 		</h1>
+				<p class={layout.description}>Manage your profile and the emails you receive.</p>
+			</div>
+		</section>
 
+		<div class={layout.section}>
 		<div class="space-y-8">
 			<!-- Profile Section -->
 			<section class="rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)] overflow-hidden">
@@ -135,6 +144,17 @@ try {
 						<TestEmailButton client:load />
 					</div>
 				</section>
-			</div>
 		</div>
-	</Page>
+		</div>
+	</div>
+</Page>
+
+<style>
+	.academy-settings {
+		--surface-card: var(--colors-academy-panel);
+		--surface-card-muted: var(--colors-academy-ground);
+		--surface-border: var(--colors-academy-border);
+		--text-primary-content: var(--colors-academy-text);
+		--text-muted: var(--colors-academy-text-muted);
+	}
+</style>

@@ -15,6 +15,9 @@ import PagerStrip from "@/components/ui/PagerStrip.astro";
 
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
+import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
 export const prerender = false;
 
@@ -237,6 +240,8 @@ const activeFilterSummary = [
 const pageTitle = "Cloud Native & Kubernetes Articles";
 const pageDescription =
 	"Long-form articles, tutorials, and field reports on cloud native engineering — Kubernetes, eBPF, containers, supply chain — from Rawkode Academy.";
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
@@ -256,105 +261,32 @@ const pageDescription =
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Articles (Atom)" href="/api/feeds/articles.atom" />
 	</Fragment>
 
-	<div class="read-page">
-		<ReadMasthead />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Field notes" title="Read" description="Long-form articles, tutorials, and field reports for engineers shipping production systems." />
 
 		{featured && (
-			<FeaturedArticle
-				href={`/read/${featured.id}`}
-				kicker={getTypeBadgeConfig(featured.data.type || "tutorial").label}
-				dispatchNum={dispatchNumFor(featuredIndex)}
-				title={featured.data.title}
-				dek={compactCopy(
-					featured.data.openGraph?.subtitle || featured.data.description,
-					180,
-				)}
-				author={featuredAuthors.map((a) => a.data.name).join(", ") || undefined}
-				date={dateFormatter.format(featured.data.publishedAt)}
-				readingTime={calculateReadingTime(featured.body || "").text}
-				cover={featured.data.cover}
-			/>
+			<section class={styles.section}><div class={styles.container}>
+				<article class={catalog.featured}>
+					<div class={catalog.featuredBody}>
+						<p class={catalog.featuredKicker}>{getTypeBadgeConfig(featured.data.type || "tutorial").label} · Dispatch {dispatchNumFor(featuredIndex)}</p>
+						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
+						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
+						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · {dateFormatter.format(featured.data.publishedAt)} · {calculateReadingTime(featured.body || "").text}</p>
+						<a class={styles.button} href={`/read/${featured.id}`}>Read the article →</a>
+					</div>
+				</article>
+			</div></section>
 		)}
 
-		<FilterRail
-			label="Type"
-			ariaLabel="Article types"
-			topics={typeItems}
-			activeIndex={activeTypeIndex}
-		/>
-
-		<FilterRail
-			label="Topics"
-			ariaLabel="Article topics"
-			topics={topicItems}
-			activeIndex={activeTopicIndex}
-		/>
-
-		{isFiltered && (
-			<div class="read-filter-status">
-				<MLabel>
-					{visibleArticles.length}{" "}
-					{visibleArticles.length === 1 ? "article" : "articles"}
-					{activeFilterSummary ? ` · ${activeFilterSummary}` : ""}
-				</MLabel>
-				<div class="read-filter-status__links">
-					{selectedTopic && (
-						<a
-							class="read-filter-status__link"
-							href={`/technology/${selectedTopic}`}
-						>
-							View technology hub →
-						</a>
-					)}
-					<a class="read-filter-status__link" href="/read">Clear filters</a>
-				</div>
+		<section class={styles.section}><div class={styles.container}>
+			<div class={catalog.filters} aria-label="Article filters">
+				{typeItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTypeIndex ? "page" : undefined}>{item.label}</a>)}
+				{topicItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTopicIndex ? "page" : undefined}>{item.label}</a>)}
 			</div>
-		)}
-
-		{visibleArticles.length === 0 && (
-			<div class="read-empty">
-				<EmptyState title="No articles match these filters.">
-					<Fragment slot="actions">
-						<a href="/read">Browse all articles →</a>
-					</Fragment>
-				</EmptyState>
-			</div>
-		)}
-
-		<div class="read-grid">
-			{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => (
-				<ArticleGridItem
-					href={`/read/${article.id}`}
-					dispatchNum={dispatchNum}
-					kicker={getTypeBadgeConfig(article.data.type || "tutorial").label}
-					title={article.data.title}
-					dek={compactCopy(
-						article.data.openGraph?.subtitle ||
-							article.data.subtitle ||
-							article.data.description,
-						130,
-					)}
-					author={author}
-					date={dateFormatter.format(article.data.publishedAt)}
-					readingTime={readingTime}
-					cover={article.data.cover}
-				/>
-			))}
-		</div>
-
-		{totalPages > 1 && (
-			<div class="read-pager">
-				<PagerStrip
-					page={page}
-					totalPages={totalPages}
-					prevHref={page > 1 ? readPathFor(page - 1) : undefined}
-					nextHref={hasNextPage ? readPathFor(page + 1) : undefined}
-					ariaLabel="Article pages"
-				/>
-			</div>
-		)}
-
-		<ReadFooter />
+			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
+			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={styles.grid}>{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => <AcademyCatalogCard href={`/read/${article.id}`} title={article.data.title} description={compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 130)} meta={[`${getTypeBadgeConfig(article.data.type || "tutorial").label} · ${dispatchNum}`, author ?? "Rawkode Academy", dateFormatter.format(article.data.publishedAt), readingTime]} />)}</div>}
+			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={styles.buttonSecondary} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={styles.button} href={readPathFor(page + 1)}>Next →</a>}</nav>}
+		</div></section>
 	</div>
 </Page>
 

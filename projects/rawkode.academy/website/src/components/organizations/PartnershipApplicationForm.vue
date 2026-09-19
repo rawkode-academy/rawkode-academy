@@ -7,126 +7,110 @@
 		<p v-if="error" class="application-form__error" role="alert">{{ error }}</p>
 
 		<div class="application-form__row application-form__row--split">
-			<label class="application-form__field">
-				<span>Name</span>
-				<input
+			<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.name)" :disabled="loading">
+				<Field.Label>Name</Field.Label>
+				<Field.Input
 					v-model="name"
 					type="text"
 					name="name"
 					autocomplete="name"
 					required
-					:aria-invalid="Boolean(fieldErrors.name)"
-					:disabled="loading"
 				/>
-				<small v-if="fieldErrors.name" class="application-form__field-error">{{ fieldErrors.name }}</small>
-			</label>
-			<label class="application-form__field">
-				<span>Work email</span>
-				<input
+				<Field.ErrorText v-if="fieldErrors.name" class="application-form__field-error">{{ fieldErrors.name }}</Field.ErrorText>
+			</Field.Root>
+			<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.email)" :disabled="loading">
+				<Field.Label>Work email</Field.Label>
+				<Field.Input
 					v-model="email"
 					type="email"
 					name="email"
 					autocomplete="email"
 					required
-					:aria-invalid="Boolean(fieldErrors.email)"
-					:disabled="loading"
 				/>
-				<small v-if="fieldErrors.email" class="application-form__field-error">{{ fieldErrors.email }}</small>
-			</label>
+				<Field.ErrorText v-if="fieldErrors.email" class="application-form__field-error">{{ fieldErrors.email }}</Field.ErrorText>
+			</Field.Root>
 		</div>
 
 		<div class="application-form__row application-form__row--split">
-			<label class="application-form__field">
-				<span>Company and product</span>
-				<input
+			<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.company)" :disabled="loading">
+				<Field.Label>Company and product</Field.Label>
+				<Field.Input
 					v-model="company"
 					type="text"
 					name="company"
 					autocomplete="organization"
 					required
-					:aria-invalid="Boolean(fieldErrors.company)"
-					:disabled="loading"
 				/>
-				<small v-if="fieldErrors.company" class="application-form__field-error">{{ fieldErrors.company }}</small>
-			</label>
-			<label class="application-form__field">
-				<span>Preferred route</span>
+				<Field.ErrorText v-if="fieldErrors.company" class="application-form__field-error">{{ fieldErrors.company }}</Field.ErrorText>
+			</Field.Root>
+			<Field.Root class="application-form__field" :disabled="loading">
+				<Field.Label>Preferred route</Field.Label>
 				<select v-model="path" name="path" :disabled="loading">
 					<option v-for="option in applicationPaths" :key="option" :value="option">
 						{{ option }}
 					</option>
 				</select>
-			</label>
+			</Field.Root>
 		</div>
 
-		<label class="application-form__field">
-			<span>The developers or platform teams you need to reach</span>
-			<input
+		<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.targetDevelopers)" :disabled="loading">
+			<Field.Label>The developers or platform teams you need to reach</Field.Label>
+			<Field.Input
 				v-model="targetDevelopers"
 				type="text"
 				name="targetDevelopers"
 				required
-				:aria-invalid="Boolean(fieldErrors.targetDevelopers)"
-				:disabled="loading"
 			/>
-			<small v-if="fieldErrors.targetDevelopers" class="application-form__field-error">{{ fieldErrors.targetDevelopers }}</small>
-		</label>
+			<Field.ErrorText v-if="fieldErrors.targetDevelopers" class="application-form__field-error">{{ fieldErrors.targetDevelopers }}</Field.ErrorText>
+		</Field.Root>
 
-		<label class="application-form__field">
-			<span>Technical buyer <em>(optional)</em></span>
-			<input
+		<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.technicalBuyer)" :disabled="loading">
+			<Field.Label>Technical buyer <em>(optional)</em></Field.Label>
+			<Field.Input
 				v-model="technicalBuyer"
 				type="text"
 				name="technicalBuyer"
-				:aria-invalid="Boolean(fieldErrors.technicalBuyer)"
-				:disabled="loading"
 			/>
-			<small v-if="fieldErrors.technicalBuyer" class="application-form__field-error">{{ fieldErrors.technicalBuyer }}</small>
-		</label>
+			<Field.ErrorText v-if="fieldErrors.technicalBuyer" class="application-form__field-error">{{ fieldErrors.technicalBuyer }}</Field.ErrorText>
+		</Field.Root>
 
-		<label class="application-form__field">
-			<span>Your current adoption challenge</span>
-			<textarea
+		<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.challenge)" :disabled="loading">
+			<Field.Label>Your current adoption challenge</Field.Label>
+			<Field.Textarea
 				v-model="challenge"
 				name="challenge"
 				rows="4"
 				required
-				:aria-invalid="Boolean(fieldErrors.challenge)"
-				:disabled="loading"
-			></textarea>
-			<small v-if="fieldErrors.challenge" class="application-form__field-error">{{ fieldErrors.challenge }}</small>
-		</label>
+			/>
+			<Field.ErrorText v-if="fieldErrors.challenge" class="application-form__field-error">{{ fieldErrors.challenge }}</Field.ErrorText>
+		</Field.Root>
 
-		<label class="application-form__field">
-			<span>Working demo, docs, or repository <em>(optional)</em></span>
-			<input
+		<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.proofAssets)" :disabled="loading">
+			<Field.Label>Working demo, docs, or repository <em>(optional)</em></Field.Label>
+			<Field.Input
 				v-model="proofAssets"
 				type="text"
 				name="proofAssets"
-				:aria-invalid="Boolean(fieldErrors.proofAssets)"
-				:disabled="loading"
 			/>
-			<small v-if="fieldErrors.proofAssets" class="application-form__field-error">{{ fieldErrors.proofAssets }}</small>
-		</label>
+			<Field.ErrorText v-if="fieldErrors.proofAssets" class="application-form__field-error">{{ fieldErrors.proofAssets }}</Field.ErrorText>
+		</Field.Root>
 
-		<label class="application-form__field">
-			<span>Budget and preferred quarter <em>(optional)</em></span>
-			<input
+		<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.budgetQuarter)" :disabled="loading">
+			<Field.Label>Budget and preferred quarter <em>(optional)</em></Field.Label>
+			<Field.Input
 				v-model="budgetQuarter"
 				type="text"
 				name="budgetQuarter"
 				placeholder="For example: Q4 2026, £4k/month"
-				:aria-invalid="Boolean(fieldErrors.budgetQuarter)"
-				:disabled="loading"
 			/>
-			<small v-if="fieldErrors.budgetQuarter" class="application-form__field-error">{{ fieldErrors.budgetQuarter }}</small>
-		</label>
+			<Field.ErrorText v-if="fieldErrors.budgetQuarter" class="application-form__field-error">{{ fieldErrors.budgetQuarter }}</Field.ErrorText>
+		</Field.Root>
 
-		<label class="application-form__field">
-			<span>Links worth a look <em>(optional)</em></span>
-			<input v-model="links" type="text" name="links" :aria-invalid="Boolean(fieldErrors.links)" :disabled="loading" />
-			<small v-if="fieldErrors.links" class="application-form__field-error">{{ fieldErrors.links }}</small>
-		</label>
+		<Field.Root class="application-form__field" :invalid="Boolean(fieldErrors.links)" :disabled="loading">
+			<Field.Label>Links worth a look <em>(optional)</em></Field.Label>
+			<Field.Input v-model="links" type="text" name="links" />
+			<Field.ErrorText v-if="fieldErrors.links" class="application-form__field-error">{{ fieldErrors.links }}</Field.ErrorText>
+		</Field.Root>
 
 		<button type="submit" class="editorial-button" :disabled="loading">
 			{{ loading ? "Sending application..." : "Submit application" }}
@@ -135,6 +119,7 @@
 </template>
 
 <script setup lang="ts">
+import { Field } from "@ark-ui/vue/field";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { actions, isInputError } from "astro:actions";
 import { applicationPaths, type ApplicationPath } from "@/lib/partnerships";
@@ -246,7 +231,7 @@ async function submit() {
 	width: 100%;
 }
 
-.application-form__field span {
+.application-form__field :is(label, [data-part="label"]) {
 	font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 	font-size: 0.7rem;
 	font-weight: 700;

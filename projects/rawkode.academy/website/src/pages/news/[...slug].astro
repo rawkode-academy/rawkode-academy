@@ -1,4 +1,7 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 import {
 	type CollectionEntry,
 	getCollection,
@@ -137,7 +140,7 @@ const categoryTrail = tags[0]?.label;
 		/>
 	</Fragment>
 
-	<div class="news-detail">
+	<div class={doc.root}>
 		<ArticleHeader
 			breadcrumbs={breadcrumbItems}
 			dispatchNum={dispatchNum}
@@ -157,13 +160,13 @@ const categoryTrail = tags[0]?.label;
 			/>
 		</ArticleHeader>
 
-		<div class="news-detail__body">
-			<article class="prose news-prose">
+		<div class={doc.reading}>
+			<article class={styles.prose}>
 				<Content />
 			</article>
 
 			<NewsletterCTA
-				class="my-12 not-prose"
+				class={doc.section}
 				audience="news"
 				badge="Cloud Native news weekly"
 				headline="Stay on top of cloud-native releases"
@@ -171,12 +174,12 @@ const categoryTrail = tags[0]?.label;
 			/>
 
 			{tags.length > 0 && (
-				<footer class="news-detail__tags">
+				<footer class={doc.rule}>
 					<MLabel>Tagged in</MLabel>
-					<ul class="news-detail__taglist">
+					<ul class={doc.tagList}>
 						{tags.map((tag) => (
 							<li>
-								<a class="news-detail__tag" href={tag.href} rel="tag">
+								<a class={doc.tag} href={tag.href} rel="tag">
 									#{tag.label}
 								</a>
 							</li>
@@ -189,100 +192,3 @@ const categoryTrail = tags[0]?.label;
 		<RelatedNews currentStory={article} limit={3} />
 	</div>
 </Page>
-
-<style>
-	.news-detail {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.news-detail__body {
-		max-width: 54rem;
-		margin: 0 auto;
-		padding: var(--space-section-pad-y) var(--space-section-pad-x) var(--space-page-pad-bottom);
-	}
-
-	.news-detail__body :global(.prose) {
-		max-width: 100%;
-	}
-
-	.news-detail__body :global(.news-prose) {
-		font-size: 1rem;
-		line-height: 1.72;
-		color: var(--editorial-ink);
-	}
-
-	.news-detail__body :global(.news-prose h3) {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-style: normal;
-		font-size: clamp(1.35rem, 2vw, 1.625rem);
-		font-weight: 650;
-		letter-spacing: 0;
-		line-height: 1.18;
-		color: var(--editorial-ink);
-		margin: 0 0 1.25rem;
-		text-wrap: balance;
-	}
-
-	.news-detail__body :global(.news-prose h3:not(:first-child)) {
-		margin-top: 2.75rem;
-	}
-
-	.news-detail__body :global(.news-prose p),
-	.news-detail__body :global(.news-prose > p:first-of-type),
-	.news-detail__body :global(.news-prose li) {
-		font-size: 1rem;
-		line-height: 1.72;
-		color: var(--editorial-ink);
-		margin-bottom: 1rem;
-	}
-
-	.news-detail__tags {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.75rem 1rem;
-		margin-top: 2.5rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.news-detail__taglist {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		list-style: none;
-		margin: 0;
-		padding: 0;
-	}
-
-	.news-detail__tag {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.65rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		padding: 0.2rem 0.5rem;
-		color: var(--editorial-ink-soft);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
-		text-decoration: none;
-		transition: color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.news-detail__tag:hover {
-		color: var(--editorial-ink);
-		border-color: var(--editorial-ink);
-	}
-
-	@media (max-width: 720px) {
-		.news-detail__body {
-			padding: 2rem 1.25rem 3rem;
-		}
-
-		.news-detail__body :global(.news-prose h3) {
-			font-size: 1.25rem;
-		}
-	}
-</style>

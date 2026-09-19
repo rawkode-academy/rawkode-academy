@@ -1,0 +1,68 @@
+import { sva } from "../../styled-system/css";
+
+/**
+ * Listing-specific pieces that sit on top of the shared Academy layout.
+ * Keep these intentionally presentational: route data, filtering, and SEO
+ * remain in Astro pages.
+ */
+export const academyCatalog = sva({
+	slots: [
+		"featured",
+		"featuredMedia",
+		"featuredImage",
+		"featuredBody",
+		"featuredKicker",
+		"featuredTitle",
+		"featuredDescription",
+		"filters",
+		"filterLink",
+		"rows",
+		"row",
+		"rowIndex",
+		"rowMain",
+		"rowTitle",
+		"rowDescription",
+		"rowMeta",
+		"avatar",
+		"logo",
+		"statGrid",
+		"stat",
+		"statValue",
+		"statLabel",
+		"pager",
+	],
+	base: {
+		featured: {
+			display: "grid",
+			gap: "6",
+			padding: "6",
+			border: "hairline",
+			borderColor: "academy.border",
+			borderRadius: "academy-l",
+			background: "academy.panel",
+			_lg: { gridTemplateColumns: "minmax(0, 1.2fr) minmax(280px, .8fr)", gap: "9", padding: "8" },
+		},
+		featuredMedia: { display: "block", overflow: "hidden", borderRadius: "academy-m", background: "academy.ground", aspectRatio: "academy-video" },
+		featuredImage: { width: "full", height: "full", objectFit: "cover" },
+		featuredBody: { display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: "4" },
+		featuredKicker: { color: "academy.accent", fontFamily: "academy-mono", fontSize: "xs", fontWeight: "medium", letterSpacing: "widest", textTransform: "uppercase" },
+		featuredTitle: { margin: "0", color: "academy.text", fontFamily: "academy-display", fontSize: "3xl", fontWeight: "bold", letterSpacing: "tight", lineHeight: "tight", textWrap: "balance", _lg: { fontSize: "4xl" } },
+		featuredDescription: { margin: "0", color: "academy.textSoft", fontSize: "md", lineHeight: "body" },
+		filters: { display: "flex", flexWrap: "wrap", gap: "2", alignItems: "center" },
+		filterLink: { display: "inline-flex", alignItems: "center", minHeight: "9", paddingInline: "3", border: "hairline", borderColor: "academy.border", borderRadius: "academy-pill", color: "academy.textMuted", fontFamily: "academy-mono", fontSize: "xs", textDecoration: "none", _hover: { borderColor: "academy.accent", color: "academy.text" }, "&[aria-current='page']": { borderColor: "academy.accent", background: "academy.accent", color: "academy.accentForeground" } },
+		rows: { display: "grid", gap: "3" },
+		row: { display: "grid", gridTemplateColumns: "auto minmax(0, 1fr) auto", gap: "4", alignItems: "start", padding: "5", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", background: "academy.panel", color: "academy.text", textDecoration: "none", transitionProperty: "colors", transitionDuration: "fast", _hover: { borderColor: "academy.accent", background: "academy.ground", transform: "translateY(-1px)" }, _motionReduce: { transitionDuration: "none", _hover: { transform: "none" } } },
+		rowIndex: { color: "academy.accent", fontFamily: "academy-mono", fontSize: "xs", paddingBlockStart: "1" },
+		rowMain: { minWidth: "0" },
+		rowTitle: { display: "block", color: "academy.text", fontFamily: "academy-display", fontSize: "xl", fontWeight: "semibold", lineHeight: "tight" },
+		rowDescription: { display: "block", marginBlockStart: "2", color: "academy.textSoft", fontSize: "sm", lineHeight: "body" },
+		rowMeta: { display: "flex", flexWrap: "wrap", gap: "2", color: "academy.textMuted", fontFamily: "academy-mono", fontSize: "xs", lineHeight: "body", textTransform: "uppercase" },
+		avatar: { width: "12", height: "12", borderRadius: "full", objectFit: "cover", background: "academy.ground", border: "hairline", borderColor: "academy.border" },
+		logo: { width: "12", height: "12", objectFit: "contain", padding: "2", borderRadius: "academy-s", background: "academy.ground", border: "hairline", borderColor: "academy.border" },
+		statGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "3", _lg: { gridTemplateColumns: "repeat(4, minmax(0, 1fr))" } },
+		stat: { padding: "4", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", background: "academy.panel" },
+		statValue: { display: "block", color: "academy.text", fontFamily: "academy-display", fontSize: "2xl", fontWeight: "bold", lineHeight: "tight" },
+		statLabel: { display: "block", marginBlockStart: "1", color: "academy.textMuted", fontFamily: "academy-mono", fontSize: "xs", textTransform: "uppercase" },
+		pager: { display: "flex", justifyContent: "space-between", gap: "3", marginBlockStart: "8" },
+	},
+});

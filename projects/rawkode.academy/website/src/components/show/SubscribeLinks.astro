@@ -1,4 +1,6 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 /**
  * Static subscribe links. The FontAwesome packages are only imported in
  * the frontmatter (server-side), so the icons render as inline SVG with
@@ -41,11 +43,11 @@ const iconFor = (iconType: string): IconDefinition => icons[iconType] ?? faLink;
 
 {
 	links.length > 0 && (
-		<div class="flex flex-col gap-3">
-			<p class="text-sm font-semibold uppercase tracking-wide text-muted">
+		<div class={doc.stack}>
+			<p class={doc.kicker}>
 				Subscribe
 			</p>
-			<div class="flex flex-wrap gap-2">
+			<div class={doc.actions}>
 				{links.map((link) => {
 					const icon = iconFor(link.icon);
 					return (
@@ -53,12 +55,12 @@ const iconFor = (iconType: string): IconDefinition => icons[iconType] ?? faLink;
 							href={link.url}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="hairline-chip gap-2 rounded-sm px-4 py-2 text-sm font-medium text-secondary-content transition-smooth focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
+							class={doc.tag}
 							data-subscribe-platform={link.platform}
 							data-subscribe-icon={link.icon}
 						>
 							<svg
-								class="h-4 w-4"
+								class={doc.iconSmall}
 								viewBox={`0 0 ${icon.icon[0]} ${icon.icon[1]}`}
 								fill="currentColor"
 								aria-hidden="true"

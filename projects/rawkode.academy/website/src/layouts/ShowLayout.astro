@@ -4,6 +4,8 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import ShowNav from "@/components/show/ShowNav.astro";
 import type { ShowNavItem } from "@/lib/shows/types";
 import Page from "@/wrappers/page.astro";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 interface Props {
 	show: CollectionEntry<"shows">;
@@ -15,6 +17,7 @@ interface Props {
 
 const { show, nav, active = null, title, description } = Astro.props;
 const activeTab = nav.find((n) => n.slug === active);
+const layout = academyLayout({ width: "wide" });
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
@@ -32,8 +35,9 @@ const breadcrumbElements = [
 ---
 
 <Page title={title} description={description ?? show.data.description ?? title}>
+	<div class={layout.root}>
 	<section
-		class="relative overflow-hidden"
+		class:list={[layout.hero, "relative overflow-hidden"]}
 		style="border-bottom: 1px solid var(--surface-border)"
 	>
 		<div
@@ -41,10 +45,10 @@ const breadcrumbElements = [
 			aria-hidden="true"
 		>
 		</div>
-		<div class="relative mx-auto max-w-7xl content-px pb-6 pt-8">
+		<div class:list={[layout.container, "relative mx-auto max-w-7xl content-px pb-6 pt-8"]}>
 			<Breadcrumb elements={breadcrumbElements} />
 			<h1
-				class="mt-6 text-3xl font-extrabold tracking-tight text-primary-content sm:text-4xl"
+				class:list={[layout.title, "mt-6 text-3xl font-extrabold tracking-tight text-primary-content sm:text-4xl"]}
 			>
 				{show.data.name}
 			</h1>
@@ -53,9 +57,10 @@ const breadcrumbElements = [
 
 	<ShowNav showId={show.data.id} nav={nav} active={active} />
 
-	<section class="section-py" style="background: var(--surface-base)">
-		<div class="mx-auto max-w-7xl content-px">
+	<section class:list={[layout.section, "section-py"]} style="background: var(--surface-base)">
+		<div class:list={[layout.container, "mx-auto max-w-7xl content-px"]}>
 			<slot />
 		</div>
 	</section>
+	</div>
 </Page>

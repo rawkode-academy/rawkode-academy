@@ -1,0 +1,80 @@
+import { sva } from "../../styled-system/css";
+
+/**
+ * Presentational additions for the Academy's informational and commercial
+ * pages. Structural sizing remains in academyLayout so collection and
+ * account routes share the same page contract.
+ */
+export const academyMarketing = sva({
+	slots: [
+		"actions",
+		"card",
+		"cardBody",
+		"eyebrow",
+		"lead",
+		"meta",
+		"pill",
+		"statGrid",
+		"stat",
+		"statValue",
+		"statLabel",
+		"faq",
+		"utility",
+		"utilityMark",
+		"utilityActions",
+		"contact",
+		"contactRow",
+		"copyButton",
+	],
+	base: {
+		actions: { display: "flex", flexWrap: "wrap", gap: "3", marginTop: "6" },
+		card: {
+			minWidth: "0",
+			padding: "6",
+			border: "hairline",
+			borderColor: "academy.border",
+			borderRadius: "academy-m",
+			backgroundColor: "academy.panel",
+		},
+		cardBody: { color: "academy.textSoft", lineHeight: "relaxed" },
+		eyebrow: {
+			margin: "0",
+			color: "academy.accent",
+			fontFamily: "academy-mono",
+			fontSize: "xs",
+			fontWeight: "bold",
+			letterSpacing: "wide",
+			textTransform: "uppercase",
+		},
+		lead: { margin: "0", color: "academy.textSoft", fontSize: "lg", lineHeight: "relaxed" },
+		meta: { margin: "0", color: "academy.textMuted", fontFamily: "academy-mono", fontSize: "xs", letterSpacing: "wide" },
+		pill: {
+			display: "inline-flex",
+			alignItems: "center",
+			paddingInline: "3",
+			paddingBlock: "1",
+			border: "hairline",
+			borderColor: "academy.border",
+			borderRadius: "academy-pill",
+			color: "academy.textSoft",
+			fontSize: "xs",
+		},
+		statGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(10rem, 1fr))", gap: "4" },
+		stat: { padding: "5", borderInlineStart: "focus", borderColor: "academy.accent", backgroundColor: "academy.panel" },
+		statValue: { display: "block", color: "academy.text", fontFamily: "academy-display", fontSize: "3xl", fontWeight: "bold", lineHeight: "tight" },
+		statLabel: { display: "block", marginTop: "2", color: "academy.textMuted", fontSize: "sm" },
+		faq: {
+			display: "grid",
+			gap: "3",
+			"& details": { padding: "5", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel" },
+			"& summary": { cursor: "pointer", color: "academy.text", fontWeight: "semibold" },
+			"& details > p": { marginTop: "4", color: "academy.textSoft", lineHeight: "relaxed" },
+		},
+		utility: { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", minHeight: "70vh", paddingBlock: "16" },
+		utilityMark: { display: "grid", placeItems: "center", width: "12", height: "12", marginBottom: "6", border: "focus", borderColor: "academy.accent", borderRadius: "academy-s", color: "academy.accent", fontFamily: "academy-mono", fontSize: "xl" },
+		utilityActions: { display: "flex", flexWrap: "wrap", gap: "3", marginTop: "8" },
+		contact: { display: "grid", gap: "4", width: "full", padding: "6", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel" },
+		contactRow: { display: "flex", flexWrap: "wrap", alignItems: "center", gap: "3" },
+		copyButton: { display: "inline-flex", alignItems: "center", minHeight: "9", paddingInline: "3", border: "hairline", borderColor: "academy.border", borderRadius: "academy-s", backgroundColor: "transparent", color: "academy.text", fontSize: "sm", fontWeight: "semibold", cursor: "pointer", _hover: { backgroundColor: "academy.ground" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+	},
+});

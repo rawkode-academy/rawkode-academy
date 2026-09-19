@@ -5,7 +5,6 @@ import {
 	tabs as academyTabs,
 } from "@rawkodeacademy/design-system";
 import { Dialog, Tabs } from "@rawkodeacademy/design-system/vue";
-import { getColorScheme, setColorScheme } from "@/lib/theme";
 
 type AcademyPage = "home" | "learn" | "watch";
 
@@ -38,18 +37,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const styles = academyPage();
 const tabStyles = academyTabs({ tone: "academy" });
-const isDark = ref(false);
 const isMounted = ref(false);
 
 onMounted(() => {
 	isMounted.value = true;
-	isDark.value = getColorScheme() === "dark";
 });
-
-const toggleTheme = () => {
-	isDark.value = !isDark.value;
-	setColorScheme(isDark.value ? "dark" : "light");
-};
 
 const tabs = [
 	{ value: "kubernetes", label: "Kubernetes" },
@@ -64,34 +56,6 @@ const description = (item: AcademyCard) =>
 
 <template>
 	<div :class="styles.root">
-		<header :class="styles.header">
-			<nav :class="styles.nav" aria-label="Primary navigation">
-				<a href="/" :class="styles.brand">rawkode academy</a>
-
-				<div :class="styles.navLinks">
-					<a href="/watch">Watch</a>
-					<a href="/read">Read</a>
-					<a href="/learning-paths">Learn</a>
-					<a href="/technology/matrix">Matrix</a>
-				</div>
-
-				<div :class="styles.navActions">
-					<button
-						type="button"
-						:class="styles.iconButton"
-						:aria-label="isDark ? 'Use light theme' : 'Use dark theme'"
-						:title="isDark ? 'Use light theme' : 'Use dark theme'"
-						@click="toggleTheme"
-					>
-						{{ isDark ? "☼" : "◐" }}
-					</button>
-					<a href="#join" :class="[styles.buttonPrimary, styles.headerButton]">
-						Join the Academy
-					</a>
-				</div>
-			</nav>
-		</header>
-
 		<template v-if="props.page === 'home'">
 			<section :class="styles.hero">
 				<div :class="styles.heroInner">
@@ -423,15 +387,5 @@ const description = (item: AcademyCard) =>
 			</section>
 		</template>
 
-		<footer :class="styles.footer">
-			<span>Rawkode Academy · practical cloud native education</span>
-			<nav :class="styles.footerNav" aria-label="Footer navigation">
-				<a href="/">Home</a>
-				<a href="/learning-paths">Learn</a>
-				<a href="/watch">Watch</a>
-				<a href="/read">Read</a>
-				<a href="/organizations/partnerships">For teams</a>
-			</nav>
-		</footer>
 	</div>
 </template>

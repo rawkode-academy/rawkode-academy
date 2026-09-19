@@ -9,6 +9,7 @@ const props = withDefaults(
 		description?: string;
 		closeLabel?: string;
 		defaultOpen?: boolean;
+		open?: boolean;
 		size?: "sm" | "md";
 		tone?: "editorial" | "academy";
 		id?: string;
@@ -23,10 +24,19 @@ const props = withDefaults(
 );
 
 const styles = computed(() => dialog({ size: props.size, tone: props.tone }));
+const emit = defineEmits<{
+	"update:open": [open: boolean];
+	openChange: [open: boolean];
+}>();
+
+const handleOpenChange = (details: { open: boolean }) => {
+	emit("update:open", details.open);
+	emit("openChange", details.open);
+};
 </script>
 
 <template>
-	<Dialog.Root :id="props.id" :default-open="props.defaultOpen">
+	<Dialog.Root :id="props.id" :default-open="props.defaultOpen" :open="props.open" @open-change="handleOpenChange">
 		<Dialog.Trigger :class="styles.trigger">
 			<slot name="trigger">Open dialog</slot>
 		</Dialog.Trigger>

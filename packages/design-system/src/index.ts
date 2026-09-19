@@ -1,4 +1,10 @@
 export { dialog } from "./recipes/dialog";
 export { academyPage } from "./recipes/academyPage";
+export { academyShell } from "./recipes/academyShell";
+export { academyLayout } from "./recipes/academyLayout";
+export { academyMarketing } from "./recipes/academyMarketing";
+export { academyMedia } from "./recipes/academyMedia";
+export { academyCatalog } from "./recipes/academyCatalog";
+export { academyDocument } from "./recipes/academyDocument";
 export { tabs } from "./recipes/tabs";
 export { Dialog } from "./vue";

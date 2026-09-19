@@ -11,6 +11,8 @@ import {
 } from "@/lib/explorer/data-layer";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import TechnologyExplorer from "@/components/explorer/TechnologyExplorer.vue";
+import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 // Helper to normalize technology references from videos
 function normalizeTechnologyRef(value: unknown): string | undefined {
@@ -63,13 +65,16 @@ const technologiesJson = serializeForClient(normalizedTechnologies);
 
 // Stats for meta
 const totalTechnologies = normalizedTechnologies.length;
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
 ---
 
 <Page
 	title="Advanced Technology Matrix"
 	description="Filter and compare cloud native and platform engineering technologies by adoption stage, category, confidence, and trajectory."
 >
-	<section class="explorer-hero">
+	<div class:list={[layout.root, media.root, "matrix-route"]}>
+	<section class:list={[layout.hero, media.hero, "explorer-hero"]}>
 		<div class="hero-background">
 			<div class="hero-gradient"></div>
 			<div class="hero-grid"></div>
@@ -90,13 +95,14 @@ const totalTechnologies = normalizedTechnologies.length;
 	</section>
 
 	<Container size="xl" padding="lg">
-		<div class="explorer-shell">
+		<div class:list={[layout.container, media.body, "explorer-shell"]}>
 			<TechnologyExplorer
 				client:load
 				technologies={JSON.parse(technologiesJson)}
 			/>
 		</div>
 	</Container>
+	</div>
 </Page>
 
 <style>

@@ -1,17 +1,15 @@
 <template>
+ <Dialog.Root :open="open" @open-change="handleOpenChange">
  <Teleport to="body">
- <dialog
- ref="dialogEl"
- class="tech-card-popover"
- :aria-label="technology.name"
- @click="onDialogClick"
- @close="$emit('close')"
- >
- <button type="button" class="close-btn" @click="dialogEl?.close()" aria-label="Close">
+ <Dialog.Backdrop class="tech-card-backdrop" />
+ <Dialog.Positioner class="tech-card-positioner">
+ <Dialog.Content class="tech-card-popover">
+ <Dialog.Title class="sr-only">{{ technology.name }}</Dialog.Title>
+ <Dialog.CloseTrigger class="close-btn" aria-label="Close">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
  </svg>
- </button>
+ </Dialog.CloseTrigger>
 
  <div class="card-frame">
  <!-- Header -->
@@ -82,12 +80,15 @@
  </a>
  </div>
  </div>
- </dialog>
+ </Dialog.Content>
+ </Dialog.Positioner>
  </Teleport>
+ </Dialog.Root>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { Dialog } from "@ark-ui/vue/dialog";
+import { computed, ref } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { getDimensionLabel } from "@/lib/explorer/dimensions";
 
@@ -97,23 +98,14 @@ interface Props {
 
 const props = defineProps<Props>();
 
-defineEmits<{
+const emit = defineEmits<{
 	close: [];
 }>();
 
-// Native <dialog>: focus trapping, Escape, and focus return come from the
-// platform. The close event bubbles up as the component's close emit.
-const dialogEl = ref<HTMLDialogElement | null>(null);
-
-onMounted(() => {
-	dialogEl.value?.showModal();
-});
-
-const onDialogClick = (event: MouseEvent) => {
-	// Clicks on ::backdrop target the dialog element itself
-	if (event.target === dialogEl.value) {
-		dialogEl.value?.close();
-	}
+const open = ref(true);
+const handleOpenChange = (details: { open: boolean }) => {
+	open.value = details.open;
+	if (!details.open) emit("close");
 };
 
 const statusLabel = computed(() => {
@@ -166,9 +158,9 @@ const formatDate = (dateStr: string | null): string => {
 
 <style scoped>
 /* =================================
- Modal Container (native <dialog>)
+ Modal Container
  ================================= */
-dialog.tech-card-popover {
+.tech-card-popover {
  /* Stage colors derive from the editorial palette, mirroring the matrix page */
  --stage-skip: var(--editorial-rust);
  --stage-watch: var(--editorial-amber-text);
@@ -188,19 +180,30 @@ dialog.tech-card-popover {
  padding: 0;
  border: none;
  background: transparent;
- margin: auto;
  overflow: visible;
 }
 
-:global(html.dark) dialog.tech-card-popover {
+:global(html.dark) .tech-card-popover {
  --stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
 }
 
-dialog.tech-card-popover::backdrop {
+.tech-card-backdrop {
+ position: fixed;
+ inset: 0;
  background: rgb(0 0 0 / 0.6);
 }
 
-dialog.tech-card-popover[open] {
+.tech-card-positioner {
+ position: fixed;
+ inset: 0;
+ z-index: 1000;
+ display: grid;
+ place-items: center;
+ padding: 1rem;
+ overflow-y: auto;
+}
+
+.tech-card-popover[data-state="open"] {
  animation: scaleIn 0.2s var(--ease-standard, ease);
 }
 
@@ -212,7 +215,7 @@ dialog.tech-card-popover[open] {
 }
 
 @media (prefers-reduced-motion: reduce) {
- dialog.tech-card-popover[open] {
+ .tech-card-popover[data-state="open"] {
  animation: none;
  }
 }
@@ -478,7 +481,7 @@ dialog.tech-card-popover[open] {
  Mobile
  ================================= */
 @media (max-width: 540px) {
- dialog.tech-card-popover {
+ .tech-card-popover {
  width: calc(100vw - 2rem);
  max-width: calc(100vw - 2rem);
  }

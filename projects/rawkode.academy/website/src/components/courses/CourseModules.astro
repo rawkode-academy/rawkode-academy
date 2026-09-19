@@ -1,4 +1,6 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import Badge from "@/components/common/Badge.vue";
@@ -57,38 +59,38 @@ function formatDuration(minutes: number): string {
 
 {
 	totalModules === 0 ? (
-		<div class="border-t border-black/10 py-6 text-center dark:border-white/10">
-			<p class="text-lg font-semibold text-primary-content">No curriculum is published yet.</p>
-			<p class="mt-2 text-sm text-secondary-content">
+		<div class={doc.empty}>
+			<p class={doc.copy}>No curriculum is published yet.</p>
+			<p class={doc.copy}>
 				Check back soon for new modules and release updates.
 			</p>
 		</div>
 	) : (
-		<div class="space-y-6">
-			<div class="grid gap-6 border-t border-black/10 pt-6 dark:border-white/10 sm:grid-cols-3">
-				<div class="space-y-2">
-						<div class="eyebrow-label tracking-[0.18em]">Curriculum</div>
+		<div class={doc.stack}>
+			<div class={doc.stats}>
+				<div class={doc.stackSmall}>
+						<div class={doc.kicker}>Curriculum</div>
 						<div>
-							<div class="text-3xl font-bold text-primary-content">{totalModules}</div>
-							<p class="mt-1 text-sm text-secondary-content">Modules planned across the course.</p>
+							<div class={doc.sectionTitle}>{totalModules}</div>
+							<p class={doc.copy}>Modules planned across the course.</p>
 						</div>
 				</div>
-				<div class="space-y-2">
-						<div class="eyebrow-label tracking-[0.18em]">Available</div>
+				<div class={doc.stackSmall}>
+						<div class={doc.kicker}>Available</div>
 						<div>
-							<div class="text-3xl font-bold text-primary-content">{availableModules.length}</div>
-							<p class="mt-1 text-sm text-secondary-content">
+							<div class={doc.sectionTitle}>{availableModules.length}</div>
+							<p class={doc.copy}>
 								{comingSoonCount > 0
 									? `${comingSoonCount} more marked as coming soon.`
 									: "Everything in the outline is live."}
 							</p>
 						</div>
 				</div>
-				<div class="space-y-2">
-						<div class="eyebrow-label tracking-[0.18em]">Runtime</div>
+				<div class={doc.stackSmall}>
+						<div class={doc.kicker}>Runtime</div>
 						<div>
-							<div class="text-3xl font-bold text-primary-content">{formatDuration(totalDuration)}</div>
-							<p class="mt-1 text-sm text-secondary-content">Published lessons ready to watch now.</p>
+							<div class={doc.sectionTitle}>{formatDuration(totalDuration)}</div>
+							<p class={doc.copy}>Published lessons ready to watch now.</p>
 						</div>
 				</div>
 			</div>
@@ -100,31 +102,31 @@ function formatDuration(minutes: number): string {
 					.reduce((acc, module) => acc + (module.data.duration || 0), 0);
 
 				return (
-					<section class="border-t border-black/10 pt-5 dark:border-white/10">
-						<header class="pb-5">
-							<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-								<div class="space-y-2">
-									<div class="eyebrow-label">{sectionName}</div>
-									<p class="text-sm leading-7 text-secondary-content">
+					<section class={doc.rule}>
+						<header class={doc.stack}>
+							<div class={doc.rowBetween}>
+								<div class={doc.stackSmall}>
+									<div class={doc.kicker}>{sectionName}</div>
+									<p class={doc.copy}>
 										{availableCount > 0
 											? `${availableCount} lesson${availableCount === 1 ? "" : "s"} ready right now.`
 											: "This section is planned and will unlock as modules publish."}
 									</p>
 								</div>
-								<div class="flex flex-wrap items-center gap-2">
+								<div class={doc.actions}>
 									{sectionDuration > 0 && (
-										<Badge variant="default" size="sm" class="bg-transparent">
+										<Badge variant="default" size="sm" class={doc.flush}>
 											{formatDuration(sectionDuration)}
 										</Badge>
 									)}
-									<Badge variant="default" size="sm" class="bg-transparent">
+									<Badge variant="default" size="sm" class={doc.flush}>
 										{modules.length} module{modules.length === 1 ? "" : "s"}
 									</Badge>
 								</div>
 							</div>
 						</header>
 
-						<div class="divide-y surface-divider border-y">
+						<div class={doc.list}>
 							{modules.map((module) => {
 								const isDraft = module.data.draft;
 								const displayOrder = displayOrderById.get(module.id);
@@ -132,40 +134,35 @@ function formatDuration(minutes: number): string {
 								const Element = isDraft ? "div" : "a";
 								const elementProps = isDraft
 									? {
-											class:
-												"block px-1 py-5 sm:px-2",
+											class: doc.listItem,
 										}
 									: {
 											href: `/courses/${course.id}/${moduleSlug}`,
-											class:
-												"group block px-1 py-5 transition-colors-smooth hover:bg-black/[0.02] dark:hover:bg-white/[0.02] sm:px-2",
+											class: doc.navItem,
 										};
 
 								return (
 									<Element {...elementProps}>
-										<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-											<div class="flex gap-4">
-												<div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary-content dark:bg-primary/18">
+										<div class={doc.rowBetween}>
+											<div class={doc.row}>
+												<div class={doc.stepIndex}>
 													{displayOrder}
 												</div>
-												<div class="min-w-0">
+												<div class={doc.main}>
 													<h3
-														class:list={[
-															"text-lg font-semibold tracking-tight text-primary-content transition-colors",
-															!isDraft && "group-hover:text-primary",
-														]}
+														class={doc.cardTitle}
 													>
 														{module.data.title}
 													</h3>
-													<p class="mt-2 max-w-[62ch] text-sm leading-7 text-secondary-content">
+													<p class={doc.copy}>
 														{module.data.description}
 													</p>
 												</div>
 											</div>
 
-											<div class="flex shrink-0 items-center gap-3 pl-[3.75rem] md:pl-0">
+											<div class={doc.row}>
 												{module.data.duration && !isDraft && (
-													<span class="text-sm font-medium text-muted">
+													<span class={doc.meta}>
 														{formatDuration(module.data.duration)}
 													</span>
 												)}
@@ -174,7 +171,7 @@ function formatDuration(minutes: number): string {
 														Coming soon
 													</Badge>
 												) : (
-													<span class="text-lg text-primary group-hover:translate-x-0.5">
+													<span class={doc.link}>
 														→
 													</span>
 												)}

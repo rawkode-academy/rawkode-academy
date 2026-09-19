@@ -2,9 +2,10 @@
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
-import ShowCard from "@/components/show/ShowCard.astro";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
-import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -81,6 +82,7 @@ const showsJsonLd = showEntries.map((s) => {
 		...(episodeCount > 0 ? { episodeCount } : {}),
 	};
 });
+const styles = academyLayout({ width: "wide" });
 ---
 
 <Page
@@ -94,22 +96,28 @@ const showsJsonLd = showEntries.map((s) => {
 		listUrl={new URL("/shows", Astro.site ?? Astro.url).href}
 		listName="Rawkode Academy Shows"
 	/>
-	<div class="shows-page">
-		<CollectionMasthead title="Shows" dek="Long-form programs." />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Program archive" title="Shows" description="Long-form programs." />
 
-		<section class="shows-page__grid-section" aria-label="Shows">
+		<section class={styles.section} aria-label="Shows">
+			<div class={styles.container}>
 			{hasShows ? (
-				<div class="shows-page__grid">
+				<div class={styles.grid}>
 					{showsToRender.map((show) => (
-						<ShowCard show={show} />
+						<AcademyCatalogCard
+							href={`/shows/${show.id}`}
+							title={show.name}
+							description={show.episodes?.[0]?.video?.title}
+							meta={[show.episodes?.length ? `${show.episodes.length} episodes` : "Program"]}
+							image={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl ?? undefined}
+							imageAlt={`${show.name} cover`}
+						/>
 					))}
 				</div>
 			) : (
-				<div class="shows-page__empty">
-					<h2>No shows available yet</h2>
-					<p>New programs will appear here when they are ready.</p>
-				</div>
+				<div class={styles.empty}>No shows available yet. New programs will appear here when they are ready.</div>
 			)}
+			</div>
 		</section>
 	</div>
 </Page>

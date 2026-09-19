@@ -12,6 +12,7 @@ const props = withDefaults(
 	defineProps<{
 		items: TabItem[];
 		defaultValue?: string;
+		modelValue?: string;
 		ariaLabel?: string;
 		id?: string;
 	}>(),
@@ -22,13 +23,24 @@ const props = withDefaults(
 );
 
 const styles = computed(() => tabs({ tone: "academy" }));
+const emit = defineEmits<{
+	"update:modelValue": [value: string];
+	valueChange: [value: string];
+}>();
+
+const handleValueChange = (details: { value: string }) => {
+	emit("update:modelValue", details.value);
+	emit("valueChange", details.value);
+};
 </script>
 
 <template>
 	<ArkTabs.Root
 		:id="props.id"
 		:default-value="props.defaultValue ?? props.items[0]?.value"
+		:value="props.modelValue"
 		:class="styles.root"
+		@value-change="handleValueChange"
 	>
 		<ArkTabs.List :class="styles.list" :aria-label="props.ariaLabel">
 			<ArkTabs.Trigger

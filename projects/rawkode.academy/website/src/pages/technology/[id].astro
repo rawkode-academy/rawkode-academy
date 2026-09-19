@@ -21,6 +21,8 @@ import { resolveContentDirSync } from "@rawkodeacademy/content/utils";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import RelatedTechnologies from "@/components/technology/RelatedTechnologies.astro";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 export interface Technology extends Omit<TechnologyData, "logos"> {
 	id: string;
@@ -318,6 +320,7 @@ const seoDescription = (() => {
 // Page is "thin" if it has no MDX body content AND no associated videos.
 // noindex these so Google doesn't classify the site as low-quality.
 const noindex = !hasContent && videoCount === 0;
+const layout = academyLayout({ width: "wide" });
 
 const technologyUrl = new URL(
 	`/technology/${technology.id.replace(/\/index$/, "")}`,
@@ -440,9 +443,9 @@ const hasCommunityLinks =
 			href={`/api/feeds/technology/${technology.id.replace(/\/index$/, "")}.xml`}
 		/>
 	</Fragment>
-	<div class="technology-stage page-px section-py section-pt-0">
-		<section class="technology-hero w-full max-w-7xl mx-auto">
-			<div class="mb-5">
+	<div class:list={[layout.root, "technology-stage page-px section-py section-pt-0"]}>
+		<section class:list={[layout.hero, "technology-hero w-full max-w-7xl mx-auto"]}>
+			<div class:list={[layout.breadcrumbs, "mb-5"]}>
 				<Breadcrumb elements={[
 					{ title: 'Home', link: '/' },
 					{ title: 'Technologies', link: '/technology' },
@@ -459,7 +462,7 @@ const hasCommunityLinks =
 						onerror={`this.onerror=null; this.src='${placeholderLogo}';`}
 					/>
 				</div>
-				<h1 class="technology-title m-0">{technology.name}</h1>
+				<h1 class:list={[layout.title, "technology-title m-0"]}>{technology.name}</h1>
 			</div>
 
 			<div class="flex flex-wrap items-center gap-2 mb-5">
@@ -539,8 +542,8 @@ const hasCommunityLinks =
 			</div>
 		</section>
 
-		<section class="w-full">
-			<div class="main-content-grid max-w-7xl mx-auto">
+		<section class:list={[layout.section, "w-full"]}>
+			<div class:list={[layout.split, "main-content-grid max-w-7xl mx-auto"]}>
 				{hasContent && Content && (
 					<section id="complete-guide" class="guide-panel rounded-sm p-6 md:p-8">
 						<div class="mb-6">
@@ -553,7 +556,7 @@ const hasCommunityLinks =
 					</section>
 				)}
 
-				<aside class="media-rail">
+				<aside class:list={[layout.sidebar, "media-rail"]}>
 					{featuredVideos.length > 0 && (
 						<section class="video-panel rounded-sm p-5 md:p-6">
 							<div class="mb-4">

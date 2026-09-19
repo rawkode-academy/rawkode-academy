@@ -3,6 +3,7 @@ import DefaultHead from "@/components/html/head.astro";
 import DefaultLayout from "@/layouts/app.astro";
 import type { OpenGraphProps } from "@/types/opengraph";
 import "@/styles/global.css";
+import "@rawkodeacademy/design-system/styles.css";
 
 interface Props extends OpenGraphProps {
 	// Astro passes MDX frontmatter under `Astro.props.frontmatter` when this
@@ -21,12 +22,13 @@ const { frontmatter, ...directProps } = Astro.props;
 const headProps = { ...(frontmatter ?? {}), ...directProps };
 ---
 
-<html lang="en" class="scroll-smooth focus:scroll-auto">
+<!DOCTYPE html>
+<html lang="en">
 	<DefaultHead {...headProps} userId={userId}>
 		<slot name="extra-head" slot="extra-head" />
 	</DefaultHead>
 
-	<body class="h-full w-full mx-auto max-w-screen-3xl text-primary-content">
+	<body>
 		<slot name="layout">
 			<DefaultLayout>
 				<slot />
@@ -34,15 +36,11 @@ const headProps = { ...(frontmatter ?? {}), ...directProps };
 		</slot>
 
 	</body>
-	<style is:global>
-		@reference "../styles/global.css";
-
-		h1,
-		h2,
-		h3 {
-			@apply mt-8 mb-4;
-		}
-	</style>
-
-
 </html>
+
+<style is:global>
+	html, body { margin: 0; padding: 0; min-width: 320px; }
+	body { background: var(--colors-academy-canvas); color: var(--colors-academy-text); }
+	*, *::before, *::after { box-sizing: border-box; }
+	button, input, select, textarea { font: inherit; }
+</style>

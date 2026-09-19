@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { Dialog } from "@ark-ui/vue/dialog";
 import { actions } from "astro:actions";
+import { computed, ref } from "vue";
+import PreferenceSwitch from "./PreferenceSwitch.vue";
 
 const props = defineProps<{
 	academyNewsletter: boolean;
@@ -161,32 +163,7 @@ const formatTechName = (id: string) => {
 							content.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'academyNewsletter'"
-						@click="
-							togglePreference('academyNewsletter', 'newsletter', 'academy')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.academyNewsletter
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'academyNewsletter' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.academyNewsletter"
-					>
-						<span class="sr-only">Toggle academy newsletter</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.academyNewsletter
-									? 'translate-x-5'
-									: 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.academyNewsletter" :disabled="isLoading === 'academyNewsletter'" label="Toggle academy newsletter" @change="togglePreference('academyNewsletter', 'newsletter', 'academy')" />
 				</div>
 
 				<!-- Technology Matrix Updates -->
@@ -202,32 +179,7 @@ const formatTechName = (id: string) => {
 							opinions are added.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'matrixNewsletter'"
-						@click="
-							togglePreference('matrixNewsletter', 'newsletter', 'matrix')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.matrixNewsletter
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'matrixNewsletter' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.matrixNewsletter"
-					>
-						<span class="sr-only">Toggle matrix updates</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.matrixNewsletter
-									? 'translate-x-5'
-									: 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.matrixNewsletter" :disabled="isLoading === 'matrixNewsletter'" label="Toggle matrix updates" @change="togglePreference('matrixNewsletter', 'newsletter', 'matrix')" />
 				</div>
 
 				<!-- Kubernetes Release Updates -->
@@ -243,32 +195,7 @@ const formatTechName = (id: string) => {
 							upgrade guides.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'kubernetesReleaseUpdates'"
-						@click="
-							togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.kubernetesReleaseUpdates
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'kubernetesReleaseUpdates' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.kubernetesReleaseUpdates"
-					>
-						<span class="sr-only">Toggle Kubernetes release updates</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.kubernetesReleaseUpdates
-									? 'translate-x-5'
-									: 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.kubernetesReleaseUpdates" :disabled="isLoading === 'kubernetesReleaseUpdates'" label="Toggle Kubernetes release updates" @change="togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')" />
 				</div>
 			</div>
 		</div>
@@ -321,30 +248,7 @@ const formatTechName = (id: string) => {
 							Product announcements, promotions, and partner offers.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'marketingEmails'"
-						@click="
-							togglePreference('marketingEmails', 'marketing', 'academy')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.marketingEmails
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'marketingEmails' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.marketingEmails"
-					>
-						<span class="sr-only">Toggle marketing emails</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.marketingEmails ? 'translate-x-5' : 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.marketingEmails" :disabled="isLoading === 'marketingEmails'" label="Toggle marketing emails" @change="togglePreference('marketingEmails', 'marketing', 'academy')" />
 				</div>
 
 				<!-- Service Notifications -->
@@ -360,28 +264,7 @@ const formatTechName = (id: string) => {
 							notices.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'serviceEmails'"
-						@click="togglePreference('serviceEmails', 'service', 'academy')"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.serviceEmails
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'serviceEmails' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.serviceEmails"
-					>
-						<span class="sr-only">Toggle service notifications</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.serviceEmails ? 'translate-x-5' : 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.serviceEmails" :disabled="isLoading === 'serviceEmails'" label="Toggle service notifications" @change="togglePreference('serviceEmails', 'service', 'academy')" />
 				</div>
 			</div>
 		</div>
@@ -433,42 +316,28 @@ const formatTechName = (id: string) => {
 			class="pt-6 border-t border-[var(--surface-border)]"
 			v-if="hasAnySubscription"
 		>
-			<div v-if="!showUnsubscribeConfirm">
-				<button
-					type="button"
-					@click="showUnsubscribeConfirm = true"
-					class="text-sm text-muted hover:text-[var(--editorial-rust)] transition-colors"
-				>
+			<Dialog.Root :open="showUnsubscribeConfirm" @open-change="showUnsubscribeConfirm = $event.open">
+				<Dialog.Trigger class="text-sm text-muted hover:text-[var(--editorial-rust)] transition-colors">
 					Unsubscribe from all emails
-				</button>
-			</div>
-			<div
-				v-else
-				class="p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--editorial-rust)]"
-			>
-				<p class="text-sm text-[var(--editorial-rust)] mb-3">
-					Are you sure you want to unsubscribe from all emails? You will stop
-					receiving all newsletters and notifications from Rawkode Academy.
-				</p>
-				<div class="flex gap-3">
-					<button
-						type="button"
-						:disabled="isUnsubscribingAll"
-						@click="unsubscribeFromAll"
-						class="px-4 py-2 text-sm font-medium text-[var(--surface-base)] bg-[var(--editorial-rust)] hover:opacity-90 rounded-sm disabled:opacity-50 disabled:cursor-wait"
-					>
-						{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
-					</button>
-					<button
-						type="button"
-						:disabled="isUnsubscribingAll"
-						@click="showUnsubscribeConfirm = false"
-						class="px-4 py-2 text-sm font-medium text-secondary-content hover:bg-[var(--surface-card-muted)] rounded-sm"
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
+				</Dialog.Trigger>
+				<Teleport to="body">
+					<Dialog.Backdrop class="fixed inset-0 z-50 bg-black/60" />
+					<Dialog.Positioner class="fixed inset-0 z-50 grid place-items-center overflow-y-auto p-4">
+						<Dialog.Content class="w-full max-w-lg p-5 rounded-sm bg-[var(--surface-card)] border border-[var(--editorial-rust)] shadow-xl">
+							<Dialog.Title class="text-lg font-semibold text-primary-content">Unsubscribe from all emails?</Dialog.Title>
+							<Dialog.Description class="text-sm text-[var(--editorial-rust)] my-3">
+								You will stop receiving all newsletters and notifications from Rawkode Academy.
+							</Dialog.Description>
+							<div class="flex gap-3">
+								<button type="button" :disabled="isUnsubscribingAll" @click="unsubscribeFromAll" class="px-4 py-2 text-sm font-medium text-[var(--surface-base)] bg-[var(--editorial-rust)] hover:opacity-90 rounded-sm disabled:opacity-50 disabled:cursor-wait">
+									{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
+								</button>
+								<Dialog.CloseTrigger :disabled="isUnsubscribingAll" class="px-4 py-2 text-sm font-medium text-secondary-content hover:bg-[var(--surface-card-muted)] rounded-sm">Cancel</Dialog.CloseTrigger>
+							</div>
+						</Dialog.Content>
+					</Dialog.Positioner>
+				</Teleport>
+			</Dialog.Root>
 		</div>
 
 		<!-- No Subscriptions Message -->

@@ -1,7 +1,8 @@
 ---
 export const prerender = true;
 
-import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
@@ -38,6 +39,8 @@ try {
 } catch (error) {
 	logger.error("Failed to load technologies from content collection", error);
 }
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
@@ -45,25 +48,26 @@ try {
 	description="Cloud native technologies with tutorials, deep dives, and references."
 	pageType="CollectionPage"
 >
-	<div class="technology-page">
-		<CollectionMasthead title="Technologies" dek="Tools and platforms." />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Technology map" title="Technologies" description="Tools and platforms." />
 
-		<section class="technology-page__tools" aria-label="Technology search">
-			<label class="technology-page__label" for="technology-search">Search technologies</label>
+		<section class={styles.section} aria-label="Technology search">
+			<div class={styles.container}>
+			<div class={styles.toolbar}>
+			<label for="technology-search">Search technologies</label>
 			<input
 				id="technology-search"
 				type="search"
 				placeholder="Name"
-				class="technology-page__search-input"
+				class={styles.input}
 				autocomplete="off"
 			/>
-			<p class="technology-page__count">
+			<p class={styles.meta}>
 				Showing <span data-tech-visible-count>{technologies.length}</span> of {technologies.length}
 			</p>
-		</section>
+			</div>
 
-		<section id="technologies" class="technology-page__grid-section" aria-label="Technologies">
-			<div class="technology-page__grid">
+			<div id="technologies" class={styles.grid} aria-label="Technologies">
 				{
 					technologies.map((tech) => {
 						const searchKeywords = tech.name.toLowerCase();
@@ -71,28 +75,29 @@ try {
 						return (
 							<a
 								href={`/technology/${tech.id}`}
-								class="tech-card-link"
+								class={styles.card}
 								data-keywords={searchKeywords}
 							>
-								<span class="tech-card-link__logo-wrap">
+								<span>
 									<img
 										src={tech.logo ?? "/apple-touch-icon.png"}
 										alt={`${tech.name} logo`}
-										class="tech-card-link__logo"
+										class={catalog.logo}
 										loading="lazy"
 										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 									/>
 								</span>
-								<span class="tech-card-link__name">{tech.name}</span>
+								<span class={styles.cardTitle}>{tech.name}</span>
 							</a>
 						);
 					})
 				}
 			</div>
 
-			<div id="technology-empty-state" class="technology-page__empty hidden">
+			<div id="technology-empty-state" class:list={[styles.empty, "hidden"]}>
 				<h2>No technologies match your search</h2>
 				<p>Try a different term.</p>
+			</div>
 			</div>
 		</section>
 
@@ -100,7 +105,7 @@ try {
 			document.addEventListener("DOMContentLoaded", () => {
 				const searchInput = document.getElementById("technology-search") as HTMLInputElement | null;
 				const cards = Array.from(
-					document.querySelectorAll<HTMLElement>("#technologies .tech-card-link"),
+					document.querySelectorAll<HTMLElement>("#technologies [data-keywords]"),
 				);
 				const emptyState = document.getElementById("technology-empty-state");
 				const countTargets = document.querySelectorAll<HTMLElement>("[data-tech-visible-count]");

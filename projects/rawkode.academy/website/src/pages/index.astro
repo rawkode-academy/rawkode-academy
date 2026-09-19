@@ -1,11 +1,9 @@
 ---
 import { getCollection } from "astro:content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
-import DefaultHead from "@/components/html/head.astro";
+import Page from "@/wrappers/page.astro";
 import { getLatestContent, getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import "@/styles/global.css";
-import "@rawkodeacademy/design-system/styles.css";
 
 // The homepage is format-agnostic. Collection routes such as /watch and
 // /read remain focused, but Latest is one chronological stream of everything
@@ -102,8 +100,7 @@ Astro.response.headers.set("Cache-Tag", "homepage");
 Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 ---
 
-<html lang="en">
-	<DefaultHead title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription}>
 		{featuredMedia && (
 			<link
 				slot="extra-head"
@@ -113,8 +110,6 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 				fetchpriority="high"
 			/>
 		)}
-	</DefaultHead>
-	<body>
 		<AcademyPage
 			client:load
 			page="home"
@@ -129,8 +124,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 				{ value: "2019", label: "Since" },
 			]}
 		/>
-	</body>
-</html>
+</Page>
 
 <style is:global>
 	html,

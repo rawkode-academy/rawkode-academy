@@ -1,10 +1,13 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 import { getCollection, getEntries, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import { createLogger } from "@/lib/logger";
-import EditorialShell from "@/components/ui/EditorialShell.astro";
+import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -59,66 +62,40 @@ const validAuthors = authors.filter((author) => author && author.data);
 	description={`Architecture Decision Record: ${adr.data.title}`}
 >
 	<AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
-	<EditorialShell
-		eyebrow={`ADR-${adrNumber}`}
+	<ArticleHeader
+		breadcrumbs={[{ label: "Architecture decisions", href: "/adrs" }]}
+		dispatchNum={adrNumber}
+		kicker={`ADR-${adrNumber}`}
 		title={adr.data.title}
-		lede={`Architecture decision record adopted on ${adoptedLabel}.`}
-		compact
+		dek={`Architecture decision record adopted on ${adoptedLabel}.`}
 	>
-		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button editorial-button--secondary" href="/adrs">All ADRs</a>
+		<div class={doc.actions}>
+			<a class={doc.buttonSecondary} href="/adrs">All ADRs</a>
 		</div>
+	</ArticleHeader>
 
-		<section class="editorial-section adr-detail-meta">
-			<div class="editorial-grid editorial-grid--3">
-				<div class="editorial-card">
-					<p class="editorial-meta">Status</p>
-					<h2 class="editorial-card__title">Adopted</h2>
+		<section class={doc.section}>
+			<div class={doc.grid}>
+				<div class={[doc.panel, doc.stackSmall].join(" ")}>
+					<p class={doc.meta}>Status</p>
+					<h2 class={doc.cardTitle}>Adopted</h2>
 				</div>
-				<div class="editorial-card">
-					<p class="editorial-meta">Date</p>
-					<h2 class="editorial-card__title">{adoptedLabel}</h2>
+				<div class={[doc.panel, doc.stackSmall].join(" ")}>
+					<p class={doc.meta}>Date</p>
+					<h2 class={doc.cardTitle}>{adoptedLabel}</h2>
 				</div>
-				<div class="editorial-card">
-					<p class="editorial-meta">Authors</p>
-					<h2 class="editorial-card__title">
+				<div class={[doc.panel, doc.stackSmall].join(" ")}>
+					<p class={doc.meta}>Authors</p>
+					<h2 class={doc.cardTitle}>
 						{validAuthors.length > 0 ? validAuthors.map((author) => author.data.name).join(", ") : "Unknown"}
 					</h2>
 				</div>
 			</div>
 		</section>
 
-		<section class="editorial-section">
-			<article class="editorial-prose adr-content">
+		<section class={doc.section}>
+			<article class={[styles.prose, doc.adrProse].join(" ")}>
 				<Content />
 			</article>
 		</section>
-	</EditorialShell>
 </Page>
-
-<style>
-	.adr-detail-meta {
-		padding-bottom: 1.5rem;
-	}
-
-	.adr-content {
-		max-width: 52rem;
-	}
-
-	.adr-content :global(h1:first-child) {
-		display: none;
-	}
-
-	.adr-content :global(table) {
-		display: block;
-		overflow-x: auto;
-		border-collapse: collapse;
-		width: 100%;
-	}
-
-	.adr-content :global(th),
-	.adr-content :global(td) {
-		border: 1px solid var(--editorial-hairline);
-		padding: 0.6rem;
-	}
-</style>

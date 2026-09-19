@@ -1,0 +1,22 @@
+---
+import { academyLayout } from "@rawkodeacademy/design-system";
+
+interface Props {
+	kicker?: string;
+	title: string;
+	description?: string;
+	width?: "wide" | "reading";
+}
+
+const { kicker, title, description, width = "wide" } = Astro.props as Props;
+const styles = academyLayout({ width });
+---
+
+<header class={styles.hero}>
+	<div class={styles.container}>
+		{kicker && <p class={styles.kicker}>{kicker}</p>}
+		<h1 class={styles.title}>{title}</h1>
+		{description && <p class={styles.description}>{description}</p>}
+		<slot name="actions" />
+	</div>
+</header>

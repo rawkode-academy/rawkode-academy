@@ -1,4 +1,6 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 import type { MarkdownHeading } from "astro";
 import MLabel from "@/components/ui/MLabel.vue";
 
@@ -17,25 +19,25 @@ const sections = headings
 	}));
 ---
 
-<aside class="article-toc">
-	<div class="article-toc__inner">
+<aside class={doc.toc}>
+	<div class={doc.stack}>
 		<MLabel>Contents</MLabel>
-		<nav class="article-toc__nav">
-			{sections.map((s, i) => (
+		<nav class={doc.stackSmall} aria-label="On this page">
+			{sections.map((s) => (
 				<a
-					class={`article-toc__link ${i === 0 ? "article-toc__link--first" : ""}`}
+					class={doc.tocLink}
 					href={`#${s.slug}`}
 					data-toc-slug={s.slug}
 				>
-					<span class="article-toc__text">{s.text}</span>
+					<span class={doc.tocText}>{s.text}</span>
 				</a>
 			))}
 		</nav>
 
 		{tools.length > 0 && (
-			<div class="article-toc__tools">
+			<div class={[doc.rule, doc.stackSmall].join(" ")}>
 				<MLabel>Tools used</MLabel>
-				<ul class="article-toc__tools-list">
+				<ul class={doc.list}>
 					{tools.map((t) => (
 						<li>
 							<MLabel>{t}</MLabel>
@@ -50,7 +52,7 @@ const sections = headings
 <script>
 	// Highlight the active section as the user scrolls.
 	const links = document.querySelectorAll<HTMLAnchorElement>(
-		".article-toc__link",
+		"[data-toc-slug]",
 	);
 	const headingsBySlug = new Map<string, HTMLElement>();
 	for (const link of links) {
@@ -67,10 +69,11 @@ const sections = headings
 					if (entry.isIntersecting) {
 						const slug = entry.target.id;
 						for (const link of links) {
-							link.classList.toggle(
-								"article-toc__link--active",
-								link.dataset.tocSlug === slug,
-							);
+							if (link.dataset.tocSlug === slug) {
+								link.setAttribute("aria-current", "location");
+							} else {
+								link.removeAttribute("aria-current");
+							}
 						}
 					}
 				}
@@ -81,76 +84,3 @@ const sections = headings
 		for (const el of headingsBySlug.values()) observer.observe(el);
 	}
 </script>
-
-<style>
-	.article-toc {
-		position: sticky;
-		top: 5rem;
-		align-self: start;
-	}
-
-	.article-toc__inner {
-		display: flex;
-		flex-direction: column;
-		gap: 0.875rem;
-	}
-
-	.article-toc__nav {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.article-toc__link {
-		display: flex;
-		gap: 0.625rem;
-		align-items: baseline;
-		padding: 0.625rem 0;
-		text-decoration: none;
-		border-top: 1px solid var(--editorial-hairline-strong);
-		transition: color var(--duration-base) var(--ease-standard);
-		color: inherit;
-	}
-
-	.article-toc__link--first {
-		border-top-color: var(--editorial-ink);
-	}
-
-	.article-toc__text {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		font-weight: 400;
-		line-height: 1.35;
-		color: var(--editorial-ink-soft);
-	}
-
-	.article-toc__link:hover .article-toc__text,
-	.article-toc__link--active .article-toc__text {
-		color: var(--editorial-ink);
-		font-weight: 500;
-	}
-
-	.article-toc__tools {
-		margin-top: 1rem;
-		padding-top: 0.875rem;
-		border-top: 1px solid var(--editorial-hairline-strong);
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.article-toc__tools-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-	}
-
-	@media (max-width: 960px) {
-		.article-toc {
-			position: static;
-			margin-bottom: 1.5rem;
-		}
-	}
-</style>

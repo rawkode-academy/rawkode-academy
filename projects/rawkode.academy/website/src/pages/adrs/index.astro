@@ -1,7 +1,8 @@
 ---
 import { getCollection, getEntries } from "astro:content";
 import { createLogger } from "@/lib/logger";
-import EditorialShell from "@/components/ui/EditorialShell.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -43,6 +44,8 @@ const formatDate = (date: Date): string => {
 const getAdrNumber = (id: string): string => {
 	return id.match(/^(\d{4})-/)?.[1] || "0000";
 };
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
@@ -50,55 +53,52 @@ const getAdrNumber = (id: string): string => {
 	description="Architecture decisions behind Rawkode Academy, including context, consequences, and accepted trade-offs."
 	pageType="CollectionPage"
 >
-	<EditorialShell
-		eyebrow="Reference"
-		title="Architecture Decision Records"
-		lede="Short records of the technical decisions behind Rawkode Academy, why we made them, and what we accepted as a consequence."
-		compact
-	>
-		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">{allAdrs.length}</span>
-					<span class="editorial-stat__label">Records</span>
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Reference" title="Architecture Decision Records" description="Short records of the technical decisions behind Rawkode Academy, why we made them, and what we accepted as a consequence." />
+		<section class={styles.section}>
+			<div class={styles.container}>
+				<div class={catalog.statGrid}>
+					<div class={catalog.stat}>
+						<span class={catalog.statValue}>{allAdrs.length}</span>
+						<span class={catalog.statLabel}>Records</span>
 				</div>
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">ADR</span>
-					<span class="editorial-stat__label">Decision format</span>
+					<div class={catalog.stat}>
+						<span class={catalog.statValue}>ADR</span>
+						<span class={catalog.statLabel}>Decision format</span>
 				</div>
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">Open</span>
-					<span class="editorial-stat__label">Project context</span>
+					<div class={catalog.stat}>
+						<span class={catalog.statValue}>Open</span>
+						<span class={catalog.statLabel}>Project context</span>
+					</div>
 				</div>
 			</div>
 		</section>
 
-		<section class="editorial-section adr-list-section">
-			<div class="adr-list">
+		<section class={styles.section}>
+			<div class={styles.container}>
+				<div class={catalog.rows}>
 				{allAdrs.map((adr) => {
 					const authorData = adrAuthors.find((author) => author.id === adr.id);
 					const authors = authorData?.authors.filter((author) => author && author.data) || [];
 					const adrNumber = getAdrNumber(adr.id);
 
 					return (
-						<a href={`/adrs/${adr.id}`} class="adr-row">
-							<div class="adr-row__number">
-								<span class="editorial-pill">ADR-{adrNumber}</span>
-								<span class="editorial-pill">Adopted</span>
-							</div>
-							<div class="adr-row__main">
-								<h2>{adr.data.title}</h2>
-								<div class="adr-row__meta">
+						<a href={`/adrs/${adr.id}`} class={catalog.row}>
+							<span class={catalog.rowIndex}>ADR-{adrNumber}</span>
+							<span class={catalog.rowMain}>
+								<span class={catalog.rowTitle}>{adr.data.title}</span>
+								<span class={catalog.rowMeta}>
 									<time datetime={adr.data.adoptedAt.toISOString()}>{formatDate(adr.data.adoptedAt)}</time>
 									{authors.length > 0 && <span>{authors.map((author) => author.data.name).join(", ")}</span>}
-								</div>
-							</div>
+								</span>
+							</span>
 						</a>
 					);
 				})}
 			</div>
+			</div>
 		</section>
-	</EditorialShell>
+	</div>
 </Page>
 
 <style>

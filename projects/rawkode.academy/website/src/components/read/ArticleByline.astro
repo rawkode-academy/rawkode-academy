@@ -1,4 +1,6 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
 import MLabel from "@/components/ui/MLabel.vue";
 
@@ -33,23 +35,23 @@ const primaryInitials = primary
 	: "";
 ---
 
-<div class="article-byline">
+<div class={doc.byline}>
 	{primary && (
-		<a class="article-byline__author" href={`/people/${primary.data.id}`}>
+		<a class={doc.author} href={`/people/${primary.data.id}`}>
 			{primary.data.avatarUrl ? (
 				<img
-					class="article-byline__avatar article-byline__avatar--image"
+					class={doc.avatar}
 					src={primary.data.avatarUrl}
 					alt={`Profile picture of ${primary.data.name}`}
 					loading="lazy"
 				/>
 			) : (
-				<span class="article-byline__avatar article-byline__avatar--initials">
+				<span class={doc.avatarInitials}>
 					{primaryInitials}
 				</span>
 			)}
-			<span class="article-byline__author-meta">
-				<span class="article-byline__name">{primary.data.name}</span>
+			<span class={doc.authorMeta}>
+				<span class={doc.authorMeta}>{primary.data.name}</span>
 				<MLabel>{primary.data.handles?.github ? `@${primary.data.handles.github}` : "Contributor"}</MLabel>
 			</span>
 		</a>
@@ -59,107 +61,19 @@ const primaryInitials = primary
 		<MLabel>+ {authors.length - 1} {authors.length - 1 === 1 ? "co-author" : "co-authors"}</MLabel>
 	)}
 
-	{primary && <span class="article-byline__divider" aria-hidden="true"></span>}
+	{primary && <span class={doc.hidden} aria-hidden="true"></span>}
 
 	<MLabel>{date}</MLabel>
 	{updatedDate && <MLabel>Updated {updatedDate}</MLabel>}
 	{readingTime && <MLabel>{readingTime}</MLabel>}
 
-	<span class="article-byline__spacer"></span>
+	<span class={doc.spacer}></span>
 
 	{tags.length > 0 && (
-		<div class="article-byline__tags">
+		<div class={doc.tagList}>
 			{tags.map((t) => (
-				<a class="article-byline__tag" href={t.href}>#{t.label}</a>
+				<a class={doc.tag} href={t.href}>#{t.label}</a>
 			))}
 		</div>
 	)}
 </div>
-
-<style>
-	.article-byline {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 1.5rem;
-		padding-top: 1.25rem;
-		border-top: 1px solid var(--editorial-hairline-strong);
-	}
-
-	.article-byline__author {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.article-byline__avatar {
-		width: 36px;
-		height: 36px;
-		border-radius: 50%;
-		flex-shrink: 0;
-	}
-
-	.article-byline__avatar--initials {
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-		display: grid;
-		place-items: center;
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-size: 0.95rem;
-	}
-
-	.article-byline__avatar--image {
-		object-fit: cover;
-		border: 1px solid var(--editorial-hairline-strong);
-	}
-
-	.article-byline__author-meta {
-		display: flex;
-		flex-direction: column;
-		gap: 0.15rem;
-	}
-
-	.article-byline__name {
-		font-family: var(--font-inter-tight), sans-serif;
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: var(--editorial-ink);
-	}
-
-	.article-byline__divider {
-		width: 1px;
-		height: 36px;
-		background: var(--editorial-hairline);
-	}
-
-	.article-byline__spacer { flex: 1; min-width: 1rem; }
-
-	.article-byline__tags {
-		display: flex;
-		gap: 0.5rem;
-		flex-wrap: wrap;
-	}
-
-	.article-byline__tag {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.65rem;
-		font-weight: 500;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		padding: 0.2rem 0.45rem;
-		color: var(--editorial-ink-soft);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-radius: 2px;
-		text-decoration: none;
-		transition: color var(--duration-base) var(--ease-standard),
-			border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.article-byline__tag:hover {
-		color: var(--editorial-ink);
-		border-color: var(--editorial-ink);
-	}
-</style>

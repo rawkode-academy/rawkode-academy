@@ -3,12 +3,10 @@ export const prerender = false;
 
 import { getCollection } from "astro:content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
-import DefaultHead from "@/components/html/head.astro";
+import Page from "@/wrappers/page.astro";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
-import "@/styles/global.css";
-import "@rawkodeacademy/design-system/styles.css";
 
 const now = new Date();
 const [publishedVideos, learningPaths] = await Promise.all([
@@ -79,8 +77,7 @@ const pageDescription =
 	"Recorded sessions and live builds from the Rawkode Academy cloud native archive.";
 ---
 
-<html lang="en">
-	<DefaultHead title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription}>
 		<Fragment slot="extra-head">
 			<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
 			<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
@@ -91,8 +88,6 @@ const pageDescription =
 				listName="Rawkode Academy Videos"
 			/>
 		</Fragment>
-	</DefaultHead>
-	<body>
 		<AcademyPage
 			client:load
 			page="watch"
@@ -107,8 +102,7 @@ const pageDescription =
 				{ value: "2019", label: "Since" },
 			]}
 		/>
-	</body>
-</html>
+</Page>
 
 <style is:global>
 	html,

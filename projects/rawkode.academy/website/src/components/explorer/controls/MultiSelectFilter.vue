@@ -1,10 +1,8 @@
 <template>
- <div ref="triggerRef" class="multi-select-filter">
- <button
- type="button"
+ <Popover.Root :open="isOpen" @open-change="isOpen = $event.open">
+ <Popover.Trigger
  class="filter-toggle"
  :class="{ 'has-selection': selected.length > 0 }"
- @click="toggleDropdown"
  >
  <span class="filter-label">{{ label }}</span>
  <span v-if="selected.length > 0" class="selection-badge">
@@ -19,17 +17,11 @@
  >
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
  </svg>
- </button>
+ </Popover.Trigger>
 
  <Teleport to="body">
- <Transition name="dropdown">
- <div
- v-if="isOpen"
- ref="dropdownRef"
- class="filter-dropdown"
- :style="dropdownStyle"
- @click.stop
- >
+ <Popover.Positioner class="filter-positioner">
+ <Popover.Content class="filter-dropdown">
  <!-- Select all / clear -->
  <div class="dropdown-actions">
  <button type="button" class="action-btn" @click="selectAll">
@@ -65,14 +57,15 @@
  <span class="option-label">{{ getValueLabel(value) }}</span>
  </label>
  </div>
- </div>
- </Transition>
+ </Popover.Content>
+ </Popover.Positioner>
  </Teleport>
- </div>
+ </Popover.Root>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { Popover } from "@ark-ui/vue/popover";
+import { ref } from "vue";
 import {
 	getDimensionLabel,
 	getDimensionColor,
@@ -93,62 +86,6 @@ const emit = defineEmits<{
 }>();
 
 const isOpen = ref(false);
-const triggerRef = ref<HTMLElement | null>(null);
-const dropdownRef = ref<HTMLElement | null>(null);
-const dropdownPosition = ref({
-	top: 0,
-	bottom: 0,
-	left: 0,
-	width: 0,
-	maxHeight: 400,
-	openUpward: false,
-});
-
-const dropdownStyle = computed(() => ({
-	position: "fixed" as const,
-	top: dropdownPosition.value.openUpward
-		? "auto"
-		: `${dropdownPosition.value.top}px`,
-	bottom: dropdownPosition.value.openUpward
-		? `${dropdownPosition.value.bottom}px`
-		: "auto",
-	left: `${dropdownPosition.value.left}px`,
-	width: `${dropdownPosition.value.width}px`,
-	maxHeight: `${dropdownPosition.value.maxHeight}px`,
-}));
-
-const updateDropdownPosition = () => {
-	if (!triggerRef.value) return;
-	const rect = triggerRef.value.getBoundingClientRect();
-	const viewportHeight = window.innerHeight;
-	const spaceBelow = viewportHeight - rect.bottom - 16;
-	const spaceAbove = rect.top - 16;
-	const minDropdownHeight = 200;
-
-	// Prefer opening downward if there's enough space
-	const openUpward = spaceBelow < minDropdownHeight && spaceAbove > spaceBelow;
-	const maxHeight = openUpward
-		? Math.min(spaceAbove, 400)
-		: Math.min(spaceBelow, 400);
-
-	dropdownPosition.value = {
-		top: rect.bottom + 8,
-		bottom: viewportHeight - rect.top + 8,
-		left: rect.left,
-		width: rect.width,
-		maxHeight,
-		openUpward,
-	};
-};
-
-const toggleDropdown = () => {
-	isOpen.value = !isOpen.value;
-	if (isOpen.value) {
-		nextTick(() => {
-			updateDropdownPosition();
-		});
-	}
-};
 
 const getValueLabel = (value: string): string => {
 	return getDimensionLabel(props.dimension, value);
@@ -172,38 +109,6 @@ const selectAll = () => {
 const clearSelection = () => {
 	emit("update:selected", []);
 };
-
-// Close on click outside
-const handleClickOutside = (event: MouseEvent) => {
-	const target = event.target as HTMLElement;
-	if (
-		triggerRef.value &&
-		!triggerRef.value.contains(target) &&
-		dropdownRef.value &&
-		!dropdownRef.value.contains(target)
-	) {
-		isOpen.value = false;
-	}
-};
-
-// Update position on scroll/resize
-const handleScrollResize = () => {
-	if (isOpen.value) {
-		updateDropdownPosition();
-	}
-};
-
-onMounted(() => {
-	document.addEventListener("click", handleClickOutside);
-	window.addEventListener("scroll", handleScrollResize, true);
-	window.addEventListener("resize", handleScrollResize);
-});
-
-onUnmounted(() => {
-	document.removeEventListener("click", handleClickOutside);
-	window.removeEventListener("scroll", handleScrollResize, true);
-	window.removeEventListener("resize", handleScrollResize);
-});
 </script>
 
 <style scoped>
@@ -270,7 +175,8 @@ onUnmounted(() => {
 <style>
 /* Dropdown styles - global because teleported to body */
 .filter-dropdown {
- z-index: 9999;
+ width: var(--reference-width);
+ max-height: min(400px, var(--available-height));
  background: var(--surface-card);
  border: 1px solid var(--surface-border);
  border-radius: 10px;
@@ -279,6 +185,8 @@ onUnmounted(() => {
  flex-direction: column;
  overflow: hidden;
 }
+
+.filter-positioner { z-index: 9999; }
 
 .filter-dropdown .dropdown-actions {
  display: flex;

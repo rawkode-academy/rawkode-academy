@@ -3,10 +3,8 @@ export const prerender = true;
 
 import { getCollection, getEntries } from "astro:content";
 import AcademyPage from "@/components/academy/AcademyPage.vue";
-import DefaultHead from "@/components/html/head.astro";
+import Page from "@/wrappers/page.astro";
 import LearningPathItemListJsonLd from "@/components/html/learning-path-itemlist-jsonld.astro";
-import "@/styles/global.css";
-import "@rawkodeacademy/design-system/styles.css";
 
 const now = new Date();
 const [learningPaths, technologies] = await Promise.all([
@@ -83,16 +81,13 @@ const pageDescription =
 	"Curated routes through Kubernetes, platform engineering, and cloud native systems.";
 ---
 
-<html lang="en">
-	<DefaultHead title={pageTitle} description={pageDescription}>
+<Page title={pageTitle} description={pageDescription}>
 		<LearningPathItemListJsonLd
 			slot="extra-head"
 			paths={itemListPaths}
 			listUrl={new URL("/learning-paths", Astro.site ?? Astro.url).href}
 			listName="Rawkode Academy Learning Paths"
 		/>
-	</DefaultHead>
-	<body>
 		<AcademyPage
 			client:load
 			page="learn"
@@ -107,8 +102,7 @@ const pageDescription =
 				{ value: "2019", label: "Since" },
 			]}
 		/>
-	</body>
-</html>
+</Page>
 
 <style is:global>
 	html,

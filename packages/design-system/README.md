@@ -55,3 +55,50 @@ chronological Latest feed:
 
 Format-specific routes such as `/watch` and `/read` remain focused views. The
 homepage uses Panda-generated classes plus the shared Ark Tabs and Dialog.
+# Academy production shell and page primitives
+
+Academy documents use `@/wrappers/page.astro`, which owns the head, one
+`main#main-content`, skip link, shared header, footer, and generated Panda CSS.
+Pass title/description/Open Graph props normally; put page-specific JSON-LD,
+feed links, and preloads in `slot="extra-head"`. Do not nest another main or
+recreate site navigation in content components. Embeds may use the minimal layout.
+
+```astro
+---
+import Page from "@/wrappers/page.astro";
+import { academyLayout } from "@rawkodeacademy/design-system";
+const s = academyLayout({ width: "wide" }); // or "reading"
+---
+<Page title="Courses" description="Learn by building.">
+  <div class={s.root}>
+    <section class={s.hero}>
+      <div class={s.container}>
+        <p class={s.kicker}>Learn</p>
+        <h1 class={s.title}>Courses</h1>
+        <p class={s.description}>Practical paths through production systems.</p>
+      </div>
+    </section>
+    <section class={s.section} aria-label="Available courses">
+      <div class={s.grid}><slot /></div>
+    </section>
+  </div>
+</Page>
+```
+
+`academyLayout` slots: `root`, `hero`, `container`, `kicker`, `title`,
+`description`, `section`, `sectionHeader`, `sectionTitle`, `grid`, `card`,
+`cardMedia`, `cardBody`, `cardTitle`, `meta`, `prose`, `sidebar`, `split`,
+`toolbar`, `input`, `button`, `buttonSecondary`, `tag`, `empty`, `notice`,
+`breadcrumbs`, `list`, `table`, `tableWrap`.
+
+`academyShell` is the production chrome recipe. `NavigationDrawer` from
+`@rawkodeacademy/design-system/vue` accepts `groups` (label plus items with
+label/href), `currentPath`, and an optional stable `id`. It uses Ark Dialog
+for focus trapping, Escape/outside dismissal, focus restoration, and scroll
+locking. Its server fallback is a real link to the complete footer navigation.
+Website-owned `src/lib/navigation.ts` supplies the shared route inventory.
+
+All custom styles must live in package recipes so Panda's package-local
+extraction sees them. Rebuild the package after recipe changes. Canonical SVG
+artwork remains in the website branding directory and is rendered inline using
+currentColor; never duplicate it into `public/`.

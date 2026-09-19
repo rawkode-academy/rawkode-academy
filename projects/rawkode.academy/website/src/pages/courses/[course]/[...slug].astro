@@ -1,4 +1,7 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import { dirname, join } from "node:path";
@@ -190,59 +193,59 @@ function formatDuration(minutes?: number) {
 			}
 		: undefined}
 >
-	<section class="page-px section-py-tight">
-		<div class="mx-auto max-w-7xl space-y-6">
+	<section class={doc.section}>
+		<div class={[doc.container, doc.stack].join(" ")}>
 			<Breadcrumb elements={breadcrumbElements} />
 
-			<header class="border-b border-black/10 pb-8 dark:border-white/10">
-				<div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_19rem] xl:items-end">
-					<div class="space-y-6">
-						<div class="flex flex-wrap items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-muted">
-							<span class="text-primary">Course Lesson</span>
+			<header class={doc.rule}>
+				<div class={doc.split}>
+					<div class={doc.stack}>
+						<div class={doc.kicker}>
+							<span class={doc.link}>Course Lesson</span>
 							{formatDuration(module.data.duration) && (
 								<>
-									<span class="hidden h-1 w-1 rounded-full bg-black/20 dark:bg-white/20 sm:block"></span>
+									<span class={doc.dot}></span>
 									<span>{formatDuration(module.data.duration)}</span>
 								</>
 							)}
 							{module.data.difficulty && (
 								<>
-									<span class="hidden h-1 w-1 rounded-full bg-black/20 dark:bg-white/20 sm:block"></span>
-									<span class="capitalize">{module.data.difficulty}</span>
+									<span class={doc.dot}></span>
+									<span class={doc.copy}>{module.data.difficulty}</span>
 								</>
 							)}
 						</div>
 
-						<div class="max-w-4xl space-y-4">
-							<h1 class="text-4xl font-extrabold tracking-tight text-primary-content md:text-5xl">
+						<div class={doc.stack}>
+							<h1 class={doc.title}>
 								{module.data.title}
 							</h1>
-							<p class="max-w-[65ch] text-lg leading-8 text-secondary-content">
+							<p class={doc.lede}>
 								{module.data.description}
 							</p>
 						</div>
 					</div>
 
-					<div class="space-y-4 border-t border-black/10 pt-5 dark:border-white/10 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
-						<div class="space-y-2">
-							<div class="eyebrow-label">Course Context</div>
-							<h2 class="text-2xl font-bold tracking-tight text-primary-content">{course.data.title}</h2>
-							<p class="text-sm leading-7 text-secondary-content">
+					<div class={[doc.rule, doc.stack].join(" ")}>
+						<div class={doc.stackSmall}>
+							<div class={doc.kicker}>Course Context</div>
+							<h2 class={doc.sectionTitle}>{course.data.title}</h2>
+							<p class={doc.copy}>
 								Module {currentIndex + 1} of {allCourseModules.length}. Move through the course in order or jump back to the full curriculum.
 							</p>
 						</div>
 
-						<div class="flex flex-wrap gap-3">
+						<div class={doc.actions}>
 							<a
 								href={`/courses/${course.id}`}
-								class="inline-flex min-h-11 items-center justify-center rounded-[2px] border border-black/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:border-primary/25 hover:text-primary-content dark:border-white/10 dark:text-white"
+								class={doc.buttonSecondary}
 							>
 								View course
 							</a>
 							{nextModule && (
 								<a
 									href={moduleHref(nextModule)}
-									class="inline-flex min-h-11 items-center justify-center rounded-[2px] bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+									class={doc.button}
 								>
 									Next lesson
 								</a>
@@ -252,19 +255,19 @@ function formatDuration(minutes?: number) {
 				</div>
 			</header>
 
-			<div class:list={["module-flow", dedupedResources.length > 0 && "module-flow--with-rail"]}>
+			<div class:list={[doc.moduleFlow, dedupedResources.length > 0 && doc.moduleFlowRail]}>
 				{module.data.video && (
-					<section class="module-flow__video space-y-5 border-y border-black/10 py-6 dark:border-white/10">
-						<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-							<div class="space-y-2">
-								<div class="eyebrow-label">Watch the Lesson</div>
-								<h2 class="text-3xl font-bold tracking-tight text-primary-content">Follow the build in real time</h2>
+					<section class={doc.moduleMain}>
+						<div class={doc.rowBetween}>
+							<div class={doc.stackSmall}>
+								<div class={doc.kicker}>Watch the Lesson</div>
+								<h2 class={doc.sectionTitle}>Follow the build in real time</h2>
 							</div>
-							<p class="max-w-xl text-sm leading-7 text-secondary-content sm:text-right sm:text-base">
+							<p class={doc.copy}>
 								Pause, replay, and keep the notes and resources beside you as you work through the module.
 							</p>
 						</div>
-						<div class="overflow-hidden rounded-sm bg-black/5 dark:bg-white/5">
+						<div class={doc.media}>
 							<VideoPlayer
 								video={module.data.video.id}
 								thumbnailUrl={module.data.video.thumbnailUrl || module.data.video.poster || ""}
@@ -276,40 +279,40 @@ function formatDuration(minutes?: number) {
 				)}
 
 				{dedupedResources.length > 0 && (
-					<aside class="module-flow__rail xl:sticky xl:top-28 xl:self-start">
+					<aside class={doc.moduleRail}>
 						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
 					</aside>
 				)}
 
-				<article class="module-flow__notes space-y-6">
-					<div class="flex flex-col gap-3 border-b border-black/10 pb-6 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
-						<div class="space-y-2">
-							<div class="eyebrow-label">Lesson Notes</div>
-							<h2 class="text-3xl font-bold tracking-tight text-primary-content">What you’ll implement</h2>
+				<article class={doc.moduleMain}>
+					<div class={doc.rowBetween}>
+						<div class={doc.stackSmall}>
+							<div class={doc.kicker}>Lesson Notes</div>
+							<h2 class={doc.sectionTitle}>What you’ll implement</h2>
 						</div>
-						<p class="max-w-xl text-sm leading-7 text-secondary-content sm:text-right sm:text-base">
+						<p class={doc.copy}>
 							The notes mirror the lesson flow so you can scan, copy, and revisit the important decisions quickly.
 						</p>
 					</div>
-					<div class="prose prose-lg max-w-none dark:prose-invert prose-headings:scroll-mt-24">
+					<div class={styles.prose}>
 						<Content />
 					</div>
 				</article>
 
 				{(previousModule || nextModule) && (
-					<nav class="module-flow__nav border-t border-black/10 pt-6 dark:border-white/10">
-						<div class="grid gap-4 md:grid-cols-2">
+					<nav class={[doc.moduleMain, doc.rule].join(" ")}>
+						<div class={doc.gridTwo}>
 							{previousModule && (
 								<a
 									href={moduleHref(previousModule)}
-									class="group border-b border-black/8 py-4 transition-colors hover:text-primary dark:border-white/8"
+									class={doc.link}
 								>
-									<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Previous</p>
-									<div class="mt-2 flex items-start justify-between gap-4">
-										<p class="font-semibold text-primary-content transition-colors group-hover:text-primary">
+									<p class={doc.kicker}>Previous</p>
+									<div class={doc.rowBetween}>
+										<p class={doc.copy}>
 											{previousModule.data.title}
 										</p>
-										<span class="text-primary group-hover:-translate-x-0.5">←</span>
+										<span class={doc.link}>←</span>
 									</div>
 								</a>
 							)}
@@ -317,14 +320,14 @@ function formatDuration(minutes?: number) {
 							{nextModule && (
 								<a
 									href={moduleHref(nextModule)}
-									class="group border-b border-black/8 py-4 text-left transition-colors hover:text-primary dark:border-white/8 md:text-right"
+									class={doc.link}
 								>
-									<p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Next</p>
-									<div class="mt-2 flex items-start justify-between gap-4 md:flex-row-reverse">
-										<p class="font-semibold text-primary-content transition-colors group-hover:text-primary">
+									<p class={doc.kicker}>Next</p>
+									<div class={doc.rowBetween}>
+										<p class={doc.copy}>
 											{nextModule.data.title}
 										</p>
-										<span class="text-primary group-hover:translate-x-0.5">→</span>
+										<span class={doc.link}>→</span>
 									</div>
 								</a>
 							)}
@@ -334,7 +337,7 @@ function formatDuration(minutes?: number) {
 			</div>
 
 			{course.data.signupConfig && (
-				<div class="mx-auto max-w-5xl">
+				<div class={doc.container}>
 					<CourseSignupForm
 						courseId={course.id}
 						courseTitle={course.data.title}
@@ -345,29 +348,3 @@ function formatDuration(minutes?: number) {
 		</div>
 	</section>
 </Page>
-
-<style>
-	.module-flow {
-		display: grid;
-		gap: clamp(2rem, 4vw, 3rem);
-	}
-
-	@media (min-width: 1280px) {
-		.module-flow--with-rail {
-			grid-template-columns: minmax(0, 1fr) 20rem;
-			column-gap: clamp(2.5rem, 4vw, 3.5rem);
-			align-items: start;
-		}
-
-		.module-flow__video,
-		.module-flow__notes,
-		.module-flow__nav {
-			grid-column: 1;
-		}
-
-		.module-flow__rail {
-			grid-column: 2;
-			grid-row: 1 / span 3;
-		}
-	}
-</style>

@@ -9,6 +9,7 @@
 		"dev": "astro dev",
 		"format": "biome format --write",
 		"preview": "astro preview",
+		"check:academy-shell": "node scripts/check-academy-shell.mjs",
 		"start": "astro dev",
 		"storybook": "storybook dev -p 6006",
 		"test:seo": "vitest run src/tests/seo.test.ts",
@@ -24,6 +25,7 @@
 		"knip": "knip"
 	},
 	"dependencies": {
+		"@ark-ui/vue": "5.39.2",
 		"@astrojs/check": "0.9.8",
 		"@astrojs/cloudflare": "13.1.10",
 		"@astrojs/mdx": "5.0.3",

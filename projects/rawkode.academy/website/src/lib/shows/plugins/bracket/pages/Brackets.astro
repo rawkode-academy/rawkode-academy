@@ -1,11 +1,13 @@
 ---
 import type { Bracket, BracketMatch } from "../queries";
+import { academyLayout } from "@rawkodeacademy/design-system";
 
 interface Props {
 	brackets: Bracket[];
 }
 
 const { brackets } = Astro.props;
+const layout = academyLayout({ width: "wide" });
 
 function roundsOf(matches: BracketMatch[]): [number, BracketMatch[]][] {
 	const byRound = new Map<number, BracketMatch[]>();
@@ -41,14 +43,14 @@ function fmt(iso?: string | null): string {
 
 {
 	brackets.length === 0 ? (
-		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
+		<div class:list={[layout.empty, "mx-auto max-w-2xl rounded-sm paper-card p-12 text-center"]}>
 			<p class="text-lg font-medium text-secondary-content">No brackets yet</p>
 			<p class="mt-2 text-sm text-muted">
 				Brackets appear here once a season is underway. Check back soon.
 			</p>
 		</div>
 	) : (
-		<div class="flex flex-col gap-12">
+		<div class:list={[layout.list, "flex flex-col gap-12"]}>
 			{brackets.map((bracket) => (
 				<div>
 					<div class="mb-4 flex flex-wrap items-center gap-3">
@@ -62,7 +64,7 @@ function fmt(iso?: string | null): string {
 							Starts {fmt(bracket.startsAt)}
 						</span>
 					</div>
-					<div class="flex gap-6 overflow-x-auto pb-2">
+					<div class:list={[layout.toolbar, "flex gap-6 overflow-x-auto pb-2"]}>
 						{roundsOf(bracket.matches).map(([round, ms]) => (
 							<div class="min-w-64 flex-shrink-0">
 								<h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
@@ -70,7 +72,7 @@ function fmt(iso?: string | null): string {
 								</h3>
 								<div class="flex flex-col gap-3">
 									{ms.map((m) => (
-										<div class="rounded-sm paper-card p-3">
+										<div class:list={[layout.card, "rounded-sm paper-card p-3"]}>
 											<div
 												class:list={[
 													"flex items-center justify-between text-sm",

@@ -1,34 +1,24 @@
 <template>
+ <Dialog.Root :open="isOpen" @open-change="isOpen = $event.open">
  <Teleport to="body">
- <Transition
- enter-active-class="transition-opacity duration-200"
- leave-active-class="transition-opacity duration-200"
- enter-from-class="opacity-0"
- leave-to-class="opacity-0"
- >
- <div
- v-if="isOpen"
- class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 overflow-y-auto"
- @click.self="close"
- >
- <div
+ <Dialog.Backdrop class="fixed inset-0 z-50 bg-black/70" />
+ <Dialog.Positioner class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+ <Dialog.Content
  class="relative w-full max-w-6xl bg-[var(--surface-card)] rounded-sm border border-[var(--surface-border)]"
- @click.stop
  >
  <!-- Header -->
  <div class="flex items-center justify-between p-4 border-b border-[var(--surface-border)] ">
- <h3 class="text-lg font-semibold text-primary-content">
+ <Dialog.Title class="text-lg font-semibold text-primary-content">
  {{ resource.title }}
- </h3>
- <button
- @click="close"
+ </Dialog.Title>
+ <Dialog.CloseTrigger
  class="p-2 text-muted hover:text-secondary-content transition-smooth rounded-sm hover:bg-[var(--surface-card-muted)]"
  aria-label="Close"
  >
  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
  </svg>
- </button>
+ </Dialog.CloseTrigger>
  </div>
 
  <!-- Container -->
@@ -80,13 +70,14 @@
  </a>
  </div>
  </div>
- </div>
- </div>
- </Transition>
+ </Dialog.Content>
+ </Dialog.Positioner>
  </Teleport>
+ </Dialog.Root>
 </template>
 
 <script setup lang="ts">
+import { Dialog } from "@ark-ui/vue/dialog";
 import { ref, computed, watch } from "vue";
 import WebContainerEmbed from "./WebContainerEmbed.vue";
 
@@ -127,10 +118,6 @@ const containerHeight = computed(() => {
 	return props.resource.embedConfig.height || "600px";
 });
 
-const close = () => {
-	isOpen.value = false;
-};
-
 const getExternalUrl = () => {
 	const config = props.resource.embedConfig;
 	switch (config.container) {
@@ -144,9 +131,6 @@ const getExternalUrl = () => {
 watch(isOpen, (value) => {
 	if (value) {
 		loading.value = true;
-		document.body.style.overflow = "hidden";
-	} else {
-		document.body.style.overflow = "";
 	}
 });
 </script>

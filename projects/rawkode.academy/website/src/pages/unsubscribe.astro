@@ -3,6 +3,8 @@ import { env } from "cloudflare:workers";
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
 import { createLogger } from "@/lib/logger";
+import { academyLayout } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
 
@@ -77,6 +79,7 @@ if (Astro.request.method === "POST" && user) {
 		};
 	}
 }
+const layout = academyLayout({ width: "reading" });
 ---
 
 <Page
@@ -84,7 +87,8 @@ if (Astro.request.method === "POST" && user) {
 	description="Unsubscribe from the Rawkode Academy newsletter."
 	noindex
 >
-	<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
+	<div class:list={[layout.root, "unsubscribe-page"]}>
+		<div class:list={[layout.container, "unsubscribe-page__content"]}>
 		{success === "true" ? (
 			<>
 				<div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8">
@@ -93,28 +97,28 @@ if (Astro.request.method === "POST" && user) {
 					</svg>
 				</div>
 				
-				<h1 class="text-4xl font-bold text-primary-content mb-4">
+				<h1 class={layout.title}>
 					Unsubscribed Successfully
 				</h1>
 				
-				<p class="text-xl text-muted max-w-2xl mb-8">
+				<p class={layout.description}>
 					You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!
 				</p>
 				
 				<a 
 					href="/"
-					class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+					class={layout.button}
 				>
 					Back to Home
 				</a>
 			</>
 		) : (
 			<>
-				<h1 class="text-4xl font-bold text-primary-content mb-4">
+				<h1 class={layout.title}>
 					Unsubscribe from Newsletter
 				</h1>
 				
-				<p class="text-xl text-muted max-w-2xl mb-8">
+				<p class={layout.description}>
 					{user 
 						? "Click the button below to unsubscribe from the Rawkode Academy newsletter."
 						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."
@@ -127,7 +131,7 @@ if (Astro.request.method === "POST" && user) {
 					</div>
 				)}
 
-				<form method="POST" class="w-full max-w-md space-y-4">
+				<form method="POST" class="unsubscribe-page__form">
 					{!user && (
 						<input
 							type="email"
@@ -135,22 +139,30 @@ if (Astro.request.method === "POST" && user) {
 							value={email || ""}
 							placeholder="Enter your email address"
 							required
-							class="w-full py-3 px-4 rounded-sm border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-primary-content placeholder-neutral-400 dark:placeholder-neutral-500 focus-ring"
+							class={layout.input}
 						/>
 					)}
 					
 					<button
 						type="submit"
-						class="w-full py-3 px-6 rounded-sm bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+						class={layout.button}
 					>
 						Unsubscribe
 					</button>
 				</form>
 
-				<p class="mt-8 text-sm text-muted">
-					Changed your mind? <a href="/" class="text-primary hover:underline">Go back home</a>
+				<p class="unsubscribe-page__return">
+					Changed your mind? <a href="/">Go back home</a>
 				</p>
 			</>
 		)}
+		</div>
 	</div>
 </Page>
+
+<style>
+	.unsubscribe-page__content { display: grid; justify-items: center; min-height: 60vh; padding-block: 5rem; text-align: center; }
+	.unsubscribe-page__form { display: grid; width: min(100%, 28rem); gap: 1rem; margin-top: 2rem; }
+	.unsubscribe-page__return { margin-top: 2rem; color: var(--colors-academy-text-muted); }
+	.unsubscribe-page__return a { color: var(--colors-academy-accent); text-underline-offset: 0.2em; }
+</style>

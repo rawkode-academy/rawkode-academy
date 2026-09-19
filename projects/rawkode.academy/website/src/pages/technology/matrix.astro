@@ -5,6 +5,8 @@ import { getCollection } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 // Helper to normalize technology references from videos
 function normalizeTechnologyRef(value: unknown): string | undefined {
@@ -188,14 +190,17 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	label: stageLabels[stage] ?? stage,
 	copy: stageCopy[stage] ?? stageDescriptions[stage] ?? "",
 }));
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
 ---
 
 <Page
 	title="Technology Matrix"
 	description="Rawkode's opinionated guide to cloud native and platform engineering technologies."
 >
+	<div class:list={[layout.root, media.root, "matrix-route"]}>
 	<!-- Custom Hero -->
-	<section class="matrix-hero">
+	<section class:list={[layout.hero, media.hero, "matrix-hero"]}>
 		<div class="hero-background">
 			<div class="hero-gradient"></div>
 			<div class="hero-grid"></div>
@@ -283,7 +288,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	</section>
 
 	<Container size="xl" padding="lg">
-		<div class="matrix-content">
+		<div class:list={[layout.container, media.body, "matrix-content"]}>
 
 			<!-- Pipeline Header -->
 			<div class="pipeline-header" role="group" aria-label="Pipeline stages from Watch to Advocate">
@@ -529,6 +534,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 			</div>
 		</div>
 	</dialog>
+	</div>
 </Page>
 
 <style>

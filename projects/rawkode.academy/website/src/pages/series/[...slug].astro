@@ -1,7 +1,11 @@
 ---
+import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
+const styles = academyLayout({ width: "reading" });
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import SeriesArticles from "@/components/articles/series/SeriesArticles.astro";
+import ArticleHeader from "@/components/read/ArticleHeader.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import Page from "@/wrappers/page.astro";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -59,19 +63,17 @@ const imageUrl = await computeImageUrl(series);
 			{ title: series.data.title, link: `/series/${series.id}` },
 		]}
 	/>
-	<div class="mx-auto max-w-3xl content-px py-12">
-		<h1>
-			{series.data.title}
-		</h1>
-
-		<article class="prose article-prose mt-8">
-			<Content />
-
-			<h2>Articles</h2>
-
-			<div class="not-prose">
-				<SeriesArticles series={series} />
-			</div>
-		</article>
-	</div>
+	<ArticleHeader
+		breadcrumbs={[{ label: "Series", href: "/series" }]}
+		dispatchNum={series.id}
+		kicker="Article series"
+		title={series.data.title}
+	/>
+	<article class={[doc.reading, styles.prose].join(" ")}>
+		<Content />
+	</article>
+	<section class={[doc.section, doc.stack].join(" ")}>
+		<h2 class={doc.sectionTitle}>Articles</h2>
+		<SeriesArticles series={series} />
+	</section>
 </Page>

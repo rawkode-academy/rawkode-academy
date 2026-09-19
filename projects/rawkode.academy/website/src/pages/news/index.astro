@@ -11,6 +11,9 @@ import TrendingPanel from "@/components/news/TrendingPanel.astro";
 import WireSubscribeCard from "@/components/news/WireSubscribeCard.astro";
 import FilterRail from "@/components/read/FilterRail.astro";
 import MLabel from "@/components/ui/MLabel.vue";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
 export const prerender = true;
 
@@ -136,6 +139,8 @@ const trendingItems = allNews.slice(0, 5).map((s) => ({
 }));
 
 const newsRows = rest.filter((s) => s.id !== cveStory?.id).slice(0, 10);
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
@@ -149,57 +154,46 @@ const newsRows = rest.filter((s) => s.id !== cveStory?.id).slice(0, 10);
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
 
-	<div class="news-page">
-		<NewsMasthead updatedAt={leadStory?.data.publishedAt} />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Cloud native wire" title="News" description="What changed, why it matters in production, and what remains unproven." />
 
 		<section class="news-page__top">
 			{leadStory && (
-				<NewsLead
-					href={`/news/${leadStory.id}`}
-					kicker={kickerFor(leadStory)}
-					time={timeFormatter.format(leadStory.data.publishedAt)}
-					title={leadStory.data.title}
-					description={leadStory.data.description}
-					tags={leadStoryTags}
-				/>
+				<article class={catalog.featured}>
+					<div class={catalog.featuredBody}>
+						<p class={catalog.featuredKicker}>{kickerFor(leadStory)} · {formatRelativeDate(leadStory.data.publishedAt)}</p>
+						<h2 class={catalog.featuredTitle}>{leadStory.data.title}</h2>
+						<p class={catalog.featuredDescription}>{leadStory.data.description}</p>
+						<div class={catalog.filters}>{leadStoryTags.map((tag) => <a class={catalog.filterLink} href={`/technology/${tag}`}>{formatTechnologyLabel(tag)}</a>)}</div>
+						<a class={styles.button} href={`/news/${leadStory.id}`}>Read the briefing →</a>
+					</div>
+				</article>
 			)}
 			{cveStory && cveMatch(cveStory) && (
-				<CVEAlert
-					id={cveMatch(cveStory) ?? "CVE"}
-					severity={cveSeverityMatch?.[1] ?? "—"}
-					project={
-						formatTechnologyLabel(
-							(cveStory.data.technologies ?? [])[0] ?? "runtime",
-						)
-					}
-					title={cveStory.data.title}
-					description={cveStory.data.description}
-					publishedAt={formatRelativeDate(cveStory.data.publishedAt)}
-					href={`/news/${cveStory.id}`}
-				/>
+				<a class={styles.notice} href={`/news/${cveStory.id}`}>
+					Security watch · {cveMatch(cveStory)} · CVSS {cveSeverityMatch?.[1] ?? "—"}: {cveStory.data.title} →
+				</a>
 			)}
 		</section>
 
-		<FilterRail topics={topics} />
+		<section class={styles.section}>
+			<div class={styles.container}>
+				<nav class={catalog.filters} aria-label="News topics">
+					{topics.map((topic) => <a class={catalog.filterLink} href={topic.href}>{topic.label}</a>)}
+				</nav>
+			</div>
+		</section>
 
-		<section class="news-page__feed">
-			<div>
+		<section class={styles.section}>
+			<div class={styles.container}>
 				<MLabel>Timeline · {newsRows.length} of {allNews.length}</MLabel>
-				<div class="news-page__rows">
+				<div class={styles.grid}>
 					{newsRows.map((s) => (
-						<NewsRow
+						<AcademyCatalogCard
 							href={`/news/${s.id}`}
-							time={timeFormatter.format(s.data.publishedAt)}
-							date={formatRelativeDate(s.data.publishedAt)}
-							kicker={kickerFor(s)}
-							project={
-								(s.data.technologies ?? [])[0]
-									? formatTechnologyLabel(s.data.technologies[0]!)
-									: undefined
-							}
 							title={s.data.title}
-							tags={(s.data.technologies ?? []).slice(0, 2)}
-							hot={isHot(s)}
+							description={s.data.description}
+							meta={[kickerFor(s), formatRelativeDate(s.data.publishedAt), ...(s.data.technologies ?? []).slice(0, 2).map(formatTechnologyLabel)]}
 						/>
 					))}
 				</div>
