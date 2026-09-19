@@ -2,7 +2,7 @@ import { sva } from "../../styled-system/css";
 
 /** Production chrome, shared by every Academy document. */
 export const academyShell = sva({
-	slots: ["root", "header", "nav", "brand", "brandArt", "links", "link", "actions", "search", "account", "main", "skip", "footer", "footerInner", "footerGroups", "footerGroup", "footerTitle", "footerLink", "copyright", "mobile", "menuTrigger", "backdrop", "positioner", "panel", "panelHeader", "panelTitle", "close", "menuGroups", "menuGroup", "menuHeading", "menuLink"],
+	slots: ["root", "header", "nav", "brand", "brandArt", "links", "link", "actions", "search", "account", "authButton", "profileTrigger", "profileAvatar", "profilePositioner", "profileMenu", "profileIdentity", "profileName", "profileEmail", "profileMenuItems", "profileMenuItem", "profileMenuButton", "main", "skip", "footer", "footerInner", "footerGroups", "footerGroup", "footerTitle", "footerLink", "copyright", "mobile", "menuTrigger", "backdrop", "positioner", "panel", "panelHeader", "panelTitle", "close", "menuGroups", "menuGroup", "menuHeading", "menuLink"],
 	base: {
 		root: { minHeight: "screen", display: "flex", flexDirection: "column", backgroundColor: "academy.canvas", color: "academy.text", fontFamily: "academy-text", lineHeight: "body" },
 		header: { backgroundColor: "academy.ground", borderBottom: "hairline", borderColor: "academy.border", position: "relative" },
@@ -14,6 +14,17 @@ export const academyShell = sva({
 		actions: { display: "flex", alignItems: "center", gap: "1", marginInlineStart: "auto" },
 		search: { display: "none", alignItems: "center", justifyContent: "center", minWidth: "11", minHeight: "11", color: "academy.text", _lg: { display: "inline-flex" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent" } },
 		account: { display: "none", _lg: { display: "block" } },
+		authButton: { display: "inline-flex", alignItems: "center", justifyContent: "center", minHeight: "9", paddingInline: "4", paddingBlock: "2", border: "academy-button", borderRadius: "academy-s", backgroundColor: "academy.accent", color: "academy.accentForeground", fontFamily: "academy-mono", fontSize: "xs", fontWeight: "semibold", letterSpacing: "wide", lineHeight: "none", textTransform: "uppercase", textDecoration: "none", _hover: { opacity: "0.9" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+		profileTrigger: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: "9", height: "9", borderRadius: "full", color: "academy.text", cursor: "pointer", _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+		profileAvatar: { width: "8", height: "8", borderRadius: "full", objectFit: "cover", border: "hairline", borderColor: "academy.border" },
+		profilePositioner: { zIndex: "overlay" },
+		profileMenu: { width: "56", overflow: "hidden", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel", color: "academy.text", boxShadow: "dialog", outline: "none" },
+		profileIdentity: { display: "flex", flexDirection: "column", gap: "1", padding: "4", borderBottom: "hairline", borderColor: "academy.border" },
+		profileName: { overflow: "hidden", color: "academy.text", fontSize: "sm", fontWeight: "semibold", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+		profileEmail: { overflow: "hidden", color: "academy.textMuted", fontSize: "xs", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+		profileMenuItems: { display: "grid", gap: "1", padding: "1" },
+		profileMenuItem: { display: "flex", alignItems: "center", minHeight: "9", paddingInline: "3", borderRadius: "academy-s", color: "academy.textSoft", fontSize: "sm", textDecoration: "none", cursor: "pointer", _hover: { backgroundColor: "academy.ground", color: "academy.text" }, "&[data-highlighted]": { backgroundColor: "academy.ground", color: "academy.text", outline: "none" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" } },
+		profileMenuButton: { width: "full", textAlign: "start", border: "academy-button", backgroundColor: "transparent" },
 		main: { flex: "1", width: "full", minWidth: "0", outline: "none" },
 		skip: { position: "fixed", top: "2", left: "2", zIndex: "overlay", transform: "translateY(-200%)", padding: "3", backgroundColor: "academy.accent", color: "academy.accentForeground", fontWeight: "bold", _focus: { transform: "none", outline: "focus", outlineColor: "academy.text" } },
 		footer: { borderTop: "hairline", borderColor: "academy.border", backgroundColor: "academy.ground", paddingInline: "6", paddingBlock: "12" },

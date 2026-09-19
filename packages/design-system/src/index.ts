@@ -6,5 +6,8 @@ export { academyMarketing } from "./recipes/academyMarketing";
 export { academyMedia } from "./recipes/academyMedia";
 export { academyCatalog } from "./recipes/academyCatalog";
 export { academyDocument } from "./recipes/academyDocument";
+export { academyLabel } from "./recipes/academyLabel";
+export { academySkeleton } from "./recipes/academySkeleton";
+export { academyWatch } from "./recipes/academyWatch";
 export { tabs } from "./recipes/tabs";
 export { Dialog } from "./vue";

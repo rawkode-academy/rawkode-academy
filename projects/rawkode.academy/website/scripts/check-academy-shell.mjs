@@ -136,6 +136,62 @@ assert.match(videoReactions, /v-model:open="pickerOpen"/);
 assert.match(videoReactions, /:lazy-mount="true"/);
 assert.match(videoReactions, /:unmount-on-exit="true"/);
 assert.match(videoReactions, /:portalled="false"/);
+
+const watchVisibleSources = [
+	"src/pages/watch/[...slug].astro",
+	"src/components/video/LiveStreamGate.vue",
+	"src/components/video/CloudflareWhepPlayer.vue",
+	"src/components/video/player.vue",
+	"src/components/video/StreamNotifyButton.vue",
+	"src/components/video/VideoReactions.astro",
+	"src/components/video/VideoReactionsClient.vue",
+	"src/components/video/video-content-tabs.vue",
+	"src/components/video/comments.vue",
+	"src/components/video/transcript.vue",
+	"src/components/video/VideoCast.astro",
+	"src/components/video/ShowVideoSection.astro",
+	"src/components/video/TechnologyVideoSection.astro",
+	"src/components/newsletter/NewsletterCTA.astro",
+	"src/components/newsletter/NewsletterWidget.vue",
+	"src/components/auth/sign-in-button.astro",
+	"src/components/auth/profile.vue",
+	"src/components/ui/MLabel.vue",
+	"src/components/ui/LiveDot.vue",
+	"src/components/ui/EmptyState.vue",
+	"src/components/common/ErrorState.vue",
+	"src/components/common/SkeletonComment.vue",
+	"src/components/common/SkeletonText.vue",
+	"src/components/common/SkeletonTranscript.vue",
+];
+const legacyWatchAliases = /--(?:editorial|surface|brand)-|\b(?:paper-card|paper-panel|section-shell|text-(?:primary-content|secondary-content|muted)|border-surface|focus-ring|bleed-x-mobile)\b/;
+const directBrandRgb = /rgb\(var\(--brand-/;
+const directPaletteUtility = /\b(?:bg|text|border|ring|outline|fill|stroke)-(?:primary|secondary|accent|white|black|neutral|red|yellow|orange|amber|green|emerald|blue|indigo|violet|purple|pink|rose)-[\w/[\].-]+/;
+const directPaletteLiteral = /(?:#[0-9a-f]{3,8}\b|\b(?:rgb|hsl|oklch)\()/i;
+for (const path of watchVisibleSources) {
+	const source = read(path);
+	assert.doesNotMatch(source, legacyWatchAliases, `${path}: legacy watch palette alias`);
+	assert.doesNotMatch(source, directBrandRgb, `${path}: direct legacy brand RGB`);
+	assert.doesNotMatch(source, directPaletteUtility, `${path}: direct palette utility`);
+	assert.doesNotMatch(source, directPaletteLiteral, `${path}: direct palette literal`);
+}
+const watchRoute = read("src/pages/watch/[...slug].astro");
+assert.match(watchRoute, /academyWatch/);
+assert.doesNotMatch(watchRoute, /<style\b/i, "watch route must use Panda recipe slots");
+assert.match(watchRoute, /const isLiveNow = isLive && studioLiveState\.live/);
+assert.match(watchRoute, /const watchStatusLabel = isLiveNow[\s\S]*?"Live now"[\s\S]*?"Upcoming"[\s\S]*?"On demand"/);
+assert.match(watchRoute, /<MLabel tone=\{isLiveNow \? "amber" : "spruce"\}>/);
+assert.match(watchRoute, /\{isLiveNow && <LiveDot color="amber" \/>\}/);
+assert.match(watchRoute, /data-academy-learn-list/);
+assert.match(watchRoute, /data-academy-prose/);
+const globalStyles = read("src/styles/global.css");
+assert.match(globalStyles, /\[data-academy-prose\][\s\S]*?list-style-type: disc/);
+assert.match(globalStyles, /\[data-academy-learn-list\][\s\S]*?list-style-type: decimal/);
+const cloudflareWhepPlayer = read("src/components/video/CloudflareWhepPlayer.vue");
+assert.match(cloudflareWhepPlayer, /academyWatch/);
+assert.doesNotMatch(cloudflareWhepPlayer, /<style\b/i, "live player must use Panda recipe slots");
+const reactionsClient = read("src/components/video/VideoReactionsClient.vue");
+assert.match(reactionsClient, /academyWatch\(\{ pressed: Boolean\(pressed\[emoji\]\) \}\)\.reactionButton/);
+assert.doesNotMatch(reactionsClient, /reactionButtonActive/);
 const drawer = readFileSync(resolve(designSystem, "src/vue/NavigationDrawer.vue"), "utf8");
 for (const behavior of ["trap-focus", "prevent-scroll", "close-on-escape", "close-on-interact-outside"]) {
 	assert.ok(drawer.includes(`:${behavior}="true"`));

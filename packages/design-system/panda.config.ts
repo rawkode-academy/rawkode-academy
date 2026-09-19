@@ -82,6 +82,7 @@ export default defineConfig({
 				sizes: {
 					"academy-shell": { value: "1180px" },
 					"academy-copy": { value: "680px" },
+					"academy-transcript": { value: "600px" },
 					"academy-card": { value: "400px" },
 					"academy-card-mobile": { value: "74vw" },
 					"academy-feature": { value: "42%" },
@@ -101,8 +102,27 @@ export default defineConfig({
 					none: { value: "0s" },
 					fast: { value: "120ms" },
 				},
+				animations: {
+					none: { value: "none" },
+					"academy-skeleton": { value: "academy-skeleton-pulse 1.8s ease-in-out infinite" },
+					"academy-live": { value: "academy-live-pulse 1.8s ease-in-out infinite" },
+					"academy-spinner": { value: "academy-spinner 1s linear infinite" },
+				},
 				zIndex: {
 					overlay: { value: 1000 },
+				},
+			},
+			keyframes: {
+				"academy-skeleton-pulse": {
+					"0%, 100%": { opacity: "1" },
+					"50%": { opacity: "0.55" },
+				},
+				"academy-live-pulse": {
+					"0%, 100%": { opacity: "1", transform: "scale(1)" },
+					"50%": { opacity: "0.7", transform: "scale(0.92)" },
+				},
+				"academy-spinner": {
+					to: { transform: "rotate(360deg)" },
 				},
 			},
 			semanticTokens: {
@@ -166,6 +186,24 @@ export default defineConfig({
 							value: {
 								base: "#ffffff",
 								_dark: "{colors.academyBase.accent-foreground}",
+							},
+						},
+						statusAmber: {
+							value: {
+								base: "#9a5800",
+								_dark: "#f2b53d",
+							},
+						},
+						statusRust: {
+							value: {
+								base: "#b23b26",
+								_dark: "#ef8f78",
+							},
+						},
+						statusSpruce: {
+							value: {
+								base: "#16785d",
+								_dark: "#6ed2ac",
 							},
 						},
 						input: {

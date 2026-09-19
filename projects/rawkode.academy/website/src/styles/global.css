@@ -195,6 +195,24 @@ body {
 	font-family: var(--font-inter-tight), "Inter", -apple-system, system-ui, sans-serif;
 }
 
+/* Uno's unlayered reset can clear list markers after Panda's layered recipe
+   classes have resolved. These semantic hooks deliberately restore only list
+   markers and indentation; colour, type, spacing, and prose treatment stay
+   in the Academy recipes. */
+[data-academy-prose] :is(ul, ol),
+[data-academy-learn-list] {
+	padding-inline-start: 1.5rem;
+}
+
+[data-academy-prose] ul {
+	list-style-type: disc;
+}
+
+[data-academy-prose] ol,
+[data-academy-learn-list] {
+	list-style-type: decimal;
+}
+
 /* Design-system raw variables that aren't expressed as UnoCSS theme keys
    but are still needed by hand-written CSS rules below. The matching
    UnoCSS theme keys live in uno.config.ts (colors, fontFamily, spacing,

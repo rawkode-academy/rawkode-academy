@@ -1,10 +1,10 @@
 <template>
- <div class="comments-section mt-8">
- <h3 class="text-xl font-semibold mb-4 text-primary-content">
+ <div :class="watch.comments">
+ <h3 :class="watch.commentsTitle">
  Comments {{ !loading ? `(${comments.length})` : '' }}
  </h3>
 
- <div v-if="loading" class="space-y-2">
+ <div v-if="loading" :class="watch.commentList">
  <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
  </div>
 
@@ -31,56 +31,56 @@
  </template>
  </EmptyState>
 
- <div v-else class="space-y-4">
+ <div v-else :class="watch.commentList">
  <div
  v-for="comment in comments"
  :key="comment.id"
- class="bg-[var(--surface-card)] border border-surface rounded-sm p-4"
+ :class="watch.comment"
  >
- <div class="flex items-start space-x-3">
- <div class="flex-shrink-0">
+ <div :class="watch.commentRow">
+ <div>
  <img
  v-if="comment.avatar_url"
  :src="comment.avatar_url"
  :alt="comment.author"
- class="h-8 w-8 rounded-full"
+ :class="watch.commentAvatar"
  loading="lazy"
  />
  <div
  v-else
- class="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium"
+ :class="watch.commentAvatarFallback"
  >
  {{ comment.author.charAt(0).toUpperCase() }}
  </div>
  </div>
 
- <div class="flex-1 min-w-0">
- <div class="flex items-center space-x-2 mb-1">
- <h4 class="text-sm font-medium text-primary-content">
+ <div :class="watch.commentContent">
+ <div :class="watch.commentMeta">
+ <h4 :class="watch.commentAuthor">
  {{ comment.author }}
  </h4>
- <span class="text-xs text-muted">
+ <span :class="watch.commentDate">
  {{ formatDate(comment.timestamp) }}
  </span>
  </div>
 
  <div
- class="text-sm text-secondary-content prose prose-sm max-w-none dark:prose-invert"
+ :class="watch.commentBody"
  v-html="formatContent(comment.content)"
  ></div>
  </div>
  </div>
  </div>
 
- <div v-if="discordInviteUrl" class="text-center pt-4 border-t border-surface">
+ <div v-if="discordInviteUrl">
  <a
  :href="discordInviteUrl"
  target="_blank"
  rel="noopener noreferrer"
- class="inline-flex items-center text-primary hover:text-primary/90"
+ :class="watch.commentCta"
  >
  Want to share your thoughts? Join the discussion on Discord
- <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-2M14 4h6m0 0v6m0-6L10 14"></path>
  </svg>
  </a>
@@ -91,6 +91,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
+import { academyWatch } from "@rawkodeacademy/design-system";
 import SkeletonComment from "@/components/common/SkeletonComment.vue";
 import ErrorState from "@/components/common/ErrorState.vue";
 import EmptyState from "@/components/ui/EmptyState.vue";
@@ -110,6 +111,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const watch = academyWatch();
 
 const comments = ref<Comment[]>([]);
 const loading = ref(true);
@@ -175,10 +177,3 @@ onMounted(() => {
 	fetchComments();
 });
 </script>
-
-<style scoped>
-@reference "../../styles/global.css";
-.comments-section {
- max-width: 100%;
-}
-</style>

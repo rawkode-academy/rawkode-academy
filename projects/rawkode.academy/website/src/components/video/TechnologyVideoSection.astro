@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { academyWatch } from "@rawkodeacademy/design-system";
 
 interface Props {
 	technology: CollectionEntry<"technologies">;
@@ -24,18 +25,18 @@ const techName = technology.data.name;
 const iconUrl = resolveTechnologyIconUrl(technology.id, technology.data.logos);
 
 const hasMoreVideos = totalVideos && totalVideos > videos.length;
+const watch = academyWatch();
 ---
 
 {videos.length > 0 && (
-	<section class="mt-8">
-		<div class="flex items-center justify-between mb-4">
-			<div class="flex items-center gap-3">
+	<section class={watch.rail}>
+		<div class={watch.railHeader}>
+			<div class={watch.commentRow}>
 				{iconUrl && (
-					<div class="w-6 h-6 relative overflow-hidden rounded">
+					<div class={watch.techIcon}>
 						<img
 							src={iconUrl}
 							alt={techName}
-							class="w-full h-full object-contain"
 							width="24"
 							height="24"
 							loading="lazy"
@@ -44,43 +45,43 @@ const hasMoreVideos = totalVideos && totalVideos > videos.length;
 						/>
 					</div>
 				)}
-				<h3 class="text-lg font-semibold text-primary-content">
+				<h3 class={watch.railTitle}>
 					More about {techName}
 				</h3>
 			</div>
 			<a
 				href={`/technology/${techId}`}
-				class="text-sm text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+				class={watch.railLink}
 			>
 				{hasMoreVideos ? `View all ${totalVideos} videos` : "View technology"}
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class={watch.railIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</a>
 		</div>
 
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<div class={watch.railGrid}>
 			{videos.map((video) => (
 				<a
 					href={`/watch/${video.slug}`}
-					class="group block paper-card-muted rounded-sm overflow-hidden"
+					class={watch.railCard}
 				>
-					<div class="relative aspect-video overflow-hidden bg-[var(--surface-card-muted)]">
+					<div class={watch.railMedia}>
 						<img
 							src={video.thumbnailUrl}
 							alt={video.title}
-							class="w-full h-full object-cover group-hover:scale-105 "
+							class={watch.railImage}
 							width="1280"
 							height="720"
 							loading="lazy"
 							decoding="async"
 						/>
-						<div class="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+						<div class={watch.railRuntime}>
 							{formatVideoRuntimeLabel(video)}
 						</div>
 					</div>
-					<div class="p-3">
-						<h4 class="font-medium text-secondary-content group-hover:text-primary-content line-clamp-2 transition-colors text-sm">
+					<div class={watch.railCardBody}>
+						<h4 class={watch.railCardTitle}>
 							{video.title}
 						</h4>
 					</div>

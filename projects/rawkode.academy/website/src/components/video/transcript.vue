@@ -1,17 +1,17 @@
 <template>
- <div class="transcript-wrapper">
+ <div :class="styles.comments">
  <!-- Search bar -->
- <div v-if="transcriptLoaded && !error" class="mb-4">
- <div class="relative">
+ <div v-if="transcriptLoaded && !error">
+ <div :class="styles.search">
  <input
  v-model="searchQuery"
  type="text"
  placeholder="Search transcript..."
  aria-label="Search transcript"
- class="w-full px-4 py-2 pl-10 border border-surface rounded-sm bg-[var(--surface-card)] text-primary-content focus-ring"
+ :class="styles.searchInput"
  />
  <svg
- class="absolute left-3 top-2.5 w-5 h-5 text-muted"
+ :class="styles.searchIcon"
  fill="none"
  stroke="currentColor"
  viewBox="0 0 24 24"
@@ -24,7 +24,7 @@
  ></path>
  </svg>
  </div>
- <div v-if="searchQuery.length >= 2" class="mt-2 text-sm text-muted">
+ <div v-if="searchQuery.length >= 2" :class="styles.searchSummary">
  <span>{{ searchResultsText }}</span>
  </div>
  </div>
@@ -33,26 +33,26 @@
  <SkeletonTranscript v-if="loading" />
 
  <!-- Error state -->
- <div v-if="error" class="text-center py-8">
- <p class="text-red-600 dark:text-red-400">{{ errorMessage }}</p>
+ <div v-if="error">
+ <p :class="styles.noticeCopy">{{ errorMessage }}</p>
  </div>
 
  <!-- Transcript content with scrollable container -->
- <div v-if="transcriptLoaded && !error" class="transcript-container" aria-live="polite">
+ <div v-if="transcriptLoaded && !error" :class="styles.transcriptContainer" aria-live="polite">
  <div
  v-for="(paragraph, index) in paragraphs"
  :key="index"
- class="transcript-paragraph mb-6"
+ :class="styles.transcriptRow"
  >
- <div class="text-sm text-primary dark:text-primary font-mono mb-2">
+ <div :class="styles.transcriptTimestamp">
  {{ paragraph[0].start }}
  </div>
- <div class="text-primary-content leading-relaxed">
+ <div :class="styles.transcriptText">
  <span
  v-for="(cue, cueIndex) in paragraph"
  :key="`${index}-${cueIndex}`"
  :data-start="cue.start"
- class="transcript-segment"
+ :class="styles.transcriptSegment"
  v-html="highlightText(cue.text)"
  ></span>
  {{ ' ' }}
@@ -64,10 +64,13 @@
 
 <script>
 import SkeletonTranscript from "@/components/common/SkeletonTranscript.vue";
+import { academyWatch } from "@rawkodeacademy/design-system";
 import {
 	groupTranscriptParagraphs,
 	parseWebVTT,
 } from "@/utils/video-transcript";
+
+const watchStyles = academyWatch();
 
 export default {
 	components: {
@@ -85,6 +88,7 @@ export default {
 	},
 	data() {
 		return {
+			styles: watchStyles,
 			loading: false,
 			error: false,
 			errorMessage: "Failed to load transcript. Please try again later.",
@@ -161,7 +165,7 @@ export default {
 			);
 			return escapedText.replace(
 				regex,
-				'<span class="transcript-highlight">$1</span>',
+				`<span class="${watchStyles.transcriptHighlight}">$1</span>`,
 			);
 		},
 
@@ -223,44 +227,3 @@ export default {
 	},
 };
 </script>
-
-<style scoped>
-/* Transcript container styles */
-.transcript-container {
- max-height: 600px;
- overflow-y: auto;
- padding-right: 0.5rem;
-}
-
-/* Custom scrollbar for transcript */
-.transcript-container::-webkit-scrollbar {
- width: 8px;
-}
-
-.transcript-container::-webkit-scrollbar-track {
- background: var(--surface-card-muted);
- border-radius: 4px;
-}
-
-.transcript-container::-webkit-scrollbar-thumb {
- background: var(--editorial-hairline-strong);
- border-radius: 4px;
-}
-
-.transcript-container::-webkit-scrollbar-thumb:hover {
- background: var(--editorial-ink-mute);
-}
-
-/* Highlight for search results */
-:deep(.transcript-highlight) {
- background-color: rgb(254 240 138);
- color: rgb(0 0 0);
- padding: 0 2px;
- border-radius: 2px;
-}
-
-.dark :deep(.transcript-highlight) {
- background-color: rgb(251 191 36);
- color: rgb(0 0 0);
-}
-</style>

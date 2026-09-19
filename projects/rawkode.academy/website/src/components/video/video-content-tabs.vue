@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Tabs } from "@ark-ui/vue/tabs";
 import { computed, ref } from "vue";
+import { academyWatch, tabs as academyTabs } from "@rawkodeacademy/design-system";
 import EmptyState from "@/components/ui/EmptyState.vue";
 import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
@@ -18,6 +19,8 @@ interface Resource {
 const props = withDefaults(defineProps<{ videoId: string; resources?: Resource[] }>(), {
 	resources: () => [],
 });
+const watch = academyWatch();
+const tabStyles = academyTabs({ tone: "academy" });
 
 const activeTab = ref("resources");
 const tabs = [
@@ -73,47 +76,40 @@ const handleMobileChange = (event: Event) => {
 </script>
 
 <template>
-	<Tabs.Root :value="activeTab" class="paper-card bleed-x-mobile" @value-change="setActiveTab($event.value)">
+	<Tabs.Root :value="activeTab" :class="watch.tabsRoot" @value-change="setActiveTab($event.value)">
 		<h2 class="sr-only">Comments, transcript, and resources</h2>
-		<div class="border-b border-subtle relative z-10">
-			<div class="sm:hidden px-2 pt-2 pb-3">
+		<div>
+			<div :class="watch.tabMobile">
 				<label for="tabs-mobile" class="sr-only">Select a tab</label>
-				<select id="tabs-mobile" name="tabs-mobile" class="paper-card-muted block w-full pl-3 pr-10 py-2 text-base focus:outline-none focus:ring-primary/50 focus:border-primary/50 sm:text-sm text-primary-content" :value="activeTab" @change="handleMobileChange">
+				<select id="tabs-mobile" name="tabs-mobile" :class="watch.tabSelect" :value="activeTab" @change="handleMobileChange">
 					<option v-for="tab in tabs" :key="tab.id" :value="tab.id">{{ tab.label }}</option>
 				</select>
 			</div>
 
-			<Tabs.List class="video-tab-list hidden sm:flex -mb-px overflow-x-auto" aria-label="Video content sections">
-				<Tabs.Trigger v-for="tab in tabs" :key="tab.id" :value="tab.id" class="tab-button flex-shrink-0 px-4 sm:px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors border-transparent text-muted hover:text-primary-content data-[selected]:border-primary data-[selected]:text-primary">
+			<Tabs.List :class="[tabStyles.list, watch.tabDesktop]" aria-label="Video content sections">
+				<Tabs.Trigger v-for="tab in tabs" :key="tab.id" :value="tab.id" :class="tabStyles.trigger">
 					{{ tab.label }}
 				</Tabs.Trigger>
-				<Tabs.Indicator />
+				<Tabs.Indicator :class="tabStyles.indicator" />
 			</Tabs.List>
 		</div>
 
-		<div class="p-4 sm:p-6 relative z-10">
-			<Tabs.Content value="comments"><VideoComments :video-id="videoId" /></Tabs.Content>
-			<Tabs.Content value="transcript"><VideoTranscript :video-id="videoId" :is-active="activeTab === 'transcript'" /></Tabs.Content>
-			<Tabs.Content value="resources">
+		<Tabs.Content value="comments" :class="tabStyles.content"><VideoComments :video-id="videoId" /></Tabs.Content>
+		<Tabs.Content value="transcript" :class="tabStyles.content"><VideoTranscript :video-id="videoId" :is-active="activeTab === 'transcript'" /></Tabs.Content>
+		<Tabs.Content value="resources" :class="tabStyles.content">
 				<EmptyState v-if="resources.length === 0" title="No resources for this episode yet." />
-				<div v-else class="space-y-6">
-					<div v-for="group in groupedResources" :key="group.category">
-						<h3 class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">{{ categoryLabels[group.category] || categoryLabels.other }}</h3>
-						<div class="grid gap-3">
-							<a v-for="(resource, idx) in group.items" :key="resource.id || `${group.category}-${idx}`" :href="resource.url || resource.filePath || '#'" :target="resource.type === 'url' ? '_blank' : undefined" :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined" class="flex items-start gap-3 p-3 rounded-sm bg-[var(--surface-card-muted)] hover:bg-[var(--surface-card)] transition-smooth group">
-								<svg class="w-5 h-5 mt-0.5 text-muted group-hover:text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="categoryIcons[group.category] || categoryIcons.other" /></svg>
-								<div class="flex-1 min-w-0"><div class="font-medium text-primary-content group-hover:text-primary">{{ resource.title }}</div><div v-if="resource.description" class="text-sm text-muted mt-0.5">{{ resource.description }}</div></div>
-								<svg v-if="resource.type === 'url'" class="w-4 h-4 mt-1 text-muted group-hover:text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+				<div v-else :class="watch.resourceGroups">
+					<div v-for="group in groupedResources" :key="group.category" :class="watch.resourceGroup">
+						<h3 :class="watch.resourceHeading">{{ categoryLabels[group.category] || categoryLabels.other }}</h3>
+						<div :class="watch.resourceList">
+							<a v-for="(resource, idx) in group.items" :key="resource.id || `${group.category}-${idx}`" :href="resource.url || resource.filePath || '#'" :target="resource.type === 'url' ? '_blank' : undefined" :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined" :class="watch.resourceLink">
+								<svg :class="watch.resourceIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="categoryIcons[group.category] || categoryIcons.other" /></svg>
+								<div :class="watch.resourceBody"><div :class="watch.resourceTitle">{{ resource.title }}</div><div v-if="resource.description" :class="watch.resourceDescription">{{ resource.description }}</div></div>
+								<svg v-if="resource.type === 'url'" :class="watch.resourceExternal" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
 							</a>
 						</div>
 					</div>
 				</div>
 			</Tabs.Content>
-		</div>
 	</Tabs.Root>
 </template>
-
-<style scoped>
-.video-tab-list::-webkit-scrollbar { display: none; }
-.video-tab-list { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
