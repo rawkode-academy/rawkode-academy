@@ -16,14 +16,19 @@ ci: pipelines: {
 			defaultBranch: true
 			manual:        true
 		}
-		tasks: [_t.deploy]
+		tasks: [_t.check, _t.test]
 	}
 }
 
 tasks: {
-	deploy: schema.#Task & {
+	check: schema.#Task & {
 		hermetic: false
-		command:  "bun"
-		args: ["x", "wrangler", "deploy"]
+		command: "cargo"
+		args: ["check", "--locked"]
+	}
+	test: schema.#Task & {
+		hermetic: false
+		command: "cargo"
+		args: ["test", "--locked"]
 	}
 }
