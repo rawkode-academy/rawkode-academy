@@ -158,10 +158,10 @@ async function generateNavigationItems(
 		},
 		{
 			href: "/organizations/lets-chat",
-			title: "Partnership Fit Check",
+			title: "Partner application",
 			category: "Organizations",
 			description:
-				"Email a partnership brief for a technical adoption fit check",
+				"Apply for the Rawkode Academy partner programme or a Fit & Proof Review",
 			keywords: [
 				"fit check",
 				"adoption",
