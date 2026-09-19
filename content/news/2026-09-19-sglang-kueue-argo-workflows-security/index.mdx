@@ -12,15 +12,13 @@ technologies:
 
 Three primary-source releases landed in the last 24 hours across LLM inference serving, Kubernetes batch scheduling, and workflow security. Two carry breaking changes and one is a coordinated security fix, so this is a short digest built around what operators need to act on rather than a padded roundup.
 
-## SGLang 0.5.20 retires CUDA 12 and makes ROCm 10 the default
+## SGLang 0.5.20 makes Responses API persistence opt-in
 
-SGLang published [v0.5.20](https://github.com/sgl-project/sglang/releases/tag/v0.5.20) on September 18, rolling up 713 PRs from 237 contributors. The change that matters most to operators is packaging: the release stops publishing CUDA 12 wheels and images (`-cu129` / `-cu12`), making v0.5.19 the final CUDA 12 build, and promotes ROCm 10 to the default AMD backend while retiring ROCm 7 CI and images.
+SGLang [v0.5.20](https://github.com/sgl-project/sglang/releases/tag/v0.5.20) keeps the Responses API available, but persistence now requires `--enable-response-store`. Without that flag, foreground generation and streaming still work, while `previous_response_id`, `background: true`, retrieval by ID, and cancellation return HTTP 400.
 
-Beyond packaging, the release removes prefill context parallelism v1 in favour of the strategy-based implementation and deletes several deprecated kernels, including `cutlass_mla`, non-Marlin GPTQ, AWQ AOT, and Dual Chunk Flash Attention. A reworked unified radix tree adds branching-point caching for sliding-window attention; the project reports the shared-prefix token hit rate rising from 43.8% to 60.8% on its benchmark. The Responses API also becomes opt-in, storing results only when `--enable-response-store` is set.
+The flag is only supported in standalone deployments. Startup rejects the flag on prefill or decode nodes in PD-disaggregated deployments. For response chaining in that topology, clients must send the required conversation history explicitly. Even when enabled, the [implementation](https://github.com/sgl-project/sglang/pull/39122) is a process-local, in-memory store with no TTL, eviction policy, or configured capacity, and stored responses disappear when the process restarts. Operators should therefore treat it as transient request state, not durable conversation storage.
 
-Teams that pin SGLang wheels or images need to plan the move off the CUDA 12 builds and audit for the removed kernels and CP flags before upgrading.
-
-**Source:** [SGLang v0.5.20 release](https://github.com/sgl-project/sglang/releases/tag/v0.5.20) - September 18, 2026
+Teams using response chaining, background execution, retrieval, or cancellation must either enable the store on standalone servers or change clients to send the required history and manage persistence elsewhere. Separately, the release stops publishing CUDA 12 wheels and images, making v0.5.19 the final CUDA 12 build, so pinned deployments also need a packaging migration plan.
 
 ---
 
