@@ -28,38 +28,40 @@ const styles = computed(() => dialog({ size: props.size }));
 			<slot name="trigger">Open dialog</slot>
 		</Dialog.Trigger>
 
-		<Dialog.Backdrop :class="styles.backdrop" />
-		<Dialog.Positioner :class="styles.positioner">
-			<Dialog.Content :class="styles.content">
-				<div :class="styles.header">
-					<div>
-						<Dialog.Title :class="styles.title">
-							{{ props.title }}
-						</Dialog.Title>
-						<Dialog.Description
-							v-if="props.description"
-							:class="styles.description"
+		<Teleport to="body">
+			<Dialog.Backdrop :class="styles.backdrop" />
+			<Dialog.Positioner :class="styles.positioner">
+				<Dialog.Content :class="styles.content">
+					<div :class="styles.header">
+						<div>
+							<Dialog.Title :class="styles.title">
+								{{ props.title }}
+							</Dialog.Title>
+							<Dialog.Description
+								v-if="props.description"
+								:class="styles.description"
+							>
+								{{ props.description }}
+							</Dialog.Description>
+						</div>
+
+						<Dialog.CloseTrigger
+							:class="styles.closeTrigger"
+							:aria-label="props.closeLabel"
 						>
-							{{ props.description }}
-						</Dialog.Description>
+							<span aria-hidden="true">×</span>
+						</Dialog.CloseTrigger>
 					</div>
 
-					<Dialog.CloseTrigger
-						:class="styles.closeTrigger"
-						:aria-label="props.closeLabel"
-					>
-						<span aria-hidden="true">×</span>
-					</Dialog.CloseTrigger>
-				</div>
+					<div :class="styles.body">
+						<slot />
+					</div>
 
-				<div :class="styles.body">
-					<slot />
-				</div>
-
-				<div v-if="$slots.footer" :class="styles.footer">
-					<slot name="footer" />
-				</div>
-			</Dialog.Content>
-		</Dialog.Positioner>
+					<div v-if="$slots.footer" :class="styles.footer">
+						<slot name="footer" />
+					</div>
+				</Dialog.Content>
+			</Dialog.Positioner>
+		</Teleport>
 	</Dialog.Root>
 </template>

@@ -94,6 +94,12 @@ export default defineConfig({
 								_dark: "{colors.editorial.paper}",
 							},
 						},
+						interactive: {
+							value: {
+								base: "{colors.editorial.spruce}",
+								_dark: "oklch(0.72 0.16 165)",
+							},
+						},
 						primaryForeground: {
 							value: {
 								base: "{colors.editorial.paper}",

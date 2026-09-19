@@ -38,3 +38,5 @@ import { Dialog } from "@rawkodeacademy/design-system/vue";
 ```
 
 Applications must import `@rawkodeacademy/design-system/styles.css` once at their application styling boundary. The first package does not enable a reset, so it can be piloted beside the existing Academy UnoCSS styles without taking ownership of global normalization.
+
+The dialog is rendered through `body` and owns viewport scrolling, so long forms remain reachable on small screens. Its `dialog` shadow is an intentional modal-elevation exception: the backdrop and elevated surface are kept visually distinct from ordinary panels.
