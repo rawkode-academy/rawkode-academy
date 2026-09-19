@@ -56,16 +56,20 @@ const react = async (emoji: string) => {
 				<span class="count text-xs sm:text-sm font-medium text-secondary-content">{{ counts[reaction.emoji] || 0 }}</span>
 			</button>
 
-			<Popover.Root :open="pickerOpen" @open-change="pickerOpen = $event.open">
+			<Popover.Root
+				v-model:open="pickerOpen"
+				:lazy-mount="true"
+				:unmount-on-exit="true"
+				:portalled="false"
+				:positioning="{ placement: 'bottom-end', gutter: 8 }"
+			>
 				<Popover.Trigger class="reaction-btn paper-card-muted flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 border-2 !border-dashed !border-[var(--editorial-hairline-strong)]" aria-label="Add custom emoji">+</Popover.Trigger>
-				<Teleport to="body">
-					<Popover.Positioner class="z-50">
-						<Popover.Content class="emoji-picker p-2 sm:p-3 paper-card grid grid-cols-5 sm:grid-cols-7 gap-1 focus:outline-none">
-							<Popover.Arrow><Popover.ArrowTip /></Popover.Arrow>
-							<button v-for="emoji in extraEmojis" :key="emoji" type="button" class="emoji-option paper-card-muted p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" :aria-label="`React with ${emoji}`" @click="react(emoji)">{{ emoji }}</button>
-						</Popover.Content>
-					</Popover.Positioner>
-				</Teleport>
+				<Popover.Positioner class="z-50">
+					<Popover.Content class="emoji-picker p-2 sm:p-3 paper-card grid grid-cols-5 sm:grid-cols-7 gap-1 focus:outline-none">
+						<Popover.Arrow><Popover.ArrowTip /></Popover.Arrow>
+						<button v-for="emoji in extraEmojis" :key="emoji" type="button" class="emoji-option paper-card-muted p-1.5 sm:p-2 text-lg sm:text-2xl cursor-pointer" :aria-label="`React with ${emoji}`" @click="react(emoji)">{{ emoji }}</button>
+					</Popover.Content>
+				</Popover.Positioner>
 			</Popover.Root>
 		</div>
 	</div>

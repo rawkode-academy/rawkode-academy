@@ -130,6 +130,12 @@ assert.match(read("src/pages/learning-paths/index.astro"), /LearningPathItemList
 assert.match(read("src/pages/index.astro"), /rel="preload"/);
 assert.doesNotMatch(read("src/components/academy/AcademyPage.vue"), /<header|<footer|toggleTheme/);
 assert.match(read("src/components/branding/AcademyBrand.astro"), /wordmark\.svg\?raw/);
+const videoReactions = read("src/components/video/VideoReactionsClient.vue");
+assert.doesNotMatch(videoReactions, /<Teleport\b/, "reaction picker must stay inside its deferred island");
+assert.match(videoReactions, /v-model:open="pickerOpen"/);
+assert.match(videoReactions, /:lazy-mount="true"/);
+assert.match(videoReactions, /:unmount-on-exit="true"/);
+assert.match(videoReactions, /:portalled="false"/);
 const drawer = readFileSync(resolve(designSystem, "src/vue/NavigationDrawer.vue"), "utf8");
 for (const behavior of ["trap-focus", "prevent-scroll", "close-on-escape", "close-on-interact-outside"]) {
 	assert.ok(drawer.includes(`:${behavior}="true"`));
