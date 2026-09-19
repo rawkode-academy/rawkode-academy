@@ -27,7 +27,7 @@ export default defineConfig({
 						spruce: { value: "oklch(0.52 0.09 165)" },
 						overlay: { value: "oklch(0 0 0 / 0.55)" },
 					},
-					academy: {
+					academyBase: {
 						ground: { value: "#0a1220" },
 						"ground-raised": { value: "#0d1728" },
 						"grid-line": { value: "#142136" },
@@ -77,12 +77,14 @@ export default defineConfig({
 					"academy-gutter-wide": { value: "96px" },
 					"academy-section": { value: "64px" },
 					"academy-section-wide": { value: "112px" },
+					"academy-join": { value: "72px" },
 				},
 				sizes: {
 					"academy-shell": { value: "1180px" },
 					"academy-copy": { value: "680px" },
 					"academy-card": { value: "400px" },
 					"academy-card-mobile": { value: "74vw" },
+					"academy-feature": { value: "42%" },
 					"academy-play": { value: "72px" },
 				},
 				aspectRatios: {
@@ -108,79 +110,79 @@ export default defineConfig({
 						canvas: {
 							value: {
 								base: "#f4f7fb",
-								_dark: "{colors.academy.ground}",
+								_dark: "{colors.academyBase.ground}",
 							},
 						},
 						ground: {
 							value: {
 								base: "#eaf0f8",
-								_dark: "{colors.academy.ground-raised}",
+								_dark: "{colors.academyBase.ground-raised}",
 							},
 						},
 						grid: {
 							value: {
 								base: "#dbe4f0",
-								_dark: "{colors.academy.grid-line}",
+								_dark: "{colors.academyBase.grid-line}",
 							},
 						},
 						panel: {
 							value: {
 								base: "#ffffff",
-								_dark: "{colors.academy.panel}",
+								_dark: "{colors.academyBase.panel}",
 							},
 						},
 						border: {
 							value: {
 								base: "#cfdae8",
-								_dark: "{colors.academy.border}",
+								_dark: "{colors.academyBase.border}",
 							},
 						},
 						text: {
 							value: {
 								base: "#0c1626",
-								_dark: "{colors.academy.text}",
+								_dark: "{colors.academyBase.text}",
 							},
 						},
 						textSoft: {
 							value: {
 								base: "#33425a",
-								_dark: "{colors.academy.text-soft}",
+								_dark: "{colors.academyBase.text-soft}",
 							},
 						},
 						textMuted: {
 							value: {
 								base: "#526178",
-								_dark: "{colors.academy.text-muted}",
+								_dark: "{colors.academyBase.text-muted}",
 							},
 						},
 						accent: {
 							value: {
 								base: "#c2185b",
-								_dark: "{colors.academy.accent}",
+								_dark: "{colors.academyBase.accent}",
 							},
 						},
 						accentForeground: {
 							value: {
 								base: "#ffffff",
-								_dark: "{colors.academy.accent-foreground}",
+								_dark: "{colors.academyBase.accent-foreground}",
 							},
 						},
 						input: {
 							value: {
 								base: "#ffffff",
-								_dark: "{colors.academy.input}",
+								_dark: "{colors.academyBase.input}",
 							},
 						},
 						inputBorder: {
 							value: {
 								base: "#6d7c93",
-								_dark: "{colors.academy.input-border}",
+								_dark: "{colors.academyBase.input-border}",
 							},
 						},
 						segmentOff: {
 							value: {
 								base: "#c3d0e2",
-								_dark: "{colors.academy.segment-off}",
+								_dark: "{colors.academyBase.segment-off}",
 							},
 						},
 					},
