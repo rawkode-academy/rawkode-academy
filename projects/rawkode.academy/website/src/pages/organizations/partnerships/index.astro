@@ -82,6 +82,8 @@ const process = [
 ];
 
 const badFits = partnershipBoundaries;
+const applyHref = `/organizations/partnerships?route=${encodeURIComponent(partnershipOffer.name)}#apply`;
+const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(fitProofReview.name)}#apply`;
 ---
 
 <Page
@@ -95,7 +97,7 @@ const badFits = partnershipBoundaries;
 		lede={partnershipOffer.summary}
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#apply" data-apply-path={partnershipOffer.name}>Apply for Adoption Advisory</a>
+			<a class="editorial-button" href={applyHref} data-apply-path={partnershipOffer.name}>Apply for Adoption Advisory</a>
 			<a class="editorial-button editorial-button--secondary" href="#programme">See the programme</a>
 		</div>
 
@@ -122,7 +124,7 @@ const badFits = partnershipBoundaries;
 				<ul class="editorial-list">
 					{partnershipOffer.included.map((item) => <li>{item}</li>)}
 				</ul>
-				<a class="editorial-button" href="#apply" data-apply-path={partnershipOffer.name}>Apply for the programme</a>
+				<a class="editorial-button" href={applyHref} data-apply-path={partnershipOffer.name}>Apply for the programme</a>
 			</div>
 		</section>
 
@@ -177,7 +179,7 @@ const badFits = partnershipBoundaries;
 				<ul class="editorial-list">
 					{fitProofReview.included.map((item) => <li>{item}</li>)}
 				</ul>
-				<a class="partner-card__link" href="#apply" data-apply-path={fitProofReview.name}>Start with a fit review</a>
+				<a class="partner-card__link" href={reviewApplyHref} data-apply-path={fitProofReview.name}>Start with a fit review</a>
 			</div>
 		</section>
 
