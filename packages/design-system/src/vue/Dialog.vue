@@ -11,6 +11,7 @@ const props = withDefaults(
 		defaultOpen?: boolean;
 		size?: "sm" | "md";
 		tone?: "editorial" | "academy";
+		id?: string;
 	}>(),
 	{
 		description: undefined,
@@ -25,7 +26,7 @@ const styles = computed(() => dialog({ size: props.size, tone: props.tone }));
 </script>
 
 <template>
-	<Dialog.Root :default-open="props.defaultOpen">
+	<Dialog.Root :id="props.id" :default-open="props.defaultOpen">
 		<Dialog.Trigger :class="styles.trigger">
 			<slot name="trigger">Open dialog</slot>
 		</Dialog.Trigger>
