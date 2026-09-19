@@ -63,6 +63,14 @@ const organizationSchema = {
 			name: "Adoption Advisory",
 			price: "4000",
 			priceCurrency: "GBP",
+			priceSpecification: {
+				"@type": "UnitPriceSpecification",
+				price: "4000",
+				priceCurrency: "GBP",
+				unitCode: "MON",
+				unitText: "month",
+				billingDuration: 1,
+			},
 			url: "https://rawkode.academy/organizations/partnerships",
 			itemOffered: {
 				"@type": "Service",
