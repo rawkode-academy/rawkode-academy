@@ -44,11 +44,14 @@ export const partnership = {
 				.trim()
 				.min(1, "Please tell us which developers you need to reach")
 				.max(2000),
+			technicalBuyer: z.string().trim().max(1000).optional(),
 			challenge: z
 				.string()
 				.trim()
 				.min(1, "Please describe your current adoption challenge")
 				.max(5000),
+			proofAssets: z.string().trim().max(2000).optional(),
+			budgetQuarter: z.string().trim().max(500).optional(),
 			links: z.string().trim().max(2000).optional(),
 		}),
 		handler: async (input) => {
@@ -69,9 +72,18 @@ export const partnership = {
 				"",
 				"Target developers or platform teams:",
 				input.targetDevelopers,
+				...(input.technicalBuyer
+					? ["", "Technical buyer:", input.technicalBuyer]
+					: []),
 				"",
 				"Current adoption challenge:",
 				input.challenge,
+				...(input.proofAssets
+					? ["", "Working demo, docs, or repository:", input.proofAssets]
+					: []),
+				...(input.budgetQuarter
+					? ["", "Budget and preferred quarter:", input.budgetQuarter]
+					: []),
 				...(input.links ? ["", "Links worth a look:", input.links] : []),
 				"",
 			].join("\r\n");

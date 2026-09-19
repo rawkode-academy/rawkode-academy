@@ -5,61 +5,34 @@ import {
 	decisionBriefMailto,
 	decisionBriefSubject,
 	decisionBriefTemplate,
+	fitProofReview,
 	partnershipBoundaries,
-	partnershipTierNames,
-	partnershipTiers,
+	partnershipOffer,
 } from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const contactHref = decisionBriefMailto;
-
 const reviewScope = [
 	{
-		term: "What we review",
-		detail: "Docs, demos, architecture, and operational claims.",
+		term: "What we build",
+		detail: "Technical demos, proof assets, companion pages, and reusable clips.",
 	},
 	{
-		term: "Risk we surface",
-		detail: "Trust boundaries, migration, RBAC/IAM, egress, and tenancy.",
+		term: "What we review",
+		detail: "Docs, architecture, operational claims, adoption risks, and technical buyer objections.",
 	},
 	{
 		term: "Who owns the work",
-		detail:
-			"Marketing, product, DevRel, sales engineering, and technical teams. Your team keeps execution.",
+		detail: "Your marketing, product, DevRel, sales engineering, and technical teams. Rawkode brings the practitioner read and the proof work.",
 	},
 ];
 
-const pricingStats = partnershipTiers.map((tier) => ({
-	value: tier.priceShort,
-	label: `${tier.name} from`,
-}));
-
-const tierSummary = partnershipTiers
-	.map(
-		(tier, index) =>
-			`${index === partnershipTiers.length - 1 ? "or " : ""}${tier.name} from ${tier.price.replace(" / ", "/")}`,
-	)
-	.join(", ");
-
-const fitAreas = [
-	{
-		title: "Partnerships",
-		body: "Work with marketing, product, DevRel, sales engineering, and technical owners to expose the claims, docs, demos, and operational gaps that stall technical buyers.",
-		items: [...partnershipTierNames, "Technical buyer proof"],
-		href: "/organizations/partnerships",
-		cta: "Compare partnership paths",
-	},
-];
-
-const utilityLinks = [
-	{
-		title: "Brand assets",
-		body: "Use the official Rawkode Academy marks, palette, and usage guidance when an approved collaboration needs co-branding.",
-		href: "/organizations/branding",
-		cta: "View brand kit",
-	},
+const proofWork = [
+	"A working technical demo or proof asset each quarter",
+	"A companion page and reusable clips for your team",
+	"Slack Connect for questions and decisions as they come up",
+	"A monthly working session and quarterly performance report",
 ];
 
 const badFits = partnershipBoundaries;
@@ -67,16 +40,16 @@ const badFits = partnershipBoundaries;
 
 <Page
 	title="For Organizations"
-	description="Cloud-native and DevTool partnerships for companies that need sharper technical proof, launch, docs, demo, and DevRel strategy."
+	description="Rawkode Academy partnerships for infrastructure companies that need sharper technical proof, useful demos, and practitioner trust."
 >
 	<EditorialShell
 		eyebrow="For Organizations"
-		title="Partnerships"
-		lede="We work with your marketing, product, DevRel, sales engineering, and technical owners to find the claims practitioners cannot verify before they trust a DevTool, cloud-native platform, or infrastructure product. Your team keeps execution ownership; the partnership sharpens the path."
+		title="Partner with Rawkode Academy"
+		lede="We help infrastructure companies turn complex products into technical proof that practitioners can understand, test, and trust. Your team keeps execution. Rawkode brings the demos, critique, and distribution."
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="/organizations/partnerships">Compare packages</a>
-			<a class="editorial-button editorial-button--secondary" href={contactHref}>Email decision brief</a>
+			<a class="editorial-button" href="/organizations/partnerships">Explore the programme</a>
+			<a class="editorial-button editorial-button--secondary" href={decisionBriefMailto}>Apply by email</a>
 		</div>
 
 		<section class="editorial-section">
@@ -92,61 +65,48 @@ const badFits = partnershipBoundaries;
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">What is active now</p>
-				<h2 class="editorial-section__title">The company route is partnerships</h2>
-				<p class="editorial-section__lede">
-					For companies, the active paths are {tierSummary}, focused on practitioner signal, focused experiments, and peer perspective.
-				</p>
+				<p class="editorial-kicker">The active programme</p>
+				<h2 class="editorial-section__title">Adoption Advisory</h2>
+				<p class="editorial-section__lede">{partnershipOffer.summary}</p>
 			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{fitAreas.map((area) => (
-					<article class="editorial-card organizations-card">
-						<h3 class="editorial-card__title">{area.title}</h3>
-						<p class="editorial-card__body">{area.body}</p>
-						<ul class="editorial-list">
-							{area.items.map((item) => <li>{item}</li>)}
-						</ul>
-						<a class="organizations-card__link" href={area.href}>{area.cta}</a>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				{pricingStats.map((signal) => (
-					<div class="editorial-stat">
-						<span class="editorial-stat__value">{signal.value}</span>
-						<span class="editorial-stat__label">{signal.label}</span>
-					</div>
-				))}
+			<div class="editorial-card organizations-offer">
+				<div>
+					<p class="editorial-kicker">{partnershipOffer.label}</p>
+					<p class="organizations-offer__price">{partnershipOffer.price}</p>
+					<p class="organizations-offer__cadence">{partnershipOffer.cadence}</p>
+				</div>
+				<ul class="editorial-list">
+					{proofWork.map((item) => <li>{item}</li>)}
+				</ul>
+				<a class="editorial-button" href="/organizations/partnerships">See what is included</a>
 			</div>
 		</section>
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Utility</p>
-				<h2 class="editorial-section__title">Brand assets are not the commercial offer</h2>
+				<p class="editorial-kicker">Optional starting point</p>
+				<h2 class="editorial-section__title">Test the fit before a partnership</h2>
+				<p class="editorial-section__lede">{fitProofReview.summary}</p>
 			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{utilityLinks.map((link) => (
-					<article class="editorial-card organizations-card">
-						<h3 class="editorial-card__title">{link.title}</h3>
-						<p class="editorial-card__body">{link.body}</p>
-						<a class="organizations-card__link" href={link.href}>{link.cta}</a>
-					</article>
-				))}
+			<div class="editorial-card editorial-card--paper organizations-offer">
+				<div>
+					<h3 class="editorial-card__title">{fitProofReview.name}</h3>
+					<p class="organizations-offer__price">{fitProofReview.price}</p>
+					<p class="organizations-offer__cadence">{fitProofReview.cadence}</p>
+				</div>
+				<ul class="editorial-list">
+					{fitProofReview.included.map((item) => <li>{item}</li>)}
+				</ul>
+				<a class="organizations-card__link" href="/organizations/lets-chat">Start a fit check</a>
 			</div>
 		</section>
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
 				<p class="editorial-kicker">Fit check</p>
-				<h2 class="editorial-section__title">This is useful when the adoption path is unclear</h2>
-			</div>
-			<div class="editorial-card editorial-card--paper">
-				<p class="editorial-card__body">
-					Bring the product, the evaluator, the current adoption risk, the docs, demos, architecture notes, enablement material, and any useful infrastructure artifacts: Helm charts, CRDs, RBAC/IAM notes, Terraform, telemetry, tenancy, runbooks, or demo environments. We will tell you whether it fits Signal, Adoption, Community, or is not a fit.
+				<h2 class="editorial-section__title">Bring the real adoption problem</h2>
+				<p class="editorial-section__lede">
+					Share the product, target practitioner, technical buyer, current proof gap, demo environment, and the quarter you want to work in. David replies with the next useful step.
 				</p>
 			</div>
 			<ContactFallback
@@ -157,8 +117,8 @@ const badFits = partnershipBoundaries;
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Bad fit</p>
-				<h2 class="editorial-section__title">What this does not solve</h2>
+				<p class="editorial-kicker">Boundaries</p>
+				<h2 class="editorial-section__title">What the programme does not promise</h2>
 			</div>
 			<ul class="organizations-list">
 				{badFits.map((item) => <li>{item}</li>)}
@@ -168,29 +128,6 @@ const badFits = partnershipBoundaries;
 </Page>
 
 <style>
-	.organizations-card {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.organizations-card__link {
-		align-self: flex-start;
-		margin-top: auto;
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		text-decoration: none;
-	}
-
-	.organizations-card__link:hover {
-		text-decoration: underline;
-		text-underline-offset: 0.2em;
-	}
-
 	.organizations-scope {
 		margin: 0;
 		border-top: 1px solid var(--editorial-hairline);
@@ -224,12 +161,27 @@ const badFits = partnershipBoundaries;
 		line-height: 1.55;
 	}
 
-	@media (min-width: 760px) {
-		.organizations-scope__row {
-			grid-template-columns: minmax(11rem, 0.28fr) minmax(0, 1fr);
-			gap: 1.5rem;
-			align-items: baseline;
-		}
+	.organizations-offer {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.organizations-offer__price {
+		margin: 0.4rem 0 0;
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: clamp(1.8rem, 5vw, 2.6rem);
+		font-weight: 750;
+		letter-spacing: -0.03em;
+		color: var(--editorial-ink);
+	}
+
+	.organizations-offer__cadence {
+		margin: 0.15rem 0 0;
+		color: var(--editorial-ink-mute);
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
 	.organizations-list {
@@ -250,9 +202,26 @@ const badFits = partnershipBoundaries;
 		line-height: 1.5;
 	}
 
-	@media (max-width: 760px) {
-		.organizations-card__link {
-			width: 100%;
+	.organizations-card__link {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+
+	.organizations-card__link:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	@media (min-width: 760px) {
+		.organizations-scope__row {
+			grid-template-columns: minmax(11rem, 0.28fr) minmax(0, 1fr);
+			gap: 1.5rem;
+			align-items: baseline;
 		}
 	}
 </style>
