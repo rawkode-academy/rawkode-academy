@@ -38,12 +38,12 @@ This is a release candidate, so it is a preview rather than an upgrade target, b
 
 ## Argo Workflows patches a path-traversal RCE and a cross-namespace archived-workflow leak
 
-The Argo Workflows maintainers released [v4.1.4 and v4.0.12](https://github.com/argoproj/argo-workflows/releases/tag/v4.1.4) on September 18 to fix two high-severity vulnerabilities disclosed the same day.
+The Argo Workflows maintainers released [v4.1.4](https://github.com/argoproj/argo-workflows/releases/tag/v4.1.4) and [v4.0.12](https://github.com/argoproj/argo-workflows/releases/tag/v4.0.12) on September 18 to fix two high-severity vulnerabilities disclosed the same day.
 
 [GHSA-vm9v-p987-xm32](https://github.com/argoproj/argo-workflows/security/advisories/GHSA-vm9v-p987-xm32) (CVSS 8.8) is a path-traversal flaw in directory-artifact materialization: the S3, GCS, and Azure Blob drivers join attacker-controlled object keys onto the download directory without containment checks, so a key containing `../` can write outside the workspace and overwrite files in the executor pod, up to remote code execution. It affects v4.1.0-v4.1.3, v4.0.0-v4.0.11, and all v3.x releases; v3.x gets no patch and must move to a fixed line.
 
 [GHSA-q65w-j2vp-47c4](https://github.com/argoproj/argo-workflows/security/advisories/GHSA-q65w-j2vp-47c4) (CVSS 7.7) is a cross-namespace IDOR in `ListArchivedWorkflows`: a `metadata.namespace!=` field selector was authorized against the supplied namespace instead of cluster-wide, letting a namespace-scoped user read archived workflows, and their embedded parameters, from other tenants. It affects v4.0.0 through v4.1.3.
 
-**Source:** [Argo Workflows v4.1.4 release](https://github.com/argoproj/argo-workflows/releases/tag/v4.1.4) - September 18, 2026
+**Source:** [Argo Workflows v4.1.4](https://github.com/argoproj/argo-workflows/releases/tag/v4.1.4) and [v4.0.12](https://github.com/argoproj/argo-workflows/releases/tag/v4.0.12) releases - September 18, 2026
 
 ---
