@@ -12,10 +12,11 @@ interface Resource {
 }
 
 interface Props {
-	resources?: Resource[] | undefined;
+	resources?: unknown[] | undefined;
 }
 
-const { resources } = Astro.props;
+const { resources: rawResources } = Astro.props;
+const resources = rawResources as Resource[] | undefined;
 
 const getCategoryIcon = (category: string) => {
 	switch (category) {

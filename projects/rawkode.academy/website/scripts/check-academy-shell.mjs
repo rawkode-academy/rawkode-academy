@@ -65,7 +65,8 @@ for (const [index, name] of bracketNames.entries()) {
 }
 const dynamicShowRoute = read("src/pages/shows/[showId]/[...slug].astro");
 assert.match(dynamicShowRoute, showLayout);
-assert.match(read("src/layouts/ShowLayout.astro"), /academyLayout/);
+assert.match(read("src/layouts/ShowLayout.astro"), /showLayoutStyles/);
+assert.match(read("src/layouts/showStyles.ts"), /academyLayout/);
 
 const exportedNames = (source) => new Set(
 	[...source.matchAll(/export\s*{([^}]+)}/gs)].flatMap((match) =>

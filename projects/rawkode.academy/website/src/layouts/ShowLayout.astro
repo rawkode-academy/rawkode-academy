@@ -4,8 +4,7 @@ import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import ShowNav from "@/components/show/ShowNav.astro";
 import type { ShowNavItem } from "@/lib/shows/types";
 import Page from "@/wrappers/page.astro";
-import { academyLayout } from "@rawkodeacademy/design-system";
-import "@rawkodeacademy/design-system/styles.css";
+import { showLayoutStyles } from "./showStyles";
 
 interface Props {
 	show: CollectionEntry<"shows">;
@@ -17,7 +16,7 @@ interface Props {
 
 const { show, nav, active = null, title, description } = Astro.props;
 const activeTab = nav.find((n) => n.slug === active);
-const layout = academyLayout({ width: "wide" });
+const layout = showLayoutStyles;
 
 const breadcrumbElements = [
 	{ title: "Home", link: "/" },
