@@ -1,6 +1,6 @@
 ---
 import type { MyParticipation } from "../queries";
-import { academyLayout } from "@rawkodeacademy/design-system";
+import { bracketLayout } from "../styles";
 
 interface Props {
 	showId: string;
@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { showId, isSignedIn, participation, submitted } = Astro.props;
-const layout = academyLayout({ width: "wide" });
+const layout = bracketLayout;
 const cards = participation.brackets;
 const applyPath = `/shows/${showId}/apply`;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(applyPath)}`;

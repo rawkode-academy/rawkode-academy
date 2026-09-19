@@ -269,7 +269,7 @@ function formatDuration(seconds: number) {
  <!-- Newsletter - full width, subtle -->
  <div class={doc.stack}>
  <NewsletterCTA
- class={doc.flush}
+ class={doc.flush ?? ""}
  audience={`show:${showEntry.data.id}`}
  badge="Get notified of new episodes"
  headline={`Subscribe to ${showEntry.data.name}`}

@@ -1,13 +1,13 @@
 ---
 import type { Bracket, BracketMatch } from "../queries";
-import { academyLayout } from "@rawkodeacademy/design-system";
+import { bracketLayout } from "../styles";
 
 interface Props {
 	brackets: Bracket[];
 }
 
 const { brackets } = Astro.props;
-const layout = academyLayout({ width: "wide" });
+const layout = bracketLayout;
 
 function roundsOf(matches: BracketMatch[]): [number, BracketMatch[]][] {
 	const byRound = new Map<number, BracketMatch[]>();

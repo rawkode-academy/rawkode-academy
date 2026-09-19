@@ -519,7 +519,7 @@ export const academyDocument = sva({
 		"mediaOverlay": {
 			"position": "absolute",
 			"inset": "0",
-			"background": "linear-gradient(transparent, rgba(0, 0, 0, 0.8))",
+			"backgroundImage": "linear-gradient(transparent, rgba(0, 0, 0, 0.8))",
 			"pointerEvents": "none"
 		},
 		"mediaCaption": {

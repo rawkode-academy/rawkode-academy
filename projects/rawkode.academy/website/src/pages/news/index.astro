@@ -3,13 +3,8 @@ import { getCollection } from "astro:content";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 
-import NewsMasthead from "@/components/news/NewsMasthead.astro";
-import NewsLead from "@/components/news/NewsLead.astro";
-import CVEAlert from "@/components/news/CVEAlert.astro";
-import NewsRow from "@/components/news/NewsRow.astro";
 import TrendingPanel from "@/components/news/TrendingPanel.astro";
 import WireSubscribeCard from "@/components/news/WireSubscribeCard.astro";
-import FilterRail from "@/components/read/FilterRail.astro";
 import MLabel from "@/components/ui/MLabel.vue";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
@@ -48,12 +43,6 @@ function formatTechnologyLabel(value: string): string {
 		.join(" ");
 }
 
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-	hour: "2-digit",
-	minute: "2-digit",
-	hour12: false,
-});
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
 	month: "short",
 	day: "2-digit",
@@ -89,11 +78,6 @@ const kickerFor = (story: (typeof allNews)[number]): string => {
 	if (/acquire|acquisition/i.test(story.data.title)) return "Acquisition";
 	return "Field";
 };
-
-const isHot = (story: (typeof allNews)[number]) =>
-	/cve|critical|urgent|patch immediately|9\.[0-9]|10\.0/i.test(
-		`${story.data.title} ${story.data.description}`,
-	);
 
 const cveMatch = (s: (typeof allNews)[number]) =>
 	(`${s.data.title} ${s.data.description}`.match(/CVE-\d{4}-\d{3,5}/i) || [

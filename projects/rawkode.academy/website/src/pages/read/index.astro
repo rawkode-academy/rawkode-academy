@@ -4,15 +4,6 @@ import { getCollection, getEntries } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
 
-import ReadMasthead from "@/components/read/ReadMasthead.astro";
-import FeaturedArticle from "@/components/read/FeaturedArticle.astro";
-import FilterRail from "@/components/read/FilterRail.astro";
-import ArticleGridItem from "@/components/read/ArticleGridItem.astro";
-import ReadFooter from "@/components/read/ReadFooter.astro";
-import MLabel from "@/components/ui/MLabel.vue";
-import EmptyState from "@/components/ui/EmptyState.vue";
-import PagerStrip from "@/components/ui/PagerStrip.astro";
-
 import { calculateReadingTime } from "@/utils/reading-time";
 import { getTypeBadgeConfig } from "@/utils/article-types";
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";

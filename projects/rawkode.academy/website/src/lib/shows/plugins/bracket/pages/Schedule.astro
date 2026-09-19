@@ -1,13 +1,13 @@
 ---
 import type { BracketMatch } from "../queries";
-import { academyLayout } from "@rawkodeacademy/design-system";
+import { bracketLayout } from "../styles";
 
 interface Props {
 	matches: BracketMatch[];
 }
 
 const { matches } = Astro.props;
-const layout = academyLayout({ width: "wide" });
+const layout = bracketLayout;
 
 const scheduled = matches
 	.filter((m) => m.status !== "cancelled")

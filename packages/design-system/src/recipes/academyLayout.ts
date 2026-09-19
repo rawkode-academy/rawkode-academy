@@ -14,7 +14,7 @@ export const academyLayout = sva({
 		sectionHeader: { display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "4", marginBottom: "6" },
 		sectionTitle: { margin: "0", fontFamily: "academy-display", fontSize: "2xl", fontWeight: "bold", lineHeight: "tight" },
 		grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 18rem), 1fr))", gap: "6" },
-		card: { display: "flex", flexDirection: "column", minWidth: "0", overflow: "hidden", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel", color: "academy.text", textDecoration: "none", transitionProperty: "border-color", transitionDuration: "fast", _hover: { borderColor: "academy.accent" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" }, _motionReduce: { transitionDuration: "none" } },
+		card: { display: "flex", flexDirection: "column", minWidth: "0", overflow: "hidden", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel", color: "academy.text", textDecoration: "none", transitionProperty: "colors", transitionDuration: "fast", _hover: { borderColor: "academy.accent" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent", outlineOffset: "focus" }, _motionReduce: { transitionDuration: "none" } },
 		cardMedia: { width: "full", aspectRatio: "academy-video", objectFit: "cover", backgroundColor: "academy.ground" },
 		cardBody: { padding: "6", display: "flex", flexDirection: "column", gap: "3" },
 		cardTitle: { margin: "0", fontFamily: "academy-display", fontSize: "xl", fontWeight: "bold", lineHeight: "tight" },

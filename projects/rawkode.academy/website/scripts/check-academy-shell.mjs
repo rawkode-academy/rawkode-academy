@@ -56,12 +56,14 @@ const bracketPages = walk(
 const bracketNames = bracketPages.map((path) => path.match(/\/([^/]+)\.astro$/)?.[1]);
 assert.deepEqual(bracketNames, ["Apply", "Brackets", "Schedule", "Seasons"]);
 const bracketPlugin = read("src/lib/shows/plugins/bracket/index.ts");
+const bracketStyles = read("src/lib/shows/plugins/bracket/styles.ts");
+assert.match(bracketStyles, /academyLayout/);
 for (const [index, name] of bracketNames.entries()) {
 	const slug = ["apply", "brackets", "schedule", "seasons"][index];
 	assert.match(bracketPlugin, new RegExp(`import ${name} from "\\./pages/${name}\\.astro"`));
 	assert.match(bracketPlugin, new RegExp(`\\b${slug}:\\s*\\{[\\s\\S]*?slug:\\s*"${slug}"[\\s\\S]*?Component:\\s*${name}`));
 	const source = read(local(bracketPages[index]));
-	assert.match(source, /academyLayout/);
+	assert.match(source, /bracketLayout/);
 	assert.doesNotMatch(source, /<(?:html|body)\b/i);
 }
 assert.match(read("src/pages/shows/[showId]/[...slug].astro"), showLayout);

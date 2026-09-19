@@ -3,9 +3,13 @@ import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
 
-type Resource = NonNullable<
+type ArticleResource = NonNullable<
 	CollectionEntry<"articles">["data"]["resources"]
 >[number];
+type VideoResource = NonNullable<
+	CollectionEntry<"videos">["data"]["resources"]
+>[number];
+type Resource = ArticleResource | VideoResource;
 
 interface Props {
 	resources?: Resource[] | undefined;

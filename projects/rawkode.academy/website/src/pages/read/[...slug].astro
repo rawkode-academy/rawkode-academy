@@ -247,7 +247,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 				<EndSlug dispatchNum={dispatchNum} date={publishDate} />
 
 				<Resources resources={article.data.resources} />
-				<NewsletterCTA class={doc.section} />
+				<NewsletterCTA class={doc.section ?? ""} />
 				<RelatedArticles currentArticle={article} limit={3} />
 				<RelatedVideos currentArticle={article} limit={3} />
 			</div>

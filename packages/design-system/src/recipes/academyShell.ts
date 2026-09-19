@@ -27,7 +27,7 @@ export const academyShell = sva({
 		menuTrigger: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: "11", height: "11", border: "academy-button", borderRadius: "academy-s", backgroundColor: "transparent", color: "academy.text", cursor: "pointer", _hover: { backgroundColor: "academy.panel" }, _focusVisible: { outline: "focus", outlineColor: "academy.accent" } },
 		backdrop: { position: "fixed", inset: "0", zIndex: "overlay", backgroundColor: "editorial.overlay" },
 		positioner: { position: "fixed", inset: "0", zIndex: "overlay", display: "flex", justifyContent: "flex-end" },
-		panel: { width: "full", maxWidth: "lg", height: "full", overflowY: "auto", overscrollBehavior: "contain", backgroundColor: "academy.canvas", color: "academy.text", padding: "6", fontFamily: "academy-text", _motionReduce: { animation: "none", transitionDuration: "none" } },
+		panel: { width: "full", maxWidth: "lg", height: "full", overflowY: "auto", overscrollBehavior: "contain", backgroundColor: "academy.canvas", color: "academy.text", padding: "6", fontFamily: "academy-text", _motionReduce: { transitionDuration: "none" } },
 		panelHeader: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "4", marginBottom: "6" },
 		panelTitle: { margin: "0", fontFamily: "academy-display", fontSize: "xl", fontWeight: "bold" },
 		close: { display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: "11", minHeight: "11", border: "hairline", borderColor: "academy.border", borderRadius: "academy-s", backgroundColor: "academy.panel", color: "academy.text", cursor: "pointer", _focusVisible: { outline: "focus", outlineColor: "academy.accent" } },

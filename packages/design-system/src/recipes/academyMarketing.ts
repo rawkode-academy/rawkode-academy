@@ -70,7 +70,7 @@ export const academyMarketing = sva({
 			"& summary": { cursor: "pointer", color: "academy.text", fontWeight: "semibold" },
 			"& details > p": { marginTop: "4", color: "academy.textSoft", lineHeight: "relaxed" },
 		},
-		utility: { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", minHeight: "70vh", paddingBlock: "16" },
+		utility: { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", minHeight: "screen", paddingBlock: "16" },
 		utilityMark: { display: "grid", placeItems: "center", width: "12", height: "12", marginBottom: "6", border: "focus", borderColor: "academy.accent", borderRadius: "academy-s", color: "academy.accent", fontFamily: "academy-mono", fontSize: "xl" },
 		utilityActions: { display: "flex", flexWrap: "wrap", gap: "3", marginTop: "8" },
 		contact: { display: "grid", gap: "4", width: "full", padding: "6", border: "hairline", borderColor: "academy.border", borderRadius: "academy-m", backgroundColor: "academy.panel" },

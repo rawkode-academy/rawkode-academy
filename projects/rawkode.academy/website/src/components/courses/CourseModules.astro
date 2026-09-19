@@ -115,11 +115,11 @@ function formatDuration(minutes: number): string {
 								</div>
 								<div class={doc.actions}>
 									{sectionDuration > 0 && (
-										<Badge variant="default" size="sm" class={doc.flush}>
+										<Badge variant="default" size="sm" class={doc.flush ?? ""}>
 											{formatDuration(sectionDuration)}
 										</Badge>
 									)}
-									<Badge variant="default" size="sm" class={doc.flush}>
+									<Badge variant="default" size="sm" class={doc.flush ?? ""}>
 										{modules.length} module{modules.length === 1 ? "" : "s"}
 									</Badge>
 								</div>

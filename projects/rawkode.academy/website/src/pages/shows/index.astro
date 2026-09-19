@@ -107,7 +107,7 @@ const styles = academyLayout({ width: "wide" });
 						<AcademyCatalogCard
 							href={`/shows/${show.id}`}
 							title={show.name}
-							description={show.episodes?.[0]?.video?.title}
+							description={show.episodes?.[0]?.video?.title ?? ""}
 							meta={[show.episodes?.length ? `${show.episodes.length} episodes` : "Program"]}
 							image={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl ?? undefined}
 							imageAlt={`${show.name} cover`}
