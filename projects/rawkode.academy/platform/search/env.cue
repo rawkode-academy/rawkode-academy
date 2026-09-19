@@ -23,12 +23,12 @@ ci: pipelines: {
 tasks: {
 	check: schema.#Task & {
 		hermetic: false
-		command: "cargo"
-		args: ["check", "--locked"]
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#cargo nixpkgs#rustc nixpkgs#pkg-config nixpkgs#openssl -c cargo check --locked"]
 	}
 	test: schema.#Task & {
 		hermetic: false
-		command: "cargo"
-		args: ["test", "--locked"]
+		command: "sh"
+		args: ["-lc", "nix shell nixpkgs#cargo nixpkgs#rustc nixpkgs#pkg-config nixpkgs#openssl -c cargo test --locked"]
 	}
 }
