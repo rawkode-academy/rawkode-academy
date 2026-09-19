@@ -13,6 +13,7 @@ const props = withDefaults(
 		items: TabItem[];
 		defaultValue?: string;
 		ariaLabel?: string;
+		id?: string;
 	}>(),
 	{
 		defaultValue: undefined,
@@ -25,6 +26,7 @@ const styles = computed(() => tabs({ tone: "academy" }));
 
 <template>
 	<ArkTabs.Root
+		:id="props.id"
 		:default-value="props.defaultValue ?? props.items[0]?.value"
 		:class="styles.root"
 	>
