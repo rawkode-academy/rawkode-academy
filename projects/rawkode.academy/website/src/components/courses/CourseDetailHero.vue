@@ -152,7 +152,7 @@
 								</li>
 								<li :class="doc.row">
 									<span :class="doc.link">•</span>
-									<span>Builder-focused guidance without marketing noise</span>
+									<span>Practical guidance for building and running cloud native systems</span>
 								</li>
 							</ul>
 						</div>

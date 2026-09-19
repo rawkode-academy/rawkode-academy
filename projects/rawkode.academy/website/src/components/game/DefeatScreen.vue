@@ -8,7 +8,7 @@
 
 			<!-- Learned phrases section -->
 			<div v-if="learnedInsults.length > 0 || learnedComebacks.length > 0" class="learned-section">
-				<h3 class="learned-title">INTELLIGENCE GATHERED</h3>
+				<h3 class="learned-title">WHAT YOU LEARNED</h3>
 				<p class="learned-subtitle">You learned from the enemy's tactics:</p>
 
 				<div v-if="learnedInsults.length > 0" class="phrase-group">

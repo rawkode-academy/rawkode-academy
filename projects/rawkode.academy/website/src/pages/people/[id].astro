@@ -183,7 +183,7 @@ const pageDescription = (() => {
 	if (parts.length === 0) {
 		return `${person.data.name} on Rawkode Academy: interviews, live coding, and conversations with leaders in Cloud Native and open source.`;
 	}
-	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and deep dives on Rawkode Academy.`;
+	return `${person.data.name}: ${parts.join(", ")}. Watch interviews, live coding, and technical discussions on Rawkode Academy.`;
 })();
 
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;

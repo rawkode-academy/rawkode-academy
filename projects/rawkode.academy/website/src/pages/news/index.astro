@@ -139,7 +139,7 @@ const catalog = academyCatalog();
 	</Fragment>
 
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="Cloud native wire" title="News" description="What changed, why it matters in production, and what remains unproven." />
+		<AcademyCatalogMasthead kicker="News" title="News" description="What changed, why it matters in production, and what remains unproven." />
 
 		<section class="news-page__top">
 			{leadStory && (
@@ -149,7 +149,7 @@ const catalog = academyCatalog();
 						<h2 class={catalog.featuredTitle}>{leadStory.data.title}</h2>
 						<p class={catalog.featuredDescription}>{leadStory.data.description}</p>
 						<div class={catalog.filters}>{leadStoryTags.map((tag) => <a class={catalog.filterLink} href={`/technology/${tag}`}>{formatTechnologyLabel(tag)}</a>)}</div>
-						<a class={styles.button} href={`/news/${leadStory.id}`}>Read the briefing →</a>
+						<a class={styles.button} href={`/news/${leadStory.id}`}>Read the article →</a>
 					</div>
 				</article>
 			)}

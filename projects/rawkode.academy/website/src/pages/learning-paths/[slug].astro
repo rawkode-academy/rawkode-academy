@@ -72,15 +72,6 @@ const durationLabel = formatDuration(learningPath.data.estimatedDuration);
 const outline = headings.filter((heading) => heading.depth === 2);
 const prerequisites = learningPath.data.prerequisites ?? [];
 
-// Dispatch number — position in chronological corpus of paths.
-const corpus = (await getCollection("learningPaths")).sort(
-	(a, b) => a.data.publishedAt.valueOf() - b.data.publishedAt.valueOf(),
-);
-const dispatchIndex = corpus.findIndex((p) => p.id === learningPath.id);
-const dispatchNum = String(
-	dispatchIndex >= 0 ? dispatchIndex + 1 : corpus.length,
-).padStart(3, "0");
-
 const difficultyLabel =
 	learningPath.data.difficulty.charAt(0).toUpperCase() +
 	learningPath.data.difficulty.slice(1);
@@ -123,12 +114,10 @@ const pageDescription = learningPath.data.description;
 				{ label: difficultyLabel },
 				{ label: learningPath.data.title, current: true },
 			]}
-			dispatchNum={dispatchNum}
 			kicker="Learning path"
 			categoryTrail={difficultyLabel}
 			title={learningPath.data.title}
 			dek={learningPath.data.description}
-			readingTime={durationLabel}
 		>
 			<ArticleByline
 				authors={authors}

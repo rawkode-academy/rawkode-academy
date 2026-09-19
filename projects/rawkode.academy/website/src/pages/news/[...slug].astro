@@ -73,7 +73,7 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 
 const readingTime = calculateReadingTime(article.body || "");
 
-// Plain article category, without issue/dispatch language.
+// Article category for the breadcrumb and header.
 const kickerFor = (a: typeof article): string => {
 	const techs = a.data.technologies ?? [];
 	if (techs.some((t) => /cve|security/i.test(t))) return "CVE";
@@ -89,15 +89,6 @@ const breadcrumbItems = [
 	...(kicker === "News" ? [] : [{ label: kicker }]),
 	{ label: article.data.title, current: true },
 ];
-
-// Dispatch number = position in the corpus, oldest = 001
-const corpus = (await getCollection("news")).sort(
-	(a, b) => a.data.publishedAt.valueOf() - b.data.publishedAt.valueOf(),
-);
-const dispatchIndex = corpus.findIndex((a) => a.id === article.id);
-const dispatchNum = String(
-	dispatchIndex >= 0 ? dispatchIndex + 1 : corpus.length,
-).padStart(3, "0");
 
 const categoryTrail = tags[0]?.label;
 ---
@@ -143,14 +134,11 @@ const categoryTrail = tags[0]?.label;
 	<div class={doc.root}>
 		<ArticleHeader
 			breadcrumbs={breadcrumbItems}
-			dispatchNum={dispatchNum}
 			kicker={kicker}
 			categoryTrail={categoryTrail}
 			eyebrow={[kicker, categoryTrail].filter(Boolean).join(" · ")}
-			hideDispatchMeta={true}
 			title={article.data.title}
 			dek={article.data.description}
-			readingTime={readingTime.text}
 		>
 			<ArticleByline
 				authors={authors}

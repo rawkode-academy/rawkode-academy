@@ -166,9 +166,6 @@ const totalPages = Math.max(1, Math.ceil(gridArticles.length / articlesPerPage))
 // instead of an empty grid with prev/next links into a phantom crawl space.
 const page = Math.min(requestedPage, totalPages);
 const featured = page === 1 ? featuredCandidate : undefined;
-const featuredIndex = featured
-	? allArticles.findIndex((article) => article.id === featured.id)
-	: -1;
 const pagedArticles = gridArticles.slice(
 	(page - 1) * articlesPerPage,
 	page * articlesPerPage,
@@ -200,20 +197,11 @@ const articleAuthorName = async (
 	return authors.map((a) => a.data.name).join(", ");
 };
 
-const dispatchNumFor = (idx: number) =>
-	String(allArticles.length - idx).padStart(3, "0");
-
-const dispatchNumForArticle = (article: (typeof allArticles)[number]) =>
-	dispatchNumFor(
-		allArticles.findIndex((candidate) => candidate.id === article.id),
-	);
-
 // Pre-resolve authors for the grid (Astro can't await in JSX iteration cleanly).
 // Only the current page's slice — not the whole archive.
 const restWithMeta = await Promise.all(
 	pagedArticles.map(async (article) => ({
 		article,
-		dispatchNum: dispatchNumForArticle(article),
 		author: await articleAuthorName(article),
 		readingTime: calculateReadingTime(article.body || "").text,
 	})),
@@ -226,11 +214,10 @@ const activeFilterSummary = [
 	.filter(Boolean)
 	.join(" · ");
 
-// SERP title leads with what people search for; the "Field Notes"
-// editorial branding stays on the visible masthead.
+// SERP title leads with what people search for.
 const pageTitle = "Cloud Native & Kubernetes Articles";
 const pageDescription =
-	"Long-form articles, tutorials, and field reports on cloud native engineering — Kubernetes, eBPF, containers, supply chain — from Rawkode Academy.";
+	"Articles and tutorials on cloud native engineering — Kubernetes, eBPF, containers, supply chain — from Rawkode Academy.";
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
 ---
@@ -253,13 +240,13 @@ const catalog = academyCatalog();
 	</Fragment>
 
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="Field notes" title="Read" description="Long-form articles, tutorials, and field reports for engineers shipping production systems." />
+		<AcademyCatalogMasthead kicker="Articles" title="Read" description="Articles and tutorials for engineers building and running production systems." />
 
 		{featured && (
 			<section class={styles.section}><div class={styles.container}>
 				<article class={catalog.featured}>
 					<div class={catalog.featuredBody}>
-						<p class={catalog.featuredKicker}>{getTypeBadgeConfig(featured.data.type || "tutorial").label} · Dispatch {dispatchNumFor(featuredIndex)}</p>
+						<p class={catalog.featuredKicker}>{getTypeBadgeConfig(featured.data.type || "tutorial").label}</p>
 						<h2 class={catalog.featuredTitle}>{featured.data.title}</h2>
 						<p class={catalog.featuredDescription}>{compactCopy(featured.data.openGraph?.subtitle || featured.data.description, 180)}</p>
 						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · {dateFormatter.format(featured.data.publishedAt)} · {calculateReadingTime(featured.body || "").text}</p>
@@ -275,7 +262,7 @@ const catalog = academyCatalog();
 				{topicItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTopicIndex ? "page" : undefined}>{item.label}</a>)}
 			</div>
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
-			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={styles.grid}>{restWithMeta.map(({ article, dispatchNum, author, readingTime }) => <AcademyCatalogCard href={`/read/${article.id}`} title={article.data.title} description={compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 130)} meta={[`${getTypeBadgeConfig(article.data.type || "tutorial").label} · ${dispatchNum}`, author ?? "Rawkode Academy", dateFormatter.format(article.data.publishedAt), readingTime]} />)}</div>}
+			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={styles.grid}>{restWithMeta.map(({ article, author, readingTime }) => <AcademyCatalogCard href={`/read/${article.id}`} title={article.data.title} description={compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 130)} meta={[getTypeBadgeConfig(article.data.type || "tutorial").label, author ?? "Rawkode Academy", dateFormatter.format(article.data.publishedAt), readingTime]} />)}</div>}
 			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={styles.buttonSecondary} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={styles.button} href={readPathFor(page + 1)}>Next →</a>}</nav>}
 		</div></section>
 	</div>

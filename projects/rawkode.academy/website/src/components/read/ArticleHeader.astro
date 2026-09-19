@@ -11,26 +11,20 @@ interface BreadcrumbItem {
 
 interface Props {
 	breadcrumbs?: BreadcrumbItem[];
-	dispatchNum: number | string;
 	kicker: string;
 	categoryTrail?: string | undefined;
 	title: string;
 	dek?: string | undefined;
-	readingTime?: string | undefined;
 	eyebrow?: string | undefined;
-	hideDispatchMeta?: boolean | undefined;
 }
 
 const {
 	breadcrumbs = [],
-	dispatchNum,
 	kicker,
 	categoryTrail,
 	title,
 	dek,
-	readingTime,
 	eyebrow,
-	hideDispatchMeta = true,
 } = Astro.props as Props;
 
 const visibleBreadcrumbs = breadcrumbs.filter((item) => !item.current);
@@ -51,11 +45,6 @@ const eyebrowText =
 			</>
 		))}
 		<span class={doc.spacer}></span>
-		{!hideDispatchMeta && (
-			<span class={doc.meta}>
-				Dispatch №{dispatchNum}{readingTime ? ` · ${readingTime}` : ""}
-			</span>
-		)}
 	</div>
 )}
 

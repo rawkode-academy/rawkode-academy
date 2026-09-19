@@ -4,20 +4,18 @@ const doc = academyDocument();
 import MLabel from "@/components/ui/MLabel.vue";
 
 interface Props {
-	dispatchNum: number | string;
 	date: string;
 	discussHref?: string;
 }
 
 const {
-	dispatchNum,
 	date,
 	discussHref = "https://discord.gg/rawkode",
 } = Astro.props as Props;
 ---
 
 <div class={doc.end}>
-	<MLabel>· Fin · Dispatch №{dispatchNum} · {date} ·</MLabel>
+	<MLabel>Published {date}</MLabel>
 	<a class={doc.link} href={discussHref} target="_blank" rel="noopener noreferrer">
 		<MLabel tone="ink">Discuss in the Discord →</MLabel>
 	</a>

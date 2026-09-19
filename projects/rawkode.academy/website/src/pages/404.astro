@@ -12,7 +12,7 @@ const quickLinks = [
 	{ title: "Browse courses", href: "/courses" },
 	{ title: "Learning paths", href: "/learning-paths" },
 	{ title: "Technology guides", href: "/technology" },
-	{ title: "Dispatch (read)", href: "/read" },
+	{ title: "Articles", href: "/read" },
 ];
 const layout = academyLayout({ width: "wide" });
 ---
@@ -23,16 +23,16 @@ const layout = academyLayout({ width: "wide" });
 	noindex
 >
 	<main class:list={[layout.root, "ed-404"]}>
-		<MastheadBar left="Dispatch §404 · Not found" right="Lost in the cluster" />
+		<MastheadBar left="404 · Page not found" right="Rawkode Academy" />
 
 		<section class:list={[layout.container, "ed-404__hero"]}>
 			<MLabel tone="rust">
 				<span class="ed-404__dot" aria-hidden="true"></span>
-				§404 · Route not found
+				404 · Page not found
 			</MLabel>
 
 			<h1 class="ed-404__title">
-				This dispatch <span class="ed-404__title-soft">isn't here.</span>
+				This page <span class="ed-404__title-soft">isn't here.</span>
 			</h1>
 
 			<p class="ed-404__lede">

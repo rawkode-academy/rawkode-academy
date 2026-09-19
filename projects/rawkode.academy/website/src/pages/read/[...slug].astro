@@ -136,13 +136,10 @@ const updateDate = wasUpdated
 	? dateFormatter.format(article.data.updatedAt as Date)
 	: undefined;
 
-// Dispatch number — articles ordered desc by date give this a meaningful index.
+// Latest articles for the related-reading section.
 const allArticles = (
 	await getCollection("articles", ({ data }) => !data.draft)
 ).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
-
-const indexInCorpus = allArticles.findIndex((a) => a.id === article.id);
-const dispatchNum = String(allArticles.length - indexInCorpus).padStart(3, "0");
 
 // Next 3 articles, skipping the current one.
 const readNextArticles = allArticles
@@ -215,12 +212,10 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 	<div class={doc.root}>
 		<ArticleHeader
 			breadcrumbs={breadcrumbs}
-			dispatchNum={dispatchNum}
 			kicker={badgeConfig.label}
 			categoryTrail={categoryTrail}
 			title={article.data.title}
 			dek={subtitle}
-			readingTime={readingTime.text}
 		>
 			<ArticleByline
 				authors={authors}
@@ -244,7 +239,7 @@ const subtitle = article.data.openGraph?.subtitle || article.data.subtitle;
 					<Content />
 				</article>
 
-				<EndSlug dispatchNum={dispatchNum} date={publishDate} />
+				<EndSlug date={publishDate} />
 
 				<Resources resources={article.data.resources} />
 				<NewsletterCTA class={doc.section ?? ""} />

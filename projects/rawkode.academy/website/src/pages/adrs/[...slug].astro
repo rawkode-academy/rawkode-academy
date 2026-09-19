@@ -64,7 +64,6 @@ const validAuthors = authors.filter((author) => author && author.data);
 	<AdrJsonLd slot="extra-head" adr={adr} authors={authors} />
 	<ArticleHeader
 		breadcrumbs={[{ label: "Architecture decisions", href: "/adrs" }]}
-		dispatchNum={adrNumber}
 		kicker={`ADR-${adrNumber}`}
 		title={adr.data.title}
 		dek={`Architecture decision record adopted on ${adoptedLabel}.`}

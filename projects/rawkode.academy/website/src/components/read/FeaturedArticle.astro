@@ -5,7 +5,6 @@ import MLabel from "@/components/ui/MLabel.vue";
 interface Props {
 	href: string;
 	kicker: string;
-	dispatchNum: number | string;
 	title: string;
 	dek: string;
 	author?: string | undefined;
@@ -22,7 +21,6 @@ interface Props {
 const {
 	href,
 	kicker,
-	dispatchNum,
 	title,
 	dek,
 	author,
@@ -50,7 +48,7 @@ const {
 		<div class="featured-article__main">
 			<MLabel tone="spruce">
 				<span class="featured-article__dot" aria-hidden="true"></span>
-				Featured · Dispatch №{dispatchNum}
+				Featured article
 			</MLabel>
 
 			<h2 class="featured-article__title">{title}</h2>
