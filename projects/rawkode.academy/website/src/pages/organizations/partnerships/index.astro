@@ -2,314 +2,215 @@
 import FAQJsonLD from "@/components/html/faq-jsonld.astro";
 import PartnershipApplicationForm from "@/components/organizations/PartnershipApplicationForm.vue";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
-import { partnershipTiers } from "@/lib/partnerships";
+import {
+	fitProofReview,
+	partnershipBoundaries,
+	partnershipOffer,
+} from "@/lib/partnerships";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
 const faqs = [
 	{
-		question: "When is this useful?",
+		question: "What happens in the first 90 days?",
 		answer:
-			"When your product has real technical depth, but adoption is getting stuck somewhere between positioning, docs, demos, DevRel activity, and the proof developers need before they trust it.",
-	},
-	{
-		question: "What happens in the first month?",
-		answer:
-			"We open Slack Connect between our workspaces and start with your current plans and objectives: what is in motion, where adoption stands, and what to focus on first.",
+			"We agree the practitioner and workflow to reach, open Slack Connect, and choose the first proof gap. Each month has one working session. Each quarter produces one technical demo or proof asset, a companion page, reusable clips, and a delivery report.",
 	},
 	{
 		question: "How does Slack access work?",
 		answer:
-			"Slack Connect links your workspace with Rawkode Academy's. It is advisory access, practitioner to practitioner: questions get considered answers within a couple of working days, and anything bigger than a thread becomes the focus of the monthly review, or a video session on Adoption and Community. It is not on-call support.",
+			"Slack Connect is the place for questions, reviews, and decisions as they come up. It is async partner communication, not on-call support or incident response. Questions are normally answered within two business days.",
 	},
 	{
-		question: "Why pay for Signal instead of just DMing David?",
+		question: "What do we need to provide?",
 		answer:
-			"You can, and people do: when there is time, about whatever happens to be in front of him. Signal means your context is held month over month, your questions take priority over the inbox, and the review of your plans happens every month whether or not you remembered to ask.",
+			"A working environment, technical subject-matter expert, relevant docs or repository, source material, and timely approvals. You keep ownership of implementation and execution.",
 	},
 	{
-		question: "Do you work with competing companies?",
+		question: "Does sponsorship buy coverage or a positive review?",
 		answer:
-			"No. One company per problem space at a time, across every plan. If a direct competitor applies while we work together, they wait. Community cohorts are screened the same way: no two member teams compete directly.",
+			"No. Sponsorship funds the work, not the verdict. The partnership includes agreed proof assets and distribution, but it does not buy independent editorial coverage, praise, leads, or sign-ups.",
 	},
 	{
-		question: "We already read the analyst reports. What does this add?",
+		question: "Can we start with a smaller engagement?",
 		answer:
-			"Keep them. Analysts tell you what developers think; this is help acting on it, week by week, on your own docs, demos, and plans.",
-	},
-	{
-		question: "Does a partnership affect Rawkode Live coverage?",
-		answer:
-			"No. Advisory clients get no coverage, and coverage decisions never consider who pays. The audience's trust is the product; it is not for sale.",
-	},
-	{
-		question: "What changes month to month?",
-		answer:
-			"Your product, your competitors, and developer reactions keep moving, and the advice keeps pace. Each monthly review starts from what changed: what developers are saying, what your team shipped, and what you are deciding next.",
-	},
-	{
-		question: "Is there an annual option?",
-		answer:
-			"Yes. Pay for twelve months up front and get two free, on any plan. Otherwise every plan is month-to-month: start, pause, or cancel any month.",
-	},
-	{
-		question: "What does Community add beyond Adoption?",
-		answer:
-			"A monthly cohort session with the other member teams, case reviews of live docs, demos, and launches, and a monthly expert session with working Q&A.",
-	},
-	{
-		question: "Why is Community limited to ten teams?",
-		answer:
-			"The room only works if every team gets reviewed and every voice knows the others. Ten teams keeps the case reviews honest and the patterns specific. The first cohort kicks off in August 2026.",
-	},
-	{
-		question: "What do you need from our team?",
-		answer:
-			"Rough context is enough to start: your company and product, the developers you need to reach, your current adoption challenge, and any links worth a look.",
+			"Yes. Fit & Proof Review is an optional £2,500 review of one named technical buyer workflow. It includes a written scorecard and one readout, and the full fee is credited if you start Adoption Advisory within 30 days.",
 	},
 	{
 		question: "What is intentionally out of scope?",
 		answer:
-			"This is not outsourced DevRel, campaign planning, custom content production on demand, lead generation, audience rental, or open-ended access. Your team owns execution; Rawkode brings a practitioner's read, strategic critique, and adoption patterns that have worked elsewhere. And if you have a DevRel team, or are hiring your first, the advice goes through them, not around them: it makes them more effective, not redundant.",
+			"On-call support, incident response, implementation ownership, outsourced DevRel, open-ended campaign work, unlimited revisions, audience rental, and blanket exclusivity. Additional demos or strategy work are separately scoped.",
 	},
 ];
 
-const packages = partnershipTiers.map((tier) => ({
-	...tier,
-	cta: `Apply for ${tier.name}`,
-}));
-
-const anchors = [
+const deliverables = [
 	{
-		term: "Instead of a conference",
-		detail:
-			"A booth at one event costs more than a year of Signal, and the feedback ends when the hall closes.",
+		title: "Technical proof",
+		body: "One working demo or proof asset each quarter, built around a real practitioner workflow.",
 	},
 	{
-		term: "Instead of an agency",
-		detail:
-			"A fraction of a retainer, no onboarding ramp, and no account manager between you and the practitioner.",
+		title: "Working partnership",
+		body: "Slack Connect for questions and decisions, plus one scheduled working session each month.",
 	},
 	{
-		term: "Instead of a fractional hire",
-		detail:
-			"A senior practitioner's judgement without a day rate, a ramp-up, or a seat on your payroll.",
+		title: "Reusable distribution",
+		body: "A companion page, clips, shared asset repository, and agreed reuse rights for your team.",
 	},
 	{
-		term: "Never your competitor",
-		detail:
-			"One company per problem space at a time, on every plan. If a direct competitor applies while we work together, they wait.",
+		title: "Evidence and renewal",
+		body: "A quarterly delivery and performance report that makes the next renewal decision explicit.",
 	},
 ];
 
-const inspectAreas = [
+const process = [
 	{
-		title: "The story does not match the technical reality.",
-		body: "The product is strong, but the public narrative skips the tradeoffs, proof, or context developers need before they trust it.",
+		step: "01",
+		title: "Apply with a real problem",
+		body: "Tell us who needs to trust the product, what they need to see, and where the current proof falls short.",
 	},
 	{
-		title: "The docs explain features, not confidence.",
-		body: "Developers can understand what the product does and still not know whether it fits their workflow, team, risk, or next step.",
+		step: "02",
+		title: "Agree the first workflow",
+		body: "We choose a technical buyer workflow, the working environment, the first proof gap, and the first quarter's asset.",
 	},
 	{
-		title: "DevRel activity is busy but hard to connect.",
-		body: "Content, community, education, and feedback all exist, but they do not clearly ladder into adoption.",
-	},
-	{
-		title: "Sales conversations expose unresolved proof gaps.",
-		body: "Technical buyers ask about operations, migration, security, cost, or fit, and the team has to assemble the answer late.",
-	},
-];
-
-const loopSteps = [
-	{
-		title: "Ask as things come up.",
-		body: "Positioning questions, launch reviews, demo feedback, a tough technical objection: raise it in Slack and get a practitioner's answer.",
-	},
-	{
-		title: "Review the plan monthly.",
-		body: "Once a month, we look at your high-level plans and objectives: what developers are telling you, what changed, and where to focus next.",
-	},
-	{
-		title: "Decide what's next.",
-		body: "Each review ends with clear calls: what to keep, change, prove, pause, or stop.",
+		step: "03",
+		title: "Build, review, and learn",
+		body: "Slack keeps the work moving. The monthly session makes decisions. The quarterly report tells us what to keep, change, or stop.",
 	},
 ];
 
-const heroProofPoints = [
-	{
-		value: "You own",
-		label: "Execution, content, and community",
-	},
-	{
-		value: "We bring",
-		label: "An advisor who lives where developers evaluate tools",
-	},
-	{
-		value: "You decide",
-		label: "What to prove, change, or stop next",
-	},
-];
+const badFits = partnershipBoundaries;
 ---
 
 <Page
 	title="Partnerships"
-	description="Developer adoption partnerships for DevTools and cloud-native teams: a practitioner advisor in your Slack, monthly video working sessions, and a ten-seat community."
+	description="Rawkode Academy's Adoption Advisory partner programme for infrastructure companies that need technical proof, useful demos, and practitioner trust."
 >
 	<FAQJsonLD questions={faqs} slot="extra-head" />
-
 	<EditorialShell
-		eyebrow="Partnerships for DevTools and infrastructure teams"
-		title="We help your team turn technical depth into developer adoption."
-		lede="Get a practitioner advisor in your team's Slack: someone who watches developers evaluate tools every week, and tells you what to fix, prove, or test next. One advisor, direct access, no agency in between."
+		eyebrow="Rawkode Partner Programme"
+		title="Turn technical depth into practitioner trust."
+		lede={partnershipOffer.summary}
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="#apply">Apply for a partnership</a>
-			<a class="editorial-button editorial-button--secondary" href="#packages">View plans and pricing</a>
+			<a class="editorial-button" href="#apply" data-apply-path={partnershipOffer.name}>Apply for Adoption Advisory</a>
+			<a class="editorial-button editorial-button--secondary" href="#programme">See the programme</a>
 		</div>
 
-		<section class="editorial-section" aria-label="How the partnership works">
-			<div class="editorial-stat-grid">
-				{heroProofPoints.map((point) => (
-					<div class="editorial-stat">
-						<span class="editorial-stat__value">{point.value}</span>
-						<span class="editorial-stat__label">{point.label}</span>
-					</div>
-				))}
+		<section class="editorial-section" aria-label="Programme principles">
+			<div class="partner-principles">
+				<div><span class="partner-principles__value">You own</span><span>Execution, content, and community</span></div>
+				<div><span class="partner-principles__value">We bring</span><span>Technical demos, critique, and practitioner context</span></div>
+				<div><span class="partner-principles__value">You decide</span><span>What to prove, change, or stop next</span></div>
 			</div>
 		</section>
 
-		<section class="editorial-section editorial-section--split" aria-labelledby="inspect-title">
+		<section id="programme" class="editorial-section editorial-section--split" aria-labelledby="programme-title">
 			<div class="editorial-section__header">
-				<h2 id="inspect-title" class="editorial-section__title">Where adoption gets unclear</h2>
-				<p class="editorial-section__lede">
-					The problem is rarely that the team is not doing enough. It is that product, marketing, DevRel, and engineering each see a different part of the adoption story. Developers feel that gap before your dashboard does.
-				</p>
+				<p class="editorial-kicker">The programme</p>
+				<h2 id="programme-title" class="editorial-section__title">{partnershipOffer.name}</h2>
+				<p class="editorial-section__lede">{partnershipOffer.cadence}. The programme is deliberately specific: access to David is useful because it is attached to real proof work, not because it is an unlimited inbox.</p>
 			</div>
-			<div class="partnerships-rows">
-				{inspectAreas.map((area) => (
-					<article class="partnerships-row">
-						<h3 class="editorial-card__title">{area.title}</h3>
-						<p class="editorial-card__body">{area.body}</p>
+			<div class="editorial-card partner-offer-card">
+				<div>
+					<p class="editorial-kicker">{partnershipOffer.label}</p>
+					<p class="partner-offer-card__price">{partnershipOffer.price}</p>
+					<p class="partner-offer-card__cadence">{partnershipOffer.cadence}</p>
+				</div>
+				<ul class="editorial-list">
+					{partnershipOffer.included.map((item) => <li>{item}</li>)}
+				</ul>
+				<a class="editorial-button" href="#apply" data-apply-path={partnershipOffer.name}>Apply for the programme</a>
+			</div>
+		</section>
+
+		<section class="editorial-section" aria-labelledby="deliverables-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">What you receive</p>
+				<h2 id="deliverables-title" class="editorial-section__title">A repeatable working rhythm</h2>
+			</div>
+			<div class="editorial-grid editorial-grid--2">
+				{deliverables.map((item) => (
+					<article class="editorial-card partner-card">
+						<h3 class="editorial-card__title">{item.title}</h3>
+						<p class="editorial-card__body">{item.body}</p>
 					</article>
 				))}
 			</div>
 		</section>
 
-		<section class="editorial-section editorial-section--split" aria-labelledby="loop-title">
+		<section class="editorial-section editorial-section--split" aria-labelledby="evidence-title">
 			<div class="editorial-section__header">
-				<h2 id="loop-title" class="editorial-section__title">An advisor on tap, not a monthly report</h2>
-				<p class="editorial-section__lede">
-					Questions do not wait for a scheduled call. Ask in Slack as they come up; once a month, we step back and look at the bigger picture together.
-				</p>
+				<p class="editorial-kicker">Evidence over theatre</p>
+				<h2 id="evidence-title" class="editorial-section__title">Build something practitioners can actually inspect.</h2>
+				<p class="editorial-section__lede">The work starts with a real environment and a real workflow. It should leave behind something your team can reuse, not just a conversation that disappears into a meeting history.</p>
 			</div>
-			<div class="partnerships-rows">
-				{loopSteps.map((step) => (
-					<article class="partnerships-row">
-						<h3 class="editorial-card__title">{step.title}</h3>
-						<p class="editorial-card__body">{step.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split" aria-labelledby="proof-title">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Why Rawkode</p>
-				<h2 id="proof-title" class="editorial-section__title">The work is public. Judge it before you email.</h2>
-				<p class="editorial-section__lede">
-					Rawkode's shows and courses reach the people your product has to convince: platform engineers, maintainers, and the practitioners who veto tools. That same audience is where the partnership's read on your product comes from.
-				</p>
-			</div>
-			<div class="partnerships-rows">
-				<article class="partnerships-row">
-					<h3 class="editorial-card__title">A new programme, an old practice</h3>
-					<p class="editorial-card__body">This programme is new, and the first teams in it are exactly that: first. The practice behind it is not. Hundreds of projects evaluated on air, dozens of teams worked with directly, and over two decades of trust in this field that does not get spent on bad advice.</p>
+			<div class="partner-evidence">
+				<article class="partner-evidence__item">
+					<h3 class="editorial-card__title">Working demos</h3>
+					<p class="editorial-card__body">Dockerfiles, manifests, code, and the operational details that let a technical evaluator follow the path from claim to proof.</p>
 				</article>
-				<article class="partnerships-row">
-					<h3 class="editorial-card__title">Courses built with partners</h3>
-					<p class="editorial-card__body">Teleport worked with Rawkode Academy on <a href="/courses/teleport-for-kubernetes">Teleport for Kubernetes</a>: a runnable course that meets developers where they evaluate, hands on, in a real cluster.</p>
+				<article class="partner-evidence__item">
+					<h3 class="editorial-card__title">Public learning</h3>
+					<p class="editorial-card__body">Courses, live builds, articles, and walkthroughs that meet practitioners where they evaluate a product.</p>
 				</article>
-				<article class="partnerships-row">
-					<h3 class="editorial-card__title">Klustered</h3>
-					<p class="editorial-card__body">Engineers from Adobe, Red Hat, Pulumi, Kong, Chainguard, DigitalOcean, Zapier, Skyscanner, and Civo have <a href="/shows/klustered">debugged broken Kubernetes clusters live on Klustered</a>. It is a public record of what practitioners trust under pressure.</p>
-				</article>
-				<article class="partnerships-row">
-					<h3 class="editorial-card__title">Rawkode Live</h3>
-					<p class="editorial-card__body"><a href="/shows/rawkode-live">Maintainer-led live builds and product walkthroughs</a> show how technical people explain tradeoffs, evaluate tools, ask questions, and decide whether something is worth trying.</p>
-				</article>
-				<article class="partnerships-row">
-					<h3 class="editorial-card__title">No agency behind this page</h3>
-					<p class="editorial-card__body">The person who answers your Slack is the person on every episode: no account managers, no juniors, no handoffs.</p>
+				<article class="partner-evidence__item">
+					<h3 class="editorial-card__title">Independent judgement</h3>
+					<p class="editorial-card__body">Sponsorship funds the work, not the verdict. Trust is protected by keeping claims and editorial decisions honest.</p>
 				</article>
 			</div>
 		</section>
 
-		<section id="packages" class="editorial-section partnerships-packages" aria-labelledby="packages-title">
-			<div class="editorial-section__header partnerships-packages__header">
-				<p class="editorial-kicker">Partnership paths</p>
-				<h2 id="packages-title" class="editorial-section__title">Start where your adoption work needs support</h2>
-				<p class="editorial-section__lede">
-					Every plan starts with an application, and not every application is a fit. All plans are month-to-month, with two months free when you pay for twelve. These are founding rates for the first teams; they will rise. Signal puts the advisor in your Slack. Adoption adds video sessions and reviews of the work itself, and is the recommended path. Community adds the room, capped at ten teams.
-				</p>
+		<section class="editorial-section editorial-section--split" aria-labelledby="review-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Optional starting point</p>
+				<h2 id="review-title" class="editorial-section__title">{fitProofReview.name}</h2>
+				<p class="editorial-section__lede">{fitProofReview.summary}</p>
 			</div>
-			<dl class="partnerships-anchors">
-				{anchors.map((anchor) => (
-					<div class="partnerships-anchors__item">
-						<dt>{anchor.term}</dt>
-						<dd>{anchor.detail}</dd>
-					</div>
-				))}
-			</dl>
-			<div class="partnerships-package-grid">
-				{packages.map((pkg) => (
-					<article class:list={["editorial-card", "partnerships-package", { "partnerships-package--featured": pkg.featured }]}>
-						<div class="partnerships-package__top">
-							<p class="editorial-kicker">{pkg.label}</p>
-							<h3 class="partnerships-package__name">{pkg.name}</h3>
-							<p class="partnerships-package__price">{pkg.price}</p>
-							{pkg.note && <p class="partnerships-package__note">{pkg.note}</p>}
-							<a class="editorial-button" href="#apply" data-apply-path={pkg.name}>{pkg.cta}</a>
-						</div>
-						<div class="partnerships-package__summary">
-							<p class="editorial-card__body">{pkg.bestFor}</p>
-							<p class="partnerships-package__outcome">{pkg.outcome}</p>
-						</div>
-						<ul class="editorial-list">
-							{pkg.included.map((item) => <li>{item}</li>)}
-						</ul>
-					</article>
-				))}
+			<div class="editorial-card editorial-card--paper partner-offer-card">
+				<div>
+					<p class="partner-offer-card__price">{fitProofReview.price}</p>
+					<p class="partner-offer-card__cadence">{fitProofReview.cadence}</p>
+				</div>
+				<ul class="editorial-list">
+					{fitProofReview.included.map((item) => <li>{item}</li>)}
+				</ul>
+				<a class="partner-card__link" href="#apply" data-apply-path={fitProofReview.name}>Start with a fit review</a>
 			</div>
 		</section>
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="process-title">
 			<div class="editorial-section__header">
-				<h2 id="process-title" class="editorial-section__title">Every plan starts with an application</h2>
+				<p class="editorial-kicker">How it starts</p>
+				<h2 id="process-title" class="editorial-section__title">A clear path from problem to proof</h2>
 			</div>
-			<div class="partnerships-rows">
-				<article class="partnerships-row partnerships-row--numbered">
-					<span class="partnerships-step">01</span>
-					<h3 class="editorial-card__title">Apply</h3>
-					<p class="editorial-card__body">Rough context is enough: your company and product, the developers you need to reach, your current adoption challenge, and any links worth a look.</p>
-				</article>
-				<article class="partnerships-row partnerships-row--numbered">
-					<span class="partnerships-step">02</span>
-					<h3 class="editorial-card__title">Get an answer</h3>
-					<p class="editorial-card__body">David Flanagan, Rawkode Academy's founder, reviews every application and replies with a straight answer: which plan fits, or that it is not a good fit.</p>
-				</article>
-				<article class="partnerships-row partnerships-row--numbered">
-					<span class="partnerships-step">03</span>
-					<h3 class="editorial-card__title">Start</h3>
-					<p class="editorial-card__body">Slack Connect opens and the monthly rhythm starts: advice as questions come up, and a review of your plans and objectives each month.</p>
-				</article>
+			<div class="partner-process">
+				{process.map((item) => (
+					<article class="partner-process__item">
+						<span class="partner-process__step">{item.step}</span>
+						<h3 class="editorial-card__title">{item.title}</h3>
+						<p class="editorial-card__body">{item.body}</p>
+					</article>
+				))}
 			</div>
+		</section>
+
+		<section class="editorial-section editorial-section--split" aria-labelledby="boundaries-title">
+			<div class="editorial-section__header">
+				<p class="editorial-kicker">Boundaries</p>
+				<h2 id="boundaries-title" class="editorial-section__title">A useful partnership has edges.</h2>
+			</div>
+			<ul class="editorial-list partner-boundaries">
+				{badFits.map((item) => <li>{item}</li>)}
+			</ul>
 		</section>
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="faq-title">
 			<div class="editorial-section__header">
-				<h2 id="faq-title" class="editorial-section__title">Questions before you start</h2>
+				<p class="editorial-kicker">Questions before you start</p>
+				<h2 id="faq-title" class="editorial-section__title">Straight answers</h2>
 			</div>
 			<div class="editorial-faq">
 				{faqs.map((faq) => (
@@ -323,10 +224,9 @@ const heroProofPoints = [
 
 		<section id="apply" class="editorial-section editorial-section--split partnerships-apply" aria-labelledby="apply-title">
 			<div class="editorial-section__header">
-				<h2 id="apply-title" class="editorial-section__title">Apply with your next adoption problem</h2>
-				<p class="editorial-section__lede">
-					Your product, the developers you need to reach, and the adoption problem in front of you. That is enough to apply.
-				</p>
+				<p class="editorial-kicker">Apply</p>
+				<h2 id="apply-title" class="editorial-section__title">Bring the next adoption problem.</h2>
+				<p class="editorial-section__lede">Tell us who needs to trust the product, what they need to see, and what you want to build this quarter. Rough context is enough.</p>
 			</div>
 			<div class="partnerships-apply__body">
 				<PartnershipApplicationForm client:visible />
@@ -336,84 +236,29 @@ const heroProofPoints = [
 </Page>
 
 <style>
-	.partnerships-rows {
+	.partner-principles {
 		display: grid;
 		gap: 0;
 		border-top: 1px solid var(--editorial-hairline);
 		border-bottom: 1px solid var(--editorial-hairline);
 	}
 
-	.partnerships-row {
-		border-top: 1px solid var(--editorial-hairline);
-		display: grid;
-		gap: 0.4rem;
-		padding: 1rem 0;
-	}
-
-	.partnerships-row:first-child {
-		border-top: 0;
-	}
-
-	.partnerships-row :global(.editorial-card__title) {
-		margin: 0;
-	}
-
-	.partnerships-row :global(a) {
-		color: var(--editorial-ink);
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.18em;
-	}
-
-	.partnerships-row :global(a:hover) {
-		color: var(--editorial-spruce);
-	}
-
-	.partnerships-row--numbered {
-		grid-template-columns: 2.4rem minmax(0, 1fr);
-		column-gap: 0.85rem;
-	}
-
-	.partnerships-row--numbered :global(.editorial-card__body) {
-		grid-column: 2;
-	}
-
-	.partnerships-step {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
-		font-weight: 700;
-		color: var(--editorial-spruce);
-		padding-top: 0.2rem;
-	}
-
-	.partnerships-packages {
-		scroll-margin-top: 5rem;
-	}
-
-	.partnerships-apply {
-		scroll-margin-top: 5rem;
-	}
-
-	.partnerships-apply__body {
-		display: grid;
-		gap: 1.25rem;
-		justify-items: start;
-	}
-
-	.partnerships-anchors {
-		display: grid;
-		gap: 1rem;
-		margin: 0 0 1.5rem;
-	}
-
-	.partnerships-anchors__item {
-		border-top: 1px solid var(--editorial-hairline-strong);
-		padding-top: 0.85rem;
+	.partner-principles > div {
 		display: grid;
 		gap: 0.35rem;
+		padding: 0.95rem 0;
+		color: var(--editorial-ink-soft);
+		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-size: 0.95rem;
+		line-height: 1.45;
 	}
 
-	.partnerships-anchors dt {
+	.partner-principles > div + div {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.partner-principles__value,
+	.partner-process__step {
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
 		font-size: 0.7rem;
 		font-weight: 700;
@@ -422,99 +267,106 @@ const heroProofPoints = [
 		color: var(--editorial-spruce);
 	}
 
-	.partnerships-anchors dd {
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 0.94rem;
-		line-height: 1.55;
-		color: var(--editorial-ink-soft);
-		margin: 0;
-	}
-
-	.partnerships-package__note {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-rust);
-		margin: 0;
-	}
-
-	@media (min-width: 720px) {
-		.partnerships-anchors {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-	}
-
-	.partnerships-packages__header {
-		max-width: 58rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.partnerships-package-grid {
+	.partner-offer-card {
 		display: grid;
 		gap: 1rem;
 	}
 
-	.partnerships-package {
-		display: flex;
-		flex-direction: column;
-		gap: 0.85rem;
-	}
-
-	.partnerships-package--featured {
-		border-color: var(--editorial-spruce);
-		box-shadow: inset 0 0 0 1px var(--editorial-spruce);
-	}
-
-	.partnerships-package__top {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		align-items: flex-start;
-	}
-
-	.partnerships-package__top :global(.editorial-button) {
-		margin-top: 0.5rem;
-	}
-
-	.partnerships-package__name {
+	.partner-offer-card__price {
+		margin: 0.4rem 0 0;
 		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 1.35rem;
-		font-weight: 700;
-		line-height: 1.1;
-		letter-spacing: 0;
+		font-size: clamp(1.9rem, 5vw, 2.8rem);
+		font-weight: 750;
+		letter-spacing: -0.03em;
 		color: var(--editorial-ink);
-		margin: 0;
 	}
 
-	.partnerships-package__price {
+	.partner-offer-card__cadence {
+		margin: 0.15rem 0 0;
+		color: var(--editorial-ink-mute);
 		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: var(--editorial-ink);
-		margin: 0;
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
-	.partnerships-package__summary {
+	.partner-card {
+		display: grid;
+		gap: 0.55rem;
+	}
+
+	.partner-card__link {
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--editorial-spruce);
+		text-decoration: none;
+	}
+
+	.partner-card__link:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	.partner-evidence,
+	.partner-process {
+		display: grid;
+		gap: 0;
+		border-top: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--editorial-hairline);
+	}
+
+	.partner-evidence__item,
+	.partner-process__item {
 		display: grid;
 		gap: 0.5rem;
+		padding: 1rem 0;
 	}
 
-	.partnerships-package__outcome {
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 0.94rem;
-		line-height: 1.55;
-		color: var(--editorial-ink);
+	.partner-evidence__item + .partner-evidence__item,
+	.partner-process__item + .partner-process__item {
+		border-top: 1px solid var(--editorial-hairline);
+	}
+
+	.partner-evidence__item h3,
+	.partner-process__item h3 {
 		margin: 0;
 	}
 
-	@media (min-width: 1100px) {
-		.partnerships-package {
-			display: grid;
-			grid-template-columns: minmax(13rem, 0.45fr) minmax(0, 0.8fr) minmax(0, 1fr);
-			gap: 1.25rem;
-			align-items: start;
+	.partner-boundaries {
+		margin: 0;
+	}
+
+	@media (min-width: 760px) {
+		.partner-principles {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.partner-principles > div {
+			padding: 1rem;
+		}
+
+		.partner-principles > div + div {
+			border-top: 0;
+			border-left: 1px solid var(--editorial-hairline);
+		}
+
+		.partner-evidence,
+		.partner-process {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.partner-evidence__item,
+		.partner-process__item {
+			padding: 1rem;
+		}
+
+		.partner-evidence__item + .partner-evidence__item,
+		.partner-process__item + .partner-process__item {
+			border-top: 0;
+			border-left: 1px solid var(--editorial-hairline);
 		}
 	}
 </style>
