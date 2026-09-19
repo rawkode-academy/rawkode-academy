@@ -99,6 +99,7 @@ jobs:
         echo '--- bun.lock generated diff ---'
         git diff -- bun.lock
         echo '--- end bun.lock generated diff ---'
+        exit 1
     - name: Setup 1Password
       run: cuenv exec -- cuenv secrets setup onepassword
       env:
