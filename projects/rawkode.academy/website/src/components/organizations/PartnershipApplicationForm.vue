@@ -50,7 +50,7 @@
 				<small v-if="fieldErrors.company" class="application-form__field-error">{{ fieldErrors.company }}</small>
 			</label>
 			<label class="application-form__field">
-				<span>Preferred plan</span>
+				<span>Preferred route</span>
 				<select v-model="path" name="path" :disabled="loading">
 					<option v-for="option in applicationPaths" :key="option" :value="option">
 						{{ option }}
