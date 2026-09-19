@@ -1,10 +1,8 @@
 /**
- * Single source of truth for the partnership offering.
+ * Single source of truth for the Rawkode Academy partner programme.
  *
- * Every page that names a tier, quotes a price, or links a contact
- * mailto must consume this module so the copy cannot drift between
- * /organizations, /organizations/partnerships, and
- * /organizations/lets-chat.
+ * Every page that names the offer, quotes a price, or links a contact
+ * mailto consumes this module so the public funnel cannot drift.
  */
 
 export const PARTNERSHIP_EMAIL = "david@rawkode.academy";
@@ -13,141 +11,122 @@ export const PARTNERSHIP_EMAIL = "david@rawkode.academy";
 const buildMailto = (subject: string, body: string): string =>
 	`mailto:${PARTNERSHIP_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body.replace(/\n/g, "\r\n"))}`;
 
-export interface PartnershipTier {
+export interface PartnershipOffer {
 	id: string;
 	name: string;
-	/** Short mono label shown above the tier name (Slack / Slack + video / Cohort). */
 	label: string;
-	/** Full price string, e.g. "£1,000 / month". */
 	price: string;
-	/** Compact price for stat rows, e.g. "£1k/mo". */
 	priceShort: string;
-	bestFor: string;
-	outcome: string;
+	cadence: string;
+	summary: string;
 	included: string[];
-	featured: boolean;
-	/** Scarcity or availability note, e.g. seat limits and cohort dates. */
-	note?: string;
-	/** Prefilled mailto for this tier. */
+	excluded: string[];
+	notes: string[];
 	mailto: string;
 }
 
-const tierBriefBody = (path: string): string =>
-	[
-		"Company and product:",
-		`Preferred path: ${path}`,
-		"Target developers or platform teams:",
-		"Current adoption challenge:",
-		"Links worth a look:",
-	].join("\n");
+const applicationBody = [
+	"Name:",
+	"Company and product:",
+	"Target developers or platform teams:",
+	"Technical buyer:",
+	"Current adoption challenge:",
+	"Working demo, docs, or repository:",
+	"Budget and preferred quarter:",
+	"Links worth a look:",
+].join("\n");
 
-export const partnershipTiers: PartnershipTier[] = [
-	{
-		id: "signal",
-		name: "Signal",
-		label: "Slack",
-		price: "£1,000 / month",
-		priceShort: "£1k/mo",
-		bestFor:
-			"Teams that want an advisor in their Slack without adding another meeting to the calendar.",
-		outcome:
-			"Your plans and objectives, checked monthly against how developers actually evaluate tools.",
-		included: [
-			"Slack Connect with Rawkode Academy: advice on positioning, docs, demos, launches, and objections as they come up",
-			"A monthly review of your high-level plans and objectives",
-		],
-		featured: false,
-		mailto: buildMailto("Signal application", tierBriefBody("Signal")),
-	},
-	{
-		id: "adoption",
-		name: "Adoption",
-		label: "Slack + video",
-		price: "£2,000 / month",
-		priceShort: "£2k/mo",
-		bestFor:
-			"Teams that want the advisor reviewing the work itself, not just the plan.",
-		outcome:
-			"Adoption blockers worked through together, with evidence instead of opinion.",
-		included: [
-			"Everything in Signal",
-			"A monthly video working session with your team on whatever matters most right now",
-			"Tactical reviews of the work itself: docs, demos, onboarding, launch posts, and pricing pages",
-			"Experiment plans when a blocker needs evidence: the audience, the hypothesis, and what success looks like",
-		],
-		featured: true,
-		mailto: buildMailto("Adoption application", tierBriefBody("Adoption")),
-	},
-	{
-		id: "community",
-		name: "Community",
-		label: "Cohort",
-		price: "£3,000 / month",
-		priceShort: "£3k/mo",
-		bestFor:
-			"Teams that want peer comparison and expert perspective on serious developer adoption problems, in a room that stays small.",
-		outcome:
-			"Patterns from the other member teams and invited experts, applied to your own adoption decisions.",
-		included: [
-			"Everything in Adoption",
-			"A monthly cohort session with the other member teams, capped at ten companies",
-			"Case reviews of live docs, demos, onboarding, and launches: yours and theirs",
-			"A monthly expert session drawn from the Rawkode network: maintainers, platform leads, and CNCF voices, with the calendar published a quarter ahead",
-		],
-		featured: false,
-		note: "Limited to 10 teams. First cohort kicks off August 2026.",
-		mailto: buildMailto("Community application", tierBriefBody("Community")),
-	},
-];
+/**
+ * The primary programme. Slack is a delivery channel, not an on-call
+ * support promise. Demos and proof assets are deliberately bounded so the
+ * partnership remains valuable without becoming an open-ended consultancy.
+ */
+export const partnershipOffer: PartnershipOffer = {
+	id: "adoption-advisory",
+	name: "Adoption Advisory",
+	label: "Rawkode Partner Programme",
+	price: "£4,000 / month",
+	priceShort: "£4k/mo",
+	cadence: "90 days, then month-to-month",
+	summary:
+		"A working partnership for infrastructure companies that need sharper technical proof, useful demos, and a practitioner's read on what developers will trust.",
+	included: [
+		"Slack Connect for questions, reviews, and decisions as they come up",
+		"One scheduled working session each month",
+		"One technical demo or proof asset each quarter, built with your team",
+		"A companion page, reusable clips, and a shared partner asset repository",
+		"A quarterly delivery and performance report with the next renewal decision",
+	],
+	excluded: [
+		"On-call support, incident response, or implementation ownership",
+		"Guaranteed leads, sign-ups, positive reviews, or independent editorial coverage",
+		"Open-ended custom content, campaign planning, or unlimited revisions",
+		"Audience rental or blanket category exclusivity",
+	],
+	notes: [
+		"The partner supplies a working environment, technical SME, source material, and timely approvals.",
+		"One factual-correction round is included for each published asset.",
+		"Additional demos, series, or strategy work are separately scoped add-ons.",
+	],
+	mailto: buildMailto("Adoption Advisory application", applicationBody),
+};
 
-/** "Signal, Adoption, or Community" for prose. */
-export const partnershipTierNames = partnershipTiers.map((tier) => tier.name);
+/** Optional paid qualification route. It is not required for every partner. */
+export const fitProofReview: PartnershipOffer = {
+	id: "fit-proof-review",
+	name: "Fit & Proof Review",
+	label: "Optional qualification",
+	price: "£2,500",
+	priceShort: "£2.5k",
+	cadence: "One bounded review",
+	summary:
+		"A focused review of one technical buyer workflow, with a scorecard and a clear recommendation on whether Adoption Advisory is useful.",
+	included: [
+		"One named workflow and its current proof gap",
+		"Async review of the supplied demo, docs, claims, and adoption context",
+		"A written scorecard and one 60-minute readout",
+		"Full fee credited toward Adoption Advisory when you start within 30 days",
+	],
+	excluded: [
+		"Open-ended Slack access or implementation work",
+		"Coverage, mentions, lead generation, or audience rental",
+	],
+	notes: [
+		"The review is kept deliberately small. A working session or build beyond the named workflow is a separate engagement.",
+	],
+	mailto: buildMailto("Fit & Proof Review application", applicationBody),
+};
 
-/** Options for the application form's preferred-path field. */
+/** Compatibility shape for components that render the primary offer. */
+export const partnershipTiers = [partnershipOffer] as const;
+export const partnershipTierNames = partnershipTiers.map((offer) => offer.name);
+
+/** Options for the application form's preferred route field. */
 export const applicationPaths = [
-	"Signal",
-	"Adoption",
-	"Community",
+	"Adoption Advisory",
+	"Fit & Proof Review",
 	"Not sure yet",
 ] as const;
 export type ApplicationPath = (typeof applicationPaths)[number];
 
-/** Boundaries: what the partnership intentionally does not include. */
+/** Boundaries shared across the organisation and partner surfaces. */
 export const partnershipBoundaries = [
-	"Outsourced DevRel execution, or someone to run the function for you.",
-	"Paid coverage, guaranteed mentions, media inventory, or lead generation.",
-	"Campaign planning or custom content production on demand.",
-	"Generic workshops disconnected from adoption strategy.",
-	"Audience rental or open-ended access.",
-];
+	"Your team owns execution. Rawkode brings technical judgement, demos, and proof work.",
+	"Sponsorship funds the work, not the verdict: no guaranteed praise, leads, or independent coverage.",
+	"No on-call support, incident response, outsourced DevRel, or implementation ownership.",
+	"No open-ended custom content, campaign planning, or unlimited revisions.",
+	"Exclusivity is never blanket or automatic. Narrow exclusions are separately scoped and priced.",
+] as const;
 
-/** General partnership application: subject, plain-text template, mailto. */
-export const partnershipFitSubject = "Partnership application";
-export const partnershipFitTemplate = [
-	"Company and product:",
-	"Target developers or platform teams:",
-	"Current adoption challenge:",
-	"Links worth a look:",
-].join("\n");
+/** General partnership application mailto used as a fallback. */
+export const partnershipFitSubject = "Rawkode Academy partner application";
+export const partnershipFitTemplate = applicationBody;
 export const partnershipFitMailto = buildMailto(
 	partnershipFitSubject,
 	partnershipFitTemplate,
 );
 
-/** Decision brief used by /organizations and /organizations/lets-chat. */
-export const decisionBriefSubject = "Decision brief request";
-export const decisionBriefTemplate = [
-	"Company/category:",
-	"Preferred partnership path:",
-	"Target technical evaluator:",
-	"Team stakeholders:",
-	"Deadline or launch window:",
-	"Docs, demos, architecture notes, or enablement material:",
-	"Infrastructure artifacts available:",
-	"Adoption risk or decision to review:",
-	"Links, if useful:",
-].join("\n");
-export const decisionBriefMailto = buildMailto(
-	decisionBriefSubject,
-	decisionBriefTemplate,
-);
+/** Decision brief used by the organisation hub and fit-check page. */
+export const decisionBriefSubject = partnershipFitSubject;
+export const decisionBriefTemplate = applicationBody;
+export const decisionBriefMailto = partnershipFitMailto;

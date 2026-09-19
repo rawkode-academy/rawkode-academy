@@ -50,7 +50,7 @@
 				<small v-if="fieldErrors.company" class="application-form__field-error">{{ fieldErrors.company }}</small>
 			</label>
 			<label class="application-form__field">
-				<span>Preferred plan</span>
+				<span>Preferred route</span>
 				<select v-model="path" name="path" :disabled="loading">
 					<option v-for="option in applicationPaths" :key="option" :value="option">
 						{{ option }}
@@ -73,6 +73,18 @@
 		</label>
 
 		<label class="application-form__field">
+			<span>Technical buyer <em>(optional)</em></span>
+			<input
+				v-model="technicalBuyer"
+				type="text"
+				name="technicalBuyer"
+				:aria-invalid="Boolean(fieldErrors.technicalBuyer)"
+				:disabled="loading"
+			/>
+			<small v-if="fieldErrors.technicalBuyer" class="application-form__field-error">{{ fieldErrors.technicalBuyer }}</small>
+		</label>
+
+		<label class="application-form__field">
 			<span>Your current adoption challenge</span>
 			<textarea
 				v-model="challenge"
@@ -83,6 +95,31 @@
 				:disabled="loading"
 			></textarea>
 			<small v-if="fieldErrors.challenge" class="application-form__field-error">{{ fieldErrors.challenge }}</small>
+		</label>
+
+		<label class="application-form__field">
+			<span>Working demo, docs, or repository <em>(optional)</em></span>
+			<input
+				v-model="proofAssets"
+				type="text"
+				name="proofAssets"
+				:aria-invalid="Boolean(fieldErrors.proofAssets)"
+				:disabled="loading"
+			/>
+			<small v-if="fieldErrors.proofAssets" class="application-form__field-error">{{ fieldErrors.proofAssets }}</small>
+		</label>
+
+		<label class="application-form__field">
+			<span>Budget and preferred quarter <em>(optional)</em></span>
+			<input
+				v-model="budgetQuarter"
+				type="text"
+				name="budgetQuarter"
+				placeholder="For example: Q4 2026, £4k/month"
+				:aria-invalid="Boolean(fieldErrors.budgetQuarter)"
+				:disabled="loading"
+			/>
+			<small v-if="fieldErrors.budgetQuarter" class="application-form__field-error">{{ fieldErrors.budgetQuarter }}</small>
 		</label>
 
 		<label class="application-form__field">
@@ -110,7 +147,10 @@ const email = ref("");
 const company = ref("");
 const path = ref<ApplicationPath>("Not sure yet");
 const targetDevelopers = ref("");
+const technicalBuyer = ref("");
 const challenge = ref("");
+const proofAssets = ref("");
+const budgetQuarter = ref("");
 const links = ref("");
 
 const loading = ref(false);
@@ -121,8 +161,9 @@ const fieldErrors = ref<Record<string, string>>({});
 const isApplicationPath = (value: string): value is ApplicationPath =>
 	(applicationPaths as readonly string[]).includes(value);
 
-// Package CTAs are plain anchors carrying data-apply-path; clicking one
-// scrolls to this form and preselects the plan.
+// Package CTAs carry the route in the URL so the selection survives the
+// client:visible hydration gap, and also retain data-apply-path for clicks
+// after hydration.
 const onDocumentClick = (event: MouseEvent) => {
 	const target = event.target as HTMLElement | null;
 	const trigger = target?.closest<HTMLElement>("[data-apply-path]");
@@ -133,6 +174,10 @@ const onDocumentClick = (event: MouseEvent) => {
 };
 
 onMounted(() => {
+	const route = new URLSearchParams(window.location.search).get("route");
+	if (route && isApplicationPath(route)) {
+		path.value = route;
+	}
 	document.addEventListener("click", onDocumentClick);
 });
 
@@ -152,7 +197,10 @@ async function submit() {
 			company: company.value,
 			path: path.value,
 			targetDevelopers: targetDevelopers.value,
+			...(technicalBuyer.value.trim() ? { technicalBuyer: technicalBuyer.value } : {}),
 			challenge: challenge.value,
+			...(proofAssets.value.trim() ? { proofAssets: proofAssets.value } : {}),
+			...(budgetQuarter.value.trim() ? { budgetQuarter: budgetQuarter.value } : {}),
 			...(links.value.trim() ? { links: links.value } : {}),
 		});
 
