@@ -22,11 +22,43 @@ export default defineConfig({
 						spruce: { value: "oklch(0.52 0.09 165)" },
 						overlay: { value: "oklch(0 0 0 / 0.55)" },
 					},
+					academy: {
+						ground: { value: "#0a1220" },
+						"ground-raised": { value: "#0d1728" },
+						"grid-line": { value: "#142136" },
+						panel: { value: "#111d31" },
+						border: { value: "#22324d" },
+						text: { value: "#e8eef8" },
+						"text-soft": { value: "#bfcbdd" },
+						"text-muted": { value: "#8fa0b8" },
+						accent: { value: "#ff7ab6" },
+						"accent-foreground": { value: "#2a0616" },
+						input: { value: "#0a1220" },
+						"input-border": { value: "#64768f" },
+						"segment-off": { value: "#2f4262" },
+					},
+				},
+				fontFamilies: {
+					"academy-display": {
+						value:
+							'"Red Hat Display", "Helvetica Neue", Arial, sans-serif',
+					},
+					"academy-text": {
+						value: '"Red Hat Text", "Helvetica Neue", Arial, sans-serif',
+					},
+					"academy-mono": {
+						value:
+							'"Red Hat Mono", ui-monospace, "SFMono-Regular", Menlo, monospace',
+					},
 				},
 				radii: {
 					xs: { value: "2px" },
 					sm: { value: "2px" },
 					md: { value: "3px" },
+					"academy-s": { value: "6px" },
+					"academy-m": { value: "8px" },
+					"academy-l": { value: "12px" },
+					"academy-pill": { value: "999px" },
 				},
 				borders: {
 					hairline: { value: "1px solid" },
@@ -34,6 +66,15 @@ export default defineConfig({
 				},
 				spacing: {
 					focus: { value: "2px" },
+					"academy-gutter": { value: "24px" },
+					"academy-gutter-wide": { value: "96px" },
+					"academy-section": { value: "64px" },
+					"academy-section-wide": { value: "112px" },
+				},
+				sizes: {
+					"academy-shell": { value: "1180px" },
+					"academy-copy": { value: "680px" },
+					"academy-card": { value: "400px" },
 				},
 				lineHeights: {
 					dialog: { value: "1.1" },
@@ -51,6 +92,86 @@ export default defineConfig({
 			},
 			semanticTokens: {
 				colors: {
+					academy: {
+						canvas: {
+							value: {
+								base: "#f4f7fb",
+								_dark: "{colors.academy.ground}",
+							},
+						},
+						ground: {
+							value: {
+								base: "#eaf0f8",
+								_dark: "{colors.academy.ground-raised}",
+							},
+						},
+						grid: {
+							value: {
+								base: "#dbe4f0",
+								_dark: "{colors.academy.grid-line}",
+							},
+						},
+						panel: {
+							value: {
+								base: "#ffffff",
+								_dark: "{colors.academy.panel}",
+							},
+						},
+						border: {
+							value: {
+								base: "#cfdae8",
+								_dark: "{colors.academy.border}",
+							},
+						},
+						text: {
+							value: {
+								base: "#0c1626",
+								_dark: "{colors.academy.text}",
+							},
+						},
+						textSoft: {
+							value: {
+								base: "#33425a",
+								_dark: "{colors.academy.text-soft}",
+							},
+						},
+						textMuted: {
+							value: {
+								base: "#526178",
+								_dark: "{colors.academy.text-muted}",
+							},
+						},
+						accent: {
+							value: {
+								base: "#c2185b",
+								_dark: "{colors.academy.accent}",
+							},
+						},
+						accentForeground: {
+							value: {
+								base: "#ffffff",
+								_dark: "{colors.academy.accent-foreground}",
+							},
+						},
+						input: {
+							value: {
+								base: "#ffffff",
+								_dark: "{colors.academy.input}",
+							},
+						},
+						inputBorder: {
+							value: {
+								base: "#6d7c93",
+								_dark: "{colors.academy.input-border}",
+							},
+						},
+						segmentOff: {
+							value: {
+								base: "#c3d0e2",
+								_dark: "{colors.academy.segment-off}",
+							},
+						},
+					},
 					surface: {
 						canvas: {
 							value: {

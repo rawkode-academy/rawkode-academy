@@ -22,7 +22,7 @@ The generated `styled-system/` directory is produced by Panda's build step. It i
 
 ## Dialog
 
-The first component is an Ark UI dialog styled with a Panda slot recipe:
+The shared components currently include an Ark UI dialog and tabs, both styled with Panda slot recipes:
 
 ```vue
 <script setup lang="ts">
@@ -40,3 +40,13 @@ import { Dialog } from "@rawkodeacademy/design-system/vue";
 Applications must import `@rawkodeacademy/design-system/styles.css` once at their application styling boundary. The first package does not enable a reset, so it can be piloted beside the existing Academy UnoCSS styles without taking ownership of global normalization.
 
 The dialog is rendered through `body` and owns viewport scrolling, so long forms remain reachable on small screens. Its `dialog` shadow is an intentional modal-elevation exception: the backdrop and elevated surface are kept visually distinct from ordinary panels.
+
+## Website preview
+
+The website PR preview uses the Academy palette and the `academyPreview` recipe across a live-content route:
+
+- `/preview` for the homepage direction
+- `/preview/learn` for learning paths
+- `/preview/watch` for the archive view
+
+The preview is intentionally isolated from the current production shell while the visual direction is reviewed. It uses the existing content collections, Panda-generated classes, Ark Tabs, and the shared Ark Dialog. Once the direction is approved, the production routes can migrate to the same primitives incrementally.

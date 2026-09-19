@@ -10,16 +10,18 @@ const props = withDefaults(
 		closeLabel?: string;
 		defaultOpen?: boolean;
 		size?: "sm" | "md";
+		tone?: "editorial" | "academy";
 	}>(),
 	{
 		description: undefined,
 		closeLabel: "Close dialog",
 		defaultOpen: false,
 		size: "md",
+		tone: "editorial",
 	},
 );
 
-const styles = computed(() => dialog({ size: props.size }));
+const styles = computed(() => dialog({ size: props.size, tone: props.tone }));
 </script>
 
 <template>
