@@ -118,3 +118,39 @@
 		"@storybook/addon-docs": "^10.3.3",
 		"@storybook/addon-links": "^10.3.3",
 		"@storybook/react": "^10.3.3",
+		"@storybook/react-vite": "^10.3.3",
+		"@storybook/vue3": "^10.3.3",
+		"@storybook/vue3-vite": "^10.3.3",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@types/node": "^25.5.0",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@types/sanitize-html": "^2.16.1",
+		"@vitejs/plugin-react": "^6.0.1",
+		"@vitejs/plugin-vue": "^6.0.5",
+		"@vue/test-utils": "^2.4.6",
+		"glob": "13.0.6",
+		"gray-matter": "^4.0.3",
+		"happy-dom": "^20.8.8",
+		"knip": "^6.0.6",
+		"node-html-parser": "^7.1.0",
+		"shiki": "^4.0.2",
+		"storybook": "^10.3.3",
+		"tsx": "^4.21.0",
+		"wrangler": "^4.77.0"
+	},
+	"overrides": {
+		"vite": "^7",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"picomatch": "^3.0.2"
+	},
+	"trustedDependencies": [
+		"esbuild",
+		"protobufjs",
+		"sharp",
+		"vue-demi",
+		"workerd"
+	]
+}
