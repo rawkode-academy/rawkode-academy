@@ -87,8 +87,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
+      run: cuenv exec -- bun install --lockfile-only
+    - name: Upload regenerated lockfile
+      uses: actions/upload-artifact@v4
+      with:
+        name: design-system-bun-lock
+        path: bun.lock
+    - name: Show lockfile diff
       run: |-
-        cuenv exec -- bun install --lockfile-only
         git diff -- bun.lock
         exit 1
     - name: 'Run pipeline: pullRequest'
