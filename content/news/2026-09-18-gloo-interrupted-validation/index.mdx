@@ -1,0 +1,20 @@
+---
+title: "Gloo Gateway Fixes Interrupted Validation That Could Drop Listeners"
+description: "Four Gloo Gateway patch releases stop interrupted Envoy validation from being cached as a configuration failure, which could remove a listener during WAF validation."
+publishedAt: '2026-09-18'
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+  - envoy
+---
+
+Gloo Gateway could mistake an interrupted Envoy validation process for invalid configuration. That false result was then cached and acted upon like a genuine rejection. In the most severe documented case, an interruption during WAF plugin validation could remove a listener with no automatic recovery path.
+
+The fix distinguishes a cancelled context or killed Envoy validation process from a completed validation failure. Gloo now discards the incomplete translation instead of publishing it or writing its status. The previously published xDS snapshot remains in the cache until a later translation completes successfully. A genuine configuration rejection still follows the existing rejection path.
+
+Solo shipped the correction on 18 September 2026 in [1.19.23](https://github.com/solo-io/gloo/releases/tag/v1.19.23), [1.20.25](https://github.com/solo-io/gloo/releases/tag/v1.20.25), [1.21.16](https://github.com/solo-io/gloo/releases/tag/v1.21.16), and [1.22.4](https://github.com/solo-io/gloo/releases/tag/v1.22.4). The project has not stated an earliest affected version, so those fixed branches should not be read as a complete vulnerable-version range.
+
+The change also separates operational interruption signals from bad configuration. `api.gloo.solo.io/translator/validation_interruption_skips`, labelled by `proxy_name`, counts translations skipped while retaining the existing xDS snapshot. Admission interruptions increment `validation.gateway.solo.io/resources_validation_incomplete` instead of `resources_rejected`.
+
+Operators using Gloo’s Envoy validation path, especially deployments with WAF configuration, should upgrade to the fixed patch for their release line. Alert on sustained increases in `validation_interruption_skips`: they indicate that a proxy is retaining its previous configuration because new translations are not completing.
