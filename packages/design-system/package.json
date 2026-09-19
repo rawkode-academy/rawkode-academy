@@ -1,0 +1,63 @@
+{
+	"name": "@rawkodeacademy/design-system",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"files": [
+		"README.md",
+		"panda.config.ts",
+		"src",
+		"styled-system",
+		"dist"
+	],
+	"exports": {
+		".": "./src/index.ts",
+		"./vue": "./src/vue/index.ts",
+		"./styles.css": "./styled-system/styles.css",
+		"./panda/*": "./dist/panda/*",
+		"./css": {
+			"types": "./styled-system/css/index.d.ts",
+			"default": "./styled-system/css/index.js"
+		},
+		"./css/*": {
+			"types": "./styled-system/css/*.d.ts",
+			"default": "./styled-system/css/*.js"
+		},
+		"./patterns": {
+			"types": "./styled-system/patterns/index.d.ts",
+			"default": "./styled-system/patterns/index.js"
+		},
+		"./patterns/*": {
+			"types": "./styled-system/patterns/*.d.ts",
+			"default": "./styled-system/patterns/*.js"
+		},
+		"./tokens": {
+			"types": "./styled-system/tokens/index.d.ts",
+			"default": "./styled-system/tokens/index.js"
+		},
+		"./helpers": {
+			"types": "./styled-system/helpers.d.ts",
+			"default": "./styled-system/helpers.js"
+		}
+	},
+	"scripts": {
+		"build": "panda build",
+		"build:lib": "panda build && panda lib",
+		"check": "panda build && panda check && vue-tsc --noEmit"
+	},
+	"dependencies": {
+		"@ark-ui/vue": "5.39.2"
+	},
+	"peerDependencies": {
+		"@pandacss/dev": "2.0.0-beta.18",
+		"vue": ">=3.5.0"
+	},
+	"devDependencies": {
+		"@pandacss/dev": "2.0.0-beta.18",
+		"@pandacss/preset-base": "2.0.0-beta.18",
+		"@pandacss/preset-panda": "2.0.0-beta.18",
+		"typescript": "^6.0.2",
+		"vue": "^3.5.31",
+		"vue-tsc": "^3.3.11"
+	}
+}
