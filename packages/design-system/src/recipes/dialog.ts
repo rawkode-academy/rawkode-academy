@@ -128,7 +128,6 @@ export const dialog = sva({
 					color: "academy.accentForeground",
 					_hover: {
 						backgroundColor: "academy.accent",
-						filter: "brightness(1.05)",
 					},
 					_focusVisible: {
 						outlineColor: "academy.accent",

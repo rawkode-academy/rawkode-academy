@@ -8,6 +8,11 @@ export default defineConfig({
 	strictTokens: true,
 	include: ["./src/**/*.{ts,vue}"],
 	outdir: "./styled-system",
+	conditions: {
+		extend: {
+			lg: "@media (min-width: 1024px)",
+		},
+	},
 	theme: {
 		extend: {
 			tokens: {
@@ -38,7 +43,7 @@ export default defineConfig({
 						"segment-off": { value: "#2f4262" },
 					},
 				},
-				fontFamilies: {
+				fonts: {
 					"academy-display": {
 						value:
 							'"Red Hat Display", "Helvetica Neue", Arial, sans-serif',
@@ -63,6 +68,8 @@ export default defineConfig({
 				borders: {
 					hairline: { value: "1px solid" },
 					focus: { value: "2px solid" },
+					"academy-button": { value: "1px solid transparent" },
+					"academy-tab": { value: "2px solid" },
 				},
 				spacing: {
 					focus: { value: "2px" },
@@ -75,6 +82,11 @@ export default defineConfig({
 					"academy-shell": { value: "1180px" },
 					"academy-copy": { value: "680px" },
 					"academy-card": { value: "400px" },
+					"academy-card-mobile": { value: "74vw" },
+					"academy-play": { value: "72px" },
+				},
+				aspectRatios: {
+					"academy-video": { value: "16 / 9" },
 				},
 				lineHeights: {
 					dialog: { value: "1.1" },

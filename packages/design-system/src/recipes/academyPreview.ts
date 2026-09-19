@@ -90,7 +90,6 @@ export const academyPreview = sva({
 		},
 		header: {
 			position: "relative",
-			zIndex: 1,
 			backgroundColor: "academy.ground",
 			backgroundImage:
 				"linear-gradient(var(--colors-academy-grid) 1px, transparent 1px), linear-gradient(90deg, var(--colors-academy-grid) 1px, transparent 1px)",
@@ -148,7 +147,7 @@ export const academyPreview = sva({
 			justifyContent: "center",
 			width: "11",
 			height: "11",
-			border: "0",
+			border: "academy-button",
 			borderRadius: "academy-s",
 			background: "transparent",
 			color: "academy.text",
@@ -202,7 +201,9 @@ export const academyPreview = sva({
 		},
 		featureCopy: {
 			display: "flex",
-			flex: "1 1 0",
+			flexGrow: 1,
+			flexShrink: 1,
+			flexBasis: 0,
 			flexDirection: "column",
 			gap: "5",
 			_lg: {
@@ -211,7 +212,7 @@ export const academyPreview = sva({
 		},
 		featureArt: {
 			order: "-1",
-			aspectRatio: "16 / 9",
+			aspectRatio: "academy-video",
 			width: "full",
 			overflow: "hidden",
 			border: "hairline",
@@ -280,7 +281,7 @@ export const academyPreview = sva({
 			justifyContent: "center",
 			minHeight: "14",
 			paddingInline: "7",
-			border: "1px solid transparent",
+			border: "academy-button",
 			borderRadius: "academy-s",
 			background: "academy.accent",
 			color: "academy.accentForeground",
@@ -289,10 +290,9 @@ export const academyPreview = sva({
 			fontWeight: "semibold",
 			textDecoration: "none",
 			cursor: "pointer",
-			transitionProperty: "colors, transform",
+			transitionProperty: "all",
 			transitionDuration: "fast",
 			_hover: {
-				filter: "brightness(1.05)",
 				transform: "translateY(-1px)",
 			},
 			_focusVisible: {
@@ -370,10 +370,9 @@ export const academyPreview = sva({
 			},
 		},
 		railTrack: {
-		display: "flex",
+			display: "flex",
 			gap: "6",
 			overflowX: "auto",
-			scrollSnapType: "x mandatory",
 			paddingBlock: "1",
 			paddingInlineEnd: "academy-gutter",
 			scrollbarWidth: "none",
@@ -387,7 +386,9 @@ export const academyPreview = sva({
 		},
 		card: {
 			display: "flex",
-			flex: "0 0 74vw",
+			flexGrow: 0,
+			flexShrink: 0,
+			flexBasis: "academy-card-mobile",
 			flexDirection: "column",
 			gap: "3",
 			scrollSnapAlign: "start",
@@ -396,7 +397,7 @@ export const academyPreview = sva({
 			},
 		},
 		cardArt: {
-			aspectRatio: "16 / 9",
+			aspectRatio: "academy-video",
 			width: "full",
 			overflow: "hidden",
 			border: "hairline",
@@ -420,8 +421,7 @@ export const academyPreview = sva({
 			textTransform: "uppercase",
 		},
 		cardTitle: {
-			display: "-webkit-box",
-			margin: "0",
+			margin: 0,
 			overflow: "hidden",
 			color: "academy.text",
 			fontSize: "lg",
@@ -429,8 +429,6 @@ export const academyPreview = sva({
 			lineHeight: "tight",
 			textDecoration: "none",
 			textOverflow: "ellipsis",
-			WebkitBoxOrient: "vertical",
-			WebkitLineClamp: "2",
 			_hover: {
 				textDecoration: "underline",
 				textUnderlineOffset: "3px",
@@ -462,7 +460,8 @@ export const academyPreview = sva({
 			maxWidth: "academy-copy",
 		},
 		joinTitle: {
-			margin: "0 0 3",
+			margin: 0,
+			marginBottom: "3",
 			fontFamily: "academy-display",
 			fontSize: "4xl",
 			fontWeight: "extrabold",
@@ -589,7 +588,8 @@ export const academyPreview = sva({
 		},
 		pageLede: {
 			maxWidth: "academy-copy",
-			margin: "5 0 0",
+			margin: 0,
+			marginTop: "5",
 			color: "academy.textSoft",
 			fontSize: "lg",
 			_lg: {
@@ -627,7 +627,7 @@ export const academyPreview = sva({
 			borderColor: "academy.border",
 			borderRadius: "academy-m",
 			background: "academy.panel",
-			transitionProperty: "colors, transform",
+			transitionProperty: "all",
 			transitionDuration: "fast",
 			_hover: {
 				borderColor: "academy.accent",
@@ -649,7 +649,8 @@ export const academyPreview = sva({
 			minWidth: "0",
 		},
 		pathTitle: {
-			margin: "0 0 1",
+			margin: 0,
+			marginBottom: "1",
 			fontFamily: "academy-display",
 			fontSize: "xl",
 			fontWeight: "semibold",
@@ -690,7 +691,8 @@ export const academyPreview = sva({
 			},
 		},
 		calloutTitle: {
-			margin: "0 0 3",
+			margin: 0,
+			marginBottom: "3",
 			fontFamily: "academy-display",
 			fontSize: "3xl",
 			fontWeight: "extrabold",
@@ -730,7 +732,7 @@ export const academyPreview = sva({
 		},
 		videoFrame: {
 			position: "relative",
-			aspectRatio: "16 / 9",
+			aspectRatio: "academy-video",
 			overflow: "hidden",
 			border: "hairline",
 			borderColor: "academy.border",
@@ -747,15 +749,16 @@ export const academyPreview = sva({
 			inset: "0",
 			display: "grid",
 			placeItems: "center",
-			background:
+			backgroundColor: "academy.ground",
+			backgroundImage:
 				"linear-gradient(135deg, rgb(5 12 24 / 0.25), rgb(5 12 24 / 0.78))",
 		},
 		play: {
 			display: "grid",
 			placeItems: "center",
-			width: "18",
-			height: "18",
-			border: "1px solid",
+			width: "academy-play",
+			height: "academy-play",
+			border: "hairline",
 			borderColor: "academy.accent",
 			borderRadius: "full",
 			background: "academy.accent",
@@ -767,7 +770,8 @@ export const academyPreview = sva({
 			marginBlockStart: "6",
 		},
 		watchTitle: {
-			margin: "0 0 3",
+			margin: 0,
+			marginBottom: "3",
 			fontFamily: "academy-display",
 			fontSize: "3xl",
 			fontWeight: "bold",
@@ -777,7 +781,8 @@ export const academyPreview = sva({
 			color: "academy.textSoft",
 			fontSize: "md",
 			"& p": {
-				margin: "0 0 4",
+				margin: 0,
+				marginBottom: "4",
 			},
 			"& ul": {
 				margin: "0",
