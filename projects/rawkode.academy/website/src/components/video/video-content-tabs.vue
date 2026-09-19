@@ -6,13 +6,13 @@ import VideoComments from "./comments.vue";
 import VideoTranscript from "./transcript.vue";
 
 interface Resource {
-	id?: string;
+	id?: string | undefined;
 	title: string;
-	description?: string;
+	description?: string | undefined;
 	type: "url" | "file" | "embed";
-	url?: string;
-	filePath?: string;
-	category?: string;
+	url?: string | undefined;
+	filePath?: string | undefined;
+	category?: string | undefined;
 }
 
 const props = withDefaults(defineProps<{ videoId: string; resources?: Resource[] }>(), {

@@ -1,22 +1,21 @@
 ---
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
-interface Resource {
-	title: string;
-	type: "file" | "url" | "embed";
-	category: "slides" | "code" | "documentation" | "demos" | "other";
-	id?: string | undefined;
-	description?: string | undefined;
-	url?: string | undefined;
-	filePath?: string | undefined;
-}
+import type { CollectionEntry } from "astro:content";
+
+type ArticleResource = NonNullable<
+	CollectionEntry<"articles">["data"]["resources"]
+>[number];
+type VideoResource = NonNullable<
+	CollectionEntry<"videos">["data"]["resources"]
+>[number];
+type Resource = ArticleResource | VideoResource;
 
 interface Props {
-	resources?: unknown[] | undefined;
+	resources?: Resource[] | undefined;
 }
 
-const { resources: rawResources } = Astro.props;
-const resources = rawResources as Resource[] | undefined;
+const { resources } = Astro.props;
 
 const getCategoryIcon = (category: string) => {
 	switch (category) {
