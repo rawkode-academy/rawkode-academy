@@ -1,0 +1,16 @@
+---
+title: "Kueue 0.19.5 And 0.18.9 Close Foreign Workload Ownership Bugs"
+description: "Kueue's 0.19 and 0.18 patch releases stop job integrations from matching, modifying or deleting Workloads they do not control."
+publishedAt: 2026-09-19
+authors:
+  - rawkode
+technologies:
+  - Kubernetes
+  - Kueue
+---
+
+Kueue 0.19.5 and 0.18.9, published on 17 September, fix a job-framework bug that could let a reconciler treat another controller's Workload as its own. Operators running Kueue with custom job integrations or multiple controllers are the affected audience.
+
+The bug was in `FindMatchingWorkloads`: matching an owner reference by the job's group, version and kind was not enough to establish control. A Workload that merely named the served job as a non-controller owner could therefore enter the match set. Kueue's reconciler could then hit a nil-pointer path, loop permanently, delete a Workload controlled by another object or overwrite its spec. The fix only considers Workloads controlled by the reconciled job, and the project added tests covering non-adoption and non-deletion. See the [fix](https://github.com/kubernetes-sigs/kueue/pull/13573).
+
+The release notes do not describe this as a security advisory, so this is an ownership and reconciliation-safety fix, not a claim of remote exploitability. Check whether an installed 0.18 or 0.19 line is at [0.18.9](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.9) or [0.19.5](https://github.com/kubernetes-sigs/kueue/releases/tag/v0.19.5) before custom integrations reconcile in production. If you implement ComposableJob, the same releases change `Load` to return `(*jobframework.LoadResult, error)` rather than `(bool, error)`, using `NewLoadResult`.
