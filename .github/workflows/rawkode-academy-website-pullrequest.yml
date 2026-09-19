@@ -94,7 +94,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Bun dependencies
-      run: cuenv exec -- bun install --frozen-lockfile
+      run: |-
+        cuenv exec -- bun install
+        echo '--- bun.lock generated diff ---'
+        git diff -- bun.lock
+        echo '--- end bun.lock generated diff ---'
     - name: Setup 1Password
       run: cuenv exec -- cuenv secrets setup onepassword
       env:
