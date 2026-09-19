@@ -1,0 +1,17 @@
+---
+title: "ExternalDNS 0.23.0 Fixes Dry-Run Mutations and Changes the CRD Registry Namespace Default"
+description: "ExternalDNS 0.23.0 prevents NS1 and Alibaba Cloud changes during dry-run, while CRD registry users must pin their existing DNSRecord namespace before upgrading."
+publishedAt: '2026-09-19'
+authors:
+  - rawkode
+technologies:
+  - kubernetes
+---
+
+ExternalDNS [v0.23.0](https://github.com/kubernetes-sigs/external-dns/releases/tag/v0.23.0), released on 18 September, corrects two providers that violated the central expectation of `--dry-run`: they still changed DNS records. Before this release, the NS1 provider executed creates, updates and deletes despite dry-run mode. The [NS1 fix](https://github.com/kubernetes-sigs/external-dns/pull/6693) now stops all three operations.
+
+Alibaba Cloud had a narrower but still consequential failure. Public and private record updates, plus private-zone deletes, continued to mutate provider state. Creates and public-zone deletes already returned without making changes. The [v0.23.0 fix](https://github.com/kubernetes-sigs/external-dns/pull/6699) closes the remaining paths. Operators using either provider should not treat dry-run output from earlier releases as proof that no write occurred.
+
+The upgrade trap affects only deployments using `--registry=crd`. In v0.22, `--namespace` both scoped watched sources and selected where ExternalDNS stored its `DNSRecord` ownership objects. [v0.23.0 separates those concerns](https://github.com/kubernetes-sigs/external-dns/pull/6606): `--namespace` now scopes sources, while the new `--crd-registry-namespace` selects registry storage. If unset, storage defaults to the namespace where ExternalDNS runs, rather than the previous `--namespace` value.
+
+Before upgrading a CRD-registry deployment, identify the namespace containing its existing `DNSRecord` objects and set `--crd-registry-namespace` explicitly to that namespace. This keeps the new controller pointed at its existing ownership state.
