@@ -1,5 +1,5 @@
 ---
-title: Portainer Plans A Kubernetes-First 3.x Without A Separate Community Edition
+title: Portainer Plans a Kubernetes-First 3.x Without a Separate Community Edition
 description: Portainer plans Kubernetes-first 3.x without a separate CE build. Native
   Docker environments remain, while users must assess maintenance and edition terms.
 publishedAt: '2026-09-12'
@@ -11,14 +11,12 @@ technologies:
 - kubernetes
 ---
 
-Portainer Community Edition will remain on the 2.x codebase and will not receive the 3.x changes, CEO Neil Cresswell [announced on 11 September 2026](https://www.portainer.io/blog/portainer-3-0-is-coming). Portainer plans 3.0.0 STS for the end of September and 3.3.0 LTS for December.
+Portainer says 2.45 LTS is the final release in the 2.x line and that [3.0.0 will be the initial 3.x STS release](https://www.portainer.io/blog/portainer-3-0-is-coming). Its [September product strategy](https://4731999.fs1.hubspotusercontent-na1.net/hubfs/4731999/Portainer%20Product%20Strategy%20-%20September%202026.pdf) targets the next LTS release for December, but neither source identifies that release as 3.3.0.
 
-Native Docker, Swarm and Podman environments will remain operable in 3.x. However, Portainer says they will not receive the new capabilities being developed for its policy, GitOps and observability layers. Teams depending on those environments need to distinguish continued operation from continued feature investment.
+Community Edition will stay on the 2.x codebase rather than receive a separate 3.x build. Portainer says it will provide security fixes and bug fixes for CE and BE 2.45 LTS, and backport 3.x capabilities that have an equivalent Docker API, for as long as that LTS is supported. Portainer says 3.x will continue to manage native Docker, Swarm and Podman environments, although capabilities that depend on Kubernetes primitives cannot have Docker feature parity.
 
-For users staying on 2.x, Portainer promises security updates, bug fixes and selected feature backports. The announcement gives no maintenance end date. These are vendor commitments, with delivery and duration still to be established.
+Portainer's [current lifecycle table](https://docs.portainer.io/start/lifecycle) marks 2.45 LTS as supported and maintained through May 2027. However, it still lists planned 2.x releases through 2.51 LTS, which conflicts with the announcement that 2.45 is the final 2.x release. Portainer has not reconciled those two published positions.
 
-Community access to 3.x will use Portainer's [three-nodes-free Business Edition programme](https://www.portainer.io/take-3), which allows one licence per organisation. Its [linked agreement](https://www.portainer.io/legal/3nf-license-agreement), last modified on 6 July 2023, limits use to one server instance and three total nodes, including the server instance. Existing CE users should check their estate against those terms before assuming their upgrade path remains equivalent.
+Community access to 3.x is directed through the [three-nodes-free Business Edition offer](https://www.portainer.io/take-3), limited to one licence per organisation. Its [licence](https://www.portainer.io/legal/3nf-license-agreement) permits internal business use on no more than one server and three total nodes, and prohibits hosting, service-bureau use, or using it to provide services to third parties.
 
-Portainer's stated rationale is the engineering cost of supporting several substrates. Concentrating development on Kubernetes may produce a more coherent platform, but that does not establish a migration benefit for every Docker workload.
-
-**Operator Action:** Inventory the environments and features you depend on, request a concrete 2.x maintenance horizon, and evaluate edition terms separately from any runtime migration. No emergency migration is announced.
+**Operator Action:** Treat the 2.x release schedule as unsettled, verify which Docker-dependent features are covered by backports, and check the 3NF terms against your use case before planning a 3.x upgrade.
