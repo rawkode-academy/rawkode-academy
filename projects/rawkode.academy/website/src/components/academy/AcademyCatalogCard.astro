@@ -4,10 +4,10 @@ import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 interface Props {
 	href: string;
 	title: string;
-	description?: string;
-	meta?: string[];
-	image?: string;
-	imageAlt?: string;
+	description?: string | undefined;
+	meta?: string[] | undefined;
+	image?: string | undefined;
+	imageAlt?: string | undefined;
 }
 
 const { href, title, description, meta = [], image, imageAlt = "" } = Astro.props as Props;

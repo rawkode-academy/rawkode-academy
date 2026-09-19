@@ -1,6 +1,5 @@
 ---
 import type { BracketSeason } from "../queries";
-import { bracketLayout } from "../styles";
 
 interface Props {
 	showId: string;
@@ -8,7 +7,6 @@ interface Props {
 }
 
 const { showId, seasons } = Astro.props;
-const layout = bracketLayout;
 
 function fmt(iso?: string | null): string {
 	if (!iso) return "TBD";
@@ -33,16 +31,16 @@ function fmtRange(season: BracketSeason): string {
 
 {
 	seasons.length === 0 ? (
-		<div class:list={[layout.empty, "mx-auto max-w-2xl rounded-sm paper-card p-12 text-center"]}>
+		<div class="mx-auto max-w-2xl rounded-sm paper-card p-12 text-center">
 			<p class="text-lg font-medium text-secondary-content">No seasons yet</p>
 			<p class="mt-2 text-sm text-muted">
 				Seasons appear here once Klustered is ready for signups.
 			</p>
 		</div>
 	) : (
-		<div class:list={[layout.grid, "grid gap-5"]}>
+		<div class="grid gap-5">
 			{seasons.map((season) => (
-				<section class:list={[layout.card, "rounded-sm paper-card p-5"]}>
+				<section class="rounded-sm paper-card p-5">
 					<div class="flex flex-wrap items-start justify-between gap-3">
 						<div>
 							<p class="font-mono text-xs uppercase text-muted">

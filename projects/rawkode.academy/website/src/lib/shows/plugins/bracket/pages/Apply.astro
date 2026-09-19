@@ -1,6 +1,5 @@
 ---
 import type { MyParticipation } from "../queries";
-import { bracketLayout } from "../styles";
 
 interface Props {
 	showId: string;
@@ -10,7 +9,6 @@ interface Props {
 }
 
 const { showId, isSignedIn, participation, submitted } = Astro.props;
-const layout = bracketLayout;
 const cards = participation.brackets;
 const applyPath = `/shows/${showId}/apply`;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(applyPath)}`;
@@ -29,7 +27,7 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 	{
 		submitted && (
 			<div
-				class:list={[layout.notice, "mb-6 rounded-sm border p-4 text-sm text-primary-content"]}
+				class="mb-6 rounded-sm border p-4 text-sm text-primary-content"
 				style="border-color: var(--surface-border); background: var(--surface-raised)"
 			>
 				Application saved. Current entry status is reflected below.
@@ -39,7 +37,7 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 
 	{
 		cards.length === 0 ? (
-			<div class:list={[layout.empty, "rounded-sm paper-card p-12 text-center"]}>
+			<div class="rounded-sm paper-card p-12 text-center">
 				<p class="text-lg font-medium text-secondary-content">
 					Applications are closed
 				</p>
@@ -48,10 +46,10 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 				</p>
 			</div>
 		) : (
-			<div class:list={[layout.grid, "grid gap-4 md:grid-cols-2"]}>
+			<div class="grid gap-4 md:grid-cols-2">
 				{cards.map((card) => (
 					<section
-						class:list={[layout.card, "rounded-sm border p-5"]}
+						class="rounded-sm border p-5"
 						style="border-color: var(--surface-border); background: var(--surface-raised)"
 					>
 						<div class="flex items-start justify-between gap-4">
@@ -80,14 +78,14 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 							{!isSignedIn ? (
 								<a
 									href={signInUrl}
-									class:list={[layout.button, "focus-ring inline-flex rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"]}
+									class="focus-ring inline-flex rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
 								>
 									Sign in to apply
 								</a>
 							) : card.applied ? (
 								<a
 									href={manageUrl(card.bracketKind)}
-									class:list={[layout.buttonSecondary, "focus-ring inline-flex rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content"]}
+									class="focus-ring inline-flex rounded-sm border px-4 py-2 text-sm font-semibold text-primary-content"
 									style="border-color: var(--surface-border)"
 								>
 									{manageLabel(card.bracketKind, Boolean(card.team))}
@@ -97,7 +95,7 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 									<input type="hidden" name="bracketId" value={card.bracketId} />
 									<button
 										type="submit"
-										class:list={[layout.button, "focus-ring rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"]}
+										class="focus-ring rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-white"
 									>
 										Apply for {card.bracketKind === "team" ? "Team" : "Individual"}
 									</button>
