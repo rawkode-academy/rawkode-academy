@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import {
-	academyPreview,
-	Dialog,
-	Tabs,
-} from "@rawkodeacademy/design-system/vue";
+import { academyPreview } from "@rawkodeacademy/design-system";
+import { Dialog, Tabs } from "@rawkodeacademy/design-system/vue";
 
 type PreviewPage = "home" | "learn" | "watch";
 
