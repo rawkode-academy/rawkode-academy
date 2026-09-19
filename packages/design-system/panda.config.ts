@@ -11,6 +11,7 @@ export default defineConfig({
 	conditions: {
 		extend: {
 			lg: "@media (min-width: 1024px)",
+			motionReduce: "@media (prefers-reduced-motion: reduce)",
 		},
 	},
 	theme: {
@@ -45,8 +46,7 @@ export default defineConfig({
 				},
 				fonts: {
 					"academy-display": {
-						value:
-							'"Red Hat Display", "Helvetica Neue", Arial, sans-serif',
+						value: '"Red Hat Display", "Helvetica Neue", Arial, sans-serif',
 					},
 					"academy-text": {
 						value: '"Red Hat Text", "Helvetica Neue", Arial, sans-serif',
@@ -98,6 +98,7 @@ export default defineConfig({
 					dialog: { value: "0 24px 80px oklch(0 0 0 / 0.2)" },
 				},
 				durations: {
+					none: { value: "0s" },
 					fast: { value: "120ms" },
 				},
 				zIndex: {

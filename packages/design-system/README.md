@@ -30,8 +30,8 @@ import { Dialog } from "@rawkodeacademy/design-system/vue";
 </script>
 
 <template>
-	<Dialog title="Preview">
-		<template #trigger>Open preview</template>
+	<Dialog title="How Rawkode teaches">
+		<template #trigger>See the approach</template>
 		<p>Dialog content.</p>
 	</Dialog>
 </template>
@@ -41,12 +41,17 @@ Applications must import `@rawkodeacademy/design-system/styles.css` once at thei
 
 The dialog is rendered through `body` and owns viewport scrolling, so long forms remain reachable on small screens. Its `dialog` shadow is an intentional modal-elevation exception: the backdrop and elevated surface are kept visually distinct from ordinary panels.
 
-## Website preview
+## Website integration
 
-The website PR preview uses the Academy palette and the `academyPreview` recipe across a live-content route:
+The production website homepage uses the Academy palette and the `academyPage`
+recipe. It renders live content from every publishable collection in one
+chronological Latest feed:
 
-- `/preview` for the homepage direction
-- `/preview/learn` for learning paths
-- `/preview/watch` for the archive view
+- videos
+- articles
+- news
+- courses
+- learning paths
 
-The preview is intentionally isolated from the current production shell while the visual direction is reviewed. It uses the existing content collections, Panda-generated classes, Ark Tabs, and the shared Ark Dialog. Once the direction is approved, the production routes can migrate to the same primitives incrementally.
+Format-specific routes such as `/watch` and `/read` remain focused views. The
+homepage uses Panda-generated classes plus the shared Ark Tabs and Dialog.

@@ -1,29 +1,34 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { academyPreview } from "@rawkodeacademy/design-system";
+import {
+	academyPage,
+	tabs as academyTabs,
+} from "@rawkodeacademy/design-system";
 import { Dialog, Tabs } from "@rawkodeacademy/design-system/vue";
+import { getColorScheme, setColorScheme } from "@/lib/theme";
 
-type PreviewPage = "home" | "learn" | "watch";
+type AcademyPage = "home" | "learn" | "watch";
 
-interface PreviewCard {
+interface AcademyCard {
 	href: string;
 	title: string;
 	description: string;
 	meta: string[];
+	publishedAt?: string;
+	kind?: string;
 	mediaSrc?: string;
 }
 
-interface PreviewPath extends PreviewCard {
+interface AcademyPath extends AcademyCard {
 	meta: [string, string];
 }
 
 interface Props {
-	page?: PreviewPage;
-	featured: PreviewCard;
-	videos: PreviewCard[];
-	articles: PreviewCard[];
-	news: PreviewCard[];
-	learningPaths: PreviewPath[];
+	page?: AcademyPage;
+	featured: AcademyCard;
+	latest: AcademyCard[];
+	videos: AcademyCard[];
+	learningPaths: AcademyPath[];
 	stats: Array<{ value: string; label: string }>;
 }
 
@@ -31,17 +36,19 @@ const props = withDefaults(defineProps<Props>(), {
 	page: "home",
 });
 
-const styles = academyPreview();
-const subscribed = ref(false);
+const styles = academyPage();
+const tabStyles = academyTabs({ tone: "academy" });
 const isDark = ref(false);
+const isMounted = ref(false);
 
 onMounted(() => {
-	isDark.value = document.documentElement.classList.contains("dark");
+	isMounted.value = true;
+	isDark.value = getColorScheme() === "dark";
 });
 
 const toggleTheme = () => {
 	isDark.value = !isDark.value;
-	document.documentElement.classList.toggle("dark", isDark.value);
+	setColorScheme(isDark.value ? "dark" : "light");
 };
 
 const tabs = [
@@ -51,23 +58,20 @@ const tabs = [
 	{ value: "systems", label: "Systems" },
 ];
 
-const description = (item: PreviewCard) =>
+const description = (item: AcademyCard) =>
 	item.description || "A practical session from the Rawkode Academy archive.";
-
-const submitSubscription = () => {
-	subscribed.value = true;
-};
 </script>
 
 <template>
 	<div :class="styles.root">
 		<header :class="styles.header">
-			<nav :class="styles.nav" aria-label="Preview navigation">
-				<a href="/preview" :class="styles.brand">rawkode academy</a>
+			<nav :class="styles.nav" aria-label="Primary navigation">
+				<a href="/" :class="styles.brand">rawkode academy</a>
 
 				<div :class="styles.navLinks">
-					<a href="/preview/watch">Watch</a>
-					<a href="/preview/learn">Learn</a>
+					<a href="/watch">Watch</a>
+					<a href="/read">Read</a>
+					<a href="/learning-paths">Learn</a>
 					<a href="/technology/matrix">Matrix</a>
 				</div>
 
@@ -107,6 +111,7 @@ const submitSubscription = () => {
 									Start watching <span aria-hidden="true">↗</span>
 								</a>
 								<Dialog
+									v-if="isMounted"
 									id="academy-approach"
 									tone="academy"
 									size="sm"
@@ -132,6 +137,9 @@ const submitSubscription = () => {
 										</a>
 									</template>
 								</Dialog>
+								<a v-else href="/about" :class="styles.buttonGhost">
+									See the approach
+								</a>
 							</div>
 							<div :class="styles.meta" aria-label="Academy archive stats">
 								<span v-for="stat in props.stats" :key="stat.label">
@@ -155,7 +163,12 @@ const submitSubscription = () => {
 						</a>
 					</div>
 
-					<Tabs id="academy-formats" :items="tabs" aria-label="Academy formats">
+					<Tabs
+						v-if="isMounted"
+						id="academy-formats"
+						:items="tabs"
+						aria-label="Academy formats"
+					>
 						<template #kubernetes>
 							<strong>Start with the system you run.</strong>
 							<span>Foundations, operations, and the details that make clusters predictable.</span>
@@ -173,15 +186,35 @@ const submitSubscription = () => {
 							<span>Architecture is a sequence of choices, not a diagram you admire once.</span>
 						</template>
 					</Tabs>
+					<div v-else :class="tabStyles.root">
+						<div
+							:class="tabStyles.list"
+							role="tablist"
+							aria-label="Academy formats"
+						>
+							<span
+								v-for="(item, index) in tabs"
+								:key="item.value"
+								:class="tabStyles.trigger"
+								role="tab"
+								:aria-selected="index === 0"
+								:data-selected="index === 0 ? '' : undefined"
+							>
+								{{ item.label }}
+							</span>
+						</div>
+						<div :class="tabStyles.content" role="tabpanel">
+							<strong>Start with the system you run.</strong>
+							<span>Foundations, operations, and the details that make clusters predictable.</span>
+						</div>
+					</div>
 				</div>
 			</section>
 
 			<section
 				v-for="rail in [
-					{ title: 'Latest', href: '/watch', items: props.videos },
+					{ title: 'Latest', href: '/search', items: props.latest },
 					{ title: 'Learn by building', href: '/learning-paths', items: props.learningPaths },
-					{ title: 'Read the reasoning', href: '/read', items: props.articles },
-					{ title: 'Latest updates', href: '/news', items: props.news },
 				]"
 				:key="rail.title"
 				:class="styles.section"
@@ -228,28 +261,24 @@ const submitSubscription = () => {
 						One useful email when there is a new course, session, or systems lesson worth your time.
 					</p>
 				</div>
-				<form :class="styles.joinForm" @submit.prevent="submitSubscription">
-					<template v-if="!subscribed">
-						<label for="preview-email" :class="styles.joinLabel">Your email</label>
-						<div :class="styles.joinRow">
-							<input
-								id="preview-email"
-								name="email"
-								type="email"
-								required
-								placeholder="you@example.com"
-								:class="styles.input"
-							/>
-							<button type="submit" :class="styles.buttonPrimary">Sign me up</button>
-						</div>
-						<label :class="styles.checkboxLabel">
-							<input type="checkbox" required />
-							<span>I want practical cloud native lessons, not inbox noise.</span>
-						</label>
-					</template>
-					<p v-else :class="styles.joinBody" role="status">
-						You are on the list. We will keep it useful.
-					</p>
+				<form
+					:class="styles.joinForm"
+					action="https://email.rawkode.academy/subscribe"
+					method="post"
+				>
+					<label for="academy-email" :class="styles.joinLabel">Your email</label>
+					<div :class="styles.joinRow">
+						<input
+							id="academy-email"
+							name="email"
+							type="email"
+							required
+							autocomplete="email"
+							placeholder="you@example.com"
+							:class="styles.input"
+						/>
+						<button type="submit" :class="styles.buttonPrimary">Sign me up</button>
+					</div>
 					<p :class="styles.finePrint">No spam. Unsubscribe whenever you want.</p>
 				</form>
 			</section>
@@ -354,10 +383,42 @@ const submitSubscription = () => {
 							Archive<strong>{{ props.videos.length }} recent sessions</strong>
 						</div>
 						<div :class="styles.resourceLinks">
-							<a href="/watch">Browse all sessions <span aria-hidden="true">→</span></a>
+							<a href="#watch-archive-title">Browse all sessions <span aria-hidden="true">→</span></a>
 							<a href="/learning-paths">Find a learning path <span aria-hidden="true">→</span></a>
 						</div>
 					</aside>
+				</div>
+			</section>
+
+			<section :class="styles.section" aria-labelledby="watch-archive-title">
+				<div :class="styles.sectionInner">
+					<div :class="styles.railHeader">
+						<h2 id="watch-archive-title" :class="styles.railTitle">Video archive</h2>
+						<span :class="styles.meta">{{ props.videos.length }} sessions</span>
+					</div>
+					<div :class="styles.railTrack">
+						<a
+							v-for="item in props.videos"
+							:key="item.href"
+							:href="item.href"
+							:class="styles.card"
+						>
+							<div :class="styles.cardArt">
+								<img
+									v-if="item.mediaSrc"
+									:src="item.mediaSrc"
+									:alt="item.title"
+									:class="styles.cardImage"
+									loading="lazy"
+								/>
+							</div>
+							<div :class="styles.cardMeta">
+								<span>{{ item.meta[0] }}</span>
+								<span>{{ item.meta[1] }}</span>
+							</div>
+							<h3 :class="styles.cardTitle">{{ item.title }}</h3>
+						</a>
+					</div>
 				</div>
 			</section>
 		</template>
@@ -365,9 +426,10 @@ const submitSubscription = () => {
 		<footer :class="styles.footer">
 			<span>Rawkode Academy · practical cloud native education</span>
 			<nav :class="styles.footerNav" aria-label="Footer navigation">
-				<a href="/preview">Home</a>
-				<a href="/preview/learn">Learn</a>
-				<a href="/preview/watch">Watch</a>
+				<a href="/">Home</a>
+				<a href="/learning-paths">Learn</a>
+				<a href="/watch">Watch</a>
+				<a href="/read">Read</a>
 				<a href="/organizations/partnerships">For teams</a>
 			</nav>
 		</footer>

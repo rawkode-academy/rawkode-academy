@@ -37,6 +37,9 @@ export const dialog = sva({
 				outlineColor: "action.interactive",
 				outlineOffset: "focus",
 			},
+			_motionReduce: {
+				transitionDuration: "none",
+			},
 		},
 		backdrop: {
 			position: "fixed",
@@ -116,6 +119,9 @@ export const dialog = sva({
 				outline: "focus",
 				outlineColor: "action.interactive",
 				outlineOffset: "focus",
+			},
+			_motionReduce: {
+				transitionDuration: "none",
 			},
 		},
 	},

@@ -302,6 +302,33 @@ export default defineConfig({
 		],
 	},
 	fonts: [
+		// Panda-powered Academy surfaces use the Red Hat family from the
+		// production design direction. Keep these non-preloaded while the
+		// legacy editorial surfaces still own the two critical font preloads.
+		{
+			provider: fontProviders.google(),
+			name: "Red Hat Display",
+			cssVariable: "--font-red-hat-display",
+			weights: ["500", "600", "700", "800", "900"],
+			styles: ["normal"],
+			display: "swap",
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Red Hat Text",
+			cssVariable: "--font-red-hat-text",
+			weights: ["400", "500", "600", "700"],
+			styles: ["normal"],
+			display: "swap",
+		},
+		{
+			provider: fontProviders.google(),
+			name: "Red Hat Mono",
+			cssVariable: "--font-red-hat-mono",
+			weights: ["400", "500", "600", "700"],
+			styles: ["normal"],
+			display: "swap",
+		},
 		// Editorial trio — "engineering journal meets terminal":
 		// Instrument Serif (display, italic) / Inter Tight (body) / JetBrains Mono (labels & metadata).
 		{

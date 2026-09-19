@@ -1,6 +1,6 @@
 import { sva } from "../../styled-system/css";
 
-export const academyPreview = sva({
+export const academyPage = sva({
 	slots: [
 		"root",
 		"header",
@@ -162,6 +162,12 @@ export const academyPreview = sva({
 				outlineColor: "academy.accent",
 				outlineOffset: "focus",
 			},
+			_motionReduce: {
+				transitionDuration: "none",
+				_hover: {
+					transform: "none",
+				},
+			},
 		},
 		headerButton: {
 			display: "none",
@@ -210,6 +216,7 @@ export const academyPreview = sva({
 			},
 		},
 		featureArt: {
+			display: "block",
 			order: "-1",
 			aspectRatio: "academy-video",
 			width: "full",
@@ -226,6 +233,7 @@ export const academyPreview = sva({
 			},
 		},
 		featureImage: {
+			display: "block",
 			width: "full",
 			height: "full",
 			objectFit: "cover",
@@ -451,9 +459,9 @@ export const academyPreview = sva({
 			background: "academy.ground",
 			_lg: {
 				gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-					gap: "academy-join",
-					marginBlockStart: "academy-section-wide",
-					padding: "academy-join",
+				gap: "academy-join",
+				marginBlockStart: "academy-section-wide",
+				padding: "academy-join",
 				marginInline: "academy-gutter-wide",
 			},
 		},
@@ -640,6 +648,12 @@ export const academyPreview = sva({
 				gap: "6",
 				padding: "6",
 			},
+			_motionReduce: {
+				transitionDuration: "none",
+				_hover: {
+					transform: "none",
+				},
+			},
 		},
 		pathIndex: {
 			color: "academy.accent",
@@ -781,8 +795,8 @@ export const academyPreview = sva({
 		watchBody: {
 			color: "academy.textSoft",
 			fontSize: "md",
-				"& p": {
-					margin: "0",
+			"& p": {
+				margin: "0",
 				marginBottom: "4",
 			},
 			"& ul": {

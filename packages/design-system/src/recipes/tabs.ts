@@ -7,14 +7,18 @@ export const tabs = sva({
 			width: "full",
 		},
 		list: {
-			display: "grid",
-			gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+			display: "flex",
+			alignItems: "stretch",
 			gap: "2",
+			overflowX: "auto",
 			borderBottom: "hairline",
 			borderColor: "academy.border",
 		},
 		trigger: {
 			position: "relative",
+			flexGrow: 1,
+			flexShrink: 0,
+			minWidth: "32",
 			minHeight: "11",
 			paddingInline: "3",
 			border: "academy-button",
@@ -41,6 +45,9 @@ export const tabs = sva({
 				borderTopColor: "academy.accent",
 				background: "academy.panel",
 				color: "academy.text",
+			},
+			_motionReduce: {
+				transitionDuration: "none",
 			},
 		},
 		indicator: {
