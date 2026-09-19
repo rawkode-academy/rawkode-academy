@@ -107,6 +107,7 @@ const submitSubscription = () => {
 									Start watching <span aria-hidden="true">↗</span>
 								</a>
 								<Dialog
+									id="academy-approach"
 									tone="academy"
 									size="sm"
 									title="How Rawkode teaches"
@@ -154,7 +155,7 @@ const submitSubscription = () => {
 						</a>
 					</div>
 
-					<Tabs :items="tabs" aria-label="Academy formats">
+					<Tabs id="academy-formats" :items="tabs" aria-label="Academy formats">
 						<template #kubernetes>
 							<strong>Start with the system you run.</strong>
 							<span>Foundations, operations, and the details that make clusters predictable.</span>
