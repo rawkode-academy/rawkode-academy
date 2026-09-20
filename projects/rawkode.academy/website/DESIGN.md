@@ -227,7 +227,7 @@ The editorial shell is the signature layout for about and commercial surfaces: m
 
 ### Do:
 
-- **Do** use `src/styles/global.css` and `uno.config.ts` tokens before adding new one-off values.
+- **Do** use `src/styles/global.css` and the design-system package tokens before adding new one-off values.
 - **Do** keep body and lede text at strong contrast against Paper and Dark Base.
 - **Do** use Spruce Signal, Amber Live, and Rust Proof for meaningful states and emphasis.
 - **Do** keep cards sharp: 6px is the normal editorial card radius, 8px is the upper bound for large framed tools.

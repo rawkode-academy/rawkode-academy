@@ -79,6 +79,8 @@ const kickerFor = (story: (typeof allNews)[number]): string => {
 	return "Field";
 };
 
+const newsImage = "/images/news/news-generic.svg";
+
 const cveMatch = (s: (typeof allNews)[number]) =>
 	(`${s.data.title} ${s.data.description}`.match(/CVE-\d{4}-\d{3,5}/i) || [
 		null,
@@ -95,6 +97,7 @@ const cveSeverityMatch = cveStory
 const topicCounts = new Map<string, number>();
 for (const story of allNews) {
 	for (const tech of story.data.technologies ?? []) {
+		if (!technologyNameById.has(tech)) continue;
 		topicCounts.set(tech, (topicCounts.get(tech) ?? 0) + 1);
 	}
 }
@@ -113,7 +116,9 @@ const pageDescription =
 	"Cloud native, Kubernetes, and AI infrastructure news for engineers: release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
 
 const leadStoryTags = leadStory
-	? (leadStory.data.technologies ?? []).slice(0, 3)
+	? (leadStory.data.technologies ?? [])
+		.filter((tag) => technologyNameById.has(tag))
+		.slice(0, 3)
 	: [];
 
 const trendingItems = allNews.slice(0, 5).map((s) => ({
@@ -144,6 +149,9 @@ const catalog = academyCatalog();
 		<section class="news-page__top">
 			{leadStory && (
 				<article class={catalog.featured}>
+					<span class={catalog.featuredMedia} aria-hidden="true">
+						<img class={catalog.featuredImage} src={newsImage} alt="" loading="eager" />
+					</span>
 					<div class={catalog.featuredBody}>
 						<p class={catalog.featuredKicker}>{kickerFor(leadStory)} · {formatRelativeDate(leadStory.data.publishedAt)}</p>
 						<h2 class={catalog.featuredTitle}>{leadStory.data.title}</h2>
@@ -177,6 +185,7 @@ const catalog = academyCatalog();
 							href={`/news/${s.id}`}
 							title={s.data.title}
 							description={s.data.description}
+							image={newsImage}
 							meta={[kickerFor(s), formatRelativeDate(s.data.publishedAt), ...(s.data.technologies ?? []).slice(0, 2).map(formatTechnologyLabel)]}
 						/>
 					))}

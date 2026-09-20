@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Rawkode Academy cloud native news</title>
+  <desc id="desc">An abstract editorial grid representing cloud native news.</desc>
+  <rect width="1200" height="675" fill="#17232d"/>
+  <path d="M0 126h1200M0 252h1200M0 378h1200M0 504h1200M120 0v675M240 0v675M360 0v675M480 0v675M600 0v675M720 0v675M840 0v675M960 0v675M1080 0v675" fill="none" stroke="#b8c8c6" stroke-opacity=".14"/>
+  <path d="M0 520 154 440l120 40 144-166 130 92 146-190 156 91 130-58 120 40" fill="none" stroke="#e5a24c" stroke-width="5"/>
+  <path d="M0 520 154 440l120 40 144-166 130 92 146-190 156 91 130-58 120 40" fill="none" stroke="#e5a24c" stroke-opacity=".18" stroke-width="22"/>
+  <circle cx="418" cy="314" r="10" fill="#e5a24c"/>
+  <circle cx="694" cy="216" r="10" fill="#9cc9bb"/>
+  <circle cx="980" cy="269" r="10" fill="#d87861"/>
+  <rect x="72" y="72" width="156" height="34" rx="2" fill="#e5a24c"/>
+  <text x="91" y="95" fill="#17232d" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="17" font-weight="700" letter-spacing="3">THE WIRE</text>
+  <text x="72" y="612" fill="#f5f2eb" font-family="Georgia, serif" font-size="82" font-style="italic" letter-spacing="-2">Cloud native news</text>
+  <text x="1080" y="614" fill="#b8c8c6" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700" letter-spacing="4" text-anchor="end">RAWKODE ACADEMY / 01</text>
+</svg>

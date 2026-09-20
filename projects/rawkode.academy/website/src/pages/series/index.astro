@@ -8,6 +8,11 @@ import Page from "@/wrappers/page.astro";
 
 const seriesEntries = await getCollection("series");
 const articles = await getCollection("articles", ({ data }) => !data.draft);
+const publishedSeriesIds = new Set(
+	articles
+		.map((article) => article.data.series?.id)
+		.filter((id): id is string => Boolean(id)),
+);
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 	day: "2-digit",
@@ -16,6 +21,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 const seriesList = seriesEntries
+	.filter((series) => publishedSeriesIds.has(series.id))
 	.map((series) => {
 		const seriesArticles = articles
 			.filter((article) => article.data.series?.id === series.id)

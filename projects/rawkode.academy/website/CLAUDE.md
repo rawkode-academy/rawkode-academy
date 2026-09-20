@@ -19,11 +19,17 @@ bun run sync:content  # Sync GraphQL content
 
 The website ships a single design system: warm paper surfaces, deep ink type, a scarce serif display voice, compact sans hierarchy, and mono metadata. Light and dark colour schemes share the same vocabulary — values invert, names do not. A compact publication masthead replaces the former persistent sidebar so reading, video, and comparison pages retain the full canvas.
 
-#### Atomic CSS engine
+#### Component and token CSS
 
-UnoCSS (via `@unocss/astro` + `@unocss/vite` for Storybook). Configuration lives in `uno.config.ts` at the project root: theme tokens, shortcuts, rules, transformers (`directives`, `variant-group`). `@apply`, `theme()`, `@screen` directives all work in scoped Astro/Vue `<style>` blocks via `@unocss/transformer-directives`.
+The website uses the Panda-powered `@rawkodeacademy/design-system` package for
+shared recipes and primitives. Project tokens, the small reset, and the
+authored publication surfaces live in `src/styles/global.css`. Route-specific
+CSS stays with its route or component; do not add a new global utility for a
+single page.
 
-There is **no `tailwind.config.ts`**. There is **no `@tailwindcss/vite` plugin**. If you are reaching for either, stop — extend `uno.config.ts` instead.
+There is no utility-CSS compiler in the website. If a layout value is reused,
+add a named recipe or component class backed by a design token. If it is used
+once, keep it local to the component that owns the layout.
 
 #### Palette
 
@@ -53,7 +59,8 @@ Every editorial value is exposed two ways:
 1. **Direct oklch CSS variable** — preferred for new code. `--editorial-paper`, `--editorial-paper-deep`, `--editorial-ink`, `--editorial-ink-soft`, `--editorial-ink-mute`, `--editorial-hairline`, `--editorial-hairline-strong`, `--editorial-spruce`, `--editorial-amber`, `--editorial-rust`, `--editorial-violet`.
 2. **Legacy RGB triplet** — kept for the `rgb(var(--brand-primary) / 0.x)` and `rgba(var(--brand-primary), 0.x)` patterns left over from Rawkode Blue. Values now resolve to editorial colours: `--brand-primary` = spruce, `--brand-secondary` = amber, `--brand-accent` = rust.
 
-UnoCSS theme keys mirror the direct palette as classes:
+The legacy publication aliases mirror the direct palette where older content
+surfaces still need them:
 
 | Class | Resolves to |
 |-------|-------------|
@@ -74,7 +81,8 @@ The trio:
 
 The `@layer base` heading ramp in `global.css` sets `h1`/`h2` to Instrument Serif italic and `h3`/`h4` to Inter Tight medium with tight tracking. Component-level utility classes still override these by specificity.
 
-UnoCSS theme keys: `font-display` (= Instrument Serif), `font-body` / `font-sans` (= Inter Tight), `font-mono` (= JetBrains Mono), `font-serif` (= Instrument Serif).
+Authored font aliases: `font-display` (= Instrument Serif), `font-body` /
+`font-sans` (= Inter Tight), `font-mono` (= JetBrains Mono), `font-serif` (= Instrument Serif).
 
 #### Radii
 
@@ -103,7 +111,8 @@ Editorial doesn't use drop shadows — it uses hairline borders. The `--shadow-*
 | `--shadow-lg` | `0 0 0 1px oklch(0.18 0.02 60 / 0.16)` |
 | `--shadow-xl` | `0 0 0 1px oklch(0.18 0.02 60 / 0.20)` |
 
-Dark mode flips to white-at-low-opacity. The `card-shadow-{sm,md,lg,xl}` shortcuts in `uno.config.ts` resolve to these tokens.
+Dark mode flips to white-at-low-opacity. The authored `card-shadow-*` helpers
+resolve to these tokens.
 
 #### Motion
 
@@ -210,7 +219,7 @@ The following class names from the Rawkode Blue era still work — they're alias
 - Don't add box-shadows for elevation. Use hairline borders.
 - Don't `rounded-2xl` and above for cards. Editorial is sharp.
 - Don't hardcode hex values. Reach for `--editorial-*` or the semantic `text-*` / `bg-*` classes.
-- Don't use raw `gray-*` colour utilities (`bg-gray-800`, `text-gray-500`, `dark:bg-gray-900`, …). They're blocked in `uno.config.ts` (no CSS is generated) and `src/tests/design-tokens.test.ts` fails CI with the offending file:line. Use `text-primary-content` / `text-secondary-content` / `text-muted`, `bg-[var(--surface-*)]`, `border-[var(--surface-border)]`, or the `--terminal-*` tokens.
+- Don't use raw `gray-*` colour utilities (`bg-gray-800`, `text-gray-500`, `dark:bg-gray-900`, …). `src/tests/design-tokens.test.ts` fails CI with the offending file:line. Use `text-primary-content` / `text-secondary-content` / `text-muted`, `bg-[var(--surface-*)]`, `border-[var(--surface-border)]`, or the `--terminal-*` tokens.
 - Don't write `rgb(95 94 215 / 0.x)` (the old Rawkode Blue purple). The triplet is now spruce; you almost always want `var(--editorial-spruce)` instead.
 - Don't reach for `react-type-animation` or other type-on effects. The editorial system is static.
 
@@ -296,5 +305,5 @@ first instance: `src/shows/klustered/index.ts` = `bracketPlugin({ showId: "klust
 - Landing composition: `src/components/landing/`
 - Theme utilities: `src/lib/theme.ts`
 - Global styles: `src/styles/global.css`
-- UnoCSS config: `uno.config.ts`
+- Design-system config: `../../../packages/design-system/panda.config.ts`
 - Storybook: `bun run storybook`

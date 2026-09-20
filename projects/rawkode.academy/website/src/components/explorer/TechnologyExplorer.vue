@@ -76,7 +76,11 @@
  </aside>
 
  <!-- Visualization canvas -->
- <main class="explorer-canvas">
+ <div
+ class="explorer-canvas"
+ role="region"
+ aria-label="Technology matrix visualization"
+ >
  <!-- Persistent search on mobile: the filter drawer is closed by default
  there, and search is the most common entry point. -->
  <div class="mobile-search">
@@ -132,7 +136,7 @@
  <h3>Sankey Flow View</h3>
  <p>Coming in Phase 3</p>
  </div>
- </main>
+ </div>
  </div>
 
  <!-- Floating filter button (mobile): keeps filters reachable after

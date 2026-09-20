@@ -30,18 +30,28 @@ const computeImageUrl = async (
 
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
-		const seriesEntries = await getCollection("series");
+		const [seriesEntries, articles] = await Promise.all([
+			getCollection("series"),
+			getCollection("articles", ({ data }) => !data.draft),
+		]);
+		const publishedSeriesIds = new Set(
+			articles
+				.map((article) => article.data.series?.id)
+				.filter((id): id is string => Boolean(id)),
+		);
 
-		return seriesEntries.map((series) => {
-			return {
-				params: {
-					slug: series.id,
-				},
-				props: {
-					series,
-				},
-			};
-		});
+		return seriesEntries
+			.filter((series) => publishedSeriesIds.has(series.id))
+			.map((series) => {
+				return {
+					params: {
+						slug: series.id,
+					},
+					props: {
+						series,
+					},
+				};
+			});
 	};
 
 const { series } = Astro.props;

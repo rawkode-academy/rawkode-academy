@@ -29,7 +29,7 @@ const items = articles.slice(0, 3).map((a) => ({
 }));
 ---
 
-<footer class={doc.related}>
+<section class={doc.related} aria-label="Read next">
 	<div class={[doc.container, doc.stack].join(" ")}>
 		<div class={doc.rowBetween}>
 			<MLabel tone="spruce">Read next</MLabel>
@@ -52,4 +52,4 @@ const items = articles.slice(0, 3).map((a) => ({
 			))}
 		</div>
 	</div>
-</footer>
+</section>

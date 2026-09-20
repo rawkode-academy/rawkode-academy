@@ -7,7 +7,7 @@ This package is intentionally small in its first iteration:
 - Panda CSS v2 owns tokens and recipes.
 - Ark UI owns accessible interactive behavior.
 - Vue components are the first framework adapter because the Academy website's common interactive path is Vue islands.
-- Panda preflight is disabled while the website still uses UnoCSS. Reset ownership will move in a later application migration.
+- The Academy website owns its small application reset in `src/styles/global.css`; this package stays composable by leaving Panda preflight disabled.
 
 ## Development
 
@@ -37,7 +37,7 @@ import { Dialog } from "@rawkodeacademy/design-system/vue";
 </template>
 ```
 
-Applications must import `@rawkodeacademy/design-system/styles.css` once at their application styling boundary. The first package does not enable a reset, so it can be piloted beside the existing Academy UnoCSS styles without taking ownership of global normalization.
+Applications must import `@rawkodeacademy/design-system/styles.css` once at their application styling boundary. Applications own any global normalization needed around the package's recipes.
 
 The dialog is rendered through `body` and owns viewport scrolling, so long forms remain reachable on small screens. Its `dialog` shadow is an intentional modal-elevation exception: the backdrop and elevated surface are kept visually distinct from ordinary panels.
 

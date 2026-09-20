@@ -8,8 +8,7 @@ import { describe, expect, it } from "vitest";
  * text-muted, bg-[var(--surface-*)], border-[var(--surface-border)], the
  * --terminal-* chrome tokens, …). Grays are cool-hued and drift from the
  * warm paper/ink palette — worst in dark mode, where gray-900 clashes with
- * the ink-dark ground. The UnoCSS blocklist in uno.config.ts stops the CSS
- * from being generated; this test points CI at the offending files.
+ * the ink-dark ground. This test points CI at the offending files.
  */
 
 const SCAN_ROOTS = ["src", ".storybook"];

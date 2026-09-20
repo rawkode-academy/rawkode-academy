@@ -1,5 +1,10 @@
 <template>
- <Popover.Root :open="isOpen" @open-change="isOpen = $event.open">
+ <Popover.Root
+ :open="isOpen"
+ :lazy-mount="true"
+ :unmount-on-exit="true"
+ @open-change="isOpen = $event.open"
+ >
  <Popover.Trigger
  class="filter-toggle"
  :class="{ 'has-selection': selected.length > 0 }"
@@ -19,7 +24,6 @@
  </svg>
  </Popover.Trigger>
 
- <Teleport to="body">
  <Popover.Positioner class="filter-positioner">
  <Popover.Content class="filter-dropdown">
  <!-- Select all / clear -->
@@ -59,8 +63,7 @@
  </div>
  </Popover.Content>
  </Popover.Positioner>
- </Teleport>
- </Popover.Root>
+</Popover.Root>
 </template>
 
 <script setup lang="ts">

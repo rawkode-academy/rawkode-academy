@@ -257,10 +257,16 @@ const catalog = academyCatalog();
 		)}
 
 		<section class={styles.section}><div class={styles.container}>
-			<div class={catalog.filters} aria-label="Article filters">
-				{typeItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTypeIndex ? "page" : undefined}>{item.label}</a>)}
-				{topicItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTopicIndex ? "page" : undefined}>{item.label}</a>)}
-			</div>
+			<nav class={`${catalog.filters} read-filter-groups`} aria-label="Article filters">
+				<div class="read-filter-group">
+					<span class="read-filter-group__label">Format</span>
+					{typeItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTypeIndex ? "page" : undefined}>{item.label}</a>)}
+				</div>
+				<div class="read-filter-group">
+					<span class="read-filter-group__label">Topic</span>
+					{topicItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTopicIndex ? "page" : undefined}>{item.label}</a>)}
+				</div>
+			</nav>
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
 			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={styles.grid}>{restWithMeta.map(({ article, author, readingTime }) => <AcademyCatalogCard href={`/read/${article.id}`} title={article.data.title} description={compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 130)} meta={[getTypeBadgeConfig(article.data.type || "tutorial").label, author ?? "Rawkode Academy", dateFormatter.format(article.data.publishedAt), readingTime]} />)}</div>}
 			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={styles.buttonSecondary} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={styles.button} href={readPathFor(page + 1)}>Next →</a>}</nav>}
@@ -303,6 +309,30 @@ const catalog = academyCatalog();
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
 		text-underline-offset: 0.35em;
+	}
+
+	.read-filter-groups {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.75rem 1.5rem;
+	}
+
+	.read-filter-group {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.375rem;
+	}
+
+	.read-filter-group__label {
+		margin-right: 0.125rem;
+		font-family: var(--font-jetbrains-mono), monospace;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		color: var(--editorial-ink-soft);
+		text-transform: uppercase;
 	}
 
 	.read-empty {

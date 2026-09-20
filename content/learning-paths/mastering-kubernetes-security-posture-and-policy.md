@@ -143,8 +143,8 @@ Catch misconfigurations before they land, enforce intent with policy engines, wi
 
 ## Bonus Practice
 
-- [Kyverno + Cosign Signatures](/watch/kyverno-supply-chain) — enforce image signatures before deployment.
-- [OPA Gatekeeper Deep Dive](/watch/opa-gatekeeper-advanced) — compare Gatekeeper auditing patterns with Kyverno.
+- [Kyverno + Cosign Signatures](/watch/hands-on-introduction-to-sigstore) — enforce image signatures before deployment.
+- [OPA Gatekeeper + Ratify](/watch/securing-cloud-native-workloads-hands-on-with-notary-project-oras-and-ratify) — compare Gatekeeper admission checks with Kyverno.
 
 ## Security Follow-ups
 

@@ -1,8 +1,8 @@
 import { defineConfig } from "@pandacss/dev";
 
 export default defineConfig({
-	// The website currently has an UnoCSS preflight. Keep reset ownership
-	// outside this package until the application migration is deliberate.
+	// The website owns the small application reset in global.css. Keep reset
+	// ownership outside this package so recipes remain composable.
 	preflight: false,
 	presets: ["@pandacss/preset-base", "@pandacss/preset-panda"],
 	strictTokens: true,
