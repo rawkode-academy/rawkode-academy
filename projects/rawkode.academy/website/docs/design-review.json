@@ -190,21 +190,21 @@
       "path": "/read/our-architecture",
       "status": "visual-pass",
       "viewports": ["1440x1000 dark and light", "390x844 dark"],
-      "environment": "Deployed f4762c10 whole-page; compiled local :4322 21:22 centring and 21:26 final card build",
+      "environment": "Deployed f4762c10 whole-page; F59/F60 deltas verified deployed 447c1270 / fbd52a50",
       "findings": ["F57 resolved", "F58 resolved", "F59 resolved", "F60 resolved"],
       "coverage": "Header, introduction, Cloud Native section, actual compiled diagram and CQRS boundary inspected. In 20:46, named diagram, written description, 44px native toggle, Space activation, Tab to scroll region, arrow-key and pointer panning, return to fitted view verified. Expanded mobile region is 350px wide over 1280px content, bounded to 591px height; document remains 390px. Desktop document remains 1440px and arrow navigation pans the enlarged region. Final 20:54 fitted mobile diagram and description rechecked; shared overflow correction verified on the GraphQL article.",
       "justification": "Title, author/date and technology links establish topic and provenance. Four authored sections explain architecture decisions; the one gateway/five-service diagram, written description and optional local enlargement make relationships readable. The command example is contained code rather than executable UI. TOC aids navigation; bounded article/video recommendations support continuation; optional signup follows content. Coverless recommendations retain useful title, summary and author without invented imagery.",
-      "limitations": "Whole body, recommendations, hydrated signup and copyright inspected on deployed f4762c10 at 1440x1000 light and 390x844 dark. Mobile code overflow stays within its own block; desktop document is 1440px. F59 final compact card verified at both sizes with full keyboard outline; F60 root-centred architecture zoom verified mobile and desktop. No infrastructure commands, external links or subscriptions exercised; historical technical narrative not independently revalidated. New corrections are local, pending deployment."
+      "limitations": "Whole body, recommendations, hydrated signup and copyright inspected on deployed f4762c10 at 1440x1000 light and 390x844 dark. Mobile code overflow stays within its own block; desktop document is 1440px. F59 final compact card verified on 447c1270 at both sizes with full keyboard outline; F60 root-centred architecture zoom and fitted reset verified hosted mobile, plus previous local desktop. No infrastructure commands, external links or subscriptions exercised; historical technical narrative not independently revalidated."
     },
     {
       "path": "/read/federated-graphql-microservices",
-      "status": "verification-pending",
-      "viewports": ["1440x1000 light", "390x844 light"],
-      "environment": "Compiled local preview :4322, 20:46 / 20:52 / 20:54 diagram builds",
-      "findings": ["F57 resolved", "F58 resolved"],
-      "coverage": "Our Federated GraphQL Stack anchor and whole compiled SVG inspected in overlapping desktop/mobile captures, with caption and written description. Corrected fitted graphic measures 397.8x700 desktop and is bounded to 591px mobile; expanded region contains 1280px content without document overflow. Space, Tab and arrow panning verified at both sizes. Final 20:54 mobile default overflow is visible and pointer scrolling over the graphic advances the page 422px; enlarged overflow is auto with keyboard panning. Document 390/390.",
-      "justification": "Diagram distinguishes shared gateway from two independent service/server/ORM/database chains. The new written description and optional enlarged region preserve both overview and label access.",
-      "limitations": "Compiled diagram and native toggle verified on deployed f4762c10 mobile/dark. F60 corrected in local 21:22 build: enlarged graph opens on API Client, Tab focuses named region, Right pans, pointer scroll reveals Cosmo, unchecking returns fitted graph. Live Browser geometry evaluation timed out, so no new numeric pan measurement claimed. Not a whole-page sign-off: article code, copy, related content, external destinations and live API remain pending."
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Whole page deployed 447c1270 / fbd52a50; final copy-control correction local :4322 21:50 build",
+      "findings": ["F57 resolved", "F58 resolved", "F60 resolved", "F62 resolved"],
+      "coverage": "Entire article inspected in overlapping captures through copyright at both sizes: hero/byline/tags, introduction and info callout, seven sections, six code blocks, diagram, all lists, publication/discussion footer, three related articles, three videos, hydrated newsletter and footer. Mobile contents opened and all seven links inspected; desktop current-section state tracks reading. Widths 390/390 and 1440/1440; code overflow stays within blocks. Hosted mobile enlargement opens on API Client and returns to fitted graph. Final local copy controls all measure 44x44 at both sizes, with centred 20px icons and complete keyboard focus. Enter shows Copied feedback. All six mobile code regions are focusable; ArrowRight pans the first 40px without moving the document.",
+      "justification": "Title and byline identify topic and historical provenance. Benefits, incremental schema example, tools, publishing steps and limitations explain the approach. Six code blocks serve distinct examples, with native copy access. Diagram distinguishes shared gateway from two independent server/ORM/database chains; its description and optional enlargement provide overview and label access. Contents supports a long article, and bounded recommendations and optional signup support continuation without interrupting reading.",
+      "limitations": "F62 is local pending deployment. No code execution, live API requests, external destination review, subscription or playback. Technical and historical claims preserved, not independently revalidated. Copy feedback is visually verified, not tested with a screen reader."
     },
     {
       "path": "/read",
@@ -232,16 +232,21 @@
     },
     {
       "path": "/news",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "390x844",
-        "1440x1000"
+        "390x844 dark",
+        "1440x1000 light"
       ],
       "findings": [
-        "F09",
-        "F10"
+        "F09 resolved",
+        "F10 resolved",
+        "F36 resolved",
+        "F61 resolved"
       ],
-      "coverage": "Original feature and controls inspected. Rewritten archive pending full review."
+      "environment": "Whole archive deployed f4762c10 / 3541053b; corrected signup compiled local :4322 21:47 build",
+      "coverage": "Whole archive inspected in overlapping captures through copyright at both sizes: lead story, all 36 earlier rows from September through March, signup and footer. DOM confirms 37 unique story URLs and all 37 images using /images/news/news-generic.svg. Mobile width 390/390; desktop 1440/1440. Long titles and technical identifiers wrap. Corrected two-column signup and keyboard input/button focus verified desktop/dark; stacked mobile/dark has complete input focus ring, 300x50 input and 300x47 button with 390px document.",
+      "justification": "Lead story identifies the latest publication; chronological rows retain date, complete title and description for choosing what to read. Generic decorative artwork identifies the News format without implying article-specific illustrations. RSS provides real syndication. Optional email signup uses one heading, no repetitive paragraph, native labelled controls and the shared compact composition.",
+      "limitations": "F61 correction is local pending deployment. No story-detail sign-off, subscription submission, live feed-reader import or independent fact-check. Native form endpoint, method and required email semantics retained and covered by actual Astro SSR regression."
     },
     {
       "path": "/technology/kubernetes",

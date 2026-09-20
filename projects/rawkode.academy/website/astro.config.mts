@@ -129,6 +129,17 @@ export default defineConfig({
 		// must fail a build rather than publish raw diagram source as prose.
 		d2({ inline: true }),
 		expressiveCode({
+			plugins: [
+				{
+					name: "academy-code-controls",
+					// The renderer otherwise shrinks copy targets to 32px for a mouse.
+					// Keep the Academy's 44px target for pointer and touch alike.
+					baseStyles: `
+					.frame .copy button { min-width: 2.75rem; min-height: 2.75rem; }
+					.frame .copy button::after { mask-position: center; mask-size: 1.25rem; }
+				`,
+				},
+			],
 			// Code blocks are "screen within the page" surfaces: like the
 			// --terminal-* tokens they stay dark in both colour schemes, so
 			// shell frames, output blocks, and editor frames all read as the

@@ -1,18 +1,22 @@
 ---
-import { academyForms } from "@rawkodeacademy/design-system";
+import { academyForms, academyMarketing } from "@rawkodeacademy/design-system";
 
 const s = academyForms();
+const marketing = academyMarketing({ newsletterVariant: "card" });
 ---
 
-<div class:list={[s.root, s.panel]}>
-	<p class={s.kicker}>Rawkode Academy newsletter</p>
-	<h3 class={s.heading}>Get cloud native tutorials and news by email.</h3>
-	<p class={s.copy}>Subscribe for tutorials, technical articles, and cloud native news.</p>
-	<form class={s.form} action="https://email.rawkode.academy/subscribe" method="post">
-		<label class={s.field}>
-			<span class={s.label}>Email address</span>
-			<input class={s.input} type="email" name="email" required autocomplete="email" placeholder="you@where-you.work" />
-		</label>
-		<button class={s.button} type="submit">Subscribe</button>
-	</form>
+<div class:list={[s.root, marketing.newsletterSection]}>
+	<div class={marketing.newsletterGrid}>
+		<div class={marketing.newsletterCopy}>
+			<p class={s.kicker}>Rawkode Academy newsletter</p>
+			<h2 class={marketing.newsletterTitle}>Cloud native tutorials and news by email.</h2>
+		</div>
+		<form class:list={[s.form, marketing.newsletterWidget]} action="https://email.rawkode.academy/subscribe" method="post">
+			<label class={s.field}>
+				<span class={s.label}>Email address</span>
+				<input class={s.input} type="email" name="email" required autocomplete="email" placeholder="you@where-you.work" />
+			</label>
+			<button class={s.button} type="submit">Subscribe</button>
+		</form>
+	</div>
 </div>

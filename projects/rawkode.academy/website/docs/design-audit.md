@@ -85,15 +85,45 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F58 | Dense architecture diagram is unreadable on mobile; narrow GraphQL diagram expands to an excessive desktop height | Shared static figure with native enlargement toggle, keyboard-scrollable region, accessible name and written relationship description. Fitted/expanded views verified at both sizes. Normal scrolling over fitted graphics preserved; containment applies only when enlarged | `academyDiagram.ts`, `articles/Diagram.astro`, both published D2 articles |
 | F59 | Coverless article reserves an empty media frame because Astro supplies a registered but empty Vue slot | Explicit media/footer presence across the renderer boundary; intrinsic text-only card height, title-only accessible name, contextual H3 below section headings. Three real Astro/Vue SSR regressions pass; final compiled desktop/mobile card and complete intrinsic focus boundary verified | `ArticleCard.astro`, `BaseCard.vue`, related/topic/series consumers |
 | F60 | Enlarging a centred graph initially shows its empty top-left corner on mobile | Small progressive enhancement centres horizontal scroll on expansion and resets on collapse; native checkbox/CSS retained. Both graphs now open on their root node at mobile; architecture also verified desktop. Keyboard region focus, right-arrow panning, pointer scrolling and fitted reset rechecked on GraphQL | `articles/Diagram.astro`, two script tests |
+| F61 | News signup spreads a single email field/button across the full desktop content width and does not use the compact shared signup composition | Shared compact two-column composition, H2 and one explanation; redundant paragraph removed. Native POST endpoint and email semantics retained. Desktop/mobile and keyboard focus verified in compiled 21:47 build | `news/WireSubscribeCard.astro`, one actual Astro SSR regression |
+| F62 | Expressive Code shrinks copy controls to 32px with a pointer (40px for touch) | Shared renderer plugin sets 44px minimum and centred 20px icon. All six GraphQL controls measured at both sizes; keyboard focus, Enter/Copied feedback and contained code ArrowRight panning verified | `astro.config.mts`, full GraphQL article review |
 
 ## Verification log
 
+- Final 21:50 build passed: 443 Astro files, zero errors/warnings, nine hints,
+  115 SSR/hydration checks, 122 interaction tests and 13 parser tests. Full Vitest
+  remains 574/574 in 46 files. Existing Zed highlighting fallback persists.
+  News signup verified desktop light/dark and mobile dark; six code copy targets
+  verified 44x44 at both sizes with 20px icons. Mobile first code region pans
+  40px by keyboard while document scroll remains zero. No code execution.
+- Full GraphQL article inspected through copyright at desktop light and mobile
+  dark on 447c1270, then F62 corrected delta verified locally at both sizes.
+  News archive and this article bring explicit whole-page passes to 31; source
+  inventories and template samples still do not count as all-page completion.
+  Latest small corrections received main-agent review only, not independent review.
+- Checkpoint `fbd52a50` pushed normally. Website CI 35535690247 and design-system
+  CI 35535690242 succeeded. New preview:
+  https://447c1270-rawkode-academy-website.rawkodeacademy.workers.dev.
+  Hosted text-only article card verified at both sizes with complete intrinsic
+  focus outline; both hosted diagrams now open centred on their root node on
+  mobile, then return to fitted view. Architecture width remains 390/390.
+- News compact composition build passed at 21:41: 443 Astro files, zero errors
+  and warnings, nine hints, 115 SSR/hydration checks, 122 interaction tests and
+  13 parser tests. Native POST semantics are covered by actual Astro SSR test.
+  Browser verification follows; F62 copy-control adjustment is not in this build.
+- News archive on deployed f4762c10 inspected in full at 390x844 dark and
+  1440x1000 light: lead story, all 36 earlier rows, newsletter and copyright.
+  DOM confirms 37 distinct story destinations and 37 uses of the shared generic
+  SVG. Widths 390/390 and 1440/1440. No article-specific imagery fabricated.
+  F61 corrected in the compiled 21:47 build and verified at both sizes with full
+  keyboard focus. Archive is now a visual pass, not sign-off of the 37 story
+  detail pages. No subscription sent or news facts revalidated.
 - Final 21:26 build passed: 442 Astro files, zero errors/warnings, nine hints,
   114 SSR/hydration checks, 13 parser tests and 122 interaction tests. Full
   Vitest 574/574 across 46 files passed. Existing Zed highlighting fallback
   warning remains. Final card mobile/desktop focus and intrinsic desktop height
-  verified, plus centred desktop architecture enlargement. These local changes
-  are not yet deployed. Main-agent review only; no independent final reviewer.
+  verified, plus centred desktop architecture enlargement. These changes are
+  deployed in the fbd52a50 checkpoint above. Main-agent review only; no independent final reviewer.
 - Architecture whole-page deployed review plus locally corrected F59/F60 delta
   now passes. Series empty state also inspected end to end at desktop/dark and
   mobile/dark; Enter on its recovery link reaches Read. No published series
