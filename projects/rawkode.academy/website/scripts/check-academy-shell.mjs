@@ -1,5 +1,6 @@
-// Dependency-free source guard. Run with Node 24+.
+// Source guard. Run with Node 24+ after installing workspace dependencies.
 import assert from "node:assert/strict";
+import { getAstroRecipeSource } from "./academy-source.mjs";
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -93,7 +94,7 @@ const designSystemImport = /import\s*{([^}]+)}\s*from\s*["'](@rawkodeacademy\/de
 for (const path of sourceFiles) {
 	const source = readFileSync(path, "utf8");
 	const slotSource = extname(path) === ".astro"
-		? source.replace(/<script\b[\s\S]*?<\/script>/gi, "")
+		? await getAstroRecipeSource(source)
 		: source;
 	for (const match of source.matchAll(designSystemImport)) {
 		const exports = match[2].endsWith("/vue") ? vueExports : publicExports;
@@ -197,6 +198,31 @@ for (const behavior of ["trap-focus", "prevent-scroll", "close-on-escape", "clos
 	assert.ok(drawer.includes(`:${behavior}="true"`));
 }
 assert.match(drawer, /href="#academy-footer-navigation"/);
+
+
+// Completed migration boundaries must stay on shared recipes and Ark controls.
+const migratedViews = [
+	"src/pages/home.astro",
+	"src/pages/settings/index.astro",
+	"src/pages/resources/kubernetes/1.35-cheatsheet.astro",
+	"src/components/settings/EmailPreferences.vue",
+	"src/components/settings/PreferenceSwitch.vue",
+	"src/components/settings/TestEmailButton.vue",
+	"src/components/courses/ResourceList.vue",
+	"src/components/courses/EmbeddedAppModal.vue",
+	"src/components/courses/WebContainerEmbed.vue",
+	"src/components/lead-magnet/K8sCheatsheetCTA.vue",
+	"src/components/command-palette/CommandPalette.vue",
+];
+for (const path of migratedViews) {
+	assert.match(read(path), /@rawkodeacademy\/design-system/, `${path}: missing shared recipe`);
+	assert.doesNotMatch(read(path), /--(?:editorial|surface|brand|terminal)-/, `${path}: legacy palette alias`);
+}
+const commandPalette = read("src/components/command-palette/CommandPalette.vue");
+assert.match(commandPalette, /@ark-ui\/vue\/combobox/);
+assert.match(commandPalette, /@ark-ui\/vue\/dialog/);
+assert.doesNotMatch(read("src/components/command-palette/mount.ts"), /react|cmdk/);
+assert.doesNotMatch(read("src/components/courses/WebContainerEmbed.vue"), /v-html/);
 
 // Exercise the real typed theme utility with blocked browser persistence.
 const attributes = new Map();

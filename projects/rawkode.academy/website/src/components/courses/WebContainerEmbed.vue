@@ -1,30 +1,33 @@
 <template>
- <div class="h-full flex flex-col bg-[var(--terminal-bg)] text-[var(--terminal-text)]">
+ <div :class="s.workbench">
  <!-- Header -->
- <div class="flex items-center justify-between p-4 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)]">
- <div class="flex items-center gap-4">
- <h3 class="text-lg font-semibold">{{ title }}</h3>
- <div v-if="status === 'booting'" class="flex items-center gap-2 text-sm text-[var(--terminal-text-dim)]">
- <div class="animate-spin rounded-full h-4 w-4 border-2 border-[var(--terminal-text-dim)] border-t-transparent"></div>
+ <div :class="s.toolbar">
+ <div :class="s.actions">
+ <h3 :class="s.title">{{ title }}</h3>
+ <div v-if="status === 'booting'" :class="s.status">
+ <div :class="s.spinner"></div>
  <span>Starting container...</span>
  </div>
- <div v-else-if="status === 'installing'" class="flex items-center gap-2 text-sm text-primary">
- <div class="animate-pulse">●</div>
+ <div v-else-if="status === 'installing'" :class="s.status">
+ <div :class="s.status">●</div>
  <span>Installing dependencies...</span>
  </div>
- <div v-else-if="status === 'ready'" class="flex items-center gap-2 text-sm text-green-400">
+ <div v-else-if="status === 'error'" :class="s.error" role="alert">Container unavailable. Check the terminal for details, then retry.</div>
+ <div v-else-if="status === 'ready'" :class="s.ready">
  <div>●</div>
  <span>Ready</span>
  </div>
  </div>
- <div class="flex items-center gap-2">
+ <div :class="s.actions">
  <button
  @click="restart"
- :disabled="status !== 'ready'"
- class="p-2 text-[var(--terminal-text-dim)] hover:text-[var(--terminal-text)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+ :disabled="status !== 'ready' && status !== 'error'"
+ :class="s.button"
  title="Restart"
+ aria-label="Restart container"
+ type="button"
  >
- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
  </svg>
  </button>
@@ -32,13 +35,14 @@
  </div>
 
  <!-- Split View -->
- <div class="flex-1 flex overflow-hidden">
+ <div :class="s.split">
  <!-- Editor -->
- <div class="w-1/2 flex flex-col border-r border-[var(--terminal-border)]">
- <div class="p-2 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)] relative z-10">
+ <div :class="s.pane">
+ <div :class="s.filebar">
  <select
  v-model="selectedFile"
- class="w-full px-3 py-1 bg-[var(--terminal-bg)] text-[var(--terminal-text)] rounded border border-[var(--terminal-border)] hover:bg-[var(--terminal-surface)] focus:border-primary focus:outline-none cursor-pointer transition-colors"
+ aria-label="File to edit"
+ :class="s.select"
  :disabled="fileList.length === 0"
  >
  <option v-if="fileList.length === 0" value="">No files loaded</option>
@@ -47,52 +51,54 @@
  </option>
  </select>
  </div>
- <div class="flex-1 relative">
+ <div :class="s.editorFrame">
  <textarea
  v-if="selectedFile && fileContents[selectedFile] !== undefined"
  v-model="fileContents[selectedFile]"
+ :aria-label="`Edit ${selectedFile}`"
  @input="onFileChange"
- class="absolute inset-0 w-full h-full p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text)] font-mono text-sm resize-none focus:outline-none"
+ :class="s.editor"
  :placeholder="`Edit ${selectedFile}...`"
  spellcheck="false"
  ></textarea>
- <div v-else class="absolute inset-0 w-full h-full p-4 bg-[var(--terminal-bg)] text-[var(--terminal-text-dim)] font-mono text-sm">
+ <div v-else :class="s.placeholder">
  Select a file to edit
  </div>
  </div>
  </div>
 
  <!-- Preview -->
- <div class="w-1/2 flex flex-col">
- <div class="p-2 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)]">
- <div class="flex items-center gap-2">
- <span class="text-sm text-[var(--terminal-text-dim)]">Preview:</span>
+ <div :class="s.pane">
+ <div :class="s.filebar">
+ <div :class="s.actions">
+ <span :class="s.status">Preview:</span>
  <a 
  v-if="previewUrl"
  :href="previewUrl" 
  target="_blank"
  rel="noopener noreferrer"
- class="text-sm text-primary hover:text-primary/90 underline decoration-primary/30 hover:decoration-primary transition-all cursor-pointer flex items-center gap-1"
+ :class="s.link"
  @click.stop
  >
  {{ previewUrl }}
- <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <svg :class="s.smallIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
  </svg>
  </a>
- <span v-else class="text-sm text-[var(--terminal-text-dim)] italic">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
+ <span v-else :class="s.status">{{ status === 'ready' ? 'Server ready (check terminal for URL)' : 'Waiting for server...' }}</span>
  </div>
  </div>
- <div class="flex-1 relative bg-[var(--surface-card)]">
+ <div :class="s.editorFrame">
  <iframe
  v-if="previewUrl"
  :src="previewUrl"
- class="absolute inset-0 w-full h-full"
+ :title="`${title} preview`"
+ :class="s.preview"
  frameborder="0"
  ></iframe>
- <div v-else class="absolute inset-0 flex items-center justify-center text-muted">
- <div class="text-center">
- <svg class="w-16 h-16 mx-auto mb-4 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+ <div v-else :class="s.placeholder">
+ <div :class="s.placeholder">
+ <svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
  </svg>
  <p>Waiting for server...</p>
@@ -103,25 +109,25 @@
  </div>
 
  <!-- Terminal -->
- <div class="h-48 flex-shrink-0 bg-black border-t border-[var(--terminal-border)] overflow-hidden flex flex-col">
- <div class="p-2 bg-[var(--terminal-surface)] border-b border-[var(--terminal-border)] flex items-center justify-between">
- <span class="text-sm text-[var(--terminal-text-dim)]">Terminal</span>
+ <div :class="s.terminal">
+ <div :class="s.toolbar">
+ <span :class="s.status">Terminal</span>
  <button
  @click="clearTerminal"
- class="text-xs text-[var(--terminal-text-dim)] hover:text-[var(--terminal-text)] transition-colors"
+ :class="s.button"
  >
  Clear
  </button>
  </div>
  <div
  ref="terminalOutput"
- class="h-[calc(100%-2rem)] overflow-y-auto p-2 font-mono text-xs"
+ :class="s.terminalOutput"
  >
  <div
  v-for="(line, index) in terminalLines"
  :key="index"
  :class="getTerminalLineClass(line)"
- v-html="formatTerminalLine(line)"
+ v-text="formatTerminalLine(line)"
  ></div>
  </div>
  </div>
@@ -129,13 +135,15 @@
 </template>
 
 <script setup lang="ts">
+import { academyCourse } from "@rawkodeacademy/design-system";
+const s = academyCourse();
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 import { WebContainer } from "@webcontainer/api";
 
 interface Props {
 	title: string;
 	files: Record<string, string>;
-	startCommand?: string;
+	startCommand?: string | undefined;
 }
 
 const props = defineProps<Props>();
@@ -174,10 +182,10 @@ const clearTerminal = () => {
 };
 
 const getTerminalLineClass = (line: string) => {
-	if (line.startsWith("[error]")) return "text-red-400";
-	if (line.startsWith("[success]")) return "text-green-400";
-	if (line.startsWith("[info]")) return "text-[var(--terminal-text)]";
-	return "text-[var(--terminal-text-dim)]";
+	if (line.startsWith("[error]")) return s.error;
+	if (line.startsWith("[success]")) return s.ready;
+	if (line.startsWith("[info]")) return s.terminalLine;
+	return s.terminalLine;
 };
 
 const formatTerminalLine = (line: string) => {
@@ -242,7 +250,7 @@ const startDevServer = async () => {
 	if (!webcontainerInstance.value) return;
 
 	const command = props.startCommand || "npm run dev";
-	const [cmd, ...args] = command.split(" ");
+	const [cmd = "npm", ...args] = command.trim().split(/\s+/);
 
 	writeTerminal(`Starting dev server: ${command}`, "info");
 
@@ -258,7 +266,7 @@ const startDevServer = async () => {
 		);
 
 		// Wait for server to be ready
-		webcontainerInstance.value.on("server-ready", (port, url) => {
+		webcontainerInstance.value.on("server-ready", (_port, url) => {
 			previewUrl.value = url;
 			status.value = "ready";
 			writeTerminal(`Server ready at ${url}`, "success");
@@ -281,7 +289,7 @@ const onFileChange = async () => {
 	try {
 		await webcontainerInstance.value.fs.writeFile(
 			selectedFile.value,
-			fileContents.value[selectedFile.value],
+			fileContents.value[selectedFile.value] ?? "",
 		);
 	} catch (error) {
 		writeTerminal(`Failed to save ${selectedFile.value}: ${error}`, "error");
@@ -289,14 +297,14 @@ const onFileChange = async () => {
 };
 
 const restart = async () => {
-	if (!webcontainerInstance.value) return;
 
 	writeTerminal("Restarting container...", "info");
 	previewUrl.value = "";
 	status.value = "booting";
 
 	// Kill existing processes
-	await webcontainerInstance.value.teardown();
+	await webcontainerInstance.value?.teardown();
+	webcontainerInstance.value = null;
 
 	// Reinitialize
 	await initWebContainer();

@@ -10,6 +10,7 @@ export default defineConfig({
 	outdir: "./styled-system",
 	conditions: {
 		extend: {
+			sm: "@media (min-width: 640px)",
 			lg: "@media (min-width: 1024px)",
 			motionReduce: "@media (prefers-reduced-motion: reduce)",
 		},
@@ -73,6 +74,7 @@ export default defineConfig({
 				},
 				spacing: {
 					focus: { value: "2px" },
+					"focus-inset": { value: "-2px" },
 					"academy-gutter": { value: "24px" },
 					"academy-gutter-wide": { value: "96px" },
 					"academy-section": { value: "64px" },
@@ -81,6 +83,8 @@ export default defineConfig({
 				},
 				sizes: {
 					"academy-shell": { value: "1180px" },
+					"academy-command": { value: "85dvh" },
+					"academy-command-list": { value: "50dvh" },
 					"academy-copy": { value: "680px" },
 					"academy-transcript": { value: "600px" },
 					"academy-card": { value: "400px" },
@@ -188,6 +192,8 @@ export default defineConfig({
 								_dark: "{colors.academyBase.accent-foreground}",
 							},
 						},
+						statusSky: { value: { base: "#0369a1", _dark: "#7dd3fc" } },
+						statusViolet: { value: { base: "#6d28d9", _dark: "#c4b5fd" } },
 						statusAmber: {
 							value: {
 								base: "#9a5800",

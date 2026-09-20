@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 defineProps<{
 	iconUrl: string;
 	revealed: boolean;
@@ -6,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-	<div class="gtl-logo-card" :class="{ revealed }">
+	<div class="gtl-logo-card" :class="[gameTheme.root, { revealed }]">
 		<!-- Duotone mask layers (do NOT animate — static, no repaint) -->
 		<div class="gtl-logo-duotone" aria-hidden="true">
 			<div class="gtl-logo-mask-cyan" :style="`--icon-url: url(${iconUrl})`"></div>
@@ -44,8 +46,8 @@ defineProps<{
 	justify-content: center;
 	padding: 1.25rem;
 	border-radius: 1.5rem;
-	background: color-mix(in srgb, #5f5ed7 5%, transparent);
-	border: 1px solid var(--colors-border-muted, oklch(0.18 0.02 60 / 0.12));
+	background: color-mix(in srgb, var(--colors-academy-status-violet) 5%, transparent);
+	border: 1px solid var(--colors-academy-border);
 	overflow: hidden;
 	transition: border-color 250ms ease, background 250ms ease;
 }
@@ -54,7 +56,7 @@ defineProps<{
 	content: "";
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(180deg, color-mix(in srgb, #fff 4%, transparent), transparent 60%);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--colors-academy-accent-foreground) 4%, transparent), transparent 60%);
 	pointer-events: none;
 }
 
@@ -81,14 +83,14 @@ defineProps<{
 }
 
 .gtl-logo-mask-cyan {
-	background-color: #00ceff;
+	background-color: var(--colors-academy-accent);
 	opacity: 0.28;
 	mask-mode: alpha;
 	-webkit-mask-mode: alpha;
 }
 
 .gtl-logo-mask-purple {
-	background-color: #5f5ed7;
+	background-color: var(--colors-academy-status-violet);
 	mask-mode: luminance;
 	-webkit-mask-mode: luminance;
 }
@@ -110,8 +112,8 @@ defineProps<{
 	bottom: -4px;
 	background: repeating-linear-gradient(
 		to bottom,
-		rgba(0, 0, 0, 0.18) 0px,
-		rgba(0, 0, 0, 0.18) 2px,
+		var(--colors-academy-border) 0px,
+		var(--colors-academy-border) 2px,
 		transparent 2px,
 		transparent 4px
 	);

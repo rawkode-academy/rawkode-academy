@@ -112,7 +112,7 @@ const processedChangelog = await Promise.all(
 	}
 
 	.changelog-entry {
-		border-top: 1px solid var(--editorial-hairline);
+		border-top: 1px solid var(--colors-academy-border);
 		display: grid;
 		grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
 		column-gap: clamp(1.5rem, 4vw, 4rem);
@@ -136,21 +136,21 @@ const processedChangelog = await Promise.all(
 
 	.changelog-entry__meta time,
 	.changelog-entry__byline {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.68rem;
 		font-weight: 600;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.changelog-entry h2 {
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-family: var(--fonts-academy-text), system-ui, sans-serif;
 		font-size: 1.75rem;
 		font-weight: 750;
 		line-height: 1.05;
 		letter-spacing: 0;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 		margin: 0;
 		text-wrap: balance;
 	}
@@ -158,21 +158,21 @@ const processedChangelog = await Promise.all(
 	.changelog-entry__summary {
 		max-width: 48rem;
 		margin: 0;
-		color: var(--editorial-ink-soft);
+		color: var(--colors-academy-text-soft);
 		font-size: 1rem;
 		line-height: 1.65;
 	}
 
 	.changelog-entry__link {
 		width: fit-content;
-		color: var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		color: var(--colors-academy-text);
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-decoration: none;
 		text-transform: uppercase;
-		border-bottom: 1px solid var(--editorial-hairline-strong);
+		border-bottom: 1px solid var(--colors-academy-border);
 		padding-bottom: 0.22rem;
 	}
 
@@ -188,7 +188,7 @@ const processedChangelog = await Promise.all(
 		height: 1.4rem;
 		border-radius: 999px;
 		object-fit: cover;
-		border: 1px solid var(--editorial-hairline-strong);
+		border: 1px solid var(--colors-academy-border);
 	}
 
 	@media (max-width: 700px) {

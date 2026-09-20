@@ -1,5 +1,5 @@
 ---
-import { academyLayout, academyMarketing } from "@rawkodeacademy/design-system";
+import { academyLayout, academyMarketing, academyEditorial } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 interface Props {
@@ -12,81 +12,21 @@ interface Props {
 const { eyebrow, title, lede, compact = false } = Astro.props as Props;
 const layout = academyLayout({ width: compact ? "reading" : "wide" });
 const marketing = academyMarketing();
+const editorial = academyEditorial();
 ---
 
-<div class:list={[layout.root, "editorial-shell"]}>
-	<header class:list={[layout.hero, "editorial-shell__masthead"]}>
+<div class:list={[layout.root, editorial.root]}>
+	<header class={layout.hero}>
 		<div class={layout.container}>
-			{eyebrow && <p class:list={[marketing.eyebrow, "editorial-kicker"]}>{eyebrow}</p>}
-			<h1 class:list={[layout.title, "editorial-shell__title"]}>{title}</h1>
-			{lede && <p class:list={[layout.description, "editorial-shell__lede"]}>{lede}</p>}
+			{eyebrow && <p class={marketing.eyebrow}>{eyebrow}</p>}
+			<h1 class={layout.title}>{title}</h1>
+			{lede && <p class={layout.description}>{lede}</p>}
 			{Astro.slots.has("actions") && (
-				<div class:list={[marketing.actions, "editorial-actions"]}><slot name="actions" /></div>
+				<div class={marketing.actions}><slot name="actions" /></div>
 			)}
 		</div>
 	</header>
-	<div class:list={[layout.container, "editorial-shell__content"]}>
+	<div class={layout.container}>
 		<slot />
 	</div>
 </div>
-
-<style is:global>
-	/* Compatibility aliases keep route-specific presentational CSS readable while
-	   the Panda recipe supplies the page structure and Academy token contract. */
-	.editorial-shell {
-		--editorial-paper: var(--colors-academy-canvas);
-		--editorial-paper-deep: var(--colors-academy-panel);
-		--editorial-ink: var(--colors-academy-text);
-		--editorial-ink-soft: var(--colors-academy-text-soft);
-		--editorial-ink-mute: var(--colors-academy-text-muted);
-		--editorial-hairline: var(--colors-academy-border);
-		--editorial-hairline-strong: var(--colors-academy-border);
-		--editorial-spruce: var(--colors-academy-accent);
-		--editorial-spruce-dim: color-mix(in srgb, var(--colors-academy-accent) 16%, transparent);
-		--editorial-rust: var(--colors-academy-accent);
-		--editorial-amber-text: var(--colors-academy-accent);
-	}
-
-	.editorial-shell__masthead { margin: 0; }
-	.editorial-shell__masthead > div { min-width: 0; }
-	.editorial-shell__title { margin-top: 0; }
-	.editorial-shell__lede { margin-bottom: 0; }
-	.editorial-shell__content { min-width: 0; }
-
-	.editorial-section { padding: 3rem 1.5rem 0; border-bottom: 1px solid var(--colors-academy-border); }
-	.editorial-section:last-child { padding-bottom: 3rem; border-bottom: 0; }
-	.editorial-section--split { display: grid; gap: 2rem; }
-	.editorial-section__header { display: grid; gap: 0.75rem; align-content: start; }
-	.editorial-section__title { margin: 0; color: var(--colors-academy-text); font-family: var(--fonts-academy-display); font-size: 1.75rem; line-height: 1.1; }
-	.editorial-section__lede, .editorial-card__body { color: var(--colors-academy-text-soft); line-height: 1.6; }
-	.editorial-grid { display: grid; gap: 1.25rem; }
-	.editorial-grid--2, .editorial-grid--3, .editorial-grid--4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
-	.editorial-card { min-width: 0; padding: 1.5rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-m); background: var(--colors-academy-panel); }
-	.editorial-card--paper { background: var(--colors-academy-ground); }
-	.editorial-card__title { margin: 0; color: var(--colors-academy-text); font-family: var(--fonts-academy-display); font-size: 1.25rem; line-height: 1.15; }
-	.editorial-card__body { margin: 0.75rem 0 0; }
-	.editorial-kicker, .editorial-meta { color: var(--colors-academy-text-muted); font-family: var(--fonts-academy-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
-	.editorial-kicker { color: var(--colors-academy-accent); margin: 0; }
-	.editorial-actions, .editorial-button-row, .editorial-pill-row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
-	.editorial-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0.75rem 1.25rem; border: 1px solid transparent; border-radius: var(--radii-academy-s); background: var(--colors-academy-accent); color: var(--colors-academy-accent-foreground); font-weight: 700; text-decoration: none; }
-	.editorial-button--secondary { border-color: var(--colors-academy-border); background: transparent; color: var(--colors-academy-text); }
-	.editorial-button:hover { filter: brightness(1.08); }
-	.editorial-pill { display: inline-flex; padding: 0.2rem 0.6rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-pill); color: var(--colors-academy-text-soft); font-size: 0.75rem; }
-	.editorial-list { display: grid; gap: 0.75rem; margin: 0; padding-left: 1.25rem; color: var(--colors-academy-text-soft); line-height: 1.55; }
-	.editorial-prose { color: var(--colors-academy-text-soft); font-size: 1.05rem; line-height: 1.7; }
-	.editorial-prose :is(h2, h3) { color: var(--colors-academy-text); font-family: var(--fonts-academy-display); }
-	.editorial-prose a { color: var(--colors-academy-accent); }
-	.editorial-faq { display: grid; gap: 0.75rem; }
-	.editorial-faq details { padding: 1.25rem; border: 1px solid var(--colors-academy-border); border-radius: var(--radii-academy-m); background: var(--colors-academy-panel); }
-	.editorial-faq summary { cursor: pointer; color: var(--colors-academy-text); font-weight: 700; }
-	.editorial-faq p { color: var(--colors-academy-text-soft); line-height: 1.6; }
-	.editorial-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
-	.editorial-stat { padding: 1.25rem; border-left: 2px solid var(--colors-academy-accent); background: var(--colors-academy-panel); }
-	.editorial-stat__value { display: block; color: var(--colors-academy-text); font-family: var(--fonts-academy-display); font-size: 2rem; font-weight: 700; }
-	.editorial-stat__label { display: block; margin-top: 0.25rem; color: var(--colors-academy-text-muted); font-size: 0.875rem; }
-
-	@media (min-width: 1024px) {
-		.editorial-section { padding-inline: 0; padding-top: 4rem; }
-		.editorial-section--split { grid-template-columns: minmax(14rem, 0.55fr) minmax(0, 1fr); gap: 3rem; }
-	}
-</style>

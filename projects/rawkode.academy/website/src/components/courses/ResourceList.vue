@@ -1,34 +1,33 @@
 <template>
-	<div v-if="resources && resources.length > 0" class="space-y-6">
-		<header class="border-b border-black/10 pb-5 dark:border-white/10">
-			<div class="flex items-center gap-3">
-				<svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+	<div v-if="resources && resources.length > 0" :class="s.resources">
+		<header :class="s.header">
+			<div :class="s.heading">
+				<svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
 				</svg>
-				<h3 class="text-2xl font-bold tracking-tight text-primary-content">Resources</h3>
+				<h3 :class="s.heading">Resources</h3>
 			</div>
-			<p class="mt-2 text-sm leading-7 text-secondary-content">
+			<p :class="s.description">
 				Supporting materials for this module.
 			</p>
 		</header>
 
-		<div class="space-y-6">
+		<div :class="s.resources">
 			<section
 				v-for="[category, categoryResources] in Object.entries(groupedResources)"
 				:key="category"
-				class="border-b border-black/8 pb-6 last:border-b-0 last:pb-0 dark:border-white/8"
+				:class="s.group"
 			>
 				<h4
-					class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em]"
-					:class="getCategoryColorClass(category)"
+					:class="s.category"
 				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg :class="s.smallIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getCategoryIconPath(category)" />
 					</svg>
 					{{ categoryLabels[category] }}
 				</h4>
 
-				<div class="divide-y divide-black/8 dark:divide-white/8">
+				<div :class="s.resources">
 					<component
 						v-for="(resource, index) in categoryResources"
 						:key="index"
@@ -38,13 +37,12 @@
 						:target="resource.type === 'url' ? '_blank' : undefined"
 						:rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
 						@click="resource.type === 'embed' && openEmbedModal(resource)"
-						class="group grid w-full grid-cols-[auto_minmax(0,1fr)_auto] gap-3 py-4 text-left transition-colors"
+						:class="s.resource"
 					>
 						<div
-							class="mt-0.5 flex h-10 w-10 items-center justify-center rounded-full"
-							:class="getResourceIconClass(resource.type)"
+							:class="s.iconBadge"
 						>
-							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -54,24 +52,24 @@
 							</svg>
 						</div>
 
-						<div class="min-w-0">
-							<h5 class="font-semibold text-primary-content transition-colors group-hover:text-primary">
+						<div :class="s.copy">
+							<h5 :class="s.title">
 								{{ resource.title }}
 							</h5>
-							<p v-if="resource.description" class="mt-1 text-sm leading-6 text-secondary-content">
+							<p v-if="resource.description" :class="s.description">
 								{{ resource.description }}
 							</p>
-							<div class="mt-3 flex items-center gap-3 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
-								<span :class="getResourceTypeBadgeClass(resource.type)">
+							<div :class="s.meta">
+								<span>
 									{{ getResourceTypeLabel(resource.type) }}
 								</span>
 							</div>
 						</div>
 
-						<div class="flex items-start justify-end pt-1">
+						<div :class="s.arrow">
 							<svg
-								class="h-4 w-4 group-hover:translate-x-0.5"
-								:class="resource.type === 'embed' ? 'text-secondary' : 'text-primary'"
+								:class="s.smallIcon"
+
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -98,6 +96,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyCourse } from "@rawkodeacademy/design-system";
+const s = academyCourse();
 import { ref, computed } from "vue";
 import EmbeddedAppModal from "./EmbeddedAppModal.vue";
 
@@ -131,9 +131,9 @@ const props = defineProps<{
 }>();
 
 const isEmbedModalOpen = ref(false);
-const selectedEmbed = ref<Resource | null>(null);
+const selectedEmbed = ref<(Resource & { type: "embed"; embedConfig: NonNullable<Resource["embedConfig"]> }) | null>(null);
 
-const categoryLabels = {
+const categoryLabels: Record<string, string> = {
 	slides: "Slides",
 	code: "Repos",
 	documentation: "Documentation",
@@ -147,7 +147,7 @@ const groupedResources = computed(() => {
 			if (!acc[resource.category]) {
 				acc[resource.category] = [];
 			}
-			acc[resource.category].push(resource);
+			acc[resource.category]!.push(resource);
 			return acc;
 		},
 		{} as Record<string, Resource[]>,
@@ -169,20 +169,6 @@ const getCategoryIconPath = (category: string) => {
 	}
 };
 
-const getCategoryColorClass = (category: string) => {
-	switch (category) {
-		case "slides":
-			return "text-orange-600 dark:text-orange-400";
-		case "code":
-			return "text-primary dark:text-primary";
-		case "documentation":
-			return "text-green-600 dark:text-green-400";
-		case "demos":
-			return "text-secondary dark:text-secondary";
-		default:
-			return "text-muted";
-	}
-};
 
 const getResourceIconPath = (type: string) => {
 	switch (type) {
@@ -197,31 +183,7 @@ const getResourceIconPath = (type: string) => {
 	}
 };
 
-const getResourceIconClass = (type: string) => {
-	switch (type) {
-		case "url":
-			return "bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary";
-		case "file":
-			return "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400";
-		case "embed":
-			return "bg-secondary/10 dark:bg-secondary/20 text-secondary dark:text-secondary";
-		default:
-			return "bg-[var(--surface-card-muted)] text-muted";
-	}
-};
 
-const getResourceTypeBadgeClass = (type: string) => {
-	switch (type) {
-		case "url":
-			return "text-primary";
-		case "file":
-			return "text-green-700 dark:text-green-300";
-		case "embed":
-			return "text-secondary";
-		default:
-			return "text-secondary-content";
-	}
-};
 
 const getResourceHref = (resource: Resource) => {
 	if (resource.type === "url") {
@@ -257,7 +219,7 @@ const openEmbedModal = (resource: Resource) => {
 				? pathParts[courseIndex + 1]
 				: props.courseId || "unknown";
 
-		const url = `/embed/webcontainer?course=${courseId}&resource=${resourceId}`;
+		const url = `/embed/webcontainer?course=${encodeURIComponent(courseId ?? "unknown")}&resource=${encodeURIComponent(resourceId)}`;
 		window.open(
 			url,
 			"webcontainer",
@@ -265,7 +227,8 @@ const openEmbedModal = (resource: Resource) => {
 		);
 	} else {
 		// Keep modal for other embed types
-		selectedEmbed.value = resource;
+		if (!resource.embedConfig) return;
+		selectedEmbed.value = { ...resource, type: "embed", embedConfig: resource.embedConfig };
 		isEmbedModalOpen.value = true;
 	}
 };

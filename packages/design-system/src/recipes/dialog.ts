@@ -169,6 +169,7 @@ export const dialog = sva({
 			},
 		},
 		size: {
+			lg: { content: { maxWidth: "6xl" } },
 			sm: {
 				content: {
 					maxWidth: "md",

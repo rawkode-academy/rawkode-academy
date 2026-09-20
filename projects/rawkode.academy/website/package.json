@@ -3,13 +3,14 @@
 	"type": "module",
 	"scripts": {
 		"build-storybook": "storybook build",
-		"build": "cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && astro check && astro build",
+		"build": "bun run check:academy-shell && bun run check:academy-interactions && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && astro check && astro build",
 		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev": "astro dev",
 		"format": "biome format --write",
 		"preview": "astro preview",
-		"check:academy-shell": "node scripts/check-academy-shell.mjs",
+		"check:academy-interactions": "vitest run src/tests/command-palette.test.ts src/tests/theme.test.ts src/lib/games/guess-the-logo.test.ts src/lib/games/guess-the-logo-achievements.test.ts",
+		"check:academy-shell": "node --test scripts/academy-source.test.mjs && node scripts/check-academy-shell.mjs",
 		"start": "astro dev",
 		"storybook": "storybook dev -p 6006",
 		"test:seo": "vitest run src/tests/seo.test.ts",
@@ -66,7 +67,6 @@
 		"better-auth": "^1.5.6",
 		"better-sqlite3": "^12.8.0",
 		"cloudevents": "^10.0.0",
-		"cmdk": "^1.1.1",
 		"drizzle-orm": "^0.45.1",
 		"email-preferences": "workspace:*",
 		"feedsmith": "^2.9.1",
@@ -112,6 +112,7 @@
 		"yaml": "^2.8.3"
 	},
 	"devDependencies": {
+		"@astrojs/compiler": "3.0.1",
 		"@biomejs/biome": "2.4.9",
 		"@graphql-codegen/cli": "^6.2.1",
 		"@graphql-codegen/client-preset": "^5.2.4",

@@ -8,9 +8,17 @@ on:
     - main
     paths:
     - .github/workflows/rawkode-academy-website-default.yml
+    - bun.lock
+    - bun.lock/**
     - content/**
     - cue.mod/**
     - packages/design-system/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/achievements/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/leaderboard/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-learned-phrases/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/player-stats/**
+    - projects/rawkode.academy/games/secrets-of-kubernetes/share-cards/**
+    - projects/rawkode.academy/platform/email-preferences/**
     - projects/rawkode.academy/platform/notifications/**
     - projects/rawkode.academy/website/astro.config.mts
     - projects/rawkode.academy/website/astro.config.mts/**
@@ -21,7 +29,10 @@ on:
     - projects/rawkode.academy/website/package.json/**
     - projects/rawkode.academy/website/public/**
     - projects/rawkode.academy/website/schema/**
+    - projects/rawkode.academy/website/scripts/**
     - projects/rawkode.academy/website/src/**
+    - projects/rawkode.academy/website/vitest.config.ts
+    - projects/rawkode.academy/website/vitest.config.ts/**
     - projects/rawkode.academy/website/wrangler.jsonc
     - projects/rawkode.academy/website/wrangler.jsonc/**
   workflow_dispatch: {}
