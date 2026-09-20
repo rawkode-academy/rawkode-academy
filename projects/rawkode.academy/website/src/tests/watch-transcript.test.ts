@@ -406,7 +406,10 @@ describe("watch resources and comments", () => {
 			{ title: " ", type: "url", url: "https://example.com" },
 		]);
 		await flushPromises();
-		expect(wrapper.get("select").element.value).toBe("resources");
+		expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+			"Resources",
+		);
+		expect(wrapper.find("select").exists()).toBe(false);
 		expect(wrapper.findAll("a").map((link) => link.attributes("href"))).toEqual(
 			[
 				"https://example.com/docs",
@@ -419,14 +422,22 @@ describe("watch resources and comments", () => {
 		expect(wrapper.text()).not.toContain("Unsafe");
 	});
 
-	it("falls back to comments if resources become invalid and allows native mobile switching", async () => {
+	it("switches the visible tabs and falls back to comments when resources become invalid", async () => {
 		const wrapper = mountTabs([
 			{ title: "Docs", type: "url", url: "https://example.com" },
 		]);
 		await flushPromises();
-		await wrapper.get("select").setValue("comments");
-		expect(wrapper.get("select").element.value).toBe("comments");
-		await wrapper.get("select").setValue("resources");
+		await wrapper.findAll('[role="tab"]')[0]!.trigger("click");
+		await flushPromises();
+		expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+			"Comments",
+		);
+		expect(wrapper.get("[data-comments-fixture]").isVisible()).toBe(true);
+		await wrapper.findAll('[role="tab"]')[1]!.trigger("click");
+		await flushPromises();
+		expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toBe(
+			"Resources",
+		);
 		await wrapper.setProps({
 			resources: [{ title: "Gone", type: "url", url: "#" }],
 		});
@@ -436,7 +447,7 @@ describe("watch resources and comments", () => {
 		expect(wrapper.get("[data-comments-fixture]").isVisible()).toBe(true);
 	});
 
-	it("uses unique native mobile select IDs and labels across instances", async () => {
+	it("keeps tab and panel IDs unique across instances without duplicate selectors", async () => {
 		const wrapper = mount(
 			defineComponent(
 				() => () =>
@@ -458,14 +469,20 @@ describe("watch resources and comments", () => {
 		);
 		wrappers.push(wrapper);
 		await flushPromises();
-		const selects = wrapper.findAll("select");
-		expect(new Set(selects.map((select) => select.attributes("id"))).size).toBe(
-			2,
-		);
-		for (const select of selects)
-			expect(
-				wrapper.find('label[for="' + select.attributes("id") + '"]').exists(),
-			).toBe(true);
+		expect(wrapper.find("select").exists()).toBe(false);
+		const tabLists = wrapper.findAll('[role="tablist"]');
+		expect(tabLists).toHaveLength(2);
+		const tabs = wrapper.findAll('[role="tab"]');
+		expect(tabs).toHaveLength(4);
+		expect(new Set(tabs.map((tab) => tab.attributes("id"))).size).toBe(4);
+		for (const tab of tabs) {
+			await tab.trigger("click");
+			await flushPromises();
+			const panel = wrapper.get(
+				'[id="' + tab.attributes("aria-controls") + '"]',
+			);
+			expect(panel.attributes("aria-labelledby")).toBe(tab.attributes("id"));
+		}
 	});
 
 	it("SSR and hydration show the initial resource panel without requiring a tab click", async () => {

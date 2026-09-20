@@ -10,6 +10,8 @@ export const tabs = sva({
 			display: "flex",
 			alignItems: "stretch",
 			gap: "2",
+			// Keep the 2px outline and 2px offset inside the scrollable area.
+			padding: "1",
 			overflowX: "auto",
 			borderBottom: "hairline",
 			borderColor: "academy.border",

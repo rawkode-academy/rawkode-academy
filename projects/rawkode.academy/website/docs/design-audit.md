@@ -91,9 +91,36 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F64 | Watch breadcrumb pushes the show to the far edge; description spans 1084px; reactions sit in an empty full-width panel with small targets | Only live status uses auto margin; 680px reading measure, unboxed reactions and 44px breadcrumb/reaction/technology targets. Show recommendations use H2/H3 with no duplicate image name | `academyWatch.ts`, `watch/[...slug].astro`, `ShowVideoSection.astro` |
 | F65 | One-option Comments tab hides its content on arrival; empty state repeats Comments inside nested panels | Render a direct H2 discussion when no resources exist, with one compact empty message/link. Resource tabs explicitly initialize the SSR selection. Actual SSR/hydration, empty/nonempty comment tests and compiled Browser verification | `video-content-tabs.vue`, `comments.vue` |
 | F66 | Kueue description ends in four unlinked Learn more names, redundant subscription prose and nonfunctional hashtags | Remove these ten lines; real technology links and newsletter already provide those onward actions. Substantive description and learning outcomes preserved | Kueue content record; both-size full-page review |
+| F67 | Populated resource tabs clip the trigger focus outline and put flush-left content inside a redundant enclosing panel | Removed outer panel and permanently hidden mobile dropdown; bounded references to 680px, padded scrollable tab list for complete keyboard outline. Resources initially selected; both panels and ArrowLeft/Right focus verified desktop/mobile | `academyWatch.ts`, shared `tabs.ts`, `video-content-tabs.vue`; local 22:28 Browser |
 
 ## Verification log
 
+- Seccomp whole collapsed-transcript page reviewed through copyright desktop/light
+  and mobile/dark in compiled 22:28 build (desktop footer additionally dark).
+  All ten expanded chapters inspected at both sizes. Search matches, no results,
+  keyboard clear restoring all 129 rows/nine sections verified; this is not a
+  visual or factual review of every transcript paragraph. Hosted c04b61c3 desktop
+  timestamp Enter sought to 4836s and began playback; navigation ended playback.
+  Four resource links, three cast, three technologies, both tab panels, six related
+  sessions and signup reviewed. Full tab focus outlines at both sizes; 390/390 and
+  1440/1440 document widths. Ledger now has 36 whole-page passes / 45 entries.
+- F67 build: 444 Astro files, zero errors/warnings and nine hints; 116 SSR checks,
+  13 parser tests passed. Final full Vitest 578/578 in 47 files; strict Panda check
+  (74 files, missing/stale zero) and vue-tsc passed. Removed stale source-shape
+  selection assertions from payload guard; actual SSR/hydration and tab-interaction
+  tests continue to verify initial selection and fallback. Root cuenv 0.55.1 sync
+  produced no generated drift. Main-agent diff review only; independent reviewer
+  unavailable. Final external-link glyph repair awaits deployed visual check.
+- Checkpoint `ecec099d` pushed normally; website CI 35538375580 and design-system
+  CI 35538375587 succeeded. New preview:
+  https://c04b61c3-rawkode-academy-website.rawkodeacademy.workers.dev.
+  Hosted mobile Watch has 24 distinct session links and 390/390 width. Hosted
+  Kueue mobile/desktop delta verified: player loads, unboxed 44px reactions,
+  680px desktop description, compact comments visible without a tab, complete
+  copy-link and Discord-link focus outlines, no old boilerplate, 390/390 and
+  1440/1440 document widths. No hosted playback or write actions performed.
+  Final full Vitest rerun passed 578/578 in 47 files. F67 remains open after
+  targeted local Seccomp resource-state review; that page is not signed off.
 - 22:11 compiled build: full Watch first page and Kueue detail inspected through
   copyright at 1440x1000 light and 390x844 dark. Ledger now has 35 whole-page
   passes; all other URLs remain individually pending. Catalogue mobile Next,

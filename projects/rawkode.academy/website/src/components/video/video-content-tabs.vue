@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Tabs } from "@ark-ui/vue/tabs";
-import { computed, ref, useId, watch as watchValue } from "vue";
+import { computed, ref, watch as watchValue } from "vue";
 import { academyWatch, tabs as academyTabs } from "@rawkodeacademy/design-system";
 import VideoComments from "./comments.vue";
 
@@ -20,7 +20,6 @@ const props = withDefaults(defineProps<{ videoId: string; resources?: Resource[]
 const watch = academyWatch();
 const tabStyles = academyTabs({ tone: "academy" });
 
-const mobileSelectId = useId();
 const categoryOrder = ["documentation", "code", "slides", "demos", "other"];
 const categoryLabels: Record<string, string> = {
 	documentation: "Documentation",
@@ -57,9 +56,7 @@ const validResources = computed(() => props.resources.flatMap((resource) => {
 	return [{ ...resource, href, category: categoryOrder.includes(resource.category ?? "") ? resource.category! : "other" }];
 }));
 const activeTab = ref(validResources.value.length > 0 ? "resources" : "comments");
-const tabs = computed(() => validResources.value.length > 0
-	? [{ id: "comments", label: "Comments" }, { id: "resources", label: "Resources" }]
-	: [{ id: "comments", label: "Comments" }]);
+const tabs = [{ id: "comments", label: "Comments" }, { id: "resources", label: "Resources" }];
 watchValue(validResources, (resources) => {
 	if (resources.length === 0 && activeTab.value === "resources") activeTab.value = "comments";
 });
@@ -76,7 +73,7 @@ const groupedResources = computed(() => {
 });
 
 const setActiveTab = (tabId: string) => {
-	if (!tabs.value.some((tab) => tab.id === tabId) || activeTab.value === tabId) return;
+	if (!tabs.some((tab) => tab.id === tabId) || activeTab.value === tabId) return;
 	const previousTab = activeTab.value;
 	activeTab.value = tabId;
 	try {
@@ -89,10 +86,6 @@ const setActiveTab = (tabId: string) => {
 		// Analytics must never block tab navigation.
 	}
 };
-
-const handleMobileChange = (event: Event) => {
-	setActiveTab((event.target as HTMLSelectElement).value);
-};
 </script>
 
 <template>
@@ -100,37 +93,28 @@ const handleMobileChange = (event: Event) => {
 		<VideoComments :video-id="videoId" :heading-level="2" />
 	</section>
 	<Tabs.Root v-else :value="activeTab" :default-value="activeTab" :class="watch.tabsRoot" @value-change="setActiveTab($event.value)">
-		<h2 class="sr-only">{{ validResources.length > 0 ? "Comments and resources" : "Comments" }}</h2>
-		<div>
-			<div :class="watch.tabMobile">
-				<label :for="mobileSelectId" class="sr-only">Select a video content section</label>
-				<select :id="mobileSelectId" :name="mobileSelectId" :class="watch.tabSelect" :value="activeTab" @change="handleMobileChange">
-					<option v-for="tab in tabs" :key="tab.id" :value="tab.id">{{ tab.label }}</option>
-				</select>
-			</div>
-
-			<Tabs.List :class="[tabStyles.list, watch.tabDesktop]" aria-label="Video content sections">
-				<Tabs.Trigger v-for="tab in tabs" :key="tab.id" :value="tab.id" :class="tabStyles.trigger">
-					{{ tab.label }}
-				</Tabs.Trigger>
-				<Tabs.Indicator :class="tabStyles.indicator" />
-			</Tabs.List>
-		</div>
+		<h2 class="sr-only">Comments and resources</h2>
+		<Tabs.List :class="tabStyles.list" aria-label="Video content sections">
+			<Tabs.Trigger v-for="tab in tabs" :key="tab.id" :value="tab.id" :class="tabStyles.trigger">
+				{{ tab.label }}
+			</Tabs.Trigger>
+			<Tabs.Indicator :class="tabStyles.indicator" />
+		</Tabs.List>
 
 		<Tabs.Content value="comments" :class="tabStyles.content"><VideoComments :video-id="videoId" /></Tabs.Content>
-		<Tabs.Content v-if="validResources.length > 0" value="resources" :class="tabStyles.content">
-				<div :class="watch.resourceGroups">
-					<div v-for="group in groupedResources" :key="group.category" :class="watch.resourceGroup">
-						<h3 :class="watch.resourceHeading">{{ categoryLabels[group.category] || categoryLabels.other }}</h3>
-						<div :class="watch.resourceList">
-							<a v-for="(resource, idx) in group.items" :key="resource.id || `${group.category}-${idx}`" :href="resource.href" :target="resource.type === 'url' ? '_blank' : undefined" :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined" :class="watch.resourceLink">
-								<svg :class="watch.resourceIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="categoryIcons[group.category] || categoryIcons.other" /></svg>
-								<div :class="watch.resourceBody"><div :class="watch.resourceTitle">{{ resource.title }}</div><div v-if="resource.description" :class="watch.resourceDescription">{{ resource.description }}</div></div>
-								<svg v-if="resource.type === 'url'" :class="watch.resourceExternal" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-							</a>
-						</div>
+		<Tabs.Content value="resources" :class="tabStyles.content">
+			<div :class="watch.resourceGroups">
+				<div v-for="group in groupedResources" :key="group.category" :class="watch.resourceGroup">
+					<h3 :class="watch.resourceHeading">{{ categoryLabels[group.category] || categoryLabels.other }}</h3>
+					<div :class="watch.resourceList">
+						<a v-for="(resource, idx) in group.items" :key="resource.id || `${group.category}-${idx}`" :href="resource.href" :target="resource.type === 'url' ? '_blank' : undefined" :rel="resource.type === 'url' ? 'noopener noreferrer' : undefined" :class="watch.resourceLink">
+							<svg :class="watch.resourceIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="categoryIcons[group.category] || categoryIcons.other" /></svg>
+							<div :class="watch.resourceBody"><div :class="watch.resourceTitle">{{ resource.title }}</div><div v-if="resource.description" :class="watch.resourceDescription">{{ resource.description }}</div></div>
+							<svg v-if="resource.type === 'url'" :class="watch.resourceExternal" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+						</a>
 					</div>
 				</div>
-			</Tabs.Content>
+			</div>
+		</Tabs.Content>
 	</Tabs.Root>
 </template>

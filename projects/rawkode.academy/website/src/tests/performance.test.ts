@@ -111,19 +111,13 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).not.toContain("descriptionHtml={renderedDescriptionHtml}");
 	});
 
-	it("defaults supplemental tabs to valid resources, otherwise comments", () => {
+	it("keeps supplemental tabs separate from description and transcript payloads", () => {
 		const source = readProjectFile(
 			"src/components/video/video-content-tabs.vue",
 		);
 
 		expect(source).not.toContain("descriptionHtml");
 		expect(source).not.toContain('label: "Description"');
-		expect(source).toMatch(
-			/const activeTab = ref\(validResources\.value\.length > 0 \? "resources" : "comments"\)/,
-		);
-		expect(source).toContain(
-			'v-if="validResources.length > 0" value="resources"',
-		);
 		expect(source).not.toContain("import VideoTranscript");
 	});
 });

@@ -4,6 +4,16 @@
   "rule": "Every path in the inventory is pending until an explicit review entry exists here. Source reviews and template samples are not visual sign-off.",
   "reviews": [
     {
+      "path": "/watch/introduction-to-the-kubernetes-seccomp-operator-rtfm-with-rawkode",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 22:28 build; desktop dark transcript/chapter states on hosted c04b61c3 / ecec099d; desktop footer dark",
+      "findings": ["F67 resolved"],
+      "coverage": "Whole collapsed-transcript page inspected through copyright at both sizes: loaded player/poster, long title and metadata, three outcomes and description, three technology links, all three cast members, four resources, both tab panels, six recommendations, hydrated signup and footer. All ten expanded chapters inspected desktop and mobile. Resource tabs initially show Resources; ArrowLeft/Right switch panels with complete focus outlines at both sizes. Transcript AppArmor query shows three highlighted matches in one paragraph; no-match state stays beside input. Keyboard clear restores all 129 rows in nine sections. Hosted desktop timestamp Enter seeks to 4836 seconds and starts playback; navigation stops playback. Widths 390/390 and 1440/1440.",
+      "justification": "Player is the primary task; date/runtime and share action orient the viewer. Outcomes and description establish scope. Chapters and searchable captions support precise navigation without an always-expanded 129-paragraph wall. Technology/cast links provide context, actual documentation and code resources enable follow-through, and two visible tabs separate references from discussion. Removed redundant outer resource panel and permanently hidden dropdown; bounded recommendations and optional signup follow learning content.",
+      "limitations": "Expanded transcript reviewed at its opening and filtered match/empty/recovery states, not every one of 129 paragraphs or caption accuracy. No full playback, fullscreen, casting, PiP, live stream, external resource visits, authentication, reactions, comments or subscriptions. Main-agent review only. Final external-link glyph repair still requires deployed delta verification."
+    },
+    {
       "path": "/watch",
       "status": "visual-pass",
       "viewports": ["1440x1000 light", "390x844 dark"],
