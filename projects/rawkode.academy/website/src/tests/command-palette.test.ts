@@ -4,7 +4,7 @@ import CommandPalette from "../components/command-palette/CommandPalette.vue";
 
 let wrapper: VueWrapper | undefined;
 const response = (data: unknown) => new Response(JSON.stringify(data), { status: 200, headers: { "Content-Type": "application/json" } });
-const navigation = [{ id: "watch", title: "Watch videos", href: "/watch", category: "Pages" }];
+const navigation = [{ id: "watch", title: "Watch videos", href: "/watch", category: "Pages" }, { id: "read", title: "All articles", href: "/read", category: "Articles" }];
 function input() { return document.querySelector<HTMLInputElement>('input[role="combobox"]')!; }
 async function search(value: string) {
 	input().value = value;
@@ -31,6 +31,7 @@ describe("Academy command palette", () => {
 	it("loads navigation, supports appearance selection, and closes with Escape", async () => {
 		await open();
 		expect(document.body.textContent).toContain("Watch videos");
+		expect(document.body.textContent).toContain("All articles");
 		const appearance = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(node => node.textContent?.includes("Change appearance"))!;
 		appearance.click(); await flushPromises();
 		expect(document.body.textContent).toContain("Light mode");

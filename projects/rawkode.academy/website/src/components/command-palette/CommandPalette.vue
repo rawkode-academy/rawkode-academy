@@ -70,7 +70,7 @@ watch(open, async (isOpen, _previous, onCleanup) => {
 		if (!response.ok) throw new Error("Navigation unavailable");
 		const data: Item[] = await response.json();
 		if (controller.signal.aborted) return;
-		navigation.value = data.filter(item => item.category !== "Articles").map(item => ({ ...item, id: `page:${item.id}` }));
+		navigation.value = data.map(item => ({ ...item, id: `page:${item.id}` }));
 		navigationLoaded.value = true;
 	} catch { if (!controller.signal.aborted) navigationError.value = true; }
 	finally { if (!controller.signal.aborted) loadingNavigation.value = false; }

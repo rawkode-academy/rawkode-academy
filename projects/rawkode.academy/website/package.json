@@ -3,7 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"build-storybook": "storybook build",
-		"build": "bun run check:academy-shell && bun run check:academy-interactions && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && astro check && astro build",
+		"build": "bun run check:academy-shell && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && bun run check:academy-interactions && astro check && astro build",
 		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev": "astro dev",
