@@ -45,7 +45,7 @@ await module.link((specifier) => {
 await module.evaluate();
 const container = await AstroContainer.create();
 
-test("one named graphic, native zoom checkbox and keyboard-scrollable region without hydration", async () => {
+test("one named graphic, native zoom checkbox and keyboard-scrollable region without framework hydration", async () => {
 	const html = await container.renderToString(module.namespace.default, {
 		props: {
 			id: "architecture",
@@ -58,7 +58,8 @@ test("one named graphic, native zoom checkbox and keyboard-scrollable region wit
 	});
 	const dom = parse(html);
 	assert.equal(dom.querySelectorAll("svg").length, 1);
-	assert.equal(dom.querySelectorAll("script, astro-island").length, 0);
+	assert.equal(dom.querySelectorAll("astro-island").length, 0);
+	assert.equal(dom.querySelectorAll('script[type="module"]').length, 1);
 	const checkbox = dom.querySelector('input[type="checkbox"]');
 	assert.equal(checkbox.hasAttribute("checked"), false);
 	assert.equal(checkbox.parentNode.tagName, "LABEL");

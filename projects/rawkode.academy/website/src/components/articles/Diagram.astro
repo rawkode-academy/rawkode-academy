@@ -14,7 +14,7 @@ const styles = academyDiagram();
 <figure class={styles.root} aria-labelledby={`${id}-caption`}>
 	<figcaption class={styles.caption} id={`${id}-caption`}>{title}</figcaption>
 	<label class={styles.toggle}>
-		<input type="checkbox" aria-controls={`${id}-viewport`} />
+		<input type="checkbox" data-diagram-toggle aria-controls={`${id}-viewport`} />
 		Enlarge diagram
 	</label>
 	<div
@@ -31,3 +31,17 @@ const styles = academyDiagram();
 	</div>
 	<div class={styles.description} id={`${id}-description`}>{description}</div>
 </figure>
+
+<script>
+	for (const toggle of document.querySelectorAll<HTMLInputElement>("[data-diagram-toggle]")) {
+		toggle.addEventListener("change", () => {
+			const viewport = document.getElementById(toggle.getAttribute("aria-controls") ?? "");
+			if (!viewport) return;
+			viewport.scrollTo({
+				left: toggle.checked ? Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2) : 0,
+				top: 0,
+				behavior: "instant",
+			});
+		});
+	}
+</script>

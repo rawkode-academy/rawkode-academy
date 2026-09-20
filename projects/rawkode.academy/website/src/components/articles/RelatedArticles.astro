@@ -58,7 +58,7 @@ const finalRelatedArticles = relatedArticles.slice(0, limit);
 		</h2>
 		<div class={styles.grid}>
 			{finalRelatedArticles.map((article) => (
-				<ArticleCard article={article} />
+				<ArticleCard article={article} headingLevel={3} />
 			))}
 		</div>
 	</section>

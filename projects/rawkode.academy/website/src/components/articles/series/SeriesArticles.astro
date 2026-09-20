@@ -25,7 +25,7 @@ const articles = (await getCollection("articles"))
 	) : (
 		<div class={doc.grid}>
 			{articles.map((article) => (
-				<ArticleCard article={article} />
+				<ArticleCard article={article} headingLevel={3} />
 			))}
 		</div>
 	)

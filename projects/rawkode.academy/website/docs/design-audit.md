@@ -83,9 +83,43 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F56 | Lesson signup nests cards and repeats its purpose three times; overview sponsor copy understates offers/product-update scope | One surface, one heading and explanation; explicit optional sponsor-sharing language in both forms. Final actual labels exceed 44px at both sizes; pointer toggle and keyboard focus verified without submission | Course signup components, `academyForms.ts` |
 | F57 | Optional D2 integration allows a successful build to publish raw diagram source when the compiler check fails | Always register the integration: build/dev preflight requires the declared compiler while preview still works without it. Compiled SVG rendering verified; dense mobile diagram readability tracked separately in F58 | `astro.config.mts`, document contract test |
 | F58 | Dense architecture diagram is unreadable on mobile; narrow GraphQL diagram expands to an excessive desktop height | Shared static figure with native enlargement toggle, keyboard-scrollable region, accessible name and written relationship description. Fitted/expanded views verified at both sizes. Normal scrolling over fitted graphics preserved; containment applies only when enlarged | `academyDiagram.ts`, `articles/Diagram.astro`, both published D2 articles |
+| F59 | Coverless article reserves an empty media frame because Astro supplies a registered but empty Vue slot | Explicit media/footer presence across the renderer boundary; intrinsic text-only card height, title-only accessible name, contextual H3 below section headings. Three real Astro/Vue SSR regressions pass; final compiled desktop/mobile card and complete intrinsic focus boundary verified | `ArticleCard.astro`, `BaseCard.vue`, related/topic/series consumers |
+| F60 | Enlarging a centred graph initially shows its empty top-left corner on mobile | Small progressive enhancement centres horizontal scroll on expansion and resets on collapse; native checkbox/CSS retained. Both graphs now open on their root node at mobile; architecture also verified desktop. Keyboard region focus, right-arrow panning, pointer scrolling and fitted reset rechecked on GraphQL | `articles/Diagram.astro`, two script tests |
 
 ## Verification log
 
+- Final 21:26 build passed: 442 Astro files, zero errors/warnings, nine hints,
+  114 SSR/hydration checks, 13 parser tests and 122 interaction tests. Full
+  Vitest 574/574 across 46 files passed. Existing Zed highlighting fallback
+  warning remains. Final card mobile/desktop focus and intrinsic desktop height
+  verified, plus centred desktop architecture enlargement. These local changes
+  are not yet deployed. Main-agent review only; no independent final reviewer.
+- Architecture whole-page deployed review plus locally corrected F59/F60 delta
+  now passes. Series empty state also inspected end to end at desktop/dark and
+  mobile/dark; Enter on its recovery link reaches Read. No published series
+  detail exists, so its data-present composition remains fixture-only/pending.
+- Checkpoint `3541053b` pushed normally. Website CI 35533972455 and design-system
+  CI 35533972424 succeeded, including cuenv 0.55.1 and `deploy.preview`.
+  Preview: https://f4762c10-rawkode-academy-website.rawkodeacademy.workers.dev.
+  Browser verified corrected Acorn related links at both sizes, plus compiled
+  SVGs in both published diagram articles. Whole architecture article inspected
+  at desktop/light and mobile/dark through copyright; discovered F59/F60 remain
+  separate from compiler success. No infrastructure or subscription writes.
+- Teleport lessons three and four are whole-page local passes on pushed
+  `3541053b`; lessons five and six are whole-page deployed passes at both sizes.
+  All authored sections, resources, navigation, hydrated optional signup and
+  footer were inspected. Lesson-five Enter navigation reaches the final lesson,
+  which correctly has only Previous. Posters/controls loaded (9:34 and 9:33);
+  these two recordings were not played. Mobile documents remain 390px wide.
+- Preview console recorded Grafana Faro transport `Failed to fetch` errors.
+  UI and forms still hydrated; telemetry delivery is not verified and the cause
+  has not been established. Monitoring was not disabled to hide these errors.
+- Fresh required root sync passed after retry with network access; generated
+  files remain unchanged. Initial sandboxed attempt could not resolve GitHub.
+- 21:14 card build passed: 441 Astro files, zero errors/warnings, nine hints,
+  114 SSR/hydration tests. Full Vitest 572/572 passed. Desktop review prompted
+  intrinsic coverless-card height; 21:18 rebuild passed with the same checks.
+  Later diagram centring requires another integration build and Browser check.
 - Final 20:54 integration build passed: 44 templates, four bracket pages, 31
   recipes, 440 Astro files / zero errors / zero warnings / nine hints, and all
   111 SSR/hydration tests. Strict design-system check passed. Final Browser delta

@@ -180,21 +180,21 @@
       "path": "/technology/acorn",
       "status": "visual-pass",
       "viewports": ["1440x1000 light", "390x844 light"],
-      "environment": "Deployed preview d3ab9ff5 whole-page; compiled local :4322 20:32 corrected related links",
+      "environment": "Deployed preview d3ab9ff5 whole-page; compiled local :4322 20:32 and deployed f4762c10 corrected related links",
       "findings": ["F55"],
       "coverage": "Whole page inspected with overlapping captures through copyright at both sizes on deployed 5e1d65cd. Historical status, metadata, project links, three authored paragraphs, one recording, six related projects and hydrated signup inspected. Mobile document width 390/390. All six corrected related links verified locally at both sizes: consistent 40px marks and AP/BU fallbacks, one shared category, complete desktop keyboard focus outline.",
       "justification": "Historical status and personal rating distinguish maintenance from opinion. Metadata qualifies the project, project links provide evidence, and description supplies context. Dated recording preserves learning history. Related projects offer onward exploration; signup explicitly concerns Academy coverage, not project updates.",
-      "limitations": "No playback, external destination verification or subscription. Authored factual statements preserved, not independently researched."
+      "limitations": "Corrected related links subsequently verified on deployed f4762c10 at both sizes in dark mode. No playback, external destination verification or subscription. Authored factual statements preserved, not independently researched."
     },
     {
       "path": "/read/our-architecture",
-      "status": "verification-pending",
+      "status": "visual-pass",
       "viewports": ["1440x1000 dark and light", "390x844 dark"],
-      "environment": "Compiled local preview :4322, 20:32 / 20:46 whole-section and 20:54 final diagram builds",
-      "findings": ["F57 resolved", "F58 resolved"],
+      "environment": "Deployed f4762c10 whole-page; compiled local :4322 21:22 centring and 21:26 final card build",
+      "findings": ["F57 resolved", "F58 resolved", "F59 resolved", "F60 resolved"],
       "coverage": "Header, introduction, Cloud Native section, actual compiled diagram and CQRS boundary inspected. In 20:46, named diagram, written description, 44px native toggle, Space activation, Tab to scroll region, arrow-key and pointer panning, return to fitted view verified. Expanded mobile region is 350px wide over 1280px content, bounded to 591px height; document remains 390px. Desktop document remains 1440px and arrow navigation pans the enlarged region. Final 20:54 fitted mobile diagram and description rechecked; shared overflow correction verified on the GraphQL article.",
-      "justification": "Diagram communicates one gateway feeding five domain services and databases, with a separate write gateway. A description makes those relationships available without reading tiny labels. Enlargement and local scrolling provide detail without modal navigation or duplicate graphics.",
-      "limitations": "Full article body and related content remain pending; no infrastructure commands, external links or subscriptions exercised. Historical technical narrative is not independently revalidated."
+      "justification": "Title, author/date and technology links establish topic and provenance. Four authored sections explain architecture decisions; the one gateway/five-service diagram, written description and optional local enlargement make relationships readable. The command example is contained code rather than executable UI. TOC aids navigation; bounded article/video recommendations support continuation; optional signup follows content. Coverless recommendations retain useful title, summary and author without invented imagery.",
+      "limitations": "Whole body, recommendations, hydrated signup and copyright inspected on deployed f4762c10 at 1440x1000 light and 390x844 dark. Mobile code overflow stays within its own block; desktop document is 1440px. F59 final compact card verified at both sizes with full keyboard outline; F60 root-centred architecture zoom verified mobile and desktop. No infrastructure commands, external links or subscriptions exercised; historical technical narrative not independently revalidated. New corrections are local, pending deployment."
     },
     {
       "path": "/read/federated-graphql-microservices",
@@ -204,7 +204,7 @@
       "findings": ["F57 resolved", "F58 resolved"],
       "coverage": "Our Federated GraphQL Stack anchor and whole compiled SVG inspected in overlapping desktop/mobile captures, with caption and written description. Corrected fitted graphic measures 397.8x700 desktop and is bounded to 591px mobile; expanded region contains 1280px content without document overflow. Space, Tab and arrow panning verified at both sizes. Final 20:54 mobile default overflow is visible and pointer scrolling over the graphic advances the page 422px; enlarged overflow is auto with keyboard panning. Document 390/390.",
       "justification": "Diagram distinguishes shared gateway from two independent service/server/ORM/database chains. The new written description and optional enlarged region preserve both overview and label access.",
-      "limitations": "Not a whole-page sign-off. Article code, copy, related content, external destinations and live API remain pending."
+      "limitations": "Compiled diagram and native toggle verified on deployed f4762c10 mobile/dark. F60 corrected in local 21:22 build: enlarged graph opens on API Client, Tab focuses named region, Right pans, pointer scroll reveals Cosmo, unchecking returns fitted graph. Live Browser geometry evaluation timed out, so no new numeric pan measurement claimed. Not a whole-page sign-off: article code, copy, related content, external destinations and live API remain pending."
     },
     {
       "path": "/read",
@@ -332,6 +332,56 @@
       "coverage": "Whole page read with overlapping captures through copyright at both sizes. Loaded video poster and 10:39 controls, all four authored sections, five deployment steps, three upstream resources, previous/next navigation and simplified signup inspected. Mobile width 390/390. Overview lesson link entered by keyboard; no unsupported script download promise remains. In 20:32 build actual clickable consent label measures 261x68.25px mobile and 479.95x45.5px desktop, with full keyboard focus; label click toggled on then off without submission.",
       "justification": "Prerequisites establish readiness, five ordered steps outline the recording, and production comparison provides context. Actual upstream resources support further study. Breadcrumb, ordinal and bidirectional lesson links locate the learner in the sequence. Optional signup remains separate from primary learning content.",
       "limitations": "No infrastructure commands or form submission. Playback was exercised on lesson one, not this recording."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/03-identity-based-access-rbac",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local preview :4322, 20:54 build / pushed commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes. Loaded poster and 6:14 controls, all four authored sections, four-step authentication flow, three GitOps bullets, wrapped inline CLI command, three upstream resources, previous/next links and signup reviewed. Mobile document 390/390. Next-lesson full keyboard outline and Enter navigation to lesson four verified.",
+      "justification": "Title, lesson ordinal and breadcrumb locate the lesson. The recording is primary; the written flow explains identity-to-certificate progression, GitOps configuration and CLI access. Documentation and source links support application. Bidirectional navigation advances the sequence; optional signup is separate from learning content.",
+      "limitations": "No playback on this recording, command execution, authentication, external resource visit or form submission. Technical claims preserved, not independently validated."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "environment": "Compiled local preview :4322, 20:54 build / pushed commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected in overlapping captures through copyright at both sizes: loaded 14:27 poster/controls, all five authored sections, two-layer ordered list, two namespace examples, deny-rule and defense-in-depth prose, three resources, bidirectional navigation and optional signup. Entered through lesson-three keyboard navigation. Mobile width 390/390. This route was inspected in dark; the shared light composition was checked on lesson three.",
+      "justification": "Least-privilege context establishes the problem. The ordered two-layer model and distinct namespace examples explain responsibility and boundaries; deny rules and defense-in-depth text describe how layers interact. Resources supply upstream reference material, while sequence navigation and optional updates serve learner continuation.",
+      "limitations": "No video playback, infrastructure commands, external resource visit or subscription. Security behavior described by the author is not independently validated."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/05-just-in-time-access",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Deployed preview f4762c10 / commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes: loaded 9:34 poster and controls, all three authored sections, six implementation steps, wrapped inline commands, three resources, previous/next navigation and hydrated signup. Mobile document 390/390; keyboard Enter on Next reaches lesson six.",
+      "justification": "Standing-privilege context motivates the lesson. The recording and six-step request/approval/drop sequence teach the workflow; TTL guidance explains its boundary. Upstream resources support further learning. Breadcrumb and sequence navigation orient; optional signup stays after the lesson.",
+      "limitations": "No playback, command execution, external resource visits or form submission. Compliance and technical claims preserved, not independently revalidated."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/06-auditing-and-session-recording",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "environment": "Deployed preview f4762c10 / commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected with overlapping captures through copyright at both sizes: loaded 9:33 poster and controls, five authored sections, four audit-event bullets, two joining modes, five-item course recap, three resources, Previous-only final-lesson navigation and hydrated signup. Entered through lesson-five keyboard navigation. Mobile document 390/390. Shared light composition inspected on lesson five.",
+      "justification": "Audit events, session playback and distinct joining modes explain the final topic; the course recap closes the six-part sequence. Resources provide next steps, Previous returns to the preceding lesson, and breadcrumb retains course access without a fictional seventh lesson. Optional updates remain separate.",
+      "limitations": "No playback, live session joining, infrastructure commands, resource visits or subscription. Technical and licensing narrative preserved, not independently researched."
+    },
+    {
+      "path": "/series",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "environment": "Deployed preview f4762c10 / commit 3541053b",
+      "findings": [],
+      "coverage": "Whole page inspected through copyright at both sizes: masthead, honest zero-published-series message, recovery link and complete footer. Keyboard Enter on all articles reaches /read. No empty series is presented as published.",
+      "justification": "Existing route explains why there is no series content and directs readers to the available article archive. Masthead establishes the content format; the normal footer provides other destinations without invented examples or a future-release promise.",
+      "limitations": "Current empty state only. No generated published series detail exists; populated list and detail are not covered by this Browser pass."
     },
     {
       "path": "/news/kubernetes-1-36-service-externalips-deprecation",

@@ -144,7 +144,7 @@ function formatLearningPathDuration(minutes: number): string {
 		<section class={s.section}>
 			<h2 class={s.heading}>Articles about {technologyName}</h2>
 			<div class={s.grid}>
-				{articles.map((article) => <ArticleCard article={article} />)}
+				{articles.map((article) => <ArticleCard article={article} headingLevel={3} />)}
 			</div>
 		</section>
 	)}

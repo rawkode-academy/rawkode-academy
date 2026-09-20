@@ -8,9 +8,11 @@ import { academyDocument } from "@rawkodeacademy/design-system";
 
 type Props = {
 	article: CollectionEntry<"articles">;
+	headingLevel?: 2 | 3;
 };
 
-const { article } = Astro.props;
+const { article, headingLevel = 2 } = Astro.props;
+const Heading = headingLevel === 3 ? "h3" : "h2";
 const doc = academyDocument();
 const authors = await getEntries(article.data.authors);
 const readingTime = calculateReadingTime(article.body || "");
@@ -25,7 +27,12 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 }).format(article.data.publishedAt);
 ---
 
-<BaseCard href={`/read/${article.id}`}>
+<BaseCard
+	href={`/read/${article.id}`}
+	aria-label={article.data.title}
+	showCover={Boolean(article.data.cover)}
+	showFooter={authors.length > 0}
+>
 	{article.data.cover && (
 		<Fragment slot="cover">
 			<Image
@@ -44,7 +51,7 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 			{article.body?.trim() && <><span aria-hidden="true">·</span><span>{readingTime.text}</span></>}
 		</div>
 
-		<h2 class:list={[doc.cardTitle, "article-card__title"]}>{article.data.title}</h2>
+		<Heading class:list={[doc.cardTitle, "article-card__title"]}>{article.data.title}</Heading>
 
 		{article.data.openGraph?.subtitle && (
 			<p class:list={[doc.copy, "article-card__body"]}>{article.data.openGraph.subtitle}</p>
