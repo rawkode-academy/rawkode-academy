@@ -1,17 +1,15 @@
 <template>
+ <Dialog.Root :open="open" @open-change="handleOpenChange">
  <Teleport to="body">
- <dialog
- ref="dialogEl"
- class="tech-card-popover"
- :aria-label="technology.name"
- @click="onDialogClick"
- @close="$emit('close')"
- >
- <button type="button" class="close-btn" @click="dialogEl?.close()" aria-label="Close">
+ <Dialog.Backdrop class="tech-card-backdrop" />
+ <Dialog.Positioner class="tech-card-positioner">
+ <Dialog.Content class="tech-card-popover">
+ <Dialog.Title class="sr-only">{{ technology.name }}</Dialog.Title>
+ <Dialog.CloseTrigger class="close-btn" aria-label="Close">
  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
  </svg>
- </button>
+ </Dialog.CloseTrigger>
 
  <div class="card-frame">
  <!-- Header -->
@@ -82,12 +80,15 @@
  </a>
  </div>
  </div>
- </dialog>
+ </Dialog.Content>
+ </Dialog.Positioner>
  </Teleport>
+ </Dialog.Root>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { Dialog } from "@ark-ui/vue/dialog";
+import { computed, ref } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { getDimensionLabel } from "@/lib/explorer/dimensions";
 
@@ -97,23 +98,14 @@ interface Props {
 
 const props = defineProps<Props>();
 
-defineEmits<{
+const emit = defineEmits<{
 	close: [];
 }>();
 
-// Native <dialog>: focus trapping, Escape, and focus return come from the
-// platform. The close event bubbles up as the component's close emit.
-const dialogEl = ref<HTMLDialogElement | null>(null);
-
-onMounted(() => {
-	dialogEl.value?.showModal();
-});
-
-const onDialogClick = (event: MouseEvent) => {
-	// Clicks on ::backdrop target the dialog element itself
-	if (event.target === dialogEl.value) {
-		dialogEl.value?.close();
-	}
+const open = ref(true);
+const handleOpenChange = (details: { open: boolean }) => {
+	open.value = details.open;
+	if (!details.open) emit("close");
 };
 
 const statusLabel = computed(() => {
@@ -166,21 +158,21 @@ const formatDate = (dateStr: string | null): string => {
 
 <style scoped>
 /* =================================
- Modal Container (native <dialog>)
+ Modal Container
  ================================= */
-dialog.tech-card-popover {
+.tech-card-popover {
  /* Stage colors derive from the editorial palette, mirroring the matrix page */
- --stage-skip: var(--editorial-rust);
- --stage-watch: var(--editorial-amber-text);
+ --stage-skip: var(--colors-academy-status-rust);
+ --stage-watch: var(--colors-academy-status-amber);
  --stage-explore: color-mix(
  in oklab,
- var(--editorial-amber-text) 45%,
- var(--editorial-spruce) 55%
+ var(--colors-academy-status-amber) 45%,
+ var(--colors-academy-status-spruce) 55%
  );
- --stage-learn: var(--editorial-violet);
- --stage-adopt: var(--editorial-spruce);
- --stage-advocate: var(--editorial-ink);
- --stage-graveyard: var(--editorial-ink-mute);
+ --stage-learn: var(--colors-academy-status-violet);
+ --stage-adopt: var(--colors-academy-status-spruce);
+ --stage-advocate: var(--colors-academy-text);
+ --stage-graveyard: var(--colors-academy-text-muted);
 
  width: 480px;
  max-width: calc(100vw - 3rem);
@@ -188,19 +180,30 @@ dialog.tech-card-popover {
  padding: 0;
  border: none;
  background: transparent;
- margin: auto;
  overflow: visible;
 }
 
-:global(html.dark) dialog.tech-card-popover {
- --stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
+:global(html.dark) .tech-card-popover {
+ --stage-learn: color-mix(in oklab, var(--colors-academy-status-violet) 60%, white 40%);
 }
 
-dialog.tech-card-popover::backdrop {
+.tech-card-backdrop {
+ position: fixed;
+ inset: 0;
  background: rgb(0 0 0 / 0.6);
 }
 
-dialog.tech-card-popover[open] {
+.tech-card-positioner {
+ position: fixed;
+ inset: 0;
+ z-index: 1000;
+ display: grid;
+ place-items: center;
+ padding: 1rem;
+ overflow-y: auto;
+}
+
+.tech-card-popover[data-state="open"] {
  animation: scaleIn 0.2s var(--ease-standard, ease);
 }
 
@@ -212,7 +215,7 @@ dialog.tech-card-popover[open] {
 }
 
 @media (prefers-reduced-motion: reduce) {
- dialog.tech-card-popover[open] {
+ .tech-card-popover[data-state="open"] {
  animation: none;
  }
 }
@@ -230,25 +233,25 @@ dialog.tech-card-popover[open] {
  display: flex;
  align-items: center;
  justify-content: center;
- background: var(--surface-card);
- border: 1px solid var(--surface-border);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-border);
  border-radius: 50%;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  cursor: pointer;
  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .close-btn:hover {
- background: var(--surface-card-muted);
- color: var(--text-primary-content);
+ background: var(--colors-academy-ground);
+ color: var(--colors-academy-text);
 }
 
 /* =================================
  Card Frame
  ================================= */
 .card-frame {
- background: var(--surface-card);
- border: 1px solid var(--editorial-hairline-strong);
+ background: var(--colors-academy-panel);
+ border: 1px solid var(--colors-academy-input-border);
  border-radius: var(--radius-4xl);
  overflow: hidden;
  max-height: calc(100vh - 4rem);
@@ -263,8 +266,8 @@ dialog.tech-card-popover[open] {
  align-items: center;
  gap: 1.25rem;
  padding: 1.75rem;
- background: var(--surface-card-muted);
- border-bottom: 4px solid var(--text-muted);
+ background: var(--colors-academy-ground);
+ border-bottom: 4px solid var(--colors-academy-text-muted);
 }
 
 .card-header.status-skip { border-bottom-color: var(--stage-skip); }
@@ -284,9 +287,9 @@ dialog.tech-card-popover[open] {
  height: 80px;
  object-fit: contain;
  border-radius: var(--radius-4xl);
- background: var(--surface-card);
+ background: var(--colors-academy-panel);
  padding: 0.875rem;
- border: 1px solid var(--surface-border);
+ border: 1px solid var(--colors-academy-border);
 }
 
 .card-icon-placeholder {
@@ -295,12 +298,12 @@ dialog.tech-card-popover[open] {
  display: flex;
  align-items: center;
  justify-content: center;
- background: var(--surface-card);
+ background: var(--colors-academy-panel);
  border-radius: var(--radius-4xl);
- border: 1px solid var(--surface-border);
+ border: 1px solid var(--colors-academy-border);
  font-size: 2rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .card-titles {
@@ -311,7 +314,7 @@ dialog.tech-card-popover[open] {
 .card-name {
  font-size: 1.75rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
  margin: 0 0 0.625rem;
  line-height: 1.2;
 }
@@ -330,8 +333,8 @@ dialog.tech-card-popover[open] {
  letter-spacing: 0.04em;
  padding: 0.375rem 0.75rem;
  border-radius: var(--radius-md);
- color: var(--surface-base);
- background: var(--text-muted);
+ color: var(--colors-academy-canvas);
+ background: var(--colors-academy-text-muted);
 }
 
 .card-status-badge.status-skip { background: var(--stage-skip); }
@@ -344,7 +347,7 @@ dialog.tech-card-popover[open] {
 
 .card-category {
  font-size: 0.875rem;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
 }
 
 /* =================================
@@ -369,13 +372,13 @@ dialog.tech-card-popover[open] {
  font-weight: 700;
  text-transform: uppercase;
  letter-spacing: 0.08em;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
 }
 
 .section-text {
  font-size: 0.9375rem;
  line-height: 1.6;
- color: var(--text-secondary-content);
+ color: var(--colors-academy-text-soft);
  margin: 0;
 }
 
@@ -392,14 +395,14 @@ dialog.tech-card-popover[open] {
  align-items: center;
  gap: 0.25rem;
  padding: 0.875rem 0.5rem;
- background: var(--surface-card-muted);
+ background: var(--colors-academy-ground);
  border-radius: var(--radius-3xl);
 }
 
 .stat-value {
  font-size: 1rem;
  font-weight: 700;
- color: var(--text-primary-content);
+ color: var(--colors-academy-text);
 }
 
 .stat-label {
@@ -407,7 +410,7 @@ dialog.tech-card-popover[open] {
  font-weight: 600;
  text-transform: uppercase;
  letter-spacing: 0.04em;
- color: var(--text-muted);
+ color: var(--colors-academy-text-muted);
  text-align: center;
 }
 
@@ -417,8 +420,8 @@ dialog.tech-card-popover[open] {
  align-items: flex-start;
  gap: 0.75rem;
  padding: 1rem;
- background: color-mix(in oklab, var(--editorial-rust) 8%, transparent);
- border: 1px solid color-mix(in oklab, var(--editorial-rust) 18%, transparent);
+ background: color-mix(in oklab, var(--colors-academy-status-rust) 8%, transparent);
+ border: 1px solid color-mix(in oklab, var(--colors-academy-status-rust) 18%, transparent);
  border-radius: var(--radius-3xl);
 }
 
@@ -431,7 +434,7 @@ dialog.tech-card-popover[open] {
 .spicy-text {
  font-size: 0.875rem;
  font-style: italic;
- color: var(--editorial-rust);
+ color: var(--colors-academy-status-rust);
  line-height: 1.5;
 }
 
@@ -449,9 +452,9 @@ dialog.tech-card-popover[open] {
  gap: 0.625rem;
  width: 100%;
  padding: 1rem 1.5rem;
- background: var(--editorial-ink);
- color: var(--editorial-paper);
- border: 1px solid var(--editorial-ink);
+ background: var(--colors-academy-text);
+ color: var(--colors-academy-canvas);
+ border: 1px solid var(--colors-academy-text);
  border-radius: var(--radius-md);
  font-size: 0.875rem;
  font-weight: 700;
@@ -462,8 +465,8 @@ dialog.tech-card-popover[open] {
 }
 
 .card-cta:hover {
- background: var(--editorial-spruce);
- border-color: var(--editorial-spruce);
+ background: var(--colors-academy-status-spruce);
+ border-color: var(--colors-academy-status-spruce);
 }
 
 .card-cta svg {
@@ -478,7 +481,7 @@ dialog.tech-card-popover[open] {
  Mobile
  ================================= */
 @media (max-width: 540px) {
- dialog.tech-card-popover {
+ .tech-card-popover {
  width: calc(100vw - 2rem);
  max-width: calc(100vw - 2rem);
  }

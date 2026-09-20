@@ -53,6 +53,9 @@ tasks: {
 		inputs: [
 			"astro.config.mts",
 			"package.json",
+			"../../../bun.lock",
+			"scripts/**",
+			"vitest.config.ts",
 			"public/**",
 			"src/**",
 		]
@@ -74,8 +77,12 @@ tasks: {
 			"env.cue",
 			"../../../packages/design-system/**",
 			"package.json",
+			"../../../bun.lock",
+			"scripts/**",
+			"vitest.config.ts",
 			"public/**",
 			"src/**",
+			"wrangler.jsonc",
 		]
 
 		outputs: [
@@ -103,6 +110,9 @@ tasks: {
 				"env.cue",
 				"../../../packages/design-system/**",
 				"package.json",
+			"../../../bun.lock",
+			"scripts/**",
+			"vitest.config.ts",
 				"public/**",
 				"src/**",
 				"wrangler.jsonc",
@@ -113,18 +123,8 @@ tasks: {
 			command:  "bun"
 			args: ["x", "wrangler", "versions", "upload"]
 			dependsOn: [_t.build]
-			inputs: [
-				// CI change detection compares repo-relative paths; retain the
-				// definition-relative glob below for local/task input resolution.
-				"content/**",
-				"../../../content/**",
-				"astro.config.mts",
-				"../../../packages/design-system/**",
-				"package.json",
-				"public/**",
-				"src/**",
-				"wrangler.jsonc",
-			]
+			// A pull-request preview is the pipeline's deliverable, so it must run
+			// whenever this pipeline is invoked. The build remains its dependency.
 			captures: previewUrl: {
 				pattern: "Version Preview URL: (.+)"
 			}

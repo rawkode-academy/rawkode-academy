@@ -1,52 +1,116 @@
-/* UnoCSS reset and generated utilities are injected by the @unocss/astro
-   integration via `injectReset: true` + the virtual `uno.css` module. This
-   file only carries project-level CSS variables and the @layer rules that
-   compose on top of those utilities. Theme tokens + @utility shortcuts now
-   live in `uno.config.ts`. */
+@layer reset, base, components, utilities;
+
+/* Existing article components resolve their historical variable names to the
+   same Academy fonts. Only the Red Hat families are loaded. */
+:root {
+	--font-instrument-serif: var(--font-red-hat-display);
+	--font-inter-tight: var(--font-red-hat-text);
+	--font-jetbrains-mono: var(--font-red-hat-mono);
+}
+
+/* The website owns its reset. It is intentionally small: Panda owns the
+   design-system recipes, while this layer only removes browser defaults that
+   would otherwise create invisible spacing or overflow. */
+@layer reset {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body {
+		margin: 0;
+		padding: 0;
+		min-width: 320px;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	blockquote,
+	figure,
+	pre,
+	dd {
+		margin: 0;
+	}
+
+	ol,
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	button,
+	input,
+	select,
+	textarea {
+		font: inherit;
+	}
+
+	button {
+		cursor: pointer;
+	}
+
+	[hidden] {
+		display: none !important;
+	}
+
+	img,
+	picture,
+	video,
+	canvas,
+	svg {
+		display: block;
+		max-width: 100%;
+	}
+}
+
+/* Project-level tokens and authored component rules live here. Layout
+   primitives belong to the design-system package; route-specific CSS stays
+   beside its route. */
 
 :root {
-	/* Editorial palette — "engineering journal meets terminal".
-	   Token *names* are preserved from the previous Rawkode Blue system
-	   so ~300 call sites keep working; only the values change.
-
-	   The triplets below are sRGB approximations of oklch design values,
-	   used by the legacy `rgb(var(--x))` and `rgba(var(--x), 0.x)` pattern
-	   throughout the codebase. New primitives should prefer the direct
-	   `--editorial-*` oklch tokens below for precision. */
-	--brand-primary: 35 115 86; /* spruce  — oklch(0.50 0.09 165) */
+	/* Compatibility aliases for authored content. Panda owns the palette. */
+	--brand-primary: 194 24 91;
 	--brand-secondary: 154 85 0; /* amber-text — oklch(0.52 0.13 65) */
 	--brand-accent: 165 74 40; /* rust    — oklch(0.52 0.13 40) */
 
 	/* Editorial direct-color palette (preferred for new primitives) */
-	--editorial-paper: oklch(0.97 0.008 85);
-	--editorial-paper-deep: oklch(0.93 0.012 85);
-	--editorial-ink: oklch(0.18 0.02 60);
-	--editorial-ink-soft: oklch(0.36 0.015 60);
-	--editorial-ink-mute: oklch(0.51 0.012 60); /* ≥4.5:1 on paper + paper-deep */
-	--editorial-hairline: oklch(0.18 0.02 60 / 0.12);
-	--editorial-hairline-strong: oklch(0.18 0.02 60 / 0.22);
-	--editorial-spruce: oklch(0.50 0.09 165); /* ≥4.5:1 on paper + paper-deep */
-	--editorial-spruce-dim: oklch(0.50 0.09 165 / 0.12);
-	--editorial-amber: oklch(0.72 0.15 65);
-	--editorial-amber-dim: oklch(0.72 0.15 65 / 0.14);
+	--editorial-paper: var(--colors-academy-canvas);
+	--editorial-paper-deep: var(--colors-academy-ground);
+	--editorial-ink: var(--colors-academy-text);
+	--editorial-ink-soft: var(--colors-academy-text-soft);
+	--editorial-ink-mute: var(--colors-academy-text-muted);
+	--editorial-hairline: var(--colors-academy-border);
+	--editorial-hairline-strong: var(--colors-academy-input-border);
+	--editorial-spruce: var(--colors-academy-status-spruce);
+	--editorial-spruce-dim: color-mix(in srgb, var(--colors-academy-status-spruce) 12%, transparent);
+	--editorial-amber: var(--colors-academy-status-amber);
+	--editorial-amber-dim: color-mix(in srgb, var(--colors-academy-status-amber) 12%, transparent);
 	/* Amber fails AA as light-mode text (2.35:1 on paper). Text/icon
 	   consumers use this darker companion; dots, borders and backgrounds
 	   keep --editorial-amber. Dark mode points both at the bright value. */
-	--editorial-amber-text: oklch(0.52 0.13 65);
-	--editorial-rust: oklch(0.52 0.13 40); /* ≥4.5:1 on paper + paper-deep */
-	--editorial-violet: oklch(0.50 0.13 290);
+	--editorial-amber-text: var(--colors-academy-status-amber);
+	--editorial-rust: var(--colors-academy-status-rust);
+	--editorial-violet: var(--colors-academy-status-violet);
 
 	/* Light-mode surface tokens */
 	color-scheme: light;
-	--surface-base: var(--editorial-paper);
-	--surface-overlay: oklch(0.97 0.008 85 / 0.94);
-	--surface-card: var(--editorial-paper-deep);
-	--surface-card-muted: oklch(0.18 0.02 60 / 0.04);
-	--surface-border: var(--editorial-hairline);
-	--surface-border-strong: var(--editorial-hairline-strong);
+	--surface-base: var(--colors-academy-canvas);
+	--surface-overlay: color-mix(in srgb, var(--colors-academy-canvas) 94%, transparent);
+	--surface-card: var(--colors-academy-panel);
+	--surface-card-muted: color-mix(in srgb, var(--colors-academy-text) 4%, transparent);
+	--surface-border: var(--colors-academy-border);
+	--surface-border-strong: var(--colors-academy-input-border);
 	/* Skeleton bone — needs to read against both paper and card surfaces,
 	   so it sits between hairline and card-muted in weight. */
-	--surface-skeleton: oklch(0.18 0.02 60 / 0.10);
+	--surface-skeleton: color-mix(in srgb, var(--colors-academy-text) 10%, transparent);
 
 	/* Theme-invariant terminal chrome. Terminals, WebContainers, and other
 	   "screen within the page" surfaces stay dark in both colour schemes;
@@ -82,20 +146,11 @@
 	--type-page-title: clamp(2rem, 3.5vw, 3.5rem);
 	--type-section: clamp(1.5rem, 2.2vw, 2.25rem);
 
-	/* Semantic text-tone tokens — mirrored into UnoCSS theme so
-	   `text-primary-content` works as both a class and a CSS variable. */
+	/* Semantic text-tone tokens used by publication surfaces. */
 	--text-primary-content: var(--editorial-ink);
 	--text-secondary-content: var(--editorial-ink-soft);
 	--text-muted: var(--editorial-ink-mute);
 
-	/* UnoCSS preflight sets `* { border-color: var(--un-default-border-color, #e5e7eb) }`
-	   unlayered, which wins against any layered `.prose code { border: 1px
-	   solid var(--surface-border) }` rule and turns every `border` shorthand
-	   into a bright gray-200 outline — visible as a glaring chip on dark
-	   surfaces (inline `<code>`, kbd, etc.). Pinning the preflight default
-	   to our editorial hairline aligns every default-border consumer with
-	   the active scheme. */
-	--un-default-border-color: var(--editorial-hairline);
 }
 
 html.dark {
@@ -104,74 +159,45 @@ html.dark {
 	/* Dark-mode editorial palette — ink-dark ground with paper-dark surfaces.
 	   The triplet legacy tokens stay; only the value brightens slightly for
 	   contrast on dark. */
-	--editorial-paper: oklch(0.22 0.012 280); /* paper-dark */
-	--editorial-paper-deep: oklch(0.26 0.014 280);
-	--editorial-ink: oklch(0.92 0.008 85); /* light text on dark */
-	--editorial-ink-soft: oklch(0.74 0.008 85);
-	--editorial-ink-mute: oklch(0.66 0.008 85); /* ≥4.5:1 on base + card */
-	--editorial-hairline: oklch(1 0 0 / 0.10);
-	--editorial-hairline-strong: oklch(1 0 0 / 0.18);
+	--editorial-paper: var(--colors-academy-canvas);
+	--editorial-paper-deep: var(--colors-academy-ground);
+	--editorial-ink: var(--colors-academy-text);
+	--editorial-ink-soft: var(--colors-academy-text-soft);
+	--editorial-ink-mute: var(--colors-academy-text-muted);
+	--editorial-hairline: var(--colors-academy-border);
+	--editorial-hairline-strong: var(--colors-academy-input-border);
 
 	/* Accents brighten on dark ground — the light-mode values sit at
 	   ~3:1 against the dark card surface, below AA for text. The legacy
 	   triplets follow so every rgb(var(--brand-*)) consumer lifts too. */
-	--editorial-spruce: oklch(0.72 0.09 165);
-	--editorial-spruce-dim: oklch(0.72 0.09 165 / 0.14);
-	--editorial-rust: oklch(0.70 0.12 40);
-	--editorial-amber-text: oklch(0.72 0.15 65);
-	--brand-primary: 107 183 151; /* spruce dark — oklch(0.72 0.09 165) */
+	--editorial-spruce: var(--colors-academy-status-spruce);
+	--editorial-spruce-dim: color-mix(in srgb, var(--colors-academy-status-spruce) 12%, transparent);
+	--editorial-rust: var(--colors-academy-status-rust);
+	--editorial-amber-text: var(--colors-academy-status-amber);
+	--brand-primary: 255 122 182;
 	--brand-secondary: 218 142 58; /* amber — oklch(0.72 0.15 65) */
 	--brand-accent: 221 131 100; /* rust dark — oklch(0.70 0.12 40) */
 
-	--surface-base: oklch(0.14 0.01 280); /* ink-dark ground */
-	--surface-overlay: oklch(0.14 0.01 280 / 0.92);
-	--surface-card: var(--editorial-paper-deep);
-	--surface-card-muted: oklch(1 0 0 / 0.04);
-	--surface-skeleton: oklch(1 0 0 / 0.10);
-	--surface-border: var(--editorial-hairline);
-	--surface-border-strong: var(--editorial-hairline-strong);
+	--surface-base: var(--colors-academy-canvas);
+	--surface-overlay: color-mix(in srgb, var(--colors-academy-canvas) 94%, transparent);
+	--surface-card: var(--colors-academy-panel);
+	--surface-card-muted: color-mix(in srgb, var(--colors-academy-text) 4%, transparent);
+	--surface-skeleton: color-mix(in srgb, var(--colors-academy-text) 10%, transparent);
+	--surface-border: var(--colors-academy-border);
+	--surface-border-strong: var(--colors-academy-input-border);
 
 	--text-primary-content: var(--editorial-ink);
 	--text-secondary-content: var(--editorial-ink-soft);
 	--text-muted: var(--editorial-ink-mute);
 }
 
-/* Cross-document view transitions — native MPA transitions, no client
-   router. Full page loads still happen (scripts, analytics, and auth all
-   behave exactly as before); supporting browsers crossfade between pages
-   and morph any element whose `view-transition-name` matches across the
-   two documents (video stills → the watch-page player frame). Browsers
-   without support simply navigate. */
-@view-transition {
-	navigation: auto;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-	animation-duration: var(--duration-base);
-	animation-timing-function: var(--ease-standard);
-}
-
 /* Honour reduced-motion globally: components opt back in only where a
    motion alternative is genuinely needed. Covers the `scroll-smooth`
-   class on <html>, skeleton pulses, view transitions, and Vue
+   class on <html>, skeleton pulses, and Vue
    <transition> fades without per-component guards. */
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto !important;
-	}
-
-	@view-transition {
-		navigation: none;
-	}
-
-	/* Belt and braces for engines that ignore @view-transition inside a
-	   conditional group: the universal selector below can't reach the
-	   ::view-transition pseudo-tree, so kill its animations explicitly. */
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
 	}
 
 	*,
@@ -192,13 +218,26 @@ body {
 	   so position:sticky descendants keep working while horizontal
 	   scrolling is still prevented. */
 	overflow-x: clip;
-	font-family: var(--font-inter-tight), "Inter", -apple-system, system-ui, sans-serif;
+	font-family: var(--font-red-hat-text), "Inter", -apple-system, system-ui, sans-serif;
 }
 
-/* Design-system raw variables that aren't expressed as UnoCSS theme keys
-   but are still needed by hand-written CSS rules below. The matching
-   UnoCSS theme keys live in uno.config.ts (colors, fontFamily, spacing,
-   borderRadius, transitionDuration, transitionTimingFunction, boxShadow). */
+/* These semantic hooks restore list markers only where content is prose. The
+   global reset keeps application lists marker-free. */
+[data-academy-prose] :is(ul, ol),
+[data-academy-learn-list] {
+	padding-inline-start: 1.5rem;
+}
+
+[data-academy-prose] ul {
+	list-style-type: disc;
+}
+
+[data-academy-prose] ol,
+[data-academy-learn-list] {
+	list-style-type: decimal;
+}
+
+/* Design-system raw variables used by hand-written CSS rules below. */
 :root {
 	/* Radius scale — collapsed to editorial sharpness (2px–8px). The names
 	   are preserved so consumers don't break; only the magnitudes drop. */
@@ -222,10 +261,7 @@ body {
 	--ease-in: cubic-bezier(0.4, 0, 1, 1);
 	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-	/* "Shadow" ramp — editorial design uses hairline borders, not depth.
-	   The token names survive so `card-shadow-*` shortcuts in uno.config.ts
-	   keep working, but each step now resolves to a 1px ink ring at varying
-	   opacity. Add depth only where the design explicitly calls for it. */
+	/* "Shadow" ramp — editorial design uses hairline borders, not depth. */
 	--shadow-sm: 0 0 0 1px oklch(0.18 0.02 60 / 0.06);
 	--shadow-md: 0 0 0 1px oklch(0.18 0.02 60 / 0.10);
 	--shadow-lg: 0 0 0 1px oklch(0.18 0.02 60 / 0.16);
@@ -300,8 +336,9 @@ html.dark {
 	/* Technical-publication heading ramp. The serif is a scarce display
 	   signal; section and interface hierarchy stays compact and sans. */
 	h1 {
-		@apply text-4xl md:text-5xl text-primary-content;
-		font-family: var(--font-instrument-serif), serif;
+		font-size: 2.25rem;
+		color: var(--text-primary-content);
+		font-family: var(--font-red-hat-display), serif;
 		font-style: normal;
 		font-weight: 400;
 		line-height: 0.98;
@@ -310,8 +347,9 @@ html.dark {
 	}
 
 	h2 {
-		@apply text-3xl md:text-4xl text-primary-content;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.875rem;
+		color: var(--text-primary-content);
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-style: normal;
 		font-weight: 650;
 		line-height: 1.02;
@@ -320,8 +358,9 @@ html.dark {
 	}
 
 	h3 {
-		@apply text-xl md:text-2xl text-primary-content;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.25rem;
+		color: var(--text-primary-content);
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		line-height: 1.2;
 		letter-spacing: -0.015em;
@@ -329,11 +368,19 @@ html.dark {
 	}
 
 	h4 {
-		@apply text-lg md:text-xl text-primary-content;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-size: 1.125rem;
+		color: var(--text-primary-content);
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		line-height: 1.25;
 		letter-spacing: -0.01em;
+	}
+
+	@media (min-width: 768px) {
+		h1 { font-size: 3rem; }
+		h2 { font-size: 2.25rem; }
+		h3 { font-size: 1.5rem; }
+		h4 { font-size: 1.25rem; }
 	}
 }
 
@@ -376,7 +423,7 @@ html.dark {
 		justify-content: center;
 		gap: 0.5rem;
 		padding: 0.25rem 0.6rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -417,7 +464,7 @@ html.dark {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -483,7 +530,7 @@ html.dark {
 		align-items: center;
 		justify-content: center;
 		gap: 0.625rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
@@ -565,13 +612,13 @@ html.dark {
 
 	.ed-aside__body {
 		min-width: 0;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-size: 0.9375rem;
 		line-height: 1.6;
 	}
 
 	.ed-aside__label {
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.65rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -621,7 +668,7 @@ html.dark {
 	   blockquote (single 2px ink border-left, no gradient fill).
 	   ════════════════════════════════════════════════════════════════ */
 	.prose {
-		font-family: var(--font-inter-tight), "Inter", sans-serif;
+		font-family: var(--font-red-hat-text), "Inter", sans-serif;
 		font-size: 1.125rem;
 		line-height: 1.7;
 		color: var(--text-secondary-content);
@@ -635,7 +682,7 @@ html.dark {
 
 	/* Reading headings stay sans so long technical documents scan quickly. */
 	.prose h1 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-style: normal;
 		font-size: clamp(2.25rem, 5vw, 3.5rem);
 		font-weight: 650;
@@ -647,7 +694,7 @@ html.dark {
 	}
 
 	.prose h2 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-style: normal;
 		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
 		font-weight: 650;
@@ -659,7 +706,7 @@ html.dark {
 	}
 
 	.prose h3 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		font-size: clamp(1.25rem, 2.5vw, 1.5rem);
 		letter-spacing: -0.015em;
@@ -670,7 +717,7 @@ html.dark {
 	}
 
 	.prose h4 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		font-size: clamp(1.125rem, 2vw, 1.25rem);
 		letter-spacing: -0.01em;
@@ -761,7 +808,7 @@ html.dark {
 		position: absolute;
 		left: -2.25rem;
 		width: 1.75rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.75em;
 		font-weight: 500;
 		letter-spacing: 0.05em;
@@ -803,7 +850,7 @@ html.dark {
 		margin: 2rem 0;
 		padding: 0.25rem 0 0.25rem 1.5rem;
 		border-left: 2px solid var(--editorial-ink);
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: italic;
 		font-size: 1.25rem;
 		line-height: 1.4;
@@ -820,7 +867,7 @@ html.dark {
 
 	/* Inline code — mono, but still part of the sentence. */
 	.prose code {
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.85em;
 		font-weight: 500;
 		line-height: inherit;
@@ -913,7 +960,7 @@ html.dark {
 
 	.prose hr.dots::before {
 		content: "§ § §";
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: italic;
 		color: var(--editorial-ink-mute);
 		letter-spacing: 0.8em;
@@ -936,7 +983,7 @@ html.dark {
 	.prose th {
 		text-align: left;
 		font-weight: 600;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.75em;
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
@@ -964,7 +1011,7 @@ html.dark {
 
 	/* Pull quote — serif italic display centered. */
 	.prose .pull-quote {
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: italic;
 		font-size: 2rem;
 		font-weight: 400;
@@ -980,7 +1027,7 @@ html.dark {
 @layer utilities {
 	/* Responsive Content Padding - commonly used pattern */
 	.content-px {
-		@apply px-3 sm:px-6 lg:px-8;
+		padding-inline: 0.75rem;
 	}
 
 	/* Mobile full-bleed escape hatch for card-style sections.
@@ -988,7 +1035,8 @@ html.dark {
 	 * layers of page-px sit between it and the viewport) and strips
 	 * horizontal chrome below sm. Restores normal card chrome from sm up. */
 	.bleed-x-mobile {
-		@apply rounded-none border-x-0 sm:rounded-2xl sm:border-x;
+		border-radius: 0;
+		border-inline-width: 0;
 	}
 
 	@media (max-width: 639px) {
@@ -999,22 +1047,42 @@ html.dark {
 
 	/* Responsive Section Gap - for vertical spacing between sections */
 	.section-gap {
-		@apply space-y-3 sm:space-y-4 lg:space-y-6;
+		display: flex;
+		flex-direction: column;
+		row-gap: 0.75rem;
 	}
 
 	/* Responsive Card Gap - for gaps within cards or smaller containers */
 	.card-gap {
-		@apply gap-2 sm:gap-3;
+		gap: 0.5rem;
 	}
 
 	/* Responsive margin bottom for sections */
 	.section-mb {
-		@apply mb-4 sm:mb-6;
+		margin-bottom: 1rem;
 	}
 
 	/* Responsive container max-width */
 	.container-content {
-		@apply container mx-auto max-w-screen-xl;
+		width: 100%;
+		max-width: 80rem;
+		margin-inline: auto;
+	}
+
+	@media (min-width: 640px) {
+		.content-px { padding-inline: 1.5rem; }
+		.bleed-x-mobile {
+			border-radius: var(--radius-2xl);
+			border-inline-width: 1px;
+		}
+		.section-gap { row-gap: 1rem; }
+		.card-gap { gap: 0.75rem; }
+		.section-mb { margin-bottom: 1.5rem; }
+	}
+
+	@media (min-width: 1024px) {
+		.content-px { padding-inline: 2rem; }
+		.section-gap { row-gap: 1.5rem; }
 	}
 
 	.page-px-sm {
@@ -1081,17 +1149,621 @@ html.dark {
 	.animate-scanline {
 		animation: scanline-scroll 1s linear infinite;
 	}
+
+	/* These selectors are a finite compatibility surface for content and game
+	   routes that have not yet moved to a Panda recipe. They are authored
+	   declarations, not a runtime utility compiler; new work must not extend
+	   this list. */
+	[class~="sr-only"] {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	[class~="not-sr-only"] { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; white-space: normal; }
+	[class~="flex"] { display: flex; }
+	[class~="inline-flex"] { display: inline-flex; }
+	[class~="inline-block"] { display: inline-block; }
+	[class~="block"] { display: block; }
+	[class~="grid"] { display: grid; }
+	[class~="hidden"] { display: none; }
+	[class~="contents"] { display: contents; }
+	[class~="container"] { width: 100%; margin-inline: auto; padding-inline: 1rem; }
+	[class~="relative"] { position: relative; }
+	[class~="absolute"] { position: absolute; }
+	[class~="fixed"] { position: fixed; }
+	[class~="sticky"] { position: sticky; }
+	[class~="inset-0"] { inset: 0; }
+	[class~="top-0"] { top: 0; }
+	[class~="right-0"] { right: 0; }
+	[class~="bottom-0"] { bottom: 0; }
+	[class~="left-0"] { left: 0; }
+	[class~="top-1\/2"] { top: 50%; }
+	[class~="left-1\/2"] { left: 50%; }
+	[class~="top-24"] { top: 6rem; }
+	[class~="top-28"] { top: 7rem; }
+	[class~="top-1"] { top: 0.25rem; }
+	[class~="top-3"] { top: 0.75rem; }
+	[class~="top-4"] { top: 1rem; }
+	[class~="top-8"] { top: 2rem; }
+	[class~="right-1"] { right: 0.25rem; }
+	[class~="right-2"] { right: 0.5rem; }
+	[class~="right-3"] { right: 0.75rem; }
+	[class~="right-4"] { right: 1rem; }
+	[class~="right-5"] { right: 1.25rem; }
+	[class~="right-8"] { right: 2rem; }
+	[class~="left-3"] { left: 0.75rem; }
+	[class~="left-4"] { left: 1rem; }
+	[class~="left-5"] { left: 1.25rem; }
+	[class~="z-10"] { z-index: 10; }
+	[class~="z-20"] { z-index: 20; }
+	[class~="z-50"] { z-index: 50; }
+	[class~="z-auto"] { z-index: auto; }
+	[class~="flex-row"] { flex-direction: row; }
+	[class~="flex-col"] { flex-direction: column; }
+	[class~="flex-wrap"] { flex-wrap: wrap; }
+	[class~="flex-nowrap"] { flex-wrap: nowrap; }
+	[class~="flex-1"] { flex: 1 1 0%; }
+	[class~="flex-auto"] { flex: 1 1 auto; }
+	[class~="flex-none"] { flex: none; }
+	[class~="flex-shrink-0"],
+	[class~="shrink-0"] { flex-shrink: 0; }
+	[class~="grow"] { flex-grow: 1; }
+	[class~="items-start"] { align-items: flex-start; }
+	[class~="items-center"] { align-items: center; }
+	[class~="items-end"] { align-items: flex-end; }
+	[class~="items-stretch"] { align-items: stretch; }
+	[class~="justify-start"] { justify-content: flex-start; }
+	[class~="justify-center"] { justify-content: center; }
+	[class~="justify-end"] { justify-content: flex-end; }
+	[class~="justify-between"] { justify-content: space-between; }
+	[class~="justify-around"] { justify-content: space-around; }
+	[class~="place-items-center"] { place-items: center; }
+	[class~="text-left"] { text-align: left; }
+	[class~="text-center"] { text-align: center; }
+	[class~="text-right"] { text-align: right; }
+	[class~="self-start"] { align-self: flex-start; }
+	[class~="self-end"] { align-self: flex-end; }
+	[class~="self-center"] { align-self: center; }
+	[class~="overflow-hidden"] { overflow: hidden; }
+	[class~="overflow-visible"] { overflow: visible; }
+	[class~="overflow-x-auto"] { overflow-x: auto; }
+	[class~="overflow-y-auto"] { overflow-y: auto; }
+	[class~="pointer-events-none"] { pointer-events: none; }
+	[class~="pointer-events-auto"] { pointer-events: auto; }
+	[class~="select-none"] { user-select: none; }
+	[class~="cursor-pointer"] { cursor: pointer; }
+	[class~="appearance-none"] { appearance: none; }
+	[class~="whitespace-nowrap"] { white-space: nowrap; }
+	[class~="truncate"] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	[class~="object-cover"] { object-fit: cover; }
+	[class~="object-contain"] { object-fit: contain; }
+	[class~="aspect-video"] { aspect-ratio: 16 / 9; }
+	[class~="min-w-0"] { min-width: 0; }
+	[class~="w-full"] { width: 100%; }
+	[class~="w-auto"] { width: auto; }
+	[class~="w-1"] { width: 0.25rem; }
+	[class~="w-1.5"] { width: 0.375rem; }
+	[class~="w-2"] { width: 0.5rem; }
+	[class~="w-2.5"] { width: 0.625rem; }
+	[class~="w-3"] { width: 0.75rem; }
+	[class~="w-3.5"] { width: 0.875rem; }
+	[class~="w-4"] { width: 1rem; }
+	[class~="w-5"] { width: 1.25rem; }
+	[class~="w-6"] { width: 1.5rem; }
+	[class~="w-7"] { width: 1.75rem; }
+	[class~="w-8"] { width: 2rem; }
+	[class~="w-10"] { width: 2.5rem; }
+	[class~="w-12"] { width: 3rem; }
+	[class~="w-14"] { width: 3.5rem; }
+	[class~="w-16"] { width: 4rem; }
+	[class~="w-20"] { width: 5rem; }
+	[class~="w-24"] { width: 6rem; }
+	[class~="w-72"] { width: 18rem; }
+	[class~="h-auto"] { height: auto; }
+	[class~="h-full"] { height: 100%; }
+	[class~="h-0.5"] { height: 0.125rem; }
+	[class~="h-1"] { height: 0.25rem; }
+	[class~="h-1.5"] { height: 0.375rem; }
+	[class~="h-2"] { height: 0.5rem; }
+	[class~="h-2.5"] { height: 0.625rem; }
+	[class~="h-3"] { height: 0.75rem; }
+	[class~="h-4"] { height: 1rem; }
+	[class~="h-5"] { height: 1.25rem; }
+	[class~="h-6"] { height: 1.5rem; }
+	[class~="h-7"] { height: 1.75rem; }
+	[class~="h-8"] { height: 2rem; }
+	[class~="h-10"] { height: 2.5rem; }
+	[class~="h-12"] { height: 3rem; }
+	[class~="h-16"] { height: 4rem; }
+	[class~="h-20"] { height: 5rem; }
+	[class~="h-24"] { height: 6rem; }
+	[class~="h-32"] { height: 8rem; }
+	[class~="h-48"] { height: 12rem; }
+	[class~="h-52"] { height: 13rem; }
+	[class~="h-px"] { height: 1px; }
+	[class~="max-w-none"] { max-width: none; }
+	[class~="max-w-sm"] { max-width: 24rem; }
+	[class~="max-w-md"] { max-width: 28rem; }
+	[class~="max-w-lg"] { max-width: 32rem; }
+	[class~="max-w-xl"] { max-width: 36rem; }
+	[class~="max-w-2xl"] { max-width: 42rem; }
+	[class~="max-w-3xl"] { max-width: 48rem; }
+	[class~="max-w-4xl"] { max-width: 56rem; }
+	[class~="max-w-6xl"] { max-width: 72rem; }
+	[class~="max-w-7xl"] { max-width: 80rem; }
+	[class~="max-w-\(--breakpoint-md\)"] { max-width: 48rem; }
+	[class~="max-w-\(--breakpoint-lg\)"] { max-width: 64rem; }
+	[class~="max-w-\(--breakpoint-xl\)"] { max-width: 80rem; }
+	[class~="max-w-[60ch]"] { max-width: 60ch; }
+	[class~="max-w-[66ch]"] { max-width: 66ch; }
+	[class~="max-w-[18ch]"] { max-width: 18ch; }
+	[class~="max-w-[16ch]"] { max-width: 16ch; }
+	[class~="max-w-[34ch]"] { max-width: 34ch; }
+	[class~="max-w-[38ch]"] { max-width: 38ch; }
+	[class~="max-w-[54ch]"] { max-width: 54ch; }
+	[class~="max-w-[12rem]"] { max-width: 12rem; }
+	[class~="mx-auto"] { margin-inline: auto; }
+	[class~="m-0"] { margin: 0; }
+	[class~="mt-0"] { margin-top: 0; }
+	[class~="mt-0.5"] { margin-top: 0.125rem; }
+	[class~="mt-1"] { margin-top: 0.25rem; }
+	[class~="mt-1.5"] { margin-top: 0.375rem; }
+	[class~="mt-2"] { margin-top: 0.5rem; }
+	[class~="mt-3"] { margin-top: 0.75rem; }
+	[class~="mt-4"] { margin-top: 1rem; }
+	[class~="mt-5"] { margin-top: 1.25rem; }
+	[class~="mt-6"] { margin-top: 1.5rem; }
+	[class~="mt-8"] { margin-top: 2rem; }
+	[class~="mt-12"] { margin-top: 3rem; }
+	[class~="mt-16"] { margin-top: 4rem; }
+	[class~="mt-20"] { margin-top: 5rem; }
+	[class~="mt-24"] { margin-top: 6rem; }
+	[class~="mb-1"] { margin-bottom: 0.25rem; }
+	[class~="mb-1.5"] { margin-bottom: 0.375rem; }
+	[class~="mb-2"] { margin-bottom: 0.5rem; }
+	[class~="mb-3"] { margin-bottom: 0.75rem; }
+	[class~="mb-4"] { margin-bottom: 1rem; }
+	[class~="mb-5"] { margin-bottom: 1.25rem; }
+	[class~="mb-6"] { margin-bottom: 1.5rem; }
+	[class~="mb-8"] { margin-bottom: 2rem; }
+	[class~="mb-12"] { margin-bottom: 3rem; }
+	[class~="ml-1"] { margin-left: 0.25rem; }
+	[class~="ml-2"] { margin-left: 0.5rem; }
+	[class~="mr-1"] { margin-right: 0.25rem; }
+	[class~="mr-2"] { margin-right: 0.5rem; }
+	[class~="mr-3"] { margin-right: 0.75rem; }
+	[class~="my-1"] { margin-block: 0.25rem; }
+	[class~="my-8"] { margin-block: 2rem; }
+	[class~="p-0"] { padding: 0; }
+	[class~="p-0.5"] { padding: 0.125rem; }
+	[class~="p-2"] { padding: 0.5rem; }
+	[class~="p-2.5"] { padding: 0.625rem; }
+	[class~="p-3"] { padding: 0.75rem; }
+	[class~="p-4"] { padding: 1rem; }
+	[class~="p-5"] { padding: 1.25rem; }
+	[class~="p-6"] { padding: 1.5rem; }
+	[class~="p-8"] { padding: 2rem; }
+	[class~="p-12"] { padding: 3rem; }
+	[class~="px-0"] { padding-inline: 0; }
+	[class~="px-1.5"] { padding-inline: 0.375rem; }
+	[class~="px-2"] { padding-inline: 0.5rem; }
+	[class~="px-2.5"] { padding-inline: 0.625rem; }
+	[class~="px-3"] { padding-inline: 0.75rem; }
+	[class~="px-3.5"] { padding-inline: 0.875rem; }
+	[class~="px-4"] { padding-inline: 1rem; }
+	[class~="px-5"] { padding-inline: 1.25rem; }
+	[class~="px-6"] { padding-inline: 1.5rem; }
+	[class~="px-8"] { padding-inline: 2rem; }
+	[class~="px-10"] { padding-inline: 2.5rem; }
+	[class~="py-0"] { padding-block: 0; }
+	[class~="py-0.5"] { padding-block: 0.125rem; }
+	[class~="py-1"] { padding-block: 0.25rem; }
+	[class~="py-1.5"] { padding-block: 0.375rem; }
+	[class~="py-2"] { padding-block: 0.5rem; }
+	[class~="py-2.5"] { padding-block: 0.625rem; }
+	[class~="py-3"] { padding-block: 0.75rem; }
+	[class~="py-5"] { padding-block: 1.25rem; }
+	[class~="py-8"] { padding-block: 2rem; }
+	[class~="py-12"] { padding-block: 3rem; }
+	[class~="py-16"] { padding-block: 4rem; }
+	[class~="py-24"] { padding-block: 6rem; }
+	[class~="pt-1"] { padding-top: 0.25rem; }
+	[class~="pt-2"] { padding-top: 0.5rem; }
+	[class~="pt-4"] { padding-top: 1rem; }
+	[class~="pt-5"] { padding-top: 1.25rem; }
+	[class~="pt-16"] { padding-top: 4rem; }
+	[class~="pb-1"] { padding-bottom: 0.25rem; }
+	[class~="pb-1.5"] { padding-bottom: 0.375rem; }
+	[class~="pb-2"] { padding-bottom: 0.5rem; }
+	[class~="pb-3"] { padding-bottom: 0.75rem; }
+	[class~="pb-5"] { padding-bottom: 1.25rem; }
+	[class~="pb-16"] { padding-bottom: 4rem; }
+	[class~="pl-8"] { padding-left: 2rem; }
+	[class~="pl-16"] { padding-left: 4rem; }
+	[class~="gap-1"] { gap: 0.25rem; }
+	[class~="gap-1.5"] { gap: 0.375rem; }
+	[class~="gap-2"] { gap: 0.5rem; }
+	[class~="gap-3"] { gap: 0.75rem; }
+	[class~="gap-4"] { gap: 1rem; }
+	[class~="gap-5"] { gap: 1.25rem; }
+	[class~="gap-6"] { gap: 1.5rem; }
+	[class~="gap-8"] { gap: 2rem; }
+	[class~="gap-10"] { gap: 2.5rem; }
+	[class~="gap-12"] { gap: 3rem; }
+	[class~="gap-x-4"] { column-gap: 1rem; }
+	[class~="gap-x-8"] { column-gap: 2rem; }
+	[class~="gap-y-1"] { row-gap: 0.25rem; }
+	[class~="gap-y-1.5"] { row-gap: 0.375rem; }
+	[class~="gap-y-10"] { row-gap: 2.5rem; }
+	[class~="space-x-2"] > :not([hidden]) ~ :not([hidden]) { margin-left: 0.5rem; }
+	[class~="space-x-3"] > :not([hidden]) ~ :not([hidden]) { margin-left: 0.75rem; }
+	[class~="space-y-1"] > :not([hidden]) ~ :not([hidden]) { margin-top: 0.25rem; }
+	[class~="space-y-2"] > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem; }
+	[class~="space-y-3"] > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }
+	[class~="space-y-4"] > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+	[class~="space-y-5"] > :not([hidden]) ~ :not([hidden]) { margin-top: 1.25rem; }
+	[class~="space-y-6"] > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+	[class~="space-y-8"] > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
+	[class~="space-y-12"] > :not([hidden]) ~ :not([hidden]) { margin-top: 3rem; }
+	[class~="grid-cols-1"] { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+	[class~="grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	[class~="grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+	[class~="grid-cols-5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+	[class~="border"] { border-width: 1px; border-style: solid; }
+	[class~="border-0"] { border-width: 0; }
+	[class~="border-2"] { border-width: 2px; border-style: solid; }
+	[class~="border-4"] { border-width: 4px; border-style: solid; }
+	[class~="border-b"] { border-bottom-width: 1px; border-bottom-style: solid; }
+	[class~="border-t"] { border-top-width: 1px; border-top-style: solid; }
+	[class~="border-r"] { border-right-width: 1px; border-right-style: solid; }
+	[class~="border-y"] { border-block-width: 1px; border-block-style: solid; }
+	[class~="border-transparent"] { border-color: transparent; }
+	[class~="rounded-none"] { border-radius: 0; }
+	[class~="rounded"] { border-radius: 0.25rem; }
+	[class~="rounded-t"] { border-top-left-radius: 0.25rem; border-top-right-radius: 0.25rem; }
+	[class~="rounded-sm"] { border-radius: var(--radius-sm); }
+	[class~="rounded-md"] { border-radius: var(--radius-md); }
+	[class~="rounded-lg"] { border-radius: var(--radius-lg); }
+	[class~="rounded-xl"] { border-radius: 0.75rem; }
+	[class~="rounded-2xl"] { border-radius: var(--radius-2xl); }
+	[class~="rounded-full"] { border-radius: 9999px; }
+	[class~="rounded-t-md"] { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+	[class~="rounded-l-xl"] { border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; }
+	[class~="shadow-sm"] { box-shadow: var(--shadow-sm); }
+	[class~="shadow"],
+	[class~="shadow-md"] { box-shadow: var(--shadow-md); }
+	[class~="shadow-lg"] { box-shadow: var(--shadow-lg); }
+	[class~="shadow-xl"] { box-shadow: var(--shadow-xl); }
+	[class~="shadow-2xl"] { box-shadow: var(--shadow-xl); }
+	[class~="text-xs"] { font-size: 0.75rem; line-height: 1rem; }
+	[class~="text-sm"] { font-size: 0.875rem; line-height: 1.25rem; }
+	[class~="text-base"] { font-size: 1rem; line-height: 1.5rem; }
+	[class~="text-lg"] { font-size: 1.125rem; line-height: 1.75rem; }
+	[class~="text-xl"] { font-size: 1.25rem; line-height: 1.75rem; }
+	[class~="text-2xl"] { font-size: 1.5rem; line-height: 2rem; }
+	[class~="text-3xl"] { font-size: 1.875rem; line-height: 2.25rem; }
+	[class~="text-4xl"] { font-size: 2.25rem; line-height: 2.5rem; }
+	[class~="text-[10px]"] { font-size: 0.625rem; }
+	[class~="text-[11px]"] { font-size: 0.6875rem; }
+	[class~="text-[0.6rem]"] { font-size: 0.6rem; }
+	[class~="text-[0.68rem]"] { font-size: 0.68rem; }
+	[class~="text-[0.72rem]"] { font-size: 0.72rem; }
+	[class~="font-light"] { font-weight: 300; }
+	[class~="font-normal"] { font-weight: 400; }
+	[class~="font-medium"] { font-weight: 500; }
+	[class~="font-semibold"] { font-weight: 600; }
+	[class~="font-bold"] { font-weight: 700; }
+	[class~="font-extrabold"] { font-weight: 800; }
+	[class~="uppercase"] { text-transform: uppercase; }
+	[class~="italic"] { font-style: italic; }
+	[class~="leading-none"] { line-height: 1; }
+	[class~="leading-tight"] { line-height: 1.25; }
+	[class~="leading-snug"] { line-height: 1.375; }
+	[class~="leading-relaxed"] { line-height: 1.625; }
+	[class~="leading-6"] { line-height: 1.5rem; }
+	[class~="leading-7"] { line-height: 1.75rem; }
+	[class~="leading-8"] { line-height: 2rem; }
+	[class~="tracking-tight"] { letter-spacing: -0.025em; }
+	[class~="tracking-wide"] { letter-spacing: 0.025em; }
+	[class~="tracking-wider"] { letter-spacing: 0.05em; }
+	[class~="tracking-widest"] { letter-spacing: 0.1em; }
+	[class~="tracking-[0.18em]"] { letter-spacing: 0.18em; }
+	[class~="tracking-[0.2em]"] { letter-spacing: 0.2em; }
+	[class~="tracking-[0.22em]"] { letter-spacing: 0.22em; }
+	[class~="opacity-0"] { opacity: 0; }
+	[class~="opacity-5"] { opacity: 0.05; }
+	[class~="opacity-10"] { opacity: 0.1; }
+	[class~="opacity-20"] { opacity: 0.2; }
+	[class~="opacity-25"] { opacity: 0.25; }
+	[class~="opacity-50"] { opacity: 0.5; }
+	[class~="opacity-75"] { opacity: 0.75; }
+	[class~="opacity-100"] { opacity: 1; }
+	[class~="transform"] { transform: translateZ(0); }
+	[class~="translate-y-full"] { transform: translateY(100%); }
+	[class~="transition-colors"] { transition: color var(--duration-base) var(--ease-standard), background-color var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard); }
+	[class~="transition-opacity"] { transition: opacity var(--duration-base) var(--ease-standard); }
+	[class~="transition-transform"] { transition: transform var(--duration-base) var(--ease-standard); }
+	[class~="transition-all"] { transition: all var(--duration-base) var(--ease-standard); }
+	[class~="duration-150"] { transition-duration: 150ms; }
+	[class~="duration-200"] { transition-duration: 200ms; }
+	[class~="duration-300"] { transition-duration: 300ms; }
+	[class~="duration-500"] { transition-duration: 500ms; }
+	[class~="ease-out"] { transition-timing-function: var(--ease-out); }
+	[class~="bg-current"] { background-color: currentColor; }
+	[class~="bg-transparent"] { background-color: transparent; }
+	[class~="bg-white"] { background-color: #fff; }
+	[class~="bg-black"] { background-color: #000; }
+	[class~="text-white"] { color: #fff; }
+	[class~="text-black"] { color: #000; }
+	[class~="bg-blue-500"] { background-color: #3b82f6; }
+	[class~="bg-purple-500"] { background-color: #a855f7; }
+	[class~="bg-green-500"] { background-color: #22c55e; }
+	[class~="bg-green-500\/20"] { background-color: rgb(34 197 94 / 20%); }
+	[class~="bg-green-100"] { background-color: #dcfce7; }
+	[class~="bg-yellow-500"] { background-color: #eab308; }
+	[class~="bg-red-500"] { background-color: #ef4444; }
+	[class~="bg-emerald-500"] { background-color: #10b981; }
+	[class~="text-green-600"] { color: #16a34a; }
+	[class~="text-green-700"] { color: #15803d; }
+	[class~="text-green-400"] { color: #4ade80; }
+	[class~="text-red-600"] { color: #dc2626; }
+	[class~="text-red-700"] { color: #b91c1c; }
+	[class~="text-red-800"] { color: #991b1b; }
+	[class~="text-red-400"] { color: #f87171; }
+	[class~="text-orange-400"] { color: #fb923c; }
+	[class~="text-orange-600"] { color: #ea580c; }
+	[class~="text-pink-600"] { color: #db2777; }
+	[class~="text-emerald-400"] { color: #34d399; }
+	[class~="bg-gradient-to-t"] { background-image: linear-gradient(to top, var(--utility-gradient-from, transparent), var(--utility-gradient-to, transparent)); }
+	[class~="from-black\/50"] { --utility-gradient-from: rgb(0 0 0 / 50%); }
+	[class~="from-black\/60"] { --utility-gradient-from: rgb(0 0 0 / 60%); }
+	[class~="from-black\/70"] { --utility-gradient-from: rgb(0 0 0 / 70%); }
+	[class~="from-black\/80"] { --utility-gradient-from: rgb(0 0 0 / 80%); }
+	[class~="to-transparent"] { --utility-gradient-to: transparent; }
+	[class~="bg-[var(--surface-base)]"] { background-color: var(--surface-base); }
+	[class~="bg-[var(--surface-card)]"] { background-color: var(--surface-card); }
+	[class~="bg-[var(--surface-card-muted)]"] { background-color: var(--surface-card-muted); }
+	[class~="bg-[var(--surface-skeleton)]"] { background-color: var(--surface-skeleton); }
+	[class~="bg-[var(--editorial-ink)]"] { background-color: var(--editorial-ink); }
+	[class~="bg-[var(--editorial-spruce)]"] { background-color: var(--editorial-spruce); }
+	[class~="text-[var(--editorial-paper)]"] { color: var(--editorial-paper); }
+	[class~="border-[var(--surface-border)]"] { border-color: var(--surface-border); }
+	[class~="border-[var(--surface-border-strong)]"] { border-color: var(--surface-border-strong); }
+	[class~="bg-[var(--terminal-bg)]"] { background-color: var(--terminal-bg); }
+	[class~="bg-[var(--terminal-surface)]"] { background-color: var(--terminal-surface); }
+	[class~="text-[var(--terminal-text)]"] { color: var(--terminal-text); }
+	[class~="text-[var(--terminal-text-dim)]"] { color: var(--terminal-text-dim); }
+	[class~="border-[var(--terminal-border)]"] { border-color: var(--terminal-border); }
+	[class~="shadow-primary\/20"] { box-shadow: 0 4px 16px rgb(var(--brand-primary) / 20%); }
+	[class~="bg-surface\/50"] { background-color: color-mix(in oklab, var(--surface-card) 50%, transparent); }
+	[class~="bg-black\/70"] { background-color: rgb(0 0 0 / 70%); }
+	[class~="bg-black\/80"] { background-color: rgb(0 0 0 / 80%); }
+	[class~="bg-primary\/10"] { background-color: rgb(var(--brand-primary) / 10%); }
+	[class~="bg-secondary\/10"] { background-color: rgb(var(--brand-secondary) / 10%); }
+	[class~="bg-secondary\/15"] { background-color: rgb(var(--brand-secondary) / 15%); }
+	[class~="bg-tertiary\/10"] { background-color: color-mix(in oklab, var(--editorial-violet) 10%, transparent); }
+	[class~="bg-red-500\/10"] { background-color: rgb(239 68 68 / 10%); }
+	[class~="border-black\/10"] { border-color: rgb(0 0 0 / 10%); }
+	[class~="border-white\/10"] { border-color: rgb(255 255 255 / 10%); }
+	[class~="border-white\/40"] { border-color: rgb(255 255 255 / 40%); }
+	[class~="border-white\/60"] { border-color: rgb(255 255 255 / 60%); }
+	[class~="border-emerald-500\/30"] { border-color: rgb(16 185 129 / 30%); }
+	[class~="border-red-500\/20"] { border-color: rgb(239 68 68 / 20%); }
+	[class~="border-secondary"] { border-color: rgb(var(--brand-secondary)); }
+	[class~="border-[var(--surface-card)]"] { border-color: var(--surface-card); }
+	[class~="max-w-none"] { max-width: none; }
+	[class~="line-clamp-2"] { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+	[class~="line-clamp-3"] { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+	[class~="prose"] { max-width: 65ch; color: var(--text-secondary-content); }
+	[class~="prose-lg"] { font-size: 1.125rem; line-height: 1.78; }
+
+	@media (min-width: 640px) {
+		[class~="container"] { max-width: 640px; }
+		[class~="sm:flex-row"] { flex-direction: row; }
+		[class~="sm:flex-col"] { flex-direction: column; }
+		[class~="sm:flex-wrap"] { flex-wrap: wrap; }
+		[class~="sm:items-center"] { align-items: center; }
+		[class~="sm:items-start"] { align-items: flex-start; }
+		[class~="sm:justify-between"] { justify-content: space-between; }
+		[class~="sm:grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		[class~="sm:grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+		[class~="sm:grid-cols-4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+		[class~="sm:grid-cols-5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+		[class~="sm:px-6"] { padding-inline: 1.5rem; }
+		[class~="sm:py-6"] { padding-block: 1.5rem; }
+		[class~="sm:py-16"] { padding-block: 4rem; }
+		[class~="sm:p-6"] { padding: 1.5rem; }
+		[class~="sm:pt-6"] { padding-top: 1.5rem; }
+		[class~="sm:pb-6"] { padding-bottom: 1.5rem; }
+		[class~="sm:h-[4.5rem]"] { height: 4.5rem; }
+		[class~="sm:w-[4.5rem]"] { width: 4.5rem; }
+		[class~="sm:text-lg"] { font-size: 1.125rem; line-height: 1.75rem; }
+		[class~="sm:text-xl"] { font-size: 1.25rem; line-height: 1.75rem; }
+		[class~="sm:text-4xl"] { font-size: 2.25rem; line-height: 2.5rem; }
+		[class~="sm:leading-8"] { line-height: 2rem; }
+	}
+	@media (min-width: 768px) {
+		[class~="md:hidden"] { display: none; }
+		[class~="md:block"] { display: block; }
+		[class~="md:flex-row"] { flex-direction: row; }
+		[class~="md:grid"] { display: grid; }
+		[class~="md:grid-cols-1"] { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+		[class~="md:grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		[class~="md:grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+		[class~="md:grid-cols-4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+		[class~="md:grid-cols-5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+		[class~="md:items-end"] { align-items: flex-end; }
+		[class~="md:items-start"] { align-items: flex-start; }
+		[class~="md:gap-8"] { gap: 2rem; }
+		[class~="md:gap-y-12"] { row-gap: 3rem; }
+		[class~="md:space-y-0"] > :not([hidden]) ~ :not([hidden]) { margin-top: 0; }
+		[class~="md:px-6"] { padding-inline: 1.5rem; }
+		[class~="md:px-8"] { padding-inline: 2rem; }
+		[class~="md:px-10"] { padding-inline: 2.5rem; }
+		[class~="md:p-6"] { padding: 1.5rem; }
+		[class~="md:p-8"] { padding: 2rem; }
+		[class~="md:pl-6"] { padding-left: 1.5rem; }
+		[class~="md:pt-0"] { padding-top: 0; }
+		[class~="md:mt-0"] { margin-top: 0; }
+		[class~="md:mt-10"] { margin-top: 2.5rem; }
+		[class~="md:max-w-[12rem]"] { max-width: 12rem; }
+		[class~="md:border-l"] { border-left-width: 1px; border-left-style: solid; }
+		[class~="md:border-t-0"] { border-top-width: 0; }
+		[class~="md:text-left"] { text-align: left; }
+		[class~="md:text-2xl"] { font-size: 1.5rem; line-height: 2rem; }
+		[class~="md:text-4xl"] { font-size: 2.25rem; line-height: 2.5rem; }
+		[class~="md:text-5xl"] { font-size: 3rem; line-height: 1; }
+	}
+	@media (min-width: 1024px) {
+		[class~="container"] { max-width: 1024px; }
+		[class~="lg:hidden"] { display: none; }
+		[class~="lg:block"] { display: block; }
+		[class~="lg:flex-row"] { flex-direction: row; }
+		[class~="lg:grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		[class~="lg:grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+		[class~="lg:items-start"] { align-items: flex-start; }
+		[class~="lg:justify-between"] { justify-content: space-between; }
+		[class~="lg:gap-6"] { gap: 1.5rem; }
+		[class~="lg:gap-y-16"] { row-gap: 4rem; }
+		[class~="lg:px-6"] { padding-inline: 1.5rem; }
+		[class~="lg:px-8"] { padding-inline: 2rem; }
+		[class~="lg:px-16"] { padding-inline: 4rem; }
+		[class~="lg:py-7"] { padding-block: 1.75rem; }
+		[class~="lg:py-16"] { padding-block: 4rem; }
+		[class~="lg:mb-8"] { margin-bottom: 2rem; }
+		[class~="lg:mb-16"] { margin-bottom: 4rem; }
+		[class~="lg:mt-24"] { margin-top: 6rem; }
+		[class~="lg:min-w-[280px]"] { min-width: 280px; }
+		[class~="lg:w-7"] { width: 1.75rem; }
+		[class~="lg:h-7"] { height: 1.75rem; }
+		[class~="lg:text-4xl"] { font-size: 2.25rem; line-height: 2.5rem; }
+		[class~="lg:text-6xl"] { font-size: 3.75rem; line-height: 1; }
+	}
+	@media (min-width: 1280px) {
+		[class~="container"] { max-width: 1280px; }
+		[class~="xl:sticky"] { position: sticky; }
+		[class~="xl:top-28"] { top: 7rem; }
+		[class~="xl:grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		[class~="xl:gap-12"] { gap: 3rem; }
+		[class~="xl:gap-y-16"] { row-gap: 4rem; }
+		[class~="xl:px-0"] { padding-inline: 0; }
+		[class~="xl:p-12"] { padding: 3rem; }
+		[class~="xl:w-[35%]"] { width: 35%; }
+		[class~="xl:min-h-[450px]"] { min-height: 450px; }
+		[class~="xl:text-2xl"] { font-size: 1.5rem; line-height: 2rem; }
+		[class~="xl:text-6xl"] { font-size: 3.75rem; line-height: 1; }
+	}
+	@media (min-width: 1536px) {
+		[class~="2xl:text-3xl"] { font-size: 1.875rem; line-height: 2.25rem; }
+	}
+
+	[class~="hover:text-primary"]:hover { color: rgb(var(--brand-primary)); }
+	[class~="hover:text-primary-content"]:hover { color: var(--text-primary-content); }
+	[class~="hover:bg-primary\/5"]:hover { background-color: rgb(var(--brand-primary) / 5%); }
+	[class~="hover:bg-white\/55"]:hover { background-color: rgb(255 255 255 / 55%); }
+	[class~="hover:border-primary"]:hover,
+	[class~="hover:border-primary\/40"]:hover { border-color: rgb(var(--brand-primary) / 40%); }
+	.group:hover [class~="group-hover:text-primary"] { color: rgb(var(--brand-primary)); }
+	.group:hover [class~="group-hover:text-primary-content"] { color: var(--text-primary-content); }
+	.group:hover [class~="group-hover:opacity-100"] { opacity: 1; }
+	.group:hover [class~="group-hover:scale-105"] { transform: scale(1.05); }
+	.group:hover [class~="group-hover:translate-x-1"] { transform: translateX(0.25rem); }
+	[class~="focus:border-primary"]:focus { border-color: rgb(var(--brand-primary)); }
+	[class~="focus:ring-2"]:focus { box-shadow: 0 0 0 2px rgb(var(--brand-primary) / 20%); }
+	[class~="focus:ring-primary"]:focus { box-shadow: 0 0 0 2px rgb(var(--brand-primary) / 45%); }
+	[class~="focus:ring-primary\/20"]:focus { box-shadow: 0 0 0 2px rgb(var(--brand-primary) / 20%); }
+	[class~="focus:absolute"]:focus { position: absolute; }
+	[class~="focus:top-4"]:focus { top: 1rem; }
+	[class~="focus:left-4"]:focus { left: 1rem; }
+	[class~="focus:z-50"]:focus { z-index: 50; }
+	[class~="focus:px-4"]:focus { padding-inline: 1rem; }
+	[class~="focus:py-2"]:focus { padding-block: 0.5rem; }
+	[class~="focus:bg-primary"]:focus { background-color: rgb(var(--brand-primary)); }
+	[class~="focus:text-white"]:focus { color: white; }
+	[class~="focus:rounded-md"]:focus { border-radius: var(--radius-md); }
+	[class~="text-balance"] { text-wrap: balance; }
+	[class~="placeholder:text-muted"]::placeholder { color: var(--text-muted); }
+	@media (prefers-reduced-motion: no-preference) {
+		[class~="motion-safe:transition-colors-smooth"] { transition: color var(--duration-base) var(--ease-standard), background-color var(--duration-base) var(--ease-standard), border-color var(--duration-base) var(--ease-standard); }
+	}
+	html.dark [class~="dark:text-white"] { color: #fff; }
+	html.dark [class~="dark:bg-secondary\/20"] { background-color: rgb(var(--brand-secondary) / 20%); }
+	html.dark [class~="dark:bg-green-900\/30"] { background-color: rgb(20 83 45 / 30%); }
+	html.dark [class~="dark:text-green-400"] { color: #4ade80; }
+	html.dark [class~="dark:text-green-200"] { color: #bbf7d0; }
+	html.dark [class~="dark:text-red-300"] { color: #fca5a5; }
+	html.dark [class~="dark:text-secondary"] { color: rgb(var(--brand-secondary)); }
+	html.dark [class~="dark:border-white\/8"] { border-color: rgb(255 255 255 / 8%); }
+	html.dark [class~="dark:border-white\/10"] { border-color: rgb(255 255 255 / 10%); }
+	html.dark [class~="dark:border-green-500\/50"] { border-color: rgb(34 197 94 / 50%); }
+	[class~="border-slate-700\/60"] { border-color: rgb(51 65 85 / 60%); }
+	[class~="border-slate-700\/50"] { border-color: rgb(51 65 85 / 50%); }
+	[class~="border-slate-800"] { border-color: #1e293b; }
+	[class~="bg-slate-950"] { background-color: #020617; }
+	[class~="bg-slate-900"] { background-color: #0f172a; }
+	[class~="bg-slate-900\/80"] { background-color: rgb(15 23 42 / 80%); }
+	[class~="bg-slate-900\/50"] { background-color: rgb(15 23 42 / 50%); }
+	[class~="bg-slate-800"] { background-color: #1e293b; }
+	[class~="bg-slate-800\/80"] { background-color: rgb(30 41 59 / 80%); }
+	[class~="bg-slate-700\/50"]:hover { background-color: rgb(51 65 85 / 50%); }
+	[class~="bg-slate-600"] { background-color: #475569; }
+	[class~="text-slate-400"] { color: #94a3b8; }
+	[class~="text-slate-500"] { color: #64748b; }
+	[class~="text-slate-300"] { color: #cbd5e1; }
+	[class~="text-slate-200"] { color: #e2e8f0; }
 }
 
-/* Text-tone utilities, focus-ring, transition-*, card-shadow-*,
-   border-surface(-strong) all live in `uno.config.ts` now — registered as
-   shortcuts / rules / preflights so `@apply` continues to work from scoped
-   Astro/Vue <style> blocks through `@unocss/transformer-directives`. */
+/* Small authored primitives retained for legacy publication components. New
+   screens should use Panda recipes or a component class instead of adding
+   another one-off utility. */
+.text-primary-content { color: var(--text-primary-content); }
+.text-secondary-content { color: var(--text-secondary-content); }
+.text-muted { color: var(--text-muted); }
+.text-primary { color: rgb(var(--brand-primary)); }
+.text-secondary { color: rgb(var(--brand-secondary)); }
+.text-accent { color: rgb(var(--brand-accent)); }
+.bg-primary { background-color: rgb(var(--brand-primary)); }
+.bg-secondary { background-color: rgb(var(--brand-secondary)); }
+.bg-accent { background-color: rgb(var(--brand-accent)); }
+.font-display,
+.font-serif { font-family: var(--font-red-hat-display), serif; }
+.font-body,
+.font-sans { font-family: var(--font-red-hat-text), sans-serif; }
+.font-mono { font-family: var(--font-red-hat-mono), monospace; }
+.focus-ring:focus-visible {
+	outline: 2px solid rgb(var(--brand-primary));
+	outline-offset: 2px;
+	border-radius: var(--radius-sm);
+}
+.transition-fast { transition: all var(--duration-fast) var(--ease-standard); }
+.transition-smooth { transition: all var(--duration-base) var(--ease-standard); }
+.transition-card { transition: all var(--duration-slow) var(--ease-standard); }
+.transition-spring { transition: all var(--duration-slow) var(--ease-spring); }
+.transition-colors-smooth,
+.transition-colors-card {
+	transition-property: color, background-color, border-color, fill, stroke;
+	transition-timing-function: var(--ease-standard);
+}
+.transition-colors-smooth { transition-duration: var(--duration-base); }
+.transition-colors-card { transition-duration: var(--duration-slow); }
+.card-shadow-sm { box-shadow: var(--shadow-sm); }
+.card-shadow,
+.card-shadow-md { box-shadow: var(--shadow-md); }
+.card-shadow-lg,
+.card-shadow-elevated { box-shadow: var(--shadow-lg); }
+.card-shadow-xl { box-shadow: var(--shadow-xl); }
+.border-surface { border-color: var(--surface-border); }
+.border-surface-strong { border-color: var(--surface-border-strong); }
 
-/* Keep prose inline code sentence-sized. This must remain unlayered so it
-   wins over UnoCSS reset's unlayered `code { font-size: 1em; }`. */
+/* Keep prose inline code sentence-sized after the browser reset. */
 .prose code {
-	font-family: var(--font-jetbrains-mono), monospace;
+	font-family: var(--font-red-hat-mono), monospace;
 	font-size: 0.85em;
 	font-weight: 500;
 	line-height: inherit;
@@ -1135,36 +1807,30 @@ html.dark {
 /* ════════════════════════════════════════════════════════════════
    Prose rhythm — unlayered restatements.
 
-   The UnoCSS preflight reset is injected unlayered, so it out-cascades
-   everything in @layer base/components regardless of specificity:
-   `h1..h6 { font-size: inherit }`, `h1..h6, p, blockquote, hr, pre
-   { margin: 0 }` and `ol, ul { padding: 0 }` were silently flattening
-   the entire prose ramp (body-sized headings, zero paragraph spacing,
-   bullets hanging outside the text column). Every size/spacing rule
-   the reset clobbers is restated here, unlayered, mirroring the
-   `.prose code` rules above.
+   The global reset intentionally removes browser defaults so the prose
+   contract below owns its heading ramp, paragraph spacing, and list markers.
    ════════════════════════════════════════════════════════════════ */
 .prose h1 {
 	font-size: clamp(2.25rem, 5vw, 3.5rem);
-	font-weight: 400;
+	font-weight: 700;
 	margin: 2.5rem 0 1.25rem;
 }
 
 .prose h2 {
 	font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-	font-weight: 400;
+	font-weight: 700;
 	margin: 2.25rem 0 1rem;
 }
 
 .prose h3 {
 	font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-	font-weight: 500;
+	font-weight: 600;
 	margin: 2rem 0 0.875rem;
 }
 
 .prose h4 {
 	font-size: clamp(1.125rem, 2vw, 1.25rem);
-	font-weight: 500;
+	font-weight: 600;
 	margin: 1.75rem 0 0.75rem;
 }
 

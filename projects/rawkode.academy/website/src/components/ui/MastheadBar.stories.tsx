@@ -16,7 +16,7 @@ export const Default: Story = {
 		template: `<MastheadBar v-bind="args" />`,
 	}),
 	args: {
-		left: "Dispatch №048 · Vol IV",
+		left: "Articles · Rawkode Academy",
 		right: "Thursday, April 23 2026",
 		quote: "The only cloud native content where I actually learn something.",
 		quoteSource: "Principal Engineer, Stripe",

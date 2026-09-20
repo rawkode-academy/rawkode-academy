@@ -2,6 +2,9 @@
 import VideoProgressBar from "@/components/video/VideoProgressBar.vue";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
+import { academyDocument } from "@rawkodeacademy/design-system";
+
+const doc = academyDocument();
 
 interface Video {
 	id: string;
@@ -30,7 +33,7 @@ const {
 	isAuthenticated = false,
 } = Astro.props;
 
-const videos: Video[] = passedVideos.map((v) => ({
+const videos = passedVideos.map((v) => ({
 	id: v.id,
 	title: v.title,
 	slug: v.slug,
@@ -40,6 +43,7 @@ const videos: Video[] = passedVideos.map((v) => ({
 		v.streamUrl || `https://content.rawkode.academy/videos/${v.id}/stream.m3u8`,
 	duration: v.duration ?? 0,
 	type: v.type,
+	runtimeLabel: formatVideoRuntimeLabel(v),
 }));
 
 function formatDate(dateString: string) {
@@ -61,16 +65,16 @@ function calculateProgress(videoId: string, duration: number): number | null {
 ---
 
 <section class="vfeed">
-	<header class="vfeed__head">
-		<h2 class="vfeed__title">{title}</h2>
-		<p class="vfeed__body">{description}</p>
-	</header>
+	{(title.trim() || description.trim()) && <header class="vfeed__head">
+		{title.trim() && <h2 class:list={[doc.sectionTitle, "vfeed__title"]}>{title}</h2>}
+		{description.trim() && <p class:list={[doc.copy, "vfeed__body"]}>{description}</p>}
+	</header>}
 
 	<div class="vfeed__grid">
-		{videos.map((video: Video) => (
+		{videos.map((video) => (
 			<a href={`/watch/${video.slug}`} class="vfeed__item focus-ring">
 				<div class="vfeed__thumb">
-					<img src={video.thumbnailUrl} alt={video.title} class="vfeed__img" loading="lazy" />
+					<img src={video.thumbnailUrl} alt={video.title} class="vfeed__img" width="1280" height="720" loading="lazy" decoding="async" />
 					{(() => {
 						if (!isAuthenticated) return null;
 						const progress = calculateProgress(video.id, video.duration);
@@ -78,13 +82,13 @@ function calculateProgress(videoId: string, duration: number): number | null {
 							<VideoProgressBar progress={progress} overlay={true} client:visible />
 						) : null;
 					})()}
-					<div class="vfeed__runtime">{formatVideoRuntimeLabel(video)}</div>
+					{video.runtimeLabel !== "--:--" && <div class="vfeed__runtime">{video.runtimeLabel}</div>}
 				</div>
 				<div class="vfeed__body-wrap">
-					<div class="vfeed__meta">
-						<span>{formatDate(video.publishedAt)}</span>
+					<div class:list={[doc.meta, "vfeed__meta"]}>
+						<time datetime={video.publishedAt}>{formatDate(video.publishedAt)}</time>
 					</div>
-					<h3 class="vfeed__item-title">{video.title}</h3>
+					<h3 class:list={[doc.cardTitle, "vfeed__item-title"]}>{video.title}</h3>
 				</div>
 			</a>
 		))}
@@ -93,7 +97,9 @@ function calculateProgress(videoId: string, duration: number): number | null {
 
 <style>
 	.vfeed {
-		padding: 3rem 0;
+		padding: clamp(1.5rem, 4vw, 3rem) 0;
+		min-width: 0;
+		font-family: var(--fonts-academy-text), sans-serif;
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
@@ -104,54 +110,54 @@ function calculateProgress(videoId: string, duration: number): number | null {
 		flex-direction: column;
 		gap: 0.5rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
 	.vfeed__title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: clamp(2rem, 4vw, 3rem);
-		line-height: 1.05;
-		letter-spacing: -0.025em;
-		color: var(--editorial-ink);
-		margin: 0;
+		font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+		line-height: 1.2;
+		overflow-wrap: anywhere;
 	}
 
 	.vfeed__body {
-		font-family: var(--font-inter-tight), sans-serif;
 		font-size: 1rem;
 		line-height: 1.55;
-		color: var(--editorial-ink-soft);
 		max-width: 40rem;
 		margin: 0;
 	}
 
 	.vfeed__grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
 		gap: 2rem 1.5rem;
 	}
 
 	.vfeed__item {
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		gap: 0.875rem;
 		text-decoration: none;
-		color: inherit;
+		color: var(--colors-academy-text);
 		position: relative;
+	}
+
+	.vfeed__item:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 4px;
 	}
 
 	.vfeed__thumb {
 		position: relative;
 		aspect-ratio: 16 / 9;
 		overflow: hidden;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
+		background: var(--colors-academy-ground);
+		border: 1px solid var(--colors-academy-border);
+		border-radius: var(--radii-academy-m);
 		transition: border-color var(--duration-base) var(--ease-standard);
 	}
 
-	.vfeed__item:hover .vfeed__thumb { border-color: var(--editorial-hairline-strong); }
+	.vfeed__item:hover .vfeed__thumb { border-color: var(--colors-academy-accent); }
 
 	.vfeed__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
@@ -160,13 +166,13 @@ function calculateProgress(videoId: string, duration: number): number | null {
 		bottom: 0.5rem;
 		right: 0.5rem;
 		padding: 0.2rem 0.5rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.72rem;
+		font-family: var(--fonts-academy-mono), monospace;
+		font-size: 0.75rem;
 		font-weight: 500;
-		letter-spacing: 0.08em;
-		background: oklch(0.12 0.01 280 / 0.85);
-		color: var(--editorial-paper);
-		border-radius: 2px;
+		line-height: 1.5;
+		background: var(--colors-academy-text);
+		color: var(--colors-academy-canvas);
+		border-radius: var(--radii-academy-s);
 	}
 
 	.vfeed__body-wrap {
@@ -176,26 +182,16 @@ function calculateProgress(videoId: string, duration: number): number | null {
 	}
 
 	.vfeed__meta {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: 0.14em;
-		color: var(--editorial-ink-mute);
+		overflow-wrap: anywhere;
 	}
 
 	.vfeed__item-title {
-		font-family: var(--font-instrument-serif), serif;
-		font-style: italic;
-		font-weight: 400;
-		font-size: 1.25rem;
-		line-height: 1.1;
-		letter-spacing: -0.02em;
-		color: var(--editorial-ink);
-		margin: 0;
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
+		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.vfeed__thumb { transition: none; }
 	}
 </style>

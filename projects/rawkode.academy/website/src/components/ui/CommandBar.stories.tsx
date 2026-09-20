@@ -25,7 +25,7 @@ export const CustomLinks: Story = {
 		setup: () => ({
 			links: [
 				{ label: "Courses", href: "/courses" },
-				{ label: "Dispatch", href: "/read" },
+				{ label: "Articles", href: "/read" },
 			],
 		}),
 		template: `<CommandBar :links="links" cta-label="Sign up" />`,

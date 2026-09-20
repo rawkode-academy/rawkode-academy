@@ -13,11 +13,6 @@ export const prerender = true;
 
 const faqs = [
 	{
-		question: "What happens in the first 90 days?",
-		answer:
-			"We agree the practitioner and workflow to reach, open Slack Connect, and choose the first proof gap. Each month has one working session. Each quarter produces one technical demo or proof asset, a companion page, reusable clips, and a delivery report.",
-	},
-	{
 		question: "How does Slack access work?",
 		answer:
 			"Slack Connect is the place for questions, reviews, and decisions as they come up. It is async partner communication, not on-call support or incident response. Questions are normally answered within two business days.",
@@ -28,38 +23,9 @@ const faqs = [
 			"A working environment, technical subject-matter expert, relevant docs or repository, source material, and timely approvals. You keep ownership of implementation and execution.",
 	},
 	{
-		question: "Does sponsorship buy coverage or a positive review?",
+		question: "How is additional work handled?",
 		answer:
-			"No. Sponsorship funds the work, not the verdict. The partnership includes agreed proof assets and distribution, but it does not buy independent editorial coverage, praise, leads, or sign-ups.",
-	},
-	{
-		question: "Can we start with a smaller engagement?",
-		answer:
-			"Yes. Fit & Proof Review is an optional £2,500 review of one named technical buyer workflow. It includes a written scorecard and one readout, and the full fee is credited if you start Adoption Advisory within 30 days.",
-	},
-	{
-		question: "What is intentionally out of scope?",
-		answer:
-			"On-call support, incident response, implementation ownership, outsourced DevRel, open-ended campaign work, unlimited revisions, audience rental, and blanket exclusivity. Additional demos or strategy work are separately scoped.",
-	},
-];
-
-const deliverables = [
-	{
-		title: "Technical proof",
-		body: "One working demo or proof asset each quarter, built around a real practitioner workflow.",
-	},
-	{
-		title: "Working partnership",
-		body: "Slack Connect for questions and decisions, plus one scheduled working session each month.",
-	},
-	{
-		title: "Reusable distribution",
-		body: "A companion page, clips, shared asset repository, and agreed reuse rights for your team.",
-	},
-	{
-		title: "Evidence and renewal",
-		body: "A quarterly delivery and performance report that makes the next renewal decision explicit.",
+			"Additional demos or strategy work are separately scoped. The programme does not include audience rental or guaranteed sign-ups.",
 	},
 ];
 
@@ -101,23 +67,13 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 			<a class="editorial-button editorial-button--secondary" href="#programme">See the programme</a>
 		</div>
 
-		<section class="editorial-section" aria-label="Programme principles">
-			<div class="partner-principles">
-				<div><span class="partner-principles__value">You own</span><span>Execution, content, and community</span></div>
-				<div><span class="partner-principles__value">We bring</span><span>Technical demos, critique, and practitioner context</span></div>
-				<div><span class="partner-principles__value">You decide</span><span>What to prove, change, or stop next</span></div>
-			</div>
-		</section>
-
 		<section id="programme" class="editorial-section editorial-section--split" aria-labelledby="programme-title">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">The programme</p>
 				<h2 id="programme-title" class="editorial-section__title">{partnershipOffer.name}</h2>
-				<p class="editorial-section__lede">{partnershipOffer.cadence}. The programme is deliberately specific: access to David is useful because it is attached to real proof work, not because it is an unlimited inbox.</p>
+				<p class="editorial-section__lede">Work with David on a specific technical workflow. Your team keeps ownership of the product, content, and community. The partnership includes agreed proof assets and distribution, backed by technical critique and practitioner context.</p>
 			</div>
-			<div class="editorial-card partner-offer-card">
+			<div class="partner-offer-card">
 				<div>
-					<p class="editorial-kicker">{partnershipOffer.label}</p>
 					<p class="partner-offer-card__price">{partnershipOffer.price}</p>
 					<p class="partner-offer-card__cadence">{partnershipOffer.cadence}</p>
 				</div>
@@ -128,50 +84,13 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 			</div>
 		</section>
 
-		<section class="editorial-section" aria-labelledby="deliverables-title">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">What you receive</p>
-				<h2 id="deliverables-title" class="editorial-section__title">A repeatable working rhythm</h2>
-			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{deliverables.map((item) => (
-					<article class="editorial-card partner-card">
-						<h3 class="editorial-card__title">{item.title}</h3>
-						<p class="editorial-card__body">{item.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split" aria-labelledby="evidence-title">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Evidence over theatre</p>
-				<h2 id="evidence-title" class="editorial-section__title">Build something practitioners can actually inspect.</h2>
-				<p class="editorial-section__lede">The work starts with a real environment and a real workflow. It should leave behind something your team can reuse, not just a conversation that disappears into a meeting history.</p>
-			</div>
-			<div class="partner-evidence">
-				<article class="partner-evidence__item">
-					<h3 class="editorial-card__title">Working demos</h3>
-					<p class="editorial-card__body">Dockerfiles, manifests, code, and the operational details that let a technical evaluator follow the path from claim to proof.</p>
-				</article>
-				<article class="partner-evidence__item">
-					<h3 class="editorial-card__title">Public learning</h3>
-					<p class="editorial-card__body">Courses, live builds, articles, and walkthroughs that meet practitioners where they evaluate a product.</p>
-				</article>
-				<article class="partner-evidence__item">
-					<h3 class="editorial-card__title">Independent judgement</h3>
-					<p class="editorial-card__body">Sponsorship funds the work, not the verdict. Trust is protected by keeping claims and editorial decisions honest.</p>
-				</article>
-			</div>
-		</section>
-
 		<section class="editorial-section editorial-section--split" aria-labelledby="review-title">
 			<div class="editorial-section__header">
 				<p class="editorial-kicker">Optional starting point</p>
 				<h2 id="review-title" class="editorial-section__title">{fitProofReview.name}</h2>
 				<p class="editorial-section__lede">{fitProofReview.summary}</p>
 			</div>
-			<div class="editorial-card editorial-card--paper partner-offer-card">
+			<div class="partner-offer-card">
 				<div>
 					<p class="partner-offer-card__price">{fitProofReview.price}</p>
 					<p class="partner-offer-card__cadence">{fitProofReview.cadence}</p>
@@ -185,8 +104,7 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="process-title">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">How it starts</p>
-				<h2 id="process-title" class="editorial-section__title">A clear path from problem to proof</h2>
+				<h2 id="process-title" class="editorial-section__title">How it starts</h2>
 			</div>
 			<div class="partner-process">
 				{process.map((item) => (
@@ -201,8 +119,7 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="boundaries-title">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Boundaries</p>
-				<h2 id="boundaries-title" class="editorial-section__title">A useful partnership has edges.</h2>
+				<h2 id="boundaries-title" class="editorial-section__title">Clear boundaries</h2>
 			</div>
 			<ul class="editorial-list partner-boundaries">
 				{badFits.map((item) => <li>{item}</li>)}
@@ -211,8 +128,7 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 
 		<section class="editorial-section editorial-section--split" aria-labelledby="faq-title">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Questions before you start</p>
-				<h2 id="faq-title" class="editorial-section__title">Straight answers</h2>
+				<h2 id="faq-title" class="editorial-section__title">Before you apply</h2>
 			</div>
 			<div class="editorial-faq">
 				{faqs.map((faq) => (
@@ -238,72 +154,49 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 </Page>
 
 <style>
-	.partner-principles {
-		display: grid;
-		gap: 0;
-		border-top: 1px solid var(--editorial-hairline);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.partner-principles > div {
-		display: grid;
-		gap: 0.35rem;
-		padding: 0.95rem 0;
-		color: var(--editorial-ink-soft);
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 0.95rem;
-		line-height: 1.45;
-	}
-
-	.partner-principles > div + div {
-		border-top: 1px solid var(--editorial-hairline);
-	}
-
-	.partner-principles__value,
 	.partner-process__step {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.7rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--editorial-spruce);
+		color: var(--colors-academy-accent);
 	}
 
 	.partner-offer-card {
 		display: grid;
 		gap: 1rem;
+		justify-items: start;
 	}
 
 	.partner-offer-card__price {
 		margin: 0.4rem 0 0;
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
+		font-family: var(--fonts-academy-text), system-ui, sans-serif;
 		font-size: clamp(1.9rem, 5vw, 2.8rem);
 		font-weight: 750;
 		letter-spacing: -0.03em;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	.partner-offer-card__cadence {
 		margin: 0.15rem 0 0;
-		color: var(--editorial-ink-mute);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		color: var(--colors-academy-text-muted);
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 	}
 
-	.partner-card {
-		display: grid;
-		gap: 0.55rem;
-	}
-
 	.partner-card__link {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		color: var(--editorial-spruce);
+		color: var(--colors-academy-accent);
 		text-decoration: none;
 	}
 
@@ -311,28 +204,28 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 		text-decoration: underline;
 		text-underline-offset: 0.2em;
 	}
+	.partner-card__link:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 4px;
+	}
 
-	.partner-evidence,
 	.partner-process {
 		display: grid;
 		gap: 0;
-		border-top: 1px solid var(--editorial-hairline);
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-top: 1px solid var(--colors-academy-border);
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
-	.partner-evidence__item,
 	.partner-process__item {
 		display: grid;
 		gap: 0.5rem;
 		padding: 1rem 0;
 	}
 
-	.partner-evidence__item + .partner-evidence__item,
 	.partner-process__item + .partner-process__item {
-		border-top: 1px solid var(--editorial-hairline);
+		border-top: 1px solid var(--colors-academy-border);
 	}
 
-	.partner-evidence__item h3,
 	.partner-process__item h3 {
 		margin: 0;
 	}
@@ -342,33 +235,8 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 	}
 
 	@media (min-width: 760px) {
-		.partner-principles {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-
-		.partner-principles > div {
-			padding: 1rem;
-		}
-
-		.partner-principles > div + div {
-			border-top: 0;
-			border-left: 1px solid var(--editorial-hairline);
-		}
-
-		.partner-evidence,
-		.partner-process {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-
-		.partner-evidence__item,
 		.partner-process__item {
 			padding: 1rem;
-		}
-
-		.partner-evidence__item + .partner-evidence__item,
-		.partner-process__item + .partner-process__item {
-			border-top: 0;
-			border-left: 1px solid var(--editorial-hairline);
 		}
 	}
 </style>

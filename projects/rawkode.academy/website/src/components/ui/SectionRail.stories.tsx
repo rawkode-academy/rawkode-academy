@@ -19,7 +19,7 @@ export const SixSection: Story = {
 				{ num: 3, label: "Instructor", href: "#instructor" },
 				{ num: 4, label: "Praise", href: "#praise" },
 				{ num: 5, label: "Schedule", href: "#schedule" },
-				{ num: 6, label: "Field notes", href: "#notes" },
+				{ num: 6, label: "Articles", href: "#articles" },
 			],
 		}),
 		template: `<SectionRail :items="items" />`,

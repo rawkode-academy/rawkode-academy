@@ -1,0 +1,894 @@
+{
+  "schema_version": 1,
+  "review_type": "independent-source-only",
+  "date": "2026-09-20",
+  "repository_head": "272b68bc",
+  "environment": {
+    "source": "Current working tree; course files inspected from disk",
+    "compiled_environment_reported_by_main": "http://127.0.0.1:4322, checkpoint 272b68bc compiled 17:28; deployment reported green",
+    "compiled_environment_verified": false,
+    "browser_used": false,
+    "rendered_urls_reviewed": 0,
+    "viewport": null,
+    "theme": null
+  },
+  "scope": {
+    "inventory": "projects/rawkode.academy/website/docs/design-inventory.json",
+    "inventory_baseline": "e528028602b3202a5cfad0cd0c8929e6af8fd80b",
+    "route_count": 21,
+    "catalogs": 1,
+    "course_details": 4,
+    "published_lessons": 16,
+    "content_counts": {
+      "complete_guide_zitadel": {
+        "total": 21,
+        "published": 9,
+        "draft": 12
+      },
+      "graphql_federation_wundergraph_cosmo": {
+        "total": 0,
+        "published": 0
+      },
+      "rust_for_the_rusty": {
+        "total": 1,
+        "published": 1
+      },
+      "teleport_for_kubernetes": {
+        "total": 6,
+        "published": 6
+      }
+    },
+    "write_scope": "This evidence file only"
+  },
+  "method": [
+    "Read all three route templates, all four course content files and all sixteen published lesson bodies/frontmatters.",
+    "Read course hero, curriculum, full/compact signup wrappers and Vue clients, resource list, embed modal, shared player and course JSON-LD.",
+    "Followed source dependencies into signup action/helper, demo registry plugin/loader and installed Resend error-return contract.",
+    "Parsed inventory/frontmatter and enumerated directories read-only to cross-check publication counts and demo IDs.",
+    "Findings concern current reachable source; introduction by PR1355 was not established for every finding."
+  ],
+  "summary": {
+    "source_routes_reviewed": 21,
+    "rendered_routes_reviewed": 0,
+    "findings": 11,
+    "blocking": 3,
+    "nonblocking": 8,
+    "overall_signoff": false
+  },
+  "findings": [
+    {
+      "id": "CS01",
+      "severity": "P1",
+      "classification": "blocking",
+      "title": "Introduction demo button references an unregistered WebContainer demo",
+      "affected_routes": [
+        "/courses/complete-guide-zitadel/01-introduction"
+      ],
+      "evidence": [
+        {
+          "file": "content/courses/complete-guide-zitadel/01-introduction.mdx",
+          "lines": "32-42",
+          "fact": "embedConfig.src is oauth-pkce-intro, while import.localDir points to examples/oauth-pkce-app."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/ResourceList.vue",
+          "lines": "146-163",
+          "fact": "The action forwards embedConfig.src as the resource query parameter; imported files are not passed to the new window."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/utils/vite-plugin-webcontainer-demos.ts",
+          "lines": "72-75,142-147",
+          "fact": "Registry IDs are example directory names; absent keys throw Demo not found."
+        }
+      ],
+      "source_check": "The only example directories are oauth-pkce-app and oauth-pkce-demo; no alias for oauth-pkce-intro exists in the inspected loader.",
+      "impact": "The advertised interactive demo cannot resolve its files through the production loader.",
+      "recommendation": "Use a registered key or an explicit validated alias, and add a source registry/reference contract check.",
+      "verification_boundary": "Deterministic source mismatch, not a browser reproduction; no WebContainer execution."
+    },
+    {
+      "id": "CS02",
+      "severity": "P1",
+      "classification": "blocking",
+      "title": "Failed course signup can be recorded and displayed as successful",
+      "affected_scope": "Three signup-enabled course detail pages and their fifteen published lessons (Zitadel, GraphQL detail, Teleport).",
+      "evidence": [
+        {
+          "file": "projects/rawkode.academy/website/src/actions/courses.ts",
+          "lines": "81-109,153-159,182-186",
+          "fact": "contacts.create response.error is never checked; session flag and analytics are written, and the handler falls through to success:true when response.data is null."
+        },
+        {
+          "file": "projects/rawkode.academy/website/node_modules/resend/dist/index.mjs",
+          "lines": "480-497,1071-1118",
+          "fact": "Installed SDK contacts.create returns the request result; unsuccessful HTTP responses resolve to {data:null,error:...} instead of throwing."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/CourseSignupFormClient.vue",
+          "lines": "153-161",
+          "fact": "Any result.data moves the client into submitted success state."
+        }
+      ],
+      "impact": "A rejected provider request can show Thank you, persist a false subscription state and record activation despite no subscription being created.",
+      "recommendation": "Require a successful provider result before session/analytics/success writes; handle explicit returned errors for course and sponsor writes. Review contact.unsubscribed in the subscription check and duplicate handling before claiming subscribed.",
+      "verification_boundary": "Control-flow and installed-SDK inspection only; no provider call, form submission or session mutation. Teleport uses slug-like audience IDs, but their validity was not externally verified."
+    },
+    {
+      "id": "CS03",
+      "severity": "P1",
+      "classification": "blocking",
+      "title": "Published Astro auth example redirects to a different route than the provided callback",
+      "affected_routes": [
+        "/courses/complete-guide-zitadel/07-astro-integration"
+      ],
+      "evidence": [
+        {
+          "file": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+          "lines": "120-123,210-212",
+          "fact": "The OAuth client sends http://localhost:4321/auth/callback, but the instructed endpoint is pages/api/auth/callback.ts."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+          "lines": "55-60,109-113",
+          "fact": "The tutorial says Arctic is the only dependency, but the example also imports @oslojs/jwt and oidc-client-ts."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+          "lines": "270-275",
+          "fact": "The code example nests a button inside an anchor; this is invalid interactive composition in the learner's resulting app, not a live nested control on the lesson page."
+        }
+      ],
+      "impact": "Following the supplied instructions cannot deliver the promised working callback without correcting the route and setup omissions.",
+      "recommendation": "Reconcile callback path and dependency setup; use a single link styled as a control. Validate the complete tutorial against a pinned minimal example before marking it usable.",
+      "verification_boundary": "Internal source contradictions only; no authentication, installs or tutorial execution. Library-version compatibility and security completeness remain unaudited."
+    },
+    {
+      "id": "CS04",
+      "severity": "P2",
+      "classification": "non-blocking",
+      "title": "Prerendered lessons cannot honor current subscription state",
+      "affected_scope": "All nine published Zitadel lessons and all six Teleport lessons.",
+      "evidence": [
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "lines": "18,295-301",
+          "fact": "The route is prerendered and calls CourseSignupForm without server:defer or deferSubscriptionCheck."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/CourseSignupForm.astro",
+          "lines": "20-38,50-52",
+          "fact": "The default is deferSubscriptionCheck=false; user and subscription status are evaluated at prerender time."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/CourseSignupFormClient.vue",
+          "lines": "98-100",
+          "fact": "Client refresh happens only when deferSubscriptionCheck is true and the subscription prop is undefined."
+        }
+      ],
+      "impact": "Returning subscribers and signed-in readers receive the generic email form on each lesson instead of their current state. Repeated full signup sections add avoidable friction.",
+      "recommendation": "Use request-time state or a deferred client check with an undefined initial state; keep a compact updates entry point rather than repeating explanatory signup copy on every lesson.",
+      "verification_boundary": "Static data-flow proof; authenticated rendering and actual account state were not exercised."
+    },
+    {
+      "id": "CS05",
+      "severity": "P2",
+      "classification": "non-blocking",
+      "title": "Course structured data invents duration and includes unpublished curriculum as available instruction",
+      "affected_scope": "All four course detail pages.",
+      "evidence": [
+        {
+          "file": "projects/rawkode.academy/website/src/components/html/course-jsonld.astro",
+          "lines": "13-16,32-38,59-60,75",
+          "fact": "Every module receives PT30M and total duration is module count times thirty; all modules become courseInstances and teaches entries."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/[...slug].astro",
+          "lines": "53-60,120",
+          "fact": "Visible duration correctly requires measured published durations, but JSON-LD receives allCourseModules, including drafts."
+        }
+      ],
+      "impact": "Zitadel emits 10h30m for 21 modules despite only nine published and no recorded durations; Rust emits 30m, Teleport 3h and GraphQL 0m without source duration data. Hidden claims contradict the truthful visible contract.",
+      "recommendation": "Share a published-only projection; omit unknown durations and do not represent drafts as available instances.",
+      "verification_boundary": "Computed directly from source counts, not a rendered JSON-LD inspection."
+    },
+    {
+      "id": "CS06",
+      "severity": "P2",
+      "classification": "non-blocking",
+      "title": "Early Zitadel lesson content repeats course sales copy and duplicates page structure",
+      "affected_routes": [
+        "/courses/complete-guide-zitadel/01-introduction",
+        "/courses/complete-guide-zitadel/02-prerequisites",
+        "/courses/complete-guide-zitadel/03-install-docker-compose",
+        "/courses/complete-guide-zitadel/04-install-kubernetes"
+      ],
+      "evidence": [
+        {
+          "file": "content/courses/complete-guide-zitadel/01-introduction.mdx",
+          "lines": "45-49",
+          "fact": "Two consecutive paragraphs repeat the same course pitch."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/02-prerequisites.mdx",
+          "lines": "16-20",
+          "fact": "Generic course welcome plus two overlapping summaries rather than a prerequisite checklist."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/03-install-docker-compose.mdx",
+          "lines": "18-22",
+          "fact": "The same welcome heading and repeated summary are used for a distinct installation lesson."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/04-install-kubernetes.mdx",
+          "lines": "6,18-22,88-95",
+          "fact": "Authored H1 duplicates the route H1; Overview repeats the description verbatim; the actual video follows the entire outcome outline."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "lines": "219-225,246-248",
+          "fact": "The wrapper already supplies the module title and description before rendering authored content."
+        }
+      ],
+      "impact": "Readers and heading-navigation users encounter duplicate page titles and promises before the actual lesson. These are source-level redundancies independent of visual styling.",
+      "recommendation": "Remove redundant H1/intro copy; keep one short lesson-specific context and the actual teaching material. Do not invent missing step-by-step content."
+    },
+    {
+      "id": "CS07",
+      "severity": "P2",
+      "classification": "non-blocking",
+      "title": "Teleport promises runnable demo scripts without supplying course-specific script links",
+      "affected_scope": "Teleport course detail and all six published Teleport lessons.",
+      "evidence": [
+        {
+          "file": "content/courses/teleport-for-kubernetes.mdx",
+          "lines": "47",
+          "fact": "Every video is promised to include runnable local Kind demo scripts."
+        },
+        {
+          "file": "content/courses/teleport-for-kubernetes/01-introduction.mdx",
+          "lines": "58",
+          "fact": "The same script promise is repeated in the introduction."
+        },
+        {
+          "file": "content/courses/teleport-for-kubernetes/02-deploying-teleport-cluster.mdx",
+          "lines": "34-41",
+          "fact": "The teaching steps explicitly refer to walking through demo scripts."
+        }
+      ],
+      "source_check": "All six lesson bodies/frontmatters and course resources were read. Resources link to upstream documentation/GitHub, not the demonstrated scripts. No Teleport examples directory is present.",
+      "impact": "The page does not provide the promised follow-along artifacts; prose checklists alone do not supply the referenced values/manifests.",
+      "recommendation": "Link the actual public demo repository/files, or narrow the promise to video walkthroughs. Do not label upstream product source as the lesson demo.",
+      "verification_boundary": "Page/source artifact availability only; scripts may be mentioned inside video content, which was not viewed.",
+      "resolution": {
+        "status": "source-fixed",
+        "correction": "Narrowed the overview to video walkthroughs, removed the introduction's promise of supplied runnable scripts, and described the deployment lesson as deployment steps. No demo repository or artifact links were invented.",
+        "files": [
+          "content/courses/teleport-for-kubernetes.mdx",
+          "content/courses/teleport-for-kubernetes/01-introduction.mdx",
+          "content/courses/teleport-for-kubernetes/02-deploying-teleport-cluster.mdx"
+        ],
+        "preserved": "All six lessons' media IDs, thumbnails, publication metadata and resource destinations; overview artwork and signup configuration; technical instructions and existing edition/licensing wording. The licensing claim was not validated.",
+        "test": "projects/rawkode.academy/website/src/tests/teleport-content-contract.test.ts",
+        "verification": "Focused Vitest run at 19:33:28 BST: 10 Teleport contract tests and 29 existing course-content contract tests passed (39 total).",
+        "boundary": "Source and contract-test evidence only. No Browser review, full build, video review, live artifact verification, or external requests were performed for this correction. Original finding evidence above records the pre-correction source."
+      }
+    },
+    {
+      "id": "CS08",
+      "severity": "P2",
+      "classification": "non-blocking",
+      "title": "Catalog does not distinguish an empty announced course from available courses",
+      "affected_routes": [
+        "/courses",
+        "/courses/graphql-federation-wundergraph-cosmo"
+      ],
+      "evidence": [
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/index.astro",
+          "lines": "14-20,109",
+          "fact": "All courses are listed; secondary cards show only difficulty and Course, without published-lesson availability."
+        },
+        {
+          "file": "content/courses/graphql-federation-wundergraph-cosmo.mdx",
+          "lines": "3-6,48-62",
+          "fact": "The description promises a comprehensive course and the body repeats a second learning-outcome list."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/CourseModules.astro",
+          "lines": "39-40",
+          "fact": "Only after opening the course does the curriculum explain that no lessons have been added."
+        }
+      ],
+      "source_check": "GraphQL has zero module files; Rust has one published module, Zitadel nine and Teleport six.",
+      "recommendation": "Expose availability before navigation, such as Announced / 0 lessons available; keep the honest empty state and updates option. Merge overlapping objective lists rather than adding filler."
+    },
+    {
+      "id": "CS09",
+      "severity": "P2",
+      "classification": "non-blocking",
+      "title": "Zitadel curriculum and lesson headers use incompatible lesson numbering",
+      "affected_routes": [
+        "/courses/complete-guide-zitadel",
+        "/courses/complete-guide-zitadel/09-authentication-methods",
+        "/courses/complete-guide-zitadel/10-social-login-providers"
+      ],
+      "evidence": [
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/CourseModules.astro",
+          "lines": "26-27,64-67",
+          "fact": "Curriculum display indices count every module, including draft Remix at position eight."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "lines": "152-164,204",
+          "fact": "Lesson headers count only published modules."
+        }
+      ],
+      "impact": "Curriculum lesson 09 opens as Lesson 8 of 9, and lesson 10 as Lesson 9 of 9. Draft-skipping navigation is correct; the unexplained index change is not.",
+      "recommendation": "Use one stable lesson number or explicitly label the header as published-lesson progress."
+    },
+    {
+      "id": "CS10",
+      "severity": "P3",
+      "classification": "non-blocking",
+      "title": "MDX retains a parallel legacy video layout and unused demo-file processing",
+      "affected_routes": [
+        "/courses/complete-guide-zitadel/01-introduction",
+        "/courses/complete-guide-zitadel/02-prerequisites",
+        "/courses/complete-guide-zitadel/03-install-docker-compose",
+        "/courses/complete-guide-zitadel/04-install-kubernetes",
+        "/courses/complete-guide-zitadel/05-zitadel-cloud",
+        "/courses/complete-guide-zitadel/06-first-application"
+      ],
+      "evidence": [
+        {
+          "file": "content/courses/complete-guide-zitadel/02-prerequisites.mdx",
+          "lines": "14,22-28",
+          "fact": "MDX imports VideoPlayer and wraps it in legacy className utilities instead of the shared frontmatter video layout."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/03-install-docker-compose.mdx",
+          "lines": "16,24-30",
+          "fact": "Same duplicate video composition."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/04-install-kubernetes.mdx",
+          "lines": "16,88-94",
+          "fact": "Same duplicate video composition."
+        },
+        {
+          "file": "content/courses/complete-guide-zitadel/05-zitadel-cloud.mdx",
+          "lines": "16,24-30",
+          "fact": "Same duplicate video composition."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+          "lines": "95-116",
+          "fact": "The route reads imports from process.cwd()/content/courses, a directory absent under the website cwd; errors return the original resource."
+        },
+        {
+          "file": "projects/rawkode.academy/website/src/components/courses/ResourceList.vue",
+          "lines": "146-163",
+          "fact": "The active WebContainer action uses only course and resource ID, not the files processed by the route."
+        }
+      ],
+      "recommendation": "Move authored video metadata into the common lesson contract. Remove or consolidate unused local-file loading only after validating the actual demo registry path. Do not add a utility shim.",
+      "verification_boundary": "Structural duplication and absent path confirmed; no rendered claim about which legacy classes currently affect layout."
+    },
+    {
+      "id": "CS11",
+      "severity": "P3",
+      "classification": "non-blocking",
+      "title": "Course catalog retains dead pre-migration CSS",
+      "affected_routes": [
+        "/courses"
+      ],
+      "evidence": [
+        {
+          "file": "projects/rawkode.academy/website/src/pages/courses/index.astro",
+          "lines": "120-177",
+          "fact": "The style block defines courses-page* selectors; markup uses Academy recipe classes and none of these selector names."
+        }
+      ],
+      "recommendation": "Remove the orphan style block in a separately authorized cleanup. It provides no intentional current section styling."
+    }
+  ],
+  "shared_dispositions": [
+    {
+      "component": "projects/rawkode.academy/website/src/components/courses/CourseDetailHero.vue",
+      "decision": "keep",
+      "reason": "Single title, actual author identities and image, availability counts and one curriculum anchor have distinct purposes. No invented duration when missing."
+    },
+    {
+      "component": "projects/rawkode.academy/website/src/components/courses/CourseModules.astro",
+      "decision": "keep with CS09 rework",
+      "reason": "Semantic ordered curriculum, explicit unavailable rows without dead links, section availability and real durations are useful; numbering must agree with lesson context."
+    },
+    {
+      "component": "projects/rawkode.academy/website/src/components/courses/ResourceList.vue",
+      "decision": "keep with CS01 correction",
+      "reason": "Categorized resources, explicit external-window/dialog labels, URL validation and deduplication at the route are meaningful. No empty category chrome is emitted."
+    },
+    {
+      "component": "projects/rawkode.academy/website/src/components/Aside.astro",
+      "decision": "keep",
+      "reason": "Authored info/tip/warning callouts distinguish actionable caveats; warning is normalized to caution and decorative SVGs are hidden. Computed colors/layout were not inspected."
+    },
+    {
+      "component": "projects/rawkode.academy/website/src/components/courses/CourseSignupFormClient.vue",
+      "decision": "rework",
+      "reason": "Opt-in consent, labeled email, disabled pre-hydration form and status/error regions are justified; repeated long promotional framing and stale lesson subscription state are not."
+    },
+    {
+      "component": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "decision": "keep with state/content corrections",
+      "reason": "Breadcrumbs, lesson context, draft-skipping previous/next, article and resources each support learning. Resources follow the article in DOM order. Desktop rail positioning and mobile reading order require rendered verification."
+    }
+  ],
+  "routes": [
+    {
+      "route": "/courses",
+      "source": "projects/rawkode.academy/website/src/pages/courses/index.astro",
+      "covered_sections": [
+        "catalog masthead",
+        "latest-course feature",
+        "available/total count",
+        "start action",
+        "cover link",
+        "three secondary cards",
+        "zero-course branches",
+        "orphan style block"
+      ],
+      "finding_ids": [
+        "CS08",
+        "CS11"
+      ],
+      "disposition": "Keep one featured course and compact secondary catalog. Availability is useful metadata; generic Course labels add less value. Remove dead CSS."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel.mdx",
+      "covered_sections": [
+        "hero/byline/cover",
+        "21-row curriculum including 12 drafts",
+        "learning objectives",
+        "About prose",
+        "deferred updates",
+        "references",
+        "structured data"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS05",
+        "CS09"
+      ],
+      "disposition": "Keep explicit 9/21 availability and unlinked drafts. Reconcile numbering and machine-readable claims; broad course promises should not imply drafts are available."
+    },
+    {
+      "route": "/courses/graphql-federation-wundergraph-cosmo",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[...slug].astro",
+      "content": "content/courses/graphql-federation-wundergraph-cosmo.mdx",
+      "covered_sections": [
+        "hero/0-of-0 count",
+        "empty curriculum",
+        "objectives",
+        "About/second objectives list",
+        "deferred updates",
+        "references",
+        "structured data"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS05",
+        "CS08"
+      ],
+      "disposition": "Rework as an announced course with honest zero-lesson status before entry; keep useful references and updates, merge duplicate outcome lists."
+    },
+    {
+      "route": "/courses/rust-for-the-rusty",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[...slug].astro",
+      "content": "content/courses/rust-for-the-rusty.mdx",
+      "covered_sections": [
+        "hero/byline/cover",
+        "one-lesson curriculum",
+        "objectives",
+        "authored motivation",
+        "platform notes/feedback links",
+        "structured data",
+        "absence of signup/resources sidebar"
+      ],
+      "finding_ids": [
+        "CS05"
+      ],
+      "disposition": "Keep authored motivation and practical caveats; no empty supplementary sidebar is emitted. Pun-only objectives would benefit from concrete skill descriptions. The open-a-PR link actually targets issues/new and should be relabeled."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes.mdx",
+      "covered_sections": [
+        "hero/byline/cover",
+        "six published lessons in three sections",
+        "objectives",
+        "About/script promise",
+        "deferred updates",
+        "references",
+        "structured data"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS05",
+        "CS07"
+      ],
+      "disposition": "Keep complete curriculum and learning objectives. Supply promised example artifacts and verify configured provider audience IDs; do not invent duration."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/01-introduction",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/01-introduction.mdx",
+      "covered_sections": [
+        "Welcome/course positioning",
+        "frontmatter video",
+        "three deduplicated reference links",
+        "OAuth PKCE demo",
+        "next lesson",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS01",
+        "CS02",
+        "CS04",
+        "CS06",
+        "CS10"
+      ],
+      "disposition": "Keep the real video and references; remove the second near-identical promotional paragraph; repair the demo before advertising it."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/02-prerequisites",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/02-prerequisites.mdx",
+      "covered_sections": [
+        "Prerequisites prose",
+        "authored VideoPlayer",
+        "inherited resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS06",
+        "CS10"
+      ],
+      "disposition": "Keep Postgres prerequisites and video; replace generic welcome heading and repeated sales summary with concrete prerequisite steps."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/03-install-docker-compose",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/03-install-docker-compose.mdx",
+      "covered_sections": [
+        "Installation summary",
+        "authored VideoPlayer",
+        "inherited resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS06",
+        "CS10"
+      ],
+      "disposition": "Keep installation video; remove repeated summary and course-wide welcome heading; promised copy-paste configuration is not supplied in this article."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/04-install-kubernetes",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/04-install-kubernetes.mdx",
+      "covered_sections": [
+        "Authored H1",
+        "Overview",
+        "learning-outcome lists",
+        "production topics",
+        "Outcome",
+        "authored VideoPlayer",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS06",
+        "CS10"
+      ],
+      "disposition": "Rework duplicated H1/lede and the long outcome-only preamble. Keep useful subject outline, but lead with the actual lesson rather than repeated promises."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/05-zitadel-cloud",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/05-zitadel-cloud.mdx",
+      "covered_sections": [
+        "Managed-service introduction",
+        "authored VideoPlayer",
+        "free-tier claims",
+        "cloud/self-host comparison",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS10"
+      ],
+      "disposition": "Keep the deployment-choice comparison. Consolidate video placement with other lessons. Pricing/feature claims require separate current-source verification, not performed here."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/06-first-application",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/06-first-application.mdx",
+      "covered_sections": [
+        "Application setup",
+        "PKCE explanation",
+        "sample app",
+        "token introspection/roles",
+        "required configuration",
+        "demo resource",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS10"
+      ],
+      "disposition": "Keep concrete sequential instruction and demo. This demo key matches a discovered folder; actual browser execution remains unverified."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/07-astro-integration",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+      "covered_sections": [
+        "Prerequisites",
+        "dependency/environment setup",
+        "Astro config",
+        "OAuth integration class",
+        "signin/callback code",
+        "login markup example",
+        "testing",
+        "next steps",
+        "callouts",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS03",
+        "CS04"
+      ],
+      "disposition": "Keep code-led instruction and meaningful callouts; repair the internally inconsistent example before treating it as a working tutorial. Missing video poster is an additional follow-up."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/09-authentication-methods",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/09-authentication-methods.mdx",
+      "covered_sections": [
+        "Authentication methods",
+        "instance/organization settings",
+        "registration/passkeys/MFA",
+        "Login V2",
+        "best practices",
+        "callouts",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS09"
+      ],
+      "disposition": "Keep settings hierarchy and safety callouts. Label published progress distinctly from curriculum numbering; product-version accuracy was not independently checked."
+    },
+    {
+      "route": "/courses/complete-guide-zitadel/10-social-login-providers",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/complete-guide-zitadel/10-social-login-providers.mdx",
+      "covered_sections": [
+        "Provider setup",
+        "scopes",
+        "account linking",
+        "name transformation example",
+        "testing",
+        "provider variants",
+        "security/troubleshooting",
+        "summary",
+        "callouts",
+        "resources",
+        "previous lesson",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS09"
+      ],
+      "disposition": "Keep safety and troubleshooting sections. Revalidate provider-specific instructions separately; do not infer current accuracy from source presence."
+    },
+    {
+      "route": "/courses/rust-for-the-rusty/01-introduction",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/rust-for-the-rusty/01-introduction.mdx",
+      "covered_sections": [
+        "Welcome/history",
+        "linked references",
+        "installation",
+        "three code/output blocks",
+        "next-module teaser",
+        "book resource",
+        "single-lesson navigation absence"
+      ],
+      "finding_ids": [],
+      "disposition": "Keep concrete compiler examples, output and references. Clarify that the teased cargo lesson is not yet published; breadcrumb remains the route back to the course."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes/01-introduction",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes/01-introduction.mdx",
+      "covered_sections": [
+        "Problem",
+        "solution",
+        "service architecture",
+        "what is ahead",
+        "video",
+        "deduplicated resources",
+        "next lesson",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS07"
+      ],
+      "disposition": "Keep architecture orientation. Link the promised runnable scripts or qualify the promise."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes/02-deploying-teleport-cluster",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes/02-deploying-teleport-cluster.mdx",
+      "covered_sections": [
+        "Prerequisites",
+        "deployment steps",
+        "production comparison",
+        "video",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS07"
+      ],
+      "disposition": "Keep ordered steps and local/production distinction; supply the exact scripts/values referred to by the lesson."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes/03-identity-based-access-rbac",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes/03-identity-based-access-rbac.mdx",
+      "covered_sections": [
+        "Manual versus identity access",
+        "GitHub SSO",
+        "GitOps configuration",
+        "CLI access",
+        "video",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS07"
+      ],
+      "disposition": "Keep the SSO/roles explanation; provide runnable manifests and mark the rawkode.cloud proxy command as an example requiring replacement."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries.mdx",
+      "covered_sections": [
+        "Least privilege",
+        "two-layer model",
+        "namespace boundaries",
+        "deny rules",
+        "defense in depth",
+        "video",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS07"
+      ],
+      "disposition": "Keep the two-layer explanation; attach the actual roles and bindings to make the hands-on promise usable."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes/05-just-in-time-access",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes/05-just-in-time-access.mdx",
+      "covered_sections": [
+        "Standing privileges",
+        "JIT model",
+        "implementation checklist/commands",
+        "TTL discussion",
+        "video",
+        "resources",
+        "previous/next",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS07"
+      ],
+      "disposition": "Keep request/approval/drop sequence; provide role manifests referenced by the checklist. No privilege-changing commands were run."
+    },
+    {
+      "route": "/courses/teleport-for-kubernetes/06-auditing-and-session-recording",
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "content": "content/courses/teleport-for-kubernetes/06-auditing-and-session-recording.mdx",
+      "covered_sections": [
+        "Audit events",
+        "session recording",
+        "live joining",
+        "course summary",
+        "video",
+        "resources",
+        "previous lesson",
+        "signup"
+      ],
+      "finding_ids": [
+        "CS02",
+        "CS04",
+        "CS07"
+      ],
+      "disposition": "Keep the distinct audit/recording/joining explanations and concise course conclusion; no recording playback or external system was accessed."
+    }
+  ],
+  "additional_followups": [
+    {
+      "source": "projects/rawkode.academy/website/src/components/courses/CourseSignupFormCompact.vue:9",
+      "note": "Success/subscribed headings use h4 beneath the wrapper h2. Consider consistent heading hierarchy or non-heading status text; not a blocking functional defect."
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro:238",
+      "note": "Astro integration lesson provides only video.id, so thumbnailUrl falls back to an empty string. No rendered poster behavior was inspected."
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro:239",
+      "note": "Video islands are client-only without an authored SSR fallback. Captions are requested by the player, but media/caption availability and keyboard playback were not verified."
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro:240",
+      "note": "Shared lesson video explicitly receives isAuthenticated=false, and authored players omit it. Saving course watch position is consequently disabled; confirm product intent before treating this as a regression."
+    },
+    {
+      "source": "content/courses/complete-guide-zitadel/10-social-login-providers.mdx:205",
+      "note": "Provider-specific instructions and historical feature-preview language need a separate current-documentation audit. No external technical claims were verified in this source-only assignment."
+    }
+  ],
+  "limitations": [
+    "No browser attempts in this source-review phase; no screenshots or rendered-page evidence.",
+    "No desktop, mobile or dark-theme signoff. Typography, spacing, imagery, code readability, sticky behavior, focus indication and actual overflow remain unverified.",
+    "No build, dependency install, test suite, demo execution, media playback, form submission, authentication or external request performed.",
+    "Source route derivation is not an HTTP status/link availability check; external links and CDN assets were not fetched.",
+    "Shared global header/footer and third-party player internals were not exhaustively re-audited. Auth examples were read for internal consistency, not certified secure or version-compatible.",
+    "Existing build/deployment results are supplied context, not independent verification of these findings."
+  ]
+}

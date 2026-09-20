@@ -5,6 +5,8 @@ import { getCollection } from "astro:content";
 import Page from "@/wrappers/page.astro";
 import { Container } from "@/components/ui";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
+import { academyLayout, academyMedia } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 // Helper to normalize technology references from videos
 function normalizeTechnologyRef(value: unknown): string | undefined {
@@ -188,14 +190,17 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	label: stageLabels[stage] ?? stage,
 	copy: stageCopy[stage] ?? stageDescriptions[stage] ?? "",
 }));
+const layout = academyLayout({ width: "wide" });
+const media = academyMedia();
 ---
 
 <Page
 	title="Technology Matrix"
 	description="Rawkode's opinionated guide to cloud native and platform engineering technologies."
 >
+	<div class:list={[layout.root, media.root, "matrix-route"]}>
 	<!-- Custom Hero -->
-	<section class="matrix-hero">
+	<section class:list={[layout.hero, media.hero, "matrix-hero"]}>
 		<div class="hero-background">
 			<div class="hero-gradient"></div>
 			<div class="hero-grid"></div>
@@ -283,7 +288,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	</section>
 
 	<Container size="xl" padding="lg">
-		<div class="matrix-content">
+		<div class:list={[layout.container, media.body, "matrix-content"]}>
 
 			<!-- Pipeline Header -->
 			<div class="pipeline-header" role="group" aria-label="Pipeline stages from Watch to Advocate">
@@ -529,6 +534,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 			</div>
 		</div>
 	</dialog>
+	</div>
 </Page>
 
 <style>
@@ -539,17 +545,17 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.matrix-legend,
 	.matrix-content,
 	.tech-modal {
-		--stage-skip: var(--editorial-rust);
-		--stage-watch: var(--editorial-amber-text);
+		--stage-skip: var(--colors-academy-status-rust);
+		--stage-watch: var(--colors-academy-status-amber);
 		--stage-explore: color-mix(
 			in oklab,
-			var(--editorial-amber-text) 45%,
-			var(--editorial-spruce) 55%
+			var(--colors-academy-status-amber) 45%,
+			var(--colors-academy-status-spruce) 55%
 		);
-		--stage-learn: var(--editorial-violet);
-		--stage-adopt: var(--editorial-spruce);
-		--stage-advocate: var(--editorial-ink);
-		--stage-graveyard: var(--editorial-ink-mute);
+		--stage-learn: var(--colors-academy-status-violet);
+		--stage-adopt: var(--colors-academy-status-spruce);
+		--stage-advocate: var(--colors-academy-text);
+		--stage-graveyard: var(--colors-academy-text-muted);
 	}
 
 	/* Violet is not re-pointed by html.dark; lift it locally for contrast
@@ -558,7 +564,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	:global(html.dark) .matrix-legend,
 	:global(html.dark) .matrix-content,
 	:global(html.dark) .tech-modal {
-		--stage-learn: color-mix(in oklab, var(--editorial-violet) 60%, white 40%);
+		--stage-learn: color-mix(in oklab, var(--colors-academy-status-violet) 60%, white 40%);
 	}
 
 	/* ===== LEGEND ===== */
@@ -568,8 +574,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	.legend-details {
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
 		border-radius: 8px;
 		overflow: hidden;
 	}
@@ -585,7 +591,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	.legend-summary:hover {
-		background: var(--surface-card-muted);
+		background: var(--colors-academy-ground);
 	}
 
 	.legend-summary::-webkit-details-marker {
@@ -601,12 +607,12 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		flex: 1;
 		font-size: 0.95rem;
 		font-weight: 600;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 	}
 
 	.legend-summary .chevron {
 		transition: transform 0.2s ease;
-		color: var(--text-muted);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.legend-details[open] .chevron {
@@ -615,14 +621,14 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 	.legend-content {
 		padding: 0 1.25rem 1.25rem;
-		border-top: 1px solid var(--surface-border);
+		border-top: 1px solid var(--colors-academy-border);
 	}
 
 	.legend-intro {
 		margin: 1rem 0 1.5rem;
 		font-size: 0.9rem;
 		line-height: 1.6;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 	}
 
 	.legend-stages {
@@ -637,7 +643,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		gap: 0.75rem;
 		padding: 0.75rem;
 		border-radius: 6px;
-		background: var(--surface-card-muted);
+		background: var(--colors-academy-ground);
 	}
 
 	.legend-stage .stage-indicator {
@@ -667,13 +673,13 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 	}
 
 	.legend-stage .stage-desc {
 		font-size: 0.8rem;
 		line-height: 1.5;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 	}
 
 	@media (max-width: 768px) {
@@ -695,7 +701,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		position: relative;
 		padding: clamp(2rem, 5vw, 4.5rem) 0 clamp(1.75rem, 4vw, 3rem);
 		overflow: hidden;
-		border-bottom: 1px solid var(--editorial-hairline);
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
 	.hero-background {
@@ -707,15 +713,15 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.hero-gradient {
 		position: absolute;
 		inset: 0;
-		background: color-mix(in oklab, var(--editorial-paper-deep) 60%, var(--editorial-paper) 40%);
+		background: color-mix(in oklab, var(--colors-academy-ground) 60%, var(--colors-academy-canvas) 40%);
 	}
 
 	.hero-grid {
 		position: absolute;
 		inset: 0;
 		background-image:
-			linear-gradient(var(--surface-border) 1px, transparent 1px),
-			linear-gradient(90deg, var(--surface-border) 1px, transparent 1px);
+			linear-gradient(var(--colors-academy-border) 1px, transparent 1px),
+			linear-gradient(90deg, var(--colors-academy-border) 1px, transparent 1px);
 		background-size: 60px 60px;
 		opacity: 0.55;
 	}
@@ -736,20 +742,20 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.badge-dot {
 		width: 6px;
 		height: 6px;
-		background: rgb(var(--brand-primary));
+		background: var(--colors-academy-accent);
 		border-radius: 50%;
 	}
 
 	.hero-title {
 		max-width: 52rem;
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--fonts-academy-display), serif;
 		font-size: clamp(3rem, 8vw, 7rem);
 		font-style: italic;
 		font-weight: 500;
 		letter-spacing: 0;
 		line-height: 0.95;
 		margin: 0 0 0.85rem;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 .hero-subtitle {
@@ -776,11 +782,11 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		border-radius: 6px;
 		min-width: 0;
 		transition: border-color 0.2s ease, background-color 0.2s ease;
-		border: 1px solid var(--surface-border);
+		border: 1px solid var(--colors-academy-border);
 	}
 
 	.preview-stage:hover {
-		border-color: var(--editorial-hairline-strong);
+		border-color: var(--colors-academy-input-border);
 	}
 
 	.preview-count {
@@ -843,10 +849,10 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1rem;
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-		border: 1px solid var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), monospace;
+		background: var(--colors-academy-text);
+		color: var(--colors-academy-canvas);
+		border: 1px solid var(--colors-academy-text);
+		font-family: var(--fonts-academy-mono), monospace;
 		font-size: 0.74rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
@@ -857,8 +863,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	.advanced-mode-link:hover {
-		background: var(--editorial-spruce);
-		border-color: var(--editorial-spruce);
+		background: var(--colors-academy-status-spruce);
+		border-color: var(--colors-academy-status-spruce);
 	}
 
 	.advanced-mode-link svg {
@@ -874,16 +880,16 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: center;
 		justify-content: center;
 		padding: 0.75rem 1rem;
-		border: 1px solid var(--editorial-hairline-strong);
+		border: 1px solid var(--colors-academy-input-border);
 		border-radius: 3px;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--fonts-academy-mono), monospace;
 		font-size: 0.74rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		text-decoration: none;
-		color: var(--editorial-ink);
-		background: var(--editorial-paper);
+		color: var(--colors-academy-text);
+		background: var(--colors-academy-canvas);
 	}
 
 	/* ===== MATRIX CONTENT ===== */
@@ -904,7 +910,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		z-index: 20;
 		gap: 0.25rem;
 		padding: 0.5rem 0;
-		background: var(--surface-base);
+		background: var(--colors-academy-canvas);
 	}
 
 	.header-flow-line {
@@ -959,14 +965,14 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.stage-label {
 		font-size: 0.85rem;
 		font-weight: 800;
-		color: var(--surface-base);
+		color: var(--colors-academy-canvas);
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 	}
 
 	.stage-sublabel {
 		font-size: 0.65rem;
-		color: var(--surface-base);
+		color: var(--colors-academy-canvas);
 		opacity: 0.9;
 		margin-top: 0.125rem;
 		font-weight: 500;
@@ -1015,8 +1021,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 1rem 0.375rem;
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
 		border-bottom: none;
 		border-radius: 8px 8px 0 0;
 		margin-left: 1rem;
@@ -1030,7 +1036,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 	}
 
 	.lane-desc {
@@ -1048,12 +1054,12 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		height: 1.5rem;
 		padding: 0 0.4rem;
 		border-radius: 4px;
-		background: var(--editorial-paper-deep);
-		border: 1px solid var(--editorial-hairline);
-		font-family: var(--font-jetbrains-mono), monospace;
+		background: var(--colors-academy-ground);
+		border: 1px solid var(--colors-academy-border);
+		font-family: var(--fonts-academy-mono), monospace;
 		font-size: 0.68rem;
 		font-weight: 700;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 	}
 
 	.lane {
@@ -1073,7 +1079,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.lane-cell {
 		padding: 0.5rem;
 		min-height: 48px;
-		border-right: 1px solid var(--surface-border);
+		border-right: 1px solid var(--colors-academy-border);
 		transition: background 0.2s ease;
 		display: flex;
 		align-items: center;
@@ -1084,7 +1090,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	.lane-cell:hover {
-		background: var(--surface-card-muted);
+		background: var(--colors-academy-ground);
 	}
 
 	/* Subtle stage tints */
@@ -1116,8 +1122,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		width: 44px;
 		height: 44px;
 		padding: 0;
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
 		border-radius: 10px;
 		text-decoration: none;
 		cursor: pointer;
@@ -1127,8 +1133,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 	.tech-icon:hover {
 		transform: scale(1.15);
-		border-color: rgb(var(--brand-primary));
-		box-shadow: 0 0 0 3px rgb(var(--brand-primary) / 0.2);
+		border-color: var(--colors-academy-accent);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--colors-academy-accent) 20%, transparent);
 	}
 
 	/* Tech icon tooltip */
@@ -1139,14 +1145,14 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		left: 50%;
 		transform: translateX(-50%) translateY(4px);
 		padding: 0.625rem 1rem;
-		background: var(--surface-card);
-		border: 1px solid var(--editorial-hairline-strong);
-		border-top: 2px solid rgb(var(--brand-primary));
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-input-border);
+		border-top: 2px solid var(--colors-academy-accent);
 		border-radius: var(--radius-3xl);
 		font-size: 0.8rem;
 		font-weight: 600;
 		letter-spacing: 0.01em;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 		white-space: nowrap;
 		opacity: 0;
 		visibility: hidden;
@@ -1166,7 +1172,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		height: 0;
 		border-left: 8px solid transparent;
 		border-right: 8px solid transparent;
-		border-top: 8px solid var(--editorial-hairline-strong);
+		border-top: 8px solid var(--colors-academy-input-border);
 		opacity: 0;
 		visibility: hidden;
 		transition: all var(--duration-base) var(--ease-standard);
@@ -1211,11 +1217,11 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--surface-card-muted);
+		background: var(--colors-academy-ground);
 		border-radius: 4px;
 		font-size: 0.7rem;
 		font-weight: 700;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 	}
 
 	.icon-trajectory {
@@ -1229,15 +1235,15 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--surface-card);
+		background: var(--colors-academy-panel);
 		border-radius: 50%;
-		border: 1px solid var(--surface-border);
+		border: 1px solid var(--colors-academy-border);
 		line-height: 1;
 	}
 
-	.trajectory-rising { color: var(--editorial-spruce); }
-	.trajectory-stable { color: var(--editorial-ink-mute); }
-	.trajectory-falling { color: var(--editorial-rust); }
+	.trajectory-rising { color: var(--colors-academy-status-spruce); }
+	.trajectory-stable { color: var(--colors-academy-text-muted); }
+	.trajectory-falling { color: var(--colors-academy-status-rust); }
 
 
 
@@ -1322,7 +1328,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 		.lane-cell {
 			border-right: none;
-			border-bottom: 1px solid var(--surface-border);
+			border-bottom: 1px solid var(--colors-academy-border);
 			min-height: auto;
 			padding: 0.75rem;
 			flex-direction: column;
@@ -1384,7 +1390,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 			text-align: left;
 			font-size: 0.8rem;
 			font-weight: 600;
-			color: var(--text-primary-content);
+			color: var(--colors-academy-text);
 		}
 
 		.icon-img {
@@ -1445,22 +1451,22 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
 		border-radius: 50%;
-		color: var(--text-muted);
+		color: var(--colors-academy-text-muted);
 		cursor: pointer;
 		transition: all 0.15s ease;
 	}
 
 	.modal-close:hover {
-		background: var(--surface-card-muted);
-		color: var(--text-primary-content);
+		background: var(--colors-academy-ground);
+		color: var(--colors-academy-text);
 	}
 
 	.modal-card-frame {
-		background: var(--surface-card);
-		border: 1px solid var(--editorial-hairline-strong);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-input-border);
 		border-radius: var(--radius-4xl);
 		overflow: hidden;
 	}
@@ -1470,8 +1476,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: center;
 		gap: 1.25rem;
 		padding: 1.75rem;
-		background: var(--surface-card-muted);
-		border-bottom: 4px solid var(--text-muted);
+		background: var(--colors-academy-ground);
+		border-bottom: 4px solid var(--colors-academy-text-muted);
 	}
 
 	.modal-header.status-skip { border-bottom-color: var(--stage-skip); }
@@ -1491,9 +1497,9 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		height: 80px;
 		object-fit: contain;
 		border-radius: var(--radius-4xl);
-		background: var(--surface-card);
+		background: var(--colors-academy-panel);
 		padding: 0.875rem;
-		border: 1px solid var(--surface-border);
+		border: 1px solid var(--colors-academy-border);
 	}
 
 	.modal-icon-placeholder {
@@ -1502,12 +1508,12 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		display: none;
 		align-items: center;
 		justify-content: center;
-		background: var(--surface-card);
+		background: var(--colors-academy-panel);
 		border-radius: var(--radius-4xl);
-		border: 1px solid var(--surface-border);
+		border: 1px solid var(--colors-academy-border);
 		font-size: 2rem;
 		font-weight: 700;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 	}
 
 	.modal-titles {
@@ -1518,7 +1524,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.modal-name {
 		font-size: 1.75rem;
 		font-weight: 700;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 		margin: 0 0 0.625rem;
 		line-height: 1.2;
 	}
@@ -1537,8 +1543,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		letter-spacing: 0.04em;
 		padding: 0.375rem 0.75rem;
 		border-radius: var(--radius-md);
-		color: var(--surface-base);
-		background: var(--text-muted);
+		color: var(--colors-academy-canvas);
+		background: var(--colors-academy-text-muted);
 	}
 
 	.modal-status-badge.status-skip { background: var(--stage-skip); }
@@ -1551,7 +1557,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 
 	.modal-category {
 		font-size: 0.875rem;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 	}
 
 	.modal-body {
@@ -1572,13 +1578,13 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
-		color: var(--text-muted);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.modal-section .section-text {
 		font-size: 0.9375rem;
 		line-height: 1.6;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 		margin: 0;
 	}
 
@@ -1594,14 +1600,14 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.875rem 0.5rem;
-		background: var(--surface-card-muted);
+		background: var(--colors-academy-ground);
 		border-radius: var(--radius-3xl);
 	}
 
 	.modal-stat .stat-value {
 		font-size: 1rem;
 		font-weight: 700;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 	}
 
 	.modal-stat .stat-label {
@@ -1609,7 +1615,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: var(--text-muted);
+		color: var(--colors-academy-text-muted);
 		text-align: center;
 	}
 
@@ -1618,8 +1624,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: flex-start;
 		gap: 0.75rem;
 		padding: 1rem;
-		background: color-mix(in oklab, var(--editorial-rust) 8%, transparent);
-		border: 1px solid color-mix(in oklab, var(--editorial-rust) 18%, transparent);
+		background: color-mix(in oklab, var(--colors-academy-status-rust) 8%, transparent);
+		border: 1px solid color-mix(in oklab, var(--colors-academy-status-rust) 18%, transparent);
 		border-radius: var(--radius-3xl);
 	}
 
@@ -1636,7 +1642,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.modal-spicy .spicy-text {
 		font-size: 0.875rem;
 		font-style: italic;
-		color: var(--editorial-rust);
+		color: var(--colors-academy-status-rust);
 		line-height: 1.5;
 	}
 
@@ -1651,9 +1657,9 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		gap: 0.625rem;
 		width: 100%;
 		padding: 1rem 1.5rem;
-		background: var(--editorial-ink);
-		color: var(--editorial-paper);
-		border: 1px solid var(--editorial-ink);
+		background: var(--colors-academy-text);
+		color: var(--colors-academy-canvas);
+		border: 1px solid var(--colors-academy-text);
 		border-radius: var(--radius-md);
 		font-size: 0.875rem;
 		font-weight: 700;
@@ -1664,8 +1670,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	}
 
 	.modal-cta:hover {
-		background: var(--editorial-spruce);
-		border-color: var(--editorial-spruce);
+		background: var(--colors-academy-status-spruce);
+		border-color: var(--colors-academy-status-spruce);
 	}
 
 	.modal-cta svg {
@@ -1717,7 +1723,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.other-section {
 		margin-top: 2rem;
 		padding-top: 1.5rem;
-		border-top: 1px dashed var(--surface-border);
+		border-top: 1px dashed var(--colors-academy-border);
 	}
 
 	.other-header {
@@ -1738,7 +1744,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.other-title {
 		font-size: 1rem;
 		font-weight: 600;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 		margin: 0;
 	}
 
@@ -1752,20 +1758,20 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		align-items: center;
 		gap: 0.375rem;
 		padding: 0.5rem 0.875rem;
-		background: var(--surface-card-muted);
-		border: 1px solid var(--surface-border);
+		background: var(--colors-academy-ground);
+		border: 1px solid var(--colors-academy-border);
 		border-radius: 6px;
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: var(--text-secondary-content);
+		color: var(--colors-academy-text-soft);
 		text-decoration: none;
 		transition: all 0.2s ease;
 	}
 
 	.other-advanced-link:hover {
-		background: rgb(var(--brand-primary) / 0.1);
-		border-color: rgb(var(--brand-primary) / 0.3);
-		color: rgb(var(--brand-primary));
+		background: color-mix(in srgb, var(--colors-academy-accent) 10%, transparent);
+		border-color: color-mix(in srgb, var(--colors-academy-accent) 30%, transparent);
+		color: var(--colors-academy-accent);
 	}
 
 	.other-advanced-link svg {
@@ -1801,7 +1807,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		letter-spacing: 0.04em;
 		padding: 0.25rem 0.5rem;
 		border-radius: 4px;
-		color: var(--surface-base);
+		color: var(--colors-academy-canvas);
 	}
 
 	.other-group-badge.skip {
@@ -1815,7 +1821,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 	.other-group-count {
 		font-size: 0.7rem;
 		font-weight: 600;
-		color: var(--text-muted);
+		color: var(--colors-academy-text-muted);
 	}
 
 	.other-items {
@@ -1832,8 +1838,8 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		width: 32px;
 		height: 32px;
 		padding: 0;
-		background: var(--surface-card);
-		border: 1px solid var(--surface-border);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-border);
 		border-radius: 6px;
 		cursor: pointer;
 		font-family: inherit;
@@ -1859,12 +1865,12 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		left: 50%;
 		transform: translateX(-50%) translateY(4px);
 		padding: 0.375rem 0.625rem;
-		background: var(--surface-card);
-		border: 1px solid var(--editorial-hairline-strong);
+		background: var(--colors-academy-panel);
+		border: 1px solid var(--colors-academy-input-border);
 		border-radius: var(--radius-3xl);
 		font-size: 0.7rem;
 		font-weight: 600;
-		color: var(--text-primary-content);
+		color: var(--colors-academy-text);
 		white-space: nowrap;
 		opacity: 0;
 		visibility: hidden;
@@ -1915,11 +1921,11 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: var(--surface-card-muted);
+		background: var(--colors-academy-ground);
 		border-radius: 3px;
 		font-size: 0.6rem;
 		font-weight: 700;
-		color: var(--text-muted);
+		color: var(--colors-academy-text-muted);
 	}
 
 	@media (max-width: 768px) {
@@ -1960,7 +1966,7 @@ const legendStages = ["skip", ...pipelineStages, "graveyard"].map((stage) => ({
 			text-align: left;
 			font-size: 0.75rem;
 			font-weight: 600;
-			color: var(--text-secondary-content);
+			color: var(--colors-academy-text-soft);
 		}
 	}
 

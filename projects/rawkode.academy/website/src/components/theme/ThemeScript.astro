@@ -25,7 +25,8 @@
 			} catch (e) {
 				// localStorage may be unavailable; fall through.
 			}
-			return "system";
+			const applied = document.documentElement.getAttribute("data-color-preference");
+			return VALID.includes(applied) ? applied : "system";
 		}
 
 		function applyScheme(scheme) {
@@ -51,7 +52,9 @@
 				: "light";
 		}
 
-		applyScheme(resolve(readPreference()));
+		const preference = readPreference();
+		document.documentElement.setAttribute("data-color-preference", preference);
+		applyScheme(resolve(preference));
 
 		// Live-update when preference is "system" and OS theme changes.
 		if (window.matchMedia) {

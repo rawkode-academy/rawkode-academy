@@ -37,6 +37,9 @@ export const dialog = sva({
 				outlineColor: "action.interactive",
 				outlineOffset: "focus",
 			},
+			_motionReduce: {
+				transitionDuration: "none",
+			},
 		},
 		backdrop: {
 			position: "fixed",
@@ -117,10 +120,56 @@ export const dialog = sva({
 				outlineColor: "action.interactive",
 				outlineOffset: "focus",
 			},
+			_motionReduce: {
+				transitionDuration: "none",
+			},
 		},
 	},
 	variants: {
+		tone: {
+			editorial: {},
+			academy: {
+				trigger: {
+					backgroundColor: "academy.accent",
+					color: "academy.accentForeground",
+					_hover: {
+						backgroundColor: "academy.accent",
+					},
+					_focusVisible: {
+						outlineColor: "academy.accent",
+					},
+				},
+				content: {
+					borderColor: "academy.border",
+					backgroundColor: "academy.panel",
+					color: "academy.text",
+				},
+				title: {
+					fontFamily: "academy-display",
+				},
+				description: {
+					color: "academy.textSoft",
+				},
+				body: {
+					color: "academy.text",
+				},
+				footer: {
+					color: "academy.text",
+				},
+				closeTrigger: {
+					color: "academy.textMuted",
+					_hover: {
+						backgroundColor: "academy.ground",
+						color: "academy.text",
+					},
+					_focusVisible: {
+						outlineColor: "academy.accent",
+					},
+				},
+			},
+		},
 		size: {
+			lg: { content: { maxWidth: "6xl" } },
 			sm: {
 				content: {
 					maxWidth: "md",
@@ -134,6 +183,7 @@ export const dialog = sva({
 		},
 	},
 	defaultVariants: {
+		tone: "editorial",
 		size: "md",
 	},
 });

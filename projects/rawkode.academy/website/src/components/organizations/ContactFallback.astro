@@ -1,5 +1,7 @@
 ---
 import { PARTNERSHIP_EMAIL } from "@/lib/partnerships";
+import { academyMarketing } from "@rawkodeacademy/design-system";
+import "@rawkodeacademy/design-system/styles.css";
 
 /**
  * Plain-text contact fallback for the partnership pages.
@@ -18,17 +20,19 @@ interface Props {
 }
 
 const { template, subject } = Astro.props;
+const marketing = academyMarketing();
 ---
 
-<aside class="contact-fallback" aria-label="Email details for copy and paste">
-	<p class="contact-fallback__label">No mail client? Copy instead</p>
+<aside class:list={[marketing.contact, "contact-fallback"]} aria-label="Email details for copy and paste">
+	<p class={marketing.eyebrow}>No mail client? Copy instead</p>
 
-	<div class="contact-fallback__row">
+	<div class:list={[marketing.contactRow, "contact-fallback__row"]}>
 		<code class="contact-fallback__email">{PARTNERSHIP_EMAIL}</code>
 		<button
 			type="button"
-			class="contact-fallback__copy"
+			class:list={[marketing.copyButton, "contact-fallback__copy"]}
 			data-copy-text={PARTNERSHIP_EMAIL}
+			data-copy-kind="Email address"
 		>
 			Copy email
 		</button>
@@ -41,11 +45,13 @@ const { template, subject } = Astro.props;
 	<pre class="contact-fallback__template">{template}</pre>
 	<button
 		type="button"
-		class="contact-fallback__copy"
+		class:list={[marketing.copyButton, "contact-fallback__copy"]}
 		data-copy-text={template}
+		data-copy-kind="Template"
 	>
 		Copy template
 	</button>
+	<p role="status" aria-live="polite" aria-atomic="true" class="sr-only" data-copy-status></p>
 </aside>
 
 <script>
@@ -56,6 +62,7 @@ const { template, subject } = Astro.props;
 		} catch {
 			// Clipboard API unavailable (insecure context, permissions):
 			// select the text in an off-screen textarea and use execCommand.
+			const previousFocus = document.activeElement;
 			const textarea = document.createElement("textarea");
 			textarea.value = text;
 			textarea.setAttribute("readonly", "");
@@ -69,7 +76,9 @@ const { template, subject } = Astro.props;
 			} catch {
 				copied = false;
 			}
+			const restoreFocus = document.activeElement === textarea;
 			textarea.remove();
+			if (restoreFocus && previousFocus instanceof HTMLElement) previousFocus.focus();
 			return copied;
 		}
 	};
@@ -78,10 +87,17 @@ const { template, subject } = Astro.props;
 		".contact-fallback__copy[data-copy-text]",
 	)) {
 		const original = button.textContent;
+		const status = button.closest(".contact-fallback")?.querySelector<HTMLElement>("[data-copy-status]");
+		let resetTimer: number | undefined;
 		button.addEventListener("click", async () => {
+			window.clearTimeout(resetTimer);
+			if (status) status.textContent = "";
 			const copied = await copyWithFallback(button.dataset.copyText ?? "");
 			button.textContent = copied ? "Copied" : "Copy failed";
-			window.setTimeout(() => {
+			if (status) status.textContent = copied
+				? `${button.dataset.copyKind} copied to clipboard.`
+				: "Copy failed. Select and copy the text shown above.";
+			resetTimer = window.setTimeout(() => {
 				button.textContent = original;
 			}, 2000);
 		});
@@ -90,23 +106,16 @@ const { template, subject } = Astro.props;
 
 <style>
 	.contact-fallback {
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
-		padding: 1.25rem;
-		display: grid;
-		gap: 0.75rem;
-		justify-items: start;
-		width: 100%;
 		max-width: 46rem;
 	}
 
 	.contact-fallback__label {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-family: var(--fonts-academy-mono);
 		font-size: 0.7rem;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
+		color: var(--colors-academy-text-muted);
 		margin: 0;
 	}
 
@@ -129,10 +138,10 @@ const { template, subject } = Astro.props;
 	}
 
 	.contact-fallback__email {
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-family: var(--fonts-academy-mono);
 		font-size: 0.95rem;
 		font-weight: 600;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 		user-select: all;
 	}
 
@@ -140,32 +149,14 @@ const { template, subject } = Astro.props;
 		width: 100%;
 		margin: 0;
 		padding: 0.85rem 1rem;
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper);
-		color: var(--editorial-ink-soft);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		border: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-ground);
+		color: var(--colors-academy-text-soft);
+		font-family: var(--fonts-academy-mono);
 		font-size: 0.8rem;
 		line-height: 1.6;
 		white-space: pre-wrap;
 		overflow-x: auto;
 	}
 
-	.contact-fallback__copy {
-		border: 1px solid var(--editorial-hairline-strong);
-		background: transparent;
-		color: var(--editorial-ink);
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		padding: 0.45rem 0.8rem;
-		border-radius: var(--radius-sm, 2px);
-		cursor: pointer;
-	}
-
-	.contact-fallback__copy:hover {
-		background: var(--editorial-paper);
-		border-color: var(--editorial-ink);
-	}
 </style>

@@ -16,7 +16,7 @@ export const FourStat: Story = {
 			stats: [
 				{ value: "339", label: "Lessons" },
 				{ value: "42k", label: "Engineers" },
-				{ value: "112", label: "Dispatches" },
+				{ value: "112", label: "Articles" },
 				{ value: "2019", label: "Since" },
 			],
 		}),
@@ -31,7 +31,7 @@ export const FiveStatWithNotes: Story = {
 			stats: [
 				{ value: "339", label: "Lessons", note: "Foundations → advanced" },
 				{ value: "42k", label: "Engineers", note: "Actively subscribed" },
-				{ value: "112", label: "Dispatches", note: "Weekly since 2023" },
+				{ value: "112", label: "Articles", note: "Published since 2023" },
 				{ value: "84", label: "Technologies", note: "K8s, eBPF, Wasm, …" },
 				{ value: "2019", label: "Since", note: "Still shipping" },
 			],

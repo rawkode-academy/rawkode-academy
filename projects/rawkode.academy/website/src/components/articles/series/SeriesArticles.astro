@@ -1,4 +1,6 @@
 ---
+import { academyDocument } from "@rawkodeacademy/design-system";
+const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import ArticleCard from "../ArticleCard.astro";
@@ -17,13 +19,13 @@ const articles = (await getCollection("articles"))
 
 {
 	articles.length === 0 ? (
-		<p class="text-muted">
+		<p class={doc.meta}>
 			No articles found for this series.
 		</p>
 	) : (
-		<div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 pt-4">
+		<div class={doc.grid}>
 			{articles.map((article) => (
-				<ArticleCard article={article} />
+				<ArticleCard article={article} headingLevel={3} />
 			))}
 		</div>
 	)

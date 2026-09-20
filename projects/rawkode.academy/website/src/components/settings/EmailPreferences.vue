@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { academyAccount, dialog, academyLayout } from "@rawkodeacademy/design-system";
+const account = academyAccount();
+const modal = dialog({ tone: "academy" });
+const layout = academyLayout();
+
+import { Dialog } from "@ark-ui/vue/dialog";
 import { actions } from "astro:actions";
+import { computed, ref } from "vue";
+import PreferenceSwitch from "./PreferenceSwitch.vue";
 
 const props = defineProps<{
 	academyNewsletter: boolean;
@@ -42,7 +49,7 @@ const togglePreference = async (
 	channel: "newsletter" | "marketing" | "service",
 	audience: string,
 ) => {
-	if (isLoading.value) return;
+	if (isLoading.value || isUnsubscribingAll.value) return;
 
 	isLoading.value = key;
 	error.value = null;
@@ -71,7 +78,7 @@ const togglePreference = async (
 };
 
 const unsubscribeTechnology = async (techId: string) => {
-	if (isLoading.value) return;
+	if (isLoading.value || isUnsubscribingAll.value) return;
 
 	isLoading.value = `tech-${techId}`;
 	error.value = null;
@@ -97,7 +104,7 @@ const unsubscribeTechnology = async (techId: string) => {
 };
 
 const unsubscribeFromAll = async () => {
-	if (isUnsubscribingAll.value) return;
+	if (isUnsubscribingAll.value || isLoading.value) return;
 
 	isUnsubscribingAll.value = true;
 	error.value = null;
@@ -130,6 +137,7 @@ const unsubscribeFromAll = async () => {
 
 const formatTechName = (id: string) => {
 	return id
+		.replace(/\/index$/, "")
 		.split("/")
 		.pop()
 		?.split("-")
@@ -139,136 +147,61 @@ const formatTechName = (id: string) => {
 </script>
 
 <template>
-	<div class="space-y-8">
+	<div :class="account.stack">
 		<!-- Newsletters Section -->
 		<div>
 			<h3
-				class="text-sm font-semibold text-secondary-content uppercase tracking-wide mb-3"
+				:class="account.heading"
 			>
 				Newsletters
 			</h3>
-			<div class="space-y-3">
+			<div :class="account.list">
 				<!-- Academy Newsletter -->
 				<div
-					class="flex items-center justify-between p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)]"
+					:class="account.preference"
 				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-primary-content">
+					<div :class="account.copy">
+						<h4 :class="account.label">
 							Academy Newsletter
 						</h4>
-						<p class="text-sm text-muted mt-1">
+						<p :class="account.description">
 							Updates about new courses, videos, articles, and cloud native
 							content.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'academyNewsletter'"
-						@click="
-							togglePreference('academyNewsletter', 'newsletter', 'academy')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.academyNewsletter
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'academyNewsletter' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.academyNewsletter"
-					>
-						<span class="sr-only">Toggle academy newsletter</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.academyNewsletter
-									? 'translate-x-5'
-									: 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.academyNewsletter" :disabled="Boolean(isLoading) || isUnsubscribingAll" label="Toggle academy newsletter" @change="togglePreference('academyNewsletter', 'newsletter', 'academy')" />
 				</div>
 
 				<!-- Technology Matrix Updates -->
 				<div
-					class="flex items-center justify-between p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)]"
+					:class="account.preference"
 				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-primary-content">
+					<div :class="account.copy">
+						<h4 :class="account.label">
 							Technology Matrix Updates
 						</h4>
-						<p class="text-sm text-muted mt-1">
+						<p :class="account.description">
 							Get notified when technologies move through the matrix or new
 							opinions are added.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'matrixNewsletter'"
-						@click="
-							togglePreference('matrixNewsletter', 'newsletter', 'matrix')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.matrixNewsletter
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'matrixNewsletter' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.matrixNewsletter"
-					>
-						<span class="sr-only">Toggle matrix updates</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.matrixNewsletter
-									? 'translate-x-5'
-									: 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.matrixNewsletter" :disabled="Boolean(isLoading) || isUnsubscribingAll" label="Toggle matrix updates" @change="togglePreference('matrixNewsletter', 'newsletter', 'matrix')" />
 				</div>
 
 				<!-- Kubernetes Release Updates -->
 				<div
-					class="flex items-center justify-between p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)]"
+					:class="account.preference"
 				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-primary-content">
+					<div :class="account.copy">
+						<h4 :class="account.label">
 							Kubernetes Release Updates
 						</h4>
-						<p class="text-sm text-muted mt-1">
+						<p :class="account.description">
 							Get notified about new Kubernetes releases, cheat sheets, and
 							upgrade guides.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'kubernetesReleaseUpdates'"
-						@click="
-							togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.kubernetesReleaseUpdates
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'kubernetesReleaseUpdates' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.kubernetesReleaseUpdates"
-					>
-						<span class="sr-only">Toggle Kubernetes release updates</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.kubernetesReleaseUpdates
-									? 'translate-x-5'
-									: 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.kubernetesReleaseUpdates" :disabled="Boolean(isLoading) || isUnsubscribingAll" label="Toggle Kubernetes release updates" @change="togglePreference('kubernetesReleaseUpdates', 'newsletter', 'kubernetes-release-updates')" />
 				</div>
 			</div>
 		</div>
@@ -276,24 +209,24 @@ const formatTechName = (id: string) => {
 		<!-- Technology-Specific Subscriptions -->
 		<div v-if="techSubs.length > 0">
 			<h3
-				class="text-sm font-semibold text-secondary-content uppercase tracking-wide mb-3"
+				:class="account.heading"
 			>
 				Technology Updates
 			</h3>
-			<div class="space-y-2">
+			<div :class="account.list">
 				<div
 					v-for="techId in techSubs"
 					:key="techId"
-					class="flex items-center justify-between p-3 rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)]"
+					:class="account.preference"
 				>
-					<span class="text-sm font-medium text-primary-content">
+					<span :class="account.label">
 						{{ formatTechName(techId) }}
 					</span>
 					<button
 						type="button"
-						:disabled="isLoading === `tech-${techId}`"
+						:disabled="Boolean(isLoading) || isUnsubscribingAll"
 						@click="unsubscribeTechnology(techId)"
-						class="text-sm text-[var(--editorial-rust)] hover:opacity-80 font-medium disabled:opacity-50"
+						:class="account.danger"
 					>
 						{{ isLoading === `tech-${techId}` ? "..." : "Unsubscribe" }}
 					</button>
@@ -304,95 +237,51 @@ const formatTechName = (id: string) => {
 		<!-- Communication Preferences Section -->
 		<div>
 			<h3
-				class="text-sm font-semibold text-secondary-content uppercase tracking-wide mb-3"
+				:class="account.heading"
 			>
 				Communication Preferences
 			</h3>
-			<div class="space-y-3">
+			<div :class="account.list">
 				<!-- Marketing Emails -->
 				<div
-					class="flex items-center justify-between p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)]"
+					:class="account.preference"
 				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-primary-content">
+					<div :class="account.copy">
+						<h4 :class="account.label">
 							Marketing Emails
 						</h4>
-						<p class="text-sm text-muted mt-1">
+						<p :class="account.description">
 							Product announcements, promotions, and partner offers.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'marketingEmails'"
-						@click="
-							togglePreference('marketingEmails', 'marketing', 'academy')
-						"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.marketingEmails
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'marketingEmails' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.marketingEmails"
-					>
-						<span class="sr-only">Toggle marketing emails</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.marketingEmails ? 'translate-x-5' : 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.marketingEmails" :disabled="Boolean(isLoading) || isUnsubscribingAll" label="Toggle marketing emails" @change="togglePreference('marketingEmails', 'marketing', 'academy')" />
 				</div>
 
 				<!-- Service Notifications -->
 				<div
-					class="flex items-center justify-between p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--surface-border)]"
+					:class="account.preference"
 				>
-					<div class="flex-1 pr-4">
-						<h4 class="text-base font-medium text-primary-content">
+					<div :class="account.copy">
+						<h4 :class="account.label">
 							Service Notifications
 						</h4>
-						<p class="text-sm text-muted mt-1">
+						<p :class="account.description">
 							Account-related notifications like login alerts and security
 							notices.
 						</p>
 					</div>
-					<button
-						type="button"
-						:disabled="isLoading === 'serviceEmails'"
-						@click="togglePreference('serviceEmails', 'service', 'academy')"
-						:class="[
-							'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 transition-colors-smooth ease-in-out focus-ring',
-							preferences.serviceEmails
-								? 'bg-[var(--editorial-spruce)] border-transparent'
-								: 'bg-[var(--surface-card-muted)] border-[var(--editorial-hairline-strong)]',
-							isLoading === 'serviceEmails' ? 'opacity-50 cursor-wait' : '',
-						]"
-						role="switch"
-						:aria-checked="preferences.serviceEmails"
-					>
-						<span class="sr-only">Toggle service notifications</span>
-						<span
-							:class="[
-								'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--editorial-paper)] ring-1 ring-[var(--editorial-hairline-strong)] transition duration-200 ease-in-out',
-								preferences.serviceEmails ? 'translate-x-5' : 'translate-x-0',
-							]"
-						/>
-					</button>
+					<PreferenceSwitch :checked="preferences.serviceEmails" :disabled="Boolean(isLoading) || isUnsubscribingAll" label="Toggle service notifications" @change="togglePreference('serviceEmails', 'service', 'academy')" />
 				</div>
 			</div>
 		</div>
 
 		<!-- Success Message -->
 		<div
-			v-if="showSuccess"
-			class="flex items-center gap-2 p-3 rounded-sm bg-[var(--editorial-spruce-dim)] text-[var(--editorial-spruce)] text-sm"
+			v-if="showSuccess" role="status"
+			:class="account.success"
 		>
 			<svg
-				class="w-5 h-5 flex-shrink-0"
+				:class="account.icon"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -409,11 +298,11 @@ const formatTechName = (id: string) => {
 
 		<!-- Error Message -->
 		<div
-			v-if="error"
-			class="flex items-center gap-2 p-3 rounded-sm bg-[var(--surface-card)] border border-[var(--editorial-rust)] text-[var(--editorial-rust)] text-sm"
+			v-if="error" role="alert"
+			:class="account.error"
 		>
 			<svg
-				class="w-5 h-5 flex-shrink-0"
+				:class="account.icon"
 				fill="none"
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -430,56 +319,45 @@ const formatTechName = (id: string) => {
 
 		<!-- Unsubscribe from All Section -->
 		<div
-			class="pt-6 border-t border-[var(--surface-border)]"
+			:class="account.divider"
 			v-if="hasAnySubscription"
 		>
-			<div v-if="!showUnsubscribeConfirm">
-				<button
-					type="button"
-					@click="showUnsubscribeConfirm = true"
-					class="text-sm text-muted hover:text-[var(--editorial-rust)] transition-colors"
-				>
+			<Dialog.Root :open="showUnsubscribeConfirm" @open-change="showUnsubscribeConfirm = $event.open">
+				<Dialog.Trigger :class="account.danger">
 					Unsubscribe from all emails
-				</button>
-			</div>
-			<div
-				v-else
-				class="p-4 rounded-sm bg-[var(--surface-card)] border border-[var(--editorial-rust)]"
-			>
-				<p class="text-sm text-[var(--editorial-rust)] mb-3">
-					Are you sure you want to unsubscribe from all emails? You will stop
-					receiving all newsletters and notifications from Rawkode Academy.
-				</p>
-				<div class="flex gap-3">
-					<button
-						type="button"
-						:disabled="isUnsubscribingAll"
-						@click="unsubscribeFromAll"
-						class="px-4 py-2 text-sm font-medium text-[var(--surface-base)] bg-[var(--editorial-rust)] hover:opacity-90 rounded-sm disabled:opacity-50 disabled:cursor-wait"
-					>
-						{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
-					</button>
-					<button
-						type="button"
-						:disabled="isUnsubscribingAll"
-						@click="showUnsubscribeConfirm = false"
-						class="px-4 py-2 text-sm font-medium text-secondary-content hover:bg-[var(--surface-card-muted)] rounded-sm"
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
+				</Dialog.Trigger>
+				<Teleport to="body">
+					<Dialog.Backdrop :class="modal.backdrop" />
+					<Dialog.Positioner :class="modal.positioner">
+						<Dialog.Content :class="modal.content">
+							<div :class="modal.body">
+							<Dialog.Title :class="account.title">Unsubscribe from all emails?</Dialog.Title>
+							<p v-if="error" role="alert" :class="account.error">{{ error }}</p>
+							<Dialog.Description :class="modal.description">
+								You will stop receiving all newsletters and notifications from Rawkode Academy.
+							</Dialog.Description>
+							<div :class="account.actions">
+								<button type="button" :disabled="isUnsubscribingAll" @click="unsubscribeFromAll" :class="account.button">
+									{{ isUnsubscribingAll ? "Unsubscribing..." : "Yes, unsubscribe" }}
+								</button>
+								<Dialog.CloseTrigger :disabled="isUnsubscribingAll" :class="layout.buttonSecondary">Cancel</Dialog.CloseTrigger>
+							</div>
+						</div>
+						</Dialog.Content>
+					</Dialog.Positioner>
+				</Teleport>
+			</Dialog.Root>
 		</div>
 
 		<!-- No Subscriptions Message -->
 		<div
 			v-if="!hasAnySubscription"
-			class="text-center py-4 text-muted"
+			:class="account.empty"
 		>
 			<p class="text-sm">You are not subscribed to any emails.</p>
 			<a
 				href="/"
-				class="text-sm text-primary hover:underline mt-1 inline-block"
+				:class="account.link"
 			>
 				Explore content and subscribe
 			</a>

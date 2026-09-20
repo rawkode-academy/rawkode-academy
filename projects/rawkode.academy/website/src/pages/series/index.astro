@@ -2,12 +2,17 @@
 export const prerender = true;
 
 import { getCollection } from "astro:content";
-import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
-import MLabel from "@/components/ui/MLabel.vue";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 
 const seriesEntries = await getCollection("series");
 const articles = await getCollection("articles", ({ data }) => !data.draft);
+const publishedSeriesIds = new Set(
+	articles
+		.map((article) => article.data.series?.id)
+		.filter((id): id is string => Boolean(id)),
+);
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 	day: "2-digit",
@@ -16,6 +21,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 const seriesList = seriesEntries
+	.filter((series) => publishedSeriesIds.has(series.id))
 	.map((series) => {
 		const seriesArticles = articles
 			.filter((article) => article.data.series?.id === series.id)
@@ -34,6 +40,9 @@ const seriesList = seriesEntries
 		};
 	})
 	.sort((a, b) => (b.latest?.getTime() ?? 0) - (a.latest?.getTime() ?? 0));
+
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
@@ -41,27 +50,22 @@ const seriesList = seriesEntries
 	description="Multi-part article series from Rawkode Academy: hands-on cloud native and Kubernetes engineering, told one chapter at a time."
 	pageType="CollectionPage"
 >
-	<div class="series-page">
-		<CollectionMasthead
-			title="Series"
-			dek="Multi-part article series, read in order."
-		/>
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Reading routes" title="Series" description="Multi-part article series, read in order." />
 
-		<section class="series-page__list" aria-label="Article series">
+		<section class={styles.section} aria-label="Article series">
+			<div class={styles.container}>
 			{seriesList.length === 0 ? (
-				<div class="series-page__empty">
-					<MLabel>No series published yet.</MLabel>
-					<p class="series-page__empty-body">
-						Browse <a href="/read">all articles</a> instead.
-					</p>
+				<div class={styles.empty}>
+					<p>No series published yet. Browse <a href="/read">all articles</a> instead.</p>
 				</div>
 			) : (
-				<ul class="series-page__grid">
+				<ul class={styles.grid}>
 					{seriesList.map((series) => (
-						<li class="series-card">
-							<a class="series-card__link focus-ring" href={`/series/${series.id}`}>
-								<span class="series-card__meta">
-									<span class="series-card__count">
+						<li>
+							<a class={styles.card} href={`/series/${series.id}`}>
+								<span class={catalog.rowMeta}>
+									<span>
 										{series.articleCount}{" "}
 										{series.articleCount === 1 ? "article" : "articles"}
 									</span>
@@ -74,16 +78,17 @@ const seriesList = seriesEntries
 										</>
 									)}
 								</span>
-								<span class="series-card__title">{series.title}</span>
+								<span class={styles.cardTitle}>{series.title}</span>
 								{series.teaser && (
-									<span class="series-card__teaser">{series.teaser}</span>
+									<span class={catalog.rowDescription}>{series.teaser}</span>
 								)}
-								<span class="series-card__cta">Read this series →</span>
+								<span class={catalog.rowMeta}>Read this series →</span>
 							</a>
 						</li>
 					))}
 				</ul>
 			)}
+			</div>
 		</section>
 	</div>
 </Page>

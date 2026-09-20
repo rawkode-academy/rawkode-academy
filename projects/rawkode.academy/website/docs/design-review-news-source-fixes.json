@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "bounded implementation and source/mock verification; no Browser evidence",
+  "date": "2026-09-20",
+  "baseCommit": "272b68bce7ed04c73e42dfcce0c1955d6a0b5814",
+  "baselineLedger": "projects/rawkode.academy/website/docs/design-review-news-source.json",
+  "state": "NEWS01-04 implemented in the working tree; awaiting main build and rendered review",
+  "findings": [
+    {
+      "id": "NEWS01",
+      "status": "source-fixed",
+      "change": "Finite publication date <= captured current time gates News archive/lead, static detail paths, related selection and ItemList metadata. No draft semantics added. Existing related tag-overlap/recency ranking is unchanged among eligible stories.",
+      "evidence": [
+        "projects/rawkode.academy/website/src/lib/news-publication.ts",
+        "projects/rawkode.academy/website/src/pages/news/index.astro",
+        "projects/rawkode.academy/website/src/pages/news/[...slug].astro",
+        "projects/rawkode.academy/website/src/lib/related-news.ts",
+        "projects/rawkode.academy/website/src/lib/news-itemlist-jsonld.ts",
+        "projects/rawkode.academy/website/src/tests/news-publication.test.ts"
+      ],
+      "verification": "Actual route declarations executed with collection fixtures: past and exact-boundary dates admitted; future-by-1ms and Invalid Date excluded. Related selection filters before ranking/limit. ItemList rejects the same fixtures even when given unfiltered input. All 37 current authored News URLs remain eligible as of 2026-09-20.",
+      "risk": "Prerendered content becomes available only after a build at/after its publication time; no scheduler or live release mechanism was added. Standalone NewsArticle builder remains a serializer; its public input is constrained by static-path eligibility."
+    },
+    {
+      "id": "NEWS02",
+      "status": "source-fixed",
+      "change": "Promoted the June 1 digest's four peer headings from H3 to H2.",
+      "evidence": [
+        "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx",
+        "projects/rawkode.academy/website/src/tests/remark-tech-autolink.test.ts"
+      ],
+      "verification": "Parsed body has heading depths [2,2,2,2]. Compared against Git HEAD: replacing its four leading ### markers with ## reproduces the edited file byte-for-byte. Facts, wording, frontmatter and explicit destinations were not changed."
+    },
+    {
+      "id": "NEWS03",
+      "status": "source-fixed",
+      "change": "Removed unsupported NewsArticle speakable metadata rather than replacing it with a generated styling selector.",
+      "evidence": [
+        "projects/rawkode.academy/website/src/lib/news-jsonld.ts",
+        "projects/rawkode.academy/website/src/tests/news-publication.test.ts"
+      ],
+      "verification": "Real builder result has no speakable field; author, headline and publication metadata retained. Existing targeted News SEO tests pass."
+    },
+    {
+      "id": "NEWS04",
+      "status": "source-fixed",
+      "change": "Extended the existing case-insensitive exact-name exclusion list with namespace, radius, fleet and waypoint only. Matching boundaries, eligible technologies, Markdown traversal, explicit links, and per-file opt-out behavior are otherwise unchanged.",
+      "evidence": [
+        "projects/rawkode.academy/website/src/lib/remark-tech-autolink.ts",
+        "projects/rawkode.academy/website/src/tests/remark-tech-autolink.test.ts"
+      ],
+      "realBodyCoverage": [
+        "2026-06-01-cloud-native-ai-infra-digest",
+        "2026-06-05-envoy-istio-nccl",
+        "2026-09-19-externaldns-023-dry-run-crd-registry",
+        "aks-critical-privilege-escalation-cve-2026-33105",
+        "containerd-cve-2026-46680-runasnonroot-bypass",
+        "kubernetes-1-36-dra-drivers-features-beta",
+        "ofu-fleet-scale-gpu-efficiency-arxiv"
+      ],
+      "verification": "Each body parsed with remark-parse/remark-mdx and transformed by the real plugin plus real loadTechLookup. All original explicit link nodes and prose text are preserved; no new links to the four ambiguous products are generated. An additional fixture retains explicit product and reference-style links while still automatically linking Kubernetes, Envoy and Istio.",
+      "risk": "These four exact names are excluded sitewide, including genuine product mentions. Authors must link genuine product mentions explicitly; existing explicit links are preserved. No technology profiles or broader exclusions changed."
+    }
+  ],
+  "retiredComponent": {
+    "file": "projects/rawkode.academy/website/src/components/news/CVEAlert.astro",
+    "status": "deleted; recoverable from Git",
+    "evidence": [
+      "Before deletion, git grep for CVEAlert outside docs returned no consumers; the broader source search found only the component's own CSS selectors.",
+      "Inspected repository import.meta.glob/Astro.glob and dynamic component-path references: loaders cover fonts, technology artwork and WebContainer demo files, not this News component. Dynamic test paths do not name CVEAlert.",
+      "After deletion, source/content/package search for CVEAlert or cve-alert excluding historical docs and dependencies returned no matches. No orphan story or test imports were found."
+    ],
+    "retained": "MLabel and all other components remain untouched. Historical inventory/review documents remain historical evidence rather than runtime consumers."
+  },
+  "verification": {
+    "commands": [
+      {
+        "command": "bun run test -- src/tests/news-publication.test.ts src/tests/remark-tech-autolink.test.ts",
+        "result": "36 passed"
+      },
+      {
+        "command": "bun run test -- src/tests/seo.test.ts -t 'News|shared technology tags|recency when no candidate|non-positive'",
+        "result": "8 passed; 35 unrelated tests skipped"
+      }
+    ],
+    "scopedTypecheck": "AstroCheck API lint(fileNames) restricted to the five changed News/autolink libraries, two tests and two News routes: 9 checked, 0 errors, 0 warnings, 0 hints. Initialization printed existing @astrojs/vue resolution notices for design-system Dialog/Tabs/NavigationDrawer outside this scope.",
+    "formatAndDiff": "Seven owned TS files formatted; scoped git diff --check clean. Both News Astro templates compile without diagnostics in tests.",
+    "mutationsNotPerformed": ["No provider calls", "No Browser", "No full build", "No restart", "No repeated cuenv sync", "No commit or push"]
+  },
+  "changedFiles": [
+    "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx",
+    "projects/rawkode.academy/website/src/pages/news/index.astro",
+    "projects/rawkode.academy/website/src/pages/news/[...slug].astro",
+    "projects/rawkode.academy/website/src/lib/news-publication.ts",
+    "projects/rawkode.academy/website/src/lib/related-news.ts",
+    "projects/rawkode.academy/website/src/lib/news-itemlist-jsonld.ts",
+    "projects/rawkode.academy/website/src/lib/news-jsonld.ts",
+    "projects/rawkode.academy/website/src/lib/remark-tech-autolink.ts",
+    "projects/rawkode.academy/website/src/components/news/CVEAlert.astro (deleted)",
+    "projects/rawkode.academy/website/src/tests/news-publication.test.ts",
+    "projects/rawkode.academy/website/src/tests/remark-tech-autolink.test.ts",
+    "projects/rawkode.academy/website/docs/design-review-news-source-fixes.json"
+  ],
+  "limitations": [
+    "This is source and mocked/in-memory execution evidence, not a Browser or deployed-page pass.",
+    "No external URLs, security-advisory facts, provider behavior or publication scheduling were verified live.",
+    "Main owns rendered review, integration and the next full build."
+  ]
+}

@@ -1,5 +1,5 @@
 <template>
-	<div class="leaderboard-container">
+	<div :class="gameTheme.root" class="leaderboard-container">
 		<div class="grid-bg"></div>
 
 		<div class="content">
@@ -85,6 +85,8 @@
 </template>
 
 <script setup lang="ts">
+import { academyGame } from "@rawkodeacademy/design-system";
+const gameTheme = academyGame();
 import { ref, computed, watch, onMounted } from "vue";
 import {
 	getLeaderboard,
@@ -200,8 +202,8 @@ onMounted(() => {
 	position: absolute;
 	inset: 0;
 	background-image:
-		linear-gradient(rgb(var(--brand-primary) / 0.1) 1px, transparent 1px),
-		linear-gradient(90deg, rgb(var(--brand-primary) / 0.1) 1px, transparent 1px);
+		linear-gradient(color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px),
+		linear-gradient(90deg, color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent) 1px, transparent 1px);
 	background-size: 40px 40px;
 }
 
@@ -215,8 +217,8 @@ onMounted(() => {
 .title {
 	font-size: 2.5rem;
 	font-weight: 700;
-	color: rgb(var(--brand-primary));
-	text-shadow: 0 0 20px rgb(var(--brand-primary) / 0.5);
+	color: var(--colors-academy-accent);
+	text-shadow: 0 0 20px color-mix(in srgb, var(--colors-academy-accent) 50.0%, transparent);
 	letter-spacing: 0.1em;
 	margin-bottom: 1.5rem;
 }
@@ -230,9 +232,9 @@ onMounted(() => {
 }
 
 .tab {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(0 0 0 / 0.1);
-	color: rgb(107 114 128);
+	background: var(--colors-academy-panel);
+	border: 1px solid var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 	padding: 0.75rem 1.25rem;
 	font-family: inherit;
 	font-size: 0.85rem;
@@ -243,36 +245,36 @@ onMounted(() => {
 }
 
 :root.dark .tab {
-	background: rgb(0 0 0 / 0.6);
-	border-color: rgb(255 255 255 / 0.2);
-	color: rgb(156 163 175);
+	background: var(--colors-academy-panel);
+	border-color: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 .tab:hover {
-	border-color: rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 }
 
 .tab.active {
-	border-color: rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
-	background: rgb(var(--brand-primary) / 0.1);
+	border-color: var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
 }
 
 .loading {
 	padding: 3rem;
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 }
 
 :root.dark .loading {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .loading-spinner {
 	width: 40px;
 	height: 40px;
-	border: 3px solid rgb(var(--brand-primary) / 0.2);
-	border-top-color: rgb(var(--brand-primary));
+	border: 3px solid color-mix(in srgb, var(--colors-academy-accent) 20.0%, transparent);
+	border-top-color: var(--colors-academy-accent);
 	border-radius: 50%;
 	animation: spin 1s linear infinite;
 	margin: 0 auto 1rem;
@@ -286,13 +288,13 @@ onMounted(() => {
 
 .error {
 	padding: 2rem;
-	color: #e74c3c;
+	color: var(--colors-academy-status-rust);
 }
 
 .retry-btn {
 	background: transparent;
-	border: 1px solid #e74c3c;
-	color: #e74c3c;
+	border: 1px solid var(--colors-academy-status-rust);
+	color: var(--colors-academy-status-rust);
 	padding: 0.5rem 1rem;
 	font-family: inherit;
 	font-size: 0.9rem;
@@ -301,12 +303,12 @@ onMounted(() => {
 }
 
 .retry-btn:hover {
-	background: rgba(231, 76, 60, 0.1);
+	background: color-mix(in srgb, var(--colors-academy-status-rust) 10.0%, transparent);
 }
 
 .table-container {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-primary) / 0.3);
+	background: var(--colors-academy-panel);
+	border: 1px solid color-mix(in srgb, var(--colors-academy-accent) 30.0%, transparent);
 	border-radius: 8px;
 	overflow: hidden;
 	margin-bottom: 1.5rem;
@@ -314,7 +316,7 @@ onMounted(() => {
 }
 
 :root.dark .table-container {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .leaderboard-table {
@@ -323,8 +325,8 @@ onMounted(() => {
 }
 
 .leaderboard-table th {
-	background: rgb(var(--brand-primary) / 0.1);
-	color: rgb(var(--brand-primary));
+	background: color-mix(in srgb, var(--colors-academy-accent) 10.0%, transparent);
+	color: var(--colors-academy-accent);
 	font-size: 0.8rem;
 	font-weight: 600;
 	letter-spacing: 0.1em;
@@ -334,23 +336,23 @@ onMounted(() => {
 
 .leaderboard-table td {
 	padding: 0.75rem;
-	border-top: 1px solid rgb(0 0 0 / 0.05);
-	color: rgb(55 65 81);
+	border-top: 1px solid var(--colors-academy-border);
+	color: var(--colors-academy-text);
 	font-size: 0.9rem;
 }
 
 :root.dark .leaderboard-table td {
-	border-top-color: rgb(255 255 255 / 0.05);
-	color: rgb(204 204 204);
+	border-top-color: var(--colors-academy-border);
+	color: var(--colors-academy-text-muted);
 }
 
 .leaderboard-table tr:hover td {
-	background: rgb(var(--brand-primary) / 0.05);
+	background: color-mix(in srgb, var(--colors-academy-accent) 5.0%, transparent);
 }
 
 .leaderboard-table tr.current-player td {
-	background: rgb(var(--brand-secondary) / 0.1);
-	color: rgb(var(--brand-secondary));
+	background: color-mix(in srgb, var(--colors-academy-status-violet) 10.0%, transparent);
+	color: var(--colors-academy-status-violet);
 }
 
 .rank-col {
@@ -373,42 +375,42 @@ onMounted(() => {
 	height: 32px;
 	line-height: 32px;
 	border-radius: 50%;
-	background: rgb(0 0 0 / 0.1);
+	background: var(--colors-academy-border);
 	font-weight: 600;
 }
 
 :root.dark .rank {
-	background: rgb(255 255 255 / 0.1);
+	background: var(--colors-academy-border);
 }
 
 .rank.gold {
-	background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
-	color: rgb(17 24 39);
+	background: linear-gradient(135deg, var(--colors-academy-status-amber) 0%, var(--colors-academy-status-amber) 100%);
+	color: var(--colors-academy-text);
 }
 
 .rank.silver {
-	background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
-	color: rgb(17 24 39);
+	background: linear-gradient(135deg, var(--colors-academy-text-soft) 0%, var(--colors-academy-text-muted) 100%);
+	color: var(--colors-academy-text);
 }
 
 .rank.bronze {
-	background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-	color: rgb(17 24 39);
+	background: linear-gradient(135deg, var(--colors-academy-status-amber) 0%, var(--colors-academy-status-amber) 100%);
+	color: var(--colors-academy-text);
 }
 
 .empty {
 	text-align: center;
-	color: rgb(107 114 128);
+	color: var(--colors-academy-text-muted);
 	padding: 2rem;
 }
 
 :root.dark .empty {
-	color: rgb(156 163 175);
+	color: var(--colors-academy-text-muted);
 }
 
 .player-rank {
-	background: rgb(255 255 255 / 0.8);
-	border: 1px solid rgb(var(--brand-secondary));
+	background: var(--colors-academy-panel);
+	border: 1px solid var(--colors-academy-status-violet);
 	border-radius: 8px;
 	padding: 1rem;
 	margin-bottom: 1.5rem;
@@ -416,11 +418,11 @@ onMounted(() => {
 }
 
 :root.dark .player-rank {
-	background: rgb(0 0 0 / 0.6);
+	background: var(--colors-academy-panel);
 }
 
 .your-rank-label {
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 	font-size: 0.8rem;
 	letter-spacing: 0.1em;
 	margin-bottom: 0.5rem;
@@ -430,13 +432,13 @@ onMounted(() => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	color: rgb(var(--brand-secondary));
+	color: var(--colors-academy-status-violet);
 }
 
 .back-btn {
 	background: transparent;
-	border: 2px solid rgb(var(--brand-primary));
-	color: rgb(var(--brand-primary));
+	border: 2px solid var(--colors-academy-accent);
+	color: var(--colors-academy-accent);
 	padding: 1rem 2rem;
 	font-family: inherit;
 	font-size: 1rem;
@@ -445,12 +447,12 @@ onMounted(() => {
 }
 
 .back-btn:hover {
-	background: rgb(var(--brand-primary));
+	background: var(--colors-academy-accent);
 	color: white;
 }
 
 :root.dark .back-btn:hover {
-	color: rgb(17 24 39);
+	color: var(--colors-academy-text);
 }
 
 .btn-text {

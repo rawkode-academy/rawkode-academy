@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">The wire — Rawkode Academy</title>
+  <desc id="desc">The Academy's shared cover for cloud native news, in navy, blue and pink.</desc>
+  <rect width="1200" height="675" fill="#101c32"/>
+  <rect width="16" height="675" fill="#e94c89"/>
+  <text x="80" y="100" fill="#c3d4ee" font-family="'Red Hat Text', Arial, sans-serif" font-size="25" font-weight="600" letter-spacing="3">RAWKODE ACADEMY</text>
+  <path d="M80 148h1040" stroke="#41536f" stroke-width="2"/>
+  <text x="72" y="350" fill="#f4f7fb" font-family="'Red Hat Display', Arial, sans-serif" font-size="150" font-weight="700" letter-spacing="-7">The wire<tspan fill="#e94c89">.</tspan></text>
+  <g fill="#85afff">
+    <rect x="80" y="405" width="160" height="8"/>
+    <rect x="256" y="405" width="80" height="8"/>
+    <rect x="352" y="405" width="40" height="8"/>
+  </g>
+  <text x="80" y="590" fill="#c3d4ee" font-family="'Red Hat Text', Arial, sans-serif" font-size="34">Cloud native news</text>
+  <path d="M1044 549h68v68m-4-64-78 78" fill="none" stroke="#e94c89" stroke-width="8"/>
+</svg>

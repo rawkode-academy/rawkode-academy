@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { academyCatalog } from "@rawkodeacademy/design-system";
+
+interface Props {
+	story: CollectionEntry<"news">;
+}
+
+const { story } = Astro.props;
+const styles = academyCatalog();
+const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
+---
+
+<a class={styles.editorialRow} href={`/news/${story.id}`}>
+	<img class={styles.editorialImage} src="/images/news/news-generic.svg" alt="" width="1200" height="675" loading="lazy" />
+	<div class={styles.editorialBody}>
+		<time class={styles.rowMeta} datetime={story.data.publishedAt.toISOString()}>{date.format(story.data.publishedAt)}</time>
+		<h3 class={styles.editorialTitle}>{story.data.title}</h3>
+		<p class={styles.rowDescription}>{story.data.description}</p>
+	</div>
+</a>

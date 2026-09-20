@@ -1,7 +1,8 @@
 ---
 import { getCollection, getEntries } from "astro:content";
 import { createLogger } from "@/lib/logger";
-import EditorialShell from "@/components/ui/EditorialShell.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -43,6 +44,8 @@ const formatDate = (date: Date): string => {
 const getAdrNumber = (id: string): string => {
 	return id.match(/^(\d{4})-/)?.[1] || "0000";
 };
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
@@ -50,120 +53,31 @@ const getAdrNumber = (id: string): string => {
 	description="Architecture decisions behind Rawkode Academy, including context, consequences, and accepted trade-offs."
 	pageType="CollectionPage"
 >
-	<EditorialShell
-		eyebrow="Reference"
-		title="Architecture Decision Records"
-		lede="Short records of the technical decisions behind Rawkode Academy, why we made them, and what we accepted as a consequence."
-		compact
-	>
-		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">{allAdrs.length}</span>
-					<span class="editorial-stat__label">Records</span>
-				</div>
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">ADR</span>
-					<span class="editorial-stat__label">Decision format</span>
-				</div>
-				<div class="editorial-stat">
-					<span class="editorial-stat__value">Open</span>
-					<span class="editorial-stat__label">Project context</span>
-				</div>
-			</div>
-		</section>
-
-		<section class="editorial-section adr-list-section">
-			<div class="adr-list">
+	<div class={styles.root}>
+		<AcademyCatalogMasthead title="Architecture Decision Records" description="Short records of the technical decisions behind Rawkode Academy, why we made them, and what we accepted as a consequence." />
+		<section class={styles.section}>
+			<div class={styles.container}>
+				<div class={catalog.rows}>
 				{allAdrs.map((adr) => {
 					const authorData = adrAuthors.find((author) => author.id === adr.id);
 					const authors = authorData?.authors.filter((author) => author && author.data) || [];
 					const adrNumber = getAdrNumber(adr.id);
 
 					return (
-						<a href={`/adrs/${adr.id}`} class="adr-row">
-							<div class="adr-row__number">
-								<span class="editorial-pill">ADR-{adrNumber}</span>
-								<span class="editorial-pill">Adopted</span>
-							</div>
-							<div class="adr-row__main">
-								<h2>{adr.data.title}</h2>
-								<div class="adr-row__meta">
+						<a href={`/adrs/${adr.id}`} class={catalog.row}>
+							<span class={catalog.rowIndex}>ADR-{adrNumber}</span>
+							<div class={catalog.rowMain}>
+								<h2 class={catalog.rowTitle}>{adr.data.title}</h2>
+								<span class={catalog.rowMeta}>
 									<time datetime={adr.data.adoptedAt.toISOString()}>{formatDate(adr.data.adoptedAt)}</time>
-									{authors.length > 0 && <span>{authors.map((author) => author.data.name).join(", ")}</span>}
-								</div>
+									{authors.length > 0 && <span>By {authors.map((author) => author.data.name).join(", ")}</span>}
+								</span>
 							</div>
 						</a>
 					);
 				})}
 			</div>
+			</div>
 		</section>
-	</EditorialShell>
+	</div>
 </Page>
-
-<style>
-	.adr-list-section {
-		padding-top: 0;
-	}
-
-	.adr-list {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.adr-row {
-		display: grid;
-		grid-template-columns: 12rem minmax(0, 1fr);
-		gap: 1.5rem;
-		padding: 1.4rem 0;
-		border-top: 1px solid var(--editorial-hairline);
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.adr-row:first-child {
-		border-top: 0;
-	}
-
-	.adr-row:hover h2 {
-		color: var(--editorial-spruce);
-	}
-
-	.adr-row__number {
-		display: flex;
-		flex-wrap: wrap;
-		align-content: flex-start;
-		gap: 0.5rem;
-	}
-
-	.adr-row h2 {
-		font-family: var(--font-inter-tight), system-ui, sans-serif;
-		font-size: 1.35rem;
-		font-weight: 750;
-		line-height: 1.1;
-		letter-spacing: 0;
-		color: var(--editorial-ink);
-		margin: 0;
-		text-wrap: balance;
-	}
-
-	.adr-row__meta {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		margin-top: 0.7rem;
-		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
-		font-size: 0.68rem;
-		font-weight: 600;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--editorial-ink-mute);
-	}
-
-	@media (max-width: 720px) {
-		.adr-row {
-			grid-template-columns: 1fr;
-			gap: 0.75rem;
-		}
-	}
-</style>

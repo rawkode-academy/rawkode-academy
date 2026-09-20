@@ -1,0 +1,2897 @@
+{
+  "baseline": "e528028602b3202a5cfad0cd0c8929e6af8fd80b",
+  "templates": [
+    {
+      "source": "projects/rawkode.academy/website/src/pages/404.astro",
+      "template": "/404",
+      "paths": [
+        "/404"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/about/index.astro",
+      "template": "/about",
+      "paths": [
+        "/about"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/adrs/[...slug].astro",
+      "template": "/adrs/[...slug]",
+      "paths": [
+        "/adrs/0001-adopt-adrs",
+        "/adrs/0002-adopt-bun"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/adrs/index.astro",
+      "template": "/adrs",
+      "paths": [
+        "/adrs"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/changelog/index.astro",
+      "template": "/changelog",
+      "paths": [
+        "/changelog"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/confirm-subscription.astro",
+      "template": "/confirm-subscription",
+      "paths": [
+        "/confirm-subscription"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/courses/[...slug].astro",
+      "template": "/courses/[...slug]",
+      "paths": [
+        "/courses/complete-guide-zitadel",
+        "/courses/graphql-federation-wundergraph-cosmo",
+        "/courses/rust-for-the-rusty",
+        "/courses/teleport-for-kubernetes"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/courses/[course]/[...slug].astro",
+      "template": "/courses/[course]/[...slug]",
+      "paths": [
+        "/courses/complete-guide-zitadel/01-introduction",
+        "/courses/complete-guide-zitadel/02-prerequisites",
+        "/courses/complete-guide-zitadel/03-install-docker-compose",
+        "/courses/complete-guide-zitadel/04-install-kubernetes",
+        "/courses/complete-guide-zitadel/05-zitadel-cloud",
+        "/courses/complete-guide-zitadel/06-first-application",
+        "/courses/complete-guide-zitadel/07-astro-integration",
+        "/courses/complete-guide-zitadel/09-authentication-methods",
+        "/courses/complete-guide-zitadel/10-social-login-providers",
+        "/courses/rust-for-the-rusty/01-introduction",
+        "/courses/teleport-for-kubernetes/01-introduction",
+        "/courses/teleport-for-kubernetes/02-deploying-teleport-cluster",
+        "/courses/teleport-for-kubernetes/03-identity-based-access-rbac",
+        "/courses/teleport-for-kubernetes/04-two-layer-rbac-boundaries",
+        "/courses/teleport-for-kubernetes/05-just-in-time-access",
+        "/courses/teleport-for-kubernetes/06-auditing-and-session-recording"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/courses/index.astro",
+      "template": "/courses",
+      "paths": [
+        "/courses"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/embed/webcontainer.astro",
+      "template": "/embed/webcontainer",
+      "paths": [
+        "/embed/webcontainer"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/feeds.astro",
+      "template": "/feeds",
+      "paths": [
+        "/feeds"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/games/cnicon/index.astro",
+      "template": "/games/cnicon",
+      "paths": [
+        "/games/cnicon"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/games/secret-of-kubernetes-island/index.astro",
+      "template": "/games/secret-of-kubernetes-island",
+      "paths": [
+        "/games/secret-of-kubernetes-island"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/home.astro",
+      "template": "/home",
+      "paths": [
+        "/home"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/index.astro",
+      "template": "/",
+      "paths": [
+        "/"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/learning-paths/[slug].astro",
+      "template": "/learning-paths/[slug]",
+      "paths": [
+        "/learning-paths/build-your-first-kubernetes-developer-platform",
+        "/learning-paths/gitops-landscape",
+        "/learning-paths/klustered-advanced-cluster-triage",
+        "/learning-paths/mastering-kubernetes-security-posture-and-policy"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/learning-paths/index.astro",
+      "template": "/learning-paths",
+      "paths": [
+        "/learning-paths"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/maintainers/share-your-project.astro",
+      "template": "/maintainers/share-your-project",
+      "paths": [
+        "/maintainers/share-your-project"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/news/[...slug].astro",
+      "template": "/news/[...slug]",
+      "paths": [
+        "/news/2026-06-01-cloud-native-ai-infra-digest",
+        "/news/2026-06-05-envoy-istio-nccl",
+        "/news/2026-06-09-nccl-opentelemetry-cert-manager",
+        "/news/2026-06-13-vllm-sglang-kubernetes-kueue-helm",
+        "/news/2026-06-20-runc-1-5-prometheus-3-13-talos",
+        "/news/2026-09-18-gloo-interrupted-validation",
+        "/news/2026-09-19-externaldns-023-dry-run-crd-registry",
+        "/news/aks-critical-privilege-escalation-cve-2026-33105",
+        "/news/backstage-1-51-catalog-perf-ms-graph-incremental",
+        "/news/cilium-may-2026-patch-wave",
+        "/news/containerd-cve-2026-46680-runasnonroot-bypass",
+        "/news/crio-1-36-spdystream-cve-2026-35469",
+        "/news/dragonfly-native-huggingface-modelscope-protocols",
+        "/news/etcd-3-7-beta-v2-api-removed",
+        "/news/flux-2-8-8-go-git-cves-helm-controller-memory",
+        "/news/helm-4-2-3-21-v3-eol-warning",
+        "/news/istio-ambient-multicluster-inference-extension",
+        "/news/kubernetes-1-36-dra-drivers-features-beta",
+        "/news/kubernetes-1-36-pod-level-resource-managers-alpha",
+        "/news/kubernetes-1-36-podgroup-workload-scheduling",
+        "/news/kubernetes-1-36-psi-metrics-ga",
+        "/news/kubernetes-1-36-server-side-sharded-list-watch-alpha",
+        "/news/kubernetes-1-36-service-externalips-deprecation",
+        "/news/kubernetes-1-36-sneak-peek",
+        "/news/kubernetes-may-2026-patch-wave",
+        "/news/kubevirt-1-8-hypervisor-abstraction",
+        "/news/kyverno-graduates-cncf",
+        "/news/linux-foundation-12m-ai-security",
+        "/news/llm-d-accepted-cncf-sandbox",
+        "/news/microcks-cncf-incubation",
+        "/news/nvidia-donates-gpu-dra-driver-to-cncf",
+        "/news/ofu-fleet-scale-gpu-efficiency-arxiv",
+        "/news/openai-acquires-astral-ruff-uv",
+        "/news/otel-collector-0-152-genai-normalizer",
+        "/news/prometheus-3-12-rc-promql-window-functions-stackit-fix",
+        "/news/spire-1-15-sigstore-stable-vault-key-manager",
+        "/news/vllm-0-21-blackwell-transformers-v5"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/news/index.astro",
+      "template": "/news",
+      "paths": [
+        "/news"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/organizations/branding/index.astro",
+      "template": "/organizations/branding",
+      "paths": [
+        "/organizations/branding"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/organizations/index.astro",
+      "template": "/organizations",
+      "paths": [
+        "/organizations"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/organizations/lets-chat.astro",
+      "template": "/organizations/lets-chat",
+      "paths": [
+        "/organizations/lets-chat"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/organizations/partnerships/index.astro",
+      "template": "/organizations/partnerships",
+      "paths": [
+        "/organizations/partnerships"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/people/[id].astro",
+      "template": "/people/[id]",
+      "paths": [
+        "/people/aantn",
+        "/people/ademariag",
+        "/people/agup006",
+        "/people/alexbowers",
+        "/people/alexellis",
+        "/people/alexgervais",
+        "/people/alexsjones",
+        "/people/amouat",
+        "/people/amy",
+        "/people/anaisdg",
+        "/people/anaisurlichs",
+        "/people/andrewrynhard",
+        "/people/andy-v-h",
+        "/people/anupdhml",
+        "/people/ariadne-cg",
+        "/people/arianvp",
+        "/people/askdba",
+        "/people/averagemarcus",
+        "/people/avillela",
+        "/people/avitaltamir",
+        "/people/avthars",
+        "/people/b5",
+        "/people/bashofmann",
+        "/people/ben-abbott",
+        "/people/benbjohnson",
+        "/people/bgrant0607",
+        "/people/bhcleek",
+        "/people/bigkevmcd",
+        "/people/birdiesanders",
+        "/people/bketelsen",
+        "/people/bojand",
+        "/people/boredabdel",
+        "/people/borkod",
+        "/people/brancz",
+        "/people/bretfisher",
+        "/people/bsctl",
+        "/people/bwplotka",
+        "/people/carlisia",
+        "/people/carofg",
+        "/people/cartyc",
+        "/people/cathpag",
+        "/people/cblecker",
+        "/people/cevian",
+        "/people/charlottemach",
+        "/people/chewi",
+        "/people/chewxy",
+        "/people/chrisns",
+        "/people/christopherhanson",
+        "/people/ciaranmcnulty",
+        "/people/clacsinarx-m",
+        "/people/codablock",
+        "/people/codesome",
+        "/people/cohix",
+        "/people/collinshoop",
+        "/people/cppforlife",
+        "/people/csantanapr",
+        "/people/cyriltovena",
+        "/people/danielbryantuk",
+        "/people/darach",
+        "/people/davidgs",
+        "/people/davidmdm",
+        "/people/dbentley",
+        "/people/deepthi",
+        "/people/denhamparry",
+        "/people/dennovondiesel",
+        "/people/denraf",
+        "/people/derickr",
+        "/people/detiber",
+        "/people/didicodes",
+        "/people/displague",
+        "/people/distributethe6ix",
+        "/people/dlorenc",
+        "/people/dmajrekar",
+        "/people/domenkozar",
+        "/people/duffney",
+        "/people/edsiper",
+        "/people/eionel",
+        "/people/eladb",
+        "/people/eli-holderness",
+        "/people/ericsmalling",
+        "/people/errordeveloper",
+        "/people/estesp",
+        "/people/evelynosman",
+        "/people/evoxmusic",
+        "/people/eyalb181",
+        "/people/fbjork",
+        "/people/feynmanzhou",
+        "/people/fforootd",
+        "/people/fharper",
+        "/people/fjogeleit",
+        "/people/fmassot",
+        "/people/fntlnz",
+        "/people/frankdejonge",
+        "/people/frezbo",
+        "/people/gc-plp",
+        "/people/georgemac",
+        "/people/gianlucam76",
+        "/people/gila",
+        "/people/gjtempleton",
+        "/people/grampelberg",
+        "/people/guineveresaenger",
+        "/people/hasheddan",
+        "/people/hazelweakly",
+        "/people/hellobudha",
+        "/people/hone",
+        "/people/hoverbear",
+        "/people/hugosantos",
+        "/people/ibuildthecloud",
+        "/people/icepuma",
+        "/people/idvoretskyi",
+        "/people/imjasonh",
+        "/people/inanimate",
+        "/people/ivan-burazin",
+        "/people/iximiuz",
+        "/people/jackkleeman",
+        "/people/jamengual",
+        "/people/jasonmorgan",
+        "/people/jaxxstorm",
+        "/people/jeefy",
+        "/people/jensneuse",
+        "/people/jeremytanner",
+        "/people/jetzlstorfer",
+        "/people/jharrington22",
+        "/people/jimbugwadia",
+        "/people/jimmykarily",
+        "/people/jjasghar",
+        "/people/jnummelin",
+        "/people/john-anderson",
+        "/people/juliusv",
+        "/people/jzelinskie",
+        "/people/kassah",
+        "/people/katcosgrove",
+        "/people/kate-goldenring",
+        "/people/katie-hallett",
+        "/people/kcq",
+        "/people/kevinhoffman",
+        "/people/klaven",
+        "/people/kmova",
+        "/people/koksay",
+        "/people/krichprollsch",
+        "/people/kris-nova",
+        "/people/ksatchit",
+        "/people/laszlocph",
+        "/people/leodido",
+        "/people/licenser",
+        "/people/lizrice",
+        "/people/lizthegrey",
+        "/people/lucasreed",
+        "/people/lukasgentele",
+        "/people/manishearth",
+        "/people/marccampbell",
+        "/people/marcosnils",
+        "/people/marcusolsson",
+        "/people/markphelps",
+        "/people/martinsadler",
+        "/people/martintc",
+        "/people/maruina",
+        "/people/mathew-citarella",
+        "/people/mauilion",
+        "/people/mauromorales",
+        "/people/mfelsche",
+        "/people/mfussell",
+        "/people/mhausenblas",
+        "/people/miekg",
+        "/people/mikesir87",
+        "/people/mikkelhegn",
+        "/people/mlbiam",
+        "/people/morrislaw",
+        "/people/mossaka",
+        "/people/mpvl",
+        "/people/mrblightning",
+        "/people/mt165",
+        "/people/mudler",
+        "/people/natansil",
+        "/people/ncresswell",
+        "/people/nicolastakashi",
+        "/people/nimbinatus",
+        "/people/nserrino",
+        "/people/onlydole",
+        "/people/otaviojava",
+        "/people/pauldix",
+        "/people/peteroneilljr",
+        "/people/phroggyy",
+        "/people/pmbanugo",
+        "/people/pst",
+        "/people/rachel-sweeney",
+        "/people/raduweiss",
+        "/people/raesene",
+        "/people/ramaro",
+        "/people/rawkode",
+        "/people/rberrelleza",
+        "/people/realshuting",
+        "/people/reconbot",
+        "/people/reginald-wilkerson",
+        "/people/rewsmith",
+        "/people/rgdacosta",
+        "/people/richburroughs",
+        "/people/rleekin",
+        "/people/rohitg00",
+        "/people/ronaldpetty",
+        "/people/rsmitty",
+        "/people/rubenhak",
+        "/people/russellwaite",
+        "/people/saada",
+        "/people/saiyam1814",
+        "/people/salmaniqbal",
+        "/people/saschagrunert",
+        "/people/senyosimpson",
+        "/people/shahar-levy",
+        "/people/shykes",
+        "/people/sidpalas",
+        "/people/slashben",
+        "/people/smira",
+        "/people/smirl",
+        "/people/sniok",
+        "/people/snyk-matt",
+        "/people/sourishkrout",
+        "/people/starefossen",
+        "/people/stealthybox",
+        "/people/stefanprodan",
+        "/people/steveklabnik",
+        "/people/stevengravy",
+        "/people/sublimino",
+        "/people/sudermanjr",
+        "/people/suhailpatel",
+        "/people/swade1987",
+        "/people/szucsitg",
+        "/people/t4lz",
+        "/people/tanay1337",
+        "/people/tartanllama",
+        "/people/tbaums",
+        "/people/techknowlogick",
+        "/people/tejal29",
+        "/people/teshsharma",
+        "/people/thebsdbox",
+        "/people/thilo",
+        "/people/thomcrowe",
+        "/people/thorstenhans",
+        "/people/tobert",
+        "/people/tonistiigi",
+        "/people/tonymeehan",
+        "/people/tormath1",
+        "/people/tpmccallum",
+        "/people/tsandall",
+        "/people/tstromberg",
+        "/people/ulexus",
+        "/people/umamukkara",
+        "/people/undera",
+        "/people/vfarcic",
+        "/people/vielmetti",
+        "/people/viglesiasce",
+        "/people/vineethreddy02",
+        "/people/vkorbes",
+        "/people/vmatsiiako",
+        "/people/walidshaari",
+        "/people/waterdrips",
+        "/people/will-case",
+        "/people/yaahc",
+        "/people/yizha1",
+        "/people/yoshuawuyts",
+        "/people/zwachtel11"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/people/index.astro",
+      "template": "/people",
+      "paths": [
+        "/people"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/privacy.mdx",
+      "template": "/privacy",
+      "paths": [
+        "/privacy"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/read/[...slug].astro",
+      "template": "/read/[...slug]",
+      "paths": [
+        "/read/apko-melange-tutorial",
+        "/read/our-architecture",
+        "/read/cgroups-from-chaos-to-control",
+        "/read/fluxcd-the-inevitable-choice",
+        "/read/building-rust-cue-library",
+        "/read/dagger-gitlab-cloudflare-deployment",
+        "/read/lazyjournal-log-viewer",
+        "/read/federated-graphql-microservices",
+        "/read/how-to-ask-for-help",
+        "/read/introducing-cuenv",
+        "/read/introducing-technology-matrix",
+        "/read/kep-2831-kubelet-tracing",
+        "/read/kubernetes-operators-rust-kube-rs",
+        "/read/kyverno-cel-validating-policy",
+        "/read/news-digest-250804",
+        "/read/introducing-wassette",
+        "/read/zed-show-and-tell"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/read/index.astro",
+      "template": "/read",
+      "paths": [
+        "/read"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/resources/kubernetes/1.35-cheatsheet.astro",
+      "template": "/resources/kubernetes/1.35-cheatsheet",
+      "paths": [
+        "/resources/kubernetes/1.35-cheatsheet"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/search.astro",
+      "template": "/search",
+      "paths": [
+        "/search"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/series/[...slug].astro",
+      "template": "/series/[...slug]",
+      "paths": []
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/series/index.astro",
+      "template": "/series",
+      "paths": [
+        "/series"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/settings/index.astro",
+      "template": "/settings",
+      "paths": [
+        "/settings"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/shows/[showId]/[...slug].astro",
+      "template": "/shows/[showId]/[...slug]",
+      "paths": [
+        "/shows/klustered/apply",
+        "/shows/klustered/brackets",
+        "/shows/klustered/schedule",
+        "/shows/klustered/seasons"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/shows/[showId].astro",
+      "template": "/shows/[showId]",
+      "paths": [
+        "/shows/alphabits",
+        "/shows/cloud-native-compass",
+        "/shows/klustered",
+        "/shows/rawkode-live"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/shows/index.astro",
+      "template": "/shows",
+      "paths": [
+        "/shows"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+      "template": "/technology/[id]",
+      "paths": [
+        "/technology/acorn",
+        "/technology/aerakimesh",
+        "/technology/agentgateway",
+        "/technology/agentregistry",
+        "/technology/akri",
+        "/technology/antrea",
+        "/technology/apko",
+        "/technology/aquaproj",
+        "/technology/argo",
+        "/technology/armada",
+        "/technology/artifacthub",
+        "/technology/athenz",
+        "/technology/atlantis",
+        "/technology/aws-lambda",
+        "/technology/backstage",
+        "/technology/bank-vaults",
+        "/technology/bfe",
+        "/technology/bootc",
+        "/technology/bpfman",
+        "/technology/buildkit",
+        "/technology/buildpacks",
+        "/technology/cadence",
+        "/technology/capsule",
+        "/technology/carina",
+        "/technology/cartography",
+        "/technology/carvel",
+        "/technology/cdk8s",
+        "/technology/cert-manager",
+        "/technology/chaosblade",
+        "/technology/chaosmesh",
+        "/technology/cilium",
+        "/technology/civo",
+        "/technology/cloud-run",
+        "/technology/cloudcustodian",
+        "/technology/cloudevents",
+        "/technology/cloudnativepg",
+        "/technology/cluster-api",
+        "/technology/clusternet",
+        "/technology/clusterpedia",
+        "/technology/cncf-distribution",
+        "/technology/cni",
+        "/technology/comtrya",
+        "/technology/confidential-containers",
+        "/technology/connect-rpc",
+        "/technology/containerd",
+        "/technology/containerssh",
+        "/technology/contour",
+        "/technology/copa",
+        "/technology/coredns",
+        "/technology/cortex",
+        "/technology/cozystack",
+        "/technology/cpp",
+        "/technology/crio",
+        "/technology/crossplane",
+        "/technology/cubefs",
+        "/technology/cue",
+        "/technology/cueblox",
+        "/technology/dagger",
+        "/technology/dalec",
+        "/technology/dapr",
+        "/technology/daytona",
+        "/technology/devenv",
+        "/technology/devfile",
+        "/technology/devpod",
+        "/technology/devspace",
+        "/technology/devstand",
+        "/technology/dex",
+        "/technology/dgraph",
+        "/technology/docker",
+        "/technology/docker-build-cloud",
+        "/technology/docker-compose",
+        "/technology/dragonfly",
+        "/technology/drasi",
+        "/technology/easegress",
+        "/technology/ebpf",
+        "/technology/emissary-ingress",
+        "/technology/env0",
+        "/technology/envoy",
+        "/technology/equinix-metal",
+        "/technology/eraser",
+        "/technology/etcd",
+        "/technology/external-secrets-operator",
+        "/technology/falco",
+        "/technology/firecracker",
+        "/technology/flatcar",
+        "/technology/fleet",
+        "/technology/flipt",
+        "/technology/fluent-bit",
+        "/technology/fluentd",
+        "/technology/fluid",
+        "/technology/fluxcd",
+        "/technology/gimlet",
+        "/technology/gitea",
+        "/technology/gitlab",
+        "/technology/gitlab-duo",
+        "/technology/gitpod",
+        "/technology/graalvm",
+        "/technology/grafana",
+        "/technology/grafbase",
+        "/technology/grpc",
+        "/technology/grype",
+        "/technology/guidepad",
+        "/technology/hadron",
+        "/technology/hami",
+        "/technology/harbor",
+        "/technology/headlamp",
+        "/technology/helm",
+        "/technology/helm-dashboard",
+        "/technology/heroku",
+        "/technology/hexa",
+        "/technology/holmesgpt",
+        "/technology/home-assistant",
+        "/technology/hubble",
+        "/technology/hurl",
+        "/technology/hwameistor",
+        "/technology/hyperlight",
+        "/technology/in-toto",
+        "/technology/inclavare",
+        "/technology/infisical",
+        "/technology/influxdb",
+        "/technology/inlets",
+        "/technology/inspektor-gadget",
+        "/technology/intar",
+        "/technology/interlink",
+        "/technology/iroh",
+        "/technology/istio",
+        "/technology/jaeger",
+        "/technology/java",
+        "/technology/jspolicy",
+        "/technology/jujutsu",
+        "/technology/k0s",
+        "/technology/k3s",
+        "/technology/k8gb",
+        "/technology/k8sgpt",
+        "/technology/k8up",
+        "/technology/kafka",
+        "/technology/kagent",
+        "/technology/kairos",
+        "/technology/kaito",
+        "/technology/kamaji",
+        "/technology/kaniko",
+        "/technology/kanister",
+        "/technology/kapitan",
+        "/technology/karmada",
+        "/technology/kcl",
+        "/technology/kcp",
+        "/technology/keda",
+        "/technology/kepler",
+        "/technology/keptn",
+        "/technology/keycloak",
+        "/technology/keylime",
+        "/technology/kgateway",
+        "/technology/kitops",
+        "/technology/kluctl",
+        "/technology/kmesh",
+        "/technology/knative",
+        "/technology/ko",
+        "/technology/komodor",
+        "/technology/konveyor",
+        "/technology/koordinator",
+        "/technology/kpt",
+        "/technology/krkn",
+        "/technology/krr",
+        "/technology/kserve",
+        "/technology/kuadrant",
+        "/technology/kuasar",
+        "/technology/kube-bench",
+        "/technology/kube-burner",
+        "/technology/kube-hunter",
+        "/technology/kube-ovn",
+        "/technology/kube-rs",
+        "/technology/kube-vip",
+        "/technology/kubean",
+        "/technology/kubearmor",
+        "/technology/kubeclipper",
+        "/technology/kubeedge",
+        "/technology/kubefleet",
+        "/technology/kubeflow",
+        "/technology/kuberhealthy",
+        "/technology/kubernetes",
+        "/technology/kubescape",
+        "/technology/kubeslice",
+        "/technology/kubestellar",
+        "/technology/kubevela",
+        "/technology/kubevious",
+        "/technology/kubevirt",
+        "/technology/kubewarden",
+        "/technology/kudo",
+        "/technology/kueue",
+        "/technology/kuma",
+        "/technology/kured",
+        "/technology/kusionstack",
+        "/technology/kustomize",
+        "/technology/kwasm",
+        "/technology/kyverno",
+        "/technology/laravel",
+        "/technology/lens",
+        "/technology/lima",
+        "/technology/linkerd",
+        "/technology/litestream",
+        "/technology/litmus",
+        "/technology/llm-d",
+        "/technology/logging-operator",
+        "/technology/loki",
+        "/technology/longhorn",
+        "/technology/loxilb",
+        "/technology/lumigo",
+        "/technology/meilisearch",
+        "/technology/melange",
+        "/technology/meshery",
+        "/technology/metal3",
+        "/technology/metallb",
+        "/technology/microcks",
+        "/technology/micronaut",
+        "/technology/minio",
+        "/technology/mirrord",
+        "/technology/modelpack",
+        "/technology/n8n",
+        "/technology/namespace",
+        "/technology/nats",
+        "/technology/nerdctl",
+        "/technology/networkservicemesh",
+        "/technology/ngrok",
+        "/technology/notary",
+        "/technology/oauth2-proxy",
+        "/technology/odin",
+        "/technology/okteto",
+        "/technology/opa",
+        "/technology/opcr",
+        "/technology/open-cluster-management",
+        "/technology/opengemini",
+        "/technology/opencost",
+        "/technology/openebs",
+        "/technology/openfaas",
+        "/technology/openfeature",
+        "/technology/openfga",
+        "/technology/openfunction",
+        "/technology/opengitops",
+        "/technology/openkruise",
+        "/technology/opentelemetry",
+        "/technology/opentofu",
+        "/technology/openunison",
+        "/technology/openyurt",
+        "/technology/operatorframework",
+        "/technology/oras",
+        "/technology/oscal-compass",
+        "/technology/otterize",
+        "/technology/ovn-kubernetes",
+        "/technology/paralus",
+        "/technology/parca",
+        "/technology/parsec",
+        "/technology/perses",
+        "/technology/php",
+        "/technology/pipecd",
+        "/technology/pipedream",
+        "/technology/piraeus",
+        "/technology/pixie",
+        "/technology/pkgx",
+        "/technology/podman",
+        "/technology/podman-desktop",
+        "/technology/policy-reporter",
+        "/technology/portainer",
+        "/technology/porter",
+        "/technology/postgresql",
+        "/technology/postman",
+        "/technology/prometheus",
+        "/technology/promlens",
+        "/technology/promscale",
+        "/technology/promtail",
+        "/technology/pulumi",
+        "/technology/python",
+        "/technology/qovery",
+        "/technology/quarkus",
+        "/technology/questdb",
+        "/technology/quickwit",
+        "/technology/radius",
+        "/technology/rancher",
+        "/technology/ratify",
+        "/technology/restate",
+        "/technology/robusta",
+        "/technology/rook",
+        "/technology/runme",
+        "/technology/rust",
+        "/technology/salt",
+        "/technology/schemahero",
+        "/technology/score",
+        "/technology/seaweedfs",
+        "/technology/second-state",
+        "/technology/security-profiles-operator",
+        "/technology/sermant",
+        "/technology/serverless-devs",
+        "/technology/serverlessworkflow",
+        "/technology/shipwright",
+        "/technology/sigstore",
+        "/technology/skaffold",
+        "/technology/slim-toolkit",
+        "/technology/slimfaas",
+        "/technology/snyk",
+        "/technology/sonobuoy",
+        "/technology/sops",
+        "/technology/spectro-cloud",
+        "/technology/spicedb",
+        "/technology/spiderpool",
+        "/technology/spiffe",
+        "/technology/spin",
+        "/technology/spinkube",
+        "/technology/spire",
+        "/technology/spring",
+        "/technology/stacker",
+        "/technology/strimzi",
+        "/technology/submariner",
+        "/technology/suborbital",
+        "/technology/sveltos",
+        "/technology/syft",
+        "/technology/sympozium",
+        "/technology/system-initiative",
+        "/technology/tektoncd",
+        "/technology/telegraf",
+        "/technology/teleport",
+        "/technology/telepresence",
+        "/technology/terraform",
+        "/technology/tetragon",
+        "/technology/thanos",
+        "/technology/tikv",
+        "/technology/tilt",
+        "/technology/timescale",
+        "/technology/timoni",
+        "/technology/tinkerbell",
+        "/technology/tokenetes",
+        "/technology/tremor",
+        "/technology/trickster",
+        "/technology/trivy",
+        "/technology/tuf",
+        "/technology/tyk",
+        "/technology/universal-blue",
+        "/technology/urunc",
+        "/technology/vcluster",
+        "/technology/velero",
+        "/technology/vineyard",
+        "/technology/virtualkubelet",
+        "/technology/vitess",
+        "/technology/volcano",
+        "/technology/wasm-edge-runtime",
+        "/technology/wasmcloud",
+        "/technology/waypoint",
+        "/technology/webassembly",
+        "/technology/werf",
+        "/technology/wundergraph",
+        "/technology/xdebug",
+        "/technology/xregistry",
+        "/technology/yoke",
+        "/technology/youki",
+        "/technology/zitadel",
+        "/technology/zot"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/technology/index.astro",
+      "template": "/technology",
+      "paths": [
+        "/technology"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/technology/matrix/advanced.astro",
+      "template": "/technology/matrix/advanced",
+      "paths": [
+        "/technology/matrix/advanced"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/technology/matrix.astro",
+      "template": "/technology/matrix",
+      "paths": [
+        "/technology/matrix"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/unsubscribe.astro",
+      "template": "/unsubscribe",
+      "paths": [
+        "/unsubscribe"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/watch/[...slug].astro",
+      "template": "/watch/[...slug]",
+      "paths": [
+        "/watch/ambient-mesh-with-marino-wijay-and-matt-turner",
+        "/watch/cloud-containers-and-kubernetes",
+        "/watch/event-driven-architectures-at-wix",
+        "/watch/event-sourcing",
+        "/watch/influxdb-3-and-rust",
+        "/watch/is-webassembly-the-future-of-cloud-native",
+        "/watch/kubernetes-security-with-identity-and-oidc",
+        "/watch/migrating-to-kubernetes",
+        "/watch/server-side-webassembly",
+        "/watch/the-magic-of-ebpf",
+        "/watch/trust-and-validation-in-ai",
+        "/watch/ai-augmented-programming",
+        "/watch/atlantis-the-terraform-automation-powerhouse",
+        "/watch/cloud-server-side-webassembly",
+        "/watch/dapr-the-future-of-microservices",
+        "/watch/flatcar-linux-a-modern-os-for-the-always-on-infrastructure",
+        "/watch/from-kubernetes-to-cloud-run-chainguards-journey",
+        "/watch/java-for-serverless-functions",
+        "/watch/navigating-kairos-immutable-operating-systems-with-a-cloud-native-twist",
+        "/watch/navigating-kubernetes-insights-challenges-and-the-release-cycle-with-kat-cosgrove",
+        "/watch/observability-for-developers",
+        "/watch/platform-engineering-asking-why",
+        "/watch/simplifying-kubernetes-adoption-challenges",
+        "/watch/the-future-of-sustainability-in-open-source",
+        "/watch/klustered-10",
+        "/watch/klustered-11",
+        "/watch/klustered-12",
+        "/watch/klustered-13",
+        "/watch/klustered-14",
+        "/watch/klustered-15",
+        "/watch/klustered-16",
+        "/watch/klustered-17",
+        "/watch/klustered-18",
+        "/watch/klustered-19",
+        "/watch/klustered-9",
+        "/watch/klustered-community-vs-rawkode",
+        "/watch/klustered-newcomers-1",
+        "/watch/klustered-part-i",
+        "/watch/klustered-part-ii",
+        "/watch/klustered-part-iii",
+        "/watch/klustered-part-iv",
+        "/watch/klustered-part-v",
+        "/watch/klustered-part-vi",
+        "/watch/klustered-part-vii",
+        "/watch/klustered-part-viii-ii",
+        "/watch/klustered-part-viii",
+        "/watch/klustered-teams-carta-and-fairwinds",
+        "/watch/klustered-teams-container-solutions-and-civo-cloud",
+        "/watch/klustered-teams-control-plane-and-learnk8s",
+        "/watch/klustered-teams-digitalocean-and-skyscanner",
+        "/watch/klustered-teams-raft-and-rx-m",
+        "/watch/klustered-teams-redhat-and-talos-systems",
+        "/watch/22-borko-vs-bojan",
+        "/watch/22-leigh-capili-vs-marcus-noble",
+        "/watch/adobe-and-zapier",
+        "/watch/alex-jones-and-alistair-hey",
+        "/watch/hans-kristian-flaatten-and-zach-wachtel",
+        "/watch/ibm-and-nisum",
+        "/watch/jetstack-and-crashbeerbackoff",
+        "/watch/klustered-20",
+        "/watch/klustered-21",
+        "/watch/klustered-teams-aerospike-and-pixielabs",
+        "/watch/klustered-teams-ambassador-labs-and-fairwinds",
+        "/watch/klustered-teams-armo-and-kong",
+        "/watch/klustered-teams-chainguard-vs-chainguard-2",
+        "/watch/klustered-teams-giant-swarm-and-wildlife-studios",
+        "/watch/klustered-teams-polarsignals-and-pulumi",
+        "/watch/marino-wijay-and-john-anderson",
+        "/watch/rawkode-and-the-null-channel-vs-the-community",
+        "/watch/the-community-vs-rawkode",
+        "/watch/building-php-applications-with-docker-docker-compose-and-kubernetes-rtfm-with-rawkode",
+        "/watch/docker-kubernetes-and-php-laravel-edition-part-ii",
+        "/watch/docker-kubernetes-and-php-laravel-edition-part-iii",
+        "/watch/docker-kubernetes-and-php-laravel-edition",
+        "/watch/example-mapping-by-example",
+        "/watch/gitops-tutorial-with-fluxcd-2-gitops-toolkit",
+        "/watch/hands-on-autoscaling-with-kubernetes",
+        "/watch/hands-on-introduction-to-tektoncd",
+        "/watch/hands-on-with-faasd-and-inlets",
+        "/watch/hands-on-with-pipedream",
+        "/watch/introduction-to-carvel",
+        "/watch/introduction-to-cilium-part-ii",
+        "/watch/introduction-to-cilium",
+        "/watch/introduction-to-containerd",
+        "/watch/introduction-to-coredns",
+        "/watch/introduction-to-cortex",
+        "/watch/introduction-to-crossplane",
+        "/watch/introduction-to-dgraph",
+        "/watch/introduction-to-falco",
+        "/watch/introduction-to-fleet-k3s-and-rancher",
+        "/watch/introduction-to-gitpod",
+        "/watch/introduction-to-grafana",
+        "/watch/introduction-to-influxdb-2-and-flux",
+        "/watch/introduction-to-keptn-part-i",
+        "/watch/introduction-to-kube-vip-bare-metal-load-balancing-rtfm-with-rawkode",
+        "/watch/introduction-to-linkerd",
+        "/watch/introduction-to-n8n",
+        "/watch/introduction-to-open-policy-agent",
+        "/watch/introduction-to-openebs",
+        "/watch/introduction-to-opentelemetry",
+        "/watch/introduction-to-prometheus-promql-and-promlens",
+        "/watch/introduction-to-rust-part-i",
+        "/watch/introduction-to-rust-part-ii",
+        "/watch/introduction-to-rust-part-iii",
+        "/watch/introduction-to-teleport",
+        "/watch/introduction-to-thanos",
+        "/watch/introduction-to-the-kubernetes-seccomp-operator-rtfm-with-rawkode",
+        "/watch/introduction-to-the-operatorsdk",
+        "/watch/introduction-to-tilt",
+        "/watch/introduction-to-webassembly-and-wascc",
+        "/watch/ipv6-only-kubernetes-clusters-rtfm-with-rawkode",
+        "/watch/kubernetes-1-19-accentuate-the-paw-sitive-rtfm-with-rawkode",
+        "/watch/kubernetes-cluster-api-for-equinix-metal-formely-packet",
+        "/watch/living-documentation-with-bdd",
+        "/watch/managing-linux-in-real-time-with-saltstack",
+        "/watch/profiling-php-applications-with-xdebug",
+        "/watch/the-newcomers-guide-to-kubernetes",
+        "/watch/the-path-to-cloud-native",
+        "/watch/what-is-advent-of-code",
+        "/watch/bdd-test-automation",
+        "/watch/buiding-a-webassembly-graphql-client",
+        "/watch/cka-tutorial-with-killer-sh-part-1",
+        "/watch/crossplane-in-action",
+        "/watch/hacking-kubernetes-ctf-edition",
+        "/watch/hands-on-introduction-to-cdk8s",
+        "/watch/hands-on-introduction-to-cue",
+        "/watch/hands-on-introduction-to-cueblox",
+        "/watch/hands-on-introduction-to-dagger",
+        "/watch/hands-on-introduction-to-firecracker",
+        "/watch/hands-on-introduction-to-jspolicy",
+        "/watch/hands-on-introduction-to-k0s",
+        "/watch/hands-on-introduction-to-kaniko",
+        "/watch/hands-on-introduction-to-lens",
+        "/watch/hands-on-introduction-to-litestream",
+        "/watch/hands-on-introduction-to-loki",
+        "/watch/hands-on-introduction-to-okteto",
+        "/watch/hands-on-introduction-to-pixie",
+        "/watch/hands-on-introduction-to-promscale",
+        "/watch/hands-on-introduction-to-sigstore",
+        "/watch/hands-on-introduction-to-skaffold",
+        "/watch/hands-on-introduction-to-snyk",
+        "/watch/hands-on-introduction-to-telepresence",
+        "/watch/hands-on-introduction-to-tyk",
+        "/watch/hands-on-introduction-to-vcluster",
+        "/watch/hands-on-introduction-to-velero",
+        "/watch/hands-on-introduction-to-waypoint",
+        "/watch/hands-on-with-buildkit-and-buildx",
+        "/watch/hands-on-with-litmus-2-0",
+        "/watch/hands-on-with-policy-reporter",
+        "/watch/hands-on-with-rust-async-await",
+        "/watch/hands-on-with-rust-lifetimes-and-ownership",
+        "/watch/how-to-write-a-kubectl-plugin-from-scratch",
+        "/watch/infrastructure-as-code-and-gitops",
+        "/watch/introduction-to-c",
+        "/watch/introduction-to-fluentd-and-fluent-bit",
+        "/watch/introduction-to-kapitan",
+        "/watch/introduction-to-keptn-part-ii",
+        "/watch/introduction-to-kubeflow",
+        "/watch/introduction-to-kyverno",
+        "/watch/introduction-to-litmus-chaos",
+        "/watch/introduction-to-meilisearch",
+        "/watch/introduction-to-second-state",
+        "/watch/introduction-to-suborbital",
+        "/watch/introduction-to-timescale",
+        "/watch/introduction-to-tremor",
+        "/watch/introduction-to-vitess",
+        "/watch/kubernetes-security-lab",
+        "/watch/kubernetes-services",
+        "/watch/laravel-on-kubernetes-into-production",
+        "/watch/monitoring-and-scaling-laravel-on-kubernetes-part-ii",
+        "/watch/monitoring-and-scaling-laravel-on-kubernetes",
+        "/watch/pulumi-multi-language-packages",
+        "/watch/should-we-still-be-using-docker-compose-for-local-development",
+        "/watch/writing-a-kubernetes-controller",
+        "/watch/acing-the-devops-interview",
+        "/watch/hands-on-introduction-to-acorn",
+        "/watch/hands-on-introduction-to-devspace",
+        "/watch/hands-on-introduction-to-devstand",
+        "/watch/hands-on-introduction-to-dockerslim",
+        "/watch/hands-on-introduction-to-gitea",
+        "/watch/hands-on-introduction-to-helm-dashboard",
+        "/watch/hands-on-introduction-to-kamaji",
+        "/watch/hands-on-introduction-to-kluctl",
+        "/watch/hands-on-introduction-to-kpt",
+        "/watch/hands-on-introduction-to-kubescape",
+        "/watch/hands-on-introduction-to-kubevious",
+        "/watch/hands-on-introduction-to-namespace",
+        "/watch/hands-on-introduction-to-openunison",
+        "/watch/hands-on-introduction-to-parca",
+        "/watch/hands-on-introduction-to-portainer",
+        "/watch/hands-on-introduction-to-schemahero",
+        "/watch/hands-on-introduction-to-spin-webassembly-microservices",
+        "/watch/hands-on-introduction-to-trivy",
+        "/watch/introducing-apko-and-melange",
+        "/watch/monitoring-kubernetes-with-prometheus-and-robusta",
+        "/watch/cncf-glossary-and-linkerd-with-catherine-paganini-and-jason-morgan",
+        "/watch/feature-flags-via-gitops-with-flipt",
+        "/watch/hands-on-introduction-to-dapr",
+        "/watch/hands-on-introduction-to-gitgat",
+        "/watch/hands-on-introduction-to-gitops-with-gimlet",
+        "/watch/hands-on-introduction-to-krr-kubernetes-resource-recommendations",
+        "/watch/hands-on-introduction-to-kwasm",
+        "/watch/hands-on-introduction-to-wundergraph",
+        "/watch/hands-on-overview-of-komodor",
+        "/watch/hands-on-tutorial-of-mirrord",
+        "/watch/hands-on-tutorial-of-project-sveltos",
+        "/watch/kluctl-new-features-and-updates",
+        "/watch/live-demo-of-devpod",
+        "/watch/timoni-cue-powered-package-management-for-kubernetes",
+        "/watch/building-a-real-application-with-guidepad",
+        "/watch/development-environments-with-devenv",
+        "/watch/docker-build-cloud",
+        "/watch/hands-on-introduction-to-docker-build-cloud",
+        "/watch/hands-on-introduction-to-gitea-actions",
+        "/watch/hands-on-introduction-to-grafbase",
+        "/watch/hands-on-introduction-to-infisical",
+        "/watch/hands-on-introduction-to-quickwit",
+        "/watch/hands-on-introduction-to-restate",
+        "/watch/hands-on-introduction-to-zitadel",
+        "/watch/hands-on-with-daytona",
+        "/watch/hands-on-with-qovery",
+        "/watch/hands-on-with-runme",
+        "/watch/building-ai-applications-with-webassembly-spin",
+        "/watch/cloud-native-buildpacks",
+        "/watch/hands-on-introduction-lightpanda",
+        "/watch/hands-on-introduction-to-fermyon-wasm-functions",
+        "/watch/hands-on-introduction-to-k0rdent",
+        "/watch/hands-on-introduction-to-perses",
+        "/watch/hands-on-introduction-to-spicedb",
+        "/watch/hands-on-with-comtrya",
+        "/watch/hands-on-with-cyhernetes",
+        "/watch/hands-on-with-headlamp-the-kubernetes-ui",
+        "/watch/hands-on-with-kairos-edge-kubernetes-made-simple",
+        "/watch/hands-on-with-preq-community-driven-reliability-problem-detection",
+        "/watch/introducing-wassette-securing-mcp-with-webassembly",
+        "/watch/manage-and-run-ai-ml-models-as-oci-artifacts-with-oras",
+        "/watch/mcp-servers-for-rust-developers",
+        "/watch/securing-cloud-native-workloads-hands-on-with-notary-project-oras-and-ratify",
+        "/watch/chevron7-2026-01-23",
+        "/watch/hands-on-introduction-to-iroh",
+        "/watch/hands-on-introduction-to-jujutsu-jj",
+        "/watch/hands-on-introduction-to-kueue",
+        "/watch/hands-on-introduction-to-odin",
+        "/watch/hands-on-introduction-to-sympozium",
+        "/watch/hands-on-introduction-to-yoke",
+        "/watch/part-1-lecture-1-introduction-to-time-series",
+        "/watch/part-2-tutorial-installing-teleport",
+        "/watch/part-3-tutorial-running-teleport-with-docker",
+        "/watch/part-4-workshop-server-access-with-teleport",
+        "/watch/part-6-workshop-application-access-with-teleport",
+        "/watch/whats-new-in-teleport-8",
+        "/watch/advanced-kubernetes-scheduling",
+        "/watch/continuously-deploy-with-gitops",
+        "/watch/full-stack-webassembly-applications-with-spin",
+        "/watch/github-authentication",
+        "/watch/global-dns-with-bgp",
+        "/watch/introduction-to-bgp",
+        "/watch/kubescape-cli-and-github-action",
+        "/watch/kubescape-operator-and-saas",
+        "/watch/lets-take-a-look-at-teleport-10",
+        "/watch/managing-tls",
+        "/watch/part-2-tutorial-1-installation",
+        "/watch/part-3-tutorial-2-getting-started-with-influxdb",
+        "/watch/part-4-tutorial-3-collecting-metrics-with-telegraf",
+        "/watch/part-5-workshop-1-introduction-to-flux",
+        "/watch/q-and-a-lets-meet-teleport-9",
+        "/watch/workshop-access-control-and-roles-deep-dive",
+        "/watch/workshop-database-access-mongodb-with-teleport",
+        "/watch/workshop-database-access-postgres-with-teleport",
+        "/watch/workshop-deploying-teleport-on-kubernetes",
+        "/watch/a-hands-on-overview-of-guidepad",
+        "/watch/aquaproj-and-dagger",
+        "/watch/automated-kubernetes-operations-with-komodor-and-vcluster",
+        "/watch/automating-deployments-to-the-edge",
+        "/watch/bluesky-embed-with-spin-webassembly",
+        "/watch/bringing-clarity-to-infrastructure-as-code-with-env0",
+        "/watch/building-and-running-spin-applications-with-docker",
+        "/watch/building-custom-frameworks",
+        "/watch/custom-controls-with-gpt",
+        "/watch/dynamic-scrape-targets",
+        "/watch/empowering-eks-cluster-deployments-and-gitops-with-portainers-simplified-workflow",
+        "/watch/go-sdk",
+        "/watch/have-you-ever-seen-a-production-grade-server-side-webassembly-application",
+        "/watch/helm-kustomize-and-pod-security-policies",
+        "/watch/improve-your-supply-chain-security-pipeline-with-scribe-security",
+        "/watch/integrating-spin-with-static-site-generators-ssgs",
+        "/watch/introduction-and-overview-of-parca-for-continuous-profiling",
+        "/watch/keep-authentication-simple-with-portainers-oauth-connectors",
+        "/watch/komodor-vs-klustered",
+        "/watch/making-kubernetes-network-policies-effortless-with-otterize",
+        "/watch/monitoring-your-security-posture-with-prometheus",
+        "/watch/ngroks-kubernetes-ingress-controller-is-amazing-2",
+        "/watch/nodejs-sdk-typescript",
+        "/watch/parca-and-grafana",
+        "/watch/podmansh-and-infisical",
+        "/watch/rust-sdk-walkthrough",
+        "/watch/secure-container-images-the-easy-way",
+        "/watch/sentry-prometheus-and-grafana-integrations",
+        "/watch/server-side-webassembly-at-the-edge",
+        "/watch/stateful-webassembly-apps-with-key-value-stores",
+        "/watch/supply-chain-security-with-a-cli-valint",
+        "/watch/testing-a-3-tier-application-with-daggers-go-sdk",
+        "/watch/universal-blue-and-system-initiative",
+        "/watch/wei-pull-and-tea-xyz",
+        "/watch/whats-new-with-spin-v0-8",
+        "/watch/why-webassembly-code-once-run-everywhere",
+        "/watch/writing-server-side-webassembly-with-python",
+        "/watch/your-own-webassembly-cloud",
+        "/watch/developing-and-building-open-source-with-dagger-for-kargo",
+        "/watch/developing-and-building-open-source-with-dagger",
+        "/watch/ebpf-for-runtime-enforcement",
+        "/watch/microservice-troubleshooting-built-for-developers",
+        "/watch/restrict-access-to-secure-files-with-tetragon",
+        "/watch/simplify-kubernetes-ingress-and-api-gateways-using-ngrok-2",
+        "/watch/the-roast-of-the-linux-desktop",
+        "/watch/using-guidepad-io-to-primitives-to-simplify-future-facing-problems",
+        "/watch/writing-new-micro-services-using-ai-with-gitlab-duo-code-suggestions",
+        "/watch/build-a-production-ready-kubernetes-cluster-with-spectro-cloud-palette-no-code-tutorial",
+        "/watch/exploring-ngroks-traffic-policies-for-secure-application-development",
+        "/watch/fuck-you-hashicorp-an-ibm-company",
+        "/watch/kubernetes-disaster-recovery",
+        "/watch/kubernetes-security-scanning",
+        "/watch/minio-we-wont-miss-you",
+        "/watch/ngrok-operator-tutorial",
+        "/watch/relaunching-klustered-with-heroku-vibes",
+        "/watch/replace-your-github-actions-yaml-with-cue",
+        "/watch/simplify-production-debugging-with-ngrok-live-demo-and-traffic-policies-explained",
+        "/watch/unlocking-global-edge-services-with-ngrok",
+        "/watch/hadron-minimal-secure-linux-for-cloud-edge"
+      ]
+    },
+    {
+      "source": "projects/rawkode.academy/website/src/pages/watch/index.astro",
+      "template": "/watch",
+      "paths": [
+        "/watch"
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "path": "/read",
+      "type": null,
+      "topic": null,
+      "page": 1,
+      "totalPages": 2,
+      "matches": 15,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?page=2",
+      "type": null,
+      "topic": null,
+      "page": 2,
+      "totalPages": 2,
+      "matches": 15,
+      "state": "grid-only"
+    },
+    {
+      "path": "/read?topic=apko",
+      "type": null,
+      "topic": "apko",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=melange",
+      "type": null,
+      "topic": "melange",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=sigstore",
+      "type": null,
+      "topic": "sigstore",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=restate",
+      "type": null,
+      "topic": "restate",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=rust",
+      "type": null,
+      "topic": "rust",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 3,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=kubernetes",
+      "type": null,
+      "topic": "kubernetes",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 10,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=fluxcd",
+      "type": null,
+      "topic": "fluxcd",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=cue",
+      "type": null,
+      "topic": "cue",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=dagger",
+      "type": null,
+      "topic": "dagger",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=gitlab",
+      "type": null,
+      "topic": "gitlab",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=docker",
+      "type": null,
+      "topic": "docker",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 5,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=wundergraph",
+      "type": null,
+      "topic": "wundergraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=dgraph",
+      "type": null,
+      "topic": "dgraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=opentelemetry",
+      "type": null,
+      "topic": "opentelemetry",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=kyverno",
+      "type": null,
+      "topic": "kyverno",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?topic=webassembly",
+      "type": null,
+      "topic": "webassembly",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial",
+      "type": "tutorial",
+      "topic": null,
+      "page": 1,
+      "totalPages": 1,
+      "matches": 2,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=apko",
+      "type": "tutorial",
+      "topic": "apko",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=melange",
+      "type": "tutorial",
+      "topic": "melange",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=sigstore",
+      "type": "tutorial",
+      "topic": "sigstore",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=restate",
+      "type": "tutorial",
+      "topic": "restate",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=rust",
+      "type": "tutorial",
+      "topic": "rust",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=kubernetes",
+      "type": "tutorial",
+      "topic": "kubernetes",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=fluxcd",
+      "type": "tutorial",
+      "topic": "fluxcd",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=cue",
+      "type": "tutorial",
+      "topic": "cue",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=dagger",
+      "type": "tutorial",
+      "topic": "dagger",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=gitlab",
+      "type": "tutorial",
+      "topic": "gitlab",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=docker",
+      "type": "tutorial",
+      "topic": "docker",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=tutorial&topic=wundergraph",
+      "type": "tutorial",
+      "topic": "wundergraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=dgraph",
+      "type": "tutorial",
+      "topic": "dgraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=opentelemetry",
+      "type": "tutorial",
+      "topic": "opentelemetry",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=kyverno",
+      "type": "tutorial",
+      "topic": "kyverno",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=tutorial&topic=webassembly",
+      "type": "tutorial",
+      "topic": "webassembly",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article",
+      "type": "article",
+      "topic": null,
+      "page": 1,
+      "totalPages": 1,
+      "matches": 9,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=apko",
+      "type": "article",
+      "topic": "apko",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article&topic=melange",
+      "type": "article",
+      "topic": "melange",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article&topic=sigstore",
+      "type": "article",
+      "topic": "sigstore",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article&topic=restate",
+      "type": "article",
+      "topic": "restate",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=rust",
+      "type": "article",
+      "topic": "rust",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 3,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=kubernetes",
+      "type": "article",
+      "topic": "kubernetes",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 6,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=fluxcd",
+      "type": "article",
+      "topic": "fluxcd",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=cue",
+      "type": "article",
+      "topic": "cue",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=dagger",
+      "type": "article",
+      "topic": "dagger",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article&topic=gitlab",
+      "type": "article",
+      "topic": "gitlab",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article&topic=docker",
+      "type": "article",
+      "topic": "docker",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 3,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=wundergraph",
+      "type": "article",
+      "topic": "wundergraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=dgraph",
+      "type": "article",
+      "topic": "dgraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=opentelemetry",
+      "type": "article",
+      "topic": "opentelemetry",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=article&topic=kyverno",
+      "type": "article",
+      "topic": "kyverno",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=article&topic=webassembly",
+      "type": "article",
+      "topic": "webassembly",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=guide",
+      "type": "guide",
+      "topic": null,
+      "page": 1,
+      "totalPages": 1,
+      "matches": 2,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=guide&topic=apko",
+      "type": "guide",
+      "topic": "apko",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=melange",
+      "type": "guide",
+      "topic": "melange",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=sigstore",
+      "type": "guide",
+      "topic": "sigstore",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=restate",
+      "type": "guide",
+      "topic": "restate",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=rust",
+      "type": "guide",
+      "topic": "rust",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=kubernetes",
+      "type": "guide",
+      "topic": "kubernetes",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 2,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=guide&topic=fluxcd",
+      "type": "guide",
+      "topic": "fluxcd",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=cue",
+      "type": "guide",
+      "topic": "cue",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=dagger",
+      "type": "guide",
+      "topic": "dagger",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=gitlab",
+      "type": "guide",
+      "topic": "gitlab",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=docker",
+      "type": "guide",
+      "topic": "docker",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=wundergraph",
+      "type": "guide",
+      "topic": "wundergraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=dgraph",
+      "type": "guide",
+      "topic": "dgraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=opentelemetry",
+      "type": "guide",
+      "topic": "opentelemetry",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=kyverno",
+      "type": "guide",
+      "topic": "kyverno",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=guide&topic=webassembly",
+      "type": "guide",
+      "topic": "webassembly",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news",
+      "type": "news",
+      "topic": null,
+      "page": 1,
+      "totalPages": 1,
+      "matches": 2,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=news&topic=apko",
+      "type": "news",
+      "topic": "apko",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=melange",
+      "type": "news",
+      "topic": "melange",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=sigstore",
+      "type": "news",
+      "topic": "sigstore",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=restate",
+      "type": "news",
+      "topic": "restate",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=rust",
+      "type": "news",
+      "topic": "rust",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=kubernetes",
+      "type": "news",
+      "topic": "kubernetes",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 2,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=news&topic=fluxcd",
+      "type": "news",
+      "topic": "fluxcd",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=cue",
+      "type": "news",
+      "topic": "cue",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=dagger",
+      "type": "news",
+      "topic": "dagger",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=gitlab",
+      "type": "news",
+      "topic": "gitlab",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=docker",
+      "type": "news",
+      "topic": "docker",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=news&topic=wundergraph",
+      "type": "news",
+      "topic": "wundergraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=dgraph",
+      "type": "news",
+      "topic": "dgraph",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=opentelemetry",
+      "type": "news",
+      "topic": "opentelemetry",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 1,
+      "state": "featured-and-grid"
+    },
+    {
+      "path": "/read?type=news&topic=kyverno",
+      "type": "news",
+      "topic": "kyverno",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    },
+    {
+      "path": "/read?type=news&topic=webassembly",
+      "type": "news",
+      "topic": "webassembly",
+      "page": 1,
+      "totalPages": 1,
+      "matches": 0,
+      "state": "empty"
+    }
+  ],
+  "runtimeCases": [
+    {
+      "paths": [
+        "/",
+        "/watch",
+        "/learning-paths"
+      ],
+      "states": [
+        "populated",
+        "empty-content",
+        "image-fallback",
+        "newsletter-states",
+        "homepage-teaching-dialog"
+      ],
+      "notes": "Homepage upcoming/live state requires controlled runtime data; no future video dates in current content."
+    },
+    {
+      "paths": [
+        "/watch/hands-on-introduction-to-kueue",
+        "/watch/hands-on-introduction-to-kueue?t=60",
+        "/watch/klustered-10"
+      ],
+      "states": [
+        "vod",
+        "chapters",
+        "transcript",
+        "resources",
+        "comments-loading-empty-error-authenticated",
+        "reactions-mobile-popover",
+        "resume-progress",
+        "scheduled",
+        "live-now",
+        "auth-gate",
+        "disconnected",
+        "recorded-fallback"
+      ],
+      "notes": "type=live is not evidence currently live; studio binding and publication time determine actual gate."
+    },
+    {
+      "paths": [
+        "/courses/complete-guide-zitadel",
+        "/courses/graphql-federation-wundergraph-cosmo",
+        "/courses/complete-guide-zitadel/01-introduction"
+      ],
+      "states": [
+        "signup",
+        "curriculum",
+        "zero-published-modules",
+        "resource-file-link-embed",
+        "modal-open-close",
+        "webcontainer-loading-ready-error-retry",
+        "module-previous-next"
+      ]
+    },
+    {
+      "paths": [
+        "/series"
+      ],
+      "states": [
+        "empty"
+      ],
+      "notes": "Only series has zero published member articles; detail template has no generated current page."
+    },
+    {
+      "paths": [
+        "/technology",
+        "/people",
+        "/technology/matrix",
+        "/technology/matrix/advanced"
+      ],
+      "states": [
+        "search-results",
+        "search-no-results",
+        "matrix-filters",
+        "matrix-presets",
+        "matrix-tooltip-popover",
+        "matrix-overflow-mobile",
+        "sparse-and-rich-details"
+      ]
+    },
+    {
+      "paths": [
+        "/search",
+        "/search?q=kubernetes",
+        "/search?q=zzzz-no-matching-content"
+      ],
+      "typeVariants": [
+        "/search?q=kubernetes&type=video",
+        "/search?q=kubernetes&type=article",
+        "/search?q=kubernetes&type=news",
+        "/search?q=kubernetes&type=course",
+        "/search?q=kubernetes&type=learning-path",
+        "/search?q=kubernetes&type=show",
+        "/search?q=kubernetes&type=technology"
+      ],
+      "states": [
+        "initial",
+        "results",
+        "zero-results",
+        "type-filter"
+      ],
+      "notes": "7 content types; result caps 12/group or 48 with type selected, no numbered pagination; arbitrary q is unbounded."
+    },
+    {
+      "paths": [
+        "/home",
+        "/settings",
+        "/confirm-subscription"
+      ],
+      "states": [
+        "signed-out-redirect",
+        "signed-in"
+      ],
+      "notes": "Production-equivalent controlled auth needed: auth middleware skips DEV/nonproduction. /confirm-subscription GET writes a subscription; do not run as a read-only probe."
+    },
+    {
+      "paths": [
+        "/home"
+      ],
+      "states": [
+        "history-populated",
+        "history-empty",
+        "history-service-error"
+      ]
+    },
+    {
+      "paths": [
+        "/settings"
+      ],
+      "states": [
+        "preferences-loading",
+        "loaded",
+        "load-error",
+        "save-in-progress",
+        "save-error",
+        "unsubscribe-dialog",
+        "test-email-controls"
+      ],
+      "notes": "Writes require controlled test account, outside this source-only sidecar."
+    },
+    {
+      "paths": [
+        "/unsubscribe",
+        "/unsubscribe?email=audit%40example.invalid",
+        "/unsubscribe?success=true"
+      ],
+      "states": [
+        "anonymous-form",
+        "authenticated-confirmation",
+        "invalid-form",
+        "service-error",
+        "success"
+      ],
+      "notes": "POST changes preferences."
+    },
+    {
+      "paths": [
+        "/resources/kubernetes/1.35-cheatsheet",
+        "/resources/kubernetes/1.35-cheatsheet?subscribed"
+      ],
+      "states": [
+        "signup-gate",
+        "unlocked-reference",
+        "accordion",
+        "mobile-cards",
+        "desktop-tables"
+      ],
+      "notes": "subscribed query sets an access cookie; also cookie/subscription-based access."
+    },
+    {
+      "paths": [
+        "/embed/webcontainer",
+        "/embed/webcontainer?course=complete-guide-zitadel&demo=oauth-pkce-app",
+        "/embed/webcontainer?course=complete-guide-zitadel&demo=oauth-pkce-demo",
+        "/embed/webcontainer?course=complete-guide-zitadel&demo=missing"
+      ],
+      "states": [
+        "missing-parameters",
+        "valid-demo",
+        "invalid-demo",
+        "loading",
+        "ready",
+        "console-editor",
+        "startup-exit-error",
+        "restart"
+      ]
+    },
+    {
+      "paths": [
+        "/shows/klustered/apply",
+        "/shows/klustered/apply?submitted=1",
+        "/shows/klustered/brackets",
+        "/shows/klustered/schedule",
+        "/shows/klustered/seasons"
+      ],
+      "states": [
+        "empty",
+        "populated",
+        "signed-out",
+        "signed-in",
+        "applied",
+        "team-management",
+        "submitted"
+      ],
+      "notes": "BRACKETS_READ is required even for apply signed-out; missing binding throws instead of rendering intended UI."
+    },
+    {
+      "paths": [
+        "/games/cnicon",
+        "/games/secret-of-kubernetes-island"
+      ],
+      "states": [
+        "signed-out",
+        "signed-in",
+        "instructions",
+        "start",
+        "play",
+        "pause",
+        "allocation",
+        "inventory",
+        "map",
+        "combat",
+        "achievements",
+        "defeat",
+        "victory",
+        "round",
+        "results",
+        "leaderboard",
+        "newsletter-prompt",
+        "network-error"
+      ],
+      "notes": "14 source components; cnicon weekly rounds vary with week/technology data; DISABLE_GAME_AUTH changes gates."
+    },
+    {
+      "paths": [
+        "/404",
+        "/404.html",
+        "/audit-deliberately-missing",
+        "/watch/audit-missing",
+        "/shows/audit-missing",
+        "/shows/klustered/audit-missing"
+      ],
+      "states": [
+        "designed-404",
+        "empty-response-404"
+      ],
+      "notes": "/404.html is prior build-output spelling; /404 is source route. Unknown SSR content paths return empty 404; no reachability probe performed."
+    },
+    {
+      "paths": [
+        "/feeds",
+        "/changelog",
+        "/courses",
+        "/shows"
+      ],
+      "states": [
+        "populated",
+        "empty"
+      ],
+      "notes": "Current data: 4 published show feeds; 16 changelog records. Empty branches need controlled fixtures."
+    },
+    {
+      "paths": [
+        "/read?page=999",
+        "/read?page=0",
+        "/read?page=invalid",
+        "/read?type=invalid&topic=invalid"
+      ],
+      "states": [
+        "last-page-clamping",
+        "first-page-normalization",
+        "invalid-filter-ignored"
+      ]
+    },
+    {
+      "paths": [
+        "/read/kyverno-cel-validating-policy",
+        "/news/kubernetes-1-36-sneak-peek",
+        "/adrs/0001-adopt-adrs",
+        "/privacy"
+      ],
+      "states": [
+        "prose",
+        "tables",
+        "code",
+        "media",
+        "toc",
+        "bylines",
+        "related-content",
+        "news-cve-emphasis-where-present"
+      ],
+      "notes": "Every content URL still needs rendered inspection; variant samples do not replace URL review."
+    }
+  ],
+  "components": {
+    "websiteFiles": [
+      "projects/rawkode.academy/website/src/components/Aside.astro",
+      "projects/rawkode.academy/website/src/components/AsideWrapper.stories.tsx",
+      "projects/rawkode.academy/website/src/components/AsideWrapper.tsx",
+      "projects/rawkode.academy/website/src/components/academy/AcademyCatalogCard.astro",
+      "projects/rawkode.academy/website/src/components/academy/AcademyCatalogMasthead.astro",
+      "projects/rawkode.academy/website/src/components/academy/AcademyPage.vue",
+      "projects/rawkode.academy/website/src/components/articles/ArticleCard.astro",
+      "projects/rawkode.academy/website/src/components/articles/ArticleCard.stories.tsx",
+      "projects/rawkode.academy/website/src/components/articles/ArticleCard.vue",
+      "projects/rawkode.academy/website/src/components/articles/RelatedArticles.astro",
+      "projects/rawkode.academy/website/src/components/articles/RelatedVideos.astro",
+      "projects/rawkode.academy/website/src/components/articles/Resources.astro",
+      "projects/rawkode.academy/website/src/components/articles/TableOfContents.astro",
+      "projects/rawkode.academy/website/src/components/articles/Updates.astro",
+      "projects/rawkode.academy/website/src/components/articles/cgroups/CgroupTimeline.tsx",
+      "projects/rawkode.academy/website/src/components/articles/cgroups/CgroupTreeDiagram.tsx",
+      "projects/rawkode.academy/website/src/components/articles/cgroups/HierarchyExplorer.tsx",
+      "projects/rawkode.academy/website/src/components/articles/cgroups/PodCgroupMapper.tsx",
+      "projects/rawkode.academy/website/src/components/articles/cgroups/ResourceSimulator.tsx",
+      "projects/rawkode.academy/website/src/components/articles/series/SeriesArticles.astro",
+      "projects/rawkode.academy/website/src/components/auth/profile.vue",
+      "projects/rawkode.academy/website/src/components/auth/sign-in-button.astro",
+      "projects/rawkode.academy/website/src/components/auth/user-header.astro",
+      "projects/rawkode.academy/website/src/components/branding/AcademyBrand.astro",
+      "projects/rawkode.academy/website/src/components/breadcrumb/Breadcrumb.astro",
+      "projects/rawkode.academy/website/src/components/breadcrumb/BreadcrumbJsonLd.astro",
+      "projects/rawkode.academy/website/src/components/command-palette/CommandPalette.vue",
+      "projects/rawkode.academy/website/src/components/common/AuthorAvatarGroup.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/AuthorAvatarGroup.vue",
+      "projects/rawkode.academy/website/src/components/common/Badge.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/Badge.vue",
+      "projects/rawkode.academy/website/src/components/common/BaseCard.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/BaseCard.vue",
+      "projects/rawkode.academy/website/src/components/common/Button.astro",
+      "projects/rawkode.academy/website/src/components/common/Button.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/Button.vue",
+      "projects/rawkode.academy/website/src/components/common/ErrorState.vue",
+      "projects/rawkode.academy/website/src/components/common/FeatureCard.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/FeatureCard.vue",
+      "projects/rawkode.academy/website/src/components/common/FeaturedContent.astro",
+      "projects/rawkode.academy/website/src/components/common/FormattedDate.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/FormattedDate.vue",
+      "projects/rawkode.academy/website/src/components/common/GridLayout.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/GridLayout.vue",
+      "projects/rawkode.academy/website/src/components/common/Heading.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/Heading.vue",
+      "projects/rawkode.academy/website/src/components/common/Section.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/Section.vue",
+      "projects/rawkode.academy/website/src/components/common/SectionHeader.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/SectionHeader.vue",
+      "projects/rawkode.academy/website/src/components/common/Skeleton.vue",
+      "projects/rawkode.academy/website/src/components/common/SkeletonCard.vue",
+      "projects/rawkode.academy/website/src/components/common/SkeletonComment.vue",
+      "projects/rawkode.academy/website/src/components/common/SkeletonList.tsx",
+      "projects/rawkode.academy/website/src/components/common/SkeletonList.vue",
+      "projects/rawkode.academy/website/src/components/common/SkeletonText.vue",
+      "projects/rawkode.academy/website/src/components/common/SkeletonTranscript.vue",
+      "projects/rawkode.academy/website/src/components/common/SkipLink.astro",
+      "projects/rawkode.academy/website/src/components/common/TerminalWindow.stories.tsx",
+      "projects/rawkode.academy/website/src/components/common/TerminalWindow.vue",
+      "projects/rawkode.academy/website/src/components/common/ThemeAwareImage.astro",
+      "projects/rawkode.academy/website/src/components/courses/CourseCard.astro",
+      "projects/rawkode.academy/website/src/components/courses/CourseDetailHero.vue",
+      "projects/rawkode.academy/website/src/components/courses/CourseModules.astro",
+      "projects/rawkode.academy/website/src/components/courses/CourseSignupForm.astro",
+      "projects/rawkode.academy/website/src/components/courses/CourseSignupFormClient.vue",
+      "projects/rawkode.academy/website/src/components/courses/CourseSignupFormCompact.astro",
+      "projects/rawkode.academy/website/src/components/courses/CourseSignupFormCompact.vue",
+      "projects/rawkode.academy/website/src/components/courses/CoursesHero.astro",
+      "projects/rawkode.academy/website/src/components/courses/EmbeddedAppModal.vue",
+      "projects/rawkode.academy/website/src/components/courses/ResourceList.vue",
+      "projects/rawkode.academy/website/src/components/courses/WebContainerEmbed.vue",
+      "projects/rawkode.academy/website/src/components/explorer/ExplorerHeader.vue",
+      "projects/rawkode.academy/website/src/components/explorer/TechnologyExplorer.vue",
+      "projects/rawkode.academy/website/src/components/explorer/cards/TechCardPopover.vue",
+      "projects/rawkode.academy/website/src/components/explorer/controls/AxisSelector.vue",
+      "projects/rawkode.academy/website/src/components/explorer/controls/FilterPanel.vue",
+      "projects/rawkode.academy/website/src/components/explorer/controls/MultiSelectFilter.vue",
+      "projects/rawkode.academy/website/src/components/explorer/views/GridView.vue",
+      "projects/rawkode.academy/website/src/components/faq/accordion-wrapper.vue",
+      "projects/rawkode.academy/website/src/components/faq/list.stories.tsx",
+      "projects/rawkode.academy/website/src/components/faq/list.vue",
+      "projects/rawkode.academy/website/src/components/feature/grid.stories.tsx",
+      "projects/rawkode.academy/website/src/components/feature/grid.vue",
+      "projects/rawkode.academy/website/src/components/feature/list-icons.vue",
+      "projects/rawkode.academy/website/src/components/feature/list.stories.tsx",
+      "projects/rawkode.academy/website/src/components/feature/list.vue",
+      "projects/rawkode.academy/website/src/components/footer/Footer.astro",
+      "projects/rawkode.academy/website/src/components/game/Achievements.vue",
+      "projects/rawkode.academy/website/src/components/game/ClusterMap.vue",
+      "projects/rawkode.academy/website/src/components/game/CombatScreen.vue",
+      "projects/rawkode.academy/website/src/components/game/DefeatScreen.vue",
+      "projects/rawkode.academy/website/src/components/game/Game.vue",
+      "projects/rawkode.academy/website/src/components/game/InitialAllocationScreen.vue",
+      "projects/rawkode.academy/website/src/components/game/Inventory.vue",
+      "projects/rawkode.academy/website/src/components/game/Leaderboard.vue",
+      "projects/rawkode.academy/website/src/components/game/MenuScreen.vue",
+      "projects/rawkode.academy/website/src/components/game/VictoryScreen.vue",
+      "projects/rawkode.academy/website/src/components/games/guess-the-logo/GuessTheLogo.vue",
+      "projects/rawkode.academy/website/src/components/games/guess-the-logo/LogoScanline.vue",
+      "projects/rawkode.academy/website/src/components/games/guess-the-logo/ResultsView.vue",
+      "projects/rawkode.academy/website/src/components/games/guess-the-logo/RoundView.vue",
+      "projects/rawkode.academy/website/src/components/grafana/index.astro",
+      "projects/rawkode.academy/website/src/components/html/adr-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/article-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/article-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/course-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/course-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/faq-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/head.astro",
+      "projects/rawkode.academy/website/src/components/html/learning-path-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/learning-path-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/news-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/news-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/opengraph.astro",
+      "projects/rawkode.academy/website/src/components/html/organization-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/person-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/person-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/podcast-series-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/search-action-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/show-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/technology-article-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/technology-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/video-itemlist-jsonld.astro",
+      "projects/rawkode.academy/website/src/components/html/video-metadata.astro",
+      "projects/rawkode.academy/website/src/components/image/ZoomableImage.astro",
+      "projects/rawkode.academy/website/src/components/landing/EditorialCardRail.astro",
+      "projects/rawkode.academy/website/src/components/landing/FeaturedFeature.astro",
+      "projects/rawkode.academy/website/src/components/landing/LandingHero.astro",
+      "projects/rawkode.academy/website/src/components/landing/NewsletterStrip.astro",
+      "projects/rawkode.academy/website/src/components/landing/OnAirPanel.astro",
+      "projects/rawkode.academy/website/src/components/landing/SecondaryGrid.astro",
+      "projects/rawkode.academy/website/src/components/landing/SectionHeader.astro",
+      "projects/rawkode.academy/website/src/components/landing/ValuesGrid.astro",
+      "projects/rawkode.academy/website/src/components/lead-magnet/K8sCheatsheetCTA.vue",
+      "projects/rawkode.academy/website/src/components/learning-paths/LearningPathCard.astro",
+      "projects/rawkode.academy/website/src/components/learning-paths/LearningPathHero.astro",
+      "projects/rawkode.academy/website/src/components/learning-paths/PathCard.astro",
+      "projects/rawkode.academy/website/src/components/learning-paths/PathsLede.astro",
+      "projects/rawkode.academy/website/src/components/learning-paths/PathsMasthead.astro",
+      "projects/rawkode.academy/website/src/components/navigation/PublicationNav.astro",
+      "projects/rawkode.academy/website/src/components/news/CVEAlert.astro",
+      "projects/rawkode.academy/website/src/components/news/NewsLead.astro",
+      "projects/rawkode.academy/website/src/components/news/NewsMasthead.astro",
+      "projects/rawkode.academy/website/src/components/news/NewsRow.astro",
+      "projects/rawkode.academy/website/src/components/news/RelatedNews.astro",
+      "projects/rawkode.academy/website/src/components/news/TrendingPanel.astro",
+      "projects/rawkode.academy/website/src/components/news/WireSubscribeCard.astro",
+      "projects/rawkode.academy/website/src/components/newsletter/NewsletterCTA.astro",
+      "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+      "projects/rawkode.academy/website/src/components/organizations/ContactFallback.astro",
+      "projects/rawkode.academy/website/src/components/organizations/PartnershipApplicationForm.vue",
+      "projects/rawkode.academy/website/src/components/posthog/index.astro",
+      "projects/rawkode.academy/website/src/components/read/ArticleByline.astro",
+      "projects/rawkode.academy/website/src/components/read/ArticleGridItem.astro",
+      "projects/rawkode.academy/website/src/components/read/ArticleHeader.astro",
+      "projects/rawkode.academy/website/src/components/read/ArticleTOC.astro",
+      "projects/rawkode.academy/website/src/components/read/EndSlug.astro",
+      "projects/rawkode.academy/website/src/components/read/FeaturedArticle.astro",
+      "projects/rawkode.academy/website/src/components/read/FilterRail.astro",
+      "projects/rawkode.academy/website/src/components/read/Pullquote.astro",
+      "projects/rawkode.academy/website/src/components/read/ReadFooter.astro",
+      "projects/rawkode.academy/website/src/components/read/ReadMasthead.astro",
+      "projects/rawkode.academy/website/src/components/read/ReadNext.astro",
+      "projects/rawkode.academy/website/src/components/series/SeriesLink.astro",
+      "projects/rawkode.academy/website/src/components/settings/EmailPreferences.vue",
+      "projects/rawkode.academy/website/src/components/settings/PreferenceSwitch.vue",
+      "projects/rawkode.academy/website/src/components/settings/TestEmailButton.vue",
+      "projects/rawkode.academy/website/src/components/shell/AcademyFooter.astro",
+      "projects/rawkode.academy/website/src/components/shell/AcademyHeader.astro",
+      "projects/rawkode.academy/website/src/components/show/ShowCard.astro",
+      "projects/rawkode.academy/website/src/components/show/ShowNav.astro",
+      "projects/rawkode.academy/website/src/components/show/SubscribeLinks.astro",
+      "projects/rawkode.academy/website/src/components/sidebar/Sidebar.astro",
+      "projects/rawkode.academy/website/src/components/stats/SimpleStatsWrapper.tsx",
+      "projects/rawkode.academy/website/src/components/stats/simple.vue",
+      "projects/rawkode.academy/website/src/components/technology/RelatedTechnologies.astro",
+      "projects/rawkode.academy/website/src/components/technology/TopicHub.astro",
+      "projects/rawkode.academy/website/src/components/testimonial/slider.astro",
+      "projects/rawkode.academy/website/src/components/testimonial/slider.stories.tsx",
+      "projects/rawkode.academy/website/src/components/testimonial/slider.vue",
+      "projects/rawkode.academy/website/src/components/theme/ThemeScript.astro",
+      "projects/rawkode.academy/website/src/components/title/center.astro",
+      "projects/rawkode.academy/website/src/components/title/h2-highlight.vue",
+      "projects/rawkode.academy/website/src/components/ui/Card.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/Card.vue",
+      "projects/rawkode.academy/website/src/components/ui/CollectionMasthead.astro",
+      "projects/rawkode.academy/website/src/components/ui/CollectionToolbar.astro",
+      "projects/rawkode.academy/website/src/components/ui/CommandBar.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/CommandBar.vue",
+      "projects/rawkode.academy/website/src/components/ui/Container.vue",
+      "projects/rawkode.academy/website/src/components/ui/ContentCard.astro",
+      "projects/rawkode.academy/website/src/components/ui/DetailFrame.astro",
+      "projects/rawkode.academy/website/src/components/ui/EditorialButton.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/EditorialButton.vue",
+      "projects/rawkode.academy/website/src/components/ui/EditorialShell.astro",
+      "projects/rawkode.academy/website/src/components/ui/EmptyState.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/EmptyState.vue",
+      "projects/rawkode.academy/website/src/components/ui/Grid.vue",
+      "projects/rawkode.academy/website/src/components/ui/HairlinePanel.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/HairlinePanel.vue",
+      "projects/rawkode.academy/website/src/components/ui/Hero.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/Hero.vue",
+      "projects/rawkode.academy/website/src/components/ui/KickerStrip.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/KickerStrip.vue",
+      "projects/rawkode.academy/website/src/components/ui/LiveDot.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/LiveDot.vue",
+      "projects/rawkode.academy/website/src/components/ui/MLabel.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/MLabel.vue",
+      "projects/rawkode.academy/website/src/components/ui/MastheadBar.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/MastheadBar.vue",
+      "projects/rawkode.academy/website/src/components/ui/PageMasthead.astro",
+      "projects/rawkode.academy/website/src/components/ui/PagerStrip.astro",
+      "projects/rawkode.academy/website/src/components/ui/SectionMark.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/SectionMark.vue",
+      "projects/rawkode.academy/website/src/components/ui/SectionRail.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/SectionRail.vue",
+      "projects/rawkode.academy/website/src/components/ui/Stack.vue",
+      "projects/rawkode.academy/website/src/components/ui/StatRow.stories.tsx",
+      "projects/rawkode.academy/website/src/components/ui/StatRow.vue",
+      "projects/rawkode.academy/website/src/components/ui/ThemeToggle.vue",
+      "projects/rawkode.academy/website/src/components/ui/UtilityShell.astro",
+      "projects/rawkode.academy/website/src/components/ui/accordion.vue",
+      "projects/rawkode.academy/website/src/components/video/CloudflareWhepPlayer.vue",
+      "projects/rawkode.academy/website/src/components/video/ContinueWatchingRail.astro",
+      "projects/rawkode.academy/website/src/components/video/LiveStreamGate.vue",
+      "projects/rawkode.academy/website/src/components/video/SeriesFilter.astro",
+      "projects/rawkode.academy/website/src/components/video/ShowVideoSection.astro",
+      "projects/rawkode.academy/website/src/components/video/StreamNotifyButton.vue",
+      "projects/rawkode.academy/website/src/components/video/TechnologyVideoSection.astro",
+      "projects/rawkode.academy/website/src/components/video/VideoCast.astro",
+      "projects/rawkode.academy/website/src/components/video/VideoGridItem.astro",
+      "projects/rawkode.academy/website/src/components/video/VideoHero.astro",
+      "projects/rawkode.academy/website/src/components/video/VideoMasthead.astro",
+      "projects/rawkode.academy/website/src/components/video/VideoProgressBar.vue",
+      "projects/rawkode.academy/website/src/components/video/VideoReactions.astro",
+      "projects/rawkode.academy/website/src/components/video/VideoReactionsClient.vue",
+      "projects/rawkode.academy/website/src/components/video/VideoStill.astro",
+      "projects/rawkode.academy/website/src/components/video/comments.vue",
+      "projects/rawkode.academy/website/src/components/video/player.vue",
+      "projects/rawkode.academy/website/src/components/video/transcript.vue",
+      "projects/rawkode.academy/website/src/components/video/video-content-tabs.vue",
+      "projects/rawkode.academy/website/src/components/video/video-feed.astro",
+      "projects/rawkode.academy/website/src/components/vue-wrapper.tsx"
+    ],
+    "showPluginFiles": [
+      "projects/rawkode.academy/website/src/lib/shows/plugins/bracket/LiveBanner.astro",
+      "projects/rawkode.academy/website/src/lib/shows/plugins/bracket/pages/Apply.astro",
+      "projects/rawkode.academy/website/src/lib/shows/plugins/bracket/pages/Brackets.astro",
+      "projects/rawkode.academy/website/src/lib/shows/plugins/bracket/pages/Schedule.astro",
+      "projects/rawkode.academy/website/src/lib/shows/plugins/bracket/pages/Seasons.astro"
+    ],
+    "sharedDesignSystemFiles": [
+      "packages/design-system/src/vue/Dialog.vue",
+      "packages/design-system/src/vue/NavigationDrawer.vue",
+      "packages/design-system/src/vue/Tabs.vue"
+    ],
+    "contentImports": [
+      {
+        "source": "content/articles/cgroups-chaos-control/index.mdx",
+        "import": "@/components/Aside.astro"
+      },
+      {
+        "source": "content/articles/cgroups-chaos-control/index.mdx",
+        "import": "@/components/articles/cgroups/CgroupTimeline"
+      },
+      {
+        "source": "content/articles/cgroups-chaos-control/index.mdx",
+        "import": "@/components/articles/cgroups/CgroupTreeDiagram"
+      },
+      {
+        "source": "content/articles/cgroups-chaos-control/index.mdx",
+        "import": "@/components/articles/cgroups/HierarchyExplorer"
+      },
+      {
+        "source": "content/articles/cgroups-chaos-control/index.mdx",
+        "import": "@/components/articles/cgroups/ResourceSimulator"
+      },
+      {
+        "source": "content/articles/cgroups-chaos-control/index.mdx",
+        "import": "@/components/articles/cgroups/PodCgroupMapper"
+      },
+      {
+        "source": "content/articles/choose-fluxcd/index.mdx",
+        "import": "@/components/Aside.astro"
+      },
+      {
+        "source": "content/articles/dagger-cicd-gitlab/index.mdx",
+        "import": "@dagger.io/dagger"
+      },
+      {
+        "source": "content/articles/discover-lazyjournal/index.mdx",
+        "import": "@/components/common/ThemeAwareImage.astro"
+      },
+      {
+        "source": "content/articles/discover-lazyjournal/index.mdx",
+        "import": "./screenshot-light-mode.png"
+      },
+      {
+        "source": "content/articles/discover-lazyjournal/index.mdx",
+        "import": "./screenshot-dark-mode.png"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "@/components/Aside.astro"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "@paralleldrive/cuid2"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "drizzle-orm/sqlite-core"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "drizzle-orm/sqlite-core"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "@pothos/plugin-drizzle"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "drizzle-orm"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "./schema.ts"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "@graphql-tools/utils"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "graphql"
+      },
+      {
+        "source": "content/articles/federated-graphql-microservice/index.mdx",
+        "import": "./schema.ts"
+      },
+      {
+        "source": "content/articles/introducing-cuenv/index.mdx",
+        "import": "@/components/Aside.astro"
+      },
+      {
+        "source": "content/articles/zed-show-and-tell.mdx",
+        "import": "@/components/image/ZoomableImage.astro"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/02-prerequisites.mdx",
+        "import": "@/components/video/player.vue"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/03-install-docker-compose.mdx",
+        "import": "@/components/video/player.vue"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/04-install-kubernetes.mdx",
+        "import": "@/components/video/player.vue"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/05-zitadel-cloud.mdx",
+        "import": "@/components/video/player.vue"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "@/components/Aside.astro"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "astro/config"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "astro:env/server"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "arctic"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "@oslojs/jwt"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "oidc-client-ts"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "astro"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "arctic"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "@/lib/zitadel"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "astro"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/07-astro-integration.mdx",
+        "import": "@/lib/zitadel"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/09-authentication-methods.mdx",
+        "import": "@/components/Aside.astro"
+      },
+      {
+        "source": "content/courses/complete-guide-zitadel/10-social-login-providers.mdx",
+        "import": "@/components/Aside.astro"
+      }
+    ],
+    "status": "inventory only; not a rendered component audit",
+    "notes": "244 website component files, 5 plugin Astro files including 4 pages and LiveBanner, 3 shared Astro/Vue components; 40 MDX import occurrences. Need recursive import/render and state coverage, including generated recipe styles and imports beyond these roots."
+  },
+  "excludedContent": [
+    {
+      "path": "/courses/complete-guide-zitadel/08-remix-integration",
+      "source": "content/courses/complete-guide-zitadel/08-remix-integration.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/branding-customization",
+      "source": "content/courses/complete-guide-zitadel/branding-customization.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/custom-actions-workflows",
+      "source": "content/courses/complete-guide-zitadel/custom-actions-workflows.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/enterprise-sso",
+      "source": "content/courses/complete-guide-zitadel/enterprise-sso.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/monitoring-audit-security",
+      "source": "content/courses/complete-guide-zitadel/monitoring-audit-security.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/multi-tenancy-b2b",
+      "source": "content/courses/complete-guide-zitadel/multi-tenancy-b2b.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/production-deployment-ha",
+      "source": "content/courses/complete-guide-zitadel/production-deployment-ha.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/rest-apis-grpc-services",
+      "source": "content/courses/complete-guide-zitadel/rest-apis-grpc-services.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/roles-permissions-authorization",
+      "source": "content/courses/complete-guide-zitadel/roles-permissions-authorization.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/scim-user-provisioning",
+      "source": "content/courses/complete-guide-zitadel/scim-user-provisioning.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/troubleshooting-performance",
+      "source": "content/courses/complete-guide-zitadel/troubleshooting-performance.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/courses/complete-guide-zitadel/user-management-registration",
+      "source": "content/courses/complete-guide-zitadel/user-management-registration.mdx",
+      "reason": "draft or default draft=true; template returns empty 404"
+    },
+    {
+      "path": "/series/talos-on-hetzner",
+      "source": "content/series/talos-on-hetzner.mdx",
+      "reason": "No published article references this series; getStaticPaths filters it out; nevertheless present in live series sitemap and PR inventory."
+    }
+  ],
+  "draftButGenerated": [
+    "/read/introducing-cuenv",
+    "/read/kubernetes-operators-rust-kube-rs"
+  ]
+}

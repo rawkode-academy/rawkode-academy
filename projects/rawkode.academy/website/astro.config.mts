@@ -3,11 +3,9 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import vue from "@astrojs/vue";
 import faroUploader from "@grafana/faro-rollup-plugin";
-import unocss from "@unocss/astro";
 import d2 from "astro-d2";
 import expressiveCode from "astro-expressive-code";
 import { defineConfig, envField, fontProviders } from "astro/config";
-import { execSync } from "node:child_process";
 import { statSync, readFileSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { createRequire } from "node:module";
@@ -70,15 +68,6 @@ type AstroVitePlugins = NonNullable<
 const asAstroVitePlugins = (plugins: unknown[]): AstroVitePlugins =>
 	plugins as unknown as AstroVitePlugins;
 
-// Check if D2 is available (used for diagram rendering)
-let d2Available = false;
-try {
-	execSync("d2 --version", { stdio: "ignore" });
-	d2Available = true;
-} catch {
-	console.warn("D2 not available, skipping diagram support");
-}
-
 const getSiteUrl = () => {
 	if (import.meta.env.DEV === true) {
 		return "http://localhost:4321";
@@ -109,7 +98,10 @@ try {
 export default defineConfig({
 	output: "server",
 	adapter: cloudflare({
-		imageService: "cloudflare",
+		// Cloudflare's runtime transform endpoint is not available on every
+		// Pages preview. Compile local assets into the deployment so content
+		// cards never render a broken image when the transform is unavailable.
+		imageService: "compile",
 		sessionKVBindingName: "SESSION",
 	}),
 	trailingSlash: "never",
@@ -127,20 +119,27 @@ export default defineConfig({
 		inlineStylesheets: "always",
 	},
 	integrations: [
-		// UnoCSS — Astro integration auto-discovers uno.config.ts and wires
-		// the transformer pipeline through Vite for .astro, .vue, .tsx, and
-		// scoped <style> blocks. `injectReset` opts into the Tailwind-equivalent
-		// preflight reset so removing @import "tailwindcss" doesn't strip
-		// base browser normalisation.
-		unocss({ injectReset: true }),
 		// Inline the SVG output so we don't depend on the generated file's
 		// on-disk path. Our article MDX lives outside the website project (in
 		// the sibling @rawkodeacademy/content package), and astro-d2 computes
 		// its output path relative to file.cwd — that traversal escapes both
 		// public/ and the URL base, leaving the <img src> pointing at a path
 		// that never ships in dist. Inlining avoids the broken file reference.
-		...(d2Available ? [d2({ inline: true })] : []),
+		// The integration checks D2 for build/dev, but not preview. Missing D2
+		// must fail a build rather than publish raw diagram source as prose.
+		d2({ inline: true }),
 		expressiveCode({
+			plugins: [
+				{
+					name: "academy-code-controls",
+					// The renderer otherwise shrinks copy targets to 32px for a mouse.
+					// Keep the Academy's 44px target for pointer and touch alike.
+					baseStyles: `
+					.frame .copy button { min-width: 2.75rem; min-height: 2.75rem; }
+					.frame .copy button::after { mask-position: center; mask-size: 1.25rem; }
+				`,
+				},
+			],
 			// Code blocks are "screen within the page" surfaces: like the
 			// --terminal-* tokens they stay dark in both colour schemes, so
 			// shell frames, output blocks, and editor frames all read as the
@@ -152,7 +151,7 @@ export default defineConfig({
 				borderWidth: "1px",
 				codeBackground: "var(--terminal-bg)",
 				codeFontFamily:
-					"var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+					"var(--font-red-hat-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
 				codeFontSize: "13px",
 				codeLineHeight: "1.7",
 				frames: {
@@ -187,6 +186,11 @@ export default defineConfig({
 		}),
 	],
 	vite: {
+		// One literal shared by prerendering and every deployed worker isolate.
+		// Scheduled News requires a new build because its detail pages are static.
+		define: {
+			__NEWS_DEPLOYMENT_CUTOFF_MS__: JSON.stringify(Date.now()),
+		},
 		plugins: asAstroVitePlugins([
 			webcontainerDemosPlugin(),
 			vidstackPlugin({ include: /components\/video\// }),
@@ -302,31 +306,31 @@ export default defineConfig({
 		],
 	},
 	fonts: [
-		// Editorial trio — "engineering journal meets terminal":
-		// Instrument Serif (display, italic) / Inter Tight (body) / JetBrains Mono (labels & metadata).
+		// One type system across every route. Display and text are preloaded
+		// by the document head; code and metadata load mono on demand.
 		{
 			provider: fontProviders.google(),
-			name: "Instrument Serif",
-			cssVariable: "--font-instrument-serif",
-			weights: ["400"],
-			styles: ["normal", "italic"],
-			display: "optional",
+			name: "Red Hat Display",
+			cssVariable: "--font-red-hat-display",
+			weights: ["500", "600", "700", "800", "900"],
+			styles: ["normal"],
+			display: "swap",
 		},
 		{
 			provider: fontProviders.google(),
-			name: "Inter Tight",
-			cssVariable: "--font-inter-tight",
-			weights: ["300", "400", "500", "600", "700"],
+			name: "Red Hat Text",
+			cssVariable: "--font-red-hat-text",
+			weights: ["400", "500", "600", "700"],
 			styles: ["normal"],
-			display: "optional",
+			display: "swap",
 		},
 		{
 			provider: fontProviders.google(),
-			name: "JetBrains Mono",
-			cssVariable: "--font-jetbrains-mono",
-			weights: ["400", "500", "600"],
+			name: "Red Hat Mono",
+			cssVariable: "--font-red-hat-mono",
+			weights: ["400", "500", "600", "700"],
 			styles: ["normal"],
-			display: "optional",
+			display: "swap",
 		},
 	],
 });

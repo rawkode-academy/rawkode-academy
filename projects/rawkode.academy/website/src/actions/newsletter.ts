@@ -147,6 +147,9 @@ export const newsletter = {
 				status: "subscribed",
 				source,
 			});
+			if (result?.success !== true) {
+				throw new Error("Subscription was not confirmed. Please try again.");
+			}
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_SUBSCRIBED,
@@ -169,10 +172,7 @@ export const newsletter = {
 				alreadySubscribed: result.alreadySubscribed,
 			});
 
-			return {
-				...result,
-				success: true,
-			};
+			return result;
 		},
 	}),
 	unsubscribe: defineAction({
@@ -321,6 +321,9 @@ export const newsletter = {
 				status: "subscribed",
 				source,
 			});
+			if (result?.success !== true) {
+				throw new Error("Subscription was not confirmed. Please try again.");
+			}
 
 			await captureNewsletterAnalytics({
 				event: GROWTH_EVENTS.NEWSLETTER_SUBSCRIBED,
@@ -352,10 +355,7 @@ export const newsletter = {
 				sameSite: "lax",
 			});
 
-			return {
-				...result,
-				success: true,
-			};
+			return result;
 		},
 	}),
 	unsubscribeWithEmail: defineAction({

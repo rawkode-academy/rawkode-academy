@@ -72,7 +72,7 @@ export function bracketEndpoints(showId: string): ShowEndpointModule[] {
 
 				return new Response(null, {
 					status: 303,
-					headers: { Location: `/shows/${showId}/apply?submitted=1` },
+					headers: { Location: `/shows/${showId}/apply` },
 				});
 			},
 		},

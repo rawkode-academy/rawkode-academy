@@ -13,7 +13,7 @@ if (!showId) return new Response(null, { status: 404 });
 
 const shows = await getCollection("shows");
 const show = shows.find((s) => s.data.id === showId);
-if (!show) return new Response(null, { status: 404 });
+if (!show || !show.data.publish) return new Response(null, { status: 404 });
 
 const ext = getShowExtension(showId);
 const page = ext?.pages.find((p) => p.slug === (slug ?? ""));

@@ -2,12 +2,13 @@
 export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
-import ShowCard from "@/components/show/ShowCard.astro";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
-import CollectionMasthead from "@/components/ui/CollectionMasthead.astro";
+import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getPublishedVideos } from "@/lib/content";
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -22,7 +23,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 const showEntries = (await getCollection("shows")).filter(
 	(s) => s.data.publish,
 );
-const videos = await getCollection("videos");
+const videos = await getPublishedVideos();
 
 const getShowId = (value: unknown): string | null => {
 	if (!value) return null;
@@ -81,11 +82,13 @@ const showsJsonLd = showEntries.map((s) => {
 		...(episodeCount > 0 ? { episodeCount } : {}),
 	};
 });
+const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
 	title="Shows"
-	description="Browse the live and recurring shows from Rawkode Academy: interviews, deep dives, and hands-on streams covering the cloud native ecosystem."
+	description="Browse live and recurring shows from Rawkode Academy: interviews, technical discussions, and hands-on cloud native streams."
 	pageType="CollectionPage"
 >
 	<ShowItemListJsonLd
@@ -94,30 +97,40 @@ const showsJsonLd = showEntries.map((s) => {
 		listUrl={new URL("/shows", Astro.site ?? Astro.url).href}
 		listName="Rawkode Academy Shows"
 	/>
-	<div class="shows-page">
-		<CollectionMasthead title="Shows" dek="Long-form programs." />
+	<div class={styles.root}>
+		<AcademyCatalogMasthead kicker="Program archive" title="Shows" description="Long-form programs." />
 
-		<section class="shows-page__grid-section" aria-label="Shows">
+		<section class={styles.section} aria-label="Shows">
+			<div class={styles.container}>
 			{hasShows ? (
-				<div class="shows-page__grid">
+				<div class={styles.grid}>
 					{showsToRender.map((show) => (
-						<ShowCard show={show} />
+						<a class={styles.card} href={`/shows/${show.id}`}>
+							{(show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl) && (
+								<span class={catalog.featuredMedia}>
+									<img class={catalog.featuredImage} src={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl} alt="" loading="lazy" />
+								</span>
+							)}
+							<div class={styles.cardBody}>
+								<span class={catalog.rowMeta}>{show.episodes?.length ?? 0} published {show.episodes?.length === 1 ? "episode" : "episodes"}</span>
+								<h2 class={styles.cardTitle}>{show.name}</h2>
+								{show.episodes?.[0]?.video?.title && <span class={catalog.rowDescription}>{show.episodes[0].video.title}</span>}
+							</div>
+						</a>
 					))}
 				</div>
 			) : (
-				<div class="shows-page__empty">
-					<h2>No shows available yet</h2>
-					<p>New programs will appear here when they are ready.</p>
-				</div>
+				<div class={styles.empty}>No shows available yet. New programs will appear here when they are ready.</div>
 			)}
+			</div>
 		</section>
 	</div>
 </Page>
 
 <style>
 	.shows-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
+		background: var(--colors-academy-canvas);
+		color: var(--colors-academy-text);
 	}
 
 	.shows-page__grid-section {
@@ -131,25 +144,25 @@ const showsJsonLd = showEntries.map((s) => {
 	}
 
 	.shows-page__empty {
-		border: 1px solid var(--editorial-hairline);
-		background: var(--editorial-paper-deep);
+		border: 1px solid var(--colors-academy-border);
+		background: var(--colors-academy-ground);
 		padding: 2rem;
 		max-width: 36rem;
 	}
 
 	.shows-page__empty h2 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--fonts-academy-text), sans-serif;
 		font-size: clamp(1.375rem, 2vw, 1.875rem);
 		font-weight: 700;
 		line-height: 1.1;
 		letter-spacing: 0;
-		color: var(--editorial-ink);
+		color: var(--colors-academy-text);
 		margin: 0;
 	}
 
 	.shows-page__empty p {
-		font-family: var(--font-inter-tight), sans-serif;
-		color: var(--editorial-ink-soft);
+		font-family: var(--fonts-academy-text), sans-serif;
+		color: var(--colors-academy-text-soft);
 		margin: 0.5rem 0 0;
 	}
 

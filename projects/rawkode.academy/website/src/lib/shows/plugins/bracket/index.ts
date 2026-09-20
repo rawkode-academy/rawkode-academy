@@ -85,7 +85,6 @@ export const bracketPlugin: ShowPlugin<BracketPluginConfig> = (
 						readModel,
 						user: ctx.locals.user ? { id: ctx.locals.user.id } : null,
 					}),
-					submitted: ctx.url.searchParams.get("submitted") === "1",
 				};
 			},
 			meta: () => ({ title: "Apply to compete" }),
