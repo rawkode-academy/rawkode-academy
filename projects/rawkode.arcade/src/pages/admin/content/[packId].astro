@@ -1,0 +1,6 @@
+---
+import ContentAdmin from "@/components/ContentAdmin.vue";
+import ArcadeLayout from "@/layouts/ArcadeLayout.astro";
+const { packId = "new-pack" } = Astro.params;
+---
+<ArcadeLayout title={`Edit ${packId} — Rawkode Arcade`}><ContentAdmin client:load packId={packId} /></ArcadeLayout>

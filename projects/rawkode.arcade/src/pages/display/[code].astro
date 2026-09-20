@@ -1,0 +1,6 @@
+---
+import LiveRoute from "@/components/LiveRoute.vue";
+import "@/styles/global.css";
+const code = Astro.params.code ?? "SHIPIT";
+---
+<!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Broadcast display — Rawkode Arcade</title></head><body><LiveRoute client:load code={code} game="merge-conflict" role="display" /></body></html>

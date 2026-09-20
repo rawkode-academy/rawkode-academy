@@ -1,0 +1,49 @@
+{
+	"name": "rawkode-arcade",
+	"private": true,
+	"version": "0.1.0",
+	"type": "module",
+	"engines": { "bun": ">=1.2.0" },
+	"scripts": {
+		"dev": "wrangler dev",
+		"panda": "panda codegen && panda cssgen",
+		"check": "bun run panda && astro check && tsc --noEmit",
+		"test": "bun run test:unit && bun run test:integration",
+		"test:unit": "bun run scripts/require-no-skips.ts -- bun test src/games tests/content-and-results.test.ts tests/access-auth.test.ts",
+		"test:integration": "bun run scripts/require-no-skips.ts -- vitest run --config vitest.config.ts",
+		"test:e2e": "bun run scripts/require-no-skips.ts -- playwright test --config e2e/playwright.config.ts",
+		"build": "bun run panda && astro check && astro build && tsc --noEmit",
+		"deploy:dry-run": "bun run build && bun run scripts/cloudflare-config.ts production --dry-run && wrangler deploy --config .wrangler/deploy-production.json --dry-run",
+		"deploy:preview": "bun run build && bun run scripts/cloudflare-config.ts preview --dry-run && wrangler deploy --config .wrangler/deploy-preview.json --dry-run",
+		"deploy": "bun run build && bun run scripts/deploy-cloudflare.ts production",
+		"migrate": "wrangler d1 migrations apply DB --local",
+		"db:migrate:local": "wrangler d1 migrations apply DB --local",
+		"db:migrate:remote": "bun run scripts/cloudflare-config.ts production --provision && wrangler d1 migrations apply DB --remote --config .wrangler/deploy-production.json",
+		"types": "wrangler types worker-configuration.d.ts --env-interface Env",
+		"ops:admission:disable": "wrangler secret put ADMISSION_ENABLED",
+		"ops:admission:restore": "wrangler secret put ADMISSION_ENABLED",
+		"ops:rotate-ticket-secret": "wrangler secret put TICKET_SECRET",
+		"ops:rotate-session-secret": "wrangler secret put SESSION_SECRET"
+	},
+	"dependencies": {
+		"@ark-ui/vue": "5.39.2",
+		"@astrojs/cloudflare": "13.1.10",
+		"@astrojs/vue": "^6.0.0",
+		"@pandacss/dev": "2.0.0-beta.18",
+		"@pandacss/preset-base": "2.0.0-beta.18",
+		"@pandacss/preset-panda": "2.0.0-beta.18",
+		"astro": "6.4.2",
+		"vue": "3.5.35"
+	},
+	"devDependencies": {
+		"@axe-core/playwright": "4.13.0",
+		"@astrojs/check": "^0.9.8",
+		"@cloudflare/workers-types": "^4.20260405.1",
+		"@cloudflare/vitest-pool-workers": "0.12.21",
+		"@playwright/test": "1.63.0",
+		"@types/bun": "1.4.2",
+		"typescript": "^5.9.3",
+		"vitest": "^3.2.4",
+		"wrangler": "4.96.0"
+	}
+}
