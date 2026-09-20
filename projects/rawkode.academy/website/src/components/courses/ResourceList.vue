@@ -1,105 +1,49 @@
 <template>
-	<div v-if="resources && resources.length > 0" :class="s.resources">
-		<header :class="s.header">
-			<div :class="s.heading">
-				<svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-				</svg>
-				<h3 :class="s.heading">Resources</h3>
-			</div>
-			<p :class="s.description">
-				Supporting materials for this module.
-			</p>
-		</header>
-
-		<div :class="s.resources">
-			<section
-				v-for="[category, categoryResources] in Object.entries(groupedResources)"
-				:key="category"
-				:class="s.group"
-			>
-				<h4
-					:class="s.category"
-				>
-					<svg :class="s.smallIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getCategoryIconPath(category)" />
-					</svg>
-					{{ categoryLabels[category] }}
-				</h4>
-
-				<div :class="s.resources">
+	<section v-if="groupedResources.size > 0" :class="s.root" :aria-labelledby="headingId">
+		<h2 :id="headingId" :class="s.heading">Resources</h2>
+		<section
+			v-for="[category, categoryResources] in groupedResources"
+			:key="category"
+			:class="s.group"
+			:aria-labelledby="`${headingId}-${category}`"
+		>
+			<h3 :id="`${headingId}-${category}`" :class="s.category">{{ categoryLabels[category] }}</h3>
+			<ul :class="s.list" role="list">
+				<li v-for="(resource, index) in categoryResources" :key="index" :class="s.item">
 					<component
-						v-for="(resource, index) in categoryResources"
-						:key="index"
 						:is="resource.type === 'embed' ? 'button' : 'a'"
 						:type="resource.type === 'embed' ? 'button' : undefined"
-						:href="resource.type !== 'embed' ? getResourceHref(resource) : undefined"
+						:href="getResourceHref(resource)"
 						:target="resource.type === 'url' ? '_blank' : undefined"
 						:rel="resource.type === 'url' ? 'noopener noreferrer' : undefined"
+						:aria-haspopup="resource.type === 'embed' && resource.embedConfig?.container === 'iframe' ? 'dialog' : undefined"
+						:aria-describedby="`${headingId}-${category}-${index}-details`"
+						:class="s.action"
 						@click="resource.type === 'embed' && openEmbedModal(resource)"
-						:class="s.resource"
-					>
-						<div
-							:class="s.iconBadge"
-						>
-							<svg :class="s.icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									:d="getResourceIconPath(resource.type)"
-								/>
-							</svg>
-						</div>
-
-						<div :class="s.copy">
-							<h5 :class="s.title">
-								{{ resource.title }}
-							</h5>
-							<p v-if="resource.description" :class="s.description">
-								{{ resource.description }}
-							</p>
-							<div :class="s.meta">
-								<span>
-									{{ getResourceTypeLabel(resource.type) }}
-								</span>
-							</div>
-						</div>
-
-						<div :class="s.arrow">
-							<svg
-								:class="s.smallIcon"
-
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									:d="resource.type === 'file' ? 'M12 5v14m0 0l-4-4m4 4l4-4' : 'M9 5l7 7-7 7'"
-								></path>
-							</svg>
-						</div>
-					</component>
-				</div>
-			</section>
-		</div>
+					>{{ resource.title }}</component>
+					<div :id="`${headingId}-${category}-${index}-details`" :class="s.details">
+						<p v-if="resource.description" :class="s.description">{{ resource.description }}</p>
+						<p :class="s.kind">{{ getResourceTypeLabel(resource) }}</p>
+					</div>
+				</li>
+			</ul>
+		</section>
 
 		<EmbeddedAppModal
 			v-if="selectedEmbed"
 			:resource="selectedEmbed"
 			v-model="isEmbedModalOpen"
 		/>
-	</div>
+	</section>
 </template>
 
 <script setup lang="ts">
-import { academyCourse } from "@rawkodeacademy/design-system";
-const s = academyCourse();
-import { ref, computed } from "vue";
+import { academyCourseResources } from "@rawkodeacademy/design-system";
+import { ref, computed, useId } from "vue";
 import EmbeddedAppModal from "./EmbeddedAppModal.vue";
+
+const s = academyCourseResources();
+const headingId = `${useId()}-resources`;
 
 interface Resource {
 	title: string;
@@ -122,7 +66,7 @@ interface Resource {
 					| undefined;
 		  }
 		| undefined;
-	category: "slides" | "code" | "documentation" | "demos" | "other";
+	category?: string | undefined;
 }
 
 const props = defineProps<{
@@ -135,75 +79,67 @@ const selectedEmbed = ref<(Resource & { type: "embed"; embedConfig: NonNullable<
 
 const categoryLabels: Record<string, string> = {
 	slides: "Slides",
-	code: "Repos",
+	code: "Code",
 	documentation: "Documentation",
 	demos: "Demos",
-	other: "Other Resources",
+	other: "Other",
+};
+
+
+const isWebUrl = (value: string) => {
+	if (!value || /[\\\u0000-\u001f\u007f]/.test(value)) return false;
+	try {
+		const url = new URL(value, "https://academy.invalid");
+		return /^https?:\/\//i.test(value)
+			? url.protocol === "https:" || url.protocol === "http:"
+			: value.startsWith("/") && !value.startsWith("//") && url.origin === "https://academy.invalid";
+	} catch {
+		return false;
+	}
+};
+
+const getResourceHref = (resource: Resource): string | undefined => {
+	if (resource.type === "url") {
+		const url = resource.url?.trim();
+		return url && isWebUrl(url) ? url : undefined;
+	}
+	if (resource.type === "file") {
+		const filePath = resource.filePath?.trim();
+		if (!filePath || filePath.startsWith("/") || /[\\?#\u0000-\u001f\u007f]/.test(filePath)) return undefined;
+		const href = `/resources/${filePath}`;
+		const pathname = new URL(href, "https://academy.invalid").pathname;
+		return pathname.startsWith("/resources/") && pathname !== "/resources/" ? href : undefined;
+	}
+	return undefined;
 };
 
 const groupedResources = computed(() => {
-	return props.resources.reduce(
-		(acc, resource) => {
-			if (!acc[resource.category]) {
-				acc[resource.category] = [];
-			}
-			acc[resource.category]!.push(resource);
-			return acc;
-		},
-		{} as Record<string, Resource[]>,
-	);
+	const groups = new Map<string, Resource[]>();
+	for (const resource of props.resources) {
+		if (!resource.title.trim()) continue;
+		if (resource.type === "embed") {
+			const config = resource.embedConfig;
+			if (!config?.src.trim()) continue;
+			if (config.container === "iframe" ? !isWebUrl(config.src.trim()) : config.container !== "webcontainer") continue;
+		} else if (!getResourceHref(resource)) {
+			continue;
+		}
+		const category = resource.category?.trim().toLowerCase() ?? "other";
+		const key = Object.hasOwn(categoryLabels, category) ? category : "other";
+		const group = groups.get(key) ?? [];
+		group.push(resource);
+		groups.set(key, group);
+	}
+	return groups;
 });
 
-const getCategoryIconPath = (category: string) => {
-	switch (category) {
-		case "slides":
-			return "M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z";
-		case "code":
-			return "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4";
-		case "documentation":
-			return "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-		case "demos":
-			return "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z";
-		default:
-			return "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-	}
-};
-
-
-const getResourceIconPath = (type: string) => {
-	switch (type) {
-		case "url":
-			return "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14";
-		case "file":
-			return "M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z";
-		case "embed":
-			return "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z";
-		default:
-			return "M13 10V3L4 14h7v7l9-11h-7z";
-	}
-};
-
-
-
-const getResourceHref = (resource: Resource) => {
-	if (resource.type === "url") {
-		return resource.url;
-	} else if (resource.type === "file" && resource.filePath) {
-		return `/resources/${resource.filePath}`;
-	}
-	return "#";
-};
-
-const getResourceTypeLabel = (type: string) => {
-	switch (type) {
-		case "url":
-			return "External Link";
-		case "file":
-			return "Download";
-		case "embed":
-			return "Demo";
-		default:
-			return type;
+const getResourceTypeLabel = (resource: Resource) => {
+	switch (resource.type) {
+		case "url": return "Link · opens in a new tab";
+		case "file": return "File";
+		case "embed": return resource.embedConfig?.container === "webcontainer"
+			? "WebContainer · opens in a new window"
+			: "Interactive demo · opens a dialog";
 	}
 };
 

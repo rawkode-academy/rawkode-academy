@@ -1,6 +1,6 @@
 // Source guard. Run with Node 24+ after installing workspace dependencies.
 import assert from "node:assert/strict";
-import { getAstroRecipeSource } from "./academy-source.mjs";
+import { getRecipeUsage } from "./academy-source.mjs";
 import { readdirSync, readFileSync } from "node:fs";
 import { extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,15 +14,19 @@ const walk = (directory, extensions) =>
 		const path = resolve(directory, entry.name);
 		return entry.isDirectory()
 			? walk(path, extensions)
-			: extensions.has(extname(entry.name)) ? [path] : [];
+			: extensions.has(extname(entry.name))
+				? [path]
+				: [];
 	});
 const local = (path) => relative(website, path).replaceAll("\\", "/");
 
 const pageWrapper = /@\/wrappers\/page\.astro/;
 const showLayout = /@\/layouts\/ShowLayout\.astro/;
 const exceptions = new Map([
-	["src/pages/404.astro", ["standalone error document", "academyLayout"]],
-	["src/pages/embed/webcontainer.astro", ["isolated workbench", "academyMedia"]],
+	[
+		"src/pages/embed/webcontainer.astro",
+		["isolated workbench", "academyMedia"],
+	],
 ]);
 const routes = walk(resolve(website, "src/pages"), new Set([".astro", ".mdx"]))
 	.map(local)
@@ -31,19 +35,37 @@ for (const route of routes) {
 	const source = read(route);
 	const exception = exceptions.get(route);
 	if (exception) {
-		assert.match(source, /@\/layouts\/minimal\.astro/, `${route}: missing MinimalLayout`);
-		assert.match(source, new RegExp(`\\b${exception[1]}\\b`), `${route}: missing Panda recipe`);
+		assert.match(
+			source,
+			/@\/layouts\/minimal\.astro/,
+			`${route}: missing MinimalLayout`,
+		);
+		assert.match(
+			source,
+			new RegExp(`\\b${exception[1]}\\b`),
+			`${route}: missing Panda recipe`,
+		);
 		continue;
 	}
-	assert.doesNotMatch(source, /<(?:html|body)\b/i, `${route}: bypasses the canonical document`);
-	assert.ok(pageWrapper.test(source) || showLayout.test(source), `${route}: no canonical Panda shell path`);
+	assert.doesNotMatch(
+		source,
+		/<(?:html|body)\b/i,
+		`${route}: bypasses the canonical document`,
+	);
+	assert.ok(
+		pageWrapper.test(source) || showLayout.test(source),
+		`${route}: no canonical Panda shell path`,
+	);
 }
 for (const route of exceptions.keys()) {
 	assert.ok(routes.includes(route), `stale minimal-layout exception: ${route}`);
 }
 
 assert.match(read("src/wrappers/page.astro"), /@\/layouts\/app\.astro/);
-assert.match(read("src/wrappers/page.astro"), /@rawkodeacademy\/design-system\/styles\.css/);
+assert.match(
+	read("src/wrappers/page.astro"),
+	/@rawkodeacademy\/design-system\/styles\.css/,
+);
 assert.match(read("src/layouts/ShowLayout.astro"), pageWrapper);
 const shell = read("src/layouts/app.astro");
 assert.match(shell, /data-ui-shell="panda-v2"/);
@@ -54,13 +76,23 @@ const bracketPages = walk(
 	resolve(website, "src/lib/shows/plugins/bracket/pages"),
 	new Set([".astro"]),
 ).sort();
-const bracketNames = bracketPages.map((path) => path.match(/\/([^/]+)\.astro$/)?.[1]);
+const bracketNames = bracketPages.map(
+	(path) => path.match(/\/([^/]+)\.astro$/)?.[1],
+);
 assert.deepEqual(bracketNames, ["Apply", "Brackets", "Schedule", "Seasons"]);
 const bracketPlugin = read("src/lib/shows/plugins/bracket/index.ts");
 for (const [index, name] of bracketNames.entries()) {
 	const slug = ["apply", "brackets", "schedule", "seasons"][index];
-	assert.match(bracketPlugin, new RegExp(`import ${name} from "\\./pages/${name}\\.astro"`));
-	assert.match(bracketPlugin, new RegExp(`\\b${slug}:\\s*\\{[\\s\\S]*?slug:\\s*"${slug}"[\\s\\S]*?Component:\\s*${name}`));
+	assert.match(
+		bracketPlugin,
+		new RegExp(`import ${name} from "\\./pages/${name}\\.astro"`),
+	);
+	assert.match(
+		bracketPlugin,
+		new RegExp(
+			`\\b${slug}:\\s*\\{[\\s\\S]*?slug:\\s*"${slug}"[\\s\\S]*?Component:\\s*${name}`,
+		),
+	);
 	const source = read(local(bracketPages[index]));
 	assert.doesNotMatch(source, /<(?:html|body)\b/i);
 }
@@ -69,49 +101,71 @@ assert.match(dynamicShowRoute, showLayout);
 assert.match(read("src/layouts/ShowLayout.astro"), /showLayoutStyles/);
 assert.match(read("src/layouts/showStyles.ts"), /academyLayout/);
 
-const exportedNames = (source) => new Set(
-	[...source.matchAll(/export\s*{([^}]+)}/gs)].flatMap((match) =>
-		match[1].split(",").map((item) => {
-			const names = item.trim().replace(/^type\s+/, "").split(/\s+as\s+/);
-			return (names[1] ?? names[0]).trim();
-		}).filter(Boolean),
-	),
+const exportedNames = (source) =>
+	new Set(
+		[...source.matchAll(/export\s*{([^}]+)}/gs)].flatMap((match) =>
+			match[1]
+				.split(",")
+				.map((item) => {
+					const names = item
+						.trim()
+						.replace(/^type\s+/, "")
+						.split(/\s+as\s+/);
+					return (names[1] ?? names[0]).trim();
+				})
+				.filter(Boolean),
+		),
+	);
+const publicExports = exportedNames(
+	readFileSync(resolve(designSystem, "src/index.ts"), "utf8"),
 );
-const publicExports = exportedNames(readFileSync(resolve(designSystem, "src/index.ts"), "utf8"));
-const vueExports = exportedNames(readFileSync(resolve(designSystem, "src/vue/index.ts"), "utf8"));
+const vueExports = exportedNames(
+	readFileSync(resolve(designSystem, "src/vue/index.ts"), "utf8"),
+);
 const recipes = new Map();
-for (const path of walk(resolve(designSystem, "src/recipes"), new Set([".ts"]))) {
+for (const path of walk(
+	resolve(designSystem, "src/recipes"),
+	new Set([".ts"]),
+)) {
 	const source = readFileSync(path, "utf8");
 	const name = source.match(/export const\s+(\w+)\s*=\s*sva\s*\(/)?.[1];
 	if (!name) continue;
 	const slots = source.match(/["']?slots["']?:\s*\[([\s\S]*?)\]/)?.[1];
 	assert.ok(slots, `${name}: missing slots`);
-	recipes.set(name, new Set([...slots.matchAll(/["'](\w+)["']/g)].map((match) => match[1])));
+	recipes.set(
+		name,
+		new Set([...slots.matchAll(/["'](\w+)["']/g)].map((match) => match[1])),
+	);
 }
 
-const sourceFiles = walk(resolve(website, "src"), new Set([".astro", ".mdx", ".ts", ".tsx", ".vue"]));
-const designSystemImport = /import\s*{([^}]+)}\s*from\s*["'](@rawkodeacademy\/design-system(?:\/vue)?)["']/g;
+const sourceFiles = walk(
+	resolve(website, "src"),
+	new Set([".astro", ".mdx", ".ts", ".tsx", ".vue"]),
+);
 for (const path of sourceFiles) {
 	const source = readFileSync(path, "utf8");
-	const slotSource = extname(path) === ".astro"
-		? await getAstroRecipeSource(source)
-		: source;
-	for (const match of source.matchAll(designSystemImport)) {
-		const exports = match[2].endsWith("/vue") ? vueExports : publicExports;
-		for (const item of match[1].split(",")) {
-			const [imported, alias] = item.trim().split(/\s+as\s+/);
-			if (!imported) continue;
-			assert.ok(exports.has(imported), `${local(path)}: missing export ${match[2]}.${imported}`);
-			if (!recipes.has(imported)) continue;
-			const recipeSlots = recipes.get(imported);
-			const calls = new RegExp(`(?:const|let)\\s+(\\w+)\\s*=\\s*${alias ?? imported}\\s*\\(`, "g");
-			for (const call of slotSource.matchAll(calls)) {
-				const accesses = new RegExp(`\\b${call[1]}(?:\\.|\\?\\.)(\\w+)`, "g");
-				for (const access of slotSource.matchAll(accesses)) {
-					assert.ok(recipeSlots.has(access[1]), `${local(path)}: missing ${imported}.${access[1]} slot`);
-				}
-			}
-		}
+	if (!source.includes("@rawkodeacademy/design-system")) continue;
+	let usage;
+	try {
+		usage = await getRecipeUsage(source, extname(path));
+	} catch (error) {
+		throw new Error(`${local(path)}: could not analyze recipe usage`, {
+			cause: error,
+		});
+	}
+	for (const { module, imported } of usage.imports) {
+		const exports = module.endsWith("/vue") ? vueExports : publicExports;
+		assert.ok(
+			exports.has(imported),
+			`${local(path)}: missing export ${module}.${imported}`,
+		);
+	}
+	for (const { imported, slot } of usage.accesses) {
+		if (!recipes.has(imported)) continue;
+		assert.ok(
+			recipes.get(imported).has(slot),
+			`${local(path)}: missing ${imported}.${slot} slot`,
+		);
 	}
 }
 
@@ -123,16 +177,33 @@ const lock = JSON.parse(
 );
 const lockWorkspace = lock.workspaces["projects/rawkode.academy/website"];
 for (const group of ["dependencies", "devDependencies"]) {
-	assert.deepEqual(lockWorkspace[group], packageJson[group], `${group}: package.json and bun.lock differ`);
+	assert.deepEqual(
+		lockWorkspace[group],
+		packageJson[group],
+		`${group}: package.json and bun.lock differ`,
+	);
 }
 
 assert.match(read("src/pages/watch/index.astro"), /VideoItemListJsonLd/);
-assert.match(read("src/pages/learning-paths/index.astro"), /LearningPathItemListJsonLd/);
+assert.match(
+	read("src/pages/learning-paths/index.astro"),
+	/LearningPathItemListJsonLd/,
+);
 assert.match(read("src/pages/index.astro"), /rel="preload"/);
-assert.doesNotMatch(read("src/components/academy/AcademyPage.vue"), /<header|<footer|toggleTheme/);
-assert.match(read("src/components/branding/AcademyBrand.astro"), /wordmark\.svg\?raw/);
+assert.doesNotMatch(
+	read("src/components/academy/AcademyPage.vue"),
+	/<header|<footer|toggleTheme/,
+);
+assert.match(
+	read("src/components/branding/AcademyBrand.astro"),
+	/wordmark\.svg\?raw/,
+);
 const videoReactions = read("src/components/video/VideoReactionsClient.vue");
-assert.doesNotMatch(videoReactions, /<Teleport\b/, "reaction picker must stay inside its deferred island");
+assert.doesNotMatch(
+	videoReactions,
+	/<Teleport\b/,
+	"reaction picker must stay inside its deferred island",
+);
 assert.match(videoReactions, /v-model:open="pickerOpen"/);
 assert.match(videoReactions, /:lazy-mount="true"/);
 assert.match(videoReactions, /:unmount-on-exit="true"/);
@@ -148,7 +219,7 @@ const watchVisibleSources = [
 	"src/components/video/VideoReactionsClient.vue",
 	"src/components/video/video-content-tabs.vue",
 	"src/components/video/comments.vue",
-	"src/components/video/transcript.vue",
+	"src/components/video/VideoTranscript.astro",
 	"src/components/video/VideoCast.astro",
 	"src/components/video/ShowVideoSection.astro",
 	"src/components/video/TechnologyVideoSection.astro",
@@ -164,41 +235,88 @@ const watchVisibleSources = [
 	"src/components/common/SkeletonText.vue",
 	"src/components/common/SkeletonTranscript.vue",
 ];
-const legacyWatchAliases = /--(?:editorial|surface|brand)-|\b(?:paper-card|paper-panel|section-shell|text-(?:primary-content|secondary-content|muted)|border-surface|focus-ring|bleed-x-mobile)\b/;
+const legacyWatchAliases =
+	/--(?:editorial|surface|brand)-|\b(?:paper-card|paper-panel|section-shell|text-(?:primary-content|secondary-content|muted)|border-surface|focus-ring|bleed-x-mobile)\b/;
 const directBrandRgb = /rgb\(var\(--brand-/;
-const directPaletteUtility = /\b(?:bg|text|border|ring|outline|fill|stroke)-(?:primary|secondary|accent|white|black|neutral|red|yellow|orange|amber|green|emerald|blue|indigo|violet|purple|pink|rose)-[\w/[\].-]+/;
+const directPaletteUtility =
+	/\b(?:bg|text|border|ring|outline|fill|stroke)-(?:primary|secondary|accent|white|black|neutral|red|yellow|orange|amber|green|emerald|blue|indigo|violet|purple|pink|rose)-[\w/[\].-]+/;
 const directPaletteLiteral = /(?:#[0-9a-f]{3,8}\b|\b(?:rgb|hsl|oklch)\()/i;
 for (const path of watchVisibleSources) {
 	const source = read(path);
-	assert.doesNotMatch(source, legacyWatchAliases, `${path}: legacy watch palette alias`);
-	assert.doesNotMatch(source, directBrandRgb, `${path}: direct legacy brand RGB`);
-	assert.doesNotMatch(source, directPaletteUtility, `${path}: direct palette utility`);
-	assert.doesNotMatch(source, directPaletteLiteral, `${path}: direct palette literal`);
+	assert.doesNotMatch(
+		source,
+		legacyWatchAliases,
+		`${path}: legacy watch palette alias`,
+	);
+	assert.doesNotMatch(
+		source,
+		directBrandRgb,
+		`${path}: direct legacy brand RGB`,
+	);
+	assert.doesNotMatch(
+		source,
+		directPaletteUtility,
+		`${path}: direct palette utility`,
+	);
+	assert.doesNotMatch(
+		source,
+		directPaletteLiteral,
+		`${path}: direct palette literal`,
+	);
 }
 const watchRoute = read("src/pages/watch/[...slug].astro");
 assert.match(watchRoute, /academyWatch/);
-assert.doesNotMatch(watchRoute, /<style\b/i, "watch route must use Panda recipe slots");
+assert.doesNotMatch(
+	watchRoute,
+	/<style\b/i,
+	"watch route must use Panda recipe slots",
+);
 assert.match(watchRoute, /const isLiveNow = isLive && studioLiveState\.live/);
-assert.match(watchRoute, /const watchStatusLabel = isLiveNow[\s\S]*?"Live now"[\s\S]*?"Upcoming"[\s\S]*?"On demand"/);
-assert.match(watchRoute, /<MLabel tone=\{isLiveNow \? "amber" : "spruce"\}>/);
+assert.match(
+	watchRoute,
+	/const watchStatusLabel = isLiveNow[\s\S]*?"Live now"[\s\S]*?"Upcoming"[\s\S]*?null/,
+);
+assert.match(watchRoute, /<MLabel tone=\{isLiveNow \? "amber" : "accent"\}>/);
 assert.match(watchRoute, /\{isLiveNow && <LiveDot color="amber" \/>\}/);
 assert.match(watchRoute, /data-academy-learn-list/);
 assert.match(watchRoute, /data-academy-prose/);
 const globalStyles = read("src/styles/global.css");
-assert.match(globalStyles, /\[data-academy-prose\][\s\S]*?list-style-type: disc/);
-assert.match(globalStyles, /\[data-academy-learn-list\][\s\S]*?list-style-type: decimal/);
-const cloudflareWhepPlayer = read("src/components/video/CloudflareWhepPlayer.vue");
+assert.match(
+	globalStyles,
+	/\[data-academy-prose\][\s\S]*?list-style-type: disc/,
+);
+assert.match(
+	globalStyles,
+	/\[data-academy-learn-list\][\s\S]*?list-style-type: decimal/,
+);
+const cloudflareWhepPlayer = read(
+	"src/components/video/CloudflareWhepPlayer.vue",
+);
 assert.match(cloudflareWhepPlayer, /academyWatch/);
-assert.doesNotMatch(cloudflareWhepPlayer, /<style\b/i, "live player must use Panda recipe slots");
+assert.doesNotMatch(
+	cloudflareWhepPlayer,
+	/<style\b/i,
+	"live player must use Panda recipe slots",
+);
 const reactionsClient = read("src/components/video/VideoReactionsClient.vue");
-assert.match(reactionsClient, /academyWatch\(\{ pressed: Boolean\(pressed\[emoji\]\) \}\)\.reactionButton/);
+assert.match(
+	reactionsClient,
+	/academyWatch\(\{ pressed: Boolean\(pressed\[emoji\]\) \}\)\.reactionButton/,
+);
 assert.doesNotMatch(reactionsClient, /reactionButtonActive/);
-const drawer = readFileSync(resolve(designSystem, "src/vue/NavigationDrawer.vue"), "utf8");
-for (const behavior of ["trap-focus", "prevent-scroll", "close-on-escape", "close-on-interact-outside"]) {
+const drawer = readFileSync(
+	resolve(designSystem, "src/vue/NavigationDrawer.vue"),
+	"utf8",
+);
+for (const behavior of [
+	"trap-focus",
+	"prevent-scroll",
+	"close-on-escape",
+	"close-on-interact-outside",
+]) {
 	assert.ok(drawer.includes(`:${behavior}="true"`));
 }
 assert.match(drawer, /href="#academy-footer-navigation"/);
-
 
 // Completed migration boundaries must stay on shared recipes and Ark controls.
 const migratedViews = [
@@ -215,14 +333,30 @@ const migratedViews = [
 	"src/components/command-palette/CommandPalette.vue",
 ];
 for (const path of migratedViews) {
-	assert.match(read(path), /@rawkodeacademy\/design-system/, `${path}: missing shared recipe`);
-	assert.doesNotMatch(read(path), /--(?:editorial|surface|brand|terminal)-/, `${path}: legacy palette alias`);
+	assert.match(
+		read(path),
+		/@rawkodeacademy\/design-system/,
+		`${path}: missing shared recipe`,
+	);
+	assert.doesNotMatch(
+		read(path),
+		/--(?:editorial|surface|brand|terminal)-/,
+		`${path}: legacy palette alias`,
+	);
 }
-const commandPalette = read("src/components/command-palette/CommandPalette.vue");
+const commandPalette = read(
+	"src/components/command-palette/CommandPalette.vue",
+);
 assert.match(commandPalette, /@ark-ui\/vue\/combobox/);
 assert.match(commandPalette, /@ark-ui\/vue\/dialog/);
-assert.doesNotMatch(read("src/components/command-palette/mount.ts"), /react|cmdk/);
-assert.doesNotMatch(read("src/components/courses/WebContainerEmbed.vue"), /v-html/);
+assert.doesNotMatch(
+	read("src/components/command-palette/mount.ts"),
+	/react|cmdk/,
+);
+assert.doesNotMatch(
+	read("src/components/courses/WebContainerEmbed.vue"),
+	/v-html/,
+);
 
 // Exercise the real typed theme utility with blocked browser persistence.
 const attributes = new Map();
@@ -230,14 +364,25 @@ let dark = false;
 let stored = null;
 let blocked = true;
 globalThis.localStorage = {
-	getItem() { if (blocked) throw new Error("Storage denied"); return stored; },
-	setItem(_key, value) { if (blocked) throw new Error("Storage denied"); stored = value; },
+	getItem() {
+		if (blocked) throw new Error("Storage denied");
+		return stored;
+	},
+	setItem(_key, value) {
+		if (blocked) throw new Error("Storage denied");
+		stored = value;
+	},
 };
 globalThis.document = {
 	documentElement: {
 		getAttribute: (key) => attributes.get(key) ?? null,
 		setAttribute: (key, value) => attributes.set(key, value),
-		classList: { toggle: (_key, value) => { dark = value; }, contains: () => dark },
+		classList: {
+			toggle: (_key, value) => {
+				dark = value;
+			},
+			contains: () => dark,
+		},
 	},
 	querySelector: () => null,
 };
@@ -258,6 +403,12 @@ theme.setColorScheme("dark");
 assert.equal(stored, "dark");
 assert.equal(theme.getColorScheme(), "dark");
 
-console.log(`Validated ${routes.length} visual routes, including ${exceptions.size} explicit minimal exceptions.`);
-console.log(`Validated ${bracketPages.length} dynamic bracket pages and ${recipes.size} design-system recipes.`);
-console.log("Canonical Panda shell, recipe slots, exports, and lock consistency passed.");
+console.log(
+	`Validated ${routes.length} visual routes, including ${exceptions.size} explicit minimal exceptions.`,
+);
+console.log(
+	`Validated ${bracketPages.length} dynamic bracket pages and ${recipes.size} design-system recipes.`,
+);
+console.log(
+	"Canonical Panda shell, recipe slots, exports, and lock consistency passed.",
+);

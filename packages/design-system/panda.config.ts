@@ -47,27 +47,29 @@ export default defineConfig({
 				},
 				fonts: {
 					"academy-display": {
-						value: '"Red Hat Display", "Helvetica Neue", Arial, sans-serif',
+						value:
+							'var(--font-red-hat-display, "Red Hat Display"), "Helvetica Neue", Arial, sans-serif',
 					},
 					"academy-text": {
-						value: '"Red Hat Text", "Helvetica Neue", Arial, sans-serif',
+						value:
+							'var(--font-red-hat-text, "Red Hat Text"), "Helvetica Neue", Arial, sans-serif',
 					},
 					"academy-mono": {
 						value:
-							'"Red Hat Mono", ui-monospace, "SFMono-Regular", Menlo, monospace',
+							'var(--font-red-hat-mono, "Red Hat Mono"), ui-monospace, "SFMono-Regular", Menlo, monospace',
 					},
 				},
 				radii: {
 					xs: { value: "2px" },
 					sm: { value: "2px" },
 					md: { value: "3px" },
-					"academy-s": { value: "6px" },
-					"academy-m": { value: "8px" },
-					"academy-l": { value: "12px" },
+					"academy-s": { value: "3px" },
+					"academy-m": { value: "4px" },
+					"academy-l": { value: "6px" },
 					"academy-pill": { value: "999px" },
 				},
 				borders: {
-					hairline: { value: "1px solid" },
+					hairline: { value: "1px solid {colors.academy.border}" },
 					focus: { value: "2px solid" },
 					"academy-button": { value: "1px solid transparent" },
 					"academy-tab": { value: "2px solid" },
@@ -75,14 +77,18 @@ export default defineConfig({
 				spacing: {
 					focus: { value: "2px" },
 					"focus-inset": { value: "-2px" },
-					"academy-gutter": { value: "24px" },
-					"academy-gutter-wide": { value: "96px" },
+					"academy-gutter": { value: "clamp(20px, 4vw, 48px)" },
+					"academy-gutter-wide": { value: "48px" },
 					"academy-section": { value: "64px" },
-					"academy-section-wide": { value: "112px" },
+					"academy-section-wide": { value: "88px" },
 					"academy-join": { value: "72px" },
 				},
 				sizes: {
+					"academy-lede": { value: "42ch" },
 					"academy-shell": { value: "1180px" },
+					"academy-content": { value: "1084px" },
+					"academy-reading-shell": { value: "776px" },
+					"academy-toc": { value: "calc(100dvh - 4rem)" },
 					"academy-command": { value: "85dvh" },
 					"academy-command-list": { value: "50dvh" },
 					"academy-copy": { value: "680px" },
@@ -95,7 +101,20 @@ export default defineConfig({
 				aspectRatios: {
 					"academy-video": { value: "16 / 9" },
 				},
+				fontSizes: {
+					"academy-display": { value: "clamp(2.75rem, 5.4vw, 5rem)" },
+					"academy-title": { value: "clamp(2.4rem, 5vw, 4rem)" },
+					"academy-section": { value: "clamp(1.75rem, 3vw, 2.5rem)" },
+					"academy-caption": { value: "0.6875rem" },
+				},
+				letterSpacings: {
+					"academy-display": { value: "-0.04em" },
+				},
 				lineHeights: {
+					"academy-display": { value: "1.04" },
+					"academy-title": { value: "1.15" },
+					"academy-card": { value: "1.3" },
+					"academy-reading": { value: "1.65" },
 					dialog: { value: "1.1" },
 					body: { value: "1.5" },
 				},
@@ -108,8 +127,12 @@ export default defineConfig({
 				},
 				animations: {
 					none: { value: "none" },
-					"academy-skeleton": { value: "academy-skeleton-pulse 1.8s ease-in-out infinite" },
-					"academy-live": { value: "academy-live-pulse 1.8s ease-in-out infinite" },
+					"academy-skeleton": {
+						value: "academy-skeleton-pulse 1.8s ease-in-out infinite",
+					},
+					"academy-live": {
+						value: "academy-live-pulse 1.8s ease-in-out infinite",
+					},
 					"academy-spinner": { value: "academy-spinner 1s linear infinite" },
 				},
 				zIndex: {

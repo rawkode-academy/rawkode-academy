@@ -4,221 +4,77 @@ import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
 
-const stats = [
-	{ value: "100+", label: "Projects featured" },
-	{ value: "60-90", label: "Minute session" },
-	{ value: "Free", label: "For open source" },
-];
-
-const benefits = [
-	{
-		title: "Show the real project",
-		body: "Show the project to developers who care about how infrastructure software is built, operated, and adopted.",
-	},
-	{
-		title: "Answer real questions",
-		body: "Talk through trade-offs, roadmap decisions, and adoption questions with people who understand the technical context.",
-	},
-	{
-		title: "Leave a useful recording",
-		body: "The recording gives your project a clear walkthrough you can share with contributors, users, and community channels.",
-	},
-];
-
+const application = "mailto:david@rawkode.academy?subject=Share%20my%20open-source%20project&body=Project%20name%3A%0AProject%20URL%3A%0AMaintainers%3A%0AWhat%20you%20want%20to%20cover%3A%0AWhy%20this%20is%20useful%20for%20developers%3A";
 const processSteps = [
-	{
-		title: "Apply",
-		body: "Share the project, maintainers, and what you want to cover. We check fit before confirming a slot.",
-	},
-	{
-		title: "Prepare",
-		body: "We send prep notes and help shape a session that works for a live technical audience.",
-	},
-	{
-		title: "Present",
-		body: "Join David for a live walkthrough, demo, architecture discussion, and audience Q&A.",
-	},
-	{
-		title: "Share",
-		body: "After the session, you get a recording and links you can use in your own project channels.",
-	},
+	{ title: "Tell us about the project", body: "Send the project, maintainers, and what you want to cover. We check fit before confirming a slot." },
+	{ title: "Shape a focused session", body: "We send prep notes and work with you on a demo, architecture walkthrough, or technical discussion." },
+	{ title: "Join David live", body: "Walk through the project, explain the trade-offs, and answer questions from the audience." },
+	{ title: "Share the recording", body: "Use the recording and session links in your documentation, contributor guides, and community channels." },
 ];
-
 const expectations = [
-	"Open-source projects, maintainer tools, cloud native systems, developer infrastructure, and automation projects are the strongest fit.",
-	"You do not need to be the original creator, but you should be able to speak deeply about the project.",
-	"The session should be technical, practical, and honest about trade-offs.",
-	"Preparation matters. A focused demo beats a broad marketing walkthrough.",
-	"This is not paid placement, endorsement, lead generation, or company partnership access.",
-];
-
-const faqItems = [
-	{
-		question: "What types of projects are suitable for Rawkode Live?",
-		answer:
-			"Open-source projects related to cloud native technology, developer tools, infrastructure, automation, observability, security, and software delivery are usually a strong fit.",
-	},
-	{
-		question: "Do I need to be the project creator to present?",
-		answer:
-			"No. Core contributors and maintainers are welcome as long as they can explain the project, decisions, and roadmap clearly.",
-	},
-	{
-		question: "How technical should the presentation be?",
-		answer:
-			"Technical enough for working developers. The best sessions balance the problem, architecture, demo, and trade-offs.",
-	},
-	{
-		question: "Is there a cost to participate?",
-		answer: "No. Featuring an open-source project on Rawkode Live is free.",
-	},
-	{
-		question: "What is the format of the session?",
-		answer:
-			"Sessions usually run 60-90 minutes and include an introduction, demo or walkthrough, architecture discussion, and audience Q&A.",
-	},
+	"Cloud native systems, developer tools, infrastructure, and automation projects are the strongest fit.",
+	"You do not need to be the original creator. Maintainers and contributors who know the project deeply are welcome.",
+	"Bring a working demo and an honest account of the trade-offs. The session is for working developers, not a sales pitch.",
+	"This is not paid placement, endorsement, or lead generation. Commercial work belongs in our partnership programme.",
 ];
 ---
 
-<Page
-	title="Share Your Project on Rawkode Live"
-	description="Showcase your open-source project to a technical audience on Rawkode Live."
->
-	<EditorialShell
-		eyebrow="Maintainers"
-		title="Share your project"
-		lede="Bring your open-source project onto Rawkode Live for a practical walkthrough, maintainer conversation, and live technical Q&A."
-	>
+<Page title="Share Your Project on Rawkode Live" description="Bring your open-source project to Rawkode Live for a maintainer conversation, technical demo, and audience Q&A.">
+	<EditorialShell eyebrow="For open-source maintainers" title="Show us how it works."
+		lede="Bring your project to Rawkode Live. Spend 60–90 minutes with David exploring the architecture, running a demo, and answering real questions. Free for open-source projects.">
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="mailto:david@rawkode.academy?subject=Share%20my%20open-source%20project&body=Project%20name%3A%0AProject%20URL%3A%0AMaintainers%3A%0AWhat%20you%20want%20to%20cover%3A%0AWhy%20this%20is%20useful%20for%20developers%3A">Email project details</a>
-			<a class="editorial-button editorial-button--secondary" href="#process">How it works</a>
+			<a class="editorial-button" href={application}>Pitch your session</a>
+			<a class="editorial-button editorial-button--secondary" href="/shows/rawkode-live">Watch previous sessions</a>
 		</div>
 
-		<section class="editorial-section">
-			<div class="editorial-stat-grid">
-				{stats.map((stat) => (
-					<div class="editorial-stat">
-						<span class="editorial-stat__value">{stat.value}</span>
-						<span class="editorial-stat__label">{stat.label}</span>
-					</div>
+		<section class="editorial-section editorial-section--split" aria-labelledby="session-process">
+			<div class="editorial-section__header">
+				<h2 id="session-process" class="editorial-section__title">From idea to live demo.</h2>
+				<p class="editorial-section__lede">A useful walkthrough your community can keep coming back to.</p>
+			</div>
+			<ol class="session-steps">
+				{processSteps.map((step) => (
+					<li><h3>{step.title}</h3><p>{step.body}</p></li>
 				))}
+			</ol>
+		</section>
+
+		<section class="editorial-section editorial-section--split" aria-labelledby="session-fit">
+			<div class="editorial-section__header">
+				<h2 id="session-fit" class="editorial-section__title">Is your project a fit?</h2>
+			</div>
+			<div class="session-copy">
+				<ul class="editorial-list">{expectations.map((expectation) => <li>{expectation}</li>)}</ul>
+				<a href="https://rawkode.link/live-prep">Read the session prep notes ↗</a>
 			</div>
 		</section>
 
-		<section class="editorial-section editorial-section--split">
+		<section class="editorial-section editorial-section--split" aria-labelledby="session-contact">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Why join</p>
-				<h2 class="editorial-section__title">A useful technical stage, not a pitch deck</h2>
-				<p class="editorial-section__lede">
-					The goal is to help developers understand what your project does, why it exists, and how to get started.
-				</p>
+				<h2 id="session-contact" class="editorial-section__title">What would you like to show?</h2>
+				<p class="editorial-section__lede">Send a short email. We’ll reply if it is a fit and arrange a time together.</p>
 			</div>
-			<div class="editorial-grid editorial-grid--3">
-				{benefits.map((benefit) => (
-					<article class="editorial-card">
-						<h3 class="editorial-card__title">{benefit.title}</h3>
-						<p class="editorial-card__body">{benefit.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section id="process" class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Process</p>
-				<h2 class="editorial-section__title">How it works</h2>
-			</div>
-			<div class="editorial-grid editorial-grid--4">
-				{processSteps.map((step, index) => (
-					<article class="editorial-card">
-						<p class="editorial-meta">Step {String(index + 1).padStart(2, "0")}</p>
-						<h3 class="editorial-card__title">{step.title}</h3>
-						<p class="editorial-card__body">{step.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Fit</p>
-				<h2 class="editorial-section__title">What makes a strong session</h2>
-			</div>
-			<div class="editorial-card">
-				<ul class="editorial-list">
-					{expectations.map((expectation) => <li>{expectation}</li>)}
-				</ul>
-				<p class="share-prep">
-					Read the live prep notes before the session: <a href="https://rawkode.link/live-prep">rawkode.link/live-prep</a>
-				</p>
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Questions</p>
-				<h2 class="editorial-section__title">Maintainer FAQ</h2>
-			</div>
-			<div class="editorial-faq">
-				{faqItems.map((item, index) => (
-					<details open={index === 0}>
-						<summary>{item.question}</summary>
-						<p>{item.answer}</p>
-					</details>
-				))}
-			</div>
-		</section>
-
-		<section id="contact" class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Email</p>
-				<h2 class="editorial-section__title">Email the project details</h2>
-				<p class="editorial-section__lede">
-					Send the project, maintainers, topic, and why the session would help working developers. We will reply if it is a fit and coordinate timing by email. Commercial adoption review belongs on the company partnerships route.
-				</p>
-			</div>
-			<div class="share-booking">
-				<h3>Include enough context to check fit</h3>
+			<div class="session-copy">
 				<ul class="editorial-list">
 					<li>Project name, URL, and maintainer contacts</li>
-					<li>The technical problem the project solves</li>
-					<li>The demo, architecture, or trade-offs you want to discuss</li>
-					<li>Any timing constraints around releases or community events</li>
+					<li>The problem it solves and the demo you have in mind</li>
+					<li>Any timing constraints around a release or community event</li>
 				</ul>
-				<a class="editorial-button" href="mailto:david@rawkode.academy?subject=Share%20my%20open-source%20project&body=Project%20name%3A%0AProject%20URL%3A%0AMaintainers%3A%0AWhat%20you%20want%20to%20cover%3A%0AWhy%20this%20is%20useful%20for%20developers%3A">Email project details</a>
+				<a href={application}>david@rawkode.academy</a>
 			</div>
 		</section>
 	</EditorialShell>
 </Page>
 
 <style>
-	.share-prep {
-		margin: 1rem 0 0;
-		font-family: var(--fonts-academy-text), system-ui, sans-serif;
-		color: var(--colors-academy-text-soft);
-		line-height: 1.55;
-	}
-
-	.share-prep a {
-		color: var(--colors-academy-status-spruce);
-		text-underline-offset: 0.2em;
-	}
-
-	.share-booking {
-		display: grid;
-		gap: 1rem;
-		border: 1px solid var(--colors-academy-border);
-		border-radius: 6px;
-		background: var(--colors-academy-panel);
-		padding: 1rem;
-	}
-
-	.share-booking h3 {
-		font-family: var(--fonts-academy-text), system-ui, sans-serif;
-		font-size: 1.25rem;
-		font-weight: 700;
-		line-height: 1.15;
-		color: var(--colors-academy-text);
-		margin: 0;
-	}
+	.session-steps { counter-reset: step; display: grid; margin: 0; padding: 0; list-style: none; }
+	.session-steps li { counter-increment: step; display: grid; grid-template-columns: 2rem minmax(0, 1fr); column-gap: 1rem; padding-block: 1.25rem; border-bottom: 1px solid var(--colors-academy-border); }
+	.session-steps li:first-child { padding-top: 0; }
+	.session-steps li:last-child { border: 0; padding-bottom: 0; }
+	.session-steps li::before { content: counter(step, decimal-leading-zero); grid-row: span 2; padding-top: 0.2rem; color: var(--colors-academy-accent); font-family: var(--fonts-academy-mono); font-size: 0.8rem; }
+	.session-steps h3 { font-family: var(--fonts-academy-display); font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
+	.session-steps p { margin-top: 0.5rem; color: var(--colors-academy-text-soft); line-height: 1.65; }
+	.session-copy { display: grid; align-content: start; gap: 1.5rem; }
+	.session-copy a { width: fit-content; min-height: 2.75rem; display: inline-flex; align-items: center; color: var(--colors-academy-accent); text-underline-offset: 0.2em; }
+	.session-copy a:focus-visible { outline: 2px solid var(--colors-academy-accent); outline-offset: 4px; }
 </style>

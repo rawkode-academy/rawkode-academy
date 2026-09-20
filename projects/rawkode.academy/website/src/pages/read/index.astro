@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntries } from "astro:content";
+import { getImage } from "astro:assets";
 
 import Page from "@/wrappers/page.astro";
 import ArticleItemListJsonLd from "@/components/html/article-itemlist-jsonld.astro";
@@ -113,16 +114,6 @@ if (selectedType && !navTypes.some(([key]) => key === selectedType)) {
 	navTypes.push([selectedType, 0]);
 }
 
-const typeItems = [
-	{ label: "All", href: readHref({ type: undefined }) },
-	...navTypes.map(([key]) => ({
-		label: getTypeBadgeConfig(key).label,
-		href: readHref({ type: key }),
-	})),
-];
-const activeTypeIndex = selectedType
-	? Math.max(0, 1 + navTypes.findIndex(([key]) => key === selectedType))
-	: 0;
 
 // Topic rail — top topics by article count within the active type.
 const topicRailCounts = new Map<string, number>();
@@ -140,16 +131,6 @@ if (selectedTopic && !navTopics.some(([id]) => id === selectedTopic)) {
 	navTopics.push([selectedTopic, topicRailCounts.get(selectedTopic) ?? 0]);
 }
 
-const topicItems = [
-	{ label: "All", href: readHref({ topic: undefined }) },
-	...navTopics.map(([id]) => ({
-		label: formatTopicLabel(id),
-		href: readHref({ topic: id }),
-	})),
-];
-const activeTopicIndex = selectedTopic
-	? Math.max(0, 1 + navTopics.findIndex(([id]) => id === selectedTopic))
-	: 0;
 
 // ─── Featured + grid ───────────────────────────────────────────
 // The featured article only fronts page 1; later pages are grid-only.
@@ -172,6 +153,9 @@ const pagedArticles = gridArticles.slice(
 );
 const hasNextPage = page < totalPages;
 const featuredAuthors = featured ? await getEntries(featured.data.authors) : [];
+const featuredImage = featured?.data.cover
+	? await getImage({ src: featured.data.cover.image, width: 1200, format: "webp" })
+	: undefined;
 
 // ─── Helpers ───────────────────────────────────────────────────
 
@@ -252,124 +236,32 @@ const catalog = academyCatalog();
 						<p class={catalog.rowMeta}>{featuredAuthors.map((author) => author.data.name).join(", ")} · {dateFormatter.format(featured.data.publishedAt)} · {calculateReadingTime(featured.body || "").text}</p>
 						<a class={styles.button} href={`/read/${featured.id}`}>Read the article →</a>
 					</div>
+					{featuredImage && <a class={catalog.featuredMedia} href={`/read/${featured.id}`} aria-label={`Read ${featured.data.title}`}>
+						<img class={catalog.featuredImage} src={featuredImage.src} alt={featured.data.cover?.alt ?? ""} width={featuredImage.attributes.width} height={featuredImage.attributes.height} fetchpriority="high" />
+					</a>}
 				</article>
 			</div></section>
 		)}
 
 		<section class={styles.section}><div class={styles.container}>
-			<nav class={`${catalog.filters} read-filter-groups`} aria-label="Article filters">
-				<div class="read-filter-group">
-					<span class="read-filter-group__label">Format</span>
-					{typeItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTypeIndex ? "page" : undefined}>{item.label}</a>)}
-				</div>
-				<div class="read-filter-group">
-					<span class="read-filter-group__label">Topic</span>
-					{topicItems.map((item, index) => <a class={catalog.filterLink} href={item.href} aria-current={index === activeTopicIndex ? "page" : undefined}>{item.label}</a>)}
-				</div>
-			</nav>
+			<form action="/read" method="get" class={catalog.filterForm} aria-label="Filter articles">
+				<label class={catalog.filterField}>Format
+					<select class={styles.input} name="type">
+						<option value="">All formats</option>
+						{navTypes.map(([key]) => <option value={key} selected={key === selectedType}>{getTypeBadgeConfig(key).label}</option>)}
+					</select>
+				</label>
+				<label class={catalog.filterField}>Topic
+					<select class={styles.input} name="topic">
+						<option value="">All topics</option>
+						{navTopics.map(([id]) => <option value={id} selected={id === selectedTopic}>{formatTopicLabel(id)}</option>)}
+					</select>
+				</label>
+				<button type="submit" class={styles.buttonSecondary}>Apply filters</button>
+			</form>
 			{isFiltered && <p class={styles.notice}>{visibleArticles.length} {visibleArticles.length === 1 ? "article" : "articles"}{activeFilterSummary ? ` · ${activeFilterSummary}` : ""} · <a href="/read">Clear filters</a></p>}
 			{visibleArticles.length === 0 ? <div class={styles.empty}>No articles match these filters. <a href="/read">Browse all articles →</a></div> : <div class={styles.grid}>{restWithMeta.map(({ article, author, readingTime }) => <AcademyCatalogCard href={`/read/${article.id}`} title={article.data.title} description={compactCopy(article.data.openGraph?.subtitle || article.data.subtitle || article.data.description, 130)} meta={[getTypeBadgeConfig(article.data.type || "tutorial").label, author ?? "Rawkode Academy", dateFormatter.format(article.data.publishedAt), readingTime]} />)}</div>}
 			{totalPages > 1 && <nav class={catalog.pager} aria-label="Article pages">{page > 1 ? <a class={styles.buttonSecondary} href={readPathFor(page - 1)}>← Previous</a> : <span />}{hasNextPage && <a class={styles.button} href={readPathFor(page + 1)}>Next →</a>}</nav>}
 		</div></section>
 	</div>
 </Page>
-
-<style>
-	.read-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.read-filter-status {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		flex-wrap: wrap;
-		gap: 0.5rem 1.5rem;
-		padding: 0.75rem 2.5rem 0;
-	}
-
-	.read-filter-status__links {
-		display: flex;
-		align-items: baseline;
-		gap: 1.25rem;
-	}
-
-	.read-filter-status__link {
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--editorial-spruce);
-		text-decoration: none;
-	}
-
-	.read-filter-status__link:hover {
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.35em;
-	}
-
-	.read-filter-groups {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.75rem 1.5rem;
-	}
-
-	.read-filter-group {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 0.375rem;
-	}
-
-	.read-filter-group__label {
-		margin-right: 0.125rem;
-		font-family: var(--font-jetbrains-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		color: var(--editorial-ink-soft);
-		text-transform: uppercase;
-	}
-
-	.read-empty {
-		padding: 1.5rem 2.5rem;
-	}
-
-	.read-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0;
-		padding: 1.5rem 2.5rem 4rem;
-	}
-
-	.read-pager {
-		display: flex;
-		justify-content: center;
-		padding: 0 2.5rem 3rem;
-	}
-
-	@media (max-width: 960px) {
-		.read-filter-status {
-			padding-inline: 1.5rem;
-		}
-
-		.read-empty {
-			padding-inline: 1.5rem;
-		}
-
-		.read-grid {
-			grid-template-columns: 1fr;
-			padding: 1rem 1.5rem 3rem;
-		}
-	}
-
-	@media (max-width: 640px) {
-		.read-grid {
-			padding: 0.375rem 1rem 2.5rem;
-		}
-	}
-</style>

@@ -14,7 +14,6 @@ import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
 import NewsJsonLd from "@/components/html/news-jsonld.astro";
 import RelatedNews from "@/components/news/RelatedNews.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
-import MLabel from "@/components/ui/MLabel.vue";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
@@ -73,24 +72,9 @@ const publishDate = new Intl.DateTimeFormat("en-US", {
 
 const readingTime = calculateReadingTime(article.body || "");
 
-// Article category for the breadcrumb and header.
-const kickerFor = (a: typeof article): string => {
-	const techs = a.data.technologies ?? [];
-	if (techs.some((t) => /cve|security/i.test(t))) return "CVE";
-	if (techs.some((t) => /cncf|graduation/i.test(t))) return "CNCF";
-	if (/release|ship|gen|alpha|beta|GA|stable|launch/i.test(a.data.title))
-		return "Release";
-	if (/acquire|acquisition/i.test(a.data.title)) return "Acquisition";
-	return "News";
-};
-const kicker = kickerFor(article);
 const breadcrumbItems = [
 	{ label: "News", href: "/news" },
-	...(kicker === "News" ? [] : [{ label: kicker }]),
-	{ label: article.data.title, current: true },
 ];
-
-const categoryTrail = tags[0]?.label;
 ---
 
 <Page
@@ -134,9 +118,8 @@ const categoryTrail = tags[0]?.label;
 	<div class={doc.root}>
 		<ArticleHeader
 			breadcrumbs={breadcrumbItems}
-			kicker={kicker}
-			categoryTrail={categoryTrail}
-			eyebrow={[kicker, categoryTrail].filter(Boolean).join(" · ")}
+			kicker="News"
+			eyebrow=""
 			title={article.data.title}
 			dek={article.data.description}
 		>
@@ -153,30 +136,11 @@ const categoryTrail = tags[0]?.label;
 				<Content />
 			</article>
 
-			<NewsletterCTA
-				class={doc.section ?? ""}
-				audience="news"
-				badge="Cloud Native news weekly"
-				headline="Stay on top of cloud-native releases"
-				subtitle="Kubernetes, AI infra, and CNCF moves, delivered when they matter."
-			/>
-
-			{tags.length > 0 && (
-				<footer class={doc.rule}>
-					<MLabel>Tagged in</MLabel>
-					<ul class={doc.tagList}>
-						{tags.map((tag) => (
-							<li>
-								<a class={doc.tag} href={tag.href} rel="tag">
-									#{tag.label}
-								</a>
-							</li>
-						))}
-					</ul>
-				</footer>
-			)}
 		</div>
 
-		<RelatedNews currentStory={article} limit={3} />
+		<div class={doc.section}>
+			<RelatedNews currentStory={article} limit={3} />
+			<NewsletterCTA audience="news" badge="Cloud native news" headline="Stay on top of cloud-native releases" subtitle="Kubernetes, AI infrastructure, and CNCF news by email." />
+		</div>
 	</div>
 </Page>

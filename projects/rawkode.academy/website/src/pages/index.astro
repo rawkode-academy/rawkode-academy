@@ -121,40 +121,6 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 				{ value: `${publishedVideos.length}`, label: "Lessons" },
 				{ value: `${totalHours}+`, label: "Hours" },
 				{ value: `${courses.length}`, label: "Courses" },
-				{ value: "2019", label: "Since" },
 			]}
 		/>
 </Page>
-
-<style is:global>
-	html,
-	body {
-		margin: 0;
-		padding: 0;
-		min-width: 320px;
-	}
-
-	body {
-		background: var(--colors-academy-canvas);
-	}
-
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box;
-	}
-
-	button,
-	input {
-		font: inherit;
-	}
-
-	ul {
-		margin: 0;
-		padding-inline-start: 1.25rem;
-	}
-
-	a {
-		color: inherit;
-	}
-</style>

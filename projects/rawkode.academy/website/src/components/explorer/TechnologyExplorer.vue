@@ -1,5 +1,5 @@
 <template>
- <div class="technology-explorer">
+ <div ref="explorerElement" class="technology-explorer">
  <!-- Header: View selector, Presets, Share -->
  <ExplorerHeader
  :view-mode="viewMode"
@@ -14,50 +14,27 @@
 
  <!-- Main content area -->
  <div class="explorer-main" :class="{ 'controls-collapsed': !showControls }">
- <button
- v-if="showControls"
- type="button"
- class="controls-backdrop"
- aria-label="Close advanced filters"
- @click="closeControls"
- />
-
- <!-- Controls sidebar (collapsible on mobile) -->
+ <!-- Closed desktop controls must leave both the layout and tab order. -->
  <aside
+ v-if="!isMobile"
+ v-show="showControls"
  class="explorer-controls"
- :class="{ 'is-open': showControls }"
- :aria-hidden="!showControls"
+ :inert="!showControls"
+ aria-label="Advanced filters"
+ @keydown.esc="closeDesktopControls"
  >
  <div class="controls-content">
- <div
- class="controls-drawer-header"
- @touchstart.passive="onSheetTouchStart"
- @touchmove.passive="onSheetTouchMove"
- @touchend="onSheetTouchEnd"
- >
- <span class="drawer-handle" aria-hidden="true"></span>
- <h2>Advanced filters</h2>
- <button
- type="button"
- class="controls-close"
- aria-label="Close advanced filters"
- @click="closeControls"
- >
- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
- </svg>
- </button>
- </div>
-
  <!-- Axis selectors -->
  <div class="control-section">
  <h3 class="control-label">Axes</h3>
  <AxisSelector
+ :id="`${controlsId}-x`"
  label="X-Axis (Columns)"
  :value="xAxis"
  @update:value="setXAxis"
  />
  <AxisSelector
+ :id="`${controlsId}-y`"
  label="Y-Axis (Rows)"
  :value="yAxis"
  @update:value="setYAxis"
@@ -74,6 +51,56 @@
  />
  </div>
  </aside>
+
+ <Dialog.Root
+ :open="isMobile && showControls"
+ :modal="true"
+ :trap-focus="true"
+ :prevent-scroll="true"
+ :close-on-escape="true"
+ :close-on-interact-outside="true"
+ :lazy-mount="true"
+ :unmount-on-exit="true"
+ :final-focus-el="getReturnFocus"
+ @open-change="onDialogOpenChange"
+ >
+ <Teleport to="body">
+ <Dialog.Backdrop class="controls-backdrop" />
+ <Dialog.Positioner class="controls-positioner">
+ <Dialog.Content class="controls-sheet">
+ <div class="controls-content">
+ <div
+ class="controls-drawer-header"
+ @touchstart.passive="onSheetTouchStart"
+ @touchmove.passive="onSheetTouchMove"
+ @touchend="onSheetTouchEnd"
+ >
+ <span class="drawer-handle" aria-hidden="true"></span>
+ <Dialog.Title>Advanced filters</Dialog.Title>
+ <Dialog.CloseTrigger class="controls-close" aria-label="Close advanced filters">
+ <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+ <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12" />
+ </svg>
+ </Dialog.CloseTrigger>
+ </div>
+ <Dialog.Description class="controls-description">Choose the matrix axes and filter technologies.</Dialog.Description>
+ <div class="control-section">
+ <h3 class="control-label">Axes</h3>
+ <AxisSelector :id="`${controlsId}-x`" label="X-Axis (Columns)" :value="xAxis" @update:value="setXAxis" />
+ <AxisSelector :id="`${controlsId}-y`" label="Y-Axis (Rows)" :value="yAxis" @update:value="setYAxis" />
+ </div>
+ <FilterPanel
+ :filters="filters"
+ :available-values="availableFilterValues"
+ @update:filter="setFilter"
+ @update:search="setSearch"
+ @clear="clearFilters"
+ />
+ </div>
+ </Dialog.Content>
+ </Dialog.Positioner>
+ </Teleport>
+ </Dialog.Root>
 
  <!-- Visualization canvas -->
  <div
@@ -142,10 +169,12 @@
  <!-- Floating filter button (mobile): keeps filters reachable after
  scrolling a long results list. -->
  <button
- v-if="!showControls"
+ v-show="!showControls"
  type="button"
  class="filters-fab"
- @click="toggleControls"
+ aria-haspopup="dialog"
+ :aria-expanded="showControls"
+ @click="toggleControls($event)"
  >
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18l-7 8v6l-4 2v-8L3 4z" />
@@ -174,7 +203,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount, onMounted, provide, watch } from "vue";
+import { Dialog } from "@ark-ui/vue/dialog";
+import { ref, computed, nextTick, onBeforeUnmount, onMounted, provide, useId } from "vue";
 import type { NormalizedTechnology } from "@/lib/explorer/data-layer";
 import { useExplorerState } from "@/composables/useExplorerState";
 import { useUrlState } from "@/composables/useUrlState";
@@ -199,11 +229,8 @@ const {
 	viewMode,
 	xAxis,
 	yAxis,
-	sizeBy,
-	colorBy,
 	filters,
 	hoveredTechId,
-	selectedTechId,
 	showControls,
 	filteredTechnologies,
 	gridData,
@@ -211,35 +238,75 @@ const {
 	yAxisValues,
 	activePreset,
 	filterCount,
-	hoveredTech,
 	selectedTech,
 	setViewMode,
 	setXAxis,
 	setYAxis,
-	setSizeBy,
-	setColorBy,
 	setFilter,
 	setSearch,
 	clearFilters,
 	applyPreset,
 	hoverTech,
 	selectTech,
-	toggleControls,
 } = explorer;
+
+const explorerElement = ref<HTMLElement | null>(null);
+const controlsId = useId();
+const isMobile = ref(false);
+let viewport: MediaQueryList | undefined;
+let desktopControlsOpen = showControls.value;
+let returnFocus: HTMLElement | null = null;
+
+const getHeaderToggle = () =>
+	explorerElement.value?.querySelector<HTMLButtonElement>(".controls-toggle") ?? null;
+
+const getReturnFocus = () =>
+	returnFocus?.isConnected && (isMobile.value || !returnFocus.classList.contains("filters-fab"))
+		? returnFocus
+		: getHeaderToggle();
+
+function toggleControls(event?: MouseEvent) {
+	if (!showControls.value) {
+		returnFocus = event?.currentTarget instanceof HTMLElement
+			? event.currentTarget
+			: getHeaderToggle();
+	}
+	explorer.toggleControls();
+}
 
 const closeControls = () => {
 	showControls.value = false;
 };
 
-const isMobile = () =>
-	typeof window !== "undefined" &&
-	window.matchMedia("(max-width: 768px)").matches;
+function closeDesktopControls(event: KeyboardEvent) {
+	if (event.defaultPrevented) return;
+	event.preventDefault();
+	event.stopPropagation();
+	closeControls();
+	getHeaderToggle()?.focus();
+}
 
-// On mobile the controls render as a bottom sheet; lock the page behind it.
-watch(showControls, (open) => {
-	if (typeof document === "undefined") return;
-	document.body.style.overflow = open && isMobile() ? "hidden" : "";
-});
+function onDialogOpenChange(details: { open: boolean }) {
+	if (isMobile.value) showControls.value = details.open;
+}
+
+async function updateViewport() {
+	const mobile = viewport?.matches ?? false;
+	if (mobile === isMobile.value) return;
+	const restoreFocus = (isMobile.value && showControls.value) ||
+		Boolean(explorerElement.value?.querySelector(".explorer-controls")?.contains(document.activeElement));
+	if (mobile) desktopControlsOpen = showControls.value;
+	// Closing the dialog releases Ark's modal effects, including its scroll lock.
+	// Keep filter state untouched and never turn a desktop sidebar into an open modal.
+	showControls.value = mobile ? false : desktopControlsOpen;
+	isMobile.value = mobile;
+	sheetTouchY = null;
+	sheetTouchDelta = 0;
+	if (restoreFocus) {
+		await nextTick();
+		getHeaderToggle()?.focus();
+	}
+}
 
 // Swipe-down on the sheet header dismisses it.
 let sheetTouchY: number | null = null;
@@ -256,7 +323,7 @@ function onSheetTouchMove(event: TouchEvent) {
 }
 
 function onSheetTouchEnd() {
-	if (sheetTouchDelta > 60 && isMobile()) {
+	if (sheetTouchDelta > 60 && isMobile.value) {
 		closeControls();
 	}
 	sheetTouchY = null;
@@ -316,22 +383,14 @@ provide("explorer", explorer);
 // Initialize from URL on mount
 onMounted(() => {
 	urlState.initFromUrl();
-	if (window.matchMedia("(max-width: 768px)").matches) {
-		showControls.value = false;
-	}
-	window.addEventListener("keydown", handleKeydown);
+	viewport = window.matchMedia("(max-width: 768px)");
+	updateViewport();
+	viewport.addEventListener("change", updateViewport);
 });
 
 onBeforeUnmount(() => {
-	window.removeEventListener("keydown", handleKeydown);
-	document.body.style.overflow = "";
+	viewport?.removeEventListener("change", updateViewport);
 });
-
-function handleKeydown(event: KeyboardEvent) {
-	if (event.key === "Escape" && showControls.value) {
-		closeControls();
-	}
-}
 </script>
 
 <style scoped>
@@ -351,13 +410,6 @@ function handleKeydown(event: KeyboardEvent) {
 .explorer-controls {
  width: 280px;
  flex-shrink: 0;
- transition: width 0.3s ease, opacity 0.3s ease;
-}
-
-.explorer-controls:not(.is-open) {
- width: 0;
- opacity: 0;
- overflow: hidden;
 }
 
 .controls-content {
@@ -375,6 +427,12 @@ function handleKeydown(event: KeyboardEvent) {
 
 .controls-drawer-header {
  display: none;
+}
+
+.controls-description {
+ margin: 0;
+ color: var(--colors-academy-text-soft);
+ font-size: 0.875rem;
 }
 
 .control-section {
@@ -488,25 +546,29 @@ function handleKeydown(event: KeyboardEvent) {
  cursor: pointer;
  }
 
- .explorer-controls {
- width: 100%;
+ .controls-positioner {
  position: fixed;
- bottom: 0;
- left: 0;
- right: 0;
+ inset: 0;
  z-index: 50;
+ display: flex;
+ align-items: flex-end;
+ pointer-events: none;
+ }
+
+ .controls-sheet {
+ width: 100%;
+ pointer-events: auto;
+ position: relative;
+ bottom: 0;
  max-height: min(82vh, 680px);
  overflow-y: auto;
+ overscroll-behavior: contain;
  border-radius: 8px 8px 0 0;
  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
  }
 
- .explorer-controls:not(.is-open) {
- transform: translateY(100%);
- width: 100%;
- }
-
  .controls-content {
+ position: static;
  border-radius: 8px 8px 0 0;
  padding-top: 0;
  }

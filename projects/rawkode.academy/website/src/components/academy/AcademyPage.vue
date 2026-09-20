@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import {
-	academyPage,
-	tabs as academyTabs,
-} from "@rawkodeacademy/design-system";
-import { Dialog, Tabs } from "@rawkodeacademy/design-system/vue";
-
-type AcademyPage = "home" | "learn" | "watch";
+import { academyPage } from "@rawkodeacademy/design-system";
 
 interface AcademyCard {
 	href: string;
@@ -17,375 +10,81 @@ interface AcademyCard {
 	kind?: string;
 	mediaSrc?: string;
 }
-
-interface AcademyPath extends AcademyCard {
-	meta: [string, string];
-}
-
-interface Props {
-	page?: AcademyPage;
+const props = withDefaults(defineProps<{
+	page?: "home" | "learn";
 	featured: AcademyCard;
 	latest: AcademyCard[];
+	// Compatibility: Home and Learn still supply this prop.
 	videos: AcademyCard[];
-	learningPaths: AcademyPath[];
+	learningPaths: AcademyCard[];
 	stats: Array<{ value: string; label: string }>;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-	page: "home",
-});
-
+}>(), { page: "home" });
 const styles = academyPage();
-const tabStyles = academyTabs({ tone: "academy" });
-const isMounted = ref(false);
-
-onMounted(() => {
-	isMounted.value = true;
-});
-
-const tabs = [
-	{ value: "kubernetes", label: "Kubernetes" },
-	{ value: "kueue", label: "Kueue" },
-	{ value: "rust", label: "Rust" },
-	{ value: "systems", label: "Systems" },
+const formats = [
+	{ href: "/watch", title: "Watch", copy: "Real builds. Every decision explained." },
+	{ href: "/read", title: "Read", copy: "Technical ideas, taken apart carefully." },
+	{ href: "/courses", title: "Learn", copy: "Structured courses. Practical outcomes." },
 ];
-
-const description = (item: AcademyCard) =>
-	item.description || "A practical session from the Rawkode Academy archive.";
 </script>
 
 <template>
 	<div :class="styles.root">
 		<template v-if="props.page === 'home'">
-			<section :class="styles.hero">
-				<div :class="styles.heroInner">
+			<section :class="styles.hero" aria-labelledby="home-title">
+				<div :class="styles.container">
+					<p :class="styles.kicker">Independent cloud native education</p>
 					<div :class="styles.feature">
 						<div :class="styles.featureCopy">
-							<p :class="styles.kicker">Hands-on cloud native</p>
-							<h1 :class="styles.title">{{ props.featured.title }}</h1>
-							<p :class="styles.lede">{{ description(props.featured) }}</p>
-							<p :class="styles.meta">
-								{{ props.featured.meta.join(" · ") }}
-							</p>
+							<h1 id="home-title" :class="styles.title">Understand<br /><span :class="styles.titleAccent">the system.</span></h1>
+							<p :class="styles.lede">Build it. Break it. Find out why.<br />Learn cloud native with the engineers doing the work.</p>
 							<div :class="styles.actions">
-								<a
-									:href="props.featured.href"
-									:class="styles.buttonPrimary"
-								>
-									Start watching <span aria-hidden="true">↗</span>
-								</a>
-								<Dialog
-									v-if="isMounted"
-									id="academy-approach"
-									tone="academy"
-									size="sm"
-									title="How Rawkode teaches"
-									description="Real systems, explicit trade-offs, and enough context to make the call yourself."
-								>
-									<template #trigger>See the approach</template>
-									<div>
-										<p>
-											Each lesson starts with the problem in front of
-											an engineer, then follows the decisions that make
-											the system hold up in production.
-										</p>
-										<ul>
-											<li>See the constraints.</li>
-											<li>Build the smallest useful system.</li>
-											<li>Leave with judgment, not trivia.</li>
-										</ul>
-									</div>
-									<template #footer>
-										<a href="/courses" :class="styles.buttonGhost">
-											Explore courses <span aria-hidden="true">→</span>
-										</a>
-									</template>
-								</Dialog>
-								<a v-else href="/about" :class="styles.buttonGhost">
-									See the approach
-								</a>
-							</div>
-							<div :class="styles.meta" aria-label="Academy archive stats">
-								<span v-for="stat in props.stats" :key="stat.label">
-									<strong>{{ stat.value }}</strong> {{ stat.label }}
-								</span>
+								<a href="/watch" :class="styles.buttonPrimary">Explore lessons <span aria-hidden="true">→</span></a>
+								<a href="/about" :class="styles.textLink">Our approach <span aria-hidden="true">↗</span></a>
 							</div>
 						</div>
-
-						<a :href="props.featured.href" :class="styles.featureArt">
-							<img
-								v-if="props.featured.mediaSrc"
-								:src="props.featured.mediaSrc"
-								:alt="props.featured.title"
-								:class="styles.featureImage"
-								loading="eager"
-							/>
-							<div v-else :class="styles.featureCopy">
-								<span :class="styles.kicker">Rawkode Academy</span>
-								<strong :class="styles.title">Build in public.</strong>
+						<a :href="props.featured.href" :class="styles.featureCard">
+							<div :class="styles.featureArt">
+								<img v-if="props.featured.mediaSrc" :src="props.featured.mediaSrc" alt="" :class="styles.featureImage" width="1280" height="720" fetchpriority="high" />
+								<span :class="styles.play" aria-hidden="true">▶</span>
+							</div>
+							<div :class="styles.featureCaption">
+								<p :class="styles.cardMeta"><span>Latest session</span><span>{{ props.featured.meta[1] }}</span></p>
+								<h2 :class="styles.featureTitle">{{ props.featured.title }} <span aria-hidden="true">↗</span></h2>
 							</div>
 						</a>
 					</div>
-
-					<Tabs
-						v-if="isMounted"
-						id="academy-formats"
-						:items="tabs"
-						aria-label="Academy formats"
-					>
-						<template #kubernetes>
-							<strong>Start with the system you run.</strong>
-							<span>Foundations, operations, and the details that make clusters predictable.</span>
-						</template>
-						<template #kueue>
-							<strong>Follow the work all the way through.</strong>
-							<span>From a real Kubernetes problem to a working queue, one decision at a time.</span>
-						</template>
-						<template #rust>
-							<strong>Learn the tool by making something.</strong>
-							<span>Short feedback loops for engineers who prefer a terminal to a slide deck.</span>
-						</template>
-						<template #systems>
-							<strong>Keep the trade-offs visible.</strong>
-							<span>Architecture is a sequence of choices, not a diagram you admire once.</span>
-						</template>
-					</Tabs>
-					<div v-else :class="tabStyles.root">
-						<div
-							:class="tabStyles.list"
-							role="tablist"
-							aria-label="Academy formats"
-						>
-							<span
-								v-for="(item, index) in tabs"
-								:key="item.value"
-								:class="tabStyles.trigger"
-								role="tab"
-								:aria-selected="index === 0"
-								:data-selected="index === 0 ? '' : undefined"
-							>
-								{{ item.label }}
-							</span>
-						</div>
-						<div :class="tabStyles.content" role="tabpanel">
-							<strong>Start with the system you run.</strong>
-							<span>Foundations, operations, and the details that make clusters predictable.</span>
-						</div>
+					<div :class="styles.archiveNote" aria-label="Academy archive">
+						<span v-for="stat in props.stats" :key="stat.label"><strong>{{ stat.value }}</strong> {{ stat.label.toLowerCase() }}</span>
+						<span>Open to everyone.</span>
 					</div>
 				</div>
 			</section>
-
-			<section
-				v-for="rail in [
-					{ title: 'Latest', href: '/search', items: props.latest },
-					{ title: 'Learn by building', href: '/learning-paths', items: props.learningPaths },
-				]"
-				:key="rail.title"
-				:class="styles.section"
-			>
-				<div :class="styles.sectionInner">
-					<div :class="styles.railHeader">
-						<h2 :class="styles.railTitle">{{ rail.title }}</h2>
-						<a :href="rail.href" :class="styles.railLink">View all →</a>
-					</div>
-					<div :class="styles.railTrack">
-						<a
-							v-for="item in rail.items"
-							:key="item.href"
-							:href="item.href"
-							:class="styles.card"
-						>
-							<div :class="styles.cardArt">
-								<img
-									v-if="item.mediaSrc"
-									:src="item.mediaSrc"
-									:alt="item.title"
-									:class="styles.cardImage"
-									loading="lazy"
-								/>
-								<div v-else :class="styles.featureCopy">
-									<span :class="styles.kicker">{{ item.meta[0] }}</span>
-									<strong :class="styles.title">{{ item.title.slice(0, 1) }}</strong>
-								</div>
-							</div>
-							<div :class="styles.cardMeta">
-								<span>{{ item.meta[0] }}</span>
-								<span>{{ item.meta[1] }}</span>
-							</div>
-							<h3 :class="styles.cardTitle">{{ item.title }}</h3>
-						</a>
-					</div>
-				</div>
-			</section>
-
-			<section id="join" :class="styles.join">
-				<div :class="styles.joinCopy">
-					<h2 :class="styles.joinTitle">Make better calls.</h2>
-					<p :class="styles.joinBody">
-						One useful email when there is a new course, session, or systems lesson worth your time.
-					</p>
-				</div>
-				<form
-					:class="styles.joinForm"
-					action="https://email.rawkode.academy/subscribe"
-					method="post"
-				>
-					<label for="academy-email" :class="styles.joinLabel">Your email</label>
-					<div :class="styles.joinRow">
-						<input
-							id="academy-email"
-							name="email"
-							type="email"
-							required
-							autocomplete="email"
-							placeholder="you@example.com"
-							:class="styles.input"
-						/>
-						<button type="submit" :class="styles.buttonPrimary">Sign me up</button>
-					</div>
-					<p :class="styles.finePrint">No spam. Unsubscribe whenever you want.</p>
-				</form>
-			</section>
-		</template>
-
-		<template v-else-if="props.page === 'learn'">
-			<section :class="styles.pageHero">
-				<div :class="styles.pageShell">
-					<p :class="styles.pageKicker">Learn by building</p>
-					<h1 :class="styles.pageTitle">A clear route through cloud native work.</h1>
-					<p :class="styles.pageLede">
-						Choose a path, follow the constraints, and finish with a system you can explain to the next engineer.
-					</p>
-				</div>
-			</section>
-
-			<section :class="styles.pageSection">
-				<div :class="styles.pageSectionHead">
-					<h2 :class="styles.railTitle">Learning paths</h2>
-					<span :class="styles.meta">{{ props.learningPaths.length }} paths in the archive</span>
-				</div>
-				<div :class="styles.pathList">
-					<a
-						v-for="(path, index) in props.learningPaths"
-						:key="path.href"
-						:href="path.href"
-						:class="styles.pathCard"
-					>
-						<span :class="styles.pathIndex">{{ String(index + 1).padStart(2, '0') }}</span>
-						<div :class="styles.pathBody">
-							<h2 :class="styles.pathTitle">{{ path.title }}</h2>
-							<p :class="styles.pathDescription">{{ description(path) }}</p>
-						</div>
-						<span :class="styles.pathFact">
-							{{ path.meta[0] }}<br />{{ path.meta[1] }}
-						</span>
-						<span :class="styles.pathArrow" aria-hidden="true">→</span>
+			<nav :class="styles.formatNav" aria-label="Ways to learn">
+				<a v-for="format in formats" :key="format.href" :href="format.href" :class="styles.formatLink"><span :class="styles.formatHeading">{{ format.title }} <span aria-hidden="true">↗</span></span><span :class="styles.cardDescription">{{ format.copy }}</span></a>
+			</nav>
+			<section :class="styles.section" aria-labelledby="latest-title">
+				<div :class="styles.sectionHead"><div><p :class="styles.kicker">Across the Academy</p><h2 id="latest-title" :class="styles.sectionTitle">Fresh perspectives.</h2></div><a href="/search" :class="styles.textLink">Explore everything <span aria-hidden="true">→</span></a></div>
+				<div :class="styles.feedGrid">
+					<a v-for="item in props.latest.slice(0, 6)" :key="item.href" :href="item.href" :class="styles.card">
+						<div v-if="item.mediaSrc" :class="styles.cardArt"><img :src="item.mediaSrc" alt="" :class="styles.cardImage" width="640" height="360" loading="lazy" /></div>
+						<div :class="styles.cardBody"><p :class="styles.cardMeta"><span>{{ item.kind || item.meta[0] }}</span><time v-if="item.publishedAt" :datetime="item.publishedAt">{{ item.meta[1] }}</time></p><h3 :class="styles.cardTitle">{{ item.title }}</h3><p :class="styles.cardDescription">{{ item.description }}</p></div>
 					</a>
 				</div>
 			</section>
-
-			<section :class="styles.pageSection">
-				<div :class="styles.callout">
-					<div>
-						<h2 :class="styles.calloutTitle">Start with the work in front of you.</h2>
-						<p :class="styles.calloutBody">
-							The best route is the one that makes your next decision clearer. Every path is made from working lessons, supporting articles, and honest trade-offs.
-						</p>
-					</div>
-					<div :class="styles.tagRow" aria-label="Learning themes">
-						<span v-for="tag in ['Kubernetes', 'Platform engineering', 'Rust', 'Delivery']" :key="tag" :class="styles.tag">{{ tag }}</span>
-					</div>
-				</div>
-			</section>
 		</template>
+		<section v-else :class="styles.pageHero">
+			<div :class="styles.container"><p :class="styles.kicker">Build your understanding</p><div :class="styles.pageHeroGrid"><h1 :class="styles.pageTitle">Learning paths.</h1><p :class="styles.lede">A sequence of lessons that connects the dots. Pick a path and build something you understand.</p></div></div>
+		</section>
+		<section v-if="props.learningPaths.length" :class="styles.section" aria-labelledby="paths-title">
+			<div :class="styles.sectionHead"><div><p v-if="props.page === 'home'" :class="styles.kicker">Go a little deeper</p><h2 id="paths-title" :class="styles.sectionTitle">{{ props.page === 'home' ? 'A path worth following.' : 'Choose your next project' }}</h2></div><a v-if="props.page === 'home'" href="/learning-paths" :class="styles.textLink">All learning paths <span aria-hidden="true">→</span></a><span v-else :class="styles.resultCount">{{ props.learningPaths.length }} paths · self-paced</span></div>
+			<div :class="styles.pathList">
+				<a v-for="(path, index) in (props.page === 'home' ? props.learningPaths.slice(0, 3) : props.learningPaths)" :key="path.href" :href="path.href" :class="styles.pathCard"><span :class="styles.pathIndex" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span><div :class="styles.pathBody"><h3 :class="styles.pathTitle">{{ path.title }}</h3><p :class="styles.cardDescription">{{ path.description }}</p><p :class="styles.pathMeta">{{ path.meta.join(' · ') }}</p></div><span :class="styles.pathArrow" aria-hidden="true">↗</span></a>
+			</div>
+		</section>
 
-		<template v-else>
-			<section :class="styles.pageHero">
-				<div :class="styles.pageShell">
-					<p :class="styles.pageKicker">Watch working systems</p>
-					<h1 :class="styles.pageTitle">The archive is the classroom.</h1>
-					<p :class="styles.pageLede">
-						Recorded sessions and live builds for the moments when a diagram is not enough.
-					</p>
-				</div>
-			</section>
-
-			<section :class="styles.pageSection">
-				<div :class="styles.watchLayout">
-					<div>
-						<a :href="props.featured.href" :class="styles.videoFrame" :aria-label="`Play ${props.featured.title}`">
-							<img
-								v-if="props.featured.mediaSrc"
-								:src="props.featured.mediaSrc"
-								:alt="props.featured.title"
-								:class="styles.videoImage"
-							/>
-							<div :class="styles.videoOverlay">
-								<span :class="styles.play" aria-hidden="true">▶</span>
-							</div>
-						</a>
-						<div :class="styles.watchCopy">
-							<p :class="styles.kicker">Featured session</p>
-							<h2 :class="styles.watchTitle">{{ props.featured.title }}</h2>
-							<div :class="styles.watchBody">
-								<p>{{ description(props.featured) }}</p>
-								<ul>
-									<li>Watch the build, not just the finished diagram.</li>
-									<li>Pause on the decision that changes the system.</li>
-									<li>Take the next step in a learning path.</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-					<aside :class="styles.watchAside">
-						<p :class="styles.railTitle">Session details</p>
-						<div :class="styles.watchFact">
-							Format<strong>{{ props.featured.meta[0] || 'Recorded session' }}</strong>
-						</div>
-						<div :class="styles.watchFact">
-							Archive<strong>{{ props.videos.length }} recent sessions</strong>
-						</div>
-						<div :class="styles.resourceLinks">
-							<a href="#watch-archive-title">Browse all sessions <span aria-hidden="true">→</span></a>
-							<a href="/learning-paths">Find a learning path <span aria-hidden="true">→</span></a>
-						</div>
-					</aside>
-				</div>
-			</section>
-
-			<section :class="styles.section" aria-labelledby="watch-archive-title">
-				<div :class="styles.sectionInner">
-					<div :class="styles.railHeader">
-						<h2 id="watch-archive-title" :class="styles.railTitle">Video archive</h2>
-						<span :class="styles.meta">{{ props.videos.length }} sessions</span>
-					</div>
-					<div :class="styles.railTrack">
-						<a
-							v-for="item in props.videos"
-							:key="item.href"
-							:href="item.href"
-							:class="styles.card"
-						>
-							<div :class="styles.cardArt">
-								<img
-									v-if="item.mediaSrc"
-									:src="item.mediaSrc"
-									:alt="item.title"
-									:class="styles.cardImage"
-									loading="lazy"
-								/>
-							</div>
-							<div :class="styles.cardMeta">
-								<span>{{ item.meta[0] }}</span>
-								<span>{{ item.meta[1] }}</span>
-							</div>
-							<h3 :class="styles.cardTitle">{{ item.title }}</h3>
-						</a>
-					</div>
-				</div>
-			</section>
-		</template>
-
+		<section v-if="props.page === 'home'" id="join" :class="styles.newsletter" aria-labelledby="newsletter-title">
+			<div><p :class="styles.kicker">Keep learning</p><h2 id="newsletter-title" :class="styles.sectionTitle">Good things.<br />In your inbox.</h2><p :class="styles.lede">New lessons, courses, and ideas from the Academy.</p></div>
+			<form :class="styles.newsletterForm" action="https://email.rawkode.academy/subscribe" method="post"><label for="academy-email">Your email address</label><div :class="styles.newsletterRow"><input id="academy-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" :class="styles.input" /><button type="submit" :class="styles.buttonPrimary">Subscribe <span aria-hidden="true">→</span></button></div><p :class="styles.finePrint">Unsubscribe at any time. <a href="/privacy">Privacy policy</a></p></form>
+		</section>
 	</div>
 </template>

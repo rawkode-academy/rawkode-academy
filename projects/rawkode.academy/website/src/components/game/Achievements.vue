@@ -79,7 +79,7 @@ function formatDate(dateStr: string): string {
 	justify-content: center;
 	position: relative;
 	overflow: hidden;
-	padding: 2rem;
+	padding: clamp(1rem, 4vw, 2rem);
 }
 
 .grid-bg {
@@ -96,10 +96,11 @@ function formatDate(dateStr: string): string {
 	z-index: 1;
 	width: 100%;
 	max-width: 800px;
+	min-width: 0;
 }
 
 .title {
-	font-size: 2.5rem;
+	font-size: clamp(1.5rem, 6vw, 2.5rem);
 	font-weight: 700;
 	color: var(--colors-academy-accent);
 	text-shadow: 0 0 20px color-mix(in srgb, var(--colors-academy-accent) 50.0%, transparent);
@@ -140,13 +141,14 @@ function formatDate(dateStr: string): string {
 
 .achievements-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
 	gap: 1rem;
 	margin-bottom: 2rem;
 }
 
 .achievement-card {
 	display: flex;
+	min-width: 0;
 	gap: 1rem;
 	padding: 1rem;
 	background: var(--colors-academy-panel);
@@ -194,6 +196,7 @@ function formatDate(dateStr: string): string {
 .achievement-info {
 	flex: 1;
 	min-width: 0;
+	overflow-wrap: anywhere;
 }
 
 .achievement-name {

@@ -22,8 +22,6 @@ authors:
   - "rawkode"
 ---
 
-# Build Your First Kubernetes Developer Platform
-
 Move from UI-driven Kubernetes operations to opinionated platform APIs, golden-path deployments, and automated incident response. Each stop introduces a production-ready building block you can stitch together into a developer platform.
 
 ## Learning Objectives

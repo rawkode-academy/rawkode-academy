@@ -1,8 +1,10 @@
 <template>
  <div class="axis-selector">
- <label class="axis-label">{{ label }}</label>
+ <label :for="selectId" class="axis-label">{{ label }}</label>
  <div class="select-wrapper">
  <select
+ :id="selectId"
+ :aria-describedby="`${selectId}-description`"
  :value="value"
  class="axis-select"
  @change="handleChange"
@@ -15,24 +17,27 @@
  {{ option.label }}
  </option>
  </select>
- <svg class="select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+ <svg class="select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
  </svg>
  </div>
- <p class="axis-description">{{ currentDescription }}</p>
+ <p :id="`${selectId}-description`" class="axis-description">{{ currentDescription }}</p>
  </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import { getAxisOptions, type DimensionKey } from "@/lib/explorer/dimensions";
 
 interface Props {
+	id?: string;
 	label: string;
 	value: DimensionKey;
 }
 
 const props = defineProps<Props>();
+const generatedId = useId();
+const selectId = computed(() => props.id ?? generatedId);
 
 const emit = defineEmits<{
 	"update:value": [value: DimensionKey];

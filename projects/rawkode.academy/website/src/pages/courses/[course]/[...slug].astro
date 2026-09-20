@@ -197,11 +197,11 @@ function formatDuration(minutes?: number) {
 		<div class={[doc.container, doc.stack].join(" ")}>
 			<Breadcrumb elements={breadcrumbElements} />
 
-			<header class={doc.rule}>
-				<div class={doc.split}>
+			<header>
+				<div>
 					<div class={doc.stack}>
 						<div class={doc.kicker}>
-							<span class={doc.link}>Course Lesson</span>
+							<span>Lesson {currentIndex + 1} of {allCourseModules.length}</span>
 							{formatDuration(module.data.duration) && (
 								<>
 									<span class={doc.dot}></span>
@@ -226,47 +226,12 @@ function formatDuration(minutes?: number) {
 						</div>
 					</div>
 
-					<div class={[doc.rule, doc.stack].join(" ")}>
-						<div class={doc.stackSmall}>
-							<div class={doc.kicker}>Course Context</div>
-							<h2 class={doc.sectionTitle}>{course.data.title}</h2>
-							<p class={doc.copy}>
-								Module {currentIndex + 1} of {allCourseModules.length}. Move through the course in order or jump back to the full curriculum.
-							</p>
-						</div>
-
-						<div class={doc.actions}>
-							<a
-								href={`/courses/${course.id}`}
-								class={doc.buttonSecondary}
-							>
-								View course
-							</a>
-							{nextModule && (
-								<a
-									href={moduleHref(nextModule)}
-									class={doc.button}
-								>
-									Next lesson
-								</a>
-							)}
-						</div>
-					</div>
 				</div>
 			</header>
 
 			<div class:list={[doc.moduleFlow, dedupedResources.length > 0 && doc.moduleFlowRail]}>
 				{module.data.video && (
 					<section class={doc.moduleMain}>
-						<div class={doc.rowBetween}>
-							<div class={doc.stackSmall}>
-								<div class={doc.kicker}>Watch the Lesson</div>
-								<h2 class={doc.sectionTitle}>Follow the build in real time</h2>
-							</div>
-							<p class={doc.copy}>
-								Pause, replay, and keep the notes and resources beside you as you work through the module.
-							</p>
-						</div>
 						<div class={doc.media}>
 							<VideoPlayer
 								video={module.data.video.id}
@@ -278,29 +243,20 @@ function formatDuration(minutes?: number) {
 					</section>
 				)}
 
+				<article class={doc.moduleMain}>
+					<div class={styles.prose}>
+						<Content />
+					</div>
+				</article>
+
 				{dedupedResources.length > 0 && (
 					<aside class={doc.moduleRail}>
 						<ResourceList resources={dedupedResources} courseId={course.id} client:load />
 					</aside>
 				)}
 
-				<article class={doc.moduleMain}>
-					<div class={doc.rowBetween}>
-						<div class={doc.stackSmall}>
-							<div class={doc.kicker}>Lesson Notes</div>
-							<h2 class={doc.sectionTitle}>What you’ll implement</h2>
-						</div>
-						<p class={doc.copy}>
-							The notes mirror the lesson flow so you can scan, copy, and revisit the important decisions quickly.
-						</p>
-					</div>
-					<div class={styles.prose}>
-						<Content />
-					</div>
-				</article>
-
 				{(previousModule || nextModule) && (
-					<nav class={[doc.moduleMain, doc.rule].join(" ")}>
+					<nav aria-label="Course lessons" class={[doc.moduleMain, doc.rule].join(" ")}>
 						<div class={doc.gridTwo}>
 							{previousModule && (
 								<a

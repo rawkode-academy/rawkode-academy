@@ -47,18 +47,18 @@ describe("Core Web Vitals Guardrails", () => {
 		);
 	});
 
-	it("preloads only the critical editorial fonts", () => {
+	it("preloads only the critical Academy fonts", () => {
 		const source = readProjectFile("src/components/html/head.astro");
 		const preloadedFonts = source.match(/<Font[^>]*preload[^>]*>/g) ?? [];
 
 		expect(preloadedFonts).toHaveLength(2);
 		expect(source).toContain(
-			'<Font cssVariable="--font-instrument-serif" preload />',
+			'<Font cssVariable="--font-red-hat-display" preload />',
 		);
 		expect(source).toContain(
-			'<Font cssVariable="--font-inter-tight" preload />',
+			'<Font cssVariable="--font-red-hat-text" preload />',
 		);
-		expect(source).not.toContain('--font-jetbrains-mono" preload');
+		expect(source).not.toContain('--font-red-hat-mono" preload');
 	});
 
 	it("avoids eager preconnects to non-critical analytics domains", () => {
@@ -85,11 +85,25 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).toContain('href="/src/styles/global.css"');
 	});
 
-	it("keeps transcript payloads out of the idle watch-page island", () => {
+	it("renders one transcript on the server without an idle island cue payload", () => {
 		const source = readProjectFile("src/pages/watch/[...slug].astro");
+		const transcript = readProjectFile(
+			"src/components/video/VideoTranscript.astro",
+		);
 
 		expect(source).toContain("<VideoContentTabs");
 		expect(source).toContain("client:idle");
+		expect(source).toContain(
+			'import VideoTranscript from "@/components/video/VideoTranscript.astro"',
+		);
+		const transcripts = source.match(/<VideoTranscript\b[^>]*\/>/g) ?? [];
+		expect(transcripts).toHaveLength(1);
+		expect(transcripts[0]).toContain("cues={transcriptCues}");
+		expect(transcripts[0]).not.toMatch(/client:/);
+		expect(transcript).toContain("data-transcript-text>{cue.text}</span>");
+		expect(transcript).not.toMatch(
+			/JSON\.stringify|define:vars|client:|initialCues/,
+		);
 		expect(source).not.toContain("initialCues={");
 		expect(source).not.toContain("initialParagraphs={");
 		expect(source).not.toContain("transcript-preview-heading");
@@ -97,13 +111,19 @@ describe("Core Web Vitals Guardrails", () => {
 		expect(source).not.toContain("descriptionHtml={renderedDescriptionHtml}");
 	});
 
-	it("keeps the watch tabs focused on supplemental content with resources selected by default", () => {
+	it("defaults supplemental tabs to valid resources, otherwise comments", () => {
 		const source = readProjectFile(
 			"src/components/video/video-content-tabs.vue",
 		);
 
 		expect(source).not.toContain("descriptionHtml");
 		expect(source).not.toContain('label: "Description"');
-		expect(source).toContain('activeTab: "resources"');
+		expect(source).toMatch(
+			/const activeTab = ref\(validResources\.value\.length > 0 \? "resources" : "comments"\)/,
+		);
+		expect(source).toContain(
+			'v-if="validResources.length > 0" value="resources"',
+		);
+		expect(source).not.toContain("import VideoTranscript");
 	});
 });

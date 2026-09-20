@@ -2,278 +2,63 @@
 import { getCollection } from "astro:content";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
-
-import TrendingPanel from "@/components/news/TrendingPanel.astro";
 import WireSubscribeCard from "@/components/news/WireSubscribeCard.astro";
-import MLabel from "@/components/ui/MLabel.vue";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
-import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
+import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
 export const prerender = true;
 
-const [allNews, allTechnologies] = await Promise.all([
-	getCollection("news"),
-	getCollection("technologies"),
-]);
-
-allNews.sort(
+const allNews = (await getCollection("news")).sort(
 	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
-
-const [leadStory, ...rest] = allNews;
-
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
-}
-
-function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
-	return value
-		.split(/[-/]/g)
-		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
-		.join(" ");
-}
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-	month: "short",
-	day: "2-digit",
-});
-
-const now = new Date();
-const isToday = (d: Date) =>
-	d.getFullYear() === now.getFullYear() &&
-	d.getMonth() === now.getMonth() &&
-	d.getDate() === now.getDate();
-const isYesterday = (d: Date) => {
-	const y = new Date(now);
-	y.setDate(now.getDate() - 1);
-	return (
-		d.getFullYear() === y.getFullYear() &&
-		d.getMonth() === y.getMonth() &&
-		d.getDate() === y.getDate()
-	);
-};
-
-const formatRelativeDate = (date: Date) => {
-	if (isToday(date)) return "Today";
-	if (isYesterday(date)) return "Yesterday";
-	return dateFormatter.format(date);
-};
-
-const kickerFor = (story: (typeof allNews)[number]): string => {
-	const tags = story.data.technologies ?? [];
-	if (tags.some((t) => /cve|security/i.test(t))) return "CVE";
-	if (tags.some((t) => /cncf|graduation/i.test(t))) return "CNCF";
-	if (/release|ship|gen|alpha|beta|GA|stable|launch/i.test(story.data.title))
-		return "Release";
-	if (/acquire|acquisition/i.test(story.data.title)) return "Acquisition";
-	return "Field";
-};
-
+const [leadStory, ...archive] = allNews;
 const newsImage = "/images/news/news-generic.svg";
-
-const cveMatch = (s: (typeof allNews)[number]) =>
-	(`${s.data.title} ${s.data.description}`.match(/CVE-\d{4}-\d{3,5}/i) || [
-		null,
-	])[0];
-
-const cveStory = rest.find((s) => cveMatch(s));
-
-const cveSeverityMatch = cveStory
-	? `${cveStory.data.title} ${cveStory.data.description}`.match(
-			/CVSS\s+([\d.]+)/i,
-		)
-	: null;
-
-const topicCounts = new Map<string, number>();
-for (const story of allNews) {
-	for (const tech of story.data.technologies ?? []) {
-		if (!technologyNameById.has(tech)) continue;
-		topicCounts.set(tech, (topicCounts.get(tech) ?? 0) + 1);
-	}
-}
-const topTopics = Array.from(topicCounts.entries())
-	.sort((a, b) => b[1] - a[1])
-	.slice(0, 7)
-	.map(([id]) => ({
-		label: formatTechnologyLabel(id),
-		href: `/technology/${id}`,
-	}));
-
-const topics = topTopics;
-
-const pageTitle = "Cloud Native News";
-const pageDescription =
-	"Cloud native, Kubernetes, and AI infrastructure news for engineers: release notes, security advisories, KEP updates, ecosystem moves, in plain language.";
-
-const leadStoryTags = leadStory
-	? (leadStory.data.technologies ?? [])
-		.filter((tag) => technologyNameById.has(tag))
-		.slice(0, 3)
-	: [];
-
-const trendingItems = allNews.slice(0, 5).map((s) => ({
-	title: s.data.title,
-	meta: formatRelativeDate(s.data.publishedAt),
-	href: `/news/${s.id}`,
-}));
-
-const newsRows = rest.filter((s) => s.id !== cveStory?.id).slice(0, 10);
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+	day: "numeric", month: "short", year: "numeric",
+});
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();
 ---
 
-<Page title={pageTitle} description={pageDescription} pageType="CollectionPage">
+<Page title="Cloud Native News" description="Releases, security updates, and changes across the cloud native ecosystem, with practical context for engineers." pageType="CollectionPage">
 	<Fragment slot="extra-head">
-		<NewsItemListJsonLd
-			stories={allNews}
-			listUrl={new URL("/news", Astro.site ?? Astro.url).href}
-		/>
+		<NewsItemListJsonLd stories={allNews} listUrl={new URL("/news", Astro.site ?? Astro.url).href} />
 		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - News (RSS)" href="/api/feeds/news.xml" />
 		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - News (Atom)" href="/api/feeds/news.atom" />
 		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - News (JSON Feed)" href="/api/feeds/news.json" />
 	</Fragment>
-
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="News" title="News" description="What changed, why it matters in production, and what remains unproven." />
+		<AcademyCatalogMasthead kicker="The wire" title="News" description="Releases, security updates, and changes worth understanding.">
+			<a slot="actions" class={catalog.feedLink} href="/api/feeds/news.xml">Follow the RSS feed ↗</a>
+		</AcademyCatalogMasthead>
 
-		<section class="news-page__top">
-			{leadStory && (
-				<article class={catalog.featured}>
-					<span class={catalog.featuredMedia} aria-hidden="true">
-						<img class={catalog.featuredImage} src={newsImage} alt="" loading="eager" />
-					</span>
-					<div class={catalog.featuredBody}>
-						<p class={catalog.featuredKicker}>{kickerFor(leadStory)} · {formatRelativeDate(leadStory.data.publishedAt)}</p>
-						<h2 class={catalog.featuredTitle}>{leadStory.data.title}</h2>
-						<p class={catalog.featuredDescription}>{leadStory.data.description}</p>
-						<div class={catalog.filters}>{leadStoryTags.map((tag) => <a class={catalog.filterLink} href={`/technology/${tag}`}>{formatTechnologyLabel(tag)}</a>)}</div>
-						<a class={styles.button} href={`/news/${leadStory.id}`}>Read the article →</a>
-					</div>
-				</article>
-			)}
-			{cveStory && cveMatch(cveStory) && (
-				<a class={styles.notice} href={`/news/${cveStory.id}`}>
-					Security watch · {cveMatch(cveStory)} · CVSS {cveSeverityMatch?.[1] ?? "—"}: {cveStory.data.title} →
+		{leadStory && <section class={styles.section} aria-label="Latest story">
+			<article class={catalog.featured}>
+				<a class={catalog.featuredMedia} href={`/news/${leadStory.id}`} aria-label={`Read ${leadStory.data.title}`}>
+					<img class={catalog.featuredImage} src={newsImage} alt="" width="1200" height="675" fetchpriority="high" />
 				</a>
-			)}
-		</section>
+				<div class={catalog.featuredBody}>
+					<p class={catalog.featuredKicker}>Latest · <time datetime={leadStory.data.publishedAt.toISOString()}>{dateFormatter.format(leadStory.data.publishedAt)}</time></p>
+					<h2 class={catalog.featuredTitle}>{leadStory.data.title}</h2>
+					<p class={catalog.featuredDescription}>{leadStory.data.description}</p>
+					<a class={styles.button} href={`/news/${leadStory.id}`}>Read the story →</a>
+				</div>
+			</article>
+		</section>}
 
-		<section class={styles.section}>
-			<div class={styles.container}>
-				<nav class={catalog.filters} aria-label="News topics">
-					{topics.map((topic) => <a class={catalog.filterLink} href={topic.href}>{topic.label}</a>)}
-				</nav>
+		<section class={styles.section} aria-labelledby="news-archive">
+			<header class={styles.sectionHeader}>
+				<h2 id="news-archive" class={styles.sectionTitle}>Earlier stories</h2>
+				<p class={catalog.resultCount}>{archive.length} stories</p>
+			</header>
+			<div class={catalog.newsList}>
+				{archive.map((story) => <NewsStoryRow story={story} />)}
 			</div>
 		</section>
 
-		<section class={styles.section}>
-			<div class={styles.container}>
-				<MLabel>Timeline · {newsRows.length} of {allNews.length}</MLabel>
-				<div class={styles.grid}>
-					{newsRows.map((s) => (
-						<AcademyCatalogCard
-							href={`/news/${s.id}`}
-							title={s.data.title}
-							description={s.data.description}
-							image={newsImage}
-							meta={[kickerFor(s), formatRelativeDate(s.data.publishedAt), ...(s.data.technologies ?? []).slice(0, 2).map(formatTechnologyLabel)]}
-						/>
-					))}
-				</div>
-				<div class="news-page__rows-footer">
-					<MLabel tone="ink">← Older items · {allNews.length} total</MLabel>
-				</div>
-			</div>
-
-			<aside class="news-page__aside">
-				<TrendingPanel items={trendingItems} />
-				<WireSubscribeCard />
-			</aside>
+		<section class={styles.section} aria-label="Newsletter">
+			<WireSubscribeCard />
 		</section>
-
-		<footer class="news-page__footer">
-			<MLabel>
-				<a class="news-page__link" href="/api/feeds/news.xml">RSS</a> ·
-				<a class="news-page__link" href="/api/feeds/news.atom">Atom</a> ·
-				<a class="news-page__link" href="https://hachyderm.io/@rawkode">@rawkode</a>
-			</MLabel>
-			<MLabel tone="ink">Archive · By project · By year</MLabel>
-		</footer>
 	</div>
 </Page>
-
-<style>
-	.news-page {
-		background: var(--editorial-paper);
-		color: var(--editorial-ink);
-	}
-
-	.news-page__top {
-		display: grid;
-		grid-template-columns: 1fr 24rem;
-		gap: var(--space-section-gap);
-		padding: var(--space-section-pad-y) var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.news-page__feed {
-		display: grid;
-		grid-template-columns: 1fr 20rem;
-		gap: var(--space-section-gap-lg);
-		padding: var(--space-section-pad-y) var(--space-section-pad-x);
-		border-bottom: 1px solid var(--editorial-hairline);
-	}
-
-	.news-page__rows-footer {
-		padding-top: 1.125rem;
-	}
-
-	.news-page__aside {
-		display: flex;
-		flex-direction: column;
-		gap: 1.25rem;
-	}
-
-	.news-page__footer {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 1.5rem;
-		padding: 1.5rem var(--space-section-pad-x);
-		border-top: 1px solid var(--editorial-ink);
-		background: var(--editorial-paper-deep);
-	}
-
-	.news-page__link {
-		color: inherit;
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 2px;
-		text-decoration-color: var(--editorial-hairline-strong);
-	}
-	.news-page__link:hover { text-decoration-color: currentColor; }
-
-	@media (max-width: 960px) {
-		.news-page__top,
-		.news-page__feed {
-			grid-template-columns: 1fr;
-			padding: 1.75rem 1.25rem;
-			gap: 2rem;
-		}
-		.news-page__footer {
-			flex-direction: column;
-			align-items: flex-start;
-			padding: 1.25rem;
-		}
-	}
-</style>

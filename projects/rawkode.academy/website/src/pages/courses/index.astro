@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntries } from "astro:content";
+import { getImage } from "astro:assets";
 import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
 import CourseItemListJsonLd from "@/components/html/course-itemlist-jsonld.astro";
@@ -16,6 +17,10 @@ const allCourses = (await getCollection("courses")).sort(
 
 const featuredCourse = allCourses[0];
 const libraryCourses = allCourses.slice(1);
+const courseImages = new Map(await Promise.all(allCourses.map(async (course) => [
+	course.id,
+	course.data.cover ? (await getImage({ src: course.data.cover.image, width: 960, format: "webp" })).src : undefined,
+] as const)));
 
 // Get course modules for featured course
 let featuredModuleCount = 0;
@@ -81,6 +86,9 @@ const catalog = academyCatalog();
 						<p class={catalog.rowMeta}>{featuredCourse.data.difficulty} · {featuredPublishedLabel}{featuredAuthors.length > 0 && ` · ${featuredAuthors.map((author) => author.name).join(", ")}`}</p>
 						<a class={styles.button} href={firstModuleSlug ? `/courses/${featuredCourse.id}/${firstModuleSlug}` : `/courses/${featuredCourse.id}`}>Start the course →</a>
 					</div>
+					{courseImages.get(featuredCourse.id) && <a class={catalog.featuredMedia} href={`/courses/${featuredCourse.id}`} aria-label={`Explore ${featuredCourse.data.title}`}>
+						<img class={catalog.featuredImage} src={courseImages.get(featuredCourse.id)} alt={featuredCourse.data.cover?.alt ?? ""} width="960" height="540" fetchpriority="high" />
+					</a>}
 				</article>
 			) : (
 				<div class={styles.empty}>Courses are on the way. Practical, engineering-first courses are being built now.</div>
@@ -91,14 +99,14 @@ const catalog = academyCatalog();
 		<section id="all-courses" class={styles.section}>
 			<div class={styles.container}>
 			<header class={styles.sectionHeader}>
-				<h2>All courses</h2>
+				<h2 class={styles.sectionTitle}>More courses</h2>
 				<span class={styles.meta}>{libraryCourses.length} more course{libraryCourses.length === 1 ? "" : "s"}</span>
 			</header>
 
 			{libraryCourses.length > 0 ? (
 				<div class={styles.grid}>
 					{libraryCourses.map((course) => (
-						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} meta={[course.data.difficulty, "Course"]} />
+						<AcademyCatalogCard href={`/courses/${course.id}`} title={course.data.title} description={course.data.description} meta={[course.data.difficulty, "Course"]} image={courseImages.get(course.id)} imageAlt={course.data.cover?.alt ?? ""} />
 					))}
 				</div>
 			) : (

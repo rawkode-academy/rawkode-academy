@@ -2,17 +2,25 @@
 export const prerender = false;
 
 import { getCollection } from "astro:content";
-import AcademyPage from "@/components/academy/AcademyPage.vue";
+import { academyPage } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import VideoItemListJsonLd from "@/components/html/video-itemlist-jsonld.astro";
 import { getPublishedVideos } from "@/lib/content";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { selectWatchArchive, watchArchiveHref, WATCH_PAGE_SIZE } from "@/lib/watch-archive";
 
-const now = new Date();
-const [publishedVideos, learningPaths] = await Promise.all([
+const styles = academyPage();
+const [publishedVideos, technologies, people, shows] = await Promise.all([
 	getPublishedVideos(),
-	getCollection("learningPaths", ({ data }) => data.publishedAt <= now),
+	getCollection("technologies"),
+	getCollection("people"),
+	getCollection("shows"),
 ]);
+const archive = selectWatchArchive(publishedVideos, {
+	query: Astro.url.searchParams.get("q"),
+	page: Astro.url.searchParams.get("page"),
+	technologies, people, shows,
+});
 
 const compactCopy = (value: string | undefined, maxLength = 220) => {
 	const normalized = (value ?? "").replace(/\s+/g, " ").trim();
@@ -25,41 +33,24 @@ const compactCopy = (value: string | undefined, maxLength = 220) => {
 };
 
 const formatDuration = (seconds?: number | null) => {
-	if (!seconds || seconds <= 0) return "Recorded session";
+	if (!seconds || !Number.isFinite(seconds) || seconds <= 0) return undefined;
 	const minutes = Math.floor(seconds / 60);
+	if (minutes < 1) return "<1 min";
 	if (minutes < 60) return `${minutes} min`;
 	const hours = Math.floor(minutes / 60);
 	const remainder = minutes % 60;
 	return remainder > 0 ? `${hours}h ${remainder}m` : `${hours}h`;
 };
 
-const videos = publishedVideos.map((video) => ({
+const videos = archive.items.map((video) => ({
 	href: `/watch/${video.data.slug}`,
 	title: video.data.title,
 	description: compactCopy(video.data.subtitle || video.data.description),
-	meta: [
-		video.data.type === "live" ? "Live session" : "Recorded session",
-		formatDuration(video.data.duration),
-	],
+	duration: formatDuration(video.data.duration),
 	mediaSrc: getVideoThumbnailUrl(video.data.id),
 }));
-
-const featured = videos[0] ?? {
-	href: "/watch",
-	title: "The archive is the classroom.",
-	description:
-		"Recorded sessions and live builds for the moments when a diagram is not enough.",
-	meta: ["Rawkode Academy", "Video archive"],
-};
-
-const totalHours = Math.floor(
-	publishedVideos.reduce(
-		(total, video) =>
-			total +
-			(typeof video.data.duration === "number" ? video.data.duration : 0),
-		0,
-	) / 3600,
-);
+const featured = archive.showFeatured ? videos[0] : undefined;
+const listUrl = new URL(watchArchiveHref(archive.query, archive.page), Astro.site ?? Astro.url).href;
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -78,51 +69,82 @@ const pageDescription =
 ---
 
 <Page title={pageTitle} description={pageDescription}>
-		<Fragment slot="extra-head">
-			<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
-			<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
-			<link rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
-			<VideoItemListJsonLd
-				videos={publishedVideos.map((video) => video.data)}
-				listUrl={new URL("/watch", Astro.site ?? Astro.url).href}
-				listName="Rawkode Academy Videos"
-			/>
-		</Fragment>
-		<AcademyPage
-			client:load
-			page="watch"
-			featured={featured}
-			latest={[]}
-			videos={videos}
-			learningPaths={[]}
-			stats={[
-				{ value: `${publishedVideos.length}`, label: "Lessons" },
-				{ value: `${totalHours}+`, label: "Hours" },
-				{ value: `${learningPaths.length}`, label: "Paths" },
-				{ value: "2019", label: "Since" },
-			]}
+	<Fragment slot="extra-head">
+		<link rel="alternate" type="application/rss+xml" title="Rawkode Academy - Videos (RSS)" href="/api/feeds/videos.xml" />
+		<link rel="alternate" type="application/atom+xml" title="Rawkode Academy - Videos (Atom)" href="/api/feeds/videos.atom" />
+		<link rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
+		<VideoItemListJsonLd
+			videos={archive.items.map((video) => video.data)}
+			listUrl={listUrl}
+			listName="Rawkode Academy Videos"
+			limit={WATCH_PAGE_SIZE}
 		/>
+	</Fragment>
+	<div class={styles.root}>
+		<section class={styles.pageHero} aria-labelledby="watch-title">
+			<div class={styles.container}>
+				<p class={styles.kicker}>Learn from the work</p>
+				<div class={styles.pageHeroGrid}>
+					<h1 id="watch-title" class={styles.pageTitle}>Watch</h1>
+					<p class={styles.lede}>Live builds, deep dives, and honest conversations with the people behind the tools.</p>
+				</div>
+			</div>
+		</section>
+		{featured && (
+			<section class={styles.section} aria-label="Featured session">
+				<a href={featured.href} class={styles.watchFeature}>
+					<div class={styles.featureArt}>
+						<img src={featured.mediaSrc} alt="" class={styles.featureImage} width="1280" height="720" fetchpriority="high" />
+						<span class={styles.play} aria-hidden="true">▶</span>
+					</div>
+					<div class={styles.featureCopy}>
+						<p class={styles.kicker}>Latest session{featured.duration && ` · ${featured.duration}`}</p>
+						<h2 class={styles.watchTitle}>{featured.title}</h2>
+						<p class={styles.lede}>{featured.description}</p>
+						<span class={styles.textLink}>Watch the session <span aria-hidden="true">→</span></span>
+					</div>
+				</a>
+			</section>
+		)}
+		<section class={styles.section} aria-labelledby="watch-archive-title">
+			<div class={styles.sectionHead}>
+				<h2 id="watch-archive-title" class={styles.sectionTitle}>The video library</h2>
+			</div>
+			<form action="/watch" method="get" role="search" aria-label="Search the video library" class={styles.searchBar}>
+				<label for="video-search">Find a session</label>
+				<input id="video-search" name="q" value={archive.query} class={styles.input} type="search" placeholder="Search topics, tools, or speakers" autocomplete="off" />
+				<button class={styles.buttonPrimary} type="submit">Search</button>
+			</form>
+			<div class={styles.sectionHead}>
+				{archive.total > 0 && <p class={styles.resultCount}>Showing {archive.first}–{archive.last} of {archive.total} {archive.total === 1 ? "session" : "sessions"}{archive.query && ` matching “${archive.query}”`}</p>}
+				{archive.query && <a href="/watch" class={styles.textLink}>Clear search</a>}
+			</div>
+			{archive.total > 0 ? (
+				<>
+					<div class={styles.feedGrid}>
+						{videos.map(item => (
+							<a href={item.href} class={styles.card}>
+								<div class={styles.cardArt}><img src={item.mediaSrc} alt="" class={styles.cardImage} width="640" height="360" loading="lazy" /></div>
+								<div class={styles.cardBody}>
+									{item.duration && <p class={styles.cardMeta}>{item.duration}</p>}
+									<h3 class={styles.cardTitle}>{item.title}</h3>
+								</div>
+							</a>
+						))}
+					</div>
+				</>
+			) : (
+				<p class={styles.empty}>{archive.query ? `No sessions match “${archive.query}”. Try a tool name, speaker, or a broader topic.` : "No published sessions are available yet."}</p>
+			)}
+			{archive.pageCount > 1 && (
+				<nav class={styles.more} aria-label="Video library pages">
+					<div class={styles.actions}>
+						{archive.page > 1 && <a class={styles.buttonSecondary} href={watchArchiveHref(archive.query, archive.page - 1)} rel="prev">Previous</a>}
+						<p class={styles.resultCount}>Page {archive.page} of {archive.pageCount}</p>
+						{archive.page < archive.pageCount && <a class={styles.buttonSecondary} href={watchArchiveHref(archive.query, archive.page + 1)} rel="next">Next</a>}
+					</div>
+				</nav>
+			)}
+		</section>
+	</div>
 </Page>
-
-<style is:global>
-	html,
-	body {
-		margin: 0;
-		padding: 0;
-		min-width: 320px;
-	}
-
-	body {
-		background: var(--colors-academy-canvas);
-	}
-
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box;
-	}
-
-	a {
-		color: inherit;
-	}
-</style>

@@ -148,7 +148,7 @@ export default defineConfig({
 				borderWidth: "1px",
 				codeBackground: "var(--terminal-bg)",
 				codeFontFamily:
-					"var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
+					"var(--font-red-hat-mono), ui-monospace, SFMono-Regular, Menlo, monospace",
 				codeFontSize: "13px",
 				codeLineHeight: "1.7",
 				frames: {
@@ -298,9 +298,8 @@ export default defineConfig({
 		],
 	},
 	fonts: [
-		// Panda-powered Academy surfaces use the Red Hat family from the
-		// production design direction. Keep these non-preloaded while the
-		// legacy editorial surfaces still own the two critical font preloads.
+		// One type system across every route. Display and text are preloaded
+		// by the document head; code and metadata load mono on demand.
 		{
 			provider: fontProviders.google(),
 			name: "Red Hat Display",
@@ -324,32 +323,6 @@ export default defineConfig({
 			weights: ["400", "500", "600", "700"],
 			styles: ["normal"],
 			display: "swap",
-		},
-		// Editorial trio — "engineering journal meets terminal":
-		// Instrument Serif (display, italic) / Inter Tight (body) / JetBrains Mono (labels & metadata).
-		{
-			provider: fontProviders.google(),
-			name: "Instrument Serif",
-			cssVariable: "--font-instrument-serif",
-			weights: ["400"],
-			styles: ["normal", "italic"],
-			display: "optional",
-		},
-		{
-			provider: fontProviders.google(),
-			name: "Inter Tight",
-			cssVariable: "--font-inter-tight",
-			weights: ["300", "400", "500", "600", "700"],
-			styles: ["normal"],
-			display: "optional",
-		},
-		{
-			provider: fontProviders.google(),
-			name: "JetBrains Mono",
-			cssVariable: "--font-jetbrains-mono",
-			weights: ["400", "500", "600"],
-			styles: ["normal"],
-			display: "optional",
 		},
 	],
 });

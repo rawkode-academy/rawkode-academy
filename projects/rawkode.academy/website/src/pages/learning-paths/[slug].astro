@@ -10,9 +10,7 @@ import {
 } from "astro:content";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import Page from "@/wrappers/page.astro";
-import ArticleHeader from "@/components/read/ArticleHeader.astro";
-import ArticleByline from "@/components/read/ArticleByline.astro";
-import MLabel from "@/components/ui/MLabel.vue";
+import ArticleTOC from "@/components/read/ArticleTOC.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import LearningPathJsonLd from "@/components/html/learning-path-jsonld.astro";
 import BreadcrumbJsonLd from "@/components/breadcrumb/BreadcrumbJsonLd.astro";
@@ -58,9 +56,6 @@ const technologyTags = (learningPath.data.technologies ?? []).map(
 );
 
 function formatDuration(minutes: number): string {
-	if (!minutes) {
-		return "Self-paced";
-	}
 	const hours = Math.floor(minutes / 60);
 	const mins = minutes % 60;
 	if (!hours) return `${mins}m`;
@@ -68,8 +63,13 @@ function formatDuration(minutes: number): string {
 	return `${hours}h ${mins}m`;
 }
 
-const durationLabel = formatDuration(learningPath.data.estimatedDuration);
-const outline = headings.filter((heading) => heading.depth === 2);
+const durationLabel = learningPath.data.estimatedDuration > 0
+	? formatDuration(learningPath.data.estimatedDuration)
+	: undefined;
+// The content owns the resource sequence; use its rendered slug, not a second index.
+const firstResource = headings.find(
+	(heading) => heading.depth === 3 && /^\d+\.\s/.test(heading.text),
+);
 const prerequisites = learningPath.data.prerequisites ?? [];
 
 const difficultyLabel =
@@ -108,133 +108,74 @@ const pageDescription = learningPath.data.description;
 	/>
 
 	<div class={doc.root}>
-		<ArticleHeader
-			breadcrumbs={[
-				{ label: "Learning Paths", href: "/learning-paths" },
-				{ label: difficultyLabel },
-				{ label: learningPath.data.title, current: true },
-			]}
-			kicker="Learning path"
-			categoryTrail={difficultyLabel}
-			title={learningPath.data.title}
-			dek={learningPath.data.description}
-		>
-			<ArticleByline
-				authors={authors}
-				date={publishDate}
-				readingTime={durationLabel}
-				tags={technologyTags.map((t) => ({
-					label: t.label,
-					href: `/technology/${t.id}`,
-				}))}
-			/>
-		</ArticleHeader>
-
-		<section class={[doc.section, doc.stats].join(" ")}>
-			<div class={doc.stat}>
-				<MLabel>Difficulty</MLabel>
-				<span class={doc.statValue}>{difficultyLabel}</span>
+		<header class={styles.hero}>
+			<div class={[styles.container, styles.heroCopy].join(" ")}>
+				<a class={doc.link} href="/learning-paths">Learning paths</a>
+				<h1 class={doc.title}>{learningPath.data.title}</h1>
+				<div class={styles.meta}>
+					<span>{difficultyLabel}</span>
+					{durationLabel && <span>Estimated {durationLabel}</span>}
+					<time datetime={learningPath.data.publishedAt.toISOString()}>{publishDate}</time>
+				</div>
+				<div class={doc.actions}>
+					{authors.map((author) => (
+						<a class={doc.author} href={`/people/${author.data.id}`}>
+							{author.data.avatarUrl && <img class={doc.avatar} src={author.data.avatarUrl} alt="" width="44" height="44" loading="lazy" />}
+							<span class={doc.authorMeta}>{author.data.name}</span>
+						</a>
+					))}
+				</div>
+				<div class={doc.actions}>
+					<a class={doc.button} href={firstResource ? `#${firstResource.slug}` : "#path-content"}>
+						Start learning
+					</a>
+				</div>
 			</div>
-			<div class={doc.stat}>
-				<MLabel>Estimated time</MLabel>
-				<span class={doc.statValue}>{durationLabel}</span>
-			</div>
-			<div class={doc.stat}>
-				<MLabel>Modules</MLabel>
-				<span class={doc.statValue}>
-					{outline.length || "—"}
-				</span>
-			</div>
-			<div class={doc.stat}>
-				<MLabel>Pace</MLabel>
-				<span class={doc.statValue}>Self-paced</span>
-			</div>
-		</section>
+		</header>
 
-		<section class={doc.body}>
-			<article class={styles.prose}>
-				<Content />
-			</article>
-
-			<aside class={doc.sidebar}>
-				{outline.length > 0 && (
-					<div class={[doc.panel, doc.stack].join(" ")}>
-						<MLabel tone="spruce">Curriculum</MLabel>
-						<ol class={doc.list}>
-							{outline.map((heading, index) => (
-								<li class={doc.step}>
-									<MLabel tone="muted">
-										§{String(index + 1).padStart(2, "0")}
-									</MLabel>
-									<a
-										class={doc.link}
-										href={`#${heading.slug}`}
-									>
-										{heading.text}
-									</a>
-								</li>
-							))}
-						</ol>
-					</div>
-				)}
-
+		<div class={doc.body}>
+			<div class={[doc.main, styles.container, doc.stack].join(" ")}>
 				{prerequisites.length > 0 && (
-					<div class={[doc.panel, doc.stack].join(" ")}>
-						<MLabel tone="spruce">Prerequisites</MLabel>
-						<ul class={doc.list}>
-							{prerequisites.map((item) => (
-								<li class={doc.row}>
-									<span aria-hidden="true">▸</span>
-									<span>{item}</span>
-								</li>
-							))}
-						</ul>
-					</div>
+					<details>
+						<summary class={doc.tocSummary}>Before you start</summary>
+						<div class={styles.prose}>
+							<ul>
+								{prerequisites.map((item) => <li>{item}</li>)}
+							</ul>
+						</div>
+					</details>
 				)}
+
+				{/* The content supplies the introduction, objectives, and ordered resources once. */}
+				<article id="path-content" class={styles.prose}>
+					<Content />
+				</article>
 
 				{technologyTags.length > 0 && (
-					<div class={[doc.panel, doc.stack].join(" ")}>
-						<MLabel tone="spruce">Technologies covered</MLabel>
-						<div class={doc.tagList}>
-							{technologyTags.map((technology) => (
-								<a
-									class={doc.tag}
-									href={`/technology/${technology.id}`}
-									rel="tag"
-								>
-									#{technology.label}
-								</a>
-							))}
-						</div>
-					</div>
+					<p class={doc.copy}>
+						Technologies: {technologyTags.map((technology, index) => (
+							<Fragment>
+								{index > 0 && ", "}
+								<a class={doc.link} href={`/technology/${technology.id}`} rel="tag">{technology.label}</a>
+							</Fragment>
+						))}
+					</p>
 				)}
-			</aside>
-		</section>
+
+				<nav class={doc.end} aria-label="More learning resources">
+					<a class={doc.link} href="/learning-paths">Browse learning paths</a>
+					<a class={doc.link} href="/watch">Watch the archive</a>
+				</nav>
+			</div>
+
+			<ArticleTOC headings={headings} />
+		</div>
 
 		<NewsletterCTA
-			class={doc.main ?? ""}
 			audience="learning-paths"
-			badge="New paths weekly"
+			badge="Learning path updates"
 			headline="Get notified when we ship new learning paths"
 			subtitle="Structured roadmaps for cloud native, AI infra, and platform engineering, delivered when they're ready."
 		/>
-
-		<footer class={[doc.section, doc.rowBetween].join(" ")}>
-			<div class={doc.stackSmall}>
-				<MLabel tone="spruce">Keep going</MLabel>
-				<h2 class={doc.sectionTitle}>Pick another path.</h2>
-				<p class={doc.copy}>
-					Browse the rest of the curriculum, or jump back into the video archive.
-				</p>
-			</div>
-			<div class={doc.actions}>
-				<a class={doc.button} href="/learning-paths">
-					Browse paths
-				</a>
-				<a class={doc.buttonSecondary} href="/watch">
-					Watch the archive
-				</a>
-			</div>
-		</footer>
 	</div>
 </Page>

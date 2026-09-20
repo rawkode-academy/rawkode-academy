@@ -273,189 +273,65 @@ const relMeUrls = [
  href={`/api/feeds/people/${person.data.id}.xml`}
  />
  </Fragment>
- <div class={[doc.section, doc.stack].join(" ")}>
- <!-- Profile Header -->
- <section class={doc.main}>
- <div class={[doc.panel, doc.container].join(" ")}>
- <div class={doc.personHero}>
- <!-- Avatar -->
- <div class={doc.main}>
- <div class={doc.portrait}>
- <img
- src={person.data.avatarUrl ?? '/apple-touch-icon.png'}
- alt={person.data.name}
- class={doc.image}
- onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
- />
- </div>
- </div>
+	<div class={[doc.section, doc.stack].join(" ")}>
+		<header class={doc.personHero}>
+			<div class={doc.portrait} aria-hidden="true">
+				{person.data.avatarUrl && <img
+					src={person.data.avatarUrl}
+					alt=""
+					width="160"
+					height="160"
+					class={doc.image}
+					onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+				/>}
+				<span class={doc.portraitInitials} hidden={Boolean(person.data.avatarUrl)}>{person.data.name.split(/\s+/).map((part: string) => part[0]).slice(0, 2).join("")}</span>
+			</div>
+			<div class={doc.stack}>
+				<a href="/people" class={doc.link}>← People</a>
+				<h1 class={doc.title}>{person.data.name}</h1>
+				{(showCount > 0 || videoCount > 0 || articleCount + newsCount > 0) && <p class={doc.meta}>{
+					[
+						showCount > 0 ? `Host of ${showCount} ${showCount === 1 ? "show" : "shows"}` : undefined,
+						videoCount > 0 ? `${videoCount} guest ${videoCount === 1 ? "appearance" : "appearances"}` : undefined,
+						articleCount + newsCount > 0 ? `${articleCount + newsCount} published stories` : undefined,
+					].filter(Boolean).join(" · ")
+				}</p>}
+				{socialLinks.length > 0 && <nav class={doc.actions} aria-label={`${person.data.name}'s links`}>
+					{socialLinks.map((link: any) => <a href={link.url} target="_blank" rel="me noopener noreferrer" class={doc.socialLink}>
+						<svg class={doc.iconSmall} viewBox="0 0 24 24" fill={link.filled ? "currentColor" : "none"} stroke={link.filled ? "none" : "currentColor"} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={link.icon} /></svg>
+						{link.name}
+					</a>)}
+				</nav>}
+			</div>
+		</header>
 
- <!-- Info -->
- <div class={[doc.spacer, doc.stack].join(" ")}>
- <div>
- <h1 class={doc.title}>
- {person.data.name}
- </h1>
- {person.data.handles.twitter && (
- <p class={doc.link}>
- @{person.data.handles.twitter}
- </p>
- )}
- </div>
+		{hasBiography && <section class={styles.prose} aria-label="Biography"><BiographyContent /></section>}
+		{noindex && <p class={doc.copy}>No published contributions yet.</p>}
 
- <!-- Social Links -->
- <div class={doc.actions}>
- {socialLinks.map((link: any) => (
- <a
- href={link.url}
- target="_blank"
- rel="me noopener noreferrer"
- class={doc.iconButton}
- aria-label={link.name}
- >
- <svg
- xmlns="http://www.w3.org/2000/svg"
- width="24"
- height="24"
- viewBox="0 0 24 24"
- fill={link.filled ? "currentColor" : "none"}
- stroke={link.filled ? "none" : "currentColor"}
- stroke-width="2"
- stroke-linecap="round"
- stroke-linejoin="round"
- >
- <path d={link.icon} />
- </svg>
- </a>
- ))}
- </div>
- </div>
- </div>
- </div>
- </section>
+		{showSummaries.length > 0 && <section class={doc.stack} aria-labelledby="hosted-shows">
+			<h2 id="hosted-shows" class={doc.sectionTitle}>Shows</h2>
+			<div class={doc.gridTwo}>{showSummaries.map((show) => <ShowCard show={show} />)}</div>
+		</section>}
 
- <!-- SEO summary + biography (always visible body text for crawlers) -->
- <section class={doc.container}>
- <div class={styles.prose}>
- <p class={doc.copy}>{pageDescription}</p>
- {hasBiography && <BiographyContent />}
- </div>
- </section>
+		{guestVideoFeed.length > 0 && <section class={doc.stack} aria-labelledby="guest-appearances">
+			<h2 id="guest-appearances" class={doc.sectionTitle}>Guest appearances</h2>
+			<VideoFeed title="" description="" videos={guestVideoFeed} />
+		</section>}
 
- <!-- Hosted Shows -->
- {showSummaries.length > 0 && (
- <section class={doc.container}>
- <div class={doc.row}>
- <div class={doc.iconButton}>
- <svg xmlns="http://www.w3.org/2000/svg" class={doc.iconLarge} fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
- </svg>
- </div>
- <h2 class={doc.sectionTitle}>
- Shows Hosted
- </h2>
- </div>
- <div class={doc.grid}>
- {showSummaries.map((show) => (
- <ShowCard show={show} />
- ))}
- </div>
- </section>
- )}
-
- <!-- Guest Appearances -->
- {guestVideoFeed.length > 0 && (
- <section class={doc.container}>
- <div class={doc.row}>
- <div class={doc.iconButton}>
- <svg xmlns="http://www.w3.org/2000/svg" class={doc.iconLarge} fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
- </svg>
- </div>
- <h2 class={doc.sectionTitle}>
- Guest Appearances
- </h2>
- </div>
- <VideoFeed
- title=""
- description=""
- videos={guestVideoFeed}
- />
- </section>
- )}
-
- <!-- Authored Articles -->
- {authoredArticles.length > 0 && (
- <section class={doc.container}>
- <div class={doc.row}>
- <div class={doc.iconButton}>
- <svg xmlns="http://www.w3.org/2000/svg" class={doc.iconLarge} fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
- </svg>
- </div>
- <h2 class={doc.sectionTitle}>
- Articles
- </h2>
- </div>
- <ul class={doc.list}>
- {authoredArticles.map((article) => (
- <li class={doc.listItem}>
- <article class={doc.stackSmall}>
- <div class={doc.kicker}>
- <time datetime={article.data.publishedAt.toISOString()}>
- {formatPublishDate(article.data.publishedAt)}
- </time>
- </div>
- <h3 class={doc.sectionTitle}>
- <a href={`/read/${article.id}`} class={doc.link}>
- {article.data.title}
- </a>
- </h3>
- <p class={doc.copy}>
- {article.data.description}
- </p>
- </article>
- </li>
- ))}
- </ul>
- </section>
- )}
-
- <!-- Latest News -->
- {authoredNews.length > 0 && (
- <section class={doc.container}>
- <div class={doc.row}>
- <div class={doc.iconButton}>
- <svg xmlns="http://www.w3.org/2000/svg" class={doc.iconLarge} fill="none" viewBox="0 0 24 24" stroke="currentColor">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
- </svg>
- </div>
- <h2 class={doc.sectionTitle}>
- Latest News
- </h2>
- </div>
- <ul class={doc.list}>
- {authoredNews.map((story) => (
- <li class={doc.listItem}>
- <article class={doc.stackSmall}>
- <div class={doc.kicker}>
- <time datetime={story.data.publishedAt.toISOString()}>
- {formatPublishDate(story.data.publishedAt)}
- </time>
- </div>
- <h3 class={doc.sectionTitle}>
- <a href={`/news/${story.id}`} class={doc.link}>
- {story.data.title}
- </a>
- </h3>
- <p class={doc.copy}>
- {story.data.description}
- </p>
- </article>
- </li>
- ))}
- </ul>
- </section>
- )}
- </div>
+		{[
+			{ id: "articles", heading: "Articles", entries: authoredArticles, prefix: "/read" },
+			{ id: "news", heading: "News", entries: authoredNews, prefix: "/news" },
+		].map(({id, heading, entries, prefix}) => entries.length > 0 && <section class={doc.stack} aria-labelledby={id}>
+			<h2 id={id} class={doc.sectionTitle}>{heading}</h2>
+			<ul class={doc.list}>
+				{entries.map((entry) => <li class={doc.listItem}>
+					<article class={doc.stackSmall}>
+						<time class={doc.meta} datetime={entry.data.publishedAt.toISOString()}>{formatPublishDate(entry.data.publishedAt)}</time>
+						<h3 class={doc.cardTitle}><a href={`${prefix}/${entry.id}`} class={doc.link}>{entry.data.title}</a></h3>
+						<p class={doc.copy}>{entry.data.description}</p>
+					</article>
+				</li>)}
+			</ul>
+		</section>)}
+	</div>
 </Page>

@@ -36,18 +36,18 @@ const watch = academyWatch();
 					<div class={watch.techIcon}>
 						<img
 							src={iconUrl}
-							alt={techName}
+							alt=""
 							width="24"
 							height="24"
 							loading="lazy"
 							decoding="async"
-							onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+							onerror="this.parentElement.hidden=true"
 						/>
 					</div>
 				)}
-				<h3 class={watch.railTitle}>
+				<h2 class={watch.railTitle}>
 					More about {techName}
-				</h3>
+				</h2>
 			</div>
 			<a
 				href={`/technology/${techId}`}
@@ -69,7 +69,7 @@ const watch = academyWatch();
 					<div class={watch.railMedia}>
 						<img
 							src={video.thumbnailUrl}
-							alt={video.title}
+							alt=""
 							class={watch.railImage}
 							width="1280"
 							height="720"
@@ -81,9 +81,9 @@ const watch = academyWatch();
 						</div>
 					</div>
 					<div class={watch.railCardBody}>
-						<h4 class={watch.railCardTitle}>
+						<h3 class={watch.railCardTitle}>
 							{video.title}
-						</h4>
+						</h3>
 					</div>
 				</a>
 			))}

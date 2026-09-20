@@ -1,59 +1,55 @@
 <template>
- <div class="flex items-center space-x-3">
- <div class="flex -space-x-3">
- <div
- v-for="(author, index) in displayAuthors"
- :key="author.id"
- class="relative"
- :style="`z-index: ${10 - index}`"
- >
- <img
- class="w-10 h-10 rounded-full object-cover border-2 border-secondary p-0.5 bg-[var(--surface-card)]"
- :src="author.data.avatarUrl ?? '/apple-touch-icon.png'"
- :alt="`Profile picture of ${author.data.name}`"
- loading="lazy"
- />
- <span
- v-if="showActiveIndicator && index === 0"
- class="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-400 rounded-full border-2 border-[var(--surface-card)]"
- ></span>
- </div>
- <div
- v-if="remainingCount > 0"
- class="relative"
- style="z-index: 0;"
- >
- <div class="w-10 h-10 rounded-full bg-secondary/10 dark:bg-secondary/20 border-2 border-secondary p-0.5 bg-[var(--surface-card)] flex items-center justify-center text-xs text-secondary dark:text-secondary font-medium">
- +{{ remainingCount }}
- </div>
- </div>
- </div>
- <div v-if="showNames" class="font-medium text-primary-content">
- <div class="text-sm">{{ authorNames }}</div>
- </div>
- </div>
+	<div :class="s.root">
+		<div :class="s.stack">
+			<div v-for="(author, index) in displayAuthors" :key="author.id"
+				:class="s.item" :style="{ zIndex: displayAuthors.length - index }">
+				<img v-if="author.data.avatarUrl && !failedAvatars.has(author.id)"
+					:class="s.avatar" :src="author.data.avatarUrl"
+					:alt="`Profile picture of ${author.data.name}`" width="40" height="40" loading="lazy"
+					@error="failedAvatars.add(author.id)" />
+				<span v-else :class="[s.avatar, s.initials]" role="img" :aria-label="author.data.name">
+					{{ initials(author.data.name) }}
+				</span>
+				<span v-if="showActiveIndicator && index === 0" :class="s.indicator" role="img"
+					:aria-label="`${author.data.name}: ${activeIndicatorLabel}`"
+					:title="`${author.data.name}: ${activeIndicatorLabel}`" />
+			</div>
+			<span v-if="remainingCount > 0" :class="[s.avatar, s.overflow]" role="img"
+				:aria-label="`${remainingCount} additional ${remainingCount === 1 ? 'author' : 'authors'}: ${remainingNames}`">
+				+{{ remainingCount }}
+			</span>
+		</div>
+		<div v-if="showNames" :class="s.names">{{ authorNames }}</div>
+	</div>
 </template>
 
 <script setup lang="ts">
 import type { CollectionEntry } from "astro:content";
-import { computed } from "vue";
+import { computed, reactive } from "vue";
+import { academyAuthorGroup } from "@rawkodeacademy/design-system";
 
 interface Props {
 	authors: CollectionEntry<"people">[];
 	maxDisplay?: number;
 	showNames?: boolean;
+	/** Opt in only when the caller has actual activity data for the first author. */
 	showActiveIndicator?: boolean;
+	activeIndicatorLabel?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	maxDisplay: 3,
 	showNames: true,
-	showActiveIndicator: true,
+	showActiveIndicator: false,
+	activeIndicatorLabel: "Currently active",
 });
 
-const displayAuthors = computed(() => props.authors.slice(0, props.maxDisplay));
-const remainingCount = computed(() => props.authors.length - props.maxDisplay);
-const authorNames = computed(() =>
-	props.authors.map((author) => author.data.name).join(", "),
-);
+const s = academyAuthorGroup();
+const failedAvatars = reactive(new Set<string>());
+const displayLimit = computed(() => Number.isFinite(props.maxDisplay) ? Math.max(0, Math.floor(props.maxDisplay)) : 3);
+const displayAuthors = computed(() => props.authors.slice(0, displayLimit.value));
+const remainingCount = computed(() => props.authors.length - displayAuthors.value.length);
+const remainingNames = computed(() => props.authors.slice(displayLimit.value).map(author => author.data.name).join(", "));
+const authorNames = computed(() => props.authors.map(author => author.data.name).join(", "));
+const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => Array.from(part)[0] ?? "").join("").toLocaleUpperCase();
 </script>

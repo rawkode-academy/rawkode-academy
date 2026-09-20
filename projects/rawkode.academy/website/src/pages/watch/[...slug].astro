@@ -6,6 +6,7 @@ import VideoPlayer from "@/components/video/player.vue";
 import LiveStreamGate from "@/components/video/LiveStreamGate.vue";
 import VideoReactions from "@/components/video/VideoReactions.astro";
 import VideoContentTabs from "@/components/video/video-content-tabs.vue";
+import VideoTranscript from "@/components/video/VideoTranscript.astro";
 import VideoCast from "@/components/video/VideoCast.astro";
 import TechnologyVideoSection from "@/components/video/TechnologyVideoSection.astro";
 import ShowVideoSection from "@/components/video/ShowVideoSection.astro";
@@ -17,7 +18,6 @@ import Page from "@/wrappers/page.astro";
 import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
-import { getVideosForTechnology } from "@/utils/get-videos-for-technology";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
 import { videoTransitionName } from "@/utils/view-transition-name";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
@@ -121,45 +121,29 @@ const showId =
 			: null;
 const showEntry = showId ? await getEntry("shows", showId) : null;
 
-const SHOW_RELATED_LIMIT = 6;
+const RELATED_VIDEO_LIMIT = 6;
+const now = new Date();
+// Match getPublishedVideos' publishedAt <= now policy, excluding this video.
+const relatedCandidates = videos
+	.filter((candidate) => candidate.data.slug !== slug && candidate.data.publishedAt <= now)
+	.sort((a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime());
+const toRelatedVideo = (candidate: (typeof videos)[number]) => ({
+	id: candidate.data.id,
+	title: candidate.data.title,
+	thumbnailUrl: getVideoThumbnailUrl(candidate.data.id),
+	slug: candidate.data.slug,
+	duration: typeof candidate.data.duration === "number" ? candidate.data.duration : undefined,
+	publishedAt: candidate.data.publishedAt,
+	type: candidate.data.type,
+});
 const showRelatedAll = showEntry
-	? videos
-			.filter((v) => {
-				if (v.data.slug === slug) return false;
-				const otherShowRef = v.data.show;
-				const otherShowId =
-					typeof otherShowRef === "string"
-						? otherShowRef
-						: otherShowRef &&
-								typeof otherShowRef === "object" &&
-								"id" in otherShowRef
-							? (otherShowRef as { id: string }).id
-							: null;
-				return otherShowId === showEntry.id;
-			})
-			.sort((a, b) => {
-				const aTime =
-					a.data.publishedAt instanceof Date
-						? a.data.publishedAt.getTime()
-						: new Date(a.data.publishedAt).getTime();
-				const bTime =
-					b.data.publishedAt instanceof Date
-						? b.data.publishedAt.getTime()
-						: new Date(b.data.publishedAt).getTime();
-				return bTime - aTime;
-			})
+	? relatedCandidates.filter((candidate) => {
+		const reference = candidate.data.show;
+		const id = typeof reference === "string" ? reference : reference?.id;
+		return id?.replace(/\/index$/, "") === showEntry.id.replace(/\/index$/, "");
+	})
 	: [];
-const showRelatedVideos = showRelatedAll
-	.slice(0, SHOW_RELATED_LIMIT)
-	.map((v) => ({
-		id: v.data.id,
-		title: v.data.title,
-		thumbnailUrl: getVideoThumbnailUrl(v.data.id),
-		slug: v.data.slug,
-		duration: typeof v.data.duration === "number" ? v.data.duration : undefined,
-		publishedAt: v.data.publishedAt,
-		type: v.data.type,
-	}));
+const showRelatedVideos = showRelatedAll.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo);
 
 const normalizedTechIds = normalizeTechnologyReferences(
 	video.data.technologies,
@@ -176,22 +160,28 @@ const techEntries = (
 	)
 ).filter((t): t is NonNullable<typeof t> => Boolean(t));
 
-const videosPerTechnology = await Promise.all(
-	techEntries.map(async (tech) => {
-		const techId = tech.id.replace(/\/index$/, "");
-		const allVideos = await getVideosForTechnology(techId);
-		const filteredVideos = allVideos.filter((v) => v.slug !== slug).slice(0, 3);
-		return {
-			technology: tech,
-			videos: filteredVideos,
-			totalVideos: allVideos.filter((v) => v.slug !== slug).length,
+let technologyRecommendation: {
+	technology: (typeof techEntries)[number];
+	videos: typeof showRelatedVideos;
+	totalVideos: number;
+} | null = null;
+if (showRelatedVideos.length === 0) {
+	// Declaration order is intentional. Stop as soon as one technology has
+	// published alternatives; do not collect rails for every technology.
+	for (const technology of techEntries) {
+		const id = technology.id.replace(/\/index$/, "");
+		const related = relatedCandidates.filter((candidate) =>
+			normalizeTechnologyReferences(candidate.data.technologies).includes(id),
+		);
+		if (related.length === 0) continue;
+		technologyRecommendation = {
+			technology,
+			videos: related.slice(0, RELATED_VIDEO_LIMIT).map(toRelatedVideo),
+			totalVideos: related.length,
 		};
-	}),
-);
-
-const technologiesWithVideos = videosPerTechnology.filter(
-	(t) => t.videos.length > 0,
-);
+		break;
+	}
+}
 
 const hostEntries =
 	showEntry && Array.isArray(showEntry.data.hosts)
@@ -225,7 +215,6 @@ const guestEntries = Array.isArray(video.data.guests)
 const thumbnailUrl = getVideoThumbnailUrl(video.data.id);
 const streamUrl = `https://content.rawkode.academy/videos/${video.data.id}/stream.m3u8`;
 const captionUrl = `https://content.rawkode.academy/videos/${video.data.id}/captions/en.vtt`;
-const now = new Date();
 const isLive = video.data.type === "live";
 const isUpcomingLive = isLive && video.data.publishedAt > now;
 const studioLiveState = isLive
@@ -284,52 +273,7 @@ const watchVideoSeoText = await buildWatchVideoSeoText({
 	description: processedDescription,
 	chapters: chapterSource,
 });
-
-// Full transcript, grouped under chapter headings, server-rendered so the
-// spoken content is crawlable in the initial HTML (the interactive
-// transcript tab hydrates separately and only ever existed client-side).
-type TranscriptSection = {
-	title: string | null;
-	startTime: number | null;
-	paragraphs: { startSeconds: number; text: string }[];
-};
-
-const transcriptSections: TranscriptSection[] = (() => {
-	const paragraphs = watchVideoSeoText.transcriptParagraphs ?? [];
-	if (paragraphs.length === 0) return [];
-	if (chapterSource.length === 0) {
-		return [{ title: null, startTime: null, paragraphs }];
-	}
-
-	const sortedChapters = [...chapterSource].sort(
-		(a, b) => a.startTime - b.startTime,
-	);
-	const leading: TranscriptSection = {
-		title: null,
-		startTime: null,
-		paragraphs: [],
-	};
-	const sections: TranscriptSection[] = sortedChapters.map((chapter) => ({
-		title: chapter.title,
-		startTime: chapter.startTime,
-		paragraphs: [],
-	}));
-
-	for (const paragraph of paragraphs) {
-		let sectionIndex = -1;
-		for (let i = 0; i < sortedChapters.length; i++) {
-			const chapter = sortedChapters[i];
-			if (chapter && paragraph.startSeconds >= chapter.startTime) {
-				sectionIndex = i;
-			}
-		}
-		(sections[sectionIndex] ?? leading).paragraphs.push(paragraph);
-	}
-
-	return [leading, ...sections].filter(
-		(section) => section.paragraphs.length > 0,
-	);
-})();
+const transcriptCues = watchVideoSeoText.transcriptParagraphs ?? [];
 
 const user = Astro.locals.user;
 const isAuthenticated = !!user;
@@ -392,13 +336,13 @@ const publishedIso =
 		? video.data.publishedAt.toISOString()
 		: String(video.data.publishedAt);
 const heroDescription =
-	video.data.tagline ?? video.data.subtitle ?? metaDescription;
+	video.data.tagline ?? video.data.subtitle;
 const isLiveNow = isLive && studioLiveState.live;
 const watchStatusLabel = isLiveNow
 	? "Live now"
 	: isUpcomingLive
 		? "Upcoming"
-		: "On demand";
+		: null;
 ---
 
 <Page
@@ -442,7 +386,7 @@ const watchStatusLabel = isLiveNow
 	<link slot="extra-head" rel="alternate" type="application/feed+json" title="Rawkode Academy - Videos (JSON Feed)" href="/api/feeds/videos.json" />
 
 	<div class:list={[layout.root, media.root, watch.root]}>
-		<div class:list={[layout.container, watch.breadcrumb]}>
+		<div class={watch.breadcrumb}>
 			<a class={watch.crumb} href="/watch">Watch</a>
 			<span aria-hidden="true">/</span>
 			{showEntry ? (
@@ -454,19 +398,19 @@ const watchStatusLabel = isLiveNow
 					<span>{categoryLabel}</span>
 				</>
 			)}
-			<span class={watch.breadcrumbStatus}>{watchStatusLabel}</span>
+			{watchStatusLabel && <span class={watch.breadcrumbStatus}>{watchStatusLabel}</span>}
 		</div>
 
 		<section
-			class:list={[media.hero, watch.hero]}
+			class={watch.hero}
 			aria-labelledby="watch-detail-title"
 			data-watch-hero
 		>
-			<aside class={watch.summary} aria-label="Video summary">
+			<header class={watch.summary}>
 				<div class={watch.summaryCopy}>
-					<MLabel tone={isLiveNow ? "amber" : "spruce"}>
+					<MLabel tone={isLiveNow ? "amber" : "accent"}>
 						{isLiveNow && <LiveDot color="amber" />}
-						{isLiveNow ? "Live · " : ""}{categoryLabel}{showEntry ? ` · ${showEntry.data.name}` : ""}
+						{isLiveNow ? "Live · " : ""}{categoryLabel}
 					</MLabel>
 					<h1 id="watch-detail-title" class={watch.title}>
 						{video.data.title}
@@ -482,21 +426,9 @@ const watchStatusLabel = isLiveNow
 						<dd class={watch.factValue}><time datetime={publishedIso}>{publishedLabel}</time></dd>
 					</div>
 					<div class={watch.fact}>
-						<dt class={watch.factLabel}>Status</dt>
-						<dd class={watch.factValue}>{watchStatusLabel}</dd>
-					</div>
-					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Runtime</dt>
 						<dd class={watch.factValue}>{runtimeLabel}</dd>
 					</div>
-					{showEntry && (
-						<div class={watch.fact}>
-							<dt class={watch.factLabel}>Show</dt>
-							<dd class={watch.factValue}>
-								<a class={watch.factLink} href={`/shows/${showEntry.id}`}>{showEntry.data.name}</a>
-							</dd>
-						</div>
-					)}
 					<div class={watch.fact}>
 						<dt class={watch.factLabel}>Share</dt>
 						<dd class={watch.factValue}>
@@ -526,7 +458,7 @@ const watchStatusLabel = isLiveNow
 						/>
 					</div>
 				)}
-			</aside>
+			</header>
 
 			<div
 				class={watch.playerWrap}
@@ -581,7 +513,6 @@ const watchStatusLabel = isLiveNow
 			<VideoReactions server:defer videoId={video.data.slug} />
 
 			<section class={watch.section}>
-				<MLabel tone="spruce">Overview</MLabel>
 				<h2 class={watch.sectionTitle}>About this video</h2>
 				{video.data.whatYouWillLearn.length > 0 && (
 					<section class={watch.learn} aria-labelledby="watch-detail-learn-heading">
@@ -600,104 +531,65 @@ const watchStatusLabel = isLiveNow
 
 			{chapterSource.length > 0 && (
 				<section class={watch.section} aria-labelledby="watch-detail-chapters-heading">
-					<MLabel tone="spruce">Chapters</MLabel>
 					<h2 id="watch-detail-chapters-heading" class={watch.sectionTitle}>
 						Jump to a chapter
 					</h2>
-					<ol class={watch.chapterList}>
-						{chapterSource.map((chapter) => (
-							<li>
-								<a
-									class={watch.chapterLink}
-									href={`?t=${chapter.startTime}`}
-									data-chapter-link={String(chapter.startTime)}
-								>
-									<span class={watch.chapterTime}>
-										{formatTimestamp(chapter.startTime)}
-									</span>
-									<span class={watch.chapterName}>{chapter.title}</span>
-								</a>
-							</li>
-						))}
-					</ol>
+					<details class={watch.transcriptDetails}>
+						<summary class={watch.transcriptSummary}>View {chapterSource.length} chapters</summary>
+						<ol class={watch.chapterList}>
+							{chapterSource.map((chapter) => (
+								<li>
+									<a
+										class={watch.chapterLink}
+										href={`?t=${chapter.startTime}`}
+										data-chapter-link={String(chapter.startTime)}
+									>
+										<span class={watch.chapterTime}>
+											{formatTimestamp(chapter.startTime)}
+										</span>
+										<span class={watch.chapterName}>{chapter.title}</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					</details>
 				</section>
 			)}
 
-			{transcriptSections.length > 0 && (
-				<section
-					class={watch.section}
-					aria-labelledby="watch-detail-transcript-heading"
-				>
-					<MLabel tone="spruce">Transcript</MLabel>
-					<h2
-						id="watch-detail-transcript-heading"
-						class={watch.sectionTitle}
-					>
-						Full transcript
-					</h2>
-					<p class={watch.transcriptNote}>
-						Generated from the English captions. Timestamps jump the player to
-						that moment.
-					</p>
+			{transcriptCues.length > 0 && (
+				<section class={watch.section} aria-labelledby="watch-detail-transcript-heading">
+					<h2 id="watch-detail-transcript-heading" class={watch.sectionTitle}>Transcript</h2>
+					<p class={watch.transcriptNote}>Generated from English captions. Select a timestamp to jump to that moment.</p>
 					<details class={watch.transcriptDetails}>
-						<summary class={watch.transcriptSummary}>Read the full transcript</summary>
-						<div class={watch.transcriptBody}>
-							{transcriptSections.map((section) => (
-								<section>
-									{section.title !== null && section.startTime !== null && (
-										<h3 class={watch.transcriptChapter}>
-											<a
-												class={watch.transcriptChapterLink}
-												href={`?t=${section.startTime}`}
-												data-chapter-link={String(section.startTime)}
-											>
-												<span class={watch.transcriptTimestamp}>
-													{formatTimestamp(section.startTime)}
-												</span>
-												<span>{section.title}</span>
-											</a>
-										</h3>
-									)}
-									{section.paragraphs.map((paragraph) => (
-										<p class={watch.transcriptParagraph}>
-											<a
-												class={watch.transcriptTimestampLink}
-												href={`?t=${paragraph.startSeconds}`}
-												data-chapter-link={String(paragraph.startSeconds)}
-											>
-												<span class={watch.transcriptTimestamp}>{formatTimestamp(paragraph.startSeconds)}</span>
-											</a>{" "}
-											{paragraph.text}
-										</p>
-									))}
-								</section>
-							))}
-						</div>
+						<summary class={watch.transcriptSummary}>Read and search the transcript</summary>
+						<VideoTranscript
+							cues={transcriptCues}
+							chapters={chapterSource}
+						/>
 					</details>
 				</section>
 			)}
 
 			{techEntries.length > 0 && (
 				<section class={watch.section} aria-labelledby="watch-detail-tech-heading">
-					<h2 id="watch-detail-tech-heading" class="sr-only">Technologies featured</h2>
-					<MLabel tone="spruce" aria-hidden="true">Technologies featured</MLabel>
+					<h2 id="watch-detail-tech-heading" class={watch.sectionTitle}>Technologies featured</h2>
 					<div class={watch.techGrid}>
 						{techEntries.map((tech) => (
 							<a
 								href={`/technology/${tech.id.replace(/\/index$/, "")}`}
 								class={watch.techChip}
 							>
-								<span class={watch.techIcon}>
+								{resolveTechnologyIconUrl(tech.id, tech.data.logos) && <span class={watch.techIcon}>
 									<img
-										src={resolveTechnologyIconUrl(tech.id, tech.data.logos) || "/apple-touch-icon.png"}
-										alt={tech.data.name}
+										src={resolveTechnologyIconUrl(tech.id, tech.data.logos)!}
+										alt=""
 										width="20"
 										height="20"
 										loading="lazy"
 										decoding="async"
-										onerror="this.onerror=null; this.src='/apple-touch-icon.png'"
+										onerror="this.parentElement.hidden=true"
 									/>
-								</span>
+								</span>}
 								<span class={watch.techName}>{tech.data.name}</span>
 								<span class={watch.techArrow} aria-hidden="true">→</span>
 							</a>
@@ -708,29 +600,26 @@ const watchStatusLabel = isLiveNow
 
 			<VideoCast hosts={hostEntries} guests={guestEntries} />
 
-			<NewsletterCTA />
-
 			<VideoContentTabs
 				client:idle
 				videoId={video.data.id}
 				resources={video.data.resources ?? []}
 			/>
 
-			{showEntry && showRelatedVideos.length > 0 && (
+			{showEntry && showRelatedVideos.length > 0 ? (
 				<ShowVideoSection
 					show={showEntry}
 					videos={showRelatedVideos}
 					totalVideos={showRelatedAll.length}
 				/>
-			)}
-
-			{technologiesWithVideos.map(({ technology, videos, totalVideos }) => (
+			) : technologyRecommendation && (
 				<TechnologyVideoSection
-					technology={technology}
-					videos={videos}
-					totalVideos={totalVideos}
+					technology={technologyRecommendation.technology}
+					videos={technologyRecommendation.videos}
+					totalVideos={technologyRecommendation.totalVideos}
 				/>
-			))}
+			)}
+			<NewsletterCTA />
 		</div>
 
 	</div>

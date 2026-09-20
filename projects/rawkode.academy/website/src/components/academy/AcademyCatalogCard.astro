@@ -21,9 +21,9 @@ const catalog = academyCatalog();
 			<img class={catalog.featuredImage} src={image} alt={imageAlt} loading="lazy" />
 		</span>
 	)}
-	<span class={layout.cardBody}>
+	<div class={layout.cardBody}>
 		{meta.length > 0 && <span class={catalog.rowMeta}>{meta.join(" · ")}</span>}
-		<span class={layout.cardTitle}>{title}</span>
+		<h3 class={layout.cardTitle}>{title}</h3>
 		{description && <span class={catalog.rowDescription}>{description}</span>}
-	</span>
+	</div>
 </a>

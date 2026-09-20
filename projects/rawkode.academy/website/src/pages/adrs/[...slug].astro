@@ -8,6 +8,7 @@ import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 import AdrJsonLd from "@/components/html/adr-jsonld.astro";
 import { createLogger } from "@/lib/logger";
 import ArticleHeader from "@/components/read/ArticleHeader.astro";
+import ArticleByline from "@/components/read/ArticleByline.astro";
 import Page from "@/wrappers/page.astro";
 
 export const prerender = true;
@@ -66,33 +67,11 @@ const validAuthors = authors.filter((author) => author && author.data);
 		breadcrumbs={[{ label: "Architecture decisions", href: "/adrs" }]}
 		kicker={`ADR-${adrNumber}`}
 		title={adr.data.title}
-		dek={`Architecture decision record adopted on ${adoptedLabel}.`}
 	>
-		<div class={doc.actions}>
-			<a class={doc.buttonSecondary} href="/adrs">All ADRs</a>
-		</div>
+		<ArticleByline authors={validAuthors} date={adoptedLabel} />
 	</ArticleHeader>
 
-		<section class={doc.section}>
-			<div class={doc.grid}>
-				<div class={[doc.panel, doc.stackSmall].join(" ")}>
-					<p class={doc.meta}>Status</p>
-					<h2 class={doc.cardTitle}>Adopted</h2>
-				</div>
-				<div class={[doc.panel, doc.stackSmall].join(" ")}>
-					<p class={doc.meta}>Date</p>
-					<h2 class={doc.cardTitle}>{adoptedLabel}</h2>
-				</div>
-				<div class={[doc.panel, doc.stackSmall].join(" ")}>
-					<p class={doc.meta}>Authors</p>
-					<h2 class={doc.cardTitle}>
-						{validAuthors.length > 0 ? validAuthors.map((author) => author.data.name).join(", ") : "Unknown"}
-					</h2>
-				</div>
-			</div>
-		</section>
-
-		<section class={doc.section}>
+		<section class={doc.reading}>
 			<article class={[styles.prose, doc.adrProse].join(" ")}>
 				<Content />
 			</article>

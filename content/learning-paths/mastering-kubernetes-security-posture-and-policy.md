@@ -22,8 +22,6 @@ authors:
   - "rawkode"
 ---
 
-# Kubernetes Security Blueprint: Posture to Policy
-
 Catch misconfigurations before they land, enforce intent with policy engines, wire everything into GitOps, and keep runtime observability tight. This path distills modern tooling so platform security teams can safeguard clusters without slowing developers.
 
 ## Learning Objectives

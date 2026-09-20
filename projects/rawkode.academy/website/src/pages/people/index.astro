@@ -46,56 +46,72 @@ const catalog = academyCatalog();
 
 		<section class={styles.section} aria-label="People search">
 			<div class={styles.container}>
-			<div class={styles.toolbar}>
-			<label for="people-search">Search people</label>
-			<input
-				id="people-search"
-				type="search"
-				placeholder="Name"
-				class={styles.input}
-				autocomplete="off"
-			/>
-			<p class={styles.meta}>
-				Showing <span data-people-visible-count>{people.length}</span> of {people.length}
-			</p>
-			</div>
+				<div class={styles.toolbar}>
+					<label for="people-search">Filter people</label>
+					<input
+						id="people-search"
+						type="search"
+						placeholder="Name or handle"
+						class={styles.input}
+						autocomplete="off"
+						aria-controls="people"
+						aria-describedby="people-count"
+					/>
+					<p id="people-count" class={catalog.resultCount} role="status" aria-atomic="true">
+						{people.length} {people.length === 1 ? "person" : "people"}
+					</p>
+				</div>
 
-			<div id="people" class={styles.grid} aria-label="People">
-				{
-					sortedPeople.map((person) => {
-						const searchKeywords = person.data.name.toLowerCase();
-						const handle = person.data.twitter?.split("/").pop();
+				<div id="people" class={catalog.identityGrid}>
+					{
+						sortedPeople.map((person) => {
+							const handles = Object.values(person.data.handles).filter(Boolean);
+							const handle = person.data.handles.twitter
+								|| person.data.handles.github
+								|| person.data.handles.bluesky;
+							const searchKeywords = [
+								person.data.name, ...handles.map((value) => `@${value}`), ...(person.data.terms ?? []),
+							].join(" ").toLowerCase();
+							const names = person.data.name.trim().split(/\s+/u);
+							const initials = (names.length > 1
+								? [...names.slice(0, 1), ...names.slice(-1)].map((name) => Array.from(name)[0]).join("")
+								: Array.from(person.data.name).slice(0, 2).join("")
+							).toUpperCase();
 
-						return (
-							<a
-								href={`/people/${person.data.id}`}
-								class={catalog.identity}
-								data-keywords={searchKeywords}
-							>
-								<span class={catalog.identityMark}>
-									<img
-										src={person.data.avatarUrl ?? "/apple-touch-icon.png"}
-										alt={person.data.name}
-										class={catalog.avatar}
-										loading="lazy"
-										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-									/>
-								</span>
-								<span class={catalog.identityBody}>
-									<span class={catalog.identityTitle}>{person.data.name}</span>
-									<span class={catalog.identityMeta}>{handle ? `@${handle}` : "Contributor profile"}</span>
-								</span>
-								<span class={catalog.identityArrow} aria-hidden="true">↗</span>
-							</a>
-						);
-					})
-				}
-			</div>
+							return (
+								<a
+									href={`/people/${person.data.id}`}
+									class={catalog.identity}
+									data-keywords={searchKeywords}
+									aria-labelledby={`person-${person.data.id}`}
+								>
+									<span class={catalog.identityPortrait} aria-hidden="true">
+										<span class={catalog.identityInitials} hidden={Boolean(person.data.avatarUrl)}>{initials}</span>
+										{person.data.avatarUrl && <img
+											src={person.data.avatarUrl}
+											alt=""
+											width="48"
+											height="48"
+											class={catalog.identityAvatar}
+											loading="lazy"
+											onerror="this.previousElementSibling.hidden=false; this.remove();"
+										/>}
+									</span>
+									<span class={catalog.identityBody}>
+										<span id={`person-${person.data.id}`} class={catalog.identityTitle}>{person.data.name}</span>
+										{handle && <span class={catalog.identityMeta}>@{handle.replace(/^@/, "")}</span>}
+									</span>
+									<span class={catalog.identityArrow} aria-hidden="true">→</span>
+								</a>
+							);
+						})
+					}
+				</div>
 
-			<div id="people-empty-state" class:list={[styles.empty, "hidden"]}>
-				<h2>No people match your search</h2>
-				<p>Try a different name.</p>
-			</div>
+				<div id="people-empty-state" class={catalog.empty} hidden={people.length !== 0}>
+					<h2>No people match your search</h2>
+					<p>Try another name or handle.</p>
+				</div>
 			</div>
 		</section>
 
@@ -106,7 +122,7 @@ const catalog = academyCatalog();
 					document.querySelectorAll<HTMLElement>("#people [data-keywords]"),
 				);
 				const emptyState = document.getElementById("people-empty-state");
-				const countTargets = document.querySelectorAll<HTMLElement>("[data-people-visible-count]");
+				const count = document.getElementById("people-count");
 
 				const applySearch = () => {
 					const query = (searchInput?.value ?? "").trim().toLowerCase();
@@ -116,18 +132,20 @@ const catalog = academyCatalog();
 						const keywords = card.dataset.keywords ?? "";
 						const matchesSearch = keywords.includes(query);
 
-						card.style.display = matchesSearch ? "" : "none";
+						card.hidden = !matchesSearch;
 						if (matchesSearch) {
 							visible += 1;
 						}
 					});
 
-					countTargets.forEach((el) => {
-						el.textContent = visible.toString();
-					});
+					if (count) {
+						count.textContent = query
+							? `${visible} of ${cards.length} people`
+							: `${cards.length} ${cards.length === 1 ? "person" : "people"}`;
+					}
 
 					if (emptyState) {
-						emptyState.classList.toggle("hidden", visible !== 0);
+						emptyState.hidden = visible !== 0;
 					}
 				};
 
@@ -137,168 +155,3 @@ const catalog = academyCatalog();
 		</script>
 	</div>
 </Page>
-
-<style>
-	.people-page {
-		background: var(--colors-academy-canvas);
-		color: var(--colors-academy-text);
-	}
-
-	.people-page__tools {
-		display: grid;
-		grid-template-columns: auto minmax(14rem, 26rem) 1fr;
-		align-items: center;
-		gap: 0.875rem 1rem;
-		padding: 1rem var(--space-section-pad-x);
-		border-bottom: 1px solid var(--colors-academy-border);
-	}
-
-	.people-page__label,
-	.people-page__count {
-		font-family: var(--fonts-academy-mono), monospace;
-		font-size: 0.6875rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--colors-academy-text-muted);
-	}
-
-	.people-page__search-input {
-		width: 100%;
-		min-height: 2.75rem;
-		border: 1px solid var(--colors-academy-input-border);
-		background: var(--colors-academy-ground);
-		color: var(--colors-academy-text);
-		font-family: var(--fonts-academy-text), sans-serif;
-		font-size: 1rem;
-		padding: 0.625rem 0.75rem;
-		border-radius: 0;
-		outline: none;
-	}
-
-	.people-page__search-input:focus {
-		border-color: var(--colors-academy-text);
-		box-shadow: 0 0 0 2px var(--colors-academy-canvas), 0 0 0 3px var(--colors-academy-text);
-	}
-
-	.people-page__search-input::placeholder {
-		color: var(--colors-academy-text-muted);
-	}
-
-	.people-page__count {
-		justify-self: end;
-		margin: 0;
-	}
-
-	.people-page__count span {
-		color: var(--colors-academy-text);
-	}
-
-	.people-page__grid-section {
-		padding: 2rem var(--space-section-pad-x) 3rem;
-	}
-
-	.people-page__grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-		gap: 1rem;
-	}
-
-	.people-card-link {
-		display: grid;
-		grid-template-rows: auto auto 1fr;
-		justify-items: center;
-		min-width: 0;
-		border: 1px solid var(--colors-academy-border);
-		background: var(--colors-academy-ground);
-		color: inherit;
-		text-align: center;
-		text-decoration: none;
-		padding: 1.125rem 0.875rem;
-		transition: border-color var(--duration-base) var(--ease-standard);
-	}
-
-	.people-card-link:hover {
-		border-color: var(--colors-academy-text);
-	}
-
-	.people-card-link__avatar {
-		width: 4.25rem;
-		height: 4.25rem;
-		border-radius: 50%;
-		object-fit: cover;
-		border: 1px solid var(--colors-academy-input-border);
-		margin-bottom: 0.875rem;
-	}
-
-	.people-card-link__name {
-		width: 100%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		font-family: var(--fonts-academy-text), sans-serif;
-		font-size: 0.975rem;
-		font-weight: 700;
-		line-height: 1.25;
-		color: var(--colors-academy-text);
-	}
-
-	.people-card-link__handle {
-		width: 100%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		font-family: var(--fonts-academy-text), sans-serif;
-		font-size: 0.8125rem;
-		color: var(--colors-academy-text-soft);
-		margin-top: 0.2rem;
-	}
-
-	.people-page__empty {
-		border: 1px solid var(--colors-academy-border);
-		background: var(--colors-academy-ground);
-		padding: 2rem;
-		max-width: 28rem;
-		margin: 0 auto;
-		text-align: center;
-	}
-
-	.people-page__empty h2 {
-		font-family: var(--fonts-academy-text), sans-serif;
-		font-size: 1.25rem;
-		font-weight: 700;
-		letter-spacing: 0;
-		color: var(--colors-academy-text);
-		margin: 0;
-	}
-
-	.people-page__empty p {
-		font-family: var(--fonts-academy-text), sans-serif;
-		color: var(--colors-academy-text-soft);
-		margin: 0.5rem 0 0;
-	}
-
-	@media (max-width: 720px) {
-		.people-page__tools {
-			grid-template-columns: 1fr;
-			padding: 0.875rem 1rem 1rem;
-		}
-		.people-page__count {
-			justify-self: start;
-		}
-		.people-page__grid-section {
-			padding: 1.25rem 1rem 2.5rem;
-		}
-		.people-page__grid {
-			grid-template-columns: repeat(auto-fill, minmax(8.75rem, 1fr));
-			gap: 0.75rem;
-		}
-		.people-card-link {
-			padding: 1rem 0.75rem;
-		}
-		.people-card-link__avatar {
-			width: 3.5rem;
-			height: 3.5rem;
-		}
-	}
-</style>

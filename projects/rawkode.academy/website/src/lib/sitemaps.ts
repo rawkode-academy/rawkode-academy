@@ -437,18 +437,28 @@ export async function getShowSitemapEntries(): Promise<SitemapUrlEntry[]> {
 }
 
 export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const seriesEntries = await getCollection("series");
+	const [seriesEntries, articles] = await Promise.all([
+		getCollection("series"),
+		getCollection("articles", ({ data }) => !data.draft),
+	]);
+	const publishedSeriesIds = new Set(
+		articles
+			.map((article) => article.data.series?.id)
+			.filter((id): id is string => Boolean(id)),
+	);
 
-	const entries = seriesEntries.map((seriesEntry) => ({
-		path: `/series/${seriesEntry.id}`,
-		lastmod: pickLastmod(
-			undefined,
-			(seriesEntry.data as Record<string, unknown>).updatedAt,
-			(seriesEntry.data as Record<string, unknown>).publishedAt,
-		),
-		changefreq: "weekly" as const,
-		priority: 0.5,
-	}));
+	const entries = seriesEntries
+		.filter((series) => publishedSeriesIds.has(series.id))
+		.map((seriesEntry) => ({
+			path: `/series/${seriesEntry.id}`,
+			lastmod: pickLastmod(
+				undefined,
+				(seriesEntry.data as Record<string, unknown>).updatedAt,
+				(seriesEntry.data as Record<string, unknown>).publishedAt,
+			),
+			changefreq: "weekly" as const,
+			priority: 0.5,
+		}));
 
 	return sortByPath(entries);
 }

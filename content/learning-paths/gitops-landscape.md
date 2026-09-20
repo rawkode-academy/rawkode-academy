@@ -22,8 +22,6 @@ authors:
   - "rawkode"
 ---
 
-# GitOps Landscape
-
 GitOps is more than a controller—you need packaging discipline, environment orchestration, reconciliation pipelines, and developer UX. This path assembles opinionated tools so platform engineers can scale fleets while keeping guardrails intact.
 
 ## Learning Objectives

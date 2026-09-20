@@ -2,6 +2,9 @@
 import { getCollection, getEntry } from "astro:content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
+import { academyDocument } from "@rawkodeacademy/design-system";
+
+const doc = academyDocument();
 
 const changelogEntries = await getCollection("changelog");
 
@@ -35,7 +38,6 @@ const processedChangelog = await Promise.all(
 			summary: cleanSummary(entry.data.description),
 			author: {
 				name: authorEntry?.data.name || "Unknown",
-				avatar_url: authorEntry?.data.avatarUrl || "",
 			},
 		};
 	}),
@@ -53,7 +55,7 @@ const processedChangelog = await Promise.all(
 		compact
 	>
 		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button editorial-button--secondary" href="https://github.com/rawkode-academy">GitHub</a>
+			<a class={doc.link} href="https://github.com/rawkode-academy/rawkode-academy/commits/main/">View the code history ↗</a>
 		</div>
 
 		<section id="latest" class="editorial-section changelog-list">
@@ -74,6 +76,7 @@ const processedChangelog = await Promise.all(
 										day: "numeric",
 									})}
 								</time>
+								<span>by {entry.author.name}</span>
 							</div>
 							<h2>{entry.title}</h2>
 							<p class="changelog-entry__summary">{entry.summary}</p>
@@ -85,17 +88,6 @@ const processedChangelog = await Promise.all(
 									View pull request
 								</a>
 							)}
-							<footer class="changelog-entry__byline">
-								{entry.author.avatar_url && (
-									<img
-										src={entry.author.avatar_url}
-										alt=""
-										class="changelog-entry__avatar"
-										loading="lazy"
-									/>
-								)}
-								<span>by {entry.author.name}</span>
-							</footer>
 						</article>
 					))
 				)
@@ -114,8 +106,7 @@ const processedChangelog = await Promise.all(
 	.changelog-entry {
 		border-top: 1px solid var(--colors-academy-border);
 		display: grid;
-		grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
-		column-gap: clamp(1.5rem, 4vw, 4rem);
+		grid-template-columns: minmax(0, 1fr);
 		row-gap: 0.75rem;
 		padding: clamp(1.5rem, 3vw, 2.5rem) 0;
 	}
@@ -131,13 +122,13 @@ const processedChangelog = await Promise.all(
 		align-content: start;
 		align-items: center;
 		gap: 0.5rem;
-		grid-row: span 4;
+		color: var(--colors-academy-text-muted);
+		font-size: 0.8125rem;
 	}
 
-	.changelog-entry__meta time,
-	.changelog-entry__byline {
+	.changelog-entry__meta time {
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.68rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
@@ -145,10 +136,10 @@ const processedChangelog = await Promise.all(
 	}
 
 	.changelog-entry h2 {
-		font-family: var(--fonts-academy-text), system-ui, sans-serif;
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
 		font-size: 1.75rem;
 		font-weight: 750;
-		line-height: 1.05;
+		line-height: 1.2;
 		letter-spacing: 0;
 		color: var(--colors-academy-text);
 		margin: 0;
@@ -176,34 +167,9 @@ const processedChangelog = await Promise.all(
 		padding-bottom: 0.22rem;
 	}
 
-	.changelog-entry__byline {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 1.2rem;
-	}
-
-	.changelog-entry__avatar {
-		width: 1.4rem;
-		height: 1.4rem;
-		border-radius: 999px;
-		object-fit: cover;
-		border: 1px solid var(--colors-academy-border);
-	}
-
 	@media (max-width: 700px) {
 		.changelog-entry {
-			display: block;
 			padding: 1.5rem 0;
-		}
-
-		.changelog-entry__meta {
-			margin-bottom: 0.75rem;
-		}
-
-		.changelog-entry__summary,
-		.changelog-entry__link {
-			margin-top: 0.85rem;
 		}
 	}
 </style>

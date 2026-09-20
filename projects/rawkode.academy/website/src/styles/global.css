@@ -1,5 +1,13 @@
 @layer reset, base, components, utilities;
 
+/* Existing article components resolve their historical variable names to the
+   same Academy fonts. Only the Red Hat families are loaded. */
+:root {
+	--font-instrument-serif: var(--font-red-hat-display);
+	--font-inter-tight: var(--font-red-hat-text);
+	--font-jetbrains-mono: var(--font-red-hat-mono);
+}
+
 /* The website owns its reset. It is intentionally small: Panda owns the
    design-system recipes, while this layer only removes browser defaults that
    would otherwise create invisible spacing or overflow. */
@@ -14,6 +22,7 @@
 	body {
 		margin: 0;
 		padding: 0;
+		min-width: 320px;
 	}
 
 	h1,
@@ -67,48 +76,41 @@
    beside its route. */
 
 :root {
-	/* Editorial palette — "engineering journal meets terminal".
-	   Token *names* are preserved from the previous Rawkode Blue system
-	   so ~300 call sites keep working; only the values change.
-
-	   The triplets below are sRGB approximations of oklch design values,
-	   used by the legacy `rgb(var(--x))` and `rgba(var(--x), 0.x)` pattern
-	   throughout the codebase. New primitives should prefer the direct
-	   `--editorial-*` oklch tokens below for precision. */
-	--brand-primary: 35 115 86; /* spruce  — oklch(0.50 0.09 165) */
+	/* Compatibility aliases for authored content. Panda owns the palette. */
+	--brand-primary: 194 24 91;
 	--brand-secondary: 154 85 0; /* amber-text — oklch(0.52 0.13 65) */
 	--brand-accent: 165 74 40; /* rust    — oklch(0.52 0.13 40) */
 
 	/* Editorial direct-color palette (preferred for new primitives) */
-	--editorial-paper: oklch(0.97 0.008 85);
-	--editorial-paper-deep: oklch(0.93 0.012 85);
-	--editorial-ink: oklch(0.18 0.02 60);
-	--editorial-ink-soft: oklch(0.36 0.015 60);
-	--editorial-ink-mute: oklch(0.51 0.012 60); /* ≥4.5:1 on paper + paper-deep */
-	--editorial-hairline: oklch(0.18 0.02 60 / 0.12);
-	--editorial-hairline-strong: oklch(0.18 0.02 60 / 0.22);
-	--editorial-spruce: oklch(0.50 0.09 165); /* ≥4.5:1 on paper + paper-deep */
-	--editorial-spruce-dim: oklch(0.50 0.09 165 / 0.12);
-	--editorial-amber: oklch(0.72 0.15 65);
-	--editorial-amber-dim: oklch(0.72 0.15 65 / 0.14);
+	--editorial-paper: var(--colors-academy-canvas);
+	--editorial-paper-deep: var(--colors-academy-ground);
+	--editorial-ink: var(--colors-academy-text);
+	--editorial-ink-soft: var(--colors-academy-text-soft);
+	--editorial-ink-mute: var(--colors-academy-text-muted);
+	--editorial-hairline: var(--colors-academy-border);
+	--editorial-hairline-strong: var(--colors-academy-input-border);
+	--editorial-spruce: var(--colors-academy-status-spruce);
+	--editorial-spruce-dim: color-mix(in srgb, var(--colors-academy-status-spruce) 12%, transparent);
+	--editorial-amber: var(--colors-academy-status-amber);
+	--editorial-amber-dim: color-mix(in srgb, var(--colors-academy-status-amber) 12%, transparent);
 	/* Amber fails AA as light-mode text (2.35:1 on paper). Text/icon
 	   consumers use this darker companion; dots, borders and backgrounds
 	   keep --editorial-amber. Dark mode points both at the bright value. */
-	--editorial-amber-text: oklch(0.52 0.13 65);
-	--editorial-rust: oklch(0.52 0.13 40); /* ≥4.5:1 on paper + paper-deep */
-	--editorial-violet: oklch(0.50 0.13 290);
+	--editorial-amber-text: var(--colors-academy-status-amber);
+	--editorial-rust: var(--colors-academy-status-rust);
+	--editorial-violet: var(--colors-academy-status-violet);
 
 	/* Light-mode surface tokens */
 	color-scheme: light;
-	--surface-base: var(--editorial-paper);
-	--surface-overlay: oklch(0.97 0.008 85 / 0.94);
-	--surface-card: var(--editorial-paper-deep);
-	--surface-card-muted: oklch(0.18 0.02 60 / 0.04);
-	--surface-border: var(--editorial-hairline);
-	--surface-border-strong: var(--editorial-hairline-strong);
+	--surface-base: var(--colors-academy-canvas);
+	--surface-overlay: color-mix(in srgb, var(--colors-academy-canvas) 94%, transparent);
+	--surface-card: var(--colors-academy-panel);
+	--surface-card-muted: color-mix(in srgb, var(--colors-academy-text) 4%, transparent);
+	--surface-border: var(--colors-academy-border);
+	--surface-border-strong: var(--colors-academy-input-border);
 	/* Skeleton bone — needs to read against both paper and card surfaces,
 	   so it sits between hairline and card-muted in weight. */
-	--surface-skeleton: oklch(0.18 0.02 60 / 0.10);
+	--surface-skeleton: color-mix(in srgb, var(--colors-academy-text) 10%, transparent);
 
 	/* Theme-invariant terminal chrome. Terminals, WebContainers, and other
 	   "screen within the page" surfaces stay dark in both colour schemes;
@@ -157,32 +159,32 @@ html.dark {
 	/* Dark-mode editorial palette — ink-dark ground with paper-dark surfaces.
 	   The triplet legacy tokens stay; only the value brightens slightly for
 	   contrast on dark. */
-	--editorial-paper: oklch(0.22 0.012 280); /* paper-dark */
-	--editorial-paper-deep: oklch(0.26 0.014 280);
-	--editorial-ink: oklch(0.92 0.008 85); /* light text on dark */
-	--editorial-ink-soft: oklch(0.74 0.008 85);
-	--editorial-ink-mute: oklch(0.66 0.008 85); /* ≥4.5:1 on base + card */
-	--editorial-hairline: oklch(1 0 0 / 0.10);
-	--editorial-hairline-strong: oklch(1 0 0 / 0.18);
+	--editorial-paper: var(--colors-academy-canvas);
+	--editorial-paper-deep: var(--colors-academy-ground);
+	--editorial-ink: var(--colors-academy-text);
+	--editorial-ink-soft: var(--colors-academy-text-soft);
+	--editorial-ink-mute: var(--colors-academy-text-muted);
+	--editorial-hairline: var(--colors-academy-border);
+	--editorial-hairline-strong: var(--colors-academy-input-border);
 
 	/* Accents brighten on dark ground — the light-mode values sit at
 	   ~3:1 against the dark card surface, below AA for text. The legacy
 	   triplets follow so every rgb(var(--brand-*)) consumer lifts too. */
-	--editorial-spruce: oklch(0.72 0.09 165);
-	--editorial-spruce-dim: oklch(0.72 0.09 165 / 0.14);
-	--editorial-rust: oklch(0.70 0.12 40);
-	--editorial-amber-text: oklch(0.72 0.15 65);
-	--brand-primary: 107 183 151; /* spruce dark — oklch(0.72 0.09 165) */
+	--editorial-spruce: var(--colors-academy-status-spruce);
+	--editorial-spruce-dim: color-mix(in srgb, var(--colors-academy-status-spruce) 12%, transparent);
+	--editorial-rust: var(--colors-academy-status-rust);
+	--editorial-amber-text: var(--colors-academy-status-amber);
+	--brand-primary: 255 122 182;
 	--brand-secondary: 218 142 58; /* amber — oklch(0.72 0.15 65) */
 	--brand-accent: 221 131 100; /* rust dark — oklch(0.70 0.12 40) */
 
-	--surface-base: oklch(0.14 0.01 280); /* ink-dark ground */
-	--surface-overlay: oklch(0.14 0.01 280 / 0.92);
-	--surface-card: var(--editorial-paper-deep);
-	--surface-card-muted: oklch(1 0 0 / 0.04);
-	--surface-skeleton: oklch(1 0 0 / 0.10);
-	--surface-border: var(--editorial-hairline);
-	--surface-border-strong: var(--editorial-hairline-strong);
+	--surface-base: var(--colors-academy-canvas);
+	--surface-overlay: color-mix(in srgb, var(--colors-academy-canvas) 94%, transparent);
+	--surface-card: var(--colors-academy-panel);
+	--surface-card-muted: color-mix(in srgb, var(--colors-academy-text) 4%, transparent);
+	--surface-skeleton: color-mix(in srgb, var(--colors-academy-text) 10%, transparent);
+	--surface-border: var(--colors-academy-border);
+	--surface-border-strong: var(--colors-academy-input-border);
 
 	--text-primary-content: var(--editorial-ink);
 	--text-secondary-content: var(--editorial-ink-soft);
@@ -245,7 +247,7 @@ body {
 	   so position:sticky descendants keep working while horizontal
 	   scrolling is still prevented. */
 	overflow-x: clip;
-	font-family: var(--font-inter-tight), "Inter", -apple-system, system-ui, sans-serif;
+	font-family: var(--font-red-hat-text), "Inter", -apple-system, system-ui, sans-serif;
 }
 
 /* These semantic hooks restore list markers only where content is prose. The
@@ -365,7 +367,7 @@ html.dark {
 	h1 {
 		font-size: 2.25rem;
 		color: var(--text-primary-content);
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: normal;
 		font-weight: 400;
 		line-height: 0.98;
@@ -376,7 +378,7 @@ html.dark {
 	h2 {
 		font-size: 1.875rem;
 		color: var(--text-primary-content);
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-style: normal;
 		font-weight: 650;
 		line-height: 1.02;
@@ -387,7 +389,7 @@ html.dark {
 	h3 {
 		font-size: 1.25rem;
 		color: var(--text-primary-content);
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		line-height: 1.2;
 		letter-spacing: -0.015em;
@@ -397,7 +399,7 @@ html.dark {
 	h4 {
 		font-size: 1.125rem;
 		color: var(--text-primary-content);
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		line-height: 1.25;
 		letter-spacing: -0.01em;
@@ -450,7 +452,7 @@ html.dark {
 		justify-content: center;
 		gap: 0.5rem;
 		padding: 0.25rem 0.6rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -491,7 +493,7 @@ html.dark {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.6875rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -557,7 +559,7 @@ html.dark {
 		align-items: center;
 		justify-content: center;
 		gap: 0.625rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.14em;
@@ -639,13 +641,13 @@ html.dark {
 
 	.ed-aside__body {
 		min-width: 0;
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-size: 0.9375rem;
 		line-height: 1.6;
 	}
 
 	.ed-aside__label {
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.65rem;
 		font-weight: 500;
 		text-transform: uppercase;
@@ -695,7 +697,7 @@ html.dark {
 	   blockquote (single 2px ink border-left, no gradient fill).
 	   ════════════════════════════════════════════════════════════════ */
 	.prose {
-		font-family: var(--font-inter-tight), "Inter", sans-serif;
+		font-family: var(--font-red-hat-text), "Inter", sans-serif;
 		font-size: 1.125rem;
 		line-height: 1.7;
 		color: var(--text-secondary-content);
@@ -709,7 +711,7 @@ html.dark {
 
 	/* Reading headings stay sans so long technical documents scan quickly. */
 	.prose h1 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-style: normal;
 		font-size: clamp(2.25rem, 5vw, 3.5rem);
 		font-weight: 650;
@@ -721,7 +723,7 @@ html.dark {
 	}
 
 	.prose h2 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-style: normal;
 		font-size: clamp(1.75rem, 3.5vw, 2.5rem);
 		font-weight: 650;
@@ -733,7 +735,7 @@ html.dark {
 	}
 
 	.prose h3 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		font-size: clamp(1.25rem, 2.5vw, 1.5rem);
 		letter-spacing: -0.015em;
@@ -744,7 +746,7 @@ html.dark {
 	}
 
 	.prose h4 {
-		font-family: var(--font-inter-tight), sans-serif;
+		font-family: var(--font-red-hat-text), sans-serif;
 		font-weight: 500;
 		font-size: clamp(1.125rem, 2vw, 1.25rem);
 		letter-spacing: -0.01em;
@@ -835,7 +837,7 @@ html.dark {
 		position: absolute;
 		left: -2.25rem;
 		width: 1.75rem;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.75em;
 		font-weight: 500;
 		letter-spacing: 0.05em;
@@ -877,7 +879,7 @@ html.dark {
 		margin: 2rem 0;
 		padding: 0.25rem 0 0.25rem 1.5rem;
 		border-left: 2px solid var(--editorial-ink);
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: italic;
 		font-size: 1.25rem;
 		line-height: 1.4;
@@ -894,7 +896,7 @@ html.dark {
 
 	/* Inline code — mono, but still part of the sentence. */
 	.prose code {
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.85em;
 		font-weight: 500;
 		line-height: inherit;
@@ -987,7 +989,7 @@ html.dark {
 
 	.prose hr.dots::before {
 		content: "§ § §";
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: italic;
 		color: var(--editorial-ink-mute);
 		letter-spacing: 0.8em;
@@ -1010,7 +1012,7 @@ html.dark {
 	.prose th {
 		text-align: left;
 		font-weight: 600;
-		font-family: var(--font-jetbrains-mono), monospace;
+		font-family: var(--font-red-hat-mono), monospace;
 		font-size: 0.75em;
 		text-transform: uppercase;
 		letter-spacing: 0.12em;
@@ -1038,7 +1040,7 @@ html.dark {
 
 	/* Pull quote — serif italic display centered. */
 	.prose .pull-quote {
-		font-family: var(--font-instrument-serif), serif;
+		font-family: var(--font-red-hat-display), serif;
 		font-style: italic;
 		font-size: 2rem;
 		font-weight: 400;
@@ -1759,10 +1761,10 @@ html.dark {
 .bg-secondary { background-color: rgb(var(--brand-secondary)); }
 .bg-accent { background-color: rgb(var(--brand-accent)); }
 .font-display,
-.font-serif { font-family: var(--font-instrument-serif), serif; }
+.font-serif { font-family: var(--font-red-hat-display), serif; }
 .font-body,
-.font-sans { font-family: var(--font-inter-tight), sans-serif; }
-.font-mono { font-family: var(--font-jetbrains-mono), monospace; }
+.font-sans { font-family: var(--font-red-hat-text), sans-serif; }
+.font-mono { font-family: var(--font-red-hat-mono), monospace; }
 .focus-ring:focus-visible {
 	outline: 2px solid rgb(var(--brand-primary));
 	outline-offset: 2px;
@@ -1790,7 +1792,7 @@ html.dark {
 
 /* Keep prose inline code sentence-sized after the browser reset. */
 .prose code {
-	font-family: var(--font-jetbrains-mono), monospace;
+	font-family: var(--font-red-hat-mono), monospace;
 	font-size: 0.85em;
 	font-weight: 500;
 	line-height: inherit;
@@ -1839,25 +1841,25 @@ html.dark {
    ════════════════════════════════════════════════════════════════ */
 .prose h1 {
 	font-size: clamp(2.25rem, 5vw, 3.5rem);
-	font-weight: 400;
+	font-weight: 700;
 	margin: 2.5rem 0 1.25rem;
 }
 
 .prose h2 {
 	font-size: clamp(1.75rem, 3.5vw, 2.5rem);
-	font-weight: 400;
+	font-weight: 700;
 	margin: 2.25rem 0 1rem;
 }
 
 .prose h3 {
 	font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-	font-weight: 500;
+	font-weight: 600;
 	margin: 2rem 0 0.875rem;
 }
 
 .prose h4 {
 	font-size: clamp(1.125rem, 2vw, 1.25rem);
-	font-weight: 500;
+	font-weight: 600;
 	margin: 1.75rem 0 0.75rem;
 }
 

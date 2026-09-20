@@ -1,6 +1,6 @@
 ---
-import { academyDocument, academyLayout } from "@rawkodeacademy/design-system";
-const doc = academyDocument();
+import { academyCourse, academyLayout } from "@rawkodeacademy/design-system";
+const s = academyCourse();
 const styles = academyLayout({ width: "reading" });
 import { getImage } from "astro:assets";
 import {
@@ -21,18 +21,6 @@ export const prerender = true;
 
 type Props = {
 	course: CollectionEntry<"courses">;
-};
-
-const computeImageUrl = async (
-	course: CollectionEntry<"courses">,
-): Promise<URL | undefined> => {
-	if (course.data.cover) {
-		const image = await getImage({ src: course.data.cover.image });
-
-		return new URL(image.src, Astro.site);
-	}
-
-	return undefined;
 };
 
 export const getStaticPaths: GetStaticPaths =
@@ -62,16 +50,17 @@ const allCourseModules = (await getCollection("courseModules"))
 	.sort((a, b) => a.data.order - b.data.order);
 
 const totalModules = allCourseModules.length;
-const availableModuleCount = allCourseModules.filter(
-	(module) => !module.data.draft,
-).length;
-const totalDuration = allCourseModules
-	.filter((module) => !module.data.draft)
-	.reduce((acc, module) => acc + (module.data.duration || 0), 0);
+const availableModules = allCourseModules.filter((module) => !module.data.draft);
+const availableModuleCount = availableModules.length;
+// Only advertise a runtime when every published lesson has a recorded duration.
+const hasCompleteDuration = availableModules.length > 0 && availableModules.every(
+	(module) => module.data.duration != null && module.data.duration > 0,
+);
+const totalDuration = hasCompleteDuration
+	? availableModules.reduce((total, module) => total + (module.data.duration ?? 0), 0)
+	: undefined;
 
-// Format duration
 function formatDuration(minutes: number): string {
-	if (minutes === 0) return "Self-paced";
 	const hours = Math.floor(minutes / 60);
 	const mins = minutes % 60;
 	if (hours === 0) return `${mins}m`;
@@ -79,14 +68,23 @@ function formatDuration(minutes: number): string {
 	return `${hours}h ${mins}m`;
 }
 
-// Utility function to get difficulty variant
-
-const imageUrl = await computeImageUrl(course);
+const coverImage = course.data.cover
+	? await getImage({ src: course.data.cover.image })
+	: undefined;
+const imageUrl = coverImage ? new URL(coverImage.src, Astro.site) : undefined;
+const cover = coverImage && course.data.cover ? {
+	src: coverImage.src,
+	alt: course.data.cover.alt,
+	width: course.data.cover.image.width,
+	height: course.data.cover.image.height,
+} : undefined;
 const hasCourseResources = Boolean(course.data.resources?.length);
+const hasSupplementaryContent = Boolean(course.data.signupConfig || hasCourseResources);
 
 // Format authors for the hero component
 const formattedAuthors = authors.map((author) => ({
 	name: author.data.name,
+	href: `/people/${author.data.id}`,
 	avatarUrl: author.data.avatarUrl,
 }));
 
@@ -118,6 +116,7 @@ function getResourceHref(
 		<CourseJsonLd
 			slot="extra-head"
 			course={course}
+			imageUrl={imageUrl}
 			modules={allCourseModules}
 			authors={authors}
 		/>
@@ -131,111 +130,77 @@ function getResourceHref(
 		]}
 	/>
 	
-	<!-- Hero Section with Signup Form -->
 	<CourseDetailHero
 		title={course.data.title}
 		description={course.data.description}
 		moduleCount={totalModules}
 		availableModuleCount={availableModuleCount}
-		totalDuration={formatDuration(totalDuration)}
+		totalDuration={totalDuration === undefined ? undefined : formatDuration(totalDuration)}
 		difficulty={course.data.difficulty.charAt(0).toUpperCase() + course.data.difficulty.slice(1)}
-		learningPath={course.data.learningPath}
 		authors={formattedAuthors}
-	>
-		<Fragment slot="signup-form">
-			{course.data.signupConfig && (
-				<CourseSignupFormCompact 
-					courseId={course.id}
-					courseTitle={course.data.title}
-					signupConfig={course.data.signupConfig}
-					isAlreadySubscribed={false}
-					server:defer 
-				/>
-			)}
-		</Fragment>
-	</CourseDetailHero>
+		cover={cover}
+	/>
 
-	<section class={doc.section}>
-		<div class={doc.container}>
-			<div class={hasCourseResources ? doc.split : doc.stack}>
-				<div class={doc.stack}>
-					{Content && (
-						<section class={[doc.panel, doc.stack].join(" ")}>
-							<div class={doc.rowBetween}>
-								<div class={doc.stackSmall}>
-									<div class={doc.kicker}>Course Overview</div>
-									<h2 class={doc.sectionTitle}>What this course covers</h2>
-								</div>
-								<p class={doc.copy}>
-									Use this as the editorial overview before diving into the curriculum below.
-								</p>
-							</div>
-							<article class={styles.prose}>
-								<Content />
-							</article>
+	<div class={s.detailBody}>
+		<section id="course-content" class={s.curriculum} aria-labelledby="curriculum-title">
+			<h2 id="curriculum-title" class={s.sectionHeading}>Curriculum</h2>
+			<CourseModules course={course} modules={allCourseModules} />
+		</section>
+
+		<div class={hasSupplementaryContent ? s.detailGrid : s.detailStack}>
+			<div class={s.detailStack}>
+				{course.data.learningPath.length > 0 && (
+					<section class={s.detailStack} aria-labelledby="objectives-title">
+						<h2 id="objectives-title" class={s.sectionHeading}>Learning objectives</h2>
+						<ul class={s.objectiveList}>
+							{course.data.learningPath.map((objective) => <li>{objective}</li>)}
+						</ul>
+					</section>
+				)}
+				<article class={styles.prose}>
+					<Content />
+				</article>
+			</div>
+
+			{hasSupplementaryContent && (
+				<aside class={s.supplementary} aria-label="Course updates and resources">
+					{course.data.signupConfig && (
+						<section class={s.signup} aria-labelledby="course-updates-title">
+							<h2 id="course-updates-title" class={s.sectionHeading}>Course updates</h2>
+							<CourseSignupFormCompact
+								courseId={course.id}
+								courseTitle={course.data.title}
+								signupConfig={course.data.signupConfig}
+								isAlreadySubscribed={false}
+								server:defer
+							/>
 						</section>
 					)}
-
-					<section id="course-content" class={[doc.panel, doc.stack].join(" ")}>
-						<div class={doc.rowBetween}>
-							<div class={doc.stackSmall}>
-								<div class={doc.kicker}>Curriculum</div>
-								<h2 class={doc.sectionTitle}>Course content</h2>
-							</div>
-							<p class={doc.copy}>
-								Published modules are ready now. Planned lessons stay visible so the path is obvious.
-							</p>
-						</div>
-						<CourseModules course={course} />
-					</section>
-				</div>
-
-				{hasCourseResources && (
-					<aside class={doc.sidebar}>
-						<div class={[doc.rule, doc.stack].join(" ")}>
-							<div class={doc.stackSmall}>
-								<div class={doc.kicker}>Course Resources</div>
-								<h2 class={doc.sectionTitle}>Reference material</h2>
-								<p class={doc.copy}>
-									Docs, source code, and supporting references for the modules in this course.
-								</p>
-							</div>
-
-							<div class={doc.list}>
+					{hasCourseResources && (
+						<section class={s.detailStack} aria-labelledby="course-resources-title">
+							<h2 id="course-resources-title" class={s.sectionHeading}>References</h2>
+							<div class={s.detailStack}>
 								{course.data.resources?.map((resource) => {
 									const href = getResourceHref(resource);
-
 									return (
-										<div class={doc.listItem}>
-											<div class={doc.rowBetween}>
-												<div class={doc.stackSmall}>
-													<h3 class={doc.copy}>{resource.title}</h3>
-													{resource.description && (
-														<p class={doc.copy}>{resource.description}</p>
-													)}
-												</div>
-												{href && (
-													<a
-														href={href}
-														target={resource.type === "url" ? "_blank" : undefined}
-														rel={resource.type === "url" ? "noopener noreferrer" : undefined}
-														class={doc.link}
-														aria-label={`Open ${resource.title}`}
-													>
-														<svg class={doc.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-														</svg>
-													</a>
-												)}
-											</div>
+										<div class={s.lessonCopy}>
+											{href ? (
+												<a
+													href={href}
+													target={resource.type === "url" ? "_blank" : undefined}
+													rel={resource.type === "url" ? "noopener noreferrer" : undefined}
+													class={s.link}
+												>{resource.title}</a>
+											) : <h3 class={s.lessonTitle}>{resource.title}</h3>}
+											{resource.description && <p class={s.lessonDescription}>{resource.description}</p>}
 										</div>
 									);
 								})}
 							</div>
-						</div>
-					</aside>
-				)}
-			</div>
+						</section>
+					)}
+				</aside>
+			)}
 		</div>
-	</section>
+	</div>
 </Page>

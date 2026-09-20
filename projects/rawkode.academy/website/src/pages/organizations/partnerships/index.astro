@@ -44,25 +44,6 @@ const faqs = [
 	},
 ];
 
-const deliverables = [
-	{
-		title: "Technical proof",
-		body: "One working demo or proof asset each quarter, built around a real practitioner workflow.",
-	},
-	{
-		title: "Working partnership",
-		body: "Slack Connect for questions and decisions, plus one scheduled working session each month.",
-	},
-	{
-		title: "Reusable distribution",
-		body: "A companion page, clips, shared asset repository, and agreed reuse rights for your team.",
-	},
-	{
-		title: "Evidence and renewal",
-		body: "A quarterly delivery and performance report that makes the next renewal decision explicit.",
-	},
-];
-
 const process = [
 	{
 		step: "01",
@@ -125,43 +106,6 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 					{partnershipOffer.included.map((item) => <li>{item}</li>)}
 				</ul>
 				<a class="editorial-button" href={applyHref} data-apply-path={partnershipOffer.name}>Apply for the programme</a>
-			</div>
-		</section>
-
-		<section class="editorial-section" aria-labelledby="deliverables-title">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">What you receive</p>
-				<h2 id="deliverables-title" class="editorial-section__title">A repeatable working rhythm</h2>
-			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{deliverables.map((item) => (
-					<article class="editorial-card partner-card">
-						<h3 class="editorial-card__title">{item.title}</h3>
-						<p class="editorial-card__body">{item.body}</p>
-					</article>
-				))}
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split" aria-labelledby="evidence-title">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Evidence over theatre</p>
-				<h2 id="evidence-title" class="editorial-section__title">Build something practitioners can actually inspect.</h2>
-				<p class="editorial-section__lede">The work starts with a real environment and a real workflow. It should leave behind something your team can reuse, not just a conversation that disappears into a meeting history.</p>
-			</div>
-			<div class="partner-evidence">
-				<article class="partner-evidence__item">
-					<h3 class="editorial-card__title">Working demos</h3>
-					<p class="editorial-card__body">Dockerfiles, manifests, code, and the operational details that let a technical evaluator follow the path from claim to proof.</p>
-				</article>
-				<article class="partner-evidence__item">
-					<h3 class="editorial-card__title">Public learning</h3>
-					<p class="editorial-card__body">Courses, live builds, articles, and walkthroughs that meet practitioners where they evaluate a product.</p>
-				</article>
-				<article class="partner-evidence__item">
-					<h3 class="editorial-card__title">Independent judgement</h3>
-					<p class="editorial-card__body">Sponsorship funds the work, not the verdict. Trust is protected by keeping claims and editorial decisions honest.</p>
-				</article>
 			</div>
 		</section>
 
@@ -266,7 +210,7 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--colors-academy-status-spruce);
+		color: var(--colors-academy-accent);
 	}
 
 	.partner-offer-card {
@@ -292,18 +236,13 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 		text-transform: uppercase;
 	}
 
-	.partner-card {
-		display: grid;
-		gap: 0.55rem;
-	}
-
 	.partner-card__link {
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
 		font-size: 0.72rem;
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		color: var(--colors-academy-status-spruce);
+		color: var(--colors-academy-accent);
 		text-decoration: none;
 	}
 
@@ -312,7 +251,6 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 		text-underline-offset: 0.2em;
 	}
 
-	.partner-evidence,
 	.partner-process {
 		display: grid;
 		gap: 0;
@@ -320,19 +258,16 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 		border-bottom: 1px solid var(--colors-academy-border);
 	}
 
-	.partner-evidence__item,
 	.partner-process__item {
 		display: grid;
 		gap: 0.5rem;
 		padding: 1rem 0;
 	}
 
-	.partner-evidence__item + .partner-evidence__item,
 	.partner-process__item + .partner-process__item {
 		border-top: 1px solid var(--colors-academy-border);
 	}
 
-	.partner-evidence__item h3,
 	.partner-process__item h3 {
 		margin: 0;
 	}
@@ -355,20 +290,16 @@ const reviewApplyHref = `/organizations/partnerships?route=${encodeURIComponent(
 			border-left: 1px solid var(--colors-academy-border);
 		}
 
-		.partner-evidence,
-		.partner-process {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
+			.partner-process {
+			grid-template-columns: 1fr;
 		}
 
-		.partner-evidence__item,
-		.partner-process__item {
+			.partner-process__item {
 			padding: 1rem;
 		}
 
-		.partner-evidence__item + .partner-evidence__item,
-		.partner-process__item + .partner-process__item {
-			border-top: 0;
-			border-left: 1px solid var(--colors-academy-border);
+			.partner-process__item + .partner-process__item {
+			border-top: 1px solid var(--colors-academy-border);
 		}
 	}
 </style>

@@ -173,12 +173,6 @@ function formatDuration(seconds: number) {
  <div class={doc.showHero}>
  <!-- Show info -->
  <div class={[doc.spacer, doc.stack].join(" ")}>
- <div class={doc.row}>
- <svg class={doc.iconSmall} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
- <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
- </svg>
- <span class={doc.link}>Show</span>
- </div>
 
  <h1 class={doc.title}>
  {showEntry.data.name}
@@ -187,10 +181,8 @@ function formatDuration(seconds: number) {
  {hostNames.length > 0 && (
  <div class={doc.actions}>
  <span class={doc.meta}>Hosted by</span>
- {hostNames.map((host) => (
- <span class={doc.tag}>
- {host}
- </span>
+ {hostEntries.map((host) => (
+ <a class={doc.link} href={`/people/${host.data.id}`}>{host.data.name}</a>
  ))}
  </div>
  )}
@@ -266,16 +258,6 @@ function formatDuration(seconds: number) {
  ) : null}
  </div>
 
- <!-- Newsletter - full width, subtle -->
- <div class={doc.stack}>
- <NewsletterCTA
- class={doc.flush ?? ""}
- audience={`show:${showEntry.data.id}`}
- badge="Get notified of new episodes"
- headline={`Subscribe to ${showEntry.data.name}`}
- subtitle="Be the first to know when new episodes drop."
- />
- </div>
  </div>
  </section>
 
@@ -317,5 +299,8 @@ function formatDuration(seconds: number) {
  </div>
  )}
  </div>
+ </section>
+ <section class={doc.section}>
+ <NewsletterCTA audience={`show:${showEntry.data.id}`} badge="New episodes by email" headline={`Follow ${showEntry.data.name}`} subtitle="Get an email when a new episode is published." />
  </section>
 </Page>

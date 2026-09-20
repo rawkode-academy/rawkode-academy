@@ -35,20 +35,10 @@ const breadcrumbElements = [
 
 <Page title={title} description={description ?? show.data.description ?? title}>
 	<div class={layout.root}>
-	<section
-		class:list={[layout.hero, "relative overflow-hidden"]}
-		style="border-bottom: 1px solid var(--surface-border)"
-	>
-		<div
-			class="absolute inset-0 bg-[var(--surface-card-muted)]"
-			aria-hidden="true"
-		>
-		</div>
-		<div class:list={[layout.container, "relative mx-auto max-w-7xl content-px pb-6 pt-8"]}>
+	<section class={layout.hero}>
+		<div class={layout.container}>
 			<Breadcrumb elements={breadcrumbElements} />
-			<h1
-				class:list={[layout.title, "mt-6 text-3xl font-extrabold tracking-tight text-primary-content sm:text-4xl"]}
-			>
+			<h1 class={layout.title}>
 				{show.data.name}
 			</h1>
 		</div>
@@ -56,8 +46,8 @@ const breadcrumbElements = [
 
 	<ShowNav showId={show.data.id} nav={nav} active={active} />
 
-	<section class:list={[layout.section, "section-py"]} style="background: var(--surface-base)">
-		<div class:list={[layout.container, "mx-auto max-w-7xl content-px"]}>
+	<section class={layout.section}>
+		<div class={layout.container}>
 			<slot />
 		</div>
 	</section>

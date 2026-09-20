@@ -50,10 +50,9 @@ const eyebrowText =
 
 <header class={doc.hero}>
 	<div class={[doc.container, doc.stack].join(" ")}>
-		<MLabel tone="spruce">
-			<span class={doc.dot} aria-hidden="true"></span>
+		{eyebrowText && <MLabel tone="accent">
 			{eyebrowText}
-		</MLabel>
+		</MLabel>}
 
 		<h1 class={doc.title} set:html={title}></h1>
 

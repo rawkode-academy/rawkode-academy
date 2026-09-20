@@ -23,7 +23,7 @@ const styles = academyShell();
 			<ThemeToggle client:load variant="icon" size="md" />
 			<div class={styles.account}>
 				<UserHeader server:defer>
-					<a href="/settings" slot="fallback" class={styles.link}>Your account</a>
+					<a href="/settings" slot="fallback" class={styles.link}>Account</a>
 				</UserHeader>
 			</div>
 			<NavigationDrawer client:load groups={navigationGroups} currentPath={Astro.url.pathname} />

@@ -1,0 +1,411 @@
+{
+  "status": "in-progress",
+  "inventory": "design-inventory.json",
+  "rule": "Every path in the inventory is pending until an explicit review entry exists here. Source reviews and template samples are not visual sign-off.",
+  "reviews": [
+    {
+      "path": "/privacy",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 17:14 BST build",
+      "findings": [],
+      "coverage": "Entire page inspected with overlapping viewport captures from header through copyright at both sizes. No overflow, unreadable text or unnecessary controls observed.",
+      "justification": "Heading and date orient the reader; summary gives a quick overview; policy sections and contact address explain data handling and provide an action; shared navigation enables discovery.",
+      "limitations": "Visual and content-structure review only; no legal accuracy assessment, mail submission or deployed proof."
+    },
+    {
+      "path": "/changelog",
+      "status": "composition-rework",
+      "viewports": ["1440x1000 light"],
+      "findings": ["F37"],
+      "coverage": "Header and first six entries inspected. Narrow content column and repetitive avatar rows removed in source; full revised page pending."
+    },
+    {
+      "path": "/feeds",
+      "status": "composition-rework",
+      "viewports": ["1440x1000 dark", "390x844 dark"],
+      "findings": ["F38"],
+      "coverage": "Hero and main-feed cards inspected. Repeated framing, redundant OPML section and generic link names need simplification. Entire lower page pending."
+    },
+    {
+      "path": "/",
+      "status": "composition-rework",
+      "viewports": [
+        "1440x1000",
+        "390x844"
+      ],
+      "findings": [
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F07"
+      ],
+      "coverage": "Hero and content sections inspected; corrected composition needs final whole-page and state review."
+    },
+    {
+      "path": "/technology",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F06"
+      ],
+      "coverage": "Initial compact identity cards reviewed; full directory and filters pending."
+    },
+    {
+      "path": "/about",
+      "status": "composition-rework",
+      "viewports": [
+        "1440x1000",
+        "390x844"
+      ],
+      "findings": [
+        "F14"
+      ],
+      "coverage": "Hero, photograph, principles, story reviewed after rewrite; final footer/link and dark-mode review pending."
+    },
+    {
+      "path": "/courses",
+      "status": "composition-rework",
+      "viewports": [
+        "1440x1000",
+        "390x844"
+      ],
+      "findings": [
+        "F08"
+      ],
+      "coverage": "Hero and catalog artwork reviewed; final unboxed feature layout pending."
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F11"
+      ],
+      "coverage": "Observed excessive stacked metadata before curriculum. Rewritten layout pending Browser review."
+    },
+    {
+      "path": "/read",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F08"
+      ],
+      "coverage": "Feature, filters, and initial cards inspected. Artwork and native filter form need final review."
+    },
+    {
+      "path": "/read/cgroups-from-chaos-to-control",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F12",
+        "F13"
+      ],
+      "coverage": "Header and first technical sections/code inspected. Entire long document, interactive diagrams, and contents states pending."
+    },
+    {
+      "path": "/news",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F09",
+        "F10"
+      ],
+      "coverage": "Original feature and controls inspected. Rewritten archive pending full review."
+    },
+    {
+      "path": "/technology/kubernetes",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F18"
+      ],
+      "coverage": "Original hero, article start, related video panel inspected; rewrite pending."
+    },
+    {
+      "path": "/organizations/partnerships",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F15"
+      ],
+      "coverage": "Hero, offer, repeated content inspected; final FAQ/application states pending."
+    },
+    {
+      "path": "/learning-paths/gitops-landscape",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "Duplicate metadata and title; curriculum buried"
+      ],
+      "coverage": "Header, metadata, objectives inspected; revised document pending."
+    },
+    {
+      "path": "/people/rawkode",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "Oversized boxed identity; decorative section icons; repeated SEO copy"
+      ],
+      "coverage": "Profile and show cards inspected. Rewritten profile and full contribution archive pending."
+    },
+    {
+      "path": "/shows/klustered",
+      "status": "composition-rework",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "Newsletter precedes episodes; generic Show label; legacy secondary navigation"
+      ],
+      "coverage": "Header and episode grid inspected. Newsletter moved; final whole-page review pending."
+    },
+    {
+      "path": "/watch/hands-on-introduction-to-kueue",
+      "viewports": [
+        "1440x1000"
+      ],
+      "findings": [
+        "F19"
+      ],
+      "coverage": "Player/header inspected. Full-width player implemented; transcript/resources integration needs compiled interactive review.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/courses/teleport-for-kubernetes/01-introduction",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F20"
+      ],
+      "coverage": "Hero/player/resources inspected. Removed filler and reordered resources. Player loaded controls but poster image failed locally; HTTP asset check returned 200. Needs compiled retry.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/news/kubernetes-1-36-service-externalips-deprecation",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F21"
+      ],
+      "coverage": "Header and body inspected; revised recommendations/footer and dark mode pending.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/search",
+      "viewports": [
+        "390x844"
+      ],
+      "findings": [
+        "F22",
+        "F29"
+      ],
+      "coverage": "Compiled mobile results, 194-video count, page 1→2 link verified. Unlayered font reset and native search-button border exposed (F29); fix requires rebuilt review. Whole result pages pending.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/adrs",
+      "viewports": [
+        "390x844",
+        "1440x1000"
+      ],
+      "findings": [
+        "F23"
+      ],
+      "coverage": "Original stats and rows inspected; simplified index needs final whole-page review.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/organizations/branding",
+      "viewports": [
+        "1440x1000"
+      ],
+      "findings": [
+        "F25"
+      ],
+      "coverage": "Hero, three logo previews and palette inspected. New explicit download variants, remaining type/usage sections and mobile/dark pending.",
+      "status": "composition-rework"
+    },
+    {
+      "path": "/maintainers/share-your-project",
+      "status": "composition-rework",
+      "viewports": [
+        "1440x1000",
+        "390x844"
+      ],
+      "findings": [
+        "F30"
+      ],
+      "coverage": "Observed cramped three/four-column cards and redundant statistics/FAQ. Replaced with a clear process, fit criteria and contact; revised compiled page pending."
+    },
+    {
+      "path": "/organizations",
+      "status": "composition-rework",
+      "viewports": [
+        "1440x1000"
+      ],
+      "findings": [
+        "F31"
+      ],
+      "coverage": "Hero, scope, priced offers inspected. Removed redundant offer boxes, labels and repeated contact template. Revised page and mobile pending."
+    },
+    {
+      "path": "/organizations/lets-chat",
+      "status": "composition-rework",
+      "viewports": [
+        "1440x1000"
+      ],
+      "findings": [
+        "F31"
+      ],
+      "coverage": "Observed contact template stranded in narrow grid column with empty space. Reworked as a reading-width application; revised compiled page and mobile pending."
+    }
+  ],
+  "componentStates": [
+    {
+      "component": "Technology directory filter",
+      "path": "/technology",
+      "viewport": "390x844",
+      "theme": "light",
+      "environment": "compiled local preview :4322, 16:33 BST checkpoint",
+      "states": [
+        "default 354",
+        "kubernetes:20matches",
+        "no-such-technology-1355:0matches",
+        "visible focus"
+      ],
+      "result": "observed-correct",
+      "limitations": "No entire-directory or detail-page sign-off."
+    },
+    {
+      "component": "HierarchyExplorer",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "states": [
+        "v1 three controller trees",
+        "CPU docker collapse",
+        "v2 unified hierarchy"
+      ],
+      "result": "observed-correct",
+      "limitations": "No entire cgroups article sign-off."
+    },
+    {
+      "component": "CgroupTimeline",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 dark"
+      ],
+      "states": [
+        "expanded 2016 March",
+        "ArrowRight focus",
+        "Enter expands May",
+        "Escape closes"
+      ],
+      "result": "observed-correct-with-follow-up",
+      "limitations": "Literal backticks in description reported for repair. Resize can leave the selected milestone offscreen; keyboard navigation brings it back."
+    },
+    {
+      "component": "PodCgroupMapper",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 dark"
+      ],
+      "states": [
+        "Burstable specification, mapping and explanation",
+        "BestEffort selection and mapping"
+      ],
+      "result": "observed-correct",
+      "limitations": "Code scrolls horizontally within its own panel. Guaranteed and desktop final review pending."
+    },
+    {
+      "component": "ResourceList",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light"
+      ],
+      "states": [
+        "valid links, file, webcontainer, iframe types",
+        "unknown category becomes Other",
+        "invalid resources omitted"
+      ],
+      "result": "observed-correct",
+      "limitations": "Fixture deliberately blocks activation; no modal, iframe, WebContainer, or external destination proof."
+    },
+    {
+      "component": "CourseDetailHero",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": [
+        "390x844 light"
+      ],
+      "states": [
+        "six published lessons, author, cover"
+      ],
+      "result": "observed-correct",
+      "limitations": "Cover arrived after initial screenshot; settled rendered layout inspected. Whole production course page pending."
+    },
+    {
+      "component": "Academy forms, progress and badges",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": ["390x844 light", "390x844 dark"],
+      "states": ["visible field error in light", "disabled form in dark", "progress 0 in light", "progress 100 in dark", "all badge variants in dark"],
+      "result": "observed-correct",
+      "limitations": "Safe fixtures only; no real subscription or account mutation."
+    },
+    {
+      "component": "BracketBoard",
+      "environment": "Local Storybook after fresh Panda build",
+      "viewports": ["390x844 light", "390x844 dark", "1440x1000 dark"],
+      "states": ["two rounds with live match and winner", "keyboard horizontal scroll", "long names wrap without truncation", "empty bracket", "matches not announced"],
+      "result": "observed-correct",
+      "limitations": "Fixture evidence, not authenticated live bracket service."
+    },
+    {
+      "component": "VideoTranscript",
+      "environment": "Compiled local preview :4322, 16:58 BST checkpoint",
+      "viewports": ["390x844 light"],
+      "states": ["single-copy SSR disclosure", "Docker search: 30 matches"],
+      "result": "observed-correct-after-repair",
+      "limitations": "Original auto-scroll defect repaired. Rechecked in 17:29 build: Docker produced 30 highlighted matches with input visible, no-match query hid unmatched paragraphs/empty sections, and clearing restored all 113 paragraphs. Whole Watch page review remains pending."
+    },
+    {
+      "component": "Unsubscribe form and mobile navigation",
+      "environment": "Compiled local preview :4322, 17:14 BST build",
+      "viewports": ["390x844 light", "390x844 dark", "1440x1000 light", "1440x1000 dark"],
+      "states": ["forged success=true displays normal form", "mobile footer through copyright", "modal menu Shift-Tab wraps to Your account", "Escape closes and returns focus to Open navigation"],
+      "result": "observed-correct-with-follow-up",
+      "limitations": "Rechecked in 17:29 build: pristine input has neutral border; revised two-column menu fits at390px and wraps without overflow at320px. No unsubscribe request sent. Signed-in/error/success route behavior only covered by mocked tests."
+    }
+  ]
+}

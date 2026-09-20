@@ -1,168 +1,107 @@
 ---
 import { env } from "cloudflare:workers";
+import { z } from "astro/zod";
 import Page from "@/wrappers/page.astro";
 import { createEmailId, createLearnerId } from "@/actions/newsletter";
 import { createLogger } from "@/lib/logger";
-import { academyLayout } from "@rawkodeacademy/design-system";
+import { academyForms, academyDocument } from "@rawkodeacademy/design-system";
 import "@rawkodeacademy/design-system/styles.css";
 
 export const prerender = false;
 
 const logger = createLogger("unsubscribe");
-
-// Get email from query parameter
-const email = Astro.url.searchParams.get("email");
-const success = Astro.url.searchParams.get("success");
 const user = Astro.locals.user;
 const pagePath = Astro.url.pathname;
+let email = Astro.url.searchParams.get("email") ?? "";
+let scope: "account" | "email" =
+	!user || Astro.url.searchParams.has("email") || Astro.url.searchParams.get("scope") === "email"
+		? "email"
+		: "account";
+let errorMessage = "";
+let emailError = false;
+let successMessage = "";
 
-let unsubscribeResult: { success: boolean; message: string } | null = null;
-
-// Handle form submission for anonymous users
-if (Astro.request.method === "POST" && !user) {
-	const formData = await Astro.request.formData();
-	const submittedEmail = formData
-		.get("email")
-		?.toString()
-		?.toLowerCase()
-		?.trim();
-
-	if (submittedEmail) {
-		try {
-			const prefixedUserId = createEmailId(submittedEmail);
-			await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
-				audience: "academy",
-				channel: "newsletter",
-				status: "unsubscribed",
-				source: `website:newsletter:${pagePath}`,
-			});
-
-			// Clear the newsletter cookie if present
-			Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
-
-			// Redirect to success state
-			return Astro.redirect(`/unsubscribe?success=true`);
-		} catch (e) {
-			logger.error("Failed to unsubscribe", e);
-			unsubscribeResult = {
-				success: false,
-				message:
-					"Failed to process your unsubscribe request. Please try again.",
-			};
-		}
-	} else {
-		unsubscribeResult = {
-			success: false,
-			message: "Please enter a valid email address.",
-		};
-	}
-}
-
-// Handle form submission for signed-in users
-if (Astro.request.method === "POST" && user) {
+if (Astro.request.method === "POST") {
+	let formData: FormData | undefined;
 	try {
-		const prefixedUserId = createLearnerId(user.id);
-		await env.EMAIL_PREFERENCES.setPreference(prefixedUserId, {
-			audience: "academy",
-			channel: "newsletter",
-			status: "unsubscribed",
-			source: `website:newsletter:${pagePath}`,
-		});
+		formData = await Astro.request.formData();
+	} catch {
+		errorMessage = "Unable to read your request. Please try again.";
+		Astro.response.status = 400;
+	}
 
-		// Redirect to success state
-		return Astro.redirect(`/unsubscribe?success=true`);
-	} catch (e) {
-		logger.error("Failed to unsubscribe", e);
-		unsubscribeResult = {
-			success: false,
-			message: "Failed to process your unsubscribe request. Please try again.",
-		};
+	if (formData) {
+		const submittedScope = formData.get("scope");
+		const submittedEmail = formData.get("email");
+		email = typeof submittedEmail === "string" ? submittedEmail.toLowerCase().trim() : "";
+		if (formData.getAll("scope").length !== 1 || (submittedScope !== "email" && submittedScope !== "account")) {
+			errorMessage = "Choose an account or email subscription to unsubscribe.";
+			Astro.response.status = 400;
+		} else if (submittedScope === "account" && !user) {
+			scope = "email";
+			errorMessage = "Sign in to unsubscribe your account, or use the email form below.";
+			Astro.response.status = 401;
+		} else {
+			scope = submittedScope;
+			if (scope === "email" && (formData.getAll("email").length !== 1 || !z.email("Please enter a valid email address").safeParse(email).success)) {
+				emailError = true;
+				errorMessage = "Please enter a valid email address.";
+				Astro.response.status = 400;
+			} else {
+				try {
+					const identity = scope === "email" ? createEmailId(email) : createLearnerId(user!.id);
+					const result = await env.EMAIL_PREFERENCES.setPreference(identity, {
+						audience: "academy",
+						channel: "newsletter",
+						status: "unsubscribed",
+						source: `website:newsletter:${pagePath}`,
+					});
+					if (!result.success) throw new Error("Unsubscribe was not confirmed");
+					if (scope === "email") {
+						Astro.cookies.delete("newsletter:academy:updates", { path: "/" });
+					}
+					successMessage = scope === "email"
+						? `The email subscription for ${email} has been unsubscribed from the Rawkode Academy newsletter. Your account subscription, if any, is unchanged.`
+						: "Your signed-in account has been unsubscribed from the Rawkode Academy newsletter. Any separate email-address subscription is unchanged.";
+				} catch (error) {
+					logger.error("Failed to unsubscribe", error);
+					errorMessage = "Failed to process your unsubscribe request. Please try again.";
+					Astro.response.status = 503;
+				}
+			}
+		}
 	}
 }
-const layout = academyLayout({ width: "reading" });
+const form = academyForms();
+const doc = academyDocument();
 ---
 
-<Page
-	title="Unsubscribe"
-	description="Unsubscribe from the Rawkode Academy newsletter."
-	noindex
->
-	<div class:list={[layout.root, "unsubscribe-page"]}>
-		<div class:list={[layout.container, "unsubscribe-page__content"]}>
-		{success === "true" ? (
-			<>
-				<div class="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-8">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-					</svg>
-				</div>
-				
-				<h1 class={layout.title}>
-					Unsubscribed Successfully
-				</h1>
-				
-				<p class={layout.description}>
-					You have been unsubscribed from the Rawkode Academy newsletter. We're sorry to see you go!
-				</p>
-				
-				<a 
-					href="/"
-					class={layout.button}
-				>
-					Back to Home
-				</a>
-			</>
-		) : (
-			<>
-				<h1 class={layout.title}>
-					Unsubscribe from Newsletter
-				</h1>
-				
-				<p class={layout.description}>
-					{user 
-						? "Click the button below to unsubscribe from the Rawkode Academy newsletter."
-						: "Enter your email address to unsubscribe from the Rawkode Academy newsletter."
-					}
-				</p>
-
-				{unsubscribeResult?.success === false && (
-					<div class="mb-6 p-4 rounded-sm bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 max-w-md">
-						{unsubscribeResult.message}
-					</div>
-				)}
-
-				<form method="POST" class="unsubscribe-page__form">
-					{!user && (
-						<input
-							type="email"
-							name="email"
-							value={email || ""}
-							placeholder="Enter your email address"
-							required
-							class={layout.input}
-						/>
-					)}
-					
-					<button
-						type="submit"
-						class={layout.button}
-					>
-						Unsubscribe
-					</button>
+<Page title="Unsubscribe" description="Unsubscribe from the Rawkode Academy newsletter." noindex>
+	<section class={doc.reading}>
+		<div class={doc.stack}>
+			{successMessage ? <>
+				<h1 class={doc.title}>Subscription removed.</h1>
+				<p class={doc.lede} role="status">{successMessage}</p>
+				<a class={doc.link} href="/">Back to the homepage →</a>
+			</> : <>
+				<h1 class={doc.title}>{scope === "account" ? "Unsubscribe your account" : "Unsubscribe an email address"}</h1>
+				<p class={doc.lede}>{scope === "account"
+					? "Stop the newsletter subscription attached to your signed-in account. Separate email-address subscriptions will not change."
+					: "Enter the email address you used to subscribe. This will not change an account subscription."}</p>
+				{errorMessage && <p id="unsubscribe-error" class={form.error} role="alert">{errorMessage}</p>}
+				<form method="POST" action="/unsubscribe" class={form.form}>
+					<input type="hidden" name="scope" value={scope} />
+					{scope === "email" && <label class={form.field} for="unsubscribe-email">
+						<span class={form.label}>Subscription email address</span>
+						<input id="unsubscribe-email" type="email" name="email" value={email} autocomplete="email" required class={form.input} aria-describedby={errorMessage ? "unsubscribe-error" : undefined} aria-invalid={emailError ? "true" : undefined} />
+					</label>}
+					<button type="submit" class={form.button}>{scope === "account" ? "Unsubscribe my account" : "Unsubscribe this email address"}</button>
 				</form>
-
-				<p class="unsubscribe-page__return">
-					Changed your mind? <a href="/">Go back home</a>
-				</p>
-			</>
-		)}
+				{scope === "account"
+					? <a class={doc.link} href="/unsubscribe?scope=email">Unsubscribe a separate email address</a>
+					: user && <a class={doc.link} href="/unsubscribe">Manage my account subscription instead</a>}
+				<a class={doc.link} href="/">Go back home</a>
+			</>}
 		</div>
-	</div>
+	</section>
 </Page>
-
-<style>
-	.unsubscribe-page__content { display: grid; justify-items: center; min-height: 60vh; padding-block: 5rem; text-align: center; }
-	.unsubscribe-page__form { display: grid; width: min(100%, 28rem); gap: 1rem; margin-top: 2rem; }
-	.unsubscribe-page__return { margin-top: 2rem; color: var(--colors-academy-text-muted); }
-	.unsubscribe-page__return a { color: var(--colors-academy-accent); text-underline-offset: 0.2em; }
-</style>

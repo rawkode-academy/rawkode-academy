@@ -15,15 +15,17 @@ const marketing = academyMarketing();
 const editorial = academyEditorial();
 ---
 
-<div class:list={[layout.root, editorial.root]}>
+<div class:list={[layout.root, editorial.root]} data-reading={compact}>
 	<header class={layout.hero}>
 		<div class={layout.container}>
+			<div class={layout.heroCopy}>
 			{eyebrow && <p class={marketing.eyebrow}>{eyebrow}</p>}
 			<h1 class={layout.title}>{title}</h1>
 			{lede && <p class={layout.description}>{lede}</p>}
 			{Astro.slots.has("actions") && (
 				<div class={marketing.actions}><slot name="actions" /></div>
 			)}
+			</div>
 		</div>
 	</header>
 	<div class={layout.container}>

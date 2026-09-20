@@ -2,7 +2,6 @@
 import { academyDocument } from "@rawkodeacademy/design-system";
 const doc = academyDocument();
 import type { CollectionEntry } from "astro:content";
-import MLabel from "@/components/ui/MLabel.vue";
 
 interface Tag {
 	label: string;
@@ -24,48 +23,18 @@ const {
 	readingTime,
 	tags = [],
 } = Astro.props as Props;
-const primary = authors[0];
-const primaryInitials = primary
-	? primary.data.name
-			.split(" ")
-			.map((s) => s[0])
-			.slice(0, 2)
-			.join("")
-			.toUpperCase()
-	: "";
 ---
 
 <div class={doc.byline}>
-	{primary && (
-		<a class={doc.author} href={`/people/${primary.data.id}`}>
-			{primary.data.avatarUrl ? (
-				<img
-					class={doc.avatar}
-					src={primary.data.avatarUrl}
-					alt={`Profile picture of ${primary.data.name}`}
-					loading="lazy"
-				/>
-			) : (
-				<span class={doc.avatarInitials}>
-					{primaryInitials}
-				</span>
-			)}
-			<span class={doc.authorMeta}>
-				<span class={doc.authorMeta}>{primary.data.name}</span>
-				<MLabel>{primary.data.handles?.github ? `@${primary.data.handles.github}` : "Contributor"}</MLabel>
-			</span>
+	{authors.map((author) => (
+		<a class={doc.author} href={`/people/${author.data.id}`}>
+			{author.data.avatarUrl && <img class={doc.avatar} src={author.data.avatarUrl} alt="" width="40" height="40" loading="lazy" />}
+			<span class={doc.authorMeta}>{author.data.name}</span>
 		</a>
-	)}
-
-	{authors.length > 1 && (
-		<MLabel>+ {authors.length - 1} {authors.length - 1 === 1 ? "co-author" : "co-authors"}</MLabel>
-	)}
-
-	{primary && <span class={doc.hidden} aria-hidden="true"></span>}
-
-	<MLabel>{date}</MLabel>
-	{updatedDate && <MLabel>Updated {updatedDate}</MLabel>}
-	{readingTime && <MLabel>{readingTime}</MLabel>}
+	))}
+	<span class={doc.meta}>{date}</span>
+	{updatedDate && <span class={doc.meta}>Updated {updatedDate}</span>}
+	{readingTime && <span class={doc.meta}>{readingTime}</span>}
 
 	<span class={doc.spacer}></span>
 

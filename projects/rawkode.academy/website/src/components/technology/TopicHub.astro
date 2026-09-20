@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import ArticleCard from "@/components/articles/ArticleCard.astro";
-import SectionHeader from "@/components/common/SectionHeader.vue";
+import { academyRelatedContent } from "@rawkodeacademy/design-system";
 
 export interface Props {
 	technologyId: string;
@@ -31,14 +31,16 @@ const {
 	newsLimit = 6,
 	learningPathLimit = 6,
 } = Astro.props;
+const s = academyRelatedContent();
 
 // Technology IDs from the collection look like "kubernetes/index"; raw IDs
 // (as used in news/article frontmatter) drop the suffix. Match both forms.
 const normalizedTechnologyId = technologyId.replace(/\/index$/, "");
-const matchesTechnology = (technologies: ReadonlyArray<string> | undefined) =>
-	Array.isArray(technologies) &&
-	(technologies.includes(technologyId) ||
-		technologies.includes(normalizedTechnologyId));
+const matchesTechnology = (technologies: ReadonlyArray<string | { id: string }> | undefined) =>
+	Array.isArray(technologies) && technologies.some(reference => {
+		const id = typeof reference === "string" ? reference : reference.id;
+		return id.replace(/\/index$/, "") === normalizedTechnologyId;
+	});
 
 // Get all articles that mention this technology
 const allArticles = await getCollection("articles", ({ data }) => {
@@ -87,7 +89,7 @@ const difficultyLabel: Record<string, string> = {
 	advanced: "Advanced",
 };
 function formatLearningPathDuration(minutes: number): string {
-	if (!minutes) return "Self-paced";
+	if (!Number.isFinite(minutes) || minutes <= 0) return "";
 	const h = Math.floor(minutes / 60);
 	const m = minutes % 60;
 	if (!h) return `${m}m`;
@@ -96,125 +98,69 @@ function formatLearningPathDuration(minutes: number): string {
 }
 ---
 
-<div class="space-y-12">
- <!-- Learning Paths Section -->
- {hasLearningPaths && (
- <section>
- <SectionHeader
- title={`${technologyName} learning paths`}
- showSeparator={false}
- class="mb-6"
- />
- <div class="grid gap-6 md:grid-cols-2">
- {learningPaths.map((path) => (
- <a
- href={`/learning-paths/${path.id}`}
- class="group block rounded-sm border border-black/10 dark:border-white/10 bg-[var(--surface-card)] p-6 shadow-sm hover:border-primary/40 hover:bg-primary/[0.03] transition-colors"
- >
- <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted mb-2">
- <span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
- <span aria-hidden="true">·</span>
- <span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
- </div>
- <h3 class="font-display text-xl font-semibold leading-tight tracking-tight text-primary-content group-hover:text-primary transition-colors">
- {path.data.title}
- </h3>
- <p class="mt-2 max-w-[60ch] text-sm leading-6 text-secondary-content">
- {path.data.description}
- </p>
- </a>
- ))}
- </div>
- </section>
- )}
-
- <!-- News Section -->
- {hasNews && (
- <section>
- <SectionHeader
- title={`Recent ${technologyName} news`}
- showSeparator={false}
- class="mb-6"
- />
- <ul class="divide-y divide-black/10 border-y border-black/10 dark:divide-white/10 dark:border-white/10">
- {allNews.map((story) => (
- <li class="py-5 sm:py-6">
- <article class="space-y-2">
- <div class="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-muted">
- <time datetime={story.data.publishedAt.toISOString()}>
- {newsDateFormatter.format(story.data.publishedAt)}
- </time>
- </div>
- <h3 class="font-display text-xl md:text-2xl font-semibold leading-tight tracking-tight text-primary-content">
- <a href={`/news/${story.id}`} class="transition-colors hover:text-primary">
- {story.data.title}
- </a>
- </h3>
- <p class="max-w-[66ch] text-base leading-7 text-secondary-content">
- {story.data.description}
- </p>
- </article>
- </li>
- ))}
- </ul>
- </section>
- )}
-
- <!-- Articles Section -->
- {hasArticles && (
- <section>
- <SectionHeader
- title={`Articles about ${technologyName}`}
- showSeparator={false}
- class="mb-6"
- />
- <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
- {articles.map((article) => (
- <ArticleCard article={article} />
- ))}
- </div>
- </section>
- )}
-
- <!-- Videos Section -->
- {hasVideos && (
- <section>
- <SectionHeader
- title={`Videos about ${technologyName}`}
- showSeparator={false}
- class="mb-6"
- />
- <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
- {videos.map((video) => (
- <a
- href={`/watch/${video.slug}`}
- class="group relative block overflow-hidden rounded-sm bg-[var(--surface-card)] aspect-video"
- >
- <img
- src={video.thumbnailUrl}
- alt={video.title}
- class="w-full h-full object-cover group-hover:scale-105 "
- width="1280"
- height="720"
- loading="lazy"
- decoding="async"
- />
- <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
- <div class="absolute bottom-0 left-0 right-0 p-4 text-white transform translate-y-full group- ">
- <h3 class="font-semibold line-clamp-2">{video.title}</h3>
- </div>
- </a>
- ))}
- </div>
- </section>
- )}
-
- <!-- Empty State -->
- {isEmpty && (
- <div class="text-center py-12">
- <p class="text-muted">
- No content found for {technologyName} yet. Check back soon!
- </p>
- </div>
- )}
+<div class={s.root}>
+	{hasLearningPaths && (
+		<section class={s.section}>
+			<h2 class={s.heading}>{technologyName} learning paths</h2>
+			<div class={s.pathGrid}>
+				{learningPaths.map((path) => (
+					<a href={`/learning-paths/${path.id}`} class:list={[s.card, s.path]}>
+						<div class={s.metadata}>
+							<span>{difficultyLabel[path.data.difficulty] ?? path.data.difficulty}</span>
+							{formatLearningPathDuration(path.data.estimatedDuration) && (
+								<span>{formatLearningPathDuration(path.data.estimatedDuration)}</span>
+							)}
+						</div>
+						<h3 class={s.title}>{path.data.title}</h3>
+						<p class={s.copy}>{path.data.description}</p>
+					</a>
+				))}
+			</div>
+		</section>
+	)}
+	{hasNews && (
+		<section class={s.section}>
+			<h2 class={s.heading}>Recent {technologyName} news</h2>
+			<ul class={s.newsList}>
+				{allNews.map((story) => (
+					<li class={s.newsItem}>
+						<article>
+							<time class={s.metadata} datetime={story.data.publishedAt.toISOString()}>
+								{newsDateFormatter.format(story.data.publishedAt)}
+							</time>
+							<h3 class={s.title}>
+								<a href={`/news/${story.id}`} class={s.link}>{story.data.title}</a>
+							</h3>
+							<p class={s.copy}>{story.data.description}</p>
+						</article>
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
+	{hasArticles && (
+		<section class={s.section}>
+			<h2 class={s.heading}>Articles about {technologyName}</h2>
+			<div class={s.grid}>
+				{articles.map((article) => <ArticleCard article={article} />)}
+			</div>
+		</section>
+	)}
+	{hasVideos && (
+		<section class={s.section}>
+			<h2 class={s.heading}>Videos about {technologyName}</h2>
+			<div class={s.grid}>
+				{videos.map((video) => (
+					<a href={`/watch/${video.slug}`} class={s.card}>
+						<div class={s.media}>
+							<img src={video.thumbnailUrl} alt={video.title} class={s.image}
+								width="1280" height="720" loading="lazy" decoding="async" />
+						</div>
+						<div class={s.body}><h3 class={s.title}>{video.title}</h3></div>
+					</a>
+				))}
+			</div>
+		</section>
+	)}
+	{isEmpty && <p class={s.empty}>No related content is available for {technologyName}.</p>}
 </div>

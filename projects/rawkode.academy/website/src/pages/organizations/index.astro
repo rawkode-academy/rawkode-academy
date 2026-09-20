@@ -1,10 +1,7 @@
 ---
-import ContactFallback from "@/components/organizations/ContactFallback.astro";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import {
 	decisionBriefMailto,
-	decisionBriefSubject,
-	decisionBriefTemplate,
 	fitProofReview,
 	partnershipBoundaries,
 	partnershipOffer,
@@ -65,13 +62,11 @@ const badFits = partnershipBoundaries;
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">The active programme</p>
 				<h2 class="editorial-section__title">Adoption Advisory</h2>
 				<p class="editorial-section__lede">{partnershipOffer.summary}</p>
 			</div>
-			<div class="editorial-card organizations-offer">
+			<div class="organizations-offer">
 				<div>
-					<p class="editorial-kicker">{partnershipOffer.label}</p>
 					<p class="organizations-offer__price">{partnershipOffer.price}</p>
 					<p class="organizations-offer__cadence">{partnershipOffer.cadence}</p>
 				</div>
@@ -84,13 +79,11 @@ const badFits = partnershipBoundaries;
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Optional starting point</p>
-				<h2 class="editorial-section__title">Test the fit before a partnership</h2>
+				<h2 class="editorial-section__title">{fitProofReview.name}</h2>
 				<p class="editorial-section__lede">{fitProofReview.summary}</p>
 			</div>
-			<div class="editorial-card editorial-card--paper organizations-offer">
+			<div class="organizations-offer">
 				<div>
-					<h3 class="editorial-card__title">{fitProofReview.name}</h3>
 					<p class="organizations-offer__price">{fitProofReview.price}</p>
 					<p class="organizations-offer__cadence">{fitProofReview.cadence}</p>
 				</div>
@@ -103,21 +96,6 @@ const badFits = partnershipBoundaries;
 
 		<section class="editorial-section editorial-section--split">
 			<div class="editorial-section__header">
-				<p class="editorial-kicker">Fit check</p>
-				<h2 class="editorial-section__title">Bring the real adoption problem</h2>
-				<p class="editorial-section__lede">
-					Share the product, target practitioner, technical buyer, current proof gap, demo environment, and the quarter you want to work in. David replies with the next useful step.
-				</p>
-			</div>
-			<ContactFallback
-				subject={decisionBriefSubject}
-				template={decisionBriefTemplate}
-			/>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Boundaries</p>
 				<h2 class="editorial-section__title">What the programme does not promise</h2>
 			</div>
 			<ul class="organizations-list">
@@ -150,7 +128,7 @@ const badFits = partnershipBoundaries;
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--colors-academy-status-spruce);
+		color: var(--colors-academy-accent);
 	}
 
 	.organizations-scope dd {
@@ -165,6 +143,10 @@ const badFits = partnershipBoundaries;
 		display: grid;
 		gap: 1rem;
 	}
+
+	.organizations-offer > a { justify-self: start; }
+
+	.organizations-card__link:focus-visible { outline: 2px solid var(--colors-academy-accent); outline-offset: 4px; }
 
 	.organizations-offer__price {
 		margin: 0.4rem 0 0;
@@ -193,9 +175,8 @@ const badFits = partnershipBoundaries;
 	}
 
 	.organizations-list li {
-		border: 1px solid var(--colors-academy-border);
-		padding: 0.8rem 1rem;
-		background: var(--colors-academy-panel);
+		border-bottom: 1px solid var(--colors-academy-border);
+		padding: 0.8rem 0;
 		color: var(--colors-academy-text-soft);
 		font-family: var(--fonts-academy-text), system-ui, sans-serif;
 		font-size: 0.95rem;
@@ -204,11 +185,12 @@ const badFits = partnershipBoundaries;
 
 	.organizations-card__link {
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.72rem;
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		font-size: 0.9rem;
 		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--colors-academy-status-spruce);
+		color: var(--colors-academy-accent);
 		text-decoration: none;
 	}
 

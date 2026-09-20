@@ -1,5 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
+import NewsStoryRow from "@/components/news/NewsStoryRow.astro";
 import { selectRelatedNews } from "@/lib/related-news";
 
 interface Props {
@@ -8,170 +10,16 @@ interface Props {
 }
 
 const { currentStory, limit = 3 } = Astro.props;
-
-const [allNews, allTechnologies] = await Promise.all([
-	getCollection("news"),
-	getCollection("technologies"),
-]);
-
-const technologyNameById = new Map<string, string>();
-for (const technology of allTechnologies) {
-	const rawId = technology.id.replace(/\/index$/, "");
-	technologyNameById.set(rawId, technology.data.name);
-}
-
-function formatTechnologyLabel(value: string): string {
-	const fromCollection = technologyNameById.get(value);
-	if (fromCollection) return fromCollection;
-	return value
-		.split(/[-/]/g)
-		.filter(Boolean)
-		.map((segment) =>
-			segment.length <= 3
-				? segment.toUpperCase()
-				: `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`,
-		)
-		.join(" ");
-}
-
-const formatDisplayDate = (date: Date) =>
-	new Intl.DateTimeFormat("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	}).format(date);
-
-const related = selectRelatedNews(
-	currentStory.id,
-	currentStory.data.technologies ?? [],
-	allNews,
-	limit,
-);
+const layout = academyLayout({ width: "wide" });
+const related = selectRelatedNews(currentStory.id, currentStory.data.technologies ?? [], await getCollection("news"), limit);
+const catalog = academyCatalog();
 ---
 
 {related.length > 0 && (
-	<section class="related-news">
-		<h2 class="related-heading">More stories</h2>
-		<ul class="related-list">
-			{related.map((story) => {
-				const topTechnology = story.data.technologies?.[0];
-				return (
-					<li class="related-item">
-						<article>
-							<div class="related-meta">
-								<time datetime={story.data.publishedAt.toISOString()}>
-									{formatDisplayDate(story.data.publishedAt)}
-								</time>
-								{topTechnology && (
-									<>
-										<span aria-hidden="true">/</span>
-										<span>{formatTechnologyLabel(topTechnology)}</span>
-									</>
-								)}
-							</div>
-							<h3 class="related-title">
-								<a href={`/news/${story.id}`}>{story.data.title}</a>
-							</h3>
-							<p class="related-dek">{story.data.description}</p>
-						</article>
-					</li>
-				);
-			})}
-		</ul>
+	<section>
+		<div class={layout.sectionHeader}><h2 class={layout.sectionTitle}>More stories</h2></div>
+		<div class={catalog.newsList}>
+			{related.map((story) => <NewsStoryRow story={story} />)}
+		</div>
 	</section>
 )}
-
-<style>
-	.related-news {
-		margin: 1.5rem 0 4rem;
-		padding-top: 2rem;
-		padding-right: 4rem;
-		border-top: 1px solid var(--surface-border);
-	}
-
-	@media (max-width: 767px) {
-		.related-news {
-			padding-right: 0;
-		}
-	}
-
-	.related-heading {
-		font-size: 1.5rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		color: var(--text-primary-content);
-		margin: 0 0 1.25rem;
-	}
-
-	.related-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: 1.25rem;
-	}
-
-	@media (min-width: 768px) {
-		.related-list {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-			gap: 1.5rem;
-		}
-	}
-
-	.related-item {
-		border-radius: var(--radius-3xl);
-		padding: 1.25rem;
-		border: 1px solid var(--surface-border);
-		transition:
-			border-color var(--duration-fast) var(--ease-standard),
-			background-color var(--duration-fast) var(--ease-standard);
-	}
-
-	.related-item:hover {
-		border-color: rgb(var(--brand-primary) / 0.4);
-		background-color: rgb(var(--brand-primary) / 0.03);
-	}
-
-	.related-meta {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.4rem;
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		color: var(--text-muted);
-		margin-bottom: 0.5rem;
-	}
-
-	.related-title {
-		font-size: 1.15rem;
-		line-height: 1.3;
-		font-weight: 600;
-		letter-spacing: -0.01em;
-		margin: 0 0 0.5rem;
-		color: var(--text-primary-content);
-	}
-
-	.related-title a {
-		color: inherit;
-		text-decoration: none;
-		transition: color var(--duration-fast) var(--ease-standard);
-	}
-
-	.related-title a:hover {
-		color: rgb(var(--brand-primary));
-	}
-
-	.related-dek {
-		font-size: 0.9rem;
-		line-height: 1.5;
-		color: var(--text-secondary-content);
-		margin: 0;
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-</style>

@@ -9,7 +9,7 @@ interface Props {
 	tools?: string[];
 }
 
-const { headings, tools = [] } = Astro.props as Props;
+const { headings } = Astro.props as Props;
 
 const sections = headings
 	.filter((h) => h.depth === 2)
@@ -19,35 +19,20 @@ const sections = headings
 	}));
 ---
 
-<aside class={doc.toc}>
-	<div class={doc.stack}>
-		<MLabel>Contents</MLabel>
-		<nav class={doc.stackSmall} aria-label="On this page">
-			{sections.map((s) => (
-				<a
-					class={doc.tocLink}
-					href={`#${s.slug}`}
-					data-toc-slug={s.slug}
-				>
-					<span class={doc.tocText}>{s.text}</span>
-				</a>
-			))}
+{sections.length > 0 && <aside class={doc.toc}>
+	<details class={doc.tocMobile}>
+		<summary class={doc.tocSummary}>On this page · {sections.length} sections</summary>
+		<nav aria-label="On this page">
+			{sections.map((section) => <a class={doc.tocLink} href={`#${section.slug}`} data-toc-slug={section.slug}>{section.text}</a>)}
 		</nav>
-
-		{tools.length > 0 && (
-			<div class={[doc.rule, doc.stackSmall].join(" ")}>
-				<MLabel>Tools used</MLabel>
-				<ul class={doc.list}>
-					{tools.map((t) => (
-						<li>
-							<MLabel>{t}</MLabel>
-						</li>
-					))}
-				</ul>
-			</div>
-		)}
+	</details>
+	<div class={doc.tocDesktop}>
+		<MLabel>On this page</MLabel>
+		<nav aria-label="On this page">
+			{sections.map((section) => <a class={doc.tocLink} href={`#${section.slug}`} data-toc-slug={section.slug}>{section.text}</a>)}
+		</nav>
 	</div>
-</aside>
+</aside>}
 
 <script>
 	// Highlight the active section as the user scrolls.

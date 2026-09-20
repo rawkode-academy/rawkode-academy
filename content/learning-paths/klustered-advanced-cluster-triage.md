@@ -18,8 +18,6 @@ authors:
   - "rawkode"
 ---
 
-# Klustered: Advanced Cluster Triage
-
 Go beyond kubectl and develop a battle-tested methodology for diagnosing multi-layer outages. Each scenario highlights a different failure domain—nodes, networking, security, and host-level manipulation—so you can bring clusters back from the dead.
 
 ## Learning Objectives

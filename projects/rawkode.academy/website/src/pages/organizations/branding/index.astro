@@ -8,54 +8,18 @@ import wordmarkSvgRaw from "@/components/branding/logos/wordmark.svg?raw";
 export const prerender = true;
 
 const colors = [
-	{
-		label: "Paper",
-		value: "oklch(0.97 0.008 85)",
-		usage: "Light surface. The default ground for the mark and all print.",
-	},
-	{
-		label: "Ink",
-		value: "oklch(0.18 0.02 60)",
-		usage:
-			"Primary type and the default solid logo treatment on light surfaces.",
-	},
-	{
-		label: "Spruce",
-		value: "oklch(0.50 0.09 165)",
-		usage: "Primary accent: links, section marks, and action states.",
-	},
-	{
-		label: "Amber",
-		value: "oklch(0.72 0.15 65)",
-		usage:
-			"Live and on-air signals. Decorative use only; never body text on light surfaces.",
-	},
-	{
-		label: "Rust",
-		value: "oklch(0.52 0.13 40)",
-		usage: "Secondary accent: difficulty tags and kickers.",
-	},
+	{ label: "Canvas", value: "#f4f7fb", usage: "The light reading surface." },
+	{ label: "Ink", value: "#0c1626", usage: "Primary text and solid artwork on light surfaces." },
+	{ label: "Accent", value: "#c2185b", usage: "Links, primary actions, and selected states on light surfaces." },
+	{ label: "Night", value: "#0a1220", usage: "The dark reading surface." },
+	{ label: "Light ink", value: "#e8eef8", usage: "Primary text and solid artwork on dark surfaces." },
+	{ label: "Night accent", value: "#ff7ab6", usage: "Links and actions on dark surfaces." },
 ];
 
 const typefaces = [
-	{
-		name: "Instrument Serif",
-		role: "Display",
-		sample: "Engineering journal meets terminal",
-		usage: "Italic display headings and headline-scale text.",
-	},
-	{
-		name: "Inter Tight",
-		role: "Body",
-		sample: "Tutorials, technical articles, and upcoming events.",
-		usage: "Body copy and interface text, weights 300–700.",
-	},
-	{
-		name: "JetBrains Mono",
-		role: "Mono",
-		sample: "§01 · PARTNER RESOURCES",
-		usage: "Labels, meta strips, code, and microcopy.",
-	},
+	{ name: "Red Hat Display", role: "Display", sample: "Understand the system.", usage: "Headlines and section titles. Bold, upright, and tightly set." },
+	{ name: "Red Hat Text", role: "Body", sample: "Practical lessons for the people building cloud native.", usage: "Body copy and interface text. Clear at reading sizes." },
+	{ name: "Red Hat Mono", role: "Mono", sample: "kubectl get pods", usage: "Code, timestamps, and concise technical metadata." },
 ];
 
 const logoAssets = [
@@ -67,7 +31,6 @@ const logoAssets = [
 			"Use for avatars, favicons, social icons, and tight square placements.",
 		asset: monogramSvgRaw,
 		downloadName: "Rawkode-Academy-Monogram.svg",
-		useCases: ["Avatars", "Favicons", "Social badges"],
 	},
 	{
 		slug: "icon",
@@ -77,7 +40,6 @@ const logoAssets = [
 			"Use for app tiles, partner lockups, product UI, and compact brand moments.",
 		asset: iconSvgRaw,
 		downloadName: "Rawkode-Academy-Icon.svg",
-		useCases: ["App tiles", "Partner cards", "Product UI"],
 	},
 	{
 		slug: "wordmark",
@@ -87,17 +49,14 @@ const logoAssets = [
 			"Use when the full Rawkode Academy name needs to be legible at a glance.",
 		asset: wordmarkSvgRaw,
 		downloadName: "Rawkode-Academy-Wordmark.svg",
-		useCases: ["Headers", "Banners", "Print"],
 	},
 ];
 
-const logoDownloadJson = JSON.stringify(
-	logoAssets.map((logo) => ({
-		slug: logo.slug,
-		svg: logo.asset,
-		downloadName: logo.downloadName,
-	})),
-).replace(/</g, "\\u003C");
+function logoDownload(svg: string, color: string) {
+	const solid = svg.replace("</svg>", `<style>path, circle, rect, polygon, polyline, line, ellipse, g, text, use { fill: ${color} !important; stroke: ${color} !important; }</style></svg>`);
+	return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(solid)}`;
+}
+
 ---
 
 <Page
@@ -119,7 +78,7 @@ const logoDownloadJson = JSON.stringify(
 				<p class="editorial-kicker">Logo assets</p>
 				<h2 class="editorial-section__title">Use the right lockup for the space</h2>
 				<p class="editorial-section__lede">
-					Preview the source artwork as a solid ink mark, then download the variant you need.
+					Download an ink mark for light backgrounds or a white mark for dark backgrounds.
 				</p>
 			</div>
 			<div class="branding-logo-grid" data-logo-preview>
@@ -134,17 +93,10 @@ const logoDownloadJson = JSON.stringify(
 						<div class="brand-asset__copy">
 							<h3 class="editorial-card__title">{logo.name}</h3>
 							<p class="editorial-card__body">{logo.description}</p>
-							<div class="editorial-pill-row">
-								{logo.useCases.map((useCase) => <span class="editorial-pill">{useCase}</span>)}
+							<div class="brand-downloads">
+								<a class="logo-download-link" href={logoDownload(logo.asset, "#0c1626")} download={logo.downloadName.replace(".svg", "-ink.svg")}>Ink SVG</a>
+								<a class="logo-download-link" href={logoDownload(logo.asset, "#ffffff")} download={logo.downloadName.replace(".svg", "-white.svg")}>White SVG</a>
 							</div>
-							<button
-								type="button"
-								class="logo-download-link"
-								data-logo-download
-								data-logo-slug={logo.slug}
-							>
-								Download SVG
-							</button>
 						</div>
 					</article>
 				))}
@@ -156,10 +108,9 @@ const logoDownloadJson = JSON.stringify(
 				<p class="editorial-kicker">Color</p>
 				<h2 class="editorial-section__title">One canonical palette</h2>
 				<p class="editorial-section__lede">
-					The editorial palette - warm paper surfaces, deep ink type, and three
-					restrained accents - is the single brand treatment across the academy,
-					streams, partner materials, and product surfaces. Flat color only: no
-					gradients, no glows, no drop shadows.
+					Cool blue surfaces, navy type, and a pink action color. The website uses
+					paired light and dark values so contrast stays clear in either theme.
+					Use a solid, high-contrast treatment for the logo.
 				</p>
 			</div>
 			<div class="editorial-grid">
@@ -183,8 +134,8 @@ const logoDownloadJson = JSON.stringify(
 				<p class="editorial-kicker">Type</p>
 				<h2 class="editorial-section__title">Three typefaces, three jobs</h2>
 				<p class="editorial-section__lede">
-					Serif italic for display, a geometric sans for body, and a mono for
-					labels and meta. Do not substitute or mix roles.
+					The Red Hat family connects headlines, reading, and code. Display gives
+					the page its voice; Text and Mono keep the technical content legible.
 				</p>
 			</div>
 			<div class="editorial-grid">
@@ -231,8 +182,8 @@ const logoDownloadJson = JSON.stringify(
   stroke: currentColor !important;
 }
 
-.brand-logo--spruce {
-  color: oklch(0.50 0.09 165);
+.brand-logo--accent {
+  color: #c2185b;
 }`}</code></pre>
 					</div>
 				</article>
@@ -241,90 +192,13 @@ const logoDownloadJson = JSON.stringify(
 	</EditorialShell>
 </Page>
 
-<script type="module" is:inline define:vars={{ logoDownloadJson }}>
-	const previewRoot = document.querySelector("[data-logo-preview]");
-	const logoDownloadEntries = JSON.parse(logoDownloadJson);
-	const logoDownloadData = new Map(Array.isArray(logoDownloadEntries) ? logoDownloadEntries.map((entry) => [entry.slug, entry]) : []);
-
-	const resolveButtonFromEvent = (event, selector) => {
-		const target = event.target;
-		if (!(target instanceof Element)) return null;
-		return target.closest(selector);
-	};
-
-	const insertBeforeClose = (svg, markup) => {
-		const closeIndex = svg.lastIndexOf("</svg>");
-		if (closeIndex === -1) return svg;
-		return `${svg.slice(0, closeIndex)}${markup}${svg.slice(closeIndex)}`;
-	};
-
-	const createStyleMarkup = (content) => `<style>${content}</style>`;
-	const paintableSelector = ":is(path, circle, rect, polygon, polyline, line, ellipse, g, text, use)";
-
-	const applySolidFill = (svg, color) => {
-		const style = `${paintableSelector} { fill: ${color} !important; stroke: ${color} !important; }`;
-		return insertBeforeClose(svg, createStyleMarkup(style));
-	};
-
-	const normalizeColorValue = (value) => {
-		if (!value) return "#000000";
-		const trimmed = value.trim();
-		if (trimmed.startsWith("#")) return trimmed;
-		const rgbMatch = trimmed.match(/(\d+(\.\d+)?)/g);
-		if (rgbMatch && rgbMatch.length >= 3) {
-			const [r, g, b] = rgbMatch;
-			const toHex = (component) =>
-				Math.max(0, Math.min(255, Math.round(parseFloat(component))))
-					.toString(16)
-					.padStart(2, "0");
-			return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-		}
-		return trimmed;
-	};
-
-	const buildFilename = (baseName, suffix) => {
-		if (!suffix) return baseName;
-		const cleanSuffix = suffix.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-		if (!cleanSuffix) return baseName;
-		const lastDot = baseName.lastIndexOf(".");
-		if (lastDot === -1) return `${baseName}--${cleanSuffix}`;
-		return `${baseName.slice(0, lastDot)}--${cleanSuffix}${baseName.slice(lastDot)}`;
-	};
-
-	const triggerDownload = (svgContent, filename) => {
-		const blob = new Blob([svgContent], { type: "image/svg+xml" });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement("a");
-		link.href = url;
-		link.download = filename;
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		setTimeout(() => URL.revokeObjectURL(url), 500);
-	};
-
-	const resolveSolidColor = () => {
-		if (!previewRoot) return "#000000";
-		const color = getComputedStyle(previewRoot).getPropertyValue("--brand-logo-surface");
-		return normalizeColorValue(color || "#000000");
-	};
-
-	document.addEventListener("click", (event) => {
-		const button = resolveButtonFromEvent(event, "[data-logo-download]");
-		if (!button || !previewRoot) return;
-		const slug = button.dataset.logoSlug;
-		const logo = slug ? logoDownloadData.get(slug) : null;
-		if (!logo) return;
-
-		const color = resolveSolidColor();
-		const svgContent = applySolidFill(logo.svg, color);
-
-		triggerDownload(svgContent, buildFilename(logo.downloadName, color));
-	});
-</script>
-
 <style is:global>
+	.brand-downloads { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 	.logo-download-link {
+		display: inline-flex;
+		align-items: center;
+		text-decoration: none;
+		min-height: 44px;
 		border: 1px solid var(--colors-academy-border);
 		border-radius: 4px;
 		background: var(--colors-academy-canvas);
@@ -364,7 +238,7 @@ const logoDownloadJson = JSON.stringify(
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 12rem;
+		height: 14rem;
 		border: 1px solid var(--colors-academy-border);
 		border-radius: 4px;
 		background: var(--colors-academy-canvas);
@@ -420,7 +294,7 @@ const logoDownloadJson = JSON.stringify(
 
 	.brand-color-grid {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 1rem;
 	}
 
@@ -440,7 +314,7 @@ const logoDownloadJson = JSON.stringify(
 
 	.brand-type-grid {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: minmax(0, 1fr);
 		gap: 1rem;
 	}
 
@@ -455,8 +329,8 @@ const logoDownloadJson = JSON.stringify(
 	}
 
 	.brand-typeface__sample--display {
-		font-family: var(--fonts-academy-display), Georgia, serif;
-		font-style: italic;
+		font-family: var(--fonts-academy-display), system-ui, sans-serif;
+		font-weight: 700;
 		letter-spacing: -0.02em;
 	}
 
