@@ -69,18 +69,23 @@ const catalog = academyCatalog();
 						return (
 							<a
 								href={`/people/${person.data.id}`}
-								class={styles.card}
+								class={catalog.identity}
 								data-keywords={searchKeywords}
 							>
-								<img
-									src={person.data.avatarUrl ?? "/apple-touch-icon.png"}
-									alt={person.data.name}
-									class={catalog.avatar}
-									loading="lazy"
-									onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
-								/>
-								<span class={styles.cardTitle}>{person.data.name}</span>
-								{handle && <span class={catalog.rowMeta}>@{handle}</span>}
+								<span class={catalog.identityMark}>
+									<img
+										src={person.data.avatarUrl ?? "/apple-touch-icon.png"}
+										alt={person.data.name}
+										class={catalog.avatar}
+										loading="lazy"
+										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
+									/>
+								</span>
+								<span class={catalog.identityBody}>
+									<span class={catalog.identityTitle}>{person.data.name}</span>
+									<span class={catalog.identityMeta}>{handle ? `@${handle}` : "Contributor profile"}</span>
+								</span>
+								<span class={catalog.identityArrow} aria-hidden="true">↗</span>
 							</a>
 						);
 					})

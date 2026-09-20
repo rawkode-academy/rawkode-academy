@@ -75,19 +75,23 @@ const catalog = academyCatalog();
 						return (
 							<a
 								href={`/technology/${tech.id}`}
-								class={styles.card}
+								class={catalog.identity}
 								data-keywords={searchKeywords}
 							>
-								<span>
+								<span class={catalog.identityMark}>
 									<img
 										src={tech.logo ?? "/apple-touch-icon.png"}
 										alt={`${tech.name} logo`}
-										class={catalog.logo}
+										class={catalog.identityLogo}
 										loading="lazy"
 										onerror={`this.onerror=null; this.src='/apple-touch-icon.png';`}
 									/>
 								</span>
-								<span class={styles.cardTitle}>{tech.name}</span>
+								<span class={catalog.identityBody}>
+									<span class={catalog.identityTitle}>{tech.name}</span>
+									<span class={catalog.identityMeta}>Technology profile</span>
+								</span>
+								<span class={catalog.identityArrow} aria-hidden="true">↗</span>
 							</a>
 						);
 					})
