@@ -17,7 +17,9 @@ ci: pipelines: {
 		tasks: [_t.check, _t.test, _t.build, _t.e2e, _t.deploy.main]
 	}
 	pullRequest: {
-		environment: "production"
+		// Pull-request validation is intentionally hermetic. Production secrets are
+		// resolved only by the default-branch deployment pipeline.
+		environment: "development"
 		when: { pullRequest: true }
 		tasks: [_t.check, _t.test, _t.build, _t.e2e, _t.deploy.preview]
 	}
