@@ -155,7 +155,7 @@ const clearSelection = () => {
  height: 20px;
  padding: 0 0.375rem;
  background: var(--colors-academy-accent);
- color: white;
+ color: var(--colors-academy-accent-foreground);
  font-size: 0.65rem;
  font-weight: 700;
  border-radius: 9999px;

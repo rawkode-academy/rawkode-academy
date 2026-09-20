@@ -620,7 +620,7 @@ function handleKeydown(event: KeyboardEvent) {
  height: 1.25rem;
  padding: 0 0.3rem;
  background: var(--colors-academy-accent);
- color: white;
+ color: var(--colors-academy-accent-foreground);
  border-radius: 9999px;
  font-size: 0.65rem;
  }
