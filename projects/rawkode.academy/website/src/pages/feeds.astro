@@ -2,6 +2,9 @@
 import { getCollection } from "astro:content";
 import EditorialShell from "@/components/ui/EditorialShell.astro";
 import Page from "@/wrappers/page.astro";
+import { academyDocument } from "@rawkodeacademy/design-system";
+
+const doc = academyDocument();
 
 export const prerender = true;
 
@@ -55,125 +58,91 @@ const formatNotes = [
 ];
 ---
 
-<Page
-	title="Feeds"
-	description="Subscribe to Rawkode Academy via RSS, Atom, JSON Feed, or OPML."
->
-	<EditorialShell
-		eyebrow="Subscribe"
-		title="Feeds"
-		lede="Use RSS, Atom, JSON Feed, or OPML to follow new Rawkode Academy articles, news, videos, and shows in your reader."
-		compact
-	>
-		<div class="editorial-actions" slot="actions">
-			<a class="editorial-button" href="/feeds.opml">Download OPML</a>
-			<a class="editorial-button editorial-button--secondary" href="#show-feeds">Show feeds</a>
-		</div>
+<Page title="Feeds" description="Subscribe to Rawkode Academy via RSS, Atom, JSON Feed, or OPML.">
+	<EditorialShell title="Feeds" lede="Follow the Academy in your feed reader. Choose a topic below, or import all feeds at once." compact>
+		<a slot="actions" class={doc.link} href="/feeds.opml" download>Download all feeds (OPML) ↓</a>
 
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Main feeds</p>
-				<h2 class="editorial-section__title">Choose the feed you actually want</h2>
-				<p class="editorial-section__lede">
-					Subscribe to everything, or keep articles, news, and videos separate.
-				</p>
-			</div>
-			<div class="editorial-grid editorial-grid--2">
+		<section class="feed-section" aria-labelledby="main-feeds">
+			<h2 id="main-feeds" class={doc.sectionTitle}>Main feeds</h2>
+			<div class="feed-list">
 				{feedGroups.map((group) => (
-					<article class="editorial-card feed-card">
-						<h3 class="editorial-card__title">{group.title}</h3>
-						<p class="editorial-card__body">{group.body}</p>
-						<div class="feed-card__links">
-							{group.links.map((link) => (
-								<a class="feed-link" href={link.href}>{link.label}</a>
-							))}
+					<article class="feed-row">
+						<div>
+							<h3 class={doc.cardTitle}>{group.title}</h3>
+							<p class={doc.copy}>{group.body}</p>
+						</div>
+						<div class="feed-links">
+							{group.links.map((link) => <a class="feed-link" href={link.href} aria-label={`${group.title} ${link.label} feed`}>{link.label} ↗</a>)}
 						</div>
 					</article>
 				))}
 			</div>
 		</section>
 
-		<section id="show-feeds" class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Podcasts</p>
-				<h2 class="editorial-section__title">Show feeds</h2>
-				<p class="editorial-section__lede">
-					Each published show has its own podcast RSS feed.
-				</p>
-			</div>
-			<div class="editorial-grid editorial-grid--2">
-				{publishedShows.length > 0 ? (
-					publishedShows.map((show) => (
-						<article class="editorial-card feed-card">
-							<h3 class="editorial-card__title">{show.data.name}</h3>
-							<p class="editorial-card__body">{show.data.description || `Subscribe to ${show.data.name}.`}</p>
-							<div class="feed-card__links">
-								<a class="feed-link" href={`/api/feeds/shows/${show.data.id}.xml`}>Podcast RSS</a>
-							</div>
-						</article>
-					))
-				) : (
-					<article class="editorial-card">
-						<p class="editorial-card__body">No podcast feeds are published yet.</p>
+		<section class="feed-section" aria-labelledby="show-feeds">
+			<h2 id="show-feeds" class={doc.sectionTitle}>Podcast feeds</h2>
+			<div class="feed-list">
+				{publishedShows.length > 0 ? publishedShows.map((show) => (
+					<article class="feed-row">
+						<div>
+							<h3 class={doc.cardTitle}>{show.data.name}</h3>
+							<p class={doc.copy}>{show.data.description}</p>
+						</div>
+						<div class="feed-links">
+							<a class="feed-link" href={`/api/feeds/shows/${show.data.id}.xml`} aria-label={`${show.data.name} podcast RSS feed`}>RSS ↗</a>
+						</div>
 					</article>
-				)}
+				)) : <p class={doc.copy}>No podcast feeds are published yet.</p>}
 			</div>
 		</section>
 
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">OPML</p>
-				<h2 class="editorial-section__title">Import everything at once</h2>
-				<p class="editorial-section__lede">
-					Import our OPML file into Feedly, Inoreader, NetNewsWire, or another feed reader to subscribe to all available feeds in one step.
-				</p>
-			</div>
-			<div class="editorial-card">
-				<a class="editorial-button" href="/feeds.opml">Download feeds.opml</a>
-			</div>
-		</section>
-
-		<section class="editorial-section editorial-section--split">
-			<div class="editorial-section__header">
-				<p class="editorial-kicker">Formats</p>
-				<h2 class="editorial-section__title">What each format is for</h2>
-			</div>
-			<div class="editorial-card">
-				<ul class="editorial-list">
-					{formatNotes.map((note) => <li>{note}</li>)}
-				</ul>
-			</div>
-		</section>
+		<details class="feed-formats">
+			<summary>Which format should I choose?</summary>
+			<ul class="editorial-list">{formatNotes.map((note) => <li>{note}</li>)}</ul>
+		</details>
 	</EditorialShell>
 </Page>
 
 <style>
-	.feed-card__links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-		margin-top: 1rem;
+	.feed-section { padding: 2.5rem var(--spacing-academy-gutter); }
+	.feed-section h2 { margin-bottom: 1.5rem; }
+	.feed-list { border-top: 1px solid var(--colors-academy-border); }
+	.feed-row {
+		display: grid;
+		gap: 1rem;
+		padding: 1.5rem 0;
+		border-bottom: 1px solid var(--colors-academy-border);
 	}
-
+	.feed-row h3 { margin: 0 0 0.5rem; }
+	.feed-row p { margin: 0; }
+	.feed-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: center; }
 	.feed-link {
 		display: inline-flex;
 		align-items: center;
 		min-height: 2.75rem;
-		border: 1px solid var(--colors-academy-border);
-		border-radius: 4px;
-		padding: 0.45rem 0.65rem;
-		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.75rem;
-		font-weight: 700;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--colors-academy-text);
-		text-decoration: none;
+		font-family: var(--fonts-academy-mono), monospace;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--colors-academy-accent);
+		text-underline-offset: 0.2em;
 	}
-
-	.feed-link:hover {
-		background: var(--colors-academy-text);
-		color: var(--colors-academy-canvas);
-		border-color: var(--colors-academy-text);
+	.feed-link:hover { text-decoration: underline; }
+	.feed-link:focus-visible, .feed-formats summary:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 4px;
+	}
+	.feed-formats { margin: 0 var(--spacing-academy-gutter) 3rem; }
+	.feed-formats summary {
+		width: fit-content;
+		min-height: 2.75rem;
+		padding-block: 0.625rem;
+		cursor: pointer;
+		font-weight: 600;
+	}
+	.feed-formats ul { padding-top: 1rem; }
+	@media (min-width: 1024px) {
+		.feed-section { padding-inline: 0; }
+		.feed-formats { margin-inline: 0; }
+		.feed-row { grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; align-items: start; }
 	}
 </style>

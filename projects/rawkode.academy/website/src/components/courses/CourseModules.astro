@@ -11,7 +11,7 @@ type Props = {
 const { course, modules } = Astro.props;
 const s = academyCourse();
 
-const courseModules = (modules ?? await getCollection("courseModules"))
+const courseModules = (modules ?? (await getCollection("courseModules")))
 	.filter((module) => module.data.course.id === course.id)
 	.sort((a, b) => a.data.order - b.data.order);
 
@@ -23,8 +23,10 @@ for (const module of courseModules) {
 	groupedModules.set(section, group);
 }
 
-const displayOrderById = new Map(
-	courseModules.map((module, index) => [module.id, index + 1]),
+const publishedOrderById = new Map(
+	courseModules
+		.filter((module) => !module.data.draft)
+		.map((module, index) => [module.id, index + 1]),
 );
 
 function formatDuration(minutes: number): string {
@@ -51,7 +53,7 @@ function formatDuration(minutes: number): string {
 				<ol class={s.lessonList} role="list">
 					{sectionModules.map((module) => {
 						const isDraft = module.data.draft;
-						const displayOrder = displayOrderById.get(module.id);
+						const displayOrder = publishedOrderById.get(module.id);
 						const moduleSlug = getCourseModuleSlug(course.id, module.id);
 						const Element = isDraft ? "div" : "a";
 						const elementProps = isDraft
@@ -64,7 +66,7 @@ function formatDuration(minutes: number): string {
 						return (
 							<li value={displayOrder}>
 								<Element {...elementProps}>
-									<span class={s.lessonIndex} aria-hidden="true">{String(displayOrder).padStart(2, "0")}</span>
+									<span class={s.lessonIndex} aria-hidden="true">{displayOrder === undefined ? "—" : String(displayOrder).padStart(2, "0")}</span>
 									<div class={s.lessonCopy}>
 										<span class={s.lessonTitle}>{module.data.title}</span>
 										<p class={s.lessonDescription}>{module.data.description}</p>

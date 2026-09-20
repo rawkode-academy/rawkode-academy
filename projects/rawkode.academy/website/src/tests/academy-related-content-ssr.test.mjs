@@ -163,6 +163,7 @@ const technologyAst = ts.createSourceFile(
 	true,
 );
 const guardNames = new Set([
+	"now",
 	"normalizedTechnologyId",
 	"matchesTechnology",
 	"hasTopicContent",
@@ -260,6 +261,30 @@ test("technology page guard retains draft exclusions and news/path matches witho
 		false,
 	);
 	assert.equal(pageHasTopicContent({}), false);
+});
+
+test("technology guard and TopicHub both exclude future articles, news and learning paths", async () => {
+	for (const collection of ["articles", "news", "learningPaths"]) {
+		const collections = {
+			[collection]: [entry("future", { publishedAt: new Date("2999-01-01") })],
+		};
+		assert.equal(pageHasTopicContent(collections), false);
+		const { dom } = await render(
+			"technology/TopicHub.astro",
+			{ ...topic, showVideos: false },
+			collections,
+		);
+		assert.equal(dom.querySelectorAll("section").length, 0);
+		collections[collection].push(entry("published"));
+		assert.equal(pageHasTopicContent(collections), true);
+		const published = await render(
+			"technology/TopicHub.astro",
+			{ ...topic, showVideos: false },
+			collections,
+		);
+		assert.equal(published.dom.querySelectorAll("section").length, 1);
+		assert(!published.html.includes("Title future"));
+	}
 });
 
 test("related videos retain ranking, destinations, genuine thumbnails, limit, and readable runtime", async () => {

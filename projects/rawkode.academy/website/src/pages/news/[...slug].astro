@@ -16,6 +16,7 @@ import RelatedNews from "@/components/news/RelatedNews.astro";
 import NewsletterCTA from "@/components/newsletter/NewsletterCTA.astro";
 import Page from "@/wrappers/page.astro";
 import { calculateReadingTime } from "@/utils/reading-time";
+import { isNewsPublished } from "@/lib/news-publication";
 import type { GetStaticPaths, GetStaticPathsResult } from "astro";
 
 export const prerender = true;
@@ -26,7 +27,8 @@ type Props = {
 
 export const getStaticPaths: GetStaticPaths =
 	async (): Promise<GetStaticPathsResult> => {
-		const articles = await getCollection("news");
+		const now = new Date();
+		const articles = await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now));
 		return articles.map((article: CollectionEntry<"news">) => ({
 			params: { slug: article.id },
 			props: { article },

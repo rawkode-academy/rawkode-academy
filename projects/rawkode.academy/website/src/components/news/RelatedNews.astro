@@ -18,7 +18,7 @@ const catalog = academyCatalog();
 {related.length > 0 && (
 	<section>
 		<div class={layout.sectionHeader}><h2 class={layout.sectionTitle}>More stories</h2></div>
-		<div class={catalog.newsList}>
+		<div class={catalog.editorialList}>
 			{related.map((story) => <NewsStoryRow story={story} />)}
 		</div>
 	</section>

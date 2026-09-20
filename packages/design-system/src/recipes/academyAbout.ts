@@ -138,6 +138,7 @@ export const academyAbout = sva({
 			gap: "2",
 			paddingBlock: "5",
 			borderBottom: "hairline",
+			_last: { borderBottom: "none", paddingBlockEnd: "0" },
 		},
 		itemTitle: {
 			margin: "0",

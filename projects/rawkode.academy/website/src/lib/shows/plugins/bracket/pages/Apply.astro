@@ -5,10 +5,9 @@ interface Props {
 	showId: string;
 	isSignedIn: boolean;
 	participation: MyParticipation;
-	submitted: boolean;
 }
 
-const { showId, isSignedIn, participation, submitted } = Astro.props;
+const { showId, isSignedIn, participation } = Astro.props;
 const cards = participation.brackets;
 const applyPath = `/shows/${showId}/apply`;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(applyPath)}`;
@@ -24,17 +23,6 @@ const manageLabel = (kind: string, hasTeam: boolean) => {
 ---
 
 <div class="mx-auto max-w-3xl">
-	{
-		submitted && (
-			<div
-				class="mb-6 rounded-sm border p-4 text-sm text-primary-content"
-				style="border-color: var(--surface-border); background: var(--surface-raised)"
-			>
-				Application saved. Current entry status is reflected below.
-			</div>
-		)
-	}
-
 	{
 		cards.length === 0 ? (
 			<div class="rounded-sm paper-card p-12 text-center">

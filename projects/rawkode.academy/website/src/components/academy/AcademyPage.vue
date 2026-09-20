@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { academyPage } from "@rawkodeacademy/design-system";
+import { academyCatalog, academyPage } from "@rawkodeacademy/design-system";
 
 interface AcademyCard {
 	href: string;
@@ -10,16 +10,24 @@ interface AcademyCard {
 	kind?: string;
 	mediaSrc?: string;
 }
-const props = withDefaults(defineProps<{
-	page?: "home" | "learn";
+interface HomeProps {
+	page?: "home";
 	featured: AcademyCard;
 	latest: AcademyCard[];
-	// Compatibility: Home and Learn still supply this prop.
-	videos: AcademyCard[];
 	learningPaths: AcademyCard[];
 	stats: Array<{ value: string; label: string }>;
-}>(), { page: "home" });
+}
+interface LearnProps {
+	page: "learn";
+	learningPaths: AcademyCard[];
+	// Exclude Home data while keeping Vue's generated runtime props optional.
+	featured?: never;
+	latest?: never;
+	stats?: never;
+}
+const props = withDefaults(defineProps<HomeProps | LearnProps>(), { page: "home" });
 const styles = academyPage();
+const catalog = academyCatalog();
 const formats = [
 	{ href: "/watch", title: "Watch", copy: "Real builds. Every decision explained." },
 	{ href: "/read", title: "Read", copy: "Technical ideas, taken apart carefully." },
@@ -63,27 +71,27 @@ const formats = [
 				<a v-for="format in formats" :key="format.href" :href="format.href" :class="styles.formatLink"><span :class="styles.formatHeading">{{ format.title }} <span aria-hidden="true">↗</span></span><span :class="styles.cardDescription">{{ format.copy }}</span></a>
 			</nav>
 			<section :class="styles.section" aria-labelledby="latest-title">
-				<div :class="styles.sectionHead"><div><p :class="styles.kicker">Across the Academy</p><h2 id="latest-title" :class="styles.sectionTitle">Fresh perspectives.</h2></div><a href="/search" :class="styles.textLink">Explore everything <span aria-hidden="true">→</span></a></div>
-				<div :class="styles.feedGrid">
-					<a v-for="item in props.latest.slice(0, 6)" :key="item.href" :href="item.href" :class="styles.card">
-						<div v-if="item.mediaSrc" :class="styles.cardArt"><img :src="item.mediaSrc" alt="" :class="styles.cardImage" width="640" height="360" loading="lazy" /></div>
-						<div :class="styles.cardBody"><p :class="styles.cardMeta"><span>{{ item.kind || item.meta[0] }}</span><time v-if="item.publishedAt" :datetime="item.publishedAt">{{ item.meta[1] }}</time></p><h3 :class="styles.cardTitle">{{ item.title }}</h3><p :class="styles.cardDescription">{{ item.description }}</p></div>
+				<div :class="styles.sectionHead"><h2 id="latest-title" :class="styles.sectionTitle">Recently published.</h2><a href="/search" :class="styles.textLink">Explore everything <span aria-hidden="true">→</span></a></div>
+				<div :class="catalog.editorialList">
+					<a v-for="item in props.latest.slice(0, 6)" :key="item.href" :href="item.href" :class="catalog.editorialRow" :data-media="Boolean(item.mediaSrc)">
+						<img v-if="item.mediaSrc" :src="item.mediaSrc" alt="" :class="catalog.editorialImage" width="640" height="360" loading="lazy" />
+						<div :class="catalog.editorialBody"><p :class="styles.cardMeta"><span>{{ item.kind || item.meta[0] }}</span><time v-if="item.publishedAt" :datetime="item.publishedAt">{{ item.meta[1] }}</time></p><h3 :class="catalog.editorialTitle">{{ item.title }}</h3><p :class="styles.cardDescription">{{ item.description }}</p></div>
 					</a>
 				</div>
 			</section>
 		</template>
 		<section v-else :class="styles.pageHero">
-			<div :class="styles.container"><p :class="styles.kicker">Build your understanding</p><div :class="styles.pageHeroGrid"><h1 :class="styles.pageTitle">Learning paths.</h1><p :class="styles.lede">A sequence of lessons that connects the dots. Pick a path and build something you understand.</p></div></div>
+			<div :class="styles.container"><div :class="styles.pageHeroGrid"><h1 :class="styles.pageTitle">Learning paths.</h1><p :class="styles.lede">Follow a sequence of related lessons, articles, and working sessions.</p></div></div>
 		</section>
-		<section v-if="props.learningPaths.length" :class="styles.section" aria-labelledby="paths-title">
-			<div :class="styles.sectionHead"><div><p v-if="props.page === 'home'" :class="styles.kicker">Go a little deeper</p><h2 id="paths-title" :class="styles.sectionTitle">{{ props.page === 'home' ? 'A path worth following.' : 'Choose your next project' }}</h2></div><a v-if="props.page === 'home'" href="/learning-paths" :class="styles.textLink">All learning paths <span aria-hidden="true">→</span></a><span v-else :class="styles.resultCount">{{ props.learningPaths.length }} paths · self-paced</span></div>
+		<section v-if="props.learningPaths.length" :class="styles.section" :aria-labelledby="props.page === 'home' ? 'paths-title' : undefined" :aria-label="props.page === 'learn' ? 'Available learning paths' : undefined">
+			<div v-if="props.page === 'home'" :class="styles.sectionHead"><h2 id="paths-title" :class="styles.sectionTitle">Choose a learning path.</h2><a href="/learning-paths" :class="styles.textLink">All learning paths <span aria-hidden="true">→</span></a></div>
 			<div :class="styles.pathList">
-				<a v-for="(path, index) in (props.page === 'home' ? props.learningPaths.slice(0, 3) : props.learningPaths)" :key="path.href" :href="path.href" :class="styles.pathCard"><span :class="styles.pathIndex" aria-hidden="true">{{ String(index + 1).padStart(2, '0') }}</span><div :class="styles.pathBody"><h3 :class="styles.pathTitle">{{ path.title }}</h3><p :class="styles.cardDescription">{{ path.description }}</p><p :class="styles.pathMeta">{{ path.meta.join(' · ') }}</p></div><span :class="styles.pathArrow" aria-hidden="true">↗</span></a>
+					<a v-for="path in (props.page === 'home' ? props.learningPaths.slice(0, 3) : props.learningPaths)" :key="path.href" :href="path.href" :class="styles.pathCard"><div :class="styles.pathBody"><component :is="props.page === 'home' ? 'h3' : 'h2'" :class="styles.pathTitle">{{ path.title }}</component><p :class="styles.cardDescription">{{ path.description }}</p><p :class="styles.pathMeta">{{ path.meta.join(' · ') }}</p></div><span :class="styles.pathArrow" aria-hidden="true">↗</span></a>
 			</div>
 		</section>
 
 		<section v-if="props.page === 'home'" id="join" :class="styles.newsletter" aria-labelledby="newsletter-title">
-			<div><p :class="styles.kicker">Keep learning</p><h2 id="newsletter-title" :class="styles.sectionTitle">Good things.<br />In your inbox.</h2><p :class="styles.lede">New lessons, courses, and ideas from the Academy.</p></div>
+			<div><h2 id="newsletter-title" :class="styles.sectionTitle">Keep learning.</h2><p :class="styles.lede">New lessons, courses, and ideas from the Academy, in your inbox.</p></div>
 			<form :class="styles.newsletterForm" action="https://email.rawkode.academy/subscribe" method="post"><label for="academy-email">Your email address</label><div :class="styles.newsletterRow"><input id="academy-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" :class="styles.input" /><button type="submit" :class="styles.buttonPrimary">Subscribe <span aria-hidden="true">→</span></button></div><p :class="styles.finePrint">Unsubscribe at any time. <a href="/privacy">Privacy policy</a></p></form>
 		</section>
 	</div>

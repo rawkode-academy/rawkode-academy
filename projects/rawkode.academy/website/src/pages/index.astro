@@ -41,13 +41,13 @@ const formatDuration = (seconds?: number | null) => {
 
 const formatPathDuration = (minutes?: number | null) => {
 	if (!minutes || minutes <= 0) return "Self-paced";
-	if (minutes < 60) return `${minutes} min route`;
+	if (minutes < 60) return `${minutes} min core video`;
 	const hours = Math.floor(minutes / 60);
 	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m route` : `${hours}h route`;
+	return remainder > 0 ? `${hours}h ${remainder}m core video` : `${hours}h core video`;
 };
 
-const videos = publishedVideos.slice(0, 12).map((video) => ({
+const videos = publishedVideos.slice(0, 1).map((video) => ({
 	href: `/watch/${video.data.slug}`,
 	title: video.data.title,
 	description: compactCopy(video.data.subtitle || video.data.description),
@@ -111,11 +111,9 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 			/>
 		)}
 		<AcademyPage
-			client:load
 			page="home"
 			featured={featured}
 			latest={latest}
-			videos={videos}
 			learningPaths={paths}
 			stats={[
 				{ value: `${publishedVideos.length}`, label: "Lessons" },

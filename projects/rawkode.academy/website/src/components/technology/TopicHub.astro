@@ -43,8 +43,9 @@ const matchesTechnology = (technologies: ReadonlyArray<string | { id: string }> 
 	});
 
 // Get all articles that mention this technology
+const now = new Date();
 const allArticles = await getCollection("articles", ({ data }) => {
-	return !data.draft && matchesTechnology(data.technologies);
+	return !data.draft && data.publishedAt <= now && matchesTechnology(data.technologies);
 });
 
 // Sort articles by date
@@ -55,7 +56,7 @@ const articles = allArticles.sort(
 // Get news matching this technology
 const allNews = showNews
 	? (await getCollection("news"))
-			.filter((story) => matchesTechnology(story.data.technologies))
+			.filter((story) => story.data.publishedAt <= now && matchesTechnology(story.data.technologies))
 			.sort(
 				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 			)
@@ -64,7 +65,7 @@ const allNews = showNews
 
 const learningPaths = showLearningPaths
 	? (await getCollection("learningPaths"))
-			.filter((path) => matchesTechnology(path.data.technologies))
+			.filter((path) => path.data.publishedAt <= now && matchesTechnology(path.data.technologies))
 			.sort(
 				(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 			)

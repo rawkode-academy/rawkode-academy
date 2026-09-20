@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { parse } from "node-html-parser";
 import { describe, expect, it } from "vitest";
 import { createSSRApp } from "vue";
 import { renderToString } from "vue/server-renderer";
@@ -191,7 +193,6 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 	const props = {
 		featured: card,
 		latest: [card],
-		videos: [card],
 		learningPaths: Array.from({ length: 5 }, (_, i) => ({
 			...card,
 			href: `/learning-paths/path-${i}`,
@@ -204,20 +205,79 @@ describe("Home and Learn remain server-rendered AcademyPage consumers", () => {
 			createSSRApp(AcademyPage, { ...props, page: "home" }),
 		);
 		expect(html).toContain("Understand");
-		expect(html).toContain("Fresh perspectives.");
+		expect(html).toContain("Recently published.");
 		expect(html).toContain('href="/learning-paths/path-2"');
 		expect(html).not.toContain('href="/learning-paths/path-3"');
 		expect(html).toContain('action="https://email.rawkode.academy/subscribe"');
 		expect(html).not.toContain("video-search");
 	});
-	it("keeps Learn's title and complete path list without Watch controls", async () => {
-		const html = await renderToString(
-			createSSRApp(AcademyPage, { ...props, page: "learn" }),
+	it("defaults to exactly the Home branch when page is omitted", async () => {
+		const implicit = await renderToString(createSSRApp(AcademyPage, props));
+		const explicit = await renderToString(
+			createSSRApp(AcademyPage, { ...props, page: "home" }),
 		);
+		expect(implicit).toBe(explicit);
+	});
+	it("keeps the supplied chronological stream, caps it at six, and supports imageless entries", async () => {
+		const latest = Array.from({ length: 8 }, (_, index) => ({
+			...card,
+			href: `/news/item-${index}`,
+			title: `Item ${index}`,
+			mediaSrc: index === 1 ? undefined : "/images/news/news-generic.svg",
+			publishedAt: "2026-09-20T12:00:00.000Z",
+			meta: ["News", "20 September 2026"],
+		}));
+		const dom = parse(
+			await renderToString(createSSRApp(AcademyPage, { ...props, latest })),
+		);
+		const rows = dom.querySelectorAll(
+			'[aria-labelledby="latest-title"] a[data-media]',
+		);
+		expect(rows.map((row) => row.getAttribute("href"))).toEqual(
+			latest.slice(0, 6).map((item) => item.href),
+		);
+		const [first, second] = rows;
+		if (!first || !second)
+			throw new Error("Expected at least two editorial rows");
+		expect(second.getAttribute("data-media")).toBe("false");
+		expect(second.querySelector("img")).toBeNull();
+		expect(first.querySelector("img")?.getAttribute("alt")).toBe("");
+		expect(first.querySelector("time")?.getAttribute("datetime")).toBe(
+			"2026-09-20T12:00:00.000Z",
+		);
+	});
+	it.each([
+		"index.astro",
+		"learning-paths/index.astro",
+	])("does not hydrate static AcademyPage markup in %s", (route) => {
+		const source = readFileSync(`src/pages/${route}`, "utf8");
+		expect(source).not.toMatch(/client:(load|idle|visible|only|media)/);
+	});
+	it("keeps Learn's title and complete path list without Watch controls", async () => {
+		const app = createSSRApp(AcademyPage, {
+			page: "learn",
+			learningPaths: props.learningPaths,
+		});
+		const warnings: string[] = [];
+		app.config.warnHandler = (message) => warnings.push(message);
+		const html = await renderToString(app);
+		expect(warnings).toEqual([]);
 		expect(html).toContain("Learning paths.");
 		expect(html).toContain('href="/learning-paths/path-4"');
 		expect(html).not.toContain("video-search");
 		expect(html).not.toContain("Show more sessions");
 		expect(html).not.toContain('videos="');
+		expect(html).not.toContain('featured="');
+		expect(html).not.toContain('latest="');
+		expect(html).not.toContain('stats="');
+	});
+	it("passes only Learn's discriminator and path data from the Astro route", () => {
+		const source = readFileSync("src/pages/learning-paths/index.astro", "utf8");
+		const component = source.match(/<AcademyPage\b([\s\S]*?)\/>/)?.[1];
+		expect(component).toBeDefined();
+		expect(component).toMatch(/page="learn"/);
+		expect(component).toMatch(/learningPaths=\{paths\}/);
+		expect(component).not.toMatch(/\b(featured|latest|stats)=/);
+		expect(source).not.toContain("const featured =");
 	});
 });

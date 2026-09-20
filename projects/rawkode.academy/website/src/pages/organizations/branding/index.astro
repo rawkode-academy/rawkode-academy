@@ -4,6 +4,7 @@ import Page from "@/wrappers/page.astro";
 import iconSvgRaw from "@/components/branding/logos/logo.svg?raw";
 import monogramSvgRaw from "@/components/branding/logos/monogram.svg?raw";
 import wordmarkSvgRaw from "@/components/branding/logos/wordmark.svg?raw";
+import { academyLogoDownload } from "@/lib/branding";
 
 export const prerender = true;
 
@@ -52,11 +53,6 @@ const logoAssets = [
 	},
 ];
 
-function logoDownload(svg: string, color: string) {
-	const solid = svg.replace("</svg>", `<style>path, circle, rect, polygon, polyline, line, ellipse, g, text, use { fill: ${color} !important; stroke: ${color} !important; }</style></svg>`);
-	return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(solid)}`;
-}
-
 ---
 
 <Page
@@ -94,8 +90,8 @@ function logoDownload(svg: string, color: string) {
 							<h3 class="editorial-card__title">{logo.name}</h3>
 							<p class="editorial-card__body">{logo.description}</p>
 							<div class="brand-downloads">
-								<a class="logo-download-link" href={logoDownload(logo.asset, "#0c1626")} download={logo.downloadName.replace(".svg", "-ink.svg")}>Ink SVG</a>
-								<a class="logo-download-link" href={logoDownload(logo.asset, "#ffffff")} download={logo.downloadName.replace(".svg", "-white.svg")}>White SVG</a>
+								<a class="logo-download-link" href={academyLogoDownload(logo.asset, "#0c1626")} download={logo.downloadName.replace(".svg", "-ink.svg")} aria-label={`Download ${logo.name} in ink (SVG)`}>Ink SVG</a>
+								<a class="logo-download-link" href={academyLogoDownload(logo.asset, "#ffffff")} download={logo.downloadName.replace(".svg", "-white.svg")} aria-label={`Download ${logo.name} in white (SVG)`}>White SVG</a>
 							</div>
 						</div>
 					</article>
@@ -177,9 +173,8 @@ function logoDownload(svg: string, color: string) {
 				<article class="editorial-card">
 					<h3 class="editorial-card__title">Inline SVG tinting</h3>
 					<div class="editorial-prose branding-code">
-						<pre><code>{`.brand-logo svg * {
+						<pre tabindex="0" role="region" aria-label="SVG tinting CSS"><code>{`.brand-logo svg * {
   fill: currentColor !important;
-  stroke: currentColor !important;
 }
 
 .brand-logo--accent {
@@ -193,6 +188,16 @@ function logoDownload(svg: string, color: string) {
 </Page>
 
 <style is:global>
+	.branding-code pre {
+		margin: 0;
+		max-width: 100%;
+		overflow-x: auto;
+		font-size: 0.875rem;
+	}
+	.branding-code pre:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 4px;
+	}
 	.brand-downloads { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 	.logo-download-link {
 		display: inline-flex;
@@ -216,6 +221,10 @@ function logoDownload(svg: string, color: string) {
 		background: var(--colors-academy-text);
 		border-color: var(--colors-academy-text);
 		color: var(--colors-academy-canvas);
+	}
+	.logo-download-link:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 4px;
 	}
 
 	.logo-download-link {
@@ -258,7 +267,6 @@ function logoDownload(svg: string, color: string) {
 
 	.brand-logo svg * {
 		fill: currentColor !important;
-		stroke: currentColor !important;
 	}
 
 	.brand-logo {
@@ -340,13 +348,7 @@ function logoDownload(svg: string, color: string) {
 
 	.brand-typeface__sample--mono {
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
-		font-size: 0.85rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-
-	.branding-code pre {
-		margin: 0;
+		font-size: 1rem;
 	}
 
 	@media (max-width: 760px) {

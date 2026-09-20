@@ -5,10 +5,10 @@ difficulty: "advanced"
 estimatedDuration: 447
 prerequisites:
   - "Deep understanding of Kubernetes architecture (control plane, worker nodes, etcd, static pods)."
-  - "Proficiency with `kubectl`, `kubectl debug`, and common triage commands (`describe`, `logs`, `events`)."
+  - "Proficiency with kubectl, kubectl debug, and common triage commands (describe, logs, events)."
   - "Comfort administering Linux servers with systemd, journalctl, iptables, tc, and process tooling (ps, lsof)."
-  - "Experience with container runtimes (containerd, CRI) and troubleshooting with `crictl`/`ctr`."
-  - "Familiarity with etcd administration (`etcdctl`, snapshots, compaction) and TLS fundamentals."
+  - "Experience with container runtimes (containerd, CRI) and troubleshooting with crictl/ctr."
+  - "Familiarity with etcd administration (etcdctl, snapshots, compaction) and TLS fundamentals."
 technologies:
   - kubernetes
   - containerd

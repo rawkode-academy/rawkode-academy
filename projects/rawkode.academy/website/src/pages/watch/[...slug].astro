@@ -19,7 +19,6 @@ import { Marked } from "marked";
 import { resolveTechnologyIconUrl } from "@/utils/resolve-technology-icon";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { buildWatchVideoSeoText } from "@/utils/watch-video-seo";
-import { videoTransitionName } from "@/utils/view-transition-name";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
 import { buildVideoClips, type VideoClip } from "@/lib/video-clips";
 import { formatVideoRuntimeLabel } from "@/lib/video-runtime";
@@ -460,10 +459,7 @@ const watchStatusLabel = isLiveNow
 				)}
 			</header>
 
-			<div
-				class={watch.playerWrap}
-				style={`view-transition-name: ${videoTransitionName(video.data.slug)}`}
-			>
+			<div class={watch.playerWrap}>
 				<div id="watch-detail-player" class={watch.playerFrame} data-watch-player-frame>
 					<img
 						class={watch.poster}

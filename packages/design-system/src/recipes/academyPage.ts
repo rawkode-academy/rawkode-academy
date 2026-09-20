@@ -43,7 +43,6 @@ export const academyPage = sva({
 		"resultCount",
 		"pathList",
 		"pathCard",
-		"pathIndex",
 		"pathBody",
 		"pathTitle",
 		"pathMeta",
@@ -419,7 +418,7 @@ export const academyPage = sva({
 		},
 		pathCard: {
 			display: "grid",
-			gridTemplateColumns: "2rem minmax(0, 1fr) auto",
+			gridTemplateColumns: "minmax(0, 1fr) auto",
 			gap: "4",
 			alignItems: "start",
 			paddingBlock: "6",
@@ -428,22 +427,15 @@ export const academyPage = sva({
 			color: "academy.text",
 			textDecoration: "none",
 			_lg: {
-				gridTemplateColumns: "4rem minmax(0, 1fr) auto",
 				gap: "8",
 				paddingBlock: "8",
 			},
-			_hover: { "& h3": { color: "academy.accent" } },
+			_hover: { "& :is(h2, h3)": { color: "academy.accent" } },
 			_focusVisible: {
 				outline: "focus",
 				outlineColor: "academy.accent",
 				outlineOffset: "focus",
 			},
-		},
-		pathIndex: {
-			paddingTop: "1",
-			color: "academy.textMuted",
-			fontFamily: "academy-mono",
-			fontSize: "sm",
 		},
 		pathBody: {
 			display: "grid",

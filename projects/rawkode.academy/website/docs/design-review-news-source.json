@@ -1,0 +1,2975 @@
+{
+  "schemaVersion": 1,
+  "reviewType": "read-only source and in-memory diagnostic audit",
+  "reviewedAt": "2026-09-20T17:39:13.813Z",
+  "head": "272b68bce7ed04c73e42dfcce0c1955d6a0b5814",
+  "snapshot": "Current uncommitted working tree, not a rebuilt or deployed snapshot. Per-source hashes identify reviewed inputs.",
+  "scope": {
+    "storyUrls": 37,
+    "additionalRoutes": [
+      "/news"
+    ],
+    "components": [
+      "NewsStoryRow",
+      "RelatedNews",
+      "WireSubscribeCard",
+      "ArticleHeader",
+      "ArticleByline",
+      "News JSON-LD"
+    ],
+    "excluded": [
+      "Browser/rendered viewport assurance",
+      "mobile/dark/theme/focus visual checks",
+      "external HTTP availability",
+      "editorial fact or security-advisory verification",
+      "live subscriptions/auth",
+      "full build/restart"
+    ]
+  },
+  "verdict": {
+    "blockingFindings": 0,
+    "nonBlockingFindings": 4,
+    "overallPagePass": false,
+    "broaderGoal": "active; other routes remain unreviewed"
+  },
+  "checks": {
+    "inventory": {
+      "file": "projects/rawkode.academy/website/docs/design-inventory.json",
+      "storyUrls": 37,
+      "matched": 37,
+      "missing": [],
+      "extra": [],
+      "archive": "1 latest + 36 earlier stories; all native links and no pagination omissions"
+    },
+    "technologyLinks": {
+      "frontmatterTagOccurrences": 46,
+      "distinctLocalTechnologyDestinations": 41,
+      "perStoryUniqueDestinationTotal": 83,
+      "allInventoryRoutesResolve": true,
+      "allTagAndAutolinkSourceFilesExist": true,
+      "method": "Parsed every body using the MDX processor, ran the real remarkTechAutolink with loadTechLookup from current local collections, checked explicit/tag/generated destinations against inventory and source. Resolution is not semantic correctness: see NEWS04."
+    },
+    "publication": {
+      "asOf": "2026-09-20",
+      "validPastDates": 37,
+      "earliest": "2026-03-17",
+      "latest": "2026-09-19",
+      "actualFutureEntries": 0,
+      "futureFixture": "Actual extracted getStaticPaths and archive declarations plus selectRelatedNews all admitted a 2999-01-01 fixture. No files or collections were modified."
+    },
+    "externalUrls": {
+      "occurrences": 77,
+      "distinctUrls": 67,
+      "malformed": 0,
+      "method": "MDX link/definition URL parsing, HTTP(S) protocol/host, credentials/whitespace/backslash/invalid-percent checks. No HTTP requests.",
+      "storiesWithoutExternalSourceLinks": [
+        "/news/dragonfly-native-huggingface-modelscope-protocols",
+        "/news/istio-ambient-multicluster-inference-extension",
+        "/news/kubernetes-1-36-sneak-peek",
+        "/news/kubevirt-1-8-hypervisor-abstraction",
+        "/news/kyverno-graduates-cncf",
+        "/news/linux-foundation-12m-ai-security",
+        "/news/llm-d-accepted-cncf-sandbox",
+        "/news/nvidia-donates-gpu-dra-driver-to-cncf",
+        "/news/openai-acquires-astral-ruff-uv"
+      ],
+      "note": "Nine stories contain no external source links; facts/provenance have not been independently verified."
+    },
+    "bodyPatterns": {
+      "parsed": 37,
+      "bodyH1s": 0,
+      "rawHtmlOrMdxExpressionsOrImports": 0,
+      "images": 0,
+      "tables": 0,
+      "customComponents": 0,
+      "codeBlocks": 2,
+      "codeBlockRoutes": [
+        "/news/dragonfly-native-huggingface-modelscope-protocols",
+        "/news/kubernetes-1-36-server-side-sharded-list-watch-alpha"
+      ],
+      "headingSkipRoutes": [
+        "/news/2026-06-01-cloud-native-ai-infra-digest"
+      ],
+      "overflowAssessment": "No explicit fixed-width body widgets. Shared prose has overflow-wrap:anywhere; pre has max-width:100% and horizontal scrolling; row text uses min-width:0/minmax(0,1fr). Two code fences (93/75-character max lines) remain priority Browser checks with actual Expressive Code CSS. No claim of measured absence of overflow."
+    },
+    "relatedSelection": {
+      "storiesChecked": 37,
+      "resultsEach": 3,
+      "noSelfLinks": true,
+      "noDuplicateTargets": true,
+      "method": "Executed current selectRelatedNews against local records. Shared-tag score then descending dates; untaged stories fall back to recency.",
+      "publicationCaveat": "NEWS01"
+    },
+    "artwork": {
+      "path": "projects/rawkode.academy/website/public/images/news/news-generic.svg",
+      "exists": true,
+      "role": "Shared decorative brand artwork, not a photograph or article-specific evidence",
+      "surfaces": "archive lead, every earlier-story row, related-story rows",
+      "alt": "",
+      "dimensions": "1200x675",
+      "loading": "lead fetchpriority=high; rows lazy",
+      "detail": "No article-body imagery; JSON-LD separately uses the existing title-based gradient OG generator, not a news photograph."
+    },
+    "execution": "Read-only Node/MDX/AST diagnostics with installed local dependencies; no test suite/full build/restart/network or application submission during this assignment."
+  },
+  "retainedPurpose": {
+    "detail": "Single editorial title and description, byline/publication context, complete authored article, relevant next stories, optional newsletter.",
+    "archive": "Chronological discovery with a single lead, all earlier stories, and feed/newsletter choices.",
+    "related": "Three relevant links with date/title/description; shared artwork is intentionally repeated brand identity, not independent visual evidence.",
+    "body": "No duplicate H1 or unsupported custom visual content warrants bulk body rewrites."
+  },
+  "findings": [
+    {
+      "id": "NEWS01",
+      "classification": "non-blocking",
+      "priority": "P2",
+      "title": "Future-dated news is emitted by static routes, archive and related selection",
+      "evidence": [
+        "projects/rawkode.academy/website/src/pages/news/[...slug].astro:29",
+        "projects/rawkode.academy/website/src/pages/news/index.astro:12",
+        "projects/rawkode.academy/website/src/lib/related-news.ts:39",
+        "projects/rawkode.academy/website/src/content.config.ts:431"
+      ],
+      "currentImpact": "None of the 37 current stories is future dated. This is a future-publication policy gap, not a current leak.",
+      "reproduction": "Append an in-memory publishedAt=2999-01-01 story to getCollection fixtures: actual static-path declaration emits it, archive promotes it to latest, untagged related selection returns it.",
+      "correction": "If publishedAt gates release, apply the same finite-date <= build-time eligibility to all three surfaces and metadata inputs; do not add imaginary draft semantics to this schema.",
+      "falsification": "A future fixture is absent from paths, archive/list metadata, and related results; all 37 current URLs remain eligible."
+    },
+    {
+      "id": "NEWS02",
+      "classification": "non-blocking",
+      "priority": "P3",
+      "title": "June 1 digest skips H2",
+      "urls": [
+        "/news/2026-06-01-cloud-native-ai-infra-digest"
+      ],
+      "evidence": [
+        "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx:9",
+        "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx:23",
+        "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx:37",
+        "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx:51",
+        "projects/rawkode.academy/website/src/components/read/ArticleHeader.astro:57"
+      ],
+      "correction": "Promote the four peer digest section headings from H3 to H2; preserve text and destinations.",
+      "falsification": "Outline contains one page H1 followed by four peer H2s; no fabricated parent section or duplicated title."
+    },
+    {
+      "id": "NEWS03",
+      "classification": "non-blocking",
+      "priority": "P3",
+      "title": "NewsArticle speakable selector no longer matches the shared header",
+      "urls": "all 37 detail routes",
+      "evidence": [
+        "projects/rawkode.academy/website/src/lib/news-jsonld.ts:87",
+        "projects/rawkode.academy/website/src/components/read/ArticleHeader.astro:51"
+      ],
+      "reproduction": "JSON-LD uses .article-header h1, but ArticleHeader now uses doc.hero and no article-header class.",
+      "correction": "Remove unsupported speakable metadata or use an intentional stable heading selector backed by an SSR assertion; avoid coupling JSON-LD to generated Panda class names.",
+      "falsification": "Every emitted speakable selector resolves to the intended heading in actual page HTML, or the field is omitted."
+    },
+    {
+      "id": "NEWS04",
+      "classification": "non-blocking",
+      "priority": "P2",
+      "title": "Autolink word collisions point ordinary technical prose at unrelated products",
+      "evidence": [
+        "projects/rawkode.academy/website/src/lib/remark-tech-autolink.ts:48",
+        "projects/rawkode.academy/website/src/lib/remark-tech-autolink.ts:143",
+        "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx:11",
+        "content/news/2026-06-05-envoy-istio-nccl/index.mdx:28",
+        "content/news/2026-09-19-externaldns-023-dry-run-crd-registry/index.mdx:15",
+        "content/news/aks-critical-privilege-escalation-cve-2026-33105/index.mdx:32",
+        "content/news/containerd-cve-2026-46680-runasnonroot-bypass/index.mdx:21",
+        "content/news/kubernetes-1-36-dra-drivers-features-beta/index.mdx:15",
+        "content/news/ofu-fleet-scale-gpu-efficiency-arxiv/index.mdx:14"
+      ],
+      "examples": [
+        {
+          "url": "/news/2026-06-01-cloud-native-ai-infra-digest",
+          "source": "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx:11",
+          "context": "namespace",
+          "href": "/technology/namespace"
+        },
+        {
+          "url": "/news/2026-06-05-envoy-istio-nccl",
+          "source": "content/news/2026-06-05-envoy-istio-nccl/index.mdx:28",
+          "context": "waypoint",
+          "href": "/technology/waypoint"
+        },
+        {
+          "url": "/news/2026-09-19-externaldns-023-dry-run-crd-registry",
+          "source": "content/news/2026-09-19-externaldns-023-dry-run-crd-registry/index.mdx:15",
+          "context": "namespace",
+          "href": "/technology/namespace"
+        },
+        {
+          "url": "/news/aks-critical-privilege-escalation-cve-2026-33105",
+          "source": "content/news/aks-critical-privilege-escalation-cve-2026-33105/index.mdx:32",
+          "context": "blast radius",
+          "href": "/technology/radius"
+        },
+        {
+          "url": "/news/containerd-cve-2026-46680-runasnonroot-bypass",
+          "source": "content/news/containerd-cve-2026-46680-runasnonroot-bypass/index.mdx:21",
+          "context": "user namespace",
+          "href": "/technology/namespace"
+        },
+        {
+          "url": "/news/kubernetes-1-36-dra-drivers-features-beta",
+          "source": "content/news/kubernetes-1-36-dra-drivers-features-beta/index.mdx:15",
+          "context": "fleet",
+          "href": "/technology/fleet"
+        },
+        {
+          "url": "/news/ofu-fleet-scale-gpu-efficiency-arxiv",
+          "source": "content/news/ofu-fleet-scale-gpu-efficiency-arxiv/index.mdx:14",
+          "context": "fleet operators",
+          "href": "/technology/fleet"
+        }
+      ],
+      "correction": "Exclude ambiguous namespace/radius/fleet/waypoint from automatic matching and link genuine product mentions explicitly, or add equally narrow context-aware matching. Do not remove or create technology profiles.",
+      "falsification": "Run the real plugin on these seven bodies: ordinary concepts remain unlinked, explicit product links and unambiguous technology autolinks remain intact."
+    }
+  ],
+  "unusedComponent": {
+    "source": "projects/rawkode.academy/website/src/components/news/CVEAlert.astro",
+    "reachability": "No imports/call sites in content or website/src; no current news MDX imports or custom components.",
+    "legacyRisks": [
+      "Old Instrument Serif/Inter Tight/JetBrains variables",
+      "Hard-coded palette",
+      "href '#' fallback"
+    ],
+    "disposition": "Unused library debt, not an active-page visual defect. Delete separately only after repository-wide ownership review, or migrate before reintroducing."
+  },
+  "sharedDetailFindingIds": [
+    "NEWS01",
+    "NEWS03"
+  ],
+  "sharedSources": [
+    {
+      "file": "projects/rawkode.academy/website/src/pages/news/index.astro",
+      "sha256": "d88e0c0be6b54e9e64822ec6bf58b507bd8648d4bacd3f7e43cb1d6f1fb88c3e"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/pages/news/[...slug].astro",
+      "sha256": "ed2708e23fcf1230b8f34b4f78b682dac132f5e2d0f6282dba74f83cd375a34a"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/components/news/NewsStoryRow.astro",
+      "sha256": "1e5fcf955faaec888705eed04b8a946aeaede376c0b0f27d1b4f80e4f2de5635"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/components/news/RelatedNews.astro",
+      "sha256": "1a8fa5342de278b28206b4a27a85ac71f5e35ea0e7d1f0cf66ac5fcb4e18d85e"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/components/news/WireSubscribeCard.astro",
+      "sha256": "598a1d32b2998aec2aae2ba6cbac5b7695b463331cca0d2e7b1076d99cf3f0ae"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/components/news/CVEAlert.astro",
+      "sha256": "fb8226f7c68e8fa06e4d03821c794fb15171dd62d8d7f53b53a03a6a42b0a7ae"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/components/read/ArticleHeader.astro",
+      "sha256": "5b035fd14b2fce79b7dc23ad8db35b465a093151ee540ca0e5380cea3cbfa3b4"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/components/read/ArticleByline.astro",
+      "sha256": "a01c790601178a291ac741397137d6fe1d45ed1122aed74b3039f64d8cc20b8b"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/lib/related-news.ts",
+      "sha256": "c4f179fb243fbc96163200e09b15b16317d6533ea8a6ed51d30141fe68231d2c"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/lib/news-jsonld.ts",
+      "sha256": "47c36940c38fa3b1a7bfc557257d069dc52a44d7d280c2a6524b23119cb62eed"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/lib/remark-tech-autolink.ts",
+      "sha256": "4e7c9d274ffcea3e744c1267a6a19ec16cfe84be4acd4e53fe9267ba5b34137d"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/lib/load-tech-lookup.ts",
+      "sha256": "86c690a5c200b7a005d8925df84b343276668c54941f4c64c76f55b36e9a961b"
+    },
+    {
+      "file": "projects/rawkode.academy/website/src/content.config.ts",
+      "sha256": "9a00b4f0d05cfda16e5eaa9d2053895e664a149c41f4fd36e12201d445c15fea"
+    },
+    {
+      "file": "projects/rawkode.academy/website/astro.config.mts",
+      "sha256": "e3c9828e3f3beadf5c796216b78aeffc4d5d4b7d1569602c16a16a6e4e053fa1"
+    },
+    {
+      "file": "packages/design-system/src/recipes/academyLayout.ts",
+      "sha256": "af06f5ae769f47b72ee2b74219a5e22e48d0cbff5aed4b1e4428585ccfa1cf8f"
+    },
+    {
+      "file": "packages/design-system/src/recipes/academyCatalog.ts",
+      "sha256": "9cf6e23792d267e5ce95d9dbe81f28294e29c0fb901bcb1c7a19c8c84e41717c"
+    }
+  ],
+  "stories": [
+    {
+      "url": "/news/2026-06-01-cloud-native-ai-infra-digest",
+      "source": "content/news/2026-06-01-cloud-native-ai-infra-digest/index.mdx",
+      "sourceSha256": "b67e5cc63f364cf7c44bf753d7b70582d23be1ad69b5f7faeeed45d99598f36f",
+      "title": "Cloud Native and AI Infrastructure Digest: June 1, 2026",
+      "publishedAt": "2026-06-01T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [],
+      "internalLinks": [
+        {
+          "href": "/technology/namespace",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://safedep.io/redhat-cloud-services-hit-by-mini-shai-hulud-npm-worm/",
+          "line": 19,
+          "issue": null
+        },
+        {
+          "href": "https://www.wiz.io/blog/miasma-supply-chain-attack-targeting-redhat-npm-packages",
+          "line": 19,
+          "issue": null
+        },
+        {
+          "href": "https://vllm.ai/blog/2026-06-01-vllm-dgx-spark",
+          "line": 33,
+          "issue": null
+        },
+        {
+          "href": "https://docs.vllm.ai/projects/vllm-omni/en/latest/user_guide/quantization/gguf/",
+          "line": 47,
+          "issue": null
+        },
+        {
+          "href": "https://www.cncf.io/blog/2026/06/01/dynamic-configuration-for-cloud-native-swift-services/",
+          "line": 61,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 3,
+            "line": 9,
+            "text": "Miasma turns npm trusted publishing against Red Hat cloud packages"
+          },
+          {
+            "depth": 3,
+            "line": 23,
+            "text": "vLLM publishes DGX Spark serving guidance for Nemotron-3-Super"
+          },
+          {
+            "depth": 3,
+            "line": 37,
+            "text": "vLLM-Omni documents GGUF quantization for diffusion serving"
+          },
+          {
+            "depth": 3,
+            "line": 51,
+            "text": "CNCF covers dynamic configuration patterns for Swift services on Kubernetes"
+          }
+        ],
+        "paragraphs": 20,
+        "lists": 0,
+        "thematicBreaks": 4,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 70,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS02",
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/2026-06-05-envoy-istio-nccl",
+      "source": "content/news/2026-06-05-envoy-istio-nccl/index.mdx",
+      "sourceSha256": "05e79e957ed42098d194a337fe1731478782a2e2384bcf164c0144353a34bd2c",
+      "title": "Envoy, Istio, and NCCL ship operator-facing fixes",
+      "publishedAt": "2026-06-05T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "envoy",
+          "href": "/technology/envoy",
+          "source": "content/technologies/envoy/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "istio",
+          "href": "/technology/istio",
+          "source": "content/technologies/istio/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/envoy",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/istio",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/waypoint",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://www.envoyproxy.io/docs/envoy/v1.38.1/version_history/v1.38/v1.38.1",
+          "line": 20,
+          "issue": null
+        },
+        {
+          "href": "https://istio.io/latest/news/releases/1.30.x/announcing-1.30.1/",
+          "line": 30,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/NVIDIA/nccl/releases/tag/v2.30.7-1",
+          "line": 40,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "Envoy patches HTTP/2 header accounting and OAuth2 filter bugs"
+          },
+          {
+            "depth": 2,
+            "line": 24,
+            "text": "Istio 1.30.1 adds Gateway API checks and ambient fixes"
+          },
+          {
+            "depth": 2,
+            "line": 34,
+            "text": "NCCL 2.30.7-1 adds zero-SM collectives"
+          }
+        ],
+        "paragraphs": 10,
+        "lists": 0,
+        "thematicBreaks": 3,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 21,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/2026-06-09-nccl-opentelemetry-cert-manager",
+      "source": "content/news/2026-06-09-nccl-opentelemetry-cert-manager/index.mdx",
+      "sourceSha256": "f8db7f0c30b35b0b71bc023eb3d4d03a4fb635569adbbe1d607258b7c356c0a8",
+      "title": "NCCL EP, OpenTelemetry Collector, and cert-manager ship runtime changes",
+      "publishedAt": "2026-06-09T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "opentelemetry",
+          "href": "/technology/opentelemetry",
+          "source": "content/technologies/opentelemetry/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "cert-manager",
+          "href": "/technology/cert-manager",
+          "source": "content/technologies/cert-manager/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/opentelemetry",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/cert-manager",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/helm",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/NVIDIA/nccl/releases/tag/nccl-ep-v0.1.0",
+          "line": 22,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/open-telemetry/opentelemetry-collector/releases/tag/v0.154.0",
+          "line": 34,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/cert-manager/cert-manager/releases/tag/v1.21.0-alpha.1",
+          "line": 46,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "NCCL EP v0.1.0 targets MoE expert-parallel communication"
+          },
+          {
+            "depth": 2,
+            "line": 26,
+            "text": "OpenTelemetry Collector v0.154.0 makes builder skip behavior real"
+          },
+          {
+            "depth": 2,
+            "line": 38,
+            "text": "cert-manager v1.21.0-alpha.1 adds Gateway API and issuer plumbing"
+          }
+        ],
+        "paragraphs": 13,
+        "lists": 0,
+        "thematicBreaks": 3,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 30,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/2026-06-13-vllm-sglang-kubernetes-kueue-helm",
+      "source": "content/news/2026-06-13-vllm-sglang-kubernetes-kueue-helm/index.mdx",
+      "sourceSha256": "352b87df353d6f990ea4f75bf385ea6799ca7e4c51cab333f7ac329c989820e6",
+      "title": "vLLM, SGLang, Kubernetes, Kueue, and Helm ship runtime fixes",
+      "publishedAt": "2026-06-13T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "helm",
+          "href": "/technology/helm",
+          "source": "content/technologies/helm/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "kueue",
+          "href": "/technology/kueue",
+          "source": "content/technologies/kueue/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/helm",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/rust",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kueue",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/vllm-project/vllm/releases/tag/v0.23.0",
+          "line": 23,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/sgl-project/sglang/releases/tag/v0.5.13",
+          "line": 35,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/releases/tag/v1.36.2",
+          "line": 41,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/releases/tag/v1.35.6",
+          "line": 41,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/releases/tag/v1.34.9",
+          "line": 41,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/releases/tag/v1.33.13",
+          "line": 41,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/releases",
+          "line": 47,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.1",
+          "line": 53,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes-sigs/kueue/releases/tag/v0.17.5",
+          "line": 53,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes-sigs/kueue/releases/tag/v0.18.1",
+          "line": 59,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v4.2.1",
+          "line": 65,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v3.21.1",
+          "line": 65,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v4.2.1",
+          "line": 71,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 15,
+            "text": "vLLM v0.23.0 expands Model Runner V2 and KV-cache offload"
+          },
+          {
+            "depth": 2,
+            "line": 27,
+            "text": "SGLang v0.5.13 makes Spec V2 the default speculative path"
+          },
+          {
+            "depth": 2,
+            "line": 39,
+            "text": "Kubernetes ships June patch releases with DRA and storage fixes"
+          },
+          {
+            "depth": 2,
+            "line": 51,
+            "text": "Kueue v0.18.1 and v0.17.5 repair DRA, TAS, and queue status behavior"
+          },
+          {
+            "depth": 2,
+            "line": 63,
+            "text": "Helm v4.2.1 and v3.21.1 patch CLI and SDK edge cases"
+          }
+        ],
+        "paragraphs": 21,
+        "lists": 0,
+        "thematicBreaks": 5,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 37,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/2026-06-20-runc-1-5-prometheus-3-13-talos",
+      "source": "content/news/2026-06-20-runc-1-5-prometheus-3-13-talos/index.mdx",
+      "sourceSha256": "b85607f9c55407cc839510a3cd002c1aa34bd23510d7be0c113db9aaa1e73a83",
+      "title": "runc 1.5.0 ships stable, Prometheus 3.13 enters RC, Talos patches etcd leak",
+      "publishedAt": "2026-06-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "prometheus",
+          "href": "/technology/prometheus",
+          "source": "content/technologies/prometheus/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/prometheus",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/etcd",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/coredns",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/containerd",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/opencontainers/runc/releases/tag/v1.5.0",
+          "line": 16,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/opencontainers/runc/releases/tag/v1.5.0",
+          "line": 22,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/prometheus/prometheus/releases/tag/v3.13.0-rc.0",
+          "line": 28,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/prometheus/prometheus/releases/tag/v3.13.0-rc.0",
+          "line": 34,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/siderolabs/talos/releases/tag/v1.12.9",
+          "line": 40,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/siderolabs/talos/releases/tag/v1.12.9",
+          "line": 44,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "runc 1.5.0 cuts the first stable release of the 1.5 branch"
+          },
+          {
+            "depth": 2,
+            "line": 26,
+            "text": "Prometheus 3.13.0-rc.0 adds scalar min_of/max_of and metadata search endpoints"
+          },
+          {
+            "depth": 2,
+            "line": 38,
+            "text": "Talos v1.12.9 fixes an etcd client leak and tightens OOM victim selection"
+          }
+        ],
+        "paragraphs": 12,
+        "lists": 0,
+        "thematicBreaks": 3,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 34,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/2026-09-18-gloo-interrupted-validation",
+      "source": "content/news/2026-09-18-gloo-interrupted-validation/index.mdx",
+      "sourceSha256": "f9afb9bee60894771bd726d08a9e0868ed54b55858be203933f95e4d1ee1dada",
+      "title": "Gloo Gateway Fixes Interrupted Validation That Could Drop Listeners",
+      "publishedAt": "2026-09-18T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "envoy",
+          "href": "/technology/envoy",
+          "source": "content/technologies/envoy/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/envoy",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/solo-io/gloo/releases/tag/v1.19.23",
+          "line": 16,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/solo-io/gloo/releases/tag/v1.20.25",
+          "line": 16,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/solo-io/gloo/releases/tag/v1.21.16",
+          "line": 16,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/solo-io/gloo/releases/tag/v1.22.4",
+          "line": 16,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [],
+        "paragraphs": 5,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 58,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/2026-09-19-externaldns-023-dry-run-crd-registry",
+      "source": "content/news/2026-09-19-externaldns-023-dry-run-crd-registry/index.mdx",
+      "sourceSha256": "f4d4a43bb789cc3382e6d0512a71da4bbe99eefc44df74b2789a739cef38291e",
+      "title": "ExternalDNS 0.23.0 Fixes Dry-Run Mutations and Changes the CRD Registry Namespace Default",
+      "publishedAt": "2026-09-19T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/namespace",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/kubernetes-sigs/external-dns/releases/tag/v0.23.0",
+          "line": 11,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes-sigs/external-dns/pull/6693",
+          "line": 11,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes-sigs/external-dns/pull/6699",
+          "line": 13,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes-sigs/external-dns/pull/6606",
+          "line": 15,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [],
+        "paragraphs": 4,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 24,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/aks-critical-privilege-escalation-cve-2026-33105",
+      "source": "content/news/aks-critical-privilege-escalation-cve-2026-33105/index.mdx",
+      "sourceSha256": "28ca5753525e06788729cc7b471b48ec9da3d30adf5e09c14f0fe29db0fb6120",
+      "title": "CVE-2026-33105: AKS Critical Privilege Escalation Hits CVSS 10.0",
+      "publishedAt": "2026-04-05T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/radius",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://msrc.microsoft.com/",
+          "line": 38,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [],
+        "paragraphs": 18,
+        "lists": 2,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/backstage-1-51-catalog-perf-ms-graph-incremental",
+      "source": "content/news/backstage-1-51-catalog-perf-ms-graph-incremental/index.mdx",
+      "sourceSha256": "d76fc993ddb43211d3e0b99b8a6a3144f5c7f0ad9c3f1f63ab082eb44f20e060",
+      "title": "Backstage 1.51 takes catalog list queries from seconds to milliseconds",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "backstage",
+          "href": "/technology/backstage",
+          "source": "content/technologies/backstage/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/backstage",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/postgresql",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/opentelemetry",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/backstage/backstage/releases/tag/v1.51.0",
+          "line": 31,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "Catalog query rewrites"
+          },
+          {
+            "depth": 2,
+            "line": 19,
+            "text": "Incremental Microsoft Graph ingestion"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "Breaking changes"
+          }
+        ],
+        "paragraphs": 9,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 30,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/cilium-may-2026-patch-wave",
+      "source": "content/news/cilium-may-2026-patch-wave/index.mdx",
+      "sourceSha256": "c2c3b8ad37891bb94e838da87a0d52da85ba7fd48652eab212a355646746c985",
+      "title": "Cilium Ships Coordinated Patch Wave Across 1.17, 1.18, and 1.19",
+      "publishedAt": "2026-05-13T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "cilium",
+          "href": "/technology/cilium",
+          "source": "content/technologies/cilium/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/cilium",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/spire",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/cilium/cilium/releases/tag/v1.19.4",
+          "line": 34,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/cilium/cilium/releases/tag/v1.18.10",
+          "line": 34,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/cilium/cilium/releases/tag/v1.17.16",
+          "line": 34,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What's fixed"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "Notable smaller items"
+          },
+          {
+            "depth": 2,
+            "line": 30,
+            "text": "What to do"
+          }
+        ],
+        "paragraphs": 14,
+        "lists": 2,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 18,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/containerd-cve-2026-46680-runasnonroot-bypass",
+      "source": "content/news/containerd-cve-2026-46680-runasnonroot-bypass/index.mdx",
+      "sourceSha256": "84fd07ae494ba13c0a6e6dd5123b643b83aa591fdca5f15ac28e33be7ff1cd54",
+      "title": "containerd patches a runAsNonRoot bypass across every supported branch",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "containerd",
+          "href": "/technology/containerd",
+          "source": "content/technologies/containerd/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/containerd",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/namespace",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/containerd/containerd/security/advisories/GHSA-fqw6-gf59-qr4w",
+          "line": 30,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "What the advisory covers"
+          },
+          {
+            "depth": 2,
+            "line": 18,
+            "text": "Other notable fixes"
+          },
+          {
+            "depth": 2,
+            "line": 26,
+            "text": "Mitigations short of upgrading"
+          }
+        ],
+        "paragraphs": 9,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 12,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/crio-1-36-spdystream-cve-2026-35469",
+      "source": "content/news/crio-1-36-spdystream-cve-2026-35469/index.mdx",
+      "sourceSha256": "bc8aec39a2a067fc23f4cbc15235195f6cf9d7bad60fe1fcf1cda8725956aa18",
+      "title": "CRI-O 1.36 ships with CNI health monitoring; all supported branches patch a spdystream DoS",
+      "publishedAt": "2026-05-05T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "crio",
+          "href": "/technology/crio",
+          "source": "content/technologies/crio/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/crio",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/java",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/cri-o/cri-o/releases/tag/v1.36.0",
+          "line": 12,
+          "issue": null
+        },
+        {
+          "href": "https://nvd.nist.gov/vuln/detail/CVE-2026-35469",
+          "line": 16,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/cri-o/cri-o/releases/tag/v1.36.0",
+          "line": 28,
+          "issue": null
+        },
+        {
+          "href": "https://nvd.nist.gov/vuln/detail/CVE-2026-35469",
+          "line": 28,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/advisories/GHSA-pc3f-x583-g7j2",
+          "line": 28,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "CVE-2026-35469 across every supported branch"
+          },
+          {
+            "depth": 2,
+            "line": 18,
+            "text": "What's new in 1.36 itself"
+          }
+        ],
+        "paragraphs": 9,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 23,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/dragonfly-native-huggingface-modelscope-protocols",
+      "source": "content/news/dragonfly-native-huggingface-modelscope-protocols/index.mdx",
+      "sourceSha256": "7312c332ed3194626f72e5164dd22f6da76b2f23522a79975cfc15eaf5312be9",
+      "title": "Dragonfly Adds Native Hugging Face and ModelScope Protocols",
+      "publishedAt": "2026-04-08T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "dragonfly",
+          "href": "/technology/dragonfly",
+          "source": "content/technologies/dragonfly/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/dragonfly",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 12,
+            "text": "What happened"
+          },
+          {
+            "depth": 2,
+            "line": 20,
+            "text": "Why it matters"
+          },
+          {
+            "depth": 2,
+            "line": 28,
+            "text": "How it looks"
+          },
+          {
+            "depth": 2,
+            "line": 39,
+            "text": "Proven vs unproven"
+          },
+          {
+            "depth": 2,
+            "line": 55,
+            "text": "What to do next"
+          }
+        ],
+        "paragraphs": 24,
+        "lists": 3,
+        "thematicBreaks": 0,
+        "codeBlocks": [
+          {
+            "language": "sh",
+            "line": 30,
+            "maxLineLength": 93
+          }
+        ],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 13,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/etcd-3-7-beta-v2-api-removed",
+      "source": "content/news/etcd-3-7-beta-v2-api-removed/index.mdx",
+      "sourceSha256": "8ccf7538cf09c072d9307e1bbfd3a1eb25f66a5645c8d6389f4fdb136c8edb94",
+      "title": "etcd cuts first 3.7 beta and removes the v2 API",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "etcd",
+          "href": "/technology/etcd",
+          "source": "content/technologies/etcd/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/etcd",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/etcd-io/etcd/releases/tag/v3.7.0-beta.0",
+          "line": 27,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "The v2 era is finally over"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "Server changes"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "Operator-facing changes"
+          }
+        ],
+        "paragraphs": 6,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 36,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/flux-2-8-8-go-git-cves-helm-controller-memory",
+      "source": "content/news/flux-2-8-8-go-git-cves-helm-controller-memory/index.mdx",
+      "sourceSha256": "487811df85f431c00adfa92bdb3dea2e70c51e32d1d579ffc35e60f0b74d3708",
+      "title": "Flux 2.8.8 patches two go-git CVEs and stops helm-controller memory growth",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "fluxcd",
+          "href": "/technology/fluxcd",
+          "source": "content/technologies/fluxcd/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/helm",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/fluxcd",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/fluxcd/flux2/releases/tag/v2.8.8",
+          "line": 34,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "go-git CVEs"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "helm-controller memory leak"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "GCP sovereign cloud artifact registries"
+          },
+          {
+            "depth": 2,
+            "line": 25,
+            "text": "Other patches worth noting"
+          }
+        ],
+        "paragraphs": 10,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 7,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/helm-4-2-3-21-v3-eol-warning",
+      "source": "content/news/helm-4-2-3-21-v3-eol-warning/index.mdx",
+      "sourceSha256": "6680b21730a2f3047181e0edcb51070ebb97fc003e5b20cbdf383ef704dc91bd",
+      "title": "Helm 4.2 lands; Helm 3.21 ships with an explicit end-of-life warning",
+      "publishedAt": "2026-05-14T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "helm",
+          "href": "/technology/helm",
+          "source": "content/technologies/helm/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/helm",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v4.2.0",
+          "line": 11,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v3.21.0",
+          "line": 11,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v4.2.0",
+          "line": 32,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/helm/helm/releases/tag/v3.21.0",
+          "line": 32,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What's in v4.2"
+          },
+          {
+            "depth": 2,
+            "line": 24,
+            "text": "What's in v3.21"
+          },
+          {
+            "depth": 2,
+            "line": 28,
+            "text": "Why this matters now"
+          }
+        ],
+        "paragraphs": 10,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 23,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/istio-ambient-multicluster-inference-extension",
+      "source": "content/news/istio-ambient-multicluster-inference-extension/index.mdx",
+      "sourceSha256": "df5476219506623e4d38e458e80ed06d74f040f82f94313a60c39f2aedd2440c",
+      "title": "Istio Ships Ambient Multicluster Beta and Gateway API Inference Extension",
+      "publishedAt": "2026-03-25T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "istio",
+          "href": "/technology/istio",
+          "source": "content/technologies/istio/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/istio",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "Ambient Multicluster Beta"
+          },
+          {
+            "depth": 2,
+            "line": 24,
+            "text": "Gateway API Inference Extension"
+          },
+          {
+            "depth": 2,
+            "line": 34,
+            "text": "The Bigger Picture"
+          }
+        ],
+        "paragraphs": 12,
+        "lists": 2,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-dra-drivers-features-beta",
+      "source": "content/news/kubernetes-1-36-dra-drivers-features-beta/index.mdx",
+      "sourceSha256": "a97d1d79a0707c0d37b9fb0cc048e47c845fe42766af2337f39011ad3b197565",
+      "title": "Kubernetes 1.36 graduates DRA prioritized list to GA and pushes five device-control features to beta",
+      "publishedAt": "2026-05-07T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/fleet",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://kubernetes.io/blog/2026/05/07/kubernetes-v1-36-dra-136-updates/",
+          "line": 33,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What graduated"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "What hit beta"
+          },
+          {
+            "depth": 2,
+            "line": 25,
+            "text": "DRA in PodGroups"
+          },
+          {
+            "depth": 2,
+            "line": 29,
+            "text": "Driver ecosystem"
+          }
+        ],
+        "paragraphs": 10,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-pod-level-resource-managers-alpha",
+      "source": "content/news/kubernetes-1-36-pod-level-resource-managers-alpha/index.mdx",
+      "sourceSha256": "43f5793d6f3d004c7bfb7e2d518529b7feeff876a834a0b024041785212a2ba1",
+      "title": "Kubernetes 1.36 introduces pod-level CPU, memory, and topology managers in alpha",
+      "publishedAt": "2026-05-01T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://kubernetes.io/blog/2026/05/01/kubernetes-v1-36-feature-pod-level-resource-managers-alpha/",
+          "line": 29,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What changes"
+          },
+          {
+            "depth": 2,
+            "line": 19,
+            "text": "Why this exists"
+          },
+          {
+            "depth": 2,
+            "line": 25,
+            "text": "Status"
+          }
+        ],
+        "paragraphs": 7,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 24,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-podgroup-workload-scheduling",
+      "source": "content/news/kubernetes-1-36-podgroup-workload-scheduling/index.mdx",
+      "sourceSha256": "2003d43b3211b4bf1716f958f95783b5d5ad8ba6c4994e59cb604dc151211171",
+      "title": "Kubernetes 1.36 splits Workload and PodGroup APIs for batch and AI scheduling",
+      "publishedAt": "2026-05-13T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kueue",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/volcano",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://kubernetes.io/blog/2026/05/13/kubernetes-v1-36-advancing-workload-aware-scheduling/",
+          "line": 28,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "A clean split"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "What landed under the new shape"
+          },
+          {
+            "depth": 2,
+            "line": 24,
+            "text": "Still alpha"
+          }
+        ],
+        "paragraphs": 8,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 26,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-psi-metrics-ga",
+      "source": "content/news/kubernetes-1-36-psi-metrics-ga/index.mdx",
+      "sourceSha256": "cf28ee2dd07be2168e0df7f2944c61d938dacf0d50a47854fac77ad581619b48",
+      "title": "Kubernetes 1.36 graduates PSI metrics to GA",
+      "publishedAt": "2026-05-12T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/ebpf",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://kubernetes.io/blog/2026/05/12/kubernetes-v1-36-psi-metrics-ga/",
+          "line": 25,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What PSI actually measures"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "Production overhead"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "Why this matters"
+          }
+        ],
+        "paragraphs": 5,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-server-side-sharded-list-watch-alpha",
+      "source": "content/news/kubernetes-1-36-server-side-sharded-list-watch-alpha/index.mdx",
+      "sourceSha256": "fd9534bd92a32e54cbd707a59cfd0b0140e7eeaf9b70c44cd27867f888aa6925",
+      "title": "Kubernetes 1.36 lands server-side sharded list and watch in alpha",
+      "publishedAt": "2026-05-06T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://kubernetes.io/blog/2026/05/06/kubernetes-v1-36-server-side-sharded-list-and-watch/",
+          "line": 31,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "The cost being paid today"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "The new path"
+          },
+          {
+            "depth": 2,
+            "line": 27,
+            "text": "What to do with this"
+          }
+        ],
+        "paragraphs": 6,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [
+          {
+            "language": null,
+            "line": 21,
+            "maxLineLength": 75
+          }
+        ],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 20,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-service-externalips-deprecation",
+      "source": "content/news/kubernetes-1-36-service-externalips-deprecation/index.mdx",
+      "sourceSha256": "ed808070abb41c250e1070e5466301afd1bfc3e6a5792fbe193cfffc9327ea33",
+      "title": "Kubernetes 1.36 formally deprecates Service externalIPs",
+      "publishedAt": "2026-05-14T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/metallb",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://www.cvedetails.com/cve/CVE-2020-8554/",
+          "line": 15,
+          "issue": null
+        },
+        {
+          "href": "https://kubernetes.io/blog/2026/05/14/kubernetes-v1-36-deprecation-and-removal-of-service-externalips/",
+          "line": 31,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "Why it's going"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "Migration paths"
+          },
+          {
+            "depth": 2,
+            "line": 27,
+            "text": "What to do"
+          }
+        ],
+        "paragraphs": 9,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 24,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-1-36-sneak-peek",
+      "source": "content/news/kubernetes-1-36-sneak-peek/index.mdx",
+      "sourceSha256": "c25959358bac645f8a9a578d86b25fbb97a112de568b32942e857465c85ae414",
+      "title": "Kubernetes 1.36 Sneak Peek: DRA Goes GA, Ingress-NGINX Retires, HPA Scales to Zero",
+      "publishedAt": "2026-03-30T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "DRA Goes GA"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "Ingress-NGINX Formally Retired"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "HPA Scale-to-Zero Enabled by Default"
+          },
+          {
+            "depth": 2,
+            "line": 25,
+            "text": "Additional Highlights"
+          }
+        ],
+        "paragraphs": 10,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 14,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubernetes-may-2026-patch-wave",
+      "source": "content/news/kubernetes-may-2026-patch-wave/index.mdx",
+      "sourceSha256": "5445049e10653f7ca19415ecd38ceb6577f4cff922ddae3a9403b0be29753c3d",
+      "title": "Kubernetes Ships May Patch Wave Across 1.33–1.36, Fixes IPv6 ServiceCIDR Allocation Bug",
+      "publishedAt": "2026-05-12T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/etcd",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/kubernetes/kubernetes/pull/138385",
+          "line": 15,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/pull/138435",
+          "line": 16,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/pull/138637",
+          "line": 17,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/pull/138601",
+          "line": 18,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/pull/138685",
+          "line": 19,
+          "issue": null
+        },
+        {
+          "href": "https://kubernetes.io/releases/patch-releases/",
+          "line": 25,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.34.md",
+          "line": 25,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "Notable fixes"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "Support context"
+          }
+        ],
+        "paragraphs": 8,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kubevirt-1-8-hypervisor-abstraction",
+      "source": "content/news/kubevirt-1-8-hypervisor-abstraction/index.mdx",
+      "sourceSha256": "05cedf594e2df453aeaa748322bfee42eb41f86cc3b71f766269cd1abed4755c",
+      "title": "KubeVirt v1.8: Hypervisor Abstraction Layer, Confidential VMs, and the Push Toward CNCF Graduation",
+      "publishedAt": "2026-03-25T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "kubevirt",
+          "href": "/technology/kubevirt",
+          "source": "content/technologies/kubevirt/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubevirt",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/firecracker",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "Hypervisor Abstraction Layer"
+          },
+          {
+            "depth": 2,
+            "line": 20,
+            "text": "Confidential Computing"
+          },
+          {
+            "depth": 2,
+            "line": 24,
+            "text": "AI/HPC Performance"
+          },
+          {
+            "depth": 2,
+            "line": 30,
+            "text": "Path to Graduation"
+          }
+        ],
+        "paragraphs": 8,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/kyverno-graduates-cncf",
+      "source": "content/news/kyverno-graduates-cncf/index.mdx",
+      "sourceSha256": "3b9af7e35f3401d965d69e054c6c41c47addc6c5499c5df4af2692198aa9e8e4",
+      "title": "Kyverno Graduates from CNCF — Policy-as-Code Goes Mainstream",
+      "publishedAt": "2026-03-24T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        },
+        {
+          "id": "kyverno",
+          "href": "/technology/kyverno",
+          "source": "content/technologies/kyverno/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kyverno",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 14,
+            "text": "What Graduation Actually Requires"
+          },
+          {
+            "depth": 2,
+            "line": 18,
+            "text": "Full CEL Adoption"
+          },
+          {
+            "depth": 2,
+            "line": 24,
+            "text": "Beyond Kubernetes"
+          },
+          {
+            "depth": 2,
+            "line": 28,
+            "text": "Growth Since 2020"
+          }
+        ],
+        "paragraphs": 7,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/linux-foundation-12m-ai-security",
+      "source": "content/news/linux-foundation-12m-ai-security/index.mdx",
+      "sourceSha256": "913216a89b9f7304b41af0994882dc831161caecafb6559a3188cf2ec757af24",
+      "title": "Linux Foundation Secures $12.5M to Defend Open Source from AI-Generated Vulnerability Flood",
+      "publishedAt": "2026-03-17T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "The Problem"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "Scale of Discovery"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "Funding and Approach"
+          },
+          {
+            "depth": 2,
+            "line": 29,
+            "text": "Who's Paying for This, and Why"
+          }
+        ],
+        "paragraphs": 8,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/llm-d-accepted-cncf-sandbox",
+      "source": "content/news/llm-d-accepted-cncf-sandbox/index.mdx",
+      "sourceSha256": "f9c8bc96acb99debf2e3517d4fe2866c1634e19ac18ee44915b955421f98a869",
+      "title": "llm-d Accepted as CNCF Sandbox Project — Kubernetes-Native Distributed LLM Inference Gets an Open Standard",
+      "publishedAt": "2026-03-24T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/llm-d",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 15,
+            "text": "Gateway API Inference Extension"
+          },
+          {
+            "depth": 2,
+            "line": 19,
+            "text": "Performance at Scale"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "What This Means for Your Inference Stack"
+          }
+        ],
+        "paragraphs": 6,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/microcks-cncf-incubation",
+      "source": "content/news/microcks-cncf-incubation/index.mdx",
+      "sourceSha256": "987e2bcf10d9b02fc25ab9970e7f7d1a88bdfa21ef018b933dcaa517f8fc2be2",
+      "title": "Microcks moves from CNCF Sandbox to Incubation",
+      "publishedAt": "2026-05-07T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "microcks",
+          "href": "/technology/microcks",
+          "source": "content/technologies/microcks/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/microcks",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/grpc",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/postman",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/nats",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://www.cncf.io/blog/2026/05/07/microcks-becomes-a-cncf-incubating-project/",
+          "line": 11,
+          "issue": null
+        },
+        {
+          "href": "https://www.cncf.io/blog/2026/05/07/microcks-becomes-a-cncf-incubating-project/",
+          "line": 23,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What Microcks covers that other mocking tools don't"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "What the promotion actually means"
+          }
+        ],
+        "paragraphs": 5,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/nvidia-donates-gpu-dra-driver-to-cncf",
+      "source": "content/news/nvidia-donates-gpu-dra-driver-to-cncf/index.mdx",
+      "sourceSha256": "14307deffde5a1aaacf7f814dc7dafd36c8b0d6712ca6a507d47f5f3b977f8e2",
+      "title": "NVIDIA Donates GPU DRA Driver to CNCF, Open-Sources KAI Scheduler and Grove",
+      "publishedAt": "2026-03-24T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "kubernetes",
+          "href": "/technology/kubernetes",
+          "source": "content/technologies/kubernetes/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/confidential-containers",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 15,
+            "text": "KAI Scheduler Enters CNCF Sandbox"
+          },
+          {
+            "depth": 2,
+            "line": 19,
+            "text": "Grove: A New API for AI Inference Orchestration"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "GPU Support for Confidential Containers"
+          }
+        ],
+        "paragraphs": 6,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/ofu-fleet-scale-gpu-efficiency-arxiv",
+      "source": "content/news/ofu-fleet-scale-gpu-efficiency-arxiv/index.mdx",
+      "sourceSha256": "15c026518143ebc8069a6041f36e9febf746cf31f7ecaadaf4067054fc4c4b95",
+      "title": "Paper proposes OFU, a counter-based GPU efficiency metric validated on 608 production training jobs",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [],
+      "internalLinks": [
+        {
+          "href": "/technology/fleet",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://arxiv.org/abs/2605.20799",
+          "line": 24,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 12,
+            "text": "The metric"
+          },
+          {
+            "depth": 2,
+            "line": 16,
+            "text": "How well it tracks MFU"
+          },
+          {
+            "depth": 2,
+            "line": 20,
+            "text": "Why this matters"
+          }
+        ],
+        "paragraphs": 5,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 10,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [
+        "NEWS04"
+      ],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/openai-acquires-astral-ruff-uv",
+      "source": "content/news/openai-acquires-astral-ruff-uv/index.mdx",
+      "sourceSha256": "0ff120fbfc8087f6508b08b5ae70f3e5b06e97cfb6c0496a316e2fb1ee1cc0eb",
+      "title": "OpenAI Acquires Astral (Ruff, uv, ty) — Open Source Python Tooling Goes Corporate",
+      "publishedAt": "2026-03-19T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "python",
+          "href": "/technology/python",
+          "source": "content/technologies/python/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/python",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/pulumi",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/dagger",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "What Astral Built"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "OpenAI's Intent"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "Community Reaction"
+          },
+          {
+            "depth": 2,
+            "line": 27,
+            "text": "The Governance Question"
+          }
+        ],
+        "paragraphs": 7,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 0,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/otel-collector-0-152-genai-normalizer",
+      "source": "content/news/otel-collector-0-152-genai-normalizer/index.mdx",
+      "sourceSha256": "1cc49a568ca40caf8c70c6260b23f10d39cfe4725f6a1ade0290002b1f51ed03",
+      "title": "OpenTelemetry Collector 0.152 ships GenAI normalizer and drops Sarama from the kafkametrics receiver",
+      "publishedAt": "2026-05-12T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "opentelemetry",
+          "href": "/technology/opentelemetry",
+          "source": "content/technologies/opentelemetry/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/opentelemetry",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/tag/v0.152.0",
+          "line": 35,
+          "issue": null
+        },
+        {
+          "href": "https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/CHANGELOG.md",
+          "line": 35,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "GenAI normalizer"
+          },
+          {
+            "depth": 2,
+            "line": 19,
+            "text": "Cardinality Guardian"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "MCP server extension"
+          },
+          {
+            "depth": 2,
+            "line": 27,
+            "text": "Kafka Sarama removal"
+          },
+          {
+            "depth": 2,
+            "line": 31,
+            "text": "Component renames"
+          }
+        ],
+        "paragraphs": 8,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 40,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/prometheus-3-12-rc-promql-window-functions-stackit-fix",
+      "source": "content/news/prometheus-3-12-rc-promql-window-functions-stackit-fix/index.mdx",
+      "sourceSha256": "2fc0db4ca5c1531f0446b1fcdf66a5194d2899db106ee090aeed1463c2e4bf4d",
+      "title": "Prometheus 3.12 RC adds time-window PromQL functions and patches a STACKIT SD secret leak",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "prometheus",
+          "href": "/technology/prometheus",
+          "source": "content/technologies/prometheus/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/prometheus",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/prometheus/prometheus/releases/tag/v3.12.0-rc.0",
+          "line": 36,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "PromQL learns about its own window"
+          },
+          {
+            "depth": 2,
+            "line": 19,
+            "text": "Performance"
+          },
+          {
+            "depth": 2,
+            "line": 23,
+            "text": "Security"
+          },
+          {
+            "depth": 2,
+            "line": 27,
+            "text": "Operator-facing additions"
+          }
+        ],
+        "paragraphs": 11,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 27,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/spire-1-15-sigstore-stable-vault-key-manager",
+      "source": "content/news/spire-1-15-sigstore-stable-vault-key-manager/index.mdx",
+      "sourceSha256": "eff5f1f93eb524cafd54e023911406a7e7e33441e8115d17213a6e788b799717",
+      "title": "SPIRE 1.15 promotes Sigstore attestation out of experimental and adds a Vault Key Manager",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [
+        {
+          "id": "spire",
+          "href": "/technology/spire",
+          "source": "content/technologies/spire/index.mdx",
+          "inInventory": true
+        }
+      ],
+      "internalLinks": [
+        {
+          "href": "/technology/spire",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/docker",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/kubernetes",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/podman",
+          "inInventory": true
+        },
+        {
+          "href": "/technology/prometheus",
+          "inInventory": true
+        }
+      ],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/spiffe/spire/releases/tag/v1.15.0",
+          "line": 34,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 13,
+            "text": "Sigstore graduates in the workload attestors"
+          },
+          {
+            "depth": 2,
+            "line": 17,
+            "text": "Vault Key Manager"
+          },
+          {
+            "depth": 2,
+            "line": 21,
+            "text": "Smaller additions"
+          },
+          {
+            "depth": 2,
+            "line": 30,
+            "text": "Breaking change to watch"
+          }
+        ],
+        "paragraphs": 11,
+        "lists": 1,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 12,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    },
+    {
+      "url": "/news/vllm-0-21-blackwell-transformers-v5",
+      "source": "content/news/vllm-0-21-blackwell-transformers-v5/index.mdx",
+      "sourceSha256": "1a6db482a2dac09c2bbc623c15a0c1d4374aa62613f5d32c656fa3e809c92c31",
+      "title": "vLLM 0.21 lands Transformers v5 deprecation, C++20 build, and a new Blackwell attention backend",
+      "publishedAt": "2026-05-15T00:00:00.000Z",
+      "publishedAsOf": "2026-09-20",
+      "inInventory": true,
+      "technologyTags": [],
+      "internalLinks": [],
+      "explicitExternalLinks": [
+        {
+          "href": "https://github.com/vllm-project/vllm/releases/tag/v0.21.0",
+          "line": 24,
+          "issue": null
+        }
+      ],
+      "body": {
+        "headings": [
+          {
+            "depth": 2,
+            "line": 12,
+            "text": "Breaking changes to plan around"
+          },
+          {
+            "depth": 2,
+            "line": 16,
+            "text": "Blackwell gets a new MLA attention backend"
+          },
+          {
+            "depth": 2,
+            "line": 20,
+            "text": "What to do"
+          }
+        ],
+        "paragraphs": 5,
+        "lists": 0,
+        "thematicBreaks": 0,
+        "codeBlocks": [],
+        "rawOrVisualNodes": [],
+        "maxInlineCodeLength": 14,
+        "h1Count": 0
+      },
+      "artwork": "shared decorative news-generic.svg in archive and related rows; no body images",
+      "findings": [],
+      "reviewStatus": "source-reviewed; no Browser or remote-link proof"
+    }
+  ],
+  "limitations": [
+    "No story received a Browser review, viewport screenshot, screen-reader run, or light/dark/mobile pass.",
+    "Static AST and recipe inspection cannot establish wrapping, contrast, font loading, or actual code-block scrollbar behavior.",
+    "Local references and syntactically valid external URLs do not establish HTTP availability, historical factual correctness, or third-party safety.",
+    "Newsletter destinations were inspected only; no submission, clipboard use, auth or other live mutation occurred.",
+    "No production sources changed; this ledger is the only authorized new file."
+  ]
+}

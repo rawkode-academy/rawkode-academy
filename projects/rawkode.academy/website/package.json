@@ -3,7 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"build-storybook": "storybook build",
-		"build": "bun run check:academy-shell && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && bun run check:academy-interactions && astro check && astro build",
+		"build": "bun run check:academy-shell && cd ../../../packages/design-system && bun run build && cd ../../projects/rawkode.academy/website && bun run check:academy-interactions && bun run check:academy-ssr && astro check && astro build",
 		"sync:content": "tsx scripts/sync-graphql-content.ts",
 		"codegen": "graphql-codegen --config graphql-codegen.ts",
 		"dev": "astro dev",
@@ -11,6 +11,7 @@
 		"preview": "astro preview",
 		"check:academy-interactions": "vitest run src/tests/webcontainer.test.ts src/tests/command-palette.test.ts src/tests/theme.test.ts src/lib/games/guess-the-logo.test.ts src/lib/games/guess-the-logo-achievements.test.ts",
 		"check:academy-shell": "node --test scripts/academy-source.test.mjs && node scripts/check-academy-shell.mjs",
+		"check:academy-ssr": "node --experimental-vm-modules --import tsx --test src/tests/*.test.mjs",
 		"start": "astro dev",
 		"storybook": "storybook dev -p 6006",
 		"test:seo": "vitest run src/tests/seo.test.ts",

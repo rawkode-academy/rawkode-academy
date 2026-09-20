@@ -12,20 +12,23 @@ interface Props {
 	headline?: string;
 	subtitle?: string;
 	audience?: string;
+	pagePath?: string;
 	variant?: "card" | "section";
 }
 
 const {
 	class: className,
 	badge = "Rawkode Academy newsletter",
-	headline = "Get cloud native tutorials by email",
-	subtitle = "Subscribe for tutorials, technical articles, and upcoming events.",
+	headline = "Academy publications by email",
+	subtitle = "Get an email when Rawkode Academy publishes new tutorials, articles, and videos.",
 	audience = "academy",
+	pagePath = Astro.url.pathname,
 	variant = "card",
 } = Astro.props;
 
 const user = Astro.locals.user;
 let isSubscribed = false;
+let preferencesUnavailable = Boolean(user);
 
 if (user && import.meta.env.PROD) {
 	try {
@@ -36,12 +39,13 @@ if (user && import.meta.env.PROD) {
 			audience,
 		);
 		isSubscribed = prefs.length > 0;
+		preferencesUnavailable = false;
 	} catch (e) {
+		preferencesUnavailable = true;
 		console.error("Failed to fetch preferences", e);
 	}
 }
 
-const pagePath = Astro.url.pathname;
 const signInUrl = `/api/auth/sign-in?returnTo=${encodeURIComponent(pagePath)}`;
 
 // Check for the newsletter subscription cookie (server-side)
@@ -62,7 +66,6 @@ const marketing = academyMarketing({ newsletterVariant: variant });
 			<div class={marketing.newsletterGrid}>
 				<div class={marketing.newsletterCopy}>
 					<div class={marketing.newsletterBadge}>
-						<span aria-hidden="true">●</span>
 						<span>{badge}</span>
 					</div>
 					<h2 class={marketing.newsletterTitle}>
@@ -78,10 +81,14 @@ const marketing = academyMarketing({ newsletterVariant: variant });
 						client:visible
 						isSignedIn={!!user}
 						isSubscribed={isSubscribed}
+						preferencesUnavailable={preferencesUnavailable}
 						signInUrl={signInUrl}
 						pagePath={pagePath}
 						audience={audience}
 					/>
+					<noscript>
+						<p>Email signup requires JavaScript. You can <a href="/settings">manage email preferences in account settings</a>.</p>
+					</noscript>
 				</div>
 			</div>
 		</div>

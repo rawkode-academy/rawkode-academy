@@ -54,7 +54,7 @@ const catalog = academyCatalog();
 	pageType="CollectionPage"
 >
 	<div class={styles.root}>
-		<AcademyCatalogMasthead kicker="Reference" title="Architecture Decision Records" description="Short records of the technical decisions behind Rawkode Academy, why we made them, and what we accepted as a consequence." />
+		<AcademyCatalogMasthead title="Architecture Decision Records" description="Short records of the technical decisions behind Rawkode Academy, why we made them, and what we accepted as a consequence." />
 		<section class={styles.section}>
 			<div class={styles.container}>
 				<div class={catalog.rows}>
@@ -70,7 +70,7 @@ const catalog = academyCatalog();
 								<h2 class={catalog.rowTitle}>{adr.data.title}</h2>
 								<span class={catalog.rowMeta}>
 									<time datetime={adr.data.adoptedAt.toISOString()}>{formatDate(adr.data.adoptedAt)}</time>
-									{authors.length > 0 && <span>{authors.map((author) => author.data.name).join(", ")}</span>}
+									{authors.length > 0 && <span>By {authors.map((author) => author.data.name).join(", ")}</span>}
 								</span>
 							</div>
 						</a>

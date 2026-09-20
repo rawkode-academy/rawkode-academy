@@ -4,9 +4,62 @@
   "rule": "Every path in the inventory is pending until an explicit review entry exists here. Source reviews and template samples are not visual sign-off.",
   "reviews": [
     {
-      "path": "/privacy",
+      "path": "/learning-paths/klustered-advanced-cluster-triage",
       "status": "visual-pass",
       "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Whole page read with overlapping captures at both sizes, including expanded prerequisites, five sessions, four bonus links, after-action steps, newsletter and copyright. Long participant names and inline commands wrap without document overflow (390/390). Corrected aligned hero, plain-text prerequisites and contained newsletter rechecked in the 19:00 build at both sizes. Shared TOC keyboard and fast/reverse-scroll behavior verified on the security and developer-platform paths.",
+      "justification": "Five sequenced real sessions demonstrate distinct triage failures. Readiness criteria and objectives establish difficulty; drills and follow-ups turn viewing into practice. Bonus links extend the subject without inflating core-video runtime. Author/date and contents aid orientation; related technology and archive links support onward navigation.",
+      "limitations": "No command execution, cluster changes, video playback or subscription. Technical guidance preserved, not independently revalidated."
+    },
+    {
+      "path": "/learning-paths/mastering-kubernetes-security-posture-and-policy",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Entire page inspected with overlapping captures at both sizes: expanded prerequisites, all seven lessons, two bonus links, three follow-ups, newsletter and copyright. All eleven mobile contents links inspected in expanded disclosure. Title, long linked headings, lists and commands fit; mobile width 390/390. In the 19:00 build, hero/body alignment, full TOC keyboard focus outline, Enter anchor, fast/reverse/end scroll current-section tracking and contained newsletter verified. Mobile dark newsletter expanded without submission; input 300x56 and document 390px wide.",
+      "justification": "Sequence distinguishes posture scanning, policy enforcement/reporting, OPA, runtime security and JavaScript policies. Prerequisites/objectives qualify the path, drills make it actionable, and optional bonus/follow-up work is separated from core recording time. Author/date, chapter navigation and related resources orient the reader.",
+      "limitations": "No security commands, external signups, video playback or independent factual validation of authored instructions."
+    },
+    {
+      "path": "/learning-paths",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Entire index including all four paths and footer inspected at both sizes. Each path has its own H2 and an honest core-video estimate. All four rebuilt rows inspected at both sizes in the 19:00 build: meaningless catalogue ordinals removed, full keyboard focus ring and Enter navigation to Klustered verified.",
+      "justification": "Title and brief description identify the collection. Four native linked rows expose title, distinguishing summary, difficulty and recording runtime. Shared navigation supports discovery; no filters or pagination for a four-item collection.",
+      "limitations": "Local visual evidence only; no playback or learner-completion estimate."
+    },
+    {
+      "path": "/learning-paths/build-your-first-kubernetes-developer-platform",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Whole page read with overlapping captures at both sizes, all six chapters, prerequisites, end links, newsletter and copyright. Mobile contents and prerequisites disclosures opened. Desktop chapter anchor used by keyboard; newsletter expanded without submission. In the 19:00 build, aligned hero, Start learning anchor, fast-scroll tracking to Crossplane in Action, end tracking to Where to Go Next and contained newsletter verified. Mobile hero and newsletter rechecked; document width 390/390. Shared full TOC focus outline verified on the security path.",
+      "justification": "Hero identifies the sequence, author, difficulty, date and core recording time. Prerequisites and objectives establish readiness and outcomes. Ordered linked chapters explain selection, learning and takeaways. TOC provides direct access through the long document. Technology links, next actions and optional learning-path email signup support further study.",
+      "limitations": "No email/auth request or video playback; desktop dark pending."
+    },
+    {
+      "path": "/learning-paths/gitops-landscape",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 dark", "390x844 light"],
+      "environment": "Compiled local preview :4322, 18:30 whole-page and 19:00 correction builds",
+      "findings": ["F45", "F50"],
+      "coverage": "Entire page read with overlapping captures at both sizes: five core chapters, drills, two bonus resources, three follow-ups, end navigation, newsletter and copyright. Prerequisites opened. Mobile width 390/390. In the 19:00 build, mobile hero and clean plain-text prerequisite rechecked; desktop aligned hero, Start learning anchor and current Timoni item, end current Fleet Follow-ups and contained newsletter verified.",
+      "justification": "Prerequisites qualify this advanced path. Objectives and sequenced chapters distinguish packaging, promotion, reconciliation, developer workflow and fleet operations. Drills apply each lesson; bonus links and follow-ups extend practice without inflating core-video time. Author/date and navigational elements provide context and recovery.",
+      "limitations": "No video playback or subscription; substantive technical instructions preserved, not independently revalidated."
+    },
+    {
+      "path": "/privacy",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
       "environment": "Compiled local preview :4322, 17:14 BST build",
       "findings": [],
       "coverage": "Entire page inspected with overlapping viewport captures from header through copyright at both sizes. No overflow, unreadable text or unnecessary controls observed.",
@@ -15,33 +68,53 @@
     },
     {
       "path": "/changelog",
-      "status": "composition-rework",
-      "viewports": ["1440x1000 light"],
-      "findings": ["F37"],
-      "coverage": "Header and first six entries inspected. Narrow content column and repetitive avatar rows removed in source; full revised page pending."
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 dark",
+        "390x844 light"
+      ],
+      "findings": [
+        "F37 resolved",
+        "F47 resolved"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 whole-page and 18:30 correction builds",
+      "coverage": "All sixteen entries and footer inspected at both sizes. Revised hero and first entries rechecked in the 18:30 build at both sizes; no empty paragraphs, sixteen entries, mobile width 390/390. Future optional PR-link branch has source accessibility coverage, not a current rendered fixture.",
+      "justification": "Dated entries and named authors explain the site's evolution; summaries and bullets distinguish each change; optional code-history links provide evidence. Historical descriptions are retained as history, not current feature promises."
     },
     {
       "path": "/feeds",
-      "status": "composition-rework",
-      "viewports": ["1440x1000 dark", "390x844 dark"],
-      "findings": ["F38"],
-      "coverage": "Hero and main-feed cards inspected. Repeated framing, redundant OPML section and generic link names need simplification. Entire lower page pending."
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 BST build",
+      "findings": [
+        "F38 resolved"
+      ],
+      "coverage": "Entire page inspected with overlapping viewport screenshots from header to copyright in both sizes. Format disclosure opened by pointer and closed with Enter. All sixteen feed links measured 44px tall; mobile document width 390px with no overflow.",
+      "justification": "Title and short introduction orient the reader. One OPML action imports the collection. Four topic groups and four published podcast rows expose individual subscription choices; descriptions distinguish them, contextual format links identify the destination. Optional native disclosure explains formats without competing with the choices. Shared footer enables discovery.",
+      "limitations": "Independent 17/17 local GET endpoint responses parsed with expected types; no production feed-reader import or subscription."
     },
     {
       "path": "/",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "1440x1000",
-        "390x844"
+        "1440x1000 dark",
+        "390x844 light"
       ],
       "findings": [
         "F02",
         "F03",
         "F04",
         "F05",
-        "F07"
+        "F07",
+        "F43"
       ],
-      "coverage": "Hero and content sections inspected; corrected composition needs final whole-page and state review."
+      "environment": "Compiled local preview :4322, 17:49 whole-page dark/light and 19:00 corrected content light at both sizes",
+      "coverage": "Entire page inspected through copyright at both sizes in 17:49 build. Corrected 19:00 hero, all six chronological rows, all three paths and newsletter rechecked desktop/mobile. Hero thumbnail loads; generic News artwork retains aspect ratio; excerpts end at word boundaries; no meaningless path ordinals. Static AcademyPage island removed. No live subscription.",
+      "justification": "Hero establishes practical education and gives an immediate real lesson. Catalogue totals indicate available depth; three format links support different learning modes. Six chronological items expose new work without an oversized cover grid. Three distinct paths provide structured entry points with honest recording time. Optional email signup and shared footer offer return/discovery routes.",
+      "limitations": "No video playback or live email delivery; this is local compiled visual proof, not a final deployed sign-off."
     },
     {
       "path": "/technology",
@@ -52,19 +125,23 @@
       "findings": [
         "F06"
       ],
-      "coverage": "Initial compact identity cards reviewed; full directory and filters pending."
+      "coverage": "Initial compact identity cards reviewed; full directory and filters pending. Deployed commit272b68bc mobile390 verified:354total, Kubernetes20, nonsense0,clear354,nohorizontaloverflow; full354directorystillpending."
     },
     {
       "path": "/about",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "1440x1000",
-        "390x844"
+        "1440x1000 dark",
+        "390x844 light"
       ],
       "findings": [
-        "F14"
+        "F14 resolved",
+        "F52 resolved"
       ],
-      "coverage": "Hero, photograph, principles, story reviewed after rewrite; final footer/link and dark-mode review pending."
+      "environment": "Compiled local preview :4322, 19:00 whole-page and 19:20 correction builds",
+      "coverage": "Entire page inspected with overlapping captures at both sizes through copyright: photograph, three principles, three timeline milestones, two archive references and three format links. Full keyboard focus ring verified on format link; mobile width 390/390. Corrected single section divider and accurate learning-path description rechecked in 19:20 build at both sizes.",
+      "justification": "Introduction and real speaker photograph establish the academy and person behind it. Principles explain the teaching approach; dated history provides context; two archive links supply concrete examples. Three format links connect the story to actual learning options. No invented biography or decorative metrics.",
+      "limitations": "Historical claims retained, not independently researched. No external video playback."
     },
     {
       "path": "/courses",
@@ -140,27 +217,19 @@
     },
     {
       "path": "/organizations/partnerships",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "390x844",
-        "1440x1000"
+        "390x844 light",
+        "1440x1000 light and earlier dark"
       ],
       "findings": [
-        "F15"
+        "F15 resolved",
+        "F48 resolved"
       ],
-      "coverage": "Hero, offer, repeated content inspected; final FAQ/application states pending."
-    },
-    {
-      "path": "/learning-paths/gitops-landscape",
-      "status": "composition-rework",
-      "viewports": [
-        "390x844",
-        "1440x1000"
-      ],
-      "findings": [
-        "Duplicate metadata and title; curriculum buried"
-      ],
-      "coverage": "Header, metadata, objectives inspected; revised document pending."
+      "environment": "Compiled local preview :4322, 19:00 build; earlier 17:49 desktop dark",
+      "coverage": "Entire revised page inspected through copyright at both sizes, including both offers, process, scope boundaries, all three expanded FAQs and every application field. Mobile document 390/390; all inputs/selects 350px wide and approximately 50px tall, textarea 122px tall. Keyboard fit-review action reaches application with correct selected route. No live submission.",
+      "justification": "Hero identifies the offer. Two unboxed choices expose distinct fees, cadence and deliverables; scope exclusions and three nonduplicated answers set expectations. Ordered steps explain the process. Application fields identify the contact, company, preferred route, audience and adoption challenge; optional buyer, proof link, budget/timing and broader references provide qualification context. Shared navigation supports discovery.",
+      "limitations": "Commercial terms retained, not independently assessed. Live application success/error and delivery are not verified; SSR/hydration behavior has isolated tests."
     },
     {
       "path": "/people/rawkode",
@@ -233,60 +302,120 @@
     },
     {
       "path": "/adrs",
+      "status": "visual-pass",
       "viewports": [
-        "390x844",
-        "1440x1000"
+        "390x844 light",
+        "1440x1000 light"
       ],
+      "environment": "Compiled local preview :4322, 17:49/18:30 whole-page and 19:00 correction builds",
       "findings": [
-        "F23"
+        "F44 resolved"
       ],
-      "coverage": "Original stats and rows inspected; simplified index needs final whole-page review.",
-      "status": "composition-rework"
+      "coverage": "Whole index and footer inspected at both sizes. In the 19:00 build, hero and both rows rechecked desktop/mobile: explicit By author prefix distinguishes metadata and wraps cleanly; no decorative Reference kicker or leading separator.",
+      "justification": "Title/lede explain decision archive; numberedlinks order decisions, dates/authors establish ownership and timing. No cards/artwork needed."
     },
     {
       "path": "/organizations/branding",
       "viewports": [
-        "1440x1000"
+        "1440x1000 dark",
+        "390x844 light"
       ],
       "findings": [
-        "F25"
+        "F25",
+        "F46"
       ],
-      "coverage": "Hero, three logo previews and palette inspected. New explicit download variants, remaining type/usage sections and mobile/dark pending.",
-      "status": "composition-rework"
+      "environment": "Compiled local preview :4322, 17:49 BST build",
+      "coverage": "Entire page through copyright inspected at both sizes. Logo exports and mono sample need corrected build; mobile CSS sample creates 22px page overflow, fixed in source. Actual downloads and keyboard states pending.",
+      "justification": "Three lockups and two download colors support real partner usage. Palette swatches pair exact values with roles; specimens identify typography; usage rules and CSS explain faithful reproduction. Jump links give quick access to assets and rules.",
+      "status": "verification-pending"
     },
     {
       "path": "/maintainers/share-your-project",
-      "status": "composition-rework",
+      "status": "verification-pending",
       "viewports": [
-        "1440x1000",
-        "390x844"
+        "1440x1000 dark",
+        "390x844 dark; light hero and focus"
       ],
       "findings": [
         "F30"
       ],
-      "coverage": "Observed cramped three/four-column cards and redundant statistics/FAQ. Replaced with a clear process, fit criteria and contact; revised compiled page pending."
+      "environment": "Compiled local preview :4322, 19:20 build",
+      "coverage": "Entire page through copyright inspected at desktop and mobile dark; mobile light hero and full keyboard action outline also checked. Four process steps, fit criteria, prep link and visible contact remain. All four main links measure at least 44px tall; mobile document 390/390. Browser accessibility snapshot exposes the ordered list without individual list-item roles; semantic and remaining scoped-style recipe migration follow-up pending.",
+      "justification": "Hero states audience, format, duration and cost. Four steps explain the real participation sequence. Fit and exclusions distinguish editorial sessions from commercial work. Prep notes and three requested context items make the email actionable; visible address provides a fallback to the mailto action.",
+      "limitations": "No email sent or session scheduled; external prep document and video playback not inspected."
     },
     {
       "path": "/organizations",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "1440x1000"
+        "1440x1000 dark",
+        "390x844 light"
       ],
       "findings": [
-        "F31"
+        "F31 resolved"
       ],
-      "coverage": "Hero, scope, priced offers inspected. Removed redundant offer boxes, labels and repeated contact template. Revised page and mobile pending."
+      "environment": "Compiled local preview :4322, 17:49 BST build",
+      "coverage": "Entire page through copyright inspected at both sizes. All four main actions measure at least 44px; visible keyboard focus and Enter navigation to programme verified. No desktop overflow observed.",
+      "justification": "Hero identifies service and application routes. Three scope definitions establish responsibility. Two offers expose actual prices, cadence and deliverables; exclusions prevent misleading expectations. The shared footer supports discovery.",
+      "limitations": "No application, email, purchase or independent legal/commercial assessment."
     },
     {
       "path": "/organizations/lets-chat",
-      "status": "composition-rework",
+      "status": "visual-pass",
       "viewports": [
-        "1440x1000"
+        "1440x1000 dark",
+        "390x844 light"
       ],
       "findings": [
-        "F31"
+        "F31 resolved",
+        "F49 resolved"
       ],
-      "coverage": "Observed contact template stranded in narrow grid column with empty space. Reworked as a reading-width application; revised compiled page and mobile pending."
+      "environment": "Compiled local preview :4322, 17:49 whole-page, 18:30 mobile and 19:00 desktop correction builds",
+      "coverage": "Entire page through copyright inspected at both sizes, no mobile page overflow. Copy template and email values verified exactly, including after navigating away and back. Corrected keyboard copy rechecked on mobile and desktop: 128x44px button retained during Copied feedback, exact address on clipboard, visible focus and persistent polite contextual status. No email sent.",
+      "justification": "Introduction explains the fit check; email and programme actions give next steps. Visible address and copyable brief work without a mail client. Expected reply explains what happens next. No duplicate application form.",
+      "limitations": "No email sent; clipboard failure is covered by isolated script tests, not an actual denied-permission Browser state."
+    },
+    {
+      "path": "/404",
+      "status": "visual-pass",
+      "viewports": [
+        "1440x1000 light",
+        "390x844 light",
+        "390x844 dark"
+      ],
+      "environment": "Deployed preview 3ff27879, commit 272b68bc",
+      "findings": [],
+      "coverage": "Entire page inspected with overlapping captures through copyright. Native GET search for cgroups reached the matching article result. Theme control worked after hydration.",
+      "justification": "Error label and plain heading explain the failure. Search, home link and issue-report link offer recovery. Shared navigation/footer expose other destinations. No decorative illustration or duplicate recommended-content panel.",
+      "limitations": "No GitHub issue or authentication submitted; search result destination inspected, article not reviewed in this pass."
+    },
+    {
+      "path": "/adrs/0001-adopt-adrs",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "environment": "Compiled local preview :4322, 17:49 whole-page and 18:30 corrected-link builds",
+      "findings": [
+        "F44 source-link resolved"
+      ],
+      "coverage": "Whole page with overlapping viewport captures through footer at both sizes. Readable prose/code wrapping; no observed overflow. Corrected GitHub source destination verified in 18:30 compiled DOM against the previously API-verified main/content/adrs target.",
+      "justification": "Breadcrumbreturnsarchive; decisionnumber/title identifyrecord; authorlinks/date provideprovenance. Background,goals/nongoals,designandconclusionretainhistoricalreasoning; bodyreferencesallowinspection. Sharedfooter providesdiscovery.",
+      "limitations": "Historicaldecisionclaimsnotre-researched; externalMediumreference notfetched."
+    },
+    {
+      "path": "/adrs/0002-adopt-bun",
+      "status": "visual-pass",
+      "viewports": [
+        "390x844 light",
+        "1440x1000 dark"
+      ],
+      "environment": "Compiled localpreview :4322 17:49BSTbuild",
+      "findings": [],
+      "coverage": "Entirepage reviewed in overlappingviewportcaptures throughcopyright atbothsizes, includinglonglists. SingleH1,nohorizontaloverflow. Breadcrumb/author/Rustlinkdestinationsinspected.",
+      "justification": "Decisionnumber/title/date/authoridentifyhistoricalrecord. Context,goals/nongoals,decision,positive/negativeconsequences,andconsideredalternatives eachdocumentadoptionreasoning. Preserveauthoredrecordratherthanremovingrepetitionthatdocumentsdistinctdecisionfacets.",
+      "limitations": "Visual/structuralreview only; historicalvendorclaimsnotre-researched, destinationsnotallopened."
     }
   ],
   "componentStates": [
@@ -378,32 +507,66 @@
     {
       "component": "Academy forms, progress and badges",
       "environment": "Local Storybook after fresh Panda build",
-      "viewports": ["390x844 light", "390x844 dark"],
-      "states": ["visible field error in light", "disabled form in dark", "progress 0 in light", "progress 100 in dark", "all badge variants in dark"],
+      "viewports": [
+        "390x844 light",
+        "390x844 dark"
+      ],
+      "states": [
+        "visible field error in light",
+        "disabled form in dark",
+        "progress 0 in light",
+        "progress 100 in dark",
+        "all badge variants in dark"
+      ],
       "result": "observed-correct",
       "limitations": "Safe fixtures only; no real subscription or account mutation."
     },
     {
       "component": "BracketBoard",
       "environment": "Local Storybook after fresh Panda build",
-      "viewports": ["390x844 light", "390x844 dark", "1440x1000 dark"],
-      "states": ["two rounds with live match and winner", "keyboard horizontal scroll", "long names wrap without truncation", "empty bracket", "matches not announced"],
+      "viewports": [
+        "390x844 light",
+        "390x844 dark",
+        "1440x1000 dark"
+      ],
+      "states": [
+        "two rounds with live match and winner",
+        "keyboard horizontal scroll",
+        "long names wrap without truncation",
+        "empty bracket",
+        "matches not announced"
+      ],
       "result": "observed-correct",
       "limitations": "Fixture evidence, not authenticated live bracket service."
     },
     {
       "component": "VideoTranscript",
       "environment": "Compiled local preview :4322, 16:58 BST checkpoint",
-      "viewports": ["390x844 light"],
-      "states": ["single-copy SSR disclosure", "Docker search: 30 matches"],
+      "viewports": [
+        "390x844 light"
+      ],
+      "states": [
+        "single-copy SSR disclosure",
+        "Docker search: 30 matches"
+      ],
       "result": "observed-correct-after-repair",
       "limitations": "Original auto-scroll defect repaired. Rechecked in 17:29 build: Docker produced 30 highlighted matches with input visible, no-match query hid unmatched paragraphs/empty sections, and clearing restored all 113 paragraphs. Whole Watch page review remains pending."
     },
     {
       "component": "Unsubscribe form and mobile navigation",
       "environment": "Compiled local preview :4322, 17:14 BST build",
-      "viewports": ["390x844 light", "390x844 dark", "1440x1000 light", "1440x1000 dark"],
-      "states": ["forged success=true displays normal form", "mobile footer through copyright", "modal menu Shift-Tab wraps to Your account", "Escape closes and returns focus to Open navigation"],
+      "viewports": [
+        "390x844 light",
+        "390x844 dark",
+        "1440x1000 light",
+        "1440x1000 dark"
+      ],
+      "states": [
+        "forged success=true displays normal form",
+        "mobile footer through copyright",
+        "modal menu Shift-Tab wraps to Your account",
+        "Escape closes and returns focus to Open navigation"
+      ],
       "result": "observed-correct-with-follow-up",
       "limitations": "Rechecked in 17:29 build: pristine input has neutral border; revised two-column menu fits at390px and wraps without overflow at320px. No unsubscribe request sent. Signed-in/error/success route behavior only covered by mocked tests."
     }

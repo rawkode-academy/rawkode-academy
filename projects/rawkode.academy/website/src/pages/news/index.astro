@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import { isNewsPublished } from "@/lib/news-publication";
 import NewsItemListJsonLd from "@/components/html/news-itemlist-jsonld.astro";
 import Page from "@/wrappers/page.astro";
 import WireSubscribeCard from "@/components/news/WireSubscribeCard.astro";
@@ -9,11 +10,12 @@ import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 
 export const prerender = true;
 
-const allNews = (await getCollection("news")).sort(
+const now = new Date();
+const allNews = (await getCollection("news", ({ data }) => isNewsPublished(data.publishedAt, now))).sort(
 	(a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
 );
 const [leadStory, ...archive] = allNews;
-const newsImage = "/images/news/news-generic.svg";
+const editorialImage = "/images/news/news-generic.svg";
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 	day: "numeric", month: "short", year: "numeric",
 });
@@ -36,7 +38,7 @@ const catalog = academyCatalog();
 		{leadStory && <section class={styles.section} aria-label="Latest story">
 			<article class={catalog.featured}>
 				<a class={catalog.featuredMedia} href={`/news/${leadStory.id}`} aria-label={`Read ${leadStory.data.title}`}>
-					<img class={catalog.featuredImage} src={newsImage} alt="" width="1200" height="675" fetchpriority="high" />
+					<img class={catalog.featuredImage} src={editorialImage} alt="" width="1200" height="675" fetchpriority="high" />
 				</a>
 				<div class={catalog.featuredBody}>
 					<p class={catalog.featuredKicker}>Latest · <time datetime={leadStory.data.publishedAt.toISOString()}>{dateFormatter.format(leadStory.data.publishedAt)}</time></p>
@@ -52,7 +54,7 @@ const catalog = academyCatalog();
 				<h2 id="news-archive" class={styles.sectionTitle}>Earlier stories</h2>
 				<p class={catalog.resultCount}>{archive.length} stories</p>
 			</header>
-			<div class={catalog.newsList}>
+			<div class={catalog.editorialList}>
 				{archive.map((story) => <NewsStoryRow story={story} />)}
 			</div>
 		</section>

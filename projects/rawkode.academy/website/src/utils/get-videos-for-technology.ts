@@ -17,9 +17,12 @@ export async function getVideosForTechnology(technologyId: string) {
 			? technologyId.slice(0, -6)
 			: technologyId;
 
+		const now = new Date();
 		const allVideos = await getCollection("videos", ({ data }) => {
 			const technologyRefs = normalizeTechnologyReferences(data.technologies);
-			return technologyRefs.includes(normalizedTechId);
+			return (
+				data.publishedAt <= now && technologyRefs.includes(normalizedTechId)
+			);
 		});
 
 		// Sort by published date, most recent first

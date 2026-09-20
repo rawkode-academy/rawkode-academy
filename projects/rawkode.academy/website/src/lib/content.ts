@@ -25,7 +25,10 @@ const compactCopy = (value: string | undefined, maxLength = 180) => {
 	const firstSentence = normalized.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim();
 	if (firstSentence && firstSentence.length <= maxLength) return firstSentence;
 	if (normalized.length <= maxLength) return normalized;
-	return `${normalized.slice(0, maxLength).trimEnd()}…`;
+	const wordBoundary = normalized.lastIndexOf(" ", maxLength);
+	// Keep whole words when possible, but still bound a single oversized token.
+	const end = wordBoundary > 0 ? wordBoundary : maxLength;
+	return `${normalized.slice(0, end).trimEnd()}…`;
 };
 
 const formatDate = (value: Date) =>

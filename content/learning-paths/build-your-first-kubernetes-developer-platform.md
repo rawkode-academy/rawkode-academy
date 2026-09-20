@@ -2,7 +2,7 @@
 title: "Build Your First Kubernetes Developer Platform"
 description: "Move from GUI-driven cluster management to platform APIs, golden-path deployments, and automated operations. This path assembles modern tools that let you offer a polished developer experience on Kubernetes without drowning in YAML."
 difficulty: "beginner"
-estimatedDuration: 270
+estimatedDuration: 428
 prerequisites:
   - "Comfortable using a command-line interface and Git."
   - "Basic understanding of containers and Kubernetes primitives (Pods, Deployments, Services)."

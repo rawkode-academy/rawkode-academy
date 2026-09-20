@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import { getPublishedVideos } from "@/lib/content";
 import { getCourseModuleSlug } from "@/utils/course-path";
+import { isNewsPublished } from "@/lib/news-publication";
 
 const DEFAULT_SITE_URL = "https://rawkode.academy";
 const BUILD_TIME = new Date();
@@ -463,8 +464,12 @@ export async function getSeriesSitemapEntries(): Promise<SitemapUrlEntry[]> {
 	return sortByPath(entries);
 }
 
-export async function getNewsSitemapEntries(): Promise<SitemapUrlEntry[]> {
-	const newsItems = await getCollection("news");
+export async function getNewsSitemapEntries(
+	now = new Date(),
+): Promise<SitemapUrlEntry[]> {
+	const newsItems = await getCollection("news", ({ data }) =>
+		isNewsPublished(data.publishedAt, now),
+	);
 
 	const entries = newsItems.map((item) => ({
 		path: `/news/${item.id}`,
@@ -488,7 +493,10 @@ export function selectFreshNewsItems<T extends { data: { publishedAt: Date } }>(
 ): T[] {
 	const cutoff = now.getTime() - GOOGLE_NEWS_FRESHNESS_MS;
 	return [...items]
-		.filter((item) => item.data.publishedAt.getTime() >= cutoff)
+		.filter((item) =>
+			isNewsPublished(item.data.publishedAt, now) &&
+			item.data.publishedAt.getTime() >= cutoff,
+		)
 		.sort(
 			(a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
 		);

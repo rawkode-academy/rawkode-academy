@@ -46,19 +46,19 @@ export const academyCatalog = sva({
 		"statValue",
 		"statLabel",
 		"pager",
-		"newsList",
-		"newsStory",
-		"newsImage",
-		"newsBody",
-		"newsTitle",
+		"editorialList",
+		"editorialRow",
+		"editorialImage",
+		"editorialBody",
+		"editorialTitle",
 	],
 	base: {
-		newsList: {
+		editorialList: {
 			display: "grid",
 			borderTop: "hairline",
 			borderColor: "academy.border",
 		},
-		newsStory: {
+		editorialRow: {
 			display: "grid",
 			gridTemplateColumns: "4.5rem minmax(0, 1fr)",
 			gap: "4",
@@ -68,6 +68,7 @@ export const academyCatalog = sva({
 			borderColor: "academy.border",
 			color: "academy.text",
 			textDecoration: "none",
+			"&[data-media='false']": { gridTemplateColumns: "minmax(0, 1fr)" },
 			_lg: { gridTemplateColumns: "10rem minmax(0, 1fr)", gap: "8" },
 			_hover: { "& h3": { color: "academy.accent" } },
 			_focusVisible: {
@@ -76,15 +77,15 @@ export const academyCatalog = sva({
 				outlineOffset: "focus",
 			},
 		},
-		newsImage: {
+		editorialImage: {
 			width: "full",
 			height: "auto",
 			aspectRatio: "academy-video",
 			objectFit: "cover",
 			borderRadius: "academy-s",
 		},
-		newsBody: { display: "grid", gap: "2", minWidth: "0" },
-		newsTitle: {
+		editorialBody: { display: "grid", gap: "2", minWidth: "0" },
+		editorialTitle: {
 			margin: "0",
 			fontFamily: "academy-display",
 			fontSize: "lg",

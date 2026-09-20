@@ -108,15 +108,17 @@ const pageDescription = learningPath.data.description;
 	/>
 
 	<div class={doc.root}>
-		<header class={styles.hero}>
-			<div class={[styles.container, styles.heroCopy].join(" ")}>
+		<header class={doc.pathHero}>
+			<div class={doc.body}>
+			<div class={[doc.main, styles.container, styles.heroCopy].join(" ")}>
 				<a class={doc.link} href="/learning-paths">Learning paths</a>
 				<h1 class={doc.title}>{learningPath.data.title}</h1>
 				<div class={styles.meta}>
 					<span>{difficultyLabel}</span>
-					{durationLabel && <span>Estimated {durationLabel}</span>}
+					{durationLabel && <span>{durationLabel} core video</span>}
 					<time datetime={learningPath.data.publishedAt.toISOString()}>{publishDate}</time>
 				</div>
+				{durationLabel && <p class={doc.meta}>Exercises and bonus material take extra time.</p>}
 				<div class={doc.actions}>
 					{authors.map((author) => (
 						<a class={doc.author} href={`/people/${author.data.id}`}>
@@ -130,6 +132,7 @@ const pageDescription = learningPath.data.description;
 						Start learning
 					</a>
 				</div>
+			</div>
 			</div>
 		</header>
 
@@ -147,7 +150,7 @@ const pageDescription = learningPath.data.description;
 				)}
 
 				{/* The content supplies the introduction, objectives, and ordered resources once. */}
-				<article id="path-content" class={styles.prose}>
+				<article id="path-content" class={[styles.prose, doc.pathProse].join(" ")}>
 					<Content />
 				</article>
 
@@ -168,10 +171,11 @@ const pageDescription = learningPath.data.description;
 				</nav>
 			</div>
 
-			<ArticleTOC headings={headings} />
+			<ArticleTOC headings={headings} maxDepth={3} />
 		</div>
 
 		<NewsletterCTA
+			class={doc.section ?? ""}
 			audience="learning-paths"
 			badge="Learning path updates"
 			headline="Get notified when we ship new learning paths"

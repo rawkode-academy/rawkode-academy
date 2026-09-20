@@ -88,6 +88,8 @@ export const academyDocument = sva({
 		"playOverlay",
 		"mediaTitle",
 		"adrProse",
+		"pathProse",
+		"pathHero",
 		"resourceTarget",
 	],
 	base: {
@@ -706,6 +708,7 @@ export const academyDocument = sva({
 				top: "8",
 				maxHeight: "academy-toc",
 				overflowY: "auto",
+				padding: "2",
 			},
 		},
 		tocMobile: {
@@ -735,6 +738,12 @@ export const academyDocument = sva({
 			color: "academy.textSoft",
 			fontSize: "sm",
 			lineHeight: "relaxed",
+			"&[data-depth='3']": { paddingInlineStart: "4" },
+			_focusVisible: {
+				outline: "focus",
+				outlineColor: "academy.accent",
+				outlineOffset: "focus",
+			},
 			_hover: {
 				color: "academy.accent",
 			},
@@ -863,6 +872,20 @@ export const academyDocument = sva({
 			fontWeight: "bold",
 			lineHeight: "tight",
 			color: "white",
+		},
+		pathProse: {
+			"& :is(h2, h3)": { scrollMarginTop: "8" },
+			"& h3": {
+				borderTop: "hairline",
+				borderColor: "academy.border",
+				paddingTop: "8",
+				marginTop: "10",
+			},
+		},
+		pathHero: {
+			background: "academy.canvas",
+			borderBottom: "hairline",
+			borderColor: "academy.border",
 		},
 		adrProse: {
 			"& > h1:first-child": {

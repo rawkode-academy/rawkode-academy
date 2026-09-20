@@ -51,10 +51,10 @@ const compactCopy = (value: string | undefined, maxLength = 220) => {
 
 const formatPathDuration = (minutes?: number | null) => {
 	if (!minutes || minutes <= 0) return "Self-paced";
-	if (minutes < 60) return `${minutes} min route`;
+	if (minutes < 60) return `${minutes} min core video`;
 	const hours = Math.floor(minutes / 60);
 	const remainder = minutes % 60;
-	return remainder > 0 ? `${hours}h ${remainder}m route` : `${hours}h route`;
+	return remainder > 0 ? `${hours}h ${remainder}m core video` : `${hours}h core video`;
 };
 
 const paths = learningPaths.map((path) => ({
@@ -67,14 +67,6 @@ const paths = learningPaths.map((path) => ({
 		formatPathDuration(path.data.estimatedDuration),
 	] as [string, string],
 }));
-
-const featured = paths[0] ?? {
-	href: "/courses",
-	title: "Choose the work in front of you.",
-	description:
-		"Structured routes through related lessons, articles, and working sessions.",
-	meta: ["Self-paced", "Start here"] as [string, string],
-};
 
 const pageTitle = "Learning Paths";
 const pageDescription =
@@ -89,17 +81,7 @@ const pageDescription =
 			listName="Rawkode Academy Learning Paths"
 		/>
 		<AcademyPage
-			client:load
 			page="learn"
-			featured={featured}
-			latest={[]}
-			videos={[]}
 			learningPaths={paths}
-			stats={[
-				{ value: `${learningPaths.length}`, label: "Paths" },
-				{ value: `${technologies.length}`, label: "Technologies" },
-				{ value: "Self-paced", label: "Format" },
-				{ value: "2019", label: "Since" },
-			]}
 		/>
 </Page>

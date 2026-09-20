@@ -3,12 +3,12 @@ export const prerender = false;
 
 import { getCollection, getEntries } from "astro:content";
 import ShowItemListJsonLd from "@/components/html/show-itemlist-jsonld.astro";
-import AcademyCatalogCard from "@/components/academy/AcademyCatalogCard.astro";
 import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.astro";
-import { academyLayout } from "@rawkodeacademy/design-system";
+import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import type { ShowSummary } from "@/types/show";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getPublishedVideos } from "@/lib/content";
 
 Astro.response.headers.set(
 	"Cache-Control",
@@ -23,7 +23,7 @@ Astro.response.headers.set("X-Build-Time", new Date().toISOString());
 const showEntries = (await getCollection("shows")).filter(
 	(s) => s.data.publish,
 );
-const videos = await getCollection("videos");
+const videos = await getPublishedVideos();
 
 const getShowId = (value: unknown): string | null => {
 	if (!value) return null;
@@ -83,6 +83,7 @@ const showsJsonLd = showEntries.map((s) => {
 	};
 });
 const styles = academyLayout({ width: "wide" });
+const catalog = academyCatalog();
 ---
 
 <Page
@@ -104,14 +105,18 @@ const styles = academyLayout({ width: "wide" });
 			{hasShows ? (
 				<div class={styles.grid}>
 					{showsToRender.map((show) => (
-						<AcademyCatalogCard
-							href={`/shows/${show.id}`}
-							title={show.name}
-							description={show.episodes?.[0]?.video?.title ?? ""}
-							meta={[show.episodes?.length ? `${show.episodes.length} episodes` : "Program"]}
-							image={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl ?? undefined}
-							imageAlt={`${show.name} cover`}
-						/>
+						<a class={styles.card} href={`/shows/${show.id}`}>
+							{(show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl) && (
+								<span class={catalog.featuredMedia}>
+									<img class={catalog.featuredImage} src={show.cover?.image.src ?? show.episodes?.[0]?.video?.thumbnailUrl} alt="" loading="lazy" />
+								</span>
+							)}
+							<div class={styles.cardBody}>
+								<span class={catalog.rowMeta}>{show.episodes?.length ?? 0} published {show.episodes?.length === 1 ? "episode" : "episodes"}</span>
+								<h2 class={styles.cardTitle}>{show.name}</h2>
+								{show.episodes?.[0]?.video?.title && <span class={catalog.rowDescription}>{show.episodes[0].video.title}</span>}
+							</div>
+						</a>
 					))}
 				</div>
 			) : (

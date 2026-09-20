@@ -49,7 +49,6 @@ const processedChangelog = await Promise.all(
 	description="Rawkode Academy product updates, fixes, and content changes."
 >
 	<EditorialShell
-		eyebrow="Updates"
 		title="Changelog"
 		lede="Product updates, fixes, and content changes."
 		compact
@@ -79,11 +78,12 @@ const processedChangelog = await Promise.all(
 								<span>by {entry.author.name}</span>
 							</div>
 							<h2>{entry.title}</h2>
-							<p class="changelog-entry__summary">{entry.summary}</p>
+							{entry.summary && <p class="changelog-entry__summary">{entry.summary}</p>}
 							{entry.pullRequest && (
 								<a
 									class="changelog-entry__link"
 									href={`https://github.com/rawkode-academy/rawkode-academy/pull/${entry.pullRequest}`}
+									aria-label={`View pull request for ${entry.title}`}
 								>
 									View pull request
 								</a>
@@ -155,6 +155,9 @@ const processedChangelog = await Promise.all(
 	}
 
 	.changelog-entry__link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
 		width: fit-content;
 		color: var(--colors-academy-text);
 		font-family: var(--fonts-academy-mono), ui-monospace, monospace;
@@ -165,6 +168,11 @@ const processedChangelog = await Promise.all(
 		text-transform: uppercase;
 		border-bottom: 1px solid var(--colors-academy-border);
 		padding-bottom: 0.22rem;
+	}
+
+	.changelog-entry__link:focus-visible {
+		outline: 2px solid var(--colors-academy-accent);
+		outline-offset: 4px;
 	}
 
 	@media (max-width: 700px) {

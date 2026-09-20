@@ -329,7 +329,11 @@ for (const fixture of fixtures) {
 			assert.equal(calls.length, 2);
 			respond({ data: { success: true, message: "Check your inbox" } });
 			await flush();
-			assert.equal(host.querySelector("form"), null);
+			if (fixture.partnership) assert.equal(host.querySelector("form"), null);
+			else {
+				assert.equal(host.querySelector("[type=checkbox]").checked, false);
+				assert.equal(host.querySelector("button[type=submit]").disabled, true);
+			}
 			assert.match(
 				host.querySelector("[role=status]").textContent,
 				/Application received|Check your inbox/,
@@ -354,7 +358,7 @@ for (const fixture of fixtures.filter((item) => !item.partnership)) {
 			view.host.querySelector("form").requestSubmit();
 			assert.equal(calls[0].get("email"), "signed-in@example.test");
 			assert.equal(calls[0].get("allowSponsorContact"), "true");
-			respond({ data: { message: "Subscribed" } });
+		respond({ data: { success: true, sponsorStatus: "subscribed", message: "Subscribed" } });
 			await flush();
 		} finally {
 			view.close();
@@ -375,7 +379,8 @@ for (const fixture of fixtures.filter((item) => !item.partnership)) {
 			assert.deepEqual(requested, [
 				"/api/subscriptions/check?audienceId=audience",
 			]);
-			assert.equal(view.host.querySelector("form"), null);
+			assert.equal(view.host.querySelector("[type=checkbox]").checked, false);
+			assert.equal(view.host.querySelector("button[type=submit]").disabled, true);
 			assert.match(
 				view.host.querySelector("[role=status]").textContent,
 				/subscribed/,
@@ -385,6 +390,81 @@ for (const fixture of fixtures.filter((item) => !item.partnership)) {
 			view.close();
 			globalThis.fetch = unexpectedFetch;
 		}
+	});
+}
+for (const fixture of fixtures.filter((item) => !item.partnership)) {
+	test(`${fixture.file}: anonymous partial-success retry retains the confirmed, readonly email`, async () => {
+		calls = [];
+		const view = await hydrate(fixture);
+		try {
+			setValue(view.host, "email", "address-a@example.test");
+			const input = view.host.querySelector("[name=email]");
+			assert.equal(input.readOnly, false);
+			view.host.querySelector("[type=checkbox]").click();
+			view.host.querySelector("form").requestSubmit();
+			assert.equal(calls[0].get("email"), "address-a@example.test");
+			respond({ data: { success: true, sponsorStatus: "unconfirmed", message: "Course updates are saved. Sponsor signup could not be confirmed." } });
+			await flush();
+			assert.equal(input.readOnly, true, "Saved identity cannot be edited to address B");
+			assert.equal(input.disabled, false, "Identity remains focusable and copyable");
+			assert.equal(input.value, "address-a@example.test");
+			assert.equal(view.host.querySelector(`label[for="${input.id}"]`).textContent, "Email address");
+			assert.equal(view.host.querySelector("[type=checkbox]").checked, false);
+			assert.equal(view.host.querySelector("button[type=submit]").disabled, true);
+			view.host.querySelector("[type=checkbox]").click();
+			await flush();
+			view.host.querySelector("form").requestSubmit();
+			assert.equal(calls.length, 2);
+			assert.equal(calls[1].get("email"), "address-a@example.test");
+			assert.equal(calls[1].get("allowSponsorContact"), "true");
+			respond({ error: { message: "Please retry" } });
+			await flush();
+			assert.equal(input.readOnly, true, "Retry failure must not unlock the saved identity");
+			assert.equal(input.value, "address-a@example.test");
+		} finally { view.close(); }
+	});
+	test(`${fixture.file}: partial success requires fresh sponsor consent; refresh retains the opt-in`, async () => {
+		calls = [];
+		const identity = { userEmail: "signed-in@example.test" };
+		const view = await hydrate(fixture, identity);
+		try {
+			view.host.querySelector("[type=checkbox]").click();
+			view.host.querySelector("form").requestSubmit();
+			assert.equal(calls.length, 1);
+			respond({ data: { success: true, sponsorStatus: "unconfirmed", message: "Course updates are saved. Sponsor signup could not be confirmed. You can choose to retry below." } });
+			await flush();
+			assert.match(view.host.querySelector("[role=status]").textContent, /Course updates are saved.*could not be confirmed/);
+			assert.equal(view.host.querySelector("[type=checkbox]").checked, false);
+			assert.equal(view.host.querySelector("button[type=submit]").disabled, true);
+			assert.match(view.host.querySelector("button[type=submit]").textContent, /Retry sponsor signup/);
+			view.host.querySelector("form").dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+			assert.equal(calls.length, 1, "No retry without renewed consent");
+			view.host.querySelector("[type=checkbox]").click();
+			await flush();
+			view.host.querySelector("form").requestSubmit();
+			assert.equal(calls.length, 2);
+			assert.equal(calls[1].get("allowSponsorContact"), "true");
+			respond({ data: { success: true, sponsorStatus: "subscribed", message: "Course updates and sponsor signup are confirmed." } });
+			await flush();
+			assert.equal(view.host.querySelector("form"), null);
+		} finally { view.close(); }
+
+		calls = [];
+		const refreshed = await hydrate(fixture, { ...identity, isAlreadySubscribed: true });
+		try {
+			assert.equal(calls.length, 0);
+			assert.equal(refreshed.host.querySelector("[type=checkbox]").checked, false);
+			assert.equal(refreshed.host.querySelector("button[type=submit]").disabled, true);
+			assert.match(refreshed.host.textContent, /Course updates are saved/);
+			refreshed.host.querySelector("[type=checkbox]").click();
+			await flush();
+			refreshed.host.querySelector("form").requestSubmit();
+			assert.equal(calls.length, 1);
+			assert.equal(calls[0].get("email"), identity.userEmail);
+			assert.equal(calls[0].get("allowSponsorContact"), "true");
+			respond({ data: { success: true, sponsorStatus: "subscribed", message: "Sponsor signup confirmed." } });
+			await flush();
+		} finally { refreshed.close(); }
 	});
 }
 after(async () => {

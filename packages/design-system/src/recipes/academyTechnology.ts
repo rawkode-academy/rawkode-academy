@@ -11,6 +11,7 @@ export const academyTechnology = sva({
 		"title",
 		"description",
 		"metadata",
+		"personalRating",
 		"actions",
 		"link",
 		"columns",
@@ -22,6 +23,7 @@ export const academyTechnology = sva({
 		"copy",
 		"list",
 		"video",
+		"videoDate",
 		"quote",
 		"facts",
 		"ruledSection",
@@ -146,6 +148,13 @@ export const academyTechnology = sva({
 				margin: "0",
 				color: "academy.text",
 			},
+		},
+		personalRating: {
+			display: "flex",
+			flexWrap: "wrap",
+			gap: "3",
+			columnGap: "6",
+			alignItems: "baseline",
 		},
 		actions: {
 			display: "flex",
@@ -344,6 +353,13 @@ export const academyTechnology = sva({
 					textUnderlineOffset: "3px",
 				},
 			},
+		},
+		videoDate: {
+			fontFamily: "academy-text",
+			fontSize: "sm",
+			fontWeight: "normal",
+			color: "academy.textMuted",
+			lineHeight: "relaxed",
 		},
 		quote: {
 			margin: "0",

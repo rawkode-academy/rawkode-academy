@@ -6,6 +6,7 @@ import AcademyCatalogMasthead from "@/components/academy/AcademyCatalogMasthead.
 import { academyCatalog, academyLayout } from "@rawkodeacademy/design-system";
 import Page from "@/wrappers/page.astro";
 import { getCollection } from "astro:content";
+import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 
 const people = await getCollection("people");
 const sortedPeople = people.sort((a, b) =>
@@ -16,15 +17,7 @@ const peopleJsonLd = sortedPeople.map((person) => ({
 	id: person.data.id,
 	name: person.data.name,
 	avatarUrl: person.data.avatarUrl,
-	sameAs: [
-		person.data.github,
-		person.data.twitter,
-		person.data.bluesky,
-		person.data.linkedin,
-		person.data.mastodon,
-		person.data.website,
-		person.data.youtube,
-	],
+	sameAs: getPersonIdentityUrls(person.data),
 }));
 const styles = academyLayout({ width: "wide" });
 const catalog = academyCatalog();

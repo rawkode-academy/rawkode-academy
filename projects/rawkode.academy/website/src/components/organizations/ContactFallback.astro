@@ -32,6 +32,7 @@ const marketing = academyMarketing();
 			type="button"
 			class:list={[marketing.copyButton, "contact-fallback__copy"]}
 			data-copy-text={PARTNERSHIP_EMAIL}
+			data-copy-kind="Email address"
 		>
 			Copy email
 		</button>
@@ -46,9 +47,11 @@ const marketing = academyMarketing();
 		type="button"
 		class:list={[marketing.copyButton, "contact-fallback__copy"]}
 		data-copy-text={template}
+		data-copy-kind="Template"
 	>
 		Copy template
 	</button>
+	<p role="status" aria-live="polite" aria-atomic="true" class="sr-only" data-copy-status></p>
 </aside>
 
 <script>
@@ -59,6 +62,7 @@ const marketing = academyMarketing();
 		} catch {
 			// Clipboard API unavailable (insecure context, permissions):
 			// select the text in an off-screen textarea and use execCommand.
+			const previousFocus = document.activeElement;
 			const textarea = document.createElement("textarea");
 			textarea.value = text;
 			textarea.setAttribute("readonly", "");
@@ -72,7 +76,9 @@ const marketing = academyMarketing();
 			} catch {
 				copied = false;
 			}
+			const restoreFocus = document.activeElement === textarea;
 			textarea.remove();
+			if (restoreFocus && previousFocus instanceof HTMLElement) previousFocus.focus();
 			return copied;
 		}
 	};
@@ -81,10 +87,17 @@ const marketing = academyMarketing();
 		".contact-fallback__copy[data-copy-text]",
 	)) {
 		const original = button.textContent;
+		const status = button.closest(".contact-fallback")?.querySelector<HTMLElement>("[data-copy-status]");
+		let resetTimer: number | undefined;
 		button.addEventListener("click", async () => {
+			window.clearTimeout(resetTimer);
+			if (status) status.textContent = "";
 			const copied = await copyWithFallback(button.dataset.copyText ?? "");
 			button.textContent = copied ? "Copied" : "Copy failed";
-			window.setTimeout(() => {
+			if (status) status.textContent = copied
+				? `${button.dataset.copyKind} copied to clipboard.`
+				: "Copy failed. Select and copy the text shown above.";
+			resetTimer = window.setTimeout(() => {
 				button.textContent = original;
 			}, 2000);
 		});

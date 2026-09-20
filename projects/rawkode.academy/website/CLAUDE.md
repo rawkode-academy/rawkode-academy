@@ -223,13 +223,9 @@ The following class names from the Rawkode Blue era still work — they're alias
 - Don't write `rgb(95 94 215 / 0.x)` (the old Rawkode Blue purple). The triplet is now spruce; you almost always want `var(--editorial-spruce)` instead.
 - Don't reach for `react-type-animation` or other type-on effects. The editorial system is static.
 
-#### View transitions
+#### Navigation and motion
 
-The site uses **native cross-document view transitions** (`@view-transition { navigation: auto }` in `global.css`), not Astro's `ClientRouter`. Full page loads still happen, so per-page `<script>` blocks need no `astro:page-load` wiring. Conventions:
-
-- Persistent chrome (topbar, sidebar) carries a fixed `view-transition-name` so it reads as static during navigation.
-- Matching elements across two pages morph by sharing a name: use `videoTransitionName(slug)` from `src/utils/view-transition-name.ts` (video stills on `/watch` morph into the watch-page player frame). Names must be unique per page — never name elements that can render the same slug twice (e.g. the continue-watching rail).
-- `prefers-reduced-motion: reduce` disables navigation transitions globally; no per-component guards needed.
+The site uses normal document navigation, not Astro's `ClientRouter`. Full page loads mean per-page `<script>` blocks need no `astro:page-load` wiring. Do not add a page-wide crossfade: overlapping old and new text obscures the destination without conveying useful continuity. Component motion must serve a specific interaction and respect the global `prefers-reduced-motion` rules.
 
 ## Light / Dark / System mode
 

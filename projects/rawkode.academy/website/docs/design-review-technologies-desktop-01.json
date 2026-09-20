@@ -1,0 +1,4201 @@
+{
+  "schemaVersion": 1,
+  "sourceFindings": {
+    "schemaVersion": 1,
+    "status": "complete-source-review-rendered-still-blocked",
+    "recordedAt": "2026-09-20T16:52:18Z",
+    "assignment": "User-directed replacement of unavailable Browser review with source-only critique of the first 30 technology detail routes and template.",
+    "evidenceType": "source-only",
+    "renderedEvidence": false,
+    "checkpoint": {
+      "buildLabel": "17:28",
+      "commit": "272b68bc",
+      "localOrigin": "http://127.0.0.1:4322",
+      "renderedBuildVerified": false,
+      "sourceHeadVerified": true,
+      "technologySourceTrackedDiffObserved": false,
+      "otherOwnersUncommittedFilesPreserved": true
+    },
+    "selection": {
+      "inventory": "projects/rawkode.academy/website/docs/design-inventory.json",
+      "template": "/technology/[id]",
+      "expression": "templates.find(t => t.template === '/technology/[id]').paths.slice(0, 30)",
+      "sourceOrderPreserved": true,
+      "totalTechnologyRoutes": 354
+    },
+    "counts": {
+      "sourceProfilesReviewed": 30,
+      "sourceTemplateReviewed": 1,
+      "renderedProfilesReviewed": 0,
+      "completePagePasses": 0,
+      "blockingProductFindings": 2,
+      "nonblockingFindings": 10,
+      "nonemptyBodies": 30,
+      "explicitLifecycleAndLicense": 30,
+      "declaredIconsWithLocalFiles": 24,
+      "declaredIconsMissingLocalFiles": 0,
+      "noIconProfiles": 6,
+      "withAvailableNonIconArtwork": 2,
+      "withNoArtwork": 4,
+      "descriptionsFromMetadata": 3,
+      "personalMatrixRatings": 29,
+      "cncfMetadata": 22,
+      "communityLinkSets": 17,
+      "profilesWithVideoMatches": 15,
+      "videoAppearances": 35,
+      "profilesWithTopicHubMatches": 3,
+      "profilesWithLearningPathMatches": 0,
+      "futureDatedMatchesAtCheckpoint": 0
+    },
+    "methodology": [
+      "Read DESIGN.md, technology skill and authoritative schema/dimension definitions; user source-only constraint overrides the skill's research workflow.",
+      "Read all 30 complete MDX source profiles, shared detail template, icon resolver, Academy recipe, content matching and newsletter/SEO state contracts.",
+      "Parsed existing frontmatter with installed gray-matter in read-only Node commands; counted assets, body words and matching content. Did not invoke Astro, Bun tests, cuenv, builds or dependency installation.",
+      "Matched technology references as strings or object IDs, normalizing /index suffix; excluded draft articles. Counts describe source eligibility, not a generated or rendered page.",
+      "Stored hashes of 41 source files to bound evidence. No current external facts, prices, link availability, SVG appearance or delivered emails were researched.",
+      "Browser attempts ceased at user direction; zero new Browser calls, screenshots, page navigation, submissions, authentication changes or implementation edits."
+    ],
+    "priorityDefinitions": {
+      "blocking": "Confirmed source defect prevents truthful or accessible sign-off for the affected state; implementation owner must resolve before claiming complete acceptance.",
+      "nonblocking": "Composition improvement, mitigation, conditional risk or unverified state which does not establish a current broken page.",
+      "infrastructure": "Original AUDIT-B001 remains an evidence blocker. This source report does not convert any rendered status to passed."
+    },
+    "findings": [
+      {
+        "id": "TECH-SB01",
+        "classification": "blocking",
+        "priority": "P1",
+        "category": "truthful-structured-data",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Software entity asserts Academy authorship and a free offer for every project",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/components/html/technology-jsonld.astro",
+            "lines": "34-35,74-102",
+            "note": "Default siteName is Rawkode Academy; SoftwareApplication creator and publisher use that name; operatingSystem Any and USD 0 offer are unconditional."
+          },
+          {
+            "file": "content/technologies/aws-lambda/index.mdx",
+            "lines": "2-13,15-19",
+            "note": "AWS Lambda is explicitly Commercial and its body describes paid per-millisecond execution."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "432-448",
+            "note": "Every profile emits this shared software entity."
+          }
+        ],
+        "impact": "Machine-readable claims contradict the authoritative profile and misattribute third-party software, including AWS Lambda, to the editorial publisher. A zero-price software offer is not established by an open-source license either.",
+        "recommendation": "Keep Academy as the article publisher; omit unsupported software creator/publisher, operating-system and pricing fields unless backed by explicit authoritative metadata. Do not invent vendor facts to fill fields.",
+        "proofBoundary": "Direct source/data contradiction, not a rendered SEO inspection or external product fact-check."
+      },
+      {
+        "id": "TECH-SB02",
+        "classification": "blocking",
+        "priority": "P1",
+        "category": "accessible-confirmation",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Anonymous successful subscription removes its own success announcement",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+            "lines": "97-104",
+            "note": "Anonymous cookie flag forces shouldHide=true independently of isSuccess."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+            "lines": "151-163,201-216",
+            "note": "Successful action sets isSuccess and hasCookieSubscription together; outer v-if excludes the entire widget including role=status."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterCTA.astro",
+            "lines": "62-85",
+            "note": "Headline/subtitle live outside the widget and remain while the successful anonymous control subtree disappears."
+          }
+        ],
+        "impact": "A confirmed action removes the focused form/control and the intended polite success message, leaving promotional copy without confirmation. No explicit focus destination is provided.",
+        "recommendation": "Keep the current successful interaction and its confirmation visible/announced; suppress only already-subscribed subsequent visits. Define focus handling when replacing controls.",
+        "proofBoundary": "Vue branch analysis only. No subscription, DOM interaction, assistive-technology run or live submit performed."
+      },
+      {
+        "id": "TECH-SN01",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "truthful-cta-copy",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Topic signup promises differ between visible and assistive copy; abandoned Acorn needs explicit editorial framing",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "627-630",
+            "note": "Every lifecycle receives [technology] updates / Stay Updated on [technology]; subtitle specifies new Academy tutorials, courses and videos."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+            "lines": "291-293",
+            "note": "Email help promises weekly cloud-native updates for every audience."
+          },
+          {
+            "file": "content/technologies/acorn/index.mdx",
+            "lines": "9,19",
+            "note": "Acorn is abandoned; body explicitly says repository unmaintained and no security updates planned."
+          }
+        ],
+        "impact": "Assistive copy promises a weekly/general newsletter where visible copy offers topic-specific publication notifications. Acorn headline can be read as project updates despite its lifecycle. The visible subtitle mitigates that reading; abandoned does not itself prohibit future Academy coverage.",
+        "recommendation": "Use one audience-specific promise without unsupported cadence. For Acorn, explicitly describe historical coverage/migration-related Academy publications, or use a neutral Academy signup. Preserve the abandoned metadata.",
+        "proofBoundary": "Copy contract reviewed; delivery cadence/pipeline and live preference service not verified."
+      },
+      {
+        "id": "TECH-SN02",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "recommendation-relevance",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Related technologies match subcategory alone and discard lifecycle context",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "244-274,609-621",
+            "note": "Fallback matches subcategory without parent category, sorts nothing explicitly, limits six, and only passes name/logo/subcategory to cards."
+          },
+          {
+            "file": "content/technologies/aws-lambda/index.mdx",
+            "lines": "9-10",
+            "note": "Serverless / Tools."
+          },
+          {
+            "file": "content/technologies/xdebug/index.mdx",
+            "lines": "10-11",
+            "note": "App Definition and Development / Tools therefore also matches Lambda."
+          },
+          {
+            "file": "content/technologies/acorn/index.mdx",
+            "lines": "9-11",
+            "note": "Abandoned Acorn remains eligible for all Application Definition & Image Build peers."
+          }
+        ],
+        "impact": "AWS Lambda can recommend Xdebug due to the generic word Tools across different categories. Historical projects can appear as unqualified alternatives. None of these 30 profiles supplies explicit relatedTechnologies.",
+        "recommendation": "Make fallback respect the hierarchical category, expose lifecycle for archived alternatives, and distinguish taxonomy siblings from curated alternatives. Preserve useful historical routes; do not silently delete them.",
+        "proofBoundary": "Source-derived eligibility, not observed rendered rail order. Actual Astro collection ordering was not executed."
+      },
+      {
+        "id": "TECH-SN03",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "metadata-density",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Rawkode’s take becomes an unexplained status-only section on all 29 rated profiles",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "366-371,542-553",
+            "note": "Four identity facts precede the article; matrix adds a full heading with conditional explanation."
+          },
+          {
+            "file": "content/technologies/cadence/index.mdx",
+            "lines": "10,21-22",
+            "note": "Stable lifecycle and graveyard personal matrix state coexist without a matrix why/confidence/date."
+          },
+          {
+            "file": "content/src/dimensions.ts",
+            "lines": "112-174",
+            "note": "Matrix is an adoption/opinion journey, distinct from project lifecycle."
+          }
+        ],
+        "impact": "All 29 matrix entries in this batch lack why, spicyTake, confidence and usage dates; 27 contain only the rendered matrix status, and two add trajectory. Sixteen say Skip. This consumes section hierarchy and may make personal preference read as objective project health, especially Cadence stable/graveyard.",
+        "recommendation": "Keep the opinion, but use a compact clearly personal rating unless explanatory content exists; explain the distinction from lifecycle. Keep metadata in semantic dl and do not manufacture rationale.",
+        "proofBoundary": "Source density assessment; spacing, fold position and visual hierarchy not measured."
+      },
+      {
+        "id": "TECH-SN04",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "description-quality",
+        "routes": [
+          "/technology/capsule",
+          "/technology/cert-manager"
+        ],
+        "title": "Raw CNCF useCase text is promoted directly to the hero",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "359,490",
+            "note": "useCase is preferred to editorial SEO description and inserted as escaped plain text."
+          },
+          {
+            "file": "content/technologies/cert-manager/index.mdx",
+            "lines": "34-39",
+            "note": "Literal cert-manager\\_is and a long multi-sentence paragraph."
+          },
+          {
+            "file": "content/technologies/capsule/index.mdx",
+            "lines": "24",
+            "note": "Cluster Multi-Tenancy,Policy-based tenancy is a tag-like comma string, not a concise explanation."
+          }
+        ],
+        "impact": "cert-manager’s escape remains a literal backslash/underscore rather than Markdown formatting; its hero duplicates much of the opening definition. Capsule gets imported taxonomy text instead of its clearer opening prose.",
+        "recommendation": "Use a presentation-safe concise description only when available; avoid raw imported fields as authored prose. Do not rewrite technology facts in this task.",
+        "proofBoundary": "String/source insertion confirmed; no screenshot or line-height claim."
+      },
+      {
+        "id": "TECH-SN05",
+        "classification": "non-blocking",
+        "priority": "P3",
+        "category": "link-density",
+        "routes": [
+          "/technology/acorn",
+          "/technology/buildkit",
+          "/technology/carvel"
+        ],
+        "title": "Multiple project actions point to identical destinations",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "372-376,498-502",
+            "note": "Only falsy filtering; no URL deduplication."
+          },
+          {
+            "file": "content/technologies/acorn/index.mdx",
+            "lines": "5-7",
+            "note": "Official website and source share the runtime repository; documentation is its readme fragment."
+          },
+          {
+            "file": "content/technologies/buildkit/index.mdx",
+            "lines": "4-6",
+            "note": "Website and source both point at moby/buildkit."
+          },
+          {
+            "file": "content/technologies/carvel/index.mdx",
+            "lines": "7-8",
+            "note": "Website and Documentation are both carvel.dev."
+          }
+        ],
+        "impact": "Two labels promise distinct choices for one destination, adding focus stops and hero density without added utility.",
+        "recommendation": "Deduplicate exact URLs with an honest combined label; preserve distinct fragments and real documentation destinations. New-window links should communicate that behavior.",
+        "proofBoundary": "URL equality only; destinations were not fetched."
+      },
+      {
+        "id": "TECH-SN06",
+        "classification": "non-blocking",
+        "priority": "P3",
+        "category": "genuine-artwork",
+        "routes": [
+          "/technology/acorn",
+          "/technology/cartography"
+        ],
+        "title": "Usable non-icon project artwork is ignored",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/utils/resolve-technology-icon.ts",
+            "lines": "43-61",
+            "note": "Icon resolver returns undefined without logos.icon, while a separate horizontal resolver exists."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "21,484-487",
+            "note": "Profile uses icon resolver only."
+          },
+          {
+            "file": "content/technologies/acorn/index.mdx",
+            "lines": "3-4",
+            "note": "Horizontal logo declared and local horizontal.svg exists."
+          },
+          {
+            "file": "content/technologies/cartography/index.mdx",
+            "lines": "3-5",
+            "note": "Horizontal/stacked assets declared and present; no icon."
+          }
+        ],
+        "impact": "Identity is still honestly represented by full title, but two profiles omit available genuine artwork. Four other no-icon profiles have no local logo assets at all and should not receive invented artwork.",
+        "recommendation": "Optionally support aspect-ratio-preserving horizontal artwork; retain text-only fallback where no real asset exists.",
+        "proofBoundary": "Filesystem availability only. No SVG rendering, loading or light/dark contrast check."
+      },
+      {
+        "id": "TECH-SN07",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "archive-context",
+        "routes": [
+          "/technology/acorn",
+          "/technology/akri",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/artifacthub",
+          "/technology/atlantis",
+          "/technology/backstage",
+          "/technology/bootc",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/capsule",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager"
+        ],
+        "title": "Latest videos omit publication dates and subject relevance/context",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "525-539,589-600",
+            "note": "Video links display thumbnail and title only."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/utils/get-videos-for-technology.ts",
+            "lines": "32-40",
+            "note": "publishedAt and duration are available but not used in the profile."
+          },
+          {
+            "file": "content/videos/shows/rawkode-live/2020/introduction-to-carvel.md",
+            "lines": "1-25",
+            "note": "Carvel linked recording is dated 2020."
+          },
+          {
+            "file": "content/videos/shows/rawkode-live/2022/hands-on-introduction-to-acorn.md",
+            "lines": "1-25",
+            "note": "Acorn tutorial predates the abandonment statement."
+          }
+        ],
+        "impact": "Historical tutorials lack age context, particularly sensitive beside abandoned Acorn. Argo has eight tagged videos, with top titles covering other tools/platform topics; matching a technology tag does not establish that every clip is a dedicated tutorial. Argo and BuildKit split 8/6 videos into 4 aside plus 4/2 below.",
+        "recommendation": "Preserve every useful recording and destination; show date and distinguish tagged/related recordings from dedicated tutorials. Do not infer live-now from stored type=live. Evaluate the long sidebar only when Browser is available.",
+        "proofBoundary": "Content dates/title/tag association inspected, not playback or visual density. Distinct Docker Build Cloud assets were checked and are not incorrectly flagged as duplicates."
+      },
+      {
+        "id": "TECH-SN08",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "latent-publication-policy",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Technology video selector has no publication-time boundary",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/utils/get-videos-for-technology.ts",
+            "lines": "20-29",
+            "note": "Matches technology references and sorts newest first, with no publishedAt check."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/pages/watch/[...slug].astro",
+            "lines": "126-129",
+            "note": "Watch related selection does enforce publishedAt <= now."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/components/technology/TopicHub.astro",
+            "lines": "45-71",
+            "note": "Article/news/path matching similarly does not check future dates."
+          }
+        ],
+        "impact": "Future non-live content could lead the Latest videos rail without an upcoming state. Current first-30 matched content contains no future dates at the supplied 17:28 checkpoint, so this is a latent template issue, not a demonstrated current leak.",
+        "recommendation": "Reuse the established published-video policy, or explicitly represent scheduled live sessions. Keep hasTopicContent and TopicHub predicates aligned if editorial publication policy changes.",
+        "proofBoundary": "Source collection scan cutoff 2026-09-20T16:28:00Z; no build or getCollection runtime executed."
+      },
+      {
+        "id": "TECH-SN09",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "newsletter-labels-and-loading",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Expanded newsletter has no visible label and incomplete pending-state semantics",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+            "lines": "255-268,270-300",
+            "note": "Expand button has no expanded/controls relationship; email label is sr-only; submit accessible name stays Submit email subscription during pending while title/spinner change."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+            "lines": "182-190,223-230",
+            "note": "Expansion does focus the input and errors use role=alert."
+          },
+          {
+            "file": "packages/design-system/src/recipes/academyMarketing.ts",
+            "lines": "276-350",
+            "note": "Focus styles exist; submit is 36px within a larger input, not a missing-style assertion."
+          }
+        ],
+        "impact": "Placeholder substitutes for the design-required visible field label. Loading feedback differs between signed-in text button and anonymous icon button. Keyboard state transitions require explicit verification.",
+        "recommendation": "Keep native form/input, persistent visible label and unique IDs; expose expansion/pending state and preserve confirmation focus. Do not introduce a modal/focus trap for this inline form.",
+        "proofBoundary": "Markup/recipe review only; no keyboard, screen-reader or target-size measurement."
+      },
+      {
+        "id": "TECH-SN10",
+        "classification": "non-blocking",
+        "priority": "P2",
+        "category": "newsletter-unavailable-state",
+        "routes": [
+          "/technology/acorn",
+          "/technology/aerakimesh",
+          "/technology/agentgateway",
+          "/technology/agentregistry",
+          "/technology/akri",
+          "/technology/antrea",
+          "/technology/apko",
+          "/technology/aquaproj",
+          "/technology/argo",
+          "/technology/armada",
+          "/technology/artifacthub",
+          "/technology/athenz",
+          "/technology/atlantis",
+          "/technology/aws-lambda",
+          "/technology/backstage",
+          "/technology/bank-vaults",
+          "/technology/bfe",
+          "/technology/bootc",
+          "/technology/bpfman",
+          "/technology/buildkit",
+          "/technology/buildpacks",
+          "/technology/cadence",
+          "/technology/capsule",
+          "/technology/carina",
+          "/technology/cartography",
+          "/technology/carvel",
+          "/technology/cdk8s",
+          "/technology/cert-manager",
+          "/technology/chaosblade",
+          "/technology/chaosmesh"
+        ],
+        "title": "Preference lookup failure and deferred/hydration failure lack an honest unavailable state",
+        "evidence": [
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterCTA.astro",
+            "lines": "28-41,77-83",
+            "note": "Preference error leaves isSubscribed=false; controls use client:visible."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+            "lines": "627-630",
+            "note": "Deferred server island has no explicit fallback slot."
+          },
+          {
+            "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+            "lines": "255-268",
+            "note": "Anonymous initial action is JS-only expansion; no native fallback form is present."
+          }
+        ],
+        "impact": "A preference outage presents the normal Subscribe state even when subscription is unknown. With unavailable island/hydration, the user has no explicit retry/unavailable explanation. A pre-existing anonymous cookie can hide the island while its outer labelled section remains.",
+        "recommendation": "Represent unknown/error separately from unsubscribed; define meaningful deferred/no-JS or hydration-failure behavior. Suppress the complete section when intentionally hidden rather than leave a named empty landmark.",
+        "proofBoundary": "Failure branches are source-derived; no outage or no-JS browser state exercised. Normal preference length check is valid because unsubscribe deletes its row."
+      }
+    ],
+    "sectionDispositions": [
+      {
+        "id": "shared-shell",
+        "disposition": "keep-contract",
+        "rationale": "Page wrapper delegates header/footer and supplies focusable main with skip link. Shared shell internals were not re-audited; no rendered/footer coverage claimed."
+      },
+      {
+        "id": "breadcrumb-identity",
+        "disposition": "keep",
+        "rationale": "Native breadcrumb nav/ordered list, current-page text and full h1. Optional real logo has empty alt beside title and hides on error; no invented identity.",
+        "exceptions": [
+          "TECH-SN06"
+        ]
+      },
+      {
+        "id": "description-metadata",
+        "disposition": "rework-selectively",
+        "rationale": "Keep semantic dl and explicit authored status/license. Most profiles need no duplicate lead when body opens with a definition; raw imported useCase needs cleanup. No missing/defaulted statuses in this batch.",
+        "exceptions": [
+          "TECH-SN03",
+          "TECH-SN04"
+        ]
+      },
+      {
+        "id": "official-links",
+        "disposition": "keep-and-deduplicate",
+        "rationale": "Real descriptive anchor destinations with noopener/noreferrer, no '#' placeholder controls. Remove exact duplicate choices and disclose new-window behavior.",
+        "exceptions": [
+          "TECH-SN05"
+        ]
+      },
+      {
+        "id": "profile-body-overview-empty",
+        "disposition": "keep",
+        "rationale": "All 30 have 168–315 whitespace-counted words across three paragraphs; no body headings/embedded media. Plain SSR article avoids complete-guide claims. Honest overview fallback exists but no concrete batch route exercises it."
+      },
+      {
+        "id": "latest-and-more-videos",
+        "disposition": "rework-context-preserve-content",
+        "rationale": "15 profiles have 35 video appearances; first four plus remainder preserves all. Titles remain linked if thumbnail fails. No image-error replacement for video thumbnails is provided; runtime failure appearance pending.",
+        "exceptions": [
+          "TECH-SN07",
+          "TECH-SN08"
+        ]
+      },
+      {
+        "id": "matrix",
+        "disposition": "compact",
+        "rationale": "29 personal ratings, zero authored explanation/confidence/usage dates. Avoid full opinion section for a one-word rating; retain the rating itself.",
+        "exceptions": [
+          "TECH-SN03"
+        ]
+      },
+      {
+        "id": "cncf-community",
+        "disposition": "keep",
+        "rationale": "22 CNCF panels and 17 community sets are grounded in metadata; conditional dates/links prevent empty sections. External destinations are not verified live. No need to expose every imported tag/persona/release-cadence field."
+      },
+      {
+        "id": "topic-hub",
+        "disposition": "keep-conditional",
+        "rationale": "Matching article for apko, news for Backstage/cert-manager; none of the 30 match learning paths. Shared string/object-reference normalization and showVideos=false avoid contradictory empty hubs and duplicate video rails.",
+        "exceptions": [
+          "TECH-SN08"
+        ]
+      },
+      {
+        "id": "related-technologies",
+        "disposition": "rework-selection-context",
+        "rationale": "Keep genuine links/identity, but fix cross-category generic-subcategory matching and make historical lifecycle visible rather than imply curated current alternatives.",
+        "exceptions": [
+          "TECH-SN02"
+        ]
+      },
+      {
+        "id": "newsletter",
+        "disposition": "rework",
+        "rationale": "The audience-specific action is real preference storage, not a decorative button. Confirmation is source-broken for anonymous success; wording/labels/loading/unavailable branches need attention.",
+        "exceptions": [
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN09",
+          "TECH-SN10"
+        ]
+      },
+      {
+        "id": "head-rss-structured-data",
+        "disposition": "rework-software-claims",
+        "rationale": "Keep canonical breadcrumb/RSS discovery and article metadata. Remove unsupported software creator/publisher, offer and platform claims; no need to discard useful SEO structure.",
+        "exceptions": [
+          "TECH-SB01"
+        ]
+      }
+    ],
+    "stateReview": [
+      {
+        "state": "initial-SSR-body",
+        "result": "Source retains all 30 MDX bodies, semantic heading and ordinary links; actual compiled HTML not inspected."
+      },
+      {
+        "state": "absent-artwork",
+        "result": "Six no-icon profiles omit img; four have no local artwork, two have horizontal/stacked assets. No fake Academy/initial-tile identity."
+      },
+      {
+        "state": "failed-logo-request",
+        "result": "Inline onerror sets hidden; recipe explicitly hides img[hidden]. JS-disabled image failure and emitted CSP behavior not exercised."
+      },
+      {
+        "state": "absent-profile-body",
+        "result": "Honest Overview fallback defined; none of first 30 exercises it."
+      },
+      {
+        "state": "empty-resources",
+        "result": "Conditionally omit video/CNCF/community/hub blocks. All 30 have article prose; no generic empty-content message needed. TopicHub reference guard matches source object/string shapes."
+      },
+      {
+        "state": "anonymous-unsubscribed",
+        "result": "Deferred widget starts with JS-driven Subscribe, expands and focuses labelled email input. Label is visually hidden; no fallback without island/hydration."
+      },
+      {
+        "state": "anonymous-success",
+        "result": "TECH-SB02 confirmed by state predicates: cookie flag hides success subtree."
+      },
+      {
+        "state": "anonymous-cookie-existing",
+        "result": "Server/client suppression exists. Outer technology updates section is unconditional and may remain empty."
+      },
+      {
+        "state": "signed-in-subscribed",
+        "result": "Preference row yields Subscribed; service deletes rows on unsubscribe, so prefs.length>0 is not falsely classified as a status-filter bug."
+      },
+      {
+        "state": "signed-in-success-error-loading",
+        "result": "Success waits for action success, error uses alert, button disables during pending. Replacing focused control lacks explicit focus handling; runtime announcements unverified."
+      },
+      {
+        "state": "preferences-unavailable",
+        "result": "Lookup error logs and leaves false rather than unknown. No unavailable state."
+      },
+      {
+        "state": "keyboard-and-focus",
+        "result": "Native anchors/forms, breadcrumb/current-page, focus recipes and shell skip target exist. No modal controls here. Actual tab order/focus visibility/AT behavior not exercised."
+      },
+      {
+        "state": "mobile-dark",
+        "result": "Recipes contain responsive semantic-token branches; neither mode rendered. No viewport/theme verified or changed."
+      }
+    ],
+    "routes": [
+      {
+        "inventoryOrdinal": 1,
+        "route": "/technology/acorn",
+        "url": "http://127.0.0.1:4322/technology/acorn",
+        "source": "content/technologies/acorn/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "abandoned",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "graveyard"
+          },
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "horizontal": true
+            },
+            "localFiles": {
+              "icon": false,
+              "horizontal": true,
+              "stacked": false
+            },
+            "sourceBehavior": "full-title-no-icon"
+          },
+          "bodyWordCount": 175,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://github.com/acorn-io/runtime",
+            "https://github.com/acorn-io/runtime#readme",
+            "https://github.com/acorn-io/runtime"
+          ],
+          "communityLinks": {},
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/hands-on-introduction-to-acorn",
+              "publishedAt": "2022-08-25T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2022/hands-on-introduction-to-acorn.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN05",
+          "TECH-SN06",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep explicit abandoned status, migration warning and historical 2022 recording. Rework signup wording, date the recording, and deduplicate repository actions; horizontal-only real artwork is optional.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 2,
+        "route": "/technology/aerakimesh",
+        "url": "http://127.0.0.1:4322/technology/aerakimesh",
+        "source": "content/technologies/aerakimesh/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 168,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://www.aeraki.net/",
+            "https://github.com/aeraki-mesh/aeraki"
+          ],
+          "communityLinks": {
+            "slack": "https://cloud-native.slack.com/messages/aeraki-mesh",
+            "blog": "https://www.aeraki.net/blog/"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep the three-paragraph explanation and genuine icon. Compact unexplained Skip assessment; preserve CNCF and actual Slack/blog links without asserting current service availability.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 3,
+        "route": "/technology/agentgateway",
+        "url": "http://127.0.0.1:4322/technology/agentgateway",
+        "source": "content/technologies/agentgateway/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "beta",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "watch",
+            "trajectory": "rising"
+          },
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": null,
+            "localFiles": {
+              "icon": false,
+              "horizontal": false,
+              "stacked": false
+            },
+            "sourceBehavior": "full-title-no-icon"
+          },
+          "bodyWordCount": 170,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://agentgateway.dev/",
+            "https://agentgateway.dev/docs/",
+            "https://github.com/agentgateway/agentgateway"
+          ],
+          "communityLinks": {},
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep explicit beta status and Rust/MCP/A2A overview. Text-only identity is honest; watch/rising is a personal assessment, not an adoption guarantee.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 4,
+        "route": "/technology/agentregistry",
+        "url": "http://127.0.0.1:4322/technology/agentregistry",
+        "source": "content/technologies/agentregistry/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "alpha",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "watch",
+            "trajectory": "rising"
+          },
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": null,
+            "localFiles": {
+              "icon": false,
+              "horizontal": false,
+              "stacked": false
+            },
+            "sourceBehavior": "full-title-no-icon"
+          },
+          "bodyWordCount": 171,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://agentregistry.dev/",
+            "https://github.com/agentregistry-dev/agentregistry"
+          ],
+          "communityLinks": {},
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep alpha status, text-only identity and registry explanation. Body describes a CNCF application, so absence of a CNCF membership panel must not be replaced with inferred membership.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 5,
+        "route": "/technology/akri",
+        "url": "http://127.0.0.1:4322/technology/akri",
+        "source": "content/technologies/akri/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 201,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://docs.akri.sh",
+            "https://github.com/project-akri/akri"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/ProjectAkri",
+            "slack": "https://kubernetes.slack.com/messages/C01D9L7QE8Z",
+            "blog": "https://medium.com/akri"
+          },
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/server-side-webassembly",
+              "publishedAt": "2023-05-08T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2023/server-side-webassembly.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep stable metadata as authored and the body’s slowed-development caveat. Related WebAssembly recording is tagged content, not necessarily a dedicated Akri tutorial; show date/context.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 6,
+        "route": "/technology/antrea",
+        "url": "http://127.0.0.1:4322/technology/antrea",
+        "source": "content/technologies/antrea/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 188,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://antrea.io/",
+            "https://github.com/antrea-io/antrea"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/projectantrea"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep OVS/CNI explanation and project identity. Compact personal Skip assessment; do not mistake stable/sandbox/Skip as three contradictory lifecycle values.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 7,
+        "route": "/technology/apko",
+        "url": "http://127.0.0.1:4322/technology/apko",
+        "source": "content/technologies/apko/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "learn"
+          },
+          "cncf": null,
+          "heroDescription": "apko builds minimal, distroless OCI images from apk packages. Reproducible, SBOM-attested, no shell. When to choose apko over a Dockerfile.",
+          "artwork": {
+            "flags": null,
+            "localFiles": {
+              "icon": false,
+              "horizontal": false,
+              "stacked": false
+            },
+            "sourceBehavior": "full-title-no-icon"
+          },
+          "bodyWordCount": 206,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://apko.dev/",
+            "https://apko.dev/docs/",
+            "https://github.com/chainguard-dev/apko"
+          ],
+          "communityLinks": {},
+          "videoCount": 1,
+          "articleCount": 1,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": true,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/introducing-apko-and-melange",
+              "publishedAt": "2022-03-17T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2022/introducing-apko-and-melange.md"
+            }
+          ],
+          "articles": [
+            "/read/apko-melange-tutorial"
+          ],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep real SEO-derived intro, single recording and apko-melange article. Text-only identity is appropriate. Lifecycle context is needed for abandoned Acorn if it appears in the taxonomy sibling rail.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 8,
+        "route": "/technology/aquaproj",
+        "url": "http://127.0.0.1:4322/technology/aquaproj",
+        "source": "content/technologies/aquaproj/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 210,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://aquaproj.github.io/",
+            "https://aquaproj.github.io/docs/"
+          ],
+          "communityLinks": {},
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/aquaproj-and-dagger",
+              "publishedAt": "2023-08-17T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/standalone/2023/aquaproj-and-dagger.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep genuine logo and Aqua explanation under authored aquaproj name. Retain Dagger recording and date/context; no need to invent an article/resource empty state.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 9,
+        "route": "/technology/argo",
+        "url": "http://127.0.0.1:4322/technology/argo",
+        "source": "content/technologies/argo/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "grouping": "platform",
+            "status": "adopt"
+          },
+          "cncf": "graduated",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 210,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://argoproj.github.io/",
+            "https://github.com/argoproj/argo-cd"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/argoproj",
+            "youtube": "https://www.youtube.com/channel/UCOvYmppcbOPm1viN6ust3lA",
+            "slack": "https://argoproj.github.io/community/join-slack",
+            "blog": "https://blog.argoproj.io/"
+          },
+          "videoCount": 8,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": true,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/hands-on-introduction-to-yoke",
+              "publishedAt": "2026-06-03T00:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2026/hands-on-introduction-to-yoke.md"
+            },
+            {
+              "path": "/watch/platform-engineering-asking-why",
+              "publishedAt": "2025-10-10T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2025/platform-engineering-asking-why.md"
+            },
+            {
+              "path": "/watch/hands-on-with-headlamp-the-kubernetes-ui",
+              "publishedAt": "2025-10-08T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2025/hands-on-with-headlamp-the-kubernetes-ui.md"
+            },
+            {
+              "path": "/watch/simplifying-kubernetes-adoption-challenges",
+              "publishedAt": "2025-03-13T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2025/simplifying-kubernetes-adoption-challenges.md"
+            },
+            {
+              "path": "/watch/hands-on-tutorial-of-project-sveltos",
+              "publishedAt": "2023-08-05T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2023/hands-on-tutorial-of-project-sveltos.md"
+            },
+            {
+              "path": "/watch/migrating-to-kubernetes",
+              "publishedAt": "2023-05-22T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2023/migrating-to-kubernetes.md"
+            },
+            {
+              "path": "/watch/hands-on-with-litmus-2-0",
+              "publishedAt": "2021-07-28T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/hands-on-with-litmus-2-0.md"
+            },
+            {
+              "path": "/watch/introduction-to-litmus-chaos",
+              "publishedAt": "2021-03-03T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/introduction-to-litmus-chaos.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep all eight recordings and four-project explanation. Consider dated related-video wording: newest titles are Yoke, platform engineering and Headlamp. Preserve 4+4 coverage but verify sidebar density later.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 10,
+        "route": "/technology/armada",
+        "url": "http://127.0.0.1:4322/technology/armada",
+        "source": "content/technologies/armada/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 194,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://armadaproject.io/",
+            "https://github.com/armadaproject/armada"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/oss_gr",
+            "slack": "http://slack.cncf.io/"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep batch-scheduling explanation and CNCF facts. Slack destination uses HTTP; record for owner verification rather than claim it broken or silently alter metadata.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 11,
+        "route": "/technology/artifacthub",
+        "url": "http://127.0.0.1:4322/technology/artifacthub",
+        "source": "content/technologies/artifacthub/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "incubating",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 192,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://artifacthub.io",
+            "https://github.com/artifacthub/hub"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/cncfartifacthub"
+          },
+          "videoCount": 4,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/hands-on-with-headlamp-the-kubernetes-ui",
+              "publishedAt": "2025-10-08T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2025/hands-on-with-headlamp-the-kubernetes-ui.md"
+            },
+            {
+              "path": "/watch/22-leigh-capili-vs-marcus-noble",
+              "publishedAt": "2022-04-08T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/klustered/2022/22-leigh-capili-vs-marcus-noble.md"
+            },
+            {
+              "path": "/watch/workshop-deploying-teleport-on-kubernetes",
+              "publishedAt": "2022-01-19T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/standalone/2022/workshop-deploying-teleport-on-kubernetes.md"
+            },
+            {
+              "path": "/watch/laravel-on-kubernetes-into-production",
+              "publishedAt": "2021-01-23T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/laravel-on-kubernetes-into-production.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep discovery-index explanation and four tagged recordings. Project-source link is real; lack of dedicated Artifact Hub titles calls for context rather than content removal.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 12,
+        "route": "/technology/athenz",
+        "url": "http://127.0.0.1:4322/technology/athenz",
+        "source": "content/technologies/athenz/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 205,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://www.athenz.io",
+            "https://github.com/AthenZ/athenz"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/athenzio",
+            "slack": "https://athenz.slack.com/"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep service identity/authorization explanation and genuine icon. Preserve community links; collapse unexplained Skip into concise personal metadata.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 13,
+        "route": "/technology/atlantis",
+        "url": "http://127.0.0.1:4322/technology/atlantis",
+        "source": "content/technologies/atlantis/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 205,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://www.runatlantis.io/",
+            "https://github.com/runatlantis/atlantis"
+          ],
+          "communityLinks": {},
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/atlantis-the-terraform-automation-powerhouse",
+              "publishedAt": "2025-04-03T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2025/atlantis-the-terraform-automation-powerhouse.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep Terraform automation explanation and the 2025 dedicated recording. Metadata can be compact; no absent community block should be synthesized.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 14,
+        "route": "/technology/aws-lambda",
+        "url": "http://127.0.0.1:4322/technology/aws-lambda",
+        "source": "content/technologies/aws-lambda/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": null,
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": false,
+              "stacked": false
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 315,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://aws.amazon.com/lambda/",
+            "https://docs.aws.amazon.com/lambda/"
+          ],
+          "communityLinks": {},
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": false,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep single-column 315-word body and Commercial license. Blocking software JSON-LD invents a free Academy-created offer; subcategory-only matching pulls Xdebug from a different parent category.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 15,
+        "route": "/technology/backstage",
+        "url": "http://127.0.0.1:4322/technology/backstage",
+        "source": "content/technologies/backstage/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "watch"
+          },
+          "cncf": "incubating",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 226,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://backstage.io/",
+            "https://github.com/backstage/backstage"
+          ],
+          "communityLinks": {
+            "discord": "https://discord.gg/backstage-687207715902193673",
+            "blog": "https://backstage.io/blog"
+          },
+          "videoCount": 4,
+          "articleCount": 0,
+          "newsCount": 1,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": true,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/platform-engineering-asking-why",
+              "publishedAt": "2025-10-10T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2025/platform-engineering-asking-why.md"
+            },
+            {
+              "path": "/watch/hands-on-with-headlamp-the-kubernetes-ui",
+              "publishedAt": "2025-10-08T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2025/hands-on-with-headlamp-the-kubernetes-ui.md"
+            },
+            {
+              "path": "/watch/cloud-containers-and-kubernetes",
+              "publishedAt": "2023-05-21T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2023/cloud-containers-and-kubernetes.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-kpt",
+              "publishedAt": "2022-07-15T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2022/hands-on-introduction-to-kpt.md"
+            }
+          ],
+          "articles": [],
+          "news": [
+            "/news/backstage-1-51-catalog-perf-ms-graph-incremental"
+          ],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep IDP explanation, four related recordings and the actual news story. Avoid rating-only heading bloat and show dates/relevance on tagged recordings.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 16,
+        "route": "/technology/bank-vaults",
+        "url": "http://127.0.0.1:4322/technology/bank-vaults",
+        "source": "content/technologies/bank-vaults/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 224,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://bank-vaults.dev/",
+            "https://github.com/bank-vaults/bank-vaults"
+          ],
+          "communityLinks": {},
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep genuine identity and Vault/operator explanation. CNCF facts justify a modest aside; no articles/videos/community empty placeholders are required.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 17,
+        "route": "/technology/bfe",
+        "url": "http://127.0.0.1:4322/technology/bfe",
+        "source": "content/technologies/bfe/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 190,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://www.bfe-networks.net",
+            "https://github.com/bfenetworks/bfe"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/BfeNetworks"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep real logo and proxy explanation. Sidebar’s Skip is subjective and unexplained; preserve source/devstats/Twitter links with no live-validity claim.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 18,
+        "route": "/technology/bootc",
+        "url": "http://127.0.0.1:4322/technology/bootc",
+        "source": "content/technologies/bootc/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "watch"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 197,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://bootc.dev/",
+            "https://bootc.dev/bootc/",
+            "https://github.com/bootc-dev/bootc"
+          ],
+          "communityLinks": {},
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/navigating-kairos-immutable-operating-systems-with-a-cloud-native-twist",
+              "publishedAt": "2025-12-18T10:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2025/navigating-kairos-immutable-operating-systems-with-a-cloud-native-twist.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep bootc’s authored operating-system explanation and real logo. The Kairos recording is related context rather than necessarily a bootc lesson; date and describe accordingly.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 19,
+        "route": "/technology/bpfman",
+        "url": "http://127.0.0.1:4322/technology/bpfman",
+        "source": "content/technologies/bpfman/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "watch"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 233,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://bpfman.io/",
+            "https://github.com/bpfman/bpfman"
+          ],
+          "communityLinks": {
+            "slack": "https://kubernetes.slack.com/archives/C04UJBW2553",
+            "blog": "https://bpfman.io/main/blog/"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep actual eBPF loader/manager explanation, logo and community links. Watch is personal matrix status; it must not imply beta lifecycle.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 20,
+        "route": "/technology/buildkit",
+        "url": "http://127.0.0.1:4322/technology/buildkit",
+        "source": "content/technologies/buildkit/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "learn"
+          },
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": null,
+            "localFiles": {
+              "icon": false,
+              "horizontal": false,
+              "stacked": false
+            },
+            "sourceBehavior": "full-title-no-icon"
+          },
+          "bodyWordCount": 215,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://github.com/moby/buildkit",
+            "https://docs.docker.com/build/buildkit/",
+            "https://github.com/moby/buildkit"
+          ],
+          "communityLinks": {},
+          "videoCount": 6,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": true,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/docker-build-cloud",
+              "publishedAt": "2024-03-06T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2024/docker-build-cloud.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-docker-build-cloud",
+              "publishedAt": "2024-03-06T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2024/hands-on-introduction-to-docker-build-cloud.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-namespace",
+              "publishedAt": "2022-12-01T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2022/hands-on-introduction-to-namespace.md"
+            },
+            {
+              "path": "/watch/hands-on-with-buildkit-and-buildx",
+              "publishedAt": "2021-08-25T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/hands-on-with-buildkit-and-buildx.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-dagger",
+              "publishedAt": "2021-06-29T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/hands-on-introduction-to-dagger.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-okteto",
+              "publishedAt": "2021-05-19T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/hands-on-introduction-to-okteto.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN05",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep all six distinct recordings; the two 2024 Docker Build Cloud entries have different asset IDs and chapters, so do not dedupe by date/title similarity. Remove only duplicate hero URL actions.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 21,
+        "route": "/technology/buildpacks",
+        "url": "http://127.0.0.1:4322/technology/buildpacks",
+        "source": "content/technologies/buildpacks/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "explore"
+          },
+          "cncf": "incubating",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 229,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://buildpacks.io/",
+            "https://github.com/buildpacks/pack"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/buildpacks_io",
+            "slack": "https://slack.cncf.io/"
+          },
+          "videoCount": 3,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/cloud-native-buildpacks",
+              "publishedAt": "2025-07-02T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2025/cloud-native-buildpacks.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-gitops-with-gimlet",
+              "publishedAt": "2023-08-26T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2023/hands-on-introduction-to-gitops-with-gimlet.md"
+            },
+            {
+              "path": "/watch/hands-on-introduction-to-skaffold",
+              "publishedAt": "2021-04-28T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/hands-on-introduction-to-skaffold.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep buildpack overview and three recordings. Explore is personal preference; preserve genuine CNCF/community resources without inflated rating presentation.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 22,
+        "route": "/technology/cadence",
+        "url": "http://127.0.0.1:4322/technology/cadence",
+        "source": "content/technologies/cadence/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "graveyard"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 238,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://cadenceworkflow.io/",
+            "https://github.com/cadence-workflow/cadence"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/CloudNativeFdn"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep stable project status and personal graveyard separately. Do not relabel project abandoned; prose explicitly says it continues. Generic CNCF Twitter destination is not a dedicated Cadence account.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 23,
+        "route": "/technology/capsule",
+        "url": "http://127.0.0.1:4322/technology/capsule",
+        "source": "content/technologies/capsule/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": "Cluster Multi-Tenancy,Policy-based tenancy",
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 220,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://projectcapsule.dev/",
+            "https://github.com/projectcapsule/capsule"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/clastixio",
+            "slack": "https://kubernetes.slack.com/"
+          },
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/hands-on-introduction-to-kamaji",
+              "publishedAt": "2022-08-13T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2022/hands-on-introduction-to-kamaji.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN04",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep tenancy explanation and real icon. Rework comma-delimited useCase hero; retain related Kamaji video with date/context.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 24,
+        "route": "/technology/carina",
+        "url": "http://127.0.0.1:4322/technology/carina",
+        "source": "content/technologies/carina/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 212,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://carina-io.github.io/",
+            "https://github.com/carina-io/carina"
+          ],
+          "communityLinks": {},
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep local-storage explanation and authored activity caveat without new research. Slim unexplained Skip; no fake related resources are necessary.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 25,
+        "route": "/technology/cartography",
+        "url": "http://127.0.0.1:4322/technology/cartography",
+        "source": "content/technologies/cartography/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": false,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "full-title-no-icon"
+          },
+          "bodyWordCount": 218,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://cartography.dev",
+            "https://github.com/cartography-cncf/cartography"
+          ],
+          "communityLinks": {},
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN06",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep graph-query explanation and title-only identity; real horizontal/stacked artwork exists if an appropriate layout supports it. No invented square icon.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 26,
+        "route": "/technology/carvel",
+        "url": "http://127.0.0.1:4322/technology/carvel",
+        "source": "content/technologies/carvel/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 246,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://carvel.dev/",
+            "https://carvel.dev/"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/carvel_dev",
+            "slack": "https://kubernetes.slack.com/archives/CH8KCCKA5",
+            "blog": "https://carvel.dev/blog/"
+          },
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/introduction-to-carvel",
+              "publishedAt": "2020-09-30T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2020/introduction-to-carvel.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN05",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep CLI-suite overview and 2020 recording with historical date context. Deduplicate website/documentation actions sharing exactly the same URL.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 27,
+        "route": "/technology/cdk8s",
+        "url": "http://127.0.0.1:4322/technology/cdk8s",
+        "source": "content/technologies/cdk8s/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "learn"
+          },
+          "cncf": null,
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 228,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://cdk8s.io/",
+            "https://cdk8s.io/docs/"
+          ],
+          "communityLinks": {},
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": false,
+          "community": false,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/hands-on-introduction-to-cdk8s",
+              "publishedAt": "2021-04-01T17:00:00.000Z",
+              "recordingType": "live",
+              "source": "content/videos/shows/rawkode-live/2021/hands-on-introduction-to-cdk8s.md"
+            }
+          ],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep code-to-YAML explanation and 2021 recording. Body mentions CNCF but frontmatter has no CNCF object; do not invent membership metadata. Preserve plain authored body.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 28,
+        "route": "/technology/cert-manager",
+        "url": "http://127.0.0.1:4322/technology/cert-manager",
+        "source": "content/technologies/cert-manager/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "grouping": "security",
+            "status": "adopt"
+          },
+          "cncf": "graduated",
+          "heroDescription": "cert-manager\\_is a powerful and extensible X.509 certificate controller for Kubernetes and OpenShift workloads. It will obtain certificates from a variety of Issuers, both popular public Issuers as well as private Issuers, and ensure the certificates are valid and up-to-date, and will attempt to renew certificates at a configured time before expiry.",
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": false,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 212,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://cert-manager.io/",
+            "https://github.com/cert-manager/cert-manager"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/CertManager",
+            "youtube": "https://www.youtube.com/@cert-manager",
+            "slack": "https://kubernetes.slack.com/messages/cert-manager"
+          },
+          "videoCount": 1,
+          "articleCount": 0,
+          "newsCount": 1,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": true,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": true,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [
+            {
+              "path": "/watch/simplifying-kubernetes-adoption-challenges",
+              "publishedAt": "2025-03-13T17:00:00.000Z",
+              "recordingType": "recorded",
+              "source": "content/videos/shows/cloud-native-compass/2025/simplifying-kubernetes-adoption-challenges.md"
+            }
+          ],
+          "articles": [],
+          "news": [
+            "/news/2026-06-09-nccl-opentelemetry-cert-manager"
+          ],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN04",
+          "TECH-SN07",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep certificate-controller explanation, real icon and genuine news/video resources. Raw useCase escape and duplicate long lead need presentation cleanup, not factual rewriting.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 29,
+        "route": "/technology/chaosblade",
+        "url": "http://127.0.0.1:4322/technology/chaosblade",
+        "source": "content/technologies/chaosblade/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "sandbox",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 204,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://chaosblade.io/",
+            "https://github.com/chaosblade-io/chaosblade"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/ChaosbladeI"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep failure-injection explanation and actual project assets/resources. No video/news/article blocks should appear when none match. Compact personal Skip.",
+        "allSectionsCoveredRendered": false
+      },
+      {
+        "inventoryOrdinal": 30,
+        "route": "/technology/chaosmesh",
+        "url": "http://127.0.0.1:4322/technology/chaosmesh",
+        "source": "content/technologies/chaosmesh/index.mdx",
+        "sourceReviewed": true,
+        "renderedReviewed": false,
+        "completePagePass": false,
+        "facts": {
+          "lifecycle": "stable",
+          "licenseExplicit": true,
+          "matrix": {
+            "status": "skip"
+          },
+          "cncf": "incubating",
+          "heroDescription": null,
+          "artwork": {
+            "flags": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "localFiles": {
+              "icon": true,
+              "horizontal": true,
+              "stacked": true
+            },
+            "sourceBehavior": "real-icon-with-title"
+          },
+          "bodyWordCount": 227,
+          "bodyHeadingCount": 0,
+          "metadataFactCount": 4,
+          "projectLinks": [
+            "https://chaos-mesh.org/",
+            "https://github.com/chaos-mesh/chaos-mesh"
+          ],
+          "communityLinks": {
+            "twitter": "https://twitter.com/chaos_mesh",
+            "youtube": "https://www.youtube.com/channel/UC4OwT4QTd0ML3YNnV1ybT6g",
+            "slack": "https://join.slack.com/t/cloud-native/shared_invite/zt-fyy3b8up-qHeDNVqbz1j8HDY6g1cY4w",
+            "blog": "https://chaos-mesh.org/blog/"
+          },
+          "videoCount": 0,
+          "articleCount": 0,
+          "newsCount": 0,
+          "learningPathCount": 0,
+          "futureMatches": 0
+        },
+        "sourceSectionBranches": {
+          "profileBody": true,
+          "overviewFallback": false,
+          "latestVideos": false,
+          "moreVideos": false,
+          "matrix": true,
+          "cncf": true,
+          "community": true,
+          "topicHub": false,
+          "newsletter": "unconditional outer section; deferred/cookie/auth branches conditional",
+          "related": "subcategory fallback; no explicit relationships in this profile"
+        },
+        "linkedContent": {
+          "videos": [],
+          "articles": [],
+          "news": [],
+          "learningPaths": []
+        },
+        "findingIds": [
+          "TECH-SB01",
+          "TECH-SB02",
+          "TECH-SN01",
+          "TECH-SN02",
+          "TECH-SN03",
+          "TECH-SN08",
+          "TECH-SN09",
+          "TECH-SN10"
+        ],
+        "disposition": "Keep chaos-engineering explanation, genuine logo and CNCF/community links. Invitation URL availability is unverified; no empty content rail or fabricated tutorial CTA.",
+        "allSectionsCoveredRendered": false
+      }
+    ],
+    "falsePositivesRejected": [
+      "All 30 have explicit lifecycle and license; no default-stable or Unknown-license invention demonstrated in this batch.",
+      "All 24 declared icons have local files. No missing declared-icon defect proven; lack of icon on six profiles is not a broken-image claim.",
+      "features/useCases/learningResources are not forwarded by the template, but none of these 30 declares them; no concrete resource-loss finding for this batch. Remaining 324 profiles are outside this audit.",
+      "Cadence stable/graveyard is lifecycle versus personal opinion, not a factual contradiction; Acorn abandoned/graveyard is consistent.",
+      "Empty TopicHub sections are guarded with the same normalized reference matching and showVideos=false; no guard regression identified from current source.",
+      "Historical type=live videos are not labelled live-now by this profile template. Preserve that restraint.",
+      "BuildKit's two Docker Build Cloud records have distinct IDs and chapters; matching dates are insufficient reason to delete one.",
+      "Three-paragraph 168–315-word profiles do not need a manufactured Complete Guide heading or table of contents.",
+      "Newsletter preference service removes unsubscribed rows; checking a returned row is not itself a false subscribed-state bug.",
+      "First-30 matching source content has no future-date case at checkpoint, so publication filtering is a latent template risk rather than an observed current leak."
+    ],
+    "limitations": [
+      "Source review does not satisfy the original whole-page desktop assignment. All 30 rendered reviews, mobile, dark, contrast, overflow, image decoding, keyboard and assistive-technology checks remain pending.",
+      "Shared header/footer internals were not independently audited in this source substitution; only their wrapper contract/skip target was checked.",
+      "Local build label/viewport/theme are supplied context, not browser-observed facts. Current source hashes are not proof of emitted bundle parity.",
+      "No live external destinations, redirect chains, publication facts, security-maintenance claims, newsletter delivery cadence or service mutations were verified.",
+      "Source collection enumeration approximates selection from content files, not executed Astro collection order/schema transformation. Related rail order was not asserted.",
+      "Only first 30 technology bodies were reviewed. Do not extrapolate these content-condition counts or findings absence to all 354 routes.",
+      "Existing top-level blocked/browser fields are preserved as the historical rendered-review record; this sourceFindings section supersedes pending source analysis only."
+    ],
+    "sourceSnapshots": [
+      {
+        "file": "content/technologies/acorn/index.mdx",
+        "sha256": "70a92bd29fcd9dcd9cfdfbe50ea08c2484017571834a61edd8ebbd2c7155c795"
+      },
+      {
+        "file": "content/technologies/aerakimesh/index.mdx",
+        "sha256": "501b025fa093a2a820149a248e0dcd9b07f512133a0e94ff1f06fe987014963f"
+      },
+      {
+        "file": "content/technologies/agentgateway/index.mdx",
+        "sha256": "54912e1c80c75a663c5907d12bbd4305118b39b013dcdc519c618c8e9f20dffb"
+      },
+      {
+        "file": "content/technologies/agentregistry/index.mdx",
+        "sha256": "e860cefb681348c4177bd1e5243aaf4d0549f64164822451bd3ba5aa8f56fcae"
+      },
+      {
+        "file": "content/technologies/akri/index.mdx",
+        "sha256": "4cf012d7f7ee8913e0436d830bc89309922d524e025ffdc0b2874d438f3037c0"
+      },
+      {
+        "file": "content/technologies/antrea/index.mdx",
+        "sha256": "e459be611d21e12b396fd3ab80b389424f7b378e60298d1df0000551c1701ff9"
+      },
+      {
+        "file": "content/technologies/apko/index.mdx",
+        "sha256": "e3577b6a0d9de8da281ee61f04f9a7806b6f13a22ab96f197e953ef2b24d98c9"
+      },
+      {
+        "file": "content/technologies/aquaproj/index.mdx",
+        "sha256": "6c1494a12d8fd1449d5c0d7ac0b335453b365a1d5db67fe7bd63054556266052"
+      },
+      {
+        "file": "content/technologies/argo/index.mdx",
+        "sha256": "c2cd234022b7fa4a429159bec7921d64241767c7918f3bd1359f5d7ef3a4e655"
+      },
+      {
+        "file": "content/technologies/armada/index.mdx",
+        "sha256": "5172f3266bb94f75d9162e0cb316e4518d4ab9e35056000977d3eec179240d5a"
+      },
+      {
+        "file": "content/technologies/artifacthub/index.mdx",
+        "sha256": "20cb5ac2c28f53b4932120a38690fdfea36998deedbe229144c77642c36bd0a2"
+      },
+      {
+        "file": "content/technologies/athenz/index.mdx",
+        "sha256": "a5c6b8b24cd63201ae9045047bc70248c8e8c6096b301dd5d370d8aa92ca1b8c"
+      },
+      {
+        "file": "content/technologies/atlantis/index.mdx",
+        "sha256": "babbd02aa9cca6d485d1ae41289455f2449a1acbbf8d2bb3413802c90b00f14a"
+      },
+      {
+        "file": "content/technologies/aws-lambda/index.mdx",
+        "sha256": "d382e25106b19d8b44064859fb49744437f10786754ee72c04af53e711b617ee"
+      },
+      {
+        "file": "content/technologies/backstage/index.mdx",
+        "sha256": "af15428ce9a3574d97847b98a577552cb9bc3b33463faecc5f0da9dfb492f2a5"
+      },
+      {
+        "file": "content/technologies/bank-vaults/index.mdx",
+        "sha256": "3005b9c8debdf67ade0275b01dc51700b1e95e3b8656b6d7633e9229eed5212c"
+      },
+      {
+        "file": "content/technologies/bfe/index.mdx",
+        "sha256": "1fdfd82f71cc07d01db2a0331a381672c98e31fc879c6da14b17b621a4cb417b"
+      },
+      {
+        "file": "content/technologies/bootc/index.mdx",
+        "sha256": "e1343754d90b8d027bb1da7e5bb993f5ddef41c22d4c3a5bb42299d89732044a"
+      },
+      {
+        "file": "content/technologies/bpfman/index.mdx",
+        "sha256": "44397b7ae3b2dea06ce627aac2d36e98a1234147ab9d7c9adf255be9374d1d37"
+      },
+      {
+        "file": "content/technologies/buildkit/index.mdx",
+        "sha256": "bfd9af3a8786b8823056b08ec294ec775ab5bc2c2c3bf46719da96aaf4bf3b18"
+      },
+      {
+        "file": "content/technologies/buildpacks/index.mdx",
+        "sha256": "2892f1c86232f49234724ad3e14cc9f33f9454d079a3d6d99fcc30639deca944"
+      },
+      {
+        "file": "content/technologies/cadence/index.mdx",
+        "sha256": "74c592a552a3b3394eb7c87279097c13547f2f93071ef5808ba4f713d3d7b8e0"
+      },
+      {
+        "file": "content/technologies/capsule/index.mdx",
+        "sha256": "b5b0412b909ce3ef349bb09a9f1fd0a4424e34e6eeb193b50ce2fe1edefba066"
+      },
+      {
+        "file": "content/technologies/carina/index.mdx",
+        "sha256": "1bb83415b9804e3e5cecd34103491b5445e41ccd4129d49a4f0cfc675662bdfc"
+      },
+      {
+        "file": "content/technologies/cartography/index.mdx",
+        "sha256": "58e15be329151f24718daaae2b87d095e7a808bc66009dd4754f268bf8f93cf9"
+      },
+      {
+        "file": "content/technologies/carvel/index.mdx",
+        "sha256": "8ac5e221323e462257f4994c4412d85cd76e2371a6b65d8786de65aa855b65fb"
+      },
+      {
+        "file": "content/technologies/cdk8s/index.mdx",
+        "sha256": "a9dc7b403ec5ef27f0688cd428345e10f7a17648011d0f0cf2b1ffef9681c7c3"
+      },
+      {
+        "file": "content/technologies/cert-manager/index.mdx",
+        "sha256": "322d08180c828cdeb1ba580ef96d20fff41f7eda1122235669a0311ae908e1c5"
+      },
+      {
+        "file": "content/technologies/chaosblade/index.mdx",
+        "sha256": "97734abf41a7f3963a5f422e909cc8eab16e9bfffa1099914aaf2b6cb8f99daf"
+      },
+      {
+        "file": "content/technologies/chaosmesh/index.mdx",
+        "sha256": "ab17b7610a53294725abbbdd874578b0808f08442e8387bd792624dab4c8ddc1"
+      },
+      {
+        "file": "content/src/technologies.ts",
+        "sha256": "97c96dafb0cf09e8b3853fb3e1ff5db69ada3e7fb4049b46dbe57aa4bb4c7e74"
+      },
+      {
+        "file": "content/src/dimensions.ts",
+        "sha256": "53b4f0cd9cf0d35d9676c15f670ae582cfa66dc837c52764ab43432de8995582"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/pages/technology/[id].astro",
+        "sha256": "ca884fdb61350284b57a2b06a1343078d1849b453749e7fd9d2f2081fdea082b"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterCTA.astro",
+        "sha256": "ed628d8042725485748d0597a25ecc30112b5eeecab2239020060997cdf7cc75"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/components/newsletter/NewsletterWidget.vue",
+        "sha256": "a5fb0f27e1466c690e2cd4a4d3985e2348706c8982563dfd4468dcab1e448c10"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/components/html/technology-jsonld.astro",
+        "sha256": "a7a54dd89aeeec800930238894fac9a0ccbe655e613a1edfa72cc20a9b70f880"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/components/html/technology-article-jsonld.astro",
+        "sha256": "734c5685655fd85c457b9e421ea69d74662e18e26a8734f39897b741e9fade48"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/components/technology/TopicHub.astro",
+        "sha256": "891e865c74f16462245a1708d7c82451d95659c560a2bafce3f6b856f1223b11"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/utils/get-videos-for-technology.ts",
+        "sha256": "d793bc5508a5b6a0241c4fce4b99caf72db11cbecc0ae2948d08e5aba7c9a977"
+      },
+      {
+        "file": "projects/rawkode.academy/website/src/utils/resolve-technology-icon.ts",
+        "sha256": "72c7cfed42b97b53296d40a873b39ee1c641a3bd7370646c60d96dd9652eed28"
+      },
+      {
+        "file": "packages/design-system/src/recipes/academyTechnology.ts",
+        "sha256": "6298fe640600f2c04a610d265ffabb5cc59e992e276d9eaa8d469ed9e0d3100f"
+      }
+    ],
+    "preservedInventory": {
+      "path": "/tmp/academy-route-inventory.json",
+      "sha256": "db9eb258dea3425c7e5d28d7a754ed8884d3122d1a2556c2375a396cbf1db20f",
+      "modified": false
+    }
+  },
+  "status": "blocked-before-rendered-review",
+  "assignment": "Independent technology-profile desktop review, first 30 concrete URLs in source inventory order",
+  "recordedAt": "2026-09-20T16:36:42Z",
+  "build": {
+    "label": "17:28",
+    "timeZone": "Europe/London",
+    "commit": "272b68bc",
+    "provenance": "Build time and commit supplied by main; repository HEAD independently verified as 272b68bc.",
+    "renderedBuildVerified": false
+  },
+  "inventory": {
+    "source": "docs/design-inventory.json",
+    "template": "/technology/[id]",
+    "totalConcretePaths": 354,
+    "selection": "paths.slice(0, 30); no sorting; exclude technology index",
+    "sourceTemplate": "src/pages/technology/[id].astro"
+  },
+  "browser": {
+    "requestedBrowser": "browser1",
+    "requestedTab": "12",
+    "requestedCurrentUrl": "http://127.0.0.1:4322/technology/acorn",
+    "availableBrowsers": [],
+    "bound": false,
+    "viewport": {
+      "expected": {
+        "width": 1280,
+        "height": 720
+      },
+      "observed": null
+    },
+    "theme": {
+      "expected": "light",
+      "observed": null
+    },
+    "viewportChanged": false,
+    "themeChanged": false,
+    "tabNavigated": false,
+    "handoffMarked": false,
+    "handoffLimitation": "No Tab binding could be obtained, so markHandoff could not be called."
+  },
+  "methodology": {
+    "required": "Overlapping viewport screenshots from page top through footer on every route; no full-page screenshots.",
+    "actual": "Source inventory and DESIGN.md inspected. Browser binding attempts failed before any rendered content or screenshots could be observed.",
+    "screenshotCount": 0,
+    "fullPageScreenshotsUsed": false,
+    "externalNavigation": false,
+    "submissions": false,
+    "implementationEdits": false
+  },
+  "counts": {
+    "planned": 30,
+    "renderedReviewed": 0,
+    "fullyCoveredDesktopLight": 0,
+    "blocked": 30,
+    "completePagePasses": 0
+  },
+  "blockers": [
+    {
+      "id": "AUDIT-B001",
+      "severity": "blocking",
+      "category": "review-infrastructure",
+      "summary": "Assigned IAB browser is not exposed to this cua_repl session.",
+      "evidence": [
+        {
+          "action": "cua.getTab(\"12\", { browser: \"browser1\" })",
+          "result": "Browser is not available: browser1"
+        },
+        {
+          "action": "cua.getState()",
+          "result": "browsers: []; native applications were listed, but no browser surface or tabs."
+        },
+        {
+          "action": "cua.getTab({ url: \"http://127.0.0.1:4322/technology/acorn\" }, { browser: \"iab\" })",
+          "result": "Browser is not available: iab"
+        }
+      ],
+      "impact": "All 30 assigned routes are blocked for rendered review. Existing viewport, theme, rendered build, page sections, footer, and controls cannot be verified.",
+      "requiredAction": "Expose/reconnect the assigned IAB browser/tab to this session, or provide an accessible existing tab identifier. No replacement tab was opened."
+    }
+  ],
+  "defects": [],
+  "plannedSectionChecks": [
+    "Shared header/navigation/search/theme/account controls",
+    "Breadcrumb, genuine logo or missing-artwork fallback, full title and description",
+    "Status/category/license metadata and website/documentation/source links",
+    "Article body or honest overview empty state",
+    "Latest videos and any additional video section",
+    "Rawkode matrix assessment and related controls",
+    "CNCF metadata/resources",
+    "Community destinations",
+    "Learning paths, news and articles rendered by TopicHub",
+    "Related technology links",
+    "Technology-specific newsletter CTA and consistency with lifecycle status",
+    "Shared footer"
+  ],
+  "pendingSpecificConcerns": [
+    {
+      "route": "/technology/acorn",
+      "source": "User-supplied review prompt; not independently rendered or fact-checked.",
+      "concern": "Abandoned status combined with a technology-updates subscription CTA may mislead.",
+      "disposition": "pending-rendered-evidence",
+      "rationale": "Do not assign keep/remove/rework or a product defect without observing the actual section, wording and surrounding context."
+    }
+  ],
+  "routes": [
+    {
+      "inventoryOrdinal": 1,
+      "route": "/technology/acorn",
+      "url": "http://127.0.0.1:4322/technology/acorn",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 2,
+      "route": "/technology/aerakimesh",
+      "url": "http://127.0.0.1:4322/technology/aerakimesh",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 3,
+      "route": "/technology/agentgateway",
+      "url": "http://127.0.0.1:4322/technology/agentgateway",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 4,
+      "route": "/technology/agentregistry",
+      "url": "http://127.0.0.1:4322/technology/agentregistry",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 5,
+      "route": "/technology/akri",
+      "url": "http://127.0.0.1:4322/technology/akri",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 6,
+      "route": "/technology/antrea",
+      "url": "http://127.0.0.1:4322/technology/antrea",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 7,
+      "route": "/technology/apko",
+      "url": "http://127.0.0.1:4322/technology/apko",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 8,
+      "route": "/technology/aquaproj",
+      "url": "http://127.0.0.1:4322/technology/aquaproj",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 9,
+      "route": "/technology/argo",
+      "url": "http://127.0.0.1:4322/technology/argo",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 10,
+      "route": "/technology/armada",
+      "url": "http://127.0.0.1:4322/technology/armada",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 11,
+      "route": "/technology/artifacthub",
+      "url": "http://127.0.0.1:4322/technology/artifacthub",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 12,
+      "route": "/technology/athenz",
+      "url": "http://127.0.0.1:4322/technology/athenz",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 13,
+      "route": "/technology/atlantis",
+      "url": "http://127.0.0.1:4322/technology/atlantis",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 14,
+      "route": "/technology/aws-lambda",
+      "url": "http://127.0.0.1:4322/technology/aws-lambda",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 15,
+      "route": "/technology/backstage",
+      "url": "http://127.0.0.1:4322/technology/backstage",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 16,
+      "route": "/technology/bank-vaults",
+      "url": "http://127.0.0.1:4322/technology/bank-vaults",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 17,
+      "route": "/technology/bfe",
+      "url": "http://127.0.0.1:4322/technology/bfe",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 18,
+      "route": "/technology/bootc",
+      "url": "http://127.0.0.1:4322/technology/bootc",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 19,
+      "route": "/technology/bpfman",
+      "url": "http://127.0.0.1:4322/technology/bpfman",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 20,
+      "route": "/technology/buildkit",
+      "url": "http://127.0.0.1:4322/technology/buildkit",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 21,
+      "route": "/technology/buildpacks",
+      "url": "http://127.0.0.1:4322/technology/buildpacks",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 22,
+      "route": "/technology/cadence",
+      "url": "http://127.0.0.1:4322/technology/cadence",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 23,
+      "route": "/technology/capsule",
+      "url": "http://127.0.0.1:4322/technology/capsule",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 24,
+      "route": "/technology/carina",
+      "url": "http://127.0.0.1:4322/technology/carina",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 25,
+      "route": "/technology/cartography",
+      "url": "http://127.0.0.1:4322/technology/cartography",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 26,
+      "route": "/technology/carvel",
+      "url": "http://127.0.0.1:4322/technology/carvel",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 27,
+      "route": "/technology/cdk8s",
+      "url": "http://127.0.0.1:4322/technology/cdk8s",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 28,
+      "route": "/technology/cert-manager",
+      "url": "http://127.0.0.1:4322/technology/cert-manager",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 29,
+      "route": "/technology/chaosblade",
+      "url": "http://127.0.0.1:4322/technology/chaosblade",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    },
+    {
+      "inventoryOrdinal": 30,
+      "route": "/technology/chaosmesh",
+      "url": "http://127.0.0.1:4322/technology/chaosmesh",
+      "status": "blocked-not-rendered",
+      "allSectionsCovered": false,
+      "footerReached": false,
+      "completePagePass": false,
+      "sections": [],
+      "evidence": [],
+      "states": {
+        "desktopLight": "blocked",
+        "mobile": "pending",
+        "dark": "pending",
+        "keyboard": "not-exercised"
+      },
+      "limitation": "AUDIT-B001: no rendered evidence; no per-section disposition can be assigned honestly."
+    }
+  ],
+  "limitations": [
+    "Zero of 30 pages were visually reviewed. Empty defects/sections arrays mean unobserved, not defect-free.",
+    "1280x720/light and build 17:28 are requested settings, not independently observed browser state.",
+    "No screenshots, scrolling, layout/overflow checks, image fallback checks or control interaction evidence was collected.",
+    "Authoritative technology metadata was not researched or edited.",
+    "Even a completed desktop/light review would not establish a complete page pass; mobile and dark remain pending.",
+    "This blocked artifact preserves the exact route order and must be completed or superseded after browser access is restored."
+  ]
+}

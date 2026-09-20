@@ -4,20 +4,15 @@ const doc = academyDocument();
 const styles = academyLayout({ width: "reading" });
 import { getImage } from "astro:assets";
 import { type CollectionEntry, getCollection, render } from "astro:content";
-import { dirname, join } from "node:path";
 import Breadcrumb from "@/components/breadcrumb/Breadcrumb.astro";
 import CourseSignupForm from "@/components/courses/CourseSignupForm.astro";
 import ResourceList from "@/components/courses/ResourceList.vue";
 import VideoPlayer from "@/components/video/player.vue";
 import Page from "@/wrappers/page.astro";
-import { createLogger } from "@/lib/logger";
 import { getCourseModuleSlug } from "@/utils/course-path";
-import { loadWebContainerFiles } from "@/utils/webcontainer-loader";
 import type { GetStaticPaths } from "astro";
 
 export const prerender = true;
-
-const logger = createLogger("courses");
 
 type Props = {
 	module: CollectionEntry<"courseModules">;
@@ -85,44 +80,9 @@ const allResources = [
 	...(module.data.resources || []),
 ];
 
-const processedResources = await Promise.all(
-	allResources.map(async (resource) => {
-		if (
-			resource.type === "embed" &&
-			resource.embedConfig?.container === "webcontainer" &&
-			resource.embedConfig.import?.localDir
-		) {
-			const moduleFilePath = join(
-				process.cwd(),
-				"content",
-				"courses",
-				`${module.id}.mdx`,
-			);
-			const moduleDir = dirname(moduleFilePath);
-			const importPath = join(moduleDir, resource.embedConfig.import.localDir);
-
-			try {
-				const importedFiles = await loadWebContainerFiles(importPath);
-				return {
-					...resource,
-					embedConfig: {
-						...resource.embedConfig,
-						files: { ...importedFiles, ...(resource.embedConfig.files || {}) },
-					},
-				};
-			} catch (error) {
-				logger.error(`Failed to load files for ${resource.title}`, error);
-				return resource;
-			}
-		}
-
-		return resource;
-	}),
-);
-
 const dedupedResources = Array.from(
 	new Map(
-		processedResources.map((resource) => {
+		allResources.map((resource) => {
 			const key = [
 				resource.type,
 				resource.title,
@@ -297,8 +257,15 @@ function formatDuration(minutes?: number) {
 					<CourseSignupForm
 						courseId={course.id}
 						courseTitle={course.data.title}
+						pagePath={Astro.url.pathname}
 						signupConfig={course.data.signupConfig}
-					/>
+						server:defer
+					>
+						<p slot="fallback" class={doc.copy}>
+							Loading optional course email signup. If it does not load, <a href={Astro.url.pathname}>reload this lesson to retry</a>.
+							Signup requires JavaScript; all lesson content remains available without signing up.
+						</p>
+					</CourseSignupForm>
 				</div>
 			)}
 		</div>

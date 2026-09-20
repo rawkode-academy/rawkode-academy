@@ -33,17 +33,29 @@ const documentComponents = [
 ];
 
 describe("Academy document migration", () => {
-	it.each(detailRoutes)("keeps %s on the canonical shell and Panda recipes", (route) => {
+	it("navigates without a decorative cross-document text crossfade", () => {
+		expect(source("styles/global.css")).not.toContain("@view-transition");
+		expect(source("pages/watch/[...slug].astro")).not.toContain("videoTransitionName");
+		expect(source("styles/global.css")).toContain("prefers-reduced-motion: reduce");
+	});
+
+	it.each(
+		detailRoutes,
+	)("keeps %s on the canonical shell and Panda recipes", (route) => {
 		const page = source(`pages/${route}`);
 		expect(page).toContain('from "@/wrappers/page.astro"');
 		expect(page).toContain('from "@rawkodeacademy/design-system"');
 		expect(page).not.toMatch(/<style\b|@apply|--editorial-|--surface-|class="/);
 	});
 
-	it.each(documentComponents)("styles %s without legacy utilities", (component) => {
+	it.each(
+		documentComponents,
+	)("styles %s without legacy utilities", (component) => {
 		const page = source(`components/${component}`);
 		expect(page).toContain('from "@rawkodeacademy/design-system"');
-		expect(page).not.toMatch(/<style\b|@apply|--editorial-|--surface-|(?<!:)class="/);
+		expect(page).not.toMatch(
+			/<style\b|@apply|--editorial-|--surface-|(?<!:)class="/,
+		);
 	});
 
 	it("keeps accessible active-location state independent of generated class names", () => {
@@ -60,8 +72,16 @@ describe("Academy document migration", () => {
 		expect(curriculum).toContain('const Element = isDraft ? "div" : "a"');
 		expect(curriculum).toContain("getCourseModuleSlug(course.id, module.id)");
 		expect(lesson).toContain('client:only="vue"');
-		expect(lesson).toContain("loadWebContainerFiles");
-		expect(lesson).toContain("dedupedResources.length > 0 && doc.moduleFlowRail");
+		expect(lesson).not.toContain("loadWebContainerFiles");
+		const resources = source("components/courses/ResourceList.vue");
+		expect(resources).toContain("const resourceId = resource.embedConfig.src");
+		expect(resources).toContain("/embed/webcontainer?course=");
+		expect(source("pages/embed/webcontainer.astro")).toContain(
+			"loadDemoFiles(courseId, demoId)",
+		);
+		expect(lesson).toContain(
+			"dedupedResources.length > 0 && doc.moduleFlowRail",
+		);
 		expect(lesson).toContain("<ResourceList resources={dedupedResources}");
 	});
 });

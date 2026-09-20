@@ -62,13 +62,90 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F35 | Unsubscribe chooses account identity despite an email link, and accepts forged success query | Explicit identity scope; successful POST required for confirmation; 23 mocked route tests | `unsubscribe.astro` |
 | F36 | News repeats oversized, retired-palette imagery with a meaningless graph | Shared branded SVG, compact image-led archive and related rows; Browser pending | `news/index.astro`, `NewsStoryRow.astro` |
 | F37 | Changelog spends a wide column on metadata and repeats avatar footers | One readable column; author in metadata; direct code-history link | `changelog/index.astro` |
-| F38 | Feeds overuses cards and repeats OPML actions; all RSS links have identical names | Recorded for next composition pass | `feeds.astro` |
+| F38 | Feeds overuses cards and repeats OPML actions; all RSS links have identical names | Flat feed rows, one OPML action, contextual labels and native format disclosure; whole-page mobile/light and desktop/dark verified | `feeds.astro` |
 | F39 | Pristine required email fields look invalid immediately | Explicit aria-invalid / user-invalid selector instead of native invalid | `academyForms.ts` |
 | F40 | Watch recommendations multiply into 21 videos across six sections | One bounded recommendation section; Gitpod compiled Browser confirmed | `watch/[...slug].astro` |
 | F41 | SSR-only forms can send personal fields in a GET URL before hydration | POST defense and disabled-until-ready controls; ten mocked SSR/hydration tests | Course and partnership forms |
 | F42 | ArticleCard SSR-only avatar error handler cannot run | Keep all author names without repeated avatar decoration | `ArticleCard.astro` |
+| F43 | Homepage latest feed gives repeated covers excessive weight and hydrates static markup | Shared compact editorial rows; unchanged chronological stream; Home/Learn now SSR-only; whole-page review completed, excerpt correction pending | `AcademyPage.vue`, `index.astro` |
+| F44 | ADR index runs dates into author names; first record points to retired repository path | Metadata separator, removed generic Reference kicker, source link corrected against GitHub contents API; rebuilt verification pending | `adrs/index.astro`, `content/adrs/0001-adopt-adrs.md` |
+| F45 | Learning-path contents omit individual steps; one estimate understates recording time by 158 minutes | Optional H3 outline, chapter separation and anchor offset; corrected Developer Platform runtime to 428 minutes, labelled core video and removed unsupported total-workload metadata; rebuilt review pending | `ArticleTOC.astro`, learning-path routes and JSON-LD |
+| F46 | Brand exports inject global SVG styling and outlines; mono specimen uppercases commands; mobile CSS example overflows by 22px | Scoped solid-color exports preserve paths; contextual download names, case-correct mono sample, bounded keyboard-accessible code example; six export unit tests pass, rebuilt Browser review pending | `lib/branding.ts`, branding page |
+| F47 | Changelog has empty summary paragraphs and a redundant Updates label | Conditional summary, removed label, contextual 44px code-history links; final render pending | `changelog/index.astro` |
+| F48 | Partnership detail repeats ownership, scope, cadence and fees in principles and six FAQs | Removed duplicate strip and repeated FAQ answers; retained unique Slack/support and partner-input guidance, exclusions, fees and route selection; unboxed offers and 44px fit-review link | `organizations/partnerships/index.astro` |
+| F49 | Contact copy confirmation shrinks its button and changes mobile wrapping; no explicit announcement | Stable control width, contextual live-region feedback, manual recovery and fallback focus restoration; four isolated script tests pass, rebuilt Browser review pending | `ContactFallback.astro`, `academyMarketing.ts` |
+| F50 | Learning-path hero and newsletter ignore reading grid; catalogue has meaningless ordinals; TOC loses keyboard outline and skips chapters during fast scroll; prerequisites expose literal Markdown | Aligned hero, contained newsletter, removed status dot/ordinals, padded focus boundary, RAF-batched reading-position calculation, plain-text prerequisites; six scroll tests, independent review and compiled desktop/mobile verification pass | Learning-path routes, `AcademyPage`, `ArticleTOC`, document/page recipes |
+| F51 | Page-wide navigation crossfade overlays old and new text; claimed thumbnail morph has no paired participant | Removed decorative navigation animation and unused naming helper; retained component reduced-motion rules. Rebuilt Browser check pending | `global.css`, watch page, obsolete helper and sidebar declaration |
+| F52 | About repeats a final principle divider before the next section; format copy claims courses/articles in current video-only paths | Remove final list divider and unnecessary end padding; describe selected lessons without unsupported format promises. Rebuilt delta pending | `academyAbout.ts`, About page |
 
 ## Verification log
+
+- User-requested cuenv upgrade: verified official 0.55.1 darwin-arm64 SHA-256
+  bd8745d5513fc8fb92ea386cfe494c11ffeff56642d55d5fd707f8fc946e1479.
+  Task-local release binary used for successful root `sync -A` and
+  `sync ci --check`; root configuration pins release 0.55.1 and all 39 generated
+  workflows differ only in that version. System Nix installation is unchanged.
+  Registry reports the matching v0.55.1 CUE module unavailable, so the existing
+  v0.53.2 schema is retained; its mismatch warning is explicit. CI will exercise
+  the release's complete-PR-diff fix on the next push.
+
+- 19:20 BST integration build passed with pinned D2; full Vitest 554/554 across
+  43 files and design-system strict check passed. Independent source review found
+  no blocking regression. Nonblocking scheduled-News timing inconsistency between
+  build-time routes, request-time feeds and cached search remains tracked for a
+  shared deployment eligibility fix; all 37 current News routes are retained.
+- About complete desktop/dark and mobile/light inspection plus rebuilt divider
+  and format-copy deltas passed. Maintainer page complete desktop/mobile dark and
+  light hero/focus inspection; ordered-list accessibility semantics and recipe
+  consolidation remain a follow-up. No email sent.
+- Navigation after the 19:20 rebuild has no old/new page text crossfade. Preview
+  had to restart after the build replaced its output; the intervening 500/error
+  is not counted as page-review evidence.
+
+- 19:00 BST full integration build passed with pinned D2 after the two strict
+  typing fixes. Full Vitest 521/521 and design-system strict checks passed.
+  Subsequent show, discovery-publication, identity and navigation changes are not
+  in that build and require another integration checkpoint.
+- All five learning-path routes now have explicit visual-pass ledger entries:
+  whole-page 18:30 evidence plus corrected 19:00 hero/rows/TOC/newsletter checks.
+  Fast and reverse scrolling, keyboard chapter navigation, current-section state
+  and mobile contained signup panels verified. No playback or subscription.
+- Contact desktop copy feedback preserves 128x44px size while showing Copied;
+  exact public address reaches clipboard and focus remains visible. No email sent.
+- Removed unused CVEAlert and obsolete view-transition naming helper after
+  reference checks; both are recoverable from Git. News and people source fixes
+  have dedicated ledgers and tests, but their full visual inventory remains open.
+
+- All four learning-path detail bodies and the index now have complete desktop
+  and mobile viewport read-throughs, including prerequisites, bonus content and
+  footer. Three details checked dark desktop/light mobile; Developer Platform
+  checked light at both sizes. All mobile documents measure 390px at 390px.
+  This is five concrete routes, not a sign-off of the remaining inventory.
+- 18:58 integration attempt: full unit suite 521/521 passed; compile caught two
+  strict typing issues (optional recipe class and social-link filter narrowing).
+  Corrected at the boundary; fresh full build running. No deployment of this batch.
+
+- 18:30 BST integration build passed with pinned D2: 13 parser tests, 44 source
+  route / 4 bracket checks, 29 recipes, 122 interaction tests and newly maintained
+  61 SSR/hydration tests. Astro checked 430 files with no errors/warnings and nine
+  hints. Full Vitest 491/491 and design-system strict check passed. Subsequent
+  course, News, people and F50 changes require a fresh integration build.
+- Developer Platform: entire desktop/light and mobile/light page reviewed,
+  including all six chapters, expanded prerequisites, contents and newsletter,
+  footer/copyright. Mobile width 390/390. GitOps: entire desktop/dark and
+  mobile/light page reviewed including five chapters, drills and bonus material.
+  Both remain verification-pending for F50 shared corrections.
+- TOC scroll correction: real-script isolated tests 6/6 and SSR 9/9 pass.
+  Independent same-frame reversal and content-order probes found no blocker.
+  Layout shifts after load may leave highlight stale until the next scroll/resize;
+  native anchors remain usable. No ClientRouter is present.
+- Branding correction in 18:30 build: lowercase monospace specimen and bounded
+  300px mobile code region verified, document width 390/390; six download SVG
+  payloads retain correct viewBox, paths and one fill without global style/stroke.
+  Browser download completion itself could not be confirmed.
+- Contact correction: mobile keyboard copy preserves a 128x44px control, visible
+  focus and exact address; persistent polite announcement verified. Desktop
+  final control geometry remains to check before closing F49.
 
 - Baseline: `e5280286`, preview `21900227-rawkode-academy-website.rawkodeacademy.workers.dev`.
 - Prior turn's representative checks are baseline context only. This audit will
@@ -129,3 +206,44 @@ duplicate navigation. Preserve useful content and functional behavior.
 - Three remaining authored-content consumers migrated: CgroupTreeDiagram,
   RelatedArticles and Aside. Their targeted tests pass; final Browser review of
   all affected authored documents remains pending.
+- Checkpoint `272b68bc` pushed normally to PR #1355. Website CI run 35523021354
+  and design-system CI run 35523021353 succeeded. Deployed preview:
+  https://3ff27879-rawkode-academy-website.rawkodeacademy.workers.dev.
+  Browser verified deployed mobile Technologies: 354 items, Kubernetes query
+  20 matches, zero-result state, clear restoring 354, and no horizontal overflow.
+- 17:49 BST local build passed with D2. Full Vitest 402/402 passed. Feeds whole
+  page reviewed at 390x844 light and 1440x1000 dark; disclosure opens by pointer
+  and closes with Enter, all sixteen feed links measure 44px high, no overflow.
+  Independent GET-only checks verified 17/17 local feed/OPML endpoints with
+  expected content types and parseable feed structure; no actual reader import.
+- Deployed `/404`: entire page reviewed at 1440x1000 light and 390x844 light/dark.
+  Search recovery for cgroups reaches the actual article result. No broken-link
+  report or authentication was submitted. One extra separator is harmless.
+- Homepage whole-page local review at 1440x1000 dark and 390x844 light found no
+  overflow or broken imagery. A mid-word excerpt truncation remains to correct.
+  Newsletter delivery/subscription has not been exercised against a live service.
+- Independent browser batches could not start because agent sessions expose no
+  browsers. Their source findings are not counted as visual coverage. Main session
+  retains browser inspection; course and technology source ledgers remain separate.
+- ADRs: both full records reviewed at desktop/dark and mobile/light. First record's
+  GitHub source link and index date/author separator require rebuilt verification.
+  The second record passed; authored historical decisions were preserved.
+- Changelog: all sixteen entries and footer inspected at 1440x1000 dark and
+  390x844 light. No overflow; minor redundant/empty markup fixes pending rebuild.
+- Branding: every section and footer inspected at 1440x1000 dark and 390x844 light.
+  Mobile CSS sample causes 412px document width at a 390px viewport; F46 fixes
+  are not yet compiled. Downloads are not yet verified by Browser.
+- Learning paths: entire desktop index reviewed. Developer Platform hero,
+  prerequisites and initial steps inspected; full body and mobile review pending.
+  Independent source review resolved all 31 distinct video destinations and found
+  recording runtimes of 427m50s, 431m12s, 446m54s and 405m50s across the four paths.
+  This is source availability/runtime evidence, not playback verification.
+- Organization hub fully reviewed at 390x844 light and 1440x1000 dark through
+  footer. All four main actions measure at least 44px; keyboard focus is visible
+  and Enter follows the programme link. Commercial terms preserved; no contact sent.
+- Partnership detail fully inspected at desktop/dark. Fit-review action selects
+  the correct application route; all fields hydrate. Repeated content remains to
+  be removed in the next build. No application submitted; mobile final review pending.
+- Contact page fully inspected at desktop/dark and mobile/light. Exact email and
+  template copied successfully, including after returning from the programme page.
+  No email sent. Confirmation's mobile layout jump identified and fixed in source.

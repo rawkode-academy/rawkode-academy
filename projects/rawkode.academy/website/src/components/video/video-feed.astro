@@ -65,10 +65,10 @@ function calculateProgress(videoId: string, duration: number): number | null {
 ---
 
 <section class="vfeed">
-	<header class="vfeed__head">
-		<h2 class:list={[doc.sectionTitle, "vfeed__title"]}>{title}</h2>
+	{(title.trim() || description.trim()) && <header class="vfeed__head">
+		{title.trim() && <h2 class:list={[doc.sectionTitle, "vfeed__title"]}>{title}</h2>}
 		{description.trim() && <p class:list={[doc.copy, "vfeed__body"]}>{description}</p>}
-	</header>
+	</header>}
 
 	<div class="vfeed__grid">
 		{videos.map((video) => (

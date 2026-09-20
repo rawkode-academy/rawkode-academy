@@ -12,6 +12,7 @@ import PersonJsonLd from "@/components/html/person-jsonld.astro";
 import type { ShowSummary } from "@/types/show";
 import { normalizeTechnologyReferences } from "@/utils/normalize-technology-refs";
 import { getVideoThumbnailUrl } from "@/lib/video-thumbnail";
+import { getPersonIdentityUrls } from "@/lib/person-identity-links";
 
 export async function getStaticPaths() {
 	const people = await getCollection("people");
@@ -23,11 +24,12 @@ export async function getStaticPaths() {
 
 const { person } = Astro.props;
 
-const videos = await getCollection("videos");
-const shows = await getCollection("shows");
+const now = new Date();
+const videos = await getCollection("videos", ({ data }) => data.publishedAt <= now);
+const shows = await getCollection("shows", ({ data }) => data.publish);
 const technologies = await getCollection("technologies");
-const news = await getCollection("news");
-const articles = await getCollection("articles", ({ data }) => !data.draft);
+const news = await getCollection("news", ({ data }) => data.publishedAt <= now);
+const articles = await getCollection("articles", ({ data }) => !data.draft && data.publishedAt <= now);
 const techNameById = new Map(
 	technologies.map((t) => [t.id.replace(/\/index$/, ""), t.data.name] as const),
 );
@@ -188,7 +190,7 @@ const pageDescription = (() => {
 
 const profileUrl = new URL(`/people/${person.data.id}`, Astro.site).href;
 
-const socialLinks = [
+const authoredSocialLinks = [
 	person.data.mastodon && {
 		name: "Mastodon",
 		url: person.data.mastodon,
@@ -221,21 +223,26 @@ const socialLinks = [
 		url: person.data.website,
 		icon: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71 M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71",
 	},
-].filter(Boolean);
+	person.data.youtube && {
+		name: "YouTube",
+		url: person.data.youtube,
+		icon: "M10 8l6 4-6 4V8Z M3 5h18v14H3V5Z",
+	},
+].filter((link) => typeof link === "object");
 
-// rel="me" advertises that this profile owns the linked accounts.
-// Mastodon's verification crawler reads this on visit (either head <link>
-// or body <a>) and shows a green checkmark on the corresponding profile
-// link. Same mechanism works for other Fediverse/IndieWeb tools.
-const relMeUrls = [
-	person.data.mastodon,
-	person.data.github,
-	person.data.bluesky,
-	person.data.twitter,
-	person.data.linkedin,
-	person.data.website,
-	person.data.youtube,
-].filter((url): url is string => typeof url === "string" && url.length > 0);
+// Exact equality only: authored fragments can identify different destinations.
+const linksByUrl = new Map<string, { name: string; url: string; icon: string; filled?: boolean }>();
+for (const link of authoredSocialLinks) {
+	const existing = linksByUrl.get(link.url);
+	if (existing) existing.name += ` / ${link.name}`;
+	else linksByUrl.set(link.url, { ...link });
+}
+const socialLinks = [...linksByUrl.values()];
+
+// Keep dedicated social-profile identity links consistent with the directory.
+// Website/YouTube links remain visible without claiming they identify a Person.
+const relMeUrls = getPersonIdentityUrls(person.data);
+const identityUrls = new Set(relMeUrls);
 ---
 
 <Page
@@ -252,15 +259,7 @@ const relMeUrls = [
  url={profileUrl}
  description={pageDescription}
  image={person.data.avatarUrl}
- sameAs={[
- person.data.github,
- person.data.twitter,
- person.data.bluesky,
- person.data.linkedin,
- person.data.website,
- person.data.youtube,
- person.data.mastodon,
- ]}
+ sameAs={relMeUrls}
  />
  <Fragment slot="extra-head">
  {relMeUrls.map((url) => (
@@ -297,7 +296,7 @@ const relMeUrls = [
 					].filter(Boolean).join(" · ")
 				}</p>}
 				{socialLinks.length > 0 && <nav class={doc.actions} aria-label={`${person.data.name}'s links`}>
-					{socialLinks.map((link: any) => <a href={link.url} target="_blank" rel="me noopener noreferrer" class={doc.socialLink}>
+					{socialLinks.map((link: any) => <a href={link.url} target="_blank" rel={identityUrls.has(link.url) ? "me noopener noreferrer" : "noopener noreferrer"} class={doc.socialLink}>
 						<svg class={doc.iconSmall} viewBox="0 0 24 24" fill={link.filled ? "currentColor" : "none"} stroke={link.filled ? "none" : "currentColor"} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={link.icon} /></svg>
 						{link.name}
 					</a>)}

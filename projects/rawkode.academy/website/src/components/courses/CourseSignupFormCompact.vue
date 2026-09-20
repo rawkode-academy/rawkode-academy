@@ -5,25 +5,26 @@
 		<div v-if="checkingSubscription" :class="s.status">
 			<p :class="s.copy">Checking subscription...</p>
 		</div>
-		<div v-else-if="isAlreadySubscribed" :class="s.status">
+		<div v-else-if="isAlreadySubscribed && !submitted" :class="s.status">
 			<h4 :class="s.heading">You're subscribed</h4>
 			<p :class="s.copy">We'll notify you when new content is available.</p>
 		</div>
 		<div v-else-if="submitted" :class="s.status">
 			<h4 :class="s.heading">Thanks for signing up</h4>
-			<p :class="s.copy">{{ successMessage || 'Check your email to confirm your subscription.' }}</p>
+			<p :class="s.copy">{{ successMessage || 'Course updates are saved.' }}</p>
 		</div>
-		<form v-else method="POST" @submit.prevent="submitForm" :class="s.form" :aria-busy="!ready || loading" :aria-describedby="error ? errorId : undefined">
+		<form v-if="!checkingSubscription && (!courseSaved || canOfferSponsor)" method="POST" @submit.prevent="submitForm" :class="s.form" :aria-busy="!ready || loading" :aria-describedby="error ? errorId : undefined">
 			<fieldset :class="[s.form, 'form-controls']" :disabled="!ready || loading" aria-label="Course update signup">
 				<div v-if="!userEmail" :class="s.field">
 					<label :for="emailId" :class="s.label">Email address</label>
-					<input v-model="email" :id="emailId" type="email" name="email" autocomplete="email" placeholder="Enter your email" required :class="s.input" :disabled="loading" />
+					<input v-model="email" :id="emailId" type="email" name="email" autocomplete="email" placeholder="Enter your email" required :class="s.input" :disabled="loading" :readonly="submitted" />
 				</div>
-				<div v-if="signupConfig.sponsor && signupConfig.allowSponsorContact" :class="s.consent">
+				<p v-if="courseSaved" :class="s.copy">Course updates are saved. Sponsor contact is optional; select the checkbox and submit only if you want to request it.</p>
+				<div v-if="canOfferSponsor" :class="s.consent">
 					<input v-model="sponsorConsent" :id="consentId" type="checkbox" name="allowSponsorContact" :class="s.checkbox" :disabled="loading" />
 					<label :for="consentId" :class="s.copy">I agree to share my email with {{ signupConfig.sponsor }} for course-related updates</label>
 				</div>
-				<button type="submit" :disabled="loading" :class="s.button">{{ loading ? 'Subscribing...' : (userEmail ? 'Subscribe to Updates' : 'Get Course Updates') }}</button>
+				<button type="submit" :disabled="loading || (courseSaved && !sponsorConsent)" :class="s.button">{{ loading ? 'Submitting...' : courseSaved ? (sponsorStatus === 'unconfirmed' ? 'Retry sponsor signup' : 'Request sponsor contact') : 'Sign Up for Updates' }}</button>
 			</fieldset>
 			<noscript :class="s.copy">JavaScript is required to sign up for course updates. Course content remains available without signing up.</noscript>
 		</form>
@@ -72,12 +73,19 @@ const error = ref("");
 const successMessage = ref("");
 const isAlreadySubscribed = ref(props.isAlreadySubscribed ?? false);
 const checkingSubscription = ref(false);
+const sponsorStatus = ref<"not_requested" | "subscribed" | "unconfirmed">("not_requested");
+const courseSaved = computed(() => isAlreadySubscribed.value || submitted.value);
+const canOfferSponsor = computed(() => Boolean(
+	props.signupConfig.allowSponsorContact && props.signupConfig.sponsor && props.signupConfig.sponsorAudienceId &&
+	sponsorStatus.value !== "subscribed",
+));
 const statusMessage = computed(() => {
 	if (!ready.value && !isAlreadySubscribed.value) return "Loading signup form...";
 	if (checkingSubscription.value) return "Checking subscription status...";
-	if (isAlreadySubscribed.value) return "You're subscribed. We'll notify you when new content is available.";
-	if (submitted.value) return successMessage.value || "Thanks for signing up. Check your email to confirm your subscription.";
-	return loading.value ? "Submitting your subscription..." : "";
+	if (loading.value) return "Submitting your subscription...";
+	if (submitted.value) return successMessage.value || "Course updates are saved.";
+	if (isAlreadySubscribed.value) return "You're subscribed to course updates.";
+	return "";
 });
 
 // Optionally check subscription status on mount if deferred
@@ -117,6 +125,7 @@ function createAttributionPayload(): string | undefined {
 
 async function submitForm() {
 	if (!ready.value || loading.value) return;
+	if (courseSaved.value && (!canOfferSponsor.value || !sponsorConsent.value)) return;
 	error.value = "";
 	loading.value = true;
 
@@ -142,9 +151,13 @@ async function submitForm() {
 
 		if (result.error) {
 			error.value = result.error.message || "An error occurred";
-		} else if (result.data) {
+		} else if (result.data?.success) {
 			submitted.value = true;
 			successMessage.value = result.data.message;
+			sponsorStatus.value = result.data.sponsorStatus ?? "not_requested";
+			sponsorConsent.value = false;
+		} else {
+			error.value = "Subscription could not be confirmed. Please try again.";
 		}
 	} catch (err: any) {
 		error.value = err.message || "An error occurred. Please try again.";

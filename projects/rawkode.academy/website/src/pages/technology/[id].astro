@@ -32,6 +32,7 @@ export interface Technology extends Omit<TechnologyData, "logos"> {
 				title: string;
 				thumbnailUrl: string;
 				slug: string;
+				publishedAt: Date | string;
 		  }[]
 		| undefined;
 	videoCount?: number;
@@ -254,11 +255,12 @@ const explicitMatches = explicitRelated
 	.filter((t): t is (typeof allTechItems)[number] => Boolean(t));
 
 let siblingMatches: typeof allTechItems = [];
-if (technology.subcategory) {
+if (technology.category && technology.subcategory) {
 	siblingMatches = allTechItems.filter(
 		(t) =>
 			t.id !== id &&
 			!explicitMatches.some((e) => e.id === t.id) &&
+			t.data.category === technology.category &&
 			t.data.subcategory === technology.subcategory,
 	);
 }
@@ -271,6 +273,7 @@ const relatedTechnologies = relatedTechSeed
 		name: entry.data.name,
 		logoUrl: resolveTechnologyIconUrl(entry.id, entry.data.logos) ?? undefined,
 		subcategory: entry.data.subcategory,
+		status: entry.data.status,
 	}));
 
 const seoTitle =
@@ -293,7 +296,6 @@ const cncfStatusLabel = (() => {
 
 const seoDescription = (() => {
 	if (technology.seo?.description) return technology.seo.description;
-	const cncfUseCase = (technology as any).cncf?.useCase as string | undefined;
 	const parts: string[] = [];
 	const projectQualifier = cncfStatusLabel
 		? `a ${cncfStatusLabel} ${categoryLabel} project`
@@ -305,7 +307,6 @@ const seoDescription = (() => {
 	} else {
 		parts.push(`${technology.name}, ${projectQualifier}`);
 	}
-	if (cncfUseCase) parts.push(cncfUseCase);
 	parts.push(
 		`Watch tutorials, live coding, and interviews from Rawkode Academy.`,
 	);
@@ -356,7 +357,11 @@ const statusLabels: Record<string, string> = {
 const statusLabel = technology.matrix?.status
 	? statusLabels[technology.matrix.status] ?? technology.matrix.status
 	: undefined;
-const description = technology.cncf?.useCase?.trim() || technology.seo?.description?.trim();
+const description = technology.seo?.description?.trim();
+const videoDateFormatter = new Intl.DateTimeFormat("en-GB", {
+	day: "numeric", month: "short", year: "numeric", timeZone: "UTC",
+});
+const historicalStatuses = new Set(["abandoned", "deprecated", "superseded"]);
 const remainingVideos = (technology.videos ?? []).slice(featuredVideos.length);
 const breadcrumbs = [
 	{ title: "Home", link: "/" },
@@ -369,11 +374,18 @@ const metadata = [
 	["Subcategory", technology.subcategory],
 	["License", technology.license],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
-const officialLinks = [
+const projectLinks = [
 	["Official website", technology.website],
 	["Documentation", technology.documentation],
 	["Source code", technology.source],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
+// Exact URLs only: a README fragment remains a distinct destination.
+const officialLinks: Array<[string, string]> = [];
+for (const [label, url] of projectLinks) {
+	const existing = officialLinks.find((entry) => entry[1] === url);
+	if (existing) existing[0] += ` / ${label}`;
+	else officialLinks.push([label, url]);
+}
 const communityLabels: Record<string, string> = {
 	twitter: "Twitter / X", youtube: "YouTube", slack: "Slack", discord: "Discord",
 	blog: "Blog", mailingList: "Mailing list", githubDiscussions: "GitHub discussions", chat: "Chat",
@@ -400,6 +412,10 @@ const matrixMetadata = [
 	["Confidence", technology.matrix?.confidence && confidenceLabels[technology.matrix.confidence]],
 	["Trajectory", technology.matrix?.trajectory],
 ].filter((entry): entry is [string, string] => Boolean(entry[1]));
+const hasMatrixDetails = Boolean(
+	technology.matrix?.why || technology.matrix?.spicyTake ||
+	technology.matrix?.makesMeFeel,
+);
 
 // Mirror TopicHub's matching rules so its generic empty state cannot contradict
 // the profile or videos already displayed here.
@@ -414,11 +430,12 @@ const matchesTechnology = (
 const [articles, news, learningPaths] = await Promise.all([
 	getCollection("articles"), getCollection("news"), getCollection("learningPaths"),
 ]);
+const now = new Date();
 const hasTopicContent =
-	articles.some(({ data }) => !data.draft && matchesTechnology(data.technologies)) ||
-	news.some(({ data }) => matchesTechnology(data.technologies)) ||
-	learningPaths.some(({ data }) => matchesTechnology(data.technologies));
-const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
+	articles.some(({ data }) => !data.draft && data.publishedAt <= now && matchesTechnology(data.technologies)) ||
+	news.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies)) ||
+	learningPaths.some(({ data }) => data.publishedAt <= now && matchesTechnology(data.technologies));
+const hasAside = videoCount > 0 || hasMatrixDetails ||
 	Boolean(technology.cncf?.status) || cncfDates.length > 0 || cncfLinks.length > 0 || communityLinks.length > 0;
 ---
 
@@ -495,6 +512,12 @@ const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
 					))}
 				</dl>
 			)}
+			{statusLabel && !hasMatrixDetails && (
+				<div class={styles.personalRating}>
+					<p class={styles.copy}>Rawkode’s personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>
+					{matrixMetadata.map(([label, value]) => <span class={styles.copy}>{label}: {value}</span>)}
+				</div>
+			)}
 			{officialLinks.length > 0 && (
 				<ul class={styles.actions} aria-label="Project links">
 					{officialLinks.map(([label, url]) => (
@@ -523,13 +546,14 @@ const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
 				<aside class={styles.aside} aria-label={technology.name + " videos and resources"}>
 					{featuredVideos.length > 0 && (
 						<section class={styles.section} aria-labelledby="videos-heading">
-							<h2 id="videos-heading" class={styles.heading}>Latest videos</h2>
+							<h2 id="videos-heading" class={styles.heading}>Related recordings</h2>
 							<ul class={styles.list}>
 								{featuredVideos.map((video) => (
 									<li>
 										<a href={"/watch/" + video.slug} class={styles.video}>
 											<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
 											<span>{video.title}</span>
+											<time class={styles.videoDate} datetime={new Date(video.publishedAt).toISOString()}>{videoDateFormatter.format(new Date(video.publishedAt))}</time>
 										</a>
 									</li>
 								))}
@@ -539,10 +563,10 @@ const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
 							)}
 						</section>
 					)}
-					{technology.matrix && (
+					{technology.matrix && hasMatrixDetails && (
 						<section class={styles.section} aria-labelledby="matrix-heading">
 							<h2 id="matrix-heading" class={styles.heading}>Rawkode’s take</h2>
-							{statusLabel && <p class={styles.copy}>Matrix: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>}
+							{statusLabel && <p class={styles.copy}>Personal rating: <a class={styles.link} href="/technology/matrix">{statusLabel}</a></p>}
 							{technology.matrix.makesMeFeel && <p class={styles.copy}>Makes me feel: {technology.matrix.makesMeFeel}</p>}
 							{technology.matrix.why && <p class={styles.copy}>{technology.matrix.why}</p>}
 							{technology.matrix.spicyTake && <blockquote class={styles.quote}>{technology.matrix.spicyTake}</blockquote>}
@@ -594,6 +618,7 @@ const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
 							<a href={"/watch/" + video.slug} class={styles.video}>
 								<img src={video.thumbnailUrl} alt="" loading="lazy" width="480" height="270" />
 								<span>{video.title}</span>
+								<time class={styles.videoDate} datetime={new Date(video.publishedAt).toISOString()}>{videoDateFormatter.format(new Date(video.publishedAt))}</time>
 							</a>
 						</li>
 					))}
@@ -617,6 +642,7 @@ const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
 								<span>
 									<span class={styles.relatedName}>{related.name}</span>
 									{related.subcategory && <span class={styles.copy}>{related.subcategory}</span>}
+									{historicalStatuses.has(related.status) && <span class={styles.copy}>Project status: {related.status}</span>}
 								</span>
 							</a>
 						</li>
@@ -624,10 +650,12 @@ const hasAside = videoCount > 0 || Boolean(technology.matrix) ||
 				</ul>
 			</section>
 		)}
-		<section class={styles.newsletter} aria-label={technology.name + " updates"}>
-			<NewsletterCTA server:defer audience={"technology:" + technology.id}
-				badge={technology.name + " updates"} headline={"Stay Updated on " + technology.name}
-				subtitle="Get notified when we publish new tutorials, courses, and videos." />
-		</section>
+		<div class={styles.newsletter}>
+			<NewsletterCTA server:defer audience={"technology:" + technology.id} pagePath={Astro.url.pathname}
+				badge="Rawkode Academy publications" headline={"New Academy publications about " + technology.name}
+				subtitle="Get an email when Rawkode Academy publishes something new about this topic. These are Academy publications, not project release or maintenance updates.">
+				<p slot="fallback" class={styles.copy}>Email signup loads here. You can also <a class={styles.link} href="/settings">manage email preferences in account settings</a>.</p>
+			</NewsletterCTA>
+		</div>
 	</div>
 </Page>

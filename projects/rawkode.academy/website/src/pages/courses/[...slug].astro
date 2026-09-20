@@ -50,14 +50,21 @@ const allCourseModules = (await getCollection("courseModules"))
 	.sort((a, b) => a.data.order - b.data.order);
 
 const totalModules = allCourseModules.length;
-const availableModules = allCourseModules.filter((module) => !module.data.draft);
+const availableModules = allCourseModules.filter(
+	(module) => !module.data.draft,
+);
 const availableModuleCount = availableModules.length;
 // Only advertise a runtime when every published lesson has a recorded duration.
-const hasCompleteDuration = availableModules.length > 0 && availableModules.every(
-	(module) => module.data.duration != null && module.data.duration > 0,
-);
+const hasCompleteDuration =
+	availableModules.length > 0 &&
+	availableModules.every(
+		(module) => module.data.duration != null && module.data.duration > 0,
+	);
 const totalDuration = hasCompleteDuration
-	? availableModules.reduce((total, module) => total + (module.data.duration ?? 0), 0)
+	? availableModules.reduce(
+			(total, module) => total + (module.data.duration ?? 0),
+			0,
+		)
 	: undefined;
 
 function formatDuration(minutes: number): string {
@@ -72,14 +79,19 @@ const coverImage = course.data.cover
 	? await getImage({ src: course.data.cover.image })
 	: undefined;
 const imageUrl = coverImage ? new URL(coverImage.src, Astro.site) : undefined;
-const cover = coverImage && course.data.cover ? {
-	src: coverImage.src,
-	alt: course.data.cover.alt,
-	width: course.data.cover.image.width,
-	height: course.data.cover.image.height,
-} : undefined;
+const cover =
+	coverImage && course.data.cover
+		? {
+				src: coverImage.src,
+				alt: course.data.cover.alt,
+				width: course.data.cover.image.width,
+				height: course.data.cover.image.height,
+			}
+		: undefined;
 const hasCourseResources = Boolean(course.data.resources?.length);
-const hasSupplementaryContent = Boolean(course.data.signupConfig || hasCourseResources);
+const hasSupplementaryContent = Boolean(
+	course.data.signupConfig || hasCourseResources,
+);
 
 // Format authors for the hero component
 const formattedAuthors = authors.map((author) => ({
@@ -170,10 +182,15 @@ function getResourceHref(
 							<CourseSignupFormCompact
 								courseId={course.id}
 								courseTitle={course.data.title}
+								pagePath={Astro.url.pathname}
 								signupConfig={course.data.signupConfig}
-								isAlreadySubscribed={false}
 								server:defer
-							/>
+							>
+								<p slot="fallback" class={s.copy}>
+									Loading optional course email signup. If it does not load, <a href={Astro.url.pathname}>reload this course to retry</a>.
+									Signup requires JavaScript; all course content remains available without signing up.
+								</p>
+							</CourseSignupFormCompact>
 						</section>
 					)}
 					{hasCourseResources && (

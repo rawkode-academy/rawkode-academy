@@ -2,9 +2,13 @@ import { getCollection, getEntries } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 import { withRssMimeType } from "../../../lib/feed-utils";
+import { isNewsPublished } from "@/lib/news-publication";
 
 export async function GET(context: APIContext) {
-	const news = await getCollection("news");
+	const now = new Date();
+	const news = await getCollection("news", ({ data }) =>
+		isNewsPublished(data.publishedAt, now),
+	);
 
 	const sortedNews = [...news].sort(
 		(a, b) =>

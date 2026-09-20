@@ -1,6 +1,7 @@
 import { getCollection, getEntries } from "astro:content";
 import type { APIRoute } from "astro";
 import { buildJsonFeed, type JsonFeedItem } from "@/lib/json-feed";
+import { isNewsPublished } from "@/lib/news-publication";
 
 const SITE_FALLBACK = "https://rawkode.academy";
 
@@ -8,7 +9,10 @@ export const GET: APIRoute = async ({ site }) => {
 	const baseUrl = (site?.toString() ?? SITE_FALLBACK).replace(/\/$/, "");
 	const u = (path: string) => `${baseUrl}${path}`;
 
-	const news = await getCollection("news");
+	const now = new Date();
+	const news = await getCollection("news", ({ data }) =>
+		isNewsPublished(data.publishedAt, now),
+	);
 
 	const items: JsonFeedItem[] = [];
 	for (const story of news) {
