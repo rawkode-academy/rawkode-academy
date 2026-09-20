@@ -90,6 +90,19 @@ export function getRealtimeKitParticipantIdentity(
     "anonymous-participant";
 }
 
+/**
+ * A departure revokes both possible programme sources for this identity. Track
+ * IDs are deliberately not used: switching a device is not a room departure.
+ */
+export function getRealtimeKitParticipantSourceIds(participant: RealtimeKitParticipant): string[] {
+  const identity = getRealtimeKitParticipantIdentity(participant);
+  const safeIdentity = toSafeSourceSegment(identity);
+  return [
+    getCameraSourceId(identity),
+    `source-realtimekit-screen-${safeIdentity}`,
+  ];
+}
+
 export function getRealtimeKitParticipantRole(
   participant: RealtimeKitParticipant,
 ): RealtimeKitParticipantRole {

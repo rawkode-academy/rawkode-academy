@@ -5,6 +5,8 @@ import type { StudioSource } from "../types";
 
 const props = defineProps<{
   audioControls?: Record<string, Pick<ProgrammeAudioSourceState, "gain" | "muted">>;
+  /** Sources explicitly admitted by the producer. Omission is deliberately backstage. */
+  onStageSourceIds?: string[];
   sources: StudioSource[];
 }>();
 
@@ -12,6 +14,7 @@ const emit = defineEmits<{
   "audio-gain-change": [sourceId: string, gain: number];
   "audio-mute-change": [sourceId: string, muted: boolean];
   "connect-source": [sourceId: string];
+  "source-admission-change": [sourceId: string, admitted: boolean];
 }>();
 
 const peopleSources = computed(() =>
@@ -74,6 +77,10 @@ function getAudioControl(sourceId: string): Pick<ProgrammeAudioSourceState, "gai
   return props.audioControls?.[sourceId];
 }
 
+function isOnStage(sourceId: string): boolean {
+  return props.onStageSourceIds?.includes(sourceId) === true;
+}
+
 function setAudioGain(sourceId: string, event: Event): void {
   emit("audio-gain-change", sourceId, Number((event.target as HTMLInputElement).value));
 }
@@ -94,6 +101,23 @@ function setAudioGain(sourceId: string, event: Event): void {
             <strong>{{ getPersonLabel(source) }}</strong>
             <small>{{ getConnectionLabel(source) }}</small>
           </span>
+          <div class="source-admission-control">
+            <span
+              class="source-stage-status"
+              :class="{ 'is-on-stage': isOnStage(source.id) }"
+              :aria-label="`${getPersonLabel(source)} is ${isOnStage(source.id) ? 'on air' : 'backstage'}`"
+            >
+              {{ isOnStage(source.id) ? "On air" : "Backstage" }}
+            </span>
+            <button
+              class="ghost-button mini"
+              type="button"
+              :aria-label="`${isOnStage(source.id) ? 'Remove' : 'Add'} ${getPersonLabel(source)} ${isOnStage(source.id) ? 'from' : 'to'} stage`"
+              @click="emit('source-admission-change', source.id, !isOnStage(source.id))"
+            >
+              {{ isOnStage(source.id) ? "Remove from stage" : "Add to stage" }}
+            </button>
+          </div>
           <button
             v-if="canConnect(source)"
             class="ghost-button mini"
@@ -130,6 +154,7 @@ function setAudioGain(sourceId: string, event: Event): void {
               />
               <output>{{ Math.round((getAudioControl(source.id)?.gain ?? 1) * 100) }}%</output>
             </label>
+            <small class="mix-scope-note">Programme audio only. Stage status is unchanged.</small>
           </div>
         </article>
       </div>

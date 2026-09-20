@@ -7,6 +7,7 @@ import {
   type ProgrammeAudioSourceState,
 } from "../audio/programmeAudioMixer";
 import { renderProgramCanvas } from "../canvas/programRenderer";
+import { createFrameCommitGuard } from "../canvas/frameCommitGuard";
 import {
   createRecordingFallbackBlob,
   type RecordingFallbackChunk,
@@ -52,6 +53,8 @@ import {
 } from "../live/publisherLease";
 import { useCanvasRenderLoop } from "../canvas/useCanvasRenderLoop";
 import { getHitTestLayerStack } from "../studio/layerStack";
+import { createProgrammeMonitor, type ProgrammeMonitor } from "../live/programmeMonitor";
+import { getRecordingOptions, type RecordingQuality } from "../recording/quality";
 import type {
   ActiveOverlay,
   ActiveSceneStinger,
@@ -123,6 +126,7 @@ const props = defineProps<{
   title: string;
   subtitle?: string;
   interactive?: boolean;
+  previewOnly?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -165,6 +169,11 @@ const recordingRecoveryActionId = ref("");
 const recordingRecoveryError = ref("");
 const recordingRecoveryStatus = ref("");
 const isLoadingRecordingRecovery = ref(false);
+const recordingQuality = ref<RecordingQuality>("high");
+const monitorError = ref("");
+let programmeMonitor: ProgrammeMonitor | undefined;
+let pendingProgrammeMonitor: ReturnType<typeof createProgrammeMonitor> | undefined;
+const frameCommitGuard = createFrameCommitGuard();
 const overlayPhaseStarts = new Map<string, { phase: ActiveOverlay["phase"]; startedAt: number }>();
 const overlayTransitionProgresses = new Map<string, number>();
 const overlayAnimations = new Map<string, MotionAnimationControls>();
@@ -302,9 +311,10 @@ async function paint(timestamp = performance.now()): Promise<void> {
     return;
   }
 
-  const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  const backingWidth = props.resolution.width * ratio;
-  const backingHeight = props.resolution.height * ratio;
+  // The backing buffer is the encoded output. Display density must not silently
+  // turn a 1080p show into a 4K capture or double rendering work on Retina screens.
+  const backingWidth = props.resolution.width;
+  const backingHeight = props.resolution.height;
 
   if (canvas.width !== backingWidth || canvas.height !== backingHeight) {
     canvas.width = backingWidth;
@@ -322,8 +332,9 @@ async function paint(timestamp = performance.now()): Promise<void> {
     return;
   }
 
-  bufferContext.setTransform(ratio, 0, 0, ratio, 0, 0);
-  await renderProgramCanvas(bufferContext, {
+  await frameCommitGuard.render(async () => {
+    bufferContext.setTransform(1, 0, 0, 1, 0, 0);
+    await renderProgramCanvas(bufferContext, {
     activeOverlays: props.activeOverlays,
     activeStinger: props.activeStinger,
     layers: props.layers,
@@ -335,12 +346,14 @@ async function paint(timestamp = performance.now()): Promise<void> {
     stingerProgress,
     stingerStartedAt,
     timestamp,
+    });
+    bufferContext.setTransform(1, 0, 0, 1, 0, 0);
+  }, () => {
+    if (isComponentUnmounted) return;
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, backingWidth, backingHeight);
+    context.drawImage(buffer, 0, 0);
   });
-  bufferContext.setTransform(1, 0, 0, 1, 0, 0);
-
-  context.setTransform(1, 0, 0, 1, 0, 0);
-  context.clearRect(0, 0, backingWidth, backingHeight);
-  context.drawImage(buffer, 0, 0);
 }
 
 function getBufferCanvas(width: number, height: number): HTMLCanvasElement {
@@ -373,6 +386,36 @@ function captureCanvasStream(): MediaStream | undefined {
   return canvasElement.value?.captureStream(props.resolution.fps);
 }
 
+async function openProgrammeMonitor(): Promise<void> {
+  if (props.previewOnly || pendingProgrammeMonitor) return;
+  if (programmeMonitor?.isOpen()) {
+    programmeMonitor.focus();
+    return;
+  }
+  monitorError.value = "";
+  // Open during the user's click, before awaiting audio permissions.
+  const popup = window.open("about:blank", "_blank", "popup,width=1280,height=760");
+  if (!popup) {
+    monitorError.value = "Allow popups for Studio to open the programme output.";
+    return;
+  }
+  const pending = createProgrammeMonitor(popup);
+  pendingProgrammeMonitor = pending;
+  let ownedTracks: MediaStreamTrack[] = [];
+  try {
+    const stream = await createProgrammeOutputStream((tracks) => { ownedTracks = tracks; }, true);
+    if (!stream || isComponentUnmounted) throw new Error("Programme output is unavailable.");
+    programmeMonitor = await pending.attach(stream);
+  } catch (error) {
+    pending.close();
+    monitorError.value = toErrorMessage(error);
+  } finally {
+    // The monitor has cloned these tracks; the shared programme audio remains alive.
+    for (const track of ownedTracks) track.stop();
+    pendingProgrammeMonitor = undefined;
+  }
+}
+
 async function toggleLocalRecording(): Promise<void> {
   if (isFinishingRecording.value || isStartingRecording.value) {
     return;
@@ -386,7 +429,7 @@ async function toggleLocalRecording(): Promise<void> {
 }
 
 async function startLocalRecording(): Promise<void> {
-  if (isStartingRecording.value || isLocalRecording.value) {
+  if (props.previewOnly || isStartingRecording.value || isLocalRecording.value) {
     return;
   }
   isStartingRecording.value = true;
@@ -446,7 +489,7 @@ async function startLocalRecording(): Promise<void> {
       return;
     }
 
-    mediaRecorder = new MediaRecorder(recordingStream, mimeType ? { mimeType } : undefined);
+    mediaRecorder = new MediaRecorder(recordingStream, getRecordingOptions(props.resolution, recordingQuality.value, mimeType));
     mediaRecorder.addEventListener("dataavailable", (event) => {
       if (event.data.size > 0) {
         const chunkIndex = recordingChunkIndex;
@@ -1462,6 +1505,7 @@ async function createRecordingStream(): Promise<MediaStream | undefined> {
 
 async function createProgrammeOutputStream(
   setOwnedVideoTracks: (tracks: MediaStreamTrack[]) => void,
+  allowSilentMonitor = false,
 ): Promise<MediaStream | undefined> {
   const canvasStream = captureCanvasStream();
   if (!canvasStream) {
@@ -1475,7 +1519,7 @@ async function createProgrammeOutputStream(
     const audioTrack = requireLiveProgrammeAudioTrack(
       audioReady,
       audioReady ? programmeAudioMixer.getOutputTrack() : undefined,
-      programmeAudioMixer.hasAudibleSource(),
+      allowSilentMonitor || programmeAudioMixer.hasAudibleSource(),
     );
     removeProgrammeAudioUnlockListeners();
     return new MediaStream([...videoTracks, audioTrack]);
@@ -1678,12 +1722,30 @@ watch(
 watch(
   () => [props.layers, props.isRecording, props.resolution],
   () => {
+    frameCommitGuard.invalidate();
     updateCanvasDisplaySize();
     if (!props.isPlaying) {
       renderLoop.queuePaint();
     }
   },
-  { deep: true },
+  { deep: true, flush: "sync" },
+);
+
+watch(
+  () => props.layers.filter((layer) => layer.enabled && layer.sourceId).map((layer) => layer.sourceId).sort().join("\u0000"),
+  () => {
+    frameCommitGuard.invalidate();
+    // Drop the previously displayed frame immediately when admission changes.
+    // Waiting for an HTML overlay must not leave a removed guest on screen.
+    const canvas = canvasElement.value;
+    const context = canvas?.getContext("2d");
+    if (canvas && context) {
+      context.fillStyle = "#000";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    renderLoop.queuePaint();
+  },
+  { flush: "sync" },
 );
 
 watch(
@@ -1715,11 +1777,12 @@ watch(
 watch(
   () => props.mediaStreams,
   (streams) => {
+    frameCommitGuard.invalidate();
     const currentStreams = streams ?? new Map();
     syncMediaVideoElements(currentStreams);
     renderLoop.queuePaint();
   },
-  { immediate: true },
+  { immediate: true, flush: "sync" },
 );
 
 watch(
@@ -1736,9 +1799,11 @@ onMounted(() => {
   window.addEventListener("pagehide", stopOwnedLivePublishingForTeardown);
   window.addEventListener("pagehide", preserveLocalRecordingForPageHide);
   document.addEventListener("visibilitychange", flushLocalRecordingForVisibilityChange);
-  addProgrammeAudioUnlockListeners();
-  startProgrammeAudioMeter();
-  void refreshRecordingRecoveryArtifacts();
+  if (!props.previewOnly) {
+    addProgrammeAudioUnlockListeners();
+    startProgrammeAudioMeter();
+    void refreshRecordingRecoveryArtifacts();
+  }
   frameResizeObserver = new ResizeObserver((entries) => {
     const entry = entries[0];
     if (!entry) {
@@ -1756,6 +1821,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isComponentUnmounted = true;
+  pendingProgrammeMonitor?.close();
+  programmeMonitor?.close();
   window.removeEventListener("pagehide", stopOwnedLivePublishingForTeardown);
   window.removeEventListener("pagehide", preserveLocalRecordingForPageHide);
   document.removeEventListener("visibilitychange", flushLocalRecordingForVisibilityChange);
@@ -1975,12 +2042,16 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         <strong>{{ title }}</strong>
         <span>{{ subtitle ?? "HTML compositor" }}</span>
       </div>
-      <div class="canvas-actions">
+      <div v-if="!previewOnly" class="canvas-actions">
+        <button v-if="!previewOnly" class="secondary-button compact" type="button" @click="openProgrammeMonitor">
+          Programme output
+        </button>
+        <span v-if="monitorError" role="alert" class="recording-upload-state error">{{ monitorError }}</span>
         <button class="secondary-button compact" type="button" @click="exportPng">
           Export PNG
         </button>
         <button
-          v-if="canPublishLive"
+          v-if="canPublishLive && !previewOnly"
           class="record-button compact"
           :class="{ active: livePublishStatus === 'live' }"
           type="button"
@@ -1996,7 +2067,15 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
         >
           {{ liveStatusText }}
         </span>
+        <label v-if="!previewOnly" class="recording-quality">
+          Recording quality
+          <select v-model="recordingQuality" :disabled="isLocalRecording || isStartingRecording || isFinishingRecording">
+            <option value="standard">Standard</option>
+            <option value="high">High</option>
+          </select>
+        </label>
         <button
+          v-if="!previewOnly"
           class="record-button compact"
           :class="{ active: isLocalRecording }"
           type="button"
@@ -2028,6 +2107,7 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
           Status
         </a>
         <div
+          v-if="!previewOnly"
           class="canvas-meter"
           role="meter"
           aria-label="Mixed programme audio level"
@@ -2139,3 +2219,9 @@ function updateCanvasDisplaySize(width = frameElement.value?.clientWidth ?? 0, h
     </div>
   </section>
 </template>
+
+<style scoped>
+.recording-quality { display: grid; gap: 3px; font-size: 10px; color: #b7c4cd; }
+.recording-quality select { color: #edf4f8; background: #171d27; border: 1px solid #465366; border-radius: 6px; padding: 4px 6px; font: inherit; font-size: 12px; }
+.recording-quality select:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+</style>

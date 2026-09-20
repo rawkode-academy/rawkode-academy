@@ -2,6 +2,7 @@ import { buildLowerThirdHtml } from "../lowerThird";
 import type { StudioLayer, StudioScene, StudioSource, StudioState } from "../types";
 import { getDynamicGridBounds, getScreenshareCameraBounds } from "./layouts";
 import { compileScenes, type SceneDefinition } from "./scenes/sceneDsl";
+import { reconcileOnStageSourceIds } from "./sourceAdmission";
 
 const RUNTIME_SOURCE_TYPES = new Set<StudioSource["type"]>(["audio", "camera", "screen"]);
 const MANUAL_BOUNDS_SETTING = "studioManualBounds";
@@ -46,27 +47,23 @@ export function reconcileStudioSources(
   const previousLayers = new Map(previousDocument.layers.map((layer) => [layer.id, layer]));
   const currentLayers = new Map(state.layers.map((layer) => [layer.id, layer]));
   const sourcesById = new Map(sources.map((source) => [source.id, source]));
-  const scenes = nextDocument.scenes.map((scene) =>
+  const compiledScenes = nextDocument.scenes.map((scene) =>
     reconcileScene(scene, state.scenes.find((candidate) => candidate.id === scene.id))
   );
   let layers = nextDocument.layers.map((layer) =>
     reconcileLayer(layer, currentLayers.get(layer.id), previousLayers.get(layer.id), sourcesById)
   );
+  const compiledSceneIds = new Set(nextDocument.scenes.map((scene) => scene.id));
+  const customScenes = state.scenes.filter((scene) => scene.isCustom && !compiledSceneIds.has(scene.id));
+  const customLayerIds = new Set(customScenes.flatMap((scene) => scene.layerIds));
+  const compiledLayerIds = new Set(layers.map((layer) => layer.id));
+  layers = [
+    ...layers,
+    ...state.layers.filter((layer) => customLayerIds.has(layer.id) && !compiledLayerIds.has(layer.id)),
+  ];
+  const scenes = reconcileSceneOrder(state.scenes, [...compiledScenes, ...customScenes]);
   layers = applyAutomaticLayouts(layers, scenes, state.resolution);
   const activeScreenShareSourceId = reconcileActiveScreenShareSourceId(state, sources, layers);
-  const activeScreenShareSource = sourcesById.get(activeScreenShareSourceId);
-
-  if (activeScreenShareSource?.type === "screen") {
-    layers = layers.map((layer) =>
-      layer.type === "screen"
-        ? {
-            ...layer,
-            sourceId: activeScreenShareSource.id,
-            label: activeScreenShareSource.label ?? activeScreenShareSource.name,
-          }
-        : layer
-    );
-  }
 
   const layerIds = new Set(layers.map((layer) => layer.id));
   const selectedLayerId = layerIds.has(state.selectedLayerId)
@@ -81,10 +78,26 @@ export function reconcileStudioSources(
         ? state.htmlDraft
         : layers.find((layer) => layer.id === selectedLayerId)?.html ?? "",
     layers,
+    onStageSourceIds: reconcileOnStageSourceIds(state.onStageSourceIds, sources),
     scenes,
     selectedLayerId,
     sources,
   };
+}
+
+function reconcileSceneOrder(
+  previousScenes: readonly StudioScene[],
+  availableScenes: readonly StudioScene[],
+): StudioScene[] {
+  const availableById = new Map(availableScenes.map((scene) => [scene.id, scene]));
+  const ordered = previousScenes
+    .map((scene) => availableById.get(scene.id))
+    .filter((scene): scene is StudioScene => Boolean(scene));
+  const orderedIds = new Set(ordered.map((scene) => scene.id));
+  return [
+    ...ordered,
+    ...availableScenes.filter((scene) => !orderedIds.has(scene.id)),
+  ];
 }
 
 function reconcileSourceList(
@@ -155,8 +168,11 @@ function reconcileLayer(
   const lockedWasEdited = preserveAllEditableProperties || currentLayer.locked !== previousCompiledLayer.locked;
   const opacityWasEdited = preserveAllEditableProperties || currentLayer.opacity !== previousCompiledLayer.opacity;
   const sourceWasEdited = preserveAllEditableProperties || currentLayer.sourceId !== previousCompiledLayer.sourceId;
+  const preserveUnavailableScreenSource =
+    compiledLayer.type === "screen" && sourceWasEdited && Boolean(currentLayer.sourceId);
   const preservedSourceId =
-    sourceWasEdited && currentLayer.sourceId && sourcesById.has(currentLayer.sourceId)
+    sourceWasEdited && currentLayer.sourceId &&
+      (sourcesById.has(currentLayer.sourceId) || preserveUnavailableScreenSource)
       ? currentLayer.sourceId
       : compiledLayer.sourceId;
   const preservedSource = preservedSourceId ? sourcesById.get(preservedSourceId) : undefined;

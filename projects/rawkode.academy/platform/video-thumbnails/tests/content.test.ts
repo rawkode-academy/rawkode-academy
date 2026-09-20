@@ -42,11 +42,11 @@ Body`);
 			commitSha: "test-sha",
 		});
 		const job = jobs.find(
-			(candidate) => candidate.videoId === "7f1dfedcbf38a19375306862",
+			(candidate) => candidate.videoId === "ki0qbn121pdjly5f5vtvii1m",
 		);
 
 		expect(job).toMatchObject({
-			videoId: "7f1dfedcbf38a19375306862",
+			videoId: "ki0qbn121pdjly5f5vtvii1m",
 			tagline: "Peer-to-peer apps, built from first principles",
 			source: {
 				commitSha: "test-sha",
@@ -61,6 +61,32 @@ Body`);
 		});
 		expect(job?.technology.iconSvg).toContain("<svg");
 		expect(job?.technology.terms).toContain("peer-to-peer");
+	});
+
+	it("discovers the scheduled Kueue session with its canonical icon", async () => {
+		const { jobs } = await discoverThumbnailJobs(repoRoot, {
+			commitSha: "test-sha",
+		});
+		const job = jobs.find(
+			(candidate) => candidate.videoId === "elpqrlouhe220jyf5tqr65vm",
+		);
+
+		expect(job).toMatchObject({
+			videoId: "elpqrlouhe220jyf5tqr65vm",
+			tagline: "Kubernetes-native job queueing, hands-on",
+			source: {
+				commitSha: "test-sha",
+				trigger: "github-actions",
+				contentPath:
+					"content/videos/shows/rawkode-live/2026/hands-on-introduction-to-kueue.md",
+			},
+			technology: {
+				id: "kueue",
+				name: "Kueue",
+			},
+		});
+		expect(job?.technology.iconSvg).toContain("<svg");
+		expect(job?.technology.terms).toContain("ClusterQueue");
 	});
 
 	it("builds canonical public thumbnail URLs", () => {

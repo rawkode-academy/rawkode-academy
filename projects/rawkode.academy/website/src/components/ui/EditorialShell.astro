@@ -1,4 +1,6 @@
 ---
+import PageMasthead from "@/components/ui/PageMasthead.astro";
+
 interface Props {
 	eyebrow?: string;
 	title: string;
@@ -10,14 +12,14 @@ const { eyebrow, title, lede, compact = false } = Astro.props as Props;
 ---
 
 <div class:list={["editorial-shell", { "editorial-shell--compact": compact }]}>
-	<header class="editorial-shell__masthead">
-		{eyebrow && <p class="editorial-kicker">{eyebrow}</p>}
-		<div class="editorial-shell__masthead-grid">
-			<h1 class="editorial-shell__title">{title}</h1>
-			{lede && <p class="editorial-shell__lede">{lede}</p>}
-		</div>
-		<slot name="actions" />
-	</header>
+	<PageMasthead
+		section={eyebrow}
+		title={title}
+		dek={lede}
+		variant={compact ? "collection" : "detail"}
+	>
+		<Fragment slot="actions"><slot name="actions" /></Fragment>
+	</PageMasthead>
 	<slot />
 </div>
 

@@ -172,8 +172,8 @@ describe("source reconciliation", () => {
     expect(updated.sources.some((source) => source.id === "realtimekit-audio-alice")).toBe(true);
     expect(updated.activeScreenShareSourceId).toBe("display-capture-main");
     expect(getSceneLayers(updated, "screenshare").find((layer) => layer.type === "screen")).toMatchObject({
-      label: "Main display",
-      sourceId: "display-capture-main",
+      label: "Screen Share",
+      sourceId: "source-host-screen-share",
     });
   });
 
@@ -273,7 +273,8 @@ describe("source reconciliation", () => {
       authoritativeRuntimeSource: "realtimekit",
       sources: firstSources,
     });
-    const transitioning = reduceStudioState(sourced, { type: "scene.select", sceneId: "guests" });
+    const staged = reduceStudioState(sourced, { type: "scene.select", sceneId: "guests" });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
     const guests = reduceStudioState(transitioning, {
       type: "stinger.midpoint",
       generation: transitioning.activeStinger?.generation,
@@ -296,7 +297,8 @@ describe("source reconciliation", () => {
       placement: "before",
     });
     const shown = reduceStudioState(reordered, { type: "lowerThird.show" });
-    const withStinger = reduceStudioState(shown, { type: "scene.select", sceneId: "screenshare" });
+    const screenshareStaged = reduceStudioState(shown, { type: "scene.select", sceneId: "screenshare" });
+    const withStinger = reduceStudioState(screenshareStaged, { type: "scene.take" });
     const activeOverlay = withStinger.activeOverlays["guests-lower-third"];
     const activeStinger = withStinger.activeStinger;
     const lifecycleGeneration = withStinger.lifecycleGeneration;
@@ -339,7 +341,7 @@ describe("source reconciliation", () => {
     expect(reconciled.lifecycleGeneration).toBe(lifecycleGeneration);
   });
 
-  it("keeps a selected screen while present and falls back when it disappears", () => {
+  it("keeps a missing on-air screen blank instead of substituting another admitted screen", () => {
     const host = camera("participant-host", "Host", "hosts");
     const displayA = screen("display-a", "Display A");
     const displayB = screen("display-b", "Display B");
@@ -348,7 +350,18 @@ describe("source reconciliation", () => {
       authoritativeRuntimeSource: "realtimekit",
       sources: [host, displayA, displayB],
     });
-    const selected = reduceStudioState(sourced, {
+    const displayAAdmitted = reduceStudioState(sourced, {
+      type: "source.admission.set",
+      sourceId: displayA.id,
+      admitted: true,
+    });
+    const admitted = reduceStudioState(displayAAdmitted, {
+      type: "source.admission.set",
+      sourceId: displayB.id,
+      admitted: true,
+    });
+    const staged = reduceStudioState(admitted, { type: "scene.select", sceneId: "screenshare" });
+    const selected = reduceStudioState(staged, {
       type: "screenShare.source.select",
       sourceId: displayB.id,
       name: displayB.name,
@@ -364,15 +377,19 @@ describe("source reconciliation", () => {
     expect(getSceneLayers(preserved, "screenshare").find((layer) => layer.type === "screen")?.sourceId)
       .toBe(displayB.id);
 
-    const removed = reduceStudioState(preserved, {
+    const taking = reduceStudioState(preserved, { type: "scene.take" });
+    const onProgram = reduceStudioState(taking, { type: "stinger.midpoint" });
+    const removed = reduceStudioState(onProgram, {
       type: "sources.reconcile",
       authoritativeRuntimeSource: "realtimekit",
-      sources: [host],
+      sources: [host, displayA],
     });
 
-    expect(removed.activeScreenShareSourceId).toBe("source-host-screen-share");
+    expect(removed.activeScreenShareSourceId).toBe(displayA.id);
     expect(getSceneLayers(removed, "screenshare").find((layer) => layer.type === "screen")?.sourceId)
-      .toBe("source-host-screen-share");
+      .toBe(displayB.id);
+    expect(removed.onStageSourceIds).toContain(displayA.id);
+    expect(removed.onStageSourceIds).not.toContain(displayB.id);
   });
 
   it("selects a remaining preview layer when the selected participant disappears", () => {
@@ -383,7 +400,8 @@ describe("source reconciliation", () => {
       authoritativeRuntimeSource: "realtimekit",
       sources: [host, guest],
     });
-    const transitioning = reduceStudioState(sourced, { type: "scene.select", sceneId: "guests" });
+    const staged = reduceStudioState(sourced, { type: "scene.select", sceneId: "guests" });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
     const guests = reduceStudioState(transitioning, {
       type: "stinger.midpoint",
       generation: transitioning.activeStinger?.generation,
@@ -400,5 +418,30 @@ describe("source reconciliation", () => {
     expect(reconciled.selectedLayerId).toBe("guests-lower-third");
     expect(reconciled.layers.some((layer) => layer.id === reconciled.selectedLayerId)).toBe(true);
     expect(selected.layers.some((layer) => layer.id === "guests-participant-guest")).toBe(true);
+  });
+
+  it("preserves custom scenes and their edited layers during runtime reconciliation", () => {
+    const added = reduceStudioState(createInitialStudioState(), { type: "scene.add" });
+    const customScene = getScene(added, added.previewSceneId)!;
+    const customLayerId = customScene.layerIds.find((id) =>
+      added.layers.find((layer) => layer.id === id)?.type === "remotion"
+    )!;
+    const selected = reduceStudioState(added, { type: "layer.select", layerId: customLayerId });
+    const edited = reduceStudioState(selected, { type: "layer.opacity.update", value: 0.42 });
+
+    const reconciled = reconcileStudioSources(
+      edited,
+      [camera("participant-host", "Host", "hosts")],
+      STUDIO_SCENE_DEFINITIONS,
+      { authoritativeRuntimeSource: "realtimekit" },
+    );
+
+    expect(getScene(reconciled, customScene.id)).toEqual(customScene);
+    expect(reconciled.scenes.map((scene) => scene.id)).toEqual(edited.scenes.map((scene) => scene.id));
+    expect(reconciled.layers.find((layer) => layer.id === customLayerId)).toMatchObject({
+      id: customLayerId,
+      opacity: 0.42,
+      type: "remotion",
+    });
   });
 });

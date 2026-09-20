@@ -3,10 +3,11 @@ import { createInitialStudioState } from "./seed";
 import { reduceStudioState } from "./studioMachine";
 
 function moveSceneToProgram(sceneId: string) {
-  const transitioning = reduceStudioState(createInitialStudioState(), {
+  const staged = reduceStudioState(createInitialStudioState(), {
     type: "scene.select",
     sceneId,
   });
+  const transitioning = reduceStudioState(staged, { type: "scene.take" });
   const generation = transitioning.activeStinger?.generation;
 
   expect(generation).toEqual(expect.any(Number));
@@ -18,39 +19,45 @@ function moveSceneToProgram(sceneId: string) {
 }
 
 describe("studioMachine lifecycle guards", () => {
-  it("cancels an in-flight stinger when the current program scene is selected", () => {
-    const transitioning = reduceStudioState(createInitialStudioState(), {
+  it("does not interrupt an in-flight stinger with another preview selection", () => {
+    const staged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
     const staleGeneration = transitioning.activeStinger?.generation;
 
-    const cancelled = reduceStudioState(transitioning, {
+    const ignored = reduceStudioState(transitioning, {
       type: "scene.select",
       sceneId: "intro",
     });
 
-    expect(cancelled.previewSceneId).toBe("intro");
-    expect(cancelled.programSceneId).toBe("intro");
-    expect(cancelled.activeStinger).toBeUndefined();
-    expect(
-      reduceStudioState(cancelled, {
-        type: "stinger.midpoint",
-        generation: staleGeneration,
-      }),
-    ).toBe(cancelled);
+    expect(ignored).toBe(transitioning);
+    expect(ignored.previewSceneId).toBe("monologue");
+    expect(ignored.programSceneId).toBe("intro");
+    expect(ignored.activeStinger?.generation).toBe(staleGeneration);
   });
 
   it("ignores callbacks from an older stinger generation", () => {
-    const first = reduceStudioState(createInitialStudioState(), {
+    const firstStaged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const first = reduceStudioState(firstStaged, { type: "scene.take" });
     const firstGeneration = first.activeStinger?.generation;
-    const second = reduceStudioState(first, {
+    const firstMidpoint = reduceStudioState(first, {
+      type: "stinger.midpoint",
+      generation: firstGeneration,
+    });
+    const firstFinished = reduceStudioState(firstMidpoint, {
+      type: "stinger.finished",
+      generation: firstGeneration,
+    });
+    const secondStaged = reduceStudioState(firstFinished, {
       type: "scene.select",
       sceneId: "guests",
     });
+    const second = reduceStudioState(secondStaged, { type: "scene.take" });
     const secondGeneration = second.activeStinger?.generation;
 
     expect(secondGeneration).toBeGreaterThan(firstGeneration ?? 0);
@@ -81,10 +88,11 @@ describe("studioMachine lifecycle guards", () => {
   });
 
   it("keeps generation-less stinger callbacks backward compatible", () => {
-    const transitioning = reduceStudioState(createInitialStudioState(), {
+    const staged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
 
     const midpoint = reduceStudioState(transitioning, { type: "stinger.midpoint" });
 

@@ -1,7 +1,7 @@
 ---
 import UserHeader from "@/components/auth/user-header.astro";
 import Footer from "@/components/footer/Footer.astro";
-import Sidebar from "@/components/sidebar/Sidebar.astro";
+import PublicationNav from "@/components/navigation/PublicationNav.astro";
 import SkipLink from "@/components/common/SkipLink.astro";
 import { ThemeToggle } from "@/components/ui";
 ---
@@ -16,7 +16,7 @@ import { ThemeToggle } from "@/components/ui";
 				<button
 					class="ed-topbar__icon-btn focus-ring hidden md:block"
 					id="sidebar-toggle-btn"
-					aria-label="Toggle sidebar"
+					aria-label="Open navigation"
 				>
 					<svg
 						class="w-5 h-5"
@@ -36,7 +36,7 @@ import { ThemeToggle } from "@/components/ui";
 				<button
 					class="ed-topbar__icon-btn focus-ring md:hidden"
 					id="mobile-sidebar-btn"
-					aria-label="Toggle mobile menu"
+					aria-label="Open navigation"
 				>
 					<svg
 						class="w-6 h-6"
@@ -66,7 +66,14 @@ import { ThemeToggle } from "@/components/ui";
 				</a>
 			</div>
 
-			<!-- Center section - search trigger. A real link to /search so
+			<nav class="ed-topbar__primary" aria-label="Primary navigation">
+				<a href="/watch">Watch</a>
+				<a href="/read">Read</a>
+				<a href="/courses">Courses</a>
+				<a href="/technology/matrix">Matrix</a>
+			</nav>
+
+			<!-- Search trigger. A real link to /search so
 			     the path works without JavaScript; the palette script
 			     upgrades the click into the command palette. -->
 			<div class="ed-topbar__center">
@@ -114,44 +121,22 @@ import { ThemeToggle } from "@/components/ui";
 		</div>
 	</nav>
 
-	<Sidebar />
+	<PublicationNav />
 
 	<div class="flex flex-col min-h-screen">
 		<div class="flex flex-1">
-			<main id="main-content" class="w-full h-auto pt-16 md:ml-64 transition-card">
+			<main id="main-content" class="w-full h-auto pt-16">
 				<slot />
 			</main>
 		</div>
-		<div id="footer-container" class="md:ml-64 transition-card">
+		<div id="footer-container">
 			<Footer />
 		</div>
 	</div>
 
 	<style>
-		:global(:root) {
-			--ed-sidebar-collapsed-width: 3.5rem;
-			--ed-sidebar-expanded-width: 16rem;
-			--ed-sidebar-current-width: var(--ed-sidebar-expanded-width);
-		}
-
-		@media (min-width: 768px) {
-			#main-content,
-			#footer-container {
-				margin-left: var(--ed-sidebar-current-width);
-			}
-
-			#footer-container {
-				width: calc(100% - var(--ed-sidebar-current-width));
-			}
-		}
-
-		@media (max-width: 767px) {
-			#main-content,
-			#footer-container {
-				margin-left: 0;
-				width: 100%;
-			}
-		}
+		#main-content,
+		#footer-container { width: 100%; }
 
 		/* ────────────────────────────────────────────────────────────
 		   Editorial top bar — flat paper with single hairline border,
@@ -249,6 +234,33 @@ import { ThemeToggle } from "@/components/ui";
 			display: none;
 			flex: 1;
 			max-width: 34rem;
+		}
+
+		.ed-topbar__primary {
+			display: none;
+			align-items: stretch;
+			align-self: stretch;
+			border-left: 1px solid var(--editorial-hairline);
+		}
+
+		.ed-topbar__primary a {
+			display: inline-flex;
+			align-items: center;
+			padding: 0 0.9rem;
+			border-right: 1px solid var(--editorial-hairline);
+			color: var(--editorial-ink-soft);
+			font-size: 0.82rem;
+			font-weight: 600;
+			text-decoration: none;
+		}
+
+		.ed-topbar__primary a:hover {
+			background: var(--surface-card-muted);
+			color: var(--editorial-ink);
+		}
+
+		@media (min-width: 1080px) {
+			.ed-topbar__primary { display: flex; }
 		}
 
 		@media (min-width: 768px) {
@@ -351,6 +363,10 @@ import { ThemeToggle } from "@/components/ui";
 				min-height: 36px;
 				padding-inline: 0.75rem;
 				font-size: 0.6875rem;
+			}
+
+			.ed-topbar__theme-toggle {
+				display: none;
 			}
 		}
 

@@ -7,6 +7,8 @@ const props = defineProps<{
   activeScreenShareSourceId: string;
   audioControls?: Record<string, StudioAudioMixControl>;
   mediaStreams?: Map<string, MediaStream>;
+  /** Sources explicitly admitted by the producer. Omission is deliberately backstage. */
+  onStageSourceIds?: string[];
   sources: StudioSource[];
 }>();
 
@@ -16,6 +18,7 @@ const emit = defineEmits<{
   "audio-mute-change": [sourceId: string, muted: boolean];
   "retry-screen-share": [sourceId: string];
   "select-screen-share": [sourceId: string];
+  "source-admission-change": [sourceId: string, admitted: boolean];
   "stop-screen-share": [sourceId: string];
 }>();
 
@@ -24,7 +27,7 @@ const screenSources = computed(() => props.sources.filter((source) => source.typ
 function getScreenStatus(source: StudioSource): string {
   const status = source.settings?.captureStatus;
   if (status === "ready") {
-    return source.id === props.activeScreenShareSourceId ? "Live source" : "Ready";
+    return source.id === props.activeScreenShareSourceId ? "Selected for editing" : "Capture ready";
   }
 
   if (status === "requesting") {
@@ -63,6 +66,10 @@ function canRetryScreen(source: StudioSource): boolean {
 
 function getAudioControl(sourceId: string): StudioAudioMixControl | undefined {
   return props.audioControls?.[sourceId];
+}
+
+function isOnStage(sourceId: string): boolean {
+  return props.onStageSourceIds?.includes(sourceId) === true;
 }
 
 function setAudioGain(sourceId: string, event: Event): void {
@@ -117,6 +124,23 @@ function getStream(source: StudioSource): MediaStream | undefined {
           </span>
         </button>
         <div class="screen-share-actions">
+          <div class="source-admission-control screen-stage-control">
+            <span
+              class="source-stage-status"
+              :class="{ 'is-on-stage': isOnStage(source.id) }"
+              :aria-label="`${source.name} is ${isOnStage(source.id) ? 'on air' : 'backstage'}`"
+            >
+              {{ isOnStage(source.id) ? "On air" : "Backstage" }}
+            </span>
+            <button
+              class="ghost-button mini"
+              type="button"
+              :aria-label="`${isOnStage(source.id) ? 'Remove' : 'Add'} ${source.name} ${isOnStage(source.id) ? 'from' : 'to'} stage`"
+              @click="emit('source-admission-change', source.id, !isOnStage(source.id))"
+            >
+              {{ isOnStage(source.id) ? "Remove from stage" : "Add to stage" }}
+            </button>
+          </div>
           <div
             v-if="getAudioControl(source.id)"
             class="screen-share-audio-controls"
@@ -145,6 +169,7 @@ function getStream(source: StudioSource): MediaStream | undefined {
               />
               <output>{{ Math.round((getAudioControl(source.id)?.gain ?? 1) * 100) }}%</output>
             </label>
+            <small class="mix-scope-note">Programme audio only. Stage status is unchanged.</small>
           </div>
           <button
             v-if="canRetryScreen(source)"

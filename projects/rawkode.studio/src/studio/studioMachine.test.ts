@@ -89,20 +89,52 @@ describe("studioMachine", () => {
     })).toBe(muted);
   });
 
-  it("switches selected scenes to program at stinger midpoint while designing", () => {
-    const transitioning = reduceStudioState(createInitialStudioState(), {
+  it("revokes admission on departure even when the durable source is in the same snapshot", () => {
+    const source: StudioSource = {
+      id: "participant-alice",
+      name: "Alice",
+      type: "camera",
+      status: "ready",
+      roles: ["guests"],
+    };
+    const sourced = reduceStudioState(createInitialStudioState(), {
+      type: "sources.reconcile",
+      sources: [source],
+    });
+    const admitted = reduceStudioState(sourced, {
+      type: "source.admission.set",
+      sourceId: source.id,
+      admitted: true,
+    });
+    const departed = reduceStudioState(admitted, {
+      type: "sources.reconcile",
+      sources: [source],
+      departedSourceIds: [source.id],
+    });
+
+    expect(admitted.onStageSourceIds).toContain(source.id);
+    expect(departed.sources).toContainEqual(source);
+    expect(departed.onStageSourceIds).not.toContain(source.id);
+  });
+
+  it("keeps a selected scene in preview until the producer takes it", () => {
+    const staged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
 
-    expect(transitioning.previewSceneId).toBe("monologue");
-    expect(transitioning.programSceneId).toBe("intro");
+    expect(staged.previewSceneId).toBe("monologue");
+    expect(staged.programSceneId).toBe("intro");
+    expect(staged.activeStinger).toBeUndefined();
+    expect(staged.status).toBe("Monologue ready in preview");
+
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
     expect(transitioning.activeStinger).toMatchObject({
       fromSceneId: "intro",
       toSceneId: "monologue",
     });
     expect(getSelectedLayer(transitioning)?.id).toBe("monologue-lower-third");
-    expect(transitioning.status).toBe("Monologue transition started");
+    expect(transitioning.status).toBe("Taking Monologue");
 
     const midpoint = reduceStudioState(transitioning, { type: "stinger.midpoint" });
     expect(midpoint.programSceneId).toBe("monologue");
@@ -116,19 +148,40 @@ describe("studioMachine", () => {
     const recording = reduceStudioState(createInitialStudioState(), {
       type: "recording.toggle",
     });
-    const transitioning = reduceStudioState(recording, {
+    const staged = reduceStudioState(recording, {
       type: "scene.select",
       sceneId: "screenshare",
     });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
 
     expect(transitioning.phase).toBe("recording");
     expect(transitioning.previewSceneId).toBe("screenshare");
     expect(transitioning.programSceneId).toBe("intro");
-    expect(transitioning.status).toBe("Screenshare transition started");
+    expect(transitioning.status).toBe("Taking Screenshare");
 
     const midpoint = reduceStudioState(transitioning, { type: "stinger.midpoint" });
     expect(midpoint.programSceneId).toBe("screenshare");
     expect(midpoint.status).toBe("Screenshare on program");
+  });
+
+  it("creates editable custom scenes without changing programme", () => {
+    const initial = createInitialStudioState();
+    const staged = reduceStudioState(initial, { type: "scene.select", sceneId: "guests" });
+    const added = reduceStudioState(staged, { type: "scene.add" });
+    const custom = added.scenes.find((scene) => scene.id === added.previewSceneId);
+
+    expect(custom).toMatchObject({ name: "Scene 1", isCustom: true, layout: "dynamic-grid" });
+    expect(added.programSceneId).toBe("intro");
+    expect(custom?.layerIds).toHaveLength(getScene(initial, "guests")?.layerIds.length ?? 0);
+    expect(custom?.layerIds.every((id) => id.startsWith(`${custom.id}-`))).toBe(true);
+    expect(custom?.layerIds.every((id) => added.layers.some((layer) => layer.id === id))).toBe(true);
+
+    const renamed = reduceStudioState(added, {
+      type: "scene.rename",
+      sceneId: custom!.id,
+      name: "  Guest Q&A  ",
+    });
+    expect(getScene(renamed, custom!.id)?.name).toBe("Guest Q&A");
   });
 
   it("compiles Remotion scenes and motion-transition stingers from TypeScript scene definitions", () => {
@@ -201,10 +254,11 @@ describe("studioMachine", () => {
           : scene,
       ),
     };
-    const switched = reduceStudioState(state, {
+    const staged = reduceStudioState(state, {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const switched = reduceStudioState(staged, { type: "scene.take" });
 
     expect(switched.programSceneId).toBe("intro");
     expect(switched.activeStinger).toEqual({
@@ -467,10 +521,11 @@ describe("studioMachine", () => {
   });
 
   it("tracks lower-third overlay phases until the exit transition completes", () => {
-    const transitioning = reduceStudioState(createInitialStudioState(), {
+    const staged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
     const monologue = reduceStudioState(transitioning, { type: "stinger.midpoint" });
     const shown = reduceStudioState(
       reduceStudioState(monologue, {
@@ -552,7 +607,21 @@ describe("studioMachine", () => {
   });
 
   it("switches the screenshare scene to a runtime captured screen source", () => {
-    const state = reduceStudioState(createInitialStudioState(), {
+    const initial = createInitialStudioState();
+    const sourced = {
+      ...initial,
+      sources: [...initial.sources, {
+        id: "source-runtime-screen-1",
+        name: "Guest laptop",
+        type: "screen" as const,
+        status: "ready" as const,
+      }],
+    };
+    const staged = reduceStudioState(sourced, {
+      type: "scene.select",
+      sceneId: "screenshare",
+    });
+    const state = reduceStudioState(staged, {
       type: "screenShare.source.select",
       sourceId: "source-runtime-screen-1",
       name: "Guest laptop",
@@ -564,7 +633,85 @@ describe("studioMachine", () => {
       label: "Guest laptop",
       sourceId: "source-runtime-screen-1",
     });
-    expect(state.status).toBe("Guest laptop selected");
+    expect(state.status).toBe("Guest laptop selected in Screenshare preview");
+  });
+
+  it("keeps screen selection in preview isolated from an on-air screenshare", () => {
+    const initial = createInitialStudioState();
+    const sourced = {
+      ...initial,
+      sources: [
+        ...initial.sources,
+        { id: "display-a", name: "Display A", type: "screen" as const, status: "ready" as const },
+        { id: "display-b", name: "Display B", type: "screen" as const, status: "ready" as const },
+      ],
+    };
+    const screenshareStaged = reduceStudioState(sourced, { type: "scene.select", sceneId: "screenshare" });
+    const withDisplayA = reduceStudioState(screenshareStaged, {
+      type: "screenShare.source.select",
+      sourceId: "display-a",
+      name: "Display A",
+    });
+    const taking = reduceStudioState(withDisplayA, { type: "scene.take" });
+    const onProgram = reduceStudioState(taking, { type: "stinger.midpoint" });
+    const settled = reduceStudioState(onProgram, { type: "stinger.finished" });
+    const duplicated = reduceStudioState(settled, { type: "scene.duplicate", sceneId: "screenshare" });
+    const previewChanged = reduceStudioState(duplicated, {
+      type: "screenShare.source.select",
+      sourceId: "display-b",
+      name: "Display B",
+    });
+
+    expect(getSceneLayers(previewChanged, "screenshare").find((layer) => layer.type === "screen")?.sourceId)
+      .toBe("display-a");
+    expect(getSceneLayers(previewChanged, previewChanged.previewSceneId).find((layer) => layer.type === "screen")?.sourceId)
+      .toBe("display-b");
+    expect(previewChanged.programSceneId).toBe("screenshare");
+  });
+
+  it("blocks screen changes without an isolated preview and during transitions", () => {
+    const initial = createInitialStudioState();
+    const sourced = {
+      ...initial,
+      sources: [
+        ...initial.sources,
+        { id: "display-a", name: "Display A", type: "screen" as const, status: "ready" as const },
+        { id: "display-b", name: "Display B", type: "screen" as const, status: "ready" as const },
+      ],
+    };
+    const staged = reduceStudioState(sourced, { type: "scene.select", sceneId: "screenshare" });
+    const selected = reduceStudioState(staged, {
+      type: "screenShare.source.select",
+      sourceId: "display-a",
+      name: "Display A",
+    });
+    const taking = reduceStudioState(selected, { type: "scene.take" });
+    const onProgram = reduceStudioState(taking, { type: "stinger.midpoint" });
+    const settled = reduceStudioState(onProgram, { type: "stinger.finished" });
+    const blockedLiveChange = reduceStudioState(settled, {
+      type: "screenShare.source.select",
+      sourceId: "display-b",
+      name: "Display B",
+    });
+
+    expect(getSceneLayers(blockedLiveChange, "screenshare").find((layer) => layer.type === "screen")?.sourceId)
+      .toBe("display-a");
+    expect(blockedLiveChange.status).toContain("Duplicate or stage a different scene");
+
+    const duplicated = reduceStudioState(blockedLiveChange, {
+      type: "scene.duplicate",
+      sceneId: "screenshare",
+    });
+    const transition = reduceStudioState(duplicated, { type: "scene.take" });
+    const blockedTransitionChange = reduceStudioState(transition, {
+      type: "screenShare.source.select",
+      sourceId: "display-b",
+      name: "Display B",
+    });
+
+    expect(getSceneLayers(blockedTransitionChange, duplicated.previewSceneId)
+      .find((layer) => layer.type === "screen")?.sourceId).toBe("display-a");
+    expect(blockedTransitionChange.status).toContain("Finish the current transition");
   });
 
   it("expands guests dynamic grid when a camera is hidden", () => {
@@ -716,10 +863,11 @@ describe("studioMachine", () => {
   });
 
   it("renders comment input into the active scene lower third layer through an event", () => {
-    const transitioning = reduceStudioState(createInitialStudioState(), {
+    const staged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "monologue",
     });
+    const transitioning = reduceStudioState(staged, { type: "scene.take" });
     const monologue = reduceStudioState(transitioning, { type: "stinger.midpoint" });
     const withComment = reduceStudioState(
       reduceStudioState(monologue, {
@@ -744,10 +892,11 @@ describe("studioMachine", () => {
       }),
       { type: "lowerThird.show" },
     );
-    const outroTransition = reduceStudioState(createInitialStudioState(), {
+    const outroStaged = reduceStudioState(createInitialStudioState(), {
       type: "scene.select",
       sceneId: "outro",
     });
+    const outroTransition = reduceStudioState(outroStaged, { type: "scene.take" });
     const outro = reduceStudioState(outroTransition, { type: "stinger.midpoint" });
     const outroComment = reduceStudioState(
       reduceStudioState(outro, {

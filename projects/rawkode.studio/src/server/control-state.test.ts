@@ -74,6 +74,38 @@ describe("Studio control state", () => {
 		expect(() => serializeStudioControlState(state)).toThrow(StudioControlStateError);
 	});
 
+	it("requires explicit bounded admission of known media sources", () => {
+		const state = createInitialStudioState();
+		state.onStageSourceIds = ["source-host-camera"];
+		expect(isStudioControlState(state)).toBe(true);
+		for (const invalid of [
+			["missing"],
+			["source-stage-wash"],
+			["source-host-camera", "source-host-camera"],
+			[123],
+			"source-host-camera",
+			undefined,
+		]) {
+			expect(isStudioControlState({ ...state, onStageSourceIds: invalid })).toBe(false);
+		}
+	});
+
+	it("restores legacy snapshots with every contributor backstage", async () => {
+		const legacyState: Partial<StudioState> = createInitialStudioState();
+		delete legacyState.onStageSourceIds;
+		const database = createControlStateDatabase({
+			changes: 0,
+			latestRevision: 1,
+			latestState: legacyState as StudioState,
+		});
+
+		expect(isStudioControlState(legacyState)).toBe(false);
+		await expect(getStudioControlState(
+			{ STUDIO_DB: database.db } as StudioEnv,
+			"session-1",
+		)).resolves.toMatchObject({ state: { onStageSourceIds: [] } });
+	});
+
 	it("rejects duplicate identities and dangling scene references", () => {
 		const duplicateLayerState = createInitialStudioState();
 		duplicateLayerState.layers[1] = {

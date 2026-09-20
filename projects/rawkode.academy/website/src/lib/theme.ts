@@ -80,6 +80,16 @@ export function getColorScheme(): ColorScheme {
 function applyColorScheme(scheme: ColorScheme): void {
 	if (typeof window === "undefined") return;
 	document.documentElement.classList.toggle("dark", scheme === "dark");
+	document.documentElement.setAttribute("data-color-scheme", scheme);
+	const themeColor = document.querySelector?.(
+		'meta[name="theme-color"][data-light-color]',
+	) as HTMLMetaElement | null;
+	if (themeColor) {
+		themeColor.content =
+			scheme === "dark"
+				? (themeColor.dataset.darkColor ?? "#1b1b23")
+				: (themeColor.dataset.lightColor ?? "#f8f5ef");
+	}
 }
 
 /**

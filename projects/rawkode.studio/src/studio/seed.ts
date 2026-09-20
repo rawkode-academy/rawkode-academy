@@ -111,6 +111,7 @@ export function createInitialStudioState(): StudioState {
     resolution,
     activeScreenShareSourceId: "source-host-screen-share",
     audioMix: {},
+    onStageSourceIds: [],
     phase: "designing",
     sources,
     scenes: document.scenes,

@@ -1,0 +1,28 @@
+---
+interface Props {
+	width?: "prose" | "content" | "wide";
+	hasRail?: boolean;
+}
+
+const { width = "content", hasRail = false } = Astro.props as Props;
+---
+
+<div class:list={["detail-frame", `detail-frame--${width}`, { "detail-frame--rail": hasRail }]}>
+	<div class="detail-frame__main"><slot /></div>
+	{hasRail && <aside class="detail-frame__rail"><slot name="rail" /></aside>}
+</div>
+
+<style>
+	.detail-frame {
+		display: grid;
+		max-width: var(--layout-content);
+		margin: 0 auto;
+		padding: var(--space-page-pad-block) var(--space-page-pad-inline);
+	}
+	.detail-frame--prose { max-width: var(--layout-prose); }
+	.detail-frame--wide { max-width: var(--layout-wide); }
+	.detail-frame--rail { grid-template-columns: minmax(0, 1fr) minmax(15rem, 20rem); gap: clamp(2rem, 5vw, 5rem); }
+	.detail-frame__main { min-width: 0; }
+	.detail-frame__rail { min-width: 0; }
+	@media (max-width: 880px) { .detail-frame--rail { grid-template-columns: 1fr; } }
+</style>

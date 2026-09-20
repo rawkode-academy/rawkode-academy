@@ -8,6 +8,7 @@ import {
   type StudioEvent,
 } from "./studioMachine";
 import type { StudioState } from "../types";
+import { selectOnStageLayers } from "./sourceAdmission";
 import {
   resolveStudioControlStateConflict,
   shouldFlushStudioControlStateAfterSave,
@@ -67,10 +68,32 @@ export function useStudioMachine(
 
   const previewScene = computed(() => getScene(state.value, state.value.previewSceneId));
   const programScene = computed(() => getScene(state.value, state.value.programSceneId));
-  const previewLayers = computed(() => getSceneLayers(state.value, state.value.previewSceneId));
-  const programLayers = computed(() => getSceneLayers(state.value, state.value.programSceneId));
+  const previewLayers = computed(() => {
+    const scene = getScene(state.value, state.value.previewSceneId);
+    return selectOnStageLayers(
+      getSceneLayers(state.value, state.value.previewSceneId),
+      state.value.onStageSourceIds,
+      scene,
+      state.value.resolution,
+    );
+  });
+  const programLayers = computed(() => {
+    const scene = getScene(state.value, state.value.programSceneId);
+    return selectOnStageLayers(
+      getSceneLayers(state.value, state.value.programSceneId),
+      state.value.onStageSourceIds,
+      scene,
+      state.value.resolution,
+    );
+  });
   const selectedLayer = computed(() => getSelectedLayer(state.value));
   const hasStagedScene = computed(() => state.value.previewSceneId !== state.value.programSceneId);
+  const nextScene = computed(() => {
+    const currentIndex = state.value.scenes.findIndex(
+      (scene) => scene.id === state.value.programSceneId,
+    );
+    return state.value.scenes[currentIndex + 1];
+  });
   const isSynchronized = computed(() =>
     !synchronize || ["conflict", "ready", "saving"].includes(syncStatus.value),
   );
@@ -235,6 +258,7 @@ export function useStudioMachine(
     programLayers,
     selectedLayer,
     hasStagedScene,
+    nextScene,
     isSynchronized,
     remoteStateEpoch,
     revision,

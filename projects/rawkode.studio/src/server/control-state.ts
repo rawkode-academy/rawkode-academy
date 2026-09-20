@@ -13,6 +13,7 @@ import type {
 } from "../types";
 import { STUDIO_SCENE_DEFINITIONS } from "../studio/seed";
 import { reconcileStudioSources } from "../studio/sourceReconciliation";
+import { sourceRequiresAdmission } from "../studio/sourceAdmission";
 import {
 	getStudioSession,
 	getStudioUserGithubHandle,
@@ -313,6 +314,12 @@ export function isStudioControlState(value: unknown): value is StudioState {
 	if (!isResolution(value.resolution)) return false;
 	if (!isId(value.activeScreenShareSourceId)) return false;
 	if (!isAudioMix(value.audioMix)) return false;
+	if (
+		!Array.isArray(value.onStageSourceIds) ||
+		value.onStageSourceIds.length > maximumSources ||
+		!value.onStageSourceIds.every(isId) ||
+		new Set(value.onStageSourceIds).size !== value.onStageSourceIds.length
+	) return false;
 	if (!isStudioPhase(value.phase)) return false;
 	if (!isId(value.previewSceneId)) return false;
 	if (!isId(value.programSceneId)) return false;
@@ -329,6 +336,10 @@ export function isStudioControlState(value: unknown): value is StudioState {
 	if (!Array.isArray(value.sources) || value.sources.length > maximumSources) return false;
 	if (!value.layers.every(isStudioLayer)) return false;
 	if (!value.scenes.every(isStudioScene) || !value.sources.every(isStudioSource)) return false;
+	const admissibleSourceIds = new Set(
+		value.sources.filter(sourceRequiresAdmission).map((source) => source.id),
+	);
+	if (!value.onStageSourceIds.every((id) => admissibleSourceIds.has(id))) return false;
 	if (!hasUniqueIds(value.scenes) || !hasUniqueIds(value.layers) || !hasUniqueIds(value.sources)) {
 		return false;
 	}
@@ -409,13 +420,14 @@ function rowToSnapshot(row: StudioControlStateRow): StudioControlStateSnapshot {
 }
 
 export function normalizeStoredStudioControlState(value: unknown): unknown {
-	if (!isRecord(value) || value.audioMix !== undefined) {
+	if (!isRecord(value)) {
 		return value;
 	}
 
 	return {
 		...value,
-		audioMix: {},
+		...(value.audioMix === undefined ? { audioMix: {} } : {}),
+		...(value.onStageSourceIds === undefined ? { onStageSourceIds: [] } : {}),
 	};
 }
 
@@ -465,6 +477,7 @@ function isStudioLayer(value: unknown): value is StudioLayer {
 function isStudioScene(value: unknown): value is StudioScene {
 	if (!isRecord(value)) return false;
 	if (!isId(value.id) || !isNonEmptyBoundedString(value.name, maximumNameLength)) return false;
+	if (value.isCustom !== undefined && typeof value.isCustom !== "boolean") return false;
 	if (!Array.isArray(value.layerIds) || value.layerIds.length > maximumLayers) return false;
 	if (!value.layerIds.every(isId) || new Set(value.layerIds).size !== value.layerIds.length) return false;
 	if (value.layout !== undefined && (typeof value.layout !== "string" || !sceneLayouts.has(value.layout))) {

@@ -8,11 +8,12 @@ import StudioWidgets from "./components/StudioWidgets.vue";
 import { selectProgrammeAudioStreams } from "./audio/programmeAudioSources";
 import { useStudioMachine } from "./studio/useStudioMachine";
 import { shouldPersistOwnedScreenCleanup } from "./studio/localSourceOwnership";
-import type { ActiveOverlay, StudioAudioMixControl, StudioSource } from "./types";
+import type { ActiveOverlay, Bounds, StudioAudioMixControl, StudioSource } from "./types";
 
 type CaptureStatus = "blocked" | "ended" | "missing" | "ready" | "requesting" | "unavailable";
 type RoomMediaPayload = {
   authoritative: boolean;
+  departedSourceIds?: string[];
   sources: StudioSource[];
   streams: Map<string, MediaStream>;
 };
@@ -31,7 +32,11 @@ const {
   state,
   send,
   acknowledgeConflict,
+  hasStagedScene,
   programLayers,
+  programScene,
+  previewLayers,
+  previewScene,
   isSynchronized,
   remoteStateEpoch,
   syncConflictNotice,
@@ -65,6 +70,7 @@ let hostCaptureGeneration = 0;
 let isComponentUnmounted = false;
 const screenShareCaptureGenerations = new Map<string, number>();
 const runtimeOwnerId = crypto.randomUUID();
+const pendingDepartedSourceIds = new Set<string>();
 let ownedScreenCleanupSent = false;
 const activeStingerKey = computed(() => {
   const stinger = state.value.activeStinger;
@@ -116,11 +122,15 @@ const sourcesForUi = computed(() =>
     .map(withRuntimeMediaState)
     .filter(isVisibleRuntimeSource),
 );
+const programmeScreenShareSourceId = computed(() =>
+  programLayers.value.find((layer) => layer.type === "screen")?.sourceId ?? ""
+);
 const programmeMediaStreams = computed(() =>
   selectProgrammeAudioStreams(
     mediaStreams.value,
     sourcesForUi.value,
-    state.value.activeScreenShareSourceId,
+    programmeScreenShareSourceId.value,
+    state.value.onStageSourceIds,
   )
 );
 const programmeAudioControls = computed(() => {
@@ -144,6 +154,7 @@ onMounted(() => {
   updateWidgetMaxHeight();
   window.addEventListener("resize", updateWidgetMaxHeight);
   window.addEventListener("pagehide", persistOwnedScreenCleanup);
+  window.addEventListener("keydown", handleProductionShortcut);
   if (hasProductionControls.value) {
     void startHostCapture();
   }
@@ -151,6 +162,81 @@ onMounted(() => {
 
 function selectScene(id: string): void {
   send({ type: "scene.select", sceneId: id });
+}
+
+function selectLayer(id: string): void {
+  send({ type: "layer.select", layerId: id });
+}
+
+function updateLayerBounds(id: string, bounds: Bounds): void {
+  send({ type: "layer.bounds.update", layerId: id, bounds });
+}
+
+function takeScene(): void {
+  send({ type: "scene.take" });
+}
+
+function addScene(): void {
+  send({ type: "scene.add" });
+}
+
+function duplicateScene(sceneId: string): void {
+  send({ type: "scene.duplicate", sceneId });
+}
+
+function renameScene(sceneId: string, name: string): void {
+  send({ type: "scene.rename", sceneId, name });
+}
+
+function deleteScene(sceneId: string): void {
+  send({ type: "scene.delete", sceneId });
+}
+
+function moveScene(sceneId: string, direction: "up" | "down"): void {
+  send({ type: "scene.move", sceneId, direction });
+}
+
+function setSourceAdmission(sourceId: string, admitted: boolean): void {
+  send({ type: "source.admission.set", sourceId, admitted });
+}
+
+function handleProductionShortcut(event: KeyboardEvent): void {
+  if (
+    !hasProductionControls.value ||
+    event.defaultPrevented ||
+    event.repeat ||
+    isInteractiveTarget(event.target)
+  ) {
+    return;
+  }
+
+  if (
+    event.key === "Enter" &&
+    (event.ctrlKey || event.metaKey) &&
+    hasStagedScene.value &&
+    !state.value.activeStinger
+  ) {
+    event.preventDefault();
+    takeScene();
+    return;
+  }
+
+  const direction = event.key.toLowerCase() === "j" ? 1 : event.key.toLowerCase() === "k" ? -1 : 0;
+  if (!direction || event.metaKey || event.ctrlKey || event.altKey) return;
+  const currentIndex = state.value.scenes.findIndex((scene) => scene.id === state.value.previewSceneId);
+  const nextIndex = Math.min(Math.max(currentIndex + direction, 0), state.value.scenes.length - 1);
+  const nextScene = state.value.scenes[nextIndex];
+  if (nextScene && nextScene.id !== state.value.previewSceneId) {
+    event.preventDefault();
+    selectScene(nextScene.id);
+  }
+}
+
+function isInteractiveTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return target.isContentEditable || Boolean(target.closest(
+    "a, button, input, select, textarea, [role='button'], [role='link']",
+  ));
 }
 
 function setRecording(recording: boolean): void {
@@ -278,7 +364,15 @@ function retryScreenShare(sourceId: string): void {
 }
 
 function selectScreenShare(sourceId: string): void {
-  const source = getScreenShareSource(sourceId);
+  const source = sourcesForUi.value.find((candidate) => candidate.id === sourceId);
+  const preview = state.value.scenes.find((scene) => scene.id === state.value.previewSceneId);
+  const previewHasScreen = preview?.layerIds.some((layerId) =>
+    state.value.layers.find((layer) => layer.id === layerId)?.type === "screen"
+  );
+  if (!previewHasScreen) {
+    const screenshareScene = state.value.scenes.find((scene) => scene.layout === "screenshare");
+    if (screenshareScene) selectScene(screenshareScene.id);
+  }
   send({ type: "screenShare.source.select", sourceId, name: source?.name ?? "Screen Share" });
 }
 
@@ -410,9 +504,13 @@ function stopMediaStream(stream: MediaStream): void {
 }
 
 function syncRoomMediaStreams(payload: RoomMediaPayload): void {
+  for (const sourceId of payload.departedSourceIds ?? []) {
+    pendingDepartedSourceIds.add(sourceId);
+  }
   roomMediaStreams.value = new Map(payload.streams);
   roomMediaSources.value = new Map(payload.sources.map((source) => [source.id, source]));
   roomMediaSnapshotAuthoritative.value = payload.authoritative;
+  reconcileRuntimeSources();
 }
 
 function withRuntimeMediaState(source: StudioSource): StudioSource {
@@ -518,9 +616,12 @@ function reconcileRuntimeSources(): void {
     runtimeSources.set(source.id, source);
   }
 
+  const departedSourceIds = [...pendingDepartedSourceIds];
+  pendingDepartedSourceIds.clear();
   send({
     type: "sources.reconcile",
     authoritativeRuntimeSource: roomMediaSnapshotAuthoritative.value ? "realtimekit" : undefined,
+    departedSourceIds,
     sources: [...runtimeSources.values()],
   });
 }
@@ -712,6 +813,7 @@ onBeforeUnmount(() => {
   isComponentUnmounted = true;
   window.removeEventListener("resize", updateWidgetMaxHeight);
   window.removeEventListener("pagehide", persistOwnedScreenCleanup);
+  window.removeEventListener("keydown", handleProductionShortcut);
   clearOverlayTimers();
   clearStingerTimer();
   finishWidgetResize();
@@ -858,6 +960,7 @@ function updateWidgetMaxHeight(): void {
         <span v-if="props.streamEnvironment">{{ props.streamEnvironment }} stream</span>
         <span v-if="currentStreamStatus">{{ currentStreamStatus }}</span>
         <span v-if="hasProductionControls">programme {{ syncStatus }}</span>
+        <span v-if="hasProductionControls" class="studio-operation-status">{{ state.status }}</span>
         <span v-if="syncConflictNotice" class="room-error">{{ syncConflictNotice }}</span>
         <span
           v-if="syncError && syncError !== syncConflictNotice"
@@ -887,10 +990,12 @@ function updateWidgetMaxHeight(): void {
     <PeopleRail
       v-if="hasProductionControls && isSynchronized"
       :audio-controls="programmeAudioControls"
+      :on-stage-source-ids="state.onStageSourceIds"
       :sources="sourcesForUi"
       @audio-gain-change="setProgrammeAudioSourceGain"
       @audio-mute-change="setProgrammeAudioSourceMuted"
       @connect-source="retryLocalCapture"
+      @source-admission-change="setSourceAdmission"
     />
 
     <section
@@ -901,30 +1006,69 @@ function updateWidgetMaxHeight(): void {
       <SceneSwitcher
         :scenes="state.scenes"
         :layers="state.layers"
-        :active-scene-id="state.programSceneId"
+        :preview-scene-id="state.previewSceneId"
+        :program-scene-id="state.programSceneId"
+        :transition-active="Boolean(state.activeStinger)"
+        @add-scene="addScene"
+        @delete-scene="deleteScene"
+        @duplicate-scene="duplicateScene"
+        @move-scene="moveScene"
+        @rename-scene="renameScene"
         @select-scene="selectScene"
+        @take-scene="takeScene"
       />
-      <StudioCanvas
-        title="Programme"
-        subtitle="Current output"
-        :layers="programLayers"
-        :active-overlays="state.activeOverlays"
-        :active-stinger="state.activeStinger"
-        :media-streams="mediaStreams"
-        :programme-audio-streams="programmeMediaStreams"
-        :audio-mix="state.audioMix"
-        :resolution="state.resolution"
-        :is-playing="state.isPlaying"
-        :is-recording="state.isRecording"
-        :session-id="props.sessionId"
-        :can-publish-live="canPublishLive"
-        :stream-environment="props.streamEnvironment"
-        :stream-status="props.streamStatus"
-        @recording-change="setRecording"
-        @recording-status-change="setRecordingStatus"
-        @stream-status-change="setStreamStatus"
-        @exported="markProgramExported"
-      />
+      <div class="studio-monitor-grid">
+        <div class="studio-monitor preview-monitor">
+          <div class="monitor-status preview-status">
+            <span>Preview</span>
+            <strong>{{ previewScene?.name ?? "No scene" }}</strong>
+            <small>{{ hasStagedScene ? "Ready to take" : "Duplicate or select a scene to edit safely" }}</small>
+          </div>
+          <StudioCanvas
+            title="Preview"
+            :subtitle="hasStagedScene ? 'Staged output' : 'Matches programme'"
+            :layers="previewLayers"
+            :active-overlays="state.activeOverlays"
+            :media-streams="mediaStreams"
+            :audio-mix="state.audioMix"
+            :resolution="state.resolution"
+            :is-playing="state.isPlaying"
+            :is-recording="false"
+            :interactive="hasStagedScene && !state.activeStinger"
+            :preview-only="true"
+            @select-layer="selectLayer"
+            @update-layer-bounds="updateLayerBounds"
+          />
+        </div>
+        <div class="studio-monitor program-monitor">
+          <div class="monitor-status program-status">
+            <span>Program</span>
+            <strong>{{ programScene?.name ?? "No scene" }}</strong>
+            <small>{{ state.activeStinger ? "Transition in progress" : "On air output" }}</small>
+          </div>
+          <StudioCanvas
+            title="Programme"
+            subtitle="Current output"
+            :layers="programLayers"
+            :active-overlays="state.activeOverlays"
+            :active-stinger="state.activeStinger"
+            :media-streams="mediaStreams"
+            :programme-audio-streams="programmeMediaStreams"
+            :audio-mix="state.audioMix"
+            :resolution="state.resolution"
+            :is-playing="state.isPlaying"
+            :is-recording="state.isRecording"
+            :session-id="props.sessionId"
+            :can-publish-live="canPublishLive"
+            :stream-environment="props.streamEnvironment"
+            :stream-status="props.streamStatus"
+            @recording-change="setRecording"
+            @recording-status-change="setRecordingStatus"
+            @stream-status-change="setStreamStatus"
+            @exported="markProgramExported"
+          />
+        </div>
+      </div>
     </section>
 
     <section
@@ -988,12 +1132,14 @@ function updateWidgetMaxHeight(): void {
       :media-streams="mediaStreams"
       :active-screen-share-source-id="state.activeScreenShareSourceId"
       :audio-controls="programmeAudioControls"
+      :on-stage-source-ids="state.onStageSourceIds"
       @audio-gain-change="setProgrammeAudioSourceGain"
       @audio-mute-change="setProgrammeAudioSourceMuted"
       @select-screen-share="selectScreenShare"
       @add-screen-share="addScreenShare"
       @stop-screen-share="stopScreenShare"
       @retry-screen-share="retryScreenShare"
+      @source-admission-change="setSourceAdmission"
     />
   </div>
 </template>

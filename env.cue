@@ -85,7 +85,7 @@ vcs: "cuenv-skills": {
 	reference: "main"
 	vendor:    false
 	subdir:    ".agents/skills"
-	path:      ".agents/skills"
+	path:      ".agents/skills/cuenv"
 }
 
 env: {

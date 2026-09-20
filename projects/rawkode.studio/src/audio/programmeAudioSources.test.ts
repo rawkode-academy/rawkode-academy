@@ -7,7 +7,7 @@ function source(id: string, type: StudioSource["type"]): StudioSource {
 }
 
 describe("selectProgrammeAudioStreams", () => {
-  it("includes every camera and only the selected screen share", () => {
+  it("includes admitted cameras and only the admitted selected screen share", () => {
     const streams = new Map<string, MediaStream>([
       ["camera-a", {} as MediaStream],
       ["camera-b", {} as MediaStream],
@@ -23,7 +23,7 @@ describe("selectProgrammeAudioStreams", () => {
       source("video", "video"),
     ];
 
-    expect([...selectProgrammeAudioStreams(streams, sources, "screen-b").keys()]).toEqual([
+    expect([...selectProgrammeAudioStreams(streams, sources, "screen-b", ["camera-a", "camera-b", "screen-a", "screen-b"]).keys()]).toEqual([
       "camera-a",
       "camera-b",
       "screen-b",
@@ -37,6 +37,25 @@ describe("selectProgrammeAudioStreams", () => {
       streams,
       [source("screen-a", "screen")],
       "missing-screen",
+      ["screen-a"],
     ).size).toBe(0);
+  });
+
+  it("keeps backstage camera audio and selected screen audio out of the mix", () => {
+    const streams = new Map<string, MediaStream>([
+      ["host", {} as MediaStream],
+      ["guest", {} as MediaStream],
+      ["screen", {} as MediaStream],
+    ]);
+    const sources = [source("host", "camera"), source("guest", "camera"), source("screen", "screen")];
+
+    expect([...selectProgrammeAudioStreams(streams, sources, "screen", ["host"]).keys()]).toEqual(["host"]);
+    expect(selectProgrammeAudioStreams(streams, sources, "screen", []).size).toBe(0);
+    expect(selectProgrammeAudioStreams(streams, sources, "screen", undefined as unknown as string[]).size).toBe(0);
+  });
+
+  it("does not admit a screen when only its contributor camera was admitted", () => {
+    const streams = new Map<string, MediaStream>([["screen", {} as MediaStream]]);
+    expect(selectProgrammeAudioStreams(streams, [source("screen", "screen")], "screen", ["camera"]).size).toBe(0);
   });
 });

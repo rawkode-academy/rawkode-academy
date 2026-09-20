@@ -10,11 +10,14 @@ This is an operator runbook for the current MVP. “Implemented” below means p
 - [x] Content-backed and ad-hoc Studio sessions with test/prod stream intent.
 - [x] RealtimeKit host, producer, guest, and program presets with guest invites and durable participant identities for token refresh/rejoin.
 - [x] Producer compositor with persisted, revision-checked control state.
+- [x] Separate Preview and Programme monitors, explicit Take, basic scene rundown editing, and producer-controlled backstage/on-stage sources. Explicit departure revokes a reappearing durable source ID, and a synchronous frame fence prevents an older asynchronous render from returning a backstage source to Programme. Live browser rehearsal remains required.
 - [x] Cloudflare Stream WebRTC/WHIP publishing with a 5-second publisher heartbeat, a 20-second server lease, explicit takeover, and one fresh prod publisher per content video/slug.
 - [x] Prod-only public live state and one notification claim after Stream confirms the input is connected.
 - [x] Prod-only browser programme recording with a 30-second heartbeat/120-second per-video lease, one immutable canonical VOD claim per content video, durable browser recovery, ready-marker handoff, and identity-checked transcode status.
+- [x] Optional contributor-local camera/microphone recording with IndexedDB recovery and download. These files stay in that browser and are not uploaded, synchronized, or attached to the canonical programme recording.
 - [x] Public website playback through its `STUDIO` service binding.
-- [ ] YouTube output provisioning is not implemented: Studio creates a live input lazily at first go-live but never creates or attaches Stream outputs.
+- [x] Manager-only control plane for a separate Cloudflare RTMPS/SRT input and its outputs. It requires migration `0009` and an external encoder that captures the Programme monitor; it does not relay the browser WHIP feed.
+- [ ] YouTube delivery is not production-supported. No provider call or end-to-end media rehearsal has validated the separate input, external encoder, destination ingest, viewer playback, or rollback. See [platform capabilities and roadmap](docs/platform-capabilities.md#supported-transport-architectures).
 - [ ] Every external gate in [External go-live gates](#external-go-live-gates) is verified in the target account.
 - [ ] A test-mode dress rehearsal and the prod dry rehearsal have been signed off for the event.
 
@@ -24,10 +27,10 @@ This is an operator runbook for the current MVP. “Implemented” below means p
 | --- | --- | --- | --- |
 | Configured operator | `/` | Creates sessions and can manage every session. Handles are set by `STUDIO_OPERATOR_GITHUB_HANDLES`; the default is `rawkode`. | Can open the producer route. |
 | Session creator/manager | Dashboard session links | A creator, configured operator, or recorded `host`, `producer`, or `program` participant is a session manager. | Can issue invites, end the session, read/write control state, stream, and record. |
-| Host | `/studio/{sessionId}/host` | RealtimeKit green room for camera, microphone, and contributors. | The Host UI does not expose programme switching, live publishing, or recording. |
+| Host | `/studio/{sessionId}/host` | RealtimeKit green room for camera, microphone, contributors, and an optional personal local recording. | The Host UI does not expose programme switching, live publishing, or programme recording. |
 | Producer | `/studio/{sessionId}/producer` | Programme compositor, scene/overlay control, Stream publishing, recording, and handoff status. | Yes. This is the normal live operator role. |
 | Program | RealtimeKit participant API/preset | Reserved programme participant preset. There is no dedicated Program navigation route in the MVP. | The Vue console supports the role when embedded, but normal operation uses Producer. |
-| Guest | `/guest/{inviteToken}` then the guest room | RealtimeKit green room. A content-listed guest can join directly; anyone else needs a valid, unexpired invite. | No. |
+| Guest | `/guest/{inviteToken}` then the guest room | RealtimeKit green room and optional personal local recording. A content-listed guest can join directly; anyone else needs a valid, unexpired invite. | No programme controls. |
 
 The current authorization boundary is “session manager”, not strict separation between host/producer/program managers. A manager who knows the producer URL can open it. Treat role labels as room/UI responsibilities, not a security boundary.
 
@@ -115,7 +118,7 @@ No command in this README is authorization to deploy; follow the repository’s 
 
 ### Worker rollback
 
-Worker rollback does not roll back D1. The current `0004`–`0008` migrations are additive, so an older Worker can ignore them, but retain the export and review compatibility before rollback. Migration `0008` deliberately fails if the duplicate audit was not clean; do not delete rows merely to make it pass.
+Worker rollback does not roll back D1. The current `0004`–`0009` migrations are additive, so an older Worker can ignore them, but retain the export and review compatibility before rollback. Migration `0008` deliberately fails if the duplicate audit was not clean; do not delete rows merely to make it pass. Migration `0009` adds the separate RTMPS/SRT input claim; applying it does not create a provider input or start media.
 
 Migration `0007` gives any row already in `recording` state with no lease ID an exact 10-minute rollout grace from migration time. During that grace, a new recording receives HTTP 409, while the first part, completion, abort, or heartbeat from the pre-deploy recording adopts its recording ID and begins the normal 120-second lease. If it sends nothing before the grace expires, the next create expires that legacy row and may claim the session. Do not manually clear these columns during rollout.
 
@@ -141,14 +144,14 @@ Run:
 cuenv exec --env production -- bun run verify:live
 ```
 
-The verifier performs only list/info/status/GET operations and a D1 `SELECT`. It does not deploy, apply migrations, create a live input, read secret values, write R2 objects, or send a queue message. Provider responses are never printed; failures show controlled metadata only.
+The verifier performs only list/info/status/GET operations and a D1 `SELECT`. It does not deploy, apply migrations, create a live input, intentionally retrieve Secrets Store values, write R2 objects, or send a queue message. Cloudflare live-input GET response schemas can include RTMPS/SRT ingest credentials even for a read operation. The verifier parses only the API envelope and collection shape needed for the check; it does not log, print, or persist provider payloads, and failures expose controlled metadata only.
 
 It checks:
 
 1. Wrangler authentication and an active Studio Worker deployment.
 2. `https://rawkode.studio/` and the unauthenticated `/api/auth/me` contract.
 3. The session KV namespace and Studio D1 database identity.
-4. All migrations `0000`–`0008`, the control-state table/revision/index, stream lease column/index, recording lease ID/heartbeat/grace/index, the unique canonical-recording index, a clean duplicate audit, and durable RealtimeKit participant identity column/index.
+4. All migrations `0000`–`0009`, the control-state table/revision/index, stream lease column/index, recording lease ID/heartbeat/grace/index, the unique canonical-recording index, a clean duplicate audit, durable RealtimeKit participant identity column/index, and the separate output-input table/mode/state index.
 5. Read access to the content R2 bucket.
 6. Presence of all three Secrets Store entries without reading their values.
 7. The actual deployed Worker’s KV, D1, R2, Queue, and Secrets Store bindings.
@@ -179,7 +182,7 @@ Complete this in order. Stop if any required check fails.
 5. Confirm the content video has no existing `studio_recordings` row and no existing `videos/{videoId}/transcode-status.json` or `videos/{videoId}/stream.m3u8` object unless this is an exact retry of the same recording/source tuple. A canonical claim is permanent.
 6. Confirm the public website deployment has its `STUDIO` service binding and the watch page resolves the same video slug.
 7. Confirm the RealtimeKit app has the four configured presets and the runtime token can create meetings/participants.
-8. If YouTube is required, confirm an approved method exists to pre-provision and associate the session’s live input and output. Studio creates the live input lazily and does not manage outputs, so a new session cannot satisfy this gate through the current UI. Do not improvise output attachment after prod confirmation.
+8. If YouTube is required, stop unless the separate RTMPS/SRT path has already passed its end-to-end rehearsal for this event profile. Require migration `0009`, a session-bound input on the **Outputs** page, an external encoder capturing the Programme monitor, confirmed RTMPS/SRT ingest, a create-disabled destination that an operator deliberately enables, independent viewer playback, and rehearsed stop/disable controls. The browser WHIP input remains separate and cannot restream.
 9. Confirm the notifications Queue consumer and R2 recording-ingest consumer are healthy. Binding visibility alone does not prove delivery.
 
 ### Operator and browser preflight
@@ -189,7 +192,7 @@ Complete this in order. Stop if any required check fails.
 3. Keep only one recording Producer active for a content video. Recording renews its server lease every 30 seconds and loses ownership after 120 seconds without a successful heartbeat; another prod session for the same video receives a controlled conflict. Different videos may record concurrently.
 4. Confirm sufficient browser storage and disk space. Recording uses IndexedDB as a durable backup before R2 completion.
 5. Assign one primary Producer and one takeover operator with an out-of-band voice/text channel.
-6. Join every host/guest, verify names and roles, preview every source, check programme audio, and rehearse mute/screen-share changes.
+6. Join every host/guest, verify names and roles, keep new sources backstage, preview and explicitly admit each source, check programme audio, and rehearse mute, return-to-backstage, leave/rejoin, screen-share, transition, and Take changes. Require no backstage picture, stale frame, or sound in Programme.
 7. Open the session’s Recordings page in a separate tab for handoff observation; do not use it as the active producer tab.
 
 ## Rehearsals
@@ -200,12 +203,20 @@ Test mode still creates/uses real Cloudflare Stream resources, but recording is 
 
 1. Create a content-backed session with `streamEnvironment: test`.
 2. Join from separate browser profiles as Producer, Host, and at least one Guest.
-3. Exercise camera, microphone, screen share, scenes, overlays, control-state refresh, and a second producer’s state view.
+3. Exercise camera, microphone, screen share, Preview/Take, scene CRUD, overlays, explicit admit/return-to-backstage, leave/rejoin, control-state refresh, and a second producer’s state view. Prove no backstage picture or sound reaches Programme during a transition.
 4. Start recording, wait for the red recording state, then click **Go live**.
 5. Require the state sequence **Starting live stream** → **Confirming stream** → **Test stream live**.
 6. Verify Cloudflare playback, remain live for at least two lease windows (40 seconds), and exercise one deliberate takeover.
 7. Click **Stop live**, then stop recording. Require the local WebM download before closing the tab.
 8. Confirm the Recordings page remains unchanged and no `studio_recordings` row, ready marker, or canonical `videos/{videoId}/` output was created.
+
+If external distribution is in scope, use an isolated test session and destination.
+From the session **Outputs** page, provision the separate input, reveal ingest
+credentials only while configuring the encoder, capture the Programme monitor,
+add the destination disabled, then enable it deliberately. Verify ingest and
+viewer playback independently, disable the destination, stop the encoder, and
+confirm Rawkode WHIP playback and browser recording were isolated throughout.
+Never paste ingest credentials or destination keys into the rehearsal record.
 
 ### Prod dry rehearsal
 
@@ -213,20 +224,20 @@ Prod confirmation is not private: it publishes public live state and claims a no
 
 1. Create or inspect the actual content-backed prod session and confirm title, show, start time, content video ID, and slug.
 2. Join every contributor and complete the same green-room/source/audio checks as test mode.
-3. Confirm the public watch URL, notification audience, incident contacts, and—if YouTube is required—the approved pre-provisioned live-input/output association. Without that association, YouTube remains blocked for this event.
+3. Confirm the public watch URL, notification audience, and incident contacts. If YouTube is required, confirm the separately provisioned RTMPS/SRT input, external encoder, destination, playback, and rollback have passed an end-to-end rehearsal. The WHIP input cannot provide that path.
 4. Do not make a disposable prod recording: the first prod handoff permanently claims the content video’s canonical VOD output. Validate mechanics in test mode and record the actual programme only when the event owner is ready to keep it.
 5. Leave the session scheduled, with `stream_status` not `starting` or `live`.
 
 ## Go-live procedure
 
 1. Primary Producer opens `/studio/{sessionId}/producer`; takeover operator opens it but does not click **Go live**.
-2. Confirm the session says `Prod`, the programme canvas/audio are correct, and any approved pre-provisioned YouTube output is enabled. If YouTube is required but no output is associated, stop: the current product cannot safely attach one before first go-live.
+2. Confirm the session says `Prod` and the programme canvas/audio are correct. If YouTube is required, stop unless the separate RTMPS/SRT input, external encoder, destination, playback, and rollback passed the event rehearsal; the WHIP input cannot deliver YouTube.
 3. Click **Record** first when a programme recording is required. Confirm the recording state before publishing.
 4. Click **Go live** once. Do not retry while the UI says starting or confirming.
 5. Require **Prod stream live**. That state is reached only after Cloudflare reports the live input connected; it also makes the content-backed session public and claims the one prod notification.
-6. Verify all three independently: Cloudflare playback, the Rawkode watch page, and YouTube Live Control Room/viewer playback.
-7. Monitor the producer heartbeat, programme audio, recording state, website playback, YouTube health, and notification/ingest systems for the event.
-8. At the end, click **Stop live**, then **Stop** recording. Wait for the recording handoff result before ending the Studio session or closing the producer tab.
+6. Verify Cloudflare WHEP playback and the Rawkode watch page independently. If an approved separate distribution path is in use, also verify its source input and YouTube Live Control Room/viewer playback independently.
+7. Monitor the producer heartbeat, programme audio, recording state, website playback, and notification/ingest systems for the event. If an approved separate distribution path is in use, monitor its gateway, input, and YouTube health separately.
+8. At the end, disable/stop any separately approved distribution path according to its runbook, click **Stop live**, then **Stop** recording. Verify both provider paths have ended and wait for the recording handoff result before ending the Studio session or closing the producer tab.
 
 ## Takeover and forced stop
 
@@ -259,7 +270,7 @@ Use these in order:
 
    A successful response marks the server lease ended. The previous browser should stop after the rejected heartbeat.
 
-4. If Studio is unavailable and media is still leaving Cloudflare, disable the affected live input or its YouTube output in the Cloudflare dashboard. Do not delete the live input during an incident; preserve identifiers and recordings for diagnosis.
+4. If Studio is unavailable and media is still leaving the WHIP path, disable the affected WebRTC live input in Cloudflare. If an approved separate RTMPS/SRT distribution path is also active, stop or disable that path through its rehearsed control. Do not delete either input during an incident; preserve identifiers and recordings for diagnosis.
 5. After recovery, query the session state, require `stream_status = 'ended'`, verify public playback is gone, and record whether a notification had already been queued. Do not manually clear notification state or edit D1 as a first response.
 
 ## Recording recovery
@@ -286,19 +297,28 @@ The Producer’s **Recording recovery** panel lists durable IndexedDB backups af
 
 Studio removes a browser backup automatically only after a verified normal or recovered server handoff. Local fallback downloads, true multipart aborts, media failures, and lease loss retain the backup until explicit discard. If the panel shows no artifact, check the session Recordings page and the R2/ingest incident trail before declaring the recording lost.
 
-## YouTube rollback
+## External distribution rollback
 
-Studio does not create, inspect, enable, or disable Cloudflare Stream outputs. YouTube is an external simulcast gate.
+The current Studio publisher is WHIP-only. Cloudflare documents that WebRTC/WHIP inputs cannot use RTMP/SRT simulcast outputs, so the Studio live input cannot own a working YouTube output. Studio can now provision and control a separate RTMPS/SRT input, but an external encoder must capture Programme and publish to it. That path remains unsupported for production until it is deployed and rehearsed end to end.
 
-There is also a provisioning gap: the session’s Stream live input is created lazily during the first start, while an output must belong to an existing live input. The MVP has no safe UI workflow to pre-provision that pair. Until that is implemented, YouTube requires a separately approved pre-provision/association procedure and is otherwise a blocking go-live gate.
+For a separately provisioned and rehearsed path:
 
-1. In Cloudflare Stream, open the session’s live input ID recorded in D1 and disable the YouTube output. Prefer disabling the output over stopping/deleting the Cloudflare live input so Rawkode playback and recording can continue.
+1. Stop or disable the separate distribution output/input using its rehearsed server-side control. Do not alter the Studio WHIP input when Rawkode playback is healthy.
 2. In YouTube Live Control Room, verify ingest has stopped. End the YouTube broadcast only if the event plan calls for it.
-3. If the source programme is also unsafe, use **Stop live** or the forced-stop procedure; disabling only YouTube does not stop Rawkode playback.
-4. Preserve the output ID, target URL, incident time, and YouTube broadcast ID. Never paste a stream key into chat, logs, tickets, or this repository.
-5. Re-enable the output only after a test-mode source is healthy and the incident owner approves the retry.
+3. If the source programme is also unsafe, use **Stop live** or the forced-stop procedure for the WHIP path as well.
+4. Preserve the distribution input/output ID, target URL, incident time, and YouTube broadcast ID. Never paste a stream key or WHIP publish URL into chat, logs, tickets, or this repository.
+5. Re-enable distribution only after the gateway/input and viewer playback are healthy in test resources and the incident owner approves the retry.
 
-Cloudflare’s read endpoint for live inputs intentionally omits publishing credentials; the output API can still expose a target stream key when retrieving outputs, which is why `verify:live` does not call it.
+If the **Outputs** page reports that provisioning needs reconciliation, preserve
+the D1 claim and stop retrying. An unknown Cloudflare create outcome is stored as
+`uncertain` so a retry cannot create a duplicate unmanaged input. Inspect
+Cloudflare live inputs for metadata `studioSessionId=<session-id>` and
+`studioPurpose=external-encoder-outputs`, then determine whether the provider
+input exists before taking any action. Do not blindly delete a provider input,
+clear the D1 row, or provision again. Record the candidate input IDs and provider
+request time and have the incident owner reconcile the exact resource.
+
+Cloudflare live-input GET responses can expose RTMPS/SRT ingest credentials, and output responses can expose destination keys. Ordinary Studio responses project allowlisted secret-free fields and suppress provider payloads from logs and errors. The explicit manager-only credentials action is the sole browser response containing ingest secrets and uses `Cache-Control: no-store`; treat the visible values as transient operator credentials.
 
 ## Incident quick reference
 
@@ -309,7 +329,8 @@ Cloudflare’s read endpoint for live inputs intentionally omits publishing cred
 | “Stream already active” | Contact the owner and use planned takeover. | Use forced stop only when ownership is lost. |
 | “Another prod Studio session is already publishing this content” | Find the other session for the same content video/slug and stop or let its stale lease expire. | Do not bypass the atomic claim or edit D1; test sessions remain available for rehearsal. |
 | Studio says prod live but watch page is not live | Verify content slug/environment and website `STUDIO` service binding. | Stop prod, fix the external gate, and repeat test rehearsal. |
-| YouTube is wrong but Rawkode playback is healthy | Disable only the YouTube output. | Follow YouTube rollback; keep Rawkode playback and the separate Studio browser recording alive if safe. |
+| YouTube is wrong but Rawkode playback is healthy | Stop or disable only the separate RTMPS/SRT distribution path. The Studio WHIP input cannot own that output. | Follow external distribution rollback; keep Rawkode playback and the separate Studio browser recording alive if safe. |
+| Output provisioning needs reconciliation | Stop retrying and preserve the D1 claim. Search Cloudflare inputs by the session/purpose metadata and determine whether the create succeeded. | Do not clear D1 or blindly delete/recreate provider resources; reconcile the exact input with an incident owner. |
 | Notification missing | Record whether `stream_notification_queued_at` is set and inspect the Queue consumer. | Do not manually resend until idempotency/audience impact is reviewed. |
 | Recording conflict or lease loss | Stop using the stale tab; keep its browser recovery copy and identify the current recording owner. | Download from Recording recovery; never clear D1 to make the stale tab win. |
 | Recording upload/transcode fails | Keep the tab open; preserve the IndexedDB recovery copy, local WebM, and recording ID. | Use the Recording recovery panel or investigate R2 event/ingest/Cloud Run. |
@@ -322,8 +343,8 @@ Cloudflare’s read endpoint for live inputs intentionally omits publishing cred
 | cuenv toolchain | The shared CI contributor must resolve a reviewed, explicitly pinned cuenv release. The current generated bootstrap follows `releases/latest`, so production release approval remains blocked until the shared contributor or generator supports and uses a pin. | No. Confirm the generated workflow and bootstrap asset before every release. |
 | Rawkode identity | OAuth client `rawkode-studio`, callback URL, session KV, and GitHub handle claims work. | KV and unauthenticated route only; interactive login is manual. |
 | RealtimeKit | One app contains the host/producer/guest/program presets; runtime token can create meetings and participants. | App/preset visibility and secret bindings; write capability needs a rehearsal. |
-| Cloudflare Stream | Runtime token can create/read live inputs and browser network permits WHIP/WHEP. | Deploy-token read capability and binding only; creation/publishing needs test mode. |
-| YouTube | A session live input/output pair is safely pre-provisioned, the broadcast is correct, and an owner can disable it. The MVP does not implement this lifecycle, so this is blocking unless an approved external procedure exists. | No. Validate manually without exposing the key. |
+| Cloudflare Stream | Runtime token can create/read live inputs and manage outputs; browser network permits WHIP/WHEP. Migration `0009` and its output-input table/mode/state index are present. | Deploy-token read capability, binding, and schema only; provisioning, publishing, output mutation, and playback need isolated test resources. |
+| YouTube | A separate RTMPS/SRT input and external encoder are deployed, the destination starts disabled, ingest/viewer playback are correct, and an owner can disable it independently. A Cloudflare output attached to the WHIP input is unsupported. | No. Validate end to end without exposing the key. |
 | Content GraphQL | The event resolves to the expected content video ID, slug, hosts, and guests. | No. Required for prod. |
 | Public website | Website Worker has the `STUDIO` service binding and the watch page renders WHEP playback. | Studio endpoint only; website deployment/playback is manual. |
 | Notifications | `rawkode-academy-notifications` exists, Studio is bound as producer, and its consumer is healthy. | Queue and producer binding; consumer delivery is manual. |
@@ -339,7 +360,7 @@ No prod event is ready while any required gate is unknown.
 - `RECORDINGS`: private Studio source recordings and ready markers in `rawkode-academy-content`.
 - `RECORDINGS_BUCKET_NAME`: source bucket name written into ready markers.
 - `CLOUDFLARE_ACCOUNT_ID`: account that owns RealtimeKit and Stream.
-- `CLOUDFLARE_STREAM_API_TOKEN`: Secrets Store runtime token used by Studio to create/read Stream live inputs.
+- `CLOUDFLARE_STREAM_API_TOKEN`: Secrets Store runtime token used by Studio to create/read Stream live inputs and manage outputs.
 - `STREAM_NOTIFICATIONS`: producer binding to `rawkode-academy-notifications`; used only after a prod stream is confirmed live.
 - `REALTIMEKIT_API_TOKEN`, `REALTIMEKIT_APP_ID`: Secrets Store runtime configuration.
 - `REALTIMEKIT_*_PRESET`: participant preset names.
@@ -348,4 +369,4 @@ No prod event is ready while any required gate is unknown.
 
 Recording source objects use `studio/recordings/{sessionId}/{recordingId}/source.webm`; ready markers use the same prefix plus `ready.json`. Content-backed VOD publishes under `videos/{videoId}/`. Ad-hoc sessions cannot use persistent recording upload or prod streaming because both require a content video.
 
-Provider references: [Wrangler D1 commands](https://developers.cloudflare.com/workers/wrangler/commands/d1/), [RealtimeKit API](https://developers.cloudflare.com/api/resources/realtime_kit/), [Stream live inputs](https://developers.cloudflare.com/api/resources/stream/subresources/live_inputs/), and [Stream live-input outputs](https://developers.cloudflare.com/api/resources/stream/subresources/live_inputs/subresources/outputs/).
+Provider references: [Wrangler D1 commands](https://developers.cloudflare.com/workers/wrangler/commands/d1/), [RealtimeKit API](https://developers.cloudflare.com/api/resources/realtime_kit/), [Stream WebRTC limitations](https://developers.cloudflare.com/stream/webrtc-beta/#limitations), [Stream RTMPS/SRT live inputs](https://developers.cloudflare.com/stream/stream-live/start-stream-live/), [Stream simulcast outputs](https://developers.cloudflare.com/stream/stream-live/simulcasting/), and [Cloudflare live-input GET schema](https://developers.cloudflare.com/api/resources/stream/subresources/live_inputs/methods/get/).

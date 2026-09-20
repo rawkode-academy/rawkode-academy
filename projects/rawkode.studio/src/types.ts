@@ -99,6 +99,7 @@ export interface StudioLayer {
 
 export interface ScenePreset {
   id: string;
+  isCustom?: boolean;
   name: string;
   layerIds: string[];
   layout?: SceneLayout;
@@ -142,6 +143,7 @@ export interface StudioState {
   resolution: CanvasResolution;
   activeScreenShareSourceId: string;
   audioMix: Record<string, StudioAudioMixControl>;
+  onStageSourceIds: string[];
   phase: StudioPhase;
   sources: StudioSource[];
   scenes: StudioScene[];

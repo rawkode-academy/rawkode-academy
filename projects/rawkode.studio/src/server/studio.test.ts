@@ -1722,17 +1722,23 @@ describe("Studio operations", () => {
 			new URL("../realtimekit/participantSources.ts", import.meta.url),
 			"utf8",
 		);
+		const roomConnection = readFileSync(
+			new URL("../realtimekit/roomConnection.ts", import.meta.url),
+			"utf8",
+		);
 		const studioApp = readFileSync(new URL("../App.vue", import.meta.url), "utf8");
 
 		expect(roomBridge).toContain("defaults: { audio: true, video: true }");
 		expect(roomBridge).not.toContain("nextMeeting.joinRoom");
 		expect(roomBridge).not.toContain("nextMeeting.join(");
 		expect(roomBridge).toContain('show-setup-screen="true"');
-		expect(roomBridge).toContain('return "Open room"');
+		expect(roomBridge).toContain('return "Open device check"');
 		expect(roomBridge).toContain('return "Close room"');
-		expect(roomBridge).toContain('return "Device setup open"');
+		expect(roomConnection).toContain('label: `${roleLabel} device check open`');
+		expect(roomConnection).toContain("producer still controls whether a source is on air");
 		expect(roomBridge).toContain(':aria-expanded="state === \'open\'"');
-		expect(roomBridge).toContain('aria-label="RealtimeKit device setup"');
+		expect(roomBridge).toContain("'RealtimeKit device setup'");
+		expect(roomBridge).toContain("'RealtimeKit contributor room'");
 		expect(roomBridge).toContain('"media-streams-change": [payload: {');
 		expect(participantSources).toContain("participant.audioTrack");
 		expect(participantSources).toContain("participant.videoTrack");
@@ -1941,7 +1947,7 @@ describe("Studio operations", () => {
 								id: "future-video",
 								slug: "future-event",
 								title: "Future event",
-								publishedAt: "2026-08-01T10:00:00.000Z",
+								publishedAt: new Date(Date.now() + 86_400_000).toISOString(),
 								guests: [],
 								episode: {
 									show: {

@@ -3,10 +3,20 @@ import type { Bounds, SceneAction, StudioLayer, StudioScene, StudioSource, Studi
 import { getDynamicGridBounds, getScreenshareCameraBounds } from "./layouts";
 import { getSceneLayerStack } from "./layerStack";
 import { STUDIO_SCENE_DEFINITIONS } from "./seed";
+import { setSourceOnStage } from "./sourceAdmission";
 import { markLayerBoundsEdited, reconcileStudioSources } from "./sourceReconciliation";
+
+const MAXIMUM_SCENES = 24;
+const MAXIMUM_SCENE_NAME_LENGTH = 64;
 
 export type StudioEvent =
   | { type: "scene.select"; sceneId: string }
+  | { type: "scene.take" }
+  | { type: "scene.add" }
+  | { type: "scene.duplicate"; sceneId: string }
+  | { type: "scene.rename"; sceneId: string; name: string }
+  | { type: "scene.delete"; sceneId: string }
+  | { type: "scene.move"; sceneId: string; direction: "up" | "down" }
   | { type: "layer.select"; layerId: string }
   | { type: "layer.toggle"; layerId: string }
   | { type: "layer.lock.toggle"; layerId: string }
@@ -30,9 +40,11 @@ export type StudioEvent =
   | { type: "program.captureReady"; trackCount: number }
   | { type: "audioMix.source.gain"; sourceId: string; gain: number }
   | { type: "audioMix.source.mute"; sourceId: string; muted: boolean }
+  | { type: "source.admission.set"; sourceId: string; admitted: boolean }
   | {
       type: "sources.reconcile";
       authoritativeRuntimeSource?: "realtimekit";
+      departedSourceIds?: string[];
       sources: StudioSource[];
     }
   | { type: "source.remove"; sourceId: string }
@@ -45,6 +57,18 @@ export function reduceStudioState(state: StudioState, event: StudioEvent): Studi
   switch (event.type) {
     case "scene.select":
       return selectScene(state, event.sceneId);
+    case "scene.take":
+      return takePreviewToProgram(state);
+    case "scene.add":
+      return addScene(state);
+    case "scene.duplicate":
+      return duplicateScene(state, event.sceneId);
+    case "scene.rename":
+      return renameScene(state, event.sceneId, event.name);
+    case "scene.delete":
+      return deleteScene(state, event.sceneId);
+    case "scene.move":
+      return moveScene(state, event.sceneId, event.direction);
     case "layer.select":
       return selectLayer(state, event.layerId);
     case "layer.toggle":
@@ -133,15 +157,17 @@ export function reduceStudioState(state: StudioState, event: StudioEvent): Studi
       return updateAudioMixSourceGain(state, event.sourceId, event.gain);
     case "audioMix.source.mute":
       return updateAudioMixSourceMuted(state, event.sourceId, event.muted);
+    case "source.admission.set":
+      return setSourceOnStage(state, event.sourceId, event.admitted);
     case "program.exported":
       return {
         ...state,
         status: "Program frame exported",
       };
     case "sources.reconcile":
-      return reconcileStudioSources(state, event.sources, STUDIO_SCENE_DEFINITIONS, {
+      return revokeDepartedSourceAdmission(reconcileStudioSources(state, event.sources, STUDIO_SCENE_DEFINITIONS, {
         authoritativeRuntimeSource: event.authoritativeRuntimeSource,
-      });
+      }), event.departedSourceIds);
     case "source.remove":
       return reconcileStudioSources(state, [], STUDIO_SCENE_DEFINITIONS, {
         removeSourceIds: [event.sourceId],
@@ -217,8 +243,50 @@ export function getScene(state: StudioState, sceneId: string): StudioScene | und
   return state.scenes.find((scene) => scene.id === sceneId);
 }
 
+function revokeDepartedSourceAdmission(
+  state: StudioState,
+  departedSourceIds: readonly string[] | undefined,
+): StudioState {
+  if (!departedSourceIds?.length) return state;
+  const departed = new Set(departedSourceIds);
+  const onStageSourceIds = state.onStageSourceIds.filter((id) => !departed.has(id));
+  return onStageSourceIds.length === state.onStageSourceIds.length
+    ? state
+    : { ...state, onStageSourceIds };
+}
+
 function selectScene(state: StudioState, sceneId: string): StudioState {
-  return transitionToScene(state, sceneId, `${getScene(state, sceneId)?.name ?? "Scene"} transition started`);
+  const scene = getScene(state, sceneId);
+  if (!scene || state.activeStinger) {
+    return state;
+  }
+
+  const selectedLayerId = getPreferredLayerId(state, scene.id) ?? state.selectedLayerId;
+  return {
+    ...state,
+    previewSceneId: scene.id,
+    selectedLayerId,
+    htmlDraft: getLayerHtml(state, selectedLayerId),
+    phase: state.isRecording
+      ? "recording"
+      : scene.id === state.programSceneId
+        ? "designing"
+        : "previewing",
+    status: scene.id === state.programSceneId
+      ? `${scene.name} selected on program`
+      : `${scene.name} ready in preview`,
+  };
+}
+
+function takePreviewToProgram(state: StudioState): StudioState {
+  if (state.activeStinger || state.previewSceneId === state.programSceneId) {
+    return state;
+  }
+
+  const scene = getScene(state, state.previewSceneId);
+  return scene
+    ? transitionToScene(state, scene.id, `Taking ${scene.name}`)
+    : state;
 }
 
 function transitionToScene(state: StudioState, sceneId: string, status: string): StudioState {
@@ -277,6 +345,7 @@ function moveSceneToProgram(state: StudioState, sceneId: string, status: string)
   return {
     ...state,
     programSceneId: scene.id,
+    phase: state.isRecording ? "recording" : "designing",
     status,
   };
 }
@@ -304,6 +373,7 @@ function switchStingerToTarget(state: StudioState, generation?: number): StudioS
     programSceneId: scene.id,
     selectedLayerId,
     htmlDraft: getLayerHtml(state, selectedLayerId),
+    phase: state.isRecording ? "recording" : "designing",
     status: `${scene.name} on program`,
   };
 }
@@ -317,6 +387,7 @@ function finishStinger(state: StudioState, generation?: number): StudioState {
   return {
     ...state,
     activeStinger: undefined,
+    phase: state.isRecording ? "recording" : "designing",
     status: "Scene stinger complete",
   };
 }
@@ -336,6 +407,164 @@ function getActiveStinger(state: StudioState, toSceneId: string): StudioState["a
     fromSceneId: fromScene.id,
     toSceneId,
   };
+}
+
+function addScene(state: StudioState): StudioState {
+  return cloneScene(state, state.previewSceneId, getNextSceneName(state));
+}
+
+function duplicateScene(state: StudioState, sceneId: string): StudioState {
+  const scene = getScene(state, sceneId);
+  return scene ? cloneScene(state, sceneId, `${scene.name} copy`) : state;
+}
+
+function cloneScene(state: StudioState, sourceSceneId: string, requestedName: string): StudioState {
+  if (state.scenes.length >= MAXIMUM_SCENES || state.activeStinger) {
+    return {
+      ...state,
+      status: state.scenes.length >= MAXIMUM_SCENES
+        ? `Scene limit reached (${MAXIMUM_SCENES})`
+        : "Finish the current transition before adding a scene",
+    };
+  }
+
+  const sourceScene = getScene(state, sourceSceneId);
+  if (!sourceScene) {
+    return state;
+  }
+
+  const sceneId = getNextCustomSceneId(state);
+  const sourceLayers = getSceneLayers(state, sourceScene.id);
+  const layerIdMap = new Map(sourceLayers.map((layer, index) => [
+    layer.id,
+    `${sceneId}-${index + 1}-${toIdSegment(layer.name)}`,
+  ]));
+  const layers = sourceLayers.map((layer) => ({
+    ...layer,
+    id: layerIdMap.get(layer.id)!,
+    settings: layer.settings ? { ...layer.settings } : undefined,
+  }));
+  const scene: StudioScene = {
+    ...sourceScene,
+    id: sceneId,
+    name: normalizeSceneName(requestedName) || "Untitled scene",
+    isCustom: true,
+    layerIds: sourceScene.layerIds
+      .map((layerId) => layerIdMap.get(layerId))
+      .filter((layerId): layerId is string => Boolean(layerId)),
+  };
+  const selectedLayerId = getPreferredLayerId(
+    {
+      ...state,
+      scenes: [...state.scenes, scene],
+      layers: [...state.layers, ...layers],
+    },
+    scene.id,
+  ) ?? state.selectedLayerId;
+
+  return {
+    ...state,
+    scenes: [...state.scenes, scene],
+    layers: [...state.layers, ...layers],
+    previewSceneId: scene.id,
+    selectedLayerId,
+    htmlDraft: layers.find((layer) => layer.id === selectedLayerId)?.html ?? state.htmlDraft,
+    phase: state.isRecording ? "recording" : "previewing",
+    status: `${scene.name} added to rundown`,
+  };
+}
+
+function renameScene(state: StudioState, sceneId: string, requestedName: string): StudioState {
+  const scene = getScene(state, sceneId);
+  const name = normalizeSceneName(requestedName);
+  if (!scene?.isCustom || !name || name === scene.name) {
+    return state;
+  }
+
+  return {
+    ...state,
+    scenes: state.scenes.map((candidate) =>
+      candidate.id === scene.id ? { ...candidate, name } : candidate
+    ),
+    status: `${scene.name} renamed to ${name}`,
+  };
+}
+
+function deleteScene(state: StudioState, sceneId: string): StudioState {
+  const scene = getScene(state, sceneId);
+  if (!scene?.isCustom || scene.id === state.programSceneId || state.activeStinger) {
+    return {
+      ...state,
+      status: scene?.id === state.programSceneId
+        ? "A scene on program cannot be deleted"
+        : state.status,
+    };
+  }
+
+  const scenes = state.scenes.filter((candidate) => candidate.id !== scene.id);
+  const retainedLayerIds = new Set(scenes.flatMap((candidate) => candidate.layerIds));
+  const layers = state.layers.filter((layer) => retainedLayerIds.has(layer.id));
+  const activeOverlays = Object.fromEntries(
+    Object.entries(state.activeOverlays).filter(([layerId]) => retainedLayerIds.has(layerId)),
+  );
+  const previewSceneId = state.previewSceneId === scene.id
+    ? state.programSceneId
+    : state.previewSceneId;
+  const selectedLayerId = retainedLayerIds.has(state.selectedLayerId)
+    ? state.selectedLayerId
+    : getPreferredLayerId({ ...state, scenes, layers }, previewSceneId) ?? layers[0]?.id ?? "";
+
+  return {
+    ...state,
+    scenes,
+    layers,
+    activeOverlays,
+    previewSceneId,
+    selectedLayerId,
+    htmlDraft: getLayerHtml({ ...state, layers }, selectedLayerId),
+    phase: state.isRecording ? "recording" : "designing",
+    status: `${scene.name} removed from rundown`,
+  };
+}
+
+function moveScene(
+  state: StudioState,
+  sceneId: string,
+  direction: "up" | "down",
+): StudioState {
+  const index = state.scenes.findIndex((scene) => scene.id === sceneId);
+  const targetIndex = direction === "up" ? index - 1 : index + 1;
+  if (index < 0 || targetIndex < 0 || targetIndex >= state.scenes.length) {
+    return state;
+  }
+
+  const scenes = [...state.scenes];
+  [scenes[index], scenes[targetIndex]] = [scenes[targetIndex], scenes[index]];
+  return {
+    ...state,
+    scenes,
+    status: `${scenes[targetIndex].name} moved ${direction} in rundown`,
+  };
+}
+
+function getNextCustomSceneId(state: StudioState): string {
+  const existingIds = new Set(state.scenes.map((scene) => scene.id));
+  let index = 1;
+  while (existingIds.has(`custom-${index}`)) index += 1;
+  return `custom-${index}`;
+}
+
+function getNextSceneName(state: StudioState): string {
+  const customCount = state.scenes.filter((scene) => scene.isCustom).length;
+  return `Scene ${customCount + 1}`;
+}
+
+function normalizeSceneName(name: string): string {
+  return name.trim().replace(/\s+/g, " ").slice(0, MAXIMUM_SCENE_NAME_LENGTH);
+}
+
+function toIdSegment(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "layer";
 }
 
 function selectLayer(state: StudioState, layerId: string): StudioState {
@@ -486,12 +715,26 @@ function applyScreenshareLayout(state: StudioState, sceneId: string): StudioStat
 }
 
 function selectScreenShareSource(state: StudioState, sourceId: string, name: string): StudioState {
-  const screenLayerIds = new Set(
-    state.scenes
-      .filter((scene) => scene.layout === "screenshare")
-      .flatMap((scene) => scene.layerIds)
-      .filter((layerId) => state.layers.find((layer) => layer.id === layerId)?.type === "screen"),
-  );
+  const previewScene = getScene(state, state.previewSceneId);
+  if (!previewScene || !state.sources.some((source) => source.id === sourceId && source.type === "screen")) {
+    return state;
+  }
+  if (state.activeStinger) {
+    return {
+      ...state,
+      status: "Finish the current transition before changing a screen",
+    };
+  }
+  if (state.previewSceneId === state.programSceneId) {
+    return {
+      ...state,
+      status: "Duplicate or stage a different scene before changing its screen",
+    };
+  }
+  const screenLayerIds = new Set(previewScene.layerIds.filter(
+    (layerId) => state.layers.find((layer) => layer.id === layerId)?.type === "screen",
+  ));
+  if (screenLayerIds.size === 0) return state;
 
   return {
     ...state,
@@ -505,7 +748,7 @@ function selectScreenShareSource(state: StudioState, sourceId: string, name: str
           }
         : layer,
     ),
-    status: `${name} selected`,
+    status: `${name} selected in ${previewScene.name} preview`,
   };
 }
 

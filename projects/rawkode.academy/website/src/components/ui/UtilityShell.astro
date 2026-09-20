@@ -1,0 +1,49 @@
+---
+interface Props {
+	kicker?: string;
+	title: string;
+	description?: string;
+	tone?: "neutral" | "success" | "danger";
+}
+
+const {
+	kicker = "Rawkode Academy",
+	title,
+	description,
+	tone = "neutral",
+} = Astro.props as Props;
+const mark = tone === "success" ? "✓" : tone === "danger" ? "!" : "→";
+---
+
+<main class:list={["utility-shell", `utility-shell--${tone}`]}>
+	<div class="utility-shell__mark" aria-hidden="true">{mark}</div>
+	<p class="utility-shell__kicker">{kicker}</p>
+	<h1>{title}</h1>
+	{description && <p class="utility-shell__description">{description}</p>}
+	{Astro.slots.has("default") && <div class="utility-shell__content"><slot /></div>}
+	{Astro.slots.has("actions") && <div class="utility-shell__actions"><slot name="actions" /></div>}
+</main>
+
+<style>
+	.utility-shell {
+		--utility-tone: var(--editorial-spruce);
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: center;
+		min-height: calc(100vh - 64px);
+		max-width: var(--layout-prose);
+		margin: 0 auto;
+		padding: var(--space-page-pad-block) var(--space-page-pad-inline);
+	}
+	.utility-shell--success { --utility-tone: var(--editorial-spruce); }
+	.utility-shell--danger { --utility-tone: var(--editorial-rust); }
+	.utility-shell__mark { display: grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: 2rem; border: 1px solid var(--utility-tone); color: var(--utility-tone); font-family: var(--font-jetbrains-mono), monospace; font-size: 1.25rem; }
+	.utility-shell__kicker { margin: 0 0 0.8rem; color: var(--utility-tone); font-family: var(--font-jetbrains-mono), monospace; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+	.utility-shell h1 { max-width: 14ch; margin: 0; font-size: var(--type-feature); }
+	.utility-shell__description { max-width: 52ch; margin: 1.25rem 0 0; color: var(--text-secondary-content); font-size: 1.15rem; line-height: 1.55; }
+	.utility-shell__content { width: 100%; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--surface-border); }
+	.utility-shell__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+	.utility-shell__actions :global(a),
+	.utility-shell__actions :global(button) { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; padding: 0.75rem 1rem; border: 1px solid var(--editorial-ink); border-radius: 2px; background: var(--editorial-ink); color: var(--editorial-paper); font-family: var(--font-jetbrains-mono), monospace; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.12em; text-decoration: none; text-transform: uppercase; }
+</style>

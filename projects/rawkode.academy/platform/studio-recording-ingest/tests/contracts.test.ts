@@ -303,9 +303,13 @@ describe("studio recording ingest contracts", () => {
 			"studio_recording_vod_claims_dispatch_token_idx",
 		);
 		expect(envCue).toContain(
-			'tasks: [_t.check, _t.test, _t."deploy.dry-run", _t.migrate, _t.deploy]',
+			'tasks: [_t.check, _t.test, _t.deploy."dry-run", _t.migrations.remote, _t.deploy.main]',
 		);
-		expect(envCue).toContain('dependsOn: [_t."deploy.dry-run"]');
+		expect(envCue).toContain('deploy: schema.#TaskGroup');
+		expect(envCue).toContain('migrations: schema.#TaskGroup');
+		expect(envCue).toContain('queues: schema.#TaskGroup');
+		expect(envCue).toContain('notify: schema.#TaskGroup');
+		expect(envCue).toContain('dependsOn: [_t.migrations.remote]');
 		expect(envCue).toContain("../../../../bun.lock");
 		expect(defaultWorkflow).toContain("environment: production");
 		expect(defaultWorkflow).toContain("bun.lock");

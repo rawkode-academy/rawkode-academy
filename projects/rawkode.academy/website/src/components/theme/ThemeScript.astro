@@ -30,6 +30,16 @@
 
 		function applyScheme(scheme) {
 			document.documentElement.classList.toggle("dark", scheme === "dark");
+			document.documentElement.setAttribute("data-color-scheme", scheme);
+			const themeColor = document.querySelector(
+				'meta[name="theme-color"][data-light-color]',
+			);
+			if (themeColor) {
+				themeColor.content =
+					scheme === "dark"
+						? themeColor.dataset.darkColor
+						: themeColor.dataset.lightColor;
+			}
 		}
 
 		function resolve(pref) {

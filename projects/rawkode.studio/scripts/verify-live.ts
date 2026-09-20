@@ -45,6 +45,7 @@ const schemaFlags = [
 	"migration_0006",
 	"migration_0007",
 	"migration_0008",
+	"migration_0009",
 	"sessions_table",
 	"recordings_table",
 	"invites_table",
@@ -63,6 +64,10 @@ const schemaFlags = [
 	"recording_lease_index",
 	"canonical_recording_index",
 	"canonical_recording_no_duplicates",
+	"stream_output_inputs_table",
+	"stream_output_input_mode",
+	"stream_output_provision_state",
+	"stream_output_inputs_state_index",
 ];
 
 const schemaQuery = `SELECT
@@ -75,6 +80,7 @@ const schemaQuery = `SELECT
   EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0006_realtimekit_participant_identity.sql') AS migration_0006,
   EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0007_recording_lease.sql') AS migration_0007,
   EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0008_canonical_vod_recording.sql') AS migration_0008,
+  EXISTS(SELECT 1 FROM d1_migrations WHERE name = '0009_stream_output_inputs.sql') AS migration_0009,
   EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_sessions') AS sessions_table,
   EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_recordings') AS recordings_table,
   EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_invites') AS invites_table,
@@ -92,6 +98,10 @@ const schemaQuery = `SELECT
   EXISTS(SELECT 1 FROM pragma_table_info('studio_sessions') WHERE name = 'recording_lease_grace_until') AS recording_lease_grace,
   EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_sessions_recording_lease_idx') AS recording_lease_index,
   EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_recordings_video_id_unique_idx') AS canonical_recording_index,
+  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'studio_stream_output_inputs') AS stream_output_inputs_table,
+  EXISTS(SELECT 1 FROM pragma_table_info('studio_stream_output_inputs') WHERE name = 'input_mode') AS stream_output_input_mode,
+  EXISTS(SELECT 1 FROM pragma_table_info('studio_stream_output_inputs') WHERE name = 'provision_state') AS stream_output_provision_state,
+  EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = 'studio_stream_output_inputs_state_idx') AS stream_output_inputs_state_index,
   NOT EXISTS(
     SELECT video_id
       FROM studio_recordings

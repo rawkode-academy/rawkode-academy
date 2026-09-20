@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  getRealtimeKitParticipantSourceIds,
   isRealtimeKitSnapshotAuthoritative,
   mapRealtimeKitParticipantSources,
   type RealtimeKitParticipant,
@@ -40,6 +41,13 @@ function sourceSummary(participants: RealtimeKitParticipant[]) {
 }
 
 describe("RealtimeKit participant source mapping", () => {
+	it("revokes every possible source by durable participant identity on departure", () => {
+		expect(getRealtimeKitParticipantSourceIds(participant("guest", "rejoining"))).toEqual([
+			"source-realtimekit-camera-studio-guest-rejoining",
+			"source-realtimekit-screen-studio-guest-rejoining",
+		]);
+	});
+
   it("authorizes pruning only after the meeting reports or emits roomJoined", () => {
     expect(isRealtimeKitSnapshotAuthoritative(undefined, false)).toBe(false);
     expect(isRealtimeKitSnapshotAuthoritative({ roomJoined: false }, false)).toBe(false);

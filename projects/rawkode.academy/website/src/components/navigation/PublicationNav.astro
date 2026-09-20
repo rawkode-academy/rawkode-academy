@@ -1,0 +1,314 @@
+---
+interface NavItem {
+	label: string;
+	href: string;
+	description: string;
+}
+
+interface NavGroup {
+	label: string;
+	items: NavItem[];
+}
+
+const groups: NavGroup[] = [
+	{
+		label: "Learn",
+		items: [
+			{
+				label: "Videos",
+				href: "/watch",
+				description: "Live builds, tutorials, and technical conversations.",
+			},
+			{
+				label: "Articles",
+				href: "/read",
+				description: "Guides, architecture notes, and practical explanations.",
+			},
+			{
+				label: "Courses",
+				href: "/courses",
+				description: "Structured, hands-on technical curricula.",
+			},
+			{
+				label: "Learning paths",
+				href: "/learning-paths",
+				description: "Curated routes through related lessons.",
+			},
+		],
+	},
+	{
+		label: "Explore",
+		items: [
+			{
+				label: "Technology Matrix",
+				href: "/technology/matrix",
+				description: "Compare tools by adoption stage and confidence.",
+			},
+			{
+				label: "Technologies",
+				href: "/technology",
+				description: "Browse the projects covered by the academy.",
+			},
+			{
+				label: "Shows",
+				href: "/shows",
+				description: "Recurring formats and their complete archives.",
+			},
+			{
+				label: "People",
+				href: "/people",
+				description: "Meet the maintainers and practitioners on the platform.",
+			},
+		],
+	},
+	{
+		label: "Current",
+		items: [
+			{
+				label: "News",
+				href: "/news",
+				description: "Operator-relevant changes across cloud native.",
+			},
+			{
+				label: "Search",
+				href: "/search",
+				description: "Search every format and technology in one place.",
+			},
+			{
+				label: "Partnerships",
+				href: "/organizations/partnerships",
+				description: "Technical adoption work for infrastructure teams.",
+			},
+			{
+				label: "CNIcon",
+				href: "/games/cnicon",
+				description: "Test your cloud native project knowledge.",
+			},
+		],
+	},
+];
+
+const currentPath = Astro.url.pathname;
+const isCurrent = (href: string) =>
+	href === "/" ? currentPath === href : currentPath.startsWith(href);
+---
+
+<div id="publication-nav" class="publication-nav" hidden>
+	<button
+		id="publication-nav-scrim"
+		class="publication-nav__scrim"
+		type="button"
+		aria-label="Close navigation"
+	></button>
+	<nav class="publication-nav__panel" aria-label="Academy navigation">
+		<div class="publication-nav__intro">
+			<p class="publication-nav__kicker">Rawkode Academy</p>
+			<p class="publication-nav__statement">
+				Practical cloud native education for people who learn by building.
+			</p>
+			<a class="publication-nav__featured" href="/watch">
+				<span>Start with the latest session</span>
+				<span aria-hidden="true">&#8599;</span>
+			</a>
+		</div>
+
+		<div class="publication-nav__groups">
+			{groups.map((group) => (
+				<section class="publication-nav__group" aria-labelledby={`nav-${group.label.toLowerCase()}`}>
+					<h2 id={`nav-${group.label.toLowerCase()}`}>{group.label}</h2>
+					<ul>
+						{group.items.map((item) => (
+							<li>
+								<a
+									href={item.href}
+									aria-current={isCurrent(item.href) ? "page" : undefined}
+								>
+									<strong>{item.label}</strong>
+									<span>{item.description}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</section>
+			))}
+		</div>
+	</nav>
+</div>
+
+<script>
+	const nav = document.getElementById("publication-nav");
+	const scrim = document.getElementById("publication-nav-scrim");
+	const triggers = [
+		document.getElementById("sidebar-toggle-btn"),
+		document.getElementById("mobile-sidebar-btn"),
+	].filter(Boolean);
+
+	let returnFocus: HTMLElement | null = null;
+
+	function setOpen(open: boolean, trigger?: HTMLElement | null) {
+		if (!nav) return;
+		nav.hidden = !open;
+		document.body.classList.toggle("publication-nav-open", open);
+		for (const item of triggers) item?.setAttribute("aria-expanded", String(open));
+
+		if (open) {
+			returnFocus = trigger ?? null;
+			(nav.querySelector("a") as HTMLElement | null)?.focus();
+		} else {
+			returnFocus?.focus();
+			returnFocus = null;
+		}
+	}
+
+	for (const trigger of triggers) {
+		trigger?.setAttribute("aria-controls", "publication-nav");
+		trigger?.setAttribute("aria-expanded", "false");
+		trigger?.addEventListener("click", () => {
+			setOpen(nav?.hidden ?? true, trigger as HTMLElement);
+		});
+	}
+
+	scrim?.addEventListener("click", () => setOpen(false));
+	window.addEventListener("keydown", (event) => {
+		if (event.key === "Escape" && nav && !nav.hidden) setOpen(false);
+	});
+</script>
+
+<style>
+	.publication-nav {
+		position: fixed;
+		inset: 64px 0 0;
+		z-index: 45;
+	}
+
+	.publication-nav__scrim {
+		position: absolute;
+		inset: 0;
+		border: 0;
+		background: color-mix(in oklab, var(--terminal-bg) 72%, transparent);
+		cursor: pointer;
+	}
+
+	.publication-nav__panel {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.7fr);
+		width: 100%;
+		max-height: calc(100vh - 64px);
+		overflow-y: auto;
+		background: var(--surface-base);
+		border-bottom: 1px solid var(--surface-border-strong);
+		box-shadow: 0 1rem 3rem color-mix(in oklab, var(--terminal-bg) 52%, transparent);
+	}
+
+	.publication-nav__intro {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: var(--space-page-pad-block) var(--space-page-pad-inline);
+		background: var(--terminal-bg);
+		color: var(--terminal-text);
+	}
+
+	.publication-nav__kicker,
+	.publication-nav__group h2 {
+		margin: 0;
+		font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+
+	.publication-nav__kicker { color: var(--editorial-amber); }
+
+	.publication-nav__statement {
+		max-width: 18ch;
+		margin: 0;
+		font-family: var(--font-instrument-serif), Georgia, serif;
+		font-size: clamp(2rem, 4vw, 3.5rem);
+		font-style: normal;
+		line-height: 0.98;
+		text-wrap: balance;
+	}
+
+	.publication-nav__featured {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: auto;
+		padding-top: 1rem;
+		border-top: 1px solid var(--terminal-border);
+		color: inherit;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.publication-nav__groups {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.publication-nav__group {
+		padding: var(--space-page-pad-block) clamp(1.25rem, 3vw, 2.5rem);
+		border-left: 1px solid var(--surface-border);
+	}
+
+	.publication-nav__group h2 { color: var(--text-muted); }
+
+	.publication-nav__group ul {
+		list-style: none;
+		margin: 1.25rem 0 0;
+		padding: 0;
+	}
+
+	.publication-nav__group li + li { border-top: 1px solid var(--surface-border); }
+
+	.publication-nav__group a {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		padding: 1rem 0;
+		color: var(--text-primary-content);
+		text-decoration: none;
+	}
+
+	.publication-nav__group a:hover strong,
+	.publication-nav__group a[aria-current="page"] strong {
+		color: var(--editorial-spruce);
+	}
+
+	.publication-nav__group strong {
+		font-size: 1rem;
+		line-height: 1.2;
+	}
+
+	.publication-nav__group span {
+		color: var(--text-secondary-content);
+		font-size: 0.82rem;
+		line-height: 1.35;
+	}
+
+	:global(body.publication-nav-open) { overflow: hidden; }
+
+	@media (max-width: 900px) {
+		.publication-nav__panel { grid-template-columns: 1fr; }
+		.publication-nav__intro { min-height: 13rem; }
+		.publication-nav__statement { max-width: 24ch; }
+	}
+
+	@media (max-width: 640px) {
+		.publication-nav__groups { grid-template-columns: 1fr; }
+		.publication-nav__group { border-left: 0; border-top: 1px solid var(--surface-border); }
+		.publication-nav__group a { padding: 0.8rem 0; }
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.publication-nav__panel { animation: publication-nav-in 180ms var(--ease-out); }
+		@keyframes publication-nav-in {
+			from { opacity: 0; transform: translateY(-0.75rem); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+	}
+</style>

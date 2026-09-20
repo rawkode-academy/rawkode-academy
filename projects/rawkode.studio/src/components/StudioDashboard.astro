@@ -198,9 +198,10 @@ function eventState(event: StudioEventSummary): string {
 															dashboard.isOperator ? (
 																isStudioSessionActive(session) ? (
 																	<>
-																		<a class="button" href={`/studio/${session.id}/host`}>Host</a>
-																		<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
-																		<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+																						<a class="button" href={`/studio/${session.id}/host`}>Host</a>
+																						<a class="button" href={`/studio/${session.id}/producer`}>Produce</a>
+																						<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+																						<a class="button" href={`/studio/${session.id}/outputs`}>Outputs</a>
 																		<form method="POST" action={actions.createInvite}>
 																			<input name="sessionId" type="hidden" value={session.id} />
 																			<button class="button" type="submit">Guest invite</button>
@@ -260,7 +261,10 @@ function eventState(event: StudioEventSummary): string {
 											</>
 										) : null}
 										{dashboard.isOperator ? (
-											<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+											<>
+												<a class="button" href={`/studio/${session.id}/recordings`}>Recordings</a>
+												<a class="button" href={`/studio/${session.id}/outputs`}>Outputs</a>
+											</>
 										) : null}
 									</div>
 								</article>
