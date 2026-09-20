@@ -28,16 +28,6 @@ description: |-
 
   Whether you operate shared GPU clusters, machine-learning platforms, research infrastructure, CI systems, or large-scale batch workloads, this session will provide a practical foundation for managing queued work with Kubernetes.
 
-  🔗 Learn more:
-
-  * Rawkode Academy
-  * Kueue documentation
-  * Kubernetes SIG Scheduling
-  * Kueue on GitHub
-
-  Subscribe for more hands-on sessions covering Kubernetes, cloud native infrastructure, AI platforms, HPC, Rust, WebAssembly, and distributed systems.
-
-  #Kueue #Kubernetes #CloudNative #MachineLearning #HPC #GPUs #BatchProcessing #PlatformEngineering #RawkodeAcademy
 whatYouWillLearn:
   - "Understand how Kueue queues and admits Kubernetes workloads."
   - "Configure LocalQueues and ClusterQueues to manage shared resource quotas."

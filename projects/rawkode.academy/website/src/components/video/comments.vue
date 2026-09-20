@@ -1,8 +1,8 @@
 <template>
  <div :class="watch.comments">
- <h3 :class="watch.commentsTitle">
+ <component :is="`h${headingLevel}`" :class="headingLevel === 2 ? watch.sectionTitle : watch.commentsTitle">
  Comments {{ !loading ? `(${comments.length})` : '' }}
- </h3>
+ </component>
 
  <div v-if="loading" :class="watch.commentList">
  <SkeletonComment v-for="i in 3" :key="i" :lines="2" />
@@ -15,21 +15,18 @@
  retry-text="Retry loading comments"
  />
 
- <EmptyState
- v-else-if="comments.length === 0"
- title="No comments yet."
- body="Be the first to start the discussion."
- >
- <template v-if="discordInviteUrl" #actions>
+ <div v-else-if="comments.length === 0" :class="watch.commentList">
+ <p :class="watch.transcriptNote">No comments yet. Be the first to start the discussion.</p>
  <a
+ v-if="discordInviteUrl"
  :href="discordInviteUrl"
  target="_blank"
  rel="noopener noreferrer"
+ :class="watch.commentCta"
  >
  Join the discussion on Discord →
  </a>
- </template>
- </EmptyState>
+ </div>
 
  <div v-else :class="watch.commentList">
  <div
@@ -56,9 +53,9 @@
 
  <div :class="watch.commentContent">
  <div :class="watch.commentMeta">
- <h4 :class="watch.commentAuthor">
+ <component :is="`h${headingLevel + 1}`" :class="watch.commentAuthor">
  {{ comment.author }}
- </h4>
+ </component>
  <span :class="watch.commentDate">
  {{ formatDate(comment.timestamp) }}
  </span>
@@ -94,7 +91,6 @@ import { onMounted, ref } from "vue";
 import { academyWatch } from "@rawkodeacademy/design-system";
 import SkeletonComment from "@/components/common/SkeletonComment.vue";
 import ErrorState from "@/components/common/ErrorState.vue";
-import EmptyState from "@/components/ui/EmptyState.vue";
 import { handleApiResponse, getErrorMessage } from "@/utils/error-handler";
 
 interface Comment {
@@ -108,9 +104,10 @@ interface Comment {
 
 interface Props {
 	videoId: string;
+	headingLevel?: 2 | 3;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), { headingLevel: 3 });
 const watch = academyWatch();
 
 const comments = ref<Comment[]>([]);

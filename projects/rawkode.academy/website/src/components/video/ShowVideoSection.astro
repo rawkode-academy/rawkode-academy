@@ -27,9 +27,9 @@ const watch = academyWatch();
 {videos.length > 0 && (
 	<section class={watch.rail}>
 		<div class={watch.railHeader}>
-			<h3 class={watch.railTitle}>
+			<h2 class={watch.railTitle}>
 				More from {show.data.name}
-			</h3>
+			</h2>
 			<a
 				href={`/shows/${show.id}`}
 				class={watch.railLink}
@@ -60,7 +60,7 @@ const watch = academyWatch();
 					<div class={watch.railMedia}>
 						<img
 							src={video.thumbnailUrl}
-							alt={video.title}
+							alt=""
 							class={watch.railImage}
 							width="1280"
 							height="720"
@@ -72,9 +72,9 @@ const watch = academyWatch();
 						</div>
 					</div>
 					<div class={watch.railCardBody}>
-						<h4 class={watch.railCardTitle}>
+						<h3 class={watch.railCardTitle}>
 							{video.title}
-						</h4>
+						</h3>
 					</div>
 				</a>
 			))}

@@ -4,6 +4,36 @@
   "rule": "Every path in the inventory is pending until an explicit review entry exists here. Source reviews and template samples are not visual sign-off.",
   "reviews": [
     {
+      "path": "/watch",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 22:11 build; earlier full desktop dark on hosted 75375748",
+      "findings": ["F63 resolved"],
+      "coverage": "Whole first page inspected in overlapping captures through copyright at both sizes: feature, search, every one of 23 grid cards and pagination. DOM confirms 24 unique session links including feature and desktop width 1440/1440. Mobile Next by Enter reaches page 2 with range 25-48; submitting kueue resets pagination and returns one session without the feature. No-match message and Clear search recovery verified. These state checks do not sign off the whole of page 2 or later pages.",
+      "justification": "One featured latest session supplies a clear starting point. Title, distinct artwork and runtime help compare sessions; search narrows the large catalogue and native pagination bounds its length. Duplicate featured grid tile removed without dropping any session. Shared navigation and footer provide routes to other learning formats.",
+      "limitations": "First-page visual review only. Pagination of a 329-record fixture is covered by an actual Astro SSR test, not by a visual review of every real archive page or video detail. Search state checks are mobile; no subscriptions or authentication."
+    },
+    {
+      "path": "/news/2026-09-18-gloo-interrupted-validation",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 21:50 build / d5b4e864",
+      "findings": [],
+      "coverage": "Whole page inspected in overlapping captures through copyright at both sizes: headline/deck/byline and two technology links, all five paragraphs, four release-source links, long metric identifiers, three complete related stories, hydrated signup and footer. Mobile document is 390px wide and identifiers wrap without clipping. Related Gloo row from the ExternalDNS story opens by Enter.",
+      "justification": "Headline and summary identify the failure, provenance links identify releases, and the body distinguishes interrupted validation from actual rejection, fixed branches, observability and operator action. A short report needs no contents sidebar or decorative hero. Three related stories use shared generic artwork, dates and descriptions; optional newsletter follows content.",
+      "limitations": "Local visual evidence only. No gateway changes, operational commands, source-fact revalidation or subscription. Signup expansion covered separately on the preceding ExternalDNS detail; no claim of reviewing other News routes."
+    },
+    {
+      "path": "/news/2026-09-19-externaldns-023-dry-run-crd-registry",
+      "status": "visual-pass",
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "environment": "Compiled local :4322, 21:50 build / d5b4e864",
+      "findings": [],
+      "coverage": "Whole page inspected in overlapping captures through copyright at both sizes: long headline/deck, author/date/read-time/technology, all four paragraphs and linked sources, three complete related rows with generic News artwork, hydrated newsletter and footer. Mobile newsletter expanded and input automatically receives a complete visible focus outline. Widths 390/390 and 1440/1440; long option names wrap within the text measure. Archive Read the story link reached this page by Enter.",
+      "justification": "Headline/deck communicate the release and upgrade consequence; byline/date and source links establish provenance. Four concise paragraphs distinguish provider fixes from the registry change. No unnecessary contents navigation or decorative hero image for this short report. Bounded related stories support continuation; optional email signup follows the article.",
+      "limitations": "Local visual evidence. No DNS commands, provider changes, source-fact revalidation, external navigation or subscription submission. Other News detail pages remain individually pending."
+    },
+    {
       "path": "/learning-paths/klustered-advanced-cluster-triage",
       "status": "visual-pass",
       "viewports": ["1440x1000 dark", "390x844 light"],
@@ -200,11 +230,11 @@
       "path": "/read/federated-graphql-microservices",
       "status": "visual-pass",
       "viewports": ["1440x1000 light", "390x844 dark"],
-      "environment": "Whole page deployed 447c1270 / fbd52a50; final copy-control correction local :4322 21:50 build",
+      "environment": "Whole page deployed 447c1270 / fbd52a50; final copy controls verified hosted 75375748 / d5b4e864 at both sizes",
       "findings": ["F57 resolved", "F58 resolved", "F60 resolved", "F62 resolved"],
       "coverage": "Entire article inspected in overlapping captures through copyright at both sizes: hero/byline/tags, introduction and info callout, seven sections, six code blocks, diagram, all lists, publication/discussion footer, three related articles, three videos, hydrated newsletter and footer. Mobile contents opened and all seven links inspected; desktop current-section state tracks reading. Widths 390/390 and 1440/1440; code overflow stays within blocks. Hosted mobile enlargement opens on API Client and returns to fitted graph. Final local copy controls all measure 44x44 at both sizes, with centred 20px icons and complete keyboard focus. Enter shows Copied feedback. All six mobile code regions are focusable; ArrowRight pans the first 40px without moving the document.",
       "justification": "Title and byline identify topic and historical provenance. Benefits, incremental schema example, tools, publishing steps and limitations explain the approach. Six code blocks serve distinct examples, with native copy access. Diagram distinguishes shared gateway from two independent server/ORM/database chains; its description and optional enlargement provide overview and label access. Contents supports a long article, and bounded recommendations and optional signup support continuation without interrupting reading.",
-      "limitations": "F62 is local pending deployment. No code execution, live API requests, external destination review, subscription or playback. Technical and historical claims preserved, not independently revalidated. Copy feedback is visually verified, not tested with a screen reader."
+      "limitations": "F62 deployed and Browser-verified at both sizes on 75375748. No code execution, live API requests, external destination review, subscription or playback. Technical and historical claims preserved, not independently revalidated. Copy feedback is visually verified locally, not tested with a screen reader."
     },
     {
       "path": "/read",
@@ -246,7 +276,7 @@
       "environment": "Whole archive deployed f4762c10 / 3541053b; corrected signup compiled local :4322 21:47 build",
       "coverage": "Whole archive inspected in overlapping captures through copyright at both sizes: lead story, all 36 earlier rows from September through March, signup and footer. DOM confirms 37 unique story URLs and all 37 images using /images/news/news-generic.svg. Mobile width 390/390; desktop 1440/1440. Long titles and technical identifiers wrap. Corrected two-column signup and keyboard input/button focus verified desktop/dark; stacked mobile/dark has complete input focus ring, 300x50 input and 300x47 button with 390px document.",
       "justification": "Lead story identifies the latest publication; chronological rows retain date, complete title and description for choosing what to read. Generic decorative artwork identifies the News format without implying article-specific illustrations. RSS provides real syndication. Optional email signup uses one heading, no repetitive paragraph, native labelled controls and the shared compact composition.",
-      "limitations": "F61 correction is local pending deployment. No story-detail sign-off, subscription submission, live feed-reader import or independent fact-check. Native form endpoint, method and required email semantics retained and covered by actual Astro SSR regression."
+      "limitations": "F61 deployed and Browser-verified desktop/mobile on 75375748. No story-detail sign-off from this archive review, subscription submission, live feed-reader import or independent fact-check. Native form endpoint, method and required email semantics retained and covered by actual Astro SSR regression."
     },
     {
       "path": "/technology/kubernetes",
@@ -302,14 +332,13 @@
     },
     {
       "path": "/watch/hands-on-introduction-to-kueue",
-      "viewports": [
-        "1440x1000"
-      ],
-      "findings": [
-        "F19"
-      ],
-      "coverage": "Player/header inspected. Full-width player implemented; transcript/resources integration needs compiled interactive review.",
-      "status": "composition-rework"
+      "viewports": ["1440x1000 light", "390x844 dark"],
+      "findings": ["F19 resolved for this recorded page", "F64 resolved", "F65 resolved", "F66 resolved"],
+      "environment": "Compiled local :4322, 22:11 build; earlier full hosted desktop dark 75375748 exposed defects",
+      "coverage": "Whole corrected page inspected in overlapping captures through copyright at both sizes: loaded player/poster, title/deck/date/runtime/share, reactions, three learning outcomes, complete ten-point description, both technology links, both cast members, immediately visible empty comments, all six related sessions, hydrated signup and footer. Desktop description is 680px wide; reaction buttons 60x44 and plus 44x44. Document widths 1440/1440 and 390/390. Mobile playback advanced through the opening slate; Space paused at 35.6 seconds. Copy link Enter gives visible feedback and full focus outline. Emoji picker Enter/Escape restores trigger focus without sending a reaction.",
+      "status": "visual-pass",
+      "justification": "Player is primary; title and metadata identify the session. Outcomes and readable description explain relevance and substance. Reactions preserve feedback without an empty enclosing panel. Technology and cast links support subject/speaker discovery. Comments communicate their real empty state and the Discord destination without a one-option tab. Six related recordings and optional newsletter follow the lesson. Removed unlinked Learn more list, duplicate subscription prose and nonfunctional hashtags.",
+      "limitations": "Local corrected evidence only. No full-session playback, caption accuracy, casting, picture-in-picture, fullscreen, live-stream state, account state, reaction/comment writes or newsletter submission. This recording has no chapter, transcript or resource data; those distinct states remain pending Browser review. Resources SSR/hydration tested separately with fixtures. Main-agent review only; independent reviewer unavailable."
     },
     {
       "path": "/courses/teleport-for-kubernetes/01-introduction",

@@ -96,7 +96,10 @@ const handleMobileChange = (event: Event) => {
 </script>
 
 <template>
-	<Tabs.Root :value="activeTab" :class="watch.tabsRoot" @value-change="setActiveTab($event.value)">
+	<section v-if="validResources.length === 0" :class="watch.section">
+		<VideoComments :video-id="videoId" :heading-level="2" />
+	</section>
+	<Tabs.Root v-else :value="activeTab" :default-value="activeTab" :class="watch.tabsRoot" @value-change="setActiveTab($event.value)">
 		<h2 class="sr-only">{{ validResources.length > 0 ? "Comments and resources" : "Comments" }}</h2>
 		<div>
 			<div :class="watch.tabMobile">

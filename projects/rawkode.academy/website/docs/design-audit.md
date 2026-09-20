@@ -87,9 +87,43 @@ duplicate navigation. Preserve useful content and functional behavior.
 | F60 | Enlarging a centred graph initially shows its empty top-left corner on mobile | Small progressive enhancement centres horizontal scroll on expansion and resets on collapse; native checkbox/CSS retained. Both graphs now open on their root node at mobile; architecture also verified desktop. Keyboard region focus, right-arrow panning, pointer scrolling and fitted reset rechecked on GraphQL | `articles/Diagram.astro`, two script tests |
 | F61 | News signup spreads a single email field/button across the full desktop content width and does not use the compact shared signup composition | Shared compact two-column composition, H2 and one explanation; redundant paragraph removed. Native POST endpoint and email semantics retained. Desktop/mobile and keyboard focus verified in compiled 21:47 build | `news/WireSubscribeCard.astro`, one actual Astro SSR regression |
 | F62 | Expressive Code shrinks copy controls to 32px with a pointer (40px for touch) | Shared renderer plugin sets 44px minimum and centred 20px icon. All six GraphQL controls measured at both sizes; keyboard focus, Enter/Copied feedback and contained code ArrowRight panning verified | `astro.config.mts`, full GraphQL article review |
+| F63 | Watch feature is duplicated as the first grid tile | Show it once, keeping the 24-session page boundary and complete pagination. Actual page SSR verifies a 329-record fixture appears exactly once across 14 unfiltered pages; first page visually verified at both sizes | `watch/index.astro`, `watch-archive-ssr.test.mjs` |
+| F64 | Watch breadcrumb pushes the show to the far edge; description spans 1084px; reactions sit in an empty full-width panel with small targets | Only live status uses auto margin; 680px reading measure, unboxed reactions and 44px breadcrumb/reaction/technology targets. Show recommendations use H2/H3 with no duplicate image name | `academyWatch.ts`, `watch/[...slug].astro`, `ShowVideoSection.astro` |
+| F65 | One-option Comments tab hides its content on arrival; empty state repeats Comments inside nested panels | Render a direct H2 discussion when no resources exist, with one compact empty message/link. Resource tabs explicitly initialize the SSR selection. Actual SSR/hydration, empty/nonempty comment tests and compiled Browser verification | `video-content-tabs.vue`, `comments.vue` |
+| F66 | Kueue description ends in four unlinked Learn more names, redundant subscription prose and nonfunctional hashtags | Remove these ten lines; real technology links and newsletter already provide those onward actions. Substantive description and learning outcomes preserved | Kueue content record; both-size full-page review |
 
 ## Verification log
 
+- 22:11 compiled build: full Watch first page and Kueue detail inspected through
+  copyright at 1440x1000 light and 390x844 dark. Ledger now has 35 whole-page
+  passes; all other URLs remain individually pending. Catalogue mobile Next,
+  search reset, one result, no result and clear recovery verified. Every first-page
+  tile reviewed at both sizes; 24 distinct links including feature.
+- Kueue: 680px desktop description, 44px reaction targets and immediately visible
+  compact comments verified. Mobile playback reached 35.6s and Space paused it;
+  Copy link keyboard feedback/focus and emoji-picker Enter/Escape verified without
+  writes. Both tech links, cast, six recommendations, signup and copyright inspected.
+  No transcript/chapter/resources data exists on this recording. Those states and
+  live-player/fullscreen/casting/caption accuracy are not covered by this pass.
+- Build passed: 443 Astro files, zero errors/warnings, nine hints; 116 SSR checks,
+  122 interaction tests, 13 parser tests. Vitest 575/575 in 46 files, plus three new
+  real comments-component tests passed. Resource-panel SSR/hydration regression
+  verifies initial selection without a click. Strict Panda check and vue-tsc passed.
+  Existing Zed highlight fallback remains. Fresh root cuenv 0.55.1 sync produced
+  no tracked generated drift. Main-agent diff review only; independent reviewer
+  unavailable, not substituted with source/test coverage.
+
+- Checkpoint `d5b4e864` pushed normally. Website CI 35536973501 and design-system
+  CI 35536973500 succeeded, including preview deployment. Current preview:
+  https://75375748-rawkode-academy-website.rawkodeacademy.workers.dev.
+  Hosted News compact signup and full keyboard focus verified desktop/mobile;
+  all six hosted GraphQL copy controls measure 44x44 with centred 20px icons,
+  complete keyboard focus and document widths 390/390 and 1440/1440.
+- While CI ran, ExternalDNS and Gloo News details were each inspected through
+  copyright at both sizes on the compiled 21:50 build. Native source links,
+  long identifiers, generic recommendation images and signup all retained.
+  ExternalDNS newsletter expansion/focus checked without submission. Ledger
+  now records 33 whole-page passes; these two latest detail reviews are local.
 - Final 21:50 build passed: 443 Astro files, zero errors/warnings, nine hints,
   115 SSR/hydration checks, 122 interaction tests and 13 parser tests. Full Vitest
   remains 574/574 in 46 files. Existing Zed highlighting fallback persists.

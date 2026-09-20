@@ -522,7 +522,7 @@ const watchStatusLabel = isLiveNow
 						</ol>
 					</section>
 				)}
-				<div class={layout.prose} data-academy-prose set:html={renderedDescriptionHtml} />
+				<div class:list={[layout.prose, watch.description]} data-academy-prose set:html={renderedDescriptionHtml} />
 			</section>
 
 			{chapterSource.length > 0 && (

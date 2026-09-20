@@ -50,6 +50,7 @@ const videos = archive.items.map((video) => ({
 	mediaSrc: getVideoThumbnailUrl(video.data.id),
 }));
 const featured = archive.showFeatured ? videos[0] : undefined;
+const libraryVideos = featured ? videos.slice(1) : videos;
 const listUrl = new URL(watchArchiveHref(archive.query, archive.page), Astro.site ?? Astro.url).href;
 
 Astro.response.headers.set(
@@ -122,7 +123,7 @@ const pageDescription =
 			{archive.total > 0 ? (
 				<>
 					<div class={styles.feedGrid}>
-						{videos.map(item => (
+						{libraryVideos.map(item => (
 							<a href={item.href} class={styles.card}>
 								<div class={styles.cardArt}><img src={item.mediaSrc} alt="" class={styles.cardImage} width="640" height="360" loading="lazy" /></div>
 								<div class={styles.cardBody}>

@@ -9,7 +9,8 @@ import {
 	vi,
 } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
-import { defineComponent, h } from "vue";
+import { createSSRApp, defineComponent, h } from "vue";
+import { renderToString } from "vue/server-renderer";
 import { transform } from "@astrojs/compiler";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import * as astroRuntime from "astro/runtime/server/index.js";
@@ -365,18 +366,17 @@ describe("transcript data helpers", () => {
 });
 
 describe("watch resources and comments", () => {
-	it("defaults to comments and has no transcript or empty resource tab", async () => {
+	it("renders comments directly with no one-option navigation", async () => {
 		const wrapper = mountTabs();
 		await flushPromises();
-		expect(wrapper.findAll("option").map((option) => option.text())).toEqual([
-			"Comments",
-		]);
-		expect(wrapper.get("select").element.value).toBe("comments");
+		expect(wrapper.find("select").exists()).toBe(false);
 		expect(wrapper.text()).not.toContain("Transcript");
 		expect(wrapper.text()).not.toContain("No resources");
-		expect(wrapper.findAll('[role="tab"]').map((tab) => tab.text())).toEqual([
-			"Comments",
-		]);
+		expect(wrapper.find('[role="tablist"]').exists()).toBe(false);
+		expect(wrapper.get("[data-comments-fixture]").isVisible()).toBe(true);
+		expect(
+			wrapper.get("[data-comments-fixture]").attributes("heading-level"),
+		).toBe("2");
 	});
 
 	it("only renders valid destinations and puts unknown categories in other", async () => {
@@ -431,10 +431,9 @@ describe("watch resources and comments", () => {
 			resources: [{ title: "Gone", type: "url", url: "#" }],
 		});
 		await flushPromises();
-		expect(wrapper.get("select").element.value).toBe("comments");
-		expect(wrapper.findAll('[role="tab"]').map((tab) => tab.text())).toEqual([
-			"Comments",
-		]);
+		expect(wrapper.find("select").exists()).toBe(false);
+		expect(wrapper.find('[role="tablist"]').exists()).toBe(false);
+		expect(wrapper.get("[data-comments-fixture]").isVisible()).toBe(true);
 	});
 
 	it("uses unique native mobile select IDs and labels across instances", async () => {
@@ -442,8 +441,18 @@ describe("watch resources and comments", () => {
 			defineComponent(
 				() => () =>
 					h("div", [
-						h(VideoContentTabs, { videoId: "one" }),
-						h(VideoContentTabs, { videoId: "two" }),
+						h(VideoContentTabs, {
+							videoId: "one",
+							resources: [
+								{ title: "Docs", type: "url", url: "https://example.com" },
+							],
+						}),
+						h(VideoContentTabs, {
+							videoId: "two",
+							resources: [
+								{ title: "Docs", type: "url", url: "https://example.com" },
+							],
+						}),
 					]),
 			),
 		);
@@ -457,5 +466,45 @@ describe("watch resources and comments", () => {
 			expect(
 				wrapper.find('label[for="' + select.attributes("id") + '"]').exists(),
 			).toBe(true);
+	});
+
+	it("SSR and hydration show the initial resource panel without requiring a tab click", async () => {
+		const props = {
+			videoId: "video-one",
+			resources: [
+				{
+					title: "Docs",
+					type: "url" as const,
+					url: "https://example.com/docs",
+				},
+			],
+		};
+		const root = document.createElement("div");
+		root.innerHTML = await renderToString(
+			createSSRApp(VideoContentTabs, props),
+		);
+		document.body.appendChild(root);
+		const assertSelected = () => {
+			expect(
+				root.querySelector('[role="tab"][aria-selected="true"]')?.textContent,
+			).toBe("Resources");
+			expect(
+				root
+					.querySelector('a[href="https://example.com/docs"]')
+					?.closest("[hidden]"),
+			).toBeNull();
+			expect(
+				root.querySelector('a[href="https://example.com/docs"]'),
+			).not.toBeNull();
+		};
+		assertSelected();
+		const app = createSSRApp(VideoContentTabs, props);
+		app.mount(root);
+		try {
+			await flushPromises();
+			assertSelected();
+		} finally {
+			app.unmount();
+		}
 	});
 });

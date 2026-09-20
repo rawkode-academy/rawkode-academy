@@ -55,7 +55,12 @@ const collections = {
 };
 
 async function renderArchive(search = "", data = collections) {
-	const context = vm.createContext({ console, URL, URLSearchParams, __NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01") });
+	const context = vm.createContext({
+		console,
+		URL,
+		URLSearchParams,
+		__NEWS_DEPLOYMENT_CUTOFF_MS__: Date.parse("2100-01-01"),
+	});
 	const pageProps = [];
 	const mocks = {
 		"astro/runtime/server/index.js": { ...runtime, createMetadata: () => ({}) },
@@ -115,7 +120,12 @@ async function renderArchive(search = "", data = collections) {
 		await module.evaluate();
 		return module;
 	}
-	for (const name of ["news-publication", "watch-archive", "content", "video-itemlist-jsonld"]) {
+	for (const name of [
+		"news-publication",
+		"watch-archive",
+		"content",
+		"video-itemlist-jsonld",
+	]) {
 		modules.set(
 			`@/lib/${name}`,
 			await compile(name, readSource(`lib/${name}.ts`)),
@@ -144,7 +154,8 @@ async function renderArchive(search = "", data = collections) {
 test("Watch is a static server-rendered archive with labeled GET search, existing SEO title and feeds", async () => {
 	const { dom, html, pageProps } = await renderArchive();
 	assert.equal(dom.querySelector("h1").text, "Watch");
-	assert.equal(dom.querySelectorAll(".archive-feedGrid > a").length, 24);
+	assert.equal(dom.querySelectorAll(".archive-feedGrid > a").length, 23);
+	assert.equal(dom.querySelectorAll('a[href="/watch/session-0"]').length, 1);
 	assert.equal(
 		dom.querySelectorAll('[aria-label="Featured session"]').length,
 		1,
@@ -158,7 +169,7 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 	assert(!dom.text.includes("per page"));
 	assert.deepEqual(
 		dom.querySelectorAll(".archive-cardMeta").map((meta) => meta.text),
-		Array(24).fill("1h 1m"),
+		Array(23).fill("1h 1m"),
 	);
 	assert.equal(
 		dom.querySelector('form[role="search"]').getAttribute("method"),
@@ -193,6 +204,27 @@ test("Watch is a static server-rendered archive with labeled GET search, existin
 	assert(!source.includes("client:") && !source.includes("AcademyPage"));
 	assert(!html.includes("astro-island"));
 	assert(!html.includes('href="/watch/future"'));
+});
+
+test("unfiltered archive features the latest once and keeps every published URL in page order", async () => {
+	const seen = [];
+	for (let page = 1; page <= 14; page++) {
+		const { dom, jsonLd } = await renderArchive(`?page=${page}`);
+		const links = dom
+			.querySelectorAll(".archive-watchFeature, .archive-feedGrid > a")
+			.map((link) => link.getAttribute("href"));
+		assert.equal(links.length, page === 14 ? 17 : 24);
+		assert.deepEqual(
+			jsonLd.itemListElement.map((item) => new URL(item.url).pathname),
+			links,
+		);
+		seen.push(...links);
+	}
+	assert.deepEqual(
+		seen,
+		fixtures.map((video) => `/watch/${video.data.slug}`),
+	);
+	assert.equal(new Set(seen).size, 329);
 });
 
 test("all published fixture URLs remain reachable once across ordinary 24-result pages", async () => {
