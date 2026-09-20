@@ -16,6 +16,8 @@ const internal = "https://game-room.internal";
  * compare-and-apply command path and buzzer claim atomic without a distributed lock.
  */
 export class GameRoom implements DurableObject {
+	private readonly testAdmissionBarrierWaiters: Record<"before" | "after", Array<() => void>> = { before: [], after: [] };
+
 	constructor(private readonly state: DurableObjectState, private readonly env: Env) {
 		this.state.blockConcurrencyWhile(async () => {
 			this.state.storage.sql.exec("CREATE TABLE IF NOT EXISTS room_state (id INTEGER PRIMARY KEY CHECK (id = 1), value TEXT NOT NULL)");
@@ -69,6 +71,10 @@ export class GameRoom implements DurableObject {
 		if (url.pathname === "/_internal/testing/fail-next-audience-admission" && request.method === "POST") return this.setTestFailure(request, "audience-admission");
 		if (url.pathname === "/_internal/testing/delay-next-audience-admission" && request.method === "POST") return this.setTestFailure(request, "audience-admission-delay");
 		if (url.pathname === "/_internal/testing/delay-next-before-audience-admission" && request.method === "POST") return this.setTestFailure(request, "audience-admission-before-delay");
+		if (url.pathname === "/_internal/testing/hold-next-audience-admission" && request.method === "POST") return this.setTestFailure(request, "audience-admission-hold-after");
+		if (url.pathname === "/_internal/testing/hold-next-before-audience-admission" && request.method === "POST") return this.setTestFailure(request, "audience-admission-hold-before");
+		if (url.pathname === "/_internal/testing/audience-admission-barriers" && request.method === "GET") return this.testAdmissionBarriers(request);
+		if (url.pathname === "/_internal/testing/release-audience-admission" && request.method === "POST") return this.releaseTestAdmissionBarrier(request, url.searchParams.get("phase"));
 		return new Response("Not found", { status: 404 });
 	}
 
@@ -178,6 +184,7 @@ export class GameRoom implements DurableObject {
 		if (!principal || principal.role !== "producer" || !game) return new Response("Forbidden", { status: 403 });
 		if (!body.commandId || !body.shardId) return Response.json({ error: { code: "BAD_COMMAND" } }, { status: 400 });
 		const admissionKey = `${body.shardId}:${body.commandId}`;
+		if (this.env.ENVIRONMENT === "test") await this.waitAtTestAdmissionBarrier("before");
 		if (this.consumeTestControl("audience-admission-before-delay")) await new Promise((resolve) => setTimeout(resolve, 500));
 		const existing = Array.from(this.state.storage.sql.exec<{ admission_version: number; prompt_id: string; canonical_choice: string | null; committed: number }>("SELECT admission_version, prompt_id, canonical_choice, committed FROM audience_admission_intents WHERE admission_key = ?", admissionKey))[0];
 		if (existing) return existing.prompt_id === body.promptId
@@ -188,6 +195,7 @@ export class GameRoom implements DurableObject {
 		if (game.activePrompt && game.activePrompt.id !== body.promptId) return Response.json({ error: { code: "STALE_PROMPT" } }, { status: 409 });
 		const canonicalChoice = typeof body.choice === "string" ? canonicalAudienceChoice(game, body.choice) : undefined;
 		this.state.storage.sql.exec("INSERT OR IGNORE INTO audience_admission_intents (admission_key, command_id, prompt_id, admission_version, shard_id, canonical_choice) VALUES (?, ?, ?, ?, ?, ?)", admissionKey, body.commandId, body.promptId, game.version, body.shardId, canonicalChoice ?? null);
+		if (this.env.ENVIRONMENT === "test") await this.waitAtTestAdmissionBarrier("after");
 		if (this.consumeTestControl("audience-admission-delay")) await new Promise((resolve) => setTimeout(resolve, 500));
 		return Response.json({ accepted: true, admissionVersion: game.version }, { status: 202 });
 	}
@@ -508,6 +516,27 @@ export class GameRoom implements DurableObject {
 		if (value <= 0) return false;
 		this.state.storage.sql.exec("UPDATE test_controls SET value = value - 1 WHERE key = ?", key);
 		return true;
+	}
+
+	private async waitAtTestAdmissionBarrier(phase: "before" | "after"): Promise<void> {
+		if (this.env.ENVIRONMENT !== "test" || !this.consumeTestControl(`audience-admission-hold-${phase}`)) return;
+		await new Promise<void>((resolve) => this.testAdmissionBarrierWaiters[phase].push(resolve));
+	}
+
+	private testAdmissionBarriers(request: Request): Response {
+		if (!this.validTestRequest(request)) return new Response("Not found", { status: 404 });
+		return Response.json({ before: this.testAdmissionBarrierWaiters.before.length, after: this.testAdmissionBarrierWaiters.after.length });
+	}
+
+	private releaseTestAdmissionBarrier(request: Request, phase: string | null): Response {
+		if (!this.validTestRequest(request) || (phase !== "before" && phase !== "after")) return new Response("Not found", { status: 404 });
+		const waiters = this.testAdmissionBarrierWaiters[phase].splice(0);
+		for (const release of waiters) release();
+		return Response.json({ released: waiters.length, phase });
+	}
+
+	private validTestRequest(request: Request): boolean {
+		return this.env.ENVIRONMENT === "test" && Boolean(this.env.E2E_SEED_SECRET) && request.headers.get("x-arcade-test-secret") === this.env.E2E_SEED_SECRET;
 	}
 
 	private send(socket: WebSocket, message: ServerMessage): void { socket.send(JSON.stringify(message)); }

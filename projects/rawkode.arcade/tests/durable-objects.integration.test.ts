@@ -509,23 +509,35 @@ describe("GameRoom Durable Object storage", () => {
 		const stub = await room(roomId, "null-pointer");
 		const hostHeaders = { ...principal("host", "host"), "content-type": "application/json" };
 		await stub.fetch("https://game-room.internal/_internal/command", { method: "POST", headers: hostHeaders, body: JSON.stringify({ v: 1, id: "start", type: "room.start", expectedVersion: 0, payload: {}, sentAt: new Date().toISOString() }) });
-		await stub.fetch("https://game-room.internal/_internal/testing/delay-next-audience-admission", { method: "POST", headers: { "x-arcade-test-secret": "test-only-local-secret" } });
+		const testHeaders = { "x-arcade-test-secret": "test-only-local-secret" };
+		await stub.fetch("https://game-room.internal/_internal/testing/hold-next-audience-admission", { method: "POST", headers: testHeaders });
 		const shard = bindings.AUDIENCE_SHARD.get(bindings.AUDIENCE_SHARD.idFromName(`${roomId}:audience:23`));
 		let originalSettled = false;
 		const originalIntent = { roomId, shardId: "23", promptId: "null-0", choice: "Java", commandId: "generation-id" };
 		const original = shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("generation-a", "audience"), "content-type": "application/json" }, body: JSON.stringify(originalIntent) }).finally(() => { originalSettled = true; });
-		for (let attempt = 0; attempt < 20; attempt += 1) {
+		for (let attempt = 0; attempt < 80; attempt += 1) {
 			const state = await (await stub.fetch("https://game-room.internal/_internal/state", { headers: principal("host", "host") })).json<{ state: { audience: { totals: Record<string, number> } } }>();
-			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: { "x-arcade-test-secret": "test-only-local-secret" } })).json<{ pendingFlushes: number; pendingAcks: number; intents: number }>();
-			if (state.state.audience.totals.Java === 1 && pending.pendingFlushes === 0 && pending.pendingAcks === 0 && pending.intents === 0) break;
+			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ pendingFlushes: number; pendingAcks: number; intents: number }>();
+			const barriers = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ before: number; after: number }>();
+			if (barriers.after === 1 && state.state.audience.totals.Java === 1 && pending.pendingFlushes === 0 && pending.pendingAcks === 0 && pending.intents === 0) break;
 			await new Promise((resolve) => setTimeout(resolve, 25));
 		}
 		expect(originalSettled).toBe(false);
-		const drained = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: { "x-arcade-test-secret": "test-only-local-secret" } })).json<{ pendingFlushes: number; pendingAcks: number; intents: number }>();
+		const drained = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ pendingFlushes: number; pendingAcks: number; intents: number }>();
 		expect(drained).toMatchObject({ pendingFlushes: 0, pendingAcks: 0, intents: 0 });
-		for (let delay = 0; delay < 2; delay += 1) await stub.fetch("https://game-room.internal/_internal/testing/delay-next-before-audience-admission", { method: "POST", headers: { "x-arcade-test-secret": "test-only-local-secret" } });
+		for (let hold = 0; hold < 2; hold += 1) await stub.fetch("https://game-room.internal/_internal/testing/hold-next-before-audience-admission", { method: "POST", headers: testHeaders });
 		const replacement = shard.fetch("https://audience-shard.internal/_internal/submit", { method: "POST", headers: { ...principal("generation-b", "audience"), "content-type": "application/json" }, body: JSON.stringify({ roomId, shardId: "23", promptId: "other-prompt", choice: "Rust", commandId: "generation-id" }) });
+		for (let attempt = 0; attempt < 80; attempt += 1) {
+			const barriers = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ before: number; after: number }>();
+			const pending = await (await shard.fetch("https://audience-shard.internal/_internal/testing/pending", { headers: testHeaders })).json<{ intents: number }>();
+			if (barriers.before === 2 && pending.intents === 1) break;
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
+		const held = await (await stub.fetch("https://game-room.internal/_internal/testing/audience-admission-barriers", { headers: testHeaders })).json<{ before: number; after: number }>();
+		expect(held).toEqual({ before: 2, after: 1 });
+		expect((await stub.fetch("https://game-room.internal/_internal/testing/release-audience-admission?phase=after", { method: "POST", headers: testHeaders })).status).toBe(200);
 		expect((await original).status).toBe(202);
+		expect((await stub.fetch("https://game-room.internal/_internal/testing/release-audience-admission?phase=before", { method: "POST", headers: testHeaders })).status).toBe(200);
 		const replacementResponse = await replacement;
 		expect(replacementResponse.status).toBe(409);
 		expect((await replacementResponse.json<{ error: { code: string } }>()).error.code).toBe("COMMAND_ID_CONFLICT");
